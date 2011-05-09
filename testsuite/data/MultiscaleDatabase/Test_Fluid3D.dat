@@ -14,7 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_FS-S
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_F-FS-S
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -42,7 +42,4 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_FS-S
 ###################################################################################################
 FluidDensity                = 1.0           # density        [g/cm^3]
 FluidViscosity              = 1.005309649148734e-06 # viscosity      [g/cm/s]
-StructureDensity            = 1.2           # density        [g/cm^3]
-StructurePoissonCoefficient = 0.48          # Poisson coeff. []
-StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################

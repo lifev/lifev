@@ -73,7 +73,7 @@ MultiscaleModelMultiscale::~MultiscaleModelMultiscale()
 }
 
 // ===================================================
-// Multiscale Physical Model
+// MultiscaleModel Methods
 // ===================================================
 void
 MultiscaleModelMultiscale::setupData( const std::string& fileName )
@@ -154,7 +154,6 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
         M_modelsList[i]->setGlobalData( M_globalData );
         M_modelsList[i]->setupData( path + enum2String( model, multiscaleModelsMap ) + "/"
                                     + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
-
     }
 
     // Load couplings
@@ -222,6 +221,9 @@ MultiscaleModelMultiscale::updateModel()
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->updateModel();
+
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+        ( *i )->updateCoupling();
 }
 
 void
@@ -255,7 +257,7 @@ MultiscaleModelMultiscale::saveSolution()
 void
 MultiscaleModelMultiscale::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleModel_Type::showMe();
         std::cout << "Models number       = " << M_modelsList.size() << std::endl
@@ -267,7 +269,7 @@ MultiscaleModelMultiscale::showMe()
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->showMe();
 
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << "=================== Couplings Information ===================" << std::endl << std::endl;
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
@@ -387,6 +389,22 @@ MultiscaleModelMultiscale::exportJacobian( multiscaleMatrix_Type& jacobian )
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->exportJacobian( jacobian );
+}
+
+bool
+MultiscaleModelMultiscale::topologyChange()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8110 ) << "MultiscaleModelMultiscale::topologyChange() \n";
+#endif
+
+    bool topologyChange( false );
+
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+        topologyChange = topologyChange || ( *i )->topologyChange();
+
+    return topologyChange;
 }
 
 // ===================================================

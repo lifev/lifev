@@ -17,4 +17,9 @@ modelName        = Windkessel0D_Template
 modelType        = Windkessel0D
 couplingFlags    = '0'
 
+[Coefficients]
 
+Resistance1    = 5e+05
+Resistance2    = 5e+05
+Capacitance    = 1e-4
+#VenousPressure = 0

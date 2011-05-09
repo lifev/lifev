@@ -22,10 +22,10 @@ list = 'FlowRate_Exp'  # Exp Flow Rate
     type                = Flux
     mode                = Full
     component           = 3
-    function            = 'a=100000; a*exp(-t)'
+    function            = 'a=-100000; a*exp(-t)'
 
     # Additional parameters for 1D BC
     quantity            = Q
-    line                = first    
-    
+    line                = first
+
     [../]

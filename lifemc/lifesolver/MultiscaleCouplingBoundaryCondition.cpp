@@ -66,7 +66,7 @@ MultiscaleCouplingBoundaryCondition::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::SetupData() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupData() \n";
 #endif
 
     multiscaleCoupling_Type::setupData( fileName );
@@ -87,7 +87,7 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::SetupCoupling() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCoupling() \n";
 #endif
 
     //Set number of coupling variables
@@ -125,7 +125,7 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 
         default:
 
-            if ( M_displayer->isLeader() )
+            if ( M_comm->MyPID() == 0 )
                 switchErrorMessage( M_models[i] );
         }
 }
@@ -133,7 +133,7 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 void
 MultiscaleCouplingBoundaryCondition::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleCoupling_Type::showMe();
 
@@ -153,7 +153,7 @@ MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localC
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::GetListOfPerturbedModels() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::listOfPerturbedModels() \n";
 #endif
 
     multiscaleModelsVector_Type emptyList;
@@ -164,55 +164,17 @@ MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localC
 void
 MultiscaleCouplingBoundaryCondition::displayCouplingValues( std::ostream& output )
 {
-    Real flowRate(0), pressure(0);
+    Real flowRate(0), stress(0);
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
     {
-        switch ( M_models[i]->type() )
-        {
-        case Fluid3D:
-        {
-            flowRate        = multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
-            pressure        = multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryPressure( M_flags[i] );
-
-            break;
-        }
-
-        case FSI3D:
-        {
-            flowRate        = multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
-            pressure        = multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryPressure( M_flags[i] );
-
-            break;
-        }
-
-        case OneDimensional:
-        {
-            flowRate        = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
-            pressure        = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryPressure( M_flags[i] );
-
-            break;
-        }
-
-        case Windkessel0D:
-        {
-            flowRate        = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
-            pressure        = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryPressure( M_flags[i] );
-
-            break;
-        }
-
-        default:
-
-            if ( M_displayer->isLeader() )
-                switchErrorMessage( M_models[i] );
-        }
+        flowRate = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+        stress   = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_flags[i] );
 
         if ( M_comm->MyPID() == 0 )
             output << "  " << M_globalData->dataTime()->time() << "    " << M_models[i]->ID()
             << "    " << M_flags[i]
             << "    " << flowRate
-            << "    " << "NaN                   "
-            << "    " << pressure << std::endl;
+            << "    " << stress << std::endl;
     }
 }
 

@@ -38,10 +38,10 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
             0       BoundaryCondition   FlowRate_Womersley              0               0
-            1       Stress              Pressure                        1,0             0,1
-            2       Stress              Pressure                        2,1             0,1
-            3       Stress              Pressure                        3,2             0,1
-            4       Stress              Pressure                        4,3             0,1
+            1       Stress              Lagrange1                       1,0             0,1
+            2       Stress              Lagrange1                       2,1             0,1
+            3       Stress              Lagrange1                       3,2             0,1
+            4       Stress              Lagrange1                       4,3             0,1
             5       BoundaryCondition   Stress_Zero                     4               1
              '
 ###################################################################################################

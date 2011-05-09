@@ -27,7 +27,7 @@ orthogonalizationSize          = 0
 	[./AztecOO]
 	    solver                     = gmres
 	    scaling                    = none
-	    output                     = all           # none
+	    output                     = none           # none
 	    conv                       = AZ_noscaled   # r0, noscaled
 	    max_iter                   = 100
 	    reuse                      = false

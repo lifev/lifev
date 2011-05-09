@@ -22,7 +22,7 @@ list = 'FlowRate_SinusoidalWave'  # Sinusoidal Flux Wave
     type                = Flux
     mode                = Full
     component           = 3
-    function            = 'a=1; p=0.01; -(t<p)*a*sin(2*pi*t/p)'
+    function            = 'a=500; T=0.05; -(t<T)*a*sin(2*pi*t/T)'
 
     # Additional parameters for 1D BC
     quantity            = Q

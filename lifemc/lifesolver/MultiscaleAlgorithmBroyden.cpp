@@ -53,7 +53,8 @@ MultiscaleAlgorithmBroyden::MultiscaleAlgorithmBroyden() :
         M_iterationsLimitForReset    ( 1 ),
         M_orthogonalization          ( false ),
         M_orthogonalizationSize      ( 1 ),
-        M_orthogonalizationContainer ()
+        M_orthogonalizationContainer (),
+        M_truncate                   ( true )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -87,6 +88,12 @@ MultiscaleAlgorithmBroyden::setupData( const std::string& fileName )
     M_solver.setCommunicator( M_comm );
     M_solver.setDataFromGetPot( dataFile, "Solver/AztecOO" );
     //M_solver.setupPreconditioner( DataFile, "Solver/Preconditioner" );
+
+#ifdef HAVE_HDF5
+    // Import Jacobian from previous simulation
+    if ( multiscaleProblemStep > 0 )
+        importJacobianFromHDF5();
+#endif
 }
 
 void
@@ -101,7 +108,12 @@ MultiscaleAlgorithmBroyden::subIterate()
 
     // Verify tolerance
     if ( checkResidual( 0 ) )
+    {
+#ifdef HAVE_HDF5
+        exportJacobianToHDF5();
+#endif
         return;
+    }
 
     M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
@@ -112,10 +124,10 @@ MultiscaleAlgorithmBroyden::subIterate()
 
     for ( UInt subIT(1); subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
-        // Compute the Jacobian (we completery delete the previous matrix)
+        // Compute the Jacobian
         if ( subIT == 1 )
         {
-            if ( M_jacobian.get() == 0 || M_iterationsLimitReached )
+            if ( M_jacobian.get() == 0 || M_iterationsLimitReached || M_multiscale->topologyChange() )
             {
                 assembleJacobianMatrix();
                 M_iterationsLimitReached = false;
@@ -154,7 +166,12 @@ MultiscaleAlgorithmBroyden::subIterate()
 
         // Verify tolerance
         if ( checkResidual( subIT ) )
+        {
+#ifdef HAVE_HDF5
+            exportJacobianToHDF5();
+#endif
             return;
+        }
     }
 
     save( M_subiterationsMaximumNumber, M_couplingResiduals->norm2() );
@@ -166,7 +183,7 @@ MultiscaleAlgorithmBroyden::subIterate()
 void
 MultiscaleAlgorithmBroyden::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleAlgorithm_Type::showMe();
 
@@ -243,6 +260,34 @@ MultiscaleAlgorithmBroyden::orthogonalizationUpdate( const multiscaleVector_Type
         M_orthogonalizationContainer.push_back( delta );
     }
 }
+
+#ifdef HAVE_HDF5
+void
+MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
+{
+    if ( !M_jacobian.get() == 0 )
+    {
+        // We create an integer variable to be used as a string for the name of the matrix in the matrix container.
+        long long timeInteger = M_multiscale->globalData()->dataTime()->time() * 1E+10;
+
+        M_jacobian->exportToHDF5( multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep ) + "_AlgorithmJacobian", number2string( timeInteger ), M_truncate );
+        M_truncate = false;
+    }
+}
+
+void
+MultiscaleAlgorithmBroyden::importJacobianFromHDF5()
+{
+    if ( M_comm->MyPID() == 0 )
+        std::cout << " MS-  Importing Jacobian matrix from time      " << number2string( M_multiscale->globalData()->dataTime()->time() ) << std::endl;
+
+    // We create an integer variable to be used as a string for the name of the matrix in the matrix container.
+    long long timeInteger = M_multiscale->globalData()->dataTime()->time() * 1E+10;
+
+    M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50 ) );
+    M_jacobian->importFromHDF5( multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep - 1 ) + "_AlgorithmJacobian", number2string( timeInteger ) );
+}
+#endif
 
 } // Namespace Multiscale
 } // Namespace LifeV

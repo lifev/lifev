@@ -53,7 +53,6 @@ MultiscaleSolver::MultiscaleSolver() :
         M_algorithm         (),
         M_globalData        ( new multiscaleData_Type() ),
         M_comm              (),
-        M_displayer         (),
         M_chrono            ()
 {
 
@@ -72,6 +71,8 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleModelFactory_Type::instance().registerProduct   (  Windkessel0D,        &createMultiscaleModelWindkessel0D );
 
     multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRate,            &createMultiscaleCouplingFlowRate );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateValve,       &createMultiscaleCouplingFlowRateValve );
     multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
     multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
 
@@ -85,23 +86,11 @@ MultiscaleSolver::MultiscaleSolver() :
 // Methods
 // ===================================================
 void
-MultiscaleSolver::setCommunicator( const multiscaleCommPtr_Type& comm )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::SetCommunicator( comm ) \n";
-#endif
-
-    M_comm = comm;
-    M_displayer.reset( new Displayer( M_comm ) );
-}
-
-void
 MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& problemFolder )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::SetupData( fileName, problemFolder ) \n";
+    Debug( 8000 ) << "MultiscaleSolver::setupData( fileName, problemFolder ) \n";
 #endif
 
     // Load data file
@@ -138,7 +127,6 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
         M_algorithm->setTolerance( dataFile( "Solver/Algorithm/tolerance", 1e-2 ) );
         std::string path = "./MultiscaleDatabase/Algorithms/"; // TODO Add this to files
         M_algorithm->setupData( path + enum2String( M_algorithm->type(), multiscaleAlgorithmsMap ) + "/" + dataFile( "Solver/Algorithm/file", "undefined" ) + ".dat" );
-        M_algorithm->initializeCouplingVariables();
     }
 }
 
@@ -147,7 +135,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::SolveProblem() \n";
+    Debug( 8000 ) << "MultiscaleSolver::solveProblem() \n";
 #endif
 
     // save initial solution if it is the very first time step
@@ -163,7 +151,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     {
         M_chrono.start();
 
-        if ( M_displayer->isLeader() )
+        if ( M_comm->MyPID() == 0 )
         {
             std::cout << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
@@ -175,7 +163,11 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 
         // Build or Update System
         if ( M_globalData->dataTime()->isFirstTimeStep() )
+        {
+            if ( M_model->type() == Multiscale )
+                M_algorithm->initializeCouplingVariables();
             M_model->buildModel();
+        }
         else
         {
             if ( M_model->type() == Multiscale )
@@ -186,7 +178,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         // Solve the model
         M_model->solveModel();
 
-        // If it is a Multiscale model, call algorithms for subiterations
+        // If it is a Multiscale model, call algorithm for subiterations
         if ( M_model->type() == Multiscale )
             M_algorithm->subIterate();
 
@@ -199,11 +191,11 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         // Updating total simulation time
         totalSimulationTime += M_chrono.diff();
 
-        if ( M_displayer->isLeader() )
+        if ( M_comm->MyPID() == 0 )
             std::cout << " MS-  Total iteration time:                    " << M_chrono.diff() << " s" << std::endl;
     }
 
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << " MS-  Total simulation time:                   " << totalSimulationTime << " s" << std::endl;
 
     // Check on the last iteration
@@ -212,7 +204,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         Real computedSolution( M_algorithm->couplingVariables()->norm2() );
         if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
             multiscaleErrorCheck( Solution, "Algorithm Solution: "  + number2string( computedSolution ) +
-                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_displayer->isLeader() );
+                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() );
     }
 
     return multiscaleExitFlag;
@@ -221,7 +213,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 void
 MultiscaleSolver::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         std::cout << std::endl << std::endl
                   << "=============== Multiscale Solver Information ===============" << std::endl << std::endl;
@@ -238,7 +230,7 @@ MultiscaleSolver::showMe()
     if ( M_model->type() == Multiscale )
         M_algorithm->showMe();
 
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << "=============================================================" << std::endl << std::endl;
 }
 

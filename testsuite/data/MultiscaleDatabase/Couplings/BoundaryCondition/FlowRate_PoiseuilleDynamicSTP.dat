@@ -23,7 +23,7 @@ list = 'FlowRate_PoiseuilleDynamic'
     mode                = Full
     component           = 3
     functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[B]
-    #OPERfunctionFile    = physicalFunctions/SmoothTrapezoidalProfile.dat[B]
+    #functionFileSolver  = physicalFunctions/SmoothTrapezoidalProfile.dat[B]
 
     # Additional parameters for 1D BC
     quantity            = Q

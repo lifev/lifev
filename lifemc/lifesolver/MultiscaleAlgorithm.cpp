@@ -53,7 +53,6 @@ MultiscaleAlgorithm::MultiscaleAlgorithm() :
         M_couplingVariables          (),
         M_couplingResiduals          (),
         M_comm                       (),
-        M_displayer                  (),
         M_subiterationsMaximumNumber (),
         M_tolerance                  ()
 {
@@ -88,7 +87,7 @@ MultiscaleAlgorithm::subIterate()
 #endif
 
     // Algorithm Type
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << " MS-  " << enum2String( M_type, multiscaleAlgorithmsMap ) << " Algorithm" << std::endl;
 }
 
@@ -118,18 +117,6 @@ MultiscaleAlgorithm::computeResidual() const
 // ===================================================
 // Set Methods
 // ===================================================
-void
-MultiscaleAlgorithm::setCommunicator( const multiscaleCommPtr_Type& comm )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MultiscaleAlgorithm::setCommunicator( comm ) \n";
-#endif
-
-    M_comm = comm;
-    M_displayer.reset( new Displayer( M_comm ) );
-}
-
 void
 MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
 {
@@ -187,7 +174,7 @@ MultiscaleAlgorithm::checkResidual( const UInt& subIT )
     Real residual ( computeResidual() );
 
     // Display subIT and residual values
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         if ( subIT > 0 )
             std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;

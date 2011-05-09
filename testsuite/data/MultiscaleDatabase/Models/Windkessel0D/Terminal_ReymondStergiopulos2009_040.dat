@@ -9,10 +9,16 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: Stress - Static Pressure ############################################################
+### COUPLING: Reymond Stergiopulos 1D Arterial Tree ###############################################
 ###################################################################################################
 
 [Multiscale]
-couplingName           = Stess_StaticPressure
-stressType             = StaticPressure
-timeInterpolationOrder = 1
+modelName        = '1D ReymondStergiopulos 040 (Windkessel RCR terminal)'
+modelType        = Windkessel0D
+couplingFlags    = '0'
+
+[Coefficients]
+
+Resistance1      = 5.5142140504e+04      # dyn s / cm^5 - Capillaries
+Resistance2      = 1.3785535126e+04      # dyn s / cm^5 - Arterioles
+Capacitance      = 4.0465821232e-06      # cm^5 / dyn
