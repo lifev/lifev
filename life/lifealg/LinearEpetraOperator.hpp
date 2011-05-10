@@ -234,7 +234,8 @@ public:
     }
     int SetUseTranspose(bool useTranspose) {M_useTranspose = useTranspose; return 0; }
     int Apply(const Epetra_MultiVector & /*X*/, Epetra_MultiVector & Y) const {Y.PutScalar(0.0); return 0;}
-    int ApplyInverse(const Epetra_MultiVector & /*X*/, Epetra_MultiVector & Y) const {Y.PutScalar(1.0/0.0); return -1;}
+    int ApplyInverse(const Epetra_MultiVector & /*X*/, Epetra_MultiVector & Y) const
+    			{Y.PutScalar(std::numeric_limits<Real>::quiet_NaN( )); return -1;}
     double NormInf() const {return 0.0;}
     const char * Label() const {return M_name.c_str();}
     bool UseTranspose() const {return M_useTranspose;}
