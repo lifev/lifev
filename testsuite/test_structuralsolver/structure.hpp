@@ -137,7 +137,19 @@ private:
      * run the 3D driven cylinder simulation
      */
     void run3d();
-    
+
+    struct RESULT_CHANGED_EXCEPTION
+     {    
+     public:
+        RESULT_CHANGED_EXCEPTION(LifeV::Real time)
+        {
+            std::cout << "Some modifications led to changes in the l2 norm of the solution at time " << time << std::endl;
+            returnValue = EXIT_FAILURE;
+        }
+      };
+
+     void CheckResults(const LifeV::Real& dispNorm, const LifeV::Real& time);
+
 private:
     struct Private;
     boost::shared_ptr<Private> parameters;

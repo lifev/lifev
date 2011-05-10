@@ -339,7 +339,7 @@ public:
             }
             if ( M_fsi->isSolid() )
             {
-               M_exporterSolid->import(M_Tstart, M_data->dataSolid()->getdataTime()->timeStep());
+               M_exporterSolid->import(M_Tstart, M_data->dataSolid()->dataTime()->timeStep());
                M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
             }
         }

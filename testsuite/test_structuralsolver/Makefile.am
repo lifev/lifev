@@ -15,10 +15,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = structure.hpp
+check_HEADERS = ud_functions.hpp
 
 check_PROGRAMS = test_structure
-test_structure_SOURCES = main.cpp structure.cpp ud_functions.cpp
+test_structure_SOURCES = main.cpp  ud_functions.cpp
 
 EXTRA_DIST = data testsuite.at
 
@@ -27,7 +27,7 @@ link:
 	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
 
 clean-results:
-	-rm velocity*.vct displacement*.vct structure.*.case structure.*.geo
+	-rm velocity*.vct displacement*.vct structure.*.case structure.*.geo *.xmf *.h5 
 
 recheck:
 	-rm $(check_PROGRAMS)

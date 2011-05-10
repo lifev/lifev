@@ -300,12 +300,23 @@ Structure::run3d()
 	    
 	    //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
+            CheckResults(solid.displacement().norm2(),time);
+
 	    exporter->postProcess( time );
 
 	  }
 
 }
     
+void Structure::CheckResults(const LifeV::Real& dispNorm,const LifeV::Real& time)
+{
+    if ( time == 0.01  && std::fabs(dispNorm-1.18594)>1e-4 )
+        throw RESULT_CHANGED_EXCEPTION(time);
+    else if ( time == 0.02  && std::fabs(dispNorm-1.10232)>1e-4 )
+        throw RESULT_CHANGED_EXCEPTION(time);
+    else if ( time == 0.03  && std::fabs(dispNorm-0.808509)>1e-4 )
+        throw RESULT_CHANGED_EXCEPTION(time);
+}
 
 //////////////////////
 

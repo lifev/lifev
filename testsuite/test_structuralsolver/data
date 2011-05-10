@@ -34,8 +34,8 @@ save       = 1
   initialtime = 0.
   endtime     = 0.003
   timestep    = 0.001
-  theta       = 0.35
-  zeta        = 0.75
+  theta       = 0.25
+  zeta        = 0.5
   BDF_order   = 1
 
   [../space_discretization]

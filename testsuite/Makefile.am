@@ -31,11 +31,10 @@ SUBDIRS		= data  \
               test_LevelSetSolver \
               test_partition \
               test_structure \
-              test_structuralsolver \
               test_TemplateTest \
               test_timeAdvance_orderI \
-              test_timeAdvance_orderII
-
+              test_timeAdvance_orderII \
+              test_structuralsolver 
 
 # add newly created testsuite.at scripts to TESTSUITES to allow the automatic generation of the
 # 'testsuite' script upon modification of one of them 
