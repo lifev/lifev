@@ -45,10 +45,20 @@
 
 #include <life/lifecore/LifeV.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wextra"
+
 #include <Epetra_Comm.h>
 #include <Epetra_Map.h>
 #include <Epetra_Operator.h>
 #include <Epetra_MultiVector.h>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+#pragma GCC diagnostic warning "-Wextra"
 
 #include <life/lifearray/VectorEpetra.hpp>
 
