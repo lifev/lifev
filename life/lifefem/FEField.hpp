@@ -106,7 +106,7 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param vector vector witch represent the solution.
     */
-    FEField ( FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ):
+    FEField ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ):
     M_FESpace ( fESpace ),
     M_vector ( vector )
     {}
@@ -118,7 +118,7 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
-    FEField ( FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ):
+    FEField ( const FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ):
     M_FESpace ( fESpace ),
     M_vector ( new vector_Type ( M_FESpace->map(), mapType ) )
     {}
@@ -307,7 +307,7 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param vector vector witch represent the solution.
     */
-    FEScalarField ( FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ):
+    FEScalarField ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ):
     FEField_Type ( fESpace, vector )
     {}
 
@@ -318,7 +318,7 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
-    FEScalarField ( FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ):
+    FEScalarField ( const FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ):
     FEField_Type ( fESpace, mapType )
     {}
 
@@ -400,7 +400,7 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param vector vector witch represent the solution.
     */
-    FEVectorField ( FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ):
+    FEVectorField ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ):
     FEField_Type ( fESpace, vector )
     {}
 
@@ -411,7 +411,7 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
-    FEVectorField ( FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ):
+    FEVectorField ( const FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ):
     FEField_Type ( fESpace, mapType )
     {}
 
