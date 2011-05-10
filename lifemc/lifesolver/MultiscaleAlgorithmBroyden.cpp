@@ -265,8 +265,14 @@ MultiscaleAlgorithmBroyden::orthogonalizationUpdate( const multiscaleVector_Type
 void
 MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
 {
+    //TODO: Fix this method when there are processors with null entries.
+    return;
+
     if ( !M_jacobian.get() == 0 )
     {
+        if ( M_comm->MyPID() == 0 )
+            std::cout << " MS-  Exporting Jacobian matrix at time        " << number2string( M_multiscale->globalData()->dataTime()->time() ) << std::endl;
+
         // We create an integer variable to be used as a string for the name of the matrix in the matrix container.
         long long timeInteger = M_multiscale->globalData()->dataTime()->time() * 1E+10;
 
@@ -278,6 +284,9 @@ MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
 void
 MultiscaleAlgorithmBroyden::importJacobianFromHDF5()
 {
+    //TODO: Fix this method when there are processors with null entries.
+    return;
+
     if ( M_comm->MyPID() == 0 )
         std::cout << " MS-  Importing Jacobian matrix from time      " << number2string( M_multiscale->globalData()->dataTime()->time() ) << std::endl;
 
