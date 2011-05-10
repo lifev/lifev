@@ -364,6 +364,15 @@ fefct::run()
     // Export all the solutions
     exporter->postProcess(0);
 
-    return 0;
+    // Define the dummy element and coordinate for the evaluation of the function
+    UInt iElem = 0;
+    std::vector<Real> point(3,0);
+
+    // Compute the error
+    Real error = 0;
+    error = std::fabs( ( std::sin(1.) + 4. ) / 3. - function.eval( iElem, point, 0. ) );
+
+    // Return the error
+    return error;
 
 } // run

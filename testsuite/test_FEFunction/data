@@ -37,13 +37,6 @@ name_fct    = Function
     #0 -> tetra, 1 -> hexa
     element_shape = 0
 
-    # For structured mesh
-    nx = 32
-    ny = 32
-    nz = 32
-    lx = 1.
-    ly = 1.
-    lz = 1.
     [../]
 
 [../]

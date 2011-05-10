@@ -81,9 +81,6 @@ int main(int argc, char** argv)
 
 #endif
 
-    // Error known
-    const LifeV::Real errorKnown( 0.2003822844278755 );
-
     // Tolerance between the error and the errorKnown
     const LifeV::Real tolerance( 1e-8 );
 
@@ -100,11 +97,11 @@ int main(int argc, char** argv)
 
 #endif
 
-    //if ( std::abs( error - errorKnown ) > tolerance )
-    //{
-    //    return ( EXIT_FAILURE );
-    //}
-   // else
+    if ( error > tolerance )
+    {
+        return ( EXIT_FAILURE );
+    }
+    else
     {
         return ( EXIT_SUCCESS );
     }
