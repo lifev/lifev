@@ -254,11 +254,6 @@ public:
     {
         return M_feDim;
     }
-/*    const UInt& __attribute__ (( __deprecated__)) FEDim() const
-    {
-        return feDim();
-        }*/
-
 
     //! Return the shape of the element
     const ReferenceShapes& shape() const

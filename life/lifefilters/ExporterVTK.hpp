@@ -908,7 +908,7 @@ ExporterVTK<Mesh>::composeDataArrayStream(const typename exporterData_Type::Wher
 
         for (it = rangeFound.first; it != rangeFound.second; ++it)
         {
-            switch ( it->second.type() )
+            switch ( it->second.fieldType() )
             {
                 case exporterData_Type::ScalarField:
 

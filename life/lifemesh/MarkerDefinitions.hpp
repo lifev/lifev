@@ -56,9 +56,6 @@ typedef MarkerTraits::entityFlag_Type entityFlag_Type;
 //!Expose NULLFLAG
 static const entityFlag_Type S_NULLFLAG = MarkerTraits::S_NULLFLAG;
 
-// Old static variable to delete after the make check
-//static const entityFlag_Type NULLFLAG __attribute__ ((deprecated)) = MarkerTraits::S_NULLFLAG;
-
 } // Namespace LifeV
 
 #endif /* MARKERDEFINITIONS_H */
