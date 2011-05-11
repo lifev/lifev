@@ -42,11 +42,11 @@ ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
 ComputeCoefficients  = true
 PowerlawCoefficient  = 9           # 2: Parabolic; 9: Typical value
 
-DistributionLaw      = none              # Coefficients distribution law: uniform, linear, pointwise
-Area0                = 0.1452201204      # Area of tube
+DistributionLaw      = uniform             # Coefficients distribution law: uniform, linear, pointwise
+Area0                = 0.1452201204        # Area of tube
 
 thickVessel          = false
-thickness            = 0.0215000000      # Thickness of tube
+thickness            = 0.0215000000        # Thickness of tube
 
 # Avolio elastin
 young                = 8.0E6 # g/cm/s^2 (dyne/cm^2)
