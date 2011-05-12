@@ -48,7 +48,7 @@ namespace Multiscale
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleCommunicatorsManager class partition a communicator among different models
+ *  The MultiscaleCommunicatorsManager class partitions a communicator among different models
  *  and couplings.
  */
 class MultiscaleCommunicatorsManager
@@ -58,7 +58,13 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef std::vector< multiscaleCommPtr_Type >                modelsCommunicatorContainer_Type;
+    typedef std::map< UInt, multiscaleCommPtr_Type >                modelsCommunicatorContainer_Type;
+    typedef modelsCommunicatorContainer_Type::const_iterator        modelsCommunicatorContainerIterator_Type;
+    typedef std::vector< UInt >                                     modelsID_Type;
+    typedef modelsID_Type::iterator                                 modelsIDIterator_Type;
+    typedef std::vector< Real >                                     modelsLoad_Type;
+    typedef modelsLoad_Type::iterator                               modelsLoadIterator_Type;
+    typedef std::vector< std::vector< Int > >                       modelsProcessesList_Type;
 
     //@}
 
@@ -81,7 +87,7 @@ public:
     //! Split the communicator among the models
     void splitCommunicators();
 
-    //! Display some information about the Multiscale problem (should be called after setupProblem)
+    //! Display some information about the communicators
     void showMe();
 
     //@}
@@ -90,7 +96,7 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set the epetra communicator for the Multiscale problem
+    //! Set the main epetra communicator
     /*!
      * @param comm Epetra communicator
      */
@@ -103,18 +109,7 @@ public:
      * @param load percentage load of the model (-1 means each model on a different processor).
      * @param modelsIDList list of models.
      */
-    void addGroup( const Real& load, const std::vector< UInt >& modelsID )
-    {
-        if ( load < 0 )
-            M_serialModelsID.insert( M_serialModelsID.end(), modelsID.begin(), modelsID.end() );
-        else
-        {
-            M_parallelModelsID.insert( M_parallelModelsID.end(), modelsID.begin(), modelsID.end() );
-
-            std::vector< Real > loadVector( modelsID.size(), load );
-            M_parallelModelsLoad.insert( M_parallelModelsLoad.end(), loadVector.begin(), loadVector.end() );
-        }
-    }
+    void addGroup( const Real& load, const modelsID_Type& modelsID );
 
     //@}
 
@@ -127,14 +122,14 @@ public:
      * @param modelID ID of the model.
      * @return communicator.
      */
-    const multiscaleCommPtr_Type& modelCommunicator( const UInt& modelID ) { return M_commContainer[modelID];}
+    const multiscaleCommPtr_Type& modelCommunicator( const UInt& modelID ) const { return M_commContainer.find( modelID )->second; }
 
     //! Get the communicator of a specific coupling
     /*!
      * @param listOfModels vector of models ID.
      * @return communicator.
      */
-    const multiscaleCommPtr_Type& couplingCommunicator( const std::vector< UInt >& listOfModels ) {}
+    const multiscaleCommPtr_Type& couplingCommunicator( const std::vector< UInt >& listOfModels ) const {}
 
     //@}
 
@@ -149,15 +144,39 @@ private:
 
     //@}
 
+
+    //! @name Private Methods
+    //@{
+
+    void parallelProcessesDistribution( std::vector<Real>& localNumberOfProcesses, const Int& numberOfProcesses );
+
+    void parallelProcessesAssignment( std::vector< std::vector< Int > >& parallelProcesses, const std::vector<Real>& localNumberOfProcesses, const Int& numberOfProcesses );
+
+    //! Round a real number to the closest integer
+    /*!
+     * NOTE: x.5 is rounded to x+1;
+     * @param value Real value
+     * @return rounded integer value
+     */
+    Int roundToInteger( const Real& value ) const { return static_cast<Int> ( std::floor( value + 0.5 ) ); }
+
+    //@}
+
     // Main Communicator
     multiscaleCommPtr_Type              M_comm;
 
-    // Models communicator
+    // Models communicators
     modelsCommunicatorContainer_Type    M_commContainer;
 
-    std::vector< UInt >                 M_serialModelsID;
-    std::vector< UInt >                 M_parallelModelsID;
-    std::vector< Real >                 M_parallelModelsLoad;
+    // Serial models data
+    modelsID_Type                       M_serialModelsID;
+    modelsProcessesList_Type            M_serialProcesses;
+
+
+    // Parallel models data
+    modelsID_Type                       M_parallelModelsID;
+    modelsLoad_Type                     M_parallelModelsLoad;
+    modelsProcessesList_Type            M_parallelProcesses;
 };
 
 } // Namespace multiscale
