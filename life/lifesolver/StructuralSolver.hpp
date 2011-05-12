@@ -875,9 +875,9 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   ///End First Approximantion
 
   // Use of the complete Jacobian
-  *matrFull += *this->M_jacobian; 
-  *matrFull *= M_zeta;
-  *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
+  //*matrFull += *this->M_jacobian; 
+  //*matrFull *= M_zeta;
+  //*matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
  
   this->M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
 
@@ -1244,6 +1244,9 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
 
     M_material->updateJacobianMatrix(sol, this->M_data, this->M_Displayer);
 
+    M_jacobian.reset(new matrix_Type(*this->M_localMap));
+    *M_jacobian += *this->M_material->stiff();
+
     jacobian.reset(new matrix_Type(*this->M_localMap));
     *jacobian += *this->M_material->stiff();
 
@@ -1274,7 +1277,7 @@ solveJacobian( vector_Type&           step,
 {
     LifeChrono chrono;
 
-    updateJacobian( *this->M_disp, this->M_jacobian );
+    updateJacobian( *this->M_disp, this->M_tempMatrix );
 
     this->M_Displayer->leaderPrint("\tS'-  Solving the linear system ... \n");
 
@@ -1288,8 +1291,8 @@ solveJacobian( vector_Type&           step,
     vector_Type rhsFull (res);
 
 
-//    bcManageMatrix( *this->M_jacobian, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), tgv );
-    applyBoundaryConditions( *this->M_jacobian, rhsFull, BCh);
+//    bcManageMatrix( *this->M_tempMatrix, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), tgv );
+    applyBoundaryConditions( *this->M_tempMatrix, rhsFull, BCh);
 
 
     this->M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
@@ -1297,9 +1300,9 @@ solveJacobian( vector_Type&           step,
     this->M_Displayer->leaderPrint("\tS'-  Solving system                    ... \n");
     chrono.start();
 
-    this->M_linearSolver->setMatrix(*this->M_jacobian);
+    this->M_linearSolver->setMatrix(*this->M_tempMatrix);
 
-    this->M_linearSolver->solveSystem( rhsFull, step, this->M_jacobian );
+    this->M_linearSolver->solveSystem( rhsFull, step, this->M_tempMatrix );
 
     chrono.stop();
 
