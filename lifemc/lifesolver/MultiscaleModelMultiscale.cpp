@@ -120,15 +120,15 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
 
     for ( UInt i( 0 ); i < groupsLinesNumber; ++i )
     {
-        load = dataFile( "Problem/groups", -1, i * groupsColumnsNumber + 1 );
+        load = dataFile( "Problem/groups", 0.0, i * groupsColumnsNumber + 1 );
         string2numbersVector< UInt > ( dataFile( "Problem/groups", "undefined", i * groupsColumnsNumber + 2 ), modelsIDVector );
 
         commManager.addGroup( load, modelsIDVector );
         modelsIDVector.clear();
     }
 
-    commManager.showMe();
     commManager.splitCommunicators();
+    commManager.showMe();
 
     // Load Models
     std::string path = dataFile( "Problem/modelsPath", "./" );
