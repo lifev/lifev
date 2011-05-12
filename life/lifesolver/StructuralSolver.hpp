@@ -869,15 +869,15 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 
   // First Approximation: The Jacobian of P is equal to its linear part.
   //this->M_tempMatrix.reset(new matrix_Type(*this->M_localMap));
-  *matrFull += *this->M_material->linearStiff(); //it returns just the linear part
-  *matrFull *= M_zeta;
-  *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
+  //*matrFull += *this->M_material->linearStiff(); //it returns just the linear part
+  //*matrFull *= M_zeta;
+  //*matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
   ///End First Approximantion
 
   // Use of the complete Jacobian
-  //*matrFull += *this->M_jacobian; 
-  //*matrFull *= M_zeta;
-  //*matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
+  *matrFull += *this->M_jacobian; 
+  *matrFull *= M_zeta;
+  *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
  
   this->M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
 
@@ -1246,6 +1246,8 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
 
     M_jacobian.reset(new matrix_Type(*this->M_localMap));
     *M_jacobian += *this->M_material->stiff();
+    //This is necessary since the matrix has to be multiplied by a constant in iterateLin
+    M_jacobian->globalAssemble(); 
 
     jacobian.reset(new matrix_Type(*this->M_localMap));
     *jacobian += *this->M_material->stiff();
