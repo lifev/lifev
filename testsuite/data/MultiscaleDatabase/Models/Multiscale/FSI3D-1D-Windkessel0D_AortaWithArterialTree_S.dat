@@ -233,7 +233,6 @@ couplings = '
             1022    Stress              Lagrange1                       1022,22         0,1
             1024    Stress              Lagrange1                       1024,24         0,1
             1025    Stress              Lagrange1                       1025,25         0,1
-            1026    Stress              Lagrange1                       1026,26         0,1
             1031    Stress              Lagrange1                       1031,31         0,1
             1032    Stress              Lagrange1                       1032,32         0,1
             1033    Stress              Lagrange1                       1033,33         0,1
