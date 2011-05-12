@@ -41,6 +41,7 @@ namespace LifeV
 namespace Multiscale
 {
 
+UInt        multiscaleCoresPerNode  = 1;
 std::string multiscaleProblemFolder = "./";
 UInt        multiscaleProblemStep   = 0;
 bool        multiscaleExitFlag      = EXIT_SUCCESS;
@@ -86,7 +87,7 @@ MultiscaleSolver::MultiscaleSolver() :
 // Methods
 // ===================================================
 void
-MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& problemFolder )
+MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& problemFolder, const UInt& coresPerNode )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -99,6 +100,9 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     // Define the folder containing the problem
     multiscaleProblemFolder = problemFolder;
 
+    // Define the number of cores on each node for the machine
+    multiscaleCoresPerNode = coresPerNode;
+
     // Define the step of the problem
     if ( dataFile( "Solver/Restart/Restart", false ) )
         multiscaleProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
@@ -107,6 +111,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "Multiscale" ) ], multiscaleModelsMap ) );
 
     M_model->setCommunicator( M_comm );
+    if ( M_model->type() == Multiscale )
 
     // Setup data
     M_globalData->readData( dataFile );
@@ -218,7 +223,8 @@ MultiscaleSolver::showMe()
         std::cout << std::endl << std::endl
                   << "=============== Multiscale Solver Information ===============" << std::endl << std::endl;
 
-        std::cout << "Problem folder                = " << multiscaleProblemFolder << std::endl
+        std::cout << "Cores per node                = " << multiscaleCoresPerNode << std::endl
+                  << "Problem folder                = " << multiscaleProblemFolder << std::endl
                   << "Problem step                  = " << multiscaleProblemStep << std::endl << std::endl;
 
         M_globalData->showMe();

@@ -95,18 +95,18 @@ main( Int argc, char** argv )
     boost::shared_ptr< Epetra_Comm > comm;
 
     //Setup MPI variables
-    Int nprocs(1);
+    Int numberOfProcesses(1);
     Int rank(0);
 
 #ifdef HAVE_MPI
     MPI_Init( &argc, &argv );
 
-    MPI_Comm_size( MPI_COMM_WORLD, &nprocs );
+    MPI_Comm_size( MPI_COMM_WORLD, &numberOfProcesses );
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 #endif
 
     if ( rank == 0 )
-        std::cout << "MPI Processes: " << nprocs << std::endl;
+        std::cout << "MPI Processes: " << numberOfProcesses << std::endl;
 
 #ifdef EPETRA_MPI
     if ( rank == 0 )
@@ -127,9 +127,13 @@ main( Int argc, char** argv )
     // Command line parameters
     GetPot commandLine( argc, argv );
     std::string dataFile      = commandLine.follow( "./Multiscale.dat", 2, "-f", "--file" );
-    bool verbose              = commandLine.follow( false, 2, "-s", "--showme" );
-    std::string problemFolder = commandLine.follow( "Output", 2, "-n", "--name" );
-    Real referenceSolution     = commandLine.follow( -1., 2, "-c", "--check" );
+    bool verbose              = commandLine.follow( true, 2, "-s", "--showme" );
+    std::string problemFolder = commandLine.follow( "Output", 2, "-o", "--output" );
+    Real referenceSolution    = commandLine.follow( -1., 2, "-c", "--check" );
+    UInt coresPerNode         = commandLine.follow(  1, 2, "-ns", "--nodesize" );
+
+    if ( coresPerNode > static_cast<UInt> ( numberOfProcesses ) )
+        coresPerNode = numberOfProcesses;
 
     // Create the problem folder
     if ( problemFolder.compare("./") )
@@ -141,7 +145,7 @@ main( Int argc, char** argv )
     }
 
     // Setup the problem
-    multiscale.setupProblem( dataFile, problemFolder );
+    multiscale.setupProblem( dataFile, problemFolder, coresPerNode );
 
     // Display problem information
     if ( verbose )
