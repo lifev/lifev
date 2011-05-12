@@ -44,6 +44,7 @@
 // STL classes
 #include <string>
 #include <fstream>
+#include <sstream>
 
 // Boost classes
 #include <boost/array.hpp>
@@ -114,6 +115,9 @@ enum errors_Type
     ModelType,               /*!< Model type not recognized */
     CouplingType             /*!< Coupling type not recognized */
 };
+
+// Folder of the problem
+extern UInt multiscaleCoresPerNode;
 
 // Folder of the problem
 extern std::string multiscaleProblemFolder;
