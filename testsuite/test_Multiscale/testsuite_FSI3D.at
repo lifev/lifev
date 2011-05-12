@@ -1,11 +1,12 @@
 ###################################################################################################
 #
-#                 This file is part of the MathCard software project                       
-#                Copyright (C) 2009, 2010 EPFL, Politecnico di Milano
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University   
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
-#           Date: 10-12-2010
+#           Date: 24-09-2009
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### TESTSUITE: MULTISCALE (FSI 3D) ################################################################
