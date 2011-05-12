@@ -174,6 +174,9 @@ private:
     //@}
 
     // Models & Couplings
+    MultiscaleCommunicatorsManager     M_commManager;
+
+    // Models & Couplings
     multiscaleModelsVector_Type        M_modelsList;
     multiscaleCouplingsVector_Type     M_couplingsList;
 };

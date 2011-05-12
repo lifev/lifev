@@ -46,6 +46,7 @@ namespace Multiscale
 // ===================================================
 MultiscaleModelMultiscale::MultiscaleModelMultiscale() :
         multiscaleModel_Type       (),
+        M_commManager              (),
         M_modelsList               (),
         M_couplingsList            ()
 {
@@ -115,20 +116,18 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
     M_couplingsList.resize( couplingsLinesNumber );
 
     // Load groups
-    MultiscaleCommunicatorsManager commManager;
-    commManager.setCommunicator( M_comm );
+    M_commManager.setCommunicator( M_comm );
 
     for ( UInt i( 0 ); i < groupsLinesNumber; ++i )
     {
         load = dataFile( "Problem/groups", 0.0, i * groupsColumnsNumber + 1 );
         string2numbersVector< UInt > ( dataFile( "Problem/groups", "undefined", i * groupsColumnsNumber + 2 ), modelsIDVector );
 
-        commManager.addGroup( load, modelsIDVector );
+        M_commManager.addGroup( load, modelsIDVector );
         modelsIDVector.clear();
     }
 
-    commManager.splitCommunicators();
-    commManager.showMe();
+    M_commManager.splitCommunicators();
 
     // Load Models
     std::string path = dataFile( "Problem/modelsPath", "./" );
@@ -167,12 +166,15 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
                 geometryTranslate[2] += dataFile( "Problem/offset", 0., j * geometryColumnsNumber + 9 );
             }
 
-        M_modelsList[i] = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( model, multiscaleModelsMap ) );
-        M_modelsList[i]->setCommunicator( M_comm );
-        M_modelsList[i]->setGeometry( geometryScale, geometryRotate, geometryTranslate );
-        M_modelsList[i]->setGlobalData( M_globalData );
-        M_modelsList[i]->setupData( path + enum2String( model, multiscaleModelsMap ) + "/"
-                                    + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
+        if ( M_commManager.hasModel( id ) )
+        {
+            M_modelsList[i] = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( model, multiscaleModelsMap ) );
+            M_modelsList[i]->setCommunicator( M_commManager.modelCommunicator( id ) );
+            M_modelsList[i]->setGeometry( geometryScale, geometryRotate, geometryTranslate );
+            M_modelsList[i]->setGlobalData( M_globalData );
+            M_modelsList[i]->setupData( path + enum2String( model, multiscaleModelsMap ) + "/"
+                                        + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
+        }
     }
 
     // Load Couplings
@@ -293,6 +295,8 @@ MultiscaleModelMultiscale::showMe()
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->showMe();
+
+    M_commManager.showMe();
 }
 
 // ===================================================

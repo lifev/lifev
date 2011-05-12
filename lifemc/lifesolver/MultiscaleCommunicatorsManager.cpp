@@ -133,6 +133,15 @@ MultiscaleCommunicatorsManager::splitCommunicators()
     }
 }
 
+bool
+MultiscaleCommunicatorsManager::hasModel( const UInt& modelID )
+{
+    if ( M_commContainer.find( modelID ) != M_commContainer.end() )
+        return true;
+    else
+        return false;
+}
+
 void
 MultiscaleCommunicatorsManager::showMe()
 {
@@ -164,8 +173,6 @@ MultiscaleCommunicatorsManager::showMe()
             std::cout << std::endl;
         }
         std::cout << std::endl;
-
-        std::cout << "=============================================================" << std::endl << std::endl;
     }
 
     M_comm->Barrier();
@@ -290,8 +297,8 @@ MultiscaleCommunicatorsManager::parallelProcessesDistribution( std::vector<Real>
             }
 
 
-        if ( M_comm->MyPID() == 0 )
-            std::cout << "currentSum: " << optimizationResources << std::endl;
+//        if ( M_comm->MyPID() == 0 )
+//            std::cout << "currentSum: " << optimizationResources << std::endl;
         totalResources = roundToInteger( availableResource + optimizationResources );
         if ( totalResources >= 0 )
         {

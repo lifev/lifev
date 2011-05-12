@@ -87,6 +87,13 @@ public:
     //! Split the communicator among the models
     void splitCommunicators();
 
+    //! Determine if the model is owned by the process
+    /*!
+     * @param modelID ID of the model.
+     * @return true if the model is owned by the process, false otherwise
+     */
+    bool hasModel( const UInt& modelID );
+
     //! Display some information about the communicators
     void showMe();
 
