@@ -218,7 +218,7 @@ void test_bdf::run()
     bdf.setup(ord_bdf);
 
     //Initialization
-    bdf.setInitialCondition<Real(*) (Real, Real, Real, Real, UInt), FESpace<RegionMesh, MapEpetra> >(AnalyticalSol::u, u, FeSpace, t0, delta_t);
+    bdf.setInitialCondition<Real(*) (Real, Real, Real, Real, UInt), FESpace<RegionMesh, MapEpetra> >(AnalyticalSol::u, u, *feSpacePtr, t0, delta_t);
 
     if (verbose) bdf.showMe();
     Members->comm->Barrier();

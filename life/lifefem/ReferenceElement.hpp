@@ -222,6 +222,8 @@ public:
         std::cerr << " Trying to access nodal values via nodalToFEValues function. " << std::endl;
         std::cerr << " This FE is not nodal, impossible operation! " << std::endl;
         abort();
+	std::vector<Real> dummy;
+	return dummy;
     }
 
     //@}

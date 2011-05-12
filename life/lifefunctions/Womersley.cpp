@@ -62,6 +62,7 @@ Real Womersley::uexact( const Real& t, const Real& /*x*/, const Real& y, const R
         default:
             exit(1);
     }
+    return 1.;
 }
 
 Real Womersley::pexact( const Real& t, const Real& x, const Real& /*y*/, const Real& /*z*/, const ID& /* i */ )
@@ -115,6 +116,7 @@ Real Womersley::grad_u( const UInt& icoor, const Real& t, const Real& /*x*/, con
 		default:
 			exit(1);
 	}
+	return 1.;
 }
 
 Real Womersley::f( const Real& /* t */, const Real&  /*x*/ , const Real&  /*y*/ , const Real& /* z */, const ID& i ) {
@@ -146,6 +148,7 @@ Real Womersley::xexact( const Real& t,
         default:
             exit(1);
     }
+    return 1.;
 }
 
 

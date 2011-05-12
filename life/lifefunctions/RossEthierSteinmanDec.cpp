@@ -64,6 +64,7 @@ Real RossEthierSteinmanUnsteadyDec::uexact( const Real& t,
         default:
             exit(1);
     }
+    return 1.;
 }
 
 Real RossEthierSteinmanUnsteadyDec::pexact( const Real& t,
@@ -119,6 +120,7 @@ Real RossEthierSteinmanUnsteadyDec::grad_u( const UInt& icoor, const Real& t, co
 		default:
 			exit(1);
 	}
+        return 1.;
 }
 
 Real RossEthierSteinmanUnsteadyDec::f( const Real& /* t */,
@@ -143,6 +145,7 @@ Real RossEthierSteinmanUnsteadyDec::xexact( const Real& t,
         default:
             exit(1);
     }
+    return 1.;
 }
 
 
