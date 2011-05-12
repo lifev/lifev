@@ -363,7 +363,7 @@ Cylinder::Cylinder( int argc,
 
 }
 
-void
+bool
 Cylinder::run()
 {
 
@@ -523,6 +523,10 @@ Cylinder::run()
     LifeChrono chrono;
     int iter = 1;
 
+    double norm;
+    double ref_norms = 2.21952;
+    double tolerance = 1e-5;
+
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
 
@@ -548,13 +552,12 @@ Cylinder::run()
 
         bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
-//         if (((iter % save == 0) || (iter == 1 )))
-//         {
         *velAndPressure = *fluid.solution();
         ensight.postProcess( time );
-//         }
-//         postProcessFluxesPressures(fluid, bcH, time, verbose);
 
+        if ((time + dt) > tFinal + dt / 2) {
+            norm = velAndPressure->norm2();
+        }
 
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -562,6 +565,18 @@ Cylinder::run()
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
     }
 
+    // Check the norms
+    bool success = true;
+
+    double error = std::abs(norm - ref_norms);
+    if (error > tolerance) {
+        std::cout << "Solution changed "
+                  << error << " > "
+                  <<tolerance << std::endl;
+        success = false;
+    }
+
+    return success;
 }
 
 

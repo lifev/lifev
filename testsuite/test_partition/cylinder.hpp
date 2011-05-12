@@ -99,7 +99,7 @@ public:
      */
     //@{
 
-    void run();
+    bool run();
 
     //@}
 
