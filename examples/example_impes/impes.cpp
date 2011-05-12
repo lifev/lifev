@@ -240,6 +240,8 @@ impes::run()
     typedef HyperbolicSolver< RegionMesh, solver_type >              hyper;
     typedef ds::vector_Type                                          vector_type;
     typedef boost::shared_ptr<vector_type>                           vector_ptrtype;
+    typedef FESpace< RegionMesh, MapEpetra >                         feSpace_Type;
+    typedef boost::shared_ptr<feSpace_Type>                          feSpacePtr_Type;
 
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
@@ -447,20 +449,20 @@ impes::run()
 
 
     // Finite element space of the primal variable.
-    FESpace< RegionMesh, MapEpetra > pressure_p_FESpace( meshPart, *pressure_refFE_primal, *pressure_qR_primal,
-                                                         *pressure_bdQr_primal, 1, Members->comm );
+    feSpacePtr_Type pressure_p_FESpacePtr( new feSpace_Type( meshPart, *pressure_refFE_primal, *pressure_qR_primal,
+                                                             *pressure_bdQr_primal, 1, Members->comm ) );
 
     // Finite element space of the dual variable.
-    FESpace< RegionMesh, MapEpetra > pressure_u_FESpace( meshPart, *pressure_refFE_dual, *pressure_qR_dual,
-                                                         *pressure_bdQr_dual, 1, Members->comm );
+    feSpacePtr_Type pressure_u_FESpacePtr( new feSpace_Type( meshPart, *pressure_refFE_dual, *pressure_qR_dual,
+                                                             *pressure_bdQr_dual, 1, Members->comm ) );
 
     // Finite element space of the interpolation of dual variable.
-    FESpace< RegionMesh, MapEpetra > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate,
-                                                                    *pressure_qR_dualInterpolate,
-                                                                    *pressure_bdQr_dualInterpolate, 3, Members->comm );
+    feSpacePtr_Type pressure_uInterpolate_FESpacePtr( new feSpace_Type( meshPart, *pressure_refFE_dualInterpolate,
+                                                                        *pressure_qR_dualInterpolate,
+                                                                        *pressure_bdQr_dualInterpolate, 3, Members->comm ) );
 
     // Vector for the interpolated dual solution.
-    vector_ptrtype pressure_dualInterpolated( new vector_type ( pressure_uInterpolate_FESpace.map(), Repeated ) );
+    vector_ptrtype pressure_dualInterpolated( new vector_type ( pressure_uInterpolate_FESpacePtr->map(), Repeated ) );
 
     // Finite element space of the hybrid variable.
     FESpace< RegionMesh, MapEpetra > pressure_hybrid_FESpace( meshPart, *pressure_refFE_hybrid, *pressure_qR_hybrid,
@@ -482,9 +484,9 @@ impes::run()
     saturation_hyperbolic_bdQr  = &quadRuleTria1pt;
 
     // Finite element space.
-    FESpace< RegionMesh, MapEpetra > saturation_hyperbolic_FESpace( meshPart, *saturation_hyperbolic_refFE,
-                                                                    *saturation_hyperbolic_qR,
-                                                                    *saturation_hyperbolic_bdQr, 1, Members->comm );
+    feSpacePtr_Type saturation_hyperbolic_FESpacePtr( new feSpace_Type( meshPart, *saturation_hyperbolic_refFE,
+                                                                        *saturation_hyperbolic_qR,
+                                                                        *saturation_hyperbolic_bdQr, 1, Members->comm ) );
 
     // Non-linear and transient Darcy parameters.
 
@@ -559,13 +561,13 @@ impes::run()
     chronoProblem.start();
 
     // Instantiation of the pressure equation solver, i.e. the Darcy solver.
-    ds pressureSolver ( dataPressure, pressure_p_FESpace, pressure_u_FESpace,
+    ds pressureSolver ( dataPressure, *pressure_p_FESpacePtr, *pressure_u_FESpacePtr,
                         pressure_hybrid_FESpace, pressure_VdotN_FESpace, Members->comm );
 
     // Instantiation of the saturation equation solver.
 
     // Instantiation of the hyperbolic solver.
-    hyper saturationHyperbolicSolver ( dataSaturationHyperbolic, saturation_hyperbolic_FESpace, Members->comm );
+    hyper saturationHyperbolicSolver ( dataSaturationHyperbolic, *saturation_hyperbolic_FESpacePtr, Members->comm );
 
     // Instantiation of the non-linear and transient Darcy solver.
     dstnl saturationDarcySolver ( dataSaturationDarcyNonLinear, saturation_darcy_p_FESpace,
@@ -613,7 +615,7 @@ impes::run()
     // Create the numerical flux
     GodunovNumericalFlux < RegionMesh > numericalFlux ( Members->getSaturationPhysicalFlux(),
                                                         Members->getSaturationFirstDerivativePhysicalFlux(),
-                                                        pressure_uInterpolate_FESpace,
+                                                        *pressure_uInterpolate_FESpacePtr,
                                                         dataFile,
                                                         "impes/hyperbolic/numerical_flux/" );
 
@@ -700,24 +702,26 @@ impes::run()
     pressureExporter.reset( new vector_type ( *pressureSolver.primalSolution(), exporter->mapType() ) );
 
     // Add the pressure variable to the exporter.
-    exporter->addVariable( ExporterData::Scalar, "Pressure",
-                           pressureExporter, static_cast<UInt>( 0 ),
-                           static_cast<UInt>( pressure_p_FESpace.dof().numTotalDof() ),
-                           static_cast<UInt>( 0 ), ExporterData::Cell );
+    exporter->addVariable( ExporterData<RegionMesh>::ScalarField, "Pressure",
+                           pressure_p_FESpacePtr, pressureExporter,
+                           static_cast<UInt>( 0 ),
+                           ExporterData< RegionMesh >::UnsteadyRegime,
+                           ExporterData< RegionMesh >::Cell );
 
     // Set the exporter saturation pointer.
     saturationExporter.reset( new vector_type ( *saturationHyperbolicSolver.solution(), exporter->mapType() ) );
 
     // Add the solution to the exporter.
-    exporter->addVariable( ExporterData::Scalar, "Saturation",
-                           saturationExporter, static_cast<UInt>( 0 ),
-                           static_cast<UInt>( saturation_hyperbolic_FESpace.dof().numTotalDof() ),
-                           static_cast<UInt>( 0 ), ExporterData::Cell );
+    exporter->addVariable( ExporterData<RegionMesh>::ScalarField, "Saturation",
+                           saturation_hyperbolic_FESpacePtr, saturationExporter,
+                           static_cast<UInt>( 0 ),
+                           ExporterData< RegionMesh >::UnsteadyRegime,
+                           ExporterData< RegionMesh >::Cell );
 
     // Display the total number of unknowns.
     pressureSolver.getDisplayer().leaderPrint( "Number of unknowns : ",
                                                2.*pressure_hybrid_FESpace.map().map(Unique)->NumGlobalElements() +
-                                               saturation_hyperbolic_FESpace.map().map(Unique)->NumGlobalElements(), "\n" );
+                                               saturation_hyperbolic_FESpacePtr->map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Solve the problem.
 
@@ -754,8 +758,8 @@ impes::run()
         pressureSolver.computePrimalAndDual();
 
         // Interpolate the Darcy velocity
-        *pressure_dualInterpolated = pressure_uInterpolate_FESpace.feToFEInterpolate( pressure_u_FESpace,
-                                                                                      *pressureSolver.dualSolution() );
+        *pressure_dualInterpolated = pressure_uInterpolate_FESpacePtr->feToFEInterpolate( *pressure_u_FESpacePtr,
+                                                                                          *pressureSolver.dualSolution() );
 
         // Solve the saturation equation.
 

@@ -160,17 +160,19 @@ int main(int argc, char** argv)
                                << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space... " << std::flush;
-    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > uFESpace(meshPart, uOrder, 3, comm);
+    boost::shared_ptr<LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > > uFESpacePtr(
+                    new LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > (meshPart, uOrder, 3, comm) );
     if (verbose)
         std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space... " << std::flush;
-    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > pFESpace(meshPart,pOrder,1,comm);
+    boost::shared_ptr<LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > > pFESpacePtr(
+                    new LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > (meshPart,pOrder,1,comm) );
     if (verbose) std::cout << "ok." << std::endl;
 
     // Total degrees of freedom (elements of matrix)
-    LifeV::UInt totalVelDof   = uFESpace.map().map(LifeV::Unique)->NumGlobalElements();
-    LifeV::UInt totalPressDof = pFESpace.map().map(LifeV::Unique)->NumGlobalElements();
+    LifeV::UInt totalVelDof   = uFESpacePtr->map().map(LifeV::Unique)->NumGlobalElements();
+    LifeV::UInt totalPressDof = pFESpacePtr->map().map(LifeV::Unique)->NumGlobalElements();
 
     if (verbose) std::cout << "Total Velocity Dof: " << totalVelDof << std::endl;
     if (verbose) std::cout << "Total Pressure Dof: " << totalPressDof << std::endl;
@@ -199,8 +201,8 @@ int main(int argc, char** argv)
     std::vector<LifeV::bcName_Type> fluxVector = bcH.findAllBCWithType( LifeV::Flux );
     LifeV::UInt numLM = static_cast<LifeV::UInt>( fluxVector.size() );
 
-    LifeV::UInt offset = uFESpace.map().map(LifeV::Unique)->NumGlobalElements()
-                         + pFESpace.map().map(LifeV::Unique)->NumGlobalElements();
+    LifeV::UInt offset = uFESpacePtr->map().map(LifeV::Unique)->NumGlobalElements()
+                         + pFESpacePtr->map().map(LifeV::Unique)->NumGlobalElements();
 
     for ( LifeV::UInt i = 0; i < numLM; ++i )
         bcH.setOffset( fluxVector[i], offset + i );
@@ -216,8 +218,8 @@ int main(int argc, char** argv)
 
     // The problem (matrix and rhs) is packed in an object called fluid
     LifeV::OseenSolver< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (oseenData,
-                                                                   uFESpace,
-                                                                   pFESpace,
+                                                                   *uFESpacePtr,
+                                                                   *pFESpacePtr,
                                                                    comm,
                                                                    numLM);
     // Gets inputs from the data file
@@ -287,12 +289,11 @@ int main(int argc, char** argv)
 
     velAndPressure.reset( new vector_Type(*fluid.solution(), exporter->mapType() ) );
 
-    exporter->addVariable( LifeV::ExporterData::Vector, "velocity", velAndPressure,
-                           LifeV::UInt(0), uFESpace.dof().numTotalDof() );
+    exporter->addVariable( LifeV::ExporterData<LifeV::RegionMesh3D<LifeV::LinearTetra> >::VectorField, "velocity",
+                           uFESpacePtr, velAndPressure, LifeV::UInt(0) );
 
-    exporter->addVariable( LifeV::ExporterData::Scalar, "pressure", velAndPressure,
-                           LifeV::UInt(3*uFESpace.dof().numTotalDof()),
-                           LifeV::UInt(pFESpace.dof().numTotalDof()) );
+    exporter->addVariable( LifeV::ExporterData<LifeV::RegionMesh3D<LifeV::LinearTetra> >::ScalarField, "pressure",
+                           pFESpacePtr, velAndPressure, LifeV::UInt(3*uFESpacePtr->dof().numTotalDof()) );
     exporter->postProcess( 0 );
 
     initChrono.stop();
@@ -332,13 +333,13 @@ int main(int argc, char** argv)
         bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
         // Computation of the error
-        vector_Type vel  (uFESpace.map(), LifeV::Repeated);
-        vector_Type press(pFESpace.map(), LifeV::Repeated);
+        vector_Type vel  (uFESpacePtr->map(), LifeV::Repeated);
+        vector_Type press(pFESpacePtr->map(), LifeV::Repeated);
         vector_Type velpressure ( *fluid.solution(), LifeV::Repeated );
 
         velpressure = *fluid.solution();
         vel.subset(velpressure);
-        press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
+        press.subset(velpressure, uFESpacePtr->dim()*uFESpacePtr->fieldDim());
 
 
         bool verbose = (comm->MyPID() == 0);

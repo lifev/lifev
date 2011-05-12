@@ -45,10 +45,20 @@
 
 #include <life/lifecore/LifeV.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wextra"
+
 #include <Epetra_Comm.h>
 #include <Epetra_Map.h>
 #include <Epetra_Operator.h>
 #include <Epetra_MultiVector.h>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+#pragma GCC diagnostic warning "-Wextra"
 
 #include <life/lifearray/VectorEpetra.hpp>
 
@@ -234,7 +244,8 @@ public:
     }
     int SetUseTranspose(bool useTranspose) {M_useTranspose = useTranspose; return 0; }
     int Apply(const Epetra_MultiVector & /*X*/, Epetra_MultiVector & Y) const {Y.PutScalar(0.0); return 0;}
-    int ApplyInverse(const Epetra_MultiVector & /*X*/, Epetra_MultiVector & Y) const {Y.PutScalar(1.0/0.0); return -1;}
+    int ApplyInverse(const Epetra_MultiVector & /*X*/, Epetra_MultiVector & Y) const
+    			{Y.PutScalar(std::numeric_limits<Real>::quiet_NaN( )); return -1;}
     double NormInf() const {return 0.0;}
     const char * Label() const {return M_name.c_str();}
     bool UseTranspose() const {return M_useTranspose;}

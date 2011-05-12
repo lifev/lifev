@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -303,7 +303,6 @@ save       = 10
 ]])
 
 AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh;
-          ln -sf ../../test_partition/cylinder_ref.h5;
           ../../test_partition/test_partition -f data_partition;
           mpirun -np 4 ../../test_partition/test_cylinder -f data_cylinder],[0],[ignore],[ignore])
 AT_CLEANUP
