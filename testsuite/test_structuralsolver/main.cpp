@@ -248,7 +248,7 @@ Structure::run3d()
     BCFunctionBase Homogen(fzero_scalar);
     BCFunctionBase Intern(InternalPressure);
 
-    /*
+    
     // BC for cyl1x02_1796_edge.mesh
     vector <ID> compx(1), compy(1), compz(1);
     compx[0]=0; compy[0]=1, compz[0]=2;
@@ -265,9 +265,9 @@ Structure::run3d()
 
     //BCh->addBC("Base3", 1 , Natural, Normal,Intern); // compression
     BCh->addBC("Base3", 1 , Natural, Full, fixed1, 3); // free stress surfac
-    */
     
-// BC for vessel2x4x20_10cm.mesh
+    /*
+    // BC for vessel2x4x20_10cm.mesh
     vector <ID> compx(1), compy(1), compz(1);
     compx[0]=0; compy[0]=1, compz[0]=2;
 
@@ -282,7 +282,7 @@ Structure::run3d()
 
     BCh->addBC("BaseIn", 10, Natural, Normal,  Homogen); // external pressure
     //BCh->addBC("BaseEx", 10, Natural, Full, fixed1, 3); // external pressure
-    
+    */
 
     StructuralSolver< RegionMesh3D<LinearTetra> > solid;
     solid.setup(dataStructure,
@@ -349,7 +349,18 @@ Structure::run3d()
 	vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(), exporter->mapType() ) );
 	vectorPtr_Type solidVel  ( new vector_Type(solid.velocity(),  exporter->mapType() ) );
 	vectorPtr_Type solidAcc  ( new vector_Type(solid.acceleration(),  exporter->mapType() ) );
+
+	exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "displacement",
+                           dFESpace, solidDisp, UInt(0) );
+
+	exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "velocity",
+                           dFESpace, solidVel, UInt(0) );
+
+	exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "acceleration",
+                           dFESpace, solidAcc, UInt(0) );
 	
+
+	/*
 	exporter->addVariable( ExporterData::Vector, "displacement", solidDisp,
 			       UInt(0), dFESpace->dof().numTotalDof() );
 	
@@ -358,7 +369,7 @@ Structure::run3d()
 
 	exporter->addVariable( ExporterData::Vector, "acceleration", solidAcc,
 			       UInt(0), dFESpace->dof().numTotalDof() );
-
+	*/
 
 	exporter->postProcess( 0 );
 
@@ -391,7 +402,7 @@ Structure::run3d()
 	    
 	    //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
-            this->CheckResults(solid.displacement().norm2(),time);
+            //this->CheckResults(solid.displacement().norm2(),time);
 	    exporter->postProcess( time );
 
 	  }

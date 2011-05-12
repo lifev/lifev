@@ -102,7 +102,7 @@ namespace LifeV
 {
 namespace
 {
-<<<<<<< HEAD
+
   //LifeV::VenantKirchhoffSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >(); }
 
 
@@ -179,7 +179,7 @@ public:
 
         case 2:
             //return 0.;
-            return -M_outflow;
+            return M_outflow;
             break;
 
         default:
@@ -196,6 +196,105 @@ private:
     Real         M_outflow;
 };
 
+class bc_adaptorFace
+{
+public:
+
+    bc_adaptorFace( FSIOperator& Operator ):
+            M_oper   ( Operator )
+    {
+        Real area0	= 0.147439938;
+        Real area	= area0;
+
+        Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
+                    (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+
+        Real qn		= M_oper.fluid().flux(3);
+
+        M_outflowFace	= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)- beta*std::sqrt(area0);
+
+    }
+
+    Real operator()( Real /*t*/, Real /*x*/, Real /*y*/, Real /*z*/, ID id)
+    {
+        switch ( id )
+        {
+        case 0:
+            return 0.155851 * M_outflowFace;
+            break;
+
+        case 1:
+            return -0.987781 * M_outflowFace;
+            break;
+
+        case 2:
+            //return 0.;
+            return 9.02676e-06 * M_outflowFace;
+            break;
+
+        default:
+            ERROR_MSG("This entrie is not allowed: disp_adatptor");
+            break;
+        }
+
+        return 0.;
+    }
+
+private:
+
+    FSIOperator& M_oper;
+    Real         M_outflowFace;
+};
+
+
+class bc_adaptorBrain
+{
+public:
+
+    bc_adaptorBrain( FSIOperator& Operator ):
+            M_oper   ( Operator )
+    {
+        Real area0	= 0.191155176;
+        Real area	= area0;
+
+        Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
+                    (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+
+        Real qn		= M_oper.fluid().flux(4);
+
+        M_outflowBrain  = std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2) - beta*std::sqrt(area0);
+
+    }
+
+    Real operator()( Real /*t*/, Real /*x*/, Real /*y*/, Real /*z*/, ID id)
+    {
+        switch ( id )
+        {
+        case 0:
+            return -0.0979856 * M_outflowBrain;
+            break;
+
+        case 1:
+            return -0.995188 * M_outflowBrain;
+            break;
+
+        case 2:
+            return -3.13375e-05 * M_outflowBrain;
+            break;
+
+        default:
+            ERROR_MSG("This entrie is not allowed: disp_adatptor");
+            break;
+        }
+
+        return 0.;
+    }
+
+private:
+
+    FSIOperator& M_oper;
+    Real         M_outflowBrain;
+};
 
 
 
@@ -246,6 +345,7 @@ public:
         M_data->setup( dataFile );
         M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
         M_data->showMe();
+	M_data->dataSolid()->showMe();
         MPI_Barrier( MPI_COMM_WORLD );
 
         Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
@@ -298,7 +398,17 @@ public:
 
             M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(),      M_exporterFluid->mapType() ));
             M_fluidDisp.reset     ( new vector_Type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
+	    /*
+            M_exporterFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
+                                          UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
 
+            M_exporterFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
+                                          UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof() ),
+                                          UInt(  M_fsi->FSIOper()->pFESpace().dof().numTotalDof() ) );
+
+            M_exporterFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
+                                          UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
+	    */
             M_exporterFluid->addVariable( ExporterData<mesh_Type>::VectorField, "f-velocity",
                                           M_fsi->FSIOper()->uFESpacePtr(), M_velAndPressure, UInt(0) );
 
@@ -308,6 +418,7 @@ public:
 
             M_exporterFluid->addVariable( ExporterData<mesh_Type>::VectorField, "f-displacement",
                                           M_fsi->FSIOper()->mmFESpacePtr(), M_fluidDisp, UInt(0) );
+
         }
         if ( M_fsi->isSolid() )
         {
@@ -319,22 +430,19 @@ public:
                 M_exporterSolid.reset( new ExporterEnsight<mesh_Type > ( dataFile, exporterName+"Solid" ) );
 
             M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
-
-<<<<<<< HEAD
-            M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().map(), M_exporterSolid->mapType() ));
+	    M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().map(), M_exporterSolid->mapType() ));
             M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->solid().map(), M_exporterSolid->mapType() ));
+
+	    M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-displacement",
+                                          M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
+            M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-velocity",
+                                          M_fsi->FSIOper()->dFESpacePtr(), M_solidVel, UInt(0) );
+	    /*
             M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                           UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
             M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                           UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-=======
-            M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
-            M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
-            M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-displacement",
-                                          M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
-            M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-velocity",
-                                          M_fsi->FSIOper()->dFESpacePtr(), M_solidVel, UInt(0) );
->>>>>>> master
+	    */
         }
 
         bool restart = dataFile("problem/restart",false);
@@ -358,13 +466,8 @@ public:
             }
             if ( M_fsi->isSolid() )
             {
-<<<<<<< HEAD
                M_exporterSolid->import(M_Tstart, M_data->dataSolid()->dataTime()->timeStep());
                M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
-=======
-                M_exporterSolid->import(M_Tstart, M_data->dataSolid()->getdataTime()->timeStep());
-                M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
->>>>>>> master
             }
         }
         else
@@ -403,9 +506,20 @@ public:
 
             if ( M_absorbingBC && M_fsi->isFluid() )
             {
+	      /*
                 BCFunctionBase outFlow;
                 outFlow.setFunction(bc_adaptor(*M_fsi->FSIOper()));
                 M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlow);
+	      */
+	      BCFunctionBase outFlowFace;
+              BCFunctionBase outFlowBrain;
+
+                outFlowFace.setFunction(bc_adaptorFace(*M_fsi->FSIOper()));
+                M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlowFace);
+
+                outFlowBrain.setFunction(bc_adaptorBrain(*M_fsi->FSIOper()));
+                M_fsi->FSIOper()->BCh_fluid()->modifyBC(4, outFlowBrain);
+
                 //std::cout << "  F-  Pressure = " << outFlow(0., 0., 0., 0., 3) << std::endl;
             }
 
@@ -438,15 +552,9 @@ public:
             }
 
             if ( M_fsi->isSolid() )
-<<<<<<< HEAD
 	      {
                 *M_solidDisp = M_fsi->FSIOper()->solid().displacement();
                 *M_solidVel = M_fsi->FSIOper()->solid().velocity();
-=======
-            {
-                *M_solidDisp = M_fsi->FSIOper()->solid().getDisplacement();
-                *M_solidVel = M_fsi->FSIOper()->solid().getVelocity();
->>>>>>> master
                 M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
             }
 
@@ -456,7 +564,7 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            checkResult( M_data->dataFluid()->dataTime()->time() );
+            //checkResult( M_data->dataFluid()->dataTime()->time() );
         }
         std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
         ofile.close();

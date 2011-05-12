@@ -34,14 +34,13 @@ save       = 1
   initialtime = 0.
   endtime     = 0.003
   timestep    = 0.001
-  theta       = 0.25
-  zeta        = 0.5
+  theta       = 0.35 
+  zeta        = 0.75
   BDF_order   = 1
 
   [../space_discretization]
   mesh_dir  = Mesh/     # the directory where the mesh file is
-  mesh_file = vessel20.mesh #cyl1x02_1796_edge.mesh
-  #mesh_file = hexa2x2.mesh # mesh file
+  mesh_file = cyl1x02_1796_edge.mesh #vessel20.mesh
   order     = P1
 
 
