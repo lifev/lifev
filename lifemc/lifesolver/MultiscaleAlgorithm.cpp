@@ -127,7 +127,7 @@ MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
     Debug( 8010 ) << "MultiscaleAlgorithm::setMultiscaleProblem( multiscale ) \n";
 #endif
 
-    M_multiscale = boost::dynamic_pointer_cast< MultiscaleModelMultiscale >( model );
+    M_multiscale = multiscaleDynamicCast< MultiscaleModelMultiscale >( model );
 
     // Build coupling variables and residuals vectors
     std::vector<Int> myGlobalElements(0);
