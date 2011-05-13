@@ -113,6 +113,7 @@ public:
     typedef typename super::exporterData_Type exporterData_Type;
     typedef typename super::feTypeToDataIdMap_Type::iterator
                                               feTypeToDataIdMap_Type_Type;
+    typedef const typename exporterData_Type::WhereEnum& where_Type;
     //@}
 
     //! @name Constructors & Destructor
@@ -267,7 +268,8 @@ private:
        \param where Node or Cell
        \param typeDataHeaderStringStream  the stringstream object (a file buffer)
      */
-    void composeTypeDataHeaderStream(const typename exporterData_Type::WhereEnum& where,
+
+    void composeTypeDataHeaderStream(where_Type where,
                                      std::stringstream& typeDataHeaderStringStream);
 
     /*!
@@ -276,7 +278,7 @@ private:
        \param where Node or Cell
        \param typeDataHeaderStringStream  the stringstream object (a file buffer)
      */
-    void composeTypeDataFooterStream(const typename exporterData_Type::WhereEnum& where,
+    void composeTypeDataFooterStream(where_Type where,
                                      std::stringstream& typeDataFooterStringStream);
     /*!
        This method writes in a buffer (according to the VTK XML format) the content
@@ -291,7 +293,7 @@ private:
                                 std::stringstream& dataArraysStringStream);
 
     // to be checked - do not use for now
-    void composeDataArrayStream(const typename exporterData_Type::WhereEnum& where,
+    void composeDataArrayStream(where_Type where,
                            std::stringstream& dataArraysStringStream);
 
     virtual void readScalar( ExporterData<mesh_Type>& /*dvar*/ ) {}
@@ -888,7 +890,7 @@ ExporterVTK<Mesh>::readASCIIData( const std::string& line, std::vector<Real>& va
  */
 template <typename Mesh>
 void
-ExporterVTK<Mesh>::composeDataArrayStream(const typename exporterData_Type::WhereEnum& where,
+ExporterVTK<Mesh>::composeDataArrayStream(where_Type where,
                                      std::stringstream& dataArraysStringStream)
 {
 
@@ -1275,7 +1277,7 @@ void ExporterVTK<Mesh>::composeVTUFooterStream( std::stringstream& vtuFooterStri
 
 template <typename Mesh>
 void
-ExporterVTK<Mesh>::composeTypeDataHeaderStream(const typename exporterData_Type::WhereEnum& where,
+ExporterVTK<Mesh>::composeTypeDataHeaderStream(where_Type where,
                                          std::stringstream& dataHeaderStringStream)
 {
     Debug(8000) << "\n[ExporterVTK::composeTypeDataHeaderStream] where = " << where << "\n";
@@ -1298,7 +1300,7 @@ ExporterVTK<Mesh>::composeTypeDataHeaderStream(const typename exporterData_Type:
 
 template <typename Mesh>
 void
-ExporterVTK<Mesh>::composeTypeDataFooterStream(const typename exporterData_Type::WhereEnum& where,
+ExporterVTK<Mesh>::composeTypeDataFooterStream(where_Type where,
                                          std::stringstream& dataFooterStringStream)
 {
     std::string whereString;
