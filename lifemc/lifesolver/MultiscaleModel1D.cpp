@@ -111,15 +111,6 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     Debug( 8130 ) << "MultiscaleModel1D::setupData( fileName ) \n";
 #endif
 
-    // Preliminary setup of the communicator
-#ifdef EPETRA_MPI
-    MPI_Comm localComm;
-    MPI_Comm_split( ( dynamic_cast<Epetra_MpiComm*> ( &(*M_comm) ) )->Comm(), M_comm->MyPID(), M_comm->MyPID(), &localComm );
-    M_comm.reset( new Epetra_MpiComm( localComm ) );
-#else
-    M_comm.reset( new Epetra_SerialComm() );
-#endif
-
     multiscaleModel_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
@@ -741,7 +732,7 @@ MultiscaleModel1D::imposePerturbation()
     Debug( 8130 ) << "MultiscaleModel1D::imposePerturbation() \n";
 #endif
 
-    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             // Find the side to perturb and apply the perturbation
@@ -857,7 +848,7 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
     displayModelStatus( "Solve linear" );
     Real jacobianCoefficient(0);
 
-    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             // Find the perturbed side

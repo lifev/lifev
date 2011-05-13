@@ -148,7 +148,7 @@ MultiscaleCouplingBoundaryCondition::showMe()
 // ===================================================
 // Private Multiscale PhysicalCoupling Implementation
 // ===================================================
-multiscaleModelsVector_Type
+multiscaleModelsContainer_Type
 MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ )
 {
 
@@ -156,7 +156,7 @@ MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localC
     Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::listOfPerturbedModels() \n";
 #endif
 
-    multiscaleModelsVector_Type emptyList;
+    multiscaleModelsContainer_Type emptyList;
 
     return emptyList;
 }

@@ -323,7 +323,7 @@ protected:
      * @param LocalCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    virtual multiscaleModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID ) = 0;
+    virtual multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& localCouplingVariableID ) = 0;
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
@@ -394,12 +394,10 @@ protected:
 
     //@}
 
-    static UInt                          M_couplingsNumber;
-
     UInt                                 M_ID;
     couplings_Type                       M_type;
 
-    multiscaleModelsVector_Type          M_models;
+    multiscaleModelsContainer_Type       M_models;
     std::string                          M_couplingName;
     std::vector< bcFlag_Type >           M_flags;
 

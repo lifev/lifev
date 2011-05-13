@@ -85,14 +85,20 @@ public:
     //@{
 
     //! Split the communicator among the models
-    void splitCommunicators();
+    void splitCommunicator();
 
     //! Determine if the model is owned by the process
     /*!
      * @param modelID ID of the model.
      * @return true if the model is owned by the process, false otherwise
      */
-    bool hasModel( const UInt& modelID );
+    bool myModel( const UInt& modelID ) const;
+
+    //! Determine the number of model owned by the process
+    /*!
+     * @return number of model owned by the process
+     */
+    UInt myModelsNumber() const { return M_commContainer.size(); }
 
     //! Display some information about the communicators
     void showMe();
@@ -130,13 +136,6 @@ public:
      * @return communicator.
      */
     const multiscaleCommPtr_Type& modelCommunicator( const UInt& modelID ) const { return M_commContainer.find( modelID )->second; }
-
-    //! Get the communicator of a specific coupling
-    /*!
-     * @param listOfModels vector of models ID.
-     * @return communicator.
-     */
-    const multiscaleCommPtr_Type& couplingCommunicator( const std::vector< UInt >& listOfModels ) const {}
 
     //@}
 

@@ -271,12 +271,10 @@ protected:
      */
     void displayModelStatus( const std::string& tag ) const;
 
-    static UInt                          M_modelsNumber;       // Total number of models
-
     UInt                                 M_ID;                 // Global ID of the model
     models_Type                          M_type;               // Type of the model (depends on the derived class)
 
-    multiscaleCouplingsVector_Type       M_couplings;          // Container for the couplings
+    multiscaleCouplingsContainer_Type    M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model
     std::vector< bcFlag_Type >           M_flags;              // Free flags, available for the couplings
 

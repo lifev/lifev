@@ -162,13 +162,13 @@ typedef MultiscaleCoupling                                                      
 typedef boost::shared_ptr< multiscaleCoupling_Type >                             multiscaleCouplingPtr_Type;
 typedef FactorySingleton< Factory< multiscaleCoupling_Type, couplings_Type > >   multiscaleCouplingFactory_Type;
 
-typedef std::vector< multiscaleModelPtr_Type >                                   multiscaleModelsVector_Type;
-typedef multiscaleModelsVector_Type::iterator                                    multiscaleModelsVectorIterator_Type;
-typedef multiscaleModelsVector_Type::const_iterator                              multiscaleModelsVectorConstIterator_Type;
+typedef std::vector< multiscaleModelPtr_Type >                                   multiscaleModelsContainer_Type;
+typedef multiscaleModelsContainer_Type::iterator                                 multiscaleModelsContainerIterator_Type;
+typedef multiscaleModelsContainer_Type::const_iterator                           multiscaleModelsContainerConstIterator_Type;
 
-typedef std::vector< multiscaleCouplingPtr_Type >                                multiscaleCouplingsVector_Type;
-typedef multiscaleCouplingsVector_Type::iterator                                 multiscaleCouplingsVectorIterator_Type;
-typedef multiscaleCouplingsVector_Type::const_iterator                           multiscaleCouplingsVectorConstIterator_Type;
+typedef std::vector< multiscaleCouplingPtr_Type >                                multiscaleCouplingsContainer_Type;
+typedef multiscaleCouplingsContainer_Type::iterator                              multiscaleCouplingsContainerIterator_Type;
+typedef multiscaleCouplingsContainer_Type::const_iterator                        multiscaleCouplingsContainerConstIterator_Type;
 
 typedef MultiscaleData                                                           multiscaleData_Type;
 typedef boost::shared_ptr< multiscaleData_Type >                                 multiscaleDataPtr_Type;

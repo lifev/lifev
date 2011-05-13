@@ -177,8 +177,8 @@ private:
     MultiscaleCommunicatorsManager     M_commManager;
 
     // Models & Couplings
-    multiscaleModelsVector_Type        M_modelsList;
-    multiscaleCouplingsVector_Type     M_couplingsList;
+    multiscaleModelsContainer_Type     M_modelsList;
+    multiscaleCouplingsContainer_Type  M_couplingsList;
 };
 
 //! Factory create function

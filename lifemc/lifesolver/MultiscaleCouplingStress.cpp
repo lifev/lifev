@@ -150,7 +150,7 @@ MultiscaleCouplingStress::showMe()
 // ===================================================
 // Private MultiscaleCoupling Implementation
 // ===================================================
-multiscaleModelsVector_Type
+multiscaleModelsContainer_Type
 MultiscaleCouplingStress::listOfPerturbedModels( const UInt& localCouplingVariableID )
 {
 
@@ -158,7 +158,7 @@ MultiscaleCouplingStress::listOfPerturbedModels( const UInt& localCouplingVariab
     Debug( 8220 ) << "MultiscaleCouplingStress::listOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
-    multiscaleModelsVector_Type perturbedModelsList(0);
+    multiscaleModelsContainer_Type perturbedModelsList(0);
 
     if ( localCouplingVariableID == 0 )
     {

@@ -145,7 +145,7 @@ MultiscaleCouplingFlowRate::showMe()
 // ===================================================
 // Private MultiscaleCoupling Implementation
 // ===================================================
-multiscaleModelsVector_Type
+multiscaleModelsContainer_Type
 MultiscaleCouplingFlowRate::listOfPerturbedModels( const UInt& localCouplingVariableID )
 {
 
@@ -153,7 +153,7 @@ MultiscaleCouplingFlowRate::listOfPerturbedModels( const UInt& localCouplingVari
     Debug( 8240 ) << "MultiscaleCouplingFlowRate::listOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
-    multiscaleModelsVector_Type perturbedModelsList(1);
+    multiscaleModelsContainer_Type perturbedModelsList(1);
 
     perturbedModelsList[0] = M_models[localCouplingVariableID];
 

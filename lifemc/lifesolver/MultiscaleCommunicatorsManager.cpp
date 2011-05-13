@@ -64,11 +64,11 @@ MultiscaleCommunicatorsManager::MultiscaleCommunicatorsManager() :
 // Methods
 // ===================================================
 void
-MultiscaleCommunicatorsManager::splitCommunicators()
+MultiscaleCommunicatorsManager::splitCommunicator()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8005 ) << "MultiscaleCommunicatorsManager::splitCommunicators() \n";
+    Debug( 8005 ) << "MultiscaleCommunicatorsManager::splitCommunicator() \n";
 #endif
 
     // Preliminaries
@@ -134,7 +134,7 @@ MultiscaleCommunicatorsManager::splitCommunicators()
 }
 
 bool
-MultiscaleCommunicatorsManager::hasModel( const UInt& modelID )
+MultiscaleCommunicatorsManager::myModel( const UInt& modelID ) const
 {
     if ( M_commContainer.find( modelID ) != M_commContainer.end() )
         return true;
@@ -145,13 +145,8 @@ MultiscaleCommunicatorsManager::hasModel( const UInt& modelID )
 void
 MultiscaleCommunicatorsManager::showMe()
 {
-    M_comm->Barrier();
-
     if ( M_comm->MyPID() == 0 )
     {
-        std::cout << std::endl;
-        std::cout << "================= Communicators Information =================" << std::endl << std::endl;
-
         std::cout << "Serial models number    = " << M_serialModelsID.size() << std::endl;
         std::cout << "Serial models list      = ";
         for ( UInt i( 0 ) ; i < M_serialModelsID.size() ; ++i )
@@ -174,8 +169,6 @@ MultiscaleCommunicatorsManager::showMe()
         }
         std::cout << std::endl;
     }
-
-    M_comm->Barrier();
 }
 
 // ===================================================

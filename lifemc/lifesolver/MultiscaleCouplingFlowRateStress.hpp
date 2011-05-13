@@ -122,7 +122,7 @@ private:
      * @param localCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    multiscaleModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
+    multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!

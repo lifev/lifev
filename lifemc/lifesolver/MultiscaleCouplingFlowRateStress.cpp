@@ -149,7 +149,7 @@ MultiscaleCouplingFlowRateStress::showMe()
 // ===================================================
 // Private Multiscale PhysicalCoupling Implementation
 // ===================================================
-multiscaleModelsVector_Type
+multiscaleModelsContainer_Type
 MultiscaleCouplingFlowRateStress::listOfPerturbedModels( const UInt& localCouplingVariableID )
 {
 
@@ -157,7 +157,7 @@ MultiscaleCouplingFlowRateStress::listOfPerturbedModels( const UInt& localCoupli
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::listOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
-    multiscaleModelsVector_Type perturbedModelsList(1);
+    multiscaleModelsContainer_Type perturbedModelsList(1);
 
     if ( localCouplingVariableID == 0 )
         perturbedModelsList[0] = M_models[0];

@@ -110,8 +110,8 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     // Create the main model and set the communicator
     M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "Multiscale" ) ], multiscaleModelsMap ) );
 
+    M_model->setID( 0 );
     M_model->setCommunicator( M_comm );
-    if ( M_model->type() == Multiscale )
 
     // Setup data
     M_globalData->readData( dataFile );

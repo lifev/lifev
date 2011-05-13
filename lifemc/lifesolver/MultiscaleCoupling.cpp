@@ -43,8 +43,6 @@ namespace Multiscale
 
 std::map< std::string, couplings_Type > multiscaleCouplingsMap;
 
-UInt MultiscaleCoupling::M_couplingsNumber = 0;
-
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -68,7 +66,6 @@ MultiscaleCoupling::MultiscaleCoupling() :
     Debug( 8200 ) << "MultiscaleCoupling::MultiscaleCoupling() \n";
 #endif
 
-    M_ID = M_couplingsNumber++;
 }
 
 // ===================================================
@@ -199,7 +196,7 @@ MultiscaleCoupling::exportJacobian( multiscaleMatrix_Type& jacobian )
 
     // Definitions
     bool solveLinearSystem;                          // Flag to avoid multiple solution of the same linear system
-    multiscaleModelsVector_Type perturbedModelsList; // List of perturbed model
+    multiscaleModelsContainer_Type perturbedModelsList; // List of perturbed model
 
     // Insert constant values in the jacobian (due to this coupling condition)
     insertJacobianConstantCoefficients( jacobian );
@@ -214,7 +211,7 @@ MultiscaleCoupling::exportJacobian( multiscaleMatrix_Type& jacobian )
         perturbedModelsList = listOfPerturbedModels( M_perturbedCoupling );
 
         // Loop on all the models, that are influenced by the perturbation of the coupling variable
-        for ( multiscaleModelsVectorIterator_Type j = perturbedModelsList.begin() ; j < perturbedModelsList.end() ; ++j )
+        for ( multiscaleModelsContainerIterator_Type j = perturbedModelsList.begin() ; j < perturbedModelsList.end() ; ++j )
         {
             solveLinearSystem = true;
 
