@@ -7,21 +7,19 @@
 #include <complex>
 #include <life/lifefunctions/bessel/bessel.hpp>
 
-using namespace std;
-
 namespace bessel{
 
-static complex<double> cii(0.0,1.0);
-static complex<double> czero(0.0,0.0);
-static complex<double> cone(1.0,0.0);
+static std::complex<double> cii(0.0,1.0);
+static std::complex<double> czero(0.0,0.0);
+static std::complex<double> cone(1.0,0.0);
 
 double gamma(double x);
 
-int cbessik01(complex<double>z,complex<double>&ci0,complex<double>&ci1,
-    complex<double>&ck0,complex<double>&ck1,complex<double>&ci0p,
-    complex<double>&ci1p,complex<double>&ck0p,complex<double>&ck1p)
+int cbessik01(std::complex<double>z,std::complex<double>&ci0,std::complex<double>&ci1,
+    std::complex<double>&ck0,std::complex<double>&ck1,std::complex<double>&ci0p,
+    std::complex<double>&ci1p,std::complex<double>&ck0p,std::complex<double>&ck1p)
 {
-    complex<double> z1,z2,zr,zr2,cr,ca,cb,cs,ct,cw;
+    std::complex<double> z1,z2,zr,zr2,cr,ca,cb,cs,ct,cw;
     double a0,w0;
     int k,kz;
     static double a[] = {
@@ -62,18 +60,18 @@ int cbessik01(complex<double>z,complex<double>&ci0,complex<double>&ci1,
         8.401390346421e08,
         7.2031420482627e10};
 
-    a0 = abs(z);
+    a0 = std::abs(z);
     z2 = z*z;
     z1 = z;
     if (a0 == 0.0) {
         ci0 = cone;
         ci1 = czero;
-        ck0 = complex<double> (1e308,0);
-        ck1 = complex<double> (1e308,0);
+        ck0 = std::complex<double> (1e308,0);
+        ck1 = std::complex<double> (1e308,0);
         ci0p = czero;
-        ci1p = complex<double>(0.5,0.0);
-        ck0p = complex<double>(-1e308,0);
-        ck1p = complex<double>(-1e308,0);
+        ci1p = std::complex<double>(0.5,0.0);
+        ck0p = std::complex<double>(-1e308,0);
+        ck1p = std::complex<double>(-1e308,0);
         return 0;
     }
     if (real(z) < 0.0) z1 = -z;
@@ -83,14 +81,14 @@ int cbessik01(complex<double>z,complex<double>&ci0,complex<double>&ci1,
         for (k=1;k<=50;k++) {
             cr *= 0.25*z2/(double)(k*k);
             ci0 += cr;
-            if (abs(cr/ci0) < eps) break;
+            if (std::abs(cr/ci0) < eps) break;
         }
         ci1 = cone;
         cr = cone;
         for (k=1;k<=50;k++) {
             cr *= 0.25*z2/(double)(k*(k+1.0));
             ci1 += cr;
-            if (abs(cr/ci1) < eps) break;
+            if (std::abs(cr/ci1) < eps) break;
         }
         ci1 *= 0.5*z1;
     }
@@ -98,16 +96,16 @@ int cbessik01(complex<double>z,complex<double>&ci0,complex<double>&ci1,
         if (a0 >= 50.0) kz = 7;
         else if (a0 >= 35.0) kz = 9;
         else kz = 12;
-        ca = exp(z1)/sqrt(2.0*M_PI*z1);
+        ca = std::exp(z1)/std::sqrt(2.0*M_PI*z1);
         ci0 = cone;
         zr = 1.0/z1;
         for (k=0;k<kz;k++) {
-            ci0 += a[k]*pow(zr,k+1.0);
+            ci0 += a[k]*std::pow(zr,k+1.0);
         }
         ci0 *= ca;
         ci1 = cone;
         for (k=0;k<kz;k++) {
-            ci1 += b[k]*pow(zr,k+1.0);
+            ci1 += b[k]*std::pow(zr,k+1.0);
         }
         ci1 *= ca;
     }
@@ -120,7 +118,7 @@ int cbessik01(complex<double>z,complex<double>&ci0,complex<double>&ci1,
             w0 += 1.0/k;
             cr *= 0.25*z2/(double)(k*k);
             cs += cr*(w0+ct);
-            if (abs((cs-cw)/cs) < eps) break;
+            if (std::abs((cs-cw)/cs) < eps) break;
             cw = cs;
         }
         ck0 = ct+cs;
@@ -130,7 +128,7 @@ int cbessik01(complex<double>z,complex<double>&ci0,complex<double>&ci1,
         zr2 = 1.0/z2;
         ck0 = cone;
         for (k=0;k<10;k++) {
-            ck0 += a1[k]*pow(zr2,k+1.0);
+            ck0 += a1[k]*std::pow(zr2,k+1.0);
         }
         ck0 *= cb/ci0;
     }
@@ -152,23 +150,23 @@ int cbessik01(complex<double>z,complex<double>&ci0,complex<double>&ci1,
     ck1p = -ck0-1.0*ck1/z;
     return 0;
 }
-int cbessikna(int n,complex<double> z,int &nm,complex<double> *ci,
-    complex<double> *ck,complex<double> *cip,complex<double> *ckp)
+int cbessikna(int n,std::complex<double> z,int &nm,std::complex<double> *ci,
+    std::complex<double> *ck,std::complex<double> *cip,std::complex<double> *ckp)
 {
-    complex<double> ci0,ci1,ck0,ck1,ckk,cf,cf1,cf2,cs;
+    std::complex<double> ci0,ci1,ck0,ck1,ckk,cf,cf1,cf2,cs;
     double a0;
     int k,m,ecode;
-    a0 = abs(z);
+    a0 = std::abs(z);
     nm = n;
     if (a0 < 1.0e-100) {
         for (k=0;k<=n;k++) {
             ci[k] = czero;
-            ck[k] = complex<double>(-1e308,0);
+            ck[k] = std::complex<double>(-1e308,0);
             cip[k] = czero;
-            ckp[k] = complex<double>(1e308,0);
+            ckp[k] = std::complex<double>(1e308,0);
         }
         ci[0] = cone;
-        cip[1] = complex<double>(0.5,0.0);
+        cip[1] = std::complex<double>(0.5,0.0);
         return 0;
     }
     ecode = cbessik01(z,ci[0],ci[1],ck[0],ck[1],cip[0],cip[1],ckp[0],ckp[1]);
@@ -181,7 +179,7 @@ int cbessikna(int n,complex<double> z,int &nm,complex<double> *ci,
     if (m < n) nm = m;
     else m = msta2(a0,n,15);
     cf2 = czero;
-    cf1 = complex<double>(1.0e-100,0.0);
+    cf1 = std::complex<double>(1.0e-100,0.0);
     for (k=m;k>=0;k--) {
         cf = 2.0*(k+1.0)*cf1/z+cf2;
         if (k <= nm) ci[k] = cf;
@@ -193,7 +191,7 @@ int cbessikna(int n,complex<double> z,int &nm,complex<double> *ci,
         ci[k] *= cs;
     }
     for (k=2;k<=nm;k++) {
-        if (abs(ci[k-1]) > abs(ci[k-2])) {
+        if (std::abs(ci[k-1]) > std::abs(ci[k-2])) {
             ckk = (1.0/z-ci[k]*ck[k-1])/ci[k-1];
         }
         else {
@@ -207,25 +205,25 @@ int cbessikna(int n,complex<double> z,int &nm,complex<double> *ci,
     }
     return 0;
 }
-int cbessiknb(int n,complex<double> z,int &nm,complex<double> *ci,
-    complex<double> *ck,complex<double> *cip,complex<double> *ckp)
+int cbessiknb(int n,std::complex<double> z,int &nm,std::complex<double> *ci,
+    std::complex<double> *ck,std::complex<double> *cip,std::complex<double> *ckp)
 {
-    complex<double> z1,cbs,csk0,cf,cf0,cf1,ca0,cbkl;
-    complex<double> cg,cg0,cg1,cs0,cs,cr;
+    std::complex<double> z1,cbs,csk0,cf,cf0,cf1,ca0,cbkl;
+    std::complex<double> cg,cg0,cg1,cs0,cs,cr;
     double a0,vt,fac;
     int k,kz,l,m;
 
-    a0 = abs(z);
+    a0 = std::abs(z);
     nm = n;
     if (a0 < 1.0e-100) {
         for (k=0;k<=n;k++) {
             ci[k] = czero;
-            ck[k] = complex<double>(1e308,0);
+            ck[k] = std::complex<double>(1e308,0);
             cip[k] = czero;
-            ckp[k] = complex<double>(-1e308,0);
+            ckp[k] = std::complex<double>(-1e308,0);
         }
-        ci[0] = complex<double>(1.0,0.0);
-        cip[1] = complex<double>(0.5,0.0);
+        ci[0] = std::complex<double>(1.0,0.0);
+        cip[1] = std::complex<double>(0.5,0.0);
         return 0;
     }
     z1 = z;
@@ -237,7 +235,7 @@ int cbessiknb(int n,complex<double> z,int &nm,complex<double> *ci,
     cbs = czero;
     csk0 = czero;
     cf0 = czero;
-    cf1 = complex<double>(1.0e-100,0.0);
+    cf1 = std::complex<double>(1.0e-100,0.0);
     for (k=m;k>=0;k--) {
         cf = 2.0*(k+1.0)*cf1/z1+cf0;
         if (k <=nm) ci[k] = cf;
@@ -246,7 +244,7 @@ int cbessiknb(int n,complex<double> z,int &nm,complex<double> *ci,
         cf0 = cf1;
         cf1 = cf;
     }
-    cs0 = exp(z1)/(cbs-cf);
+    cs0 = std::exp(z1)/(cbs-cf);
     for (k=0;k<=nm;k++) {
         ci[k] *= cs0;
     }
@@ -255,7 +253,7 @@ int cbessiknb(int n,complex<double> z,int &nm,complex<double> *ci,
         ck[1] = (1.0/z1-ci[1]*ck[0])/ci[0];
     }
     else {
-        ca0 = sqrt(M_PI_2/z1)*exp(-z1);
+        ca0 = std::sqrt(M_PI_2/z1)*std::exp(-z1);
         if (a0 >= 200.0) kz = 6;
         else if (a0 >= 80.0) kz = 8;
         else if (a0 >= 25.0) kz = 10;
@@ -265,7 +263,7 @@ int cbessiknb(int n,complex<double> z,int &nm,complex<double> *ci,
             vt = 4.0*l;
             cr = cone;
             for (k=1;k<=kz;k++) {
-                cr *= 0.125*(vt-pow(2.0*k-1.0,2.0))/((double)k*z1);
+                cr *= 0.125*(vt-std::pow(2.0*k-1.0,2.0))/((double)k*z1);
                 cbkl += cr;
             }
             ck[l] = ca0*cbkl;
@@ -300,16 +298,16 @@ int cbessiknb(int n,complex<double> z,int &nm,complex<double> *ci,
     }
     return 0;
 }
-int cbessikv(double v,complex<double>z,double &vm,complex<double> *civ,
-    complex<double> *ckv,complex<double> *civp,complex<double> *ckvp)
+int cbessikv(double v,std::complex<double>z,double &vm,std::complex<double> *civ,
+    std::complex<double> *ckv,std::complex<double> *civp,std::complex<double> *ckvp)
 {
-    complex<double> z1,z2,ca1,ca,cs,cr,ci0,cbi0,cf,cf1,cf2;
-    complex<double> ct,cp,cbk0,ca2,cr1,cr2,csu,cws,cb;
-    complex<double> cg0,cg1,cgk,cbk1,cvk;
+    std::complex<double> z1,z2,ca1,ca,cs,cr,ci0,cbi0,cf,cf1,cf2;
+    std::complex<double> ct,cp,cbk0,ca2,cr1,cr2,csu,cws,cb;
+    std::complex<double> cg0,cg1,cgk,cbk1,cvk;
     double a0,v0,v0p,v0n,vt,w0,piv,gap(0),gan;
     int m,n,k,kz;
 
-    a0 = abs(z);
+    a0 = std::abs(z);
     z1 = z;
     z2 = z*z;
     n = (int)v;
@@ -320,13 +318,13 @@ int cbessikv(double v,complex<double>z,double &vm,complex<double> *civ,
     if (a0 < 1e-100) {
         for (k=0;k<=n;k++) {
             civ[k] = czero;
-            ckv[k] = complex<double>(-1e308,0);
+            ckv[k] = std::complex<double>(-1e308,0);
             civp[k] = czero;
-            ckvp[k] = complex<double>(1e308,0);
+            ckvp[k] = std::complex<double>(1e308,0);
         }
         if (v0 == 0.0) {
             civ[0] = cone;
-            civp[1] = complex<double> (0.5,0.0);
+            civp[1] = std::complex<double> (0.5,0.0);
         }
         vm = v;
         return 0;
@@ -342,23 +340,23 @@ int cbessikv(double v,complex<double>z,double &vm,complex<double> *civ,
         else {
             v0p = 1.0+v0;
             gap = gamma(v0p);
-            ca1 = pow(0.5*z1,v0)/gap;
+            ca1 = std::pow(0.5*z1,v0)/gap;
         }
         ci0 = cone;
         cr = cone;
         for (k=1;k<=50;k++) {
             cr *= 0.25*z2/(k*(k+v0));
             ci0 += cr;
-            if (abs(cr/ci0) < eps) break;
+            if (std::abs(cr/ci0) < eps) break;
         }
         cbi0 = ci0*ca1;
     }
     else {
-        ca = exp(z1)/sqrt(2.0*M_PI*z1);
+        ca = std::exp(z1)/std::sqrt(2.0*M_PI*z1);
         cs = cone;
         cr = cone;
         for (k=1;k<=kz;k++) {
-            cr *= -0.125*(vt-pow(2.0*k-1.0,2.0))/((double)k*z1);
+            cr *= -0.125*(vt-std::pow(2.0*k-1.0,2.0))/((double)k*z1);
             cs += cr;
         }
         cbi0 = ca*cs;
@@ -367,7 +365,7 @@ int cbessikv(double v,complex<double>z,double &vm,complex<double> *civ,
     if (m < n) n = m;
     else m = msta2(a0,n,15);
     cf2 = czero;
-    cf1 = complex<double>(1.0e-100,0.0);
+    cf1 = std::complex<double>(1.0e-100,0.0);
     for (k=m;k>=0;k--) {
         cf = 2.0*(v0+k+1.0)*cf1/z1+cf2;
         if (k <= n) civ[k] = cf;
@@ -389,15 +387,15 @@ int cbessikv(double v,complex<double>z,double &vm,complex<double> *civ,
                 cr *= 0.25*z2/(double)(k*k);
                 cp = cr*(w0+ct);
                 cs += cp;
-                if ((k >= 10) && (abs(cp/cs) < eps)) break;
+                if ((k >= 10) && (std::abs(cp/cs) < eps)) break;
             }
             cbk0 = ct+cs;
         }
         else {
             v0n = 1.0-v0;
             gan = gamma(v0n);
-            ca2 = 1.0/(gan*pow(0.5*z1,v0));
-            ca1 = pow(0.5*z1,v0)/gap;
+            ca2 = 1.0/(gan*std::pow(0.5*z1,v0));
+            ca1 = std::pow(0.5*z1,v0)/gap;
             csu = ca2-ca1;
             cr1 = cone;
             cr2 = cone;
@@ -406,18 +404,18 @@ int cbessikv(double v,complex<double>z,double &vm,complex<double> *civ,
                 cr1 *= 0.25*z2/(k*(k-v0));
                 cr2 *= 0.25*z2/(k*(k+v0));
                 csu += ca2*cr1-ca1*cr2;
-                if ((k >= 10) && (abs((cws-csu)/csu) < eps)) break;
+                if ((k >= 10) && (std::abs((cws-csu)/csu) < eps)) break;
                 cws = csu;
             }
-            cbk0 = csu*M_PI_2/sin(piv);
+            cbk0 = csu*M_PI_2/std::sin(piv);
         }
     }
     else {
-        cb = exp(-z1)*sqrt(M_PI_2/z1);
+        cb = std::exp(-z1)*std::sqrt(M_PI_2/z1);
         cs = cone;
         cr = cone;
         for (k=1;k<=kz;k++) {
-            cr *= 0.125*(vt-pow(2.0*k-1.0,2.0))/((double)k*z1);
+            cr *= 0.125*(vt-std::pow(2.0*k-1.0,2.0))/((double)k*z1);
             cs += cr;
         }
         cbk0 = cb*cs;
@@ -435,7 +433,7 @@ int cbessikv(double v,complex<double>z,double &vm,complex<double> *civ,
     }
     if (real(z) < 0.0) {
         for (k=0;k<=n;k++) {
-            cvk = exp((k+v0)*M_PI*cii);
+            cvk = std::exp((k+v0)*M_PI*cii);
             if (imag(z) < 0.0) {
                 ckv[k] = cvk*ckv[k]+M_PI*cii*civ[k];
                 civ[k] /= cvk;

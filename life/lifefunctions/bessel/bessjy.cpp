@@ -11,7 +11,6 @@
 //      pi/4    M_PI_4
 //      pi/2    M_PI_2
 //
-#include <math.h>
 #include <life/lifefunctions/bessel/bessel.hpp>
 namespace bessel{
 double gamma(double x);
@@ -120,17 +119,17 @@ int bessjy01a(double x,double &j0,double &j1,double &y0,double &y1,
         for (k=1;k<=30;k++) {
             r *= -0.25*x2/(k*k);
             j0 += r;
-            if (fabs(r) < fabs(j0)*1e-15) break;
+            if (std::fabs(r) < std::fabs(j0)*1e-15) break;
         }
         j1 = 1.0;
         r = 1.0;
         for (k=1;k<=30;k++) {
             r *= -0.25*x2/(k*(k+1));
             j1 += r;
-            if (fabs(r) < fabs(j1)*1e-15) break;
+            if (std::fabs(r) < std::fabs(j1)*1e-15) break;
         }
         j1 *= 0.5*x;
-        ec = log(0.5*x)+el;
+        ec = std::log(0.5*x)+el;
         cs0 = 0.0;
         w0 = 0.0;
         r0 = 1.0;
@@ -139,7 +138,7 @@ int bessjy01a(double x,double &j0,double &j1,double &y0,double &y1,
             r0 *= -0.25*x2/(k*k);
             r = r0 * w0;
             cs0 += r;
-            if (fabs(r) < fabs(cs0)*1e-15) break;
+            if (std::fabs(r) < std::fabs(cs0)*1e-15) break;
         }
         y0 = M_2_PI*(ec*j0-cs0);
         cs1 = 1.0;
@@ -150,7 +149,7 @@ int bessjy01a(double x,double &j0,double &j1,double &y0,double &y1,
             r1 *= -0.25*x2/(k*(k+1));
             r = r1*(2.0*w1+1.0/(k+1));
             cs1 += r;
-            if (fabs(r) < fabs(cs1)*1e-15) break;
+            if (std::fabs(r) < std::fabs(cs1)*1e-15) break;
         }
         y1 = M_2_PI * (ec*j1-1.0/x-0.25*x*cs1);
     }
@@ -162,21 +161,21 @@ int bessjy01a(double x,double &j0,double &j1,double &y0,double &y1,
         p0 = 1.0;
         q0 = -0.125/x;
         for (k=0;k<kz;k++) {
-            p0 += a[k]*pow(x,-2*k-2);
-            q0 += b[k]*pow(x,-2*k-3);
+            p0 += a[k]*std::pow(x,-2*k-2);
+            q0 += b[k]*std::pow(x,-2*k-3);
         }
-        cu = sqrt(M_2_PI/x);
-        j0 = cu*(p0*cos(t1)-q0*sin(t1));
-        y0 = cu*(p0*sin(t1)+q0*cos(t1));
+        cu = std::sqrt(M_2_PI/x);
+        j0 = cu*(p0*std::cos(t1)-q0*std::sin(t1));
+        y0 = cu*(p0*std::sin(t1)+q0*std::cos(t1));
         t2 = x-0.75*M_PI;
         p1 = 1.0;
         q1 = 0.375/x;
         for (k=0;k<kz;k++) {
-            p1 += a1[k]*pow(x,-2*k-2);
-            q1 += b1[k]*pow(x,-2*k-3);
+            p1 += a1[k]*std::pow(x,-2*k-2);
+            q1 += b1[k]*std::pow(x,-2*k-3);
         }
-        j1 = cu*(p1*cos(t2)-q1*sin(t2));
-        y1 = cu*(p1*sin(t2)+q1*cos(t2));
+        j1 = cu*(p1*std::cos(t2)-q1*std::sin(t2));
+        y1 = cu*(p1*std::sin(t2)+q1*std::cos(t2));
     }
     j0p = -j1;
     j1p = j0-j1/x;
@@ -231,30 +230,30 @@ int bessjy01b(double x,double &j0,double &j1,double &y0,double &y1,
         dtmp = (((((((-0.567433e-4*t2+0.859977e-3)*t2-0.94855882e-2)*t2+
             0.0772975809)*t2-0.4261737419)*t2+1.4216421221)*t2-
             2.3498519931)*t2+1.0766115157)*t2+0.3674669052;
-        y0 = M_2_PI*log(0.5*x)*j0+dtmp;
+        y0 = M_2_PI*std::log(0.5*x)*j0+dtmp;
         dtmp = (((((((0.6535773e-3*t2-0.0108175626)*t2+0.107657607)*t2-
             0.7268945577)*t2+3.1261399273)*t2-7.3980241381)*t2+
             6.8529236342)*t2+0.3932562018)*t2-0.6366197726;
-        y1 = M_2_PI*log(0.5*x)*j1+dtmp/x;
+        y1 = M_2_PI*std::log(0.5*x)*j1+dtmp/x;
     }
     else {
         t = 4.0/x;
         t2 = t*t;
-        a0 = sqrt(M_2_PI/x);
+        a0 = std::sqrt(M_2_PI/x);
         p0 = ((((-0.9285e-5*t2+0.43506e-4)*t2-0.122226e-3)*t2+
              0.434725e-3)*t2-0.4394275e-2)*t2+0.999999997;
         q0 = t*(((((0.8099e-5*t2-0.35614e-4)*t2+0.85844e-4)*t2-
             0.218024e-3)*t2+0.1144106e-2)*t2-0.031249995);
         ta0 = x-M_PI_4;
-        j0 = a0*(p0*cos(ta0)-q0*sin(ta0));
-        y0 = a0*(p0*sin(ta0)+q0*cos(ta0));
+        j0 = a0*(p0*std::cos(ta0)-q0*std::sin(ta0));
+        y0 = a0*(p0*std::sin(ta0)+q0*std::cos(ta0));
         p1 = ((((0.10632e-4*t2-0.50363e-4)*t2+0.145575e-3)*t2
             -0.559487e-3)*t2+0.7323931e-2)*t2+1.000000004;
         q1 = t*(((((-0.9173e-5*t2+0.40658e-4)*t2-0.99941e-4)*t2
             +0.266891e-3)*t2-0.1601836e-2)*t2+0.093749994);
         ta1 = x-0.75*M_PI;
-        j1 = a0*(p1*cos(ta1)-q1*sin(ta1));
-        y1 = a0*(p1*sin(ta1)+q1*cos(ta1));
+        j1 = a0*(p1*std::cos(ta1)-q1*std::sin(ta1));
+        y1 = a0*(p1*std::sin(ta1)+q1*std::cos(ta1));
     }
     j0p = -j1;
     j1p = j0-j1/x;
@@ -267,15 +266,15 @@ int msta1(double x,int mp)
     double a0,f0,f1,f;
     int i,n0,n1,nn;
 
-    a0 = fabs(x);
+    a0 = std::fabs(x);
     n0 = (int)(1.1*a0)+1;
-    f0 = 0.5*log10(6.28*n0)-n0*log10(1.36*a0/n0)-mp;
+    f0 = 0.5*std::log10(6.28*n0)-n0*std::log10(1.36*a0/n0)-mp;
     n1 = n0+5;
-    f1 = 0.5*log10(6.28*n1)-n1*log10(1.36*a0/n1)-mp;
+    f1 = 0.5*std::log10(6.28*n1)-n1*std::log10(1.36*a0/n1)-mp;
     for (i=0;i<20;i++) {
         nn = (int) (n1- (n1-n0)/(1.0-f0/f1));
-        f = 0.5*log10(6.28*nn)-nn*log10(1.36*a0/nn)-mp;
-        if (abs(nn-n1) < 1) break;
+        f = 0.5*std::log10(6.28*nn)-nn*std::log10(1.36*a0/nn)-mp;
+        if (std::abs(nn-n1) < 1) break;
         n0 = n1;
         f0 = f1;
         n1 = nn;
@@ -288,9 +287,9 @@ int msta2(double x,int n,int mp)
     double a0,ejn,hmp,f0,f1,f,obj;
     int i,n0,n1,nn;
 
-    a0 = fabs(x);
+    a0 = std::fabs(x);
     hmp = 0.5*mp;
-    ejn = 0.5*log10(6.28*n)-n*log10(1.36*a0/n);
+    ejn = 0.5*std::log10(6.28*n)-n*std::log10(1.36*a0/n);
     if (ejn <= hmp) {
         obj = mp;
         n0 = (int)(1.1*a0);
@@ -300,13 +299,13 @@ int msta2(double x,int n,int mp)
         obj = hmp+ejn;
         n0 = n;
     }
-    f0 = 0.5*log10(6.28*n0)-n0*log10(1.36*a0/n0)-obj;
+    f0 = 0.5*std::log10(6.28*n0)-n0*std::log10(1.36*a0/n0)-obj;
     n1 = n0+5;
-    f1 = 0.5*log10(6.28*n1)-n1*log10(1.36*a0/n1)-obj;
+    f1 = 0.5*std::log10(6.28*n1)-n1*std::log10(1.36*a0/n1)-obj;
     for (i=0;i<20;i++) {
         nn = (int)(n1-(n1-n0)/(1.0-f0/f1));
-        f = 0.5*log10(6.28*nn)-nn*log10(1.36*a0/nn)-obj;
-        if (abs(nn-n1) < 1) break;
+        f = 0.5*std::log10(6.28*nn)-nn*std::log10(1.36*a0/nn)-obj;
+        if (std::abs(nn-n1) < 1) break;
         n0 = n1;
         f0 = f1;
         n1 = nn;
@@ -374,7 +373,7 @@ int bessjyna(int n,double x,int &nm,double *jn,double *yn,
             f2 = f1;
             f1 = f;
         }
-        if (fabs(bj0) > fabs(bj1)) cs = bj0/f;
+        if (std::fabs(bj0) > std::fabs(bj1)) cs = bj0/f;
         else cs = bj1/f2;
         for (k=0;k<=nm;k++) {
             jn[k] *= cs;
@@ -455,11 +454,11 @@ int bessjynb(int n,double x,int &nm,double *jn,double *yn,
             if (k <= nm) jn[k] = f;
             if ((k == 2*(int)(k/2)) && (k != 0)) {
                 bs += 2.0*f;
-//                su += pow(-1,k>>1)*f/(double)k;
+//                su += std::pow(-1,k>>1)*f/(double)k;
                 su += (-1)*((k & 2)-1)*f/(double)k;
             }
             else if (k > 1) {
-//                sv += pow(-1,k>>1)*k*f/(k*k-1.0);
+//                sv += std::pow(-1,k>>1)*k*f/(k*k-1.0);
                 sv += (-1)*((k & 2)-1)*(double)k*f/(k*k-1.0);
             }
             f2 = f1;
@@ -469,7 +468,7 @@ int bessjynb(int n,double x,int &nm,double *jn,double *yn,
         for (k=0;k<=nm;k++) {
             jn[k] /= s0;
         }
-        ec = log(0.5*x) +0.5772156649015329;
+        ec = std::log(0.5*x) +0.5772156649015329;
         by0 = M_2_PI*(ec*jn[0]-4.0*su/s0);
         yn[0] = by0;
         by1 = M_2_PI*((ec-1.0)*jn[1]-jn[0]/x-4.0*sv/s0);
@@ -480,23 +479,23 @@ int bessjynb(int n,double x,int &nm,double *jn,double *yn,
         p0 = 1.0;
         q0 = -0.125/x;
         for (k=0;k<4;k++) {
-            p0 += a[k]*pow(x,-2*k-2);
-            q0 += b[k]*pow(x,-2*k-3);
+            p0 += a[k]*std::pow(x,-2*k-2);
+            q0 += b[k]*std::pow(x,-2*k-3);
         }
-        cu = sqrt(M_2_PI/x);
-        bj0 = cu*(p0*cos(t1)-q0*sin(t1));
-        by0 = cu*(p0*sin(t1)+q0*cos(t1));
+        cu = std::sqrt(M_2_PI/x);
+        bj0 = cu*(p0*std::cos(t1)-q0*std::sin(t1));
+        by0 = cu*(p0*std::sin(t1)+q0*std::cos(t1));
         jn[0] = bj0;
         yn[0] = by0;
         t2 = x-0.75*M_PI;
         p1 = 1.0;
         q1 = 0.375/x;
         for (k=0;k<4;k++) {
-            p1 += a1[k]*pow(x,-2*k-2);
-            q1 += b1[k]*pow(x,-2*k-3);
+            p1 += a1[k]*std::pow(x,-2*k-2);
+            q1 += b1[k]*std::pow(x,-2*k-3);
         }
-        bj1 = cu*(p1*cos(t2)-q1*sin(t2));
-        by1 = cu*(p1*sin(t2)+q1*cos(t2));
+        bj1 = cu*(p1*std::cos(t2)-q1*std::sin(t2));
+        by1 = cu*(p1*std::sin(t2)+q1*std::cos(t2));
         jn[1] = bj1;
         yn[1] = by1;
         for (k=2;k<=nm;k++) {
@@ -565,10 +564,10 @@ int bessjyv(double v,double x,double &vm,double *jv,double *yv,
             for (k=1;k<=40;k++) {
                 r *= -0.25*x2/(k*(k+vl));
                 bjvl += r;
-                if (fabs(r) < fabs(bjvl)*1e-15) break;
+                if (std::fabs(r) < std::fabs(bjvl)*1e-15) break;
             }
             vg = 1.0 + vl;
-            a = pow(0.5*x,vl)/gamma(vg);
+            a = std::pow(0.5*x,vl)/gamma(vg);
             if (l == 0) bjv0 = bjvl*a;
             else bjv1 = bjvl*a;
         }
@@ -582,22 +581,22 @@ int bessjyv(double v,double x,double &vm,double *jv,double *yv,
             px = 1.0;
             rp = 1.0;
             for (k=1;k<=kz;k++) {
-                rp *= (-0.78125e-2)*(vv-pow(4.0*k-3.0,2.0))*
-                    (vv-pow(4.0*k-1.0,2.0))/(k*(2.0*k-1.0)*x2);
+                rp *= (-0.78125e-2)*(vv-std::pow(4.0*k-3.0,2.0))*
+                    (vv-std::pow(4.0*k-1.0,2.0))/(k*(2.0*k-1.0)*x2);
                 px += rp;
             }
             qx = 1.0;
             rq = 1.0;
             for (k=1;k<=kz;k++) {
-                rq *= (-0.78125e-2)*(vv-pow(4.0*k-1.0,2.0))*
-                    (vv-pow(4.0*k+1.0,2.0))/(k*(2.0*k+1.0)*x2);
+                rq *= (-0.78125e-2)*(vv-std::pow(4.0*k-1.0,2.0))*
+                    (vv-std::pow(4.0*k+1.0,2.0))/(k*(2.0*k+1.0)*x2);
                 qx += rq;
             }
             qx *= 0.125*(vv-1.0)/x;
             xk = x-(0.5*(j+v0)+0.25)*M_PI;
-            a0 = sqrt(M_2_PI/x);
-            ck = cos(xk);
-            sk = sin(xk);
+            a0 = std::sqrt(M_2_PI/x);
+            ck = std::cos(xk);
+            sk = std::sin(xk);
 
             if (j == 0) {
                 bjv0 = a0*(px*ck-qx*sk);
@@ -635,7 +634,7 @@ int bessjyv(double v,double x,double &vm,double *jv,double *yv,
             f2 = f1;
             f1 = f;
         }
-        if (fabs(bjv0) > fabs(bjv1)) cs = bjv0/f;
+        if (std::fabs(bjv0) > std::fabs(bjv1)) cs = bjv0/f;
         else cs = bjv1/f2;
         for (k=0;k<=n;k++) {
             jv[k] *= cs;
@@ -653,20 +652,20 @@ int bessjyv(double v,double x,double &vm,double *jv,double *yv,
                 for (k=1;k<=40;k++) {
                     r *= -0.25*x2/(k*(k-vl));
                     bjvl += r;
-                    if (fabs(r) < fabs(bjvl)*1e-15) break;
+                    if (std::fabs(r) < std::fabs(bjvl)*1e-15) break;
                 }
                 vg = 1.0-vl;
-                b = pow(2.0/x,vl)/gamma(vg);
+                b = std::pow(2.0/x,vl)/gamma(vg);
                 if (l == 0) bju0 = bjvl*b;
                 else bju1 = bjvl*b;
             }
             pv0 = M_PI*v0;
             pv1 = M_PI*(1.0+v0);
-            byv0 = (bjv0*cos(pv0)-bju0)/sin(pv0);
-            byv1 = (bjv1*cos(pv1)-bju1)/sin(pv1);
+            byv0 = (bjv0*std::cos(pv0)-bju0)/std::sin(pv0);
+            byv1 = (bjv1*std::cos(pv1)-bju1)/std::sin(pv1);
         }
         else {
-            ec = log(0.5*x)+el;
+            ec = std::log(0.5*x)+el;
             cs0 = 0.0;
             w0 = 0.0;
             r0 = 1.0;

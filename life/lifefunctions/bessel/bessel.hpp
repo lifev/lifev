@@ -4,6 +4,8 @@
   Wiley and Sons, 1996.
 */
 #include <complex>
+#include <cmath>
+#include <cstdlib>
 
 #ifndef bessH
 #define bessH
