@@ -102,7 +102,6 @@ MultiscaleAlgorithm::showMe()
                   << "Algorithm name                       = " << M_name << std::endl
                   << "Max Sub-iterations                   = " << M_subiterationsMaximumNumber << std::endl
                   << "Tolerance                            = " << M_tolerance << std::endl << std::endl;
-        std::cout << std::endl << std::endl;
     }
 }
 

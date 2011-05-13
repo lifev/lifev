@@ -167,7 +167,7 @@ MultiscaleCommunicatorsManager::showMe()
                 std::cout << M_parallelProcesses[i][j] << " ";
             std::cout << std::endl;
         }
-        std::cout << std::endl;
+        std::cout << std::endl << std::endl << std::endl;
     }
 }
 
