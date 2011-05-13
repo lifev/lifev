@@ -123,11 +123,11 @@ Real RossEthierSteinmanUnsteadyDec::grad_u( const UInt& icoor, const Real& t, co
         return 1.;
 }
 
-Real RossEthierSteinmanUnsteadyDec::f( const Real& t,
-                                const Real& x,
-                                const Real& y,
-                                const Real& z,
-                                const ID& i ) { return 0.; }
+Real RossEthierSteinmanUnsteadyDec::f( const Real& /* t */,
+                                const Real& /* x */,
+                                const Real& /* y */,
+                                const Real& /* z */,
+                                const ID& /* i */ ) { return 0.; }
 
 Real RossEthierSteinmanUnsteadyDec::xexact( const Real& t,
                                      const Real& x,
