@@ -261,6 +261,12 @@ public:
      */
     const multiscaleDataPtr_Type& globalData() const { return M_globalData; }
 
+    //! Get the communicator of the model.
+    /*!
+     * @return Communicator of the model.
+     */
+    const multiscaleCommPtr_Type& communicator() const { return M_comm; }
+
     //@}
 
 protected:
