@@ -129,19 +129,6 @@ MultiscaleCouplingFlowRate::exportCouplingResiduals( multiscaleVector_Type& coup
 
 }
 
-void
-MultiscaleCouplingFlowRate::showMe()
-{
-    if ( M_comm->MyPID() == 0 )
-    {
-        multiscaleCoupling_Type::showMe();
-
-        for ( UInt i( 0 ); i < modelsNumber(); ++i )
-            std::cout << "Coupling FlowRate(" << i << ")= " << localCouplingVariables( 0 )[i] << std::endl;
-        std::cout << std::endl << std::endl;
-    }
-}
-
 // ===================================================
 // Private MultiscaleCoupling Implementation
 // ===================================================
@@ -212,23 +199,6 @@ MultiscaleCouplingFlowRate::insertJacobianDeltaCoefficients( multiscaleMatrix_Ty
         Debug( 8240 ) << "J(" << row << "," << column << ") = " << -coefficient  << "\n";
 #endif
 
-    }
-}
-
-void
-MultiscaleCouplingFlowRate::displayCouplingValues( std::ostream& output )
-{
-    Real flowRate(0), stress(0);
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-    {
-        flowRate = localCouplingVariables( 0 )[i];
-        stress   = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_flags[i] );
-
-        if ( M_comm->MyPID() == 0 )
-            output << "  " << M_globalData->dataTime()->time() << "    " << M_models[i]->ID()
-            << "    " << M_flags[i]
-            << "    " << flowRate
-            << "    " << stress << std::endl;
     }
 }
 

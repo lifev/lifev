@@ -71,15 +71,18 @@ MultiscaleCouplingBoundaryCondition::setupData( const std::string& fileName )
 
     multiscaleCoupling_Type::setupData( fileName );
 
-    M_fileName = fileName;
-    GetPot dataFile( fileName );
+    if ( modelsNumber() > 0 )
+    {
+        M_fileName = fileName;
+        GetPot dataFile( fileName );
 
-    //Load the list of boundary conditions
-    M_listSize = dataFile.vector_variable_size( "boundary_conditions/list" );
+        //Load the list of boundary conditions
+        M_listSize = dataFile.vector_variable_size( "boundary_conditions/list" );
 
-    M_list.reserve( M_listSize );
-    for ( UInt i( 0 ); i < M_listSize; ++i )
-        M_list.push_back( dataFile( "boundary_conditions/list", " ", i ) );
+        M_list.reserve( M_listSize );
+        for ( UInt i( 0 ); i < M_listSize; ++i )
+            M_list.push_back( dataFile( "boundary_conditions/list", " ", i ) );
+    }
 }
 
 void
@@ -125,24 +128,9 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 
         default:
 
-            if ( M_comm->MyPID() == 0 )
+            if ( M_models[i]->communicator()->MyPID() == 0 )
                 switchErrorMessage( M_models[i] );
         }
-}
-
-void
-MultiscaleCouplingBoundaryCondition::showMe()
-{
-    if ( M_comm->MyPID() == 0 )
-    {
-        multiscaleCoupling_Type::showMe();
-
-        std::cout << "List size           = " << M_listSize << std::endl;
-        std::cout << "List                = ";
-        for ( UInt i( 0 ); i < M_listSize; ++i )
-            std::cout << M_list[i] << " ";
-        std::cout << std::endl << std::endl << std::endl << std::endl;
-    }
 }
 
 // ===================================================
@@ -159,23 +147,6 @@ MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localC
     multiscaleModelsContainer_Type emptyList;
 
     return emptyList;
-}
-
-void
-MultiscaleCouplingBoundaryCondition::displayCouplingValues( std::ostream& output )
-{
-    Real flowRate(0), stress(0);
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-    {
-        flowRate = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
-        stress   = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_flags[i] );
-
-        if ( M_comm->MyPID() == 0 )
-            output << "  " << M_globalData->dataTime()->time() << "    " << M_models[i]->ID()
-            << "    " << M_flags[i]
-            << "    " << flowRate
-            << "    " << stress << std::endl;
-    }
 }
 
 } // Namespace Multiscale

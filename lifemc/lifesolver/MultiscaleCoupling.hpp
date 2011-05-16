@@ -41,6 +41,8 @@
 #include <lifemc/lifesolver/MultiscaleData.hpp>
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 
+#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp> // This should not be here
+
 namespace LifeV
 {
 namespace Multiscale
@@ -127,9 +129,6 @@ public:
      */
     virtual bool topologyChange() { return false; }
 
-    //! Display some information about the coupling
-    virtual void showMe();
-
     //@}
 
 
@@ -178,6 +177,9 @@ public:
 
     //! save the coupling variables information on a file
     void saveSolution();
+
+    //! Display some information about the coupling
+    void showMe();
 
     //! Clear the list of pointers to the models.
     /*!
@@ -339,12 +341,6 @@ protected:
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
      */
     virtual void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& linearSystemSolved ) = 0;
-
-    //! Display some information about the coupling
-    /*!
-     * @param output specify the output stream
-     */
-    virtual void displayCouplingValues( std::ostream& output ) = 0;
 
     //@}
 

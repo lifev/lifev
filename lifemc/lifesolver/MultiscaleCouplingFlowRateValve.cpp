@@ -167,18 +167,6 @@ MultiscaleCouplingFlowRateValve::exportCouplingResiduals( multiscaleVector_Type&
 
 }
 
-void
-MultiscaleCouplingFlowRateValve::showMe()
-{
-    if ( M_comm->MyPID() == 0 )
-    {
-        super_Type::showMe();
-
-        std::cout << "Valve position      = " << M_valveIsOpen << std::endl;
-        std::cout << std::endl << std::endl;
-    }
-}
-
 // ===================================================
 // Private MultiscaleCoupling Implementation
 // ===================================================

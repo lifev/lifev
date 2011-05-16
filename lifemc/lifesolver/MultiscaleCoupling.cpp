@@ -83,32 +83,14 @@ MultiscaleCoupling::setupData( const std::string& fileName )
 
     // Read Multiscale parameters
     M_couplingName = dataFile( "Multiscale/couplingName", "couplingName" );
-    M_timeInterpolationOrder = dataFile( "Multiscale/timeInterpolationOrder", 0 );
 
-    // Set the size of the local coupling variables
-    M_localCouplingVariables.reserve( M_timeInterpolationOrder + 1 );
-}
+    if ( modelsNumber() > 0 )
+    {
+        M_timeInterpolationOrder = dataFile( "Multiscale/timeInterpolationOrder", 0 );
 
-void
-MultiscaleCoupling::showMe()
-{
-    std::cout << "Coupling id         = " << M_ID << std::endl
-              << "Coupling name       = " << M_couplingName << std::endl
-              << "Coupling type       = " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
-
-    std::cout << "Models number       = " << modelsNumber() << std::endl;
-    std::cout << "Models ID(s)        = ";
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        std::cout << M_models[i]->ID() << " ";
-    std::cout << std::endl;
-    std::cout << "Models type(s)      = ";
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        std::cout << enum2String( M_models[i]->type(), multiscaleModelsMap ) << " ";
-    std::cout << std::endl;
-    std::cout << "Flags list          = ";
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        std::cout << M_flags[i] << " ";
-    std::cout << std::endl << std::endl;
+        // Set the size of the local coupling variables
+        M_localCouplingVariables.reserve( M_timeInterpolationOrder + 1 );
+    }
 }
 
 // ===================================================
@@ -233,27 +215,63 @@ MultiscaleCoupling::saveSolution()
     Debug( 8200 ) << "MultiscaleCoupling::saveSolution() \n";
 #endif
 
-    std::ofstream output;
-    output << std::scientific << std::setprecision( 15 );
-
-    if ( M_comm->MyPID() == 0 )
+    for ( UInt i( 0 ); i < modelsNumber(); ++i )
     {
-        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep ) + "_Coupling_" + number2string( M_ID ) + ".mfile";
+        Real flowRate ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] ) );
+        Real stress   ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_flags[i] ) );
 
-        if ( M_globalData->dataTime()->isFirstTimeStep() )
+        if ( M_models[i]->communicator()->MyPID() == 0 )
         {
-            output.open( filename.c_str(), std::ios::trunc );
-            output << "% Coupling Type: " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
-            output << "% TIME                     ID   FLAG FLOW RATE                STRESS" << std::endl;
+            std::ofstream output;
+            output << std::scientific << std::setprecision( 15 );
+
+            std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep )
+                                                           + "_Coupling_" + number2string( M_ID ) +
+                                                           + "_Flag_" + number2string( M_flags[i] ) + ".mfile";
+
+            if ( M_globalData->dataTime()->isFirstTimeStep() )
+            {
+                output.open( filename.c_str(), std::ios::trunc );
+                output << "% Coupling Type: " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
+                output << "% TIME                     ID   FLOW RATE                STRESS" << std::endl;
+            }
+            else
+            {
+                output.open( filename.c_str(), std::ios::app );
+                output << "  " << M_globalData->dataTime()->time() << "    " << M_models[i]->ID()
+                       << "    " << flowRate
+                       << "    " << stress << std::endl;
+            }
+            output.close();
         }
-        else
-            output.open( filename.c_str(), std::ios::app );
     }
+}
 
-    displayCouplingValues( output );
+void
+MultiscaleCoupling::showMe()
+{
+    if ( modelsNumber() > 0 )
+    {
+        std::cout << "Coupling id         = " << M_ID << std::endl
+                  << "Coupling name       = " << M_couplingName << std::endl
+                  << "Coupling type       = " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
 
-    if ( M_comm->MyPID() == 0 )
-        output.close();
+        for ( UInt i( 0 ); i < modelsNumber(); ++i )
+        {
+            std::cout << "Models ID(s)        = ";
+            for ( UInt i( 0 ); i < modelsNumber(); ++i )
+                std::cout << M_models[i]->ID() << " ";
+            std::cout << std::endl;
+            std::cout << "Models type(s)      = ";
+            for ( UInt i( 0 ); i < modelsNumber(); ++i )
+                std::cout << enum2String( M_models[i]->type(), multiscaleModelsMap ) << " ";
+            std::cout << std::endl;
+            std::cout << "Flags list          = ";
+            for ( UInt i( 0 ); i < modelsNumber(); ++i )
+                std::cout << M_flags[i] << " ";
+            std::cout << std::endl << std::endl;
+        }
+    }
 }
 
 // ===================================================
