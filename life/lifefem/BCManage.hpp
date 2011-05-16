@@ -71,7 +71,7 @@ bcManage( MatrixType& matrix,
           BCHandler const& bcHandler,
           CurrentBoundaryFE& currentBdFE,
           DataType const& diagonalizeCoef,
-          DataType const& time );
+          DataType const& time = 0 );
 
 
 
@@ -124,7 +124,7 @@ bcManageMatrix( MatrixType&      matrix,
                 const BCHandler& bcHandler,
                 CurrentBoundaryFE&     currentBdFE,
                 const DataType&  diagonalizeCoef,
-                const DataType&  time );
+                const DataType&  time = 0 );
 
 
 
@@ -228,7 +228,7 @@ bcEssentialManageUDep( MatrixType& matrix,
                        const DataType& diagonalizeCoef,
                        const DataType& time,
                        const VectorType& feVec ,
-                       UInt offset );
+                       UInt offset = 0 );
 
 
 
