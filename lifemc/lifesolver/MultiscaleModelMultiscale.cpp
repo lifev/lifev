@@ -182,39 +182,33 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
         }
     }
 
-    // Reset my counter
-    myIDCounter = 0;
-
     // Load Couplings
+    M_couplingsList.resize( couplingsLinesNumber );
     path = dataFile( "Problem/couplingsPath", "./" );
     for ( UInt fileCouplingsLine( 0 ); fileCouplingsLine < couplingsLinesNumber; ++fileCouplingsLine )
     {
+        //id = dataFile( "Problem/couplings", 0, i * couplingsColumnsNumber );
+        coupling = multiscaleCouplingsMap[dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 1 )];
+        M_couplingsList.reserve( ++myIDCounter );
+        M_couplingsList[fileCouplingsLine] = multiscaleCouplingPtr_Type( multiscaleCouplingFactory_Type::instance().createObject( coupling, multiscaleCouplingsMap ) );
+        M_couplingsList[fileCouplingsLine]->setID( fileCouplingsLine );
+        M_couplingsList[fileCouplingsLine]->setCommunicator( M_comm );
+
         string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 3 ), modelsIDVector );
         string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 4 ), flagsIDVector );
         for ( UInt j( 0 ); j < modelsIDVector.size(); ++j )
-        {
             if ( M_commManager.myModel( modelsIDVector[j] ) )
             {
-                if ( M_couplingsList.size() == myIDCounter )
-                {
-                    //id = dataFile( "Problem/couplings", 0, i * couplingsColumnsNumber );
-                    coupling = multiscaleCouplingsMap[dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 1 )];
-                    M_couplingsList.reserve( ++myIDCounter );
-                    M_couplingsList.push_back( multiscaleCouplingPtr_Type( multiscaleCouplingFactory_Type::instance().createObject( coupling, multiscaleCouplingsMap ) ) );
-                    M_couplingsList.back()->setID( fileCouplingsLine );
-                    M_couplingsList.back()->setCommunicator( M_commManager.modelCommunicator( modelsIDVector[j] ) );
-                    M_couplingsList.back()->setGlobalData( M_globalData );
-                    M_couplingsList.back()->setupData( path + enum2String( coupling, multiscaleCouplingsMap ) + "/"
-                                                       + dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 2 ) + ".dat" );
-                }
-
-                M_couplingsList.back()->addModel( M_modelsList[modelsIDMap[modelsIDVector[j]]] );
-                M_couplingsList.back()->addFlagID( flagsIDVector[j] );
-                M_modelsList[modelsIDMap[modelsIDVector[j]]]->addCoupling( M_couplingsList.back() );
+                M_couplingsList[fileCouplingsLine]->addModel( M_modelsList[modelsIDMap[modelsIDVector[j]]] );
+                M_couplingsList[fileCouplingsLine]->addFlagID( flagsIDVector[j] );
+                M_modelsList[modelsIDMap[modelsIDVector[j]]]->addCoupling( M_couplingsList[fileCouplingsLine] );
             }
-        }
         modelsIDVector.clear();
         flagsIDVector.clear();
+
+        M_couplingsList[fileCouplingsLine]->setGlobalData( M_globalData );
+        M_couplingsList[fileCouplingsLine]->setupData( path + enum2String( coupling, multiscaleCouplingsMap ) + "/"
+                                                       + dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 2 ) + ".dat" );
     }
 }
 
