@@ -743,8 +743,8 @@ MultiscaleModel1D::imposePerturbation()
             M_bcDeltaType = M_linearBC->bc( M_bcDeltaSide )->type( OneDimensional::first );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
-            // We replace pressure BC with area BC for the perturbed problem
-            if ( M_bcDeltaType == OneDimensional::P )
+            // We replace stress BC with area BC for the perturbed problem
+            if ( M_bcDeltaType == OneDimensional::S )
             {
                 M_linearBC->bc( M_bcDeltaSide )->setType( OneDimensional::first, OneDimensional::A );
                 M_bcDeltaType = OneDimensional::A;
