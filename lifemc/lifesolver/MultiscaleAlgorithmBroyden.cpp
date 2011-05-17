@@ -124,6 +124,11 @@ MultiscaleAlgorithmBroyden::subIterate()
 
     for ( UInt subIT(1); subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
+//        std::cout << " MS-  CouplingVariables:\n" << std::endl;
+//        M_couplingVariables->showMe();
+//        std::cout << " MS-  CouplingResiduals:\n" << std::endl;
+//        M_couplingResiduals->showMe();
+    
         // Compute the Jacobian
         if ( subIT == 1 )
         {
@@ -136,12 +141,6 @@ MultiscaleAlgorithmBroyden::subIterate()
         else
             broydenJacobianUpdate( delta );
 
-        // To be moved in a post-processing class
-        //std::cout << " MS-  CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->showMe();
-        //std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-        //M_couplingResiduals->showMe();
-
         //Compute delta using -R
         minusCouplingResidual = -( *M_couplingResiduals );
 
@@ -152,8 +151,8 @@ MultiscaleAlgorithmBroyden::subIterate()
         // Update Coupling Variables using the Broyden Method
         *M_couplingVariables += delta;
 
-        //std::cout << " MS-  New CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->showMe();
+//        std::cout << " MS-  New CouplingVariables:\n" << std::endl;
+//        M_couplingVariables->showMe();
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );

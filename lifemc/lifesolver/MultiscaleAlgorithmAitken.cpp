@@ -105,19 +105,18 @@ MultiscaleAlgorithmAitken::subIterate()
     M_generalizedAitken.restart();
 
     // Temporary Computation of a Block Vector - Testing purpose
-    //VectorType blocksVector( M_couplingVariables ); blocksVector = 0.0;
-    //for ( UInt i = 1 ; i < blocksVector.size() ; i = i+2)
-    //    blocksVector[i] = 1.0;
-    //std::cout << "blocksVector: " << std::endl;
-    //blocksVector.showMe();
+//    VectorType blocksVector( M_couplingVariables ); blocksVector = 0.0;
+//    for ( UInt i = 1 ; i < blocksVector.size() ; i = i+2)
+//        blocksVector[i] = 1.0;
+//    std::cout << "blocksVector: " << std::endl;
+//    blocksVector.showMe();
 
     for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
-        // To be moved in a post-processing class
-        //std::cout << " MS-  CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->showMe();
-        //std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-        //M_couplingResiduals->showMe();
+//        std::cout << " MS-  CouplingVariables:\n" << std::endl;
+//        M_couplingVariables->showMe();
+//        std::cout << " MS-  CouplingResiduals:\n" << std::endl;
+//        M_couplingResiduals->showMe();
 
         // Update Coupling Variables
         switch ( M_method )
@@ -141,8 +140,8 @@ MultiscaleAlgorithmAitken::subIterate()
             break;
         }
 
-        //std::cout << " MS-  New CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->showMe();
+//        std::cout << " MS-  New CouplingVariables:\n" << std::endl;
+//        M_couplingVariables->showMe();
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );
