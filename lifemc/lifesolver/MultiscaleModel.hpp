@@ -166,6 +166,19 @@ public:
      */
     void setID( const UInt& id ) { M_ID = id; }
 
+    //! Set the number of couplings attached to this model
+    /*!
+     * @param couplingsNumber number of couplings attached to this model
+     */
+    void setCouplingsNumber( const UInt& couplingsNumber ) { M_couplings.resize( couplingsNumber ); }
+
+    //! Add a pointer to one of the couplings attached to this model
+    /*!
+     * @param localCouplingID local coupling ID
+     * @param coupling shared_ptr of the coupling
+     */
+    void setCoupling( const UInt& localCouplingID, const multiscaleCouplingPtr_Type& coupling ) { M_couplings[localCouplingID] = coupling ; }
+
     //! Add a pointer to one of the couplings which couple the model
     /*!
      * @param coupling shared_ptr of the coupling
