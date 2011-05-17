@@ -668,6 +668,20 @@ VectorEpetra::add( const VectorEpetra& vector, const Int offset )
 }
 
 VectorEpetra&
+VectorEpetra::replace( const VectorEpetra& vector, const Int& offset )
+{
+    // Definitions
+    Int numMyEntries = vector.M_epetraVector->MyLength ();
+    const Int* globalIDs = vector.blockMap().MyGlobalElements();
+
+    // Replace part of the vector
+    for ( Int i(0); i < numMyEntries; ++i )
+        ( *this )[globalIDs[i] + offset] = vector( globalIDs[i] );
+
+    return *this;
+}
+
+VectorEpetra&
 VectorEpetra::subset( const VectorEpetra& vector,
                       const UInt          offset )
 {

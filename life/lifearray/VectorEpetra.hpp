@@ -461,6 +461,19 @@ public:
      */
     VectorEpetra& add( const VectorEpetra& vector, const Int offset = 0 );
 
+    //! Replace part of the vector with a given vector
+    /*!
+     * Typical examples are: (u,p) = p or (u,p) = u.
+     * Note: the nodes to add are taken by the map of vector, hence:
+     * <ol>
+     *   <li> if this has a unique map: then vector should also (otherwise run time error)
+     *   <li> if this has a repeated map: then vector should also. (otherwise wrong)
+     * </ol>
+     * @param vector given vector
+     * @param offset identify the first element to be replaced
+     */
+    VectorEpetra& replace( const VectorEpetra& vector, const Int& offset );
+
     //! Set the current vector to a subset of the given vector with an offset
     /*!
       typically to do: p = (u,p) or u = (u,p).
