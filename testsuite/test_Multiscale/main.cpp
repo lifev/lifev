@@ -33,15 +33,15 @@
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
- *
  *  This is a very general main file to run a Multiscale simulation.
  *
  *  Models available:
  *  <ol>
- *      <li> Fluid3D (Oseen)
+ *      <li> Fluid3D
  *      <li> FSI3D
- *      <li> 1D
+ *      <li> OneDimensional
  *      <li> Multiscale
+ *      <li> Windkessel0D
  *  </ol>
  *
  *  Couplings available:
@@ -49,6 +49,8 @@
  *      <li> BoundaryCondition
  *      <li> Stress
  *      <li> FlowRateStress
+ *      <li> FlowRate
+ *      <li> FlowRateValve
  *  </ol>
  *
  *  Algorithms available:
@@ -56,8 +58,8 @@
  *      <li> Aitken
  *      <li> Explicit
  *      <li> Newton
+ *      <li> Broyden
  *  </ol>
- *
  */
 
 // Tell the compiler to ignore specific kind of warnings:
