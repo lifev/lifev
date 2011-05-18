@@ -98,7 +98,7 @@ VectorEpetra::VectorEpetra( const VectorEpetra& vector, const MapEpetraType& map
 }
 
 VectorEpetra::VectorEpetra( const VectorEpetra& vector, const MapEpetraType& mapType,
-                            const Epetra_CombineMode& combineMode ):
+                            const combineMode_Type& combineMode ):
         M_epetraMap   ( vector.M_epetraMap ),
         M_mapType     ( mapType ),
         M_epetraVector( new vector_type( *M_epetraMap->map( M_mapType ) ) ),
@@ -922,7 +922,7 @@ void VectorEpetra::showMe( std::ostream& output ) const
 // Set Methods
 // ===================================================
 void
-VectorEpetra::setCombineMode( Epetra_CombineMode combineMode )
+VectorEpetra::setCombineMode( combineMode_Type combineMode )
 {
     M_combineMode = combineMode;
 }
@@ -955,7 +955,7 @@ VectorEpetra::size() const
 // Private Methods
 // ===================================================
 VectorEpetra&
-VectorEpetra::Import (const Epetra_FEVector& vector, Epetra_CombineMode combineMode )
+VectorEpetra::Import (const Epetra_FEVector& vector, combineMode_Type combineMode )
 {
     if ( &vector == &this->epetraVector() )
         return *this;
@@ -975,7 +975,7 @@ VectorEpetra::Import (const Epetra_FEVector& vector, Epetra_CombineMode combineM
 }
 
 VectorEpetra&
-VectorEpetra::Export ( const Epetra_FEVector& vector, Epetra_CombineMode combineMode )
+VectorEpetra::Export ( const Epetra_FEVector& vector, combineMode_Type combineMode )
 {
     if ( &vector == &this->epetraVector() )
         return *this;
