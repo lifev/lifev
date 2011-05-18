@@ -69,8 +69,8 @@ solidMeshPartitioned = none
 
 [fluid]
 useShapeDerivatives = true
-domainVelImplicit   = false  # tells if the domain vel is to be considered implicitly in the convective term
-convectiveTermDer   = false  # tells if the velocity is to be considered implicitly in the convective term
+domainVelImplicit   = true   # tells if the domain vel is to be considered implicitly in the convective term
+convectiveTermDer   = true   # tells if the velocity is to be considered implicitly in the convective term
 semiImplicit        = false  # tells if we advance in time after the first nonlinear iteration or not
 
     [./physics] # Defined here only if different from the one in the main file.
@@ -151,7 +151,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     material_flag    = 1
     #externalPressure = 0
     #density          = 1.2
-    #young            = 4.0E6
+    #young            = 3.0784E6
     #poisson          = 0.48
 
     [../time_discretization]
