@@ -176,7 +176,7 @@ MultiscaleAlgorithmBroyden::subIterate()
     save( M_subiterationsMaximumNumber, M_couplingResiduals->norm2() );
 
     multiscaleErrorCheck( Tolerance, "Broyden algorithm residual: " + number2string( M_couplingResiduals->norm2() ) +
-                        " (required: " + number2string( M_tolerance ) + ")\n" );
+                        " (required: " + number2string( M_tolerance ) + ")\n", M_multiscale->communicator() == 0 );
 }
 
 void
