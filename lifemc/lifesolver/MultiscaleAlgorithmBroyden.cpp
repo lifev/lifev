@@ -117,9 +117,9 @@ MultiscaleAlgorithmBroyden::subIterate()
 
     M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
-    multiscaleVector_Type delta( *M_couplingResiduals );
+    multiscaleVector_Type delta( *M_couplingResiduals, Unique );
     delta = 0.0;
-    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals );
+    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals, Unique );
     minusCouplingResidual = 0.0;
 
     for ( UInt subIT(1); subIT <= M_subiterationsMaximumNumber; ++subIT )
@@ -225,7 +225,7 @@ MultiscaleAlgorithmBroyden::broydenJacobianUpdate( const multiscaleVector_Type& 
     if ( M_orthogonalization )
     {
         // Orthogonalize the vector
-        multiscaleVector_Type orthogonalization ( delta );
+        multiscaleVector_Type orthogonalization ( delta, Unique );
         for ( containerIterator_Type i = M_orthogonalizationContainer.begin(); i != M_orthogonalizationContainer.end() ; ++i )
             orthogonalization -= orthogonalization.dot( *i ) * *i;
         orthogonalization /= orthogonalization.norm2();
@@ -245,7 +245,7 @@ MultiscaleAlgorithmBroyden::broydenJacobianUpdate( const multiscaleVector_Type& 
 
     M_jacobian->globalAssemble();
 
-    //M_jacobian->spy( "Jacobian" )
+    //M_jacobian->spy( "Jacobian" );
 }
 
 void

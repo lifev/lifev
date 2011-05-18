@@ -62,7 +62,7 @@ MultiscaleModelMultiscale::~MultiscaleModelMultiscale()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8110 ) << "MultiscaleModelMultiscale::~MultiscaleModelMultiscale( ) \n";
+    Debug( 8110 ) << "MultiscaleModelMultiscale::~MultiscaleModelMultiscale() \n";
 #endif
 
     // Disconnect models and couplings to allow their destruction
@@ -196,11 +196,13 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
 
         string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 3 ), modelsIDVector );
         string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 4 ), flagsIDVector );
+
+        M_couplingsList[fileCouplingsLine]->setModelsNumber( modelsIDVector.size() );
         for ( UInt j( 0 ); j < modelsIDVector.size(); ++j )
             if ( M_commManager.myModel( modelsIDVector[j] ) )
             {
-                M_couplingsList[fileCouplingsLine]->addModel( M_modelsList[modelsIDMap[modelsIDVector[j]]] );
-                M_couplingsList[fileCouplingsLine]->addFlagID( flagsIDVector[j] );
+                M_couplingsList[fileCouplingsLine]->setModel( j, M_modelsList[modelsIDMap[modelsIDVector[j]]] );
+                M_couplingsList[fileCouplingsLine]->setFlagFromModel( j, flagsIDVector[j] );
                 M_modelsList[modelsIDMap[modelsIDVector[j]]]->addCoupling( M_couplingsList[fileCouplingsLine] );
             }
         modelsIDVector.clear();

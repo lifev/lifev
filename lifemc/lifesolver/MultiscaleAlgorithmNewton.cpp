@@ -93,9 +93,9 @@ MultiscaleAlgorithmNewton::subIterate()
 
     M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
-    multiscaleVector_Type delta( *M_couplingResiduals );
+    multiscaleVector_Type delta( *M_couplingResiduals, Unique );
     delta = 0.0;
-    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals );
+    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals, Unique );
     minusCouplingResidual = 0.0;
 
     for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
@@ -149,7 +149,7 @@ MultiscaleAlgorithmNewton::assembleJacobianMatrix()
     M_multiscale->exportJacobian( *M_jacobian );
     M_jacobian->globalAssemble();
 
-    //M_jacobian->spy( "Jacobian" )
+    //M_jacobian->spy( "Jacobian" );
 }
 
 } // Namespace Multiscale

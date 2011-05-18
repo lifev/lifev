@@ -71,7 +71,7 @@ MultiscaleCouplingFlowRateValve::setupCoupling()
 
     super_Type::setupCoupling();
 
-    if ( M_couplingIndex.first > 2)
+    if ( M_couplingIndex.first > 2 )
         std::cout << "!!! WARNING: MultiscaleCouplingFlowRateValve does not work with more than two models !!!" << std::endl;
 }
 
@@ -85,21 +85,38 @@ MultiscaleCouplingFlowRateValve::initializeCouplingVariables()
 
     super_Type::initializeCouplingVariables();
 
-    if ( localCouplingVariables( 0 )[0] <= 1e-10 )
-    {
-        if ( M_comm->MyPID() == 0 )
-            std::cout << " MS-  Valve closed at coupling " << M_ID << std::endl;
+    // We determine the initial position of the valve on the leader process of model 0,
+    // then we share the information with the other processes.
 
+    Int localValvePosition( 0 );
+    Int globalValvePosition( 0 );
+    if ( myModel( 0 ) )
+        if ( isModelLeaderProcess( 0 ) )
+        {
+            if ( localCouplingVariables( 0 )[0] <= 1e-10 )
+            {
+                std::cout << " MS-  Valve closed at coupling " << M_ID << std::endl;
+                localValvePosition = 0;
+            }
+            else
+            {
+                std::cout << " MS-  Valve open at coupling " << M_ID << std::endl;
+                localValvePosition = 1;
+            }
+        }
+
+    // We use the SumAll() instead of the Broadcast() because this way we don't need the id of the leader process.
+    M_comm->SumAll( &localValvePosition, &globalValvePosition, 1 );
+
+    // If the valve is closed the coupling variables are set to zero
+    if ( globalValvePosition == 0 )
+    {
         M_valveIsOpen = false;
-        localCouplingVariables( 0 ) = 0;
+        if ( myModelsNumber() > 0 )
+            localCouplingVariables( 0 ) = 0;
     }
     else
-    {
-        if ( M_comm->MyPID() == 0 )
-            std::cout << " MS-  Valve open at coupling " << M_ID << std::endl;
-
         M_valveIsOpen = true;
-    }
 }
 
 void
@@ -112,36 +129,61 @@ MultiscaleCouplingFlowRateValve::updateCoupling()
 
     super_Type::updateCoupling();
 
-    M_topologyChange = false;
+    // We determine if there is a topology change on the leader process of model 0,
+    // then we share the information with the other processes.
+    Int localTopology( 0 );
+    Int globalTopology( 0 );
     if ( M_valveIsOpen )
     {
-        if ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryFlowRate( M_flags[0] ) < 0 )
+        if ( myModel( 0 ) )
         {
-            if ( M_comm->MyPID() == 0 )
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryFlowRate( M_flags[0] );
+            if ( isModelLeaderProcess( 0 ) && myValue < 0 )
+            {
                 std::cout << " MS-  Opening the valve at coupling " << M_ID << std::endl;
-
-            M_valveIsOpen = false;
-            M_topologyChange = true;
-
-            // Reset coupling variable history
-            resetCouplingHistory();
+                localTopology = 1;
+            }
         }
     }
     else
     {
-        if (   multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[1] )->boundaryStress( M_flags[1] )
-             - multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryStress( M_flags[0] ) > 0 )
+        Real globalSum( 0 );
+        Real localSum( 0 );
+
+        if ( myModel( 1 ) )
         {
-            if ( M_comm->MyPID() == 0 )
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[1] )->boundaryStress( M_flags[1] );
+            if ( isModelLeaderProcess( 1 ) )
+                localSum = myValue;
+        }
+
+        // We use the SumAll() instead of the Broadcast() because this way we don't need the id of the leader process.
+        M_comm->SumAll( &localSum, &globalSum, 1 );
+
+        if ( myModel( 0 ) )
+        {
+            Real myValue = globalSum - multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryStress( M_flags[0] );
+            if ( isModelLeaderProcess( 0 ) && myValue > 0 )
+            {
                 std::cout << " MS-  Closing the valve at coupling " << M_ID << std::endl;
-
-            M_valveIsOpen = true;
-            M_topologyChange = true;
-
-            // Reset coupling variable history
-            resetCouplingHistory();
+                localTopology = 1;
+            }
         }
     }
+
+    // We use the SumAll() instead of the Broadcast() because this way we don't need the id of the leader process.
+    M_comm->SumAll( &localTopology, &globalTopology, 1 );
+
+    if ( globalTopology > 0 )
+    {
+        M_topologyChange = true;
+        M_valveIsOpen = !M_valveIsOpen;
+
+        // Reset coupling variable history
+        resetCouplingHistory();
+    }
+    else
+        M_topologyChange = false;
 }
 
 void
@@ -157,7 +199,7 @@ MultiscaleCouplingFlowRateValve::exportCouplingResiduals( multiscaleVector_Type&
     else
     {
         *M_localCouplingResiduals = 0.;
-        exportCouplingVector( *M_localCouplingResiduals, couplingResiduals );
+        exportCouplingVector( couplingResiduals, *M_localCouplingResiduals );
     }
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -182,12 +224,16 @@ MultiscaleCouplingFlowRateValve::insertJacobianConstantCoefficients( multiscaleM
         super_Type::insertJacobianConstantCoefficients( jacobian );
     else
     {
-        UInt row    = M_couplingIndex.second;
-        UInt column = M_couplingIndex.second;
+        // The constant coefficients are added by the leader process of model 0.
+        if ( myModel( 0 ) )
+            if ( isModelLeaderProcess( 0 ) )
+            {
+                UInt row    = M_couplingIndex.second;
+                UInt column = M_couplingIndex.second;
 
-        if ( M_comm->MyPID() == 0 )
-            for ( UInt i( 0 ); i < modelsNumber(); ++i )
-                jacobian.addToCoefficient( row + i, column + i, 1 );
+                for ( UInt i( 0 ); i < modelsNumber(); ++i )
+                    jacobian.addToCoefficient( row + i, column + i, 1 );
+            }
     }
 }
 

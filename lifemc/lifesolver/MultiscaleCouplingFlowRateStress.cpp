@@ -66,20 +66,29 @@ MultiscaleCouplingFlowRateStress::setupCoupling()
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::setupCoupling() \n";
 #endif
 
-    //Set number of coupling variables
-    M_couplingIndex.first = 2;
+    if ( myModelsNumber() > 0 )
+    {
+        // Set the number of coupling variables
+        M_couplingIndex.first = 2;
 
-    //Create local vectors
+        // Impose flow rate boundary condition on the first model
+        if ( myModel( 0 ) )
+        {
+            M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, 0 ) );
+            multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->imposeBoundaryFlowRate( M_flags[0], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+        }
+
+        // Impose stress boundary condition on all the other models
+        for ( UInt i( 1 ); i < modelsNumber(); ++i )
+            if ( myModel( i ) )
+            {
+                M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, 1 ) );
+                multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryStress( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+            }
+    }
+
+    // Create local vectors
     createLocalVectors();
-
-    // Impose stress boundary condition on the first model
-    M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, 0 ) );
-    multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->imposeBoundaryFlowRate( M_flags[0], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
-
-    // Impose stress boundary condition on all the other models
-    M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, 1 ) );
-    for ( UInt i( 1 ); i < modelsNumber(); ++i )
-        multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryStress( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
 }
 
 void
@@ -90,15 +99,37 @@ MultiscaleCouplingFlowRateStress::initializeCouplingVariables()
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::initializeCouplingVariables() \n";
 #endif
 
-    localCouplingVariables( 0 ) = 0.;
+    // Compute the flow rate coupling variable summing the flow rate of all the models but the first one
+    Real localSum( 0 );
+    Real globalSum( 0 );
 
-    // Compute the FlowRate
     for ( UInt i( 1 ); i < modelsNumber(); ++i )
-        localCouplingVariables( 0 )[0] -= multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+        if ( myModel( i ) )
+        {
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            if ( isModelLeaderProcess( i ) )
+                localSum -= myValue;
+        }
+    
+    // Sum the flow rate on all the models (but the first one)
+    M_comm->SumAll( &localSum, &globalSum, 1 );
+    if ( myModelsNumber() > 0 )
+        localCouplingVariables( 0 )[0] = globalSum;
 
-    // Compute the Stress
-    localCouplingVariables( 0 )[1] = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryStress( M_flags[0] );
+    // Compute the stress on the first model, then broadcast it with the others
+    localSum  = 0;
+    globalSum = 0;
+    
+    if ( myModel( 0 ) )
+    {
+        Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryStress( M_flags[0] );
+        if ( isModelLeaderProcess( 0 ) )
+            localSum = myValue;
+    }
 
+    M_comm->SumAll( &localSum, &globalSum, 1 );
+    if ( myModelsNumber() > 0 )
+        localCouplingVariables( 0 )[1] = globalSum;
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
@@ -114,18 +145,29 @@ MultiscaleCouplingFlowRateStress::exportCouplingResiduals( multiscaleVector_Type
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::exportCouplingResiduals() \n";
 #endif
 
+    // Reset coupling residual
     *M_localCouplingResiduals = 0.;
 
-    // Compute the FlowRate
     for ( UInt i( 1 ); i < modelsNumber(); ++i )
-        ( *M_localCouplingResiduals )[0] -= multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+        if ( myModel( i ) )
+        {
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            if ( isModelLeaderProcess( i ) )
+                ( *M_localCouplingResiduals )[0] -= myValue;
+        }
 
-    // Compute the Stress
-    ( *M_localCouplingResiduals )[1] = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryStress( M_flags[0] );
+    if ( myModelsNumber() > 0 )
+        if ( myModel( 0 ) )
+        {
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryStress( M_flags[0] );
+            if ( isModelLeaderProcess( 0 ) )
+            {
+                ( *M_localCouplingResiduals )[1] = myValue;
+                *M_localCouplingResiduals -= localCouplingVariables( 0 );
+            }
+        }
 
-    *M_localCouplingResiduals -= localCouplingVariables( 0 );
-
-    exportCouplingVector( *M_localCouplingResiduals, couplingResiduals );
+    exportCouplingVector( couplingResiduals, *M_localCouplingResiduals );
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
@@ -134,7 +176,7 @@ MultiscaleCouplingFlowRateStress::exportCouplingResiduals( multiscaleVector_Type
 }
 
 // ===================================================
-// Private Multiscale PhysicalCoupling Implementation
+// Private MultiscaleCoupling Implementation
 // ===================================================
 multiscaleModelsContainer_Type
 MultiscaleCouplingFlowRateStress::listOfPerturbedModels( const UInt& localCouplingVariableID )
@@ -144,16 +186,23 @@ MultiscaleCouplingFlowRateStress::listOfPerturbedModels( const UInt& localCoupli
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::listOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
-    multiscaleModelsContainer_Type perturbedModelsList(1);
+    multiscaleModelsContainer_Type perturbedModelsList(0);
 
     if ( localCouplingVariableID == 0 )
-        perturbedModelsList[0] = M_models[0];
+    {
+        if ( myModel(localCouplingVariableID) )
+        {
+            perturbedModelsList.reserve( 1 );
+            perturbedModelsList.push_back( M_models[0] );
+        }
+    }
     else
     {
-        perturbedModelsList.resize( modelsNumber() - 1 );
+        perturbedModelsList.reserve( myModelsNumber() );
 
         for ( UInt i( 1 ); i < modelsNumber(); ++i )
-            perturbedModelsList[i-1] = M_models[i];
+            if ( myModel(i) )
+                perturbedModelsList.push_back( M_models[i] );
     }
 
     return perturbedModelsList;
@@ -167,13 +216,15 @@ MultiscaleCouplingFlowRateStress::insertJacobianConstantCoefficients( multiscale
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::insertJacobianConstantCoefficients( jacobian )  \n";
 #endif
 
-    UInt row = M_couplingIndex.second;
+    // The constant coefficients are added by the leader process of model 0.
+    if ( myModel( 0 ) )
+        if ( isModelLeaderProcess( 0 ) )
+        {
+            UInt row = M_couplingIndex.second;
 
-    if ( M_comm->MyPID() == 0 )
-    {
-        jacobian.addToCoefficient( row,     row,     -1 );
-        jacobian.addToCoefficient( row + 1, row + 1, -1 );
-    }
+            jacobian.addToCoefficient( row,     row,     -1 );
+            jacobian.addToCoefficient( row + 1, row + 1, -1 );
+        }
 }
 
 void
@@ -184,27 +235,32 @@ MultiscaleCouplingFlowRateStress::insertJacobianDeltaCoefficients( multiscaleMat
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
 #endif
 
-    // Definitions
+    // Model global to local conversion
     UInt modelLocalID = modelGlobalToLocalID( ID );
-    Real coefficient  = 0;
-    UInt row          = M_couplingIndex.second;
-
-    // Compute the coefficient
-    if ( modelLocalID == 0 )
+    if ( myModel( modelLocalID ) )
     {
-        row += 1;
-        coefficient =  multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem );
-    }
-    else
-        coefficient = -multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
+        Real coefficient = 0;
+        UInt row         = M_couplingIndex.second;
 
-    // Add coefficient to the matrix
-    if ( M_comm->MyPID() == 0 )
-        jacobian.addToCoefficient( row, column, coefficient );
+        // Compute the coefficient
+        if ( modelLocalID == 0 )
+        {
+            row += 1;
+            coefficient =  multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem );
+        }
+        else
+            coefficient = -multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
+
+        // Add the coefficient to the matrix
+        if ( isModelLeaderProcess( modelLocalID ) )
+        {
+            jacobian.addToCoefficient( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "J(" << row << "," << column << ") = " << coefficient  << "\n";
+            Debug( 8230 ) << "J(" << row << "," << column << ") = " << coefficient  << "\n";
 #endif
+        }
+    }
 
 }
 

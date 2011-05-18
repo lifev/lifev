@@ -100,37 +100,38 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
     createLocalVectors();
 
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        switch ( M_models[i]->type() )
-        {
-        case Fluid3D:
+        if ( myModel( i ) )
+            switch ( M_models[i]->type() )
+            {
+            case Fluid3D:
 
-            applyBoundaryConditions3D< MultiscaleModelFluid3D > ( i );
+                applyBoundaryConditions3D< MultiscaleModelFluid3D > ( i );
 
-            break;
+                break;
 
-        case FSI3D:
+            case FSI3D:
 
-            applyBoundaryConditions3D< MultiscaleModelFSI3D > ( i );
+                applyBoundaryConditions3D< MultiscaleModelFSI3D > ( i );
 
-            break;
+                break;
 
-        case OneDimensional:
+            case OneDimensional:
 
-            applyBoundaryConditions1D< MultiscaleModel1D > ( i );
+                applyBoundaryConditions1D< MultiscaleModel1D > ( i );
 
-            break;
+                break;
 
-        case Windkessel0D:
+            case Windkessel0D:
 
-            applyBoundaryConditions0D< MultiscaleModelWindkessel0D > ( i );
+                applyBoundaryConditions0D< MultiscaleModelWindkessel0D > ( i );
 
-            break;
+                break;
 
-        default:
+            default:
 
-            if ( M_models[i]->communicator()->MyPID() == 0 )
-                switchErrorMessage( M_models[i] );
-        }
+                if ( M_models[i]->communicator()->MyPID() == 0 )
+                    switchErrorMessage( M_models[i] );
+            }
 }
 
 // ===================================================
