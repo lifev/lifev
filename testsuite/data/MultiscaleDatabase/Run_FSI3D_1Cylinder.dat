@@ -24,9 +24,9 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_1Cylinder-tube20
     RestartFromStepNumber      = 0
 
     [../time_discretization]
-    initialtime                = 0.000   # [s]
-    endtime                    = 0.040   # [s]
-    timestep                   = 0.001   # [s]
+    initialtime                = 0.0       # [s]
+    endtime                    = 0.05      # [s]
+    timestep                   = 0.0001    # [s]
 
     [../Algorithm]
     type                       = Explicit          # Aitken, Explicit, Newton, Broyden
@@ -43,8 +43,8 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_1Cylinder-tube20
 FluidDensity                = 1.04          # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
 FluidVenousPressure         = 0             # ven. pressure  [g/cm/s^2 - dyne/cm^2]
-SolidExternalPressure       = 1E+05         # ref. pressure  [g/cm/s^2 - dyne/cm^2]
+SolidExternalPressure       = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.2           # density        [g/cm^3]
-SolidPoissonCoefficient     = 0.48          # Poisson coeff. []
-SolidYoungModulus           = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
+SolidPoissonCoefficient     = 0.3          # Poisson coeff. []
+SolidYoungModulus           = 3.0784E6      # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################
