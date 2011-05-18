@@ -219,11 +219,11 @@ public:
 
     //! Add to the matrix a dyadic product: \f[ C += A \otimes B + \f], where \f[ C \f] is the matrix.
     /*!
-     *  NOTE: This method has been tested only for square matrices.
-      @param vector1 Vector A
-      @param vector2 Vector B
+     *  NOTE: This method has been tested only for square matrices and unique vectors
+     *  @param vector1 unique vector A
+     *  @param vector2 unique vector B
      */
-    void addDyadicProduct( const vector_type& vector1, const vector_type& vector2 );
+    void addDyadicProduct( const vector_type& uniqueVector1, const vector_type& uniqueVector2 );
 
     //! Add a multiple of a given matrix:  *this += scalar*matrix
     /*!
@@ -738,7 +738,7 @@ Int MatrixEpetra<DataType>::multiply( bool transposeCurrent, const vector_type& 
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::addDyadicProduct( const vector_type& vector1, const vector_type& vector2 )
+void MatrixEpetra<DataType>::addDyadicProduct( const vector_type& uniqueVector1, const vector_type& uniqueVector2 )
 {
     // Check if the matrix is open
     if ( M_epetraCrs->Filled() )
@@ -748,16 +748,22 @@ void MatrixEpetra<DataType>::addDyadicProduct( const vector_type& vector1, const
         return;
     }
 
-    // Creating a fully repeated copy of vector2
-    VectorEpetra repeatedVector2( vector2, Repeated );
-    //Epetra_Map repeatedMap( Epetra_Util::Create_OneToOne_Map ( vector2.epetraMap(), -1 ) );
-    //boost::VectorEpetra repeatedVector2( repeatedMap, Repeated );
-    //repeatedVector2 = vector2;
+    // Build a repeated list of globalElements
+    std::vector<Int> myGlobalElements( uniqueVector2.size() );
+    for ( UInt i = 0 ; i < myGlobalElements.size() ; ++i )
+        myGlobalElements[i] = i;
 
-    // Add the new coefficients to the matrix
+    // Build a repeated map
+    MapEpetra repeatedMap( -1, static_cast< Int > ( myGlobalElements.size() ), &myGlobalElements[0], uniqueVector2.map().commPtr() );
+
+    // Create a fully repeated copy of uniqueVector2
+    VectorEpetra repeatedVector2( repeatedMap, Repeated );
+    repeatedVector2 = uniqueVector2;
+
+    // Fill the matrix with the result of the dyadic Product
     for( Int row(0); row < M_epetraCrs->NumMyRows(); ++row )
         for( Int column(0); column < M_epetraCrs->NumGlobalCols(); ++column )
-            addToCoefficient( M_epetraCrs->GRID(row), column, vector1[row]*repeatedVector2[column] );
+            addToCoefficient( M_epetraCrs->GRID( row ), column, uniqueVector1[M_epetraCrs->GRID( row )] * repeatedVector2[column] );
 }
 
 template <typename DataType>
