@@ -209,7 +209,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         Real computedSolution( M_algorithm->couplingVariables()->norm2() );
         if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
             multiscaleErrorCheck( Solution, "Algorithm Solution: "  + number2string( computedSolution ) +
-                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() );
+                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() == 0 );
     }
 
     return multiscaleExitFlag;
