@@ -93,45 +93,48 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
     Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCoupling() \n";
 #endif
 
-    //Set number of coupling variables
-    M_couplingIndex.first  = 0;
+    if ( myModelsNumber() > 0 )
+    {
+        //Set the number of coupling variables
+        M_couplingVariablesNumber  = 0;
+
+        // Impose boundary conditions on all the models
+        for ( UInt i( 0 ); i < modelsNumber(); ++i )
+            if ( myModel( i ) )
+                switch ( M_models[i]->type() )
+                {
+                case Fluid3D:
+
+                    applyBoundaryConditions3D< MultiscaleModelFluid3D > ( i );
+
+                    break;
+
+                case FSI3D:
+
+                    applyBoundaryConditions3D< MultiscaleModelFSI3D > ( i );
+
+                    break;
+
+                case OneDimensional:
+
+                    applyBoundaryConditions1D< MultiscaleModel1D > ( i );
+
+                    break;
+
+                case Windkessel0D:
+
+                    applyBoundaryConditions0D< MultiscaleModelWindkessel0D > ( i );
+
+                    break;
+
+                default:
+
+                    switchErrorMessage( M_models[i] );
+                }
+    }
 
     //Create local vectors
     createLocalVectors();
-
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        if ( myModel( i ) )
-            switch ( M_models[i]->type() )
-            {
-            case Fluid3D:
-
-                applyBoundaryConditions3D< MultiscaleModelFluid3D > ( i );
-
-                break;
-
-            case FSI3D:
-
-                applyBoundaryConditions3D< MultiscaleModelFSI3D > ( i );
-
-                break;
-
-            case OneDimensional:
-
-                applyBoundaryConditions1D< MultiscaleModel1D > ( i );
-
-                break;
-
-            case Windkessel0D:
-
-                applyBoundaryConditions0D< MultiscaleModelWindkessel0D > ( i );
-
-                break;
-
-            default:
-
-                if ( M_models[i]->communicator()->MyPID() == 0 )
-                    switchErrorMessage( M_models[i] );
-            }
 }
 
 // ===================================================

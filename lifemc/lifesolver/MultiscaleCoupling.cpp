@@ -53,7 +53,8 @@ MultiscaleCoupling::MultiscaleCoupling() :
         M_couplingName                (),
         M_flags                       (),
         M_globalData                  (),
-        M_couplingIndex               ( 0, 0 ),
+        M_couplingVariablesNumber     ( 0 ),
+        M_couplingVariablesOffset     ( 0 ),
         M_localCouplingFunctions      (),
         M_localCouplingVariables      (),
         M_localCouplingResiduals      (),
@@ -110,7 +111,7 @@ MultiscaleCoupling::createCouplingMap( MapEpetra& couplingMap )
     Debug( 8200 ) << "MultiscaleCoupling::createCouplingMap( couplingMap ) \n";
 #endif
 
-    M_couplingIndex.second = couplingMap.map( Unique )->NumGlobalElements();
+    M_couplingVariablesOffset = couplingMap.map( Unique )->NumGlobalElements();
 
     couplingMap += localCouplingVariables( 0 ).map();
 }
@@ -144,8 +145,8 @@ MultiscaleCoupling::extrapolateCouplingVariables()
         localCouplingVariables( 0 ) = extrapolatedCouplingVariables;
 
 #ifdef HAVE_LIFEV_DEBUG
-        for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-            Debug( 8200 ) << "C(" << M_couplingIndex.second + i << ") = " << ( localCouplingVariables( 0 ) )[i]  << "\n";
+        for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
+            Debug( 8200 ) << "C(" << M_couplingVariablesOffset + i << ") = " << ( localCouplingVariables( 0 ) )[i]  << "\n";
 #endif
     }
 }
@@ -197,7 +198,7 @@ MultiscaleCoupling::exportJacobian( multiscaleMatrix_Type& jacobian )
         M_perturbedCoupling = 0;
 
         // Loop on all the local coupling variables that should be perturbed
-        for ( UInt column(M_couplingIndex.second) ; M_perturbedCoupling < static_cast< Int > ( M_couplingIndex.first ); ++M_perturbedCoupling, ++column )
+        for ( UInt column(M_couplingVariablesOffset) ; M_perturbedCoupling < static_cast< Int > ( M_couplingVariablesNumber ); ++M_perturbedCoupling, ++column )
         {
             // Build the list of models affected by the perturbation of the variable associated with this column
             perturbedModelsList = listOfPerturbedModels( M_perturbedCoupling );
@@ -318,7 +319,7 @@ void
 MultiscaleCoupling::createLocalVectors()
 {
     // Build a repeated list of GlobalElements
-    std::vector<Int> myGlobalElements( M_couplingIndex.first );
+    std::vector<Int> myGlobalElements( M_couplingVariablesNumber );
     for ( UInt i = 0 ; i < myGlobalElements.size() ; ++i )
         myGlobalElements[i] = i;
 
@@ -342,7 +343,7 @@ void
 MultiscaleCoupling::importCouplingVector( multiscaleVector_Type& repeatedLocalVector, const multiscaleVector_Type& uniqueGlobalVector, const combineMode_Type& combineMode )
 {
     multiscaleVector_Type uniqueLocalVector( repeatedLocalVector.mapPtr(), Unique, combineMode );
-    uniqueLocalVector.subset( uniqueGlobalVector, M_couplingIndex.second );
+    uniqueLocalVector.subset( uniqueGlobalVector, M_couplingVariablesOffset );
 
     repeatedLocalVector = uniqueLocalVector;
 }
@@ -351,14 +352,14 @@ void
 MultiscaleCoupling::exportCouplingVector( multiscaleVector_Type& uniqueGlobalVector, const multiscaleVector_Type& repeatedLocalVector, const combineMode_Type& combineMode )
 {
     multiscaleVector_Type localVectorUnique( repeatedLocalVector, Unique, combineMode );
-    uniqueGlobalVector.replace( localVectorUnique, M_couplingIndex.second );
+    uniqueGlobalVector.replace( localVectorUnique, M_couplingVariablesOffset );
 }
 
 void
 MultiscaleCoupling::switchErrorMessage( const multiscaleModelPtr_Type& model )
 {
     multiscaleErrorCheck( ModelType, "Invalid model type ["  + enum2String( model->type(), multiscaleModelsMap ) +
-                        "] for coupling type [" + enum2String( M_type, multiscaleCouplingsMap ) +"]\n" );
+                        "] for coupling type [" + enum2String( M_type, multiscaleCouplingsMap ) +"]\n", model->communicator()->MyPID() == 0 );
 }
 
 } // Namespace Multiscale

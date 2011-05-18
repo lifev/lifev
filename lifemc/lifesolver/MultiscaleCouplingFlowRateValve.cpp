@@ -71,7 +71,7 @@ MultiscaleCouplingFlowRateValve::setupCoupling()
 
     super_Type::setupCoupling();
 
-    if ( M_couplingIndex.first > 2 )
+    if ( M_couplingVariablesNumber > 2 )
         std::cout << "!!! WARNING: MultiscaleCouplingFlowRateValve does not work with more than two models !!!" << std::endl;
 }
 
@@ -203,8 +203,8 @@ MultiscaleCouplingFlowRateValve::exportCouplingResiduals( multiscaleVector_Type&
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8250 ) << "R(" << M_couplingIndex.second + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
+    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
+        Debug( 8250 ) << "R(" << M_couplingVariablesOffset + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
 #endif
 
 }
@@ -228,8 +228,8 @@ MultiscaleCouplingFlowRateValve::insertJacobianConstantCoefficients( multiscaleM
         if ( myModel( 0 ) )
             if ( isModelLeaderProcess( 0 ) )
             {
-                UInt row    = M_couplingIndex.second;
-                UInt column = M_couplingIndex.second;
+                UInt row    = M_couplingVariablesOffset;
+                UInt column = M_couplingVariablesOffset;
 
                 for ( UInt i( 0 ); i < modelsNumber(); ++i )
                     jacobian.addToCoefficient( row + i, column + i, 1 );

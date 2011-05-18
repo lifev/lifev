@@ -324,7 +324,7 @@ public:
     /*!
      * @return number of the coupling variables
      */
-    const UInt& couplingVariablesNumber() const { return M_couplingIndex.first; }
+    const UInt& couplingVariablesNumber() const { return M_couplingVariablesNumber; }
 
     //! Get the container of the local coupling variables
     /*!
@@ -437,7 +437,8 @@ protected:
 
     multiscaleDataPtr_Type               M_globalData;
 
-    std::pair< UInt, UInt >              M_couplingIndex;
+    UInt                                 M_couplingVariablesNumber;
+    UInt                                 M_couplingVariablesOffset;
 
     couplingFunctionsContainer_Type      M_localCouplingFunctions;
     couplingVariablesContainer_Type      M_localCouplingVariables;

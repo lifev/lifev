@@ -69,7 +69,7 @@ MultiscaleCouplingFlowRate::setupCoupling()
     if ( myModelsNumber() > 0 )
     {
         // Set the number of coupling variables
-        M_couplingIndex.first = modelsNumber();
+        M_couplingVariablesNumber = modelsNumber();
 
         // Impose flow rate boundary condition on all the models
         for ( UInt i( 0 ); i < modelsNumber(); ++i )
@@ -116,8 +116,8 @@ MultiscaleCouplingFlowRate::initializeCouplingVariables()
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8240 ) << "C(" << M_couplingIndex.second + i << ") = " << localCouplingVariables( 0 )[i]  << "\n";
+    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
+        Debug( 8240 ) << "C(" << M_couplingVariablesOffset + i << ") = " << localCouplingVariables( 0 )[i]  << "\n";
 #endif
 
 }
@@ -159,8 +159,8 @@ MultiscaleCouplingFlowRate::exportCouplingResiduals( multiscaleVector_Type& coup
     exportCouplingVector( couplingResiduals, *M_localCouplingResiduals );
 
 #ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8240 ) << "R(" << M_couplingIndex.second + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
+    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
+        Debug( 8240 ) << "R(" << M_couplingVariablesOffset + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
 #endif
 
 }
@@ -199,8 +199,8 @@ MultiscaleCouplingFlowRate::insertJacobianConstantCoefficients( multiscaleMatrix
     if ( myModel( 0 ) )
         if ( isModelLeaderProcess( 0 ) )
         {
-            UInt row    = M_couplingIndex.second;
-            UInt column = M_couplingIndex.second;
+            UInt row    = M_couplingVariablesOffset;
+            UInt column = M_couplingVariablesOffset;
 
             for ( UInt i( 0 ); i < modelsNumber(); ++i )
                 jacobian.addToCoefficient( row, column + i, 1 );
@@ -225,7 +225,7 @@ MultiscaleCouplingFlowRate::insertJacobianDeltaCoefficients( multiscaleMatrix_Ty
         // Add the coefficient to the matrix
         if ( isModelLeaderProcess( modelLocalID ) )
         {
-            UInt row = M_couplingIndex.second + modelLocalID;
+            UInt row = M_couplingVariablesOffset + modelLocalID;
             if ( modelLocalID == 0 )
             {
                 for ( UInt i( 1 ); i < modelsNumber(); ++i )

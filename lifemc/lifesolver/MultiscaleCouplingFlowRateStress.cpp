@@ -69,7 +69,7 @@ MultiscaleCouplingFlowRateStress::setupCoupling()
     if ( myModelsNumber() > 0 )
     {
         // Set the number of coupling variables
-        M_couplingIndex.first = 2;
+        M_couplingVariablesNumber = 2;
 
         // Impose flow rate boundary condition on the first model
         if ( myModel( 0 ) )
@@ -132,8 +132,8 @@ MultiscaleCouplingFlowRateStress::initializeCouplingVariables()
         localCouplingVariables( 0 )[1] = globalSum;
 
 #ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8230 ) << "C(" << M_couplingIndex.second + i << ") = " << localCouplingVariables( 0 )[i]  << "\n";
+    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
+        Debug( 8230 ) << "C(" << M_couplingVariablesOffset + i << ") = " << localCouplingVariables( 0 )[i]  << "\n";
 #endif
 
 }
@@ -170,8 +170,8 @@ MultiscaleCouplingFlowRateStress::exportCouplingResiduals( multiscaleVector_Type
     exportCouplingVector( couplingResiduals, *M_localCouplingResiduals );
 
 #ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8230 ) << "R(" << M_couplingIndex.second + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
+    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
+        Debug( 8230 ) << "R(" << M_couplingVariablesOffset + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
 #endif
 }
 
@@ -220,7 +220,7 @@ MultiscaleCouplingFlowRateStress::insertJacobianConstantCoefficients( multiscale
     if ( myModel( 0 ) )
         if ( isModelLeaderProcess( 0 ) )
         {
-            UInt row = M_couplingIndex.second;
+            UInt row = M_couplingVariablesOffset;
 
             jacobian.addToCoefficient( row,     row,     -1 );
             jacobian.addToCoefficient( row + 1, row + 1, -1 );
@@ -240,7 +240,7 @@ MultiscaleCouplingFlowRateStress::insertJacobianDeltaCoefficients( multiscaleMat
     if ( myModel( modelLocalID ) )
     {
         Real coefficient = 0;
-        UInt row         = M_couplingIndex.second;
+        UInt row         = M_couplingVariablesOffset;
 
         // Compute the coefficient
         if ( modelLocalID == 0 )
