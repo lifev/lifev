@@ -27,10 +27,10 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_2Cylinders_S
     [../time_discretization]
     initialtime                = 0.000     # [s]
     endtime                    = 0.050     # [s]
-    timestep                   = 0.001     # [s]
+    timestep                   = 0.0001    # [s]
 
     [../Algorithm]
-    type                       = Explicit          # Aitken, Explicit, Newton, Broyden
+    type                       = Broyden           # Aitken, Explicit, Newton, Broyden
     file                       = Default           # File name (without .dat extension)
     subiterationsMaximumNumber = 100               # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values
@@ -47,5 +47,5 @@ FluidVenousPressure         = 0             # ven. pressure  [g/cm/s^2 - dyne/cm
 SolidExternalPressure       = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.2           # density        [g/cm^3]
 SolidPoissonCoefficient     = 0.48          # Poisson coeff. []
-SolidYoungModulus           = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
+SolidYoungModulus           = 3.0784E6      # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################

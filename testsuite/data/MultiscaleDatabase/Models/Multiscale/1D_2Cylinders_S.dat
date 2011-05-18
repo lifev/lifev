@@ -14,7 +14,7 @@
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = '2 Cylinders (OneDimensional, Stress)'
+modelName        = 'Two Cylinders (OneDimensional, Stress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
@@ -26,15 +26,15 @@ couplingsPath    = './MultiscaleDatabase/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '    
-            0       Fluid3D      Cylinder_tube20
-            1       Fluid3D      Cylinder_tube20
+            0       OneDimensional      Cylinder_5x10
+            1       OneDimensional      Cylinder_5x10
          '
 ###################################################################################################
 
 # List of MPI groups ##############################################################################
 ########### ID #### Load # Models #################################################################
 mpiGroups = '
-            1       50     0,1
+            1       -1     0,1
             '
 ###################################################################################################
 
@@ -42,8 +42,8 @@ mpiGroups = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
             0       BoundaryCondition   FlowRate_SquareSinusoidalWave   0               0
-            1       BoundaryCondition   FlowRate_One                    1               0
-            2       BoundaryCondition   Stress_Zero                     0,1             1,1
+            1       Stress              Lagrange1                       1,0             0,1
+            2       BoundaryCondition   Absorbing_1DRight               1               1
             '
 ###################################################################################################
 
