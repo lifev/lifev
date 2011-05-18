@@ -152,25 +152,25 @@ public:
     /*!
      * @return shared_ptr to the Multiscale problem
      */
-    const multiscaleModelMultiscalePtr_Type multiScaleProblem() const { return M_multiscale; }
+    const multiscaleModelMultiscalePtr_Type& multiScaleProblem() const { return M_multiscale; }
 
     //! Get the coupling variables
     /*!
      * @return pointer to the coupling variables vector
      */
-    const multiscaleVectorPtr_Type couplingVariables() const { return M_couplingVariables; }
+    const multiscaleVectorPtr_Type& couplingVariables() const { return M_couplingVariables; }
 
     //! Get the coupling residuals
     /*!
      * @return pointer to the coupling residuals vector
      */
-    const multiscaleVectorPtr_Type couplingResiduals() const { return M_couplingResiduals; }
+    const multiscaleVectorPtr_Type& couplingResiduals() const { return M_couplingResiduals; }
 
     //! Get the communicator
     /*!
      * @return pointer to the communicator
      */
-    const multiscaleCommPtr_Type communicator() const { return M_comm; }
+    const multiscaleCommPtr_Type& communicator() const { return M_comm; }
 
     //! Get the subiterations maximum number
     /*!
@@ -196,14 +196,14 @@ protected:
      * @param subiterationsNumber Number of subiterations performed.
      * @param computeResidual computeResidual.
      */
-    void save( const UInt& subiterationsNumber, const Real& residual );
+    void save( const UInt& subiterationsNumber, const Real& residual ) const;
 
     //! Update the residual and check if the tolerance has been satisfied
     /*!
      * @param subIT subiteration number (for output purpose)
      * @return true if the tolerance is satisfied
      */
-    bool checkResidual( const UInt& subIT = 0 );
+    bool checkResidual( const UInt& subIT = 0 ) const;
 
     //@}
 

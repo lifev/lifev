@@ -142,7 +142,7 @@ MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
 // Protected Methods
 // ===================================================
 void
-MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual )
+MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual ) const
 {
     std::ofstream output;
     output << std::scientific << std::setprecision( 15 );
@@ -170,7 +170,7 @@ MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual
 }
 
 bool
-MultiscaleAlgorithm::checkResidual( const UInt& subIT )
+MultiscaleAlgorithm::checkResidual( const UInt& subIT ) const
 {
     // Compute computeResidual
     Real residual ( computeResidual() );
