@@ -146,6 +146,7 @@ namespace LifeV
   -# \c UInt an alias to uint32_type used for adressing
   -# \c ID an alias to id_type used to identify local numbering or components
   -# \c size_type an alias to size_t used as indices for arrays, vectors or matrices
+  -# \c flag_Type an alias to uint32_type used for boolean flags
 
 */
 
@@ -172,6 +173,9 @@ typedef uint32_type UInt;
 
 //! IDs
 typedef uint32_type ID;
+
+// This is a 32 bits type, so we can store up to 32 different flags
+typedef uint32_type flag_Type;
 
 // For now only 3 dimensional problems.
 extern const UInt nDimensions;

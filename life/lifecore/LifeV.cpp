@@ -38,5 +38,19 @@
 namespace LifeV
 {
 const UInt nDimensions(NDIM);
+
+// flag testers
+static bool flagTestAllSet( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+  return ( inputFlag  & refFlag ) == refFlag;
+  // returns true if all byte-flags common set in refFlag are also set in inputFlag
+}
+
+static bool flagTestOneSet( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+ return inputFlag  & refFlag;
+  // returns true if at least one flag set in refFlag is set in inputFlag
+}
+
 } //end namespace LifeV
 
