@@ -273,7 +273,7 @@ public:
                                           M_fsi->FSIOper()->uFESpacePtr(), M_velAndPressure, UInt(0) );
 
             M_exporterFluid->addVariable( ExporterData<mesh_Type>::ScalarField, "f-pressure",
-                                          M_fsi->FSIOper()->uFESpacePtr(), M_velAndPressure,
+                                          M_fsi->FSIOper()->pFESpacePtr(), M_velAndPressure,
                                           UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof() ) );
 
             M_exporterFluid->addVariable( ExporterData<mesh_Type>::VectorField, "f-displacement",
