@@ -27,7 +27,7 @@ couplingsPath    = './MultiscaleDatabase/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
-            200     FSI3D               IdealLeftVentricle_MonolithicGE
+            200     FSI3D               IdealLeftVentricle_MonolithicGI
             300     FSI3D               Aorta_Coarse_MonolithicGI
             400     FSI3D               Iliac_Coarse_MonolithicGI
             1       OneDimensional      Aorta_ReymondStergiopulos2009_001

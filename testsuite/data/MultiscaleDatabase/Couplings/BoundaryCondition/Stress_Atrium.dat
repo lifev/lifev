@@ -5,20 +5,21 @@
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#                 Toni Lassila <toni.lassila@epfl.ch>
 #           Date: 2011-03-10
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Pressure ########################################################
+### COUPLING: BoundaryCondition - Stress Atrium ###################################################
 ###################################################################################################
 
 [Multiscale]
-couplingName    = BoundaryCondition_Pressure
+couplingName    = BoundaryCondition_Stress_Atrium
 
 [boundary_conditions]
-list = 'Pressure'
+list = 'Stress_Atrium'
 
-    [./Pressure]
+    [./Stress_Atrium]
     type                = Natural
     mode                = Normal
     #function            = '13332'

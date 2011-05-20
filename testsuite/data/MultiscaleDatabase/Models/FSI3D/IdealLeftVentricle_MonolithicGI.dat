@@ -70,8 +70,8 @@ solidMeshPartitioned = none
 
 [fluid]
 useShapeDerivatives = true
-domainVelImplicit   = true  # tells if the domain vel is to be considered implicitly in the convective term
-convectiveTermDer   = true  # tells if the velocity is to be considered implicitly in the convective term
+domainVelImplicit   = true   # tells if the domain vel is to be considered implicitly in the convective term
+convectiveTermDer   = true   # tells if the velocity is to be considered implicitly in the convective term
 semiImplicit        = false  # tells if we advance in time after the first nonlinear iteration or not
 
     [./physics] # Defined here only if different from the one in the main file.
@@ -173,7 +173,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
     externalPressure = 0
     #density          = 1.2
     young            = 7.0E6
-    #poisson          = 0.4
+    poisson          = 0.48
 
     [../time_discretization]
     #timestep                   = 0.0001 # [s]
@@ -236,7 +236,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
     #prectype                = AztecOO
@@ -321,4 +321,3 @@ max_restarts = 1000;
 tol          = 1e-5;
 which        = ML
 neval        = 5
-

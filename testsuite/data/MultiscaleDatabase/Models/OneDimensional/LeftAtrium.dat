@@ -43,17 +43,15 @@ ComputeCoefficients  = true
 PowerlawCoefficient  = 9           # 2: Parabolic; 9: Typical value
 SolidExternalPressure = -100     # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 
-DistributionLaw      = linear              # Coefficients distribution law: uniform, linear, pointwise
-Area0                = '12.3391 12.3391' # Area of tube
-#Area0                = '6.7655964941 6.7655964941' # Area of tube - averaged
+DistributionLaw      = uniform             # Coefficients distribution law: uniform, linear, pointwise
+Area0                = 12.3391             # Area of tube
 
 thickVessel          = false
-thickness            = '0.1470000000 0.1465000000' # Thickness of tube
-#thickness            = '0.1467500000 0.1467500000' # Thickness of tube - averaged
+thickness            = 0.1470000000        # Thickness of tube
 
 # Avolio elastin
 young                = 7.0E6 # g/cm/s^2 (dyne/cm^2)
-poisson              = 0.4
+poisson              = 0.48
 
 [../space_discretization]
 Length               = 0.3

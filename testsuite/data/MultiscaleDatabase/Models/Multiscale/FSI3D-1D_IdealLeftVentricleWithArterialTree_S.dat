@@ -27,7 +27,7 @@ couplingsPath    = './MultiscaleDatabase/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
-          200       FSI3D               IdealLeftVentricle_MonolithicGE
+          200       FSI3D               IdealLeftVentricle_MonolithicGI
             1       OneDimensional      ReymondStergiopulos2009_001
             2       OneDimensional      ReymondStergiopulos2009_002
             3       OneDimensional      ReymondStergiopulos2009_003
