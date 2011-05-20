@@ -193,11 +193,13 @@ struct BareFace
         @param j ID of the second node of the face
         @param k ID of the third node of the face
      */
+    /// LF TO BE CHANGED. THIS CONSTRUCTOR MAY MAKE COMPARISON OPERATOR USELESS
     //!
     BareFace( ID i, ID j, ID k ) : first( i ), second( j ), third( k )
     {}
     ;
-    //! Constructor that takes a BareEdge object and an ID. The face is then identified by the ID of the Points on the BareEdge + the point with identified by id
+    //! Constructor that takes a BareEdge object and an ID. The face is then identified by the ID
+    //  of the Points on the BareEdge + the point identified by id
     /*!
         @param id of the third point defining the face
         @param id of the edgedefining the face
