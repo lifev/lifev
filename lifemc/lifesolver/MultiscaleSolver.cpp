@@ -143,7 +143,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     Debug( 8000 ) << "MultiscaleSolver::solveProblem() \n";
 #endif
 
-    // save initial solution if it is the very first time step
+    // Save the initial solution if it is the very first time step
     if ( !multiscaleProblemStep )
         M_model->saveSolution();
 
@@ -151,7 +151,11 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     M_globalData->dataTime()->updateTime();
     M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 
+    // Chrono definitions
     Real totalSimulationTime(0);
+    Real localTimeStepTime(0);
+    Real globalTimeStepTime(0);
+
     for ( ; M_globalData->dataTime()->canAdvance(); M_globalData->dataTime()->updateTime() )
     {
         M_chrono.start();
@@ -193,11 +197,14 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         // Chrono stop
         M_chrono.stop();
 
-        // Updating total simulation time
-        totalSimulationTime += M_chrono.diff();
-
+        // Compute time step time
+        localTimeStepTime = M_chrono.diff();
+        M_comm->MaxAll( &localTimeStepTime, &globalTimeStepTime, 1 );
         if ( M_comm->MyPID() == 0 )
-            std::cout << " MS-  Total iteration time:                    " << M_chrono.diff() << " s" << std::endl;
+            std::cout << " MS-  Total iteration time:                    " << globalTimeStepTime << " s" << std::endl;
+
+        // Updating total simulation time
+        totalSimulationTime += globalTimeStepTime;
     }
 
     if ( M_comm->MyPID() == 0 )
