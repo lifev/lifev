@@ -43,8 +43,6 @@ namespace Multiscale
 
 std::map< std::string, models_Type > multiscaleModelsMap;
 
-UInt MultiscaleModel::M_modelsNumber = 0;
-
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -64,8 +62,6 @@ MultiscaleModel::MultiscaleModel() :
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8100 ) << "MultiscaleModel::MultiscaleModel() \n";
 #endif
-
-    M_ID = M_modelsNumber++;
 
     //Initialization of geometry arrays
     for ( UInt i( 0 ); i < nDimensions; ++i )

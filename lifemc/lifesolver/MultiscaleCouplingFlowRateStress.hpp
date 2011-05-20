@@ -97,9 +97,6 @@ public:
      */
     void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals );
 
-    //! Display some information about the coupling
-    void showMe();
-
     //@}
 
 private:
@@ -122,7 +119,7 @@ private:
      * @param localCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    multiscaleModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
+    multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
@@ -138,12 +135,6 @@ private:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
     void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
-
-    //! Display some information about the coupling
-    /*!
-     * @param output specify the output stream
-     */
-    void displayCouplingValues( std::ostream& output );
 
     //@}
 };

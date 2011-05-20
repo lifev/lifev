@@ -1,11 +1,12 @@
 ###################################################################################################
 #
-#                 This file is part of the MathCard software project                       
-#                Copyright (C) 2009, 2010 EPFL, Politecnico di Milano
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University   
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
-#           Date: 10-12-2010
+#           Date: 24-09-2009
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### TESTSUITE: MULTISCALE (1D) ####################################################################
@@ -19,6 +20,6 @@ AT_DATA([data],[[
 AT_CHECK([ln -sf $top_srcdir/testsuite/data/mesh/inria Mesh &&
           ln -sf $top_srcdir/testsuite/data/physicalFunctions physicalFunctions &&
 		  ln -sf $top_srcdir/testsuite/data/MultiscaleDatabase MultiscaleDatabase &&
-		  mpirun -n 1 $abs_top_builddir/testsuite/test_Multiscale/test_MS -s 1 -f MultiscaleDatabase/Test_1D.dat -c 88.582269590507565],[0],[ignore],[ignore])
+		  mpirun -n 4 $abs_top_builddir/testsuite/test_Multiscale/test_MS -s 1 -f MultiscaleDatabase/Test_1D.dat -c 88.582269590507565],[0],[ignore],[ignore])
 AT_CLEANUP
 

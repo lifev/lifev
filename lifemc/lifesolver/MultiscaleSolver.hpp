@@ -82,8 +82,9 @@ public:
     /*!
      * @param fileName Name of the data file.
      * @param problemName the name of the problem (used to save data in a specific folder).
+     * @param coresPerNode number of cores for each node (this is mandatory when running on clusters for a correct distribution of the models among the nodes).
      */
-    void setupProblem( const std::string& fileName, const std::string& problemName );
+    void setupProblem( const std::string& fileName, const std::string& problemName, const UInt& coresPerNode );
 
     //! Run the time-loop to solve the Multiscale problem
     /*!

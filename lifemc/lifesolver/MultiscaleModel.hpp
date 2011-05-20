@@ -166,6 +166,19 @@ public:
      */
     void setID( const UInt& id ) { M_ID = id; }
 
+    //! Set the number of couplings attached to this model
+    /*!
+     * @param couplingsNumber number of couplings attached to this model
+     */
+    void setCouplingsNumber( const UInt& couplingsNumber ) { M_couplings.resize( couplingsNumber ); }
+
+    //! Add a pointer to one of the couplings attached to this model
+    /*!
+     * @param localCouplingID local coupling ID
+     * @param coupling shared_ptr of the coupling
+     */
+    void setCoupling( const UInt& localCouplingID, const multiscaleCouplingPtr_Type& coupling ) { M_couplings[localCouplingID] = coupling ; }
+
     //! Add a pointer to one of the couplings which couple the model
     /*!
      * @param coupling shared_ptr of the coupling
@@ -261,6 +274,12 @@ public:
      */
     const multiscaleDataPtr_Type& globalData() const { return M_globalData; }
 
+    //! Get the communicator of the model.
+    /*!
+     * @return Communicator of the model.
+     */
+    const multiscaleCommPtr_Type& communicator() const { return M_comm; }
+
     //@}
 
 protected:
@@ -271,12 +290,10 @@ protected:
      */
     void displayModelStatus( const std::string& tag ) const;
 
-    static UInt                          M_modelsNumber;       // Total number of models
-
     UInt                                 M_ID;                 // Global ID of the model
     models_Type                          M_type;               // Type of the model (depends on the derived class)
 
-    multiscaleCouplingsVector_Type       M_couplings;          // Container for the couplings
+    multiscaleCouplingsContainer_Type    M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model
     std::vector< bcFlag_Type >           M_flags;              // Free flags, available for the couplings
 

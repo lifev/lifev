@@ -106,9 +106,6 @@ public:
      */
     bool topologyChange() { return M_topologyChange; }
 
-    //! Display some information about the coupling
-    void showMe();
-
     //@}
 
 private:

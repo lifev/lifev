@@ -37,6 +37,8 @@
 #ifndef MultiscaleModelMultiscale_H
 #define MultiscaleModelMultiscale_H 1
 
+#include <lifemc/lifesolver/MultiscaleCommunicatorsManager.hpp>
+
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
@@ -172,8 +174,11 @@ private:
     //@}
 
     // Models & Couplings
-    multiscaleModelsVector_Type        M_modelsList;
-    multiscaleCouplingsVector_Type     M_couplingsList;
+    MultiscaleCommunicatorsManager     M_commManager;
+
+    // Models & Couplings
+    multiscaleModelsContainer_Type     M_modelsList;
+    multiscaleCouplingsContainer_Type  M_couplingsList;
 };
 
 //! Factory create function

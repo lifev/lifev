@@ -102,7 +102,6 @@ MultiscaleAlgorithm::showMe()
                   << "Algorithm name                       = " << M_name << std::endl
                   << "Max Sub-iterations                   = " << M_subiterationsMaximumNumber << std::endl
                   << "Tolerance                            = " << M_tolerance << std::endl << std::endl;
-        std::cout << std::endl << std::endl;
     }
 }
 
@@ -128,7 +127,7 @@ MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
     Debug( 8010 ) << "MultiscaleAlgorithm::setMultiscaleProblem( multiscale ) \n";
 #endif
 
-    M_multiscale = boost::dynamic_pointer_cast< MultiscaleModelMultiscale >( model );
+    M_multiscale = multiscaleDynamicCast< MultiscaleModelMultiscale >( model );
 
     // Build coupling variables and residuals vectors
     std::vector<Int> myGlobalElements(0);
@@ -143,7 +142,7 @@ MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
 // Protected Methods
 // ===================================================
 void
-MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual )
+MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual ) const
 {
     std::ofstream output;
     output << std::scientific << std::setprecision( 15 );
@@ -171,7 +170,7 @@ MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual
 }
 
 bool
-MultiscaleAlgorithm::checkResidual( const UInt& subIT )
+MultiscaleAlgorithm::checkResidual( const UInt& subIT ) const
 {
     // Compute computeResidual
     Real residual ( computeResidual() );

@@ -41,6 +41,7 @@ namespace LifeV
 namespace Multiscale
 {
 
+UInt        multiscaleCoresPerNode  = 1;
 std::string multiscaleProblemFolder = "./";
 UInt        multiscaleProblemStep   = 0;
 bool        multiscaleExitFlag      = EXIT_SUCCESS;
@@ -86,7 +87,7 @@ MultiscaleSolver::MultiscaleSolver() :
 // Methods
 // ===================================================
 void
-MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& problemFolder )
+MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& problemFolder, const UInt& coresPerNode )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -99,6 +100,9 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     // Define the folder containing the problem
     multiscaleProblemFolder = problemFolder;
 
+    // Define the number of cores on each node for the machine
+    multiscaleCoresPerNode = coresPerNode;
+
     // Define the step of the problem
     if ( dataFile( "Solver/Restart/Restart", false ) )
         multiscaleProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
@@ -106,6 +110,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     // Create the main model and set the communicator
     M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "Multiscale" ) ], multiscaleModelsMap ) );
 
+    M_model->setID( 0 );
     M_model->setCommunicator( M_comm );
 
     // Setup data
@@ -138,7 +143,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     Debug( 8000 ) << "MultiscaleSolver::solveProblem() \n";
 #endif
 
-    // save initial solution if it is the very first time step
+    // Save the initial solution if it is the very first time step
     if ( !multiscaleProblemStep )
         M_model->saveSolution();
 
@@ -146,7 +151,11 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     M_globalData->dataTime()->updateTime();
     M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 
+    // Chrono definitions
     Real totalSimulationTime(0);
+    Real localTimeStepTime(0);
+    Real globalTimeStepTime(0);
+
     for ( ; M_globalData->dataTime()->canAdvance(); M_globalData->dataTime()->updateTime() )
     {
         M_chrono.start();
@@ -188,11 +197,14 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         // Chrono stop
         M_chrono.stop();
 
-        // Updating total simulation time
-        totalSimulationTime += M_chrono.diff();
-
+        // Compute time step time
+        localTimeStepTime = M_chrono.diff();
+        M_comm->MaxAll( &localTimeStepTime, &globalTimeStepTime, 1 );
         if ( M_comm->MyPID() == 0 )
-            std::cout << " MS-  Total iteration time:                    " << M_chrono.diff() << " s" << std::endl;
+            std::cout << " MS-  Total iteration time:                    " << globalTimeStepTime << " s" << std::endl;
+
+        // Updating total simulation time
+        totalSimulationTime += globalTimeStepTime;
     }
 
     if ( M_comm->MyPID() == 0 )
@@ -204,7 +216,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         Real computedSolution( M_algorithm->couplingVariables()->norm2() );
         if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
             multiscaleErrorCheck( Solution, "Algorithm Solution: "  + number2string( computedSolution ) +
-                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() );
+                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() == 0 );
     }
 
     return multiscaleExitFlag;
@@ -218,7 +230,8 @@ MultiscaleSolver::showMe()
         std::cout << std::endl << std::endl
                   << "=============== Multiscale Solver Information ===============" << std::endl << std::endl;
 
-        std::cout << "Problem folder                = " << multiscaleProblemFolder << std::endl
+        std::cout << "Cores per node                = " << multiscaleCoresPerNode << std::endl
+                  << "Problem folder                = " << multiscaleProblemFolder << std::endl
                   << "Problem step                  = " << multiscaleProblemStep << std::endl << std::endl;
 
         M_globalData->showMe();

@@ -697,7 +697,7 @@ MultiscaleModelFSI3D::imposePerturbation()
     Debug( 8140 ) << "MultiscaleModelFSI3D::imposePerturbation() \n";
 #endif
 
-    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             BCFunctionBase bcBaseDeltaOne;
@@ -717,7 +717,7 @@ MultiscaleModelFSI3D::resetPerturbation()
     Debug( 8140 ) << "MultiscaleModelFSI3D::resetPerturbation() \n";
 #endif
 
-    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             BCFunctionBase bcBaseDeltaZero;

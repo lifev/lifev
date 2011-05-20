@@ -43,8 +43,6 @@ namespace Multiscale
 
 std::map< std::string, couplings_Type > multiscaleCouplingsMap;
 
-UInt MultiscaleCoupling::M_couplingsNumber = 0;
-
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -55,11 +53,12 @@ MultiscaleCoupling::MultiscaleCoupling() :
         M_couplingName                (),
         M_flags                       (),
         M_globalData                  (),
-        M_couplingIndex               (),
+        M_couplingVariablesNumber     ( 0 ),
+        M_couplingVariablesOffset     ( 0 ),
         M_localCouplingFunctions      (),
         M_localCouplingVariables      (),
         M_localCouplingResiduals      (),
-        M_timeInterpolationOrder      ( 1 ),
+        M_timeInterpolationOrder      ( 0 ),
         M_perturbedCoupling           ( false ),
         M_comm                        ()
 {
@@ -68,7 +67,6 @@ MultiscaleCoupling::MultiscaleCoupling() :
     Debug( 8200 ) << "MultiscaleCoupling::MultiscaleCoupling() \n";
 #endif
 
-    M_ID = M_couplingsNumber++;
 }
 
 // ===================================================
@@ -86,37 +84,25 @@ MultiscaleCoupling::setupData( const std::string& fileName )
 
     // Read Multiscale parameters
     M_couplingName = dataFile( "Multiscale/couplingName", "couplingName" );
-    M_timeInterpolationOrder = dataFile( "Multiscale/timeInterpolationOrder", 0 );
 
-    // Set the size of the local coupling variables
-    M_localCouplingVariables.reserve( M_timeInterpolationOrder + 1 );
-}
+    if ( myModelsNumber() > 0 )
+    {
+        M_timeInterpolationOrder = dataFile( "Multiscale/timeInterpolationOrder", 0 );
 
-void
-MultiscaleCoupling::showMe()
-{
-    std::cout << "Coupling id         = " << M_ID << std::endl
-              << "Coupling name       = " << M_couplingName << std::endl
-              << "Coupling type       = " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
-
-    std::cout << "Models number       = " << modelsNumber() << std::endl;
-    std::cout << "Models ID(s)        = ";
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        std::cout << M_models[i]->ID() << " ";
-    std::cout << std::endl;
-    std::cout << "Models type(s)      = ";
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        std::cout << enum2String( M_models[i]->type(), multiscaleModelsMap ) << " ";
-    std::cout << std::endl;
-    std::cout << "Flags list          = ";
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        std::cout << M_flags[i] << " ";
-    std::cout << std::endl << std::endl;
+        // Set the size of the local coupling variables
+        M_localCouplingVariables.reserve( M_timeInterpolationOrder + 1 );
+    }
 }
 
 // ===================================================
 // Methods
 // ===================================================
+bool
+MultiscaleCoupling::isModelLeaderProcess( const UInt& localModelID ) const
+{
+    return M_models[localModelID]->communicator()->MyPID() == 0 ? true :false;
+}
+
 void
 MultiscaleCoupling::createCouplingMap( MapEpetra& couplingMap )
 {
@@ -125,7 +111,7 @@ MultiscaleCoupling::createCouplingMap( MapEpetra& couplingMap )
     Debug( 8200 ) << "MultiscaleCoupling::createCouplingMap( couplingMap ) \n";
 #endif
 
-    M_couplingIndex.second = couplingMap.map( Unique )->NumGlobalElements();
+    M_couplingVariablesOffset = couplingMap.map( Unique )->NumGlobalElements();
 
     couplingMap += localCouplingVariables( 0 ).map();
 }
@@ -138,29 +124,31 @@ MultiscaleCoupling::extrapolateCouplingVariables()
     Debug( 8200 ) << "MultiscaleCoupling::extrapolateCouplingVariables() \n";
 #endif
 
-    // Extrapolate the coupling variables at the next time
-    multiscaleVector_Type extrapolatedCouplingVariables( localCouplingVariables( 0 ) );
-    interpolateCouplingVariables( M_globalData->dataTime()->nextTime(), extrapolatedCouplingVariables );
-
-    // If we have not yet enough samples for interpolation, we add a new one
-    UInt couplingVariablesSize( M_localCouplingVariables.size() );
-    if ( couplingVariablesSize <= M_timeInterpolationOrder )
+    if ( myModelsNumber() > 0 )
     {
-        ++couplingVariablesSize;
-        M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new VectorEpetra( localCouplingVariables( 0 ) ) ) );
-    }
+        // Extrapolate the coupling variables at the next time
+        multiscaleVector_Type extrapolatedCouplingVariables( localCouplingVariables( 0 ) );
+        interpolateCouplingVariables( M_globalData->dataTime()->nextTime(), extrapolatedCouplingVariables );
 
-    // Updating database
-    for ( UInt i(1) ; i < couplingVariablesSize ; ++i )
-        localCouplingVariables( couplingVariablesSize-i ) = localCouplingVariables( couplingVariablesSize-i-1 );
+        // If we have not yet enough samples for interpolation, we add a new one
+        UInt couplingVariablesSize( M_localCouplingVariables.size() );
+        if ( couplingVariablesSize <= M_timeInterpolationOrder )
+        {
+            ++couplingVariablesSize;
+            M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new VectorEpetra( localCouplingVariables( 0 ) ) ) );
+        }
 
-    localCouplingVariables( 0 ) = extrapolatedCouplingVariables;
+        // Updating database
+        for ( UInt i(1) ; i < couplingVariablesSize ; ++i )
+            localCouplingVariables( couplingVariablesSize-i ) = localCouplingVariables( couplingVariablesSize-i-1 );
+
+        localCouplingVariables( 0 ) = extrapolatedCouplingVariables;
 
 #ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8200 ) << "C(" << M_couplingIndex.second + i << ") = " << ( localCouplingVariables( 0 ) )[i]  << "\n";
+        for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
+            Debug( 8200 ) << "C(" << M_couplingVariablesOffset + i << ") = " << ( localCouplingVariables( 0 ) )[i]  << "\n";
 #endif
-
+    }
 }
 
 void
@@ -197,35 +185,38 @@ MultiscaleCoupling::exportJacobian( multiscaleMatrix_Type& jacobian )
     Debug( 8200 ) << "MultiscaleCoupling::exportJacobian( jacobian ) \n";
 #endif
 
-    // Definitions
-    bool solveLinearSystem;                          // Flag to avoid multiple solution of the same linear system
-    multiscaleModelsVector_Type perturbedModelsList; // List of perturbed model
-
-    // Insert constant values in the jacobian (due to this coupling condition)
-    insertJacobianConstantCoefficients( jacobian );
-
-    // Set as perturbed
-    M_perturbedCoupling = 0;
-
-    // Loop on all the local coupling variables that should be perturbed
-    for ( UInt column(M_couplingIndex.second) ; M_perturbedCoupling < static_cast< Int > ( M_couplingIndex.first ); ++M_perturbedCoupling, ++column )
+    if ( myModelsNumber() > 0 )
     {
-        // Build the list of models affected by the perturbation of the variable associated with this column
-        perturbedModelsList = listOfPerturbedModels( M_perturbedCoupling );
+        // Definitions
+        bool solveLinearSystem;                             // Flag to avoid multiple solution of the same linear system
+        multiscaleModelsContainer_Type perturbedModelsList; // List of perturbed model
 
-        // Loop on all the models, that are influenced by the perturbation of the coupling variable
-        for ( multiscaleModelsVectorIterator_Type j = perturbedModelsList.begin() ; j < perturbedModelsList.end() ; ++j )
+        // Insert constant values in the jacobian (due to this coupling condition)
+        insertJacobianConstantCoefficients( jacobian );
+
+        // Set as perturbed
+        M_perturbedCoupling = 0;
+
+        // Loop on all the local coupling variables that should be perturbed
+        for ( UInt column(M_couplingVariablesOffset) ; M_perturbedCoupling < static_cast< Int > ( M_couplingVariablesNumber ); ++M_perturbedCoupling, ++column )
         {
-            solveLinearSystem = true;
+            // Build the list of models affected by the perturbation of the variable associated with this column
+            perturbedModelsList = listOfPerturbedModels( M_perturbedCoupling );
 
-            // Loop on all the couplings (boundary flags) that connect the j-model
-            for ( UInt k(0) ; k < ( *j )->couplingsNumber() ; ++k )
-                ( *j )->coupling( k )->insertJacobianDeltaCoefficients( jacobian, column, ( *j )->ID(), solveLinearSystem );
+            // Loop on all the models, that are influenced by the perturbation of the coupling variable
+            for ( multiscaleModelsContainerIterator_Type j = perturbedModelsList.begin() ; j < perturbedModelsList.end() ; ++j )
+            {
+                solveLinearSystem = true;
+
+                // Loop on all the couplings (boundary flags) that connect the j-model
+                for ( UInt k(0) ; k < ( *j )->couplingsNumber() ; ++k )
+                    ( *j )->coupling( k )->insertJacobianDeltaCoefficients( jacobian, column, ( *j )->ID(), solveLinearSystem );
+            }
         }
-    }
 
-    // Set as unperturbed
-    M_perturbedCoupling = -1;
+        // Set as unperturbed
+        M_perturbedCoupling = -1;
+    }
 }
 
 void
@@ -236,45 +227,88 @@ MultiscaleCoupling::saveSolution()
     Debug( 8200 ) << "MultiscaleCoupling::saveSolution() \n";
 #endif
 
-    std::ofstream output;
-    output << std::scientific << std::setprecision( 15 );
-
-    if ( M_comm->MyPID() == 0 )
+    if ( myModelsNumber() > 0 )
     {
-        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep ) + "_Coupling_" + number2string( M_ID ) + ".mfile";
+        for ( UInt i( 0 ); i < modelsNumber(); ++i )
+            if ( myModel( i ) )
+            {
+                Real flowRate ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] ) );
+                Real stress   ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_flags[i] ) );
 
-        if ( M_globalData->dataTime()->isFirstTimeStep() )
-        {
-            output.open( filename.c_str(), std::ios::trunc );
-            output << "% Coupling Type: " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
-            output << "% TIME                     ID   FLAG FLOW RATE                STRESS" << std::endl;
-        }
-        else
-            output.open( filename.c_str(), std::ios::app );
+                if ( isModelLeaderProcess( i ) )
+                {
+                    std::ofstream output;
+                    output << std::scientific << std::setprecision( 15 );
+
+                    std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep )
+                                                                   + "_Coupling_" + number2string( M_ID ) +
+                                                                   + "_Flag_" + number2string( i ) + ".mfile";
+
+                    if ( M_globalData->dataTime()->isFirstTimeStep() )
+                    {
+                        output.open( filename.c_str(), std::ios::trunc );
+                        output << "% Coupling Type: " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl;
+                        output << "% Model:         " << number2string( M_models[i]->ID() ) << std::endl;
+                        output << "% Flag:          " << number2string( M_flags[i] ) << std::endl << std::endl;
+                        output << "% TIME                     FLOW RATE                STRESS" << std::endl;
+                    }
+                    else
+                    {
+                        output.open( filename.c_str(), std::ios::app );
+                        output << "  " << M_globalData->dataTime()->time() << "    " << flowRate << "    " << stress << std::endl;
+                    }
+                    output.close();
+                }
+            }
     }
+}
 
-    displayCouplingValues( output );
+void
+MultiscaleCoupling::showMe()
+{
+    if ( myModelsNumber() > 0 )
+    {
+        std::cout << "Coupling id         = " << M_ID << std::endl
+                  << "Coupling name       = " << M_couplingName << std::endl
+                  << "Coupling type       = " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
 
-    if ( M_comm->MyPID() == 0 )
-        output.close();
+        std::cout << "Models ID(s)        = ";
+        for ( UInt i( 0 ); i < modelsNumber(); ++i )
+            if ( myModel( i ) )
+                std::cout << M_models[i]->ID() << " ";
+        std::cout << std::endl;
+        std::cout << "Models type(s)      = ";
+        for ( UInt i( 0 ); i < modelsNumber(); ++i )
+            if ( myModel( i ) )
+                std::cout << enum2String( M_models[i]->type(), multiscaleModelsMap ) << " ";
+        std::cout << std::endl;
+        std::cout << "Flags list          = ";
+        for ( UInt i( 0 ); i < modelsNumber(); ++i )
+            if ( myModel( i ) )
+                std::cout << M_flags[i] << " ";
+        std::cout << std::endl << std::endl;
+    }
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
 void
-MultiscaleCoupling::addFlagID( const UInt& flagID )
+MultiscaleCoupling::setFlagFromModel( const UInt& localModelID, const UInt& modelFlagNumber )
 {
-    M_flags.push_back( M_models.back()->flag( flagID ) );
+    M_flags[localModelID] = M_models[localModelID]->flag( modelFlagNumber );
 }
 
 UInt
 MultiscaleCoupling::modelGlobalToLocalID( const UInt& ID ) const
 {
-    for ( UInt localID( 0 ); localID < modelsNumber(); ++localID )
-        if ( M_models[localID]->ID() == ID )
-            return localID;
+    if ( myModelsNumber() > 0 )
+        for ( UInt localID( 0 ); localID < modelsNumber(); ++localID )
+            if ( myModel( localID ) )
+                if ( M_models[localID]->ID() == ID )
+                    return localID;
 
+    std::cout << " !!! WARNING: modelGlobalToLocalID was not able to find the model ID !!! " << std::endl;
     return 0;
 }
 
@@ -285,8 +319,8 @@ void
 MultiscaleCoupling::createLocalVectors()
 {
     // Build a repeated list of GlobalElements
-    std::vector<Int> myGlobalElements( M_couplingIndex.first );
-    for ( UInt i = 0 ; i < static_cast< UInt > ( myGlobalElements.size() ) ; ++i )
+    std::vector<Int> myGlobalElements( M_couplingVariablesNumber );
+    for ( UInt i = 0 ; i < myGlobalElements.size() ; ++i )
         myGlobalElements[i] = i;
 
     // Build a repeated map for the couplings
@@ -306,33 +340,26 @@ MultiscaleCoupling::resetCouplingHistory()
 }
 
 void
-MultiscaleCoupling::importCouplingVector( const multiscaleVector_Type& globalVector, multiscaleVector_Type& localVector )
+MultiscaleCoupling::importCouplingVector( multiscaleVector_Type& repeatedLocalVector, const multiscaleVector_Type& uniqueGlobalVector, const combineMode_Type& combineMode )
 {
-    Real value(0);
-    for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
-    {
-        if ( M_comm->MyPID() == 0 )
-            value = globalVector[ M_couplingIndex.second + i ];
+    multiscaleVector_Type uniqueLocalVector( repeatedLocalVector.mapPtr(), Unique, combineMode );
+    uniqueLocalVector.subset( uniqueGlobalVector, M_couplingVariablesOffset );
 
-        M_comm->Broadcast( &value, 1, 0 );
-
-        localVector[i] = value;
-    }
+    repeatedLocalVector = uniqueLocalVector;
 }
 
 void
-MultiscaleCoupling::exportCouplingVector( const multiscaleVector_Type& localVector, multiscaleVector_Type& globalVector )
+MultiscaleCoupling::exportCouplingVector( multiscaleVector_Type& uniqueGlobalVector, const multiscaleVector_Type& repeatedLocalVector, const combineMode_Type& combineMode )
 {
-    for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
-        if ( M_comm->MyPID() == 0 )
-            globalVector[ M_couplingIndex.second + i ] = localVector[i];
+    multiscaleVector_Type localVectorUnique( repeatedLocalVector, Unique, combineMode );
+    uniqueGlobalVector.replace( localVectorUnique, M_couplingVariablesOffset );
 }
 
 void
 MultiscaleCoupling::switchErrorMessage( const multiscaleModelPtr_Type& model )
 {
     multiscaleErrorCheck( ModelType, "Invalid model type ["  + enum2String( model->type(), multiscaleModelsMap ) +
-                        "] for coupling type [" + enum2String( M_type, multiscaleCouplingsMap ) +"]\n" );
+                        "] for coupling type [" + enum2String( M_type, multiscaleCouplingsMap ) +"]\n", model->communicator()->MyPID() == 0 );
 }
 
 } // Namespace Multiscale
