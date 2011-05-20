@@ -60,6 +60,7 @@ namespace LifeV
     Note: Documentation by Samuel Quinodoz, implementation anterior
     to the documentation, without name of author.
  */
+
 class MeshEntity
 {
 public:
@@ -217,6 +218,15 @@ private:
   Note: Documentation by Samuel Quinodoz, implementation anterior
   to the documentation, without name of author.
  */
+
+// available bool-flags for different geometric properties
+const flag_Type DEFAULT             ( 0x00 );
+const flag_Type PHYSICAL_BOUNDARY   ( 0x01 );
+const flag_Type INTERNAL_INTERFACE  ( 0x02 );
+const flag_Type SUBDOMAIN_INTERFACE ( 0x04 );
+const flag_Type OVERLAP             ( 0x08 );
+const flag_Type CUTTED              ( 0x10 );
+
 class MeshEntityWithBoundary : public MeshEntity
 {
 public:
@@ -229,13 +239,14 @@ public:
       This constructor calls the empty constructor of MeshEntity and
       sets the boundary indicator to false.
     */
-    MeshEntityWithBoundary() : MeshEntity(), M_boundary( false )
+    MeshEntityWithBoundary() : MeshEntity(), M_boundary( false ), M_flag ( DEFAULT )
     {};
 
     //! Copy constructor
     MeshEntityWithBoundary( const MeshEntityWithBoundary& meshEntityWithBoundary ) :
             MeshEntity( meshEntityWithBoundary ),
-            M_boundary( meshEntityWithBoundary.M_boundary )
+            M_boundary( meshEntityWithBoundary.M_boundary ),
+            M_flag ( meshEntityWithBoundary.M_flag )
     {};
 
     //! Specific constructor
@@ -245,9 +256,10 @@ public:
       a set method if you want different identifiers.
       @param boundary The value of the boundary indicator.
     */
-    MeshEntityWithBoundary( const ID& id, bool boundary = false ) :
+    MeshEntityWithBoundary( const ID& id, bool boundary = false, flag_Type flag = DEFAULT ) :
             MeshEntity( id ),
-            M_boundary( boundary )
+            M_boundary( boundary ),
+            M_flag ( flag )
     {};
 
     //! Destructor
@@ -269,6 +281,7 @@ public:
         {
             output << " -- Boundary ";
         };
+        output << " -- Flags: " << M_flag;
         output << std::endl;
     };
 
@@ -284,11 +297,19 @@ public:
     /*!
       @param boundary The value to be set for the boundary indicator.
     */
-    inline void setBoundary(const bool& boundary)
+    void setBoundary(const bool& boundary)
     {
         M_boundary = boundary;
     };
 
+    //! Set method for the entity flag
+    /*!
+      @param flag The value to be set for the entity flag.
+    */
+    void setFlag ( const flag_Type& flag )
+    {
+        M_flag = flag;
+    };
 
     //@}
 
@@ -297,9 +318,16 @@ public:
 
 
     //! Tells if it is on the boundary
-    inline const bool & boundary() const
+    const bool & boundary() const
     {
         return M_boundary;
+    };
+
+
+    //! returns the entity flag
+    const flag_Type & flag() const
+    {
+        return M_flag;
     };
 
 
@@ -307,6 +335,7 @@ public:
 
 private:
     bool M_boundary;
+    flag_Type M_flag;
 };
 
 
