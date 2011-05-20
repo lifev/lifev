@@ -75,6 +75,11 @@ namespace LifeV
  *  This is the class that stores the mesh entities for a single 2D region.
  *
  *  In a region elements are all of the same type.
+ *
+ *  Note: to provide data useful in a parallel setting some methods
+ *  return either the number of entities in the current mesh region or
+ *  the ones in the global mesh, before partitioning. The latter are identified
+ *  by the keyword Global in the name, e.g. numGlobalFaces() versus numFaces()
  */
 template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh3D
@@ -434,7 +439,7 @@ public:
     /**
      *  @return Number of elements in mesh.
      *  @sa numFaces
-     *  @note Alias to numFaces()
+     *  @note Alias to numElements()
      */
     UInt & numElements();
 
@@ -3513,15 +3518,15 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
         faceList.reserve( ef );
 
     FaceType face;
-
-
-
     MeshElementBareHandler<BareFace> _be;
+    // Extra map for faces stored which are not boundary faces
+    MeshElementBareHandler<BareFace> _extraFaces;
     std::pair<UInt, bool> e;
     M_VToF.reshape( numLocalFaces(), numVolumes() ); // DIMENSION ARRAY
 
     UInt vid, i1, i2, i3, i4;
     std::pair<BareFace, bool>_face;
+
     GEOSHAPE ele;
     // If we have all faces and the faces store all adjacency info
     // everything is easier
@@ -3542,19 +3547,17 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
         return ;
     }
 
-    // If I have only boundary faces I need to process them first to keep the correct numbering
+    // If I have not all faces I need to process them first to keep the correct numbering
 
     // First We check if we have already Faces stored
     if ( ! faceList.empty() )
     {
         // dump all faces in the container, to maintain the correct numbering
         // if everything is correct the numbering in the bareface structure
-        // will reflect the actual face numbering However, if I want to create
+        // will reflect the actual face numbering. However, if I want to create
         // the internal faces I need to make sure that I am processing only the
-        // boundary ones. So I resize the container!
-        if ( cf )
-            faceList.resize( M_numBFaces );
-
+        // boundary ones in a special way.
+        int _numOriginalStoredFaces=faceList.size();
         std::pair<UInt, bool> _check;
         for ( UInt j = 0; j < faceList.size(); ++j )
         {
@@ -3571,6 +3574,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
                 _face = makeBareFace( i1, i2, i3 );
             }
             _check = _be.addIfNotThere( _face.first );
+            if (j>=this->M_numBFaces)_extraFaces.addIfNotThere( _face.first, j);
         }
     }
 
@@ -3596,14 +3600,43 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
             {
                 _face = makeBareFace( i1, i2, i3 );
             }
-
             e = _be.addIfNotThere( _face.first );
             M_VToF( j, vid ) = e.first;
-            if ( cf )
+            bool _isBound=e.first<this->M_numBFaces;
+            // Is the face an extra face (not on the boundary but originally included in the list)?
+            bool _isExtra = (e.first >=this->M_numBFaces  || e.first < _numOriginalStoredFaces);
+            if (_isBound)
+            {
+                FaceType & _thisFace(faceList[e.first]);
+                _thisFace.firstAdjacentElementIdentity()   = vid;
+                _thisFace.firstAdjacentElementPosition()   = j;
+                _thisFace.secondAdjacentElementIdentity()  = NotAnId;
+                _thisFace.secondAdjacentElementPosition()  = NotAnId;
+            }
+            else if (_isExtra)
+            {
+                // This is not a bfaces and I need to set up all info about adjacency properly
+                FaceType & _thisFace(faceList[e.first]);
+                // I need to check if it is the first time I meet it. Then I delete it from the
+                // map: if it as there it means that it is the first time I am treating this face
+                if(_extraFaces.deleteIfThere(_face.first)){
+                    // I need to be sure about orientation, the easiest thing is to rewrite the face points
+                    for ( UInt k = 0; k < FaceType::S_numPoints; ++k )
+                        _thisFace.setPoint( k, iv->point( ele.faceToPoint( j, k ) ) );
+                    _thisFace.firstAdjacentElementIdentity()  = vid;
+                    _thisFace.firstAdjacentElementPosition()  = j;
+
+                }else{
+                    _thisFace.secondAdjacentElementIdentity()  = vid;
+                    _thisFace.secondAdjacentElementPosition()  = j;
+                }
+            }
+            else if ( cf ) // A face not contained in the original list.
+                // I process it only if requested!
             {
                 if ( e.second )
                 {
-                    // a new face It must be internal.
+                    // a new face
                     for ( UInt k = 0; k < FaceType::S_numPoints; ++k )
                         face.setPoint( k, iv->point( ele.faceToPoint( j, k ) ) );
 
@@ -3617,43 +3650,26 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
                 }
                 else
                 {
-                    // We assume that BFaces have been already set so we have to do
-                    // nothing if the face is on the boundary
-                    if ( e.first >= M_numBFaces )
-                    {
-                        faceList( e.first ).secondAdjacentElementIdentity() = vid;
-                        faceList( e.first ).secondAdjacentElementPosition() = j;
-
-                    }
-                    else
-                    {
-                    }
+                    faceList( e.first ).secondAdjacentElementIdentity() = vid;
+                    faceList( e.first ).secondAdjacentElementPosition() = j;
                 }
             }
         }
     }
 
     UInt n = _be.maxId();
-    // Fix _numfaces if it was not set or set to just the # of Bfaces
-    if (!cf)
-    {
-        if ( M_numFaces == 0 || M_numFaces == M_numBFaces )
-            M_numFaces = n;
-    }
-    else
-    {
-        M_numGlobalFaces = n;
-    }
-
+    // LF Fix _numfaces. This part has to be checked. One may want to use
+    // this method on a partitioned mesh, in which case the Global faces are there
+    M_numFaces=n; // We have found the right total number of faces in the mesh
+    if(M_numGlobalFaces==0) M_numGlobalFaces=n; // If not already set fix it.
 
     if (verbose) std::cout << n << " faces ";
-    ASSERT_POS( n == M_numFaces , "#Faces found inconsistent with that stored in RegionMesh" ) ;
+    //ASSERT_POS( n == M_numFaces , "#Faces found inconsistent with that stored in RegionMesh" ) ;
     setLinkSwitch( "HAS_VOLUME_TO_FACES" );
     if ( cf )
         setLinkSwitch( "HAS_ALL_FACES" );
-    if ( cf )
+    //if ( cf ) Faces have adjacency in any case!
         setLinkSwitch( "FACES_HAVE_ADIACENCY" );
-
     if (verbose)
         std::cout << " done." << std::endl;
 }
