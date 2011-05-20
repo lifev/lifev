@@ -107,7 +107,7 @@ Real absFunctionDotNormal ( const Real&              unknown,
         valueFunctionDotNormal += function( t, x, y, z, unknownAndFields )[nDim] * normal[nDim];
     }
 
-    return plusMinus * fabs( valueFunctionDotNormal );
+    return plusMinus * std::fabs( valueFunctionDotNormal );
 }
 
 }

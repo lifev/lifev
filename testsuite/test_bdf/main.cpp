@@ -99,8 +99,8 @@ int main(int argc, char** argv)
     std::cout << "MPI Finalization" << std::endl;
 #endif
 
-    if(check)
-    	return( EXIT_SUCCESS );
+    if (check)
+        return( EXIT_SUCCESS );
     else
-    	return( EXIT_FAILURE );
+        return( EXIT_FAILURE );
 }
