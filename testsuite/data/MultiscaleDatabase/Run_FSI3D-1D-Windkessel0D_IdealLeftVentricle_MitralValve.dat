@@ -14,7 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D-Windkessel0D_IdealLeftVentricleWithArterialTree_S
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D-Windkessel0D_IdealLeftVentricleWithArterialTreeAndMitralValve_S
 
 [Solver] ##########################################################################################
 ###################################################################################################

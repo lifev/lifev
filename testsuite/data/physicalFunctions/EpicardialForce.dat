@@ -17,11 +17,11 @@
 # One loop correspond to one heart pulse (pulse / minute: 75)
 ###################################################################################################
 
-function    = 'F'
+function    = 'F*(8-y)/4'
 
 variables    =  't            F'
 #scale        =  '1            -450000'
-scale        =  '1            -1800000'
+scale        =  '1             -650000'
 
 loop        = true
 

@@ -1,0 +1,33 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Toni Lassila <toni.lassila@epfl.ch>, Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### EPICARDIAL NORMAL FORCE #######################################################################
+###################################################################################################
+# First column:  time [s]
+# Second column: pressure in left atrium (including A-wave)
+#
+# One loop correspond to one heart pulse (pulse / minute: 75)
+###################################################################################################
+
+function    = 'p'
+
+variables    =  't            p'
+scale        =  '1            -10666'
+
+loop        = true
+
+# Items must be sorted by the first column value!
+data        =  '0.00      0.0
+		0.10      0.0
+                0.11      1.0
+		0.60      1.0
+		0.70      1.5
+		0.80      0.0'
