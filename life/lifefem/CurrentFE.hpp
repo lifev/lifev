@@ -145,11 +145,6 @@ namespace LifeV
 
 */
 
-
-
-// This is a 32 bits type, so we can store up to 32 different flags
-typedef unsigned int flag_Type;
-
 const flag_Type UPDATE_ONLY_CELL_NODES(1);
 const flag_Type UPDATE_ONLY_QUAD_NODES(2);
 const flag_Type UPDATE_ONLY_PHI(4);
@@ -169,7 +164,8 @@ const flag_Type UPDATE_ONLY_DET_JACOBIAN(8192);
 const flag_Type UPDATE_QUAD_NODES(UPDATE_ONLY_CELL_NODES
                                   |UPDATE_ONLY_QUAD_NODES);
 
-const flag_Type UPDATE_PHI(UPDATE_ONLY_PHI);
+const flag_Type UPDATE_PHI(UPDATE_ONLY_PHI
+                           |UPDATE_ONLY_CELL_NODES);
 
 const flag_Type UPDATE_DPHI(UPDATE_ONLY_CELL_NODES
                             |UPDATE_ONLY_DPHI_GEO_MAP

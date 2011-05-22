@@ -79,8 +79,8 @@ public:
 private:
     //! @name Private methods
     //@{
-    virtual void readScalar( ExporterData& /*dvar*/) {}
-    virtual void readVector( ExporterData& /*dvar*/) {}
+    virtual void readScalar( ExporterData<MeshType>& /*dvar*/) {}
+    virtual void readVector( ExporterData<MeshType>& /*dvar*/) {}
     //@}
 
 };
@@ -101,7 +101,7 @@ ExporterEmpty<MeshType>::ExporterEmpty():
 
 template<typename MeshType>
 ExporterEmpty<MeshType>::ExporterEmpty(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
-                         const int& procId):
+                                       const int& procId):
         super(dfile, prefix)
 {
     setMeshProcId(mesh, procId);

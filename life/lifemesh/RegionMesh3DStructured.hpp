@@ -881,7 +881,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
         {
             for ( UInt i(0); i<m_x; ++i )
             {
-                volumeID = ( k * m_y * m_x + j * m_y + i ) * 6;
+                volumeID = ( k * m_y * m_x + j * m_x + i ) * 6;
 
                 if ( ( i + 1 <= mid_x && j + 1 <= mid_y && k + 1 <= mid_z ) ||
                      ( i + 1 > mid_x && j + 1 > mid_y && k + 1 > mid_z ) )

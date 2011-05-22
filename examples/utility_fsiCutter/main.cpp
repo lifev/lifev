@@ -117,7 +117,7 @@ int main( int argc, char** argv )
     cutter->execute();
 
     ExporterHDF5Mesh3D<Mesh> fluidOutput(dataFile, uncutFluidMesh, "FSIFluidPartitions",
-                                       comm->MyPID());
+                                         comm->MyPID());
     fluidOutput.addPartitionGraph(cutter->fluidGraph(), comm);
     fluidOutput.addMeshPartitionAll(cutter->fluidPartitions(), comm);
     fluidOutput.addDOFInterface(cutter->dofStructureToHarmonicExtension(),
@@ -129,7 +129,7 @@ int main( int argc, char** argv )
     fluidOutput.closeFile();
 
     ExporterHDF5Mesh3D<Mesh> solidOutput(dataFile, uncutSolidMesh, "FSISolidPartitions",
-                                       comm->MyPID());
+                                         comm->MyPID());
     solidOutput.addPartitionGraph(cutter->solidGraph(), comm);
     solidOutput.addMeshPartitionAll(cutter->solidPartitions(), comm);
     solidOutput.addDOFInterface(cutter->dofStructureToHarmonicExtension(),
