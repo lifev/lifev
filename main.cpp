@@ -633,11 +633,11 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-836642)     /dispNorm*(dispNorm-836642)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.001 && (dispNorm-1.00024e+06)     /dispNorm*(dispNorm-1.00024e+06)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.002 && (dispNorm-687107)/dispNorm*(dispNorm-687107)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.003 && (dispNorm-640969)     /dispNorm*(dispNorm-640969)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.004 && (dispNorm-612951)     /dispNorm*(dispNorm-612951)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if (time==0.000 && (dispNorm-839635)     /dispNorm*(dispNorm-836642)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.001 && (dispNorm-1.1497e+06)     /dispNorm*(dispNorm-1.00024e+06)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.002 && (dispNorm-943511)/dispNorm*(dispNorm-687107)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.003 && (dispNorm-828791)     /dispNorm*(dispNorm-640969)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.004 && (dispNorm-817100)     /dispNorm*(dispNorm-612951)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
 
 
