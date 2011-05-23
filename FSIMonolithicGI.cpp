@@ -130,54 +130,56 @@ FSIMonolithicGI::updateSystem()
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
-    M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.`
     super_Type::updateSystem();
+    M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.`
     M_un.reset(new vector_Type(*M_uk));
 }
 
 void
 FSIMonolithicGI::evalResidual( vector_Type& res, const vector_Type& disp, const UInt iter )
 {
-    M_uk.reset(new vector_Type( disp ));
-    UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
-
-    vectorPtr_Type meshDispDiff( new vector_Type(M_mmFESpace->map()) );
-    vectorPtr_Type meshDispOld( new vector_Type(M_mmFESpace->map()) );
-
-    meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
-
-    meshDispOld->subset(*M_un, offset);
-
-    //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
-    //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
-    M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.
-    double alpha = 1/M_data->dataFluid()->dataTime()->timeStep();
-    vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
-    moveMesh(mmRep);// re-initialize the mesh points
-    *meshDispDiff -= *meshDispOld;//relative displacement
-    if (!M_domainVelImplicit)
+    if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
-        meshDispDiff=meshDispOld;// at time n /*->subset(*M_un, offset)*/; //if the mesh motion is at the previous time step in the convective term
-        *meshDispDiff -= M_meshMotion->dispOld();//at time n-1
+        M_uk.reset(new vector_Type( disp ));
+        UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
+
+        vectorPtr_Type meshDispDiff( new vector_Type(M_mmFESpace->map()) );
+        vectorPtr_Type meshDispOld( new vector_Type(M_mmFESpace->map()) );
+
+        meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
+
+        meshDispOld->subset(*M_un, offset);
+
+        //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
+        //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
+        M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.
+        double alpha = 1/M_data->dataFluid()->dataTime()->timeStep();
+        vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
+        moveMesh(mmRep);// re-initialize the mesh points
+        *meshDispDiff -= *meshDispOld;//relative displacement
+        if (!M_domainVelImplicit)
+        {
+            meshDispDiff=meshDispOld;// at time n /*->subset(*M_un, offset)*/; //if the mesh motion is at the previous time step in the convective term
+            *meshDispDiff -= M_meshMotion->dispOld();//at time n-1
+        }
+        *meshDispDiff *= -alpha;// -w, mesh velocity
+        mmRep = *meshDispDiff;
+
+        interpolateVelocity(mmRep, *M_beta);
+        //            *M_beta *= -alpha; //HE solution scaled!
+        vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
+        if (!M_convectiveTermDer)
+            fluid->subset(*M_un/**M_unOld*/, 0);
+        else
+            fluid->subset(disp, 0);
+        *M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
+
+        assembleSolidBlock( iter, M_uk );
+        assembleFluidBlock( iter, M_uk );
+        assembleMeshBlock ( iter );
+        *M_rhsFull = *M_rhs;
+        applyBoundaryConditions();
     }
-    *meshDispDiff *= -alpha;// -w, mesh velocity
-    mmRep = *meshDispDiff;
-
-    interpolateVelocity(mmRep, *M_beta);
-    //            *M_beta *= -alpha; //HE solution scaled!
-    vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
-    if (!M_convectiveTermDer)
-        fluid->subset(*M_un/**M_unOld*/, 0);
-    else
-        fluid->subset(disp, 0);
-    *M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
-
-    assembleSolidBlock( iter, M_uk );
-    assembleFluidBlock( iter, M_uk );
-    assembleMeshBlock ( iter );
-
-    applyBoundaryConditions();
-
     super_Type::evalResidual( disp, M_rhsFull, res, false );
 }
 
