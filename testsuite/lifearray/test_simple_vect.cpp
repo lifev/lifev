@@ -37,14 +37,36 @@
 	Test if the template class VectorSimple compiles and works correctly.
  */
 
+// ===================================================
+//! Includes
+// ===================================================
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+
 #include<iostream>
 
 #include <life/lifearray/VectorSimple.hpp>
 
 int
-main()
+main(int argc, char ** argv)
 {
-    using namespace LifeV;
+using namespace LifeV;
+
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    std::cout << "MPI Initialization" << std::endl;
+#endif
 
     VectorSimple<int> a;
     VectorSimple<float> b(10);
@@ -54,6 +76,12 @@ main()
         *p=10.0;
     }
     std::cout << b(4) << "\n";
-}
 
+#ifdef HAVE_MPI
+    MPI_Finalize();
+    std::cout << "MPI Finalization" << std::endl;
+#endif
+
+    return( EXIT_SUCCESS );
+}
 

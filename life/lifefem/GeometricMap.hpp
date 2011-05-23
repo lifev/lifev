@@ -190,6 +190,7 @@ const GeometricMap& getGeometricMap( MeshType & /*mesh*/ )
     default:
         ERROR_MSG( "Geomap type not yet implemented" );
     }
+    return  geoLinearNode;
 }
 }
 #endif

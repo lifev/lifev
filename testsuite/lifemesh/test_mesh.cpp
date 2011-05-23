@@ -38,6 +38,22 @@
 
  */
 
+// ===================================================
+//! Includes
+// ===================================================
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <life/lifefilters/GetPot.hpp>
 
 #include <life/lifemesh/MarkerDefinitions.hpp>
@@ -46,8 +62,14 @@
 #include <life/lifemesh/MeshElementBare.hpp>
 
 
-int main()
+int main(int argc, char** argv)
 {
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    std::cout << "MPI Initialization" << std::endl;
+#endif
+
+
     using namespace LifeV;
     using namespace LifeV::MeshUtility;
     using namespace std;
@@ -134,5 +156,11 @@ int main()
     cerr<<endl;
     vector<Real> disp(3*aMesh.numPoints());
     //aMesh.moveMesh(disp,3); // TO MAKE IT WORKING disp SHOULD BE AN EPETRA VECTOR!
+
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif
+
+    return( EXIT_SUCCESS );
 }
 

@@ -47,46 +47,47 @@ const Real Pi = 3.14159265358979323846264338328;
 
 Real Womersley::uexact( const Real& t, const Real& /*x*/, const Real& y, const Real& z, const ID& i)
 {
-	Real r=sqrt(z*z+y*y);
+	Real r=std::sqrt(z*z+y*y);
 	std::complex<Real> z2, b2;
 	z2 = 2.*r/S_D*S_z1;
-	cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
-	Real u = real(S_A/S_L/S_rho/S_wi*(1.-b2/S_b1)*exp(S_wi*t));
+	bessel::cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
+	Real u = real(S_A/S_L/S_rho/S_wi*(1.-b2/S_b1)*std::exp(S_wi*t));
     switch(i) {
         case 0:  //u_1
             return u;//-4*x*y*y; //u-4*x*y*y;
         case 1:  //u_2
-            return 0;//y*y*y;
+            return 0.;//y*y*y;
         case 2:
-        	return 0;
+        	return 0.;
         default:
             exit(1);
     }
+    return 1.;
 }
 
 Real Womersley::pexact( const Real& t, const Real& x, const Real& /*y*/, const Real& /*z*/, const ID& /* i */ )
 {
-    return S_A/S_L*(S_L-x)*cos(S_w*t);
+    return S_A/S_L*(S_L-x)*std::cos(S_w*t);
 }
 
 Real Womersley::grad_u( const UInt& icoor, const Real& t, const Real& /*x*/, const Real& y, const Real& z, const ID& i )
 {
-	Real r=sqrt(y*y+z*z);
+	Real r=std::sqrt(y*y+z*z);
 	std::complex<Real> z2, b2;
 	z2 = 2.*r/S_D*S_z1;
-	cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
+	bessel::cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
 	b2 = -2./S_D*S_z1*S_cj0p;
-	Real u_r = real(S_A/S_L/S_rho/S_wi*+b2/S_b1*exp(S_wi*t));
+	Real u_r = real(S_A/S_L/S_rho/S_wi*+b2/S_b1*std::exp(S_wi*t));
 
 	switch(icoor) {
 		case 0:
 			switch(i) {
 			case 0:
-				return 0;
+				return 0.;
 			case 1:
-				return 0;
+				return 0.;
 			case 2:
-				return 0;
+				return 0.;
 			default:
 				exit(1);
 			 }
@@ -95,9 +96,9 @@ Real Womersley::grad_u( const UInt& icoor, const Real& t, const Real& /*x*/, con
 	        case 0:
 	            return u_r/r*y;
 	        case 1:
-	            return 0;
+	            return 0.;
 	        case 2:
-	        	return 0;
+	        	return 0.;
 	        default:
 	            exit(1);
 			}
@@ -106,29 +107,30 @@ Real Womersley::grad_u( const UInt& icoor, const Real& t, const Real& /*x*/, con
 	        case 0:
 	            return u_r/r*z;
 	        case 1:
-	            return 0;
+	            return 0.;
 	        case 2:
-	        	return 0;
+	        	return 0.;
 	        default:
 	            exit(1);
 			}
 		default:
 			exit(1);
 	}
+	return 1.;
 }
 
 Real Womersley::f( const Real& /* t */, const Real&  /*x*/ , const Real&  /*y*/ , const Real& /* z */, const ID& i ) {
 	switch(i) {
 	        case 0:
-	            return 0;
+	            return 0.;
 	        case 1:
-	            return 0;
+	            return 0.;
 	        case 2:
-	        	return 0;
+	        	return 0.;
 	        default:
 	            exit(1);
 	    }
-	return 0; }
+	return 1.; }
 
 Real Womersley::xexact( const Real& t,
 					const Real& x,
@@ -146,6 +148,7 @@ Real Womersley::xexact( const Real& t,
         default:
             exit(1);
     }
+    return 1.;
 }
 
 
@@ -171,8 +174,8 @@ Real Womersley::p0( const Real& t, const Real& x, const Real& y, const Real& z, 
 //we suppose that the problem geometry is the cylinder having axis x, origin (0,0,0), diameter D and height L
 Real Womersley::fNeumann( const Real& t, const Real& x, const Real& y, const Real& z, const ID& i )
 {
-	Real r=sqrt(y*y+z*z);
-    Real n[3] = {0, 0, 0}; Real out=0;
+	Real r=std::sqrt(y*y+z*z);
+    Real n[3] = {0., 0., 0.}; Real out=0.;
     if        ( x < 1e-6/S_L ) {
         n[0] = -1.;
     } else if ( x >  S_L*(1-1e-6) ) {
@@ -201,8 +204,8 @@ Real Womersley::fNeumann( const Real& t, const Real& x, const Real& y, const Rea
 Real Womersley::normalVector( const Real& /*t*/, const Real& x, const Real& y,
         const Real& z, const ID& i )
 {
-    Real r=sqrt(y*y+z*z);
-    Real n[3] = {0, 0, 0};
+    Real r=std::sqrt(y*y+z*z);
+    Real n[3] = {0., 0., 0.};
     if        ( x < 1e-6/S_L ) {
         n[0] = -1.;
     } else if ( x >  S_L*(1-1e-6) ) {
@@ -220,8 +223,8 @@ Real Womersley::normalVector( const Real& /*t*/, const Real& x, const Real& y,
 //we suppose that the problem geometry is the cylinder having axis x, origin (0,0,0), diameter D and height L
 Real Womersley::fShearStress( const Real& t, const Real& x, const Real& y, const Real& z, const ID& i )
 {
-    Real r=sqrt(y*y+z*z);
-    Real n[3] = {0, 0, 0}; Real out=0;
+    Real r=std::sqrt(y*y+z*z);
+    Real n[3] = {0., 0., 0.}; Real out=0.;
     if        ( x < 1e-6/S_L ) {
         n[0] = -1.;
     } else if ( x >  S_L*(1-1e-6) ) {
@@ -247,8 +250,8 @@ Real Womersley::fShearStress( const Real& t, const Real& x, const Real& y, const
 //we suppose that the problem geometry is the cylinder having axis x, origin (0,0,0), diameter D and height L
 Real Womersley::fWallShearStress( const Real& t, const Real& x, const Real& y, const Real& z, const ID& i )
 {
-    Real r=sqrt(y*y+z*z);
-    Real n[3] = {0, 0, 0};
+    Real r=std::sqrt(y*y+z*z);
+    Real n[3] = {0., 0., 0.};
     if        ( x < 1e-6/S_L ) {
         n[0] = -1.;
     } else if ( x >  S_L*(1-1e-6) ) {
@@ -262,7 +265,7 @@ Real Womersley::fWallShearStress( const Real& t, const Real& x, const Real& y, c
     }
 
     // wss = s_n - ( s_n \cdot n ) n
-    Real wss=0;
+    Real wss=0.;
     Real s_n_n(0.);
     // this is the i-component of the normal stress
     wss = fShearStress(t, x, y, z, i);
@@ -283,14 +286,14 @@ void Womersley::setParamsFromGetPot( const GetPot& dataFile )
     S_D = dataFile( "fluid/problem/D", 1. );
     S_T = dataFile( "fluid/problem/T", 1. );
     S_rho = dataFile( "fluid/physics/density", 1. );
-    S_W0 =S_D/2*sqrt(2*Pi/S_nu/S_T);
+    S_W0 =S_D/2*std::sqrt(2*Pi/S_nu/S_T);
     S_L = dataFile( "fluid/problem/L", 1. );
     S_A = dataFile( "fluid/problem/A", 16*S_mu/S_D/S_D*S_L*S_L);
     S_ii = std::complex<Real>(0.,1.);
     S_w = 2.*Pi/S_T;
     S_wi = S_w*S_ii;
-    S_z1 = S_W0*pow(S_ii,1.5);
-    cbessjy01(S_z1, S_b1, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
+    S_z1 = S_W0*std::pow(S_ii,1.5);
+    bessel::cbessjy01(S_z1, S_b1, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
 
 }
 
@@ -300,7 +303,7 @@ void Womersley::showMe()
 	std::cout << "Pipe radius " << S_D/2. << " Pipe lenght " << S_L << std::endl;
 	std::cout << "Oscillation period " << S_T << std::endl;
 	std::cout << "Pressure Drop " << S_A << std::endl;
-	std::cout << "Womersley Number " << S_D/2.*sqrt(S_w/S_nu) << std::endl;
+	std::cout << "Womersley Number " << S_D/2.*std::sqrt(S_w/S_nu) << std::endl;
 }
 
 Real Womersley::S_nu;
