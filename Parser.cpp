@@ -193,7 +193,7 @@ Parser::setVariable( const std::string& name, const Real& value )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5030 ) << "Parser_Utility::SetVariable    variables[" << name << "]: " << value << "\n";
+    Debug( 5030 ) << "Parser::setVariable    variables[" << name << "]: " << value << "\n";
 #endif
 
     M_calculator.setVariable( name, value);
@@ -209,7 +209,7 @@ Parser::variable( const std::string& name )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5030 ) << "Parser_Utility::GetVariable    variables[" << name << "]: " << M_calculator.variable( name ) << "\n";
+    Debug( 5030 ) << "Parser::variable    variables[" << name << "]: " << M_calculator.variable( name ) << "\n";
 #endif
 
     return M_calculator.variable( name );
