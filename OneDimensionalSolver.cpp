@@ -531,7 +531,7 @@ OneDimensionalSolver::boundaryDOF( const bcSide_Type& bcSide ) const
 
         std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
 
-        return -1;
+        return 0;
     }
 }
 
