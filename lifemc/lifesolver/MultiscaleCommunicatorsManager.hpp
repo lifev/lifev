@@ -48,8 +48,7 @@ namespace Multiscale
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleCommunicatorsManager class partitions a communicator among different models
- *  and couplings.
+ *  The MultiscaleCommunicatorsManager class partitions a communicator among different models.
  */
 class MultiscaleCommunicatorsManager
 {
@@ -177,7 +176,6 @@ private:
     // Serial models data
     modelsID_Type                       M_serialModelsID;
     modelsProcessesList_Type            M_serialProcesses;
-
 
     // Parallel models data
     modelsID_Type                       M_parallelModelsID;
