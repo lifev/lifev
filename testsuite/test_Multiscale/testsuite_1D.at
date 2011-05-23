@@ -17,6 +17,7 @@ AT_KEYWORDS([test_MS 1D])
 AT_DATA([data],[[
 
 ]])
+
 AT_CHECK([ln -sf $top_srcdir/testsuite/data/mesh/inria Mesh &&
           ln -sf $top_srcdir/testsuite/data/physicalFunctions physicalFunctions &&
 		  ln -sf $top_srcdir/testsuite/data/MultiscaleDatabase MultiscaleDatabase &&
