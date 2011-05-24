@@ -140,7 +140,7 @@ MultiscaleCouplingFlowRateValve::updateCoupling()
             Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryFlowRate( M_flags[0] );
             if ( isModelLeaderProcess( 0 ) && myValue < 0 )
             {
-                std::cout << " MS-  Opening the valve at coupling " << M_ID << std::endl;
+                std::cout << " MS-  Closing the valve at coupling " << M_ID << std::endl;
                 localTopology = 1;
             }
         }
@@ -165,7 +165,7 @@ MultiscaleCouplingFlowRateValve::updateCoupling()
             Real myValue = globalSum - multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryStress( M_flags[0] );
             if ( isModelLeaderProcess( 0 ) && myValue > 0 )
             {
-                std::cout << " MS-  Closing the valve at coupling " << M_ID << std::endl;
+                std::cout << " MS-  Opening the valve at coupling " << M_ID << std::endl;
                 localTopology = 1;
             }
         }
