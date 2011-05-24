@@ -221,7 +221,7 @@ main( int argc, char** argv )
 #ifdef TEST_RHS
     Real matrixNorm(systemMatrix->norm1());
     if (verbose) std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
-    if ( abs(matrixNorm - 1.68421 ) > 1e-3)
+    if ( std::fabs(matrixNorm - 1.68421 ) > 1e-3)
     {
         std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
         return EXIT_FAILURE;
@@ -344,8 +344,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Updating the exporter ... " << std::flush;
-    exporter.addVariable( ExporterData::Scalar, "solution", solutionPtr, UInt(0), uFESpace->dof().numTotalDof() );
-    exporter.addVariable( ExporterData::Scalar, "error", solutionErrPtr, UInt(0), uFESpace->dof().numTotalDof() );
+    exporter.addVariable( ExporterData<mesh_type>::ScalarField, "solution", uFESpace, solutionPtr, UInt(0) );
+    exporter.addVariable( ExporterData<mesh_type>::ScalarField, "error", uFESpace, solutionErrPtr, UInt(0) );
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Exporting ... " << std::flush;

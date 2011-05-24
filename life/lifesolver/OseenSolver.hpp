@@ -112,8 +112,8 @@ public:
     typedef typename linearSolver_Type::vector_type     vector_Type;
     typedef boost::shared_ptr<vector_Type>              vectorPtr_Type;
 
-    typedef typename linearSolver_Type::prec_raw_type   preconditioner_Type;
-    typedef typename linearSolver_Type::prec_type       preconditionerPtr_Type;
+    typedef typename linearSolver_Type::prec_raw_type preconditioner_Type;
+    typedef typename linearSolver_Type::prec_type     preconditionerPtr_Type;
 
     //@}
 
@@ -1736,7 +1736,7 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
     mean = ones* ( M_matrixMassPtr * x );
     x += ( -mean );
 
-    ASSERT( abs( ones* ( M_matrixMassPtr * x ) ) < 1e-9 , "after removeMean the mean pressure should be zero!");
+    ASSERT( std::fabs( ones* ( M_matrixMassPtr * x ) ) < 1e-9 , "after removeMean the mean pressure should be zero!");
 
     return mean;
 

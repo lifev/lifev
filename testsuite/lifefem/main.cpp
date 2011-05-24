@@ -168,12 +168,12 @@ main( int argc, char** argv )
             sum_dphi += test_CFE.dphi(n,0,i);
         }
 
-        if (std::abs(sum_phi-1) > test_tolerance)
+        if (std::fabs(sum_phi-1) > test_tolerance)
         {
             std::cerr << " Sum of the basis functions : " << sum_phi << std::endl;
             return EXIT_FAILURE;
         };
-        if (std::abs(sum_dphi) > test_tolerance)
+        if (std::fabs(sum_dphi) > test_tolerance)
         {
             std::cerr << " Sum of the derivatives of the basis functions : " << sum_dphi << std::endl;
             return EXIT_FAILURE;
@@ -187,7 +187,7 @@ main( int argc, char** argv )
     test_CFE.update(Tetra1,UPDATE_WDET );
 
     Real meas(test_CFE.measure());
-    if (std::abs(meas-0.0005) > test_tolerance)
+    if (std::fabs(meas-0.0005) > test_tolerance)
     {
         std::cerr << " Measure : " << meas << std::endl;
         return EXIT_FAILURE;

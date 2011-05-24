@@ -314,11 +314,11 @@ hyperbolic::hyperbolic( int argc,
     Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-    if(Members->comm->NumProc() > 1)
+    if (Members->comm->NumProc() > 1)
     {
-    	std::cout<<"HyperbolicSolver works only in serial \n";
-    	MPI_Finalize();
-    	exit(1);
+        std::cout<<"HyperbolicSolver works only in serial \n";
+        MPI_Finalize();
+        exit(1);
     }
 #else
     Members->comm.reset( new Epetra_SerialComm() );
@@ -338,6 +338,8 @@ hyperbolic::run()
     typedef HyperbolicSolver< RegionMesh, solver_type > hyper;
     typedef hyper::vector_Type                          vector_type;
     typedef boost::shared_ptr<vector_type>              vector_ptrtype;
+    typedef FESpace< RegionMesh, MapEpetra >            feSpace_Type;
+    typedef boost::shared_ptr< feSpace_Type >           feSpacePtr_Type;
 
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
@@ -458,12 +460,12 @@ hyperbolic::run()
     pressure_uInterpolate_FESpace.interpolate( dataProblem::dual, *pressure_dualInterpolated, 0 );
 
     // Finite element space
-    FESpace< RegionMesh, MapEpetra > fESpace( meshPart,
-                                              *refFE,
-                                              *qR,
-                                              *bdQr,
-                                              1,
-                                              Members->comm );
+    feSpacePtr_Type feSpacePtr( new feSpace_Type( meshPart,
+                                                  *refFE,
+                                                  *qR,
+                                                  *bdQr,
+                                                  1,
+                                                  Members->comm ) );
 
     // Stop chronoFiniteElementSpace
     chronoFiniteElementSpace.stop();
@@ -478,7 +480,7 @@ hyperbolic::run()
 
     // Instantiation of the HyperbolicSolver class
     hyper hyperbolicSolver ( dataHyperbolic,
-                             fESpace,
+                             *feSpacePtr,
                              Members->comm );
 
     // Stop chronoProblem
@@ -569,17 +571,16 @@ hyperbolic::run()
                                               exporter->mapType() ) );
 
     // Add the solution to the exporter
-    exporter->addVariable( ExporterData::Scalar,
-                           "Concentration",
+    exporter->addVariable( ExporterData<RegionMesh>::ScalarField,
+                           "Concentration", feSpacePtr,
                            exporterSolution,
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( fESpace.dof().numTotalDof() ),
-                           static_cast<UInt>( 0 ),
-                           ExporterData::Cell );
+                           ExporterData<RegionMesh>::UnsteadyRegime,
+                           ExporterData<RegionMesh>::Cell );
 
     // Display the total number of unknowns
     hyperbolicSolver.getDisplayer().leaderPrint( "Number of unknowns : ",
-                                                 fESpace.map().map(Unique)->NumGlobalElements(), "\n" );
+                                                 feSpacePtr->map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Solve the problem
 
@@ -613,7 +614,7 @@ hyperbolic::run()
             // This is the last time step in the simulation
             isLastTimeStep = true;
         }
-	else
+        else
         {
             // Compute the new time step according to the CFL condition.
             timeStep = hyperbolicSolver.CFL();
@@ -667,25 +668,25 @@ hyperbolic::run()
     hyperbolicSolver.getDisplayer().leaderPrint( "\nERROR\n" );
 
     // Compute the L2 norm for the solution
-    L2Norm = fESpace.l2Norm( *hyperbolicSolver.solution() );
+    L2Norm = feSpacePtr->l2Norm( *hyperbolicSolver.solution() );
 
     // Display the L2 norm for the solution
     hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of solution:            ",
                                                  L2Norm, "\n" );
 
     // Compute the L2 norm for the analytical solution
-    exactL2Norm = fESpace.l2NormFunction( Members->getAnalyticalSolution(),
-                                          dataHyperbolic.dataTime()->endTime() );
+    exactL2Norm = feSpacePtr->l2NormFunction( Members->getAnalyticalSolution(),
+                                              dataHyperbolic.dataTime()->endTime() );
 
     // Display the L2 norm for the analytical solution
     hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of exact solution:      ",
                                                  exactL2Norm, "\n" );
 
     // Compute the L2 error for the solution
-    L2Error = fESpace.l2ErrorWeighted( Members->getAnalyticalSolution(),
-                                       *hyperbolicSolver.solution(),
-                                       Members->getUOne(),
-                                       dataHyperbolic.dataTime()->endTime() );
+    L2Error = feSpacePtr->l2ErrorWeighted( Members->getAnalyticalSolution(),
+                                           *hyperbolicSolver.solution(),
+                                           Members->getUOne(),
+                                           dataHyperbolic.dataTime()->endTime() );
 
     // Display the L2 error for the solution
     hyperbolicSolver.getDisplayer().leaderPrint( " L2 error:                       ",
