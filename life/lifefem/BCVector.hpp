@@ -245,14 +245,6 @@ public:
 
     inline void setBetaCoeff( const Real& betaCoeff ) { M_betaCoeff = betaCoeff;}
 
-    //! set the right hand side FE vector
-    /*!
-      @param righHandSideVector
-      @param numberOfTotalDOF
-      @param type
-     */
-    void setRhsVector( const vector_Type& righHandSideVector, UInt numberOfTotalDOF, UInt type=0 );
-
 
     //! set the boundary mass coefficient FE vector for Robin boundary conditions
     /*!
@@ -270,7 +262,13 @@ public:
     void setBetaCoeffVector( const vector_Type& betaCoeffVector );
 
 
-
+    //! set the right hand side FE vector
+    /*!
+      @param righHandSideVector
+      @param numberOfTotalDOF
+      @param type
+     */
+    void setRhsVector( const vector_Type& righHandSideVector, UInt numberOfTotalDOF, UInt type=0 );
 
     //@}
 
