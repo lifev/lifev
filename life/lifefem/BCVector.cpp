@@ -167,14 +167,14 @@ void
 BCVectorBase::setRobinCoeffVector( const vector_Type& robinBoundaryMassCoeffVector )
 {
     M_isRobinBdMassCoeffAVector = true;
-    M_robinBoundaryMassCoeffVectorPtr= &robinBoundaryMassCoeffVector;
+    M_robinBoundaryMassCoeffVectorPtr= new vector_Type(robinBoundaryMassCoeffVector);
 }
 
 void
 BCVectorBase::setBetaCoeffVector( const vector_Type& betaCoeffVector )
 {
     M_isBetaCoeffAVector = true;
-    M_betaCoeffVectorPtr= &betaCoeffVector;
+    M_betaCoeffVectorPtr= new vector_Type(betaCoeffVector);
 }
 
 
