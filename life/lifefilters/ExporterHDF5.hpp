@@ -760,7 +760,7 @@ void ExporterHDF5<MeshType>::writeAttributes  ( std::ofstream& xdmf )
             "         Center=\"" << i->whereName() << "\"\n" <<
             "         Name=\"" << i->variableName()<<"\">\n";
 
-        switch ( i->type() )
+        switch ( i->fieldType() )
         {
         case exporterData_Type::ScalarField:
             writeScalarDatastructure(xdmf, *i);
@@ -805,7 +805,7 @@ void ExporterHDF5<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, co
         "           </DataStructure>\n" <<
 
         "           <DataStructure  Format=\"HDF\"\n" <<
-        "                           Dimensions=\"" << dvar.size() << " " << dvar.fieldDim() << "\"\n" <<
+        "                           Dimensions=\"" << dvar.numDOF() << " " << dvar.fieldDim() << "\"\n" <<
         "                           DataType=\"Float\"\n" <<
         "                           Precision=\"8\">\n" <<
         "               " << M_outputFileName << ":/" << dvar.variableName()
@@ -855,7 +855,7 @@ template <typename MeshType>
 void ExporterHDF5<MeshType>::writeVariable(const exporterData_Type& dvar)
 {
 
-    switch ( dvar.type() )
+    switch ( dvar.fieldType() )
     {
     case exporterData_Type::ScalarField:
         writeScalar(dvar);
@@ -876,7 +876,7 @@ void ExporterHDF5<MeshType>::writeScalar(const exporterData_Type& dvar)
        M_HDF5->Write("RHS", RHS);
     */
 
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
     MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start, size);
@@ -892,7 +892,7 @@ template <typename MeshType>
 void ExporterHDF5<MeshType>::writeVector(const exporterData_Type& dvar)
 {
 
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
     using namespace boost;
@@ -1079,7 +1079,7 @@ template <typename MeshType>
 void ExporterHDF5<MeshType>::readScalar(exporterData_Type& dvar)
 {
 
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
     MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start, size);
@@ -1102,7 +1102,7 @@ void ExporterHDF5<MeshType>::readScalar(exporterData_Type& dvar)
 template <typename MeshType>
 void ExporterHDF5<MeshType>::readVector( exporterData_Type& dvar)
 {
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
     using namespace boost;

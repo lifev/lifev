@@ -176,10 +176,7 @@ public:
     }
 
     //! number of (scalar) DOFs of the variable
-    const UInt& __attribute__ (( deprecated )) size() const
-    {
-        return numDOF();
-    }
+
     const UInt& numDOF() const
     {
         return M_numDOF;
@@ -189,10 +186,6 @@ public:
     const UInt& start() const { return M_start; }
 
     //! scalar or vector field
-    const FieldTypeEnum& __attribute__ (( deprecated )) type() const
-    {
-        return fieldType();
-    }
     const FieldTypeEnum& fieldType() const
     {
         return M_fieldType;
@@ -211,10 +204,6 @@ public:
     std::string typeName() const;
 
     //! returns 1 (if Scalar) or 3 (if Vector)
-    UInt __attribute__ (( deprecated )) typeDim() const
-    {
-        return fieldDim();
-    }
     UInt fieldDim() const;
 
     //! Node or Cell centered ?
@@ -588,7 +577,7 @@ void Exporter<MeshType>::addVariable(const FieldTypeEnum& type,
 template <typename MeshType>
 void Exporter<MeshType>::readVariable(exporterData_Type& dvar)
 {
-    switch ( dvar.type() )
+    switch ( dvar.fieldType() )
     {
     case exporterData_Type::ScalarField:
         readScalar(dvar);
