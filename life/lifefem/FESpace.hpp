@@ -1127,7 +1127,7 @@ FESpace<MeshType, MapType>::h1Norm(const vector_type& vec)
         this->fe().updateFirstDerivQuadPt( this->mesh()->element( ielem ) );
         //
 //		for ( UInt j = 0; j < nbComp; ++j)
-        norm += elem_H1_2( vec, this->fe(), this->dof(), nbComp );
+        norm += elementaryH1NormSquare( vec, this->fe(), this->dof(), nbComp );
     }
 
     Real sendbuff[1] = {norm};

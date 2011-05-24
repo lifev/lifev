@@ -589,7 +589,7 @@ Real CurrentFE::diameter() const
             s = 0.0;
             for ( int icoor(0); icoor < (int)nDimensions; ++icoor )
             {
-                s += abs( M_cellNodes[i][icoor] - M_cellNodes[j][icoor] );
+                s += std::fabs( M_cellNodes[i][icoor] - M_cellNodes[j][icoor] );
             }
             if ( s > h )
             {

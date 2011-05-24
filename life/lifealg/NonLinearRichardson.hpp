@@ -133,7 +133,7 @@ Int NonLinearRichardson( VectorEpetra& sol,
 
     Real normRes      = residual.normInf();
     Real stop_tol     = abstol + reltol*normRes;
-    Real linearRelTol = fabs(eta_max);
+    Real linearRelTol = std::fabs(eta_max);
     Real eta_old;
     Real eta_new;
     Real ratio;
