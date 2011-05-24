@@ -79,6 +79,17 @@ enum MeshType{RegularMesh, File};
 enum InitType{Interpolation, Projection};
 enum ConvectionType{Explicit, SemiImplicit, KIO91};
 
+/*
+ * Some references for the KIO91 scheme:
+ *
+ * Karniadakis, G.E., Israeli, M. and Orszag, S.A. (1991)
+ * High-OrderSplitting Methods for the Incompressible Navier-Stokes Equations,
+ * Journal of Computational Physics, 97, 414-443.
+ *
+ * Canuto, C., Hussaini, M.Y., Quarteroni, A., Zang, T.A. (2007),
+ * Spectral Methods Evolution to Complex Geometries and Applications to Fluid Dynamics
+ */
+
 typedef RegionMesh3D<LinearTetra> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
 typedef VectorEpetra vector_type;
@@ -483,11 +494,10 @@ main( int argc, char** argv )
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Updating the exporter... " << std::flush;
-    exporter.addVariable( ExporterData::Vector, "velocity", solution,
-                          UInt(0), uFESpace->dof().numTotalDof() );
-    exporter.addVariable( ExporterData::Scalar, "pressure", solution,
-                          pressureOffset,
-                          UInt(pFESpace->dof().numTotalDof()) );
+    exporter.addVariable( ExporterData<mesh_type>::VectorField, "velocity", uFESpace,
+                          solution, UInt(0));
+    exporter.addVariable( ExporterData<mesh_type>::ScalarField, "pressure", pFESpace,
+                          solution, pressureOffset );
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Exporting solution at time t=" << initialTime << "... " << std::endl;

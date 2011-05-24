@@ -29,6 +29,7 @@
     @brief A short description of the file content
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @date 16 Nov 2010
 
     A more detailed description of the file (if necessary)
@@ -47,6 +48,10 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+
+namespace{
+    LifeV::UInt nDimension = 3;
+}
 
 namespace LifeV {
 
@@ -74,7 +79,7 @@ public:
 
     typedef boost::shared_ptr<matrix_type>  matrix_ptrType;
 
-    typedef LifeChrono                          chrono_type;
+    typedef LifeChrono                      chrono_type;
 
     //@}
 
@@ -135,7 +140,7 @@ public:
     //! Add the term involved in the gradient of the pressure term
     void addGradPressure(matrix_ptrType matrix)
     {
-        addGradPressure(matrix,M_uFESpace->dof().numTotalDof()*3,0);
+        addGradPressure(matrix,M_uFESpace->dof().numTotalDof()*nDimension,0);
     };
 
     //! Add the term involved in the gradient of the pressure term using the given offsets
@@ -144,7 +149,7 @@ public:
     //! Add the term corresponding to the divergence free constraint
     void addDivergence(matrix_ptrType matrix,const Real& coefficient=1.0)
     {
-        addDivergence(matrix,0,M_uFESpace->dof().numTotalDof()*3,coefficient);
+        addDivergence(matrix,0,M_uFESpace->dof().numTotalDof()*nDimension,coefficient);
     };
 
     //! Add the divergence free constraint in a given position of the matrix.
@@ -283,9 +288,9 @@ setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fe
     ASSERT(pFESpace !=0, "Impossible to set empty FE space for the pressure. ");
     ASSERT(betaFESpace !=0, "Impossible to set empty FE space for the convective field (beta). ");
 
-    ASSERT(uFESpace->fieldDim() == 3, "FE space for the velocity has to be vectorial");
+    ASSERT(uFESpace->fieldDim() == nDimension, "FE space for the velocity has to be vectorial");
     ASSERT(pFESpace->fieldDim() == 1, "FE space for the pressure has to be scalar");
-    ASSERT(betaFESpace->fieldDim() == 3, "FE space for the convective field (beta) has to be vectorial");
+    ASSERT(betaFESpace->fieldDim() == nDimension, "FE space for the convective field (beta) has to be vectorial");
 
     M_uFESpace = uFESpace;
     M_pFESpace = pFESpace;
@@ -335,9 +340,9 @@ setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fe
     M_localViscous.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
                                               M_uFESpace->fieldDim(),
                                               M_uFESpace->fieldDim()));
-    M_localGradPressure.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),3,0,
+    M_localGradPressure.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),nDimension,0,
                                                    M_pFESpace->fe().nbFEDof(),0,1));
-    M_localDivergence.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),0,3,
+    M_localDivergence.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),0,nDimension,
                                                  M_pFESpace->fe().nbFEDof(),1,0));
     M_localMass.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
                                            M_uFESpace->fieldDim(),
@@ -457,7 +462,7 @@ addGradPressure(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offse
     ASSERT(offsetLeft + M_pFESpace->dof().numTotalDof() <=
            UInt(matrix->matrixPtr()->NumGlobalCols()),
            "The matrix is too small (columns) for the assembly of the pressure gradient");
-    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*3 <=
+    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*nDimension <=
            UInt(matrix->matrixPtr()->NumGlobalRows()),
            " The matrix is too small (rows) for the assembly of the pressure gradient");
 
@@ -480,7 +485,7 @@ addGradPressure(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offse
         AssemblyElemental::grad(*M_localGradPressure,*M_gradPressureUCFE,*M_gradPressurePCFE,fieldDim);
 
         // Assembly
-        for (UInt iFieldDim(0); iFieldDim<3; ++iFieldDim)
+        for (UInt iFieldDim(0); iFieldDim<nDimension; ++iFieldDim)
         {
             assembleMatrix( *matrix,
                             *M_localGradPressure,
@@ -502,7 +507,7 @@ addDivergence(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetU
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the divergence.");
     ASSERT(M_pFESpace != 0, "No pressure FE space for assembling the divergence.");
     ASSERT(matrix !=0, "Cannot perform the assembly of the divergence with no matrix.");
-    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*3 <=
+    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*nDimension <=
            UInt(matrix->matrixPtr()->NumGlobalCols()),
            "The matrix is too small (columns) for the assembly of the divergence");
     ASSERT(offsetUp + M_pFESpace->dof().numTotalDof() <=
@@ -528,7 +533,7 @@ addDivergence(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetU
         AssemblyElemental::divergence(*M_localDivergence,*M_divergenceUCFE,*M_divergencePCFE,fieldDim,coefficient);
 
         // Assembly
-        for (UInt iFieldDim(0); iFieldDim<3; ++iFieldDim)
+        for (UInt iFieldDim(0); iFieldDim<nDimension; ++iFieldDim)
         {
             assembleMatrix( *matrix,
                             *M_localDivergence,
@@ -558,9 +563,9 @@ addConvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offset
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the convection.");
     ASSERT(M_betaFESpace != 0, "No convective FE space for assembling the convection.");
     ASSERT(matrix !=0, "Cannot perform the assembly of the convection with no matrix.");
-    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*3 <= matrix->matrixPtr()->NumGlobalCols(),
+    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*nDimension <= matrix->matrixPtr()->NumGlobalCols(),
            "The matrix is too small (columns) for the assembly of the convection");
-    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*3 <= matrix->matrixPtr()->NumGlobalRows(),
+    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*nDimension <= matrix->matrixPtr()->NumGlobalRows(),
            " The matrix is too small (rows) for the assembly of the convection");
 
     // Some constants
@@ -569,7 +574,7 @@ addConvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offset
     const UInt nbUTotalDof(M_uFESpace->dof().numTotalDof());
     const UInt nbQuadPt(M_convectionUCFE->nbQuadPt());
 
-    std::vector< std::vector< Real > > localBetaValue(nbQuadPt,std::vector<Real>(3,0.0));
+    std::vector< std::vector< Real > > localBetaValue(nbQuadPt,std::vector<Real>(nDimension,0.0));
 
     // Loop over the elements
     for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
@@ -582,13 +587,13 @@ addConvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offset
         M_localConvection->zero();
 
         // Interpolate
-        AssemblyElemental::interpolate(localBetaValue,*M_convectionBetaCFE,3,M_betaFESpace->dof(),iterElement,beta);
+        AssemblyElemental::interpolate(localBetaValue,*M_convectionBetaCFE,nDimension,M_betaFESpace->dof(),iterElement,beta);
 
         // Local convection
         AssemblyElemental::advection(*M_localConvection,*M_convectionUCFE,localBetaValue,fieldDim);
 
         // Assembly
-        for (UInt iFieldDim(0); iFieldDim<3; ++iFieldDim)
+        for (UInt iFieldDim(0); iFieldDim<nDimension; ++iFieldDim)
         {
             assembleMatrix( *matrix,
                             *M_localConvection,
@@ -672,9 +677,9 @@ addMass(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, 
 
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the mass.");
     ASSERT(matrix !=0, "Cannot perform the assembly of the mass with no matrix.");
-    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*3 <= matrix->matrixPtr()->NumGlobalCols(),
+    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*nDimension <= matrix->matrixPtr()->NumGlobalCols(),
            "The matrix is too small (columns) for the assembly of the mass");
-    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*3 <= matrix->matrixPtr()->NumGlobalRows(),
+    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*nDimension <= matrix->matrixPtr()->NumGlobalRows(),
            " The matrix is too small (rows) for the assembly of the mass");
 
     // Some constants
@@ -695,7 +700,7 @@ addMass(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, 
         AssemblyElemental::mass(*M_localMass,*M_massCFE,coefficient,fieldDim);
 
         // Assembly
-        for (UInt iFieldDim(0); iFieldDim<3; ++iFieldDim)
+        for (UInt iFieldDim(0); iFieldDim<nDimension; ++iFieldDim)
         {
             assembleMatrix( *matrix,
                             *M_localMass,
