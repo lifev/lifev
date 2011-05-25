@@ -21,7 +21,7 @@ function    = 'F*(8-y)/4'
 
 variables    =  't            F'
 #scale        =  '1            -450000'
-scale        =  '1             -650000'
+scale        =  '1             -270000'
 
 loop        = true
 
