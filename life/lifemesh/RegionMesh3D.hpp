@@ -3550,6 +3550,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
     // If I have not all faces I need to process them first to keep the correct numbering
 
     // First We check if we have already Faces stored
+    int _numOriginalStoredFaces=faceList.size();
     if ( ! faceList.empty() )
     {
         // dump all faces in the container, to maintain the correct numbering
@@ -3557,7 +3558,6 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
         // will reflect the actual face numbering. However, if I want to create
         // the internal faces I need to make sure that I am processing only the
         // boundary ones in a special way.
-        int _numOriginalStoredFaces=faceList.size();
         std::pair<UInt, bool> _check;
         for ( UInt j = 0; j < faceList.size(); ++j )
         {
@@ -3604,7 +3604,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
             M_VToF( j, vid ) = e.first;
             bool _isBound=e.first<this->M_numBFaces;
             // Is the face an extra face (not on the boundary but originally included in the list)?
-            bool _isExtra = (e.first >=this->M_numBFaces  || e.first < _numOriginalStoredFaces);
+            bool _isExtra = (e.first >=this->M_numBFaces  && e.first < _numOriginalStoredFaces);
             if (_isBound)
             {
                 FaceType & _thisFace(faceList[e.first]);
