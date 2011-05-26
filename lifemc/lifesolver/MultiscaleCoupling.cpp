@@ -248,6 +248,7 @@ MultiscaleCoupling::saveSolution()
                     {
                         output.open( filename.c_str(), std::ios::trunc );
                         output << "% Coupling Type: " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl;
+                        output << "% Coupling Name: " << M_couplingName << std::endl;
                         output << "% Model:         " << number2string( M_models[i]->ID() ) << std::endl;
                         output << "% Flag:          " << number2string( M_flags[i] ) << std::endl << std::endl;
                         output << "% TIME                     FLOW RATE                STRESS" << std::endl;
