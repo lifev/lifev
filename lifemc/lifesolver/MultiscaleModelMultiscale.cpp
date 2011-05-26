@@ -285,6 +285,39 @@ MultiscaleModelMultiscale::saveSolution()
 
     for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->saveSolution();
+
+    // Save the framework numbering
+    if ( M_globalData->dataTime()->isFirstTimeStep() )
+    {
+        // File name
+        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep )
+                                                       + "_Model_" + number2string( M_ID ) + ".mfile";
+
+        // Remove the old file if present
+        if ( M_comm->MyPID() == 0 )
+            std::remove( filename.c_str() );
+
+        M_comm->Barrier();
+
+        // Open the file
+        std::ofstream output;
+        output.open( filename.c_str(), std::ios::app );
+
+        // Models list
+        for ( multiscaleModelsContainerConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+            if ( ( *i )->communicator()->MyPID() == 0 )
+                output << "Model ID: " << ( *i )->ID() << ", Name: " << ( *i )->modelName() << std::endl;
+
+        M_comm->Barrier();
+
+        // Couplings list
+        if ( M_comm->MyPID() == 0 )
+            for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+                output << "Coupling ID: " << ( *i )->ID() << ", Name: " << ( *i )->couplingName() << std::endl;
+
+        // Close the file
+        output.close();
+    }
 }
 
 void
