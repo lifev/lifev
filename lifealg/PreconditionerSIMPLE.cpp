@@ -42,16 +42,9 @@ PreconditionerSIMPLE::PreconditionerSIMPLE(const  boost::shared_ptr<Epetra_Comm>
     PreconditionerComposition(comm),
     M_velocityBlockSize(-1),
     M_pressureBlockSize(-1),
-    M_timestep(1.0),
-    M_viscosity(1.0),
-    M_density(1.0),
     M_dampingFactor(0.5),
     M_SIMPLEType("SIMPLE")
-{
-    M_uFESpace.reset();
-    M_pFESpace.reset();
-    M_beta.reset();
-}
+{}
 
 PreconditionerSIMPLE::~PreconditionerSIMPLE()
 {}
@@ -78,6 +71,16 @@ void PreconditionerSIMPLE::createSIMPLEList( list_Type&         list,
     int pressureBlockSize = dataFile((section + "/" + subsection + "/blocks/pressure_block_size").data(), -1);
     string SIMPLEType = dataFile((section + "/" + subsection + "/SIMPLE_type").data(), "SIMPLE");
 
+    std::string fluidPrec = dataFile((section + "/" + subsection + "/subprecs/fluid_prec").data(),"ML");
+    list.set("subprecs: fluid prec", fluidPrec);
+    std::string fluidPrecDataSection = dataFile((section + "/" + subsection + "/subprecs/fluid_prec_data_section").data(), "");
+    list.set("subprecs: fluid prec data section", (section + "/" + subsection+"/subprecs/"+fluidPrecDataSection).data());
+
+    std::string schurPrec = dataFile((section + "/" + subsection + "/subprecs/schur_prec").data(),"ML");
+    list.set("subprecs: Schur prec", schurPrec);
+    std::string schurPrecDataSection = dataFile((section + "/" + subsection + "/subprecs/schur_prec_data_section").data(), "");
+    list.set("subprecs: Schur prec data section", (section + "/" + subsection+"/subprecs/"+schurPrecDataSection).data());
+
     list.set("blocks: velocity block size", velocityBlockSize);
     list.set("blocks: pressure block size", pressureBlockSize);
     list.set("SIMPLE Type", SIMPLEType);
@@ -90,14 +93,9 @@ Real PreconditionerSIMPLE::condest()
     return 0.0;
 }
 
-void PreconditionerSIMPLE::updateBeta(const vector_type& beta)
-{
-    *M_beta = beta;
-}
-
 int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
 {
-    if((M_uFESpace.get()==NULL)||(M_pFESpace.get()==NULL))
+    if(M_velocityBlockSize<0||M_pressureBlockSize<0)
     {
         std::cout << "You must specified manually the pointers to the FESpaces" << std::endl;
         exit(0);
@@ -124,9 +122,11 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
 
     LifeChrono timer;
 
-    // Getting the block structure of A
-    // / F Bt \
-    // \ B C  /
+    /*
+     * Getting the block structure of A
+     * / F Bt \
+     * \ B C  /
+     */
     if(verbose) std::cout << std::endl << "      >Getting the structure of A... ";
     timer.start();
     MatrixBlockView F,Bt,B,C;
@@ -142,22 +142,26 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     //oper.getMatrixBlockView(1,1,C );
     C.setup(blockNumRows[0],blockNumColumns[0],blockNumRows[1],blockNumColumns[1],*oper);
 
-    if(verbose) std::cout << "done in " << timer.diff() << " s." << std::endl;
+    if(verbose) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
-    // SIMPLE:
-    // P = / F  0 \ / I D^-1Bt \
-    //     \ B -S / \ 0 alphaI /
+    /*
+     * SIMPLE:
+     * P = / F  0 \ / I D^-1Bt \
+     *     \ B -S / \ 0 alphaI /
+     */
 
     // Getting the block structure of B
     MatrixBlockView B11,B12,B21,B22,B22base;
 
-    // Building the First block
-    // / F  0 \ = / F 0 \/ I 0 \/ I  0 \
-    // \ B -S /   \ 0 I /\ B I /\ 0 -S /
-
-    // / F 0 \
-    // \ 0 I /
-    if(verbose) std::cout << " P1a" << std::endl;
+    /*
+     * Building the First block
+     * / F  0 \ = / F 0 \/ I 0 \/ I  0 \
+     * \ B -S /   \ 0 I /\ B I /\ 0 -S /
+     *
+     * / F 0 \
+     * \ 0 I /
+     */
+    if(verbose) std::cout << "       Block 1 (F)" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> P1a(new matrix_type(map));
     P1a->setBlockStructure(blockNumRows,blockNumColumns);
@@ -166,17 +170,17 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     MatrixBlockUtils::copyBlock(F,B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P1a->globalAssemble();
-    P1a->spy("p1a");
     boost::shared_ptr<parent_matrix_type> p1a = P1a;
-    super_PtrType precForBlock1;
-    precForBlock1.reset(new PreconditionerIfpack());
-    precForBlock1->setDataFromGetPot(M_dataFile,M_section);
+    super_PtrType precForBlock1(PRECFactory::instance().createObject(M_fluidPrec));
+    precForBlock1->setDataFromGetPot(M_dataFile,M_fluidDataSection);
     this->pushBack(p1a,precForBlock1,notInversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    if(verbose) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
-    // / I 0 \
-    // \ B I /
-    if(verbose) std::cout << " P1b" << std::endl;
+    /*
+     * / I 0 \
+     * \ B I /
+     */
+    if(verbose) std::cout << "       Block 1 (B)" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> P1b(new matrix_type(map));
     P1b->setBlockStructure(blockNumRows,blockNumColumns);
@@ -184,18 +188,19 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     P1b->getMatrixBlockView(1,0,B21);
     P1b->getMatrixBlockView(1,1,B22);
     MatrixBlockUtils::copyBlock(B,B21);
-    (*P1b) *= -1;
+    //(*P1b) *= -1;
     MatrixBlockUtils::createIdentityBlock(B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P1b->globalAssemble();
-    P1b->spy("p1b");
     boost::shared_ptr<parent_matrix_type> p1b = P1b;
     this->pushBack(p1b,inversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    if(verbose) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
-    // / I  0 \
-    // \ 0 -S /
-    if(verbose) std::cout << " P1c" << std::endl;
+    /*
+     * / I  0 \
+     * \ 0 -S /
+     */
+    if(verbose) std::cout << "       Block 1 (Schur)" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> P1c(new matrix_type(map));
 
@@ -210,7 +215,6 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     if(M_SIMPLEType == "SIMPLE")
     {
         MatrixBlockUtils::createInvDiagBlock(F,B11);
-        //MatrixBlockUtils::copyBlock(F,B11);
     }
     else if(M_SIMPLEType == "SIMPLEC")
     {
@@ -239,21 +243,21 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     P1c->getMatrixBlockView(0,0,B11);
     MatrixBlockUtils::createIdentityBlock(B11);
     P1c->globalAssemble();
-    P1c->spy("p1c");
     boost::shared_ptr<parent_matrix_type> p1c = P1c;
-    super_PtrType precForBlock2;
-    precForBlock2.reset(new PreconditionerIfpack());
-    precForBlock2->setDataFromGetPot(M_dataFile,M_section);
+    super_PtrType precForBlock2(PRECFactory::instance().createObject(M_schurPrec));
+    precForBlock2->setDataFromGetPot(M_dataFile,M_schurDataSection);
     this->pushBack(p1c,precForBlock2,notInversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    if(verbose) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
-    // Building the First block
-    // / I  D^-1Bt \ = / D^-1 0      \/ I Bt \/ D 0 \
-    // \ 0  alphaI /   \ 0    alphaI /\ 0 I  /\ 0 I /
-
-    // / D^-1 0     \
-    // \ 0    aphaI /
-    if(verbose) std::cout << " P2a" << std::endl;
+    /*
+     * Building the Second block
+     * / I  -D^-1Bt \ = / D^-1   0    \/ I -Bt \/ D 0 \
+     * \ 0   alphaI /   \ 0    alphaI /\ 0  I  /\ 0 I /
+     *
+     * / D^-1    0   \
+     * \ 0    alphaI /
+     */
+    if(verbose) std::cout << "       Block 2 (D^-1,alpha I)" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> P2a(new matrix_type( map ));
     *P2a *= 0.0;
@@ -270,14 +274,15 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     }
     MatrixBlockUtils::createScalarBlock(B22,1/M_dampingFactor);
     P2a->globalAssemble();
-    P2a->spy("p2a");
     boost::shared_ptr<parent_matrix_type> p2a = P2a;
     this->pushBack(p2a,inversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    if(verbose) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
-    // / I Bt \
-    // \ 0 I  /
-    if(verbose) std::cout << " P2b" << std::endl;
+    /*
+     * / I Bt \
+     * \ 0 I  /
+     */
+    if(verbose) std::cout << "       Block 2 (Bt)" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> P2b(new matrix_type(map));
     P2b->setBlockStructure(blockNumRows,blockNumColumns);
@@ -289,14 +294,15 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     MatrixBlockUtils::createIdentityBlock(B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P2b->globalAssemble();
-    P2b->spy("p2b");
     boost::shared_ptr<parent_matrix_type> p2b = P2b;
     this->pushBack(p2b,inversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    if(verbose) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
-    // / D 0 \
-    // \ 0 I /
-    if(verbose) std::cout << " P2c" << std::endl;
+    /*
+     * / D 0 \
+     * \ 0 I /
+     */
+    if(verbose) std::cout << "       Block2 (D)" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> P2c(new matrix_type( map ));
     *P2c *= 0.0;
@@ -313,14 +319,11 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     }
     MatrixBlockUtils::createIdentityBlock(B22);
     P2c->globalAssemble();
-    P2c->spy("p2c");
     boost::shared_ptr<parent_matrix_type> p2c = P2c;
     this->pushBack(p2c,inversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    if(verbose) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
     this->M_preconditionerCreated = true;
-
-    if(verbose) std::cout << "[DEBUG] number of operators: " << numOperators() << std::endl;
 
     if(verbose) std::cout << "      >All the blocks are built" << std::endl
                           << "      >";
@@ -340,37 +343,22 @@ void PreconditionerSIMPLE::setDataFromGetPot( const GetPot& dataFile,
                                            const std::string& section )
 {
     M_dataFile   = dataFile;
-    M_section    = section;
     createSIMPLEList(M_list, dataFile, section, "SIMPLE");
 
-    M_velocityBlockSize = this->M_list.get("blocks: velocity block size", -1);
-    M_pressureBlockSize = this->M_list.get("blocks: pressure block size", -1);
     M_precType          = this->M_list.get("prectype", "SIMPLE");
     M_SIMPLEType        = this->M_list.get("SIMPLE Type", "SIMPLE");
+
+    M_fluidPrec            = this->M_list.get("subprecs: fluid prec","ML");
+    M_fluidDataSection = this->M_list.get("subprecs: fluid prec data section", "");
+
+    M_schurPrec            = this->M_list.get("subprecs: Schur prec","ML");
+    M_schurDataSection = this->M_list.get("subprecs: Schur prec data section", "");
 }
 
 void PreconditionerSIMPLE::setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace){
-    M_uFESpace = uFESpace;
-    M_pFESpace = pFESpace;
-    M_adrPressureAssembler.setup(pFESpace,uFESpace); // p,beta=u
-    M_adrVelocityAssembler.setup(uFESpace,uFESpace); // u,beta=u
-    M_beta.reset(new vector_type(M_uFESpace->map() + M_pFESpace->map()));
-    *M_beta *= 0;
-}
-
-void PreconditionerSIMPLE::setTimestep(const Real& timestep)
-{
-    M_timestep = timestep;
-}
-
-void PreconditionerSIMPLE::setViscosity(const Real& viscosity)
-{
-    M_viscosity = viscosity;
-}
-
-void PreconditionerSIMPLE::setDensity(const Real& density)
-{
-    M_density = density;
+    // We setup the size of the blocks
+    M_velocityBlockSize = uFESpace->fieldDim() * uFESpace->dof().numTotalDof();
+    M_pressureBlockSize = pFESpace->dof().numTotalDof();
 }
 
 void PreconditionerSIMPLE::setDampingFactor(const Real& dampingFactor)

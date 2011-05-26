@@ -110,14 +110,6 @@ public:
     //! Return an estimation of the conditionement number of the preconditioner
     double      condest ();
 
-    //! Update the vector beta of the convective term in Fp
-    /*!
-        This method updates the value of beta.
-        @param beta New vector beta to be used to built the convective term
-     */
-    void updateBeta(const vector_type& beta);
-
-
     //! Build the preconditioner
     int buildPreconditioner(operator_type& A);
 
@@ -150,27 +142,6 @@ public:
      */
     void setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace);
 
-    //! Setter for the timestep
-    /*!
-        This method set the timestep used to compute Fp.
-        @param timestep Timestep used to compute the solution of the Navier-Stokes equations
-     */
-    void setTimestep(const Real& timestep);
-
-    //! Setter for the viscosity
-    /*!
-        This method set the viscosity used to compute Fp.
-        @param viscosity Viscosity used to compute the solution of the Navier-Stokes equations
-     */
-    void setViscosity(const Real& viscosity);
-
-    //! Setter for the densitz
-    /*!
-        This method set the density used to compute Fp.
-        @param density Density used to compute the solution of the Navier-Stokes equations
-     */
-    void setDensity(const Real& density);
-
     //! Setter for the damping factor
     /*!
         This method set damping factor used to build the preconditioner
@@ -184,26 +155,21 @@ protected:
 
     int         M_velocityBlockSize;
     int         M_pressureBlockSize;
-    FESpace_ptr M_uFESpace;
-    FESpace_ptr M_pFESpace;
 
-    Real        M_timestep;
-    Real        M_viscosity;
-    Real        M_density;
     Real        M_dampingFactor;
-    vector_ptr  M_beta;
 
     string      M_SIMPLEType;
 
-    ADRAssembler<mesh_type,matrix_type,vector_type> M_adrPressureAssembler;
-    ADRAssembler<mesh_type,matrix_type,vector_type> M_adrVelocityAssembler;
-
     // todo: Remove the member dataFile (bad programmation)
     GetPot      M_dataFile;
-    string      M_section;
+    string      M_fluidPrec;
+    string      M_fluidDataSection;
+    string      M_schurPrec;
+    string      M_schurDataSection;
 
 private:
-    PreconditionerSIMPLE(const PreconditionerSIMPLE& /*P*/){}
+    PreconditionerSIMPLE(const PreconditionerSIMPLE& P):
+        PreconditionerComposition(P.M_comm){}
     PreconditionerSIMPLE(const boost::shared_ptr<PreconditionerSIMPLE>& /*P*/){}
 
 };
