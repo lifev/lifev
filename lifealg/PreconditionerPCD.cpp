@@ -32,10 +32,17 @@
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
 #include <life/lifecore/LifeChrono.hpp>
+#include <life/lifefem/BCManage.hpp>
 #include <lifemc/lifearray/MatrixBlock.hpp>
 #include <lifemc/lifearray/MatrixBlockView.hpp>
 #include <lifemc/lifearray/MatrixBlockUtils.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <EpetraExt_MatrixMatrix.h>
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV {
 
@@ -306,6 +313,68 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
                 }
             }
         }
+    }
+    else if(M_pressureBoundaryConditions == "dirichlet_at_inflow")
+    {
+        // Loop on boundary conditions
+        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
+        {
+            if( M_bcHandlerPtr->operator[](i).flag() == 1 )
+            {
+                for ( ID j = 0; j < M_bcHandlerPtr->operator[](i).list_size(); ++j )
+                {
+                    UInt myId = M_bcHandlerPtr->operator[](i)[j]->id() + B22.firstRowIndex();
+                    if(M_setApBoundaryConditions) pAp->diagonalize(myId,1.0);
+                    if(M_setFpBoundaryConditions) pFp->diagonalize(myId,1.0);
+                }
+            }
+        }
+    }
+    else if(M_pressureBoundaryConditions == "robin_at_inflow")
+    {
+        BCHandler bcHandler;
+
+        // Offset to set the BC for the pressure
+        bcHandler.setOffset(B22.firstRowIndex());
+
+        // Loop on boundary conditions
+        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
+        {
+            if(verbose) std::cout << "BCHandler name: " << M_bcHandlerPtr->operator[](i).name() << std::endl;
+
+            UInt numComponents = M_bcHandlerPtr->operator[](i).numberOfComponents();
+            numComponents = 1;
+
+            if(M_bcHandlerPtr->operator[](i).flag() == 1)
+            {
+                vector_type convVelocity(*M_beta,Repeated);
+                vector_type robinRHS(M_uFESpace->map(), Repeated);
+                /*
+                BCVector uRobin(robinRHS, M_uFESpace->dof().numTotalDof(), 0);
+                uRobin.setRobinCoeffVector(convVelocity);
+                uRobin.setBetaCoeff(M_viscosity/M_density);
+
+                bcHandler.addBC(M_bcHandlerPtr->operator[](i).name(),
+                                M_bcHandlerPtr->operator[](i).flag(),
+                                Robin,
+                                Normal,
+                                uRobin,
+                                numComponents);
+                */
+            }
+            else
+            {
+                bcHandler.addBC(M_bcHandlerPtr->operator[](i).name(),
+                                M_bcHandlerPtr->operator[](i).flag(),
+                                M_bcHandlerPtr->operator[](i).type(),
+                                M_bcHandlerPtr->operator[](i).mode(),
+                                const_cast<BCFunctionBase&>(*(M_bcHandlerPtr->operator[](i).pointerToFunctor())),
+                                numComponents);
+            }
+        }
+        if(M_setApBoundaryConditions) bcManageMatrix( *pAp,*M_uFESpace->mesh(),M_uFESpace->dof(),bcHandler,M_uFESpace->feBd(),1.0,0.0);
+        if(M_setFpBoundaryConditions) bcManageMatrix( *pFp,*M_uFESpace->mesh(),M_uFESpace->dof(),bcHandler,M_uFESpace->feBd(),1.0,0.0);
+
     }
     if(verbose) std::cout << " Pressure BC type = " << M_pressureBoundaryConditions << std::endl;
     if((verbose)&&(M_setApBoundaryConditions)) std::cout << " BC imposed on Ap" << std::endl;

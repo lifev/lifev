@@ -41,6 +41,7 @@
 #include <life/lifesolver/ADRAssembler.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifemesh/RegionMesh3D.hpp>
+//#include <life/lifefem/BCVector.hpp>
 
 namespace LifeV {
 
@@ -79,6 +80,9 @@ public:
     typedef boost::shared_ptr<BCHandler>            BCHandlerPtr_type;
 
     typedef Teuchos::ParameterList                  list_Type;
+
+    // BC
+    typedef entityFlag_Type bcFlag_Type;
     //@}
 
 
@@ -215,7 +219,8 @@ protected:
     bool        M_setFpBoundaryConditions;
 
 private:
-    PreconditionerPCD(const PreconditionerPCD& /*P*/){}
+    PreconditionerPCD(const PreconditionerPCD& P):
+        PreconditionerComposition(P.M_comm){}
     PreconditionerPCD(const boost::shared_ptr<PreconditionerPCD>& /*P*/){}
 
 };
