@@ -255,7 +255,7 @@ public:
       a set method if you want different identifiers.
       @param flag The value of the bool-flag.
     */
-    MeshEntityWithBoundary( const ID& id, const flag_Type flag = DEFAULT ) :
+    MeshEntityWithBoundary( const ID& id, const flag_Type& flag = DEFAULT ) :
             MeshEntity( id ),
             M_flag ( flag )
     {};
@@ -267,12 +267,14 @@ public:
       a set method if you want different identifiers.
       @param boundary The value of the boundary indicator.
     */
-    MeshEntityWithBoundary( const ID& id, const bool boundary ) :
+    MeshEntityWithBoundary( const ID& id, const bool& boundary ) :
             MeshEntity( id )
     {
+        // NOTE: this is conservative, if PHYSICAL_BOUNDARY = 0x01
+        // this can be done as
+        // M_flag = static_cast<flag_Type> boundary
         if( boundary ) M_flag = PHYSICAL_BOUNDARY;
         else           M_flag = DEFAULT;
-
     };
 
     //! Destructor
@@ -308,10 +310,8 @@ public:
     */
     void setBoundary (const bool& boundary)
     {
-        // NOTE: this is conservative, if PHYSICAL_BOUNDARY = 0x01
-        // this can be done as flagTurnOn ( M_flag, boundary )
-        if ( boundary ) Flag::turnOn  ( M_flag, PHYSICAL_BOUNDARY );
-        else            Flag::turnOff ( M_flag, PHYSICAL_BOUNDARY );
+        if ( boundary ) M_flag = Flag::turnOn  ( M_flag, PHYSICAL_BOUNDARY );
+        else            M_flag = Flag::turnOff ( M_flag, PHYSICAL_BOUNDARY );
     };
 
     //! Set method for the entity flag
