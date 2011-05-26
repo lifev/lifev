@@ -95,6 +95,16 @@
 #include <string>
 #include <limits>
 
+// deprecated attribute for LifeV functions
+// the macro is needed to avoid problems with compilers other than gcc
+// other compiler specific implementation of the deprecated attribute can be
+// added with #elif defined macros
+#ifdef __GNUC__
+#define LIFEV_DEPRECATED( func ) func __attribute__ ((deprecated))
+#else
+#define LIFEV_DEPRECATED( func ) func
+#endif
+
 #include <life/lifecore/LifeAssert.hpp>
 
 namespace LifeV
