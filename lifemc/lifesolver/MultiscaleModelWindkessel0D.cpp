@@ -336,6 +336,7 @@ MultiscaleModelWindkessel0D::setupExporterImporter()
     std::string file = multiscaleProblemFolder + "/Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) + ".m";
     M_outputFile.open( file.c_str(), std::ios::trunc );
     M_outputFile << std::scientific << std::setprecision( 15 )
+                 << "%   MODEL: " << M_modelName << std::endl
                  << "%   TIME                     FLOW RATE                PRESSURE" << std::endl;
 }
 
