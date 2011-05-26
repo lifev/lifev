@@ -3545,7 +3545,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
     // If I have not all faces I need to process them first to keep the correct numbering
 
     // First We check if we have already Faces stored
-    int _numOriginalStoredFaces=faceList.size();
+    UInt _numOriginalStoredFaces=faceList.size();
     if ( ! faceList.empty() )
     {
         // dump all faces in the container, to maintain the correct numbering
