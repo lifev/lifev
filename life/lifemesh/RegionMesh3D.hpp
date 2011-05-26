@@ -3604,7 +3604,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
             M_VToF( j, vid ) = e.first;
             bool _isBound=e.first<this->M_numBFaces;
             // Is the face an extra face (not on the boundary but originally included in the list)?
-            bool _isExtra = (e.first >=this->M_numBFaces  || e.first < _numOriginalStoredFaces);
+            bool _isExtra = (e.first >=this->M_numBFaces  && e.first < _numOriginalStoredFaces);
             if (_isBound)
             {
                 FaceType & _thisFace(faceList[e.first]);

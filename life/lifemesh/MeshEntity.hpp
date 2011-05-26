@@ -239,13 +239,12 @@ public:
       This constructor calls the empty constructor of MeshEntity and
       sets the boundary indicator to false.
     */
-    MeshEntityWithBoundary() : MeshEntity(), M_boundary( false ), M_flag ( DEFAULT )
+    MeshEntityWithBoundary() : MeshEntity(), M_flag ( DEFAULT )
     {};
 
     //! Copy constructor
     MeshEntityWithBoundary( const MeshEntityWithBoundary& meshEntityWithBoundary ) :
             MeshEntity( meshEntityWithBoundary ),
-            M_boundary( meshEntityWithBoundary.M_boundary ),
             M_flag ( meshEntityWithBoundary.M_flag )
     {};
 
@@ -254,13 +253,27 @@ public:
       This is the "full" constructor for this class.
       @param id The identifier to be set for both (global and local) identifiers. Use
       a set method if you want different identifiers.
-      @param boundary The value of the boundary indicator.
+      @param flag The value of the bool-flag.
     */
-    MeshEntityWithBoundary( const ID& id, bool boundary = false, flag_Type flag = DEFAULT ) :
+    MeshEntityWithBoundary( const ID& id, const flag_Type flag = DEFAULT ) :
             MeshEntity( id ),
-            M_boundary( boundary ),
             M_flag ( flag )
     {};
+
+    //! backward-compatible constructor
+    /*!
+      This is the "full" constructor for this class.
+      @param id The identifier to be set for both (global and local) identifiers. Use
+      a set method if you want different identifiers.
+      @param boundary The value of the boundary indicator.
+    */
+    MeshEntityWithBoundary( const ID& id, const bool boundary ) :
+            MeshEntity( id )
+    {
+        if( boundary ) M_flag = PHYSICAL_BOUNDARY;
+        else           M_flag = DEFAULT;
+
+    };
 
     //! Destructor
     ~MeshEntityWithBoundary()
@@ -274,13 +287,9 @@ public:
 
 
     //! Display the informations stored by this class
-    void showMe( std::ostream& output = std::cout ) const
+    void showMe ( std::ostream& output = std::cout ) const
     {
         output << " Global ID : " << id() << " -- " << " Local ID " << localId();
-        if (M_boundary)
-        {
-            output << " -- Boundary ";
-        };
         output << " -- Flags: " << M_flag;
         output << std::endl;
     };
@@ -297,9 +306,12 @@ public:
     /*!
       @param boundary The value to be set for the boundary indicator.
     */
-    void setBoundary(const bool& boundary)
+    void setBoundary (const bool& boundary)
     {
-        M_boundary = boundary;
+        // NOTE: this is conservative, if PHYSICAL_BOUNDARY = 0x01
+        // this can be done as flagTurnOn ( M_flag, boundary )
+        if ( boundary ) Flag::turnOn  ( M_flag, PHYSICAL_BOUNDARY );
+        else            Flag::turnOff ( M_flag, PHYSICAL_BOUNDARY );
     };
 
     //! Set method for the entity flag
@@ -318,9 +330,9 @@ public:
 
 
     //! Tells if it is on the boundary
-    const bool & boundary() const
+    bool boundary() const
     {
-        return M_boundary;
+        return Flag::testOneSet ( M_flag, PHYSICAL_BOUNDARY );
     };
 
 
@@ -334,7 +346,6 @@ public:
     //@}
 
 private:
-    bool M_boundary;
     flag_Type M_flag;
 };
 
