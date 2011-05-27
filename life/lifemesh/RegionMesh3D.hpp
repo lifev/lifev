@@ -136,7 +136,7 @@ public:
      */
 
     //! Volume Element (3D)
-    typedef MeshElementMarked3D<GEOSHAPE, MC>  VolumeType;
+    typedef MeshElementMarked3D<VolumeShape, MC>  VolumeType;
     //! Face Element (2D)
     typedef MeshElementMarked2D<FaceShape, MC> FaceType;
     //! Edge Element (1D)
