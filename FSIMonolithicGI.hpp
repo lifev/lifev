@@ -152,6 +152,9 @@ public:
                                             FSIOperator::solidPtr_Type::value_type::Function const& w0,
                                             FSIOperator::solidPtr_Type::value_type::Function const& df0 );
 
+    //!Empty method kept for compatibility with FSIOperator.
+    void couplingVariableExtrap( );
+
     //@}
     //!@name Get Methods
     //@{

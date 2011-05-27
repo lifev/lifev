@@ -121,7 +121,7 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
 }
 
 void
-FSIMonolithicGI::updateSystem()
+FSIMonolithicGI::updateSystem( )
 {
     //M_meshMotion->dispOld() is at time n-1 !!
     //M_meshMotion->updateSystem();
@@ -129,13 +129,15 @@ FSIMonolithicGI::updateSystem()
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
+    super_Type::updateSystem( );
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.`
-    super_Type::updateSystem();
+    couplingVariableExtrap( );
     M_un.reset(new vector_Type(*M_uk));
+    setSolution(*M_lambda);
 }
 
 void
-FSIMonolithicGI::buildSystem ()
+FSIMonolithicGI::buildSystem ( )
 {
     super_Type::buildSystem();
     M_meshMotion->computeMatrix();
@@ -146,70 +148,83 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
                                const vector_Type& disp,
                                const UInt          iter )
 {
-    Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
-    setDispSolid(disp);
-    if (iter > 0)
+
+    if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
-        this->M_solid->updateVel();
-    }
-    M_uk.reset(new vector_Type( disp ));
-    UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
-    vectorPtr_Type meshDispDiff( new vector_Type(M_mmFESpace->map()) );
-    vectorPtr_Type meshDispOld( new vector_Type(M_mmFESpace->map()) );
-
-    meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
-
-    meshDispOld->subset(*M_un, offset);
-
-    //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
-    //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
-    M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
-    vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
-    this->moveMesh(mmRep);// re-initialize the mesh points
-    if (!M_domainVelImplicit)
-    {
-        if(M_restarts)
+        Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
+        setDispSolid(disp);
+        if (iter > 0)
         {
-            //M_data->resetTimeStep( M_data->restartTimestep() );
-            alpha = 1/M_data->restartTimestep();//dataFluid()->dataTime()->timeStep();
-            //M_data->restoreTimeStep();
+            this->M_solid->updateVel();
         }
+        M_uk.reset(new vector_Type( disp ));//M_uk should point to the same vector as disp, indeed, not be copied.
+        //in that case this line is useless
 
-        meshDispDiff=meshDispOld;// at time n /*->subset(*M_un, offset)*/; //if the mesh motion is at the previous time step in the convective term
-        *meshDispDiff -= M_meshMotion->dispOld();//at time n-1
+        UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
+
+        vectorPtr_Type meshDispDiff( new vector_Type(M_mmFESpace->map()) );
+        vectorPtr_Type meshDispOld( new vector_Type(M_mmFESpace->map()) );
+
+        meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
+
+        meshDispOld->subset(*M_un, offset);
+
+        //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
+        //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
+        M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
+        meshDispDiff->spy("meshDispGI");
+        vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
+        this->moveMesh(mmRep);// re-initialize the mesh points
+        if (!M_domainVelImplicit)
+        {
+            if(M_restarts)
+            {
+                //M_data->resetTimeStep( M_data->restartTimestep() );
+                alpha = 1/M_data->restartTimestep();//dataFluid()->dataTime()->timeStep();
+                //M_data->restoreTimeStep();
+            }
+
+            meshDispDiff = meshDispOld;// at time n /*->subset(*M_un, offset)*/; //if the mesh motion is at the previous time step in the convective term
+            *meshDispDiff -= M_meshMotion->dispOld();//at time n-1
+            meshDispDiff->spy("dispNGI");
+            M_meshMotion->dispOld().spy("dispOldGI");
+        }
+        else
+        {
+            *meshDispDiff -= *meshDispOld;//relative displacement
+            meshDispDiff->spy("dispNGI");
+            meshDispOld->spy("dispOld");
+        }
+        *meshDispDiff *= -alpha;// -w, mesh velocity
+        mmRep = *meshDispDiff;
+
+        this->interpolateVelocity(mmRep, *this->M_beta);
+        //            *this->M_beta *= -alpha; //HE solution scaled!
+        M_beta->spy("betaFI");
+
+        vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
+        if (!M_convectiveTermDer)
+            fluid->subset(*M_un/**M_unOld*/, 0);
+        else
+            fluid->subset(disp, 0);
+        *this->M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
+
+        //      if(iter == 0)
+        //      {
+        // //         M_solid->updateSystem();
+        //      }
+        //      else
+        //      {
+        //          //         M_solid->computeMatrix( disp, 1.);
+        //      }
+
+        assembleSolidBlock( iter, M_uk );
+        assembleFluidBlock( iter, M_uk );
+        assembleMeshBlock ( iter );
+        *M_rhsFull = *M_rhs;
+        applyBoundaryConditions();
     }
-    else
-    {
-    *meshDispDiff -= *meshDispOld;//relative displacement
-    }
-    *meshDispDiff *= -alpha;// -w, mesh velocity
-    mmRep = *meshDispDiff;
-
-    this->interpolateVelocity(mmRep, *this->M_beta);
-    //            *this->M_beta *= -alpha; //HE solution scaled!
-    vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
-    if (!M_convectiveTermDer)
-        fluid->subset(*M_un/**M_unOld*/, 0);
-    else
-        fluid->subset(disp, 0);
-    *this->M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
-
-//      if(iter == 0)
-//      {
-// //         M_solid->updateSystem();
-//      }
-//      else
-//      {
-//          //         M_solid->computeMatrix( disp, 1.);
-//      }
-
-    assembleSolidBlock( iter, M_uk );
-    assembleFluidBlock( iter, M_uk );
-    assembleMeshBlock ( iter );
-
-    applyBoundaryConditions();
-
     super_Type::evalResidual( disp, M_rhsFull, res, false );
 }
 
@@ -260,7 +275,7 @@ FSIMonolithicGI::applyBoundaryConditions()
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
-    //M_monolithicMatrix->matrix()->spy("FM");
+    //M_monolithicMatrix->matrix()->spy("FMFI");
 }
 
 
@@ -301,6 +316,34 @@ void FSIMonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::functi
     M_un->add(df, M_solidAndFluidDim+getDimInterface());
     M_meshMotion->setDisplacement(df);
 }
+
+
+void
+FSIMonolithicGI::couplingVariableExtrap( )
+{
+    M_lambda.reset(new vector_Type(solution()));//uk (un at the starting point)
+
+    if (true || !M_lambdaDot.get())//first iteration when not properly initialized
+    {
+        //*M_lambda     += *M_un;
+    }
+    else
+    {
+        *M_lambda *= 2.;
+        *M_lambda -= (*M_lambdaDot);
+    }
+
+    //M_lambdaDDot   = M_lambdaDot;//un-1
+    *M_lambdaDot   = *solutionPtr();//un
+
+    //initializeBDF(*M_lambda);
+
+    M_solid->getDisplayer().leaderPrint("norm( disp  ) init = ", M_lambda->normInf() );
+    M_solid->getDisplayer().leaderPrint("norm( velo )  init = ", M_lambdaDot->normInf());
+}
+
+
+//============ Protected Methods ===================
 
 
 void FSIMonolithicGI::setupBlockPrec( )

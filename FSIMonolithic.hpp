@@ -219,7 +219,7 @@ public:
        \small initializes the current solution vector. Note: this is not sufficient for the correct initialization
        of bdf!
     */
-    void initialize( vectorPtr_Type u0)
+    virtual void initialize( const vectorPtr_Type u0)
     {
         M_un=u0;
 
@@ -508,10 +508,6 @@ protected:
     //!Empty method kept for compatibility with FSIOperator.
     void shiftSolution(){}
 
-    //!Empty method kept for compatibility with FSIOperator.
-    void couplingVariableExtrap(vectorPtr_Type& /*lambda*/, vectorPtr_Type& /*lambdaDot*/, bool& /*firstIter*/)
-    { }
-
     //! Constructs the solid FESpace
     /**
        Creates the solid FESpace with an unpartitioned mesh, necessary step to create the dof interconnections
@@ -576,10 +572,10 @@ protected:
     precPtr_Type                                      M_precPtr;
     boost::shared_ptr<vector_Type>                    M_rhsFull;
 
-    fluidBchandlerPtr_Type                              M_BCh_flux;
-    solidBchandlerPtr_Type                              M_BCh_Robin;
-    //UInt                                              M_fluxes;
-    solidBchandlerPtr_Type                              M_BChWS;
+    fluidBchandlerPtr_Type                            M_BCh_flux;
+    solidBchandlerPtr_Type                            M_BCh_Robin;
+    //UInt                                            M_fluxes;
+    solidBchandlerPtr_Type                            M_BChWS;
     BCFunctionRobin                                   M_bcfWs;
     //    matrixPtr_Type                                    M_robinCoupling;
     UInt                                              M_offset;

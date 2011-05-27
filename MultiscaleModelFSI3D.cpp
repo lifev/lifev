@@ -242,15 +242,16 @@ MultiscaleModelFSI3D::solveSystem( )
     }
 
     UInt status = NonLinearRichardson( *solution, *M_FSIoperator,
-                                    M_data->absoluteTolerance(),
-                                    M_data->relativeTolerance(),
-                                    maxSubIterationNumber,
-                                    M_data->errorTolerance(),
-                                    M_data->NonLinearLineSearch(),
-                                    outRes,
-                                    M_data->dataFluid()->dataTime()->time(),
-                                    M_nonLinearRichardsonIteration
-                                  );
+                                       M_data->absoluteTolerance(),
+                                       M_data->relativeTolerance(),
+                                       maxSubIterationNumber,
+                                       M_data->errorTolerance(),
+                                       M_data->NonLinearLineSearch(),
+                                       outRes,
+                                       M_data->dataFluid()->dataTime()->time(),
+                                       M_nonLinearRichardsonIteration
+                                       );
+
     if (M_nonLinearRichardsonIteration == 0)
         *M_fluidDisplacement = M_FSIoperator->meshDisp();
 

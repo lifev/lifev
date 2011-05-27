@@ -122,11 +122,7 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
     if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
 
-        if(M_restarts)
-        {
-            M_data->resetTimeStep( M_data->restartTimestep() );
-        }
-
+        Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
         // Solve HE
         iterateMesh(disp);
 
@@ -134,27 +130,35 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         M_meshMotion->updateDispDiff();
 
         M_beta.reset(new vector_Type(M_uFESpace->map()));
+        M_meshMotion->disp().spy("meshDispGCE");
         vector_Type meshDispDiff( M_meshMotion->disp(), Repeated );
 
         this->moveMesh(meshDispDiff);//initialize the mesh position with the total displacement
 
         meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
+
+//         if(M_restarts)
+//         {
+//             M_data->resetTimeStep( M_data->restartTimestep() );
+//         }
+
+        meshDispDiff *= -alpha; //mesh velocity w
         this->interpolateVelocity(meshDispDiff, *this->M_beta);
 
-        *this->M_beta /= -M_data->dataFluid()->dataTime()->timeStep(); //mesh velocity w
+//         if (M_restarts)
+//         {
+//             M_data->restoreTimeStep();
+//         }
 
+        M_beta->spy("betaGCE");
         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
         fluid->subset(*M_un, (UInt)0);
         *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
-
-        if (M_restarts)
-        {
-            M_data->restoreTimeStep();
-        }
         //M_monolithicMatrix.reset(new matrix_Type(*M_monolithicMap));
 
-        assembleFluidBlock(iter, M_un);
         assembleSolidBlock(iter, M_un);
+        assembleFluidBlock(iter, M_un);
+        *M_rhsFull = *M_rhs;
 
         applyBoundaryConditions();
     }
