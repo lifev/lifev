@@ -63,6 +63,7 @@ filename   = solid
 
 [importer]
 type       = hdf5
+restart_timestep = 0.0001
 [./fluid]
 filename   = fluid
 [../solid]

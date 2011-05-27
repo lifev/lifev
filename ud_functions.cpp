@@ -399,6 +399,15 @@ Real fluxFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Rea
         //return 0.;
 }
 
+Real benchmarkP(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+if(t < 0.0025)
+    return -50000*std::sin(2*3.1415*t/0.005)*std::sin(2*3.1415*t/0.005);
+else return 0;
+}
+
+Real LifeV::aortaVelIn::S_timestep;
+
 }
 
 

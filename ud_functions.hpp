@@ -47,6 +47,13 @@
 
 namespace LifeV
 {
+
+class aortaVelIn
+{
+public:
+	static Real S_timestep;
+};
+
 Real f(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 Real u1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
@@ -75,6 +82,9 @@ Real aortaPhisPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const 
 Real u2normal(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 
 Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+
+Real benchmarkP(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+
 }
 
 

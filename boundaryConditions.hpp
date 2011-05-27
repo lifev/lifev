@@ -162,6 +162,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
     BCh_solid->addBC("Top",   RING, Essential, Full, bcf,  3);
     BCh_solid->addBC("Base",  RING2, Essential, Full, bcf,  3);
 
+    aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
     BCFunctionBase hyd(fZero);
     BCFunctionBase young (E);
     //robin condition on the outer wall
