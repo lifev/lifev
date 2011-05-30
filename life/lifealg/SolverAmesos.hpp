@@ -123,7 +123,7 @@ public:
     */
     Int solveSystem( vector_type&    rhsFull,
                      vector_type&    solution,
-                     matrix_ptrtype& /* unused */ );
+                     const matrix_ptrtype& /* unused */ );
 
     //! Display status of the solver
     void printStatus();

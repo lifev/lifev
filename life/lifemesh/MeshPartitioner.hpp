@@ -1335,14 +1335,16 @@ void MeshPartitioner<MeshType>::finalSetup()
 
         (*M_meshPartitions)[i]->updateElementFaces();
 
+#ifdef HAVE_LIFEV_DEBUG
         if (M_serialMode)
         {
-            std::cout << "Created local mesh number " << i << std::endl;
+            Debug(4000) << "Created local mesh number " << i << "\n";
         }
         else
         {
-            std::cout << "Rank " << M_me << " created local mesh." << std::endl;
+            Debug(4000) << "Rank " << M_me << " created local mesh.\n";
         }
+#endif
     }
 }
 
@@ -1420,14 +1422,16 @@ void MeshPartitioner<MeshType>::createRepeatedMap()
             M_repeatedFaceVector[i].push_back(*is);
         }
 
+#ifdef HAVE_LIFEV_DEBUG
         if (M_serialMode)
         {
-            std::cout <<  "Created repeated map number " << i << std::endl;
+            Debug(4000) <<  "Created repeated map number " << i << "\n";
         }
         else
         {
-            std::cout << "Rank " << M_me << " created repeated map." << std::endl;
+            Debug(4000) << "Rank " << M_me << " created repeated map.\n";
         }
+#endif
     }
 }
 
@@ -1479,7 +1483,7 @@ void MeshPartitioner<MeshType>::execute()
     redistributeElements();
 
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
 #endif
 

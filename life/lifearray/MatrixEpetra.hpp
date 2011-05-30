@@ -1267,8 +1267,8 @@ addToCoefficients( Int const numRows, Int const numColumns,
 template <typename DataType>
 Int MatrixEpetra<DataType>::meanNumEntries() const
 {
-    const Int minEntries = M_epetraCrs->MaxNumEntries ()/2;
-    if ( M_epetraCrs->NumMyRows() )
+    const Int minEntries = M_epetraCrs->MaxNumEntries()/2;
+    if ( !M_epetraCrs->NumMyRows() )
         return minEntries;
 
     Int meanNumEntries = M_epetraCrs->NumMyNonzeros()/M_epetraCrs->NumMyRows();

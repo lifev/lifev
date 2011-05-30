@@ -225,26 +225,26 @@ Real EthierSteinmanSteady::fNeumann(const Real& t, const Real& x,
     switch (i)
     {
     case 0:
-        return pexact(t, x, y, z, 1) * nx
-               - mu * ( ux(t, x, y, z, 1) * nx * 2 +
-                        ux(t, x, y, z, 2) * ny +
-                        ux(t, x, y, z, 3) * nz +
-                        uy(t, x, y, z, 1) * ny +
-                        uz(t, x, y, z, 1) * nz );
+        return pexact(t, x, y, z, 0) * nx
+               - mu * ( ux(t, x, y, z, 0) * nx * 2 +
+                        ux(t, x, y, z, 1) * ny +
+                        ux(t, x, y, z, 2) * nz +
+                        uy(t, x, y, z, 0) * ny +
+                        uz(t, x, y, z, 0) * nz );
     case 1:
-        return pexact(t, x, y, z, 1) * ny
-               - mu * ( uy(t, x, y, z, 1) * nx +
-                        uy(t, x, y, z, 2) * ny * 2 +
-                        uy(t, x, y, z, 3) * nz +
-                        ux(t, x, y, z, 2) * nx +
-                        uz(t, x, y, z, 2) * nz );
+        return pexact(t, x, y, z, 0) * ny
+               - mu * ( uy(t, x, y, z, 0) * nx +
+                        uy(t, x, y, z, 1) * ny * 2 +
+                        uy(t, x, y, z, 2) * nz +
+                        ux(t, x, y, z, 1) * nx +
+                        uz(t, x, y, z, 1) * nz );
     case 2:
-        return pexact(t, x, y, z, 1) * nz
-               - mu * ( uz(t, x, y, z, 1) * nx +
-                        uz(t, x, y, z, 2) * ny +
-                        uz(t, x, y, z, 3) * nz * 2 +
-                        ux(t, x, y, z, 3) * nx +
-                        uy(t, x, y, z, 3) * ny);
+        return pexact(t, x, y, z, 0) * nz
+               - mu * ( uz(t, x, y, z, 0) * nx +
+                        uz(t, x, y, z, 1) * ny +
+                        uz(t, x, y, z, 2) * nz * 2 +
+                        ux(t, x, y, z, 2) * nx +
+                        uy(t, x, y, z, 2) * ny);
     default:
         exit(1);
     }
