@@ -1,12 +1,12 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications
-#                                 Copyright (C) 2010 EPFL
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-04-26
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MULTISCALE: Main data file ####################################################################
@@ -14,10 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalSquareWave_3DFSI_2Cylinders_FluxStress_tube20
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalSquareWave_3DFSI_2Cylinders_Stress_tube20
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/TestStress_3DFSI_2Cylinders_FluxStress_tube20
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/TestStress_3DFSI_2Cylinders_Stress_tube20
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_2Cylinders-tube20_FS
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_2Cylinders-tube20_S
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -28,7 +26,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalSquareWave_3DFSI_
 
     [../time_discretization]
     initialtime                = 0.000   # [s]
-    endtime                    = 0.030   # [s]
+    endtime                    = 0.040   # [s]
     timestep                   = 0.001   # [s]
 
     [../Algorithm]

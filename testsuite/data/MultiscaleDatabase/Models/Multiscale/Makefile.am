@@ -12,57 +12,54 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = CarotidBifurcation_1D-3DFluid_FluxStress.dat \
-                    CarotidBifurcation_1D-3DFSI_FluxStress.dat \
-                    CarotidBifurcation_3DFluid.dat \
-					CarotidBifurcation_3DFluid_FluxStress.dat \
-                    CarotidBifurcation_3DFluid_Stress.dat \
-                    CarotidBifurcation_3DFluid_Synthetic_FluxStress.dat \
-                    CarotidBifurcation_3DFluid_Synthetic_Stress.dat \
-                    ReymondStergiopulos2009_1D_Absorbing_Stress.dat \
-                    ReymondStergiopulos2009_1D_Aorta_Absorbing_Stress.dat \
-                    ReymondStergiopulos2009_1D_Aorta_Resistance_Stress.dat \
-                    ReymondStergiopulos2009_1D_AortaArmsLegs_Absorbing_Stress.dat \
-                    ReymondStergiopulos2009_1D_AortaArmsLegs_Resistance_Stress.dat \
-                    SinusoidalWave_1D_1Cylinder.dat \
-                    SinusoidalWave_1D_2Cylinders_Stress.dat \
-                    SinusoidalWave_1D_2Cylinders_FluxStress.dat \
-                    SinusoidalWave_1D_3Cylinders_Stress.dat \
-                    SinusoidalWave_1D_3Cylinders_FluxStress.dat \
-                    SinusoidalWave_1D_Hexagon_Stress.dat \
-                    SinusoidalWave_1D_Hexagon_FluxStress.dat \
-                    SinusoidalWave_1D_Hexagon_Mixed.dat \
-                    SinusoidalWave_1D-3DFluid_2Cylinders_FluxStress.dat \
-                    SinusoidalWave_1D-3DFluid_2Cylinders_Stress.dat \
-                    SinusoidalWave_1D-3DFSI_2Cylinders_FluxStress.dat \
-                    SinusoidalWave_3DFluid-1D_2Cylinders_FluxStress.dat \
-                    SinusoidalWave_3DFluid-1D_2Cylinders_Stress.dat \
-                    SinusoidalSquareWave_3DFSI_1Cylinder_tube20.dat \
-                    SinusoidalSquareWave_3DFSI_2Cylinders_FluxStress_tube20.dat \
-                    SinusoidalSquareWave_3DFSI_2Cylinders_Stress_tube20.dat \
-                    Stationary_3DFluid_CarotidBifurcation_FluxStress.dat \
-                    Stationary_3DFluid_CarotidBifurcation_Stress.dat \
-                    Stationary_3DFluid_CarotidBifurcation_Synthetic_FluxStress.dat \
-                    Stationary_3DFluid_CarotidBifurcation_Synthetic_Stress.dat \
-                    Stationary_3DFluid_1Cylinder_tube20.dat \
-                    Stationary_3DFluid_Bifurcation_FluxStress.dat \
-                    Stationary_3DFluid_Bifurcation_Stress.dat \
-                    Stationary_3DFluid_Hexagon_FluxStress.dat \
-                    Stationary_3DFluid_Hexagon_Mixed.dat \
-                    Stationary_3DFluid_Hexagon_Stress.dat \
-                    TestStress_3DFSI_1Cylinder_tube20.dat \
-                    TestStress_3DFSI_2Cylinders_FluxStress_tube20.dat \
-                    TestStress_3DFSI_2Cylinders_Stress_tube20.dat \
-                    Womersley_3DFluid_1Cylinder_tube20.dat \
-                    Womersley_3DFluid_5Cylinders_FluxStress_tube20.dat \
-                    Womersley_3DFluid_5Cylinders_FluxStress_tube40.dat \
-                    Womersley_3DFluid_5Cylinders_FluxStress_tube60.dat \
-                    Womersley_3DFluid_5Cylinders_FluxStress_tube80.dat \
-                    Womersley_3DFluid_5Cylinders_Stress_tube20.dat \
-                    Womersley_3DFluid_5Cylinders_Stress_tube40.dat \
-                    Womersley_3DFluid_5Cylinders_Stress_tube60.dat \
-                    Womersley_3DFluid_5Cylinders_Stress_tube80.dat \
-                    Template.dat
+dist_pkgdata_DATA = 1D_1Cylinder.dat \
+                    1D_2Cylinders_FS.dat \
+                    1D_2Cylinders_S.dat \
+                    1D_ReymondStergiopulos2009-Aorta_S.dat \
+                    1D_ReymondStergiopulos2009-Aorta-Absorbing_S.dat \
+                    1D_ReymondStergiopulos2009-AortaArmsLegs_S.dat \
+                    1D_ReymondStergiopulos2009-AortaArmsLegs-Absorbing_S.dat \
+                    1D_ReymondStergiopulos2009-ArterialTree_S.dat \
+                    1D_ReymondStergiopulos2009-ArterialTree-Absorbing_S.dat \
+                    1D_Rhombus_FS.dat \
+                    1D_Rhombus_FS-S.dat \
+                    1D_Rhombus_S.dat \
+                    1D-Fluid3D_2Cylinders_FS.dat \
+                    1D-Fluid3D_2Cylinders_S.dat \
+                    1D-FSI3D_2Cylinders_FS.dat \
+                    1D-FSI3D_2Cylinders_S.dat \
+                    1D-FSI3D_3Cylinders_FS.dat \
+                    1D-FSI3D_3Cylinders_S.dat \
+                    1D-Windkessel0D_1Cylinder_FS.dat \
+                    1D-Windkessel0D_1Cylinder_S.dat \
+                    Fluid3D_1Cylinder-Stokes-tube20.dat \
+                    Fluid3D_1Cylinder-tube20.dat \
+                    Fluid3D_5Cylinders-tube20_FS.dat \
+                    Fluid3D_5Cylinders-tube20_S.dat \
+                    Fluid3D_5Cylinders-tube40_FS.dat \
+                    Fluid3D_5Cylinders-tube40_S.dat \
+                    Fluid3D_5Cylinders-tube60_FS.dat \
+                    Fluid3D_5Cylinders-tube60_S.dat \
+                    Fluid3D_5Cylinders-tube80_FS.dat \
+                    Fluid3D_5Cylinders-tube80_S.dat \
+                    Fluid3D_CarotidBifurcation.dat \
+                    Fluid3D_CarotidBifurcationAnd3Cylinders_FS.dat \
+                    Fluid3D_CarotidBifurcationAnd3Cylinders_S.dat \
+                    Fluid3D_CarotidBifurcationSynthetic_FS.dat \
+                    Fluid3D_CarotidBifurcationSynthetic_S.dat \
+                    Fluid3D_Rhombus-tube20_FS.dat \
+                    Fluid3D_Rhombus-tube20_FS-S.dat \
+                    Fluid3D_Rhombus-tube20_S.dat \
+                    Fluid3D-1D_2Cylinders_FS.dat \
+                    Fluid3D-1D_2Cylinders_S.dat \
+                    Fluid3D-1D_CarotidBifurcation_FS.dat \
+                    FSI3D_1Cylinder-tube20.dat \
+                    FSI3D_2Cylinders-tube20_FS.dat \
+                    FSI3D_2Cylinders-tube20_S.dat \
+                    FSI3D_3Cylinders-tube20_FS.dat \
+                    FSI3D-1D_CarotidBifurcation_FS.dat \
+                    Template.dat \
+                    Windkessel0D_Test.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

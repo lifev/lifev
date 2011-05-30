@@ -15,7 +15,9 @@ SUFFIXES    = .cpp .hpp .idl .c .h .f .F .o .moc
 dist_pkgdata_DATA =   Absorbing_1DLeft.dat \
                       Absorbing_1DRight.dat \
                       Absorbing_NobileVergara.dat \
+                      Area_One.dat \
                       FlowRate_CarotidBifurcation.dat \
+                      FlowRate_Exp.dat \
                       FlowRate_Heart.dat \
                       FlowRate_One.dat \
                       FlowRate_Poiseuille.dat \
@@ -59,6 +61,31 @@ dist_pkgdata_DATA =   Absorbing_1DLeft.dat \
                       Terminal_ReymondStergiopulos2009_053.dat \
                       Terminal_ReymondStergiopulos2009_054.dat \
                       Terminal_ReymondStergiopulos2009_055.dat \
+                      Terminal_ReymondStergiopulos2009_057.dat \
+                      Terminal_ReymondStergiopulos2009_058.dat \
+                      Terminal_ReymondStergiopulos2009_064.dat \
+                      Terminal_ReymondStergiopulos2009_065.dat \
+                      Terminal_ReymondStergiopulos2009_071.dat \
+                      Terminal_ReymondStergiopulos2009_072.dat \
+                      Terminal_ReymondStergiopulos2009_074.dat \
+                      Terminal_ReymondStergiopulos2009_075.dat \
+                      Terminal_ReymondStergiopulos2009_076.dat \
+                      Terminal_ReymondStergiopulos2009_078.dat \
+                      Terminal_ReymondStergiopulos2009_080.dat \
+                      Terminal_ReymondStergiopulos2009_082.dat \
+                      Terminal_ReymondStergiopulos2009_084.dat \
+                      Terminal_ReymondStergiopulos2009_086.dat \
+                      Terminal_ReymondStergiopulos2009_088.dat \
+                      Terminal_ReymondStergiopulos2009_090.dat \
+                      Terminal_ReymondStergiopulos2009_091.dat \
+                      Terminal_ReymondStergiopulos2009_092.dat \
+                      Terminal_ReymondStergiopulos2009_093.dat \
+                      Terminal_ReymondStergiopulos2009_094.dat \
+                      Terminal_ReymondStergiopulos2009_096.dat \
+                      Terminal_ReymondStergiopulos2009_098.dat \
+                      Terminal_ReymondStergiopulos2009_099.dat \
+                      Terminal_ReymondStergiopulos2009_100.dat \
+               		  Terminal_ReymondStergiopulos2009_102.dat \
                       Velocity_Poiseuille.dat \
                       Velocity_PoiseuilleDynamicSTP.dat \
                       Velocity_ZeroXY.dat

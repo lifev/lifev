@@ -49,7 +49,8 @@ MultiscaleAlgorithmBroyden::MultiscaleAlgorithmBroyden() :
         M_solver                     (),
         M_jacobian                   (),
         M_initializeAsIdentityMatrix ( false ),
-        M_resetAtEachTimeStep        ( false ),
+        M_iterationsLimitReached     ( false ),
+        M_iterationsLimitForReset    ( 1 ),
         M_orthogonalization          ( false ),
         M_orthogonalizationSize      ( 1 ),
         M_orthogonalizationContainer ()
@@ -78,7 +79,7 @@ MultiscaleAlgorithmBroyden::setupData( const std::string& fileName )
     GetPot dataFile( fileName );
 
     M_initializeAsIdentityMatrix = dataFile( "Parameters/initializeAsIdentityMatrix", false );
-    M_resetAtEachTimeStep = dataFile( "Parameters/resetAtEachTimeStep", true );
+    M_iterationsLimitForReset = static_cast <UInt> ( M_subiterationsMaximumNumber * dataFile( "Parameters/iterationsLimitForReset", 1.0 ) );
 
     M_orthogonalization = dataFile( "Parameters/orthogonalization", false );
     M_orthogonalizationSize = dataFile( "Parameters/orthogonalizationSize", 1 );
@@ -109,13 +110,16 @@ MultiscaleAlgorithmBroyden::subIterate()
     multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals );
     minusCouplingResidual = 0.0;
 
-    for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
+    for ( UInt subIT(1); subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
         // Compute the Jacobian (we completery delete the previous matrix)
         if ( subIT == 1 )
         {
-            if ( M_jacobian.get() == 0 || M_resetAtEachTimeStep )
+            if ( M_jacobian.get() == 0 || M_iterationsLimitReached )
+            {
                 assembleJacobianMatrix();
+                M_iterationsLimitReached = false;
+            }
         }
         else
             broydenJacobianUpdate( delta );
@@ -142,8 +146,11 @@ MultiscaleAlgorithmBroyden::subIterate()
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );
 
-        // solveSystem
-        M_multiscale->solveSystem();
+        // solveModel
+        M_multiscale->solveModel();
+
+        if ( subIT >= M_iterationsLimitForReset )
+            M_iterationsLimitReached = true;
 
         // Verify tolerance
         if ( checkResidual( subIT ) )
@@ -164,7 +171,7 @@ MultiscaleAlgorithmBroyden::showMe()
         multiscaleAlgorithm_Type::showMe();
 
         std::cout << "Initialize as identity matrix        = " << M_initializeAsIdentityMatrix << std::endl;
-        std::cout << "Reset matrix at each time step       = " << M_resetAtEachTimeStep << std::endl;
+        std::cout << "Reset limit                          = " << M_iterationsLimitForReset << std::endl;
         std::cout << "Enable orthogonalization             = " << M_orthogonalization << std::endl;
         std::cout << "Orthogonalization memory size        = " << M_orthogonalizationSize << std::endl;
         std::cout << std::endl << std::endl;

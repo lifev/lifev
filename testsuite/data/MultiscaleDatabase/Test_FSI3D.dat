@@ -1,12 +1,12 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications
-#                                 Copyright (C) 2010 EPFL
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-11-16
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MULTISCALE: Main data file for the automatic check of the FSI3D Model #########################
@@ -14,7 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalSquareWave_3DFSI_2Cylinders_FluxStress_tube20
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_2Cylinders-tube20_FS
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -25,13 +25,13 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalSquareWave_3DFSI_
 
     [../time_discretization]
     initialtime                = 0.000   # [s]
-    endtime                    = 0.005   # [s]
+    endtime                    = 0.004   # [s]
     timestep                   = 0.001   # [s]
 
     [../Algorithm]
-    type                       = Newton            # Aitken, Explicit, Newton, Broyden
+    type                       = Broyden           # Aitken, Explicit, Newton, Broyden
     file                       = Default           # File name (without .dat extension)
-    subiterationsMaximumNumber = 1                 # Maximum number for coupling subiterations
+    subiterationsMaximumNumber = 3                 # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values
 
     [../]

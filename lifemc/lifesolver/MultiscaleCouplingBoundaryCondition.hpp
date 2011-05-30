@@ -44,6 +44,7 @@
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
+#include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
 
 namespace LifeV
 {
@@ -148,6 +149,10 @@ private:
     //! @name Private Methods
     //@{
 
+    //! Apply the boundary condition to the specific 0D model
+    template< class ModelType >
+    void applyBoundaryConditions0D( const UInt& i );
+
     //! Apply the boundary condition to the specific 1D model
     template< class ModelType >
     void applyBoundaryConditions1D( const UInt& i );
@@ -175,9 +180,23 @@ inline multiscaleCoupling_Type* createMultiscaleCouplingBoundaryCondition()
 // ===================================================
 template< class ModelType >
 inline void
+MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D( const UInt& i )
+{
+    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
+
+    for ( UInt j( 0 ); j < M_listSize; ++j )
+    {
+        model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
+
+        model->bcInterface().insertBC();
+    }
+}
+
+template< class ModelType >
+inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
 {
-    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
+    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
@@ -193,7 +212,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D( const UInt& i )
 {
-    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
+    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
