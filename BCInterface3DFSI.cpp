@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3DFunctionFSI class
+ *  @brief File containing the BCInterface3DFSI class
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/BCInterface3DFunctionFSI.hpp>
+#include <lifemc/lifesolver/BCInterface3DFSI.hpp>
 
 namespace LifeV
 {
@@ -42,14 +42,13 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI() :
+BCInterface3DFSI< FSIOperator >::BCInterface3DFSI() :
         M_FSIFunction   (),
         M_name          (),
         M_flag          (),
         M_type          (),
         M_mode          (),
-        M_comV          (),
-        M_base          ()
+        M_comV          ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -58,14 +57,13 @@ BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI() :
 
 }
 
-BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI( const data_Type& data ) :
+BCInterface3DFSI< FSIOperator >::BCInterface3DFSI( const data_Type& data ) :
         M_FSIFunction   (),
         M_name          (),
         M_flag          (),
         M_type          (),
         M_mode          (),
-        M_comV          (),
-        M_base          ()
+        M_comV          ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -79,11 +77,11 @@ BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI( const data_Ty
 // Methods
 // ===================================================
 void
-BCInterface3DFunctionFSI< FSIOperator >::exportData( data_Type& data )
+BCInterface3DFSI< FSIOperator >::exportData( data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFunctionFSIFunctionFile::ExportData" << "\n";
+    Debug( 5025 ) << "BCInterface3DFunctionFSIFunctionFile::exportData" << "\n";
 #endif
 
     data.setName( M_name );
@@ -94,7 +92,7 @@ BCInterface3DFunctionFSI< FSIOperator >::exportData( data_Type& data )
 }
 
 void
-BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< FSIOperator >& physicalSolver )
+BCInterface3DFSI< FSIOperator >::assignFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base )
 {
     //Set mapMethod
     std::map< std::string, FSIMethod > mapMethod;
@@ -103,7 +101,6 @@ BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< F
     mapMethod["fixedPoint"]      = FIXEDPOINT;
     mapMethod["monolithicGE"]    = MONOLITHIC_GE;
     mapMethod["monolithicGI"]    = MONOLITHIC_GI;
-    mapMethod["steklovPoincare"] = STEKLOVPOINCARE;
 
     switch ( mapMethod[physicalSolver->data().method()] )
     {
@@ -113,7 +110,7 @@ BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< F
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
-        checkFunction< FSIExactJacobian > ( physicalSolver );
+        checkFunction< FSIExactJacobian > ( physicalSolver, base );
 
         break;
 
@@ -123,7 +120,7 @@ BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< F
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
-        checkFunction< FSIFixedPoint > ( physicalSolver );
+        checkFunction< FSIFixedPoint > ( physicalSolver, base );
 
         break;
 
@@ -133,7 +130,7 @@ BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< F
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            monolithicGE" << "\n";
 #endif
 
-        checkFunction< FSIMonolithicGE >( physicalSolver );
+        checkFunction< FSIMonolithicGE >( physicalSolver, base );
 
         break;
 
@@ -143,19 +140,14 @@ BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< F
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            monolithicGI" << "\n";
 #endif
 
-        checkFunction< FSIMonolithicGI >( physicalSolver );
+        checkFunction< FSIMonolithicGI >( physicalSolver, base );
 
         break;
 
-    case STEKLOVPOINCARE:
+    default:
 
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            steklovPoincare" << "\n";
-#endif
+        std::cout << " !!! Warning:" << mapMethod[physicalSolver->data().method()] << " not assigned !!!" << std::endl;
 
-        //checkFunction< steklovPoincare >( physicalSolver );
-
-        break;
     }
 }
 
@@ -163,7 +155,7 @@ BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< F
 // Set Methods
 // ===================================================
 void
-BCInterface3DFunctionFSI< FSIOperator >::setData( const data_Type& data )
+BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
