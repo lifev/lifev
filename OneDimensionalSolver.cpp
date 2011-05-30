@@ -81,7 +81,8 @@ OneDimensionalSolver::OneDimensionalSolver():
     M_dFdUStiffnessMatrix       (),
     M_dFdUGradientMatrix        (),
     M_dSdUDivergenceMatrix      (),
-    M_linearSolver              ()
+    M_linearSolver              (),
+    M_linearViscoelasticSolver  ()
 {
 }
 
@@ -91,8 +92,8 @@ OneDimensionalSolver::OneDimensionalSolver():
 void
 OneDimensionalSolver::buildConstantMatrices()
 {
-    std::fill( M_dFdUVector.begin(), M_dFdUVector.end(), ublas::zero_vector<Real>( M_feSpace->dim()) );
-    std::fill( M_dSdUVector.begin(), M_dSdUVector.end(), ublas::zero_vector<Real>( M_feSpace->dim()) );
+    std::fill( M_dFdUVector.begin(), M_dFdUVector.end(), ublas::zero_vector<Real>( M_physics->data()->numberOfNodes()) );
+    std::fill( M_dSdUVector.begin(), M_dSdUVector.end(), ublas::zero_vector<Real>( M_physics->data()->numberOfNodes()) );
 
     for ( UInt i(0); i < 4; ++i )
     {
@@ -134,14 +135,18 @@ OneDimensionalSolver::buildConstantMatrices()
 }
 
 void
-OneDimensionalSolver::setupSolution( solution_Type& solution, const MapEpetra& map )
+OneDimensionalSolver::setupSolution( solution_Type& solution, const MapEpetra& map, const bool& onlyMainQuantities )
 {
-    solution["A"].reset( new vector_Type( map ) );
-    solution["A/A0-1"].reset( new vector_Type( map ) );
     solution["Q"].reset( new vector_Type( map ) );
+    solution["P"].reset( new vector_Type( map ) );
+    solution["AoverA0minus1"].reset( new vector_Type( map ) );
+
+    if( onlyMainQuantities )
+        return;
+
+    solution["A"].reset( new vector_Type( map ) );
     solution["W1"].reset( new vector_Type( map ) );
     solution["W2"].reset( new vector_Type( map ) );
-    solution["P"].reset( new vector_Type( map ) );
 
     // Flux correction with viscoelastic term
     if ( M_physics->data()->viscoelasticWall() )
@@ -213,14 +218,14 @@ void
 OneDimensionalSolver::computeAreaRatio( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
-        ( *solution["A/A0-1"] ) [iNode] = ( *solution["A"] ) [iNode] / M_physics->data()->area0( iNode ) - 1;
+        ( *solution["AoverA0minus1"] ) [iNode] = ( *solution["A"] ) [iNode] / M_physics->data()->area0( iNode ) - 1;
 }
 
 void
 OneDimensionalSolver::computeArea( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
-        ( *solution["A"] ) [iNode] = ( (*solution["A/A0-1"] ) [iNode] + 1 ) * M_physics->data()->area0( iNode );
+        ( *solution["A"] ) [iNode] = ( (*solution["AoverA0minus1"] ) [iNode] + 1 ) * M_physics->data()->area0( iNode );
 }
 
 void
@@ -301,7 +306,7 @@ OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type
 
     if ( M_physics->data()->viscoelasticWall() )
     {
-        *solution["Q_visc"] = viscoelasticFluxCorrection( area, flowRate, timeStep );
+        *solution["Q_visc"] = viscoelasticFluxCorrection( area, flowRate, timeStep, bcHandler );
         flowRate += *solution["Q_visc"];
     }
 
@@ -323,6 +328,74 @@ OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type
 
     // Update the pressure (taking into account the viscoelastic wall)
     computePressure( solution, timeStep );
+}
+
+OneDimensionalSolver::vector_Type
+OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix )
+{
+    // Matrix
+    matrix_Type systemMatrix( M_feSpace->map() );
+    matrix_Type stiffnessMatrix( M_feSpace->map() );
+
+    Real massCoefficient;
+    Real stiffnessCoefficient;
+
+    // RHS
+    vector_Type rhs( M_feSpace->map() );
+    rhs = 0;
+
+    // Elementary computation and matrix assembling
+    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
+    {
+        // Update the current element
+        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
+
+        // Compute mass coefficient
+        massCoefficient = 1 / ( 0.5 * ( area[ iElement ] + area[ iElement + 1 ] ) );
+//      massCoefficient = 1 / ( 0.5 * ( M_physics->data()->area0( iElement ) + M_physics->data()->area0( iElement + 1 ) ) );
+
+        // Compute stiffness coefficient
+        stiffnessCoefficient  = timeStep * 0.5 * ( M_physics->data()->viscoelasticCoefficient( iElement ) + M_physics->data()->viscoelasticCoefficient( iElement + 1 ) )
+                              / M_physics->data()->densityRho() * massCoefficient * std::sqrt( massCoefficient );
+
+        // Set the elementary matrices to 0.
+        M_elementalMassMatrix->zero();
+        M_elementalStiffnessMatrix->zero();
+
+        // Assemble the elemental matrix
+        mass(  massCoefficient,      *M_elementalMassMatrix,      M_feSpace->fe(), 0, 0 );
+        stiff( stiffnessCoefficient, *M_elementalStiffnessMatrix, M_feSpace->fe(), 0, 0 );
+
+        // Assemble the stiffness matrix
+        assembleMatrix( systemMatrix,    *M_elementalMassMatrix,      M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+        assembleMatrix( stiffnessMatrix, *M_elementalStiffnessMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+
+        // Natural BC
+        if ( iElement == 0 )
+            rhs( 0 )            -= stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, 0, 1 );
+        if ( iElement == M_physics->data()->numberOfElements() - 1 )
+            rhs( iElement + 1 ) += stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, iElement + 1, 1 );
+    }
+
+    // System Matrix = MassMatrix + stiffnessCoefficient * StiffnessMatrix
+    stiffnessMatrix.globalAssemble();
+    systemMatrix.globalAssemble();
+    systemMatrix += stiffnessMatrix;
+
+    // RHS
+    rhs += stiffnessMatrix * (-flowRate);
+
+    // Apply BC to Matrix and RHS
+    bcHandler.applyViscoelasticBC( M_flux, systemMatrix, rhs );
+
+    // Compute flow rate correction at t^n+1
+    vector_Type flowRateCorrection( rhs );
+
+    if ( updateSystemMatrix )
+        M_linearViscoelasticSolver->setMatrix( systemMatrix );
+    M_linearViscoelasticSolver->solveSystem( rhs, flowRateCorrection, M_homogeneousMassMatrix );
+
+    return flowRateCorrection;
 }
 
 Real
@@ -367,6 +440,7 @@ OneDimensionalSolver::postProcess( const solution_Type& solution )
     {
         std::string file = M_physics->data()->postprocessingDirectory() + "/" + M_physics->data()->postprocessingFile() + "_" + i->first + ".m";
         outfile.open( file.c_str(), std::ios::app );
+        outfile.setf( ios::scientific, ios::floatfield );
 
         for ( UInt iNode(0); iNode < static_cast< UInt > ( (*i->second).size() ); ++iNode )
             outfile << (*i->second)(iNode) << " ";
@@ -427,6 +501,12 @@ OneDimensionalSolver::setLinearSolver( const linearSolverPtr_Type& linearSolver 
     M_linearSolver = linearSolver;
 }
 
+void
+OneDimensionalSolver::setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolver )
+{
+    M_linearViscoelasticSolver = linearViscoelasticSolver;
+}
+
 // ===================================================
 // Get Methods
 // ===================================================
@@ -437,21 +517,13 @@ OneDimensionalSolver::boundaryDOF( const bcSide_Type& bcSide ) const
     {
     case OneDimensional::left:
 
-#ifdef GHOSTNODE
-        return 1;
-#else
         return 0;
-#endif
 
         break;
 
     case OneDimensional::right:
 
-#ifdef GHOSTNODE
-        return M_feSpace->dim() - 2;
-#else
-        return M_feSpace->dim() - 1;
-#endif
+        return M_physics->data()->numberOfNodes() - 1;
 
         break;
 
@@ -490,6 +562,10 @@ OneDimensionalSolver::boundaryValue( const solution_Type& solution, const bcType
     case OneDimensional::P:
 
         return (*solution.find("P")->second)( boundaryDof );
+
+    case OneDimensional::S:
+
+        return -(*solution.find("P")->second)( boundaryDof );
 
     default:
 
@@ -714,81 +790,10 @@ OneDimensionalSolver::matrixAssemble( const UInt& ii, const UInt& jj )
 void
 OneDimensionalSolver::applyDirichletBCToMatrix( matrix_Type& matrix )
 {
-#ifdef GHOSTNODE
-    matrix.openCrsMatrix();
-
-    // Left ghost node extrapolation
-    matrix.setCoefficient( 0, 0, 1 );
-
-    // Constant
-    matrix.setCoefficient( 0, 1, 0 );
-    matrix.addToCoefficient( 0, 1, -1 );
-
-    // Linear
-//    matrix.setCoefficient( 0, 1, 0 );
-//    matrix.setCoefficient( 0, 2, 0 );
-//    matrix.addToCoefficient( 0, 1, -2 );
-//    matrix.addToCoefficient( 0, 2,  1 );
-
-    // Quadratic
-//    matrix.setCoefficient( 0, 1, 0 );
-//    matrix.setCoefficient( 0, 2, 0 );
-//    matrix.setCoefficient( 0, 3, 0 );
-//    matrix.addToCoefficient( 0, 1, -3 );
-//    matrix.addToCoefficient( 0, 2,  3 );
-//    matrix.addToCoefficient( 0, 3, -1 );
-
-    // Cubic
-//    matrix.setCoefficient( 0, 1, 0 );
-//    matrix.setCoefficient( 0, 2, 0 );
-//    matrix.setCoefficient( 0, 3, 0 );
-//    matrix.setCoefficient( 0, 4, 0 );
-//    matrix.addToCoefficient( 0, 1, -4 );
-//    matrix.addToCoefficient( 0, 2,  6 );
-//    matrix.addToCoefficient( 0, 3, -4 );
-//    matrix.addToCoefficient( 0, 4,  1 );
-
-    // Right ghost node extrapolation
-    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 1, 1 );
-
-    // Constant
-    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 2, 0 );
-    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 2, -1 );
-
-    // Linear
-//    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 2, 0 );
-//    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 3, 0 );
-//    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 2, -2 );
-//    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 3,  1 );
-
-    // Quadratic
-//    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 2, 0 );
-//    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 3, 0 );
-//    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 4, 0 );
-//    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 2, -3 );
-//    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 3,  3 );
-//    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 4, -1 );
-
-    // Cubic
-//    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 2, 0 );
-//    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 3, 0 );
-//    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 4, 0 );
-//    matrix.setCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 5, 0 );
-//    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 2, -4 );
-//    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 3,  6 );
-//    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 4, -4 );
-//    matrix.addToCoefficient( M_feSpace->dim() - 1, M_feSpace->dim() - 5,  1 );
-
-    // Dirichlet BC
-    matrix.globalAssemble();
-    matrix.diagonalize( 1, 1, 0 );
-    matrix.diagonalize( M_feSpace->dim() - 2, 1, 0 );
-#else
     // Dirichlet BC
     matrix.globalAssemble();
     matrix.diagonalize( 0, 1, 0 );
-    matrix.diagonalize( M_feSpace->dim() - 1, 1, 0 );
-#endif
+    matrix.diagonalize( M_physics->data()->numberOfNodes() - 1, 1, 0 );
 
     //matrix.spy("SystemMatrix");
 }
@@ -888,68 +893,12 @@ OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
 }
 
 OneDimensionalSolver::vector_Type
-OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep )
-{
-    matrix_Type systemMatrix( *M_homogeneousMassMatrix );
-    matrix_Type stiffnessMatrix( M_feSpace->map() );
-
-    Real stiffnessCoefficient;
-
-    // Elementary computation and matrix assembling
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
-    {
-        // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
-
-        // Compute stiffness coefficient
-        stiffnessCoefficient  = timeStep * 0.5* ( M_physics->data()->viscoelasticCoefficient( iElement ) + M_physics->data()->viscoelasticCoefficient( iElement + 1 ) );
-        stiffnessCoefficient /= M_physics->data()->densityRho() * std::sqrt( 0.5 * ( area[ iElement ] + area[ iElement + 1 ] ) );
-
-        // Set the elementary matrices to 0.
-        M_elementalStiffnessMatrix->zero();
-
-        // Assemble the elemental matrix
-        stiff( stiffnessCoefficient, *M_elementalStiffnessMatrix, M_feSpace->fe(), 0, 0 );
-
-        // Assemble the stiffness matrix
-        assembleMatrix( stiffnessMatrix, *M_elementalStiffnessMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
-    }
-    // System Matrix = MassMatrix + stiffnessCoefficient * StiffnessMatrix
-    stiffnessMatrix.globalAssemble();
-    systemMatrix += stiffnessMatrix;
-
-    // RHS
-    vector_Type rhs( M_feSpace->map() );
-    rhs = stiffnessMatrix * (-flowRate);
-
-    // Apply BC
-    applyDirichletBCToMatrix( systemMatrix );
-#ifdef GHOSTNODE
-    rhs( 1 ) = 0;
-    rhs( M_feSpace->dim() - 2 ) = 0;
-#endif
-    rhs( 0 ) = 0;
-    rhs( M_feSpace->dim() -1 ) = 0;
-
-    // Compute flow rate correction at t^n+1
-    vector_Type flowRateCorrection( rhs );
-
-    linearSolver_Type linearSolver( M_comm );
-    linearSolver.setParametersList( M_linearSolver->parametersList() );
-    linearSolver.setParameters();
-    linearSolver.setMatrix( systemMatrix );
-    linearSolver.solveSystem( rhs, flowRateCorrection, M_homogeneousMassMatrix );
-
-    return flowRateCorrection;
-}
-
-OneDimensionalSolver::vector_Type
 OneDimensionalSolver::longitudinalFluxCorrection()
 {
     matrix_Type massLHS(M_feSpace->map());
     matrix_Type massRHS(M_feSpace->map());
 
-    //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_feSpace->dim());
+    //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_physics->data()->numberOfNodes());
 
     MatrixElemental elmatMassLHS (M_feSpace->fe().nbFEDof(),1,1);
     MatrixElemental elmatMassRHS (M_feSpace->fe().nbFEDof(),1,1);
@@ -961,7 +910,7 @@ OneDimensionalSolver::longitudinalFluxCorrection()
     vector_Type f(M_feSpace->map());
 
     //          _g = *M_rhs[0];
-    for ( UInt iNode(0); iNode<M_feSpace->dim(); ++iNode )
+    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes(); ++iNode )
         g(iNode) = std::sqrt((*M_rhs[0])(iNode)) - std::sqrt(M_physics->data()->area0(iNode));
 
     UInt iNode;

@@ -35,8 +35,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_MODEL_FSI3D_H
-#define MS_MODEL_FSI3D_H 1
+#ifndef MultiscaleModelFSI3D_H
+#define MultiscaleModelFSI3D_H 1
 
 // LifeV includes
 #include <life/lifesolver/FSIOperator.hpp>
@@ -68,6 +68,7 @@ namespace Multiscale
 //! MultiscaleModelFSI3D - Multiscale model for 3D FSI simulations
 /*!
  *  @author Paolo Crosetto
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 class MultiscaleModelFSI3D: public virtual multiscaleModel_Type
 {
@@ -100,7 +101,7 @@ public:
 
     typedef BCHandler                                 bc_Type;
     typedef boost::shared_ptr< bc_Type >              bcPtr_Type;
-    typedef BCInterface3D< FSIOperator >              bcInterface_Type;
+    typedef BCInterface3D< bc_Type, FSIOperator >     bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >     bcInterfacePtr_Type;
 
     //@}
@@ -130,16 +131,16 @@ public:
     //! Setup the model.
     void setupModel();
 
-    //! Build the initial system (matrix and vectors).
-    void buildSystem();
+    //! Build the initial model.
+    void buildModel();
 
-    //! Update the system for (matrix and vectors).
-    void updateSystem();
+    //! Update the model.
+    void updateModel();
 
-    //! Solve the problem.
-    void solveSystem( );
+    //! Solve the model.
+    void solveModel();
 
-    //! save the solution
+    //! Save the solution
     void saveSolution();
 
     //! Display some information about the model.
@@ -207,13 +208,6 @@ public:
      */
     Real boundaryPressure( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().pressure( flag, *M_FSIoperator->solutionPtr() ); }
 
-    //! Get the integral of the dynamic pressure (on a specific boundary face)
-    /*!
-     * @param flag flag of the boundary face
-     * @return dynamic pressure value
-     */
-    Real boundaryDynamicPressure( const bcFlag_Type& flag ) const { return 0.5 * boundaryDensity( flag ) * ( boundaryFlowRate( flag ) * boundaryFlowRate( flag ) ) / ( boundaryArea( flag ) * boundaryArea( flag ) ); }
-
     //! Get the value of the Lagrange multiplier associated to a specific boundary face
     /*!
      * @param flag flag of the boundary face
@@ -227,7 +221,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = StaticPressure ) const;
+    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = Pressure ) const;
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -245,14 +239,6 @@ public:
      */
     Real boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
 
-    //! Get the variation of the total pressure (on a specific boundary face) using the linear model
-    /*!
-     * @param flag flag of the boundary face on which quantity should be computed
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the dynamic pressure
-     */
-    Real boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
-
     //! Get the variation of the Lagrange multiplier associated to a specific boundary face, using the linear model
     /*!
      * @param flag flag of the boundary face
@@ -268,7 +254,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return variation of the stress
      */
-    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = StaticPressure );
+    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = Pressure );
 
     //@}
 
@@ -299,7 +285,6 @@ private:
     void setupCommunicator();
 
     void setupBC( const std::string& fileName );
-    //void setupSegregatedBC( const std::string& fileName );
     void updateBC();
 
     void setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
@@ -337,16 +322,17 @@ private:
     IOFilePtr_Type                         M_importerSolid;
 
     // Solution
-    vectorPtr_Type                         M_fluidVelocityPressure;
+    vectorPtr_Type                         M_fluidVelocityAndPressure;
     vectorPtr_Type                         M_fluidDisplacement;
     vectorPtr_Type                         M_solidVelocity;
     vectorPtr_Type                         M_solidDisplacement;
 
     // Old Solution
-    vectorPtr_Type                         M_fluidVelocityPressure_tn;
+    vectorPtr_Type                         M_fluidVelocityAndPressure_tn;
+    vectorPtr_Type                         M_fluidDisplacement_tn;
+    vectorPtr_Type                         M_solidVelocity_tn;
     vectorPtr_Type                         M_solidDisplacement_tn;
-    vectorPtr_Type                         M_solidDisplacementOld_tn;
-    vectorPtr_Type                         M_rhs_tn;
+
     UInt                                   M_nonLinearRichardsonIteration;
 
     // Boundary Conditions
@@ -373,4 +359,4 @@ inline multiscaleModel_Type* createMultiscaleModelFSI3D()
 } // Namespace multiscale
 } // Namespace LifeV
 
-#endif /* MS_MODEL_FSI3D_H */
+#endif /* MultiscaleModelFSI3D_H */

@@ -125,7 +125,8 @@ private:
     multiscaleMatrixPtr_Type                 M_jacobian;
 
     bool                                     M_initializeAsIdentityMatrix;
-    bool                                     M_resetAtEachTimeStep;
+    bool                                     M_iterationsLimitReached;
+    UInt                                     M_iterationsLimitForReset;
     bool                                     M_orthogonalization;
     Real                                     M_orthogonalizationSize;
     container_Type                           M_orthogonalizationContainer;

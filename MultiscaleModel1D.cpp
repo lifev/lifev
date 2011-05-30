@@ -73,6 +73,7 @@ MultiscaleModel1D::MultiscaleModel1D() :
         M_source                       (),
         M_solver                       ( new solver_Type() ),
         M_linearSolver                 (),
+        M_linearViscoelasticSolver     (),
         M_feSpace                      (),
         M_solution_tn                  ( new solution_Type() ),
         M_solution                     ( new solution_Type() )
@@ -106,7 +107,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::setupData( ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::setupData( fileName ) \n";
 #endif
 
     // Preliminary setup of the communicator
@@ -145,10 +146,19 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     M_linearSolver->setParameter( "Verbose", false );
     M_linearSolver->setParameters();
 
+    //Linear Viscoelastic Solver
+    if ( M_data->viscoelasticWall() )
+    {
+        M_linearViscoelasticSolver.reset( new linearSolver_Type( M_comm ) );
+        M_linearViscoelasticSolver->setParametersList( M_linearSolver->parametersList() );
+        M_linearViscoelasticSolver->setParameters();
+    }
+
     //1D Model Solver
     M_solver->setCommunicator( M_comm );
     M_solver->setProblem( M_physics, M_flux, M_source );
     M_solver->setLinearSolver( M_linearSolver );
+    M_solver->setLinearViscoelasticSolver( M_linearViscoelasticSolver );
 
     //BC - We need to create the BCHandler before using it
     M_bc->createHandler();
@@ -162,12 +172,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     M_exporter->setDataFromGetPot( dataFile );
     M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
     M_exporter->setPostDir( multiscaleProblemFolder );
-
-#ifdef GHOSTNODE
-    M_exporterMesh->setup( M_data->length() * ( M_data->numberOfElements() - 2 ) / M_data->numberOfElements(), M_data->numberOfElements() - 2 );
-#else
     M_exporterMesh->setup( M_data->length(), M_data->numberOfElements() );
-#endif
 
     M_importer->setDataFromGetPot( dataFile );
     M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
@@ -181,7 +186,7 @@ MultiscaleModel1D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::setupProblem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::setupModel() \n";
 #endif
 
     //FEspace
@@ -196,23 +201,20 @@ MultiscaleModel1D::setupModel()
     M_bc->setPhysicalSolver( M_solver );
     M_bc->setSolution( M_solution );
     M_bc->setFluxSource( M_flux, M_source );
-#ifdef GHOSTNODE
-    M_bc->setSystemResidual( M_solver->residual() );
-#endif
 
     //Post-processing
 #ifdef HAVE_HDF5
     M_exporter->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
     MapEpetra map( M_feSpace->refFE(), *M_exporterMesh, M_comm );
-    M_solver->setupSolution( *M_exporterSolution, map );
+    M_solver->setupSolution( *M_exporterSolution, map, true );
 
-    //M_exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_exporterSolution)["A"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Area ratio",      (*M_exporterSolution)["A/A0-1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_exporterSolution)["Q"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-    //M_exporter->addVariable( ExporterData::Scalar, "W1",              (*M_exporterSolution)["W1"],   static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-    //M_exporter->addVariable( ExporterData::Scalar, "W2",              (*M_exporterSolution)["W2"],   static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Fluid Pressure",  (*M_exporterSolution)["P"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+    //M_exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "Solid Area",      (*M_exporterSolution)["A"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "Area ratio",      M_feSpace, (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ) );
+    M_exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "Fluid Flow Rate", M_feSpace, (*M_exporterSolution)["Q"],    static_cast <UInt> ( 0 ) );
+    //M_exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "W1",              (*M_exporterSolution)["W1"],   static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+    //M_exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "W2",              (*M_exporterSolution)["W2"],   static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "Fluid Pressure",  M_feSpace, (*M_exporterSolution)["P"],    static_cast <UInt> ( 0 ) );
 #endif
 
 #ifdef HAVE_MATLAB_POSTPROCESSING
@@ -234,14 +236,17 @@ MultiscaleModel1D::setupModel()
 }
 
 void
-MultiscaleModel1D::buildSystem()
+MultiscaleModel1D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::buildSystem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::buildModel() \n";
 #endif
 
-    //M_data->showMe();
+    // Display data
+//    if ( M_displayer->isLeader() )
+//        M_data->showMe();
+
     M_solver->buildConstantMatrices();
 
     // Update previous solution
@@ -255,11 +260,11 @@ MultiscaleModel1D::buildSystem()
 }
 
 void
-MultiscaleModel1D::updateSystem()
+MultiscaleModel1D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::updateSystem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::updateModel() \n";
 #endif
 
     // Update previous solution
@@ -273,14 +278,14 @@ MultiscaleModel1D::updateSystem()
 }
 
 void
-MultiscaleModel1D::solveSystem()
+MultiscaleModel1D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::solveSystem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::solveModel() \n";
 #endif
 
-    displayModelstatus( "Solve" );
+    displayModelStatus( "Solve" );
     solve( *M_bc->handler(), *M_solution );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
@@ -397,7 +402,7 @@ MultiscaleModel1D::solveLinearModel( bool& solveLinearSystem )
 
     imposePerturbation();
 
-    displayModelstatus( "Solve linear" );
+    displayModelStatus( "Solve linear" );
     solve( *M_linearBC, *M_linearSolution, "L1D-" );
 
     resetPerturbation();
@@ -416,14 +421,9 @@ MultiscaleModel1D::boundaryStress( const bcFlag_Type& flag, const stress_Type& s
 {
     switch ( stressType )
     {
-    case StaticPressure:
+    case Pressure:
     {
-        return boundaryPressure( flag );
-    }
-
-    case TotalPressure:
-    {
-        return boundaryPressure( flag ) + boundaryDynamicPressure( flag ) * ( ( boundaryFlowRate( flag ) > 0.0 ) ? 1 : -1 );
+        return M_solver->boundaryValue( *M_solution, OneDimensional::S, flagConverter( flag ) );
     }
 
     default:
@@ -448,7 +448,7 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLi
     Real Qdelta = M_solver->boundaryValue( *M_linearSolution, OneDimensional::Q, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::getBoundaryDeltaFlowRate( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaFlowRate( flag, solveLinearSystem ) \n";
     Debug( 8130 ) << "Q:          " << Q << "\n";
     Debug( 8130 ) << "Qdelta:     " << Qdelta << "\n";
 #endif
@@ -475,50 +475,59 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLi
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType )
 {
-    bcSide_Type bcSide = flagConverter( flag );
+    switch ( stressType )
+    {
+    case Pressure:
+    {
+        bcSide_Type bcSide = flagConverter( flag );
 
-    solveLinearModel( solveLinearSystem );
+        solveLinearModel( solveLinearSystem );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 
-    Real A      = M_solver->boundaryValue( *M_solution, OneDimensional::A, bcSide );
-    Real Adelta = M_solver->boundaryValue( *M_linearSolution, OneDimensional::A, bcSide );
+        Real A      = M_solver->boundaryValue( *M_solution, OneDimensional::A, bcSide );
+        Real Adelta = M_solver->boundaryValue( *M_linearSolution, OneDimensional::A, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::getBoundaryDeltaPressure( flag, solveLinearSystem ) \n";
-    Debug( 8130 ) << "A:          " << A <<  "\n";
-    Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
+        Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaStress( flag, solveLinearSystem ) \n";
+        Debug( 8130 ) << "A:          " << A <<  "\n";
+        Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
 #endif
 
-    if ( M_bcDeltaType == OneDimensional::A )
-    {
-        // dP/dP
-        return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcSide ), M_data->dataTime()->timeStep(), 0 )
-               * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, bcSide ), M_data->dataTime()->timeStep(), 0 );
-    }
-    else
-    {
-        // dP/dQ
-        return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcSide ), M_data->dataTime()->timeStep(), 0 );
-    }
+        if ( M_bcDeltaType == OneDimensional::A )
+        {
+            // dP/dP
+            return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcSide ), M_data->dataTime()->timeStep(), 0 )
+                   * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, bcSide ), M_data->dataTime()->timeStep(), 0 );
+        }
+        else
+        {
+            // dP/dQ
+            return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcSide ), M_data->dataTime()->timeStep(), 0 );
+        }
 
 #else
 
-    Real P      = M_solver->boundaryValue( *M_solution, OneDimensional::P, bcSide );
-    Real Pdelta = M_solver->boundaryValue( *M_linearSolution, OneDimensional::P, bcSide );
+        Real S      = M_solver->boundaryValue( *M_solution, OneDimensional::S, bcSide );
+        Real Sdelta = M_solver->boundaryValue( *M_linearSolution, OneDimensional::S, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::getBoundaryDeltaPressure( flag, solveLinearSystem ) \n";
-    Debug( 8130 ) << "P:          " << P <<  "\n";
-    Debug( 8130 ) << "Pdelta:     " << Pdelta <<  "\n";
+        Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaStress( flag, solveLinearSystem ) \n";
+        Debug( 8130 ) << "S:          " << S <<  "\n";
+        Debug( 8130 ) << "Sdelta:     " << Sdelta <<  "\n";
 #endif
 
-    return (Pdelta - P) / M_bcDelta;
-
+        return (Sdelta - S) / M_bcDelta;
 #endif
+    }
+    default:
 
+        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
+
+        return 0.0;
+    }
 }
 
 #else
@@ -530,43 +539,23 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& /*solve
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
-{
-    return tangentProblem( flagConverter( flag ), OneDimensional::P );
-}
-
-#endif
-
-Real
-MultiscaleModel1D::boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
-{
-    // Untested
-    return boundaryDensity( flag ) * boundaryDeltaFlowRate( flag, solveLinearSystem ) * boundaryFlowRate( flag ) / ( boundaryArea( flag ) * boundaryArea( flag ) );
-}
-
-Real
-MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType )
+MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& /*solveLinearSystem*/, const stress_Type& stressType )
 {
     switch ( stressType )
     {
-    case StaticPressure:
-    {
-        return boundaryDeltaPressure( flag, solveLinearSystem );
-    }
+    case Pressure:
 
-    case TotalPressure:
-    {
-        return boundaryDeltaPressure( flag, solveLinearSystem ) + boundaryDeltaDynamicPressure( flag, solveLinearSystem ); //Verify the sign of DynamicPressure contribute!
-    }
+        return tangentProblem( flagConverter( flag ), OneDimensional::S );
 
     default:
-    {
+
         std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
-    }
 }
+
+#endif
 
 // ===================================================
 // Private Methods
@@ -655,15 +644,15 @@ MultiscaleModel1D::initializeSolution()
     {
         M_importer->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
-//        M_exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_exporterSolution)["A"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Area ratio",      (*M_exporterSolution)["A/A0-1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_exporterSolution)["Q"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-//        M_importer->addVariable( ExporterData::Scalar, "W1",              (*M_exporterSolution)["W1"],     static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-//        M_importer->addVariable( ExporterData::Scalar, "W2",              (*M_exporterSolution)["W2"],     static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Fluid Pressure",  (*M_exporterSolution)["P"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+//        M_exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "Solid Area",      (*M_exporterSolution)["A"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+        M_importer->addVariable( ExporterData<mesh_Type>::ScalarField, "Area ratio",      M_feSpace, (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ) );
+        M_importer->addVariable( ExporterData<mesh_Type>::ScalarField, "Fluid Flow Rate", M_feSpace, (*M_exporterSolution)["Q"],      static_cast <UInt> ( 0 ) );
+//        M_importer->addVariable( ExporterData<mesh_Type>::ScalarField, "W1",              (*M_exporterSolution)["W1"],     static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+//        M_importer->addVariable( ExporterData<mesh_Type>::ScalarField, "W2",              (*M_exporterSolution)["W2"],     static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+        M_importer->addVariable( ExporterData<mesh_Type>::ScalarField, "Fluid Pressure",  M_feSpace, (*M_exporterSolution)["P"],      static_cast <UInt> ( 0 ) );
 
         // Import
-        M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
+        M_exporter->setTimeIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
 
         // Copy the imported solution to the problem solution container
         copySolution( *M_exporterSolution, *M_solution );
@@ -686,28 +675,8 @@ MultiscaleModel1D::copySolution( const solution_Type& solution1, solution_Type& 
     Debug( 8130 ) << "MultiscaleModel1D::copySolution( solution1, solution2 ) \n";
 #endif
 
-    for ( solutionConstIterator_Type i = solution1.begin() ; i != solution1.end() ; ++i )
-    {
-#ifdef GHOSTNODE
-        UInt sizeVector1( ( solution1.find(i->first)->second )->size() );
-        UInt sizeVector2( ( solution2.find(i->first)->second )->size() );
-
-        if ( sizeVector1 - 2 == sizeVector2 )      // True copy of the solution removing the ghost nodes.
-            for ( UInt iNode(0) ; iNode < sizeVector2 ; ++iNode )
-                (*solution2[i->first])[iNode] = (*i->second)[iNode + 1];
-        else if ( sizeVector1 + 2 == sizeVector2 ) // True copy of the solution adding ghost nodes (linear extrapolation).
-        {
-            for ( UInt iNode(0) ; iNode < sizeVector1 ; ++iNode )
-                (*solution2[i->first])[iNode + 1] = (*i->second)[iNode];
-
-                // Linear extrapolation for the ghost nodes
-                (*solution2[i->first])[0]           = 2 * (*solution2[i->first])[1] - (*solution2[i->first])[2];
-                (*solution2[i->first])[sizeVector2-1] = 2 * (*solution2[i->first])[sizeVector2-2] - (*solution2[i->first])[sizeVector2-3];
-        }
-        else // True copy of the solution
-#endif
-            *solution2[i->first] = *i->second;
-    }
+    for ( solutionConstIterator_Type i = solution2.begin() ; i != solution2.end() ; ++i )
+        *solution2[i->first] = *solution1.find(i->first)->second;
 }
 
 void
@@ -767,10 +736,10 @@ void
 MultiscaleModel1D::updateLinearBC( const solution_Type& solution )
 {
     M_bcPreviousTimeSteps[0][OneDimensional::left][OneDimensional::A]  = M_solver->boundaryValue( solution, OneDimensional::A, OneDimensional::left );
-    M_bcPreviousTimeSteps[0][OneDimensional::left][OneDimensional::P]  = M_solver->boundaryValue( solution, OneDimensional::P, OneDimensional::left );
+    M_bcPreviousTimeSteps[0][OneDimensional::left][OneDimensional::S]  = M_solver->boundaryValue( solution, OneDimensional::S, OneDimensional::left );
     M_bcPreviousTimeSteps[0][OneDimensional::left][OneDimensional::Q]  = M_solver->boundaryValue( solution, OneDimensional::Q, OneDimensional::left );
     M_bcPreviousTimeSteps[0][OneDimensional::right][OneDimensional::A] = M_solver->boundaryValue( solution, OneDimensional::A, OneDimensional::right );
-    M_bcPreviousTimeSteps[0][OneDimensional::right][OneDimensional::P] = M_solver->boundaryValue( solution, OneDimensional::P, OneDimensional::right );
+    M_bcPreviousTimeSteps[0][OneDimensional::right][OneDimensional::S] = M_solver->boundaryValue( solution, OneDimensional::S, OneDimensional::right );
     M_bcPreviousTimeSteps[0][OneDimensional::right][OneDimensional::Q] = M_solver->boundaryValue( solution, OneDimensional::Q, OneDimensional::right );
 }
 
@@ -810,6 +779,7 @@ MultiscaleModel1D::imposePerturbation()
             case OneDimensional::A:
 
                 M_bcDelta = M_data->jacobianPerturbationArea();
+
                 break;
 
             case OneDimensional::Q:
@@ -818,13 +788,14 @@ MultiscaleModel1D::imposePerturbation()
 
                 break;
 
-            case OneDimensional::P:
+            case OneDimensional::S:
 
-                M_bcDelta = 5; //M_Data->jacobianPerturbationPressure();
+                M_bcDelta = M_data->jacobianPerturbationStress();
 
                 break;
 
             default:
+
                 std::cout << "Warning: bcType \"" << M_bcDeltaType << "\"not available!" << std::endl;
             }
 
@@ -886,13 +857,14 @@ MultiscaleModel1D::bcFunctionDelta( const Real& t )
 #else
 
 Real
-MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType )
+MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& outputType )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MultiscaleModel1D::tangentProblem( bcOutputSide, bcOutputType ) \n";
 #endif
 
+    displayModelStatus( "Solve linear" );
     Real jacobianCoefficient(0);
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
@@ -905,50 +877,106 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
             if ( bcSide != bcOutputSide )
                 break;
 
+            // Compute the RHS
+            solver_Type::vector_Type rhs( M_feSpace->map() );
+            rhs = 0.;
+
             // Compute the eigenvectors
             data_Type::container2D_Type eigenvalues, leftEigenvector1, leftEigenvector2;
             M_solver->boundaryEigenValuesEigenVectors( bcSide, *M_solution_tn, eigenvalues, leftEigenvector1, leftEigenvector2 );
 
-            switch ( bcSide )
+            UInt bcNode = M_solver->boundaryDOF( bcOutputSide );
+
+            switch ( bcOutputSide )
             {
             case OneDimensional::left:
-                switch ( bcOutputType )
+                switch ( outputType )
                 {
-                case OneDimensional::Q: // dQ_L/dP_L
-                    jacobianCoefficient = leftEigenvector2[0] / leftEigenvector2[1]
-                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, OneDimensional::left ), M_data->dataTime()->timeStep(), 0 );
+                case OneDimensional::Q: // dQ_L/dS_L given by -1 * -1 * ( -L21/L22 )
+
+                    rhs[bcNode] = leftEigenvector2[0] / leftEigenvector2[1];
+                    jacobianCoefficient = -solveTangentProblem( rhs, bcNode ) * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, bcOutputSide ), M_data->dataTime()->timeStep(), bcNode );
+
                     break;
-                case OneDimensional::P: // dP_L/dQ_L
-                    jacobianCoefficient = leftEigenvector2[1] / leftEigenvector2[0]
-                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, OneDimensional::left ), M_data->dataTime()->timeStep(), 0 );
+
+                case OneDimensional::S: // dS_L/dQ_L given by -1 * -1 * ( -L22/L21 )
+
+                    jacobianCoefficient = -leftEigenvector2[1] / leftEigenvector2[0]
+                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcOutputSide ), M_data->dataTime()->timeStep(), bcNode );
+
                     break;
+
                 default:
-                    std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
+
+                    std::cout << "Warning: bcType \"" << outputType << "\"not available!" << std::endl;
                 }
+
                 break;
-            case OneDimensional::right:
-                switch ( bcOutputType )
+
+           case OneDimensional::right:
+                switch ( outputType )
                 {
-                case OneDimensional::Q: // dQ_R/dP_R
-                    jacobianCoefficient = -leftEigenvector1[0] / leftEigenvector1[1]
-                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, OneDimensional::right ), M_data->dataTime()->timeStep(), M_data->numberOfElements() );
+                case OneDimensional::Q: // dQ_R/dS_R given by -1 * -L11/L12
+
+                    rhs[bcNode] = leftEigenvector1[0] / leftEigenvector1[1];
+                    jacobianCoefficient = solveTangentProblem( rhs, bcNode ) * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, bcOutputSide ), M_data->dataTime()->timeStep(), bcNode );
+
                     break;
-                case OneDimensional::P: // dP_R/dQ_R
-                    jacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0]
-                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, OneDimensional::right ), M_data->dataTime()->timeStep(), M_data->numberOfElements() );
+
+                case OneDimensional::S: // dS_R/dQ_R given by -1 * -L12/L11
+
+                    jacobianCoefficient = leftEigenvector1[1] / leftEigenvector1[0]
+                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcOutputSide ), M_data->dataTime()->timeStep(), bcNode );
                     break;
+
                 default:
-                    std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
+
+                    std::cout << "Warning: bcType \"" << outputType << "\"not available!" << std::endl;
                 }
+
                 break;
+
             default:
+
                 std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
             }
 
+            // Quit the loop
             break;
         }
 
     return jacobianCoefficient;
+}
+
+Real
+MultiscaleModel1D::solveTangentProblem( solver_Type::vector_Type& rhs, const UInt& bcNode )
+{
+#ifdef HAVE_NEUMANN_VISCOELASTIC_BC
+    if ( M_data->viscoelasticWall() )
+    {
+        // Solve elastic tangent problem
+        solver_Type::vector_Type flowRateElasticCorrection( M_feSpace->map() );
+        M_linearSolver->solveSystem( rhs, flowRateElasticCorrection, M_solver->massMatrix() );
+
+        // Solve viscoelastic tangent problem
+        solver_Type::vector_Type flowRateViscoelasticCorrection( M_feSpace->map() );
+        flowRateViscoelasticCorrection = 0.;
+
+        solver_Type::vector_Type flowRateDelta( M_feSpace->map() );
+        flowRateDelta = 0.;
+
+        for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
+        {
+            flowRateDelta[iNode] = 1.;
+            flowRateViscoelasticCorrection += M_solver->viscoelasticFluxCorrection( *(*M_solution)["A"], flowRateDelta, M_data->dataTime()->timeStep(), *M_bc->handler(), false ) * flowRateElasticCorrection[iNode];
+            flowRateDelta[iNode] = 0.;
+        }
+
+        return flowRateViscoelasticCorrection[bcNode] + flowRateElasticCorrection[bcNode];
+    }
+    else
+#endif
+        return rhs[bcNode];
 }
 
 #endif

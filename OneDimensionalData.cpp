@@ -67,7 +67,7 @@ OneDimensionalData::OneDimensionalData():
     M_CFLmax                    (),
     M_jacobianPerturbationArea  (),
     M_jacobianPerturbationFlowRate(),
-    M_jacobianPerturbationPressure(),
+    M_jacobianPerturbationStress(),
     M_computeCoefficients       (),
     M_powerLawCoefficient       (),
     M_density                   (),
@@ -124,18 +124,15 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     // Mesh setup - Space Discretization
     Real length = dataFile( ( section + "/space_discretization/Length"           ).data(), 1. );
     Real numberOfElements = dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 );
-#ifdef GHOSTNODE
-    M_mesh->setup( length * ( numberOfElements + 2 ) / numberOfElements, numberOfElements + 2 );
-#else
+
     M_mesh->setup( length, numberOfElements );
-#endif
 
     //std::cout << " 1D- Mesh nodes:                               " << M_mesh->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_mesh->numElements() << std::endl;
 
     // Physical Wall
     M_viscoelasticWall        = dataFile( ( section + "/PhysicalWall/ViscoelasticWall"                ).data(), false );
-    M_viscoelasticAngle       = dataFile( ( section + "/PhysicalWall/ViscoelasticAngle"               ).data(), 5 ) * M_PI / 180.;
+    M_viscoelasticAngle       = dataFile( ( section + "/PhysicalWall/ViscoelasticAngle"               ).data(), 5. ) * M_PI / 180.;
     M_viscoelasticPeriod      = dataFile( ( section + "/PhysicalWall/ViscoelasticPeriod"              ).data(), 0.3 * 0.8 );
 
     M_inertialWall            = dataFile( ( section + "/PhysicalWall/InertialWall"                    ).data(), false );
@@ -155,7 +152,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     // Jacobian perturbation
     M_jacobianPerturbationArea     = dataFile( ( section + "/JacobianPerturbation/deltaArea"         ).data(), 0.001 );
     M_jacobianPerturbationFlowRate = dataFile( ( section + "/JacobianPerturbation/deltaFlowRate"     ).data(), 0.001 );
-    M_jacobianPerturbationPressure = dataFile( ( section + "/JacobianPerturbation/deltaPressure"     ).data(), 1 );
+    M_jacobianPerturbationStress   = dataFile( ( section + "/JacobianPerturbation/deltaStress"       ).data(), 1.0 );
 
     // Physical Parameters
     M_computeCoefficients    = dataFile( ( section + "/PhysicalParameters/ComputeCoefficients"       ).data(), false );
@@ -168,7 +165,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     M_young                  = dataFile( ( section + "/PhysicalParameters/young"                     ).data(), 4.0E6 );
     M_poisson                = dataFile( ( section + "/PhysicalParameters/poisson"                   ).data(), 0.5 );
 
-    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0 );
+    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0. );
     M_friction               = dataFile( ( section + "/PhysicalParameters/Kr"                        ).data(), 1. );
 
     M_robertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
@@ -330,7 +327,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     // Jacobian perturbation
     M_jacobianPerturbationArea     = dataFile( ( section + "JacobianPerturbation/deltaArea"          ).data(), 0.001 );
     M_jacobianPerturbationFlowRate = dataFile( ( section + "JacobianPerturbation/deltaFlowRate"      ).data(), 0.001 );
-    M_jacobianPerturbationPressure = dataFile( ( section + "JacobianPerturbation/deltaPressure"      ).data(), 1 );
+    M_jacobianPerturbationStress   = dataFile( ( section + "JacobianPerturbation/deltaStress"        ).data(), 1.0 );
 
     // Physical Parameters
     M_computeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
@@ -344,7 +341,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     M_young                  = dataFile( ( section + "/1d_physics/young"                             ).data(), 4.0E6 );
     M_poisson                = dataFile( ( section + "/1d_physics/ksi"                               ).data(), 0.5 );
 
-    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0 );
+    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0. );
 
     M_inertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
     M_robertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
@@ -515,7 +512,7 @@ OneDimensionalData::showMe( std::ostream& output ) const
     // Jacobian perturbation
     output << "Jacobian perturbation Area      = " << M_jacobianPerturbationArea << std::endl;
     output << "Jacobian perturbation Flow Rate = " << M_jacobianPerturbationFlowRate << std::endl;
-    output << "Jacobian perturbation Pressure  = " << M_jacobianPerturbationPressure << std::endl;
+    output << "Jacobian perturbation Stress    = " << M_jacobianPerturbationStress << std::endl;
 
     // Physical Parameters
     output << "\n*** Values for data [PhysicalParameters]" << std::endl << std::endl;
@@ -586,13 +583,8 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
     Real a  = dataFile( quantity.data(), defaultValue, 0 );
     Real b  = dataFile( quantity.data(), a, 1 );
 
-#ifdef GHOSTNODE
-    Real xa = M_mesh->point( 1 ).x();
-    Real xb = M_mesh->point( M_mesh->numPoints() - 2 ).x();
-#else
     Real xa = M_mesh->firstPoint().x();
     Real xb = M_mesh->lastPoint().x();
-#endif
 
     for ( UInt i(0) ; i < M_mesh->numPoints() ; ++i )
         if ( isArea )

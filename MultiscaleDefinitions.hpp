@@ -90,7 +90,8 @@ enum models_Type
     Fluid3D,                /*!< Fluid (Oseen) 3D model */
     FSI3D,                  /*!< FSI 3D model */
     Multiscale,             /*!< Multiscale model */
-    OneDimensional          /*!< 1D model */
+    OneDimensional,         /*!< 1D model */
+    Windkessel0D            /*!< Windkessel0D model */
 };
 
 /*! @enum couplingsTypes
@@ -106,8 +107,7 @@ enum couplings_Type
  */
 enum stress_Type
 {
-    StaticPressure,          /*!< Use static pressure */
-    TotalPressure,           /*!< Use total pressure (static + dynamic) */
+    Pressure,                /*!< Use static pressure */
     LagrangeMultiplier       /*!< Use the Lagrange multiplier */
 };
 
@@ -116,6 +116,7 @@ enum errors_Type
     IterationsMaximumNumber, /*!< Maximum number of iterations reached */
     Tolerance,               /*!< Tolerance not satisfied */
     Residual,                /*!< External residual not satisfied */
+    Solution,                /*!< Solution check not satisfied */
     ModelType,               /*!< Model type not recognized */
     CouplingType             /*!< Coupling type not recognized */
 };
@@ -187,6 +188,7 @@ multiscaleMapsDefinition()
     multiscaleModelsMap["FSI3D"]                = FSI3D;
     multiscaleModelsMap["Multiscale"]           = Multiscale;
     multiscaleModelsMap["OneDimensional"]       = OneDimensional;
+    multiscaleModelsMap["Windkessel0D"]         = Windkessel0D;
 
     multiscaleCouplingsMap["BoundaryCondition"] = BoundaryCondition;
     multiscaleCouplingsMap["FlowRateStress"]    = FlowRateStress;
@@ -198,8 +200,7 @@ multiscaleMapsDefinition()
     multiscaleAlgorithmsMap["Newton"]           = Newton;
 
     multiscaleStressesMap["LagrangeMultiplier"] = LagrangeMultiplier;
-    multiscaleStressesMap["StaticPressure"]     = StaticPressure;
-    multiscaleStressesMap["TotalPressure"]      = TotalPressure;
+    multiscaleStressesMap["Pressure"]           = Pressure;
 }
 
 //! Perform a dynamic cast from a base class to a derived class
@@ -208,10 +209,10 @@ multiscaleMapsDefinition()
  * @return pointer to the derived object
  */
 template < typename DerivedType, typename BasePtrType >
-inline DerivedType*
+inline boost::shared_ptr< DerivedType >
 multiscaleDynamicCast( BasePtrType& base )
 {
-    return dynamic_cast< DerivedType * > ( &( *base ) );
+    return boost::dynamic_pointer_cast< DerivedType > ( base );
 }
 
 //! Display and error message
@@ -221,7 +222,7 @@ multiscaleDynamicCast( BasePtrType& base )
 inline void
 multiscaleErrorMessage( const std::stringstream& errorMessage )
 {
-    std::cout << "MS ERROR: " << errorMessage.str() << std::endl;
+    std::cout << std::setprecision( 10 ) << std::scientific << "MS ERROR: " << errorMessage.str() << std::endl;
 }
 
 //! Create an error message
@@ -230,50 +231,58 @@ multiscaleErrorMessage( const std::stringstream& errorMessage )
  * @param message - Additional information about the error
  */
 inline void
-multiscaleErrorCheck( const errors_Type& error, const std::string& message = "" )
+multiscaleErrorCheck( const errors_Type& error, const std::string& message = "", const UInt& isLeader = true )
 {
-    std::stringstream errorMessage;
-    errorMessage << std::scientific << std::setprecision( 6 );
-
-    switch ( error )
+    if ( isLeader )
     {
-    case IterationsMaximumNumber:
+        std::stringstream errorMessage;
 
-        errorMessage << "Maximum number of iterations reached!\n";
+        switch ( error )
+        {
+        case IterationsMaximumNumber:
 
-        break;
+            errorMessage << "Maximum number of iterations reached!\n";
 
-    case Tolerance:
+            break;
 
-        errorMessage << "Tolerance not satisfied!\n";
+        case Tolerance:
 
-        break;
+            errorMessage << "Tolerance not satisfied!\n";
 
-    case Residual:
+            break;
 
-        errorMessage << "External residual not satisfied!\n";
+        case Residual:
 
-        break;
+            errorMessage << "External residual not satisfied!\n";
 
-    case ModelType:
+            break;
 
-        errorMessage << "Model type incorrect!\n";
+        case Solution:
 
-        break;
+            errorMessage << "Solution check not satisfied!\n";
 
-    case CouplingType:
+            break;
 
-        errorMessage << "Coupling type incorrect!\n";
+        case ModelType:
 
-        break;
+            errorMessage << "Model type incorrect!\n";
 
-    default:
+            break;
 
-        errorMessage << "No error message for this errorType!\n";
+        case CouplingType:
+
+            errorMessage << "Coupling type incorrect!\n";
+
+            break;
+
+        default:
+
+            errorMessage << "No error message for this errorType!\n";
+        }
+
+        errorMessage << message << "\n";
+        multiscaleErrorMessage( errorMessage );
     }
-
-    errorMessage << message << "\n";
-    multiscaleErrorMessage( errorMessage );
 
     // Change ExitFlag
     multiscaleExitFlag = EXIT_FAILURE;

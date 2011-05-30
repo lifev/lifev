@@ -65,14 +65,15 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleMapsDefinition();
 
     //Register the objects
-    multiscaleModelFactory_Type::instance().registerProduct   (  Multiscale,          &createMultiscaleModelMultiscale );
     multiscaleModelFactory_Type::instance().registerProduct   (  Fluid3D,             &createMultiscaleModelFluid3D );
-    multiscaleModelFactory_Type::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
     multiscaleModelFactory_Type::instance().registerProduct   (  FSI3D,               &createMultiscaleModelFSI3D );
+    multiscaleModelFactory_Type::instance().registerProduct   (  Multiscale,          &createMultiscaleModelMultiscale );
+    multiscaleModelFactory_Type::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
+    multiscaleModelFactory_Type::instance().registerProduct   (  Windkessel0D,        &createMultiscaleModelWindkessel0D );
 
-    multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
-    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
     multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
 
     multiscaleAlgorithmFactory_Type::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
     multiscaleAlgorithmFactory_Type::instance().registerProduct( Broyden,             &createMultiscaleAlgorithmBroyden );
@@ -142,7 +143,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
 }
 
 bool
-MultiscaleSolver::solveProblem( const Real& externalResidual )
+MultiscaleSolver::solveProblem( const Real& referenceSolution )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -166,30 +167,30 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
         {
             std::cout << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
-            std::cout << "                    MULTISCALE SIMULATION" << std::endl;
-            std::cout << "             time = " << M_globalData->dataTime()->time() << " s; "  <<
-                      "time step number = " << M_globalData->dataTime()->timeStepNumber()  << std::endl;
+            std::cout << "                    MULTISCALE FRAMEWORK" << std::endl;
+            std::cout << "             time = " << M_globalData->dataTime()->time() << " s; "
+                      << "time step number = " << M_globalData->dataTime()->timeStepNumber()  << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
         }
 
         // Build or Update System
         if ( M_globalData->dataTime()->isFirstTimeStep() )
-            M_model->buildSystem();
+            M_model->buildModel();
         else
         {
             if ( M_model->type() == Multiscale )
                 M_algorithm->updateCouplingVariables();
-            M_model->updateSystem();
+            M_model->updateModel();
         }
 
-        // solveSystem
-        M_model->solveSystem();
+        // Solve the model
+        M_model->solveModel();
 
         // If it is a Multiscale model, call algorithms for subiterations
         if ( M_model->type() == Multiscale )
             M_algorithm->subIterate();
 
-        // saveSolution
+        // Save the solution
         M_model->saveSolution();
 
         // Chrono stop
@@ -205,11 +206,14 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
     if ( M_displayer->isLeader() )
         std::cout << " MS-  Total simulation time:                   " << totalSimulationTime << " s" << std::endl;
 
-    // Redisual check
-    Real algorithmResidual( M_algorithm->computeResidual() );
-    if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-8 )
-        multiscaleErrorCheck( Residual, "Algorithm Residual: " + number2string( algorithmResidual ) +
-                       " (External Residual: " + number2string( externalResidual ) + ")\n" );
+    // Check on the last iteration
+    if ( M_model->type() == Multiscale )
+    {
+        Real computedSolution( M_algorithm->couplingVariables()->norm2() );
+        if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
+            multiscaleErrorCheck( Solution, "Algorithm Solution: "  + number2string( computedSolution ) +
+                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_displayer->isLeader() );
+    }
 
     return multiscaleExitFlag;
 }
