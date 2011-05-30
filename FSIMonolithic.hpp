@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -24,6 +23,7 @@
 *******************************************************************************
 */
 //@HEADER
+
 /**
  * @file monolithic.hpp
  * @author Paolo Crosetto
@@ -52,11 +52,8 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-
 #include <life/lifecore/LifeChrono.hpp>
-
 #include <life/lifefem/FESpace.hpp>
-
 #include <life/lifesolver/FSIOperator.hpp>
 
 #include <lifemc/lifealg/PreconditionerComposed.hpp>
@@ -66,11 +63,6 @@
 #endif
 
 #include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
-
-
-
-
-//#include <Epetra_IntVector.h>
 
 namespace LifeV
 {
@@ -115,15 +107,6 @@ public:
     typedef boost::shared_ptr<blockMatrix_Type>                blockMatrixPtr_Type;
     typedef SolverAztecOO                                      solver_Type;
     //@}
-
-    //! OBSOLETE typedefs
-    // typedef MonolithicBlock                                     prec_raw_type;
-    //     typedef boost::shared_ptr<prec_raw_type>                   precPtr_Type;
-
-    //     typedef MonolithicBlockMatrix                                        MonolithicBlockMatrix_Type;
-    //     typedef boost::shared_ptr<blockMatrix_Type>           blockMatrixPtr_Type;
-    //     typedef SolverTrilinos                                     solver_Type;
-    // END of OBSOLETE typedefs
 
     // constructors
 
@@ -222,15 +205,20 @@ public:
     virtual void initialize( const vectorPtr_Type u0)
     {
         M_un=u0;
-
-        //mergeBCHandlers();
-        //         M_BCh_u->merge(*M_BCh_flux);
-        //         M_BCh_flux.reset();
-        //         M_BCh_d->merge(*M_BCh_Robin);
-        //         M_BCh_Robin.reset();
-
     }
 
+    //! Initialize all the quantities required by FSI
+    /*!
+     * This method has been designed to initialize all the quantities of the FSI problem.
+     * @param fluidVelocityAndPressure velocity and pressure of the fluid
+     * @param fluidDisplacement displacement of the fluid
+     * @param solidVelocity velocity of the solid
+     * @param solidDisplacement displacement of the solid
+     */
+    void initialize( const vectorPtr_Type& fluidVelocityAndPressure,
+                     const vectorPtr_Type& fluidDisplacement,
+                     const vectorPtr_Type& solidVelocity,
+                     const vectorPtr_Type& solidDisplacement );
 
     void mergeBCHandlers()
     {
@@ -300,15 +288,19 @@ public:
     */
     virtual void updateSystem();
 
-
-    /**
-       \small initialize with functions
-    */
-    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
-                             FSIOperator::solidPtr_Type::value_type::Function const& p0,
-                             FSIOperator::solidPtr_Type::value_type::Function const& d0,
-                             FSIOperator::solidPtr_Type::value_type::Function const& w0,
-                             FSIOperator::solidPtr_Type::value_type::Function const& df0);
+    //! Initializes all the quantities using functions
+    /*!
+     * calls the initialize methods for the subproblems. The mesh velocity is used to compute the convective term in the fluid equations
+     * \param u0: initial fluid velocity
+     * \param p0: initial fluid pressure
+     * \param d0: initial solid displacement
+     * \param w0: initial mesh velocity
+     */
+    virtual void initialize( fluidPtr_Type::value_type::function_Type const& u0,
+                             fluidPtr_Type::value_type::function_Type const& p0,
+                             solidPtr_Type::value_type::Function const& d0,
+                             solidPtr_Type::value_type::Function const& w0,
+                             fluidPtr_Type::value_type::function_Type const& df0 );
 
     /**
        \small initialize the mesh displacement
@@ -336,8 +328,6 @@ public:
 
     //!@name Set Methods
     //@{
-    //!Sets the restart flag
-    void  setRestarts( bool restarts ){ M_restarts = restarts; }
 
     //! returns a non-const pointer to the preconditioner. Can be used either as a setter or a getter.
     precPtr_Type& precPtrView(){ return M_precPtr; }
@@ -388,55 +378,52 @@ public:
     //!get the total dimension of the FS interface
     UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->interface();}
 
-    //! Returns the solution at the previous time step
-    vectorPtr_Type const&       un(){return M_un;}
-
     //! Returns true if CE of FI methods are used, false otherwise (GCE)
     //bool const isFullMonolithic(){return M_fullMonolithic;}
 
     //! Returns the offset assigned to the solid block
     UInt  getOffset() const {return M_offset;}
 
-
-    //!Get the solid displacement from the solution M_un
+    //!Get the solid displacement from the solution
     /*!
       \param soliddisp: input vector
     */
-    void getSolidDisp(vector_Type& soliddisp)
+    void exportSolidDisplacement( vector_Type& solidDisplacement )
     {
-        soliddisp.subset(*un(), M_offset);
-        soliddisp *= dataFluid()->dataTime()->timeStep()*M_solid->getRescaleFactor();
-
+        solidDisplacement.subset( solution(), M_offset);
+        solidDisplacement *= dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
     }
 
     //!Get the solid velocity
     /*!
-      fills an input vector with the solid displacement trom the solution M_un.
+      fills an input vector with the solid displacement from the solution.
       \param solidvel: input vector (output solid velocity)
     */
-    void getSolidVel(vector_Type& solidvel)
+    void exportSolidVelocity( vector_Type& solidVelocity )
     {
-        solidvel.subset(M_solid->getVelocity(), M_offset);
-        solidvel *= dataFluid()->dataTime()->timeStep()*M_solid->getRescaleFactor();
+        solidVelocity.subset( M_solid->getVelocity(), M_offset );
+        solidVelocity *= dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
     }
 
     //! Gets the fluid and pressure
     /**
-       fills an input vector with the fluid and pressure trom the solution M_un.
-       It performs an Import. Thus it works also for the velocity, depending on the map of the input vector
+       fills an input vector with the fluid and pressure from the solution M_un.
+       It performs a trilinos import. Thus it works also for the velocity, depending on the map of the input vector
        \param sol: input vector
     */
-    void getFluidVelAndPres(vector_Type& sol)
+    void exportFluidVelocityAndPressure( vector_Type& fluidVelocityAndPressure )
     {
-        sol = *un();
+        fluidVelocityAndPressure = solution();
     }
 
-
     //! Returns the monolithic map
-    virtual    boost::shared_ptr<MapEpetra>& couplingVariableMap(){return M_monolithicMap;}
+    virtual boost::shared_ptr<MapEpetra>& couplingVariableMap() { return M_monolithicMap; }
 
     //! get the solution vector
     virtual const vector_Type& solution() const = 0;
+
+    //! get the solution vector
+    virtual vectorPtr_Type& solutionPtr() = 0;
 
     //! set the BCs, this method when the boundary conditions  are changed during the simulation
     //! resets the vector of shared pointers to the boundary conditions in the operator and preconditioner
@@ -460,7 +447,6 @@ public:
         }
     }
 
-    //virtual vectorPtr_Type& solutionPtr() = 0;
     //@}
 
 
@@ -505,8 +491,17 @@ protected:
        \param matrFull: the output matrix*/
     void    diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull);
 
-    //!Empty method kept for compatibility with FSIOperator.
-    void shiftSolution(){}
+    //! Update the solution after NonLinearRichardson is called.
+    /*!
+     *  Here it is used also to update the velocity for the post-processing.
+     */
+    void updateSolution( const vector_Type& solution )
+    {
+        setSolution( solution );
+
+        setDispSolid( solution );
+        M_solid->updateVel();
+    }
 
     //! Constructs the solid FESpace
     /**
@@ -525,7 +520,7 @@ protected:
     void variablesInit(std::string const& dOrder);
 
     //!
-    virtual void setupBlockPrec( );
+    virtual void setupBlockPrec();
 
 #ifdef OBSOLETE
     void setOperator(Epetra_Operator& epetraOperator) {M_linearSolver->setOperator(epetraOperator);}
@@ -606,6 +601,7 @@ private:
     //! operator \f$P^{-1}AA^TP^{-T}\f$, where P is the preconditioner and A is the monolithic matrix
     boost::shared_ptr<ComposedOperator<Epetra_Operator> > M_preconditionedSymmetrizedMatrix;
     boost::shared_ptr<vector_Type>                    M_stress;
+    UInt                                              M_fluxes;
     std::vector<bcName_Type>                          M_BCFluxNames;
     std::vector<UInt>                                 M_fluxOffset;
 #ifdef OBSOLETE
