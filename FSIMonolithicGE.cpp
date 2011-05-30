@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -24,6 +23,7 @@
 *******************************************************************************
 */
 //@HEADER
+
 
 /*!
     @file
@@ -104,12 +104,9 @@ FSIMonolithicGE::setupSystem( )
 }
 
 void
-FSIMonolithicGE::updateSystem( )
+FSIMonolithicGE::updateSystem()
 {
     super_Type::updateSystem();
-
-    // Set displacement for solid RHS
-    setDispSolid( *M_un );
 }
 
 
@@ -137,18 +134,14 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
 
         meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
 
-//         if(M_restarts)
-//         {
-//             M_data->resetTimeStep( M_data->restartTimestep() );
-//         }
+         if(M_restarts)
+         {
+             alpha = 1/M_data->restartTimestep();//dataFluid()->dataTime()->timeStep();
+             M_restarts = false;
+         }
 
         meshDispDiff *= -alpha; //mesh velocity w
         this->interpolateVelocity(meshDispDiff, *this->M_beta);
-
-//         if (M_restarts)
-//         {
-//             M_data->restoreTimeStep();
-//         }
 
         M_beta->spy("betaGCE");
         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
@@ -218,7 +211,7 @@ void FSIMonolithicGE::applyBoundaryConditions( )
          M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
 
          M_monolithicMatrix->GlobalAssemble();
-         //M_monolithicMatrix->matrix()->spy("M");
+         M_monolithicMatrix->matrix()->spy("M");
 }
 
 
