@@ -51,7 +51,7 @@ thickness            = 0.023172115430259
 #thickness            = 0.02 # Original
 
 # Avolio elastin
-young                = 16.0E6 # g/cm/s^2 (dyne/cm^2)
+young                = 4.0E6 # g/cm/s^2 (dyne/cm^2)
 poisson              = 0.0
 
 [../space_discretization]
