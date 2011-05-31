@@ -38,6 +38,8 @@
 #ifndef MultiscaleModelFSI3D_H
 #define MultiscaleModelFSI3D_H 1
 
+//#define FSI_WITH_EXTERNALPRESSURE
+
 // LifeV includes
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifealg/NonLinearRichardson.hpp>
@@ -67,6 +69,11 @@ namespace LifeV
 namespace Multiscale
 {
 
+#ifndef FSI_WITH_EXTERNALPRESSURE
+// Forward declaration
+class FSI3DCouplingFunction;
+#endif
+
 //! MultiscaleModelFSI3D - Multiscale model for 3D FSI simulations
 /*!
  *  @author Paolo Crosetto
@@ -80,33 +87,39 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FSIOperator                               FSIOperator_Type;
-    typedef boost::shared_ptr< FSIOperator_Type>      FSIOperatorPtr_Type;
+    typedef FSIOperator                                FSIOperator_Type;
+    typedef boost::shared_ptr< FSIOperator_Type>       FSIOperatorPtr_Type;
 
-    typedef FSIOperator::data_Type                    data_Type;
-    typedef FSIOperator::dataPtr_Type                 dataPtr_Type;
+    typedef FSIOperator::data_Type                     data_Type;
+    typedef FSIOperator::dataPtr_Type                  dataPtr_Type;
 
-    typedef FSIOperator::mesh_Type                    mesh_Type;
+    typedef FSIOperator::mesh_Type                     mesh_Type;
 
-    typedef FSIOperator::fluid_Type                   fluid_Type;
-    typedef FSIOperator::solid_Type                   solid_Type;
+    typedef FSIOperator::fluid_Type                    fluid_Type;
+    typedef FSIOperator::solid_Type                    solid_Type;
 
-    typedef FSIOperator::vector_Type                  vector_Type;
-    typedef FSIOperator::vectorPtr_Type               vectorPtr_Type;
+    typedef FSIOperator::vector_Type                   vector_Type;
+    typedef FSIOperator::vectorPtr_Type                vectorPtr_Type;
 
-    typedef Exporter< mesh_Type >                     IOFile_Type;
-    typedef boost::shared_ptr< IOFile_Type >          IOFilePtr_Type;
-    typedef ExporterData< mesh_Type >                 IOData_Type;
+    typedef Exporter< mesh_Type >                      IOFile_Type;
+    typedef boost::shared_ptr< IOFile_Type >           IOFilePtr_Type;
+    typedef ExporterData< mesh_Type >                  IOData_Type;
 
-    typedef ExporterEnsight< mesh_Type >              ensightIOFile_Type;
+    typedef ExporterEnsight< mesh_Type >               ensightIOFile_Type;
 #ifdef HAVE_HDF5
-    typedef ExporterHDF5< mesh_Type >                 hdf5IOFile_Type;
+    typedef ExporterHDF5< mesh_Type >                  hdf5IOFile_Type;
 #endif
 
-    typedef BCHandler                                 bc_Type;
-    typedef boost::shared_ptr< bc_Type >              bcPtr_Type;
-    typedef BCInterface3D< bc_Type, FSIOperator >     bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >     bcInterfacePtr_Type;
+    typedef BCHandler                                  bc_Type;
+    typedef boost::shared_ptr< bc_Type >               bcPtr_Type;
+    typedef BCInterface3D< bc_Type, FSIOperator >      bcInterface_Type;
+    typedef boost::shared_ptr< bcInterface_Type >      bcInterfacePtr_Type;
+
+#ifndef FSI_WITH_EXTERNALPRESSURE
+    typedef FSI3DCouplingFunction                      couplingFunction_Type;
+    typedef boost::shared_ptr< couplingFunction_Type > couplingFunctionPtr_Type;
+    typedef std::vector< couplingFunction_Type >       couplingFunctionsContainer_Type;
+#endif
 
     //@}
 
@@ -161,14 +174,14 @@ public:
      * @param flag flag of the boundary face
      * @param function boundary condition function
      */
-    void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const;
+    void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function );
 
     //! Impose the integral of the normal stress on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @param function boundary condition function
      */
-    void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const;
+    void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function );
 
     //! Get the flow rate on a specific boundary face of the model
     /*!
@@ -318,13 +331,24 @@ private:
     IOFilePtr_Type                         M_importerFluid;
     IOFilePtr_Type                         M_importerSolid;
 
-    // Solution
+#ifndef FSI_WITH_EXTERNALPRESSURE
+    // Stress coupling function container
+    couplingFunctionsContainer_Type        M_stressCouplingFunction;
+
+    // Scalar external pressure
+    Real                                   M_externalPressureScalar;
+#endif
+
+    // Vectorial external pressure
+    vectorPtr_Type                         M_externalPressureVector;
+
+    // Post processing members
     vectorPtr_Type                         M_fluidVelocityAndPressure;
     vectorPtr_Type                         M_fluidDisplacement;
     vectorPtr_Type                         M_solidVelocity;
     vectorPtr_Type                         M_solidDisplacement;
 
-    // Old Solution
+    // Old Solution (used for subiterations)
     vectorPtr_Type                         M_fluidVelocityAndPressure_tn;
     vectorPtr_Type                         M_fluidDisplacement_tn;
     vectorPtr_Type                         M_solidVelocity_tn;
@@ -342,6 +366,78 @@ private:
     vectorPtr_Type                         M_linearRHS;
     vectorPtr_Type                         M_linearSolution;
 };
+
+
+
+#ifndef FSI_WITH_EXTERNALPRESSURE
+
+//! FSI3DCouplingFunction - The FSI3D coupling function
+/*!
+ *  @author Cristiano Malossi
+ *
+ *  This simple class provides the implementation for the BC function used by the FSI3D model
+ *  in order to apply an offset to the coupling quantity (e.g.: to remove the wall pressure).
+ */
+class FSI3DCouplingFunction
+{
+public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef MultiscaleInterfaceFluid::function_Type function_Type;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    /*!
+     * @param couplingFunction original coupling function
+     * @param delta delta to be applied
+     */
+    explicit FSI3DCouplingFunction( const function_Type& couplingFunction, const Real& delta ) : M_couplingFunction( couplingFunction ), M_delta( delta ) {}
+
+    //! Destructor
+    virtual ~FSI3DCouplingFunction() {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Evaluate the coupling quantity
+    /*!
+     * @return evaluation of the function
+     */
+    Real function( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
+    {
+        return M_couplingFunction( t, x, y, z, id ) + M_delta;
+    }
+
+    //@}
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    FSI3DCouplingFunction();
+
+    FSI3DCouplingFunction( const MultiscaleCoupling& coupling );
+
+    FSI3DCouplingFunction& operator=( const MultiscaleCoupling& coupling );
+
+    //@}
+
+    function_Type                          M_couplingFunction;
+    Real                                   M_delta;
+};
+
+#endif
 
 //! Factory create function
 inline multiscaleModel_Type* createMultiscaleModelFSI3D()
