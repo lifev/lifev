@@ -339,7 +339,7 @@ MultiscaleModelFluid3D::showMe()
 // MultiscaleInterfaceFluid Methods
 // ===================================================
 void
-MultiscaleModelFluid3D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const
+MultiscaleModelFluid3D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
 {
     BCFunctionBase base;
     base.setFunction( function );
@@ -348,7 +348,7 @@ MultiscaleModelFluid3D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const f
 }
 
 void
-MultiscaleModelFluid3D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const
+MultiscaleModelFluid3D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
 {
     BCFunctionBase base;
     base.setFunction( function );
@@ -598,8 +598,7 @@ MultiscaleModelFluid3D::setupLinearModel()
 #endif
 
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
-    bcPtr_Type linearBCHandler( new bc_Type( *M_bc->handler() ) );
-    M_linearBC = linearBCHandler;
+    M_linearBC.reset( new bc_Type( *M_bc->handler() ) );
 
     // Set all the BCFunctions to zero
     BCFunctionBase bcBaseDeltaZero;

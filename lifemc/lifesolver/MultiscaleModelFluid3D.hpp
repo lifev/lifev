@@ -86,7 +86,7 @@ public:
 
     typedef Exporter< mesh_Type >                             IOFile_Type;
     typedef boost::shared_ptr< IOFile_Type >                  IOFilePtr_Type;
-    typedef ExporterData< mesh_Type >                 IOData_Type;
+    typedef ExporterData< mesh_Type >                         IOData_Type;
 
     typedef ExporterEnsight< mesh_Type >                      ensightIOFile_Type;
 #ifdef HAVE_HDF5
@@ -157,14 +157,14 @@ public:
      * @param flag flag of the boundary face
      * @param function boundary condition function
      */
-    void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const;
+    void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function );
 
     //! Impose the integral of the normal stress on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @param function boundary condition function
      */
-    void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const;
+    void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function );
 
     //! Get the flow rate on a specific boundary face of the model
     /*!

@@ -125,14 +125,14 @@ public:
      * @param flag flag of the boundary face
      * @param function boundary condition function
      */
-    void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const;
+    void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function );
 
     //! Impose the integral of the normal stress on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @param function boundary condition function
      */
-    void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const;
+    void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function );
 
     //! Get the flux on a specific boundary face of the model
     /*!

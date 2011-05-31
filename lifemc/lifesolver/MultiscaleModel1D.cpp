@@ -330,7 +330,7 @@ MultiscaleModel1D::showMe()
 // MultiscaleInterfaceFluid Methods
 // ===================================================
 void
-MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const
+MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
 {
     OneDimensionalBCFunction base;
    base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
@@ -339,7 +339,7 @@ MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const functi
 }
 
 void
-MultiscaleModel1D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const
+MultiscaleModel1D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
 {
     OneDimensionalBCFunction base;
     base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );

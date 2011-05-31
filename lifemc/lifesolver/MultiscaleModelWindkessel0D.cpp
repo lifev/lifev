@@ -207,13 +207,13 @@ MultiscaleModelWindkessel0D::showMe()
 // MultiscaleInterfaceFluid Methods
 // ===================================================
 void
-MultiscaleModelWindkessel0D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const
+MultiscaleModelWindkessel0D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
 {
     M_bc->handler()->setBC( flagConverter( flag ), OneDimensional::Q, boost::bind( function, _1, _1, _1, _1, _1 ) );
 }
 
 void
-MultiscaleModelWindkessel0D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const
+MultiscaleModelWindkessel0D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
 {
     M_bc->handler()->setBC( flagConverter( flag ), OneDimensional::S, boost::bind( function, _1, _1, _1, _1, _1 ) );
 }
