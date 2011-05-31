@@ -52,7 +52,7 @@ int MonolithicBlockComposedNN::solveSystem( const vector_Type& rhs, vector_Type&
         M_overlapLevel     = M_list.get("overlap level", 2);
         M_precType = M_list.get("prectype", "Amesos");
 
-        ////////////////Copy: should be avoided ////////////////////////
+        //////////////// \todo Copy: should be avoided ////////////////////////
         M_matrixVector.push_back(*M_blocks[(*M_blockReordering)[0]]);
         M_matrixVector.push_back(*M_blocks[(*M_blockReordering)[1]]);
         M_matrixVector.push_back(*M_blocks[(*M_blockReordering)[2]]);
@@ -63,13 +63,13 @@ int MonolithicBlockComposedNN::solveSystem( const vector_Type& rhs, vector_Type&
         {
             M_blockPrecs->displayer().leaderPrint("  M-  Computing double prec. factorization ...        ");
             chrono.start();
-            ////////////////Copy: should be avoided ////////////////////////
+            //////////////// \todo Copy: should be avoided ////////////////////////
             if (!M_recompute[(*M_blockReordering)[k]])
             {
                 M_prec[k].reset(M_factory.Create(M_precType, M_matrixVector[k].matrixPtr().get(), M_overlapLevel));
             }
             else
-                /////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////
 
                 M_prec[k].reset(M_factory.Create(M_precType, M_blocks[(*M_blockReordering)[k]]->matrixPtr().get(), M_overlapLevel));
             if ( !M_prec[k].get() )

@@ -132,14 +132,11 @@ public:
       interface between the two subproblems (the numeration can be different but the nodes must be matching in each
       subdomain), an EpetraVector defined on the multipliers map containing the corresponding dof at the interface (NB: the multipliers map should be constructed from the second numeration in the std::map)
       @param map the map of the global problem
-      @param FESpace1 FESpace of the first problem
-      @param offset1  offset for the first block in the global matrix
-      @param FESpace2 FESpace of the second problem
-      @param offset2  offset for the second block in the global matrix
       @param locDofMap std::map with the correspondence between the interface dofs for the two different maps in
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
       @param  unused flag kept for compliance with the base class
+      @param couplingFlag flag specifying which block must be coupled whith which block.
      */
     void coupler(mapPtr_Type& /*map*/,
                  const std::map<ID, ID>& locDofMap,
@@ -148,12 +145,6 @@ public:
                  UInt /*flag*/,
                  UInt couplingFlag
                  );
-
-//     void coupler(mapPtr_Type& map,
-//                  const std::map<ID, ID>& locDofMap,
-//                  const vectorPtr_Type& numerationInterface,
-//                  const Real& timeStep,
-//                  UInt /*flag*/ );
 
     //! returns true if the operator has at least one block
     /*!

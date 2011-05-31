@@ -202,7 +202,7 @@ public:
        \small initializes the current solution vector. Note: this is not sufficient for the correct initialization
        of bdf!
     */
-    virtual void initialize( const vectorPtr_Type u0)
+    void initialize( vectorPtr_Type u0)
     {
         M_un=u0;
     }

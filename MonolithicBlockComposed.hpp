@@ -150,6 +150,7 @@ public:
       @param numerationInterface: the numeration of the interface dofs
       @param timeStep: time step
       @param couplingBlock: UInt specifying the position of the coupling block to be added.
+      @param couplingFlag: flag specifying which block must be coupled whith which block.
      */
     void coupler(mapPtr_Type& map,
                  const std::map<ID, ID>& locDofMap,
@@ -158,13 +159,6 @@ public:
                  UInt flag,
                  UInt couplingFlag
                  );
-
-//     void coupler(mapPtr_Type& map,
-//                  const std::map<ID, ID>& locDofMap,
-//                  const vectorPtr_Type& numerationInterface,
-//                  const Real& timeStep,
-//                  UInt couplingBlock
-//                  );
 
 
     //! pushes a block at the end of the vector

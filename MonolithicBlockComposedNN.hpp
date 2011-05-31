@@ -180,7 +180,7 @@ private:
     boost::shared_ptr< composed_prec > M_firstCompPrec ;
     boost::shared_ptr< composed_prec > M_secondCompPrec;
 
-    std::vector<matrix_Type> M_matrixVector; // temporary, should be avoided
+    std::vector<matrix_Type> M_matrixVector; // \todo temporary, should be avoided
     int M_overlapLevel;
     std::string M_precType;
     Ifpack M_factory;

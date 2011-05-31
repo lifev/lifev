@@ -115,6 +115,13 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
 }
 
 void
+FSIMonolithicGI::buildSystem ( )
+{
+    super_Type::buildSystem();
+    M_meshMotion->computeMatrix();
+}
+
+void
 FSIMonolithicGI::updateSystem( )
 {
     //M_meshMotion->dispOld() is at time n-1 !!
@@ -126,13 +133,6 @@ FSIMonolithicGI::updateSystem( )
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.`
     //couplingVariableExtrap( ); II order extrapolation: under development
     M_un.reset(new vector_Type(*M_uk));
-}
-
-void
-FSIMonolithicGI::buildSystem ( )
-{
-    super_Type::buildSystem();
-    M_meshMotion->computeMatrix();
 }
 
 void
