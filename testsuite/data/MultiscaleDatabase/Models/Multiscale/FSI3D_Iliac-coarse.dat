@@ -40,7 +40,7 @@ mpiGroups = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
-            0       BoundaryCondition   FlowRate_SquareSinusoidalWave   0               0
+            0       BoundaryCondition   FlowRate_Heart                  0               0
             1       BoundaryCondition   Stress_ExternalPressure         0,0,0,0         1,2,3,4
             '
 ###################################################################################################
