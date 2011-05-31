@@ -22,6 +22,7 @@
 #include<life/lifemesh/MeshData.hpp>
 
 #include<life/lifefilters/GetPot.hpp>
+#include <life/lifefilters/MeshWriter.hpp>
 #include <string>
 
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
@@ -59,6 +60,7 @@ int main(int argc, char** argv)
         int me;
         MPI_Comm_rank(MPI_COMM_WORLD, &me);
         MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+        MPI_Comm MPIcomm;
         MPI_Group  originGroup, newGroup;
         MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
         int members[numtasks];
@@ -66,16 +68,16 @@ int main(int argc, char** argv)
             members[i]=0;
         MPI_Group_incl(originGroup, 1, members, &newGroup);
 
-        /* We have removed mesh_wrt, but here it was called ...
         MPI_Comm_create(MPI_COMM_WORLD, newGroup, &MPIcomm);
         if(me==0)
-            {
-                mesh->orderMesh( MPIcomm);
-                //solidData.mesh()->orderMesh( MPIcomm);
-                writeMesh( mesh_output , *mesh);
-                //writeMesh( "solid_ord.mesh", *solidData.mesh());
-            }
-        */
+        {
+            mesh->orderMesh( MPIcomm);
+            //solidData.mesh()->orderMesh( MPIcomm);
+
+            MeshWriter::writeMeshMedit<RegionMesh3D<LinearTetra> >( mesh_output , *mesh);
+            //writeMesh( "solid_ord.mesh", *solidData.mesh());
+        }
+
     }
     else if (create_edge)
     {
@@ -110,9 +112,8 @@ int main(int argc, char** argv)
             *mesh, SolidInterfaceFlag,
             0., &edgeFlag);
         mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), TimeAdvanceNewmarker);
-        /* We have removed mesh_wrt, but here it was called ...
-            writeMesh( mesh_output , *mesh2);
-        */
+        MeshWriter::writeMeshMedit<RegionMesh3D<LinearTetra> >( mesh_output , *mesh2);
+
     }
     MPI_Finalize();
 #endif
