@@ -128,22 +128,14 @@ public:
      */
     inline void setDataSolid( const dataSolid_PtrType dataSolid ) { M_dataSolid = dataSolid; }
 
+    //! Set the time step for both the subproblems
+    /*!
+      @param timestep new time step
+     */
     void setTimeStep(const Real& timestep)
     {
         M_dataFluid->dataTime()->setTimeStep(timestep);
         M_dataSolid->getdataTime()->setTimeStep(timestep);
-    }
-
-    void resetTimeStep(const Real& timestep)
-    {
-        M_dataFluid->dataTime()->resetTimeStep(timestep);
-        M_dataSolid->getdataTime()->resetTimeStep(timestep);
-    }
-
-    void restoreTimeStep( )
-    {
-        M_dataFluid->dataTime()->restoreTimeStep();
-        M_dataSolid->getdataTime()->restoreTimeStep();
     }
     //@}
 
