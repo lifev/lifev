@@ -53,8 +53,7 @@ TimeData::TimeData( ) :
         M_timeStepNumber( 0 ),
         M_orderBDF      ( 1 ),
         M_theta         ( 0.25 ),
-        M_gamma         ( 0.5),
-        M_timestepBackup( 1.e-4)
+        M_gamma         ( 0.5)
 {
 }
 

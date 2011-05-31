@@ -151,25 +151,6 @@ public:
      */
     void setTimeStep( const Real& timeStep ) { M_timeStep = timeStep; }
 
-    //! Set the initial time step
-    /*!
-     * @param timeStep initial time step value
-     */
-    void resetTimeStep( const Real& timeStep )
-    {
-        M_timestepBackup=M_timeStep;
-        M_timeStep = timeStep;
-    }
-
-    //! Restores the original time step
-    /*!
-     * @param timeStep initial time step value
-     */
-    void restoreTimeStep( )
-    {
-        M_timeStep=M_timestepBackup;
-    }
-
     //! Set the BDF odert to use
     /*!
      * @param order BDF order
@@ -302,7 +283,6 @@ private:
     UInt					M_orderBDF; 	  // order of the time discretization formula
     Real                                    M_theta;          // TimeAdvanceNewmark parameter
     Real                                    M_gamma;           // TimeAdvanceNewmark parameter
-    Real                    M_timestepBackup;
 };
 
 } // namespace LifeV

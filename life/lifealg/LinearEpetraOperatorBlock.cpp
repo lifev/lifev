@@ -262,15 +262,15 @@ int BlockOperator::ApplyInverse(const Epetra_MultiVector & X, Epetra_MultiVector
         return blockUpperTriangularSolve(X,Y);
         break;
     case NoStructure:
-        Y.Scale(1.0/0.0);
+        Y.Scale(std::numeric_limits<Real>::quiet_NaN( ));
         return -1;
         break;
     case Rectangular:
-        Y.Scale(1.0/0.0);
+        Y.Scale(std::numeric_limits<Real>::quiet_NaN( ));
         return -1;
         break;
     default:
-        Y.Scale(1.0/0.0);
+        Y.Scale(std::numeric_limits<Real>::quiet_NaN( ));
         return -1;
         break;
     }

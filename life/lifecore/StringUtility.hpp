@@ -51,6 +51,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -132,10 +133,7 @@ string2number( const std::string& s )
 template <typename NumberType>
 inline std::string number2string( const NumberType& n )
 {
-    std::stringstream out;
-    out << n;
-
-    return out.str();
+    return boost::lexical_cast< std::string >( n );
 }
 
 // @author Cristiano Malossi
@@ -145,8 +143,7 @@ inline std::string enum2String( const EnumeratorType& Enum,
                                 const std::map<std::string,
                                 EnumeratorType>& Map )
 {
-    for ( typename std::map<std::string, EnumeratorType>::const_iterator j = Map.begin();
-          j != Map.end() ; ++j )
+    for ( typename std::map<std::string, EnumeratorType>::const_iterator j = Map.begin(); j != Map.end() ; ++j )
         if ( j->second == Enum )
             return j->first;
 

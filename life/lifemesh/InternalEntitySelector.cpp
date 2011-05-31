@@ -62,7 +62,7 @@ M_watermarkFlag( w )
 bool
 InternalEntitySelector::operator()(entityFlag_Type const & test) const
 {
-    return (test==EntityFlag(0) || test > M_watermarkFlag );
+    return (test==entityFlag_Type(0) || test > M_watermarkFlag );
 }
 
 } // Namespace LifeV

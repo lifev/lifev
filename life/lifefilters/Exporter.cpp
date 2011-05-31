@@ -43,68 +43,67 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace LifeV
 {
-
+#if 0
 // =================
 // Constructor
 // =================
 
-ExporterData::ExporterData( const ExporterData::Type& type,
-                            const std::string& variableName,
-                            const vectorPtr_Type& vec,
-                            const UInt& start,
-                            const UInt& size,
-                            const UInt& steady,
-                            const ExporterData::Where& where):
-        M_variableName  ( variableName ),
-        M_vr            ( vec ),
-        M_size          ( size ),
-        M_start         ( start ),
-        M_type          ( type ),
-        M_steady        ( steady ),
-        M_where         ( where )
+template< typename MeshType >
+ExporterData<MeshType>::ExporterData( const FieldTypeEnum&   type,
+                                      const std::string&     variableName,
+                                      const feSpacePtr_Type& feSpacePtr,
+                                      const vectorPtr_Type&  vectorPtr,
+                                      const UInt&            start,
+                                      const FieldRegimeEnum& regime,
+                                      const WhereEnum&       where ):
+        M_variableName      ( variableName ),
+        M_feSpacePtr        ( feSpacePtr ),
+        M_storedArrayPtr    ( vectorPtr ),
+        M_numDOF            ( feSpacePtr->dim() ),
+        M_start             ( start ),
+        M_fieldType         ( type ),
+        M_regime            ( regime ),
+        M_where             ( where )
 {}
 
 // ==============
 // Operators
 // ==============
 
-Real ExporterData::operator()( const UInt i ) const
+template< typename MeshType >
+Real ExporterData<MeshType>::operator()( const UInt i ) const
 {
-    return (*M_vr)[i];
+    return (*M_storedArrayPtr)[i];
 }
 
-Real& ExporterData::operator()( const UInt i )
+template< typename MeshType >
+Real& ExporterData<MeshType>::operator()( const UInt i )
 {
-    return (*M_vr)[i];
+    return (*M_storedArrayPtr)[i];
 }
 
-std::string ExporterData::typeName() const
+template< typename MeshType >
+std::string ExporterData<MeshType>::typeName() const
 {
-    switch (M_type)
+    switch (M_fieldType)
     {
-    case Scalar:
+    case ScalarField:
         return "Scalar";
-    case Vector:
+    case VectorField:
         return "Vector";
     }
 
     return "ERROR string";
 }
 
-UInt ExporterData::typeDim() const
+template< typename MeshType >
+UInt ExporterData<MeshType>::fieldDim() const
 {
-    switch ( M_type )
-    {
-    case Scalar:
-        return 1;
-    case Vector:
-        return 3;
-    }
-
-    return 0;
+    return M_feSpacePtr->fieldDim();
 }
 
-std::string ExporterData::whereName() const
+template< typename MeshType >
+std::string ExporterData<MeshType>::whereName() const
 {
     switch (M_where)
     {
@@ -116,6 +115,5 @@ std::string ExporterData::whereName() const
 
     return "ERROR string";
 }
-
-
+#endif
 }

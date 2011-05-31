@@ -58,8 +58,6 @@
 #include <life/lifealg/PreconditionerML.hpp>
 
 #include "cylinder.hpp"
-#include "EqualSolutions.hpp"
-
 
 
 using namespace LifeV;
@@ -89,19 +87,13 @@ main( int argc, char** argv )
 //    MPI_Init(&argc,&argv);
 
     Cylinder cyl( argc, argv  );
-    cyl.run();
+    bool success = cyl.run();
 
-// Test validity of solution
-
-    if (rank == 0)
-    {
-        if (equalSolutions("cylinder_ref.h5", "cylinder.h5", 2, 1e-6))
-        {
-            std::cout << "TEST PARTITION WAS SUCCESSFUL.\n";
-        }
-        else
-        {
-            std::cout << "TEST PARTITION FAILED.\n";
+    if (rank == 0) {
+        if (success) {
+            std::cout << "\nTEST PARTITION WAS SUCCESSFUL.\n\n";
+        } else {
+            std::cout << "\nTEST PARTITION FAILED.\n\n";
             return_value = EXIT_FAILURE;
         }
     }

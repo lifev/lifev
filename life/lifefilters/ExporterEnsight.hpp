@@ -61,6 +61,7 @@ public:
     typedef Exporter<MeshType> super;
     typedef typename super::meshPtr_Type  meshPtr_Type;
     typedef typename super::vectorPtr_Type vectorPtr_Type;
+    typedef typename super::exporterData_Type exporterData_Type;
     //@}
 
     //! @name Constructors and destructor
@@ -117,7 +118,7 @@ public:
     void import(const Real& startTime);
 
     //! Read variable
-    void readVariable(ExporterData& dvar) {super::readVariable(dvar);}
+    void readVariable(exporterData_Type& dvar) {super::readVariable(dvar);}
 
     //! Set the mesh and the processor id
     void setMeshProcId( const meshPtr_Type mesh, const Int& procId );
@@ -139,15 +140,15 @@ private:
     void writeCase(const Real& time);
     void writeAsciiGeometry( const std::string geoFile );
 
-    void writeAscii(const ExporterData& dvar);
-    void writeAsciiScalar(const ExporterData& dvar);
-    void writeAsciiVector(const ExporterData& dvar);
+    void writeAscii(const exporterData_Type& dvar);
+    void writeAsciiScalar(const exporterData_Type& dvar);
+    void writeAsciiVector(const exporterData_Type& dvar);
     void caseMeshSection(std::ofstream& casef);
     void caseVariableSection(std::ofstream& casef);
     void caseTimeSection(std::ofstream& casef, const Real& time);
 
-    void readScalar( ExporterData& dvar );
-    void readVector( ExporterData& dvar );
+    void readScalar( exporterData_Type& dvar );
+    void readVector( exporterData_Type& dvar );
 
     void initProcId();
     void setNodesMap( std::vector<Int> ltGNodesMap );
@@ -179,34 +180,34 @@ private:
 
 template<typename MeshType>
 ExporterEnsight<MeshType>::ExporterEnsight():
-    super(),
-    M_importDir("./"),
-    M_steps(0),
-    M_ltGNodesMap(),
-    M_me()
+        super(),
+        M_importDir("./"),
+        M_steps(0),
+        M_ltGNodesMap(),
+        M_me()
 {
 }
 
 template<typename MeshType>
 ExporterEnsight<MeshType>::ExporterEnsight(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
-                       const Int& procId)
-    :
-    super(dfile, prefix),
-    M_importDir(dfile("exporter/import_dir", "./")),
-    M_steps(0),
-    M_ltGNodesMap(),
-    M_me()
+                                           const Int& procId)
+        :
+        super(dfile, prefix),
+        M_importDir(dfile("exporter/import_dir", "./")),
+        M_steps(0),
+        M_ltGNodesMap(),
+        M_me()
 {
     this->setMeshProcId(mesh,procId);
 }
 
 template<typename MeshType>
 ExporterEnsight<MeshType>::ExporterEnsight(const GetPot& dfile, const std::string& prefix):
-    super(dfile,prefix),
-    M_importDir(dfile("exporter/import_dir", "./")),
-    M_steps(0),
-    M_ltGNodesMap(),
-    M_me()
+        super(dfile,prefix),
+        M_importDir(dfile("exporter/import_dir", "./")),
+        M_steps(0),
+        M_ltGNodesMap(),
+        M_me()
 {
 }
 
@@ -217,20 +218,22 @@ ExporterEnsight<MeshType>::ExporterEnsight(const GetPot& dfile, const std::strin
 template<typename MeshType>
 void ExporterEnsight<MeshType>::postProcess(const Real& time)
 {
-    typedef std::list< ExporterData >::iterator Iterator;
+    // typedef std::list< exporterData_Type >::iterator Iterator;
 
     this->computePostfix();
 
-    if ( this->M_postfix != "*****" )
+    std::size_t found( this->M_postfix.find( "*" ) );
+    if ( found == string::npos )
     {
-        if (!this->M_procId) std::cout << "  x-  ExporterEnsight post-processing ...        " << std::flush;
+        if (!this->M_procId) std::cout << "  X-  ExporterEnsight post-processing ...        " << std::flush;
         LifeChrono chrono;
         chrono.start();
-        for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+        for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
         {
-            if (i->steady() < 2 )
+            if ( i->regime() != exporterData_Type::NullRegime )
                 writeAscii(*i);
-            if (i->steady() == 1) i->setSteady(2);
+            if (i->regime() == exporterData_Type::SteadyRegime)
+                i->setRegime( exporterData_Type::NullRegime );
         }
         writeCase(time);
 
@@ -239,15 +242,16 @@ void ExporterEnsight<MeshType>::postProcess(const Real& time)
         chrono.stop();
         if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
     }
+
 }
 
 template<typename MeshType>
 void ExporterEnsight<MeshType>::import(const Real& startTime, const Real& dt)
 {
     // dt is used to rebuild the history up to now
-    Real time(startTime - this->M_startIndex * dt);
+    Real time(startTime - this->M_timeIndex * dt);
 
-    for ( UInt count(0); count < this->M_startIndex; ++count)
+    for ( UInt count(0); count < this->M_timeIndex; ++count)
     {
         this->M_timeSteps.push_back(time);
         ++this->M_steps;
@@ -266,17 +270,17 @@ void ExporterEnsight<MeshType>::import(const Real& time)
     this->M_timeSteps.push_back(time);
     ++this->M_steps;
 
-    typedef std::list< ExporterData >::iterator Iterator;
+    // typedef std::list< exporterData_Type >::iterator Iterator;
 
     this->computePostfix();
 
     assert( this->M_postfix != "*****" );
 
-    if (!this->M_procId) std::cout << "  x-  ExporterEnsight importing ..."<< std::endl;
+    if (!this->M_procId) std::cout << "  X-  ExporterEnsight importing ..."<< std::endl;
 
     LifeChrono chrono;
     chrono.start();
-    for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+    for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
     {
         this->readVariable(*i);
     }
@@ -400,15 +404,15 @@ void ExporterEnsight<MeshType>::writeAsciiGeometry(const std::string gFile)
 }
 
 template <typename MeshType>
-void ExporterEnsight<MeshType>::writeAscii(const ExporterData& dvar)
+void ExporterEnsight<MeshType>::writeAscii(const exporterData_Type& dvar)
 {
 
-    switch ( dvar.type() )
+    switch ( dvar.fieldType() )
     {
-    case ExporterData::Scalar:
+    case exporterData_Type::ScalarField:
         writeAsciiScalar(dvar);
         break;
-    case ExporterData::Vector:
+    case exporterData_Type::VectorField:
         writeAsciiVector(dvar);
         break;
     }
@@ -416,13 +420,13 @@ void ExporterEnsight<MeshType>::writeAscii(const ExporterData& dvar)
 }
 
 template <typename MeshType>
-void ExporterEnsight<MeshType>::writeAsciiScalar(const ExporterData& dvar)
+void ExporterEnsight<MeshType>::writeAsciiScalar(const exporterData_Type& dvar)
 {
     using std::setw;
 
     std::ofstream scalarFile;
 
-    if (dvar.steady() )
+    if ( dvar.regime() == exporterData_Type::SteadyRegime )
         scalarFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
                           this->M_me + ".scl").c_str() );
     else
@@ -452,13 +456,13 @@ void ExporterEnsight<MeshType>::writeAsciiScalar(const ExporterData& dvar)
     scalarFile << std::endl;
 }
 
-template <typename MeshType> void ExporterEnsight<MeshType>::writeAsciiVector(const ExporterData& dvar)
+template <typename MeshType> void ExporterEnsight<MeshType>::writeAsciiVector(const exporterData_Type& dvar)
 {
     using std::setw;
 
     std::ofstream vectorFile;
 
-    if (dvar.steady() )
+    if ( dvar.regime() == exporterData_Type::SteadyRegime )
         vectorFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
                           this->M_me + ".vct").c_str() );
     else
@@ -467,7 +471,7 @@ template <typename MeshType> void ExporterEnsight<MeshType>::writeAsciiVector(co
 
     UInt count=0;
 
-    UInt size   = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
     UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
 
@@ -477,7 +481,7 @@ template <typename MeshType> void ExporterEnsight<MeshType>::writeAsciiVector(co
     vectorFile.precision(5);
 
     for (UInt i=0; i<vertexNumber; ++i)
-        for (UInt j=0; j< nDimensions; ++j)
+        for (UInt j=0; j< dvar.fieldDim(); ++j)
         {
             Int id = this->M_ltGNodesMap[i];
             vectorFile << setw(12) << float(dvar(start + j * size + id)) ;
@@ -504,22 +508,22 @@ void ExporterEnsight<MeshType>::caseMeshSection(std::ofstream& casef)
 template <typename MeshType>
 void ExporterEnsight<MeshType>::caseVariableSection(std::ofstream& casef)
 {
-    typedef std::list< ExporterData >::const_iterator Iterator;
+    // typedef typename std::list< exporterData_Type >::const_iterator Iterator;
     casef << "VARIABLE\n";
     std::string aux, str;
-    for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+    for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
     {
-        if (i-> steady() )
+        if ( i->regime() == exporterData_Type::SteadyRegime )
             str = "";
         else
             str = ".*****";
         aux = i->variableName() + " " + super::M_prefix + "_" + i->variableName();
-        switch ( i->type() )
+        switch ( i->fieldType() )
         {
-        case ExporterData::Scalar:
+        case exporterData_Type::ScalarField:
             casef << "scalar per node: 1 " +  aux + str << this->M_me << ".scl\n";
             break;
-        case ExporterData::Vector:
+        case exporterData_Type::VectorField:
             casef << "vector per node: 1 " +  aux +  str << this->M_me << ".vct\n";
             break;
         }
@@ -534,7 +538,7 @@ void ExporterEnsight<MeshType>::caseTimeSection(std::ofstream& casef, const Real
     casef << "TIME\n";
     casef << "time set: 1\n";
     casef << "number of steps: " <<  this->M_steps << "\n";
-    casef << "filename start number: 0\n";
+    casef << "filename start number: " << this->M_timeIndexStart << "\n";
     casef << "filename increment: 1\n";
     casef << "time values:\n";
 
@@ -554,7 +558,7 @@ void ExporterEnsight<MeshType>::caseTimeSection(std::ofstream& casef, const Real
 }
 
 template <typename MeshType>
-void ExporterEnsight<MeshType>::readScalar( ExporterData& dvar )
+void ExporterEnsight<MeshType>::readScalar( exporterData_Type& dvar )
 {
 
     std::string filename( M_importDir + super::M_prefix + "_" + dvar.variableName() +
@@ -593,7 +597,7 @@ void ExporterEnsight<MeshType>::readScalar( ExporterData& dvar )
                                                  filename).str().c_str() );
 }
 
-template <typename MeshType> void ExporterEnsight<MeshType>::readVector(ExporterData& dvar)
+template <typename MeshType> void ExporterEnsight<MeshType>::readVector(exporterData_Type& dvar)
 {
 
     std::string filename( M_importDir + super::M_prefix + "_" + dvar.variableName() +
@@ -605,7 +609,7 @@ template <typename MeshType> void ExporterEnsight<MeshType>::readVector(Exporter
     ASSERT(vectorFile.good(), std::stringstream("There is an error while reading " +
                                                 filename).str().c_str() );
 
-    UInt size   = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
     UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
 
@@ -617,7 +621,7 @@ template <typename MeshType> void ExporterEnsight<MeshType>::readVector(Exporter
     vectorFile.precision(5);
 
     for (UInt i=0; i<vertexNumber; ++i)
-        for (UInt j=0; j< nDimensions; ++j)
+        for (UInt j=0; j< dvar.fieldDim(); ++j)
         {
             ASSERT(vectorFile.good(), std::stringstream("There is an error while reading " +
                                                         filename).str().c_str() );
