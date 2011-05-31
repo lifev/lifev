@@ -296,7 +296,7 @@ FSISolver::iterate()
     // Update the system
     M_oper->updateSystem( );
 
-    // We extract a copy to the solution (uselessly)
+    // We extract a copy to the solution (\todo{uselessly})
     vectorPtr_Type lambda(new vector_Type(M_oper->solution()));
     //M_oper->solutionPtr(lambda);//copy of a shared_ptr
 
