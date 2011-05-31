@@ -84,8 +84,8 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = idealHeartPoints_fluid.mesh
-    #mesh_file       = heart_fine.mesh
+    #mesh_file       = idealHeartPoints_fluid.mesh
+    mesh_file       = heart_fine.mesh
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -181,8 +181,8 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
-    mesh_file        = idealHeartPoints_wall.mesh
-    #mesh_file        = toto2.mesh  # mesh file
+    #mesh_file        = idealHeartPoints_wall.mesh
+    mesh_file        = toto2.mesh  # mesh file
     order            = P1
 
     [../miscellaneous]
@@ -200,7 +200,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
     list = 'Top InnerRing Epicardium'      
 
         [./Top]
-        type       = Essential
+        type       = EssentialVertices
         flag       = 40
         mode       = Full
         component  = 3
@@ -301,6 +301,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
     [../prec]
     #prectype                = AztecOO
     prectype                = Composed
+    #prectype                = Ifpack
     displayList             = false
 
         [./robin]
