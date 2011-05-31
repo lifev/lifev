@@ -296,7 +296,7 @@ FSISolver::iterate()
     // Update the system
     M_oper->updateSystem( );
 
-    // We extract a pointer to the solution
+    // We extract a copy to the solution (uselessly)
     vectorPtr_Type lambda(new vector_Type(M_oper->solution()));
     //M_oper->solutionPtr(lambda);//copy of a shared_ptr
 
@@ -313,7 +313,7 @@ FSISolver::iterate()
                                        M_data->dataFluid()->dataTime()->time() );
 
     // We update the solution
-    M_oper->setSolution( *lambda );
+    M_oper->updateSolution( *lambda );
 
     if (status == EXIT_FAILURE)
     {
@@ -330,13 +330,9 @@ FSISolver::iterate()
         }
     }
 
-    M_oper->shiftSolution();
-
-
     Debug( 6220 ) << "FSISolver iteration at time " << M_data->dataFluid()->dataTime()->time() << " done\n";
     Debug( 6220 ) << "============================================================\n";
     std::cout << std::flush;
-
 }
 
 // ===================================================
