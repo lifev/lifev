@@ -256,8 +256,8 @@ MultiscaleCoupling::saveSolution()
                     else
                     {
                         output.open( filename.c_str(), std::ios::app );
-                        output << "  " << M_globalData->dataTime()->time() << "    " << flowRate << "    " << stress << std::endl;
                     }
+                    output << "  " << M_globalData->dataTime()->time() << "    " << flowRate << "    " << stress << std::endl;
                     output.close();
                 }
             }
