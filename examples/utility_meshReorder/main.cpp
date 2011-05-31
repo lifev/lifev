@@ -71,9 +71,10 @@ int main(int argc, char** argv)
         MPI_Comm_create(MPI_COMM_WORLD, newGroup, &MPIcomm);
         if(me==0)
         {
-            mesh->orderMesh( MPIcomm);
+            //mesh->orderMesh( MPIcomm);
             //solidData.mesh()->orderMesh( MPIcomm);
-            Exporter<RegionMesh3D<LinearTetra> >::writeMeshMedit( mesh_output , *mesh);
+
+            //Exporter<RegionMesh3D<LinearTetra> >::writeMeshMedit( mesh_output , *mesh);
             //writeMesh( "solid_ord.mesh", *solidData.mesh());
         }
 
@@ -111,7 +112,7 @@ int main(int argc, char** argv)
             *mesh, SolidInterfaceFlag,
             0., &edgeFlag);
         mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), TimeAdvanceNewmarker);
-        Exporter<RegionMesh3D<LinearTetra> >::writeMeshMedit( mesh_output , *mesh2);
+        //Exporter<RegionMesh3D<LinearTetra> >::writeMeshMedit( mesh_output , *mesh2);
 
     }
     MPI_Finalize();
