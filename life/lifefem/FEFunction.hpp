@@ -134,8 +134,8 @@ public:
       @param time Time in the evaluation.
       @note The method does not work for matrix value functions.
     */
-    inline void interpolate ( FEField_Type& interpolatedFct,
-                              const Real& time = 0. ) const
+    void interpolate ( FEField_Type& interpolatedFct,
+                       const Real& time = 0. ) const
     {
         interpolatedFct.getFESpace().interpolate( this, interpolatedFct.getVector(), time );
     }
@@ -144,7 +144,7 @@ public:
     /*!
       @param fieldPtr Pointer of a scalar field which as to be added.
     */
-    inline void addScalarField ( const FEScalarFieldPtr_Type& fieldPtr )
+    void addScalarField ( const FEScalarFieldPtr_Type& fieldPtr )
     {
         M_scalarFields.push_back( fieldPtr );
     }
@@ -153,7 +153,7 @@ public:
     /*!
       @param fieldPtr Pointer of a vector field which as to be added.
     */
-    inline void addVectorField ( const FEVectorFieldPtr_Type& fieldPtr )
+    void addVectorField ( const FEVectorFieldPtr_Type& fieldPtr )
     {
         M_vectorFields.push_back( fieldPtr );
     }
@@ -168,7 +168,7 @@ public:
       @param i Index of the scalar field.
       @return Constant FEScalarFieldPtr_Type reference stored of index i.
     */
-    inline const FEScalarFieldPtr_Type& scalarFieldPtr ( const UInt& i ) const
+    const FEScalarFieldPtr_Type& scalarFieldPtr ( const UInt& i ) const
     {
         ASSERT ( i < M_scalarFields.size() , "Index out of range.");
         return M_scalarFields[ i ];
@@ -179,7 +179,7 @@ public:
       @param i Index of the scalar field.
       @return FEScalarFieldPtr_Type reference stored of index i.
     */
-    inline FEScalarFieldPtr_Type& scalarFieldPtr ( const UInt& i )
+    FEScalarFieldPtr_Type& scalarFieldPtr ( const UInt& i )
     {
         ASSERT ( i < M_scalarFields.size() , "Index out of range.");
         return M_scalarFields[ i ];
@@ -190,7 +190,7 @@ public:
       @param i Index of the scalar field.
       @return Constant FEScalarField_Type reference stored of index i.
     */
-    inline const FEScalarField_Type& scalarField ( const UInt& i ) const
+    const FEScalarField_Type& scalarField ( const UInt& i ) const
     {
         ASSERT ( i < M_scalarFields.size() , "Index out of range.");
         return *( M_scalarFields[ i ] );
@@ -201,7 +201,7 @@ public:
       @param i Index of the scalar field.
       @return FEScalarField_Type reference stored of index i.
     */
-    inline FEScalarField_Type& scalarField ( const UInt& i )
+    FEScalarField_Type& scalarField ( const UInt& i )
     {
         ASSERT ( i < M_scalarFields.size() , "Index out of range.");
         return *( M_scalarFields[ i ] );
@@ -212,7 +212,7 @@ public:
       @param i Index of the vector field.
       @return Constant FEVectorFieldPtr_Type reference stored of index i.
     */
-    inline const FEVectorFieldPtr_Type& vectorFieldPtr ( const UInt& i ) const
+    const FEVectorFieldPtr_Type& vectorFieldPtr ( const UInt& i ) const
     {
         ASSERT ( i < M_vectorFields.size() , "Index out of range.");
         return M_vectorFields[ i ];
@@ -223,7 +223,7 @@ public:
       @param i Index of the vector field.
       @return FEVectorFieldPtr_Type reference stored of index i.
     */
-    inline FEVectorFieldPtr_Type& vectorFieldPtr ( const UInt& i )
+    FEVectorFieldPtr_Type& vectorFieldPtr ( const UInt& i )
     {
         ASSERT ( i < M_vectorFields.size() , "Index out of range.");
         return M_vectorFields[ i ];
@@ -234,7 +234,7 @@ public:
       @param i Index of the vector field.
       @return Constant FEVectorField_Type reference stored of index i.
     */
-    inline const FEVectorField_Type& vectorField ( const UInt& i ) const
+    const FEVectorField_Type& vectorField ( const UInt& i ) const
     {
         ASSERT ( i < M_vectorFields.size() , "Index out of range.");
         return *( M_vectorFields[ i ] );
@@ -245,7 +245,7 @@ public:
       @param i Index of the vector field.
       @return FEVectorField_Type reference stored of index i.
     */
-    inline FEVectorField_Type& vectorField ( const UInt& i )
+    FEVectorField_Type& vectorField ( const UInt& i )
     {
         ASSERT ( i < M_vectorFields.size() , "Index out of range.");
         return *( M_vectorFields[ i ] );

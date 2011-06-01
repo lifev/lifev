@@ -137,6 +137,21 @@ public:
 
     //@}
 
+    //! @name Operators
+    //@{
+
+    FEField & operator = ( const FEField& field )
+    {
+        if ( this != & field )
+        {
+            M_FESpace = field.M_FESpace;
+            M_vector = field.M_vector;
+        }
+        return *this;
+    }
+
+    //@}
+
     //! @name Methods
     //@{
 
@@ -162,13 +177,13 @@ public:
       @param createVector True if the vector is created, false otherwise. Default value: false.
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
-    inline void setFESpacePtr ( const FESpacePtr_Type& fESpace,
-                                const bool createVector = false,
-                                const MapEpetraType& mapType = Repeated )
+    void setFESpacePtr ( const FESpacePtr_Type& fESpace,
+                         const bool createVector = false,
+                         const MapEpetraType& mapType = Repeated )
     {
         M_FESpace = fESpace;
 
-        if ( !createVector )
+        if ( createVector )
         {
             M_vector.reset ( new vector_Type ( M_FESpace->map(), mapType ) );
         }
@@ -178,7 +193,7 @@ public:
     /*!
       @param vector Pointer of a vector.
     */
-    inline void setVectorPtr ( const vectorPtr_Type& vector )
+    void setVectorPtr ( const vectorPtr_Type& vector )
     {
         M_vector = vector;
     }
@@ -188,7 +203,7 @@ public:
       @param fESpace Pointer of a FESpace.
       @param vector Pointer of a vector.
     */
-    inline void setUp ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector )
+    void setUp ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector )
     {
         this->setFESpacePtr ( fESpace, false );
         this->setVectorPtr ( vector );
@@ -203,7 +218,7 @@ public:
     /*!
       @return Constant FESpace_Type reference of the finite element space.
     */
-    inline const FESpace_Type& getFESpace () const
+    const FESpace_Type& getFESpace () const
     {
         return *M_FESpace;
     }
@@ -212,7 +227,7 @@ public:
     /*!
       @return FESpace_Type reference of the finite element space.
     */
-    inline FESpace_Type& getFESpace ()
+    FESpace_Type& getFESpace ()
     {
         return *M_FESpace;
     }
@@ -221,7 +236,7 @@ public:
     /*!
       @return Constant vectorPtr_Type reference of the vector.
     */
-    inline const vectorPtr_Type& getVectorPtr () const
+    const vectorPtr_Type& getVectorPtr () const
     {
         return M_vector;
     }
@@ -230,7 +245,7 @@ public:
     /*!
       @return vectorPtr_Type reference of the vector.
     */
-    inline vectorPtr_Type& getVectorPtr ()
+    vectorPtr_Type& getVectorPtr ()
     {
         return M_vector;
     }
@@ -239,7 +254,7 @@ public:
     /*!
       @return Constant vector_Type reference of the vector.
     */
-    inline const vector_Type& getVector () const
+    const vector_Type& getVector () const
     {
         return *M_vector;
     }
@@ -248,7 +263,7 @@ public:
     /*!
       @return vector_Type reference of the vector.
     */
-    inline vector_Type& getVector ()
+    vector_Type& getVector ()
     {
         return *M_vector;
     }
@@ -345,9 +360,9 @@ public:
       @param point Point where the field is evaluated, vector format.
       @return The scalar value of the field.
     */
-    inline virtual return_Type eval ( const UInt& iElem, 
-                                      const point_Type& P, 
-                                      const Real& time = 0. ) const
+    virtual return_Type eval ( const UInt& iElem, 
+                               const point_Type& P, 
+                               const Real& time = 0. ) const
     {
         // Evaluate the field using a method implemented in FESpace
         return this->M_FESpace->feInterpolateValue( iElem, *(this->M_vector), P );
@@ -438,9 +453,9 @@ public:
       @param point Point where the field is evaluated, vector format.
       @return The vector value of the field.
     */
-    inline virtual return_Type eval ( const UInt& iElem, 
-                                      const point_Type& P, 
-                                      const Real& time = 0. ) const
+    virtual return_Type eval ( const UInt& iElem, 
+                               const point_Type& P, 
+                               const Real& time = 0. ) const
     {
         Vector value( P.size() );
         // Evaluate each component of the vector field with a method in the class FESpace.
