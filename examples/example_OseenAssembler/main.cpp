@@ -71,8 +71,6 @@ using namespace LifeV;
 
 namespace
 {
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 
 enum DiffusionType{ViscousStress, StiffStrain};
 enum MeshType{RegularMesh, File};
@@ -378,7 +376,7 @@ main( int argc, char** argv )
     if(convectionTerm == KIO91) BDFOrder = 3;
 
     // bdf object to store the previous solutions
-    TimeAdvanceBDFNavierStokes<vector_type> bdf;
+    TimeAdvanceBDF<vector_type> bdf;
     bdf.setup(BDFOrder);
     TimeAdvanceBDF<vector_type> bdfConvection;
     bdfConvection.setup(BDFOrder);
@@ -414,7 +412,7 @@ main( int argc, char** argv )
     *solution *= 0;
     *solution = *velocity;
     solution->add(*pressure,pressureOffset);
-    bdf.bdfVelocity().setInitialCondition( *solution );
+    bdf.setInitialCondition( *solution );
 
     // Initial solution (interpolation or projection)
     currentTime += timestep;
@@ -471,7 +469,7 @@ main( int argc, char** argv )
         }
 
         // Updating bdf
-        bdf.bdfVelocity().shiftRight( *solution );
+        bdf.shiftRight( *solution );
 
         if(convectionTerm == KIO91)
         {
@@ -525,17 +523,17 @@ main( int argc, char** argv )
         if (verbose) std::cout << std::endl << "[t = "<< currentTime << " s.]" << std::endl;
 
         if (verbose) std::cout << "Updating the system... " << std::flush;
-        bdf.bdfVelocity().updateRHSContribution( timestep );
-        *rhs  = *massMatrix*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        bdf.updateRHSContribution( timestep );
+        *rhs  = *massMatrix*bdf.rhsContributionFirstDerivative();
 
         systemMatrix.reset(new matrix_type( solutionMap ));
-        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / timestep;
+        double alpha = bdf.coefficientFirstDerivative( 0 ) / timestep;
         *systemMatrix += *massMatrix*alpha;
         *systemMatrix += *baseMatrix;
 
         if(convectionTerm == SemiImplicit)
         {
-            *beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+            *beta = bdf.extrapolation(); // Extrapolation for the convective term
             oseenAssembler.addConvection(systemMatrix,*beta);
         }
         else if(convectionTerm == Explicit)
@@ -560,7 +558,7 @@ main( int argc, char** argv )
         linearSolver.solveSystem(*rhs,*solution,systemMatrix);
 
         // Updating the BDF scheme
-        bdf.bdfVelocity().shiftRight( *solution );
+        bdf.shiftRight( *solution );
 
         if(convectionTerm == KIO91)
         {
