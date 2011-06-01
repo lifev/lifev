@@ -86,8 +86,16 @@ public:
 
     typedef Epetra_Map                                            map_type;
     typedef boost::shared_ptr<map_type>                           map_ptrtype;
+
+    /* Double shared_ptr are used here to ensure that all the similar MapEpetra
+       point to the same exporter/importer. If double shared_ptr were not used, a
+       map initialized without importer/exporter (i.e. with a shared_ptr
+       pointing to 0) would not "gain" the importer/exporter created by another
+       map.*/
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Export> > exporter_ptrtype;
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importer_ptrtype;
+
+
     typedef Epetra_Comm                                           comm_type;
     typedef boost::shared_ptr<comm_type>                          comm_ptrtype;
 
@@ -196,7 +204,7 @@ public:
       The addition operator combines two map together to create a new map
       @param epetraMap MapEpetra to be combined with the current map
      */
-    MapEpetra operator +  ( const MapEpetra& epetraMap );
+    MapEpetra operator +  ( const MapEpetra& epetraMap ) const;
 
     //! Addition operator
     /*!
@@ -211,7 +219,7 @@ public:
       to create a new map
       @param size Size of the map to be added to the current map
      */
-    MapEpetra operator +  ( Int const size );
+    MapEpetra operator +  ( Int const size ) const;
 
     //@}
 

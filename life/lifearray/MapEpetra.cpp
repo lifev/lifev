@@ -245,11 +245,11 @@ MapEpetra::operator += ( const MapEpetra& epetraMap )
 }
 
 MapEpetra
-MapEpetra::operator + ( const MapEpetra& epetraMap )
+MapEpetra::operator + ( const MapEpetra& epetraMap ) const
 {
     MapEpetra map( *this );
     map += epetraMap;
-    createImportExport();
+    //createImportExport();
     return map;
 }
 
@@ -265,11 +265,11 @@ MapEpetra::operator += ( Int const size )
 }
 
 MapEpetra
-MapEpetra::operator +  ( Int const size )
+MapEpetra::operator +  ( Int const size ) const
 {
     MapEpetra map( *this );
     map += size;
-    createImportExport();
+    //createImportExport();
     return map;
 }
 

@@ -60,6 +60,9 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <cstdlib>
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
+#include <life/lifefem/ETIntegrateMatrixElement.hpp>
 #include <vector>
 
 //@@
@@ -167,6 +170,13 @@ public:
       @param scalar Value for the multiplication
      */
     MatrixEpetra  operator *  ( const DataType scalar ) const;
+
+	template< typename MeshType, typename TestSpace, typename SolutionSpace, typename ExpressionType >
+	void operator +=
+	( ETIntegrateMatrixElement<MeshType,TestSpace,SolutionSpace,ExpressionType> integrator )
+	{
+		integrator.addTo(*this);
+	}
 
     //@}
 
@@ -461,6 +471,9 @@ public:
 
     //! Return the shared_pointer of the Epetra_FECrsMatrix
     matrix_ptrtype& matrixPtr(){ return M_epetraCrs; }
+
+    //! Return the shared_pointer of the Epetra_Map
+    boost::shared_ptr<MapEpetra> mapPtr(){ return M_map; }
 
     //! Return the const shared_pointer of the Epetra_FECrsMatrix
     const matrix_ptrtype& matrixPtr() const{ return M_epetraCrs; }
@@ -1173,7 +1186,7 @@ void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::str
 
     // Save the matrix into the file
     HDF5.Write( matrixName.data(), *M_epetraCrs );
-    
+
     // Close the file
     HDF5.Close();
 
