@@ -232,6 +232,15 @@ public:
         return *M_FESpace;
     }
 
+    //! Return the finite element space.
+    /*!
+      @return FESpace_Type reference of the finite element space.
+    */
+    FESpace_Type& getFESpace ()
+    {
+        return *M_FESpace;
+    }
+
     //! Return the vector where the value are stored.
     /*!
       @return Constant vectorPtr_Type reference of the vector.
