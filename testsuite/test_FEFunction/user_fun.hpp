@@ -35,8 +35,14 @@
 
 #include <fefct.hpp>
 
-namespace LifeV
+namespace dataProblem
 {
+
+using namespace LifeV;
+
+// ===================================================
+//!                     Typedef
+// ===================================================
 
 typedef LinearTetra geoElement_Type;
 typedef RegionMesh3D < geoElement_Type > regionMesh_Type;
@@ -61,13 +67,6 @@ typedef boost::shared_ptr < FEVectorFct_Type > FEVectorFctPtr_Type;
 
 typedef FEFunction < regionMesh_Type, map_Type, Real > FEScalarFct_Type;
 typedef boost::shared_ptr < FEScalarFct_Type > FEScalarFctPtr_Type;
-
-} // Namespace LifeV
-
-namespace dataProblem
-{
-
-using namespace LifeV;
 
 // ===================================================
 //!                       Data

@@ -113,6 +113,8 @@ fefct::fefct( int argc,
 Real
 fefct::run()
 {
+    using namespace dataProblem;
+
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
     LifeChrono chronoFiniteElementSpace;
@@ -150,7 +152,7 @@ fefct::run()
     readMesh( *fullMeshPtr, meshData );
 
     // Partition the mesh using ParMetis
-    MeshPartitioner< regionMesh_Type >  meshPart( fullMeshPtr, Members->comm );
+    MeshPartitioner < regionMesh_Type >  meshPart( fullMeshPtr, Members->comm );
 
     // Stop chronoReadAndPartitionMesh
     chronoReadAndPartitionMesh.stop();
@@ -246,7 +248,7 @@ fefct::run()
     vectorField->getVector() = 3.;
 
     // Function
-    dataProblem::MyFun function;
+    MyFun function;
 
     // Scalar field for visualize the function
     FEScalarFieldPtr_Type scalarFieldFunction ( new FEScalarField_Type ( function_FESpace ) );
