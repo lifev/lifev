@@ -70,6 +70,7 @@ typedef boost::numeric::ublas::matrix<Real> Matrix;
   more efficient compared to the case where the id of the geometrical element is not given.
 
   @todo Add a method without the element id, less efficient but more flexible.
+  @note The attribute which represent a point is an array of three elements. Change in future with a standard container.
 */
 template < typename MeshType, typename MapType, typename ReturnType >
 class FEField
