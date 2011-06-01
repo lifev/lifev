@@ -180,31 +180,9 @@ public:
     //! Return the i-th scalar field.
     /*!
       @param i Index of the scalar field.
-      @return FEScalarFieldPtr_Type reference stored of index i.
-    */
-    FEScalarFieldPtr_Type& scalarFieldPtr ( const UInt& i )
-    {
-        ASSERT ( i < M_scalarFields.size() , "Index out of range.");
-        return M_scalarFields[ i ];
-    }
-
-    //! Return the i-th scalar field.
-    /*!
-      @param i Index of the scalar field.
       @return Constant FEScalarField_Type reference stored of index i.
     */
     const FEScalarField_Type& scalarField ( const UInt& i ) const
-    {
-        ASSERT ( i < M_scalarFields.size() , "Index out of range.");
-        return *( M_scalarFields[ i ] );
-    }
-
-    //! Return the i-th scalar field.
-    /*!
-      @param i Index of the scalar field.
-      @return FEScalarField_Type reference stored of index i.
-    */
-    FEScalarField_Type& scalarField ( const UInt& i )
     {
         ASSERT ( i < M_scalarFields.size() , "Index out of range.");
         return *( M_scalarFields[ i ] );
@@ -224,31 +202,9 @@ public:
     //! Return the i-th vector field.
     /*!
       @param i Index of the vector field.
-      @return FEVectorFieldPtr_Type reference stored of index i.
-    */
-    FEVectorFieldPtr_Type& vectorFieldPtr ( const UInt& i )
-    {
-        ASSERT ( i < M_vectorFields.size() , "Index out of range.");
-        return M_vectorFields[ i ];
-    }
-
-    //! Return the i-th vector field.
-    /*!
-      @param i Index of the vector field.
       @return Constant FEVectorField_Type reference stored of index i.
     */
     const FEVectorField_Type& vectorField ( const UInt& i ) const
-    {
-        ASSERT ( i < M_vectorFields.size() , "Index out of range.");
-        return *( M_vectorFields[ i ] );
-    }
-
-    //! Return the i-th vector field.
-    /*!
-      @param i Index of the vector field.
-      @return FEVectorField_Type reference stored of index i.
-    */
-    FEVectorField_Type& vectorField ( const UInt& i )
     {
         ASSERT ( i < M_vectorFields.size() , "Index out of range.");
         return *( M_vectorFields[ i ] );

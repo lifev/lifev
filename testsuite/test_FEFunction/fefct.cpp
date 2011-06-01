@@ -233,7 +233,9 @@ fefct::run()
 
     // First scalar field
     FEScalarFieldPtr_Type scalarField1 ( new FEScalarField_Type ( scalarField1_FESpace ) );
-    scalarField1->getVector() = 1.;
+    
+    // Create a dummy epetra vector
+    scalarField1->getVector() = 1. ;
 
     // Second scalar field
     FEScalarFieldPtr_Type scalarField2 ( new FEScalarField_Type ( scalarField2_FESpace ) );

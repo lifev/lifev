@@ -189,13 +189,22 @@ public:
         }
     }
 
-    //! Set the vector
+    //! Set the epetra vector
     /*!
-      @param vector Pointer of a vector.
+      @param vector Pointer of an epetra vector.
     */
     void setVectorPtr ( const vectorPtr_Type& vector )
     {
         M_vector = vector;
+    }
+
+    //! Set the epetra vector
+    /*!
+      @param vector The epetra vector.
+    */
+    void setVector ( const vector_Type& vector )
+    {
+        M_vector.reset ( new vector_Type ( vector ) );
     }
 
     //! Set both FESpace and vector
@@ -223,15 +232,6 @@ public:
         return *M_FESpace;
     }
 
-    //! Return the finite element space.
-    /*!
-      @return FESpace_Type reference of the finite element space.
-    */
-    FESpace_Type& getFESpace ()
-    {
-        return *M_FESpace;
-    }
-
     //! Return the vector where the value are stored.
     /*!
       @return Constant vectorPtr_Type reference of the vector.
@@ -243,11 +243,11 @@ public:
 
     //! Return the vector where the value are stored.
     /*!
-      @return vectorPtr_Type reference of the vector.
+      @return vector_Type reference of the vector.
     */
-    vectorPtr_Type& getVectorPtr ()
+    vector_Type& getVector ()
     {
-        return M_vector;
+        return *M_vector;
     }
 
     //! Return the vector where the value are stored.
@@ -255,15 +255,6 @@ public:
       @return Constant vector_Type reference of the vector.
     */
     const vector_Type& getVector () const
-    {
-        return *M_vector;
-    }
-
-    //! Return the vector where the value are stored.
-    /*!
-      @return vector_Type reference of the vector.
-    */
-    vector_Type& getVector ()
     {
         return *M_vector;
     }
