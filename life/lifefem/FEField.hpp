@@ -368,7 +368,10 @@ public:
 
 };
 
-inline return_Type FEScalarField::eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
+template < typename MeshType, typename MapType >
+inline Real 
+FEScalarField < MeshType, MapType >::
+eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
 {
     // Evaluate the field using a method implemented in FESpace
     return this->M_FESpace->feInterpolateValue( iElem, *(this->M_vector), P );
@@ -462,7 +465,10 @@ public:
 
 };
 
-inline return_Type FEVectorField::eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
+template < typename MeshType, typename MapType >
+inline Vector
+FEVectorField < MeshType, MapType >::
+eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
 {
     Vector value( P.size() );
 
@@ -474,7 +480,6 @@ inline return_Type FEVectorField::eval ( const UInt& iElem, const point_Type& P,
     return value;
 
 } // eval
-
 
 typedef FEScalarField < RegionMesh3D < LinearTetra >, MapEpetra > FEScalarFieldTetra;
 
