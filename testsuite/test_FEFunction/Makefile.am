@@ -6,7 +6,8 @@
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
-#           Date: 00-00-0000
+#                 Michel Kern <michel.kern@inria.fr>
+#           Date: 01-06-2011
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
