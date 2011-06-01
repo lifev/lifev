@@ -147,6 +147,10 @@ public:
     void addGradPressure(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Add the term corresponding to the divergence free constraint
+    /*!
+     * The default choice coefficient=1.0 leads to a divergence matrix which is the transpose of the
+     * pressure gradient matrix.
+     */
     void addDivergence(matrix_ptrType matrix,const Real& coefficient=1.0)
     {
         addDivergence(matrix,0,M_uFESpace->dof().numTotalDof()*nDimension,coefficient);
