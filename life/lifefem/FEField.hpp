@@ -362,15 +362,18 @@ public:
     */
     virtual return_Type eval ( const UInt& iElem, 
                                const point_Type& P, 
-                               const Real& time = 0. ) const
-    {
-        // Evaluate the field using a method implemented in FESpace
-        return this->M_FESpace->feInterpolateValue( iElem, *(this->M_vector), P );
-    }
-   
+                               const Real& time = 0. ) const;
+
     //!}
 
 };
+
+inline return_Type FEScalarField::eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
+{
+    // Evaluate the field using a method implemented in FESpace
+    return this->M_FESpace->feInterpolateValue( iElem, *(this->M_vector), P );
+} // eval
+
 
 //! FEVectorField - This class gives an abstract implementation of a finite element vector field.
 /*!
@@ -453,20 +456,25 @@ public:
       @param point Point where the field is evaluated, vector format.
       @return The vector value of the field.
     */
-    virtual return_Type eval ( const UInt& iElem, 
-                               const point_Type& P, 
-                               const Real& time = 0. ) const
-    {
-        Vector value( P.size() );
-        // Evaluate each component of the vector field with a method in the class FESpace.
-        for ( UInt i = 0; i < P.size(); ++i )
-        {
-            value(i) = this->M_FESpace->feInterpolateValue( iElem, *(this->M_vector), P, i );
-        }
-        return value;
-    }
+    virtual return_Type eval ( const UInt& iElem,
+                               const point_Type& P,
+                               const Real& time = 0. ) const;
 
 };
+
+inline return_Type FEVectorField::eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
+{
+    Vector value( P.size() );
+
+    // Evaluate each component of the vector field with a method in the class FESpace.
+    for ( UInt i = 0; i < P.size(); ++i )
+    {
+        value(i) = this->M_FESpace->feInterpolateValue( iElem, *(this->M_vector), P, i );
+    }
+    return value;
+
+} // eval
+
 
 typedef FEScalarField < RegionMesh3D < LinearTetra >, MapEpetra > FEScalarFieldTetra;
 
