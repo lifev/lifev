@@ -107,9 +107,12 @@ public:
     //@{
 
     //! Empty constructor for the class.
-    FEFunction ( )
+    FEFunction ()
     {}
 
+    //! Virtual destructor.
+    virtual ~FEFunction ()
+    {}
 
     //! @name Methods
     //@{
