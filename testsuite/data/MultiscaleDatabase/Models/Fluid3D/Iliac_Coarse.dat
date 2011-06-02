@@ -5,17 +5,31 @@
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2011-03-10
+#           Date: 2011-06-02
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Fluid3D - Cylinder #####################################################################
+### MODEL: Fluid3D - Iliac ########################################################################
 ###################################################################################################
 
 [Multiscale]
-modelName        = Fluid3D_Cylinder_tube20
+modelName        = Fluid3D_Iliac_Coarse
 modelType        = Fluid3D
-couplingFlags    = '2 3'
+couplingFlags    = '2 3 4 5 6'
+
+#Note on the flags: 
+# 2: Abdominal Aorta E,        Area = 1.528053101775165e+00 - (RS_041: 0.9160884178 0.8494866535)
+# 3: Inner Iliac (left),       Area = 1.608700348268665e-01 - (RS_045: 0.125663706143592)
+# 4: External Iliac (left),    Area = 1.991225727820763e-01 - (RS_044: 0.3216990877 0.2922466566)
+# 5: Inner Iliac (right),      Area = 1.686868541692753e-01 - (RS_051: 0.125663706143592)
+# 6: External Iliac (right),   Area = 2.210729557211047e-01 - (RS_050: 0.3216990877 0.2922466566)
+
+### Iliac dimensions (measures taken from the centerline):
+# Abdominal Aorta E lenght        = 3.57 cm (1D lenght: 2.0 cm)
+# Inner Iliac (left) lenght       = 3.15 cm (1D length: 5.0 cm)
+# External Iliac (left) lenght    = 5.70 cm (1D length: 14.4 cm)
+# Inner Iliac (right) lenght      = 3.00 cm (1D length: 5.0 cm)
+# External Iliac (right) lenght   = 5.57 cm (1D length: 14.4 cm)
 
 
 
@@ -43,11 +57,7 @@ diagonalBlockPrec   = false
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = tube20.mesh      #  1050 Vertex
-    #mesh_file       = tube2x4x20.mesh  #  1785 Vertex
-    #mesh_file       = tube40.mesh      # 9486 Vertex
-    #mesh_file       = tube60.mesh      # 25063 Vertex
-    #mesh_file       = tube80.mesh      # 71820 Vertex
+    mesh_file       = iliac_fluid_scaled.mesh
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -70,11 +80,11 @@ diagonalBlockPrec   = false
     inverseOmega    = true             # Use inverse minimization
 
     [../ipstab]
-    gammaBeta       = 0.02
+    gammaBeta       = 1
     gammaDiv        = 0.2
-    gammaPress      = 0.2
+    gammaPress      = 0.05
     max_iter_reuse  = 100
-    reuse           = false
+    reuse           = true
 
     #[../valuespersection]
     #computeMeanValuesPerSection    = 0
@@ -94,7 +104,7 @@ diagonalBlockPrec   = false
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
     #prectype                = AztecOO
@@ -151,8 +161,7 @@ diagonalBlockPrec   = false
         [../]
 
     [../boundary_conditions]
-    list = 'Wall InletRing OutletRing'
-    #list = 'Wall InletRing OutletRing Inlet_NoVelocityOnXY Outlet_NoVelocityOnXY'
+    list = 'Wall'
 
         [./Wall]
         type       = Essential
@@ -161,34 +170,7 @@ diagonalBlockPrec   = false
         component  = 3
         function   = 0
 
-        [../InletRing]
-        type       = Essential
-        flag       = 20
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../OutletRing]
-        type       = Essential
-        flag       = 30
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../Inlet_NoVelocityOnXY]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = '0 1'
-        function   = 0
-
-        [../Outlet_NoVelocityOnXY]
-        type       = Essential
-        flag       = 3
-        mode       = Component
-        component  = '0 1'
-        function   = 0
-
         [../]
 
     [../]
+

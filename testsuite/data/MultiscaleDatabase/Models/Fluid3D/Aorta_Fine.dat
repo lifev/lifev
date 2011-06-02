@@ -5,17 +5,39 @@
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2011-03-10
+#           Date: 2011-06-02
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Fluid3D - Cylinder #####################################################################
+### MODEL: Fluid3D - Aorta ########################################################################
 ###################################################################################################
 
 [Multiscale]
-modelName        = Fluid3D_Cylinder_tube20
+modelName        = Fluid3D_Aorta_Fine
 modelType        = Fluid3D
-couplingFlags    = '2 3'
+couplingFlags    = '2 3 4 5 6 7 8 9'
+
+### Note on the flags: 
+# 2: Ascending Aorta,        Area = 7.666204022361373e+00 - (RS_001: 6.7886675651 6.7425646930)        - Ratio 1.34 (sqrt: 1.066)
+# 3: Thoracic Aorta,         Area = 2.460573813714928e+00 - (RS_027: 2.1382464998 1.3069810837)
+# 4: Subclavian B (left),    Area = 4.031583374473228e-01 - (RS_007/RS_021: 0.5152997350 0.1734944543) - Ratio 0.81 (sqrt: 0.90)
+# 5: Common Carotid (right), Area = 4.485879453850000e-01 - (RS_005: 1.4313881528 0.3848451001)        - Ratio 0.41 (sqrt: 0.64)
+# 6: Vertebral (right),      Area = 7.038741686883122e-02 - (RS_006: 0.1075210086 0.0615752160)        - Ratio 0.69 (sqrt: 0.83)
+# 7: Subclavian B (right),   Area = 4.804978622581893e-01 - (RS_007/RS_021: 0.5152997350 0.1734944543) - Ratio 1
+# 8: Common Carotid (left),  Area = 4.343466128489345e-01 - (RS_015: 1.1309733553 0.2827433388 )       - Ratio 0.59 (sqrt: 0.77)
+# 9: Vertebral (left),       Area = 1.989038523172571e-01 - (RS_020: 0.1075210086 0.0615752160 )       - Ratio 0.94 (sqrt: 1.39)
+
+### Aorta dimensions (measures taken from the centerline):
+# Arch heigh                    = 18.2 cm 
+# Subclavian B (left) lenght    = 2.53 cm (1D length: 42.2 cm) -> 1D estimated area: 0.494807617460403 OK
+# Common Carotid (right) lenght = 3.07 cm (1D length: 9.4 cm)  -> 1D estimated area: 1.089591645162872
+# Vertebral (right) lenght      = 1.66 cm (1D length: 14.9 cm) -> 1D estimated area: 0.102402215598926
+# Subclavian B (right) lenght   = 2.80 cm (1D length: 42.2 cm) -> 1D estimated area: 0.492620711636019
+# Common Carotid (left) lenght  = 6.61 cm (1D length: 13.9 cm) -> 1D estimated area: 0.727606419396043
+# Vertebral (left) lenght       = 1.85 cm (1D length: 14.8 cm) -> 1D estimated area: 0.101816329653020
+# Subclavian A (left) lenght    = 5.03 cm (1D length: 3.4 cm)
+# Brachiocephalic (left) lenght = 5.25 cm (1D length: 3.4 cm)  - Ratio 1.54
+# Subclavian A (right) lenght   = 2.93 cm (1D length: 3.4 cm)
 
 
 
@@ -43,11 +65,7 @@ diagonalBlockPrec   = false
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = tube20.mesh      #  1050 Vertex
-    #mesh_file       = tube2x4x20.mesh  #  1785 Vertex
-    #mesh_file       = tube40.mesh      # 9486 Vertex
-    #mesh_file       = tube60.mesh      # 25063 Vertex
-    #mesh_file       = tube80.mesh      # 71820 Vertex
+    mesh_file       = aorta_fluid_fine.mesh
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -70,11 +88,11 @@ diagonalBlockPrec   = false
     inverseOmega    = true             # Use inverse minimization
 
     [../ipstab]
-    gammaBeta       = 0.02
+    gammaBeta       = 1
     gammaDiv        = 0.2
-    gammaPress      = 0.2
+    gammaPress      = 0.05
     max_iter_reuse  = 100
-    reuse           = false
+    reuse           = true
 
     #[../valuespersection]
     #computeMeanValuesPerSection    = 0
@@ -94,7 +112,7 @@ diagonalBlockPrec   = false
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
     #prectype                = AztecOO
@@ -151,8 +169,7 @@ diagonalBlockPrec   = false
         [../]
 
     [../boundary_conditions]
-    list = 'Wall InletRing OutletRing'
-    #list = 'Wall InletRing OutletRing Inlet_NoVelocityOnXY Outlet_NoVelocityOnXY'
+    list = 'Wall Rings'
 
         [./Wall]
         type       = Essential
@@ -161,34 +178,14 @@ diagonalBlockPrec   = false
         component  = 3
         function   = 0
 
-        [../InletRing]
+        [../Rings]
         type       = Essential
         flag       = 20
         mode       = Full
         component  = 3
         function   = 0
 
-        [../OutletRing]
-        type       = Essential
-        flag       = 30
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../Inlet_NoVelocityOnXY]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = '0 1'
-        function   = 0
-
-        [../Outlet_NoVelocityOnXY]
-        type       = Essential
-        flag       = 3
-        mode       = Component
-        component  = '0 1'
-        function   = 0
-
         [../]
 
     [../]
+

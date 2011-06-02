@@ -82,12 +82,12 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = IdealThoracicAortaA_RS2009_18_fluid.mesh
+    mesh_file       = IdealThoracicAortaA_RS2009_18_fluid_2.mesh
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
-    vel_order       = P1               # P1, P1Bubble, P2
-    #vel_order       = P1Bubble         # P1, P1Bubble, P2
+    #vel_order       = P1               # P1, P1Bubble, P2
+    vel_order       = P1Bubble         # P1, P1Bubble, P2
     #vel_order       = P2               # P1, P1Bubble, P2
     press_order     = P1               # P1, P2
     stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it
@@ -164,7 +164,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
-    mesh_file        = IdealThoracicAortaA_RS2009_18_solid_RM.mesh  # mesh file
+    mesh_file        = IdealThoracicAortaA_RS2009_18_solid_2_RM.mesh  # mesh file
     order            = P1
 
     [../miscellaneous]
