@@ -160,8 +160,6 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 fluid_flag      =  1   # default: 1
 tolerance       =  0   # how far points are to be considered the same on the interface
 
-
-
 [solid]
 
     [./physics]
@@ -193,9 +191,12 @@ tolerance       =  0   # how far points are to be considered the same on the int
     linesearch = 0
 
     [../boundary_conditions]
-    #list = ' '                                                                         # Free dispacement
+    #list = ' '                                                                          # Free dispacement
+    #list = 'OuterWall_Robin'                                                            # Free dispacement + Robin on the external Wall
     list = 'AscendingAorta_ReferencePressure OuterWall_ReferencePressure'               # Free dispacement + Reference pressure
-    #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
+    #list = 'InternalRings_Clumped OuterWall_Robin'                                      # Clumped area + Robin on the external Wall
+    #list = 'InternalRings_Clumped 
+    #        AscendingAorta_ReferencePressure OuterWall_ReferencePressure'               # Clumped area + Reference pressure
         
         [./AscendingAorta_ReferencePressure]
         type       = Natural
@@ -208,6 +209,13 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 9
         mode       = Normal
         functionSolver = '-s_externalPressure'
+        
+        [../InternalRings_Clumped]
+        type       = EssentialVertices
+        flag       = 20
+        mode       = Full
+        component  = 3
+        function   = 0
         
         [../OuterWall_Robin]
         type       = Robin

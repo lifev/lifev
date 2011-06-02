@@ -188,13 +188,23 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     linesearch = 0
 
     [../boundary_conditions]
-    #list = ' '                                                                         # Free dispacement
+    #list = ' '                                                                          # Free dispacement
+    #list = 'OuterWall_Robin'                                                            # Free dispacement + Robin on the external Wall
     list = 'AscendingAorta_ReferencePressure    CeliacA_ReferencePressure 
             SubclavianBLeft_ReferencePressure   SubclavianBRight_ReferencePressure 
             VertebralLeft_ReferencePressure     VertebralRight_ReferencePressure
-            CommonCarotidLeft_ReferencePressure CommonCarotid_RightReferencePressure
-            OuterWall_ReferencePressure'                                                # Free dispacement + Reference pressure
-    #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
+            CommonCarotidLeft_ReferencePressure CommonCarotidRight_ReferencePressure
+            OuterWall_ReferencePressure'                                                # Free dispacement + Reference pressure            
+    #list = 'AscendingAorta_Clumped              CeliacA_Clumped          
+    #        SubclavianBLeft_Clumped             SubclavianBRight_Clumped          
+    #        VertebralLeft_Clumped               VertebralRight_Clumped         
+    #        CommonCarotidLeft_Clumped           CommonCarotidRight_Clumped         
+    #        OuterWall_Robin'                                                            # Clumped + Robin on the external Wall
+    #list = 'AscendingAorta_Clumped              CeliacA_Clumped          
+    #        SubclavianBLeft_Clumped             SubclavianBRight_Clumped          
+    #        VertebralLeft_Clumped               VertebralRight_Clumped         
+    #        CommonCarotidLeft_Clumped           CommonCarotidRight_Clumped         
+    #        OuterWall_ReferencePressure'                                                # Clumped + Reference pressure
         
         [./AscendingAorta_ReferencePressure]
         type       = Natural
@@ -214,7 +224,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         mode       = Normal
         functionSolver = '-s_externalPressure'
         
-        [../CommonCarotid_RightReferencePressure]
+        [../CommonCarotidRight_ReferencePressure]
         type       = Natural
         flag       = 5
         mode       = Normal
@@ -249,6 +259,62 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 10
         mode       = Normal
         functionSolver = '-s_externalPressure'
+        
+        [../AscendingAorta_Clumped]
+        type       = Essential
+        flag       = 2
+        mode       = Full
+        component  = 3
+        function   = 0
+                
+        [../CeliacA_Clumped]
+        type       = Essential
+        flag       = 3
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../SubclavianBLeft_Clumped]
+        type       = Essential
+        flag       = 4
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../CommonCarotidRight_Clumped]
+        type       = Essential
+        flag       = 5
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../VertebralRight_Clumped]
+        type       = Essential
+        flag       = 6
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../SubclavianBRight_Clumped]
+        type       = Essential
+        flag       = 7
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../CommonCarotidLeft_Clumped]
+        type       = Essential
+        flag       = 8
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../VertebralLeft_Clumped]
+        type       = Essential
+        flag       = 9
+        mode       = Full
+        component  = 3
+        function   = 0
         
         [../OuterWall_Robin]
         type       = Robin

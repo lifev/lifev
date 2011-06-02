@@ -171,11 +171,17 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     linesearch = 0
 
     [../boundary_conditions]
-    #list = ' '                                                                         # Free dispacement
+    #list = ' '                                                                          # Free dispacement
+    #list = 'OuterWall_Robin'                                                            # Free dispacement + Robin on the external Wall
     list = 'AbdominalAorta_ReferencePressure    OuterWall_ReferencePressure
             ExternalIliacLeft_ReferencePressure ExternalIliacRight_ReferencePressure
             InternalIliacLeft_ReferencePressure InternalIliacRight_ReferencePressure'   # Free dispacement + Reference pressure
-    #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
+    #list = 'AbdominalAorta_Clumped             OuterWall_Robin
+    #        ExternalIliacLeft_Clumped          ExternalIliacRight_Clumped          
+    #        InternalIliacLeft_Clumped          InternalIliacRight_Clumped'              # Fixed dispacement + Robin on the external Wall       
+    #list = 'AbdominalAorta_Clumped             OuterWall_ReferencePressure
+    #        ExternalIliacLeft_Clumped          ExternalIliacRight_Clumped          
+    #        InternalIliacLeft_Clumped          InternalIliacRight_Clumped'              # Fixed dispacement + Reference pressure
         
         [./AbdominalAorta_ReferencePressure]
         type       = Natural
@@ -212,6 +218,41 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 10
         mode       = Normal
         functionSolver = '-s_externalPressure'
+        
+        [../AbdominalAorta_Clumped]
+        type       = Essential
+        flag       = 5
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../ExternalIliacLeft_Clumped]
+        type       = Essential
+        flag       = 6
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../ExternalIliacRight_Clumped]
+        type       = Essential
+        flag       = 3
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../InternalIliacLeft_Clumped]
+        type       = Essential
+        flag       = 2
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../InternalIliacRight_Clumped]
+        type       = Essential
+        flag       = 4
+        mode       = Full
+        component  = 3
+        function   = 0
         
         [../OuterWall_Robin]
         type       = Robin

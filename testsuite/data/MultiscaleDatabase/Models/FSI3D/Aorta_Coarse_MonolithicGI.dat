@@ -188,9 +188,12 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     linesearch = 0
 
     [../boundary_conditions]
-    #list = ' '                                                                         # Free dispacement
+    #list = ' '                                                                          # Free dispacement
+    #list = 'OuterWall_Robin'                                                            # Free dispacement + Robin on the external Wall
     list = 'AscendingAorta_ReferencePressure OuterWall_ReferencePressure'               # Free dispacement + Reference pressure
-    #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
+    #list = 'InternalRings_Clumped OuterWall_Robin'                                      # Clumped area + Robin on the external Wall
+    #list = 'InternalRings_Clumped 
+    #        AscendingAorta_ReferencePressure OuterWall_ReferencePressure'               # Clumped area + Reference pressure
         
         [./AscendingAorta_ReferencePressure]
         type       = Natural
@@ -203,6 +206,13 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 9
         mode       = Normal
         functionSolver = '-s_externalPressure'
+        
+        [../InternalRings_Clumped]
+        type       = EssentialVertices
+        flag       = 20
+        mode       = Full
+        component  = 3
+        function   = 0
         
         [../OuterWall_Robin]
         type       = Robin
