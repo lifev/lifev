@@ -173,15 +173,15 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     [../boundary_conditions]
     #list = ' '                                                                          # Free dispacement
     #list = 'OuterWall_Robin'                                                            # Free dispacement + Robin on the external Wall
-    list = 'AbdominalAorta_ReferencePressure    OuterWall_ReferencePressure
-            ExternalIliacLeft_ReferencePressure ExternalIliacRight_ReferencePressure
-            InternalIliacLeft_ReferencePressure InternalIliacRight_ReferencePressure'   # Free dispacement + Reference pressure
+    #list = 'AbdominalAorta_ReferencePressure    OuterWall_ReferencePressure
+    #        ExternalIliacLeft_ReferencePressure ExternalIliacRight_ReferencePressure
+    #        InternalIliacLeft_ReferencePressure InternalIliacRight_ReferencePressure'   # Free dispacement + Reference pressure
     #list = 'AbdominalAorta_Clumped             OuterWall_Robin
     #        ExternalIliacLeft_Clumped          ExternalIliacRight_Clumped          
     #        InternalIliacLeft_Clumped          InternalIliacRight_Clumped'              # Fixed dispacement + Robin on the external Wall       
-    #list = 'AbdominalAorta_Clumped             OuterWall_ReferencePressure
-    #        ExternalIliacLeft_Clumped          ExternalIliacRight_Clumped          
-    #        InternalIliacLeft_Clumped          InternalIliacRight_Clumped'              # Fixed dispacement + Reference pressure
+    list = 'AbdominalAorta_Clumped             OuterWall_ReferencePressure
+            ExternalIliacLeft_Clumped          ExternalIliacRight_Clumped          
+            InternalIliacLeft_Clumped          InternalIliacRight_Clumped'              # Fixed dispacement + Reference pressure
         
         [./AbdominalAorta_ReferencePressure]
         type       = Natural
