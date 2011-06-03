@@ -448,7 +448,6 @@ main( int argc, char** argv )
             }
             else if(convectionTerm == KIO91)
             {
-                vector_type tmp(uFESpace->map(),Unique); // we do not want the pressure part
                 *rhs -= bdfConvectionInit.extrapolation();
                 *beta *= 0;
                 oseenAssembler.addConvectionRhs(*beta,*solution);
@@ -542,7 +541,6 @@ main( int argc, char** argv )
         }
         else if(convectionTerm == KIO91)
         {
-            vector_type tmp(uFESpace->map(),Unique); // we do not want the pressure part
             *rhs -= bdfConvection.extrapolation();
         }
         if (verbose) std::cout << "done" << std::endl;
