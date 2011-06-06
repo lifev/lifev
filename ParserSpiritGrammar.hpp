@@ -304,8 +304,10 @@ ParserSpiritGrammar< IteratorType, ResultsType >::ParserSpiritGrammar() :
     M_compare
     =   M_plusMinus                                      [qi::_val = qi::_1]
         >> *(
-            qi::lit('>') >> M_plusMinus                  [qi::_val = qi::_val > qi::_1]
-        |   qi::lit('<') >> M_plusMinus                  [qi::_val = qi::_val < qi::_1]
+            qi::lit(">=") >> M_plusMinus                 [qi::_val = qi::_val >= qi::_1]
+        |   qi::lit("<=") >> M_plusMinus                 [qi::_val = qi::_val <= qi::_1]
+        |   qi::lit(">") >> M_plusMinus                  [qi::_val = qi::_val > qi::_1]
+        |   qi::lit("<") >> M_plusMinus                  [qi::_val = qi::_val < qi::_1]
         )
         ;
 
