@@ -189,17 +189,17 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [../boundary_conditions]
     #list = ' '                                                                          # Free dispacement
-    #list = 'OuterWall_Robin'                                                            # Free dispacement + Robin on the external Wall
-    list = 'AscendingAorta_ReferencePressure    CeliacA_ReferencePressure 
-            SubclavianBLeft_ReferencePressure   SubclavianBRight_ReferencePressure 
-            VertebralLeft_ReferencePressure     VertebralRight_ReferencePressure
-            CommonCarotidLeft_ReferencePressure CommonCarotidRight_ReferencePressure
-            OuterWall_ReferencePressure'                                                # Free dispacement + Reference pressure            
-    #list = 'AscendingAorta_Clumped              CeliacA_Clumped          
-    #        SubclavianBLeft_Clumped             SubclavianBRight_Clumped          
-    #        VertebralLeft_Clumped               VertebralRight_Clumped         
-    #        CommonCarotidLeft_Clumped           CommonCarotidRight_Clumped         
-    #        OuterWall_Robin'                                                            # Clumped + Robin on the external Wall
+    #list = 'OuterWall_RobinPhysiological'                                                            # Free dispacement + Robin on the external Wall
+    #list = 'AscendingAorta_ReferencePressure    CeliacA_ReferencePressure 
+    #        SubclavianBLeft_ReferencePressure   SubclavianBRight_ReferencePressure 
+    #        VertebralLeft_ReferencePressure     VertebralRight_ReferencePressure
+    #        CommonCarotidLeft_ReferencePressure CommonCarotidRight_ReferencePressure
+    #        OuterWall_ReferencePressure'                                                # Free dispacement + Reference pressure            
+    list = 'AscendingAorta_Clumped              CeliacA_Clumped          
+            SubclavianBLeft_Clumped             SubclavianBRight_Clumped          
+            VertebralLeft_Clumped               VertebralRight_Clumped         
+            CommonCarotidLeft_Clumped           CommonCarotidRight_Clumped         
+            OuterWall_RobinPhysiological'                                                            # Clumped + Robin on the external Wall
     #list = 'AscendingAorta_Clumped              CeliacA_Clumped          
     #        SubclavianBLeft_Clumped             SubclavianBRight_Clumped          
     #        VertebralLeft_Clumped               VertebralRight_Clumped         
@@ -324,6 +324,16 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         
             [./Robin]
         	functionSolver = '29000 * f_timeStep'
+        	[../]
+        	
+        [../OuterWall_RobinPhysiological]
+        type       = Robin
+        flag       = 10
+        mode       = Normal
+        function   = 0
+        
+            [./Robin]
+        	functionSolver = 'L1=7.5; L2=6.5; L3=1.5; L4=-1.5; ((y>=L1)*3+(y>=L2)*(y<L1)*(1+2*(y-L2))+(y>=L3)*(y<L2)+(y>=L4)*(y<L3)*(1-0.3*y)+(y<L4)*1.9) * 10000 * f_timeStep'
         	[../]
 
         [../]
