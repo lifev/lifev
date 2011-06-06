@@ -71,6 +71,8 @@ typedef boost::numeric::ublas::matrix<Real> Matrix;
 
   @todo Add a method without the element id, less efficient but more flexible.
   @note The attribute which represent a point is an array of three elements. Change in future with a standard container.
+  @note If you need an Raviart-Thomas field you need to create a scalar field and not a vector field, since the field
+        contains the value of a Raviart-Thomas times the outward unit normal of the face element.
 */
 template < typename MeshType, typename MapType, typename ReturnType >
 class FEField
