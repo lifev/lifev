@@ -323,7 +323,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         function   = 0
         
             [./Robin]
-        	functionSolver = '-29000 * f_timeStep'
+        	functionSolver = '29000 * f_timeStep'
         	[../]
 
         [../]
