@@ -38,6 +38,7 @@
 // ===================================================
 
 #include <life/lifecore/LifeV.hpp>
+#include <life/lifecore/Displayer.hpp>
 
 #include <life/lifearray/MapEpetra.hpp>
 

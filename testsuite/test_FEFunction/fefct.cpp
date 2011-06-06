@@ -28,42 +28,30 @@
    \author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
    \date 2011-05-02
  */
+/*
+  This simple test show how to use FEField (scalar and vector) and FEFunction.
+  After reading a mesh and creating the FESpaces the programs create three FEFields:
+  the first is a Raviart-Thomas field, the second is a P1 vector field and the third is a
+  P0 scalar field. Then the function is created, using the one written in user_fun.hpp,
+  and the fields are added. After that there is a computation of an error between the FEFunction
+  and its "free function" equivalence. Since we want to export the FEFunction we need to 
+  interpolate it on a finite element space, in this case P0, so we call the interpolate over a new
+  field. The last part of the code contains the standard part to export the fields and the 
+  interpolated function.
+*/
 
 // ===================================================
-//! Includes
+//!                     Includes
 // ===================================================
 
 #include "fefct.hpp"
 #include "user_fun.hpp"
 
 // ===================================================
-//! Namespaces & define
+//!                    Namespaces 
 // ===================================================
 
 using namespace LifeV;
-
-// ===================================================
-//!              Standard functions
-// ===================================================
-
-Real UOne( const Real& /* t */,
-           const Real& /* x */,
-           const Real& /* y */,
-           const Real& /* z */,
-           const ID&   /* icomp */)
-{
-    return 1.;
-}
-
-Real UZero( const Real& /* t */,
-            const Real& /* x */,
-            const Real& /* y */,
-            const Real& /* z */,
-            const ID&   /* icomp */)
-{
-    return 0.;
-}
-
 
 // ===================================================
 //!                  Private Members
@@ -130,11 +118,10 @@ fefct::run()
     // Reading from data file
     GetPot dataFile( Members->data_file_name.c_str() );
 
-    // Create the leader process, i.e. the process with MyPID equal to zero
-    bool isLeader = ( Members->comm->MyPID() == 0 );
+    // Create the displayer
+    Displayer displayer ( Members->comm );
 
-    if ( isLeader )
-        std::cout << "The FEField and FEFunction test" << std::endl;
+    displayer.leaderPrint ( "The FEField and FEFunction test\n" );
 
     // Start chronoReadAndPartitionMesh for measure the total time for the creation of the local meshes
     chronoReadAndPartitionMesh.start();
@@ -158,85 +145,42 @@ fefct::run()
     chronoReadAndPartitionMesh.stop();
 
     // The leader process print chronoReadAndPartitionMesh
-    if ( isLeader )
-        std::cout << "Time for read and partition the mesh " <<
-                  chronoReadAndPartitionMesh.diff() << std::endl << std::flush;
+    displayer.leaderPrintMax ( "Time for read and partition the mesh ",
+                               chronoReadAndPartitionMesh.diff() );
 
     // Create the FEField and FEFunction spaces
 
     // Start chronoFiniteElementSpace for measure the total time for create the finite element spaces
     chronoFiniteElementSpace.start();
 
-    // First FEScalarField parameters
-    const ReferenceFE*    refFE_scalarField1 ( static_cast<ReferenceFE*>(NULL) );
-    const QuadratureRule* qR_scalarField1    ( static_cast<QuadratureRule*>(NULL) );
-    const QuadratureRule* bdQr_scalarField1  ( static_cast<QuadratureRule*>(NULL) );
+    // Finite element space of the first scalar field - RT0
+    FESpacePtr_Type scalarField1_FESpace ( new FESpace_Type ( meshPart, feTetraP0, quadRuleTetra15pt, 
+                                                              quadRuleTria4pt, 1, Members->comm ) );
 
-    refFE_scalarField1 = &feTetraP0;
-    qR_scalarField1    = &quadRuleTetra15pt;
-    bdQr_scalarField1  = &quadRuleTria4pt;
+    // Finite element space of the second scalar field - P1
+    FESpacePtr_Type scalarField2_FESpace ( new FESpace_Type ( meshPart, feTetraP1, quadRuleTetra15pt,
+                                                              quadRuleTria4pt, 1, Members->comm ) );
 
-    // Second FEScalarField parameters
-    const ReferenceFE*    refFE_scalarField2 ( static_cast<ReferenceFE*>(NULL) );
-    const QuadratureRule* qR_scalarField2    ( static_cast<QuadratureRule*>(NULL) );
-    const QuadratureRule* bdQr_scalarField2  ( static_cast<QuadratureRule*>(NULL) );
+    // Finite element space of the vector field - P0
+    FESpacePtr_Type vectorField_FESpace ( new FESpace_Type ( meshPart, feTetraP0, quadRuleTetra15pt,
+                                                             quadRuleTria4pt, 3, Members->comm ) );
 
-    refFE_scalarField2 = &feTetraP1;
-    qR_scalarField2    = &quadRuleTetra15pt;
-    bdQr_scalarField2  = &quadRuleTria4pt;
-
-    // FEVectorField parameters
-    const ReferenceFE*    refFE_vectorField ( static_cast<ReferenceFE*>(NULL) );
-    const QuadratureRule* qR_vectorField    ( static_cast<QuadratureRule*>(NULL) );
-    const QuadratureRule* bdQr_vectorField  ( static_cast<QuadratureRule*>(NULL) );
-
-    refFE_vectorField = &feTetraP0;
-    qR_vectorField    = &quadRuleTetra15pt;
-    bdQr_vectorField  = &quadRuleTria4pt;
-
-    // Parameters for function visualization
-    const ReferenceFE*    refFE_fct ( static_cast<ReferenceFE*>(NULL) );
-    const QuadratureRule* qR_fct    ( static_cast<QuadratureRule*>(NULL) );
-    const QuadratureRule* bdQr_fct  ( static_cast<QuadratureRule*>(NULL) );
-
-    refFE_fct = &feTetraP0;
-    qR_fct    = &quadRuleTetra15pt;
-    bdQr_fct  = &quadRuleTria4pt;
-
-    // Finite element space of the first scalar field
-    FESpacePtr_Type scalarField1_FESpace ( new FESpace_Type ( meshPart, *refFE_scalarField1, 
-                                                              *qR_scalarField1, *bdQr_scalarField1,
-                                                              1, Members->comm ) );
-
-    // Finite element space of the second scalar field
-    FESpacePtr_Type scalarField2_FESpace ( new FESpace_Type ( meshPart, *refFE_scalarField2,
-                                                              *qR_scalarField2, *bdQr_scalarField2,
-                                                              1, Members->comm ) );
-
-    // Finite element space of the vector field
-    FESpacePtr_Type vectorField_FESpace ( new FESpace_Type ( meshPart, *refFE_vectorField,
-                                                             *qR_vectorField, *bdQr_vectorField,
-                                                             3, Members->comm ) );
-
-    // Finite element space for the function visualization
-    FESpacePtr_Type function_FESpace ( new FESpace_Type ( meshPart, *refFE_fct, *qR_fct,
-                                                          *bdQr_fct, 1, Members->comm ) );
+    // Finite element space for the function visualization - P0
+    FESpacePtr_Type function_FESpace ( new FESpace_Type ( meshPart, feTetraP0, quadRuleTetra15pt,
+                                                          quadRuleTria4pt, 1, Members->comm ) );
 
     // Stop chronoFiniteElementSpace
     chronoFiniteElementSpace.stop();
 
     // The leader process print chronoFiniteElementSpace
-    if ( isLeader )
-        std::cout << "Time for create the finite element spaces " <<
-                  chronoFiniteElementSpace.diff() << std::endl << std::flush;
+    displayer.leaderPrintMax ( "Time for create the finite element spaces ",
+                               chronoFiniteElementSpace.diff() );
 
     // Start chronoFEFieldAndFEFct for measure the total time for create the fields and the function
     chronoFEFieldAndFEFct.start();
 
     // First scalar field
     FEScalarFieldPtr_Type scalarField1 ( new FEScalarField_Type ( scalarField1_FESpace ) );
-    
-    // Create a dummy epetra vector
     scalarField1->getVector() = 1. ;
 
     // Second scalar field
@@ -257,9 +201,8 @@ fefct::run()
     chronoFEFieldAndFEFct.stop();
 
     // The leader process print chronoFEFieldAndFEFct
-    if ( isLeader )
-        std::cout << "Time for create the fields and the function " <<
-                  chronoFEFieldAndFEFct.diff() << std::endl;
+    displayer.leaderPrintMax ( "Time for create the fields and the function ",
+                               chronoFEFieldAndFEFct.diff() );
 
     // Add the fields to the function
 
@@ -279,9 +222,19 @@ fefct::run()
     chronoAddFields.stop();
 
     // The leader process print chronoAddFields
-    if ( isLeader )
-        std::cout << "Time for create the add the fields to the function " <<
-                  chronoAddFields.diff() << std::endl;
+    displayer.leaderPrintMax ( "Time for create the add the fields to the function ",
+                               chronoAddFields.diff() );
+
+    // Define the dummy element and coordinate for the evaluation of the function
+    UInt iElem = 0;
+    std::vector<Real> point(3,0);
+
+    // Compute the error
+    Real error = 0;
+    error = std::fabs( ( std::sin(1.) + 4. ) / 3. - function.eval( iElem, point, 0. ) );
+
+    // Interpolate the value of the function
+    function.interpolate( *scalarFieldFunction );
 
     // Set the exporter for the fields
     exporterPtr_Type exporter;
@@ -362,19 +315,8 @@ fefct::run()
                            ExporterData< regionMesh_Type >::UnsteadyRegime,                           
                            ExporterData< regionMesh_Type >::Cell );
 
-    // Interpolate the value of the function
-    function.interpolate( *scalarFieldFunction );
-
     // Export all the solutions
     exporter->postProcess(0);
-
-    // Define the dummy element and coordinate for the evaluation of the function
-    UInt iElem = 0;
-    std::vector<Real> point(3,0);
-
-    // Compute the error
-    Real error = 0;
-    error = std::fabs( ( std::sin(1.) + 4. ) / 3. - function.eval( iElem, point, 0. ) );
 
     // Return the error
     return error;
