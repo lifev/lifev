@@ -135,7 +135,7 @@ main( Int argc, char** argv )
               << expression << " = " << result << std::endl;
 
     // TEST 5:
-    expression = "(0.8 < 0.9)"; // = 1
+    expression = "(0.800000000000000 <= 0.8)"; // = 1
     parser.setString(expression);
     result = parser.evaluate();
     std::cout << "TEST  5:  " << check( std::abs(result - 1) > tolerance )
