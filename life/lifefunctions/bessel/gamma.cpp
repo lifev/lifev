@@ -9,7 +9,8 @@
 // NOTE: Returns 1e308 if argument is a negative integer or 0,
 //      or if argument exceeds 171.
 //
-#include <math.h>
+#include <cmath>
+namespace bessel{
 double gamma(double x)
 {
     int i,k,m;
@@ -54,8 +55,8 @@ double gamma(double x)
             ga = 1e308;
      }
      else {
-        if (fabs(x) > 1.0) {
-            z = fabs(x);
+        if (std::fabs(x) > 1.0) {
+            z = std::fabs(x);
             m = (int)z;
             r = 1.0;
             for (k=1;k<=m;k++) {
@@ -70,12 +71,13 @@ double gamma(double x)
             gr = gr*z+g[k];
         }
         ga = 1.0/(gr*z);
-        if (fabs(x) > 1.0) {
+        if (std::fabs(x) > 1.0) {
             ga *= r;
             if (x < 0.0) {
-                ga = -M_PI/(x*ga*sin(M_PI*x));
+                ga = -M_PI/(x*ga*std::sin(M_PI*x));
             }
         }
     }
     return ga;
+}
 }

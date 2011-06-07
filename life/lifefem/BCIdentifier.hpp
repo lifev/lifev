@@ -323,11 +323,6 @@ public:
         return M_localToGlobal( i );
     }
 
-    ID __attribute__ ((__deprecated__)) bdLocalToGlobal( const ID& i ) const
-    {
-        return boundaryLocalToGlobalMap( i );
-    }
-
     //@}
 
 private:

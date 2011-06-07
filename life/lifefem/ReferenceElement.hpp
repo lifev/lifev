@@ -222,6 +222,8 @@ public:
         std::cerr << " Trying to access nodal values via nodalToFEValues function. " << std::endl;
         std::cerr << " This FE is not nodal, impossible operation! " << std::endl;
         abort();
+	std::vector<Real> dummy;
+	return dummy;
     }
 
     //@}
@@ -254,11 +256,6 @@ public:
     {
         return M_feDim;
     }
-/*    const UInt& __attribute__ (( __deprecated__)) FEDim() const
-    {
-        return feDim();
-        }*/
-
 
     //! Return the shape of the element
     const ReferenceShapes& shape() const
