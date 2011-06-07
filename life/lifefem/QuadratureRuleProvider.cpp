@@ -96,6 +96,10 @@ provideExactness(const ReferenceShapes& shape, const UInt& exactness)
         std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
         abort();
     };
+
+    // In case you have found nothing, return the maximal
+    // quadrature rule.
+    return provideMaximal(shape);
 };
 
 const QuadratureRule&
@@ -185,6 +189,8 @@ provideMaximal(const ReferenceShapes& shape)
         std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
         abort();
     };
+
+    return quadRuleTetra64pt;
 };
 
 // ===================================================
@@ -228,6 +234,8 @@ provideExactnessTetra(const UInt& exactness)
         std::cerr << std::endl;
         abort();
     };
+
+    return quadRuleTetra64pt;
 };
 
 const QuadratureRule&
@@ -241,6 +249,13 @@ provideExactnessPrism(const UInt& exactness)
         std::cerr << std::endl;
         abort();
     };
+
+    /*
+     * Fix to remove warning
+     * This line should be changed when a QuadratureRule object for
+     * the prism will be available!
+     */
+    return quadRuleTetra64pt;
 };
 
 const QuadratureRule&
@@ -262,6 +277,8 @@ provideExactnessHexa(const UInt& exactness)
         std::cerr << std::endl;
         abort();
     };
+
+    return quadRuleHexa8pt;
 };
 
 const QuadratureRule&
@@ -287,6 +304,8 @@ provideExactnessQuad(const UInt& exactness)
         std::cerr << std::endl;
         abort();
     };
+
+    return quadRuleQuad9pt;
 };
 
 const QuadratureRule&
@@ -316,6 +335,8 @@ provideExactnessTriangle(const UInt& exactness)
         std::cerr << std::endl;
         abort();
     };
+
+    return quadRuleTria7pt;
 };
 
 const QuadratureRule&
@@ -339,6 +360,8 @@ provideExactnessLine(const UInt& exactness)
         std::cerr << std::endl;
         abort();
     };
+
+    return quadRuleTria3pt;
 };
 
 const QuadratureRule&

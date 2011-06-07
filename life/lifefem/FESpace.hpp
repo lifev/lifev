@@ -2147,6 +2147,8 @@ polynomialDegree() const
         std::cerr << " FESpace: " << M_refFE->name() << std::endl;
         abort();
     };
+
+    return 0;
 }
 
 } // end of the namespace
