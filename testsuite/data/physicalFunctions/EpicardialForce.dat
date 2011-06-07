@@ -24,7 +24,7 @@ variables    =  't            F'
 # For use with a coarse mesh
 #scale        =  '1             -270000'	
 # For use with a fine mesh
-scale        =  '1             -140000'	
+scale        =  '1             -155000'	
 
 loop        = true
 
