@@ -409,10 +409,10 @@ public:
   Real thickness() const { return M_data->thickness(); }
 
   //! Get the Young modulus
-  Real young()            const { return M_data->young(); }
+  Real young( UInt material )            const { return M_data->young( material ); }
 
   //! Get the Poisson coefficient
-  Real poisson()          const { return M_data->poisson(); }
+  Real poisson( UInt material )          const { return M_data->poisson( material ); }
 
   //! Get the density
   Real rho()       const { return M_data->rho(); }
@@ -553,8 +553,8 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
   M_source                     ( ),
   M_offset                     ( 0 ),
   M_rescaleFactor              ( 1. ),
-  M_zeta                       ( 0.0 ),
-  M_theta                      ( 0.0 ),
+  M_zeta                       ( 0.75 ),
+  M_theta                      ( 0.7 ),
   M_material                   ( )
 {
   std::cout << "I am in the constructor for the solver" << std::endl;
@@ -611,8 +611,8 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   M_jacobian.reset                  (new matrix_Type(*M_localMap));
   M_offset                          = offset;
 
-  M_theta                           = 2.0 * M_data->dataTime()->theta();
-  M_zeta                            = M_data->dataTime()->gamma();
+  //M_theta                           = 2.0 * M_data->dataTime()->theta();
+  //M_zeta                            = M_data->dataTime()->gamma();
 
   M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->getSolidType()));
   M_material->setup(dFESpace,M_localMap,M_offset);
