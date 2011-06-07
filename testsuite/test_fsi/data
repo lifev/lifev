@@ -41,22 +41,20 @@ semiImplicit = true # (only valid for method = exactJacobian or monolithic).
 maxSubIter = 500
 #monolithic = 0
 
-
 restart    = false   # restart the computations (see also importer)
 #restart    = true
 #Tstart     = 0.005 # restart from time Tstart
 
 [interface] # mesh dependent flags for the interface.
 fluid_flag      =  1 # default: 1
-#solid_flag      =  1 # default: fluid_flag
+solid_flag      =  1 # default: fluid_flag
 #structure_flag  =  1 # default: fluid_flag
 #harmonic_flag   =  1 # default: fluid_flag
 tolerance       =  0 # how far points are to be considered the same on the interface
 
 [exporter]
 multimesh  = false  # actually we export also the displacement
-start      = 0
-#start      = 4
+start      = 0 #start      = 4
 save       = 1
 type       = hdf5
 [./fluid]
@@ -66,30 +64,30 @@ filename = solid
 
 [fluid]
 
-useShapeDerivatives = true
-absorbing_bc		= true
+useShapeDerivatives = false
+absorbing_bc	    = true
 
 [./physics]
 density   = 1.0               # density
-viscosity = 0.03              # viscosity
+viscosity = 0.035              # viscosity
 
 [../time_discretization]
 initialtime		= 0.
-endtime			= 0.005
+endtime			= 0.05
 timestep		= 0.001
 BDF_order		= 1
 
 # end of fluid preconditioner parameters
 [../ipstab]
-gammaBeta  = 1
-gammaDiv   = 0.2
-gammaPress = 0.2
-reuse      = false
+gammaBeta  = 0.00125
+gammaDiv   = 0.00125
+gammaPress = 0.0003125
+reuse      = true
 max_iter_reuse = 100
 
 [../space_discretization]
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
-mesh_file = carotid_fluid.mesh  # mesh file
+mesh_file = carotid_fluid.mesh #tube_curve20.mesh  # mesh file
 
 vel_order		= P1		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
@@ -109,7 +107,7 @@ conv            = rhs
 max_iter        = 500
 reuse           = true
 max_iter_reuse  = 101
-kspace          = 100
+kspace          = 50
 tol             = 1.e-10    # AztecOO tolerance
 
 [../prec]
@@ -159,7 +157,7 @@ filter_singletons      = false
   output          = all  #none
   conv            = rhs
   max_iter        = 500
-  kspace          = 100
+  kspace          = 50
   tol             = 1.e-5    # AztecOO tolerance
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
@@ -167,7 +165,7 @@ filter_singletons      = false
   displayList     = false
 
     [./ifpack]
-    prectype        = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+    prectype        = Amesos   # Amesos (does a local LU factorization), ILUT (not ILU)
     overlap         = 2
 
       [./relaxation]
@@ -206,7 +204,6 @@ filter_singletons      = false
 [./physics]
 material_flag   = '1' # '1 2'
 solidType       = linearVenantKirchhoff
-material_flag   = 1 # '1 2'
 young           = 3.0E6 #,1.9E9
 poisson         = 0.30 #,0.30
 
@@ -218,11 +215,11 @@ timestep        = 0.001
 
 [../space_discretization]
 mesh_dir  = ./Mesh/  # the directory where the mesh file is
-mesh_file = carotid_solid.mesh  # mesh 
+mesh_file = carotid_solid.mesh #vessel_curve20.mesh  # mesh 
 order     = P1
 
 [../miscellaneous]
-factor    = 12
+factor    = 1
 verbose   = 1
 depname   = dep
 
@@ -236,7 +233,7 @@ linesearch = 0
 output          = all
 max_iter        = 500
 poly_ord        = 5
-kspace          = 100
+kspace          = 50
 precond         = dom_decomp
 drop            = 1.00e-4
 ilut_fill       = 2
@@ -267,7 +264,7 @@ solvertype      = Amesos_Umfpack
   max_iter        = 500
   reuse           = true
   max_iter_reuse  = 101
-  kspace          = 100
+  kspace          = 50
   tol             = 1.e-5    # AztecOO tolerance
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html

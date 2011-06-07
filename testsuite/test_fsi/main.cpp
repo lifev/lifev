@@ -142,20 +142,25 @@ public:
         Real area0	= 0.7854;
         //Real area0	= M_oper.fluid().area(3);
         Real area	= area0;
+	UInt flag       = 1;
 
-        Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
-                    (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+        //Real beta	= M_oper.solid().thickness()*M_oper.solid().young() / (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+
+	//Alexandra's Abc
+	Real exp  = 5/4;
+	Real beta = ( std::sqrt(PI) * M_oper.solid().thickness() * M_oper.solid().young( flag ) ) / (1 - M_oper.solid().poisson( flag ) * M_oper.solid().poisson( flag ) );
+	Real R    = ( std::sqrt(M_oper.solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
 
         Real qn		= M_oper.fluid().flux(3);
 
-        M_outflow			= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)
-                      - beta*std::sqrt(area0);
+	M_outflow       = R * qn;
+        //M_outflow	= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2) - beta*std::sqrt(area0);
 
         std::cout << "--------------- Absorbing boundary condition ---------------" << std::endl;
         std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
         std::cout << "  Outflow BC : thickness = " << M_oper.solid().thickness() << std::endl;
-        std::cout << "  Outflow BC : young     = " << M_oper.solid().young() << std::endl;
-        std::cout << "  Outflow BC : poisson   = " << M_oper.solid().poisson() << std::endl;
+        std::cout << "  Outflow BC : young     = " << M_oper.solid().young( flag ) << std::endl;
+        std::cout << "  Outflow BC : poisson   = " << M_oper.solid().poisson( flag ) << std::endl;
         std::cout << "  Outflow BC : area0     = " << area0 << std::endl;
         std::cout << "  Outflow BC : area      = " << M_oper.fluid().area(3) << std::endl;
         std::cout << "  Outflow BC : radius    = " << std::sqrt(area0/PI) << std::endl;
@@ -179,7 +184,7 @@ public:
 
         case 2:
             //return 0.;
-            return M_outflow;
+            return -M_outflow;
             break;
 
         default:
@@ -205,13 +210,31 @@ public:
     {
         Real area0	= 0.147439938;
         Real area	= area0;
+	UInt flag       = 1;
 
-        Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
-                    (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+        //Real beta	= M_oper.solid().thickness()*M_oper.solid().young() / (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+	//Alexandra's Abc
+	Real exp  = 5/4;
+	Real beta = ( std::sqrt(PI) * M_oper.solid().thickness() * M_oper.solid().young( flag ) ) / (1 - M_oper.solid().poisson( flag ) * M_oper.solid().poisson( flag ) );
+	Real R    = ( std::sqrt(M_oper.solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
 
         Real qn		= M_oper.fluid().flux(3);
 
-        M_outflowFace	= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)- beta*std::sqrt(area0);
+	M_outflowFace	= R * qn;
+        //M_outflowFace	= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)- beta*std::sqrt(area0);
+
+        std::cout << "--------------- Absorbing boundary condition for Face-------" << std::endl;
+        std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
+        std::cout << "  Outflow BC : thickness = " << M_oper.solid().thickness() << std::endl;
+        std::cout << "  Outflow BC : young     = " << M_oper.solid().young( flag ) << std::endl;
+        std::cout << "  Outflow BC : poisson   = " << M_oper.solid().poisson( flag ) << std::endl;
+        std::cout << "  Outflow BC : area0     = " << area0 << std::endl;
+        std::cout << "  Outflow BC : area      = " << M_oper.fluid().area(3) << std::endl;
+        std::cout << "  Outflow BC : radius    = " << std::sqrt(area0/PI) << std::endl;
+        std::cout << "  Outflow BC : beta      = " << beta << std::endl;
+        std::cout << "  Outflow BC : Flow rate = " << qn << std::endl;
+        std::cout << "  Outflow BC : outflow   = " << M_outflowFace << std::endl;
+        std::cout << "------------------------------------------------------------" << std::endl;
 
     }
 
@@ -256,14 +279,33 @@ public:
     {
         Real area0	= 0.191155176;
         Real area	= area0;
+	UInt flag       = 1 ;
 
-        Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
-                    (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+        //Real beta	= M_oper.solid().thickness()*M_oper.solid().young() / (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+
+	//Alexandra's Abc
+	Real exp  = 5/4;
+	Real beta = ( std::sqrt(PI) * M_oper.solid().thickness() * M_oper.solid().young( flag ) ) / (1 - M_oper.solid().poisson( flag ) * M_oper.solid().poisson( flag ) );
+	Real R    = ( std::sqrt(M_oper.solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
 
         Real qn		= M_oper.fluid().flux(4);
 
-        M_outflowBrain  = std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2) - beta*std::sqrt(area0);
+	M_outflowBrain = R * qn;
+        //M_outflowBrain  = std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2) - beta*std::sqrt(area0);
 
+
+	std::cout << "--------------- Absorbing boundary condition for Brain-------" << std::endl;
+        std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
+        std::cout << "  Outflow BC : thickness = " << M_oper.solid().thickness() << std::endl;
+        std::cout << "  Outflow BC : young     = " << M_oper.solid().young( flag ) << std::endl;
+        std::cout << "  Outflow BC : poisson   = " << M_oper.solid().poisson( flag ) << std::endl;
+        std::cout << "  Outflow BC : area0     = " << area0 << std::endl;
+        std::cout << "  Outflow BC : area      = " << M_oper.fluid().area(4) << std::endl;
+        std::cout << "  Outflow BC : radius    = " << std::sqrt(area0/PI) << std::endl;
+        std::cout << "  Outflow BC : beta      = " << beta << std::endl;
+        std::cout << "  Outflow BC : Flow rate = " << qn << std::endl;
+        std::cout << "  Outflow BC : outflow   = " << M_outflowBrain << std::endl;
+        std::cout << "------------------------------------------------------------" << std::endl;
     }
 
     Real operator()( Real /*t*/, Real /*x*/, Real /*y*/, Real /*z*/, ID id)
@@ -398,22 +440,12 @@ public:
 
             M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(),      M_exporterFluid->mapType() ));
             M_fluidDisp.reset     ( new vector_Type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
-	    /*
-            M_exporterFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
-                                          UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
 
-            M_exporterFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
-                                          UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof() ),
-                                          UInt(  M_fsi->FSIOper()->pFESpace().dof().numTotalDof() ) );
-
-            M_exporterFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
-                                          UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
-	    */
             M_exporterFluid->addVariable( ExporterData<mesh_Type>::VectorField, "f-velocity",
                                           M_fsi->FSIOper()->uFESpacePtr(), M_velAndPressure, UInt(0) );
 
             M_exporterFluid->addVariable( ExporterData<mesh_Type>::ScalarField, "f-pressure",
-                                          M_fsi->FSIOper()->uFESpacePtr(), M_velAndPressure,
+                                          M_fsi->FSIOper()->pFESpacePtr(), M_velAndPressure,
                                           UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof() ) );
 
             M_exporterFluid->addVariable( ExporterData<mesh_Type>::VectorField, "f-displacement",
@@ -437,12 +469,7 @@ public:
                                           M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
             M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-velocity",
                                           M_fsi->FSIOper()->dFESpacePtr(), M_solidVel, UInt(0) );
-	    /*
-            M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
-                                          UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-            M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
-                                          UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-	    */
+
         }
 
         bool restart = dataFile("problem/restart",false);
@@ -511,15 +538,16 @@ public:
                 outFlow.setFunction(bc_adaptor(*M_fsi->FSIOper()));
                 M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlow);
 	      */
+	      
 	      BCFunctionBase outFlowFace;
               BCFunctionBase outFlowBrain;
 
-                outFlowFace.setFunction(bc_adaptorFace(*M_fsi->FSIOper()));
-                M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlowFace);
+              outFlowFace.setFunction(bc_adaptorFace(*M_fsi->FSIOper()));
+	      M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlowFace);
 
-                outFlowBrain.setFunction(bc_adaptorBrain(*M_fsi->FSIOper()));
-                M_fsi->FSIOper()->BCh_fluid()->modifyBC(4, outFlowBrain);
-
+	      outFlowBrain.setFunction(bc_adaptorBrain(*M_fsi->FSIOper()));
+	      M_fsi->FSIOper()->BCh_fluid()->modifyBC(4, outFlowBrain);
+	      
                 //std::cout << "  F-  Pressure = " << outFlow(0., 0., 0., 0., 3) << std::endl;
             }
 

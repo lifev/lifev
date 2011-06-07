@@ -74,7 +74,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 
     BCh_he->addBC("Top",         3, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",        2, Essential, Full, bcf,   3);
-    BCh_he->addBC("Brain",       4, Essential, Full, bcf,   3);
+    BCh_he->addBC("Base",        4, Essential, Full, bcf,   3);
 
     if (_oper.data().method() == "steklovPoincare")
     {
@@ -120,6 +120,8 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
 
     BCFunctionBase bcf           (fZero);
     BCFunctionBase in_flow       (u2);
+    BCFunctionBase in_vel        (u2vel);
+    BCFunctionBase in_flow_pr       (pressure);
     BCFunctionBase in_flow_flux  (PhysFlux);
     BCFunctionBase out_flow      (fZero);
 
@@ -127,19 +129,16 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
 #ifdef FLUX
     BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
 #else
-    BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
+    BCh_fluid->addBC("InFlow" , 2,  Essential, Full, in_vel, 3);
+    //BCh_fluid->addBC("InFlow" , 5,  Natural,   Normal, in_flow_pr);
 #endif
 
-    BCh_fluid->addBC("OutFlow",   3,  Natural,   Full, out_flow, 3);
     BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
-    BCh_fluid->addBC("EdgesOutFlowFace",      30, Essential, Full, bcf,  3);
-    BCh_fluid->addBC("OutFlowBrain",           4,  Natural,   Full, out_flow, 3);
-    BCh_fluid->addBC("EdgesOutFlowBrain",     40, Essential, Full, bcf,  3);
 
-
-
-
-    //    BCh_fluid->showMe();
+    BCh_fluid->addBC("OutFlowBrain",   3,  Natural,   Full, out_flow, 3);
+    BCh_fluid->addBC("EdgesFace",  30, Essential, Full, bcf,  3);
+    BCh_fluid->addBC("OutFlowBrain",   4,  Natural,   Full, out_flow, 3);
+    BCh_fluid->addBC("EdgesBrain",  40, Essential, Full, bcf,  3);
 
     _oper.setStructureToFluid(_oper.veloFluidMesh());
     // _oper.setHarmonicExtensionVelToFluid(_oper.veloFluidMesh());
@@ -177,8 +176,12 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluidInv(FSIOperator &_oper)
 
     BCFunctionBase bcf(fZero);
     BCFunctionBase in_flow(u2);
+    BCFunctionBase in_vel(u2vel);
+    BCFunctionBase in_flow_pr(pressure);
 
-    BCh_fluidInv->addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
+
+    BCh_fluidInv->addBC("InFlow", 2,  Essential,  Normal, in_vel);
+    //BCh_fluidInv->addBC("InFlow", 5,  Natural,   Normal, in_flow_pr);
     BCh_fluidInv->addBC("EdgesIn",  20, Essential, Full, bcf,     3);
 
     return BCh_fluidInv;
@@ -202,13 +205,16 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluidLin(FSIOperator &_oper)
 #ifdef FLUX
     BCh_fluidLin->addBC("InFlow",   2,       Flux, Full, bcf,     3);
 #else
-    //BCh_fluidLin->addBC("InFlow",  2,  Natural,   Full, bcf,     3);
+    BCh_fluidLin->addBC("InFlow",  2,  Essential,  Full, bcf, 3);
+    // BCh_fluidLin->addBC("InFlow",  5,  Natural, Normal, bcf);
 #endif
-    BCh_fluidLin->addBC("EdgesoutFlowFace",   30,  Essential, Full, bcf,     3);
-    BCh_fluidLin->addBC("outFlow",  3,    Natural, Full, bcf,     3);
-    BCh_fluidLin->addBC("Edges",   20,  Essential, Full, bcf,     3);//this condition must be equal to the one
+
+    BCh_fluidLin->addBC("InletFace",  20,  Essential, Full, bcf,     3);
+
+    BCh_fluidLin->addBC("outFlowFace",  3,    Natural, Full, bcf,     3);
+    BCh_fluidLin->addBC("edgesFace",  30,  Essential, Full, bcf,     3);
     BCh_fluidLin->addBC("outFlowBrain",  4,    Natural, Full, bcf,     3);
-    BCh_fluidLin->addBC("EdgesoutFlowBrain",   40,  Essential, Full, bcf,     3);
+    BCh_fluidLin->addBC("InletFace",  40,  Essential, Full, bcf,     3);
 
 
     //BCh_fluidLin->addBC("ainterface",  1,  Essential,   Full, bcf,     3);
@@ -247,9 +253,10 @@ FSIOperator::solidBchandlerPtr_Type BCh_solid(FSIOperator &_oper)
     BCFunctionBase bcf(fZero);
 
 
-    BCh_solid->addBC("Top",       3, Essential, Full, bcf,  3);
-    BCh_solid->addBC("Base",      2, Essential, Full, bcf,  3);
-    BCh_solid->addBC("EdgesIn",    20, Essential, Full, bcf,  3);
+    BCh_solid->addBC("BaseRingF5",      3, Essential, Full, bcf,  3);
+    BCh_solid->addBC("BaseRingF3",      2, Essential, Full, bcf,  3);
+    BCh_solid->addBC("Ring6",      20, Essential, Full, bcf,  3);
+
 
     std::vector<ID> zComp(1);
     zComp[0] = 3;
@@ -296,9 +303,10 @@ FSIOperator::solidBchandlerPtr_Type BCh_solidLin(FSIOperator &_oper)
 
     BCFunctionBase bcf(fZero);
 
-    BCh_solidLin->addBC("Top",       3, Essential, Full, bcf,  3);
-    BCh_solidLin->addBC("Base",      2, Essential, Full, bcf,  3);
-    BCh_solidLin->addBC("EdgesIn",    20, Essential, Full, bcf,  3);
+    BCh_solidLin->addBC("BaseRingF5",      3, Essential, Full, bcf,  3);
+    BCh_solidLin->addBC("BaseRingF3",      2, Essential, Full, bcf,  3);
+    BCh_solidLin->addBC("Ring6",      20, Essential, Full, bcf,  3);
+
 
     std::vector<ID> zComp(1);
     zComp[0] = 3;
@@ -333,9 +341,10 @@ FSIOperator::solidBchandlerPtr_Type BCh_solidInvLin(FSIOperator &_oper)
 
     BCFunctionBase bcf(fZero);
 
-    BCh_solidLinInv->addBC("Base",      3, Essential, Full, bcf,  3);
-    BCh_solidLinInv->addBC("Base",      2, Essential, Full, bcf,  3);
-    BCh_solidLinInv->addBC("EdgesIn",    20, Essential, Full, bcf,  3);
+
+    BCh_solidLinInv->addBC("BasRingF5",     3, Essential, Full, bcf,  3);
+    BCh_solidLinInv->addBC("BaseRingF3",   2, Essential, Full, bcf,  3);
+    BCh_solidLinInv->addBC("Ring6",      20, Essential, Full, bcf,  3);
 
 //     if (_oper.method() == "steklovPoincare")
 //     {
