@@ -45,12 +45,15 @@ namespace LifeV
 namespace Multiscale
 {
 
+// Forward declaration
+class MultiscaleModelMultiscale;
+
 //! MultiscaleAlgorithm - The Multiscale Algorithm Interface
 /*!
  *  @author Cristiano Malossi
  *
  *  The MultiscaleAlgorithm class provides a general interface between the
- *  MS_Solver and the specific Algorithm to solve the problem.
+ *  MultiscaleSolver and the specific Algorithm to solve the problem.
  *
  */
 class MultiscaleAlgorithm
@@ -60,7 +63,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef boost::shared_ptr< MultiscaleModelMultiscale >                   multiscaleModelMultiscalePtr_Type;
+    typedef MultiscaleModelMultiscale                                        multiscaleModelMultiscale_Type;
+    typedef multiscaleModelMultiscale_Type*                                  multiscaleModelMultiscalePtr_Type;
 
     //@}
 
@@ -86,11 +90,11 @@ public:
      */
     virtual void setupData( const std::string& fileName );
 
+    //! Setup coupling variables and other quantities of the algorithm
+    virtual void setupAlgorithm();
+
     //! Perform sub-iteration on the coupling variables
     virtual void subIterate();
-
-    //! Update coupling variables for the next time step.
-    virtual void updateCouplingVariables() { M_multiscale->extrapolateCouplingVariables(); }
 
     //! Display some information about the algorithm
     virtual void showMe();
@@ -100,9 +104,6 @@ public:
 
     //! @name Methods
     //@{
-
-    //! Initialize coupling variables for the first time step.
-    void initializeCouplingVariables() { M_multiscale->initializeCouplingVariables(); }
 
     Real computeResidual() const;
 
@@ -122,7 +123,7 @@ public:
     /*!
      * @param model Multiscale model
      */
-    void setModel( const multiscaleModelPtr_Type model );
+    void setMultiscaleModel( const multiscaleModelMultiscalePtr_Type model ) { M_multiscale = model; }
 
     //! Set the maximum number of subiterations
     /*!

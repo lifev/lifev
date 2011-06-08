@@ -76,6 +76,26 @@ MultiscaleAlgorithm::setupData( const std::string& fileName )
 
     GetPot dataFile( fileName );
     M_name = dataFile( "Multiscale/algorithmName", "algorithmName" );
+
+    M_subiterationsMaximumNumber = dataFile( "Parameters/subiterationsMaximumNumber", 10 );
+    M_tolerance = dataFile( "Parameters/tolerance", 1e-2 );
+}
+
+void
+MultiscaleAlgorithm::setupAlgorithm()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8010 ) << "MultiscaleAlgorithm::setMultiscaleProblem( multiscale ) \n";
+#endif
+
+    // Build coupling variables and residuals vectors
+    std::vector<Int> myGlobalElements(0);
+    MapEpetra couplingMap( -1, static_cast<Int> ( myGlobalElements.size() ), &myGlobalElements[0],  M_comm );
+    M_multiscale->createCouplingMap( couplingMap );
+
+    M_couplingVariables.reset( new VectorEpetra( couplingMap, Unique ) );
+    M_couplingResiduals.reset( new VectorEpetra( couplingMap, Unique ) );
 }
 
 void
@@ -96,8 +116,6 @@ MultiscaleAlgorithm::showMe()
 {
     if ( M_comm->MyPID() == 0 )
     {
-        std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
-
         std::cout << "Algorithm type                       = " << enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl
                   << "Algorithm name                       = " << M_name << std::endl
                   << "Max Sub-iterations                   = " << M_subiterationsMaximumNumber << std::endl
@@ -114,28 +132,6 @@ MultiscaleAlgorithm::computeResidual() const
     // Compute computeResidual
     M_multiscale->exportCouplingResiduals( *M_couplingResiduals );
     return M_couplingResiduals->norm2();
-}
-
-// ===================================================
-// Set Methods
-// ===================================================
-void
-MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::setMultiscaleProblem( multiscale ) \n";
-#endif
-
-    M_multiscale = multiscaleDynamicCast< MultiscaleModelMultiscale >( model );
-
-    // Build coupling variables and residuals vectors
-    std::vector<Int> myGlobalElements(0);
-    MapEpetra couplingMap( -1, static_cast<Int> ( myGlobalElements.size() ), &myGlobalElements[0],  M_comm );
-    M_multiscale->createCouplingMap( couplingMap );
-
-    M_couplingVariables.reset( new VectorEpetra( couplingMap, Unique ) );
-    M_couplingResiduals.reset( new VectorEpetra( couplingMap, Unique ) );
 }
 
 // ===================================================

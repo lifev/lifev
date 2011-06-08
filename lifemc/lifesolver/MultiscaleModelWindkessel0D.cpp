@@ -203,6 +203,12 @@ MultiscaleModelWindkessel0D::showMe()
     }
 }
 
+Real
+MultiscaleModelWindkessel0D::checkSolution() const
+{
+    return M_pressure + M_flowRate;
+}
+
 // ===================================================
 // MultiscaleInterfaceFluid Methods
 // ===================================================

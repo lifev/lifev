@@ -71,10 +71,7 @@ public:
     //@{
 
     //! Perform sub-iteration on the coupling variables
-    void subIterate() { checkResidual(); }
-
-    //! Update coupling variables for the next time step.
-    void updateCouplingVariables() { M_multiscale->initializeCouplingVariables(); }
+    void subIterate();
 
     //@}
 

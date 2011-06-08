@@ -157,9 +157,6 @@ MultiscaleAlgorithmBroyden::subIterate()
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );
 
-        // solveModel
-        M_multiscale->solveModel();
-
         if ( subIT >= M_iterationsLimitForReset )
             M_iterationsLimitReached = true;
 

@@ -38,13 +38,6 @@
 #define MultiscaleSolver_H 1
 
 #include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
-
-#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmAitken.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmBroyden.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmExplicit.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmNewton.hpp>
-
 #include <lifemc/lifesolver/MultiscaleModelMultiscale.hpp>
 
 namespace LifeV
@@ -95,7 +88,15 @@ public:
     bool solveProblem( const Real& referenceSolution = -1. );
 
     //! Display some information about the Multiscale problem (should be called after setupProblem)
-    void showMe();
+    void showMe() const;
+
+    //! Save CPU time at each time step
+    /*!
+     * @param buildUpdateCPUTime CPU time to build/update the problem
+     * @param solveCPUTime CPU time to solve the problem
+     * @param saveCPUTime CPU time to save the solution
+     */
+    void saveCPUTime( const Real& buildUpdateCPUTime, const Real& solveCPUTime, const Real& saveCPUTime ) const;
 
     //@}
 
@@ -125,17 +126,11 @@ private:
     // The main model (can be a specific model or a Multiscale model)
     multiscaleModelPtr_Type          M_model;
 
-    // Algorithm for subiterations
-    multiscaleAlgorithmPtr_Type      M_algorithm;
-
     // Container of global data
     multiscaleDataPtr_Type           M_globalData;
 
     // Communicator
     multiscaleCommPtr_Type           M_comm;
-
-    // Chrono performances
-    LifeChrono                       M_chrono;
 };
 
 } // Namespace multiscale
