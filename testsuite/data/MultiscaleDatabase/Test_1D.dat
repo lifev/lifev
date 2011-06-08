@@ -28,12 +28,6 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_Rhombus_FS-S
     endtime                    = 1e-2     # [s]
     timestep                   = 1e-3     # [s]
 
-    [../Algorithm]
-    type                       = Newton            # Aitken, Explicit, Newton, Broyden
-    file                       = Default           # File name (without .dat extension)
-    subiterationsMaximumNumber = 3                 # Maximum number for coupling subiterations
-    tolerance                  = 1.e-6             # Tolerance on the coupling values
-
     [../]
 
 ###################################################################################################

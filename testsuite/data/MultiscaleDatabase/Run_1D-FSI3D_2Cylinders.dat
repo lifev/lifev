@@ -29,12 +29,6 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_2Cylinders_FS
     endtime                    = 0.050    # [s]
     timestep                   = 0.001    # [s]
 
-    [../Algorithm]
-    type                       = Newton            # Aitken, Explicit, Newton, Broyden
-    file                       = Default           # File name (without .dat extension)
-    subiterationsMaximumNumber = 100               # Maximum number for coupling subiterations
-    tolerance                  = 1.e-6             # Tolerance on the coupling values
-
     [../]
 
 ###################################################################################################

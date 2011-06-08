@@ -31,12 +31,6 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricle
     endtime                    = 0.800   # [s]
     timestep                   = 0.001   # [s]
 
-    [../Algorithm]
-    type                       = Broyden           # Aitken, Explicit, Newton, Broyden
-    file                       = Default           # File name (without .dat extension)
-    subiterationsMaximumNumber = 100               # Maximum number for coupling subiterations
-    tolerance                  = 1.e-6             # Tolerance on the coupling values
-
     [../]
 
 ###################################################################################################
