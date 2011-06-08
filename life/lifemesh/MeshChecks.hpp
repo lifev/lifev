@@ -337,11 +337,11 @@ Real testClosedDomain( RegionMesh3D const & mesh,
 template <typename RegionMesh3D>
 bool checkMesh3D( RegionMesh3D & mesh,
                   Switch & sw,
-                  bool fix = true,
-                  bool verbose = false,
-                  std::ostream & out = std::cerr,
-                  std::ostream & err = std::cerr,
-                  std::ostream & clog = std::cout )
+                  bool fix,
+                  bool verbose,
+                  std::ostream & out,
+                  std::ostream & err,
+                  std::ostream & clog )
 {
 
     if ( mesh.storedPoints() == 0 )
