@@ -326,6 +326,12 @@ MultiscaleModel1D::showMe()
     }
 }
 
+Real
+MultiscaleModel1D::checkSolution() const
+{
+    return (*M_solution)["AoverA0minus1"]->norm2() + (*M_solution)["Q"]->norm2() + (*M_solution)["P"]->norm2();
+}
+
 // ===================================================
 // MultiscaleInterfaceFluid Methods
 // ===================================================

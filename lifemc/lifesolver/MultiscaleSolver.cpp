@@ -51,10 +51,8 @@ bool        multiscaleExitFlag      = EXIT_SUCCESS;
 // ===================================================
 MultiscaleSolver::MultiscaleSolver() :
         M_model             (),
-        M_algorithm         (),
         M_globalData        ( new multiscaleData_Type() ),
-        M_comm              (),
-        M_chrono            ()
+        M_comm              ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -70,17 +68,6 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleModelFactory_Type::instance().registerProduct   (  Multiscale,          &createMultiscaleModelMultiscale );
     multiscaleModelFactory_Type::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
     multiscaleModelFactory_Type::instance().registerProduct   (  Windkessel0D,        &createMultiscaleModelWindkessel0D );
-
-    multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
-    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRate,            &createMultiscaleCouplingFlowRate );
-    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateValve,       &createMultiscaleCouplingFlowRateValve );
-    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
-    multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
-
-    multiscaleAlgorithmFactory_Type::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
-    multiscaleAlgorithmFactory_Type::instance().registerProduct( Broyden,             &createMultiscaleAlgorithmBroyden );
-    multiscaleAlgorithmFactory_Type::instance().registerProduct( Explicit,            &createMultiscaleAlgorithmExplicit );
-    multiscaleAlgorithmFactory_Type::instance().registerProduct( Newton,              &createMultiscaleAlgorithmNewton );
 }
 
 // ===================================================
@@ -116,23 +103,10 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     // Setup data
     M_globalData->readData( dataFile );
     M_model->setGlobalData( M_globalData );
-    M_model->setupData( dataFile( "Problem/ProblemFile", "./MultiscaleData/Models/NoModel.dat" ) + ".dat" );
+    M_model->setupData( dataFile( "Problem/ProblemFile", "./MultiscaleDatabase/Models/NoModel" ) + ".dat" );
 
     // Setup Models
     M_model->setupModel();
-
-    // Algorithm parameters
-    if ( M_model->type() == Multiscale )
-    {
-        M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( multiscaleAlgorithmsMap[ dataFile( "Solver/Algorithm/type", "Newton" ) ], multiscaleAlgorithmsMap ) );
-
-        M_algorithm->setCommunicator( M_comm );
-        M_algorithm->setModel( M_model );
-        M_algorithm->setSubiterationsMaximumNumber( dataFile( "Solver/Algorithm/subiterationsMaximumNumber", 100 ) );
-        M_algorithm->setTolerance( dataFile( "Solver/Algorithm/tolerance", 1e-2 ) );
-        std::string path = "./MultiscaleDatabase/Algorithms/"; // TODO Add this to files
-        M_algorithm->setupData( path + enum2String( M_algorithm->type(), multiscaleAlgorithmsMap ) + "/" + dataFile( "Solver/Algorithm/file", "undefined" ) + ".dat" );
-    }
 }
 
 bool
@@ -152,13 +126,17 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 
     // Chrono definitions
-    Real totalSimulationTime(0);
-    Real localTimeStepTime(0);
-    Real globalTimeStepTime(0);
+    LifeChrono buildUpdateChrono;
+    LifeChrono solveChrono;
+    LifeChrono saveChrono;
+    LifeChrono globalChrono;
+    Real       totalSimulationTime(0);
+    Real       timeStepTime(0);
 
     for ( ; M_globalData->dataTime()->canAdvance(); M_globalData->dataTime()->updateTime() )
     {
-        M_chrono.start();
+        // Global chrono start
+        globalChrono.start();
 
         if ( M_comm->MyPID() == 0 )
         {
@@ -171,59 +149,51 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         }
 
         // Build or Update System
+        buildUpdateChrono.start();
         if ( M_globalData->dataTime()->isFirstTimeStep() )
-        {
-            if ( M_model->type() == Multiscale )
-                M_algorithm->initializeCouplingVariables();
             M_model->buildModel();
-        }
         else
-        {
-            if ( M_model->type() == Multiscale )
-                M_algorithm->updateCouplingVariables();
             M_model->updateModel();
-        }
+        buildUpdateChrono.stop();
 
         // Solve the model
+        solveChrono.start();
         M_model->solveModel();
-
-        // If it is a Multiscale model, call algorithm for subiterations
-        if ( M_model->type() == Multiscale )
-            M_algorithm->subIterate();
+        solveChrono.stop();
 
         // Save the solution
+        saveChrono.start();
         M_model->saveSolution();
+        saveChrono.stop();
 
-        // Chrono stop
-        M_chrono.stop();
+        // Global chrono stop
+        globalChrono.stop();
 
         // Compute time step time
-        localTimeStepTime = M_chrono.diff();
-        M_comm->MaxAll( &localTimeStepTime, &globalTimeStepTime, 1 );
+        saveCPUTime( buildUpdateChrono.globalDiff( *M_comm ), solveChrono.globalDiff( *M_comm ), saveChrono.globalDiff( *M_comm ) );
+        timeStepTime = globalChrono.globalDiff( *M_comm );
+
         if ( M_comm->MyPID() == 0 )
-            std::cout << " MS-  Total iteration time:                    " << globalTimeStepTime << " s" << std::endl;
+            std::cout << " MS-  Total iteration time:                    " << timeStepTime << " s" << std::endl;
 
         // Updating total simulation time
-        totalSimulationTime += globalTimeStepTime;
+        totalSimulationTime += timeStepTime;
     }
 
     if ( M_comm->MyPID() == 0 )
         std::cout << " MS-  Total simulation time:                   " << totalSimulationTime << " s" << std::endl;
 
     // Check on the last iteration
-    if ( M_model->type() == Multiscale )
-    {
-        Real computedSolution( M_algorithm->couplingVariables()->norm2() );
-        if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
-            multiscaleErrorCheck( Solution, "Algorithm Solution: "  + number2string( computedSolution ) +
-                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() == 0 );
-    }
+    Real computedSolution( M_model->checkSolution() );
+    if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
+        multiscaleErrorCheck( Solution, "Problem solution: "  + number2string( computedSolution ) +
+                                        " (External solution: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() == 0 );
 
     return multiscaleExitFlag;
 }
 
 void
-MultiscaleSolver::showMe()
+MultiscaleSolver::showMe() const
 {
     if ( M_comm->MyPID() == 0 )
     {
@@ -240,11 +210,35 @@ MultiscaleSolver::showMe()
     }
 
     M_model->showMe();
-    if ( M_model->type() == Multiscale )
-        M_algorithm->showMe();
 
     if ( M_comm->MyPID() == 0 )
         std::cout << "=============================================================" << std::endl << std::endl;
+}
+
+void
+MultiscaleSolver::saveCPUTime( const Real& buildUpdateCPUTime, const Real& solveCPUTime, const Real& saveCPUTime ) const
+{
+    if ( M_comm->MyPID() == 0 )
+    {
+        std::ofstream output;
+        output << std::scientific << std::setprecision( 15 );
+
+        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep )
+                                                       + "_CPUTime.mfile";
+
+        if ( M_globalData->dataTime()->isFirstTimeStep() )
+        {
+            output.open( filename.c_str(), std::ios::trunc );
+            output << "% TIME                     TOTAL                    BUILD/UPDATE             SOLVE                    SAVE" << std::endl;
+        }
+        else
+        {
+            output.open( filename.c_str(), std::ios::app );
+        }
+        output << "  " << M_globalData->dataTime()->time() << "    " << buildUpdateCPUTime+solveCPUTime+saveCPUTime
+               << "    " << buildUpdateCPUTime << "    " << solveCPUTime  << "    " << saveCPUTime << std::endl;
+        output.close();
+    }
 }
 
 } // Namespace multiscale

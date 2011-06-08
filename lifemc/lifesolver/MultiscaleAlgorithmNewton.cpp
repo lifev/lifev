@@ -124,9 +124,6 @@ MultiscaleAlgorithmNewton::subIterate()
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );
 
-        // solveModel
-        M_multiscale->solveModel();
-
         // Verify tolerance
         if ( checkResidual( subIT ) )
             return;

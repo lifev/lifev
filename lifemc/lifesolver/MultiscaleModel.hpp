@@ -141,6 +141,13 @@ public:
     //! Display some information about the model.
     virtual void showMe();
 
+    //! Return a specific scalar quantity to be used for a comparison with a reference value.
+    /*!
+     * This method is meant to be used for night checks.
+     * @return reference quantity.
+     */
+    virtual Real checkSolution() const = 0;
+
     //@}
 
 

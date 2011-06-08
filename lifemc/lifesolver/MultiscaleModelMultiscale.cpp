@@ -36,6 +36,17 @@
 
 #include <lifemc/lifesolver/MultiscaleModelMultiscale.hpp>
 
+#include <lifemc/lifesolver/MultiscaleAlgorithmAitken.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmBroyden.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmExplicit.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmNewton.hpp>
+
+#include <lifemc/lifesolver/MultiscaleCouplingBoundaryCondition.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingFlowRateValve.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingFlowRateStress.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingStress.hpp>
+
 namespace LifeV
 {
 namespace Multiscale
@@ -48,7 +59,8 @@ MultiscaleModelMultiscale::MultiscaleModelMultiscale() :
         multiscaleModel_Type       (),
         M_commManager              (),
         M_modelsList               (),
-        M_couplingsList            ()
+        M_couplingsList            (),
+        M_algorithm                ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -56,6 +68,17 @@ MultiscaleModelMultiscale::MultiscaleModelMultiscale() :
 #endif
 
     M_type = Multiscale;
+
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Broyden,             &createMultiscaleAlgorithmBroyden );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Explicit,            &createMultiscaleAlgorithmExplicit );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Newton,              &createMultiscaleAlgorithmNewton );
+
+    multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRate,            &createMultiscaleCouplingFlowRate );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateValve,       &createMultiscaleCouplingFlowRateValve );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
 }
 
 MultiscaleModelMultiscale::~MultiscaleModelMultiscale()
@@ -95,6 +118,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
 
     models_Type model;
     couplings_Type coupling;
+    algorithms_Type algorithm;
 
     boost::array< Real, NDIM > geometryScale, geometryRotate, geometryTranslate;
 
@@ -212,6 +236,13 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
         M_couplingsList[fileCouplingsLine]->setupData( path + enum2String( coupling, multiscaleCouplingsMap ) + "/"
                                                        + dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 2 ) + ".dat" );
     }
+
+    // Load Algorithm
+    path = dataFile( "Problem/algorithmsPath", "./" );
+    algorithm = multiscaleAlgorithmsMap[ dataFile( "Problem/algorithm", "Newton", 0 ) ];
+    M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( algorithm, multiscaleAlgorithmsMap ) );
+    M_algorithm->setCommunicator( M_comm );
+    M_algorithm->setupData( path + enum2String( algorithm, multiscaleAlgorithmsMap ) + "/" + dataFile( "Problem/algorithm", "undefined", 1 ) + ".dat" );
 }
 
 void
@@ -227,6 +258,9 @@ MultiscaleModelMultiscale::setupModel()
 
     for ( multiscaleModelsContainerConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->setupModel();
+
+    M_algorithm->setMultiscaleModel( this );
+    M_algorithm->setupAlgorithm();
 }
 
 void
@@ -256,7 +290,14 @@ MultiscaleModelMultiscale::updateModel()
         ( *i )->updateModel();
 
     for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    {
         ( *i )->updateCoupling();
+
+        if ( M_algorithm->type() != Explicit )
+            ( *i )->extrapolateCouplingVariables();
+        else
+            ( *i )->initializeCouplingVariables();
+    }
 }
 
 void
@@ -267,9 +308,7 @@ MultiscaleModelMultiscale::solveModel()
     Debug( 8110 ) << "MultiscaleModelMultiscale::solveModel() \n";
 #endif
 
-    displayModelStatus( "Solve" );
-    for ( multiscaleModelsContainerConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        ( *i )->solveModel();
+    M_algorithm->subIterate();
 }
 
 void
@@ -345,6 +384,17 @@ MultiscaleModelMultiscale::showMe()
         std::cout << "================= Communicators Information =================" << std::endl << std::endl;
 
     M_commManager.showMe();
+
+    if ( M_comm->MyPID() == 0 )
+        std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
+
+    M_algorithm->showMe();
+}
+
+Real
+MultiscaleModelMultiscale::checkSolution() const
+{
+    return M_algorithm->couplingVariables()->norm2();
 }
 
 // ===================================================
@@ -364,38 +414,6 @@ MultiscaleModelMultiscale::createCouplingMap( MapEpetra& couplingMap )
 
     for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->createCouplingMap( couplingMap );
-}
-
-void
-MultiscaleModelMultiscale::initializeCouplingVariables()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8110 ) << "MultiscaleModelMultiscale::initializeCouplingVariables() \n";
-#endif
-
-    for ( multiscaleModelsContainerConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == Multiscale )
-            ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->initializeCouplingVariables();
-
-    for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->initializeCouplingVariables();
-}
-
-void
-MultiscaleModelMultiscale::extrapolateCouplingVariables()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8110 ) << "MultiscaleModelMultiscale::extrapolateCouplingVariables() \n";
-#endif
-
-    for ( multiscaleModelsContainerConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == Multiscale )
-            ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->extrapolateCouplingVariables();
-
-    for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->extrapolateCouplingVariables();
 }
 
 void
@@ -437,6 +455,10 @@ MultiscaleModelMultiscale::exportCouplingResiduals( multiscaleVector_Type& coupl
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MultiscaleModelMultiscale::exportCouplingResiduals( couplingResiduals ) \n";
 #endif
+
+    displayModelStatus( "Solve" );
+    for ( multiscaleModelsContainerConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+        ( *i )->solveModel();
 
     for ( multiscaleModelsContainerConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         if ( ( *i )->type() == Multiscale )

@@ -15,3 +15,7 @@
 [Multiscale]
 algorithmName        = Default
 algorithmType        = Explicit
+
+[Parameters]
+subiterationsMaximumNumber     = 0      # Maximum number for coupling subiterations
+tolerance                      = 0      # Tolerance on the coupling values

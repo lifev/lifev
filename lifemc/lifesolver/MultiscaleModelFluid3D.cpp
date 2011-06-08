@@ -335,6 +335,12 @@ MultiscaleModelFluid3D::showMe()
     }
 }
 
+Real
+MultiscaleModelFluid3D::checkSolution() const
+{
+    return M_solution->norm2();
+}
+
 // ===================================================
 // MultiscaleInterfaceFluid Methods
 // ===================================================

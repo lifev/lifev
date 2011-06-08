@@ -335,6 +335,13 @@ MultiscaleModelFSI3D::showMe()
     }
 }
 
+Real
+MultiscaleModelFSI3D::checkSolution() const
+{
+    return M_fluidDisplacement->norm2() + M_fluidVelocityAndPressure->norm2() + M_solidDisplacement->norm2() + M_solidVelocity->norm2();
+}
+
+
 
 // ===================================================
 // MultiscaleInterfaceFluid Methods

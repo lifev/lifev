@@ -39,18 +39,15 @@
 
 #include <lifemc/lifesolver/MultiscaleCommunicatorsManager.hpp>
 
+#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
+
+#include <lifemc/lifesolver/MultiscaleCoupling.hpp>
+
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
-
-#include <lifemc/lifesolver/MultiscaleCoupling.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingBoundaryCondition.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRateValve.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRateStress.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingStress.hpp>
 
 namespace LifeV
 {
@@ -107,6 +104,13 @@ public:
     //! Display some information about the multiscale problem (call after SetupProblem)
     void showMe();
 
+    //! Return a specific scalar quantity to be used for a comparison with a reference value.
+    /*!
+     * This method is meant to be used for night checks.
+     * @return reference quantity.
+     */
+    Real checkSolution() const;
+
     //@}
 
 
@@ -118,12 +122,6 @@ public:
      * @param couplingMap Global coupling map
      */
     void createCouplingMap( MapEpetra& couplingMap );
-
-    //! Initialize coupling variables for the first time step
-    void initializeCouplingVariables();
-
-    //! Extrapolate coupling variables for the next time step
-    void extrapolateCouplingVariables();
 
     //! Import the values of the coupling variables
     void importCouplingVariables( const multiscaleVector_Type& couplingVariables );
@@ -179,6 +177,9 @@ private:
     // Models & Couplings
     multiscaleModelsContainer_Type     M_modelsList;
     multiscaleCouplingsContainer_Type  M_couplingsList;
+
+    // Algorithm for subiterations
+    multiscaleAlgorithmPtr_Type        M_algorithm;
 };
 
 //! Factory create function
