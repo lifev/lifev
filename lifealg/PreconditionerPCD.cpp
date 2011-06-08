@@ -461,8 +461,6 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
 
     this->M_preconditionerCreated = true;
 
-    if(verbose) std::cout << "[DEBUG] number of operators: " << numOperators() << std::endl;
-
     if(verbose) std::cout << "      >All the blocks are built" << std::endl
                           << "      >";
     return ( EXIT_SUCCESS );

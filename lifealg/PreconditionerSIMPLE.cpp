@@ -188,7 +188,7 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     P1b->getMatrixBlockView(1,0,B21);
     P1b->getMatrixBlockView(1,1,B22);
     MatrixBlockUtils::copyBlock(B,B21);
-    //(*P1b) *= -1;
+    (*P1b) *= -1;
     MatrixBlockUtils::createIdentityBlock(B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P1b->globalAssemble();
@@ -253,9 +253,6 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
      * Building the Second block
      * / I  -D^-1Bt \ = / D^-1   0    \/ I -Bt \/ D 0 \
      * \ 0   alphaI /   \ 0    alphaI /\ 0  I  /\ 0 I /
-     *
-     * / D^-1    0   \
-     * \ 0    alphaI /
      */
     if(verbose) std::cout << "       Block 2 (D^-1,alpha I)" << std::endl;
     timer.start();
@@ -279,8 +276,8 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     if(verbose) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
     /*
-     * / I Bt \
-     * \ 0 I  /
+     * / I -Bt \
+     * \ 0  I  /
      */
     if(verbose) std::cout << "       Block 2 (Bt)" << std::endl;
     timer.start();
@@ -290,7 +287,7 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     P2b->getMatrixBlockView(0,1,B12);
     P2b->getMatrixBlockView(1,1,B22);
     MatrixBlockUtils::copyBlock(Bt,B12);
-    (*P2b) *= -1;
+    //(*P2b) *= -1; // We inverse already the block
     MatrixBlockUtils::createIdentityBlock(B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P2b->globalAssemble();
