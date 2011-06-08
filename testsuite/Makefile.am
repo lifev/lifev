@@ -26,6 +26,7 @@ SUBDIRS		= data  \
 			  test_ADRAssembler \
 			  test_bdf \
               test_darcy \
+              test_FEFunction \
               test_fsi \
               test_hyperbolic \
               test_LevelSetSolver \
