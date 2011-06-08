@@ -60,17 +60,22 @@ namespace LifeV {
 
  Inherits @c BCFunctionBase to facilitate use of interpolated data as boundary condition.
 
- The format of the data file passed to readData() should be as follows:
+ If the interpolated data depends on time, the user must pass the data values at 2n specific time instances
+ uniformly sampled at interval M_timeInterval and with period M_timePeriod. The values of the data between
+ these time instances is interpolated using Fourier interpolation, i.e. the interpolant is a trigonometric
+ polynomial of order 2n and periodic with period M_timePeriod.
 
-     # header line before dimension definition
-     nof_data_sites nof_data_dimensions
-     # header line before control point definitions
-     data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord
-     ...
-     data_site_n_x_coord data_site_n_y_coord data_site_n_z_coord
-     # header line before data definitions
-     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
-     ...
+ The format of the data file passed to readData() should be as follows:\
+\
+     # header line before dimension definition\
+     nof_data_sites nof_data_dimensions t_interval t_period\
+     # header line before control point definitions\
+     data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord\
+     ...\
+     data_site_n_x_coord data_site_n_y_coord data_site_n_z_coord\
+     # header line before data definitions\
+     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord\
+     ...\
      data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
 
  The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
@@ -218,8 +223,13 @@ private:
 
     BCInterpolation_VectorialData* M_dataSites;
     BCInterpolation_VectorialData* M_dataValues;
+    BCInterpolation_VectorialData* M_dataValues_timeSamples;
 
     UInt M_nofControlPoints;
+
+    Real M_lastInterpolatedAtTime;
+    Real M_timePeriod;
+    Real M_timeInterval;
 
     bool M_flagInterpolated;
     bool M_verbose;
@@ -227,14 +237,23 @@ private:
 
     void formRBFMatrix();
     void solveInterpolationSystem();
-    BCInterpolation_VectorialData interpolateVectorialFunction( const Real& x,
+    BCInterpolation_VectorialData interpolateVectorialFunction( const Real& t,
+                                                                const Real& x,
                                                                 const Real& y,
                                                                 const Real& z );
     Real evaluateRBF( const BCInterpolation_VectorialData point1,
                       const BCInterpolation_VectorialData point2 );
     bool needSideConstraints();
+    void formRBFvectors();
+    void interpolateDataValuesInTime( const Real t );
+
+    Int getIndexInTime(Int dataSite, Int timeInstant) const
+    {
+        return M_nofControlPoints * timeInstant + dataSite;
+    }
 
 };
+
 
 } // namespace LifeV
 

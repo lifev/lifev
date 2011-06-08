@@ -40,10 +40,15 @@
 
  Inherits @c BCFunctionBase to facilitate use of interpolated data as boundary condition.
 
+ If the interpolated data depends on time, the user must pass the data values at 2n specific time instances
+ uniformly sampled at interval M_timeInterval and with period M_timePeriod. The values of the data between
+ these time instances is interpolated using Fourier interpolation, i.e. the interpolant is a trigonometric
+ polynomial of order 2n and periodic with period M_timePeriod.
+
  The format of the data file passed to readData() should be as follows:\
 \
      # header line before dimension definition\
-     nof_data_sites nof_data_dimensions\
+     nof_data_sites nof_data_dimensions t_interval t_period\
      # header line before control point definitions\
      data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord\
      ...\
@@ -51,7 +56,7 @@
      # header line before data definitions\
      data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord\
      ...\
-     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord\
+     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
 
  The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
  is being interpolated. The variable nof_data_sites has to equal the number of rows passed in
@@ -73,6 +78,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <cmath>
 
 namespace LifeV {
 
@@ -80,11 +86,13 @@ namespace LifeV {
 // Constructors & Destructor
 // ===================================================
 BCDataInterpolator::BCDataInterpolator( BCInterpolationMethod interpolationMethod ) :
-                M_interpolationMatrix(), M_rhs_x(), M_rhs_y(), M_rhs_z(), M_coeffs_x(), M_coeffs_y(),
-                    M_coeffs_z(), M_denseSolver(), M_interpolationMethod ( interpolationMethod ), M_flagInterpolated( false )
+    M_interpolationMatrix(), M_rhs_x(), M_rhs_y(), M_rhs_z(), M_coeffs_x(), M_coeffs_y(), M_coeffs_z(), M_denseSolver(),
+                    M_interpolationMethod( interpolationMethod ), M_lastInterpolatedAtTime( -1 ),
+                    M_timePeriod ( 0 ), M_timeInterval ( 0 ), M_flagInterpolated( false )
 {
 
-    M_userDefinedFunction = boost::bind(&BCDataInterpolator::vectFct, this, _1, _2, _3, _4, _5);
+    M_userDefinedFunction = boost::bind( &BCDataInterpolator::vectFct,
+                                         this,_1,_2,_3,_4,_5 );
 
 }
 
@@ -120,9 +128,7 @@ Real BCDataInterpolator::vectFct( const Real& t,
 
     BCInterpolation_VectorialData vectEval;
 
-    vectEval = interpolateVectorialFunction( x,
-                                             y,
-                                             z );
+    vectEval = interpolateVectorialFunction( t,x,y,z );
 
     switch ( component )
     {
@@ -144,52 +150,96 @@ void BCDataInterpolator::showMe( bool verbose,
 {
 
     out << " Boundary Conditions Data Interpolator ====>" << std::endl;
+    out << " Data sites:" << std::endl;
 
+    for (UInt i=0; i < M_nofControlPoints; i++)
+    {
+        out << "(" << M_dataSites[i].x << ", " << M_dataSites[i].y << ", " << M_dataSites[i].z << ")" << std::endl;
+    }
+
+    if (verbose)
+    {
+        for (Int t=0; t < M_timePeriod / M_timeInterval; t++)
+        {
+            out << " Data values (at sites):" << std::endl;
+            for (UInt i=0; i < M_nofControlPoints; i++)
+            {
+                out << "(" << M_dataValues_timeSamples[getIndexInTime(i,t)].x << ", " << M_dataValues_timeSamples[getIndexInTime(i,t)].y << ", " << M_dataValues_timeSamples[getIndexInTime(i,t)].z << ")" << std::endl;
+            }
+        }
+    }
+
+    out << " Data values (interpolated):" << std::endl;
+    for (UInt i=0; i < M_nofControlPoints; i++)
+    {
+        out << "(" << M_dataValues[i].x << ", " << M_dataValues[i].y << ", " << M_dataValues[i].z << ")" << std::endl;
+    }
 }
 
-void BCDataInterpolator::readData(const char *fileName)
+void BCDataInterpolator::readData( const char *fileName )
 {
 
     std::ifstream fin;
     UInt RDIM;
 
-    fin.open(fileName);
+    fin.open( fileName );
 
     if ( !fin.fail() )
     {
-        fin.ignore(80,'\n');
+        fin.ignore( 80, '\n' );
 
         fin >> M_nofControlPoints;
         fin >> RDIM;
+        fin >> M_timeInterval;
+        fin >> M_timePeriod;
 
-        if ((RDIM != 1) && (RDIM != 3))
+        if ( ( RDIM != 1 ) && ( RDIM != 3 ) )
         {
             std::ostringstream __ex;
-                        __ex << "Interpolated data must be either scalar or a 3-vector: " << std::endl;
-                        throw std::invalid_argument( __ex.str() );
+            __ex << "Interpolated data must be either scalar or a 3-vector: " << std::endl;
+            throw std::invalid_argument( __ex.str() );
         }
 
-        fin.ignore(80,'\n');
-        fin.ignore(80,'\n');
+        if ( M_timePeriod <= 0 || M_timeInterval <= 0 || fmod(M_timePeriod,M_timeInterval) != 0 || M_timeInterval > M_timePeriod)
+        {
+            std::ostringstream __ex;
+                    __ex << "Interpolation time interval and/or period are inconsistent." << std::endl;
+                    throw std::invalid_argument( __ex.str() );
+        }
+
+        Int n = static_cast< Int > (floor(M_timePeriod / M_timeInterval));
 
         M_dataSites = new BCInterpolation_VectorialData[M_nofControlPoints];
         M_dataValues = new BCInterpolation_VectorialData[M_nofControlPoints];
+        M_dataValues_timeSamples = new BCInterpolation_VectorialData[M_nofControlPoints * (n+1)];
 
-        for (UInt i=0; i < M_nofControlPoints; i++)
+        fin.ignore( 80, '\n' );
+        fin.ignore( 80, '\n' );
+
+        // Read the data site locations
+        for ( UInt i = 0; i < M_nofControlPoints; i++ )
         {
             fin >> M_dataSites[i].x;
             fin >> M_dataSites[i].y;
             fin >> M_dataSites[i].z;
         }
 
-        fin.ignore(80,'\n');
-        fin.ignore(80,'\n');
+        fin.ignore( 80, '\n' );
+        fin.ignore( 80, '\n' );
 
-        for (UInt i=0; i < M_nofControlPoints; i++)
+        // Read the data values at time instances
+        for (Int t = 0; t <= n; t++)
         {
-            fin >> M_dataValues[i].x;
-            fin >> M_dataValues[i].y;
-            fin >> M_dataValues[i].z;
+
+            for ( UInt i = 0; i < M_nofControlPoints; i++ )
+            {
+                fin >> M_dataValues_timeSamples[getIndexInTime(i,t)].x;
+                fin >> M_dataValues_timeSamples[getIndexInTime(i,t)].y;
+                fin >> M_dataValues_timeSamples[getIndexInTime(i,t)].z;
+            }
+
+            fin.ignore( 80, '\n' );
+            fin.ignore( 80, '\n' );
         }
 
         fin.close();
@@ -198,7 +248,6 @@ void BCDataInterpolator::readData(const char *fileName)
 
         formRBFMatrix();
     }
-
 
 }
 
@@ -235,15 +284,7 @@ void BCDataInterpolator::formRBFMatrix()
     Int nofElementsPerRow = ( needSideConstraints() ? 2 * M_nofControlPoints + NDIM : M_nofControlPoints );
 
     M_interpolationMatrix.Shape( static_cast< int > ( nofElementsPerRow ),
-                       static_cast< int > ( nofElementsPerRow ) );
-
-    M_rhs_x.Size( static_cast< int > ( nofElementsPerRow ) );
-    M_rhs_y.Size( static_cast< int > ( nofElementsPerRow ) );
-    M_rhs_z.Size( static_cast< int > ( nofElementsPerRow ) );
-
-    M_coeffs_x.Size( static_cast< int > ( nofElementsPerRow ) );
-    M_coeffs_y.Size( static_cast< int > ( nofElementsPerRow ) );
-    M_coeffs_z.Size( static_cast< int > ( nofElementsPerRow ) );
+                                 static_cast< int > ( nofElementsPerRow ) );
 
     Real rbfEval;
 
@@ -254,20 +295,12 @@ void BCDataInterpolator::formRBFMatrix()
         {
             // Symmetric interpolation matrix [A]_ij = phi(|x_i - x_j|)
 
-            rbfEval = evaluateRBF( M_dataSites[i],
-                                   M_dataSites[j] );
-            M_interpolationMatrix( static_cast< int >(i),
-                         static_cast< int >(j) ) = static_cast< double >(rbfEval);
-            M_interpolationMatrix( static_cast< int >(j),
-                         static_cast< int >(i) ) = static_cast< double >(rbfEval);
+            rbfEval = evaluateRBF( M_dataSites[i], M_dataSites[j] );
+            M_interpolationMatrix( static_cast< int > ( i ), static_cast< int > ( j ) ) = static_cast< double > ( rbfEval );
+            M_interpolationMatrix( static_cast< int > ( j ), static_cast< int > ( i ) ) = static_cast< double > ( rbfEval );
 
         }
 
-        // Form RHS for the values at the RBF sites
-
-        M_rhs_x( i ) = M_dataValues[i].x;
-        M_rhs_y( i ) = M_dataValues[i].y;
-        M_rhs_z( i ) = M_dataValues[i].z;
     }
 
     if ( needSideConstraints() )
@@ -279,36 +312,29 @@ void BCDataInterpolator::formRBFMatrix()
         {
 
             // Constant term of the polynomial
-            M_interpolationMatrix( i,
-                         M_nofControlPoints + i ) = 1;
-            M_interpolationMatrix( M_nofControlPoints + i,
-                         i ) = 1;
+            M_interpolationMatrix( i, M_nofControlPoints + i ) = 1;
+            M_interpolationMatrix( M_nofControlPoints + i, i ) = 1;
 
             // First order term of the polynomial
-            M_interpolationMatrix( i,
-                         2 * M_nofControlPoints ) = M_dataSites[i].x;
-            M_interpolationMatrix( i,
-                         2 * M_nofControlPoints + 1 ) = M_dataSites[i].y;
-            M_interpolationMatrix( i,
-                         2 * M_nofControlPoints + 2 ) = M_dataSites[i].z;
+            M_interpolationMatrix( i, 2 * M_nofControlPoints )     = M_dataSites[i].x;
+            M_interpolationMatrix( i, 2 * M_nofControlPoints + 1 ) = M_dataSites[i].y;
+            M_interpolationMatrix( i, 2 * M_nofControlPoints + 2 ) = M_dataSites[i].z;
 
-            M_interpolationMatrix( 2 * M_nofControlPoints,
-                         i ) = M_dataSites[i].x;
-            M_interpolationMatrix( 2 * M_nofControlPoints + 1,
-                         i ) = M_dataSites[i].y;
-            M_interpolationMatrix( 2 * M_nofControlPoints + 2,
-                         i ) = M_dataSites[i].z;
+            M_interpolationMatrix( 2 * M_nofControlPoints,     i ) = M_dataSites[i].x;
+            M_interpolationMatrix( 2 * M_nofControlPoints + 1, i ) = M_dataSites[i].y;
+            M_interpolationMatrix( 2 * M_nofControlPoints + 2, i ) = M_dataSites[i].z;
         }
     }
 
     M_denseSolver.SetMatrix( M_interpolationMatrix );
+    M_flagInterpolated = false;
 
 }
 
 void BCDataInterpolator::solveInterpolationSystem()
 {
 
-    #ifdef DEBUG
+#ifdef DEBUG
     // Check that condition number is "reasonable" (< 1e6), if not print a warning
     Real reciprocalCond = M_denseSolver.RCOND();
 
@@ -317,25 +343,23 @@ void BCDataInterpolator::solveInterpolationSystem()
         Debug( 5000 ) << "Radial basis interpolation matrix is ill-conditioned.\n";
         Debug( 5000 ) << "Estimated reciprocal of condition number: " << reciprocalCond << "\n";
     }
-    #endif
+#endif
 
     // Solve the interpolation system for each component using LU-factorization
 
-    M_denseSolver.SetVectors( M_coeffs_x,
-                               M_rhs_x );
+    M_denseSolver.SetVectors( M_coeffs_x, M_rhs_x );
     M_denseSolver.Solve();
 
-    M_denseSolver.SetVectors( M_coeffs_x,
-                               M_rhs_y );
+    M_denseSolver.SetVectors( M_coeffs_y, M_rhs_y );
     M_denseSolver.Solve();
 
-    M_denseSolver.SetVectors( M_coeffs_z,
-                               M_rhs_z );
+    M_denseSolver.SetVectors( M_coeffs_z, M_rhs_z );
     M_denseSolver.Solve();
 
 }
 
-BCDataInterpolator::BCInterpolation_VectorialData BCDataInterpolator::interpolateVectorialFunction( const Real& x,
+BCDataInterpolator::BCInterpolation_VectorialData BCDataInterpolator::interpolateVectorialFunction( const Real& t,
+                                                                                                    const Real& x,
                                                                                                     const Real& y,
                                                                                                     const Real& z )
 {
@@ -350,6 +374,12 @@ BCDataInterpolator::BCInterpolation_VectorialData BCDataInterpolator::interpolat
     evalPoint.y = y;
     evalPoint.z = z;
 
+    // Data values need to be interpolated in time, if not already done for this t
+    if (M_lastInterpolatedAtTime != t)
+    {
+        interpolateDataValuesInTime( t );
+    }
+
     // If not yet solved the interpolation system, do so
     if ( !M_flagInterpolated )
     {
@@ -361,8 +391,7 @@ BCDataInterpolator::BCInterpolation_VectorialData BCDataInterpolator::interpolat
     for ( UInt i = 0; i < M_nofControlPoints; i++ )
     {
 
-        rbfShape = evaluateRBF( evalPoint,
-                                M_dataSites[i] );
+        rbfShape = evaluateRBF( evalPoint, M_dataSites[i] );
 
         // Interpolated function value at point (x,y,z)
         rbfEval.x += M_coeffs_x( i ) * rbfShape;
@@ -372,7 +401,7 @@ BCDataInterpolator::BCInterpolation_VectorialData BCDataInterpolator::interpolat
     } // ...for each data site
 
 
-    if (needSideConstraints())
+    if ( needSideConstraints() )
     {
         // For each data site...
         for ( UInt i = 0; i < M_nofControlPoints; i++ )
@@ -383,17 +412,17 @@ BCDataInterpolator::BCInterpolation_VectorialData BCDataInterpolator::interpolat
             rbfEval.z += M_coeffs_z( i + M_nofControlPoints );
 
             // ...and the linear term of the polynomial
-            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints )    * M_dataSites[i].x;
-            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 1) * M_dataSites[i].y;
-            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 2) * M_dataSites[i].z;
+            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints )     * M_dataSites[i].x;
+            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].y; // BUG?
+            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].z;
 
-            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints )    * M_dataSites[i].x;
-            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints + 1) * M_dataSites[i].y;
-            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints + 2) * M_dataSites[i].z;
+            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints )     * M_dataSites[i].x;
+            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].y;
+            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].z;
 
-            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints )    * M_dataSites[i].x;
-            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints + 1) * M_dataSites[i].y;
-            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints + 2) * M_dataSites[i].z;
+            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints )     * M_dataSites[i].x;
+            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].y;
+            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].z;
         } // ...for each data site
 
     }
@@ -446,6 +475,95 @@ bool BCDataInterpolator::needSideConstraints()
         default:
             return true;
     }
+}
+
+void BCDataInterpolator::formRBFvectors()
+{
+
+    Int nofElementsPerRow = ( needSideConstraints() ? 2 * M_nofControlPoints + NDIM : M_nofControlPoints );
+
+    M_rhs_x.Size( static_cast< int > ( nofElementsPerRow ) );
+    M_rhs_y.Size( static_cast< int > ( nofElementsPerRow ) );
+    M_rhs_z.Size( static_cast< int > ( nofElementsPerRow ) );
+
+    M_coeffs_x.Size( static_cast< int > ( nofElementsPerRow ) );
+    M_coeffs_y.Size( static_cast< int > ( nofElementsPerRow ) );
+    M_coeffs_z.Size( static_cast< int > ( nofElementsPerRow ) );
+
+    for ( UInt i = 0; i < M_nofControlPoints; i++ )
+    {
+        // Form RHS for the values at the RBF sites
+
+        M_rhs_x( i ) = M_dataValues[i].x;
+        M_rhs_y( i ) = M_dataValues[i].y;
+        M_rhs_z( i ) = M_dataValues[i].z;
+    }
+
+    M_flagInterpolated = false;
+
+}
+
+void BCDataInterpolator::interpolateDataValuesInTime( const Real t )
+{
+
+    Int n = static_cast< Int > (floor(M_timePeriod / (2 * M_timeInterval))); // 2n time instances per period
+    UInt index_t = 0;
+
+    if ( fmod( t, M_timeInterval ) == 0 )
+    {
+        // We are exactly at a time instant
+        index_t = fmod( t / M_timePeriod, 2*n );
+
+        for ( UInt i = 0; i < M_nofControlPoints; i++ )
+        {
+            M_dataValues[i] = M_dataValues_timeSamples[getIndexInTime(i, index_t)];
+        }
+    }
+    else
+    {
+        // We need to Fourier interpolate the values between two time instants
+
+        for ( UInt i = 0; i < M_nofControlPoints; i++ )
+        {
+            BCInterpolation_VectorialData c1, c2;
+
+            c1.x = 0; c1.y = 0; c1.z = 0;
+            c2.x = 0; c2.y = 0; c2.z = 0;
+
+            M_dataValues[i].x = 0; M_dataValues[i].y = 0; M_dataValues[i].z = 0;
+
+            for (Int j = -n; j <= n; j++)
+            {
+                for (Int k = 0; k <= 2 * n; k++)
+                {
+                    Real tk = M_timePeriod / (2 * n + 1) * k;
+                    Int indexInTime = getIndexInTime(i, k);
+
+                    c1.x += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].x;
+                    c1.y += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].y;
+                    c1.z += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].z;
+
+                    c2.x += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].x;
+                    c2.y += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].y;
+                    c2.z += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].z;
+                }
+
+                c1.x = c1.x / (2 * n + 1); c1.y = c1.y / (2 * n + 1); c1.z = c1.z / (2 * n + 1);
+                c2.x = c2.x / (2 * n + 1); c2.y = c2.y / (2 * n + 1); c2.z = c2.z / (2 * n + 1);
+
+                M_dataValues[i].x += c1.x * cos(j * t * 2 * M_PI / M_timePeriod) - c2.x * sin(j * t * 2 * M_PI / M_timePeriod);
+                M_dataValues[i].y += c1.y * cos(j * t * 2 * M_PI / M_timePeriod) - c2.y * sin(j * t * 2 * M_PI / M_timePeriod);
+                M_dataValues[i].z += c1.z * cos(j * t * 2 * M_PI / M_timePeriod) - c2.z * sin(j * t * 2 * M_PI / M_timePeriod);
+            }
+        }
+    }
+
+    // Afterwards must solve again the interpolation weights because RHS changed
+    formRBFvectors();
+
+    M_flagInterpolated = false;
+    M_lastInterpolatedAtTime = t;
+
 }
 
 } // namespace LifeV
