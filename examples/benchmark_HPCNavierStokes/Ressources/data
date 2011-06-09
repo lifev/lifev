@@ -3,6 +3,16 @@
 #      Data file for EthierSteinman test case
 #-------------------------------------------------
 
+[problem]
+mesh_dir   = ./
+mesh_file  = 100170_cm_N2H0.008_fluid_coarse.mesh
+
+viscosity  = 0.035
+density    = 1.0
+
+initial_time = 0.0;
+end_time     = 1e-2;
+timestep     = 1e-4;
 
 [exporter]
 type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
@@ -100,25 +110,44 @@ save       = 1
 			[../]
 		[../]
 
-    [../solver]
-    solver          = gmres
-    scaling         = none
-    output          = all # none
-    conv            = rhs
-    max_iter        = 400
-    reuse           = false
-    max_iter_reuse  = 80
-    kspace          = 100
-    tol             = 1.e-10    # AztecOO tolerance
+[prec]
+	prectype                = Ifpack # Ifpack or ML
+	displayList             = true
 
-    [../ipstab]
-    gammaBeta  = 1.0
-    gammaDiv   = 0.2
-    gammaPress = 0.05
-    max_iter_reuse  = 60
+        # ifpack
+        [./ifpack]
+        overlap		= 2
 
-    [../problem]
-    #a = 1.57
-    #d = 0.78
-    sigma = 0
+           	[./fact]
+           	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+		[../]
+
+
+[solver]
+solver          = gmres
+scaling         = none
+output          = all # none
+conv            = rhs
+max_iter        = 500
+reuse           = true
+max_iter_reuse  = 80
+kspace          = 100
+tol             = 1.e-10    # AztecOO tolerance
+
+
+
 
