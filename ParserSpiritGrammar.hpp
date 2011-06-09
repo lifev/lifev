@@ -43,6 +43,7 @@ namespace LifeV
 {
 
 #ifdef HAVE_BOOST_SPIRIT_QI
+#ifndef DISABLE_SPIRIT_PARSER
 
 //! ParserSpiritGrammar - A string parser grammar based on \c boost::spirit::qi
 /*!
@@ -489,6 +490,36 @@ ParserSpiritGrammar< IteratorType, ResultsType >::setVariable( const std::string
                 )
         ;
 */
+
+#else
+
+//! ParserSpiritGrammar - An empty implementation for when explicitly disabling Boost Spirit
+template < typename IteratorType = std::string::const_iterator, typename ResultsType = std::vector < Real > >
+class ParserSpiritGrammar
+{
+public:
+
+    typedef IteratorType                                        iterator_Type;
+    typedef boost::iterator_range< iterator_Type >              iteratorRange_Type;
+    typedef ResultsType                                         results_Type;
+
+    ParserSpiritGrammar() : M_real(0.) {}
+    ParserSpiritGrammar( const ParserSpiritGrammar& ) : M_real(0.) {}
+    ~ParserSpiritGrammar() {}
+
+    ParserSpiritGrammar& operator=( const ParserSpiritGrammar& ) { return *this; }
+
+    void clearVariables() {}
+
+    void setDefaultVariables() {}
+    void setVariable( const std::string&, const Real& ) {}
+
+    Real& variable( const std::string& ) { return M_real; }
+
+    Real M_real;
+};
+
+#endif /* DISABLE_SPIRIT_PARSER */
 
 #else
 
