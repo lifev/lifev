@@ -31,39 +31,60 @@
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 
-    @date 2010-08-30
+    @date 2011-06-09
  */
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifesolver/OseenSolver.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifesolver/OseenData.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifefilters/ExporterEnsight.hpp>
-#include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifefilters/ExporterEmpty.hpp>
-//#include <fstream> // To create an output for the flux
 
-#include "Epetra_config.h"
-#ifdef HAVE_MPI
-#include "Epetra_MpiComm.h"
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
 #else
-#include "Epetra_SerialComm.h"
+#include <Epetra_SerialComm.h>
 #endif
 
-typedef LifeV::MatrixEpetra<LifeV::Real> matrix_type;
-typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_type;
-typedef LifeV::MapEpetra                              map_type;
-typedef LifeV::FESpace<mesh_type,map_type>            fespace_type;
-typedef boost::shared_ptr< fespace_type >             fespace_ptr;
-typedef LifeV::OseenSolver< mesh_type >               fluid_type;
-typedef fluid_type::vector_Type                       vector_type;
-typedef boost::shared_ptr<vector_type>                vector_ptrtype;
-typedef LifeV::Preconditioner                         basePrec_Type;
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifemesh/RegionMesh3DStructured.hpp>
+#include <life/lifemesh/MeshData.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
+#include <life/lifefem/FESpace.hpp>
+#include <life/lifefem/BCManage.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifesolver/OseenAssembler.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <life/lifealg/PreconditionerML.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
+#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
+
+using namespace LifeV;
+
+namespace
+{
+
+enum DiffusionType{ViscousStress, StiffStrain};
+
+typedef RegionMesh3D<LinearTetra>         mesh_type;
+typedef MatrixEpetra<Real>                matrix_type;
+typedef VectorEpetra                      vector_type;
+typedef boost::shared_ptr<VectorEpetra>   vectorPtr_type;
+typedef FESpace< mesh_type, MapEpetra >   fespace_type;
+typedef boost::shared_ptr< fespace_type > fespacePtr_type;
+
+//typedef LifeV::Preconditioner             basePrec_type;
+//typedef boost::shared_ptr<basePrec_type>  basePrecPtr_type;
+//typedef boost::shared_ptr<prec_type>      precPtr_type;
+
 
 // +-----------------------------------------------+
 // | Data and functions for the boundary conditions|
@@ -143,37 +164,34 @@ LifeV::Real aneurismFluxIn2(const LifeV::Real&  t, const LifeV::Real& x, const L
     }
 }
 
+}
 
-int main(int argc, char** argv)
+
+int
+main( int argc, char** argv )
 {
-
     // +-----------------------------------------------+
     // |            Initialization of MPI              |
     // +-----------------------------------------------+
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
-#endif
-
-    boost::shared_ptr<Epetra_Comm>   comm;
-#ifdef EPETRA_MPI
-    comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
     int nproc;
     MPI_Comm_size(MPI_COMM_WORLD, &nproc);
 #else
-    comm.reset( new Epetra_SerialComm() );
+    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
 #endif
 
-    bool verbose(false);
-    if(comm->MyPID() == 0){
-        verbose = true;
+    const bool verbose(Comm->MyPID()==0);
+    if(verbose){
         std::cout
             << " +-----------------------------------------------+" << std::endl
-            << " |           Fluid benchmark for LifeV           |" << std::endl
+            << " |          HPC Navier-Stokes benchmark          |" << std::endl
             << " +-----------------------------------------------+" << std::endl
             << std::endl
             << " +-----------------------------------------------+" << std::endl
             << " |           Author: Gwenol Grandperrin          |" << std::endl
-            << " |             Date: 2010-10-28                  |" << std::endl
+            << " |             Date: 2010-03-25                  |" << std::endl
             << " +-----------------------------------------------+" << std::endl
             << std::endl;
 
@@ -185,260 +203,342 @@ int main(int argc, char** argv)
 #endif
     }
 
-    LifeV::LifeChrono globalChrono;
-    LifeV::LifeChrono initChrono;
-    LifeV::LifeChrono iterChrono;
-    globalChrono.start();
-    initChrono.start();
-
     // +-----------------------------------------------+
     // |               Loading the data                |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the data]" << std::endl;
+    LifeChrono globalChrono;
+    LifeChrono initChrono;
+    LifeChrono iterChrono;
+
+    globalChrono.start();
+    initChrono.start();
+
+    // ******* GetPot stuff ********
     GetPot command_line(argc,argv);
     const std::string dataFileName = command_line.follow("data", 2, "-f","--file");
     GetPot dataFile(dataFileName);
+    // *****************************
+
+    // Physical quantity
+    const Real viscosity       = dataFile("problem/viscosity",0.035);
+    const Real density         = dataFile("problem/density",1.0);
+
+    // Time discretization
+    const Real initialTime     = dataFile("problem/initial_time",0.0);
+    const Real endTime         = dataFile("problem/end_time",1e-2);
+    const Real timestep        = dataFile("problem/timestep",1e-3);
+
+    if (verbose) std::cout << "Viscosity    : " << viscosity << std::endl;
+    if (verbose) std::cout << "Density      : " << density << std::endl;
+    if (verbose) std::cout << "Initial time : " << initialTime << std::endl;
+    if (verbose) std::cout << "End time     : " << endTime << std::endl;
+    if (verbose) std::cout << "Timestep     : " << timestep << std::endl;
+
+    // Space discretization
+    const UInt numDimensions   = 3;
+
+    // Finite element
+    std::string uOrder("P2");
+    std::string pOrder("P1");
+
+    // Numerical scheme
+    const DiffusionType diffusionType = ViscousStress;
+    UInt BDFOrder = 1;
+
+    // Preconditioner
+    std::string precName       = dataFile("prec/prectype","none");
+
+    const bool reusePreconditioner = false;
 
     // +-----------------------------------------------+
     // |               Loading the mesh                |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
-    LifeV::MeshData dataMesh;
-    dataMesh.setup(dataFile, "fluid/space_discretization");
-    if (verbose) std::cout << "Mesh file: " << dataMesh.meshDir() << dataMesh.meshFile() << std::endl;
 
-    boost::shared_ptr< LifeV::RegionMesh3D<LifeV::LinearTetra> > fullMeshPtr(new LifeV::RegionMesh3D<LifeV::LinearTetra>);
-    LifeV::readMesh(*fullMeshPtr, dataMesh);
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
 
-    LifeV::MeshPartitioner< LifeV::RegionMesh3D<LifeV::LinearTetra> >   meshPart(fullMeshPtr, comm);
+    // Building the mesh from the source
+    MeshData meshData;
+    meshData.setup(dataFile, "problem");
+    if (verbose) std::cout << "Mesh source: file("
+                           << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
+    readMesh(*fullMeshPtr, meshData);
+
+    if (verbose) std::cout << "Mesh size  : " << fullMeshPtr->maxH() << std::endl;
+    if (verbose) std::cout << "Partitioning the mesh ... " << std::endl;
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, Comm);
+    fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
     // +-----------------------------------------------+
     // |            Creating the FE spaces             |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
-    std::string uOrder =  dataFile( "fluid/space_discretization/vel_order",   "P2");
-    std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
+
     if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
                            << "FE for the pressure: " << pOrder << std::endl;
 
-    if (verbose) std::cout << "Building the velocity FE space... " << std::flush;
-    fespace_ptr uFESpace (new fespace_type(meshPart, uOrder, 3, comm));
-    if (verbose)
-        std::cout << "ok." << std::endl;
-
-    if (verbose) std::cout << "Building the pressure FE space... " << std::flush;
-    fespace_ptr pFESpace(new fespace_type(meshPart,pOrder,1,comm));
+    if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
+    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
-    LifeV::UInt totalVelDof   = uFESpace->map().map(LifeV::Unique)->NumGlobalElements();
-    LifeV::UInt totalPressDof = pFESpace->map().map(LifeV::Unique)->NumGlobalElements();
+    if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
+    fespacePtr_type pFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,pOrder, 1, Comm));
+    if (verbose) std::cout << "ok." << std::endl;
 
-    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+    // Creation of the total map
+    MapEpetra solutionMap(uFESpace->map()+pFESpace->map());
+
+    // Pressure offset in the vector
+    UInt pressureOffset = numDimensions * uFESpace->dof().numTotalDof();
+
+    if (verbose) std::cout << "Total Velocity Dof: " << pressureOffset << std::endl;
+    if (verbose) std::cout << "Total Pressure Dof: " << pFESpace->dof().numTotalDof() << std::endl;
 
     // +-----------------------------------------------+
     // |             Boundary conditions               |
     // +-----------------------------------------------+
-    if (verbose) std::cout<< std::endl << "[Boundary conditions]" << std::endl;
-
+    if (verbose) std::cout << std::endl << "[Boundary conditions]" << std::endl;
+    boost::shared_ptr<BCHandler> bcHandler;
+    bcHandler.reset(new BCHandler);
     LifeV::BCFunctionBase uZero(fZero);
     LifeV::BCFunctionBase uFlux(aneurismFluxIn2);
 
-    LifeV::BCHandler bcH;
-    bcH.addBC( "Inflow"  , INFLOW  , LifeV::Essential, LifeV::Full, uFlux, 3 );
-    bcH.addBC( "Outflow1", OUTFLOW1, LifeV::Natural  , LifeV::Full, uZero, 3 );
-    bcH.addBC( "Outflow2", OUTFLOW2, LifeV::Natural  , LifeV::Full, uZero, 3 );
-    bcH.addBC( "Outflow3", OUTFLOW3, LifeV::Natural  , LifeV::Full, uZero, 3 );
-    bcH.addBC( "Outflow4", OUTFLOW4, LifeV::Natural  , LifeV::Full, uZero, 3 );
-    bcH.addBC( "Wall"    , WALL    , LifeV::Essential, LifeV::Full, uZero, 3 );
+    if (verbose) std::cout << "Setting BC... " << std::flush;
+    bcHandler->addBC( "Inflow"  , INFLOW  , LifeV::Essential, LifeV::Full, uFlux, 3 );
+    bcHandler->addBC( "Outflow1", OUTFLOW1, LifeV::Natural  , LifeV::Full, uZero, 3 );
+    bcHandler->addBC( "Outflow2", OUTFLOW2, LifeV::Natural  , LifeV::Full, uZero, 3 );
+    bcHandler->addBC( "Outflow3", OUTFLOW3, LifeV::Natural  , LifeV::Full, uZero, 3 );
+    bcHandler->addBC( "Outflow4", OUTFLOW4, LifeV::Natural  , LifeV::Full, uZero, 3 );
+    bcHandler->addBC( "Wall"    , WALL    , LifeV::Essential, LifeV::Full, uZero, 3 );
+    if (verbose) std::cout << "ok." << std::endl;
 
-    // Getting the number of Lagrange Multiplyers (LM)
-    // and setting the offsets
-    std::vector<LifeV::bcName_Type> fluxVector = bcH.findAllBCWithType( LifeV::Flux );
-    LifeV::UInt numLM = static_cast<LifeV::UInt>( fluxVector.size() );
-
-    LifeV::UInt offset = uFESpace->map().map(LifeV::Unique)->NumGlobalElements()
-                            + pFESpace->map().map(LifeV::Unique)->NumGlobalElements();
-
-    for ( LifeV::UInt i = 0; i < numLM; ++i )
-        bcH.setOffset( fluxVector[i], offset + i );
+    // Update the BCHandler (internal data related to FE)
+    bcHandler->bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
 
     // +-----------------------------------------------+
-    // |             Creating the problem              |
+    // |              Matrices Assembly                |
     // +-----------------------------------------------+
-    if (verbose) std::cout<< std::endl << "[Creating the problem]" << std::endl;
-    boost::shared_ptr<LifeV::OseenData> oseenData(new LifeV::OseenData());
-    oseenData->setup( dataFile );
+    if (verbose) std::cout << std::endl << "[Matrices Assembly]" << std::endl;
 
-    if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
+    if (verbose) std::cout << "Setting up assembler... " << std::flush;
+    OseenAssembler<mesh_type,matrix_type,vector_type> oseenAssembler;
+    oseenAssembler.setup(uFESpace,pFESpace);
+    if (verbose) std::cout << "done" << std::endl;
 
-    LifeV::OseenSolver< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (oseenData,
-                                                                       *uFESpace,
-                                                                       *pFESpace,
-                                                                       comm,
-                                                                       numLM);
-    fluid.setUp(dataFile);
-    // ==>Call setupPreconditioner from SolverAztecOO
-    //    ==> Call the factory to build the preconditioner
-    //        Call setSolver from the preconditioner
-    //        Call setDataFromGetPot from the preconditioner
+    if (verbose) std::cout << "Defining the matrices... " << std::flush;
+    boost::shared_ptr<matrix_type> systemMatrix(new matrix_type( solutionMap ));
+    *systemMatrix *=0.0;
+    boost::shared_ptr<matrix_type> baseMatrix(new matrix_type( solutionMap ));
+    *baseMatrix *=0.0;
+    boost::shared_ptr<matrix_type> massMatrix(new matrix_type( solutionMap ));
+    *massMatrix *=0.0;
+    if (verbose) std::cout << "done" << std::endl;
 
-    fluid.buildSystem();
+    // Perform the assembly of the matrix
+    switch(diffusionType)
+    {
+        case ViscousStress:
+            if (verbose) std::cout << "Adding the viscous stress... " << std::flush;
+            oseenAssembler.addViscousStress(baseMatrix,viscosity/density);
+            if (verbose) std::cout << "done" << std::endl;
+            break;
+        case StiffStrain:
+            if (verbose) std::cout << "Adding the stiff strain... " << std::flush;
+            oseenAssembler.addStiffStrain(baseMatrix,viscosity/density);
+            if (verbose) std::cout << "done" << std::endl;
+            break;
+        default:
+            cerr << "[Error] Diffusion type unknown" << std::endl;
+            exit(1);
+            break;
+    }
 
-    LifeV::MapEpetra fullMap(fluid.getMap());
+    if (verbose) std::cout << "Adding the gradient of the pressure... " << std::flush;
+    oseenAssembler.addGradPressure(baseMatrix);
+    if (verbose) std::cout << "done" << std::endl;
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    if (verbose) std::cout << "Adding the divergence free constraint... " << std::flush;
+    oseenAssembler.addDivergence(baseMatrix,-1.0);
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Adding the mass... " << std::flush;
+    oseenAssembler.addMass(massMatrix,1.0);
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Closing the matrices... " << std::flush;
+    baseMatrix->globalAssemble();
+    massMatrix->globalAssemble();
+    if (verbose) std::cout << "done" << std::endl;
+
+    // +-----------------------------------------------+
+    // |            Solver initialization              |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Solver initialization]" << std::endl;
+    SolverAztecOO linearSolver;
+
+    if (verbose) std::cout << "Setting up the solver... " << std::flush;
+    linearSolver.setDataFromGetPot(dataFile,"solver");
+
+    // Creating the preconditioner
+    linearSolver.setupPreconditioner(dataFile,"prec");
+
+    if (verbose) std::cout << "done" << std::endl;
+
+    linearSolver.setCommunicator(Comm);
 
     // +-----------------------------------------------+
     // |       Initialization of the simulation        |
     // +-----------------------------------------------+
     if (verbose) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
-    LifeV::Real dt     = oseenData->dataTime()->timeStep();
-    LifeV::Real t0     = oseenData->dataTime()->initialTime();
-    LifeV::Real tFinal = oseenData->dataTime()->endTime ();
+    if (verbose) std::cout << "Creation of vectors... " << std::flush;
+    vectorPtr_type rhs;
+    rhs.reset(new vector_type(solutionMap,Unique));
+
+    vectorPtr_type beta;
+    beta.reset(new vector_type(solutionMap,Repeated));
+
+    vectorPtr_type velocity;
+    velocity.reset(new vector_type(uFESpace->map(),Unique));
+
+    vectorPtr_type pressure;
+    pressure.reset(new vector_type(pFESpace->map(),Unique));
+
+    vectorPtr_type solution;
+    solution.reset(new vector_type(solutionMap,Unique));
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Computing the initial solution ... " << std::endl;
 
     // bdf object to store the previous solutions
-    LifeV::TimeAdvanceBDFNavierStokes<vector_type> bdf;
-    bdf.setup(oseenData->dataTime()->orderBDF());
+    TimeAdvanceBDFNavierStokes<vector_type> bdf;
+    bdf.setup(BDFOrder);
+    Real currentTime = initialTime-timestep*BDFOrder;
 
-    // initialization with exact solution: either interpolation or "L2-NS"-projection
-    t0 -= dt * bdf.bdfVelocity().order();
+    *velocity *= 0;
+    *pressure *= 0;
+    *solution *= 0;
+    bdf.bdfVelocity().setInitialCondition( *solution );
 
-    vector_type beta( fullMap );
-    vector_type rhs ( fullMap );
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    oseenData->dataTime()->setTime(t0);
-
-    beta *= 0.;
-    rhs  *= 0.;
-    fluid.updateSystem(0.0,beta,rhs);
-    fluid.setTolMaxIteration(1e-6,400); // Set the tolerance of the solver
-    fluid.iterate(bcH);
-    bdf.bdfVelocity().setInitialCondition(*fluid.solution());
-
-    LifeV::Real time = t0 + dt;
-    for (  ; time <=  oseenData->dataTime()->initialTime() + dt/2.; time += dt)
+    // Initial solution (interpolation or projection)
+    linearSolver.setTolerance(1e-6);
+    currentTime += timestep;
+    for ( ; currentTime <=  initialTime + timestep/2.; currentTime += timestep)
     {
-        oseenData->dataTime()->setTime(time);
 
-        fluid.updateSystem(0.0,beta,rhs);
-        fluid.iterate(bcH);
-        bdf.bdfVelocity().shiftRight( *fluid.solution() );
+        if (verbose) std::cout << "Updating the system... " << std::flush;
+        *rhs  *= 0.;
+        rhs->globalAssemble();
+        systemMatrix.reset(new matrix_type( solutionMap ));
+        *systemMatrix += *baseMatrix;
+        if (verbose) std::cout << "done" << std::endl;
+
+        if (verbose) std::cout << "Applying BC... " << std::flush;
+        bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),*bcHandler,uFESpace->feBd(),1.0,currentTime);
+        systemMatrix->globalAssemble();
+        if (verbose) std::cout << "done" << std::endl;
+
+        if (verbose) std::cout << "Solving the system... " << std::endl;
+        *solution *= 0;
+        linearSolver.setMatrix(*systemMatrix);
+        linearSolver.solveSystem(*rhs,*solution,systemMatrix);
+
+        // Updating bdf
+        bdf.bdfVelocity().shiftRight( *solution );
+
     }
 
-    fluid.resetPreconditioner();
+    linearSolver.resetPreconditioner();
 
-    boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > exporter;
+    // +-----------------------------------------------+
+    // |             Setting the exporter              |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << "Defining the exporter... " << std::flush;
+    ExporterHDF5<mesh_type> exporter ( dataFile, "OseenAssembler");
+    exporter.setPostDir( "./" ); // This is a test to see if M_post_dir is working
+    exporter.setMeshProcId( meshPart.meshPartition(), Comm->MyPID() );
+    if (verbose) std::cout << "done" << std::endl;
 
-    vector_ptrtype velAndPressure;
+    if (verbose) std::cout << "Updating the exporter... " << std::flush;
+    exporter.addVariable( ExporterData<mesh_type>::VectorField, "velocity", uFESpace,
+                          solution, UInt(0));
+    exporter.addVariable( ExporterData<mesh_type>::ScalarField, "pressure", pFESpace,
+                          solution, pressureOffset );
+    if (verbose) std::cout << "done" << std::endl;
 
-    std::string const exporterType =  dataFile( "exporter/type", "ensight");
-
-#ifdef HAVE_HDF5
-    if (exporterType.compare("hdf5") == 0)
-    {
-        exporter.reset( new LifeV::ExporterHDF5<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "benchmark_HPCNavierStokes" ) );
-        exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
-    }
-    else
-#endif
-    {
-        if (exporterType.compare("none") == 0)
-        {
-            exporter.reset( new LifeV::ExporterEmpty<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, meshPart.meshPartition(), "benchmark_HPCNavierStokes", comm->MyPID()) );
-        } else {
-            exporter.reset( new LifeV::ExporterEnsight<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, meshPart.meshPartition(), "benchmark_HPCNavierStokes", comm->MyPID()) );
-        }
-    }
-
-    velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
-
-    exporter->addVariable( LifeV::ExporterData::Vector, "velocity", velAndPressure,
-                           LifeV::UInt(0), uFESpace->dof().numTotalDof() );
-
-    exporter->addVariable( LifeV::ExporterData::Scalar, "pressure", velAndPressure,
-                           LifeV::UInt(3*uFESpace->dof().numTotalDof()),
-                           LifeV::UInt(pFESpace->dof().numTotalDof()) );
-    exporter->postProcess( 0 );
+    if (verbose) std::cout << "Exporting solution at time t=" << initialTime << "... " << std::endl;
+    exporter.postProcess(initialTime);
 
     initChrono.stop();
-    if (verbose) std::cout << "Initialization time:  " << initChrono.diff() << " s." << std::endl;
+    if (verbose) std::cout << "Initialization time: " << initChrono.diff() << " s." << std::endl;
+
+    // Reset the preconditioner
+    linearSolver.resetPreconditioner();
+    linearSolver.setReusePreconditioner(reusePreconditioner);
+    linearSolver.setTolerance(1e-10);
 
     // +-----------------------------------------------+
     // |             Solving the problem               |
     // +-----------------------------------------------+
     if (verbose) std::cout<< std::endl << "[Solving the problem]" << std::endl;
-
-    // We now change the tolerance of the solver
-    fluid.setTolMaxIteration(1e-10,400);
-
     int iter = 1;
 
-    for ( ; time <= tFinal + dt/2.; time += dt, iter++)
+    for ( ; currentTime <= endTime + timestep/2.; currentTime += timestep, iter++)
     {
-
-        oseenData->dataTime()->setTime(time);
-
-        if (verbose) std::cout << "[t = "<< oseenData->dataTime()->time() << " s.]" << std::endl;
-
+        iterChrono.reset();
         iterChrono.start();
 
-        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
+        if (verbose) std::cout << std::endl << "[t = "<< currentTime << " s.]" << std::endl;
 
-        beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+        if (verbose) std::cout << "Updating the system... " << std::flush;
+        bdf.bdfVelocity().updateRHSContribution( timestep );
+        *rhs  = *massMatrix*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
-        bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
-        rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        systemMatrix.reset(new matrix_type( solutionMap ));
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / timestep;
+        *systemMatrix += *massMatrix*alpha;
+        *systemMatrix += *baseMatrix;
 
-        fluid.getDisplayer().leaderPrint("alpha ", alpha);
-        fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm beta ", beta.norm2());
-        fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.norm2());
-        fluid.getDisplayer().leaderPrint("\n");
+        // SemiImplicit
+        *beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+        oseenAssembler.addConvection(systemMatrix,*beta);
 
-        fluid.updateSystem( alpha, beta, rhs );
-        fluid.iterate( bcH );
+        if (verbose) std::cout << "done" << std::endl;
 
-        bdf.bdfVelocity().shiftRight( *fluid.solution() );
+        if (verbose) std::cout << "Applying BC... " << std::flush;
+        bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),*bcHandler,uFESpace->feBd(),1.0,currentTime);
+        systemMatrix->globalAssemble();
+        if (verbose) std::cout << "done" << std::endl;
 
-        // Computation of the error
-        vector_type vel  (uFESpace->map(), LifeV::Repeated);
-        vector_type press(pFESpace->map(), LifeV::Repeated);
-        vector_type velpressure ( *fluid.solution(), LifeV::Repeated );
+        if (verbose) std::cout << "Solving the system... " << std::endl;
+        *solution *= 0;
+        linearSolver.setMatrix(*systemMatrix);
+        linearSolver.solveSystem(*rhs,*solution,systemMatrix);
 
-        velpressure = *fluid.solution();
-        vel.subset(velpressure);
-        press.subset(velpressure, uFESpace->dim()*uFESpace->fieldDim());
-
-
-        bool verbose = (comm->MyPID() == 0);
-
+        // Updating the BDF scheme
+        bdf.bdfVelocity().shiftRight( *solution );
 
         // Exporting the solution
-        *velAndPressure = *fluid.solution();
-        exporter->postProcess( time );
-
-
-        MPI_Barrier(MPI_COMM_WORLD);
+        exporter.postProcess( currentTime );
 
         iterChrono.stop();
-        if (verbose) std::cout << "Iteration time: " << iterChrono.diff() << " s." << std::endl << std::endl;
+        if (verbose) std::cout << "Iteration time: " << iterChrono.diff() << " s." << std::endl;
+
+        MPI_Barrier(MPI_COMM_WORLD);
     }
 
-    globalChrono.stop();
-    if (verbose) std::cout << "Total simulation time:  " << globalChrono.diff() << " s." << std::endl;
+    // +-----------------------------------------------+
+    // |            Ending the simulation              |
+    // +-----------------------------------------------+
+    exporter.closeFile();
 
-#ifdef HAVE_HDF5
-    exporter->closeFile();
-#endif
+    globalChrono.stop();
+    if (verbose) std::cout << std::endl << "Total simulation time: " << globalChrono.diff() << " s." << std::endl;
+    if (verbose) std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
-
-    return 0;
+    return( EXIT_SUCCESS );
 }
+
