@@ -69,7 +69,7 @@ Real EthierSteinmanSteady::f(const Real& t, const Real& x, const Real& y,
             + sigma*uexact(t,x,y,z,i);
         break;
     }
-    exit(1);
+    return 1.;
 }
 
 Real EthierSteinmanSteady::uexact(const Real& /* t */,
@@ -95,7 +95,7 @@ Real EthierSteinmanSteady::uexact(const Real& /* t */,
         break;
     }
 
-    exit(1);
+    return 1.;
 }
 
 Real EthierSteinmanSteady::ux( const Real& /* t */,
@@ -121,7 +121,7 @@ Real EthierSteinmanSteady::ux( const Real& /* t */,
         break;
     }
 
-    exit(1);
+    return 1.;
 }
 
 Real EthierSteinmanSteady::uy( const Real& /* t */,
@@ -147,7 +147,7 @@ Real EthierSteinmanSteady::uy( const Real& /* t */,
         break;
     }
 
-    exit(1);
+    return 1.;
 }
 
 Real EthierSteinmanSteady::uz( const Real& /* t */,
@@ -173,7 +173,7 @@ Real EthierSteinmanSteady::uz( const Real& /* t */,
         break;
     }
 
-    exit(1);
+    return 1.;
 }
 
 
@@ -204,6 +204,7 @@ Real EthierSteinmanSteady::xexact(const Real& t, const Real& x, const Real& y,
     default:
         exit(1);
     }
+    return 1.;
 }
 
 
@@ -248,6 +249,7 @@ Real EthierSteinmanSteady::fNeumann(const Real& t, const Real& x,
     default:
         exit(1);
     }
+    return 1.;
 }
 
 void EthierSteinmanSteady::setParamsFromGetPot( const GetPot& dataFile )

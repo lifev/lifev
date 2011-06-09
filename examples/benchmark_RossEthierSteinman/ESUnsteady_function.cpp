@@ -74,6 +74,7 @@ Real EthierSteinmanUnsteady::xexact( const Real& t,
     default:
         exit(1);
     }
+    return 1.;
 }
 
 Real EthierSteinmanUnsteady::uexact( const Real& t,
@@ -118,11 +119,6 @@ Real EthierSteinmanUnsteady::uderexact( const Real& t,
         return 0.;
 }
 
-
-
-
-
-
 // derivatives for neumann
 Real EthierSteinmanUnsteady::ux( const Real& t, const Real& x, const Real& y,
                                  const Real& z, const ID& i )
@@ -149,6 +145,7 @@ Real EthierSteinmanUnsteady::ux( const Real& t, const Real& x, const Real& y,
     default:
         exit(1);
     }
+    return 1.;
 }
 
 Real EthierSteinmanUnsteady::uy( const Real& t, const Real& x, const Real& y,
@@ -176,6 +173,7 @@ Real EthierSteinmanUnsteady::uy( const Real& t, const Real& x, const Real& y,
     default:
         exit(1);
     }
+    return 1.;
 }
 
 Real EthierSteinmanUnsteady::uz( const Real& t, const Real& x, const Real& y,
@@ -203,6 +201,7 @@ Real EthierSteinmanUnsteady::uz( const Real& t, const Real& x, const Real& y,
     default:
         exit(1);
     }
+    return 1.;
 }
 
 Real EthierSteinmanUnsteady::fNeumann( const Real& t,
@@ -292,6 +291,7 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
             exit(1);
     }
     */
+    return 1.;
 }
 
 void EthierSteinmanUnsteady::setParamsFromGetPot( const GetPot& dataFile )

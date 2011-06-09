@@ -180,7 +180,6 @@ Ethiersteinman::Ethiersteinman( int argc,
     M_exportNorms = dataFile("RossEthierSteinman/export_norms", false);
     M_exportExactSolutions = dataFile("RossEthierSteinman/export_exact_solutions", false);
 
-
     std::string meshSource =  dataFile( "RossEthierSteinman/mesh_source", "regular_mesh");
     if(meshSource == "regular_mesh")
     {
@@ -230,7 +229,7 @@ Ethiersteinman::computeErrors(const vector_Type& velocityAndPressureSolution,
 
     velpressure = velocityAndPressureSolution;
     vel.subset(velpressure);
-    press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
+    press.subset(velpressure, uFESpacePtr->dim()*uFESpacePtr->fieldDim());
 
     uL2Error = uFESpace.l2Error (Problem::uexact, vel  , time, &uRelError );
     pL2Error = pFESpace.l20Error(Problem::pexact, press, time, &pRelError );
@@ -544,6 +543,7 @@ Ethiersteinman::run()
                                                       uFESpace,
                                                       pFESpace,
                                                       d->comm);
+
             MapEpetra fullMap(fluid.getMap());
 
             fluid.setUp(dataFile);
@@ -597,8 +597,8 @@ Ethiersteinman::run()
 
                 if (M_initMethod == Projection)
                 {
-                    uFESpace.interpolate(Problem::uderexact, rhs, time);
-                    //uFESpace.l2ScalarProduct(Problem::uderexact, rhs, time);
+                    uFESpacePtr->interpolate(Problem::uderexact, rhs, time);
+                    //uFESpacePtr->l2ScalarProduct(Problem::uderexact, rhs, time);
                     rhs *= -1.;
                     rhs = fluid.matrixMass()*rhs;
                     fluid.updateSystem( 0., beta, rhs );
@@ -630,7 +630,7 @@ Ethiersteinman::run()
 
             fluid.resetPreconditioner();
 
-            boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
+            boost::shared_ptr< Exporter<mesh_Type > > exporter;
 
             vectorPtr_Type velAndPressure;
             // only for export -->
@@ -645,7 +645,7 @@ Ethiersteinman::run()
 #ifdef HAVE_HDF5
             if (exporterType.compare("hdf5") == 0)
             {
-                exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
+                exporter.reset( new ExporterHDF5<mesh_Type > ( dataFile, "ethiersteinman" ) );
                 exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
                 exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
             }
@@ -654,11 +654,11 @@ Ethiersteinman::run()
             {
                 if (exporterType.compare("none") == 0)
                 {
-                    exporter.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
+                    exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
                 }
                 else
                 {
-                    exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
+                    exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
                 }
             }
 
@@ -708,7 +708,7 @@ Ethiersteinman::run()
 
                 beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
                 //beta *= 0;
-                //uFESpace.interpolate(Problem::uexact, beta, time);
+                //uFESpacePtr->interpolate(Problem::uexact, beta, time);
                 bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
                 rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 

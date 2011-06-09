@@ -449,11 +449,6 @@ protected:
 
   UInt getDim() const { return M_FESpace->dim(); }
 
-  //Deprecated
-  UInt __attribute__ ((__deprecated__))dim() const
-  { return getDim(); }
-
-
   //!Protected Members
 
   boost::shared_ptr<data_Type>   M_data;
@@ -845,7 +840,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 
   //M_Displayer->leaderPrintMax("dz norm     = " , M_disp.NormInf() );
 
-  numIter = abs(numIter);
+  numIter = std::abs(numIter);
 
   *M_residual_d =  *M_massStiff*(*M_disp);
   //    M_residual_d -= M_rhsNoBC;
@@ -1072,7 +1067,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, V
 
   if ( getComunicator()->MyPID() == 0 )
     {
-      for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
+      for ( UInt iDof = 0; iDof < nDimensions*getDim(); ++iDof )
 	{
 	  disp[ iDof ] = displacement[ iDof ];
 	  vel [ iDof ] = velocity    [ iDof ];

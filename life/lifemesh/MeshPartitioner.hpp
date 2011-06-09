@@ -140,7 +140,7 @@ public:
                                  Epetra_Map* interfaceMapRep = 0);
     //! Releases the original unpartitioned mesh
     /*!
-      Releases the unpartitioned mesh so that it can be deleted, freein A LOT of memory
+      Releases the unpartitioned mesh so that it can be deleted, freeing A LOT of memory
       in some cases.
     */
     void releaseUnpartitionedMesh();

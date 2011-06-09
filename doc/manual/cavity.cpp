@@ -224,9 +224,9 @@ main( int argc, char** argv )
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
     OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                              uFESpace,
-                                              pFESpace,
-                                              comm);
+                                                    uFESpace,
+                                                    pFESpace,
+                                                    comm);
 
 
     // this is the total map ( velocity + pressure ). it will be used to create

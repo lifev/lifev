@@ -362,6 +362,9 @@ Cylinder::run()
 
     typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type>                   vectorPtr_Type;
+    typedef FESpace< Mesh, MapEpetra >                       feSpace_Type;
+    typedef boost::shared_ptr<feSpace_Type>                  feSpacePtr_Type;
+
     // Reading from data file
     //
     GetPot dataFile( d->data_file_name );
@@ -409,7 +412,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< Mesh, MapEpetra > uFESpace(meshPart,uOrder,3,d->comm);
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type( meshPart,uOrder,3,d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -420,13 +423,13 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< Mesh, MapEpetra > pFESpace(meshPart, pOrder, 1, d->comm);
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart, pOrder, 1, d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
 
-    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpacePtr->map().map(Unique)->NumGlobalElements();
 
 
     if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
@@ -437,9 +440,9 @@ Cylinder::run()
     bcH.setOffset("Inlet", totalVelDof + totalPressDof);
 
     OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                              uFESpace,
-                                              pFESpace,
-                                              d->comm, numLM);
+                                                    *uFESpacePtr,
+                                                    *pFESpacePtr,
+                                                    d->comm, numLM);
     MapEpetra fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
@@ -470,12 +473,11 @@ Cylinder::run()
 
     vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), exporter.mapType() ) );
 
-    exporter.addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                          UInt(0), uFESpace.dof().numTotalDof() );
+    exporter.addVariable( ExporterData<Mesh>::VectorField, "velocity", uFESpacePtr,
+                          velAndPressure, UInt(0) );
 
-    exporter.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                          UInt(3*uFESpace.dof().numTotalDof()),
-                          UInt(pFESpace.dof().numTotalDof()) );
+    exporter.addVariable( ExporterData<Mesh>::ScalarField, "pressure", pFESpacePtr,
+                          velAndPressure, UInt(3*uFESpacePtr->dof().numTotalDof()) );
 
 
 
@@ -511,49 +513,49 @@ Cylinder::run()
         std::string filename = dataFile("fluid/importer/filename", "cylinder");
 
         LifeV::ExporterHDF5<Mesh> importer( dataFile, filename);
-        importer.setMeshProcId(uFESpace.mesh(), d->comm->MyPID());
+        importer.setMeshProcId(uFESpacePtr->mesh(), d->comm->MyPID());
 
-        importer.addVariable( ExporterData::Vector,
+        importer.addVariable( ExporterData<Mesh>::VectorField,
                               "velocity",
+                              uFESpacePtr,
                               velAndPressure,
-                              UInt ( 0 ),
-                              uFESpace.dof().numTotalDof() );
+                              UInt ( 0 ) );
 
-        importer.addVariable( ExporterData::Scalar,
+        importer.addVariable( ExporterData<Mesh>::ScalarField,
                               "pressure",
+                              pFESpacePtr,
                               velAndPressure,
-                              3*uFESpace.dof().numTotalDof(),
-                              pFESpace.dof().numTotalDof());
+                              3*uFESpacePtr->dof().numTotalDof() );
 
-        exporter.setStartIndex(importer.importFromTime(0.0));
+        exporter.setTimeIndex(importer.importFromTime(0.0));
 
 
         //
 #if 0
-        vectorPtr_Type vel      (new LifeV::VectorEpetra(uFESpace.map(), importer.mapType()));
-        vectorPtr_Type pressure (new LifeV::VectorEpetra(pFESpace.map(), importer.mapType()));
+        vectorPtr_Type vel      (new LifeV::VectorEpetra(uFESpacePtr->map(), importer.mapType()));
+        vectorPtr_Type pressure (new LifeV::VectorEpetra(pFESpacePtr->map(), importer.mapType()));
 
-        LifeV::ExporterData initSolVel(LifeV::ExporterData::Vector,
+        LifeV::ExporterData initSolVel(LifeV::ExporterData<Mesh>::VectorField,
                                        std::string("velocity." + start),
                                        vel,
                                        UInt(0),
-                                       uFESpace.dof().numTotalDof(),
+                                       uFESpacePtr->dof().numTotalDof(),
                                        UInt(0),
-                                       LifeV::ExporterData::Node );
+                                       LifeV::ExporterData<Mesh>::Node );
 
-        LifeV::ExporterData initSolPress(LifeV::ExporterData::Scalar,
+        LifeV::ExporterData initSolPress(LifeV::ExporterData<Mesh>::ScalarField,
                                          std::string("pressure." + start),
                                          pressure,
                                          UInt(0),
-                                         pFESpace.dof().numTotalDof(),
+                                         pFESpacePtr->dof().numTotalDof(),
                                          UInt(0),
-                                         LifeV::ExporterData::Node  );
+                                         LifeV::ExporterData<Mesh>::Node  );
 
         importer.rd_var(initSolVel  );
         importer.rd_var(initSolPress);
 
         velAndPressure->subset(*vel,           vel->getMap(), (UInt) 0,                            0);
-        velAndPressure->subset(*pressure, pressure->getMap(), (UInt) 0, uFESpace.dof().numTotalDof());
+        velAndPressure->subset(*pressure, pressure->getMap(), (UInt) 0, uFESpacePtr->dof().numTotalDof());
 
         std::cout << vel->Norm2() << std::endl;
         std::cout << pressure->Norm2() << std::endl;

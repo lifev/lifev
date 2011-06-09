@@ -331,9 +331,9 @@ MassTransport::run()
     if (verbose) std::cout << "Calling the fluid solver constructor ... ";
 
     OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                              uFESpace,
-                                              pFESpace,
-                                              *d->comm);
+                                                    uFESpace,
+                                                    pFESpace,
+                                                    *d->comm);
     MapEpetra fullFluidMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
@@ -502,14 +502,14 @@ MassTransport::run()
     vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
     vector_ptrtype concentration  ( new vector_type(adr.solution(), Repeated ) );
 
-    exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
+    exporter->addVariable( ExporterData::VectorField, "velocity", velAndPressure,
                            UInt(0), uFESpace.dof().numTotalDof() );
 
-    exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
+    exporter->addVariable( ExporterData::ScalarField, "pressure", velAndPressure,
                            UInt(3*uFESpace.dof().numTotalDof() ),
                            UInt(  pFESpace.dof().numTotalDof() ) );
 
-    exporter->addVariable( ExporterData::Scalar, "concentration", concentration,
+    exporter->addVariable( ExporterData::ScalarField, "concentration", concentration,
                            UInt(0), UInt(adrFESpace.dof().numTotalDof()));
 
 

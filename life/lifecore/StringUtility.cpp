@@ -91,7 +91,7 @@ int atoi( const std::string & s )
 
 std::string operator+( const std::string & str, const int i )
 {
-    int digits = abs( i ) / 10;
+    int digits = std::abs( i ) / 10;
     char* str_i = new char[ digits ];
     sprintf( str_i, "%i", i );
     std::string str2 = str + str_i;
@@ -101,7 +101,7 @@ std::string operator+( const std::string & str, const int i )
 
 std::string operator+( const std::string & str, const long i )
 {
-    int digits = abs( i ) / 10;
+    int digits = std::abs( i ) / 10;
     char* str_i = new char[ digits ];
     sprintf( str_i, "%ld", i );
     std::string str2 = str + str_i;

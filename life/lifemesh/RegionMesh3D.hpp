@@ -2757,7 +2757,11 @@ RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i ) const
 {
     ASSERT_BD( i < pointList.size() ) ;
 
-    return _pointList( i );
+    // If the mesh has not been moved, _pointList is empty, therefore we use pointList.
+    if ( M_moved )
+        return _pointList( i );
+    else
+        return point(i);
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2767,7 +2771,11 @@ RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i )
 {
     ASSERT_BD( i < pointList.size() ) ;
 
-    return _pointList( i );
+    // If the mesh has not been moved, _pointList is empty, therefore we use pointList.
+    if ( M_moved )
+        return _pointList( i );
+    else
+        return point(i);
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2852,9 +2860,7 @@ RegionMesh3D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
     out << "                      RegionMesh3D                " << std::endl;
     out << "**************************************************" << std::endl;
     out << "**************************************************" << std::endl;
-    out << " ID: " << this->id() << " Marker Flag:";
-    this->printFlag( out );
-    out << std::endl;
+    out << " ID: " << this->id() << " Marker Flag: " << this->marker() << std::endl;
     //  out <<"Faces local to  volumes stored: "<<hasLocalFaces()<<std::endl;
     //out <<"Edges local to  volumes stored: "<<hasLocalEdges()<<std::endl;
     //out <<"Edges local to  faces   stored:"<<switches.test("FACEtoEDGE")<<std::endl;
@@ -2886,10 +2892,7 @@ RegionMesh3D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
 
 }
 
-template <class RegionMesh3D>
-extern
-bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
-                  std::ostream & out, std::ostream & err, std::ostream & clog );
+
 
 
 template <typename GEOSHAPE, typename MC>

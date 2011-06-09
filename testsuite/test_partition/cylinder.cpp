@@ -70,7 +70,7 @@
 
 using namespace LifeV;
 
-
+typedef RegionMesh3D<LinearTetra> mesh_Type;
 
 const int INLET       = 2;
 const int WALL        = 1;
@@ -109,7 +109,7 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
 }
 
 void
-postProcessFluxesPressures( OseenSolver< RegionMesh3D<LinearTetra> >& nssolver,
+postProcessFluxesPressures( OseenSolver< mesh_Type >& nssolver,
                             BCHandler& bcHandler,
                             const LifeV::Real& t, bool _verbose )
 {
@@ -363,12 +363,13 @@ Cylinder::Cylinder( int argc,
 
 }
 
-void
+bool
 Cylinder::run()
-
 {
 
-    typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_type;
+    typedef FESpace< mesh_Type, MapEpetra > feSpace_Type;
+    typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+    typedef OseenSolver< mesh_Type >::vector_Type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
     // Reading from data file
     //
@@ -402,10 +403,10 @@ Cylinder::run()
     boost::shared_ptr<OseenData> oseenData(new OseenData());
     oseenData->setup( dataFile );
 
-    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart;
+    MeshPartitioner< mesh_Type >   meshPart;
     meshPart.setup(1, (d->comm));
 
-    ExporterHDF5Mesh3D<RegionMesh3D<LinearTetra> > HDF5Input(dataFile, "cylinderPart");
+    ExporterHDF5Mesh3D<mesh_Type > HDF5Input(dataFile, "cylinderPart");
     HDF5Input.setComm(d->comm);
 //    HDF5Input.loadGraph(meshPart.elementDomains(), d->comm);
     meshPart.elementDomains() = HDF5Input.getGraph();
@@ -421,7 +422,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,uOrder,3,d->comm);
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart,uOrder,3,d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -432,13 +433,13 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,pOrder,1,d->comm);
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart,pOrder,1,d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
 
-    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpacePtr->map().map(Unique)->NumGlobalElements();
 
 
 
@@ -449,10 +450,10 @@ Cylinder::run()
 
     bcH.setOffset("Inlet", totalVelDof + totalPressDof);
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                              uFESpace,
-                                              pFESpace,
-                                              d->comm, numLM);
+    OseenSolver< mesh_Type > fluid (oseenData,
+                                    *uFESpacePtr,
+                                    *pFESpacePtr,
+                                    d->comm, numLM);
     MapEpetra fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
@@ -478,19 +479,18 @@ Cylinder::run()
     vector_type rhs ( fullMap );
 
 #ifdef HAVE_HDF5
-    ExporterHDF5Mesh3D<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
+    ExporterHDF5Mesh3D<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #else
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
+    Ensight<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #endif
 
     vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), ensight.mapType() ) );
 
-    ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                         UInt(0), uFESpace.dof().numTotalDof() );
+    ensight.addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
+                         velAndPressure, UInt(0) );
 
-    ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                         UInt(3*uFESpace.dof().numTotalDof() ),
-                         UInt(  pFESpace.dof().numTotalDof() ) );
+    ensight.addVariable( ExporterData<mesh_Type>::ScalarField, "pressure", uFESpacePtr,
+                         velAndPressure, UInt(3*uFESpacePtr->dof().numTotalDof() ) );
 
     // initialization with stokes solution
 
@@ -523,6 +523,10 @@ Cylinder::run()
     LifeChrono chrono;
     int iter = 1;
 
+    double norm;
+    double ref_norms = 2.21952;
+    double tolerance = 1e-5;
+
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
 
@@ -548,13 +552,12 @@ Cylinder::run()
 
         bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
-//         if (((iter % save == 0) || (iter == 1 )))
-//         {
         *velAndPressure = *fluid.solution();
         ensight.postProcess( time );
-//         }
-//         postProcessFluxesPressures(fluid, bcH, time, verbose);
 
+        if ((time + dt) > tFinal + dt / 2) {
+            norm = velAndPressure->norm2();
+        }
 
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -562,6 +565,18 @@ Cylinder::run()
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
     }
 
+    // Check the norms
+    bool success = true;
+
+    double error = std::abs(norm - ref_norms);
+    if (error > tolerance) {
+        std::cout << "Solution changed "
+                  << error << " > "
+                  <<tolerance << std::endl;
+        success = false;
+    }
+
+    return success;
 }
 
 

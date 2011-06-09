@@ -86,8 +86,6 @@ public:
 
     //! entityFlag_Type is the type used to store the geometric entity flags
     typedef ID entityFlag_Type;
-    // Old typedef to delete
-    typedef ID EntityFlag __attribute__ ((__deprecated__));
 
     //@}
 
@@ -95,9 +93,6 @@ public:
       set to a usable value
     */
     static const entityFlag_Type S_NULLFLAG;
-
-    static const entityFlag_Type NULLFLAG __attribute__ ((__deprecated__));
-
 
     //! Selects the stronger between two flags
     /*! A dimensional geometric entity G_i may inherit the stronger flag
@@ -149,8 +144,6 @@ public:
     //! @name Public Types
     //@{
     typedef typename MarkerTraits::entityFlag_Type entityFlag_Type;
-    // Old typedef to be removed
-    typedef typename MarkerTraits::EntityFlag EntityFlag;
 
     //@}
 
@@ -192,12 +185,6 @@ public:
     //! Display method
     virtual void showMe( std::ostream & output = std::cout ) const;
 
-    //! Helper function that prints a marker Flag
-    std::ostream & __attribute__ ((__deprecated__)) printFlag( entityFlag_Type const f, std::ostream & output ) const;
-
-    //! Helper function that prints "this" marker flag
-    std::ostream & __attribute__ ((__deprecated__)) printFlag( std::ostream & output ) const;
-
     //@}
 
     //! @name Set Methods
@@ -233,9 +220,6 @@ public:
 
     //! Put marker to nullflag
     inline void unsetMarker(); //const;
-
-    //! Put marker to nullflag
-    inline void __attribute__ ((__deprecated__)) markerUnset() const;
 
     //@}
 
@@ -378,33 +362,9 @@ void Marker<MarkerTraits>::unsetMarker()
 }
 
 template <typename MarkerTraits>
-void Marker<MarkerTraits>::markerUnset() const
-{
-    M_flag = nullFlag();
-}
-
-
-template <typename MarkerTraits>
 bool Marker<MarkerTraits>::hasEqualEntityFlag(entityFlag_Type const & flag) const
 {
     return MarkerTraits::EqualFlags(flag,M_flag);
-}
-
-template <typename MarkerTraits>
-std::ostream & Marker<MarkerTraits>::printFlag( entityFlag_Type const f, std::ostream & output ) const
-{
-    if ( f == nullFlag() )
-        output << "UNSET";
-    else
-        output << f;
-    return output;
-}
-
-template <typename MarkerTraits>
-std::ostream & Marker<MarkerTraits>::printFlag( std::ostream & output ) const
-{
-    showMe( output );
-    return output;
 }
 
 template <typename MarkerTraits>

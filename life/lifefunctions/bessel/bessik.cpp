@@ -5,9 +5,8 @@
 //
 //  (C) 2003, C. Bond. All rights reserved.
 //
-#include <math.h>
 #include <life/lifefunctions/bessel/bessel.hpp>
-
+namespace bessel{
 double gamma(double x);
 
 int bessik01a(double x,double &i0,double &i1,double &k0,double &k1,
@@ -70,14 +69,14 @@ int bessik01a(double x,double &i0,double &i1,double &k0,double &k1,
         for (k=1;k<=50;k++) {
             r *= 0.25*x2/(k*k);
             i0 += r;
-            if (fabs(r/i0) < eps) break;
+            if (std::fabs(r/i0) < eps) break;
         }
         i1 = 1.0;
         r = 1.0;
         for (k=1;k<=50;k++) {
             r *= 0.25*x2/(k*(k+1));
             i1 += r;
-            if (fabs(r/i1) < eps) break;
+            if (std::fabs(r/i1) < eps) break;
         }
         i1 *= 0.5*x;
     }
@@ -85,21 +84,21 @@ int bessik01a(double x,double &i0,double &i1,double &k0,double &k1,
         if (x >= 50.0) kz = 7;
         else if (x >= 35.0) kz = 9;
         else kz = 12;
-        ca = exp(x)/sqrt(2.0*M_PI*x);
+        ca = std::exp(x)/std::sqrt(2.0*M_PI*x);
         i0 = 1.0;
         xr = 1.0/x;
         for (k=0;k<kz;k++) {
-            i0 += a[k]*pow(xr,k+1);
+            i0 += a[k]*std::pow(xr,k+1);
         }
         i0 *= ca;
         i1 = 1.0;
         for (k=0;k<kz;k++) {
-            i1 += b[k]*pow(xr,k+1);
+            i1 += b[k]*std::pow(xr,k+1);
         }
         i1 *= ca;
     }
     if (x <= 9.0) {
-        ct = -(log(0.5*x)+el);
+        ct = -(std::log(0.5*x)+el);
         k0 = 0.0;
         w0 = 0.0;
         r = 1.0;
@@ -108,7 +107,7 @@ int bessik01a(double x,double &i0,double &i1,double &k0,double &k1,
             w0 += 1.0/k;
             r *= 0.25*x2/(k*k);
             k0 += r*(w0+ct);
-            if (fabs((k0-ww)/k0) < eps) break;
+            if (std::fabs((k0-ww)/k0) < eps) break;
             ww = k0;
         }
         k0 += ct;
@@ -118,7 +117,7 @@ int bessik01a(double x,double &i0,double &i1,double &k0,double &k1,
         xr2 = 1.0/x2;
         k0 = 1.0;
         for (k=0;k<8;k++) {
-            k0 += a1[k]*pow(xr2,k+1);
+            k0 += a1[k]*std::pow(xr2,k+1);
         }
         k0 *= cb/i0;
     }
@@ -157,7 +156,7 @@ int bessik01b(double x,double &i0,double &i1,double &k0,double &k1,
     }
     else {
         t = 3.75/x;
-        dtmp1 = exp(x)/sqrt(x);
+        dtmp1 = std::exp(x)/std::sqrt(x);
         dtmp = (((((((0.00392377*t-0.01647633)*t+0.026355537)*t-0.02057706)*t+
           0.00916281)*t-0.00157565)*t+0.00225319)*t+0.01328592)*t+0.39894228;
         i0 = dtmp*dtmp1;
@@ -170,14 +169,14 @@ int bessik01b(double x,double &i0,double &i1,double &k0,double &k1,
         t2 = t*t;       // already calculated above
         dtmp = (((((0.0000074*t2+0.0001075)*t2+0.00262698)*t2+0.0348859)*t2+
           0.23069756)*t2+0.4227842)*t2-0.57721566;
-        k0 = dtmp - i0*log(t);
+        k0 = dtmp - i0*std::log(t);
         dtmp = (((((-0.00004686*t2-0.00110404)*t2-0.01919402)*t2-
           0.18156897)*t2-0.67278578)*t2+0.15443144)*t2+1.0;
-        k1 = dtmp/x + i1*log(t);
+        k1 = dtmp/x + i1*std::log(t);
     }
     else {
         t = 2.0/x;
-        dtmp1 = exp(-x)/sqrt(x);
+        dtmp1 = std::exp(-x)/std::sqrt(x);
         dtmp = (((((0.00053208*t-0.0025154)*t+0.00587872)*t-0.01062446)*t+
           0.02189568)*t-0.07832358)*t+1.25331414;
         k0 = dtmp*dtmp1;
@@ -294,16 +293,16 @@ int bessiknb(int n,double x,int &nm,double *in,double *kn,
         f0 = f1;
         f1 = f;
     }
-    s0 = exp(x)/(bs-f);
+    s0 = std::exp(x)/(bs-f);
     for (k=0;k<=nm;k++) {
         in[k] *= s0;
     }
     if (x <= 8.0) {
-        kn[0] = -(log(0.5*x)+el)*in[0]+s0*sk0;
+        kn[0] = -(std::log(0.5*x)+el)*in[0]+s0*sk0;
         kn[1] = (1.0/x-in[1]*kn[0])/in[0];
     }
     else {
-        a0 = sqrt(M_PI_2/x)*exp(-x);
+        a0 = std::sqrt(M_PI_2/x)*std::exp(-x);
         if (x >= 200.0) kz = 6;
         else if (x >= 80.0) kz = 8;
         else if (x >= 25.0) kz = 10;
@@ -313,7 +312,7 @@ int bessiknb(int n,double x,int &nm,double *in,double *kn,
             vt = 4.0*l;
             r = 1.0;
             for (k=1;k<=kz;k++) {
-                r *= 0.125*(vt-pow(2.0*k-1.0,2))/(k*x);
+                r *= 0.125*(vt-std::pow(2.0*k-1.0,2))/(k*x);
                 bkl += r;
             }
             kn[l] = a0*bkl;
@@ -378,7 +377,7 @@ int bessikv(double v,double x,double &vm,double *iv,double *kv,
     else {
         v0p = 1.0+v0;
         gap = gamma(v0p);
-        a1 = pow(0.5*x,v0)/gap;
+        a1 = std::pow(0.5*x,v0)/gap;
     }
     if (x >= 50.0) kz = 8;
     else if (x >= 35.0) kz = 10;
@@ -389,16 +388,16 @@ int bessikv(double v,double x,double &vm,double *iv,double *kv,
         for (k=1;k<=30;k++) {
             r *= 0.25*x2/(k*(k+v0));
             bi0 += r;
-            if (fabs(r/bi0) < eps) break;
+            if (std::fabs(r/bi0) < eps) break;
         }
         bi0 *= a1;
     }
     else {
-        ca = exp(x)/sqrt(2.0*M_PI*x);
+        ca = std::exp(x)/std::sqrt(2.0*M_PI*x);
         sum = 1.0;
         r = 1.0;
         for (k=1;k<=kz;k++) {
-            r *= -0.125*(vt-pow(2.0*k-1.0,2.0))/(k*x);
+            r *= -0.125*(vt-std::pow(2.0*k-1.0,2.0))/(k*x);
             sum += r;
         }
         bi0 = ca*sum;
@@ -425,7 +424,7 @@ int bessikv(double v,double x,double &vm,double *iv,double *kv,
     ww = 0.0;
     if (x <= 9.0) {
         if (v0 == 0.0) {
-            ct = -log(0.5*x)-el;
+            ct = -std::log(0.5*x)-el;
             cs = 0.0;
             w0 = 0.0;
             r = 1.0;
@@ -433,8 +432,8 @@ int bessikv(double v,double x,double &vm,double *iv,double *kv,
                 w0 += 1.0/k;
                 r *= 0.25*x2/(k*k);
                 cs += r*(w0+ct);
-                wa = fabs(cs);
-                if (fabs((wa-ww)/wa) < eps) break;
+                wa = std::fabs(cs);
+                if (std::fabs((wa-ww)/wa) < eps) break;
                 ww = wa;
             }
             bk0 = ct+cs;
@@ -442,8 +441,8 @@ int bessikv(double v,double x,double &vm,double *iv,double *kv,
         else {
             v0n = 1.0-v0;
             gan = gamma(v0n);
-            a2 = 1.0/(gan*pow(0.5*x,v0));
-            a1 = pow(0.5*x,v0)/gap;
+            a2 = 1.0/(gan*std::pow(0.5*x,v0));
+            a1 = std::pow(0.5*x,v0)/gap;
             sum = a2-a1;
             r1 = 1.0;
             r2 = 1.0;
@@ -451,19 +450,19 @@ int bessikv(double v,double x,double &vm,double *iv,double *kv,
                 r1 *= 0.25*x2/(k*(k-v0));
                 r2 *= 0.25*x2/(k*(k+v0));
                 sum += a2*r1-a1*r2;
-                wa = fabs(sum);
-                if (fabs((wa-ww)/wa) < eps) break;
+                wa = std::fabs(sum);
+                if (std::fabs((wa-ww)/wa) < eps) break;
                 ww = wa;
             }
-            bk0 = M_PI_2*sum/sin(piv);
+            bk0 = M_PI_2*sum/std::sin(piv);
         }
     }
     else {
-        cb = exp(-x)*sqrt(M_PI_2/x);
+        cb = std::exp(-x)*std::sqrt(M_PI_2/x);
         sum = 1.0;
         r = 1.0;
         for (k=1;k<=kz;k++) {
-            r *= 0.125*(vt-pow(2.0*k-1.0,2.0))/(k*x);
+            r *= 0.125*(vt-std::pow(2.0*k-1.0,2.0))/(k*x);
             sum += r;
         }
         bk0 = cb*sum;
@@ -483,4 +482,5 @@ int bessikv(double v,double x,double &vm,double *iv,double *kv,
     }
     vm = n+v0;
     return 0;
+}
 }

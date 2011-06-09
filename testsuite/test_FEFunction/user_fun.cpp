@@ -24,14 +24,25 @@
 */
 //@HEADER
 
-/*!
-    @file
-    @brief
+/**
+   @file
+   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+   @date 2010-07-29
+*/
 
-    @author Radu Popescu <radu.popescu@epfl.ch>
-    @date 20-07-2010
+#include "user_fun.hpp"
 
- */
-#include <string>
+namespace dataProblem
+{
 
-bool equalSolutions(const std::string& fileA, const std::string& fileB, int timesteps, double tolerance);
+Real MyFun::eval ( const UInt& iElem, const point_Type& P, const Real& time ) const
+{
+    const Real scalar1 = scalarField(0).eval( iElem, P, time );
+    const Real scalar2 = scalarField(1).eval( iElem, P, time );
+
+    const Vector vector = vectorField(0).eval( iElem, P, time );
+
+    return ( std::sin(scalar1) + scalar2*scalar2 ) /  vector(0);
+}
+
+} // Namespace DataProblem
