@@ -152,6 +152,15 @@ public:
     template<typename vector_type>
     void interpolateBC( BCHandler& BCh, vector_type&    vect, const Real      time);
 
+    //! Interpolation method for FEFunctions
+    /*!
+      @param fEFunction Pointer to an FEFunction
+      @param vector Interpolated function
+      @param time Time in the interpolation
+    */
+    template < typename FEFunctionType, typename vector_Type >
+    void interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time = 0. );
+
     //! calculate L2 velocity error for given exact velocity function
     //! \param pexact the exact velocity as a function
     //! \param time the time
@@ -344,6 +353,8 @@ public:
     template <typename vector_type>
     vector_type laplacianRecovery(const vector_type& solution) const;
 
+    //! Return the polynomial degree of the finite element used
+    UInt polynomialDegree() const;
 
     //@}
 
@@ -734,6 +745,65 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
     }
 }
 
+template < typename MeshType, typename MapType>
+template < typename FEFunctionType, typename vector_Type >
+void FESpace<MeshType, MapType>::
+interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time )
+{
+
+    // First, we build a "quadrature" that consists in the nodes (0 weight)
+    QuadratureRule interpQuad;
+    interpQuad.setDimensionShape ( 3, M_refFE->shape() );
+    interpQuad.setPoints ( M_refFE->refCoor(), std::vector<Real>(M_refFE->nbDof(), 0) );
+
+    // Then, we define a currentFE with nodes on the reference nodes
+    CurrentFE interpCFE ( *M_refFE, getGeometricMap( *M_mesh ), interpQuad );
+
+    // Some constants
+    const UInt totalNumberElements ( M_mesh->numElements() );
+    const UInt numberLocalDof ( M_dof->numLocalDof() );
+
+    // Storage for the values
+    typename FEFunctionType::point_Type point(3);
+    std::vector<Real> nodalValues (numberLocalDof, 0);
+    std::vector<Real> FEValues (numberLocalDof, 0);
+
+    // Do the loop over the cells
+    for (UInt iterVolume(0); iterVolume < totalNumberElements; ++iterVolume)
+    {
+        // We update the CurrentFE so that we get the coordinates of the nodes
+        interpCFE.update( M_mesh->element(iterVolume), UPDATE_QUAD_NODES );
+
+        // Loop over the dimension of the field
+        for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
+        {
+            // Loop over the degrees of freedom (= quadrature nodes)
+            for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+            {
+                point [0] = interpCFE.quadNode( iterDof, 0 );
+                point [1] = interpCFE.quadNode( iterDof, 1 );
+                point [2] = interpCFE.quadNode( iterDof, 2 );
+                // Store the nodal value
+                nodalValues[iterDof] =  fEFunction->eval( iterVolume, point, time );
+            }
+
+            // Transform the nodal values in FE values
+            FEValues = M_refFE->nodalToFEValues ( nodalValues );
+
+            // Then on the dimension of the FESpace (scalar field vs vectorial field)
+            for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+            {
+                // Find the ID of the considered DOF
+                const ID globalDofID( M_dof->localToGlobalMap ( iterVolume, iterDof ) + iDim * M_dim );
+
+                // Compute the value of the function and set it
+                vector.setCoefficient ( globalDofID, FEValues[iterDof] );
+
+            }
+        }
+    }
+
+} // interpolate
 
 template <typename MeshType, typename MapType>
 template<typename vector_type>
@@ -1170,7 +1240,7 @@ feInterpolateValue(const ID& elementID, const vector_type& solutionVector, const
     if (pt.size()>=3)    z=pt[2];
 
     M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
-
+    
     // Store the number of local DoF
     UInt nDof(dof().numLocalDof());
     UInt totalDof(dof().numTotalDof());
@@ -1187,6 +1257,7 @@ feInterpolateValue(const ID& elementID, const vector_type& solutionVector, const
         ID globalDofID(component*totalDof + dof().localToGlobalMap(elementID, iter_dof) ); // iter_dof -> dofID
 
         // Make the accumulation
+//        std::cout << M_refFE->phi(iter_dof, hat_x, hat_y, hat_z) << " " << iter_dof << " " << hat_x << " " << hat_y << " " << hat_z << std::endl;
         value += solutionVector[globalDofID] * M_refFE->phi(iter_dof, hat_x, hat_y, hat_z);
     };
 
@@ -2104,6 +2175,50 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
 }
 
 
+template<typename MeshType, typename MapType>
+UInt
+FESpace<MeshType,MapType>::
+polynomialDegree() const
+{
+    switch(M_refFE->type())
+    {
+    case FE_P0_0D:
+    case FE_P0_2D:
+    case FE_Q0_2D:
+    case FE_P0_3D:
+    case FE_Q0_3D:
+        return 0;
+        break;
+
+    case FE_P1_1D:
+    case FE_P1_2D:
+    case FE_Q1_2D:
+    case FE_P1_3D:
+    case FE_Q1_3D:
+        return 1;
+        break;
+
+    case FE_P2_1D:
+    case FE_P2_2D:
+    case FE_Q2_2D:
+    case FE_P2_3D:
+    case FE_Q2_3D:
+        return 2;
+        break;
+
+    case FE_P1bubble_3D:
+    case FE_P2tilde_3D:
+        return 4;
+        break;
+
+    default:
+        std::cerr << " FESpace: No polynomial degre for this type of finite element " << std::endl;
+        std::cerr << " FESpace: " << M_refFE->name() << std::endl;
+        abort();
+    };
+
+    return 0;
+}
 
 } // end of the namespace
 #endif
