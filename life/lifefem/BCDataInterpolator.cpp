@@ -26,45 +26,12 @@
 
 /*!
  @file
- @brief File containing BCDataInterpolator class for interpolating boundary data
+ @brief Class for interpolating boundary functions from scattered data
 
  @author Toni Lassila <toni.lassila@epfl.ch>
  @maintainer Toni Lassila <toni.lassila@epfl.ch
 
- @date 23-05-2011
-
- Implements Radial Basis Function (RBF) interpolation of pointwise scalar or vectorial functions defined
- on a set of scattered interpolation points. Currently implements thin-plate splines and multiquadrics.
- For mathematical details see M.D. Buhmann. Radial basis functions: theory and implementations, Cambridge
- University Press, 2004.
-
- Inherits @c BCFunctionBase to facilitate use of interpolated data as boundary condition.
-
- If the interpolated data depends on time, the user must pass the data values at 2n specific time instances
- uniformly sampled at interval M_timeInterval and with period M_timePeriod. The values of the data between
- these time instances is interpolated using Fourier interpolation, i.e. the interpolant is a trigonometric
- polynomial of order 2n and periodic with period M_timePeriod.
-
- The format of the data file passed to readData() should be as follows:\
-\
-     # header line before dimension definition\
-     nof_data_sites nof_data_dimensions t_interval t_period\
-     # header line before control point definitions\
-     data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord\
-     ...\
-     data_site_n_x_coord data_site_n_y_coord data_site_n_z_coord\
-     # header line before data definitions\
-     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord\
-     ...\
-     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
-
- The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
- is being interpolated. The variable nof_data_sites has to equal the number of rows passed in
- both the section involving the data_sites and the data values.
-
- Warning: in the current implementation the data sites are assumed fixed in time and they do not move
- with the mesh. Thus they should only be used in a Lagrangian frame of reference, i.e. with structural
- BC's.
+ @date 09-06-2011
 
  *///@HEADER
 
@@ -82,6 +49,50 @@
 
 namespace LifeV {
 
+/*!
+ \class CurrentBoundaryFE
+ \brief Headers for BCDataInterpolator.cpp
+
+ Implements Radial Basis Function (RBF) interpolation of pointwise scalar or vectorial functions defined
+ on a set of scattered interpolation points. Currently implements a variety of different basis functions
+ for interpolation. Temporal interpolation done with trigonometric polynomials. For mathematical details
+ see M.D. Buhmann. Radial basis functions: theory and implementations, Cambridge University Press, 2004.
+
+ Inherits @c BCFunctionBase to facilitate use of interpolated data as boundary condition.
+
+ If the interpolated data depends on time, the user must pass the data values at 2n specific time instances,
+ uniformly sampled at interval M_timeInterval and with period M_timePeriod. The values of the data between
+ these time instances is interpolated using Fourier interpolation, i.e. the interpolant is a trigonometric
+ polynomial of order 2n and periodic with period M_timePeriod.
+
+ The format of the data file passed to readData() is the following:
+ <quote>
+     # HEADER LINE FOR PARAMETERS
+     nof_data_sites nof_data_dimensions t_interval t_period
+     # HEADER LINE FOR DATA SITES
+     data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord
+     ...
+     data_site_n_x_coord data_site_n_y_coord data_site_n_z_coord
+     # HEADER LINE FOR DATA VALUES
+     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
+     ...
+     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
+     # HEADER LINE FOR DATA VALUES
+     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
+     ...
+     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
+ </quote>
+ The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
+ is being interpolated. The variable nof_data_sites has to equal the number of rows passed in
+ both the section involving the data_sites and the data values. The data value section has to be
+ repeated t_period / t_interval times.
+
+ Warning: in the current implementation the data sites are assumed fixed in time and they do not move
+ with the mesh. Thus they should only be used in a Lagrangian frame of reference, i.e. with structural
+ BC's.
+
+ */
+
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -98,7 +109,9 @@ BCDataInterpolator::BCDataInterpolator( BCInterpolationMethod interpolationMetho
 
 BCDataInterpolator::~BCDataInterpolator()
 {
-
+    delete [] M_dataSites; M_dataSites = NULL;
+    delete [] M_dataValues; M_dataValues = NULL;
+    delete [] M_dataValues_timeSamples; M_dataValues_timeSamples = NULL;
 }
 
 // ===================================================
@@ -126,7 +139,7 @@ Real BCDataInterpolator::vectFct( const Real& t,
                                   const ID& component )
 {
 
-    BCInterpolation_VectorialData vectEval;
+    BCDataInterpolator_point vectEval;
 
     vectEval = interpolateVectorialFunction( t,x,y,z );
 
@@ -200,7 +213,7 @@ void BCDataInterpolator::readData( const char *fileName )
             throw std::invalid_argument( __ex.str() );
         }
 
-        if ( M_timePeriod <= 0 || M_timeInterval <= 0 || fmod(M_timePeriod,M_timeInterval) != 0 || M_timeInterval > M_timePeriod)
+        if ( M_timeInterval > M_timePeriod)
         {
             std::ostringstream __ex;
                     __ex << "Interpolation time interval and/or period are inconsistent." << std::endl;
@@ -209,9 +222,9 @@ void BCDataInterpolator::readData( const char *fileName )
 
         Int n = static_cast< Int > (floor(M_timePeriod / M_timeInterval));
 
-        M_dataSites = new BCInterpolation_VectorialData[M_nofControlPoints];
-        M_dataValues = new BCInterpolation_VectorialData[M_nofControlPoints];
-        M_dataValues_timeSamples = new BCInterpolation_VectorialData[M_nofControlPoints * (n+1)];
+        M_dataSites = new BCDataInterpolator_point[M_nofControlPoints];
+        M_dataValues = new BCDataInterpolator_point[M_nofControlPoints];
+        M_dataValues_timeSamples = new BCDataInterpolator_point[M_nofControlPoints * (n+1)];
 
         fin.ignore( 80, '\n' );
         fin.ignore( 80, '\n' );
@@ -244,33 +257,17 @@ void BCDataInterpolator::readData( const char *fileName )
 
         fin.close();
 
-        // We can form the interpolation matrix now
+        // Form the interpolation matrix now
 
         formRBFMatrix();
     }
 
 }
 
-void BCDataInterpolator::exportInterpolationMatrix()
+void BCDataInterpolator::exportInterpolationMatrix() const
 {
 
     // TODO: Write matrix exporting routine
-
-}
-
-// ===================================================
-// Set Methods
-// ===================================================
-
-
-// ===================================================
-// Get Methods
-// ===================================================
-UInt&
-BCDataInterpolator::nofControlPoints()
-{
-
-    return M_nofControlPoints;
 
 }
 
@@ -358,13 +355,13 @@ void BCDataInterpolator::solveInterpolationSystem()
 
 }
 
-BCDataInterpolator::BCInterpolation_VectorialData BCDataInterpolator::interpolateVectorialFunction( const Real& t,
+BCDataInterpolator::BCDataInterpolator_point BCDataInterpolator::interpolateVectorialFunction( const Real& t,
                                                                                                     const Real& x,
                                                                                                     const Real& y,
                                                                                                     const Real& z )
 {
 
-    BCInterpolation_VectorialData rbfEval, evalPoint;
+    BCDataInterpolator_point rbfEval, evalPoint;
     Real rbfShape;
 
     rbfEval.x = 0;
@@ -413,15 +410,15 @@ BCDataInterpolator::BCInterpolation_VectorialData BCDataInterpolator::interpolat
 
             // ...and the linear term of the polynomial
             rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints )     * M_dataSites[i].x;
-            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].y; // BUG?
-            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].z;
+            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].x;
+            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].x;
 
-            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints )     * M_dataSites[i].x;
+            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints )     * M_dataSites[i].y;
             rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].y;
-            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].z;
+            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].y;
 
-            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints )     * M_dataSites[i].x;
-            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].y;
+            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints )     * M_dataSites[i].z;
+            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].z;
             rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].z;
         } // ...for each data site
 
@@ -431,32 +428,29 @@ BCDataInterpolator::BCInterpolation_VectorialData BCDataInterpolator::interpolat
 
 }
 
-Real BCDataInterpolator::evaluateRBF( const BCInterpolation_VectorialData point1,
-                                      const BCInterpolation_VectorialData point2 )
+Real BCDataInterpolator::evaluateRBF( const BCDataInterpolator_point point1,
+                                      const BCDataInterpolator_point point2 )
 {
 
-    Real h = sqrt( pow( point1.x - point2.x,
-                        2 ) + pow( point1.y - point2.y,
-                                   2 ) + pow( point1.z - point2.z,
-                                              2 ) );
+    Real r = sqrt( pow( point1.x - point2.x, 2 ) + pow( point1.y - point2.y, 2 ) + pow( point1.z - point2.z, 2 ) );
 
     switch ( M_interpolationMethod )
     {
 
         case RBF_ThinPlateSpline:
-            if ( h < 1e-3 )
-            {
-                return 0.0;
-            }
-            else
-            {
-                return pow( h,
-                            2 ) * log( h );
-            }
+            return ( r < 1e-3 ? 0.0 : pow( r, 2 ) * log( r ));
 
         case RBF_MultiQuadric:
-            return sqrt( pow( h,
-                              2 ) + 1 );
+            return sqrt( pow( r, 2 ) + 1 );
+
+        case RBF_Cubic:
+            return pow( r, 3 );
+
+        case RBF_Gaussian:
+            return exp( -pow( r, 2 ) );
+
+        case RBF_InverseMultiQuadric:
+            return 1 / sqrt(pow( r, 2 ) + 1);
 
         default:
             return 0.0;
@@ -464,12 +458,14 @@ Real BCDataInterpolator::evaluateRBF( const BCInterpolation_VectorialData point1
 
 }
 
-bool BCDataInterpolator::needSideConstraints()
+bool BCDataInterpolator::needSideConstraints() const
 {
     switch ( M_interpolationMethod )
     {
 
         case RBF_MultiQuadric:
+        case RBF_Gaussian:
+        case RBF_InverseMultiQuadric:
             return false;
 
         default:
@@ -506,61 +502,47 @@ void BCDataInterpolator::formRBFvectors()
 void BCDataInterpolator::interpolateDataValuesInTime( const Real t )
 {
 
-    Int n = static_cast< Int > (floor(M_timePeriod / (2 * M_timeInterval))); // 2n time instances per period
-    UInt index_t = 0;
+    Int n = static_cast< Int > (floor(0.5 + M_timePeriod / (2 * M_timeInterval))); // 2n time instances per period
 
-    if ( fmod( t, M_timeInterval ) == 0 )
+    // Fourier interpolate the values between two time instants
+
+    for ( UInt i = 0; i < M_nofControlPoints; i++ )
     {
-        // We are exactly at a time instant
-        index_t = fmod( t / M_timePeriod, 2*n );
+        BCDataInterpolator_point c1, c2;
 
-        for ( UInt i = 0; i < M_nofControlPoints; i++ )
+        c1.x = 0; c1.y = 0; c1.z = 0;
+        c2.x = 0; c2.y = 0; c2.z = 0;
+
+        M_dataValues[i].x = 0; M_dataValues[i].y = 0; M_dataValues[i].z = 0;
+
+        for (Int j = -n; j <= n; j++)
         {
-            M_dataValues[i] = M_dataValues_timeSamples[getIndexInTime(i, index_t)];
-        }
-    }
-    else
-    {
-        // We need to Fourier interpolate the values between two time instants
-
-        for ( UInt i = 0; i < M_nofControlPoints; i++ )
-        {
-            BCInterpolation_VectorialData c1, c2;
-
-            c1.x = 0; c1.y = 0; c1.z = 0;
-            c2.x = 0; c2.y = 0; c2.z = 0;
-
-            M_dataValues[i].x = 0; M_dataValues[i].y = 0; M_dataValues[i].z = 0;
-
-            for (Int j = -n; j <= n; j++)
+            for (Int k = 0; k <= 2 * n; k++)
             {
-                for (Int k = 0; k <= 2 * n; k++)
-                {
-                    Real tk = M_timePeriod / (2 * n + 1) * k;
-                    Int indexInTime = getIndexInTime(i, k);
+                Real tk = M_timePeriod / (2 * n + 1) * k;
+                Int indexInTime = getIndexInTime(i, k);
 
-                    c1.x += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].x;
-                    c1.y += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].y;
-                    c1.z += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].z;
+                c1.x += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].x;
+                c1.y += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].y;
+                c1.z += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].z;
 
-                    c2.x += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].x;
-                    c2.y += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].y;
-                    c2.z += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].z;
-                }
-
-                c1.x = c1.x / (2 * n + 1); c1.y = c1.y / (2 * n + 1); c1.z = c1.z / (2 * n + 1);
-                c2.x = c2.x / (2 * n + 1); c2.y = c2.y / (2 * n + 1); c2.z = c2.z / (2 * n + 1);
-
-                M_dataValues[i].x += c1.x * cos(j * t * 2 * M_PI / M_timePeriod) - c2.x * sin(j * t * 2 * M_PI / M_timePeriod);
-                M_dataValues[i].y += c1.y * cos(j * t * 2 * M_PI / M_timePeriod) - c2.y * sin(j * t * 2 * M_PI / M_timePeriod);
-                M_dataValues[i].z += c1.z * cos(j * t * 2 * M_PI / M_timePeriod) - c2.z * sin(j * t * 2 * M_PI / M_timePeriod);
+                c2.x += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].x;
+                c2.y += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].y;
+                c2.z += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].z;
             }
+
+            c1.x = c1.x / (2 * n + 1); c1.y = c1.y / (2 * n + 1); c1.z = c1.z / (2 * n + 1);
+            c2.x = c2.x / (2 * n + 1); c2.y = c2.y / (2 * n + 1); c2.z = c2.z / (2 * n + 1);
+
+            M_dataValues[i].x += c1.x * cos(j * t * 2 * M_PI / M_timePeriod) - c2.x * sin(j * t * 2 * M_PI / M_timePeriod);
+            M_dataValues[i].y += c1.y * cos(j * t * 2 * M_PI / M_timePeriod) - c2.y * sin(j * t * 2 * M_PI / M_timePeriod);
+            M_dataValues[i].z += c1.z * cos(j * t * 2 * M_PI / M_timePeriod) - c2.z * sin(j * t * 2 * M_PI / M_timePeriod);
         }
     }
 
-    // Afterwards must solve again the interpolation weights because RHS changed
     formRBFvectors();
 
+    // Afterwards must solve again the interpolation weights because RHS changed
     M_flagInterpolated = false;
     M_lastInterpolatedAtTime = t;
 

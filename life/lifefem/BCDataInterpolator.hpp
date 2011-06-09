@@ -26,12 +26,12 @@
 
 /*!
  @file
- @brief File containing BCDataInterpolator class for interpolating boundary data
+ @brief Class for interpolating boundary functions from scattered data
 
  @author Toni Lassila <toni.lassila@epfl.ch>
  @maintainer Toni Lassila <toni.lassila@epfl.ch
 
- @date 28-03-2011
+ @date 09-06-2011
 
  *///@HEADER
 
@@ -49,38 +49,43 @@
 
 namespace LifeV {
 
-//! BCDataInterpolator - class for interpolating boundary data
 /*!
- @author Toni Lassila
+ \class CurrentBoundaryFE
+ \brief Headers for BCDataInterpolator.cpp
 
  Implements Radial Basis Function (RBF) interpolation of pointwise scalar or vectorial functions defined
- on a set of scattered interpolation points. Currently implements thin-plate splines and multiquadrics.
- For mathematical details see M.D. Buhmann. Radial basis functions: theory and implementations, Cambridge
- University Press, 2004.
+ on a set of scattered interpolation points. Currently implements a variety of different basis functions
+ for interpolation. Temporal interpolation done with trigonometric polynomials. For mathematical details
+ see M.D. Buhmann. Radial basis functions: theory and implementations, Cambridge University Press, 2004.
 
  Inherits @c BCFunctionBase to facilitate use of interpolated data as boundary condition.
 
- If the interpolated data depends on time, the user must pass the data values at 2n specific time instances
+ If the interpolated data depends on time, the user must pass the data values at 2n specific time instances,
  uniformly sampled at interval M_timeInterval and with period M_timePeriod. The values of the data between
  these time instances is interpolated using Fourier interpolation, i.e. the interpolant is a trigonometric
  polynomial of order 2n and periodic with period M_timePeriod.
 
- The format of the data file passed to readData() should be as follows:\
-\
-     # header line before dimension definition\
-     nof_data_sites nof_data_dimensions t_interval t_period\
-     # header line before control point definitions\
-     data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord\
-     ...\
-     data_site_n_x_coord data_site_n_y_coord data_site_n_z_coord\
-     # header line before data definitions\
-     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord\
-     ...\
+ The format of the data file passed to readData() is the following:
+ <quote>
+     # HEADER LINE FOR PARAMETERS
+     nof_data_sites nof_data_dimensions t_interval t_period
+     # HEADER LINE FOR DATA SITES
+     data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord
+     ...
+     data_site_n_x_coord data_site_n_y_coord data_site_n_z_coord
+     # HEADER LINE FOR DATA VALUES
+     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
+     ...
      data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
-
+     # HEADER LINE FOR DATA VALUES
+     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
+     ...
+     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
+ </quote>
  The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
  is being interpolated. The variable nof_data_sites has to equal the number of rows passed in
- both the section involving the data_sites and the data values.
+ both the section involving the data_sites and the data values. The data value section has to be
+ repeated t_period / t_interval times.
 
  Warning: in the current implementation the data sites are assumed fixed in time and they do not move
  with the mesh. Thus they should only be used in a Lagrangian frame of reference, i.e. with structural
@@ -106,11 +111,17 @@ public:
     /*! @enum BCInterpolation_Type
      Interpolation methods: RBF_ThinPlateSpline
                             RBF_MultiQuadric
+                            RBF_Cubic
+                            RBF_Gaussian
+                            RBF_InverseMultiQuadric
      */
     enum BCInterpolationMethod
     {
-        RBF_ThinPlateSpline, /*!< Thin plate splines */
-        RBF_MultiQuadric,    /*!< Multiquadrics */
+        RBF_ThinPlateSpline,    /*!< Thin plate splines */
+        RBF_MultiQuadric,       /*!< Multiquadrics */
+        RBF_Cubic,              /*!< Cubics */
+        RBF_Gaussian,           /*!< Gaussians */
+        RBF_InverseMultiQuadric /*!< Inverse multiquadrics */
     };
 
     //@}
@@ -120,8 +131,7 @@ public:
 
     //! Constructors for an data interpolator
     /*!
-     \param comm  the Epetra_Comm to be used for communication
-     \param localMap use localMap instead of M_FESpace.map()
+     \param interpolationMethod the radial basis function type to use
      */
     BCDataInterpolator( BCInterpolationMethod interpolationMethod );
 
@@ -173,15 +183,15 @@ public:
 
     //! Read control points and data from a file
     /*!
-
+     @param filename The filename for the data sites and data values
      */
     void readData(const char *fileName);
 
-    //! Exports the interpolation matrix (for debugging purposes)
+    //! Export the interpolation matrix for debugging purposes
     /*!
 
      */
-    void exportInterpolationMatrix();
+    void exportInterpolationMatrix() const;
 
     //@}
 
@@ -194,22 +204,20 @@ public:
     //@{
 
     //! Returns number of control points
-    UInt& nofControlPoints();
+    UInt nofControlPoints() const
+    {
+        return M_nofControlPoints;
+    }
 
     //@}
 
 private:
 
-    struct BCInterpolation_VectorialData
+    struct BCDataInterpolator_point
     {
         Real x;
         Real y;
         Real z;
-    };
-
-    struct BCInterpolation_ScalarData
-    {
-        Real s;
     };
 
     matrix_Type M_interpolationMatrix;
@@ -221,9 +229,9 @@ private:
 
     BCInterpolationMethod M_interpolationMethod;
 
-    BCInterpolation_VectorialData* M_dataSites;
-    BCInterpolation_VectorialData* M_dataValues;
-    BCInterpolation_VectorialData* M_dataValues_timeSamples;
+    BCDataInterpolator_point* M_dataSites;
+    BCDataInterpolator_point* M_dataValues;
+    BCDataInterpolator_point* M_dataValues_timeSamples;
 
     UInt M_nofControlPoints;
 
@@ -237,17 +245,17 @@ private:
 
     void formRBFMatrix();
     void solveInterpolationSystem();
-    BCInterpolation_VectorialData interpolateVectorialFunction( const Real& t,
+    BCDataInterpolator_point interpolateVectorialFunction( const Real& t,
                                                                 const Real& x,
                                                                 const Real& y,
                                                                 const Real& z );
-    Real evaluateRBF( const BCInterpolation_VectorialData point1,
-                      const BCInterpolation_VectorialData point2 );
-    bool needSideConstraints();
+    Real evaluateRBF( const BCDataInterpolator_point point1,
+                      const BCDataInterpolator_point point2 );
+    bool needSideConstraints() const;
     void formRBFvectors();
     void interpolateDataValuesInTime( const Real t );
 
-    Int getIndexInTime(Int dataSite, Int timeInstant) const
+    Int getIndexInTime(const Int dataSite, const Int timeInstant) const
     {
         return M_nofControlPoints * timeInstant + dataSite;
     }
