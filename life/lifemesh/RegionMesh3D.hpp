@@ -3791,7 +3791,7 @@ orderMesh(MPI_Comm comm) // serial reordering:
         ics[order[iv]]=pointList[iv].x();
         ipsilon[order[iv]]=pointList[iv].y();
         zeta[order[iv]]=pointList[iv].z();
-        mk[order[iv]]=entityFlag_Type( pointList[iv].marker() );
+        mk[order[iv]]=static_cast<UInt>( pointList[iv].marker() );
     }
 
     for ( UInt iv = 0; iv < pointList.size(); ++iv )

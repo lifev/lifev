@@ -28,6 +28,33 @@
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
 #include <life/lifefem/FESpace.hpp>
 
+/*!
+ * @file
+ * @brief File containing a utility to reorder a mesh
+ *
+ * This utility contains a method to reorder the meshes reducing the fill-in of the matrix,
+ * and a method to create a different marker on a region of a mesh.
+ * In particular this region is identified by a marker of another mesh that shares an interface
+ * (e.g. solid interface and fluid edges in FSI).
+ *
+ * For instance suppose that you have marker=20 on the fluid 'edges'
+ * and on the solid mesh you have just different markers for the internal and external walls,
+ * then using this test you can create a marker '30' on the solid mesh whenever the corresponding marker on the fluid
+ * mesh is '20', and rewrite the mesh.
+ *
+ * usage: test_meshReorder -o mesh_output.mesh
+ *
+ * without the options -o or --output the output mesh can be specified from this data file.
+ * Otherwise the mesh will be written in a file 'mesh'.
+ *
+ * the first mesh is the one reordered. The second mesh is the one where the new marker is added
+ * (not read when create_edge=false).
+ *
+ * @author Paolo Crosetto <paolo.crosetto@epfl.ch>
+ *
+ * @mantainer Paolo Crosetto <paolo.crosetto@epfl.ch>
+ */
+
 
 int main(int argc, char** argv)
 {

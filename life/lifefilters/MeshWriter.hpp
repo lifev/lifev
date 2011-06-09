@@ -49,7 +49,8 @@ namespace LifeV {
     @author Paolo Crosetto
 
     This file contains the namespace MeshWriters. There a method to write meshes in format MEDIT (ASCII) is implemented.
-    The files in MEDIT format have the extension .mesh and can be read by several softwares (like MEDIT, from INRIA, or GMSH)
+    The files in MEDIT format have the extension .mesh and can be read by several softwares (like MEDIT, from INRIA, or GMSH),
+    The method writeMeshMedit implemented here works in serial and only for 3D meshes.
  */
 namespace MeshWriter
 {
@@ -62,7 +63,7 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     ASSERT( ofile, "Error: Output file cannot be open" );
 
     ofile << "MeshVersionFormatted 1\n";
-    ofile << "Dimension\n3\n";
+    ofile << "Dimension 3\n";
     ofile << "\n";
     ofile << "Vertices\n";
 
@@ -104,9 +105,9 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     UInt nVerticesPerFace = FaceShape::S_numVertices;
 
 
-    for ( ID k = 0; k < nBdF; ++k )
+    for ( UInt k = 0; k < nBdF; ++k )
     {
-        for ( ID i = 0; i < nVerticesPerFace; ++i )
+        for ( UInt i = 0; i < nVerticesPerFace; ++i )
         {
             ofile << mesh.boundaryFace( k ).point( i ).id()+1
                   << " ";
@@ -136,9 +137,9 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
 
     UInt ielem;
 
-    for ( ID k = 0; k < nElements; ++k )
+    for ( UInt k = 0; k < nElements; ++k )
     {
-        for ( ID i = 0; i < nVerticesPerElement; ++i )
+        for ( UInt i = 0; i < nVerticesPerElement; ++i )
         {
             ielem =  mesh.volume( k ).point( i ).localId();
 
