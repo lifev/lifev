@@ -23,8 +23,6 @@
 *******************************************************************************
 */
 //@HEADER
-//  \include ../../../mathcard/testsuite/test_monolithic/fluidstructure.dox
-
 
 /*!
 
@@ -47,7 +45,6 @@
     Newton \ref FM05 , Dirichlet--Neumann \ref DDFQ06 , Robin Neumann \ref BNV08 )
 
  */
-
 
 
 #ifndef FSIOPERATOR_H
@@ -87,12 +84,6 @@
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
-//#include <life/lifesolver/fixedPointBase.hpp>
-
-
-#define FLUID 1
-#define SOLID 0
-
 namespace LifeV
 {
 /*!
@@ -125,10 +116,10 @@ public:
 #ifdef HAVE_HDF5
     typedef ExporterHDF5Mesh3D<mesh_Type>                                           meshFilter_Type;
 #endif
-    typedef OseenSolverShapeDerivative   <mesh_Type>                                      fluid_Type;
+    typedef OseenSolverShapeDerivative   <mesh_Type>                                fluid_Type;
     typedef VenantKirchhoffSolver  <mesh_Type>                                      solid_Type;
     typedef HarmonicExtensionSolver<mesh_Type>                                      meshMotion_Type;
-    typedef OseenSolverShapeDerivative   <mesh_Type>                                      fluidLin_Type;
+    typedef OseenSolverShapeDerivative   <mesh_Type>                                fluidLin_Type;
     typedef VenantKirchhoffSolver  <mesh_Type>                                      solidLin_Type;
     typedef boost::shared_ptr<fluid_Type>                                           fluidPtr_Type;
     typedef boost::shared_ptr<solid_Type>                                           solidPtr_Type;
@@ -153,10 +144,10 @@ public:
     typedef FSIData                                                                 data_Type;
     typedef boost::shared_ptr<data_Type>                                            dataPtr_Type;
     typedef std::map<ID, ID>::const_iterator                                        iterator_Type;
-    typedef FactorySingleton<Factory<FSIOperator, std::string> >                            FSIFactory_Type;
+    typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
     typedef Displayer::commPtr_Type/*Displayer::commPtr_Type*/                      commPtr_Type;
 
-     //@}
+    //@}
 
 
 
@@ -271,55 +262,42 @@ public:
        \param disp: current unknown solution
        \param iter: nonlinear iteration counter. The part of th rhs related to the time discretization is computed only for iter=0
      */
-    virtual void evalResidual( vector_Type&        res,
-                               const vector_Type&  disp,
-                               const UInt          iter ) = 0;
+    virtual void evalResidual( vector_Type& res, const vector_Type&  disp, const UInt iter ) = 0;
 
-    //!increases the time level
-    /**
-       the Oseen::shiftSolution() method of the fluid solver is called
+    //! Update the solution after NonLinearRichardson is called.
+    /*!
+     *  Eventually it can update also some post-processing quantity.
      */
-    virtual void shiftSolution( );
+    virtual void updateSolution( const vector_Type& solution );
 
-    //!initializes the solution with functions
-    /**
-       calls the initialize methods for the subproblems. The mesh velocity is used to compute the convective term in the
-       fluid equations
-       \param u0: initial fluid velocity
-       \param p0: initial fluid pressure
-       \param d0: initial solid displacement
-       \param w0: initial mesh velocity
+    //! Initializes all the quantities using functions
+    /*!
+     * calls the initialize methods for the subproblems. The mesh velocity is used to compute the convective term in the fluid equations
+     * \param u0: initial fluid velocity
+     * \param p0: initial fluid pressure
+     * \param d0: initial solid displacement
+     * \param w0: initial mesh velocity
      */
-    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
-                             FSIOperator::fluidPtr_Type::value_type::function_Type const& p0,
-                             FSIOperator::solidPtr_Type::value_type::Function const& d0,
-                             FSIOperator::solidPtr_Type::value_type::Function const& w0,
-                             FSIOperator::fluidPtr_Type::value_type::function_Type const& /*df0=FSI::solidPtr_Type::value_type::Function()*/)
-    {
-        Debug( 6220 ) << "FSI:: solid init \n";
-        if (this->isSolid())
-            solid().initialize(d0, w0, w0);
-        Debug( 6220 ) << "FSI:: fluid init \n";
-        if (this->isFluid())
-            fluid().initialize(u0, p0);
-    }
+    virtual void initialize( fluidPtr_Type::value_type::function_Type const& u0,
+                             fluidPtr_Type::value_type::function_Type const& p0,
+                             solidPtr_Type::value_type::Function const& d0,
+                             solidPtr_Type::value_type::Function const& w0,
+                             fluidPtr_Type::value_type::function_Type const& df0 );
 
-    //! getter for the fluid velocity
-    virtual const vectorPtr_Type& un() { return M_un; }
-
-    //! Returns the number of imposed fluxes
-    virtual UInt imposeFlux();
-
-    // \todo{kill this method?}
-    //virtual void mergeBCHandlers() {}
+    //! Initialize all the quantities required by FSI
+    /*!
+     * This method has been designed to initialize all the quantities of the FSI problem.
+     * @param fluidVelocityAndPressure velocity and pressure of the fluid
+     * @param fluidDisplacement displacement of the fluid
+     * @param solidVelocity velocity of the solid
+     * @param solidDisplacement displacement of the solid
+     */
+    virtual void initialize( const vectorPtr_Type& fluidVelocityAndPressure,
+                             const vectorPtr_Type& fluidDisplacement,
+                             const vectorPtr_Type& solidVelocity,
+                             const vectorPtr_Type& solidDisplacement );
 
     //@}
-
-    //!\todo{kill this method}
-    //virtual void setFluxBC             (fluidBchandlerPtr_Type /*bc_fluid*/) {}
-
-    //!\todo{kill this method}
-    //virtual void setRobinBC             (fluidBchandlerPtr_Type /*bc_solid*/) {}
 
 
 
@@ -336,7 +314,7 @@ public:
     //!@name Factory Methods
     //@{
     //! Factory method for the linear elasticity solver
-    static VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSIOperator::mesh_Type, SolverAztecOO >(); }
+    static VenantKirchhoffSolver< mesh_Type, SolverAztecOO >* createLinearStructure() { return new VenantKirchhoffSolverLinear< mesh_Type, SolverAztecOO >(); }
     //@}
 
     //!@name Public Methods
@@ -347,6 +325,32 @@ public:
      */
     void initializeBDF( const vector_Type& un );
 
+    //! initializes the fluid solver with vectors
+    /**
+       \param velAndPressure: initial vector containing the velocity and pressure
+       \param displacement: initial vector containing the mesh displacement
+     */
+    void initializeFluid( const vector_Type& velAndPressure, const vector_Type& displacement );
+
+    //! initializes the solid solver with vectors
+    /**
+       \param displacement: initial vector containing the structure displacement
+       \param velocity: initial vector containing the velocity, used for the initialization of the TimeAdvanceNewmark scheme
+     */
+    void initializeSolid( vectorPtr_Type displacement, vectorPtr_Type velocity );
+
+    //!\todo{kill this method}
+    //void updateJacobian ( const vector_Type& sol, const int& iter );
+
+    //!moves the mesh using the solution of the harmonic extension equation
+    /**
+       \param disp displacement of the mesh, must be the difference between the current solution of the HE problem and the one at the previous time step.
+     */
+    void moveMesh( const vector_Type& disp );
+
+//     void solveLinearFluid();
+//     void solveLinearSolid();
+
     //! Creates the Epetra maps for the interface
     /**
        Given a std::map holding the numeration of the interface according to the fluid (first) and the solid (second),
@@ -356,34 +360,6 @@ public:
      */
     void createInterfaceMaps(std::map<ID, ID> const& locDofMap);
 
-    //! initializes the fluid solver with vectors
-    /**
-       \param velAndPressure: initial vector containing the velocity and pressure
-       \param displacement: initial vector containing the mesh displacement
-     */
-    void initializeFluid( const vector_Type& velAndPressure,
-                          const vector_Type& displacement );
-
-    //! initializes the solid solver with vectors
-    /**
-       \param displacement: initial vector containing the structure displacement
-       \param velocity: initial vector containing the velocity, used for the initialization of the TimeAdvanceNewmark scheme
-     */
-    void initializeSolid( vectorPtr_Type displacement,
-                          vectorPtr_Type velocity );
-
-    //!\todo{kill this method}
-    //void updateJacobian ( const vector_Type& sol, const int& iter );
-
-    //!moves the mesh using the solution of the harmonic extension equation
-    /**
-       \param disp displacement of the mesh, must be the difference between the current solution of the HE problem and the one at the previous time step.
-     */
-    void moveMesh       ( const vector_Type& disp );
-
-//     void solveLinearFluid();
-//     void solveLinearSolid();
-
     //!Method to import an VectorEpetra defined on the fluid map (i.e. with the fluid numeration of the dofs) to the interface
     /**
        Note that the output vector will have the solid numeration on the interface! By default in fact the vectors on the
@@ -392,7 +368,7 @@ public:
     void transferFluidOnInterface( const vector_Type& _vec1, vector_Type& _vec2 );
 
     //works in serial but no yet in parallel
-    void transferSolidOnFluid    ( const vector_Type& _vec1, vector_Type& _vec2 );
+    void transferSolidOnFluid( const vector_Type& _vec1, vector_Type& _vec2 );
 
     //!Method to import an VectorEpetra defined on the solid map (i.e. with the solid numeration of the dofs) to the interface
     /**
@@ -414,20 +390,17 @@ public:
     void bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs );
 
     //! Method to set the Robin vector coefficient of the Robin--Neumann coupling scheme (as a constant vector vector)
-    void setAlphaf     () { M_Alphaf->epetraVector().PutScalar( M_AlphafCoef ); }
+    void setAlphaf() { M_Alphaf->epetraVector().PutScalar( M_AlphafCoef ); }
     //! Method to compute the scalar coefficient \f$\alpha\f$ of the Robin--Neumann coupling scheme
-    void setAlphafCoef ();
+    void setAlphafCoef();
     //! Method calling setAlphaf and setAlphafCoef
     void setStructureToFluidParametres();
 
-    //! method to set the number of fluxes imposed
-    void setFluxesNumber                     ( const UInt numLM )
-    {
-        M_fluxes=numLM;
-    }
-    //! Setter for the right hand side
-    void setRHS                              ( vectorPtr_Type& rhs ) {M_rhs = rhs;}
-
+    //! Reset the right hand side to zero
+    /*!
+     *  This method is used in the multiscale framework during subiterations
+     */
+    void resetRHS() { *M_rhs = 0; }
 
     //@}
 
@@ -455,6 +428,9 @@ public:
 //     vector_Type & residual();
 //     vector_Type const & velocity()                                const { return *M_lambdaDotSolid; }
 //     vector_Type & residualFSI();
+
+    //! Returns the number of imposed fluxes
+    UInt imposedFluxes();
 
     const vector_Type& lambdaFluid()                              const { return *M_lambdaFluid; }
     const vector_Type& lambdaSolid()                              const { return *M_lambdaSolid; }
@@ -490,21 +466,21 @@ public:
     int getSolidLeaderId()                                        const { return M_solidLeader; }
 
     //! Getter for the fluid solver
-    const fluid_Type& fluid()                                 const { return *M_fluid; }
+    const fluid_Type& fluid()                                     const { return *M_fluid; }
     //! Getter for the solid solver
-    const solid_Type& solid()                                 const { return *M_solid; }
+    const solid_Type& solid()                                     const { return *M_solid; }
     //! Getter for the harmonic extension solver
-    const meshMotion_Type& meshMotion()                       const { return *M_meshMotion; }
+    const meshMotion_Type& meshMotion()                           const { return *M_meshMotion; }
 
     //! Getter-Setter for the fluid solver
     /** \todo{mark as deprecated}*/
-    fluidPtr_Type::value_type& fluid()                                     { return *M_fluid; }
+    fluidPtr_Type::value_type& fluid()                                  { return *M_fluid; }
     //! Getter-Setter for the solid solver
     /** \todo{mark as deprecated}*/
-    solidPtr_Type::value_type& solid()                                     { return *M_solid; }
+    solidPtr_Type::value_type& solid()                                  { return *M_solid; }
     //! Getter-Setter for the mesh motion solver
     /** \todo{mark as deprecated}*/
-    meshMotionPtr_Type::value_type& meshMotion()                           { return *M_meshMotion; }
+    meshMotionPtr_Type::value_type& meshMotion()                        { return *M_meshMotion; }
 //     fluidLinPtr_Type::value_type& fluidLin()                               { return *M_fluidLin; }
 //     solidLinPtr_Type::value_type& solidLin()                               { return *M_solidLin; }
 
@@ -524,18 +500,22 @@ public:
     // const mesh_Type& solidMesh()                                  const { return *M_solidMesh; }
 
     //!getter for the partitioned fluid mesh
-    const MeshPartitioner< mesh_Type >& fluidMeshPart()             const { return *M_fluidMeshPart; }
+    const MeshPartitioner< mesh_Type >& fluidMeshPart()           const { return *M_fluidMeshPart; }
     //!getter for the partitioned solid mesh
-    const MeshPartitioner< mesh_Type >& solidMeshPart()             const { return *M_solidMeshPart; }
+    const MeshPartitioner< mesh_Type >& solidMeshPart()           const { return *M_solidMeshPart; }
 
     //!getter for the fluid velocity FESpace
     const FESpace<mesh_Type, MapEpetra>& uFESpace()               const { return *M_uFESpace; }
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > uFESpacePtr() const { return M_uFESpace; }
     //!getter for the fluid pressure FESpace
     const FESpace<mesh_Type, MapEpetra>& pFESpace()               const { return *M_pFESpace; }
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > pFESpacePtr() const { return M_pFESpace; }
     //!getter for the solid displacement FESpace
     const FESpace<mesh_Type, MapEpetra>& dFESpace()               const { return *M_dFESpace; }
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > dFESpacePtr() const { return M_dFESpace; }
     //!getter for the harmonic extension solution FESpace
     const FESpace<mesh_Type, MapEpetra>& mmFESpace()              const { return *M_mmFESpace; }
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > mmFESpacePtr() const { return M_mmFESpace; }
     //!getter for the harmonic extension solution
     virtual const vector_Type& meshDisp()                         const { return M_meshMotion->disp(); }
     //!getter for the harmonic extension solution of the previous time step
@@ -544,7 +524,7 @@ public:
     virtual       vector_Type& veloFluidMesh()                          { return *M_veloFluidMesh; }
     //!getter for the mesh velocity increment (used for Newton FSI)
     //! \todo{try to remove this method}
-    vector_Type& derVeloFluidMesh()                       { return *M_derVeloFluidMesh; }
+    vector_Type& derVeloFluidMesh()                                     { return *M_derVeloFluidMesh; }
 
     const dofInterface3DPtr_Type& dofFluidToStructure()             const { return M_dofFluidToStructure; }
     const dofInterface3DPtr_Type& dofStructureToSolid()             const { return M_dofStructureToSolid; }
@@ -555,7 +535,7 @@ public:
     boost::shared_ptr<MapEpetra>& solidInterfaceMap()                   { return M_solidInterfaceMap; }
 
     //! Getter for the map of the variable used for the coupling
-    virtual boost::shared_ptr<MapEpetra>& couplingVariableMap()      { return M_solidInterfaceMap; }
+    virtual boost::shared_ptr<MapEpetra>& couplingVariableMap()         { return M_solidInterfaceMap; }
 
     //! Method to implement Robin boundary conditions on the external wall for the structure
     BCFunctionRobin& bcfRobinOuterWall()                                { return M_bcfRobinOuterWall; }
@@ -592,24 +572,41 @@ public:
     //! \todo{mark as deprecated untill debugged}
     const solidBchandlerPtr_Type& BCh_dz_inv()                      const { return M_BCh_dz_inv; }
 
+    //! Getter for the right hand side
+    const vectorPtr_Type& getRHS()                                  const { return M_rhs; }
+
+    //! getter for the fluid velocity
+    const vectorPtr_Type& un()                                      const { return M_un; }
+
     //! gets the solution vector by reference
-    virtual const vector_Type& solution()                      const { return *M_lambda; }
+    virtual const vector_Type& solution()                           const { return *M_lambda; }
 
     //! gets a pointer to the solution vector by reference
-    virtual vectorPtr_Type& solutionPtr()                               { return M_lambda; }
+    virtual vectorPtr_Type& solutionPtr()                                 { return M_lambda; }
 
-    //! gets the solid displacement by copy
-    virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->getDisplacement(); }
+    //! Export the solid displacement by copying it to an external vector
+    /*!
+     * @param solidDisplacement vector to be filled with the solid displacement
+     */
+    virtual void exportSolidDisplacement( vector_Type& solidDisplacement ) { solidDisplacement = M_solid->getDisplacement(); }
 
-    //! gets the solid velocity by copy
-    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solid->getVelocity(); }
+    //! Export the solid velocity by copying it to an external vector
+    /*!
+     * @param solidVelocity vector to be filled with the solid velocity
+     */
+    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solid->getVelocity(); }
 
-    //! gets the fluid velocity and pressure by copy
-    virtual void getFluidVelAndPres( vector_Type& sol )                 { sol = *M_fluid->solution(); }
+    //! Export the fluid velocity and pressure by copying it to an external vector
+    /*!
+     * @param fluidVelocityAndPressure vector to be filled with the fluid velocity and pressure
+     */
+    virtual void exportFluidVelocityAndPressure( vector_Type& fluidVelocityAndPressure ) { fluidVelocityAndPressure = *M_fluid->solution(); }
 
-    //! Getter for the right hand side
-    vectorPtr_Type const& getRHS       ( ) const {return M_rhs;}
-
+    //! Export the fluid displacement by copying it to an external vector
+    /*!
+     * @param fluidDisplacement vector to be filled with the fluid displacement
+     */
+    virtual void exportFluidDisplacement( vector_Type& fluidDisplacement ) { fluidDisplacement = M_meshMotion->disp(); }
 
     //@}
 
@@ -720,22 +717,20 @@ public:
     void setRobinOuterWall                   ( const function_Type& dload, const function_Type& E);
 
     //! sets the solution vector by reference
-    virtual void setSolutionPtr              ( const vectorPtr_Type& sol )      { M_lambda = sol; }
+    virtual void setSolutionPtr              ( const vectorPtr_Type& sol ) { M_lambda = sol; }
 
     //! sets the solution vector by copy
-    virtual void setSolution                 ( const vector_Type& solution )    { M_lambda.reset( new vector_Type( solution ) ); }
+    virtual void setSolution                 ( const vector_Type& solution ) { M_lambda.reset( new vector_Type( solution ) ); }
+    virtual void initialize                  ( const vector_Type& solution ) { setSolution(solution); }
     //! Initialize the fluid solution given a vector (calls setSolution)
-    virtual void initialize                  ( vectorPtr_Type u0)               { setSolution(*u0); }
 
 
     //! sets the solution time derivative vector by copy
     //void setSolutionDerivative( vectorPtr_Type& lambdaDot ) { M_lambdaDot = lambdaDot; }
 
     //! Setter for the time derivative of the interface displacement
-    void setSolutionDerivative( const vector_Type& solutionDerivative )         { M_lambdaDot.reset( new vector_Type( solutionDerivative ) ); }
+    void setSolutionDerivative( const vector_Type& solutionDerivative ) { M_lambdaDot.reset( new vector_Type( solutionDerivative ) ); }
 
-    //!\todo{see if can be marked ad deprected}
-    virtual void  setRestarts( bool /*restarts*/ ) { /*M_restarts = restarts;*/ }
     //@}
 
 //     void setDerReducedFluidLoadToStructure   ( vector_Type &dload, UInt type = 0 );
@@ -773,15 +768,13 @@ protected:
        in space the overall approximation is of the first order even if the fluid is solved with hicher order FEs.
        Calls the interpolateVelocity method
      */
-    void transferMeshMotionOnFluid( const vector_Type& _vec1,
-                                    vector_Type& _vec2 );
+    void transferMeshMotionOnFluid( const vector_Type& _vec1, vector_Type& _vec2 );
 
     //! Interpolates mesh motion into velocity
     /**
        Interpolates a vector with the map of the harmonic extension into one with the map of the fluid velocity
      */
-    void interpolateVelocity(const vector_Type& _vec1,
-                             vector_Type& _vec2);
+    void interpolateVelocity(const vector_Type& _vec1, vector_Type& _vec2);
 
 
     //!Interpolates to vectors on the interface
@@ -895,8 +888,6 @@ protected:
     Real                                              M_AlphafCoef;
     //\todo{try to set as deprecated}
     Real                                              M_betamedio;
-
-    UInt                                              M_fluxes;
 
     commPtr_Type                                      M_epetraComm;
     commPtr_Type                                      M_epetraWorldComm;

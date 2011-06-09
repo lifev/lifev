@@ -137,6 +137,143 @@ void stiffness(MatrixElemental& localStiff,
         }
     }
 }
+
+void grad( MatrixElemental& elmat,
+           const CurrentFE& uCFE,
+           const CurrentFE& pCFE,
+           const UInt& fieldDim)
+{
+    const UInt nbPFEDof(pCFE.nbFEDof());
+    const UInt nbUFEDof(uCFE.nbFEDof());
+    const UInt nbQuadPt(pCFE.nbQuadPt());
+    Real localValue(0);
+
+    for (UInt iFDim(0); iFDim<fieldDim; ++iFDim)
+    {
+        MatrixElemental::matrix_view localView = elmat.block(iFDim,0);
+
+        for (UInt iDofP(0); iDofP < nbPFEDof; ++iDofP)
+        {
+            for (UInt iDofU(0); iDofU< nbUFEDof; ++iDofU)
+            {
+                localValue=0.0;
+                for (UInt iQuadPt(0); iQuadPt< nbQuadPt; ++iQuadPt)
+                {
+                    localValue += uCFE.dphi(iDofU,iFDim,iQuadPt)
+                        * pCFE.phi(iDofP,iQuadPt)
+                        * uCFE.wDetJacobian(iQuadPt);
+                }
+                localView(iDofU,iDofP)-=localValue;
+            }
+        }
+    }
+}
+
+void divergence( MatrixElemental& elmat,
+                 const CurrentFE& uCFE,
+                 const CurrentFE& pCFE,
+                 const UInt& fieldDim,
+                 const Real& coefficient)
+{
+    const UInt nbPFEDof(pCFE.nbFEDof());
+    const UInt nbUFEDof(uCFE.nbFEDof());
+    const UInt nbQuadPt(pCFE.nbQuadPt());
+    Real localValue(0);
+
+    for (UInt iFDim(0); iFDim<fieldDim; ++iFDim)
+    {
+        MatrixElemental::matrix_view localView = elmat.block(0,iFDim);
+
+        for (UInt iDofP(0); iDofP < nbPFEDof; ++iDofP)
+        {
+            for (UInt iDofU(0); iDofU< nbUFEDof; ++iDofU)
+            {
+                localValue=0.0;
+                for (UInt iQuadPt(0); iQuadPt< nbQuadPt; ++iQuadPt)
+                {
+                    localValue += uCFE.dphi(iDofU,iFDim,iQuadPt)
+                        * pCFE.phi(iDofP,iQuadPt)
+                        * uCFE.wDetJacobian(iQuadPt);
+                }
+                localView(iDofP,iDofU)-=coefficient*localValue;
+            }
+        }
+    }
+}
+
+void stiffStrain(MatrixElemental& localStiff,
+                 const CurrentFE& stiffCFE,
+                 const Real& coefficient,
+                 const UInt& fieldDim)
+{
+    const UInt nbFEDof(stiffCFE.nbFEDof());
+    const UInt nbQuadPt(stiffCFE.nbQuadPt());
+    Real localValue(0);
+    const Real newCoefficient(coefficient*0.5);
+
+    // Assemble the local diffusion
+    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    {
+        // Extract the view of the matrix
+        MatrixElemental::matrix_view localView = localStiff.block(iterFDim,iterFDim);
+
+        // Loop over the basis functions
+        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+        {
+            // Build the local matrix only where needed:
+            // Lower triangular + diagonal parts
+            for (UInt jDof(0); jDof <= iDof; ++jDof)
+            {
+                localValue = 0.0;
+
+                //Loop on the quadrature nodes
+                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                {
+                    for (UInt iDim(0); iDim<3; ++iDim)
+                    {
+                        localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
+                            * stiffCFE.dphi(jDof,iDim,iQuadPt)
+                            * stiffCFE.wDetJacobian(iQuadPt);
+                    }
+                }
+
+                localValue*=newCoefficient;
+
+                // Add on the local matrix
+                localView(iDof,jDof)+=localValue;
+
+                if (iDof != jDof)
+                {
+                    localView(jDof,iDof)+=localValue;
+                }
+            }
+        }
+    }
+
+    for ( UInt iFDim (0); iFDim < fieldDim; ++iFDim )
+    {
+        for ( UInt jFDim (0); jFDim < fieldDim; ++jFDim )
+        {
+            MatrixElemental::matrix_view localView = localStiff.block( iFDim, jFDim );
+
+            for ( UInt iDof(0); iDof < nbFEDof; ++iDof )
+            {
+                for ( UInt jDof (0); jDof < nbFEDof; ++jDof )
+                {
+                    localValue = 0.0;
+                    for ( UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt )
+                    {
+                        localValue += stiffCFE.dphi( iDof, jFDim, iQuadPt )
+                            * stiffCFE.dphi( jDof, iFDim, iQuadPt )
+                            * stiffCFE.wDetJacobian( iQuadPt );
+                    }
+                    localView( iDof, jDof ) += newCoefficient * localValue;
+                }
+            }
+        }
+    }
+}
+
 }
 
 //
@@ -1478,7 +1615,7 @@ void ipstab_bagrad( const Real         coef,
                 sum1 += betaLoc * bdfe.normal(icoor, ig);
             }
         }
-        bn[ ig ] = std::abs(sum1);
+        bn[ ig ] = std::fabs(sum1);
     }
 
     for ( UInt ig = 0; ig < bdfe.nbQuadPt(); ++ig )
@@ -3270,6 +3407,82 @@ void source_fhn( Real coef_f, Real coef_a, VectorElemental& u, VectorElemental& 
         }
     }
 
+}
+
+//! \f$(beta\cdot\nabla u^k, v  )\f$
+void source_advection( const VectorElemental& beta_loc, const VectorElemental& uk_loc,
+                       VectorElemental& elvec, const CurrentFE& fe )
+{
+
+    Real guk[ fe.nbCoor() ][ fe.nbCoor() ];      // \grad u^k at a quadrature point
+    Real beta[ fe.nbCoor() ];                    // beta at a quadrature point
+    Real conv[ fe.nbQuadPt() ][ fe.nbCoor() ];    // beta(\grad u^k) at each quadrature point
+    Real s;
+
+    UInt ig, icoor, jcoor, i;
+
+    // loop on quadrature points
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+
+        // Interpolating beta
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+            // Evaluate beta in the Gauss Point
+            s = 0.0;
+            for ( i = 0; i < fe.nbFEDof(); i++ )
+                s += fe.phi( i, ig ) * beta_loc.vec() [ i + icoor * fe.nbFEDof() ];
+            beta[ icoor ] = s;
+        }
+
+        // Interpolation of grad u
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+            // loop  on the derivative variable
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            {
+                // Evaluate the derivative in the gauss point
+                s = 0.0;
+                for ( i = 0; i < fe.nbFEDof(); i++ )
+                {
+                    //  grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
+                guk[ icoor ][ jcoor ] = s;
+            }
+        }
+
+        // beta*(\grad u^k) at each quadrature point
+        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        {
+            s = 0.0;
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                s += beta[ icoor ] * guk[ jcoor ][ icoor ];
+            conv[ ig ][ jcoor ] = s;
+        }
+    }
+
+    //
+    // Numerical integration
+    //
+
+    // loop on coordinates, i.e. loop on elementary vector blocks
+    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+    {
+
+        VectorElemental::vector_view vec = elvec.block( icoor );
+
+        // loop on nodes, i.e. loop on components of this block
+        for ( i = 0; i < fe.nbFEDof(); i++ )
+        {
+
+            // loop on quadrature points
+            s = 0;
+            for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+                s += conv[ ig ][ icoor ] * fe.phi( i, ig ) * fe.wDetJacobian( ig );
+            vec( i ) += s;
+        }
+    }
 }
 
 // coef * ( - \grad w^k :[I\div d - (\grad d)^T] u^k + convect^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  ) for Newton FSI

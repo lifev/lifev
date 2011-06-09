@@ -565,7 +565,7 @@ VectorEpetra::operator!( void )
 // ===================================================
 Int VectorEpetra::globalToLocalRowId( const UInt row ) const
 {
-    Int lrow = blockMap().LID(row); // BASEINDEX + 1, row + 1
+    Int lrow = blockMap().LID(row);
 
     if ( lrow < 0 && blockMap().Comm().NumProc() == 1 )
     {

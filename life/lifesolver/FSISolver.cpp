@@ -257,12 +257,12 @@ FSISolver::initialize(vectorPtr_Type u0, vectorPtr_Type v0)
     if (!u0.get())
     {
         u0.reset(new vector_Type(*M_oper->couplingVariableMap()));
-        M_oper->setSolution(*u0); // couplingVariableMap()
+        M_oper->initialize(*u0); // couplingVariableMap()
         M_oper->initializeBDF(*u0);
     }
     else
     {
-        M_oper->setSolution(*u0); // couplingVariableMap()//copy
+        M_oper->initialize(*u0); // couplingVariableMap()//copy
         M_oper->initializeBDF(*u0);
     }
     if (!v0.get())
@@ -313,7 +313,7 @@ FSISolver::iterate()
                                     M_data->dataFluid()->dataTime()->time() );
 
     // We update the solution
-    M_oper->setSolution( *lambda );
+    M_oper->updateSolution( *lambda );
 
     if (status == EXIT_FAILURE)
     {
@@ -330,13 +330,9 @@ FSISolver::iterate()
         }
     }
 
-    M_oper->shiftSolution();
-
-
     Debug( 6220 ) << "FSISolver iteration at time " << M_data->dataFluid()->dataTime()->time() << " done\n";
     Debug( 6220 ) << "============================================================\n";
     std::cout << std::flush;
-
 }
 
 // ===================================================

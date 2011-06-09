@@ -103,7 +103,7 @@ int main( int argc, char** argv )
     fullMeshPtr.reset();
 
     ExporterHDF5Mesh3D<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, meshPart.meshPartition(), "cylinderPart",
-                                                            comm->MyPID());
+                                                              comm->MyPID());
     HDF5Output.addPartitionGraph(meshPart.elementDomains(), comm);
     HDF5Output.addMeshPartitionAll(meshPart.meshPartitions(), comm);
     HDF5Output.postProcess(0);

@@ -449,11 +449,6 @@ protected:
 
   UInt getDim() const { return M_FESpace->dim(); }
 
-  //Deprecated
-  UInt __attribute__ ((__deprecated__))dim() const
-  { return getDim(); }
-
-
   //!Protected Members
 
   boost::shared_ptr<data_Type>   M_data;
@@ -663,15 +658,15 @@ void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*st
   vector_Type z = *M_disp;
   z             += coef*(*M_vel);
 
-  std::cout<< "M_disp in solid" << M_disp->norm2()<<std::endl;
+  //std::cout<< "M_disp in solid" << M_disp->norm2()<<std::endl;
 
   *M_rhsNoBC  = *M_mass * z;
 
-  std::cout<< "rhsNoBC in solid 1" << M_rhsNoBC->norm2()<<std::endl;
+  //std::cout<< "rhsNoBC in solid 1" << M_rhsNoBC->norm2()<<std::endl;
 
   *M_rhsNoBC -= *M_linearStiff * (*M_disp);
 
-  std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->norm2()<<std::endl;
+  //std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->norm2()<<std::endl;
 
   coef = 2.0/M_data->getdataTime()->timeStep();
   *M_rhsW  = coef * (*M_disp);
@@ -845,7 +840,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 
   //M_Displayer->leaderPrintMax("dz norm     = " , M_disp.NormInf() );
 
-  numIter = abs(numIter);
+  numIter = std::abs(numIter);
 
   *M_residual_d =  *M_massStiff*(*M_disp);
   //    M_residual_d -= M_rhsNoBC;
@@ -1072,7 +1067,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, V
 
   if ( getComunicator()->MyPID() == 0 )
     {
-      for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
+      for ( UInt iDof = 0; iDof < nDimensions*getDim(); ++iDof )
 	{
 	  disp[ iDof ] = displacement[ iDof ];
 	  vel [ iDof ] = velocity    [ iDof ];
@@ -1094,12 +1089,6 @@ VenantKirchhoffSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFi
 {
   M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
   M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
-
-  UInt marker = M_FESpace->mesh()->volumeList( 0 ).marker();
-  if (!M_data->getYoung(marker))
-    M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
-  if (!M_data->getPoisson(marker))
-    M_data->setPoisson(dataFile( "solid/physics/poisson", 0. ), marker);
 }
 
 

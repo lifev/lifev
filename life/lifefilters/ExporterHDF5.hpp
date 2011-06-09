@@ -1,4 +1,4 @@
- //@HEADER
+//@HEADER
 /*
 *******************************************************************************
 
@@ -97,8 +97,9 @@ public:
     typedef MeshType mesh_Type;
     typedef Exporter<MeshType> super;
     typedef typename super::meshPtr_Type meshPtr_Type;
-    typedef typename super::vectorRaw_Type vector_Type;
+    typedef typename super::vector_Type    vector_Type;
     typedef typename super::vectorPtr_Type vectorPtr_Type;
+    typedef typename super::exporterData_Type exporterData_Type;
 
     typedef EpetraExt::HDF5 hdf5_Type;
     typedef boost::shared_ptr<hdf5_Type> hdf5Ptr_Type;
@@ -177,7 +178,7 @@ public:
     void closeFile() {M_HDF5->Close();}
 
     //! Read variable
-    void readVariable( ExporterData& dvar);
+    void readVariable( exporterData_Type& dvar);
 
     //@}
 
@@ -207,17 +208,17 @@ protected:
     void writeTopology  ( std::ofstream& xdmf );
     void writeGeometry  ( std::ofstream& xdmf );
     void writeAttributes( std::ofstream& xdmf );
-    void writeScalarDatastructure  ( std::ofstream& xdmf, const ExporterData& dvar );
-    void writeVectorDatastructure  ( std::ofstream& xdmf, const ExporterData& dvar );
+    void writeScalarDatastructure  ( std::ofstream& xdmf, const exporterData_Type& dvar );
+    void writeVectorDatastructure  ( std::ofstream& xdmf, const exporterData_Type& dvar );
 
-    void writeVariable(const ExporterData& dvar);
-    void writeScalar(const ExporterData& dvar);
-    void writeVector(const ExporterData& dvar);
+    void writeVariable(const exporterData_Type& dvar);
+    void writeScalar(const exporterData_Type& dvar);
+    void writeVector(const exporterData_Type& dvar);
 
     void writeGeometry();
 
-    void readScalar( ExporterData& dvar);
-    void readVector( ExporterData& dvar);
+    void readScalar( exporterData_Type& dvar);
+    void readVector( exporterData_Type& dvar);
     //@}
 
     //! @name Protected data members
@@ -239,30 +240,30 @@ protected:
 // ===================================================
 template<typename MeshType>
 ExporterHDF5<MeshType>::ExporterHDF5():
-    super               (),
-    M_HDF5              (),
-    M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
-    M_outputFileName    ( "noninitialisedFileName" )
+        super               (),
+        M_HDF5              (),
+        M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
+        M_outputFileName    ( "noninitialisedFileName" )
 {
 }
 
 template<typename MeshType>
 ExporterHDF5<MeshType>::ExporterHDF5(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
                                      const Int& procId) :
-    super               ( dfile, prefix ),
-    M_HDF5              (),
-    M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
-    M_outputFileName    ( "noninitialisedFileName" )
+        super               ( dfile, prefix ),
+        M_HDF5              (),
+        M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
+        M_outputFileName    ( "noninitialisedFileName" )
 {
     setMeshProcId( mesh, procId );
 }
 
 template<typename MeshType>
 ExporterHDF5<MeshType>::ExporterHDF5(const GetPot& dfile, const std::string& prefix):
-    super               ( dfile, prefix ),
-    M_HDF5              (),
-    M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
-    M_outputFileName    ( "noninitialisedFileName" )
+        super               ( dfile, prefix ),
+        M_HDF5              (),
+        M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
+        M_outputFileName    ( "noninitialisedFileName" )
 {
 }
 
@@ -275,7 +276,7 @@ void ExporterHDF5<MeshType>::postProcess(const Real& time)
 {
     if ( M_HDF5.get() == 0)
     {
-        M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->comm()));
+        M_HDF5.reset(new hdf5_Type(this->M_dataVector.begin()->storedArrayPtr()->comm()));
         M_outputFileName=this->M_prefix+".h5";
         M_HDF5->Create(this->M_postDir+M_outputFileName);
 
@@ -289,16 +290,17 @@ void ExporterHDF5<MeshType>::postProcess(const Real& time)
         }
     }
 
-    typedef std::list< ExporterData >::const_iterator Iterator;
+    // typedef std::list< exporterData_Type >::const_iterator Iterator;
 
     this->computePostfix();
 
-    if ( this->M_postfix != "*****" )
+    std::size_t found( this->M_postfix.find( "*" ) );
+    if ( found == string::npos )
     {
-        if (!this->M_procId) std::cout << "  x-  HDF5 post-processing ...        " << std::flush;
+        if (!this->M_procId) std::cout << "  X-  HDF5 post-processing ...                 " << std::flush;
         LifeChrono chrono;
         chrono.start();
-        for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+        for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
         {
             writeVariable(*i);
         }
@@ -317,7 +319,7 @@ void ExporterHDF5<MeshType>::postProcess(const Real& time)
         // Write to file without closing the file
         M_HDF5->Flush();
 
-        if (!this->M_procId) std::cout << "         done in " << chrono.diff() << " s." << std::endl;
+        if (!this->M_procId) std::cout << "done in " << chrono.diff() << " s." << std::endl;
     }
 }
 
@@ -360,20 +362,20 @@ UInt ExporterHDF5<MeshType>::importFromTime( const Real& Time )
         SelectedTimeAndPostfix = TimeAndPostfix.front();
         for ( std::vector< std::pair< Real, Int > >::const_iterator i = TimeAndPostfix.begin();
               i < TimeAndPostfix.end() ; ++i )
-            if ( std::abs( SelectedTimeAndPostfix.first - Time ) >= std::abs( (*i).first - Time ) )
+            if ( std::fabs( SelectedTimeAndPostfix.first - Time ) >= std::fabs( (*i).first - Time ) )
                 SelectedTimeAndPostfix = *i;
     }
-    this->M_listData.begin()->storedArray()->comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
-    this->M_startIndex = SelectedTimeAndPostfix.second;
+    this->M_dataVector.begin()->storedArrayPtr()->comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
+    this->M_timeIndex = SelectedTimeAndPostfix.second;
     this->computePostfix();
 
     // Importing
     if ( !this->M_procId )
-        std::cout << "  x-  HDF5 importing ...                       "<< std::flush;
+        std::cout << "  X-  HDF5 importing ...                       "<< std::flush;
 
     LifeChrono chrono;
     chrono.start();
-    for ( std::list< ExporterData >::iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i )
+    for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
         this->readVariable(*i);
 
     chrono.stop();
@@ -426,7 +428,7 @@ Real ExporterHDF5<MeshType>::importFromIter( const UInt& iter )
         bool found             = false;
 
         for ( std::vector< std::pair< Real, Int > >::const_iterator i = TimeAndPostfix.begin();
-              i < TimeAndPostfix.end()  ; ++i )
+                i < TimeAndPostfix.end()  ; ++i )
         {
             if ( i->second == iter )
             {
@@ -440,26 +442,25 @@ Real ExporterHDF5<MeshType>::importFromIter( const UInt& iter )
 
     }
 
-    this->M_listData.begin()->storedArray()->Comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
-    this->M_startIndex = SelectedTimeAndPostfix.second;
+    this->M_dataVector.begin()->storedArrayPtr()->Comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
+    this->M_timeIndex = SelectedTimeAndPostfix.second;
 
     std::ostringstream index;
     index.fill('0');
 
-    index << std::setw(5) << this->M_startIndex;
+    index << std::setw(5) << this->M_timeIndex;
     this->M_postfix = "." + index.str();
 
     // Importing
     if ( !this->M_procId )
-        std::cout << "  x-  HDF5 importing iteration "
+        std::cout << "  X-  HDF5 importing iteration "
                   << index.str()
                   << " at time " << SelectedTimeAndPostfix.first
                   << " ... " << std::flush;
 
     LifeChrono chrono;
     chrono.start();
-    for ( std::list< ExporterData >::iterator i = this->M_listData.begin();
-          i != this->M_listData.end(); ++i )
+    for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
     {
         this->readVariable(*i);
     }
@@ -477,9 +478,9 @@ template<typename MeshType>
 void ExporterHDF5<MeshType>::import(const Real& Tstart, const Real& dt)
 {
     // dt is used to rebuild the history up to now
-    Real time(Tstart - this->M_startIndex*dt);
+    Real time(Tstart - this->M_timeIndex*dt);
 
-    for ( UInt count(0); count < this->M_startIndex; ++count )
+    for ( UInt count(0); count < this->M_timeIndex; ++count )
     {
         this->M_timeSteps.push_back(time);
         time += dt;
@@ -495,7 +496,7 @@ void ExporterHDF5<MeshType>::import(const Real& time)
 {
     if ( M_HDF5.get() == 0)
     {
-        M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->comm()));
+        M_HDF5.reset(new hdf5_Type(this->M_dataVector.begin()->storedArrayPtr()->comm()));
         M_HDF5->Open(this->M_postDir+this->M_prefix+".h5"); //!! Simone
     }
 
@@ -505,24 +506,24 @@ void ExporterHDF5<MeshType>::import(const Real& time)
 
     assert( this->M_postfix != "*****" );
 
-    if (!this->M_procId) std::cout << "  x-  HDF5 importing ..."<< std::endl;
+    if (!this->M_procId) std::cout << "  X-  HDF5 importing ...      "<< std::endl;
 
     LifeChrono chrono;
     chrono.start();
-    for (std::list< ExporterData >::iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+    for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
     {
         this->readVariable(*i); ///!!! Simone
     }
     chrono.stop();
-    if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+    if (!this->M_procId) std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
 template <typename MeshType>
-void ExporterHDF5<MeshType>::readVariable(ExporterData& dvar)
+void ExporterHDF5<MeshType>::readVariable(exporterData_Type& dvar)
 {
     if ( M_HDF5.get() == 0)
     {
-        M_HDF5.reset(new hdf5_Type(dvar.storedArray()->blockMap().Comm()));
+        M_HDF5.reset(new hdf5_Type(dvar.storedArrayPtr()->blockMap().Comm()));
         M_HDF5->Open(this->M_postDir+this->M_prefix+".h5"); //!! Simone
     }
     super::readVariable(dvar);
@@ -751,8 +752,7 @@ void ExporterHDF5<MeshType>::writeAttributes  ( std::ofstream& xdmf )
 {
 
     // Loop on the variables to output
-    for (std::list< ExporterData >::const_iterator i=this->M_listData.begin();
-         i != this->M_listData.end(); ++i)
+    for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
     {
         xdmf <<
             "\n      <Attribute\n" <<
@@ -760,14 +760,14 @@ void ExporterHDF5<MeshType>::writeAttributes  ( std::ofstream& xdmf )
             "         Center=\"" << i->whereName() << "\"\n" <<
             "         Name=\"" << i->variableName()<<"\">\n";
 
-        switch ( i->type() )
+        switch ( i->fieldType() )
         {
-        case ExporterData::Scalar:
+        case exporterData_Type::ScalarField:
             writeScalarDatastructure(xdmf, *i);
             break;
-        case ExporterData::Vector:
+        case exporterData_Type::VectorField:
             writeScalarDatastructure(xdmf, *i);
-            //writeVectorDatastructure(xdmf, *i);
+            //writeVectorFieldstructure(xdmf, *i);
             break;
         }
 
@@ -777,16 +777,16 @@ void ExporterHDF5<MeshType>::writeAttributes  ( std::ofstream& xdmf )
 }
 
 template <typename MeshType>
-void ExporterHDF5<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, const ExporterData& dvar )
+void ExporterHDF5<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, const exporterData_Type& dvar )
 {
 
     Int globalUnknowns (0);
     switch ( dvar.where() )
     {
-    case ExporterData::Node:
+    case exporterData_Type::Node:
         globalUnknowns = this->M_mesh->numGlobalVertices();
         break;
-    case ExporterData::Cell:
+    case exporterData_Type::Cell:
         globalUnknowns = this->M_mesh->numGlobalElements();
         break;
     }
@@ -795,17 +795,17 @@ void ExporterHDF5<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, co
     xdmf <<
 
         "         <DataStructure ItemType=\"HyperSlab\"\n" <<
-        "                        Dimensions=\"" << globalUnknowns << " " << dvar.typeDim() << "\"\n" <<
+        "                        Dimensions=\"" << globalUnknowns << " " << dvar.fieldDim() << "\"\n" <<
         "                        Type=\"HyperSlab\">\n" <<
         "           <DataStructure  Dimensions=\"3 2\"\n" <<
         "                           Format=\"XML\">\n" <<
         "               0    0\n" <<
         "               1    1\n" <<
-        "               " << globalUnknowns << " " << dvar.typeDim() << "\n" <<
+        "               " << globalUnknowns << " " << dvar.fieldDim() << "\n" <<
         "           </DataStructure>\n" <<
 
         "           <DataStructure  Format=\"HDF\"\n" <<
-        "                           Dimensions=\"" << dvar.size() << " " << dvar.typeDim() << "\"\n" <<
+        "                           Dimensions=\"" << dvar.numDOF() << " " << dvar.fieldDim() << "\"\n" <<
         "                           DataType=\"Float\"\n" <<
         "                           Precision=\"8\">\n" <<
         "               " << M_outputFileName << ":/" << dvar.variableName()
@@ -816,7 +816,7 @@ void ExporterHDF5<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, co
 }
 
 template <typename MeshType>
-void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, const ExporterData& dvar )
+void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, const exporterData_Type& dvar )
 {
 
 
@@ -826,11 +826,11 @@ void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
          << "                        Dimensions=\""
          << this->M_mesh->numGlobalVertices()
          << " "
-         << dvar.typeDim()
+         << dvar.fieldDim()
          << "\"\n"
          << "                        Function=\"JOIN($0 , $1, $2)\">\n";
 
-    for (Int i(0); i < dvar.typeDim(); ++i)
+    for (Int i(0); i < dvar.fieldDim(); ++i)
     {
         xdmf << "           <DataStructure  Format=\"HDF\"\n"
              << "                           Dimensions=\""
@@ -852,22 +852,22 @@ void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
 }
 
 template <typename MeshType>
-void ExporterHDF5<MeshType>::writeVariable(const ExporterData& dvar)
+void ExporterHDF5<MeshType>::writeVariable(const exporterData_Type& dvar)
 {
 
-    switch ( dvar.type() )
+    switch ( dvar.fieldType() )
     {
-    case ExporterData::Scalar:
+    case exporterData_Type::ScalarField:
         writeScalar(dvar);
         break;
-    case ExporterData::Vector:
+    case exporterData_Type::VectorField:
         writeVector(dvar);
         break;
     }
 }
 
 template <typename MeshType>
-void ExporterHDF5<MeshType>::writeScalar(const ExporterData& dvar)
+void ExporterHDF5<MeshType>::writeScalar(const exporterData_Type& dvar)
 {
     /* Examples:
        M_HDF5->Write("map-" + toString(Comm.NumProc()), Map);
@@ -876,12 +876,12 @@ void ExporterHDF5<MeshType>::writeScalar(const ExporterData& dvar)
        M_HDF5->Write("RHS", RHS);
     */
 
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
-    MapEpetra subMap(dvar.storedArray()->blockMap(), start, size);
+    MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start, size);
     vector_Type subVar(subMap);
-    subVar.subset(*dvar.storedArray(),start);
+    subVar.subset(*dvar.storedArrayPtr(),start);
 
     std::string varname (dvar.variableName()+ this->M_postfix); // see also in writeAttributes
     bool writeTranspose (true);
@@ -889,10 +889,10 @@ void ExporterHDF5<MeshType>::writeScalar(const ExporterData& dvar)
 }
 
 template <typename MeshType>
-void ExporterHDF5<MeshType>::writeVector(const ExporterData& dvar)
+void ExporterHDF5<MeshType>::writeVector(const exporterData_Type& dvar)
 {
 
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
     using namespace boost;
@@ -913,14 +913,14 @@ void ExporterHDF5<MeshType>::writeVector(const ExporterData& dvar)
 
     for (UInt d ( 0 ); d < nDimensions; ++d)
     {
-        MapEpetra subMap(dvar.storedArray()->blockMap(), start+d*size, size);
+        MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start+d*size, size);
         ArrayOfVectors[d].reset(new  vector_Type(subMap));
-        ArrayOfVectors[d]->subset(*dvar.storedArray(),start+d*size);
+        ArrayOfVectors[d]->subset(*dvar.storedArrayPtr(),start+d*size);
 
         ArrayOfVectors[d]->epetraVector().ExtractView(&ArrayOfPointers[d], &MyLDA);
     }
 
-    MapEpetra subMap(dvar.storedArray()->blockMap(), start, size);
+    MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start, size);
     Epetra_MultiVector multiVector(View, *subMap.map(Unique), ArrayOfPointers, nDimensions);
 
 
@@ -955,7 +955,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     // (if we write out a P0 variable)
     // We build a map for the connections based on the element numbers and for the points we fake a P1 map
 
-    ASSERT (this->M_listData.size() > 0 , "hdf5exporter: ListData is empty");
+    ASSERT (this->M_dataVector.size() > 0 , "hdf5exporter: ListData is empty");
 
     // Connections
     // Need to use elements not dofs for this map. Recover local element lists
@@ -976,7 +976,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     Epetra_Map connectionsMap(this->M_mesh->numGlobalElements()*numberOfPoints,
                               this->M_mesh->numElements()*numberOfPoints,
                               &elementList[0],
-                              0, this->M_listData.begin()->storedArray()->comm());
+                              0, this->M_dataVector.begin()->storedArrayPtr()->comm());
 
     Epetra_IntVector connections(connectionsMap);
     for (ID i=0; i < this->M_mesh->numElements(); ++i)
@@ -989,7 +989,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
         }
     }
 
-    this->M_listData.begin()->storedArray()->comm().Barrier();
+    this->M_dataVector.begin()->storedArrayPtr()->comm().Barrier();
 
     // Points
 
@@ -1003,7 +1003,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     {
         const ReferenceFE & refFEP1 = feTetraP1;
         MapEpetra tmpMapP1(refFEP1, *this->M_mesh,
-                           this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
+                           this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
         subMap = tmpMapP1;
         break;
     }
@@ -1011,7 +1011,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     {
         const ReferenceFE & refFEQ1 = feHexaQ1;
         MapEpetra tmpMapQ1(refFEQ1, *this->M_mesh,
-                           this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
+                           this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
         subMap = tmpMapQ1;
         break;
     }
@@ -1019,7 +1019,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     {
         const ReferenceFE & refFEP11D = feSegP1;
         MapEpetra tmpMapQ11D(refFEP11D, *this->M_mesh,
-                             this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
+                             this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
         subMap = tmpMapQ11D;
         break;
     }
@@ -1035,7 +1035,12 @@ void ExporterHDF5<MeshType>::writeGeometry()
     Int gid;
     for (ID i=0; i < this->M_mesh->numVertices(); ++i)
     {
-        typename MeshType::point_Type const& point (this->M_mesh->pointList(i));
+        // Saving the initial mesh if M_multimesh is false (this is important for restart)
+        typename MeshType::point_Type point;
+        if ( this->M_multimesh )
+            point = this->M_mesh->point(i);
+        else
+            point = this->M_mesh->pointInitial(i);
 
         gid = point.id();
 
@@ -1071,13 +1076,13 @@ void ExporterHDF5<MeshType>::writeGeometry()
 }
 
 template <typename MeshType>
-void ExporterHDF5<MeshType>::readScalar(ExporterData& dvar)
+void ExporterHDF5<MeshType>::readScalar(exporterData_Type& dvar)
 {
 
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
-    MapEpetra subMap(dvar.storedArray()->blockMap(), start, size);
+    MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start, size);
     Epetra_MultiVector* subVar(0);
 
     std::string varname (dvar.variableName()); // see also in writeAttributes
@@ -1088,16 +1093,16 @@ void ExporterHDF5<MeshType>::readScalar(ExporterData& dvar)
     bool readTranspose (true);
     M_HDF5->Read(varname, *subMap.map(this->mapType()), subVar, readTranspose);
 
-    dvar.storedArray()->subset(*subVar, subMap, 0, start );
+    dvar.storedArrayPtr()->subset(*subVar, subMap, 0, start );
 
     delete subVar;
 
 }
 
 template <typename MeshType>
-void ExporterHDF5<MeshType>::readVector( ExporterData& dvar)
+void ExporterHDF5<MeshType>::readVector( exporterData_Type& dvar)
 {
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
     using namespace boost;
@@ -1105,7 +1110,7 @@ void ExporterHDF5<MeshType>::readVector( ExporterData& dvar)
     // solution array has first to be read has Multivector.
 
     // first read the multivector:
-    MapEpetra subMap(dvar.storedArray()->blockMap(), start, size);
+    MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start, size);
     Epetra_MultiVector* subVar(0);
 
     bool readTranspose (true);
@@ -1123,7 +1128,7 @@ void ExporterHDF5<MeshType>::readVector( ExporterData& dvar)
 
     for (UInt d ( 0 ); d < nDimensions; ++d)
     {
-        dvar.storedArray()->subset(*subVar, subMap,  0, start+d*size, d );
+        dvar.storedArrayPtr()->subset(*subVar, subMap,  0, start+d*size, d );
     }
 
     delete subVar;

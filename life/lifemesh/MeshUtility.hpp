@@ -938,7 +938,7 @@ setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
             if ( verbose )
             {
                 logStream << edgePtr->id() << " -> ";
-                edgePtr->printFlag( logStream );
+                edgePtr->Marker<MarkerTraits>::showMe( logStream );
                 logStream << " ";
                 if ( ++counter % 3 == 0 )
                     logStream << std::endl;
@@ -988,7 +988,7 @@ setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
             if ( verbose )
             {
                 logStream << facePtr->id() << " -> ";
-                facePtr->printFlag( logStream );
+                facePtr->Marker<MarkerTraits>::showMe( logStream );
                 logStream << "\t";
                 if ( ++counter % 3 == 0 )
                     logStream << std::endl;
@@ -1056,7 +1056,7 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
             if ( *isDefinedPointMarkerIterator++ )
             {
                 logStream << pointContainerIterator->id() << " -> ";
-                pointContainerIterator->printFlag( logStream );
+                pointContainerIterator->Marker<MarkerTraits>::showMe( logStream );
                 logStream << "\t";
                 if ( ++counter % 3 )
                     logStream << std::endl;
@@ -1476,7 +1476,7 @@ bool fixBoundaryFaces( MeshType & mesh,
                 if ( verbose )
                 {
                     logStream << faceContainerIterator->id() << " -> ";
-                    faceContainerIterator->printFlag( logStream );
+                    faceContainerIterator->Marker<MarkerTraits>::showMe( logStream );
                     logStream << " ";
                     if ( ++counter % 3 == 0 )
                         logStream << std::endl;
@@ -1637,7 +1637,7 @@ bool buildFaces( MeshType & mesh,
                 if ( newFaceId % 3 == 0 )
                     logStream << std::endl;
                 logStream << newFaceId << " -> ";
-                face.printFlag( logStream );
+                face.Marker<MarkerTraits>::showMe( logStream );
                 logStream << " ";
             }
         }
@@ -1898,7 +1898,7 @@ bool buildEdges( MeshType & mesh,
                 if ( newEdgeId % 6 == 0 )
                     logStream << std::endl;
                 logStream << newEdgeId << " -> ";
-                edge.printFlag( logStream );
+                edge.Marker<MarkerTraits>::showMe( logStream );
                 logStream << " ";
             }
         }

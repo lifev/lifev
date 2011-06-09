@@ -1,0 +1,31 @@
+# -*- makefile -*-
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+#                 Michel Kern <michel.kern@inria.fr>
+#           Date: 01-06-2011
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+SUFFIXES        = .cpp .hpp .idl .c .h .f .F .o .moc
+
+include $(top_srcdir)/testsuite/Makefile.testsuite
+
+check_HEADERS = fefct.hpp user_fun.hpp
+check_PROGRAMS = test_FEFunction
+
+test_FEFunction_SOURCES = main.cpp fefct.cpp user_fun.cpp
+
+EXTRA_DIST = data testsuite.at
+
+link:
+	test -a data || ln -s $(srcdir)/data
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria Mesh
+
+clean-results:
+	-rm *.vct *.scl *.case *.geo *.h5 *.xmf

@@ -176,7 +176,7 @@ main( int argc, char** argv )
     ExporterHDF5<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID());
     exporter.setMultimesh(false);
     boost::shared_ptr<vector_type> solutionPtr (new vector_type(level_set.solution(),Repeated));
-    exporter.addVariable( ExporterData::Scalar, "level-set", solutionPtr, UInt(0), uFESpace->dof().numTotalDof() );
+    exporter.addVariable( ExporterData<mesh_type>::ScalarField, "level-set", uFESpace, solutionPtr, UInt(0) );
     exporter.postProcess(0);
 
     Real current_time( data_level_set->dataTime()->initialTime() );

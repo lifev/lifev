@@ -4,6 +4,8 @@
   Wiley and Sons, 1996.
 */
 #include <complex>
+#include <cmath>
+#include <cstdlib>
 
 #ifndef bessH
 #define bessH
@@ -11,7 +13,7 @@
 
 #define eps 1e-15
 #define el 0.5772156649015329
-
+namespace bessel{
 int msta1(double x,int mp);
 int msta2(double x,int n,int mp);
 int bessjy01a(double x,double &j0,double &j1,double &y0,double &y1,
@@ -52,5 +54,5 @@ int cbessjyva(double v,std::complex<double> z,double &vm,std::complex<double>*cj
 		std::complex<double>*cyv,std::complex<double>*cjvp,std::complex<double>*cyvp);
 int cbessikv(double v,std::complex<double>z,double &vm,std::complex<double> *civ,
 		std::complex<double> *ckv,std::complex<double> *civp,std::complex<double> *ckvp);
-
+}
 #endif
