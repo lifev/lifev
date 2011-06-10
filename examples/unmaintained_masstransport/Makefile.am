@@ -26,9 +26,9 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS = ud_functions.hpp boundaryConditions.hpp masstransport.hpp
 
-# To compile test_mt uncomment the following line and make check
+# To compile test_mt uncomment the following two lines, rerun make -f Makefile.git, reconfigure  and make check
 ##check_PROGRAMS = test_mt
-test_mt_SOURCES = main.cpp masstransport.cpp
+#test_mt_SOURCES = main.cpp masstransport.cpp
 
 EXTRA_DIST = data
 
