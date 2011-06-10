@@ -52,8 +52,6 @@ enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
  */
 
 class Ethiersteinman
-//     :
-//     public LifeV::Application
 {
 public:
     typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_Type;
@@ -67,16 +65,6 @@ public:
     // Problem definition
     typedef LifeV::EthierSteinmanUnsteady Problem;
 
-
-
-    /** @name Typedefs
-     */
-    //@{
-
-//    typedef LifeV::Application super;
-
-    //@}
-
     /** @name Constructors, destructor
      */
     //@{
@@ -86,27 +74,6 @@ public:
 
     ~Ethiersteinman()
     {}
-
-    //@}
-
-    /** @name Operator overloads
-     */
-    //@{
-
-
-    //@}
-
-    /** @name Accessors
-     */
-    //@{
-
-
-    //@}
-
-    /** @name  Mutators
-     */
-    //@{
-
 
     //@}
 
@@ -134,8 +101,8 @@ private:
     };
 
     void computeErrors(const vector_Type& velocityAndPressureSolution,
-                       LifeV::Real& uL2Error, LifeV::Real& uRelError, fespace_Type& uFESpace,
-                       LifeV::Real& pL2Error, LifeV::Real& pRelError, fespace_Type& pFESpace,
+                       LifeV::Real& uL2Error, LifeV::Real& uRelError, feSpacePtr_Type& uFESpace,
+                       LifeV::Real& pL2Error, LifeV::Real& pRelError, feSpacePtr_Type& pFESpace,
                        LifeV::Real time);
 
     bool checkConvergenceRate(const std::vector<std::string>& uFELabel,
@@ -164,7 +131,7 @@ private:
                            // if the improvement of accuracy is less
                            // than predicted by the theory.
                            // convTol lower down the theoretical bounds
-    LifeV::Real M_accuracyTol;
+    LifeV::Real        M_accuracyTol;
 
     // Data related to norm export
     bool               M_exportNorms;
@@ -177,7 +144,7 @@ private:
     InitializationType M_initMethod;
 
     // Mesh source
-    MeshSourceType M_meshSource;
+    MeshSourceType     M_meshSource;
 };
 
 #endif /* __Ethiersteinman_H */

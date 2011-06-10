@@ -218,21 +218,21 @@ Ethiersteinman::Ethiersteinman( int argc,
 
 void
 Ethiersteinman::computeErrors(const vector_Type& velocityAndPressureSolution,
-                              LifeV::Real& uL2Error, LifeV::Real& uRelError, fespace_Type& uFESpace,
-                              LifeV::Real& pL2Error, LifeV::Real& pRelError, fespace_Type& pFESpace,
+                              LifeV::Real& uL2Error, LifeV::Real& uRelError, feSpacePtr_Type& uFESpace,
+                              LifeV::Real& pL2Error, LifeV::Real& pRelError, feSpacePtr_Type& pFESpace,
                               LifeV::Real time)
 {
     // Computation of the error
-    vector_Type vel  (uFESpace.map(), Repeated);
-    vector_Type press(pFESpace.map(), Repeated);
+    vector_Type vel  (uFESpace->map(), Repeated);
+    vector_Type press(pFESpace->map(), Repeated);
     vector_Type velpressure ( velocityAndPressureSolution, Repeated );
 
     velpressure = velocityAndPressureSolution;
     vel.subset(velpressure);
-    press.subset(velpressure, uFESpacePtr->dim()*uFESpacePtr->fieldDim());
+    press.subset(velpressure, uFESpace->dim()*uFESpace->fieldDim());
 
-    uL2Error = uFESpace.l2Error (Problem::uexact, vel  , time, &uRelError );
-    pL2Error = pFESpace.l20Error(Problem::pexact, press, time, &pRelError );
+    uL2Error = uFESpace->l2Error (Problem::uexact, vel  , time, &uRelError );
+    pL2Error = pFESpace->l20Error(Problem::pexact, press, time, &pRelError );
 }
 
 bool
@@ -490,15 +490,20 @@ Ethiersteinman::run()
                                    << "FE for the pressure: " << pOrder << std::endl;
 
             if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
-            FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart, uOrder, 3, d->comm);
+            feSpacePtr_Type uFESpace;
+            uFESpace.reset(new feSpace_Type(meshPart, uOrder, 3, d->comm));
             if (verbose) std::cout << "ok." << std::endl;
 
             if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
-            FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart, pOrder, 1, d->comm);
+            feSpacePtr_Type pFESpace;
+            pFESpace.reset(new feSpace_Type(meshPart, pOrder, 1, d->comm));
             if (verbose) std::cout << "ok." << std::endl;
 
-            UInt totalVelDof   = uFESpace.dof().numTotalDof();
-            UInt totalPressDof = pFESpace.dof().numTotalDof();
+            UInt totalVelDof   = uFESpace->dof().numTotalDof();
+            UInt totalPressDof = pFESpace->dof().numTotalDof();
+
+            // Pressure offset in the vector
+            UInt pressureOffset = nDimensions * uFESpace->dof().numTotalDof();
 
             if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
             if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
@@ -528,7 +533,7 @@ Ethiersteinman::run()
             }
 
             // If we change the FE we have to update the BCHandler (internal data)
-            bcH.bcUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
+            bcH.bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
 
             // +-----------------------------------------------+
             // |             Creating the problem              |
@@ -540,8 +545,8 @@ Ethiersteinman::run()
             if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
             OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                                      uFESpace,
-                                                      pFESpace,
+                                                      *uFESpace,
+                                                      *pFESpace,
                                                       d->comm);
 
             MapEpetra fullMap(fluid.getMap());
@@ -597,8 +602,8 @@ Ethiersteinman::run()
 
                 if (M_initMethod == Projection)
                 {
-                    uFESpacePtr->interpolate(Problem::uderexact, rhs, time);
-                    //uFESpacePtr->l2ScalarProduct(Problem::uderexact, rhs, time);
+                    uFESpace->interpolate(Problem::uderexact, rhs, time);
+                    //uFESpace->l2ScalarProduct(Problem::uderexact, rhs, time);
                     rhs *= -1.;
                     rhs = fluid.matrixMass()*rhs;
                     fluid.updateSystem( 0., beta, rhs );
@@ -635,9 +640,9 @@ Ethiersteinman::run()
             vectorPtr_Type velAndPressure;
             // only for export -->
             vectorPtr_Type exactPressPtr;
-            vector_Type exactPress(pFESpace.map(), Repeated);
+            vector_Type exactPress(pFESpace->map(), Repeated);
             vectorPtr_Type exactVelPtr;
-            vector_Type exactVel(uFESpace.map(), Repeated);
+            vector_Type exactVel(uFESpace->map(), Repeated);
             // <--
 
             std::string const exporterType =  dataFile( "exporter/type", "ensight");
@@ -666,23 +671,21 @@ Ethiersteinman::run()
             if(M_exportExactSolutions)
             {
                 exactPressPtr.reset( new vector_Type(exactPress, exporter->mapType() ) );
-                pFESpace.interpolate(Problem::pexact, *exactPressPtr, 0);
+                pFESpace->interpolate(Problem::pexact, *exactPressPtr, 0);
                 exactVelPtr.reset( new vector_Type(exactVel, exporter->mapType() ) );
-                uFESpace.interpolate(Problem::uexact, *exactVelPtr, 0);
+                uFESpace->interpolate(Problem::uexact, *exactVelPtr, 0);
             }
 
-            exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                                   UInt(0), uFESpace.dof().numTotalDof() );
-
-            exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                                   UInt(3*uFESpace.dof().numTotalDof()),
-                                   UInt(pFESpace.dof().numTotalDof()) );
+            exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace,
+                                  velAndPressure, UInt(0));
+            exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace,
+                                  velAndPressure, pressureOffset );
             if(M_exportExactSolutions)
             {
-                exporter->addVariable( ExporterData::Scalar, "exactPressure", exactPressPtr,
-                                       UInt(0), UInt(pFESpace.dof().numTotalDof()) );
-                exporter->addVariable( ExporterData::Vector, "exactVelocity", exactVelPtr,
-                                       UInt(0), UInt(uFESpace.dof().numTotalDof()) );
+                exporter->addVariable( ExporterData<mesh_Type>::VectorField, "exactVelocity", uFESpace,
+                                      exactVelPtr, UInt(0));
+                exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "exactPressure", pFESpace,
+                                      exactPressPtr, UInt(0) );
             }
             exporter->postProcess( 0 );
 
@@ -707,8 +710,6 @@ Ethiersteinman::run()
                 double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
 
                 beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
-                //beta *= 0;
-                //uFESpacePtr->interpolate(Problem::uexact, beta, time);
                 bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
                 rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
@@ -749,8 +750,8 @@ Ethiersteinman::run()
                 *velAndPressure = *fluid.solution();
                 if(M_exportExactSolutions)
                 {
-                    pFESpace.interpolate(Problem::pexact, *exactPressPtr, time);
-                    uFESpace.interpolate(Problem::uexact, *exactVelPtr, time);
+                    pFESpace->interpolate(Problem::pexact, *exactPressPtr, time);
+                    uFESpace->interpolate(Problem::uexact, *exactVelPtr, time);
                 }
                 exporter->postProcess( time );
 
@@ -816,8 +817,3 @@ Ethiersteinman::run()
     if (verbose && (M_test != None)) std::cout << "TEST_ROSSETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
     if (verbose) std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
 }
-
-
-//////////////////////
-
-
