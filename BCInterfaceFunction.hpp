@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3DFunction class
+ *  @brief File containing the BCInterfaceFunction class
  *
  *  @date 06-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,18 +34,18 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface3DFunction_H
-#define BCInterface3DFunction_H 1
+#ifndef BCInterfaceFunction_H
+#define BCInterfaceFunction_H 1
 
-#include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
-#include <lifemc/lifesolver/BCInterface3DData.hpp>
+#include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
+#include <lifemc/lifesolver/BCInterfaceData.hpp>
 
 #include <lifemc/lifecore/Parser.hpp>
 
 namespace LifeV
 {
 
-//! BCInterface3DFunction - LifeV bcFunction wrapper for BCInterface
+//! BCInterfaceFunction - LifeV bcFunction wrapper for BCInterface
 /*!
  *  @author Cristiano Malossi
  *
@@ -84,7 +84,7 @@ namespace LifeV
  *
  */
 template< typename PhysicalSolverType >
-class BCInterface3DFunction
+class BCInterfaceFunction
 {
 public:
 
@@ -92,8 +92,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface3DData                                                     data_Type;
-    typedef BCFunctionBase                                                        bcFunction_Type;
+    typedef BCInterfaceData                                                       data_Type;
     typedef Parser                                                                parser_Type;
 
     //@}
@@ -103,16 +102,52 @@ public:
     //@{
 
     //! Empty Constructor
-    explicit BCInterface3DFunction();
+    explicit BCInterfaceFunction();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface3DFunction( const data_Type& data );
+    explicit BCInterfaceFunction( const data_Type& data );
 
     //! Destructor
-    virtual ~BCInterface3DFunction() {}
+    virtual ~BCInterfaceFunction() {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Assign the function to the base of the 1D bcHandler
+    /*!
+     * @param base base of the bc
+     */
+    void assignFunction( OneDimensionalBCFunction& base )
+    {
+        base.setFunction( boost::bind( &BCInterfaceFunction::functionTime, this, _1 ) );
+    }
+    
+    //! Assign the function to the base of the 3D bcHandler
+    /*!
+     * @param base base of the bc
+     */
+    void assignFunction( BCFunctionBase& base )
+    {
+        if ( M_parser->countSubstring( "," ) )
+            base.setFunction( boost::bind( &BCInterfaceFunction::functionTimeSpaceID, this, _1, _2, _3, _4, _5 ) );
+        else
+            base.setFunction( boost::bind( &BCInterfaceFunction::functionTimeSpace, this, _1, _2, _3, _4, _5 ) );
+    }
+
+    //! Function of time
+    Real functionTime( const Real& t );
+
+    //! Function of time and space
+    Real functionTimeSpace( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
+
+    //! Function of time and space and id
+    Real functionTimeSpaceID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
 
     //@}
 
@@ -125,18 +160,6 @@ public:
      * @param data BC data loaded from GetPot file
      */
     virtual void setData( const data_Type& data );
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
-    //! Get the base of the boundary condition
-    /*!
-     * @return boundary condition base
-     */
-    bcFunction_Type& base() { return M_base; }
 
     //@}
 
@@ -157,25 +180,12 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface3DFunction( const BCInterface3DFunction& function );
+    BCInterfaceFunction( const BCInterfaceFunction& function );
 
-    BCInterface3DFunction& operator=( const BCInterface3DFunction& function );
-
-    //@}
-
-
-    //! @name Private Methods
-    //@{
-
-    //! function
-    Real function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
-
-    //! functionID
-    Real functionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
+    BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
 
     //@}
 
-    bcFunction_Type                  M_base;
     std::map< ID, ID >               M_mapID;
 
 };
@@ -185,36 +195,34 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterface3DFunction< PhysicalSolverType >* createBCInterface3DFunction()
+inline BCInterfaceFunction< PhysicalSolverType >* createBCInterfaceFunction()
 {
-    return new BCInterface3DFunction< PhysicalSolverType > ();
+    return new BCInterfaceFunction< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructor
 // ===================================================
 template< typename PhysicalSolverType >
-BCInterface3DFunction< PhysicalSolverType >::BCInterface3DFunction() :
+BCInterfaceFunction< PhysicalSolverType >::BCInterfaceFunction() :
         M_parser    (),
-        M_base      (),
         M_mapID     ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface3DFunction::BCInterface3DFunction()" << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction()" << "\n";
 #endif
 
 }
 
 template< typename PhysicalSolverType >
-BCInterface3DFunction< PhysicalSolverType >::BCInterface3DFunction( const data_Type& data ) :
+BCInterfaceFunction< PhysicalSolverType >::BCInterfaceFunction( const data_Type& data ) :
         M_parser    (),
-        M_base      (),
         M_mapID     ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface3DFunction::BCInterface3DFunction( data )" << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -225,11 +233,11 @@ BCInterface3DFunction< PhysicalSolverType >::BCInterface3DFunction( const data_T
 // ===================================================
 template< typename PhysicalSolverType >
 void
-BCInterface3DFunction< PhysicalSolverType >::setData( const data_Type& data )
+BCInterfaceFunction< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface3DFunction::setData" << "\n";
+    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
 
     if ( M_parser )
@@ -249,15 +257,12 @@ BCInterface3DFunction< PhysicalSolverType >::setData( const data_Type& data )
      * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
      */
 
-    UInt arguments = M_parser->countSubstring( "," ) + 1;
-
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface3DFunction::setFunction            arguments: " << arguments << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring( "," ) << "\n";
 #endif
 
-    if ( arguments == 1 )
-        M_base.setFunction( boost::bind( &BCInterface3DFunction::function, this, _1, _2, _3, _4, _5 ) );
-    else
+    // Note: the map ID is used only for 3D handler.
+    if ( M_parser->countSubstring( "," ) )
     {
         //Create the ID map
         if ( data.comV().size() > 1 ) // Component
@@ -267,8 +272,6 @@ BCInterface3DFunction< PhysicalSolverType >::setData( const data_Type& data )
             // if ( data.comV().front() == arguments )  Full
             for ( ID i( 0 ); i < data.comV().front(); ++i )
                 M_mapID[i+1] = i+1;
-
-        M_base.setFunction( boost::bind( &BCInterface3DFunction::functionID, this, _1, _2, _3, _4, _5 ) );
     }
 }
 
@@ -277,11 +280,32 @@ BCInterface3DFunction< PhysicalSolverType >::setData( const data_Type& data )
 // ===================================================
 template< typename PhysicalSolverType >
 Real
-BCInterface3DFunction< PhysicalSolverType >::function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/)
+BCInterfaceFunction< PhysicalSolverType >::functionTime( const Real& t )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface3DFunction::Function: " << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::functionTime: " << "\n";
+    Debug( 5021 ) << "                                                           t: " << t << "\n";
+#endif
+
+    M_parser->setVariable( "t", t );
+
+    this->dataInterpolation();
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
+#endif
+
+    return M_parser->evaluate( 0 );
+}
+
+template< typename PhysicalSolverType >
+Real
+BCInterfaceFunction< PhysicalSolverType >::functionTimeSpace( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/)
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5021 ) << "BCInterfaceFunction::functionTimeSpace: " << "\n";
     Debug( 5021 ) << "                                                           x: " << x << "\n";
     Debug( 5021 ) << "                                                           y: " << y << "\n";
     Debug( 5021 ) << "                                                           z: " << z << "\n";
@@ -304,11 +328,11 @@ BCInterface3DFunction< PhysicalSolverType >::function( const Real& t, const Real
 
 template< typename PhysicalSolverType >
 Real
-BCInterface3DFunction< PhysicalSolverType >::functionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
+BCInterfaceFunction< PhysicalSolverType >::functionTimeSpaceID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface3DFunction::Function: " << "\n";
+    Debug( 5021 ) << "BCInterfaceFunction::functionTimeSpaceID: " << "\n";
     Debug( 5021 ) << "                                                           x: " << x << "\n";
     Debug( 5021 ) << "                                                           y: " << y << "\n";
     Debug( 5021 ) << "                                                           z: " << z << "\n";
@@ -332,4 +356,4 @@ BCInterface3DFunction< PhysicalSolverType >::functionID( const Real& t, const Re
 
 } // Namespace LifeV
 
-#endif /* BCInterface3DFunction_H */
+#endif /* BCInterfaceFunction_H */
