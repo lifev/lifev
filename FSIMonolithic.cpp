@@ -557,9 +557,9 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
     if (iter==0)
     {
         M_resetPrec=true;
-        M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
-        *this->M_rhs += M_fluid->matrixMass()*(*M_un)*1/M_data->dataFluid()->dataTime()->timeStep();//M_bdf->rhsContributionFirstDerivative() ;
-        couplingRhs(this->M_rhs, M_un);
+        M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+        *M_rhs += M_fluid->matrixMass()*(*M_un)*1/M_data->dataFluid()->dataTime()->timeStep();//*M_bdf->rhsContributionFirstDerivative() ;
+        couplingRhs(M_rhs, M_un);
     }
     *M_rhsFull = *M_rhs;
 }
