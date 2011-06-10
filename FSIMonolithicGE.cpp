@@ -152,8 +152,9 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
         //M_monolithicMatrix.reset(new matrix_Type(*M_monolithicMap));
 
-        assembleFluidBlock(iter, M_un);
         assembleSolidBlock(iter, M_un);
+        assembleFluidBlock(iter, M_un);
+        *M_rhsFull = *M_rhs;
 
         applyBoundaryConditions();
     }

@@ -129,8 +129,8 @@ FSIMonolithicGI::updateSystem()
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
-    M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.`
     super_Type::updateSystem();
+    M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.`
     M_un.reset(new vector_Type(*M_uk));
 }
 
@@ -147,6 +147,8 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
                                const UInt          iter )
 {
     Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
+    if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
+    {
     setDispSolid(disp);
     if (iter > 0)
     {
@@ -195,20 +197,12 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         fluid->subset(disp, 0);
     *this->M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
 
-//      if(iter == 0)
-//      {
-// //         M_solid->updateSystem();
-//      }
-//      else
-//      {
-//          //         M_solid->computeMatrix( disp, 1.);
-//      }
-
     assembleSolidBlock( iter, M_uk );
     assembleFluidBlock( iter, M_uk );
     assembleMeshBlock ( iter );
-
+    *M_rhsFull = *M_rhs;
     applyBoundaryConditions();
+    }
 
     super_Type::evalResidual( disp, M_rhsFull, res, false );
 }

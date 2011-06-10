@@ -226,8 +226,16 @@ MultiscaleModelFSI3D::solveSystem( )
     vectorPtr_Type solution( new vector_Type( *M_fluidVelocityPressure_tn ) ) ;
     boost::dynamic_pointer_cast<LifeV::FSIMonolithic>(M_FSIoperator)->initializeMesh(M_solidDisplacement_tn);
     M_FSIoperator->fluid().initialize( *M_fluidVelocityPressure );//useless?
-    vectorPtr_Type newDisp(new vector_Type(*M_solidDisplacement));
-    M_FSIoperator->solid().initialize( newDisp, M_solidVelocity );
+//     vectorPtr_Type newDisp(new vector_Type(*M_solidDisplacement));
+
+    vectorPtr_Type newDisp(new vector_Type(*M_FSIoperator->couplingVariableMap()));
+    vectorPtr_Type newVel(new vector_Type(*M_FSIoperator->couplingVariableMap()));
+    newDisp->subset(*M_solidDisplacement, M_solidDisplacement->map(), (UInt)0, boost::dynamic_pointer_cast<FSIMonolithic>(M_FSIoperator)->getOffset());
+    newVel->subset(*M_solidVelocity, M_solidDisplacement->map(), (UInt)0, boost::dynamic_pointer_cast<FSIMonolithic>(M_FSIoperator)->getOffset());
+    M_FSIoperator->solid().initialize( newDisp, newVel );
+
+    //M_FSIoperator->solid().initialize( newDisp, M_solidVelocity );
+
     vectorPtr_Type newRHS(new vector_Type(*M_rhs_tn));
     M_FSIoperator->setRHS( newRHS );
     M_FSIoperator->setSolution( *M_fluidVelocityPressure_tn );
