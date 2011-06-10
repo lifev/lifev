@@ -37,8 +37,8 @@
 #include <life/lifemesh/RegionMesh3D.hpp>
 #include <life/lifemesh/ElementShapes.hpp>
 
-#include "ESSteady_function.hpp"
-#include "ESUnsteady_function.hpp"
+#include "life/lifefunctions/RossEthierSteinmanDec.hpp"
+#include "life/lifefunctions/RossEthierSteinmanInc.hpp"
 
 enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
 
@@ -61,9 +61,7 @@ public:
     typedef fluid_Type::vector_Type                       vector_Type;
     typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
     typedef fluid_Type::matrix_Type                       matrix_Type;
-
-    // Problem definition
-    typedef LifeV::EthierSteinmanUnsteady Problem;
+    typedef LifeV::RossEthierSteinmanUnsteadyDec          problem_Type;
 
     /** @name Constructors, destructor
      */

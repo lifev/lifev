@@ -231,8 +231,8 @@ Ethiersteinman::computeErrors(const vector_Type& velocityAndPressureSolution,
     vel.subset(velpressure);
     press.subset(velpressure, uFESpace->dim()*uFESpace->fieldDim());
 
-    uL2Error = uFESpace->l2Error (Problem::uexact, vel  , time, &uRelError );
-    pL2Error = pFESpace->l20Error(Problem::pexact, press, time, &pRelError );
+    uL2Error = uFESpace->l2Error (problem_Type::uexact, vel  , time, &uRelError );
+    pL2Error = pFESpace->l20Error(problem_Type::pexact, press, time, &pRelError );
 }
 
 bool
@@ -354,7 +354,7 @@ Ethiersteinman::run()
                 break;
         }
     }
-    Problem::setParamsFromGetPot( dataFile );
+    problem_Type::setParamsFromGetPot( dataFile );
 
     UInt discretizationNumber;
     if((M_test == SpaceConvergence) || (M_test == None))
@@ -518,8 +518,8 @@ Ethiersteinman::run()
             std::set<UInt> neumannMarkers = parseList( neumannList );
 
             BCHandler bcH;
-            BCFunctionBase uWall( Problem::uexact );
-            BCFunctionBase uNeumann( Problem::fNeumann );
+            BCFunctionBase uWall( problem_Type::uexact );
+            BCFunctionBase uNeumann( problem_Type::fNeumann );
 
             for (std::set<UInt>::const_iterator it = dirichletMarkers.begin();
                     it != dirichletMarkers.end(); ++it)
@@ -580,7 +580,7 @@ Ethiersteinman::run()
             MPI_Barrier(MPI_COMM_WORLD);
 
             oseenData->dataTime()->setTime(t0);
-            fluid.initialize( Problem::uexact, Problem::pexact );
+            fluid.initialize( problem_Type::uexact, problem_Type::pexact );
 
             bdf.bdfVelocity().setInitialCondition( *fluid.solution() );
 
@@ -596,14 +596,13 @@ Ethiersteinman::run()
                 beta *= 0.;
                 rhs  *= 0.;
 
-                fluid.initialize( Problem::uexact, Problem::pexact );
+                fluid.initialize( problem_Type::uexact, problem_Type::pexact );
 
                 beta = *fluid.solution();
 
                 if (M_initMethod == Projection)
                 {
-                    uFESpace->interpolate(Problem::uderexact, rhs, time);
-                    //uFESpace->l2ScalarProduct(Problem::uderexact, rhs, time);
+                    uFESpace->interpolate(problem_Type::uderexact, rhs, time);
                     rhs *= -1.;
                     rhs = fluid.matrixMass()*rhs;
                     fluid.updateSystem( 0., beta, rhs );
@@ -671,9 +670,9 @@ Ethiersteinman::run()
             if(M_exportExactSolutions)
             {
                 exactPressPtr.reset( new vector_Type(exactPress, exporter->mapType() ) );
-                pFESpace->interpolate(Problem::pexact, *exactPressPtr, 0);
+                pFESpace->interpolate(problem_Type::pexact, *exactPressPtr, 0);
                 exactVelPtr.reset( new vector_Type(exactVel, exporter->mapType() ) );
-                uFESpace->interpolate(Problem::uexact, *exactVelPtr, 0);
+                uFESpace->interpolate(problem_Type::uexact, *exactVelPtr, 0);
             }
 
             exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace,
@@ -750,8 +749,8 @@ Ethiersteinman::run()
                 *velAndPressure = *fluid.solution();
                 if(M_exportExactSolutions)
                 {
-                    pFESpace->interpolate(Problem::pexact, *exactPressPtr, time);
-                    uFESpace->interpolate(Problem::uexact, *exactVelPtr, time);
+                    pFESpace->interpolate(problem_Type::pexact, *exactPressPtr, time);
+                    uFESpace->interpolate(problem_Type::uexact, *exactVelPtr, time);
                 }
                 exporter->postProcess( time );
 

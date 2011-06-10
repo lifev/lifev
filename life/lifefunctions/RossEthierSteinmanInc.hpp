@@ -35,7 +35,7 @@
 
     @date 2004-11-12
 
-	esponentially increasing analytic solution of Ross-Ethier Steinmann for unsteady Navier-Stokes 3D on the cube [0,1]x[0,1]x[0,1].
+	Exponentially increasing analytic solution of Ross-Ethier Steinmann for unsteady Navier-Stokes 3D on the cube [-1,1]x[-1,1]x[-1,1].
 	@see Exact fully 3D Navier-Stokes solutions for benchmarking - C. Ross Ethier, D. A. Steinman
  */
 
@@ -76,6 +76,8 @@ public:
                         const Real& z, const ID& i );
     static Real uexact( const Real& t, const Real& x, const Real& y,
                         const Real& z, const ID& i );
+    static Real uderexact( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i );
     static Real pexact( const Real& t, const Real& x, const Real& y,
                         const Real& z, const ID& i );
     static Real grad_u( const UInt& icoor, const Real& t, const Real& x, const Real& y,

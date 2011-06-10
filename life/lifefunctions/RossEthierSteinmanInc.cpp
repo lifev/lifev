@@ -67,6 +67,19 @@ Real RossEthierSteinmanUnsteadyInc::uexact( const Real& t,
 	return 1.;
 }
 
+Real RossEthierSteinmanUnsteadyInc::uderexact( const Real& t,
+                                               const Real& x,
+                                               const Real& y,
+                                               const Real& z,
+                                               const ID& i)
+{
+
+    if (i < 3)
+        return 2.*(S_a*S_a + S_d*S_d + S_a*S_d)*S_nu *xexact(t, x, y, z, i);
+    else
+        return 0.;
+}
+
 Real RossEthierSteinmanUnsteadyInc::pexact( const Real& t,
                                      const Real& x,
                                      const Real& y,
