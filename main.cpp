@@ -316,14 +316,11 @@ public:
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->getdataTime()->updateTime(), ++_i)
         {
             LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
-            //std::cout<<"flux : "<<flux<<std::endl;
             if ( valveIsOpen)
             {
                 if ( false && _i == 3 /*flux < -100*/)
                 {
                     valveIsOpen=false;
-                    //M_fsi->setFluxBC(LifeV::BCh_monolithicFlux(valveIsOpen));
-                    //M_fsi->setup(/*data_file*/);
                     M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
                     //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Essential, LifeV::Full, (const LifeV::UInt) 3);
                 }
@@ -382,14 +379,14 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            try
+            //try
             {
                 if (!M_data->method().compare("monolithicGI"))
                     checkCEResult(M_data->dataFluid()->dataTime()->time());
                 else
                     checkGCEResult(M_data->dataFluid()->dataTime()->time());
             }
-            catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
+            //catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
         }
         if (M_data->method().compare("monolithicGI"))

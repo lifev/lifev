@@ -5,7 +5,7 @@
 
 [problem]
 
-blockOper   = AdditiveSchwarzGI
+blockOper   = AdditiveSchwarz
 # OPTIONS:
 #AdditiveSchwarz
 #AdditiveSchwarzRN
@@ -25,8 +25,7 @@ DDBlockPrec = AdditiveSchwarzGI
 #ComposedDNDGI: under testing, do not use
 #ComposedDND2GI: under testing, do not use
 
-
-method     = monolithicGI # monolithicGE, monolithicGI
+method     = monolithicGE # monolithicGE, monolithicGI
 
 reducedFluid = 0 # 0 = exact, 1 = inexact
 defOmega   = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
@@ -71,12 +70,10 @@ filename   = solid
 # [../] # importer
 
 [fluid]
-useShapeDerivatives           = true
-semiImplicit                  = false # (only valid for method = monolithic or monolithic).
-domainVelImplicit             = false
-convectiveTermDer             = false
-
-
+useShapeDerivatives           = false
+semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
+domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
+convectiveTermDer             = false  # tells if the velocity is to be considered implicitly in the convective term
 
 [./physics]
 density   = 1.0               # density
@@ -200,8 +197,8 @@ alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
 
 
 [../Composed]
-list                = 'Ifpack Ifpack Ifpack'
-sections            = 'Ifpack1 Ifpack2 Ifpack2'
+list                = 'Ifpack Ifpack'
+sections            = 'Ifpack1 Ifpack2'
 
 [../ML1] # preconditioner for the first factor in case our choice was ML
 displayList = false
