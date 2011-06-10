@@ -64,7 +64,6 @@
 #include <life/lifealg/PreconditionerML.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
 #include <life/lifefem/TimeAdvanceBDF.hpp>
 
 using namespace LifeV;
@@ -80,11 +79,6 @@ typedef VectorEpetra                      vector_type;
 typedef boost::shared_ptr<VectorEpetra>   vectorPtr_type;
 typedef FESpace< mesh_type, MapEpetra >   fespace_type;
 typedef boost::shared_ptr< fespace_type > fespacePtr_type;
-
-//typedef LifeV::Preconditioner             basePrec_type;
-//typedef boost::shared_ptr<basePrec_type>  basePrecPtr_type;
-//typedef boost::shared_ptr<prec_type>      precPtr_type;
-
 
 // +-----------------------------------------------+
 // | Data and functions for the boundary conditions|
@@ -191,7 +185,7 @@ main( int argc, char** argv )
             << std::endl
             << " +-----------------------------------------------+" << std::endl
             << " |           Author: Gwenol Grandperrin          |" << std::endl
-            << " |             Date: 2010-03-25                  |" << std::endl
+            << " |             Date: 2011-06-09                  |" << std::endl
             << " +-----------------------------------------------+" << std::endl
             << std::endl;
 
@@ -235,9 +229,6 @@ main( int argc, char** argv )
     if (verbose) std::cout << "End time     : " << endTime << std::endl;
     if (verbose) std::cout << "Timestep     : " << timestep << std::endl;
 
-    // Space discretization
-    const UInt numDimensions   = 3;
-
     // Finite element
     std::string uOrder("P2");
     std::string pOrder("P1");
@@ -279,7 +270,7 @@ main( int argc, char** argv )
                            << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
-    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
+    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, nDimensions, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
@@ -290,7 +281,7 @@ main( int argc, char** argv )
     MapEpetra solutionMap(uFESpace->map()+pFESpace->map());
 
     // Pressure offset in the vector
-    UInt pressureOffset = numDimensions * uFESpace->dof().numTotalDof();
+    UInt pressureOffset = nDimensions * uFESpace->dof().numTotalDof();
 
     if (verbose) std::cout << "Total Velocity Dof: " << pressureOffset << std::endl;
     if (verbose) std::cout << "Total Pressure Dof: " << pFESpace->dof().numTotalDof() << std::endl;
@@ -411,14 +402,14 @@ main( int argc, char** argv )
     if (verbose) std::cout << "Computing the initial solution ... " << std::endl;
 
     // bdf object to store the previous solutions
-    TimeAdvanceBDFNavierStokes<vector_type> bdf;
+    TimeAdvanceBDF<vector_type> bdf;
     bdf.setup(BDFOrder);
     Real currentTime = initialTime-timestep*BDFOrder;
 
     *velocity *= 0;
     *pressure *= 0;
     *solution *= 0;
-    bdf.bdfVelocity().setInitialCondition( *solution );
+    bdf.setInitialCondition( *solution );
 
     // Initial solution (interpolation or projection)
     linearSolver.setTolerance(1e-6);
@@ -444,7 +435,7 @@ main( int argc, char** argv )
         linearSolver.solveSystem(*rhs,*solution,systemMatrix);
 
         // Updating bdf
-        bdf.bdfVelocity().shiftRight( *solution );
+        bdf.shiftRight( *solution );
 
     }
 
@@ -491,16 +482,16 @@ main( int argc, char** argv )
         if (verbose) std::cout << std::endl << "[t = "<< currentTime << " s.]" << std::endl;
 
         if (verbose) std::cout << "Updating the system... " << std::flush;
-        bdf.bdfVelocity().updateRHSContribution( timestep );
-        *rhs  = *massMatrix*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        bdf.updateRHSContribution( timestep );
+        *rhs  = *massMatrix*bdf.rhsContributionFirstDerivative();
 
         systemMatrix.reset(new matrix_type( solutionMap ));
-        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / timestep;
+        double alpha = bdf.coefficientFirstDerivative( 0 ) / timestep;
         *systemMatrix += *massMatrix*alpha;
         *systemMatrix += *baseMatrix;
 
         // SemiImplicit
-        *beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+        *beta = bdf.extrapolation(); // Extrapolation for the convective term
         oseenAssembler.addConvection(systemMatrix,*beta);
 
         if (verbose) std::cout << "done" << std::endl;
@@ -516,7 +507,7 @@ main( int argc, char** argv )
         linearSolver.solveSystem(*rhs,*solution,systemMatrix);
 
         // Updating the BDF scheme
-        bdf.bdfVelocity().shiftRight( *solution );
+        bdf.shiftRight( *solution );
 
         // Exporting the solution
         exporter.postProcess( currentTime );
