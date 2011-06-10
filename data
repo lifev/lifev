@@ -63,6 +63,7 @@ filename   = solid
 
 [importer]
 type       = hdf5
+restart_timestep = 0.001
 [./fluid]
 filename   = fluid
 [../solid]
@@ -187,7 +188,7 @@ displayList        = false
 
 [../prec]
 reuse           = false
-prectype        = Ifpack
+prectype        = Composed
 rescale_factor = 1. # solid matrix rescale factor
 displayList     = true
 entry           = 0.0
@@ -195,7 +196,6 @@ entry           = 0.0
 [./robin]
 alphaf = 0.
 alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
-
 
 [../Composed]
 list                = 'Ifpack Ifpack'
