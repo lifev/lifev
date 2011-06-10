@@ -53,7 +53,7 @@ MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
         M_bc                           ( new bcInterface_Type() ),
         M_bdf                          (),
         M_data                         ( new data_Type() ),
-        M_meshData                     ( new MeshData()),
+        M_meshData                     ( new MeshData() ),
         M_mesh                         (),
         M_map                          (),
         M_solution                     (),
@@ -85,7 +85,7 @@ MultiscaleModelFluid3D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupData( ) \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupData( fileName ) \n";
 #endif
 
     multiscaleModel_Type::setupData( fileName );
@@ -93,12 +93,13 @@ MultiscaleModelFluid3D::setupData( const std::string& fileName )
 
     GetPot dataFile( fileName );
 
-    //Fluid data
+    // Load data
     M_data->setup( dataFile );
     if ( M_globalData.get() )
         setupGlobalData( fileName );
 
-    M_meshData->setup(dataFile, "fluid/space_discretization");
+    // Mesh data
+    M_meshData->setup( dataFile, "fluid/space_discretization" );
 
     // Parameters for the NS Iterations
     M_subiterationsMaximumNumber = dataFile( "fluid/miscellaneous/SubITMax", 0 );
@@ -122,7 +123,7 @@ MultiscaleModelFluid3D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupProblem() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupModel() \n";
 #endif
 
     //Mesh
@@ -160,8 +161,8 @@ MultiscaleModelFluid3D::setupModel()
     if ( M_exporter->mapType() == Unique )
         M_solution->setCombineMode( Zero );
 
-    M_exporter->addVariable( ExporterData::Vector, "Fluid Velocity", M_solution, static_cast<UInt> ( 0 ), M_uFESpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(),              M_pFESpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData<mesh_Type>::VectorField, "Fluid Velocity", M_uFESpace, M_solution, static_cast<UInt> ( 0 ) );
+    M_exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "Fluid Pressure", M_pFESpace, M_solution, 3 * M_uFESpace->dof().numTotalDof() );
 
     //Setup linear model
     setupLinearModel();
@@ -171,12 +172,16 @@ MultiscaleModelFluid3D::setupModel()
 }
 
 void
-MultiscaleModelFluid3D::buildSystem()
+MultiscaleModelFluid3D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::BuildSystem() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::buildModel() \n";
 #endif
+
+    // Display data
+//    if ( M_displayer->isLeader() )
+//        M_data->showMe();
 
     //Build constant matrices
     M_fluid->buildSystem();
@@ -195,20 +200,24 @@ MultiscaleModelFluid3D::buildSystem()
     {
         M_alpha = M_bdf->bdfVelocity().coefficientFirstDerivative( 0 ) / M_data->dataTime()->timeStep();
         *M_beta = M_bdf->bdfVelocity().extrapolation();
-	M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
+
+        M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
         *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative();
     }
 
     //Set problem coefficients
     M_fluid->updateSystem( M_alpha, *M_beta, *M_rhs );
+
+    //Update operator BC
+    M_bc->updatePhysicalSolverVariables();
 }
 
 void
-MultiscaleModelFluid3D::updateSystem()
+MultiscaleModelFluid3D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::UpdateSystem() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::updateModel() \n";
 #endif
 
     //Update BDF
@@ -220,7 +229,6 @@ MultiscaleModelFluid3D::updateSystem()
 
     M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
     *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative();
-
 
     //Set problem coefficients
     M_fluid->updateSystem( M_alpha, *M_beta, *M_rhs );
@@ -236,17 +244,18 @@ MultiscaleModelFluid3D::updateSystem()
 }
 
 void
-MultiscaleModelFluid3D::solveSystem()
+MultiscaleModelFluid3D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SolveSystem() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::solveModel() \n";
 #endif
 
-    //Solve the problem
-    displayModelstatus( "Solve" );
+    // Solve the problem
+    displayModelStatus( "Solve" );
     M_fluid->iterate( *M_bc->handler() );
 
+    // Non linear convective term with Aitken
     if ( M_subiterationsMaximumNumber > 0 )
     {
         Real residual = ( *M_beta - *M_fluid->solution() ).norm2(); // residual is computed on the whole solution vector;
@@ -289,7 +298,7 @@ MultiscaleModelFluid3D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SaveSolution() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::saveSolution() \n";
 #endif
 
     //Post-processing
@@ -334,7 +343,7 @@ MultiscaleModelFluid3D::setupLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupLinearModel( ) \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupLinearModel( ) \n";
 #endif
 
     // Define BCFunctions for tangent problem
@@ -345,7 +354,7 @@ MultiscaleModelFluid3D::setupLinearModel()
     bcPtr_Type LinearBCHandler ( new bc_Type( *M_bc->handler() ) );
     M_linearBC = LinearBCHandler;
 
-    // Set all te BCFunctions to zero
+    // Set all the BCFunctions to zero
     for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
         i->setBCFunction( M_bcBaseDeltaZero );
 }
@@ -355,7 +364,7 @@ MultiscaleModelFluid3D::updateLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::UpdateLinearModel() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::updateLinearModel() \n";
 #endif
 
     //Create an empty vector
@@ -363,14 +372,8 @@ MultiscaleModelFluid3D::updateLinearModel()
     vectorZero = 0.0;
 
     //updateLinearModel TODO REMOVE ?
-    M_fluid->updateLinearSystem( M_fluid->matrixNoBC(),
-                                 M_alpha,
-                                 *M_beta,
-                                 *M_fluid->solution(),
-                                 vectorZero,
-                                 vectorZero,
-                                 vectorZero,
-                                 vectorZero );
+    M_fluid->updateLinearSystem( M_fluid->matrixNoBC(), M_alpha, *M_beta, *M_fluid->solution(),
+                                 vectorZero, vectorZero, vectorZero, vectorZero );
 
     //Linear System Updated
     M_updateLinearModel = false;
@@ -381,7 +384,7 @@ MultiscaleModelFluid3D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SolveLinearModel() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::solveLinearModel() \n";
 #endif
 
     if ( !solveLinearSystem )
@@ -393,7 +396,7 @@ MultiscaleModelFluid3D::solveLinearModel( bool& solveLinearSystem )
         updateLinearModel();
 
     //Solve the linear problem
-    displayModelstatus( "Solve linear" );
+    displayModelStatus( "Solve linear" );
     M_fluid->solveLinearSystem( *M_linearBC );
 
     resetPerturbation();
@@ -421,14 +424,9 @@ MultiscaleModelFluid3D::boundaryStress( const bcFlag_Type& flag, const stress_Ty
 {
     switch ( stressType )
     {
-    case StaticPressure:
+    case Pressure:
     {
         return -boundaryPressure( flag );
-    }
-
-    case TotalPressure:
-    {
-        return -boundaryPressure( flag ) + boundaryDynamicPressure( flag ) * ( ( boundaryFlowRate( flag ) > 0.0 ) ? 1 : -1 );
     }
 
     case LagrangeMultiplier:
@@ -461,12 +459,6 @@ MultiscaleModelFluid3D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& so
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
-{
-    return boundaryDensity( flag ) * boundaryDeltaFlowRate( flag, solveLinearSystem ) * boundaryFlowRate( flag ) / ( boundaryArea( flag ) * boundaryArea( flag ) );
-}
-
-Real
 MultiscaleModelFluid3D::boundaryDeltaLagrangeMultiplier( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
@@ -479,14 +471,9 @@ MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solv
 {
     switch ( stressType )
     {
-    case StaticPressure:
+    case Pressure:
     {
         return -boundaryDeltaPressure( flag, solveLinearSystem );
-    }
-
-    case TotalPressure:
-    {
-        return -boundaryDeltaPressure( flag, solveLinearSystem ) + boundaryDeltaDynamicPressure( flag, solveLinearSystem ); //Verify the sign of DynamicPressure contribute!
     }
 
     case LagrangeMultiplier:
@@ -510,7 +497,7 @@ MultiscaleModelFluid3D::setupGlobalData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupGlobalData( fileName ) \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupGlobalData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -578,7 +565,7 @@ MultiscaleModelFluid3D::setupFEspace()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupFEspace() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupFEspace() \n";
 #endif
 
     //Velocity FE Space
@@ -595,7 +582,7 @@ MultiscaleModelFluid3D::setupFEspace()
     else if ( M_data->uOrder().compare( "P1" ) == 0 )
     {
         u_refFE = &feTetraP1;
-        u_qR = &quadRuleTetra4pt; // DoE 2
+        u_qR = &quadRuleTetra4pt;  // DoE 2
         u_bdQr = &quadRuleTria3pt; // DoE 2
     }
     else if ( M_data->uOrder().compare( "P1Bubble" ) == 0 )
@@ -644,13 +631,10 @@ MultiscaleModelFluid3D::setupDOF()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupDOF \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupDOF \n";
 #endif
 
     M_lmDOF = M_bc->handler()->numberOfBCWithType( Flux );
-
-    //M_uDOF = M_uFESpace->map().getMap(Unique)->NumGlobalElements();
-    //M_pFESpace->dof().numTotalDof() = M_pFESpace->map().getMap(Unique)->NumGlobalElements();
 }
 
 void
@@ -658,7 +642,7 @@ MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& BC )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupBCOffset( BC ) \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupBCOffset( BC ) \n";
 #endif
 
     UInt offset = M_uFESpace->map().map( Unique )->NumGlobalElements() + M_pFESpace->map().map( Unique )->NumGlobalElements();
@@ -673,18 +657,18 @@ MultiscaleModelFluid3D::initializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::InitializeSolution() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::initializeSolution() \n";
 #endif
 
     if ( multiscaleProblemStep > 0 )
     {
         M_importer->setMeshProcId( M_mesh->meshPartition(), M_comm->MyPID() );
 
-        M_importer->addVariable( ExporterData::Vector, "Fluid Velocity", M_solution, static_cast <UInt> ( 0 ),            M_uFESpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof());
+        M_importer->addVariable( ExporterData<mesh_Type>::VectorField, "Fluid Velocity", M_uFESpace, M_solution, static_cast <UInt> ( 0 ) );
+        M_importer->addVariable( ExporterData<mesh_Type>::ScalarField, "Fluid Pressure", M_pFESpace, M_solution, 3 * M_uFESpace->dof().numTotalDof() );
 
         // Import
-        M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
+        M_exporter->setTimeIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
     }
     else
         *M_solution = 0.0;
@@ -697,7 +681,7 @@ MultiscaleModelFluid3D::imposePerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::ImposePerturbation() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::imposePerturbation() \n";
 #endif
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
@@ -714,7 +698,7 @@ MultiscaleModelFluid3D::resetPerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::ResetPerturbation() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::resetPerturbation() \n";
 #endif
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )

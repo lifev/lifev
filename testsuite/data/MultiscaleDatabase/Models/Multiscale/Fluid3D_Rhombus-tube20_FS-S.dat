@@ -1,0 +1,62 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### MODEL: Multiscale - TEST: 7 elements Rhombus ##################################################
+###################################################################################################
+
+[Multiscale] ######################################################################################
+###################################################################################################
+modelName        = 'Rhombus (Fluid3D, FlowRateStress-Stress)'
+modelType        = Multiscale
+couplingFlags    = ' '
+
+[Problem] #########################################################################################
+###################################################################################################
+modelsPath       = './MultiscaleDatabase/Models/'
+couplingsPath    = './MultiscaleDatabase/Couplings/'
+
+# List of models ##################################################################################
+########### ID #### Type ############## File (without .dat) #######################################
+models = '    
+            0       Fluid3D             Cylinder_Stokes_tube20
+            1       Fluid3D             Cylinder_Stokes_tube20
+            2       Fluid3D             Cylinder_Stokes_tube20
+            3       Fluid3D             Cylinder_Stokes_tube20
+            4       Fluid3D             Cylinder_Stokes_tube20
+            5       Fluid3D             Cylinder_Stokes_tube20
+            6       Fluid3D             Cylinder_Stokes_tube20
+         '
+###################################################################################################
+
+# List of couplings ###############################################################################
+########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
+couplings = '    
+            0       BoundaryCondition   FlowRate_One                    0                0
+            1       Stress              Pressure                        1,0,3,4          0,1,0,0
+            2       FlowRateStress      LagrangeMultiplier              2,1,5,6          0,1,0,0
+            3       Stress              Pressure                        3,6              1,1
+            4       FlowRateStress      LagrangeMultiplier              4,5              1,1
+            5       BoundaryCondition   Stress_Zero                     2                1
+            '
+###################################################################################################
+
+# Geometry offset #################################################################################
+########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
+offset = '    
+            0       0.08    0.08    0.08        0.0      0.0  0.0           0.0   0.0     -0.68
+            1       0.08    0.08    0.08        0.0      0.0  0.0           0.0   0.0     -0.2
+            2       0.08    0.08    0.08        0.0      0.0  0.0           0.0   0.0      0.28
+            3       0.08    0.08    0.08       -60.0     0.0  0.0           0.0   0.08    -0.24
+            4       0.08    0.08    0.08        60.0     0.0  0.0           0.0  -0.08    -0.24
+            5       0.08    0.08    0.08        120.0    0.0  0.0           0.0  -0.08     0.24
+            6       0.08    0.08    0.08       -120.0    0.0  0.0           0.0   0.08     0.24
+         '
+###################################################################################################

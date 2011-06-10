@@ -43,7 +43,7 @@
 #define MultiscaleModel1D_H 1
 
 // Jacobian coefficient approximation
-#define JACOBIAN_WITH_FINITEDIFFERENCE
+//#define JACOBIAN_WITH_FINITEDIFFERENCE
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 //#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 #endif
@@ -110,10 +110,10 @@ public:
     typedef solver_Type::feSpace_Type                              feSpace_Type;
     typedef solver_Type::feSpacePtr_Type                           feSpacePtr_Type;
 
-    typedef BCInterface1D< solver_Type >                           bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
     typedef OneDimensionalBCHandler                                bc_Type;
     typedef boost::shared_ptr< bc_Type >                           bcPtr_Type;
+    typedef BCInterface1D< bc_Type, solver_Type >                  bcInterface_Type;
+    typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
 
     typedef OneDimensionalBCFunction                               bcFunction_Type;
 
@@ -149,16 +149,16 @@ public:
     //! Setup the model.
     void setupModel();
 
-    //! Build the initial system (matrix and vectors).
-    void buildSystem();
+    //! Build the initial model.
+    void buildModel();
 
-    //! Update the system for (matrix and vectors).
-    void updateSystem();
+    //! Update the model.
+    void updateModel();
 
-    //! Solve the problem.
-    void solveSystem();
+    //! Solve the model.
+    void solveModel();
 
-    //! save the solution
+    //! Save the solution
     void saveSolution();
 
     //! Display some information about the model.
@@ -243,7 +243,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = StaticPressure ) const;
+    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = Pressure ) const;
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -253,22 +253,6 @@ public:
      */
     Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem );
 
-    //! Get the variation of the pressure (on a specific boundary face) using the linear model
-    /*!
-     * @param flag flag of the boundary face on which quantity should be computed
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the pressure
-     */
-    Real boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
-
-    //! Get the variation of the total pressure (on a specific boundary face) using the linear model
-    /*!
-     * @param flag flag of the boundary face on which quantity should be computed
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the dynamic pressure
-     */
-    Real boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
-
     //! Get the variation of the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
@@ -276,7 +260,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return variation of the stress
      */
-    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = StaticPressure );
+    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = Pressure );
 
     //@}
 
@@ -288,7 +272,7 @@ public:
     /*!
      * @return BC handler
      */
-    bc_Type& bc() const { return *(M_bc->handler()); }
+    bc_Type& bc() const { return *( M_bc->handler() ); }
 
     //! Get the data container of the 1D model.
     /*!
@@ -417,6 +401,14 @@ private:
      */
     Real tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType );
 
+    //! Solve the tangent problem formulation
+    /*!
+     * @param flowRate rhs for the tangent problem.
+     * @param bcNode node of the quantity to be computed.
+     * @return solution of the tangent problem at specific node.
+     */
+    Real solveTangentProblem( solver_Type::vector_Type& rhs, const UInt& bcNode );
+
 #endif
     //@}
 
@@ -455,6 +447,7 @@ private:
 
     // Linear solver
     boost::shared_ptr< linearSolver_Type > M_linearSolver;
+    boost::shared_ptr< linearSolver_Type > M_linearViscoelasticSolver;
 
     // FE spaces
     boost::shared_ptr< feSpace_Type >      M_feSpace;
