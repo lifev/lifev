@@ -94,7 +94,7 @@ Real RossEthierSteinmanUnsteadyInc::grad_u( const UInt& icoor, const Real& t, co
 {
 	Real e = std::exp(2.*(S_a*S_a + S_d*S_d + S_a*S_d)*S_nu * t);
 	switch(icoor) {
-			case 1:    // u_x
+			case 0:    // u_x
 			switch(i) {
 				case 0:
 					return S_a*S_d*e * ( std::exp(S_a*(x-z)+S_d*(y-z)) - std::exp(S_a*(z-y)+S_d*(x-y)) );
@@ -105,7 +105,7 @@ Real RossEthierSteinmanUnsteadyInc::grad_u( const UInt& icoor, const Real& t, co
 				default:
 					exit(1);
 			 }
-			case 2:   // u_y
+			case 1:   // u_y
 			switch(i) {
 				case 0:
 					return e * ( S_d*S_d*std::exp(S_a*(x-z)+S_d*(y-z)) + S_a*(S_a+S_d)*std::exp(S_a*(z-y)+S_d*(x-y)) );
@@ -116,7 +116,7 @@ Real RossEthierSteinmanUnsteadyInc::grad_u( const UInt& icoor, const Real& t, co
 				default:
 					exit(1);
 			}
-			case 3:
+			case 2:
 			switch(i) {
 			    case 0:
 			        return e * ( -S_d*(S_a+S_d)*std::exp(S_a*(x-z)+S_d*(y-z)) - S_a*S_a*std::exp(S_a*(z-y)+S_d*(x-y)) );
@@ -169,7 +169,7 @@ Real RossEthierSteinmanUnsteadyInc::x0( const Real& t, const Real& x, const Real
 
 
 
-//we suppose that the problem geometry is the cube [0,1]x[0,1]x[0,1].
+//we suppose that the problem geometry is the cube [-1,1]x[-1,1]x[-1,1].
 Real RossEthierSteinmanUnsteadyInc::fNeumann( const Real& t,
                                        const Real& x,
                                        const Real& y,
@@ -177,15 +177,15 @@ Real RossEthierSteinmanUnsteadyInc::fNeumann( const Real& t,
                                        const ID& i )
 {
 	Real n[3] = {0., 0., 0.}; Real out=0.;
-	if        ( x == 0. ) {
+	if        ( x == -1. ) {
 		n[0] = -1.;
 	} else if ( x ==  1. ) {
 		n[0] =  1.;
-	} else if ( y == 0. ) {
+	} else if ( y == -1. ) {
 		n[1] = -1.;
 	} else if ( y ==  1. ) {
 		n[1] =  1.;
-	} else if ( z == 0. ) {
+	} else if ( z == -1. ) {
 		n[2] = -1.;
 	} else if ( z ==  1. ) {
 		n[2] =  1.;
@@ -214,6 +214,28 @@ void RossEthierSteinmanUnsteadyInc::setParamsFromGetPot( const GetPot& dataFile 
     S_rho =  dataFile( "fluid/physics/density", 1. );
     S_nu = S_mu /S_rho;
     S_flagStrain = dataFile( "fluid/physics/flag_strain", 0 );
+}
+void RossEthierSteinmanUnsteadyInc::setA(const Real& aValue)
+{
+    S_a = aValue;
+}
+void RossEthierSteinmanUnsteadyInc::setD(const Real& dValue)
+{
+    S_d = dValue;
+}
+void RossEthierSteinmanUnsteadyInc::setViscosity(const Real& mu)
+{
+    S_mu = mu;
+    S_nu = S_mu / S_rho;
+}
+void RossEthierSteinmanUnsteadyInc::setDensity(const Real& rho)
+{
+    S_rho = rho;
+    S_nu = S_mu / S_rho;
+}
+void RossEthierSteinmanUnsteadyInc::setFlagStrain(const Int& flagValue)
+{
+    S_flagStrain = flagValue;
 }
 
 Real RossEthierSteinmanUnsteadyInc::S_a;

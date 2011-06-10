@@ -98,9 +98,13 @@ public:
 
     static Real fWallShearStress( const Real& t, const Real& x, const Real& y,
                                   const Real& z, const ID& i );
+
     static void setParamsFromGetPot( const GetPot& dataFile );
-
-
+    static void setA(const Real& aValue);
+    static void setD(const Real& dValue);
+    static void setViscosity(const Real& mu);
+    static void setDensity(const Real& rho);
+    static void setFlagStrain(const Int& flagValue);
 
 private:
 
