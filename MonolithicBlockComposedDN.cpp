@@ -59,7 +59,7 @@ int MonolithicBlockComposedDN::solveSystem( const vector_Type& rhs, vector_Type&
         {
             if (M_recompute[(*M_blockReordering)[k]])
             {
-                linearSolver->displayer()->leaderPrint("  M-  Computing preconditioner factor:           ", k, "\n");
+                linearSolver->displayer()->leaderPrint("  M-  Computing preconditioner factor:         ", k, "\n");
                 replace_precs(M_blocks[(*M_blockReordering)[k]], k);
             }
             else

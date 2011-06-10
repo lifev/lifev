@@ -236,8 +236,9 @@ public:
     /*!
      * @param solution solution container
      * @param map map for initializing the solution vectors
+     * @param onlyMainQuantities if true setup only Q, P, and A/A0-1
      */
-    void setupSolution( solution_Type& solution, const MapEpetra& map );
+    void setupSolution( solution_Type& solution, const MapEpetra& map, const bool& onlyMainQuantities = false );
 
     //! Initialize all the variables of the solution to a reference condition with Q=0, A=A0, and P=P_ext
     /*!
@@ -286,6 +287,18 @@ public:
      */
     void iterate( OneDimensionalBCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
 
+    //! Apply the viscoelastic Flux correction:
+    /*!
+     *  We use a finite element scheme for the correction term:
+     *  given the solution of Taylor-Galerkin scheme, solve
+     *  ( 1/(dt*Ah(n+1)) Qtildeh(n+1), phi) +        //! 1/A * massFactor^{-1} * Un+1
+     *  ( gamma / rho ) *     ( dQtildeh(n+1)/dz, dphi/dz )  //! stiff * Qtilde(U)
+     *  = - ( gamma / rho ) * ( dQhath(n+1)/dz, dphi/dz )  //! stiff * Qhat(U)
+     *
+     *  gamma = gamma_tilde / ( 2 sqrt(pi) )
+     */
+    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix = true );
+
     //! CFL computation (correct for constant mesh)
     /*!
      * @param timeStep the time step
@@ -311,13 +324,28 @@ public:
                      const sourcePtr_Type&  source );
 
     //! Set the communicator
+    /*!
+     * @param comm the Epetra MPI communicator
+     */
     void setCommunicator( const commPtr_Type& comm );
 
     //! Set the FEspace
-    void setFESpace( const feSpacePtr_Type& FESpace );
+    /*!
+     * @param feSpace the FE space
+     */
+    void setFESpace( const feSpacePtr_Type& feSpace );
 
     //! Set the linear solver
+    /*!
+     * @param linearSolver the linear solver for the hyperbolic problem
+     */
     void setLinearSolver( const linearSolverPtr_Type& linearSolver );
+
+    //! Set the linear solver
+    /*!
+     * @param linearViscoelasticSolver the linear solver for the viscoelastic problem
+     */
+    void setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolver );
 
     //@}
 
@@ -368,6 +396,12 @@ public:
      * @return System residual container
      */
     const vectorPtrContainer_Type& residual() const { return M_residual; }
+
+    //! Get the system matrix without BC
+    /*!
+     * @return system matrix without BC
+     */
+    const matrixPtr_Type& massMatrix() const { return M_homogeneousMassMatrix; }
 
     //@}
 
@@ -427,7 +461,7 @@ private:
      *  the Dirichlet boundary conditions
      *  (works for P1Seg and canonic numbering!)
      */
-    void applyDirichletBCToMatrix( matrix_Type& mat );
+    void applyDirichletBCToMatrix( matrix_Type& matrix );
 
     //! Apply the inertial Flux correction:
     /*!
@@ -440,18 +474,6 @@ private:
      *  m = rho_w h0 / ( 2 sqrt(pi) sqrt(A0) )
      */
     vector_Type inertialFluxCorrection( const vector_Type& );
-
-    //! Apply the viscoelastic Flux correction:
-    /*!
-     *  We use a finite element scheme for the correction term:
-     *  given the solution of Taylor-Galerkin scheme, solve
-     *  ( 1/(dt*Ah(n+1)) Qtildeh(n+1), phi) +        //! 1/A * massFactor^{-1} * Un+1
-     *  ( gamma / rho ) *     ( dQtildeh(n+1)/dz, dphi/dz )  //! stiff * Qtilde(U)
-     *  = - ( gamma / rho ) * ( dQhath(n+1)/dz, dphi/dz )  //! stiff * Qhat(U)
-     *
-     *  gamma = gamma_tilde / ( 2 sqrt(pi) )
-     */
-    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep );
 
     //! Apply the longitudinal Flux correction:
     /*!
@@ -518,6 +540,7 @@ private:
 
     //! The linear solver
     linearSolverPtr_Type               M_linearSolver;
+    linearSolverPtr_Type               M_linearViscoelasticSolver;
 
 private:
 

@@ -104,37 +104,37 @@ public:
      */
     virtual void setupModel() = 0;
 
-    //! Build the initial system.
+    //! Build the initial model.
     /*!
-     * This method is alternative to updateSystem and should be called only once at the fist timestep.
+     * This method is alternative to updateModel and should be called only once at the fist timestep.
      * This method is reserved for the construction of:
      * <ol>
      *     <li> objects that are constant (with respect to the time);
      *     <li> objects that are required for the first time step and should not be updated during subiterations.
      * </ol>
      */
-    virtual void buildSystem() = 0;
+    virtual void buildModel() = 0;
 
-    //! Update the system.
+    //! Update the model.
     /*!
-     * This method is alternative to buildSystem and should be called from the second timestep.
+     * This method is alternative to buildModel and should be called from the second timestep.
      * This method is reserved for the update of:
      * <ol>
      *     <li> objects that are not constant with respect to the time but should not be updated during subiterations.
      * </ol>
      */
-    virtual void updateSystem() = 0;
+    virtual void updateModel() = 0;
 
     //! Solve the System.
     /*!
      * This method is called once for each subiteration (in the case of implicit coupling).
      * It computes the solution at time t_n+1.
      */
-    virtual void solveSystem() = 0;
+    virtual void solveModel() = 0;
 
     //! save the solution.
     /*!
-     * This method wrote to file the solution computed during the last call of solveSystem.
+     * This method wrote to file the solution computed during the last call of solveModel.
      */
     virtual void saveSolution() = 0;
 
@@ -269,7 +269,7 @@ protected:
     /*!
      * @param tag user provided tag.
      */
-    void displayModelstatus( const std::string& tag ) const;
+    void displayModelStatus( const std::string& tag ) const;
 
     static UInt                          M_modelsNumber;       // Total number of models
 
@@ -305,7 +305,7 @@ private:
 // Protected Inline Methods
 // ===================================================
 inline void
-MultiscaleModel::displayModelstatus( const std::string& tag ) const
+MultiscaleModel::displayModelStatus( const std::string& tag ) const
 {
     if ( M_displayer->isLeader() )
         std::cout << " MS-  " << tag << " model " << M_ID << " - " << M_modelName << std::endl;

@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -24,6 +23,7 @@
 *******************************************************************************
 */
 //@HEADER
+
 
 /*!
     @file
@@ -104,12 +104,9 @@ FSIMonolithicGE::setupSystem( )
 }
 
 void
-FSIMonolithicGE::updateSystem( )
+FSIMonolithicGE::updateSystem()
 {
     super_Type::updateSystem();
-
-    // Set displacement for solid RHS
-    setDispSolid( *M_un );
 }
 
 
@@ -137,11 +134,6 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
 
         meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
 
-//          if(M_restarts)
-//          {
-//              alpha = 1/M_data->restartTimestep();//dataFluid()->dataTime()->timeStep();
-//              M_restarts = false;
-//          }
 
         meshDispDiff *= -alpha; //mesh velocity w
         this->interpolateVelocity(meshDispDiff, *this->M_beta);

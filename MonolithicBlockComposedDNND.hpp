@@ -135,14 +135,6 @@ public:
     //! @name Public Methods
     //@{
 
-    //! Sets the parameters needed by the preconditioner from data file
-    /*!
-        @param data GetPot object reading the text data file
-        @param section string specifying the path in the data file where to find the options for the operator
-     */
-//     void setDataFromGetPot( const GetPot&      /*dataFile*/,
-//                             const std::string& /*section*/ ){}
-
     //! Computes the coupling
     /*!
       computes all the coupling blocks specific for the chosen preconditioner. The coupling is handled

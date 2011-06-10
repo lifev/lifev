@@ -38,8 +38,6 @@
 #ifndef OneDimensionalDefinitions_H
 #define OneDimensionalDefinitions_H
 
-//#define GHOSTNODE 1
-
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -74,6 +72,8 @@ namespace LifeV
 {
 namespace OneDimensional
 {
+
+//#define HAVE_NEUMANN_VISCOELASTIC_BC 1 // Define whether to use homogeneous Neumann/Dirichlet BC for the viscoelastic problem.
 
 /*! @enum Physics Types
  */
@@ -112,11 +112,12 @@ class OneDimensionalModel_BCFunction;
 
 enum bcType_Type
 {
-    W1,
-    W2,
-    A,
-    Q,
-    P
+    W1,         /*!< Riemann variable 1 */
+    W2,         /*!< Riemann variable 2 */
+    A,          /*!< Area */
+    Q,          /*!< Flow rate */
+    P,          /*!< Pressure */
+    S           /*!< Normal Stress */
 };
 
 enum bcSide_Type

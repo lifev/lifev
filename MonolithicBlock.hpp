@@ -230,6 +230,7 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
       @param couplingBlock: flag specifying the block associated with the coupling
+      @param couplingFlag: flag specifying which block must be coupled whith which block.
      */
     virtual void coupler(mapPtr_Type& map,
                  const std::map<ID, ID>& locDofMap,

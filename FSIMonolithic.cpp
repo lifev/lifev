@@ -1,88 +1,87 @@
-/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <EpetraExt_Reindex_MultiVector.h>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/LifeV.hpp>
 #include <lifemc/lifesolver/FSIMonolithic.hpp>
 
-#include <EpetraExt_Reindex_MultiVector.h>
-
 namespace LifeV
 {
 
-
-
 // ===================================================
-//! Constructors, Destructor
+// Constructors, Destructor
 // ===================================================
-
 FSIMonolithic::FSIMonolithic():
-    super_Type(),
-    M_monolithicMap(),
-    M_interfaceMap(),
-    M_beta(),
-    M_monolithicMatrix(),
-    M_precPtr(),
-    M_rhsFull(),
-    M_BCh_flux(),
-    M_BCh_Robin(),
-    M_BChWS(),
-    M_offset(0),
-    M_solidAndFluidDim(0),
-    M_fluidBlock(),
-    M_solidBlock(),
-    M_solidBlockPrec(),
-    M_linearSolver(),
-    M_numerationInterface(),
-    M_BChs(),
-    M_FESpaces(),
-    M_diagonalScale(false),
-    M_reusePrec(true),
-    M_resetPrec(true),
-    M_maxIterSolver(-1),
-    M_restarts(false),
-    //end of protected attributes
-    M_preconditionedSymmetrizedMatrix()
+        super_Type(),
+        M_monolithicMap(),
+        M_interfaceMap(),
+        M_beta(),
+        M_monolithicMatrix(),
+        M_precPtr(),
+        M_rhsFull(),
+        M_BCh_flux(),
+        M_BCh_Robin(),
+        M_BChWS(),
+        M_offset(0),
+        M_solidAndFluidDim(0),
+        M_fluidBlock(),
+        M_solidBlock(),
+        M_solidBlockPrec(),
+        M_linearSolver(),
+        M_numerationInterface(),
+        M_BChs(),
+        M_FESpaces(),
+        M_diagonalScale(false),
+        M_reusePrec(true),
+        M_resetPrec(true),
+        M_maxIterSolver(-1),
+        M_restarts(false),
+        //end of protected attributes
+        M_preconditionedSymmetrizedMatrix(),
+        M_stress(),
+        M_fluxes(0)
 #ifdef OBSOLETE
-    ,M_rhsShapeDerivatives()
+        ,M_rhsShapeDerivatives()
 #endif
 {}
-
-// Destructor
 
 FSIMonolithic::~FSIMonolithic()
 {
 }
 
-
 // ===================================================
-//! Setup Methods
+// Setup Methods
 // ===================================================
-
-
 void
 FSIMonolithic::setupFEspace()
 {
@@ -164,12 +163,10 @@ FSIMonolithic::setupFluidSolid( )
 
     M_BCh_Robin = M_BCh_d;// For the moment M_BCh_d contains only the Robin b.c..
     M_BCh_Robin->setOffset(M_offset);
-
-}//end setup
-
+}
 
 void
-FSIMonolithic::setupFluidSolid( UInt const /*fluxes*/ )
+FSIMonolithic::setupFluidSolid( UInt const fluxes )
 {
 
     // Note: up to now it works only with matching grids (and poly order) on the interface
@@ -187,7 +184,7 @@ FSIMonolithic::setupFluidSolid( UInt const /*fluxes*/ )
     createOperator( opertype );
 
     *M_monolithicMap+= M_pFESpace->map();
-    *M_monolithicMap+= M_fluxes;
+    *M_monolithicMap+= fluxes;
     *M_monolithicMap+= M_dFESpace->map();
 
     M_monolithicMatrix->createInterfaceMap( *M_interfaceMap, M_dofStructureToHarmonicExtension->localDofMap(), M_dFESpace->map().map(Unique)->NumGlobalElements()/nDimensions, M_epetraWorldComm );
@@ -197,16 +194,14 @@ FSIMonolithic::setupFluidSolid( UInt const /*fluxes*/ )
     M_monolithicMatrix->numerationInterface(M_numerationInterface);
     M_beta.reset  (new vector_Type(/*M_monolithicMap*/M_uFESpace->map()));
 
-    M_offset = M_uFESpace->dof().numTotalDof()*nDimensions + M_fluxes +  M_pFESpace->dof().numTotalDof();
+    M_offset = M_uFESpace->dof().numTotalDof()*nDimensions + fluxes +  M_pFESpace->dof().numTotalDof();
     M_solidAndFluidDim= M_offset + M_dFESpace->dof().numTotalDof()*nDimensions;
     M_BCh_d->setOffset(M_offset);
 }
 
 // ===================================================
-//! Public Methods
+// Public Methods
 // ===================================================
-
-
 void
 FSIMonolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type& disp)
 {
@@ -233,7 +228,6 @@ FSIMonolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type
     subDisp.subset(disp, M_offset);
     lambdaSolid=subDisp;
 }
-
 
 void
 FSIMonolithic::monolithicToX(const vector_Type& disp, vector_Type& dispFluid, MapEpetra& map, UInt offset)
@@ -264,7 +258,6 @@ FSIMonolithic::buildSystem()
     M_solidBlock->globalAssemble();
     M_solid->rescaleMatrices();
 }
-
 
 #ifdef HAVE_TRILINOS_ANASAZI
 Real&
@@ -320,25 +313,21 @@ FSIMonolithic::computeFNormals( vector_Type& normals)
 }
 
 void
-FSIMonolithic::solveJac(vector_Type         &_step,
-                     const vector_Type   &_res,
-                     const Real         /*_linearRelTol*/)
+FSIMonolithic::solveJac( vector_Type& _step, const vector_Type& _res, const Real /*_linearRelTol*/ )
 {
     setupBlockPrec( );
 
     checkIfChangedFluxBC( M_precPtr );
 
     M_precPtr->blockAssembling();
-    M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->time());
+    M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->time() );
     M_precPtr->GlobalAssemble();
 
-    M_solid->getDisplayer().leaderPrint("  M-  normInf res:                    ", _res.normInf(), "\n");
-    M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
-
-    //M_monolithicMatrix->matrix()->spy("J");
-    this->iterateMonolithic(_res, _step);
-
-    M_solid->getDisplayer().leaderPrint("  M-  Newton step normInf:                    ", _step.normInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Residual NormInf:                        ", _res.normInf(), "\n");
+    iterateMonolithic(_res, _step);
+    M_solid->getDisplayer().leaderPrint("  M-  Solution NormInf:                        ", _step.normInf(), "\n");
+    _step.spy("step");
+    _res.spy("res");
 }
 
 void
@@ -357,11 +346,11 @@ FSIMonolithic::updateSystem()
 }
 
 void
-FSIMonolithic::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
-                        FSIOperator::solidPtr_Type::value_type::Function const& p0,
-                        FSIOperator::solidPtr_Type::value_type::Function const& d0,
-                        FSIOperator::solidPtr_Type::value_type::Function const& /*w0*/,
-                        FSIOperator::solidPtr_Type::value_type::Function const& /*w0*/ )
+FSIMonolithic::initialize( fluidPtr_Type::value_type::function_Type const& u0,
+                           fluidPtr_Type::value_type::function_Type const& p0,
+                           solidPtr_Type::value_type::Function const& d0,
+                           solidPtr_Type::value_type::Function const& /*w0*/,
+                           fluidPtr_Type::value_type::function_Type const& /*df0*/ )
 {
     vector_Type u(M_uFESpace->map());
     M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->time());
@@ -373,6 +362,35 @@ FSIMonolithic::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type
     M_dFESpace->interpolate(d0, d, M_data->dataSolid()->getdataTime()->time());
 
     initialize(u, p, d);
+}
+
+void
+FSIMonolithic::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
+                           const vectorPtr_Type& fluidDisplacement,
+                           const vectorPtr_Type& solidVelocity,
+                           const vectorPtr_Type& solidDisplacement )
+{
+    // Solution
+    setSolution( *fluidVelocityAndPressure );
+
+    // Fluid
+    M_fluid->initialize( *fluidVelocityAndPressure );
+    M_meshMotion->initialize( *fluidDisplacement );
+    initializeBDF( *fluidVelocityAndPressure );
+
+    // Solid
+    // Extend the external solid vectors to have the monolithic map
+    vectorPtr_Type extendedSolidDisplacement( new vector_Type( *M_monolithicMap ) );
+    vectorPtr_Type extendedSolidVelocity( new vector_Type( *M_monolithicMap ) );
+
+    extendedSolidDisplacement->subset( *solidDisplacement, solidDisplacement->map(), static_cast <UInt> ( 0 ), M_offset );
+    extendedSolidVelocity->subset( *solidVelocity, solidVelocity->map(), static_cast <UInt> ( 0 ), M_offset );
+
+    // Rescale the quantities
+    *extendedSolidDisplacement /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
+    *extendedSolidVelocity /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
+
+    M_solid->initialize( extendedSolidDisplacement, extendedSolidVelocity );
 }
 
 void
@@ -390,14 +408,12 @@ FSIMonolithic::initialize( const vector_Type& u0, const vector_Type& p0, const v
 }
 
 
-// ===================================================
-//! Protected Methods
-// ===================================================
 
-
+// ===================================================
+// Protected Methods
+// ===================================================
 void
-FSIMonolithic::
-iterateMonolithic(const vector_Type& rhs, vector_Type& step)
+FSIMonolithic::iterateMonolithic(const vector_Type& rhs, vector_Type& step)
 {
     LifeChrono chrono;
 
@@ -421,7 +437,7 @@ iterateMonolithic(const vector_Type& rhs, vector_Type& step)
             M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
     }
 
-    M_solid->getDisplayer().leaderPrint("  M-  System solved.\n" );
+    //M_solid->getDisplayer().leaderPrint("  M-  System solved.\n" );
 }
 
 void
@@ -525,23 +541,17 @@ void FSIMonolithic::setupBlockPrec( )
 void
 FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
 {
-    if (iter == 0)
-    {
-        if (!M_restarts)
-        {
-            this->M_solid->updateVel( );
-        }
-        else
-            M_restarts = false;
-
+     if (iter == 0)
+     {
         updateSolidSystem(this->M_rhs);
     }
     else
     {
         M_solid->computeMatrix( *solution, 1.);
     }
-    M_solid->getSolidMatrix(M_solidBlock);
-    M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
+
+    M_solid->getSolidMatrix( M_solidBlock );
+    M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap, 1 ) );
     *M_solidBlockPrec += *M_solidBlock;
 }
 
@@ -550,7 +560,7 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
 {
     M_fluidBlock.reset(new matrix_Type(*M_monolithicMap));
 
-    double alpha = 1./M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
+    Real alpha = 1./M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
     M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
     this->M_fluid->updateStabilization(*M_fluidBlock);
 
@@ -558,22 +568,19 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
     {
         M_resetPrec=true;
         M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-        *M_rhs += M_fluid->matrixMass()*(*M_un)*1/M_data->dataFluid()->dataTime()->timeStep();//*M_bdf->rhsContributionFirstDerivative() ;
+        *M_rhs += M_fluid->matrixMass()*(*M_un)/M_data->dataFluid()->dataTime()->timeStep();//(M_bdf->rhsContributionFirstDerivative()) ;
         couplingRhs(M_rhs, M_un);
     }
 }
 
-
-
-void FSIMonolithic::updateRHS(  )
+void FSIMonolithic::updateRHS()
 {
-
-    M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
-    *this->M_rhs += M_fluid->matrixMass()*M_bdf->rhsContributionFirstDerivative() ;
-    couplingRhs(this->M_rhs, M_un);
+    M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+    *M_rhs += M_fluid->matrixMass()*(*M_un)*1/M_data->dataFluid()->dataTime()->timeStep();//M_bdf->rhsContributionFirstDerivative() ;
+    couplingRhs(M_rhs, M_un);
+    //M_solid->updateVel();
+    updateSolidSystem(M_rhs);
     *M_rhsFull = *M_rhs;
-    //this->M_solid->updateVel();
-    updateSolidSystem(this->M_rhs);
 }
 
 namespace
@@ -614,7 +621,7 @@ FSIMonolithic::vectorPtr_Type FSIMonolithic::computeStress()
     vectorPtr_Type sol(new vector_Type(M_monolithicMatrix->interfaceMap()));
     solverMass.setMatrix(*M_bdMass);
     solverMass.setReusePreconditioner(false);
-    int numIter = solverMass.solveSystem( lambda, *sol, M_bdMass);
+    solverMass.solveSystem( lambda, *sol, M_bdMass);
 
     EpetraExt::MultiVector_Reindex reindexMV(*M_interfaceMap->map(Unique));
     boost::shared_ptr<MapEpetra> newMap(new MapEpetra( *M_interfaceMap ));

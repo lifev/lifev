@@ -26,9 +26,8 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifemcsolver.la
 
-liblifemcsolver_la_SOURCES   = BCInterface1DData.cpp \
-                               BCInterface3DData.cpp \
-                               BCInterface3DFunctionFSI.cpp \
+liblifemcsolver_la_SOURCES   = BCInterfaceData.cpp \
+                               BCInterface3DFSI.cpp \
                                FSIMonolithic.cpp \
                                FSIMonolithicGI.cpp \
                                FSIMonolithicGE.cpp \
@@ -53,6 +52,7 @@ liblifemcsolver_la_SOURCES   = BCInterface1DData.cpp \
                                MultiscaleModelFluid3D.cpp \
                                MultiscaleModelFSI3D.cpp \
                                MultiscaleModel1D.cpp \
+                               MultiscaleModelWindkessel0D.cpp \
                                MultiscaleCoupling.cpp \
                                MultiscaleCouplingBoundaryCondition.cpp \
                                MultiscaleCouplingStress.cpp \

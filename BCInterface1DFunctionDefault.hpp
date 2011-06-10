@@ -37,8 +37,8 @@
 #ifndef BCInterface1DFunctionDefault_H
 #define BCInterface1DFunctionDefault_H 1
 
-#include <lifemc/lifesolver/BCInterface1DDefinitions.hpp>
-#include <lifemc/lifesolver/BCInterface1DData.hpp>
+#include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
+#include <lifemc/lifesolver/BCInterfaceData.hpp>
 
 #include <lifemc/lifesolver/OneDimensionalSolver.hpp>
 
@@ -73,11 +73,9 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface1DData                                                     data_Type;
+    typedef BCInterfaceData                                                       data_Type;
 
     typedef OneDimensionalBC                                                      bc_Type;
-    typedef bc_Type::bcFunction_Type                                              bcFunction_Type;
-    typedef bc_Type::bcFunctionPtr_Type                                           bcFunction_PtrType;
     typedef bc_Type::bcFunctionDefaultPtr_Type                                    bcFunction_Default_PtrType;
 
     typedef bc_Type::vectorPtrContainer_Type                                      vectorPtrContainer_Type;
@@ -107,6 +105,18 @@ public:
     //@}
 
 
+    //! @name Methods
+    //@{
+
+    //! Assign the function to the base
+    /*!
+     * @param base base of the bc
+     */
+    void assignFunction( OneDimensionalBCFunction& base );
+
+    //@}
+
+
     //! @name Set Methods
     //@{
 
@@ -121,33 +131,13 @@ public:
      * @param flux flux object of the 1D model
      * @param source source object of the 1D model
      */
-    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source ) { M_defaultFunction->setFluxSource( flux, source ); }
+    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source ) { M_function->setFluxSource( flux, source ); }
 
     //! Set solution
     /*!
      * @param solution solution container of the 1D model
      */
-    void setSolution( const solutionPtr_Type& solution ) { M_defaultFunction->setSolution( solution ); }
-
-#ifdef GHOSTNODE
-    // Set the system residual that is required by the ghost node implementation
-    /*
-     * @param systemResidual system residual
-     */
-    void setSystemResidual( const vectorPtrContainer_Type& systemResidual ) { M_defaultFunction->setSystemResidual( systemResidual ); }
-#endif
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
-    //! Get the base of the boundary condition
-    /*!
-     * @return boundary condition base
-     */
-    bcFunction_Type& base() { return *M_base; }
+    void setSolution( const solutionPtr_Type& solution ) { M_function->setSolution( solution ); }
 
     //@}
 
@@ -170,8 +160,8 @@ private:
         Resistance
     };
 
-    bcFunction_PtrType          M_base;
-    bcFunction_Default_PtrType  M_defaultFunction;
+    defaultFunctions            M_defaultFunction;
+    bcFunction_Default_PtrType  M_function;
 };
 
 // ===================================================
@@ -179,8 +169,8 @@ private:
 // ===================================================
 template< class PhysicalSolverType >
 BCInterface1DFunctionDefault< PhysicalSolverType >::BCInterface1DFunctionDefault() :
-        M_base              ( new bcFunction_Type() ),
-        M_defaultFunction   ()
+        M_defaultFunction (),
+        M_function        ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -191,8 +181,8 @@ BCInterface1DFunctionDefault< PhysicalSolverType >::BCInterface1DFunctionDefault
 
 template< class PhysicalSolverType >
 BCInterface1DFunctionDefault< PhysicalSolverType >::BCInterface1DFunctionDefault( const data_Type& data ) :
-        M_base              ( new bcFunction_Type() ),
-        M_defaultFunction   ()
+        M_defaultFunction (),
+        M_function        ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -200,6 +190,46 @@ BCInterface1DFunctionDefault< PhysicalSolverType >::BCInterface1DFunctionDefault
 #endif
 
     this->setData( data );
+}
+
+
+// ===================================================
+// Methods
+// ===================================================
+template< class PhysicalSolverType >
+inline void
+BCInterface1DFunctionDefault< PhysicalSolverType >::assignFunction( OneDimensionalBCFunction& base )
+{
+    switch ( M_defaultFunction )
+    {
+    case Riemann:
+
+        base.setFunction( boost::bind( &OneDimensionalBCFunctionRiemann::operator(),
+                                       dynamic_cast<OneDimensionalBCFunctionRiemann *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+
+    case Compatibility:
+
+        base.setFunction( boost::bind( &OneDimensionalBCFunctionCompatibility::operator(),
+                                       dynamic_cast<OneDimensionalBCFunctionCompatibility *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+
+    case Absorbing:
+
+        base.setFunction( boost::bind( &OneDimensionalBCFunctionAbsorbing::operator(),
+                                       dynamic_cast<OneDimensionalBCFunctionAbsorbing *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+
+    case Resistance:
+
+        base.setFunction( boost::bind( &OneDimensionalBCFunctionResistance::operator(),
+                                       dynamic_cast<OneDimensionalBCFunctionResistance *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+    }
 }
 
 // ===================================================
@@ -211,7 +241,7 @@ BCInterface1DFunctionDefault< PhysicalSolverType >::setData( const data_Type& da
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface1DFunctionDefault::setData" << "\n";
+    Debug( 5025 ) << "BCInterface1DFunctionDefault::setData( data )" << "\n";
 #endif
 
     //Set mapFunction
@@ -221,44 +251,33 @@ BCInterface1DFunctionDefault< PhysicalSolverType >::setData( const data_Type& da
     mapFunction["Absorbing"]           = Absorbing;
     mapFunction["Resistance"]          = Resistance;
 
-    switch ( mapFunction[data.baseString()] )
+    M_defaultFunction = mapFunction[data.baseString()];
+
+    switch ( M_defaultFunction )
     {
     case Riemann:
 
-        M_defaultFunction.reset( new OneDimensionalBCFunctionRiemann( data.side(), data.quantity() ) );
-
-        M_base->setFunction( boost::bind( &OneDimensionalBCFunctionRiemann::operator(),
-                                          dynamic_cast<OneDimensionalBCFunctionRiemann *> ( &( *M_defaultFunction ) ), _1, _2 ) );
+        M_function.reset( new OneDimensionalBCFunctionRiemann( data.side(), data.quantity() ) );
 
         break;
 
     case Compatibility:
 
-        M_defaultFunction.reset( new OneDimensionalBCFunctionCompatibility( data.side(), data.quantity() ) );
-
-        M_base->setFunction( boost::bind( &OneDimensionalBCFunctionCompatibility::operator(),
-                                          dynamic_cast<OneDimensionalBCFunctionCompatibility *> ( &( *M_defaultFunction ) ), _1, _2 ) );
+        M_function.reset( new OneDimensionalBCFunctionCompatibility( data.side(), data.quantity() ) );
 
         break;
 
     case Absorbing:
 
-        M_defaultFunction.reset( new OneDimensionalBCFunctionAbsorbing( data.side(), data.quantity() ) );
-
-        M_base->setFunction( boost::bind( &OneDimensionalBCFunctionAbsorbing::operator(),
-                                          dynamic_cast<OneDimensionalBCFunctionAbsorbing *> ( &( *M_defaultFunction ) ), _1, _2 ) );
+        M_function.reset( new OneDimensionalBCFunctionAbsorbing( data.side(), data.quantity() ) );
 
         break;
 
     case Resistance:
 
-        M_defaultFunction.reset( new OneDimensionalBCFunctionResistance( data.side(), data.quantity(), data.resistance()[0] ) );
-
-        M_base->setFunction( boost::bind( &OneDimensionalBCFunctionResistance::operator(),
-                                          dynamic_cast<OneDimensionalBCFunctionResistance *> ( &( *M_defaultFunction ) ), _1, _2 ) );
+        M_function.reset( new OneDimensionalBCFunctionResistance( data.side(), data.quantity(), data.resistance()[0] ) );
 
         break;
-
     }
 }
 
