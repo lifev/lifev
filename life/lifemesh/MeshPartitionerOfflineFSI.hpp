@@ -101,7 +101,6 @@ public:
     typedef MeshPartitioner<uncutMesh_Type> meshCutter_Type;
     typedef boost::scoped_ptr<meshCutter_Type> meshCutterPtr_Type;
 
-    typedef MarkerTraits::entityFlag_Type entityFlag_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -129,8 +128,8 @@ public:
       @param solidPartitionNumber Int
       @param velocityOrder std::string
       @param displacementOrder std::string
-      @param fluidInterfaceFlag LifeV::MarkerTraits::EntityFlag (Int)
-      @param solidInterfaceFlag LifeV::MarkerTraits::EntityFlag (Int)
+      @param fluidInterfaceFlag LifeV::EntityFlagStandardPolicy::entityFlag_Type (Int)
+      @param solidInterfaceFlag LifeV::EntityFlagStandardPolicy::entityFlag_Type (Int)
       @param interfaceTolerance Real
       @param fluidInterfaceVertexFlag Int
       @param comm boost::shared_ptr to a Epetra_Comm object

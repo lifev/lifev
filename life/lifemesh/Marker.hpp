@@ -91,15 +91,7 @@ class EntityFlagStandardPolicy
 {
 public:
 
-    //! @name Public Types
-    //@{
-
-    //! entityFlag_Type is the type used to store the geometric entity flags
-    typedef ID entityFlag_Type;
-
-    //@}
-
-    /*! Nullflag is the value indicating a null flag, i.e a flag not yet
+    /*! S_NULLFLAG is the value indicating a null flag, i.e a flag not yet
       set to a usable value
     */
     static const entityFlag_Type S_NULLFLAG;

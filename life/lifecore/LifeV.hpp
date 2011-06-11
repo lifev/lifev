@@ -181,50 +181,41 @@ typedef uint32_type flag_Type;
 namespace Flag
 {
 //! returns true if all byte-flags common set in refFlag are also set in inputFlag
-static bool testAllSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline bool testAllSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
 {
     return ( inputFlag  & refFlag ) == refFlag;
 }
 
 //! returns true if at least one flag set in refFlag is set in inputFlag
-static bool testOneSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline bool testOneSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
 {
     return inputFlag  & refFlag;
 }
 
 //! turns on the refFlag active bits in inputFlag
-static flag_Type turnOn  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline flag_Type turnOn  ( flag_Type const & inputFlag, flag_Type const & refFlag )
 {
     return inputFlag  | refFlag;
 }
 
 //! turns off the refFlag active bits in inputFlag
-static flag_Type turnOff ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline flag_Type turnOff ( flag_Type const & inputFlag, flag_Type const & refFlag )
 {
     return inputFlag  & ~refFlag;
 }
 
 //! switches the refFlag active bits in inputFlag
-static flag_Type change ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline flag_Type change ( flag_Type const & inputFlag, flag_Type const & refFlag )
 {
     return inputFlag  ^ refFlag;
 }
 
 //! showMe method to print out flag status
 //! the flag is converted to its binary form ( right -> left corresponds to first -> last flag )
-static void showMe ( flag_Type const & flag, std::ostream & out )
-{
-    out << "Flag -- ";
-    flag_Type bit = 0x01;
-    for ( UInt i = 0; i < sizeof( flag_Type )*8; i++ )
-    {
-        out << static_cast<bool> ( flag & bit );
-        bit <<= 1;
-    }
-    out << std::endl;
-}
-} //end namespace Flag
+void showMe ( flag_Type const & flag, std::ostream & out );
 
+//end namespace Flag
+}
 // For now only 3 dimensional problems.
 extern const UInt nDimensions;
 

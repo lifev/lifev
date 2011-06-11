@@ -28,11 +28,11 @@
     @file
     @brief This file implements the standard selector for internal entities
 
-    @author 
+    @author
     @contributor Nur Aiman Fadel <nur.fadel@mail.polimi.it>
     @maintainer Nur Aiman Fadel <nur.fadel@mail.polimi.it>
 
-    @date 
+    @date
 
     A more detailed description of the file (if necessary)
  */
