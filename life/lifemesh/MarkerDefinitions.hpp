@@ -76,7 +76,7 @@ public:
 
     // Old typedefs to delete
 
- //   typedef MT MarkerTraits;
+ //   typedef MT FlagPolicy;
     typedef Marker<MT> PointMarker;
     typedef Marker<MT> EdgeMarker;
     typedef Marker<MT> FaceMarker;
