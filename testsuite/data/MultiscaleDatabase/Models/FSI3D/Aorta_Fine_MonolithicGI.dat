@@ -333,7 +333,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         function   = 0
         
             [./Robin]
-        	functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; ((y>=L1)*4+(y>=L2)*(y<L1)*(4-2.5/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*1.5+(y>=L4)*(y<L3)*(1.5+1/(L4-L3)*(y-L3))+(y<L4)*2.5) * 10000 * f_timeStep'
+        	functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(5.5-3.5/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*2.0+(y>=L4)*(y<L3)*(2.0+1.5/(L4-L3)*(y-L3))+(y<L4)*3.5) * 10000 * f_timeStep'
         	[../]
 
         [../]
