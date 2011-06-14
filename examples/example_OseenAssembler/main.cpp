@@ -64,8 +64,6 @@
 #include <life/lifefilters/ExporterHDF5.hpp>
 #include <life/lifefem/TimeAdvanceBDF.hpp>
 #include "life/lifefunctions/RossEthierSteinmanDec.hpp"
-#include "life/lifefunctions/RossEthierSteinmanInc.hpp"
-#include "EthierSteinmanUnsteady.hpp"
 
 using namespace LifeV;
 
@@ -95,7 +93,6 @@ typedef boost::shared_ptr<VectorEpetra> vectorPtr_type;
 typedef FESpace< mesh_type, MapEpetra > fespace_type;
 typedef boost::shared_ptr< fespace_type > fespacePtr_type;
 typedef LifeV::RossEthierSteinmanUnsteadyDec problem_Type;
-//typedef LifeV::EthierSteinmanUnsteady problem_Type;
 }
 
 void printErrors(const vector_type& solution, const Real& currentTime, fespacePtr_type uFESpace, fespacePtr_type pFESpace, bool verbose)
@@ -195,6 +192,15 @@ main( int argc, char** argv )
     problem_Type::setD(1.0);
     problem_Type::setViscosity(viscosity);
     problem_Type::setDensity(density);
+
+    if(diffusionType == StiffStrain)
+    {
+        problem_Type::setFlagStrain(1);
+    }
+    else
+    {
+        problem_Type::setFlagStrain(0);
+    }
 
     // +-----------------------------------------------+
     // |               Loading the mesh                |
@@ -432,7 +438,6 @@ main( int argc, char** argv )
         if (initializationMethod == Projection)
         {
             uFESpace->interpolate(problem_Type::uderexact, *rhs, currentTime);
-            //uFESpace.l2ScalarProduct(problem_Type::uderexact, rhs, currentTime);
             rhs->globalAssemble();
             *rhs *= -1.;
             *rhs = (*massMatrix)*(*rhs);
