@@ -91,7 +91,15 @@ class EntityFlagStandardPolicy
 {
 public:
 
-    /*! S_NULLFLAG is the value indicating a null flag, i.e a flag not yet
+    //! @name Public Types
+    //@{
+
+    //! entityFlag_Type is the type used to store the geometric entity flags
+    typedef ID entityFlag_Type;
+
+    //@}
+
+    /*! Nullflag is the value indicating a null flag, i.e a flag not yet
       set to a usable value
     */
     static const entityFlag_Type S_NULLFLAG;
@@ -148,6 +156,12 @@ class Marker
 {
 public:
 
+    //! @name Public Types
+    //@{
+    typedef typename MarkerTraits::entityFlag_Type entityFlag_Type;
+
+    //@}
+
     //! @name Constructor & Destructor
     //@{
 
@@ -186,12 +200,6 @@ public:
     //! Display method
     virtual void showMe( std::ostream & output = std::cout ) const;
 
-    //! Helper function that prints a marker Flag
-    std::ostream & __attribute__ ((__deprecated__)) printFlag( entityFlag_Type const f, std::ostream & output ) const;
-
-    //! Helper function that prints "this" marker flag
-    std::ostream & __attribute__ ((__deprecated__)) printFlag( std::ostream & output ) const;
-
     //@}
 
     //! @name Set Methods
@@ -227,9 +235,6 @@ public:
 
     //! Put marker to nullflag
     inline void unsetMarker(); //const;
-
-    //! Put marker to nullflag
-    inline void __attribute__ ((__deprecated__)) markerUnset() const;
 
     //@}
 
@@ -349,34 +354,10 @@ void Marker<FlagPolicy>::unsetMarker()
     M_flag = nullFlag();
 }
 
-template <typename FlagPolicy>
-void Marker<FlagPolicy>::markerUnset() const
+template <typename MarkerTraits>
+bool Marker<MarkerTraits>::hasEqualEntityFlag(entityFlag_Type const & flag) const
 {
-    M_flag = nullFlag();
-}
-
-
-template <typename FlagPolicy>
-bool Marker<FlagPolicy>::hasEqualEntityFlag(entityFlag_Type const & flag) const
-{
-    return FlagPolicy::EqualFlags(flag,M_flag);
-}
-
-template <typename FlagPolicy>
-std::ostream & Marker<FlagPolicy>::printFlag( entityFlag_Type const f, std::ostream & output ) const
-{
-    if ( f == nullFlag() )
-        output << "UNSET";
-    else
-        output << f;
-    return output;
-}
-
-template <typename FlagPolicy>
-std::ostream & Marker<FlagPolicy>::printFlag( std::ostream & output ) const
-{
-    showMe( output );
-    return output;
+    return MarkerTraits::EqualFlags(flag,M_flag);
 }
 
 template <typename FlagPolicy>

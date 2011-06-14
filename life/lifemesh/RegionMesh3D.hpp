@@ -2865,9 +2865,7 @@ RegionMesh3D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
     out << "                      RegionMesh3D                " << std::endl;
     out << "**************************************************" << std::endl;
     out << "**************************************************" << std::endl;
-    out << " ID: " << this->id() << " Marker Flag:";
-    this->printFlag( out );
-    out << std::endl;
+    out << " ID: " << this->id() << " Marker Flag: " << this->marker() << std::endl;
     //  out <<"Faces local to  volumes stored: "<<hasLocalFaces()<<std::endl;
     //out <<"Edges local to  volumes stored: "<<hasLocalEdges()<<std::endl;
     //out <<"Edges local to  faces   stored:"<<switches.test("FACEtoEDGE")<<std::endl;
@@ -2899,10 +2897,7 @@ RegionMesh3D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
 
 }
 
-template <class RegionMesh3D>
-extern
-bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
-                  std::ostream & out, std::ostream & err, std::ostream & clog );
+
 
 
 template <typename GEOSHAPE, typename MC>
@@ -3812,7 +3807,7 @@ orderMesh(MPI_Comm comm) // serial reordering:
         ics[order[iv]]=pointList[iv].x();
         ipsilon[order[iv]]=pointList[iv].y();
         zeta[order[iv]]=pointList[iv].z();
-        mk[order[iv]]=EntityFlag( pointList[iv].marker() );
+        mk[order[iv]]=static_cast<UInt>( pointList[iv].marker() );
     }
 
     for ( UInt iv = 0; iv < pointList.size(); ++iv )

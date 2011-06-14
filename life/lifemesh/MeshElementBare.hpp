@@ -617,13 +617,6 @@ MeshElementBareHandler<BareItemType>::deleteIfThere( bareItem_Type const & item 
 }
 
 template <class BareItemType>
-bool  __attribute__ ((__deprecated__))
-MeshElementBareHandler<BareItemType>::isThereDel( bareItem_Type const & item )
-{
-    return erase( item ) != 0;
-}
-
-template <class BareItemType>
 inline
 UInt
 MeshElementBareHandler<BareItemType>::howMany() const
@@ -656,24 +649,6 @@ MeshElementBareHandler<BareItemType>::id( const bareItem_Type & item ) const
 // ===================================================
 // Set Methods
 // ===================================================
-template <class BareItemType>
-inline
-bool  __attribute__ ((__deprecated__))
-MeshElementBareHandler<BareItemType>::setId( const bareItem_Type & item, const ID& id )
-{
-    containerConstIterator_Type i = find( item );
-    if ( i != container_Type::end() )
-    {
-        i->second = id;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-
-}
-
 
 template <class BareItemType>
 inline

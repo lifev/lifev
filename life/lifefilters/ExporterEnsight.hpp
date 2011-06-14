@@ -407,7 +407,7 @@ template <typename MeshType>
 void ExporterEnsight<MeshType>::writeAscii(const exporterData_Type& dvar)
 {
 
-    switch ( dvar.type() )
+    switch ( dvar.fieldType() )
     {
     case exporterData_Type::ScalarField:
         writeAsciiScalar(dvar);
@@ -471,7 +471,7 @@ template <typename MeshType> void ExporterEnsight<MeshType>::writeAsciiVector(co
 
     UInt count=0;
 
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
     UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
 
@@ -518,7 +518,7 @@ void ExporterEnsight<MeshType>::caseVariableSection(std::ofstream& casef)
         else
             str = ".*****";
         aux = i->variableName() + " " + super::M_prefix + "_" + i->variableName();
-        switch ( i->type() )
+        switch ( i->fieldType() )
         {
         case exporterData_Type::ScalarField:
             casef << "scalar per node: 1 " +  aux + str << this->M_me << ".scl\n";
@@ -609,7 +609,7 @@ template <typename MeshType> void ExporterEnsight<MeshType>::readVector(exporter
     ASSERT(vectorFile.good(), std::stringstream("There is an error while reading " +
                                                 filename).str().c_str() );
 
-    UInt size  = dvar.size();
+    UInt size  = dvar.numDOF();
     UInt start = dvar.start();
     UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
 
