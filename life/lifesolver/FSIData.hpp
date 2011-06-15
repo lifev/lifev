@@ -256,7 +256,7 @@ public:
      * @return the timestep used in the previous simulation from which we want to restart, used for the initialization
      of the time discretization
      */
-    inline Real restartTimestep() const { return M_restartTimestep; }
+    inline Real restartTimeStep() const { return M_restartTimeStep; }
 
     //@}
 
@@ -293,7 +293,7 @@ private:
 
     Real                          M_interfaceTolerance;
 
-    Real                          M_restartTimestep;
+    Real                          M_restartTimeStep;
 };
 
 
