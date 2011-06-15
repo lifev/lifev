@@ -114,10 +114,10 @@ dnl AC_CHECK_LIB([grace_np],GraceClose,[grace_libs="-lgrace_np"],[grace_libs=""]
 dnl AC_SUBST(grace_libs)
 
 AC_CHECK_BOOST
-AC_CHECK_BOOST_GRAPH
+dnl AC_CHECK_BOOST_GRAPH
 dnl AC_CHECK_BOOST_SIGNALS
-AC_CHECK_BOOST_REGEX
-AC_CHECK_BOOST_UNIT_TEST_FRAMEWORK
+dnl AC_CHECK_BOOST_REGEX
+dnl AC_CHECK_BOOST_UNIT_TEST_FRAMEWORK
 AC_CHECK_BOOST_SPIRIT
 
 dnl disabling boost_program_options
