@@ -232,11 +232,11 @@ PreconditionerML::createMLList( list_Type& list,
     bool SmootherHiptmairEfficientSymmetric = dataFile( (section + "/" + subSection + "/smoother/Hiptmair_efficient_symmetric").data(), true, found );
     if ( found ) list.set( "smoother: Hiptmair efficient symmetric", SmootherHiptmairEfficientSymmetric );
 
-    std::string SmootherIpackType           = dataFile( (section + "/" + subSection + "/smoother/ifpack_type").data(), "ILU", found );
-    if ( found ) list.set( "smoother: ifpack type", SmootherIpackType );
+    std::string SmootherIfpackType           = dataFile( (section + "/" + subSection + "/smoother/ifpack_type").data(), "ILU", found );
+    if ( found ) list.set( "smoother: ifpack type", SmootherIfpackType );
 
-    Int SmootherIpackOverlap                = dataFile( (section + "/" + subSection + "/smoother/ifpack_overlap").data(), 1, found );
-    if ( found ) list.set( "smoother: ifpack overlap", SmootherIpackOverlap );
+    Int SmootherIfpackOverlap                = dataFile( (section + "/" + subSection + "/smoother/ifpack_overlap").data(), 1, found );
+    if ( found ) list.set( "smoother: ifpack overlap", SmootherIfpackOverlap );
 
     Int SmootherNumLevelTypes               = dataFile( (section + "/" + subSection + "/smoother/level_type").data(), 0, found );
     if ( found )
@@ -371,7 +371,7 @@ PreconditionerML::setDataFromGetPot( const GetPot&      dataFile,
         }
         else
         {
-            std::cout << "Warning: Visualization options are not available if you have not use setVerticesCoordinates firt!" << std::endl;
+            std::cout << "Warning: Visualization options are not available if you have not use setVerticesCoordinates first!" << std::endl;
         }
     }
 
