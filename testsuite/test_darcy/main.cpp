@@ -71,7 +71,6 @@ Solve the problem
 
 #include "darcy.hpp"
 
-#include <life/lifemesh/BarePoint.hpp>
 
 // ===================================================
 //! Namespaces
@@ -88,28 +87,6 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 // ===================================================
 int main(int argc, char** argv)
 {
-  BarePoint v1( 1., 1., 2. ), v2( 0., 1., 0. ), v3;
-
-  std::cout << v1              << std::endl << std::endl;
-  std::cout << v2              << std::endl << std::endl;
-  std::cout << v3              << std::endl << std::endl;
-  std::cout << v1[ 0 ]         << std::endl << std::endl;
-  v1 [ 0 ] = 0.;
-  std::cout << v1[ 0 ]         << std::endl << std::endl;
-  std::cout << v1( 0 )         << std::endl << std::endl;
-  v1 ( 0 ) = 1.;
-  std::cout << v1( 0 )         << std::endl << std::endl;
-  std::cout << v1 + v2         << std::endl << std::endl;
-  std::cout << v1 - v2         << std::endl << std::endl;
-  std::cout << 2. * v1         << std::endl << std::endl;
-  std::cout << v1 / 2.         << std::endl << std::endl;
-  std::cout << v1.dot( v2 )    << std::endl << std::endl;
-  std::cout << v1.cross( v2 )  << std::endl << std::endl;
-  std::cout << v1.normalized() << std::endl << std::endl;
-  v1.normalize();
-  std::cout << v1              << std::endl << std::endl;
-
-  return 0;
 
 #ifdef HAVE_MPI
 
