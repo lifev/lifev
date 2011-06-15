@@ -127,7 +127,6 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         M_meshMotion->updateDispDiff();
 
         M_beta.reset(new vector_Type(M_uFESpace->map()));
-        M_meshMotion->disp().spy("meshDispGCE");
         vector_Type meshDispDiff( M_meshMotion->disp(), Repeated );
 
         this->moveMesh(meshDispDiff);//initialize the mesh position with the total displacement
@@ -138,7 +137,6 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         meshDispDiff *= -alpha; //mesh velocity w
         this->interpolateVelocity(meshDispDiff, *this->M_beta);
 
-        M_beta->spy("betaGCE");
         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
         fluid->subset(*M_un, (UInt)0);
         *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
@@ -206,7 +204,7 @@ void FSIMonolithicGE::applyBoundaryConditions( )
          M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
 
          M_monolithicMatrix->GlobalAssemble();
-         M_monolithicMatrix->matrix()->spy("M");
+         //M_monolithicMatrix->matrix()->spy("M");
 }
 
 

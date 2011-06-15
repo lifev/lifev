@@ -99,13 +99,22 @@ FSIMonolithic::setupDOF( void )
 {
 
     M_dofStructureToHarmonicExtension    .reset( new DOFInterface3Dto3D );
+    M_dofStructureToFluid    .reset( new DOFInterface3Dto3D );
 
-    M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
+    M_dofStructureToHarmonicExtension->setup(   M_mmFESpace->refFE(), M_mmFESpace->dof(),
                                                 M_dFESpace->refFE(), M_dFESpace->dof() );
-    M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
+    M_dofStructureToHarmonicExtension->update( *M_mmFESpace->mesh(),  M_data->fluidInterfaceFlag(),
                                                *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
                                                M_data->interfaceTolerance(),
                                                M_data->fluidInterfaceVertexFlag() );
+
+    M_dofStructureToFluid->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
+                                    M_dFESpace->refFE(), M_dFESpace->dof() );
+    M_dofStructureToFluid->update( *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
+                                   *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
+                                   M_data->interfaceTolerance(),
+                                   M_data->fluidInterfaceVertexFlag() );
+
 
     createInterfaceMaps(M_dofStructureToHarmonicExtension->localDofMap());
 }
@@ -326,8 +335,6 @@ FSIMonolithic::solveJac( vector_Type& _step, const vector_Type& _res, const Real
     M_solid->getDisplayer().leaderPrint("  M-  Residual NormInf:                        ", _res.normInf(), "\n");
     iterateMonolithic(_res, _step);
     M_solid->getDisplayer().leaderPrint("  M-  Solution NormInf:                        ", _step.normInf(), "\n");
-    _step.spy("step");
-    _res.spy("res");
 }
 
 void

@@ -130,7 +130,7 @@ FSIMonolithicGI::updateSystem( )
     vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
     super_Type::updateSystem();
-    M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.`
+    M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.`
     M_un.reset(new vector_Type(*M_uk));
 }
 
@@ -146,7 +146,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
         if(M_restarts)
         {
-            alpha = 1/M_data->restartTimestep();
+            alpha = 1/M_data->restartTimeStep();
             M_restarts = false;
         }
 
@@ -164,9 +164,9 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
         //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
-        M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
+        M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.
         vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
-        this->moveMesh(mmRep);// re-initialize the mesh points
+        moveMesh(mmRep);// re-initialize the mesh points
 
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
@@ -180,15 +180,15 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         *meshDispDiff *= -alpha;// -w, mesh velocity
         mmRep = *meshDispDiff;
 
-        interpolateVelocity(mmRep, *this->M_beta);
-        //            *this->M_beta *= -alpha; //if the HE solution is scaled!
+        interpolateVelocity(mmRep, *M_beta);
+        //            *M_beta *= -alpha; //if the HE solution is scaled!
 
-        vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
+        vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
         if (!M_convectiveTermDer)
             fluid->subset(*M_un, 0);
         else
             fluid->subset(disp, 0);
-        *this->M_beta += *fluid; /*M_un or disp, it could be also M_uk in a FP strategy*/
+        *M_beta += *fluid; /*M_un or disp, it could be also M_uk in a FP strategy*/
 
         assembleSolidBlock( iter, M_uk );
         assembleFluidBlock( iter, M_uk );
@@ -221,8 +221,8 @@ FSIMonolithicGI::applyBoundaryConditions()
         M_monolithicMatrix->setConditions(M_BChs);
         M_monolithicMatrix->setSpaces(M_FESpaces);
         M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
-        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
-        M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), 2, 16);
+        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
+        M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), 16);
     }
     else
     {
@@ -331,7 +331,7 @@ void FSIMonolithicGI::setupBlockPrec( )
         M_precPtr->setConditions( M_BChs );
         M_precPtr->setSpaces( M_FESpaces );
         M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
-        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), 2 , 16);
+        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep() , 2);
 
         if (M_data->dataFluid()->useShapeDerivatives())
         {
