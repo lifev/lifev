@@ -65,7 +65,6 @@ FSIMonolithic::FSIMonolithic():
         M_reusePrec(true),
         M_resetPrec(true),
         M_maxIterSolver(-1),
-        M_restarts(false),
         //end of protected attributes
         M_preconditionedSymmetrizedMatrix(),
         M_stress(),
@@ -154,7 +153,6 @@ FSIMonolithic::setUp( const GetPot& dataFile )
     M_reusePrec     = dataFile( "linear_system/prec/reuse", true);
     M_maxIterSolver = dataFile( "linear_system/solver/max_iter", -1);
     M_diagonalScale    = dataFile( "linear_system/prec/diagonalScaling",  false );
-    M_restarts         = dataFile( "exporter/start"  ,  0   );
 }
 
 void
@@ -548,8 +546,8 @@ void FSIMonolithic::setupBlockPrec( )
 void
 FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
 {
-     if (iter == 0)
-     {
+    if (iter == 0)
+    {
         updateSolidSystem(this->M_rhs);
     }
     else

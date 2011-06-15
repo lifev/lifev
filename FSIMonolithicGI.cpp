@@ -115,14 +115,14 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
 }
 
 void
-FSIMonolithicGI::buildSystem ( )
+FSIMonolithicGI::buildSystem()
 {
     super_Type::buildSystem();
     M_meshMotion->computeMatrix();
 }
 
 void
-FSIMonolithicGI::updateSystem( )
+FSIMonolithicGI::updateSystem()
 {
     //M_meshMotion->dispOld() is at time n-1 !!
 
@@ -291,8 +291,7 @@ FSIMonolithicGI::couplingVariableExtrap( )
 
 //============ Protected Methods ===================
 
-
-void FSIMonolithicGI::setupBlockPrec( )
+void FSIMonolithicGI::setupBlockPrec()
 {
     super_Type::setupBlockPrec( );
 

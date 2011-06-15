@@ -498,7 +498,6 @@ protected:
     void updateSolution( const vector_Type& solution )
     {
         setSolution( solution );
-
         setDispSolid( solution );
         M_solid->updateVel();
     }
@@ -588,7 +587,6 @@ protected:
     bool                                              M_reusePrec;//!\todo to move to private
     bool                                              M_resetPrec;//!\todo to move to private
     Int                                               M_maxIterSolver;//!\todo to move to private
-    bool                                              M_restarts;
     //@}
 
 private:

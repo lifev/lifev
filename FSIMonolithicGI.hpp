@@ -150,9 +150,7 @@ public:
        also the right hand side.
      */
     void applyBoundaryConditions();
-
     //@}
-
 
     //!@name Set Methods
     //@{
