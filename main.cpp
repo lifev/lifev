@@ -527,7 +527,6 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 {
 
     M_Tstart=data_file( "fluid/time_discretization/initialtime", 0.);
-    //M_data->resetTimeStep( M_data->restartTimestep() );
 
     using namespace LifeV;
     std::string const importerType =  data_file( "importer/type", "ensight");
@@ -631,9 +630,6 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
     M_fsi->initialize(initSol);
-
-    //M_data->restoreTimeStep();
-
 }
 
 void Problem::checkGCEResult(const LifeV::Real& time)
