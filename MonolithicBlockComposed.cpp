@@ -67,9 +67,7 @@ void MonolithicBlockComposed::coupler( mapPtr_Type& map,
                                        const std::map<ID, ID>& locDofMap,
                                        const vectorPtr_Type& numerationInterface,
                                        const Real& timeStep,
-                                       UInt couplingBlock,
-                                       UInt /*couplingFlag*/
-                                       )
+                                       UInt couplingBlock)
 {
     matrixPtr_Type coupling(new matrix_Type(*map));
     couplingMatrix( coupling,  (*M_couplingFlags)[couplingBlock], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);

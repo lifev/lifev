@@ -142,9 +142,7 @@ public:
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
-                 UInt /*flag*/,
-                 UInt couplingFlag
-                 );
+                 UInt couplingFlag);
 
     //! returns true if the operator has at least one block
     /*!

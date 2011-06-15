@@ -149,16 +149,17 @@ public:
       @param locDofMap: std::map holding the connections between the coupling interface dofs
       @param numerationInterface: the numeration of the interface dofs
       @param timeStep: time step
-      @param couplingBlock: UInt specifying the position of the coupling block to be added.
-      @param couplingFlag: flag specifying which block must be coupled whith which block.
+      @param couplingBlock: UInt specifying the position of the coupling block to be added. Not used in this case, since the coupling flag for each block
+      is contained in the vector M_couplingFlags. See MonolithicBlock::couplingMatrix to understand what the values
+      for this flag correspond to.
+      @param couplingBlock: flag specifying which block is considered (must not exceed the size of the vector of blocks,
+      otherwise a std::bad_alloc exception is thrown). The coupling for each block is specified by a static vector passed to the constructor.
      */
     void coupler(mapPtr_Type& map,
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
-                 UInt flag,
-                 UInt couplingFlag
-                 );
+                 UInt couplingBlock);
 
 
     //! pushes a block at the end of the vector

@@ -59,7 +59,7 @@
     to each factor, so that \f$ P^{-1}=(P_{AS}(P_2))^{-1}(P_{AS}(P_1))^{-1}\f$.
 
     NOTE: this class is used also in the geometry implicit case, with an additional factor for the mesh motion, which is
-    coupled to the solid block using the default coupling method ComposedBlockOper::coupler. In that case the
+    coupled to the solid block using the default coupling method MonolithicBlockComposed::coupler. In that case the
     preconditioner is decomposed in three factors, the fluid and structure ones being the same as for the GCE case.
     NOTE2: this class is also the base class for other types of preconditioners, like ComposedDN2, ComposedDND. In fact for
     instance it is used as F-S block in the preconditioners for the GI matrix in FSIFSIMonolithicGI
