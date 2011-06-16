@@ -63,7 +63,7 @@ public:
     //! @name Constructors and destructor
     //@{
 
-    MonolithicBlockComposedDND( const std::vector<Int>& flag, const std::vector<Block>& order ):
+    MonolithicBlockComposedDND( const std::vector<Int>& flag, const std::vector<Int>& order ):
             super_Type(flag, order),
             M_swapped(false)
     {

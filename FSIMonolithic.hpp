@@ -498,14 +498,9 @@ protected:
     void updateSolution( const vector_Type& solution )
     {
         setSolution( solution );
-
         setDispSolid( solution );
         M_solid->updateVel();
     }
-
-    //!Empty method kept for compatibility with FSIOperator.
-    void couplingVariableExtrap(vectorPtr_Type& /*lambda*/, vectorPtr_Type& /*lambdaDot*/, bool& /*firstIter*/)
-    { }
 
     //! Constructs the solid FESpace
     /**
@@ -571,10 +566,10 @@ protected:
     precPtr_Type                                      M_precPtr;
     boost::shared_ptr<vector_Type>                    M_rhsFull;
 
-    fluidBchandlerPtr_Type                              M_BCh_flux;
-    solidBchandlerPtr_Type                              M_BCh_Robin;
-    //UInt                                              M_fluxes;
-    solidBchandlerPtr_Type                              M_BChWS;
+    fluidBchandlerPtr_Type                            M_BCh_flux;
+    solidBchandlerPtr_Type                            M_BCh_Robin;
+    //UInt                                            M_fluxes;
+    solidBchandlerPtr_Type                            M_BChWS;
     BCFunctionRobin                                   M_bcfWs;
     //    matrixPtr_Type                                    M_robinCoupling;
     UInt                                              M_offset;
@@ -592,6 +587,7 @@ protected:
     bool                                              M_reusePrec;//!\todo to move to private
     bool                                              M_resetPrec;//!\todo to move to private
     Int                                               M_maxIterSolver;//!\todo to move to private
+    bool                                              M_restarts;
     //@}
 
 private:

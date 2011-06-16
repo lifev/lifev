@@ -125,7 +125,6 @@ void
 FSIMonolithicGI::updateSystem()
 {
     //M_meshMotion->dispOld() is at time n-1 !!
-    //M_meshMotion->updateSystem();
 
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
@@ -136,11 +135,24 @@ FSIMonolithicGI::updateSystem()
 }
 
 void
-FSIMonolithicGI::evalResidual( vector_Type& res, const vector_Type& disp, const UInt iter )
+FSIMonolithicGI::evalResidual( vector_Type&       res,
+                               const vector_Type& disp,
+                               const UInt          iter )
 {
+
     if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
-        M_uk.reset(new vector_Type( disp ));
+
+        Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
+        if(M_restarts)
+        {
+            alpha = 1/M_data->restartTimeStep();
+            M_restarts = false;
+        }
+
+        M_uk.reset(new vector_Type( disp ));//M_uk should point to the same vector as disp, indeed, not be copied.
+        //in that case this line is useless
+
         UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
         vectorPtr_Type meshDispDiff( new vector_Type(M_mmFESpace->map()) );
@@ -153,26 +165,30 @@ FSIMonolithicGI::evalResidual( vector_Type& res, const vector_Type& disp, const 
         //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
         //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
         M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.
-        double alpha = 1/M_data->dataFluid()->dataTime()->timeStep();
         vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
         moveMesh(mmRep);// re-initialize the mesh points
-        *meshDispDiff -= *meshDispOld;//relative displacement
-        if (!M_domainVelImplicit)
+
+        if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
-            meshDispDiff=meshDispOld;// at time n /*->subset(*M_un, offset)*/; //if the mesh motion is at the previous time step in the convective term
+            meshDispDiff = meshDispOld;// at time n;
             *meshDispDiff -= M_meshMotion->dispOld();//at time n-1
+        }
+        else
+        {
+            *meshDispDiff -= *meshDispOld;//relative displacement
         }
         *meshDispDiff *= -alpha;// -w, mesh velocity
         mmRep = *meshDispDiff;
 
         interpolateVelocity(mmRep, *M_beta);
-        //            *M_beta *= -alpha; //HE solution scaled!
+        //            *M_beta *= -alpha; //if the HE solution is scaled!
+
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
         if (!M_convectiveTermDer)
-            fluid->subset(*M_un/**M_unOld*/, 0);
+            fluid->subset(*M_un, 0);
         else
             fluid->subset(disp, 0);
-        *M_beta += *fluid/*M_un or disp, it could be also M_uk in a FP strategy*/;
+        *M_beta += *fluid; /*M_un or disp, it could be also M_uk in a FP strategy*/
 
         assembleSolidBlock( iter, M_uk );
         assembleFluidBlock( iter, M_uk );
@@ -205,7 +221,8 @@ FSIMonolithicGI::applyBoundaryConditions()
         M_monolithicMatrix->setConditions(M_BChs);
         M_monolithicMatrix->setSpaces(M_FESpaces);
         M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
-        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
+        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
+        M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), 16);
     }
     else
     {
@@ -229,7 +246,7 @@ FSIMonolithicGI::applyBoundaryConditions()
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
-    //M_monolithicMatrix->matrix()->spy("FM");
+    //M_monolithicMatrix->matrix()->spy("FMFI");
 }
 
 void FSIMonolithicGI::initialize( fluidPtr_Type::value_type::function_Type const& u0,
@@ -245,6 +262,34 @@ void FSIMonolithicGI::initialize( fluidPtr_Type::value_type::function_Type const
     M_un->add(df, M_solidAndFluidDim+getDimInterface());
     M_meshMotion->setDisplacement(df);
 }
+
+void
+FSIMonolithicGI::couplingVariableExtrap( )
+{
+    M_lambda.reset(new vector_Type(solution()));//un
+
+    if (true || !M_lambdaDot.get())//first iteration when not properly initialized
+    {
+        M_lambdaDot.reset        ( new vector_Type(*M_monolithicMap, Unique) );
+    }
+    else
+    {
+        *M_lambda *= 2.;
+        *M_lambda -= (*M_lambdaDot);
+    }
+
+    //M_lambdaDDot   = M_lambdaDot;//un-1
+    *M_lambdaDot   = *solutionPtr();//un
+
+    //initializeBDF(*M_lambda);
+    setSolution(*M_lambda);
+
+    M_solid->getDisplayer().leaderPrint("norm( disp  ) init = ", M_lambda->normInf() );
+    M_solid->getDisplayer().leaderPrint("norm( velo )  init = ", M_lambdaDot->normInf());
+}
+
+
+//============ Protected Methods ===================
 
 void FSIMonolithicGI::setupBlockPrec()
 {
@@ -285,7 +330,7 @@ void FSIMonolithicGI::setupBlockPrec()
         M_precPtr->setConditions( M_BChs );
         M_precPtr->setSpaces( M_FESpaces );
         M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
-        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), 2 );
+        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep() , 2);
 
         if (M_data->dataFluid()->useShapeDerivatives())
         {
@@ -309,7 +354,7 @@ void FSIMonolithicGI::shapeDerivatives( matrixPtr_Type sdMatrix )
 {
     Real alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
     vectorPtr_Type rhsNew(new vector_Type(*M_monolithicMap));
-    vector_Type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
+    vector_Type un(M_uFESpace->map());
     vector_Type uk(M_uFESpace->map()+M_pFESpace->map());
 
     vectorPtr_Type meshVel(new vector_Type(M_mmFESpace->map()));
@@ -394,20 +439,20 @@ namespace
 
 MonolithicBlockMatrix* createAdditiveSchwarzGI()
 {
-    return new MonolithicBlockMatrix(31);
+    return new MonolithicBlockMatrix(15);
 }
 
 MonolithicBlockMatrix* createAdditiveSchwarzRNGI()
 {
-    return new MonolithicBlockMatrixRN(31);
+    return new MonolithicBlockMatrixRN(15);
 }
 
 MonolithicBlock* createComposedDNGI()
 {
-    const MonolithicBlockComposed::Block order[] = {  MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid, MonolithicBlockComposed::mesh };
+    const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid, MonolithicBlockComposed::mesh };
     const Int couplingsDNGI[] = { 0, 7, 16 };
     const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
-    const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+3);
+    const std::vector<Int> orderVector(order, order+3);
     return new MonolithicBlockComposedDN( couplingVectorDNGI, orderVector );
 }
 
@@ -416,7 +461,7 @@ MonolithicBlock* createComposedDN2GI()
     const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh };
     const Int couplingsDN2GI[] = { 8, 6, 16 };
     const std::vector<Int> couplingVectorDN2GI(couplingsDN2GI, couplingsDN2GI+3);
-    const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+3);
+    const std::vector<Int> orderVector(order, order+3);
     return new MonolithicBlockComposedDN( couplingVectorDN2GI, orderVector );
 }
 
@@ -425,7 +470,7 @@ MonolithicBlock* createComposedDNDGI()
     const MonolithicBlockComposed::Block order[] = {  MonolithicBlockComposed::mesh, MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid };
     const Int couplingsDNGI2[] = { 0, 7, 0 };
     const std::vector<Int> couplingVectorDNGI2(couplingsDNGI2, couplingsDNGI2+3);
-    const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+3);
+    const std::vector<Int> orderVector(order, order+3);
     return new MonolithicBlockComposedDND( couplingVectorDNGI2, orderVector );
 }
 
@@ -434,7 +479,7 @@ MonolithicBlock* createComposedDND2GI()
     const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::mesh, MonolithicBlockComposed::fluid , MonolithicBlockComposed::solid};
     const Int couplingsDN2GI2[] = { 8, 6, 0 };
     const std::vector<Int> couplingVectorDN2GI2(couplingsDN2GI2, couplingsDN2GI2+3);
-    const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+3);
+    const std::vector<Int> orderVector(order, order+3);
     return new MonolithicBlockComposedDND( couplingVectorDN2GI2, orderVector );
 }
 FSIOperator* createFM() { return new FSIMonolithicGI(); }

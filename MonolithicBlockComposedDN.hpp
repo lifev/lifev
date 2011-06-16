@@ -59,7 +59,7 @@
     to each factor, so that \f$ P^{-1}=(P_{AS}(P_2))^{-1}(P_{AS}(P_1))^{-1}\f$.
 
     NOTE: this class is used also in the geometry implicit case, with an additional factor for the mesh motion, which is
-    coupled to the solid block using the default coupling method ComposedBlockOper::coupler. In that case the
+    coupled to the solid block using the default coupling method MonolithicBlockComposed::coupler. In that case the
     preconditioner is decomposed in three factors, the fluid and structure ones being the same as for the GCE case.
     NOTE2: this class is also the base class for other types of preconditioners, like ComposedDN2, ComposedDND. In fact for
     instance it is used as F-S block in the preconditioners for the GI matrix in FSIFSIMonolithicGI
@@ -88,14 +88,9 @@ class MonolithicBlockComposedDN : public MonolithicBlockComposed
 public:
     typedef MonolithicBlockComposed super_Type;
 
-    MonolithicBlockComposedDN( const std::vector<Int>& flag, const std::vector<Block>& order):
+    MonolithicBlockComposedDN( const std::vector<Int>& flag, const std::vector<Int>& order):
             super_Type( flag, order ),
-            M_blockPrecs(),
-            M_uMap(),
-            M_pMap(),
-            M_dMap(),
-            M_interfaceMap(),
-            M_multipliers(0)
+            M_blockPrecs()
     {
     }
 
@@ -187,20 +182,20 @@ public:
 
     static MonolithicBlock* createComposedDN()
     {
-        const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid};
+        const Int order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid};
         const Int couplingsDN[] = { 0, 7};
         const std::vector<Int> couplingVectorDN(couplingsDN, couplingsDN+2);
-        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+2);
+        const std::vector<Int> orderVector(order, order+2);
         return new MonolithicBlockComposedDN(couplingVectorDN, orderVector);
     }
 
 
     static MonolithicBlock* createComposedDN2()
     {
-        const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
+        const Int order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
         const Int couplingsDN2[] = { 8, 6};
         const std::vector<Int> couplingVectorDN2(couplingsDN2, couplingsDN2+2);
-        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+2);
+        const std::vector<Int> orderVector(order, order+2);
         return new MonolithicBlockComposedDN(couplingVectorDN2, orderVector);
     }
     //@}
@@ -222,12 +217,7 @@ protected:
     /*!
       Pointer to an PreconditionerComposed object containing the preconditioners for each block
     */
-    boost::shared_ptr<PreconditionerComposed>            M_blockPrecs;
-    mapPtr_Type                                      M_uMap;
-    mapPtr_Type                                      M_pMap;
-    mapPtr_Type                                      M_dMap;
-    mapPtr_Type                                      M_interfaceMap;
-    UInt                                             M_multipliers;
+    boost::shared_ptr<PreconditionerComposed>        M_blockPrecs;
     //@}
 
 private:

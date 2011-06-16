@@ -229,14 +229,16 @@ public:
       @param locDofMap std::map with the correspondence between the interface dofs for the two different maps in
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
-      @param couplingBlock: flag specifying the block associated with the coupling
+      @param couplingBlock: flag specifying the block associated with the coupling. See MonolithicBlock::couplingMatrix to understand what the values
+      for this flag correspond to.
+      @param couplingFlag: flag specifying which block must be coupled whith which block.
      */
     virtual void coupler(mapPtr_Type& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep,
-                         UInt couplingBlock
-                        )=0;
+                 const std::map<ID, ID>& locDofMap,
+                 const vectorPtr_Type& numerationInterface,
+                 const Real& timeStep,
+                 UInt couplingFlag
+                 )=0;
 
     //! returns true if the operator is set
     /*!

@@ -44,19 +44,34 @@ int MonolithicBlockComposedNN::solveSystem( const vector_Type& rhs, vector_Type&
     M_secondCompPrec.reset(new composed_prec(M_comm));
 
     LifeChrono chrono;
-    int overlapLevel     = M_list.get("overlap level", 2);
-    std::string precType = M_list.get("prectype", "Amesos");
-    Ifpack factory;
 
     if ( !M_blockPrecs.get() )
         M_blockPrecs.reset(new ComposedOperator< composed_prec >(M_comm));
-    if ( true || !set())
+    if ( !set() )
     {
+        M_overlapLevel     = M_list.get("overlap level", 2);
+        M_precType = M_list.get("prectype", "Amesos");
+
+        //////////////// \todo Copy: should be avoided ////////////////////////
+        M_matrixVector.push_back(*M_blocks[(*M_blockReordering)[0]]);
+        M_matrixVector.push_back(*M_blocks[(*M_blockReordering)[1]]);
+        M_matrixVector.push_back(*M_blocks[(*M_blockReordering)[2]]);
+        M_matrixVector.push_back(*M_blocks[(*M_blockReordering)[3]]);
+        /////////////////////////////////////////////////////////////
+
         for (ID k(0); k < M_blocks.size(); ++k)
         {
             M_blockPrecs->displayer().leaderPrint("  M-  Computing double prec. factorization ...        ");
             chrono.start();
-            M_prec[k].reset(factory.Create(precType, M_blocks[(*M_blockReordering)[k]]->matrixPtr().get(), overlapLevel));
+            //////////////// \todo Copy: should be avoided ////////////////////////
+            if (!M_recompute[(*M_blockReordering)[k]])
+            {
+                M_prec[k].reset(M_factory.Create(M_precType, M_matrixVector[k].matrixPtr().get(), M_overlapLevel));
+            }
+            else
+            //////////////////////////////////////////////////////////////
+
+                M_prec[k].reset(M_factory.Create(M_precType, M_blocks[(*M_blockReordering)[k]]->matrixPtr().get(), M_overlapLevel));
             if ( !M_prec[k].get() )
             {
                 ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
@@ -76,7 +91,7 @@ int MonolithicBlockComposedNN::solveSystem( const vector_Type& rhs, vector_Type&
             {
                 M_blockPrecs->displayer().leaderPrint("  M-  Computing double prec. factorization ...        ");
                 chrono.start();
-                M_prec[k].reset(factory.Create(precType, M_blocks[(*M_blockReordering)[k]]->matrixPtr().get(), overlapLevel));
+                M_prec[k].reset(M_factory.Create(M_precType, M_blocks[(*M_blockReordering)[k]]->matrixPtr().get(), M_overlapLevel));
                 if ( !M_prec[k].get() )
                 {
                     ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
@@ -116,7 +131,7 @@ int MonolithicBlockComposedNN::solveSystem( const vector_Type& rhs, vector_Type&
 
 void MonolithicBlockComposedNN::setDataFromGetPot(const GetPot& data, const std::string& section)
 {
-    PreconditionerIfpack::createIfpackList( M_list, data, section, "");
+    PreconditionerIfpack::createIfpackList( M_list, data, section, "ifpack");
 }
 
 void MonolithicBlockComposedNN::coupler(mapPtr_Type& map,
@@ -193,7 +208,7 @@ void MonolithicBlockComposedNN::replace_matrix( const matrixPtr_Type& oper, UInt
     oper->globalAssemble();
     *oper *= 2.;
     M_blocks[position]=oper;
-    M_blocks[position]=oper;
+    M_blocks[(position+2)%4]=oper;
 }
 
 } // Namespace LifeV

@@ -85,12 +85,12 @@ public:
        \param flags: vector of flags specifying the type of coupling between the different blocks that we chose for this operator
        \param order: vector specifying the order of the blocks.
      */
-    MonolithicBlockComposed(const std::vector<Int>& flags, const std::vector<Block>& order):
+    MonolithicBlockComposed(const std::vector<Int>& flags, const std::vector<Int>& order):
             super_Type(),
             M_recompute(order.size()),
             M_coupling(),
             M_couplingFlags(new std::vector<Int>(flags)),// here I copy, so that the input param can be destroyed
-            M_blockReordering(new std::vector<Block>(order))
+            M_blockReordering(new std::vector<Int>(order))
     {}
 
 
@@ -149,14 +149,17 @@ public:
       @param locDofMap: std::map holding the connections between the coupling interface dofs
       @param numerationInterface: the numeration of the interface dofs
       @param timeStep: time step
-      @param couplingBlock: UInt specifying the position of the coupling block to be added.
+      @param couplingBlock: UInt specifying the position of the coupling block to be added. Not used in this case, since the coupling flag for each block
+      is contained in the vector M_couplingFlags. See MonolithicBlock::couplingMatrix to understand what the values
+      for this flag correspond to.
+      @param couplingBlock: flag specifying which block is considered (must not exceed the size of the vector of blocks,
+      otherwise a std::bad_alloc exception is thrown). The coupling for each block is specified by a static vector passed to the constructor.
      */
     void coupler(mapPtr_Type& map,
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
-                 UInt couplingBlock
-                 );
+                 UInt couplingBlock);
 
 
     //! pushes a block at the end of the vector
@@ -267,11 +270,10 @@ protected:
     vector. e.g. the fisrt block to be applied corresponds to the number M_blockReordering[0] in the vector
     M_blocks of blocks. This vector is assigned in the coupler method of each class.
     */
-    boost::scoped_ptr<std::vector<Block> >                      M_blockReordering;
+    boost::scoped_ptr<std::vector<Int> >                      M_blockReordering;
     //@}
 
 private:
-
 
 };
 

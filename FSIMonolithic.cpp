@@ -65,6 +65,7 @@ FSIMonolithic::FSIMonolithic():
         M_reusePrec(true),
         M_resetPrec(true),
         M_maxIterSolver(-1),
+        M_restarts(false),
         //end of protected attributes
         M_preconditionedSymmetrizedMatrix(),
         M_stress(),
@@ -98,13 +99,22 @@ FSIMonolithic::setupDOF( void )
 {
 
     M_dofStructureToHarmonicExtension    .reset( new DOFInterface3Dto3D );
+    M_dofStructureToFluid    .reset( new DOFInterface3Dto3D );
 
-    M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
+    M_dofStructureToHarmonicExtension->setup(   M_mmFESpace->refFE(), M_mmFESpace->dof(),
                                                 M_dFESpace->refFE(), M_dFESpace->dof() );
-    M_dofStructureToHarmonicExtension->update( *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
+    M_dofStructureToHarmonicExtension->update( *M_mmFESpace->mesh(),  M_data->fluidInterfaceFlag(),
                                                *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
                                                M_data->interfaceTolerance(),
                                                M_data->fluidInterfaceVertexFlag() );
+
+    M_dofStructureToFluid->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
+                                    M_dFESpace->refFE(), M_dFESpace->dof() );
+    M_dofStructureToFluid->update( *M_uFESpace->mesh(),  M_data->fluidInterfaceFlag(),
+                                   *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
+                                   M_data->interfaceTolerance(),
+                                   M_data->fluidInterfaceVertexFlag() );
+
 
     createInterfaceMaps(M_dofStructureToHarmonicExtension->localDofMap());
 }
@@ -144,6 +154,7 @@ FSIMonolithic::setUp( const GetPot& dataFile )
     M_reusePrec     = dataFile( "linear_system/prec/reuse", true);
     M_maxIterSolver = dataFile( "linear_system/solver/max_iter", -1);
     M_diagonalScale    = dataFile( "linear_system/prec/diagonalScaling",  false );
+    M_restarts         = dataFile( "exporter/start"  ,  0   );
 }
 
 void
@@ -313,7 +324,7 @@ FSIMonolithic::computeFNormals( vector_Type& normals)
 void
 FSIMonolithic::solveJac( vector_Type& _step, const vector_Type& _res, const Real /*_linearRelTol*/ )
 {
-    this->setupBlockPrec();
+    setupBlockPrec( );
 
     checkIfChangedFluxBC( M_precPtr );
 
@@ -564,14 +575,13 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
     {
         M_resetPrec=true;
         M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-        *M_rhs += M_fluid->matrixMass()*(*M_un)*1/M_data->dataFluid()->dataTime()->timeStep();//M_bdf->rhsContributionFirstDerivative() ;
+        *M_rhs += M_fluid->matrixMass()*(*M_un)/M_data->dataFluid()->dataTime()->timeStep();//(M_bdf->rhsContributionFirstDerivative()) ;
         couplingRhs(M_rhs, M_un);
     }
 }
 
 void FSIMonolithic::updateRHS()
 {
-
     M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
     *M_rhs += M_fluid->matrixMass()*(*M_un)*1/M_data->dataFluid()->dataTime()->timeStep();//M_bdf->rhsContributionFirstDerivative() ;
     couplingRhs(M_rhs, M_un);

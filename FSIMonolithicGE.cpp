@@ -118,6 +118,8 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
 
     if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
+
+        Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
         // Solve HE
         iterateMesh(disp);
 
@@ -130,14 +132,14 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         this->moveMesh(meshDispDiff);//initialize the mesh position with the total displacement
 
         meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
-        this->interpolateVelocity(meshDispDiff, *this->M_beta);
 
-        *this->M_beta /= -M_data->dataFluid()->dataTime()->timeStep(); //mesh velocity w
+
+        meshDispDiff *= -alpha; //mesh velocity w
+        this->interpolateVelocity(meshDispDiff, *this->M_beta);
 
         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
         fluid->subset(*M_un, (UInt)0);
         *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
-
         //M_monolithicMatrix.reset(new matrix_Type(*M_monolithicMap));
 
         assembleSolidBlock(iter, M_un);

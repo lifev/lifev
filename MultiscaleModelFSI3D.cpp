@@ -654,13 +654,11 @@ MultiscaleModelFSI3D::initializeSolution()
         if ( !M_data->method().compare("monolithicGI") )
         {
             offset = boost::dynamic_pointer_cast< FSIMonolithicGI > ( M_FSIoperator )->mapWithoutMesh().map( Unique )->NumGlobalElements();
-
             temporaryVector = 0;
             temporaryVector.subset( *M_fluidDisplacement, M_fluidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
 
             solution += temporaryVector;
         }
-
         *M_fluidVelocityAndPressure = solution;
     }
     else

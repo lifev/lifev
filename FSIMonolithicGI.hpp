@@ -135,8 +135,6 @@ public:
     */
     void updateSystem();
 
-    void applyBoundaryConditions();
-
     /**
        evaluates the residual b-Ax
        \param res: output
@@ -145,8 +143,14 @@ public:
     */
     void evalResidual( vector_Type&  res, const vector_Type& _sol, const UInt _iter );
 
+    //!Apply the boundary conditions to each block composing the monolithic problem
+    /**
+       Sets the vectors of: boundary conditions, FESpaces, couplings, offsets, and sets the blocks in the composed operator
+       which constitutes the monolithic problem. Then calls the applyBoundaryConditions of the MonolithicBlockMatrix operator, passing
+       also the right hand side.
+     */
+    void applyBoundaryConditions();
     //@}
-
 
     //!@name Set Methods
     //@{
@@ -155,6 +159,9 @@ public:
     void setSolution( const vector_Type& solution ) { M_uk.reset( new vector_Type( solution ) ); }
 
     void setSolutionPtr( const vectorPtr_Type& sol) { M_uk = sol; }
+
+    //!Builds an extrapolation of the solution to initialize the Newton scheme
+    void couplingVariableExtrap( );
 
     //@}
 
@@ -169,7 +176,7 @@ public:
     const matrixPtr_Type matrixPtr() const { return M_monolithicMatrix->matrix(); }
 
     //! getter for the current iteration solution
-    const vectorPtr_Type uk() const { return M_uk; }
+    const vectorPtr_Type  uk()  const      {return M_uk;}
 
     //! get the solution.
     const vector_Type& solution() const { return *M_uk; }

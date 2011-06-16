@@ -55,16 +55,19 @@ void MonolithicBlockComposed::blockAssembling()
     {
         blockAssembling(k);
     }
-    //     M_coupling[0]->spy("C1");
-    //     M_coupling[1]->spy("C2");
+//     M_coupling[0]->spy("C1");
+//     M_coupling[1]->spy("C2");
+//     M_coupling[2]->spy("C1");
+//     M_coupling[3]->spy("C2");
 }
 
 
+
 void MonolithicBlockComposed::coupler( mapPtr_Type& map,
-                                 const std::map<ID, ID>& locDofMap,
-                                 const vectorPtr_Type& numerationInterface,
-                                 const Real& timeStep,
-                                 UInt couplingBlock )
+                                       const std::map<ID, ID>& locDofMap,
+                                       const vectorPtr_Type& numerationInterface,
+                                       const Real& timeStep,
+                                       UInt couplingBlock)
 {
     matrixPtr_Type coupling(new matrix_Type(*map));
     couplingMatrix( coupling,  (*M_couplingFlags)[couplingBlock], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);

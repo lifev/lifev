@@ -56,8 +56,10 @@ void MonolithicRobinInterface::applyRobinCoupling( std::vector<MonolithicBlock::
 void MonolithicRobinInterface::applyRobinCoupling( MonolithicBlock::matrixPtr_Type block)
 {
     MonolithicBlock::matrixPtr_Type tmpMatrix(new MonolithicBlock::matrix_Type(M_robinCoupling->map(), 0));
-    Int err;
-    err = EpetraExt::MatrixMatrix::Multiply( *M_robinCoupling->matrixPtr(), false, *block->matrixPtr(), false, *tmpMatrix->matrixPtr() );
+#ifdef HAVE_LIFEV_DEBUG
+    Int err =
+#endif
+    EpetraExt::MatrixMatrix::Multiply( *M_robinCoupling->matrixPtr(), false, *block->matrixPtr(), false, *tmpMatrix->matrixPtr() );
     ASSERT(!err, "Error in multiplication");
     tmpMatrix->globalAssemble();
     *M_robinPart += *tmpMatrix;
