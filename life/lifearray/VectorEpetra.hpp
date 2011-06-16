@@ -75,7 +75,6 @@ public:
     typedef Epetra_FEVector                  vector_type;
     typedef boost::shared_ptr< vector_type > Vector_PtrType;
     typedef Real                             data_type;
-    typedef Epetra_CombineMode               combineMode_Type;
 
     //@}
 
@@ -127,7 +126,7 @@ public:
     */
     VectorEpetra( const VectorEpetra& vector,
                   const MapEpetraType& mapType,
-                  const combineMode_Type& combineMode );
+                  const Epetra_CombineMode& combineMode );
 
     //! Copy constructor
     /*!
@@ -405,7 +404,7 @@ public:
        with a the given operation
        @param mode Combining mode used to gather the data
     */
-    Int globalAssemble( combineMode_Type mode = Add )
+    Int globalAssemble( Epetra_CombineMode mode = Add )
     {
         return M_epetraVector->GlobalAssemble( mode );
     }
@@ -461,19 +460,6 @@ public:
       @param offset Offset to shift the value
      */
     VectorEpetra& add( const VectorEpetra& vector, const Int offset = 0 );
-
-    //! Replace part of the vector with a given vector
-    /*!
-     * Typical examples are: (u,p) = p or (u,p) = u.
-     * Note: the nodes to add are taken by the map of vector, hence:
-     * <ol>
-     *   <li> if this has a unique map: then vector should also (otherwise run time error)
-     *   <li> if this has a repeated map: then vector should also. (otherwise wrong)
-     * </ol>
-     * @param vector given vector
-     * @param offset identify the first element to be replaced
-     */
-    VectorEpetra& replace( const VectorEpetra& vector, const Int& offset );
 
     //! Set the current vector to a subset of the given vector with an offset
     /*!
@@ -653,7 +639,7 @@ public:
       to discard the data coming from other processors.
       @param combineMode combien mode to use for this vector from now on
      */
-    void setCombineMode( combineMode_Type combineMode );
+    void setCombineMode( Epetra_CombineMode combineMode );
 
     //! Sets the combine mode for the import/export operations to default.
     /*!
@@ -753,7 +739,7 @@ private:
       @param vector Vector to be imported
       @param combineMode Mode to be used to combine the vector
      */
-    VectorEpetra& Import( const Epetra_FEVector& vector, combineMode_Type combineMode );
+    VectorEpetra& Import( const Epetra_FEVector& vector, Epetra_CombineMode combineMode );
 
     //! Export the value of a vector
     /*!
@@ -771,14 +757,14 @@ private:
       @param vector Vector where to store the exportation
       @param combineMode Mode to be used to combine the vector
      */
-    VectorEpetra& Export( const Epetra_FEVector& vector, combineMode_Type combineMode );
+    VectorEpetra& Export( const Epetra_FEVector& vector, Epetra_CombineMode combineMode );
 
     //@}
 
     boost::shared_ptr< MapEpetra > M_epetraMap;
     MapEpetraType                  M_mapType;
     Vector_PtrType                 M_epetraVector;
-    combineMode_Type               M_combineMode;
+    Epetra_CombineMode             M_combineMode;
 };
 
 VectorEpetra operator-( const VectorEpetra& vector );

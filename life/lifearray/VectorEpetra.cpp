@@ -98,7 +98,7 @@ VectorEpetra::VectorEpetra( const VectorEpetra& vector, const MapEpetraType& map
 }
 
 VectorEpetra::VectorEpetra( const VectorEpetra& vector, const MapEpetraType& mapType,
-                            const combineMode_Type& combineMode ):
+                            const Epetra_CombineMode& combineMode ):
         M_epetraMap   ( vector.M_epetraMap ),
         M_mapType     ( mapType ),
         M_epetraVector( new vector_type( *M_epetraMap->map( M_mapType ) ) ),
@@ -668,20 +668,6 @@ VectorEpetra::add( const VectorEpetra& vector, const Int offset )
 }
 
 VectorEpetra&
-VectorEpetra::replace( const VectorEpetra& vector, const Int& offset )
-{
-    // Definitions
-    Int numMyEntries = vector.M_epetraVector->MyLength ();
-    const Int* globalIDs = vector.blockMap().MyGlobalElements();
-
-    // Replace part of the vector
-    for ( Int i(0); i < numMyEntries; ++i )
-        ( *this )[globalIDs[i] + offset] = vector( globalIDs[i] );
-
-    return *this;
-}
-
-VectorEpetra&
 VectorEpetra::subset( const VectorEpetra& vector,
                       const UInt          offset )
 {
@@ -922,7 +908,7 @@ void VectorEpetra::showMe( std::ostream& output ) const
 // Set Methods
 // ===================================================
 void
-VectorEpetra::setCombineMode( combineMode_Type combineMode )
+VectorEpetra::setCombineMode( Epetra_CombineMode combineMode )
 {
     M_combineMode = combineMode;
 }
@@ -955,7 +941,7 @@ VectorEpetra::size() const
 // Private Methods
 // ===================================================
 VectorEpetra&
-VectorEpetra::Import (const Epetra_FEVector& vector, combineMode_Type combineMode )
+VectorEpetra::Import (const Epetra_FEVector& vector, Epetra_CombineMode combineMode )
 {
     if ( &vector == &this->epetraVector() )
         return *this;
@@ -975,7 +961,7 @@ VectorEpetra::Import (const Epetra_FEVector& vector, combineMode_Type combineMod
 }
 
 VectorEpetra&
-VectorEpetra::Export ( const Epetra_FEVector& vector, combineMode_Type combineMode )
+VectorEpetra::Export ( const Epetra_FEVector& vector, Epetra_CombineMode combineMode )
 {
     if ( &vector == &this->epetraVector() )
         return *this;
