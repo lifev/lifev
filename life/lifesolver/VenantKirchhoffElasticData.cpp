@@ -55,6 +55,7 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData():
         M_time                             ( ),
         M_density                          ( ),
         M_thickness                        ( ),
+        M_externalPressure                 ( ),
         M_materialsFlagSet                 ( false ),
         M_poisson                          ( ),
         M_young                            ( ),
@@ -65,10 +66,10 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData():
 }
 
 VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffElasticData& venantKirchhoffElasticData ):
-        TimeData                           ( venantKirchhoffElasticData ),
         M_time                             ( venantKirchhoffElasticData.M_time ),
         M_density                          ( venantKirchhoffElasticData.M_density ),
         M_thickness                        ( venantKirchhoffElasticData.M_thickness ),
+        M_externalPressure                 ( venantKirchhoffElasticData.M_externalPressure ),
         M_materialsFlagSet                 ( venantKirchhoffElasticData.M_materialsFlagSet ),
         M_poisson                          ( venantKirchhoffElasticData.M_poisson ),
         M_young                            ( venantKirchhoffElasticData.M_young ),
@@ -89,6 +90,7 @@ VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& venantK
         M_time                             = venantKirchhoffElasticData.M_time;
         M_density                          = venantKirchhoffElasticData.M_density;
         M_thickness                        = venantKirchhoffElasticData.M_thickness;
+        M_externalPressure                 = venantKirchhoffElasticData.M_externalPressure;
         M_materialsFlagSet                 = venantKirchhoffElasticData.M_materialsFlagSet;
         M_poisson                          = venantKirchhoffElasticData.M_poisson;
         M_young                            = venantKirchhoffElasticData.M_young;
@@ -111,9 +113,10 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
         M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
 
     // physics
-    M_solidType = dataFile( ( section + "/physics/solidType" ).data(), "linearVenantKirchhof" );
-    M_density   = dataFile( ( section + "/physics/density"   ).data(), 1. );
-    M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
+    M_solidType        = dataFile( ( section + "/physics/solidType" ).data(), "linearVenantKirchhof" );
+    M_externalPressure = dataFile( ( section + "/physics/externalPressure" ).data(), 0. );
+    M_density          = dataFile( ( section + "/physics/density"   ).data(), 1. );
+    M_thickness        = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
 
     UInt materialsNumber = dataFile.vector_variable_size( ( section + "/physics/material_flag" ).data() );
     if ( materialsNumber == 0 )
@@ -156,6 +159,7 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
 {
     // physics
     output << "\n*** Values for data [solid/physics]\n\n";
+    output << "external pressure                = " << M_externalPressure << std::endl;
     output << "density                          = " << M_density << std::endl;
     output << "thickness                        = " << M_thickness << std::endl;
     for ( materialContainerIterator_Type i = M_young.begin() ; i != M_young.end() ; ++i )

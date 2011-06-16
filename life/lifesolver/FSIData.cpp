@@ -52,7 +52,7 @@ FSIData::FSIData( ) :
         M_absoluteTolerance             (),
         M_relativeTolerance             (),
         M_errorTolerance                (),
-        M_NonLinearLineSearch                    (),
+        M_NonLinearLineSearch           (),
         M_method                        (),
         M_algorithm                     (),
         M_defaultOmega                  (),
@@ -73,7 +73,7 @@ FSIData::FSIData( const FSIData& FSIData ) :
         M_absoluteTolerance             ( FSIData.M_absoluteTolerance ),
         M_relativeTolerance             ( FSIData.M_relativeTolerance ),
         M_errorTolerance                ( FSIData.M_errorTolerance ),
-        M_NonLinearLineSearch                    ( FSIData.M_NonLinearLineSearch ),
+        M_NonLinearLineSearch           ( FSIData.M_NonLinearLineSearch ),
         M_method                        ( FSIData.M_method ),
         M_algorithm                     ( FSIData.M_algorithm ),
         M_defaultOmega                  ( FSIData.M_defaultOmega ),
@@ -81,8 +81,8 @@ FSIData::FSIData( const FSIData& FSIData ) :
         M_updateEvery                   ( FSIData.M_updateEvery ),
         M_fluidInterfaceFlag            ( FSIData.M_fluidInterfaceFlag ),
         M_structureInterfaceFlag        ( FSIData.M_structureInterfaceFlag ),
-        M_fluidInterfaceVertexFlag      ( new int const ( *FSIData.M_fluidInterfaceVertexFlag ) ),
-        M_structureInterfaceVertexFlag  ( new int const ( *FSIData.M_structureInterfaceVertexFlag ) ),
+        M_fluidInterfaceVertexFlag      ( new Int const ( *FSIData.M_fluidInterfaceVertexFlag ) ),
+        M_structureInterfaceVertexFlag  ( new Int const ( *FSIData.M_structureInterfaceVertexFlag ) ),
         M_interfaceTolerance            ( FSIData.M_interfaceTolerance ),
         M_restartTimeStep               ( 0. )
 {
@@ -103,7 +103,7 @@ FSIData::operator=( const FSIData& FSIData )
         M_absoluteTolerance             = FSIData.M_absoluteTolerance;
         M_relativeTolerance             = FSIData.M_relativeTolerance;
         M_errorTolerance                = FSIData.M_errorTolerance;
-        M_NonLinearLineSearch                    = FSIData.M_NonLinearLineSearch;
+        M_NonLinearLineSearch           = FSIData.M_NonLinearLineSearch;
         M_method                        = FSIData.M_method;
         M_algorithm                     = FSIData.M_algorithm;
         M_defaultOmega                  = FSIData.M_defaultOmega;
@@ -112,8 +112,8 @@ FSIData::operator=( const FSIData& FSIData )
         M_fluidInterfaceFlag            = FSIData.M_fluidInterfaceFlag;
         M_structureInterfaceFlag        = FSIData.M_structureInterfaceFlag;
 
-        M_fluidInterfaceVertexFlag.reset    ( new int const ( *FSIData.M_fluidInterfaceVertexFlag ) );
-        M_structureInterfaceVertexFlag.reset( new int const ( *FSIData.M_structureInterfaceVertexFlag ) );
+        M_fluidInterfaceVertexFlag.reset    ( new Int const ( *FSIData.M_fluidInterfaceVertexFlag ) );
+        M_structureInterfaceVertexFlag.reset( new Int const ( *FSIData.M_structureInterfaceVertexFlag ) );
 
         M_interfaceTolerance            = FSIData.M_interfaceTolerance;
     }
@@ -134,8 +134,6 @@ FSIData::setup( const GetPot& dataFile, const std::string& section )
     M_errorTolerance = dataFile( ( section + "/etamax" ).data(), 1.e-03 );
     M_NonLinearLineSearch = static_cast<Int> ( dataFile( ( section + "/NonLinearLineSearch" ).data(), 0 ) );
 
-    // Problem - Preconditioner
-
     // Problem - Methods
     M_method = dataFile( ( section + "/method" ).data(), "steklovPoincare" );
     M_algorithm = dataFile( ( section + "/algorithm" ).data(), "DirichletNeumann" );
@@ -150,16 +148,16 @@ FSIData::setup( const GetPot& dataFile, const std::string& section )
     M_fluidInterfaceFlag     = dataFile( "interface/fluid_flag",     1 );
     M_structureInterfaceFlag = dataFile( "interface/structure_flag", M_fluidInterfaceFlag );
 
-    int vertexFlag;
+    Int vertexFlag;
     vertexFlag               = dataFile( "interface/edgeFlag",      -1 );
     vertexFlag               = dataFile( "interface/fluid_vertex_flag", vertexFlag );
 
     if (vertexFlag >= 0)
-        M_fluidInterfaceVertexFlag.reset    ( new int const ( vertexFlag ) );
+        M_fluidInterfaceVertexFlag.reset    ( new Int const ( vertexFlag ) );
 
     vertexFlag               = dataFile( "interface/structure_vertex_flag", -1 );
     if (vertexFlag >= 0)
-        M_structureInterfaceVertexFlag.reset( new int const ( vertexFlag ) );
+        M_structureInterfaceVertexFlag.reset( new Int const ( vertexFlag ) );
 
     M_interfaceTolerance = dataFile( "interface/tolerance",      0. );
 
@@ -203,7 +201,6 @@ FSIData::showMe( std::ostream& output )
     if (M_structureInterfaceVertexFlag.get() != 0)
         output << "Interface structure vertices     = " << *M_structureInterfaceVertexFlag << std::endl;
     output << "Interface tolerance              = " << M_interfaceTolerance << std::endl;
-
 }
 
 }
