@@ -701,6 +701,8 @@ darcy::run()
     darcySolver->getDisplayer().leaderPrint( "Number of unknowns : ",
                                              hybrid_FESpace.map().map(Unique)->NumGlobalElements(), "\n" );
 
+    exporter->exportPID( meshPart );
+
     switch ( solverType )
     {
     case DARCY_LINEAR:
