@@ -165,7 +165,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     material_flag    = 2
     #externalPressure = 0
     #density          = 1.2
-    young            = 4E6
+    young            = 3.19E6 # Computed as 4E6 * (1-nu^2) to match the value of the 1D
     poisson          = 0.45
 
     [../time_discretization]
