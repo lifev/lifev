@@ -123,6 +123,7 @@ public:
     const std::string&   meshDir()   const { return M_meshDir; }
     const std::string&   meshFile()  const { return M_meshFile; }
     const std::string&   meshType()  const { return M_meshType; }
+    const std::string&   mOrder()    const { return M_order; }
 
     const bool&          verbose()   const { return M_verbose; }
 
@@ -133,6 +134,7 @@ private:
     std::string     M_meshDir;     //!< mesh directory
     std::string     M_meshFile;    //!< mesh file
     std::string     M_meshType;    //!< mesh type
+    std::string     M_order;       //!< mesh type
 
     bool            M_verbose;		//!< verbose output?
 };
