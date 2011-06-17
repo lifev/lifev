@@ -243,6 +243,13 @@ public:
      */
     const Real& interfaceTolerance() const { return M_interfaceTolerance; }
 
+    //! Get the timestep to restart the simulation
+    /*!
+     * @return the timestep used in the previous simulation from which we want to restart, used for the initialization
+     of the time discretization
+     */
+    inline Real restartTimeStep() const { return M_restartTimeStep; }
+
     //@}
 
 private:
@@ -274,6 +281,8 @@ private:
     boost::scoped_ptr<Int const>  M_structureInterfaceVertexFlag;
 
     Real                          M_interfaceTolerance;
+
+    Real                          M_restartTimeStep;
 };
 
 } // end namespace LifeV
