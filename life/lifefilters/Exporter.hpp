@@ -604,12 +604,12 @@ void Exporter<MeshType>::readVariable(exporterData_Type& dvar)
 
      feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( meshPart, refFE, qR, bdQr, 1, meshPart.comm() ) );
 
-     vectorPtr_Type PIDData ( PID_FESpacePtr->map() );
+     vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
 
      for ( UInt iElem( 0 ); iElem < PID_FESpacePtr->mesh()->numElements(); ++iElem )
      {
          ID globalElem = PID_FESpacePtr->mesh()->volumeList[ iElem ].id();
-         (*PIDData)[ globalElem ] = M_mesh->comm()->MyPID();
+         (*PIDData)[ globalElem ] = meshPart.comm()->MyPID();
      }
 
      addVariable( exporterData_Type::ScalarField,
