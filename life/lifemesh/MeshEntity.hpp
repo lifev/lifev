@@ -291,9 +291,9 @@ public:
     //! Display the informations stored by this class
     void showMe ( std::ostream& output = std::cout ) const
     {
-        output << " Global ID : " << id() << " -- " << " Local ID " << localId();
-        output << " -- Flags: " << M_flag;
-        output << std::endl;
+      MeshEntity::showMe(output);
+      output << " -- Flags: " << M_flag;
+      output << std::endl;
     };
 
 

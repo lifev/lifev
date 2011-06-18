@@ -85,7 +85,7 @@ template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh3D
         :
         public MeshEntity,
-        public MC::RegionMarker
+        public MC::regionMarker_Type
 {
 public:
     /** @name Marker Types
@@ -98,17 +98,19 @@ public:
     //! Common Markers
     typedef MC MarkerCommon;
     //! Point Marker
-    typedef typename MC::PointMarker PointMarker;
+    typedef typename MC::pointMarker_Type PointMarker;
     //! Edge Marker
-    typedef typename MC::EdgeMarker EdgeMarker;
+    typedef typename MC::edgeMarker_Type EdgeMarker;
     //! Face Marker
-    typedef typename MC::FaceMarker FaceMarker;
+    typedef typename MC::faceMarker_Type FaceMarker;
     //! Volume Marker
-    typedef typename MC::VolumeMarker VolumeMarker;
+    typedef typename MC::volumeMarker_Type VolumeMarker;
     //! Region Marker
-    typedef typename MC::RegionMarker RegionMarker;
-    //! Region Marker
-    typedef typename MC::RegionMarker Marker;
+    typedef typename MC::regionMarker_Type RegionMarker;
+    //! Region Marker (obsolete)
+    typedef typename MC::regionMarker_Type  Marker;
+    //! Region Marker (generic name)
+     typedef typename MC::regionMarker_Type  marker_Type;
 
     /** @} */ // End of group Marker Types
 
@@ -1684,7 +1686,7 @@ void set_switches_for_regionmesh( Switch & sw );
 template <typename GEOSHAPE, typename MC>
 RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D() :
         MeshEntity(),
-        MC::RegionMarker(),
+        MC::regionMarker_Type(),
         switches(),
         M_numVolumes( 0 ),
         M_numVertices( 0 ),
