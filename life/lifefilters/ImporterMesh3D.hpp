@@ -1348,8 +1348,9 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     // bitstream to check which file section has already been visited
     UInt flag;
 
-    typename MC::PointMarker pointMarker;
-    typename MC::EdgeMarker edgeMarker;
+    typename MC::pointMarker_Type pointMarker;
+    typename MC::edgeMarker_Type edgeMarker;
+    typename MC::faceMarker_Type faceMarker;
 
     // open file stream to look for points information
     std::ifstream fstreamp( fileName.c_str() );
@@ -1408,10 +1409,10 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                 pointCoordinates[ i * nDimensions + 1 ] = y;
                 pointCoordinates[ i * nDimensions + 2 ] = z;
                 boundaryPoint  [ i ] = false;
-                bcnpoints[ i ] = S_NULLFLAG;
+                bcnpoints[ i ] = pointMarker.nullFlag();
             }
             boundaryPoint  [ numberVertices ] = false;
-            bcnpoints[ numberVertices ] = S_NULLFLAG;
+            bcnpoints[ numberVertices ] =pointMarker.nullFlag();
 
             // done parsing point section
             flag&=~1;
@@ -1506,6 +1507,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     }
     fstreamv.close();
 
+
     std::ifstream fstreamf( fileName.c_str() );
     while ( getline( fstreamf, line ) )
     {
@@ -1526,7 +1528,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 
             facePointID.resize( 3 * numberBoundaryFaces );
             bcnsurf.resize( numberBoundaryFaces + 1 );
-            bcnsurf[ 0 ] = S_NULLFLAG;
+            bcnsurf[ 0 ] = faceMarker.nullFlag();
 
 
             for ( UInt i = 0; i < numberBoundaryFaces; i++ )
@@ -1583,15 +1585,15 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                 // (I've found this silly but easy way MM)
                 BareEdge bed = setBareEdge( p1, p2 );
 
-                bihBedges.addIfNotThere( bed, ( ID )S_NULLFLAG );
+                bihBedges.addIfNotThere( bed, edgeMarker.nullFlag() );
                 bihBedges[ bed ] = ( ID )edgeMarker.setStrongerMarker( bihBedges[ bed ], bcnr );
 
                 bed = setBareEdge( p2, p3 );
-                bihBedges.addIfNotThere( bed,( ID )S_NULLFLAG );
+                bihBedges.addIfNotThere( bed, edgeMarker.nullFlag() );
                 bihBedges[ bed ] = ( ID )edgeMarker.setStrongerMarker( bihBedges[ bed ], bcnr );
 
                 bed = setBareEdge( p3, p1 );
-                bihBedges.addIfNotThere( bed,( ID )S_NULLFLAG );
+                bihBedges.addIfNotThere( bed, edgeMarker.nullFlag() );
                 bihBedges[ bed ] = ( ID )edgeMarker.setStrongerMarker( bihBedges[ bed ], bcnr );
             }
             flag&=~4;

@@ -67,7 +67,7 @@ template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh2D
         :
         public MeshEntity,
-        public MC::RegionMarker
+        public MC::regionMarker_Type
 {
 
 public:
@@ -79,15 +79,17 @@ public:
      */
 
     //! Point Marker
-    typedef typename MC::PointMarker PointMarker;
+    typedef typename MC::pointMarker_Type PointMarker;
     //! Edge Marker
-    typedef typename MC::EdgeMarker EdgeMarker;
+    typedef typename MC::edgeMarker_Type EdgeMarker;
     //! Face Marker
-    typedef typename MC::FaceMarker FaceMarker;
+    typedef typename MC::faceMarker_Type FaceMarker;
     //! Region Marker
-    typedef typename MC::RegionMarker RegionMarker;
-    //! Region Marker
-    typedef typename MC::RegionMarker Marker;
+    typedef typename MC::regionMarker_Type RegionMarker;
+    //! Region Marker (obsolete)
+    typedef typename MC::regionMarker_Type Marker;
+    //! Region Marker (generic name)
+    typedef typename MC::regionMarker_Type marker_Type;
 
     /** @} */ // End of group Marker Types
 

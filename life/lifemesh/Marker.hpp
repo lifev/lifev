@@ -76,23 +76,23 @@ namespace LifeV
 /*!
  *  An entity flag is an integral type that is used to store information about each geometric entity
  *  belonging to a mesh. In particular, it is the number given by the mesh generator that has
- *  generated the mesh to identify different portion of the boundary.
+ *  generated the mesh to identify different portion of the boundary. It mast be convertible with
+ *  an ID type.
 */
 typedef ID entityFlag_Type;
 
-
 //! EntityFlagStandardPolicy - Class that defines the standard policies on EntityFlags
 /*!
-    This class defines the NULLFLAG and how to handle ambiguities among EntityFlags
+    This class defines NULLFLAG and how to handle ambiguities among entityFlags
     In particular what to do if a geometric item has to inherit its flag by adjacent items and
-    the flags are different
+    the flags are different. The policy is passed as template argument to the Marker class.
  */
 class EntityFlagStandardPolicy
 {
 public:
 
-    /*! S_NULLFLAG is the value indicating a null flag, i.e a flag not yet
-      set to a usable value
+    /*! Nullflag is the value indicating a null flag, i.e a flag not yet
+      set to any usable value
     */
     static const entityFlag_Type S_NULLFLAG;
 
@@ -126,27 +126,32 @@ public:
 
 //! Marker - Base marker class.
 /*!
-  It stores an integral type, of entityFlag_Type (we indicate it by entityflag),
-  which may be used for marking a geometric entity. The typical use is to specify
-  boundary conditions or material properties associated with the entity.
-  The actual boundary conditions will be handled in the Dof
-  class. During the creation of a field, the markers are post-processed
-  to furnish the correct boundary conditions.
-  The main interfaces are passed trough the EntityFlagStandardPolicy template argument,
-  which is defaulted to EntityFlagStandardPolicy
+  It stores an object of entityFlag_Type which may be used for marking a geometric entity.
+  The typical use is to specify boundary conditions or material properties associated with
+  the entity. The actual boundary conditions will be handled in the Dof
+  class. During the creation of a field, the markers are processed to furnish the
+  correct boundary conditions.
+  The template argument FlagPolicy defualts to EntityFlagStandardPolicy and it defines the way
+  ambiguities in the flag definition are treated.
 
-  It is a concrete base class which also implements basic tool to operate on the entityflag
-  using the policy passed as template argument. Since all geometric entities stored in a mesh
-  derives from it, it may be used to extend the capabilities of a goemetric entity, for any purpose.
+  Marker is a concrete base class which also implements basic tool to operate on the entityFlag.
+  All geometric entities stored in a mesh derives from it, thus
+  it may be used to extend the capabilities of a goemetric entity, for any purpose.
 
   The default markers used by RegionMesh are contained in MarkerDefinitions.hpp
 
  */
 
-template <typename FlagPolicy>
+template <typename FlagPolicy=EntityFlagStandardPolicy>
 class Marker
 {
 public:
+
+    //! @name Public Types
+    //@{
+    //! The policy used by this marker
+    typedef FlagPolicy flagPolicy_Type;
+    //@}
 
     //! @name Constructor & Destructor
     //@{
@@ -163,7 +168,6 @@ public:
     //! Destructor
     virtual ~Marker()
     {
-        // Nothing to be done
     }
 
     //@}
@@ -183,18 +187,18 @@ public:
     */
     inline bool hasEqualEntityFlag(entityFlag_Type const & flag ) const;
 
-    //! Display method
+    //! Display information about the marker object
     virtual void showMe( std::ostream & output = std::cout ) const;
 
     //@}
 
-    //! @name Set Methods
+    //! @name Setters
     //@{
 
-    //! Set marker to given value
+    //! Set marker to the given value
     inline entityFlag_Type setMarker( entityFlag_Type const & flag );
 
-    //! Set marker to given value only if unset
+    //! Set marker to the given value only if unset
     entityFlag_Type updateMarker( entityFlag_Type const & flag );
 
     //! Sets the flag to the stronger flag of two given markers
@@ -219,7 +223,7 @@ public:
      */
     entityFlag_Type setWeakerMarker( entityFlag_Type const & flag );
 
-    //! Put marker to nullflag
+    //! Put marker to NULLFLAG
     inline void unsetMarker(); //const;
 
     //@}
@@ -237,7 +241,7 @@ public:
 
     //! Returns the null flag
 
-    inline entityFlag_Type const & nullFlag() const;
+    static entityFlag_Type const & nullFlag();
 
     //@}
 
@@ -276,7 +280,7 @@ entityFlag_Type Marker<FlagPolicy>::marker() const
 }
 
 template <typename FlagPolicy>
-entityFlag_Type const & Marker<FlagPolicy>::nullFlag() const
+entityFlag_Type const & Marker<FlagPolicy>::nullFlag()
 {
     return FlagPolicy::S_NULLFLAG;
 }
@@ -341,33 +345,9 @@ void Marker<FlagPolicy>::unsetMarker()
 }
 
 template <typename FlagPolicy>
-void Marker<FlagPolicy>::markerUnset() const
-{
-    M_flag = nullFlag();
-}
-
-
-template <typename FlagPolicy>
 bool Marker<FlagPolicy>::hasEqualEntityFlag(entityFlag_Type const & flag) const
 {
     return FlagPolicy::EqualFlags(flag,M_flag);
-}
-
-template <typename FlagPolicy>
-std::ostream & Marker<FlagPolicy>::printFlag( entityFlag_Type const f, std::ostream & output ) const
-{
-    if ( f == nullFlag() )
-        output << "UNSET";
-    else
-        output << f;
-    return output;
-}
-
-template <typename FlagPolicy>
-std::ostream & Marker<FlagPolicy>::printFlag( std::ostream & output ) const
-{
-    showMe( output );
-    return output;
 }
 
 template <typename FlagPolicy>

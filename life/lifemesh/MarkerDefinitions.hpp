@@ -48,9 +48,9 @@ namespace LifeV
 {
 //! MarkerCommon - A trait class that defines the markers used in RegionMesh
 /*!
- * It takes as template parameter the policy for the entityFlag treatment. In fact
- * it is a concrete class that may be redefined by the used if different markers are
- * needed
+ * It takes as template parameter the policy for the entityFlag treatment.
+ * It is a concrete class that may be redefined by the user if different markers are
+ * needed. It is passed as template argument to the RegionMesh classes
  */
 
 template
@@ -61,37 +61,21 @@ public:
 
     //! @name Public Types
     //@{
-    //! The policy used to treat entityFlags
-    typedef MT entityFlagPolicy_Type;
     //! The marker used for the Points
     typedef Marker<MT> pointMarker_Type;
     //! The marker used for the Edges
     typedef Marker<MT> edgeMarker_Type;
-    //! The marker used for the faces
+    //! The marker used for the Faces
     typedef Marker<MT> faceMarker_Type;
-    //! The marker used for the volumes
+    //! The marker used for the Volumes
     typedef Marker<MT> volumeMarker_Type;
-    //! The marker used for the regions
+    //! The marker used for the Regions
     typedef Marker<MT> regionMarker_Type;
-
-    // Old typedefs to delete
-
- //   typedef MT FlagPolicy;
-    typedef Marker<MT> PointMarker;
-    typedef Marker<MT> EdgeMarker;
-    typedef Marker<MT> FaceMarker;
-    typedef Marker<MT> VolumeMarker;
-    typedef Marker<MT> RegionMarker;
-
     //@}
 };
 
-//! The simples MarkerCommon: uses all defaults
+//! The simplest MarkerCommon: uses all defaults
 typedef MarkerCommon<EntityFlagStandardPolicy> defaultMarkerCommon_Type;
-
-//!Expose NULLFLAG
-static const entityFlag_Type S_NULLFLAG = EntityFlagStandardPolicy::S_NULLFLAG;
-
 
 } // Namespace LifeV
 
