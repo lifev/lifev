@@ -52,6 +52,7 @@ MeshData::MeshData( ):
         M_meshDir  ( "./" ),
         M_meshFile ( "mesh.mesh" ),
         M_meshType ( ".mesh" ),
+        M_order ( "P1" ),
         M_verbose   ( false )
 {}
 
@@ -59,6 +60,7 @@ MeshData::MeshData( const GetPot& dataFile, const std::string& section ):
         M_meshDir  (),
         M_meshFile (),
         M_meshType (),
+        M_order    (),
         M_verbose   ()
 {
     setup( dataFile, section );
@@ -68,6 +70,7 @@ MeshData::MeshData( const MeshData& meshData ):
         M_meshDir    ( meshData.M_meshDir ),
         M_meshFile   ( meshData.M_meshFile ),
         M_meshType   ( meshData.M_meshType ),
+        M_order      ( meshData.M_order ),
         M_verbose     ( meshData.M_verbose )
 {}
 
@@ -80,6 +83,7 @@ MeshData::setup( const GetPot& dataFile, const std::string& section )
     M_meshDir  = dataFile( ( section + "/mesh_dir"  ).data(), "./" );
     M_meshFile = dataFile( ( section + "/mesh_file" ).data(), "mesh.mesh" );
     M_meshType = dataFile( ( section + "/mesh_type" ).data(), ".mesh" );
+    M_order    = dataFile( ( section + "/mesh_order"   ).data(), "P1" );
     M_verbose   = dataFile( ( section + "/verbose"   ).data(), false );
 }
 
@@ -90,6 +94,7 @@ void MeshData::showMe( std::ostream& output ) const
     output << "mesh_dir   = " << M_meshDir  << std::endl;
     output << "mesh_file  = " << M_meshFile << std::endl;
     output << "mesh_type  = " << M_meshType << std::endl;
+    output << "mesh_order  = " << M_order << std::endl;
 }
 
 }

@@ -398,24 +398,30 @@ BCBase::BCBase( const bcName_Type&  name,
 
 }
 
-
-BCBase::BCBase( const BCBase& bcBase )
-        :
-        M_name( bcBase.M_name ),
-        M_flag( bcBase.M_flag ),
-        M_type( bcBase.M_type ),
-        M_mode( bcBase.M_mode ),
-        M_components( bcBase.M_components ),
-        M_bcFunction( bcBase.M_bcFunction ),
-        M_bcFunctionFEVectorDependent(bcBase.M_bcFunctionFEVectorDependent),
-        M_bcVector( bcBase.M_bcVector ),
-        M_isStored_BcVector( bcBase.M_isStored_BcVector ),
-        M_isStored_BcFunctionVectorDependent(bcBase.M_isStored_BcFunctionVectorDependent),
-        M_idSet( ),
-        M_idVector( ),
-        M_offset   ( bcBase.M_offset ),
-        M_finalized( bcBase.M_finalized )
+BCBase::BCBase( const BCBase& bcBase ) :
+        M_name                                  ( bcBase.M_name ),
+        M_flag                                  ( bcBase.M_flag ),
+        M_type                                  ( bcBase.M_type ),
+        M_mode                                  ( bcBase.M_mode ),
+        M_components                            ( bcBase.M_components ),
+        M_bcFunction                            ( ),
+        M_bcFunctionFEVectorDependent           ( ),
+        M_bcVector                              ( ),
+        M_isStored_BcVector                     ( bcBase.M_isStored_BcVector ),
+        M_isStored_BcFunctionVectorDependent    ( bcBase.M_isStored_BcFunctionVectorDependent ),
+        M_idSet                                 ( ),
+        M_idVector                              ( ),
+        M_offset                                ( bcBase.M_offset ),
+        M_finalized                             ( bcBase.M_finalized )
 {
+    // If the shared_ptr is not empty we make a true copy
+    if ( bcBase.M_bcFunction.get() != 0 )
+        M_bcFunction = bcBase.M_bcFunction->clone();
+    if ( bcBase.M_bcFunctionFEVectorDependent.get() != 0 )
+        M_bcFunctionFEVectorDependent = bcBase.M_bcFunctionFEVectorDependent->clone();
+    if ( bcBase.M_bcVector.get() != 0 )
+        M_bcVector = bcBase.M_bcVector->clone();
+
     // Important!!: The set member M_idSet is always empty at this point, it is just
     // an auxiliary container used at the moment of the boundary update (see BCHandler::bcUpdate)
 
