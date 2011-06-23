@@ -36,10 +36,13 @@
 #ifndef VECTORBLOCKEPETRA_H
 #define VECTORBLOCKEPETRA_H 1
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifearray/MapVector.hpp>
+#include <life/lifearray/VectorBlockViewEpetra.hpp>
+
+#include <boost/shared_ptr.hpp>
 
 namespace LifeV {
 
@@ -57,10 +60,14 @@ public:
     //@{
 
     typedef Real data_type;
+
     typedef MapEpetra map_type;
     typedef MapVector<map_type> mapVector_type;
     typedef MapEpetraType mapType_type;
     typedef Epetra_CombineMode combine_type;
+
+    typedef VectorBlockViewEpetra block_type;
+    typedef boost::shared_ptr<block_type> block_ptrType;
 
     //@}
 
@@ -100,6 +107,13 @@ public:
     //! @name Set Methods
     //@{
 
+    //! @name  Set Methods
+    //@{
+    /*! Set the size of the blocks of the vector
+     *  @param blockSizes Sizes of the blocks
+     */
+    void setBlockStructure( const std::vector<UInt>& blockSizes );
+
 
     //@}
 
@@ -107,6 +121,11 @@ public:
     //! @name Get Methods
     //@{
 
+    UInt blockSize(const UInt& index) const { return M_blockSize[index]; }
+
+    void vectorBlockView( const UInt& index, block_type& blockView) const;
+
+    block_ptrType block( const UInt& index) const;
 
     //@}
 
