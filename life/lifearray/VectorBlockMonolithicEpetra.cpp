@@ -26,13 +26,13 @@
 
 /*!
     @file
-    @brief Implementation file for VectorBlockEpetra
+    @brief Implementation file for VectorBlockMonolithicEpetra
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @date 01 Jun 2011
  */
 
-#include <VectorBlockEpetra.hpp>
+#include <VectorBlockMonolithicEpetra.hpp>
 
 namespace LifeV {
 
@@ -40,24 +40,24 @@ namespace LifeV {
 // Constructors & Destructor
 // ===================================================
 
-VectorBlockEpetra::
-VectorBlockEpetra( const map_type& map, const mapType_type& mapType)
+VectorBlockMonolithicEpetra::
+VectorBlockMonolithicEpetra( const map_type& map, const mapType_type& mapType)
     : VectorEpetra(map,mapType),
-      M_blockSize(1,map.map(Unique)->NumMyElements()),
+      M_blockSize(1,map.map(Unique)->NumGlobalElements()),
       M_blockFirstIndex(1,0)
 {}
 
-VectorBlockEpetra::
-VectorBlockEpetra( const mapVector_type& mapVector, const mapType_type& mapType)
+VectorBlockMonolithicEpetra::
+VectorBlockMonolithicEpetra( const mapVector_type& mapVector, const mapType_type& mapType)
     : VectorEpetra(mapType),
       M_blockSize(mapVector.nbMap()),
       M_blockFirstIndex(mapVector.nbMap())
 {
-    ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to construct a VectorBlockEpetra!");
+    ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to construct a VectorBlockMonolithicEpetra!");
 
     map_type myMap(mapVector.map(0));
 
-	M_blockSize[0]=mapVector.map(0).map(Unique)->NumMyElements();
+	M_blockSize[0]=mapVector.mapSize(0);
 	M_blockFirstIndex[0]=0;
 
 	UInt totalSize(M_blockSize[0]);
@@ -65,7 +65,7 @@ VectorBlockEpetra( const mapVector_type& mapVector, const mapType_type& mapType)
 	for (UInt i(1); i<mapVector.nbMap(); ++i)
 	{
 		myMap += mapVector.map(i);
-		M_blockSize[i]=mapVector.map(i).map(Unique)->NumMyElements();
+		M_blockSize[i]=mapVector.mapSize(i);
 		M_blockFirstIndex[i]=totalSize;
 
 		totalSize+= M_blockSize[i];
@@ -75,22 +75,22 @@ VectorBlockEpetra( const mapVector_type& mapVector, const mapType_type& mapType)
     this->setMap(myMap);
 }
 
-VectorBlockEpetra::
-VectorBlockEpetra( const VectorBlockEpetra& vector)
+VectorBlockMonolithicEpetra::
+VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector)
     : VectorEpetra(vector),
       M_blockSize(vector.M_blockSize),
       M_blockFirstIndex(vector.M_blockFirstIndex)
 {}
 
-VectorBlockEpetra::
-VectorBlockEpetra( const VectorBlockEpetra& vector, const mapType_type& mapType)
+VectorBlockMonolithicEpetra::
+VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType)
     : VectorEpetra(vector,mapType),
       M_blockSize(vector.M_blockSize),
       M_blockFirstIndex(vector.M_blockFirstIndex)
 {}
 
-VectorBlockEpetra::
-VectorBlockEpetra( const VectorBlockEpetra& vector, const mapType_type& mapType, const combine_type& combineMode)
+VectorBlockMonolithicEpetra::
+VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType, const combine_type& combineMode)
     : VectorEpetra(vector,mapType,combineMode),
       M_blockSize(vector.M_blockSize),
       M_blockFirstIndex(vector.M_blockFirstIndex)
@@ -111,7 +111,7 @@ VectorBlockEpetra( const VectorBlockEpetra& vector, const mapType_type& mapType,
 // ===================================================
 
 void
-VectorBlockEpetra::
+VectorBlockMonolithicEpetra::
 setBlockStructure( const std::vector<UInt>& blockSizes)
 {
     M_blockSize = blockSizes;
@@ -131,19 +131,19 @@ setBlockStructure( const std::vector<UInt>& blockSizes)
 // ===================================================
 
 void
-VectorBlockEpetra::
+VectorBlockMonolithicEpetra::
 vectorBlockView( const UInt& index, block_type& blockView ) const
 {
-    blockView.setup( M_blockFirstIndex[index], M_blockSize[index], *this);
+    blockView.setup( M_blockFirstIndex[index], M_blockSize[index], this->epetraVectorPtr());
 }
 
-VectorBlockEpetra::block_ptrType
-VectorBlockEpetra::
+VectorBlockMonolithicEpetra::block_ptrType
+VectorBlockMonolithicEpetra::
 block( const UInt& index) const
 {
     block_ptrType mbv(new block_type);
 
-    mbv->setup( M_blockFirstIndex[index], M_blockSize[index], *this);
+    mbv->setup( M_blockFirstIndex[index], M_blockSize[index], this->epetraVectorPtr());
 
     return mbv;
 }

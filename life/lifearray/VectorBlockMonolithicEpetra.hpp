@@ -26,32 +26,36 @@
 
 /*!
     @file
-    @brief File containing the VectorBlockEpetra
+    @brief File containing the VectorBlockMonolithicEpetra
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @date 01 Jun 2011
 
  */
 
-#ifndef VECTORBLOCKEPETRA_H
-#define VECTORBLOCKEPETRA_H 1
+#ifndef VECTOR_BLOCK_MONOLITHIC_EPETRA_H
+#define VECTOR_BLOCK_MONOLITHIC_EPETRA_H 1
 
 #include <life/lifecore/LifeV.hpp>
 
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifearray/MapVector.hpp>
-#include <life/lifearray/VectorBlockViewEpetra.hpp>
+#include <life/lifearray/VectorBlockMonolithicEpetraView.hpp>
 
 #include <boost/shared_ptr.hpp>
 
 namespace LifeV {
 
-//! VectorBlockEpetra - A block vector structure for the Epetra framework of Trilinos
+//! VectorBlockMonolithicEpetra - A block vector structure for the Epetra framework of Trilinos
 /*!
     @author Samuel Quinodoz
+
+    This structure represents a vector with a block structure while keeping internally
+    only an entire vector with informations of on the location of the blocks with
+    respect to this vector (monolithic approach).
  */
 
-class VectorBlockEpetra
+class VectorBlockMonolithicEpetra
     : public VectorEpetra
 {
 public:
@@ -66,7 +70,7 @@ public:
     typedef MapEpetraType mapType_type;
     typedef Epetra_CombineMode combine_type;
 
-    typedef VectorBlockViewEpetra block_type;
+    typedef VectorBlockMonolithicEpetraView block_type;
     typedef boost::shared_ptr<block_type> block_ptrType;
 
     //@}
@@ -75,17 +79,28 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    VectorBlockEpetra( const map_type& map, const mapType_type& mapType = Unique);
+    //! Constructor with the monolithic map
+    VectorBlockMonolithicEpetra( const map_type& map, const mapType_type& mapType = Unique);
 
-    VectorBlockEpetra( const mapVector_type& mapVector, const mapType_type& mapType = Unique);
+    //! Construction with a vector of map
+    /*!
+      With this constructor, the block structure is automatically deduced from the maps in the
+      vector. The monolithic map and vectors are also built by concanating the different maps
+      in the vector.
+     */
+    VectorBlockMonolithicEpetra( const mapVector_type& mapVector, const mapType_type& mapType = Unique);
 
-    VectorBlockEpetra( const VectorBlockEpetra& vector);
+    //! Copy constructor
+    VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector);
 
-    VectorBlockEpetra( const VectorBlockEpetra& vector, const mapType_type& mapType);
+    //! Copy constructor with a specified map type (Repeated/Unique)
+    VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType);
 
-    VectorBlockEpetra( const VectorBlockEpetra& vector, const mapType_type& mapType, const combine_type& combineMode);
+    //! Copy constructor with specified map type and combine mode
+    VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType, const combine_type& combineMode);
 
-    ~VectorBlockEpetra(){}
+    //! Destructor
+    ~VectorBlockMonolithicEpetra(){}
 
     //@}
 

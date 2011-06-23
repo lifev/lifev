@@ -25,64 +25,64 @@
 //@HEADER
 
 /*!
-   @file MatrixBlock.hpp
-   @brief The file contains the MatrixBlock class
+   @file MatrixBlockMonolithicEpetra.hpp
+   @brief The file contains the MatrixBlockMonolithicEpetra class
 
    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
    @date 2010-10-09
  */
 
-#ifndef _MATRIXBLOCK_HPP_
-#define _MATRIXBLOCK_HPP_
+#ifndef _MATRIX_BLOCK_MONOLITHIC_EPETRA_HPP_
+#define _MATRIX_BLOCK_MONOLITHIC_EPETRA_HPP_
 
 #include <boost/shared_ptr.hpp>
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/MapVector.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/MatrixBlockView.hpp>
+#include <life/lifearray/MatrixBlockMonolithicEpetraView.hpp>
 
 namespace LifeV {
 
-//! MatrixBlock - class of block matrix
+//! MatrixBlockMonolithicEpetra - class of block matrix
 /*!
  *  @author Gwenol Grandperrin
  *  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  *
- *  The BlockMatrix class contains data related
+ *  The MatrixBlockMonolithicEpetra class contains data related
  *  to block matrix. It is an extension to
- *  EpetraMatrix where data about blocks have
+ *  MatrixEpetra where data about blocks have
  *  been set.
  */
 template <typename DataType>
-class MatrixBlock : public MatrixEpetra<DataType>
+class MatrixBlockMonolithicEpetra : public MatrixEpetra<DataType>
 {
 public:
 
-    typedef MatrixBlockView<DataType> block_type;
+    typedef MatrixBlockMonolithicEpetraView<DataType> block_type;
     typedef boost::shared_ptr<block_type> block_ptrType;
 
     /** @name Constructors, destructor
      */
     //@{
     //! default constructor.
-    MatrixBlock( const MapEpetra& map, int numEntries = 50);
+    MatrixBlockMonolithicEpetra( const MapEpetra& map, int numEntries = 50);
 
 	//! Block constructor
 	/*!
 	This is the most complete constructor, as it builds the whole block
 	structure of the matrix, using the maps stored in the vector.
 	*/
-	MatrixBlock( const MapEpetraVector& vector, int numEntries = 50);
+	MatrixBlockMonolithicEpetra( const MapEpetraVector& vector, int numEntries = 50);
 
     //! Casting constructor
-    MatrixBlock( const MatrixEpetra<DataType>& matrix );
+    MatrixBlockMonolithicEpetra( const MatrixEpetra<DataType>& matrix );
 
     //! Copy constructor
-    MatrixBlock( const MatrixBlock& matrix );
+    MatrixBlockMonolithicEpetra( const MatrixBlockMonolithicEpetra& matrix );
 
-    //! default virtual destructor
-    ~MatrixBlock();
+    //! Destructor
+    ~MatrixBlockMonolithicEpetra();
 
     //@}
 
@@ -103,30 +103,30 @@ public:
     /*!
      * @param rowIndex Row index of the block
      */
-    UInt getBlockNumRows(const UInt& rowIndex) const;
+    UInt blockNumRows(const UInt& rowIndex) const;
 
     //! Returns the number of columns of the block
     /*!
      * @param columnIndex Column index of the block
      */
-    UInt getBlockNumColumns(const UInt& columnIndex) const;
+    UInt blockNumColumns(const UInt& columnIndex) const;
 
-    //! Returns the MatrixBlockView at the (rowIndex,colIndex) location
+    //! Returns the MatrixBlockMonolithicEpetraView at the (rowIndex,colIndex) location
     /*!
      * @param rowIndex Row position of the block in the matrix
      * @param columnIndex Column position of the block in the matrix
-     * @param mbv MatrixBlockView to be filled
+     * @param mbv MatrixBlockMonolithicEpetraView to be filled
      */
-    void getMatrixBlockView( const UInt& rowIndex,
+    void matrixBlockMonolithicEpetraView( const UInt& rowIndex,
                              const UInt& columnIndex,
-                             block_type& mbv);
+                             block_type& mbv) const;
 
 	//! Returns the block (rowIndex,columnIndex) of the matrix
 	/*!
 	@assert: rowIndex is a valid row number
 	@assert: columnIndex is a valid column number
 	*/
-	block_ptrType block(const UInt& rowIndex, const UInt& columnIndex);
+	block_ptrType block(const UInt& rowIndex, const UInt& columnIndex) const;
     //@}
 
 private:
@@ -145,10 +145,10 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename DataType>
-MatrixBlock<DataType>::MatrixBlock(const MapEpetra& map, int numEntries) :
+MatrixBlockMonolithicEpetra<DataType>::MatrixBlockMonolithicEpetra(const MapEpetra& map, int numEntries) :
     MatrixEpetra<DataType>(map,numEntries),
-	M_blockNumRows(std::vector<UInt>(1,map.map(Unique)->NumMyElements())),
-	M_blockNumColumns(std::vector<UInt>(1,map.map(Unique)->NumMyElements())),
+	M_blockNumRows(std::vector<UInt>(1,map.map(Unique)->NumGlobalElements())),
+	M_blockNumColumns(std::vector<UInt>(1,map.map(Unique)->NumGlobalElements())),
 	M_blockFirstRows(std::vector<UInt>(1,0)),
 	M_blockFirstColumns(std::vector<UInt>(1,0))
 {
@@ -157,30 +157,30 @@ MatrixBlock<DataType>::MatrixBlock(const MapEpetra& map, int numEntries) :
 
 
 template <typename DataType>
-MatrixBlock<DataType>::MatrixBlock( const MapEpetraVector& vector, int numEntries):
+MatrixBlockMonolithicEpetra<DataType>::MatrixBlockMonolithicEpetra( const MapEpetraVector& vector, int numEntries):
     MatrixEpetra<DataType>( typename MatrixEpetra<DataType>::matrix_ptrtype())
 {
-	ASSERT( vector.nbMap() > 0 ,"Map vector empty, impossible to construct a MatrixBlock!");
+	ASSERT( vector.nbMap() > 0 ,"Map vector empty, impossible to construct a MatrixBlockMonolithicEpetra!");
 
 	MapEpetra myMap(vector.map(0));
-	M_blockNumRows.push_back(vector.map(0).map(Unique)->NumMyElements());
-	M_blockNumColumns.push_back(vector.map(0).map(Unique)->NumMyElements());
+	M_blockNumRows.push_back(vector.mapSize(0));
+	M_blockNumColumns.push_back(vector.mapSize(0));
 	M_blockFirstRows.push_back(0);
 	M_blockFirstColumns.push_back(0);
 
-	UInt totalRows(vector.map(0).map(Unique)->NumMyElements());
-	UInt totalColumns(vector.map(0).map(Unique)->NumMyElements());
+	UInt totalRows(vector.mapSize(0));
+	UInt totalColumns(vector.mapSize(0));
 
 	for (UInt i(1); i<vector.nbMap(); ++i)
 	{
 		myMap += vector.map(i);
-		M_blockNumRows.push_back(vector.map(i).map(Unique)->NumMyElements());
-		M_blockNumColumns.push_back(vector.map(i).map(Unique)->NumMyElements());
+		M_blockNumRows.push_back(vector.mapSize(i));
+		M_blockNumColumns.push_back(vector.mapSize(i));
 		M_blockFirstRows.push_back(totalRows);
 		M_blockFirstColumns.push_back(totalColumns);
 
-		totalRows+= vector.map(i).map(Unique)->NumMyElements();
-		totalColumns+= vector.map(i).map(Unique)->NumMyElements();
+		totalRows+= vector.mapSize(i);
+		totalColumns+= vector.mapSize(i);
 	}
 
 	this->mapPtr().reset(new MapEpetra(myMap));
@@ -189,7 +189,7 @@ MatrixBlock<DataType>::MatrixBlock( const MapEpetraVector& vector, int numEntrie
 
 
 template <typename DataType>
-MatrixBlock<DataType>::MatrixBlock( const MatrixEpetra<DataType>& matrix ) :
+MatrixBlockMonolithicEpetra<DataType>::MatrixBlockMonolithicEpetra( const MatrixEpetra<DataType>& matrix ) :
     MatrixEpetra<DataType>(matrix),
 	M_blockNumRows(),
 	M_blockNumColumns(),
@@ -198,7 +198,7 @@ MatrixBlock<DataType>::MatrixBlock( const MatrixEpetra<DataType>& matrix ) :
 {}
 
 template <typename DataType>
-MatrixBlock<DataType>::MatrixBlock( const MatrixBlock& matrix ) :
+MatrixBlockMonolithicEpetra<DataType>::MatrixBlockMonolithicEpetra( const MatrixBlockMonolithicEpetra& matrix ) :
     MatrixEpetra<DataType>(matrix),
     M_blockNumRows(matrix.M_blockNumRows),
     M_blockNumColumns(matrix.M_blockNumColumns),
@@ -207,7 +207,7 @@ MatrixBlock<DataType>::MatrixBlock( const MatrixBlock& matrix ) :
 {}
 
 template <typename DataType>
-MatrixBlock<DataType>::~MatrixBlock()
+MatrixBlockMonolithicEpetra<DataType>::~MatrixBlockMonolithicEpetra()
 {}
 
 // ===================================================
@@ -215,46 +215,75 @@ MatrixBlock<DataType>::~MatrixBlock()
 // ===================================================
 template <typename DataType>
 void
-MatrixBlock<DataType>::setBlockStructure(const std::vector<UInt>& blockNumRows,
+MatrixBlockMonolithicEpetra<DataType>::setBlockStructure(const std::vector<UInt>& blockNumRows,
                                          const std::vector<UInt>& blockNumColumns)
 {
+	ASSERT( blockNumRows.size() > 0, "No way to build a matrix with 0 block rows");
+    ASSERT( blockNumColumns.size() > 0, "No way to build a matrix with 0 block columns")
+
+
     M_blockNumRows    = blockNumRows;
     M_blockNumColumns = blockNumColumns;
+
+    M_blockFirstRows.resize(M_blockNumRows.size());
+    M_blockFirstColumns.resize(M_blockNumColumns.size());
+
+    UInt currentSize(0);
+    for (UInt i(0); i<blockNumRows.size(); ++i)
+    {
+        M_blockFirstRows[i] = currentSize;
+        currentSize += M_blockNumRows[i];
+    }
+
+    currentSize = 0;
+    for (UInt i(0); i<blockNumColumns.size(); ++i)
+    {
+        M_blockFirstColumns[i] = currentSize;
+        currentSize += M_blockNumColumns[i];
+    }
 }
+
 
 // ===================================================
 // Get Methods
 // ===================================================
 template <typename DataType>
 UInt
-MatrixBlock<DataType>::getBlockNumRows(const UInt& rowIndex) const
+MatrixBlockMonolithicEpetra<DataType>::blockNumRows(const UInt& rowIndex) const
 {
+	ASSERT(rowIndex < M_blockFirstRows.size(), "Row index out of bound. No block to return");
+
     return M_blockNumRows[rowIndex];
 }
 
 template <typename DataType>
 UInt
-MatrixBlock<DataType>::getBlockNumColumns(const UInt& columnIndex) const
+MatrixBlockMonolithicEpetra<DataType>::blockNumColumns(const UInt& columnIndex) const
 {
+	ASSERT(columnIndex < M_blockFirstColumns.size(), "Column index out of bound. No block to return");
+
     return M_blockNumColumns[columnIndex];
 }
 
 template <typename DataType>
 void
-MatrixBlock<DataType>::getMatrixBlockView(const UInt& rowIndex,
+MatrixBlockMonolithicEpetra<DataType>::matrixBlockMonolithicEpetraView(const UInt& rowIndex,
                                           const UInt& columnIndex,
-                                          block_type& mbv)
+                                          block_type& mbv) const
 {
+	ASSERT(rowIndex < M_blockFirstRows.size(), "Row index out of bound. No block to return");
+	ASSERT(columnIndex < M_blockFirstColumns.size(), "Column index out of bound. No block to return");
+
     mbv.setup(M_blockFirstRows[rowIndex],
               M_blockFirstColumns[columnIndex],
               M_blockNumRows[rowIndex],
               M_blockNumColumns[columnIndex],
-              *this);
+              this->matrixPtr());
 }
 
 template <typename DataType>
-typename MatrixBlock<DataType>::block_ptrType
-MatrixBlock<DataType>::block(const UInt& rowIndex, const UInt& columnIndex)
+typename MatrixBlockMonolithicEpetra<DataType>::block_ptrType
+MatrixBlockMonolithicEpetra<DataType>::block(const UInt& rowIndex, const UInt& columnIndex) const
 {
 	ASSERT(rowIndex < M_blockFirstRows.size(), "Row index out of bound. No block to return");
 	ASSERT(columnIndex < M_blockFirstColumns.size(), "Column index out of bound. No block to return");
@@ -265,7 +294,7 @@ MatrixBlock<DataType>::block(const UInt& rowIndex, const UInt& columnIndex)
               M_blockFirstColumns[columnIndex],
               M_blockNumRows[rowIndex],
               M_blockNumColumns[columnIndex],
-              *this);
+              this->matrixPtr());
 
 	return mbv;
 }

@@ -25,16 +25,16 @@
 //@HEADER
 
 /*!
-   @file MatrixBlockView.hpp
-   @brief The file contains the MatrixBlockView class
+   @file MatrixBlockMonolithicEpetraView.hpp
+   @brief The file contains the MatrixBlockMonolithicEpetraView class
 
    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
    @date 2010-10-09
  */
 
-#ifndef _MATRIXBLOCKVIEW_HPP_
-#define _MATRIXBLOCKVIEW_HPP_
+#ifndef _MATRIX_BLOCK_MONOLITHIC_EPETRA_VIEW_HPP_
+#define _MATRIX_BLOCK_MONOLITHIC_EPETRA_VIEW_HPP_
 
 #include <boost/shared_ptr.hpp>
 
@@ -42,30 +42,28 @@
 
 #include <Epetra_FECrsMatrix.h>
 
-#include <life/lifearray/MatrixEpetra.hpp>
 
 namespace LifeV {
 
-//! MatrixBlockView - class to manage the block in a block matrix
+//! MatrixBlockMonolithicEpetraView - class to manage the block in a MatrixBlockMonolithicEpetra
 /*!
  *  @author Gwenol Grandperrin
  *  @contributor Samuel Quinodoz
  *
- *  The BlockMatrixView class contains data related
+ *  The MatrixBlockMonolithicEpetraView class contains data related
  *  to block of a matrix. It is useful to setup a
  *  clean and easy-to-use blocks management
  */
 template<typename DataType>
-class MatrixBlockView
+class MatrixBlockMonolithicEpetraView
 {
 public:
 
     /** @name Typedefs
      */
     //@{
-    typedef MatrixEpetra<DataType> matrix_type;
-    typedef boost::shared_ptr<matrix_type>  matrix_ptrtype;
-    typedef typename matrix_type::matrix_type rawMatrix_type;
+
+    typedef Epetra_FECrsMatrix rawMatrix_type;
     typedef boost::shared_ptr<rawMatrix_type>  rawMatrix_ptrtype;
 	//@}
 
@@ -74,47 +72,27 @@ public:
      */
     //@{
     //! default constructor.
-    MatrixBlockView();
+    MatrixBlockMonolithicEpetraView();
 
     //! Copy constructor
-    MatrixBlockView( const MatrixBlockView<DataType>& mbv );
+    MatrixBlockMonolithicEpetraView( const MatrixBlockMonolithicEpetraView<DataType>& mbv );
 
     //! default virtual destructor
-    ~MatrixBlockView();
+    ~MatrixBlockMonolithicEpetraView();
 
     //@}
 
     //! @name Methods
     //@{
 
-    //! Print the informations about the MatrixBlockView
+    //! Print the informations about the MatrixBlockMonolithicEpetraView
     void showMe(std::ostream& output = std::cout) const;
 
 	//! Function to assemble an elemental matrix in a block
     void addToCoefficients( UInt const numRows, UInt const numColumns,
                             std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
                             DataType* const* const localValues,
-                            Int format = Epetra_FECrsMatrix::COLUMN_MAJOR )
-	{
-		std::vector<Int> rowIndices(blockRowIndices);
-		std::vector<Int> columnIndices(blockColumnIndices);
-
-		for (UInt i(0); i<numRows; ++i)
-		{
-			rowIndices[i]+=M_firstRowIndex;
-		}
-		for (UInt i(0); i<numColumns; ++i)
-		{
-			columnIndices[i]+=M_firstColumnIndex;
-		}
-
-		Int ierr = M_matrix->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
-                                                &columnIndices[0], localValues, format );
-
-		ASSERT( ierr != -2, " \n <!> Error in block matrix insertion <!> \n Code : -2 \n Possible cause : try to insert a new element in a closed matrix")
-		ASSERT( ierr >= 0 , " \n <!> Unknown error in block matrix insertion <!> ");
-	}
-
+                            Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
     //@}
 
     //! @name  Set Methods
@@ -130,39 +108,49 @@ public:
                 const UInt& firstColumn,
                 const UInt& numRows,
                 const UInt& numColumns,
-                const matrix_type& A );
+                const rawMatrix_ptrtype& A );
 
     //@}
 
     //! @name  Get Methods
     //@{
     //! Returns the number of rows in the block
-    UInt numRows() const;
+    UInt numRows() const {return M_numRows; }
 
     //! Returns the number of columns in the block
-    UInt numColumns() const;
+    UInt numColumns() const {return M_numColumns; }
 
     //! Returns the index of the first row in the block
-    UInt firstRowIndex() const;
+    UInt firstRowIndex() const {return M_firstRowIndex; }
 
     //! Returns the index of the last row in the block
-    UInt lastRowIndex() const;
+    UInt lastRowIndex() const {return M_lastRowIndex; }
 
     //! Returns the index of the first column in the block
-    UInt firstColumnIndex() const;
+    UInt firstColumnIndex() const {return M_firstColumnIndex; }
 
     //! Returns the index of the last column in the block
-    UInt lastColumnIndex() const;
+    UInt lastColumnIndex() const {return M_firstColumnIndex; }
 
     //! Return the shared_pointer of the Epetra_FECrsMatrix
-    rawMatrix_ptrtype& getMatrixPtr(){return M_matrix;}
+    rawMatrix_ptrtype& getMatrixPtr(){return M_matrix; }
 
     //! Return the const shared_pointer of the Epetra_FECrsMatrix
-    const rawMatrix_ptrtype& getMatrixPtr() const{return M_matrix;}
+    const rawMatrix_ptrtype& getMatrixPtr() const {return M_matrix; }
 
     //@}
 
 private:
+
+    //! @name Private Methods
+    //@{
+
+    //! No assignement operator, it is missleading (would copy the views, not the blocks!)
+    MatrixBlockMonolithicEpetraView<DataType> operator=( const MatrixBlockMonolithicEpetraView& otherView);
+
+    //@}
+
+
     UInt M_numRows;
     UInt M_numColumns;
     UInt M_firstRowIndex;
@@ -177,7 +165,7 @@ private:
 // ===================================================
 
 template<typename DataType>
-MatrixBlockView<DataType>::MatrixBlockView() :
+MatrixBlockMonolithicEpetraView<DataType>::MatrixBlockMonolithicEpetraView() :
     M_numRows( 0 ),
     M_numColumns( 0 ),
     M_firstRowIndex( 0 ),
@@ -190,7 +178,7 @@ MatrixBlockView<DataType>::MatrixBlockView() :
 }
 
 template<typename DataType>
-MatrixBlockView<DataType>::MatrixBlockView( const MatrixBlockView<DataType>& mbv ) :
+MatrixBlockMonolithicEpetraView<DataType>::MatrixBlockMonolithicEpetraView( const MatrixBlockMonolithicEpetraView<DataType>& mbv ) :
     M_numRows( mbv.M_numRows ),
     M_numColumns( mbv.M_numColumns ),
     M_firstRowIndex( mbv.M_firstRowIndex ),
@@ -203,7 +191,7 @@ MatrixBlockView<DataType>::MatrixBlockView( const MatrixBlockView<DataType>& mbv
 }
 
 template<typename DataType>
-MatrixBlockView<DataType>::~MatrixBlockView()
+MatrixBlockMonolithicEpetraView<DataType>::~MatrixBlockMonolithicEpetraView()
 {
     M_matrix.reset();
 }
@@ -214,9 +202,9 @@ MatrixBlockView<DataType>::~MatrixBlockView()
 
 template<typename DataType>
 void
-MatrixBlockView<DataType>::showMe( std::ostream& output ) const
+MatrixBlockMonolithicEpetraView<DataType>::showMe( std::ostream& output ) const
 {
-    output << "MatrixBlockView informations:" << std::endl
+    output << "MatrixBlockMonolithicEpetraView informations:" << std::endl
            << "Size = " << M_numRows << " x " << M_numColumns << std::endl
            << "firstRow = " << M_firstRowIndex << std::endl
            << "lastRow = " << M_lastRowIndex << std::endl
@@ -224,17 +212,45 @@ MatrixBlockView<DataType>::showMe( std::ostream& output ) const
            << "lastColumn = " << M_lastColumnIndex << std::endl;
 }
 
+template<typename DataType>
+void
+MatrixBlockMonolithicEpetraView<DataType>::
+addToCoefficients( UInt const numRows, UInt const numColumns,
+                            std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
+                            DataType* const* const localValues,
+                            Int format)
+{
+	std::vector<Int> rowIndices(blockRowIndices);
+    std::vector<Int> columnIndices(blockColumnIndices);
+
+    for (UInt i(0); i<numRows; ++i)
+    {
+        rowIndices[i]+=M_firstRowIndex;
+    }
+    for (UInt i(0); i<numColumns; ++i)
+    {
+        columnIndices[i]+=M_firstColumnIndex;
+    }
+
+    Int ierr = M_matrix->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
+                                             &columnIndices[0], localValues, format );
+
+    ASSERT( ierr != -2, " \n <!> Error in block matrix insertion <!> \n Code : -2 \n Possible cause : try to insert a new element in a closed matrix");
+    ASSERT( ierr >= 0 , " \n <!> Unknown error in block matrix insertion <!> ");
+}
+
+
 // ===================================================
 // Set Methods
 // ===================================================
 
 template<typename DataType>
 void
-MatrixBlockView<DataType>::setup( const UInt& firstRow,
+MatrixBlockMonolithicEpetraView<DataType>::setup( const UInt& firstRow,
                         const UInt& firstColumn,
                         const UInt& numRows,
                         const UInt& numColumns,
-                        const matrix_type& A )
+                        const rawMatrix_ptrtype& A )
 {
     M_numRows          = numRows;
     M_numColumns       = numColumns;
@@ -242,55 +258,12 @@ MatrixBlockView<DataType>::setup( const UInt& firstRow,
     M_lastRowIndex     = firstRow+numRows-1;
     M_firstColumnIndex = firstColumn;
     M_lastColumnIndex  = firstColumn+numColumns-1;
-    M_matrix           = A.matrixPtr();
+    M_matrix           = A;
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
-
-template<typename DataType>
-UInt
-MatrixBlockView<DataType>::numRows() const
-{
-    return M_numRows;
-}
-
-template<typename DataType>
-UInt
-MatrixBlockView<DataType>::numColumns() const
-{
-    return M_numColumns;
-}
-
-template<typename DataType>
-UInt
-MatrixBlockView<DataType>::firstRowIndex() const
-{
-    return M_firstRowIndex;
-}
-
-template<typename DataType>
-UInt
-MatrixBlockView<DataType>::lastRowIndex() const
-{
-    return M_lastRowIndex;
-}
-
-template<typename DataType>
-UInt
-MatrixBlockView<DataType>::firstColumnIndex() const
-{
-    return M_firstColumnIndex;
-}
-
-template<typename DataType>
-UInt
-MatrixBlockView<DataType>::lastColumnIndex() const
-{
-    return M_lastColumnIndex;
-}
-
 
 } // namespace LifeV
 

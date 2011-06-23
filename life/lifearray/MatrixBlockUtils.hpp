@@ -35,7 +35,7 @@
 #ifndef _MATRIXBLOCKUTILS_HPP_
 #define _MATRIXBLOCKUTILS_HPP_
 
-#include <lifemc/lifearray/MatrixBlockView.hpp>
+#include <life/lifearray/MatrixBlockMonolithicEpetraView.hpp>
 
 namespace LifeV {
 
@@ -47,8 +47,8 @@ namespace MatrixBlockUtils {
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType>
-void copyBlock ( const MatrixBlockView<DataType>& srcBlock,
-                 MatrixBlockView<DataType>& destBlock )
+void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
+                 MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
@@ -114,7 +114,7 @@ void copyBlock ( const MatrixBlockView<DataType>& srcBlock,
 */
 
 template< typename DataType >
-void createZeroBlock ( MatrixBlockView<DataType>& destBlock )
+void createZeroBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // This method will maybe be replaced
     // by the method setBlockToZero
@@ -126,7 +126,7 @@ void createZeroBlock ( MatrixBlockView<DataType>& destBlock )
   @param diagonalValue Value to be inserted in the diagonal
 */
 template< typename DataType >
-void createScalarBlock ( MatrixBlockView<DataType>& destBlock, const DataType& diagonalValue )
+void createScalarBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock, const DataType& diagonalValue )
 {
     // SQUARE TEST
     // BLOCK PTR TEST
@@ -162,7 +162,7 @@ void createScalarBlock ( MatrixBlockView<DataType>& destBlock, const DataType& d
   @param destBlock Block where the data will be stored
 */
 template< typename DataType >
-void createIdentityBlock ( MatrixBlockView<DataType>& destBlock )
+void createIdentityBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     createScalarBlock(destBlock,1.0);
 }
@@ -173,8 +173,8 @@ void createIdentityBlock ( MatrixBlockView<DataType>& destBlock )
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createDiagBlock ( const MatrixBlockView<DataType>& srcBlock,
-                       MatrixBlockView<DataType>& destBlock )
+void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
+                       MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -241,8 +241,8 @@ void createDiagBlock ( const MatrixBlockView<DataType>& srcBlock,
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createInvDiagBlock ( const MatrixBlockView<DataType>& srcBlock,
-                          MatrixBlockView<DataType>& destBlock );
+void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
+                          MatrixBlockMonolithicEpetraView<DataType>& destBlock );
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -310,8 +310,8 @@ void createInvDiagBlock ( const MatrixBlockView<DataType>& srcBlock,
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createUpperTriangularBlock ( const MatrixBlockView<DataType>& srcBlock,
-                                  MatrixBlockView<DataType>& destBlock )
+void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
+                                  MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -379,8 +379,8 @@ void createUpperTriangularBlock ( const MatrixBlockView<DataType>& srcBlock,
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createLowerTriangularBlock ( const MatrixBlockView<DataType>& srcBlock,
-                                  MatrixBlockView<DataType>& destBlock )
+void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
+                                  MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -449,8 +449,8 @@ void createLowerTriangularBlock ( const MatrixBlockView<DataType>& srcBlock,
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createLumpedBlock ( const MatrixBlockView<DataType>& srcBlock,
-                         MatrixBlockView<DataType>& destBlock )
+void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
+                         MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -515,8 +515,8 @@ void createLumpedBlock ( const MatrixBlockView<DataType>& srcBlock,
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createInvLumpedBlock ( const MatrixBlockView<DataType>& srcBlock,
-                            MatrixBlockView<DataType>& destBlock )
+void createInvLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
+                            MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST

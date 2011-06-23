@@ -142,6 +142,9 @@ public:
 	//! Returns the number of maps stored
 	inline UInt nbMap() const {return M_vector.size(); }
 
+    //! Returns the size of the ith map stored (global number of ids)
+    inline UInt mapSize(UInt i) const {return M_vector[i].map(Unique)->NumGlobalElements(); }
+
 
     //! Display internal state
     inline void showMe( std::ostream& output = std::cout) const
