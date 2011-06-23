@@ -8,8 +8,8 @@
 The simple structures used in LifeV with the Trilinos framework are:
 
 <ul>
-<li> MatrixEpetra for the matrices
-<li> VectorEpetra for the vectors
+<li> LifeV::MatrixEpetra for the matrices
+<li> LifeV::VectorEpetra for the vectors
 </ul>
 
 
@@ -30,14 +30,16 @@ There are two ways of implementing block structures
 
 As the choice for the most suitable approach depends strongly on the problem at hand, the user is responsible it.
 
+\image html linear_algebra_monolithic_vs_split.png "The two possible approaches"
+
 
 \subsection LinearAlgebraPage_blockMonolithicStructures Monolithic approach
 
 Structures following this approach are:
 
 <ul>
-<li> MatrixBlockMonolithicEpetra for the matrices
-<li> VectorBlockMonolithicEpetra for the vectors
+<li> LifeV::MatrixBlockMonolithicEpetra for the matrices
+<li> LifeV::VectorBlockMonolithicEpetra for the vectors
 </ul>
 
 As these structures derive from their basic counterparts, any functionality working
@@ -47,7 +49,7 @@ Moreover, the block structures can be changed at any time without large computat
 <b> First Example </b>
 
 The following example shows the preferred syntax for defining these structures. We will use a Stokes problem to illustrate the use 
-of these structures. We suppose that the FESpace structures have already been defined. We will define a matrix and a vector,
+of these structures. We suppose that the LifeV::FESpace structures have already been defined. We will define a matrix and a vector,
 so the corresponding declaration files have to be included:
 
 \code
@@ -62,8 +64,8 @@ typedef MatrixBlockMonolithicEpetra<Real> matrix_type;
 typedef VectorBlockMonolithicEpetra       vector_type;
 \endcode
 
-We suppose now that the maps (MapEpetra) for the velocity and the pressure space are defined, using e.g. the map
-of the corresponding FESpace:
+We suppose now that the maps (LifeV::MapEpetra) for the velocity and the pressure space are defined, using e.g. the map
+of the corresponding LifeV::FESpace:
 
 \code
 MapEpetra uMap(...);
@@ -88,7 +90,7 @@ rightHandSide.block(1) ...
 
 <b> Second Example </b>
 
-For this second example, we suppose that instead of the map (MapEpetra) that contained
+For this second example, we suppose that instead of the map (LifeV::MapEpetra) that contained
 all the components of the velocity, we have three different maps, one for each component (the velocity is supposed to be 3D):
 
 \code
