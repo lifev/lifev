@@ -27,13 +27,13 @@
 /*!
     @file
     @brief File containing a class for handling temporal discretization
- 
+
     @author M.A. Fernandez
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
     @date 01-06-2009
-  
+
     @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
-  
+
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 #include <life/lifefem/TimeData.hpp>

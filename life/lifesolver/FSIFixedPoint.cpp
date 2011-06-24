@@ -153,7 +153,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
 
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    M_epetraWorldComm->Barrier();
 
     // possibly unsafe when using more cpus,
     this->setLambdaFluid(_disp);
@@ -219,7 +219,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    M_epetraWorldComm->Barrier();
 
     if ( true && this->isFluid() )
     {
@@ -239,7 +239,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     this->setSigmaFluid( sigmaFluidUnique );
     this->setSigmaSolid( sigmaFluidUnique );
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    M_epetraWorldComm->Barrier();
 
 
     vector_Type lambdaSolidUnique   (this->lambdaSolid().map(),    Unique);
@@ -258,7 +258,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     this->setLambdaDotSolid( lambdaDotSolidUnique );
     this->setSigmaSolid( sigmaSolidUnique );
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    M_epetraWorldComm->Barrier();
 
 
     // Some displays:
