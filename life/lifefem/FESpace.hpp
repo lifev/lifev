@@ -328,14 +328,6 @@ public:
                                   const vector_type& originalVector, const MapEpetraType& outputMapType = Unique) const;
 
 
-
-    template<typename vector_type>
-    vector_type
-	interpolateGeneric( const FESpace<mesh_Type,map_Type>& OriginalSpace,
-								  const vector_type& OriginalVector) const;
-
-
-
     //! This method reconstruct a gradient of a solution in the present FE space.
     /*!
       The goal of this method is to build an approximation of the gradient of a given
@@ -731,7 +723,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
             }
         }
     }
-}*/
+}
 
 template < typename MeshType, typename MapType>
 template < typename FEFunctionType, typename vector_Type >
@@ -1327,7 +1319,7 @@ feInterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
     M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
 
     // Store the number of local DoF
-    UInt nDof(dof().numLocalDof(feInterpolateGradient));
+    UInt nDof(dof().numLocalDof());
     UInt totalDof(dof().numTotalDof());
 
     // Initialization
