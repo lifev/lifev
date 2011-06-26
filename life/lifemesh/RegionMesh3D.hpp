@@ -117,19 +117,17 @@ public:
      *  @{
      */
 
-    //! Volume Shape.
+    //! Element Shape.
     typedef GEOSHAPE volumeShape_Type;
     typedef GEOSHAPE elementShape_Type;
+    
     //! Facet Shape (Boundary Facet).
-    typedef typename GEOSHAPE::GeoBShape facetShape_Type;
     typedef typename GEOSHAPE::GeoBShape faceShape_Type;
-//    typedef typename GEOSHAPE::GeoBShape bFacetShape_Type;
-//    typedef typename GEOSHAPE::GeoBShape bFaceShape_Type;
+    typedef typename GEOSHAPE::GeoBShape facetShape_Type;
+    
     //! Ridge Shape (Boundary of Boundary Facet)
     typedef typename faceShape_Type::GeoBShape edgeShape_Type;
     typedef typename facetShape_Type::GeoBShape ridgeShape_Type;
-//    typedef typename faceShape_Type::GeoBShape bEdgesShape_Type;
-//    typedef typename facetShape_Type::GeoBShape bRidgesShape_Type;
 
     /** @} */ // End of group Basic Element Shape Types
 
@@ -143,18 +141,14 @@ public:
     //! Volume Element (3D)
     typedef MeshElementMarked3D<GEOSHAPE, MC>  volume_Type;
     typedef MeshElementMarked3D<GEOSHAPE, MC>  element_Type;
+    
     //! Face Element (2D)
     typedef MeshElementMarked2D<facetShape_Type, MC> facet_Type;
     typedef MeshElementMarked2D<facetShape_Type, MC> face_Type;
-    //! Boundary Element Geometric Type
-//    typedef MeshElementMarked2D<facetShape_Type, MC>  bFacet_Type;
-//    typedef MeshElementMarked2D<facetShape_Type, MC>  bFace_Type;
 
     //! Edge Element (1D)
     typedef MeshElementMarked1D<ridgeShape_Type, MC> ridge_Type;
     typedef MeshElementMarked1D<ridgeShape_Type, MC> edge_Type;
-//    typedef MeshElementMarked1D<ridgesShape_Type, MC> bRidge_Type;
-//    typedef MeshElementMarked1D<ridgesShape_Type, MC> bEdge_Type;
     //! Point Element (0D)
     typedef MeshElementMarked0D<MC>            point_Type;
     typedef MeshElementMarked0D<MC>            peak_Type;
@@ -168,19 +162,19 @@ public:
      */
     //! Points Container.
     typedef MeshEntityContainer<point_Type>   points_Type;
+    typedef MeshEntityContainer<point_Type>   peaks_Type;
+    
     //! Elements Container.
     typedef MeshEntityContainer<element_Type > volumes_Type;
     typedef MeshEntityContainer<element_Type>  elements_Type;
-    //! Faces Container: it may contain only Boundary facets.
+    
+    //! Facets Container: it may contain only Boundary facets.
     typedef MeshEntityContainer<facet_Type>    faces_Type;
     typedef MeshEntityContainer<facet_Type>    facets_Type;
-//    typedef MeshEntityContainer<facet_Type>    bFaces_Type;
-//    typedef MeshEntityContainer<facet_Type>    bFacets_Type;
-    //! Edges Container: it may be empty.
+    
+    //! Ridges Container: it may be empty.
     typedef MeshEntityContainer<ridge_Type>    edges_Type;
     typedef MeshEntityContainer<ridge_Type>    ridges_Type;
-//    typedef MeshEntityContainer<ridge_Type>    bEdges_Type;
-//    typedef MeshEntityContainer<ridge_Type>    bRidges_Type;
 
 
     /** @} */ // End of group Geometric Element Container Types
@@ -262,14 +256,18 @@ public:
      *  set up.
      *
      *  The possible Switches are:
+     *  - \c HAS_ALL_FACETS
      *  - \c HAS_ALL_RIDGES
-     *  - \c HAS_FACE_TO_EDGES
-     *  - \c HAS_BEEN_CHECKED
+     *  - \c HAS_BOUNDARY_FACETS
      *  - \c HAS_BOUNDARY_RIDGES
-     *  - \c EDGES_HAVE_ADIACENCY
+     *  - \c HAS_ELEMENT_TO_FACETS
+     *  - \c HAS_ELEMENT_TO_RIDGES
+     *  - \c HAS_BEEN_CHECKED
+     *  - \c FACETS_HAVE_ADIACENCY
      *
      *  @{
      */
+     
 
     //! Get the number of switch which have been set.
     /**
@@ -445,7 +443,7 @@ public:
      *  @return how many elements may be stored.
      */
     UInt maxNumVolumes() const;
-    UInt maxNumElements() const {return maxNumVolumes();}
+    inline UInt maxNumElements() const {return maxNumVolumes();}
 
     //! Changes Current capacity of Volumes.
     /**
@@ -455,7 +453,7 @@ public:
      *  @param setcounter true to set the counter, false otherwise (default).
      */
     void setMaxNumVolumes      ( UInt const n, bool const setcounter = false );
-    void setMaxNumElements   ( UInt const n, bool const setcounter = false ) {setMaxNumVolumes( n, setcounter);}
+    inline void setMaxNumElements   ( UInt const n, bool const setcounter = false ) {setMaxNumVolumes( n, setcounter);}
 
     //! Changes Current capacity of Global Volumes.
     /**
@@ -464,7 +462,7 @@ public:
      *  @param n maximum number of global volumes.
      */
     void setMaxNumGlobalVolumes( UInt const n );
-    void setMaxNumGlobalElements( UInt const n ) {setMaxNumGlobalVolumes(n) ;}
+    inline void setMaxNumGlobalElements( UInt const n ) {setMaxNumGlobalVolumes(n) ;}
 
     //! Set Number of Volumes.
     /**
@@ -472,7 +470,7 @@ public:
      *  @param n Number of volumes.
      */
     void setNumVolumes      ( UInt const n );
-    void setNumElements      ( UInt const n ) {setNumVolumes(n);}
+    inline void setNumElements      ( UInt const n ) {setNumVolumes(n);}
 
     //! Adds volumes.
     /**
@@ -480,7 +478,7 @@ public:
      *  @return Reference to added volume.
      */
     element_Type & addVolume();
-    element_Type & addElement() {return addVolume();}
+    inline element_Type & addElement() {return addVolume();}
 
     //! Adds volumes.
     /**
@@ -489,7 +487,7 @@ public:
      *  @return Reference to the newly added volume.
      */
     element_Type & addVolume( element_Type const & v );
-    element_Type & addElement( element_Type const & v ) {return addVolume(v);}
+    inline element_Type & addElement( element_Type const & v ) {return addVolume(v);}
 
     //! Adds volume in a certain position.
     /**
@@ -499,9 +497,11 @@ public:
      *  @return Reference to the newly added volume.
      */
     element_Type & setVolume( element_Type const & v, UInt const pos );
+    inline element_Type & setElement( element_Type const & elem, UInt const pos ) {return setVolume( elem, pos );}
 
     //! set numVolumes counter.
     void setVolumeCounter();
+    inline void setElementCounter() {setVolumeCounter();}
 
     //! Reference to last volume stored in list.
     /**
@@ -554,7 +554,7 @@ public:
      *  @return true if array for local Faces in set up.
      */
     bool hasLocalFaces() const;
-    bool hasLocalFacets() const {return hasLocalFaces();}
+    inline bool hasLocalFacets() const {return hasLocalFaces();}
 
     //! Build localFacetId table and optionally fills the list of Faces.
     /**
@@ -572,11 +572,12 @@ public:
      *
      */
     void updateElementFaces( bool createFaces = false, const bool verbose = false, UInt estimateFaceNumber = 0 );
-    void updateElementFacets( bool createFaces = false, const bool verbose = false, UInt estimateFaceNumber = 0 )
+    inline void updateElementFacets( bool createFaces = false, const bool verbose = false, UInt estimateFaceNumber = 0 )
 		{updateElementFaces( createFaces , verbose, estimateFaceNumber );}
 
     //! Destroys element-to-face container. Useful to save memory!
     void cleanElementFacets();
+    inline void cleanElementFaces(){cleanElementFacets();}
 
     //! Local Face Id.
     /** @param volId Id of volume (element).
@@ -584,14 +585,17 @@ public:
      *  @return ID of the face.
      */
     UInt localFacetId( UInt const volId, UInt const locF ) const;
-    UInt localFaceId( UInt const volId, UInt const locF ) const {return localFacetId( volId, locF );}
+    inline UInt localFaceId( UInt const volId, UInt const locF ) const {return localFacetId( volId, locF );}
 
     //! Local Face Id.
     /** @param iv Reference to a volume (element).
      *  @param locF local face number 0 \< LocF \< numLocalFaces().
      *  @return ID of the face.
      */
-    UInt localFacetId( const element_Type & iv, UInt const locF ) const;
+    UInt localFacetId( const element_Type & iEl, UInt const locF ) const;
+    inline UInt localFaceId( const element_Type & iv, UInt const locF ) const 
+    	{return localFacetId( iv, locF ); }
+    
 
     //! Is the array for local Edges set up?
     /**
@@ -600,7 +604,7 @@ public:
      *  @return true if edges information are available, false otherwise.
      */
     bool hasLocalEdges() const;
-    bool hasLocalRidges() const {return hasLocalEdges();}
+    inline bool hasLocalRidges() const {return hasLocalEdges();}
 
     //! Build localEdgeId table and optionally fills the list of Edges
     /**
@@ -627,6 +631,7 @@ public:
 
     //! Destroys Edge-To-Face lookup table.
     void cleanElementRidges();
+    inline void cleanElementEdges() {cleanElementRidges();}
 
     //! Local Edge.
     /** @param volId Id of volume (element).
@@ -634,7 +639,7 @@ public:
      *  @return ID of the edge.
      */
     UInt localEdgeId( UInt const volId, UInt const locE ) const;
-    UInt localRidgeId( UInt const volId, UInt const locE ) const {return localEdgeId( volId, locE );}
+    inline UInt localRidgeId( UInt const volId, UInt const locE ) const {return localEdgeId( volId, locE );}
 
     //! Local Edge.
     /** @param iv Reference of the volume.
@@ -642,7 +647,7 @@ public:
      *  @return ID of the edge.
      */
     UInt localEdgeId( const element_Type & iv, UInt const locE ) const;
-    UInt localRidgeId( const element_Type & iv, UInt const locE ) const {return localEdgeId( iv, locE );}
+    inline UInt localRidgeId( const element_Type & iv, UInt const locE ) const {return localEdgeId( iv, locE );}
 
     //! Returns Global-to-Local Node map.
     /**
@@ -696,7 +701,7 @@ public:
      *  @return Number of Faces.
      */
     UInt numFaces() const;
-    UInt numFacets() const {return numFaces();}
+    inline UInt numFacets() const {return numFaces();}
 
 
     //! Returns Global Number of Faces
@@ -707,7 +712,7 @@ public:
      *  @return Global Number of Faces.
      */
     UInt numGlobalFaces() const;
-    UInt numGlobalFacets() const {return numGlobalFaces();}
+    inline UInt numGlobalFacets() const {return numGlobalFaces();}
 
     //! Number of Faces actually stored.
     /**
