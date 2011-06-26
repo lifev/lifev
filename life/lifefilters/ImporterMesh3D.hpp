@@ -234,8 +234,8 @@ readMppFile( Mesh & mesh,
 
 
     typename Mesh::point_Type  * pointerPoint  = 0;
-    typename Mesh::ridge_Type   * pointerEdge   = 0;
-    typename Mesh::facet_Type   * pointerFace   = 0;
+    typename Mesh::edge_Type   * pointerEdge   = 0;
+    typename Mesh::face_Type   * pointerFace   = 0;
     typename Mesh::volume_Type * pointerVolume = 0;
 
     // addPoint(), Face() and Edge() return a reference to the last stored point
@@ -650,8 +650,8 @@ readINRIAMeshFile( Mesh&      mesh,
 
 
     typename Mesh::point_Type  * pointerPoint  = 0;
-    typename Mesh::ridge_Type   * pointerEdge   = 0;
-    typename Mesh::facet_Type   * pointerFace   = 0;
+    typename Mesh::edge_Type   * pointerEdge   = 0;
+    typename Mesh::face_Type   * pointerFace   = 0;
     typename Mesh::volume_Type * pointerVolume = 0;
     // addPoint()/Face()/Edge() returns a reference to the last stored point
     // I use that information to set all point info, by using a pointer.
@@ -1038,8 +1038,8 @@ readGmshFile( Mesh & mesh,
     UInt numberElements;
     inputFile >> numberElements;
 
-    typename Mesh::ridge_Type   * pointerEdge   = 0;
-    typename Mesh::facet_Type   * pointerFace   = 0;
+    typename Mesh::edge_Type   * pointerEdge   = 0;
+    typename Mesh::face_Type   * pointerFace   = 0;
     typename Mesh::volume_Type * pointerVolume = 0;
 
 #ifdef DEBUG
@@ -1672,8 +1672,8 @@ readNetgenMesh(Mesh & mesh,
     mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
 
     typename Mesh::point_Type  * pointerPoint  = 0;
-    typename Mesh::ridge_Type   * pointerEdge   = 0;
-    typename Mesh::facet_Type   * pointerFace   = 0;
+    typename Mesh::edge_Type   * pointerEdge   = 0;
+    typename Mesh::face_Type   * pointerFace   = 0;
     typename Mesh::volume_Type * pointerVolume = 0;
 
     // addPoint()/Face()/Edge() returns a reference to the last stored point
