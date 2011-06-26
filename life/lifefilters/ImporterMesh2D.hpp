@@ -259,7 +259,7 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
 
     // Now put the whole lot into the RegionMesh2D structure
     typename RegionMesh2D::point_Type * pp = 0;
-    typename RegionMesh2D::facet_Type  * pe = 0;
+    typename RegionMesh2D::edge_Type  * pe = 0;
     typename RegionMesh2D::face_Type  * pf = 0;
 
 
@@ -433,7 +433,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     UInt __nele;
     __is >> __nele;
 
-    typename RegionMesh2D<GeoShape, MC>::facet_Type * pe = 0;
+    typename RegionMesh2D<GeoShape, MC>::edge_Type * pe = 0;
     typename RegionMesh2D<GeoShape, MC>::face_Type * pf = 0;
 
 #ifdef DEBUG
@@ -607,7 +607,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::pair<BareEdge, bool> _edge;
 
     typename RegionMesh2D<GeoShape, MC>::point_Type * pp = 0;
-    typename RegionMesh2D<GeoShape, MC>::facet_Type * pe = 0;
+    typename RegionMesh2D<GeoShape, MC>::edge_Type * pe = 0;
     typename RegionMesh2D<GeoShape, MC>::face_Type * pf = 0;
 
     std::ifstream __is ( fileName.c_str() );
