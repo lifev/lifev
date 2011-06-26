@@ -170,7 +170,7 @@ void test_bdf::run()
     //finite element space of the solution
     boost::shared_ptr<FESpace<RegionMesh, MapEpetra> > feSpacePtr(
         new FESpace<RegionMesh, MapEpetra> (
-            meshPart, dataFile(("bdf/"+discretization_section).c_str(), "P2"), 1, Members->comm) );
+            meshPart, dataFile(("bdf/"+discretization_section + "/order").c_str(), "P2"), 1, Members->comm) );
 
     if (verbose)
         std::cout << "  Number of unknowns : "
