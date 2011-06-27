@@ -37,6 +37,9 @@
 #ifndef BCInterface3D_H
 #define BCInterface3D_H 1
 
+// LifeV includes
+#include <life/lifefem/BCDataInterpolator.hpp>
+
 // Mathcard includes
 #include <lifemc/lifesolver/BCInterface.hpp>
 
@@ -140,6 +143,10 @@ public:
     typedef boost::shared_ptr< bcFunctionDirectional_Type >       bcFunctionDirectionalPtr_Type;
     typedef std::vector< bcFunctionDirectionalPtr_Type >          vectorFunctionDirectional_Type;
 
+    typedef BCDataInterpolator                                    bcFunctionDataInterpolator_Type;
+    typedef boost::shared_ptr< bcFunctionDataInterpolator_Type >  bcFunctionDataInterpolatorPtr_Type;
+    typedef std::vector< bcFunctionDataInterpolatorPtr_Type >     vectorDataInterpolator_Type;
+
     typedef BCInterface3DFSI< physicalSolver_Type >               bcFunctionFSI_Type;
     typedef boost::shared_ptr< bcFunctionFSI_Type >               bcFunctionFSIPtr_Type;
     typedef std::vector< bcFunctionFSIPtr_Type >                  vectorFSI_Type;
@@ -229,14 +236,15 @@ private:
     //! @name Private Methods
     //@{
 
-    template< class BCInterfaceBaseType >
-    void createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
-
     template< class BCBaseType >
     void createFunctionRobin( BCBaseType& base );
 
     template< class BCBaseType >
     void createFunctionDirectional( BCBaseType& base );
+
+    void createFunctionDataInterpolator();
+
+    void createFunctionFSI();
 
     // This method should be removed: it is a workaround due to legacy of LifeV BC.
     void addBcToHandler( BCVectorInterface& base );
@@ -252,6 +260,9 @@ private:
     // Functions Directions
     vectorFunctionDirectional_Type  M_vectorFunctionDirection;
 
+    // Data Interpolator Functions
+    vectorDataInterpolator_Type     M_vectorDataInterpolator;
+
     // FSI Functions
     vectorFSI_Type                  M_vectorFSI;
 };
@@ -264,6 +275,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::BCInterface3D() :
         bcInterface_Type          (),
         M_vectorFunctionRobin     (),
         M_vectorFunctionDirection (),
+        M_vectorDataInterpolator  (),
         M_vectorFSI               ()
 {
 
@@ -321,9 +333,16 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
 
         return;
     }
+    case BCI3DDataInterpolator:
+
+        createFunctionDataInterpolator();
+        addBcToHandler( *M_vectorDataInterpolator.back() );
+
+        return;
+
     case BCI3DFSI:
 
-        createFunction( M_vectorFSI );
+        createFunctionFSI();
 
         return;
 
@@ -356,14 +375,6 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
 // ===================================================
 // Private Methods
 // ===================================================
-template< class BcHandler, class PhysicalSolverType > template< class BCInterfaceBaseType >
-inline void
-BCInterface3D< BcHandler, PhysicalSolverType >::createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
-{
-    boost::shared_ptr< BCInterfaceBaseType > function( new BCInterfaceBaseType( this->M_data ) );
-    baseVector.push_back( function );
-}
-
 template< class BcHandler, class PhysicalSolverType >  template< class BCBaseType >
 inline void
 BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionRobin( BCBaseType& base )
@@ -402,6 +413,24 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDirectional( BCBas
     // Directional base
     bcFunctionDirectionalPtr_Type directionalBase( new bcFunctionDirectional_Type( base.Function(), baseDirectional.Function() ) );
     M_vectorFunctionDirection.push_back( directionalBase );
+}
+
+template< class BcHandler, class PhysicalSolverType >
+inline void
+BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDataInterpolator()
+{
+    // Directional base
+    bcFunctionDataInterpolatorPtr_Type dataInterpolatorBase( new bcFunctionDataInterpolator_Type() );
+    dataInterpolatorBase->readData( this->M_data.baseString().c_str() );
+    M_vectorDataInterpolator.push_back( dataInterpolatorBase );
+}
+
+template< class BcHandler, class PhysicalSolverType >
+inline void
+BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionFSI()
+{
+    bcFunctionFSIPtr_Type function( new bcFunctionFSI_Type( this->M_data ) );
+    M_vectorFSI.push_back( function );
 }
 
 template< class BcHandler, class PhysicalSolverType >

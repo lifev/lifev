@@ -76,7 +76,8 @@ enum baseList_Type
     BCIFunctionSolver,
     BCIFunctionFileSolver,
     BCI1DFunctionDefault,
-    BCI3DFSI
+    BCI3DFSI,
+    BCI3DDataInterpolator
 };
 
 } // Namespace LifeV
