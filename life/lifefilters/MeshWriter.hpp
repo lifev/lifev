@@ -85,9 +85,9 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     }
     ofile << "\n";
 
-    typedef typename Mesh::FaceShape FaceShape;
+    typedef typename Mesh::faceShape_Type faceShape_Type;
 
-    switch ( FaceShape::S_shape )
+    switch ( faceShape_Type::S_shape )
     {
     case QUAD:
         ofile << "Quadrilaterals\n";
@@ -102,7 +102,7 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     UInt nBdF = mesh. numBFaces();
     ofile << nBdF << "\n";
 
-    UInt nVerticesPerFace = FaceShape::S_numVertices;
+    UInt nVerticesPerFace = faceShape_Type::S_numVertices;
 
 
     for ( UInt k = 0; k < nBdF; ++k )
@@ -116,9 +116,9 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     }
     ofile << "\n";
 
-    typedef typename Mesh::VolumeShape ElementShape;
+    typedef typename Mesh::volumeShape_Type volumeShape_Type;
 
-    switch ( ElementShape::S_shape )
+    switch ( volumeShape_Type::S_shape )
     {
     case HEXA:
         ofile << "Hexaedra\n";
@@ -133,7 +133,7 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     UInt nElements = mesh.numVolumes();
     ofile << nElements << "\n";
 
-    UInt nVerticesPerElement = ElementShape::S_numVertices;
+    UInt nVerticesPerElement = volumeShape_Type::S_numVertices;
 
     UInt ielem;
 
