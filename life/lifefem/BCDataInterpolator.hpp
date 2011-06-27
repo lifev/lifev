@@ -131,9 +131,9 @@ public:
 
     //! Constructors for an data interpolator
     /*!
-     \param interpolationMethod the radial basis function type to use
+
      */
-    BCDataInterpolator( BCInterpolationMethod interpolationMethod );
+    BCDataInterpolator(  );
 
     //! Destructor
     ~BCDataInterpolator();
@@ -198,7 +198,9 @@ public:
     //! @name Set Methods
     //@{
 
+    void setInterpolationMethod(BCInterpolationMethod bcim);
 
+    void setFilteringLevel(Int level);
 
     //! @name Get Methods
     //@{
@@ -234,6 +236,8 @@ private:
     BCDataInterpolator_point* M_dataValues_timeSamples;
 
     UInt M_nofControlPoints;
+
+    Int M_filteringLevel;
 
     Real M_lastInterpolatedAtTime;
     Real M_timePeriod;

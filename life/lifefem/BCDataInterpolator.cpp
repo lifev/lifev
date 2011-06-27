@@ -96,9 +96,9 @@ namespace LifeV {
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-BCDataInterpolator::BCDataInterpolator( BCInterpolationMethod interpolationMethod ) :
+BCDataInterpolator::BCDataInterpolator(  ) :
     M_interpolationMatrix(), M_rhs_x(), M_rhs_y(), M_rhs_z(), M_coeffs_x(), M_coeffs_y(), M_coeffs_z(), M_denseSolver(),
-                    M_interpolationMethod( interpolationMethod ), M_lastInterpolatedAtTime( -1 ),
+                    M_interpolationMethod( RBF_MultiQuadric ), M_filteringLevel( 0 ), M_lastInterpolatedAtTime( -1 ),
                     M_timePeriod ( 0 ), M_timeInterval ( 0 ), M_flagInterpolated( false )
 {
 
@@ -268,6 +268,20 @@ void BCDataInterpolator::exportInterpolationMatrix() const
 {
 
     // TODO: Write matrix exporting routine
+
+}
+
+void BCDataInterpolator::setInterpolationMethod(BCInterpolationMethod bcim)
+{
+
+    M_interpolationMethod = bcim;
+
+}
+
+void BCDataInterpolator::setFilteringLevel(Int level)
+{
+
+    M_filteringLevel = level;
 
 }
 
@@ -515,7 +529,7 @@ void BCDataInterpolator::interpolateDataValuesInTime( const Real t )
 
         M_dataValues[i].x = 0; M_dataValues[i].y = 0; M_dataValues[i].z = 0;
 
-        for (Int j = -n; j <= n; j++)
+        for (Int j = (M_filteringLevel - n); j <= (n - M_filteringLevel); j++)
         {
             for (Int k = 0; k <= 2 * n; k++)
             {
