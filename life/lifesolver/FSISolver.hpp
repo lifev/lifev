@@ -245,7 +245,7 @@ private:
     FSISolver& operator=( FSISolver const& );
 
     //Private members
-    FSIOperPtr_Type							M_oper;
+    FSIOperPtr_Type 							M_oper;
 
     dataPtr_Type                                M_data;
 
