@@ -83,18 +83,18 @@ typedef boost::shared_ptr< fespace_type > fespacePtr_type;
 // +-----------------------------------------------+
 // | Data and functions for the boundary conditions|
 // +-----------------------------------------------+
-const int INFLOW   = 1;
-const int OUTFLOW1 = 2;
-const int OUTFLOW2 = 3;
-const int OUTFLOW3 = 4;
-const int OUTFLOW4 = 5;
-const int WALL     = 6;
+const Int INFLOW   = 1;
+const Int OUTFLOW1 = 2;
+const Int OUTFLOW2 = 3;
+const Int OUTFLOW3 = 4;
+const Int OUTFLOW4 = 5;
+const Int WALL     = 6;
 
-LifeV::Real fZero( const LifeV::Real& /* t */,
-                  const LifeV::Real& /* x */,
-                  const LifeV::Real& /* y */,
-                  const LifeV::Real& /* z */,
-                  const LifeV::ID& /* i */ )
+Real fZero( const Real& /* t */,
+                  const Real& /* x */,
+                  const Real& /* y */,
+                  const Real& /* z */,
+                  const ID& /* i */ )
 {
     return 0.0;
 }
@@ -106,45 +106,50 @@ LifeV::Real fZero( const LifeV::Real& /* t */,
    J R Soc Interface. 2010 Jun 6;7(47):967-88. Epub 2009 Dec 18.
 
 */
-LifeV::Real aneurismFluxIn(const LifeV::Real&  t, const LifeV::Real& /*x*/, const LifeV::Real& /*y*/, const LifeV::Real& /*z*/, const LifeV::ID& /*i*/)
+Real aneurismFluxIn(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     // We change the flux for our geometry
-    const LifeV::Real pi         = 3.141592653589793;
-    const LifeV::Real area       = 0.0907122;
-    const LifeV::Real areaFactor = area/((0.6/2)*(0.6/2)*pi);
+    const Real pi         = 3.141592653589793;
+    const Real area       = 0.0907122;
+    const Real areaFactor = area/((0.6/2)*(0.6/2)*pi);
 
     // Unit conversion from ml/min to cm^3/s
-    const LifeV::Real unitFactor = 1./ 60.;
+    const Real unitFactor = 1./ 60.;
 
     // T is the period of the cardiac cycle
-    const LifeV::Real T          = 1.0;
+    const Real T          = 1.0;
 
     // a0 is the average VFR (the value is taken from Karniadakis p970)
-    const LifeV::Real a0         = 255;
+    const Real a0         = 255;
 
     // Fourrier
-    const LifeV::Int M(7);
-    const LifeV::Real a[M] = {-0.152001,-0.111619, 0.043304,0.028871,0.002098,-0.027237,-0.000557};
-    const LifeV::Real b[M] = { 0.129013,-0.031435,-0.086106,0.028263,0.010177, 0.012160,-0.026303};
+    const Int M(7);
+    const Real a[M] = {-0.152001,-0.111619, 0.043304,0.028871,0.002098,-0.027237,-0.000557};
+    const Real b[M] = { 0.129013,-0.031435,-0.086106,0.028263,0.010177, 0.012160,-0.026303};
 
-    LifeV::Real flux(0);
-    const LifeV::Real xi(2*pi*t/T);
+    Real flux(0);
+    const Real xi(2*pi*t/T);
 
     flux = a0;
-    int k(1);
+    Int k(1);
     for (; k<=M ; ++k)
         flux += a0*(a[k-1]*cos(k*xi) + b[k-1]*sin(k*xi));
 
     return - flux * areaFactor * unitFactor;
 }
 
-LifeV::Real aneurismFluxIn2(const LifeV::Real&  t, const LifeV::Real& x, const LifeV::Real& y, const LifeV::Real& z, const LifeV::ID& i)
+/*
+ * This function imposes a flat profile for the inflow.
+ * It is not the best choice as a boundary condition.
+ * However this is satisfactory enough for a benchmark
+ */
+Real aneurismFluxInVectorial(const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    LifeV::Real n1(-0.000019768882940);
-    LifeV::Real n2(-0.978289616345544);
-    LifeV::Real n3( 0.207242433298975);
-    LifeV::Real flux(aneurismFluxIn(t,x,y,z,i));
-    LifeV::Real area(0.0907122); // Computed with the triangle on the INLET boundary
+    Real n1(-0.000019768882940);
+    Real n2(-0.978289616345544);
+    Real n3( 0.207242433298975);
+    Real flux(aneurismFluxIn(t,x,y,z,i));
+    Real area(0.0907122); // Computed with the triangle on the INLET boundary
 
     switch(i) {
     case 0:
@@ -161,8 +166,8 @@ LifeV::Real aneurismFluxIn2(const LifeV::Real&  t, const LifeV::Real& x, const L
 }
 
 
-int
-main( int argc, char** argv )
+Int
+main( Int argc, char** argv )
 {
     // +-----------------------------------------------+
     // |            Initialization of MPI              |
@@ -170,7 +175,7 @@ main( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
-    int nproc;
+    Int nproc;
     MPI_Comm_size(MPI_COMM_WORLD, &nproc);
 #else
     boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
@@ -185,7 +190,7 @@ main( int argc, char** argv )
             << std::endl
             << " +-----------------------------------------------+" << std::endl
             << " |           Author: Gwenol Grandperrin          |" << std::endl
-            << " |             Date: 2011-06-09                  |" << std::endl
+            << " |             Date: 2011-06-28                  |" << std::endl
             << " +-----------------------------------------------+" << std::endl
             << std::endl;
 
@@ -292,16 +297,16 @@ main( int argc, char** argv )
     if (verbose) std::cout << std::endl << "[Boundary conditions]" << std::endl;
     boost::shared_ptr<BCHandler> bcHandler;
     bcHandler.reset(new BCHandler);
-    LifeV::BCFunctionBase uZero(fZero);
-    LifeV::BCFunctionBase uFlux(aneurismFluxIn2);
+    BCFunctionBase uZero(fZero);
+    BCFunctionBase uFlux(aneurismFluxInVectorial);
 
     if (verbose) std::cout << "Setting BC... " << std::flush;
-    bcHandler->addBC( "Inflow"  , INFLOW  , LifeV::Essential, LifeV::Full, uFlux, 3 );
-    bcHandler->addBC( "Outflow1", OUTFLOW1, LifeV::Natural  , LifeV::Full, uZero, 3 );
-    bcHandler->addBC( "Outflow2", OUTFLOW2, LifeV::Natural  , LifeV::Full, uZero, 3 );
-    bcHandler->addBC( "Outflow3", OUTFLOW3, LifeV::Natural  , LifeV::Full, uZero, 3 );
-    bcHandler->addBC( "Outflow4", OUTFLOW4, LifeV::Natural  , LifeV::Full, uZero, 3 );
-    bcHandler->addBC( "Wall"    , WALL    , LifeV::Essential, LifeV::Full, uZero, 3 );
+    bcHandler->addBC( "Inflow"  , INFLOW  , Essential, Full, uFlux, 3 );
+    bcHandler->addBC( "Outflow1", OUTFLOW1, Natural  , Full, uZero, 3 );
+    bcHandler->addBC( "Outflow2", OUTFLOW2, Natural  , Full, uZero, 3 );
+    bcHandler->addBC( "Outflow3", OUTFLOW3, Natural  , Full, uZero, 3 );
+    bcHandler->addBC( "Outflow4", OUTFLOW4, Natural  , Full, uZero, 3 );
+    bcHandler->addBC( "Wall"    , WALL    , Essential, Full, uZero, 3 );
     if (verbose) std::cout << "ok." << std::endl;
 
     // Update the BCHandler (internal data related to FE)
@@ -411,7 +416,7 @@ main( int argc, char** argv )
     *solution *= 0;
     bdf.setInitialCondition( *solution );
 
-    // Initial solution (interpolation or projection)
+    // Initial solution (obtained from a Stokes problem)
     linearSolver.setTolerance(1e-6);
     currentTime += timestep;
     for ( ; currentTime <=  initialTime + timestep/2.; currentTime += timestep)
@@ -472,7 +477,7 @@ main( int argc, char** argv )
     // |             Solving the problem               |
     // +-----------------------------------------------+
     if (verbose) std::cout<< std::endl << "[Solving the problem]" << std::endl;
-    int iter = 1;
+    Int iter = 1;
 
     for ( ; currentTime <= endTime + timestep/2.; currentTime += timestep, iter++)
     {
@@ -486,7 +491,7 @@ main( int argc, char** argv )
         *rhs  = *massMatrix*bdf.rhsContributionFirstDerivative();
 
         systemMatrix.reset(new matrix_type( solutionMap ));
-        double alpha = bdf.coefficientFirstDerivative( 0 ) / timestep;
+        Real alpha = bdf.coefficientFirstDerivative( 0 ) / timestep;
         *systemMatrix += *massMatrix*alpha;
         *systemMatrix += *baseMatrix;
 
