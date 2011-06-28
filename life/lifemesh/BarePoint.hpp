@@ -74,7 +74,6 @@ public:
     }
 
     //! Full contructor with all components explicitly initialized
-
     /*!
     @param x x-component of the point
     @param y y-component of the point
@@ -86,7 +85,6 @@ public:
         M_coords[ 1 ] = y;
         M_coords[ 2 ] = z;
     }
-
 
     //! Assignment operator
     BarePoint & operator= ( BarePoint const & vector )
@@ -201,7 +199,6 @@ public:
     //@{
 
     //! Scalar product
-    
     /*!
     @param vector second operand
     @return scalar product value
@@ -214,7 +211,6 @@ public:
     }
 
     //! Cross product
-    
     /*!
     @param vector second operand
     @return a BarePoint with the cross product result
@@ -230,7 +226,6 @@ public:
     }
 
     //! \f$ L^2 \f$ norm
-    
     /*!
     @return norm value
     */
@@ -248,7 +243,6 @@ public:
     }
 
     //! Create the versor associated to this BarePoint
-    
     /*!
     @return the versor associated to this BarePoint
     */
@@ -261,6 +255,12 @@ public:
 
     //! @name Tools
     //@{
+
+    //! function to get the size of the barePoint ( for compatibility with Eigen)
+    /*!
+    @return the fixed size of the BarePoint
+    */
+    UInt size() { return 3;}
 
     //! Operator <<
     friend std::ostream & operator<< ( std::ostream & out , BarePoint const & point );
