@@ -203,7 +203,7 @@ public:
     @param vector second operand
     @return scalar product value
     */
-    Real dot ( BarePoint const & vector )
+    Real dot ( BarePoint const & vector ) const
     {
         return ( this->M_coords[ 0 ] * vector.M_coords[ 0 ]
                + this->M_coords[ 1 ] * vector.M_coords[ 1 ]
@@ -215,7 +215,7 @@ public:
     @param vector second operand
     @return a BarePoint with the cross product result
     */
-    BarePoint cross ( BarePoint const & vector )
+    BarePoint cross ( BarePoint const & vector ) const
     {
         return BarePoint ( this->M_coords[ 1 ] * vector.M_coords[ 2 ]
                          - this->M_coords[ 2 ] * vector.M_coords[ 1 ],
@@ -229,7 +229,7 @@ public:
     /*!
     @return norm value
     */
-    Real norm ()
+    Real norm () const
     {
         return std::sqrt( M_coords[ 0 ] * M_coords[ 0 ] +
                           M_coords[ 1 ] * M_coords[ 1 ] +
@@ -260,7 +260,7 @@ public:
     /*!
     @return the fixed size of the BarePoint
     */
-    UInt size() { return 3;}
+    const UInt size() const { return 3;}
 
     //! Operator <<
     friend std::ostream & operator<< ( std::ostream & out , BarePoint const & point );
