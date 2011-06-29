@@ -26,7 +26,7 @@
 
 /* ========================================================
 
-Simple BarePoint class test
+Simple VectorSmall class test
 
 */
 
@@ -50,10 +50,10 @@ using namespace LifeV;
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char** argv)
+int main()
 {
 
-  BarePoint v1( 1., 1., 2. ), v2( 0., 1., 0. ), v3;
+  Vector3D v1( 1., 1., 2. ), v2( 0., 1., 0. ), v3;
 
   std::cout << v1              << std::endl << std::endl;
   std::cout << v2              << std::endl << std::endl;
@@ -75,5 +75,4 @@ int main(int argc, char** argv)
   std::cout << v1              << std::endl << std::endl;
 
   return 0;
-
 }

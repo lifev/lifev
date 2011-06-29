@@ -33,8 +33,8 @@
      @author A. Cervone <ant.cervone@gmail.com>
  */
 
-#ifndef _BAREPOINT_H_
-#define _BAREPOINT_H_ 1
+#ifndef _VECTORSMALL_H_
+#define _VECTORSMALL_H_ 1
 
 #include "life/lifecore/LifeV.hpp"
 #include "life/lifemesh/MeshVertex.hpp"
@@ -46,20 +46,26 @@
 // LifeV namespace.
 namespace LifeV
 {
-//! class BarePoint   This class implements a simple \f$ R^3 \f$ vector
+//! class VectorSmall   This class implements a simple \f$ R^n \f$ vector
 
 /*!
   @author A. Cervone <ant.cervone@gmail.com>
 
-  This class implements a simple R^3 vector.
+  This class implements a simple R^n vector.
   <br>
   It allows all kind of geometric operations on the node,
   such as summation, multiplication by scalar, scalar product,
   cross product, norm, etc.
+  The implementation is oriented to best perform with small (less than 30) n
 
 */
 
-class BarePoint
+// forward declarations
+template <UInt Dim> class VectorSmall;
+template <UInt Dim> std::ostream & operator<< ( std::ostream & out , VectorSmall<Dim> const & point );
+
+template <UInt Dim>
+class VectorSmall
 {
 
 public:
@@ -68,18 +74,297 @@ public:
     //@{
 
     //! Empty constructor (all components are set to zero)
-    BarePoint()
+    VectorSmall()
+    {
+        for ( UInt i = 0; i < Dim; i++ ) M_coords[ i ] = 0.;
+    }
+
+    //! Full constructor with all components explicitly initialized
+    VectorSmall( Real const & /*x*/, Real const & /*y*/, Real const & /*z*/ )
+    {
+        ASSERT ( 0, "explicit initializer is only available for Dim = 3" );
+    }
+
+    //! Assignment operator
+    VectorSmall<Dim> & operator= ( VectorSmall<Dim> const & vector )
+    {
+        for ( UInt i = 0; i < Dim; i++ )
+            this->M_coords[ i ] = vector.M_coords[ i ];
+        return *this;
+    }
+
+    //! Copy constructor
+    VectorSmall( VectorSmall<Dim> const & vector )
+    {
+        *this = vector;
+    }
+
+    //@}
+
+    //! @name Overloaded operators
+    //@{
+
+    //! Operator +=
+    VectorSmall<Dim> & operator+= ( VectorSmall<Dim> const & vector )
+    {
+        for ( UInt i = 0; i < Dim; i++ )
+            this->M_coords[ i ] += vector.M_coords[ i ];
+        return *this;
+    }
+
+    //! Operator +
+    VectorSmall<Dim> operator+ ( VectorSmall<Dim> const & vector )
+    {
+        VectorSmall<Dim> tmp ( *this ); return tmp += vector;
+    }
+
+    //! Operator -=
+    VectorSmall<Dim> & operator-= ( VectorSmall<Dim> const & vector )
+    {
+        for ( UInt i = 0; i < Dim; i++ )
+            this->M_coords[ i ] -= vector.M_coords[ i ];
+        return *this;
+    }
+
+    //! Operator -
+    VectorSmall<Dim> operator- ( VectorSmall<Dim> const & vector )
+    {
+        VectorSmall tmp ( *this ); return tmp -= vector;
+    }
+
+    //! Operator *= (multiplication by scalar)
+    VectorSmall<Dim> &  operator*= ( Real const & factor )
+    {
+        for ( UInt i = 0; i < Dim; i++ )
+            this->M_coords[ i ] *= factor;
+        return *this;
+    }
+
+    //! Operator * (multiplication by scalar on the right)
+    VectorSmall<Dim> operator* ( Real const & factor )
+    {
+        VectorSmall<Dim> tmp ( *this ); return tmp *= factor;
+    }
+
+    //! Operator /= (division by scalar)
+    VectorSmall<Dim> & operator/= ( Real const & factor )
+    {
+        ASSERT ( factor != 0. , "Division by zero!" );
+        *this *= 1. / factor;
+        return *this;
+    }
+
+    //! Operator / (division by scalar)
+    VectorSmall<Dim> operator/ ( Real const & factor )
+    {
+        VectorSmall<Dim> tmp ( *this ); return tmp /= factor;
+    }
+
+    //! Operator []
+    Real const & operator[] ( UInt const & i ) const
+    {
+        ASSERT ( i < Dim, "trying to set an index that exceeds the dimension of the array" );
+        return M_coords [ i ];
+    }
+
+    //! Operator []
+    Real & operator[] ( UInt const & i )
+    {
+        ASSERT ( i < Dim, "trying to set an index that exceeds the dimension of the array" );
+        return M_coords [ i ];
+    }
+
+    //! Operator ()
+    Real const & operator() ( UInt const & i ) const
+    {
+        ASSERT ( i < Dim, "trying to set an index that exceeds the dimension of the array" );
+        return M_coords [ i ];
+    }
+
+    //! Operator ()
+    Real & operator() ( UInt const & i )
+    {
+        ASSERT ( i < Dim, "trying to set an index that exceeds the dimension of the array" );
+        return M_coords [ i ];
+    }
+
+    //@}
+
+    //! @name Geometric Methods
+    //@{
+
+    //! Scalar product
+    /*!
+    @param vector second operand
+    @return scalar product value
+    */
+    Real dot ( VectorSmall<Dim> const & vector ) const
+    {
+        Real scalarProduct = 0.;
+        for ( UInt i = 0; i < Dim; i++ )
+        scalarProduct += this->M_coords[ i ] * vector.M_coords[ i ];
+        return scalarProduct;
+    }
+
+    //! Cross product
+    /*!
+    @param vector second operand
+    @return a VectorSmall with the cross product result
+    */
+    VectorSmall<Dim> cross ( VectorSmall<Dim> const & /*vector*/ ) const
+    {
+        ASSERT ( 0, "cross product is only defined in R^3" );
+        return VectorSmall<Dim>();
+    }
+
+    //! \f$ L^2 \f$ norm
+    /*!
+    @return norm value
+    */
+    Real norm () const
+    {
+        return std::sqrt( this->dot( *this ) );
+    }
+
+    //! Normalize vector
+    void normalize ()
+    {
+        *this /= norm ();
+    }
+
+    //! Create the versor associated to this VectorSmall
+    /*!
+    @return the versor associated to this VectorSmall
+    */
+    VectorSmall<Dim> normalized ()
+    {
+        return VectorSmall ( ( *this ) / norm () );
+    }
+
+    //@}
+
+    //! @name Tools
+    //@{
+
+    //! function to get the size of the barePoint ( for compatibility with Eigen)
+    /*!
+    @return the fixed size of the VectorSmall
+    */
+    UInt size() const { return Dim;}
+
+    //! Operator <<
+    friend std::ostream & operator<< <Dim> ( std::ostream & out , VectorSmall<Dim> const & point );
+
+    //@}
+
+private:
+
+    //! @name Data
+    //@{
+
+    //! Data storage
+    Real M_coords[ Dim ];
+
+    //@}
+};
+
+//! @name External overloaded operators
+//@{
+
+//! Operator * (multiplication by scalar on the left)
+template <UInt Dim>
+inline VectorSmall<Dim> operator* ( Real const & factor, VectorSmall<Dim> const & vector )
+{
+    VectorSmall<Dim> tmp ( vector );
+    tmp *= factor;
+    return tmp;
+}
+
+//! Operator <<
+template <UInt Dim>
+inline std::ostream & operator<< ( std::ostream & out , VectorSmall<Dim> const & point )
+{
+    out << "( ";
+    for ( UInt i = 0; i < Dim; i++ )
+        out << point.M_coords[ i ] << " ";
+    out << ")";
+    return out;
+}
+
+//@}
+
+//! @name Conversion free-functions
+//@{
+
+//! Conversion of an STL-vector of coordinates to a VectorSmall
+/*!
+@param coords vector of point coordinates
+@return the VectorSmall that corresponds to the input
+*/
+template <UInt Dim>
+inline VectorSmall<Dim> castToVectorSmall ( std::vector<Real> const & coords )
+{
+    ASSERT ( coords.size() == Dim , "the input vector has the wrong dimension" );
+    VectorSmall<Dim> tmp;
+    for ( UInt i = 0; i < Dim; i++ )
+        tmp[ i ] = coords[ i ];
+    return tmp;
+}
+
+//! Conversion of a MeshVertex to a VectorSmall
+/*!
+@param vertex MeshVertex original object to be copied
+@return the VectorSmall that corresponds to the input
+*/
+template <UInt Dim>
+inline VectorSmall<Dim> castToVectorSmall ( MeshVertex const & vertex )
+{
+    ASSERT ( Dim == 3 , "a MeshVertex can only be cast to a 3-length SmallVector" );
+    return VectorSmall<Dim> ( vertex.x(), vertex.y(), vertex.z() );
+}
+
+//! Conversion of a KN<Real> vector to a VectorSmall
+/*!
+@param vector vector of point coordinates
+@return the VectorSmall that corresponds to the input
+*/
+template <UInt Dim>
+inline VectorSmall<Dim> castToVectorSmall ( KN<Real> const & vector )
+{
+    ASSERT ( vector.size() == Dim , "the input vector has the wrong dimension" );
+    VectorSmall<Dim> tmp;
+    for ( UInt i = 0; i < Dim; i++ )
+        tmp[ i ] = vector[ i ];
+    return tmp;
+}
+
+//@}
+
+// =====================================
+// class specialization for Dim = 3
+// =====================================
+
+template <>
+class VectorSmall<3>
+{
+
+public:
+
+    //! @name Constructors and destructors
+    //@{
+    //! Empty constructor (all components are set to zero)
+    VectorSmall()
     {
         M_coords[ 0 ] = M_coords[ 1 ] = M_coords[ 2 ] = 0.;
     }
 
-    //! Full contructor with all components explicitly initialized
+    //! Full constructor with all components explicitly initialized
     /*!
     @param x x-component of the point
     @param y y-component of the point
     @param z z-component of the point
     */
-    BarePoint( Real const & x, Real const & y, Real const & z )
+    VectorSmall( Real const & x, Real const & y, Real const & z )
     {
         M_coords[ 0 ] = x;
         M_coords[ 1 ] = y;
@@ -87,7 +372,7 @@ public:
     }
 
     //! Assignment operator
-    BarePoint & operator= ( BarePoint const & vector )
+    VectorSmall<3> & operator= ( VectorSmall<3> const & vector )
     {
         this->M_coords[ 0 ] = vector.M_coords[ 0 ];
         this->M_coords[ 1 ] = vector.M_coords[ 1 ];
@@ -96,7 +381,7 @@ public:
     }
 
     //! Copy constructor
-    BarePoint( BarePoint const & vector )
+    VectorSmall ( VectorSmall<3> const & vector )
     {
         *this = vector;
     }
@@ -107,7 +392,7 @@ public:
     //@{
 
     //! Operator +=
-    BarePoint & operator+= ( BarePoint const & vector )
+    VectorSmall<3> & operator+= ( VectorSmall<3> const & vector )
     {
         this->M_coords[ 0 ] += vector.M_coords[ 0 ];
         this->M_coords[ 1 ] += vector.M_coords[ 1 ];
@@ -116,13 +401,13 @@ public:
     }
 
     //! Operator +
-    BarePoint operator+ ( BarePoint const & vector )
+    VectorSmall<3> operator+ ( VectorSmall<3> const & vector )
     {
-        BarePoint tmp ( *this ); return tmp += vector;
+        VectorSmall<3> tmp ( *this ); return tmp += vector;
     }
 
     //! Operator -=
-    BarePoint & operator-= ( BarePoint const & vector )
+    VectorSmall<3> & operator-= ( VectorSmall<3> const & vector )
     {
         this->M_coords[ 0 ] -= vector.M_coords[ 0 ];
         this->M_coords[ 1 ] -= vector.M_coords[ 1 ];
@@ -131,13 +416,13 @@ public:
     }
 
     //! Operator -
-    BarePoint operator- ( BarePoint const & vector )
+    VectorSmall<3> operator- ( VectorSmall<3> const & vector )
     {
-        BarePoint tmp ( *this ); return tmp -= vector;
+        VectorSmall<3> tmp ( *this ); return tmp -= vector;
     }
 
     //! Operator *= (multiplication by scalar)
-    BarePoint &  operator*= ( Real const & factor )
+    VectorSmall<3> &  operator*= ( Real const & factor )
     {
         this->M_coords[ 0 ] *= factor;
         this->M_coords[ 1 ] *= factor;
@@ -146,13 +431,13 @@ public:
     }
 
     //! Operator * (multiplication by scalar on the right)
-    BarePoint operator* ( Real const & factor )
+    VectorSmall<3> operator* ( Real const & factor )
     {
-        BarePoint tmp ( *this ); return tmp *= factor;
+        VectorSmall<3> tmp ( *this ); return tmp *= factor;
     }
 
     //! Operator /= (division by scalar)
-    BarePoint & operator/= ( Real const & factor )
+    VectorSmall<3> & operator/= ( Real const & factor )
     {
         ASSERT ( factor != 0. , "Division by zero!" );
         *this *= 1. / factor;
@@ -160,9 +445,9 @@ public:
     }
 
     //! Operator / (division by scalar)
-    BarePoint operator/ ( Real const & factor )
+    VectorSmall<3> operator/ ( Real const & factor )
     {
-        BarePoint tmp ( *this ); return tmp /= factor;
+        VectorSmall<3> tmp ( *this ); return tmp /= factor;
     }
 
     //! Operator []
@@ -203,7 +488,7 @@ public:
     @param vector second operand
     @return scalar product value
     */
-    Real dot ( BarePoint const & vector ) const
+    Real dot ( VectorSmall<3> const & vector ) const
     {
         return ( this->M_coords[ 0 ] * vector.M_coords[ 0 ]
                + this->M_coords[ 1 ] * vector.M_coords[ 1 ]
@@ -213,16 +498,15 @@ public:
     //! Cross product
     /*!
     @param vector second operand
-    @return a BarePoint with the cross product result
     */
-    BarePoint cross ( BarePoint const & vector ) const
+    VectorSmall<3> cross ( VectorSmall<3> const & vector ) const
     {
-        return BarePoint ( this->M_coords[ 1 ] * vector.M_coords[ 2 ]
-                         - this->M_coords[ 2 ] * vector.M_coords[ 1 ],
-                           this->M_coords[ 2 ] * vector.M_coords[ 0 ]
-                         - this->M_coords[ 0 ] * vector.M_coords[ 2 ],
-                           this->M_coords[ 0 ] * vector.M_coords[ 1 ]
-                         - this->M_coords[ 1 ] * vector.M_coords[ 0 ] );
+        return VectorSmall ( this->M_coords[ 1 ] * vector.M_coords[ 2 ]
+                           - this->M_coords[ 2 ] * vector.M_coords[ 1 ],
+                             this->M_coords[ 2 ] * vector.M_coords[ 0 ]
+                           - this->M_coords[ 0 ] * vector.M_coords[ 2 ],
+                             this->M_coords[ 0 ] * vector.M_coords[ 1 ]
+                           - this->M_coords[ 1 ] * vector.M_coords[ 0 ] );
     }
 
     //! \f$ L^2 \f$ norm
@@ -231,9 +515,7 @@ public:
     */
     Real norm () const
     {
-        return std::sqrt( M_coords[ 0 ] * M_coords[ 0 ] +
-                          M_coords[ 1 ] * M_coords[ 1 ] +
-                          M_coords[ 2 ] * M_coords[ 2 ] );
+        return std::sqrt( this->dot( *this ) );
     }
 
     //! Normalize vector
@@ -242,13 +524,13 @@ public:
         *this /= norm ();
     }
 
-    //! Create the versor associated to this BarePoint
+    //! Create the versor associated to this VectorSmall
     /*!
-    @return the versor associated to this BarePoint
+    @return the versor associated to this VectorSmall
     */
-    BarePoint normalized ()
+    VectorSmall<3> normalized ()
     {
-        return BarePoint ( ( *this ) / norm () );
+        return VectorSmall<3> ( ( *this ) / norm () );
     }
 
     //@}
@@ -258,12 +540,12 @@ public:
 
     //! function to get the size of the barePoint ( for compatibility with Eigen)
     /*!
-    @return the fixed size of the BarePoint
+    @return the fixed size of the VectorSmall
     */
-    const UInt size() const { return 3;}
+    UInt size() const { return 3; }
 
     //! Operator <<
-    friend std::ostream & operator<< ( std::ostream & out , BarePoint const & point );
+    friend std::ostream & operator<< ( std::ostream & out , VectorSmall<3> const & point );
 
     //@}
 
@@ -282,17 +564,21 @@ private:
 //@{
 
 //! Operator * (multiplication by scalar on the left)
-inline BarePoint operator* ( Real const & factor, BarePoint const & vector )
+inline VectorSmall<3> operator* ( Real const & factor, VectorSmall<3> const & vector )
 {
-    BarePoint tmp ( vector ); return tmp *= factor;
+    VectorSmall<3> tmp ( vector );
+    tmp *= factor;
+    return tmp;
 }
 
 //! Operator <<
-inline std::ostream & operator<< ( std::ostream & out , BarePoint const & point )
+inline std::ostream & operator<< ( std::ostream & out , VectorSmall<3> const & point )
 {
-    out << "(" << point.M_coords[ 0 ] << ", " 
-               << point.M_coords[ 1 ] << ", " 
-               << point.M_coords[ 2 ] << ")";
+    out << "( ";
+    out << point.M_coords[ 0 ] << " ";
+    out << point.M_coords[ 1 ] << " ";
+    out << point.M_coords[ 2 ] << " ";
+    out << ")";
     return out;
 }
 
@@ -301,44 +587,45 @@ inline std::ostream & operator<< ( std::ostream & out , BarePoint const & point 
 //! @name Conversion free-functions
 //@{
 
-//! Conversion of an STL-vector of coordinates to a BarePoint
-
+//! Conversion of an STL-vector of coordinates to a VectorSmall
 /*!
 @param coords vector of point coordinates
-@return the BarePoint that corresponds to the input
+@return the VectorSmall that corresponds to the input
 */
-inline BarePoint castToBarePoint ( std::vector<Real> const & coords )
+inline VectorSmall<3> castToVectorSmall ( std::vector<Real> const & coords )
 {
-    ASSERT ( coords.size() == 3 , "the inpunt vector is of the wrong dimension" );
-    return BarePoint( coords[ 0 ], coords[ 1 ], coords[ 2 ] );
+    ASSERT ( coords.size() == 3 , "the input vector has the wrong dimension" );
+    return VectorSmall<3> ( coords[ 0 ], coords[ 1 ], coords[ 2 ] );
 }
 
-//! Conversion of a MeshVertex to a BarePoint
-
+//! Conversion of a MeshVertex to a VectorSmall
 /*!
 @param vertex MeshVertex original object to be copied
-@return the BarePoint that corresponds to the input
+@return the VectorSmall that corresponds to the input
 */
-inline BarePoint castToBarePoint ( MeshVertex const & vertex )
+inline VectorSmall<3> castToVectorSmall ( MeshVertex const & vertex )
 {
-    return BarePoint( vertex.x(), vertex.y(), vertex.z() );
+    return VectorSmall<3> ( vertex.x(), vertex.y(), vertex.z() );
 }
 
-//! Conversion of a KN<Real> vector to a BarePoint
-
+//! Conversion of a KN<Real> vector to a VectorSmall
 /*!
 @param vector vector of point coordinates
-@return the BarePoint that corresponds to the input
+@return the VectorSmall that corresponds to the input
 */
-inline BarePoint castToBarePoint ( KN<Real> const & vector )
+inline VectorSmall<3> castToVectorSmall ( KN<Real> const & vector )
 {
-    ASSERT ( vector.size() == 3 , "the inpunt vector is of the wrong dimension" );
-    return BarePoint( vector[ 0 ], vector[ 1 ], vector[ 2 ]);
+    ASSERT ( vector.size() == 3 , "the input vector has the wrong dimension" );
+    return VectorSmall<3> ( vector[ 0 ], vector[ 1 ], vector[ 2 ] );
 }
+
+//@}
+
+typedef VectorSmall<3> Vector3D;
 
 } // namespace LifeV
 
 
-#endif //_BAREPOINT_H_
+#endif //_VECTORSMALL_H_
 
 // -*- mode: c++ -*-
