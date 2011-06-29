@@ -15,10 +15,9 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-check_PROGRAMS		= test_mesh test_barepoint
+check_PROGRAMS		= test_mesh
 
 test_mesh_SOURCES	= test_mesh.cpp
-test_barepoint_SOURCES	= test_barepoint.cpp
  
 test_mesh_LDFLAGS       =
 

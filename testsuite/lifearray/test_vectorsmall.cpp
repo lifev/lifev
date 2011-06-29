@@ -43,7 +43,7 @@ Simple VectorSmall class test
 // ===================================================
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifemesh/BarePoint.hpp>
+#include <life/lifearray/VectorSmall.hpp>
 
 using namespace LifeV;
 

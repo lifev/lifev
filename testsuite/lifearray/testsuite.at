@@ -17,3 +17,8 @@ AT_SETUP([test_simple_vect])
 AT_KEYWORDS([ array simple vect ])
 AT_CHECK([mpirun -n 1 ../../lifearray/test_simple_vect],[0],[ignore],[ignore])
 AT_CLEANUP
+
+AT_SETUP([test_vectorsmall])
+AT_KEYWORDS([vectorsmall])
+AT_CHECK([mpirun -n 1 ../../lifemesh/test_vectorsmall],[0],[ignore],[ignore])
+AT_CLEANUP
