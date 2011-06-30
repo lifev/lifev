@@ -36,9 +36,9 @@
 #ifndef _VECTORSMALL_H_
 #define _VECTORSMALL_H_ 1
 
-#include "life/lifecore/LifeV.hpp"
-#include "life/lifemesh/MeshVertex.hpp"
-#include "life/lifearray/RNM.hpp"
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifemesh/MeshVertex.hpp>
+#include <life/lifearray/RNM.hpp>
 
 #include <vector>
 #include <cmath>
