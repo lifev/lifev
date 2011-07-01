@@ -49,6 +49,7 @@ mpiGroups = '
 couplings = '    
             0       BoundaryCondition   FlowRate_SquareSinusoidalWave   1               0
             1       FlowRateStress      Lagrange1                       2,1             0,1
+            2       BoundaryCondition   Stress_VenousPressure           2               1
             '
 ###################################################################################################
 

@@ -47,6 +47,7 @@ mpiGroups = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
             0       BoundaryCondition   Stress_Exp                      0               0
+            1       BoundaryCondition   Stress_Zero                     0               1
             '
 ###################################################################################################
 
