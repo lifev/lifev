@@ -67,10 +67,8 @@ public:
     typedef ZeroDimensionalBCHandler                                        bc_Type;
     typedef boost::shared_ptr< bc_Type >                                    bcPtr_Type;
 
-    typedef BCInterface0D< bc_Type, MultiscaleModelWindkessel0D >           bcInterface_Type;
+    typedef BCInterface0D< bc_Type, MultiscaleData >                        bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >                           bcInterfacePtr_Type;
-
-    typedef bc_Type::bcSide_Type                                            bcSide_Type;
 
     //@}
 
@@ -146,7 +144,7 @@ public:
      * @param flag flag of the boundary face
      * @return flux value
      */
-    Real boundaryFlowRate( const bcFlag_Type& /*flag*/ ) const { return M_flowRate; }
+    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return ( flag == 0 ) ? M_flowRateLeft : 0; }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
@@ -188,7 +186,7 @@ public:
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const bcFlag_Type& /*flag*/ ) const { return M_pressure; }
+    Real boundaryPressure( const bcFlag_Type& flag ) const { return ( flag == 0 ) ? M_pressureLeft : M_pressureRight; }
 
     //@}
 
@@ -257,31 +255,24 @@ private:
 
     //@}
 
-    //! Convert the flag from a bcFlag type to a bcSide type
-    /*!
-     * @param flag boundary condition flag
-     * @return boundary condition side.
-     */
-    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
-
     std::ofstream          M_outputFile;
 
     bcInterfacePtr_Type    M_bc;
 
-    Real                   M_pressure_tn;      // Pressure (P1) @ t=t(n)
-    Real                   M_flowRate_tn;      // flowRate (Q1) @ t=t(n)
+    Real                   M_pressureLeft_tn;  // pressure left (P1) @ t=t(n)
+    Real                   M_flowRateLeft_tn;  // flowRate left (Q1) @ t=t(n)
 
-    Real                   M_pressure;         // Pressure (P2) @ t=t(n+1)
-    Real                   M_flowRate;         // flowRate (Q2) @ t=t(n+1)
+    Real                   M_pressureLeft;     // pressure left (P2) @ t=t(n+1)
+    Real                   M_flowRateLeft;     // flowRate left (Q2) @ t=t(n+1)
 
-    Real                   M_tangentPressure;  // Tangent pressure
-    Real                   M_tangentFlowRate;  // Tangent flowRate
+    Real                   M_pressureRight;    // pressure right (usually venous pressure)
+
+    Real                   M_tangentPressureLeft;  // Tangent pressure left
+    Real                   M_tangentFlowRateLeft;  // Tangent flowRate left
 
     Real                   M_resistance1;      // Resistance 1 (R1)
     Real                   M_resistance2;      // Resistance 2 (R2)
     Real                   M_capacitance;      // capacitance  (C)
-
-    Real                   M_venousPressure;   // Back Pressure (Pv)
 };
 
 //! Factory create function
