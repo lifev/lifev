@@ -185,6 +185,8 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D( const UInt& i )
     {
         model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
+        model->bcInterface().dataContainer().setFlag( M_flags[i] );
+
         model->bcInterface().insertBC();
     }
 }
