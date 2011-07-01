@@ -61,8 +61,8 @@ public:
     typedef bc_Type::bcType_Type                                          bcType_Type;
     typedef bc_Type::function_Type                                        function_Type;
 
-    typedef OneDimensional::bcSide_Type                                   bcSide_Type;
-    typedef std::map< bcSide_Type, bc_Type >                              bcContainer_Type;
+    typedef entityFlag_Type                                               bcFlag_Type;
+    typedef std::map< bcFlag_Type, bc_Type >                              bcContainer_Type;
 
     //@}
 
@@ -88,7 +88,7 @@ public:
     /*!
       @param bcType the bc type
     */
-    void setBC( const bcSide_Type& side, const bcType_Type& bcType, const function_Type& function ) { M_bc[side].setBC( bcType, function ); }
+    void setBC( const bcFlag_Type& flag, const bcType_Type& bcType, const function_Type& function ) { M_bc[flag].setBC( bcType, function ); }
 
     //@}
 
@@ -101,7 +101,7 @@ public:
      *  @param side the boundary condition side
      *  @return boundary condition
      */
-    const bc_Type& bc( const bcSide_Type& side ) const { return M_bc.find( side )->second; }
+    const bc_Type& bc( const bcFlag_Type& flag ) const { return M_bc.find( flag )->second; }
 
     //@}
 
