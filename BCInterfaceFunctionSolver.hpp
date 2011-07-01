@@ -42,6 +42,7 @@
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
+#include <lifemc/lifesolver/MultiscaleCommunicatorsManager.hpp>
 #include <lifemc/lifesolver/BCInterfaceFunction.hpp>
 
 namespace LifeV
@@ -71,10 +72,12 @@ namespace LifeV
  *	f_flux
  *	f_pressure
  *	f_viscosity
+ *	f_venousPressure
  *	s_density
  *	s_poisson
  *	s_thickness
  *	s_young
+ *	s_externalPressure
  */
 template< class PhysicalSolverType >
 class BCInterfaceFunctionSolver: public virtual BCInterfaceFunction< PhysicalSolverType >
@@ -174,6 +177,7 @@ protected:
         f_density,
         f_pressure,
         f_viscosity,
+        f_venousPressure,
         s_density,
         s_poisson,
         s_thickness,
@@ -207,7 +211,7 @@ private:
     void createSolidMap( std::map< std::string, physicalSolverList >& mapList );
     void createList( const std::map< std::string, physicalSolverList >& mapList, const data_Type& data );
 
-    void switchErrorMessage( const std::string& operatorType ) { std::cout << "ERROR: Invalid variable type for " << operatorType << "OperatorFunction" << std::endl; }
+    void switchErrorMessage( const std::string& operatorType ) { std::cout << "ERROR: Invalid variable type for " << operatorType << " FunctionSolver" << std::endl; }
 
     //@}
 
@@ -279,7 +283,7 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::updatePhysicalSolverVariables
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_timeStep(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->physics()->data()->dataTime()->timeStep() << "\n";
+            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->physics()->data()->dataTime()->timeStep() << "\n";
 #endif
             setVariable( "f_timeStep", M_physicalSolver->physics()->data()->dataTime()->timeStep() );
 
@@ -329,6 +333,15 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::updatePhysicalSolverVariables
             Debug( 5023 ) << "                                              f_viscosity: " << M_physicalSolver->physics()->data()->viscosity() << "\n";
 #endif
             setVariable( "f_viscosity", M_physicalSolver->physics()->data()->viscosity() );
+
+            break;
+
+        case f_venousPressure:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              f_venousPressure: " << M_physicalSolver->physics()->data()->venousPressure() << "\n";
+#endif
+            setVariable( "f_venousPressure", M_physicalSolver->physics()->data()->venousPressure() );
 
             break;
 
@@ -405,7 +418,7 @@ BCInterfaceFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_timeStep(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->data().dataFluid()->dataTime()->timeStep() << "\n";
+            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->data().dataFluid()->dataTime()->timeStep() << "\n";
 #endif
             setVariable( "f_timeStep", M_physicalSolver->data().dataFluid()->dataTime()->timeStep() );
 
@@ -531,7 +544,7 @@ BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::updateP
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_timeStep(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
+            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
 #endif
             setVariable( "f_timeStep", M_physicalSolver->data()->dataTime()->timeStep() );
 
@@ -607,7 +620,7 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_timeStep(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
+            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
 #endif
             setVariable( "f_timeStep", M_physicalSolver->data()->dataTime()->timeStep() );
 
@@ -666,6 +679,62 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
         }
 }
 
+template< >
+inline void
+BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVariables()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::updatePhysicalSolverVariables" << "\n";
+#endif
+
+    // Create/Update variables for OseenSolverShapeDerivative problem
+    for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
+        switch ( *j )
+        {
+        // f_ -> FLUID
+        case f_timeStep:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->dataTime()->timeStep() << "\n";
+#endif
+            setVariable( "f_timeStep", M_physicalSolver->dataTime()->timeStep() );
+
+            break;
+
+        case f_density:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              f_density(): " << M_physicalSolver->fluidDensity() << "\n";
+#endif
+            setVariable( "f_density", M_physicalSolver->fluidDensity() );
+
+            break;
+
+        case f_viscosity:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              f_viscosity(): " << M_physicalSolver->fluidViscosity() << "\n";
+#endif
+            setVariable( "f_viscosity", M_physicalSolver->fluidViscosity() );
+
+            break;
+
+        case f_venousPressure:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              f_venousPressure(): " << M_physicalSolver->fluidVenousPressure() << "\n";
+#endif
+            setVariable( "f_venousPressure", M_physicalSolver->fluidVenousPressure() );
+
+            break;
+
+        default:
+
+            switchErrorMessage( "MultiscaleData" );
+        }
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
@@ -678,8 +747,8 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const data_Type& data 
     Debug( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
 #endif
 
-    M_side     = data.side();
-    M_flag     = data.flag();
+    M_side = data.side();
+    M_flag = data.flag();
 
     function_Type::setData( data );
 
@@ -763,6 +832,24 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
         updatePhysicalSolverVariables();
 }
 
+template< >
+inline void
+BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::createAccessList( const data_Type& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::createAccessList( data )" << "\n";
+#endif
+
+    std::map< std::string, physicalSolverList > mapList;
+
+    createFluidMap( mapList );
+    createList( mapList, data );
+
+    if ( M_physicalSolver.get() )
+        updatePhysicalSolverVariables();
+}
+
 // ===================================================
 // Private Methods
 // ===================================================
@@ -770,12 +857,13 @@ template< class PhysicalSolverType >
 inline void
 BCInterfaceFunctionSolver< PhysicalSolverType >::createFluidMap( std::map< std::string, physicalSolverList >& mapList )
 {
-    mapList["f_timeStep"]  = f_timeStep;
-    mapList["f_area"]      = f_area;
-    mapList["f_density"]   = f_density;
-    mapList["f_flux"]      = f_flux;
-    mapList["f_pressure"]  = f_pressure;
-    mapList["f_viscosity"] = f_viscosity;
+    mapList["f_timeStep"]       = f_timeStep;
+    mapList["f_area"]           = f_area;
+    mapList["f_density"]        = f_density;
+    mapList["f_flux"]           = f_flux;
+    mapList["f_pressure"]       = f_pressure;
+    mapList["f_viscosity"]      = f_viscosity;
+    mapList["f_venousPressure"] = f_venousPressure;
 }
 
 template< class PhysicalSolverType >
