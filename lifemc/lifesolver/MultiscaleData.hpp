@@ -37,7 +37,11 @@
 #ifndef MultiscaleData_H
 #define MultiscaleData_H 1
 
-#include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifefilters/GetPot.hpp>
+#include <life/lifefem/TimeData.hpp>
+
+#include <boost/shared_ptr.hpp>
 
 namespace LifeV
 {

@@ -62,11 +62,12 @@
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
-#include <life/lifefem/TimeData.hpp>
 
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
+
+#include <lifemc/lifesolver/MultiscaleData.hpp>
 
 namespace LifeV
 {
@@ -137,7 +138,6 @@ extern std::map< std::string, couplings_Type >  multiscaleCouplingsMap;
 class MultiscaleAlgorithm;
 class MultiscaleModel;
 class MultiscaleCoupling;
-class MultiscaleData;
 
 // Type definitions
 typedef entityFlag_Type                                                          bcFlag_Type;
