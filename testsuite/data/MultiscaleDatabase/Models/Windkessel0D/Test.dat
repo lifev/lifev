@@ -15,7 +15,7 @@
 [Multiscale]
 modelName        = Windkessel0D_Test
 modelType        = Windkessel0D
-couplingFlags    = '0'
+couplingFlags    = '0 1'
 
 [Coefficients]
 

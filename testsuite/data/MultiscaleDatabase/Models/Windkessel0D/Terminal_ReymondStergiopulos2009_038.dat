@@ -15,7 +15,7 @@
 [Multiscale]
 modelName        = '1D ReymondStergiopulos 038 (Windkessel RCR terminal)'
 modelType        = Windkessel0D
-couplingFlags    = '0'
+couplingFlags    = '0 1'
 
 [Coefficients]
 
