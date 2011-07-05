@@ -147,7 +147,7 @@ public:
     //! Operator []
     Real const & operator[] ( UInt const & i ) const
     {
-        ASSERT ( i < Dim, "trying to set an index that exceeds the dimension of the array" );
+        ASSERT ( i < Dim, "trying to access an index that exceeds the dimension of the array" );
         return M_coords [ i ];
     }
 
@@ -161,7 +161,7 @@ public:
     //! Operator ()
     Real const & operator() ( UInt const & i ) const
     {
-        ASSERT ( i < Dim, "trying to set an index that exceeds the dimension of the array" );
+        ASSERT ( i < Dim, "trying to access an index that exceeds the dimension of the array" );
         return M_coords [ i ];
     }
 
@@ -403,7 +403,7 @@ public:
     //! Operator []
     Real const & operator[] ( UInt const & i ) const
     {
-        ASSERT ( i < 3 , "trying to set an index different from 0,1,2" );
+        ASSERT ( i < 3 , "trying to access an index different from 0,1,2" );
         return M_coords [ i ];
     }
 
@@ -417,7 +417,7 @@ public:
     //! Operator ()
     Real const & operator() ( UInt const & i ) const
     {
-        ASSERT ( i < 3 , "trying to set an index different from 0,1,2" );
+        ASSERT ( i < 3 , "trying to access an index different from 0,1,2" );
         return M_coords [ i ];
     }
 
