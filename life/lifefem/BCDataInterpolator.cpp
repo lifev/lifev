@@ -35,17 +35,25 @@
 
  *///@HEADER
 
-#include <sstream>
-#include <stdexcept>
-#include <boost/bind.hpp>
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifefem/BCBase.hpp>
 #include <life/lifefem/BCFunction.hpp>
 #include <life/lifefem/BCDataInterpolator.hpp>
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/shared_array.hpp>
+#include <boost/bind.hpp>
+#include <sstream>
+#include <stdexcept>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <cmath>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV {
 
@@ -102,16 +110,14 @@ BCDataInterpolator::BCDataInterpolator(  ) :
                     M_timePeriod ( 0 ), M_timeInterval ( 0 ), M_flagInterpolated( false )
 {
 
-    M_userDefinedFunction = boost::bind( &BCDataInterpolator::vectFct,
+    M_userDefinedFunction = boost::bind( &BCDataInterpolator::interpolatedDataFunction,
                                          this,_1,_2,_3,_4,_5 );
 
 }
 
 BCDataInterpolator::~BCDataInterpolator()
 {
-    delete [] M_dataSites; M_dataSites = NULL;
-    delete [] M_dataValues; M_dataValues = NULL;
-    delete [] M_dataValues_timeSamples; M_dataValues_timeSamples = NULL;
+
 }
 
 // ===================================================
@@ -132,7 +138,7 @@ BCDataInterpolator::~BCDataInterpolator()
 // Methods
 // ===================================================
 
-Real BCDataInterpolator::vectFct( const Real& t,
+Real BCDataInterpolator::interpolatedDataFunction( const Real& t,
                                   const Real& x,
                                   const Real& y,
                                   const Real& z,
@@ -177,7 +183,7 @@ void BCDataInterpolator::showMe( bool verbose,
             out << " Data values (at sites):" << std::endl;
             for (UInt i=0; i < M_nofControlPoints; i++)
             {
-                out << "(" << M_dataValues_timeSamples[getIndexInTime(i,t)].x << ", " << M_dataValues_timeSamples[getIndexInTime(i,t)].y << ", " << M_dataValues_timeSamples[getIndexInTime(i,t)].z << ")" << std::endl;
+                out << "(" << M_dataValues_timeSamples[indexInTime(i,t)].x << ", " << M_dataValues_timeSamples[indexInTime(i,t)].y << ", " << M_dataValues_timeSamples[indexInTime(i,t)].z << ")" << std::endl;
             }
         }
     }
@@ -189,13 +195,13 @@ void BCDataInterpolator::showMe( bool verbose,
     }
 }
 
-void BCDataInterpolator::readData( const char *fileName )
+void BCDataInterpolator::readData( const std::string *fileName )
 {
-
+    char *fileName_c = (char*)fileName->c_str();
     std::ifstream fin;
     UInt RDIM;
 
-    fin.open( fileName );
+    fin.open( fileName_c );
 
     if ( !fin.fail() )
     {
@@ -222,9 +228,9 @@ void BCDataInterpolator::readData( const char *fileName )
 
         Int n = static_cast< Int > (floor(M_timePeriod / M_timeInterval));
 
-        M_dataSites = new BCDataInterpolator_point[M_nofControlPoints];
-        M_dataValues = new BCDataInterpolator_point[M_nofControlPoints];
-        M_dataValues_timeSamples = new BCDataInterpolator_point[M_nofControlPoints * (n+1)];
+        M_dataSites = boost::shared_array<BCDataInterpolator_point>(new BCDataInterpolator_point[M_nofControlPoints]);
+        M_dataValues = boost::shared_array<BCDataInterpolator_point>(new BCDataInterpolator_point[M_nofControlPoints]);
+        M_dataValues_timeSamples = boost::shared_array<BCDataInterpolator_point>(new BCDataInterpolator_point[M_nofControlPoints * (n+1)]);
 
         fin.ignore( 80, '\n' );
         fin.ignore( 80, '\n' );
@@ -246,9 +252,9 @@ void BCDataInterpolator::readData( const char *fileName )
 
             for ( UInt i = 0; i < M_nofControlPoints; i++ )
             {
-                fin >> M_dataValues_timeSamples[getIndexInTime(i,t)].x;
-                fin >> M_dataValues_timeSamples[getIndexInTime(i,t)].y;
-                fin >> M_dataValues_timeSamples[getIndexInTime(i,t)].z;
+                fin >> M_dataValues_timeSamples[indexInTime(i,t)].x;
+                fin >> M_dataValues_timeSamples[indexInTime(i,t)].y;
+                fin >> M_dataValues_timeSamples[indexInTime(i,t)].z;
             }
 
             fin.ignore( 80, '\n' );
@@ -271,19 +277,6 @@ void BCDataInterpolator::exportInterpolationMatrix() const
 
 }
 
-void BCDataInterpolator::setInterpolationMethod(BCInterpolationMethod bcim)
-{
-
-    M_interpolationMethod = bcim;
-
-}
-
-void BCDataInterpolator::setFilteringLevel(Int level)
-{
-
-    M_filteringLevel = level;
-
-}
 
 // ===================================================
 // Private Methods
@@ -292,7 +285,7 @@ void BCDataInterpolator::setFilteringLevel(Int level)
 void BCDataInterpolator::formRBFMatrix()
 {
 
-    Int nofElementsPerRow = ( needSideConstraints() ? 2 * M_nofControlPoints + NDIM : M_nofControlPoints );
+    Int nofElementsPerRow = ( needSideConstraints() ? M_nofControlPoints + NDIM + 1 : M_nofControlPoints );
 
     M_interpolationMatrix.Shape( static_cast< int > ( nofElementsPerRow ),
                                  static_cast< int > ( nofElementsPerRow ) );
@@ -322,18 +315,19 @@ void BCDataInterpolator::formRBFMatrix()
         for ( UInt i = 0; i < M_nofControlPoints; i++ )
         {
 
-            // Constant term of the polynomial
-            M_interpolationMatrix( i, M_nofControlPoints + i ) = 1;
-            M_interpolationMatrix( M_nofControlPoints + i, i ) = 1;
-
             // First order term of the polynomial
-            M_interpolationMatrix( i, 2 * M_nofControlPoints )     = M_dataSites[i].x;
-            M_interpolationMatrix( i, 2 * M_nofControlPoints + 1 ) = M_dataSites[i].y;
-            M_interpolationMatrix( i, 2 * M_nofControlPoints + 2 ) = M_dataSites[i].z;
+            M_interpolationMatrix( i, M_nofControlPoints )     = M_dataSites[i].x;
+            M_interpolationMatrix( i, M_nofControlPoints + 1 ) = M_dataSites[i].y;
+            M_interpolationMatrix( i, M_nofControlPoints + 2 ) = M_dataSites[i].z;
 
-            M_interpolationMatrix( 2 * M_nofControlPoints,     i ) = M_dataSites[i].x;
-            M_interpolationMatrix( 2 * M_nofControlPoints + 1, i ) = M_dataSites[i].y;
-            M_interpolationMatrix( 2 * M_nofControlPoints + 2, i ) = M_dataSites[i].z;
+            M_interpolationMatrix( M_nofControlPoints,     i ) = M_dataSites[i].x;
+            M_interpolationMatrix( M_nofControlPoints + 1, i ) = M_dataSites[i].y;
+            M_interpolationMatrix( M_nofControlPoints + 2, i ) = M_dataSites[i].z;
+
+            // Constant term of the polynomial
+            M_interpolationMatrix( i, M_nofControlPoints + 3 ) = 1;
+            M_interpolationMatrix( M_nofControlPoints + 3, i ) = 1;
+
         }
     }
 
@@ -414,28 +408,23 @@ BCDataInterpolator::BCDataInterpolator_point BCDataInterpolator::interpolateVect
 
     if ( needSideConstraints() )
     {
-        // For each data site...
-        for ( UInt i = 0; i < M_nofControlPoints; i++ )
-        {
-            // Add the constant term of the polynomial...
-            rbfEval.x += M_coeffs_x( i + M_nofControlPoints );
-            rbfEval.y += M_coeffs_y( i + M_nofControlPoints );
-            rbfEval.z += M_coeffs_z( i + M_nofControlPoints );
+            // Add the linear term of the polynomial...
+            rbfEval.x += M_coeffs_x(     M_nofControlPoints ) * evalPoint.x;
+            rbfEval.x += M_coeffs_x( 1 + M_nofControlPoints ) * evalPoint.y;
+            rbfEval.x += M_coeffs_x( 2 + M_nofControlPoints ) * evalPoint.z;
 
-            // ...and the linear term of the polynomial
-            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints )     * M_dataSites[i].x;
-            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].x;
-            rbfEval.x += M_coeffs_x( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].x;
+            rbfEval.y += M_coeffs_y(     M_nofControlPoints ) * evalPoint.x;
+            rbfEval.y += M_coeffs_y( 1 + M_nofControlPoints ) * evalPoint.y;
+            rbfEval.y += M_coeffs_y( 2 + M_nofControlPoints ) * evalPoint.z;
 
-            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints )     * M_dataSites[i].y;
-            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].y;
-            rbfEval.y += M_coeffs_y( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].y;
+            rbfEval.z += M_coeffs_z(     M_nofControlPoints ) * evalPoint.x;
+            rbfEval.z += M_coeffs_z( 1 + M_nofControlPoints ) * evalPoint.y;
+            rbfEval.z += M_coeffs_z( 2 + M_nofControlPoints ) * evalPoint.z;
 
-            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints )     * M_dataSites[i].z;
-            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints + 1 ) * M_dataSites[i].z;
-            rbfEval.z += M_coeffs_z( 2 * M_nofControlPoints + 2 ) * M_dataSites[i].z;
-        } // ...for each data site
-
+            // ...and the constant term of the polynomial
+            rbfEval.x += M_coeffs_x( 3 + M_nofControlPoints );
+            rbfEval.y += M_coeffs_y( 3 + M_nofControlPoints );
+            rbfEval.z += M_coeffs_z( 3 + M_nofControlPoints );
     }
 
     return rbfEval;
@@ -534,15 +523,15 @@ void BCDataInterpolator::interpolateDataValuesInTime( const Real t )
             for (Int k = 0; k <= 2 * n; k++)
             {
                 Real tk = M_timePeriod / (2 * n + 1) * k;
-                Int indexInTime = getIndexInTime(i, k);
+                Int index_ik = indexInTime(i, k);
 
-                c1.x += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].x;
-                c1.y += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].y;
-                c1.z += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].z;
+                c1.x += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].x;
+                c1.y += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].y;
+                c1.z += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].z;
 
-                c2.x += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].x;
-                c2.y += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].y;
-                c2.z += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[indexInTime].z;
+                c2.x += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].x;
+                c2.y += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].y;
+                c2.z += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].z;
             }
 
             c1.x = c1.x / (2 * n + 1); c1.y = c1.y / (2 * n + 1); c1.z = c1.z / (2 * n + 1);

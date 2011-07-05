@@ -38,14 +38,22 @@
 #ifndef BCDATAINTERPOLATOR_H
 #define BCDATAINTERPOLATOR 1
 
-#include "Epetra_SerialDenseMatrix.h"
-#include "Epetra_SerialDenseSolver.h"
-#include "Epetra_SerialDenseVector.h"
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/Displayer.hpp>
 #include <life/lifefem/BCBase.hpp>
 #include <life/lifefem/BCFunction.hpp>
 #include <life/lifefem/BCManage.hpp>
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/shared_array.hpp>
+#include "Epetra_SerialDenseMatrix.h"
+#include "Epetra_SerialDenseSolver.h"
+#include "Epetra_SerialDenseVector.h"
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV {
 
@@ -104,8 +112,8 @@ public:
     typedef Epetra_SerialDenseSolver        solver_Type;
     typedef Epetra_SerialDenseMatrix        matrix_Type;
     typedef Epetra_SerialDenseVector        vector_Type;
-    typedef boost::shared_ptr<matrix_Type>  matrix_ptrType;
-    typedef boost::shared_ptr<vector_Type>  vector_ptrType;
+    typedef boost::shared_ptr<matrix_Type>  matrixPtr_Type;
+    typedef boost::shared_ptr<vector_Type>  vectorPtr_Type;
 
 
     /*! @enum BCInterpolation_Type
@@ -167,7 +175,7 @@ public:
      \param component The component of the vector function
      \return The selected component of the vector function evaluated in (t,x,y,z)
      */
-    Real vectFct( const Real& t,
+    Real interpolatedDataFunction( const Real& t,
                   const Real& x,
                   const Real& y,
                   const Real& z,
@@ -185,7 +193,7 @@ public:
     /*!
      @param filename The filename for the data sites and data values
      */
-    void readData(const char *fileName);
+    void readData(const std::string *fileName);
 
     //! Export the interpolation matrix for debugging purposes
     /*!
@@ -198,9 +206,15 @@ public:
     //! @name Set Methods
     //@{
 
-    void setInterpolationMethod(BCInterpolationMethod bcim);
+    void setInterpolationMethod(BCInterpolationMethod bcim)
+    {
+        M_interpolationMethod = bcim;
+    }
 
-    void setFilteringLevel(Int level);
+    void setFilteringLevel(Int level)
+    {
+        M_filteringLevel = level;
+    }
 
     //! @name Get Methods
     //@{
@@ -231,9 +245,9 @@ private:
 
     BCInterpolationMethod M_interpolationMethod;
 
-    BCDataInterpolator_point* M_dataSites;
-    BCDataInterpolator_point* M_dataValues;
-    BCDataInterpolator_point* M_dataValues_timeSamples;
+    boost::shared_array<BCDataInterpolator_point> M_dataSites;
+    boost::shared_array<BCDataInterpolator_point> M_dataValues;
+    boost::shared_array<BCDataInterpolator_point> M_dataValues_timeSamples;
 
     UInt M_nofControlPoints;
 
@@ -259,7 +273,7 @@ private:
     void formRBFvectors();
     void interpolateDataValuesInTime( const Real t );
 
-    Int getIndexInTime(const Int dataSite, const Int timeInstant) const
+    Int indexInTime(const Int dataSite, const Int timeInstant) const
     {
         return M_nofControlPoints * timeInstant + dataSite;
     }
