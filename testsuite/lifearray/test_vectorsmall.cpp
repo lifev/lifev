@@ -32,7 +32,7 @@ Simple VectorSmall class test
 
 
 /**
-   @file test_barepoint.cpp
+   @file test_vectorsmall.cpp
    @author A. Cervone <ant.cervone@gmail.com>
    @date 2011-06-15
 */
@@ -53,26 +53,59 @@ using namespace LifeV;
 int main()
 {
 
-  Vector3D v1( 1., 1., 2. ), v2( 0., 1., 0. ), v3;
+    // test for dim = 3
+    Vector3D v1( 1., 1., 2. ), v2( 0., 1., 0. ), v3;
 
-  std::cout << v1              << std::endl << std::endl;
-  std::cout << v2              << std::endl << std::endl;
-  std::cout << v3              << std::endl << std::endl;
-  std::cout << v1[ 0 ]         << std::endl << std::endl;
-  v1 [ 0 ] = 0.;
-  std::cout << v1[ 0 ]         << std::endl << std::endl;
-  std::cout << v1( 0 )         << std::endl << std::endl;
-  v1 ( 0 ) = 1.;
-  std::cout << v1( 0 )         << std::endl << std::endl;
-  std::cout << v1 + v2         << std::endl << std::endl;
-  std::cout << v1 - v2         << std::endl << std::endl;
-  std::cout << 2. * v1         << std::endl << std::endl;
-  std::cout << v1 / 2.         << std::endl << std::endl;
-  std::cout << v1.dot( v2 )    << std::endl << std::endl;
-  std::cout << v1.cross( v2 )  << std::endl << std::endl;
-  std::cout << v1.normalized() << std::endl << std::endl;
-  v1.normalize();
-  std::cout << v1              << std::endl << std::endl;
+    std::cout << v1              << std::endl << std::endl;
+    std::cout << v2              << std::endl << std::endl;
+    std::cout << v3              << std::endl << std::endl;
+    std::cout << v1[ 0 ]         << std::endl << std::endl;
+    v1 [ 0 ] = 0.;
+    std::cout << v1[ 0 ]         << std::endl << std::endl;
+    std::cout << v1( 0 )         << std::endl << std::endl;
+    v1 ( 0 ) = 1.;
+    std::cout << v1( 0 )         << std::endl << std::endl;
+    std::cout << v1 + v2         << std::endl << std::endl;
+    std::cout << v1 - v2         << std::endl << std::endl;
+    std::cout << 2. * v1         << std::endl << std::endl;
+    std::cout << v1 / 2.         << std::endl << std::endl;
+    std::cout << v1.dot( v2 )    << std::endl << std::endl;
+    std::cout << v1.cross( v2 )  << std::endl << std::endl;
+    std::cout << v1.normalized() << std::endl << std::endl;
+    v1.normalize();
+    std::cout << v1              << std::endl << std::endl;
 
-  return 0;
+    MeshVertex v4( 0, 1., 2., 3. );
+    std::cout << castToVector3D ( v4 ) << std::endl << std::endl;
+    std::vector<Real> v5( 3, 1. );
+    std::cout << castToVector3D ( v5 ) << std::endl << std::endl;
+    KN<Real> v6( 3, 2. );
+    std::cout << castToVector3D ( v6 ) << std::endl << std::endl;
+
+
+    // test for dim = 5
+    VectorSmall<5> a,b;
+    for ( UInt i = 0; i < 5; i++ )
+    {
+        a[ i ] = i;
+        b( i ) = 4 - i;
+    }
+
+    std::cout << a              << std::endl << std::endl;
+    std::cout << b              << std::endl << std::endl;
+    std::cout << a + b          << std::endl << std::endl;
+    std::cout << a - b          << std::endl << std::endl;
+    std::cout << 0.5 * a        << std::endl << std::endl;
+    std::cout << b / 2.         << std::endl << std::endl;
+    std::cout << a.dot(b)       << std::endl << std::endl;
+    std::cout << a.normalized() << std::endl << std::endl;
+    b.normalize();
+    std::cout << b              << std::endl << std::endl;
+
+    std::vector<Real> c( 5, 1. );
+    std::cout << castToVectorSmall<5> ( c ) << std::endl << std::endl;
+    KN<Real> d( 5, 2. );
+    std::cout << castToVectorSmall<5> ( d ) << std::endl << std::endl;
+
+    return 0;
 }
