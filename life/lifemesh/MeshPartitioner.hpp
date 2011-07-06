@@ -91,6 +91,7 @@ public:
     //@{
     //! Default empty constructor
     MeshPartitioner();
+
     //! Constructor
     /*!
       This is a non-empty constructor. It takes as parameters the
@@ -104,14 +105,35 @@ public:
       \param interfaceMap - Epetra_Map*
       \param interfaceMapRep - Epetra_Map*
     */
-    MeshPartitioner(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm, Epetra_Map* interfaceMap = 0,
-                  Epetra_Map* interfaceMapRep = 0);
+    MeshPartitioner ( meshPtr_Type &mesh,
+                      boost::shared_ptr<Epetra_Comm>& comm,
+                      Epetra_Map* interfaceMap = 0,
+                      Epetra_Map* interfaceMapRep = 0 );
+
     //! Empty destructor
     virtual ~MeshPartitioner() {}
     //@}
 
     //! \name Public Methods
     //@{
+    //! Partition the mesh.
+    /*!
+      It takes as parameters the unpartitioned mesh (reference),
+      the Epetra_Comm object in use (reference) and pointers to
+      the Epetra interface and repeated interface maps.
+      The method initializes the data members and calls a private method
+      MeshPartitioner::execute which handles the mesh partitioning.
+      @param mesh - Mesh& - the unpartitioned mesh
+      @param _comm - Epetra_Comm& - Epetra communicator object
+      @param interfaceMap - Epetra_Map*
+      @param interfaceMapRep - Epetra_Map*
+      @note This method is meant to be used with the empty constructor.
+    */
+    void doPartition ( meshPtr_Type &mesh,
+                       boost::shared_ptr<Epetra_Comm>& comm,
+                       Epetra_Map* interfaceMap = 0,
+                       Epetra_Map* interfaceMapRep = 0 );
+
     //! To be used with the new constructor.
     /*!
       Loads the parameters of the partitioning process from the simulation data file.
@@ -121,6 +143,7 @@ public:
       \param _comm - Epetra_Comm& - reference of the Epetra communicator used
     */
     void setup(UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm);
+
     //! Call update() method after loading the graph, to rebuild all data structures
     /*!
       This method is to be called after the partitioned graph is LOADED from a HDF5 file.
@@ -129,6 +152,7 @@ public:
       !!! This method should be the first one to be called after loading the graph. !!!
     */
     void update();
+
     //!  Stores a pointer to the unpartitioned mesh in the M_originalMesh data member.
     /*!
       Stores a pointer to the unpartitioned mesh in the M_originalMesh data member.
@@ -138,17 +162,20 @@ public:
     */
     void attachUnpartitionedMesh(meshPtr_Type &mesh, Epetra_Map* interfaceMap = 0,
                                  Epetra_Map* interfaceMapRep = 0);
+
     //! Releases the original unpartitioned mesh
     /*!
       Releases the unpartitioned mesh so that it can be deleted, freeing A LOT of memory
       in some cases.
     */
     void releaseUnpartitionedMesh();
+
     //! Executes the ParMETIS graph partitioning
     /*!
       Executes the ParMETIS graph partitioning
     */
     void doPartitionGraph();
+
     //! Builds the partitioned mesh using the partitioned graph
     /*!
       Builds the partitioned mesh using the partitioned graph
@@ -196,6 +223,10 @@ private:
     MeshPartitioner& operator=(const MeshPartitioner&);
     //! Private Methods
     //@{
+
+    //! Initialize the parameters with default value.
+    void init ();
+
     //! Execute mesh partitioning using the configured MPI processes (online partitioning)
     /*!
       Executed the mesh partitioning using the number of MPI processes as the number of partitions.
@@ -345,45 +376,66 @@ private:
 // Constructors and destructor
 // =================================
 
-template<typename MeshType>
-MeshPartitioner<MeshType>::MeshPartitioner()
+template < typename MeshType >
+MeshPartitioner < MeshType >::
+MeshPartitioner()
 {
-}
+    init ();
+} // constructor
 
-template<typename MeshType>
-MeshPartitioner<MeshType>::MeshPartitioner(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm,
-                                   Epetra_Map* interfaceMap,
-                                   Epetra_Map* interfaceMapRep):
-    M_numPartitions (1),
-    M_comm (comm),
-    M_originalMesh (mesh),
-    M_interfaceMap (interfaceMap),
-    M_interfaceMapRep (interfaceMapRep),
-    M_elementDomains (new graph_Type),
-    M_serialMode (false)
+template < typename MeshType >
+MeshPartitioner < MeshType >::
+MeshPartitioner ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
+                  Epetra_Map* interfaceMap, Epetra_Map* interfaceMapRep)
 {
+    init ();
+    doPartition ( mesh, comm, interfaceMap, interfaceMapRep );
+} // constructor
+
+template < typename MeshType >
+void
+MeshPartitioner < MeshType >::
+init ()
+{
+    M_numPartitions = 1;
+    M_localNodes.resize ( M_numPartitions );
+    M_localEdges.resize ( M_numPartitions );
+    M_localFaces.resize ( M_numPartitions );
+    M_localVolumes.resize ( M_numPartitions );
+    M_repeatedNodeVector.resize ( M_numPartitions );
+    M_repeatedEdgeVector.resize ( M_numPartitions );
+    M_repeatedFaceVector.resize ( M_numPartitions );
+    M_repeatedVolumeVector.resize ( M_numPartitions );
+    M_globalToLocalNode.resize ( M_numPartitions );
+    M_globalToLocalVolume.resize ( M_numPartitions );
+    M_nBoundaryPoints.resize ( M_numPartitions );
+    M_nBoundaryEdges.resize ( M_numPartitions );
+    M_nBoundaryFaces.resize ( M_numPartitions );
+    M_elementDomains.reset ( new graph_Type );
+    M_serialMode = false;
+
+} // init
+
+template < typename MeshType >
+void
+MeshPartitioner < MeshType >::
+doPartition ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
+              Epetra_Map* interfaceMap, Epetra_Map* interfaceMapRep )
+{
+    M_comm = comm;
+    M_originalMesh = mesh;
+    M_interfaceMap = interfaceMap;
+    M_interfaceMapRep = interfaceMapRep;
+
     M_me = M_comm->MyPID();
 
-    meshPtr_Type newMesh (new MeshType);
-    M_meshPartitions.reset(new partMesh_Type(M_numPartitions, newMesh));
+    meshPtr_Type newMesh ( new MeshType );
+    M_meshPartitions.reset ( new partMesh_Type( M_numPartitions, newMesh ) );
     newMesh.reset();
 
-    M_localNodes.resize(1);
-    M_localEdges.resize(1);
-    M_localFaces.resize(1);
-    M_localVolumes.resize(1);
-    M_repeatedNodeVector.resize(1);
-    M_repeatedEdgeVector.resize(1);
-    M_repeatedFaceVector.resize(1);
-    M_repeatedVolumeVector.resize(1);
-    M_globalToLocalNode.resize(1);
-    M_globalToLocalVolume.resize(1);
-    M_nBoundaryPoints.resize(1);
-    M_nBoundaryEdges.resize(1);
-    M_nBoundaryFaces.resize(1);
-
     execute();
-}
+
+} // doPartiton
 
 // =================================
 // Public methods

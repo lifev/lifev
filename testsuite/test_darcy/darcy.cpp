@@ -373,8 +373,11 @@ darcy::run()
                        dataFile( ( Members->discretization_section + "/space_discretization/lz" ).data(), 1. ) );
     }
 
+    // Create the partitioner
+    MeshPartitioner< RegionMesh >  meshPart;
+
     // Partition the mesh using ParMetis
-    MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
+    meshPart.doPartition ( fullMeshPtr, Members->comm );
 
     // Stop chronoReadAndPartitionMesh
     chronoReadAndPartitionMesh.stop();
