@@ -102,7 +102,7 @@ public:
     {};
 
     //! Destructor
-    ~MeshEntity()
+    virtual ~MeshEntity()
     {};
 
     //@}
