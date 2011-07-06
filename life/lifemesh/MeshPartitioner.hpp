@@ -1366,9 +1366,9 @@ void MeshPartitioner<MeshType>::constructFaces()
                 pf->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
             }
 
-            (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACES");
-            (*M_meshPartitions)[i]->setLinkSwitch("FACES_HAVE_ADIACENCY");
         }
+        (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACES");
+        (*M_meshPartitions)[i]->setLinkSwitch("FACES_HAVE_ADIACENCY");
     }
 }
 
