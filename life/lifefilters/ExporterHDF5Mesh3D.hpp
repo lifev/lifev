@@ -71,8 +71,9 @@ public:
     typedef MeshType mesh_Type;
     typedef ExporterHDF5<MeshType> base;
     typedef typename base::meshPtr_Type meshPtr_Type;
-    typedef typename base::vectorRaw_Type vector_Type;
+    typedef typename base::vector_Type    vector_Type;
     typedef typename base::vectorPtr_Type vectorPtr_Type;
+    typedef typename base::exporterData_Type exporterData_Type;
 
     typedef EpetraExt::HDF5 hdf5_Type;
     typedef boost::shared_ptr<hdf5_Type> hdf5Ptr_Type;
@@ -221,15 +222,15 @@ private:
 
 template<typename MeshType>
 ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D(const GetPot& dataFile, meshPtr_Type mesh,
-                                             const std::string& prefix,
-                                             const Int& procId) :
-    base                ( dataFile, mesh, prefix, procId )
+                                                 const std::string& prefix,
+                                                 const Int& procId) :
+        base                ( dataFile, mesh, prefix, procId )
 {
 }
 
 template<typename MeshType>
 ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D(const GetPot& dataFile, const std::string& prefix):
-    base                ( dataFile, prefix )
+        base                ( dataFile, prefix )
 {
 }
 
@@ -239,10 +240,10 @@ ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D(const GetPot& dataFile, const s
 
 template<typename MeshType>
 void ExporterHDF5Mesh3D<MeshType>::addDOFInterface(const interfaceVectorPtr_Type& interfaces,
-                                                 const std::string& type,
-                                                 const Int& firstInterfaceFlag,
-                                                 const Int& secondInterfaceFlag,
-                                                 const boost::shared_ptr<Epetra_Comm>& comm)
+                                                   const std::string& type,
+                                                   const Int& firstInterfaceFlag,
+                                                   const Int& secondInterfaceFlag,
+                                                   const boost::shared_ptr<Epetra_Comm>& comm)
 {
     M_DOFInterfaces.push_back(interfaces);
     M_interfaceTypes.push_back(type);
@@ -257,9 +258,9 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
 {
     if ( this->M_HDF5.get() == 0)
     {
-        if (this->M_listData.size() != 0)
+        if (this->M_dataVector.size() != 0)
         {
-            this->M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->comm()));
+            this->M_HDF5.reset(new hdf5_Type(this->M_dataVector.begin()->storedArrayPtr()->comm()));
         }
         else
         {
@@ -273,7 +274,7 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
 
         if (!this->M_multimesh)
         {
-            if (this->M_listData.size() != 0)
+            if (this->M_dataVector.size() != 0)
             {
                 this->writeGeometry(); // see also writeGeometrymetry
             }
@@ -304,7 +305,7 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
         }
     }
 
-    typedef std::list< ExporterData >::const_iterator Iterator;
+    // typedef typename std::list< exporterData_Type >::const_iterator Iterator;
 
     this->computePostfix();
 
@@ -313,7 +314,7 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
         if (!this->M_procId) std::cout << "  X-  HDF5 post-processing ...        " << std::flush;
         LifeChrono chrono;
         chrono.start();
-        for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+        for (typename base::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
         {
             this->writeVariable(*i);
         }
@@ -743,7 +744,7 @@ void ExporterHDF5Mesh3D<MeshType>::writeGraph()
     // sizes
     partitionSizes.reserve(M_graph->size());
     for (std::vector<std::vector<Int> >::iterator it = M_graph->begin();
-         it != M_graph->end(); ++it)
+            it != M_graph->end(); ++it)
     {
         size = it->size();
         if (size > maxSize)
@@ -1046,7 +1047,7 @@ void ExporterHDF5Mesh3D<MeshType>::writeInterfaces()
 
             Int k = 0;
             for (std::map<UInt, UInt>::const_iterator it = locDofMap.begin();
-                 it != locDofMap.end(); ++it)
+                    it != locDofMap.end(); ++it)
             {
                 firstDOF[k] = it->first;
                 secondDOF[k] = it->second;

@@ -279,10 +279,10 @@ private:
     Real					M_inCycleTime;	  // in cycle time
     Real					M_time;           // time
     Real					M_timeStep; 	  // time step
-    UInt                                     M_timeStepNumber; // iteration number
+    UInt                    M_timeStepNumber; // iteration number
     UInt					M_orderBDF; 	  // order of the time discretization formula
-    Real                                    M_theta;          // TimeAdvanceNewmark parameter
-    Real                                    M_gamma;           // TimeAdvanceNewmark parameter
+    Real                    M_theta;          // TimeAdvanceNewmark parameter
+    Real                    M_gamma;          // TimeAdvanceNewmark parameter
 };
 
 } // namespace LifeV

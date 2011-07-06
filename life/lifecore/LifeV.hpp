@@ -95,6 +95,16 @@
 #include <string>
 #include <limits>
 
+// deprecated attribute for LifeV functions
+// the macro is needed to avoid problems with compilers other than gcc
+// other compiler specific implementation of the deprecated attribute can be
+// added with #elif defined macros
+#ifdef __GNUC__
+#define LIFEV_DEPRECATED( func ) func __attribute__ ((deprecated))
+#else
+#define LIFEV_DEPRECATED( func ) func
+#endif
+
 #include <life/lifecore/LifeAssert.hpp>
 
 namespace LifeV
@@ -136,6 +146,7 @@ namespace LifeV
   -# \c UInt an alias to uint32_type used for adressing
   -# \c ID an alias to id_type used to identify local numbering or components
   -# \c size_type an alias to size_t used as indices for arrays, vectors or matrices
+  -# \c flag_Type an alias to uint32_type used for boolean flags
 
 */
 
@@ -163,6 +174,48 @@ typedef uint32_type UInt;
 //! IDs
 typedef uint32_type ID;
 
+//! bit flag with up to 32 different flags
+typedef uint32_type flag_Type;
+
+// flag related free functions
+namespace Flag
+{
+//! returns true if all byte-flags common set in refFlag are also set in inputFlag
+inline bool testAllSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return ( inputFlag  & refFlag ) == refFlag;
+}
+
+//! returns true if at least one flag set in refFlag is set in inputFlag
+inline bool testOneSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return inputFlag  & refFlag;
+}
+
+//! turns on the refFlag active bits in inputFlag
+inline flag_Type turnOn  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return inputFlag  | refFlag;
+}
+
+//! turns off the refFlag active bits in inputFlag
+inline flag_Type turnOff ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return inputFlag  & ~refFlag;
+}
+
+//! switches the refFlag active bits in inputFlag
+inline flag_Type change ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return inputFlag  ^ refFlag;
+}
+
+//! showMe method to print out flag status
+//! the flag is converted to its binary form ( right -> left corresponds to first -> last flag )
+void showMe ( flag_Type const & flag, std::ostream & out );
+
+//end namespace Flag
+}
 // For now only 3 dimensional problems.
 extern const UInt nDimensions;
 

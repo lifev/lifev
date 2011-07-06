@@ -23,15 +23,53 @@
 *******************************************************************************
 */
 //@HEADER
-
-/*!
-    @file
-    @brief
-
-    @author Radu Popescu <radu.popescu@epfl.ch>
-    @date 20-07-2010
-
+/**
+   \file ensightToHdf5.hpp
+   \author  <simone.deparis@epfl.ch>
+   \date 2008-08-08
  */
-#include <string>
 
-bool equalSolutions(const std::string& fileA, const std::string& fileB, int timesteps, double tolerance);
+
+#ifndef __EnsightToHdf5_H
+#define __EnsightToHdf5_H 1
+
+#include <boost/shared_ptr.hpp>
+
+// Didn't know where to put this
+const double Pi = 3.14159265358979323846264338328;
+
+class EnsightToHdf5
+
+{
+public:
+
+
+    /** @name Typedefs
+     */
+    //@{
+
+//    typedef LifeV::Application super;
+
+    //@}
+
+    /** @name Constructors, destructor
+     */
+    //@{
+
+    EnsightToHdf5( int argc,
+                   char** argv );
+
+    ~EnsightToHdf5()
+    {}
+
+    void run();
+
+    //@}
+
+
+private:
+    struct Private;
+    boost::shared_ptr<Private> d;
+};
+
+#endif /* __EnsightToHdf5_H */

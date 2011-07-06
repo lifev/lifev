@@ -52,11 +52,11 @@
     is provided by traits. In particular,
 
     <ul>
-        <li> The MarkerTraits define the basic (compulsory) interface of
+        <li> The EntityFlagStandardPolicy define the basic (compulsory) interface of
         any user defined Marker class.</li>
 
         <li> The Marker is a class template whose template argument is a
-        MarkerTrait, defaulted to MarkerTraits.</li>
+        MarkerTrait, defaulted to EntityFlagStandardPolicy.</li>
 
         <li>A user may change some basic behavior of the Marker class by
         providing a special Traits.</li>
@@ -72,32 +72,29 @@
 namespace LifeV
 {
 
-//! MarkerTraits - Class that defines the basic entities and functions.
+//! entityFlag_Type is the type used to store the geometric entity flags
 /*!
-    @todo Change the name of the class in MarkerTraitsBase
- */
+ *  An entity flag is an integral type that is used to store information about each geometric entity
+ *  belonging to a mesh. In particular, it is the number given by the mesh generator that has
+ *  generated the mesh to identify different portion of the boundary. It mast be convertible with
+ *  an ID type.
+*/
+typedef ID entityFlag_Type;
 
-class MarkerTraits
+//! EntityFlagStandardPolicy - Class that defines the standard policies on EntityFlags
+/*!
+    This class defines NULLFLAG and how to handle ambiguities among entityFlags
+    In particular what to do if a geometric item has to inherit its flag by adjacent items and
+    the flags are different. The policy is passed as template argument to the Marker class.
+ */
+class EntityFlagStandardPolicy
 {
 public:
 
-    //! @name Public Types
-    //@{
-
-    //! entityFlag_Type is the type used to store the geometric entity flags
-    typedef ID entityFlag_Type;
-    // Old typedef to delete
-    typedef ID EntityFlag __attribute__ ((__deprecated__));
-
-    //@}
-
     /*! Nullflag is the value indicating a null flag, i.e a flag not yet
-      set to a usable value
+      set to any usable value
     */
     static const entityFlag_Type S_NULLFLAG;
-
-    static const entityFlag_Type NULLFLAG __attribute__ ((__deprecated__));
-
 
     //! Selects the stronger between two flags
     /*! A dimensional geometric entity G_i may inherit the stronger flag
@@ -129,29 +126,31 @@ public:
 
 //! Marker - Base marker class.
 /*!
-  It stores an integral type, aliased to entityFlag_Type, which may be used
-  for marking a geometric entity. The typical use is to specify
-  boundary conditions or material properties associated with the entity.
-  The actual boundary conditions will be handled in the Dof
-  class. During the creation of a field, the markers are post-processed
-  to furnish the correct boundary conditions.
-  The main interfaces are passed trough the MarkerTraits template argument,
-  which is defaulted to MarkerTraits
+  It stores an object of entityFlag_Type which may be used for marking a geometric entity.
+  The typical use is to specify boundary conditions or material properties associated with
+  the entity. The actual boundary conditions will be handled in the Dof
+  class. During the creation of a field, the markers are processed to furnish the
+  correct boundary conditions.
+  The template argument FlagPolicy defualts to EntityFlagStandardPolicy and it defines the way
+  ambiguities in the flag definition are treated.
 
-  @todo Change the name of the class in MarkerBase
+  Marker is a concrete base class which also implements basic tool to operate on the entityFlag.
+  All geometric entities stored in a mesh derives from it, thus
+  it may be used to extend the capabilities of a goemetric entity, for any purpose.
+
+  The default markers used by RegionMesh are contained in MarkerDefinitions.hpp
+
  */
 
-template <typename MarkerTraits>
+template <typename FlagPolicy=EntityFlagStandardPolicy>
 class Marker
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef typename MarkerTraits::entityFlag_Type entityFlag_Type;
-    // Old typedef to be removed
-    typedef typename MarkerTraits::EntityFlag EntityFlag;
-
+    //! The policy used by this marker
+    typedef FlagPolicy flagPolicy_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -164,12 +163,11 @@ public:
     explicit Marker( entityFlag_Type & p );
 
     //! Copy Constructor
-    Marker( Marker<MarkerTraits> const & markerBase );
+    Marker( Marker<FlagPolicy> const & markerBase );
 
     //! Destructor
     virtual ~Marker()
     {
-        // Nothing to be done
     }
 
     //@}
@@ -189,24 +187,18 @@ public:
     */
     inline bool hasEqualEntityFlag(entityFlag_Type const & flag ) const;
 
-    //! Display method
+    //! Display information about the marker object
     virtual void showMe( std::ostream & output = std::cout ) const;
-
-    //! Helper function that prints a marker Flag
-    std::ostream & __attribute__ ((__deprecated__)) printFlag( entityFlag_Type const f, std::ostream & output ) const;
-
-    //! Helper function that prints "this" marker flag
-    std::ostream & __attribute__ ((__deprecated__)) printFlag( std::ostream & output ) const;
 
     //@}
 
-    //! @name Set Methods
+    //! @name Setters
     //@{
 
-    //! Set marker to given value
+    //! Set marker to the given value
     inline entityFlag_Type setMarker( entityFlag_Type const & flag );
 
-    //! Set marker to given value only if unset
+    //! Set marker to the given value only if unset
     entityFlag_Type updateMarker( entityFlag_Type const & flag );
 
     //! Sets the flag to the stronger flag of two given markers
@@ -231,22 +223,25 @@ public:
      */
     entityFlag_Type setWeakerMarker( entityFlag_Type const & flag );
 
-    //! Put marker to nullflag
+    //! Put marker to NULLFLAG
     inline void unsetMarker(); //const;
-
-    //! Put marker to nullflag
-    inline void __attribute__ ((__deprecated__)) markerUnset() const;
 
     //@}
 
     //! @name Get Methods
     //@{
 
-    //! Extract marker flag
+    //! Extracts the enitytFlag associated to the marked entity
+    /*!
+     * For hystorical reason this method is called marker, while it should be called
+     * entityFlag() instead. Refactoring however would involve changing too many files and it has been
+     * posponed. Just remember that marker() does not return a Marker!
+     */
     inline entityFlag_Type marker() const;
 
-    //! Returns the null flag (cannot be modified)
-    inline entityFlag_Type const & nullFlag() const;
+    //! Returns the null flag
+
+    static entityFlag_Type const & nullFlag();
 
     //@}
 
@@ -254,161 +249,109 @@ protected:
     entityFlag_Type M_flag;
 };
 
-//! MarkerCommon - Contains only typedefs
-
-template
-<class MT>
-class MarkerCommon
-{
-public:
-
-    //! @name Public Types
-    //@{
-
-    typedef MT markerTraits_Type;
-    typedef Marker<MT> pointMarker_Type;
-    typedef Marker<MT> edgeMarker_Type;
-    typedef Marker<MT> faceMarker_Type;
-    typedef Marker<MT> volumeMarker_Type;
-    typedef Marker<MT> regionMarker_Type;
-
-    // Old typedefs to delete
-    typedef MT MarkerTraits;
-    typedef Marker<MT> PointMarker;
-    typedef Marker<MT> EdgeMarker;
-    typedef Marker<MT> FaceMarker;
-    typedef Marker<MT> VolumeMarker;
-    typedef Marker<MT> RegionMarker;
-
-    //@}
-};
 
 
 //  ***********************************************************************************************************
 //                                           IMPLEMENTATION
 //  ***********************************************************************************************************
 
-template <typename MarkerTraits>
-Marker<MarkerTraits>::Marker() : M_flag( MarkerTraits::S_NULLFLAG )
+template <typename FlagPolicy>
+Marker<FlagPolicy>::Marker() : M_flag( FlagPolicy::S_NULLFLAG )
 {
     // nothing to be done here
 }
 
-template <typename MarkerTraits>
-Marker<MarkerTraits>::Marker( entityFlag_Type & flag ) : M_flag( flag )
+template <typename FlagPolicy>
+Marker<FlagPolicy>::Marker( entityFlag_Type & flag ) : M_flag( flag )
 {
     // nothing to be done here
 }
 
-template <typename MarkerTraits>
-Marker<MarkerTraits>::Marker( Marker<MarkerTraits> const & markerBase ) : M_flag( markerBase.marker() )
+template <typename FlagPolicy>
+Marker<FlagPolicy>::Marker( Marker<FlagPolicy> const & markerBase ) : M_flag( markerBase.marker() )
 {
     // nothing to be done here
 }
 
-template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::marker() const
+template <typename FlagPolicy>
+entityFlag_Type Marker<FlagPolicy>::marker() const
 {
     return M_flag;
 }
 
-template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type const & Marker<MarkerTraits>::nullFlag() const
+template <typename FlagPolicy>
+entityFlag_Type const & Marker<FlagPolicy>::nullFlag()
 {
-    return MarkerTraits::S_NULLFLAG;
+    return FlagPolicy::S_NULLFLAG;
 }
 
-template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setMarker( entityFlag_Type const & flag )
+template <typename FlagPolicy>
+entityFlag_Type Marker<FlagPolicy>::setMarker( entityFlag_Type const & flag )
 {
     return M_flag = flag;
 }
 
-template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::updateMarker( entityFlag_Type const & flag )
+template <typename FlagPolicy>
+entityFlag_Type Marker<FlagPolicy>::updateMarker( entityFlag_Type const & flag )
 {
     if ( M_flag == nullFlag() )
         return setMarker( flag );
 }
 
-template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setStrongerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+template <typename FlagPolicy>
+entityFlag_Type Marker<FlagPolicy>::setStrongerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {
-    return setMarker( MarkerTraits::strongerFlag( flag1, flag2 ) );
+    return setMarker( FlagPolicy::strongerFlag( flag1, flag2 ) );
 }
 
-template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setWeakerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+template <typename FlagPolicy>
+entityFlag_Type Marker<FlagPolicy>::setWeakerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {
-    return setMarker( MarkerTraits::weakerFlag( flag1, flag2 ) );
+    return setMarker( FlagPolicy::weakerFlag( flag1, flag2 ) );
 }
 
-template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setStrongerMarker( entityFlag_Type const & flag )
-{
-    if ( isMarkerUnset() )
-        return M_flag = flag;
-    return setMarker( MarkerTraits::strongerFlag( this->marker(), flag ) );
-}
-
-template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setWeakerMarker( entityFlag_Type const & flag )
+template <typename FlagPolicy>
+entityFlag_Type Marker<FlagPolicy>::setStrongerMarker( entityFlag_Type const & flag )
 {
     if ( isMarkerUnset() )
         return M_flag = flag;
-    return setMarker( MarkerTraits::weakerFlag( this->marker(), flag ) );
+    return setMarker( FlagPolicy::strongerFlag( this->marker(), flag ) );
 }
 
-template <typename MarkerTraits>
-bool Marker<MarkerTraits>::isMarkerSet() const
+template <typename FlagPolicy>
+entityFlag_Type Marker<FlagPolicy>::setWeakerMarker( entityFlag_Type const & flag )
+{
+    if ( isMarkerUnset() )
+        return M_flag = flag;
+    return setMarker( FlagPolicy::weakerFlag( this->marker(), flag ) );
+}
+
+template <typename FlagPolicy>
+bool Marker<FlagPolicy>::isMarkerSet() const
 {
     return M_flag != nullFlag();
 }
 
-template <typename MarkerTraits>
-bool Marker<MarkerTraits>::isMarkerUnset() const
+template <typename FlagPolicy>
+bool Marker<FlagPolicy>::isMarkerUnset() const
 {
     return M_flag == nullFlag();
 }
 
-template <typename MarkerTraits>
-void Marker<MarkerTraits>::unsetMarker()
+template <typename FlagPolicy>
+void Marker<FlagPolicy>::unsetMarker()
 {
     M_flag = nullFlag();
 }
 
-template <typename MarkerTraits>
-void Marker<MarkerTraits>::markerUnset() const
+template <typename FlagPolicy>
+bool Marker<FlagPolicy>::hasEqualEntityFlag(entityFlag_Type const & flag) const
 {
-    M_flag = nullFlag();
+    return FlagPolicy::EqualFlags(flag,M_flag);
 }
 
-
-template <typename MarkerTraits>
-bool Marker<MarkerTraits>::hasEqualEntityFlag(entityFlag_Type const & flag) const
-{
-    return MarkerTraits::EqualFlags(flag,M_flag);
-}
-
-template <typename MarkerTraits>
-std::ostream & Marker<MarkerTraits>::printFlag( entityFlag_Type const f, std::ostream & output ) const
-{
-    if ( f == nullFlag() )
-        output << "UNSET";
-    else
-        output << f;
-    return output;
-}
-
-template <typename MarkerTraits>
-std::ostream & Marker<MarkerTraits>::printFlag( std::ostream & output ) const
-{
-    showMe( output );
-    return output;
-}
-
-template <typename MarkerTraits>
-void Marker<MarkerTraits>::showMe( std::ostream & output) const
+template <typename FlagPolicy>
+void Marker<FlagPolicy>::showMe( std::ostream & output) const
 {
 	if ( M_flag == nullFlag() )
 		output << "UNSET";

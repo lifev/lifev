@@ -60,6 +60,7 @@ namespace LifeV
     Note: Documentation by Samuel Quinodoz, implementation anterior
     to the documentation, without name of author.
  */
+
 class MeshEntity
 {
 public:
@@ -217,6 +218,15 @@ private:
   Note: Documentation by Samuel Quinodoz, implementation anterior
   to the documentation, without name of author.
  */
+
+// available bool-flags for different geometric properties
+const flag_Type DEFAULT             ( 0x00 );
+const flag_Type PHYSICAL_BOUNDARY   ( 0x01 );
+const flag_Type INTERNAL_INTERFACE  ( 0x02 );
+const flag_Type SUBDOMAIN_INTERFACE ( 0x04 );
+const flag_Type OVERLAP             ( 0x08 );
+const flag_Type CUTTED              ( 0x10 );
+
 class MeshEntityWithBoundary : public MeshEntity
 {
 public:
@@ -229,13 +239,13 @@ public:
       This constructor calls the empty constructor of MeshEntity and
       sets the boundary indicator to false.
     */
-    MeshEntityWithBoundary() : MeshEntity(), M_boundary( false )
+    MeshEntityWithBoundary() : MeshEntity(), M_flag ( DEFAULT )
     {};
 
     //! Copy constructor
     MeshEntityWithBoundary( const MeshEntityWithBoundary& meshEntityWithBoundary ) :
             MeshEntity( meshEntityWithBoundary ),
-            M_boundary( meshEntityWithBoundary.M_boundary )
+            M_flag ( meshEntityWithBoundary.M_flag )
     {};
 
     //! Specific constructor
@@ -243,12 +253,29 @@ public:
       This is the "full" constructor for this class.
       @param id The identifier to be set for both (global and local) identifiers. Use
       a set method if you want different identifiers.
+      @param flag The value of the bool-flag.
+    */
+    MeshEntityWithBoundary( const ID& id, const flag_Type& flag = DEFAULT ) :
+            MeshEntity( id ),
+            M_flag ( flag )
+    {};
+
+    //! backward-compatible constructor
+    /*!
+      This is the "full" constructor for this class.
+      @param id The identifier to be set for both (global and local) identifiers. Use
+      a set method if you want different identifiers.
       @param boundary The value of the boundary indicator.
     */
-    MeshEntityWithBoundary( const ID& id, bool boundary = false ) :
-            MeshEntity( id ),
-            M_boundary( boundary )
-    {};
+    MeshEntityWithBoundary( const ID& id, const bool& boundary ) :
+            MeshEntity( id )
+    {
+        // NOTE: this is conservative, if PHYSICAL_BOUNDARY = 0x01
+        // this can be done as
+        // M_flag = static_cast<flag_Type> boundary
+        if( boundary ) M_flag = PHYSICAL_BOUNDARY;
+        else           M_flag = DEFAULT;
+    };
 
     //! Destructor
     ~MeshEntityWithBoundary()
@@ -262,14 +289,11 @@ public:
 
 
     //! Display the informations stored by this class
-    void showMe( std::ostream& output = std::cout ) const
+    void showMe ( std::ostream& output = std::cout ) const
     {
-        output << " Global ID : " << id() << " -- " << " Local ID " << localId();
-        if (M_boundary)
-        {
-            output << " -- Boundary ";
-        };
-        output << std::endl;
+      MeshEntity::showMe(output);
+      output << " -- Flags: " << M_flag;
+      output << std::endl;
     };
 
 
@@ -284,11 +308,20 @@ public:
     /*!
       @param boundary The value to be set for the boundary indicator.
     */
-    inline void setBoundary(const bool& boundary)
+    void setBoundary (const bool& boundary)
     {
-        M_boundary = boundary;
+        if ( boundary ) M_flag = Flag::turnOn  ( M_flag, PHYSICAL_BOUNDARY );
+        else            M_flag = Flag::turnOff ( M_flag, PHYSICAL_BOUNDARY );
     };
 
+    //! Set method for the entity flag
+    /*!
+      @param flag The value to be set for the entity flag.
+    */
+    void setFlag ( const flag_Type& flag )
+    {
+        M_flag = flag;
+    };
 
     //@}
 
@@ -297,16 +330,23 @@ public:
 
 
     //! Tells if it is on the boundary
-    inline const bool & boundary() const
+    bool boundary() const
     {
-        return M_boundary;
+        return Flag::testOneSet ( M_flag, PHYSICAL_BOUNDARY );
+    };
+
+
+    //! returns the entity flag
+    const flag_Type & flag() const
+    {
+        return M_flag;
     };
 
 
     //@}
 
 private:
-    bool M_boundary;
+    flag_Type M_flag;
 };
 
 

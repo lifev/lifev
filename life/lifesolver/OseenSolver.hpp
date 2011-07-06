@@ -112,8 +112,8 @@ public:
     typedef typename linearSolver_Type::vector_type     vector_Type;
     typedef boost::shared_ptr<vector_Type>              vectorPtr_Type;
 
-    typedef typename linearSolver_Type::prec_raw_type   preconditioner_Type;
-    typedef typename linearSolver_Type::prec_type       preconditionerPtr_Type;
+    typedef typename linearSolver_Type::prec_raw_type preconditioner_Type;
+    typedef typename linearSolver_Type::prec_type     preconditionerPtr_Type;
 
     //@}
 

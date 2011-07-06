@@ -120,15 +120,6 @@ public:
      * @param gammaPress Real          the stabilization parameter @f$\gamma_p@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\nabla p] \cdot [\nabla q]@f$
      * @param viscosity  Real          the fluid viscosity @f$\nu@f$
      */
-    __attribute__((__deprecated__)) StabilizationIP( const meshPtr_Type&     mesh,
-                     const dof_Type&        dof,
-                     const ReferenceFE&           refFE,
-                     CurrentBoundaryFE&           feBd,
-                     const QuadratureRule&        quadRule,
-                     Real                   gammaBeta = 0,
-                     Real                   gammaDiv = 0,
-                     Real                   gammaPress = 0,
-                     Real                   viscosity = 1 );
 
     virtual ~StabilizationIP() {};
     //@}
@@ -240,50 +231,6 @@ StabilizationIP<MeshType, DofType>::StabilizationIP():
         M_gammaPress( 0.0 ),
         M_viscosity ( 0.0 )
         {}
-
-
-template<typename MeshType, typename DofType>
-StabilizationIP<MeshType, DofType>::StabilizationIP( const meshPtr_Type & mesh,
-                                                     const dof_Type&      dof,
-                                                     const ReferenceFE&    refFE,
-                                                     CurrentBoundaryFE&    feBd,
-                                                     const QuadratureRule& quadRule,
-                                                     Real            gammaBeta,
-                                                     Real            gammaDiv,
-                                                     Real            gammaPress,
-                                                     Real            viscosity ) :
-        M_mesh      ( mesh ),
-        M_dof       ( new dof_Type(dof) ),
-        M_feOnSide1 ( new CurrentFE(refFE, getGeometricMap(*mesh), quadRule) ),
-        M_feOnSide2 ( new CurrentFE(refFE, getGeometricMap(*mesh), quadRule) ),
-        M_feBd      ( &feBd ),
-        M_gammaBeta ( gammaBeta ),
-        M_gammaDiv  ( gammaDiv ),
-        M_gammaPress( gammaPress ),
-        M_viscosity ( viscosity )
-{
-    switch ( M_feOnSide1->nbFEDof() )
-    {
-    case 4:
-        M_faceToPoint = LinearTetra::faceToPoint;
-        break;
-    case 5:
-        M_faceToPoint = LinearTetra::faceToPoint;
-        break;
-    case 10:
-        M_faceToPoint = QuadraticTetra::faceToPoint;
-        break;
-    case 8:
-        M_faceToPoint = LinearHexa::faceToPoint;
-        break;
-    case 20:
-        M_faceToPoint = QuadraticHexa::faceToPoint;
-        break;
-    default:
-//            ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
-        break;
-    }
-}
 
 //=============================================================================
 // Method

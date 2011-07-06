@@ -94,7 +94,9 @@ namespace LifeV
 {
 namespace
 {
-LifeV::VenantKirchhoffSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >(); }
+LifeV::VenantKirchhoffSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >*    createLinearStructure() {
+    return new VenantKirchhoffSolverLinear< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >();
+}
 
 //NOTE: the nonlinear structure solver is still in development in the FSI framework
 //LifeV::VenantKirchhofSolver< LifeV::FSI::mesh_Type, LifeV::SolverAztecOO >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSI::mesh_Type, LifeV::SolverAztecOO >(); }
@@ -186,9 +188,13 @@ public:
 
     typedef FSIOperator::vector_Type                        vector_Type;
     typedef FSIOperator::vectorPtr_Type                     vectorPtr_Type;
+    typedef FSIOperator::mesh_Type                          mesh_Type;
 
     typedef Exporter<FSIOperator::mesh_Type>                filter_type;
     typedef boost::shared_ptr<filter_type>                  filter_ptrtype;
+
+    typedef FESpace<FSIOperator::mesh_Type, MapEpetra>      feSpace_Type;
+    typedef boost::shared_ptr<feSpace_Type>                 feSpacePtr_Type;
 
     /*!
       This routine sets up the problem:
@@ -252,10 +258,10 @@ public:
         {
 #ifdef HAVE_HDF5
             if (exporterType.compare("hdf5") == 0)
-                M_exporterFluid.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Fluid" ) );
+                M_exporterFluid.reset( new ExporterHDF5<mesh_Type > ( dataFile, exporterName+"Fluid" ) );
             else
 #endif
-                M_exporterFluid.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Fluid" ) );
+                M_exporterFluid.reset( new ExporterEnsight<mesh_Type > ( dataFile, exporterName+"Fluid" ) );
 
 
             M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
@@ -263,33 +269,33 @@ public:
             M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(),      M_exporterFluid->mapType() ));
             M_fluidDisp.reset     ( new vector_Type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
 
-            M_exporterFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
-                                          UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
+            M_exporterFluid->addVariable( ExporterData<mesh_Type>::VectorField, "f-velocity",
+                                          M_fsi->FSIOper()->uFESpacePtr(), M_velAndPressure, UInt(0) );
 
-            M_exporterFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
-                                          UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof() ),
-                                          UInt(  M_fsi->FSIOper()->pFESpace().dof().numTotalDof() ) );
+            M_exporterFluid->addVariable( ExporterData<mesh_Type>::ScalarField, "f-pressure",
+                                          M_fsi->FSIOper()->pFESpacePtr(), M_velAndPressure,
+                                          UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof() ) );
 
-            M_exporterFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
-                                          UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
+            M_exporterFluid->addVariable( ExporterData<mesh_Type>::VectorField, "f-displacement",
+                                          M_fsi->FSIOper()->mmFESpacePtr(), M_fluidDisp, UInt(0) );
         }
         if ( M_fsi->isSolid() )
         {
 #ifdef HAVE_HDF5
             if (exporterType.compare("hdf5") == 0)
-                M_exporterSolid.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Solid" ) );
+                M_exporterSolid.reset( new ExporterHDF5<mesh_Type > ( dataFile, exporterName+"Solid" ) );
             else
 #endif
-                M_exporterSolid.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Solid" ) );
+                M_exporterSolid.reset( new ExporterEnsight<mesh_Type > ( dataFile, exporterName+"Solid" ) );
 
             M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
 
             M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
             M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
-            M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
-                                          UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-            M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
-                                          UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+            M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-displacement",
+                                          M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
+            M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-velocity",
+                                          M_fsi->FSIOper()->dFESpacePtr(), M_solidVel, UInt(0) );
         }
 
         bool restart = dataFile("problem/restart",false);
@@ -313,8 +319,8 @@ public:
             }
             if ( M_fsi->isSolid() )
             {
-               M_exporterSolid->import(M_Tstart, M_data->dataSolid()->getdataTime()->timeStep());
-               M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
+                M_exporterSolid->import(M_Tstart, M_data->dataSolid()->getdataTime()->timeStep());
+                M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
             }
         }
         else
@@ -388,11 +394,11 @@ public:
             }
 
             if ( M_fsi->isSolid() )
-	      {
+            {
                 *M_solidDisp = M_fsi->FSIOper()->solid().getDisplacement();
                 *M_solidVel = M_fsi->FSIOper()->solid().getVelocity();
                 M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
-	      }
+            }
 
             std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
 

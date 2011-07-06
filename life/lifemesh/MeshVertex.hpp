@@ -134,14 +134,6 @@ public:
     {
         return M_coordinates.data();
     };
-    //! Returns the pointer to the coordinates vector
-    /*!
-    	@return Pointer to coordinate vector
-     */
-//    Real const * __attribute__ ((__deprecated__)) coor() const
-//    {
-//        return coordinatesArray();
-//    };
 
     //! Returns the reference to the x-coordinate
     /*!
@@ -242,15 +234,6 @@ public:
     {
         return M_coordinates;
     }
-    //! Returns the coordinates vector
-    /*!
-        The method allows to access coordinates and modify them
-    	@return Coordinates array
-     */
-//    boost::array<Real,NDIM>& __attribute__ ((__deprecated__)) coordinate ( void )
-//    {
-//        return coordinates();
-//    }
 
     //@}
 

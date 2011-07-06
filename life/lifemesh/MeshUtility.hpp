@@ -937,8 +937,7 @@ setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
         	inheritPointsWeakerMarker( *edgePtr );
             if ( verbose )
             {
-                logStream << edgePtr->id() << " -> ";
-                edgePtr->printFlag( logStream );
+	      logStream << edgePtr->id() << " -> " << edgePtr->marker();
                 logStream << " ";
                 if ( ++counter % 3 == 0 )
                     logStream << std::endl;
@@ -987,8 +986,7 @@ setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
         	inheritPointsWeakerMarker( *facePtr );
             if ( verbose )
             {
-                logStream << facePtr->id() << " -> ";
-                facePtr->printFlag( logStream );
+	      logStream << facePtr->id() << " -> "<<facePtr->marker();
                 logStream << "\t";
                 if ( ++counter % 3 == 0 )
                     logStream << std::endl;
@@ -1055,8 +1053,8 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
         {
             if ( *isDefinedPointMarkerIterator++ )
             {
-                logStream << pointContainerIterator->id() << " -> ";
-                pointContainerIterator->printFlag( logStream );
+	      logStream << pointContainerIterator->id() << " -> "<< 
+                           pointContainerIterator->marker();
                 logStream << "\t";
                 if ( ++counter % 3 )
                     logStream << std::endl;
@@ -1475,8 +1473,8 @@ bool fixBoundaryFaces( MeshType & mesh,
                 inheritPointsWeakerMarker( *faceContainerIterator );
                 if ( verbose )
                 {
-                    logStream << faceContainerIterator->id() << " -> ";
-                    faceContainerIterator->printFlag( logStream );
+		  logStream << faceContainerIterator->id() << " -> " <<
+                               faceContainerIterator->marker();
                     logStream << " ";
                     if ( ++counter % 3 == 0 )
                         logStream << std::endl;
@@ -1636,8 +1634,7 @@ bool buildFaces( MeshType & mesh,
             {
                 if ( newFaceId % 3 == 0 )
                     logStream << std::endl;
-                logStream << newFaceId << " -> ";
-                face.printFlag( logStream );
+                logStream << newFaceId << " -> "<<face.marker();
                 logStream << " ";
             }
         }
@@ -1897,8 +1894,7 @@ bool buildEdges( MeshType & mesh,
             {
                 if ( newEdgeId % 6 == 0 )
                     logStream << std::endl;
-                logStream << newEdgeId << " -> ";
-                edge.printFlag( logStream );
+                logStream << newEdgeId << " -> "<<edge.marker();
                 logStream << " ";
             }
         }

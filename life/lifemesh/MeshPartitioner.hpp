@@ -140,7 +140,7 @@ public:
                                  Epetra_Map* interfaceMapRep = 0);
     //! Releases the original unpartitioned mesh
     /*!
-      Releases the unpartitioned mesh so that it can be deleted, freein A LOT of memory
+      Releases the unpartitioned mesh so that it can be deleted, freeing A LOT of memory
       in some cases.
     */
     void releaseUnpartitionedMesh();
@@ -619,10 +619,11 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
     M_isOnProc.reset(new std::vector<Int> (*myIsOnProc));
 
     // Lot of communication here!!
-    MPI_Allreduce(&myRepeatedFace[0], &(*M_repeatedFace)[0], myRepeatedFace.size(),
-                  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&(*myIsOnProc)[0], &(*M_isOnProc)[0], myIsOnProc->size(),
-                  MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+    boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> ( M_comm );
+    MPI_Allreduce( &myRepeatedFace[0], &(*M_repeatedFace)[0], myRepeatedFace.size(),
+                  MPI_INT, MPI_SUM, mpiComm->Comm() );
+    MPI_Allreduce( &(*myIsOnProc)[0], &(*M_isOnProc)[0], myIsOnProc->size(),
+                  MPI_INT, MPI_MAX, mpiComm->Comm() );
 }
 
 template<typename MeshType>

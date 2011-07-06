@@ -58,14 +58,14 @@
 #include <Epetra_SerialComm.h>
 #endif
 
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <life/lifecore/LifeV.hpp>
 
 //#include <life/lifealg/newton.hpp>
 
 #include <life/lifesolver/FSIOperator.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV
 {
@@ -245,7 +245,7 @@ private:
     FSISolver& operator=( FSISolver const& );
 
     //Private members
-    FSIOperPtr_Type							M_oper;
+    FSIOperPtr_Type 							M_oper;
 
     dataPtr_Type                                M_data;
 

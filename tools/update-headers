@@ -3,7 +3,7 @@
 findhpp()
 {
 # find life/$1 -name '*.hpp' | xargs -ithehppheader echo "thehppheader \\ "
- find life/$1 -name '*.hpp' | xargs -ithehppheader echo -n "thehppheader "
+ find life/$1 -name '*.hpp' | xargs -I thehppheader echo -n "thehppheader "
 }
 
 cp /dev/null Makefile.headers
@@ -52,7 +52,7 @@ EOF
 echo " done."
 
 
-exit 0;
+# exit 0;
 # Local variables:
 # eval: (add-hook 'write-file-hooks 'time-stamp)
 # time-stamp-start: "timestamp='"

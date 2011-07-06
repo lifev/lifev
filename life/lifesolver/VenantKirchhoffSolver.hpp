@@ -449,11 +449,6 @@ protected:
 
   UInt getDim() const { return M_FESpace->dim(); }
 
-  //Deprecated
-  UInt __attribute__ ((__deprecated__))dim() const
-  { return getDim(); }
-
-
   //!Protected Members
 
   boost::shared_ptr<data_Type>   M_data;
@@ -599,7 +594,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>     
 {
   setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
   M_stiff.reset                      ( new matrix_Type(*M_localMap) );
-  M_massStiff.reset                  ( new matrix_Type(*M_localMap) );
+  //M_massStiff.reset                  ( new matrix_Type(*M_localMap) );
   M_jacobian.reset                   ( new matrix_Type(*M_localMap) );
   M_rhs.reset                        ( new vector_Type(*M_localMap));
   M_f.reset                          ( new vector_Type(*M_localMap));
@@ -658,7 +653,6 @@ void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*st
 
   Real coef;
   coef = (Real) M_data->getdataTime()->timeStep();
-
 
   vector_Type z = *M_disp;
   z             += coef*(*M_vel);
@@ -1072,7 +1066,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, V
 
   if ( getComunicator()->MyPID() == 0 )
     {
-      for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
+      for ( UInt iDof = 0; iDof < nDimensions*getDim(); ++iDof )
 	{
 	  disp[ iDof ] = displacement[ iDof ];
 	  vel [ iDof ] = velocity    [ iDof ];

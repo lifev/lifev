@@ -872,6 +872,7 @@ GetPot::__get_next_token(std::istream& istr)
             continue;              // don't append un-backslashed backslashes
         token += tmp;
     }
+    return token;
 }
 
 inline const std::string
@@ -892,6 +893,7 @@ GetPot::__get_string(std::istream& istr)
 
         str += tmp;
     }
+    return str;
 }
 
 inline const std::string
@@ -918,6 +920,7 @@ GetPot::__get_until_closing_bracket(std::istream& istr)
         }
         str += tmp;
     }
+    return str;
 }
 
 inline std::string
@@ -1329,6 +1332,7 @@ GetPot::nominus_followers(const char* Option)
             result_list.push_back(argv[cursor]);
         }
     }
+    return result_list;
 }
 
 inline std::vector<std::string>

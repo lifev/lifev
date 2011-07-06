@@ -85,7 +85,7 @@ template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh3D
         :
         public MeshEntity,
-        public MC::RegionMarker
+        public MC::regionMarker_Type
 {
 public:
     /** @name Marker Types
@@ -98,17 +98,19 @@ public:
     //! Common Markers
     typedef MC MarkerCommon;
     //! Point Marker
-    typedef typename MC::PointMarker PointMarker;
+    typedef typename MC::pointMarker_Type PointMarker;
     //! Edge Marker
-    typedef typename MC::EdgeMarker EdgeMarker;
+    typedef typename MC::edgeMarker_Type EdgeMarker;
     //! Face Marker
-    typedef typename MC::FaceMarker FaceMarker;
+    typedef typename MC::faceMarker_Type FaceMarker;
     //! Volume Marker
-    typedef typename MC::VolumeMarker VolumeMarker;
+    typedef typename MC::volumeMarker_Type VolumeMarker;
     //! Region Marker
-    typedef typename MC::RegionMarker RegionMarker;
-    //! Region Marker
-    typedef typename MC::RegionMarker Marker;
+    typedef typename MC::regionMarker_Type RegionMarker;
+    //! Region Marker (obsolete)
+    typedef typename MC::regionMarker_Type  Marker;
+    //! Region Marker (generic name)
+     typedef typename MC::regionMarker_Type  marker_Type;
 
     /** @} */ // End of group Marker Types
 
@@ -136,7 +138,7 @@ public:
      */
 
     //! Volume Element (3D)
-    typedef MeshElementMarked3D<GEOSHAPE, MC>  VolumeType;
+    typedef MeshElementMarked3D<VolumeShape, MC>  VolumeType;
     //! Face Element (2D)
     typedef MeshElementMarked2D<FaceShape, MC> FaceType;
     //! Edge Element (1D)
@@ -1684,7 +1686,7 @@ void set_switches_for_regionmesh( Switch & sw );
 template <typename GEOSHAPE, typename MC>
 RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D() :
         MeshEntity(),
-        MC::RegionMarker(),
+        MC::regionMarker_Type(),
         switches(),
         M_numVolumes( 0 ),
         M_numVertices( 0 ),
@@ -2865,9 +2867,7 @@ RegionMesh3D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
     out << "                      RegionMesh3D                " << std::endl;
     out << "**************************************************" << std::endl;
     out << "**************************************************" << std::endl;
-    out << " ID: " << this->id() << " Marker Flag:";
-    this->printFlag( out );
-    out << std::endl;
+    out << " ID: " << this->id() << " Marker Flag: " << this->marker() << std::endl;
     //  out <<"Faces local to  volumes stored: "<<hasLocalFaces()<<std::endl;
     //out <<"Edges local to  volumes stored: "<<hasLocalEdges()<<std::endl;
     //out <<"Edges local to  faces   stored:"<<switches.test("FACEtoEDGE")<<std::endl;
@@ -2899,10 +2899,7 @@ RegionMesh3D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
 
 }
 
-template <class RegionMesh3D>
-extern
-bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
-                  std::ostream & out, std::ostream & err, std::ostream & clog );
+
 
 
 template <typename GEOSHAPE, typename MC>
@@ -3550,6 +3547,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
     // If I have not all faces I need to process them first to keep the correct numbering
 
     // First We check if we have already Faces stored
+    UInt _numOriginalStoredFaces=faceList.size();
     if ( ! faceList.empty() )
     {
         // dump all faces in the container, to maintain the correct numbering
@@ -3557,7 +3555,6 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
         // will reflect the actual face numbering. However, if I want to create
         // the internal faces I need to make sure that I am processing only the
         // boundary ones in a special way.
-        int _numOriginalStoredFaces=faceList.size();
         std::pair<UInt, bool> _check;
         for ( UInt j = 0; j < faceList.size(); ++j )
         {
@@ -3604,7 +3601,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
             M_VToF( j, vid ) = e.first;
             bool _isBound=e.first<this->M_numBFaces;
             // Is the face an extra face (not on the boundary but originally included in the list)?
-            bool _isExtra = (e.first >=this->M_numBFaces  || e.first < _numOriginalStoredFaces);
+            bool _isExtra = (e.first >=this->M_numBFaces  && e.first < _numOriginalStoredFaces);
             if (_isBound)
             {
                 FaceType & _thisFace(faceList[e.first]);
@@ -3812,7 +3809,7 @@ orderMesh(MPI_Comm comm) // serial reordering:
         ics[order[iv]]=pointList[iv].x();
         ipsilon[order[iv]]=pointList[iv].y();
         zeta[order[iv]]=pointList[iv].z();
-        mk[order[iv]]=EntityFlag( pointList[iv].marker() );
+        mk[order[iv]]=static_cast<UInt>( pointList[iv].marker() );
     }
 
     for ( UInt iv = 0; iv < pointList.size(); ++iv )
