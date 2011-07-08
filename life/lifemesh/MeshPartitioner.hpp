@@ -235,7 +235,13 @@ private:
       Other data members are changed indirectly by calling other private methods.
     */
     void execute();
-
+    //! Sets the element parameters according to the type of mesh element used.
+    /*!
+      Sets element parameters (nodes, faces, edges and number of nodes on each
+      face according to the type of mesh element used (Mesh::ElementShape::S_shape).
+      Updates M_elementNodes, M_elementFaces, M_elementEdges, M_faceNodes.
+    */
+    void setElementParameters();
     //! Build the graph vertex distribution vector
     /*!
       Updates the member M_vertexDistribution according to the number of processors to be
@@ -243,7 +249,6 @@ private:
       \param numElements - UInt - number of elements in the mesh
     */
     void distributeElements(UInt numElements);
-
     //! Find faces on the boundaries between domains (FSI)
     /*!
       Identifies the element faces that are common to both the fluid and the solid
@@ -252,7 +257,6 @@ private:
       M_isOnProc.
     */
     void findRepeatedFacesFSI();
-
     //! Partition the connectivity graph using ParMETIS
     /*!
       Partitions the connectivity graph using ParMETIS. The result is stored in the
@@ -264,20 +268,17 @@ private:
       \param numParts - unsigned int - number of partitions for the graph cutting process
     */
     void partitionConnectivityGraph(UInt numParts);
-
     //! Updates the map between elements and processors in FSI
     /*!
       Updates M_elementDomains during FSI modeling.
     */
     void matchFluidPartitionsFSI();
-
     //! Redistribute elements among processes
     /*!
       Redistributes elements among processes, when needed, after the connectivity
       graph partitioning phase. Updates M_elementDomains
     */
     void redistributeElements();
-
     //! Construct local mesh
     /*!
       Constructs the data structures for the local mesh partition.
@@ -303,14 +304,12 @@ private:
       M_meshPartitions.
     */
     void constructEdges();
-
     //! Construct faces
     /*!
       Adds faces to the partitioned mesh object. Updates M_nBoundaryFaces,
       M_meshPartitions.
     */
     void constructFaces();
-
     //! Final setup of local mesh
     /*!
       Updates the partitioned mesh object data members after adding the mesh
@@ -318,7 +317,6 @@ private:
       Updates M_meshPartitions.
     */
     void finalSetup();
-
     //! Create repeated element map
     /*!
       Creates a map of the boundary elements (nodes, edges, faces, volumes).
@@ -416,16 +414,6 @@ init ()
     M_elementDomains.reset ( new graph_Type );
     M_serialMode = false;
 
-    /*
-      Sets element parameters (nodes, faces, edges and number of nodes on each
-      face according to the type of mesh element used (Mesh::ElementShape::S_shape).
-      Updates M_elementNodes, M_elementFaces, M_elementEdges, M_faceNodes.
-    */
-    M_elementNodes = MeshType::ElementShape::S_numVertices;
-    M_elementFaces = MeshType::ElementShape::S_numFaces;
-    M_elementEdges = MeshType::ElementShape::S_numEdges;
-    M_faceNodes    = MeshType::BElementShape::S_numVertices;
-
 } // init
 
 template < typename MeshType >
@@ -459,6 +447,7 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
     M_serialMode = true;
     M_comm = comm;
     M_me = M_comm->MyPID();
+    setElementParameters();
 
     M_numPartitions = numPartitions;
 
@@ -534,72 +523,30 @@ void MeshPartitioner<MeshType>::releaseUnpartitionedMesh()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::doPartitionGraph()
 {
-    // Build graph vertex distribution vector. Graph vertex represents one element
-    // in the mesh.
     distributeElements(M_originalMesh->numElements());
-
-    // In fluid-structure interaction:
-    // *    If the solid mesh is not partitioned the following part won't be
-    //      executed
-    // *    If the solid mesh is partitioned:
-    //      - The fluid is partitioned first
-    //      - The solid mesh partition tries to follow the partition of the fluid
-    //      This is achieved by specifying a weight to some edge of the graph.
-    //      The interface between two processors is the set of the nodes that for
-    //      at least one processor are on the repeated map and not on the unique map.
-    //      That's why the constructor needs both the unique and repeated maps
-    //      on the interface
-
-
-    //////////////////// BEGIN OF SOLID PARTITION PART ////////////////////////
     if (M_interfaceMap)
     {
         findRepeatedFacesFSI();
     }
-    //////////////////// END OF SOLID PARTITION PART ////////////////////////
-
-    // Partition connectivity graph
-    partitionConnectivityGraph(M_comm->NumProc());
-
-    //////////////// BEGIN OF SOLID PARTITION PART ////////////////
+    partitionConnectivityGraph(M_numPartitions);
     if (M_interfaceMap)
     {
         matchFluidPartitionsFSI();
     }
-    ////////////////// END OF SOLID PARTITION PART /////////////////////
-
-
-    // Redistribute elements to appropriate processors before building the
-    // partitioned mesh.
     redistributeElements();
-
-} // doPartitionGraph
+}
 
 template<typename MeshType>
 void MeshPartitioner<MeshType>::doPartitionMesh()
 {
-    // local mesh construction
     constructLocalMesh();
-
-    // nodes construction
     constructNodes();
-
-    // volumes construction
     constructVolumes();
-
-    // edges construction
     constructEdges();
-
-    // faces construction
     constructFaces();
-
-    // final setup
     finalSetup();
-
-    // repeated map creation
     createRepeatedMap();
-
-} // doPartitionMesh
+}
 
 template<typename MeshType>
 void MeshPartitioner<MeshType>::showMe(std::ostream& output) const
@@ -611,6 +558,28 @@ void MeshPartitioner<MeshType>::showMe(std::ostream& output) const
 // =================================
 // Private methods
 // =================================
+
+template<typename MeshType>
+void MeshPartitioner<MeshType>::setElementParameters()
+{
+    switch (MeshType::ElementShape::S_shape)
+    {
+    case HEXA:
+        M_elementNodes = 8;
+        M_elementFaces = 6;
+        M_elementEdges = 12;
+        M_faceNodes    = 4;
+        break;
+    case TETRA:
+        M_elementNodes = 4;
+        M_elementFaces = 4;
+        M_elementEdges = 6;
+        M_faceNodes    = 3;
+        break;
+    default:
+        ERROR_MSG( "Face Shape not implemented in MeshPartitioner" );
+    }
+}
 
 template<typename MeshType>
 void MeshPartitioner<MeshType>::distributeElements(UInt numElements)
@@ -1525,18 +1494,94 @@ void MeshPartitioner<MeshType>::createRepeatedMap()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::execute()
 {
-    // Generate the partitioned graph of the mesh
-    doPartitionGraph ();
+    // Set element parameters (number of nodes, faces, edges and number of nodes
+    // on each face according to the type of mesh element used.
+    setElementParameters();
+
+    // Build graph vertex distribution vector. Graph vertex represents one element
+    // in the mesh.
+    distributeElements(M_originalMesh->numElements());
+
+
+    // In fluid-structure interaction:
+    // *    If the solid mesh is not partitioned the following part won't be
+    //      executed
+    // *    If the solid mesh is partitioned:
+    //      - The fluid is partitioned first
+    //      - The solid mesh partition tries to follow the partition of the fluid
+    //      This is achieved by specifying a weight to some edge of the graph.
+    //      The interface between two processors is the set of the nodes that for
+    //      at least one processor are on the repeated map and not on the unique map.
+    //      That's why the constructor needs both the unique and repeated maps
+    //      on the interface
+
+
+    //////////////////// BEGIN OF SOLID PARTITION PART ////////////////////////
+    if (M_interfaceMap)
+    {
+        findRepeatedFacesFSI();
+    }
+    //////////////////// END OF SOLID PARTITION PART ////////////////////////
+
+    // Partition connectivity graph
+    partitionConnectivityGraph(M_comm->NumProc());
+
+    //////////////// BEGIN OF SOLID PARTITION PART ////////////////
+    if (M_interfaceMap)
+    {
+        matchFluidPartitionsFSI();
+    }
+    ////////////////// END OF SOLID PARTITION PART /////////////////////
+
+
+    // Redistribute elements to appropriate processors before building the
+    // partitioned mesh.
+    redistributeElements();
+
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
 #endif
 
-    // Generate the new partitioned mesh.
-    doPartitionMesh ();
+    // ***********************
+    // local mesh construction
+    // ***********************
+    constructLocalMesh();
 
+    // ******************
+    // nodes construction
+    // ******************
+    constructNodes();
+
+    // ********************
+    // volumes construction
+    // ********************
+    constructVolumes();
+
+    // ******************
+    // edges construction
+    // ******************
+    constructEdges();
+
+    // ******************
+    // faces construction
+    // ******************
+    constructFaces();
+
+    // ******************
+    // final setup
+    // ******************
+    finalSetup();
+
+    // *********************
+    // repeated map creation
+    // *********************
+    createRepeatedMap();
+
+    // ***************************************
     // release the original unpartitioned mesh
     // allowing it to be deleted
+    // ***************************************
     releaseUnpartitionedMesh();
 }
 
