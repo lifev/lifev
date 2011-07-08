@@ -235,13 +235,6 @@ private:
       Other data members are changed indirectly by calling other private methods.
     */
     void execute();
-    //! Sets the element parameters according to the type of mesh element used.
-    /*!
-      Sets element parameters (nodes, faces, edges and number of nodes on each
-      face according to the type of mesh element used (Mesh::ElementShape::S_shape).
-      Updates M_elementNodes, M_elementFaces, M_elementEdges, M_faceNodes.
-    */
-    void setElementParameters();
     //! Build the graph vertex distribution vector
     /*!
       Updates the member M_vertexDistribution according to the number of processors to be
@@ -414,6 +407,16 @@ init ()
     M_elementDomains.reset ( new graph_Type );
     M_serialMode = false;
 
+    /*
+      Sets element parameters (nodes, faces, edges and number of nodes on each
+      face according to the type of mesh element used (Mesh::ElementShape::S_shape).
+      Updates M_elementNodes, M_elementFaces, M_elementEdges, M_faceNodes.
+    */
+    M_elementNodes = MeshType::ElementShape::S_numVertices;
+    M_elementFaces = MeshType::ElementShape::S_numFaces;
+    M_elementEdges = MeshType::ElementShape::S_numEdges;
+    M_faceNodes    = MeshType::BElementShape::S_numVertices;
+
 } // init
 
 template < typename MeshType >
@@ -447,7 +450,6 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
     M_serialMode = true;
     M_comm = comm;
     M_me = M_comm->MyPID();
-    setElementParameters();
 
     M_numPartitions = numPartitions;
 
@@ -539,12 +541,40 @@ void MeshPartitioner<MeshType>::doPartitionGraph()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::doPartitionMesh()
 {
+
+    // ***********************
+    // local mesh construction
+    // ***********************
     constructLocalMesh();
+
+    // ******************
+    // nodes construction
+    // ******************
     constructNodes();
+
+    // ********************
+    // volumes construction
+    // ********************
     constructVolumes();
+
+    // ******************
+    // edges construction
+    // ******************
     constructEdges();
+
+    // ******************
+    // faces construction
+    // ******************
     constructFaces();
+
+    // ******************
+    // final setup
+    // ******************
     finalSetup();
+
+    // *********************
+    // repeated map creation
+    // *********************
     createRepeatedMap();
 }
 
@@ -558,28 +588,6 @@ void MeshPartitioner<MeshType>::showMe(std::ostream& output) const
 // =================================
 // Private methods
 // =================================
-
-template<typename MeshType>
-void MeshPartitioner<MeshType>::setElementParameters()
-{
-    switch (MeshType::ElementShape::S_shape)
-    {
-    case HEXA:
-        M_elementNodes = 8;
-        M_elementFaces = 6;
-        M_elementEdges = 12;
-        M_faceNodes    = 4;
-        break;
-    case TETRA:
-        M_elementNodes = 4;
-        M_elementFaces = 4;
-        M_elementEdges = 6;
-        M_faceNodes    = 3;
-        break;
-    default:
-        ERROR_MSG( "Face Shape not implemented in MeshPartitioner" );
-    }
-}
 
 template<typename MeshType>
 void MeshPartitioner<MeshType>::distributeElements(UInt numElements)
@@ -1480,9 +1488,6 @@ void MeshPartitioner<MeshType>::createRepeatedMap()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::execute()
 {
-    // Set element parameters (number of nodes, faces, edges and number of nodes
-    // on each face according to the type of mesh element used.
-    setElementParameters();
 
     // Build graph vertex distribution vector. Graph vertex represents one element
     // in the mesh.
@@ -1529,40 +1534,7 @@ void MeshPartitioner<MeshType>::execute()
     Debug(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
 #endif
 
-    // ***********************
-    // local mesh construction
-    // ***********************
-    constructLocalMesh();
-
-    // ******************
-    // nodes construction
-    // ******************
-    constructNodes();
-
-    // ********************
-    // volumes construction
-    // ********************
-    constructVolumes();
-
-    // ******************
-    // edges construction
-    // ******************
-    constructEdges();
-
-    // ******************
-    // faces construction
-    // ******************
-    constructFaces();
-
-    // ******************
-    // final setup
-    // ******************
-    finalSetup();
-
-    // *********************
-    // repeated map creation
-    // *********************
-    createRepeatedMap();
+    doPartitionMesh();
 
     // ***************************************
     // release the original unpartitioned mesh
