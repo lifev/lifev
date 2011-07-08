@@ -1176,12 +1176,19 @@ void MeshPartitioner<MeshType>::constructNodes()
             }
 
             pp = &(*M_meshPartitions)[i]->addPoint(boundary);
-            *pp = M_originalMesh->point( *it );
+            pp->setMarker(M_originalMesh->point(*it).marker());
 
-            pp->setLocalId( inode );
+            pp->x() = M_originalMesh->point(*it).x();
+            pp->y() = M_originalMesh->point(*it).y();
+            pp->z() = M_originalMesh->point(*it).z();
 
-            (*M_meshPartitions)[i]->localToGlobalNode().insert(std::make_pair( pp->localId(), pp->id() ));
-            (*M_meshPartitions)[i]->globalToLocalNode().insert(std::make_pair( pp->id(), pp->localId() ));
+            UInt id = M_originalMesh->point(*it).id();
+
+            pp->setId(id);
+            pp->setLocalId(inode);
+
+            (*M_meshPartitions)[i]->localToGlobalNode().insert(std::make_pair(inode, id));
+            (*M_meshPartitions)[i]->globalToLocalNode().insert(std::make_pair(id, inode));
         }
     }
 }
@@ -1207,10 +1214,10 @@ void MeshPartitioner<MeshType>::constructVolumes()
         for (it = M_localVolumes[i].begin(); it != M_localVolumes[i].end(); ++it, ++count)
         {
             pv = &((*M_meshPartitions)[i]->addVolume());
-            *pv = M_originalMesh->volume( *it );
-            pv->setLocalId( count );
+            pv->setId (M_originalMesh->volume(*it).id());
+            pv->setLocalId(count);
 
-            M_globalToLocalVolume[i].insert(std::make_pair( pv->id(), pv->localId() ) );
+            M_globalToLocalVolume[i].insert(std::make_pair(M_originalMesh->volume(*it).id(), count));
 
             for (ID id = 0; id < M_elementNodes; ++id)
             {
@@ -1221,6 +1228,10 @@ void MeshPartitioner<MeshType>::constructVolumes()
                 im = M_globalToLocalNode[i].find(inode);
                 pv->setPoint(id, (*M_meshPartitions)[i]->pointList( (*im).second ));
             }
+
+            Int ibc = M_originalMesh->volume(*it).marker();
+
+            pv->setMarker(entityFlag_Type( ibc ));
         }
     }
 }
@@ -1253,8 +1264,8 @@ void MeshPartitioner<MeshType>::constructEdges()
             }
 
             pe = &(*M_meshPartitions)[i]->addEdge(boundary);
-            *pe = M_originalMesh->edge( *is );
 
+            pe->setId (M_originalMesh->edge(*is).id());
             pe->setLocalId(count);
 
             for (ID id = 0; id < 2; ++id)
@@ -1266,6 +1277,7 @@ void MeshPartitioner<MeshType>::constructEdges()
                 im = M_globalToLocalNode[i].find(inode);
                 pe->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
             }
+            pe->setMarker(M_originalMesh->edge(*is).marker());
         }
     }
 }
@@ -1298,9 +1310,9 @@ void MeshPartitioner<MeshType>::constructFaces()
             }
 
             pf =  &(*M_meshPartitions)[i]->addFace(boundary);
-            *pf = M_originalMesh->face( *is );
 
-            pf->setLocalId( count );
+            pf->setId (M_originalMesh->face(*is).id());
+            pf->setLocalId(count);
 
             Int elem1 = M_originalMesh->face(*is).firstAdjacentElementIdentity();
             Int elem2 = M_originalMesh->face(*is).secondAdjacentElementIdentity();
@@ -1368,6 +1380,8 @@ void MeshPartitioner<MeshType>::constructFaces()
                 im = M_globalToLocalNode[i].find(inode);
                 pf->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
             }
+
+            pf->setMarker(M_originalMesh->face(*is).marker());
 
             (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACES");
             (*M_meshPartitions)[i]->setLinkSwitch("FACES_HAVE_ADIACENCY");
