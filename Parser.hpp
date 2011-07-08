@@ -31,7 +31,7 @@
  *  @date 07-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
- *  @contributor Gilles Fourestey  <gilles.fourestey@epfl.ch>
+ *  @contributor Gilles Fourestey <gilles.fourestey@epfl.ch>
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
@@ -39,6 +39,7 @@
 #define Parser_H 1
 
 #include <life/lifecore/LifeDebug.hpp>
+
 #include <lifemc/lifecore/ParserDefinitions.hpp>
 #include <lifemc/lifecore/ParserSpiritGrammar.hpp>
 
@@ -47,9 +48,32 @@ namespace LifeV
 
 //! Parser - A string parser for algebraic expressions
 /*!
- *  @author(s) Cristiano Malossi, Gilles Fourestey
+ *  @author Cristiano Malossi
  *
- *  See \c ParserSpiritGrammar class for more details.
+ *  \c Parser is a general interface class for \c LifeV algebraic parsers.
+ *  At the present time it works only with \c boost::spirit::qi.
+ *
+ *  <b>EXAMPLE - HOW TO USE</b>
+ *
+ *  The syntax is very simple:
+ *
+ *  <CODE>
+ *  Parser parser;<BR>
+ *  parser.setString( "-sqrt(4)+1*2" );<BR>
+ *  Real result = parser.evaluate();<BR>
+ *  </CODE>
+ *
+ *  You can change the string at any time:
+ *
+ *  <CODE>
+ *  parser.setString( "c=2; [0., c, c*c, c*c*c]" );<BR>
+ *  Real result0 = parser.evaluate(0); // 0<BR>
+ *  Real result1 = parser.evaluate(1); // c<BR>
+ *  Real result2 = parser.evaluate(2); // c*c<BR>
+ *  Real result3 = parser.evaluate(3); // c*c*c<BR>
+ *  </CODE>
+ *
+ *  See \c ParserSpiritGrammar class for more details on the expression syntax.
  */
 class Parser
 {
@@ -112,12 +136,12 @@ public:
      */
     const Real& evaluate( const ID& id = 0 );
 
-    /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
+    /*! Count how many substrings are present in the string (utility for BCInterfaceFunction)
      *
      * @param substring string to find
      * @return number of substring
      */
-    UInt countSubstring( const std::string& substring );
+    UInt countSubstring( const std::string& substring ) const;
 
     //! Clear all the variables.
     void clearVariables();

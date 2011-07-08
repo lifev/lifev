@@ -31,7 +31,7 @@
  *  @date 07-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
- *  @contributor Gilles Fourestey  <gilles.fourestey@epfl.ch>
+ *  @contributor Gilles Fourestey <gilles.fourestey@epfl.ch>
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
@@ -65,7 +65,7 @@ Parser::Parser( const std::string& string ) :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5030 ) << "Parser::Parser( string, applyRules )"<< "\n";
+    Debug( 5030 ) << "Parser::Parser( string )"<< "\n";
 #endif
 
     M_calculator.setDefaultVariables();
@@ -116,16 +116,15 @@ Parser::evaluate( const ID& id )
             qi::phrase_parse( start, end, M_calculator, ascii::space, M_results );
 #else
             std::cout << "!!! ERROR: Boost version < 1.41 !!!" << std::endl;
-            // This generate an error ---------
+            // This block generates a segmentation fault
             Int *a = new Int(0);
             Int *b;
             b = a;
             delete a;
             delete b;
-            // --------------------------------
+            // ----------------------------------------
 #endif
         }
-
         M_evaluate = false;
     }
 
@@ -137,9 +136,9 @@ Parser::evaluate( const ID& id )
 }
 
 UInt
-Parser::countSubstring( const std::string& substring )
+Parser::countSubstring( const std::string& substring ) const
 {
-    UInt count( 0 );
+    UInt counter( 0 );
     std::string::size_type position( 0 );
 
     for ( ;; )
@@ -149,11 +148,11 @@ Parser::countSubstring( const std::string& substring )
         if ( position == std::string::npos )
             break;
 
-        ++count;
+        ++counter;
         position += substring.length(); // start next search after this substring
     }
 
-    return count;
+    return counter;
 }
 
 void
@@ -171,7 +170,7 @@ Parser::setString( const std::string& string, const std::string& stringSeparator
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5030 ) << "Parser::setString:          strings: " << string << "\n";
+    Debug( 5030 ) << "Parser::setString         strings: " << string << "\n";
 #endif
 
     M_strings.clear();
@@ -193,7 +192,7 @@ Parser::setVariable( const std::string& name, const Real& value )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5030 ) << "Parser::setVariable    variables[" << name << "]: " << value << "\n";
+    Debug( 5030 ) << "Parser::setVariable       variables[" << name << "]: " << value << "\n";
 #endif
 
     M_calculator.setVariable( name, value);
@@ -209,7 +208,7 @@ Parser::variable( const std::string& name )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5030 ) << "Parser::variable    variables[" << name << "]: " << M_calculator.variable( name ) << "\n";
+    Debug( 5030 ) << "Parser::variable          variables[" << name << "]: " << M_calculator.variable( name ) << "\n";
 #endif
 
     return M_calculator.variable( name );

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the Parser grammar
+ *  @brief File containing the Boost Spirit parser grammar
  *
  *  @date 05-02-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -42,7 +42,37 @@
 namespace LifeV
 {
 
-#ifdef HAVE_BOOST_SPIRIT_QI
+#ifndef HAVE_BOOST_SPIRIT_QI
+
+//! ParserSpiritGrammar - An empty implementation for boost version < 1.41
+template < typename IteratorType = std::string::const_iterator, typename ResultsType = std::vector < Real > >
+class ParserSpiritGrammar
+{
+public:
+
+    typedef IteratorType                                        iterator_Type;
+    typedef boost::iterator_range< iterator_Type >              iteratorRange_Type;
+    typedef ResultsType                                         results_Type;
+
+    ParserSpiritGrammar() : M_real(0.) {}
+    ParserSpiritGrammar( const ParserSpiritGrammar& ) : M_real(0.) {}
+    ~ParserSpiritGrammar() {}
+
+    ParserSpiritGrammar& operator=( const ParserSpiritGrammar& ) { return *this; }
+
+    void clearVariables() {}
+
+    void setDefaultVariables() {}
+    void setVariable( const std::string&, const Real& ) {}
+
+    Real& variable( const std::string& ) { return M_real; }
+
+private:
+
+    Real M_real;
+};
+
+#else
 
 //! ParserSpiritGrammar - A string parser grammar based on \c boost::spirit::qi
 /*!
@@ -66,7 +96,9 @@ namespace LifeV
  *
  *  To evaluate function f(x,y,z,t), we use this syntax:
  *
+ *  <CODE>
  *  string = "a=5.12345 ; b=9.999999 ; (a*b*x, a/b*sqrt(x^2 + y^2), b*t)"
+ *  </CODE>
  *
  *  where semicolons (";") separate constants and commas (",") separate output functions.
  *
@@ -462,63 +494,6 @@ ParserSpiritGrammar< IteratorType, ResultsType >::setVariable( const std::string
     else
         M_variable.add( name, value );
 }
-
-//qi::rule< IteratorType, double(double), ascii::space_type > Power, M_multiplyDivide, M_plusMinus, M_compare;
-/*
-        M_expression
-            =   ExpressionLevel_1                          [qi::_val = qi::_1]
-            >> *M_plusMinus(qi::_val)                        [qi::_val = qi::_1]
-        ;
-
-        ExpressionLevel_1
-            =   M_element                                    [qi::_val = qi::_1]
-            >> *M_multiplyDivide(qi::_val)                   [qi::_val = qi::_1]
-        ;
-
-        M_plusMinus
-            =   qi::eps(qi::_val = qi::_r1)
-            >>  (
-                qi::lit('+') >> ExpressionLevel_1          [qi::_val += qi::_1]
-            |   qi::lit('-') >> ExpressionLevel_1          [qi::_val -= qi::_1]
-                )
-        ;
-
-        M_multiplyDivide
-            =   qi::eps(qi::_val = qi::_r1)
-            >>  (
-                qi::lit('*') >> M_element                    [qi::_val *= qi::_1]
-            |   qi::lit('/') >> M_element                    [qi::_val /= qi::_1]
-                )
-        ;
-*/
-
-#else
-
-//! ParserSpiritGrammar - An empty implementation for boost version < 1.41
-template < typename IteratorType = std::string::const_iterator, typename ResultsType = std::vector < Real > >
-class ParserSpiritGrammar
-{
-public:
-
-    typedef IteratorType                                        iterator_Type;
-    typedef boost::iterator_range< iterator_Type >              iteratorRange_Type;
-    typedef ResultsType                                         results_Type;
-
-    ParserSpiritGrammar() : M_real(0.) {}
-    ParserSpiritGrammar( const ParserSpiritGrammar& ) : M_real(0.) {}
-    ~ParserSpiritGrammar() {}
-
-    ParserSpiritGrammar& operator=( const ParserSpiritGrammar& ) { return *this; }
-
-    void clearVariables() {}
-
-    void setDefaultVariables() {}
-    void setVariable( const std::string&, const Real& ) {}
-
-    Real& variable( const std::string& ) { return M_real; }
-
-    Real M_real;
-};
 
 #endif /* HAVE_BOOST_SPIRIT_QI */
 
