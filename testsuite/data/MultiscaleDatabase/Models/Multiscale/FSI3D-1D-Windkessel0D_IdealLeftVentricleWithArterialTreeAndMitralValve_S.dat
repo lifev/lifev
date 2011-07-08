@@ -34,7 +34,7 @@ algorithm = '       Broyden             Default'
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
           200       FSI3D               IdealLeftVentricle_MonolithicGE
-            0       OneDimensional      LeftAtrium
+            0       Windkessel0D        Terminal_LeftAtrium
             1       OneDimensional      ReymondStergiopulos2009_001
             2       OneDimensional      ReymondStergiopulos2009_002
             3       OneDimensional      ReymondStergiopulos2009_003
@@ -207,8 +207,8 @@ mpiGroups = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
-             199    BoundaryCondition   Stress_Atrium                   0               0
-             200    FlowRateValve       Lagrange1                       0,200           1,0
+             199    BoundaryCondition   Stress_Atrium                   0               1
+             200    FlowRateValve       Lagrange1                       0,200           0,0
              201    FlowRateValve       Lagrange1                       200,1           1,0
                2    Stress              Lagrange1                       95,96,97,1      0,0,0,1
                3    Stress              Lagrange1                       98,99,97        0,0,1
