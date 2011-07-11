@@ -33,7 +33,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/LifeV.hpp>
-#include <lifemc/lifesolver/FSIMonolithic.hpp>
+#include <life/lifesolver/FSIMonolithic.hpp>
 
 namespace LifeV
 {

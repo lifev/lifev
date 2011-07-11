@@ -37,7 +37,7 @@
 #ifndef _MONOLITHICGI_HPP
 #define _MONOLITHICGI_HPP
 
-#include <lifemc/lifesolver/FSIMonolithic.hpp>
+#include <life/lifesolver/FSIMonolithic.hpp>
 
 namespace LifeV
 {

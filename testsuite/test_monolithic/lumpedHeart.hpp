@@ -46,7 +46,7 @@
 #include <life/lifesolver/FSIOperator.hpp>
 
 // Mathcard includes
-#include <lifemc/lifesolver/BCInterface3D.hpp>
+#include <life/lifesolver/BCInterface3D.hpp>
 
 namespace LifeV
 {

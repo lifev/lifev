@@ -70,9 +70,9 @@
 
 #include <life/lifecore/LifeV.hpp>
 
-#include <lifemc/lifealg/PreconditionerComposed.hpp>
+#include <life/lifealg/PreconditionerComposed.hpp>
 
-#include <lifemc/lifesolver/MonolithicBlockComposed.hpp>
+#include <life/lifesolver/MonolithicBlockComposed.hpp>
 
 namespace LifeV {
 

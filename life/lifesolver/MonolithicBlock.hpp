@@ -48,7 +48,7 @@
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/BCManage.hpp>
 
-#include <lifemc/lifealg/ComposedOperator.hpp>
+#include <life/lifealg/ComposedOperator.hpp>
 
 
 namespace LifeV {

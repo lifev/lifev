@@ -39,7 +39,7 @@
 #define ROBININTERFACE_H 1
 
 #include <life/lifecore/LifeV.hpp>
-#include <lifemc/lifesolver/MonolithicBlock.hpp>
+#include <life/lifesolver/MonolithicBlock.hpp>
 
 #include <life/lifearray/MatrixEpetra.hpp>
 

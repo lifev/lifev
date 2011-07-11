@@ -56,13 +56,13 @@
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
 
-#include <lifemc/lifealg/PreconditionerComposed.hpp>
-#include <lifemc/lifealg/ComposedOperator.hpp>
+#include <life/lifealg/PreconditionerComposed.hpp>
+#include <life/lifealg/ComposedOperator.hpp>
 #ifdef HAVE_TRILINOS_ANASAZI
 #include <lifemc/lifealg/EigenSolver.hpp>
 #endif
 
-#include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
+#include <life/lifesolver/MonolithicBlockMatrix.hpp>
 
 namespace LifeV
 {

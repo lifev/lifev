@@ -98,7 +98,7 @@
 
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
-#include <lifemc/lifesolver/FSIMonolithicGI.hpp>
+#include <life/lifesolver/FSIMonolithicGI.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
 #include <life/lifefilters/ExporterEmpty.hpp>

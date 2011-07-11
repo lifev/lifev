@@ -47,8 +47,8 @@
 #include "life/lifefem/BCHandler.hpp"
 
 // Mathcard includes
-#include "lifemc/lifesolver/FSIMonolithicGE.hpp"
-#include "lifemc/lifesolver/FSIMonolithicGI.hpp"
+#include "life/lifesolver/FSIMonolithicGE.hpp"
+#include "life/lifesolver/FSIMonolithicGI.hpp"
 
 #include "flowConditions.hpp"
 //#include "lumpedHeart.hpp"

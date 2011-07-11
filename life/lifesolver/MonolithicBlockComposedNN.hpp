@@ -38,7 +38,7 @@
 #ifndef COMPOSEDNN_H
 #define COMPOSEDNN_H 1
 
-#include <lifemc/lifesolver/MonolithicBlockComposed.hpp>
+#include <life/lifesolver/MonolithicBlockComposed.hpp>
 
 namespace LifeV
 {

@@ -26,7 +26,7 @@
 
 #include <life/lifecore/LifeV.hpp>
 
-#include <lifemc/lifesolver/MonolithicRobinInterface.hpp>
+#include <life/lifesolver/MonolithicRobinInterface.hpp>
 
 namespace LifeV
 {
