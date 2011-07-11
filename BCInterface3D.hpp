@@ -421,7 +421,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDataInterpolator()
 {
     // Directional base
     bcFunctionDataInterpolatorPtr_Type dataInterpolatorBase( new bcFunctionDataInterpolator_Type() );
-    dataInterpolatorBase->readData( this->M_data.baseString().c_str() );
+    dataInterpolatorBase->readData( this->M_data.baseString() );
     M_vectorDataInterpolator.push_back( dataInterpolatorBase );
 }
 
