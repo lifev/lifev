@@ -195,13 +195,12 @@ void BCDataInterpolator::showMe( bool verbose,
     }
 }
 
-void BCDataInterpolator::readData( const std::string *fileName )
+void BCDataInterpolator::readData( const std::string& fileName )
 {
-    char *fileName_c = (char*)fileName->c_str();
     std::ifstream fin;
     UInt RDIM;
 
-    fin.open( fileName_c );
+    fin.open( fileName.c_str() );
 
     if ( !fin.fail() )
     {

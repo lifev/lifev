@@ -193,7 +193,7 @@ public:
     /*!
      @param filename The filename for the data sites and data values
      */
-    void readData(const std::string *fileName);
+    void readData( const std::string& fileName );
 
     //! Export the interpolation matrix for debugging purposes
     /*!
