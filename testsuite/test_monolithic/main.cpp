@@ -107,7 +107,7 @@
 #endif
 
 // Mathcard includes
-#include <lifemc/lifesolver/FSIMonolithicGI.hpp>
+#include <life/lifesolver/FSIMonolithicGI.hpp>
 
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"

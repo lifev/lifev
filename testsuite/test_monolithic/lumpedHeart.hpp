@@ -46,7 +46,7 @@
 #include <life/lifesolver/FSIOperator.hpp>
 
 // Mathcard includes
-#include <life/lifesolver/BCInterface3D.hpp>
+//#include <life/lifesolver/BCInterface3D.hpp>
 
 namespace LifeV
 {
@@ -54,14 +54,14 @@ namespace LifeV
 class LumpedHeart
 {
 public:
-    typedef BCInterface3D< BCHandler, FSIOperator >                                        bc_type;
+    //    typedef BCInterface3D< BCHandler, FSIOperator >                                        bc_type;
     typedef FSIOperator::vector_Type                                                       vector_Type;
     typedef FSIOperator::vectorPtr_Type                                                    vectorPtr_Type;
 
     LumpedHeart()
             :
             M_time(0.),
-            M_BC(),
+            //M_BC(),
             M_ODEscheme(),
             M_dt(0.),
             M_T_max()  ,
@@ -106,7 +106,7 @@ private:
     //@}
 
     Real                                      M_time;
-    boost::shared_ptr< bc_type >              M_BC;
+    //boost::shared_ptr< bc_type >              M_BC;
     TimeAdvanceBDF<Real>                      M_ODEscheme;
     Real                                      M_dt;
     Real                                      M_T_max  ;

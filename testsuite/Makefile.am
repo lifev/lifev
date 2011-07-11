@@ -58,7 +58,7 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
            $(srcdir)/test_timeAdvance_orderI/testsuite.at \
            $(srcdir)/test_timeAdvance_orderII/testsuite.at \
            $(srcdir)/test_monolithic/testsuiteGCE.at \
-           $(srcdir)/test_monlithic/testsuiteCE.at
+           $(srcdir)/test_monolithic/testsuiteCE.at
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
