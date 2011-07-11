@@ -1,0 +1,195 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief File containing the Composed Preconditioner Class
+ *
+ *  @date 07-05-2009
+ *  @author Simone Deparis <simone.deparis@epfl.ch>
+ *
+ *  @contributor Paolo Crosetto <paolo.crosetto@epfl.ch>
+ *  @maintainer Paolo Crosetto <paolo.crosetto@epfl.ch>
+ */
+
+#ifndef PreconditionerComposed_HPP
+#define PreconditionerComposed_HPP
+
+#include <life/lifefilters/GetPot.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifealg/Preconditioner.hpp>
+#include <life/lifealg/ComposedOperator.hpp>
+
+namespace LifeV
+{
+
+class PreconditionerComposed:
+        public Preconditioner
+{
+public:
+
+    /** @name Typedefs
+     */
+    //@{
+
+    typedef Preconditioner                                             super_Type;
+    typedef ComposedOperator<Preconditioner>                           prec_Type;
+    typedef boost::shared_ptr<prec_Type>                               precPtr_Type;
+    typedef boost::shared_ptr<Preconditioner>                          epetraPrecPtr_Type;
+    typedef super_Type::operator_raw_type                              operator_Type;
+    typedef boost::shared_ptr<operator_Type>                           operatorPtr_Type;
+    typedef super_Type::list_Type                                      list_Type;
+    typedef boost::shared_ptr<Preconditioner>                          epetraPrec_Type;
+
+
+    /** @name Constructors, destructor
+     */
+    //@{
+    //! default constructor.
+    PreconditionerComposed( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+
+    //!Copy Constructor
+    /**
+       This copy constructor does not copy the matrices, but just the shared_ptrs. It calls the copy constructor of ComposedOperator.
+     */
+    PreconditionerComposed( PreconditionerComposed& P );
+
+    //! constructor from matrix A.
+    //! @param A MatrixEpetra<double> matrix upon which construct the preconditioner
+    //    PreconditionerComposed(operatorPtr_Type& A);
+
+    //! default destructor
+
+    ~PreconditionerComposed();
+
+    //@}
+
+
+    //!@name  Public Methods
+    //@{
+    void                   setDataFromGetPot ( const GetPot&      dataFile,
+                                               const std::string& section);
+
+    void                   createParametersList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection );
+    double                 condest ();
+
+    int                    buildPreconditioner(operatorPtr_Type& A);
+    int                    buildPreconditioner(operatorPtr_Type& A,
+                                               const bool useInverse,
+                                               const bool useTranspose=false);
+    //! Build a preconditioner based on A and push it back in the composedPreconditioner.
+    int                    push_back          (operatorPtr_Type& A,
+                                               const bool useInverse=false,
+                                               const bool useTranspose=false
+                                              );
+
+    //! Build a preconditioner based on A and replace it in the composedPreconditioner.
+    int                    replace            (operatorPtr_Type& A,
+                                               const UInt index,
+                                               const bool useInverse=false,
+                                               const bool useTranspose=false);
+
+    void                   resetPreconditioner();
+
+    //! returns true if prec exists
+    /*const*/
+    bool                   isPreconditionerSet() const {return M_prec;}
+    //@}
+
+    //!@name Implementation of Methods from Epetra_Operator
+    //@{
+    const Epetra_Comm& Comm(){return preconditioner()->Comm(); }
+
+    const Epetra_Map& OperatorDomainMap() { return  M_prec->OperatorDomainMap(); }
+    const Epetra_Map& OperatorRangeMap() { return  M_prec->OperatorRangeMap(); }
+    std::vector<operatorPtr_Type>& getOperVector(){return M_operVector;}
+
+    int            SetUseTranspose( bool useTranspose=false )
+    {
+        return M_prec->SetUseTranspose(useTranspose);
+    }
+
+    bool            UseTranspose(  ) {return M_prec->UseTranspose();}
+
+    virtual int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    {
+        return M_prec->ApplyInverse(X, Y);
+    }
+
+    virtual int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    {
+        return M_prec->Apply(X, Y);
+    }
+
+    const Epetra_Map & OperatorRangeMap() const
+    {return M_prec->OperatorRangeMap();}
+
+    const Epetra_Map & OperatorDomainMap() const
+    {return M_prec->OperatorDomainMap();}
+    //@}
+
+    //!@name Get Methods
+    //@{
+    super_Type::prec_raw_type*  preconditioner ();
+
+    UInt number() const {return M_prec->number();}
+
+    super_Type::prec_type              preconditionerPtr(){return M_prec;}
+
+    std::string            preconditionerType() {return "composedPreconditioner";}
+    //@}
+
+    //!@name Static Methods
+    //@{
+
+    //! Factory method
+    static Preconditioner* createComposedPreconditioner()
+    {
+        return new PreconditionerComposed();
+    }
+    //@}
+
+private:
+
+    //!@name Private Methods
+    //@{
+
+    Int createPrec (operatorPtr_Type& oper,
+                    boost::shared_ptr<Preconditioner>& prec);
+    //@}
+
+
+    //!@name Private Members
+    //@{
+    precPtr_Type                  M_prec;
+    std::vector<operatorPtr_Type> M_operVector; // we need to keep track of all the operators.
+    static bool registerComposed;
+    //@}
+};
+
+} // namespace LifeV
+
+#endif // PreconditionerComposed_HPP
