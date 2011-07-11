@@ -1308,6 +1308,10 @@ void MeshPartitioner<MeshType>::constructFaces()
                 localElem2 = (*im).second;
             }
 
+            // set teh flag for faces on the subdomain border
+            if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
+                pf->setFlag( Flag::turnOn ( pf->flag(), SUBDOMAIN_INTERFACE ) );
+
             // if this process does not own either of the adjacent elements
             // then the two adjacent elements and the respective face positions coincide in the local mesh
             // possible bug fixed: not only the two adjacent elements face, but also the face
