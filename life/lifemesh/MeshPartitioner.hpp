@@ -1271,10 +1271,6 @@ void MeshPartitioner<MeshType>::constructFaces()
                 ++M_nBoundaryFaces[i];
             }
 
-            pf =  &(*M_meshPartitions)[i]->addFace(boundary);
-            *pf = M_originalMesh->face( *is );
-
-            pf->setLocalId( count );
 
             Int elem1 = M_originalMesh->face(*is).firstAdjacentElementIdentity();
             Int elem2 = M_originalMesh->face(*is).secondAdjacentElementIdentity();
@@ -1305,6 +1301,11 @@ void MeshPartitioner<MeshType>::constructFaces()
                 localElem2 = (*im).second;
             }
 
+            pf =  &(*M_meshPartitions)[i]->addFace(boundary);
+             *pf = M_originalMesh->face( *is );
+
+             pf->setLocalId( count );
+
             // set teh flag for faces on the subdomain border
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
                 pf->setFlag( Flag::turnOn ( pf->flag(), SUBDOMAIN_INTERFACE ) );
@@ -1316,6 +1317,28 @@ void MeshPartitioner<MeshType>::constructFaces()
             // otherwise it could happen that a pair(element, position) is associated to different faces.
             // This can lead to a wrong treatment of the dofPerFace (in 2D of the dofPerEdge, as occurred
             // with P2)
+
+            // NEW CODE
+            ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging face in mesh partitioner!");
+
+            if (localElem1 == NotAnId)
+             {
+                 pf->firstAdjacentElementIdentity()  = localElem2;
+                 pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                 pf->secondAdjacentElementIdentity() = localElem1;
+                 pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
+                 pf->swap();
+             }
+            else
+            {
+                pf->firstAdjacentElementIdentity()  = localElem1;
+                pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+                pf->secondAdjacentElementIdentity() = localElem2;
+                pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+
+            }
+            // END NEW CODE
+            /* OLD CODE
 
             if ((localElem1 == NotAnId) && !boundary)
             {
@@ -1339,10 +1362,10 @@ void MeshPartitioner<MeshType>::constructFaces()
                 pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
             }
 
-
+*/
             for (ID id = 0; id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
             {
-                inode = M_originalMesh->face(*is).point(id).id();
+                inode = pf->point(id).id();
                 im = M_globalToLocalNode[i].find(inode);
                 pf->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
             }
