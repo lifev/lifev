@@ -52,41 +52,6 @@ DOF::DOF( const DOFLocalPattern& fePattern) : M_elementDofPattern( fePattern ), 
         M_localToGlobalByBdFacet()
 {
     //Getting the face
-    switch ( fePattern.nbLocalDof() )
-    {
-    case 1: //P0 Q0
-    	M_numLocalDofByFace = 0;
-    	break;
-    case 2:
-        // No M_faceToPoint (it is 1D)
-        M_numLocalDofByFace = 1;
-        break;
-    case 4:
-        M_faceToPoint = LinearTetra::faceToPoint;
-        M_numLocalDofByFace = 3;
-        break;
-    case 5:
-        M_faceToPoint = LinearTetraBubble::faceToPoint;
-        M_numLocalDofByFace = 3;
-        break;
-    case 10:
-        M_faceToPoint = QuadraticTetra::faceToPoint;
-        M_numLocalDofByFace = 6;
-        break;
-    case 8:
-        M_faceToPoint = LinearHexa::faceToPoint;
-        M_numLocalDofByFace = 4;
-        break;
-    case 27:
-        M_faceToPoint = QuadraticHexa::faceToPoint;
-        M_numLocalDofByFace = 27;
-        break;
-    default:
-        std::cout << "Warning: This refFE is not available for the dof by face."  <<  std::endl;
-        M_numLocalDofByFace = 0;
-        break;
-    }
-
     for ( UInt i = 0; i < 5; ++i )
         M_dofPositionByEntity[ i ] = 0;
 }

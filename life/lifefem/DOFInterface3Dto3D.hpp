@@ -486,8 +486,6 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
             {
             	ID ibF2 = *it;
 
-				UInt vertexOk = 0; // Number of matched vertices
-
 				// Loop on facet vertices
 				bool matched;
 				ID iVeFa = 0;

@@ -111,7 +111,7 @@ test_bdf::test_bdf(int argc, char** argv) :
 {
     GetPot command_line(argc, argv);
     const string data_file_name =
-        command_line.follow("data", 2, "-f", "--file");
+        command_line.follow("data_2d", 2, "-f", "--file");
     GetPot dataFile(data_file_name);
 
     Members->data_file_name = data_file_name;
@@ -144,9 +144,9 @@ void test_bdf::run()
         std::cout << "The BDF Solver" << std::flush;
 
     //the forcing term
-    SourceFct sf;
+    SourceFct_2d sf;
     // the boundary conditions
-    BCFunctionBase g_Ess(AnalyticalSol::u);
+    BCFunctionBase g_Ess(AnalyticalSol_2d::u);
 
     BCHandler bc;
 
@@ -198,8 +198,6 @@ void test_bdf::run()
     }
     matM.globalAssemble();
     Members->comm->Barrier();
-
-    matM.spy("M");
     chrono.stop();
     if (verbose)
         std::cout << "\n \n -- Mass matrix assembling time = " << chrono.diff() << std::endl
@@ -216,7 +214,7 @@ void test_bdf::run()
     bdf.setup(ord_bdf);
 
     //Initialization
-    bdf.setInitialCondition<Real(*) (Real, Real, Real, Real, UInt), FESpace<RegionMesh, MapEpetra> >(AnalyticalSol::u, u, *feSpacePtr, t0, delta_t);
+    bdf.setInitialCondition<Real(*) (Real, Real, Real, Real, UInt), FESpace<RegionMesh, MapEpetra> >(AnalyticalSol_2d::u, u, *feSpacePtr, t0, delta_t);
 
     if (verbose) bdf.showMe();
     Members->comm->Barrier();
@@ -226,7 +224,7 @@ void test_bdf::run()
     boost::shared_ptr<Exporter<RegionMesh> > exporter;
     std::string const exporterType =  dataFile( "exporter/type", "hdf5");
 
-#ifdef HAVE1_HDF5
+#ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
         exporter.reset( new ExporterHDF5<RegionMesh > ( dataFile, "bdf_test" ) );
@@ -302,7 +300,6 @@ void test_bdf::run()
         chrono.start();
         bcManage(*matA_ptr, f, *feSpacePtr->mesh(), feSpacePtr->dof(), bc, feSpacePtr->feBd(), tgv, t);
         matA_ptr->globalAssemble();
-        matA_ptr->spy("A");
         chrono.stop();
         if (verbose) cout << chrono.diff() << "s." << endl;
 
@@ -329,7 +326,7 @@ void test_bdf::run()
 
         Real L2_Error, L2_RelError;
 
-        L2_Error = feSpacePtr->l2Error(AnalyticalSol::u, uComputed, t, &L2_RelError);
+        L2_Error = feSpacePtr->l2Error(AnalyticalSol_2d::u, uComputed, t, &L2_RelError);
 
         if (verbose)
             std::cout << "Error Norm L2: " << L2_Error
