@@ -233,7 +233,7 @@ main( Int argc, char** argv )
     if (verbose) std::cout << "Initial time : " << initialTime << std::endl;
     if (verbose) std::cout << "End time     : " << endTime << std::endl;
     if (verbose) std::cout << "Timestep     : " << timestep << std::endl;
-    
+
     // Finite element
     std::string uOrder("P2");
     std::string pOrder("P1");
@@ -361,7 +361,7 @@ main( Int argc, char** argv )
     if (verbose) std::cout << "Adding the mass... " << std::flush;
     oseenAssembler.addMass(massMatrix,1.0);
     if (verbose) std::cout << "done" << std::endl;
-    
+
     if (verbose) std::cout << "Closing the matrices... " << std::flush;
     baseMatrix->globalAssemble();
     massMatrix->globalAssemble();
