@@ -43,11 +43,47 @@
 namespace LifeV
 {
 
-//! BCInterface0D - A very simple BCInterface for zero-dimensional models
+//! BCInterface0D - LifeV interface to load boundary conditions for 0D problems completely from a \c GetPot file
 /*!
  *  @author Cristiano Malossi
  *
- *  This simple class provide the BCInterface for zero-dimensional model BCHandler.
+ *  This class allows to impose boundary conditions for a 0D problem completely from a file.
+ *
+ *  <b>EXAMPLE - DATA FILE</b> <BR>
+ *  In the GetPot data file, \c BCInterface reads a new section: <CODE> [boundary_conditions] </CODE>.
+ *
+ *  Inside the new section there is a list of boundary conditions which correspond to other sub-section
+ *  with the same name, for example: <CODE> list = 'InFlow OutFlow' </CODE>
+ *
+ *  Each boundary condition has a similar structure. The list of properties depends from the type of the
+ *  boundary condition. For example:
+ *
+ *  <CODE>
+ *  [InFlow]                             <BR>
+ *  flag                = 0              <BR>
+ *  quantity            = Q              <BR>
+ *  function            = 'sin(2*pi*t)'  <BR>
+ *
+ *  [OutFlow]                            <BR>
+ *  flag                = 1              <BR>
+ *  quantity            = S              <BR>
+ *  function            = 0              <BR>
+ *  </CODE>
+ *
+ *  where \c flag, and \c quantity are the classical parameters for a 0D boundary condition.
+ *  The string \c function represents the base module and can be replaced by other derived/alternative modules.
+ *  The following functions are available (see the related classes for more information):
+ *
+ *  <ol>
+ *      <li> \c function, which is implemented in \c BCInterfaceFunction;
+ *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionFile;
+ *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionSolver;
+ *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionFileSolver;
+ *  </ol>
+ *
+ *  All the parameters are case sensitive.
+ *
+ *  See \c BCInterface base class for more details.
  */
 template< class BcHandler, class PhysicalSolverType >
 class BCInterface0D : public virtual BCInterface< BcHandler, PhysicalSolverType >
