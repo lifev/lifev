@@ -55,36 +55,31 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  *
- *  The VectorContainer class has the purpose to contains a certain number of
- *  different vectors as a standard container, but providing some general functions
- *  to perform common algebraic operations.
+ *  The \c VectorContainer class has the purpose to concatenate a certain number of
+ *  different vectors providing also some general methods to perform common algebraic operations.
  *
- *
- *
- *  <b> Type of compatible vectors </b>
+ *  <b> Type of compatible vectors </b><BR>
  *  This class has been developed in order to work with:
  *  <ol>
- *  	<li> LifeV::EpetraVector
- *  	<li> boost::numeric::ublas::vector
+ *  	<li> \c VectorEpetra
+ *  	<li> \c  boost::numeric::ublas::vector
  *  </ol>
  *
- *
- *
- *  <b> Type of compatible containers </b>
+ *  <b> Type of compatible containers </b><BR>
  *  This class has been developed in order to work with:
  *  <ol>
- *  	<li> std::vector
- *  	<li> std::dequee
- *  	<li> std::list
+ *  	<li> \c std::vector
+ *  	<li> \c std::dequee
+ *  	<li> \c std::list
  *  </ol>
  *
- *  <b> NOTES </b>
+ *  <b> NOTES </b><BR>
  *  <ol>
- *      <li> The VectorContainer contains shared_ptr to vectors: if you perform an operation (such as the
+ *      <li> The \c VectorContainer contains \c shared_ptr to vectors: if you perform an operation (such as the
  *           element by element multiplication) among two containers which hold the same vectors (or at least one),
  *           the results can be different from what expected!
- *      <li> Up to now it has been strongly tested only with LifeV::EpetraVector. However the design should be
- *           more or less compatible with boost::numeric::ublas::vector.
+ *      <li> Up to now it has been tested only with \c VectorEpetra. However the design should be
+ *           more or less compatible also with \c boost::numeric::ublas::vector.
  *  </ol>
  *
  */
