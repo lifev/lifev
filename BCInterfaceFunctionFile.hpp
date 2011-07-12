@@ -41,50 +41,47 @@
 namespace LifeV
 {
 
-//! BCInterfaceFunctionFile - LifeV bcFunction wrapper for BCInterface
+//! BCInterfaceFunctionFile - LifeV boundary condition function file wrapper for \c BCInterface
 /*!
  *  @author Cristiano Malossi
  *
- *  This class is an interface between BCInterface and the grammar parser. It allows to construct LifeV
- *  functions type for boundary conditions, using a GetPot file containing a function string and a
+ *  This class is an interface between the \c BCInterface and the \c Parser. It allows to construct LifeV
+ *  functions type for boundary conditions, using a \c GetPot file containing a function string and a
  *  table of discrete data (for example a discrete flow rate or pressure as a function of the time).
  *
+ *  See \c BCInterfaceFunction class for more details.
  *
+ *  <b>DETAILS</b> <BR>
+ *  The constructor of the class takes a string contains the \c GetPot file name.
+ *  The \c GetPot file has the following structure:
  *
- *  <b>DETAILS:</b>
+ *  <ul>
+ *      <li> <b>function:</b> contains the expression of the function (as described in the \c BCInterfaceFunction class).
+ *      <li> <b>variables:</b> contains the list of variables and coefficients present in the function.
+ *                             The first one is the variable and should be sorted in a growing order,
+ *                             while all the others are coefficients.
+ *      <li> <b>data:</b> contains the discrete list of variable and related coefficients. It must
+ *                        have n columns, where n is the number of variables (and coefficients).
+ *      <li> <b>scale:</b> Contains n optional coefficients (default = 1), which multiply each column in the data table.
+ *      <li> <b>loop:</b> Useful for periodic simulation: at the end of the list, it restarts using the first value instead of extrapolating the last two.
+ *  </ul>
  *
- *  The constructor of the class takes a string contains the GetPot file name.
- *  The GetPot file has the following structure:
- *
- *  function:  contains the expression of the function to use (as described in the BCInterfaceFunction class).
- *
- *  variables: contains the list of variables and coefficients present in the function.
- *             The first one is the variable and should be sorted in a growing order,
- *             while all the others are coefficients.
- *
- *  data:      contains the discrete list of variable and related coefficients. It must
- *             have n columns, where n is the number of variables (and coefficients).
- *
- *	scale:     Contains n optional coefficients (Default = 1), which multiply each column
- *	           in the data table.
- *
- *  loop:      Useful for time dependent value: at the end of the list, restart using the first value
- *             instead of extrapolating.
- *
- *	NOTE:
+ *	<b>NOTE</b> <BR>
  *	During the execution, if the value of the variable (usually the time) is not present in the 'data' table,
  *	the class linearly interpolates the value between the two closest values. Moreover, if the value of the variable is higher
  *	than anyone present in the 'data' table, the class linearly extrapolates the value using the last two values in the table.
  *
- *   <b>EXAMPLE OF DATAFILE</b>
- *
- *  function	= '(0,0,q)'
- *  variables	=   't				q'
- *  scale		= 	'1				1'
- *  data		=  '0.000000000		1.00
- *  				0.333333333		2.00
- *  				0.666666666		3.00
- *  				1.000000000		4.00'
+ *   <b>EXAMPLE OF DATA FILE</b> <BR>
+ *  <CODE>
+ *  function	= '(0,0,q)'                    <BR>
+ *  loop        = false                        <BR>
+ *  variables	=   't				q'         <BR>
+ *  scale		= 	'1				1'         <BR>
+ *  data		=  '0.000000000		1.00       <BR>
+ *  				0.333333333		2.00       <BR>
+ *  				0.666666666		3.00       <BR>
+ *  				1.000000000		4.00'      <BR>
+ *  </CODE>
  */
 template< typename PhysicalSolverType >
 class BCInterfaceFunctionFile: public virtual BCInterfaceFunction< PhysicalSolverType >
@@ -94,7 +91,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                    physicalSolver_Type;
+    typedef PhysicalSolverType                                                  physicalSolver_Type;
     typedef BCInterfaceData                                                     data_Type;
     typedef BCInterfaceFunction< physicalSolver_Type >                          function_Type;
 
@@ -109,7 +106,7 @@ public:
 
     //! Constructor
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     explicit BCInterfaceFunctionFile( const data_Type& data );
 
@@ -124,7 +121,7 @@ public:
 
     //! Set data
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from a \c GetPot file
      */
     virtual void setData( const data_Type& data ) { loadData( data ); }
 
@@ -145,7 +142,10 @@ private:
     //! @name Private methods
     //@{
 
-    //! loadData
+    //! Load data from a \c GetPot file
+    /*!
+     * @param data boundary condition data loaded from a \c GetPot file
+     */
     void loadData( data_Type data );
 
     //! Linear interpolation (extrapolation) between two values of the data.

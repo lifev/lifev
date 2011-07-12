@@ -45,98 +45,120 @@
 namespace LifeV
 {
 
-//! BCInterface - LifeV Interface to load boundary conditions completely from a GetPot file
+//! BCInterface - LifeV interface to load boundary conditions completely from a \c GetPot file
 /*!
  *  @author Cristiano Malossi
  *
- *  This class allows to impose boundary conditions completely from a GetPot file. You can derive a
- *  specific implementation for the BCHandler of your problem. For 1D and 3D problem the derived classes
- *  are already available, see BCInterface1D and BCInterface3D.
+ *  This class allows to impose boundary conditions completely from a \c GetPot file. You can derive a
+ *  specific implementation for the BCHandler of your problem. For 0D (\c BCInterface0D), 1D (\c BCInterface1D) and 3D (\c BCInterface3D) problems the derived classes
+ *  are already available.
  *
- *  <b>EXAMPLE - DATA FILE</b>
- *
- *  In the GetPot data file, BCInterface reads a new section: [boundary_conditions].
+ *  <b>EXAMPLE - DATA FILE</b> <BR>
+ *  In the GetPot data file, \c BCInterface reads a new section: <CODE> [boundary_conditions] </CODE>.
  *
  *  Inside the new section there is a list of boundary conditions which correspond to other sub-section
- *  with the same name, for example: list = 'InFlow OutFlow'
+ *  with the same name, for example: <CODE> list = 'InFlow OutFlow' </CODE>
  *
  *  Each boundary condition has a similar structure. The list of properties depends from the type of the
  *  boundary condition (if it is for 1D or 3D solver for example). For example:
  *
- *  [InFlow]                             <br>
- *  ...                                  <br>
- *  ...                                  <br>
- *  function   = '3*0.03*(1/4-(x^2+y^2)' <br>
+ *  <CODE>
+ *  [InFlow]                             <BR>
+ *  ...                                  <BR>
+ *  ...                                  <BR>
+ *  function   = '3*0.03*(1/4-(x^2+y^2)' <BR>
  *
- *  [OutFlow]        <br>
- *  ...              <br>
- *  ...              <br>
- *  function   = '0' <br>
+ *  [OutFlow]        <BR>
+ *  ...              <BR>
+ *  ...              <BR>
+ *  function   = '0' <BR>
+ *  </CODE>
+ *
+ *  The string \c function represents the base module and can be replaced by other derived/alternative modules.
+ *  The following functions are available (see the related classes for more information):
+ *
+ *  <ol>
+ *      <li> \c function, which is implemented in \c BCInterfaceFunction;
+ *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionFile;
+ *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionSolver;
+ *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionFileSolver;
+ *  </ol>
  *
  *  All the parameters are case sensitive.
  *
- *  <b>NOTE:</b>
- *
- *  The string "function" represent the base module and can be replaced by other expanded modules.
- *  The following functions are available (see the related classes for more information):
- *
- *  - function
- *  - functionFile
- *  - functionSolver
- *  - functionFileSolver
- *
- *  <b>EXAMPLE - HOW TO USE</b>
- *
+ *  <b>EXAMPLE - HOW TO USE</b> <BR>
  *  Here there is a short guide on how to create and use a BCInterface object.
  *
- *  1) First of all, you have to define a BCInterface class:
+ *  <ol>
+ *      <li> First of all, you have to define a BCInterface class:
  *
- *     BCInterface bcInterface;
+ *      <CODE>
+ *      BCInterface bcInterface;
+ *      </CODE>
  *
- *  2) You can create an empty handler by calling:
+ *      <li> You can create an empty handler by calling:
  *
- *     bcInterface.createHandler()
+ *      <CODE>
+ *      bcInterface.createHandler()
+ *      </CODE>
  *
- *     or you can set it from outside
+ *      or you can set it from outside
  *
- *     boost::shared_ptr< bcHandler_Type > bcHandler( new bcHandler_Type() );
- *     bcInterface.setHandler( bcHandler );
+ *      <CODE>
+ *      boost::shared_ptr< bcHandler_Type > bcHandler( new bcHandler_Type() ); <BR>
+ *      bcInterface.setHandler( bcHandler );
+ *      </CODE>
  *
- *  3) Then you can add all the file boundary condition by calling
+ *      <li> Then you can add all the file boundary condition by calling
  *
- *     bcInterface.fillHandler( "fileName.dat", "section" );
+ *      <CODE>
+ *      bcInterface.fillHandler( "fileName.dat", "section" );
+ *      </CODE>
  *
- *     Or you can add one specific boundary conditions by calling
+ *      Or you can add one specific boundary conditions by calling
  *
- *     bcInterface.readBC( "fileName.dat", "section", "bcSection" )
- *     bcInterface.insertBC();
+ *      <CODE>
+ *      bcInterface.readBC( "fileName.dat", "section", "bcSection" ); <BR>
+ *      bcInterface.insertBC();
+ *      </CODE>
  *
- *     Note that between readBC and insertBC you can manipulate the BC parameters by accessing
- *     the data container:
+ *      Note that between readBC and insertBC you can manipulate the BC parameters by accessing
+ *      the data container:
  *
- *     bcInterface.dataContainer();
+ *      <CODE>
+ *      bcInterface.dataContainer();
+ *      </CODE>
  *
- *     In addition, you can also add BC directly from the code by accessing the bcHandler
+ *      In addition, you can also add BC directly from the code by accessing the bcHandler
  *
- *     M_bc.handler()->addBC( ... );
+ *      <CODE>
+ *      M_bc.handler()->addBC( ... );
+ *      </CODE>
  *
- *  4) If you are using functions that use solver variables first you have to pass the solver
+ *      <li> If you are using functions that use solver variables first you have to pass the solver
  *
- *     M_bc.setPhysicalSolver( physicalSolverPtr );
+ *      <CODE>
+ *      M_bc.setPhysicalSolver( physicalSolverPtr );
+ *      </CODE>
  *
- *     Then be sure to update the variable at each time step before using the BCHandler:
+ *      Then be sure to update the variable at each time step before using the BCHandler:
  *
- *     M_bc.updatePhysicalSolverVariables();
+ *      <CODE>
+ *      M_bc.updatePhysicalSolverVariables();
+ *      </CODE>
  *
- *  5) Finally, to get the handler you can use:
+ *      <li> Finally, to get the handler you can use:
  *
- *     M_bc.handler();
+ *      <CODE>
+ *      M_bc.handler();
+ *      </CODE>
  *
- *  NOTE:
+ *  </ol>
  *
- *  a) You can add manually more conditions by using setBC() after the call to buildHandler() function.
- *     In this case you have to manually set the TOTAL number of boundary conditions
- *     by using setHandlerParameters() function BEFORE building the handler.
+ *  <b>IMPORTANT NOTE</b> <BR>
+ *  You can add manually more conditions by using \c setBC() after the call to \c buildHandler() function.
+ *  In this case you have to manually set the total number of boundary conditions
+ *  by using \c setHandlerParameters() function before building the handler.
  */
 template< class BcHandler, class PhysicalSolverType >
 class BCInterface

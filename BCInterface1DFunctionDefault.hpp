@@ -45,24 +45,23 @@
 namespace LifeV
 {
 
-//! BCInterface1DFunctionDefault - Interface with the default boundary conditions of the 1D model
+//! BCInterface1DFunctionDefault - LifeV boundary condition function wrapper for \c BCInterface1D
 /*!
  *  @author Cristiano Malossi
  *
  *  The BCInterface1DFunctionDefault class provides a general interface between the
- *  BCInterface1D and the default BC for the 1D Model.
+ *  \c BCInterface1D and the default boundary condition for the \c OneDimensionalSolver.
  *
- *  <b>DETAILS:</b>
- *
+ *  <b>DETAILS:</b> <BR>
  *  The list of available conditions is described by the \c defaultFunctions enum type.
+ *
  *  They are:
- *
- *	- Riemann,
- *	- Compatibility,
- *	- Absorbing,
- *	- Resistance
- *
- *	To get the base for the boundary condition, call the \c base() method.
+ *  <ol>
+ *      <li> Riemann;
+ *      <li> Compatibility;
+ *	    <li> Absorbing;
+ *	    <li> Resistance;
+ *	</ol>
  */
 template< class PhysicalSolverType >
 class BCInterface1DFunctionDefault
@@ -95,7 +94,7 @@ public:
 
     //! Constructor
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     explicit BCInterface1DFunctionDefault( const data_Type& data );
 

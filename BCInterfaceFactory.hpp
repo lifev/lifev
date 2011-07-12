@@ -48,9 +48,19 @@
 namespace LifeV
 {
 
-//! BCInterfaceFactory - Factory to create BCInterface Functions
+//! BCInterfaceFactory - Factory to create \c BCInterface functions
 /*!
  *  @author Cristiano Malossi
+ *
+ *  This class allows to create boundary functions which can be used by any BCInterface implementation.
+ *  The following functions are available (see the related classes for more information):
+ *
+ *  <ol>
+ *      <li> \c function, which is implemented in \c BCInterfaceFunction;
+ *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionFile;
+ *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionSolver;
+ *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionFileSolver;
+ *  </ol>
  */
 
 template< class PhysicalSolverType >
@@ -87,6 +97,10 @@ public:
     //! @name Methods
     //@{
 
+    //! Create a function
+    /*!
+     * @param data data container
+     */
     bcFunctionPtr_Type createFunction( const data_Type& data );
 
     //@}

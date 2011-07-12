@@ -45,43 +45,50 @@
 namespace LifeV
 {
 
-//! BCInterfaceFunction - LifeV bcFunction wrapper for BCInterface
+//! BCInterfaceFunction - LifeV boundary condition function wrapper for \c BCInterface
 /*!
  *  @author Cristiano Malossi
  *
- *  This class is an interface between BCInterface and grammar parser. It allows to construct LifeV
- *  functions type for boundary conditions, using a functions string loaded from a GetPot file.
+ *  This class is an interface between the \c BCInterface and the \c Parser. It allows to construct LifeV
+ *  function types for boundary conditions, using a function string loaded from a \c GetPot file.
  *
- *  <b>DETAILS:</b>
- *
- *  By default the stringSeparator is set to semicolon ";".
+ *  <b>DETAILS</b> <BR>
+ *  By default the string separator is set to semicolon ";".
  *
  *  The function string has to be in this form:
  *
+ *  <CODE>
  *  function = '[u, v, w]'
+ *  </CODE>
  *
- *  where u(x,y,z,t), v(x,y,z,t), w(x,y,z,t).
- *  Here there is an example:
+ *  where \f$ u=u(x,y,z,t) \f$, \f$ v=v(x,y,z,t) \f$,  and \f$ w=w(x,y,z,t) \f$. They are separated by commas,
+ *  as shown in the following example
  *
+ *  <CODE>
  *  function = '[x^2 + y^2, 0, 2*sin(2*pi*t)]'
+ *  </CODE>
  *
- *  To set a constant for complicate expression it is possible to add them before the expression
- *  using a semicolon ";":
+ *  It is possible to define constants separated by the string separator before the expression
  *
+ *  <CODE>
  *  function = 'a=5.67436; [x^2+y^2,0,a*sin(2*pi*t)^a]'
+ *  </CODE>
  *
- *  NOTE:
+ *  <b>NOTE</b> <BR>
  *  In the boundary condition file, if you have three component with the same expression
  *  (the same function) you can both write:
  *
+ *  <CODE>
  *  function = '[0, 0, 0]'
+ *  </CODE>
  *
- *  and
+ *  or
  *
+ *  <CODE>
  *  function = 0
+ *  </CODE>
  *
- *  The only difference is that the second kind of instruction is more efficient during execution.
- *
+ *  However the second way is more efficient during execution.
  */
 template< typename PhysicalSolverType >
 class BCInterfaceFunction
@@ -106,7 +113,7 @@ public:
 
     //! Constructor
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     explicit BCInterfaceFunction( const data_Type& data );
 
@@ -119,18 +126,18 @@ public:
     //! @name Methods
     //@{
 
-    //! Assign the function to the base of the 1D bcHandler
+    //! Assign the function to the base of the 1D \c BCHandler
     /*!
-     * @param base base of the bc
+     * @param base base of the 1D boundary condition
      */
     void assignFunction( OneDimensionalBCFunction& base )
     {
         base.setFunction( boost::bind( &BCInterfaceFunction::functionTime, this, _1 ) );
     }
     
-    //! Assign the function to the base of the 3D bcHandler
+    //! Assign the function to the base of the 3D \c BCHandler
     /*!
-     * @param base base of the bc
+     * @param base base of the 3D boundary condition
      */
     void assignFunction( BCFunctionBase& base )
     {
@@ -141,12 +148,32 @@ public:
     }
 
     //! Function of time
+    /*!
+     * @param t time
+     * @return boundary condition value
+     */
     Real functionTime( const Real& t );
 
     //! Function of time and space
+    /*!
+     * @param t time
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
+     * @param id id of the boundary condition (not used)
+     * @return boundary condition value
+     */
     Real functionTimeSpace( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
 
     //! Function of time and space and id
+    /*!
+     * @param t time
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
+     * @param id id of the boundary condition
+     * @return boundary condition value
+     */
     Real functionTimeSpaceID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
 
     //@}
@@ -157,7 +184,7 @@ public:
 
     //! Set data
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     virtual void setData( const data_Type& data );
 

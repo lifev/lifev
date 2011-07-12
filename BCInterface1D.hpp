@@ -44,70 +44,50 @@
 namespace LifeV
 {
 
-//! BCInterface1D - LifeV Interface to load Boundary Conditions completely from a GetPot file
+//! BCInterface1D - LifeV interface to load boundary conditions for 1D problems completely from a \c GetPot file
 /*!
  *  @author Cristiano Malossi
  *
- *  This class allows to impose boundary conditions completely from a file.
+ *  This class allows to impose boundary conditions for a 1D problem completely from a file.
  *
- *  <b>EXAMPLE - DATA FILE</b>
+ *  <b>EXAMPLE - DATA FILE</b> <BR>
+ *  In the GetPot data file, \c BCInterface reads a new section: <CODE> [boundary_conditions] </CODE>.
  *
- *  In the GetPot data file, BCInterface1D reads a new section: [boundary_conditions].
+ *  Inside the new section there is a list of boundary conditions which correspond to other sub-section
+ *  with the same name, for example: <CODE> list = 'InFlow OutFlow' </CODE>
  *
- *  Inside the new section there is a list of condition which correspond to other sub-section
- *  with the same name. The list must be inside the apex ' '.
+ *  Each boundary condition has a similar structure. The list of properties depends from the type of the
+ *  boundary condition. For example:
  *
- *  Each condition has a similar structure; here there is an example:
+ *  <CODE>
+ *  [InFlow]                             <BR>
+ *  side                = left           <BR>
+ *  quantity            = Q              <BR>
+ *  line                = first          <BR>
+ *  function            = 'sin(2*pi*t)'  <BR>
  *
- *  [InFlow]               <br>
- *  type       = Q         <br>
- *  side       = left      <br>
- *  line       = first     <br>
- *  function   = '3*0.03*(1/4-(x^2+y^2)' <br>
+ *  [OutFlow]                            <BR>
+ *  side                = right          <BR>
+ *  quantity            = W2             <BR>
+ *  line                = first          <BR>
+ *  functionDefault     = Absorbing      <BR>
+ *  </CODE>
  *
- *  NOTE: All the parameters are case sensitive.
+ *  where \c side, \c quantity, and \c line are the classical parameters for a 1D boundary condition.
+ *  The string \c function represents the base module and can be replaced by other derived/alternative modules.
+ *  The following functions are available (see the related classes for more information):
  *
- *  type - can be: A, Q, W1, W2, P
- *  side - can be: left, right
- *  line - can be: first, second.
- *  function - contains the function. See BCInterfaceFunction1D for more details about the syntax.
+ *  <ol>
+ *      <li> \c function, which is implemented in \c BCInterfaceFunction;
+ *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionFile;
+ *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionSolver;
+ *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionFileSolver;
+ *      <li> \c functionDefault, which is implemented in \c BCInterface1DFunctionDefault;
+ *  </ol>
  *
- *  <b>NOTE:</b>
+ *  All the parameters are case sensitive.
  *
- *  The string "function" represent the base module and can be replaced by other expanded modules.
- *  Up to now we have the following modules for function:
- *
- *  - function
- *  - functionFile
- *  - OperatorFunction
- *  - OperatorFunctionFile
- *  - Default_1D
- *
- *  To see some example look at test_fsi.
- *
- *  <b>EXAMPLE - HOW TO USE</b>
- *
- *  Here there is a short example on how to use it.
- *
- *  1) You can define your BCInterface1D class in a shared pointer:
- *     boost::shared_ptr<BCInterface1D> 	M_fluidBC;
- *
- *  2) Build the BCInterface1D using empty constructor;
- *
- *  3) If you have operator conditions you have to give the operator to access variables
- *     M_fluidBC->setPhysicalSolver( M_fsi->FSIOper() );
- *
- *  4) Then you can fill the handler from a file and a section (this can be done for multiple files & sections)
- *     M_fluidBC->fillHandler( "fileName.dat", "fluid" );
- *
- *  5) Finally, to get the handler you can use:
- *     M_fluidBC->handler();
- *
- *  NOTE:
- *
- *  a) You can add manually more conditions by using setBC() after the call to buildHandler() function.
- *     In this case you have to manually set the TOTAL number of boundary conditions
- *     by using setHandlerParameters() function BEFORE building the handler.
+ *  See \c BCInterface base class for more details.
  */
 template< class BcHandler, class PhysicalSolverType >
 class BCInterface1D : public virtual BCInterface< BcHandler, PhysicalSolverType >

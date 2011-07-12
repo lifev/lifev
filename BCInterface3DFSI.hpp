@@ -107,40 +107,38 @@ private:
 
 };
 
-//! BCInterface3DFSI - specialized template implementation for FSI problems.
+//! BCInterface3DFSI - LifeV boundary condition function wrapper for \c BCInterface3D and FSI problems
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_PhysicalCoupling class provides a general interface between the
- *  MS_Algorithm and all the coupling conditions.
  *
- *  This class allows to use impose interface conditions for FSI problems.
+ *  The BCInterface3DFSI class provides a general interface between the
+ *  \c BCInterface3D and the default boundary condition for the \c FSIOperator.
  *
- *  <b>DETAILS:</b>
- *
+ *  <b>DETAILS:</b> <BR>
  *  The constructor of the class takes a string contains the ID of the interface condition to impose,
  *  and the FSI. The list of available conditions is the FSIFunction variable. These are:
  *
- *	- DerFluidLoadToFluid,					(not implemented)
- *	- DerFluidLoadToStructure,
- *	- DerHarmonicExtensionVelToFluid,
- *	- DerStructureDispToSolid,				(not implemented)
- *	- FluidInterfaceDisp,					(not working)
- *	- FluidLoadToStructure,
- *	- HarmonicExtensionVelToFluid,
- *	- SolidLoadToStructure,
- *	- StructureDispToHarmonicExtension,
- *	- StructureDispToSolid, 				(not implemented)
- *	- StructureToFluid
+ *	<ol>
+ *      <li> DerFluidLoadToFluid,					(not implemented)
+ *	    <li> DerFluidLoadToStructure,
+ *	    <li> DerHarmonicExtensionVelToFluid,
+ *	    <li> DerStructureDispToSolid,				(not implemented)
+ *	    <li> FluidInterfaceDisp,					(not working)
+ *	    <li> FluidLoadToStructure,
+ *	    <li> HarmonicExtensionVelToFluid,
+ *	    <li> SolidLoadToStructure,
+ *	    <li> StructureDispToHarmonicExtension,
+ *	    <li> StructureDispToSolid, 				    (not implemented)
+ *	    <li> StructureToFluid
+ *  <ol>
  *
- *	The class automatically recognize which method is used among:
- *
- *	- EXACTJACOBIAN
- *	- FIXEDPOINT
- *	- MONOLITHIC
- *	- STEKLOVPOINCARE 	(not working)
- *
- *	To get the base for the boundary condition call the getBase function.
+ *	The class automatically recognize which FSI algorithm is used among:
+ *  <ol>
+ *      <li> EXACTJACOBIAN;
+ *      <li> FIXEDPOINT;
+ *      <li> MONOLITHIC (both GE and GI);
+ *  </ol>
  */
 template< >
 class BCInterface3DFSI< FSIOperator >
@@ -163,7 +161,7 @@ public:
 
     //! Constructor
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     explicit BCInterface3DFSI( const data_Type& data );
 
@@ -178,13 +176,14 @@ public:
 
     //! Copy the stored parameters in the data container
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     void exportData( data_Type& data );
 
-    //! Check method passing the operator
+    //! Assign a boundary function to the boundary condition vector base
     /*!
-     * @param physicalSolver FSI
+     * @param physicalSolver FSI physical solver,
+     * @param base boundary condition vector base
      */
     void assignFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base );
 
@@ -196,7 +195,7 @@ public:
 
     //! Set data
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     void setData( const data_Type& data );
 

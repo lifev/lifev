@@ -43,15 +43,17 @@
 namespace LifeV
 {
 
-//! BCInterfaceFunctionFileSolver - LifeV bcFunction wrapper for BCInterface (with Operators)
+//! BCInterfaceFunctionFileSolver - LifeV boundary condition function file wrapper for \c BCInterface
 /*!
  *  @author Cristiano Malossi
  *
- *  This class is an interface between BCInterface, SpiritParser and and a general
- *  LifeV operator (such as Oseen or FSI). It allows to construct LifeV
- *  functions type for boundary conditions, using a GetPot file containing a function string and a
+ *  This class is an interface between the \c BCInterface, the \c Parser, and and a general
+ *  LifeV physical solver (such as \c OseenSolver or \c FSISolver). It allows to construct LifeV
+ *  functions type for boundary conditions, using a \c GetPot file containing a function string and a
  *  table of discrete data (for example a discrete Flux or Pressure depending on time).
- *  The function string can contain Operator parameters.
+ *  The function string can contain physical solver parameters.
+ *
+ *  See \c BCInterfaceFunction, \c BCInterfaceFunctionFile, and \c BCInterfaceFunctionSolver classes for more details.
  */
 template< class PhysicalSolverType >
 class BCInterfaceFunctionFileSolver: public virtual BCInterfaceFunctionFile< PhysicalSolverType > ,
@@ -79,7 +81,7 @@ public:
 
     //! Constructor
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     explicit BCInterfaceFunctionFileSolver( const data_Type& data );
 
@@ -94,7 +96,7 @@ public:
 
     //! Set data
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     virtual void setData( const data_Type& data );
 

@@ -48,36 +48,43 @@
 namespace LifeV
 {
 
-//! BCInterfaceFunctionSolver - LifeV bcFunction wrapper for BCInterface (with operators)
+//! BCInterfaceFunctionSolver - LifeV boundary condition function file wrapper for \c BCInterface
 /*!
  *  @author Cristiano Malossi
  *
- *  This class is an interface between BCInterface, the grammar parser and a general
- *  LifeV solver (such as Oseen or FSI). It allows to construct LifeV
- *  functions type for boundary conditions, using a functions string loaded from
- *  a GetPot file in which are present some "solver" parameters.
+ *  This class is an interface between the \c BCInterface, the \c Parser, and a general
+ *  LifeV physical solver (such as \c OseenSolver or \c FSISolver). It allows to construct LifeV
+ *  function types for boundary conditions, using a functions string loaded from
+ *  a \c GetPot file in which are present some physical solver parameters.
  *
  *  The class can be used in two ways:
  *
- *  1) hereditating it and implementing the template specialization of createAccessList() and updatePhysicalSolverVariables();
- *  2) manually setting the variables by using the setVariable() function.
+ *  <ol>
+ *      <li> first hereditate it and then implement the template specialization for the methods \c createAccessList() and \c updatePhysicalSolverVariables();
+ *      <li> manually setting the variables by using the \c setVariable() method.
+ *  </ol>
  *
- *	<b>AVAILABLE OPERATORS</b>
+ *  See \c BCInterfaceFunction class for more details.
  *
- *	Available variables are:
+ *	<b>AVAILABLE VARIABLES</b> <BR>
+ *	Current available variables are:
  *
- *  f_timeStep
- *	f_area
- *	f_density
- *	f_flux
- *	f_pressure
- *	f_viscosity
- *	f_venousPressure
- *	s_density
- *	s_poisson
- *	s_thickness
- *	s_young
- *	s_externalPressure
+ *  <ul>
+ *      <li> f_timeStep
+ *	    <li> f_area
+ *	    <li> f_density
+ *	    <li> f_flux
+ *	    <li> f_pressure
+ *	    <li> f_viscosity
+ *	    <li> f_venousPressure
+ *	    <li> s_density
+ *	    <li> s_poisson
+ *	    <li> s_thickness
+ *	    <li> s_young
+ *	    <li> s_externalPressure
+ *	</ul>
+ *
+ *	Of course, some of those variables are available only for fluid problems, other only for solid problems.
  */
 template< class PhysicalSolverType >
 class BCInterfaceFunctionSolver: public virtual BCInterfaceFunction< PhysicalSolverType >
@@ -103,7 +110,7 @@ public:
 
     //! Constructor
     /*!
-     * @param data BC data loaded from GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
     explicit BCInterfaceFunctionSolver( const data_Type& data );
 
@@ -118,7 +125,7 @@ public:
 
     //! Update the solver variables
     /*!
-     *  NOTE: A template specialization of this method should be provided for each solver.
+     *  <b>NOTE:</b> A template specialization of this method should be provided for each solver.
      */
     void updatePhysicalSolverVariables() { std::cout << " !!! WARNING: updatePhysicalSolverVariables() is not defined for the selected solver. !!!" << std::endl; }
 
