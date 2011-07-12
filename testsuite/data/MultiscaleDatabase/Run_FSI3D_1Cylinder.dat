@@ -39,6 +39,6 @@ FluidViscosity              = 0.035         # viscosity      [g/cm/s]
 FluidVenousPressure         = 6.6661195E+03 # ven. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidExternalPressure       = 1E+05         # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.2           # density        [g/cm^3]
-SolidPoissonCoefficient     = 0.48          # Poisson coeff. []
-SolidYoungModulus           = 3.0784E6      # Young modulus  [g/cm/s^2 - dyne/cm^2]
+SolidPoissonCoefficient     = 0.45          # Poisson coeff. []
+SolidYoungModulus           = 3.19E6        # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################
