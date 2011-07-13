@@ -40,6 +40,7 @@
 
 #include <life/lifemesh/MeshVertex.hpp>
 #include <life/lifemesh/MeshEntity.hpp>
+#include <algorithm>
 
 namespace LifeV
 {
@@ -132,6 +133,17 @@ public:
      */
     void swapPoints( const ID & firstIdentity, const ID & secondIdentity );
 
+    //! Reverses the points of the element.
+    /*!
+        Useful in the phase of building a mesh if you want to change the orientation of
+        the element. First point becomes last etc.etc
+
+        \note Beware that the some adjacency list may be invalidated. If you revert the point
+        of a 3D element, for instance, the local faces change.  Therefore, a elementToFace list may be
+        now invalid. So this method must be used with care and only when building the basic entities
+        of a mesh.
+     */
+    void reversePoints();
     //! Exchange points
     /*!
      	 Exchanges points according to a list of old-to-new local identity numbering
@@ -308,10 +320,15 @@ showMe( bool verbose, std::ostream & out ) const
 template <typename GeoShape, typename PointType>
 void MeshElement<GeoShape, PointType>::swapPoints( const ID & firstIdentity, const ID & secondIdentity )
 {
-    point_Type const* tmp( M_points[ firstIdentity ] );
-    M_points[ firstIdentity ] = M_points[ secondIdentity ];
-    M_points[ secondIdentity ] = tmp;
+    std::swap(M_points[ firstIdentity ],M_points[ secondIdentity ]);
 }
+
+template <typename GeoShape, typename PointType>
+void MeshElement<GeoShape, PointType>::reversePoints()
+{
+    std::reverse(M_points,&(M_points[GeoShape::S_numPoints]));
+}
+
 
 template <typename GeoShape, typename PointType>
 void MeshElement<GeoShape, PointType>::exchangePoints( const ID oldToNew[ GeoShape::S_numPoints ] )
