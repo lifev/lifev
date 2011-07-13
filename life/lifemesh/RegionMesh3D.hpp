@@ -3531,9 +3531,9 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
     {
         for ( typename Faces::iterator itf = faceList.begin(); itf != faceList.end(); ++itf )
         {
-            if ( itf->firstAdjacentElementPosition() != NotAnId )
+            if ( itf->firstAdjacentElementPosition() != NotAnId && itf->firstAdjacentElementIdentity() != NotAnId)
                 M_VToF( itf->firstAdjacentElementPosition() , itf->firstAdjacentElementIdentity() ) = itf->localId();
-            if ( itf->secondAdjacentElementPosition() != NotAnId )
+            if ( itf->secondAdjacentElementPosition() != NotAnId && itf->secondAdjacentElementIdentity() != NotAnId)
                 M_VToF( itf->secondAdjacentElementPosition(), itf->secondAdjacentElementIdentity() ) = itf->localId();
         }
         // we finish here

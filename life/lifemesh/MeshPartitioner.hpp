@@ -1334,7 +1334,10 @@ void MeshPartitioner<MeshType>::constructFaces()
                 pf->firstAdjacentElementIdentity()  = localElem1;
                 pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
                 pf->secondAdjacentElementIdentity() = localElem2;
-                pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                pf->secondAdjacentElementPosition() =
+                                localElem2 != NotAnId ?
+                                                       M_originalMesh->face(*is).secondAdjacentElementPosition():
+                                                       NotAnId;
 
             }
             // END NEW CODE
