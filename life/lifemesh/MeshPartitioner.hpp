@@ -1325,8 +1325,8 @@ void MeshPartitioner<MeshType>::constructFaces()
              {
                  pf->firstAdjacentElementIdentity()  = localElem2;
                  pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
-                 pf->secondAdjacentElementIdentity() = localElem1;
-                 pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
+                 pf->secondAdjacentElementIdentity() = NotAnId;
+                 pf->secondAdjacentElementPosition() = NotAnId;
                  pf->reversePoints();
              }
             else
