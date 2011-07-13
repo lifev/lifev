@@ -1309,7 +1309,7 @@ void MeshPartitioner<MeshType>::constructFaces()
 
              pf->setLocalId( count );
 
-            // set teh flag for faces on the subdomain border
+            // set the flag for faces on the subdomain border
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
                 pf->setFlag( Flag::turnOn ( pf->flag(), SUBDOMAIN_INTERFACE ) );
 
