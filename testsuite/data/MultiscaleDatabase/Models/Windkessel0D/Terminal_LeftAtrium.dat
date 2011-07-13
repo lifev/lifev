@@ -19,6 +19,6 @@ couplingFlags    = '0 1'
 
 [Coefficients]
 
-Resistance1    = 0.5e+02    # dyn s / cm^5 
-Resistance2    = 0.5e+02    # dyn s / cm^5 
+Resistance1    = 0.5e+01    # dyn s / cm^5 
+Resistance2    = 0.5e+01    # dyn s / cm^5 
 Capacitance    = 0          # cm^5 / dyn

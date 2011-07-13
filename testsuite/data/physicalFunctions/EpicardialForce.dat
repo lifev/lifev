@@ -20,11 +20,10 @@
 function    = 'F*(8-y)/4'
 
 variables    =  't            F'
-#scale        =  '1            -450000'
 # For use with a coarse mesh
-#scale        =  '1             -270000'	
+#scale        =  '1            -450000'
 # For use with a fine mesh
-scale        =  '1             -204000'	
+scale        =  '1             -233143'	
 
 loop        = true
 

@@ -24,7 +24,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D-Windkessel0D_Ideal
     RestartFromStepNumber      = 0
 
     [../time_discretization]
-    initialtime                = 0.001   # [s]
+    initialtime                = 0.000   # [s]
     endtime                    = 4.800   # [s]
     timestep                   = 0.001   # [s]
 
