@@ -84,13 +84,6 @@ public:
      */
     explicit MeshElement( ID identity );
 
-    //! Declares item identity and item local identiy
-    /*!
-    	@param identity Element identity
-    	@param localIdentity Element local identity
-     */
-    explicit MeshElement( ID identity, ID localIdentity );
-
     //! Copy constructor
     /*!
         @param Element MeshElement to be copied
@@ -252,22 +245,16 @@ MeshElement<GeoShape, PointType>::MeshElement() :
 
 template <typename GeoShape, typename PointType>
 MeshElement<GeoShape, PointType>::MeshElement( ID identity ) :
-        MeshEntityWithBoundary( identity, identity )
-{
-
-}
-
-template <typename GeoShape, typename PointType>
-MeshElement<GeoShape, PointType>::MeshElement( ID identity, ID localIdentity ) :
-        MeshEntityWithBoundary( identity, localIdentity )
+        MeshEntityWithBoundary( identity )
 {
 
 }
 
 template <typename GeoShape, typename PointType>
 MeshElement<GeoShape, PointType>::MeshElement( MeshElement<GeoShape, PointType> const & element ) :
-        MeshEntityWithBoundary( element.id(), element.localId() )
+        MeshEntityWithBoundary( element.id() )
 {
+    setLocalId( element.localId() );
     for ( UInt i = 0; i < MeshElement<GeoShape, PointType>::S_numLocalPoints; ++i )
     {
         M_points[ i ] = element.M_points[ i ];

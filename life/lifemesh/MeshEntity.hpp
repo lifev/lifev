@@ -260,6 +260,17 @@ public:
             M_flag ( flag )
     {};
 
+    //! Full constructor, where both identifiers are specified.
+    /*!
+       @param id The value for the global ID.
+       @param lid The value for the local ID.
+       @param flag The value of the bool-flag.
+     */
+    MeshEntityWithBoundary( const ID& id, const ID& lid, const flag_Type& flag = DEFAULT  ):
+            MeshEntity( id , lid ),
+            M_flag ( flag )
+    {};
+
     //! backward-compatible constructor
     /*!
       This is the "full" constructor for this class.
