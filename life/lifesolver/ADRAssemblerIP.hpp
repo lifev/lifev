@@ -368,7 +368,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // across the different partitions of the mesh (if they exist).
         // These cases are the excluded.
 
-        if ( Flag::testOneSet( M_fespace->mesh()->face(iFace).flag(), INTERNAL_INTERFACE | PHYSICAL_BOUNDARY ) )
+        if ( Flag::testOneSet( M_fespace->mesh()->face(iFace).flag(), SUBDOMAIN_INTERFACE | PHYSICAL_BOUNDARY ) )
         {
             continue;
         };

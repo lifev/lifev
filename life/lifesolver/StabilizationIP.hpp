@@ -281,7 +281,7 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
         const UInt iElAd1 ( M_mesh->face( iFace ).firstAdjacentElementIdentity()  );
         const UInt iElAd2 ( M_mesh->face( iFace ).secondAdjacentElementIdentity() );
 
-        if ( Flag::testOneSet( M_mesh->face( iFace ).flag(), INTERNAL_INTERFACE | PHYSICAL_BOUNDARY ) )
+        if ( Flag::testOneSet( M_mesh->face( iFace ).flag(), SUBDOMAIN_INTERFACE | PHYSICAL_BOUNDARY ) )
         {
             //std::cout << "iElAd1 = " << iElAd1 << "; iElAd2 = " << iElAd2 << std::endl;
             continue;
