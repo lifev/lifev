@@ -112,14 +112,14 @@ public:
     typedef typename vector_Type::pointer           pointer;
     typedef typename vector_Type::const_pointer     const_pointer;
     typedef typename vector_Type::reverse_iterator  reverse_iterator;
-    typedef typename vector_Type::allocator_type    allocator_type
+    typedef typename vector_Type::allocator_type    allocator_type;
     //@}
 
     //! @name Constructor & Destructor
     //@{
 
     //! Empty Constructor
-    VectorSimple() : vector_Type() {};
+    VectorSimple() : vector_Type() {}
 
     //! Constructor
     /*!
