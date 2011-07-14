@@ -1557,7 +1557,7 @@ public:
     //! Container of mesh 3D Elements
     Volumes volumeList;
     //! Boundary points list.
-    VectorSimple<point_Type * > _bPoints;
+    std::vector<point_Type * > _bPoints;
     //! Container of mesh points/vertices (mesh movement)
     /**
      *  Used only by mesh node movement routines. It contains the
@@ -2658,7 +2658,7 @@ RegionMesh3D<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position, bool 
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename VectorSimple<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename std::vector<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {
@@ -2689,7 +2689,7 @@ setPoint(UInt const & position, bool const boundary, bool const vertex)
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename VectorSimple<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename std::vector<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {

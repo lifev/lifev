@@ -287,7 +287,7 @@ private:
     std::map< entityFlag_Type, std::list<ID> >   M_boundaryMarkerToFacetIdMap;
 
     // for each boundary face, it contains the numbering of the dof of the face
-    std::vector< std::vector< VectorSimple<ID> > > M_vectorNumberingPerFacetVector;
+    std::vector< std::vector< std::vector<ID> > > M_vectorNumberingPerFacetVector;
     // it converts from a local numbering over the boundary faces on the global numbering of the mesh
     std::vector< std::vector< ID > >             M_dofGlobalIdVector;
 
@@ -424,7 +424,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
 template<typename MeshType>
 void PostProcessingBoundary<MeshType>::buildVectors()
 {
-    VectorSimple<ID>            boundaryDofGlobalIdVector;
+    std::vector<ID>            boundaryDofGlobalIdVector;
 
     UInt                      iFirstAdjacentElement, iVertexLocalId, iFaceLocalId, iEdgeLocalId;
     ID                        dofLocalId, dofGlobalId, dofAuxiliaryId;
@@ -472,8 +472,9 @@ void PostProcessingBoundary<MeshType>::buildVectors()
 
         for (UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace)
         {
+            clearVector(boundaryDofGlobalIdVector);
 
-            boundaryDofGlobalIdVector.clearVector();
+            //OLD: boundaryDofGlobalIdVector.clearVector();
             boundaryDofGlobalIdVector.resize( M_numTotalDofPerFaceVector[iFESpace] );
 
             // updating finite element information
@@ -501,14 +502,14 @@ void PostProcessingBoundary<MeshType>::buildVectors()
                         		M_dofGlobalIdVector[iFESpace].begin(), M_dofGlobalIdVector[iFESpace].end(), dofGlobalId );
                         if ( dofGlobalIdVectorIterator == M_dofGlobalIdVector[iFESpace].end() )
                         { // the dofGlobalId has been encountered for the first time
-                            boundaryDofGlobalIdVector( dofLocalId ) = numBoundaryDofVector[iFESpace];
+                            boundaryDofGlobalIdVector[ dofLocalId ] = numBoundaryDofVector[iFESpace];
                             M_dofGlobalIdVector[iFESpace].push_back( dofGlobalId ); // local to boundary global on this face
                             numBoundaryDofVector[iFESpace]++;
                         }
                         else
                         { // the dofGlobalId has been already inserted in the M_dofGlobalIdVector vector
                             dofAuxiliaryId = ( ID ) ( ( dofGlobalIdVectorIterator - M_dofGlobalIdVector[iFESpace].begin() ) );
-                            boundaryDofGlobalIdVector( dofLocalId ) = dofAuxiliaryId; // local to boundary global on this face
+                            boundaryDofGlobalIdVector[ dofLocalId ] = dofAuxiliaryId; // local to boundary global on this face
                         }
                     }
                 }
@@ -535,14 +536,14 @@ void PostProcessingBoundary<MeshType>::buildVectors()
                         		M_dofGlobalIdVector[iFESpace].begin(), M_dofGlobalIdVector[iFESpace].end(), dofGlobalId );
                         if ( dofGlobalIdVectorIterator == M_dofGlobalIdVector[iFESpace].end() )
                         { // the dofGlobalId has been encountered for the first time
-                            boundaryDofGlobalIdVector( dofLocalId ) = numBoundaryDofVector[iFESpace];
+                            boundaryDofGlobalIdVector[ dofLocalId ] = numBoundaryDofVector[iFESpace];
                             M_dofGlobalIdVector[iFESpace].push_back( dofGlobalId ); // local to boundary global on this face
                             numBoundaryDofVector[iFESpace]++;
                         }
                         else
                         { // the dofGlobalId has been already inserted in the M_dofGlobalIdVector vector
                             dofAuxiliaryId = ( ID ) ( dofGlobalIdVectorIterator - M_dofGlobalIdVector[iFESpace].begin() );
-                            boundaryDofGlobalIdVector( dofLocalId ) = dofAuxiliaryId; // local to boundary global on this face
+                            boundaryDofGlobalIdVector[ dofLocalId ] = dofAuxiliaryId; // local to boundary global on this face
                         }
                     }
                 }
@@ -562,14 +563,14 @@ void PostProcessingBoundary<MeshType>::buildVectors()
                 		M_dofGlobalIdVector[iFESpace].begin(), M_dofGlobalIdVector[iFESpace].end(), dofGlobalId );
                 if ( dofGlobalIdVectorIterator == M_dofGlobalIdVector[iFESpace].end() )
                 { // the dofGlobalId has been encountered for the first time
-                    boundaryDofGlobalIdVector( dofLocalId ) = numBoundaryDofVector[iFESpace];
+                    boundaryDofGlobalIdVector[ dofLocalId ] = numBoundaryDofVector[iFESpace];
                     M_dofGlobalIdVector[iFESpace].push_back( dofGlobalId ); // local to boundary global on this face
                     numBoundaryDofVector[iFESpace]++;
                 }
                 else
                 { // the dofGlobalId has been already inserted in the M_dofGlobalIdVector vector
                     dofAuxiliaryId = ( ID ) ( dofGlobalIdVectorIterator - M_dofGlobalIdVector[iFESpace].begin() ) ;
-                    boundaryDofGlobalIdVector( dofLocalId ) = dofAuxiliaryId; // local to boundary global on this face
+                    boundaryDofGlobalIdVector[ dofLocalId ] = dofAuxiliaryId; // local to boundary global on this face
                 }
             }
 
@@ -848,12 +849,12 @@ void PostProcessingBoundary<MeshType>::showDOFIndexMap( std::ostream& output ) c
         Int counter = 0;
         output << "\n***** Post Proc: Vector Indexes per Facet *****" << std::endl;
         output << M_vectorNumberingPerFacetVector[iFESpace].size() << std::endl;
-        for ( std::vector<VectorSimple<ID> >::iterator it1 = M_vectorNumberingPerFacetVector[iFESpace].begin();
+        for ( std::vector<std::vector<ID> >::iterator it1 = M_vectorNumberingPerFacetVector[iFESpace].begin();
                 it1<M_vectorNumberingPerFacetVector[iFESpace].end(); it1++ )
         {
             counter++;
             output << "Boundary Facet " << counter << ", indexes: " << std::endl;
-            for ( VectorSimple<ID>::iterator it2 = it1->begin(); it2<it1->end(); it2++ )
+            for ( std::vector<ID>::iterator it2 = it1->begin(); it2<it1->end(); it2++ )
             {
                 output << *it2 << ",";
             }
