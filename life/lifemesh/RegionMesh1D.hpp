@@ -1159,7 +1159,7 @@ public:
     //! Container of mesh Edges.
     Edges   edgeList;
     //! Boundary points list.
-    VectorSimple<point_Type * > _bPoints;
+    std::vector<point_Type * > _bPoints;
 
     /** @} */ // End of group Region Containers
 
@@ -1237,7 +1237,7 @@ protected:
 
 #ifdef NOT_BDATA_FIRST
     //! Boundary Edges Container
-    VectorSimple<EdgeType * > _bEdges;
+    std::vector<EdgeType * > _bEdges;
 #endif
 
     /** @} */ // End of group Face-To-Edge and Boundary Containers
@@ -2088,7 +2088,7 @@ RegionMesh1D<GEOSHAPE, MC>::setPoint
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename VectorSimple<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for (std::vector<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {

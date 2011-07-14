@@ -39,7 +39,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifearray/VectorSimple.hpp>
 #include <life/lifemesh/MeshUtility.hpp>
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/CurrentFE.hpp>
@@ -110,7 +109,7 @@ namespace LifeV
 */
 template <typename RegionMesh3D>
 Real checkVolumes( RegionMesh3D const & mesh,
-                   VectorSimple<bool> & elSign,
+                   std::vector<bool> & elSign,
                    Switch & sw )
 {
     Real meas = 0.0;
@@ -172,7 +171,7 @@ Real checkVolumes( RegionMesh3D const & mesh,
 */
 template <typename RegionMesh3D>
 void fixVolumes( RegionMesh3D & mesh,
-                 const VectorSimple<bool> & elSign,
+                 const std::vector<bool> & elSign,
                  Switch & sw )
 {
     typedef typename RegionMesh3D::VolumeShape GeoShape;
@@ -189,7 +188,7 @@ void fixVolumes( RegionMesh3D & mesh,
     for ( ID i = 0; i < mesh.numVolumes(); i++ )
     {
 
-        if ( ! elSign( i ) )
+        if ( ! elSign[ i ] )
         {
             switch ( GeoShape::S_shape )
             {
@@ -419,7 +418,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     // test now orientation
 
-    boost::shared_ptr<VectorSimple<bool> > elSign( new VectorSimple<bool> );
+    boost::shared_ptr<std::vector<bool> > elSign( new std::vector<bool> );
 
     Real meshMeasure = checkVolumes( mesh, *elSign, sw );
     UInt positive;

@@ -224,6 +224,29 @@ extern const UInt nDimensions;
 const ID NotAnId = std::numeric_limits<Int>::max();
 #define NDIM 3
 
+//! clearVector
+/*!
+ * This is a general purpose utility that clears up a std::vector<T>
+ * making sure that it does not uses up memory after the call
+ * Useful when memory is an issue, since clear() does not free memory
+ * */
+template<typename T>
+void clearVector(T & stdVector){
+    stdVector.clear();
+    T().swap(stdVector);
+}
+//! resizeVector
+/*!
+ * This is a general purpose utility that resizes up a std::vector<T>
+ * making sure that it does not uses up more memory after the call
+ * Useful when memory is an issue, since resize() does not free memory
+ */
+template<typename T>
+void resizeVector(T & stdVector, UInt const & newsize){
+    stdVector.resize(newsize);
+    if (stdVector.capacity() > stdVector.size())  T(stdVector).swap(stdVector);
+}
+
 } // end namespace LifeV
 
 #endif
