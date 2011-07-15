@@ -14,7 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_Iliac-coarse
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Aorta-coarse
 
 [Solver] ##########################################################################################
 ###################################################################################################
