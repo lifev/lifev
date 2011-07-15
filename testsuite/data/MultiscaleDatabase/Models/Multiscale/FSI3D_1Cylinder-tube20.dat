@@ -32,7 +32,7 @@ algorithm = '       Explicit            Default'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
-            0       FSI3D               IdealThoracicAortaA_RS2009_18_MonolithicGE
+            0       FSI3D               Cylinder_tube20_MonolithicGE
          '  
 ###################################################################################################
 
