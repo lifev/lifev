@@ -306,7 +306,7 @@ MultiscaleModel1D::saveSolution()
 
 #ifdef HAVE_MATLAB_POSTPROCESSING
     //Matlab post-processing
-    M_solver->postProcess( *M_exporterSolution );
+    M_solver->postProcess( *M_exporterSolution, M_data->dataTime()->time() );
 #endif
 
 }
