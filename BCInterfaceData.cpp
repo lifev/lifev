@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3DData class
+ *  @brief File containing the BCInterfaceData class
  *
  *  @date 17-07-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -45,8 +45,10 @@ namespace LifeV
 BCInterfaceData::BCInterfaceData() :
         M_base                  (),
         M_baseString            (),
-        M_baseRobin             (),
-        M_baseStringRobin       (),
+        M_baseRobinAlpha        (),
+        M_baseStringRobinAlpha  (),
+        M_baseRobinBeta         (),
+        M_baseStringRobinBeta   (),
         M_baseDirectional       (),
         M_baseStringDirectional (),
         M_mapBase               (),
@@ -112,8 +114,10 @@ BCInterfaceData::BCInterfaceData() :
 BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :
         M_base                  ( data.M_base ),
         M_baseString            ( data.M_baseString ),
-        M_baseRobin             ( data.M_baseRobin ),
-        M_baseStringRobin       ( data.M_baseStringRobin ),
+        M_baseRobinAlpha        ( data.M_baseRobinAlpha ),
+        M_baseStringRobinAlpha  ( data.M_baseStringRobinAlpha ),
+        M_baseRobinBeta         ( data.M_baseRobinBeta ),
+        M_baseStringRobinBeta   ( data.M_baseStringRobinBeta ),
         M_baseDirectional       ( data.M_baseDirectional ),
         M_baseStringDirectional ( data.M_baseStringDirectional ),
         M_mapBase               ( data.M_mapBase ),
@@ -145,8 +149,10 @@ BCInterfaceData::operator=( const BCInterfaceData& data )
     {
         M_base                  = data.M_base;
         M_baseString            = data.M_baseString;
-        M_baseRobin             = data.M_baseRobin;
-        M_baseStringRobin       = data.M_baseStringRobin;
+        M_baseRobinAlpha        = data.M_baseRobinAlpha;
+        M_baseStringRobinAlpha  = data.M_baseStringRobinAlpha;
+        M_baseRobinBeta         = data.M_baseRobinBeta;
+        M_baseStringRobinBeta   = data.M_baseStringRobinBeta;
         M_baseDirectional       = data.M_baseDirectional;
         M_baseStringDirectional = data.M_baseStringDirectional;
         M_mapBase               = data.M_mapBase;
@@ -196,7 +202,10 @@ BCInterfaceData::readBC( const std::string& fileName, const std::string& dataSec
     // Read base
     readBase( dataFile, dataSection + name + "/", M_base, M_baseString );
     if ( M_type == Robin )
-        readBase( dataFile, dataSection + name + "/Robin/", M_baseRobin, M_baseStringRobin );
+    {
+        readBase( dataFile, dataSection + name + "/RobinAlpha/", M_baseRobinAlpha, M_baseStringRobinAlpha );
+        readBase( dataFile, dataSection + name + "/RobinBeta/", M_baseRobinBeta, M_baseStringRobinBeta );
+    }
     if ( M_mode == Directional )
         readBase( dataFile, dataSection + name + "/Directional/", M_baseDirectional, M_baseStringDirectional );
 }

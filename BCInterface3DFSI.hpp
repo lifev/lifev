@@ -45,6 +45,7 @@
 
 #include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
 #include <lifemc/lifesolver/BCInterfaceData.hpp>
+#include <lifemc/lifesolver/BCInterfaceFactory.hpp>
 
 namespace LifeV
 {
@@ -61,8 +62,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceData                                                       data_Type;
+    typedef PhysicalSolverType                                    physicalSolver_Type;
+    typedef BCInterfaceData                                       data_Type;
 
     //@}
 
@@ -82,7 +83,12 @@ public:
     //@{
 
     void exportData( data_Type& /*data*/ ) {}
-    void assignFunction( const boost::shared_ptr< physicalSolver_Type >& /*physicalSolver*/, BCVectorInterface& /*base*/ ) {}
+
+    template< class BCBaseType >
+    void assignFunction( const boost::shared_ptr< physicalSolver_Type >& /*physicalSolver*/, BCBaseType& /*base*/ ) {}
+
+    void updatePhysicalSolverVariables() {}
+
 
     //@}
 
@@ -131,13 +137,15 @@ private:
  *	    <li> StructureDispToHarmonicExtension,
  *	    <li> StructureDispToSolid, 				    (not implemented)
  *	    <li> StructureToFluid
+ *	    <li> RobinWall
  *  <ol>
  *
  *	The class automatically recognize which FSI algorithm is used among:
  *  <ol>
  *      <li> EXACTJACOBIAN;
  *      <li> FIXEDPOINT;
- *      <li> MONOLITHIC (both GE and GI);
+ *      <li> MONOLITHIC_GE;
+ *      <li> MONOLITHIC_GI;
  *  </ol>
  */
 template< >
@@ -148,7 +156,15 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterfaceData                                                      data_Type;
+    typedef FSIOperator                                           physicalSolver_Type;
+    typedef boost::shared_ptr< physicalSolver_Type >              physicalSolverPtr_Type;
+
+    typedef BCInterfaceFactory< FSIOperator >                     factory_Type;
+    typedef factory_Type::bcFunctionPtr_Type                      bcFunctionPtr_Type;
+
+    typedef BCInterfaceData                                       data_Type;
+
+    typedef std::vector< bcFunctionPtr_Type >                     vectorFunction_Type;
 
     //@}
 
@@ -183,9 +199,13 @@ public:
     //! Assign a boundary function to the boundary condition vector base
     /*!
      * @param physicalSolver FSI physical solver,
-     * @param base boundary condition vector base
+     * @param base boundary condition base
      */
-    void assignFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base );
+    template< class BCBaseType >
+    void assignFunction( const physicalSolverPtr_Type& physicalSolver, BCBaseType& base );
+
+    //! Update the solver variables
+    void updatePhysicalSolverVariables();
 
     //@}
 
@@ -216,8 +236,11 @@ private:
     //! @name Private Methods
     //@{
 
-    template< class method >
-    void checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base );
+    template< class MethodType >
+    void checkFunction( BCVectorInterface& base );
+
+    template< class MethodType >
+    void checkFunction( BCVector& base );
 
     //@}
 
@@ -238,33 +261,112 @@ private:
         SolidLoadToStructure,
         StructureDispToHarmonicExtension,
         StructureDispToSolid,
-        StructureToFluid
+        StructureToFluid,
+        RobinWall
     };
 
     FSIFunction                                    M_FSIFunction;
 
-    // These are required since FSI BC are applied a posteriori, when setPhysicalSolver is called
+    physicalSolverPtr_Type                         M_physicalSolver;
+
+    // The following are required since the FSI BC are applied
+    // a posteriori, when setPhysicalSolver is called.
+
+    // Classical parameters
     bcName_Type                                    M_name;
     bcFlag_Type                                    M_flag;
     bcType_Type                                    M_type;
     bcMode_Type                                    M_mode;
     bcComponentsVec_Type                           M_comV;
+
+    // RobinViscoelastic
+    vectorFunction_Type                            M_vectorFunctionRobin;
+    FSIOperator::vectorPtr_Type                    M_robinRHS;
+    FSIOperator::vectorPtr_Type                    M_robinAlphaCoefficient;
+    FSIOperator::vectorPtr_Type                    M_robinBetaCoefficient;
 };
+
+// ===================================================
+// Methods
+// ===================================================
+template< class BCBaseType >
+inline void
+BCInterface3DFSI< FSIOperator >::assignFunction( const physicalSolverPtr_Type& physicalSolver, BCBaseType& base )
+{
+    // Set physical solver
+    M_physicalSolver = physicalSolver;
+
+    //Set mapMethod
+    std::map< std::string, FSIMethod > mapMethod;
+
+    mapMethod["exactJacobian"] = EXACTJACOBIAN;
+    mapMethod["fixedPoint"]    = FIXEDPOINT;
+    mapMethod["monolithicGE"]  = MONOLITHIC_GE;
+    mapMethod["monolithicGI"]  = MONOLITHIC_GI;
+
+    switch ( mapMethod[M_physicalSolver->data().method()] )
+    {
+    case EXACTJACOBIAN:
+
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface3DFSI::checkMethod                            exactJacobian" << "\n";
+#endif
+
+        checkFunction< FSIExactJacobian > ( base );
+
+        break;
+
+    case FIXEDPOINT:
+
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface3DFSI::checkMethod                            fixedPoint" << "\n";
+#endif
+
+        checkFunction< FSIFixedPoint > ( base );
+
+        break;
+
+    case MONOLITHIC_GE:
+
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface3DFSI::checkMethod                            monolithicGE" << "\n";
+#endif
+
+        checkFunction< FSIMonolithicGE >( base );
+
+        break;
+
+    case MONOLITHIC_GI:
+
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface3DFSI::checkMethod                            monolithicGI" << "\n";
+#endif
+
+        checkFunction< FSIMonolithicGI >( base );
+
+        break;
+
+    default:
+
+        std::cout << " !!! Warning:" << mapMethod[physicalSolver->data().method()] << " not assigned !!!" << std::endl;
+
+    }
+}
 
 // ===================================================
 // Private functions
 // ===================================================
-template< class method >
-inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base )
+template< class MethodType >
+inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& base )
 {
-    method *operMethod = dynamic_cast< method * > ( &*physicalSolver );
+    boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
 
     switch ( M_FSIFunction )
     {
     case DerFluidLoadToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          DerFluidLoadToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          DerFluidLoadToFluid" << "\n";
 #endif
 
         break;
@@ -272,7 +374,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case DerFluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          DerFluidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
         if ( !operMethod->isSolid() )
             return;
@@ -286,7 +388,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case DerHarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -301,7 +403,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case DerStructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          DerStructureDispToSolid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          DerStructureDispToSolid" << "\n";
 #endif
 
         break;
@@ -309,7 +411,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case FluidInterfaceDisp:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          FluidInterfaceDisp" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
         //operMethod->FluidInterfaceDisp( (LifeV::Vector&) operMethod->lambdaFluidRepeated() );
@@ -321,7 +423,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case FluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          FluidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
         if ( !operMethod->isSolid() )
@@ -336,7 +438,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case HarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -351,7 +453,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case SolidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          SolidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
         if ( !operMethod->isFluid() )
             return;
@@ -365,7 +467,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case StructureDispToHarmonicExtension:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -380,7 +482,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case StructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          StructureDispToSolid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          StructureDispToSolid" << "\n";
 #endif
 
         break;
@@ -388,7 +490,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
     case StructureToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          StructureToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          StructureToFluid" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -400,6 +502,54 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_
         base = *operMethod->bcvStructureToFluid();
 
         break;
+
+    default:
+
+        std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCVectorInterface !!!" << std::endl;
+    }
+}
+
+template< class MethodType >
+inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVector& base )
+{
+    boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
+
+    switch ( M_FSIFunction )
+    {
+    case RobinWall:
+
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          RobinWall" << "\n";
+#endif
+
+        if ( !operMethod->isSolid() )
+            return;
+
+        // Define the vectors
+        M_robinRHS.reset( new physicalSolver_Type::vector_Type( operMethod->dFESpace().map(), Repeated, Zero ) );
+        M_robinAlphaCoefficient.reset( new physicalSolver_Type::vector_Type( operMethod->dFESpace().map(), Repeated, Zero ) );
+        M_robinBetaCoefficient.reset( new physicalSolver_Type::vector_Type( operMethod->dFESpace().map(), Repeated, Zero ) );
+
+        // Set the vectors (still empty)
+        base.setRhsVector( *M_robinRHS, operMethod->dFESpace().dof().numTotalDof(), 0 );
+        base.setRobinCoeffVector( *M_robinAlphaCoefficient );
+        base.setBetaCoeffVector( *M_robinBetaCoefficient );
+
+        // Set the physical solver in the Robin functions for alpha and beta
+        for ( UInt i( 0 ); i < M_vectorFunctionRobin.size(); ++i )
+        {
+            boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
+                boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
+
+            if ( castedFunctionSolver != 0 )
+                castedFunctionSolver->setPhysicalSolver( M_physicalSolver );
+        }
+
+        break;
+
+    default:
+
+        std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCVector !!!" << std::endl;
     }
 }
 

@@ -43,31 +43,41 @@ namespace LifeV
 // Constructors
 // ===================================================
 BCInterface3DFSI< FSIOperator >::BCInterface3DFSI() :
-        M_FSIFunction   (),
-        M_name          (),
-        M_flag          (),
-        M_type          (),
-        M_mode          (),
-        M_comV          ()
+        M_FSIFunction           (),
+        M_physicalSolver        (),
+        M_name                  (),
+        M_flag                  (),
+        M_type                  (),
+        M_mode                  (),
+        M_comV                  (),
+        M_vectorFunctionRobin   (),
+        M_robinRHS              (),
+        M_robinAlphaCoefficient (),
+        M_robinBetaCoefficient  ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFunctionFSI::BCInterface3DFunctionFSI()" << "\n";
+    Debug( 5025 ) << "BCInterface3DFSI::BCInterface3DFSI()" << "\n";
 #endif
 
 }
 
 BCInterface3DFSI< FSIOperator >::BCInterface3DFSI( const data_Type& data ) :
-        M_FSIFunction   (),
-        M_name          (),
-        M_flag          (),
-        M_type          (),
-        M_mode          (),
-        M_comV          ()
+        M_FSIFunction           (),
+        M_physicalSolver        (),
+        M_name                  (),
+        M_flag                  (),
+        M_type                  (),
+        M_mode                  (),
+        M_comV                  (),
+        M_vectorFunctionRobin   (),
+        M_robinRHS              (),
+        M_robinAlphaCoefficient (),
+        M_robinBetaCoefficient  ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFunctionFSI::BCInterface3DFunctionFSI( data )" << "\n";
+    Debug( 5025 ) << "BCInterface3DFSI::BCInterface3DFSI( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -81,7 +91,7 @@ BCInterface3DFSI< FSIOperator >::exportData( data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFunctionFSIFunctionFile::exportData" << "\n";
+    Debug( 5025 ) << "BCInterface3DFSI::exportData" << "\n";
 #endif
 
     data.setName( M_name );
@@ -92,64 +102,60 @@ BCInterface3DFSI< FSIOperator >::exportData( data_Type& data )
 }
 
 void
-BCInterface3DFSI< FSIOperator >::assignFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base )
+BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
 {
-    //Set mapMethod
-    std::map< std::string, FSIMethod > mapMethod;
 
-    mapMethod["exactJacobian"]   = EXACTJACOBIAN;
-    mapMethod["fixedPoint"]      = FIXEDPOINT;
-    mapMethod["monolithicGE"]    = MONOLITHIC_GE;
-    mapMethod["monolithicGI"]    = MONOLITHIC_GI;
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5025 ) << "BCInterface3DFSI::updatePhysicalSolverVariables" << "\n";
+#endif
 
-    switch ( mapMethod[physicalSolver->data().method()] )
+    switch ( M_FSIFunction )
     {
-    case EXACTJACOBIAN:
+    case RobinWall:
+    {
+        if ( !M_physicalSolver->isSolid() )
+            return;
 
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            exactJacobian" << "\n";
-#endif
+        // Update the physical solver variables
+        for ( UInt i( 0 ); i < M_vectorFunctionRobin.size(); ++i )
+        {
+            boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
+                boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
 
-        checkFunction< FSIExactJacobian > ( physicalSolver, base );
+            if ( castedFunctionSolver != 0 )
+                castedFunctionSolver->updatePhysicalSolverVariables();
+        }
 
-        break;
+        // Set displacement at time tn
+        M_physicalSolver->exportFluidDisplacement( *M_robinRHS );
 
-    case FIXEDPOINT:
+        // Set coefficients
+        Int gid;
+        Real x, y, z;
+        Real alpha, beta;
+        Real t( M_physicalSolver->dataSolid()->getdataTime()->time() );
+        Real timeStep( M_physicalSolver->dataSolid()->getdataTime()->timeStep() );
 
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            fixedPoint" << "\n";
-#endif
+        for ( UInt i(0) ; i < M_physicalSolver->solidMeshPart().meshPartition()->numVertices() ; ++i )
+        {
+            gid = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).id();
 
-        checkFunction< FSIFixedPoint > ( physicalSolver, base );
+            x   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).x();
+            y   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).y();
+            z   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).z();
 
-        break;
+            alpha = M_vectorFunctionRobin[0]->functionTimeSpace( t, x, y, z, 0 );
+            beta  = M_vectorFunctionRobin[1]->functionTimeSpace( t, x, y, z, 0 );
 
-    case MONOLITHIC_GE:
-
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            monolithicGE" << "\n";
-#endif
-
-        checkFunction< FSIMonolithicGE >( physicalSolver, base );
-
-        break;
-
-    case MONOLITHIC_GI:
-
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            monolithicGI" << "\n";
-#endif
-
-        checkFunction< FSIMonolithicGI >( physicalSolver, base );
-
-        break;
-
+            (*M_robinAlphaCoefficient)[gid] = alpha + beta / timeStep;
+            (*M_robinBetaCoefficient)[gid]  = beta / timeStep;
+        }
+    }
     default:
-
-        std::cout << " !!! Warning:" << mapMethod[physicalSolver->data().method()] << " not assigned !!!" << std::endl;
-
+        ;// Do nothing
     }
 }
+
 
 // ===================================================
 // Set Methods
@@ -159,7 +165,7 @@ BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFunctionFSI::setData" << "\n";
+    Debug( 5025 ) << "BCInterface3DFSI::setData" << "\n";
 #endif
 
     //Set mapFunction
@@ -175,6 +181,7 @@ BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
     mapFunction["StructureDispToHarmonicExtension"] = StructureDispToHarmonicExtension;
     mapFunction["StructureDispToSolid"]             = StructureDispToSolid;
     mapFunction["StructureToFluid"]                 = StructureToFluid;
+    mapFunction["RobinWall"]                        = RobinWall;
 
     // Retrieving the strings
     M_FSIFunction = mapFunction[ data.baseString() ];
@@ -184,6 +191,21 @@ BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
     M_type = data.type();
     M_mode = data.mode();
     M_comV = data.comV();
+
+    if ( M_FSIFunction == RobinWall )
+    {
+        factory_Type factory;
+        M_vectorFunctionRobin.reserve(2);
+        data_Type temporaryData ( data );
+
+        // Create the mass term function
+        temporaryData.setRobinBaseAlpha();
+        M_vectorFunctionRobin.push_back( factory.createFunction( temporaryData ) );
+
+        // Create the RHS
+        temporaryData.setRobinBaseBeta();
+        M_vectorFunctionRobin.push_back( factory.createFunction( temporaryData ) );
+    }
 }
 
 } // Namespace LifeV
