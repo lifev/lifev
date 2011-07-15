@@ -260,7 +260,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         mode       = Normal
         function   = 0
         
-            [./Robin]
+            [./RobinAlpha]
         	functionSolver = '29000 * f_timeStep'
         	[../]
 

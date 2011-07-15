@@ -5,18 +5,41 @@
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Paolo Crosetto <paolo.crosetto@epfl.ch>
+#                 Jean Bonnemain <jean.bonemain@epfl.ch>
 #                 Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2011-03-10
+#           Date: 2011-07-14
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: FSI3D - Cylinder #######################################################################
+### MODEL: FSI3D - Aorta ##########################################################################
 ###################################################################################################
 
 [Multiscale]
-modelName        = FSI3D_TemplateGE
+modelName        = FSI3D_Aorta_BL_Coarse_MonolithicGE
 modelType        = FSI3D
-couplingFlags    = ''
+couplingFlags    = '2 9 8 5 4 3 6 7'
+
+### Note on the flags: 
+# 2: Ascending Aorta,        Area = 7.666204022361373e+00 - (RS_001: 6.7886675651 6.7425646930)        - Ratio 1.34 (sqrt: 1.066)
+# 9: Thoracic Aorta,         Area = 2.460573813714928e+00 - (RS_027: 2.1382464998 1.3069810837)
+# 8: Subclavian B (left),    Area = 4.031583374473228e-01 - (RS_007/RS_021: 0.5152997350 0.1734944543) - Ratio 0.81 (sqrt: 0.90)
+# 5: Common Carotid (right), Area = 4.485879453850000e-01 - (RS_005: 1.4313881528 0.3848451001)        - Ratio 0.41 (sqrt: 0.64)
+# 4: Vertebral (right),      Area = 7.038741686883122e-02 - (RS_006: 0.1075210086 0.0615752160)        - Ratio 0.69 (sqrt: 0.83)
+# 3: Subclavian B (right),   Area = 4.804978622581893e-01 - (RS_007/RS_021: 0.5152997350 0.1734944543) - Ratio 1
+# 6: Common Carotid (left),  Area = 4.343466128489345e-01 - (RS_015: 1.1309733553 0.2827433388 )       - Ratio 0.59 (sqrt: 0.77)
+# 7: Vertebral (left),       Area = 1.989038523172571e-01 - (RS_020: 0.1075210086 0.0615752160 )       - Ratio 0.94 (sqrt: 1.39)
+
+### Aorta dimensions (measures taken from the centerline):
+# Arch heigh                    = 18.2 cm 
+# Subclavian B (left) lenght    = 2.53 cm (1D length: 42.2 cm) -> 1D estimated area: 0.494807617460403 OK
+# Common Carotid (right) lenght = 3.07 cm (1D length: 9.4 cm)  -> 1D estimated area: 1.089591645162872
+# Vertebral (right) lenght      = 1.66 cm (1D length: 14.9 cm) -> 1D estimated area: 0.102402215598926
+# Subclavian B (right) lenght   = 2.80 cm (1D length: 42.2 cm) -> 1D estimated area: 0.492620711636019
+# Common Carotid (left) lenght  = 6.61 cm (1D length: 13.9 cm) -> 1D estimated area: 0.727606419396043
+# Vertebral (left) lenght       = 1.85 cm (1D length: 14.8 cm) -> 1D estimated area: 0.101816329653020
+# Subclavian A (left) lenght    = 5.03 cm (1D length: 3.4 cm)
+# Brachiocephalic (left) lenght = 5.25 cm (1D length: 3.4 cm)  - Ratio 1.54
+# Subclavian A (right) lenght   = 2.93 cm (1D length: 3.4 cm)
 
 
 
@@ -83,7 +106,7 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = tube20.mesh      #  1050 Vertex
+    mesh_file       = Aorta_BL_coarse_fluid.mesh
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -120,33 +143,14 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
     [../boundary_conditions]
     list = ' '
-    #list = 'InFlowEdge OutFlowEdge'
-
-        [./InFlowEdge]
-        type            = Essential
-        flag            = 20
-        mode            = Full
-        component       = 3
-        function        = 0
-
-        [../OutFlowEdge]
-        type            = Essential
-        flag            = 30
-        mode            = Full
-        component       = 3
-        function        = 0
-
-        [../]
 
     [../]
 
 
 
 [interface] # mesh dependent flags for the interface.
-fluid_flag      =  1   # default: 1
+fluid_flag      =  100   # default: 1
 tolerance       =  0   # how far points are to be considered the same on the interface
-
-
 
 [solid]
 
@@ -156,8 +160,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
     material_flag    = 1
     #externalPressure = 0
     #density          = 1.2
-    #young            = 4.0E6
-    #poisson          = 0.48
+    young            = 3.19E6 # Computed as 4E6 * (1-nu^2) to match the value of the 1D
+    poisson          = 0.45
 
     [../time_discretization]
     #timestep                   = 0.0001 # [s]
@@ -165,7 +169,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
-    mesh_file        = vessel20.mesh  # mesh file
+    mesh_file        = Aorta_BL_coarse_solid.mesh  # mesh file
     order            = P1
 
     [../miscellaneous]
@@ -179,80 +183,157 @@ tolerance       =  0   # how far points are to be considered the same on the int
     linesearch = 0
 
     [../boundary_conditions]
-    #list = ' '                                                                         # Free dispacement
-    list = 'Top_ReferencePressure Base_ReferencePressure OuterWall_ReferencePressure'   # Free dispacement + Reference pressure
-    #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
-    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ OuterWall_ReferencePressure'  # Free dispacement on XY + Reference pressure
-    #list = 'Top Base TopEdge BaseEdge OuterWall_ReferencePressure'                     # Fixed dispacement + Reference pressure
-
-        [./Top]
-        type       = Essential
-        flag       = 3
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../Base]
-        type       = Essential
+    #list = ' '                                                                          # Free dispacement
+    #list = 'OuterWall_RobinPhysiological'                                               # Free dispacement + Robin on the external Wall
+    #list = 'AscendingAorta_ReferencePressure    CeliacA_ReferencePressure 
+    #        SubclavianBLeft_ReferencePressure   SubclavianBRight_ReferencePressure 
+    #        VertebralLeft_ReferencePressure     VertebralRight_ReferencePressure
+    #        CommonCarotidLeft_ReferencePressure CommonCarotidRight_ReferencePressure
+    #        OuterWall_ReferencePressure'                                                # Free dispacement + Reference pressure            
+    list = 'AscendingAorta_Clumped              CeliacA_Clumped          
+            SubclavianBLeft_Clumped             SubclavianBRight_Clumped          
+            VertebralLeft_Clumped               VertebralRight_Clumped         
+            CommonCarotidLeft_Clumped           CommonCarotidRight_Clumped         
+            OuterWall_RobinPhysiological'                                                # Clumped + Robin on the external Wall
+    #list = 'AscendingAorta_Clumped              CeliacA_Clumped          
+    #        SubclavianBLeft_Clumped             SubclavianBRight_Clumped          
+    #        VertebralLeft_Clumped               VertebralRight_Clumped         
+    #        CommonCarotidLeft_Clumped           CommonCarotidRight_Clumped         
+    #        OuterWall_ReferencePressure'                                                # Clumped + Reference pressure
+        
+        [./AscendingAorta_ReferencePressure]
+        type       = Natural
         flag       = 2
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../TopEdge]
-        type       = Essential
-        flag       = 20
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../BaseEdge]
-        type       = Essential
-        flag       = 30
-        mode       = Full
-        component  = 3
-        function   = 0
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
         
-        [../Top_NoDisplacementOnZ]
-        type       = Essential
-        flag       = 3
-        mode       = Component
-        component  = '2'
-        function   = 0
+        [../CeliacA_ReferencePressure]
+        type       = Natural
+        flag       = 9
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
         
-        [../Base_NoDisplacementOnZ]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = '2'
-        function   = 0
+        [../SubclavianBLeft_ReferencePressure]
+        type       = Natural
+        flag       = 8
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
         
-        [../Top_ReferencePressure]
+        [../CommonCarotidRight_ReferencePressure]
+        type       = Natural
+        flag       = 5
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
+        
+        [../VertebralRight_ReferencePressure]
+        type       = Natural
+        flag       = 4
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
+        
+        [../SubclavianBRight_ReferencePressure]
         type       = Natural
         flag       = 3
         mode       = Normal
         functionSolver = '-s_externalPressure'
         
-        [../Base_ReferencePressure]
+        [../CommonCarotidLeft_ReferencePressure]
         type       = Natural
-        flag       = 2
+        flag       = 6
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
+        
+        [../VertebralLeft_ReferencePressure]
+        type       = Natural
+        flag       = 7
         mode       = Normal
         functionSolver = '-s_externalPressure'
         
         [../OuterWall_ReferencePressure]
         type       = Natural
-        flag       = 10
+        flag       = 1000
         mode       = Normal
         functionSolver = '-s_externalPressure'
         
+        [../AscendingAorta_Clumped]
+        type       = Essential
+        flag       = 2
+        mode       = Full
+        component  = 3
+        function   = 0
+                
+        [../CeliacA_Clumped]
+        type       = Essential
+        flag       = 9
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../SubclavianBLeft_Clumped]
+        type       = Essential
+        flag       = 8
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../CommonCarotidRight_Clumped]
+        type       = Essential
+        flag       = 5
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../VertebralRight_Clumped]
+        type       = Essential
+        flag       = 4
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../SubclavianBRight_Clumped]
+        type       = Essential
+        flag       = 3
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../CommonCarotidLeft_Clumped]
+        type       = Essential
+        flag       = 6
+        mode       = Full
+        component  = 3
+        function   = 0
+        
+        [../VertebralLeft_Clumped]
+        type       = Essential
+        flag       = 7
+        mode       = Full
+        component  = 3
+        function   = 0
+        
         [../OuterWall_Robin]
         type       = Robin
-        flag       = 10
+        flag       = 1000
         mode       = Normal
         function   = 0
         
             [./RobinAlpha]
-        	functionSolver = '-29000 * f_timeStep'
+        	functionSolver = '29000 * f_timeStep'
+        	[../]
+        	
+        [../OuterWall_RobinPhysiological]
+        type       = Robin
+        flag       = 1000
+        mode       = Normal
+        function   = 0
+        
+            [./RobinAlpha]
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=3.0; V2=1.0; V3=1.9; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R0 - Paolo
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=4.0; V2=1.5; V3=2.5; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R1
+            functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=5.5; V2=2.0; V3=3.5; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R2
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=8.0; V2=3.0; V3=5.0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R3
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=9.5; V2=4.0; V3=6.5; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R4
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=11.0; V2=5.0; V3=8.0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R5
         	[../]
 
         [../]
@@ -272,7 +353,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
     #prectype                = AztecOO
@@ -330,65 +411,13 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../boundary_conditions]
     list = 'Interface'                                              # Free dispacement
-    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ Interface' # Free dispacement on XY
-    #list = 'Top TopEdge Interface'                                  # Fixed displacement
-    #list = 'Top TopEdge Base BaseEdge NoInterface'                  # Test
 
-        [./Top]
+        [./Interface]
         type       = Essential
-        flag       = 3
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../Base]
-        type       = Essential
-        flag       = 2
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../TopEdge]
-        type       = Essential
-        flag       = 20
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../BaseEdge]
-        type       = Essential
-        flag       = 30
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../Interface]
-        type       = Essential
-        flag       = 1
+        flag       = 100
         mode       = Full
         component  = 3
         FSI        = StructureDispToHarmonicExtension
-        
-        [../NoInterface]
-        type       = Essential
-        flag       = 1
-        mode       = Full
-        component  = 3
-        function   = 0
-        
-        [../Top_NoDisplacementOnZ]
-        type       = Essential
-        flag       = 3
-        mode       = Component
-        component  = '2'
-        function   = 0
-        
-        [../Base_NoDisplacementOnZ]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = '2'
-        function   = 0
 
         [../]
 
@@ -407,7 +436,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
     #prectype                = AztecOO
