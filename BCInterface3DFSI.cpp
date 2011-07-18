@@ -136,6 +136,7 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
         Real t( M_physicalSolver->dataSolid()->getdataTime()->time() );
         Real timeStep( M_physicalSolver->dataSolid()->getdataTime()->timeStep() );
 
+        Int verticesGlobalNumber( M_physicalSolver->solidMeshPart().meshPartition()->numGlobalVertices() );
         for ( UInt i(0) ; i < M_physicalSolver->solidMeshPart().meshPartition()->numVertices() ; ++i )
         {
             gid = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).id();
@@ -144,11 +145,20 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
             y   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).y();
             z   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).z();
 
-            alpha = M_vectorFunctionRobin[0]->functionTimeSpace( t, x, y, z, 0 );
             beta  = M_vectorFunctionRobin[1]->functionTimeSpace( t, x, y, z, 0 );
+            alpha = M_vectorFunctionRobin[0]->functionTimeSpace( t, x, y, z, 0 );
 
-            (*M_robinAlphaCoefficient)[gid] = alpha + beta / timeStep;
-            (*M_robinBetaCoefficient)[gid]  = beta / timeStep;
+            beta /= timeStep;
+            alpha += beta;
+
+            (*M_robinAlphaCoefficient)[gid] = alpha;
+            (*M_robinBetaCoefficient)[gid]  = beta;
+
+            (*M_robinAlphaCoefficient)[gid + verticesGlobalNumber] = alpha;
+            (*M_robinBetaCoefficient)[gid + verticesGlobalNumber]  = beta;
+
+            (*M_robinAlphaCoefficient)[gid + verticesGlobalNumber * 2] = alpha;
+            (*M_robinBetaCoefficient)[gid + verticesGlobalNumber * 2]  = beta;
         }
     }
     default:
