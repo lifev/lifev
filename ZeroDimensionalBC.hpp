@@ -69,7 +69,7 @@ public:
     //! Constructor
     explicit ZeroDimensionalBC() : M_function(), M_bcType() {}
 
-    explicit ZeroDimensionalBC( const ZeroDimensionalBC& bc ) :
+    ZeroDimensionalBC( const ZeroDimensionalBC& bc ) :
                     M_function( bc.M_function ),
                     M_bcType  ( bc.M_bcType ) {}
 
