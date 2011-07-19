@@ -83,7 +83,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = tube025_unstructured_fluid.mesh      #  1050 Vertex
+    mesh_file       = tube20.mesh      #  1050 Vertex
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -160,7 +160,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
-    mesh_file        = tube025_unstructured_solid.mesh  # mesh file
+    mesh_file        = vessel20.mesh  # mesh file
     order            = P1
 
     [../miscellaneous]
@@ -175,11 +175,9 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [../boundary_conditions]
     #list = ' '                                                                         # Free dispacement
-    #list = 'Top_ReferencePressure Base_ReferencePressure OuterWall_ReferencePressure'   # Free dispacement + Reference pressure
+    list = 'Top_ReferencePressure Base_ReferencePressure OuterWall_ReferencePressure'   # Free dispacement + Reference pressure
     #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
     #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ OuterWall_ReferencePressure'  # Free dispacement on XY + Reference pressure
-    list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ OuterWall_ReferencePressure
-            NoXRigidMode NoYRigidMode'                                                  # Free dispacement on XY + Reference pressure + No Rigid modes
     #list = 'Top Base TopEdge BaseEdge OuterWall_ReferencePressure'                     # Fixed dispacement + Reference pressure
 
         [./Top]
@@ -224,20 +222,6 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         component  = '2'
         function   = 0
         
-        [../NoXRigidMode]
-        type       = Essential
-        flag       = 60
-        mode       = Component
-        component  = '0'
-        function   = 0
-
-        [../NoYRigidMode]
-        type       = Essential
-        flag       = 50
-        mode       = Component
-        component  = '1'
-        function   = 0
-                
         [../Top_ReferencePressure]
         type       = Natural
         flag       = 3
