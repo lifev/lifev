@@ -136,16 +136,16 @@ struct Ethiersteinman::Private
 Ethiersteinman::Ethiersteinman( int argc,
                                 char** argv )
         :
-        d( new Private )
+        M_data( new Private )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
-    d->data_file_name = data_file_name;
+    M_data->data_file_name = data_file_name;
 
-    d->Re = dataFile( "fluid/problem/Re", 1. );
-    d->nu = dataFile( "fluid/physics/viscosity", 1. ) /
+    M_data->Re = dataFile( "fluid/problem/Re", 1. );
+    M_data->nu = dataFile( "fluid/physics/viscosity", 1. ) /
             dataFile( "fluid/physics/density", 1. );
 
     // Test type
@@ -217,11 +217,11 @@ Ethiersteinman::Ethiersteinman( int argc,
 
     //    MPI_Init(&argc,&argv);
 
-    d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    M_data->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
-    d->comm.reset( new Epetra_SerialComm() );
+    M_data->comm.reset( new Epetra_SerialComm() );
 #endif
 
 }
@@ -246,10 +246,10 @@ Ethiersteinman::computeErrors(const vector_Type& velocityAndPressureSolution,
 }
 
 bool
-Ethiersteinman::checkConvergenceRate(const std::vector<std::string>& uFELabel,
+Ethiersteinman::checkConvergenceRate(const std::vector<std::string>& uFELabels,
                                      const std::vector<std::vector<LifeV::Real> >& uL2Error,
                                      const std::vector<UInt>& uConvergenceOrder,
-                                     const std::vector<std::string>& pFELabel,
+                                     const std::vector<std::string>& pFELabels,
                                      const std::vector<std::vector<LifeV::Real> > pL2Error,
                                      const std::vector<UInt>& pConvergenceOrder,
                                      const std::vector<UInt>& meshDiscretizations,
@@ -266,12 +266,12 @@ Ethiersteinman::checkConvergenceRate(const std::vector<std::string>& uFELabel,
     Real uErrRatio(0.0), pErrRatio(0.0); // Ratio of the error E1/E2
     std::string status(""); // Information string
 
-    UInt FEnumber(uFELabel.size());
+    UInt FENumber(uFELabels.size());
     UInt discretizationNumber(meshDiscretizations.size());
 
-    for (UInt iElem(0); iElem<FEnumber; ++iElem)
+    for (UInt iElem(0); iElem<FENumber; ++iElem)
     {
-        std::cout << "    - " << uFELabel[iElem] << "-" << pFELabel[iElem] << " ... " << std::endl;
+        std::cout << "    - " << uFELabels[iElem] << "-" << pFELabels[iElem] << " ... " << std::endl;
 
         // Everything is OK a priori
         status = "OK";
@@ -310,12 +310,12 @@ Ethiersteinman::checkConvergenceRate(const std::vector<std::string>& uFELabel,
 void
 Ethiersteinman::run()
 {
-    bool verbose = (d->comm->MyPID() == 0);
+    bool verbose = (M_data->comm->MyPID() == 0);
     int nproc;
     MPI_Comm_size(MPI_COMM_WORLD,&nproc);
     if(verbose){
         std::cout << " +-----------------------------------------------+" << std::endl
-                  << " |    RossEthierSteinman benchmark for LifeV     |" << std::endl
+                  << " |      EthierSteinman benchmark for LifeV       |" << std::endl
                   << " +-----------------------------------------------+" << std::endl
                   << std::endl
                   << " +-----------------------------------------------+" << std::endl
@@ -349,7 +349,7 @@ Ethiersteinman::run()
     // |               Loading the data                |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the data]" << std::endl;
-    GetPot dataFile( d->data_file_name.c_str() );
+    GetPot dataFile( M_data->data_file_name.c_str() );
     if (verbose)
     {
         switch(M_test)
@@ -373,12 +373,12 @@ Ethiersteinman::run()
         discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
         for ( UInt i( 0 ); i < discretizationNumber; ++i )
         {
-            meshDiscretization.push_back(dataFile( "fluid/space_discretization/mesh_size", 8, i ));
+            M_meshDiscretization.push_back(dataFile( "fluid/space_discretization/mesh_size", 8, i ));
         }
     }
     else
     {
-        meshDiscretization.push_back(0); // Just to be sure to have 1 element
+        M_meshDiscretization.push_back(0); // Just to be sure to have 1 element
         discretizationNumber = 1;
     }
 
@@ -388,11 +388,11 @@ Ethiersteinman::run()
         UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
         for ( UInt i( 0 ); i < FEnumber; ++i )
         {
-            uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order", 2, i ));
+            M_uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order", 2, i ));
         }
         for ( UInt i( 0 ); i < FEnumber; ++i )
         {
-            pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
+            M_pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
         }
     }
 
@@ -400,11 +400,11 @@ Ethiersteinman::run()
     UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
     for ( UInt i( 0 ); i < FEnumber; ++i )
     {
-        uFE.push_back(dataFile( "fluid/space_discretization/vel_order", "P1", i ));
+        M_uFELabels.push_back(dataFile( "fluid/space_discretization/vel_order", "P1", i ));
     }
     for ( UInt i( 0 ); i < FEnumber; ++i )
     {
-        pFE.push_back(dataFile( "fluid/space_discretization/press_order", "P1", i ));
+        M_pFELabels.push_back(dataFile( "fluid/space_discretization/press_order", "P1", i ));
     }
 
     // Initialization of the errors array
@@ -425,7 +425,7 @@ Ethiersteinman::run()
     // Loop on the mesh refinement
     for (UInt jDiscretization(0); jDiscretization<discretizationNumber; ++jDiscretization)
     {
-        UInt mElem = meshDiscretization[jDiscretization];
+        UInt mElem = M_meshDiscretization[jDiscretization];
 
         // Loop on the finite element
         for (UInt iElem(0); iElem<FEnumber; ++iElem)
@@ -443,11 +443,11 @@ Ethiersteinman::run()
                 oss << mElem;
                 fileName.append(oss.str());
                 fileName.append("_");
-                fileName.append(uFE[iElem]);
-                fileName.append(pFE[iElem]);
+                fileName.append(M_uFELabels[iElem]);
+                fileName.append(M_pFELabels[iElem]);
                 fileName.append(".txt");
-                out_norm.open(fileName.c_str());
-                out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
+                M_outNorm.open(fileName.c_str());
+                M_outNorm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
             }
 
             // +-----------------------------------------------+
@@ -486,27 +486,27 @@ Ethiersteinman::run()
             }
 
             if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
-            MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+            MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, M_data->comm);
             fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
             // +-----------------------------------------------+
             // |            Creating the FE spaces             |
             // +-----------------------------------------------+
             if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
-            std::string uOrder =  uFE[iElem];
-            std::string pOrder =  pFE[iElem];
+            std::string uOrder =  M_uFELabels[iElem];
+            std::string pOrder =  M_pFELabels[iElem];
 
             if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
                                    << "FE for the pressure: " << pOrder << std::endl;
 
             if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
             feSpacePtr_Type uFESpace;
-            uFESpace.reset(new feSpace_Type(meshPart, uOrder, 3, d->comm));
+            uFESpace.reset(new feSpace_Type(meshPart, uOrder, 3, M_data->comm));
             if (verbose) std::cout << "ok." << std::endl;
 
             if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
             feSpacePtr_Type pFESpace;
-            pFESpace.reset(new feSpace_Type(meshPart, pOrder, 1, d->comm));
+            pFESpace.reset(new feSpace_Type(meshPart, pOrder, 1, M_data->comm));
             if (verbose) std::cout << "ok." << std::endl;
 
             UInt totalVelDof   = uFESpace->dof().numTotalDof();
@@ -557,7 +557,7 @@ Ethiersteinman::run()
             OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                                       *uFESpace,
                                                       *pFESpace,
-                                                      d->comm);
+                                                      M_data->comm);
 
             MapEpetra fullMap(fluid.getMap());
 
@@ -651,7 +651,7 @@ Ethiersteinman::run()
 
                 if (verbose && M_exportNorms)
                 {
-                    out_norm << time  << " "
+                    M_outNorm << time  << " "
                     << ul2error << " "
                     << urelerr << " "
                     << pl2error << " "
@@ -683,18 +683,18 @@ Ethiersteinman::run()
             {
                 exporter.reset( new ExporterHDF5<mesh_Type > ( dataFile, "ethiersteinman" ) );
                 exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-                exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
+                exporter->setMeshProcId( meshPart.meshPartition(), M_data->comm->MyPID() );
             }
             else
 #endif
             {
                 if (exporterType.compare("none") == 0)
                 {
-                    exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
+                    exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, meshPart.meshPartition(), "ethiersteinman", M_data->comm->MyPID()) );
                 }
                 else
                 {
-                    exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
+                    exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, meshPart.meshPartition(), "ethiersteinman", M_data->comm->MyPID()) );
                 }
             }
 
@@ -766,7 +766,7 @@ Ethiersteinman::run()
 
                 if (verbose && M_exportNorms)
                 {
-                    out_norm << time  << " "
+                    M_outNorm << time  << " "
                     << ul2error << " "
                     << urelerr << " "
                     << pl2error << " "
@@ -795,7 +795,7 @@ Ethiersteinman::run()
 
             if (verbose && M_exportNorms)
             {
-                out_norm.close();
+                M_outNorm.close();
             }
 
             // ** BEGIN Accuracy test **
@@ -831,9 +831,9 @@ Ethiersteinman::run()
     if (verbose && (M_test == SpaceConvergence))
     {
         bool success;
-        success = checkConvergenceRate(uFE, uL2Error, uConvergenceOrder,
-                                       pFE, pL2Error, pConvergenceOrder,
-                                       meshDiscretization,
+        success = checkConvergenceRate(M_uFELabels, uL2Error, M_uConvergenceOrder,
+                                       M_pFELabels, pL2Error, M_pConvergenceOrder,
+                                       M_meshDiscretization,
                                        M_convTol);
 
         if (!success)

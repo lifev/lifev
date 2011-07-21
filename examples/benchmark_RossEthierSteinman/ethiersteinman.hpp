@@ -176,19 +176,19 @@ private:
     /*!
         For each type of finite elements the method uses the computed errors obtained with the
         different meshes to check if the order of convergence follows the theory predictions
-        @param uFELabel Vector containing the FE names for the velocity (e.g. P2, P1Bubble, P1)
+        @param uFELabels Vector containing the FE names for the velocity (e.g. P2, P1Bubble, P1)
         @param uL2Error Vector containing the computed errors for the velocity
         @param uConvergenceOrder Vector containing the convergence order corresponding to uFELabel
-        @param pFELabel Vector containing the FE names for the pressure (e.g. P2, P1Bubble, P1)
+        @param pFELabels Vector containing the FE names for the pressure (e.g. P2, P1Bubble, P1)
         @param pL2Error Vector containing the computed errors for the pressure
         @param pConvergenceOrder Vector containing the convergence order corresponding to pFELabel
         @param meshDiscretization Vector containing the subdivisions values used to generate the meshes
         @param convTolerance Tolerance for the test. The test is passed if (observed error)<convTolerance*(theory error prediction)
      */
-    bool checkConvergenceRate(const std::vector<std::string>& uFELabel,
+    bool checkConvergenceRate(const std::vector<std::string>& uFELabels,
                               const std::vector<std::vector<LifeV::Real> >& uL2Error,
                               const std::vector<LifeV::UInt>& uConvergenceOrder,
-                              const std::vector<std::string>& pFELabel,
+                              const std::vector<std::string>& pFELabels,
                               const std::vector<std::vector<LifeV::Real> > pL2Error,
                               const std::vector<LifeV::UInt>& pConvergenceOrder,
                               const std::vector<LifeV::UInt>& meshDiscretizations,
@@ -196,35 +196,35 @@ private:
 
 
     struct Private;
-    boost::shared_ptr<Private> d;
+    boost::shared_ptr<Private> M_data;
 
-    std::vector<LifeV::UInt> meshDiscretization;
-    std::vector<std::string> uFE;
-    std::vector<std::string> pFE;
-    std::vector<LifeV::UInt> uConvergenceOrder;
-    std::vector<LifeV::UInt> pConvergenceOrder;
+    std::vector<LifeV::UInt>   M_meshDiscretization;
+    std::vector<std::string>   M_uFELabels;
+    std::vector<std::string>   M_pFELabels;
+    std::vector<LifeV::UInt>   M_uConvergenceOrder;
+    std::vector<LifeV::UInt>   M_pConvergenceOrder;
 
     // Test to be performed (accuracy or convergence in space)
-    TestType    M_test;
-    LifeV::Real M_convTol; // Tolerance of the test (should be <1)
-                           // Actually for convTol=1, the test failed
-                           // if the improvement of accuracy is less
-                           // than predicted by the theory.
-                           // convTol lower down the theoretical bounds
-    LifeV::Real        M_accuracyTol;
+    TestType                   M_test;
+    LifeV::Real                M_convTol; // Tolerance of the test (should be <1)
+                                          // Actually for convTol=1, the test failed
+                                          // if the improvement of accuracy is less
+                                          // than predicted by the theory.
+                                          // convTol lower down the theoretical bounds
+    LifeV::Real                M_accuracyTol;
 
     // Data related to norm export
-    bool               M_exportNorms;
-    std::ofstream      out_norm;
+    bool                       M_exportNorms;
+    std::ofstream              M_outNorm;
 
     // Data related to solution export
-    bool               M_exportExactSolutions;
+    bool                       M_exportExactSolutions;
 
     // Initialization method
-    InitializationType M_initMethod;
+    InitializationType         M_initMethod;
 
     // Mesh source
-    MeshSourceType     M_meshSource;
+    MeshSourceType             M_meshSource;
 };
 
 #endif /* ETHIERSTEINMAN_H */
