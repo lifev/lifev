@@ -26,12 +26,14 @@
 
 /*!
     @file
-    @brief
+    @brief Benchmark to test the performance of LifeV for HPC
 
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 25-03-2011
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 2011-06-09
  */
+
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -63,7 +65,6 @@
 #include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
 #include <life/lifefem/TimeAdvanceBDF.hpp>
-#include "life/lifefunctions/RossEthierSteinmanDec.hpp"
 
 using namespace LifeV;
 
@@ -71,51 +72,102 @@ namespace
 {
 
 enum DiffusionType{ViscousStress, StiffStrain};
-enum MeshType{RegularMesh, File};
-enum InitType{Interpolation, Projection};
-enum ConvectionType{Explicit, SemiImplicit, KIO91};
+
+typedef RegionMesh3D<LinearTetra>         mesh_type;
+typedef MatrixEpetra<Real>                matrix_type;
+typedef VectorEpetra                      vector_type;
+typedef boost::shared_ptr<VectorEpetra>   vectorPtr_type;
+typedef FESpace< mesh_type, MapEpetra >   fespace_type;
+typedef boost::shared_ptr< fespace_type > fespacePtr_type;
+
+// +-----------------------------------------------+
+// | Data and functions for the boundary conditions|
+// +-----------------------------------------------+
+const Int INFLOW   = 1;
+const Int OUTFLOW1 = 2;
+const Int OUTFLOW2 = 3;
+const Int OUTFLOW3 = 4;
+const Int OUTFLOW4 = 5;
+const Int WALL     = 6;
+
+Real fZero( const Real& /* t */,
+                  const Real& /* x */,
+                  const Real& /* y */,
+                  const Real& /* z */,
+                  const ID& /* i */ )
+{
+    return 0.0;
+}
 
 /*
- * Some references for the KIO91 scheme:
- *
- * Karniadakis, G.E., Israeli, M. and Orszag, S.A. (1991)
- * High-OrderSplitting Methods for the Incompressible Navier-Stokes Equations,
- * Journal of Computational Physics, 97, 414-443.
- *
- * Canuto, C., Hussaini, M.Y., Quarteroni, A., Zang, T.A. (2007),
- * Spectral Methods Evolution to Complex Geometries and Applications to Fluid Dynamics
- */
+   fluxes as fourier interpolation of physiological values, taken from
+   Baek H, Jayaraman MV, Richardson PD, Karniadakis GE.
+   Flow instability and wall shear stress variation in intracranial aneurysms.
+   J R Soc Interface. 2010 Jun 6;7(47):967-88. Epub 2009 Dec 18.
 
-typedef RegionMesh3D<LinearTetra> mesh_type;
-typedef MatrixEpetra<Real> matrix_type;
-typedef VectorEpetra vector_type;
-typedef boost::shared_ptr<VectorEpetra> vectorPtr_type;
-typedef FESpace< mesh_type, MapEpetra > fespace_type;
-typedef boost::shared_ptr< fespace_type > fespacePtr_type;
-typedef LifeV::RossEthierSteinmanUnsteadyDec problem_Type;
-}
-
-void printErrors(const vector_type& solution, const Real& currentTime, fespacePtr_type uFESpace, fespacePtr_type pFESpace, bool verbose)
+*/
+Real aneurismFluxIn(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    vector_type velocity(uFESpace->map(),Repeated);
-    vector_type pressure(pFESpace->map(),Repeated);
-    if (verbose) std::cout << std::endl << "[Computed errors]" << std::endl;
-    velocity.subset(solution);
-    pressure.subset(solution, 3 * uFESpace->dof().numTotalDof());
-    Real uRelativeError, pRelativeError, uL2Error, pL2Error;
-    uL2Error = uFESpace->l2Error (problem_Type::uexact, velocity, currentTime, &uRelativeError );
-    pL2Error = pFESpace->l20Error(problem_Type::pexact, pressure, currentTime, &pRelativeError );
-    if (verbose) std::cout << "Velocity" << std::endl;
-    if (verbose) std::cout << "  L2 error      : " << uL2Error << std::endl;
-    if (verbose) std::cout << "  Relative error: " << uRelativeError << std::endl;
-    if (verbose) std::cout << "Pressure" << std::endl;
-    if (verbose) std::cout << "  L2 error      : " << pL2Error << std::endl;
-    if (verbose) std::cout << "  Relative error: " << pRelativeError << std::endl;
+    // We change the flux for our geometry
+    const Real pi         = 3.141592653589793;
+    const Real area       = 0.0907122;
+    const Real areaFactor = area/((0.6/2)*(0.6/2)*pi);
+
+    // Unit conversion from ml/min to cm^3/s
+    const Real unitFactor = 1./ 60.;
+
+    // T is the period of the cardiac cycle
+    const Real T          = 1.0;
+
+    // a0 is the average VFR (the value is taken from Karniadakis p970)
+    const Real a0         = 255;
+
+    // Fourrier
+    const Int M(7);
+    const Real a[M] = {-0.152001,-0.111619, 0.043304,0.028871,0.002098,-0.027237,-0.000557};
+    const Real b[M] = { 0.129013,-0.031435,-0.086106,0.028263,0.010177, 0.012160,-0.026303};
+
+    Real flux(0);
+    const Real xi(2*pi*t/T);
+
+    flux = a0;
+    Int k(1);
+    for (; k<=M ; ++k)
+        flux += a0*(a[k-1]*cos(k*xi) + b[k-1]*sin(k*xi));
+
+    return - flux * areaFactor * unitFactor;
+}
+
+/*
+ * This function imposes a flat profile for the inflow.
+ * It is not the best choice as a boundary condition.
+ * However this is satisfactory enough for a benchmark
+ */
+Real aneurismFluxInVectorial(const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+    Real n1(-0.000019768882940);
+    Real n2(-0.978289616345544);
+    Real n3( 0.207242433298975);
+    Real flux(aneurismFluxIn(t,x,y,z,i));
+    Real area(0.0907122); // Computed with the triangle on the INLET boundary
+
+    switch(i) {
+    case 0:
+        return n1*flux/area;
+    case 1:
+        return n2*flux/area;
+    case 2:
+        return n3*flux/area;
+    default:
+        return 0.0;
+    }
+}
+
 }
 
 
-int
-main( int argc, char** argv )
+Int
+main( Int argc, char** argv )
 {
     // +-----------------------------------------------+
     // |            Initialization of MPI              |
@@ -123,7 +175,7 @@ main( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
-    int nproc;
+    Int nproc;
     MPI_Comm_size(MPI_COMM_WORLD, &nproc);
 #else
     boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
@@ -133,12 +185,12 @@ main( int argc, char** argv )
     if(verbose){
         std::cout
             << " +-----------------------------------------------+" << std::endl
-            << " |            OseenAssembler example             |" << std::endl
+            << " |          HPC Navier-Stokes benchmark          |" << std::endl
             << " +-----------------------------------------------+" << std::endl
             << std::endl
             << " +-----------------------------------------------+" << std::endl
             << " |           Author: Gwenol Grandperrin          |" << std::endl
-            << " |             Date: 2010-03-25                  |" << std::endl
+            << " |             Date: 2011-06-28                  |" << std::endl
             << " +-----------------------------------------------+" << std::endl
             << std::endl;
 
@@ -161,46 +213,39 @@ main( int argc, char** argv )
     globalChrono.start();
     initChrono.start();
 
-    // **** Stupid GetPot stuff ****
+    // ******* GetPot stuff ********
     GetPot command_line(argc,argv);
     const std::string dataFileName = command_line.follow("data", 2, "-f","--file");
     GetPot dataFile(dataFileName);
     // *****************************
 
     // Physical quantity
-    const Real viscosity      = 0.01;
-    const Real density        = 1.0;
+    const Real viscosity       = dataFile("problem/viscosity",0.035);
+    const Real density         = dataFile("problem/density",1.0);
 
     // Time discretization
-    const Real initialTime    = 0.0;
-    const Real endTime        = 1e-2;
-    const Real timestep       = 1e-3;
+    const Real initialTime     = dataFile("problem/initial_time",0.0);
+    const Real endTime         = dataFile("problem/end_time",1e-2);
+    const Real timestep        = dataFile("problem/timestep",1e-3);
 
-    // Space discretization
-    const UInt numDimensions  = 3;
-    const MeshType meshSource = RegularMesh;
-    const UInt numMeshElem    = 10;
+    if (verbose) std::cout << "Viscosity    : " << viscosity << std::endl;
+    if (verbose) std::cout << "Density      : " << density << std::endl;
+    if (verbose) std::cout << "Initial time : " << initialTime << std::endl;
+    if (verbose) std::cout << "End time     : " << endTime << std::endl;
+    if (verbose) std::cout << "Timestep     : " << timestep << std::endl;
+
+    // Finite element
+    std::string uOrder("P2");
+    std::string pOrder("P1");
 
     // Numerical scheme
     const DiffusionType diffusionType = ViscousStress;
-          UInt BDFOrder = 3;
-    const InitType initializationMethod = Interpolation;
-    const ConvectionType convectionTerm = KIO91;
+    UInt BDFOrder = 1;
 
-    // EthierSteinman data
-    problem_Type::setA(1.0);
-    problem_Type::setD(1.0);
-    problem_Type::setViscosity(viscosity);
-    problem_Type::setDensity(density);
+    // Preconditioner
+    std::string precName       = dataFile("prec/prectype","none");
 
-    if(diffusionType == StiffStrain)
-    {
-        problem_Type::setFlagStrain(1);
-    }
-    else
-    {
-        problem_Type::setFlagStrain(0);
-    }
+    const bool reusePreconditioner = false;
 
     // +-----------------------------------------------+
     // |               Loading the mesh                |
@@ -210,32 +255,11 @@ main( int argc, char** argv )
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
 
     // Building the mesh from the source
-    if(meshSource == RegularMesh)
-    {
-        regularMesh3D( *fullMeshPtr,
-                       1,
-                       numMeshElem, numMeshElem, numMeshElem,
-                       false,
-                       2.0,   2.0,   2.0,
-                       -1.0,  -1.0,  -1.0);
-
-        if (verbose) std::cout << "Mesh source: regular mesh("
-                               << numMeshElem << "x" << numMeshElem << "x" << numMeshElem << ")" << std::endl;
-    }
-    else if(meshSource == File)
-    {
-        MeshData meshData;
-        meshData.setup(dataFile, "fluid/space_discretization");
-        readMesh(*fullMeshPtr, meshData);
-
-        if (verbose) std::cout << "Mesh source: file("
-                               << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
-    }
-    else
-    {
-        if (verbose) std::cout << std::endl << "Error: Unknown source type for the mesh" << std::endl;
-        exit(1);
-    }
+    MeshData meshData;
+    meshData.setup(dataFile, "problem");
+    if (verbose) std::cout << "Mesh source: file("
+                           << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
+    readMesh(*fullMeshPtr, meshData);
 
     if (verbose) std::cout << "Mesh size  : " << fullMeshPtr->maxH() << std::endl;
     if (verbose) std::cout << "Partitioning the mesh ... " << std::endl;
@@ -246,14 +270,12 @@ main( int argc, char** argv )
     // |            Creating the FE spaces             |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
-    std::string uOrder("P2");
-    std::string pOrder("P1");
 
     if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
                            << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
-    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
+    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, nDimensions, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
@@ -264,7 +286,7 @@ main( int argc, char** argv )
     MapEpetra solutionMap(uFESpace->map()+pFESpace->map());
 
     // Pressure offset in the vector
-    UInt pressureOffset = numDimensions * uFESpace->dof().numTotalDof();
+    UInt pressureOffset = nDimensions * uFESpace->dof().numTotalDof();
 
     if (verbose) std::cout << "Total Velocity Dof: " << pressureOffset << std::endl;
     if (verbose) std::cout << "Total Pressure Dof: " << pFESpace->dof().numTotalDof() << std::endl;
@@ -273,23 +295,22 @@ main( int argc, char** argv )
     // |             Boundary conditions               |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Boundary conditions]" << std::endl;
-    BCHandler bcHandler;
-    BCFunctionBase uDirichlet( problem_Type::uexact );
-    BCFunctionBase uNeumann( problem_Type::fNeumann );
+    boost::shared_ptr<BCHandler> bcHandler;
+    bcHandler.reset(new BCHandler);
+    BCFunctionBase uZero(fZero);
+    BCFunctionBase uFlux(aneurismFluxInVectorial);
 
-    if (verbose) std::cout << "Setting Neumann BC... " << std::flush;
-    bcHandler.addBC( "Flux", 1, Natural, Full, uNeumann, 3 );
-    if (verbose) std::cout << "ok." << std::endl;
-
-    if (verbose) std::cout << "Setting Dirichlet BC... " << std::flush;
-    for (UInt iDirichlet(2);iDirichlet<=26;++iDirichlet)
-    {
-        bcHandler.addBC( "Wall", iDirichlet, Essential, Full, uDirichlet, 3 );
-    }
+    if (verbose) std::cout << "Setting BC... " << std::flush;
+    bcHandler->addBC( "Inflow"  , INFLOW  , Essential, Full, uFlux, 3 );
+    bcHandler->addBC( "Outflow1", OUTFLOW1, Natural  , Full, uZero, 3 );
+    bcHandler->addBC( "Outflow2", OUTFLOW2, Natural  , Full, uZero, 3 );
+    bcHandler->addBC( "Outflow3", OUTFLOW3, Natural  , Full, uZero, 3 );
+    bcHandler->addBC( "Outflow4", OUTFLOW4, Natural  , Full, uZero, 3 );
+    bcHandler->addBC( "Wall"    , WALL    , Essential, Full, uZero, 3 );
     if (verbose) std::cout << "ok." << std::endl;
 
     // Update the BCHandler (internal data related to FE)
-    bcHandler.bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
+    bcHandler->bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
 
     // +-----------------------------------------------+
     // |              Matrices Assembly                |
@@ -354,7 +375,10 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << "Setting up the solver... " << std::flush;
     linearSolver.setDataFromGetPot(dataFile,"solver");
+
+    // Creating the preconditioner
     linearSolver.setupPreconditioner(dataFile,"prec");
+
     if (verbose) std::cout << "done" << std::endl;
 
     linearSolver.setCommunicator(Comm);
@@ -381,108 +405,42 @@ main( int argc, char** argv )
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Computing the initial solution ... " << std::endl;
-    if(convectionTerm == KIO91) BDFOrder = 3;
 
     // bdf object to store the previous solutions
     TimeAdvanceBDF<vector_type> bdf;
     bdf.setup(BDFOrder);
-    TimeAdvanceBDF<vector_type> bdfConvection;
-    bdfConvection.setup(BDFOrder);
-    TimeAdvanceBDF<vector_type> bdfConvectionInit; // Just for KIO91
-    bdfConvectionInit.setup(BDFOrder);
     Real currentTime = initialTime-timestep*BDFOrder;
 
-    if(convectionTerm == KIO91)
-    {
-        uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
-        *solution *= 0;
-        *solution = *velocity;
-        *beta *= 0;
-        oseenAssembler.addConvectionRhs(*beta,*solution);
-        bdfConvection.setInitialCondition( *beta );
-        bdfConvectionInit.setInitialCondition( *beta );
-
-        if(initializationMethod == Projection)
-        {
-            for(UInt i(0);i<BDFOrder;++i)
-            {
-                uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime-(3-i)*timestep);
-                *solution = *velocity;
-                *beta *= 0;
-                oseenAssembler.addConvectionRhs(*beta,*solution);
-                bdfConvectionInit.shiftRight( *beta );
-            }
-        }
-    }
-
-    uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
-    pFESpace->interpolate(problem_Type::pexact,*pressure,currentTime);
+    *velocity *= 0;
+    *pressure *= 0;
     *solution *= 0;
-    *solution = *velocity;
-    solution->add(*pressure,pressureOffset);
     bdf.setInitialCondition( *solution );
 
-    // Initial solution (interpolation or projection)
+    // Initial solution (obtained from a Stokes problem)
+    linearSolver.setTolerance(1e-6);
     currentTime += timestep;
     for ( ; currentTime <=  initialTime + timestep/2.; currentTime += timestep)
     {
+
+        if (verbose) std::cout << "Updating the system... " << std::flush;
         *rhs  *= 0.;
-        *beta *= 0.;
+        rhs->globalAssemble();
+        systemMatrix.reset(new matrix_type( solutionMap ));
+        *systemMatrix += *baseMatrix;
+        if (verbose) std::cout << "done" << std::endl;
+
+        if (verbose) std::cout << "Applying BC... " << std::flush;
+        bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),*bcHandler,uFESpace->feBd(),1.0,currentTime);
+        systemMatrix->globalAssemble();
+        if (verbose) std::cout << "done" << std::endl;
+
+        if (verbose) std::cout << "Solving the system... " << std::endl;
         *solution *= 0;
-
-        uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
-        pFESpace->interpolate(problem_Type::pexact,*pressure,currentTime);
-        *solution = *velocity;
-        solution->add(*pressure,pressureOffset);
-
-        if (initializationMethod == Projection)
-        {
-            uFESpace->interpolate(problem_Type::uderexact, *rhs, currentTime);
-            rhs->globalAssemble();
-            *rhs *= -1.;
-            *rhs = (*massMatrix)*(*rhs);
-
-            if (verbose) std::cout << "Updating the system... " << std::flush;
-            systemMatrix.reset(new matrix_type( solutionMap ));
-            *systemMatrix += *baseMatrix;
-            if(convectionTerm == SemiImplicit)
-            {
-                oseenAssembler.addConvection(systemMatrix,*solution);
-            }
-            else if(convectionTerm == Explicit)
-            {
-                oseenAssembler.addConvectionRhs(*rhs,*solution);
-            }
-            else if(convectionTerm == KIO91)
-            {
-                *rhs -= bdfConvectionInit.extrapolation();
-                *beta *= 0;
-                oseenAssembler.addConvectionRhs(*beta,*solution);
-                bdfConvectionInit.shiftRight(*beta);
-            }
-
-            if (verbose) std::cout << "done" << std::endl;
-
-            if (verbose) std::cout << "Applying BC... " << std::flush;
-            bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,currentTime);
-            systemMatrix->globalAssemble();
-            if (verbose) std::cout << "done" << std::endl;
-
-            if (verbose) std::cout << "Solving the system... " << std::endl;
-            *solution *= 0;
-            linearSolver.setMatrix(*systemMatrix);
-            linearSolver.solveSystem(*rhs,*solution,systemMatrix);
-        }
+        linearSolver.setMatrix(*systemMatrix);
+        linearSolver.solveSystem(*rhs,*solution,systemMatrix);
 
         // Updating bdf
         bdf.shiftRight( *solution );
-
-        if(convectionTerm == KIO91)
-        {
-            *beta *= 0;
-            oseenAssembler.addConvectionRhs(*beta,*solution);
-            bdfConvection.shiftRight(*beta);
-        }
 
     }
 
@@ -510,16 +468,16 @@ main( int argc, char** argv )
     initChrono.stop();
     if (verbose) std::cout << "Initialization time: " << initChrono.diff() << " s." << std::endl;
 
-    // +-----------------------------------------------+
-    // |             Computing the error               |
-    // +-----------------------------------------------+
-    printErrors(*solution,currentTime, uFESpace,pFESpace,verbose);
+    // Reset the preconditioner
+    linearSolver.resetPreconditioner();
+    linearSolver.setReusePreconditioner(reusePreconditioner);
+    linearSolver.setTolerance(1e-10);
 
     // +-----------------------------------------------+
     // |             Solving the problem               |
     // +-----------------------------------------------+
     if (verbose) std::cout<< std::endl << "[Solving the problem]" << std::endl;
-    int iter = 1;
+    Int iter = 1;
 
     for ( ; currentTime <= endTime + timestep/2.; currentTime += timestep, iter++)
     {
@@ -533,27 +491,18 @@ main( int argc, char** argv )
         *rhs  = *massMatrix*bdf.rhsContributionFirstDerivative();
 
         systemMatrix.reset(new matrix_type( solutionMap ));
-        double alpha = bdf.coefficientFirstDerivative( 0 ) / timestep;
+        Real alpha = bdf.coefficientFirstDerivative( 0 ) / timestep;
         *systemMatrix += *massMatrix*alpha;
         *systemMatrix += *baseMatrix;
 
-        if(convectionTerm == SemiImplicit)
-        {
-            *beta = bdf.extrapolation(); // Extrapolation for the convective term
-            oseenAssembler.addConvection(systemMatrix,*beta);
-        }
-        else if(convectionTerm == Explicit)
-        {
-            oseenAssembler.addConvectionRhs(*rhs,*solution);
-        }
-        else if(convectionTerm == KIO91)
-        {
-            *rhs -= bdfConvection.extrapolation();
-        }
+        // SemiImplicit
+        *beta = bdf.extrapolation(); // Extrapolation for the convective term
+        oseenAssembler.addConvection(systemMatrix,*beta);
+
         if (verbose) std::cout << "done" << std::endl;
 
         if (verbose) std::cout << "Applying BC... " << std::flush;
-        bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,currentTime);
+        bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),*bcHandler,uFESpace->feBd(),1.0,currentTime);
         systemMatrix->globalAssemble();
         if (verbose) std::cout << "done" << std::endl;
 
@@ -565,23 +514,11 @@ main( int argc, char** argv )
         // Updating the BDF scheme
         bdf.shiftRight( *solution );
 
-        if(convectionTerm == KIO91)
-        {
-            *beta *= 0;
-            oseenAssembler.addConvectionRhs(*beta,*solution);
-            bdfConvection.shiftRight(*beta);
-        }
-
         // Exporting the solution
         exporter.postProcess( currentTime );
 
         iterChrono.stop();
         if (verbose) std::cout << "Iteration time: " << iterChrono.diff() << " s." << std::endl;
-
-        // +-----------------------------------------------+
-        // |             Computing the error               |
-        // +-----------------------------------------------+
-        printErrors(*solution,currentTime, uFESpace,pFESpace,verbose);
 
         MPI_Barrier(MPI_COMM_WORLD);
     }
@@ -600,5 +537,4 @@ main( int argc, char** argv )
 #endif
     return( EXIT_SUCCESS );
 }
-
 

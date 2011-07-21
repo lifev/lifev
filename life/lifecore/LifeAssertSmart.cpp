@@ -48,12 +48,12 @@ void breakIntoDebugger()
 {
     // MSVC, BCB,
 #if (defined _MSC_VER) || (defined __BORLANDC__)
-    __asm { int 3 };
+//    __asm { int 3 };
 #elif defined(__GNUC__)
     // GCC
-    __asm ("int $0x3");
+//    __asm ("int $0x3");
 #else
-#  error Please supply instruction to break into code
+//#  error Please supply instruction to break into code
 #endif
 }
 

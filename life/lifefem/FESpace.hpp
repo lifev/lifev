@@ -383,7 +383,8 @@ public:
     //! Returns map
     const map_Type&		map()	const { return *M_map; }
     map_Type&			map()		  { return *M_map; }
-    const boost::shared_ptr<const MapType>			mapPtr() const  { return M_map; }
+
+    const mapPtr_Type& mapPtr() const { return M_map; }
 
     //! Returns the velocity dof
     const DOF&			dof()	const { return *M_dof; }
@@ -1240,7 +1241,7 @@ feInterpolateValue(const ID& elementID, const vector_type& solutionVector, const
     if (pt.size()>=3)    z=pt[2];
 
     M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
-    
+
     // Store the number of local DoF
     UInt nDof(dof().numLocalDof());
     UInt totalDof(dof().numTotalDof());

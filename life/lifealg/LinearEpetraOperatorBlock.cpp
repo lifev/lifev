@@ -217,8 +217,8 @@ int BlockOperator::Apply(const Epetra_MultiVector & X, Epetra_MultiVector & Y) c
     {
         Xblock[jblock].reset( new Epetra_MultiVector(*M_domainBlockMapsShift[jblock], nMultiVectors) );
         Xblock[jblock]->PutScalar(0.0);
-        EPETRA_CHK_ERR( Xblock[jblock]->Import(X, *M_mono2blockDomain[jblock], Insert) );
-        EPETRA_CHK_ERR(Xblock[jblock]->ReplaceMap(*M_domainBlockMaps[jblock]) );
+         Xblock[jblock]->Import(X, *M_mono2blockDomain[jblock], Insert) ;
+        Xblock[jblock]->ReplaceMap(*M_domainBlockMaps[jblock]) ;
     }
 
     // Allocate Space for the Solution
@@ -233,16 +233,16 @@ int BlockOperator::Apply(const Epetra_MultiVector & X, Epetra_MultiVector & Y) c
     for (UInt iblock=0; iblock < M_nBlockRows; ++iblock)
         for (UInt jblock=0; jblock < M_nBlockCols; ++jblock)
         {
-            EPETRA_CHK_ERR(M_oper(iblock, jblock)->Apply(*Xblock[jblock], *tmpYblock[iblock]));
-            EPETRA_CHK_ERR(Yblock[iblock]->Update(1.0, *tmpYblock[iblock], 1.0));
+            M_oper(iblock, jblock)->Apply(*Xblock[jblock], *tmpYblock[iblock]);
+            Yblock[iblock]->Update(1.0, *tmpYblock[iblock], 1.0);
         }
 
     //Reassemble the results
     Y.PutScalar(0.0);
     for (UInt iblock=0; iblock<M_nBlockRows; ++iblock)
     {
-        EPETRA_CHK_ERR(Yblock[iblock]->ReplaceMap(*M_rangeBlockMapsShift[iblock]) );
-        EPETRA_CHK_ERR(Y.Import(*Yblock[iblock], *M_block2monoRange[iblock], Insert) );
+        Yblock[iblock]->ReplaceMap(*M_rangeBlockMapsShift[iblock]) ;
+        Y.Import(*Yblock[iblock], *M_block2monoRange[iblock], Insert) ;
     }
     return 0;
 
@@ -285,7 +285,7 @@ int BlockOperator::merge(const Epetra_MultiVector & vBlock, Epetra_MultiVector &
     ASSERT_PRE(vBlock.NumVectors() == vMono.NumVectors(), "The number of vectors in vBlock and vMono is different" );
 
     Epetra_MultiVector tmp(vBlock);
-    EPETRA_CHK_ERR( tmp.ReplaceMap(*M_domainBlockMapsShift[jblock]) );
+     tmp.ReplaceMap(*M_domainBlockMapsShift[jblock]) ;
 
     return vMono.Import(tmp,*M_block2monoDomain[jblock], Insert);
 
@@ -298,9 +298,9 @@ int BlockOperator::extract(Epetra_MultiVector & vBlock, const Epetra_MultiVector
     ASSERT_PRE(M_rangeMap->SameAs(vMono.Map()), "vMono does not have the correct map");
     ASSERT_PRE(vBlock.NumVectors() == vMono.NumVectors(), "The number of vectors in vBlock and vMono is different" );
 
-    EPETRA_CHK_ERR( vBlock.ReplaceMap(*M_rangeBlockMapsShift[iblock]) );
-    EPETRA_CHK_ERR( vBlock.Import(vMono, *M_mono2blockDomain[iblock], Insert) );
-    EPETRA_CHK_ERR( vBlock.ReplaceMap(*M_rangeBlockMaps[iblock]) );
+     vBlock.ReplaceMap(*M_rangeBlockMapsShift[iblock]) ;
+     vBlock.Import(vMono, *M_mono2blockDomain[iblock], Insert) ;
+     vBlock.ReplaceMap(*M_rangeBlockMaps[iblock]) ;
     return 0;
 }
 
@@ -309,7 +309,7 @@ int BlockOperator::split(const Epetra_MultiVector & up,
 {
     UInt block(0);
     for (vector_container::iterator it=vi.begin(); it != vi.end(); ++it, ++block)
-        EPETRA_CHK_ERR( extract(**it, up, block) );
+         extract(**it, up, block) ;
     return 0;
 }
 
@@ -317,7 +317,7 @@ int BlockOperator::merge( Epetra_MultiVector & up, const vector_container & vi) 
 {
     UInt block(0);
     for (vector_container::const_iterator it=vi.begin(); it != vi.end(); ++it, ++block)
-        EPETRA_CHK_ERR( merge(**it, up, block) );
+         merge(**it, up, block) ;
     return 0;
 
 }
@@ -410,8 +410,8 @@ int BlockOperator::blockJacobi(const Epetra_MultiVector & X, Epetra_MultiVector 
     {
         Xblock[jblock].reset( new Epetra_MultiVector(*M_domainBlockMapsShift[jblock], nMultiVectors) );
         Xblock[jblock]->PutScalar(0.0);
-        EPETRA_CHK_ERR(Xblock[jblock]->Import(X, *M_mono2blockDomain[jblock], Insert) );
-        EPETRA_CHK_ERR(Xblock[jblock]->ReplaceMap(*M_domainBlockMaps[jblock]) );
+        Xblock[jblock]->Import(X, *M_mono2blockDomain[jblock], Insert) ;
+        Xblock[jblock]->ReplaceMap(*M_domainBlockMaps[jblock]) ;
     }
 
     // Allocate Space for the Solution
@@ -423,14 +423,14 @@ int BlockOperator::blockJacobi(const Epetra_MultiVector & X, Epetra_MultiVector 
 
     //Perform the mat-vec multiplications
     for (UInt iblock = 0; iblock < M_nBlockRows; ++iblock)
-        EPETRA_CHK_ERR(M_oper(iblock, iblock)->ApplyInverse(*Xblock[iblock], *Yblock[iblock]));
+        M_oper(iblock, iblock)->ApplyInverse(*Xblock[iblock], *Yblock[iblock]);
 
     //Reassemble the results
     Y.PutScalar(0.0);
     for (UInt iblock=0; iblock<M_nBlockRows; ++iblock)
     {
-        EPETRA_CHK_ERR(Yblock[iblock]->ReplaceMap(*M_rangeBlockMapsShift[iblock]) );
-        EPETRA_CHK_ERR( Y.Import(*Yblock[iblock], *M_block2monoRange[iblock], Insert) );
+        Yblock[iblock]->ReplaceMap(*M_rangeBlockMapsShift[iblock]) ;
+         Y.Import(*Yblock[iblock], *M_block2monoRange[iblock], Insert) ;
     }
 
     return 0;
@@ -456,8 +456,8 @@ int BlockOperator::blockLowerTriangularSolve(const Epetra_MultiVector & X, Epetr
     {
         Xblock[jblock].reset( new Epetra_MultiVector(*M_domainBlockMapsShift[jblock], nMultiVectors) );
         Xblock[jblock]->PutScalar(0.0);
-        EPETRA_CHK_ERR(Xblock[jblock]->Import(X, *M_mono2blockDomain[jblock], Insert) );
-        EPETRA_CHK_ERR(Xblock[jblock]->ReplaceMap(*M_domainBlockMaps[jblock]) );
+        Xblock[jblock]->Import(X, *M_mono2blockDomain[jblock], Insert) ;
+        Xblock[jblock]->ReplaceMap(*M_domainBlockMaps[jblock]) ;
 
         Zblock[jblock].reset( new Epetra_MultiVector(*M_domainBlockMaps[jblock], nMultiVectors) );
     }
@@ -472,10 +472,10 @@ int BlockOperator::blockLowerTriangularSolve(const Epetra_MultiVector & X, Epetr
     //Perform the mat-vec multiplications
     for (UInt iblock = 0; iblock < M_nBlockRows; ++iblock)
     {
-        EPETRA_CHK_ERR(M_oper(iblock, iblock)->ApplyInverse(*Xblock[iblock], *Yblock[iblock]));
+        M_oper(iblock, iblock)->ApplyInverse(*Xblock[iblock], *Yblock[iblock]);
         for (UInt kblock = iblock; kblock < M_nBlockRows; ++kblock)
         {
-            EPETRA_CHK_ERR( M_oper(kblock, iblock)->Apply(*Yblock[iblock], *Zblock[kblock]) );
+             M_oper(kblock, iblock)->Apply(*Yblock[iblock], *Zblock[kblock]) ;
             Xblock[kblock]->Update(-1.0, *Zblock[kblock], 1.0);
         }
     }
@@ -484,8 +484,8 @@ int BlockOperator::blockLowerTriangularSolve(const Epetra_MultiVector & X, Epetr
     Y.PutScalar(0.0);
     for (UInt iblock=0; iblock<M_nBlockRows; ++iblock)
     {
-        EPETRA_CHK_ERR(Yblock[iblock]->ReplaceMap(*M_rangeBlockMapsShift[iblock]) );
-        EPETRA_CHK_ERR( Y.Import(*Yblock[iblock], *M_block2monoRange[iblock], Insert) );
+        Yblock[iblock]->ReplaceMap(*M_rangeBlockMapsShift[iblock]) ;
+         Y.Import(*Yblock[iblock], *M_block2monoRange[iblock], Insert) ;
     }
 
     return 0;
@@ -511,8 +511,8 @@ int BlockOperator::blockUpperTriangularSolve(const Epetra_MultiVector & X, Epetr
     {
         Xblock[jblock].reset( new Epetra_MultiVector(*M_domainBlockMapsShift[jblock], nMultiVectors) );
         Xblock[jblock]->PutScalar(0.0);
-        EPETRA_CHK_ERR(Xblock[jblock]->Import(X, *M_mono2blockDomain[jblock], Insert) );
-        EPETRA_CHK_ERR(Xblock[jblock]->ReplaceMap(*M_domainBlockMaps[jblock]) );
+        Xblock[jblock]->Import(X, *M_mono2blockDomain[jblock], Insert) ;
+        Xblock[jblock]->ReplaceMap(*M_domainBlockMaps[jblock]) ;
 
         Zblock[jblock].reset( new Epetra_MultiVector(*M_domainBlockMaps[jblock], nMultiVectors) );
     }
@@ -527,10 +527,10 @@ int BlockOperator::blockUpperTriangularSolve(const Epetra_MultiVector & X, Epetr
     //Perform the mat-vec multiplications
     for (int iblock = M_nBlockRows - 1 ; iblock > -1 ; --iblock)
     {
-        EPETRA_CHK_ERR(M_oper(iblock, iblock)->ApplyInverse(*Xblock[iblock], *Yblock[iblock]));
+        M_oper(iblock, iblock)->ApplyInverse(*Xblock[iblock], *Yblock[iblock]);
         for (int kblock = 0; kblock < iblock; ++kblock)
         {
-            EPETRA_CHK_ERR( M_oper(kblock, iblock)->Apply(*Yblock[iblock], *Zblock[kblock]) );
+             M_oper(kblock, iblock)->Apply(*Yblock[iblock], *Zblock[kblock]) ;
             Xblock[kblock]->Update(-1.0, *Zblock[kblock], 1.0);
         }
     }
@@ -539,8 +539,8 @@ int BlockOperator::blockUpperTriangularSolve(const Epetra_MultiVector & X, Epetr
     Y.PutScalar(0.0);
     for (UInt iblock=0; iblock<M_nBlockRows; ++iblock)
     {
-        EPETRA_CHK_ERR(Yblock[iblock]->ReplaceMap(*M_rangeBlockMapsShift[iblock]) );
-        EPETRA_CHK_ERR(Y.Import(*Yblock[iblock], *M_block2monoRange[iblock], Insert) );
+        Yblock[iblock]->ReplaceMap(*M_rangeBlockMapsShift[iblock]) ;
+        Y.Import(*Yblock[iblock], *M_block2monoRange[iblock], Insert) ;
     }
 
     return 0;

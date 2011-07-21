@@ -21,7 +21,7 @@ mesh_source            = file
 [fluid]
 
     [./physics]
-    density         = 1.0          # density
+    density         = 1.0       # density
     viscosity       = .01       # viscosity
 
     [../time_discretization]
