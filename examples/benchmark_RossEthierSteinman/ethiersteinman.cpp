@@ -266,26 +266,26 @@ Ethiersteinman::checkConvergenceRate(const std::vector<std::string>& uFELabels,
     Real uErrRatio(0.0), pErrRatio(0.0); // Ratio of the error E1/E2
     std::string status(""); // Information string
 
-    UInt FENumber(uFELabels.size());
-    UInt discretizationNumber(meshDiscretizations.size());
+    UInt numFELabels(uFELabels.size());
+    UInt numDiscretizations(meshDiscretizations.size());
 
-    for (UInt iElem(0); iElem<FENumber; ++iElem)
+    for (UInt iFELabel(0); iFELabel<numFELabels; ++iFELabel)
     {
-        std::cout << "    - " << uFELabels[iElem] << "-" << pFELabels[iElem] << " ... " << std::endl;
+        std::cout << "    - " << uFELabels[iFELabel] << "-" << pFELabels[iFELabel] << " ... " << std::endl;
 
         // Everything is OK a priori
         status = "OK";
 
-        for (UInt jDiscretization(0); jDiscretization<discretizationNumber-1; ++jDiscretization)
+        for (UInt jDiscretization(0); jDiscretization<numDiscretizations-1; ++jDiscretization)
         {
             h1 = 1.0/meshDiscretizations[jDiscretization];
             h2 = 1.0/meshDiscretizations[jDiscretization+1];
 
-            uBound = convTolerance*pow(h1/h2,int(uConvergenceOrder[iElem]));
-            pBound = convTolerance*pow(h1/h2,int(pConvergenceOrder[iElem]));
+            uBound = convTolerance*pow(h1/h2,int(uConvergenceOrder[iFELabel]));
+            pBound = convTolerance*pow(h1/h2,int(pConvergenceOrder[iFELabel]));
 
-            uErrRatio = uL2Error[iElem][jDiscretization]/uL2Error[iElem][jDiscretization+1]; // E1/E2
-            pErrRatio = pL2Error[iElem][jDiscretization]/pL2Error[iElem][jDiscretization+1];
+            uErrRatio = uL2Error[iFELabel][jDiscretization]/uL2Error[iFELabel][jDiscretization+1]; // E1/E2
+            pErrRatio = pL2Error[iFELabel][jDiscretization]/pL2Error[iFELabel][jDiscretization+1];
 
             if (uErrRatio < uBound)
             {
@@ -366,12 +366,12 @@ Ethiersteinman::run()
     }
     problem_Type::setParamsFromGetPot( dataFile );
 
-    UInt discretizationNumber;
+    UInt numDiscretizations;
     if((M_test == SpaceConvergence) || (M_test == None))
     {
         // Loading the discretization to be tested
-        discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
-        for ( UInt i( 0 ); i < discretizationNumber; ++i )
+        numDiscretizations = dataFile( "fluid/space_discretization/mesh_number", 1 );
+        for ( UInt i( 0 ); i < numDiscretizations; ++i )
         {
             M_meshDiscretization.push_back(dataFile( "fluid/space_discretization/mesh_size", 8, i ));
         }
@@ -379,30 +379,29 @@ Ethiersteinman::run()
     else
     {
         M_meshDiscretization.push_back(0); // Just to be sure to have 1 element
-        discretizationNumber = 1;
+        numDiscretizations = 1;
     }
 
+    UInt numFELabels = dataFile( "fluid/space_discretization/FE_number", 1 );
     if(M_test == SpaceConvergence)
     {
         // Loading the convergence rate for the finite elements tested
-        UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
-        for ( UInt i( 0 ); i < FEnumber; ++i )
+        for ( UInt i( 0 ); i < numFELabels; ++i )
         {
             M_uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order", 2, i ));
         }
-        for ( UInt i( 0 ); i < FEnumber; ++i )
+        for ( UInt i( 0 ); i < numFELabels; ++i )
         {
             M_pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
         }
     }
 
     // Loading the Finite element to be tested
-    UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
-    for ( UInt i( 0 ); i < FEnumber; ++i )
+    for ( UInt i( 0 ); i < numFELabels; ++i )
     {
         M_uFELabels.push_back(dataFile( "fluid/space_discretization/vel_order", "P1", i ));
     }
-    for ( UInt i( 0 ); i < FEnumber; ++i )
+    for ( UInt i( 0 ); i < numFELabels; ++i )
     {
         M_pFELabels.push_back(dataFile( "fluid/space_discretization/press_order", "P1", i ));
     }
@@ -412,8 +411,8 @@ Ethiersteinman::run()
     std::vector<std::vector<LifeV::Real> > pL2Error;
     uL2Error.clear();
     pL2Error.clear();
-    std::vector<LifeV::Real> tmpVec(discretizationNumber,0.0);
-    for (UInt iElem(0); iElem<FEnumber; ++iElem)
+    std::vector<LifeV::Real> tmpVec(numDiscretizations,0.0);
+    for (UInt iFELabel(0); iFELabel<numFELabels; ++iFELabel)
     {
         uL2Error.push_back(tmpVec);
         pL2Error.push_back(tmpVec);
@@ -423,14 +422,14 @@ Ethiersteinman::run()
     if (verbose) std::cout << "Initialization time (pre-run): " << initChrono.diff() << " s." << std::endl;
 
     // Loop on the mesh refinement
-    for (UInt jDiscretization(0); jDiscretization<discretizationNumber; ++jDiscretization)
+    for (UInt jDiscretization(0); jDiscretization<numDiscretizations; ++jDiscretization)
     {
         UInt mElem = M_meshDiscretization[jDiscretization];
 
         // Loop on the finite element
-        for (UInt iElem(0); iElem<FEnumber; ++iElem)
+        for (UInt iFELabel(0); iFELabel<numFELabels; ++iFELabel)
         {
-            if (verbose) std::cout << std::endl << "[[BEGIN_RUN_" << jDiscretization*FEnumber+iElem << "]]" << std::endl;
+            if (verbose) std::cout << std::endl << "[[BEGIN_RUN_" << jDiscretization*numFELabels+iFELabel << "]]" << std::endl;
             runChrono.reset();
             runChrono.start();
             initChrono.reset();
@@ -443,8 +442,8 @@ Ethiersteinman::run()
                 oss << mElem;
                 fileName.append(oss.str());
                 fileName.append("_");
-                fileName.append(M_uFELabels[iElem]);
-                fileName.append(M_pFELabels[iElem]);
+                fileName.append(M_uFELabels[iFELabel]);
+                fileName.append(M_pFELabels[iFELabel]);
                 fileName.append(".txt");
                 M_outNorm.open(fileName.c_str());
                 M_outNorm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
@@ -493,8 +492,8 @@ Ethiersteinman::run()
             // |            Creating the FE spaces             |
             // +-----------------------------------------------+
             if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
-            std::string uOrder =  M_uFELabels[iElem];
-            std::string pOrder =  M_pFELabels[iElem];
+            std::string uOrder =  M_uFELabels[iFELabel];
+            std::string pOrder =  M_pFELabels[iFELabel];
 
             if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
                                    << "FE for the pressure: " << pOrder << std::endl;
@@ -774,8 +773,8 @@ Ethiersteinman::run()
                 }
 
                 // Saving the errors for the final test
-                uL2Error[iElem][jDiscretization] = ul2error;
-                pL2Error[iElem][jDiscretization] = pl2error;
+                uL2Error[iFELabel][jDiscretization] = ul2error;
+                pL2Error[iFELabel][jDiscretization] = pl2error;
 
                 // Exporting the solution
                 *velAndPressure = *fluid.solution();
@@ -822,7 +821,7 @@ Ethiersteinman::run()
 
             runChrono.stop();
             if (verbose) std::cout << "Total run time: " << runChrono.diff() << " s." << std::endl;
-            if (verbose) std::cout << "[[END_RUN_" << jDiscretization*FEnumber+iElem << "]]" << std::endl;
+            if (verbose) std::cout << "[[END_RUN_" << jDiscretization*numFELabels+iFELabel << "]]" << std::endl;
 
         } // End of loop on the finite elements
     } // End of loop on the mesh refinement

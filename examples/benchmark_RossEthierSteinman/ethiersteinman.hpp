@@ -183,7 +183,7 @@ private:
         @param pL2Error Vector containing the computed errors for the pressure
         @param pConvergenceOrder Vector containing the convergence order corresponding to pFELabel
         @param meshDiscretization Vector containing the subdivisions values used to generate the meshes
-        @param convTolerance Tolerance for the test. The test is passed if (observed error)<convTolerance*(theory error prediction)
+        @param convTolerance Tolerance for the test. The test is passed if (observed convergence)>convTolerance*(theory error prediction)
      */
     bool checkConvergenceRate(const std::vector<std::string>& uFELabels,
                               const std::vector<std::vector<LifeV::Real> >& uL2Error,
