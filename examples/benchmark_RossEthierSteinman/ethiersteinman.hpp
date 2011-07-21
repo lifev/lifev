@@ -23,15 +23,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA
 */
-/**
-   \file ethiersteiman.hpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2011-03-08
+/*!
+    @file ethiersteiman.hpp
+    @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @date 2011-03-08
  */
 
-#ifndef __Ethiersteinman_H
-#define __Ethiersteinman_H 1
+#ifndef ETHIERSTEINMAN_H
+#define ETHIERSTEINMAN_H 1
 
 #include <life/lifesolver/OseenSolver.hpp>
 #include <life/lifemesh/RegionMesh3D.hpp>
@@ -40,15 +40,53 @@
 #include "life/lifefunctions/RossEthierSteinmanDec.hpp"
 #include "life/lifefunctions/RossEthierSteinmanInc.hpp"
 
+/*! @enum TimeScheme
+    Order of the BDF
+ */
 enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
 
 /*!
- * \class Ethiersteinman
- * \brief 2D/3D Ethiersteinman Simulation class
- *
- *  @author Christophe Prud'homme
- *  @author Gwenol Grandperrin
- *  @see
+    @class Ethiersteinman
+    @brief Ethiersteinman Simulation class
+
+    @author Christophe Prud'homme
+    @author Gwenol Grandperrin
+    @see C.R. Ethier and D.A. Steinman. Exact fully 3D Navier-Stokes solutions for benchmarking. Int. J. Numer. Methods Fluids, 19(5):369-375, 1994
+
+    This class tests many settings, we propose here a list of the available options.
+    <ul>
+        <li> RossEthierSteinman/test (none/accuracy/space_convergence)
+        <li> RossEthierSteinman/initialization (interpolation/projection)
+        <li> RossEthierSteinman/export_norms
+        <li> RossEthierSteinman/export_exact_solutions
+        <li> RossEthierSteinman/mesh_source (regular_mesh/file)
+        <li> exporter/type (ensight/hdf5)
+        <li> fluid/problem/Re
+        <li> fluid/physics/viscosity
+        <li> fluid/physics/density
+    </ul>
+
+    In the case of a space convergence test the following options are available
+    <ul>
+        <li> RossEthierSteinman/space_convergence_tolerance
+        <li> fluid/space_discretization/mesh_number
+        <li> fluid/space_discretization/mesh_size
+        <li> fluid/space_discretization/FE_number
+        <li> fluid/space_discretization/vel_order
+        <li> fluid/space_discretization/vel_conv_order_order
+        <li> fluid/space_discretization/press_order
+        <li> fluid/space_discretization/press_conv_order
+    </ul>
+
+    In the case of an accuracy test the following options are available
+    <ul>
+        <li> RossEthierSteinman/accuracy_tolerance
+    </ul>
+
+    If the mesh source is a file, the file must be specified in
+    <ul>
+        <li> fluid/space_discretization
+    </ul>
  */
 
 class Ethiersteinman
@@ -67,9 +105,15 @@ public:
      */
     //@{
 
+    //! Constructor
+    /*!
+        @param argc number of parameter passed through the command line
+        @param argv char passed through the command line
+     */
     Ethiersteinman( int argc,
                     char** argv );
 
+    //! Destructor
     ~Ethiersteinman()
     {}
 
@@ -78,15 +122,29 @@ public:
     /** @name  Methods
      */
     //@{
-    //! Computes L2 errors
+
+    //! Launches the simulation
     void run();
 
     //@}
 
 
 private:
+    /*! @enum TestType
+        Order of the BDF
+     */
     enum TestType{None, Accuracy,SpaceConvergence};
+
+    /*! @enum InitializationType
+        Type of initialization. "Interpolation" just interpolates the value of the exact solution to the DoFs.
+        "Projection" solves an Oseen problem where alpha=0, the convective term is linearized by using the exact solution for beta,
+        and the time derivative is passed to the right hand side and computed from the exact solution.
+     */
     enum InitializationType{Projection,Interpolation};
+
+    /*! @enum MeshSourceType
+        Type of mesh source. It can be a "File" or a "RegularMesh" which is generated during the simulation
+     */
     enum MeshSourceType{File,RegularMesh};
 
     struct RESULT_CHANGED_EXCEPTION
@@ -98,11 +156,35 @@ private:
         }
     };
 
+    //! Computes the L2 error and the relative L2 error with the exact solution
+    /*!
+        @param velocityAndPressureSolution number of parameter passed through the command line
+        @param uL2Error Variable to store the L2 error for the veloctity
+        @param uRelError Variable to store the Relative L2 error for the velocity
+        @param uFESpace Variable to store the FE space for the velocity
+        @param pL2Error Variable to store the L2 error the pressure
+        @param pRelError Variable to store the Relative L2 error for the pressure
+        @param pFESpace Variable to store the FE space for the pressure
+        @param time Actual timestep of the simulation
+     */
     void computeErrors(const vector_Type& velocityAndPressureSolution,
                        LifeV::Real& uL2Error, LifeV::Real& uRelError, feSpacePtr_Type& uFESpace,
                        LifeV::Real& pL2Error, LifeV::Real& pRelError, feSpacePtr_Type& pFESpace,
                        LifeV::Real time);
 
+    //! Method to check the convergence rate of the solution
+    /*!
+        For each type of finite elements the method uses the computed errors obtained with the
+        different meshes to check if the order of convergence follows the theory predictions
+        @param uFELabel Vector containing the FE names for the velocity (e.g. P2, P1Bubble, P1)
+        @param uL2Error Vector containing the computed errors for the velocity
+        @param uConvergenceOrder Vector containing the convergence order corresponding to uFELabel
+        @param pFELabel Vector containing the FE names for the pressure (e.g. P2, P1Bubble, P1)
+        @param pL2Error Vector containing the computed errors for the pressure
+        @param pConvergenceOrder Vector containing the convergence order corresponding to pFELabel
+        @param meshDiscretization Vector containing the subdivisions values used to generate the meshes
+        @param convTolerance Tolerance for the test. The test is passed if (observed error)<convTolerance*(theory error prediction)
+     */
     bool checkConvergenceRate(const std::vector<std::string>& uFELabel,
                               const std::vector<std::vector<LifeV::Real> >& uL2Error,
                               const std::vector<LifeV::UInt>& uConvergenceOrder,
@@ -145,4 +227,4 @@ private:
     MeshSourceType     M_meshSource;
 };
 
-#endif /* __Ethiersteinman_H */
+#endif /* ETHIERSTEINMAN_H */

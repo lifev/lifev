@@ -23,11 +23,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA
 */
-/**
-   \file ethiersteiman.cpp
-   \author Gilles Fourestey <gilles.fourestey@epfl.ch>
-   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2011-03-08
+/*!
+    @file ethiersteiman.cpp
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @date 2011-03-08
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -69,7 +69,14 @@
 
 using namespace LifeV;
 
-
+//! Null function used to define the boundary conditions
+/*!
+    @param t Current time
+    @param x x-position
+    @param y y-position
+    @param z z-position
+    @param i ith component of the returned value of the function
+ */
 Real zero_scalar( const Real& /* t */,
                   const Real& /* x */,
                   const Real& /* y */,
@@ -80,7 +87,10 @@ Real zero_scalar( const Real& /* t */,
 }
 
 
-
+//! Parse a string using "," to separate values and return a set of value
+/*!
+    @param list String containing the list of desired value separated by ","
+ */
 std::set<UInt> parseList( const std::string& list )
 {
     std::string stringList = list;
@@ -115,8 +125,8 @@ struct Ethiersteinman::Private
 
     std::string    data_file_name;
 
-    double         nu;  /**< viscosity (in m^2/s) */
-    //const double rho; /**< density is constant (in kg/m^3) */
+    double         nu;  /* < viscosity (in m^2/s) */
+    //const double rho; /* < density is constant (in kg/m^3) */
 
     bool                             steady;
     boost::shared_ptr<Epetra_Comm>   comm;
@@ -378,7 +388,7 @@ Ethiersteinman::run()
         UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
         for ( UInt i( 0 ); i < FEnumber; ++i )
         {
-            uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order_order", 2, i ));
+            uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order", 2, i ));
         }
         for ( UInt i( 0 ); i < FEnumber; ++i )
         {
@@ -569,7 +579,12 @@ Ethiersteinman::run()
             TimeAdvanceBDFNavierStokes<vector_Type> bdf;
             bdf.setup(oseenData->dataTime()->orderBDF());
 
-            // initialization with exact solution: either interpolation or "L2-NS"-projection
+            /*
+                Initialization with exact solution: either interpolation or "L2-NS"-projection
+                Depending on which order scheme we want for the time derivative, we need a to
+                setup a fixed number of solution required by the scheme. Therefore we need to
+                compute the solution for some timestep before t0.
+             */
             t0 -= dt*bdf.bdfVelocity().order();
 
             if (verbose) std::cout << "Computing the initial solution ... " << std::endl;
@@ -584,9 +599,26 @@ Ethiersteinman::run()
 
             bdf.bdfVelocity().setInitialCondition( *fluid.solution() );
 
-            //
-            // Initial solution loading (interpolation or projection)
-            //
+            /*
+                Initial solution loading (interpolation or projection)
+                This part of the code take advantage of the fact that the Projection
+                method adds only a few lines to the Interpolation initialization method.
+                First notice that the loop ensure that enough solutions are computed in
+                order to use the BDF scheme chose previously.
+
+                Interpolation case:
+                We start by setting the current time then we initialize the OseenSolver
+                using fluid.initialize. Therefore the exact solution is interpolated to
+                obtain a solution. Then we store this solution for the BDF scheme using
+                bdf.bdfVelocity().shiftRight(...).
+
+                Projection case:
+                In that case the solution obtained in fluid.initialize is used as a starting
+                point to solve the steady-state problem:
+                \Delta u + u^*\nabla u +\nabla p = -(\frace{\partial u}{\partial t})^*
+                where the * means that the value is obtained by interpolating the quantity
+                using the exact solution.
+             */
             Real time = t0 + dt;
             for (  ; time <=  oseenData->dataTime()->initialTime() + dt/2.; time += dt)
             {
