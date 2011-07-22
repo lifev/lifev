@@ -361,6 +361,11 @@ PreconditionerML::setDataFromGetPot( const GetPot&      dataFile,
     bool enableViz    = dataFile( (section + "/" + "ML" + "/visualization/enable").data(), false, found );
     if ( found )
     {
+        /*
+           If the visualization is desired and we have set the required data,
+           we set the following variables.
+           (see Trilinos::ML manual for more details)
+         */
         if(M_visualizationDataAvailable)
         {
             M_list.set( "viz: enable", enableViz);
