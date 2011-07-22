@@ -15,10 +15,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = EthierSteinmanUnsteady.hpp
+check_HEADERS = 
 
 check_PROGRAMS = example_OseenAssembler
-example_OseenAssembler_SOURCES = main.cpp EthierSteinmanUnsteady.cpp
+example_OseenAssembler_SOURCES = main.cpp
 
 EXTRA_DIST = data testsuite.at
 
