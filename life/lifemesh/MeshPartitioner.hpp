@@ -61,6 +61,21 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace LifeV
 {
+
+
+struct GhostEntityData
+{
+    //! ID in the current sub-domain of the face.
+    ID localFaceId;
+
+    //! ID of element that faces the local one on the other sub-domain.
+    ID ghostElementLocalId;
+
+    //! Position on the ghost element.
+    UInt ghostElementPosition;
+
+}; // struct AdjacentEntityData
+
 /*!
   @brief Class that handles mesh partitioning
   @author Gilles Fourestey gilles.fourestey@epfl.ch
@@ -73,7 +88,6 @@ namespace LifeV
   partitions are stored and can be saved to disk, using the HDF5 filter,
   for later use during a parallel run.
 */
-
 template<typename MeshType>
 class MeshPartitioner
 {
@@ -86,6 +100,13 @@ public:
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
     typedef std::vector<meshPtr_Type> partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type> partMeshPtr_Type;
+
+    //! Container for the ghost data
+    typedef std::vector < GhostEntityData > GhostEntityDataContainer_Type;
+
+    //! Map processor -> container for the ghost data
+    typedef std::map < UInt,  GhostEntityDataContainer_Type > GhostEntityDataMap_Type;
+
     //@}
     //! \name Constructors & Destructors
     //@{
@@ -354,6 +375,9 @@ private:
     std::vector<Int>                     M_graphVertexLocations;
     graphPtr_Type                        M_elementDomains;
     bool                                 M_serialMode; // how to tell if running serial partition mode
+
+    //! Map for the ghost data
+    GhostEntityDataMap_Type M_ghostDataMap;
     //@}
 }; // class MeshPartitioner
 
@@ -1308,7 +1332,11 @@ void MeshPartitioner<MeshType>::constructFaces()
 
             // set the flag for faces on the subdomain border
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
+            {
                 pf->setFlag( Flag::turnOn ( pf->flag(), SUBDOMAIN_INTERFACE ) );
+
+
+            }
 
             // if this process does not own either of the adjacent elements
             // then the two adjacent elements and the respective face positions coincide in the local mesh
