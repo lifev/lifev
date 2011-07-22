@@ -719,7 +719,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     // This array's size is equal to the number of locally-stored vertices:
     // at the end of the partitioning process, "M_graphVertexLocations" will contain the partitioning array:
     // M_graphVertexLocations[m] = n; means that graph vertex m belongs to subdomain n
-    M_graphVertexLocations.resize(M_vertexDistribution[M_me + 1] - M_vertexDistribution[M_me]);
+    M_graphVertexLocations.resize( M_vertexDistribution[M_comm->NumProc()] - M_vertexDistribution[0], M_comm->NumProc() );
 
     // Now each processor will take care of its own graph vertices (i. e. mesh elements).
     // Nothing guarantees about the neighbor elements distribution across the processors,
@@ -835,13 +835,21 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
                          static_cast<Int*>(&M_adjacencyGraphValues[0]),
                          weightVector, adjwgtPtr, &weightFlag, &numflag,
                          &ncon, &numberParts, &tpwgts[0], &ubvec[0],
-                         &options[0], &cutEdges, &M_graphVertexLocations[0],
+                         &options[0], &cutEdges, &M_graphVertexLocations[localStart],
                          &MPIcomm);
 
     M_comm->Barrier();
 
     Int nProc;
     nProc = M_comm->NumProc();
+
+    // distribute the resulting partitioning stored in M_graphVertexLocations to all processors
+    for ( Int proc = 0; proc < nProc; proc++ )
+    {
+        UInt procStart  = M_vertexDistribution[ proc ];
+        UInt procLength = M_vertexDistribution[ proc + 1 ] - M_vertexDistribution[ proc ];
+        M_comm->Broadcast ( &M_graphVertexLocations[ procStart ], procLength, proc );
+    }
 
     // this is a vector of subdomains: each component is
     // the list of vertices belonging to the specific subdomain
@@ -851,7 +859,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     for (UInt ii = 0; ii < M_graphVertexLocations.size(); ++ii)
     {
         // here we are associating the vertex global ID to the subdomain ID
-        (*M_elementDomains)[M_graphVertexLocations[ii]].push_back(ii + M_vertexDistribution[M_me]);
+        (*M_elementDomains)[ M_graphVertexLocations[ ii ] ].push_back( ii );
     }
 }
 
@@ -1581,12 +1589,6 @@ void MeshPartitioner<MeshType>::execute()
         matchFluidPartitionsFSI();
     }
     ////////////////// END OF SOLID PARTITION PART /////////////////////
-
-
-    // Redistribute elements to appropriate processors before building the
-    // partitioned mesh.
-    redistributeElements();
-
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
