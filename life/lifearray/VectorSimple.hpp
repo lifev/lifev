@@ -238,7 +238,7 @@ public:
      *  flag is set as that of refFlag according to the policy
      */
     template<typename Policy>
-    VectorSimple<DataType,Allocator> extractElementsWithFlag(const flag_Type & refFlag, Policy const & policy);
+    VectorSimple<DataType,Allocator> extractElementsWithFlag(const flag_Type & refFlag, Policy const & policy=&Flag::testOneSet);
 
     /*! @brief It counts all elements that satisfy a condition on the flag
      *  It only operates on container elements where the method
@@ -321,9 +321,9 @@ template<typename Policy>
 VectorSimple<DataType,Allocator>
 VectorSimple<DataType,Allocator>::extractElementsWithFlag(
                 const flag_Type & refFlag,
-                const Policy & policy=&Flag::testOneSet)
+                const Policy & policy)
                 {
-    VectorSimple<DataType,Allocator> M_tmp();
+    VectorSimple<DataType,Allocator> M_tmp;
     // There is no copy_if std algorithm (sic), see Stroustoup for
     // the explanation... they just forgot about it. So I do
     // the for loop directly. No need of EntityFlagInterrogator
