@@ -74,7 +74,16 @@ struct GhostEntityData
     //! Position on the ghost element.
     UInt ghostElementPosition;
 
+    friend std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged );
 }; // struct AdjacentEntityData
+
+inline std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged )
+{
+    out << "ghostEntityData: localFace " << ged.localFaceId
+        << " - ghostElem "               << ged.ghostElementLocalId
+        << " - ghostPos "                << ged.ghostElementPosition << " ";
+    return out;
+}
 
 /*!
   @brief Class that handles mesh partitioning
@@ -585,6 +594,10 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // edges construction
     // ******************
     constructEdges();
+
+
+    // new faces can be built only after all local volumes are complete in order to get proper ghost faces data
+    M_comm->Barrier();
 
     // ******************
     // faces construction
@@ -1337,16 +1350,44 @@ void MeshPartitioner<MeshType>::constructFaces()
             }
 
             pf =  &(*M_meshPartitions)[i]->addFace(boundary);
-             *pf = M_originalMesh->face( *is );
+            *pf = M_originalMesh->face( *is );
 
-             pf->setLocalId( count );
+            pf->setLocalId( count );
 
-            // set the flag for faces on the subdomain border
+            // true if we are on a subdomain border
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
             {
+                // set the flag for faces on the subdomain border
                 pf->setFlag( Flag::turnOn ( pf->flag(), SUBDOMAIN_INTERFACE ) );
 
+                // build GhostEntityData
+                GhostEntityData ghostFace;
+                ghostFace.localFaceId = pf->localId();
 
+                // set the ghostElem to be searched on other subdomains
+                ID ghostElem = ( localElem1 == NotAnId ) ? elem1 : elem2;
+                // find which process holds the facing element
+                Int ghostProc ( M_me );
+                for ( Int proc = 0; proc < M_comm->NumProc(); proc++ )
+                {
+                    if ( proc != M_me )
+                    {
+                        std::vector<Int>::const_iterator ghostIt =
+                                        std::find ( (*M_elementDomains)[ proc ].begin(), (*M_elementDomains)[ proc ].end(), ghostElem );
+                        if ( ghostIt != ( (*M_elementDomains)[ proc ] ).end() )
+                        {
+                            // we have found the proc storing the element
+                            ghostProc = proc;
+                            // we can get its local id
+                            ghostFace.ghostElementLocalId = *ghostIt;
+                            // TODO: the local face id is the same of the original mesh ?!
+                            ghostFace.ghostElementPosition = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                            break;
+                        }
+                    }
+                }
+                ASSERT ( ghostProc != M_me, "ghost face not found" );
+                M_ghostDataMap[ ghostProc ].push_back( ghostFace );
             }
 
             // if this process does not own either of the adjacent elements
@@ -1405,6 +1446,7 @@ void MeshPartitioner<MeshType>::constructFaces()
             }
 
 */
+
             for (ID id = 0; id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
             {
                 inode = pf->point(id).id();
@@ -1416,6 +1458,21 @@ void MeshPartitioner<MeshType>::constructFaces()
         (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACES");
         (*M_meshPartitions)[i]->setLinkSwitch("FACES_HAVE_ADIACENCY");
     }
+
+    // DEBUG
+//    std::ofstream fout ( ("ghostfaces" + boost::lexical_cast<std::string>( M_me ) + ".out").c_str() );
+//
+//    fout << "partition " << M_me << std::endl;
+//    for ( GhostEntityDataMap_Type::iterator pIt = M_ghostDataMap.begin(); pIt != M_ghostDataMap.end(); ++pIt )
+//    {
+//        fout << "proc " << pIt->first << std::endl;
+//        for ( UInt i = 0; i < pIt->second.size(); i++ )
+//        {
+//            fout << pIt->second[i] << std::endl;
+//        }
+//        fout << std::endl;
+//    }
+//    ASSERT ( 0, "DEBUG abort" );
 }
 
 template<typename MeshType>
