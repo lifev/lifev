@@ -67,6 +67,19 @@ Real RossEthierSteinmanUnsteadyDec::uexact( const Real& t,
     return 1.;
 }
 
+Real RossEthierSteinmanUnsteadyDec::uderexact( const Real& t,
+                                               const Real& x,
+                                               const Real& y,
+                                               const Real& z,
+                                               const ID& i)
+{
+
+    if (i < 3)
+        return -S_d*S_d*S_nu*xexact(t, x, y, z, i);
+    else
+        return 0.;
+}
+
 Real RossEthierSteinmanUnsteadyDec::pexact( const Real& t,
                                      const Real& x,
                                      const Real& y,
@@ -84,7 +97,7 @@ Real RossEthierSteinmanUnsteadyDec::grad_u( const UInt& icoor, const Real& t, co
 {
     Real e = std::exp(-S_d*S_d*S_nu*t);
 	switch(icoor) {
-		case 1:    // u_x
+		case 0:    // u_x
 			switch(i) {
 				case 0:
 					return -S_a * e * ( S_a * std::exp(S_a*x) * std::sin(S_a*y+S_d*z) - S_a * std::exp(S_a*z) * std::sin(S_a*x+S_d*y) );
@@ -95,7 +108,7 @@ Real RossEthierSteinmanUnsteadyDec::grad_u( const UInt& icoor, const Real& t, co
 				default:
 					exit(1);
 			 }
-		case 2:   // u_y
+		case 1:   // u_y
 			switch(i) {
 				case 0:
 					return -S_a * e * ( S_a * std::exp(S_a*x) * std::cos(S_a*y+S_d*z) - S_d * std::exp(S_a*z) * std::sin(S_a*x+S_d*y) );
@@ -106,7 +119,7 @@ Real RossEthierSteinmanUnsteadyDec::grad_u( const UInt& icoor, const Real& t, co
 				default:
 					exit(1);
 			}
-		case 3:
+		case 2:
 		    switch(i) {
 		        case 0:
 		            return -S_a * e * ( S_d * std::exp(S_a*x) * std::cos(S_a*y+S_d*z) +  S_a * std::exp(S_a*z) * std::cos(S_a*x+S_d*y) );
@@ -159,7 +172,7 @@ Real RossEthierSteinmanUnsteadyDec::x0( const Real& t, const Real& x, const Real
 
 
 
-//we suppose that the problem geometry is the cube [0,1]x[0,1]x[0,1].
+//we suppose that the problem geometry is the cube [-1,1]x[-1,1]x[-1,1].
 Real RossEthierSteinmanUnsteadyDec::fNeumann( const Real& t,
                                        const Real& x,
                                        const Real& y,
@@ -167,15 +180,15 @@ Real RossEthierSteinmanUnsteadyDec::fNeumann( const Real& t,
                                        const ID& i )
 {
 	Real n[3] = {0., 0., 0.}; Real out=0.;
-	if        ( x == 0. ) {
+	if        ( x == -1. ) {
 		n[0] = -1.;
 	} else if ( x ==  1. ) {
 		n[0] =  1.;
-	} else if ( y == 0. ) {
+	} else if ( y == -1. ) {
 		n[1] = -1.;
 	} else if ( y ==  1. ) {
 		n[1] =  1.;
-	} else if ( z == 0. ) {
+	} else if ( z == -1. ) {
 		n[2] = -1.;
 	} else if ( z ==  1. ) {
 		n[2] =  1.;
@@ -196,7 +209,7 @@ Real RossEthierSteinmanUnsteadyDec::fNeumann( const Real& t,
 }
 
 
-//we suppose that the problem geometry is the cube [0,1]x[0,1]x[0,1].
+//we suppose that the problem geometry is the cube [-1,1]x[-1,1]x[-1,1].
 Real RossEthierSteinmanUnsteadyDec::normalVector( const Real& /*t*/,
                                                const Real& x,
                                                const Real& y,
@@ -204,15 +217,15 @@ Real RossEthierSteinmanUnsteadyDec::normalVector( const Real& /*t*/,
                                                const ID& i )
 {
     Real n[3] = {0., 0., 0.};
-    if        ( x == 0. ) {
+    if        ( x == -1. ) {
         n[0] = -1.;
     } else if ( x ==  1. ) {
         n[0] =  1.;
-    } else if ( y == 0. ) {
+    } else if ( y == -1. ) {
         n[1] = -1.;
     } else if ( y ==  1. ) {
         n[1] =  1.;
-    } else if ( z == 0. ) {
+    } else if ( z == -1. ) {
         n[2] = -1.;
     } else if ( z ==  1. ) {
         n[2] =  1.;
@@ -265,6 +278,28 @@ void RossEthierSteinmanUnsteadyDec::setParamsFromGetPot( const GetPot& dataFile 
     S_rho = dataFile( "fluid/physics/density", 1. );
     S_nu = S_mu / S_rho;
     S_flagStrain = dataFile( "fluid/physics/flag_strain", 0 );
+}
+void RossEthierSteinmanUnsteadyDec::setA(const Real& aValue)
+{
+    S_a = aValue;
+}
+void RossEthierSteinmanUnsteadyDec::setD(const Real& dValue)
+{
+    S_d = dValue;
+}
+void RossEthierSteinmanUnsteadyDec::setViscosity(const Real& mu)
+{
+    S_mu = mu;
+    S_nu = S_mu / S_rho;
+}
+void RossEthierSteinmanUnsteadyDec::setDensity(const Real& rho)
+{
+    S_rho = rho;
+    S_nu = S_mu / S_rho;
+}
+void RossEthierSteinmanUnsteadyDec::setFlagStrain(const Int& flagValue)
+{
+    S_flagStrain = flagValue;
 }
 
 Real RossEthierSteinmanUnsteadyDec::S_a;
