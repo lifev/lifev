@@ -41,7 +41,7 @@
 
 namespace LifeV
 {
-const entityFlag_Type InternalEntitySelector::defMarkFlag(entityFlag_Type(1000));
+const entityFlag_Type InternalEntitySelector::defMarkFlag(entityFlag_Type(1e10));
 
 // ===================================================
 // Constructors & Destructor
