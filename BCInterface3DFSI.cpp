@@ -126,9 +126,6 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
                 castedFunctionSolver->updatePhysicalSolverVariables();
         }
 
-        // Set displacement at time tn
-        M_physicalSolver->exportFluidDisplacement( *M_robinRHS );
-
         // Set coefficients
         Int gid;
         Real x, y, z;
@@ -145,11 +142,10 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
             y   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).y();
             z   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).z();
 
-            beta  = M_vectorFunctionRobin[1]->functionTimeSpace( t, x, y, z, 0 );
             alpha = M_vectorFunctionRobin[0]->functionTimeSpace( t, x, y, z, 0 );
+            beta  = M_vectorFunctionRobin[1]->functionTimeSpace( t, x, y, z, 0 );
 
-            beta /= timeStep;
-            alpha += beta;
+            alpha += 2 / timeStep * beta;
 
             (*M_robinAlphaCoefficient)[gid] = alpha;
             (*M_robinBetaCoefficient)[gid]  = beta;
@@ -160,6 +156,15 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
             (*M_robinAlphaCoefficient)[gid + verticesGlobalNumber * 2] = alpha;
             (*M_robinBetaCoefficient)[gid + verticesGlobalNumber * 2]  = beta;
         }
+
+        // Set displacement and velocity at time tn (mid-point scheme for the solid)
+        FSIOperator::vector_Type displacementTn( M_physicalSolver->dFESpace().map(), Repeated, Zero );
+        FSIOperator::vector_Type velocityTn( M_physicalSolver->dFESpace().map(), Repeated, Zero );
+
+        M_physicalSolver->exportFluidDisplacement( displacementTn );
+        M_physicalSolver->exportSolidVelocity( velocityTn );
+
+        *M_robinRHS = 2 / timeStep * displacementTn + velocityTn;
     }
     default:
         ;// Do nothing
