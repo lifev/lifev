@@ -62,10 +62,8 @@
 #include <life/lifealg/PreconditionerML.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
 #include <life/lifefem/TimeAdvanceBDF.hpp>
-
-#include "EthierSteinmanUnsteady.hpp"
+#include "life/lifefunctions/RossEthierSteinmanDec.hpp"
 
 using namespace LifeV;
 
@@ -94,6 +92,7 @@ typedef VectorEpetra vector_type;
 typedef boost::shared_ptr<VectorEpetra> vectorPtr_type;
 typedef FESpace< mesh_type, MapEpetra > fespace_type;
 typedef boost::shared_ptr< fespace_type > fespacePtr_type;
+typedef LifeV::RossEthierSteinmanUnsteadyDec problem_Type;
 }
 
 void printErrors(const vector_type& solution, const Real& currentTime, fespacePtr_type uFESpace, fespacePtr_type pFESpace, bool verbose)
@@ -104,8 +103,8 @@ void printErrors(const vector_type& solution, const Real& currentTime, fespacePt
     velocity.subset(solution);
     pressure.subset(solution, 3 * uFESpace->dof().numTotalDof());
     Real uRelativeError, pRelativeError, uL2Error, pL2Error;
-    uL2Error = uFESpace->l2Error (EthierSteinmanUnsteady::uexact, velocity, currentTime, &uRelativeError );
-    pL2Error = pFESpace->l20Error(EthierSteinmanUnsteady::pexact, pressure, currentTime, &pRelativeError );
+    uL2Error = uFESpace->l2Error (problem_Type::uexact, velocity, currentTime, &uRelativeError );
+    pL2Error = pFESpace->l20Error(problem_Type::pexact, pressure, currentTime, &pRelativeError );
     if (verbose) std::cout << "Velocity" << std::endl;
     if (verbose) std::cout << "  L2 error      : " << uL2Error << std::endl;
     if (verbose) std::cout << "  Relative error: " << uRelativeError << std::endl;
@@ -189,10 +188,19 @@ main( int argc, char** argv )
     const ConvectionType convectionTerm = KIO91;
 
     // EthierSteinman data
-    EthierSteinmanUnsteady::setA(1.0);
-    EthierSteinmanUnsteady::setD(1.0);
-    EthierSteinmanUnsteady::setViscosity(viscosity);
-    EthierSteinmanUnsteady::setDensity(density);
+    problem_Type::setA(1.0);
+    problem_Type::setD(1.0);
+    problem_Type::setViscosity(viscosity);
+    problem_Type::setDensity(density);
+
+    if(diffusionType == StiffStrain)
+    {
+        problem_Type::setFlagStrain(1);
+    }
+    else
+    {
+        problem_Type::setFlagStrain(0);
+    }
 
     // +-----------------------------------------------+
     // |               Loading the mesh                |
@@ -266,8 +274,8 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Boundary conditions]" << std::endl;
     BCHandler bcHandler;
-    BCFunctionBase uDirichlet( EthierSteinmanUnsteady::uexact );
-    BCFunctionBase uNeumann( EthierSteinmanUnsteady::fNeumann );
+    BCFunctionBase uDirichlet( problem_Type::uexact );
+    BCFunctionBase uNeumann( problem_Type::fNeumann );
 
     if (verbose) std::cout << "Setting Neumann BC... " << std::flush;
     bcHandler.addBC( "Flux", 1, Natural, Full, uNeumann, 3 );
@@ -386,7 +394,7 @@ main( int argc, char** argv )
 
     if(convectionTerm == KIO91)
     {
-        uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
+        uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
         *solution *= 0;
         *solution = *velocity;
         *beta *= 0;
@@ -398,7 +406,7 @@ main( int argc, char** argv )
         {
             for(UInt i(0);i<BDFOrder;++i)
             {
-                uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime-(3-i)*timestep);
+                uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime-(3-i)*timestep);
                 *solution = *velocity;
                 *beta *= 0;
                 oseenAssembler.addConvectionRhs(*beta,*solution);
@@ -407,8 +415,8 @@ main( int argc, char** argv )
         }
     }
 
-    uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
-    pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
+    uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
+    pFESpace->interpolate(problem_Type::pexact,*pressure,currentTime);
     *solution *= 0;
     *solution = *velocity;
     solution->add(*pressure,pressureOffset);
@@ -422,15 +430,14 @@ main( int argc, char** argv )
         *beta *= 0.;
         *solution *= 0;
 
-        uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
-        pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
+        uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
+        pFESpace->interpolate(problem_Type::pexact,*pressure,currentTime);
         *solution = *velocity;
         solution->add(*pressure,pressureOffset);
 
         if (initializationMethod == Projection)
         {
-            uFESpace->interpolate(EthierSteinmanUnsteady::uderexact, *rhs, currentTime);
-            //uFESpace.l2ScalarProduct(EthierSteinmanUnsteady::uderexact, rhs, currentTime);
+            uFESpace->interpolate(problem_Type::uderexact, *rhs, currentTime);
             rhs->globalAssemble();
             *rhs *= -1.;
             *rhs = (*massMatrix)*(*rhs);

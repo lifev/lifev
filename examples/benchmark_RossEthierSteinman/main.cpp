@@ -4,7 +4,7 @@
 
   Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
              Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-       Date: 2010-05-18
+       Date: 2011-03-08
 
   Copyright (C) 2010 EPFL
 
@@ -27,12 +27,8 @@
    \file main.cpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2010-05-18
+   \date 2011-03-08
  */
-
-#ifdef TWODIM
-#error test_ethiersteinman cannot be compiled in 2D
-#endif
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -57,30 +53,20 @@
 
 #include "ethiersteinman.hpp"
 
-
 using namespace LifeV;
-
-namespace
-{
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-#ifdef HAVE_TRILINOS_ML
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
-#endif
-}
-
 
 int
 main( int argc, char** argv )
 {
 
+    bool verbose(false);
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     Epetra_MpiComm Comm(MPI_COMM_WORLD);
-    if ( Comm.MyPID() == 0 )
-        cout << "% using MPI" << endl;
+    if ( Comm.MyPID() == 0 ) verbose = true;
 #else
     Epetra_SerialComm Comm;
-    cout << "% using serial Version" << endl;
+    verbose = true;
 #endif
 
 //**************** cylinder
@@ -88,13 +74,10 @@ main( int argc, char** argv )
 
     Ethiersteinman es( argc, argv );
 
-    GetPot command_line( argc, argv );
-    const bool check = command_line.search(2, "-c", "--check");
-
-    if (check) es.check();
-    else es.run();
+    es.run();
 
 #ifdef HAVE_MPI
+    if (verbose) std::cout << "MPI Finalization" << std::endl;
     MPI_Finalize();
 #endif
     return( EXIT_SUCCESS );
