@@ -252,7 +252,7 @@ MeshElement<GeoShape, PointType>::MeshElement( ID identity ) :
 
 template <typename GeoShape, typename PointType>
 MeshElement<GeoShape, PointType>::MeshElement( MeshElement<GeoShape, PointType> const & element ) :
-        MeshEntityWithBoundary( element.id() )
+        MeshEntityWithBoundary( element )
 {
     setLocalId( element.localId() );
     for ( UInt i = 0; i < MeshElement<GeoShape, PointType>::S_numLocalPoints; ++i )
