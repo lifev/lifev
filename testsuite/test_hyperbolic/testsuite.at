@@ -26,14 +26,14 @@ AT_DATA([data],
     [hyperbolic]
 
         [./space_discretization]
-    	mesh_dir      = ./ # the directory where the mesh file is
-    	mesh_file     = cartesian_cube8.mesh
-    	mesh_type     = .mesh #structured #.mesh
+        mesh_dir      = ./ # the directory where the mesh file is
+        mesh_file     = cartesian_cube8.mesh
+        mesh_type     = .mesh #structured #.mesh
         mesh_faces    = all
-	    verbose       = 0                        # verbose during mesh-reading
-    	# 0 -> tetra, 1 -> hexa
-	    element_shape = 0
-    	[../]
+        verbose       = 0                        # verbose during mesh-reading
+        # 0 -> tetra, 1 -> hexa
+        element_shape = 0
+        [../]
 
         [./time_discretization]
         initialtime   = 0.
@@ -57,13 +57,13 @@ AT_DATA([data],
 
         [../]
 
-       	[./miscellaneous]
-	    verbose       = 2
-    	[../]
+        [./miscellaneous]
+        verbose       = 2
+        [../]
 
     [../]
 
 ]])
 AT_CHECK([ln -sf ../../data/mesh/inria/cartesian_cube8.mesh;
-          mpirun -np 1 ../../test_hyperbolic/test_hyperbolic -c],[0],[ignore],[ignore])
+          mpirun -np 2 ../../test_hyperbolic/test_hyperbolic -c],[0],[ignore],[ignore])
 AT_CLEANUP
