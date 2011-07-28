@@ -156,6 +156,11 @@ public:
     typedef AbstractNumericalFlux<Mesh, SolverType>  flux_Type;
     typedef boost::shared_ptr< flux_Type >           fluxPtr_Type;
 
+    typedef Real                                     ghostData_Type;
+    typedef std::vector< ghostData_Type >            ghostDataContainer_Type;
+    typedef std::map< UInt, ghostDataContainer_Type > buffer_Type;
+    typedef std::map< ID, ghostData_Type >           ghostDataMap_Type;
+
     //@}
 
     //! @name Constructors & Destructor
@@ -198,7 +203,10 @@ public:
     void solveOneTimeStep();
 
     //! Compute the global CFL condition.
-    Real CFL() const;
+    Real CFL();
+
+    //! Get solution values across subdomain interfaces.
+    void updateGhostValues( MeshPartitioner<Mesh> const & meshPart );
 
     //@}
 
@@ -395,6 +403,9 @@ protected:
     //! Vector of all local mass matrices, possibly with mass function.
     std::vector<MatrixElemental>  M_elmatMass;
 
+    //! Ghost data container
+    ghostDataMap_Type M_ghostDataMap;
+
 private:
 
     //! @name Private Constructors
@@ -547,7 +558,10 @@ setup ()
         matElem.zero();
 
         // Compute the mass matrix for the current element
-        mass( vectorMass[iElem], matElem, M_FESpace.fe(), 0, 0);
+        VectorElemental massValue  ( M_FESpace.refFE().nbDof(), 1 );
+        extract_vec( vectorMass, massValue, M_FESpace.refFE(), M_FESpace.dof(), iElem, 0 );
+        // TODO: this works only for P0
+        mass( massValue[ 0 ], matElem, M_FESpace.fe(), 0, 0);
 
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
@@ -615,9 +629,8 @@ solveOneTimeStep ()
 template< typename Mesh, typename SolverType >
 Real
 HyperbolicSolver< Mesh, SolverType >::
-CFL() const
+CFL()
 {
-
     // Total number of elements in the mesh
     const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
 
@@ -662,7 +675,7 @@ CFL() const
                          M_FESpace.dof(),
                          leftElement , 0 );
 
-            if ( rightElement  != NotAnId)
+            if ( !Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY | SUBDOMAIN_INTERFACE ) )
             {
                 // Extract the solution in the current element, now is the leftElement
                 extract_vec( *M_uOld,
@@ -671,7 +684,12 @@ CFL() const
                              M_FESpace.dof(),
                              rightElement , 0 );
             }
-            else
+            else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), SUBDOMAIN_INTERFACE ) )
+            {
+                // TODO: this works only for P0 elements
+                rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+            }
+            else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
             {
                 rightValue = leftValue;
             }
@@ -727,6 +745,82 @@ CFL() const
     return timeStep;
 
 } //CFL
+
+template< typename Mesh, typename SolverType >
+void
+HyperbolicSolver< Mesh, SolverType >::
+updateGhostValues( MeshPartitioner<Mesh> const & meshPart )
+{
+
+    // fill send buffer
+    buffer_Type sendBuffer;
+
+    // TODO: move this to a const reference
+    typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type ghostDataMap = meshPart.ghostDataMap();
+    typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type::const_iterator procIt  = ghostDataMap.begin();
+    typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type::const_iterator procEnd = ghostDataMap.end();
+    typename MeshPartitioner<Mesh>::GhostEntityDataContainer_Type::const_iterator dataIt;
+    typename MeshPartitioner<Mesh>::GhostEntityDataContainer_Type::const_iterator dataEnd;
+    for ( ; procIt != procEnd; ++procIt )
+    {
+        std::vector<Real> valueList ( sendBuffer[ procIt->first ] );
+
+        dataEnd = procIt->second.end();
+        for ( dataIt = procIt->second.begin(); dataIt != dataEnd; ++dataIt )
+        {
+            ID elementId ( M_FESpace.mesh()->faceElement( dataIt->localFaceId, 0 ) );
+
+            VectorElemental ghostValue  ( M_FESpace.refFE().nbDof(), 1 );
+            extract_vec( *M_uOld, ghostValue, M_FESpace.refFE(), M_FESpace.dof(), elementId, 0 );
+            // TODO: this works only for P0
+            sendBuffer[ procIt->first ].push_back ( ghostValue[ 0 ] );
+        }
+    }
+
+    // organize recvBuffer
+    buffer_Type recvBuffer ( sendBuffer );
+
+    // send data
+    MPI_Status status;
+    for ( Int proc = 0; proc < M_displayer.comm()->NumProc(); proc++ )
+    {
+        if ( proc != M_displayer.comm()->MyPID() )
+        {
+            MPI_Send( &sendBuffer[ proc ][ 0 ], sendBuffer[ proc ].size(), MPI_DOUBLE, proc, M_displayer.comm()->MyPID() + 1000*proc, ( boost::dynamic_pointer_cast <Epetra_MpiComm> (M_displayer.comm() ) )->Comm() );
+            MPI_Recv( &recvBuffer[ proc ][ 0 ], recvBuffer[ proc ].size(), MPI_DOUBLE, proc, proc + 1000*M_displayer.comm()->MyPID(), ( boost::dynamic_pointer_cast <Epetra_MpiComm> (M_displayer.comm() ) )->Comm(), &status );
+        }
+
+    }
+
+    // store data in the M_ghostDataMap member
+    for ( buffer_Type::const_iterator procIt = recvBuffer.begin(); procIt != recvBuffer.end(); ++procIt )
+    {
+        UInt count ( 0 );
+        for ( ghostDataContainer_Type::const_iterator dataIt = procIt->second.begin(); dataIt != procIt->second.end(); ++dataIt, count++ )
+        {
+            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFaceId;
+            M_ghostDataMap[ ghostFaceId ] = *dataIt;
+        }
+    }
+
+
+    // DEBUG
+//    std::ofstream outf ( ( "hype." + boost::lexical_cast<std::string> ( M_displayer.comm()->MyPID() ) + ".out" ).c_str() );
+//    outf << M_uOld->epetraVector() << std::endl << std::endl;
+//
+//    for ( buffer_Type::const_iterator procIt = recvBuffer.begin(); procIt != recvBuffer.end(); ++procIt )
+//    {
+//        outf << "proc " << procIt->first << " size " << recvBuffer[ procIt->first ].size() << std::endl;
+//        UInt count ( 0 );
+//        for ( procData_Type::const_iterator dataIt = procIt->second.begin(); dataIt != procIt->second.end(); ++dataIt, count++ )
+//        {
+//            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFaceId;
+//            ID elementId ( M_FESpace.mesh()->faceElement( ghostFaceId, 0 ) );
+//            outf << "lid " << elementId << " " << "gid " << ghostDataMap[ procIt->first ][ count ].ghostElementLocalId << " " << *dataIt << std::endl;
+//        }
+//    }
+
+} // updateGhostValues
 
 // ===================================================
 // Set Methods
@@ -823,7 +917,21 @@ localEvolve ( const UInt& iElem )
                      leftElement , 0 );
 
         // Check if the current face is a boundary face, that is rightElement == NotAnId
-        if ( rightElement == NotAnId)
+        if ( !Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY | SUBDOMAIN_INTERFACE ) )
+        {
+            // Extract the solution in the current element, now is the leftElement
+            extract_vec( *M_uOld,
+                         rightValue,
+                         M_FESpace.refFE(),
+                         M_FESpace.dof(),
+                         rightElement , 0 );
+        }
+        else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), SUBDOMAIN_INTERFACE ) )
+        {
+            // TODO: this works only for P0 elements
+            rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+        }
+        else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
         {
 
             // Clean the value of the right element
@@ -892,21 +1000,6 @@ localEvolve ( const UInt& iElem )
 
             // Clean the localFaceFluxWeight
             localFaceFluxWeight.zero();
-
-        }
-        else
-        {
-            // The current element is not a boundary element
-
-            // Clean the rightValue
-            rightValue.zero();
-
-            // Extract the solution in the right element
-            extract_vec( *M_uOld,
-                         rightValue,
-                         M_FESpace.refFE(),
-                         M_FESpace.dof(),
-                         rightElement, 0 );
 
         }
 
