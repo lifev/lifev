@@ -558,6 +558,9 @@ hyperbolic::run()
         }
     }
 
+    // Export the partitioning
+    exporter->exportPID( meshPart );
+
     // Set the exporter solution
     exporterSolution.reset( new vector_type ( *hyperbolicSolver.solution(),
                                               exporter->mapType() ) );
