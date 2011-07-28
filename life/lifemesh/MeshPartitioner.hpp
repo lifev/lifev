@@ -242,6 +242,8 @@ public:
     const std::vector<Int>&  repeatedFaceVector()   const {return M_repeatedFaceVector[0];}
     //! Return a reference to M_repeatedVolumeVector
     const std::vector<Int>&  repeatedVolumeVector() const {return M_repeatedVolumeVector[0];}
+    //! Return a reference to M_ghostDataMap
+    const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
     //@}
 
 private:
