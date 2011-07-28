@@ -24,10 +24,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = ESSteady_function.hpp ESUnsteady_function.hpp ethiersteinman.hpp
+check_HEADERS = ethiersteinman.hpp
 
 check_PROGRAMS = test_ethiersteinman
-test_ethiersteinman_SOURCES = main.cpp ethiersteinman.cpp ESSteady_function.cpp ESUnsteady_function.cpp
+test_ethiersteinman_SOURCES = main.cpp ethiersteinman.cpp
 
 EXTRA_DIST = data testsuite.at
 

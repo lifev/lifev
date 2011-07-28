@@ -176,7 +176,10 @@ FSIOperator::setupFEspace()
 
     std::string uOrder = M_data->dataFluid()->uOrder();
     std::string pOrder = M_data->dataFluid()->pOrder();
+
     std::string dOrder = M_data->dataSolid()->order();
+    std::string meshOrder = M_meshDataFluid->mOrder();
+
 
     const ReferenceFE*    refFE_vel(0);
     const QuadratureRule* qR_vel(0);
@@ -189,6 +192,10 @@ FSIOperator::setupFEspace()
     const ReferenceFE*    refFE_struct(0);
     const QuadratureRule* qR_struct(0);
     const QuadratureRule* bdQr_struct(0);
+
+    const ReferenceFE*    refFE_mesh(0);
+    const QuadratureRule* qR_mesh(0);
+    const QuadratureRule* bdQr_mesh(0);
 
     if ( uOrder.compare("P2") == 0 )
     {
@@ -247,6 +254,25 @@ FSIOperator::setupFEspace()
     {
         ERROR_MSG(dOrder + " structure FE not implemented yet.");
     }
+
+
+    if ( meshOrder.compare("P2") == 0 )
+    {
+        refFE_mesh = &feTetraP2;
+        qR_mesh    = &quadRuleTetra15pt; // DoE 5
+        bdQr_mesh  = &quadRuleTria3pt;   // DoE 2
+    }
+    else if ( meshOrder.compare("P1") == 0 )
+    {
+        refFE_mesh = &feTetraP1;
+        qR_mesh    = &quadRuleTetra4pt;  // DoE 2
+        bdQr_mesh  = &quadRuleTria3pt;   // DoE 2
+    }
+    else
+    {
+        ERROR_MSG(dOrder + " mesh FE not implemented yet.");
+    }
+
     disp.leaderPrint("done\n");
 
     disp.leaderPrint("FSI-  Building fluid FESpace ...               \n");
@@ -255,9 +281,9 @@ FSIOperator::setupFEspace()
 
         M_mmFESpace.reset(new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
                                                             //dOrder,
-                                                            *refFE_struct,
-                                                            *qR_struct,
-                                                            *bdQr_struct,
+                                                            *refFE_mesh,
+                                                            *qR_mesh,
+                                                            *bdQr_mesh,
                                                             3,
                                                             M_epetraComm));
 
@@ -281,9 +307,9 @@ FSIOperator::setupFEspace()
     {
         M_mmFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_fluidMesh,
                                                             //dOrder,
-                                                            *refFE_struct,
-                                                            *qR_struct,
-                                                            *bdQr_struct,
+                                                            *refFE_mesh,
+                                                            *qR_mesh,
+                                                            *bdQr_mesh,
                                                             3,
                                                             M_epetraComm));
 

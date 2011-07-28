@@ -24,6 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 SUBDIRS		=  benchmark_RossEthierSteinman \
                example_cavity \
+			   benchmark_HPCNavierStokes \
                example_cylinder \
                example_heart \
                example_impes \
@@ -32,6 +33,7 @@ SUBDIRS		=  benchmark_RossEthierSteinman \
                example_NavierStokesRestart \
                example_ns_flux \
                example_nsResistanceBC \
+               example_OseenAssembler \
                utility_converterGetPot2Teuchos \
                utility_fsiCutter \
                utility_meshReorder \

@@ -1152,7 +1152,7 @@ void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::str
 
     // Save the matrix into the file
     HDF5.Write ( matrixName.data(), *M_epetraCrs );
-    
+
     // Close the file
     HDF5.Close ( );
 
