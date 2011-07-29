@@ -124,7 +124,7 @@ public:
     \param monolithicMap: the MapEpetra
     \param offset: the offset parameter used assembling the matrices
   */
-    virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+  virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                         const boost::shared_ptr<const MapEpetra>&   monolithicMap,
                         const UInt offset
                         ) = 0;
@@ -141,7 +141,7 @@ public:
     \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
     \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
   */
-    virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
+  virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
 
   //! Updates the nonlinear terms in the Jacobian matrix in StructuralSolver::updateJacobian
   /*!

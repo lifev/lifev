@@ -170,7 +170,7 @@ public:
   /*!
     \param stiff stiffness matrix provided from outside
   */
-  void updateSystem(matrixPtr_Type& stiff);
+  void updateSystem(matrixPtr_Type& stiffls);
 
   //! Updates the system at the end of each time step given a source term
   /*!
