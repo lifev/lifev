@@ -40,6 +40,20 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <life/lifecore/LifeV.hpp>
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/shared_ptr.hpp>
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
+#endif
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 namespace LifeV
 {
 
@@ -50,6 +64,14 @@ namespace LifeV
 class LifeChrono
 {
 public:
+
+    //! @name Public Types
+    //@{
+
+    typedef Epetra_Comm                              comm_Type;
+    typedef boost::shared_ptr< comm_Type >           commPtr_Type;
+
+    //@}
 
     //! @name Constructor
     //@{
@@ -95,6 +117,25 @@ public:
             return ( 1. * ( clock() - M_t1 ) ) / CLOCKS_PER_SEC;
 
         return ( 1. * ( M_t2 - M_t1 ) ) / CLOCKS_PER_SEC;
+    }
+
+    //! Compute the global difference in time between start and stop for all the processes in the communicator
+    /*!
+     * @param comm the global communicator
+     */
+    Real globalDiff( const comm_Type& comm )
+    {
+        Real localDifference;
+        Real globalDifference;
+
+        if ( M_running )
+            localDifference = ( 1. * ( clock() - M_t1 ) ) / CLOCKS_PER_SEC;
+        else
+            localDifference = ( 1. * ( M_t2 - M_t1 ) ) / CLOCKS_PER_SEC;
+
+        comm.MaxAll( &localDifference, &globalDifference, 1 );
+
+        return globalDifference;
     }
 
     //! Return a cumulative time difference

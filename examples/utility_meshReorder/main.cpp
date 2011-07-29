@@ -22,10 +22,38 @@
 #include<life/lifemesh/MeshData.hpp>
 
 #include<life/lifefilters/GetPot.hpp>
+#include <life/lifefilters/MeshWriter.hpp>
 #include <string>
 
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
 #include <life/lifefem/FESpace.hpp>
+
+/*!
+ * @file
+ * @brief File containing a utility to reorder a mesh
+ *
+ * This utility contains a method to reorder the meshes reducing the fill-in of the matrix,
+ * and a method to create a different marker on a region of a mesh.
+ * In particular this region is identified by a marker of another mesh that shares an interface
+ * (e.g. solid interface and fluid edges in FSI).
+ *
+ * For instance suppose that you have marker=20 on the fluid 'edges'
+ * and on the solid mesh you have just different markers for the internal and external walls,
+ * then using this test you can create a marker '30' on the solid mesh whenever the corresponding marker on the fluid
+ * mesh is '20', and rewrite the mesh.
+ *
+ * usage: test_meshReorder -o mesh_output.mesh
+ *
+ * without the options -o or --output the output mesh can be specified from this data file.
+ * Otherwise the mesh will be written in a file 'mesh'.
+ *
+ * the first mesh is the one reordered. The second mesh is the one where the new marker is added
+ * (not read when create_edge=false).
+ *
+ * @author Paolo Crosetto <paolo.crosetto@epfl.ch>
+ *
+ * @mantainer Paolo Crosetto <paolo.crosetto@epfl.ch>
+ */
 
 
 int main(int argc, char** argv)
@@ -59,6 +87,7 @@ int main(int argc, char** argv)
         int me;
         MPI_Comm_rank(MPI_COMM_WORLD, &me);
         MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+        MPI_Comm MPIcomm;
         MPI_Group  originGroup, newGroup;
         MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
         int members[numtasks];
@@ -66,16 +95,16 @@ int main(int argc, char** argv)
             members[i]=0;
         MPI_Group_incl(originGroup, 1, members, &newGroup);
 
-        /* We have removed mesh_wrt, but here it was called ...
         MPI_Comm_create(MPI_COMM_WORLD, newGroup, &MPIcomm);
         if(me==0)
-            {
-                mesh->orderMesh( MPIcomm);
-                //solidData.mesh()->orderMesh( MPIcomm);
-                writeMesh( mesh_output , *mesh);
-                //writeMesh( "solid_ord.mesh", *solidData.mesh());
-            }
-        */
+        {
+            mesh->orderMesh( MPIcomm);
+            //solidData.mesh()->orderMesh( MPIcomm);
+
+            MeshWriter::writeMeshMedit<RegionMesh3D<LinearTetra> >( mesh_output , *mesh);
+            //writeMesh( "solid_ord.mesh", *solidData.mesh());
+        }
+
     }
     else if (create_edge)
     {
@@ -110,9 +139,8 @@ int main(int argc, char** argv)
             *mesh, SolidInterfaceFlag,
             0., &edgeFlag);
         mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), TimeAdvanceNewmarker);
-        /* We have removed mesh_wrt, but here it was called ...
-            writeMesh( mesh_output , *mesh2);
-        */
+        MeshWriter::writeMeshMedit<RegionMesh3D<LinearTetra> >( mesh_output , *mesh2);
+
     }
     MPI_Finalize();
 #endif

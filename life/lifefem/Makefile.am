@@ -32,7 +32,8 @@ liblifefem_la_SOURCES	= BCBase.cpp BCFunction.cpp BCVector.cpp BCHandler.cpp \
           CurrentFE.cpp CurrentBoundaryFE.cpp FEDefinitions.cpp DOF.cpp \
           DOFInterface3Dto2D.cpp DOFInterface3Dto3D.cpp DOFInterface.cpp \
           AssemblyElemental.cpp  GeometricMap.cpp \
-          DOFLocalPattern.cpp QuadratureRule.cpp ReferenceElement.cpp ReferenceFE.cpp ReferenceFEScalar.cpp ReferenceFEHdiv.cpp \
+          DOFLocalPattern.cpp QuadratureRule.cpp QuadratureRuleProvider.cpp \
+          ReferenceElement.cpp ReferenceFE.cpp ReferenceFEScalar.cpp ReferenceFEHdiv.cpp \
           ReferenceFEHybrid.cpp CurrentBoundaryFEBase.cpp \
           BCManage.cpp QuadraturePoint.cpp
 
