@@ -116,6 +116,15 @@ class VenantKirchhoffMaterialLinear :
                                         const dataPtr_Type& /*dataMaterial*/,
                                         const displayerPtr_Type& /*displayer*/);
 
+    //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in 
+    //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
+    /*!
+      \param sol:  the solution vector
+      \param factor: scaling factor used in FSI
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
+    */
+    void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
@@ -130,13 +139,34 @@ class VenantKirchhoffMaterialLinear :
 			const dataPtr_Type& /*dataMaterial*/,
 			const displayerPtr_Type& displayer);
 
+    //! Missing Documentation!!!
+    void computeKinematicsVariables( const VectorElemental& dk_loc ){}
+
     //@}
 
+    //! @name Get Methods
+    //@{
+
+    //! Get the Stiffness matrix
+    matrixPtr_Type const linearStiff()    const {return M_linearStiff; }
+
+    //@}
+
+protected:
+  //! Protected members
+
+  //! Elementary matrices
+  boost::scoped_ptr<MatrixElemental>             M_elmatK;
+
+  //! Matrix Kl: stiffness linear
+  matrixPtr_Type                                 M_linearStiff;
 };
 
 template <typename Mesh>
 VenantKirchhoffMaterialLinear<Mesh>::VenantKirchhoffMaterialLinear():
-    super()
+    super			 ( ),
+    M_elmatK                     ( ),
+    M_linearStiff                ( )
 {
 }
 
@@ -155,7 +185,7 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
   std::cout<<"I am setting up the Material"<<std::endl;
 
   this->M_FESpace                       = dFESpace;
-  this->M_elmatK.reset                        (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+  this->M_elmatK.reset                  (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
   this->M_localMap                      = monolithicMap;
   this->M_linearStiff.reset             (new matrix_Type(*this->M_localMap));
   this->M_offset                        = offset;
@@ -229,10 +259,21 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianMatrix( matrixP
                                                                          const  vector_Type& /*disp*/,
                                                                          const dataPtr_Type& /*dataMaterial*/,
                                                                          const displayerPtr_Type& displayer )
-    {
+{
       displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
       std::cout << std::endl;
-    }
+}
+
+
+template <typename Mesh>
+void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& disp,
+							       Real factor,
+							       const dataPtr_Type& dataMaterial,
+							       const displayerPtr_Type& displayer )
+{
+    this->computeMatrix( disp, factor, dataMaterial, displayer );
+}
+
 
 template <typename Mesh>
 void VenantKirchhoffMaterialLinear<Mesh>::computeMatrix(const vector_Type& /*disp*/,

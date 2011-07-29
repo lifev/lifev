@@ -26,13 +26,14 @@
 
 /*!
  *  @file
- *  @brief This file contains an abstract class to implement different kinds of materials for structural dynamic (St. Venant-Kirchhoff materials right now )
+ *  @brief This file contains an abstract class to implement different kinds of materials for structural dynamic (St. Venant-Kirchhoff, Neo-Hookean and Exponential materials right now )
  *
  *  @version 1.0
  *  @date 01-01-2010
  *  @author Paolo Tricerri
- *
+ *  @author Gianmarco Mengaldo
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
+ *  @contributor  Gianmarco Mengaldo <gianmarco.mengaldo@gmail.com>
  */
 
 #ifndef _STRUCTURALMATERIAL_H_
@@ -150,7 +151,7 @@ public:
     \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
     \param displayer: a pointer to the Dysplaier member in the StructuralSolver class    
   */
-  virtual  void updateNonLinearJacobianMatrix( matrixPtr_Type& /*stiff*/, const vector_Type& /*disp*/, const dataPtr_Type& /*dataMaterial*/, const displayerPtr_Type& /*displayer*/ ) = 0;
+    virtual  void updateNonLinearJacobianMatrix( matrixPtr_Type& /*stiff*/, const vector_Type& /*disp*/, const dataPtr_Type& /*dataMaterial*/, const displayerPtr_Type& /*displayer*/ ) = 0;
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
@@ -160,17 +161,13 @@ public:
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void computeMatrix( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
+    virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
 
-    //! Computes the nonlinear part of Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
-    //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same. This is virtual and not pure virtual since in the linear St. Venant-Kirchhoff law it is not needed.
+    //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
     /*!
-      \param sol:  the solution vector
-      \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
+      \param dk_loc: local displacement vector
     */
-  virtual  void computeNonLinearMatrix( matrixPtr_Type& /*stiff*/, const vector_Type& /*sol*/, Real /*factor*/, const dataPtr_Type& /*dataMaterial*/, const displayerPtr_Type& /*displayer*/ ){};
+    virtual  void computeKinematicsVariables( const VectorElemental& dk_loc ) = 0;
 
 
   //! Output of the class
@@ -198,9 +195,6 @@ public:
   //! Get the Stiffness matrix
   matrixPtr_Type const stiff()    const {return M_stiff; }
 
-  //! Get the Stiffness matrix
-  matrixPtr_Type const linearStiff()    const {return M_linearStiff; }
-
   //! Get the FESpace object
   FESpace<Mesh, MapEpetra>& dFESpace()  {return M_FESpace;}
 
@@ -214,14 +208,8 @@ protected:
 
   boost::shared_ptr<const MapEpetra>             M_localMap;
 
-  //! Elementary matrices
-  boost::scoped_ptr<MatrixElemental>             M_elmatK;
-
   //! Matrix Knl: stiffness (linear + nonlinear)
   matrixPtr_Type                                 M_stiff;
-
-  //! Matrix Kl: stiffness linear
-  matrixPtr_Type                                 M_linearStiff;
 
   //! The Offset parameter
   UInt                                           M_offset;
@@ -236,9 +224,7 @@ template <typename Mesh>
 StructuralMaterial<Mesh>::StructuralMaterial( ):
   M_FESpace                    ( ),
   M_localMap                   ( ),
-  M_elmatK                     ( ),
   M_stiff                      ( ),
-  M_linearStiff                ( ),
   M_offset                     ( 0 )
 {
   std::cout << "I am in the constructor of StructuralMaterial" << std::endl;

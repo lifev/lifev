@@ -633,7 +633,8 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
     chrono.start();
 
     //Compute the new Stiffness Matrix
-    M_material->computeMatrix(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
+    //M_material->computeMatrix(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
+    M_material->computeStiffness(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
 
 
     stiff.reset(new matrix_Type(*this->M_localMap));
@@ -932,7 +933,8 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     chrono.start();
 
     //It is right to do globalAssemble() inside the M_material class
-    M_material->computeMatrix( sol, 1., this->M_data, this->M_Displayer);
+    //M_material->computeMatrix( sol, 1., this->M_data, this->M_Displayer);
+    M_material->computeStiffness( sol, 1., this->M_data, this->M_Displayer);
 
     stiff.reset(new matrix_Type(*this->M_localMap));
     *stiff +=*this->M_material->stiff();
@@ -1000,7 +1002,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Ty
 
   //This is consisten with the previous first approximation in iterateLin
   this->M_tempMatrix.reset (new matrix_Type(*this->M_localMap));
-  *this->M_tempMatrix += *this->M_material->linearStiff();
+  *this->M_tempMatrix += *this->M_material->stiff();
   *this->M_tempMatrix *= M_zeta;
   *this->M_tempMatrix += *this->M_mass;
   this->M_tempMatrix->globalAssemble();
