@@ -1385,7 +1385,8 @@ void MeshPartitioner<MeshType>::constructFaces()
                         }
                     }
                 }
-                ASSERT ( ghostProc != M_me, "ghost face not found" );
+                // check that the ghost element is found on another proc ( this test is acceptable only for online partitioning )
+                ASSERT ( ghostProc != M_me || M_serialMode, "ghost face not found" );
                 M_ghostDataMap[ ghostProc ].push_back( ghostFace );
             }
 
