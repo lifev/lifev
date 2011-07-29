@@ -216,6 +216,9 @@ public:
     //! Return a pointer to the mesh partition with rank k
     const meshPtr_Type&      getPartition(Int k)    const {return (*M_meshPartitions)[k];}
 
+    //! Clean structures that are not needed after partitioning
+    void cleanUp();
+
     //! Prints information about the state (data) of the object
     void showMe(std::ostream& output = std::cout) const;
     //@}
@@ -1661,6 +1664,28 @@ void MeshPartitioner<MeshType>::execute()
     // allowing it to be deleted
     // ***************************************
     releaseUnpartitionedMesh();
+
+    // ***************************************
+    // clear all internal structures that are
+    // not needed anymore
+    // ***************************************
+    cleanUp();
+}
+
+template<typename MeshType>
+void MeshPartitioner<MeshType>::cleanUp()
+{
+    clearVector( M_vertexDistribution );
+    clearVector( M_adjacencyGraphKeys );
+    clearVector( M_adjacencyGraphValues );
+    clearVector( M_localNodes );
+    clearVector( M_localEdges );
+    clearVector( M_localFaces );
+    clearVector( M_localVolumes );
+    clearVector( M_nBoundaryPoints );
+    clearVector( M_nBoundaryEdges );
+    clearVector( M_nBoundaryFaces );
+    clearVector( M_graphVertexLocations );
 }
 
 }
