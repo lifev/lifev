@@ -30,10 +30,10 @@
     A class for an easy handling of different order time
     discretizations/extrapolations BDF based for first and second order problem
     @date
- 
+
     @author Simone Deparis  <simone.deparis@epfl.ch>
     @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
- 
+
     @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
@@ -166,10 +166,10 @@ public:
     //@{
 
     //! Empty  Constructor
-    
+
     TimeAdvanceBDF();
      //! Constructor
-     /*! 
+     /*!
      @param  order of the BDF
      */
     //  TimeAdvanceBDF( const UInt& order);
@@ -187,7 +187,7 @@ public:
 
     //! @name Methods
     //@{
-  
+
      //!Update the state vector
      /*! Update the vectors of the previous time steps by shifting on the right  the old values.
      @param solution current (new) value of the state vector
@@ -201,7 +201,7 @@ public:
      @returns rhsV
      */
      feVectorType updateRHSFirstDerivative(const Real& timeStep = 1 );
-   
+
      //! Update the right hand side \f$ f_W \f$ of the time derivative formula
      /*
      Sets and Returns the right hand side \f$ f_W \f$ of the time derivative formula
@@ -242,12 +242,12 @@ public:
 
     //! Initialize the StateVector used in TimeAdvanceNewmark
     void setInitialCondition(const feVectorType& x0, const feVectorType& v0, const feVectorType&  w0 );
-   
+
     //! Initialize all the entries of the unknown vector to be derived with a
     //! set of vectors x0
     //! note: this is taken as a copy (not a reference), since x0 is resized inside the method.
     void setInitialCondition(const feVectorContainer_Type& x0 );
-  
+
     //@}
 
     //!@name Get Methods
@@ -259,19 +259,19 @@ public:
     @returns beta
     */
     Real coefficientExtrapolation(const UInt& i ) const;
-   
+
     //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
     /*!
     @param \f$i\f$ index of velocity's extrapolation  coefficient
     @returns betaVelocity
     */
     Real coefficientExtrapolationVelocity(const UInt& i ) const;
-   
+
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
-    */ 
+    */
     feVectorType extrapolation() const;
 
     //! Compute the polynomial extrapolation of velocity
@@ -507,7 +507,7 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorType& x0)
     feVectorType zero(x0);
     zero *=0;
     this->setInitialRHS(zero);
-   
+
     ASSERT ( this->M_unknowns.size() == this->M_order,
              "M_unknowns.size() and  M_order must be equal" );
 }
@@ -562,7 +562,7 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorContainer_
                  "M_unknowns.size() and  M_order must be equal" );
     }
 
-    //!initialize zero 
+    //!initialize zero
     feVectorType zero(x0[0]);
     zero *=0;
     this->setInitialRHS(zero);
@@ -570,7 +570,7 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorContainer_
 
 // ===================================================
 // Get Methods
-// ===================================================  
+// ===================================================
 
 template<typename feVectorType>
 Real

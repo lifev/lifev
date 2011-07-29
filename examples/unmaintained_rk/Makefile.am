@@ -26,9 +26,9 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS = ctRK.hpp
 
-# To compile test_mt uncomment the following line and make check
-##check_PROGRAMS = test_rk
-test_rk_SOURCES = main.cpp ctRK.cpp
+# To compile test_mt uncomment the following two lines, rerun make -f Makefile.git, reconfigure  and make check
+#check_PROGRAMS = test_rk
+#test_rk_SOURCES = main.cpp ctRK.cpp
 
 EXTRA_DIST = data
 

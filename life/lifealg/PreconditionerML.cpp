@@ -49,7 +49,8 @@ PreconditionerML::PreconditionerML():
         super(),
         M_operator(),
         M_preconditioner(),
-        M_analyze(false)
+        M_analyze(false),
+        M_visualizationDataAvailable(false)
 {
 
 }
@@ -121,7 +122,7 @@ PreconditionerML::createMLList( list_Type& list,
 
     bool found;
 
-    Int MLPrintParameterList = dataFile( (section + "/displayList").data(), 0, found );
+    bool MLPrintParameterList = dataFile( (section + "/displayList").data(), false, found );
 
     Int MLOutput             = dataFile((section + "/" + subSection + "/MLOuput").data(), 0, found);
     if ( found ) list.set( "ML output", MLOutput );
@@ -158,6 +159,9 @@ PreconditionerML::createMLList( list_Type& list,
     std::string AggregationType                  = dataFile( (section + "/" + subSection + "/aggregation/type").data(), "Uncoupled", found );
     if ( found ) list.set( "aggregation: type", AggregationType );
 
+    bool AggregationBlockScaling          = dataFile( (section + "/" + subSection + "/aggregation/block_scaling").data(), false, found );
+    if ( found ) list.set( "aggregation: block scaling", AggregationBlockScaling );
+
     Real        AggregationThreshold             = dataFile( (section + "/" + subSection + "/aggregation/threshold").data(), 0.0 , found );
     if ( found ) list.set( "aggregation: threshold", AggregationThreshold );
 
@@ -184,6 +188,17 @@ PreconditionerML::createMLList( list_Type& list,
 
     bool AggregationSymmetrize                   = dataFile( (section + "/" + subSection + "/aggregation/symmetrize").data(), false, found );
     if ( found ) list.set( "aggregation: symmetrize", AggregationSymmetrize );
+
+    Int AggregationNumLevelTypes                 = dataFile( (section + "/" + subSection + "/aggregation/level_type").data(), 0, found );
+    if ( found )
+    {
+        for(Int i(0);i<AggregationNumLevelTypes;++i)
+        {
+            std::string levelIndex             = dataFile( (section + "/" + subSection + "/aggregation/level_type").data(), "0", 2*i+1 );
+            std::string levelParamValue = dataFile( (section + "/" + subSection + "/aggregation/level_type").data(), "METIS", 2*i+2 );
+            list.set( ("aggregation: type (level " + levelIndex + ")").data(), levelParamValue );
+        }
+    }
 
     bool   EnergyMinimizationEnable              = dataFile( (section + "/" + subSection + "/energy_minimization/enable").data(), false, found );
     if ( found ) list.set( "energy minimization: enable", EnergyMinimizationEnable );
@@ -216,6 +231,34 @@ PreconditionerML::createMLList( list_Type& list,
 
     bool SmootherHiptmairEfficientSymmetric = dataFile( (section + "/" + subSection + "/smoother/Hiptmair_efficient_symmetric").data(), true, found );
     if ( found ) list.set( "smoother: Hiptmair efficient symmetric", SmootherHiptmairEfficientSymmetric );
+
+    std::string SmootherIfpackType           = dataFile( (section + "/" + subSection + "/smoother/ifpack_type").data(), "ILU", found );
+    if ( found ) list.set( "smoother: ifpack type", SmootherIfpackType );
+
+    Int SmootherIfpackOverlap                = dataFile( (section + "/" + subSection + "/smoother/ifpack_overlap").data(), 1, found );
+    if ( found ) list.set( "smoother: ifpack overlap", SmootherIfpackOverlap );
+
+    Int SmootherNumLevelTypes               = dataFile( (section + "/" + subSection + "/smoother/level_type").data(), 0, found );
+    if ( found )
+    {
+        for(Int i(0);i<SmootherNumLevelTypes;++i)
+        {
+            std::string levelIndex          = dataFile( (section + "/" + subSection + "/smoother/level_type").data(), "0", 2*i+1 );
+            std::string levelParamValue     = dataFile( (section + "/" + subSection + "/smoother/level_type").data(), "IFPACK", 2*i+2 );
+            list.set( ("smoother: type (level " + levelIndex + ")").data(), levelParamValue );
+        }
+    }
+
+    Int SmootherNumLevelSweeps              = dataFile( (section + "/" + subSection + "/smoother/level_sweeps").data(), 0, found );
+    if ( found )
+    {
+        for(Int i(0);i<SmootherNumLevelSweeps;++i)
+        {
+            std::string levelIndex          = dataFile( (section + "/" + subSection + "/smoother/level_sweeps").data(), "0", 2*i+1 );
+            Int levelParamValue             = dataFile( (section + "/" + subSection + "/smoother/level_sweeps").data(), 1, 2*i+2 );
+            list.set( ("smoother: sweeps (level " + levelIndex + ")").data(), levelParamValue );
+        }
+    }
 
     // subsmoother parameter
 
@@ -288,7 +331,6 @@ PreconditionerML::createMLList( list_Type& list,
     Int RepartitionZoltanDimensions    = dataFile( (section + "/" + subSection + "/repartition/Zoltan_dimensions").data(), 2, found );
     if ( found ) list.set( "repartition: Zoltan dimensions", RepartitionZoltanDimensions );
 
-
     if ( MLPrintParameterList )
     {
         std::cout << "  Parameters List: " << std::endl;
@@ -314,9 +356,44 @@ PreconditionerML::setDataFromGetPot( const GetPot&      dataFile,
     // ML List
     createMLList( M_list, dataFile, section, "ML" );
 
+    // visualization
+    bool found(false);
+    bool enableViz    = dataFile( (section + "/" + "ML" + "/visualization/enable").data(), false, found );
+    if ( found )
+    {
+        /*
+           If the visualization is desired and we have set the required data,
+           we set the following variables.
+           (see Trilinos::ML manual for more details)
+         */
+        if(M_visualizationDataAvailable)
+        {
+            M_list.set( "viz: enable", enableViz);
+            M_list.set( "viz: output format", "vtk");
+            M_list.set("x-coordinates", &((*M_xCoord)[0]) );
+            M_list.set("y-coordinates", &((*M_yCoord)[0]) );
+            M_list.set("z-coordinates", &((*M_zCoord)[0]) );
+        }
+        else
+        {
+            std::cout << "Warning: Visualization options are not available if you have not use setVerticesCoordinates first!" << std::endl;
+        }
+    }
+
     // IfPack list
     list_Type& SmootherIFSubList = M_list.sublist( "smoother: ifpack list" );
     PreconditionerIfpack::createIfpackList( SmootherIFSubList, dataFile, section, "ML" );
+}
+
+void
+PreconditionerML::setVerticesCoordinates(boost::shared_ptr<vector<Real> > xCoord,
+                                         boost::shared_ptr<vector<Real> > yCoord,
+                                         boost::shared_ptr<vector<Real> > zCoord)
+{
+    M_xCoord = xCoord;
+    M_yCoord = yCoord;
+    M_zCoord = zCoord;
+    M_visualizationDataAvailable = true;
 }
 
 
