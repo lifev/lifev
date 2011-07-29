@@ -124,14 +124,15 @@ void  FSIExactJacobian::solveLinearFluid()
     }
     else
     {
-
         this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         dispFluidMesh);
     }
     //dispFluidDomainRep = dispFluidMesh;//import
     dispFluidDomain=dispFluidMesh;//import
+
+
     this->derVeloFluidMesh() = dispFluidMesh;
-    this->derVeloFluidMesh() *= 1./(M_data->dataFluid()->dataTime()->timeStep());
+    this->derVeloFluidMesh() *= M_fluidTimeAdvance->coefficientFirstDerivative(0)/(M_data->dataFluid()->dataTime()->timeStep());
     this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().normInf(), "\n" );
     *M_rhsNew *= 0.;
 
@@ -307,8 +308,10 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
         this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         this->veloFluidMesh());
 
-        this->veloFluidMesh()    -= dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
+        this->veloFluidMesh() = this->ALETimeAdvance()->velocity( M_meshMotion->disp() );
+	
+	//  this->veloFluidMesh()    -= dispFluidMeshOld();
+        //this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
 
         if ( iter==0 || !this->M_data->dataFluid()->isSemiImplicit() )
         {
@@ -322,17 +325,25 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 
             this->moveMesh(meshDisp);
 
-            vector_Type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
-            this->interpolateVelocity(meshDispDiff, *M_beta);
+	    // vector_Type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
+            //this->interpolateVelocity(meshDispDiff, *M_beta);
 
-            *M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
+	     *M_beta = this->veloFluidMesh();
+	     *M_beta *= -1;
 
-            *M_beta  += *this->M_un;
+	     if(iter==0)
+	       *M_beta += this->M_fluidTimeAdvance->extrapolation();
+	     else
+	       *M_beta += this->M_fluid->solution();
+	     
+	     // *M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
+
+	     //*M_beta  += *this->M_un;
 
             if (recomputeMatrices)
             {
-                double alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
-                this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
+	      double alpha = M_fluidTimeAdvance->coefficientFirstDerivative(0)/M_data->dataFluid()->dataTime()->timeStep();
+	      this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
             }
             else
             {
@@ -343,7 +354,6 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
         this->M_fluid->iterate( *M_BCh_u );
 
         this->transferFluidOnInterface(this->M_fluid->residual(), sigmaFluidUnique);
-
     }
 
     M_epetraWorldComm->Barrier();
@@ -396,7 +406,8 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     if (this->isSolid())
     {
         this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->velocity(),      lambdaDotSolidUnique);
+	this->transferSolidOnInterface( M_solidTimeAdvance->velocity( this->solid().disp()), lambdaDotSolidUnique );
+	//        this->transferSolidOnInterface(this->M_solid->velocity(),      lambdaDotSolidUnique);
         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
@@ -439,7 +450,7 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 // ===================================================
 
 // ===================================================
-// Constructors & Destructor
+// Constructors & Destructorxs
 // ===================================================
 
 FSIExactJacobian::Epetra_ExactJacobian::Epetra_ExactJacobian() :

@@ -172,8 +172,12 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         this->veloFluidMesh());
 
-        this->veloFluidMesh()    -= this->dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
+       
+	this->veloFluidMesh() = this->ALETimeAdvance()->velocity( M_meshMotion->disp() );  // w lives in HE fespace 
+
+
+        //this->veloFluidMesh()    -= this->dispFluidMeshOld();
+	// this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
 
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
@@ -185,13 +189,19 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         this->moveMesh(meshDispDiff);
         */
 
-        *M_beta *= 0.;
+        *M_beta = this->veloFluidMesh();
+	*M_beta *= -1;
 
-        this->transferMeshMotionOnFluid(M_meshMotion->dispDiff(),  *M_beta);
+        //this->transferMeshMotionOnFluid(M_meshMotion->dispDiff(),  *M_beta);
 
-        *M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
+        //*M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
 
-        *M_beta += this->M_bdf->extrapolation();
+        //*M_beta += this->M_bdf->extrapolation();
+
+	if(iter==0)
+	  *M_beta += this->M_fluidTimeAdvance->extrapolation();
+	else
+	  *M_beta += this->M_fluid->solution();
 
         double alpha = this->M_bdf->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
 
@@ -201,7 +211,6 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
         if (recomputeMatrices)
         {
-
             this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
         }
         else
@@ -245,12 +254,12 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     vector_Type lambdaSolidUnique   (this->lambdaSolid().map(),    Unique);
     vector_Type lambdaDotSolidUnique(this->lambdaDotSolid().map(), Unique);
     vector_Type sigmaSolidUnique    (this->sigmaSolid().map(),     Unique);
-
     if (this->isSolid())
     {
         this->M_solid->iterate( M_BCh_d );
         this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->velocity(),      lambdaDotSolidUnique);
+	this->transferSolidOnInterface( M_solidTimeAdvance->velocity( this->solid().disp()), lambdaDotSolidUnique );
+	//  this->transferSolidOnInterface(this->M_solid->velocity(),      lambdaDotSolidUnique);
         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
