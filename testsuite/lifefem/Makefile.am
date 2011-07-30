@@ -25,7 +25,7 @@ test_interpolate_SOURCES = test_interpolate.cpp
 
 link:
 	test -a data || ln -s $(srcdir)/data
-	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/Mesh
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
 
 EXTRA_DIST = data testsuite.at
 
