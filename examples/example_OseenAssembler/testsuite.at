@@ -23,7 +23,7 @@ AT_DATA([data],[[
 
 [mesh]
 
-nelements = 19
+nelements = 10
 
 [../exporter]
 
@@ -32,11 +32,11 @@ multimesh  = false
 start      = 0
 save       = 1
 
-[../prec]
+[prec]
 	prectype                = Ifpack # Ifpack or ML
 	displayList             = false
 
-        [../ifpack]
+        [./ifpack]
 	        overlap		= 2
 
            	[./fact]
@@ -54,10 +54,10 @@ save       = 1
            	reordering_type = none #metis, rcm, none
            	filter_singletons = true
 
-		[../]
-	[../]
+		    [../]
+	    [../]
 
-[../solver]
+[solver]
     solver          = gmres
     scaling         = none
     output          = all # none
