@@ -1451,7 +1451,6 @@ feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     if(InterpolatedVectorPtr->mapType() == outputMapType)
     	return *InterpolatedVectorPtr;
     else
-    	return vector_type(*InterpolatedVectorPtr, outputMapType, Insert);
     {
     	// Here we do need to use the combine mode "Insert": the default combine mode
 		// is "Add". In fact, when we convert from a Repeated to a unique Map, as we pass several times on the same DoF, the values would be added, what would
