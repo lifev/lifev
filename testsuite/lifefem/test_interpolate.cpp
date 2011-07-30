@@ -69,10 +69,10 @@ Also it test the interpolation of an analytical function into a finite element s
 
 #include "test_interpolate.hpp"
 
+using namespace LifeV;
+
 int main(int argc, char** argv )
 {
-    using namespace LifeV;
-
     typedef FESpace < RegionMesh3D<LinearTetra>, MapEpetra > FESpaceTetra_Type;
     typedef boost::shared_ptr < FESpaceTetra_Type > FESpaceTetraPtr_Type;
 
@@ -224,30 +224,27 @@ int main(int argc, char** argv )
 }//end main
 
 
-namespace LifeV
+Real linearFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic)
 {
-	Real linearFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic)
-	{
-		return  2*x+-z+4 + y*(ic+1) + t;
-	}
+	return  2*x+-z+4 + y*(ic+1) + t;
+}
 
-	//linear function containing a bubble. The bubble is defined on a particular mesh tetrahedra.
-	Real linearBubbleFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic)
-	{
-		Real xx = std::max(x, 0.);
-		Real yy = std::max(y-x, 0.);
-		Real zz = std::max(z-y, 0.);
-		return  2*x+-z+4 + y*ic + t + xx*yy*zz*std::max(0.1-xx-yy-zz, 0.);
-	}
+//linear function containing a bubble. The bubble is defined on a particular mesh tetrahedra.
+Real linearBubbleFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic)
+{
+	Real xx = std::max(x, 0.);
+	Real yy = std::max(y-x, 0.);
+	Real zz = std::max(z-y, 0.);
+	return  2*x+-z+4 + y*ic + t + xx*yy*zz*std::max(0.1-xx-yy-zz, 0.);
+}
 
-	Real quadraticFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic)
-	{
-		return  2*x*x + t*y*y - z*z +x*y -x*z + 2*y*z -x + y*(ic+1) -z -8;
-	}
+Real quadraticFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic)
+{
+	return  2*x*x + t*y*y - z*z +x*y -x*z + 2*y*z -x + y*(ic+1) -z -8;
+}
 
-	Real bilinearFunction(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& ic)
-	{
-		return  x*y -x*z + 2*y*z -x + y*(ic+1) -z -8;
-	}
+Real bilinearFunction(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& ic)
+{
+	return  x*y -x*z + 2*y*z -x + y*(ic+1) -z -8;
 }
 

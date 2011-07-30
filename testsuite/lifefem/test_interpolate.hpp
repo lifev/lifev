@@ -42,24 +42,10 @@ Also it test the interpolation of an analytical function into a finite element s
 #include <life/lifefem/QuadratureRule.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifecore/LifeChrono.hpp>
 #include <string>
 #include <fstream>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <boost/numeric/ublas/vector.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
-#include "SetOfFun.hpp"
-namespace LifeV
-{
-typedef boost::numeric::ublas::vector<Real> Vector;
-typedef std::vector<QuadratureRule const *> container_Type;
-typedef container_Type::const_iterator constIterator_Type;
+using namespace LifeV;
 
 Real linearFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic);
 
@@ -80,7 +66,6 @@ bool check_interpolate(const std::vector< boost::shared_ptr < FESpace<MeshType, 
 					  const MapEpetraType& outputMapType, const Fct& function,
 					  const Real* errorArray, const string* stringArray, Real eps, Real time, UInt verbose)
 {
-	LifeChrono chrono;
 	std::vector< boost::shared_ptr <VectorEpetra> > interpVecPtr(originalFeSpaceVecPtr.size());
 	bool check(true);
 
@@ -104,13 +89,10 @@ bool check_interpolate(const std::vector< boost::shared_ptr < FESpace<MeshType, 
 				UInt index = finalFeSpaceVecPtr.size() * i+ j;
 				cout.precision(7);
 				std::cout << stringArray[index] << ": " << std::setw(12) << err_rel << " (expected " << errorArray[index] << ")\t";
-				//if(j == finalFeSpaceVecPtr.size()-1)
-					std::cout << "\n";
+				std::cout << "\n";
 			}
 		}
 	if(verbose)
 		std::cout << std::endl;
 	return check;
 }
-
-}//end namespace
