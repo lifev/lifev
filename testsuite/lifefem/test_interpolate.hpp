@@ -88,7 +88,7 @@ bool check_interpolate(const std::vector< boost::shared_ptr < FESpace<MeshType, 
 			{
 				UInt index = finalFeSpaceVecPtr.size() * i+ j;
 				cout.precision(7);
-				std::cout << stringArray[index] << ": " << std::setw(12) << err_rel << " (expected " << errorArray[index] << ")\t";
+				std::cout << stringArray[index] << ": " << std::setw(15) << std::setprecision(10) << err_rel << " (expected " << errorArray[index] << ")\t";
 				std::cout << "\n";
 			}
 		}

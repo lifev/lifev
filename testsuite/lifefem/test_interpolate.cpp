@@ -94,15 +94,15 @@ int main(int argc, char** argv )
 
     //definition of Array of Errors which will be used to check the correctness of the interpolate test.
 
-    Real errArrayBilinear[2] = { 0.031282, 0 };
+    Real errArrayBilinear[2] = { 0.0312819802, 0 };
 
-    Real errArrayQuadratic[12] = {	0.0136248, 0.000508837, 0.000557749, 0.000508837,
-									0.0136172, 0.000508837, 0.000427072, 0.000508837,
-									0.0136172, 0.000508837, 0.000427072,           0.};
+    Real errArrayQuadratic[12] = {	0.0136247667, 0.0005088372, 0.0005577494, 0.0005088372,
+									0.0136172446, 0.0005088372, 0.0004270717, 0.0005088372,
+									0.0136172446, 0.0005088372, 0.0004270717,           0.};
 
-    Real errArrayBubble[12] = {	0.00947027, 3.58419e-10, 3.67611e-10, 3.58419e-10,
-								0.00947027, 3.58419e-10,           0., 3.58419e-10,
-								0.00947027, 3.58419e-10, 3.67611e-10, 3.58419e-10};
+    Real errArrayBubble[12] = {	0.0094702745, 3.584186e-10, 3.67611e-10,  3.584186e-10,
+								0.0094702745, 3.584186e-10,           0., 3.584186e-10,
+								0.0094702745, 3.584186e-10, 3.67611e-10,  3.584186e-10};
 
     Real errArrayLinear[12] = {	0.010437463587, 0., 0., 0.,
 								0.010437463587, 0., 0., 0.,
@@ -180,28 +180,28 @@ int main(int argc, char** argv )
 
 	if(verbose)
 		std::cout<< "\nA bilinear function is interpolated into Q1 vector. \nThen this FE vector is interpolated into Q0 and Q1 vectors. \nThese are the errors with respect to the analytical solution.\n";
-	check = check_interpolate(originalFeSpaceHexaVec, finalFeSpaceHexaVec, Unique, bilinearFunction, errArrayBilinear, stringArrayQ, 1e-6, time, verbose);
+	check = check_interpolate(originalFeSpaceHexaVec, finalFeSpaceHexaVec, Unique, bilinearFunction, errArrayBilinear, stringArrayQ, 1e-10, time, verbose);
 
 
 	if(verbose)
 		std::cout<< "\nA linear function is interpolated into P1, P1b, P2 vectors. "
 				"\nThen these FE vectors are interpolated into the following finite elements \nand error with respect to the analytic solution are reported.\n";
 
-	check &= check_interpolate(originalFeSpaceTetraVec, finalFeSpaceTetraVec, Repeated, linearFunction, errArrayLinear, stringArrayP, 1e-9, time, verbose);
+	check &= check_interpolate(originalFeSpaceTetraVec, finalFeSpaceTetraVec, Repeated, linearFunction, errArrayLinear, stringArrayP, 1e-10, time, verbose);
 
 
 	if(verbose)
 		std::cout<< "\nA quadratic function is interpolated into P1, P1b, P2 vectors. "
 				"\nThen these FE vectors are interpolated into the following finite elements \nand error with respect to the analytic solution are reported.\n";
 
-	check &= check_interpolate(originalFeSpaceTetraVec, finalFeSpaceTetraVec, Unique, quadraticFunction, errArrayQuadratic, stringArrayP, 1e-6, time, verbose);
+	check &= check_interpolate(originalFeSpaceTetraVec, finalFeSpaceTetraVec, Unique, quadraticFunction, errArrayQuadratic, stringArrayP, 1e-10, time, verbose);
 
 
 	if(verbose)
 		std::cout<< "\nA linear bubble function is interpolated into P1, P1b, P2 vectors. "
 				"\nThen these FE vectors are interpolated into the following finite elements \nand error with respect to the analytic solution are reported.\n";
 
-	check &= check_interpolate(originalFeSpaceTetraVec, finalFeSpaceTetraVec, Repeated, linearBubbleFunction,  errArrayBubble, stringArrayP, 1e-6, time, verbose);
+	check &= check_interpolate(originalFeSpaceTetraVec, finalFeSpaceTetraVec, Repeated, linearBubbleFunction,  errArrayBubble, stringArrayP, 1e-10, time, verbose);
 
 
 #ifdef HAVE_MPI
