@@ -94,15 +94,15 @@ public:
     //! Common Markers
     typedef MC MarkerCommon;
     //! Point Marker
-    typedef typename MC::pointMarker_Type PointMarker;
+    typedef typename MC::pointMarker_Type pointMarker_Type;
     //! Edge Marker
-    typedef typename MC::edgeMarker_Type EdgeMarker;
+    typedef typename MC::edgeMarker_Type edgeMarker_Type;
     //! Face Marker
-    typedef typename MC::faceMarker_Type FaceMarker;
+    typedef typename MC::faceMarker_Type faceMarker_Type;
     //! Volume Marker
-    typedef typename MC::volumeMarker_Type VolumeMarker;
+    typedef typename MC::volumeMarker_Type volumeMarker_Type;
     //! Region Marker
-    typedef typename MC::regionMarker_Type RegionMarker;
+    typedef typename MC::regionMarker_Type regionMarker_Type;
     //! Region Marker (obsolete)
     typedef typename MC::regionMarker_Type  Marker;
     //! Region Marker (generic name)
@@ -3100,7 +3100,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
             bool _isExtra = (e.first >=this->M_numBFaces  && e.first < _numOriginalStoredFaces);
             if (_isBound)
             {
-                FaceType & _thisFace(faceList[e.first]);
+                face_Type & _thisFace(faceList[e.first]);
                 _thisFace.firstAdjacentElementIdentity()   = vid;
                 _thisFace.firstAdjacentElementPosition()   = j;
                 _thisFace.secondAdjacentElementIdentity()  = NotAnId;
@@ -3109,12 +3109,12 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
             else if (_isExtra)
             {
                 // This is not a bfaces and I need to set up all info about adjacency properly
-                FaceType & _thisFace(faceList[e.first]);
+                face_Type & _thisFace(faceList[e.first]);
                 // I need to check if it is the first time I meet it. Then I delete it from the
                 // map: if it as there it means that it is the first time I am treating this face
                 if(_extraFaces.deleteIfThere(_face.first)){
                     // I need to be sure about orientation, the easiest thing is to rewrite the face points
-                    for ( UInt k = 0; k < FaceType::S_numPoints; ++k )
+                    for ( UInt k = 0; k < face_Type::S_numPoints; ++k )
                         _thisFace.setPoint( k, iv->point( ele.faceToPoint( j, k ) ) );
                     _thisFace.firstAdjacentElementIdentity()  = vid;
                     _thisFace.firstAdjacentElementPosition()  = j;
@@ -3159,11 +3159,11 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
 
     if (verbose) std::cout << n << " faces ";
     //ASSERT_POS( n == M_numFaces , "#Faces found inconsistent with that stored in RegionMesh" ) ;
-    setLinkSwitch( "HAS_VOLUME_TO_FACES" );
+    setLinkSwitch( "HAS_ELEMENT_TO_FACETS" );
     if ( cf )
-        setLinkSwitch( "HAS_ALL_FACES" );
+        setLinkSwitch( "HAS_ALL_FACETS" );
     //if ( cf ) Faces have adjacency in any case!
-    setLinkSwitch( "FACES_HAVE_ADIACENCY" );
+        setLinkSwitch( "FACETS_HAVE_ADIACENCY" );
     if (verbose)
         std::cout << " done." << std::endl;
 }

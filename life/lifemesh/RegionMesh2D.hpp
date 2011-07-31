@@ -79,13 +79,13 @@ public:
      */
 
     //! Point Marker
-    typedef typename MC::pointMarker_Type PointMarker;
+    typedef typename MC::pointMarker_Type pointMarker_Type;
     //! Edge Marker
-    typedef typename MC::edgeMarker_Type EdgeMarker;
+    typedef typename MC::edgeMarker_Type edgeMarker_Type;
     //! Face Marker
-    typedef typename MC::faceMarker_Type FaceMarker;
+    typedef typename MC::faceMarker_Type faceMarker_Type;
     //! Region Marker
-    typedef typename MC::regionMarker_Type RegionMarker;
+    typedef typename MC::regionMarker_Type regionMarker_Type;
     //! Region Marker (obsolete)
     typedef typename MC::regionMarker_Type Marker;
     //! Region Marker (generic name)
@@ -1376,7 +1376,7 @@ void set_switches_for_regionmesh( Switch & sw );
 template <typename GEOSHAPE, typename MC>
 RegionMesh2D<GEOSHAPE, MC>::RegionMesh2D() :
         MeshEntity(),
-        MC::RegionMarker(),
+        MC::regionMarker_Type(),
         switches(),
         M_moved(0),
         M_numVertices( 0 ),
@@ -1399,7 +1399,7 @@ RegionMesh2D<GEOSHAPE, MC>::RegionMesh2D() :
 template <typename GEOSHAPE, typename MC>
 RegionMesh2D<GEOSHAPE, MC>::RegionMesh2D( UInt id ) :
         MeshEntity( id ),
-        MC::RegionMarker(),
+        MC::regionMarker_Type(),
         switches(),
         M_moved(0),
         M_numVertices( 0 ),

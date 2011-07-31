@@ -1348,9 +1348,9 @@ readNetgenMesh(Mesh & mesh,
     // bitstream to check which file section has already been visited
     UInt flag;
 
-    typename MC::pointMarker_Type pointMarker;
-    typename MC::edgeMarker_Type edgeMarker;
-    typename MC::faceMarker_Type faceMarker;
+    typename Mesh::pointMarker_Type pointMarker;
+    typename Mesh::edgeMarker_Type edgeMarker;
+    typename Mesh::faceMarker_Type faceMarker;
 
     // open file stream to look for points information
     std::ifstream fstreamp( fileName.c_str() );

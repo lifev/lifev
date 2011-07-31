@@ -136,7 +136,7 @@ public:
 
     //! @name Public Types
     //@{
-    typedef typename MC::PointMarker marker_Type;
+    typedef typename MC::pointMarker_Type marker_Type;
 
     void setPoint( ID const identity, MeshElementMarked0Din2D<MC> const * point );
 
@@ -398,7 +398,7 @@ private:
  */
 template
 <typename GeoShape, typename MC = defaultMarkerCommon_Type>
-class MeshElementMarked1Din2DGeo: public MeshElement<GeoShape, MeshElementMarked0Din2D<MC> >, public MC::FaceMarker
+class MeshElementMarked1Din2DGeo: public MeshElement<GeoShape, MeshElementMarked0Din2D<MC> >, public MC::faceMarker_Type
 {
 
 public:
@@ -410,7 +410,7 @@ public:
     static const UInt S_numLocalVertices = MeshElement<GeoShape, MeshElementMarked0Din2D<MC> >::S_numVertices;
 
     typedef GeoShape geoShape_Type;
-    typedef typename MC::FaceMarker marker_Type;
+    typedef typename MC::faceMarker_Type marker_Type;
     typedef typename GeoShape::GeoBShape edgeShape_Type;
     typedef MeshElementMarked1D<edgeShape_Type, MC> edge_Type;
     typedef MeshElementMarked0D<MC> point_Type;
@@ -596,7 +596,7 @@ public:
  */
 template
 <typename GeoShape, typename MC = defaultMarkerCommon_Type>
-class MeshElementMarked2Din2DGeo: public MeshElement<GeoShape, MeshElementMarked0Din2D<MC> >, public MC::VolumeMarker
+class MeshElementMarked2Din2DGeo: public MeshElement<GeoShape, MeshElementMarked0Din2D<MC> >, public MC::volumeMarker_Type
 {
 public:
 
@@ -609,7 +609,7 @@ public:
     static const UInt S_numLocalEdges = MeshElement<GeoShape, MeshElementMarked0Din2D<MC> >::S_numEdges;
 
     typedef GeoShape geoShape_Type;
-    typedef typename MC::VolumeMarker marker_Type;
+    typedef typename MC::volumeMarker_Type marker_Type;
     typedef typename GeoShape::GeoBShape faceShape_Type;
     typedef typename faceShape_Type::GeoBShape edgeShape_Type;
 
@@ -663,7 +663,7 @@ MeshElementMarked0D<MC>::MeshElementMarked0D( ID identity, bool boundary ) :
 
 template <typename MC>
 MeshElementMarked0D<MC>::MeshElementMarked0D( ID identity, Real x, Real y, Real z, bool boundary ) :
-        MeshVertex( identity, x, y, z, boundary ), MC::PointMarker()
+        MeshVertex( identity, x, y, z, boundary ), MC::pointMarker_Type()
 {}
 
 template <typename MC>
@@ -830,7 +830,7 @@ MeshElementMarked1Din2DGeo<GeoShape, MC>::MeshElementMarked1Din2DGeo( ID identit
 template <typename GeoShape, typename MC>
 MeshElementMarked1Din2DGeo<GeoShape, MC>::MeshElementMarked1Din2DGeo( const MeshElementMarked1Din2DGeo<GeoShape, MC>& Element ) :
         MeshElement<GeoShape, MeshElementMarked0Din2D<MC> >( Element ),
-        MC::FaceMarker                    ( Element ),
+        MC::faceMarker_Type               ( Element ),
         M_firstAdjacentElementIdentity    ( Element.M_firstAdjacentElementIdentity),
         M_secondAdjacentElementIdentity   ( Element.M_secondAdjacentElementIdentity),
         M_firstAdjacentElementPosition    ( Element.M_firstAdjacentElementPosition ),
@@ -885,7 +885,7 @@ MeshElementMarked2Din2DGeo<GeoShape, MC>::MeshElementMarked2Din2DGeo( ID identit
 template <typename GeoShape, typename MC>
 MeshElementMarked2Din2DGeo<GeoShape, MC>::MeshElementMarked2Din2DGeo( const MeshElementMarked2Din2DGeo<GeoShape, MC>& Element ) :
         MeshElement<GeoShape, MeshElementMarked0Din2D<MC> >( Element ),
-        MC::VolumeMarker                  ( Element )
+        MC::volumeMarker_Type                  ( Element )
 {
     ASSERT_PRE( GeoShape::S_nDimensions == 2 , "geoElement2D in 2D geometry with incorrect GeoShape" )
 }
