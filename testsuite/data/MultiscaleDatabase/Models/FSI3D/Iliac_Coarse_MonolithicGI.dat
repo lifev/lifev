@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -18,7 +18,7 @@ modelName        = FSI3D_Iliac_Coarse_MonolithicGI
 modelType        = FSI3D
 couplingFlags    = '2 3 4 5 6'
 
-#Note on the flags: 
+#Note on the flags:
 # 2: Abdominal Aorta E,        Area = 1.528053101775165e+00 - (RS_041: 0.9160884178 0.8494866535)
 # 3: Inner Iliac (left),       Area = 1.608700348268665e-01 - (RS_045: 0.125663706143592)
 # 4: External Iliac (left),    Area = 1.991225727820763e-01 - (RS_044: 0.3216990877 0.2922466566)
@@ -148,7 +148,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     material_flag    = 1
     #externalPressure = 0
     #density          = 1.2
-    young            = 4E6
+    young            = 3.19E6
     poisson          = 0.45
 
     [../time_discretization]
@@ -177,104 +177,99 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     #        ExternalIliacLeft_ReferencePressure ExternalIliacRight_ReferencePressure
     #        InternalIliacLeft_ReferencePressure InternalIliacRight_ReferencePressure'   # Free dispacement + Reference pressure
     list = 'AbdominalAorta_Clumped             OuterWall_RobinPhysiological
-            ExternalIliacLeft_Clumped          ExternalIliacRight_Clumped          
-            InternalIliacLeft_Clumped          InternalIliacRight_Clumped'              # Fixed dispacement + Robin on the external Wall       
+            ExternalIliacLeft_Clumped          ExternalIliacRight_Clumped
+            InternalIliacLeft_Clumped          InternalIliacRight_Clumped'              # Fixed dispacement + Robin on the external Wall
     #list = 'AbdominalAorta_Clumped             OuterWall_ReferencePressure
-    #        ExternalIliacLeft_Clumped          ExternalIliacRight_Clumped          
+    #        ExternalIliacLeft_Clumped          ExternalIliacRight_Clumped
     #        InternalIliacLeft_Clumped          InternalIliacRight_Clumped'              # Fixed dispacement + Reference pressure
-        
+
         [./AbdominalAorta_ReferencePressure]
         type       = Natural
         flag       = 5
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../ExternalIliacLeft_ReferencePressure]
         type       = Natural
         flag       = 6
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../ExternalIliacRight_ReferencePressure]
         type       = Natural
         flag       = 3
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../InternalIliacLeft_ReferencePressure]
         type       = Natural
         flag       = 2
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../InternalIliacRight_ReferencePressure]
         type       = Natural
         flag       = 4
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../OuterWall_ReferencePressure]
         type       = Natural
         flag       = 10
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../AbdominalAorta_Clumped]
         type       = Essential
         flag       = 5
         mode       = Full
         component  = 3
         function   = 0
-        
+
         [../ExternalIliacLeft_Clumped]
         type       = Essential
         flag       = 6
         mode       = Full
         component  = 3
         function   = 0
-        
+
         [../ExternalIliacRight_Clumped]
         type       = Essential
         flag       = 3
         mode       = Full
         component  = 3
         function   = 0
-        
+
         [../InternalIliacLeft_Clumped]
         type       = Essential
         flag       = 2
         mode       = Full
         component  = 3
         function   = 0
-        
+
         [../InternalIliacRight_Clumped]
         type       = Essential
         flag       = 4
         mode       = Full
         component  = 3
         function   = 0
-        
-        [../OuterWall_Robin]
-        type       = Robin
-        flag       = 10
-        mode       = Normal
-        function   = 0
-        
-            [./RobinAlpha]
-        	functionSolver = '29000 * f_timeStep'
-        	[../]
-        	
+
         [../OuterWall_RobinPhysiological]
         type       = Robin
         flag       = 10
-        mode       = Normal
-        function   = 0
-        
+        mode       = Full
+        component  = 3
+        FSI        = RobinWall
+
             [./RobinAlpha]
             #functionSolver = 'L1=-36.3; L2=-37.2; L3=-42.3; L4=-43.8; V1=3.0; V2=5;  V3=6.0;  ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep'
             #functionSolver = 'L1=-36.3; L2=-37.2; L3=-42.3; L4=-43.8; V1=5.5; V2=8;  V3=10.0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep'
             functionSolver = 'L1=-36.3; L2=-37.2; L3=-42.3; L4=-43.8; V1=11.0; V2=16; V3=20.0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep'
             #functionSolver = 'L1=-36.3; L2=-37.2; L3=-42.3; L4=-43.8; V1=22.0; V2=32; V3=40.0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep'
+
+            [../RobinBeta]
+            function       = 0
+
             [../]
 
         [../]
@@ -287,15 +282,6 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [./boundary_conditions]
     list = ' '                                              # Free dispacement
-
-        [./Interface]
-        type       = Essential
-        flag       = 1
-        mode       = Full
-        component  = 3
-        FSI        = StructureDispToHarmonicExtension
-
-        [../]
 
     [../]
 
@@ -322,7 +308,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
-        
+
         [../Composed]
         list                = 'Ifpack Ifpack Ifpack'
         sections            = 'ifpack ifpack ifpack'

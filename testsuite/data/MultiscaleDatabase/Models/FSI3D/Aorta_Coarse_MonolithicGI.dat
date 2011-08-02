@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -18,7 +18,7 @@ modelName        = FSI3D_Aorta_Coarse_MonolithicGI
 modelType        = FSI3D
 couplingFlags    = '2 3 4 5 6 7 8 9'
 
-### Note on the flags: 
+### Note on the flags:
 # 2: Ascending Aorta,        Area = 7.666204022361373e+00 - (RS_001: 6.7886675651 6.7425646930)        - Ratio 1.34 (sqrt: 1.066)
 # 3: Thoracic Aorta,         Area = 2.460573813714928e+00 - (RS_027: 2.1382464998 1.3069810837)
 # 4: Subclavian B (left),    Area = 4.031583374473228e-01 - (RS_007/RS_021: 0.5152997350 0.1734944543) - Ratio 0.81 (sqrt: 0.90)
@@ -29,7 +29,7 @@ couplingFlags    = '2 3 4 5 6 7 8 9'
 # 9: Vertebral (left),       Area = 1.989038523172571e-01 - (RS_020: 0.1075210086 0.0615752160 )       - Ratio 0.94 (sqrt: 1.39)
 
 ### Aorta dimensions (measures taken from the centerline):
-# Arch heigh                    = 18.2 cm 
+# Arch heigh                    = 18.2 cm
 # Subclavian B (left) lenght    = 2.53 cm (1D length: 42.2 cm) -> 1D estimated area: 0.494807617460403 OK
 # Common Carotid (right) lenght = 3.07 cm (1D length: 9.4 cm)  -> 1D estimated area: 1.089591645162872
 # Vertebral (right) lenght      = 1.66 cm (1D length: 14.9 cm) -> 1D estimated area: 0.102402215598926
@@ -192,44 +192,35 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     #list = 'OuterWall_RobinPhysiological'                                               # Free dispacement + Robin on the external Wall
     #list = 'AscendingAorta_ReferencePressure OuterWall_ReferencePressure'               # Free dispacement + Reference pressure
     list = 'InternalRings_Clumped OuterWall_RobinPhysiological'                         # Clumped area + Robin on the external Wall
-    #list = 'InternalRings_Clumped 
+    #list = 'InternalRings_Clumped
     #        AscendingAorta_ReferencePressure OuterWall_ReferencePressure'               # Clumped area + Reference pressure
-        
+
         [./AscendingAorta_ReferencePressure]
         type       = Natural
         flag       = 2
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../OuterWall_ReferencePressure]
         type       = Natural
         flag       = 9
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../InternalRings_Clumped]
         type       = EssentialVertices
         flag       = 20
         mode       = Full
         component  = 3
         function   = 0
-        
-        [../OuterWall_Robin]
-        type       = Robin
-        flag       = 9
-        mode       = Normal
-        function   = 0
-        
-            [./RobinAlpha]
-        	functionSolver = '29000 * f_timeStep'
-        	[../]
 
         [../OuterWall_RobinPhysiological]
         type       = Robin
         flag       = 9
-        mode       = Normal
-        function   = 0
-        
+        mode       = Full
+        component  = 3
+        FSI        = RobinWall
+
             [./RobinAlpha]
             #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=3.0; V2=1.0; V3=1.9; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R0 - Paolo
             #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=4.0; V2=1.5; V3=2.5; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R1
@@ -237,7 +228,17 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
             #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=8.0; V2=3.0; V3=5.0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R3
             #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=9.5; V2=4.0; V3=6.5; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R4
             #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=11.0; V2=5.0; V3=8.0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R5
-        	[../]
+
+            [../RobinBeta]
+            function        = 0
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=3.0; V2=1.0; V3=1.9; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R0 - Paolo
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=4.0; V2=1.5; V3=2.5; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R1
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=5.5; V2=2.0; V3=3.5; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R2
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=8.0; V2=3.0; V3=5.0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R3
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=9.5; V2=4.0; V3=6.5; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R4
+            #functionSolver = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=11.0; V2=5.0; V3=8.0; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R5
+
+            [../]
 
         [../]
 
@@ -249,15 +250,6 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [./boundary_conditions]
     list = ' '                                              # Free dispacement
-
-        [./Interface]
-        type       = Essential
-        flag       = 1
-        mode       = Full
-        component  = 3
-        FSI        = StructureDispToHarmonicExtension
-
-        [../]
 
     [../]
 
@@ -284,7 +276,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
-        
+
         [../Composed]
         list                = 'Ifpack Ifpack Ifpack'
         sections            = 'ifpack ifpack ifpack'
