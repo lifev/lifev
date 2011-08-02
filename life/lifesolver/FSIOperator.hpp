@@ -339,7 +339,15 @@ public:
     /**
        \todo{a general time advancing class should be used everywhere}
      */
-    void initializeBDF( const vector_Type& un );
+    //void initializeBDF( const vector_Type& un );
+
+    //!@name Public Methods
+    //@{
+    //!Initializes the TimeAdvance scheme which should handle the fluid time discretization, solid and move mesh
+    /**
+       \todo{a general time advancing class should be used everywhere}
+     */
+     void initializeTimeAdvance( const std::vector<vector_Type>& initialFluidVel, const std::vector<vector_Type>& initialSolidDisp,const std::vector<vector_Type>&  initialFluiDisp);
 
     //! initializes the fluid solver with vectors
     /**

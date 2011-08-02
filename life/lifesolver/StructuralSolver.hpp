@@ -179,6 +179,12 @@ public:
   */
   void updateSystem( source_Type const& source );
 
+  //! Updates the rhs at the start of each time step
+  /*!
+  \param rhs: solid  right hand side   
+  !*/
+  void updateRightHandSide(const vector_Type& rightHandSide) { *M_rhsNoBC = rightHandSide;};
+
   //! Comuptes the right hand side in the updateSystem methods
   void computeRightHandSide( void );
 

@@ -240,7 +240,20 @@ public:
     /*!
      * @return the tolerance for the Interface identification
      */
+
     inline Real interfaceTolerance() const { return M_interfaceTolerance; }
+
+    //! Get the Newmark parameters for ALE
+    /*!
+     * @return the Newmark parameters for ALE
+     */
+    inline std::vector<Real> timeALEParameters(){return M_timeALEParameters; }
+
+    //! Get the BDF order for ALE
+    /*!
+     * @return the BDF order for ALE
+     */
+    inline Real timeALEOrderBDF(){return M_timeALEOrderBDF; }
 
     //@}
 
@@ -276,6 +289,11 @@ private:
     boost::scoped_ptr<int const>  M_structureInterfaceVertexFlag;
 
     Real                          M_interfaceTolerance;
+
+   // ALE time advance:
+   std::vector<Real>             M_timeALEParameters;
+   Real                          M_timeALEOrderBDF;  
+
 };
 
 
