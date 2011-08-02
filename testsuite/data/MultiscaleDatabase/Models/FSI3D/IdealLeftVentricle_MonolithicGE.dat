@@ -84,8 +84,8 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    #mesh_file       = idealHeartPoints_fluid.mesh
-    mesh_file       = heart_fine.mesh
+    #mesh_file       = heart_fine.mesh
+    mesh_file       = idealHeart_fluid_level2.mesh
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -181,8 +181,8 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
-    #mesh_file        = idealHeartPoints_wall.mesh
-    mesh_file        = toto2.mesh  # mesh file
+    #mesh_file        = toto2.mesh  # mesh file
+    mesh_file       = idealHeart_structure_level2.mesh
     order            = P1
 
     [../miscellaneous]
