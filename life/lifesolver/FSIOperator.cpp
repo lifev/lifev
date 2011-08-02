@@ -667,7 +667,7 @@ FSIOperator::setupTimeAdvance( )
       M_data->dataFluid()->dataTime()->setTheta( M_dataFile( "fluid/time_discretization/theta", 0.5) );
 
       M_fluidTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );
-          std::cout<<" M_fluidTimeAdvanceMethod  "<< M_fluidTimeAdvanceMethod <<"\n";
+
 	  //M_fluidMassTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );
 
       if (M_fluidTimeAdvanceMethod =="Newmark")
@@ -687,9 +687,8 @@ FSIOperator::setupTimeAdvance( )
 	  //M_fluidMassTimeAdvance->setup(M_data->dataFluid()->dataTime()->rhoInf() , 1,M_data->dataFluid()->dataTime()->typeOfGeneralizedAlpha() );
 	}
     */
-
       M_ALETimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_ALETimeAdvanceMethod ) );
-      std::cout<<" M_ALETimeAdvanceMethod  "<< M_ALETimeAdvanceMethod <<"\n";
+
      //  std::vector<Real> parameters(2);
       //       parameters[0]  = M_dataFile("mesh_motion/time_discretization/theta", 0.25);
       //       parameters[1]  = M_dataFile("mesh_motion/time_discretization/zeta", 0.5);

@@ -74,7 +74,9 @@
 #include <life/lifefem/DOFInterface3Dto2D.hpp>
 #include <life/lifefem/BCHandler.hpp>
 #include <life/lifefem/BCFunction.hpp>
+#include <life/lifefem/TimeAdvance.hpp>
 #include <life/lifefem/TimeAdvanceBDF.hpp>
+#include <life/lifefem/TimeAdvanceNewmark.hpp>
 #include <life/lifefem/FESpace.hpp>
 
 #include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
@@ -866,9 +868,9 @@ protected:
     std::string                                          M_fluidTimeAdvanceMethod;
     std::string                                          M_solidTimeAdvanceMethod;
     std::string                                          M_ALETimeAdvanceMethod;
-    boost::shared_ptr<TimeAdvanceBDF<vector_Type> >      M_fluidTimeAdvance;
-    boost::shared_ptr<TimeAdvanceBDF<vector_Type> >      M_solidTimeAdvance;
-    boost::shared_ptr<TimeAdvanceBDF<vector_Type> >      M_ALETimeAdvance;
+    boost::shared_ptr<TimeAdvance<vector_Type> >      M_fluidTimeAdvance;
+    boost::shared_ptr<TimeAdvance<vector_Type> >      M_solidTimeAdvance;
+    boost::shared_ptr<TimeAdvance<vector_Type> >      M_ALETimeAdvance;
 
 
 //     fluidLinPtr_Type                                     M_fluidLin;
