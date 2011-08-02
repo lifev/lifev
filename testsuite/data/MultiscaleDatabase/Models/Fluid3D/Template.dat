@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -58,7 +58,7 @@ diagonalBlockPrec   = false
 
     [../miscellaneous]
     Stokes          = false            # Solve a Stokes problem
-    SubITMax        = 0                # Maximum number of iterations 
+    SubITMax        = 0                # Maximum number of iterations
     Tolerance       = 1e-6             # Tolerance
     Omega           = 0.001            # Relaxation parameter
     #range           = '0.1 1.5'        # Range coefficient: OmegaMin < Omega < OmegaMax
@@ -93,8 +93,8 @@ diagonalBlockPrec   = false
     tol             = 1.e-13
 
     [../prec]
-    #prectype                = AztecOO 
-    prectype                = Ifpack 
+    #prectype                = AztecOO
+    prectype                = Ifpack
     displayList             = false
 
         [./AztecOO]

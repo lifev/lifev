@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -26,7 +26,7 @@ algorithmsPath   = './MultiscaleDatabase/Algorithms/'
 
 # Algorithm #######################################################################################
 ################### Type ############## File (without .dat) #######################################
-algorithm = '       Broyden             Default'    
+algorithm = '       Broyden             Default'
 ###################################################################################################
 
 # List of models ##################################################################################
@@ -35,7 +35,7 @@ models = '
             0       FSI3D               Cylinder_tube20_MonolithicGE
             1       FSI3D               Cylinder_tube20_MonolithicGI
             2       FSI3D               Cylinder_tube20_MonolithicGE
-         '  
+         '
 ###################################################################################################
 
 # List of MPI groups ##############################################################################

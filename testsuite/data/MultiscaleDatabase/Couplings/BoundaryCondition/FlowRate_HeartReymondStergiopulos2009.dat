@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -27,6 +27,6 @@ list = 'FlowRate_HeartReymondStergiopulos2009'
     # Additional parameters for 1D BC
     quantity            = Q
     line                = first
-    
+
     [../]
-    
+

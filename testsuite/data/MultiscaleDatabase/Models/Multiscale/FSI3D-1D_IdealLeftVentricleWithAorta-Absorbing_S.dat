@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -27,12 +27,12 @@ algorithmsPath   = './MultiscaleDatabase/Algorithms/'
 
 # Algorithm #######################################################################################
 ################### Type ############## File (without .dat) #######################################
-algorithm = '       Broyden             Default'    
+algorithm = '       Broyden             Default'
 ###################################################################################################
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
-models = '    
+models = '
           200       FSI3D               IdealLeftVentricle_MonolithicGE
             1       OneDimensional      ReymondStergiopulos2009_001
             2       OneDimensional      ReymondStergiopulos2009_002
@@ -71,7 +71,7 @@ mpiGroups = '
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
-couplings = '    
+couplings = '
             1001    BoundaryCondition   FlowRate_Mitral                 200             0
             1       Stress              Lagrange1                       1,200           0,1
             2       Stress              Lagrange1                       95,1            0,1
@@ -93,7 +93,7 @@ couplings = '
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
 offset = '
-          200       1.0 1.0 1.0                 -90 0 0                     1.4 -8.45 0 
+          200       1.0 1.0 1.0                 -90 0 0                     1.4 -8.45 0
             1       1       1       1       0       0     105       0       0       0
             2       1       1       1       0       0      30 -0.7371781444 3.929790049       0
             3       1       1       1       0       0 102.584652 -0.7371781444 3.929790049       0

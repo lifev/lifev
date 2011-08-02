@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -12,17 +12,17 @@
 ### HEART PROFILE #################################################################################
 ###################################################################################################
 # First column:  time [s]
-# Second column: Physioligical flow rate given by P. Reymond 
+# Second column: Physioligical flow rate given by P. Reymond
 #
 # One loop correspond to one heart pulse (pulse / minute: 75)
 ###################################################################################################
 
-function    = '-q' # Physiological flux [cm^3/s]
+function  = '-q' # Physiological flux [cm^3/s]
 
-variables   = 't            q'
-scale       = '1            1'
+variables = 't            q'
+scale     = '1            1'
 
-loop        = true
+loop      = true
 
 # Items must be sorted by the first column value!
 data        = '
