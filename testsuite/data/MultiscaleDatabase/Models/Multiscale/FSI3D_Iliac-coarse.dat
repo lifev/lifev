@@ -46,7 +46,7 @@ mpiGroups = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
-            0       BoundaryCondition   FlowRate_Heart                  400             0
+            0       BoundaryCondition   FlowRate_HeartReymondStergiopulos2009 400       0
             1       BoundaryCondition   Stress_ExternalPressure         400,400,400,400 1,2,3,4
             '
 ###################################################################################################

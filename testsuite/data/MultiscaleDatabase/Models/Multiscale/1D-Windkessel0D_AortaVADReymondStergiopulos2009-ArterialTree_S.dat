@@ -206,7 +206,7 @@ mpiGroups = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
-            1000    BoundaryCondition   FlowRate_Heart                  200             0
+            1000    BoundaryCondition   FlowRate_HeartReymondStergiopulos2009 200       0
             1001    BoundaryCondition   FlowRate_Zero                   1               0
                1    Stress              Lagrange1                       952,200,951     0,1,1
                2    Stress              Lagrange1                       951,96,97,1     0,0,0,1
