@@ -136,7 +136,7 @@ void  FSIExactJacobian::solveLinearFluid()
     this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().normInf(), "\n" );
     *M_rhsNew *= 0.;
 
-    double alpha = this->M_bdf->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
+    double alpha = this->M_fluidTimeAdvance->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
 
     if (!this->M_fluid->stabilization())//if using P1Bubble
     {
@@ -308,8 +308,8 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
         this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         this->veloFluidMesh());
 
-        this->veloFluidMesh() = this->ALETimeAdvance()->velocity( M_meshMotion->disp() );
-	
+        this->veloFluidMesh() = M_ALETimeAdvance()->velocity( M_meshMotion->displacement() );
+
 	//  this->veloFluidMesh()    -= dispFluidMeshOld();
         //this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
 
@@ -334,8 +334,8 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 	     if(iter==0)
 	       *M_beta += this->M_fluidTimeAdvance->extrapolation();
 	     else
-	       *M_beta += this->M_fluid->solution();
-	     
+	       *M_beta += *this->M_fluid->solution();
+
 	     // *M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
 
 	     //*M_beta  += *this->M_un;

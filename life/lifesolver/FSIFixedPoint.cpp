@@ -172,8 +172,8 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         this->veloFluidMesh());
 
-       
-	this->veloFluidMesh() = this->ALETimeAdvance()->velocity( M_meshMotion->disp() );  // w lives in HE fespace 
+
+	this->veloFluidMesh() = M_ALETimeAdvance->velocity( M_meshMotion->disp() );  // w lives in HE fespace
 
 
         //this->veloFluidMesh()    -= this->dispFluidMeshOld();
@@ -201,9 +201,9 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 	if(iter==0)
 	  *M_beta += this->M_fluidTimeAdvance->extrapolation();
 	else
-	  *M_beta += this->M_fluid->solution();
+	  *M_beta += *this->M_fluid->solution();
 
-        double alpha = this->M_bdf->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
+        double alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
 
         //*M_rhsNew   = *this->M_rhs;
         //*M_rhsNew  *= alpha;
@@ -258,7 +258,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     {
         this->M_solid->iterate( M_BCh_d );
         this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
-	this->transferSolidOnInterface( M_solidTimeAdvance->velocity( this->solid().disp()), lambdaDotSolidUnique );
+	this->transferSolidOnInterface( M_solidTimeAdvance->velocity( this->solid().displacement()), lambdaDotSolidUnique );
 	//  this->transferSolidOnInterface(this->M_solid->velocity(),      lambdaDotSolidUnique);
         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }

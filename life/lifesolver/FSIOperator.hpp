@@ -761,6 +761,9 @@ public:
     //! Setter for the time derivative of the interface displacement
     void setSolutionDerivative( const vector_Type& solutionDerivative ) { M_lambdaDot.reset( new vector_Type( solutionDerivative ) ); }
 
+    void
+    setupTimeAdvance( );
+
     //@}
 
 //     void setDerReducedFluidLoadToStructure   ( vector_Type &dload, UInt type = 0 );
@@ -816,6 +819,7 @@ protected:
                                   const FESpace<mesh_Type, MapEpetra>& _fespace2,
                                   vector_Type&                         _vec2,
                                   dofInterface3DPtr_Type&                _dofInterface);
+
     //@}
 
     //!@name Protected Attributes
@@ -851,10 +855,18 @@ protected:
     solidPtr_Type                                        M_solid;
     meshMotionPtr_Type                                   M_meshMotion;
 
+    std::string                                          M_fluidTimeAdvanceMethod;
+    std::string                                          M_solidTimeAdvanceMethod;
+    std::string                                          M_ALETimeAdvanceMethod;
+    boost::shared_ptr<TimeAdvanceBDF<vector_Type> >      M_fluidTimeAdvance;
+    boost::shared_ptr<TimeAdvanceBDF<vector_Type> >      M_solidTimeAdvance;
+    boost::shared_ptr<TimeAdvanceBDF<vector_Type> >      M_ALETimeAdvance;
+
+
 //     fluidLinPtr_Type                                     M_fluidLin;
 //     solidLinPtr_Type                                     M_solidLin;
 
-    boost::shared_ptr<TimeAdvanceBDF<vector_Type> >             M_bdf;
+    //boost::shared_ptr<TimeAdvanceBDF<vector_Type> >             M_bdf;
 
     GetPot                                            M_dataFile;
 

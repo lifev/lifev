@@ -183,7 +183,7 @@ public:
   void computeRightHandSide( void );
 
   //! Compute the mass matrix and it calls the method to build the linear part of the stiffness matrix of the material class
-  void buildSystem( void );
+  void buildSystem( Real timeAdvanceCoefficient );
 
   //void buildSystem(matrix_Type & bigMatrixStokes); // used for monolithic
 
@@ -718,7 +718,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( source_Type const& source
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::computeRightHandSide( void )
 {
-  
+
     Real DeltaT    = this->M_data->dataTime()->timeStep();
     vector_Type z  = *this->M_disp;
 
@@ -748,7 +748,7 @@ void StructuralSolver<Mesh, SolverType>::computeRightHandSide( void )
 
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::buildSystem( void )
+void StructuralSolver<Mesh, SolverType>::buildSystem( Real timeAdvanceCoefficient )
 {
   M_Displayer->leaderPrint("  S-  Computing constant matrices ...          ");
   LifeChrono chrono;
@@ -853,7 +853,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
     //*this->M_residual_d = *this->M_mass*(*this->M_disp);
     //*this->M_residual_d -= *this->M_rhsNoBC;
 
-  
+
 }
 
 template <typename Mesh, typename SolverType>
@@ -875,10 +875,10 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   ///End First Approximantion
 
   // Use of the complete Jacobian
-  *matrFull += *this->M_jacobian; 
+  *matrFull += *this->M_jacobian;
   *matrFull *= M_zeta;
   *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
- 
+
   this->M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
 
   // for BC treatment (done at each time-step)
@@ -894,14 +894,14 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 
   this->M_Displayer->leaderPrint("\tS'-  Solving system                    ... \n");
   chrono.start();
-    
+
   this->M_linearSolver->setMatrix(*matrFull);
-  
+
   this->M_linearSolver->solveSystem( rhsFull, *M_disp, matrFull );
-  
+
   chrono.stop();
 
-  //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a 
+  //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a
   //totally different expression.For structural problems it is not used
   evalResidualDisplacementLin(*M_disp);
 
@@ -1247,7 +1247,7 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
     M_jacobian.reset(new matrix_Type(*this->M_localMap));
     *M_jacobian += *this->M_material->stiff();
     //This is necessary since the matrix has to be multiplied by a constant in iterateLin
-    M_jacobian->globalAssemble(); 
+    M_jacobian->globalAssemble();
 
     jacobian.reset(new matrix_Type(*this->M_localMap));
     *jacobian += *this->M_material->stiff();
@@ -1308,7 +1308,7 @@ solveJacobian( vector_Type&           step,
 
     chrono.stop();
 
-    //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a 
+    //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a
     //totally different expression.For structural problems it is not used
     *this->M_residual_d= *this->M_mass*step;
 
