@@ -28,3 +28,19 @@ AT_SETUP([test_quadRule])
 AT_KEYWORDS([quadRule])
 AT_CHECK([mpirun -n 1 ../../lifefem/test_quadRule -c],[0],[ignore],[ignore])
 AT_CLEANUP
+
+AT_SETUP([test_interpolate])
+AT_KEYWORDS([interpolate])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for INTERPOLATE test
+#-------------------------------------------------
+[interpolate]
+
+[./space_discretization]
+mesh_dir = './'
+mesh_file = hexahexa_4x4x4.mesh
+]])
+AT_CHECK([ln -sf ../../data/mesh/inria/hexahexa_4x4x4.mesh  && \
+	mpirun -n 2 ../../lifefem/test_interpolate],[0],[ignore],[ignore])
+AT_CLEANUP
