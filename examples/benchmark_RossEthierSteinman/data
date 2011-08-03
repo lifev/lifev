@@ -1,6 +1,6 @@
 # -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
-#      Data file for EthierSteinman test case
+#      Data file for RossEthierSteinman test case
 #-------------------------------------------------
 
 
@@ -9,6 +9,14 @@ type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
+
+[RossEthierSteinman]
+initialization         = projection   # initialization (L2 projection) or interpolation
+export_norms           = false
+export_exact_solutions = true
+test                   = accuracy
+accuracy_tolerance     = 0.02
+mesh_source            = file
 
 [fluid]
 
@@ -24,9 +32,7 @@ save       = 1
     BDF_order		= 1
 
     [../space_discretization]
-	mesh_number     = 3
-    mesh_size       = '4 8 16'
-    mesh_dir		 = ./Mesh/
+    mesh_dir		= ./Mesh/
     mesh_file       = cube16x16.mesh
 
     verbose         = 0
@@ -36,11 +42,6 @@ save       = 1
     FE_number         = 3
     vel_order         = 'P1 P1Bubble P2'
     press_order       = 'P1 P1 P1'
-    vel_conv_order    = '2 2 3'
-    press_conv_order  = '2 2 2'
-
-    initialization  = proj              # initialize using proj: L2 projection
-                                        #                  interp: interpolation
 
     [../miscellaneous]
     verbose         = 1
@@ -67,7 +68,7 @@ save       = 1
 			damping_factor          = 1
 
 			[../coarse]
-			#type                    = Amesos-UMFPACK
+			#type                   = Amesos-UMFPACK
 			type                    = Amesos-KLU
 			sweeps                  = 1
 			pre_or_post             = both

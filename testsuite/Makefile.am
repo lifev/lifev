@@ -1,9 +1,9 @@
 # -*- makefile -*-
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Name Surname <name.surname@epfl.ch>
 #           Date: 00-00-0000
@@ -15,7 +15,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 DO_NOT_COMPILE=
 
-# add newly created folders to SUBDIRS to allow 'make' to enter those folders recursively 
+# add newly created folders to SUBDIRS to allow 'make' to enter those folders recursively
 SUBDIRS		= data  \
 			  lifealg \
 			  lifearray \
@@ -34,11 +34,12 @@ SUBDIRS		= data  \
               test_structure \
               test_TemplateTest \
               test_timeAdvance_orderI \
-              test_timeAdvance_orderII
+              test_timeAdvance_orderII \
+              test_monolithic
 
 
 # add newly created testsuite.at scripts to TESTSUITES to allow the automatic generation of the
-# 'testsuite' script upon modification of one of them 
+# 'testsuite' script upon modification of one of them
 TESTSUITES=$(srcdir)/lifealg/testsuite.at \
            $(srcdir)/lifearray/testsuite.at \
            $(srcdir)/lifecore/testsuite.at \
@@ -55,7 +56,9 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
            $(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_timeAdvance_orderI/testsuite.at \
-           $(srcdir)/test_timeAdvance_orderII/testsuite.at
+           $(srcdir)/test_timeAdvance_orderII/testsuite.at \
+           $(srcdir)/test_monolithic/testsuiteGCE.at \
+           $(srcdir)/test_monolithic/testsuiteCE.at
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in

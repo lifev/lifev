@@ -63,6 +63,8 @@ namespace LifeV
 //! PreconditionerML - Class of multilevels preconditioner
 /*!
   @author Simone Deparis   <simone.deparis@epfl.ch>
+  @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+  @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 */
 class PreconditionerML:
         public Preconditioner
@@ -110,9 +112,6 @@ public:
 
     //! Reset the preconditioner
     void resetPreconditioner();
-
-    //! ?
-    void testSmoothers( operator_type& matrix );
 
     //! Returns true if the preconditioner is set
     bool  isPreconditionerSet() const {return M_preconditioner;}
@@ -184,6 +183,27 @@ public:
      */
     Int SetUseTranspose( bool useTranspose=false ) { return M_preconditioner->SetUseTranspose(useTranspose); }
 
+    //! Set the coordinate to be used for the visualization of the aggregates
+    /*!
+      According to the Trilinos::ML manual one should setup the following variables in ML:
+      <ul>
+        <li> viz: enable
+        <li> viz: output format
+        <li> x-coordinates
+        <li> y-coordinates
+        <li> z-coordinates
+      </ul>
+      This is the reason why one has to provide these informations. In order to get an output of the aggregation one has to set
+      the variable /ML/visualization/enable to true in the datafile.
+      @see M.W. Gee, C.M. Siefert, J.J. Hu, R.S. Tuminaro and M.G. Sala. ML 5.0 Smoothed Aggregation User's Guide. Sandia National Laboratories, 2006
+      @param xCoord Shared pointer on a vector of the x coordinates of the vertices of the mesh
+      @param yCoord Shared pointer on a vector of the y coordinates of the vertices of the mesh
+      @param zCoord Shared pointer on a vector of the z coordinates of the vertices of the mesh
+     */
+    void setVerticesCoordinates(boost::shared_ptr<vector<Real> > xCoord,
+                                boost::shared_ptr<vector<Real> > yCoord,
+                                boost::shared_ptr<vector<Real> > zCoord);
+
     //@}
 
 
@@ -226,6 +246,11 @@ private:
     prec_type               M_preconditioner;
 
     bool                    M_analyze;
+
+    bool                    M_visualizationDataAvailable;
+    boost::shared_ptr<vector<Real> > M_xCoord;
+    boost::shared_ptr<vector<Real> > M_yCoord;
+    boost::shared_ptr<vector<Real> > M_zCoord;
 
 };
 
