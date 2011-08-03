@@ -122,12 +122,12 @@ public:
     void updateSystem();
 
     /**
-       evaluates the residual b-Ax
+       evaluates the residual Ax-b
        \param res: output
        \param _sol: monolithic solution
        \param iter: current NonLinearRichardson (Newton) iteration
     */
-    void evalResidual( vector_Type& res, const vector_Type& _sol, const UInt _iter );
+    void evalResidual( vector_Type& res, const vector_Type& sol, const UInt iter );
 
     /**
       iterates the mesh
@@ -135,10 +135,13 @@ public:
     */
     void iterateMesh( const vector_Type& disp );
 
+    //! Applies the bounsary conditions to the matrix
+    void applyBoundaryConditions();
+
     //@}
 
 
-    //! @name Getter Methods
+    //! @name Get Methods
     //@{
 
     //! Gets the solution
@@ -146,26 +149,23 @@ public:
 
     //! Gets the solution ptr
     vectorPtr_Type& solutionPtr() { return M_un; }
-
-    //! Sets the solution
-    void setSolution( const vector_Type& solution ) { M_un.reset( new vector_Type( solution ) ); }
     //@}
 
 
-    //! @name Setter Methods
+    //! @name Set Methods
     //@{
+
+    //! Sets the solution
+    void setSolution( const vector_Type& solution ) { M_un.reset( new vector_Type( solution ) ); }
 
     //! Sets the solution ptr
     void setSolutionPtr( const vectorPtr_Type& sol) { M_un = sol; }
-
-    //! Applies the bounsary conditions to the matrix
-    void applyBoundaryConditions();
 
     //@}
 
 
     //! Factory method
-    static FSIOperator* createM(){ return new FSIMonolithicGE(); }
+    static FSIOperator* instantiate(){ return new FSIMonolithicGE(); }
 
 private:
 
@@ -183,7 +183,7 @@ private:
     //!@name Private Members
     //@{
 
-    static bool reg;
+    static bool S_register;
 
     //@}
 };

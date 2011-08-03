@@ -27,7 +27,7 @@
 
 /*!
   \include ../../testsuite/test_monolithic/fluidstructure.dox
-    @file composedBlockOper.hpp
+    @file MonolithicBlockComposed.hpp
     @brief this file contains a class which is suited for handling a block-structured matrix that can be written as a
     multiplication of a variable number of factors. It contains a vector of pointers for each factor, BCHandler, FESpace
     and for each coupling part.
@@ -37,8 +37,8 @@
 
  */
 
-#ifndef COMPOSEDBLOCKOPER_H
-#define COMPOSEDBLOCKOPER_H 1
+#ifndef MONOLITHICBLOCKCOMPOSED_H
+#define MONOLITHICBLOCKCOMPOSED_H 1
 
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifesolver/MonolithicBlock.hpp>
@@ -165,20 +165,31 @@ public:
     //! pushes a block at the end of the vector
     /*!
       adds a new block
-        @param Mat block matrix to push
-        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
+        @param Mat: block matrix to push
+        @param recompute: flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
     virtual void    push_back_matrix(const matrixPtr_Type& Mat, const bool recompute);
 
+    //! Merges an input MonolithicBlockComposed operator with this one
+    /*!
+       pushes the operator vector of the input operator at the end of the operatoe vector of this instance, and does the same for the
+       vector of coupling matrices.
+      @param Oper: input operator
+     */
     virtual void push_back_oper( MonolithicBlockComposed& Oper);
 
+
+    //! Pushes an extra coupling matrix at the end of the vector of coupling matrices
+    /*!
+      @param coupling: extra coupling matrix
+     */
     virtual void push_back_coupling( matrixPtr_Type& coupling);
 
     //! replaces a block
     /*!
       replaces a block on a specified position in the vector
-        @param Mat block matrix to push
-        @param index position in the vector
+        @param Mat: block matrix to push
+        @param index: position in the vector
      */
     virtual void replace_matrix( const matrixPtr_Type& oper, UInt position );//{M_blocks.replace(oper, position);}
 
@@ -279,4 +290,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* COMPOSEDBLOCKOPER_H */
+#endif /* MONOLITHICBLOCKCOMPOSED_H */

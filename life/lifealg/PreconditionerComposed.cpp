@@ -22,18 +22,6 @@
 
 *******************************************************************************
 */
-//@HEADER
-
-/*!
- *  @file
- *  @brief File containing the Composed Preconditioner Class
- *
- *  @date 07-05-2009
- *  @author Simone Deparis <simone.deparis@epfl.ch>
- *
- *  @contributor Paolo Crosetto <paolo.crosetto@epfl.ch>
- *  @maintainer Paolo Crosetto <paolo.crosetto@epfl.ch>
- */
 
 #include <life/lifealg/PreconditionerComposed.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>
@@ -56,7 +44,7 @@ PreconditionerComposed::PreconditionerComposed( boost::shared_ptr<Epetra_Comm> c
 PreconditionerComposed::PreconditionerComposed(PreconditionerComposed& P):
     super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.preconditionerPtr())->commPtr()),
     M_prec(new prec_Type(*boost::dynamic_pointer_cast<prec_Type>(P.preconditionerPtr()))),
-    M_operVector(P.getOperVector())
+    M_operVector(P.operVector())
     //M_precType(P.preconditionerType())
 {
     //    *M_prec=*P.preconditioner();
@@ -90,7 +78,7 @@ PreconditionerComposed::createParametersList(       list_Type& /*list*/,
     {
         epetraPrec_Type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
         M_prec->push_back(tmp);
-        M_prec->Operator()[i]->createParametersList(M_prec->Operator()[i]->parametersList(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
+        M_prec->OperatorView()[i]->createParametersList(M_prec->OperatorView()[i]->parametersList(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
     }
 }
 
@@ -137,7 +125,7 @@ PreconditionerComposed::push_back(operatorPtr_Type& oper,
     this->M_displayer.leaderPrint( std::string("ICP-  Preconditioner type:                     ") + M_prec->Operator()[M_operVector.size()-1]->preconditionerType() + std::string("\n") );
     this->M_displayer.leaderPrint( "ICP-  Computing preconditioner ...             " );
     chrono.start();
-    createPrec(oper, M_prec->Operator()[M_operVector.size()-1]);
+    createPrec(oper, M_prec->OperatorView()[M_operVector.size()-1]);
     chrono.stop();
     this->M_displayer.leaderPrintMax("done in ", chrono.diff());
     M_prec->replace(prec, useInverse, useTranspose);// \TODO to reset as push_back
@@ -160,7 +148,7 @@ PreconditionerComposed::replace(operatorPtr_Type& oper,
     this->M_displayer.leaderPrint( std::string("ICP-  Preconditioner type:                     ") + M_prec->Operator()[index]->preconditionerType() + std::string("\n") );
     this->M_displayer.leaderPrint( "ICP-  Computing preconditioner ...             " );
     chrono.start();
-    createPrec(oper, M_prec->Operator()[index]);
+    createPrec(oper, M_prec->OperatorView()[index]);
     chrono.stop();
     this->M_displayer.leaderPrintMax("done in ", chrono.diff());
 

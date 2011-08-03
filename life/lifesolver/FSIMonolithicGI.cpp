@@ -259,7 +259,7 @@ void FSIMonolithicGI::initialize( fluidPtr_Type::value_type::function_Type const
     vector_Type df(M_mmFESpace->map());
     M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->getdataTime()->time());
 
-    M_un->add(df, M_solidAndFluidDim+getDimInterface());
+    M_un->add(df, M_solidAndFluidDim+dimInterface());
     M_meshMotion->setDisplacement(df);
 }
 
@@ -432,76 +432,22 @@ FSIMonolithicGI::assembleMeshBlock(UInt /*iter*/)
 }
 
 // ===================================================
-//  Factory methods
-// ===================================================
-namespace
-{
-
-MonolithicBlockMatrix* createAdditiveSchwarzGI()
-{
-    return new MonolithicBlockMatrix(15);
-}
-
-MonolithicBlockMatrix* createAdditiveSchwarzRNGI()
-{
-    return new MonolithicBlockMatrixRN(15);
-}
-
-MonolithicBlock* createComposedDNGI()
-{
-    const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid, MonolithicBlockComposed::mesh };
-    const Int couplingsDNGI[] = { 0, 7, 16 };
-    const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
-    const std::vector<Int> orderVector(order, order+3);
-    return new MonolithicBlockComposedDN( couplingVectorDNGI, orderVector );
-}
-
-MonolithicBlock* createComposedDN2GI()
-{
-    const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh };
-    const Int couplingsDN2GI[] = { 8, 6, 16 };
-    const std::vector<Int> couplingVectorDN2GI(couplingsDN2GI, couplingsDN2GI+3);
-    const std::vector<Int> orderVector(order, order+3);
-    return new MonolithicBlockComposedDN( couplingVectorDN2GI, orderVector );
-}
-
-MonolithicBlock* createComposedDNDGI()
-{
-    const MonolithicBlockComposed::Block order[] = {  MonolithicBlockComposed::mesh, MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid };
-    const Int couplingsDNGI2[] = { 0, 7, 0 };
-    const std::vector<Int> couplingVectorDNGI2(couplingsDNGI2, couplingsDNGI2+3);
-    const std::vector<Int> orderVector(order, order+3);
-    return new MonolithicBlockComposedDND( couplingVectorDNGI2, orderVector );
-}
-
-MonolithicBlock* createComposedDND2GI()
-{
-    const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::mesh, MonolithicBlockComposed::fluid , MonolithicBlockComposed::solid};
-    const Int couplingsDN2GI2[] = { 8, 6, 0 };
-    const std::vector<Int> couplingVectorDN2GI2(couplingsDN2GI2, couplingsDN2GI2+3);
-    const std::vector<Int> orderVector(order, order+3);
-    return new MonolithicBlockComposedDND( couplingVectorDN2GI2, orderVector );
-}
-FSIOperator* createFM() { return new FSIMonolithicGI(); }
-}
-
-// ===================================================
 //  Products registration
 // ===================================================
-bool FSIMonolithicGI::reg =  BlockPrecFactory::instance().registerProduct("AdditiveSchwarzGI"  , &createAdditiveSchwarzGI )
-                          &&
-                          BlockPrecFactory::instance().registerProduct("ComposedDNGI"  , &createComposedDNGI )
-                          &&
-                          MonolithicBlockMatrix::Factory_Type::instance().registerProduct( "AdditiveSchwarzGI", &createAdditiveSchwarzGI )
-                          &&
-                          MonolithicBlockMatrix::Factory_Type::instance().registerProduct( "AdditiveSchwarzRNGI", &createAdditiveSchwarzRNGI )
-                          &&
-                          FSIFactory_Type::instance().registerProduct( "monolithicGI", &createFM )
-                          &&
-                          BlockPrecFactory::instance().registerProduct("ComposedDNDGI"  , &createComposedDNDGI )
-                          &&
-                          BlockPrecFactory::instance().registerProduct("ComposedDND2GI"  , &createComposedDND2GI )
-                          &&
-                          BlockPrecFactory::instance().registerProduct("ComposedDN2GI"  , &createComposedDN2GI );
+bool FSIMonolithicGI::S_register =  BlockPrecFactory::instance().registerProduct("AdditiveSchwarzGI"  , &MonolithicBlockMatrix::createAdditiveSchwarz )
+    &&
+    BlockPrecFactory::instance().registerProduct("ComposedDNGI"  , &MonolithicBlockComposedDN::createComposedDNGI )
+    &&
+    MonolithicBlockMatrix::Factory_Type::instance().registerProduct( "AdditiveSchwarzGI", &MonolithicBlockMatrix::createAdditiveSchwarz )
+    &&
+    MonolithicBlockMatrix::Factory_Type::instance().registerProduct( "AdditiveSchwarzRNGI", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN )
+    &&
+    FSIFactory_Type::instance().registerProduct( "monolithicGI", &FSIMonolithicGI::instantiate )
+    &&
+    BlockPrecFactory::instance().registerProduct("ComposedDNDGI"  , &MonolithicBlockComposedDND::createComposedDNDGI )
+    &&
+    BlockPrecFactory::instance().registerProduct("ComposedDND2GI"  , &MonolithicBlockComposedDND::createComposedDND2GI )
+    &&
+    BlockPrecFactory::instance().registerProduct("ComposedDN2GI"  , &MonolithicBlockComposedDN::createComposedDN2GI );
 
 }

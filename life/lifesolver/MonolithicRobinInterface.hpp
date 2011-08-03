@@ -35,8 +35,8 @@
     Used for the robin coupling in a monolithic formulation of a multiphysics problem.
  */
 
-#ifndef ROBININTERFACE_H
-#define ROBININTERFACE_H 1
+#ifndef MONOLITHICROBININTERFACE_H
+#define MONOLITHICROBININTERFACE_H 1
 
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifesolver/MonolithicBlock.hpp>
@@ -46,7 +46,7 @@
 namespace LifeV
 {
 
-//! robinInterface - Class for the Robin coupling of etherogeneaous problems
+//! MonolithicRobinInterface - Class for the Robin coupling of etherogeneaous problems
 /*!
     @author Paolo Crosetto
 
@@ -139,4 +139,4 @@ protected:
 
 } // Namespace LifeV
 
-#endif /* ROBININTERFACE_H */
+#endif /* MONOLITHICROBININTERFACE_H */

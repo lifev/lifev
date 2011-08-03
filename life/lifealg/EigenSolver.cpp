@@ -46,9 +46,9 @@
 
 namespace LifeV
 {
-EigenSolver::EigenSolver(boost::shared_ptr<Solver> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec):
+EigenSolver::EigenSolver(boost::shared_ptr<solver_Type> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec):
         M_eigenVectors(new Epetra_MultiVector(block_map, numvec)),
-        MyProblem( new Anasazi::BasicEigenproblem<DataType, Vector, Solver>(Teuchos::rcp(matrix), M_eigenVectors) ),
+        MyProblem( new Anasazi::BasicEigenproblem<data_Type, vector_Type, solver_Type>(Teuchos::rcp(matrix), M_eigenVectors) ),
         MyPL(),
         MySolver()
 {
@@ -100,10 +100,10 @@ EigenSolver::setDataFromGetPot(GetPot const& data , const std::string& section)
 
 void
 EigenSolver
-::eigenvalues(std::vector<DataType>& realPart, std::vector<DataType>& imgPart)
+::eigenvalues(std::vector<data_Type>& realPart, std::vector<data_Type>& imgPart)
 {
-    Anasazi::Eigensolution<DataType,Vector> sol = MyProblem->getSolution();
-    std::vector<Anasazi::Value<DataType> > evals = sol.Evals;
+    Anasazi::Eigensolution<data_Type,vector_Type> sol = MyProblem->getSolution();
+    std::vector<Anasazi::Value<data_Type> > evals = sol.Evals;
     for (UInt i=0; i<evals.size(); ++i)
     {
         realPart.push_back(evals[i].realpart);
@@ -117,7 +117,7 @@ EigenSolver
 {
     bool out=MyProblem->setProblem();
     std::cout<<"problem set: "<<out<<std::endl;
-    MySolver.reset(new eigensolver_raw_type(MyProblem, MyPL));
+    MySolver.reset(new eigensolver_Type(MyProblem, MyPL));
     return MySolver->solve();
 }
 }

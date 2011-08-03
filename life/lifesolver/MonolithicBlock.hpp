@@ -162,6 +162,7 @@ public:
      */
     virtual void addToCoupling( const Real& entry , UInt row, UInt col, UInt position ) =0;
 
+    //! If not present in the derived class it must not be called (gives an assertion fail)
     virtual void setRecompute(UInt /*position*/, bool /*flag*/) {assert(false);}
 
     //! replaces a block
@@ -343,7 +344,7 @@ public:
        \param value value to insert in the coupling blocks
      */
     void couplingMatrix(matrixPtr_Type& bigMatrix,
-                        Int coupling,
+                        Int flag,
                         const std::vector<fespacePtr_Type>& problem,
                         const std::vector<UInt>& offset,
                         const std::map<ID, ID>& locDofMap,
@@ -355,16 +356,16 @@ public:
     //!sets the vector of raw pointer to the BCHandler
     /*!
       each entry of the vector correspond to a block in the same
-      position in the vector of matrix pointers M_blocks. An arbitrary number of raw pointers can be passed.
-      \param blocks: total number of blocks
+      position in the vector of matrix pointers M_blocks. A vector of any size can be passed.
+      \param vec: the vector of BCHandlers
      */
     void setConditions(std::vector<bchandlerPtr_Type>& vec );
 
 
     //!sets the vector of raw pointer to the FESpaces
     /*!
-      An arbitrary number of raw pointers can be passed.
-      \param blocks: total number of input FESpaces
+      A vector of arbitrary size can be passed
+      \param vec: the vector of FESpaces
      */
     void setSpaces    ( std::vector<fespacePtr_Type>& vec );
 

@@ -198,6 +198,26 @@ public:
         const std::vector<Int> orderVector(order, order+2);
         return new MonolithicBlockComposedDN(couplingVectorDN2, orderVector);
     }
+
+    static MonolithicBlock* createComposedDNGI()
+    {
+        const Int order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid, MonolithicBlockComposed::mesh };
+        const Int couplingsDNGI[] = { 0, 7, 16 };
+        const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
+        const std::vector<Int> orderVector(order, order+3);
+        return new MonolithicBlockComposedDN( couplingVectorDNGI, orderVector );
+    }
+
+
+    static MonolithicBlock* createComposedDN2GI()
+    {
+        const Int order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh };
+        const Int couplingsDN2GI[] = { 8, 6, 16 };
+        const std::vector<Int> couplingVectorDN2GI(couplingsDN2GI, couplingsDN2GI+3);
+        const std::vector<Int> orderVector(order, order+3);
+        return new MonolithicBlockComposedDN( couplingVectorDN2GI, orderVector );
+    }
+
     //@}
 
 protected:

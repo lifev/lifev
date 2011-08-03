@@ -169,23 +169,25 @@ public:
     //!@name Public Methods
     //!@{
 
-    //! Transfer a vector to the interface
+    //! Transfers a vector to the interface
     /**
        restricts a vector with a monolithic map on the solid interface map
-       \param _lambdasolid: vector on the solid interface
-       \param _disp: monolithic vector
+       \param lambdaSolid: vector on the solid interface
+       \param disp: monolithic vector
     */
-    void monolithicToInterface(    vector_Type& _lambdaSolid, const vector_Type& _sol) ;
+    void monolithicToInterface(    vector_Type& lambdaSolid, const vector_Type& sol) ;
 
 
-    //!Transfer a vector to a subdomain
+    //!Transfers a vector to a subdomain
     /**
        restricts a vector with a monolithic map on another map that must
        have a sequential numbering (not the interface map)
-       \param _dispFluid: vector on the fluid domain
-       \param _disp: monolithic vector
+       \param disp: monolithic vector
+       \param dispFluid: vector on the fluid domain
+       \param map: MapEpetra of the part of vector that we want to transfer
+       \param offset: offset for the monolithic vector (also alpplied to the input map)
     */
-    void monolithicToX(const vector_Type& _disp, vector_Type& _dispFluid, MapEpetra& map, UInt offset=(UInt)0);
+    void monolithicToX(const vector_Type& disp, vector_Type& dispFluid, MapEpetra& map, UInt offset=(UInt)0);
 
     /**
        sets the vector M_solid->dispSolid() to the monolithic solution M_solid->disp() in the solid nodes, to 0 in the fluid nodes
@@ -220,6 +222,10 @@ public:
                      const vectorPtr_Type& solidVelocity,
                      const vectorPtr_Type& solidDisplacement );
 
+    //! Merges the flux boundary conditions into the fluid BCHandler
+    /*!two separate BCHandlers are initially created for the flux-type boundary conditions, these are later merged with the fluid BCHandler
+      automatically, using this method
+     */
     void mergeBCHandlers()
     {
         M_BCh_u->merge(*M_BCh_flux);
@@ -229,7 +235,7 @@ public:
 #ifdef HAVE_TRILINOS_ANASAZI
     //! Computes the maximum singular value
     /**
-       \small Computes the maximum singular value of the preconditioned system \f$P^-1A\f$ where \f$P\f$ is an
+       \small Computes the maximum singular value of the preconditioned system \f$P^{-1}A\f$ where \f$P\f$ is an
        instance of ComposedOperator and \f$A\f$ is the system matrix.
     */
     LifeV::Real& computeMaxSingularValue();
@@ -240,7 +246,7 @@ public:
        to use the boundary conditions methods to compute the normal field on
        a surface.
     */
-    void computeFNormals( vector_Type& normals);
+    void computeFluidNormals( vector_Type& normals);
 
 
     //!Evaluates the nonlinear residual
@@ -251,36 +257,36 @@ public:
        \param iter: current NonLinearRichardson (Newton) iteration
     */
     virtual void   evalResidual(vector_Type&        res,
-                                const vector_Type& _sol,
-                                const UInt          _iter) = 0 ;
+                                const vector_Type& sol,
+                                const UInt         iter) = 0 ;
 
     /**
        solves the Jacobian system
-       \param _muk: output, solution at the current Newton step
-       \param _res: nonlinear residual
-       \param _linearRelTol: not used
+       \param muk: output, solution at the current Newton step
+       \param res: nonlinear residual
+       \param linearRelTol: not used
 
        \small The preconditioner type is usually an algebraic additive Schwarz. The following values
        assigned to the field DDBlockPrec in the data file correspond to different variants:
 
-       - DDBlockPrec = AdditiveSchwarz is AAS on a the system matrix
        Only for the FSIMonolithic Geometry Explicit:
+       - DDBlockPrec = AdditiveSchwarz is AAS on a the system matrix
        - DDBlockPrec = MonolithicBlockComposedDN is AAS on a Dirichlet-Neumann preconditioner using the ComposedOperator strategy
        - DDBlockPrec = ComposedDN2 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedOperator strategy
        - DDBlockPrec = MonolithicBlockComposedNN is AAS on a Neumann-Neumann preconditioner using the ComposedOperator strategy
        - DDBlockPrec = MonolithicBlockComposedDNND is AAS on a Dirichler-Neumamm -- Neumann-Dirichlet preconditioner using the ComposedOperator strategy
 
        Only for the Geometry Implicit:
-       - DDBlockPrec = 9 is AAS on the quasi-newton matrix obtained with the ComposedOperator strategy
-       - DDBlockPrec = 10 is AAS on an alternative matrix obtained with the ComposedOperator strategy
-       - DDBlockPrec = 11 is AAS on the quasi-newton matrix obtained with the ComposedOperator strategy, composing
-       3 preconditioners
-       - DDBlockPrec = 12 is AAS on an alternative matrix obtained with the ComposedOperator strategy, composing
-       3 preconditioners
-    */
-    virtual void   solveJac(vector_Type&       _muk,
-                            const vector_Type& _res,
-                            const Real       _linearRelTol);
+       - DDBlockPrec = AdditiveSchwarzGI is AAS on the whole matrix.
+       - DDBlockPrec = MonolithicBlockComposedDNDGI is AAS on the quasi-newton matrix obtained with the ComposedOperator strategy. Split in 3 factors.
+       - DDBlockPrec = ComposedDND2GI is AAS on the quasi-newton matrix obtained with the ComposedOperator strategy. Split in 3 factors.
+       - DDBlockPrec = MonolithicBlockComposedDNGI is AAS on the full Jacobian matrix obtained with the ComposedOperator strategy by neglecting part
+       of the fluid--structure coupling, split in 3 factors
+       - DDBlockPrec = MonolithicBlockComposedDN2GI is AAS on an alternative matrix obtained with the previous strategy
+     */
+    virtual void   solveJac(vector_Type&       muk,
+                            const vector_Type& res,
+                            const Real       linearRelTol);
 
     /**
        updates the meshmotion, advances of a time step
@@ -295,6 +301,7 @@ public:
      * \param p0: initial fluid pressure
      * \param d0: initial solid displacement
      * \param w0: initial mesh velocity
+     * \param df0: mesh displacement of the previous time step (useful if geometry--explicit)
      */
     virtual void initialize( fluidPtr_Type::value_type::function_Type const& u0,
                              fluidPtr_Type::value_type::function_Type const& p0,
@@ -315,10 +322,6 @@ public:
     void enableStressComputation(UInt  flag);
 
     /**
-       Enables the computation of the stress on a coupling boundary
-       \param flag flag of the boundary portion where the stress is computed
-     */
-    /**
        Computes the stress on the coupling boundary (the traction vector)
      */
     vectorPtr_Type computeStress();
@@ -336,7 +339,7 @@ public:
     blockMatrixPtr_Type& operatorPtrView(){ return M_monolithicMatrix; }
 
     /**
-       \small sets the solid BCHandler and merges it with the Robin BCHandler
+       \small sets the solid BCHandle
     */
     virtual void setSolidBC     ( const fluidBchandlerPtr_Type& bc_solid )
     {
@@ -350,10 +353,31 @@ public:
     */
     virtual void setSolutionPtr                     ( const vectorPtr_Type& sol)=0;
 
+    //! Initializes the solution M_un by copy
     virtual void initialize( const vector_Type& un ) { M_un.reset( new vector_Type( un ) ); }
 
     //! set the solution
     virtual void setSolution( const vector_Type& solution ) = 0;
+
+    void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
+    {
+        super_Type::setFluidBC(bc_fluid);
+        if(M_BChs.size())
+        {
+            UInt nfluxes(M_BChs[1]->numberOfBCWithType(Flux));
+            //M_substituteFlux.reset(new std::vector<bool>(nfluxes))
+            M_fluxOffset.resize(nfluxes);
+            M_BCFluxNames = M_BChs[1]->findAllBCWithType(Flux);
+             for (UInt i=0; i<nfluxes; ++i)
+             {
+                 const BCBase* bc = M_BChs[1]->findBCWithName(M_BCFluxNames[i]);
+                 M_fluxOffset[i]=bc->offset();
+             }
+            M_BChs[1]=bc_fluid;
+            M_monolithicMatrix->setConditions(M_BChs);
+            M_precPtr->setConditions(M_BChs);
+        }
+    }
 
     //!@}
     //!@name Get Methods
@@ -376,17 +400,17 @@ public:
     //    const boost::shared_ptr<MapEpetra>& monolithicMap() {return M_monolithicMap;}
 
     //!get the total dimension of the FS interface
-    UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->interface();}
+    UInt dimInterface() const {return nDimensions*M_monolithicMatrix->interface();}
 
     //! Returns true if CE of FI methods are used, false otherwise (GCE)
     //bool const isFullMonolithic(){return M_fullMonolithic;}
 
     //! Returns the offset assigned to the solid block
-    UInt  getOffset() const {return M_offset;}
+    UInt  offset() const {return M_offset;}
 
     //!Get the solid displacement from the solution
     /*!
-      \param soliddisp: input vector
+      \param solidDisplacement: input vector
     */
     void exportSolidDisplacement( vector_Type& solidDisplacement )
     {
@@ -397,7 +421,7 @@ public:
     //!Get the solid velocity
     /*!
       fills an input vector with the solid displacement from the solution.
-      \param solidvel: input vector (output solid velocity)
+      \param solidVelocity: input vector (output solid velocity)
     */
     void exportSolidVelocity( vector_Type& solidVelocity )
     {
@@ -409,7 +433,7 @@ public:
     /**
        fills an input vector with the fluid and pressure from the solution M_un.
        It performs a trilinos import. Thus it works also for the velocity, depending on the map of the input vector
-       \param sol: input vector
+       \param fluidVelocityandPressure: input vector
     */
     void exportFluidVelocityAndPressure( vector_Type& fluidVelocityAndPressure )
     {
@@ -427,25 +451,6 @@ public:
 
     //! set the BCs, this method when the boundary conditions  are changed during the simulation
     //! resets the vector of shared pointers to the boundary conditions in the operator and preconditioner
-    void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
-    {
-        super_Type::setFluidBC(bc_fluid);
-        if(M_BChs.size())
-        {
-            UInt nfluxes(M_BChs[1]->numberOfBCWithType(Flux));
-            //M_substituteFlux.reset(new std::vector<bool>(nfluxes))
-            M_fluxOffset.resize(nfluxes);
-            M_BCFluxNames = M_BChs[1]->findAllBCWithType(Flux);
-             for (UInt i=0; i<nfluxes; ++i)
-             {
-                 const BCBase* bc = M_BChs[1]->findBCWithName(M_BCFluxNames[i]);
-                 M_fluxOffset[i]=bc->offset();
-             }
-            M_BChs[1]=bc_fluid;
-            M_monolithicMatrix->setConditions(M_BChs);
-            M_precPtr->setConditions(M_BChs);
-        }
-    }
 
     //@}
 
@@ -528,6 +533,7 @@ protected:
     //! assembles the solid problem (the matrix and the rhs due to the time derivative)
     /*
       \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
+      \param solution: current solution, used for the time advance implementation, and thus for the update of the right hand side
     */
     void assembleSolidBlock(UInt iter, vectorPtr_Type& solution);
 
@@ -535,6 +541,7 @@ protected:
     //! assembles the fluid problem (the matrix and the rhs due to the time derivative)
     /*
       \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
+      \param solution: current solution, used for the time advance implementation, and thus for the update of the right hand side
     */
     void assembleFluidBlock(UInt iter, vectorPtr_Type& solution);
 
@@ -578,7 +585,7 @@ protected:
     matrixPtr_Type                                    M_solidBlock;
     matrixPtr_Type                                    M_solidBlockPrec;
     matrixPtr_Type                                    M_robinCoupling; //uninitialized if not needed
-    matrixPtr_Type                                    M_bdMass;
+    matrixPtr_Type                                    M_boundaryMass;
     boost::shared_ptr<solver_Type>                    M_linearSolver;
     boost::shared_ptr<vector_Type>                    M_numerationInterface;
     std::vector<fluidBchandlerPtr_Type>                 M_BChs;
@@ -606,7 +613,6 @@ private:
 #ifdef OBSOLETE
     boost::shared_ptr<vector_Type>                    M_rhsShapeDerivatives;
 #endif
-    static bool                                       reg;
     //@}
 };
 

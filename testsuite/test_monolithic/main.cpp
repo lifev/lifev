@@ -106,9 +106,6 @@
 #include <life/lifefilters/ExporterHDF5.hpp>
 #endif
 
-// Mathcard includes
-#include <life/lifesolver/FSIMonolithicGI.hpp>
-
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
 #include "flowConditions.hpp"
@@ -299,8 +296,8 @@ public:
     {
         boost::timer _overall_timer;
 
-        int _i = 1;
-        LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->getOffset();
+        int iter = 1;
+        LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
 
         dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(1);
 
@@ -314,12 +311,12 @@ public:
 
         bool valveIsOpen=true;
 
-        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->getdataTime()->updateTime(), ++_i)
+        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->getdataTime()->updateTime(), ++iter)
         {
             LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
             if ( valveIsOpen)
             {
-                if ( _i == 3 /*flux < -100*/)
+                if ( iter == 3 /*flux < -100*/)
                 {
                     valveIsOpen=false;
                     M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
@@ -371,10 +368,10 @@ public:
             M_fsi->FSIOper()->displayer().leaderPrint( "inlet flux              = ", M_fsi->FSIOper()->fluid().flux(2, *M_velAndPressure));
             M_fsi->FSIOper()->displayer().leaderPrint( "outlet flux             = ", M_fsi->FSIOper()->fluid().flux(3, *M_velAndPressure));
 
-            std::cout << "[fsi_run] Iteration " << _i << " was done in : "
+            std::cout << "[fsi_run] Iteration " << iter << " was done in : "
                       << _timer.elapsed() << "\n";
 
-            std::cout << "solution norm " << _i << " : "
+            std::cout << "solution norm " << iter << " : "
                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
@@ -590,7 +587,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     boost::shared_ptr<LifeV::VectorEpetra> UniqueVFDOld;
 
 
-    UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->getOffset();
+    UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
 
     Real dt= M_fsi->FSIOper()->dataFluid()->dataTime()->timeStep();//data_file("problem/Tstart"   ,0.);
     M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,M_Tstart);

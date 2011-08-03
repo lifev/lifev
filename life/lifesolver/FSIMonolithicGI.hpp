@@ -25,8 +25,8 @@
 //@HEADER
 
 /**
-   \file monolithicGI.hpp
-   @breif Monolithic Geometry--Implicit FSI Solver
+   \file FSIMonolithicGI.hpp
+   @brief Monolithic Geometry--Implicit FSI Solver
    \author crosetto <Paolo Crosetto>
    \date 18 Sep 2008
 
@@ -103,13 +103,14 @@ public:
     //!@name Public Methods
     //@{
 
-    //! initialize the system with functions
+    //! Initializes the system with functions
     void initialize( fluidPtr_Type::value_type::function_Type const& u0,
                      fluidPtr_Type::value_type::function_Type const& p0,
                      solidPtr_Type::value_type::Function const& d0,
                      solidPtr_Type::value_type::Function const& /*w0*/,
                      fluidPtr_Type::value_type::function_Type const& /*df0*/ );
 
+    //! Initializes the system with vectors
     void initialize( const vector_Type& un )
     {
         M_un.reset( new vector_Type( un ) );
@@ -117,9 +118,7 @@ public:
     }
 
     /**
-       constructs the matrix handling the coupling and sums it to matrix
-       \param matrix: output matrix
-       \param coupling:   flag handling the coupling of the different blocks. Chosing properly it's value, ranging from 0 to 31, one can decide which couplings to keep and which to neglect (it works like the chmod command in bash)
+       Sets the parameters read from data file
     */
     void setUp( const GetPot& dataFile );
 
@@ -130,8 +129,7 @@ public:
     void buildSystem ();
 
     /**
-       updates the meshmotion, advances of a time step
-       \param displacement: solution
+       updates the solution, advances of a time step
     */
     void updateSystem();
 
@@ -141,7 +139,7 @@ public:
        \param _sol: fluid domain displacement solution
        \param iter: current NonLinearRichardson (block Gauss Seidel for the tangent system) iteration
     */
-    void evalResidual( vector_Type&  res, const vector_Type& _sol, const UInt _iter );
+    void evalResidual( vector_Type&  res, const vector_Type& sol, const UInt iter );
 
     //!Apply the boundary conditions to each block composing the monolithic problem
     /**
@@ -175,10 +173,10 @@ public:
     //! getter for the global matrix of the system
     const matrixPtr_Type matrixPtr() const { return M_monolithicMatrix->matrix(); }
 
-    //! getter for the current iteration solution
-    const vectorPtr_Type  uk()  const      {return M_uk;}
+    //! getter for the pointer to the current iteration solution
+    //const vectorPtr_Type  uk()  const      {return M_uk;}
 
-    //! get the solution.
+    //! get the current solution vector.
     const vector_Type& solution() const { return *M_uk; }
 
     //! get the solution.
@@ -209,10 +207,9 @@ private:
     }
 
     /**
-       calculates the terms due to the shape derivatives on the rhs of the monolithic system rhsShapeDerivatives
-       given the mesh increment deltaDisp.
-       \param rhsShapeDerivatives: output. Shape derivative terms.
-       \param meshDeltaDisp: input. Mesh displacement increment.
+       calculates the terms due to the shape derivatives given the mesh increment deltaDisp. The shape derivative block is assembled in a matrix
+       (not in a right hand side representing the matrix-vector multiplication)
+       \param sdMatrix: output. Shape derivatives block to be summed to the Jacobian matrix.
     */
     void shapeDerivatives( matrixPtr_Type sdMatrix );
 
@@ -238,9 +235,12 @@ private:
     matrixPtr_Type                       M_shapeDerivativesBlock;
     matrixPtr_Type                       M_solidDerBlock;
     //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
-    static bool                          reg;
-
+    static bool                          S_register;
     //@}
+
+    //! Factory method
+    static FSIOperator* instantiate() { return new FSIMonolithicGI(); }
+
 };
 
 }

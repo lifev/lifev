@@ -26,7 +26,7 @@
 //@HEADER
 
 /*!
-    @file BlockMatrix.hpp
+    @file MonolithicBlockMatrixRN.hpp
     @brief file containing a class for handling a 2-blocks matrix with Robin-Neumann coupling
 
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>

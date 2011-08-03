@@ -56,7 +56,7 @@
 
 namespace LifeV
 {
-//! PreconditionerComposed -
+//! ComposedOperator -
 /*!
   @author Simone Deparis, Paolo Crosetto
   @mantainer Paolo Crosetto
@@ -169,6 +169,11 @@ public:
     */
     int SetUseTranspose(bool UseTranspose);
 
+    /**
+       Method returning the result of applying the operator to a vector
+       \param X: input vector
+       \param Y: output vector
+     */
     int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
     // Simone:here use the ApplyInverse from the local operators.
@@ -187,18 +192,39 @@ public:
     */
     double Condest() const;
 
+    /**
+       Method returning a string identifying the type of operator
+     */
     const char * Label() const;
 
+    /**
+       Returns true if all the operators composed have to be considered transpose (i.e. if M_allTranspose==true)
+     */
     bool UseTranspose() const;
 
+    /**
+       Never called: it is implemented for compatibility with Epetra_Operator
+     */
     bool HasNormInf() const;
 
+    /**
+       Returns the communicator
+     */
     const Epetra_Comm & Comm() const;
 
+    /**
+       Returns a shared pointer to the communicator
+     */
     const boost::shared_ptr<Epetra_Comm> commPtr() const;
 
+    /**
+       returns the OperatorDomainMap of the operators contained
+     */
     const Epetra_Map & OperatorDomainMap() const;
 
+    /**
+       returns the OperatorRangeMap of the operators contained
+     */
     const Epetra_Map & OperatorRangeMap() const;
     //@}
 
@@ -208,12 +234,12 @@ public:
     //!returns a const reference tor the std::vector of factors
     /**
      */
-    const std::vector<operatorPtr_Type>& getOperator() const  {return M_operator;}
+    const std::vector<operatorPtr_Type>& Operator() const  {return M_operator;}
 
     //!returns the std::vector of factors by (non const) reference
     /**
      */
-    std::vector<operatorPtr_Type>& Operator() const {return M_operator;}
+    std::vector<operatorPtr_Type>& OperatorView() const {return M_operator;}
 
     //! Returns true if the operator is transposed
     /**
@@ -311,7 +337,7 @@ ComposedOperator<operator_Type>::ComposedOperator( const ComposedOperator<operat
 {
     for(UInt i=0; i<M_set; ++i)
     {
-        M_operator.push_back(P.getOperator()[i]);
+        M_operator.push_back(P.Operator()[i]);
     }
 }
 

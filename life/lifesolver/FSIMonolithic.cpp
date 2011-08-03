@@ -312,7 +312,7 @@ FSIMonolithic::computeMaxSingularValue( )
 #endif
 
 void
-FSIMonolithic::computeFNormals( vector_Type& normals)
+FSIMonolithic::computeFluidNormals( vector_Type& normals)
 {
     BCManageNormal<matrix_Type> normalManager;
     if ( !M_BChWS->bcUpdateDone() )//possibly to avoid
@@ -322,7 +322,7 @@ FSIMonolithic::computeFNormals( vector_Type& normals)
 }
 
 void
-FSIMonolithic::solveJac( vector_Type& _step, const vector_Type& _res, const Real /*_linearRelTol*/ )
+FSIMonolithic::solveJac( vector_Type& step, const vector_Type& res, const Real /*linearRelTol*/ )
 {
     setupBlockPrec( );
 
@@ -332,9 +332,9 @@ FSIMonolithic::solveJac( vector_Type& _step, const vector_Type& _res, const Real
     M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->time() );
     M_precPtr->GlobalAssemble();
 
-    M_solid->getDisplayer().leaderPrint("  M-  Residual NormInf:                        ", _res.normInf(), "\n");
-    iterateMonolithic(_res, _step);
-    M_solid->getDisplayer().leaderPrint("  M-  Solution NormInf:                        ", _step.normInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Residual NormInf:                        ", res.normInf(), "\n");
+    iterateMonolithic(res, step);
+    M_solid->getDisplayer().leaderPrint("  M-  Solution NormInf:                        ", step.normInf(), "\n");
 }
 
 void
@@ -613,11 +613,11 @@ FSIMonolithic::vectorPtr_Type FSIMonolithic::computeStress()
     vector_Type lambda(M_monolithicMatrix->interfaceMap());
     lambda.subset(*M_un, M_solidAndFluidDim);
 
-    M_bdMass.reset(new matrix_Type(*M_interfaceMap));
+    M_boundaryMass.reset(new matrix_Type(*M_interfaceMap));
     if ( !M_BChWS->bcUpdateDone() )
         M_BChWS->bcUpdate(*M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-    bcManageMatrix(*M_bdMass, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BChWS, M_dFESpace->feBd(), 1., dataSolid()->getdataTime()->time() );
-    M_bdMass->globalAssemble();
+    bcManageMatrix(*M_boundaryMass, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BChWS, M_dFESpace->feBd(), 1., dataSolid()->getdataTime()->time() );
+    M_boundaryMass->globalAssemble();
 
     solver_Type solverMass(M_epetraComm);
     solverMass.setDataFromGetPot( M_dataFile, "solid/solver" );
@@ -626,9 +626,9 @@ FSIMonolithic::vectorPtr_Type FSIMonolithic::computeStress()
     boost::shared_ptr<PreconditionerIfpack> P(new PreconditionerIfpack());
 
     vectorPtr_Type sol(new vector_Type(M_monolithicMatrix->interfaceMap()));
-    solverMass.setMatrix(*M_bdMass);
+    solverMass.setMatrix(*M_boundaryMass);
     solverMass.setReusePreconditioner(false);
-    solverMass.solveSystem( lambda, *sol, M_bdMass);
+    solverMass.solveSystem( lambda, *sol, M_boundaryMass);
 
     EpetraExt::MultiVector_Reindex reindexMV(*M_interfaceMap->map(Unique));
     boost::shared_ptr<MapEpetra> newMap(new MapEpetra( *M_interfaceMap ));

@@ -82,7 +82,7 @@ class UNDEF_EIGENSOLVER_EXCEPTION;
 // namespace Epetra
 // {
 
-//  template <typename DataType, typename Solver, typename Vector>
+//  template <typename DataType, typename solver_Type, typename vector_Type>
 class EigenSolver
 {
 /**
@@ -97,20 +97,20 @@ public:
 
     //!@name Public Types
     //@{
-    typedef double DataType;
-    typedef Epetra_Operator Solver;
-    typedef Epetra_MultiVector Vector;
+    typedef double data_Type;
+    typedef Epetra_Operator solver_Type;
+    typedef Epetra_MultiVector vector_Type;
 
-    typedef Anasazi::BasicEigenproblem<DataType, Vector, Solver>                     eigenpb_raw_type;
-    typedef Teuchos::RCP<Anasazi::BasicEigenproblem<DataType, Vector, Solver> >      eigenpb_type;
-    typedef Anasazi::BlockKrylovSchurSolMgr <DataType,Vector,Solver>                 eigensolver_raw_type;
-    typedef boost::shared_ptr<eigensolver_raw_type>                                  eigensolver_type;
+    typedef Anasazi::BasicEigenproblem<data_Type, vector_Type, solver_Type>                     eigenpb_Type;
+    typedef Teuchos::RCP<Anasazi::BasicEigenproblem<data_Type, vector_Type, solver_Type> >      eigenpbPtr_Type;
+    typedef Anasazi::BlockKrylovSchurSolMgr <data_Type,vector_Type,solver_Type>                 eigensolver_Type;
+    typedef boost::shared_ptr<eigensolver_Type>                                  eigensolverPtr_Type;
 
     //@}
     //!@name Constructor and Destructor
     //@{
 
-    EigenSolver(boost::shared_ptr<Solver> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec);
+    EigenSolver(boost::shared_ptr<solver_Type> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec);
 
     virtual ~EigenSolver()
     {}
@@ -127,7 +127,7 @@ public:
     void setHermitian(bool flag) { MyProblem->setHermitian(flag);}
 
     /** fills the input vectors with the real and imaginary part of the eigenvalues*/
-    void eigenvalues(std::vector< DataType>& realPart, std::vector< DataType>& imgPart);
+    void eigenvalues(std::vector< data_Type>& realPart, std::vector< data_Type>& imgPart);
 
     /** solves the eigenproblem*/
     int solve();
@@ -137,10 +137,10 @@ private :
 
     //!@name Private Members
     //@{
-    Teuchos::RCP<Vector> M_eigenVectors;
-    eigenpb_type MyProblem;
+    Teuchos::RCP<vector_Type> M_eigenVectors;
+    eigenpbPtr_Type MyProblem;
     Teuchos::ParameterList MyPL;
-    eigensolver_type MySolver;
+    eigensolverPtr_Type MySolver;
     //@}
 };
 

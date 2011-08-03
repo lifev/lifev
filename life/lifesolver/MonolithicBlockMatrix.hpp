@@ -279,6 +279,13 @@ public:
     void addToCoupling( const matrixPtr_Type& Mat, UInt /*position*/);
 
 
+    //!
+    /*!
+      adds an entry to the coupling matrix
+        @param entry entry
+        @param row row for the insertion
+        @param col colon for the insertion
+     */
     void addToCoupling( const Real& entry , UInt row, UInt col, UInt position );
 
     //! adds a block to the coupling matrix
@@ -331,6 +338,7 @@ public:
     {
         return new MonolithicBlockMatrix(15);
     }
+
     //@}
 
 

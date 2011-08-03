@@ -305,9 +305,7 @@ Real p0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -29;//*e-1*5; // circa [(110-60)*(133.332*10)]/[10*(2.08-1.85)] (il 10 x via dei mm, il 133... x via dei mmHg)
-    // (vedi paper di Liu, Dang, etc). Nel loro grafico sono invertite x e y. 5e1 invece di e5 xche' d e'
-    // riscalato * il timestep, che e' 5e-4
+    return -29;  // (see paper by Liu, Dang, etc.. about the sourrounding tissue effect on arteries)
 }
 
 
