@@ -52,8 +52,22 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#include <AztecOO_ConfigDefs.h>
-#include <AztecOO.h>
+#include <BelosConfigDefs.hpp>
+#include <BelosLinearProblem.hpp>
+#include <BelosEpetraAdapter.hpp>
+#include <BelosEpetraOperator.h>
+#include <BelosOutputManager.hpp>
+#include <BelosMVOPTester.hpp>
+#include <BelosBlockCGSolMgr.hpp>
+#include <BelosBlockGmresSolMgr.hpp>
+#include <BelosGCRODRSolMgr.hpp>
+#include <BelosGmresPolySolMgr.hpp>
+#include <BelosPCPGSolMgr.hpp>
+#include <BelosPseudoBlockCGSolMgr.hpp>
+#include <BelosPseudoBlockGmresSolMgr.hpp>
+#include <BelosRCGSolMgr.hpp>
+#include <BelosTFQMRSolMgr.hpp>
+
 #include <Teuchos_ParameterList.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -63,7 +77,6 @@
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifealg/Preconditioner.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifecore/LifeDebug.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/LifeChrono.hpp>
@@ -87,7 +100,13 @@ public:
 
     typedef Real                               value_type;
 
-    typedef SolverBelos                      solver_type;
+    typedef SolverBelos                        solver_type;
+    typedef Epetra_MultiVector                 MV;
+    typedef Epetra_Operator                    OP;
+    typedef Belos::SolverManager<Real,MV,OP>   SolverManager_type;
+    typedef RCP< SolverManager_type >          SolverManager_ptrtype;
+    typedef Belos::LinearProblem<double,MV,OP> LinearProblem_type;
+    typedef RCP< LinearProblem_type >          LinearProblem_ptrtype;
 
     typedef MatrixEpetra<Real>                 matrix_type;
     typedef VectorEpetra                       vector_type;
@@ -265,7 +284,7 @@ public:
     //! @name Get Method
     //@{
 
-    //! Return the total number of iterations
+    //!! Return the total number of iterations
     Int numIterations() const;
 
     //! Return the maximum total number of iterations
@@ -278,13 +297,13 @@ public:
     prec_type& preconditioner();
 
     //! Return the AztecStatus
-    void aztecStatus( Real status[AZ_STATUS_SIZE] );
+    //void aztecStatus( Real status[AZ_STATUS_SIZE] );
 
     //! Return a Teuchos parameters list
     Teuchos::ParameterList& getParametersList();
 
-    //! Return a reference on the AztecOO solver
-    AztecOO& solver();
+    //!! Return a pointer on the Belos solver manager
+    SolverManager_ptrtype solver();
 
     //@}
 
@@ -293,15 +312,22 @@ private:
     matrix_type::matrix_ptrtype  M_matrix;
     prec_type                    M_preconditioner;
 
-    AztecOO                      M_solver;
+    SolverManager_ptrtype        M_solverManager;
+    LinearProblem_ptrtype        M_problem;
 
-    Teuchos::ParameterList       M_TrilinosParameterList;
+    Teuchos::ParameterList       M_parameterList;
     boost::shared_ptr<Displayer> M_displayer;
 
     Real                         M_tolerance;
     Int                          M_maxIter;
     Int                          M_maxIterForReuse;
     bool                         M_reusePreconditioner;
+
+    //!! Setup the solver manager to be used
+    void setupSolverManager();
+
+    //! Create an EpetraProblem to be solved by the solver manager
+    void createEpetraProblem();
 };
 
 template <typename PrecPtrOperator>
@@ -310,7 +336,8 @@ Int SolverBelos::solveSystem( const vector_type&  rhsFull,
                                  PrecPtrOperator     preconditioner )
 
 {
-    M_displayer->leaderPrint("SLV-  AztecOO solving system ...               ");
+    M_displayer->leaderPrint("SLV-  Belos solving system ...               ");
+    /*
     setPreconditioner(preconditioner);
 
     LifeChrono chrono;
@@ -320,7 +347,7 @@ Int SolverBelos::solveSystem( const vector_type&  rhsFull,
     M_displayer->leaderPrintMax( "done in " , chrono.diff() );
 
     // If we use the "none" as output setting, we display just a summary
-    if ( M_TrilinosParameterList.get( "output", "all" ) == "none" )
+    if ( M_parameterList.get( "output", "all" ) == "none" )
     {
         M_displayer->leaderPrint( "SLV-  Iterations number:                       ", M_solver.NumIters(), "\n" );
         M_displayer->leaderPrint( "SLV-  Scaled residual:                         ", M_solver.ScaledResidual(), "\n" );
@@ -329,6 +356,8 @@ Int SolverBelos::solveSystem( const vector_type&  rhsFull,
     if ( numIter >= M_maxIter )
         numIter = -numIter;
 
+    */
+    Int numIter=0;
     return numIter;
 }
 

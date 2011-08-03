@@ -45,8 +45,9 @@ namespace LifeV
 // ===================================================
 SolverBelos::SolverBelos() :
         M_preconditioner       (),
-        M_solver               (),
-        M_TrilinosParameterList(),
+        M_solverManager        (),
+        M_problem              (),
+        M_parameterList        (),
         M_displayer            ( new Displayer() ),
         M_tolerance            ( 0. ),
         M_maxIter              ( 0 ),
@@ -57,8 +58,9 @@ SolverBelos::SolverBelos() :
 
 SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_preconditioner       (),
-        M_solver               (),
-        M_TrilinosParameterList(),
+        M_solverManager        (),
+        M_problem              (),
+        M_parameterList        (),
         M_displayer            ( new Displayer(comm) ),
         M_tolerance            ( 0. ),
         M_maxIter              ( 0 ),
@@ -73,20 +75,20 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
 Int
 SolverBelos::solve( vector_type& solution, const vector_type& rhs )
 {
-    M_solver.SetLHS( &solution.epetraVector() );
+    //M_solver.SetLHS( &solution.epetraVector() );
     // The Solver from Aztecoo takes a non const (because of rescaling?)
     // We should be careful if you use scaling
     Epetra_FEVector* rhsVectorPtr ( const_cast<Epetra_FEVector*> (&rhs.epetraVector()) );
-    M_solver.SetRHS( rhsVectorPtr );
+    //M_solver.SetRHS( rhsVectorPtr );
 
     Int  maxiter(M_maxIter);
     Real mytol  (M_tolerance);
     Int status;
 
-    if ( isPreconditionerSet() && M_preconditioner->preconditionerType().compare("AztecOO") )
-        M_solver.SetPrecOperator(M_preconditioner->preconditioner());
+    //if ( isPreconditionerSet() && M_preconditioner->preconditionerType().compare("AztecOO") )
+        //M_solver.SetPrecOperator(M_preconditioner->preconditioner());
 
-    status = M_solver.Iterate(maxiter, mytol);
+    //status = M_solver.Iterate(maxiter, mytol);
 
 #ifdef HAVE_LIFEV_DEBUG
     M_displayer->comm()->Barrier();
@@ -104,8 +106,8 @@ SolverBelos::solve( vector_type& solution, const vector_type& rhs )
     {
         maxiter     = M_maxIter;
         mytol       = M_tolerance;
-        Int oldIter = M_solver.NumIters();
-        status      = M_solver.Iterate(maxiter, mytol);
+        //Int oldIter = M_solver.NumIters();
+        //status      = M_solver.Iterate(maxiter, mytol);
 
 #ifdef HAVE_LIFEV_DEBUG
         M_displayer->comm()->Barrier();
@@ -113,10 +115,11 @@ SolverBelos::solve( vector_type& solution, const vector_type& rhs )
         M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
         M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
 #endif
-        return( M_solver.NumIters() + oldIter );
+        //return( M_solver.NumIters() + oldIter );
     }
 
-    return( M_solver.NumIters() );
+    //return( M_solver.NumIters() );
+    return 0; // GWENOL todo
 }
 
 Real
@@ -125,7 +128,7 @@ SolverBelos::computeResidual( vector_type& solution, vector_type& rhs )
     vector_type Ax ( solution.map() );
     vector_type res( rhs );
 
-    M_solver.GetUserMatrix()->Apply( solution.epetraVector(), Ax.epetraVector() );
+    //M_solver.GetUserMatrix()->Apply( solution.epetraVector(), Ax.epetraVector() );
 
     res.epetraVector().Update( 1, Ax.epetraVector(), -1 );
 
@@ -143,6 +146,7 @@ SolverBelos::printStatus()
     std::ostringstream stat;
     std::string str;
 
+    /*
     Real status[AZ_STATUS_SIZE];
     aztecStatus( status );
 
@@ -155,6 +159,7 @@ SolverBelos::printStatus()
     stat << setw(12) << "res = " << status[AZ_scaled_r];
     stat << setw(4)  << " " << (Int)status[AZ_its] << " iters. ";
     stat << std::endl;
+    */
 
     str = stat.str();
     return str;
@@ -272,13 +277,13 @@ SolverBelos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 void SolverBelos::setMatrix( matrix_type& matrix )
 {
     M_matrix = matrix.matrixPtr();
-    M_solver.SetUserMatrix( M_matrix.get() );
+    //M_solver.SetUserMatrix( M_matrix.get() );
 }
 
 void
 SolverBelos::setOperator( Epetra_Operator& oper )
 {
-    M_solver.SetUserOperator( &oper );
+    //M_solver.SetUserOperator( &oper );
 }
 
 void
@@ -290,7 +295,7 @@ SolverBelos::setPreconditioner( prec_type& preconditioner )
 void
 SolverBelos::setPreconditioner( comp_prec_type& preconditioner )
 {
-    M_solver.SetPrecOperator( preconditioner.get() );
+    //M_solver.SetPrecOperator( preconditioner.get() );
 }
 
 void
@@ -299,38 +304,38 @@ SolverBelos::setDataFromGetPot( const GetPot& dataFile, const std::string& secti
     // SOLVER PARAMETERS
 
     // Solver type
-    M_TrilinosParameterList.set( "solver",  dataFile( ( section + "/solver" ).data(), "gmres" ) );
+    //M_parameterList.set( "solver",  dataFile( ( section + "/solver" ).data(), "gmres" ) );
 
     // Residual expression
-    M_TrilinosParameterList.set( "conv",    dataFile( ( section + "/conv" ).data(), "rhs" ) );
+    //M_parameterList.set( "conv",    dataFile( ( section + "/conv" ).data(), "rhs" ) );
 
     // Scaling
-    M_TrilinosParameterList.set( "scaling", dataFile( ( section + "/scaling" ).data(), "none" ) );
+    //M_parameterList.set( "scaling", dataFile( ( section + "/scaling" ).data(), "none" ) );
 
     // Output
-    M_TrilinosParameterList.set( "output",  dataFile( ( section + "/output" ).data(), "all" ) );
+    //M_parameterList.set( "output",  dataFile( ( section + "/output" ).data(), "all" ) );
 
     // Tolerance
     M_tolerance = dataFile( ( section + "/tol" ).data(), 1.e-6 );
-    M_TrilinosParameterList.set( "tol", M_tolerance );
+    M_parameterList.set( "Convergence Tolerance", M_tolerance );
 
     // Maximum Number of iterations
     M_maxIter         = dataFile( ( section + "/max_iter"      ).data(), 200 );
     M_maxIterForReuse = dataFile( ( section + "/max_iter_reuse").data(), static_cast<Int> ( M_maxIter*8./10.) );
     M_reusePreconditioner = dataFile( (section + "/reuse").data(), M_reusePreconditioner );
 
-    M_TrilinosParameterList.set( "max_iter", M_maxIter );
+    M_parameterList.set( "Maximum Iterations", M_maxIter );
 
     // GMRES PARAMETERS
 
     // Krylov space dimension
-    M_TrilinosParameterList.set( "kspace", dataFile( ( section + "/kspace" ).data(), M_maxIter ) );
+    //M_parameterList.set( "kspace", dataFile( ( section + "/kspace" ).data(), M_maxIter ) );
 
     // Gram-Schmidt algorithm
-    M_TrilinosParameterList.set( "orthog", dataFile( ( section + "/orthog" ).data(), AZ_classic ) );
+    //M_parameterList.set( "orthog", dataFile( ( section + "/orthog" ).data(), AZ_classic ) );
 
     // r-vector
-    M_TrilinosParameterList.set( "aux_vec", dataFile( ( section + "/aux_vec" ).data(), AZ_resid ) );
+    //M_parameterList.set( "aux_vec", dataFile( ( section + "/aux_vec" ).data(), AZ_resid ) );
 
 
     // SET PARAMETERS
@@ -340,7 +345,7 @@ SolverBelos::setDataFromGetPot( const GetPot& dataFile, const std::string& secti
 void
 SolverBelos::setParameters( bool cerrWarningIfUnused )
 {
-    M_solver.SetParameters( M_TrilinosParameterList, cerrWarningIfUnused );
+    //M_solver.SetParameters( M_parameterList, cerrWarningIfUnused );
 }
 
 void
@@ -349,7 +354,7 @@ SolverBelos::setTolerance( const Real tolerance )
     if ( tolerance > 0 )
     {
         M_tolerance = tolerance;
-        M_TrilinosParameterList.set( "tol", M_tolerance );
+        M_parameterList.set( "Convergence Tolerance", M_tolerance );
     }
 }
 
@@ -359,7 +364,7 @@ SolverBelos::setMaxNumIterations( const Int maxIter )
     if ( maxIter >= 0 )
     {
         M_maxIter = maxIter;
-        M_TrilinosParameterList.set( "max_iter", M_maxIter );
+        M_parameterList.set( "Maximum Iterations", M_maxIter );
     }
 }
 
@@ -378,10 +383,11 @@ SolverBelos::displayer()
 // ===================================================
 // Get Methods
 // ===================================================
+//!
 Int
 SolverBelos::numIterations() const
 {
-    return M_solver.NumIters();
+    return M_solverManager->getNumIters();
 }
 
 Int
@@ -394,7 +400,8 @@ SolverBelos::maxNumIterations() const
 Real
 SolverBelos::trueResidual()
 {
-    return M_solver.TrueResidual();
+    //return M_solver.TrueResidual();
+    return 1.0;
 }
 
 SolverBelos::prec_type&
@@ -403,22 +410,58 @@ SolverBelos::preconditioner()
     return M_preconditioner;
 }
 
+/*
 void
 SolverBelos::aztecStatus( Real status[AZ_STATUS_SIZE] )
 {
-    M_solver.GetAllAztecStatus( status );
+    //M_solver.GetAllAztecStatus( status );
 }
+*/
 
 Teuchos::ParameterList&
 SolverBelos::getParametersList()
 {
-    return M_TrilinosParameterList;
+    return M_parameterList;
 }
 
-AztecOO&
+SolverBelos::SolverManager_ptrtype
 SolverBelos::solver()
 {
-    return M_solver;
+    return M_solverManager;
+}
+
+void
+SolverBelos::setupSolverManager()
+{
+    // Create the block CG iteration
+    M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+
+    // Create the block GMRes iteration
+    // Create the flexible, block GMRes iteration
+    M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+
+    M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+
+    M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+
+    M_solverManager = rcp( new Belos::PCPGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+
+    // Create the pseudo block CG iteration
+    M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+
+    // Create the pseudo block GMRes iteration
+    M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+
+    M_solverManager = rcp( new Belos::RCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+
+    // Create TFQMR iteration
+    M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+}
+
+void
+SolverBelos::createEpetraProblem()
+{
+    //M_problem = rcp( new LinearProblem_type( A, LHS, RHS ) );
 }
 
 } // namespace LifeV
