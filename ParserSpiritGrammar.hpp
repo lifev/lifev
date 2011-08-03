@@ -42,7 +42,7 @@
 namespace LifeV
 {
 
-#ifndef HAVE_BOOST_SPIRIT_QI
+#if ( !defined(HAVE_BOOST_SPIRIT_QI) || defined(DISABLE_SPIRIT_PARSER) )
 
 //! ParserSpiritGrammar - An empty implementation for boost version < 1.41
 template < typename IteratorType = std::string::const_iterator, typename ResultsType = std::vector < Real > >
@@ -68,36 +68,6 @@ public:
     Real& variable( const std::string& ) { return M_real; }
 
 private:
-
-    Real M_real;
-};
-
-#else
-
-#ifdef DISABLE_SPIRIT_PARSER
-
-//! ParserSpiritGrammar - An empty implementation for when explicitly disabling Boost Spirit
-template < typename IteratorType = std::string::const_iterator, typename ResultsType = std::vector < Real > >
-class ParserSpiritGrammar
-{
-public:
-
-    typedef IteratorType                                        iterator_Type;
-    typedef boost::iterator_range< iterator_Type >              iteratorRange_Type;
-    typedef ResultsType                                         results_Type;
-
-    ParserSpiritGrammar() : M_real(0.) {}
-    ParserSpiritGrammar( const ParserSpiritGrammar& ) : M_real(0.) {}
-    ~ParserSpiritGrammar() {}
-
-    ParserSpiritGrammar& operator=( const ParserSpiritGrammar& ) { return *this; }
-
-    void clearVariables() {}
-
-    void setDefaultVariables() {}
-    void setVariable( const std::string&, const Real& ) {}
-
-    Real& variable( const std::string& ) { return M_real; }
 
     Real M_real;
 };
@@ -525,9 +495,7 @@ ParserSpiritGrammar< IteratorType, ResultsType >::setVariable( const std::string
         M_variable.add( name, value );
 }
 
-#endif /* DISABLE_SPIRIT_PARSER */
-
-#endif /* HAVE_BOOST_SPIRIT_QI */
+#endif /* HAVE_BOOST_SPIRIT_QI || DISABLE_SPIRIT_PARSER */
 
 } // Namespace LifeV
 
