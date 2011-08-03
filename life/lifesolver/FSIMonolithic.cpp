@@ -332,9 +332,15 @@ FSIMonolithic::solveJac( vector_Type& step, const vector_Type& res, const Real /
     M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->time() );
     M_precPtr->GlobalAssemble();
 
+#ifdef HAVE_LIFEV_DEBUG
     M_solid->getDisplayer().leaderPrint("  M-  Residual NormInf:                        ", res.normInf(), "\n");
+#endif
+
     iterateMonolithic(res, step);
+
+#ifdef HAVE_LIFEV_DEBUG
     M_solid->getDisplayer().leaderPrint("  M-  Solution NormInf:                        ", step.normInf(), "\n");
+#endif
 }
 
 void
