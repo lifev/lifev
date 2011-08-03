@@ -44,6 +44,7 @@ namespace LifeV
 
 #ifndef HAVE_BOOST_SPIRIT_QI
 
+/// @cond
 //! ParserSpiritGrammar - An empty implementation for boost version < 1.41
 template < typename IteratorType = std::string::const_iterator, typename ResultsType = std::vector < Real > >
 class ParserSpiritGrammar
@@ -71,6 +72,7 @@ private:
 
     Real M_real;
 };
+/// @endcond
 
 #else
 
