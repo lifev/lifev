@@ -594,7 +594,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>     
 {
   setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
   M_stiff.reset                      ( new matrix_Type(*M_localMap) );
-  M_massStiff.reset                  ( new matrix_Type(*M_localMap) );
+  //M_massStiff.reset                  ( new matrix_Type(*M_localMap) );
   M_jacobian.reset                   ( new matrix_Type(*M_localMap) );
   M_rhs.reset                        ( new vector_Type(*M_localMap));
   M_f.reset                          ( new vector_Type(*M_localMap));
@@ -653,7 +653,6 @@ void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stif
 
   Real coef;
   coef = (Real) M_data->dataTime()->timeStep();
-
 
   vector_Type z = *M_disp;
   z             += coef*(*M_vel);

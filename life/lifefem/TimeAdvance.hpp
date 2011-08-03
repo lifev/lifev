@@ -397,13 +397,13 @@ public:
     /*!
     @returns the order of accuracy of the scheme
     */
-    inline const UInt order() const  {return M_order;}
+    inline UInt order() const  {return M_order;}
 
     //! Returns size of the stencil used by time integration scheme
     /*!
     @returns the size of the stencil
     */
-    inline const UInt size() const  {return M_size;}
+    inline UInt size() const  {return M_size;}
 
     //@}
 

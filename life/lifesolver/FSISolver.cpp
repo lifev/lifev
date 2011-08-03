@@ -296,21 +296,21 @@ FSISolver::iterate()
     // Update the system
     M_oper->updateSystem( );
 
-    // We extract a pointer to the solution
+    // We extract a copy to the solution (\todo{uselessly})
     vectorPtr_Type lambda(new vector_Type(M_oper->solution()));
     //M_oper->solutionPtr(lambda);//copy of a shared_ptr
 
     // the newton solver
     UInt maxiter = M_data->maxSubIterationNumber();
     UInt status = NonLinearRichardson( *lambda,
-                                    *M_oper,
-                                    M_data->absoluteTolerance(),
-                                    M_data->relativeTolerance(),
-                                    maxiter,
-                                    M_data->errorTolerance(),
-                                    M_data->NonLinearLineSearch(),
-                                    M_out_res,
-                                    M_data->dataFluid()->dataTime()->time() );
+                                       *M_oper,
+                                       M_data->absoluteTolerance(),
+                                       M_data->relativeTolerance(),
+                                       maxiter,
+                                       M_data->errorTolerance(),
+                                       M_data->NonLinearLineSearch(),
+                                       M_out_res,
+                                       M_data->dataFluid()->dataTime()->time() );
 
     // We update the solution
     M_oper->updateSolution( *lambda );

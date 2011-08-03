@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -31,6 +31,7 @@ m4_include([lifecore/testsuite.at])
 #lifefem tests
 AT_BANNER([life/lifefem testsuite ...])
 m4_include([lifefem/testsuite.at])
+m4_include([test_FEFunction/testsuite.at])
 
 #filters tests
 AT_BANNER([life/lifefilters testsuite ...])
@@ -54,4 +55,5 @@ m4_include([test_partition/testsuite.at])
 m4_include([test_timeAdvance_orderI/testsuite.at])
 m4_include([test_timeAdvance_orderII/testsuite.at])
 m4_include([test_structuralsolver/testsuite.at])
-
+m4_include([test_monolithic/testsuiteGCE.at])
+m4_include([test_monolithic/testsuiteCE.at])
