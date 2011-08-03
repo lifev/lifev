@@ -40,8 +40,8 @@
 #include <life/lifesolver/FSIExactJacobian.hpp>
 #include <life/lifesolver/FSIFixedPoint.hpp>
 
-#include <lifemc/lifesolver/FSIMonolithicGE.hpp>
-#include <lifemc/lifesolver/FSIMonolithicGI.hpp>
+#include <life/lifesolver/FSIMonolithicGE.hpp>
+#include <life/lifesolver/FSIMonolithicGI.hpp>
 
 #include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
 #include <lifemc/lifesolver/BCInterfaceData.hpp>
