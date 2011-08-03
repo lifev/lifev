@@ -501,7 +501,7 @@ MultiscaleModelFSI3D::initializeSolution()
         solution = temporaryVector;
 
         // Add solid
-        UInt offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->getOffset();
+        UInt offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->offset();
 
         temporaryVector = 0;
         temporaryVector.subset( *M_solidDisplacement, M_solidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
