@@ -66,21 +66,21 @@ namespace LifeV
  *      <li> <b>loop:</b> Useful for periodic simulation: at the end of the list, it restarts using the first value instead of extrapolating the last two.
  *  </ul>
  *
- *	<b>NOTE</b> <BR>
- *	During the execution, if the value of the variable (usually the time) is not present in the 'data' table,
- *	the class linearly interpolates the value between the two closest values. Moreover, if the value of the variable is higher
- *	than anyone present in the 'data' table, the class linearly extrapolates the value using the last two values in the table.
+ *  <b>NOTE</b> <BR>
+ *  During the execution, if the value of the variable (usually the time) is not present in the 'data' table,
+ *  the class linearly interpolates the value between the two closest values. Moreover, if the value of the variable is higher
+ *  than anyone present in the 'data' table, the class linearly extrapolates the value using the last two values in the table.
  *
- *   <b>EXAMPLE OF DATA FILE</b> <BR>
+ *  <b>EXAMPLE OF DATA FILE</b> <BR>
  *  <CODE>
- *  function	= '(0,0,q)'                    <BR>
- *  loop        = false                        <BR>
- *  variables	=   't				q'         <BR>
- *  scale		= 	'1				1'         <BR>
- *  data		=  '0.000000000		1.00       <BR>
- *  				0.333333333		2.00       <BR>
- *  				0.666666666		3.00       <BR>
- *  				1.000000000		4.00'      <BR>
+ *  function  = '(0,0,q)'                    <BR>
+ *  loop      = false                        <BR>
+ *  variables = 't                q'         <BR>
+ *  scale     = '1                1'         <BR>
+ *  data      = '0.000000000      1.00       <BR>
+ *               0.333333333      2.00       <BR>
+ *               0.666666666      3.00       <BR>
+ *               1.000000000      4.00'      <BR>
  *  </CODE>
  */
 template< typename PhysicalSolverType >

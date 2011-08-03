@@ -50,6 +50,7 @@
 namespace LifeV
 {
 
+/// @cond
 //! BCInterface3DFSI Fake class for non-FSI problems.
 /*!
  *  @author Cristiano Malossi
@@ -112,6 +113,9 @@ private:
     //@}
 
 };
+/// @endcond
+
+
 
 //! BCInterface3DFSI - LifeV boundary condition function wrapper for \c BCInterface3D and FSI problems
 /*!
@@ -125,22 +129,22 @@ private:
  *  The constructor of the class takes a string contains the ID of the interface condition to impose,
  *  and the FSI. The list of available conditions is the FSIFunction variable. These are:
  *
- *	<ol>
- *      <li> DerFluidLoadToFluid,					(not implemented)
- *	    <li> DerFluidLoadToStructure,
- *	    <li> DerHarmonicExtensionVelToFluid,
- *	    <li> DerStructureDispToSolid,				(not implemented)
- *	    <li> FluidInterfaceDisp,					(not working)
- *	    <li> FluidLoadToStructure,
- *	    <li> HarmonicExtensionVelToFluid,
- *	    <li> SolidLoadToStructure,
- *	    <li> StructureDispToHarmonicExtension,
- *	    <li> StructureDispToSolid, 				    (not implemented)
- *	    <li> StructureToFluid
- *	    <li> RobinWall
  *  <ol>
+ *      <li> DerFluidLoadToFluid,                    (not implemented)
+ *        <li> DerFluidLoadToStructure,
+ *        <li> DerHarmonicExtensionVelToFluid,
+ *        <li> DerStructureDispToSolid,                (not implemented)
+ *        <li> FluidInterfaceDisp,                    (not working)
+ *        <li> FluidLoadToStructure,
+ *        <li> HarmonicExtensionVelToFluid,
+ *        <li> SolidLoadToStructure,
+ *        <li> StructureDispToHarmonicExtension,
+ *        <li> StructureDispToSolid,                     (not implemented)
+ *        <li> StructureToFluid
+ *        <li> RobinWall
+ *  </ol>
  *
- *	The class automatically recognize which FSI algorithm is used among:
+ *  The class automatically recognize which FSI algorithm is used among:
  *  <ol>
  *      <li> EXACTJACOBIAN;
  *      <li> FIXEDPOINT;

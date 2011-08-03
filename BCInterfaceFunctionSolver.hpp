@@ -66,25 +66,25 @@ namespace LifeV
  *
  *  See \c BCInterfaceFunction class for more details.
  *
- *	<b>AVAILABLE VARIABLES</b> <BR>
- *	Current available variables are:
+ *  <b>AVAILABLE VARIABLES</b> <BR>
+ *  Current available variables are:
  *
  *  <ul>
  *      <li> f_timeStep
- *	    <li> f_area
- *	    <li> f_density
- *	    <li> f_flux
- *	    <li> f_pressure
- *	    <li> f_viscosity
- *	    <li> f_venousPressure
- *	    <li> s_density
- *	    <li> s_poisson
- *	    <li> s_thickness
- *	    <li> s_young
- *	    <li> s_externalPressure
- *	</ul>
+ *        <li> f_area
+ *        <li> f_density
+ *        <li> f_flux
+ *        <li> f_pressure
+ *        <li> f_viscosity
+ *        <li> f_venousPressure
+ *        <li> s_density
+ *        <li> s_poisson
+ *        <li> s_thickness
+ *        <li> s_young
+ *        <li> s_externalPressure
+ *    </ul>
  *
- *	Of course, some of those variables are available only for fluid problems, other only for solid problems.
+ *    Of course, some of those variables are available only for fluid problems, other only for solid problems.
  */
 template< class PhysicalSolverType >
 class BCInterfaceFunctionSolver: public virtual BCInterfaceFunction< PhysicalSolverType >
