@@ -1,0 +1,73 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for EthierSteinman test case
+#-------------------------------------------------
+
+[finite_element]
+velocity = P2
+
+[mesh]
+num_elements = 15
+
+[exporter]
+type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+multimesh  = false
+start      = 0
+save       = 1
+
+
+[prec]
+	prectype                = ML # PCD, LSC, Ifpack or ML
+	displayList             = false
+			
+		[./ML]
+			default_parameter_list  = DD
+  	        max_levels              = 2
+  	        inc_or_dec              = increasing
+  	        #prec_type               = full-MGV
+  	        #prec_type               = two-level-additive
+
+			[./smoother]
+			type                    = IFPACK
+			pre_or_post             = pre
+			ifpack_overlap          = 2
+			#ifpack_type             = ILU
+
+			[../coarse]
+			type                    = Amesos-KLU
+
+			[../aggregation]
+			type                    = METIS
+			nodes_per_aggregate     = 200
+			[../]
+			
+			# IFPACK infos
+			[./fact]
+           	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+           	[../]
+           	# END IFPACK
+		
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all # none
+conv            = rhs
+max_iter        = 200
+reuse           = true
+max_iter_reuse  = 80
+kspace          = 100
+tol             = 1.e-10    # AztecOO tolerance
+

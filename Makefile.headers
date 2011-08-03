@@ -16,7 +16,7 @@ LIFESOLVER_HDRS=life/lifesolver/ADRAssembler.hpp life/lifesolver/ADRAssemblerIP.
 
 LIFEFILTERS_HDRS=life/lifefilters/Exporter.hpp life/lifefilters/ExporterEmpty.hpp life/lifefilters/ExporterEnsight.hpp life/lifefilters/ExporterHDF5.hpp life/lifefilters/ExporterHDF5Mesh3D.hpp life/lifefilters/GetPot.hpp life/lifefilters/Importer.hpp life/lifefilters/ImporterMesh2D.hpp life/lifefilters/ImporterMesh3D.hpp life/lifefilters/ExporterVTK.hpp life/lifefilters/MeshWriter.hpp 
 
-LIFEFUNCTIONS_HDRS=life/lifefunctions/RossEthierSteinmanDec.hpp life/lifefunctions/RossEthierSteinmanInc.hpp life/lifefunctions/Womersley.hpp life/lifefunctions/bessel/bessel.hpp 
+LIFEFUNCTIONS_HDRS=life/lifefunctions/RossEthierSteinmanDec.hpp life/lifefunctions/RossEthierSteinmanInc.hpp life/lifefunctions/Womersley.hpp life/lifefunctions/bessel/bessel.hpp life/lifefunctions/Laplacian.hpp 
 
 nobase_include_HEADERS=lifeconfig.h\
 $(LIFECORE_HDRS)\
