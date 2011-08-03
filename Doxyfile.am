@@ -46,9 +46,10 @@ apidox:
 
 apidox-am-no-doxygen:
 apidox-am-doxygen:
+	@cp $(top_srcdir)/doc/common/LifeV.png $(top_builddir)/doc/api/html/LifeV.png;
 	@cp $(top_srcdir)/admin/Doxyfile.global Doxyfile; \
 	chmod a+w Doxyfile; \
-	echo "PROJECT_NAME           = \"$(PACKAGE)\"" >> Doxyfile ; \
+	echo "PROJECT_NAME           = \"LifeV\"" >> Doxyfile ; \
 	echo "PROJECT_NUMBER         = \"$(VERSION)\"" >> Doxyfile ; \
 	echo "INPUT                  = $(top_srcdir) $(top_srcdir)/life/lifealg $(top_srcdir)/life/lifearray $(top_srcdir)/life/lifecore $(top_srcdir)/life/lifefem $(top_srcdir)/life/lifefilters $(top_srcdir)/life/lifefunctions $(top_srcdir)/life/lifemesh $(top_srcdir)/life/lifesolver $(top_srcdir)/examples/benchmark_RossEthierSteinman $(top_srcdir)/examples/example_cavity $(top_srcdir)/examples/example_cylinder $(top_srcdir)/examples/example_heart $(top_srcdir)/examples/example_impes $(top_srcdir)/examples/example_masstransport $(top_srcdir)/examples/example_ML $(top_srcdir)/examples/example_NavierStokesRestart $(top_srcdir)/examples/example_ns_flux $(top_srcdir)/examples/example_nsResistanceBC $(top_srcdir)/examples/utility_converterGetPot2Teuchos $(top_srcdir)/examples/utility_fsiCutter $(top_srcdir)/examples/utility_meshReorder $(top_srcdir)/testsuite/lifealg $(top_srcdir)/testsuite/lifearray $(top_srcdir)/testsuite/lifecore $(top_srcdir)/testsuite/lifefem $(top_srcdir)/testsuite/lifefilters $(top_srcdir)/testsuite/lifemesh $(top_srcdir)/testsuite/test_ADRAssembler $(top_srcdir)/testsuite/test_bdf $(top_srcdir)/testsuite/test_darcy $(top_srcdir)/testsuite/test_fsi $(top_srcdir)/testsuite/test_hyperbolic $(top_srcdir)/testsuite/test_LevelSetSolver $(top_srcdir)/testsuite/test_partition $(top_srcdir)/testsuite/test_structure $(top_srcdir)/testsuite/test_TemplateTest $(top_srcdir)/testsuite/test_timeAdvance_orderI $(top_srcdir)/testsuite/test_timeAdvance_orderII" >> Doxyfile; \
 	echo "IMAGE_PATH             = $(top_srcdir)/doc/api" >> Doxyfile ;\
@@ -56,13 +57,9 @@ apidox-am-doxygen:
 	echo "HTML_OUTPUT            = $(subdir)/html" >> Doxyfile; \
 	echo "HTML_HEADER            = $(top_srcdir)/doc/common/header.html" >> Doxyfile;\
 	echo "HTML_FOOTER            = $(top_srcdir)/doc/common/footer.html" >> Doxyfile;\
-	echo "HTML_STYLESHEET        = $(top_srcdir)/doc/common/doxygen.css" >> Doxyfile;\
 	echo "LATEX_OUTPUT           = $(subdir)/latex" >> Doxyfile; \
 	echo "RTF_OUTPUT             = $(subdir)/rtf" >> Doxyfile; \
 	echo "MAN_OUTPUT             = $(subdir)/man" >> Doxyfile; \
-	echo "GENERATE_HTML          = YES" >> Doxyfile ;\
-	echo "GENERATE_MAN           = NO" >> Doxyfile ;\
-	echo "GENERATE_LATEX         = NO" >> Doxyfile ;\
 	echo "GENERATE_TAGFILE       = $(top_builddir)/doc/api/$(PACKAGE).tag" >> Doxyfile ;\
 	echo "HAVE_DOT               = $(LIFE_HAS_DOT)" >> Doxyfile ; \
 	$(DOXYGEN) Doxyfile;\
