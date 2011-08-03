@@ -50,14 +50,14 @@
 #endif
 
 // Mathcard includes
-#include <lifemc/lifesolver/FSIMonolithicGE.hpp>
-#include <lifemc/lifesolver/FSIMonolithicGI.hpp>
+#include <life/lifesolver/FSIMonolithicGE.hpp>
+#include <life/lifesolver/FSIMonolithicGI.hpp>
 
-#include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
-#include <lifemc/lifesolver/MonolithicBlockMatrixRN.hpp>
-#include <lifemc/lifesolver/MonolithicBlockComposedDN.hpp>
-#include <lifemc/lifesolver/MonolithicBlockComposedNN.hpp>
-#include <lifemc/lifesolver/MonolithicBlockComposedDNND.hpp>
+#include <life/lifesolver/MonolithicBlockMatrix.hpp>
+#include <life/lifesolver/MonolithicBlockMatrixRN.hpp>
+#include <life/lifesolver/MonolithicBlockComposedDN.hpp>
+#include <life/lifesolver/MonolithicBlockComposedNN.hpp>
+#include <life/lifesolver/MonolithicBlockComposedDNND.hpp>
 
 #include <lifemc/lifesolver/BCInterface3D.hpp>
 
