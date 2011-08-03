@@ -89,7 +89,7 @@ FSIMonolithic::setupFEspace()
 
     // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
     M_dFESpace.reset( new FESpace<mesh_Type, MapEpetra>( M_solidMesh,
-                                                         M_data->dataSolid()->getOrder(),
+                                                         M_data->dataSolid()->order(),
                                                          nDimensions,
                                                          M_epetraComm));
 }
@@ -263,7 +263,8 @@ void
 FSIMonolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->getdataTime()->timeStep()*M_solid->getRescaleFactor());//M_data->dataSolid()->rescaleFactor());
+    double xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep() *M_data->dataSolid()->dataTime()->timeStep());
+    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
     M_solidBlock->globalAssemble();
     M_solid->rescaleMatrices();
 }
@@ -332,17 +333,20 @@ FSIMonolithic::solveJac( vector_Type& step, const vector_Type& res, const Real /
     M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->time() );
     M_precPtr->GlobalAssemble();
 
-    M_solid->getDisplayer().leaderPrint("  M-  Residual NormInf:                        ", res.normInf(), "\n");
+    M_solid->displayer().leaderPrint("  M-  Residual NormInf:                        ", res.normInf(), "\n");
     iterateMonolithic(res, step);
-    M_solid->getDisplayer().leaderPrint("  M-  Solution NormInf:                        ", step.normInf(), "\n");
+    M_solid->displayer().leaderPrint("  M-  Solution NormInf:                        ", step.normInf(), "\n");
 }
 
 void
 FSIMonolithic::updateSystem()
 {
+
+    this->ALETimeAdvance()->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+
     vector_Type solution(*this->M_monolithicMap);
     monolithicToX(*this->M_un, solution, M_uFESpace->map(), UInt(0));
-    this->M_bdf->shiftRight(solution);
+    this->M_velocityTimeAdvance->shiftRight(solution);
 
     M_meshMotion->updateSystem();
 
@@ -489,8 +493,11 @@ void
 FSIMonolithic::
 updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
-    M_solid->updateSystem();
-    *rhsFluidCoupling += *M_solid->getRhsWithoutBC();
+  //M_solid->updateSystem();
+  solidTimeAdvance()->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
+  //*rhsFluidCoupling += *M_solid->getRhsWithoutBC();
+  *rhsFluidCoupling += M_solid->getMass() *  M_solidTimeAdvance->rhsContributionSecondDerivative() * M_data->dataSolid()->dataTime()->timeStep();
+
 }
 
 void
@@ -574,7 +581,7 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
     if (iter==0)
     {
         M_resetPrec=true;
-        M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+        M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
         *M_rhs += M_fluid->matrixMass()*(*M_un)/M_data->dataFluid()->dataTime()->timeStep();//(M_bdf->rhsContributionFirstDerivative()) ;
         couplingRhs(M_rhs, M_un);
     }

@@ -71,7 +71,8 @@ void FSIMonolithicGE::setupFluidSolid( UInt const fluxes )
     M_rhsFull.reset(new vector_Type(*this->M_monolithicMap));
     M_beta.reset  (new vector_Type(M_uFESpace->map()));
 
-    M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType() ));
+    M_solid.reset(new solid_Type());
+    //M_solid.reset(new solid_Type()::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType() ));
 
     M_solid->setup(M_data->dataSolid(),
                    M_dFESpace,
@@ -127,19 +128,17 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         M_meshMotion->updateDispDiff();
 
         M_beta.reset(new vector_Type(M_uFESpace->map()));
-        vector_Type meshDispDiff( M_meshMotion->disp(), Repeated );
+        vector_Type meshDisp( M_meshMotion->disp(), Repeated );
 
-        this->moveMesh(meshDispDiff);//initialize the mesh position with the total displacement
+        this->moveMesh(meshDisp);//initialize the mesh position with the total displacement
 
-        meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
-
-
-        meshDispDiff *= -alpha; //mesh velocity w
-        this->interpolateVelocity(meshDispDiff, *this->M_beta);
-
-        vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
-        fluid->subset(*M_un, (UInt)0);
-        *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
+        //meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
+        //meshDispDiff *= -alpha; //mesh velocity w
+        this->interpolateVelocity(ALETimeAdvance()->velocity( meshDisp ), *this->M_beta);
+	*M_beta *= -1.;
+//         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
+//         fluid->subset(*M_un, (UInt)0);
+        *this->M_beta += M_fluidTimeAdvance->extrapolation();/*M_un*/;//relative velocity beta=un-w
         //M_monolithicMatrix.reset(new matrix_Type(*M_monolithicMap));
 
         assembleSolidBlock(iter, M_un);

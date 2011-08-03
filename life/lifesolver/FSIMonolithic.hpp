@@ -415,7 +415,7 @@ public:
     void exportSolidDisplacement( vector_Type& solidDisplacement )
     {
         solidDisplacement.subset( solution(), M_offset);
-        solidDisplacement *= dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
+        solidDisplacement *= dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
     }
 
     //!Get the solid velocity
@@ -425,8 +425,8 @@ public:
     */
     void exportSolidVelocity( vector_Type& solidVelocity )
     {
-        solidVelocity.subset( M_solid->getVelocity(), M_offset );
-        solidVelocity *= dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
+        solidVelocity.subset( M_solid->velocity(), M_offset );
+        solidVelocity *= dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
     }
 
     //! Gets the fluid and pressure
@@ -504,7 +504,7 @@ protected:
     {
         setSolution( solution );
         setDispSolid( solution );
-        M_solid->updateVel();
+        M_solid->updateVelAndAcceleration();
     }
 
     //! Constructs the solid FESpace

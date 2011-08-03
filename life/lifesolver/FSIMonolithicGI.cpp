@@ -104,7 +104,8 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
                                       M_epetraComm,
                                       *M_monolithicMap,
                                       fluxes));
-    M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ));
+    M_solid.reset(new solid_Type());
+    //M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ));
 
     M_solid->setup(M_data->dataSolid(),
                    M_dFESpace,
@@ -155,39 +156,45 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
-        vectorPtr_Type meshDispDiff( new vector_Type(M_mmFESpace->map()) );
+        vectorPtr_Type meshDisp( new vector_Type(M_mmFESpace->map()) );
         vectorPtr_Type meshDispOld( new vector_Type(M_mmFESpace->map()) );
 
-        meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
+        meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
         meshDispOld->subset(*M_un, offset);
 
         //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
         //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
-        M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.
-        vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
+        M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
+        vector_Type mmRep(*meshDisp, Repeated);// just to repeat dispDiff. No way witout copying?
         moveMesh(mmRep);// re-initialize the mesh points
 
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
-            meshDispDiff = meshDispOld;// at time n;
-            *meshDispDiff -= M_meshMotion->dispOld();//at time n-1
+	  meshDisp = ALETimeAdvance()->extrapolateVelocity( );
+
+	  //meshDisp = meshDispOld;// at time n;
+	  //*meshDispDiff -= M_meshMotion->dispOld();//at time n-1
         }
         else
         {
-            *meshDispDiff -= *meshDispOld;//relative displacement
+	  meshDisp = ALETimeAdvance()->velocity( meshDisp );
+            //*meshDispDiff -= *meshDispOld;//relative displacement
         }
-        *meshDispDiff *= -alpha;// -w, mesh velocity
-        mmRep = *meshDispDiff;
+        //*meshDispDiff *= -alpha;// -w, mesh velocity
+        mmRep = *meshDisp;
 
         interpolateVelocity(mmRep, *M_beta);
         //            *M_beta *= -alpha; //if the HE solution is scaled!
 
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
         if (!M_convectiveTermDer)
-            fluid->subset(*M_un, 0);
+	  fluid = M_fluidTimeAdvance->extrapolation();
+	//fluid->subset(*M_un, 0);
         else
-            fluid->subset(disp, 0);
+	  {
+	    fluid->subset(disp, 0);
+	  }
         *M_beta += *fluid; /*M_un or disp, it could be also M_uk in a FP strategy*/
 
         assembleSolidBlock( iter, M_uk );

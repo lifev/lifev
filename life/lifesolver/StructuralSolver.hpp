@@ -181,17 +181,17 @@ public:
 
   //! Updates the rhs at the start of each time step
   /*!
-  \param rhs: solid  right hand side   
+  \param rhs: solid  right hand side
   !*/
   void updateRightHandSide(const vector_Type& rightHandSide) { *M_rhsNoBC = rightHandSide;};
 
   //! Comuptes the right hand side in the updateSystem methods
   void computeRightHandSide( void );
 
-  //! Compute the mass matrix and it calls the method to build the linear part of the stiffness matrix of the material class
-  void buildSystem( Real timeAdvanceCoefficient );
+    //! Compute the mass matrix and it calls the method to build the linear part of the stiffness matrix of the material class
+    void buildSystem( const Real& timeAdvanceCoefficient );
 
-  //void buildSystem(matrix_Type & bigMatrixStokes); // used for monolithic
+    void buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor); // used for monolithic
 
   //! Compute the mass matrix and the linear part of the stiffness matrix
   /*!
@@ -754,7 +754,7 @@ void StructuralSolver<Mesh, SolverType>::computeRightHandSide( void )
 
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::buildSystem( Real timeAdvanceCoefficient )
+void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& timeAdvanceCoefficient )
 {
   M_Displayer->leaderPrint("  S-  Computing constant matrices ...          ");
   LifeChrono chrono;
@@ -766,6 +766,8 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( Real timeAdvanceCoefficien
   chrono.stop();
   M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
 }
+
+void buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor); // used for monolithic
 
 template <typename Mesh, typename SolverType>
 void

@@ -187,8 +187,6 @@ FSIOperator::setupFEspace()
     std::string pOrder = M_data->dataFluid()->pOrder();
     std::string dOrder = M_data->dataSolid()->order();
     std::string meshOrder = M_meshDataFluid->mOrder();
-    std::string dOrder = M_data->dataSolid()->order();
-    std::string meshOrder = M_meshDataFluid->mOrder();
 
 
     const ReferenceFE*    refFE_vel(0);
