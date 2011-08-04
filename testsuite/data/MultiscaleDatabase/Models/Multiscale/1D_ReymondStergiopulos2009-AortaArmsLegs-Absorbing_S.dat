@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -26,12 +26,12 @@ algorithmsPath   = './MultiscaleDatabase/Algorithms/'
 
 # Algorithm #######################################################################################
 ################### Type ############## File (without .dat) #######################################
-algorithm = '       Broyden             Default'    
+algorithm = '       Broyden             Default'
 ###################################################################################################
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
-models = '    
+models = '
             1       OneDimensional      ReymondStergiopulos2009_001
             2       OneDimensional      ReymondStergiopulos2009_002
             3       OneDimensional      ReymondStergiopulos2009_003
@@ -93,7 +93,7 @@ mpiGroups = '
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
-couplings = '    
+couplings = '
             1       BoundaryCondition   FlowRate_SquareSinusoidalWave   1               0
             2       Stress              Lagrange1                       95,1            0,1
             3       Stress              Lagrange1                       2,3,95          0,0,1
@@ -122,13 +122,13 @@ couplings = '
            26       Stress              Lagrange1                       50,51,42        0,0,1
            27       Stress              Lagrange1                       52,53,50        0,0,1
            28       Stress              Lagrange1                       54,55,52        0,0,1
-           29       BoundaryCondition   Absorbing_1DRight               8,10,11,15,22,24,25,26,31,32,33,34,36,38,40,45,47,48,49,51,53,54,55  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1   
+           29       BoundaryCondition   Absorbing_1DRight               8,10,11,15,22,24,25,26,31,32,33,34,36,38,40,45,47,48,49,51,53,54,55  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
            '
 ###################################################################################################
 
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
-offset = '    
+offset = '
             1       1       1       1       0       0     105       0       0       0
             2       1       1       1       0       0      30 -0.7371781444 3.929790049       0
             3       1       1       1       0       0 102.584652 -0.7371781444 3.929790049       0

@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -17,13 +17,13 @@
 # One loop correspond to one heart pulse (pulse / minute: 75)
 ###################################################################################################
 
-#function    = 'u'
-function    = '[0.28979*u,0.95709*u,0]'
+#function  = 'u'
+function  = '[0.28979*u,0.95709*u,0]'
 
-variables    =  't            u'
-scale        =  '1            -80'
+variables =  't            u'
+scale     =  '1            -80'
 
-loop        = true
+loop      = true
 
 # Items must be sorted by the first column value!
 data        =  '0         0

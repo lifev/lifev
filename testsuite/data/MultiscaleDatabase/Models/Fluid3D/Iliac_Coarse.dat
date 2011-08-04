@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -17,7 +17,7 @@ modelName        = Fluid3D_Iliac_Coarse
 modelType        = Fluid3D
 couplingFlags    = '2 3 4 5 6'
 
-#Note on the flags: 
+#Note on the flags:
 # 2: Abdominal Aorta E,        Area = 1.528053101775165e+00 - (RS_041: 0.9160884178 0.8494866535)
 # 3: Inner Iliac (left),       Area = 1.608700348268665e-01 - (RS_045: 0.125663706143592)
 # 4: External Iliac (left),    Area = 1.991225727820763e-01 - (RS_044: 0.3216990877 0.2922466566)
@@ -72,7 +72,7 @@ diagonalBlockPrec   = false
 
     [../miscellaneous]
     Stokes          = false            # Solve a Stokes problem
-    SubITMax        = 0                # Maximum number of iterations 
+    SubITMax        = 0                # Maximum number of iterations
     Tolerance       = 1e-6             # Tolerance
     Omega           = 0.001            # Relaxation parameter
     #range           = '0.1 1.5'        # Range coefficient: OmegaMin < Omega < OmegaMax

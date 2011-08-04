@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -121,14 +121,14 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     [../boundary_conditions]
     list = ' '
     #list = 'InletRing OutletRingOne OutletRingTwo'
-        
+
         [./InletRing]
         type       = Essential
         flag       = 20
         mode       = Full
         component  = 3
         function   = 0
-        
+
         [../OutletRingOne]
         type       = Essential
         flag       = 30
@@ -322,7 +322,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         mode       = Full
         component  = 3
         FSI        = StructureDispToHarmonicExtension
-        
+
         [../NoInterface]
         type       = Essential
         flag       = 1
@@ -357,7 +357,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
-        
+
         [../Composed]
         list                = 'Ifpack Ifpack'
         sections            = 'ifpack ifpack'

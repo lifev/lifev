@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -26,12 +26,12 @@ algorithmsPath   = './MultiscaleDatabase/Algorithms/'
 
 # Algorithm #######################################################################################
 ################### Type ############## File (without .dat) #######################################
-algorithm = '       Broyden             Default'    
+algorithm = '       Broyden             Default'
 ###################################################################################################
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
-models = '    
+models = '
             0       Fluid3D             Cylinder_tube40
             1       Fluid3D             Cylinder_tube40
             2       Fluid3D             Cylinder_tube40
@@ -50,7 +50,7 @@ mpiGroups = '
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
-couplings = '    
+couplings = '
             0       BoundaryCondition   FlowRate_CarotidBifurcation     0               0
             1       Stress              Lagrange1                       1,0             0,1
             2       Stress              Lagrange1                       2,4             0,1
@@ -62,7 +62,7 @@ couplings = '
 
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
-offset = '    
+offset = '
             0       0.668543400937273 0.668543400937273 0.668543400937273     0.0  0.0 0.0     0.0  0.0 -3.5
             1       0.668543400937273 0.668543400937273 0.43                  0.0  0.0 0.0     0.0  0.0  0.0
             2       0.432151343621970 0.432151343621970 0.432151343621970     0.0 -9   0.0    -0.82 0.0  5.5

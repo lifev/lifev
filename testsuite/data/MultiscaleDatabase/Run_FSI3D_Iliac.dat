@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -24,8 +24,8 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_Iliac-coarse
     RestartFromStepNumber      = 0
 
     [../time_discretization]
-    initialtime                = 0.000   # [s]
-    endtime                    = 0.040   # [s]
+    initialtime                = 0.070   # [s]
+    endtime                    = 0.100   # [s]
     timestep                   = 0.001   # [s]
 
     [../]

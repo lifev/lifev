@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -17,7 +17,7 @@ couplingName    = BoundaryCondition_Stress_VenousPressure
 
 [boundary_conditions]
 list = 'Stress_VenousPressure'  # Venous pressure
-        
+
     [./Stress_VenousPressure]
     type                = Natural
     mode                = Normal
@@ -26,5 +26,5 @@ list = 'Stress_VenousPressure'  # Venous pressure
     # Additional parameters for 1D BC
     quantity            = S
     line                = first
-        
+
     [../]

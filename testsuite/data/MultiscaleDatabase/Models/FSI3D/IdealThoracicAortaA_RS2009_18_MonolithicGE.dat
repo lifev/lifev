@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -212,62 +212,62 @@ tolerance       =  0   # how far points are to be considered the same on the int
         mode       = Full
         component  = 3
         function   = 0
-        
+
         [../Top_NoDisplacementOnZ]
         type       = Essential
         flag       = 3
         mode       = Component
         component  = '2'
         function   = 0
-        
+
         [../Base_NoDisplacementOnZ]
         type       = Essential
         flag       = 2
         mode       = Component
         component  = '2'
         function   = 0
-        
+
         [../NoRigidModeX]
         type       = EssentialVertices
         flag       = 50
         mode       = Component
         component  = '0'
         function   = 0
-        
+
         [../NoRigidModeY]
         type       = EssentialVertices
         flag       = 60
         mode       = Component
         component  = '1'
         function   = 0
-        
+
         [../Top_ReferencePressure]
         type       = Natural
         flag       = 3
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../Base_ReferencePressure]
         type       = Natural
         flag       = 2
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../OuterWall_ReferencePressure]
         type       = Natural
         flag       = 10
         mode       = Normal
         functionSolver = '-s_externalPressure'
-        
+
         [../OuterWall_Robin]
         type       = Robin
         flag       = 10
         mode       = Normal
         function   = 0
-        
-            [./Robin]
-        	functionSolver = '29000 * f_timeStep'
-        	[../]
+
+            [./RobinAlpha]
+            functionSolver = '29000 * f_timeStep'
+            [../]
 
         [../]
 
@@ -382,21 +382,21 @@ tolerance       =  0   # how far points are to be considered the same on the int
         mode       = Full
         component  = 3
         FSI        = StructureDispToHarmonicExtension
-        
+
         [../NoInterface]
         type       = Essential
         flag       = 1
         mode       = Full
         component  = 3
         function   = 0
-        
+
         [../Top_NoDisplacementOnZ]
         type       = Essential
         flag       = 3
         mode       = Component
         component  = '2'
         function   = 0
-        
+
         [../Base_NoDisplacementOnZ]
         type       = Essential
         flag       = 2
@@ -431,7 +431,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
-        
+
         [../Composed]
         list                = 'Ifpack Ifpack'
         sections            = 'ifpack ifpack'
