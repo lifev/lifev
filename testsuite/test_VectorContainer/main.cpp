@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the Vector Container Test
+ *  @brief File containing the vector container test
  *
  *  @date 29-09-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -51,11 +51,9 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-// LifeV includes
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 
-// Mathcard includes
 #include "TestFunction.hpp"
 
 using namespace LifeV;
@@ -73,9 +71,9 @@ main( Int argc, char** argv )
     // ===================================================
 
     //Setup main communicator
-    boost::shared_ptr<Epetra_Comm>	comm;
+    boost::shared_ptr<Epetra_Comm>    comm;
 
-    Int	nprocs;
+    Int    nprocs;
     Int rank;
 
     //MPI Preprocessing

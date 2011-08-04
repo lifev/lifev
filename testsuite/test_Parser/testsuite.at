@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                 This file is part of the MathCard software project                       
+#                 This file is part of the MathCard software project
 #                Copyright (C) 2009, 2010 EPFL, Politecnico di Milano
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -11,13 +11,13 @@
 ### TESTSUITE: BOOST SPIRIT #######################################################################
 ###################################################################################################
 
-AT_SETUP([test_spiritParser])
-AT_KEYWORDS([test_spiritParser parser])
+AT_SETUP([test_Parser])
+AT_KEYWORDS([test_Parser parser])
 AT_DATA([data],[[
 
 ]])
 
 
-AT_CHECK([$abs_top_builddir/testsuite/test_spiritParser/test_spiritParser -c],[0],[ignore],[ignore])
+AT_CHECK([$abs_top_builddir/testsuite/test_Parser/test_Parser -c],[0],[ignore],[ignore])
 AT_CLEANUP
 

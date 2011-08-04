@@ -26,14 +26,14 @@
 
 /*!
  *  @file
- *  @brief File containing the Spirit Parser Test
+ *  @brief File containing the parser test
  *
  *  @date 22-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
- *  This is a test to verify that spiritParser performs correct computations.
+ *  This is a test to verify that the parser performs correct computations.
  *  Note that the parser works only with boost v1.41+.
  */
 
