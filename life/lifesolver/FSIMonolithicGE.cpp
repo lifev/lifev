@@ -134,8 +134,8 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
 
         //meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
         //meshDispDiff *= -alpha; //mesh velocity w
-        this->interpolateVelocity(this->M_ALETimeAdvance->velocity( meshDisp ), *this->M_beta);
-	*M_beta *= -1.;
+        this->interpolateVelocity(M_ALETimeAdvance->velocity( meshDisp ), *this->M_beta);
+        *M_beta *= -1.;
 //         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
 //         fluid->subset(*M_un, (UInt)0);
         *this->M_beta += M_fluidTimeAdvance->extrapolation();/*M_un*/;//relative velocity beta=un-w
