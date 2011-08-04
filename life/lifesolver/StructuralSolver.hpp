@@ -179,6 +179,14 @@ public:
   */
   void updateSystem( source_Type const& source );
 
+
+  //! Updates the system at the end of each time step given a source term
+  /*!
+    \param source volumic source
+    \param time present time
+  */
+  void updateSourceTerm( source_Type const& source );
+
   //! Updates the rhs at the start of each time step
   /*!
   \param rhs: solid  right hand side
@@ -383,10 +391,10 @@ public:
   vector_Type& displacement()        { return *M_disp; }
 
   //! Get the velocity
-  vector_Type& velocity()         { return *M_vel; }
+  //vector_Type& velocity()         { return *M_vel; }
 
   //! Get the velocity
-  vector_Type& acceleration()         { return *M_acc; }
+  //vector_Type& acceleration()         { return *M_acc; }
 
   //! Get the right hand sde without BC
   vectorPtr_Type& rhsWithoutBC() { return M_rhsNoBC; }
@@ -465,17 +473,17 @@ protected:
 
   //! linearized velocity
   vectorPtr_Type                       M_disp;
-  vectorPtr_Type                       M_vel;
-  vectorPtr_Type                       M_acc;
+  //vectorPtr_Type                       M_vel;
+  //vectorPtr_Type                       M_acc;
 
   //! right  hand  side displacement
   vectorPtr_Type                       M_rhs;
 
   //! right  hand  side velocity
-  vectorPtr_Type                       M_rhsW;
+  //  vectorPtr_Type                       M_rhsW;
 
   //! right  hand  side velocity
-  vectorPtr_Type                       M_rhsA;
+  //vectorPtr_Type                       M_rhsA;
 
   //! right  hand  side
   vectorPtr_Type                       M_rhsNoBC;
@@ -501,8 +509,11 @@ protected:
   //! Map Epetra
   boost::shared_ptr<const MapEpetra>   M_localMap;
 
-  //! Matrix M: mass
+  //! Matrix M: mass 
   matrixPtr_Type                       M_mass;
+ 
+  //! Matrix mass: M * xi /(dt*dt)
+  matrixPtr_Type                       M_massTimeAdvanceCoefficient;
 
   //! Matrix Temp: Temporary matrix to compute residuals, store jacobian
   matrixPtr_Type                       M_tempMatrix;
@@ -516,9 +527,8 @@ protected:
 
   UInt                                 M_offset;
   Real                                 M_rescaleFactor;
-
-  Real                                 M_zeta;
-  Real                                 M_theta;
+//  Real                                 M_zeta;
+//  Real                                 M_theta;
 
   //! Material class
   materialPtr_Type                     M_material;
@@ -538,11 +548,11 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
   M_linearSolver               ( ),
   M_elmatM                     ( ),
   M_disp                       ( ),
-  M_vel                        ( ),
-  M_acc                        ( ),
-  M_rhs                        ( /*new vector_Type(M_localMap)*/),//useful
-  M_rhsW                       ( ),
-  M_rhsA                       ( ),
+ // M_vel                        ( ),
+ // M_acc                        ( ),
+ // M_rhs                        ( /*new vector_Type(M_localMap)*/),//useful
+ // M_rhsW                       ( ),
+ // M_rhsA                       ( ),
   M_rhsNoBC                    ( ),
   M_residual_d                 ( ),
   M_sxx                        (/*M_localMap*/),//useless
@@ -553,14 +563,15 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
   M_BCh                        (),
   M_localMap                   ( ),
   M_mass                       ( ),
+  M_massTimeAdvanceCoefficient ( ),
   M_tempMatrix                 ( ),
   M_jacobian                   ( ),
   M_recur                      ( ),
   M_source                     ( ),
   M_offset                     ( 0 ),
   M_rescaleFactor              ( 1. ),
-  M_zeta                       ( 0.75 ),
-  M_theta                      ( 0.7 ),
+  //M_zeta                       ( 0.75 ),
+ // M_theta                      ( 0.7 ),
   M_material                   ( )
 {
   std::cout << "I am in the constructor for the solver" << std::endl;
@@ -584,6 +595,7 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
 					  boost::shared_ptr<Epetra_Comm>&     comm)
 {
   setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
+
   M_rhs.reset                        ( new vector_Type(*M_localMap));
   M_residual_d.reset                 ( new vector_Type(*M_localMap));
   M_sxx.reset                        ( new vector_Type(*M_localMap) );
@@ -607,12 +619,14 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   M_elmatM.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
   M_localMap                        = monolithicMap;
   M_disp.reset                      (new vector_Type(*M_localMap));
-  M_vel.reset                       (new vector_Type(*M_localMap));
-  M_acc.reset                       (new vector_Type(*M_localMap));
-  M_rhsW.reset                      ( new vector_Type(*M_localMap) );
-  M_rhsA.reset                      ( new vector_Type(*M_localMap) );
-  M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
+  //M_vel.reset                       (new vector_Type(*M_localMap));
+  // M_acc.reset                       (new vector_Type(*M_localMap));
+  // M_rhsW.reset                      ( new vector_Type(*M_localMap) );
+  // M_rhsA.reset                      ( new vector_Type(*M_localMap) );
+  // M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
+
   M_mass.reset                      (new matrix_Type(*M_localMap));
+  M_massTimeAdvanceCoefficient.reset(new matrix_Type(*M_localMap));
   M_tempMatrix.reset                (new matrix_Type(*M_localMap));
   M_jacobian.reset                  (new matrix_Type(*M_localMap));
   M_offset                          = offset;
@@ -630,6 +644,8 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( void )
   updateSystem(M_tempMatrix);
 }
 
+
+
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
 {
@@ -646,16 +662,18 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
     *stiff += *this->M_material->stiff();
     stiff->globalAssemble();
 
-    *this->M_rhsNoBC *= 0.0;
+  /*
+  //Matteo: timeAdvance method updates the update Right Hand Side;  
+   *this->M_rhsNoBC *= 0.0;
 
     computeRightHandSide();
 
-    Real DeltaT    = this->M_data->dataTime()->timeStep();
+  //  Real DeltaT    = this->M_data->dataTime()->timeStep();
     vector_Type z = *this->M_disp;
 
-     z            +=  DeltaT*(*this->M_vel);
+    z            +=  DeltaT*(*this->M_vel);
 
-    Real coef;
+   //  Real coef;
     coef= (1.0 - this->M_zeta);
 
     *this->M_rhsNoBC  = *this->M_mass * z;
@@ -664,25 +682,52 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
     // acceleration rhs
     *this->M_rhsA = (2.0 / ( this->M_zeta * pow(DeltaT,2) )) * z + ((1.0 - this->M_zeta ) / ( this->M_zeta )) * (*M_acc);
 
-    // velocity rhs
+  // velocity rhs
 
-    *this->M_rhsW = *this->M_vel + ( 1 - this->M_theta  ) * DeltaT *  (*M_acc);
+   *this->M_rhsW = *this->M_vel + ( 1 - this->M_theta  ) * DeltaT *  (*M_acc);
 
    std::cout << std::endl;
 
     std::cout << "rhsNoBC norm    = " << this->M_rhsNoBC->norm2() << std::endl;
     std::cout << "rhs_w   norm    = " << this->M_rhsW->norm2() << std::endl;
     std::cout << "    w   norm    = " << this->M_vel->norm2() << std::endl;
-
+*/
     chrono.stop();
     this->M_Displayer->leaderPrintMax("done in ", chrono.diff());
 
 }
 
 template <typename Mesh, typename SolverType>
+void StructuralSolver<Mesh, SolverType>::updateSourceTerm( source_Type const& source )
+{
+   vector_Type rhs(vector_Type(*M_localMap));
+
+    VectorElemental M_elvec(this->M_FESpace->fe().nbFEDof(), nDimensions);
+    UInt nc = nDimensions;
+
+    // loop on volumes: assembling source term
+    for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); ++i )
+      {
+
+        this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
+
+        M_elvec.zero();
+
+        for ( UInt ic = 0; ic < nc; ++ic )
+	  {
+            compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->dataTime()->getTime(), ic ); // compute local vector
+            assembleVector( *rhs, M_elvec, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, ic*this->M_FESpace->getDim() ); // assemble local vector into global one
+	  }
+      }
+   M_rhsNoBC +=rhs;
+}
+
+// Matteo this method isn't necessary it is replaced to updateRHS + updateSourceTerm;
+/*
+template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::updateSystem( source_Type const& source )
 {
-    this->M_Displayer->leaderPrint(" S-  Updating mass term on right hand side... ");
+   this->M_Displayer->leaderPrint(" S-  Updating mass term on right hand side... ");
 
     LifeChrono chrono;
     chrono.start();
@@ -700,7 +745,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( source_Type const& source
     VectorElemental M_elvec(this->M_FESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;
 
-    // loop on volumes: assembling source term
+     // loop on volumes: assembling source term
     for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); ++i )
       {
 
@@ -715,12 +760,14 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( source_Type const& source
 	  }
       }
 
-    this->M_rhsNoBC->GlobalAssemble();
+   this->M_rhsNoBC->GlobalAssemble();
 
-    computeRightHandSide();
+   computeRightHandSide();
 
 }
-
+*/
+/*
+//Matteo  this method isn't necessary. The method updateRHSContribution of timeAdvance method  does it;
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::computeRightHandSide( void )
 {
@@ -748,10 +795,9 @@ void StructuralSolver<Mesh, SolverType>::computeRightHandSide( void )
     std::cout << "rhsNoBC norm    = " << this->M_rhsNoBC->norm2() << std::endl;
     std::cout << "rhs_w   norm    = " << this->M_rhsNoBC->norm2() << std::endl;
     std::cout << "    w   norm    = " << this->M_vel->norm2() << std::endl;
-
 }
 
-
+*/
 
 
 template <typename Mesh, typename SolverType>
@@ -762,6 +808,11 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& timeAdvanceCoe
   chrono.start();
 
   computeMassMatrix();
+  
+  // Matteo  compute \xi_0 *Mass* \eta/(dt*dt)
+  *M_massTimeAdvanceCoefficient = *M_mass;
+     *M_massTimeAdvanceCoefficient *= timeAdvanceCoefficient / ( M_data->dataTime()->timeStep() * M_data->dataTime()->timeStep() );
+  
   M_material->computeLinearStiffMatrix(this->M_data);
 
   chrono.stop();
@@ -785,7 +836,6 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
   UInt nc = nDimensions;
 
   //inverse of dt square:
-  Real dti2 = 2.0 / ( M_data->dataTime()->timeStep() * M_data->dataTime()->timeStep() );
 
   // Elementary computation and matrix assembling
   // Loop on elements
@@ -797,7 +847,7 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
       M_elmatM->zero();
 
       // mass
-      mass( dti2 * M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
+      mass(  M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
 
       // assembling
       for ( UInt ic = 0; ic < nc; ic++ )
@@ -854,11 +904,11 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
         this->M_out_iter << time << " " << maxiter << std::endl;
     }
 
-    updateVelAndAcceleration();
+   // updateVelAndAcceleration();
 
     std::cout << "iterate: d norm       = " << this->M_disp->norm2() << std::endl;
-    std::cout << "iterate: w norm       = " << this->M_vel->norm2() << std::endl;
-    std::cout << "iterate: a norm       = " << this->M_acc->norm2() << std::endl;
+    //std::cout << "iterate: w norm       = " << this->M_vel->norm2() << std::endl;
+    //std::cout << "iterate: a norm       = " << this->M_acc->norm2() << std::endl;
 
     //These two lines mut be checked fo FSI. With the linear solver, they have a totally
     //different expression. For structural problems it is not used.
@@ -877,7 +927,7 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   LifeChrono chrono;
 
   matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_tempMatrix->meanNumEntries()));
-
+\
   // matrix and vector assembling communication
   this->M_Displayer->leaderPrint("  S-  Solving the system in iteratLin... \n");
 
@@ -890,8 +940,9 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 
   // Use of the complete Jacobian
   *matrFull += *this->M_jacobian;
-  *matrFull *= M_zeta;
-  *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
+ // Matteo:
+   // *matrFull *= M_zeta;
+  *matrFull += *this->M_massTimeAdvanceCoefficient; // Global Assemble is done inside BCManageMatrix
 
   this->M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
 
@@ -932,8 +983,8 @@ StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
   c << "Density:      " << M_data->rho() << std::endl;
   c << "Young:        " << M_data->young() << std::endl;
   c << "Poisson:      " << M_data->poisson() << std::endl;
-  c << "Theta:        " << M_theta << std::endl;
-  c << "Zeta:         " << M_zeta << std::endl;
+//  c << "Theta:        " << M_theta << std::endl;
+//  c << "Zeta:         " << M_zeta << std::endl;
   c << "***************************************" << std::endl;
 }
 
@@ -950,8 +1001,9 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
 
     stiff.reset(new matrix_Type(*this->M_localMap));
     *stiff +=*this->M_material->stiff();
-    *stiff *= M_zeta;
-    *stiff += *this->M_mass;
+    // Matteo
+    //*stiff *= M_zeta;
+    *stiff += *this->M_massTimeAdvanceCoefficient;
     stiff->globalAssemble();
 
     chrono.stop();
@@ -1015,8 +1067,9 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Ty
   //This is consisten with the previous first approximation in iterateLin
   this->M_tempMatrix.reset (new matrix_Type(*this->M_localMap));
   *this->M_tempMatrix += *this->M_material->linearStiff();
-  *this->M_tempMatrix *= M_zeta;
-  *this->M_tempMatrix += *this->M_mass;
+  // Matteo
+  //*this->M_tempMatrix *= M_zeta;
+  *this->M_tempMatrix += *this->M_massTimeAdvanceCoefficient;
   this->M_tempMatrix->globalAssemble();
 
   this->M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
@@ -1175,27 +1228,29 @@ void
 StructuralSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_Type vel, vectorPtr_Type /*acc*/)
 {
   *M_disp = *disp;
-  if (vel.get())
-    initializeVel(*vel);
+//  if (vel.get())
+//    initializeVel(*vel);
 }
-
+/*
 template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::initializeVel( const vector_Type& vel)
 {
   *M_vel = vel;
 }
+*/
 
 template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::initialize( const Function& d0, const Function& w0, const Function& a0 )
 {
   this->M_FESpace->interpolate(d0, *M_disp, 0.0);
-  this->M_FESpace->interpolate(w0, *M_vel , 0.0);
-  this->M_FESpace->interpolate(a0, *M_acc , 0.0);
+  //this->M_FESpace->interpolate(w0, *M_vel , 0.0);
+  // this->M_FESpace->interpolate(a0, *M_acc , 0.0);
 }
 
-
+/*
+//Matteo this method isn't necessary timeAdvance compute the accelerate and velocity
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::updateVelAndAcceleration()
 {
@@ -1204,21 +1259,21 @@ void StructuralSolver<Mesh, SolverType>::updateVelAndAcceleration()
     *this->M_acc = (2.0 /( this->M_zeta * pow(DeltaT,2) ))  * (*this->M_disp)  - *this->M_rhsA;
     *this->M_vel = *this->M_rhsW + this->M_theta * DeltaT * (*M_acc) ;
 }
-
+*/
 
 template<typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, Vector& velocity )
 {
   vector_Type disp(*M_disp, 0);
-  vector_Type vel(*M_vel , 0);
+  //vector_Type vel(*M_vel , 0);
 
   if ( getComunicator()->MyPID() == 0 )
     {
       for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
 	{
 	  disp[ iDof ] = displacement[ iDof + 1 ];
-	  vel [ iDof ] = velocity    [ iDof + 1 ];
+	  //vel [ iDof ] = velocity    [ iDof + 1 ];
 	}
     }
 }
@@ -1265,9 +1320,9 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
 
     jacobian.reset(new matrix_Type(*this->M_localMap));
     *jacobian += *this->M_material->stiff();
-
-    *jacobian *= M_zeta;
-    *jacobian += *this->M_mass;
+     // Matteo
+    //   *jacobian *= M_zeta;
+    *jacobian += *this->M_massTimeAdvanceCoefficient;
     jacobian->globalAssemble();
 
     chrono.stop();
@@ -1302,7 +1357,7 @@ solveJacobian( vector_Type&           step,
     this->M_Displayer->leaderPrint("\tS'-  Applying boundary conditions      ... ");
 
     this->M_rhsNoBC->globalAssemble();
-    this->M_rhsW->globalAssemble();
+   // this->M_rhsW->globalAssemble();
 
     vector_Type rhsFull (res);
 
@@ -1324,7 +1379,7 @@ solveJacobian( vector_Type&           step,
 
     //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a
     //totally different expression.For structural problems it is not used
-    *this->M_residual_d= *this->M_mass*step;
+    *this->M_residual_d= *this->M_massTimeAdvanceCoefficient*step;
 
 }
 

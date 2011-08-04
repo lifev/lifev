@@ -424,8 +424,8 @@ public:
       \param solidVelocity: input vector (output solid velocity)
     */
     void exportSolidVelocity( vector_Type& solidVelocity )
-    {
-        solidVelocity.subset( M_solid->velocity(), M_offset );
+    {   // Matteo
+        solidVelocity.subset( this->M_solidTimeAdvance->velocity(), M_offset );
         solidVelocity *= dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
     }
 

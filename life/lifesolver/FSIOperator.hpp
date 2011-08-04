@@ -614,7 +614,7 @@ public:
     virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->displacement(); }
 
     //! gets the solid velocity by copy
-    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solid->velocity(); }
+    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solidTimeAdvance->velocity(); }
 
     virtual vectorPtr_Type& solutionPtr()                                 { return M_lambda; }
 
@@ -629,7 +629,7 @@ public:
     /*!
      * @param solidVelocity vector to be filled with the solid velocity
      */
-    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solid->velocity(); }
+    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solidTimeAdvance->velocity(); }
 
 
     //! Getter for the right hand side
