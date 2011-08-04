@@ -896,6 +896,8 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
                 default:
 
                     std::cout << "Warning: bcType \"" << outputType << "\"not available!" << std::endl;
+
+                    break;
                 }
 
                 break;
@@ -919,6 +921,8 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
                 default:
 
                     std::cout << "Warning: bcType \"" << outputType << "\"not available!" << std::endl;
+
+                    break;
                 }
 
                 break;
@@ -926,6 +930,8 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
             default:
 
                 std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
+
+                break;
             }
 
             // Quit the loop

@@ -43,7 +43,7 @@
 #ifndef ONED_FUNCTIONS_1D_H
 #define ONED_FUNCTIONS_1D_H
 
-#include <lifemc/lifefem/OneDimensionalBCFunction.hpp>
+#include <life/lifefem/OneDimensionalBCFunction.hpp>
 
 namespace LifeV
 {
