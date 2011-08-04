@@ -753,6 +753,7 @@ void StructuralSolver<Mesh, SolverType>::computeRightHandSide( void )
 
 
 
+
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& timeAdvanceCoefficient )
 {
@@ -767,7 +768,12 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& timeAdvanceCoe
   M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
 }
 
-void buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor); // used for monolithic
+
+template <typename Mesh, typename SolverType>
+void  StructuralSolver<Mesh, SolverType>::buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor)
+{}
+; // used for monolithic
+
 
 template <typename Mesh, typename SolverType>
 void
