@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Multiscale]
-modelName            = '1D Reymond-Stergiopulos 18 (thoracic aorta B)'
+modelName            = '1D Reymond-Stergiopulos 18 (thoracic aorta A)'
 modelType            = OneDimensional
 couplingFlags        = '0 1'
 
@@ -35,7 +35,7 @@ SourceType           = OneD_NonLinearSource
 
 [../PhysicalWall]
 ViscoelasticWall     = true        # Enable/Disable viscoelastic effects
-ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree) 
+ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree)
 ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
 
 [../PhysicalParameters]
@@ -67,19 +67,19 @@ deltaStress          = 10           # perturbation on the pressure
 post_dir             = ./           # the directory for postprocessing files
 post_file            = sol          # the file name
 verbose              = 1
-CFLmax               = 0.5          # Maximum admissible value of the CFL 
+CFLmax               = 0.5          # Maximum admissible value of the CFL
 
 [../solver]
 
     [./amesos]
     solvertype            = Umfpack
-    
+
     outputlevel           = 0
     print_status          = false
     print_timing          = false
     computevectornorms    = false
     computeresidual       = false
-    
+
     addzerotodiag         = false
     refactorize           = false
     rcondthreshold        = 1e-2
@@ -87,6 +87,5 @@ CFLmax               = 0.5          # Maximum admissible value of the CFL
     maxprocs              = -1
     matrixproperty        = general
     scalemethod           = 1
-    
+
     [../]
- 

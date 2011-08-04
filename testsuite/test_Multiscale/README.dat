@@ -1,18 +1,17 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2009 EPFL          
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University   
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-24
-#  License Terms: GNU GPL
+#           Date: 24-09-2009
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MULTISCALE INSTRUCTIONS #######################################################################
-###################################################################################################
 
-Inside the test multiscale folder (mathcard-cvs/testsuite/test_Multiscale) there isn't any data file,
-in fact all the data are placed into "mathcard-cvs/data/MultiscaleDatabase".
+Inside the test_Multiscale folder (mathcard-git/testsuite/test_Multiscale) there isn't any data file,
+in fact all the data are placed into "mathcard-git/data/MultiscaleDatabase".
 
 To run a simulation type:
 
@@ -21,11 +20,12 @@ make link
 
 ./test_MS -f MultiscaleDatabase/*.dat
 
-where the star * means that you should chose which main file do you want to load.
+where the * should be replaced with the name of the file to be loaded.
 
-More generally, after ./test_MS you can specify the following option:
--f (--file):   to specify the file
--s (--showme): to turn on verbose mode (available parameters: 0, 1)
--n (--name):   to specify the output folder (default: Multiscale/)
--c (--check):  to specify the final external residual at the coupling interface that
-               will be compared with the one obtained from the solver (default: -1.)
+More generally, after ./test_MS the following options can be specified:
+-f (--file):      to specify the file
+-s (--showme):    to turn on verbose mode (available parameters: 0, 1)
+-o (--output):    to specify the output folder (default: Output/)
+-ns (--nodesize): to specify the number of cores per node (mandatory for clusters - default: 1)
+-c (--check):     to specify the final external residual at the coupling interface that
+                  will be compared with the one obtained from the solver (default: -1.)

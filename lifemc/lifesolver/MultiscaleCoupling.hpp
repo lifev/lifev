@@ -41,10 +41,15 @@
 #include <lifemc/lifesolver/MultiscaleData.hpp>
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 
+#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp> // This should not be here
+
 namespace LifeV
 {
 namespace Multiscale
 {
+
+// Forward declaration
+class MultiscaleCouplingFunction;
 
 //! MultiscaleCoupling - The Multiscale Physical Coupling
 /*!
@@ -60,8 +65,15 @@ public:
     //! @name Type definitions
     //@{
 
+    typedef MultiscaleCouplingFunction                           couplingFunction_Type;
+    typedef boost::shared_ptr < couplingFunction_Type >          couplingFunctionPtr_Type;
+    typedef std::vector< couplingFunction_Type >                 couplingFunctionsContainer_Type;
+
     typedef std::vector< multiscaleVectorPtr_Type >              couplingVariablesContainer_Type;
+
     typedef std::vector< Real >                                  timeContainer_Type;
+
+    typedef multiscaleVector_Type::combineMode_Type              combineMode_Type;
 
     //@}
 
@@ -93,20 +105,62 @@ public:
     //! Initialize the values of the coupling variables
     virtual void initializeCouplingVariables() = 0;
 
+    //! Update the coupling
+    /*!
+     * This method is the analogous of the "updateModel" for the models.
+     * It is alternative to initializeCouplingVariables and is called from the second timestep.
+     * It is reserved for the update of:
+     * <ol>
+     *     <li> objects that are not constant with respect to the time but should not be updated during subiterations.
+     * </ol>
+     */
+    virtual void updateCoupling() = 0;
+
     //! Export the values of the local coupling residuals into a global vector
     /*!
      * @param couplingResiduals Global vector of variables
      */
     virtual void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals ) = 0;
 
-    //! Display some information about the coupling
-    virtual void showMe();
+    //! Check if the topology is changed
+    /*!
+     * A topology change can be caused by a change in the coupling equations by,
+     * for example, the opening/closure of a valve (see MultiscaleCouplingFlowRateValve).
+     *
+     * @return true if the topology is changed, false otherwise
+     */
+    virtual bool topologyChange() { return false; }
 
     //@}
 
 
     //! @name Methods
     //@{
+
+    //! Determine the number of models owned by this coupling
+    /*!
+     * @return number of models owned by the coupling
+     */
+    UInt myModelsNumber() const;
+
+    //! Determine if the model is owned by this coupling
+    /*!
+     * Note: this method does not check if M_models is empty or not!
+     *
+     * @param localModelID local ID of the model.
+     * @return true if the model is owned by the coupling, false otherwise
+     */
+    bool myModel( const UInt& localModelID ) const { return M_models[localModelID].get() ? true : false; }
+
+    //! Determine if this is the model leader process
+    /*!
+     * Note: this method does not check if the model is owned by the process!
+     * Use myModelsNumber() for that!
+     *
+     * @param localModelID local ID of the model.
+     * @return true if this is the model leader process, false otherwise
+     */
+    bool isModelLeaderProcess( const UInt& localModelID ) const;
 
     //! Build the global map for the coupling vectors
     /*!
@@ -118,16 +172,23 @@ public:
     /*!
      * @param couplingVariables Global vector of coupling variables
      */
-    void importCouplingVariables( const multiscaleVector_Type& couplingVariables ) { importCouplingVector( couplingVariables, *M_localCouplingVariables[0] ); }
+    void importCouplingVariables( const multiscaleVector_Type& couplingVariables ) { importCouplingVector( localCouplingVariables( 0 ), couplingVariables, Add ); }
 
     //! Export the values of the coupling variables
     /*!
      * @param couplingVariables Global vector of coupling variables
      */
-    void exportCouplingVariables( multiscaleVector_Type& couplingVariables ) { exportCouplingVector( *M_localCouplingVariables[0], couplingVariables ); }
+    void exportCouplingVariables( multiscaleVector_Type& couplingVariables ) { exportCouplingVector( couplingVariables, localCouplingVariables( 0 ), Zero ); }
 
     //! Extrapolate the values of the coupling variables for the next time step
     void extrapolateCouplingVariables();
+
+    //! Lagrange interpolation/extrapolation of the coupling variables at selected time.
+    /*!
+     * @param t interpolation time
+     * @param interpolatedCouplingVariables variables interpolated/extrapolated at time t
+     */
+    void interpolateCouplingVariables( const Real& t, multiscaleVector_Type& interpolatedCouplingVariables ) const;
 
     //! Find if a perturbation is imposed on the coupling.
     /*!
@@ -141,15 +202,11 @@ public:
      */
     void exportJacobian( multiscaleMatrix_Type& jacobian );
 
-    //! Export the values of the Jacobian product
-    /*!
-     * @param deltaCouplingVariables variation of the coupling variables
-     * @param jacobianProduct the product of the Jacobian by the varuatuib if tge coupling variables
-     */
-    void exportJacobianProduct( const multiscaleVector_Type& deltaCouplingVariables, multiscaleVector_Type& jacobianProduct );
-
     //! save the coupling variables information on a file
     void saveSolution();
+
+    //! Display some information about the coupling
+    void showMe();
 
     //! Clear the list of pointers to the models.
     /*!
@@ -164,29 +221,38 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set the global ID of the coupling
+    //! Set the global ID of the coupling condition
     /*!
-     * @param id Coupling ID
+     * @param ID Coupling global ID
      */
-    void setID( const UInt& id ) { M_ID = id; }
+    void setID( const UInt& ID ) { M_ID = ID; }
 
-    //! Add a pointer to one of the models to couple
+    //! Set the number of models coupled by this coupling condition
     /*!
+     * @param modelsNumber number of models coupled by this coupling
+     */
+    void setModelsNumber( const UInt& modelsNumber ) { M_models.resize( modelsNumber ); M_flags.resize( modelsNumber ); }
+
+    //! Add a pointer to one of the models to be coupled
+    /*!
+     * @param localModelID local model ID
      * @param model shared_ptr of the model
      */
-    void addModel( const multiscaleModelPtr_Type& model ) { M_models.push_back( model ); }
+    void setModel( const UInt& localModelID, const multiscaleModelPtr_Type& model ) { M_models[localModelID] = model; }
 
-    //! Add a flag of one of the models to couple
+    //! Add a flag to one of the models to be coupled
     /*!
+     * @param localModelID local model ID
      * @param flag flag of the model
      */
-    void addFlag( const bcFlag_Type& flag ) { M_flags.push_back( flag ); }
+    void setFlag( const UInt& localModelID, const bcFlag_Type& flag ) { M_flags[localModelID] = flag ; }
 
-    //! Add a flag of one of the models to couple
+    //! Add a flag to one of the models to be coupled using the corresponding model flag.
     /*!
+     * @param localModelID local model ID
      * @param flagID get from the model the flag with this flagID
      */
-    void addFlagID( const UInt& flagID );
+    void setFlagFromModel( const UInt& localModelID, const UInt& modelFlagNumber );
 
     //! Setup the global data of the coupling.
     /*!
@@ -201,7 +267,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
 
     //@}
 
@@ -228,7 +294,10 @@ public:
     const std::string& couplingName() const { return M_couplingName; }
 
     //! Get the number of models connected by the coupling
-    UInt modelsNumber() const { return static_cast< UInt > ( M_models.size() ); }
+    /*!
+     * @return number of models connected by the coupling
+     */
+    UInt modelsNumber() const { return M_models.size(); }
 
     //! Get the model local ID through global ID
     /*!
@@ -255,7 +324,13 @@ public:
     /*!
      * @return number of the coupling variables
      */
-    const UInt& couplingVariablesNumber() const { return M_couplingIndex.first; }
+    const UInt& couplingVariablesNumber() const { return M_couplingVariablesNumber; }
+
+    //! Get the container of the local coupling variables
+    /*!
+     * @return container of the local coupling variables
+     */
+    const couplingVariablesContainer_Type& couplingVariables() const { return M_localCouplingVariables; }
 
     //! Get the perturbed coupling.
     /*!
@@ -281,15 +356,15 @@ public:
 
 protected:
 
-    //! @name Protected Multiscale PhysicalCoupling Virtual Methods
+    //! @name Protected MultiscaleCoupling Virtual Methods
     //@{
 
-    //! Build the list of models affected by the perturbation of a local coupling variable
+    //! Build the list of models affected by the perturbation of the local coupling variable
     /*!
-     * @param LocalCouplingVariableID local coupling variable (perturbed)
-     * @return list of models affected by the perturbation
+     * @param localCouplingVariableID local coupling variable (perturbed)
+     * @return list of models affected by the perturbation of the given coupling variable
      */
-    virtual multiscaleModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID ) = 0;
+    virtual multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& localCouplingVariableID ) = 0;
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
@@ -306,44 +381,44 @@ protected:
      */
     virtual void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& linearSystemSolved ) = 0;
 
-    //! Display some information about the coupling
-    /*!
-     * @param output specify the output stream
-     */
-    virtual void displayCouplingValues( std::ostream& output ) = 0;
-
     //@}
 
 
     //! @name Protected Methods
     //@{
 
+    //! Access by reference to a specific local coupling variable
+    /*!
+     * This method is used to simplify the access to a specific local coupling variables vector.
+     * Note that the returned value is not const!
+     * @param id id of the local coupling variables vector
+     * @return reference to the local coupling variables vector
+     */
+    const multiscaleVector_Type& localCouplingVariables( const UInt& id ) const { return *M_localCouplingVariables[id]; }
+          multiscaleVector_Type& localCouplingVariables( const UInt& id )       { return *M_localCouplingVariables[id]; }
+
     //! Create the local vectors of the coupling
     void createLocalVectors();
 
-    //! Import the content of the Global Vector in the Local vector
+    //! Reset the history of the couplings
     /*!
-     * @param globalVector the global vector
-     * @param localVector the local vector
+     *  This method is used when the topology change.
      */
-    void importCouplingVector( const multiscaleVector_Type& globalVector, multiscaleVector_Type& localVector );
+    void resetCouplingHistory();
 
-    //! Export the content of the Local Vector in the Global vector
+    //! Import the content of the unique global vector into the repeated local vector
     /*!
-     *
-     * @param localVector the local vector
-     * @param globalVector the global vector
+     * @param repeatedLocalVector the repeated local vector
+     * @param uniqueglobalVector the unique global vector
      */
-    void exportCouplingVector( const multiscaleVector_Type& localVector, multiscaleVector_Type& globalVector );
+    void importCouplingVector( multiscaleVector_Type& repeatedLocalVector, const multiscaleVector_Type& uniqueGlobalVector, const combineMode_Type& combineMode = Add );
 
-    //! Lagrange interpolation/extrapolation of the coupling variables at selected time.
+    //! Export the content of the repeated local vector into the unique global vector
     /*!
-     * @param timeContainer vector of times
-     * @param t interpolation time
-     * @param interpolatedCouplingVariables variables interpolated/extrapolated at time t
+     * @param uniqueGlobalVector the unique global vector
+     * @param repeatedLocalVector the repeated local vector
      */
-    void interpolateCouplingVariables( const timeContainer_Type& timeContainer, const Real& t,
-                                       multiscaleVector_Type& interpolatedCouplingVariables );
+    void exportCouplingVector( multiscaleVector_Type& uniqueGlobalVector, const multiscaleVector_Type& repeatedLocalVector, const combineMode_Type& combineMode = Add );
 
     //! Display and error message for the specific model
     /*!
@@ -353,19 +428,19 @@ protected:
 
     //@}
 
-    static UInt                          M_couplingsNumber;
-
     UInt                                 M_ID;
     couplings_Type                       M_type;
 
-    multiscaleModelsVector_Type          M_models;
+    multiscaleModelsContainer_Type       M_models;
     std::string                          M_couplingName;
     std::vector< bcFlag_Type >           M_flags;
 
     multiscaleDataPtr_Type               M_globalData;
 
-    std::pair< UInt, UInt >              M_couplingIndex;
+    UInt                                 M_couplingVariablesNumber;
+    UInt                                 M_couplingVariablesOffset;
 
+    couplingFunctionsContainer_Type      M_localCouplingFunctions;
     couplingVariablesContainer_Type      M_localCouplingVariables;
     multiscaleVectorPtr_Type             M_localCouplingResiduals;
 
@@ -374,7 +449,6 @@ protected:
     Int                                  M_perturbedCoupling;
 
     multiscaleCommPtr_Type               M_comm;
-    boost::shared_ptr< Displayer >       M_displayer;
 
 private:
 
@@ -386,6 +460,73 @@ private:
     MultiscaleCoupling& operator=( const MultiscaleCoupling& coupling );
 
     //@}
+};
+
+// ===================================================
+// Inline Methods
+// ===================================================
+inline UInt
+MultiscaleCoupling::myModelsNumber() const
+{
+    UInt myModelsNumber( 0 );
+
+    for ( UInt i( 0 ); i < modelsNumber(); ++i )
+        if ( myModel( i ) )
+            ++myModelsNumber;
+
+    return myModelsNumber;
+}
+
+//! MultiscaleCouplingFunction - The multiscale function for the couplings
+/*!
+ *  @author Cristiano Malossi
+ *
+ *  This simple class provides the implementation for the BC function used by the couplings.
+ */
+class MultiscaleCouplingFunction
+{
+public:
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    explicit MultiscaleCouplingFunction() : M_coupling(), M_couplingID() {}
+
+    //! Constructor
+    /*!
+     * @param coupling pointer to the coupling
+     * @param id id of the coupling variable
+     */
+    explicit MultiscaleCouplingFunction( const multiscaleCoupling_Type* coupling, const UInt& id ) : M_coupling( coupling ), M_couplingID( id ) {}
+
+    //! Destructor
+    virtual ~MultiscaleCouplingFunction() { /* M_coupling is deleted outside */ }
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Evaluate the coupling quantity
+    /*!
+     * @return evaluation of the function
+     */
+    Real function( const Real& t, const Real&, const Real&, const Real&, const UInt& )
+    {
+        multiscaleVector_Type interpolatedCouplingVariables( *M_coupling->couplingVariables()[0] );
+        M_coupling->interpolateCouplingVariables( t, interpolatedCouplingVariables );
+
+        return interpolatedCouplingVariables[M_couplingID];
+    }
+
+    //@}
+
+private:
+
+    const multiscaleCoupling_Type*         M_coupling;
+    UInt                                   M_couplingID;
 };
 
 } // Namespace Multiscale

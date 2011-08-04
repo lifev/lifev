@@ -53,7 +53,6 @@ MultiscaleAlgorithm::MultiscaleAlgorithm() :
         M_couplingVariables          (),
         M_couplingResiduals          (),
         M_comm                       (),
-        M_displayer                  (),
         M_subiterationsMaximumNumber (),
         M_tolerance                  ()
 {
@@ -77,6 +76,26 @@ MultiscaleAlgorithm::setupData( const std::string& fileName )
 
     GetPot dataFile( fileName );
     M_name = dataFile( "Multiscale/algorithmName", "algorithmName" );
+
+    M_subiterationsMaximumNumber = dataFile( "Parameters/subiterationsMaximumNumber", 10 );
+    M_tolerance = dataFile( "Parameters/tolerance", 1e-2 );
+}
+
+void
+MultiscaleAlgorithm::setupAlgorithm()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8010 ) << "MultiscaleAlgorithm::setMultiscaleProblem( multiscale ) \n";
+#endif
+
+    // Build coupling variables and residuals vectors
+    std::vector<Int> myGlobalElements(0);
+    MapEpetra couplingMap( -1, static_cast<Int> ( myGlobalElements.size() ), &myGlobalElements[0],  M_comm );
+    M_multiscale->createCouplingMap( couplingMap );
+
+    M_couplingVariables.reset( new VectorEpetra( couplingMap, Unique ) );
+    M_couplingResiduals.reset( new VectorEpetra( couplingMap, Unique ) );
 }
 
 void
@@ -88,20 +107,20 @@ MultiscaleAlgorithm::subIterate()
 #endif
 
     // Algorithm Type
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << " MS-  " << enum2String( M_type, multiscaleAlgorithmsMap ) << " Algorithm" << std::endl;
 }
 
 void
 MultiscaleAlgorithm::showMe()
 {
-    std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
-
-    std::cout << "Algorithm type                       = " << enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl
-              << "Algorithm name                       = " << M_name << std::endl
-              << "Max Sub-iterations                   = " << M_subiterationsMaximumNumber << std::endl
-              << "Tolerance                            = " << M_tolerance << std::endl << std::endl;
-    std::cout << std::endl << std::endl;
+    if ( M_comm->MyPID() == 0 )
+    {
+        std::cout << "Algorithm type                       = " << enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl
+                  << "Algorithm name                       = " << M_name << std::endl
+                  << "Max Sub-iterations                   = " << M_subiterationsMaximumNumber << std::endl
+                  << "Tolerance                            = " << M_tolerance << std::endl << std::endl;
+    }
 }
 
 // ===================================================
@@ -116,44 +135,10 @@ MultiscaleAlgorithm::computeResidual() const
 }
 
 // ===================================================
-// Set Methods
-// ===================================================
-void
-MultiscaleAlgorithm::setCommunicator( const multiscaleCommPtr_Type& comm )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MultiscaleAlgorithm::setCommunicator( comm ) \n";
-#endif
-
-    M_comm = comm;
-    M_displayer.reset( new Displayer( M_comm ) );
-}
-
-void
-MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::setMultiscaleProblem( multiscale ) \n";
-#endif
-
-    M_multiscale = boost::dynamic_pointer_cast< MultiscaleModelMultiscale >( model );
-
-    // Build coupling variables and residuals vectors
-    std::vector<Int> myGlobalElements(0);
-    MapEpetra couplingMap( -1, static_cast<Int> ( myGlobalElements.size() ), &myGlobalElements[0],  M_comm );
-    M_multiscale->createCouplingMap( couplingMap );
-
-    M_couplingVariables.reset( new VectorEpetra( couplingMap, Unique ) );
-    M_couplingResiduals.reset( new VectorEpetra( couplingMap, Unique ) );
-}
-
-// ===================================================
 // Protected Methods
 // ===================================================
 void
-MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual )
+MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual ) const
 {
     std::ofstream output;
     output << std::scientific << std::setprecision( 15 );
@@ -181,13 +166,13 @@ MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual
 }
 
 bool
-MultiscaleAlgorithm::checkResidual( const UInt& subIT )
+MultiscaleAlgorithm::checkResidual( const UInt& subIT ) const
 {
     // Compute computeResidual
     Real residual ( computeResidual() );
 
     // Display subIT and residual values
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         if ( subIT > 0 )
             std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;

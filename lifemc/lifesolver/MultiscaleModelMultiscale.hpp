@@ -37,16 +37,17 @@
 #ifndef MultiscaleModelMultiscale_H
 #define MultiscaleModelMultiscale_H 1
 
+#include <lifemc/lifesolver/MultiscaleCommunicatorsManager.hpp>
+
+#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
+
+#include <lifemc/lifesolver/MultiscaleCoupling.hpp>
+
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
-
-#include <lifemc/lifesolver/MultiscaleCoupling.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingBoundaryCondition.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingStress.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRateStress.hpp>
 
 namespace LifeV
 {
@@ -76,7 +77,7 @@ public:
     //@}
 
 
-    //! @name Multiscale PhysicalModel Virtual Methods
+    //! @name MultiscaleModel Methods
     //@{
 
     //! Setup the data of the model.
@@ -103,6 +104,13 @@ public:
     //! Display some information about the multiscale problem (call after SetupProblem)
     void showMe();
 
+    //! Return a specific scalar quantity to be used for a comparison with a reference value.
+    /*!
+     * This method is meant to be used for night checks.
+     * @return reference quantity.
+     */
+    Real checkSolution() const;
+
     //@}
 
 
@@ -114,12 +122,6 @@ public:
      * @param couplingMap Global coupling map
      */
     void createCouplingMap( MapEpetra& couplingMap );
-
-    //! Initialize coupling variables for the first time step
-    void initializeCouplingVariables();
-
-    //! Extrapolate coupling variables for the next time step
-    void extrapolateCouplingVariables();
 
     //! Import the values of the coupling variables
     void importCouplingVariables( const multiscaleVector_Type& couplingVariables );
@@ -135,6 +137,14 @@ public:
      * @param jacobian Matrix
      */
     void exportJacobian( multiscaleMatrix_Type& jacobian );
+
+    //! Check if the topology is changed
+    /*!
+     * A topology change can be caused by a change in the coupling equations by,
+     * for example, the opening/closure of a valve (see MultiscaleCouplingFlowRateValve).
+     * @return true if the topology is changed, false otherwise
+     */
+    bool topologyChange();
 
     //@}
 
@@ -162,8 +172,14 @@ private:
     //@}
 
     // Models & Couplings
-    multiscaleModelsVector_Type        M_modelsList;
-    multiscaleCouplingsVector_Type     M_couplingsList;
+    MultiscaleCommunicatorsManager     M_commManager;
+
+    // Models & Couplings
+    multiscaleModelsContainer_Type     M_modelsList;
+    multiscaleCouplingsContainer_Type  M_couplingsList;
+
+    // Algorithm for subiterations
+    multiscaleAlgorithmPtr_Type        M_algorithm;
 };
 
 //! Factory create function
