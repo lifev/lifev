@@ -37,8 +37,10 @@
 #ifndef BCInterface0D_H
 #define BCInterface0D_H 1
 
-// Mathcard includes
-#include <lifemc/lifesolver/BCInterface.hpp>
+#include <life/lifesolver/BCInterface.hpp>
+
+// Move this to BCInterfaceDefinitions.hpp
+#include <lifemc/lifefem/ZeroDimensionalBCHandler.hpp>
 
 namespace LifeV
 {
