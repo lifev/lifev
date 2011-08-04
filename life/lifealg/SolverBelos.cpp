@@ -34,6 +34,16 @@
     @date 03-08-2011
  */
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include "Teuchos_RCPBoostSharedPtrConversions.hpp"
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifealg/SolverBelos.hpp>
 
@@ -44,9 +54,10 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 SolverBelos::SolverBelos() :
-        M_preconditioner       (),
+        M_leftPreconditioner   (),
+        M_rightPreconditioner  (),
         M_solverManager        (),
-        M_problem              (),
+        M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer() ),
         M_tolerance            ( 0. ),
@@ -57,9 +68,10 @@ SolverBelos::SolverBelos() :
 }
 
 SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
-        M_preconditioner       (),
+        M_leftPreconditioner   (),
+        M_rightPreconditioner  (),
         M_solverManager        (),
-        M_problem              (),
+        M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer(comm) ),
         M_tolerance            ( 0. ),
@@ -75,26 +87,28 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
 Int
 SolverBelos::solve( vector_type& solution, const vector_type& rhs )
 {
-    //M_solver.SetLHS( &solution.epetraVector() );
-    // The Solver from Aztecoo takes a non const (because of rescaling?)
-    // We should be careful if you use scaling
+    M_problem->setLHS( rcp(&solution.epetraVector()) );
+    // WARNING: This remark is stated in Aztec00. I do not know if
+    //          it is also valid for Belos
+    //        > The Solver from Aztecoo takes a non const (because of rescaling?)
+    //        > We should be careful if you use scaling
     Epetra_FEVector* rhsVectorPtr ( const_cast<Epetra_FEVector*> (&rhs.epetraVector()) );
-    //M_solver.SetRHS( rhsVectorPtr );
+    M_problem->setRHS( rcp(rhsVectorPtr) );
 
     Int  maxiter(M_maxIter);
     Real mytol  (M_tolerance);
     Int status;
 
-    //if ( isPreconditionerSet() && M_preconditioner->preconditionerType().compare("AztecOO") )
-        //M_solver.SetPrecOperator(M_preconditioner->preconditioner());
+    //if ( isPreconditionerSet() && M_rightPreconditioner->preconditionerType().compare("AztecOO") )
+        //M_solver.SetPrecOperator(M_rightPreconditioner->preconditioner()); //Left prec??????????????????????????????? todo
 
     //status = M_solver.Iterate(maxiter, mytol);
 
 #ifdef HAVE_LIFEV_DEBUG
     M_displayer->comm()->Barrier();
-    M_displayer->leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
-    M_displayer->leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
-    M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+    //M_displayer->leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
+    //M_displayer->leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
+    //M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
 #endif
 
     /* try to solve again (reason may be:
@@ -111,9 +125,9 @@ SolverBelos::solve( vector_type& solution, const vector_type& rhs )
 
 #ifdef HAVE_LIFEV_DEBUG
         M_displayer->comm()->Barrier();
-        M_displayer->leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
-        M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
-        M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+        //M_displayer->leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
+        //M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
+        //M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
 #endif
         //return( M_solver.NumIters() + oldIter );
     }
@@ -128,7 +142,7 @@ SolverBelos::computeResidual( vector_type& solution, vector_type& rhs )
     vector_type Ax ( solution.map() );
     vector_type res( rhs );
 
-    //M_solver.GetUserMatrix()->Apply( solution.epetraVector(), Ax.epetraVector() );
+    M_problem->getOperator()->Apply( solution.epetraVector(), Ax.epetraVector() );
 
     res.epetraVector().Update( 1, Ax.epetraVector(), -1 );
 
@@ -170,7 +184,7 @@ Int SolverBelos::solveSystem( const vector_type& rhsFull,
                                  matrix_ptrtype&    baseMatrixForPreconditioner )
 
 {
-
+    // todo deal with preconditioner
     bool retry( true );
 
     LifeChrono chrono;
@@ -191,7 +205,7 @@ Int SolverBelos::solveSystem( const vector_type& rhsFull,
         M_displayer->leaderPrint( "SLV-  Reusing precond ...                 \n" );
     }
 
-    Int numIter = solveSystem( rhsFull, solution, M_preconditioner );
+    Int numIter = solveSystem( rhsFull, solution, M_rightPreconditioner );
 
     // If we do not want to retry, return now.
     // otherwise rebuild the preconditioner and solve again:
@@ -208,7 +222,7 @@ Int SolverBelos::solveSystem( const vector_type& rhsFull,
         chrono.stop();
         M_displayer->leaderPrintMax( "done in " , chrono.diff() );
         // Solving again, but only once (retry = false)
-        numIter = solveSystem( rhsFull, solution, M_preconditioner );
+        numIter = solveSystem( rhsFull, solution, M_rightPreconditioner );
 
         if ( numIter < 0 )
             M_displayer->leaderPrint( " ERROR: Iterative solver failed again.\n" );
@@ -223,11 +237,11 @@ Int SolverBelos::solveSystem( const vector_type& rhsFull,
 void SolverBelos::setupPreconditioner( const GetPot& dataFile,  const std::string& section )
 {
     std::string precType = dataFile( (section + "/prectype").data(), "Ifpack" );
-    M_preconditioner.reset( PRECFactory::instance().createObject( precType ) );
+    M_rightPreconditioner.reset( PRECFactory::instance().createObject( precType ) );
 
-    ASSERT( M_preconditioner.get() != 0, " Preconditioner not set" );
-    //M_preconditioner->setSolver( *this ); GWENOL TODO
-    M_preconditioner->setDataFromGetPot( dataFile, section );
+    ASSERT( M_rightPreconditioner.get() != 0, " Preconditioner not set" );
+    //M_rightPreconditioner->setSolver( *this ); GWENOL TODO
+    M_rightPreconditioner->setDataFromGetPot( dataFile, section );
 }
 
 void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
@@ -239,9 +253,9 @@ void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
 
     M_displayer->leaderPrint( "SLV-  Computing the precond ...                " );
 
-    M_preconditioner->buildPreconditioner( preconditioner );
+    M_rightPreconditioner->buildPreconditioner( preconditioner ); //todo
 
-    condest = M_preconditioner->condest();
+    condest = M_rightPreconditioner->condest();
     chrono.stop();
 
     M_displayer->leaderPrintMax( "done in " , chrono.diff() );
@@ -250,13 +264,14 @@ void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
 
 void SolverBelos::resetPreconditioner()
 {
-    M_preconditioner->resetPreconditioner();
+    M_rightPreconditioner->resetPreconditioner();
+    M_leftPreconditioner->resetPreconditioner();
 }
 
 bool
 SolverBelos::isPreconditionerSet() const
 {
-    return ( M_preconditioner.get() !=0 && M_preconditioner->preconditionerCreated() );
+    return ( M_leftPreconditioner.get() !=0 && M_leftPreconditioner->preconditionerCreated() )||( M_rightPreconditioner.get() !=0 && M_rightPreconditioner->preconditionerCreated() );
 }
 
 void
@@ -276,24 +291,47 @@ SolverBelos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 
 void SolverBelos::setMatrix( matrix_type& matrix )
 {
+    /*
     M_matrix = matrix.matrixPtr();
-    //M_solver.SetUserMatrix( M_matrix.get() );
+    boost::shared_ptr<const Epetra_FECrsMatrix> const_matrix=boost::const_pointer_cast<const Epetra_FECrsMatrix>(M_matrix);
+    boost::shared_ptr<const Epetra_Operator> const_operator=boost::static_pointer_cast<const Epetra_Operator>(const_matrix);
+    std::cout << "pointer: " << M_matrix.get() << std::endl;
+    //M_sA = Teuchos::rcp(M_matrix);
+    M_sA = Teuchos::rcp(const_operator);
+    std::cout << "pointer: " << M_sA.get() << std::endl;
+
+    M_problem->setOperator( M_sA );
+    */
+
+    M_matrix = matrix.matrixPtr();
+    //std::cout << "pointer: " << M_matrix.get() << std::endl;
+    Teuchos::RCP<Epetra_FECrsMatrix> M_sA = Teuchos::rcp(M_matrix);
+    //std::cout << "pointer: " << M_sA.get() << std::endl;
+
+    M_problem->setOperator( M_sA );
 }
 
 void
 SolverBelos::setOperator( Epetra_Operator& oper )
 {
-    //M_solver.SetUserOperator( &oper );
+    M_problem->setOperator(rcp(&oper));
 }
 
 void
-SolverBelos::setPreconditioner( prec_type& preconditioner )
+SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType precType )
 {
-    M_preconditioner = preconditioner;
+    if(precType == RightPreconditioner)
+    {
+        M_rightPreconditioner = preconditioner;
+    }
+    else
+    {
+        M_leftPreconditioner  = preconditioner;
+    }
 }
 
 void
-SolverBelos::setPreconditioner( comp_prec_type& preconditioner )
+SolverBelos::setPreconditioner( comp_prec_type& preconditioner, PrecApplicationType precType )
 {
     //M_solver.SetPrecOperator( preconditioner.get() );
 }
@@ -405,9 +443,13 @@ SolverBelos::trueResidual()
 }
 
 SolverBelos::prec_type&
-SolverBelos::preconditioner()
+SolverBelos::preconditioner( PrecApplicationType precType )
 {
-    return M_preconditioner;
+    if(precType == RightPreconditioner)
+    {
+        return M_rightPreconditioner;
+    }
+    return M_leftPreconditioner;
 }
 
 /*
@@ -434,12 +476,13 @@ void
 SolverBelos::setupSolverManager()
 {
     // Create the block CG iteration
-    M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+    //M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
 
     // Create the block GMRes iteration
     // Create the flexible, block GMRes iteration
     M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
 
+    /*
     M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
 
     M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
@@ -456,12 +499,7 @@ SolverBelos::setupSolverManager()
 
     // Create TFQMR iteration
     M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
-}
-
-void
-SolverBelos::createEpetraProblem()
-{
-    //M_problem = rcp( new LinearProblem_type( A, LHS, RHS ) );
+    */
 }
 
 } // namespace LifeV

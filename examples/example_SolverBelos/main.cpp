@@ -44,6 +44,8 @@
 #include <Epetra_SerialComm.h>
 #endif
 
+#include <Teuchos_ParameterList.hpp>
+
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -63,6 +65,7 @@
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
+#include <life/lifealg/SolverBelos.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
 #include <life/lifefunctions/Laplacian.hpp>
 
@@ -231,25 +234,39 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     // |            Solver initialization              |
     // +-----------------------------------------------+
-    if (verbose) std::cout << std::endl << "[Solver initialization]" << std::endl;
-    SolverAztecOO linearSolver;
-
-    if (verbose) std::cout << "Setting up the solver... " << std::flush;
-    linearSolver.setDataFromGetPot(dataFile,"solver");
-    linearSolver.setTolerance(1e-10);
-
-    //linearSolver.setupPreconditioner(dataFile,"prec");
-
+    if (verbose) std::cout << std::endl << "[Solvers initialization]" << std::endl;
     prec_type* precRawPtr;
     basePrecPtr_type precPtr;
     precRawPtr = new PreconditionerML;
     precRawPtr->setDataFromGetPot(dataFile,"prec");
     precPtr.reset(precRawPtr);
-    linearSolver.setPreconditioner(precPtr);
 
+    if (verbose) std::cout << "Setting up SolverAztecOO... " << std::flush;
+    SolverAztecOO linearSolver1;
+    linearSolver1.setCommunicator(Comm);
+    linearSolver1.setDataFromGetPot(dataFile,"solver");
+    linearSolver1.setTolerance(1e-10);
+    linearSolver1.setPreconditioner(precPtr);
     if (verbose) std::cout << "done" << std::endl;
 
-    linearSolver.setCommunicator(Comm);
+    if (verbose) std::cout << "Setting up SolverBelos... " << std::flush;
+    Teuchos::ParameterList belosList;
+    belosList.set( "Num Blocks", 200 );                     // Maximum number of blocks in Krylov factorization
+    belosList.set( "Block Size", 200 );                  // Blocksize to be used by iterative solver
+    belosList.set( "Adaptive Block Size", false ); // Adapt blocksize to numrhs
+    belosList.set( "Maximum Iterations", 200 );           // Maximum number of iterations allowed
+    belosList.set( "Maximum Restarts", 0 );          // Maximum number of restarts allowed
+    belosList.set( "Convergence Tolerance", 1e-10 );             // Relative convergence tolerance requested
+    belosList.set( "Verbosity", Belos::Errors + Belos::Warnings +
+                   Belos::TimingDetails + Belos::StatusTestDetails );
+    belosList.set( "Output Frequency", 5 );
+
+    SolverBelos linearSolver2;
+    linearSolver2.setCommunicator(Comm);
+    linearSolver2.setDataFromGetPot(dataFile,"solver");
+    linearSolver2.setTolerance(1e-10);
+    linearSolver2.setPreconditioner(precPtr);
+    if (verbose) std::cout << "done" << std::endl;
 
     // +-----------------------------------------------+
     // |                   Simulation                  |
@@ -277,12 +294,19 @@ main( int argc, char** argv )
     bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,0.0);
     if (verbose) std::cout << "done" << std::endl;
 
-    if (verbose) std::cout << "Solving the system... " << std::endl;
+    if (verbose) std::cout << "Solving the system with SolverAztec00... " << std::endl;
     boost::shared_ptr<vector_type> solution;
     solution.reset(new vector_type(uFESpace->map(), Unique));
-    *solution *= 0;
-    linearSolver.setMatrix(*systemMatrix);
-    linearSolver.solveSystem(rhsBC,*solution,systemMatrix);
+    *solution *= 0.0;
+    //linearSolver1.setMatrix(*systemMatrix);
+    //linearSolver1.solveSystem(rhsBC,*solution,systemMatrix);
+
+    if (verbose) std::cout << "Solving the system with SolverBelos... " << std::endl;
+    boost::shared_ptr<vector_type> solution2;
+    solution2.reset(new vector_type(uFESpace->map(), Unique));
+    *solution2 *= 0.0;
+    linearSolver2.setMatrix(*systemMatrix);
+    //linearSolver2.solveSystem(rhsBC,*solution2,systemMatrix);
 
     // +-----------------------------------------------+
     // |           Computing the error vector          |

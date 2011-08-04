@@ -117,6 +117,8 @@ public:
     typedef boost::shared_ptr<matrix_type>     matrix_ptrtype;
     typedef boost::shared_ptr<VectorEpetra>    vector_ptrtype;
 
+    enum PrecApplicationType {LeftPreconditioner,RightPreconditioner};
+
     //@}
 
     //! @name Constructors & Destructor
@@ -204,7 +206,7 @@ public:
     //! Delete the stored preconditioner
     void resetPreconditioner();
 
-    //! Return true if preconditioner has been setted
+    //!! Return true if preconditioner has been setted
     bool isPreconditionerSet() const;
 
     //! Print informations about the solver
@@ -215,35 +217,35 @@ public:
     //! @name Set Method
     //@{
 
-    //! Method to set communicator for Displayer (for empty constructor)
+    //!! Method to set communicator for Displayer (for empty constructor)
     /*!
       @param comm Communicator for the displayer
      */
     void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm );
 
-    //! Method to set matrix from MatrixEpetra
+    //!! Method to set matrix from MatrixEpetra
     /*!
       @param matrix Matrix of the system
      */
     void setMatrix( matrix_type& matrix );
 
-    //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
+    //!! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
     /*!
       @param oper Operator for the system
      */
     void setOperator( Epetra_Operator& oper );
 
-    //! Method to set an Preconditioner preconditioner
+    //!! Method to set an Preconditioner preconditioner
     /*!
       @param preconditioner Preconditioner to be used to solve the system
      */
-    void setPreconditioner( prec_type& preconditioner );
+    void setPreconditioner( prec_type& preconditioner, PrecApplicationType precType=RightPreconditioner );
 
-    //! Method to set a general Epetra_Operator as preconditioner
+    //!! Method to set a general Epetra_Operator as preconditioner
     /*!
       @param preconditioner  Preconditioner to be set of type Epetra_Operator
      */
-    void setPreconditioner( comp_prec_type& preconditioner );
+    void setPreconditioner( comp_prec_type& preconditioner, PrecApplicationType precType=RightPreconditioner );
 
     //! Method to setup the solver using GetPot
     /*!
@@ -293,8 +295,8 @@ public:
     //! Return the true residual
     Real trueResidual();
 
-    //! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
-    prec_type& preconditioner();
+    //!! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
+    prec_type& preconditioner( PrecApplicationType precType=RightPreconditioner );
 
     //! Return the AztecStatus
     //void aztecStatus( Real status[AZ_STATUS_SIZE] );
@@ -310,7 +312,8 @@ public:
 private:
 
     matrix_type::matrix_ptrtype  M_matrix;
-    prec_type                    M_preconditioner;
+    prec_type                    M_leftPreconditioner;
+    prec_type                    M_rightPreconditioner;
 
     SolverManager_ptrtype        M_solverManager;
     LinearProblem_ptrtype        M_problem;
@@ -325,15 +328,12 @@ private:
 
     //!! Setup the solver manager to be used
     void setupSolverManager();
-
-    //! Create an EpetraProblem to be solved by the solver manager
-    void createEpetraProblem();
 };
 
 template <typename PrecPtrOperator>
-Int SolverBelos::solveSystem( const vector_type&  rhsFull,
-                                 vector_type&        solution,
-                                 PrecPtrOperator     preconditioner )
+Int SolverBelos::solveSystem( const vector_type& rhsFull,
+                                 vector_type&    solution,
+                                 PrecPtrOperator preconditioner )
 
 {
     M_displayer->leaderPrint("SLV-  Belos solving system ...               ");
