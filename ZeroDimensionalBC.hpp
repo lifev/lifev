@@ -37,8 +37,7 @@
 #ifndef ZeroDimensionalBC_H
 #define ZeroDimensionalBC_H 1
 
-// Mathcard includes
-#include <lifemc/lifesolver/OneDimensionalDefinitions.hpp>
+#include <life/lifesolver/OneDimensionalDefinitions.hpp>
 
 namespace LifeV
 {
