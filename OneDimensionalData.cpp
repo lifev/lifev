@@ -284,7 +284,10 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
         break;
 
     default:
+
         std::cout << "Warning: distributionLaw \"" << distributionLaw << "\"not available!" << std::endl;
+
+        break;
     }
 
     updateCoefficients();
@@ -438,17 +441,8 @@ OneDimensionalData::updateCoefficients()
 }
 
 void
-OneDimensionalData::initLinearParam( const GetPot& /*dataFile*/ )  // CHECK THIS!!!
+OneDimensionalData::initializeLinearParameters()
 {
-    /*
-      The linearization of Euler model yields
-
-      F = [ Q; A * (c_L)^2];
-
-      B = [ 0; k_R / A0];
-
-      c_L = sqrt( beta0 * beta1 / rho );
-    */
     for ( UInt indz=0; indz < M_mesh->numPoints(); ++indz )
     {
         M_celerity1[indz] = std::sqrt( M_beta0[indz] * M_beta1[indz] / M_density );
