@@ -35,7 +35,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include "MultiscaleModelWindkessel0D.hpp"
+#include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
 
 namespace LifeV
 {
@@ -179,6 +179,8 @@ MultiscaleModelWindkessel0D::solveModel()
     default:
 
         std::cout << "Warning: bcType \"" << M_bc->handler()->bc( 0 ).bcType() << "\"not available!" << std::endl;
+
+        break;
     }
 }
 
@@ -341,6 +343,8 @@ MultiscaleModelWindkessel0D::initializeSolution()
         default:
 
             std::cout << "Warning: bcType \"" << M_bc->handler()->bc( 0 ).bcType() << "\"not available!" << std::endl;
+
+            break;
         }
     }
 }
@@ -445,6 +449,8 @@ MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
     default:
 
         std::cout << "Warning: bcType \"" << M_bc->handler()->bc( 0 ).bcType() << "\"not available!" << std::endl;
+
+        break;
     }
 
     //This flag avoid recomputation of the same system
