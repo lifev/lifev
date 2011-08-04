@@ -134,7 +134,7 @@ public:
     {
         base.setFunction( boost::bind( &BCInterfaceFunction::functionTime, this, _1 ) );
     }
-    
+
     //! Assign the function to the base of the 3D \c BCHandler
     /*!
      * @param base base of the 3D boundary condition

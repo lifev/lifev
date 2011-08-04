@@ -433,7 +433,7 @@ OneDimensionalSolver::resetOutput( const solution_Type& solution )
 }
 
 void
-OneDimensionalSolver::postProcess( const solution_Type& solution )
+OneDimensionalSolver::postProcess( const solution_Type& solution, const Real& time )
 {
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
@@ -442,6 +442,7 @@ OneDimensionalSolver::postProcess( const solution_Type& solution )
         outfile.open( file.c_str(), std::ios::app );
         outfile.setf( ios::scientific, ios::floatfield );
 
+        outfile << time << " ";
         for ( UInt iNode(0); iNode < static_cast< UInt > ( (*i->second).size() ); ++iNode )
             outfile << (*i->second)(iNode) << " ";
 

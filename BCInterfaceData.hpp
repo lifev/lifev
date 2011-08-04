@@ -106,8 +106,11 @@ public:
     //! Set the directional base as the current base
     void setDirectionalBase() { M_base = M_baseDirectional; M_baseString = M_baseStringDirectional; }
 
-    //! Set the Robin base as the current base
-    void setRobinBase() { M_base = M_baseRobin; M_baseString = M_baseStringRobin; }
+    //! Set the Robin Alpha base as the current base
+    void setRobinBaseAlpha() { M_base = M_baseRobinAlpha; M_baseString = M_baseStringRobinAlpha; }
+
+    //! Set the Robin Beta base as the current base
+    void setRobinBaseBeta() { M_base = M_baseRobinBeta; M_baseString = M_baseStringRobinBeta; }
 
     //! Display general information about the content of the class
     /*!
@@ -322,8 +325,11 @@ private:
     std::pair< std::string, baseList_Type >                        M_base;
     std::string                                                    M_baseString;
 
-    std::pair< std::string, baseList_Type >                        M_baseRobin;
-    std::string                                                    M_baseStringRobin;
+    std::pair< std::string, baseList_Type >                        M_baseRobinAlpha;
+    std::string                                                    M_baseStringRobinAlpha;
+
+    std::pair< std::string, baseList_Type >                        M_baseRobinBeta;
+    std::string                                                    M_baseStringRobinBeta;
 
     std::pair< std::string, baseList_Type >                        M_baseDirectional;
     std::string                                                    M_baseStringDirectional;

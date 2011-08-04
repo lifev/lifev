@@ -156,6 +156,9 @@ public:
     //! Insert the current boundary condition in the BChandler
     void insertBC();
 
+    //! Update the variables inside the physical solver
+    void updatePhysicalSolverVariables();
+
     //@}
 
 
@@ -229,9 +232,6 @@ private:
     void createFunctionDataInterpolator();
 
     void createFunctionFSI();
-
-    // This method should be removed: it is a workaround due to legacy of LifeV BC.
-    void addBcToHandler( BCVectorInterface& base );
 
     template< class BCBaseType >
     void addBcToHandler( BCBaseType& base );
@@ -336,6 +336,21 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
     }
 }
 
+template< class BcHandler, class PhysicalSolverType >
+void
+BCInterface3D< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5020 ) << "BCInterface3D::updatePhysicalSolverVariables\n";
+#endif
+
+    bcInterface_Type::updatePhysicalSolverVariables();
+
+    for ( typename vectorFSI_Type::const_iterator i = M_vectorFSI.begin() ; i < M_vectorFSI.end() ; ++i )
+        ( *i )->updatePhysicalSolverVariables();
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
@@ -347,12 +362,23 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
 
     for ( typename vectorFSI_Type::const_iterator i = M_vectorFSI.begin() ; i < M_vectorFSI.end() ; ++i )
     {
-        BCVectorInterface base;
-
-        ( *i )->assignFunction( physicalSolver, base );
         ( *i )->exportData( this->M_data );
 
-        addBcToHandler( base );
+        // Robin BC
+        if ( this->M_data.type() == Robin )
+        {
+            BCVector base;
+
+            ( *i )->assignFunction( physicalSolver, base );
+            addBcToHandler( base );
+        }
+        else
+        {
+            BCVectorInterface base;
+
+            ( *i )->assignFunction( physicalSolver, base );
+            addBcToHandler( base );
+        }
     }
 }
 
@@ -365,7 +391,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionRobin( BCBaseType&
 {
     // Parameters for direction BC
     this->M_data.setName( this->M_data.name() + "_robinMassTerm" );
-    this->M_data.setRobinBase();
+    this->M_data.setRobinBaseAlpha();
 
     // Create the mass term function
     factory_Type factory;
@@ -415,40 +441,6 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionFSI()
 {
     bcFunctionFSIPtr_Type function( new bcFunctionFSI_Type( this->M_data ) );
     M_vectorFSI.push_back( function );
-}
-
-template< class BcHandler, class PhysicalSolverType >
-inline void
-BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCVectorInterface& base )
-{
-    if ( !this->M_handler.get() ) // If BCHandler has not been created yet, we do it now
-        this->createHandler();
-
-    switch ( this->M_data.mode() )
-    {
-    case Scalar:
-    case Normal:
-    case Tangential:
-    case Directional:
-    case Component:
-
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            others" << "\n\n";
-#endif
-
-        std::cout << "ERROR: Scalar, Normal, Tangential, Directional, Component NOT AVAILABLE FOR BCVectorInterface BASE" << std::endl;
-        break;
-
-    case Full:
-
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Full" << "\n\n";
-#endif
-
-        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.comN() );
-
-        break;
-    }
 }
 
 template< class BcHandler, class PhysicalSolverType > template< class BCBaseType >

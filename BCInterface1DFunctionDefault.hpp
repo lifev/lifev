@@ -59,9 +59,9 @@ namespace LifeV
  *  <ol>
  *      <li> Riemann;
  *      <li> Compatibility;
- *	    <li> Absorbing;
- *	    <li> Resistance;
- *	</ol>
+ *      <li> Absorbing;
+ *      <li> Resistance;
+ *  </ol>
  */
 template< class PhysicalSolverType >
 class BCInterface1DFunctionDefault

@@ -290,8 +290,8 @@ BCInterface1D< BcHandler, PhysicalSolverType >::setSolution( const solutionPtr_T
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < this->M_vectorFunction.size(); ++i )
     {
-        BCInterfaceFunctionSolver< physicalSolver_Type > *castedFunctionSolver =
-            dynamic_cast < BCInterfaceFunctionSolver< physicalSolver_Type >* > ( &( *this->M_vectorFunction[i] ) );
+        boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
+            boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( this->M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->setSolution( solution );

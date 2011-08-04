@@ -310,7 +310,11 @@ public:
     void resetOutput( const solution_Type& solution );
 
     //! Save results on output files
-    void postProcess( const solution_Type& solution );
+    /*!
+     * @param solution solution container
+     * @param time solution time
+     */
+    void postProcess( const solution_Type& solution, const Real& time );
 
     //@}
 

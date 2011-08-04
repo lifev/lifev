@@ -154,11 +154,6 @@ namespace LifeV
  *      </CODE>
  *
  *  </ol>
- *
- *  <b>IMPORTANT NOTE</b> <BR>
- *  You can add manually more conditions by using \c setBC() after the call to \c buildHandler() function.
- *  In this case you have to manually set the total number of boundary conditions
- *  by using \c setHandlerParameters() function before building the handler.
  */
 template< class BcHandler, class PhysicalSolverType >
 class BCInterface
@@ -224,7 +219,7 @@ public:
     virtual void insertBC();
 
     //! Update the variables inside the physical solver
-    void updatePhysicalSolverVariables();
+    virtual void updatePhysicalSolverVariables();
 
     //@}
 
@@ -350,8 +345,8 @@ BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
 
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        BCInterfaceFunctionSolver< physicalSolver_Type > *castedFunctionSolver =
-            dynamic_cast < BCInterfaceFunctionSolver< physicalSolver_Type > * > ( &( *M_vectorFunction[i] ) );
+        boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
+            boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->updatePhysicalSolverVariables();
@@ -368,8 +363,8 @@ BCInterface< BcHandler, PhysicalSolverType >::setPhysicalSolver( const physicalS
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        BCInterfaceFunctionSolver< physicalSolver_Type > *castedFunctionSolver =
-            dynamic_cast < BCInterfaceFunctionSolver< physicalSolver_Type > * > ( &( *M_vectorFunction[i] ) );
+        boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
+            boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->setPhysicalSolver( physicalSolver );
