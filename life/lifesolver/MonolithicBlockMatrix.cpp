@@ -142,8 +142,7 @@ void MonolithicBlockMatrix::createInterfaceMap( const MapEpetra& interfaceMap , 
     //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;
 
-    int numtasks;
-    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+    Int numtasks = epetraWorldComm->NumProc();
     int* numInterfaceDof(new int[numtasks]);
     int pid=epetraWorldComm->MyPID();
     int numMyElements = interfaceMap.map(Unique)->NumMyElements();
