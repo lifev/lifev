@@ -124,7 +124,7 @@ BCBase::BCBase( const bcName_Type& name,
         M_components.push_back( 0 );
         break;
     case Tangential:
-        numberOfComponents = nDimensions;
+        numberOfComponents = nDimensions - 1;
         M_components.reserve( numberOfComponents );
         for ( ID i = 0; i < numberOfComponents; ++i )
             M_components.push_back( i );
