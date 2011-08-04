@@ -25,19 +25,15 @@
 //@HEADER
 
 /*!
- @file
- @brief Class for interpolating boundary functions from scattered data
+ *  @file
+ *  @brief File containing a class for interpolating boundary functions from scattered data
+ *
+ *  @date 09-06-2011
+ *  @author Toni Lassila <toni.lassila@epfl.ch>
+ *
+ *  @maintainer Toni Lassila <toni.lassila@epfl.ch>
+ */
 
- @author Toni Lassila <toni.lassila@epfl.ch>
- @maintainer Toni Lassila <toni.lassila@epfl.ch
-
- @date 09-06-2011
-
- *///@HEADER
-
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/BCBase.hpp>
-#include <life/lifefem/BCFunction.hpp>
 #include <life/lifefem/BCDataInterpolator.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -57,73 +53,39 @@
 
 namespace LifeV {
 
-/*!
- \class CurrentBoundaryFE
- \brief Headers for BCDataInterpolator.cpp
-
- Implements Radial Basis Function (RBF) interpolation of pointwise scalar or vectorial functions defined
- on a set of scattered interpolation points. Currently implements a variety of different basis functions
- for interpolation. Temporal interpolation done with trigonometric polynomials. For mathematical details
- see M.D. Buhmann. Radial basis functions: theory and implementations, Cambridge University Press, 2004.
-
- Inherits @c BCFunctionBase to facilitate use of interpolated data as boundary condition.
-
- If the interpolated data depends on time, the user must pass the data values at 2n specific time instances,
- uniformly sampled at interval M_timeInterval and with period M_timePeriod. The values of the data between
- these time instances is interpolated using Fourier interpolation, i.e. the interpolant is a trigonometric
- polynomial of order 2n and periodic with period M_timePeriod.
-
- The format of the data file passed to readData() is the following:
- <quote>
-     # HEADER LINE FOR PARAMETERS
-     nof_data_sites nof_data_dimensions t_interval t_period
-     # HEADER LINE FOR DATA SITES
-     data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord
-     ...
-     data_site_n_x_coord data_site_n_y_coord data_site_n_z_coord
-     # HEADER LINE FOR DATA VALUES
-     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
-     ...
-     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
-     # HEADER LINE FOR DATA VALUES
-     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
-     ...
-     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
- </quote>
- The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
- is being interpolated. The variable nof_data_sites has to equal the number of rows passed in
- both the section involving the data_sites and the data values. The data value section has to be
- repeated t_period / t_interval times.
-
- Warning: in the current implementation the data sites are assumed fixed in time and they do not move
- with the mesh. Thus they should only be used in a Lagrangian frame of reference, i.e. with structural
- BC's.
-
- */
-
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 BCDataInterpolator::BCDataInterpolator(  ) :
-    M_interpolationMatrix(), M_rhs_x(), M_rhs_y(), M_rhs_z(), M_coeffs_x(), M_coeffs_y(), M_coeffs_z(), M_denseSolver(),
-                    M_interpolationMethod( RBF_MultiQuadric ), M_filteringLevel( 0 ), M_lastInterpolatedAtTime( -1 ),
-                    M_timePeriod ( 0 ), M_timeInterval ( 0 ), M_flagInterpolated( false )
+        M_interpolationMatrix(),
+        M_rhs_x(),
+        M_rhs_y(),
+        M_rhs_z(),
+        M_coeffs_x(),
+        M_coeffs_y(),
+        M_coeffs_z(),
+        M_denseSolver(),
+        M_interpolationMethod( RBF_MultiQuadric ),
+        M_dataSites(), M_dataValues(),
+        M_dataValues_timeSamples(),
+        M_nofControlPoints(),
+        M_filteringLevel( 0 ),
+        M_lastInterpolatedAtTime( -1 ),
+        M_timePeriod ( 0 ),
+        M_timeInterval ( 0 ),
+        M_flagInterpolated( false ),
+        M_verbose( false )
 {
-
-    M_userDefinedFunction = boost::bind( &BCDataInterpolator::interpolatedDataFunction,
-                                         this,_1,_2,_3,_4,_5 );
-
+    M_userDefinedFunction = boost::bind( &BCDataInterpolator::interpolatedDataFunction, this,_1,_2,_3,_4,_5 );
 }
 
 BCDataInterpolator::~BCDataInterpolator()
 {
-
 }
 
 // ===================================================
 // Operators
 // ===================================================
-
 /*BCDataInterpolator&
  BCDataInterpolator::operator = (const BCDataInterpolator &BCdi)
  {
@@ -137,14 +99,12 @@ BCDataInterpolator::~BCDataInterpolator()
 // ===================================================
 // Methods
 // ===================================================
-
 Real BCDataInterpolator::interpolatedDataFunction( const Real& t,
                                   const Real& x,
                                   const Real& y,
                                   const Real& z,
                                   const ID& component )
 {
-
     BCDataInterpolator_point vectEval;
 
     vectEval = interpolateVectorialFunction( t,x,y,z );
@@ -158,16 +118,14 @@ Real BCDataInterpolator::interpolatedDataFunction( const Real& t,
         case 2:
             return vectEval.z;
         default:
-            std::ostringstream __ex;
-            __ex << "Invalid component: " << component << std::endl;
-            throw std::invalid_argument( __ex.str() );
+            std::ostringstream exception;
+            exception << "Invalid component: " << component << std::endl;
+            throw std::invalid_argument( exception.str() );
     }
 }
 
-void BCDataInterpolator::showMe( bool verbose,
-                                 std::ostream& out ) const
+void BCDataInterpolator::showMe( bool verbose, std::ostream& out ) const
 {
-
     out << " Boundary Conditions Data Interpolator ====>" << std::endl;
     out << " Data sites:" << std::endl;
 
@@ -213,16 +171,16 @@ void BCDataInterpolator::readData( const std::string& fileName )
 
         if ( ( RDIM != 1 ) && ( RDIM != 3 ) )
         {
-            std::ostringstream __ex;
-            __ex << "Interpolated data must be either scalar or a 3-vector: " << std::endl;
-            throw std::invalid_argument( __ex.str() );
+            std::ostringstream exception;
+            exception << "Interpolated data must be either scalar or a 3-vector: " << std::endl;
+            throw std::invalid_argument( exception.str() );
         }
 
         if ( M_timeInterval > M_timePeriod)
         {
-            std::ostringstream __ex;
-                    __ex << "Interpolation time interval and/or period are inconsistent." << std::endl;
-                    throw std::invalid_argument( __ex.str() );
+            std::ostringstream exception;
+            exception << "Interpolation time interval and/or period are inconsistent." << std::endl;
+            throw std::invalid_argument( exception.str() );
         }
 
         Int n = static_cast< Int > (floor(M_timePeriod / M_timeInterval));
@@ -263,7 +221,6 @@ void BCDataInterpolator::readData( const std::string& fileName )
         fin.close();
 
         // Form the interpolation matrix now
-
         formRBFMatrix();
     }
 
@@ -271,19 +228,15 @@ void BCDataInterpolator::readData( const std::string& fileName )
 
 void BCDataInterpolator::exportInterpolationMatrix() const
 {
-
     // TODO: Write matrix exporting routine
-
 }
 
 
 // ===================================================
 // Private Methods
 // ===================================================
-
 void BCDataInterpolator::formRBFMatrix()
 {
-
     Int nofElementsPerRow = ( needSideConstraints() ? M_nofControlPoints + NDIM + 1 : M_nofControlPoints );
 
     M_interpolationMatrix.Shape( static_cast< int > ( nofElementsPerRow ),
@@ -359,15 +312,13 @@ void BCDataInterpolator::solveInterpolationSystem()
 
     M_denseSolver.SetVectors( M_coeffs_z, M_rhs_z );
     M_denseSolver.Solve();
-
 }
 
 BCDataInterpolator::BCDataInterpolator_point BCDataInterpolator::interpolateVectorialFunction( const Real& t,
-                                                                                                    const Real& x,
-                                                                                                    const Real& y,
-                                                                                                    const Real& z )
+                                                                                               const Real& x,
+                                                                                               const Real& y,
+                                                                                               const Real& z )
 {
-
     BCDataInterpolator_point rbfEval, evalPoint;
     Real rbfShape;
 
@@ -427,13 +378,11 @@ BCDataInterpolator::BCDataInterpolator_point BCDataInterpolator::interpolateVect
     }
 
     return rbfEval;
-
 }
 
 Real BCDataInterpolator::evaluateRBF( const BCDataInterpolator_point point1,
                                       const BCDataInterpolator_point point2 )
 {
-
     Real r = sqrt( pow( point1.x - point2.x, 2 ) + pow( point1.y - point2.y, 2 ) + pow( point1.z - point2.z, 2 ) );
 
     switch ( M_interpolationMethod )
@@ -457,7 +406,6 @@ Real BCDataInterpolator::evaluateRBF( const BCDataInterpolator_point point1,
         default:
             return 0.0;
     }
-
 }
 
 bool BCDataInterpolator::needSideConstraints() const
@@ -477,7 +425,6 @@ bool BCDataInterpolator::needSideConstraints() const
 
 void BCDataInterpolator::formRBFvectors()
 {
-
     Int nofElementsPerRow = ( needSideConstraints() ? 2 * M_nofControlPoints + NDIM : M_nofControlPoints );
 
     M_rhs_x.Size( static_cast< int > ( nofElementsPerRow ) );
@@ -498,12 +445,10 @@ void BCDataInterpolator::formRBFvectors()
     }
 
     M_flagInterpolated = false;
-
 }
 
 void BCDataInterpolator::interpolateDataValuesInTime( const Real t )
 {
-
     Int n = static_cast< Int > (floor(0.5 + M_timePeriod / (2 * M_timeInterval))); // 2n time instances per period
 
     // Fourier interpolate the values between two time instants
@@ -547,7 +492,6 @@ void BCDataInterpolator::interpolateDataValuesInTime( const Real t )
     // Afterwards must solve again the interpolation weights because RHS changed
     M_flagInterpolated = false;
     M_lastInterpolatedAtTime = t;
-
 }
 
 } // namespace LifeV

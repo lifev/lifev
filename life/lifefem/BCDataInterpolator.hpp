@@ -25,24 +25,17 @@
 //@HEADER
 
 /*!
- @file
- @brief Class for interpolating boundary functions from scattered data
-
- @author Toni Lassila <toni.lassila@epfl.ch>
- @maintainer Toni Lassila <toni.lassila@epfl.ch
-
- @date 09-06-2011
-
- *///@HEADER
+ *  @file
+ *  @brief File containing a class for interpolating boundary functions from scattered data
+ *
+ *  @date 09-06-2011
+ *  @author Toni Lassila <toni.lassila@epfl.ch>
+ *
+ *  @maintainer Toni Lassila <toni.lassila@epfl.ch>
+ */
 
 #ifndef BCDATAINTERPOLATOR_H
 #define BCDATAINTERPOLATOR 1
-
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/Displayer.hpp>
-#include <life/lifefem/BCBase.hpp>
-#include <life/lifefem/BCFunction.hpp>
-#include <life/lifefem/BCManage.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -55,26 +48,32 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifecore/Displayer.hpp>
+#include <life/lifefem/BCBase.hpp>
+#include <life/lifefem/BCFunction.hpp>
+#include <life/lifefem/BCManage.hpp>
+
 namespace LifeV {
 
+//! BCDataInterpolator - Class for interpolating boundary functions from scattered data
 /*!
- \class CurrentBoundaryFE
- \brief Headers for BCDataInterpolator.cpp
+  @author Toni Lassila
 
- Implements Radial Basis Function (RBF) interpolation of pointwise scalar or vectorial functions defined
- on a set of scattered interpolation points. Currently implements a variety of different basis functions
- for interpolation. Temporal interpolation done with trigonometric polynomials. For mathematical details
- see M.D. Buhmann. Radial basis functions: theory and implementations, Cambridge University Press, 2004.
+  Implements Radial Basis Function (RBF) interpolation of pointwise scalar or vectorial functions defined
+  on a set of scattered interpolation points. Currently implements a variety of different basis functions
+  for interpolation. Temporal interpolation done with trigonometric polynomials. For mathematical details
+  see M.D. Buhmann. Radial basis functions: theory and implementations, Cambridge University Press, 2004.
 
- Inherits @c BCFunctionBase to facilitate use of interpolated data as boundary condition.
+  Inherits @c BCFunctionBase to facilitate use of interpolated data as boundary condition.
 
- If the interpolated data depends on time, the user must pass the data values at 2n specific time instances,
- uniformly sampled at interval M_timeInterval and with period M_timePeriod. The values of the data between
- these time instances is interpolated using Fourier interpolation, i.e. the interpolant is a trigonometric
- polynomial of order 2n and periodic with period M_timePeriod.
+  If the interpolated data depends on time, the user must pass the data values at 2n specific time instances,
+  uniformly sampled at interval M_timeInterval and with period M_timePeriod. The values of the data between
+  these time instances is interpolated using Fourier interpolation, i.e. the interpolant is a trigonometric
+  polynomial of order 2n and periodic with period M_timePeriod.
 
- The format of the data file passed to readData() is the following:
- <quote>
+  The format of the data file passed to readData() is the following:
+  <quote>
      # HEADER LINE FOR PARAMETERS
      nof_data_sites nof_data_dimensions t_interval t_period
      # HEADER LINE FOR DATA SITES
@@ -89,16 +88,15 @@ namespace LifeV {
      data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
      ...
      data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
- </quote>
- The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
- is being interpolated. The variable nof_data_sites has to equal the number of rows passed in
- both the section involving the data_sites and the data values. The data value section has to be
- repeated t_period / t_interval times.
+  </quote>
+  The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
+  is being interpolated. The variable nof_data_sites has to equal the number of rows passed in
+  both the section involving the data_sites and the data values. The data value section has to be
+  repeated t_period / t_interval times.
 
- Warning: in the current implementation the data sites are assumed fixed in time and they do not move
- with the mesh. Thus they should only be used in a Lagrangian frame of reference, i.e. with structural
- BC's.
-
+  Warning: in the current implementation the data sites are assumed fixed in time and they do not move
+  with the mesh. Thus they should only be used in a Lagrangian frame of reference, i.e. with structural
+  BC's.
  */
 
 class BCDataInterpolator :
@@ -134,6 +132,7 @@ public:
 
     //@}
 
+
     //! @name Constructor & Destructor
     //@{
 
@@ -141,10 +140,10 @@ public:
     /*!
 
      */
-    BCDataInterpolator(  );
+    explicit BCDataInterpolator();
 
     //! Destructor
-    ~BCDataInterpolator();
+    virtual ~BCDataInterpolator();
 
     //@}
 
@@ -157,8 +156,7 @@ public:
      @param bdFunctionDirectional The BCFunctionDirectional object
      @return Reference to a new BCFunctionDirectional object which is a copy of bcFunctionDirectional
      */
-    BCFunctionDirectional&
-    operator=( const BCDataInterpolator& bcDataInterpolator );
+    //BCFunctionDirectional& operator=( const BCDataInterpolator& bcDataInterpolator );
 
     //@}
 
@@ -183,7 +181,7 @@ public:
 
     //! Display the content of the variables
     /*!
-     @param verbose The verbosity (default: true)
+     @param verbose The verbosity (default: false)
      @param out The ostream output (default: std::cout)
      */
     void showMe( bool verbose = false,
@@ -203,24 +201,37 @@ public:
 
     //@}
 
+
     //! @name Set Methods
     //@{
 
-    void setInterpolationMethod(BCInterpolationMethod bcim)
+    //! Set the interpolation method
+    /*!
+     @param bcInterpolationMethod The interpolation method
+     */
+    void setInterpolationMethod( const BCInterpolationMethod& bcInterpolationMethod )
     {
-        M_interpolationMethod = bcim;
+        M_interpolationMethod = bcInterpolationMethod;
     }
 
-    void setFilteringLevel(Int level)
+    //! Set the filtering level
+    /*!
+     @param filteringLevel The filtering level
+     */
+    void setFilteringLevel( const Int& filteringLevel )
     {
-        M_filteringLevel = level;
+        M_filteringLevel = filteringLevel;
     }
+
 
     //! @name Get Methods
     //@{
 
-    //! Returns number of control points
-    UInt nofControlPoints() const
+    //! Returns the number of control points
+    /*!
+     * @return The number of control points
+     */
+    const UInt& nofControlPoints() const
     {
         return M_nofControlPoints;
     }
@@ -228,6 +239,28 @@ public:
     //@}
 
 private:
+
+    //! @name Private Methods
+    //@{
+
+    void formRBFMatrix();
+    void solveInterpolationSystem();
+    BCDataInterpolator_point interpolateVectorialFunction( const Real& t,
+                                                                const Real& x,
+                                                                const Real& y,
+                                                                const Real& z );
+    Real evaluateRBF( const BCDataInterpolator_point point1,
+                      const BCDataInterpolator_point point2 );
+    bool needSideConstraints() const;
+    void formRBFvectors();
+    void interpolateDataValuesInTime( const Real t );
+
+    Int indexInTime(const Int dataSite, const Int timeInstant) const
+    {
+        return M_nofControlPoints * timeInstant + dataSite;
+    }
+
+    //@}
 
     struct BCDataInterpolator_point
     {
@@ -259,27 +292,7 @@ private:
 
     bool M_flagInterpolated;
     bool M_verbose;
-
-
-    void formRBFMatrix();
-    void solveInterpolationSystem();
-    BCDataInterpolator_point interpolateVectorialFunction( const Real& t,
-                                                                const Real& x,
-                                                                const Real& y,
-                                                                const Real& z );
-    Real evaluateRBF( const BCDataInterpolator_point point1,
-                      const BCDataInterpolator_point point2 );
-    bool needSideConstraints() const;
-    void formRBFvectors();
-    void interpolateDataValuesInTime( const Real t );
-
-    Int indexInTime(const Int dataSite, const Int timeInstant) const
-    {
-        return M_nofControlPoints * timeInstant + dataSite;
-    }
-
 };
-
 
 } // namespace LifeV
 
