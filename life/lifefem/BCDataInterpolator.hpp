@@ -240,6 +240,13 @@ public:
 
 private:
 
+    struct BCDataInterpolator_point
+    {
+        Real x;
+        Real y;
+        Real z;
+    };
+
     //! @name Private Methods
     //@{
 
@@ -261,13 +268,6 @@ private:
     }
 
     //@}
-
-    struct BCDataInterpolator_point
-    {
-        Real x;
-        Real y;
-        Real z;
-    };
 
     matrix_Type M_interpolationMatrix;
 
