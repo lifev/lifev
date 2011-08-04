@@ -171,14 +171,14 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
-	  meshDisp = ALETimeAdvance()->extrapolateVelocity( );
+	  *meshDisp = this->M_ALETimeAdvance->extrapolationVelocity( );
 
 	  //meshDisp = meshDispOld;// at time n;
 	  //*meshDispDiff -= M_meshMotion->dispOld();//at time n-1
         }
         else
         {
-	  meshDisp = ALETimeAdvance()->velocity( meshDisp );
+	  *meshDisp = this->M_ALETimeAdvance->velocity( *meshDisp );
             //*meshDispDiff -= *meshDispOld;//relative displacement
         }
         //*meshDispDiff *= -alpha;// -w, mesh velocity
@@ -189,7 +189,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
         if (!M_convectiveTermDer)
-	  fluid = M_fluidTimeAdvance->extrapolation();
+	  *fluid = this->M_fluidTimeAdvance->extrapolation();
 	//fluid->subset(*M_un, 0);
         else
 	  {
@@ -264,7 +264,7 @@ void FSIMonolithicGI::initialize( fluidPtr_Type::value_type::function_Type const
 {
     super_Type::initialize(u0, p0, d0, w0, df0);
     vector_Type df(M_mmFESpace->map());
-    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->getdataTime()->time());
+    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->dataTime()->time());
 
     M_un->add(df, M_solidAndFluidDim+dimInterface());
     M_meshMotion->setDisplacement(df);
@@ -291,8 +291,8 @@ FSIMonolithicGI::couplingVariableExtrap( )
     //initializeBDF(*M_lambda);
     setSolution(*M_lambda);
 
-    M_solid->getDisplayer().leaderPrint("norm( disp  ) init = ", M_lambda->normInf() );
-    M_solid->getDisplayer().leaderPrint("norm( velo )  init = ", M_lambdaDot->normInf());
+    M_solid->displayer().leaderPrint("norm( disp  ) init = ", M_lambda->normInf() );
+    M_solid->displayer().leaderPrint("norm( velo )  init = ", M_lambdaDot->normInf());
 }
 
 

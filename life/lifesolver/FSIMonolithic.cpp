@@ -263,8 +263,8 @@ void
 FSIMonolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-    double xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep() *M_data->dataSolid()->dataTime()->timeStep());
-    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
+    Real xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep() *M_data->dataSolid()->dataTime()->timeStep());
+    M_solid->buildSystem(*M_solidBlock, xi,  M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
     M_solidBlock->globalAssemble();
     M_solid->rescaleMatrices();
 }
@@ -342,11 +342,11 @@ void
 FSIMonolithic::updateSystem()
 {
 
-    this->ALETimeAdvance()->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+    this->M_ALETimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
 
     vector_Type solution(*this->M_monolithicMap);
     monolithicToX(*this->M_un, solution, M_uFESpace->map(), UInt(0));
-    this->M_velocityTimeAdvance->shiftRight(solution);
+    this->M_fluidTimeAdvance->shiftRight(solution);
 
     M_meshMotion->updateSystem();
 
@@ -370,7 +370,7 @@ FSIMonolithic::initialize( fluidPtr_Type::value_type::function_Type const& u0,
     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
 
     vector_Type d(M_dFESpace->map());
-    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->getdataTime()->time());
+    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->dataTime()->time());
 
     initialize(u, p, d);
 }
@@ -387,7 +387,7 @@ FSIMonolithic::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
     // Fluid
     M_fluid->initialize( *fluidVelocityAndPressure );
     M_meshMotion->initialize( *fluidDisplacement );
-    initializeBDF( *fluidVelocityAndPressure );
+   // initializeBDF( *fluidVelocityAndPressure );
 
     // Solid
     // Extend the external solid vectors to have the monolithic map
@@ -398,8 +398,8 @@ FSIMonolithic::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
     extendedSolidVelocity->subset( *solidVelocity, solidVelocity->map(), static_cast <UInt> ( 0 ), M_offset );
 
     // Rescale the quantities
-    *extendedSolidDisplacement /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
-    *extendedSolidVelocity /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
+    *extendedSolidDisplacement /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
+    *extendedSolidVelocity /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
 
     M_solid->initialize( extendedSolidDisplacement, extendedSolidVelocity );
 }
@@ -442,10 +442,10 @@ FSIMonolithic::iterateMonolithic(const vector_Type& rhs, vector_Type& step)
     {
         chrono.start();
 
-        M_solid->getDisplayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
+        M_solid->displayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
 
         if (numIter <= -M_maxIterSolver)
-            M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
+            M_solid->displayer().leaderPrint("   ERROR: Iterative solver failed.\n");
     }
 
     //M_solid->getDisplayer().leaderPrint("  M-  System solved.\n" );
@@ -494,9 +494,9 @@ FSIMonolithic::
 updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
   //M_solid->updateSystem();
-  solidTimeAdvance()->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
+  this->M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
   //*rhsFluidCoupling += *M_solid->getRhsWithoutBC();
-  *rhsFluidCoupling += M_solid->getMass() *  M_solidTimeAdvance->rhsContributionSecondDerivative() * M_data->dataSolid()->dataTime()->timeStep();
+  *rhsFluidCoupling += *M_solid->Mass() *  M_solidTimeAdvance->rhsContributionSecondDerivative() * M_data->dataSolid()->dataTime()->timeStep();
 
 }
 
@@ -561,10 +561,10 @@ FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
     }
     else
     {
-        M_solid->computeMatrix( *solution, 1.);
+        M_solid->computeMatrix( M_solidBlock,  *solution, 1.);
     }
 
-    M_solid->getSolidMatrix( M_solidBlock );
+    //M_solid->solidMatrix( M_solidBlock );
     M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap, 1 ) );
     *M_solidBlockPrec += *M_solidBlock;
 }
@@ -589,7 +589,7 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
 
 void FSIMonolithic::updateRHS()
 {
-    M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+    M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
     *M_rhs += M_fluid->matrixMass()*(*M_un)*1/M_data->dataFluid()->dataTime()->timeStep();//M_bdf->rhsContributionFirstDerivative() ;
     couplingRhs(M_rhs, M_un);
     //M_solid->updateVel();
@@ -623,7 +623,7 @@ FSIMonolithic::vectorPtr_Type FSIMonolithic::computeStress()
     M_boundaryMass.reset(new matrix_Type(*M_interfaceMap));
     if ( !M_BChWS->bcUpdateDone() )
         M_BChWS->bcUpdate(*M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-    bcManageMatrix(*M_boundaryMass, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BChWS, M_dFESpace->feBd(), 1., dataSolid()->getdataTime()->time() );
+    bcManageMatrix(*M_boundaryMass, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BChWS, M_dFESpace->feBd(), 1., dataSolid()->dataTime()->time() );
     M_boundaryMass->globalAssemble();
 
     solver_Type solverMass(M_epetraComm);
