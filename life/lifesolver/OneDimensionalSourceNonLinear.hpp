@@ -1,0 +1,144 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief File containing a class for the non linear source function B of the 1D hyperbolic problem
+ *
+ *  @version 1.0
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ */
+
+#ifndef OneDimensionalSourceNonLinear_H
+#define OneDimensionalSourceNonLinear_H
+
+// LIFEV - MATHCARD
+#include <lifemc/lifesolver/OneDimensionalSource.hpp>
+
+namespace LifeV
+{
+
+//! OneDimensionalSourceNonLinear - Class for the non-linear source function B of the 1D hyperbolic problem.
+/*!
+ *  @author Vincent Martin, Cristiano Malossi
+ *
+ *  dU/dt + dF(U)/dz + B(U) = 0
+ *  with U=[A,Q]^T
+ */
+class OneDimensionalSourceNonLinear : public OneDimensionalSource
+{
+public:
+
+    //! @name Type definitions and Enumerators
+    //@{
+
+    typedef OneDimensionalSource         super;
+//    typedef FactorySingleton< Factory< OneDimensionalModel_Source, OneDimensional::sourceTerm_Type > > factorySource_Type;
+
+//    typedef OneDimensionalModel_Physics                       physics_Type;
+//    typedef boost::shared_ptr< physics_Type >                 physicsPtr_Type;
+
+//    typedef OneDimensionalModel_Data::container2D_Type        container2D_Type;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    explicit OneDimensionalSourceNonLinear() : super() {}
+
+    explicit OneDimensionalSourceNonLinear( const physicsPtr_Type physics ) : super( physics ) {}
+
+    //! Do nothing destructor
+    virtual ~OneDimensionalSourceNonLinear() {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! B = [0, B2]^T
+    /*!
+     *  with B2 such that:
+     *
+     *  B2 = Kr*Q/A
+     *     - beta1 * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)  * dA0/dz
+     *     + A0/rho * [ 1/(beta1+1) * (A/A0)^(beta1+1) - A/A0 ]  * dbeta0/dz
+     *     + A0    * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)
+     *     * [ log(A/A0) - 1/(beta1+1) ]                         * dbeta1/dz
+     *
+     *  \param iNode : is the index position for the parameter
+     */
+    Real source( const Real& A, const Real& Q, const ID& ii, const UInt& iNode ) const ;
+
+    //! Jacobian matrix dBi/dxj
+    Real dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode ) const;
+
+    //! Second derivative tensor d2Bi/(dxj dxk)
+//    Real diff2(const Real& _A, const Real& _Q,
+//               const ID& ii, const ID& jj, const ID& kk,
+//               const UInt& iNode = 0) const;
+
+    //! Sql = [Sql1, Sql2]^T
+    /*!
+     *  Sql source term of the equation under its quasi-linear formulation:
+     *
+     *  dU/dt + H(U) dU/dz + Sql(U) = 0
+     */
+    Real interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
+                                        const ID& ii,    const container2D_Type& bcNodes, const Real& cfl ) const ;
+
+    //@}
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    OneDimensionalSourceNonLinear& operator=( const physicsPtr_Type physics );
+
+    //@}
+};
+
+//! Factory create function
+inline OneDimensionalSource* createOneDimensionalSourceNonLinear()
+{
+    return new OneDimensionalSourceNonLinear();
+}
+
+}
+
+#endif // OneDimensionalSourceNonLinear_H
