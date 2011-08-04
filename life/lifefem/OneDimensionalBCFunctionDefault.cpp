@@ -40,7 +40,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifefem/OneDimensionalBCFunctionDefault.hpp>
+#include <life/lifefem/OneDimensionalBCFunctionDefault.hpp>
 
 namespace LifeV
 {
@@ -193,6 +193,7 @@ OneDimensionalBCFunctionCompatibility::setupNode()
 
     default:
         std::cout << "Warning: bcSide \"" << M_bcSide << "\" not available!" << std::endl;
+        break;
     }
 }
 
@@ -329,6 +330,7 @@ OneDimensionalBCFunctionAbsorbing::operator()( const Real& /*time*/, const Real&
         break;
     default:
         std::cout << "Warning: bcType \"" << M_bcType  << "\"not available!" << std::endl;
+        break;
     }
 
     Real a1, a2, a11, a22, b1, b2, c1, c2;
@@ -420,6 +422,7 @@ OneDimensionalBCFunctionWindkessel3::operator()( const Real& time, const Real& t
         break;
     default:
         std::cout << "Warning: bcType \"" << M_bcType  << "\"not available!" << std::endl;
+        break;
     }
 
     Real A( M_bcU[0] );

@@ -51,7 +51,6 @@
 #ifndef OneDimensionalSolver_H
 #define OneDimensionalSolver_H
 
-// LIFEV
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifearray/VectorElemental.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
@@ -62,9 +61,8 @@
 
 #include <life/lifefem/FESpace.hpp>
 
-// LIFEV - MATHCARD
-#include <lifemc/lifefem/OneDimensionalBCHandler.hpp>
-#include <lifemc/lifesolver/OneDimensionalDefinitions.hpp>
+#include <life/lifefem/OneDimensionalBCHandler.hpp>
+#include <life/lifesolver/OneDimensionalDefinitions.hpp>
 
 
 namespace LifeV

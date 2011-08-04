@@ -43,9 +43,8 @@
 #ifndef OneDimensionalBCHandler_H
 #define OneDimensionalBCHandler_H
 
-// LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalDefinitions.hpp>
-#include <lifemc/lifefem/OneDimensionalBC.hpp>
+#include <life/lifesolver/OneDimensionalDefinitions.hpp>
+#include <life/lifefem/OneDimensionalBC.hpp>
 
 namespace LifeV
 {

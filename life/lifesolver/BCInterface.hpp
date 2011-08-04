@@ -37,10 +37,10 @@
 #ifndef BCInterface_H
 #define BCInterface_H 1
 
-#include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
+#include <life/lifesolver/BCInterfaceDefinitions.hpp>
 
-#include <lifemc/lifesolver/BCInterfaceData.hpp>
-#include <lifemc/lifesolver/BCInterfaceFactory.hpp>
+#include <life/lifesolver/BCInterfaceData.hpp>
+#include <life/lifesolver/BCInterfaceFactory.hpp>
 
 namespace LifeV
 {

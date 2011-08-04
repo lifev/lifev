@@ -26,8 +26,8 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS = TestFunction.hpp
 
-check_PROGRAMS = test_ContainerOfVectors
-test_ContainerOfVectors_SOURCES = main.cpp
+check_PROGRAMS = test_VectorContainer
+test_VectorContainer_SOURCES = main.cpp
 
 EXTRA_DIST = testsuite.at
 

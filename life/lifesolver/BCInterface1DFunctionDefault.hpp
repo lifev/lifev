@@ -37,10 +37,10 @@
 #ifndef BCInterface1DFunctionDefault_H
 #define BCInterface1DFunctionDefault_H 1
 
-#include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
-#include <lifemc/lifesolver/BCInterfaceData.hpp>
+#include <life/lifesolver/BCInterfaceDefinitions.hpp>
+#include <life/lifesolver/BCInterfaceData.hpp>
 
-#include <lifemc/lifesolver/OneDimensionalSolver.hpp>
+#include <life/lifesolver/OneDimensionalSolver.hpp>
 
 namespace LifeV
 {

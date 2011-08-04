@@ -39,7 +39,7 @@
  *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <OneDimensionalSourceLinear.hpp>
+#include <life/lifesolver/OneDimensionalSourceLinear.hpp>
 
 namespace LifeV
 {

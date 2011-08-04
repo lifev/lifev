@@ -37,13 +37,11 @@
 #ifndef BCInterface3D_H
 #define BCInterface3D_H 1
 
-// LifeV includes
 #include <life/lifefem/BCDataInterpolator.hpp>
 
-// Mathcard includes
-#include <lifemc/lifesolver/BCInterface.hpp>
+#include <life/lifesolver/BCInterface.hpp>
 
-#include <lifemc/lifesolver/BCInterface3DFSI.hpp>
+#include <life/lifesolver/BCInterface3DFSI.hpp>
 
 namespace LifeV
 {
@@ -333,6 +331,8 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
     default:
 
         std::cout << " !!! Error: " << this->M_data.base().first << " is not valid in BCInterface3D !!!" << std::endl;
+
+        break;
     }
 }
 

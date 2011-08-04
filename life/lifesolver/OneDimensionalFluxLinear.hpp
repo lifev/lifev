@@ -42,8 +42,7 @@
 #ifndef OneDimensionalFluxLinear_H
 #define OneDimensionalFluxLinear_H
 
-// LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalFlux.hpp>
+#include <life/lifesolver/OneDimensionalFlux.hpp>
 
 namespace LifeV
 {

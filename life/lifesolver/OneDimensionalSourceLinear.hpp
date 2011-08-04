@@ -42,8 +42,7 @@
 #ifndef OneDimensionalSourceLinear_H
 #define OneDimensionalSourceLinear_H
 
-// LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalSource.hpp>
+#include <life/lifesolver/OneDimensionalSource.hpp>
 
 namespace LifeV
 {

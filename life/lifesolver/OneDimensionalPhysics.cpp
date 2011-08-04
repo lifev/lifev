@@ -40,7 +40,7 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/OneDimensionalPhysics.hpp>
+#include <life/lifesolver/OneDimensionalPhysics.hpp>
 
 namespace LifeV
 {

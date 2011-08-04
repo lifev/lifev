@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/BCInterface3DFSI.hpp>
+#include <life/lifesolver/BCInterface3DFSI.hpp>
 
 namespace LifeV
 {
@@ -165,9 +165,11 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
         M_physicalSolver->exportSolidVelocity( velocityTn );
 
         *M_robinRHS = 2 / timeStep * displacementTn + velocityTn;
+
+        break;
     }
     default:
-        ;// Do nothing
+        break;
     }
 }
 

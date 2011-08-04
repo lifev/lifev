@@ -43,8 +43,7 @@
 #ifndef OneDimensionalPhysicsNonLinear_H
 #define OneDimensionalPhysicsNonLinear_H
 
-// LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalPhysics.hpp>
+#include <life/lifesolver/OneDimensionalPhysics.hpp>
 
 namespace LifeV
 {

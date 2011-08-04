@@ -49,9 +49,7 @@
 
 // LifeV includes
 #include <life/lifecore/LifeV.hpp>
-
-// Mathcard includes
-#include <lifemc/lifearray/VectorContainer.hpp>
+#include <life/lifearray/VectorContainer.hpp>
 
 using namespace LifeV;
 

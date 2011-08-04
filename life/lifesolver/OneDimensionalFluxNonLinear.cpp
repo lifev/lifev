@@ -39,7 +39,7 @@
  *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <OneDimensionalFluxNonLinear.hpp>
+#include <life/lifesolver/OneDimensionalFluxNonLinear.hpp>
 
 namespace LifeV
 {

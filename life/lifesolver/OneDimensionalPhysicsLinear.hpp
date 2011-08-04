@@ -43,8 +43,7 @@
 #ifndef OneDimensionalPhysicsLinear_H
 #define OneDimensionalPhysicsLinear_H
 
-// LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalPhysics.hpp>
+#include <life/lifesolver/OneDimensionalPhysics.hpp>
 
 namespace LifeV
 {

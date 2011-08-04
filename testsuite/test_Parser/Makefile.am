@@ -26,8 +26,8 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS =
 
-check_PROGRAMS = test_spiritParser
-test_spiritParser_SOURCES = main.cpp
+check_PROGRAMS = test_Parser
+test_Parser_SOURCES = main.cpp
 
 EXTRA_DIST = testsuite.at
 

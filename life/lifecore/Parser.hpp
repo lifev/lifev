@@ -40,8 +40,8 @@
 
 #include <life/lifecore/LifeDebug.hpp>
 
-#include <lifemc/lifecore/ParserDefinitions.hpp>
-#include <lifemc/lifecore/ParserSpiritGrammar.hpp>
+#include <life/lifecore/ParserDefinitions.hpp>
+#include <life/lifecore/ParserSpiritGrammar.hpp>
 
 namespace LifeV
 {

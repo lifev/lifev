@@ -46,7 +46,7 @@
  *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/OneDimensionalSolver.hpp>
+#include <life/lifesolver/OneDimensionalSolver.hpp>
 
 namespace LifeV
 {

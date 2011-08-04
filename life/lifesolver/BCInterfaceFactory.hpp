@@ -37,13 +37,13 @@
 #ifndef BCInterfaceFactory_H
 #define BCInterfaceFactory_H 1
 
-#include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
+#include <life/lifesolver/BCInterfaceDefinitions.hpp>
 
-#include <lifemc/lifesolver/BCInterfaceData.hpp>
-#include <lifemc/lifesolver/BCInterfaceFunction.hpp>
-#include <lifemc/lifesolver/BCInterfaceFunctionFile.hpp>
-#include <lifemc/lifesolver/BCInterfaceFunctionSolver.hpp>
-#include <lifemc/lifesolver/BCInterfaceFunctionFileSolver.hpp>
+#include <life/lifesolver/BCInterfaceData.hpp>
+#include <life/lifesolver/BCInterfaceFunction.hpp>
+#include <life/lifesolver/BCInterfaceFunctionFile.hpp>
+#include <life/lifesolver/BCInterfaceFunctionSolver.hpp>
+#include <life/lifesolver/BCInterfaceFunctionFileSolver.hpp>
 
 namespace LifeV
 {

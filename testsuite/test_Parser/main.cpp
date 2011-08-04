@@ -58,8 +58,7 @@
 #include <life/lifecore/StringUtility.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 
-// Mathcard includes
-#include <lifemc/lifecore/Parser.hpp>
+#include <life/lifecore/Parser.hpp>
 
 using namespace LifeV;
 

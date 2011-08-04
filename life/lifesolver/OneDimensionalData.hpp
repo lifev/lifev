@@ -43,13 +43,11 @@
 #ifndef OneDimensionalData_H
 #define OneDimensionalData_H
 
-// LIFEV
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifefem/TimeData.hpp>
 #include <life/lifemesh/RegionMesh1D.hpp>
 
-// LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalDefinitions.hpp>
+#include <life/lifesolver/OneDimensionalDefinitions.hpp>
 
 namespace LifeV
 {

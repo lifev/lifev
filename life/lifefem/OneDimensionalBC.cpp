@@ -41,7 +41,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifefem/OneDimensionalBC.hpp>
+#include <life/lifefem/OneDimensionalBC.hpp>
 
 namespace LifeV
 {
@@ -137,6 +137,8 @@ OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& ma
     default:
 
         std::cout << "Warning: bcType \"" << M_bcType.find( OneDimensional::first )->second << "\"not available!" << std::endl;
+
+        break;
     }
 }
 
@@ -186,6 +188,7 @@ OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, c
         break;
     default:
         std::cout << "\n[OneDimensionalBC::computeMatrixAndRHS] Wrong boundary variable as " << line << " condition on bcSide " << M_bcSide;
+        break;
     }
 
 #ifdef HAVE_LIFEV_DEBUG

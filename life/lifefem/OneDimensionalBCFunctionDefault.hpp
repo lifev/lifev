@@ -43,11 +43,10 @@
 #ifndef OneDimensionalBCFunctionDefault_H
 #define OneDimensionalBCFunctionDefault_H
 
-// LIFEV - MATHCARD
-#include <lifemc/lifefem/OneDimensionalBCFunction.hpp>
-#include <lifemc/lifesolver/OneDimensionalData.hpp>
-#include <lifemc/lifesolver/OneDimensionalFlux.hpp>
-#include <lifemc/lifesolver/OneDimensionalSource.hpp>
+#include <life/lifefem/OneDimensionalBCFunction.hpp>
+#include <life/lifesolver/OneDimensionalData.hpp>
+#include <life/lifesolver/OneDimensionalFlux.hpp>
+#include <life/lifesolver/OneDimensionalSource.hpp>
 
 namespace LifeV
 {
@@ -141,7 +140,7 @@ protected:
     fluxPtr_Type                             M_flux;
     sourcePtr_Type                           M_source;
     solutionPtr_Type                         M_solution;
-    
+
     UInt                                     M_bcNode;
     bcSide_Type                              M_bcSide;
     bcType_Type                              M_bcType;

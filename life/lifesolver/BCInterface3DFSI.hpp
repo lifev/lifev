@@ -43,9 +43,9 @@
 #include <life/lifesolver/FSIMonolithicGE.hpp>
 #include <life/lifesolver/FSIMonolithicGI.hpp>
 
-#include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
-#include <lifemc/lifesolver/BCInterfaceData.hpp>
-#include <lifemc/lifesolver/BCInterfaceFactory.hpp>
+#include <life/lifesolver/BCInterfaceDefinitions.hpp>
+#include <life/lifesolver/BCInterfaceData.hpp>
+#include <life/lifesolver/BCInterfaceFactory.hpp>
 
 namespace LifeV
 {
@@ -354,6 +354,8 @@ BCInterface3DFSI< FSIOperator >::assignFunction( const physicalSolverPtr_Type& p
 
         std::cout << " !!! Warning:" << mapMethod[physicalSolver->data().method()] << " not assigned !!!" << std::endl;
 
+        break;
+
     }
 }
 
@@ -510,6 +512,8 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     default:
 
         std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCVectorInterface !!!" << std::endl;
+
+        break;
     }
 }
 
@@ -554,6 +558,8 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVector& base )
     default:
 
         std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCVector !!!" << std::endl;
+
+        break;
     }
 }
 

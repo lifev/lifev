@@ -35,7 +35,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include "Parser.hpp"
+#include <life/lifecore/Parser.hpp>
 
 namespace LifeV
 {

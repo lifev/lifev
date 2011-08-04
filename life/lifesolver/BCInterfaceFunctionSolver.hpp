@@ -37,13 +37,12 @@
 #ifndef BCInterfaceFunctionSolver_H
 #define BCInterfaceFunctionSolver_H 1
 
-#include <lifemc/lifesolver/OneDimensionalSolver.hpp>
+#include <life/lifesolver/OneDimensionalSolver.hpp>
 
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
-#include <lifemc/lifesolver/MultiscaleCommunicatorsManager.hpp>
-#include <lifemc/lifesolver/BCInterfaceFunction.hpp>
+#include <life/lifesolver/BCInterfaceFunction.hpp>
 
 namespace LifeV
 {
@@ -405,6 +404,8 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::updatePhysicalSolverVariables
 
         default:
             switchErrorMessage( "OneDimensionalModel_Solver" );
+
+            break;
         }
 }
 
@@ -530,7 +531,10 @@ BCInterfaceFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
             break;
 
         default:
+
             switchErrorMessage( "FSIOperator" );
+
+            break;
         }
 }
 
@@ -607,6 +611,8 @@ BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::updateP
         default:
 
             switchErrorMessage( "OSEEN" );
+
+            break;
         }
 }
 
@@ -683,9 +689,11 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
         default:
 
             switchErrorMessage( "OSEENSHAPEDERIVATIVE" );
+
+            break;
         }
 }
-
+/*
 template< >
 inline void
 BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVariables()
@@ -739,9 +747,11 @@ BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVar
         default:
 
             switchErrorMessage( "MultiscaleData" );
+
+            break;
         }
 }
-
+*/
 // ===================================================
 // Set Methods
 // ===================================================
@@ -838,7 +848,7 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
     if ( M_physicalSolver.get() )
         updatePhysicalSolverVariables();
 }
-
+/*
 template< >
 inline void
 BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::createAccessList( const data_Type& data )
@@ -856,7 +866,7 @@ BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::createAccessList( const
     if ( M_physicalSolver.get() )
         updatePhysicalSolverVariables();
 }
-
+*/
 // ===================================================
 // Private Methods
 // ===================================================
