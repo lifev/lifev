@@ -92,6 +92,7 @@ public:
 
   //!@name Type definitions
   //@{
+
   typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
   typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
 
@@ -108,7 +109,8 @@ public:
   typedef typename SolverType::prec_raw_type     precRaw_Type;
   typedef typename SolverType::prec_type         prec_Type;
 
-  typedef VenantKirchhoffElasticData                   data_Type;
+  typedef VenantKirchhoffElasticData             data_Type;
+  typedef boost::shared_ptr<data_Type>           dataPtr_Type;
 
   typedef FactorySingleton<Factory<VenantKirchhoffSolver,  std::string> >  StructureSolverFactory;
 
@@ -415,6 +417,12 @@ public:
   {
   }
 
+  //! Return the data container of the solid
+  /*!
+   *  @return data container of the solid
+   */
+  const dataPtr_Type& data() const { return M_data; }
+
   // Physic constant
   //! Get the thickness
   const Real& getThickness() const { return M_data->getThickness(); }
@@ -451,7 +459,7 @@ protected:
 
   //!Protected Members
 
-  boost::shared_ptr<data_Type>   M_data;
+  dataPtr_Type                                      M_data;
 
   boost::shared_ptr<FESpace<Mesh, MapEpetra> >      M_FESpace;
 
@@ -495,10 +503,6 @@ protected:
   vectorPtr_Type                    M_sxx;
   vectorPtr_Type                    M_syy;
   vectorPtr_Type                    M_szz;
-
-  //! files for lists of iterations and residuals per timestep
-  std::ofstream                  M_out_iter;
-  std::ofstream                  M_out_res;
 
   bchandler_Type   M_BCh;
 
@@ -557,8 +561,6 @@ VenantKirchhoffSolver<Mesh, SolverType>::VenantKirchhoffSolver( ):
   M_sxx                        (/*M_localMap*/),//useless
   M_syy                        (/*M_localMap*/),//useless
   M_szz                        (/*M_localMap*/),//useless
-  M_out_iter                   ( "out_iter_solid" ),
-  M_out_res                    ( "out_res_solid" ),
   M_BCh                        (),
   M_localMap                   ( ),
   M_mass                       ( ),

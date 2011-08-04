@@ -263,10 +263,11 @@ public:
     comm_type const& comm() const { return *M_commPtr; }
 
     //! Return a shared pointer on the communicator
+    comm_ptrtype const& commPtr() const { return M_commPtr; }
     comm_ptrtype& commPtr() { return M_commPtr; }
 
     //! Return a shared pointer on the internal Epetra_Map
-    map_ptrtype const & map  ( MapEpetraType mapType ) const;
+    map_ptrtype const& map( MapEpetraType mapType ) const;
 
     //! Getter for the Epetra_Export
     Epetra_Export const& exporter();

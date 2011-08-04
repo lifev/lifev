@@ -58,7 +58,7 @@ namespace LifeV
 {
 
 //! DataElasticStructure - Data container for solid problems with elastic structure
-class VenantKirchhoffElasticData: public TimeData
+class VenantKirchhoffElasticData
 {
 public:
 
@@ -126,6 +126,12 @@ public:
      */
     void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
 
+    //! Set data external pressure for the external surface of the solid
+    /*!
+     * @param externalPressure external pressure value
+     */
+    void setExternalPressure( const Real& externalPressure ) { M_externalPressure = externalPressure; }
+
     //! Set density
     /*!
      * @param density solid density value
@@ -163,6 +169,12 @@ public:
      * @return shared_ptr to TimeData container
      */
     const timePtr_Type& getdataTime() const { return M_time; }
+
+    //! Get the external pressure to be applied to the external surface of the solid
+    /*!
+     * @return the value of the external pressure
+     */
+    const Real& externalPressure() const { return M_externalPressure; }
 
     //! Get solid density
     /*!
@@ -244,6 +256,7 @@ private:
     //! Physics
     Real                   M_density;
     Real                   M_thickness;
+    Real                   M_externalPressure;
 
     bool                   M_materialsFlagSet;
     materialContainer_Type M_poisson;
