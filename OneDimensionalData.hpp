@@ -56,59 +56,41 @@ namespace LifeV
 
 //! OneDimensionalData - Class which read and holds all the data for the One Dimensional Model Solver.
 /*!
- *  @author Vincent Martin, Cristiano Malossi
+ *  @authors Vincent Martin, Cristiano Malossi
  *
- *  NOTE: Physical Parameters
- *  =========================
+ *  <b>Physical Parameters</b>
  *
- *  Parameters: Area0, alpha, beta0, beta1, Kr, rho.
+ *  Main parameters: \f$A^0, \alpha, \beta_0, \beta_1, K_r, \rho\f$.
  *
- *  Euler equations
- *  dA/dt + dQ/dz = 0
- *  dQ/dt + d/dz(alpha * Q^2/A) + A/rho * dP/dz + Kr * Q/A = 0
+ *  Euler equations:
+ *
+ *  \f[
+ *  \left\{\begin{array}{l}
+ *  \displaystyle\frac{dA}{dt} + \frac{dQ}{dz} = 0\\[2ex]
+ *  \displaystyle\frac{dQ}{dt} + \frac{d}{dz}\left(\alpha \frac{Q^2}{A}\right) + \frac{A}{\rho} \frac{dP}{dz} + K_r \frac{Q}{A} = 0
+ *  \end{array}\right.
+ *  \f]
  *
  *  with
- *  P - P_ext = beta0 [ ( A / Area0 )^{beta1} - 1 ]
  *
- *  BEWARE: there are at least 2 or 3 different ways of defining it!!!
+ *  \f[
+ *  P - P_\mathrm{ext} = \beta_0 \left( \left( \frac{A}{A^0} \right)^{\beta_1} - 1 \right)
+ *  \f]
  *
- *  CONVENTIONS used here:
- *  Parameter homogeneous to a pressure:
- *  P - P_ext = Beta0 [ ( A / Area0 )^{Beta1} - 1 ]
+ *  <b>Linear Parameters</b>
  *
- *  This Beta0 is homogeneous to a pressure.
- *  In most cases Beta1 is taken equal to 1/2.
- *
- *  Beta0 = ( \sqrt{\pi} h_0 E ) / ( ( 1 - \ksi^2 ) * \sqrt{Area0} )
- *  OTHER CONVENTION not used here:
- *
- *  a) from Formaggia and Veneziani (p. 1.10, MOX report No 21 - june 2003)
- *  P - P_ext = \tilde{\beta_0} ( \sqrt{A} - \sqrt{A_0} ) / A_0
- *  with
- *  \beta0 = ( \sqrt{\pi} h_0 E ) / ( 1 - \ksi^2 )
- *
- *  link with PressBeta0: \tilde{\beta_0} = PressBeta0 * \sqrt{A_0}
- *
- *  b) Auxiliary Parameter often used in the model1D code (by J-FG or D Lamponi)
- *  (ONLY when beta1=1/2 !!)
- *  P - P_ext = 2 * rho * AuxBeta ( \sqrt{A} - \sqrt{A_0} )
- *
- *  link with PressBeta0:          AuxBeta = PressBeta0 * PressBeta1 / ( rho * Area0^(PressBeta1) )
- *  or whenever PressBeta1 = 1/2 : AuxBeta = PressBeta0 / ( 2 * rho * \sqrt{A_0} )
- *
- *
- *
- *  NOTE: Linear Parameters
- *  =======================
- *
- *  Parameters: F11, F12, F21, F22, celerity1, celerity2
+ *  Parameters: \f$F_{11}, F_{12}, F_{21}, F_{22}, \lambda_1, \lambda_2\f$
  *
  *  Equations:
- *  dU1/dt + F11 dU1/dz + F12 dU2/dz = 0
- *  dU2/dt + F21 dU1/dz + F22 dU2/dz = 0
  *
- *  The flux matrix F = [F11, F12 ; F21 F22] has the eigenvalues
- *  celerity1, celerity2.
+ *  \f[
+ *  \left\{\begin{array}{l}
+ *  \displaystyle\frac{dU_1}{dt} + F_{11} \frac{dU_1}{dz} + F_{12} \frac{dU_2}{dz} = 0\\[2ex]
+ *  \displaystyle\frac{dU_2}{dt} + F_{21} \frac{dU_1}{dz} + F_{22} \frac{dU_2}{dz} = 0
+ *  \end{array}\right.
+ *  \f]
+ *
+ *  The flux matrix \f$F = [F_{11}, F_{12}; F_{21}, F_{22}]\f$ has the eigenvalues \f$\lambda_1, \lambda_2\f$.
  */
 class OneDimensionalData
 {
