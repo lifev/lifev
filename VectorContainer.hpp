@@ -51,7 +51,7 @@
 namespace LifeV
 {
 
-//! VectorContainer - LifeV vector made of other vectors
+//! VectorContainer - LifeV vector composed by concatenating other vectors
 /*!
  *  @author Cristiano Malossi
  *
