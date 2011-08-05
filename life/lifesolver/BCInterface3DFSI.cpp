@@ -161,7 +161,7 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
         FSIOperator::vector_Type displacementTn( M_physicalSolver->dFESpace().map(), Repeated, Zero );
         FSIOperator::vector_Type velocityTn( M_physicalSolver->dFESpace().map(), Repeated, Zero );
 
-        M_physicalSolver->exportFluidDisplacement( displacementTn );
+        M_physicalSolver->exportSolidDisplacement( displacementTn );
         M_physicalSolver->exportSolidVelocity( velocityTn );
 
         *M_robinRHS = 2 / timeStep * displacementTn + velocityTn;
