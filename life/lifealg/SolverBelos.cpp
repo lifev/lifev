@@ -304,16 +304,23 @@ void SolverBelos::setMatrix( matrix_type& matrix )
 
     M_matrix = matrix.matrixPtr();
     //std::cout << "pointer: " << M_matrix.get() << std::endl;
-    Teuchos::RCP<Epetra_FECrsMatrix> M_sA = Teuchos::rcp(M_matrix);
-    //std::cout << "pointer: " << M_sA.get() << std::endl;
+    Teuchos::RCP<Epetra_FECrsMatrix> A = Teuchos::rcp(M_matrix);
+    //std::cout << "pointer: " << A.get() << std::endl;
 
-    M_problem->setOperator( M_sA );
+    M_problem->setOperator( A );
 }
 
 void
 SolverBelos::setOperator( Epetra_Operator& oper )
 {
     M_problem->setOperator(rcp(&oper));
+}
+
+void
+SolverBelos::setRightHandSide(const vector_type& rhs)
+{
+    Teuchos::RCP<const vector_type::vector_type> rhsPtr(&(rhs.epetraVector()),false);
+    M_problem->setRHS(rhsPtr);
 }
 
 void

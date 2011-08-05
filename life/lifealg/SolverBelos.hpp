@@ -235,6 +235,12 @@ public:
      */
     void setOperator( Epetra_Operator& oper );
 
+    //!! Method to set the right hand side (rhs) of the linear system
+    /*!
+      @param rhs right hand side of the system
+     */
+    void setRightHandSide(const vector_type& rhs);
+
     //!! Method to set an Preconditioner preconditioner
     /*!
       @param preconditioner Preconditioner to be used to solve the system

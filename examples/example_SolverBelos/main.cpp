@@ -306,6 +306,7 @@ main( int argc, char** argv )
     solution2.reset(new vector_type(uFESpace->map(), Unique));
     *solution2 *= 0.0;
     linearSolver2.setMatrix(*systemMatrix);
+    linearSolver2.setRightHandSide(rhsBC);
     //linearSolver2.solveSystem(rhsBC,*solution2,systemMatrix);
 
     // +-----------------------------------------------+
