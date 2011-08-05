@@ -50,6 +50,9 @@ MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
         MultiscaleInterfaceFluid       (),
         M_outputFile                   (),
         M_bc                           ( new bcInterface_Type() ),
+#ifndef MULTISCALE_IS_IN_LIFE
+        M_temporaryData                ( new temporaryData_Type() ),
+#endif
         M_pressureLeft_tn              (),
         M_flowRateLeft_tn              (),
         M_pressureLeft                 (),
@@ -108,7 +111,12 @@ MultiscaleModelWindkessel0D::setupModel()
 
     initializeSolution();
 
+#ifdef MULTISCALE_IS_IN_LIFEV
     M_bc->setPhysicalSolver( M_globalData );
+#else
+    M_temporaryData->setFluidVenousPressure( M_globalData->fluidVenousPressure() );
+    M_bc->setPhysicalSolver( M_temporaryData );
+#endif
 
     // Safety check
     if ( M_bc->handler()->bc( 1 ).bcType() != OneDimensional::S )
