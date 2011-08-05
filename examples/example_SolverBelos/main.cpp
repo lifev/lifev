@@ -263,10 +263,10 @@ main( int argc, char** argv )
 
     SolverBelos linearSolver2;
     linearSolver2.setCommunicator(Comm);
-    linearSolver2.setDataFromGetPot(dataFile,"solver");
-    linearSolver2.setTolerance(1e-10);
+    linearSolver2.setParameters(belosList);
     linearSolver2.setPreconditioner(precPtr);
     if (verbose) std::cout << "done" << std::endl;
+    linearSolver2.showMe();
 
     // +-----------------------------------------------+
     // |                   Simulation                  |

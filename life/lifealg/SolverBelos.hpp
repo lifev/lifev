@@ -124,10 +124,10 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Empty constructor
+    //!! Empty constructor
     SolverBelos();
 
-    //! Constructor
+    //!! Constructor
     /*!
       @param comm Communicator
      */
@@ -154,7 +154,7 @@ public:
      */
     Real computeResidual( vector_type& solution, vector_type& rhs );
 
-    //! return the Aztec status
+    //! return the solver status
     std::string printStatus();
 
     //! Solves the system and returns the number of iterations.
@@ -209,7 +209,7 @@ public:
     //!! Return true if preconditioner has been setted
     bool isPreconditionerSet() const;
 
-    //! Print informations about the solver
+    //!! Print informations about the solver
     void showMe( std::ostream& output = std::cout ) const;
 
     //@}
@@ -247,39 +247,28 @@ public:
      */
     void setPreconditioner( comp_prec_type& preconditioner, PrecApplicationType precType=RightPreconditioner );
 
-    //! Method to setup the solver using GetPot
+    //!! Method to setup the solver using GetPot
     /*!
       @param dataFile GetPot object which contains the data about the solver
+      Note: the parameters are added to the existing one. Use resetParameters to clean the parameters list.
      */
-    void setDataFromGetPot( const GetPot& dataFile, const std::string& section );
+    void setParameters( const GetPot& dataFile, const std::string& section );
 
-    //! Set the current parameters with the internal parameters list
+    //!! Method to setup the solver using Teuchos::ParameterList
     /*!
-      Note: The parameter list is set using "setDataFromGetPot".
-      @param cerrWarningIfUnused If true the solver return warning if some parameters are unused
+      @param list Teuchos::ParameterList object
+      Note: the parameters are added to the existing one. Use resetParameters to clean the parameters list.
      */
-    void setParameters( bool cerrWarningIfUnused = false );
+    void setParameters( const Teuchos::ParameterList& list );
 
-    //! Set the tolerance of the solver
-    /*!
-      @param tolerance Tolerance for the solver
-    */
-    void setTolerance( const Real tolerance );
+    //!! Method to reset the parameters list of the solver
+    void resetParameters();
 
-    //! Set the tolerance and the maximum number of iterations
-    /*!
-    @param maxIter Maximum number of iteration
-    */
-    void setMaxNumIterations( const Int maxIter = -1 );
-
-    //! Specify if the preconditioner should be reuse or not
+    //!! Specify if the preconditioner should be reuse or not
     /*!
       @param reusePreconditioner If set to true, do not recompute the preconditioner
      */
     void setReusePreconditioner( const bool reusePreconditioner );
-
-    //! Return the displayer
-    boost::shared_ptr<Displayer> displayer();
 
     //@}
 
@@ -289,23 +278,20 @@ public:
     //!! Return the total number of iterations
     Int numIterations() const;
 
-    //! Return the maximum total number of iterations
-    Int maxNumIterations() const;
-
     //! Return the true residual
     Real trueResidual();
 
     //!! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
     prec_type& preconditioner( PrecApplicationType precType=RightPreconditioner );
 
-    //! Return the AztecStatus
-    //void aztecStatus( Real status[AZ_STATUS_SIZE] );
-
-    //! Return a Teuchos parameters list
+    //!! Return a Teuchos parameters list
     Teuchos::ParameterList& getParametersList();
 
     //!! Return a pointer on the Belos solver manager
     SolverManager_ptrtype solver();
+
+    //!! Return a shared pointer on the displayer
+    boost::shared_ptr<Displayer> displayer();
 
     //@}
 
@@ -321,8 +307,6 @@ private:
     Teuchos::ParameterList       M_parameterList;
     boost::shared_ptr<Displayer> M_displayer;
 
-    Real                         M_tolerance;
-    Int                          M_maxIter;
     Int                          M_maxIterForReuse;
     bool                         M_reusePreconditioner;
 

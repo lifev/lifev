@@ -60,8 +60,6 @@ SolverBelos::SolverBelos() :
         M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer() ),
-        M_tolerance            ( 0. ),
-        M_maxIter              ( 0 ),
         M_maxIterForReuse      ( 0 ),
         M_reusePreconditioner  (false)
 {
@@ -74,8 +72,6 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer(comm) ),
-        M_tolerance            ( 0. ),
-        M_maxIter              ( 0 ),
         M_maxIterForReuse      ( 0 ),
         M_reusePreconditioner  (false)
 {
@@ -95,8 +91,8 @@ SolverBelos::solve( vector_type& solution, const vector_type& rhs )
     Epetra_FEVector* rhsVectorPtr ( const_cast<Epetra_FEVector*> (&rhs.epetraVector()) );
     M_problem->setRHS( rcp(rhsVectorPtr) );
 
-    Int  maxiter(M_maxIter);
-    Real mytol  (M_tolerance);
+    //Int  maxiter(M_maxIter);
+    //Real mytol  (M_tolerance);
     Int status;
 
     //if ( isPreconditionerSet() && M_rightPreconditioner->preconditionerType().compare("AztecOO") )
@@ -118,8 +114,8 @@ SolverBelos::solve( vector_type& solution, const vector_type& rhs )
     */
     if ( status <= -2 )
     {
-        maxiter     = M_maxIter;
-        mytol       = M_tolerance;
+        //maxiter     = M_maxIter; //todo
+        //mytol       = M_tolerance; //todo
         //Int oldIter = M_solver.NumIters();
         //status      = M_solver.Iterate(maxiter, mytol);
 
@@ -214,7 +210,7 @@ Int SolverBelos::solveSystem( const vector_type& rhsFull,
         chrono.start();
 
         M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , - numIter );
-        M_displayer->leaderPrint( "SLV-  maxIterSolver = " , M_maxIter );
+        //M_displayer->leaderPrint( "SLV-  maxIterSolver = " , M_maxIter );
         M_displayer->leaderPrint( "SLV-  retrying:          " );
 
         buildPreconditioner( baseMatrixForPreconditioner );
@@ -277,7 +273,10 @@ SolverBelos::isPreconditionerSet() const
 void
 SolverBelos::showMe( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the SolverBelos class" << std::endl;
+    output << "SolverBelos, parameters list:" << std::endl;
+    output << "-----------------------------" << std::endl;
+    output << M_parameterList << endl;
+    output << "-----------------------------" << std::endl;
 }
 
 // ===================================================
@@ -337,7 +336,7 @@ SolverBelos::setPreconditioner( comp_prec_type& preconditioner, PrecApplicationT
 }
 
 void
-SolverBelos::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
+SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
 {
     // SOLVER PARAMETERS
 
@@ -354,15 +353,17 @@ SolverBelos::setDataFromGetPot( const GetPot& dataFile, const std::string& secti
     //M_parameterList.set( "output",  dataFile( ( section + "/output" ).data(), "all" ) );
 
     // Tolerance
-    M_tolerance = dataFile( ( section + "/tol" ).data(), 1.e-6 );
-    M_parameterList.set( "Convergence Tolerance", M_tolerance );
+    Real tolerance = dataFile( ( section + "/tol" ).data(), 1.e-6 );
+    M_parameterList.set( "Convergence Tolerance", tolerance );
 
     // Maximum Number of iterations
-    M_maxIter         = dataFile( ( section + "/max_iter"      ).data(), 200 );
-    M_maxIterForReuse = dataFile( ( section + "/max_iter_reuse").data(), static_cast<Int> ( M_maxIter*8./10.) );
+    Int maxIter         = dataFile( ( section + "/max_iter"      ).data(), 200 );
+    M_parameterList.set( "Maximum Iterations", maxIter );
+
+    M_maxIterForReuse = dataFile( ( section + "/max_iter_reuse").data(), static_cast<Int> ( maxIter*8./10.) );
     M_reusePreconditioner = dataFile( (section + "/reuse").data(), M_reusePreconditioner );
 
-    M_parameterList.set( "Maximum Iterations", M_maxIter );
+
 
     // GMRES PARAMETERS
 
@@ -374,48 +375,24 @@ SolverBelos::setDataFromGetPot( const GetPot& dataFile, const std::string& secti
 
     // r-vector
     //M_parameterList.set( "aux_vec", dataFile( ( section + "/aux_vec" ).data(), AZ_resid ) );
-
-
-    // SET PARAMETERS
-    setParameters( false );
 }
 
 void
-SolverBelos::setParameters( bool cerrWarningIfUnused )
+SolverBelos::setParameters( const Teuchos::ParameterList& list )
 {
-    //M_solver.SetParameters( M_parameterList, cerrWarningIfUnused );
+    M_parameterList.setParameters( list );
 }
 
 void
-SolverBelos::setTolerance( const Real tolerance )
+SolverBelos::resetParameters()
 {
-    if ( tolerance > 0 )
-    {
-        M_tolerance = tolerance;
-        M_parameterList.set( "Convergence Tolerance", M_tolerance );
-    }
-}
-
-void
-SolverBelos::setMaxNumIterations( const Int maxIter )
-{
-    if ( maxIter >= 0 )
-    {
-        M_maxIter = maxIter;
-        M_parameterList.set( "Maximum Iterations", M_maxIter );
-    }
+    M_parameterList = Teuchos::ParameterList();
 }
 
 void
 SolverBelos::setReusePreconditioner( const bool reusePreconditioner )
 {
     M_reusePreconditioner = reusePreconditioner;
-}
-
-boost::shared_ptr<Displayer>
-SolverBelos::displayer()
-{
-    return M_displayer;
 }
 
 // ===================================================
@@ -426,12 +403,6 @@ Int
 SolverBelos::numIterations() const
 {
     return M_solverManager->getNumIters();
-}
-
-Int
-SolverBelos::maxNumIterations() const
-{
-    return M_maxIter;
 }
 
 
@@ -452,14 +423,6 @@ SolverBelos::preconditioner( PrecApplicationType precType )
     return M_leftPreconditioner;
 }
 
-/*
-void
-SolverBelos::aztecStatus( Real status[AZ_STATUS_SIZE] )
-{
-    //M_solver.GetAllAztecStatus( status );
-}
-*/
-
 Teuchos::ParameterList&
 SolverBelos::getParametersList()
 {
@@ -470,6 +433,12 @@ SolverBelos::SolverManager_ptrtype
 SolverBelos::solver()
 {
     return M_solverManager;
+}
+
+boost::shared_ptr<Displayer>
+SolverBelos::displayer()
+{
+    return M_displayer;
 }
 
 void
