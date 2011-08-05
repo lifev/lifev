@@ -43,7 +43,7 @@
 #include <Teuchos_ParameterList.hpp>
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifealg/Preconditioner.hpp>
-#include "ComposedOperator.hpp"
+#include <life/lifealg/ComposedOperator.hpp>
 
 namespace LifeV {
 
