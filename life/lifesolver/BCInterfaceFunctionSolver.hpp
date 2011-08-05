@@ -47,6 +47,56 @@
 namespace LifeV
 {
 
+#ifndef MULTISCALE_IS_IN_LIFEV
+//! ZeroDimensionalData - Temporary data container for ZeroDimensionalModels until they are defined only in LifeV
+/*!
+ * This class will be removed when the Multiscale framework will be ported in LifeV
+ */
+class ZeroDimensionalTemporaryData
+{
+public:
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    explicit ZeroDimensionalTemporaryData() : M_fluidVenousPressure() {}
+
+    //! Destructor
+    virtual ~ZeroDimensionalTemporaryData() {}
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Set the global fluid venous pressure.
+    /*!
+     * @return venous pressure of the fluid.
+     */
+    void setFluidVenousPressure( const Real& fluidVenousPressure ) { M_fluidVenousPressure = fluidVenousPressure; }
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the global fluid venous pressure.
+    /*!
+     * @return venous pressure of the fluid.
+     */
+    const Real& fluidVenousPressure() const { return M_fluidVenousPressure; }
+
+    //@}
+
+private:
+
+    Real                                M_fluidVenousPressure;
+};
+#endif
+
 //! BCInterfaceFunctionSolver - LifeV boundary condition function file wrapper for \c BCInterface
 /*!
  *  @author Cristiano Malossi
@@ -281,7 +331,7 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::updatePhysicalSolverVariables
     Debug( 5023 ) << "BCInterfaceFunctionSolver<FSI>::updatePhysicalSolverVariables" << "\n";
 #endif
 
-    // Create/Update variables for 1D problem
+    // Create/Update variables
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
@@ -418,7 +468,7 @@ BCInterfaceFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
     Debug( 5023 ) << "BCInterfaceFunctionSolver<FSIOperator>::updatePhysicalSolverVariables" << "\n";
 #endif
 
-    // Create/Update variables for FSI problem
+    // Create/Update variables
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
@@ -547,7 +597,7 @@ BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::updateP
     Debug( 5023 ) << "BCInterfaceFunctionSolver<OseenSolver>::updatePhysicalSolverVariables" << "\n";
 #endif
 
-    // Create/Update variables for Oseen problem
+    // Create/Update variables
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
@@ -625,7 +675,7 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
     Debug( 5023 ) << "BCInterfaceFunctionSolver<OseenSolverShapeDerivative>::updatePhysicalSolverVariables" << "\n";
 #endif
 
-    // Create/Update variables for OseenSolverShapeDerivative problem
+    // Create/Update variables
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
@@ -693,21 +743,26 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
             break;
         }
 }
-/*
+
 template< >
 inline void
+#ifdef MULTISCALE_IS_IN_LIFEV
 BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVariables()
+#else
+BCInterfaceFunctionSolver< ZeroDimensionalTemporaryData >::updatePhysicalSolverVariables()
+#endif
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::updatePhysicalSolverVariables" << "\n";
 #endif
 
-    // Create/Update variables for OseenSolverShapeDerivative problem
+    // Create/Update variables
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
         // f_ -> FLUID
+#ifdef MULTISCALE_IS_IN_LIFEV
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -734,7 +789,7 @@ BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVar
             setVariable( "f_viscosity", M_physicalSolver->fluidViscosity() );
 
             break;
-
+#endif
         case f_venousPressure:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -751,7 +806,7 @@ BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVar
             break;
         }
 }
-*/
+
 // ===================================================
 // Set Methods
 // ===================================================
@@ -848,10 +903,14 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
     if ( M_physicalSolver.get() )
         updatePhysicalSolverVariables();
 }
-/*
+
 template< >
 inline void
+#ifdef MULTISCALE_IS_IN_LIFEV
 BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::createAccessList( const data_Type& data )
+#else
+BCInterfaceFunctionSolver< ZeroDimensionalTemporaryData >::createAccessList( const data_Type& data )
+#endif
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -866,7 +925,7 @@ BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::createAccessList( const
     if ( M_physicalSolver.get() )
         updatePhysicalSolverVariables();
 }
-*/
+
 // ===================================================
 // Private Methods
 // ===================================================
