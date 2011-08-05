@@ -155,7 +155,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     solidType = linearVenantKirchhof # linearVenantKirchhof
                                      # nonLinearVenantKirchhof
     # Material list: Outer Wall; Subclavian Right; Vertebral Right; Carotid Right; Carotid Left; Vertebral Left; Subclavian Left
-    material_flag    = '1000 1001 1002 1003 1004 1005 1006'
+    material_flag    = '1001 1002 1003 1004 1005 1006 1007'
     #externalPressure = 0
     #density          = 1.2
     young            = '3.19E6 3.19E6 3.19E6 3.19E6 3.19E6 3.19E6 3.19E6' # Computed as 4E6 * (1-nu^2) to match the value of the 1D
@@ -249,7 +249,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
         [../CommonCarotidLeftOuterWall_RobinPhysiological]
         type       = Robin
-        flag       = 1004
+        flag       = 1005
         mode       = Full
         component  = 3
         FSI        = RobinWall
@@ -269,7 +269,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
         [../CommonCarotidRightOuterWall_RobinPhysiological]
         type       = Robin
-        flag       = 1003
+        flag       = 1004
         mode       = Full
         component  = 3
         FSI        = RobinWall
@@ -289,7 +289,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
           [../SubclavianBLeftOuterWall_RobinPhysiological]
         type       = Robin
-        flag       = 1006
+        flag       = 1007
         mode       = Full
         component  = 3
         FSI        = RobinWall
@@ -309,7 +309,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
            [../SubclavianBRightOuterWall_RobinPhysiological]
         type       = Robin
-        flag       = 1001
+        flag       = 1002
         mode       = Full
         component  = 3
         FSI        = RobinWall
@@ -329,7 +329,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
            [../VertebralLeftOuterWall_RobinPhysiological]
         type       = Robin
-        flag       = 1005
+        flag       = 1006
         mode       = Full
         component  = 3
         FSI        = RobinWall
@@ -349,7 +349,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
            [../VertebralRightOuterWall_RobinPhysiological]
         type       = Robin
-        flag       = 1002
+        flag       = 1003
         mode       = Full
         component  = 3
         FSI        = RobinWall
@@ -369,7 +369,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
            [../AorticArchOuterWall_RobinPhysiological]
         type       = Robin
-        flag       = 1000
+        flag       = 1001
         mode       = Full
         component  = 3
         FSI        = RobinWall
