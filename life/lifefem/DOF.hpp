@@ -290,6 +290,9 @@ DOF::DOF( MeshType& mesh, const DOFLocalPattern& fePattern)://, UInt offset ) :
     //Getting the face
     switch ( fePattern.nbLocalDof() )
     {
+    case 1: //P0 Q0
+    	M_numLocalDofByFace = 0;
+    	break;
     case 2:
         // No M_faceToPoint (it is 1D)
         M_numLocalDofByFace = 1;

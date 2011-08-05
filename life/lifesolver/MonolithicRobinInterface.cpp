@@ -1,0 +1,65 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+#include <life/lifecore/LifeV.hpp>
+
+#include <life/lifesolver/MonolithicRobinInterface.hpp>
+
+namespace LifeV
+{
+
+// ===================================================
+// Public Methods
+// ===================================================
+void MonolithicRobinInterface::setRobinData(const GetPot& data, const std::string& section)
+{
+    M_alphas=data((section + "/alphas").data(), 0.);
+    M_alphaf=data((section + "/alphaf").data(), 0.);
+}
+
+void MonolithicRobinInterface::applyRobinCoupling( std::vector<MonolithicBlock::matrixPtr_Type> blockVector)
+{
+    M_robinPart.reset(new MonolithicBlock::matrix_Type(M_robinCoupling->map(), 0));
+
+    for( UInt ITBlock = 0; ITBlock < blockVector.size(); ++ITBlock )
+        applyRobinCoupling( blockVector[ITBlock] );
+}
+
+
+
+// ===================================================
+// Protected Methods
+// ===================================================
+void MonolithicRobinInterface::applyRobinCoupling( MonolithicBlock::matrixPtr_Type block)
+{
+    MonolithicBlock::matrixPtr_Type tmpMatrix(new MonolithicBlock::matrix_Type(M_robinCoupling->map(), 0));
+    Int err = EpetraExt::MatrixMatrix::Multiply( *M_robinCoupling->matrixPtr(), false, *block->matrixPtr(), false, *tmpMatrix->matrixPtr() );
+    ASSERT(!err, "Error in multiplication");
+    tmpMatrix->globalAssemble();
+    *M_robinPart += *tmpMatrix;
+}
+
+} // Namespace LifeV
