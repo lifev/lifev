@@ -20,8 +20,9 @@
 function  = 'F*(-y)/4'
 
 variables =  't            F'
-#scale     =  '1            -450000'
-scale     =  '1             -300000'
+#scale     =  '1             -450000'
+#scale     =  '1             -300000'
+scale     =  '1             -150000'
 
 loop      = true
 
