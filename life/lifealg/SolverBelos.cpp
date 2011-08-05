@@ -81,55 +81,48 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
 // Methods
 // ===================================================
 Int
-SolverBelos::solve( vector_type& solution, const vector_type& rhs )
+SolverBelos::solve( vector_type& solution )
 {
-    M_problem->setLHS( rcp(&solution.epetraVector()) );
-    // WARNING: This remark is stated in Aztec00. I do not know if
-    //          it is also valid for Belos
-    //        > The Solver from Aztecoo takes a non const (because of rescaling?)
-    //        > We should be careful if you use scaling
-    Epetra_FEVector* rhsVectorPtr ( const_cast<Epetra_FEVector*> (&rhs.epetraVector()) );
-    M_problem->setRHS( rcp(rhsVectorPtr) );
+    // Setting the unknown in the system
+    Teuchos::RCP<vector_type::vector_type> solutionPtr(&(solution.epetraVector()),false);
+    M_problem->setLHS( solutionPtr );
 
-    //Int  maxiter(M_maxIter);
-    //Real mytol  (M_tolerance);
-    Int status;
-
-    //if ( isPreconditionerSet() && M_rightPreconditioner->preconditionerType().compare("AztecOO") )
-        //M_solver.SetPrecOperator(M_rightPreconditioner->preconditioner()); //Left prec??????????????????????????????? todo
-
-    //status = M_solver.Iterate(maxiter, mytol);
-
-#ifdef HAVE_LIFEV_DEBUG
-    M_displayer->comm()->Barrier();
-    //M_displayer->leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
-    //M_displayer->leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
-    //M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
-#endif
-
-    /* try to solve again (reason may be:
-      -2 "Aztec status AZ_breakdown: numerical breakdown"
-      -3 "Aztec status AZ_loss: loss of precision"
-      -4 "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned"
-    */
-    if ( status <= -2 )
-    {
-        //maxiter     = M_maxIter; //todo
-        //mytol       = M_tolerance; //todo
-        //Int oldIter = M_solver.NumIters();
-        //status      = M_solver.Iterate(maxiter, mytol);
-
-#ifdef HAVE_LIFEV_DEBUG
-        M_displayer->comm()->Barrier();
-        //M_displayer->leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
-        //M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
-        //M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
-#endif
-        //return( M_solver.NumIters() + oldIter );
+    // todo Check that all the ingredient are there
+    bool set = M_problem->setProblem();
+    if (set == false) {
+        M_displayer->leaderPrint( "ERROR:  SolverBelos failed to set up correctly!\n");
+        return -1;
     }
 
-    //return( M_solver.NumIters() );
-    return 0; // GWENOL todo
+    // Setup the Solver Manager
+    setupSolverManager();
+
+    // Solve the linear system
+    Belos::ReturnType ret = M_solverManager->solve();
+
+    // Getting informations post-solve
+    Int numIters = M_solverManager->getNumIters();
+    bool lossOfPrecision = M_solverManager->isLOADetected();
+
+    // todo missing the automatic second run
+
+    if(lossOfPrecision)
+    {
+        M_displayer->leaderPrint("WARNING: Loss of accuracy detected!\n");
+    }
+    if(ret == Belos::Converged)
+    {
+        M_displayer->leaderPrint("SolverBelos converged in ", numIters, " iterations\n");
+    }
+    else
+    {
+        M_displayer->leaderPrint( "WARNING: SolverBelos failed to converged to the desired precision!\n");
+        return -1;
+    }
+
+    // todo option to quit on failure may be useful
+
+    return numIters;
 }
 
 Real
@@ -290,23 +283,8 @@ SolverBelos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 
 void SolverBelos::setMatrix( matrix_type& matrix )
 {
-    /*
     M_matrix = matrix.matrixPtr();
-    boost::shared_ptr<const Epetra_FECrsMatrix> const_matrix=boost::const_pointer_cast<const Epetra_FECrsMatrix>(M_matrix);
-    boost::shared_ptr<const Epetra_Operator> const_operator=boost::static_pointer_cast<const Epetra_Operator>(const_matrix);
-    std::cout << "pointer: " << M_matrix.get() << std::endl;
-    //M_sA = Teuchos::rcp(M_matrix);
-    M_sA = Teuchos::rcp(const_operator);
-    std::cout << "pointer: " << M_sA.get() << std::endl;
-
-    M_problem->setOperator( M_sA );
-    */
-
-    M_matrix = matrix.matrixPtr();
-    //std::cout << "pointer: " << M_matrix.get() << std::endl;
     Teuchos::RCP<Epetra_FECrsMatrix> A = Teuchos::rcp(M_matrix);
-    //std::cout << "pointer: " << A.get() << std::endl;
-
     M_problem->setOperator( A );
 }
 
@@ -451,6 +429,12 @@ SolverBelos::displayer()
 void
 SolverBelos::setupSolverManager()
 {
+    // If a SolverManager already exists we simply clean it!
+    if(!M_solverManager.is_null())
+    {
+        M_solverManager.reset();
+    }
+
     // Create the block CG iteration
     //M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
 

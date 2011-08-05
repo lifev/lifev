@@ -307,7 +307,7 @@ main( int argc, char** argv )
     *solution2 *= 0.0;
     linearSolver2.setMatrix(*systemMatrix);
     linearSolver2.setRightHandSide(rhsBC);
-    //linearSolver2.solveSystem(rhsBC,*solution2,systemMatrix);
+    linearSolver2.solve(*solution);
 
     // +-----------------------------------------------+
     // |           Computing the error vector          |

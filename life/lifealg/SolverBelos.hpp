@@ -142,10 +142,9 @@ public:
     /*!
       A has been entered via \c setMatrix.
       @param solution Vector to store the solution
-      @rhs rhs Right hand side of the problem
       @return Number of iterations, M_maxIter+1 if solve failed.
      */
-    Int solve( vector_type& solution, const vector_type& rhs );
+    Int solve( vector_type& solution );
 
     //! Compute the residual
     /*!
