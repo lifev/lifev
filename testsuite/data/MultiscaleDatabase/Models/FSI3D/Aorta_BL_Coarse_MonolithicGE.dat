@@ -258,12 +258,12 @@ tolerance       =  0   # how far points are to be considered the same on the int
         FSI        = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
-            functionSolver = '5.5  * 10000 * f_timeStep' # R2
-            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
-            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
-            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+            #function = '3.0  * 10000' # R0 - Paolo
+            #function = '4.0  * 10000' # R1
+            function = '5.5  * 10000' # R2
+            #function = '8.0  * 10000' # R3
+            #function = '9.5  * 10000' # R4
+            #function = '11.0 * 10000' # R5
 
             [../RobinBeta]
             function        = 0
@@ -278,12 +278,12 @@ tolerance       =  0   # how far points are to be considered the same on the int
         FSI        = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
-            functionSolver = '5.5  * 10000 * f_timeStep' # R2
-            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
-            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
-            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+            #function = '3.0  * 10000' # R0 - Paolo
+            #function = '4.0  * 10000' # R1
+            function = '5.5  * 10000' # R2
+            #function = '8.0  * 10000' # R3
+            #function = '9.5  * 10000' # R4
+            #function = '11.0 * 10000' # R5
 
             [../RobinBeta]
             function        = 0
@@ -298,12 +298,12 @@ tolerance       =  0   # how far points are to be considered the same on the int
         FSI        = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
-            functionSolver = '5.5  * 10000 * f_timeStep' # R2
-            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
-            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
-            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+            #function = '3.0  * 10000' # R0 - Paolo
+            #function = '4.0  * 10000' # R1
+            function = '5.5  * 10000' # R2
+            #function = '8.0  * 10000' # R3
+            #function = '9.5  * 10000' # R4
+            #function = '11.0 * 10000' # R5
 
             [../RobinBeta]
             function        = 0
@@ -318,12 +318,12 @@ tolerance       =  0   # how far points are to be considered the same on the int
         FSI        = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
-            functionSolver = '5.5  * 10000 * f_timeStep' # R2
-            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
-            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
-            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+            #function = '3.0  * 10000' # R0 - Paolo
+            #function = '4.0  * 10000' # R1
+            function = '5.5  * 10000' # R2
+            #function = '8.0  * 10000' # R3
+            #function = '9.5  * 10000' # R4
+            #function = '11.0 * 10000' # R5
 
             [../RobinBeta]
             function        = 0
@@ -338,12 +338,12 @@ tolerance       =  0   # how far points are to be considered the same on the int
         FSI        = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
-            functionSolver = '5.5  * 10000 * f_timeStep' # R2
-            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
-            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
-            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+            #function = '3.0  * 10000' # R0 - Paolo
+            #function = '4.0  * 10000' # R1
+            function = '5.5  * 10000' # R2
+            #function = '8.0  * 10000' # R3
+            #function = '9.5  * 10000' # R4
+            #function = '11.0 * 10000' # R5
 
             [../RobinBeta]
             function        = 0
@@ -358,12 +358,12 @@ tolerance       =  0   # how far points are to be considered the same on the int
         FSI        = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
-            functionSolver = '5.5  * 10000 * f_timeStep' # R2
-            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
-            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
-            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+            #function = '3.0  * 10000' # R0 - Paolo
+            #function = '4.0  * 10000' # R1
+            function = '5.5  * 10000' # R2
+            #function = '8.0  * 10000' # R3
+            #function = '9.5  * 10000' # R4
+            #function = '11.0 * 10000' # R5
 
             [../RobinBeta]
             function        = 0
@@ -378,12 +378,12 @@ tolerance       =  0   # how far points are to be considered the same on the int
         FSI        = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R1
-            functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R2
-            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R3
-            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R4
-            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R5
+            #function = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # R0 - Paolo
+            #function = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # R1
+            function = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # R2
+            #function = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # R3
+            #function = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # R4
+            #function = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # R5
 
             [../RobinBeta]
             function        = 0
