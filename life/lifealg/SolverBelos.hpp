@@ -118,6 +118,7 @@ public:
     typedef boost::shared_ptr<VectorEpetra>    vector_ptrtype;
 
     enum PrecApplicationType {LeftPreconditioner,RightPreconditioner};
+    enum SolverManagerType {BlockCG,BlockGmres,GCRODR,GmresPoly,PCPG,PseudoBlockCG,PseudoBlockGmres,RCG,TFQMR};
 
     //@}
 
@@ -226,7 +227,7 @@ public:
     /*!
       @param matrix Matrix of the system
      */
-    void setMatrix( matrix_type& matrix );
+    void setMatrix( matrix_ptrtype& matrix );
 
     //!! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
     /*!
@@ -302,10 +303,12 @@ public:
 
 private:
 
-    matrix_type::matrix_ptrtype  M_matrix;
+    matrix_ptrtype               M_matrix;
+    matrix_ptrtype               M_baseMatrixForPreconditioner;
     prec_type                    M_leftPreconditioner;
     prec_type                    M_rightPreconditioner;
 
+    SolverManagerType            M_solverManagerType;
     SolverManager_ptrtype        M_solverManager;
     LinearProblem_ptrtype        M_problem;
 

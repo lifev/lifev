@@ -7,7 +7,7 @@
 velocity = P2
 
 [mesh]
-num_elements = 5
+num_elements = 10
 
 [exporter]
 type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight

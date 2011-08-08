@@ -246,20 +246,20 @@ main( int argc, char** argv )
     linearSolver1.setCommunicator(Comm);
     linearSolver1.setDataFromGetPot(dataFile,"solver");
     linearSolver1.setTolerance(1e-10);
-    linearSolver1.setPreconditioner(precPtr);
+    //linearSolver1.setPreconditioner(precPtr);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Setting up SolverBelos... " << std::flush;
     Teuchos::ParameterList belosList;
-    belosList.set( "Num Blocks", 200 );                     // Maximum number of blocks in Krylov factorization
-    belosList.set( "Block Size", 200 );                  // Blocksize to be used by iterative solver
-    belosList.set( "Adaptive Block Size", false ); // Adapt blocksize to numrhs
-    belosList.set( "Maximum Iterations", 200 );           // Maximum number of iterations allowed
-    belosList.set( "Maximum Restarts", 0 );          // Maximum number of restarts allowed
-    belosList.set( "Convergence Tolerance", 1e-10 );             // Relative convergence tolerance requested
-    belosList.set( "Verbosity", Belos::Errors + Belos::Warnings +
-                   Belos::TimingDetails + Belos::StatusTestDetails );
-    belosList.set( "Output Frequency", 5 );
+    belosList.set( "Flexible Gmres", true );         // Flexible Gmres will be used to solve this problem
+    belosList.set( "Num Blocks", 20 );               // Maximum number of blocks in Krylov factorization
+    belosList.set( "Block Size", 10 );               // Blocksize to be used by iterative solver
+    belosList.set( "Maximum Iterations", 200 );      // Maximum number of iterations allowed
+    belosList.set( "Maximum Restarts", 1 );          // Maximum number of restarts allowed
+    belosList.set( "Convergence Tolerance", 1e-10 ); // Relative convergence tolerance requested
+    //belosList.set( "Verbosity", Belos::Errors + Belos::Warnings + Belos::TimingDetails + Belos::StatusTestDetails );
+    belosList.set("Verbosity", Belos::Errors + Belos::Warnings + Belos::IterationDetails );
+    belosList.set( "Output Frequency", 1 );
 
     SolverBelos linearSolver2;
     linearSolver2.setCommunicator(Comm);
@@ -305,7 +305,7 @@ main( int argc, char** argv )
     boost::shared_ptr<vector_type> solution2;
     solution2.reset(new vector_type(uFESpace->map(), Unique));
     *solution2 *= 0.0;
-    linearSolver2.setMatrix(*systemMatrix);
+    linearSolver2.setMatrix(systemMatrix);
     linearSolver2.setRightHandSide(rhsBC);
     linearSolver2.solve(*solution);
 

@@ -56,6 +56,7 @@ namespace LifeV
 SolverBelos::SolverBelos() :
         M_leftPreconditioner   (),
         M_rightPreconditioner  (),
+        M_solverManagerType    (BlockGmres),
         M_solverManager        (),
         M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
@@ -68,6 +69,7 @@ SolverBelos::SolverBelos() :
 SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_leftPreconditioner   (),
         M_rightPreconditioner  (),
+        M_solverManagerType    (BlockGmres),
         M_solverManager        (),
         M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
@@ -87,10 +89,32 @@ SolverBelos::solve( vector_type& solution )
     Teuchos::RCP<vector_type::vector_type> solutionPtr(&(solution.epetraVector()),false);
     M_problem->setLHS( solutionPtr );
 
+    // Build preconditioners if needed
+    bool retry( true );
+    if ( !isPreconditionerSet() || !M_reusePreconditioner  )
+    {
+        if( M_baseMatrixForPreconditioner.get()==0 )
+        {
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n");
+            buildPreconditioner( M_matrix );
+        }
+        else
+        {
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n");
+            buildPreconditioner( M_baseMatrixForPreconditioner );
+        }
+        // do not retry if I am recomputing the preconditioner
+        retry = false;
+    }
+    else
+    {
+        M_displayer->leaderPrint( "SLV-  Reusing precond ...                 \n" );
+    }
+
     // todo Check that all the ingredient are there
     bool set = M_problem->setProblem();
     if (set == false) {
-        M_displayer->leaderPrint( "ERROR:  SolverBelos failed to set up correctly!\n");
+        M_displayer->leaderPrint( "SLV-  ERROR: SolverBelos failed to set up correctly!\n");
         return -1;
     }
 
@@ -108,15 +132,15 @@ SolverBelos::solve( vector_type& solution )
 
     if(lossOfPrecision)
     {
-        M_displayer->leaderPrint("WARNING: Loss of accuracy detected!\n");
+        M_displayer->leaderPrint("SLV-  WARNING: Loss of accuracy detected!\n");
     }
     if(ret == Belos::Converged)
     {
-        M_displayer->leaderPrint("SolverBelos converged in ", numIters, " iterations\n");
+        M_displayer->leaderPrint( "SLV-  Convergence in " , numIters, " iterations\n" );
     }
     else
     {
-        M_displayer->leaderPrint( "WARNING: SolverBelos failed to converged to the desired precision!\n");
+        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos failed to converged to the desired precision!\n");
         return -1;
     }
 
@@ -181,7 +205,7 @@ Int SolverBelos::solveSystem( const vector_type& rhsFull,
     M_displayer->leaderPrint( "SLV-  Setting up the solver ...                \n" );
 
     if ( baseMatrixForPreconditioner.get() == 0 )
-        M_displayer->leaderPrint( "SLV-  Warning: baseMatrixForPreconditioner is empty     \n" );
+        M_displayer->leaderPrint( "SLV-  WARNING: BaseMatrixForPreconditioner is empty     \n" );
 
     if ( !isPreconditionerSet() || !M_reusePreconditioner  )
     {
@@ -202,9 +226,9 @@ Int SolverBelos::solveSystem( const vector_type& rhsFull,
     {
         chrono.start();
 
-        M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , - numIter );
+        M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , - numIter, "\n" );
         //M_displayer->leaderPrint( "SLV-  maxIterSolver = " , M_maxIter );
-        M_displayer->leaderPrint( "SLV-  retrying:          " );
+        M_displayer->leaderPrint( "SLV-  retrying:\n" );
 
         buildPreconditioner( baseMatrixForPreconditioner );
 
@@ -229,7 +253,7 @@ void SolverBelos::setupPreconditioner( const GetPot& dataFile,  const std::strin
     M_rightPreconditioner.reset( PRECFactory::instance().createObject( precType ) );
 
     ASSERT( M_rightPreconditioner.get() != 0, " Preconditioner not set" );
-    //M_rightPreconditioner->setSolver( *this ); GWENOL TODO
+
     M_rightPreconditioner->setDataFromGetPot( dataFile, section );
 }
 
@@ -238,23 +262,46 @@ void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
     LifeChrono chrono;
     Real condest(-1);
 
-    chrono.start();
-
-    M_displayer->leaderPrint( "SLV-  Computing the precond ...                " );
-
-    M_rightPreconditioner->buildPreconditioner( preconditioner ); //todo
-
-    condest = M_rightPreconditioner->condest();
-    chrono.stop();
-
-    M_displayer->leaderPrintMax( "done in " , chrono.diff() );
-    M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
+    if(M_leftPreconditioner)
+    {
+        chrono.start();
+        M_displayer->leaderPrint( "SLV-  Computing the left preconditioner ... " );
+        M_leftPreconditioner->buildPreconditioner( preconditioner );
+        condest = M_leftPreconditioner->condest();
+        Teuchos::RCP<OP> rightPrec(M_leftPreconditioner->preconditioner(),false);
+        // Create the Belos preconditioned operator from the preconditioner.
+        // NOTE:  This is necessary because Belos expects an operator to apply the
+        //        preconditioner with Apply() NOT ApplyInverse().
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
+        M_problem->setLeftPrec(belosPrec);
+        chrono.stop();
+        M_displayer->leaderPrintMax( "done in " , chrono.diff());
+        M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
+    }
+    if(M_rightPreconditioner)
+    {
+        chrono.start();
+        M_displayer->leaderPrint( "SLV-  Computing the right preconditioner ... " );
+        M_rightPreconditioner->buildPreconditioner( preconditioner );
+        condest = M_rightPreconditioner->condest();
+        Teuchos::RCP<OP> leftPrec(M_rightPreconditioner->preconditioner(),false);
+        // Create the Belos preconditioned operator from the preconditioner.
+        // NOTE:  This is necessary because Belos expects an operator to apply the
+        //        preconditioner with Apply() NOT ApplyInverse().
+        //RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
+        M_problem->setRightPrec(belosPrec);
+        chrono.stop();
+        M_displayer->leaderPrintMax( "done in " , chrono.diff());
+        M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
+    }
 }
 
 void SolverBelos::resetPreconditioner()
 {
     M_rightPreconditioner->resetPreconditioner();
     M_leftPreconditioner->resetPreconditioner();
+    // todo reset also the preconditioner in M_problem
 }
 
 bool
@@ -266,10 +313,13 @@ SolverBelos::isPreconditionerSet() const
 void
 SolverBelos::showMe( std::ostream& output ) const
 {
-    output << "SolverBelos, parameters list:" << std::endl;
-    output << "-----------------------------" << std::endl;
-    output << M_parameterList << endl;
-    output << "-----------------------------" << std::endl;
+    if(M_displayer->isLeader())
+    {
+        output << "SolverBelos, parameters list:" << std::endl;
+        output << "-----------------------------" << std::endl;
+        output << M_parameterList << endl;
+        output << "-----------------------------" << std::endl;
+    }
 }
 
 // ===================================================
@@ -281,10 +331,10 @@ SolverBelos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
     M_displayer->setCommunicator( comm );
 }
 
-void SolverBelos::setMatrix( matrix_type& matrix )
+void SolverBelos::setMatrix( matrix_ptrtype& matrix )
 {
-    M_matrix = matrix.matrixPtr();
-    Teuchos::RCP<Epetra_FECrsMatrix> A = Teuchos::rcp(M_matrix);
+    M_matrix = matrix;
+    Teuchos::RCP<Epetra_FECrsMatrix> A = Teuchos::rcp(M_matrix->matrixPtr());
     M_problem->setOperator( A );
 }
 
@@ -317,7 +367,25 @@ SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType p
 void
 SolverBelos::setPreconditioner( comp_prec_type& preconditioner, PrecApplicationType precType )
 {
-    //M_solver.SetPrecOperator( preconditioner.get() );
+    if(precType == RightPreconditioner)
+    {
+        Teuchos::RCP<OP> rightPrec=Teuchos::rcp(preconditioner);
+        // Create the Belos preconditioned operator from the preconditioner.
+        // NOTE:  This is necessary because Belos expects an operator to apply the
+        //        preconditioner with Apply() NOT ApplyInverse().
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
+        M_problem->setRightPrec(belosPrec);
+    }
+    else
+    {
+        Teuchos::RCP<OP> leftPrec=Teuchos::rcp(preconditioner);
+        // Create the Belos preconditioned operator from the preconditioner.
+        // NOTE:  This is necessary because Belos expects an operator to apply the
+        //        preconditioner with Apply() NOT ApplyInverse().
+        //RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
+        M_problem->setLeftPrec(belosPrec);
+    }
 }
 
 void
@@ -435,31 +503,42 @@ SolverBelos::setupSolverManager()
         M_solverManager.reset();
     }
 
-    // Create the block CG iteration
-    //M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
-
-    // Create the block GMRes iteration
-    // Create the flexible, block GMRes iteration
-    M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
-
-    /*
-    M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
-
-    M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
-
-    M_solverManager = rcp( new Belos::PCPGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
-
-    // Create the pseudo block CG iteration
-    M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
-
-    // Create the pseudo block GMRes iteration
-    M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
-
-    M_solverManager = rcp( new Belos::RCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
-
-    // Create TFQMR iteration
-    M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
-    */
+    switch(M_solverManagerType)
+    {
+        case BlockCG:
+            // Create the block CG iteration
+            M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            break;
+        case BlockGmres:
+            // Create the block GMRes iteration
+            // Create the flexible, block GMRes iteration
+            M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+            break;
+        case GCRODR:
+            M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+            break;
+        case GmresPoly:
+            M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+            break;
+        case PCPG:
+            M_solverManager = rcp( new Belos::PCPGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            break;
+        case PseudoBlockCG:
+            // Create the pseudo block CG iteration
+            M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            break;
+        case PseudoBlockGmres:
+            // Create the pseudo block GMRes iteration
+            M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+            break;
+        case RCG:
+            M_solverManager = rcp( new Belos::RCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            break;
+        case TFQMR:
+            // Create TFQMR iteration
+            M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            break;
+    }
 }
 
 } // namespace LifeV
