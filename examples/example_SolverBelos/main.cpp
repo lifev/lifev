@@ -251,6 +251,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << "Setting up SolverBelos... " << std::flush;
     Teuchos::ParameterList belosList;
+    belosList.set( "Reuse preconditioner", true );   // Reuse preconditioner
     belosList.set( "Flexible Gmres", true );         // Flexible Gmres will be used to solve this problem
     belosList.set( "Num Blocks", 20 );               // Maximum number of blocks in Krylov factorization
     belosList.set( "Block Size", 10 );               // Blocksize to be used by iterative solver

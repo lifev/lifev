@@ -265,13 +265,10 @@ void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
     if(M_leftPreconditioner)
     {
         chrono.start();
-        M_displayer->leaderPrint( "SLV-  Computing the left preconditioner ... " );
+        M_displayer->leaderPrint( "SLV-  Computing the left preconditioner...    " );
         M_leftPreconditioner->buildPreconditioner( preconditioner );
         condest = M_leftPreconditioner->condest();
         Teuchos::RCP<OP> rightPrec(M_leftPreconditioner->preconditioner(),false);
-        // Create the Belos preconditioned operator from the preconditioner.
-        // NOTE:  This is necessary because Belos expects an operator to apply the
-        //        preconditioner with Apply() NOT ApplyInverse().
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
         M_problem->setLeftPrec(belosPrec);
         chrono.stop();
@@ -281,14 +278,10 @@ void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
     if(M_rightPreconditioner)
     {
         chrono.start();
-        M_displayer->leaderPrint( "SLV-  Computing the right preconditioner ... " );
+        M_displayer->leaderPrint( "SLV-  Computing the right preconditioner...    " );
         M_rightPreconditioner->buildPreconditioner( preconditioner );
         condest = M_rightPreconditioner->condest();
         Teuchos::RCP<OP> leftPrec(M_rightPreconditioner->preconditioner(),false);
-        // Create the Belos preconditioned operator from the preconditioner.
-        // NOTE:  This is necessary because Belos expects an operator to apply the
-        //        preconditioner with Apply() NOT ApplyInverse().
-        //RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
         M_problem->setRightPrec(belosPrec);
         chrono.stop();
@@ -301,13 +294,16 @@ void SolverBelos::resetPreconditioner()
 {
     M_rightPreconditioner->resetPreconditioner();
     M_leftPreconditioner->resetPreconditioner();
+
     // todo reset also the preconditioner in M_problem
 }
 
 bool
 SolverBelos::isPreconditionerSet() const
 {
-    return ( M_leftPreconditioner.get() !=0 && M_leftPreconditioner->preconditionerCreated() )||( M_rightPreconditioner.get() !=0 && M_rightPreconditioner->preconditionerCreated() );
+    return ( M_leftPreconditioner.get() !=0 && M_leftPreconditioner->preconditionerCreated() )||
+           ( M_rightPreconditioner.get() !=0 && M_rightPreconditioner->preconditionerCreated() )||
+             M_problem->isLeftPrec() || M_problem->isRightPrec();
 }
 
 void
@@ -356,10 +352,21 @@ SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType p
 {
     if(precType == RightPreconditioner)
     {
+        // If a right Epetra_Operator exists it must be deleted
+        if(M_problem->isRightPrec())
+        {
+            // todo erase in M_problem the right prec
+        }
+
         M_rightPreconditioner = preconditioner;
     }
     else
     {
+        // If a left Epetra_Operator exists it must be deleted
+        if(M_problem->isLeftPrec())
+        {
+            // todo erase in M_problem the left prec
+        }
         M_leftPreconditioner  = preconditioner;
     }
 }
@@ -369,20 +376,19 @@ SolverBelos::setPreconditioner( comp_prec_type& preconditioner, PrecApplicationT
 {
     if(precType == RightPreconditioner)
     {
+        // If a right LifeV::Preconditioner exists it must be deleted
+        M_rightPreconditioner.reset();
+
         Teuchos::RCP<OP> rightPrec=Teuchos::rcp(preconditioner);
-        // Create the Belos preconditioned operator from the preconditioner.
-        // NOTE:  This is necessary because Belos expects an operator to apply the
-        //        preconditioner with Apply() NOT ApplyInverse().
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
         M_problem->setRightPrec(belosPrec);
     }
     else
     {
+        // If a left LifeV::Preconditioner exists it must be deleted
+        M_leftPreconditioner.reset();
+
         Teuchos::RCP<OP> leftPrec=Teuchos::rcp(preconditioner);
-        // Create the Belos preconditioned operator from the preconditioner.
-        // NOTE:  This is necessary because Belos expects an operator to apply the
-        //        preconditioner with Apply() NOT ApplyInverse().
-        //RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
         M_problem->setLeftPrec(belosPrec);
     }
@@ -391,43 +397,61 @@ SolverBelos::setPreconditioner( comp_prec_type& preconditioner, PrecApplicationT
 void
 SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
 {
-    // SOLVER PARAMETERS
+    bool found;
 
-    // Solver type
-    //M_parameterList.set( "solver",  dataFile( ( section + "/solver" ).data(), "gmres" ) );
+    // Flexible Gmres will be used to solve this problem
+    bool flexibleGmres = dataFile( ( section + "/flexible_gmres" ).data(), false, found );
+    if ( found ) M_parameterList.set( "Flexible Gmres", flexibleGmres );
 
-    // Residual expression
-    //M_parameterList.set( "conv",    dataFile( ( section + "/conv" ).data(), "rhs" ) );
+    // Relative convergence tolerance requested
+    Real tolerance = dataFile( ( section + "/tol" ).data(), 1.e-6, found );
+    if ( found ) M_parameterList.set( "Convergence Tolerance", tolerance );
 
-    // Scaling
-    //M_parameterList.set( "scaling", dataFile( ( section + "/scaling" ).data(), "none" ) );
+    // Maximum number of iterations allowed
+    Int maxIter         = dataFile( ( section + "/max_iter"      ).data(), 200, found );
+    if ( found ) M_parameterList.set( "Maximum Iterations", maxIter );
 
-    // Output
-    //M_parameterList.set( "output",  dataFile( ( section + "/output" ).data(), "all" ) );
+    // Reuse the preconditioner from one to another call
+    bool reusePreconditioner = dataFile( (section + "/reuse_preconditioner").data(), true, found );
+    if ( found ) M_reusePreconditioner = reusePreconditioner;
+    //if ( found ) M_parameterList.set( "Reuse preconditioner", true );
 
-    // Tolerance
-    Real tolerance = dataFile( ( section + "/tol" ).data(), 1.e-6 );
-    M_parameterList.set( "Convergence Tolerance", tolerance );
+    // Max iterations allowed to reuse the preconditioner
+    Int maxIterForReuse = dataFile( ( section + "/max_iter_reuse").data(), static_cast<Int> ( maxIter*8./10.), found );
+    if ( found ) M_maxIterForReuse=maxIterForReuse;
 
-    // Maximum Number of iterations
-    Int maxIter         = dataFile( ( section + "/max_iter"      ).data(), 200 );
-    M_parameterList.set( "Maximum Iterations", maxIter );
+    // Output Frequency
+    Int outputFrequency = dataFile( ( section + "/max_iter" ).data(), 1, found );
+    if ( found ) M_parameterList.set( "Output Frequency", 1 );
 
-    M_maxIterForReuse = dataFile( ( section + "/max_iter_reuse").data(), static_cast<Int> ( maxIter*8./10.) );
-    M_reusePreconditioner = dataFile( (section + "/reuse").data(), M_reusePreconditioner );
+    Int blockSize = dataFile( ( section + "/block_size" ).data(), 10, found );
+    if ( found ) M_parameterList.set( "Block Size", blockSize );               // Blocksize to be used by iterative solver
 
+    // Maximum number of blocks in Krylov factorization
+    Int numBlocks = dataFile( ( section + "/num_blocks" ).data(), 10, found );
+    if ( found ) M_parameterList.set( "Num Blocks", numBlocks );
 
+    // Maximum number of restarts allowed
+    Int maximumRestarts = dataFile( ( section + "/maximum_restarts" ).data(), 0, found );
+    if ( found ) M_parameterList.set( "Maximum Restarts", maximumRestarts );
 
-    // GMRES PARAMETERS
-
-    // Krylov space dimension
-    //M_parameterList.set( "kspace", dataFile( ( section + "/kspace" ).data(), M_maxIter ) );
-
-    // Gram-Schmidt algorithm
-    //M_parameterList.set( "orthog", dataFile( ( section + "/orthog" ).data(), AZ_classic ) );
-
-    // r-vector
-    //M_parameterList.set( "aux_vec", dataFile( ( section + "/aux_vec" ).data(), AZ_resid ) );
+    // Setting the desired output informations
+    int msg = Belos::Errors;
+    dataFile( ( section + "/enable_warnings" ).data(), true, found );
+    if ( found ) msg += Belos::Warnings;
+    dataFile( ( section + "/enable_iterations_details" ).data(), true, found );
+    if ( found ) msg += Belos::IterationDetails;
+    dataFile( ( section + "/enable_ortho_details" ).data(), false, found );
+    if ( found ) msg += Belos::OrthoDetails;
+    dataFile( ( section + "/enable_final_summary" ).data(), false, found );
+    if ( found ) msg += Belos::FinalSummary;
+    dataFile( ( section + "/enable_timing_details" ).data(), false, found );
+    if ( found ) msg += Belos::TimingDetails;
+    dataFile( ( section + "/enable_status_test_details" ).data(), false, found );
+    if ( found ) msg += Belos::StatusTestDetails;
+    dataFile( ( section + "/enable_debug" ).data(), false, found );
+    if ( found ) msg += Belos::Debug;
+    M_parameterList.set("Verbosity", msg );
 }
 
 void
@@ -451,7 +475,7 @@ SolverBelos::setReusePreconditioner( const bool reusePreconditioner )
 // ===================================================
 // Get Methods
 // ===================================================
-//!
+
 Int
 SolverBelos::numIterations() const
 {

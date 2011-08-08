@@ -195,7 +195,7 @@ public:
      */
     void setupPreconditioner( const GetPot& dataFile, const std::string& section );
 
-    //! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
+    //!! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
     /*!
       The preconditioner is build starting from the matrix baseMatrixForPreconditioner
       by the preconditioner object passed in by the method setPreconditioner
