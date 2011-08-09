@@ -189,6 +189,16 @@ public:
     //! Add the mass using offsets
     void addPressureMass(matrix_type& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
 
+
+    //! Add the Pressure mass
+    void addPressureMass(matrix_type& matrix, const Real& coefficient)
+    {
+        addPressureMass(matrix,coefficient,M_uFESpace->dof().numTotalDof()*nDimensions,M_uFESpace->dof().numTotalDof()*nDimensions);
+    };
+
+    //! Add the mass using offsets
+    void addPressureMass(matrix_type& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
+
     //! Add the convective term
     void addConvection(matrix_type& matrix, const vector_type& beta)
     {
