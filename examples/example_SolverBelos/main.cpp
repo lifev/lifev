@@ -88,7 +88,6 @@ typedef boost::shared_ptr<prec_type>      precPtr_type;
 void printErrors(const vector_type& solution, fespacePtr_type uFESpace, bool verbose)
 {
     vector_type velocity(solution,Repeated);
-    if (verbose) std::cout << std::endl << "[Computed errors]" << std::endl;
     Real uRelativeError, uL2Error;
     uL2Error = uFESpace->l2Error (Laplacian::uexact, velocity, 0, &uRelativeError );
     if (verbose) std::cout << "Velocity" << std::endl;
@@ -245,7 +244,7 @@ main( int argc, char** argv )
     linearSolver1.setCommunicator(Comm);
     linearSolver1.setDataFromGetPot(dataFile,"solver");
     linearSolver1.setTolerance(1e-10);
-    //linearSolver1.setPreconditioner(precPtr);
+    linearSolver1.setPreconditioner(precPtr);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Setting up SolverBelos... " << std::flush;
@@ -257,10 +256,9 @@ main( int argc, char** argv )
     belosList.set( "Maximum Iterations", 200 );      // Maximum number of iterations allowed
     belosList.set( "Maximum Restarts", 1 );          // Maximum number of restarts allowed
     belosList.set( "Convergence Tolerance", 1e-10 ); // Relative convergence tolerance requested
-    //belosList.set( "Verbosity", Belos::Errors + Belos::Warnings + Belos::TimingDetails + Belos::StatusTestDetails );
-    belosList.set("Verbosity", Belos::Errors + Belos::Warnings + Belos::IterationDetails + Belos::StatusTestDetails );
-    belosList.set( "Output Frequency", 1 );
-    belosList.set( "Output Style", Belos::Brief );
+    belosList.set( "Verbosity", Belos::Errors + Belos::Warnings + Belos::IterationDetails + Belos::StatusTestDetails );
+    belosList.set( "Output Frequency", 1 );          // Printing frequency
+    belosList.set( "Output Style", Belos::Brief );   // Print only informations about the residual
 
     SolverBelos linearSolver2;
     linearSolver2.setCommunicator(Comm);
@@ -300,8 +298,8 @@ main( int argc, char** argv )
     boost::shared_ptr<vector_type> solution;
     solution.reset(new vector_type(uFESpace->map(), Unique));
     *solution *= 0.0;
-    //linearSolver1.setMatrix(*systemMatrix);
-    //linearSolver1.solveSystem(rhsBC,*solution,systemMatrix);
+    linearSolver1.setMatrix(*systemMatrix);
+    linearSolver1.solveSystem(rhsBC,*solution,systemMatrix);
 
     if (verbose) std::cout << "Solving the system with SolverBelos... " << std::endl;
     boost::shared_ptr<vector_type> solution2;
@@ -309,20 +307,40 @@ main( int argc, char** argv )
     *solution2 *= 0.0;
     linearSolver2.setMatrix(systemMatrix);
     linearSolver2.setRightHandSide(rhsBC);
-    linearSolver2.solve(*solution);
+    linearSolver2.solve(*solution2);
 
     // +-----------------------------------------------+
-    // |           Computing the error vector          |
+    // |             Computing the error               |
     // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Errors computation]" << std::endl;
     vector_type solutionErr(*solution);
     solutionErr*=0.0;
     uFESpace->interpolate(Laplacian::uexact,solutionErr,0.0);
     solutionErr -= *solution;
     solutionErr.abs();
 
+    vector_type solution2Err(*solution2);
+    solution2Err*=0.0;
+    uFESpace->interpolate(Laplacian::uexact,solution2Err,0.0);
+    solution2Err -= *solution2;
+    solution2Err.abs();
+
+    vector_type solutionsDiff(*solution2);
+    solutionsDiff -= *solution;
+    Real solutionsDiffNorm = solutionsDiff.norm2();
+
+    if (verbose) std::cout << "AztecOO solver" << std::endl;
+    printErrors(*solution, uFESpace,verbose);
+
+    if (verbose) std::cout << "Belos solver" << std::endl;
+    printErrors(*solution, uFESpace,verbose);
+
+    if (verbose) std::cout << "Difference between the two solutions: " << solutionsDiffNorm << std::endl;
+
     // +-----------------------------------------------+
     // |             Setting the exporter              |
     // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Solutions export]" << std::endl;
     if (verbose) std::cout << "Defining the exporter... " << std::flush;
     ExporterHDF5<mesh_type> exporter ( dataFile, "test_SolverBelos");
     exporter.setPostDir( "./" ); // This is a test to see if M_post_dir is working
@@ -337,13 +355,15 @@ main( int argc, char** argv )
     boost::shared_ptr<vector_type> solutionErrPtr (new vector_type(solutionErr,Repeated));
     exporter.addVariable( ExporterData<mesh_type>::VectorField, "error", uFESpace,
                           solutionErrPtr, UInt(0));
+    boost::shared_ptr<vector_type> solution2Ptr (new vector_type(*solution2,Repeated));
+    exporter.addVariable( ExporterData<mesh_type>::VectorField, "velocity2", uFESpace,
+                          solution2Ptr, UInt(0));
+    boost::shared_ptr<vector_type> solution2ErrPtr (new vector_type(solution2Err,Repeated));
+    exporter.addVariable( ExporterData<mesh_type>::VectorField, "error2", uFESpace,
+                          solution2ErrPtr, UInt(0));
+
     if (verbose) std::cout << "done" << std::endl;
     exporter.postProcess(0);
-
-    // +-----------------------------------------------+
-    // |             Computing the error               |
-    // +-----------------------------------------------+
-    printErrors(*solution, uFESpace,verbose);
 
     // +-----------------------------------------------+
     // |            Ending the simulation              |
