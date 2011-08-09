@@ -128,11 +128,14 @@ public:
     //!! Empty constructor
     SolverBelos();
 
-    //!! Constructor
+    //! Constructor
     /*!
       @param comm Communicator
      */
     SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm );
+
+    //! Destructor
+    ~SolverBelos();
 
     //@}
 
@@ -195,7 +198,7 @@ public:
      */
     void setupPreconditioner( const GetPot& dataFile, const std::string& section );
 
-    //!! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
+    //! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
     /*!
       The preconditioner is build starting from the matrix baseMatrixForPreconditioner
       by the preconditioner object passed in by the method setPreconditioner
@@ -206,10 +209,10 @@ public:
     //! Delete the stored preconditioner
     void resetPreconditioner();
 
-    //!! Return true if preconditioner has been setted
+    //! Return true if preconditioner has been setted
     bool isPreconditionerSet() const;
 
-    //!! Print informations about the solver
+    //! Print informations about the solver
     void showMe( std::ostream& output = std::cout ) const;
 
     //@}
@@ -217,60 +220,60 @@ public:
     //! @name Set Method
     //@{
 
-    //!! Method to set communicator for Displayer (for empty constructor)
+    //! Method to set communicator for Displayer (for empty constructor)
     /*!
       @param comm Communicator for the displayer
      */
     void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm );
 
-    //!! Method to set matrix from MatrixEpetra
+    //! Method to set matrix from MatrixEpetra
     /*!
       @param matrix Matrix of the system
      */
     void setMatrix( matrix_ptrtype& matrix );
 
-    //!! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
+    //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
     /*!
       @param oper Operator for the system
      */
     void setOperator( Epetra_Operator& oper );
 
-    //!! Method to set the right hand side (rhs) of the linear system
+    //! Method to set the right hand side (rhs) of the linear system
     /*!
       @param rhs right hand side of the system
      */
     void setRightHandSide(const vector_type& rhs);
 
-    //!! Method to set an Preconditioner preconditioner
+    //! Method to set an Preconditioner preconditioner
     /*!
       @param preconditioner Preconditioner to be used to solve the system
      */
     void setPreconditioner( prec_type& preconditioner, PrecApplicationType precType=RightPreconditioner );
 
-    //!! Method to set a general Epetra_Operator as preconditioner
+    //! Method to set a general Epetra_Operator as preconditioner
     /*!
       @param preconditioner  Preconditioner to be set of type Epetra_Operator
      */
     void setPreconditioner( comp_prec_type& preconditioner, PrecApplicationType precType=RightPreconditioner );
 
-    //!! Method to setup the solver using GetPot
+    //! Method to setup the solver using GetPot
     /*!
       @param dataFile GetPot object which contains the data about the solver
       Note: the parameters are added to the existing one. Use resetParameters to clean the parameters list.
      */
     void setParameters( const GetPot& dataFile, const std::string& section );
 
-    //!! Method to setup the solver using Teuchos::ParameterList
+    //! Method to setup the solver using Teuchos::ParameterList
     /*!
       @param list Teuchos::ParameterList object
       Note: the parameters are added to the existing one. Use resetParameters to clean the parameters list.
      */
     void setParameters( const Teuchos::ParameterList& list );
 
-    //!! Method to reset the parameters list of the solver
+    //! Method to reset the parameters list of the solver
     void resetParameters();
 
-    //!! Specify if the preconditioner should be reuse or not
+    //! Specify if the preconditioner should be reuse or not
     /*!
       @param reusePreconditioner If set to true, do not recompute the preconditioner
      */
@@ -281,22 +284,22 @@ public:
     //! @name Get Method
     //@{
 
-    //!! Return the total number of iterations
+    //! Return the total number of iterations
     Int numIterations() const;
 
     //! Return the true residual
     Real trueResidual();
 
-    //!! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
+    //! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
     prec_type& preconditioner( PrecApplicationType precType=RightPreconditioner );
 
     //!! Return a Teuchos parameters list
     Teuchos::ParameterList& getParametersList();
 
-    //!! Return a pointer on the Belos solver manager
+    //! Return a pointer on the Belos solver manager
     SolverManager_ptrtype solver();
 
-    //!! Return a shared pointer on the displayer
+    //! Return a shared pointer on the displayer
     boost::shared_ptr<Displayer> displayer();
 
     //@}
@@ -328,6 +331,7 @@ Int SolverBelos::solveSystem( const vector_type& rhsFull,
                                  PrecPtrOperator preconditioner )
 
 {
+    // todo redo the implementation or delete the method
     M_displayer->leaderPrint("SLV-  Belos solving system ...               ");
     /*
     setPreconditioner(preconditioner);

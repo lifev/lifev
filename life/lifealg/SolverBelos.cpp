@@ -79,6 +79,11 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
 {
 }
 
+SolverBelos::~SolverBelos()
+{
+
+}
+
 // ===================================================
 // Methods
 // ===================================================
@@ -152,6 +157,8 @@ SolverBelos::solve( vector_type& solution )
 Real
 SolverBelos::computeResidual( vector_type& solution, vector_type& rhs )
 {
+    // todo old implementation... check if there's something in Belos
+    /*
     vector_type Ax ( solution.map() );
     vector_type res( rhs );
 
@@ -164,12 +171,15 @@ SolverBelos::computeResidual( vector_type& solution, vector_type& rhs )
     res.norm2( &residual );
 
     return residual;
+    */
+    M_displayer->leaderPrint( " ERROR: The feature is not yet available.\n" );
+    return 0;
 }
 
 std::string
 SolverBelos::printStatus()
 {
-
+    // todo code or remove the method
     std::ostringstream stat;
     std::string str;
 
@@ -187,16 +197,18 @@ SolverBelos::printStatus()
     stat << setw(4)  << " " << (Int)status[AZ_its] << " iters. ";
     stat << std::endl;
     */
-
+    M_displayer->leaderPrint( " ERROR: The feature is not yet available.\n" );
     str = stat.str();
     return str;
 }
 
-Int SolverBelos::solveSystem( const vector_type& rhsFull,
-                                 vector_type&       solution,
-                                 matrix_ptrtype&    baseMatrixForPreconditioner )
+Int
+SolverBelos::solveSystem( const vector_type& rhsFull,
+                              vector_type&       solution,
+                              matrix_ptrtype&    baseMatrixForPreconditioner )
 
 {
+    // todo redo the implementation or delete the method
     // todo deal with preconditioner
     bool retry( true );
 
@@ -247,17 +259,23 @@ Int SolverBelos::solveSystem( const vector_type& rhsFull,
     return numIter;
 }
 
-void SolverBelos::setupPreconditioner( const GetPot& dataFile,  const std::string& section )
+void
+SolverBelos::setupPreconditioner( const GetPot& dataFile,  const std::string& section )
 {
+    /*
     std::string precType = dataFile( (section + "/prectype").data(), "Ifpack" );
     M_rightPreconditioner.reset( PRECFactory::instance().createObject( precType ) );
 
     ASSERT( M_rightPreconditioner.get() != 0, " Preconditioner not set" );
 
     M_rightPreconditioner->setDataFromGetPot( dataFile, section );
+    */
+    // todo Implement the method
+    M_displayer->leaderPrint( " ERROR: The feature is not yet available.\n" );
 }
 
-void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
+void
+SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
 {
     LifeChrono chrono;
     Real condest(-1);
@@ -268,8 +286,8 @@ void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
         M_displayer->leaderPrint( "SLV-  Computing the left preconditioner...    " );
         M_leftPreconditioner->buildPreconditioner( preconditioner );
         condest = M_leftPreconditioner->condest();
-        Teuchos::RCP<OP> rightPrec(M_leftPreconditioner->preconditioner(),false);
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
+        Teuchos::RCP<OP> leftPrec(M_leftPreconditioner->preconditioner(),false);
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
         M_problem->setLeftPrec(belosPrec);
         chrono.stop();
         M_displayer->leaderPrintMax( "done in " , chrono.diff());
@@ -281,8 +299,8 @@ void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
         M_displayer->leaderPrint( "SLV-  Computing the right preconditioner...    " );
         M_rightPreconditioner->buildPreconditioner( preconditioner );
         condest = M_rightPreconditioner->condest();
-        Teuchos::RCP<OP> leftPrec(M_rightPreconditioner->preconditioner(),false);
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
+        Teuchos::RCP<OP> rightPrec(M_rightPreconditioner->preconditioner(),false);
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
         M_problem->setRightPrec(belosPrec);
         chrono.stop();
         M_displayer->leaderPrintMax( "done in " , chrono.diff());
@@ -290,7 +308,8 @@ void SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
     }
 }
 
-void SolverBelos::resetPreconditioner()
+void
+SolverBelos::resetPreconditioner()
 {
     M_rightPreconditioner->resetPreconditioner();
     M_leftPreconditioner->resetPreconditioner();
@@ -486,6 +505,7 @@ SolverBelos::numIterations() const
 Real
 SolverBelos::trueResidual()
 {
+    // todo Write or delete the method
     //return M_solver.TrueResidual();
     return 1.0;
 }
