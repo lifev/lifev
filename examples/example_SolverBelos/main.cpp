@@ -63,7 +63,6 @@
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifesolver/ADRAssembler.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/SolverBelos.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
@@ -82,7 +81,7 @@ typedef boost::shared_ptr< fespace_type > fespacePtr_type;
 
 typedef LifeV::Preconditioner             basePrec_type;
 typedef boost::shared_ptr<basePrec_type>  basePrecPtr_type;
-typedef LifeV::PreconditionerML           prec_type;
+typedef LifeV::PreconditionerIfpack       prec_type;
 typedef boost::shared_ptr<prec_type>      precPtr_type;
 }
 
@@ -142,11 +141,11 @@ main( int argc, char** argv )
 
     globalChrono.start();
 
-    // ******* GetPot stuff ********
+    // ********** GetPot **********
     GetPot command_line(argc,argv);
     const std::string dataFileName = command_line.follow("data", 2, "-f","--file");
     GetPot dataFile(dataFileName);
-    // *****************************
+    // ****************************
 
     // Space discretization
     const UInt numMeshElem    = dataFile( "mesh/num_elements", 10);
@@ -237,7 +236,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << std::endl << "[Solvers initialization]" << std::endl;
     prec_type* precRawPtr;
     basePrecPtr_type precPtr;
-    precRawPtr = new PreconditionerML;
+    precRawPtr = new PreconditionerIfpack;
     precRawPtr->setDataFromGetPot(dataFile,"prec");
     precPtr.reset(precRawPtr);
 
