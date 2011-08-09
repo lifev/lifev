@@ -440,10 +440,9 @@ main( int argc, char** argv )
 
         if (initializationMethod == Projection)
         {
-            uFESpace->interpolate(problem_Type::uderexact, *rhs, currentTime);
-            rhs->globalAssemble();
+            oseenAssembler.addMassRhs(*rhs, problem_Type::uderexact , currentTime);
             *rhs *= -1.;
-            *rhs = (*massMatrix)*(*rhs);
+
 
             if (verbose) std::cout << "Updating the system... " << std::flush;
             systemMatrix.reset(new matrix_type( solutionMap ));
