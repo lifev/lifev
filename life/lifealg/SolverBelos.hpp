@@ -87,7 +87,7 @@ namespace LifeV
 
 //! SolverBelos - Class to wrap linear solver
 /*!
-  By default the solver is gmres and the preconditioner is ilu.
+  By default the solver is block gmres.
 
   @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 */
@@ -153,9 +153,9 @@ public:
     //! Compute the residual
     /*!
       @param solution Solution of the system
-      @param rhs Right hand side of the problem
+      The method returns -1 if an error occurs
      */
-    Real computeResidual( vector_type& solution, vector_type& rhs );
+    Real computeResidual( vector_type& solution );
 
     //! return the solver status
     std::string printStatus();
@@ -297,12 +297,15 @@ public:
     Int numIterations() const;
 
     //! Return the true residual
+    /*!
+      The method returns -1 if an error occurs
+     */
     Real trueResidual();
 
     //! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
     prec_type& preconditioner( PrecApplicationType precType=RightPreconditioner );
 
-    //!! Return a Teuchos parameters list
+    //! Return a Teuchos parameters list
     Teuchos::ParameterList& getParametersList();
 
     //! Return a pointer on the Belos solver manager

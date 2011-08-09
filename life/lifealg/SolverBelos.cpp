@@ -68,6 +68,7 @@ SolverBelos::SolverBelos() :
         M_lossOfPrecision      (false),
         M_maxNumItersReached   (false)
 {
+    M_problem->setLabel("SolverBelos");
 }
 
 SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
@@ -83,6 +84,7 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_lossOfPrecision      (false),
         M_maxNumItersReached   (false)
 {
+    M_problem->setLabel("SolverBelos");
 }
 
 SolverBelos::~SolverBelos()
@@ -164,25 +166,18 @@ SolverBelos::solve( vector_type& solution )
 }
 
 Real
-SolverBelos::computeResidual( vector_type& solution, vector_type& rhs )
+SolverBelos::computeResidual( vector_type& solution )
 {
-    // todo old implementation... check if there's something in Belos
-    /*
-    vector_type Ax ( solution.map() );
-    vector_type res( rhs );
-
-    M_problem->getOperator()->Apply( solution.epetraVector(), Ax.epetraVector() );
-
-    res.epetraVector().Update( 1, Ax.epetraVector(), -1 );
-
+    if( M_problem->getOperator()==null || M_problem->getRHS()==null )
+    {
+        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the operator or the rhs is not set!\n");
+        return -1;
+    }
+    vector_type res( solution.map() );
+    M_problem->computeCurrResVec(&res.epetraVector(),&solution.epetraVector(),M_problem->getRHS().get());
     Real residual;
-
     res.norm2( &residual );
-
     return residual;
-    */
-    M_displayer->leaderPrint( " ERROR: The feature is not yet available.\n" );
-    return 0;
 }
 
 std::string
@@ -437,7 +432,7 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     if ( found ) M_parameterList.set( "Convergence Tolerance", tolerance );
 
     // Maximum number of iterations allowed
-    Int maxIter         = dataFile( ( section + "/max_iter"      ).data(), 200, found );
+    Int maxIter = dataFile( ( section + "/max_iter"      ).data(), 200, found );
     if ( found ) M_parameterList.set( "Maximum Iterations", maxIter );
 
     // Reuse the preconditioner from one to another call
@@ -523,9 +518,16 @@ SolverBelos::numIterations() const
 Real
 SolverBelos::trueResidual()
 {
-    // todo Write or delete the method
-    //return M_solver.TrueResidual();
-    return 1.0;
+    if( !M_problem->isProblemSet() )
+    {
+        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the linear system is not set!\n");
+        return -1;
+    }
+    MV res( *(M_problem->getRHS().get()) );
+    M_problem->computeCurrResVec(&res,M_problem->getLHS().get(),M_problem->getRHS().get());
+    Real residual;
+    res.Norm2( &residual );
+    return residual;
 }
 
 SolverBelos::prec_type&
