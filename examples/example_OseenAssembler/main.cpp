@@ -318,12 +318,12 @@ main( int argc, char** argv )
     {
         case ViscousStress:
             if (verbose) std::cout << "Adding the viscous stress... " << std::flush;
-            oseenAssembler.addViscousStress(baseMatrix,viscosity/density);
+            oseenAssembler.addViscousStress(*baseMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         case StiffStrain:
             if (verbose) std::cout << "Adding the stiff strain... " << std::flush;
-            oseenAssembler.addStiffStrain(baseMatrix,viscosity/density);
+            oseenAssembler.addStiffStrain(*baseMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         default:
@@ -333,15 +333,15 @@ main( int argc, char** argv )
     }
 
     if (verbose) std::cout << "Adding the gradient of the pressure... " << std::flush;
-    oseenAssembler.addGradPressure(baseMatrix);
+    oseenAssembler.addGradPressure(*baseMatrix);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the divergence free constraint... " << std::flush;
-    oseenAssembler.addDivergence(baseMatrix,-1.0);
+    oseenAssembler.addDivergence(*baseMatrix,-1.0);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the mass... " << std::flush;
-    oseenAssembler.addMass(massMatrix,1.0);
+    oseenAssembler.addMass(*massMatrix,1.0);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Closing the matrices... " << std::flush;
@@ -450,7 +450,7 @@ main( int argc, char** argv )
             *systemMatrix += *baseMatrix;
             if(convectionTerm == SemiImplicit)
             {
-                oseenAssembler.addConvection(systemMatrix,*solution);
+                oseenAssembler.addConvection(*systemMatrix,*solution);
             }
             else if(convectionTerm == Explicit)
             {
@@ -543,7 +543,7 @@ main( int argc, char** argv )
         if(convectionTerm == SemiImplicit)
         {
             *beta = bdf.extrapolation(); // Extrapolation for the convective term
-            oseenAssembler.addConvection(systemMatrix,*beta);
+            oseenAssembler.addConvection(*systemMatrix,*beta);
         }
         else if(convectionTerm == Explicit)
         {
