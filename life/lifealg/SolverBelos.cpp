@@ -64,7 +64,9 @@ SolverBelos::SolverBelos() :
         M_parameterList        (),
         M_displayer            ( new Displayer() ),
         M_maxIterForReuse      ( 0 ),
-        M_reusePreconditioner  (false)
+        M_reusePreconditioner  (false),
+        M_lossOfPrecision      (false),
+        M_maxNumItersReached   (false)
 {
 }
 
@@ -77,7 +79,9 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_parameterList        (),
         M_displayer            ( new Displayer(comm) ),
         M_maxIterForReuse      ( 0 ),
-        M_reusePreconditioner  (false)
+        M_reusePreconditioner  (false),
+        M_lossOfPrecision      (false),
+        M_maxNumItersReached   (false)
 {
 }
 
@@ -92,6 +96,10 @@ SolverBelos::~SolverBelos()
 Int
 SolverBelos::solve( vector_type& solution )
 {
+    // Reset status informations
+    M_lossOfPrecision = false;
+    M_maxNumItersReached = false;
+
     // Setting the unknown in the system
     Teuchos::RCP<vector_type::vector_type> solutionPtr(&(solution.epetraVector()),false);
     M_problem->setLHS( solutionPtr );
@@ -118,7 +126,6 @@ SolverBelos::solve( vector_type& solution )
         M_displayer->leaderPrint( "SLV-  Reusing precond ...                 \n" );
     }
 
-    // todo Check that all the ingredient are there
     bool set = M_problem->setProblem();
     if (set == false) {
         M_displayer->leaderPrint( "SLV-  ERROR: SolverBelos failed to set up correctly!\n");
@@ -133,11 +140,11 @@ SolverBelos::solve( vector_type& solution )
 
     // Getting informations post-solve
     Int numIters = M_solverManager->getNumIters();
-    bool lossOfPrecision = M_solverManager->isLOADetected();
+    bool M_lossOfPrecision = M_solverManager->isLOADetected();
 
     // todo missing the automatic second run
 
-    if(lossOfPrecision)
+    if(M_lossOfPrecision)
     {
         M_displayer->leaderPrint("SLV-  WARNING: Loss of accuracy detected!\n");
     }
@@ -148,7 +155,7 @@ SolverBelos::solve( vector_type& solution )
     else
     {
         M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos failed to converged to the desired precision!\n");
-        return -1;
+        M_maxNumItersReached = true;
     }
 
     // todo option to quit on failure may be useful
@@ -181,14 +188,11 @@ SolverBelos::computeResidual( vector_type& solution, vector_type& rhs )
 std::string
 SolverBelos::printStatus()
 {
-    // todo code or remove the method
     std::ostringstream stat;
     std::string str;
 
     /*
-    Real status[AZ_STATUS_SIZE];
-    aztecStatus( status );
-
+    // AztecOO informations
     if ( status[AZ_why] == AZ_normal         ) stat << "Normal Convergence    ";
     else if ( status[AZ_why] == AZ_maxits    ) stat << "Maximum iters reached ";
     else if ( status[AZ_why] == AZ_loss      ) stat << "Accuracy loss         ";
@@ -199,7 +203,9 @@ SolverBelos::printStatus()
     stat << setw(4)  << " " << (Int)status[AZ_its] << " iters. ";
     stat << std::endl;
     */
-    M_displayer->leaderPrint( " ERROR: The feature is not yet available.\n" );
+
+    if (M_lossOfPrecision) stat    << "Accuracy loss ";
+    if (M_maxNumItersReached) stat << "Maximum number of iterations reached ";
     str = stat.str();
     return str;
 }
@@ -309,10 +315,10 @@ SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
 void
 SolverBelos::resetPreconditioner()
 {
-    M_rightPreconditioner->resetPreconditioner();
     M_leftPreconditioner->resetPreconditioner();
-
-    // todo reset also the preconditioner in M_problem
+    M_rightPreconditioner->resetPreconditioner();
+    M_problem->setLeftPrec(Teuchos::RCP<OP>(null));
+    M_problem->setRightPrec(Teuchos::RCP<OP>(null));
 }
 
 bool
@@ -372,7 +378,7 @@ SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType p
         // If a right Epetra_Operator exists it must be deleted
         if(M_problem->isRightPrec())
         {
-            // todo erase in M_problem the right prec
+            M_problem->setRightPrec(Teuchos::RCP<OP>(null));
         }
 
         M_rightPreconditioner = preconditioner;
@@ -382,7 +388,7 @@ SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType p
         // If a left Epetra_Operator exists it must be deleted
         if(M_problem->isLeftPrec())
         {
-            // todo erase in M_problem the left prec
+            M_problem->setLeftPrec(Teuchos::RCP<OP>(null));
         }
         M_leftPreconditioner  = preconditioner;
     }
@@ -451,6 +457,14 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     // Maximum number of restarts allowed
     Int maximumRestarts = dataFile( ( section + "/maximum_restarts" ).data(), 0, found );
     if ( found ) M_parameterList.set( "Maximum Restarts", maximumRestarts );
+
+    // Set the output style (General Brief)
+    std::string outputStyle = dataFile( ( section + "/output_style" ).data(), "brief", found );
+    if ( found )
+    {
+        if (outputStyle == "brief") M_parameterList.set( "Output Style", Belos::Brief );
+        if (outputStyle == "general") M_parameterList.set( "Output Style", Belos::General );
+    }
 
     // Setting the desired output informations
     int msg = Belos::Errors;

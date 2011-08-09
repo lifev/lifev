@@ -258,13 +258,15 @@ main( int argc, char** argv )
     belosList.set( "Maximum Restarts", 1 );          // Maximum number of restarts allowed
     belosList.set( "Convergence Tolerance", 1e-10 ); // Relative convergence tolerance requested
     //belosList.set( "Verbosity", Belos::Errors + Belos::Warnings + Belos::TimingDetails + Belos::StatusTestDetails );
-    belosList.set("Verbosity", Belos::Errors + Belos::Warnings + Belos::IterationDetails );
+    belosList.set("Verbosity", Belos::Errors + Belos::Warnings + Belos::IterationDetails + Belos::StatusTestDetails );
     belosList.set( "Output Frequency", 1 );
+    belosList.set( "Output Style", Belos::Brief );
 
     SolverBelos linearSolver2;
     linearSolver2.setCommunicator(Comm);
     linearSolver2.setParameters(belosList);
     linearSolver2.setPreconditioner(precPtr);
+    //linearSolver2.setPreconditionerFromGetPot(dataFile,"prec");
     if (verbose) std::cout << "done" << std::endl;
     linearSolver2.showMe();
 

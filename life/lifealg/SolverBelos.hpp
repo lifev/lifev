@@ -321,7 +321,11 @@ private:
     Int                          M_maxIterForReuse;
     bool                         M_reusePreconditioner;
 
-    //!! Setup the solver manager to be used
+    // Status information
+    bool                         M_lossOfPrecision;
+    bool                         M_maxNumItersReached;
+
+    //! Setup the solver manager to be used
     void setupSolverManager();
 };
 
