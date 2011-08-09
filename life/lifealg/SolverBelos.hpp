@@ -191,12 +191,12 @@ public:
                       vector_type&       solution,
                       PrecPtrOperator    preconditionerPtr );
 
-    //! Setup the preconditioner
+    //! Setup the preconditioner from a GetPot file
     /*!
       @param dataFile GetPot object which contains the data about the preconditioner
       @param section Section the GetPot structure where to find the informations about the preconditioner
      */
-    void setupPreconditioner( const GetPot& dataFile, const std::string& section );
+    void setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section );
 
     //! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
     /*!

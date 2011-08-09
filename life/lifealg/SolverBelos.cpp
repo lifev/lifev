@@ -46,6 +46,8 @@
 
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifealg/SolverBelos.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <life/lifealg/PreconditionerML.hpp>
 
 namespace LifeV
 {
@@ -260,18 +262,14 @@ SolverBelos::solveSystem( const vector_type& rhsFull,
 }
 
 void
-SolverBelos::setupPreconditioner( const GetPot& dataFile,  const std::string& section )
+SolverBelos::setPreconditionerFromGetPot( const GetPot& dataFile,  const std::string& section )
 {
-    /*
     std::string precType = dataFile( (section + "/prectype").data(), "Ifpack" );
     M_rightPreconditioner.reset( PRECFactory::instance().createObject( precType ) );
 
     ASSERT( M_rightPreconditioner.get() != 0, " Preconditioner not set" );
 
     M_rightPreconditioner->setDataFromGetPot( dataFile, section );
-    */
-    // todo Implement the method
-    M_displayer->leaderPrint( " ERROR: The feature is not yet available.\n" );
 }
 
 void
