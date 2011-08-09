@@ -345,6 +345,12 @@ SolverBelos::showMe( std::ostream& output ) const
 // Set Methods
 // ===================================================
 void
+SolverBelos::setSolverManager( const SolverManagerType& solverManager )
+{
+    M_solverManagerType = solverManager;
+}
+
+void
 SolverBelos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 {
     M_displayer->setCommunicator( comm );

@@ -220,6 +220,15 @@ public:
     //! @name Set Method
     //@{
 
+    //! Set the solver manager which should be used by Belos
+    /*!
+      @param solverManager type of solver manager
+      The solver manager can be chosen from one of the following:
+      BlockCG, BlockGmres, GCRODR, GmresPoly,PCPG, PseudoBlockCG,
+      PseudoBlockGmres, RCG, TFQMR.
+     */
+    void setSolverManager( const SolverManagerType& solverManager );
+
     //! Method to set communicator for Displayer (for empty constructor)
     /*!
       @param comm Communicator for the displayer
