@@ -58,35 +58,35 @@ namespace LifeV
 SolverBelos::SolverBelos() :
         M_leftPreconditioner   (),
         M_rightPreconditioner  (),
-        M_solverManagerType    (BlockGmres),
+        M_solverManagerType    ( BlockGmres ),
         M_solverManager        (),
         M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer() ),
         M_maxItersForReuse     ( 0 ),
-        M_reusePreconditioner  (false),
-        M_quitOnFailure        (false),
-        M_lossOfPrecision      (false),
-        M_maxNumItersReached   (false)
+        M_reusePreconditioner  ( false ),
+        M_quitOnFailure        ( false ),
+        M_lossOfPrecision      ( false ),
+        M_maxNumItersReached   ( false )
 {
-    M_problem->setLabel("SolverBelos");
+    M_problem->setLabel( "SolverBelos" );
 }
 
 SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_leftPreconditioner   (),
         M_rightPreconditioner  (),
-        M_solverManagerType    (BlockGmres),
+        M_solverManagerType    ( BlockGmres ),
         M_solverManager        (),
         M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
-        M_displayer            ( new Displayer(comm) ),
+        M_displayer            ( new Displayer( comm ) ),
         M_maxItersForReuse     ( 0 ),
-        M_reusePreconditioner  (false),
-        M_quitOnFailure        (false),
-        M_lossOfPrecision      (false),
-        M_maxNumItersReached   (false)
+        M_reusePreconditioner  ( false ),
+        M_quitOnFailure        ( false ),
+        M_lossOfPrecision      ( false ),
+        M_maxNumItersReached   ( false )
 {
-    M_problem->setLabel("SolverBelos");
+    M_problem->setLabel( "SolverBelos" );
 }
 
 SolverBelos::~SolverBelos()
@@ -106,7 +106,7 @@ SolverBelos::solve( vector_type& solution )
     bool failure = false;
 
     // Setting the unknown in the system
-    Teuchos::RCP<vector_type::vector_type> solutionPtr(&(solution.epetraVector()),false);
+    Teuchos::RCP<vector_type::vector_type> solutionPtr( &( solution.epetraVector() ), false );
     M_problem->setLHS( solutionPtr );
 
     // Build preconditioners if needed
@@ -115,17 +115,17 @@ SolverBelos::solve( vector_type& solution )
     {
         buildPreconditioner();
 
-        // do not retry if I am recomputing the preconditioner
+        // There will be no retry if the preconditioner is recomputed
         retry = false;
     }
     else
     {
-        M_displayer->leaderPrint( "SLV-  Reusing precond ...                 \n" );
+        M_displayer->leaderPrint( "SLV-  Reusing precond ...\n" );
     }
 
     bool set = M_problem->setProblem();
-    if (set == false) {
-        M_displayer->leaderPrint( "SLV-  ERROR: SolverBelos failed to set up correctly!\n");
+    if ( set == false ) {
+        M_displayer->leaderPrint( "SLV-  ERROR: SolverBelos failed to set up correctly!\n" );
         return -1;
     }
 
@@ -137,7 +137,7 @@ SolverBelos::solve( vector_type& solution )
     chrono.start();
     Belos::ReturnType ret = M_solverManager->solve();
     chrono.stop();
-    M_displayer->leaderPrint( "SLV-  Solution time: " , chrono.diff(), " s.\n" );
+    M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
 
     // Getting informations post-solve
     Int numIters = M_solverManager->getNumIters();
@@ -146,8 +146,8 @@ SolverBelos::solve( vector_type& solution )
     // Second run recomputing the preconditioner
     // This is done only if the preconditioner has not been
     // already recomputed and if it is a LifeV preconditioner.
-    if( ret != Belos::Converged && retry &&
-        (M_leftPreconditioner || M_rightPreconditioner) )
+    if ( ret != Belos::Converged && retry &&
+       ( M_leftPreconditioner || M_rightPreconditioner ) )
     {
         M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , numIters, "\n" );
         M_displayer->leaderPrint( "SLV-  retrying:\n" );
@@ -156,36 +156,37 @@ SolverBelos::solve( vector_type& solution )
 
         // Solving again, but only once (retry = false)
         chrono.start();
-        Belos::ReturnType ret = M_solverManager->solve();
+        ret = M_solverManager->solve();
         chrono.stop();
-        M_displayer->leaderPrint( "SLV-  Solution time: " , chrono.diff(), " s.\n" );
+        M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
     }
 
-    if(M_lossOfPrecision)
+    if ( M_lossOfPrecision )
     {
-        M_displayer->leaderPrint("SLV-  WARNING: Loss of accuracy detected!\n");
+        M_displayer->leaderPrint( "SLV-  WARNING: Loss of accuracy detected!\n" );
         failure = true;
     }
-    if(ret == Belos::Converged)
+
+    if ( ret == Belos::Converged )
     {
         M_displayer->leaderPrint( "SLV-  Convergence in " , numIters, " iterations\n" );
     }
     else
     {
-        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos failed to converged to the desired precision!\n");
+        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos failed to converged to the desired precision!\n" );
         M_maxNumItersReached = true;
         failure = true;
     }
 
     // If quitOnFailure is enabled and if some problems occur
     // the simulation is stopped
-    if(M_quitOnFailure && failure)
-        exit(-1);
+    if ( M_quitOnFailure && failure )
+        exit( -1 );
 
     // If the number of iterations reaches the threshold of maxIterForReuse
     // we reset the preconditioners to force to solver to recompute it next
     // time
-    if(numIters > M_maxItersForReuse)
+    if ( numIters > M_maxItersForReuse )
         resetPreconditioner();
 
     return numIters;
@@ -194,13 +195,13 @@ SolverBelos::solve( vector_type& solution )
 Real
 SolverBelos::computeResidual( vector_type& solution )
 {
-    if( M_problem->getOperator()==null || M_problem->getRHS()==null )
+    if ( M_problem->getOperator() == null || M_problem->getRHS() == null )
     {
-        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the operator or the rhs is not set!\n");
+        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the operator or the rhs is not set!\n" );
         return -1;
     }
     vector_type res( solution.map() );
-    M_problem->computeCurrResVec(&res.epetraVector(),&solution.epetraVector(),M_problem->getRHS().get());
+    M_problem->computeCurrResVec( &res.epetraVector(), &solution.epetraVector(), M_problem->getRHS().get() );
     Real residual;
     res.norm2( &residual );
     return residual;
@@ -225,8 +226,8 @@ SolverBelos::printStatus()
     stat << std::endl;
     */
 
-    if (M_lossOfPrecision) stat    << "Accuracy loss ";
-    if (M_maxNumItersReached) stat << "Maximum number of iterations reached ";
+    if ( M_lossOfPrecision )    stat << "Accuracy loss ";
+    if ( M_maxNumItersReached ) stat << "Maximum number of iterations reached ";
     str = stat.str();
     return str;
 }
@@ -234,9 +235,10 @@ SolverBelos::printStatus()
 void
 SolverBelos::setPreconditionerFromGetPot( const GetPot& dataFile,  const std::string& section )
 {
-    std::string precType = dataFile( (section + "/prectype").data(), "Ifpack" );
+    std::string precType = dataFile( ( section + "/prectype" ).data(), "Ifpack" );
     M_rightPreconditioner.reset( PRECFactory::instance().createObject( precType ) );
 
+    // todo left preconditioner
     ASSERT( M_rightPreconditioner.get() != 0, " Preconditioner not set" );
 
     M_rightPreconditioner->setDataFromGetPot( dataFile, section );
@@ -246,50 +248,50 @@ void
 SolverBelos::buildPreconditioner()
 {
     LifeChrono chrono;
-    Real condest(-1);
+    Real condest( -1 );
 
-    if(M_leftPreconditioner)
+    if ( M_leftPreconditioner )
     {
         chrono.start();
         M_displayer->leaderPrint( "SLV-  Computing the left preconditioner...\n" );
-        if( M_baseMatrixForPreconditioner.get()==0 )
+        if ( M_baseMatrixForPreconditioner.get() == 0 )
         {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n");
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n" );
             M_leftPreconditioner->buildPreconditioner( M_matrix );
         }
         else
         {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n");
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n" );
             M_leftPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
         }
         condest = M_leftPreconditioner->condest();
-        Teuchos::RCP<OP> leftPrec(M_leftPreconditioner->preconditioner(),false);
+        Teuchos::RCP<OP> leftPrec( M_leftPreconditioner->preconditioner(), false );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
-        M_problem->setLeftPrec(belosPrec);
+        M_problem->setLeftPrec( belosPrec );
         chrono.stop();
-        M_displayer->leaderPrintMax( "SLV-  Left preconditioner computed in " , chrono.diff());
+        M_displayer->leaderPrintMax( "SLV-  Left preconditioner computed in " , chrono.diff(), " s." );
         M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
     }
-    if(M_rightPreconditioner)
+    if ( M_rightPreconditioner )
     {
         chrono.start();
         M_displayer->leaderPrint( "SLV-  Computing the right preconditioner...\n" );
-        if( M_baseMatrixForPreconditioner.get()==0 )
+        if ( M_baseMatrixForPreconditioner.get() == 0 )
         {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n");
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n" );
             M_rightPreconditioner->buildPreconditioner( M_matrix );
         }
         else
         {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n");
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n" );
             M_rightPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
         }
         condest = M_rightPreconditioner->condest();
-        Teuchos::RCP<OP> rightPrec(M_rightPreconditioner->preconditioner(),false);
+        Teuchos::RCP<OP> rightPrec( M_rightPreconditioner->preconditioner(), false );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
-        M_problem->setRightPrec(belosPrec);
+        M_problem->setRightPrec( belosPrec );
         chrono.stop();
-        M_displayer->leaderPrintMax( "SLV-  Right preconditioner computed in " , chrono.diff());
+        M_displayer->leaderPrintMax( "SLV-  Right preconditioner computed in " , chrono.diff(), " s." );
         M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
     }
 }
@@ -297,28 +299,28 @@ SolverBelos::buildPreconditioner()
 void
 SolverBelos::resetPreconditioner()
 {
-    if(M_leftPreconditioner)
+    if ( M_leftPreconditioner )
         M_leftPreconditioner->resetPreconditioner();
 
-    if(M_rightPreconditioner)
+    if ( M_rightPreconditioner )
         M_rightPreconditioner->resetPreconditioner();
 
-    M_problem->setLeftPrec(Teuchos::RCP<OP>(null)); // wrong todo
-    M_problem->setRightPrec(Teuchos::RCP<OP>(null)); //wrong
+    M_problem->setLeftPrec( Teuchos::RCP<OP>( null ) );  // wrong todo
+    M_problem->setRightPrec( Teuchos::RCP<OP>( null ) ); //wrong
 }
 
 bool
 SolverBelos::isPreconditionerSet() const
 {
-    return ( M_leftPreconditioner.get() !=0 && M_leftPreconditioner->preconditionerCreated() )||
-           ( M_rightPreconditioner.get() !=0 && M_rightPreconditioner->preconditionerCreated() )||
+    return ( M_leftPreconditioner.get() != 0 && M_leftPreconditioner->preconditionerCreated() ) ||
+           ( M_rightPreconditioner.get() != 0 && M_rightPreconditioner->preconditionerCreated() ) ||
              M_problem->isLeftPrec() || M_problem->isRightPrec(); // wrong todo
 }
 
 void
 SolverBelos::showMe( std::ostream& output ) const
 {
-    if(M_displayer->isLeader())
+    if ( M_displayer->isLeader() )
     {
         output << "SolverBelos, parameters list:" << std::endl;
         output << "-----------------------------" << std::endl;
@@ -345,32 +347,32 @@ SolverBelos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 void SolverBelos::setMatrix( matrix_ptrtype& matrix )
 {
     M_matrix = matrix;
-    Teuchos::RCP<Epetra_FECrsMatrix> A = Teuchos::rcp(M_matrix->matrixPtr());
+    Teuchos::RCP<Epetra_FECrsMatrix> A = Teuchos::rcp( M_matrix->matrixPtr() );
     M_problem->setOperator( A );
 }
 
 void
 SolverBelos::setOperator( Epetra_Operator& oper )
 {
-    M_problem->setOperator(rcp(&oper));
+    M_problem->setOperator( rcp( &oper ) );
 }
 
 void
-SolverBelos::setRightHandSide(const vector_type& rhs)
+SolverBelos::setRightHandSide( const vector_type& rhs )
 {
-    Teuchos::RCP<const vector_type::vector_type> rhsPtr(&(rhs.epetraVector()),false);
-    M_problem->setRHS(rhsPtr);
+    Teuchos::RCP<const vector_type::vector_type> rhsPtr( &( rhs.epetraVector() ), false );
+    M_problem->setRHS( rhsPtr );
 }
 
 void
 SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType precType )
 {
-    if(precType == RightPreconditioner)
+    if ( precType == RightPreconditioner )
     {
         // If a right Epetra_Operator exists it must be deleted
-        if(M_problem->isRightPrec())
+        if ( M_problem->isRightPrec() )
         {
-            M_problem->setRightPrec(Teuchos::RCP<OP>(null));
+            M_problem->setRightPrec( Teuchos::RCP<OP>( null ) );
         }
 
         M_rightPreconditioner = preconditioner;
@@ -378,9 +380,9 @@ SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType p
     else
     {
         // If a left Epetra_Operator exists it must be deleted
-        if(M_problem->isLeftPrec())
+        if ( M_problem->isLeftPrec() )
         {
-            M_problem->setLeftPrec(Teuchos::RCP<OP>(null));
+            M_problem->setLeftPrec( Teuchos::RCP<OP>( null ) );
         }
         M_leftPreconditioner  = preconditioner;
     }
@@ -389,23 +391,23 @@ SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType p
 void
 SolverBelos::setPreconditioner( comp_prec_type& preconditioner, PrecApplicationType precType )
 {
-    if(precType == RightPreconditioner)
+    if ( precType == RightPreconditioner )
     {
         // If a right LifeV::Preconditioner exists it must be deleted
         M_rightPreconditioner.reset();
 
-        Teuchos::RCP<OP> rightPrec=Teuchos::rcp(preconditioner);
+        Teuchos::RCP<OP> rightPrec=Teuchos::rcp( preconditioner );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
-        M_problem->setRightPrec(belosPrec);
+        M_problem->setRightPrec( belosPrec );
     }
     else
     {
         // If a left LifeV::Preconditioner exists it must be deleted
         M_leftPreconditioner.reset();
 
-        Teuchos::RCP<OP> leftPrec=Teuchos::rcp(preconditioner);
+        Teuchos::RCP<OP> leftPrec=Teuchos::rcp( preconditioner );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
-        M_problem->setLeftPrec(belosPrec);
+        M_problem->setLeftPrec( belosPrec );
     }
 }
 
@@ -428,10 +430,11 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
 
     // Output Frequency
     Int outputFrequency = dataFile( ( section + "/max_iter" ).data(), 1, found );
-    if ( found ) M_parameterList.set( "Output Frequency", 1 );
+    if ( found ) M_parameterList.set( "Output Frequency", outputFrequency );
 
+    // Blocksize to be used by iterative solver
     Int blockSize = dataFile( ( section + "/block_size" ).data(), 10, found );
-    if ( found ) M_parameterList.set( "Block Size", blockSize );               // Blocksize to be used by iterative solver
+    if ( found ) M_parameterList.set( "Block Size", blockSize );
 
     // Maximum number of blocks in Krylov factorization
     Int numBlocks = dataFile( ( section + "/num_blocks" ).data(), 10, found );
@@ -445,8 +448,8 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     std::string outputStyle = dataFile( ( section + "/output_style" ).data(), "brief", found );
     if ( found )
     {
-        if (outputStyle == "brief") M_parameterList.set( "Output Style", Belos::Brief );
-        if (outputStyle == "general") M_parameterList.set( "Output Style", Belos::General );
+        if ( outputStyle == "brief" ) M_parameterList.set( "Output Style", Belos::Brief );
+        if ( outputStyle == "general" ) M_parameterList.set( "Output Style", Belos::General );
     }
 
     // Setting the desired output informations
@@ -465,23 +468,23 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     if ( found ) msg += Belos::StatusTestDetails;
     dataFile( ( section + "/enable_debug" ).data(), false, found );
     if ( found ) msg += Belos::Debug;
-    M_parameterList.set("Verbosity", msg );
+    M_parameterList.set( "Verbosity", msg );
 
     // LifeV features
 
     // Reuse the preconditioner from one to another call
-    bool reusePreconditioner = dataFile( (section + "/reuse_preconditioner").data(), true, found );
+    bool reusePreconditioner = dataFile( ( section + "/reuse_preconditioner" ).data(), true, found );
     if ( found ) M_reusePreconditioner = reusePreconditioner;
     //if ( found ) M_parameterList.set( "Reuse preconditioner", true );
 
     // Max iterations allowed to reuse the preconditioner
-    Int maxItersForReuse = dataFile( ( section + "/max_iters_for_reuse").data(), static_cast<Int> ( maxIter*8./10.), found );
-    if ( found ) M_maxItersForReuse=maxItersForReuse;
+    Int maxItersForReuse = dataFile( ( section + "/max_iters_for_reuse" ).data(), static_cast<Int> ( maxIter*8./10. ), found );
+    if ( found ) M_maxItersForReuse = maxItersForReuse;
 
     // If quitOnFailure is enabled and if some problems occur
     // the simulation is stopped
     bool quitOnFailure = dataFile( ( section + "/quit_on_failure").data(), false, found );
-    if ( found ) M_quitOnFailure=quitOnFailure;
+    if ( found ) M_quitOnFailure = quitOnFailure;
 }
 
 void
@@ -503,7 +506,7 @@ SolverBelos::setReusePreconditioner( const bool reusePreconditioner )
 }
 
 void
-SolverBelos::setQuitOnFailure(const bool enable)
+SolverBelos::setQuitOnFailure( const bool enable )
 {
     M_quitOnFailure = enable;
 }
@@ -522,13 +525,13 @@ SolverBelos::numIterations() const
 Real
 SolverBelos::trueResidual()
 {
-    if( !M_problem->isProblemSet() )
+    if ( !M_problem->isProblemSet() )
     {
-        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the linear system is not set!\n");
+        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the linear system is not set!\n" );
         return -1;
     }
-    MV res( *(M_problem->getRHS().get()) );
-    M_problem->computeCurrResVec(&res,M_problem->getLHS().get(),M_problem->getRHS().get());
+    MV res( *( M_problem->getRHS().get() ) );
+    M_problem->computeCurrResVec( &res,M_problem->getLHS().get(), M_problem->getRHS().get() );
     Real residual;
     res.Norm2( &residual );
     return residual;
@@ -537,7 +540,7 @@ SolverBelos::trueResidual()
 SolverBelos::prec_type&
 SolverBelos::preconditioner( PrecApplicationType precType )
 {
-    if(precType == RightPreconditioner)
+    if ( precType == RightPreconditioner )
     {
         return M_rightPreconditioner;
     }
@@ -562,49 +565,53 @@ SolverBelos::displayer()
     return M_displayer;
 }
 
+// ===================================================
+// Private Methods
+// ===================================================
+
 void
 SolverBelos::setupSolverManager()
 {
     // If a SolverManager already exists we simply clean it!
-    if(!M_solverManager.is_null())
+    if ( !M_solverManager.is_null() )
     {
         M_solverManager.reset();
     }
 
-    switch(M_solverManagerType)
+    switch ( M_solverManagerType )
     {
         case BlockCG:
             // Create the block CG iteration
-            M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case BlockGmres:
             // Create the block GMRes iteration
             // Create the flexible, block GMRes iteration
-            M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+            M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case GCRODR:
-            M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+            M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case GmresPoly:
-            M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+            M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList,false ) ) );
             break;
         case PCPG:
-            M_solverManager = rcp( new Belos::PCPGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            M_solverManager = rcp( new Belos::PCPGSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case PseudoBlockCG:
             // Create the pseudo block CG iteration
-            M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false) ) );
             break;
         case PseudoBlockGmres:
             // Create the pseudo block GMRes iteration
-            M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false) ) );
+            M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case RCG:
-            M_solverManager = rcp( new Belos::RCGSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            M_solverManager = rcp( new Belos::RCGSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case TFQMR:
             // Create TFQMR iteration
-            M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,MV,OP>( M_problem, rcp(&M_parameterList,false)) );
+            M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
     }
 }

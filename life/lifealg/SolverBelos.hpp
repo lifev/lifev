@@ -224,7 +224,7 @@ public:
     /*!
       @param rhs right hand side of the system
      */
-    void setRightHandSide(const vector_type& rhs);
+    void setRightHandSide( const vector_type& rhs );
 
     //! Method to set an Preconditioner preconditioner
     /*!
@@ -268,7 +268,7 @@ public:
             system does not converge or if a loss of precision occurs time is saved
             by stoping the simulation
      */
-    void setQuitOnFailure(const bool enable);
+    void setQuitOnFailure( const bool enable );
 
     //@}
 
@@ -300,6 +300,14 @@ public:
 
 private:
 
+    //! @name Private Methods
+    //@{
+
+    //! Setup the solver manager to be used
+    void setupSolverManager();
+
+    //@}
+
     matrix_ptrtype               M_matrix;
     matrix_ptrtype               M_baseMatrixForPreconditioner;
     prec_type                    M_leftPreconditioner;
@@ -321,8 +329,6 @@ private:
     bool                         M_lossOfPrecision;
     bool                         M_maxNumItersReached;
 
-    //! Setup the solver manager to be used
-    void setupSolverManager();
 };
 
 
