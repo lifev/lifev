@@ -177,20 +177,6 @@ public:
                      vector_type&       solution,
                      matrix_ptrtype&    baseMatrixForPreconditioner );
 
-    //! Solves the system and returns the number of iterations.
-    /*!
-      The Matrix has already been passed by the method
-      setMatrix or setOperator
-      @param  rhsFull Right hand side
-      @param  solution Vector to store the solution
-      @param  preconditionerPtr Pointer on a preconditioner to use (templated parameter, can derive from
-                                Preconditioner class or from Epetra_Operator)
-    */
-    template <typename PrecPtrOperator>
-    Int solveSystem(  const vector_type& rhsFull,
-                      vector_type&       solution,
-                      PrecPtrOperator    preconditionerPtr );
-
     //! Setup the preconditioner from a GetPot file
     /*!
       @param dataFile GetPot object which contains the data about the preconditioner
@@ -351,38 +337,6 @@ private:
     //! Setup the solver manager to be used
     void setupSolverManager();
 };
-
-template <typename PrecPtrOperator>
-Int SolverBelos::solveSystem( const vector_type& rhsFull,
-                                 vector_type&    solution,
-                                 PrecPtrOperator preconditioner )
-
-{
-    // todo redo the implementation or delete the method
-    M_displayer->leaderPrint("SLV-  Belos solving system ...               ");
-    /*
-    setPreconditioner(preconditioner);
-
-    LifeChrono chrono;
-    chrono.start();
-    Int numIter = solve( solution, rhsFull );
-    chrono.stop();
-    M_displayer->leaderPrintMax( "done in " , chrono.diff() );
-
-    // If we use the "none" as output setting, we display just a summary
-    if ( M_parameterList.get( "output", "all" ) == "none" )
-    {
-        M_displayer->leaderPrint( "SLV-  Iterations number:                       ", M_solver.NumIters(), "\n" );
-        M_displayer->leaderPrint( "SLV-  Scaled residual:                         ", M_solver.ScaledResidual(), "\n" );
-    }
-
-    if ( numIter >= M_maxIter )
-        numIter = -numIter;
-
-    */
-    Int numIter=0;
-    return numIter;
-}
 
 
 } // namespace LifeV

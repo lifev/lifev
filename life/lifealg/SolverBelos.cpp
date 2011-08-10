@@ -141,7 +141,11 @@ SolverBelos::solve( vector_type& solution )
     setupSolverManager();
 
     // Solve the linear system
+    LifeChrono chrono;
+    chrono.start();
     Belos::ReturnType ret = M_solverManager->solve();
+    chrono.stop();
+    M_displayer->leaderPrint( "SLV-  Solution time: " , chrono.diff(), " s.\n" );
 
     // Getting informations post-solve
     Int numIters = M_solverManager->getNumIters();
@@ -221,6 +225,7 @@ SolverBelos::solveSystem( const vector_type& rhsFull,
 {
     // todo redo the implementation or delete the method
     // todo deal with preconditioner
+    /*
     bool retry( true );
 
     LifeChrono chrono;
@@ -268,6 +273,8 @@ SolverBelos::solveSystem( const vector_type& rhsFull,
         resetPreconditioner();
 
     return numIter;
+    */
+    return 0;
 }
 
 void
@@ -519,7 +526,8 @@ SolverBelos::setReusePreconditioner( const bool reusePreconditioner )
     M_reusePreconditioner = reusePreconditioner;
 }
 
-void setQuitOnFailure(const bool enable)
+void
+SolverBelos::setQuitOnFailure(const bool enable)
 {
     M_quitOnFailure = enable;
 }
