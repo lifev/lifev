@@ -419,6 +419,10 @@ setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fe
     M_localGradPressure.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),nDimensions,0,
                                                    M_pFESpace->fe().nbFEDof(),0,1));
 
+    /*
+    M_localGradPressure.reset(new localMatrix_type(M_pFESpace->fe().nbFEDof(),0,1,
+                                                   M_uFESpace->fe().nbFEDof(),nDimensions,0) );
+    */
     M_localDivergence.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),0,nDimensions,
                                                  M_pFESpace->fe().nbFEDof(),1,0));
     M_localMass.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
