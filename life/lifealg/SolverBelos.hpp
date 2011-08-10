@@ -169,7 +169,7 @@ public:
       @param dataFile GetPot object which contains the data about the preconditioner
       @param section Section the GetPot structure where to find the informations about the preconditioner
      */
-    void setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section );
+    void setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section, PrecApplicationType precType=RightPreconditioner );
 
     //! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
     /*!
@@ -179,7 +179,11 @@ public:
     */
     void buildPreconditioner();
 
-    //! Delete the stored preconditioner
+    //! Reset the stored preconditioner
+    /*!
+      Note: This method only affects the LifeV::Preconditioner (i.e. not the Epetra_Operators
+            used as preconditioner
+     */
     void resetPreconditioner();
 
     //! Return true if preconditioner has been setted

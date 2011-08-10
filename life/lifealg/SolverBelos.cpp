@@ -233,15 +233,21 @@ SolverBelos::printStatus()
 }
 
 void
-SolverBelos::setPreconditionerFromGetPot( const GetPot& dataFile,  const std::string& section )
+SolverBelos::setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section, PrecApplicationType precType )
 {
-    std::string precType = dataFile( ( section + "/prectype" ).data(), "Ifpack" );
-    M_rightPreconditioner.reset( PRECFactory::instance().createObject( precType ) );
-
-    // todo left preconditioner
-    ASSERT( M_rightPreconditioner.get() != 0, " Preconditioner not set" );
-
-    M_rightPreconditioner->setDataFromGetPot( dataFile, section );
+    std::string precName = dataFile( ( section + "/prectype" ).data(), "Ifpack" );
+    if ( precType == RightPreconditioner )
+    {
+        M_rightPreconditioner.reset( PRECFactory::instance().createObject( precName ) );
+        ASSERT( M_rightPreconditioner.get() != 0, " Preconditioner not set" );
+        M_rightPreconditioner->setDataFromGetPot( dataFile, section );
+    }
+    else
+    {
+        M_leftPreconditioner.reset( PRECFactory::instance().createObject( precName ) );
+        ASSERT( M_leftPreconditioner.get() != 0, " Preconditioner not set" );
+        M_leftPreconditioner->setDataFromGetPot( dataFile, section );
+    }
 }
 
 void
@@ -304,9 +310,6 @@ SolverBelos::resetPreconditioner()
 
     if ( M_rightPreconditioner )
         M_rightPreconditioner->resetPreconditioner();
-
-    M_problem->setLeftPrec( Teuchos::RCP<OP>( null ) );  // wrong todo
-    M_problem->setRightPrec( Teuchos::RCP<OP>( null ) ); //wrong
 }
 
 bool
@@ -314,7 +317,7 @@ SolverBelos::isPreconditionerSet() const
 {
     return ( M_leftPreconditioner.get() != 0 && M_leftPreconditioner->preconditionerCreated() ) ||
            ( M_rightPreconditioner.get() != 0 && M_rightPreconditioner->preconditionerCreated() ) ||
-             M_problem->isLeftPrec() || M_problem->isRightPrec(); // wrong todo
+             M_problem->isLeftPrec() || M_problem->isRightPrec();
 }
 
 void
