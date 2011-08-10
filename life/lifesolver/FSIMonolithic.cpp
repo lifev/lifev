@@ -155,6 +155,7 @@ FSIMonolithic::setUp( const GetPot& dataFile )
     M_maxIterSolver = dataFile( "linear_system/solver/max_iter", -1);
     M_diagonalScale    = dataFile( "linear_system/prec/diagonalScaling",  false );
     M_restarts         = dataFile( "exporter/start"  ,  0   );
+    setupTimeAdvance( dataFile );
 }
 
 void
@@ -262,11 +263,8 @@ FSIMonolithic::setDispSolid( const vector_Type& solution )
 void
 FSIMonolithic::buildSystem()
 {
-    M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-    Real xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep() *M_data->dataSolid()->dataTime()->timeStep());
-    M_solid->buildSystem(*M_solidBlock, xi,  M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
-    M_solidBlock->globalAssemble();
-    M_solid->rescaleMatrices();
+    M_solid->buildSystem( M_solidTimeAdvance->coefficientSecondDerivative( 0 )/(M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()));
+    //M_solid->rescaleMatrices();
 }
 
 #ifdef HAVE_TRILINOS_ANASAZI
@@ -342,13 +340,25 @@ void
 FSIMonolithic::updateSystem()
 {
 
-    this->M_ALETimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+//     vector_Type solution(*this->M_monolithicMap);
+//     monolithicToX(*this->M_un, solution, M_uFESpace->map(), UInt(0));
+//     this->M_fluidTimeAdvance->shiftRight(solution);
+//     solution *= 0.;
+//     monolithicToX(*this->M_un, solution, M_dFESpace->map(), M_offset);
+//     this->M_solidTimeAdvance->shiftRight(solution);
 
-    vector_Type solution(*this->M_monolithicMap);
-    monolithicToX(*this->M_un, solution, M_uFESpace->map(), UInt(0));
-    this->M_fluidTimeAdvance->shiftRight(solution);
+    this->M_fluidTimeAdvance->shiftRight(*M_un);
+    this->M_solidTimeAdvance->shiftRight(*M_un);
 
     M_meshMotion->updateSystem();
+
+    M_solid->material()->computeMatrix(*M_un, M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
+    M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));
+    *M_solidBlock += *M_solid->Mass();
+    *M_solidBlock += *M_solid->material()->stiff();
+    M_solidBlock->globalAssemble();
+    *M_solidBlock *= M_data->dataSolid()->dataTime()->timeStep();
+    M_solidBlock->spy("solid");
 
     this->fluid().updateUn(*this->M_un);
     *M_rhs*=0;
@@ -493,11 +503,9 @@ void
 FSIMonolithic::
 updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
-  //M_solid->updateSystem();
-  this->M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
-  //*rhsFluidCoupling += *M_solid->getRhsWithoutBC();
-  *rhsFluidCoupling += *M_solid->Mass() *  M_solidTimeAdvance->rhsContributionSecondDerivative() * M_data->dataSolid()->dataTime()->timeStep();
-
+    M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
+    //*rhsFluidCoupling += *M_solid->getRhsWithoutBC();
+    *rhsFluidCoupling += (*M_solid->Mass() *  M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()/M_solidTimeAdvance->coefficientSecondDerivative( 0 );
 }
 
 void
@@ -559,12 +567,7 @@ FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
     {
         updateSolidSystem(this->M_rhs);
     }
-    else
-    {
-        M_solid->computeMatrix( M_solidBlock,  *solution, 1.);
-    }
 
-    //M_solid->solidMatrix( M_solidBlock );
     M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap, 1 ) );
     *M_solidBlockPrec += *M_solidBlock;
 }

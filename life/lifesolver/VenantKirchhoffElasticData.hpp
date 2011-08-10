@@ -181,28 +181,28 @@ public:
      * @param material material ID (1 by default)
      * @return Solid poisson coefficient
      */
-    Real poisson( const UInt& material = 1 ) const;
+    Real poisson( const UInt& material ) const;
 
     //! Get solid young modulus
     /*!
      * @param material material ID (1 by default)
      * @return Solid young modulus
      */
-    Real young( const UInt& material = 1 ) const;
+    Real young( const UInt& material ) const;
 
     //! Get solid first lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid first Lame coefficient
      */
-    Real lambda( const UInt& material = 1 ) const;
+    Real lambda( const UInt& material ) const;
 
     //! Get solid second Lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid second Lame coefficient
      */
-    Real mu( const UInt& material = 1 ) const;
+    Real mu( const UInt& material ) const;
 
     //! Get FE order
     /*!

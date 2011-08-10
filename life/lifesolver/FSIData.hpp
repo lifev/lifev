@@ -61,10 +61,13 @@ public:
     //@{
 
     typedef OseenData                               dataFluid_Type;
-    typedef boost::shared_ptr< dataFluid_Type >     dataFluid_PtrType;
+    typedef boost::shared_ptr< dataFluid_Type >     dataFluidPtr_Type;
 
     typedef VenantKirchhoffElasticData              dataSolid_Type;
-    typedef boost::shared_ptr< dataSolid_Type >     dataSolid_PtrType;
+    typedef boost::shared_ptr< dataSolid_Type >     dataSolidPtr_Type;
+
+    typedef TimeData                                timeData_Type;
+    typedef boost::shared_ptr< timeData_Type >      timeDataPtr_Type;
 
     //@}
 
@@ -123,13 +126,22 @@ public:
     /*!
      * @param dataFluid shared_ptr to dataFluid container
      */
-    void setDataFluid( const dataFluid_PtrType& dataFluid ) { M_dataFluid = dataFluid; }
+    void setDataFluid( const dataFluidPtr_Type& dataFluid ) { M_dataFluid = dataFluid; }
 
     //! Set data solid container
     /*!
      * @param dataFluid shared_ptr to dataSolid container
      */
-    void setDataSolid( const dataSolid_PtrType& dataSolid ) { M_dataSolid = dataSolid; }
+    void setDataSolid( const dataSolidPtr_Type& dataSolid ) { M_dataSolid = dataSolid; }
+
+
+    //! Set data solid container
+    /*!
+     * @param dataFluid shared_ptr to dataSolid container
+     */
+    void setDataALE( const timeDataPtr_Type& dataALE ) { M_dataALE = dataALE; }
+
+    const timeDataPtr_Type& dataALE ( ) const { return M_dataALE; }
 
     //@}
 
@@ -141,13 +153,13 @@ public:
     /*!
      * @return shared_ptr to dataFluid container
      */
-    const dataFluid_PtrType& dataFluid() const { return M_dataFluid; }
+    const dataFluidPtr_Type& dataFluid() const { return M_dataFluid; }
 
     //! Get data solid container
     /*!
      * @return shared_ptr to dataSolid container
      */
-    const dataSolid_PtrType& dataSolid() const { return M_dataSolid; }
+    const dataSolidPtr_Type& dataSolid() const { return M_dataSolid; }
 
     //! Get maximum number of subiterations
     /*!
@@ -250,24 +262,25 @@ public:
      */
     inline Real restartTimeStep() const { return M_restartTimeStep; }
 
-    //! Get the Newmark parameters for ALE
-    /*!
-     * @return the Newmark parameters for ALE
-     */
-    inline std::vector<Real> timeALEParameters(){return M_timeALEParameters; }
+//     //! Get the Newmark parameters for ALE
+//     /*!
+//      * @return the Newmark parameters for ALE
+//      */
+//     inline std::vector<Real> timeALEParameters(){return M_timeALEParameters; }
 
-    //! Get the BDF order for ALE
-    /*!
-     * @return the BDF order for ALE
-     */
-    inline Real timeALEOrderBDF(){return M_timeALEOrderBDF; }
+//     //! Get the BDF order for ALE
+//     /*!
+//      * @return the BDF order for ALE
+//      */
+//     inline Real timeALEOrderBDF(){return M_timeALEOrderBDF; }
 
     //@}
 
 private:
 
-    dataFluid_PtrType             M_dataFluid;
-    dataSolid_PtrType             M_dataSolid;
+    dataFluidPtr_Type             M_dataFluid;
+    dataSolidPtr_Type             M_dataSolid;
+    timeDataPtr_Type              M_dataALE;
 
     // Problem - Non Linear Richardson parameters
     UInt                          M_maxSubIterationNumber;
@@ -295,8 +308,8 @@ private:
     Real                          M_interfaceTolerance;
 
     // ALE time advance:
-    std::vector<Real>             M_timeALEParameters;
-    Real                          M_timeALEOrderBDF;
+//     std::vector<Real>             M_timeALEParameters;
+//     Real                          M_timeALEOrderBDF;
 
     Real                          M_restartTimeStep;
 };

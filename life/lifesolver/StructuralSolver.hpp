@@ -38,7 +38,7 @@
 #ifndef _STRUCTURALSOLVER_H_
 #define _STRUCTURALSOLVER_H_ 1
 
-#include<boost/scoped_ptr.hpp>
+//#include<boost/scoped_ptr.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -197,9 +197,9 @@ public:
   void computeRightHandSide( void );
 
     //! Compute the mass matrix and it calls the method to build the linear part of the stiffness matrix of the material class
-    void buildSystem( const Real& timeAdvanceCoefficient );
+    void buildSystem( const Real& coefficient );
 
-    void buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor); // used for monolithic
+    //void buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor); // used for monolithic
 
   //! Compute the mass matrix and the linear part of the stiffness matrix
   /*!
@@ -305,7 +305,7 @@ public:
   void initialize( vectorPtr_Type d0,  vectorPtr_Type w0 = vectorPtr_Type(),  vectorPtr_Type a0 = vectorPtr_Type() );
 
   //! Computes the velocity and acceleration vector at the n-th time step
-  void updateVelAndAcceleration();
+    //void updateVelAndAcceleration();
 
   //! Reduce the complete solution to the solution on the pocessor with rank 0
   /*!
@@ -315,7 +315,7 @@ public:
   void reduceSolution( Vector& displacement, Vector& velocity );
 
   //! Multiply the mass matrix and the linear stiffness matrix by the rescaleFactor
-  void rescaleMatrices(); // used for monolithic
+    //  void rescaleMatrices(); // used for monolithic
 
   /**
      in the linear case the solid matrix is constant, thus it does not need to be recomputed.
@@ -367,7 +367,9 @@ public:
   MapEpetra   const& map()       const { return *M_localMap; }
 
   //! Get the Displayer object
-  Displayer   const& displayer() const { return *M_Displayer; }
+    Displayer   const& displayer() const { return *M_Displayer; }
+
+    boost::shared_ptr<const Displayer>   const& displayerPtr() const { return M_Displayer; }
 
   //! Get the matrix containing the mass mtrix and the linear part of the stiffness matrix
   //matrixPtr_Type const MassStiff() const {return M_massStiff; }
@@ -409,6 +411,11 @@ public:
     are applied and the matrices are assembled.
   */
   const UInt& offset() const { return M_offset; }
+
+  /*! Get the offset parameter. It is taken into account when the boundary conditions
+    are applied and the matrices are assembled.
+  */
+    const materialPtr_Type& material() const { return M_material; }
 
   /**
      Do nothing in the linear case: the matrix remains constant. Otherwise substitute the matrix with an updated one
@@ -461,7 +468,7 @@ protected:
 
   boost::shared_ptr<FESpace<Mesh, MapEpetra> >      M_FESpace;
 
-  boost::scoped_ptr<Displayer>         M_Displayer;
+  boost::shared_ptr<const Displayer>         M_Displayer;
 
   Int                                  M_me;
 
@@ -509,9 +516,9 @@ protected:
   //! Map Epetra
   boost::shared_ptr<const MapEpetra>   M_localMap;
 
-  //! Matrix M: mass 
+  //! Matrix M: mass
   matrixPtr_Type                       M_mass;
- 
+
   //! Matrix mass: M * xi /(dt*dt)
   matrixPtr_Type                       M_massTimeAdvanceCoefficient;
 
@@ -644,8 +651,6 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( void )
   updateSystem(M_tempMatrix);
 }
 
-
-
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
 {
@@ -658,12 +663,12 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
     M_material->computeMatrix(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
 
 
-    stiff.reset(new matrix_Type(*this->M_localMap));
+    //stiff.reset(new matrix_Type(*this->M_localMap));
     *stiff += *this->M_material->stiff();
     stiff->globalAssemble();
 
   /*
-  //Matteo: timeAdvance method updates the update Right Hand Side;  
+  //Matteo: timeAdvance method updates the update Right Hand Side;
    *this->M_rhsNoBC *= 0.0;
 
     computeRightHandSide();
@@ -801,18 +806,18 @@ void StructuralSolver<Mesh, SolverType>::computeRightHandSide( void )
 
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& timeAdvanceCoefficient )
+void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& coefficient )
 {
   M_Displayer->leaderPrint("  S-  Computing constant matrices ...          ");
   LifeChrono chrono;
   chrono.start();
 
-  computeMassMatrix();
-  
+  computeMassMatrix( coefficient );
+
   // Matteo  compute \xi_0 *Mass* \eta/(dt*dt)
-  *M_massTimeAdvanceCoefficient = *M_mass;
-     *M_massTimeAdvanceCoefficient *= timeAdvanceCoefficient / ( M_data->dataTime()->timeStep() * M_data->dataTime()->timeStep() );
-  
+  //*M_massTimeAdvanceCoefficient = *M_mass;
+  //*M_massTimeAdvanceCoefficient *= /*timeAdvanceCoefficient*/1 / ( M_data->dataTime()->timeStep() * M_data->dataTime()->timeStep() );
+
   M_material->computeLinearStiffMatrix(this->M_data);
 
   chrono.stop();
@@ -820,10 +825,10 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& timeAdvanceCoe
 }
 
 
-template <typename Mesh, typename SolverType>
-void  StructuralSolver<Mesh, SolverType>::buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor)
-{}
-; // used for monolithic
+// template <typename Mesh, typename SolverType>
+// void  StructuralSolver<Mesh, SolverType>::buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor)
+// {}
+// ;
 
 
 template <typename Mesh, typename SolverType>
@@ -847,7 +852,7 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
       M_elmatM->zero();
 
       // mass
-      mass(  M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
+      mass( factor * M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
 
       // assembling
       for ( UInt ic = 0; ic < nc; ic++ )
@@ -857,7 +862,7 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
       }
     }
 
-  getComunicator()->Barrier();
+  //getComunicator()->Barrier();
 
   M_mass->globalAssemble();
 
@@ -981,8 +986,8 @@ StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
   c << "****** Data of the Material************" << std::endl;
   c << "Thickness:    " << M_data->thickness() << std::endl;
   c << "Density:      " << M_data->rho() << std::endl;
-  c << "Young:        " << M_data->young() << std::endl;
-  c << "Poisson:      " << M_data->poisson() << std::endl;
+  c << "Young:        " << M_data->young(1) << std::endl;
+  c << "Poisson:      " << M_data->poisson(1) << std::endl;
 //  c << "Theta:        " << M_theta << std::endl;
 //  c << "Zeta:         " << M_zeta << std::endl;
   c << "***************************************" << std::endl;
@@ -997,7 +1002,7 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     chrono.start();
 
     //It is right to do globalAssemble() inside the M_material class
-    M_material->computeMatrix( sol, 1., this->M_data, this->M_Displayer);
+    M_material->computeMatrix( sol, 1., this->M_data, M_Displayer);
 
     stiff.reset(new matrix_Type(*this->M_localMap));
     *stiff +=*this->M_material->stiff();
@@ -1111,17 +1116,17 @@ StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
 
-	      s+= (2*M_data->mu() + M_data->lambda())*
+	      s+= (2*M_data->mu(1) + M_data->lambda(1))*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 0 , ig )*
 		(*M_disp)[idof + 0*M_FESpace->dim()];
 
-	      s+= M_data->lambda()*
+	      s+= M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 1 , ig )*
 		(*M_disp)[idof + 1*M_FESpace->dim()];
 
-	      s+= M_data->lambda()*
+	      s+= M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 2 , ig )*
 		(*M_disp)[idof + 2*M_FESpace->dim()];
@@ -1147,17 +1152,17 @@ StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
 
-	      s += M_data->lambda()*
+	      s += M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 0 , ig )*
 		(*M_disp)[idof + 0*M_FESpace->dim()];
 
-	      s += (2*M_data->mu() + M_data->lambda())*
+	      s += (2*M_data->mu(1) + M_data->lambda(1))*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 1 , ig )*
 		(*M_disp)[idof + 1*M_FESpace->dim()];
 
-	      s += M_data->lambda()*
+	      s += M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 2 , ig )*
 		(*M_disp)[idof + 2*M_FESpace->dim()];
@@ -1185,17 +1190,17 @@ StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
 
-	      s += M_data->lambda()*
+	      s += M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 0 , ig )*
 		(*M_disp)[idof + 0*M_FESpace->dim()];
 
-	      s += M_data->lambda()*
+	      s += M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 1 , ig )*
 		(*M_disp)[idof + 1*M_FESpace->dim()];
 
-	      s += (2*M_data->mu() + M_data->lambda())*
+	      s += (2*M_data->mu(1) + M_data->lambda(1))*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 2 , ig )*
 		(*M_disp)[idof + 2*M_FESpace->dim()];
@@ -1278,15 +1283,15 @@ StructuralSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, Vector
     }
 }
 
-/*
-template <typename Mesh, typename SolverType>
-void
-StructuralSolver<Mesh, SolverType>::rescaleMatrices()
-{
-  *M_mass *=(M_data->dataTime()->timeStep()*M_rescaleFactor);
-  *M_linearStiff *= (M_data->dataTime()->timeStep()*M_rescaleFactor);
-}
-*/
+
+// template <typename Mesh, typename SolverType>
+// void
+// StructuralSolver<Mesh, SolverType>::rescaleMatrices()
+// {
+//     *M_mass *=(M_data->dataTime()->timeStep()*M_rescaleFactor);
+//     //*M_linearStiff *= (M_data->dataTime()->timeStep()*M_rescaleFactor);
+// }
+
 template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )

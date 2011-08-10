@@ -100,7 +100,7 @@ public:
   typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
 
   typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
-  typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
+    typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
   typedef FactorySingleton<Factory<StructuralMaterial<Mesh>,std::string> >  StructureMaterialFactory;
   //@}
@@ -148,11 +148,11 @@ public:
     \param stiff: stiffness matrix provided from outside
     \param disp: solution at the k-th iteration of NonLinearRichardson Method
     \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-    \param displayer: a pointer to the Dysplaier member in the StructuralSolver class    
+    \param displayer: a pointer to the Displayer member in the StructuralSolver class
   */
   virtual  void updateNonLinearJacobianMatrix( matrixPtr_Type& /*stiff*/, const vector_Type& /*disp*/, const dataPtr_Type& /*dataMaterial*/, const displayerPtr_Type& /*displayer*/ ) = 0;
 
-    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
+    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
@@ -162,7 +162,7 @@ public:
     */
     virtual  void computeMatrix( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
 
-    //! Computes the nonlinear part of Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
+    //! Computes the nonlinear part of Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same. This is virtual and not pure virtual since in the linear St. Venant-Kirchhoff law it is not needed.
     /*!
       \param sol:  the solution vector

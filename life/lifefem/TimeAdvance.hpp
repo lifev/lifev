@@ -181,7 +181,7 @@ public:
      @param timeStep defined the  time step need to compute the
      @return  rhsV the first order Rhs
      */
-     virtual  feVectorType updateRHSFirstDerivative(const Real& timeStep = 1 )  = 0;
+     virtual  void updateRHSFirstDerivative(const Real& timeStep = 1 )  = 0;
 
      //! Update the right hand side \f$ f_W \f$ of the time derivative formula
      /*
@@ -189,7 +189,7 @@ public:
      @param timeStep defined the  time step need to compute the \f$ f_W \f$
      @return  rhsW the fsecond order Rhs
      */
-     virtual feVectorType updateRHSSecondDerivative(const Real& timeStep = 1 ) = 0;
+     virtual void updateRHSSecondDerivative(const Real& timeStep = 1 ) = 0;
 
      //!Show the properties  of temporal scheme
      /*!
@@ -340,7 +340,7 @@ public:
     \f$u^{n+1}\f$ defined by the n stored state vectors
     @returns  extrap of state vector \f$V^*\f$
     */
-    virtual feVectorType extrapolationVelocity() const  = 0;
+    virtual void extrapolationVelocity(feVectorType& extrapolation) const  = 0;
 
     //! Return the state vector
      /*!
@@ -353,10 +353,17 @@ public:
     @param \f$i\f$ index of element
     @returns the i-th element of state vector
     */
-    const  feVectorType singleElement(const UInt& i)  const;
+    const  feVectorType& singleElement(const UInt& i)  const;
 
     //! Return the last solution (the first element of state vector)
-    const  feVectorType solution()  const;
+    const  feVectorType& solution()  const;
+
+    void setSolution( feVectorType& solution )
+    {
+        delete M_unknowns[0];
+        M_unknowns[0]= new feVectorType(solution);
+    }
+
 
     //! Return the current velocity
     virtual  feVectorType velocity() const = 0;
@@ -368,7 +375,7 @@ public:
     this method is used for example in FSI to return the value of solid
     in the internal loop
     */
-    const feVectorType  velocity(const  feVectorType& u);
+    feVectorType  velocity(const  feVectorType& u);
 
     //!Return the current accelerate
     virtual feVectorType accelerate() const =0;
@@ -379,19 +386,19 @@ public:
     @return the accelerate associated to \f$u\f$;
     this method is used for example in FSI to return the value of solid in the internal loop;
      */
-    const feVectorType accelerate(const  feVectorType& u);
+    feVectorType accelerate(const  feVectorType& u);
 
     //!Return velocity's right hand side
     /*!
     @returns velocity's right hand side
     */
-    inline const feVectorType rhsContributionFirstDerivative() {return *M_rhsContribution[0];}
+    inline const feVectorType& rhsContributionFirstDerivative() {return *M_rhsContribution[0];}
 
     //! Return accelerate's right hand side
     /*!
     @return accelerate's right hand side
     */
-    inline const feVectorType rhsContributionSecondDerivative(){return *M_rhsContribution[1];}
+    inline const feVectorType& rhsContributionSecondDerivative(){return *M_rhsContribution[1];}
 
     //! Return order of accuracy of the scheme
     /*!
@@ -573,27 +580,26 @@ TimeAdvance<feVectorType>::coefficientSecondDerivative( const UInt& i )  const
 }
 
 template<typename feVectorType>
-const feVectorType
+const feVectorType&
 TimeAdvance<feVectorType>::solution() const
 {
-    feVectorType solution(*M_unknowns[0]);
-    return solution;
+   return *M_unknowns[0];
 }
 
+
 template<typename feVectorType>
-const feVectorType
+const feVectorType&
 TimeAdvance<feVectorType>::singleElement( const UInt& i) const
 {
 // Pay attention: i is c-based indexed
     ASSERT( i < M_size,
             "Error there isn't unk(i), i must be shorter than M_size" );
 
-    feVectorType u(*M_unknowns[i]);
-    return u;
+    return *M_unknowns[i];
 }
 
 template<typename feVectorType>
-const feVectorType
+feVectorType
 TimeAdvance<feVectorType>::velocity( const feVectorType& u)
 {  // you should replace any call to vnk() with a call to vnk()
     feVectorType velocity( u );
@@ -603,7 +609,7 @@ TimeAdvance<feVectorType>::velocity( const feVectorType& u)
 }
 
 template<typename feVectorType>
-const feVectorType
+feVectorType
 TimeAdvance<feVectorType>::accelerate(const feVectorType& u)
 {
     feVectorType accelerate(u);

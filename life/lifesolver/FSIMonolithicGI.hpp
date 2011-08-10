@@ -113,7 +113,22 @@ public:
     //! Initializes the system with vectors
     void initialize( const vector_Type& un )
     {
-        M_un.reset( new vector_Type( un ) );
+        super_Type::initialize( vectorPtr_Type( new vector_Type( un ) ));
+
+        //TEMPORARY TEST INITIALIZATION//
+        std::vector<vector_Type> fluidDisp;
+        std::vector<vector_Type> structureDisp;
+        std::vector<vector_Type> fluidVel;
+        vector_Type meshDisp(M_mmFESpace->map());
+        meshDisp.subset(*M_un, M_solidAndFluidDim + nDimensions*M_interface );
+        fluidDisp.push_back(meshDisp);
+        structureDisp.push_back(*M_un);
+        structureDisp.push_back(*M_un);
+        structureDisp.push_back(*M_un);
+        fluidVel.push_back(*M_un);
+        initializeTimeAdvance(fluidVel, structureDisp, fluidDisp);
+        //END OF TEMPORARY TEST INITIALIZATION//
+
         M_uk.reset( new vector_Type( un ) );
     }
 

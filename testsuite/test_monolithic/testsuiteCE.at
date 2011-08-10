@@ -102,6 +102,11 @@ initialtime		= 0.
 endtime			= 0.004
 timestep		= 0.001
 BDF_order		= 1
+theta           = 0.5
+zeta            = 0.5
+rhoInf          = 1
+typeOfGeneralizedAlpha            = HHT
+
 
 [../space_discretization]
 mesh_dir  = ./
@@ -150,6 +155,10 @@ initialtime		= 0.
 endtime			= 0.004
 timestep		= 0.001
 BDF_order		= 1
+theta           = 0.5
+zeta            = 0.5
+rhoInf          = 1
+typeOfGeneralizedAlpha            = HHT
 
 [../space_discretization]
 mesh_dir  = ./ #test_tubes/  # the directory where the mesh file is
@@ -200,7 +209,7 @@ displayList        = false
 reuse           = false
 prectype        = Composed
 rescale_factor = 1. # solid matrix rescale factor
-displayList     = true
+displayList     = false
 entry           = 0.0
 
 [./robin]
@@ -255,7 +264,7 @@ pre_or_post = pre
 
 [../ML2]  # preconditioner for the second factor in case our choice was ML
 default_parameter_list = NSSA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
-displayList = true
+displayList = false
 prec_type = MGV # MGV, MGW
           # one-level-postsmoothing , two-level-additive
           # two-level-hybrid , two-level-hybrid2
@@ -415,6 +424,17 @@ drop            = 1.00e-4
 ilut_fill       = 4
 tol             = 1.e-10
 keep_info       = 1
+
+[../time_discretization]
+initialtime		= 0.
+endtime			= 0.01
+timestep		= 0.001
+BDF_order		= 1
+theta           = 0.5
+zeta            = 0.5
+rhoInf          = 1
+typeOfGeneralizedAlpha            = HHT
+
 
 [../prec]
 prectype        = Ifpack

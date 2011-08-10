@@ -51,17 +51,16 @@ class VenantKirchhoffMaterialLinear :
 
   public:
     typedef StructuralMaterial<Mesh>                 super;
-  
-  
-    typedef VenantKirchhoffElasticData               data_Type;
+
+    typedef typename  super::data_Type                         data_Type;
 
     typedef typename super::vector_Type              vector_Type;
     typedef typename super::matrix_Type              matrix_Type;
 
     typedef typename super::matrixPtr_Type           matrixPtr_Type;
-    typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
-    typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
-  
+    typedef typename super::dataPtr_Type             dataPtr_Type;
+    typedef typename super::displayerPtr_Type        displayerPtr_Type;
+
 
  //@}
 
@@ -117,7 +116,7 @@ class VenantKirchhoffMaterialLinear :
                                         const displayerPtr_Type& /*displayer*/);
 
 
-    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
+    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
@@ -183,8 +182,8 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiffMatrix(dataPtr_Type&
 	Real mu = dataMaterial->mu(marker);
 	Real lambda = dataMaterial->lambda(marker);
 
-        stiff_strain(    2.0 * mu, *this->M_elmatK, this->M_FESpace->fe() );
-        stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );
+    stiff_strain( mu, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 1. (instead of 2.)
+    stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 0.5 (instead of 1.)
 
         // assembling
         for ( UInt ic = 0; ic < nc; ic++ )

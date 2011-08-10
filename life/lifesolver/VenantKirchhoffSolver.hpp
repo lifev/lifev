@@ -423,10 +423,10 @@ public:
   //  const Real& density()   const { return M_data->rho(); }
 
   //! Get the Young modulus
-  Real getYoung()            const { return M_data->young(); }
+  Real getYoung()            const { return M_data->young(1); }
 
   //! Get the Poisson coefficient
-  Real getPoisson()          const { return M_data->poisson(); }
+  Real getPoisson()          const { return M_data->poisson(1); }
 
   //! Get the density
   const Real& getRho()       const { return M_data->rho(); }
@@ -854,8 +854,8 @@ VenantKirchhoffSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
   c << "****** Data of the Material************" << std::endl;
   c << "Thickness:   " << M_data->thickness();
   c << "Density:   " << M_data->rho();
-  c << "Young:   " << M_data->young();
-  c << "Poisson:   " << M_data->poisson();
+  c << "Young:   " << M_data->young(1);
+  c << "Poisson:   " << M_data->poisson(1);
   c << "***************************************" << std::endl;
 }
 
@@ -912,17 +912,17 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i);
 
-	      s+= (2*M_data->mu() + M_data->lambda())*
+	      s+= (2*M_data->mu(1) + M_data->lambda(1))*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 0 , ig )*
 		(*M_disp)[idof + 0*M_FESpace->dim()];
 
-	      s+= M_data->lambda()*
+	      s+= M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 1 , ig )*
 		(*M_disp)[idof + 1*M_FESpace->dim()];
 
-	      s+= M_data->lambda()*
+	      s+= M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 2 , ig )*
 		(*M_disp)[idof + 2*M_FESpace->dim()];
@@ -948,17 +948,17 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i);
 
-	      s += M_data->lambda()*
+	      s += M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 0 , ig )*
 		(*M_disp)[idof + 0*M_FESpace->dim()];
 
-	      s += (2*M_data->mu() + M_data->lambda())*
+	      s += (2*M_data->mu(1) + M_data->lambda(1))*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 1 , ig )*
 		(*M_disp)[idof + 1*M_FESpace->dim()];
 
-	      s += M_data->lambda()*
+	      s += M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 2 , ig )*
 		(*M_disp)[idof + 2*M_FESpace->dim()];
@@ -986,17 +986,17 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i);
 
-	      s += M_data->lambda()*
+	      s += M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 0 , ig )*
 		(*M_disp)[idof + 0*M_FESpace->dim()];
 
-	      s += M_data->lambda()*
+	      s += M_data->lambda(1)*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 1 , ig )*
 		(*M_disp)[idof + 1*M_FESpace->dim()];
 
-	      s += (2*M_data->mu() + M_data->lambda())*
+	      s += (2*M_data->mu(1) + M_data->lambda(1))*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 2 , ig )*
 		(*M_disp)[idof + 2*M_FESpace->dim()];

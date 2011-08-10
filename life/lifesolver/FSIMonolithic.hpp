@@ -504,7 +504,6 @@ protected:
     {
         setSolution( solution );
         setDispSolid( solution );
-        M_solid->updateVelAndAcceleration();
     }
 
     //! Constructs the solid FESpace

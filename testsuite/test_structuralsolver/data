@@ -1,8 +1,8 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Name Surname <name.surname@epfl.ch>
 #           Date: 00-00-0000
@@ -28,13 +28,13 @@ save       = 1
   density   = 1.2               # density
   young     = 8.0E6
   poisson   = 0.4
-  solidType = nonlinearVenantKirchhoff
+  solidType = nonlinearVenantKirchhoff #nonlinearVenantKirchhoff, linearVenantKirchhoff
 
   [../time_discretization]
   initialtime = 0.
   endtime     = 0.003
   timestep    = 0.001
-  theta       = 0.35 
+  theta       = 0.35
   zeta        = 0.75
   BDF_order   = 1
 

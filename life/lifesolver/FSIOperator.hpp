@@ -158,7 +158,8 @@ public:
     typedef std::map<ID, ID>::const_iterator                                        iterator_Type;
     typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
     typedef Displayer::commPtr_Type/*Displayer::commPtr_Type*/                      commPtr_Type;
-
+    typedef GetPot                                                                  dataFile_Type;
+    typedef boost::shared_ptr<dataFile_Type>                                        dataFilePtr_Type;
     //@}
 
 
@@ -179,7 +180,7 @@ public:
     //@{
 
     //! initializes the GetPot data file
-    virtual void setDataFile( const GetPot& data );
+    virtual void setDataFile( const dataFile_Type& data );
 
     //! sets the space discretization parameters
     /*!
@@ -304,10 +305,10 @@ public:
      * @param solidVelocity velocity of the solid
      * @param solidDisplacement displacement of the solid
      */
-    virtual void initialize( const vectorPtr_Type& fluidVelocityAndPressure,
-                             const vectorPtr_Type& fluidDisplacement,
-                             const vectorPtr_Type& solidVelocity,
-                             const vectorPtr_Type& solidDisplacement );
+//     virtual void initializeTimeAdvance( const vectorPtr_Type& fluidVelocityAndPressure,
+//                              const vectorPtr_Type& fluidDisplacement,
+//                              const vectorPtr_Type& solidVelocity,
+//                              const vectorPtr_Type& solidDisplacement );
 
     //@}
 
@@ -349,7 +350,7 @@ public:
     /**
        \todo{a general time advancing class should be used everywhere}
      */
-     void initializeTimeAdvance( const std::vector<vector_Type>& initialFluidVel, const std::vector<vector_Type>& initialSolidDisp,const std::vector<vector_Type>&  initialFluiDisp);
+    void initializeTimeAdvance( const std::vector<vector_Type>& initialFluidVel, const std::vector<vector_Type>& initialSolidDisp,const std::vector<vector_Type>&  initialFluiDisp);
 
     //! initializes the fluid solver with vectors
     /**
@@ -513,9 +514,9 @@ public:
     //!getter for the FSI data container
     const data_Type& data()                                       const { return *M_data; }
     //!getter for the fluid data container
-    const data_Type::dataFluid_PtrType& dataFluid()               const { return M_data->dataFluid(); }
+    const data_Type::dataFluidPtr_Type& dataFluid()               const { return M_data->dataFluid(); }
     //!getter for the solid data container
-    const data_Type::dataSolid_PtrType& dataSolid()               const { return M_data->dataSolid(); }
+    const data_Type::dataSolidPtr_Type& dataSolid()               const { return M_data->dataSolid(); }
 
     //!getter for the unpartitioned fluid mesh
     mesh_Type& fluidMesh()                                        const { return *M_fluidMesh; }
@@ -772,7 +773,7 @@ public:
     void setSolutionDerivative( const vector_Type& solutionDerivative ) { M_lambdaDot.reset( new vector_Type( solutionDerivative ) ); }
 
     void
-    setupTimeAdvance( );
+    setupTimeAdvance( const dataFile_Type& dataFile );
 
     //@}
 
@@ -878,7 +879,7 @@ protected:
 
     //boost::shared_ptr<TimeAdvanceBDF<vector_Type> >             M_bdf;
 
-    GetPot                                            M_dataFile;
+    dataFile_Type                                     M_dataFile;
 
     boost::shared_ptr<MeshData>                       M_meshDataFluid;
     boost::shared_ptr<MeshData>                       M_meshDataSolid;

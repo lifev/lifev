@@ -130,9 +130,9 @@ FSIMonolithicGI::updateSystem()
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
+    M_un.reset(new vector_Type(*M_uk));
     super_Type::updateSystem();
     M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.`
-    M_un.reset(new vector_Type(*M_uk));
 }
 
 void
@@ -161,6 +161,12 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
+        if( iter==0 )
+        {
+            M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
+            M_ALETimeAdvance->shiftRight(*meshDisp);
+        }
+
         meshDispOld->subset(*M_un, offset);
 
         //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
@@ -171,17 +177,19 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
-	  *meshDisp = this->M_ALETimeAdvance->extrapolationVelocity( );
+            this->M_ALETimeAdvance->extrapolationVelocity( *meshDisp );
+            //*meshDisp = this->M_ALETimeAdvance->velocity( );
 
-	  //meshDisp = meshDispOld;// at time n;
-	  //*meshDispDiff -= M_meshMotion->dispOld();//at time n-1
+            //meshDisp = meshDispOld;// at time n;
+            //*meshDispDiff -= M_meshMotion->dispOld();//at time n-1
         }
         else
         {
-	  *meshDisp = this->M_ALETimeAdvance->velocity( *meshDisp );
+            M_ALETimeAdvance->setSolution(*meshDisp);
+            *meshDisp = this->M_ALETimeAdvance->velocity( );
             //*meshDispDiff -= *meshDispOld;//relative displacement
         }
-        //*meshDispDiff *= -alpha;// -w, mesh velocity
+        //*meshDisp *= -alpha;// -w, mesh velocity
         mmRep = *meshDisp;
 
         interpolateVelocity(mmRep, *M_beta);
@@ -189,12 +197,14 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
         if (!M_convectiveTermDer)
-	  *fluid = this->M_fluidTimeAdvance->extrapolation();
-	//fluid->subset(*M_un, 0);
+        {
+            *fluid = this->M_fluidTimeAdvance->extrapolation();
+            //fluid->subset(*M_un, 0);
+        }
         else
-	  {
-	    fluid->subset(disp, 0);
-	  }
+        {
+            fluid->subset(disp, 0);
+        }
         *M_beta += *fluid; /*M_un or disp, it could be also M_uk in a FP strategy*/
 
         assembleSolidBlock( iter, M_uk );

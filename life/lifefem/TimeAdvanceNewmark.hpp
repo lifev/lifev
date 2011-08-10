@@ -164,14 +164,14 @@ public:
     Set and Return the right hand side \f$ f_V \f$ of the time derivative formula
     @param timeStep defined the  time step need to compute the
     */
-    feVectorType updateRHSFirstDerivative(const Real& timeStep = 1 );
+    void updateRHSFirstDerivative(const Real& timeStep = 1 );
 
     //! Update the right hand side \f$ f_W \f$ of the time derivative formula
     /*
     Set and Return the right hand side \f$ f_W \f$ of the time derivative formula
     @param timeStep defined the  time step need to compute the \f$ f_W \f$
     */
-   feVectorType updateRHSSecondDerivative(const Real& timeStep = 1 );
+    void updateRHSSecondDerivative(const Real& timeStep = 1 );
 
     //!Show the properties  of temporal scheme
     void showMe() const;
@@ -262,7 +262,7 @@ public:
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
-    feVectorType  extrapolationVelocity() const;
+    void  extrapolationVelocity(feVectorType& extrapolation) const;
 
     //! Return the current velocity
     feVectorType velocity()  const;
@@ -335,40 +335,45 @@ void TimeAdvanceNewmark <feVectorType>::shiftRight(const feVectorType& solution)
 }
 
 template<typename feVectorType>
-feVectorType
+//const feVectorType&
+void
 TimeAdvanceNewmark<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
 {
     feVectorContainerPtrIterate_Type it  =  this->M_rhsContribution.begin();
 
-    feVectorType fv(* this->M_unknowns[0]);
+    //feVectorType fv(*this->M_unknowns[0]);
 
-    fv *=  this->M_alpha[ 1 ] / timeStep ;
+    *it = new feVectorType(*this->M_unknowns[0]);
+
+    **it *=  this->M_alpha[ 1 ] / timeStep ;
 
     for (UInt i= 1; i  < this->M_firstOrderDerivateSize; ++i )
-        fv += ( this->M_alpha[ i+1 ] * pow( timeStep, static_cast<Real>(i - 1 ) ) ) *  (* this->M_unknowns[ i ]);
+        **it += ( this->M_alpha[ i+1 ] * pow( timeStep, static_cast<Real>(i - 1 ) ) ) *  (* this->M_unknowns[ i ]);
 
-    *it = new feVectorType(fv);
+    //*it = new feVectorType(fv);
 
-    return fv;
+    //return fv;
 }
 
 template<typename feVectorType>
-feVectorType
+void
 TimeAdvanceNewmark<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
 {
-    feVectorContainerPtrIterate_Type it  =  this->M_rhsContribution.end()-1;
+    feVectorContainerPtrIterate_Type it =  this->M_rhsContribution.end()-1;
 
-    feVectorType fw(* this->M_unknowns[0]);
+    //feVectorType fw(* this->M_unknowns[0]);
 
-    fw *=  this->M_xi[ 1 ] /(timeStep * timeStep) ;
+    *it = new feVectorType(*this->M_unknowns[0]);
+
+    **it *=  this->M_xi[ 1 ] /(timeStep * timeStep) ;
 
     for ( UInt i = 1;  i < this->M_secondOrderDerivateSize; ++i )
 
-      fw += ( this->M_xi[ i+1 ] * pow(timeStep, static_cast<Real>(i - 2) ) ) * ( *this->M_unknowns[ i ]);
+        **it += ( this->M_xi[ i+1 ] * pow(timeStep, static_cast<Real>(i - 2) ) ) * ( *this->M_unknowns[ i ]);
 
-    *it = new feVectorType(fw);
+    //*it = new feVectorType(fw);
 
-    return fw;
+    //return fw;
 }
 
 template<typename feVectorType>
@@ -639,13 +644,11 @@ TimeAdvanceNewmark<feVectorType>::extrapolation()  const
 }
 
 template<typename feVectorType>
-feVectorType
-TimeAdvanceNewmark<feVectorType>::extrapolationVelocity() const
+void
+TimeAdvanceNewmark<feVectorType>::extrapolationVelocity(feVectorType& extrapolation) const
 {
-    feVectorType extrapolation( *this->M_unknowns[1]);
+    extrapolation = *this->M_unknowns[1];
     extrapolation += this->M_timeStep * ( *this->M_unknowns[ 2 ]);
-
-    return extrapolation;
 }
 
 template<typename feVectorType>

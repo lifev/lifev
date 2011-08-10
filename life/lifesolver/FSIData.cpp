@@ -124,6 +124,9 @@ FSIData::operator=( const FSIData& FSIData )
 void
 FSIData::setup( const GetPot& dataFile, const std::string& section )
 {
+    if ( !M_dataALE.get() )
+        M_dataALE.reset( new timeData_Type( dataFile, "mesh_motion/time_discretization" ) );
+
     M_dataFluid->setup( dataFile );
     M_dataSolid->setup( dataFile );
 
