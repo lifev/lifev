@@ -232,8 +232,14 @@ addToCoefficients( UInt const numRows, UInt const numColumns,
         columnIndices[i]+=M_firstColumnIndex;
     }
 
+// Avoid a warning when compiling in opt
+#ifdef NDEBUG
+    M_matrix->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
+                                  &columnIndices[0], localValues, format );
+#else
     Int ierr = M_matrix->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
                                              &columnIndices[0], localValues, format );
+#endif
 
     ASSERT( ierr != -2, " \n <!> Error in block matrix insertion <!> \n Code : -2 \n Possible cause : try to insert a new element in a closed matrix");
     ASSERT( ierr >= 0 , " \n <!> Unknown error in block matrix insertion <!> ");
