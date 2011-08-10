@@ -122,12 +122,21 @@ public:
     //! @name Set Methods
     //@{
 
-    //! @name  Set Methods
-    //@{
     /*! Set the size of the blocks of the vector
      *  @param blockSizes Sizes of the blocks
      */
     void setBlockStructure( const std::vector<UInt>& blockSizes );
+
+    //! Reset the block structure using the blocks of a vector of map
+    /*
+      The resulting block structure is symmetric (same block structure
+      in the rows and in the columns).
+
+      This method does not involve big computation overhead. Remark that
+      it is not possible to change the size of the block vector
+      through this method, nor its map.
+     */
+    void setBlockStructure( const mapVector_type& mapVector);
 
 
     //@}

@@ -242,7 +242,7 @@ void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock
 */
 template< typename DataType >
 void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                          MatrixBlockMonolithicEpetraView<DataType>& destBlock );
+                          MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST

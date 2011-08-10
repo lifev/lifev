@@ -126,6 +126,29 @@ setBlockStructure( const std::vector<UInt>& blockSizes)
     }
 }
 
+void
+VectorBlockMonolithicEpetra::
+setBlockStructure( const mapVector_type& mapVector)
+{
+    ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to set the block structure");
+
+    M_blockSize.resize(mapVector.nbMap());
+    M_blockFirstIndex.resize(mapVector.nbMap());
+
+	UInt totalSize(0);
+
+	for (UInt i(0); i<mapVector.nbMap(); ++i)
+	{
+		M_blockSize[i]=mapVector.mapSize(i);
+		M_blockFirstIndex[i]=totalSize;
+
+		totalSize+= M_blockSize[i];
+	}
+
+    ASSERT( totalSize == this->size()," Incompatible block structure (global size does not match) ");
+}
+
+
 // ===================================================
 // Get Methods
 // ===================================================

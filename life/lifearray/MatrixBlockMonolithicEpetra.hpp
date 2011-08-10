@@ -88,12 +88,24 @@ public:
 
     //! @name  Set Methods
     //@{
+
     /*! Set the size of the blocks of the matrix
      *  @param blockNumRows Number of rows in the blocks
      *  @param blockNumColumns Number of columns in the blocks
      */
     void setBlockStructure( const std::vector<UInt>& blockNumRows,
                             const std::vector<UInt>& blockNumColumns );
+
+    /*! Set the size of the blocks of the matrix using the maps stored in the vector
+      of map. The resulting block structure in symmetric (same blocks in the rows
+      and in the columns).
+
+      This method does not involve large computations. The global size and the map
+      of the matrix cannot be changed with this method (and the block structure has
+      to be compatible with the global size).
+
+     */
+    void setBlockStructure(const MapEpetraVector& mapVector);
 
     //@}
 
@@ -243,6 +255,34 @@ MatrixBlockMonolithicEpetra<DataType>::setBlockStructure(const std::vector<UInt>
     }
 }
 
+template <typename DataType>
+void
+MatrixBlockMonolithicEpetra<DataType>::setBlockStructure(const MapEpetraVector& mapVector)
+{
+    ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to set the block structure");
+
+    M_blockNumRows.resize(mapVector.nbMap());
+    M_blockNumColumns.resize(mapVector.nbMap());
+
+    M_blockFirstRows.resize(mapVector.nbMap());
+    M_blockFirstColumns.resize(mapVector.nbMap());
+
+	UInt totalSize(0);
+
+	for (UInt i(0); i<mapVector.nbMap(); ++i)
+	{
+		M_blockNumRows[i]=mapVector.mapSize(i);
+		M_blockNumColumns[i]=mapVector.mapSize(i);
+
+		M_blockFirstRows[i]=totalSize;
+		M_blockFirstColumns[i]=totalSize;
+
+		totalSize+= mapVector.mapSize(i);
+	}
+
+    ASSERT( this->matrixPtr()->NumGlobalCols()==totalSize," Incompatible block structure (global size does not match) ");
+    ASSERT( this->matrixPtr()->NumGlobalRows()==totalSize," Incompatible block structure (global size does not match) ");
+}
 
 // ===================================================
 // Get Methods
