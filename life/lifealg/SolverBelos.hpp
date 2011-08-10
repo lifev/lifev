@@ -268,14 +268,14 @@ public:
     //! Method to setup the solver using GetPot
     /*!
       @param dataFile GetPot object which contains the data about the solver
-      Note: the parameters are added to the existing one. Use resetParameters to clean the parameters list.
+      Note: The parameters are added to the existing one. Use resetParameters to clean the parameters list.
      */
     void setParameters( const GetPot& dataFile, const std::string& section );
 
     //! Method to setup the solver using Teuchos::ParameterList
     /*!
       @param list Teuchos::ParameterList object
-      Note: the parameters are added to the existing one. Use resetParameters to clean the parameters list.
+      Note: The parameters are added to the existing one. Use resetParameters to clean the parameters list.
      */
     void setParameters( const Teuchos::ParameterList& list );
 
@@ -287,6 +287,15 @@ public:
       @param reusePreconditioner If set to true, do not recompute the preconditioner
      */
     void setReusePreconditioner( const bool reusePreconditioner );
+
+    //! Specify if the application should stop when problems occur in the iterations
+    /*!
+      @param enable If set to true, application will stop if problems occur
+      Note: This option is useful for simulation on clusters. In particular if the
+            system does not converge or if a loss of precision occurs time is saved
+            by stoping the simulation
+     */
+    void setQuitOnFailure(const bool enable);
 
     //@}
 
@@ -330,8 +339,10 @@ private:
     Teuchos::ParameterList       M_parameterList;
     boost::shared_ptr<Displayer> M_displayer;
 
+    // LifeV features for Belos
     Int                          M_maxIterForReuse;
     bool                         M_reusePreconditioner;
+    bool                         M_quitOnFailure;
 
     // Status information
     bool                         M_lossOfPrecision;

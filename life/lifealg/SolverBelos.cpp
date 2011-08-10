@@ -65,6 +65,7 @@ SolverBelos::SolverBelos() :
         M_displayer            ( new Displayer() ),
         M_maxIterForReuse      ( 0 ),
         M_reusePreconditioner  (false),
+        M_quitOnFailure        (false),
         M_lossOfPrecision      (false),
         M_maxNumItersReached   (false)
 {
@@ -81,6 +82,7 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_displayer            ( new Displayer(comm) ),
         M_maxIterForReuse      ( 0 ),
         M_reusePreconditioner  (false),
+        M_quitOnFailure        (false),
         M_lossOfPrecision      (false),
         M_maxNumItersReached   (false)
 {
@@ -101,6 +103,7 @@ SolverBelos::solve( vector_type& solution )
     // Reset status informations
     M_lossOfPrecision = false;
     M_maxNumItersReached = false;
+    bool failure = false;
 
     // Setting the unknown in the system
     Teuchos::RCP<vector_type::vector_type> solutionPtr(&(solution.epetraVector()),false);
@@ -149,6 +152,7 @@ SolverBelos::solve( vector_type& solution )
     if(M_lossOfPrecision)
     {
         M_displayer->leaderPrint("SLV-  WARNING: Loss of accuracy detected!\n");
+        failure = true;
     }
     if(ret == Belos::Converged)
     {
@@ -158,9 +162,13 @@ SolverBelos::solve( vector_type& solution )
     {
         M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos failed to converged to the desired precision!\n");
         M_maxNumItersReached = true;
+        failure = true;
     }
 
-    // todo option to quit on failure may be useful
+    // If quitOnFailure is enabled and if some problems occur
+    // the simulation is stopped
+    if(M_quitOnFailure && failure)
+        exit(-1);
 
     return numIters;
 }
@@ -435,15 +443,6 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     Int maxIter = dataFile( ( section + "/max_iter"      ).data(), 200, found );
     if ( found ) M_parameterList.set( "Maximum Iterations", maxIter );
 
-    // Reuse the preconditioner from one to another call
-    bool reusePreconditioner = dataFile( (section + "/reuse_preconditioner").data(), true, found );
-    if ( found ) M_reusePreconditioner = reusePreconditioner;
-    //if ( found ) M_parameterList.set( "Reuse preconditioner", true );
-
-    // Max iterations allowed to reuse the preconditioner
-    Int maxIterForReuse = dataFile( ( section + "/max_iter_reuse").data(), static_cast<Int> ( maxIter*8./10.), found );
-    if ( found ) M_maxIterForReuse=maxIterForReuse;
-
     // Output Frequency
     Int outputFrequency = dataFile( ( section + "/max_iter" ).data(), 1, found );
     if ( found ) M_parameterList.set( "Output Frequency", 1 );
@@ -484,6 +483,22 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     dataFile( ( section + "/enable_debug" ).data(), false, found );
     if ( found ) msg += Belos::Debug;
     M_parameterList.set("Verbosity", msg );
+
+    // LifeV features
+
+    // Reuse the preconditioner from one to another call
+    bool reusePreconditioner = dataFile( (section + "/reuse_preconditioner").data(), true, found );
+    if ( found ) M_reusePreconditioner = reusePreconditioner;
+    //if ( found ) M_parameterList.set( "Reuse preconditioner", true );
+
+    // Max iterations allowed to reuse the preconditioner
+    Int maxIterForReuse = dataFile( ( section + "/max_iter_reuse").data(), static_cast<Int> ( maxIter*8./10.), found );
+    if ( found ) M_maxIterForReuse=maxIterForReuse;
+
+    // If quitOnFailure is enabled and if some problems occur
+    // the simulation is stopped
+    bool quitOnFailure = dataFile( ( section + "/quit_on_failure").data(), false, found );
+    if ( found ) M_quitOnFailure=quitOnFailure;
 }
 
 void
@@ -502,6 +517,11 @@ void
 SolverBelos::setReusePreconditioner( const bool reusePreconditioner )
 {
     M_reusePreconditioner = reusePreconditioner;
+}
+
+void setQuitOnFailure(const bool enable)
+{
+    M_quitOnFailure = enable;
 }
 
 // ===================================================
