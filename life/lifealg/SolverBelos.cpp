@@ -63,7 +63,7 @@ SolverBelos::SolverBelos() :
         M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer() ),
-        M_maxIterForReuse      ( 0 ),
+        M_maxItersForReuse     ( 0 ),
         M_reusePreconditioner  (false),
         M_quitOnFailure        (false),
         M_lossOfPrecision      (false),
@@ -80,7 +80,7 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_problem              ( new LinearProblem_type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer(comm) ),
-        M_maxIterForReuse      ( 0 ),
+        M_maxItersForReuse     ( 0 ),
         M_reusePreconditioner  (false),
         M_quitOnFailure        (false),
         M_lossOfPrecision      (false),
@@ -113,16 +113,8 @@ SolverBelos::solve( vector_type& solution )
     bool retry( true );
     if ( !isPreconditionerSet() || !M_reusePreconditioner  )
     {
-        if( M_baseMatrixForPreconditioner.get()==0 )
-        {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n");
-            buildPreconditioner( M_matrix );
-        }
-        else
-        {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n");
-            buildPreconditioner( M_baseMatrixForPreconditioner );
-        }
+        buildPreconditioner();
+
         // do not retry if I am recomputing the preconditioner
         retry = false;
     }
@@ -151,7 +143,23 @@ SolverBelos::solve( vector_type& solution )
     Int numIters = M_solverManager->getNumIters();
     bool M_lossOfPrecision = M_solverManager->isLOADetected();
 
-    // todo missing the automatic second run
+    // Second run recomputing the preconditioner
+    // This is done only if the preconditioner has not been
+    // already recomputed and if it is a LifeV preconditioner.
+    if( ret != Belos::Converged && retry &&
+        (M_leftPreconditioner || M_rightPreconditioner) )
+    {
+        M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , numIters, "\n" );
+        M_displayer->leaderPrint( "SLV-  retrying:\n" );
+
+        buildPreconditioner();
+
+        // Solving again, but only once (retry = false)
+        chrono.start();
+        Belos::ReturnType ret = M_solverManager->solve();
+        chrono.stop();
+        M_displayer->leaderPrint( "SLV-  Solution time: " , chrono.diff(), " s.\n" );
+    }
 
     if(M_lossOfPrecision)
     {
@@ -173,6 +181,12 @@ SolverBelos::solve( vector_type& solution )
     // the simulation is stopped
     if(M_quitOnFailure && failure)
         exit(-1);
+
+    // If the number of iterations reaches the threshold of maxIterForReuse
+    // we reset the preconditioners to force to solver to recompute it next
+    // time
+    if(numIters > M_maxItersForReuse)
+        resetPreconditioner();
 
     return numIters;
 }
@@ -217,66 +231,6 @@ SolverBelos::printStatus()
     return str;
 }
 
-Int
-SolverBelos::solveSystem( const vector_type& rhsFull,
-                              vector_type&       solution,
-                              matrix_ptrtype&    baseMatrixForPreconditioner )
-
-{
-    // todo redo the implementation or delete the method
-    // todo deal with preconditioner
-    /*
-    bool retry( true );
-
-    LifeChrono chrono;
-
-    M_displayer->leaderPrint( "SLV-  Setting up the solver ...                \n" );
-
-    if ( baseMatrixForPreconditioner.get() == 0 )
-        M_displayer->leaderPrint( "SLV-  WARNING: BaseMatrixForPreconditioner is empty     \n" );
-
-    if ( !isPreconditionerSet() || !M_reusePreconditioner  )
-    {
-        buildPreconditioner( baseMatrixForPreconditioner );
-        // do not retry if I am recomputing the preconditioner
-        retry = false;
-    }
-    else
-    {
-        M_displayer->leaderPrint( "SLV-  Reusing precond ...                 \n" );
-    }
-
-    Int numIter = solveSystem( rhsFull, solution, M_rightPreconditioner );
-
-    // If we do not want to retry, return now.
-    // otherwise rebuild the preconditioner and solve again:
-    if ( numIter < 0  && retry )
-    {
-        chrono.start();
-
-        M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , - numIter, "\n" );
-        //M_displayer->leaderPrint( "SLV-  maxIterSolver = " , M_maxIter );
-        M_displayer->leaderPrint( "SLV-  retrying:\n" );
-
-        buildPreconditioner( baseMatrixForPreconditioner );
-
-        chrono.stop();
-        M_displayer->leaderPrintMax( "done in " , chrono.diff() );
-        // Solving again, but only once (retry = false)
-        numIter = solveSystem( rhsFull, solution, M_rightPreconditioner );
-
-        if ( numIter < 0 )
-            M_displayer->leaderPrint( " ERROR: Iterative solver failed again.\n" );
-    }
-
-    if ( std::abs(numIter) > M_maxIterForReuse )
-        resetPreconditioner();
-
-    return numIter;
-    */
-    return 0;
-}
-
 void
 SolverBelos::setPreconditionerFromGetPot( const GetPot& dataFile,  const std::string& section )
 {
@@ -289,7 +243,7 @@ SolverBelos::setPreconditionerFromGetPot( const GetPot& dataFile,  const std::st
 }
 
 void
-SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
+SolverBelos::buildPreconditioner()
 {
     LifeChrono chrono;
     Real condest(-1);
@@ -297,27 +251,45 @@ SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
     if(M_leftPreconditioner)
     {
         chrono.start();
-        M_displayer->leaderPrint( "SLV-  Computing the left preconditioner...    " );
-        M_leftPreconditioner->buildPreconditioner( preconditioner );
+        M_displayer->leaderPrint( "SLV-  Computing the left preconditioner...\n" );
+        if( M_baseMatrixForPreconditioner.get()==0 )
+        {
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n");
+            M_leftPreconditioner->buildPreconditioner( M_matrix );
+        }
+        else
+        {
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n");
+            M_leftPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
+        }
         condest = M_leftPreconditioner->condest();
         Teuchos::RCP<OP> leftPrec(M_leftPreconditioner->preconditioner(),false);
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
         M_problem->setLeftPrec(belosPrec);
         chrono.stop();
-        M_displayer->leaderPrintMax( "done in " , chrono.diff());
+        M_displayer->leaderPrintMax( "SLV-  Left preconditioner computed in " , chrono.diff());
         M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
     }
     if(M_rightPreconditioner)
     {
         chrono.start();
-        M_displayer->leaderPrint( "SLV-  Computing the right preconditioner...    " );
-        M_rightPreconditioner->buildPreconditioner( preconditioner );
+        M_displayer->leaderPrint( "SLV-  Computing the right preconditioner...\n" );
+        if( M_baseMatrixForPreconditioner.get()==0 )
+        {
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n");
+            M_rightPreconditioner->buildPreconditioner( M_matrix );
+        }
+        else
+        {
+            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n");
+            M_rightPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
+        }
         condest = M_rightPreconditioner->condest();
         Teuchos::RCP<OP> rightPrec(M_rightPreconditioner->preconditioner(),false);
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
         M_problem->setRightPrec(belosPrec);
         chrono.stop();
-        M_displayer->leaderPrintMax( "done in " , chrono.diff());
+        M_displayer->leaderPrintMax( "SLV-  Right preconditioner computed in " , chrono.diff());
         M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
     }
 }
@@ -325,10 +297,14 @@ SolverBelos::buildPreconditioner( matrix_ptrtype& preconditioner )
 void
 SolverBelos::resetPreconditioner()
 {
-    M_leftPreconditioner->resetPreconditioner();
-    M_rightPreconditioner->resetPreconditioner();
-    M_problem->setLeftPrec(Teuchos::RCP<OP>(null));
-    M_problem->setRightPrec(Teuchos::RCP<OP>(null));
+    if(M_leftPreconditioner)
+        M_leftPreconditioner->resetPreconditioner();
+
+    if(M_rightPreconditioner)
+        M_rightPreconditioner->resetPreconditioner();
+
+    M_problem->setLeftPrec(Teuchos::RCP<OP>(null)); // wrong todo
+    M_problem->setRightPrec(Teuchos::RCP<OP>(null)); //wrong
 }
 
 bool
@@ -336,7 +312,7 @@ SolverBelos::isPreconditionerSet() const
 {
     return ( M_leftPreconditioner.get() !=0 && M_leftPreconditioner->preconditionerCreated() )||
            ( M_rightPreconditioner.get() !=0 && M_rightPreconditioner->preconditionerCreated() )||
-             M_problem->isLeftPrec() || M_problem->isRightPrec();
+             M_problem->isLeftPrec() || M_problem->isRightPrec(); // wrong todo
 }
 
 void
@@ -499,8 +475,8 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     //if ( found ) M_parameterList.set( "Reuse preconditioner", true );
 
     // Max iterations allowed to reuse the preconditioner
-    Int maxIterForReuse = dataFile( ( section + "/max_iter_reuse").data(), static_cast<Int> ( maxIter*8./10.), found );
-    if ( found ) M_maxIterForReuse=maxIterForReuse;
+    Int maxItersForReuse = dataFile( ( section + "/max_iters_for_reuse").data(), static_cast<Int> ( maxIter*8./10.), found );
+    if ( found ) M_maxItersForReuse=maxItersForReuse;
 
     // If quitOnFailure is enabled and if some problems occur
     // the simulation is stopped

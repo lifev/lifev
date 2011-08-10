@@ -142,9 +142,13 @@ public:
    //! @name Methods
     //@{
 
-    //! Solve the problem \f$ A x = b \f$.
+    //! Solves the system and returns the number of iterations.
     /*!
-      A has been entered via \c setMatrix.
+      The Matrix has already been passed by the method
+      setMatrix or setOperator
+
+      The preconditioner is build starting from the matrix baseMatrixForPreconditioner
+      if it is set otherwise from the problem matrix.
       @param solution Vector to store the solution
       @return Number of iterations, M_maxIter+1 if solve failed.
      */
@@ -160,23 +164,6 @@ public:
     //! return the solver status
     std::string printStatus();
 
-    //! Solves the system and returns the number of iterations.
-    /*!
-      The Matrix has already been passed by the method
-      setMatrix or setOperator
-
-      The preconditioner is build starting from the matrix baseMatrixForPreconditioner
-      by the preconditioner object passed in by the method setPreconditioner
-      @param  rhsFull Right hand side
-      @param  solution vector to store the solution
-      @param  baseMatrixForPreconditioner Base matrix for the preconditioner construction
-      @return number of iterations. If negative, the solver did not converge,
-               the preconditioner has been recomputed, and a second solution is tried
-    */
-    Int solveSystem( const vector_type& rhsFull,
-                     vector_type&       solution,
-                     matrix_ptrtype&    baseMatrixForPreconditioner );
-
     //! Setup the preconditioner from a GetPot file
     /*!
       @param dataFile GetPot object which contains the data about the preconditioner
@@ -190,7 +177,7 @@ public:
       by the preconditioner object passed in by the method setPreconditioner
       @param  baseMatrixForPreconditioner Base matrix for the preconditioner construction
     */
-    void buildPreconditioner( matrix_ptrtype& baseMatrixForPreconditioner );
+    void buildPreconditioner();
 
     //! Delete the stored preconditioner
     void resetPreconditioner();
@@ -326,7 +313,7 @@ private:
     boost::shared_ptr<Displayer> M_displayer;
 
     // LifeV features for Belos
-    Int                          M_maxIterForReuse;
+    Int                          M_maxItersForReuse;
     bool                         M_reusePreconditioner;
     bool                         M_quitOnFailure;
 
