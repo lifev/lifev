@@ -138,7 +138,7 @@ public:
     UInt lastColumnIndex() const {return M_lastColumnIndex; }
 
     //! Return the pointer of the full matrix
-    matrix_Type* matrixPtr(){return M_matrix; }
+    matrix_Type* matrixPtr() const {return M_matrix; }
 
     //@}
 

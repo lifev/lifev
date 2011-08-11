@@ -53,16 +53,16 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
 
-    int indexBase(0);
+    const int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
     int  srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
-    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
-    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+    const int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
+    const int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
 
     // Source informations handlers
     int numSrcEntries;
@@ -80,8 +80,8 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
         if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
-            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
+            srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
             int destIndices[numSrcEntries];
             DataType destValues[numSrcEntries];
@@ -90,7 +90,7 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
 
             for(int j(0);j<numSrcEntries;++j)
             {
-                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+                srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is in the block
                 if((srcGlobalIndex>=srcBlock.firstColumnIndex()+indexBase) &&
@@ -101,21 +101,21 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
                     numDestEntries++;
                 }
             }
-            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
+            if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
             {
 #ifdef NDEBUG
-                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
 #else
-                Int errorCode = destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                Int errorCode = destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
                 ASSERT(errorCode >=0, " Error in block copy: insertion failed");
 #endif
             }
             else
             {
 #ifdef NDEBUG
-                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
 #else
-                Int errorCode = destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                Int errorCode = destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
                 ASSERT(errorCode >=0, " Error in block copy: sum failed");
 #endif
             }
@@ -155,8 +155,8 @@ void createScalarBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock, c
     int firstColumnIndex(destBlock.firstColumnIndex()+indexBase);
 
     // Processor informations
-    int  numDestElements    = destBlock.getMatrixPtr()->RowMap().NumMyElements();
-    int* destGlobalElements = destBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  numDestElements    = destBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    int* destGlobalElements = destBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
     int  destRowElement(0);
 
     for(int i(0);i<numDestElements;++i)
@@ -167,7 +167,7 @@ void createScalarBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock, c
         if((destRowElement>=firstRowIndex) && (destRowElement<=lastRowIndex))
         {
             destIndex = firstColumnIndex+destRowElement-firstRowIndex;
-            destBlock.getMatrixPtr()->InsertGlobalValues(destRowElement,1,&diagonalValue,&destIndex);
+            destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRowElement,1,&diagonalValue,&destIndex);
         }
     }
 }
@@ -199,8 +199,8 @@ void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock
     int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
     int  srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
@@ -223,8 +223,8 @@ void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock
         if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
-            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
+            srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
             int diagIndex=srcRowElement-srcBlock.firstRowIndex();
             int destRow = destBlock.firstRowIndex()+diagIndex;
@@ -233,7 +233,7 @@ void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock
 
             for(int j(0);j<numSrcEntries;++j)
             {
-                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+                srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is on the diagonal of the source block
                 if(srcGlobalIndex-srcBlock.firstColumnIndex()==diagIndex)
@@ -242,10 +242,10 @@ void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock
                     j=numSrcEntries; //Exit the loop
                 }
             }
-            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
-                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
+            if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
             else
-                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,1,&diagValue,&destIndex);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,1,&diagValue,&destIndex);
         }
     }
 }
@@ -267,8 +267,8 @@ void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBl
     int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
     int  srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
@@ -291,8 +291,8 @@ void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBl
         if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
-            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
+            srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
             int diagIndex=srcRowElement-srcBlock.firstRowIndex();
             int destRow = destBlock.firstRowIndex()+diagIndex;
@@ -301,7 +301,7 @@ void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBl
 
             for(int j(0);j<numSrcEntries;++j)
             {
-                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+                srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is on the diagonal of the source block
                 if(srcGlobalIndex-srcBlock.firstColumnIndex()==diagIndex)
@@ -310,10 +310,10 @@ void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBl
                     j=numSrcEntries; //Exit the loop
                 }
             }
-            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
-                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
+            if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
             else
-                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,1,&diagValue,&destIndex);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,1,&diagValue,&destIndex);
         }
     }
 
@@ -333,8 +333,8 @@ void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
     // BLOCK PTR TEST
 
     // Processor informations
-    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
     int  srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
@@ -357,8 +357,8 @@ void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
         if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
-            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
+            srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
             int destIndices[numSrcEntries];
             DataType destValues[numSrcEntries];
@@ -366,7 +366,7 @@ void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
             int destRow(srcRowElement+rowsOffset);
             for(int j(0);j<numSrcEntries;++j)
             {
-                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+                srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is:
                 // a) in the block, and
@@ -380,10 +380,10 @@ void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
                     numDestEntries++;
                 }
             }
-            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
-                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+            if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
             else
-                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
         }
     }
 }
@@ -402,8 +402,8 @@ void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
     // BLOCK PTR TEST
 
     // Processor informations
-    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
     int  srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
@@ -426,8 +426,8 @@ void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
         if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
-            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
+            srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
             int destIndices[numSrcEntries];
             DataType destValues[numSrcEntries];
@@ -435,7 +435,7 @@ void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
             int destRow(srcRowElement+rowsOffset);
             for(int j(0);j<numSrcEntries;++j)
             {
-                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+                srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is:
                 // a) in the block, and
@@ -449,10 +449,10 @@ void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
                     numDestEntries++;
                 }
             }
-            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
-                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+            if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
             else
-                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
         }
     }
 }
@@ -474,8 +474,8 @@ void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlo
     int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
     int  srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
@@ -498,8 +498,8 @@ void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlo
         if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
-            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
+            srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
             int diagIndex=srcRowElement-srcBlock.firstRowIndex();
             int destRow = destBlock.firstRowIndex()+diagIndex;
@@ -507,7 +507,7 @@ void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlo
             DataType srcBlockRowSum = 0.0;
             for(int j(0);j<numSrcEntries;++j)
             {
-                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+                srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is in the block
                 if((srcGlobalIndex>=srcBlock.firstColumnIndex()+indexBase) &&
@@ -516,10 +516,10 @@ void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlo
                     srcBlockRowSum += abs(srcValues[j]);
                 }
             }
-            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
-                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
+            if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
             else
-                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
         }
     }
 }
@@ -541,8 +541,8 @@ void createInvLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& src
     int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
+    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
     int  srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
@@ -565,8 +565,8 @@ void createInvLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& src
         if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
-            srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
-            srcBlock.getMatrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
+            srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
             int diagIndex=srcRowElement-srcBlock.firstRowIndex();
             int destRow = destBlock.firstRowIndex()+diagIndex;
@@ -574,7 +574,7 @@ void createInvLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& src
             DataType srcBlockRowSum = 0.0;
             for(int j(0);j<numSrcEntries;++j)
             {
-                srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
+                srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is in the block
                 if((srcGlobalIndex>=srcBlock.firstColumnIndex()+indexBase) &&
@@ -584,10 +584,10 @@ void createInvLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& src
                 }
             }
             srcBlockRowSum = 1/srcBlockRowSum;
-            if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
-                destBlock.getMatrixPtr()->InsertGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
+            if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
             else
-                destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
         }
     }
 }
