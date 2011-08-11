@@ -1,35 +1,39 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
-  This file is part of the LifeV library
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
-  Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-       Date: 2010-10-08
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-  Copyright (C) 2010 EPFL
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+************************************************************************
 */
-/**
-   \file PreconditionerLSC.hpp
-   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2010-10-08
+//@HEADER
+
+/*!
+    @file
+    @brief This file contains the PreconditionerLSC class.
+
+    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @date 08-11-2010
  */
 
-
-#ifndef _PRECONDITIONERLSC_HPP_
-#define _PRECONDITIONERLSC_HPP_
+#ifndef PRECONDITIONERLSC_HPP
+#define PRECONDITIONERLSC_HPP 1
 
 #include <boost/shared_ptr.hpp>
 
@@ -88,7 +92,7 @@ public:
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
-    //    IfpackPreconditioner(operator_type& A);
+    //    IfpackPreconditioner( operator_type& A );
 
     //! default destructor
     ~PreconditionerLSC();
@@ -106,7 +110,7 @@ public:
         @param section is the section containing the data
      */
     void setDataFromGetPot ( const GetPot&      dataFile,
-                            const std::string& section );
+                             const std::string& section );
 
     void createParametersList( list_type&         list,
                                const GetPot&      dataFile,
@@ -119,16 +123,16 @@ public:
                                const std::string& subSection = "LSC" );
 
     //! Return an estimation of the conditionement number of the preconditioner
-    double      condest ();
+    double condest ();
 
     //! Return the name of the preconditioner to be used in the factory
-    std::string preconditionerType(){return M_precType;}
+    std::string preconditionerType(){ return M_precType; }
 
     //! Build the preconditioner
-    int         buildPreconditioner(operator_type& A);
+    int buildPreconditioner( operator_type& A );
 
-    int         numBlocksRows() const;
-    int         numBlocksCols() const;
+    int numBlocksRows() const;
+    int numBlocksCols() const;
 protected:
 
     std::string M_precType;
@@ -145,4 +149,4 @@ namespace
 
 } // namespace LifeV
 
-#endif
+#endif /* PRECONDITIONERLSC_HPP */

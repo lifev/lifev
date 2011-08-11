@@ -1,30 +1,37 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-       Date: 2010-11-29
+    This file is part of LifeV.
 
-  Copyright (C) 2010 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file PreconditionerPCD.cpp
-   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2010-11-29
+//@HEADER
+
+/*!
+    @file
+    @brief PreconditionerPCD
+
+    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 29-11-2010
  */
 
 #include <vector>
@@ -40,24 +47,27 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <EpetraExt_MatrixMatrix.h>
+
+// Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV {
 
-PreconditionerPCD::PreconditionerPCD(const  boost::shared_ptr<Epetra_Comm>& comm):
-    PreconditionerComposition(comm),
-    M_velocityBlockSize(-1),
-    M_pressureBlockSize(-1),
-    M_timestep(1.0),
-    M_viscosity(1.0),
-    M_density(1.0),
-    M_pressureBoundaryConditions("none"),
-    M_pressureLaplacianOperator("standard"),
-    M_useLumpedPressureMass(false),
-    M_setApBoundaryConditions(false),
-    M_setFpBoundaryConditions(false)
+PreconditionerPCD::PreconditionerPCD( const  boost::shared_ptr<Epetra_Comm>& comm ):
+    PreconditionerComposition    ( comm ),
+    M_velocityBlockSize          ( -1 ),
+    M_pressureBlockSize          ( -1 ),
+    M_timestep                   ( 1.0 ),
+    M_viscosity                  ( 1.0 ),
+    M_density                    ( 1.0 ),
+    M_pressureBoundaryConditions ( "none" ),
+    M_pressureLaplacianOperator  ( "standard" ),
+    M_useLumpedPressureMass      ( false ),
+    M_setApBoundaryConditions    ( false ),
+    M_setFpBoundaryConditions    ( false )
 {
     M_uFESpace.reset();
     M_pFESpace.reset();
@@ -65,96 +75,103 @@ PreconditionerPCD::PreconditionerPCD(const  boost::shared_ptr<Epetra_Comm>& comm
 }
 
 PreconditionerPCD::~PreconditionerPCD()
-{}
+{
 
-void PreconditionerPCD::createParametersList( list_Type&         list,
-                                              const GetPot&      dataFile,
-                                              const std::string& section,
-                                              const std::string& subSection )
+}
+
+void
+PreconditionerPCD::createParametersList( list_Type&         list,
+                                         const GetPot&      dataFile,
+                                         const std::string& section,
+                                         const std::string& subSection )
 {
     createPCDList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
 }
 
-void PreconditionerPCD::createPCDList( list_Type&         list,
-                                       const GetPot&      dataFile,
-                                       const std::string& section,
-                                       const std::string& subsection,
-                                       const bool& verbose)
+void
+PreconditionerPCD::createPCDList( list_Type&         list,
+                                  const GetPot&      dataFile,
+                                  const std::string& section,
+                                  const std::string& subsection,
+                                  const bool&        verbose )
 {
-    bool displayList = dataFile((section + "/displayList").data(), false);
+    bool displayList = dataFile( ( section + "/displayList" ).data(), false );
 
-    std::string precType = dataFile((section + "/prectype").data(),"PCD");
-    list.set("prectype", precType);
+    std::string precType = dataFile( ( section + "/prectype" ).data(),"PCD" );
+    list.set( "prectype", precType );
 
-    std::string fluidPrec = dataFile((section + "/" + subsection + "/subprecs/fluid_prec").data(),"ML");
-    list.set("subprecs: fluid prec", fluidPrec);
-    std::string fluidPrecDataSection = dataFile((section + "/" + subsection + "/subprecs/fluid_prec_data_section").data(), "");
-    list.set("subprecs: fluid prec data section", (section + "/" + subsection+"/subprecs/"+fluidPrecDataSection).data());
+    std::string fluidPrec = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec" ).data(), "ML" );
+    list.set( "subprecs: fluid prec", fluidPrec );
+    std::string fluidPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec_data_section" ).data(), "" );
+    list.set( "subprecs: fluid prec data section", ( section + "/" + subsection+"/subprecs/"+fluidPrecDataSection ).data() );
 
-    std::string pressureLaplacianPrec = dataFile((section + "/" + subsection + "/subprecs/pressure_laplacian_prec").data(),"ML");
-    list.set("subprecs: pressure laplacian prec", pressureLaplacianPrec);
-    std::string pressureLaplacianPrecDataSection = dataFile((section + "/" + subsection + "/subprecs/pressure_laplacian_prec_data_section").data(), "");
-    list.set("subprecs: pressure laplacian prec data section", (section + "/" + subsection+"/subprecs/"+pressureLaplacianPrecDataSection).data());
+    std::string pressureLaplacianPrec = dataFile( ( section + "/" + subsection + "/subprecs/pressure_laplacian_prec" ).data(), "ML" );
+    list.set( "subprecs: pressure laplacian prec", pressureLaplacianPrec );
+    std::string pressureLaplacianPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/pressure_laplacian_prec_data_section" ).data(), "" );
+    list.set( "subprecs: pressure laplacian prec data section", ( section + "/" + subsection+"/subprecs/"+pressureLaplacianPrecDataSection ).data() );
 
-    std::string pressureMassPrec = dataFile((section + "/" + subsection + "/subprecs/pressure_mass_prec").data(),"ML");
-    list.set("subprecs: pressure mass prec", pressureMassPrec);
-    std::string pressureMassPrecDataSection = dataFile((section + "/" + subsection + "/subprecs/pressure_mass_prec_data_section").data(), "");
-    list.set("subprecs: pressure mass prec data section", (section + "/" + subsection+"/subprecs/"+pressureMassPrecDataSection).data());
+    std::string pressureMassPrec = dataFile( ( section + "/" + subsection + "/subprecs/pressure_mass_prec" ).data(), "ML" );
+    list.set( "subprecs: pressure mass prec", pressureMassPrec );
+    std::string pressureMassPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/pressure_mass_prec_data_section" ).data(), "" );
+    list.set( "subprecs: pressure mass prec data section", ( section + "/" + subsection+"/subprecs/"+pressureMassPrecDataSection ).data() );
 
-    std::string pressureBoundaryConditions = dataFile((section + "/" + subsection + "/pressure_boundary_conditions").data(),"none");
-    list.set("pressure boundary conditions",pressureBoundaryConditions);
+    std::string pressureBoundaryConditions = dataFile( ( section + "/" + subsection + "/pressure_boundary_conditions").data(), "none" );
+    list.set( "pressure boundary conditions", pressureBoundaryConditions );
 
-    std::string pressureLaplacianOperator = dataFile((section + "/" + subsection + "/pressure_laplacian_operator").data(),"standard");
-    list.set("pressure laplacian operator",pressureLaplacianOperator);
+    std::string pressureLaplacianOperator = dataFile( ( section + "/" + subsection + "/pressure_laplacian_operator").data(), "standard" );
+    list.set( "pressure laplacian operator", pressureLaplacianOperator );
 
-    bool useLumpedPressureMass = dataFile((section + "/" + subsection + "/use_lumped_pressure_mass").data(),false);
-    list.set("use lumped pressure mass",useLumpedPressureMass);
+    bool useLumpedPressureMass = dataFile( ( section + "/" + subsection + "/use_lumped_pressure_mass" ).data(), false );
+    list.set( "use lumped pressure mass", useLumpedPressureMass );
 
-    bool setApBoundaryConditions = dataFile((section + "/" + subsection + "/set_Ap_boundary_conditions").data(),false);
-    list.set("set Ap boundary conditions",setApBoundaryConditions);
+    bool setApBoundaryConditions = dataFile( ( section + "/" + subsection + "/set_Ap_boundary_conditions" ).data(), false );
+    list.set( "set Ap boundary conditions", setApBoundaryConditions );
 
-    bool setFpBoundaryConditions = dataFile((section + "/" + subsection + "/set_Fp_boundary_conditions").data(),false);
-    list.set("set Fp boundary conditions",setFpBoundaryConditions);
+    bool setFpBoundaryConditions = dataFile( ( section + "/" + subsection + "/set_Fp_boundary_conditions" ).data(), false );
+    list.set( "set Fp boundary conditions", setFpBoundaryConditions );
 
-    if (displayList && verbose) list.print(std::cout);
+    if ( displayList && verbose ) list.print( std::cout );
 }
 
-Real PreconditionerPCD::condest()
+Real
+PreconditionerPCD::condest()
 {
     return 0.0;
 }
 
-void PreconditionerPCD::updateBeta(const vector_type& beta)
+void
+PreconditionerPCD::updateBeta( const vector_type& beta )
 {
     *M_beta = beta;
 }
 
-int PreconditionerPCD::buildPreconditioner(operator_type& oper)
+int
+PreconditionerPCD::buildPreconditioner( operator_type& oper )
 {
-    if((M_uFESpace.get()==NULL)||(M_pFESpace.get()==NULL))
+    if ( ( M_uFESpace.get() == NULL ) || ( M_pFESpace.get() == NULL ) )
     {
         std::cout << "You must specified manually the pointers to the FESpaces" << std::endl;
-        exit(0);
+        exit( -1 );
     }
 
-    bool verbose(false);
-    if(M_comm->MyPID() == 0) verbose = true;
+    bool verbose( false );
+    if ( M_comm->MyPID() == 0 ) verbose = true;
 
     // Make sure that an operator exists
     initializeOperator();
 
-    std::vector<UInt> blockNumRows(2,0);
+    std::vector<UInt> blockNumRows( 2, 0 );
     blockNumRows[0] = M_velocityBlockSize;
     blockNumRows[1] = M_pressureBlockSize;
-    std::vector<UInt> blockNumColumns(blockNumRows);
+    std::vector<UInt> blockNumColumns( blockNumRows );
 
-    bool inversed(true);
-    bool notInversed(false);
-    //bool transposed(true);
-    bool notTransposed(false);
+    bool inversed( true );
+    bool notInversed( false );
+    //bool transposed( true );
+    bool notTransposed( false );
 
-    map_type map(oper->map());
-    //oper->spy("A");
+    map_type map( oper->map() );
+    //oper->spy( "A" );
 
     LifeChrono timer;
 
@@ -163,25 +180,25 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
      * / F Bt \
      * \ B C  /
      */
-    if(verbose) std::cout << std::endl << "      >Getting the structure of A... ";
+    if ( verbose ) std::cout << std::endl << "      >Getting the structure of A... ";
     timer.start();
-    MatrixBlockView F,Bt,B,C;
-    //oper.getMatrixBlockView(0,0,F );
-    F.setup(0,0,blockNumRows[0],blockNumColumns[0],*oper);
+    MatrixBlockView F, Bt, B, C;
+    //oper.getMatrixBlockView( 0, 0, F );
+    F.setup( 0 ,0, blockNumRows[0], blockNumColumns[0], *oper );
     //F.showMe();
 
-    //oper.getMatrixBlockView(0,1,Bt);
-    Bt.setup(0,blockNumColumns[0],blockNumRows[0],blockNumColumns[1],*oper);
+    //oper.getMatrixBlockView( 0, 1, Bt );
+    Bt.setup( 0, blockNumColumns[0], blockNumRows[0], blockNumColumns[1], *oper );
     //Bt.showMe();
 
-    //oper.getMatrixBlockView(1,0,B );
-    B.setup(blockNumRows[0],0,blockNumRows[1],blockNumColumns[0],*oper);
+    //oper.getMatrixBlockView( 1, 0, B );
+    B.setup( blockNumRows[0], 0, blockNumRows[1], blockNumColumns[0], *oper );
     //B.showMe();
 
-    //oper.getMatrixBlockView(1,1,C );
-    C.setup(blockNumRows[0],blockNumColumns[0],blockNumRows[1],blockNumColumns[1],*oper);
+    //oper.getMatrixBlockView( 1, 1, C );
+    C.setup( blockNumRows[0], blockNumColumns[0], blockNumRows[1], blockNumColumns[1], *oper );
     //C.showMe();
-    if(verbose) std::cout << "done in " << timer.diff() << " s." << std::endl;
+    if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     /*
      * PCD:
@@ -194,284 +211,286 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
      */
 
     // Getting the block structure of B
-    MatrixBlockView B11,B12,B21,B22,B22base;
+    MatrixBlockView B11, B12, B21, B22, B22base;
 
     /*
      * Building the block
      * / I  0 \   / I     0      \   / I  0  \ / I 0     \ / I 0  \
      * \ 0 -S / = \ 0 -ApFp^-1Mp / = \ 0 -Ap / \ 0 Fp^-1 / \ 0 Mp /
      */
-    if(verbose) std::cout << " Building Fp... ";
+    if ( verbose ) std::cout << " Building Fp... ";
     timer.start();
-    boost::shared_ptr<matrix_type> PFp(new matrix_type( map ));
+    boost::shared_ptr<matrix_type> PFp( new matrix_type( map ) );
     *PFp *= 0.0;
-    PFp->setBlockStructure(blockNumRows,blockNumColumns);
-    PFp->getMatrixBlockView(1,1,B22);
-    M_adrPressureAssembler.addDiffusion(PFp,-M_viscosity/M_density,B22.firstRowIndex(),B22.firstColumnIndex());
-    M_adrPressureAssembler.addAdvection(PFp,*M_beta,B22.firstRowIndex(),B22.firstColumnIndex());
-    M_adrPressureAssembler.addMass(PFp,1.0/M_timestep,B22.firstRowIndex(),B22.firstColumnIndex());
+    PFp->setBlockStructure( blockNumRows, blockNumColumns );
+    PFp->getMatrixBlockView( 1, 1, B22 );
+    M_adrPressureAssembler.addDiffusion( PFp, -M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
+    M_adrPressureAssembler.addAdvection( PFp, *M_beta, B22.firstRowIndex(), B22.firstColumnIndex() );
+    M_adrPressureAssembler.addMass( PFp, 1.0/M_timestep, B22.firstRowIndex(), B22.firstColumnIndex() );
     PFp->globalAssemble();
     boost::shared_ptr<parent_matrix_type> pFp = PFp;
-    if(verbose) std::cout << "done in " << timer.diff() << " s." << std::endl;
+    if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
-    if(verbose) std::cout << " Building Ap";
+    if ( verbose ) std::cout << " Building Ap";
     timer.start();
-    boost::shared_ptr<matrix_type> PAp(new matrix_type( map ));
+    boost::shared_ptr<matrix_type> PAp( new matrix_type( map ) );
     *PAp *= 0.0;
-    PAp->setBlockStructure(blockNumRows,blockNumColumns);
-    PAp->getMatrixBlockView(0,0,B11);
-    PAp->getMatrixBlockView(1,1,B22);
+    PAp->setBlockStructure( blockNumRows, blockNumColumns );
+    PAp->getMatrixBlockView( 0, 0, B11 );
+    PAp->getMatrixBlockView( 1, 1, B22 );
 
-    if(M_pressureLaplacianOperator == "symmetric")
+    if ( M_pressureLaplacianOperator == "symmetric" )
     {
-        if(verbose) std::cout << " (Symm(Fp) version)... ";
-        Epetra_CrsMatrix* tmpCrsMatrix(NULL);
+        if ( verbose ) std::cout << " (Symm(Fp) version)... ";
+        Epetra_CrsMatrix* tmpCrsMatrix( NULL );
         tmpCrsMatrix = PAp->matrixPtr().get();
-        EpetraExt::MatrixMatrix::Add(*(pFp->matrixPtr()), false, 0.5*M_density/M_viscosity,
-                                     *(pFp->matrixPtr()), true,  0.5*M_density/M_viscosity,
-                                     tmpCrsMatrix);
+        EpetraExt::MatrixMatrix::Add( *( pFp->matrixPtr() ), false, 0.5*M_density/M_viscosity,
+                                      *( pFp->matrixPtr() ), true,  0.5*M_density/M_viscosity,
+                                      tmpCrsMatrix );
 
-        MatrixBlockUtils::createScalarBlock(B11,1);
+        MatrixBlockUtils::createScalarBlock( B11, 1 );
     }
     else
     {
-        if(verbose) std::cout << "... ";
-        M_adrPressureAssembler.addDiffusion(PAp,1.0,B22.firstRowIndex(),B22.firstColumnIndex());
-        MatrixBlockUtils::createIdentityBlock(B11);
+        if ( verbose ) std::cout << "... ";
+        M_adrPressureAssembler.addDiffusion( PAp, 1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
+        MatrixBlockUtils::createIdentityBlock( B11 );
     }
     PAp->globalAssemble();
     boost::shared_ptr<parent_matrix_type> pAp = PAp;
-    if(verbose) std::cout << "done in " << timer.diff() << " s." << std::endl;
+    if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
 
-    if(verbose) std::cout << " Building Mp";
+    if ( verbose ) std::cout << " Building Mp";
     timer.start();
-    boost::shared_ptr<matrix_type> PMp(new matrix_type( map ));
+    boost::shared_ptr<matrix_type> PMp( new matrix_type( map ) );
     *PMp *= 0.0;
-    PMp->setBlockStructure(blockNumRows,blockNumColumns);
-    PMp->getMatrixBlockView(0,0,B11);
-    PMp->getMatrixBlockView(1,1,B22);
-    MatrixBlockUtils::createIdentityBlock(B11);
-    if(M_useLumpedPressureMass)
+    PMp->setBlockStructure( blockNumRows, blockNumColumns );
+    PMp->getMatrixBlockView( 0, 0, B11 );
+    PMp->getMatrixBlockView( 1, 1, B22 );
+    MatrixBlockUtils::createIdentityBlock( B11 );
+    if ( M_useLumpedPressureMass )
     {
-        if(verbose) std::cout << " (Lumped version)... ";
-        boost::shared_ptr<matrix_type> tmpMass(new matrix_type( map ));
-        M_adrPressureAssembler.addMass(tmpMass,-1.0,B22.firstRowIndex(),B22.firstColumnIndex());
+        if ( verbose ) std::cout << " (Lumped version)... ";
+        boost::shared_ptr<matrix_type> tmpMass( new matrix_type( map ) );
+        M_adrPressureAssembler.addMass( tmpMass, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
         tmpMass->globalAssemble();
-        tmpMass->setBlockStructure(blockNumRows,blockNumColumns);
-        tmpMass->getMatrixBlockView(1,1,B11);
-        MatrixBlockUtils::createInvLumpedBlock(B11, B22);
+        tmpMass->setBlockStructure( blockNumRows, blockNumColumns );
+        tmpMass->getMatrixBlockView( 1, 1, B11 );
+        MatrixBlockUtils::createInvLumpedBlock( B11, B22 );
         tmpMass.reset();
 
     }
     else
     {
-        if(verbose) std::cout << "... ";
-        M_adrPressureAssembler.addMass(PMp,-1.0,B22.firstRowIndex(),B22.firstColumnIndex());
+        if ( verbose ) std::cout << "... ";
+        M_adrPressureAssembler.addMass( PMp, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
     PMp->globalAssemble();
     boost::shared_ptr<parent_matrix_type> pMp = PMp;
-    if(verbose) std::cout << "done in " << timer.diff() << " s." << std::endl;
+    if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
-    if(M_pressureBoundaryConditions == "first_dof_dirichlet")
+    if ( M_pressureBoundaryConditions == "first_dof_dirichlet" )
     {
-        UInt firstIndex = M_pFESpace->map().map(Unique)->MaxMyGID() + B22.firstRowIndex();
-        pAp->diagonalize(firstIndex,1.0);
-        pFp->diagonalize(firstIndex,1.0);
-        //pMp->diagonalize(firstIndex,1.0);
+        UInt firstIndex = M_pFESpace->map().map( Unique )->MaxMyGID() + B22.firstRowIndex();
+        pAp->diagonalize( firstIndex, 1.0 );
+        pFp->diagonalize( firstIndex, 1.0 );
+        //pMp->diagonalize( firstIndex, 1.0 );
     }
-    else if(M_pressureBoundaryConditions == "dirichlet_to_dirichlet")
-    {
-        // Loop on boundary conditions
-        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
-        {
-            if( M_bcHandlerPtr->operator[](i).type() == Essential )
-            {
-                for ( ID j = 0; j < M_bcHandlerPtr->operator[](i).list_size(); ++j )
-                {
-                    UInt myId = M_bcHandlerPtr->operator[](i)[j]->id() + B22.firstRowIndex();
-                    if(M_setApBoundaryConditions) pAp->diagonalize(myId,1.0);
-                    if(M_setFpBoundaryConditions) pFp->diagonalize(myId,1.0);
-                    //pMp->diagonalize(myId,1.0);
-                }
-            }
-        }
-    }
-    else if(M_pressureBoundaryConditions == "neumann_to_dirichlet")
+    else if ( M_pressureBoundaryConditions == "dirichlet_to_dirichlet" )
     {
         // Loop on boundary conditions
         for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
         {
-            if( M_bcHandlerPtr->operator[](i).type() == Natural )
+            if ( M_bcHandlerPtr->operator[]( i ).type() == Essential )
             {
-                for ( ID j = 0; j < M_bcHandlerPtr->operator[](i).list_size(); ++j )
+                for ( ID j = 0; j < M_bcHandlerPtr->operator[]( i ).list_size(); ++j )
                 {
-                    UInt myId = M_bcHandlerPtr->operator[](i)[j]->id() + B22.firstRowIndex();
-                    if(M_setApBoundaryConditions) pAp->diagonalize(myId,1.0);
-                    if(M_setFpBoundaryConditions) pFp->diagonalize(myId,1.0);
-                    //pMp->diagonalize(myId,1.0);
+                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id() + B22.firstRowIndex();
+                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0);
+                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0);
+                    //pMp->diagonalize( myId, 1.0 );
                 }
             }
         }
     }
-    else if(M_pressureBoundaryConditions == "dirichlet_at_inflow")
+    else if ( M_pressureBoundaryConditions == "neumann_to_dirichlet" )
     {
         // Loop on boundary conditions
         for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
         {
-            if( M_bcHandlerPtr->operator[](i).flag() == 1 )
+            if( M_bcHandlerPtr->operator[]( i ).type() == Natural )
             {
-                for ( ID j = 0; j < M_bcHandlerPtr->operator[](i).list_size(); ++j )
+                for ( ID j = 0; j < M_bcHandlerPtr->operator[]( i ).list_size(); ++j )
                 {
-                    UInt myId = M_bcHandlerPtr->operator[](i)[j]->id() + B22.firstRowIndex();
-                    if(M_setApBoundaryConditions) pAp->diagonalize(myId,1.0);
-                    if(M_setFpBoundaryConditions) pFp->diagonalize(myId,1.0);
+                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id() + B22.firstRowIndex();
+                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0 );
+                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0 );
+                    //pMp->diagonalize( myId, 1.0 );
                 }
             }
         }
     }
-    else if(M_pressureBoundaryConditions == "robin_at_inflow")
+    else if ( M_pressureBoundaryConditions == "dirichlet_at_inflow" )
+    {
+        // Loop on boundary conditions
+        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
+        {
+            if ( M_bcHandlerPtr->operator[]( i ).flag() == 1 )
+            {
+                for ( ID j = 0; j < M_bcHandlerPtr->operator[]( i ).list_size(); ++j )
+                {
+                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id() + B22.firstRowIndex();
+                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0 );
+                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0 );
+                }
+            }
+        }
+    }
+    else if ( M_pressureBoundaryConditions == "robin_at_inflow" )
     {
         BCHandler bcHandler;
 
         // Offset to set the BC for the pressure
-        bcHandler.setOffset(B22.firstRowIndex());
+        bcHandler.setOffset( B22.firstRowIndex() );
 
         // Loop on boundary conditions
         for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
         {
-            if(verbose) std::cout << "BCHandler name: " << M_bcHandlerPtr->operator[](i).name() << std::endl;
+            if ( verbose ) std::cout << "BCHandler name: " << M_bcHandlerPtr->operator[]( i ).name() << std::endl;
 
-            UInt numComponents = M_bcHandlerPtr->operator[](i).numberOfComponents();
+            UInt numComponents = M_bcHandlerPtr->operator[]( i ).numberOfComponents();
             numComponents = 1;
 
-            if(M_bcHandlerPtr->operator[](i).flag() == 1)
+            if ( M_bcHandlerPtr->operator[]( i ).flag() == 1 )
             {
-                vector_type convVelocity(*M_beta,Repeated);
-                vector_type robinRHS(M_uFESpace->map(), Repeated);
+                vector_type convVelocity( *M_beta, Repeated );
+                vector_type robinRHS( M_uFESpace->map(), Repeated );
                 /*
-                BCVector uRobin(robinRHS, M_uFESpace->dof().numTotalDof(), 0);
-                uRobin.setRobinCoeffVector(convVelocity);
-                uRobin.setBetaCoeff(M_viscosity/M_density);
+                BCVector uRobin( robinRHS, M_uFESpace->dof().numTotalDof(), 0 );
+                uRobin.setRobinCoeffVector( convVelocity );
+                uRobin.setBetaCoeff( M_viscosity/M_density );
 
-                bcHandler.addBC(M_bcHandlerPtr->operator[](i).name(),
-                                M_bcHandlerPtr->operator[](i).flag(),
-                                Robin,
-                                Normal,
-                                uRobin,
-                                numComponents);
+                bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
+                                 M_bcHandlerPtr->operator[]( i ).flag(),
+                                 Robin,
+                                 Normal,
+                                 uRobin,
+                                 numComponents );
                 */
             }
             else
             {
-                bcHandler.addBC(M_bcHandlerPtr->operator[](i).name(),
-                                M_bcHandlerPtr->operator[](i).flag(),
-                                M_bcHandlerPtr->operator[](i).type(),
-                                M_bcHandlerPtr->operator[](i).mode(),
-                                const_cast<BCFunctionBase&>(*(M_bcHandlerPtr->operator[](i).pointerToFunctor())),
-                                numComponents);
+                bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
+                                 M_bcHandlerPtr->operator[]( i ).flag(),
+                                 M_bcHandlerPtr->operator[]( i ).type(),
+                                 M_bcHandlerPtr->operator[]( i ).mode(),
+                                 const_cast<BCFunctionBase&>( *( M_bcHandlerPtr->operator[]( i ).pointerToFunctor() ) ),
+                                 numComponents );
             }
         }
-        if(M_setApBoundaryConditions) bcManageMatrix( *pAp,*M_uFESpace->mesh(),M_uFESpace->dof(),bcHandler,M_uFESpace->feBd(),1.0,0.0);
-        if(M_setFpBoundaryConditions) bcManageMatrix( *pFp,*M_uFESpace->mesh(),M_uFESpace->dof(),bcHandler,M_uFESpace->feBd(),1.0,0.0);
+        if ( M_setApBoundaryConditions ) bcManageMatrix( *pAp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
+        if ( M_setFpBoundaryConditions ) bcManageMatrix( *pFp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
 
     }
-    if(verbose) std::cout << " Pressure BC type = " << M_pressureBoundaryConditions << std::endl;
-    if((verbose)&&(M_setApBoundaryConditions)) std::cout << " BC imposed on Ap" << std::endl;
-    if((verbose)&&(M_setFpBoundaryConditions)) std::cout << " BC imposed on Fp" << std::endl;
+    if ( verbose ) std::cout << " Pressure BC type = " << M_pressureBoundaryConditions << std::endl;
+    if ( ( verbose )&&( M_setApBoundaryConditions ) ) std::cout << " BC imposed on Ap" << std::endl;
+    if ( ( verbose )&&( M_setFpBoundaryConditions ) ) std::cout << " BC imposed on Fp" << std::endl;
 
-    if(verbose) std::cout << " Schur block (a)... ";
+    if ( verbose ) std::cout << " Schur block (a)... ";
     timer.start();
-    //pAp->spy("p1a");
-    super_PtrType precForBlock1(PRECFactory::instance().createObject(M_pressureLaplacianPrec));
-    precForBlock1->setDataFromGetPot(M_dataFile,M_pressureLaplacianPrecDataSection);
-    this->pushBack(pAp,precForBlock1,notInversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    //pAp->spy( "p1a" );
+    super_PtrType precForBlock1( PRECFactory::instance().createObject( M_pressureLaplacianPrec ) );
+    precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
+    this->pushBack( pAp, precForBlock1, notInversed, notTransposed );
+    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-    if(verbose) std::cout << " Schur block (b)... ";
+    if ( verbose ) std::cout << " Schur block (b)... ";
     timer.start();
-    boost::shared_ptr<matrix_type> P1b(new matrix_type( map ));
-    P1b->setBlockStructure(blockNumRows,blockNumColumns);
+    boost::shared_ptr<matrix_type> P1b( new matrix_type( map ) );
+    P1b->setBlockStructure( blockNumRows, blockNumColumns );
     *P1b += *PFp;
-    P1b->getMatrixBlockView(0,0,B11);
-    MatrixBlockUtils::createIdentityBlock(B11);
+    P1b->getMatrixBlockView( 0, 0, B11 );
+    MatrixBlockUtils::createIdentityBlock( B11 );
     P1b->globalAssemble();
     boost::shared_ptr<parent_matrix_type> p1b = P1b;
-    //p1b->spy("p1b");
-    this->pushBack(p1b,inversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    //p1b->spy( "p1b" );
+    this->pushBack( p1b, inversed,notTransposed );
+    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-    if(verbose) std::cout << " Schur block (c)... ";
+    if ( verbose ) std::cout << " Schur block (c)... ";
     timer.start();
-    //pMp->spy("p1c");
-    if(M_useLumpedPressureMass)
+    //pMp->spy( "p1c" );
+    if ( M_useLumpedPressureMass )
     {
-        this->pushBack(pMp,inversed,notTransposed);
+        this->pushBack( pMp, inversed, notTransposed );
     }
     else
     {
-        super_PtrType precForBlock2(PRECFactory::instance().createObject(M_pressureMassPrec));
-        precForBlock2->setDataFromGetPot(M_dataFile,M_pressureMassPrecDataSection);
-        this->pushBack(pMp,precForBlock2,notInversed,notTransposed);
+        super_PtrType precForBlock2( PRECFactory::instance().createObject( M_pressureMassPrec ) );
+        precForBlock2->setDataFromGetPot( M_dataFile, M_pressureMassPrecDataSection );
+        this->pushBack( pMp,precForBlock2, notInversed, notTransposed );
     }
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
     /*
      * Building the block (the block is inversed)
      * / I -Bt \
      * \ 0  I  /
      */
-    if(verbose) std::cout << " Gradient block... ";
+    if ( verbose ) std::cout << " Gradient block... ";
     timer.start();
-    boost::shared_ptr<matrix_type> P2(new matrix_type(map));
-    P2->setBlockStructure(blockNumRows,blockNumColumns);
-    P2->getMatrixBlockView(0,0,B11);
-    P2->getMatrixBlockView(0,1,B12);
-    P2->getMatrixBlockView(1,1,B22);
-    MatrixBlockUtils::copyBlock(Bt,B12);
-    (*P2) *= -1;
-    MatrixBlockUtils::createIdentityBlock(B11);
-    MatrixBlockUtils::createIdentityBlock(B22);
+    boost::shared_ptr<matrix_type> P2( new matrix_type( map ) );
+    P2->setBlockStructure( blockNumRows, blockNumColumns );
+    P2->getMatrixBlockView( 0, 0, B11 );
+    P2->getMatrixBlockView( 0, 1, B12 );
+    P2->getMatrixBlockView( 1, 1, B22 );
+    MatrixBlockUtils::copyBlock( Bt, B12 );
+    ( *P2 ) *= -1;
+    MatrixBlockUtils::createIdentityBlock( B11 );
+    MatrixBlockUtils::createIdentityBlock( B22 );
     P2->globalAssemble();
-    //P2->spy("p2");
+    //P2->spy( "p2" );
     boost::shared_ptr<parent_matrix_type> p2 = P2;
-    this->pushBack(p2,inversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    this->pushBack( p2, inversed, notTransposed );
+    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
     /*
      * Building the block
      * / F 0 \
      * \ 0 I /
      */
-    if(verbose) std::cout << " Fluid block... ";
+    if ( verbose ) std::cout << " Fluid block... ";
     timer.start();
-    boost::shared_ptr<matrix_type> P3(new matrix_type(map));
-    P3->setBlockStructure(blockNumRows,blockNumColumns);
-    P3->getMatrixBlockView(0,0,B11);
-    P3->getMatrixBlockView(1,1,B22);
-    MatrixBlockUtils::copyBlock(F,B11);
-    MatrixBlockUtils::createIdentityBlock(B22);
+    boost::shared_ptr<matrix_type> P3( new matrix_type( map ) );
+    P3->setBlockStructure( blockNumRows, blockNumColumns );
+    P3->getMatrixBlockView( 0, 0, B11 );
+    P3->getMatrixBlockView( 1, 1, B22 );
+    MatrixBlockUtils::copyBlock( F, B11 );
+    MatrixBlockUtils::createIdentityBlock( B22 );
     P3->globalAssemble();
-    //P3->spy("p3");
+    //P3->spy( "p3" );
     boost::shared_ptr<parent_matrix_type> p3 = P3;
-    super_PtrType precForBlock3(PRECFactory::instance().createObject(M_fluidPrec));
-    precForBlock3->setDataFromGetPot(M_dataFile,M_fluidPrecDataSection);
-    this->pushBack(p3,precForBlock3,notInversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    super_PtrType precForBlock3( PRECFactory::instance().createObject( M_fluidPrec ) );
+    precForBlock3->setDataFromGetPot( M_dataFile, M_fluidPrecDataSection );
+    this->pushBack( p3,precForBlock3, notInversed, notTransposed );
+    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
     this->M_preconditionerCreated = true;
 
-    if(verbose) std::cout << "      >All the blocks are built" << std::endl
+    if ( verbose ) std::cout << "      >All the blocks are built" << std::endl
                           << "      >";
     return ( EXIT_SUCCESS );
 }
 
-int PreconditionerPCD::numBlocksRows() const
+int
+PreconditionerPCD::numBlocksRows() const
 {
     return 2;
 }
 
-int PreconditionerPCD::numBlocksColumns() const
+int
+PreconditionerPCD::numBlocksColumns() const
 {
     return 2;
 }
@@ -480,34 +499,35 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
                                            const std::string& section )
 {
     M_dataFile   = dataFile;
-    createPCDList(M_list, dataFile, section, "PCD");
+    createPCDList( M_list, dataFile, section, "PCD" );
 
-    M_precType          = this->M_list.get("prectype", "PCD");
+    M_precType                         = this->M_list.get( "prectype", "PCD" );
 
-    M_fluidPrec                   = this->M_list.get("subprecs: fluid prec","ML");
-    M_fluidPrecDataSection        = this->M_list.get("subprecs: fluid prec data section", "");
+    M_fluidPrec                        = this->M_list.get( "subprecs: fluid prec","ML" );
+    M_fluidPrecDataSection             = this->M_list.get( "subprecs: fluid prec data section", "" );
 
-    M_pressureLaplacianPrec       = this->M_list.get("subprecs: pressure laplacian prec","ML");
-    M_pressureLaplacianPrecDataSection = this->M_list.get("subprecs: pressure laplacian prec data section", "");
+    M_pressureLaplacianPrec            = this->M_list.get( "subprecs: pressure laplacian prec", "ML");
+    M_pressureLaplacianPrecDataSection = this->M_list.get( "subprecs: pressure laplacian prec data section", "" );
 
-    M_pressureMassPrec            = this->M_list.get("subprecs: pressure mass prec","ML");
-    M_pressureMassPrecDataSection = this->M_list.get("subprecs: pressure mass prec data section", "");
+    M_pressureMassPrec                 = this->M_list.get( "subprecs: pressure mass prec", "ML" );
+    M_pressureMassPrecDataSection      = this->M_list.get( "subprecs: pressure mass prec data section", "" );
 
-    M_pressureBoundaryConditions  = this->M_list.get("pressure boundary conditions","none");
-    M_pressureLaplacianOperator   = this->M_list.get("pressure laplacian operator","standard");
+    M_pressureBoundaryConditions       = this->M_list.get( "pressure boundary conditions", "none" );
+    M_pressureLaplacianOperator        = this->M_list.get( "pressure laplacian operator", "standard" );
 
-    M_useLumpedPressureMass       = this->M_list.get("use lumped pressure mass",false);
-    M_setApBoundaryConditions     = this->M_list.get("set Ap boundary conditions",false);
-    M_setFpBoundaryConditions     = this->M_list.get("set Fp boundary conditions",false);
+    M_useLumpedPressureMass            = this->M_list.get( "use lumped pressure mass", false );
+    M_setApBoundaryConditions          = this->M_list.get( "set Ap boundary conditions", false );
+    M_setFpBoundaryConditions          = this->M_list.get( "set Fp boundary conditions", false );
 }
 
-void PreconditionerPCD::setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace)
+void
+PreconditionerPCD::setFESpace( FESpace_ptr uFESpace, FESpace_ptr pFESpace )
 {
     M_uFESpace = uFESpace;
     M_pFESpace = pFESpace;
-    M_adrPressureAssembler.setup(pFESpace,uFESpace); // p,beta=u
-    M_adrVelocityAssembler.setup(uFESpace,uFESpace); // u,beta=u
-    M_beta.reset(new vector_type(M_uFESpace->map() + M_pFESpace->map()));
+    M_adrPressureAssembler.setup( pFESpace, uFESpace ); // p,beta=u
+    M_adrVelocityAssembler.setup( uFESpace, uFESpace ); // u,beta=u
+    M_beta.reset( new vector_type( M_uFESpace->map() + M_pFESpace->map() ) );
     *M_beta *= 0;
 
     // We setup the size of the blocks
@@ -515,22 +535,26 @@ void PreconditionerPCD::setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace)
     M_pressureBlockSize = M_pFESpace->dof().numTotalDof();
 }
 
-void PreconditionerPCD::setBCHandler(BCHandlerPtr_type bchPtr)
+void
+PreconditionerPCD::setBCHandler( BCHandlerPtr_type bchPtr )
 {
     M_bcHandlerPtr = bchPtr;
 }
 
-void PreconditionerPCD::setTimestep(const Real& timestep)
+void
+PreconditionerPCD::setTimestep( const Real& timestep )
 {
     M_timestep = timestep;
 }
 
-void PreconditionerPCD::setViscosity(const Real& viscosity)
+void
+PreconditionerPCD::setViscosity( const Real& viscosity )
 {
     M_viscosity = viscosity;
 }
 
-void PreconditionerPCD::setDensity(const Real& density)
+void
+PreconditionerPCD::setDensity( const Real& density )
 {
     M_density = density;
 }

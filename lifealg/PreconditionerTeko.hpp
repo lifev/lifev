@@ -1,41 +1,51 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-       Date: 2010-10-14
+    This file is part of LifeV.
 
-  Copyright (C) 2010 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file PreconditionerTeko.hpp
-   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2010-10-14
+//@HEADER
+
+/*!
+    @file
+    @brief PreconditionerTeko
+
+    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 14-10-2010
  */
 
-
-#ifndef _PRECONDITIONERTEKO_HPP_
-#define _PRECONDITIONERTEKO_HPP_
+#ifndef PRECONDITIONERTEKO_HPP
+#define PRECONDITIONERTEKO_HPP 1
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifealg/Preconditioner.hpp>
 #include <lifemc/lifealg/PreconditionerBlock.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Teuchos includes
 #include "Teuchos_RCP.hpp"
@@ -48,6 +58,10 @@
 #include "Teko_EpetraBlockPreconditioner.hpp"
 #include "Teko_BlockPreconditionerFactory.hpp"
 #include "Teuchos_RCPBoostSharedPtrConversions.hpp"
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // for simplicity
 using Teuchos::RCP;
@@ -84,10 +98,10 @@ public:
      */
     //@{
     //! default constructor.
-    PreconditionerTeko(const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>());
+    PreconditionerTeko( const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     /** Copy constructor*/
-    PreconditionerTeko(PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerTeko( PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! default virtual destructor
     virtual ~PreconditionerTeko();
@@ -102,31 +116,31 @@ public:
     super::prec_raw_type* preconditioner();
 
     //! Return a pointer on the preconditioner
-    super::prec_type      preconditionerPtr();
+    super::prec_type preconditionerPtr();
 
     //! Reset the preconditioner
-    void                  resetPreconditioner();
+    void resetPreconditioner();
 
     //! returns true if prec exists
-    /*const*/
-    bool                  isPreconditionerSet() const;
+    bool isPreconditionerSet() const;
 
-    virtual int           SetUseTranspose( const bool useTranspose=false );
-    virtual bool          UseTranspose();
-    virtual int           ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
-    virtual int           Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    virtual int SetUseTranspose( const bool useTranspose = false );
+    virtual bool UseTranspose();
+    virtual int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    virtual int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
     virtual const Epetra_Map & OperatorRangeMap() const;
     virtual const Epetra_Map & OperatorDomainMap() const;
 
 protected:
-    prec_type             M_prec;
 
-    void buildBlockGIDs(std::vector<std::vector<int> > & gids,
-                        const MapEpetra & map,
-                        const std::vector<int>& blockSizes);
-    void buildPreconditionerTeko(RCP<Teko::BlockPreconditionerFactory> precFact,
-                                 operator_type& oper,
-                                 const std::vector<int>& blockSizes);
+    void buildBlockGIDs( std::vector<std::vector<int> > & gids,
+                         const MapEpetra & map,
+                         const std::vector<int>& blockSizes);
+    void buildPreconditionerTeko( RCP<Teko::BlockPreconditionerFactory> precFact,
+                                  operator_type& oper,
+                                  const std::vector<int>& blockSizes );
+
+    prec_type M_prec;
 
 private:
     operator_raw_type::matrix_ptrtype M_oper;
@@ -135,4 +149,4 @@ private:
 
 } // namespace LifeV
 
-#endif
+#endif /* PRECONDITIONERTEKO_HPP */

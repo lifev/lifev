@@ -83,19 +83,19 @@ public:
      */
     PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
+private:
+
     //! Copy constructor
     /*!
         @param precComp PreconditionerComposition
      */
-private:
     PreconditionerComposition( const PreconditionerComposition& precComp );
+
 public:
     //! Destructor
     ~PreconditionerComposition();
 
     //@}
-
-
 
     //! @name Methods
     //@{
@@ -109,7 +109,7 @@ public:
     /*!
       @param A the base matrix for computing the preconditioner
     */
-    virtual int buildPreconditioner(matrix_PtrType& A) = 0;
+    virtual int buildPreconditioner( matrix_PtrType& A ) = 0;
 
     //! Reset the preconditioner
     void resetPreconditioner();
@@ -118,8 +118,6 @@ public:
     Real condest();
 
     //@}
-
-
 
     //! @name Epetra Operator Interface Methods
     //@{
@@ -137,7 +135,6 @@ public:
     const Epetra_Map& OperatorDomainMap() const;
 
     //@}
-
 
     //! @name Set Methods
     //@{
@@ -158,7 +155,6 @@ public:
     void setComm( boost::shared_ptr<Epetra_Comm> comm );
 
     //@}
-
 
     //! @name Get Methods
     //@{
@@ -195,25 +191,25 @@ protected:
 
     //! Add A to the right of the composition
     int pushBack( matrix_PtrType& A,
-                  const bool useInverse=false,
-                  const bool useTranspose=false );
+                  const bool useInverse   = false,
+                  const bool useTranspose = false );
 
     //! Use a preconditioner to build the inverse of A and add it to the right of the composition
     int pushBack( matrix_PtrType& A,
                   super_PtrType& preconditioner,
-                  const bool useInverse=false,
-                  const bool useTranspose=false );
+                  const bool useInverse   = false,
+                  const bool useTranspose = false );
 
     //! Use a preconditioner to build the inverse of A and add it to the right of the composition
     int pushBack( operator_Type& A,
-                  const bool useInverse=false,
-                  const bool useTranspose=false );
+                  const bool useInverse   = false,
+                  const bool useTranspose = false );
 
     //! Replace the operators at position i by A
     int replace( operator_Type& A,
                  const UInt index,
-                 const bool useInverse=false,
-                 const bool useTranspose=false );
+                 const bool useInverse   = false,
+                 const bool useTranspose = false );
 
     //! If no operator exists (null pointer), build a new one
     int initializeOperator();

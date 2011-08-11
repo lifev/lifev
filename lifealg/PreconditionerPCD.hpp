@@ -1,35 +1,41 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-       Date: 2010-11-29
+    This file is part of LifeV.
 
-  Copyright (C) 2010 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file PreconditionerPCD.hpp
-   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2010-11-29
+//@HEADER
+
+/*!
+    @file
+    @brief PreconditionerPCD
+
+    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 29-11-2010
  */
 
-
-#ifndef _PRECONDITIONERPCD_HPP_
-#define _PRECONDITIONERPCD_HPP_
+#ifndef PRECONDITIONERPCD_HPP
+#define PRECONDITIONERPCD_HPP 1
 
 #include <boost/shared_ptr.hpp>
 
@@ -89,11 +95,11 @@ public:
     //! @name Constructors, destructor
     //@{
     //! default constructor.
-    PreconditionerPCD(const  boost::shared_ptr<Epetra_Comm>& comm= boost::shared_ptr<Epetra_Comm>());
+    PreconditionerPCD( const  boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
-    //    IfpackPreconditioner(operator_type& A);
+    //    IfpackPreconditioner( operator_type& A );
 
     //! default destructor
     ~PreconditionerPCD();
@@ -114,25 +120,25 @@ public:
                                const bool& verbose = true );
 
     //! Return an estimation of the conditionement number of the preconditioner
-    double      condest ();
+    double condest ();
 
     //! Update the vector beta of the convective term in Fp
     /*!
         This method updates the value of beta.
         @param beta New vector beta to be used to built the convective term
      */
-    void updateBeta(const vector_type& beta);
+    void updateBeta( const vector_type& beta );
 
 
     //! Build the preconditioner
-    int buildPreconditioner(operator_type& A);
+    int buildPreconditioner( operator_type& A );
 
     //@}
 
     //! @name  Get Methods
     //@{
-    int         numBlocksRows() const;
-    int         numBlocksColumns() const;
+    int numBlocksRows() const;
+    int numBlocksColumns() const;
     //@}
 
     //! @name  Set Methods
@@ -144,7 +150,7 @@ public:
         @param dataFile is a GetPot dataFile
         @param section is the section containing the data
      */
-    void setDataFromGetPot ( const GetPot&      dataFile,
+    void setDataFromGetPot( const GetPot&      dataFile,
                             const std::string& section );
 
     //! Setter for the FESpace
@@ -154,7 +160,7 @@ public:
         @param uFESpace Boost::shared_ptr on the FESpace for the velocity
         @param pFESpace Boost::shared_ptr on the FESpace for the pressure
      */
-    void setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace);
+    void setFESpace( FESpace_ptr uFESpace, FESpace_ptr pFESpace );
 
     //! Setter for the BCHandler
     /*!
@@ -162,28 +168,28 @@ public:
         for the construction of the operators Ap, Fp and Mp.
         @param bchPtr pointer to a BCHandler boject
     */
-    void setBCHandler(BCHandlerPtr_type bchPtr);
+    void setBCHandler( BCHandlerPtr_type bchPtr );
 
     //! Setter for the timestep
     /*!
         This method set the timestep used to compute Fp.
         @param timestep Timestep used to compute the solution of the Navier-Stokes equations
      */
-    void setTimestep(const Real& timestep);
+    void setTimestep( const Real& timestep );
 
     //! Setter for the viscosity
     /*!
         This method set the viscosity used to compute Fp.
         @param viscosity Viscosity used to compute the solution of the Navier-Stokes equations
      */
-    void setViscosity(const Real& viscosity);
+    void setViscosity( const Real& viscosity );
 
     //! Setter for the densitz
     /*!
         This method set the density used to compute Fp.
         @param density Density used to compute the solution of the Navier-Stokes equations
      */
-    void setDensity(const Real& density);
+    void setDensity( const Real& density );
 
     //@}
 
@@ -219,9 +225,9 @@ protected:
     bool        M_setFpBoundaryConditions;
 
 private:
-    PreconditionerPCD(const PreconditionerPCD& P):
-        PreconditionerComposition(P.M_comm){}
-    PreconditionerPCD(const boost::shared_ptr<PreconditionerPCD>& /*P*/){}
+    PreconditionerPCD( const PreconditionerPCD& P ):
+        PreconditionerComposition( P.M_comm ){}
+    PreconditionerPCD( const boost::shared_ptr<PreconditionerPCD>& /*P*/ ){}
 
 };
 
@@ -233,4 +239,4 @@ namespace
 
 } // namespace LifeV
 
-#endif
+#endif /* PRECONDITIONERPCD_HPP */

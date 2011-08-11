@@ -1,35 +1,41 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-       Date: 2011-01-24
+    This file is part of LifeV.
 
-  Copyright (C) 2011 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file PreconditionerSIMPLE.hpp
-   \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2011-01-24
+//@HEADER
+
+/*!
+    @file
+    @brief PreconditionerSIMPLE
+
+    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+    @date 24-01-2011
  */
 
-
-#ifndef _PRECONDITIONERSIMPLE_HPP_
-#define _PRECONDITIONERSIMPLE_HPP_
+#ifndef PRECONDITIONERSIMPLE_HPP
+#define PRECONDITIONERSIMPLE_HPP 1
 
 #include <boost/shared_ptr.hpp>
 
@@ -84,11 +90,11 @@ public:
     //! @name Constructors, destructor
     //@{
     //! default constructor.
-    PreconditionerSIMPLE(const  boost::shared_ptr<Epetra_Comm>& comm= boost::shared_ptr<Epetra_Comm>());
+    PreconditionerSIMPLE( const  boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
-    //    IfpackPreconditioner(operator_type& A);
+    //    IfpackPreconditioner( operator_type& A );
 
     //! default destructor
     ~PreconditionerSIMPLE();
@@ -108,10 +114,10 @@ public:
                                   const std::string& subSection = "SIMPLE" );
 
     //! Return an estimation of the conditionement number of the preconditioner
-    double      condest ();
+    double condest ();
 
     //! Build the preconditioner
-    int buildPreconditioner(operator_type& A);
+    int buildPreconditioner( operator_type& A );
 
     //@}
 
@@ -140,14 +146,14 @@ public:
         @param uFESpace Boost::shared_ptr on the FESpace for the velocity
         @param pFESpace Boost::shared_ptr on the FESpace for the pressure
      */
-    void setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace);
+    void setFESpace( FESpace_ptr uFESpace, FESpace_ptr pFESpace );
 
     //! Setter for the damping factor
     /*!
         This method set damping factor used to build the preconditioner
         @param dampingFactor Damping factor
     */
-    void setDampingFactor(const Real& dampingFactor);
+    void setDampingFactor( const Real& dampingFactor );
 
     //@}
 
@@ -168,9 +174,9 @@ protected:
     string      M_schurDataSection;
 
 private:
-    PreconditionerSIMPLE(const PreconditionerSIMPLE& P):
-        PreconditionerComposition(P.M_comm){}
-    PreconditionerSIMPLE(const boost::shared_ptr<PreconditionerSIMPLE>& /*P*/){}
+    PreconditionerSIMPLE( const PreconditionerSIMPLE& P ):
+        PreconditionerComposition( P.M_comm ){}
+    PreconditionerSIMPLE( const boost::shared_ptr<PreconditionerSIMPLE>& /*P*/ ){}
 
 };
 
@@ -182,4 +188,4 @@ namespace
 
 } // namespace LifeV
 
-#endif
+#endif /* PRECONDITIONERSIMPLE_HPP */
