@@ -87,6 +87,7 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
             DataType destValues[numSrcEntries];
             int numDestEntries(0);
             int destRow(srcRowElement+rowsOffset);
+
             for(int j(0);j<numSrcEntries;++j)
             {
                 srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
@@ -101,9 +102,23 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
                 }
             }
             if(srcBlock.getMatrixPtr()->Map().MyGID(destRow))
+            {
+#ifdef NDEBUG
                 destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+#else
+                Int errorCode = destBlock.getMatrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                ASSERT(errorCode >=0, " Error in block copy: insertion failed");
+#endif
+            }
             else
+            {
+#ifdef NDEBUG
                 destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+#else
+                Int errorCode = destBlock.getMatrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                ASSERT(errorCode >=0, " Error in block copy: sum failed");
+#endif
+            }
         }
     }
 }
