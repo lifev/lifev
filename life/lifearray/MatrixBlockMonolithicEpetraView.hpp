@@ -130,7 +130,7 @@ public:
     UInt firstColumnIndex() const {return M_firstColumnIndex; }
 
     //! Returns the index of the last column in the block
-    UInt lastColumnIndex() const {return M_firstColumnIndex; }
+    UInt lastColumnIndex() const {return M_lastColumnIndex; }
 
     //! Return the shared_pointer of the Epetra_FECrsMatrix
     rawMatrix_ptrtype& getMatrixPtr(){return M_matrix; }
