@@ -603,10 +603,8 @@ void FSIOperator::couplingVariableExtrap( )
     }
     else
     {
-        vector_Type ALEvel(M_mmFESpace->map(), Unique);
-        M_solidTimeAdvance->extrapolationVelocity(ALEvel);
         transferSolidOnInterface(M_solidTimeAdvance->extrapolation(), *this->M_lambda);
-        transferSolidOnInterface(ALEvel, *this->M_lambdaDot);
+        transferSolidOnInterface( M_solidTimeAdvance->extrapolationFirstDerivative(), *this->M_lambdaDot);
       //*M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
       //*M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
     }

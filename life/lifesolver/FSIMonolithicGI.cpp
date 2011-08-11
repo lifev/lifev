@@ -174,10 +174,10 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
         vector_Type mmRep(*meshDisp, Repeated);// just to repeat dispDiff. No way witout copying?
         moveMesh(mmRep);// re-initialize the mesh points
-
+	//Matteo: per Paolo meshDisp io lo chiamerei meshVelocity da qua in poi !!!!
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
-        {
-            this->M_ALETimeAdvance->extrapolationVelocity( *meshDisp );
+        {   
+            *meshDisp = this->M_ALETimeAdvance->extrapolation( );
             //*meshDisp = this->M_ALETimeAdvance->velocity( );
 
             //meshDisp = meshDispOld;// at time n;

@@ -185,17 +185,17 @@ public:
      /*
      Initialize parameters of time advance scheme used in TimeAdvanceNewmark scheme
      @param  coefficients define the TimeAdvanceNewmark's coefficients
-     @param  orderDerivate  define the order of derivate;
+     @param  orderDerivative  define the order of derivate;
      */
-     void setup (const  std::vector<Real>&  coefficients, const  UInt& orderDerivate);
+     void setup (const  std::vector<Real>&  coefficients, const  UInt& orderDerivative);
 
      //! initialize parameters of time advance scheme;
      /*
      Initialize parameters of time advance scheme used in BDF;
      @param  order define the order of BDF;
-     @param  orderDerivate  define the order of derivate;
+     @param  orderDerivative  define the order of derivate;
      */
-     void setup ( const UInt& order, const  UInt& orderDerivate);
+     void setup ( const UInt& order, const  UInt& orderDerivative);
 
      //! Initialize the StateVector
      /*!
@@ -245,10 +245,10 @@ public:
 
    //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
    /*!
-   @param \f$i\f$ index of velocity's extrapolation  coefficient
-   @returns \f$\beta^V_i\f$
+   @param \f$i\f$ index of the coefficient of the first derivative
+   @returns \f$\betaFirstDerivative\f$
    */
-   Real coefficientExtrapolationVelocity(const UInt& i ) const;
+   Real coefficientExtrapolationFirstDerivative(const UInt& i ) const;
 
     //! Compute the polynomial extrapolation of solution
     /*!
@@ -262,7 +262,7 @@ public:
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
-    void  extrapolationVelocity(feVectorType& extrapolation) const;
+    feVectorType  extrapolationFirstDerivative( ) const;
 
     //! Return the current velocity
     feVectorType velocity()  const;
@@ -320,7 +320,7 @@ void TimeAdvanceNewmark <feVectorType>::shiftRight(const feVectorType& solution)
     // update unknows[1] with velocityTemp is current velocity
     *itb = new feVectorType(velocityTemp);
 
-    if ( this->M_orderDerivate == 2 )
+    if ( this->M_orderDerivative == 2 )
     {
      itb++;
 
@@ -347,7 +347,7 @@ TimeAdvanceNewmark<feVectorType>::updateRHSFirstDerivative(const Real& timeStep 
 
     **it *=  this->M_alpha[ 1 ] / timeStep ;
 
-    for (UInt i= 1; i  < this->M_firstOrderDerivateSize; ++i )
+    for (UInt i= 1; i  < this->M_firstOrderDerivativeSize; ++i )
         **it += ( this->M_alpha[ i+1 ] * pow( timeStep, static_cast<Real>(i - 1 ) ) ) *  (* this->M_unknowns[ i ]);
 
     //*it = new feVectorType(fv);
@@ -367,7 +367,7 @@ TimeAdvanceNewmark<feVectorType>::updateRHSSecondDerivative(const Real& timeStep
 
     **it *=  this->M_xi[ 1 ] /(timeStep * timeStep) ;
 
-    for ( UInt i = 1;  i < this->M_secondOrderDerivateSize; ++i )
+    for ( UInt i = 1;  i < this->M_secondOrderDerivativeSize; ++i )
 
         **it += ( this->M_xi[ i+1 ] * pow(timeStep, static_cast<Real>(i - 2) ) ) * ( *this->M_unknowns[ i ]);
 
@@ -381,7 +381,7 @@ void
 TimeAdvanceNewmark<feVectorType>::showMe() const
 {
     std::cout << "*** TimeAdvanceNewmarkTime discretization maximum order of derivate "
-                    << this->M_orderDerivate<< " ***"<< std::endl;
+                    << this->M_orderDerivative<< " ***"<< std::endl;
     std::cout <<" Coefficients : "      <<  std::endl;
     std::cout <<" theta :        "      << M_theta<<"\n"
               <<" gamma :  "            <<  M_gamma<<"\n"
@@ -390,7 +390,7 @@ TimeAdvanceNewmark<feVectorType>::showMe() const
     for ( UInt i = 0; i <  this->M_alpha.size(); ++i )
         std::cout << "  alpha(" << i << ") = " <<  this->M_alpha[ i ]<< std::endl;
 
-    if (this->M_orderDerivate == 2)
+    if (this->M_orderDerivative == 2)
     {
         for ( UInt i = 0; i <  this->M_xi.size(); ++i )
             std::cout << "       xi(" << i << ") = " <<  this->M_xi[ i ] << std::endl;
@@ -406,14 +406,14 @@ TimeAdvanceNewmark<feVectorType>::showMe() const
 
 template<typename feVectorType>
 void
-TimeAdvanceNewmark<feVectorType>::setup (const UInt& /*order*/, const  UInt& /*orderDerivate*/)
+TimeAdvanceNewmark<feVectorType>::setup (const UInt& /*order*/, const  UInt& /*orderDerivative*/)
 {
     ERROR_MSG("use setup for BDF but the time advance scheme is TimeAdvanceNewmark or  theta-method");
 }
 
 template<typename feVectorType>
 void
-TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, const  UInt& orderDerivate)
+TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, const  UInt& orderDerivative)
 {
     //initialize theta
     M_theta = coefficients[0];
@@ -421,13 +421,13 @@ TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, c
     //initilialize gamma
     M_gamma = coefficients[1];
 
-    //initialize Order Derivate
-    this->M_orderDerivate= orderDerivate;
+    //initialize Order Derivative
+    this->M_orderDerivative= orderDerivative;
 
     // If theta equal 0, explicit meta method
     if (M_theta == 0)
     {
-        ASSERT (this->M_orderDerivate == 2,  "theta is 0 must be different from 0 in TimeAdvanceNewmark");
+        ASSERT (this->M_orderDerivative == 2,  "theta is 0 must be different from 0 in TimeAdvanceNewmark");
         this->M_size = 4;
         this->M_alpha[ 0 ] =  1;
         this->M_alpha[ 1 ] =  1;
@@ -436,7 +436,7 @@ TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, c
     }
     else
     {
-        if (this->M_orderDerivate == 1 )  // Theta method
+        if (this->M_orderDerivative == 1 )  // Theta method
         {
             this->M_gamma = 1;
             //  unknown vector's  dimension;
@@ -462,7 +462,7 @@ TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, c
             this->M_alpha.resize(4);
             this->M_xi.resize(4);
             this->M_beta.resize(3);
-            this->M_betaVelocity.resize(3);
+            this->M_betaFirstDerivative.resize(3);
             //initialitation alpha coefficients
             this->M_alpha[ 0 ] =  M_gamma / M_theta;
             this->M_alpha[ 1 ] =  M_gamma / M_theta;
@@ -480,9 +480,9 @@ TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, c
             this->M_beta[ 0 ] = 1;
             this->M_beta[ 1 ] = 1;
             this->M_beta[ 2 ] = 0.5;
-            this->M_betaVelocity[ 0 ] = 0;
-            this->M_betaVelocity[ 1 ] = 1;
-            this->M_betaVelocity[ 2 ] = 1;
+            this->M_betaFirstDerivative[ 0 ] = 0;
+            this->M_betaFirstDerivative[ 1 ] = 1;
+            this->M_betaFirstDerivative[ 2 ] = 1;
 
             this->M_coefficientsSize  = 4;
         }
@@ -494,8 +494,8 @@ TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, c
         else
             this->M_order = 1;
 
-        this->M_firstOrderDerivateSize  =  static_cast<Real>(this->M_size) / 2.0;
-        this->M_secondOrderDerivateSize = static_cast<Real>(this->M_size) / 2.0;
+        this->M_firstOrderDerivativeSize  =  static_cast<Real>(this->M_size) / 2.0;
+        this->M_secondOrderDerivativeSize = static_cast<Real>(this->M_size) / 2.0;
     }
 }
 
@@ -627,9 +627,9 @@ TimeAdvanceNewmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
 
 template<typename feVectorType>
 Real
-TimeAdvanceNewmark<feVectorType>::coefficientExtrapolationVelocity(const UInt& i ) const
+TimeAdvanceNewmark<feVectorType>::coefficientExtrapolationFirstDerivative(const UInt& i ) const
 {
- return  this->M_betaVelocity(i)*pow( this->M_timeStep, static_cast<Real>(i));
+ return  this->M_betaFirstDerivative(i)*pow( this->M_timeStep, static_cast<Real>(i));
 }
 
 template<typename feVectorType>
@@ -638,18 +638,32 @@ TimeAdvanceNewmark<feVectorType>::extrapolation()  const
 {
     feVectorType extrapolation(*this->M_unknowns[0]);
     extrapolation += this->M_timeStep * ( *this->M_unknowns[ 1 ]);
-    if ( this->M_orderDerivate == 2 )
+    if ( this->M_orderDerivative == 2 )
         extrapolation += ( this->M_timeStep * this->M_timeStep ) / 2.0 * ( *this->M_unknowns[2]);
     return extrapolation;
 }
 
+
+template<typename feVectorType>
+feVectorType
+TimeAdvanceNewmark<feVectorType>::extrapolationFirstDerivative( ) const
+{
+    feVectorType extrapolation(*this->M_unknowns[1]);
+    extrapolation += this->M_timeStep * ( *this->M_unknowns[ 2 ]);
+}
+
+/*
 template<typename feVectorType>
 void
-TimeAdvanceNewmark<feVectorType>::extrapolationVelocity(feVectorType& extrapolation) const
+TimeAdvanceNewmark<feVectorType>::extrapolationFirstDerivative(feVectorType& extrapolation) const
 {
+   ASSERT ( this->M_orderDerivative == 2,
+             "extrapolationFirstDerivative: this method must be used with the second order problem." )
+
     extrapolation = *this->M_unknowns[1];
     extrapolation += this->M_timeStep * ( *this->M_unknowns[ 2 ]);
 }
+*/
 
 template<typename feVectorType>
 feVectorType
