@@ -129,16 +129,16 @@ public:
      * @param columnIndex Column position of the block in the matrix
      * @param mbv MatrixBlockMonolithicEpetraView to be filled
      */
-    void matrixBlockMonolithicEpetraView( const UInt& rowIndex,
-                             const UInt& columnIndex,
-                             block_type& mbv) const;
+    void blockView( const UInt& rowIndex,
+                    const UInt& columnIndex,
+                    block_type& mbv);
 
 	//! Returns the block (rowIndex,columnIndex) of the matrix
 	/*!
 	@assert: rowIndex is a valid row number
 	@assert: columnIndex is a valid column number
 	*/
-	block_ptrType block(const UInt& rowIndex, const UInt& columnIndex) const;
+	block_ptrType block(const UInt& rowIndex, const UInt& columnIndex);
     //@}
 
 private:
@@ -307,9 +307,9 @@ MatrixBlockMonolithicEpetra<DataType>::blockNumColumns(const UInt& columnIndex) 
 
 template <typename DataType>
 void
-MatrixBlockMonolithicEpetra<DataType>::matrixBlockMonolithicEpetraView(const UInt& rowIndex,
+MatrixBlockMonolithicEpetra<DataType>::blockView(const UInt& rowIndex,
                                           const UInt& columnIndex,
-                                          block_type& mbv) const
+                                          block_type& mbv)
 {
 	ASSERT(rowIndex < M_blockFirstRows.size(), "Row index out of bound. No block to return");
 	ASSERT(columnIndex < M_blockFirstColumns.size(), "Column index out of bound. No block to return");
@@ -318,12 +318,12 @@ MatrixBlockMonolithicEpetra<DataType>::matrixBlockMonolithicEpetraView(const UIn
               M_blockFirstColumns[columnIndex],
               M_blockNumRows[rowIndex],
               M_blockNumColumns[columnIndex],
-              this->matrixPtr());
+              this);
 }
 
 template <typename DataType>
 typename MatrixBlockMonolithicEpetra<DataType>::block_ptrType
-MatrixBlockMonolithicEpetra<DataType>::block(const UInt& rowIndex, const UInt& columnIndex) const
+MatrixBlockMonolithicEpetra<DataType>::block(const UInt& rowIndex, const UInt& columnIndex)
 {
 	ASSERT(rowIndex < M_blockFirstRows.size(), "Row index out of bound. No block to return");
 	ASSERT(columnIndex < M_blockFirstColumns.size(), "Column index out of bound. No block to return");
@@ -334,7 +334,7 @@ MatrixBlockMonolithicEpetra<DataType>::block(const UInt& rowIndex, const UInt& c
               M_blockFirstColumns[columnIndex],
               M_blockNumRows[rowIndex],
               M_blockNumColumns[columnIndex],
-              this->matrixPtr());
+              this);
 
 	return mbv;
 }

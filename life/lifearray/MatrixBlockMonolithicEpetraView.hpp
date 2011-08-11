@@ -40,7 +40,9 @@
 
 #include <iostream>
 
-#include <Epetra_FECrsMatrix.h>
+//#include <Epetra_FECrsMatrix.h>
+//#include <life/lifearray/MatrixBlockMonolithicEpetra.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 
 
 namespace LifeV {
@@ -63,9 +65,12 @@ public:
      */
     //@{
 
-    typedef Epetra_FECrsMatrix rawMatrix_type;
-    typedef boost::shared_ptr<rawMatrix_type>  rawMatrix_ptrtype;
-	//@}
+    // Not a block matrix to avoid circular dependancies
+    //typedef MatrixBlockMonolithicEpetra<DataType> matrix_Type;
+
+    typedef MatrixEpetra<DataType> matrix_Type;
+
+    //@}
 
 
     /** @name Constructors, destructor
@@ -108,7 +113,7 @@ public:
                 const UInt& firstColumn,
                 const UInt& numRows,
                 const UInt& numColumns,
-                const rawMatrix_ptrtype& A );
+                matrix_Type* A );
 
     //@}
 
@@ -132,11 +137,8 @@ public:
     //! Returns the index of the last column in the block
     UInt lastColumnIndex() const {return M_lastColumnIndex; }
 
-    //! Return the shared_pointer of the Epetra_FECrsMatrix
-    rawMatrix_ptrtype& getMatrixPtr(){return M_matrix; }
-
-    //! Return the const shared_pointer of the Epetra_FECrsMatrix
-    const rawMatrix_ptrtype& getMatrixPtr() const {return M_matrix; }
+    //! Return the pointer of the full matrix
+    matrix_Type* matrixPtr(){return M_matrix; }
 
     //@}
 
@@ -157,7 +159,7 @@ private:
     UInt M_lastRowIndex;
     UInt M_firstColumnIndex;
     UInt M_lastColumnIndex;
-    rawMatrix_ptrtype M_matrix;
+    matrix_Type* M_matrix;
 };
 
 // ===================================================
@@ -193,7 +195,7 @@ MatrixBlockMonolithicEpetraView<DataType>::MatrixBlockMonolithicEpetraView( cons
 template<typename DataType>
 MatrixBlockMonolithicEpetraView<DataType>::~MatrixBlockMonolithicEpetraView()
 {
-    M_matrix.reset();
+    //M_matrix.reset();
 }
 
 // ===================================================
@@ -232,8 +234,12 @@ addToCoefficients( UInt const numRows, UInt const numColumns,
         columnIndices[i]+=M_firstColumnIndex;
     }
 
+    M_matrix->addToCoefficients(numRows,numColumns,
+                                rowIndices,columnIndices,
+                                localValues,format);
+
 // Avoid a warning when compiling in opt
-#ifdef NDEBUG
+/*#ifdef NDEBUG
     M_matrix->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
                                   &columnIndices[0], localValues, format );
 #else
@@ -242,7 +248,7 @@ addToCoefficients( UInt const numRows, UInt const numColumns,
 #endif
 
     ASSERT( ierr != -2, " \n <!> Error in block matrix insertion <!> \n Code : -2 \n Possible cause : try to insert a new element in a closed matrix");
-    ASSERT( ierr >= 0 , " \n <!> Unknown error in block matrix insertion <!> ");
+    ASSERT( ierr >= 0 , " \n <!> Unknown error in block matrix insertion <!> ");*/
 }
 
 
@@ -256,7 +262,7 @@ MatrixBlockMonolithicEpetraView<DataType>::setup( const UInt& firstRow,
                         const UInt& firstColumn,
                         const UInt& numRows,
                         const UInt& numColumns,
-                        const rawMatrix_ptrtype& A )
+                        matrix_Type* A )
 {
     M_numRows          = numRows;
     M_numColumns       = numColumns;
