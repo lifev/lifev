@@ -176,9 +176,9 @@ public:
 
     /*! Constructor
      @param order: is accurancy's order of the BDF,
-     @param orderDerivate: is the maximum order of derivate
+     @param orderDerivative: is the maximum order of derivate
      */
-    //TimeAdvanceBDF( const UInt& order, const  UInt& orderDerivate );
+    //TimeAdvanceBDF( const UInt& order, const  UInt& orderDerivative );
 
      //! Destructor
      ~TimeAdvanceBDF() {}
@@ -221,13 +221,13 @@ public:
      /*
      Initialize parameters of time advance scheme;
      @param  order define the order of BDF;
-     @param  orderDerivate  define the order of derivate;
+     @param  orderDerivative  define the order of derivate;
      */
-    void setup ( const UInt& order, const UInt& orderDerivate = 1 );
+    void setup ( const UInt& order, const UInt& orderDerivative = 1 );
 
     //! Initialize the parameters of time advance scheme used in TimeAdvanceNewmark
 
-    void setup ( const  std::vector<Real>&  coefficients, const  UInt& orderDerivate);
+    void setup ( const  std::vector<Real>&  coefficients, const  UInt& orderDerivative);
 
      //! Initialize the StateVector
      /*!
@@ -263,9 +263,9 @@ public:
     //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
     /*!
     @param \f$i\f$ index of velocity's extrapolation  coefficient
-    @returns betaVelocity
+    @returns betaFirstDerivative
     */
-    Real coefficientExtrapolationVelocity(const UInt& i ) const;
+    Real coefficientExtrapolationFirstDerivative(const UInt& i ) const;
 
     //! Compute the polynomial extrapolation of solution
     /*!
@@ -279,7 +279,7 @@ public:
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
-    void extrapolationVelocity(feVectorType& extrapolation) const;
+    feVectorType extrapolationFirstDerivative() const;
 
     //! Return the current velocity
     feVectorType velocity()  const;
@@ -308,7 +308,7 @@ template<typename feVectorType>
 void
 TimeAdvanceBDF<feVectorType>::shiftRight(feVectorType const&  solution )
 {
-    ASSERT ( this->M_unknowns.size() == this->M_size,
+     ASSERT ( this->M_unknowns.size() == this->M_size,
              "M_unknowns.size() and  M_size must be equal" );
 
     feVectorContainerPtrIterate_Type it   = this->M_unknowns.end() - 1;
@@ -350,8 +350,8 @@ template<typename feVectorType>
 void
 TimeAdvanceBDF<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
 {
-    ASSERT ( this->M_orderDerivate== 2 ,
-             " M_orderDerivate must be equal two" );
+    ASSERT ( this->M_orderDerivative== 2 ,
+             " M_orderDerivative must be equal two" );
 
     feVectorContainerPtrIterate_Type it  = this->M_rhsContribution.end()-1;
 
@@ -371,7 +371,7 @@ template<typename feVectorType>
 void
 TimeAdvanceBDF<feVectorType>::showMe() const
 {
-    std::cout << "*** BDF Time discretization of order " << this->M_order << " maximum order of derivate "<< this->M_orderDerivate<< " ***"
+    std::cout << "*** BDF Time discretization of order " << this->M_order << " maximum order of derivate "<< this->M_orderDerivative<< " ***"
               << std::endl;
     std::cout << "    Coefficients: " << std::endl;
     for ( UInt i = 0; i < this->M_order + 1; ++i )
@@ -380,12 +380,13 @@ TimeAdvanceBDF<feVectorType>::showMe() const
     for ( UInt i = 0; i < this->M_order; ++i )
         std::cout << "       beta (" << i << ") = " << this->M_beta[ i ]
                   << std::endl;
-    if (this->M_orderDerivate==2)
+    if (this->M_orderDerivative==2)
     {
-        for ( UInt i = 0; i < this->M_order + this->M_orderDerivate; ++i )
+        for ( UInt i = 0; i < this->M_order + this->M_orderDerivative; ++i )
             std::cout << "     xi(" << i << ") = " << this->M_xi[ i ]  << std::endl;
         for ( UInt i = 0;  i < this->M_order; ++i  )
-            std::cout << "       beta Velocity (" << i << ") = " << this->M_betaVelocity[ i ]
+            std::cout << "       beta of the extrapolation of the first derivative (" 
+		      << i << ") = " << this->M_betaFirstDerivative[ i ]
                       << std::endl;
     }
     std::cout <<"Delta Time : "<<this->M_timeStep<<"\n";
@@ -399,7 +400,7 @@ TimeAdvanceBDF<feVectorType>::showMe() const
 
 template<typename feVectorType>
 void
-TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivate)
+TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivative)
 {
     if ( order <= 0 || order > BDF_MAX_ORDER )
     {
@@ -411,13 +412,13 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
     }
 
     this->M_order = order ;
-    this->M_orderDerivate= orderDerivate ;
+    this->M_orderDerivative = orderDerivative ;
     this->M_size = order ;
     this->M_alpha.resize( order + 1 );
     this->M_xi.resize( order + 2 );
     this->M_beta.resize( order );
-    this->M_betaVelocity.resize( order );
-    this->M_coefficientsSize = order + orderDerivate ;
+    this->M_betaFirstDerivative.resize( order + 1 );
+    this->M_coefficientsSize = order + orderDerivative;
 
     switch ( order )
     {
@@ -426,11 +427,10 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
         this->M_alpha[ 1 ] = 1.;
         this->M_beta[ 0 ] = 1.; // u^{n+1} \approx u^n
         this->M_xi[ 0 ] = 1.;
-        this->M_xi[ 1 ] = 2;
-        this->M_xi[ 2 ] = -1;
-        this->M_betaVelocity[0]=1.;
-//         this->M_betaVelocity[0]=2.;
-//         this->M_betaVelocity[1]=-1;
+        this->M_xi[ 1 ] = 2.;
+        this->M_xi[ 2 ] = -1.;
+        this->M_betaFirstDerivative[0]=2.;
+        this->M_betaFirstDerivative[0]=-1.;
         break;
     case 2:
         this->M_alpha[ 0 ] = 3. / 2.;
@@ -442,11 +442,9 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
         this->M_xi[ 1 ] = 5.;
         this->M_xi[ 2 ] =  -4.;
         this->M_xi[ 3 ] = 1.;
-        this->M_betaVelocity[0]=2.;
-        this->M_betaVelocity[1]=-1;
-//         this->M_betaVelocity[0]=3.;
-//         this->M_betaVelocity[ 1 ] = -3.;
-//         this->M_betaVelocity[ 2 ] = 1.;
+        this->M_betaFirstDerivative[0]=3.;
+        this->M_betaFirstDerivative[1]=-3.;
+        this->M_betaFirstDerivative[2]=1.;
         break;
     case 3:
         this->M_alpha[ 0 ] = 11. / 6.;
@@ -461,13 +459,10 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
         this->M_xi[ 2 ] =  -19./2;
         this->M_xi[ 3 ] =  14./3.;
         this->M_xi[ 4 ] =  -11./12.;
-        this->M_betaVelocity[0]=3.;
-        this->M_betaVelocity[ 1 ] = -3.;
-        this->M_betaVelocity[ 2 ] = 1.;
-//         this->M_betaVelocity[ 0 ] = 4.;
-//         this->M_betaVelocity[ 1 ] = -6.;
-//         this->M_betaVelocity[ 2 ] = 4.;
-//         this->M_betaVelocity[ 3 ] = -1;
+        this->M_betaFirstDerivative[0]= 4.;
+        this->M_betaFirstDerivative[ 1 ] = -6.;
+        this->M_betaFirstDerivative[ 2 ] = 4.;
+        this->M_betaFirstDerivative[ 3 ] = -1.;
         break;
     case 4:
         this->M_alpha[ 0 ] = 25. / 12.;
@@ -479,14 +474,15 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
         this->M_beta[ 1 ] = -6.;
         this->M_beta[ 2 ] = 4.;
         this->M_beta[ 3 ] = -1;
-        this->M_betaVelocity[ 0 ] = 4.;
-        this->M_betaVelocity[ 1 ] = -6.;
-        this->M_betaVelocity[ 2 ] = 4.;
-        this->M_betaVelocity[ 3 ] = -1;
+        this->M_betaFirstDerivative[ 0 ] = 5.;
+        this->M_betaFirstDerivative[ 1 ] = -10.;
+        this->M_betaFirstDerivative[ 2 ] = 10.;
+        this->M_betaFirstDerivative[ 3 ] = -5.;
+        this->M_betaFirstDerivative[ 4 ] = 1.;
         break;
     }
 
-    if ( this->M_orderDerivate== 2 )
+    if ( this->M_orderDerivative== 2 )
         this->M_size++;
     this->M_unknowns.reserve( this->M_size);
     this->M_rhsContribution.reserve(2);
@@ -494,7 +490,7 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
 
 template<typename feVectorType>
 void
-TimeAdvanceBDF<feVectorType>::setup ( const  std::vector<Real>&  /*coefficients*/,  const  UInt& /*orderDerivate*/)
+TimeAdvanceBDF<feVectorType>::setup ( const  std::vector<Real>&  /*coefficients*/,  const  UInt& /*orderDerivative*/)
 {
     ERROR_MSG("use setup for TimeAdvanceNewmark but the time advance scheme is BDF");
 }
@@ -555,7 +551,7 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorContainer_
     for ( i = this->M_unknowns.size() ; i < this->M_order && i< n0; ++i )
         this->M_unknowns.push_back(new feVectorType(x0[i]));
 
-    if (this->M_orderDerivate == 1)
+    if (this->M_orderDerivative == 1)
     {
         for ( i = this->M_unknowns.size() ; i < this->M_order; ++i )
             this->M_unknowns.push_back(new feVectorType(x0[n0-1]));
@@ -563,7 +559,7 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorContainer_
         ASSERT ( this->M_unknowns.size() == this->M_order,
                  "M_unknowns.size() and  M_order must be equal" );
     }
-    if (this->M_orderDerivate == 2)
+    if (this->M_orderDerivative == 2)
     {
         for ( i = this->M_unknowns.size() ; i < this->M_order + 1; ++i )
             this->M_unknowns.push_back(new feVectorType(x0[n0-1]));
@@ -594,18 +590,19 @@ TimeAdvanceBDF<feVectorType>::coefficientExtrapolation(const UInt& i ) const
 
 template<typename feVectorType>
 double
-TimeAdvanceBDF<feVectorType>::coefficientExtrapolationVelocity (const UInt& i ) const
+TimeAdvanceBDF<feVectorType>::coefficientExtrapolationFirstDerivative (const UInt& i ) const
 {
       // Pay attention: i is c-based indexed
     ASSERT( i < this->M_order,
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
-    return this->M_betaVelocity[ i ];
+    return this->M_betaFirstDerivative[ i ];
 }
 
 template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::extrapolation() const
 {
+
     feVectorType ue(*this->M_unknowns[ 0 ]);
     ue *= this->M_beta[ 0 ];
 
@@ -617,17 +614,38 @@ TimeAdvanceBDF<feVectorType>::extrapolation() const
     return ue;
 }
 
+
 template<typename feVectorType>
-void
-TimeAdvanceBDF<feVectorType>::extrapolationVelocity(feVectorType& extrap) const
+feVectorType
+TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative() const
 {
-    //feVectorType velocity(*this->M_unknowns[ 0 ]);
-    extrap = this->M_betaVelocity[ 0 ]*(*this->M_unknowns[ 0 ]);
+   ASSERT ( this->M_orderDerivative == 2,
+             "extrapolationFirstDerivative: this method must be used with the second order problem." )
+
+    feVectorType extrapolation(*this->M_unknowns[ 0 ]);
+
+    extrapolation *= this->M_betaFirstDerivative[ 0 ];
 
     for ( UInt i = 1; i < this->M_order; ++i )
-        extrap += this->M_betaVelocity[ i ] * (*this->M_unknowns[ i ]);
+        extrapolation += this->M_betaFirstDerivative[ i ] * (*this->M_unknowns[ i ]);
 
 }
+
+
+/*
+template<typename feVectorType>
+void
+TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative(feVectorType& extrapolation) const
+{
+   ASSERT ( this->M_orderDerivative == 2,
+             "extrapolationFirstDerivative: this method must be used with the second order problem." )
+
+    extrapolation = this->M_betaFirstDerivative[ 0 ]*(*this->M_unknowns[ 0 ]);
+
+    for ( UInt i = 1; i < this->M_order; ++i )
+        extrapolation += this->M_betaFirstDerivative[ i ] * (*this->M_unknowns[ i ]);
+}
+*/
 
 template<typename feVectorType>
 feVectorType

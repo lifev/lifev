@@ -166,14 +166,13 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
         //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
+        M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
+        vector_Type mmRep(*meshDisp, Repeated);// just to repeat dispDiff. No way witout copying?
+        moveMesh(mmRep);// re-initialize the mesh points
+	//Matteo: per Paolo meshDisp io lo chiamerei meshVelocity da qua in poi !!!!
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
-             *meshDisp = this->M_ALETimeAdvance->velocity( );
-            if( iter==0 )
-            {
-                M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-                M_ALETimeAdvance->shiftRight(*meshDisp);
-            }
+            *meshDisp = this->M_ALETimeAdvance->extrapolation( );
             //*meshDisp = this->M_ALETimeAdvance->velocity( );
 
             //meshDisp = meshDispOld;// at time n;

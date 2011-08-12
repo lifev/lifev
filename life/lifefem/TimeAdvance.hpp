@@ -224,23 +224,23 @@ public:
      //!Initialize parameters of time advance scheme;
      /*!
      Initialize parameters of time advance scheme;
-     @param  orderDerivate  define the maximum  order of derivate
+     @param  orderDerivative  define the maximum  order of derivate
      */
-     inline void setup ( const  UInt& orderDerivate ) { M_orderDerivate = orderDerivate;}
+     inline void setup ( const  UInt& orderDerivative ) { M_orderDerivative = orderDerivative;}
 
      //! Initialize the parameters of time advance scheme
      /*
      @param  order define the order of BDF;
-     @param  orderDerivate  define the order of derivate;
+     @param  orderDerivatve  define the order of derivate;
      */
-     virtual void setup ( const UInt& order,  const  UInt& orderDerivate ) = 0;
+     virtual void setup ( const UInt& order,  const  UInt& orderDerivative ) = 0;
 
      //! Initialize the parameters of time advance scheme
      /*
      @param  coefficients define the TimeAdvanceNewmark's coefficients (\theta, \gamma);
-     @param  orderDerivate  define the order of derivate;
+     @param  orderDerivative  define the order of derivate;
      */
-     virtual void setup ( const std::vector<Real>&  coefficients, const  UInt& orderDerivate ) = 0;
+     virtual void setup ( const std::vector<Real>&  coefficients, const  UInt& orderDerivative ) = 0;
 
      //! Initialize the State Vector
      /*!
@@ -314,7 +314,7 @@ public:
     //!Return the\f$ i-\f$th coefficient of the solution's extrapolation
     /*!
      @param \f$i\f$ index of  extrapolation coefficient
-     @returns the \f$i-\f$th coefficient of the velocity's extrapolation
+     @returns the \f$i-\f$th coefficient of the extrapolation of the first order derivative 
     */
     virtual Real coefficientExtrapolation(const UInt& i )  const = 0;
 
@@ -324,15 +324,23 @@ public:
     @returns the \f$i-\f$th coefficient of the velocity's extrapolation
    */
 
-    virtual Real coefficientExtrapolationVelocity(const UInt& i ) const =0;
-;
+    virtual Real coefficientExtrapolationFirstDerivative(const UInt& i ) const =0;
+
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
-   @returns  extrap of state vector u^*
+    @returns  extrap of state vector u^*
     */
     virtual feVectorType extrapolation() const  = 0;
+
+    //! Compute the polynomial extrapolation of solution
+    /*!
+    Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
+    \f$u^{n+1}\f$ defined by the n stored state vectors
+    @returns  extrap of state vector u^*
+    */
+    virtual feVectorType extrapolationFirstDerivative() const  = 0;
 
     //! Compute the polynomial extrapolation of velocity
     /*!
@@ -340,13 +348,13 @@ public:
     \f$u^{n+1}\f$ defined by the n stored state vectors
     @returns  extrap of state vector \f$V^*\f$
     */
-    virtual void extrapolationVelocity(feVectorType& extrapolation) const  = 0;
+    //    virtual void extrapolationFirstDerivative(feVectorType& extrapolation) const  = 0;
 
     //! Return the state vector
      /*!
     @returns the state vector
     */
-  // inline const feVectorContainerPtr_Type unknowns() const {return this->M_unknowns;}
+    // inline const feVectorContainerPtr_Type unknowns() const {return this->M_unknowns;}
 
     //! Return the \f$i-\f$th element of state vector
     /*!
@@ -422,7 +430,7 @@ protected:
 
     //! Order of temporal derivate: the time-derivative
     //! coefficients vector has size \f$n+1\f$, the extrapolation vector has size \f$n\f$
-    UInt M_orderDerivate;
+    UInt M_orderDerivative;
 
     //! time step
     Real M_timeStep;
@@ -430,13 +438,13 @@ protected:
     //! Size of the unknown vector
     UInt M_size;
 
-    //! Size for firstOrderDerivate loop (for bdf  equal M_order, for TimeAdvanceNewmark equal  M_size/2)
-    UInt M_firstOrderDerivateSize;
+    //! Size for firstOrderDerivative loop (for bdf  equal M_order, for TimeAdvanceNewmark equal  M_size/2)
+    UInt M_firstOrderDerivativeSize;
 
-    //! Size for setSecondOrderDerivate loop  (for bdf  equal M_order, for TimeAdvanceNewmark equal M_size/2)
-    UInt M_secondOrderDerivateSize;
+    //! Size for setSecondOrderDerivatve loop  (for bdf  equal M_order, for TimeAdvanceNewmark equal M_size/2)
+    UInt M_secondOrderDerivativeSize;
 
-    //!Size of coefficients (for bdf equal M_order + M_orderDerivate, for theta-method is 3, and TimeAdvanceNewmark is 4)
+    //!Size of coefficients (for bdf equal M_order + M_orderDerivative, for theta-method is 3, and TimeAdvanceNewmark is 4)
     UInt M_coefficientsSize;
 
     //! Coefficients \f$ \alpha_i \f$ of the time advance discretization
@@ -449,7 +457,7 @@ protected:
     container_Type M_beta;
 
     //! Coefficients \f$ \beta^V_i \f$ of the velocity's extrapolation
-    container_Type M_betaVelocity;
+    container_Type M_betaFirstDerivative;
 
     //! Last n state vectors
     feVectorContainerPtr_Type M_unknowns;
@@ -493,11 +501,11 @@ void
 TimeAdvance<feVectorType>::
 updateRHSContribution(const Real& timeStep )
 {
-  //! update rhsContribution  of the first Derivate
+  //! update rhsContribution  of the first Derivative
   this->updateRHSFirstDerivative( timeStep);
 
-  //! update rhsContribution  of the second Derivate
-  if( M_orderDerivate == 2 )
+  //! update rhsContribution  of the second Derivative
+  if( M_orderDerivative == 2 )
     this->updateRHSSecondDerivative( timeStep );
 }
 
