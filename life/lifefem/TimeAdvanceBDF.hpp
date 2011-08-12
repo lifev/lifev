@@ -384,7 +384,7 @@ TimeAdvanceBDF<feVectorType>::showMe() const
     {
         for ( UInt i = 0; i < this->M_order + this->M_orderDerivative; ++i )
             std::cout << "     xi(" << i << ") = " << this->M_xi[ i ]  << std::endl;
-        for ( UInt i = 0;  i < this->M_order; ++i  )
+        for ( UInt i = 0;  i < this->M_order + 1; ++i  )
             std::cout << "       beta of the extrapolation of the first derivative (" 
 		      << i << ") = " << this->M_betaFirstDerivative[ i ]
                       << std::endl;
