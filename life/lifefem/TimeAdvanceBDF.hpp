@@ -412,12 +412,12 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
     }
 
     this->M_order = order ;
-    this->M_orderDerivative= orderDerivative ;
+    this->M_orderDerivative = orderDerivative ;
     this->M_size = order ;
     this->M_alpha.resize( order + 1 );
     this->M_xi.resize( order + 2 );
     this->M_beta.resize( order );
-    this->M_betaFirstDerivative.resize( order );
+    this->M_betaFirstDerivative.resize( order + 1 );
     this->M_coefficientsSize = order + orderDerivative;
 
     switch ( order )
@@ -427,8 +427,8 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
         this->M_alpha[ 1 ] = 1.;
         this->M_beta[ 0 ] = 1.; // u^{n+1} \approx u^n
         this->M_xi[ 0 ] = 1.;
-        this->M_xi[ 1 ] = 2;
-        this->M_xi[ 2 ] = -1;
+        this->M_xi[ 1 ] = 2.;
+        this->M_xi[ 2 ] = -1.;
         this->M_betaFirstDerivative[0]=2.;
         this->M_betaFirstDerivative[0]=-1.;
         break;
@@ -443,8 +443,8 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
         this->M_xi[ 2 ] =  -4.;
         this->M_xi[ 3 ] = 1.;
         this->M_betaFirstDerivative[0]=3.;
-        this->M_betaFirstDerivative[1]=-3;
-        this->M_betaFirstDerivative[2]=1;
+        this->M_betaFirstDerivative[1]=-3.;
+        this->M_betaFirstDerivative[2]=1.;
         break;
     case 3:
         this->M_alpha[ 0 ] = 11. / 6.;
