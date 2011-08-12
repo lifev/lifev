@@ -47,14 +47,15 @@
 
 namespace LifeV {
 
-//! MatrixBlockMonolithicEpetraView - class to manage the block in a MatrixBlockMonolithicEpetra
+//! MatrixBlockMonolithicEpetraView - class representing a block in a MatrixBlockMonolithicEpetra
 /*!
- *  @author Gwenol Grandperrin
- *  @contributor Samuel Quinodoz
- *
- *  The MatrixBlockMonolithicEpetraView class contains data related
- *  to block of a matrix. It is useful to setup a
- *  clean and easy-to-use blocks management
+  @author Gwenol Grandperrin
+  @author Samuel Quinodoz
+
+  The MatrixBlockMonolithicEpetraView class contains data related
+  to block of a matrix. It is useful to setup a clean and easy-to-use blocks management.
+
+  For more information about the block structures in LifeV, see \ref BlockAlgebraPage "this page".
  */
 template<typename DataType>
 class MatrixBlockMonolithicEpetraView

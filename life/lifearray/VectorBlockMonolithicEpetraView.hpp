@@ -45,16 +45,14 @@
 
 namespace LifeV {
 
-//! VectorBlockMonolithicEpetraView - A view on the Epetra vector, used especially to access the
-//! vector stored in a VectorBlockMonolithicEpetra
+//! VectorBlockMonolithicEpetraView - class representing a block in a VectorBlockMonolithicEpetra
 /*!
-    @author Samuel Quinodoz
+  @author Samuel Quinodoz
 
-    The only scope of this class is to access the Epetra vector (from Trilinos) stored in a VectorBlockMonolithicEpetra
-    structure.
+  The VectorBlockMonolithicEpetraView class contains data related
+  to block of a vector. It is useful to setup a clean and easy-to-use blocks management.
 
-    This class represents a view, so all the operations (copy, assignement,...) have to be understood in terms of view.
-    For example, copying a view does not copy the underlying vectors (both views simply look at the same data in memory).
+  For more information about the block structures in LifeV, see \ref BlockAlgebraPage "this page".
  */
 class VectorBlockMonolithicEpetraView
 {

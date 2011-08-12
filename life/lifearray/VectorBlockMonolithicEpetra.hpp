@@ -47,15 +47,26 @@
 
 namespace LifeV {
 
-//! VectorBlockMonolithicEpetra - A block vector structure for the Epetra framework of Trilinos
+//! VectorBlockMonolithicEpetra - class of block vector
 /*!
-    @author Samuel Quinodoz
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
-    This structure represents a vector with a block structure while keeping internally
-    only a vector with informations on the location of the blocks with
-    respect to this vector (monolithic approach).
+  The VectorBlockMonolithicEpetra class contains data related
+  to block vector. It is an extension to VectorEpetra where data about blocks have
+  been set. For an introduction to the block structures in LifeV, see
+  \ref BlockAlgebraPage "this page".
+
+  There are mainly two ways to define a VectorBlockMonolithicEpetra:
+  <ul>
+  <li> Construct it using the same syntax as for LifeV::VectorEpetra and the use
+  a setter for the structure.
+  <li> Construct it directly with the maps of the blocks.
+  </ul>
+  Both ways are equivalent.
+
+  To access the blocks, one uses then the blockView or block methods.
+
  */
-
 class VectorBlockMonolithicEpetra
     : public VectorEpetra
 {

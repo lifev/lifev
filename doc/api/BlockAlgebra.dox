@@ -1,19 +1,7 @@
 /*!
 
-\page LinearAlgebraPage Linear algebra structures
+\page BlockAlgebraPage Block algebra structures
 
-
-\section LinearAlgebraPage_basicStructures Basic structures
-
-The simple structures used in LifeV with the Trilinos framework are:
-
-<ul>
-<li> LifeV::MatrixEpetra for the matrices
-<li> LifeV::VectorEpetra for the vectors
-</ul>
-
-
-\section LinearAlgebraPage_blockStructures Block structures
 
 Having block structures can be very useful in many situations, for example when assembling a system or devising a preconditionner.
 Blocks are very intuitive structures that help the code the match closer numerical analysis concepts.
@@ -24,7 +12,7 @@ There are two ways of implementing block structures
 <li> The <b> monolithic </b> approach, which consists in building structures that are aware of the blocks but stores
 	a monolithic structure. For example, with such an approach, a block matrix is a structure storing the positions of the
 	blocks while keeping a unique matrix to represent the global matrix (all the blocks together).
-<li> The <b> split </b> approach, which consists in effectively storing the blocks as different structures. For example, with
+<li> The <b> composite </b> approach, which consists in effectively storing the blocks as different structures. For example, with
 	this approach, a block matrix is a structure storing many matrices, each of them representing one of the blocks.
 </ol>
 
@@ -33,7 +21,7 @@ As the choice for the most suitable approach depends strongly on the problem at 
 \image html linear_algebra_monolithic_vs_split.png "The two possible approaches"
 
 
-\subsection LinearAlgebraPage_blockMonolithicStructures Monolithic approach
+\section LinearAlgebraPage_blockMonolithicStructures Monolithic approach
 
 Structures following this approach are:
 
@@ -42,13 +30,13 @@ Structures following this approach are:
 <li> LifeV::VectorBlockMonolithicEpetra for the vectors
 </ul>
 
-As these structures derive from their basic counterparts, any functionality working
+As these structures derive from their basic counterparts (LifeV::MatrixEpetra and LifeV::VectorEpetra), any functionality working
 for the basic structures will work with these block structures (solvers, preconditionners,...).
 Moreover, the block structures can be changed at any time without large computation.
 
 <b> First Example </b>
 
-The following example shows the preferred syntax for defining these structures. We will use a Stokes problem to illustrate the use 
+The following example shows the preferred syntax for defining these structures. We will use a Stokes problem to illustrate the use
 of these structures. We suppose that the LifeV::FESpace structures have already been defined. We will define a matrix and a vector,
 so the corresponding declaration files have to be included:
 
@@ -118,13 +106,16 @@ matrix_type fusionMatrix( (uxMap + uyMap + uzMap) | pMap );
 vector_type fusionRHS( (uxMap + uyMap + uzMap) | pMap );
 \endcode
 
-Now, the matrix has again a 2x2 block structure while the vector has 2 blocks.
+Now, the matrix has again a 2x2 block structure while the vector has 2 blocks. The usage of parentheses around the blocks to be fusioned is warmly recommended in order not to have to deal with operator priorities. Some compilers might even rise a warning if parentheses are not used.
 
-The usage of parentheses around the blocks to be fusioned is warmly recommended in order not to have
-to deal with operator priorities. Some compilers might even rise a warning if parentheses are not used.
+Remark that it is possible to change the block structure for a low computational cost at any time using the setBlockStructure methods:
 
+\code
+componentMatrix.setBlockStructure( (uxMap + uyMap + uzMap) | pMap );
+componentRHS.setBlockStructure( (uxMap + uyMap + uzMap) | pMap );
+\endcode
 
-\subsection LinearAlgebraPage_blockSplitStructures Split approach
+\section LinearAlgebraPage_blockCompositeStructures Composite approach
 
 These structures have not been implemented yet in LifeV.
 

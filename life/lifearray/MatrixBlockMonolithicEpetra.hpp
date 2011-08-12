@@ -46,13 +46,24 @@ namespace LifeV {
 
 //! MatrixBlockMonolithicEpetra - class of block matrix
 /*!
- *  @author Gwenol Grandperrin
- *  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
- *
- *  The MatrixBlockMonolithicEpetra class contains data related
- *  to block matrix. It is an extension to
- *  MatrixEpetra where data about blocks have
- *  been set.
+  @author Gwenol Grandperrin
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+  The MatrixBlockMonolithicEpetra class contains data related
+  to block matrix. It is an extension to MatrixEpetra where data about blocks have
+  been set. For an introduction to the block structures in LifeV, see
+  \ref BlockAlgebraPage "this page".
+
+  There are mainly two ways to define a MatrixBlockMonolithicEpetra:
+  <ul>
+  <li> Construct it using the same syntax as for LifeV::MatrixEpetra and the use
+  a setter for the structure.
+  <li> Construct it directly with the maps of the blocks.
+  </ul>
+  Both ways are equivalent.
+
+  To access the blocks, one uses then the blockView or block methods.
+
  */
 template <typename DataType>
 class MatrixBlockMonolithicEpetra : public MatrixEpetra<DataType>
