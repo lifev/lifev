@@ -1230,7 +1230,7 @@ StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_Type vel, vectorPtr_Type /*acc*/)
+StructuralSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_Type /*vel*/, vectorPtr_Type /*acc*/)
 {
   *M_disp = *disp;
 //  if (vel.get())

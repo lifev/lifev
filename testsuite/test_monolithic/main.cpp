@@ -624,7 +624,11 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
 
     //M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
-    M_fsi->initialize(initSol);
+
+
+    //removed
+    //M_fsi->initialize(initSol);
+    //end of removed
 }
 
 void Problem::checkGCEResult(const LifeV::Real& time)

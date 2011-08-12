@@ -161,34 +161,41 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
-        if( iter==0 )
-        {
-            M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-            M_ALETimeAdvance->shiftRight(*meshDisp);
-        }
 
-        meshDispOld->subset(*M_un, offset);
+        //meshDispOld->subset(*M_un, offset);
 
         //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
         //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
         M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
-        vector_Type mmRep(*meshDisp, Repeated);// just to repeat dispDiff. No way witout copying?
-        moveMesh(mmRep);// re-initialize the mesh points
-	//Matteo: per Paolo meshDisp io lo chiamerei meshVelocity da qua in poi !!!!
+        //Matteo: per Paolo meshDisp io lo chiamerei meshVelocity da qua in poi !!!!
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
-        {   
-            *meshDisp = this->M_ALETimeAdvance->extrapolation( );
-            //*meshDisp = this->M_ALETimeAdvance->velocity( );
-
-            //meshDisp = meshDispOld;// at time n;
-            //*meshDispDiff -= M_meshMotion->dispOld();//at time n-1
+        {
+            *meshDisp = this->M_ALETimeAdvance->velocity( );
+            if( iter==0 )
+            {
+                M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
+                M_ALETimeAdvance->shiftRight(*meshDisp);
+            }
         }
         else
         {
-            M_ALETimeAdvance->setSolution(*meshDisp);
-            *meshDisp = this->M_ALETimeAdvance->velocity( );
+            if( iter==0 )
+            {
+                M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
+                M_ALETimeAdvance->shiftRight(*meshDisp);
+            }
+            else
+            {
+                M_ALETimeAdvance->setSolution(*meshDisp);
+            }
+            *meshDisp = M_ALETimeAdvance->velocity();
             //*meshDispDiff -= *meshDispOld;//relative displacement
         }
+
+        //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
+        vector_Type mmRep(M_ALETimeAdvance->extrapolation(), Repeated);// just to repeat dispDiff. No way witout copying?
+        moveMesh(mmRep);// re-initialize the mesh points
+
         //*meshDisp *= -alpha;// -w, mesh velocity
         mmRep = *meshDisp;
 
@@ -198,7 +205,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
         if (!M_convectiveTermDer)
         {
-            *fluid = this->M_fluidTimeAdvance->extrapolation();
+            *fluid = M_fluidTimeAdvance->extrapolation();
             //fluid->subset(*M_un, 0);
         }
         else

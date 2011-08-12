@@ -322,10 +322,9 @@ public:
     virtual void applyBoundaryConditions() {}
     //@}
 
-    //    static VenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >(); }
-  static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear(){ return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >(); }
+    static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear(){ return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >(); }
 
-  static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear(){ return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >(); }
+    static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear(){ return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >(); }
 
     //!@name Factory Methods
     //@{
@@ -605,6 +604,10 @@ public:
     //! getter for the fluid velocity
     const vectorPtr_Type& un()                                      const { return M_un; }
 
+    const boost::shared_ptr<const TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
+    const boost::shared_ptr<const TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
+    const boost::shared_ptr<const TimeAdvance<vector_Type> > solidTimeAdvance()const { return  M_solidTimeAdvance; }
+
     //! gets the solution vector by reference
     virtual const vector_Type& solution()                           const { return *M_lambda; }
 
@@ -762,7 +765,37 @@ public:
 
     //! sets the solution vector by copy
     virtual void setSolution                 ( const vector_Type& solution ) { M_lambda.reset( new vector_Type( solution ) ); }
-    virtual void initialize                  ( const vector_Type& solution ) { setSolution(solution); }
+
+
+    //! Initializer for the solution M_un
+    /**
+       \small initializes the current solution vector. Note: this is not sufficient for the correct initialization
+       of bdf!
+    */
+    virtual void initialize( std::vector<vector_Type>& u0Vec, std::vector<vector_Type>& ds0Vec, std::vector<vector_Type>& df0Vec)
+    {
+        //*M_un=*u0Vec[0];
+
+        //TEMPORARY TEST INITIALIZATION//
+        std::vector<vector_Type> structureDisp(0);
+        std::vector<vector_Type> fluidVel(0);
+        std::vector<vector_Type> fluidDisp(0);
+        for(UInt i=0; i< M_solidTimeAdvance->order(); ++i)
+        {
+            structureDisp.push_back(ds0Vec[i]);
+        }
+        for(UInt i=0; i< M_fluidTimeAdvance->order(); ++i)
+        {
+            fluidVel.push_back(u0Vec[i]);
+        }
+        for(UInt i=0; i< M_ALETimeAdvance->order(); ++i)
+        {
+            fluidVel.push_back(df0Vec[i]);
+        }
+        initializeTimeAdvance(fluidVel, structureDisp, fluidDisp);
+        //END OF TEMPORARY TEST INITIALIZATION//
+    }
+
     //! Initialize the fluid solution given a vector (calls setSolution)
 
 
@@ -945,6 +978,7 @@ protected:
     commPtr_Type                                      M_epetraComm;
     commPtr_Type                                      M_epetraWorldComm;
 
+    bool                                              M_structureNonLinear;
     //@}
 private:
 
