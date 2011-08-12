@@ -111,7 +111,7 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
         M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
 
     // physics
-    M_solidType = dataFile( ( section + "/physics/solidType" ).data(), "linearVenantKirchhoff" );
+    M_solidType = dataFile( ( section + "/physics/solidType" ).data(), "NO_DEFAULT_PARAMETER" );
     M_density   = dataFile( ( section + "/physics/density"   ).data(), 1. );
     M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
 

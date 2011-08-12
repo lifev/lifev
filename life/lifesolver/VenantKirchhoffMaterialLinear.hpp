@@ -124,10 +124,10 @@ class VenantKirchhoffMaterialLinear :
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void computeMatrix( const vector_Type& /*sol*/,
-			Real /*factor*/,
-			const dataPtr_Type& /*dataMaterial*/,
-			const displayerPtr_Type& displayer);
+    virtual void computeMatrix( const vector_Type& /*sol*/,
+                                Real /*factor*/,
+                                const dataPtr_Type& /*dataMaterial*/,
+                                const displayerPtr_Type& displayer);
 
     //@}
 

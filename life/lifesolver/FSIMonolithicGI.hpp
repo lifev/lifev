@@ -111,25 +111,10 @@ public:
                      fluidPtr_Type::value_type::function_Type const& /*df0*/ );
 
     //! Initializes the system with vectors
-    void initialize( const vector_Type& un )
+    void initialize(  std::vector<vector_Type>& u0Vec, std::vector<vector_Type>& ds0Vec, std::vector<vector_Type>& df0Vec)
     {
-        super_Type::initialize( vectorPtr_Type( new vector_Type( un ) ));
-
-        //TEMPORARY TEST INITIALIZATION//
-        std::vector<vector_Type> fluidDisp;
-        std::vector<vector_Type> structureDisp;
-        std::vector<vector_Type> fluidVel;
-        vector_Type meshDisp(M_mmFESpace->map());
-        meshDisp.subset(*M_un, M_solidAndFluidDim + nDimensions*M_interface );
-        fluidDisp.push_back(meshDisp);
-        structureDisp.push_back(*M_un);
-        structureDisp.push_back(*M_un);
-        structureDisp.push_back(*M_un);
-        fluidVel.push_back(*M_un);
-        initializeTimeAdvance(fluidVel, structureDisp, fluidDisp);
-        //END OF TEMPORARY TEST INITIALIZATION//
-
-        M_uk.reset( new vector_Type( un ) );
+        super_Type::super_Type::initialize( u0Vec, ds0Vec, df0Vec );
+        M_uk.reset( new vector_Type( u0Vec[0] ) );
     }
 
     /**

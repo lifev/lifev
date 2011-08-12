@@ -73,7 +73,7 @@ filename   = solid
 
 [fluid]
 useShapeDerivatives           = false
-semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
+semiImplicit                  = false # tells if we advance in time after the first nonlinear iteration or not
 domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
 convectiveTermDer             = false  # tells if the velocity is to be considered implicitly in the convective term
 
@@ -140,7 +140,6 @@ material_flag = 1
 density   = 1.2
 young     = 4.0E6
 poisson   = 0.45
-
 
 [../time_discretization]
 method          = BDF

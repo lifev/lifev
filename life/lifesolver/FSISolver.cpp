@@ -252,24 +252,32 @@ FSISolver::initialize( const std::string& /*velFName*/,
 
 
 void
-FSISolver::initialize(vectorPtr_Type u0, vectorPtr_Type v0)
+FSISolver::initialize(std::vector< vector_Type> u0, std::vector< vector_Type> ds0, std::vector< vector_Type> df0)
 {
-    if (!u0.get())
+    if (!u0.size()||!ds0.size()||!df0.size())
     {
-        u0.reset(new vector_Type(*M_oper->couplingVariableMap()));
-        M_oper->initialize(*u0); // couplingVariableMap()
+        vector_Type vec(*M_oper->couplingVariableMap());
+        UInt i;
+        for(i=0; i<M_oper->fluidTimeAdvance()->size(); ++i)
+            u0.push_back(vec);// couplingVariableMap()
+        for(i=0; i<M_oper->solidTimeAdvance()->size(); ++i)
+            ds0.push_back(vec);// couplingVariableMap()
+        for(i=0; i<M_oper->ALETimeAdvance()->size(); ++i)
+            df0.push_back(vec);// couplingVariableMap()
+        M_oper->initializeTimeAdvance(u0, ds0, df0);
         //  M_oper->initializeBDF(*u0);
     }
     else
     {
-        M_oper->initialize(*u0); // couplingVariableMap()//copy
+
+        M_oper->initializeTimeAdvance(u0, ds0, df0); // couplingVariableMap()//copy
         //   M_oper->initializeBDF(*u0);
     }
-    if (!v0.get())
-        M_oper->setSolutionDerivative(*u0); // couplingVariableMap()//copy
-    //        M_oper->setSolutionDerivative(u0); // couplingVariableMap()//copy
-    else
-        M_oper->setSolutionDerivative(*v0);
+//     if (!v0.get())
+//         M_oper->setSolutionDerivative(*u0); // couplingVariableMap()//copy
+//     //        M_oper->setSolutionDerivative(u0); // couplingVariableMap()//copy
+//     else
+//         M_oper->setSolutionDerivative(*v0);
 
 
     //M_oper->setSolutionDerivative(v0);

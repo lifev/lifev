@@ -199,15 +199,6 @@ public:
     */
     void buildSystem();
 
-    //! Initializer for the solution M_un
-    /**
-       \small initializes the current solution vector. Note: this is not sufficient for the correct initialization
-       of bdf!
-    */
-    void initialize( vectorPtr_Type u0)
-    {
-        M_un=u0;
-    }
 
     //! Initialize all the quantities required by FSI
     /*!
@@ -609,6 +600,7 @@ private:
     UInt                                              M_fluxes;
     std::vector<bcName_Type>                          M_BCFluxNames;
     std::vector<UInt>                                 M_fluxOffset;
+
 #ifdef OBSOLETE
     boost::shared_ptr<vector_Type>                    M_rhsShapeDerivatives;
 #endif

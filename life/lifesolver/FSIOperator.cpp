@@ -146,7 +146,8 @@ FSIOperator::FSIOperator():
     M_linearFluid                        ( false ),
     M_linearSolid                        ( false ),
     M_fluidLeader                        ( ),
-    M_solidLeader                        ( )
+    M_solidLeader                        ( ),
+    M_structureNonLinear                 (false)
 {
 }
 
@@ -175,6 +176,7 @@ FSIOperator::setDataFile( const GetPot& dataFile )
     M_fluidTimeAdvanceMethod =  dataFile( "fluid/time_discretization/method", "BDF");
     M_solidTimeAdvanceMethod =  dataFile( "solid/time_discretization/method", "BDF");
     M_ALETimeAdvanceMethod = dataFile("mesh_motion/time_discretization/method", "BDF");
+    M_structureNonLinear   = M_data->dataSolid()->getSolidType().compare("linearVenantKirchhof");
 }
 
 void

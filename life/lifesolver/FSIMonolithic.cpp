@@ -92,6 +92,7 @@ FSIMonolithic::setupFEspace()
                                                          M_data->dataSolid()->order(),
                                                          nDimensions,
                                                          M_epetraComm));
+
 }
 
 void
@@ -155,6 +156,7 @@ FSIMonolithic::setUp( const GetPot& dataFile )
     M_maxIterSolver = dataFile( "linear_system/solver/max_iter", -1);
     M_diagonalScale    = dataFile( "linear_system/prec/diagonalScaling",  false );
     M_restarts         = dataFile( "exporter/start"  ,  0   );
+
     setupTimeAdvance( dataFile );
 }
 
@@ -352,13 +354,7 @@ FSIMonolithic::updateSystem()
 
     M_meshMotion->updateSystem();
 
-    M_solid->material()->computeMatrix(*M_un, M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
-    M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));
-    *M_solidBlock += *M_solid->Mass();
-    *M_solidBlock += *M_solid->material()->stiff();
-    M_solidBlock->globalAssemble();
-    *M_solidBlock *= M_data->dataSolid()->dataTime()->timeStep();
-    M_solidBlock->spy("solid");
+    //M_solidBlock->spy("solid");
 
     this->fluid().updateUn(*this->M_un);
     *M_rhs*=0;
@@ -469,7 +465,7 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working
     //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
     vector_Type lambda(*M_interfaceMap, Unique);
-    this->monolithicToInterface(lambda, *un);
+    this->monolithicToInterface(lambda, M_solidTimeAdvance->extrapolation());
     UInt interface(M_monolithicMatrix->interface());
     //Real rescale(M_solid->rescaleFactor());
     UInt totalDofs(M_dFESpace->dof().numTotalDof());
@@ -546,7 +542,7 @@ void FSIMonolithic::setupBlockPrec( )
 {
     if(!(M_precPtr->set()))
      {
-         M_precPtr->push_back_matrix(M_solidBlockPrec, false);
+         M_precPtr->push_back_matrix(M_solidBlockPrec, M_structureNonLinear);
          M_precPtr->push_back_matrix(M_fluidBlock, true);
          M_precPtr->setConditions(M_BChs);
          M_precPtr->setSpaces(M_FESpaces);
@@ -567,6 +563,13 @@ FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
     {
         updateSolidSystem(this->M_rhs);
     }
+
+    M_solid->material()->computeMatrix(*M_un, M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
+    M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));
+    *M_solidBlock += *M_solid->Mass();
+    *M_solidBlock += *M_solid->material()->stiff();
+    M_solidBlock->globalAssemble();
+    *M_solidBlock *= M_data->dataSolid()->dataTime()->timeStep();
 
     M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap, 1 ) );
     *M_solidBlockPrec += *M_solidBlock;
