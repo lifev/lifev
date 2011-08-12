@@ -37,7 +37,7 @@
 #ifndef VECTOR_BLOCK_MONOLITHIC_EPETRA_VIEW_H
 #define VECTOR_BLOCK_MONOLITHIC_EPETRA_VIEW_H 1
 
-#include <Epetra_FEVector.h>
+#include <life/lifearray/VectorEpetra.hpp>
 
 #include <life/lifecore/LifeV.hpp>
 
@@ -63,8 +63,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Epetra_FEVector rawVector_type;
-    typedef boost::shared_ptr<rawVector_type>  rawVector_ptrtype;
+    typedef VectorEpetra vector_Type;
 
     //@}
 
@@ -85,12 +84,6 @@ public:
 
     //! default destructor
     ~VectorBlockMonolithicEpetraView();
-
-    //@}
-
-
-    //! @name Operators
-    //@{
 
     //@}
 
@@ -127,8 +120,7 @@ public:
      */
     void setup( const UInt& firstIndex,
                 const UInt& blockSize,
-                const rawVector_ptrtype vector );
-
+                vector_Type* vector );
 
     //@}
 
@@ -146,13 +138,10 @@ public:
     UInt lastValidIndex() const { return M_lastValidIndex; }
 
     //! Return the shared_pointer of the Epetra_FEVector
-    rawVector_ptrtype& vectorPtr() { return M_vector; }
-
-    //! Return the const shared_pointer of the Epetra_FEVector
-    const rawVector_ptrtype& vectorPtr() const { return M_vector; }
-
+    vector_Type* vectorPtr() { return M_vector; }
 
     //@}
+
 
 private:
 
@@ -172,7 +161,7 @@ private:
     UInt M_blockSize;
     UInt M_firstIndex;
     UInt M_lastValidIndex;
-    rawVector_ptrtype M_vector;
+    vector_Type* M_vector;
 };
 
 } // Namespace LifeV

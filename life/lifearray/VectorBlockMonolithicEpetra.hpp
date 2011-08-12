@@ -38,6 +38,7 @@
 
 #include <life/lifecore/LifeV.hpp>
 
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifearray/MapVector.hpp>
 #include <life/lifearray/VectorBlockMonolithicEpetraView.hpp>
@@ -51,7 +52,7 @@ namespace LifeV {
     @author Samuel Quinodoz
 
     This structure represents a vector with a block structure while keeping internally
-    only an entire vector with informations of on the location of the blocks with
+    only a vector with informations on the location of the blocks with
     respect to this vector (monolithic approach).
  */
 
@@ -105,20 +106,6 @@ public:
     //@}
 
 
-    //! @name Operators
-    //@{
-
-
-    //@}
-
-
-    //! @name Methods
-    //@{
-
-
-    //@}
-
-
     //! @name Set Methods
     //@{
 
@@ -138,18 +125,24 @@ public:
      */
     void setBlockStructure( const mapVector_type& mapVector);
 
-
     //@}
 
 
     //! @name Get Methods
     //@{
 
-    UInt blockSize(const UInt& index) const { return M_blockSize[index]; }
+    //! Getter for the size of the block index
+    UInt blockSize(const UInt& index) const
+    {
+        ASSERT( index < M_blockSize.size(), "Invalid block index");
+        return M_blockSize[index];
+    }
 
-    void vectorBlockView( const UInt& index, block_type& blockView) const;
+    //! Getter for the block index
+    void blockView( const UInt& index, block_type& blockView);
 
-    block_ptrType block( const UInt& index) const;
+    //! Getter for the block index
+    block_ptrType block( const UInt& index);
 
     //@}
 

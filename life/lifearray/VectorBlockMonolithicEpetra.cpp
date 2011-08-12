@@ -96,16 +96,6 @@ VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const ma
       M_blockFirstIndex(vector.M_blockFirstIndex)
 {}
 
-
-
-// ===================================================
-// Operators
-// ===================================================
-
-// ===================================================
-// Methods
-// ===================================================
-
 // ===================================================
 // Set Methods
 // ===================================================
@@ -148,33 +138,33 @@ setBlockStructure( const mapVector_type& mapVector)
     ASSERT( totalSize == this->size()," Incompatible block structure (global size does not match) ");
 }
 
-
 // ===================================================
 // Get Methods
 // ===================================================
 
 void
 VectorBlockMonolithicEpetra::
-vectorBlockView( const UInt& index, block_type& blockView ) const
+blockView( const UInt& index, block_type& blockView )
 {
-    blockView.setup( M_blockFirstIndex[index], M_blockSize[index], this->epetraVectorPtr());
+    ASSERT( index < M_blockFirstIndex.size(), "Invalid block index");
+    ASSERT( index < M_blockSize.size(), "Invalid block index");
+
+    blockView.setup( M_blockFirstIndex[index], M_blockSize[index], this);
 }
 
 VectorBlockMonolithicEpetra::block_ptrType
 VectorBlockMonolithicEpetra::
-block( const UInt& index) const
+block( const UInt& index)
 {
+    ASSERT( index < M_blockFirstIndex.size(), "Invalid block index");
+    ASSERT( index < M_blockSize.size(), "Invalid block index");
+
     block_ptrType mbv(new block_type);
 
-    mbv->setup( M_blockFirstIndex[index], M_blockSize[index], this->epetraVectorPtr());
+    mbv->setup( M_blockFirstIndex[index], M_blockSize[index], this);
 
     return mbv;
 }
 
-
-
-// ===================================================
-// Private Methods
-// ===================================================
 
 } // Namespace LifeV

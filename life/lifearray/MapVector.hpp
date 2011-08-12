@@ -47,7 +47,7 @@ namespace LifeV
 
 //! This class is used to store maps that will be used for block defined problems.
 /*!
-  This class consists in a collection of maps (e.g. MapEpetra) to represent a problem made of several blocks.
+  This class consists in a collection of maps (e.g. LifeV::MapEpetra) to represent a problem made of several blocks.
 
   When a system is made of several blocks (like a Stokes problem, with the velocity block and pressure block), one might want to use a block matrix and block vector. This class represents the "map" to construct block structures.
 
@@ -55,7 +55,10 @@ namespace LifeV
 
   Between the operators "+" and "|", the "+" has a higher priority, meaning that all the "+" are evaluated before the "|" are. However, it is strongly recommanded to use brackets (some compilers might issue warnings if brackets are not used).
 
-  The only valid template argument is for now MapEpetra, for the Epetra framework of Trilinos.
+  <b> Example of valid template argument </b>
+
+  LifeV::MapEpetra
+
 */
 
 template< typename MapType>
@@ -67,6 +70,7 @@ public:
     //! @name Public Types
     //@{
 
+    //! Type of the map
 	typedef MapType map_Type;
 
     //@}
@@ -75,49 +79,33 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Destructor
-    ~MapVector(){}
-
-
 	//! Empty constructor
-	MapVector()
-        : M_vector(){}
-
+	MapVector();
 
 	//! Copy constructor
-	MapVector(const MapVector<map_Type>& otherMapVector)
-        : M_vector(otherMapVector.M_vector) {}
-
+	MapVector(const MapVector<map_Type>& otherMapVector);
 
 	//! Constructor with one map
 	/*!
       This constructor builds a MapVector with only
       the map given in arguement.
 	*/
-	MapVector(const map_Type& map)
-        : M_vector(1,map) {}
-
+	MapVector(const map_Type& map);
 
 	//! Constructor with two maps
 	/*!
       The MapVector is filled with the two maps given in argument.
 	*/
-	MapVector(const map_Type& map1, const map_Type& map2)
-        : M_vector() {
-		M_vector.push_back(map1);
-		M_vector.push_back(map2);
-	}
-
+	MapVector(const map_Type& map1, const map_Type& map2);
 
 	//! Concatenation constructor
 	/*!
       This constructor copies the maps in vector and adds the map to it.
 	*/
-	MapVector(const MapVector<map_Type>& vector, const map_Type& map)
-        : M_vector(vector.M_vector)
-	{
-		M_vector.push_back(map);
-	}
+	MapVector(const MapVector<map_Type>& vector, const map_Type& map);
+
+    //! Destructor
+    ~MapVector();
 
     //@}
 
@@ -126,11 +114,7 @@ public:
     //@{
 
 	//! Copy operator
-	MapVector<map_Type> operator=(const MapVector<map_Type>& vector)
-	{
-		M_vector=vector.M_vector;
-		return *this;
-	}
+	MapVector<map_Type> operator=(const MapVector<map_Type>& vector);
 
     //@}
 
@@ -138,19 +122,20 @@ public:
     //! @name Methods
     //@{
 
-
 	//! Returns the number of maps stored
-	inline UInt nbMap() const {return M_vector.size(); }
+	UInt nbMap() const;
 
     //! Returns the size of the ith map stored (global number of ids)
-    inline UInt mapSize(UInt i) const {return M_vector[i].map(Unique)->NumGlobalElements(); }
-
+    UInt mapSize(UInt i) const;
 
     //! Display internal state
-    inline void showMe( std::ostream& output = std::cout) const
-    {
-        std::cout << " Number of map stored : " << M_vector.size() << std::endl;
-    }
+    void showMe( std::ostream& output = std::cout) const;
+
+    //! Return the map made by concatenating all the maps of the vector
+    map_Type totalMap() const;
+
+    //! Add a map into this vector (at the end of the vector)
+    void addMap(const map_Type& newMap);
 
     //@}
 
@@ -158,16 +143,10 @@ public:
     //! @name Get Methods
     //@{
 
-
 	//! Getter for the ith map stored
-	inline const map_Type& map(const UInt& i) const
-	{
-		ASSERT( i< M_vector.size() ,"Index out of bound, no map to return");
-		return M_vector[i];
-	}
+	const map_Type& map(const UInt& i) const;
 
     //@}
-
 
 
 private:
@@ -195,6 +174,129 @@ MapVector<MapType>
 operator|(const MapVector<MapType>& vector, const MapType& map)
 {
 	return MapVector<MapType>(vector,map);
+}
+
+
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
+template< typename MapType>
+MapVector<MapType>::
+MapVector()
+    : M_vector()
+{}
+
+template< typename MapType>
+MapVector<MapType>::
+MapVector(const MapVector<map_Type>& otherMapVector)
+    : M_vector(otherMapVector.M_vector)
+{}
+
+template< typename MapType>
+MapVector<MapType>::
+MapVector(const map_Type& map)
+    : M_vector(1,map)
+{}
+
+template< typename MapType>
+MapVector<MapType>::
+MapVector(const map_Type& map1, const map_Type& map2)
+    : M_vector()
+{
+    M_vector.push_back(map1);
+    M_vector.push_back(map2);
+}
+
+template< typename MapType>
+MapVector<MapType>::
+MapVector(const MapVector<map_Type>& vector, const map_Type& map)
+    : M_vector(vector.M_vector)
+{
+    M_vector.push_back(map);
+}
+
+template< typename MapType>
+MapVector<MapType>::
+~MapVector()
+{}
+
+// ===================================================
+// Operators
+// ===================================================
+
+template< typename MapType>
+MapVector<MapType>
+MapVector<MapType>::
+operator=(const MapVector<map_Type>& vector)
+{
+    M_vector=vector.M_vector;
+    return *this;
+}
+
+// ===================================================
+// Methods
+// ===================================================
+
+template< typename MapType>
+UInt
+MapVector<MapType>::
+nbMap() const
+{
+    return M_vector.size();
+}
+
+template< typename MapType>
+UInt
+MapVector<MapType>::
+mapSize(UInt i) const
+{
+    ASSERT( i< M_vector.size() ,"Index out of bound, no map to return");
+    return M_vector[i].map(Unique)->NumGlobalElements();
+}
+
+template< typename MapType>
+void
+MapVector<MapType>::
+showMe( std::ostream& output) const
+{
+    std::cout << " Number of map stored : " << M_vector.size() << std::endl;
+}
+
+template< typename MapType>
+MapType
+MapVector<MapType>::
+totalMap() const
+{
+    ASSERT( M_vector.size() !=0 ,"No map to concatenate for the total map");
+    map_Type total(M_vector[0]);
+
+    for (UInt i(1); i<M_vector.size(); ++i)
+    {
+        total += M_vector[i];
+    }
+    return total;
+}
+
+template< typename MapType>
+void
+MapVector<MapType>::
+addMap(const map_Type& newMap)
+{
+    M_vector.push_back(newMap);
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+
+template< typename MapType>
+const MapType&
+MapVector<MapType>::
+map(const UInt& i) const
+{
+    ASSERT( i< M_vector.size() ,"Index out of bound, no map to return");
+    return M_vector[i];
 }
 
 

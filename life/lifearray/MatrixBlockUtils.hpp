@@ -53,11 +53,9 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
 
-    const int indexBase(0);
-
     // Processor informations
-    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    const int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    const int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
     int  srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
@@ -77,7 +75,8 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
         srcRowElement = srcGlobalElements[i];
 
         // Test if the rows are in the source block
-        if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
+        if(( static_cast<UInt>(srcRowElement)>=srcBlock.firstRowIndex())
+           && ( static_cast<UInt>(srcRowElement)<=srcBlock.lastRowIndex()))
         {
             // Get the data of the row
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
@@ -93,8 +92,8 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
                 srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is in the block
-                if((srcGlobalIndex>=srcBlock.firstColumnIndex()+indexBase) &&
-                   (srcGlobalIndex<=srcBlock.lastColumnIndex()+indexBase))
+                if(( static_cast<UInt>(srcGlobalIndex)>=srcBlock.firstColumnIndex())
+                   && ( static_cast<UInt>(srcGlobalIndex)<=srcBlock.lastColumnIndex()))
                 {
                     destIndices[numDestEntries] = srcGlobalIndex+columnsOffset;
                     destValues[numDestEntries] = srcValues[j];

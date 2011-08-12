@@ -86,6 +86,7 @@ public:
 
     //@}
 
+
     //! @name  Set Methods
     //@{
 
@@ -109,8 +110,10 @@ public:
 
     //@}
 
+
     //! @name  Get Methods
     //@{
+
     //! Returns the number of rows of the block
     /*!
      * @param rowIndex Row index of the block
@@ -134,11 +137,8 @@ public:
                     block_type& mbv);
 
 	//! Returns the block (rowIndex,columnIndex) of the matrix
-	/*!
-	@assert: rowIndex is a valid row number
-	@assert: columnIndex is a valid column number
-	*/
 	block_ptrType block(const UInt& rowIndex, const UInt& columnIndex);
+
     //@}
 
 private:

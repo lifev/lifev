@@ -62,11 +62,6 @@ VectorBlockMonolithicEpetraView::
 ~VectorBlockMonolithicEpetraView()
 {}
 
-
-// ===================================================
-// Operators
-// ===================================================
-
 // ===================================================
 // Methods
 // ===================================================
@@ -90,9 +85,8 @@ sumIntoGlobalValues( const Int GID, const Real value )
     // Compute the global ID in the monolithic vector:
     // size of the block + location in the block
     const Int TotalGID(GID + M_firstIndex);
-    return M_vector->SumIntoGlobalValues( 1, &TotalGID, &value );
+    return M_vector->sumIntoGlobalValues( TotalGID, value );
 }
-
 
 // ===================================================
 // Set Methods
@@ -100,20 +94,12 @@ sumIntoGlobalValues( const Int GID, const Real value )
 
 void
 VectorBlockMonolithicEpetraView::
-setup( const UInt& firstIndex, const UInt& blockSize, const rawVector_ptrtype vector )
+setup( const UInt& firstIndex, const UInt& blockSize, vector_Type* vector )
 {
 	M_blockSize = blockSize;
 	M_firstIndex = firstIndex;
 	M_lastValidIndex = firstIndex + blockSize -1;
 	M_vector = vector;
 }
-
-// ===================================================
-// Get Methods
-// ===================================================
-
-// ===================================================
-// Private Methods
-// ===================================================
 
 } // Namespace LifeV
