@@ -21,7 +21,7 @@ As the choice for the most suitable approach depends strongly on the problem at 
 \image html linear_algebra_monolithic_vs_split.png "The two possible approaches"
 
 
-\section LinearAlgebraPage_blockMonolithicStructures Monolithic approach
+\section BlockAlgebraPage_blockMonolithicStructures Monolithic approach
 
 Structures following this approach are:
 
@@ -96,7 +96,7 @@ vector_type componentRHS( uxMap | uyMap | uzMap | pMap );
 \endcode
 
 The matrix will now contain 4x4 blocks and the vector 4 blocks. This might be useful if some blocks
-are exactly the same (e.g. the ux-ux, uy-uy and uz-uz blocks). One can then compute one of the blocks and copy it into the other blocks.
+are exactly the same (e.g. the ux-ux, uy-uy and uz-uz blocks). One can then compute one of the blocks and copy it into the other blocks (using utilities defined in LifeV::MatrixBlockUtils).
 
 However, if for some reason, one wants to define the system as in the first example, one can use the "+" operator, that has the effect of fusioning the blocks
 (actually, it concatenates the maps):
@@ -115,7 +115,7 @@ componentMatrix.setBlockStructure( (uxMap + uyMap + uzMap) | pMap );
 componentRHS.setBlockStructure( (uxMap + uyMap + uzMap) | pMap );
 \endcode
 
-\section LinearAlgebraPage_blockCompositeStructures Composite approach
+\section BlockAlgebraPage_blockCompositeStructures Composite approach
 
 These structures have not been implemented yet in LifeV.
 
