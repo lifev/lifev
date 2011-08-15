@@ -89,7 +89,7 @@ namespace LifeV
  *  \f]
  *
  *
- *  The flux matrix \f$F = [F_{11}, F_{12}; F_{21}, F_{22}]\f$ has the eigenvalues \f$\lambda_1, \lambda_2\f$.
+ *  The flux matrix \f$\mathbf F = [F_{11}, F_{12}; F_{21}, F_{22}]\f$ has the eigenvalues \f$\lambda_1, \lambda_2\f$.
  */
 class OneDimensionalData
 {
