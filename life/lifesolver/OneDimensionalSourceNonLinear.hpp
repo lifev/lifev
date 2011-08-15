@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing a class for the non linear source function B of the 1D hyperbolic problem
+ *  @brief File containing a class for the non linear source term \f$\mathbf S\f$ of the 1D hyperbolic problem
  *
  *  @version 1.0
  *  @author Vincent Martin
@@ -36,7 +36,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalSourceNonLinear_H
@@ -51,8 +51,46 @@ namespace LifeV
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
- *  dU/dt + dF(U)/dz + B(U) = 0
- *  with U=[A,Q]^T
+ *  The conservative form of the generic hyperbolic problem is
+ *
+ *  \f[
+ *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
+ *  \f]
+ *
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes, and \f$\mathbf S\f$ represents the source terms.
+ *
+ *  In the present implementation we have:
+ *
+ *  \f[
+ *  \mathbf F(\mathbf U) =
+ *  \left[\begin{array}{c}
+ *  Q \\[2ex]
+ *  \alpha \displaystyle \frac{Q^2}{A} + \displaystyle \displaystyle\int_{0}^A \frac{A}{\rho}\frac{\partial \psi}{\partial A} dA
+ *  \end{array}\right], \quad
+ *  \mathbf S(\mathbf U) =  \mathbf B(\mathbf U) -
+ *  \left[\begin{array}{c}
+ *  0 \\[2ex]
+ *  \displaystyle\frac{\partial}{\partial A^0}\displaystyle\int_{0}^A \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial A^0}{\partial z} + \displaystyle\frac{\partial}{\partial \beta_0}\displaystyle\int_{0}^A \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial \beta_0}{\partial z} + \displaystyle\frac{\partial}{\partial \beta_1}\displaystyle\int_{0}^A \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial \beta_1}{\partial z}
+ *  \end{array}\right]
+ *  \f]
+ *
+ *  where
+ *
+ *  \f[
+ *  \mathbf B(\mathbf U) =
+ *  \left[\begin{array}{c}
+ *  0 \\[2ex]
+ *  K_r \displaystyle\frac{Q}{A} + \displaystyle\frac{A}{\rho}\left(\displaystyle\frac{\partial \psi}{\partial A^0}\displaystyle\frac{\partial A^0}{\partial z} + \displaystyle\frac{\partial \psi}{\partial \beta_0}\displaystyle\frac{\partial \beta_0}{\partial z} + \displaystyle\frac{\partial \psi}{\partial \beta_1}\displaystyle\frac{\partial \beta_1}{\partial z}\right) + \displaystyle\frac{Q^2}{A}\displaystyle\frac{\partial \alpha}{\partial z}
+ *  \end{array}\right]
+ *  \f]
+ *
+ *  The assumed wall-law is
+ *
+ *  \f[
+ *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) = \underbrace{\sqrt{\frac{\pi}{A^0}}\frac{h E}{1-\nu^2}}_{\beta_0} \left(\left(\frac{A}{A^0}\right)^{\beta_1}-1\right) + \underbrace{\frac{T \tan\phi}{4 \sqrt{\pi}}\frac{h E}{1-\nu^2}}_{\displaystyle\gamma} \frac{1}{A\sqrt{A}} \frac{\partial A}{\partial t}.
+ *  \f]
+ *
+ *  This class implements all the interfaces required for the computation of \f$\mathbf S\f$ and its derivatives.
  */
 class OneDimensionalSourceNonLinear : public OneDimensionalSource
 {
@@ -62,12 +100,6 @@ public:
     //@{
 
     typedef OneDimensionalSource         super;
-//    typedef FactorySingleton< Factory< OneDimensionalModel_Source, OneDimensional::sourceTerm_Type > > factorySource_Type;
-
-//    typedef OneDimensionalModel_Physics                       physics_Type;
-//    typedef boost::shared_ptr< physics_Type >                 physicsPtr_Type;
-
-//    typedef OneDimensionalModel_Data::container2D_Type        container2D_Type;
 
     //@}
 
@@ -75,9 +107,13 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
+    //! Empty constructor
     explicit OneDimensionalSourceNonLinear() : super() {}
 
+    //! Constructor
+    /*!
+     * @param physics physics of the problem
+     */
     explicit OneDimensionalSourceNonLinear( const physicsPtr_Type physics ) : super( physics ) {}
 
     //! Do nothing destructor
@@ -89,36 +125,64 @@ public:
     //! @name Methods
     //@{
 
-    //! B = [0, B2]^T
+    //! Evaluate the source term
     /*!
-     *  with B2 such that:
+     *  \f[
+     *  \begin{array}{rcl}
+     *  \mathbf S(\mathbf U)_1 & = & 0,\\
+     *  \mathbf S(\mathbf U)_2 & = &
+     *  K_r\displaystyle\frac{Q}{A} -\displaystyle\frac{\beta_0 \beta_1}{\rho(\beta_1+1)}\left(\displaystyle\frac{A}{A^0}\right)^{\beta_1+1}\displaystyle\frac{\partial A^0}{\partial z}
+     *  + \displaystyle\frac{1}{\rho}\left(\displaystyle\frac{A^0}{(\beta_1+1)}\left(\displaystyle\frac{A}{A^0}\right)^{\beta_1+1}-A\right)\displaystyle\frac{\partial \beta_0}{\partial z}\\[4ex]
+     *  &+& \displaystyle\frac{A^0 \beta_0}{\rho(\beta_1+1)}\left(\ln\left(\displaystyle\frac{A}{A^0}\right)-\displaystyle\frac{1}{(\beta_1+1)}\right)\left(\displaystyle\frac{A}{A^0}\right)^{\beta_1+1}\displaystyle\frac{\partial \beta_1}{\partial z}+\displaystyle\frac{Q^2}{A}\displaystyle\frac{\partial \alpha}{\partial z},
+     *  \end{array}
+     *  \f]
      *
-     *  B2 = Kr*Q/A
-     *     - beta1 * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)  * dA0/dz
-     *     + A0/rho * [ 1/(beta1+1) * (A/A0)^(beta1+1) - A/A0 ]  * dbeta0/dz
-     *     + A0    * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)
-     *     * [ log(A/A0) - 1/(beta1+1) ]                         * dbeta1/dz
-     *
-     *  \param iNode : is the index position for the parameter
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the source term
+     *  @param iNode node of the mesh
      */
-    Real source( const Real& A, const Real& Q, const ID& ii, const UInt& iNode ) const ;
+    Real source( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const ;
 
-    //! Jacobian matrix dBi/dxj
-    Real dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode ) const;
-
-    //! Second derivative tensor d2Bi/(dxj dxk)
-//    Real diff2(const Real& _A, const Real& _Q,
-//               const ID& ii, const ID& jj, const ID& kk,
-//               const UInt& iNode = 0) const;
-
-    //! Sql = [Sql1, Sql2]^T
+    //! Evaluate the derivative of the source term
     /*!
-     *  Sql source term of the equation under its quasi-linear formulation:
+     *  \f[
+     *  \displaystyle\frac{\partial \mathbf S}{\partial A} =
+     *  \left[\begin{array}{c}
+     *  0 \\[2ex]
+     *  -K_r\displaystyle\frac{Q}{A^2}+\displaystyle\frac{1}{\rho}\left(\displaystyle\frac{\partial \psi}{\partial A^0}\displaystyle\frac{\partial A^0}{\partial z}
+     *                    + \displaystyle\frac{\partial \psi}{\partial \beta_0}\displaystyle\frac{\partial \beta_0}{\partial z}
+     *                    + \displaystyle\frac{\partial \psi}{\partial \beta_1}\displaystyle\frac{\partial \beta_1}{\partial z} \right)
+     *                    -\left(\displaystyle\frac{Q}{A}\right)^2\displaystyle\frac{\partial \alpha}{\partial z}
+     *  \end{array}\right],
+     *  \quad
+     *  \displaystyle\frac{\partial \mathbf S}{\partial Q} =
+     *  \left[\begin{array}{c}
+     *  0 \\[2ex]
+     *  \displaystyle\frac{K_r}{A} + 2 \displaystyle\frac{Q}{A} \displaystyle\frac{\partial \alpha}{\partial z}
+     *  \end{array}\right].
+     *  \f]
      *
-     *  dU/dt + H(U) dU/dz + Sql(U) = 0
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the derivative of the source term
+     *  @param column column of the derivative of the source term
+     *  @param iNode node of the mesh
      */
-    Real interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
-                                        const ID& ii,    const container2D_Type& bcNodes, const Real& cfl ) const ;
+    Real dSdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const;
+
+    //! Evaluate the non-conservative form of the source term at the foot of the outgoing characteristic.
+    /*!
+     *  This method is used for imposing the compatibility equations at the boundaries. It interpolates the value between to nodes.
+     *
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the source term
+     *  @param bcNodes list of boundary nodes
+     *  @param cfl cfl used to identify the foot of the characteristic
+     */
+    Real interpolatedNonConservativeSource( const Real& A, const Real& Q,
+                                            const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const ;
 
     //@}
 
@@ -127,7 +191,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalSourceNonLinear& operator=( const physicsPtr_Type physics );
+    explicit OneDimensionalSourceNonLinear( const OneDimensionalSourceNonLinear& source );
+
+    OneDimensionalSourceNonLinear& operator=( const OneDimensionalSourceNonLinear& source );
 
     //@}
 };

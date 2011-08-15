@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing a class for the linear source function B of the 1D hyperbolic problem
+ *  @brief File containing a class for the linear source term \f$\mathbf S\f$ of the 1D hyperbolic problem
  *
  *  @version 1.0
  *  @author Vincent Martin
@@ -51,8 +51,37 @@ namespace LifeV
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
- *  dU/dt + dF(U)/dz + S(U) = 0
- *  with U=[U1,U2]^T
+ *  The conservative form of the generic hyperbolic problem is
+ *
+ *  \f[
+ *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
+ *  \f]
+ *
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes, and \f$\mathbf S\f$ represents the source terms.
+ *
+ *  In the present implementation we have:
+ *
+ *  \f[
+ *  \mathbf F(\mathbf U) =
+ *  \left[\begin{array}{c}
+ *  \dots \\[2ex]
+ *  \dots
+ *  \end{array}\right], \quad
+ *  \mathbf S(\mathbf U) =  \mathbf B(\mathbf U) -
+ *  \left[\begin{array}{c}
+ *  \dots \\[2ex]
+ *  \dots
+ *  \end{array}\right]
+ *  \f]
+ *
+ *
+ *  The assumed wall-law is
+ *
+ *  \f[
+ *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) = \dots
+ *  \f]
+ *
+ *  This class implements all the interfaces required for the computation of \f$\mathbf S\f$ and its derivatives.
  */
 class OneDimensionalSourceLinear : public OneDimensionalSource
 {
@@ -70,9 +99,13 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
+    //! Empty constructor
     explicit OneDimensionalSourceLinear() : super() {}
 
+    //! Constructor
+    /*!
+     * @param physics physics of the problem
+     */
     explicit OneDimensionalSourceLinear( const physicsPtr_Type physics ) : super( physics ) {}
 
     //! Do nothing destructor
@@ -84,35 +117,44 @@ public:
     //! @name Methods
     //@{
 
-    //! S = [S1, S2]^T
+    //! Evaluate the source term
     /*!
+     *  \f[
+     *  \begin{array}{rcl}
+     *  \mathbf S(\mathbf U)_1 & = & S_{10} + S_{11} U_1 + S_{12} U_2,\\
+     *  \mathbf S(\mathbf U)_2 & = & S_{20} + S_{21} U_1 + S_{22} U_2
+     *  \end{array}
+     *  \f]
      *
-     * S1 = S10 + S11 U1 + S12 U2
-     * S2 = S20 + S21 U1 + S22 U2
-     *
-     * \param iNode : is the index position for the parameter
+     *  @param U1 first unknown
+     *  @param U2 second unknown
+     *  @param row row of the source term
+     *  @param iNode node of the mesh
      */
-    Real source( const Real& U1, const Real& U2, const ID& ii, const UInt& iNode ) const ;
+    Real source( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const ;
 
-    //! Jacobian matrix dSi/dxj
-    Real dSdU( const Real& U1, const Real& U2, const ID& ii, const ID& jj, const UInt& iNode ) const;
-
-    //! Second derivative tensor d2Si/(dxj dxk)
-//    Real diff2( const Real& _U1, const Real& _U2,
-//                const ID& ii,    const ID& jj, const ID& kk,
-//                const UInt& iNode = 0 ) const;
-
-    //! Sql = [Sql1, Sql2]^T
+    //! Evaluate the derivative of the source term
     /*!
-     *  Sql source term of the equation under its quasi-linear formulation:
-     *
-     *  dU/dt + H(U) dU/dz + Sql(U) = 0
-     *
-     *  Here H is constant w.r. to U. And Sql = S(U), because there is no variation of
-     *  the coefficients.
+     *  @param U1 first unknown
+     *  @param U2 second unknown
+     *  @param row row of the derivative of the source term
+     *  @param column column of the derivative of the source term
+     *  @param iNode node of the mesh
      */
-    Real interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
-                                        const ID& ii,   const container2D_Type& bcNodes, const Real& cfl ) const ;
+    Real dSdU( const Real& U1, const Real& U2, const ID& row, const ID& colum, const UInt& iNode ) const;
+
+    //! Evaluate the non-conservative form of the source term at the foot of the outgoing characteristic.
+    /*!
+     *  This method is used for imposing the compatibility equations at the boundaries. It interpolates the value between to nodes.
+     *
+     *  @param U1 first unknown
+     *  @param U2 second unknown
+     *  @param row row of the source term
+     *  @param bcNodes list of boundary nodes
+     *  @param cfl cfl used to identify the foot of the characteristic
+     */
+    Real interpolatedNonConservativeSource( const Real& U1, const Real& U2,
+                                            const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const ;
 
     //@}
 private:
@@ -120,7 +162,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalSourceLinear& operator=( const physicsPtr_Type physics );
+    explicit OneDimensionalSourceLinear( const OneDimensionalSourceLinear& source );
+
+    OneDimensionalSourceLinear& operator=( const OneDimensionalSourceLinear& source );
 
     //@}
 
