@@ -47,14 +47,14 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  const UInt& iNode ) const
+OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& row,  const UInt& iNode ) const
 {
-    if ( ii == 0 ) // F1
+    if ( row == 0 ) // F1
     {
         return Q;
     }
 
-    if ( ii == 1 ) // F2
+    if ( row == 1 ) // F2
     {
         return ( M_physics->data()->alpha( iNode ) * Q * Q / A +
                  M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) *
@@ -69,19 +69,19 @@ OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  
 }
 
 Real
-OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode ) const
+OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const
 {
-    if ( ii == 0 && jj == 0 ) // dF1/dA
+    if ( row == 0 && column == 0 ) // dF1/dA
     {
         return 0.;
     }
 
-    if ( ii == 0 && jj == 1 ) // dF1/dQ
+    if ( row == 0 && column == 1 ) // dF1/dQ
     {
         return 1.;
     }
 
-    if ( ii == 1 && jj == 0 ) // dF2/dA
+    if ( row == 1 && column == 0 ) // dF2/dA
     {
         return ( M_physics->data()->beta0( iNode ) *
                  M_physics->data()->beta1( iNode ) /
@@ -89,7 +89,7 @@ OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, c
                  M_physics->data()->alpha( iNode ) * Q * Q / A / A ) *
                  M_physics->data()->robertsonCorrection();
     }
-    if ( ii == 1 && jj == 1 ) // dF2/dQ
+    if ( row == 1 && column == 1 ) // dF2/dQ
     {
         return M_physics->data()->robertsonCorrection() * 2 * M_physics->data()->alpha( iNode ) * Q / A;
     }
@@ -98,41 +98,6 @@ OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, c
 
     return -1.;
 }
-
-//Real
-//OneDimensionalFluxNonLinear::diff2( const Real& A, const Real& Q,
-//                                           const ID& ii,   const ID& jj, const ID& kk,
-//                                           const UInt& iNode ) const
-//{
-//    // diff second of F1 is always 0.
-//    if( ii == 1 ) // d2F1/dUjdUk = 0.
-//    {
-//        if( ( jj == 1 || jj == 2 ) && ( kk == 1 || kk == 2 ) )
-//            return 0.;
-//    }
-//    if( ii == 2 )
-//    {
-//        if( jj == 1 && kk == 1 )  // d2F2/dA2
-//        {
-//            return M_physics->data()->robertsonCorrection()
-//                       * M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) * M_physics->data()->beta1( iNode )
-//                       / ( M_physics->data()->densityRho() * M_physics->data()->area0( iNode ) )
-//                       * std::pow( A / M_physics->data()->area0( iNode ), M_physics->data()->beta1( iNode ) - 1 );
-//        }
-//        // cross terms (equal)
-//        if( (jj == 1 && kk == 2) || (jj == 2 && kk == 1) ) // d2F2/dAdQ=d2F2/dQdA
-//        {
-//            return -M_physics->data()->robertsonCorrection() * M_physics->data()->alpha( iNode ) * Q / ( A * A );
-//        }
-//        if( jj == 2 && kk == 2 ) // d2F2/dQ2
-//        {
-//            return M_physics->data()->robertsonCorrection() * 2 * M_physics->data()->alpha( iNode ) / A;
-//        }
-//    }
-//    ERROR_MSG("Flux's second differential function has only 8 components.");
-//
-//    return -1.;
-//}
 
 void
 OneDimensionalFluxNonLinear::eigenValuesEigenVectors( const Real& A,
