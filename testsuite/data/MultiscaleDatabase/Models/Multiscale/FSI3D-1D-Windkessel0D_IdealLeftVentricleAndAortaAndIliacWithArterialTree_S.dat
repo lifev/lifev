@@ -34,8 +34,8 @@ algorithm = '       Broyden             Default'
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
             200     FSI3D               IdealLeftVentricle_MonolithicGE
-            300     FSI3D               Aorta_Coarse_MonolithicGE
-            400     FSI3D               Iliac_Coarse_MonolithicGE
+            300     FSI3D               Aorta_NOBL_Medium_MonolithicGE
+            400     FSI3D               Iliac_NOBL_Medium_MonolithicGE
             1       OneDimensional      Aorta_ReymondStergiopulos2009_001
             5       OneDimensional      Aorta_ReymondStergiopulos2009_005
             6       OneDimensional      Aorta_ReymondStergiopulos2009_006
