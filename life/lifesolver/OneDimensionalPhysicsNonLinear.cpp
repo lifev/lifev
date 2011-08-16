@@ -85,7 +85,7 @@ OneDimensionalPhysicsNonLinear::fromWToP( const Real& W1, const Real& W2, const 
 }
 
 Real
-OneDimensionalPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& iNode ) const
+OneDimensionalPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const
 {
     Real SQRTbeta0beta1overrho( M_data -> beta0( iNode ) * M_data -> beta1( iNode ) / M_data -> densityRho() );
     SQRTbeta0beta1overrho = std::sqrt( SQRTbeta0beta1overrho );
@@ -103,9 +103,9 @@ OneDimensionalPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_fromP] add term = " << add << "\n";
 #endif
 
-    if ( i == 0 )
+    if ( iW == 0 )
         return W - add;
-    if ( i == 1 )
+    if ( iW == 1 )
         return W + add;
 
     ERROR_MSG("You can only find W1 or W2 as function of P");
@@ -113,7 +113,7 @@ OneDimensionalPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID
 }
 
 Real
-OneDimensionalPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& iNode ) const
+OneDimensionalPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_tn, const Real& W, const ID& iW, const UInt& iNode ) const
 {
     Real K0( M_data -> beta1( iNode ) / ( std::sqrt(M_data -> robertsonCorrection()) * 4 ) );
 
@@ -121,24 +121,23 @@ OneDimensionalPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_n, const 
     K1 *= OneDimensional::pow20( M_data -> densityRho() / (M_data -> beta0( iNode ) * M_data -> beta1( iNode )), 1 / M_data -> beta1( iNode ) );
     K1 *= OneDimensional::pow40( K0, 2/M_data -> beta1( iNode ) );
 
-    Real w_k = W_n;
     Real f_k, df_k, tau_k(0);
 
-    if ( i == 0 ) // W1 given
+    if ( iW == 0 ) // W1 given
     {
-        f_k = OneDimensional::pow40( W - w_k + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
-        tau_k = OneDimensional::pow40( W - w_k + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
-        df_k = (-2 / M_data -> beta1( iNode )) * OneDimensional::pow30( W - w_k + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) - 1 );
+        f_k = OneDimensional::pow40( W - W_tn + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
+        tau_k = OneDimensional::pow40( W - W_tn + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
+        df_k = (-2 / M_data -> beta1( iNode )) * OneDimensional::pow30( W - W_tn + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) - 1 );
     }
-    if ( i == 1 ) // W2 given
+    if ( iW == 1 ) // W2 given
     {
-        f_k = OneDimensional::pow40( w_k - W + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
-        tau_k = OneDimensional::pow40( w_k - W + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
-        df_k = (-2 / M_data -> beta1( iNode )) * OneDimensional::pow30( w_k - W + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) - 1 );
+        f_k = OneDimensional::pow40( W_tn - W + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
+        tau_k = OneDimensional::pow40( W_tn - W + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
+        df_k = (-2 / M_data -> beta1( iNode )) * OneDimensional::pow30( W_tn - W + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) - 1 );
     }
-    f_k *= (W + w_k);
+    f_k *= (W + W_tn);
     f_k += - Q / K1;
-    df_k *= (W + w_k);
+    df_k *= (W + W_tn);
     df_k += f_k;
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -157,7 +156,7 @@ OneDimensionalPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_n, const 
 // Derivatives methods
 // ===================================================
 Real
-OneDimensionalPhysicsNonLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& iNode ) const
+OneDimensionalPhysicsNonLinear::dPdW( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const
 {
     Real rhoover2SQRTchi ( M_data -> densityRho() / ( std::sqrt(M_data -> robertsonCorrection()) * 2 ) );
 
@@ -167,12 +166,12 @@ OneDimensionalPhysicsNonLinear::dPdW( const Real& W1, const Real& W2, const ID& 
     result += celerity0( iNode );
     result *= rhoover2SQRTchi;
 
-    if ( i == 0 ) //! dP/dW1
+    if ( iW == 0 ) //! dP/dW1
     {
         return result;
     }
 
-    if ( i == 1 ) //! dP/dW2
+    if ( iW == 1 ) //! dP/dW2
     {
         return -result;
     }

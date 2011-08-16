@@ -52,25 +52,11 @@ namespace LifeV
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
- *  Parameters:
- *  Area0, alpha, beta0, beta1, Kr, rho.
- *
- *  Euler equations:
- *  dA/dt + dQ/dz = 0
- *  dQ/dt + A/rho * dP/dz + Kr * Q/A_0 = 0
- *
- *  with
- *  P - P_ext = beta0 [ ( A / Area0 )^{beta1} - 1 ]
- *
- *  which means
- *  dP / dz = beta0 beta1 ( A / Area0 )^{beta1 - 1} dA / dz
- *  \simeq beta0 beta1 dA / dz
- *
- *  The linearization of Euler model yields
- *
- *  F = [ Q; A * (c_L)^2];
- *  B = [ 0; k_R / A0];
- *  c_L = sqrt( beta0 * beta1 / rho );
+ *  It contains the following methods:
+ *  <ol>
+ *      <li> utilities for converting Riemann variables to physical quantities (and viceversa);
+ *      <li> utilities to compute the different pressure components (and derivatives).
+ *  </ol>
  */
 class OneDimensionalPhysicsLinear : public OneDimensionalPhysics
 {
@@ -87,9 +73,13 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
+    //! Empty constructor
     explicit OneDimensionalPhysicsLinear() : super() {}
 
+    //! Constructor
+    /*!
+     * @param data data container of the problem
+     */
     explicit OneDimensionalPhysicsLinear( const dataPtr_Type data ) : super( data ) {}
 
     //! Destructor
@@ -101,39 +91,77 @@ public:
     //! @name Conversion methods
     //@{
 
-    //! Compute W from U
+    //! Compute \f$\mathbf U\f$ from \f$\mathbf W\f$
     /*!
-     *  Riemann Invariants corresponding to data (Q, A) at node iNode
-     *  W1,2 = Q +- celerity * ( A - A0 )
-     */
-    void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const;
-
-    //! Compute U from W
-    /*!
+     *  \cond \TODO improve doxygen description with latex equation and other features \endcond
+     *
      *  Physical variables corresponding to (W1, W2) at node iNode
      *  A = A0 + (W1 - W2) / (2 * celerity)
      *  Q = (W1 + W2) / 2
+     *
+     *  @param U1 first physical variable
+     *  @param U2 second physical variable
+     *  @param W1 first Riemann variable
+     *  @param W2 second Riemann variable
+     *  @param iNode node of the mesh
      */
     void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const;
 
-    //! Compute the pressure as a function of W1, W2:
+    //! Compute \f$\mathbf W\f$ from \f$\mathbf U\f$
     /*!
-     *  P = beta0 * ( ( 1 / Area0 )^(beta1) * ( (W1 - W2) / (2 * celerity0) + Area0 )^(beta1) - 1 )
+     *  \cond \TODO improve doxygen description with latex equation and other features \endcond
+     *
+     *  Riemann Invariants corresponding to data (Q, A) at node iNode
+     *  W1,2 = Q +- celerity * ( A - A0 )
+     *
+     *  @param W1 first Riemann variable
+     *  @param W2 second Riemann variable
+     *  @param U1 first physical variable
+     *  @param U2 second physical variable
+     *  @param iNode node of the mesh
+     */
+    void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const;
+
+    //! Compute \f$P\f$ from \f$\mathbf W\f$
+    /*!
+     *  \cond \TODO improve doxygen description with latex equation and other features \endcond
+     *
+     *  @param W1 first Riemann variable
+     *  @param W2 second Riemann variable
+     *  @param iNode node of the mesh
+     *  @return pressure P = beta0 * ( ( 1 / Area0 )^(beta1) * ( (W1 - W2) / (2 * celerity0) + Area0 )^(beta1) - 1 )
      */
     Real fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const;
 
-    //! Compute W1 or W2 given the pressure:
+    //! Compute \f$W_1\f$ or \f$W_2\f$ from \f$P\f$
     /*!
+     *  \cond \TODO improve doxygen description with latex equation and other features \endcond
+     *
      *  W1 - W2 = (2 * celerity * A0) * ( ( P / beta0 + 1 )^(1/beta1) - 1 )
-     *  W1 - W2 = 4 * sqrt( beta0 / (beta1 * rho ) ) * ( sqrt( P / beta0 + 1 ) - 1 )
+     *  W1 - W2 = 4 * sqrt( beta0 / (beta1 * rho ) ) * ( sqrt( P / beta0 + 1 ) - 1
+     *
+     *  @param P pressure
+     *  @param W Riemann variable
+     *  @param iW Riemann variable ID (0 for \f$W_1\f$, 1 or \f$W_2\f$)
+     *  @param iNode node of the mesh
+     *  @return the other Riemann variable
      */
-    Real fromPToW( const Real& P, const Real& W, const ID& i, const UInt& iNode ) const;
+    Real fromPToW( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const;
 
-    //! Compute W1 or W2 given the flux
+    //! Compute \f$W_1\f$ or \f$W_2\f$ from \f$Q\f$
     /*!
+     *  \cond \TODO improve doxygen description with latex equation and other features \endcond
+     *
      *  W1 + W2 = 2 * Q
+     *
+     *  @param Q pressure
+     *  @param W_tn Riemann variable at time \f$t^n\f$
+     *  @param W Riemann variable
+     *  @param iW Riemann variable ID (0 for \f$W_1\f$, 1 or \f$W_2\f$)
+     *  @param iNode node of the mesh
+     *  @return the other Riemann variable
      */
-    Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& iNode ) const;
+    Real fromQToW( const Real& Q, const Real& W_tn, const Real& W, const ID& iW, const UInt& iNode ) const;
 
     //@}
 
@@ -141,12 +169,20 @@ public:
     //! @name Derivatives methods
     //@{
 
-    //! Compute the derivative of pressure with respect to W1 and W2
+    //! Compute the derivative of pressure with respect to \f$ \mathbf W\f$
     /*!
+     *  \cond \TODO improve doxygen description with latex equation and other features \endcond
+     *
      *  dP(W1,W2)/dW_1 = beta0 * beta1 / ( 2 * celerity0 * Area0^(beta1) ) * ( (W1 - W2) / ( 2 * celerity0 ) + Area0 )^(beta1-1)
      *  dP(W1,W2)/dW_2 = - dP(W1,W2)/dW_1
+     *
+     *  @param W1 first Riemann variable
+     *  @param W2 second Riemann variable
+     *  @param iW Riemann derivative ID (0 for \f$\displaystyle\frac{dP}{dW_1}\f$, 1 or \f$\displaystyle\frac{dP}{dW_2}\f$)
+     *  @param iNode node of the mesh
+     *  @return \f$\displaystyle\frac{dP}{dW_1}\f$ or \f$\displaystyle\frac{dP}{dW_2}\f$
      */
-    Real dPdW( const Real& W1, const Real&_W2, const ID& i, const UInt& iNode ) const;
+    Real dPdW( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const;
 
     //@}
 
@@ -155,7 +191,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalPhysicsLinear& operator=( const dataPtr_Type data );
+    explicit OneDimensionalPhysicsLinear( const OneDimensionalPhysicsLinear& physics );
+
+    OneDimensionalPhysicsLinear& operator=( const OneDimensionalPhysicsLinear& physics );
 
     //@}
 };

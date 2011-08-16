@@ -83,7 +83,7 @@ OneDimensionalPhysicsLinear::fromWToP( const Real& W1, const Real& W2, const UIn
 }
 
 Real
-OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& iNode ) const
+OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const
 {
     Real add( 2 * celerity0( iNode ) * M_data -> area0( iNode ) * ( OneDimensional::pow20( P / M_data -> beta0( iNode ) + 1, 1 / M_data -> beta1( iNode ) ) - 1 ) );
 
@@ -95,9 +95,9 @@ OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i
     Debug(6320) << "[fromPToW] add term = " << add << "\n";
 #endif
 
-    if ( i == 0 )
+    if ( iW == 0 )
         return W - add;
-    if ( i == 1 )
+    if ( iW == 1 )
         return W + add;
 
     ERROR_MSG("You can only find W1 or W2 as function of P");
@@ -105,14 +105,14 @@ OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i
 }
 
 Real
-OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const Real& W, const ID& i, const UInt& /*iNode*/ ) const
+OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_tn*/, const Real& W, const ID& iW, const UInt& /*iNode*/ ) const
 {
     Real add( 2 * Q );
 
-    if ( i == 0 ) // W1 given
+    if ( iW == 0 ) // W1 given
         return add - W;
 
-    if ( i == 1 ) // W2 given
+    if ( iW == 1 ) // W2 given
         return add - W;
 
     ERROR_MSG("You can only find W1 or W2 as function of Q");
@@ -123,7 +123,7 @@ OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const
 // Derivatives Methods
 // ===================================================
 Real
-OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& iNode ) const
+OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const
 {
     Real beta0beta1overA0beta1 ( M_data->beta0( iNode ) * M_data -> beta1( iNode ) / OneDimensional::pow05( M_data -> area0( iNode ), M_data -> beta1( iNode ) ) );
 
@@ -132,10 +132,10 @@ OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& i, 
     Real result( beta0beta1overA0beta1 * oneover2celerity );
     result *= ( ( W1 - W2 ) * oneover2celerity + M_data -> area0( iNode ) );
 
-    if ( i == 0 ) //! dP/dW1
+    if ( iW == 0 ) //! dP/dW1
         return result;
 
-    if ( i == 1 ) //! dP/dW2
+    if ( iW == 1 ) //! dP/dW2
         return -result;
 
     ERROR_MSG("P(W1,W2)'s differential function has only 2 components.");

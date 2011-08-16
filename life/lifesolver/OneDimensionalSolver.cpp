@@ -300,19 +300,19 @@ OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type
     // Correct flux with inertial, viscoelastic and longitudinal terms
     if ( M_physics->data()->inertialWall() )
     {
-        *solution["Q_inert"] = inertialFluxCorrection( flowRate );
+        *solution["Q_inert"] = inertialFlowRateCorrection( flowRate );
         flowRate += *solution["Q_inert"];
     }
 
     if ( M_physics->data()->viscoelasticWall() )
     {
-        *solution["Q_visc"] = viscoelasticFluxCorrection( area, flowRate, timeStep, bcHandler );
+        *solution["Q_visc"] = viscoelasticFlowRateCorrection( area, flowRate, timeStep, bcHandler );
         flowRate += *solution["Q_visc"];
     }
 
     if ( M_physics->data()->longitudinalWall() )
     {
-        *solution["Q_long"] = longitudinalFluxCorrection();
+        *solution["Q_long"] = longitudinalFlowRateCorrection();
         flowRate += *solution["Q_long"];
     }
 
@@ -331,7 +331,7 @@ OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type
 }
 
 OneDimensionalSolver::vector_Type
-OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix )
+OneDimensionalSolver::viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix )
 {
     // Matrix
     matrix_Type systemMatrix( M_feSpace->map() );
@@ -800,7 +800,7 @@ OneDimensionalSolver::applyDirichletBCToMatrix( matrix_Type& matrix )
 }
 
 OneDimensionalSolver::vector_Type
-OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
+OneDimensionalSolver::inertialFlowRateCorrection( const vector_Type& flux )
 {
     matrix_Type matrixLHS(M_feSpace->map());
     matrix_Type stiffRHS (M_feSpace->map());
@@ -894,7 +894,7 @@ OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
 }
 
 OneDimensionalSolver::vector_Type
-OneDimensionalSolver::longitudinalFluxCorrection()
+OneDimensionalSolver::longitudinalFlowRateCorrection()
 {
     matrix_Type massLHS(M_feSpace->map());
     matrix_Type massRHS(M_feSpace->map());
