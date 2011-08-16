@@ -86,6 +86,9 @@ public:
     //@{
     typedef Preconditioner                          super_Type;
 
+    typedef Epetra_Operator                         operator_Type;
+    typedef boost::shared_ptr<Epetra_Operator>      operatorPtr_Type;
+
     typedef Teko::Epetra::EpetraBlockPreconditioner preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
@@ -113,10 +116,10 @@ public:
      */
 
     //! Return a pointer on the preconditioner
-    super_Type::prec_raw_type* preconditioner();
+    operator_Type* preconditioner();
 
     //! Return a pointer on the preconditioner
-    super_Type::prec_type preconditionerPtr();
+    operatorPtr_Type preconditionerPtr();
 
     //! Reset the preconditioner
     void resetPreconditioner();

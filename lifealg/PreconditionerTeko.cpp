@@ -55,13 +55,13 @@ PreconditionerTeko::~PreconditionerTeko()
 
 }
 
-PreconditionerTeko::super_Type::prec_type
+PreconditionerTeko::operatorPtr_Type
 PreconditionerTeko::preconditionerPtr()
 {
     return M_prec;
 }
 
-Preconditioner::preconditioner_Type*
+PreconditionerTeko::operator_Type*
 PreconditionerTeko::preconditioner()
 {
     return M_prec.get();
