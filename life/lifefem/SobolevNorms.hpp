@@ -421,7 +421,7 @@ Real elementaryDifferenceIntegral( VectorType & u,
     Real y;
     Real z;
     Real uQuadPt;
-    Real diffQuadPt;
+    Real diffQuadPt(0.0);
 
     for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
