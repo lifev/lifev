@@ -1,15 +1,17 @@
+%% usage: bibtex2html -a -suffix "" biblio.bib
+%% alphabetical order and without the .html extension
 
 %%
 %% NavierStokes
 %%
 
 @Article{gauthier03:_navier_stokes,
-  author = 	 {A. Gauthier and F. Saleri and A. Veneziani},
-  title = 	 {A fast preconditioner for the incompressible {N}avier-{S}tokes equations},
-  journal = 	 {Computing and Visualization in Science (CVS)},
-  year = 	 2003,
-  note = 	 {To appear. \url{http://www.lifev.org/documentation/GSV.ps.gz}},
-  annote = 	 {}
+  author =      {A. Gauthier and F. Saleri and A. Veneziani},
+  title =      {A fast preconditioner for the incompressible {N}avier-{S}tokes equations},
+  journal =      {Computing and Visualization in Science (CVS)},
+  year =      2003,
+  note =      {To appear.},
+  url =       "http://www.lifev.org/documentation/GSV.ps.gz"
 }
 
 %%
@@ -21,7 +23,8 @@
   title =        {Multidomain Simulations of Flow in Porous Media. },
   school =       {Universit\'e Paris IX Dauphine},
   year =         {March 2004},
-  note =         {Partly in French, \url{http://www-rocq.inria.fr/~vmartin/These-MartinVincent.ps.gz}}
+  url =          "http://www-rocq.inria.fr/~vmartin/These-MartinVincent.ps.gz",
+  note =         {Partly in French}
 }
 
 @TechReport{rr5131:_darcy,
@@ -33,20 +36,44 @@ numerical codes},
   type =      {Research Report},
   number =    {5131},
   address =   {Rocquencourt, France},
-  note =     {\url{http://www.inria.fr/rrrt/rr-5131.html}}
+  url =     "http://www.inria.fr/rrrt/rr-5131.html"
 }
 
+%%
+%% Multiscale
+%%
+
+@ARTICLE{Blanco2011,
+  AUTHOR =       "P.J. Blanco and J.S. Leiva and R.A. Feij{\'o}o and G.C. Buscaglia",
+  TITLE =        "Black-box decomposition approach for computational hemodynamics: \text{One-dimensional} models",
+  JOURNAL =      "Comp. Meth. Appl. Mech. Engrg.",
+  YEAR =         "2011",
+  VOLUME =       "200",
+  NUMBER =       "13--16",
+  PAGES =        "1389--1405"
+}
+
+@ARTICLE{Blanco2007,
+  AUTHOR =       "P.J. Blanco and R.A. Feij{\'o}o and S.A. Urquiza",
+  TITLE =        "A unified variational approach for coupling \text{$3$D--$1$D} models and its blood flow applications",
+  JOURNAL =      "Comp. Meth. Appl. Mech. Engrg.",
+  YEAR =         "2007",
+  VOLUME =       "196",
+  NUMBER =       "41--44",
+  PAGES =        "4391--4410"
+}
 
 %%
 %% Computer Science
 %%
+
 @book{Stroustrup:2000,
-  author	= {Bjarne Stroustrup},
-  title		= {{The C++ Programming Language, Special Edition}},
-  publisher	= {Addison-Wesley Verlag},
-  year		= 2000,
-  address	= {Boston},
-  isbn		= {0-201-70073-5}
+  author    = {Bjarne Stroustrup},
+  title        = {{The C++ Programming Language, Special Edition}},
+  publisher    = {Addison-Wesley Verlag},
+  year        = 2000,
+  address    = {Boston},
+  isbn        = {0-201-70073-5}
 }
 
 @Book{Saad:1992:NML,
