@@ -98,24 +98,25 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Real                               value_type;
+    typedef Real                                                        value_Type;
 
-    typedef SolverBelos                        solver_type;
-    typedef Epetra_MultiVector                 MV;
-    typedef Epetra_Operator                    OP;
-    typedef Belos::SolverManager<Real,MV,OP>   SolverManager_type;
-    typedef RCP< SolverManager_type >          SolverManager_ptrtype;
-    typedef Belos::LinearProblem<double,MV,OP> LinearProblem_type;
-    typedef RCP< LinearProblem_type >          LinearProblem_ptrtype;
+    typedef SolverBelos                                                 solver_Type;
+    typedef Epetra_MultiVector                                          multiVector_Type;
+    typedef Epetra_Operator                                             operator_Type;
+    typedef boost::shared_ptr<operator_Type>                            operatorPtr_Type;
+    typedef Belos::SolverManager<Real,multiVector_Type,operator_Type>   SolverManager_Type;
+    typedef RCP< SolverManager_Type >                                   SolverManagerPtr_Type;
+    typedef Belos::LinearProblem<double,multiVector_Type,operator_Type> LinearProblem_Type;
+    typedef RCP< LinearProblem_Type >                                   LinearProblemPtr_Type;
 
-    typedef MatrixEpetra<Real>                 matrix_type;
-    typedef VectorEpetra                       vector_type;
+    typedef MatrixEpetra<Real>                                          matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>                              matrixPtr_Type;
+    typedef VectorEpetra                                                vector_Type;
+    typedef boost::shared_ptr<VectorEpetra>                             vectorPtr_Type;
+    typedef Preconditioner                                              preconditioner_Type;
+    typedef boost::shared_ptr<preconditioner_Type>                      preconditionerPtr_Type;
 
-    typedef Preconditioner                     prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>   prec_type;
-    typedef boost::shared_ptr<Epetra_Operator> comp_prec_type;
-    typedef boost::shared_ptr<matrix_type>     matrix_ptrtype;
-    typedef boost::shared_ptr<VectorEpetra>    vector_ptrtype;
+
 
     enum PrecApplicationType {LeftPreconditioner,RightPreconditioner};
     enum SolverManagerType {BlockCG,BlockGmres,GCRODR,GmresPoly,PCPG,PseudoBlockCG,PseudoBlockGmres,RCG,TFQMR};
@@ -152,14 +153,14 @@ public:
       @param solution Vector to store the solution
       @return Number of iterations, M_maxIter+1 if solve failed.
      */
-    Int solve( vector_type& solution );
+    Int solve( vector_Type& solution );
 
     //! Compute the residual
     /*!
       @param solution Solution of the system
       The method returns -1 if an error occurs
      */
-    Real computeResidual( vector_type& solution );
+    Real computeResidual( vector_Type& solution );
 
     //! return the solver status
     std::string printStatus();
@@ -169,7 +170,7 @@ public:
       @param dataFile GetPot object which contains the data about the preconditioner
       @param section Section the GetPot structure where to find the informations about the preconditioner
      */
-    void setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section, PrecApplicationType precType=RightPreconditioner );
+    void setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section, PrecApplicationType precType = RightPreconditioner );
 
     //! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
     /*!
@@ -216,7 +217,7 @@ public:
     /*!
       @param matrix Matrix of the system
      */
-    void setMatrix( matrix_ptrtype& matrix );
+    void setMatrix( matrixPtr_Type& matrix );
 
     //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
     /*!
@@ -228,19 +229,19 @@ public:
     /*!
       @param rhs right hand side of the system
      */
-    void setRightHandSide( const vector_type& rhs );
+    void setRightHandSide( const vector_Type& rhs );
 
     //! Method to set an Preconditioner preconditioner
     /*!
       @param preconditioner Preconditioner to be used to solve the system
      */
-    void setPreconditioner( prec_type& preconditioner, PrecApplicationType precType=RightPreconditioner );
+    void setPreconditioner( preconditionerPtr_Type& preconditioner, PrecApplicationType precType = RightPreconditioner );
 
     //! Method to set a general Epetra_Operator as preconditioner
     /*!
       @param preconditioner  Preconditioner to be set of type Epetra_Operator
      */
-    void setPreconditioner( comp_prec_type& preconditioner, PrecApplicationType precType=RightPreconditioner );
+    void setPreconditioner( operatorPtr_Type& preconditioner, PrecApplicationType precType = RightPreconditioner );
 
     //! Method to setup the solver using GetPot
     /*!
@@ -289,13 +290,13 @@ public:
     Real trueResidual();
 
     //! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
-    prec_type& preconditioner( PrecApplicationType precType=RightPreconditioner );
+    preconditionerPtr_Type& preconditioner( PrecApplicationType precType = RightPreconditioner );
 
     //! Return a Teuchos parameters list
     Teuchos::ParameterList& getParametersList();
 
     //! Return a pointer on the Belos solver manager
-    SolverManager_ptrtype solver();
+    SolverManagerPtr_Type solver();
 
     //! Return a shared pointer on the displayer
     boost::shared_ptr<Displayer> displayer();
@@ -312,14 +313,14 @@ private:
 
     //@}
 
-    matrix_ptrtype               M_matrix;
-    matrix_ptrtype               M_baseMatrixForPreconditioner;
-    prec_type                    M_leftPreconditioner;
-    prec_type                    M_rightPreconditioner;
+    matrixPtr_Type               M_matrix;
+    matrixPtr_Type               M_baseMatrixForPreconditioner;
+    preconditionerPtr_Type       M_leftPreconditioner;
+    preconditionerPtr_Type       M_rightPreconditioner;
 
     SolverManagerType            M_solverManagerType;
-    SolverManager_ptrtype        M_solverManager;
-    LinearProblem_ptrtype        M_problem;
+    SolverManagerPtr_Type        M_solverManager;
+    LinearProblemPtr_Type        M_problem;
 
     Teuchos::ParameterList       M_parameterList;
     boost::shared_ptr<Displayer> M_displayer;

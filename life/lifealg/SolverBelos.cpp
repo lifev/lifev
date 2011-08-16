@@ -60,7 +60,7 @@ SolverBelos::SolverBelos() :
         M_rightPreconditioner  (),
         M_solverManagerType    ( BlockGmres ),
         M_solverManager        (),
-        M_problem              ( new LinearProblem_type() ),
+        M_problem              ( new LinearProblem_Type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer() ),
         M_maxItersForReuse     ( 0 ),
@@ -77,7 +77,7 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_rightPreconditioner  (),
         M_solverManagerType    ( BlockGmres ),
         M_solverManager        (),
-        M_problem              ( new LinearProblem_type() ),
+        M_problem              ( new LinearProblem_Type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer( comm ) ),
         M_maxItersForReuse     ( 0 ),
@@ -98,7 +98,7 @@ SolverBelos::~SolverBelos()
 // Methods
 // ===================================================
 Int
-SolverBelos::solve( vector_type& solution )
+SolverBelos::solve( vector_Type& solution )
 {
     // Reset status informations
     M_lossOfPrecision = false;
@@ -106,7 +106,7 @@ SolverBelos::solve( vector_type& solution )
     bool failure = false;
 
     // Setting the unknown in the system
-    Teuchos::RCP<vector_type::vector_type> solutionPtr( &( solution.epetraVector() ), false );
+    Teuchos::RCP<vector_Type::vector_type> solutionPtr( &( solution.epetraVector() ), false );
     M_problem->setLHS( solutionPtr );
 
     // Build preconditioners if needed
@@ -193,14 +193,14 @@ SolverBelos::solve( vector_type& solution )
 }
 
 Real
-SolverBelos::computeResidual( vector_type& solution )
+SolverBelos::computeResidual( vector_Type& solution )
 {
     if ( M_problem->getOperator() == null || M_problem->getRHS() == null )
     {
         M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the operator or the rhs is not set!\n" );
         return -1;
     }
-    vector_type res( solution.map() );
+    vector_Type res( solution.map() );
     M_problem->computeCurrResVec( &res.epetraVector(), &solution.epetraVector(), M_problem->getRHS().get() );
     Real residual;
     res.norm2( &residual );
@@ -271,7 +271,7 @@ SolverBelos::buildPreconditioner()
             M_leftPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
         }
         condest = M_leftPreconditioner->condest();
-        Teuchos::RCP<OP> leftPrec( M_leftPreconditioner->preconditioner(), false );
+        Teuchos::RCP<operator_Type> leftPrec( M_leftPreconditioner->preconditioner(), false );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
         M_problem->setLeftPrec( belosPrec );
         chrono.stop();
@@ -293,7 +293,7 @@ SolverBelos::buildPreconditioner()
             M_rightPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
         }
         condest = M_rightPreconditioner->condest();
-        Teuchos::RCP<OP> rightPrec( M_rightPreconditioner->preconditioner(), false );
+        Teuchos::RCP<operator_Type> rightPrec( M_rightPreconditioner->preconditioner(), false );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
         M_problem->setRightPrec( belosPrec );
         chrono.stop();
@@ -347,7 +347,7 @@ SolverBelos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
     M_displayer->setCommunicator( comm );
 }
 
-void SolverBelos::setMatrix( matrix_ptrtype& matrix )
+void SolverBelos::setMatrix( matrixPtr_Type& matrix )
 {
     M_matrix = matrix;
     Teuchos::RCP<Epetra_FECrsMatrix> A = Teuchos::rcp( M_matrix->matrixPtr() );
@@ -361,21 +361,21 @@ SolverBelos::setOperator( Epetra_Operator& oper )
 }
 
 void
-SolverBelos::setRightHandSide( const vector_type& rhs )
+SolverBelos::setRightHandSide( const vector_Type& rhs )
 {
-    Teuchos::RCP<const vector_type::vector_type> rhsPtr( &( rhs.epetraVector() ), false );
+    Teuchos::RCP<const vector_Type::vector_type> rhsPtr( &( rhs.epetraVector() ), false );
     M_problem->setRHS( rhsPtr );
 }
 
 void
-SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType precType )
+SolverBelos::setPreconditioner( preconditionerPtr_Type& preconditioner, PrecApplicationType precType )
 {
     if ( precType == RightPreconditioner )
     {
         // If a right Epetra_Operator exists it must be deleted
         if ( M_problem->isRightPrec() )
         {
-            M_problem->setRightPrec( Teuchos::RCP<OP>( null ) );
+            M_problem->setRightPrec( Teuchos::RCP<operator_Type>( null ) );
         }
 
         M_rightPreconditioner = preconditioner;
@@ -385,21 +385,21 @@ SolverBelos::setPreconditioner( prec_type& preconditioner, PrecApplicationType p
         // If a left Epetra_Operator exists it must be deleted
         if ( M_problem->isLeftPrec() )
         {
-            M_problem->setLeftPrec( Teuchos::RCP<OP>( null ) );
+            M_problem->setLeftPrec( Teuchos::RCP<operator_Type>( null ) );
         }
         M_leftPreconditioner  = preconditioner;
     }
 }
 
 void
-SolverBelos::setPreconditioner( comp_prec_type& preconditioner, PrecApplicationType precType )
+SolverBelos::setPreconditioner( operatorPtr_Type& preconditioner, PrecApplicationType precType )
 {
     if ( precType == RightPreconditioner )
     {
         // If a right LifeV::Preconditioner exists it must be deleted
         M_rightPreconditioner.reset();
 
-        Teuchos::RCP<OP> rightPrec=Teuchos::rcp( preconditioner );
+        Teuchos::RCP<operator_Type> rightPrec=Teuchos::rcp( preconditioner );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
         M_problem->setRightPrec( belosPrec );
     }
@@ -408,7 +408,7 @@ SolverBelos::setPreconditioner( comp_prec_type& preconditioner, PrecApplicationT
         // If a left LifeV::Preconditioner exists it must be deleted
         M_leftPreconditioner.reset();
 
-        Teuchos::RCP<OP> leftPrec=Teuchos::rcp( preconditioner );
+        Teuchos::RCP<operator_Type> leftPrec=Teuchos::rcp( preconditioner );
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
         M_problem->setLeftPrec( belosPrec );
     }
@@ -533,14 +533,14 @@ SolverBelos::trueResidual()
         M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the linear system is not set!\n" );
         return -1;
     }
-    MV res( *( M_problem->getRHS().get() ) );
+    multiVector_Type res( *( M_problem->getRHS().get() ) );
     M_problem->computeCurrResVec( &res,M_problem->getLHS().get(), M_problem->getRHS().get() );
     Real residual;
     res.Norm2( &residual );
     return residual;
 }
 
-SolverBelos::prec_type&
+SolverBelos::preconditionerPtr_Type&
 SolverBelos::preconditioner( PrecApplicationType precType )
 {
     if ( precType == RightPreconditioner )
@@ -556,7 +556,7 @@ SolverBelos::getParametersList()
     return M_parameterList;
 }
 
-SolverBelos::SolverManager_ptrtype
+SolverBelos::SolverManagerPtr_Type
 SolverBelos::solver()
 {
     return M_solverManager;
@@ -585,36 +585,36 @@ SolverBelos::setupSolverManager()
     {
         case BlockCG:
             // Create the block CG iteration
-            M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
+            M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case BlockGmres:
             // Create the block GMRes iteration
             // Create the flexible, block GMRes iteration
-            M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
+            M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case GCRODR:
-            M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
+            M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case GmresPoly:
-            M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList,false ) ) );
+            M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList,false ) ) );
             break;
         case PCPG:
-            M_solverManager = rcp( new Belos::PCPGSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
+            M_solverManager = rcp( new Belos::PCPGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case PseudoBlockCG:
             // Create the pseudo block CG iteration
-            M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false) ) );
+            M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false) ) );
             break;
         case PseudoBlockGmres:
             // Create the pseudo block GMRes iteration
-            M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
+            M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case RCG:
-            M_solverManager = rcp( new Belos::RCGSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
+            M_solverManager = rcp( new Belos::RCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case TFQMR:
             // Create TFQMR iteration
-            M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,MV,OP>( M_problem, rcp( &M_parameterList, false ) ) );
+            M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
     }
 }
