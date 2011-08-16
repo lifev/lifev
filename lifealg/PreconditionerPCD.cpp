@@ -140,13 +140,13 @@ PreconditionerPCD::condest()
 }
 
 void
-PreconditionerPCD::updateBeta( const vector_type& beta )
+PreconditionerPCD::updateBeta( const vector_Type& beta )
 {
     *M_beta = beta;
 }
 
 int
-PreconditionerPCD::buildPreconditioner( operator_type& oper )
+PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
 {
     if ( ( M_uFESpace.get() == NULL ) || ( M_pFESpace.get() == NULL ) )
     {
@@ -170,7 +170,7 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
     //bool transposed( true );
     bool notTransposed( false );
 
-    map_type map( oper->map() );
+    map_Type map( oper->map() );
     //oper->spy( "A" );
 
     LifeChrono timer;
@@ -220,7 +220,7 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
      */
     if ( verbose ) std::cout << " Building Fp... ";
     timer.start();
-    boost::shared_ptr<matrix_type> PFp( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> PFp( new matrixBlock_Type( map ) );
     *PFp *= 0.0;
     PFp->setBlockStructure( blockNumRows, blockNumColumns );
     PFp->getMatrixBlockView( 1, 1, B22 );
@@ -228,12 +228,12 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
     M_adrPressureAssembler.addAdvection( PFp, *M_beta, B22.firstRowIndex(), B22.firstColumnIndex() );
     M_adrPressureAssembler.addMass( PFp, 1.0/M_timestep, B22.firstRowIndex(), B22.firstColumnIndex() );
     PFp->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> pFp = PFp;
+    boost::shared_ptr<matrix_Type> pFp = PFp;
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     if ( verbose ) std::cout << " Building Ap";
     timer.start();
-    boost::shared_ptr<matrix_type> PAp( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> PAp( new matrixBlock_Type( map ) );
     *PAp *= 0.0;
     PAp->setBlockStructure( blockNumRows, blockNumColumns );
     PAp->getMatrixBlockView( 0, 0, B11 );
@@ -257,13 +257,13 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
         MatrixBlockUtils::createIdentityBlock( B11 );
     }
     PAp->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> pAp = PAp;
+    boost::shared_ptr<matrix_Type> pAp = PAp;
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
 
     if ( verbose ) std::cout << " Building Mp";
     timer.start();
-    boost::shared_ptr<matrix_type> PMp( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> PMp( new matrixBlock_Type( map ) );
     *PMp *= 0.0;
     PMp->setBlockStructure( blockNumRows, blockNumColumns );
     PMp->getMatrixBlockView( 0, 0, B11 );
@@ -272,7 +272,7 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
     if ( M_useLumpedPressureMass )
     {
         if ( verbose ) std::cout << " (Lumped version)... ";
-        boost::shared_ptr<matrix_type> tmpMass( new matrix_type( map ) );
+        boost::shared_ptr<matrixBlock_Type> tmpMass( new matrixBlock_Type( map ) );
         M_adrPressureAssembler.addMass( tmpMass, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
         tmpMass->globalAssemble();
         tmpMass->setBlockStructure( blockNumRows, blockNumColumns );
@@ -287,7 +287,7 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
         M_adrPressureAssembler.addMass( PMp, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
     PMp->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> pMp = PMp;
+    boost::shared_ptr<matrix_Type> pMp = PMp;
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     if ( M_pressureBoundaryConditions == "first_dof_dirichlet" )
@@ -364,8 +364,8 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
 
             if ( M_bcHandlerPtr->operator[]( i ).flag() == 1 )
             {
-                vector_type convVelocity( *M_beta, Repeated );
-                vector_type robinRHS( M_uFESpace->map(), Repeated );
+                vector_Type convVelocity( *M_beta, Repeated );
+                vector_Type robinRHS( M_uFESpace->map(), Repeated );
                 /*
                 BCVector uRobin( robinRHS, M_uFESpace->dof().numTotalDof(), 0 );
                 uRobin.setRobinCoeffVector( convVelocity );
@@ -400,20 +400,20 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
     if ( verbose ) std::cout << " Schur block (a)... ";
     timer.start();
     //pAp->spy( "p1a" );
-    super_PtrType precForBlock1( PRECFactory::instance().createObject( M_pressureLaplacianPrec ) );
+    superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_pressureLaplacianPrec ) );
     precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
     this->pushBack( pAp, precForBlock1, notInversed, notTransposed );
     if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
     if ( verbose ) std::cout << " Schur block (b)... ";
     timer.start();
-    boost::shared_ptr<matrix_type> P1b( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
     P1b->setBlockStructure( blockNumRows, blockNumColumns );
     *P1b += *PFp;
     P1b->getMatrixBlockView( 0, 0, B11 );
     MatrixBlockUtils::createIdentityBlock( B11 );
     P1b->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> p1b = P1b;
+    boost::shared_ptr<matrix_Type> p1b = P1b;
     //p1b->spy( "p1b" );
     this->pushBack( p1b, inversed,notTransposed );
     if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
@@ -427,7 +427,7 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
     }
     else
     {
-        super_PtrType precForBlock2( PRECFactory::instance().createObject( M_pressureMassPrec ) );
+        superPtr_Type precForBlock2( PRECFactory::instance().createObject( M_pressureMassPrec ) );
         precForBlock2->setDataFromGetPot( M_dataFile, M_pressureMassPrecDataSection );
         this->pushBack( pMp,precForBlock2, notInversed, notTransposed );
     }
@@ -440,7 +440,7 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
      */
     if ( verbose ) std::cout << " Gradient block... ";
     timer.start();
-    boost::shared_ptr<matrix_type> P2( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> P2( new matrixBlock_Type( map ) );
     P2->setBlockStructure( blockNumRows, blockNumColumns );
     P2->getMatrixBlockView( 0, 0, B11 );
     P2->getMatrixBlockView( 0, 1, B12 );
@@ -451,7 +451,7 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
     MatrixBlockUtils::createIdentityBlock( B22 );
     P2->globalAssemble();
     //P2->spy( "p2" );
-    boost::shared_ptr<parent_matrix_type> p2 = P2;
+    boost::shared_ptr<matrix_Type> p2 = P2;
     this->pushBack( p2, inversed, notTransposed );
     if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
@@ -462,7 +462,7 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
      */
     if ( verbose ) std::cout << " Fluid block... ";
     timer.start();
-    boost::shared_ptr<matrix_type> P3( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> P3( new matrixBlock_Type( map ) );
     P3->setBlockStructure( blockNumRows, blockNumColumns );
     P3->getMatrixBlockView( 0, 0, B11 );
     P3->getMatrixBlockView( 1, 1, B22 );
@@ -470,8 +470,8 @@ PreconditionerPCD::buildPreconditioner( operator_type& oper )
     MatrixBlockUtils::createIdentityBlock( B22 );
     P3->globalAssemble();
     //P3->spy( "p3" );
-    boost::shared_ptr<parent_matrix_type> p3 = P3;
-    super_PtrType precForBlock3( PRECFactory::instance().createObject( M_fluidPrec ) );
+    boost::shared_ptr<matrix_Type> p3 = P3;
+    superPtr_Type precForBlock3( PRECFactory::instance().createObject( M_fluidPrec ) );
     precForBlock3->setDataFromGetPot( M_dataFile, M_fluidPrecDataSection );
     this->pushBack( p3,precForBlock3, notInversed, notTransposed );
     if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
@@ -521,13 +521,13 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
 }
 
 void
-PreconditionerPCD::setFESpace( FESpace_ptr uFESpace, FESpace_ptr pFESpace )
+PreconditionerPCD::setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace )
 {
     M_uFESpace = uFESpace;
     M_pFESpace = pFESpace;
     M_adrPressureAssembler.setup( pFESpace, uFESpace ); // p,beta=u
     M_adrVelocityAssembler.setup( uFESpace, uFESpace ); // u,beta=u
-    M_beta.reset( new vector_type( M_uFESpace->map() + M_pFESpace->map() ) );
+    M_beta.reset( new vector_Type( M_uFESpace->map() + M_pFESpace->map() ) );
     *M_beta *= 0;
 
     // We setup the size of the blocks
@@ -536,7 +536,7 @@ PreconditionerPCD::setFESpace( FESpace_ptr uFESpace, FESpace_ptr pFESpace )
 }
 
 void
-PreconditionerPCD::setBCHandler( BCHandlerPtr_type bchPtr )
+PreconditionerPCD::setBCHandler( BCHandlerPtr_Type bchPtr )
 {
     M_bcHandlerPtr = bchPtr;
 }

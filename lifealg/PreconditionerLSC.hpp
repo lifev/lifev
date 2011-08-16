@@ -75,12 +75,12 @@ public:
     //@{
     typedef Preconditioner                          super_Type;
 
-    typedef Teko::Epetra::EpetraBlockPreconditioner prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>        prec_type;
-    typedef super_Type::operator_raw_type           operator_raw_type;
-    typedef super_Type::operator_type               operator_type;
+    typedef Teko::Epetra::EpetraBlockPreconditioner preconditioner_Type;
+    typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
+    typedef MatrixEpetra<Real>                      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
 
-    typedef Teuchos::ParameterList                  list_type;
+    typedef Teuchos::ParameterList                  list_Type;
     //@}
 
 
@@ -92,7 +92,7 @@ public:
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
-    //    IfpackPreconditioner( operator_type& A );
+    //    IfpackPreconditioner( matrixPtr_Type& A );
 
     //! default destructor
     ~PreconditionerLSC();
@@ -112,12 +112,12 @@ public:
     void setDataFromGetPot ( const GetPot&      dataFile,
                              const std::string& section );
 
-    void createParametersList( list_type&         list,
+    void createParametersList( list_Type&         list,
                                const GetPot&      dataFile,
                                const std::string& section,
                                const std::string& subSection );
 
-    static void createLSCList( list_type&         list,
+    static void createLSCList( list_Type&         list,
                                const GetPot&      dataFile,
                                const std::string& section,
                                const std::string& subSection = "LSC" );
@@ -129,7 +129,7 @@ public:
     std::string preconditionerType(){ return M_precType; }
 
     //! Build the preconditioner
-    int buildPreconditioner( operator_type& A );
+    int buildPreconditioner( matrixPtr_Type& A );
 
     int numBlocksRows() const;
     int numBlocksCols() const;

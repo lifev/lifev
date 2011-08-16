@@ -64,24 +64,21 @@ public:
     /** @name Public Types
      */
     //@{
-    typedef RegionMesh3D<LinearTetra>               mesh_type;
-    typedef MapEpetra                               map_type;
-    typedef MatrixBlock<Real>                       matrix_type;
-    typedef MatrixEpetra<Real>                      parent_matrix_type;
-    typedef Epetra_FECrsMatrix                      src_matrix_type;
-    typedef VectorEpetra                            vector_type;
-    typedef boost::shared_ptr<vector_type>          vector_ptr;
+    typedef RegionMesh3D<LinearTetra>               mesh_Type;
+    typedef MapEpetra                               map_Type;
+    typedef MatrixBlock<Real>                       matrixBlock_Type;
+    typedef MatrixEpetra<Real>                      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
+    typedef VectorEpetra                            vector_Type;
+    typedef boost::shared_ptr<vector_Type>          vectorPtr_Type;
 
-    typedef Preconditioner                          super;
-    typedef boost::shared_ptr<super>                super_PtrType;
+    typedef Preconditioner                          super_Type;
+    typedef boost::shared_ptr<super_Type>           superPtr_Type;
 
-    typedef ComposedOperator<Preconditioner>        prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>        prec_type;
+    typedef ComposedOperator<Preconditioner>        preconditioner_Type;
+    typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
-    typedef super::operator_raw_type                operator_raw_type;
-    typedef boost::shared_ptr<operator_raw_type>    operator_type;
-
-    typedef boost::shared_ptr<FESpace<mesh_type,map_type> >  FESpace_ptr;
+    typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
 
     typedef Teuchos::ParameterList                  list_Type;
     //@}
@@ -94,7 +91,7 @@ public:
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
-    //    IfpackPreconditioner( operator_type& A );
+    //    IfpackPreconditioner( matrixPtr_Type& A );
 
     //! default destructor
     ~PreconditionerSIMPLE();
@@ -117,7 +114,7 @@ public:
     double condest ();
 
     //! Build the preconditioner
-    int buildPreconditioner( operator_type& A );
+    int buildPreconditioner( matrixPtr_Type& A );
 
     //@}
 
@@ -146,7 +143,7 @@ public:
         @param uFESpace Boost::shared_ptr on the FESpace for the velocity
         @param pFESpace Boost::shared_ptr on the FESpace for the pressure
      */
-    void setFESpace( FESpace_ptr uFESpace, FESpace_ptr pFESpace );
+    void setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
 
     //! Setter for the damping factor
     /*!

@@ -65,25 +65,22 @@ public:
     /** @name Public Types
      */
     //@{
-    typedef RegionMesh3D<LinearTetra>               mesh_type;
-    typedef MapEpetra                               map_type;
-    typedef MatrixBlock<Real>                       matrix_type;
-    typedef MatrixEpetra<Real>                      parent_matrix_type;
-    typedef Epetra_FECrsMatrix                      src_matrix_type;
-    typedef VectorEpetra                            vector_type;
-    typedef boost::shared_ptr<vector_type>          vector_ptr;
+    typedef RegionMesh3D<LinearTetra>               mesh_Type;
+    typedef MapEpetra                               map_Type;
+    typedef MatrixBlock<Real>                       matrixBlock_Type;
+    typedef MatrixEpetra<Real>                      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>          matrixPtr_type;
+    typedef VectorEpetra                            vector_Type;
+    typedef boost::shared_ptr<vector_Type>          vectorPtr_Type;
 
-    typedef Preconditioner                          super;
-    typedef boost::shared_ptr<super>                super_PtrType;
+    typedef Preconditioner                          super_Type;
+    typedef boost::shared_ptr<super_Type>           superPtr_Type;
 
-    typedef ComposedOperator<Preconditioner>        prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>        prec_type;
+    typedef ComposedOperator<Preconditioner>        preconditioner_Type;
+    typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
-    typedef super::operator_raw_type                operator_raw_type;
-    typedef boost::shared_ptr<operator_raw_type>    operator_type;
-
-    typedef boost::shared_ptr<FESpace<mesh_type,map_type> >  FESpace_ptr;
-    typedef boost::shared_ptr<BCHandler>            BCHandlerPtr_type;
+    typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
+    typedef boost::shared_ptr<BCHandler>            BCHandlerPtr_Type;
 
     typedef Teuchos::ParameterList                  list_Type;
 
@@ -99,7 +96,7 @@ public:
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
-    //    IfpackPreconditioner( operator_type& A );
+    //    IfpackPreconditioner( matrixPtr_type& A );
 
     //! default destructor
     ~PreconditionerPCD();
@@ -127,11 +124,11 @@ public:
         This method updates the value of beta.
         @param beta New vector beta to be used to built the convective term
      */
-    void updateBeta( const vector_type& beta );
+    void updateBeta( const vector_Type& beta );
 
 
     //! Build the preconditioner
-    int buildPreconditioner( operator_type& A );
+    int buildPreconditioner( matrixPtr_type& A );
 
     //@}
 
@@ -160,7 +157,7 @@ public:
         @param uFESpace Boost::shared_ptr on the FESpace for the velocity
         @param pFESpace Boost::shared_ptr on the FESpace for the pressure
      */
-    void setFESpace( FESpace_ptr uFESpace, FESpace_ptr pFESpace );
+    void setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
 
     //! Setter for the BCHandler
     /*!
@@ -168,7 +165,7 @@ public:
         for the construction of the operators Ap, Fp and Mp.
         @param bchPtr pointer to a BCHandler boject
     */
-    void setBCHandler( BCHandlerPtr_type bchPtr );
+    void setBCHandler( BCHandlerPtr_Type bchPtr );
 
     //! Setter for the timestep
     /*!
@@ -197,20 +194,20 @@ protected:
 
     int         M_velocityBlockSize;
     int         M_pressureBlockSize;
-    FESpace_ptr M_uFESpace;
-    FESpace_ptr M_pFESpace;
+    FESpacePtr_Type M_uFESpace;
+    FESpacePtr_Type M_pFESpace;
 
     Real        M_timestep;
     Real        M_viscosity;
     Real        M_density;
-    vector_ptr  M_beta;
+    vectorPtr_Type  M_beta;
 
-    ADRAssembler<mesh_type,matrix_type,vector_type> M_adrPressureAssembler;
-    ADRAssembler<mesh_type,matrix_type,vector_type> M_adrVelocityAssembler;
+    ADRAssembler<mesh_Type,matrixBlock_Type,vector_Type> M_adrPressureAssembler;
+    ADRAssembler<mesh_Type,matrixBlock_Type,vector_Type> M_adrVelocityAssembler;
 
     // todo: Remove the member dataFile (bad programmation)
     GetPot      M_dataFile;
-    BCHandlerPtr_type M_bcHandlerPtr;
+    BCHandlerPtr_Type M_bcHandlerPtr;
     string      M_fluidPrec;
     string      M_fluidPrecDataSection;
     string      M_pressureLaplacianPrec;

@@ -108,7 +108,7 @@ PreconditionerSIMPLE::condest()
 }
 
 int
-PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
+PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
 {
     if ( M_velocityBlockSize < 0 || M_pressureBlockSize < 0 )
     {
@@ -132,7 +132,7 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
     //bool transposed( true );
     bool notTransposed( false );
 
-    map_type map( oper->map() );
+    map_Type map( oper->map() );
     //oper->spy( "A" );
 
     LifeChrono timer;
@@ -178,15 +178,15 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
      */
     if ( verbose ) std::cout << "       Block 1 (F)" << std::endl;
     timer.start();
-    boost::shared_ptr<matrix_type> P1a( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> P1a( new matrixBlock_Type( map ) );
     P1a->setBlockStructure( blockNumRows, blockNumColumns );
     P1a->getMatrixBlockView( 0, 0, B11 );
     P1a->getMatrixBlockView( 1, 1, B22 );
     MatrixBlockUtils::copyBlock( F, B11 );
     MatrixBlockUtils::createIdentityBlock( B22 );
     P1a->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> p1a = P1a;
-    super_PtrType precForBlock1( PRECFactory::instance().createObject( M_fluidPrec ) );
+    boost::shared_ptr<matrix_Type> p1a = P1a;
+    superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_fluidPrec ) );
     precForBlock1->setDataFromGetPot( M_dataFile, M_fluidDataSection );
     this->pushBack( p1a,precForBlock1, notInversed, notTransposed );
     if ( verbose ) std::cout << "       done in " << timer.diff() << " s." << std::endl;
@@ -197,7 +197,7 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
      */
     if ( verbose ) std::cout << "       Block 1 (B)" << std::endl;
     timer.start();
-    boost::shared_ptr<matrix_type> P1b( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
     P1b->setBlockStructure( blockNumRows, blockNumColumns );
     P1b->getMatrixBlockView( 0, 0, B11 );
     P1b->getMatrixBlockView( 1, 0, B21 );
@@ -207,7 +207,7 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
     MatrixBlockUtils::createIdentityBlock( B11 );
     MatrixBlockUtils::createIdentityBlock( B22 );
     P1b->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> p1b = P1b;
+    boost::shared_ptr<matrix_Type> p1b = P1b;
     this->pushBack( p1b, inversed, notTransposed );
     if ( verbose ) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
@@ -217,14 +217,14 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
      */
     if ( verbose ) std::cout << "       Block 1 (Schur)" << std::endl;
     timer.start();
-    boost::shared_ptr<matrix_type> P1c( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> P1c( new matrixBlock_Type( map ) );
 
-    boost::shared_ptr<matrix_type> BBlockMat( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> BBlockMat( new matrixBlock_Type( map ) );
     BBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
     BBlockMat->getMatrixBlockView( 1, 0, B21 );
     MatrixBlockUtils::copyBlock( B, B21 );
     BBlockMat->globalAssemble();
-    boost::shared_ptr<matrix_type> invDBlockMat( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> invDBlockMat( new matrixBlock_Type( map ) );
     invDBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
     invDBlockMat->getMatrixBlockView( 0, 0, B11 );
     if ( M_SIMPLEType == "SIMPLE" )
@@ -237,13 +237,13 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
     }
     *invDBlockMat *= -1.0;
     invDBlockMat->globalAssemble();
-    boost::shared_ptr<matrix_type> tmpResultMat( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> tmpResultMat( new matrixBlock_Type( map ) );
     BBlockMat->multiply( false,
                          *invDBlockMat, false,
                          *tmpResultMat, true );
     BBlockMat.reset();
     invDBlockMat.reset();
-    boost::shared_ptr<matrix_type> BtBlockMat( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> BtBlockMat( new matrixBlock_Type( map ) );
     BtBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
     BtBlockMat->getMatrixBlockView( 0, 1, B12 );
     MatrixBlockUtils::copyBlock( Bt, B12 );
@@ -258,8 +258,8 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
     P1c->getMatrixBlockView( 0, 0, B11 );
     MatrixBlockUtils::createIdentityBlock( B11 );
     P1c->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> p1c = P1c;
-    super_PtrType precForBlock2( PRECFactory::instance().createObject( M_schurPrec ) );
+    boost::shared_ptr<matrix_Type> p1c = P1c;
+    superPtr_Type precForBlock2( PRECFactory::instance().createObject( M_schurPrec ) );
     precForBlock2->setDataFromGetPot( M_dataFile, M_schurDataSection );
     this->pushBack( p1c,precForBlock2, notInversed, notTransposed );
     if ( verbose ) std::cout << "       done in " << timer.diff() << " s." << std::endl;
@@ -271,7 +271,7 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
      */
     if ( verbose ) std::cout << "       Block 2 (D^-1,alpha I)" << std::endl;
     timer.start();
-    boost::shared_ptr<matrix_type> P2a( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> P2a( new matrixBlock_Type( map ) );
     *P2a *= 0.0;
     P2a->setBlockStructure( blockNumRows, blockNumColumns );
     P2a->getMatrixBlockView( 0, 0, B11 );
@@ -286,7 +286,7 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
     }
     MatrixBlockUtils::createScalarBlock( B22, 1/M_dampingFactor );
     P2a->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> p2a = P2a;
+    boost::shared_ptr<matrix_Type> p2a = P2a;
     this->pushBack( p2a, inversed, notTransposed );
     if ( verbose ) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
@@ -296,7 +296,7 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
      */
     if ( verbose ) std::cout << "       Block 2 (Bt)" << std::endl;
     timer.start();
-    boost::shared_ptr<matrix_type> P2b( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> P2b( new matrixBlock_Type( map ) );
     P2b->setBlockStructure( blockNumRows, blockNumColumns );
     P2b->getMatrixBlockView( 0, 0, B11 );
     P2b->getMatrixBlockView( 0, 1, B12 );
@@ -306,7 +306,7 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
     MatrixBlockUtils::createIdentityBlock( B11 );
     MatrixBlockUtils::createIdentityBlock( B22 );
     P2b->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> p2b = P2b;
+    boost::shared_ptr<matrix_Type> p2b = P2b;
     this->pushBack( p2b,inversed, notTransposed );
     if ( verbose ) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
@@ -316,7 +316,7 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
      */
     if ( verbose ) std::cout << "       Block2 (D)" << std::endl;
     timer.start();
-    boost::shared_ptr<matrix_type> P2c( new matrix_type( map ) );
+    boost::shared_ptr<matrixBlock_Type> P2c( new matrixBlock_Type( map ) );
     *P2c *= 0.0;
     P2c->setBlockStructure( blockNumRows, blockNumColumns );
     P2c->getMatrixBlockView( 0, 0, B11 );
@@ -331,7 +331,7 @@ PreconditionerSIMPLE::buildPreconditioner( operator_type& oper )
     }
     MatrixBlockUtils::createIdentityBlock( B22 );
     P2c->globalAssemble();
-    boost::shared_ptr<parent_matrix_type> p2c = P2c;
+    boost::shared_ptr<matrix_Type> p2c = P2c;
     this->pushBack( p2c, inversed, notTransposed );
     if ( verbose ) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
@@ -372,7 +372,7 @@ PreconditionerSIMPLE::setDataFromGetPot( const GetPot& dataFile,
 }
 
 void
-PreconditionerSIMPLE::setFESpace( FESpace_ptr uFESpace, FESpace_ptr pFESpace )
+PreconditionerSIMPLE::setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace )
 {
     // We setup the size of the blocks
     M_velocityBlockSize = uFESpace->fieldDim() * uFESpace->dof().numTotalDof();

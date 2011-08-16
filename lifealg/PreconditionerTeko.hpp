@@ -84,13 +84,13 @@ public:
     /** @name Typedefs
      */
     //@{
-    typedef Preconditioner                          super;
+    typedef Preconditioner                          super_Type;
 
-    typedef Teko::Epetra::EpetraBlockPreconditioner prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>        prec_type;
+    typedef Teko::Epetra::EpetraBlockPreconditioner preconditioner_Type;
+    typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
-    typedef super::operator_raw_type                operator_raw_type;
-    typedef super::operator_type                    operator_type;
+    typedef MatrixEpetra<Real>                      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
     //@}
 
 
@@ -113,10 +113,10 @@ public:
      */
 
     //! Return a pointer on the preconditioner
-    super::prec_raw_type* preconditioner();
+    super_Type::prec_raw_type* preconditioner();
 
     //! Return a pointer on the preconditioner
-    super::prec_type preconditionerPtr();
+    super_Type::prec_type preconditionerPtr();
 
     //! Reset the preconditioner
     void resetPreconditioner();
@@ -137,13 +137,13 @@ protected:
                          const MapEpetra & map,
                          const std::vector<int>& blockSizes);
     void buildPreconditionerTeko( RCP<Teko::BlockPreconditionerFactory> precFact,
-                                  operator_type& oper,
+                                  matrixPtr_Type& oper,
                                   const std::vector<int>& blockSizes );
 
-    prec_type M_prec;
+    preconditionerPtr_Type M_prec;
 
 private:
-    operator_raw_type::matrix_ptrtype M_oper;
+    matrix_Type::matrix_ptrtype M_oper;
 
 };
 

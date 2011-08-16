@@ -55,13 +55,13 @@ PreconditionerTeko::~PreconditionerTeko()
 
 }
 
-PreconditionerTeko::super::prec_type
+PreconditionerTeko::super_Type::prec_type
 PreconditionerTeko::preconditionerPtr()
 {
     return M_prec;
 }
 
-Preconditioner::prec_raw_type*
+Preconditioner::preconditioner_Type*
 PreconditionerTeko::preconditioner()
 {
     return M_prec.get();
@@ -149,7 +149,7 @@ PreconditionerTeko::buildBlockGIDs( std::vector<std::vector<int> > & gids,
 
 void
 PreconditionerTeko::buildPreconditionerTeko( RCP<Teko::BlockPreconditionerFactory> precFact,
-                                             operator_type& oper,
+                                             matrixPtr_Type& oper,
                                              const std::vector<int>& blockSizes )
 {
     // Building the preconditioner

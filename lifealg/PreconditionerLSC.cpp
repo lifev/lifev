@@ -62,7 +62,7 @@ PreconditionerLSC::setDataFromGetPot( const GetPot& dataFile,
 }
 
 int
-PreconditionerLSC::buildPreconditioner( operator_type& oper )
+PreconditionerLSC::buildPreconditioner( matrixPtr_Type& oper )
 {
     // Creating the InverseLibrary from Stratimikos
     RCP<Teko::InverseLibrary> invLib = Teko::InverseLibrary::buildFromStratimikos();
@@ -91,7 +91,7 @@ PreconditionerLSC::buildPreconditioner( operator_type& oper )
 }
 
 void
-PreconditionerLSC::createParametersList( list_type&         list,
+PreconditionerLSC::createParametersList( list_Type&         list,
                                          const GetPot&      dataFile,
                                          const std::string& section,
                                          const std::string& subSection )
@@ -100,7 +100,7 @@ PreconditionerLSC::createParametersList( list_type&         list,
 }
 
 void
-PreconditionerLSC::createLSCList( list_type&         list,
+PreconditionerLSC::createLSCList( list_Type&         list,
                                   const GetPot&      dataFile,
                                   const std::string& section,
                                   const std::string& subsection )

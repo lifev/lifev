@@ -61,16 +61,16 @@ public:
     //! @name Public Types
     //@{
     typedef Preconditioner                         super_Type;
-    typedef boost::shared_ptr<super_Type>          super_PtrType;
-    typedef super_Type::prec_raw_type              operator_Type;
-    typedef boost::shared_ptr<operator_Type>       operator_PtrType;
+    typedef boost::shared_ptr<super_Type>          superPtr_Type;
+    typedef Epetra_Operator                        operator_Type;
+    typedef boost::shared_ptr<operator_Type>       operatorPtr_Type;
     typedef ComposedOperator<operator_Type>        prec_Type;
-    typedef boost::shared_ptr<prec_Type>           prec_PtrType;
-
-    typedef Teuchos::ParameterList                 list_Type;
+    typedef boost::shared_ptr<prec_Type>           precPtr_Type;
 
     typedef MatrixEpetra<Real>                     matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>         matrix_PtrType;
+    typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
+
+    typedef Teuchos::ParameterList                 list_Type;
     //@}
 
 
@@ -109,7 +109,7 @@ public:
     /*!
       @param A the base matrix for computing the preconditioner
     */
-    virtual int buildPreconditioner( matrix_PtrType& A ) = 0;
+    virtual int buildPreconditioner( matrixPtr_Type& A ) = 0;
 
     //! Reset the preconditioner
     void resetPreconditioner();
@@ -171,7 +171,7 @@ public:
 
     /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
      it must derive from the Epetra_Operator object*/
-    operator_PtrType preconditionerPtr();
+    operatorPtr_Type preconditionerPtr();
 
     //! Return the type name of the preconditioner.
     /*!
@@ -190,13 +190,13 @@ protected:
     //@{
 
     //! Add A to the right of the composition
-    int pushBack( matrix_PtrType& A,
+    int pushBack( matrixPtr_Type& A,
                   const bool useInverse   = false,
                   const bool useTranspose = false );
 
     //! Use a preconditioner to build the inverse of A and add it to the right of the composition
-    int pushBack( matrix_PtrType& A,
-                  super_PtrType& preconditioner,
+    int pushBack( matrixPtr_Type& A,
+                  superPtr_Type& preconditioner,
                   const bool useInverse   = false,
                   const bool useTranspose = false );
 
@@ -219,7 +219,7 @@ protected:
     boost::shared_ptr<Epetra_Comm> M_comm;
 
 private:
-    prec_PtrType                   M_prec;
+    precPtr_Type                   M_prec;
     std::vector<operator_type>     M_precBaseOperators;
 };
 

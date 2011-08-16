@@ -158,7 +158,7 @@ PreconditionerComposition::preconditioner()
     return M_prec.get();
 }
 
-PreconditionerComposition::operator_PtrType
+PreconditionerComposition::operatorPtr_Type
 PreconditionerComposition::preconditionerPtr()
 {
     return M_prec;
@@ -180,7 +180,7 @@ PreconditionerComposition::numOperators() const
 // Protected Methods
 // ===================================================
 int
-PreconditionerComposition::pushBack( matrix_PtrType& A,
+PreconditionerComposition::pushBack( matrixPtr_Type& A,
                                      const bool useInverse,
                                      const bool useTranspose )
 {
@@ -191,15 +191,15 @@ PreconditionerComposition::pushBack( matrix_PtrType& A,
 }
 
 int
-PreconditionerComposition::pushBack( matrix_PtrType& A,
-                                     super_PtrType& preconditionerPtr,
+PreconditionerComposition::pushBack( matrixPtr_Type& A,
+                                     superPtr_Type& preconditionerPtr,
                                      const bool useInverse,
                                      const bool useTranspose )
 {
     //std::cout << "[DEBUG] pushBack() preconditioner version" << std::endl;
     M_precBaseOperators.push_back( A );
     preconditionerPtr->buildPreconditioner( A );
-    operator_PtrType oper( preconditionerPtr->preconditionerPtr() );
+    operatorPtr_Type oper( preconditionerPtr->preconditionerPtr() );
     //std::cout << "[DEBUG] Number of pointers which share the operator: " << oper.use_count() << std::endl;
     M_prec->push_back( oper,useInverse, useTranspose );
 
