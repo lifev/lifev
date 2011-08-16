@@ -2,83 +2,104 @@
 %%
 %% FSI
 %%
-@article{fernandez03:_newton_1,
-     AUTHOR = {Fern{\'a}ndez, M.A. and Moubachir, M.},
-     TITLE = {An exact block-{N}ewton algorithm for solving fluid-structure interaction problems},
-    JOURNAL = {C. R. Math. Acad. Sci. Paris},
-    VOLUME = 336,
-    YEAR = 2003,
-    NUMBER = 8,
-    PAGES = {681--686}
- }
- 
- 
-@article{fernandez03:_newton_2,
-     AUTHOR = {Fern{\'a}ndez, M.A. and Moubachir, M.},
-     TITLE = {{N}ewton methods using exact jacobians for solving fluid-structure coupling},
-     YEAR = 2003,
-     NOTE = {In preparation}
- }
 
-%%
-%% NavierStokes
-%%
 
-@Article{gauthier03:_navier_stokes,
-  author = 	 {A. Gauthier and F. Saleri and A. Veneziani},
-  title = 	 {A fast preconditioner for the incompressible {N}avier-{S}tokes equations},
-  journal = 	 {Computing and Visualization in Science (CVS)},
-  year = 	 2003,
-  note = 	 {To appear. \url{http://www.lifev.org/documentation/GSV.ps.gz}},
-  annote = 	 {}
+@article{CrosettoEtAl2009,
+title = {Parallel Algorithms for Fluid-Structure Interaction Problems in Haemodynamics},
+publisher = {SIAM},
+year = {2011},
+doi = {DOI:10.1137/090772836},
+issn = {10648275},
+eissn = {10957197},
+coden = {SJOCE3},
+volume = {33},
+number = {4},
+pages = {1598-1622},
+author = {Paolo Crosetto and  Simone Deparis and  Gilles Fourestey and Alfio Quarteroni},
+url = {http://dx.doi.org/doi/10.1137/090772836},
 }
 
-%%
-%% Darcy
-%%
-
-@PhdThesis{vmartin04:_darcy,
-  author =       {V. Martin},
-  title =        {Multidomain Simulations of Flow in Porous Media. },
-  school =       {Universit\'e Paris IX Dauphine},
-  year =         {March 2004},
-  note =         {Partly in French, \url{http://www-rocq.inria.fr/~vmartin/These-MartinVincent.ps.gz}}
-}
-
-@TechReport{rr5131:_darcy,
-  author =      {R. Di Cosmo and P. Weis and Zheng Li and F. Cl\'ement and V. Martin and A. Vodicka},
-  title =        {Parallel programming with the OcamlP3l system with application to coupling
-numerical codes},
-  institution =  {Inria},
-  year =         {2003},
-  type =      {Research Report},
-  number =    {5131},
-  address =   {Rocquencourt, France},
-  note =     {\url{http://www.inria.fr/rrrt/rr-5131.html}}
+@Unpublished{ReymondCrosettoEtAl2010,
+AUTHOR = {Reymond, Philippe and Crosetto, Paolo and Deparis, Simone and Quarteroni, Alfio and Stergiopulos, Nikos},
+TITLE = {Physiological aspects of fluid structure interaction and their effects on blood flow in a person-specific aorta.},
+year  = {2011},
+note = 	 {Submitted}
 }
 
 
-%%
-%% Computer Science
-%%
-@book{Stroustrup:2000,
-  author	= {Bjarne Stroustrup},
-  title		= {{The C++ Programming Language, Special Edition}},
-  publisher	= {Addison-Wesley Verlag},
-  year		= 2000,
-  address	= {Boston},
-  isbn		= {0-201-70073-5}
+@Unpublished{ReymondCrosettoEtAl2010,
+AUTHOR = {Nobile, Pozzoli and Vergara},
+TITLE = {Time accurate partitioned algorithms for the solution of
+fluid-structure interaction problems in haemodynamics},
+year  = {2011},
+note = {Submitted}
+url  = "http://mox.polimi.it/it/progetti/pubblicazioni/quaderni/30-2011.pdf"
 }
 
-@Book{Saad:1992:NML,
-  author =       "Y. Saad",
-  key =          "Saad",
-  title =        "Numerical Methods for Large Eigenvalue Problems",
-  publisher =    "Halstead Press",
-  address =      "New York",
-  year =         "1992",
-  bibsource =    "ftp://ftp.math.utah.edu/pub/bibnet/authors/s/saad-yousef.bib",
+@article{CrosettoReymondEtAl2010,
+title = "Fluid-structure interaction simulation of aortic blood flow",
+journal = "Computers \& Fluids",
+volume = "43",
+number = "1",
+pages = "46--57",
+year = "2011",
+note = "Symposium on High Accuracy Flow Simulations. Special Issue Dedicated to Prof. Michel Deville.",
+issn = "0045-7930",
+doi = "DOI: 10.1016/j.compfluid.2010.11.032",
+url = "http://www.sciencedirect.com/science/article/B6V26-51N7RNF-1/2/bd15b5b3bc2a3676176404e24a5e7252",
+author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontaxakis, Dimitrios and Stergiopulos, Nikolaos and Quarteroni, Alfio",
 }
+
+@incollection{MarchandiseCrosettoEtAl2011,
+  title = {Quality open source mesh generation for cardiovascular flow simulations},
+  author = {Marchandise, E. and Crosetto, P. and 	Geuzaine, C. and Remacle, J.-F. and Sauvage, E.},
+  year = 2011,
+  booktitle = {Modelling Physiological Flow},
+  series = {Springer Series on Modeling, Simulation and Applications},
+  editor = {Ambrosi, D. and Quarteroni, A. and Rozza, G.},
+  publisher = {Springer-Verlag},
+  note = {submitted}
+}
+
+
+@PhDThesis{CrosettoThesis2011,
+   address     = {Lausanne},
+   school = {\'Ecole Polytechnique F\'ed\'erale de Lausanne},
+   author      = {Crosetto, Paolo},
+   publisher   = {EPFL},
+   status      = {in preparation},
+   title       = {Fluid-Structure Interaction Problems in  Hemodynamics: Formulation, Solver, Preconditioners and Applications},
+   unit        = {CMCS},
+   month       = {July},
+   year        = {2011},
+   url         = {http://library.epfl.ch/en/theses/?nr=5109}
+}
+
+@article {deparisEtAl:steklov,
+    AUTHOR = {Deparis, Simone and Discacciati, Marco and Fourestey, Gilles
+              and Quarteroni, Alfio},
+     TITLE = {Fluid-structure algorithms based on {S}teklov-{P}oincar\'e
+              operators},
+   JOURNAL = {Comput. Methods Appl. Mech. Engrg.},
+  FJOURNAL = {Computer Methods in Applied Mechanics and Engineering},
+    VOLUME = {195},
+      YEAR = {2006},
+    NUMBER = {41-43},
+     PAGES = {5797--5812},
+      ISSN = {0045-7825},
+     CODEN = {CMMECC},
+}
+
+@ARTICLE{FerMou04:NewtonFS,
+  AUTHOR       = "M.A. Fern\'andez and M. Moubachir",
+  TITLE        = "A {N}ewton method using exact jacobians for solving fluid-structure coupling",
+  JOURNAL      = "Computers and Structures",
+  YEAR         = 2005,
+  VOLUME       = 83,
+  NUMBER       = {2-3},
+  PAGES        = "127-142"
+}
+
 
 
 @Misc{02:_lifev_projec,
