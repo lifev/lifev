@@ -257,6 +257,15 @@ public:
      */
     void setParameters( const Teuchos::ParameterList& list );
 
+    //! Method to set a particular parameter
+    /*!
+      @param name Name of the parameter
+      @param value Value of the parameter
+      Note: The parameters are added to the existing one. Use resetParameters to clean the parameters list.
+     */
+    template<typename T>
+    void setParameter( const std::string& name, T value );
+
     //! Method to reset the parameters list of the solver
     void resetParameters();
 
@@ -336,6 +345,12 @@ private:
 
 };
 
+template<typename T>
+void
+SolverBelos::setParameter( const std::string& name, T value )
+{
+    M_parameterList.set( name, value );
+}
 
 } // namespace LifeV
 
