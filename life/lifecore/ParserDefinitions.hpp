@@ -56,6 +56,7 @@
 
 #ifdef HAVE_BOOST_SPIRIT_QI
 #ifndef DISABLE_SPIRIT_PARSER
+
 // BOOST Spirit Classes
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
@@ -66,6 +67,7 @@ namespace spirit  = boost::spirit;
 namespace qi      = spirit::qi;
 namespace ascii   = spirit::ascii;
 namespace phoenix = boost::phoenix;
+
 #endif /* DISABLE_SPIRIT_PARSER */
 #endif /* HAVE_BOOST_SPIRIT_QI */
 

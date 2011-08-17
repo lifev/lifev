@@ -88,6 +88,9 @@ Parser::operator=( const Parser& parser )
 {
     if ( this != &parser )
     {
+        std::cerr << "!!! ERROR: Operator= not working !!!" << std::endl;
+        std::exit( EXIT_FAILURE );
+
         M_strings    = parser.M_strings;
         M_results    = parser.M_results;
         //M_calculator = parser.M_calculator; //NOT WORKING!!!
@@ -116,17 +119,12 @@ Parser::evaluate( const ID& id )
 #ifndef DISABLE_SPIRIT_PARSER
             qi::phrase_parse( start, end, M_calculator, ascii::space, M_results );
 #else
-            std::cout << "The Boost Spirit parser is disabled" << std::endl;
+            std::cerr << "!!! ERROR: The Boost Spirit parser has been disabled !!!" << std::endl;
+            std::exit( EXIT_FAILURE );
 #endif /* DISABLE_SPIRIT_PARSER */
 #else
-            std::cout << "!!! ERROR: Boost version < 1.41 !!!" << std::endl;
-            // This block generates a segmentation fault
-            Int *a = new Int(0);
-            Int *b;
-            b = a;
-            delete a;
-            delete b;
-            // ----------------------------------------
+            std::cerr << "!!! ERROR: Boost version < 1.41 !!!" << std::endl;
+            std::exit( EXIT_FAILURE );
 #endif
         }
         M_evaluate = false;
