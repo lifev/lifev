@@ -1,8 +1,9 @@
+%% usage: bibtex2html -a -suffix "" lifev.bib
+%% alphabetical order and without the .html extension
 
 %%
 %% FSI
 %%
-
 
 @article{CrosettoEtAl2009,
 title = {Parallel Algorithms for Fluid-Structure Interaction Problems in Haemodynamics},
@@ -23,16 +24,14 @@ url = {http://dx.doi.org/doi/10.1137/090772836},
 AUTHOR = {Reymond, Philippe and Crosetto, Paolo and Deparis, Simone and Quarteroni, Alfio and Stergiopulos, Nikos},
 TITLE = {Physiological aspects of fluid structure interaction and their effects on blood flow in a person-specific aorta.},
 year  = {2011},
-note = 	 {Submitted}
+note =      {Submitted}
 }
 
-
-@Unpublished{ReymondCrosettoEtAl2010,
-AUTHOR = {Nobile, Pozzoli and Vergara},
-TITLE = {Time accurate partitioned algorithms for the solution of
-fluid-structure interaction problems in haemodynamics},
+@Unpublished{NobilePozzoliVergara2010,
+AUTHOR = {Nobile, Fabio and Pozzoli, Matteo and Vergara, Christian},
+TITLE = {Time accurate partitioned algorithms for the solution of fluid-structure interaction problems in haemodynamics},
 year  = {2011},
-note = {Submitted}
+note = {Submitted},
 url  = "http://mox.polimi.it/it/progetti/pubblicazioni/quaderni/30-2011.pdf"
 }
 
@@ -52,7 +51,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 
 @incollection{MarchandiseCrosettoEtAl2011,
   title = {Quality open source mesh generation for cardiovascular flow simulations},
-  author = {Marchandise, E. and Crosetto, P. and 	Geuzaine, C. and Remacle, J.-F. and Sauvage, E.},
+  author = {Marchandise, E. and Crosetto, P. and     Geuzaine, C. and Remacle, J.-F. and Sauvage, E.},
   year = 2011,
   booktitle = {Modelling Physiological Flow},
   series = {Springer Series on Modeling, Simulation and Applications},
@@ -61,13 +60,17 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
   note = {submitted}
 }
 
-
 @PhDThesis{CrosettoThesis2011,
    address     = {Lausanne},
    school = {\'Ecole Polytechnique F\'ed\'erale de Lausanne},
    author      = {Crosetto, Paolo},
    publisher   = {EPFL},
-   status      = {in preparation},
+   status      = {in prepa@ARTICLE{Malossi2011,
+  AUTHOR =       "A.C.I. Malossi and P.J. Blanco and S. Deparis and A. Quarteroni",
+  TITLE =        "Algorithms for the partitioned solution of weakly coupled fluid models for cardiovascular flows",
+  JOURNAL =      IJNMBE,
+  YEAR =         "2011"
+}ration},
    title       = {Fluid-Structure Interaction Problems in  Hemodynamics: Formulation, Solver, Preconditioners and Applications},
    unit        = {CMCS},
    month       = {July},
@@ -100,22 +103,103 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
   PAGES        = "127-142"
 }
 
+%%
+%% GEOMETRICAL MULTISCALE
+%%
 
+@ARTICLE{Malossi2011Algorithms,
+  AUTHOR =       "A.C.I. Malossi and P.J. Blanco and S. Deparis and A. Quarteroni",
+  TITLE =        "Algorithms for the partitioned solution of weakly coupled fluid models for cardiovascular flows",
+  JOURNAL =      "Accepted on Int. J. Num. Meth. Biomed. Engng.",
+  YEAR =         "2011",
+  URL =          "http://onlinelibrary.wiley.com/doi/10.1002/cnm.1457/abstract",
+  doi =          "10.1002/cnm.1457"
+}
+
+@UNPUBLISHED{Malossi2011Algorithms1D,
+  AUTHOR =       "A.C.I. Malossi and P.J. Blanco and S. Deparis",
+  TITLE =        "A two-level time step technique for the partitioned solution of one-dimensional arterial networks",
+  NOTE =         "In preparation",
+  YEAR =         "2011"
+}
+
+%%
+%% LifeV
+%%
 
 @Misc{02:_lifev_projec,
-  key =		 {lifev},
-  author =	 {L. Formaggia  and M. Fernandez and A. Gauthier and J.F. Gerbeau and C. Prud'homme and Alessandro Veneziani},
-  title =	 {The {L}ife{V} {P}roject},
+  author =     {L. Formaggia  and M. Fernandez and A. Gauthier and J.F. Gerbeau and C. Prud'homme and Alessandro Veneziani},
+  title =      {The {L}ife{V} {P}roject},
   howpublished = {Web},
-  year =	 {2002-2004},
-  note =	 {\url{http://www.lifev.org}}
+  year =       {2002-2004},
+  URL =        "http://www.lifev.org",
+  key =        {lifev}
 }
 
 @Manual{formaggia:_lifev_dev_manual,
-  title = 	 {LifeV Developer Manual},
-  key =		 {lifev-dev},
-  author =	 {L. Formaggia  and J.F. Gerbeau and C. Prud'homme},
+  title =      {LifeV Developer Manual},
+  author =     {L. Formaggia  and J.F. Gerbeau and C. Prud'homme},
   organization = {The {L}ife{V} {P}roject},
-  note =	 {\url{http://www.lifev.org/documentation/lifev-dev.pdf}}
+  URL =        "http://www.lifev.org/documentation/LifeV-Developer-Manual.pdf",
+  key =        {lifev-dev}
 }
 
+<<<<<<< HEAD
+
+@article{ponziniv1,
+	   Author = {Ponzini, R. and Vergara, C. and Redaelli, A. and Veneziani, A.},
+           Title = {Reliable CFD-based estimation of flow rate in haemodynamics measures},
+           Journal = {Ultrasound in Medicine & Biology},
+           Volume = {32},
+	   Number = {10},
+	   Pages = {1545-55},
+	   Year = {2006} }
+
+@article{nobilev1,
+           Author = {F. Nobile and C. Vergara},
+           Date-Added = {2007-05-16 10:26:46 -0700},
+	   Date-Modified = {2008-04-03 09:54:37 -0700},
+	   Journal = {SIAM J Sc Comp},
+	   Number = {2},
+	   Pages = {731-763},
+	   Title = {An effective fluid-structure interaction formulation for vascular dynamics by generalized {Robin} conditions},
+	   Volume = {30},
+	   Year = {2008}}
+
+@article{vergaraz1,
+        Author = {Vergara, Christian and Zunino, Paolo},
+        Title = {Multiscale modeling and simulation of drug release from cardiovascular stents},
+        Journal = {SIAM Multiscale Modeling and Simulation},
+        Number = {2},
+        Year = {2008},
+        Volume = {7}
+        Pages = {565-588}
+}
+
+
+@article{zuninod1,
+         Author = {Zunino P., D'Angelo C., Petrini L., Vergara C., Capelli C., Migliavacca F},
+         Title = {Numerical simulation of drug eluting coronary stents: mechanics, fluid dynamics and drug release},
+         Journal = {Comp. Meth. Appl. Mech. Eng},
+         Number = {45-46},
+         Year = {2009},
+         Volume = {198}
+         Pages = {3633-3644}
+}
+
+@article{viscardiv1,
+         Author = {Viscardi F., Vergara C., Antiga L., Merelli S., Veneziani A., Puppini G., Faggian G., Mazzucco A., Luciani G.B},
+         Title = {Comparative finite-element model analysis of ascending aortic flow in bicuspid and tricuspid aortic valve},
+         Journal = {Artificial Organs},
+         Number = {12},
+         Year = {2010},
+         Volume = {34}
+=======
+@MANUAL{LifeVGuidelines,
+  title =      "Life{V} {D}evelopment {G}uidelines",
+  author =     "A.C.I. Malossi and S. Deparis",
+  organization = "The {L}ife{V} {P}roject",
+  URL =        "http://www.lifev.org/documentation/LifeV_Development_Guidelines.pdf",
+  key =        "lifev-coding-guidelines"
+}
+>>>>>>> 4e40f9533f1a551a00901118c71e3903738571db
