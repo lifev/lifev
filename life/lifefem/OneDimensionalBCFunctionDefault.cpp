@@ -296,23 +296,6 @@ OneDimensionalBCFunctionCompatibility::computeCFL( const Real& eigenvalue, const
 Real
 OneDimensionalBCFunctionAbsorbing::operator()( const Real& /*time*/, const Real& timeStep )
 {
-//    updateBCVariables();
-//    computeEigenValuesVectors();
-//
-//    switch ( M_bcType )
-//    {
-//    case OneDimensional::W1:
-//        return scalarProduct( M_leftEigenvector1, M_bcU );
-//        break;
-//
-//    case OneDimensional::W2:
-//        return scalarProduct( M_leftEigenvector2, M_bcU );
-//        break;
-//    default:
-//        std::cout << "Warning: bcType \"" << M_bcType  << "\"not available!" << std::endl;
-//        return 0;
-//    }
-
     updateBCVariables();
     computeEigenValuesVectors();
 
@@ -374,13 +357,13 @@ OneDimensionalBCFunctionWindkessel3::OneDimensionalBCFunctionWindkessel3( const 
                                                                           const Real&        resistance1,
                                                                           const Real&        resistance2,
                                                                           const Real&        compliance,
-                                                                          const bool&        absorbing1,
+                                                                          const bool&        absorbing,
                                                                           const Real&        venousPressure ):
         super                           ( bcSide, bcType ),
         M_resistance1                   ( resistance1 ),
         M_resistance2                   ( resistance2 ),
         M_compliance                    ( compliance ),
-        M_absorbing1                    ( absorbing1 ),
+        M_absorbing                     ( absorbing ),
         M_venousPressure                ( venousPressure ),
         M_P0                            ( 0. ),
         M_Q_tn                          ( 0. ),
@@ -393,7 +376,7 @@ OneDimensionalBCFunctionWindkessel3::OneDimensionalBCFunctionWindkessel3( const 
         M_resistance1                   ( bcFunctionWindkessel3.M_resistance1 ),
         M_resistance2                   ( bcFunctionWindkessel3.M_resistance2 ),
         M_compliance                    ( bcFunctionWindkessel3.M_compliance ),
-        M_absorbing1                    ( bcFunctionWindkessel3.M_absorbing1 ),
+        M_absorbing                     ( bcFunctionWindkessel3.M_absorbing ),
         M_venousPressure                ( bcFunctionWindkessel3.M_venousPressure ),
         M_P0                            ( bcFunctionWindkessel3.M_P0 ),
         M_Q_tn                          ( bcFunctionWindkessel3.M_Q_tn ),
@@ -428,7 +411,7 @@ OneDimensionalBCFunctionWindkessel3::operator()( const Real& time, const Real& t
     Real A( M_bcU[0] );
     Real Q( M_bcU[1] );
 
-    if ( M_absorbing1 )
+    if ( M_absorbing )
     {
         Real b1( M_flux->physics()->dPdW( A, Q, 0, M_bcNode ) );  // dP / dW1 - Missing W_outID ???
         Real b2( A / 2 ); // dQ / dW1

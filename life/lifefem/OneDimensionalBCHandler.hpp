@@ -51,7 +51,12 @@ namespace LifeV
 
 //! OneDimensionalBCHandler - Class featuring methods to handle boundary conditions.
 /*!
- *  @author Lucia Mirabella, Tiziano Passerini
+ *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
+ *
+ *  We need to impose 2 boundary condition on each side of the 1D segment.
+ *  These boundary conditions are stored in \c OneDimensionalBC objects.
+ *
+ *  \cond \TODO Improve the description of BC. \endcond
  */
 class OneDimensionalBCHandler
 {
@@ -88,12 +93,12 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
+    //! Empty Constructor
     explicit OneDimensionalBCHandler();
 
     //! Copy constructor
     /*!
-     * @param BCH OneDimensionalBCHandler
+     * @param bcHandler OneDimensionalBCHandler
      */
     explicit OneDimensionalBCHandler( const OneDimensionalBCHandler& bcHandler );
 
@@ -106,10 +111,22 @@ public:
     //! @name Methods
     //@{
 
-    //! Apply boundary conditions
+    //! Apply boundary conditions to the rhs of the Taylor-Galerkin problem
+    /*!
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @param solution the solution container.
+     *  @param flux the flux class.
+     *  @param rhs the rhs of the Taylor-Galerking problem.
+     */
     void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
 
-    //! Apply boundary conditions for the viscoelastic problem
+    //! Apply boundary conditions to the rhs of the viscoelastic problem
+    /*!
+     *  @param flux the flux class.
+     *  @param matrix the matrix of the viscoelastic problem.
+     *  @param rhs the rhs of the viscoelastic problem.
+     */
     void applyViscoelasticBC(const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs );
 
     //@}
@@ -118,12 +135,32 @@ public:
     //! @name Set Methods
     //@{
 
-    void setBC( const bcSide_Type& bcSide, const bcLine_Type& line, const bcType_Type& bcType, const bcFunction_Type& bcFunction );
+    //! Set a boundary condition
+    /*!
+     *  @param bcSide the side of the boundary condition (left or right).
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     *  @param bcFunction the boundary condition function.
+     */
+    void setBC( const bcSide_Type& bcSide, const bcLine_Type& bcLine, const bcType_Type& bcType, const bcFunction_Type& bcFunction );
 
+    //! Set the default boundary conditions
+    /*!
+     *  This is done only for the boundary conditions that have not been set yet.
+     */
     void setDefaultBC();
 
+    //! Set the flux and the source classes for the problem
+    /*!
+     *  @param flux the flux term of the problem.
+     *  @param source the source term of the problem.
+     */
     void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
 
+    //! Set the solution of the problem
+    /*!
+     *  @param solution pointer to the solution of the problem.
+     */
     void setSolution( const solutionPtr_Type& solution );
 
     //@}
@@ -132,9 +169,20 @@ public:
     //! @name Get Methods
     //@{
 
+    //! Get a specific boundary condition
+    /*!
+     *  @param bcSide the side of the boundary condition (left or right).
+     *  @return the pointer to the boundary conditions on a specific side
+     */
     const bcPtr_Type& bc( const bcSide_Type& bcSide ) const { return M_boundary.find( bcSide )->second; }
 
-    const bool& bcReady( const bcSide_Type& bcSide, const bcLine_Type& line ) const { return M_boundarySet.find( bcSide )->second.find( line )->second; }
+    //! Return true if the boundary condition has been set
+    /*!
+     *  @param bcSide the side of the boundary condition (left or right).
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @return true if the boundary condition has been set, false otherwise.
+     */
+    const bool& bcReady( const bcSide_Type& bcSide, const bcLine_Type& bcLine ) const { return M_boundarySet.find( bcSide )->second.find( bcLine )->second; }
 
     //@}
 

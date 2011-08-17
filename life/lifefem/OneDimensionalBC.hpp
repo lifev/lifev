@@ -52,7 +52,12 @@ namespace LifeV
 
 //! OneDimensionalBC - Class featuring methods to handle boundary conditions.
 /*!
- *  @author Lucia Mirabella, Tiziano Passerini
+ *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
+ *
+ *  We need to impose 2 boundary condition on each side of the 1D segment.
+ *  These class stores the boundary conditions on one side.
+ *
+ *  \cond \TODO Improve the description of this class. \endcond
  */
 class OneDimensionalBC
 {
@@ -93,9 +98,9 @@ public:
 
     //! Copy constructor
     /*!
-     * @param BC OneDimensionalBC
+     * @param bc OneDimensionalBC
      */
-    explicit OneDimensionalBC( const OneDimensionalBC& BC );
+    explicit OneDimensionalBC( const OneDimensionalBC& bc );
 
     //! Destructor
     virtual ~OneDimensionalBC() {}
@@ -106,10 +111,22 @@ public:
     //! @name Methods
     //@{
 
-    //! Apply boundary conditions
+    //! Apply boundary conditions to the rhs of the Taylor-Galerkin problem
+    /*!
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @param solution the solution container.
+     *  @param flux the flux class.
+     *  @param rhs the rhs of the Taylor-Galerking problem.
+     */
     void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
 
-    //! Apply boundary conditions for the viscoelastic problem
+    //! Apply boundary conditions to the rhs of the viscoelastic problem
+    /*!
+     *  @param flux the flux class.
+     *  @param matrix the matrix of the viscoelastic problem.
+     *  @param rhs the rhs of the viscoelastic problem.
+     */
     void applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs );
 
     //@}
@@ -118,8 +135,18 @@ public:
     //! @name Set Methods
     //@{
 
-    void setType( const bcLine_Type& bcLine, const bcType_Type& bc ) { M_bcType[bcLine] = bc; }
+    //! Set the type of boundary condition
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     */
+    void setType( const bcLine_Type& bcLine, const bcType_Type& bcType ) { M_bcType[bcLine] = bcType; }
 
+    //! Set the boundary condition function
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcFunction the boundary condition function.
+     */
     void setBCFunction( const bcLine_Type& bcLine, const bcFunction_Type& rhs ) { M_bcFunction[bcLine] = rhs; }
 
     //@}
@@ -128,8 +155,18 @@ public:
     //! @name Get Methods
     //@{
 
+    //! Get the type of boundary condition
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @return the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     */
     const bcType_Type& type( const bcLine_Type& bcLine ) const { return M_bcType.find( bcLine )->second; }
 
+    //! Get the boundary condition function
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @return the boundary condition function.
+     */
     const bcFunction_Type& bcFunction( const bcLine_Type& bcLine ) const { return M_bcFunction.find( bcLine )->second; }
 
     //@}
@@ -148,16 +185,28 @@ private:
     //@{
 
     //! Compute the matrix and the RHS for the BC 2x2 linear system
+    /*!
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @param flux the flux class.
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param leftEigenvector1 first line of the left eigenvector matrix.
+     *  @param leftEigenvector2 second line of the left eigenvector matrix.
+     *  @param dof degree of freedom of the boundary condition.
+     *  @param bcMatrix the 2x2 matrix problem for the boundary condition computation.
+     *  @param bcRHS the rhs of the 2x2 problem for the boundary condition computation.
+     */
     void computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& bcLine,
                               const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
                               const UInt& dof, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS );
 
-    //! Solve a 2x2 linear system by the Cramer method (for the boundary systems)
+    //! Solve a 2x2 linear system by the Cramer method (for the boundary conditions)
     /*!
-     * Matrix A is given by two pairs corresponding to the 2 M_lines.
-     * A = [ M_matrixrow_at_line["first" ] ;
-     *       M_matrixrow_at_line["second"] ]
-     * @return A^{-1} * rhs2d
+     * Matrix A is given by two pairs corresponding to the 2 lines.
+     * @param line1 first line of the 2x2 matrix.
+     * @param line2 second line of the 2x2 matrix.
+     * @param rhs rhs of the 2x2 system.
+     * @return solution
      */
     container2D_Type solveLinearSystem( const container2D_Type& line1, const container2D_Type& line2, const container2D_Type& rhs ) const;
 

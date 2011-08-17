@@ -51,9 +51,12 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_BCDefaultFunction - Base class for default BC functions
+//! OneDimensionalModelBCFunctionDefault - Base class for deriving specific 1D boundary functions
 /*!
- *  @author Lucia Mirabella
+ *  @author Lucia Mirabella, Cristiano Malossi
+ *
+ *  This class provide a general interface for implementing some specific boundary conditions
+ *  for the 1D segment.
  */
 class OneDimensionalBCFunctionDefault
 {
@@ -97,11 +100,15 @@ public:
     //@{
 
     //! Constructor
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     */
     explicit OneDimensionalBCFunctionDefault( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param BCF_Default OneDimensionalBCFunctionDefault
+     * @param bcFunctionDefault OneDimensionalBCFunctionDefault
      */
     explicit OneDimensionalBCFunctionDefault( const OneDimensionalBCFunctionDefault& bcFunctionDefault );
 
@@ -114,6 +121,14 @@ public:
     //! @name Methods
     //@{
 
+    //! Operator()
+    /*!
+     *  Evaluate the function.
+     *
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @return the value of the function.
+     */
     virtual Real operator() ( const Real& time, const Real& timeStep );
 
     //@}
@@ -122,8 +137,17 @@ public:
     //! @name Set Methods
     //@{
 
+    //! Set the flux and the source classes for the problem
+    /*!
+     *  @param flux the flux term of the problem.
+     *  @param source the source term of the problem.
+     */
     void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
 
+    //! Set the solution of the problem
+    /*!
+     *  @param solution pointer to the solution of the problem.
+     */
     void setSolution( const solutionPtr_Type& solution ) { M_solution = solution; }
 
     //@}
@@ -133,6 +157,7 @@ protected:
     //! @name Protected Methods
     //@{
 
+    //! Automatically identify the boundary node.
     virtual void setupNode();
 
     //@}
@@ -148,9 +173,11 @@ protected:
 
 
 
-//! Riemann - Class which implement Riemann BC for One Dimensional BC Functions
+//! OneDimensionalBCFunctionRiemann - Class which implements Riemann boundary conditions for the 1D segment
 /*!
  *  @author Lucia Mirabella
+ *
+ *  \cond \TODO Add the equation and some descriptions \endcond
  */
 class OneDimensionalBCFunctionRiemann : public OneDimensionalBCFunctionDefault
 {
@@ -169,11 +196,15 @@ public:
     //@{
 
     //! Constructor
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     */
     explicit OneDimensionalBCFunctionRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param BCF_Riemann OneDimensionalBCFunctionRiemann
+     * @param bcFunctionRiemann OneDimensionalBCFunctionRiemann
      */
     explicit OneDimensionalBCFunctionRiemann( const OneDimensionalBCFunctionRiemann& bcFunctionRiemann );
 
@@ -186,6 +217,14 @@ public:
     //! @name Methods
     //@{
 
+    //! Operator()
+    /*!
+     *  Evaluate the function.
+     *
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @return the value of the function.
+     */
     virtual Real operator() ( const Real& time, const Real& timeStep );
 
     //@}
@@ -195,6 +234,7 @@ protected:
     //! @name Protected Methods
     //@{
 
+    //! Update the boundary condition variables.
     void updateBCVariables();
 
     //@}
@@ -207,10 +247,15 @@ protected:
 };
 
 
-
-//! Compatibility - Class which implement Compatibility BC for One Dimensional BC Functions
+//! OneDimensionalBCFunctionCompatibility - Class which implements Compatibility boundary conditions for the 1D segment
 /*!
- *  @author Lucia Mirabella
+ *  @author Lucia Mirabella, Cristiano Malossi
+ *
+ *  The compatibility equations are derived using the pseudo-characteristic teory:
+ *
+ *  \f[
+ *  \mathbf L(\mathbf U^{n+1}-\mathbf U^{n}_\star + \mathbf U^0 - \mathbf U^0_\star) = \Delta t \left( \mathbf \Lambda \displaystyle\frac{\partial \mathbf L}{\partial z}(\mathbf U^n_\star - \mathbf U^0_\star) - \mathbf L \mathbf B(\mathbf U^n_\star) + \mathbf L \mathbf B(\mathbf U^0_\star) \right).
+ *  \f]
  */
 class OneDimensionalBCFunctionCompatibility : public OneDimensionalBCFunctionRiemann
 {
@@ -235,11 +280,15 @@ public:
     //@{
 
     //! Constructor
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     */
     explicit OneDimensionalBCFunctionCompatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param BCF_Compatibility OneDimensionalBCFunctionCompatibility
+     * @param bcFunctionCompatibility OneDimensionalBCFunctionCompatibility
      */
     explicit OneDimensionalBCFunctionCompatibility( const OneDimensionalBCFunctionCompatibility& bcFunctionCompatibility );
 
@@ -252,6 +301,14 @@ public:
     //! @name Methods
     //@{
 
+    //! Operator()
+    /*!
+     *  Evaluate the function.
+     *
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @return the value of the function.
+     */
     virtual Real operator() ( const Real& /*time*/, const Real& timeStep ) { return computeRHS( timeStep ); }
 
     //@}
@@ -261,17 +318,43 @@ protected:
     //! @name Protected Methods
     //@{
 
+    //! Automatically identify the boundary node.
     void setupNode();
 
+    //! Compute the rhs
+    /*!
+     *  @param timeStep the time step.
+     *  @return rhs of the problem.
+     */
     Real computeRHS( const Real& timeStep );
 
+    //! Compute the current eigenvalues and eigenvectors
     void computeEigenValuesVectors();
 
+    //! Compute the rhs
+    /*!
+     *  @param eigenvalue eigenvalue
+     *  @param eigenvector eigenvector
+     *  @param deltaEigenvector derivative of the eigenvector
+     *  @param timeStep the time step.
+     *  @return rhs of the problem
+     */
     Real evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector, const container2D_Type& deltaEigenvector, const Real& timeStep );
 
+    //! Compute the current CFL
+    /*!
+     *  @param eigenvalue eigenvalue
+     *  @param timeStep the time step.
+     *  @return CFL
+     */
     Real computeCFL( const Real& eigenvalue, const Real& timeStep ) const;
 
-    //! Scalar product between 2D vectors
+    //! Scalar product between 2 2D vectors
+    /*!
+     *  @pararm vector1 first vector
+     *  @pararm vector2 second vector
+     *  @return scalar product
+     */
     Real scalarProduct( const container2D_Type& vector1, const container2D_Type& vector2 ) { return vector1[0]*vector2[0] + vector1[1]*vector2[1]; }
 
     //@}
@@ -293,10 +376,11 @@ protected:
 };
 
 
-
-//! Absorbing - Class which implement Absorbing BC for One Dimensional BC Functions
+//! OneDimensionalBCFunctionAbsorbing - Class which implements absorbing boundary conditions for the 1D segment
 /*!
- *  @author Lucia Mirabella
+ *  @author Maria Rita de Luca
+ *
+ *  \cond \TODO Add the equation and some descriptions \endcond
  */
 class OneDimensionalBCFunctionAbsorbing : public OneDimensionalBCFunctionCompatibility
 {
@@ -320,11 +404,15 @@ public:
     //@{
 
     //! Constructor
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     */
     explicit OneDimensionalBCFunctionAbsorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
 
     //! Copy constructor
     /*!
-     * @param BCF_Absorbing OneDimensionalBCFunctionAbsorbing
+     * @param bcFunctionAbsorbing OneDimensionalBCFunctionAbsorbing
      */
     explicit OneDimensionalBCFunctionAbsorbing( const OneDimensionalBCFunctionAbsorbing& bcFunctionAbsorbing ) : super( bcFunctionAbsorbing ) {}
 
@@ -337,6 +425,14 @@ public:
     //! @name Methods
     //@{
 
+    //! Operator()
+    /*!
+     *  Evaluate the function.
+     *
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @return the value of the function.
+     */
     Real operator() ( const Real& time, const Real& timeStep );
 
     //@}
@@ -360,10 +456,11 @@ protected:
 };
 
 
-
-//! Resistance - Class which implement Resistance BC for One Dimensional BC Functions
+//! OneDimensionalBCFunctionResistance - Class which implements resistance boundary conditions for the 1D segment
 /*!
  *  @author Lucia Mirabella
+ *
+ *  \cond \TODO Add the equation and some descriptions \endcond
  */
 class OneDimensionalBCFunctionResistance : public OneDimensionalBCFunctionAbsorbing
 {
@@ -385,11 +482,16 @@ public:
     //@{
 
     //! Constructor
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     *  @param resistance the terminal resistance.
+     */
     explicit OneDimensionalBCFunctionResistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
 
     //! Copy constructor
     /*!
-     * @param BCF_Resistance OneDimensionalBCFunctionResistance
+     * @param bcFunctionResistance OneDimensionalBCFunctionResistance
      */
     explicit OneDimensionalBCFunctionResistance( const OneDimensionalBCFunctionResistance& bcFunctionResistance );
 
@@ -417,9 +519,13 @@ protected:
 
 
 
-//! Windkessel (3 elements)
+//! OneDimensionalBCFunctionWindkessel3 - Class which implements windkessel RCR boundary conditions for the 1D segment
 /*!
- *   Q -> ---R1-------R2---
+ *
+ *  \cond \TODO Description should be reordered using latex etc... \endcond
+ *  \cond \TODO This method has not been tested yet \endcond
+ *
+ *   *   Q -> ---R1-------R2---
  *         ^      |       ^
  *         P      C       Pv
  *         ^      |       ^
@@ -461,15 +567,24 @@ public:
     //@{
 
     //! Constructor
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     *  @param resistance1 the first terminal resistance.
+     *  @param resistance2 the second terminal resistance.
+     *  @param compliance the compliance.
+     *  @param absorbing is an absorbing boundary condition
+     *  @param venousPressure the venous pressure
+     */
     explicit OneDimensionalBCFunctionWindkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
-                                                         const Real& resistance1, const Real& resistance2,
-                                                         const Real& compliance,
-                                                         const bool& absorbing1 = false,
-                                                         const Real& venousPressure = 6666. );
+                                                  const Real& resistance1, const Real& resistance2,
+                                                  const Real& compliance,
+                                                  const bool& absorbing = false,
+                                                  const Real& venousPressure = 6666. );
 
     //! Copy constructor
     /*!
-     * @param BCF_Resistance OneDimensionalBCFunctionResistance
+     * @param bcFunctionWindkessel3 OneDimensionalBCFunctionWindkessel3
      */
     explicit OneDimensionalBCFunctionWindkessel3( const OneDimensionalBCFunctionWindkessel3& bcFunctionWindkessel3 );
 
@@ -482,6 +597,14 @@ public:
     //! @name Methods
     //@{
 
+    //! Operator()
+    /*!
+     *  Evaluate the function.
+     *
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @return the value of the function.
+     */
     Real operator() ( const Real& time, const Real& timeStep );
 
     //@}
@@ -491,7 +614,7 @@ protected:
     Real M_resistance1;
     Real M_resistance2;
     Real M_compliance;
-    bool M_absorbing1;
+    bool M_absorbing;
     Real M_venousPressure;
 
     // Initial value of the pressure

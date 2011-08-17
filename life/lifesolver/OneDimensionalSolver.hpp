@@ -257,7 +257,7 @@ public:
     //! Compute the right hand side
     /*!
      *  @param solution the solution container
-     *  @param timeStep The time step.
+     *  @param timeStep the time step.
      */
     void updateRHS( const solution_Type& solution, const Real& timeStep );
 

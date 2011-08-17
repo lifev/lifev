@@ -47,9 +47,11 @@
 namespace LifeV
 {
 
-//! OneDimensionalBCFunction - Base class for One Dimensional BC Functions.
+//! OneDimensionalBCFunction - Base class for 1D BC Functions.
 /*!
- *  @author Lucia Mirabella
+ *  @author Lucia Mirabella, Cristiano Malossi
+ *
+ *  The 1D boundary condition function is evaluated as a function of the current time and of the time step.
  */
 class OneDimensionalBCFunction
 {
@@ -58,6 +60,8 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
+    /*! @typedef function_Type */
+    //! Type definition for the 1D boundary function
     typedef boost::function<Real ( const Real&, const Real&  )> function_Type;
 
     //@}
@@ -66,16 +70,19 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
+    //! Empty Constructor
     explicit OneDimensionalBCFunction() : M_function() {}
 
     //! Constructor by function
     /*!
-      @param function the user defined function
-    */
+     *  @param function the user defined function
+     */
     explicit OneDimensionalBCFunction( const function_Type& function ) : M_function( function ) {}
 
     //! Copy constructor
+    /*!
+     *  @param bcFunction OneDimensionalBCFunction
+     */
     OneDimensionalBCFunction( const OneDimensionalBCFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
 
     //! Destructor
@@ -87,8 +94,21 @@ public:
     //! @name Operators
     //@{
 
+    //! Operator=
+    /*!
+     *  @param bcFunction OneDimensionalBCFunction
+     *  @return reference to a copy of the class
+     */
     OneDimensionalBCFunction& operator=( const OneDimensionalBCFunction& bcFunction ) { if( this != &bcFunction ) { M_function = bcFunction.M_function; } return *this; }
 
+    //! Operator()
+    /*!
+     *  Evaluate the function.
+     *
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @return the value of the function.
+     */
     Real operator()( const Real& time, const Real& timeStep = 0. ) const { return M_function( time, timeStep ); }
 
     //@}

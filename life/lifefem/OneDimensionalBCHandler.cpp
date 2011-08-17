@@ -86,7 +86,8 @@ OneDimensionalBCHandler::OneDimensionalBCHandler( const OneDimensionalBCHandler&
     // the BCFunctions inside M_boundary are still pointing to the original M_defaultFunction, instead
     // of to the copy (which remain unused!). This is because the link between M_boundary and M_defaultFunction
     // is provided by boost::bind and, for now, we have no solution for this.
-    std::cout << "!!! WARNING: COPY CONSTRUCTOR DOES NOT CREATE A TRUE COPY !!!" << std::endl;
+    std::cerr << "!!! WARNING: COPY CONSTRUCTOR DOES NOT CREATE A TRUE COPY !!!" << std::endl;
+    std::exit( EXIT_FAILURE );
 }
 
 // ===================================================
