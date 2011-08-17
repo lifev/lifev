@@ -173,7 +173,7 @@ Real sourceTerm(const Real& t, const Real& X, const Real& Y, const Real& Z, cons
   default:
     ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
     break;
-  } 
+  }
 }
 
     fct_type getDisplacementExact()
@@ -318,7 +318,7 @@ problem::run()
 
     // the boundary conditions
     boost::shared_ptr<BCHandler> BCh( new BCHandler() );
- 
+
     //
     // Boundary conditions for the displacement
     //
@@ -367,7 +367,7 @@ problem::run()
 
      const Real Pi = 3.14159265358979323846264338328;
 
-   
+
      /*
      // Traslate function is a Sino:
 
@@ -385,7 +385,7 @@ problem::run()
 
    // Rotation 2:
    /*
-   Real theta  = -1./100*cos(100*Pi*t),  
+   Real theta  = -1./100*cos(100*Pi*t),
             dtheta =Pi *sin(100*Pi*t),
            ddtheta =100* Pi*Pi*cos(100*Pi*t),
            dtheta2 = dtheta*dtheta;
@@ -393,18 +393,18 @@ problem::run()
 
    //Rotation 3:
    /*
-   Real theta  = 1./5.*(1-cos(50*Pi*t)),  
+   Real theta  = 1./5.*(1-cos(50*Pi*t)),
       dtheta = 10*Pi *sin(50*Pi* t),
       ddtheta =500 * Pi*Pi*cos(50*Pi*t),
       dtheta2 = dtheta*dtheta;
     */
 
-  members->c1 = 0; 
+  members->c1 = 0;
   members->c2 = 0;
   members->c3 = 0;
-  members->dc1 = 0; 
-  members->dc2 = 0;  
-  members->dc3 = 0; 
+  members->dc1 = 0;
+  members->dc2 = 0;
+  members->dc3 = 0;
   members->ddc1 = 0;
   members->ddc2 = 0;
   members->ddc3 = 0;
@@ -469,10 +469,10 @@ problem::run()
     vector_ptrtype disp ( new vector_type(problem.displacement(), exporter->mapType() ) );
     vector_ptrtype vel  ( new vector_type(problem.displacement(),  exporter->mapType() ) );
     vector_ptrtype acc ( new vector_type(problem.displacement(),  exporter->mapType() ) );
-    
+
     exporter->addVariable( ExporterData<mesh_Type>::VectorField, "displacement", feSpace->dof().numTotalDof(),  disp,
 					       UInt(0) );
-	
+
     exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity", vel,
                      			       UInt(0), feSpace->dof().numTotalDof() );
 
@@ -552,7 +552,7 @@ problem::run()
         rhs += *problem.Mass() *timeAdvance->rhsContributionSecondDerivative();
 
         //update system
-        problem.updateRightHandSide(rhs );
+        problem.updateRightHandSide( rhs );
 
         //solver system
         problem.iterate( BCh );    // Computes the matrices and solves the system
@@ -587,7 +587,7 @@ problem::run()
         << displacementL2_Error << "   "
         << velocityL2_Error << "   "
         << accelerateL2_Error << " \n";
-      
+
         out_norm.close();
         MPI_Barrier(MPI_COMM_WORLD);
     }

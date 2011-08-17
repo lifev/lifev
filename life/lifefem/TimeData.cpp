@@ -89,7 +89,7 @@ TimeData::setup( const GetPot& dfile, const std::string& section )
     M_timeStep = dfile(( section + "/timestep" ).data(), M_endTime );
     M_orderBDF = dfile(( section + "/BDF_order" ).data(), 1 );
     M_theta = dfile((section + "/theta").data(),0.25);
-    M_gamma = dfile(( section + "/zeta").data(),0.5);
+    M_gamma = dfile(( section + "/gamma").data(),0.5);
 }
 
 void
