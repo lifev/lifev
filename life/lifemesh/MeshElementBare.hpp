@@ -439,6 +439,14 @@ struct cmpBareItem<BareFace>
     }
 };
 
+inline
+bool
+operator<( const BareFace & f1 , const BareFace & f2 )
+{
+    return cmpBareItem<BareFace>()(f1,f2);
+}
+
+
 //! MeshElementBareHandler class - Class to handle bare edges and faces construction
 /*!
     @author Luca Formaggia

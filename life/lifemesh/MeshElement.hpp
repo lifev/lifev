@@ -132,8 +132,8 @@ public:
         the element. First point becomes last etc.etc
 
         \note Beware that the some adjacency list may be invalidated. If you revert the point
-        of a 3D element, for instance, the local faces change.  Therefore, a elementToFace list may be
-        now invalid. So this method must be used with care and only when building the basic entities
+        of a 3D element, for instance, the local faces change and a elementToFace list may be
+        now incorrect. So this method must be used with care and only when building the basic entities
         of a mesh.
      */
     void reversePoints();
@@ -203,7 +203,7 @@ public:
         @return TRUE if the point is set
     	@warning A const_cast to M_points is done in order to change the flag
     */
-    entityFlag_Type setStrongerMarkerAtPoint( const ID& identity, entityFlag_Type const & flag );
+    markerID_Type setStrongerMarkerAtPoint( const ID& identity, markerID_Type const & flag );
 
     //@}
 
@@ -313,7 +313,13 @@ void MeshElement<GeoShape, PointType>::swapPoints( const ID & firstIdentity, con
 template <typename GeoShape, typename PointType>
 void MeshElement<GeoShape, PointType>::reversePoints()
 {
-    std::reverse(M_points,&(M_points[GeoShape::S_numPoints]));
+    static bool first(true);
+    static ID oldToNew[ GeoShape::S_numPoints ];
+    if(first){
+        for (ID i=0; i< GeoShape::S_numPoints; ++i)oldToNew[i]=reversePoint<GeoShape>(i);
+        first=false;
+    }
+    this->exchangePoints(oldToNew);
 }
 
 
@@ -344,7 +350,7 @@ inline
 PointType const & MeshElement<GeoShape, PointType>::reversepoint( ID const identity ) const
 {
     ASSERT_BD( ( identity < MeshElement<GeoShape, PointType>::S_numLocalPoints ) );
-    return *( static_cast<PointType const*>( M_points[ reversePoint<GeoShape>::operate( identity ) ] ) );
+    return *( static_cast<PointType const*>( M_points[ reversePoint<GeoShape>( identity ) ] ) );
 }
 
 template <typename GeoShape, typename PointType>
@@ -384,7 +390,7 @@ bool MeshElement<GeoShape, PointType>::setPointWithBoundaryCheck( ID const ident
 }
 
 template <typename GeoShape, typename PointType>
-entityFlag_Type MeshElement<GeoShape, PointType>::setStrongerMarkerAtPoint( const ID& identity, entityFlag_Type const & flag )
+markerID_Type MeshElement<GeoShape, PointType>::setStrongerMarkerAtPoint( const ID& identity, markerID_Type const & flag )
 {
     return (const_cast<PointType *> ( M_points[identity]) ) -> setStrongerMarker(flag);
 }

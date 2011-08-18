@@ -41,7 +41,10 @@
 
 namespace LifeV
 {
-const entityFlag_Type InternalEntitySelector::defMarkFlag(entityFlag_Type(100000));
+// LF REGIONMESH
+// This class was meant to separate internal from boundary flags. With the
+// new way of selecting boundary entities this will be useless!
+const markerID_Type InternalEntitySelector::defMarkFlag(markerID_Type(100000));
 
 // ===================================================
 // Constructors & Destructor
@@ -51,7 +54,7 @@ InternalEntitySelector::InternalEntitySelector():
 M_watermarkFlag( defMarkFlag )
 {};
 
-InternalEntitySelector::InternalEntitySelector(const entityFlag_Type & w):
+InternalEntitySelector::InternalEntitySelector(const markerID_Type & w):
 M_watermarkFlag( w )
 {};
 
@@ -60,9 +63,9 @@ M_watermarkFlag( w )
 // ===================================================
 
 bool
-InternalEntitySelector::operator()(entityFlag_Type const & test) const
+InternalEntitySelector::operator()(markerID_Type const & test) const
 {
-    return (test==entityFlag_Type(0) || test > M_watermarkFlag );
+    return (test==markerID_Type(0) || test > M_watermarkFlag );
 }
 
 } // Namespace LifeV

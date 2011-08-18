@@ -46,7 +46,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifemesh/MeshElementMarked.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 #include <life/lifemesh/ElementShapes.hpp>
-#include <life/lifearray/VectorSimple.hpp>
+#include <life/lifearray/MeshEntityContainer.hpp>
 #include <life/lifearray/ArraySimple.hpp>
 
 namespace LifeV
@@ -128,11 +128,11 @@ public:
      */
 
     //! Points Container
-    typedef VectorSimple<point_Type> Points;
+    typedef MeshEntityContainer<point_Type> Points;
     //! Faces Container
-    typedef VectorSimple<FaceType> Faces;
+    typedef MeshEntityContainer<FaceType> Faces;
     //! Edges Container: at least boundary edges
-    typedef VectorSimple<EdgeType> Edges;
+    typedef MeshEntityContainer<EdgeType> Edges;
 
     /** @} */ // End of group Geometric Element Container Types
 
@@ -158,9 +158,9 @@ public:
     typedef MeshElementMarked1D<EdgeShape, MC>  BElementType;
 
     //! Element Geometric Shape Container Type
-    typedef VectorSimple<FaceType >        Elements;
+    typedef MeshEntityContainer<FaceType >        Elements;
     //! Boundary Element Geometric Shape Container Type
-    typedef VectorSimple<EdgeType>         BElements;
+    typedef MeshEntityContainer<EdgeType>         BElements;
 
     /** @} */ // End of group Generic Types
 
@@ -1162,32 +1162,32 @@ protected:
     /**
      *  Returns the number of elements in a given list.
      *
-     *  @param list VectorSimple list of elements.
+     *  @param list MeshEntityContainer list of elements.
      *  @return Number of elements in list.
      */
     template < typename T >
-    UInt numItems( VectorSimple< T> const & list ) const;
+    UInt numItems( MeshEntityContainer< T> const & list ) const;
 
     //! Maximum number of Elements in a list.
     /**
      *  Returns maximum number of elements in a given list.
      *
-     *  @param list VectorSimple list of elements.
+     *  @param list MeshEntityContainer list of elements.
      *  @return Maximum number of elements in list.
      */
     template < typename T >
-    UInt maxNumItems( VectorSimple< T> const & list ) const;
+    UInt maxNumItems( MeshEntityContainer< T> const & list ) const;
 
     //! Set maximum number of Elements in a list.
     /**
      *  Set maximum number of elements in a given list.
      *
-     *  @param list VectorSimple list of elements.
+     *  @param list MeshEntityContainer list of elements.
      *  @param n Number of elements.
      *  @param title Title for verbose output.
      */
     template < typename T >
-    void setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title );
+    void setMaxNumItems( MeshEntityContainer< T> & list, UInt n, std::string title );
 
     /** @defgroup protected_attributes Protected Attributes
      */
@@ -1214,7 +1214,7 @@ protected:
 
 #ifdef NOT_BDATA_FIRST
     //! Boundary Edges Container
-    VectorSimple<EdgeType * > _bEdges;
+    MeshEntityContainer<EdgeType * > _bEdges;
 #endif
 
     /** @} */ // End of group Face-To-Edge and Boundary Containers
@@ -1428,7 +1428,7 @@ RegionMesh2D<GEOSHAPE, MC>::bElement( UInt const & i ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh2D<GEOSHAPE, MC>::numItems( VectorSimple< T> const & list ) const
+RegionMesh2D<GEOSHAPE, MC>::numItems( MeshEntityContainer< T> const & list ) const
 {
     return list.size();
 }
@@ -1436,7 +1436,7 @@ RegionMesh2D<GEOSHAPE, MC>::numItems( VectorSimple< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh2D<GEOSHAPE, MC>::maxNumItems( VectorSimple< T> const & list ) const
+RegionMesh2D<GEOSHAPE, MC>::maxNumItems( MeshEntityContainer< T> const & list ) const
 {
     return list.capacity();
 }
@@ -1444,7 +1444,7 @@ RegionMesh2D<GEOSHAPE, MC>::maxNumItems( VectorSimple< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 void
-RegionMesh2D<GEOSHAPE, MC>::setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title )
+RegionMesh2D<GEOSHAPE, MC>::setMaxNumItems( MeshEntityContainer< T> & list, UInt n, std::string title )
 {
     if ( list.capacity() == 0 )
     {

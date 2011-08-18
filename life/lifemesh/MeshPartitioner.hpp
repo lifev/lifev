@@ -362,7 +362,7 @@ private:
     std::vector<Int>                     M_adjacencyGraphKeys;
     std::vector<Int>                     M_adjacencyGraphValues;
     boost::shared_ptr<Epetra_Comm>       M_comm;
-    UInt                                 M_me;
+    Int                                  M_me;
 
     std::vector<std::vector<Int> >       M_localNodes;
     std::vector<std::set<Int> >          M_localEdges;
@@ -1363,7 +1363,7 @@ void MeshPartitioner<MeshType>::constructFaces()
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
             {
                 // set the flag for faces on the subdomain border
-                pf->setFlag( Flag::turnOn ( pf->flag(), SUBDOMAIN_INTERFACE ) );
+                pf->setFlag( Flag::turnOn ( pf->flag(), EntityFlags::SUBDOMAIN_INTERFACE ) );
 
                 // build GhostEntityData
                 GhostEntityData ghostFace;
