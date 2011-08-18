@@ -128,7 +128,7 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //!! Empty constructor
+    //! Empty constructor
     SolverBelos();
 
     //! Constructor
