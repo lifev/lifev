@@ -551,7 +551,7 @@ SolverBelos::preconditioner( PrecApplicationType precType )
 }
 
 Teuchos::ParameterList&
-SolverBelos::getParametersList()
+SolverBelos::parametersList()
 {
     return M_parameterList;
 }
@@ -587,30 +587,34 @@ SolverBelos::setupSolverManager()
             // Create the block CG iteration
             M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
+        case PseudoBlockCG:
+            // Create the pseudo block CG iteration
+            M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false) ) );
+            break;
+        case RCG:
+            M_solverManager = rcp( new Belos::RCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
+            break;
+        case BlockFGmres:
+            M_parameterList.set( "Flexible Gmres", true );
         case BlockGmres:
             // Create the block GMRes iteration
             // Create the flexible, block GMRes iteration
             M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
-        case GCRODR:
-            M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
-        case GmresPoly:
-            M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList,false ) ) );
-            break;
-        case PCPG:
-            M_solverManager = rcp( new Belos::PCPGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
-        case PseudoBlockCG:
-            // Create the pseudo block CG iteration
-            M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false) ) );
-            break;
+        case PseudoBlockFGmres:
+            M_parameterList.set( "Flexible Gmres", true );
         case PseudoBlockGmres:
             // Create the pseudo block GMRes iteration
             M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
-        case RCG:
-            M_solverManager = rcp( new Belos::RCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
+        case GmresPoly:
+            M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList,false ) ) );
+            break;
+        case GCRODR:
+            M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
+            break;
+        case PCPG:
+            M_solverManager = rcp( new Belos::PCPGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case TFQMR:
             // Create TFQMR iteration

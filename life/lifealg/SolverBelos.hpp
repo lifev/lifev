@@ -118,8 +118,10 @@ public:
 
 
 
-    enum PrecApplicationType {LeftPreconditioner,RightPreconditioner};
-    enum SolverManagerType {BlockCG,BlockGmres,GCRODR,GmresPoly,PCPG,PseudoBlockCG,PseudoBlockGmres,RCG,TFQMR};
+    enum PrecApplicationType { LeftPreconditioner, RightPreconditioner };
+    enum SolverManagerType { BlockCG, PseudoBlockCG, RCG,
+                             BlockGmres, PseudoBlockGmres, BlockFGmres, PseudoBlockFGmres, GmresPoly,
+                             GCRODR, PCPG, TFQMR };
 
     //@}
 
@@ -202,8 +204,8 @@ public:
     /*!
       @param solverManager type of solver manager
       The solver manager can be chosen from one of the following:
-      BlockCG, BlockGmres, GCRODR, GmresPoly,PCPG, PseudoBlockCG,
-      PseudoBlockGmres, RCG, TFQMR.
+      BlockCG, PseudoBlockCG, RCG, BlockGmres, PseudoBlockGmres,
+      BlockFGmres, PseudoBlockFGmres, GCRODR, GmresPoly,PCPG, TFQMR.
      */
     void setSolverManager( const SolverManagerType& solverManager );
 
@@ -302,7 +304,7 @@ public:
     preconditionerPtr_Type& preconditioner( PrecApplicationType precType = RightPreconditioner );
 
     //! Return a Teuchos parameters list
-    Teuchos::ParameterList& getParametersList();
+    Teuchos::ParameterList& parametersList();
 
     //! Return a pointer on the Belos solver manager
     SolverManagerPtr_Type solver();
