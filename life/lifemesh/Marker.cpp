@@ -47,13 +47,13 @@ namespace LifeV
 // EntityFlagStandardPolicy //
 ///////////////////////
 
-const entityFlag_Type EntityFlagStandardPolicy::S_NULLFLAG =
+const markerID_Type EntityFlagStandardPolicy::S_NULLFLAG =
     std::numeric_limits<Int>::max();
 
 //MM: if you modify these changes here recheck function readNetgenMesh
 //        because it uses this changes
 
-entityFlag_Type EntityFlagStandardPolicy::strongerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+markerID_Type EntityFlagStandardPolicy::strongerFlag( markerID_Type const & flag1, markerID_Type const & flag2 )
 {
     if ( flag1 == S_NULLFLAG )
         return flag2;
@@ -62,7 +62,7 @@ entityFlag_Type EntityFlagStandardPolicy::strongerFlag( entityFlag_Type const & 
     return flag1 > flag2 ? flag1 : flag2 ;
 }
 
-entityFlag_Type EntityFlagStandardPolicy::weakerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+markerID_Type EntityFlagStandardPolicy::weakerFlag( markerID_Type const & flag1, markerID_Type const & flag2 )
 {
     if ( flag1 == S_NULLFLAG )
         return flag2;
@@ -71,7 +71,7 @@ entityFlag_Type EntityFlagStandardPolicy::weakerFlag( entityFlag_Type const & fl
     return flag1 < flag2 ? flag1 : flag2 ;
 }
 
-bool EntityFlagStandardPolicy::EqualFlags(const entityFlag_Type& flag1, const entityFlag_Type& flag2)
+bool EntityFlagStandardPolicy::EqualFlags(const markerID_Type& flag1, const markerID_Type& flag2)
 {
     return flag1 == flag2;
 }

@@ -670,7 +670,7 @@ void
 FSIOperator::moveMesh( const vector_Type& dep )
 {
     displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
-    M_fluidMeshPart->meshPartition()->moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
+    M_fluidMeshPart->meshPartition()->meshTransformer().moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
     displayer().leaderPrint( "done\n" );
     M_fluid->setRecomputeMatrix( true );
 }

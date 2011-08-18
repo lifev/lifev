@@ -85,7 +85,7 @@ public:
 
     //! Empty Constructor
     /*!
-      @param mapType Specify wether the map is Unique or Repeated
+      @param mapType Specify whether the map is Unique or Repeated
      */
     VectorEpetra( const MapEpetraType& mapType = Unique );
 
@@ -158,6 +158,12 @@ public:
     //! @name Operators
     //@{
 
+    //! Access operators
+    /**
+     * It returns true if the element is present in the vector
+     * @param row The element to test
+     */
+    bool isPresent(const UInt row) const;
     //! Access operators
     /*!
       @param row Index of the entry to be accessed

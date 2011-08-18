@@ -675,7 +675,8 @@ CFL()
                          M_FESpace.dof(),
                          leftElement , 0 );
 
-            if ( !Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY | SUBDOMAIN_INTERFACE ) )
+            if ( !Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(),
+                                     EntityFlags::PHYSICAL_BOUNDARY | EntityFlags::SUBDOMAIN_INTERFACE ) )
             {
                 // Extract the solution in the current element, now is the leftElement
                 extract_vec( *M_uOld,
@@ -684,7 +685,7 @@ CFL()
                              M_FESpace.dof(),
                              rightElement , 0 );
             }
-            else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), SUBDOMAIN_INTERFACE ) )
+            else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
             {
                 // TODO: this works only for P0 elements
                 rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
@@ -917,7 +918,7 @@ localEvolve ( const UInt& iElem )
                      leftElement , 0 );
 
         // Check if the current face is a boundary face, that is rightElement == NotAnId
-        if ( !Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY | SUBDOMAIN_INTERFACE ) )
+        if ( !Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), EntityFlags::PHYSICAL_BOUNDARY | EntityFlags::SUBDOMAIN_INTERFACE ) )
         {
             // Extract the solution in the current element, now is the leftElement
             extract_vec( *M_uOld,
@@ -926,7 +927,7 @@ localEvolve ( const UInt& iElem )
                          M_FESpace.dof(),
                          rightElement , 0 );
         }
-        else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), SUBDOMAIN_INTERFACE ) )
+        else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
         {
             // TODO: this works only for P0 elements
             rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];

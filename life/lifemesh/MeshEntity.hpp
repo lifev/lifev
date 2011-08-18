@@ -24,6 +24,8 @@
 */
 //@HEADER
 
+//LF REGIONMESH WE NEED TO ELIMINATE MeshEntityWithBoundary. All meshEntities now will
+//Have a boundary flag.
 /*!
     @file
     @brief This file contains the MeshEntity and MeshEntityWithBoundary classes.
@@ -219,6 +221,7 @@ private:
   to the documentation, without name of author.
  */
 
+namespace EntityFlags{
 // available bool-flags for different geometric properties
 const flag_Type DEFAULT             ( 0x00 );
 const flag_Type PHYSICAL_BOUNDARY   ( 0x01 );
@@ -226,6 +229,8 @@ const flag_Type INTERNAL_INTERFACE  ( 0x02 );
 const flag_Type SUBDOMAIN_INTERFACE ( 0x04 );
 const flag_Type OVERLAP             ( 0x08 );
 const flag_Type CUTTED              ( 0x10 );
+const flag_Type VERTEX              ( 0x12 );
+}
 
 class MeshEntityWithBoundary : public MeshEntity
 {
@@ -239,7 +244,7 @@ public:
       This constructor calls the empty constructor of MeshEntity and
       sets the boundary indicator to false.
     */
-    MeshEntityWithBoundary() : MeshEntity(), M_flag ( DEFAULT )
+    MeshEntityWithBoundary() : MeshEntity(), M_flag ( EntityFlags::DEFAULT )
     {};
 
     //! Copy constructor
@@ -255,7 +260,7 @@ public:
       a set method if you want different identifiers.
       @param flag The value of the bool-flag.
     */
-    MeshEntityWithBoundary( const ID& id, const flag_Type& flag = DEFAULT ) :
+    MeshEntityWithBoundary( const ID& id, const flag_Type& flag = EntityFlags::DEFAULT ) :
             MeshEntity( id ),
             M_flag ( flag )
     {};
@@ -266,7 +271,7 @@ public:
        @param lid The value for the local ID.
        @param flag The value of the bool-flag.
      */
-    MeshEntityWithBoundary( const ID& id, const ID& lid, const flag_Type& flag = DEFAULT  ):
+    MeshEntityWithBoundary( const ID& id, const ID& lid, const flag_Type& flag = EntityFlags::DEFAULT  ):
             MeshEntity( id , lid ),
             M_flag ( flag )
     {};
@@ -284,8 +289,8 @@ public:
         // NOTE: this is conservative, if PHYSICAL_BOUNDARY = 0x01
         // this can be done as
         // M_flag = static_cast<flag_Type> boundary
-        if( boundary ) M_flag = PHYSICAL_BOUNDARY;
-        else           M_flag = DEFAULT;
+        if( boundary ) M_flag = EntityFlags::PHYSICAL_BOUNDARY;
+        else           M_flag = EntityFlags::DEFAULT;
     };
 
     //! Destructor
@@ -321,18 +326,37 @@ public:
     */
     void setBoundary (const bool& boundary)
     {
-        if ( boundary ) M_flag = Flag::turnOn  ( M_flag, PHYSICAL_BOUNDARY );
-        else            M_flag = Flag::turnOff ( M_flag, PHYSICAL_BOUNDARY );
+        if ( boundary ) M_flag = Flag::turnOn  ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+        else            M_flag = Flag::turnOff ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
     };
 
     //! Set method for the entity flag
     /*!
       @param flag The value to be set for the entity flag.
+      @note Beware, it sets the entire flag; if you want to add a flag use | or addFlag
     */
     void setFlag ( const flag_Type& flag )
     {
         M_flag = flag;
     };
+
+    //! Adds a flag
+    /**
+     * @param flag The flag to be added
+     */
+    void addFlag ( const flag_Type& flag )
+    {
+        M_flag = Flag::turnOn(flag,M_flag);
+    };
+    //! Remove a flag
+    /**
+     * @param flag The flag to be removed
+     */
+    void unSetFlag ( const flag_Type& flag )
+    {
+        M_flag = Flag::turnOff(M_flag,flag);
+    };
+
 
     //@}
 
@@ -343,7 +367,7 @@ public:
     //! Tells if it is on the boundary
     bool boundary() const
     {
-        return Flag::testOneSet ( M_flag, PHYSICAL_BOUNDARY );
+        return Flag::testOneSet ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
     };
 
 

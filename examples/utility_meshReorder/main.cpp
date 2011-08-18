@@ -6,7 +6,7 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
+#include <life/lifemesh/InternalEntitySelector.hpp>
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <mpi.h>
@@ -98,7 +98,8 @@ int main(int argc, char** argv)
         MPI_Comm_create(MPI_COMM_WORLD, newGroup, &MPIcomm);
         if(me==0)
         {
-            mesh->orderMesh( MPIcomm);
+            // LF TAKEN AWAY. IT IS BROKEN
+            // mesh->orderMesh( MPIcomm);
             //solidData.mesh()->orderMesh( MPIcomm);
 
             MeshWriter::writeMeshMedit<RegionMesh3D<LinearTetra> >( mesh_output , *mesh);
@@ -138,7 +139,11 @@ int main(int argc, char** argv)
             *mesh, FluidInterfaceFlag,
             *mesh, SolidInterfaceFlag,
             0., &edgeFlag);
-        mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), TimeAdvanceNewmarker);
+
+        ChangeMarkersAccordingToMap(mesh2->pointList,
+                                    dofEdgeFluidToEdgeSolid->localDofMap(),
+                                    TimeAdvanceNewmarker);
+        //mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), TimeAdvanceNewmarker);
         MeshWriter::writeMeshMedit<RegionMesh3D<LinearTetra> >( mesh_output , *mesh2);
 
     }

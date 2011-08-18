@@ -148,6 +148,10 @@ VectorEpetra::VectorEpetra( const VectorEpetra& vector, const Int& reduceToProc)
 // ===================================================
 // Operators
 // ===================================================
+bool VectorEpetra::isPresent(const UInt row) const
+{
+    return blockMap().LID(row)>=0;
+}
 VectorEpetra::data_type&
 VectorEpetra::operator[]( const UInt row )
 {

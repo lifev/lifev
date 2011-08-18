@@ -34,7 +34,7 @@
     Here we define the basic markers. Markers have two purposes:
 
     <ul>
-        <li> To add an indicator (entityFlag_Type) to all geometry entities. In the
+        <li> To add an indicator (markerID_Type) to all geometry entities. In the
         base MarkerTrait this indicator is a long integer (aliased to
         EntityFLAG). The main purpose of the Entity flag is to associate
         boundary conditions or material properties to the Geometry
@@ -68,22 +68,21 @@
 
 #include <iostream>
 #include <life/lifecore/LifeV.hpp>
-
 namespace LifeV
 {
 
-//! entityFlag_Type is the type used to store the geometric entity flags
+//! markerID_Type is the type used to store the geometric entity flags
 /*!
  *  An entity flag is an integral type that is used to store information about each geometric entity
  *  belonging to a mesh. In particular, it is the number given by the mesh generator that has
  *  generated the mesh to identify different portion of the boundary. It mast be convertible with
  *  an ID type.
 */
-typedef ID entityFlag_Type;
+typedef ID markerID_Type;
 
 //! EntityFlagStandardPolicy - Class that defines the standard policies on EntityFlags
 /*!
-    This class defines NULLFLAG and how to handle ambiguities among entityFlags
+    This class defines NULLFLAG and how to handle ambiguities among markerIDs
     In particular what to do if a geometric item has to inherit its flag by adjacent items and
     the flags are different. The policy is passed as template argument to the Marker class.
  */
@@ -94,7 +93,7 @@ public:
     /*! Nullflag is the value indicating a null flag, i.e a flag not yet
       set to any usable value
     */
-    static const entityFlag_Type S_NULLFLAG;
+    static const markerID_Type S_NULLFLAG;
 
     //! Selects the stronger between two flags
     /*! A dimensional geometric entity G_i may inherit the stronger flag
@@ -103,7 +102,7 @@ public:
       strongerst Flag of the adjacent boundary faces.
       It returns NULLFLAG if any of the entity a or b is a NULLFLAG.
     */
-    static entityFlag_Type strongerFlag( entityFlag_Type const & a, entityFlag_Type const & b );
+    static markerID_Type strongerFlag( markerID_Type const & a, markerID_Type const & b );
 
     //! Selects the weaker between two flags
     /*
@@ -114,19 +113,19 @@ public:
       Nodes generated on high order elements.
       It returns NULLFLAG if any of the entity a or b is a NULLFLAG.
     */
-    static entityFlag_Type weakerFlag( entityFlag_Type const & a, entityFlag_Type const & b );
+    static markerID_Type weakerFlag( markerID_Type const & a, markerID_Type const & b );
 
     //! Equality operator.
     /*
         It is needed in order to select markers with the same entity flag
     */
-    static bool EqualFlags(const entityFlag_Type& a, const entityFlag_Type& b);
+    static bool EqualFlags(const markerID_Type& a, const markerID_Type& b);
 
 };
 
 //! Marker - Base marker class.
 /*!
-  It stores an object of entityFlag_Type which may be used for marking a geometric entity.
+  It stores an object of markerID_Type which may be used for marking a geometric entity.
   The typical use is to specify boundary conditions or material properties associated with
   the entity. The actual boundary conditions will be handled in the Dof
   class. During the creation of a field, the markers are processed to furnish the
@@ -134,7 +133,7 @@ public:
   The template argument FlagPolicy defualts to EntityFlagStandardPolicy and it defines the way
   ambiguities in the flag definition are treated.
 
-  Marker is a concrete base class which also implements basic tool to operate on the entityFlag.
+  Marker is a concrete base class which also implements basic tool to operate on the markerID.
   All geometric entities stored in a mesh derives from it, thus
   it may be used to extend the capabilities of a goemetric entity, for any purpose.
 
@@ -160,7 +159,7 @@ public:
     Marker();
 
     //! Constructor given the flag
-    explicit Marker( entityFlag_Type & p );
+    explicit Marker( markerID_Type & p );
 
     //! Copy Constructor
     Marker( Marker<FlagPolicy> const & markerBase );
@@ -185,7 +184,7 @@ public:
     /*!
         It returns true if the marker flag is equal to the argument
     */
-    inline bool hasEqualEntityFlag(entityFlag_Type const & flag ) const;
+    inline bool hasEqualEntityFlag(markerID_Type const & flag ) const;
 
     //! Display information about the marker object
     virtual void showMe( std::ostream & output = std::cout ) const;
@@ -196,16 +195,16 @@ public:
     //@{
 
     //! Set marker to the given value
-    inline entityFlag_Type setMarker( entityFlag_Type const & flag );
+    inline markerID_Type setMarker( markerID_Type const & flag );
 
     //! Set marker to the given value only if unset
-    entityFlag_Type updateMarker( entityFlag_Type const & flag );
+    markerID_Type updateMarker( markerID_Type const & flag );
 
     //! Sets the flag to the stronger flag of two given markers
-    entityFlag_Type setStrongerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 );
+    markerID_Type setStrongerMarker( markerID_Type const & flag1, markerID_Type const & flag2 );
 
     //! Sets the flag to the weaker flag of two given markers
-    entityFlag_Type setWeakerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 );
+    markerID_Type setWeakerMarker( markerID_Type const & flag1, markerID_Type const & flag2 );
 
     //! Sets to the strongest flag
     /*!
@@ -213,7 +212,7 @@ public:
         it sets it to  the stronger flag between the stored one
         and the one provided by the argument.
      */
-    entityFlag_Type setStrongerMarker( entityFlag_Type const & flag );
+    markerID_Type setStrongerMarker( markerID_Type const & flag );
 
     //! Sets to the strongest flag
     /*!
@@ -221,7 +220,7 @@ public:
         it sets it to  the weaker flag between the stored one
         and the one provided by the argument.
      */
-    entityFlag_Type setWeakerMarker( entityFlag_Type const & flag );
+    markerID_Type setWeakerMarker( markerID_Type const & flag );
 
     //! Put marker to NULLFLAG
     inline void unsetMarker(); //const;
@@ -234,19 +233,19 @@ public:
     //! Extracts the enitytFlag associated to the marked entity
     /*!
      * For hystorical reason this method is called marker, while it should be called
-     * entityFlag() instead. Refactoring however would involve changing too many files and it has been
+     * markerID() instead. Refactoring however would involve changing too many files and it has been
      * posponed. Just remember that marker() does not return a Marker!
      */
-    inline entityFlag_Type marker() const;
+    inline markerID_Type marker() const;
 
     //! Returns the null flag
 
-    static entityFlag_Type const & nullFlag();
+    static markerID_Type const & nullFlag();
 
     //@}
 
 protected:
-    entityFlag_Type M_flag;
+    markerID_Type M_flag;
 };
 
 
@@ -262,7 +261,7 @@ Marker<FlagPolicy>::Marker() : M_flag( FlagPolicy::S_NULLFLAG )
 }
 
 template <typename FlagPolicy>
-Marker<FlagPolicy>::Marker( entityFlag_Type & flag ) : M_flag( flag )
+Marker<FlagPolicy>::Marker( markerID_Type & flag ) : M_flag( flag )
 {
     // nothing to be done here
 }
@@ -274,44 +273,44 @@ Marker<FlagPolicy>::Marker( Marker<FlagPolicy> const & markerBase ) : M_flag( ma
 }
 
 template <typename FlagPolicy>
-entityFlag_Type Marker<FlagPolicy>::marker() const
+markerID_Type Marker<FlagPolicy>::marker() const
 {
     return M_flag;
 }
 
 template <typename FlagPolicy>
-entityFlag_Type const & Marker<FlagPolicy>::nullFlag()
+markerID_Type const & Marker<FlagPolicy>::nullFlag()
 {
     return FlagPolicy::S_NULLFLAG;
 }
 
 template <typename FlagPolicy>
-entityFlag_Type Marker<FlagPolicy>::setMarker( entityFlag_Type const & flag )
+markerID_Type Marker<FlagPolicy>::setMarker( markerID_Type const & flag )
 {
     return M_flag = flag;
 }
 
 template <typename FlagPolicy>
-entityFlag_Type Marker<FlagPolicy>::updateMarker( entityFlag_Type const & flag )
+markerID_Type Marker<FlagPolicy>::updateMarker( markerID_Type const & flag )
 {
     if ( M_flag == nullFlag() )
         return setMarker( flag );
 }
 
 template <typename FlagPolicy>
-entityFlag_Type Marker<FlagPolicy>::setStrongerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+markerID_Type Marker<FlagPolicy>::setStrongerMarker( markerID_Type const & flag1, markerID_Type const & flag2 )
 {
     return setMarker( FlagPolicy::strongerFlag( flag1, flag2 ) );
 }
 
 template <typename FlagPolicy>
-entityFlag_Type Marker<FlagPolicy>::setWeakerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+markerID_Type Marker<FlagPolicy>::setWeakerMarker( markerID_Type const & flag1, markerID_Type const & flag2 )
 {
     return setMarker( FlagPolicy::weakerFlag( flag1, flag2 ) );
 }
 
 template <typename FlagPolicy>
-entityFlag_Type Marker<FlagPolicy>::setStrongerMarker( entityFlag_Type const & flag )
+markerID_Type Marker<FlagPolicy>::setStrongerMarker( markerID_Type const & flag )
 {
     if ( isMarkerUnset() )
         return M_flag = flag;
@@ -319,7 +318,7 @@ entityFlag_Type Marker<FlagPolicy>::setStrongerMarker( entityFlag_Type const & f
 }
 
 template <typename FlagPolicy>
-entityFlag_Type Marker<FlagPolicy>::setWeakerMarker( entityFlag_Type const & flag )
+markerID_Type Marker<FlagPolicy>::setWeakerMarker( markerID_Type const & flag )
 {
     if ( isMarkerUnset() )
         return M_flag = flag;
@@ -345,7 +344,7 @@ void Marker<FlagPolicy>::unsetMarker()
 }
 
 template <typename FlagPolicy>
-bool Marker<FlagPolicy>::hasEqualEntityFlag(entityFlag_Type const & flag) const
+bool Marker<FlagPolicy>::hasEqualEntityFlag(markerID_Type const & flag) const
 {
     return FlagPolicy::EqualFlags(flag,M_flag);
 }
