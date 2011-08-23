@@ -46,7 +46,6 @@ apidox:
 
 apidox-am-no-doxygen:
 apidox-am-doxygen:
-	@cp $(top_srcdir)/doc/common/LifeV.png $(top_builddir)/doc/api/html/LifeV.png;
 	@cp $(top_srcdir)/admin/Doxyfile.global Doxyfile; \
 	chmod a+w Doxyfile; \
 	echo "PROJECT_NAME           = \"LifeV\"" >> Doxyfile ; \
@@ -62,7 +61,8 @@ apidox-am-doxygen:
 	echo "MAN_OUTPUT             = $(subdir)/man" >> Doxyfile; \
 	echo "GENERATE_TAGFILE       = $(top_builddir)/doc/api/$(PACKAGE).tag" >> Doxyfile ;\
 	echo "HAVE_DOT               = $(LIFE_HAS_DOT)" >> Doxyfile ; \
-	$(DOXYGEN) Doxyfile;\
+	$(DOXYGEN) Doxyfile; \
+	cp $(top_srcdir)/doc/common/LifeV.png $(top_builddir)/doc/api/html/LifeV.png; \
 	rm -f Doxyfile;
 
 .PHONY: apidox-am-doxygen apidox-am-no-doxygen install-data-local install-apidox install-apidox uninstall-local uninstall-apidox uninstall-apidox apidox apidox-am-toplevel-no-doxygen apidox-am-toplevel-doxygen
