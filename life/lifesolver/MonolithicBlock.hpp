@@ -50,6 +50,8 @@
 
 #include <life/lifealg/ComposedOperator.hpp>
 
+#include <life/lifemesh/RegionMesh3D.hpp>
+
 
 namespace LifeV {
 
