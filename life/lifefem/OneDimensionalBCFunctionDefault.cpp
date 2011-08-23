@@ -49,9 +49,9 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 OneDimensionalBCFunctionDefault::OneDimensionalBCFunctionDefault( const bcSide_Type& bcSide, const bcType_Type& bcType ):
-        M_flux                          (),
-        M_source                        (),
-        M_solution                      (),
+        M_fluxPtr                       (),
+        M_sourcePtr                     (),
+        M_solutionPtr                   (),
         M_bcNode                        (),
         M_bcSide                        ( bcSide ),
         M_bcType                        ( bcType )
@@ -59,9 +59,9 @@ OneDimensionalBCFunctionDefault::OneDimensionalBCFunctionDefault( const bcSide_T
 }
 
 OneDimensionalBCFunctionDefault::OneDimensionalBCFunctionDefault( const OneDimensionalBCFunctionDefault& bcFunctionDefault ) :
-        M_flux                          ( bcFunctionDefault.M_flux ),        // Ptr copy
-        M_source                        ( bcFunctionDefault.M_source ),      // Ptr copy
-        M_solution                      ( bcFunctionDefault.M_solution ),    // Ptr copy
+        M_fluxPtr                       ( bcFunctionDefault.M_fluxPtr ),        // Ptr copy
+        M_sourcePtr                     ( bcFunctionDefault.M_sourcePtr ),      // Ptr copy
+        M_solutionPtr                   ( bcFunctionDefault.M_solutionPtr ),    // Ptr copy
         M_bcNode                        ( bcFunctionDefault.M_bcNode ),
         M_bcType                        ( bcFunctionDefault.M_bcType )
 {}
@@ -82,10 +82,10 @@ OneDimensionalBCFunctionDefault::operator() ( const Real& /*time*/, const Real& 
 // Set Methods
 // ===================================================
 void
-OneDimensionalBCFunctionDefault::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+OneDimensionalBCFunctionDefault::setFluxSource( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr )
 {
-    M_flux   = flux;
-    M_source = source;
+    M_fluxPtr   = fluxPtr;
+    M_sourcePtr = sourcePtr;
 
     this->setupNode();
 }
@@ -96,7 +96,7 @@ OneDimensionalBCFunctionDefault::setFluxSource( const fluxPtr_Type& flux, const 
 void
 OneDimensionalBCFunctionDefault::setupNode()
 {
-    ( M_bcSide == OneDimensional::left ) ? M_bcNode = 0 : M_bcNode = M_flux->physics()->data()->numberOfNodes() - 1;
+    ( M_bcSide == OneDimensional::left ) ? M_bcNode = 0 : M_bcNode = M_fluxPtr->physics()->data()->numberOfNodes() - 1;
 }
 
 
@@ -133,10 +133,10 @@ OneDimensionalBCFunctionRiemann::operator()( const Real& /*time*/, const Real& /
 void
 OneDimensionalBCFunctionRiemann::updateBCVariables()
 {
-    M_bcU[0] = (*(*M_solution)["A"])(M_bcNode);
-    M_bcU[1] = (*(*M_solution)["Q"])(M_bcNode);
-    M_bcW[0] = (*(*M_solution)["W1"])(M_bcNode);
-    M_bcW[1] = (*(*M_solution)["W2"])(M_bcNode);
+    M_bcU[0] = (*(*M_solutionPtr)["A"])(M_bcNode);
+    M_bcU[1] = (*(*M_solutionPtr)["Q"])(M_bcNode);
+    M_bcW[0] = (*(*M_solutionPtr)["W1"])(M_bcNode);
+    M_bcW[1] = (*(*M_solutionPtr)["W2"])(M_bcNode);
 }
 
 
@@ -222,13 +222,13 @@ OneDimensionalBCFunctionCompatibility::computeRHS( const Real& timeStep )
 void
 OneDimensionalBCFunctionCompatibility::computeEigenValuesVectors()
 {
-    M_flux->eigenValuesEigenVectors( M_bcU[0], M_bcU[1],
-                                     M_eigenvalues, M_leftEigenvector1, M_leftEigenvector2,
-                                     M_bcNode );
+    M_fluxPtr->eigenValuesEigenVectors( M_bcU[0], M_bcU[1],
+                                        M_eigenvalues, M_leftEigenvector1, M_leftEigenvector2,
+                                        M_bcNode );
 
-    M_flux->deltaEigenValuesEigenVectors( M_bcU[0], M_bcU[1],
-                                          M_deltaEigenvalues, M_deltaLeftEigenvector1, M_deltaLeftEigenvector2,
-                                          M_bcNode );
+    M_fluxPtr->deltaEigenValuesEigenVectors( M_bcU[0], M_bcU[1],
+                                             M_deltaEigenvalues, M_deltaLeftEigenvector1, M_deltaLeftEigenvector2,
+                                             M_bcNode );
 }
 
 Real
@@ -238,8 +238,8 @@ OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, cons
     Real cfl = computeCFL( eigenvalue, timeStep );
 
     container2D_Type U_interpolated;
-    U_interpolated[0] = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_solution)["A"])( M_bcInternalNode );
-    U_interpolated[1] = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_solution)["Q"])( M_bcInternalNode );
+    U_interpolated[0] = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_solutionPtr)["A"])( M_bcInternalNode );
+    U_interpolated[1] = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_solutionPtr)["Q"])( M_bcInternalNode );
 
     container2D_Type U;
 
@@ -248,21 +248,21 @@ OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, cons
     bcNodes[1] = M_bcInternalNode;
 
 #ifdef OLD_COMPATIBILITY
-    U[0] = U_interpolated[0] - timeStep * M_source->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl );
-    U[1] = U_interpolated[1] - timeStep * M_source->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl );
+    U[0] = U_interpolated[0] - timeStep * M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl );
+    U[1] = U_interpolated[1] - timeStep * M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl );
 #else
     container2D_Type U0_interpolated;
-    U0_interpolated[0] = ( 1 - cfl ) * M_flux->physics()->data()->area0(bcNodes[0]) + cfl * M_flux->physics()->data()->area0(bcNodes[1]);
+    U0_interpolated[0] = ( 1 - cfl ) * M_fluxPtr->physics()->data()->area0(bcNodes[0]) + cfl * M_fluxPtr->physics()->data()->area0(bcNodes[1]);
     U0_interpolated[1] = 0;
 
-    U[0] = U_interpolated[0] - U0_interpolated[0] - timeStep * ( M_source->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl ) - M_source->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 0, bcNodes, cfl ) );
-    U[1] = U_interpolated[1] - U0_interpolated[1] - timeStep * ( M_source->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl ) - M_source->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 1, bcNodes, cfl ) );
+    U[0] = U_interpolated[0] - U0_interpolated[0] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl ) - M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 0, bcNodes, cfl ) );
+    U[1] = U_interpolated[1] - U0_interpolated[1] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl ) - M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 1, bcNodes, cfl ) );
 
     U_interpolated[0] -= U0_interpolated[0];
     U_interpolated[1] -= U0_interpolated[1];
 
     // Adding Z_0
-    U[0] += M_flux->physics()->data()->area0(bcNodes[0]);
+    U[0] += M_fluxPtr->physics()->data()->area0(bcNodes[0]);
     U[1] += 0;
 #endif
     return scalarProduct( eigenvector, U ) + timeStep * eigenvalue * scalarProduct( deltaEigenvector, U_interpolated );
@@ -271,7 +271,7 @@ OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, cons
 Real
 OneDimensionalBCFunctionCompatibility::computeCFL( const Real& eigenvalue, const Real& timeStep ) const
 {
-    Real cfl = eigenvalue * timeStep / M_flux->physics()->data()->mesh()->edgeLength( M_bcElement );
+    Real cfl = eigenvalue * timeStep / M_fluxPtr->physics()->data()->mesh()->edgeLength( M_bcElement );
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( M_bcInternalNode == 1 ) // the edge is on the left of the domain
@@ -317,13 +317,13 @@ OneDimensionalBCFunctionAbsorbing::operator()( const Real& /*time*/, const Real&
     }
 
     Real a1, a2, a11, a22, b1, b2, c1, c2;
-    a1 = M_flux->physics()->pressure( M_bcU[0], timeStep, M_bcNode ) - this->venousPressure(); // pressure at previous time step
+    a1 = M_fluxPtr->physics()->pressure( M_bcU[0], timeStep, M_bcNode ) - this->venousPressure(); // pressure at previous time step
     a2 = M_bcU[1]; // flux at previous time step
 
-    b1 = M_flux->physics()->dPdW( M_bcW[0], M_bcW[1], 0, M_bcNode );  // dP / dW1
+    b1 = M_fluxPtr->physics()->dPdW( M_bcW[0], M_bcW[1], 0, M_bcNode );  // dP / dW1
     b2 = M_bcU[0] / 2; // dQ / dW1
 
-    c1 = M_flux->physics()->dPdW( M_bcW[0], M_bcW[1], 1, M_bcNode );  // dP / dW2
+    c1 = M_fluxPtr->physics()->dPdW( M_bcW[0], M_bcW[1], 1, M_bcNode );  // dP / dW2
     c2 = b2; // dQ / dW2
 
     a11 = a1 - b1*M_bcW[0] - c1*M_bcW[1];
@@ -413,7 +413,7 @@ OneDimensionalBCFunctionWindkessel3::operator()( const Real& time, const Real& t
 
     if ( M_absorbing )
     {
-        Real b1( M_flux->physics()->dPdW( A, Q, 0, M_bcNode ) );  // dP / dW1 - Missing W_outID ???
+        Real b1( M_fluxPtr->physics()->dPdW( A, Q, 0, M_bcNode ) );  // dP / dW1 - Missing W_outID ???
         Real b2( A / 2 ); // dQ / dW1
         M_resistance1 = b1 / b2;
     }
@@ -447,7 +447,7 @@ OneDimensionalBCFunctionWindkessel3::operator()( const Real& time, const Real& t
     M_Q_tn        = Q;
 
     // Remove this call to fromPToW it is not compatible with viscoelasticity!
-    return  M_flux->physics()->fromPToW( P, W_out, W_outID, M_bcNode ); // W_in
+    return  M_fluxPtr->physics()->fromPToW( P, W_out, W_outID, M_bcNode ); // W_in
 }
 
 }

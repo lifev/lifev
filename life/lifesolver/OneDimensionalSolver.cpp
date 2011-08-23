@@ -43,7 +43,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/OneDimensionalSolver.hpp>
@@ -59,30 +59,30 @@ std::map< std::string, OneDimensional::sourceTerm_Type >  OneDimensional::source
 // Constructors & Destructor
 // ===================================================
 OneDimensionalSolver::OneDimensionalSolver():
-    M_physics                   (),
-    M_flux                      (),
-    M_source                    (),
-    M_feSpace                   (),
-    M_comm                      (),
-    M_displayer                 (),
-    M_elementalMassMatrix       (),
-    M_elementalStiffnessMatrix  (),
-    M_elementalGradientMatrix   (),
-    M_elementalDivergenceMatrix (),
-    M_rhs                       (),
-    M_residual                  (),
-    M_fluxVector                (),
-    M_sourceVector              (),
-    M_dFdUVector                (),
-    M_dSdUVector                (),
-    M_homogeneousMassMatrix     (),
-    M_homogeneousGradientMatrix (),
-    M_dSdUMassMatrix            (),
-    M_dFdUStiffnessMatrix       (),
-    M_dFdUGradientMatrix        (),
-    M_dSdUDivergenceMatrix      (),
-    M_linearSolver              (),
-    M_linearViscoelasticSolver  ()
+    M_physicsPtr                   (),
+    M_fluxPtr                      (),
+    M_sourcePtr                    (),
+    M_feSpacePtr                   (),
+    M_commPtr                      (),
+    M_displayer                    (),
+    M_elementalMassMatrixPtr       (),
+    M_elementalStiffnessMatrixPtr  (),
+    M_elementalGradientMatrixPtr   (),
+    M_elementalDivergenceMatrixPtr (),
+    M_rhs                          (),
+    M_residual                     (),
+    M_fluxVector                   (),
+    M_sourceVector                 (),
+    M_dFdUVector                   (),
+    M_dSdUVector                   (),
+    M_homogeneousMassMatrixPtr     (),
+    M_homogeneousGradientMatrixPtr (),
+    M_dSdUMassMatrixPtr            (),
+    M_dFdUStiffnessMatrixPtr       (),
+    M_dFdUGradientMatrixPtr        (),
+    M_dSdUDivergenceMatrixPtr      (),
+    M_linearSolverPtr              (),
+    M_linearViscoelasticSolverPtr  ()
 {
 }
 
@@ -92,46 +92,46 @@ OneDimensionalSolver::OneDimensionalSolver():
 void
 OneDimensionalSolver::buildConstantMatrices()
 {
-    std::fill( M_dFdUVector.begin(), M_dFdUVector.end(), ublas::zero_vector<Real>( M_physics->data()->numberOfNodes()) );
-    std::fill( M_dSdUVector.begin(), M_dSdUVector.end(), ublas::zero_vector<Real>( M_physics->data()->numberOfNodes()) );
+    std::fill( M_dFdUVector.begin(), M_dFdUVector.end(), ublas::zero_vector<Real>( M_physicsPtr->data()->numberOfNodes()) );
+    std::fill( M_dSdUVector.begin(), M_dSdUVector.end(), ublas::zero_vector<Real>( M_physicsPtr->data()->numberOfNodes()) );
 
     for ( UInt i(0); i < 4; ++i )
     {
-        M_dSdUMassMatrix[i].reset( new matrix_Type( M_feSpace->map() ) );
-        M_dFdUStiffnessMatrix[i].reset( new matrix_Type( M_feSpace->map() ) );
-        M_dFdUGradientMatrix[i].reset( new matrix_Type( M_feSpace->map() ) );
-        M_dSdUDivergenceMatrix[i].reset( new matrix_Type( M_feSpace->map() ) );
+        M_dSdUMassMatrixPtr[i].reset( new matrix_Type( M_feSpacePtr->map() ) );
+        M_dFdUStiffnessMatrixPtr[i].reset( new matrix_Type( M_feSpacePtr->map() ) );
+        M_dFdUGradientMatrixPtr[i].reset( new matrix_Type( M_feSpacePtr->map() ) );
+        M_dSdUDivergenceMatrixPtr[i].reset( new matrix_Type( M_feSpacePtr->map() ) );
     }
 
     // Elementary computation and matrix assembling
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
+    for ( UInt iElement(0); iElement < M_physicsPtr->data()->numberOfElements(); ++iElement )
     {
         // set the elementary matrices to 0.
-        M_elementalMassMatrix->zero();
-        M_elementalGradientMatrix->zero();
+        M_elementalMassMatrixPtr->zero();
+        M_elementalGradientMatrixPtr->zero();
 
         // update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList( iElement ), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpacePtr->fe().update( M_feSpacePtr->mesh()->edgeList( iElement ), UPDATE_DPHI | UPDATE_WDET );
 
         // update the mass and grad matrices
-        mass( 1, *M_elementalMassMatrix, M_feSpace->fe(), 0, 0 );
-        grad( 0 , -1, *M_elementalGradientMatrix, M_feSpace->fe(), M_feSpace->fe(), 0, 0 );
+        mass( 1, *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
+        grad( 0 , -1, *M_elementalGradientMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->fe(), 0, 0 );
 
         // assemble the mass and grad matrices
-        assembleMatrix( *M_homogeneousMassMatrix, *M_elementalMassMatrix, M_feSpace->fe(), M_feSpace->dof() , 0, 0, 0, 0 );
-        assembleMatrix( *M_homogeneousGradientMatrix, *M_elementalGradientMatrix, M_feSpace->fe(), M_feSpace->dof() , 0, 0, 0, 0  );
+        assembleMatrix( *M_homogeneousMassMatrixPtr, *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof() , 0, 0, 0, 0 );
+        assembleMatrix( *M_homogeneousGradientMatrixPtr, *M_elementalGradientMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof() , 0, 0, 0, 0  );
     }
 
     // Dirichlet boundary conditions set in the mass matrix
-    M_homogeneousMassMatrix->globalAssemble();
-    M_homogeneousGradientMatrix->globalAssemble();
+    M_homogeneousMassMatrixPtr->globalAssemble();
+    M_homogeneousGradientMatrixPtr->globalAssemble();
 
     // In the classical case the linear system use a mass matrix (with Dirichlet BC)
-    //matrixPtr_Type systemMatrix( new matrix_Type( M_feSpace->map() ) );
-    //systemMatrix->insertValueDiagonal( M_physics->data()->mesh()->meanH() );
-    matrix_Type systemMatrix( *M_homogeneousMassMatrix );
+    //matrixPtr_Type systemMatrix( new matrix_Type( M_feSpacePtr->map() ) );
+    //systemMatrix->insertValueDiagonal( M_physicsPtr->data()->mesh()->meanH() );
+    matrix_Type systemMatrix( *M_homogeneousMassMatrixPtr );
     applyDirichletBCToMatrix( systemMatrix );
-    M_linearSolver->setMatrix( systemMatrix );
+    M_linearSolverPtr->setMatrix( systemMatrix );
 }
 
 void
@@ -149,18 +149,18 @@ OneDimensionalSolver::setupSolution( solution_Type& solution, const MapEpetra& m
     solution["W2"].reset( new vector_Type( map ) );
 
     // Flux correction with viscoelastic term
-    if ( M_physics->data()->viscoelasticWall() )
+    if ( M_physicsPtr->data()->viscoelasticWall() )
     {
         solution["Q_visc"].reset( new vector_Type( map ) ); // viscoelastic contribution to the flux
         solution["P_visc"].reset( new vector_Type( map ) ); // viscoelastic contribution to the pressure
     }
 
     // correction flux with inertial term
-    if ( M_physics->data()->inertialWall() )
+    if ( M_physicsPtr->data()->inertialWall() )
         solution["Q_inert"].reset( new vector_Type( map ) );
 
     // correction flux with longitudinal term
-    if ( M_physics->data()->longitudinalWall() )
+    if ( M_physicsPtr->data()->longitudinalWall() )
         solution["Q_long"].reset( new vector_Type( map ) );
 
     // Initialize solution to zero
@@ -171,9 +171,9 @@ OneDimensionalSolver::setupSolution( solution_Type& solution, const MapEpetra& m
 void
 OneDimensionalSolver::initialize( solution_Type& solution )
 {
-    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
+    for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
     {
-        (*solution["A"])[iNode] = M_physics->data()->area0( iNode );
+        (*solution["A"])[iNode] = M_physicsPtr->data()->area0( iNode );
         (*solution["Q"])[iNode] = 0;
     }
 
@@ -184,31 +184,31 @@ OneDimensionalSolver::initialize( solution_Type& solution )
     computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    M_physics->setArea_tn( *solution["A"] );
-    computePressure( solution, M_physics->data()->dataTime()->timeStep() );
+    M_physicsPtr->setArea_tn( *solution["A"] );
+    computePressure( solution, M_physicsPtr->data()->dataTime()->timeStep() );
 }
 
 void
 OneDimensionalSolver::computeW1W2( solution_Type& solution )
 {
-    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
+    for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
     {
-        M_physics->fromUToW( ( *solution["W1"]) [iNode], (*solution["W2"]) [iNode],
-                             ( *solution["A"] ) [iNode], (*solution["Q"] ) [iNode], iNode );
+        M_physicsPtr->fromUToW( ( *solution["W1"]) [iNode], (*solution["W2"]) [iNode],
+                                ( *solution["A"] ) [iNode], (*solution["Q"] ) [iNode], iNode );
     }
 }
 
 void
 OneDimensionalSolver::computePressure( solution_Type& solution, const Real& timeStep )
 {
-    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
+    for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
     {
-        ( *solution["P"] ) [iNode] = M_physics->elasticPressure( ( *solution["A"] ) [iNode], iNode )
-                                   + M_physics->externalPressure();
+        ( *solution["P"] ) [iNode] = M_physicsPtr->elasticPressure( ( *solution["A"] ) [iNode], iNode )
+                                   + M_physicsPtr->externalPressure();
 
-        if ( M_physics->data()->viscoelasticWall() )
+        if ( M_physicsPtr->data()->viscoelasticWall() )
         {
-            ( *solution["P_visc"] ) [iNode] = M_physics->viscoelasticPressure( ( *solution["A"]) [iNode], timeStep, iNode );
+            ( *solution["P_visc"] ) [iNode] = M_physicsPtr->viscoelasticPressure( ( *solution["A"]) [iNode], timeStep, iNode );
             ( *solution["P"] )      [iNode] += ( *solution["P_visc"] ) [iNode];
         }
     }
@@ -217,15 +217,15 @@ OneDimensionalSolver::computePressure( solution_Type& solution, const Real& time
 void
 OneDimensionalSolver::computeAreaRatio( solution_Type& solution )
 {
-    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
-        ( *solution["AoverA0minus1"] ) [iNode] = ( *solution["A"] ) [iNode] / M_physics->data()->area0( iNode ) - 1;
+    for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
+        ( *solution["AoverA0minus1"] ) [iNode] = ( *solution["A"] ) [iNode] / M_physicsPtr->data()->area0( iNode ) - 1;
 }
 
 void
 OneDimensionalSolver::computeArea( solution_Type& solution )
 {
-    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
-        ( *solution["A"] ) [iNode] = ( (*solution["AoverA0minus1"] ) [iNode] + 1 ) * M_physics->data()->area0( iNode );
+    for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
+        ( *solution["A"] ) [iNode] = ( (*solution["AoverA0minus1"] ) [iNode] + 1 ) * M_physicsPtr->data()->area0( iNode );
 }
 
 void
@@ -253,64 +253,64 @@ OneDimensionalSolver::updateRHS( const solution_Type& solution, const Real& time
     for ( UInt i(0); i < 2; ++i )
     {
         // rhs = rhs + dt * grad * F(Un)
-        *M_residual[i] += ( *M_homogeneousGradientMatrix ) * ( timeStep * *M_fluxVector[i] );
+        *M_residual[i] += ( *M_homogeneousGradientMatrixPtr ) * ( timeStep * *M_fluxVector[i] );
 
         // rhs = rhs - dt * mass * S(Un)
-        *M_residual[i] += ( *M_homogeneousMassMatrix ) * ( - timeStep * *M_sourceVector[i] );
+        *M_residual[i] += ( *M_homogeneousMassMatrixPtr ) * ( - timeStep * *M_sourceVector[i] );
 
         for ( UInt j(0); j < 2; ++j )
         {
             // rhs = rhs - dt^2/2 * gradDiffFlux * S(Un)
-            M_dFdUGradientMatrix[2*i + j]->globalAssemble();
-            *M_residual[i] += *M_dFdUGradientMatrix[2*i + j] * ( -dt2over2 * *M_sourceVector[j] );
+            M_dFdUGradientMatrixPtr[2*i + j]->globalAssemble();
+            *M_residual[i] += *M_dFdUGradientMatrixPtr[2*i + j] * ( -dt2over2 * *M_sourceVector[j] );
 
             // rhs = rhs + dt^2/2 * divDiffSrc * F(Un)
-            M_dSdUDivergenceMatrix[2*i + j]->globalAssemble();
-            *M_residual[i] += *M_dSdUDivergenceMatrix[2*i + j] * ( dt2over2 * *M_fluxVector[j] );
+            M_dSdUDivergenceMatrixPtr[2*i + j]->globalAssemble();
+            *M_residual[i] += *M_dSdUDivergenceMatrixPtr[2*i + j] * ( dt2over2 * *M_fluxVector[j] );
 
             // rhs = rhs - dt^2/2 * stiffDiffFlux * F(Un)
-            M_dFdUStiffnessMatrix[2*i + j]->globalAssemble();
-            *M_residual[i] += *M_dFdUStiffnessMatrix[2*i + j]*( -dt2over2 * *M_fluxVector[j] );
+            M_dFdUStiffnessMatrixPtr[2*i + j]->globalAssemble();
+            *M_residual[i] += *M_dFdUStiffnessMatrixPtr[2*i + j]*( -dt2over2 * *M_fluxVector[j] );
 
             // rhs = rhs + dt^2/2 * massDiffSrc * S(Un)
-            M_dSdUMassMatrix[2*i + j]->globalAssemble();
-            *M_residual[i] += *M_dSdUMassMatrix[2*i + j] * ( dt2over2 * *M_sourceVector[j] );
+            M_dSdUMassMatrixPtr[2*i + j]->globalAssemble();
+            *M_residual[i] += *M_dSdUMassMatrixPtr[2*i + j] * ( dt2over2 * *M_sourceVector[j] );
         }
     }
 
     // rhs = mass * Un + residual
-    *M_rhs[0]  = *M_residual[0] + ( *M_homogeneousMassMatrix ) * *solution.find("A")->second;
-    *M_rhs[1]  = *M_residual[1] + ( *M_homogeneousMassMatrix ) * *solution.find("Q")->second;
+    *M_rhs[0]  = *M_residual[0] + ( *M_homogeneousMassMatrixPtr ) * *solution.find("A")->second;
+    *M_rhs[1]  = *M_residual[1] + ( *M_homogeneousMassMatrixPtr ) * *solution.find("Q")->second;
 }
 
 void
 OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type& solution, const Real& time, const Real& timeStep )
 {
     // Apply BC to RHS
-    bcHandler.applyBC( time, timeStep, solution, M_flux, M_rhs );
+    bcHandler.applyBC( time, timeStep, solution, M_fluxPtr, M_rhs );
 
     // Compute A^n+1
     vector_Type area( *M_rhs[0] );
-    M_linearSolver->solveSystem( *M_rhs[0], area, M_homogeneousMassMatrix );
+    M_linearSolverPtr->solveSystem( *M_rhs[0], area, M_homogeneousMassMatrixPtr );
 
     // Compute Q^n+1
     vector_Type flowRate( *M_rhs[1] );
-    M_linearSolver->solveSystem( *M_rhs[1], flowRate, M_homogeneousMassMatrix );
+    M_linearSolverPtr->solveSystem( *M_rhs[1], flowRate, M_homogeneousMassMatrixPtr );
 
     // Correct flux with inertial, viscoelastic and longitudinal terms
-    if ( M_physics->data()->inertialWall() )
+    if ( M_physicsPtr->data()->inertialWall() )
     {
         *solution["Q_inert"] = inertialFlowRateCorrection( flowRate );
         flowRate += *solution["Q_inert"];
     }
 
-    if ( M_physics->data()->viscoelasticWall() )
+    if ( M_physicsPtr->data()->viscoelasticWall() )
     {
         *solution["Q_visc"] = viscoelasticFlowRateCorrection( area, flowRate, timeStep, bcHandler );
         flowRate += *solution["Q_visc"];
     }
 
-    if ( M_physics->data()->longitudinalWall() )
+    if ( M_physicsPtr->data()->longitudinalWall() )
     {
         *solution["Q_long"] = longitudinalFlowRateCorrection();
         flowRate += *solution["Q_long"];
@@ -334,47 +334,47 @@ OneDimensionalSolver::vector_Type
 OneDimensionalSolver::viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix )
 {
     // Matrix
-    matrix_Type systemMatrix( M_feSpace->map() );
-    matrix_Type stiffnessMatrix( M_feSpace->map() );
+    matrix_Type systemMatrix( M_feSpacePtr->map() );
+    matrix_Type stiffnessMatrix( M_feSpacePtr->map() );
 
     Real massCoefficient;
     Real stiffnessCoefficient;
 
     // RHS
-    vector_Type rhs( M_feSpace->map() );
+    vector_Type rhs( M_feSpacePtr->map() );
     rhs = 0;
 
     // Elementary computation and matrix assembling
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
+    for ( UInt iElement(0); iElement < M_physicsPtr->data()->numberOfElements() ; ++iElement )
     {
         // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpacePtr->fe().update( M_feSpacePtr->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
 
         // Compute mass coefficient
         massCoefficient = 1 / ( 0.5 * ( area[ iElement ] + area[ iElement + 1 ] ) );
-//      massCoefficient = 1 / ( 0.5 * ( M_physics->data()->area0( iElement ) + M_physics->data()->area0( iElement + 1 ) ) );
+//      massCoefficient = 1 / ( 0.5 * ( M_physicsPtr->data()->area0( iElement ) + M_physicsPtr->data()->area0( iElement + 1 ) ) );
 
         // Compute stiffness coefficient
-        stiffnessCoefficient  = timeStep * 0.5 * ( M_physics->data()->viscoelasticCoefficient( iElement ) + M_physics->data()->viscoelasticCoefficient( iElement + 1 ) )
-                              / M_physics->data()->densityRho() * massCoefficient * std::sqrt( massCoefficient );
+        stiffnessCoefficient  = timeStep * 0.5 * ( M_physicsPtr->data()->viscoelasticCoefficient( iElement ) + M_physicsPtr->data()->viscoelasticCoefficient( iElement + 1 ) )
+                              / M_physicsPtr->data()->densityRho() * massCoefficient * std::sqrt( massCoefficient );
 
         // Set the elementary matrices to 0.
-        M_elementalMassMatrix->zero();
-        M_elementalStiffnessMatrix->zero();
+        M_elementalMassMatrixPtr->zero();
+        M_elementalStiffnessMatrixPtr->zero();
 
         // Assemble the elemental matrix
-        mass(  massCoefficient,      *M_elementalMassMatrix,      M_feSpace->fe(), 0, 0 );
-        stiff( stiffnessCoefficient, *M_elementalStiffnessMatrix, M_feSpace->fe(), 0, 0 );
+        mass(  massCoefficient,      *M_elementalMassMatrixPtr,      M_feSpacePtr->fe(), 0, 0 );
+        stiff( stiffnessCoefficient, *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
 
         // Assemble the stiffness matrix
-        assembleMatrix( systemMatrix,    *M_elementalMassMatrix,      M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
-        assembleMatrix( stiffnessMatrix, *M_elementalStiffnessMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+        assembleMatrix( systemMatrix,    *M_elementalMassMatrixPtr,      M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
+        assembleMatrix( stiffnessMatrix, *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
 
         // Natural BC
         if ( iElement == 0 )
-            rhs( 0 )            -= stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, 0, 1 );
-        if ( iElement == M_physics->data()->numberOfElements() - 1 )
-            rhs( iElement + 1 ) += stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, iElement + 1, 1 );
+            rhs( 0 )            -= stiffnessCoefficient * M_fluxPtr->physics()->data()->computeSpatialDerivativeAtNode( flowRate, 0, 1 );
+        if ( iElement == M_physicsPtr->data()->numberOfElements() - 1 )
+            rhs( iElement + 1 ) += stiffnessCoefficient * M_fluxPtr->physics()->data()->computeSpatialDerivativeAtNode( flowRate, iElement + 1, 1 );
     }
 
     // System Matrix = MassMatrix + stiffnessCoefficient * StiffnessMatrix
@@ -386,14 +386,14 @@ OneDimensionalSolver::viscoelasticFlowRateCorrection( const vector_Type& area, c
     rhs += stiffnessMatrix * (-flowRate);
 
     // Apply BC to Matrix and RHS
-    bcHandler.applyViscoelasticBC( M_flux, systemMatrix, rhs );
+    bcHandler.applyViscoelasticBC( M_fluxPtr, systemMatrix, rhs );
 
     // Compute flow rate correction at t^n+1
     vector_Type flowRateCorrection( rhs );
 
     if ( updateSystemMatrix )
-        M_linearViscoelasticSolver->setMatrix( systemMatrix );
-    M_linearViscoelasticSolver->solveSystem( rhs, flowRateCorrection, M_homogeneousMassMatrix );
+        M_linearViscoelasticSolverPtr->setMatrix( systemMatrix );
+    M_linearViscoelasticSolverPtr->solveSystem( rhs, flowRateCorrection, M_homogeneousMassMatrixPtr );
 
     return flowRateCorrection;
 }
@@ -407,17 +407,17 @@ OneDimensionalSolver::computeCFL( const solution_Type& solution, const Real& tim
     container2D_Type leftEigenvector1;
     container2D_Type leftEigenvector2;
 
-    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
+    for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
     {
         // compute the eigenvalues at node
-        M_flux->eigenValuesEigenVectors( ( *solution.find("A")->second ) ( iNode ),
+        M_fluxPtr->eigenValuesEigenVectors( ( *solution.find("A")->second ) ( iNode ),
                                          ( *solution.find("Q")->second ) ( iNode ),
                                            eigenvalues, leftEigenvector1, leftEigenvector2, iNode );
 
         lambdaMax = std::max<Real>( std::max<Real>( std::fabs(eigenvalues[0]), std::fabs(eigenvalues[1]) ), lambdaMax );
     }
 
-    return lambdaMax * timeStep / M_feSpace->mesh()->minH();
+    return lambdaMax * timeStep / M_feSpacePtr->mesh()->minH();
 }
 
 void
@@ -426,7 +426,7 @@ OneDimensionalSolver::resetOutput( const solution_Type& solution )
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
     {
-        std::string file = M_physics->data()->postprocessingDirectory() + "/" + M_physics->data()->postprocessingFile() + "_" + i->first + ".m";
+        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".m";
         outfile.open( file.c_str(), std::ios::trunc );
         outfile.close();
     }
@@ -438,7 +438,7 @@ OneDimensionalSolver::postProcess( const solution_Type& solution, const Real& ti
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
     {
-        std::string file = M_physics->data()->postprocessingDirectory() + "/" + M_physics->data()->postprocessingFile() + "_" + i->first + ".m";
+        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".m";
         outfile.open( file.c_str(), std::ios::app );
         outfile.setf( ios::scientific, ios::floatfield );
 
@@ -455,57 +455,57 @@ OneDimensionalSolver::postProcess( const solution_Type& solution, const Real& ti
 // Set Methods
 // ===================================================
 void
-OneDimensionalSolver::setProblem( const physicsPtr_Type& physics,
-                                  const fluxPtr_Type&    flux,
-                                  const sourcePtr_Type&  source )
+OneDimensionalSolver::setProblem( const physicsPtr_Type& physicsPtr,
+                                  const fluxPtr_Type&    fluxPtr,
+                                  const sourcePtr_Type&  sourcePtr )
 {
-    M_physics = physics;
-    M_flux    = flux;
-    M_source  = source;
+    M_physicsPtr = physicsPtr;
+    M_fluxPtr    = fluxPtr;
+    M_sourcePtr  = sourcePtr;
 }
 
 void
-OneDimensionalSolver::setCommunicator( const commPtr_Type& comm )
+OneDimensionalSolver::setCommunicator( const commPtr_Type& commPtr )
 {
-    M_comm = comm;
-    M_displayer.setCommunicator( comm );
+    M_commPtr = commPtr;
+    M_displayer.setCommunicator( commPtr );
 }
 
 void
-OneDimensionalSolver::setFESpace( const feSpacePtr_Type& feSpace )
+OneDimensionalSolver::setFESpace( const feSpacePtr_Type& feSpacePtr )
 {
-    M_feSpace = feSpace;
+    M_feSpacePtr = feSpacePtr;
 
     //Elementary Matrices
-    M_elementalMassMatrix.reset ( new MatrixElemental( M_feSpace->fe().nbFEDof(), 1, 1 ) );
-    M_elementalStiffnessMatrix.reset( new MatrixElemental( M_feSpace->fe().nbFEDof(), 1, 1 ) );
-    M_elementalGradientMatrix.reset ( new MatrixElemental( M_feSpace->fe().nbFEDof(), 1, 1 ) );
-    M_elementalDivergenceMatrix.reset  ( new MatrixElemental( M_feSpace->fe().nbFEDof(), 1, 1 ) );
+    M_elementalMassMatrixPtr.reset ( new MatrixElemental( M_feSpacePtr->fe().nbFEDof(), 1, 1 ) );
+    M_elementalStiffnessMatrixPtr.reset( new MatrixElemental( M_feSpacePtr->fe().nbFEDof(), 1, 1 ) );
+    M_elementalGradientMatrixPtr.reset ( new MatrixElemental( M_feSpacePtr->fe().nbFEDof(), 1, 1 ) );
+    M_elementalDivergenceMatrixPtr.reset  ( new MatrixElemental( M_feSpacePtr->fe().nbFEDof(), 1, 1 ) );
 
     //Vectors
     for ( UInt i(0) ; i < 2 ; ++i )
     {
-        M_rhs[i].reset( new vector_Type( M_feSpace->map() ) );
-        M_residual[i].reset( new vector_Type( M_feSpace->map() ) );
-        M_fluxVector[i].reset( new vector_Type( M_feSpace->map() ) );
-        M_sourceVector[i].reset( new vector_Type( M_feSpace->map() ) );
+        M_rhs[i].reset( new vector_Type( M_feSpacePtr->map() ) );
+        M_residual[i].reset( new vector_Type( M_feSpacePtr->map() ) );
+        M_fluxVector[i].reset( new vector_Type( M_feSpacePtr->map() ) );
+        M_sourceVector[i].reset( new vector_Type( M_feSpacePtr->map() ) );
     }
 
     //Matrix
-    M_homogeneousMassMatrix.reset( new matrix_Type( M_feSpace->map() ) );
-    M_homogeneousGradientMatrix.reset( new matrix_Type( M_feSpace->map() ) );
+    M_homogeneousMassMatrixPtr.reset( new matrix_Type( M_feSpacePtr->map() ) );
+    M_homogeneousGradientMatrixPtr.reset( new matrix_Type( M_feSpacePtr->map() ) );
 }
 
 void
-OneDimensionalSolver::setLinearSolver( const linearSolverPtr_Type& linearSolver )
+OneDimensionalSolver::setLinearSolver( const linearSolverPtr_Type& linearSolverPtr )
 {
-    M_linearSolver = linearSolver;
+    M_linearSolverPtr = linearSolverPtr;
 }
 
 void
-OneDimensionalSolver::setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolver )
+OneDimensionalSolver::setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolverPtr )
 {
-    M_linearViscoelasticSolver = linearViscoelasticSolver;
+    M_linearViscoelasticSolverPtr = linearViscoelasticSolverPtr;
 }
 
 // ===================================================
@@ -524,7 +524,7 @@ OneDimensionalSolver::boundaryDOF( const bcSide_Type& bcSide ) const
 
     case OneDimensional::right:
 
-        return M_physics->data()->numberOfNodes() - 1;
+        return M_physicsPtr->data()->numberOfNodes() - 1;
 
         break;
 
@@ -585,7 +585,7 @@ OneDimensionalSolver::boundaryEigenValuesEigenVectors( const bcSide_Type& bcSide
 {
     UInt boundaryDof( boundaryDOF( bcSide ) );
 
-    M_flux->eigenValuesEigenVectors( (*solution.find("A")->second)( boundaryDof ),
+    M_fluxPtr->eigenValuesEigenVectors( (*solution.find("A")->second)( boundaryDof ),
                                      (*solution.find("Q")->second)( boundaryDof ),
                                      eigenvalues, leftEigenvector1, leftEigenvector2,
                                      boundaryDof );
@@ -599,13 +599,13 @@ OneDimensionalSolver::updateFlux( const solution_Type& solution )
 {
     Real Ai, Qi;
 
-    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
+    for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
     {
         Ai = (*solution.find("A")->second)( iNode );
         Qi = (*solution.find("Q")->second)( iNode );
 
-        (*M_fluxVector[0])( iNode ) = M_flux->flux( Ai, Qi, 0, iNode );
-        (*M_fluxVector[1])( iNode ) = M_flux->flux( Ai, Qi, 1, iNode );
+        (*M_fluxVector[0])( iNode ) = M_fluxPtr->flux( Ai, Qi, 0, iNode );
+        (*M_fluxVector[1])( iNode ) = M_fluxPtr->flux( Ai, Qi, 1, iNode );
     }
 }
 
@@ -620,7 +620,7 @@ OneDimensionalSolver::updatedFdU( const solution_Type& solution )
     Real Aii, Qii;
     Real Aiip1, Qiip1;
 
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
+    for ( UInt iElement(0); iElement < M_physicsPtr->data()->numberOfElements(); ++iElement )
     {
         // for P1Seg and appropriate mesh only!
         Aii   = (*solution.find("A")->second)( iElement );
@@ -633,8 +633,8 @@ OneDimensionalSolver::updatedFdU( const solution_Type& solution )
         {
             for ( UInt jj=0; jj<2; ++jj )
             {
-                tmp  = M_flux->dFdU(   Aii,   Qii, ii, jj, iElement );     // left node of current element
-                tmp += M_flux->dFdU( Aiip1, Qiip1, ii, jj, iElement + 1 ); // right node of current element
+                tmp  = M_fluxPtr->dFdU(   Aii,   Qii, ii, jj, iElement );     // left node of current element
+                tmp += M_fluxPtr->dFdU( Aiip1, Qiip1, ii, jj, iElement + 1 ); // right node of current element
 
                 M_dFdUVector[ 2*ii + jj ]( iElement ) = 0.5 * tmp;
             }
@@ -647,13 +647,13 @@ OneDimensionalSolver::updateSource( const solution_Type& solution )
 {
     Real Ai, Qi;
 
-    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
+    for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
     {
         Ai = (*solution.find("A")->second)( iNode );
         Qi = (*solution.find("Q")->second)( iNode );
 
-        (*M_sourceVector[0])( iNode ) = M_source->source( Ai, Qi, 0, iNode );
-        (*M_sourceVector[1])( iNode ) = M_source->source( Ai, Qi, 1, iNode );
+        (*M_sourceVector[0])( iNode ) = M_sourcePtr->source( Ai, Qi, 0, iNode );
+        (*M_sourceVector[1])( iNode ) = M_sourcePtr->source( Ai, Qi, 1, iNode );
     }
 }
 
@@ -668,7 +668,7 @@ OneDimensionalSolver::updatedSdU( const solution_Type& solution )
     Real Aii, Qii;
     Real Aiip1, Qiip1;
 
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
+    for ( UInt iElement(0); iElement < M_physicsPtr->data()->numberOfElements(); ++iElement )
     {
         // for P1Seg and appropriate mesh only!
         Aii   = (*solution.find("A")->second)( iElement);
@@ -680,8 +680,8 @@ OneDimensionalSolver::updatedSdU( const solution_Type& solution )
         {
             for ( UInt jj=0; jj<2; ++jj )
             {
-                tmp =  M_source->dSdU(   Aii,   Qii, ii, jj, iElement );     // left node of current element
-                tmp += M_source->dSdU( Aiip1, Qiip1, ii, jj, iElement + 1 ); // right node of current element
+                tmp =  M_sourcePtr->dSdU(   Aii,   Qii, ii, jj, iElement );     // left node of current element
+                tmp += M_sourcePtr->dSdU( Aiip1, Qiip1, ii, jj, iElement + 1 ); // right node of current element
 
                 M_dSdUVector[ 2*ii + jj ]( iElement ) = 0.5 * tmp;
             }
@@ -695,17 +695,17 @@ OneDimensionalSolver::updateMatrices()
     // Matrices initialization
     for ( UInt i(0); i < 4; ++i )
     {
-        M_dSdUMassMatrix[i].reset( new matrix_Type( M_feSpace->map() ) );
-        M_dFdUStiffnessMatrix[i].reset( new matrix_Type( M_feSpace->map() ) );
-        M_dFdUGradientMatrix[i].reset( new matrix_Type( M_feSpace->map() ) );
-        M_dSdUDivergenceMatrix[i].reset( new matrix_Type( M_feSpace->map() ) );
+        M_dSdUMassMatrixPtr[i].reset( new matrix_Type( M_feSpacePtr->map() ) );
+        M_dFdUStiffnessMatrixPtr[i].reset( new matrix_Type( M_feSpacePtr->map() ) );
+        M_dFdUGradientMatrixPtr[i].reset( new matrix_Type( M_feSpacePtr->map() ) );
+        M_dSdUDivergenceMatrixPtr[i].reset( new matrix_Type( M_feSpacePtr->map() ) );
     }
 
     // Elementary computation and matrix assembling
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
+    for ( UInt iElement(0); iElement < M_physicsPtr->data()->numberOfElements(); ++iElement )
     {
         // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList( iElement), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpacePtr->fe().update( M_feSpacePtr->mesh()->edgeList( iElement), UPDATE_DPHI | UPDATE_WDET );
 
         for ( UInt ii(0); ii < 2; ++ii )
         {
@@ -725,21 +725,21 @@ void
 OneDimensionalSolver::updateElementalMatrices( const Real& dFdU, const Real& dSdU )
 {
     // Set the elementary matrices to 0.
-    M_elementalMassMatrix->zero();
-    M_elementalStiffnessMatrix->zero();
-    M_elementalGradientMatrix->zero();
-    M_elementalDivergenceMatrix->zero();
+    M_elementalMassMatrixPtr->zero();
+    M_elementalStiffnessMatrixPtr->zero();
+    M_elementalGradientMatrixPtr->zero();
+    M_elementalDivergenceMatrixPtr->zero();
 
     // Update the mass matrix
-    mass( dSdU, *M_elementalMassMatrix, M_feSpace->fe(), 0, 0 );
+    mass( dSdU, *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
 //    std::cout << "Elem Stiff matrix :" << std::endl;
-//    M_elementalMassMatrix->showMe( std::cout );
+//    M_elementalMassMatrixPtr->showMe( std::cout );
 
     // Update the stiffness matrix
-    stiff( dFdU, *M_elementalStiffnessMatrix, M_feSpace->fe(), 0 ,0 );
-    //AssemblyElemental::stiffness( *M_elementalStiffnessMatrix, M_feSpace->fe(), M_coeffStiff, 0 );
+    stiff( dFdU, *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), 0 ,0 );
+    //AssemblyElemental::stiffness( *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), M_coeffStiff, 0 );
 //    std::cout << "Elem Stiff matrix :" << std::endl;
-//    M_elementalStiffnessMatrix->showMe( std::cout );
+//    M_elementalStiffnessMatrixPtr->showMe( std::cout );
 
     /*! Update the gradient matrix
       gradient operator:
@@ -753,39 +753,39 @@ OneDimensionalSolver::updateElementalMatrices( const Real& dFdU, const Real& dSd
       is added to correspond to the described operator.
       (There is a minus in the elemOper implementation).
     */
-    grad( 0, -dFdU, *M_elementalGradientMatrix, M_feSpace->fe(), M_feSpace->fe(), 0, 0 );
+    grad( 0, -dFdU, *M_elementalGradientMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->fe(), 0, 0 );
 //    std::cout << "Elem Grad matrix :" << std::endl;
-//    M_elementalGradientMatrix->showMe( std::cout );
+//    M_elementalGradientMatrixPtr->showMe( std::cout );
 
     /*! update the divergence matrix
       divergence operator: (transpose of the gradient)
       div_{ij} = \int_{fe} coeff \frac{d \phi_j}{d x} \phi_i
 
-      \note formally this M_elementalDivergenceMatrix is not necessary
-      as it is the transpose of the M_elementalGradientMatrix.
+      \note formally this M_elementalDivergenceMatrixPtr is not necessary
+      as it is the transpose of the M_elementalGradientMatrixPtr.
       But for the sake of clarity, I prefer to keep it. (low cost!)
 
       BEWARE : same remarks as grad (see above).
     */
-    div( 0, -dSdU, *M_elementalDivergenceMatrix, M_feSpace->fe(), M_feSpace->fe(), 0, 0 );
+    div( 0, -dSdU, *M_elementalDivergenceMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->fe(), 0, 0 );
 //    std::cout << "Elem Div matrix :" << std::endl;
-//    M_elementalDivergenceMatrix->showMe( std::cout );
+//    M_elementalDivergenceMatrixPtr->showMe( std::cout );
 }
 
 void
 OneDimensionalSolver::matrixAssemble( const UInt& ii, const UInt& jj )
 {
     // Assemble the mass matrix
-    assembleMatrix( *M_dSdUMassMatrix[ 2*ii + jj ], *M_elementalMassMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+    assembleMatrix( *M_dSdUMassMatrixPtr[ 2*ii + jj ], *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
 
     // Assemble the stiffness matrix
-    assembleMatrix( *M_dFdUStiffnessMatrix[ 2*ii + jj ], *M_elementalStiffnessMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+    assembleMatrix( *M_dFdUStiffnessMatrixPtr[ 2*ii + jj ], *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
 
     // Assemble the gradient matrix
-    assembleMatrix( *M_dFdUGradientMatrix[ 2*ii + jj ], *M_elementalGradientMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+    assembleMatrix( *M_dFdUGradientMatrixPtr[ 2*ii + jj ], *M_elementalGradientMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
 
     // Assemble the divergence matrix
-    assembleMatrix( *M_dSdUDivergenceMatrix[ 2*ii + jj ], *M_elementalDivergenceMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+    assembleMatrix( *M_dSdUDivergenceMatrixPtr[ 2*ii + jj ], *M_elementalDivergenceMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
 }
 
 void
@@ -794,7 +794,7 @@ OneDimensionalSolver::applyDirichletBCToMatrix( matrix_Type& matrix )
     // Dirichlet BC
     matrix.globalAssemble();
     matrix.diagonalize( 0, 1, 0 );
-    matrix.diagonalize( M_physics->data()->numberOfNodes() - 1, 1, 0 );
+    matrix.diagonalize( M_physicsPtr->data()->numberOfNodes() - 1, 1, 0 );
 
     //matrix.spy("SystemMatrix");
 }
@@ -802,14 +802,14 @@ OneDimensionalSolver::applyDirichletBCToMatrix( matrix_Type& matrix )
 OneDimensionalSolver::vector_Type
 OneDimensionalSolver::inertialFlowRateCorrection( const vector_Type& flux )
 {
-    matrix_Type matrixLHS(M_feSpace->map());
-    matrix_Type stiffRHS (M_feSpace->map());
+    matrix_Type matrixLHS(M_feSpacePtr->map());
+    matrix_Type stiffRHS (M_feSpacePtr->map());
 
-    MatrixElemental elmatMassLHS  (M_feSpace->fe().nbFEDof(), 1, 1);
-    MatrixElemental elmatStiffLHS (M_feSpace->fe().nbFEDof(), 1, 1);
-    MatrixElemental elmatStiffRHS (M_feSpace->fe().nbFEDof(), 1, 1);
+    MatrixElemental elmatMassLHS  (M_feSpacePtr->fe().nbFEDof(), 1, 1);
+    MatrixElemental elmatStiffLHS (M_feSpacePtr->fe().nbFEDof(), 1, 1);
+    MatrixElemental elmatStiffRHS (M_feSpacePtr->fe().nbFEDof(), 1, 1);
 
-    vector_Type rhs(M_feSpace->map());
+    vector_Type rhs(M_feSpacePtr->map());
 
     Real coeffMass;
     Real coeffStiff;
@@ -820,7 +820,7 @@ OneDimensionalSolver::inertialFlowRateCorrection( const vector_Type& flux )
     stiffRHS  *= 0.;
 
     // Elementary computation and matrix assembling
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
+    for ( UInt iElement(0); iElement < M_physicsPtr->data()->numberOfElements(); ++iElement )
     {
         // set the elementary matrices to 0.
         elmatMassLHS. zero();
@@ -831,25 +831,25 @@ OneDimensionalSolver::inertialFlowRateCorrection( const vector_Type& flux )
         coeffMass /= 2;
         coeffMass  = 1./ coeffMass;
 
-        meanA0  = M_physics->data()->area0(iElement) + M_physics->data()->area0(iElement + 1);
+        meanA0  = M_physicsPtr->data()->area0(iElement) + M_physicsPtr->data()->area0(iElement + 1);
         meanA0 /= 2;
 
-        m = M_physics->data()->densityWall()*M_physics->data()->thickness(iElement + 1)/
+        m = M_physicsPtr->data()->densityWall()*M_physicsPtr->data()->thickness(iElement + 1)/
             ( 2*std::sqrt(4*std::atan(1))*std::sqrt(meanA0) );
 
-        coeffStiff = m/M_physics->data()->densityRho();
+        coeffStiff = m/M_physicsPtr->data()->densityRho();
 
         // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpacePtr->fe().update( M_feSpacePtr->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
 
-        mass (   coeffMass,  elmatMassLHS,  M_feSpace->fe(), 0, 0 );
-        stiff(   coeffStiff, elmatStiffLHS, M_feSpace->fe(), 0, 0 );
-        stiff( - coeffStiff, elmatStiffRHS, M_feSpace->fe(), 0, 0 );
+        mass (   coeffMass,  elmatMassLHS,  M_feSpacePtr->fe(), 0, 0 );
+        stiff(   coeffStiff, elmatStiffLHS, M_feSpacePtr->fe(), 0, 0 );
+        stiff( - coeffStiff, elmatStiffRHS, M_feSpacePtr->fe(), 0, 0 );
 
         // assemble the mass and grad matrices
-        assembleMatrix( matrixLHS, elmatMassLHS, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
-        assembleMatrix( matrixLHS, elmatStiffLHS, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
-        assembleMatrix( stiffRHS, elmatStiffRHS, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+        assembleMatrix( matrixLHS, elmatMassLHS, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
+        assembleMatrix( matrixLHS, elmatStiffLHS, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
+        assembleMatrix( stiffRHS, elmatStiffRHS, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 6310 ) << "\n\tm = "           << m << "\n\t_coeffMass = "  << coeffMass << "\n\t_coeffStiff = " << coeffStiff << "\n";
@@ -885,8 +885,8 @@ OneDimensionalSolver::inertialFlowRateCorrection( const vector_Type& flux )
 
     vector_Type sol( rhs);
 
-    M_linearSolver->setMatrix( matrixLHS );
-    //@int numIter = M_linearSolver->solveSystem( _rhs, _sol, _matrixLHS, true);
+    M_linearSolverPtr->setMatrix( matrixLHS );
+    //@int numIter = M_linearSolverPtr->solveSystem( _rhs, _sol, _matrixLHS, true);
 
     //std::cout <<" iterations number :  " << numIter << std::endl;
 
@@ -896,23 +896,23 @@ OneDimensionalSolver::inertialFlowRateCorrection( const vector_Type& flux )
 OneDimensionalSolver::vector_Type
 OneDimensionalSolver::longitudinalFlowRateCorrection()
 {
-    matrix_Type massLHS(M_feSpace->map());
-    matrix_Type massRHS(M_feSpace->map());
+    matrix_Type massLHS(M_feSpacePtr->map());
+    matrix_Type massRHS(M_feSpacePtr->map());
 
-    //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_physics->data()->numberOfNodes());
+    //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_physicsPtr->data()->numberOfNodes());
 
-    MatrixElemental elmatMassLHS (M_feSpace->fe().nbFEDof(),1,1);
-    MatrixElemental elmatMassRHS (M_feSpace->fe().nbFEDof(),1,1);
+    MatrixElemental elmatMassLHS (M_feSpacePtr->fe().nbFEDof(),1,1);
+    MatrixElemental elmatMassRHS (M_feSpacePtr->fe().nbFEDof(),1,1);
 
-    vector_Type rhs(M_feSpace->map());
+    vector_Type rhs(M_feSpacePtr->map());
     // let g = sqrt(A) - sqrt(A0)
     // now f = _d3g_dz3
-    vector_Type g(M_feSpace->map());
-    vector_Type f(M_feSpace->map());
+    vector_Type g(M_feSpacePtr->map());
+    vector_Type f(M_feSpacePtr->map());
 
     //          _g = *M_rhs[0];
-    for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes(); ++iNode )
-        g(iNode) = std::sqrt((*M_rhs[0])(iNode)) - std::sqrt(M_physics->data()->area0(iNode));
+    for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes(); ++iNode )
+        g(iNode) = std::sqrt((*M_rhs[0])(iNode)) - std::sqrt(M_physicsPtr->data()->area0(iNode));
 
     UInt iNode;
 
@@ -924,11 +924,11 @@ OneDimensionalSolver::longitudinalFlowRateCorrection()
     massLHS *= 0.;
     massRHS *= 0.;
 
-    Real h( M_physics->data()->length() / static_cast<Real>(M_physics->data()->numberOfElements() - 1) );
+    Real h( M_physicsPtr->data()->length() / static_cast<Real>(M_physicsPtr->data()->numberOfElements() - 1) );
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
+    for ( UInt iElement(0); iElement < M_physicsPtr->data()->numberOfElements() ; ++iElement )
     {
         iNode = iElement;
 
@@ -941,8 +941,8 @@ OneDimensionalSolver::longitudinalFlowRateCorrection()
         coeffMassLHS /= 2;
         coeffMassLHS = 1./ coeffMassLHS;
 
-        a = M_physics->data()->inertialModulus() / std::sqrt(4*std::atan(1));
-        coeffMassRHS = M_physics->data()->dataTime()->timeStep() * a / M_physics->data()->densityRho();
+        a = M_physicsPtr->data()->inertialModulus() / std::sqrt(4*std::atan(1));
+        coeffMassRHS = M_physicsPtr->data()->dataTime()->timeStep() * a / M_physicsPtr->data()->densityRho();
 
         // backward differentiation when near to the left boundary
         // d3 A (xi)/ dz3 = (1/h^3) * ( -A(xi) + A(xi+3) - 3A(xi+2) + 3A(xi+1) )
@@ -963,7 +963,7 @@ OneDimensionalSolver::longitudinalFlowRateCorrection()
             Debug( 6310 ) << "\n\tbackward differentiation = " << coeffMassLHS << "\n";
 #endif
         }
-        else if (iNode>M_feSpace->mesh()->numEdges()-2)
+        else if (iNode>M_feSpacePtr->mesh()->numEdges()-2)
         { // forward differentiation
             f( iNode ) = g( iNode ) - g( iNode-3 ) + 3 * g( iNode-2 ) - 3 * g( iNode-1 );
 #ifdef HAVE_LIFEV_DEBUG
@@ -981,16 +981,16 @@ OneDimensionalSolver::longitudinalFlowRateCorrection()
         f(iNode) *= 1 / ( 2 * OneDimensional::pow30(h, 3) );
 
         // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpacePtr->fe().update( M_feSpacePtr->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
 
-        mass( coeffMassLHS, elmatMassLHS, M_feSpace->fe(),0, 0 );
-        mass( coeffMassRHS, elmatMassRHS, M_feSpace->fe(),0, 0 );
+        mass( coeffMassLHS, elmatMassLHS, M_feSpacePtr->fe(),0, 0 );
+        mass( coeffMassRHS, elmatMassRHS, M_feSpacePtr->fe(),0, 0 );
 
         // assemble the mass and grad matrices
-        //assemb_mat( massLHS, elmatMassLHS, M_feSpace->fe(), M_feSpace->dof() , 0, 0 );
-        assembleMatrix( massLHS, elmatMassLHS, M_feSpace->fe(), M_feSpace->dof() , 0, 0, 0, 0 );
-        //assemb_mat( massRHS, elmatMassRHS, M_feSpace->fe(), M_feSpace->dof() , 0, 0 );
-        assembleMatrix( massRHS, elmatMassRHS, M_feSpace->fe(), M_feSpace->dof() , 0, 0, 0, 0 );
+        //assemb_mat( massLHS, elmatMassLHS, M_feSpacePtr->fe(), M_feSpacePtr->dof() , 0, 0 );
+        assembleMatrix( massLHS, elmatMassLHS, M_feSpacePtr->fe(), M_feSpacePtr->dof() , 0, 0, 0, 0 );
+        //assemb_mat( massRHS, elmatMassRHS, M_feSpacePtr->fe(), M_feSpacePtr->dof() , 0, 0 );
+        assembleMatrix( massRHS, elmatMassRHS, M_feSpacePtr->fe(), M_feSpacePtr->dof() , 0, 0, 0, 0 );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 6310 ) << "\n\t_coeffMassLHS = " << coeffMassLHS << "\n";

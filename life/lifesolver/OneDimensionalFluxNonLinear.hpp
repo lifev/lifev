@@ -36,7 +36,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalFluxNonLinear_H
@@ -113,9 +113,9 @@ public:
 
     //! Constructor
     /*!
-     * @param physics physics of the problem
+     * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalFluxNonLinear( const physicsPtr_Type physics ) : super( physics ) {};
+    explicit OneDimensionalFluxNonLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {};
 
     //! Do nothing destructor
     virtual ~OneDimensionalFluxNonLinear() {}

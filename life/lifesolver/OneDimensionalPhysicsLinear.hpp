@@ -37,7 +37,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalPhysicsLinear_H
@@ -78,9 +78,9 @@ public:
 
     //! Constructor
     /*!
-     * @param data data container of the problem
+     * @param dataPtr pointer to the data container of the problem
      */
-    explicit OneDimensionalPhysicsLinear( const dataPtr_Type data ) : super( data ) {}
+    explicit OneDimensionalPhysicsLinear( const dataPtr_Type dataPtr ) : super( dataPtr ) {}
 
     //! Destructor
     virtual ~OneDimensionalPhysicsLinear() {}

@@ -94,17 +94,17 @@ OneDimensionalBCHandler::OneDimensionalBCHandler( const OneDimensionalBCHandler&
 // Methods
 // ===================================================
 void
-OneDimensionalBCHandler::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs )
+OneDimensionalBCHandler::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs )
 {
-    M_boundary[ OneDimensional::left  ]->applyBC( time, timeStep, solution, flux, rhs );
-    M_boundary[ OneDimensional::right ]->applyBC( time, timeStep, solution, flux, rhs );
+    M_boundary[ OneDimensional::left  ]->applyBC( time, timeStep, solution, fluxPtr, rhs );
+    M_boundary[ OneDimensional::right ]->applyBC( time, timeStep, solution, fluxPtr, rhs );
 }
 
 void
-OneDimensionalBCHandler::applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs )
+OneDimensionalBCHandler::applyViscoelasticBC( const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs )
 {
-    M_boundary[ OneDimensional::left  ]->applyViscoelasticBC( flux, matrix, rhs );
-    M_boundary[ OneDimensional::right ]->applyViscoelasticBC( flux, matrix, rhs );
+    M_boundary[ OneDimensional::left  ]->applyViscoelasticBC( fluxPtr, matrix, rhs );
+    M_boundary[ OneDimensional::right ]->applyViscoelasticBC( fluxPtr, matrix, rhs );
 }
 
 // ===================================================
@@ -201,10 +201,10 @@ OneDimensionalBCHandler::setDefaultBC()
 }
 
 void
-OneDimensionalBCHandler::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+OneDimensionalBCHandler::setFluxSource( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr )
 {
     for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
-        ( *i )->setFluxSource( flux, source );
+        ( *i )->setFluxSource( fluxPtr, sourcePtr );
 }
 
 void

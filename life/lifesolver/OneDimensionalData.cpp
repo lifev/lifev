@@ -37,7 +37,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/OneDimensionalData.hpp>
@@ -52,8 +52,8 @@ OneDimensionalData::OneDimensionalData():
     M_physicsType               (),
     M_fluxType                  (),
     M_sourceType                (),
-    M_time                      (),
-    M_mesh                      ( new mesh_Type() ),
+    M_timeDataPtr               (),
+    M_meshPtr                   ( new mesh_Type() ),
     M_viscoelasticWall          (),
     M_viscoelasticAngle         (),
     M_viscoelasticPeriod        (),
@@ -119,17 +119,17 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     M_sourceType  = OneDimensional::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
-    if ( !M_time.get() )
-        M_time.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
+    if ( !M_timeDataPtr.get() )
+        M_timeDataPtr.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
 
     // Mesh setup - Space Discretization
     Real length = dataFile( ( section + "/space_discretization/Length"           ).data(), 1. );
     Real numberOfElements = dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 );
 
-    M_mesh->setup( length, numberOfElements );
+    M_meshPtr->setup( length, numberOfElements );
 
-    //std::cout << " 1D- Mesh nodes:                               " << M_mesh->numPoints() << std::endl;
-    //std::cout << " 1D- Mesh elements:                            " << M_mesh->numElements() << std::endl;
+    //std::cout << " 1D- Mesh nodes:                               " << M_meshPtr->numPoints() << std::endl;
+    //std::cout << " 1D- Mesh elements:                            " << M_meshPtr->numElements() << std::endl;
 
     // Physical Wall
     M_viscoelasticWall        = dataFile( ( section + "/PhysicalWall/ViscoelasticWall"                ).data(), false );
@@ -188,7 +188,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     {
     case uniform:
 
-        for ( UInt i = 0; i < M_mesh->numPoints() ; ++i )
+        for ( UInt i = 0; i < M_meshPtr->numPoints() ; ++i )
         {
             // Physical Parameters
             M_thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0. );
@@ -251,7 +251,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
 
     case pointwise:
 
-        for ( UInt i = 0; i < M_mesh->numPoints() ; ++i )
+        for ( UInt i = 0; i < M_meshPtr->numPoints() ; ++i )
         {
             // Physical Parameters
             M_thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0., i );
@@ -302,17 +302,17 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     M_sourceType  = OneDimensional::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
-    if ( !M_time.get() )
-        M_time.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
+    if ( !M_timeDataPtr.get() )
+        M_timeDataPtr.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
 
     // Mesh setup - Space Discretization
     Real length = dataFile( ( section + "/discretization/x_right" ).data(), 1. ) -
                   dataFile( ( section + "/discretization/x_left"  ).data(), 0. );
 
-    M_mesh->setup( length, dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
+    M_meshPtr->setup( length, dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
 
-    //std::cout << " 1D- Mesh nodes:                               " << M_mesh->numPoints() << std::endl;
-    //std::cout << " 1D- Mesh elements:                            " << M_mesh->numElements() << std::endl;
+    //std::cout << " 1D- Mesh nodes:                               " << M_meshPtr->numPoints() << std::endl;
+    //std::cout << " 1D- Mesh elements:                            " << M_meshPtr->numElements() << std::endl;
 
     // Physical Wall Model
     M_inertialWall            = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
@@ -359,7 +359,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     resetContainers();
 
     // Linear Parameters
-    for ( UInt i = 0; i < M_mesh->numPoints() ; ++i )
+    for ( UInt i = 0; i < M_meshPtr->numPoints() ; ++i )
     {
         M_viscoelasticCoefficient[i]   = dataFile( ( section + "/PhysicalParameters/gamma" ).data(), 0. );
 
@@ -413,7 +413,7 @@ OneDimensionalData::updateCoefficients()
         // Compute Friction Coefficient: Kr = -2*pi*mu/rho*s'(R)
         M_friction = 2 * M_PI * M_viscosity / M_density * ( M_powerLawCoefficient + 2 ) * std::pow( radius, M_powerLawCoefficient - 1 );
 
-        for ( UInt i = 0; i < M_mesh->numPoints(); ++i )
+        for ( UInt i = 0; i < M_meshPtr->numPoints(); ++i )
         {
             // Compute Coriolis Coefficient: Alpha = 2*pi/Area0*Int(s(r)^2)
             M_alpha[i] = 2 / ( radius * radius ) * profileIntegral;
@@ -443,7 +443,7 @@ OneDimensionalData::updateCoefficients()
 void
 OneDimensionalData::initializeLinearParameters()
 {
-    for ( UInt indz=0; indz < M_mesh->numPoints(); ++indz )
+    for ( UInt indz=0; indz < M_meshPtr->numPoints(); ++indz )
     {
         M_celerity1[indz] = std::sqrt( M_beta0[indz] * M_beta1[indz] / M_density );
         M_flux21[indz]    =  M_celerity1[indz] *  M_celerity1[indz];
@@ -453,20 +453,20 @@ OneDimensionalData::initializeLinearParameters()
     M_celerity2 = - M_celerity1;
 
     M_celerity1LeftEigenvector1 = M_celerity1;
-    M_celerity1LeftEigenvector2 = scalarVector_Type(M_mesh->numPoints(), 1.);
+    M_celerity1LeftEigenvector2 = scalarVector_Type(M_meshPtr->numPoints(), 1.);
     M_celerity2LeftEigenvector1 = M_celerity2;
-    M_celerity2LeftEigenvector2 = scalarVector_Type(M_mesh->numPoints(), 1.);
+    M_celerity2LeftEigenvector2 = scalarVector_Type(M_meshPtr->numPoints(), 1.);
 
-    M_flux11 = ZeroVector(M_mesh->numPoints());
-    M_flux12 = scalarVector_Type(M_mesh->numPoints(), 1.);
-    M_flux22 = ZeroVector(M_mesh->numPoints());
+    M_flux11 = ZeroVector(M_meshPtr->numPoints());
+    M_flux12 = scalarVector_Type(M_meshPtr->numPoints(), 1.);
+    M_flux22 = ZeroVector(M_meshPtr->numPoints());
 
-    M_source10 = ZeroVector(M_mesh->numPoints());
-    M_source11 = ZeroVector(M_mesh->numPoints());
-    M_source12 = ZeroVector(M_mesh->numPoints());
+    M_source10 = ZeroVector(M_meshPtr->numPoints());
+    M_source11 = ZeroVector(M_meshPtr->numPoints());
+    M_source12 = ZeroVector(M_meshPtr->numPoints());
 
-    M_source20 = ZeroVector(M_mesh->numPoints());
-    M_source21 = ZeroVector(M_mesh->numPoints());
+    M_source20 = ZeroVector(M_meshPtr->numPoints());
+    M_source21 = ZeroVector(M_meshPtr->numPoints());
 }
 
 void
@@ -482,12 +482,12 @@ OneDimensionalData::showMe( std::ostream& output ) const
 
     // Time
     output << "\n*** Values for data [time_discretization]" << std::endl << std::endl;
-    M_time->showMe( output );
+    M_timeDataPtr->showMe( output );
 
     // Space Discretization
     output << "\n*** Values for data [space_discretization]" << std::endl << std::endl;
     output << "Length                 = " << length() << std::endl;
-    output << "NumberOfElements       = " << M_mesh->numElements() << std::endl;
+    output << "NumberOfElements       = " << M_meshPtr->numElements() << std::endl;
 
     // Physical Wall Model
     output << "\n*** Values for data [PhysicalWallModel]" << std::endl << std::endl;
@@ -581,20 +581,20 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
     Real a  = dataFile( quantity.data(), defaultValue, 0 );
     Real b  = dataFile( quantity.data(), a, 1 );
 
-    Real xa = M_mesh->firstPoint().x();
-    Real xb = M_mesh->lastPoint().x();
+    Real xa = M_meshPtr->firstPoint().x();
+    Real xb = M_meshPtr->lastPoint().x();
 
-    for ( UInt i(0) ; i < M_mesh->numPoints() ; ++i )
+    for ( UInt i(0) ; i < M_meshPtr->numPoints() ; ++i )
         if ( isArea )
         {
-            vector[i] = std::sqrt(a / M_PI) + ( std::sqrt(b / M_PI) - std::sqrt(a / M_PI) ) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
+            vector[i] = std::sqrt(a / M_PI) + ( std::sqrt(b / M_PI) - std::sqrt(a / M_PI) ) / ( xb - xa ) * ( M_meshPtr->point( i ).x() - xa );
             vector[i] *= vector[i] * M_PI;
         }
         else
-            vector[i] = a + (b - a) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
+            vector[i] = a + (b - a) / ( xb - xa ) * ( M_meshPtr->point( i ).x() - xa );
 
     // linearInterpolation to disable tapering (when needed)
-//    for ( UInt i(0); i < M_mesh->numPoints() ; ++i )
+//    for ( UInt i(0); i < M_meshPtr->numPoints() ; ++i )
 //        if ( isArea )
 //            vector[i] = (a + b + 2 * std::sqrt(a*b)) / 4;
 //        else
@@ -604,7 +604,7 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
 void
 OneDimensionalData::computeSpatialDerivatives()
 {
-    for ( UInt iNode( 0 ) ; iNode < M_mesh->numPoints() ; ++iNode )
+    for ( UInt iNode( 0 ) ; iNode < M_meshPtr->numPoints() ; ++iNode )
     {
         M_dArea0dz[iNode] = computeSpatialDerivativeAtNode( M_area0, iNode );
         M_dBeta0dz[iNode] = computeSpatialDerivativeAtNode( M_beta0, iNode );
@@ -616,36 +616,36 @@ OneDimensionalData::computeSpatialDerivatives()
 void
 OneDimensionalData::resetContainers()
 {
-    M_viscoelasticCoefficient.resize( M_mesh->numPoints() );
-    M_thickness.resize( M_mesh->numPoints() );
+    M_viscoelasticCoefficient.resize( M_meshPtr->numPoints() );
+    M_thickness.resize( M_meshPtr->numPoints() );
 
-    M_area0.resize( M_mesh->numPoints() );
-    M_beta0.resize( M_mesh->numPoints() );
-    M_beta1.resize( M_mesh->numPoints() );
-    M_alpha.resize( M_mesh->numPoints() );
+    M_area0.resize( M_meshPtr->numPoints() );
+    M_beta0.resize( M_meshPtr->numPoints() );
+    M_beta1.resize( M_meshPtr->numPoints() );
+    M_alpha.resize( M_meshPtr->numPoints() );
 
-    M_dArea0dz.resize( M_mesh->numPoints() );
-    M_dBeta0dz.resize( M_mesh->numPoints() );
-    M_dBeta1dz.resize( M_mesh->numPoints() );
-    M_dAlphadz.resize( M_mesh->numPoints() );
+    M_dArea0dz.resize( M_meshPtr->numPoints() );
+    M_dBeta0dz.resize( M_meshPtr->numPoints() );
+    M_dBeta1dz.resize( M_meshPtr->numPoints() );
+    M_dAlphadz.resize( M_meshPtr->numPoints() );
 
     // Linear Parameters defined along the 1D model
-    M_flux11.resize( M_mesh->numPoints() );
-    M_flux12.resize( M_mesh->numPoints() );
-    M_flux21.resize( M_mesh->numPoints() );
-    M_flux22.resize( M_mesh->numPoints() );
-    M_celerity1.resize( M_mesh->numPoints() );
-    M_celerity2.resize( M_mesh->numPoints() );
-    M_celerity1LeftEigenvector1.resize( M_mesh->numPoints() );
-    M_celerity1LeftEigenvector2.resize( M_mesh->numPoints() );
-    M_celerity2LeftEigenvector1.resize( M_mesh->numPoints() );
-    M_celerity2LeftEigenvector2.resize( M_mesh->numPoints() );
-    M_source10.resize( M_mesh->numPoints() );
-    M_source20.resize( M_mesh->numPoints() );
-    M_source11.resize( M_mesh->numPoints() );
-    M_source12.resize( M_mesh->numPoints() );
-    M_source21.resize( M_mesh->numPoints() );
-    M_source22.resize( M_mesh->numPoints() );
+    M_flux11.resize( M_meshPtr->numPoints() );
+    M_flux12.resize( M_meshPtr->numPoints() );
+    M_flux21.resize( M_meshPtr->numPoints() );
+    M_flux22.resize( M_meshPtr->numPoints() );
+    M_celerity1.resize( M_meshPtr->numPoints() );
+    M_celerity2.resize( M_meshPtr->numPoints() );
+    M_celerity1LeftEigenvector1.resize( M_meshPtr->numPoints() );
+    M_celerity1LeftEigenvector2.resize( M_meshPtr->numPoints() );
+    M_celerity2LeftEigenvector1.resize( M_meshPtr->numPoints() );
+    M_celerity2LeftEigenvector2.resize( M_meshPtr->numPoints() );
+    M_source10.resize( M_meshPtr->numPoints() );
+    M_source20.resize( M_meshPtr->numPoints() );
+    M_source11.resize( M_meshPtr->numPoints() );
+    M_source12.resize( M_meshPtr->numPoints() );
+    M_source21.resize( M_meshPtr->numPoints() );
+    M_source22.resize( M_meshPtr->numPoints() );
 }
 
 } // LifeV namespace

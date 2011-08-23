@@ -116,18 +116,18 @@ public:
      *  @param time the current time.
      *  @param timeStep the time step.
      *  @param solution the solution container.
-     *  @param flux the flux class.
+     *  @param fluxPtr pointer to the flux class.
      *  @param rhs the rhs of the Taylor-Galerking problem.
      */
-    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
+    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs );
 
     //! Apply boundary conditions to the rhs of the viscoelastic problem
     /*!
-     *  @param flux the flux class.
+     *  @param fluxPtr pointer to the flux class.
      *  @param matrix the matrix of the viscoelastic problem.
      *  @param rhs the rhs of the viscoelastic problem.
      */
-    void applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs );
+    void applyViscoelasticBC( const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs );
 
     //@}
 
@@ -188,7 +188,7 @@ private:
     /*!
      *  @param time the current time.
      *  @param timeStep the time step.
-     *  @param flux the flux class.
+     *  @param fluxPtr pointer to the flux class.
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param leftEigenvector1 first line of the left eigenvector matrix.
      *  @param leftEigenvector2 second line of the left eigenvector matrix.
@@ -196,7 +196,7 @@ private:
      *  @param bcMatrix the 2x2 matrix problem for the boundary condition computation.
      *  @param bcRHS the rhs of the 2x2 problem for the boundary condition computation.
      */
-    void computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& bcLine,
+    void computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& fluxPtr, const bcLine_Type& bcLine,
                               const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
                               const UInt& dof, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS );
 

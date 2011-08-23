@@ -32,7 +32,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalSource_H
@@ -78,13 +78,13 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalSource() : M_physics() {}
+    explicit OneDimensionalSource() : M_physicsPtr() {}
 
     //! Constructor
     /*!
-     * @param physics physics of the problem
+     * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalSource( const physicsPtr_Type physics ) : M_physics( physics ) {}
+    explicit OneDimensionalSource( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
 
     //! Do nothing destructor
     virtual ~OneDimensionalSource() {}
@@ -135,9 +135,9 @@ public:
 
     //! Set the physics of the problem.
     /*!
-     * @param physics physics of the problem
+     * @param physicsPtr pointer to physics of the problem
      */
-    void setPhysics( const physicsPtr_Type& physics ) { M_physics = physics; }
+    void setPhysics( const physicsPtr_Type& physicsPtr ) { M_physicsPtr = physicsPtr; }
 
     //@}
 
@@ -149,13 +149,13 @@ public:
     /*!
      * @return physics of the problem
      */
-    physicsPtr_Type physics() const { return M_physics; }
+    physicsPtr_Type physics() const { return M_physicsPtr; }
 
     //@}
 
 protected:
 
-    physicsPtr_Type                 M_physics;
+    physicsPtr_Type                 M_physicsPtr;
 
 private:
 

@@ -32,7 +32,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalFlux_H
@@ -79,13 +79,13 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalFlux() : M_physics() {}
+    explicit OneDimensionalFlux() : M_physicsPtr() {}
 
     //! Constructor
     /*!
-     * @param physics physics of the problem
+     * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalFlux( const physicsPtr_Type physics ) : M_physics( physics ) {}
+    explicit OneDimensionalFlux( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
 
     //! Do nothing destructor
     virtual ~OneDimensionalFlux() {}
@@ -154,9 +154,9 @@ public:
 
     //! Set the physics of the problem.
     /*!
-     * @param physics physics of the problem
+     * @param physicsPtr pointer to the physics of the problem
      */
-    void setPhysics( const physicsPtr_Type& physics ) { M_physics = physics; }
+    void setPhysics( const physicsPtr_Type& physicsPtr ) { M_physicsPtr = physicsPtr; }
 
     //@}
 
@@ -168,13 +168,13 @@ public:
     /*!
      * @return physics of the problem
      */
-    physicsPtr_Type physics() const { return M_physics; }
+    physicsPtr_Type physics() const { return M_physicsPtr; }
 
     //@}
 
 protected:
 
-    physicsPtr_Type                 M_physics;
+    physicsPtr_Type                 M_physicsPtr;
 
 private:
 

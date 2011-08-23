@@ -37,7 +37,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalPhysics_H
@@ -79,13 +79,13 @@ public :
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalPhysics() : M_data(), M_previousArea() {}
+    explicit OneDimensionalPhysics() : M_dataPtr(), M_previousAreaPtr() {}
 
     //! Constructor
     /*!
-     * @param data data container of the problem
+     * @param dataPtr pointer to the data container of the problem
      */
-    explicit OneDimensionalPhysics( const dataPtr_Type data ) : M_data ( data ), M_previousArea() {}
+    explicit OneDimensionalPhysics( const dataPtr_Type dataPtr ) : M_dataPtr ( dataPtr ), M_previousAreaPtr() {}
 
     //! Destructor
     virtual ~OneDimensionalPhysics() {}
@@ -280,13 +280,13 @@ public :
     /*!
      * @return \f$P_\mathrm{external}\f$
      */
-    const Real& externalPressure() const { return M_data->externalPressure(); }
+    const Real& externalPressure() const { return M_dataPtr->externalPressure(); }
 
     //! Return the venous pressure.
     /*!
      * @return \f$P_\mathrm{venous}\f$
      */
-    const Real& venousPressure() const { return M_data->venousPressure(); }
+    const Real& venousPressure() const { return M_dataPtr->venousPressure(); }
 
     //! Compute the elastic pressure.
     /*!
@@ -360,16 +360,16 @@ public :
 
     //! Set the data container of the problem.
     /*!
-     * @param data data container of the problem
+     * @param dataPtr pointer to the data container of the problem
      */
-    void setData( const dataPtr_Type& data ) { M_data = data; }
+    void setData( const dataPtr_Type& dataPtr ) { M_dataPtr = dataPtr; }
 
     //! Set the area at time \f$t^n\f$.
     /*!
      *  This parameter is required for computing the derivative of the area in time.
      * @param area_tn \f$A^{n}\f$
      */
-    void setArea_tn( const vector_Type& area_tn ) { M_previousArea.reset( new vector_Type ( area_tn ) ); }
+    void setArea_tn( const vector_Type& area_tn ) { M_previousAreaPtr.reset( new vector_Type ( area_tn ) ); }
 
     //@}
 
@@ -378,15 +378,15 @@ public :
 
     //! Get the data container of the problem.
     /*!
-     * @return data container of the problem
+     * @return shared pointer to the data container of the problem
      */
-    dataPtr_Type data() const { return M_data; }
+    dataPtr_Type data() const { return M_dataPtr; }
 
     //@}
 
 protected:
 
-    dataPtr_Type                      M_data;
+    dataPtr_Type                      M_dataPtr;
 
 private:
 
@@ -399,7 +399,7 @@ private:
 
     //@}
 
-    vectorPtr_Type                    M_previousArea;
+    vectorPtr_Type                    M_previousAreaPtr;
 };
 
 // ===================================================
@@ -408,8 +408,8 @@ private:
 inline Real
 OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
-        return ( M_data->area0( iNode ) * OneDimensional::pow20( ( P - externalPressure() ) / M_data->beta0( iNode ) + 1, 1 / M_data->beta1( iNode ) )  );
+    if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+        return ( M_dataPtr->area0( iNode ) * OneDimensional::pow20( ( P - externalPressure() ) / M_dataPtr->beta0( iNode ) + 1, 1 / M_dataPtr->beta1( iNode ) )  );
     else
     {
         // Newton method to solve the non linear equation
@@ -417,7 +417,7 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
         Real maxIT(100);
         UInt i(0);
 
-        Real A( M_data->area0( iNode ) );
+        Real A( M_dataPtr->area0( iNode ) );
         Real newtonUpdate(0);
         for ( ; i < maxIT ; ++i )
         {
@@ -446,7 +446,7 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
 inline Real
 OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& timeStep, const UInt& iNode ) const
 {
-    return ( Anp1 - (*M_previousArea)[iNode] ) / timeStep;
+    return ( Anp1 - (*M_previousAreaPtr)[iNode] ) / timeStep;
 }
 
 inline Real
@@ -458,32 +458,32 @@ OneDimensionalPhysics::dPdA( const Real& A, const Real& timeStep, const UInt& iN
 inline Real
 OneDimensionalPhysics::dPdAelastic( const Real& A, const UInt& iNode ) const
 {
-    return M_data->beta0( iNode ) * M_data->beta1( iNode ) * OneDimensional::pow05( A / M_data->area0( iNode ), M_data->beta1( iNode ) ) / A;
+    return M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) * OneDimensional::pow05( A / M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) / A;
 }
 
 inline Real
 OneDimensionalPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+    if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
         return 0;
     else
-        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
+        return M_dataPtr->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
 }
 
 inline Real
 OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+    if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
     {
-        return M_data->area0( iNode ) / ( M_data->beta0( iNode ) * M_data->beta1( iNode ) )
+        return M_dataPtr->area0( iNode ) / ( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) )
                                       * OneDimensional::pow10( 1 + ( P - externalPressure() )
-                                      / M_data->beta0( iNode ), 1 / M_data->beta1( iNode ) - 1 );
+                                      / M_dataPtr->beta0( iNode ), 1 / M_dataPtr->beta1( iNode ) - 1 );
     }
     else
     {
         // Finite difference approach
-        return ( fromPToA( P + M_data->jacobianPerturbationStress(), timeStep, iNode, elasticExternalNodes ) - fromPToA( P, timeStep, iNode, elasticExternalNodes ) )
-               / M_data->jacobianPerturbationStress();
+        return ( fromPToA( P + M_dataPtr->jacobianPerturbationStress(), timeStep, iNode, elasticExternalNodes ) - fromPToA( P, timeStep, iNode, elasticExternalNodes ) )
+               / M_dataPtr->jacobianPerturbationStress();
     }
 }
 
@@ -491,10 +491,10 @@ inline Real
 OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const Real& timeStep, const ID& id, const UInt& iNode ) const
 {
     if ( id == 0 ) // dPt/dA
-        return dPdA( A, timeStep, iNode ) - M_data->densityRho() * Q * Q / ( A * A * A );
+        return dPdA( A, timeStep, iNode ) - M_dataPtr->densityRho() * Q * Q / ( A * A * A );
 
     if ( id == 1 ) // dPt/dQ
-        return M_data->densityRho() * Q / ( A * A );
+        return M_dataPtr->densityRho() * Q / ( A * A );
 
     ERROR_MSG("Total pressure's differential function has only 2 components.");
     return -1.;
@@ -506,7 +506,7 @@ OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const Real& timeStep
 inline Real
 OneDimensionalPhysics::celerity0( const UInt& iNode ) const
 {
-    return std::sqrt( M_data->beta0( iNode ) * M_data->beta1( iNode ) / M_data->densityRho() );
+    return std::sqrt( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) / M_dataPtr->densityRho() );
 }
 
 inline Real
@@ -518,22 +518,22 @@ OneDimensionalPhysics::pressure( const Real& A, const Real& timeStep, const UInt
 inline Real
 OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& iNode ) const
 {
-    return ( M_data->beta0( iNode ) * ( OneDimensional::pow05( A/M_data->area0( iNode ), M_data->beta1( iNode ) ) - 1 ) );
+    return ( M_dataPtr->beta0( iNode ) * ( OneDimensional::pow05( A/M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) - 1 ) );
 }
 
 inline Real
 OneDimensionalPhysics::viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+    if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
         return 0;
     else
-        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * dAdt( A, timeStep, iNode );
+        return M_dataPtr->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * dAdt( A, timeStep, iNode );
 }
 
 inline Real
 OneDimensionalPhysics::totalPressure( const Real& A, const Real& Q, const UInt& iNode ) const
 {
-    return elasticPressure( A, iNode ) + M_data->densityRho() / 2 * Q * Q / ( A * A );
+    return elasticPressure( A, iNode ) + M_dataPtr->densityRho() / 2 * Q * Q / ( A * A );
 }
 
 }

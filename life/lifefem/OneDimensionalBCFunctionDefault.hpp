@@ -139,16 +139,16 @@ public:
 
     //! Set the flux and the source classes for the problem
     /*!
-     *  @param flux the flux term of the problem.
-     *  @param source the source term of the problem.
+     *  @param fluxPtr pointer to the flux term of the problem.
+     *  @param sourcePtr pointer to the source term of the problem.
      */
-    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
+    void setFluxSource( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr );
 
     //! Set the solution of the problem
     /*!
-     *  @param solution pointer to the solution of the problem.
+     *  @param solutionPtr pointer to the solution of the problem.
      */
-    void setSolution( const solutionPtr_Type& solution ) { M_solution = solution; }
+    void setSolution( const solutionPtr_Type& solutionPtr ) { M_solutionPtr = solutionPtr; }
 
     //@}
 
@@ -162,9 +162,9 @@ protected:
 
     //@}
 
-    fluxPtr_Type                             M_flux;
-    sourcePtr_Type                           M_source;
-    solutionPtr_Type                         M_solution;
+    fluxPtr_Type                             M_fluxPtr;
+    sourcePtr_Type                           M_sourcePtr;
+    solutionPtr_Type                         M_solutionPtr;
 
     UInt                                     M_bcNode;
     bcSide_Type                              M_bcSide;
@@ -451,7 +451,7 @@ protected:
      * For absorbing BC the venous pressure is equal to the external pressure.
      * @return venous pressure.
      */
-    virtual Real venousPressure() { return M_flux->physics()->externalPressure(); }
+    virtual Real venousPressure() { return M_fluxPtr->physics()->externalPressure(); }
 
 };
 
@@ -512,7 +512,7 @@ protected:
     /*!
      * @return venous pressure.
      */
-    Real venousPressure() { return M_flux->physics()->venousPressure(); }
+    Real venousPressure() { return M_fluxPtr->physics()->venousPressure(); }
 
     Real M_resistance;
 };

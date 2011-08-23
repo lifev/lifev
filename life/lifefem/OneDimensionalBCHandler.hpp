@@ -116,18 +116,18 @@ public:
      *  @param time the current time.
      *  @param timeStep the time step.
      *  @param solution the solution container.
-     *  @param flux the flux class.
+     *  @param fluxPtr pointer to the flux class.
      *  @param rhs the rhs of the Taylor-Galerking problem.
      */
-    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
+    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs );
 
     //! Apply boundary conditions to the rhs of the viscoelastic problem
     /*!
-     *  @param flux the flux class.
+     *  @param fluxPtr pointer to the flux class.
      *  @param matrix the matrix of the viscoelastic problem.
      *  @param rhs the rhs of the viscoelastic problem.
      */
-    void applyViscoelasticBC(const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs );
+    void applyViscoelasticBC(const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs );
 
     //@}
 
@@ -152,16 +152,16 @@ public:
 
     //! Set the flux and the source classes for the problem
     /*!
-     *  @param flux the flux term of the problem.
-     *  @param source the source term of the problem.
+     *  @param fluxPtr pointer to the flux term of the problem.
+     *  @param source pointer to the source term of the problem.
      */
-    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
+    void setFluxSource( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr );
 
     //! Set the solution of the problem
     /*!
-     *  @param solution pointer to the solution of the problem.
+     *  @param solutionPtr pointer to the solution of the problem.
      */
-    void setSolution( const solutionPtr_Type& solution );
+    void setSolution( const solutionPtr_Type& solutionPtr );
 
     //@}
 

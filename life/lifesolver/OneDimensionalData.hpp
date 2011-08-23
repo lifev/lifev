@@ -37,7 +37,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalData_H
@@ -207,9 +207,9 @@ public:
 
     //! Set data time container
     /*!
-     * @param TimeData shared_ptr to TimeData container
+     * @param timeDataPtr shared_ptr to TimeData container
      */
-    void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
+    void setTimeData( const timePtr_Type timeDataPtr ) { M_timeDataPtr = timeDataPtr; }
 
     //! Set the fluid density
     /*!
@@ -309,31 +309,31 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    timePtr_Type dataTime() const { return M_time; }
+    timePtr_Type dataTime() const { return M_timeDataPtr; }
 
     //! Get the mesh container
     /*!
      * @return shared_ptr to the mesh
      */
-    meshPtr_Type mesh() const { return M_mesh; }
+    meshPtr_Type mesh() const { return M_meshPtr; }
 
     //! Get the length of the 1D segment
     /*!
      * @return length of the 1D segment
      */
-    Real length() const { return M_mesh->pointList( M_mesh->numVertices() - 1).x() - M_mesh->pointList( 0 ).x(); }
+    Real length() const { return M_meshPtr->pointList( M_meshPtr->numVertices() - 1).x() - M_meshPtr->pointList( 0 ).x(); }
 
     //! Get the number of elements in the 1D segment
     /*!
      * @return number of elements in the 1D segment
      */
-    UInt numberOfElements() const { return M_mesh->numElements(); }
+    UInt numberOfElements() const { return M_meshPtr->numElements(); }
 
     //! Get the number of nodes in the 1D segment
     /*!
      * @return number of nodes in the 1D segment
      */
-    UInt numberOfNodes() const { return M_mesh->numPoints(); }
+    UInt numberOfNodes() const { return M_meshPtr->numPoints(); }
 
     //! Get the flag identifying if the wall is viscoelastic
     /*!
@@ -665,8 +665,8 @@ private:
     OneDimensional::sourceTerm_Type  M_sourceType;
 
     //! Data containers for time and mesh
-    timePtr_Type M_time;
-    meshPtr_Type M_mesh;
+    timePtr_Type M_timeDataPtr;
+    meshPtr_Type M_meshPtr;
 
     //! Physical Wall Model
     bool M_viscoelasticWall;
@@ -759,15 +759,15 @@ OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, co
         // We use 1° order finite differences at the boundaries to compute the derivatives
         if ( iNode == 0 )
         {
-            return ( -vector[0] + vector[1] ) / ( M_mesh->meanH() );
+            return ( -vector[0] + vector[1] ) / ( M_meshPtr->meanH() );
         }
-        else if ( iNode == M_mesh->numPoints() - 1 )
+        else if ( iNode == M_meshPtr->numPoints() - 1 )
         {
-            return ( vector[iNode] - vector[iNode-1] ) / ( M_mesh->meanH() );
+            return ( vector[iNode] - vector[iNode-1] ) / ( M_meshPtr->meanH() );
         }
         else
         {
-            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_mesh->meanH() );
+            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_meshPtr->meanH() );
         }
 
         break;
@@ -777,15 +777,15 @@ OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, co
         // We use 2° order finite differences at the boundaries to compute the derivatives
         if ( iNode == 0 )
         {
-            return ( -1.5 * vector[0] + 2.0*vector[1] - 0.5 * vector[2] ) / ( M_mesh->meanH() );
+            return ( -1.5 * vector[0] + 2.0*vector[1] - 0.5 * vector[2] ) / ( M_meshPtr->meanH() );
         }
-        else if ( iNode == M_mesh->numPoints() - 1 )
+        else if ( iNode == M_meshPtr->numPoints() - 1 )
         {
-            return ( 1.5 * vector[iNode] - 2.0*vector[iNode-1] + 0.5 * vector[iNode-2] ) / ( M_mesh->meanH() );
+            return ( 1.5 * vector[iNode] - 2.0*vector[iNode-1] + 0.5 * vector[iNode-2] ) / ( M_meshPtr->meanH() );
         }
         else
         {
-            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_mesh->meanH() );
+            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_meshPtr->meanH() );
         }
 
         break;

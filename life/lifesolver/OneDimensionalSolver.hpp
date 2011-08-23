@@ -43,7 +43,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 
@@ -211,7 +211,7 @@ public:
     /*!
      * @param solution solution container
      */
-    void setupSolution( solution_Type& solution ) { setupSolution( solution, M_feSpace->map() ); }
+    void setupSolution( solution_Type& solution ) { setupSolution( solution, M_feSpacePtr->map() ); }
 
     //! Setup the solution using user defined FESpace map.
     /*!
@@ -326,37 +326,37 @@ public:
 
     //! Set problem classes
     /*!
-     * @param physics the physics class.
-     * @param flux the flux class.
-     * @param source the source class.
+     * @param physicsPtr pointer to the physics class.
+     * @param fluxPtr pointer to the flux class.
+     * @param sourcePtr pointer to the source class.
      */
-    void setProblem( const physicsPtr_Type& physics,
-                     const fluxPtr_Type&    flux,
-                     const sourcePtr_Type&  source );
+    void setProblem( const physicsPtr_Type& physicsPtr,
+                     const fluxPtr_Type&    fluxPtr,
+                     const sourcePtr_Type&  sourcePtr );
 
     //! Set the communicator
     /*!
-     * @param comm the Epetra MPI communicator
+     * @param commPtr pointer to the Epetra MPI communicator
      */
-    void setCommunicator( const commPtr_Type& comm );
+    void setCommunicator( const commPtr_Type& commPtr );
 
     //! Set the FEspace
     /*!
-     * @param feSpace the FE space
+     * @param feSpacePtr pointer to the FE space
      */
-    void setFESpace( const feSpacePtr_Type& feSpace );
+    void setFESpace( const feSpacePtr_Type& feSpacePtr );
 
     //! Set the linear solver
     /*!
-     * @param linearSolver the linear solver for the hyperbolic problem
+     * @param linearSolverPtr pointer to the linear solver for the hyperbolic problem
      */
-    void setLinearSolver( const linearSolverPtr_Type& linearSolver );
+    void setLinearSolver( const linearSolverPtr_Type& linearSolverPtr );
 
     //! Set the viscoelastic linear solver
     /*!
-     * @param linearViscoelasticSolver the linear solver for the viscoelastic problem
+     * @param linearViscoelasticSolverPtr pointer to the linear solver for the viscoelastic problem
      */
-    void setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolver );
+    void setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolverPtr );
 
     //@}
 
@@ -366,21 +366,21 @@ public:
 
     //! Get the physics class
     /*!
-     *  @return the physics class.
+     *  @return shared pointer to the physics class.
      */
-    const physicsPtr_Type& physics() const { return M_physics; }
+    const physicsPtr_Type& physics() const { return M_physicsPtr; }
 
     //! Get the flux class
     /*!
-     *  @return the flux class.
+     *  @return shared pointer to the flux class.
      */
-    const fluxPtr_Type& flux() const { return M_flux; }
+    const fluxPtr_Type& flux() const { return M_fluxPtr; }
 
     //! Get the source class
     /*!
-     *  @return the source class.
+     *  @return shared pointer to the source class.
      */
-    const sourcePtr_Type& source() const { return M_source; }
+    const sourcePtr_Type& source() const { return M_sourcePtr; }
 
     //! Return the ID of the boundary node given a side.
     /*!
@@ -419,9 +419,9 @@ public:
 
     //! Get the system matrix without BC
     /*!
-     * @return system matrix without BC
+     * @return shared pointer to the system matrix without BC
      */
-    const matrixPtr_Type& massMatrix() const { return M_homogeneousMassMatrix; }
+    const matrixPtr_Type& massMatrix() const { return M_homogeneousMassMatrixPtr; }
 
     //@}
 
@@ -530,17 +530,17 @@ private:
 
     //@}
 
-    physicsPtr_Type                    M_physics;
-    fluxPtr_Type                       M_flux;
-    sourcePtr_Type                     M_source;
-    feSpacePtr_Type                    M_feSpace;
-    commPtr_Type                       M_comm;
+    physicsPtr_Type                    M_physicsPtr;
+    fluxPtr_Type                       M_fluxPtr;
+    sourcePtr_Type                     M_sourcePtr;
+    feSpacePtr_Type                    M_feSpacePtr;
+    commPtr_Type                       M_commPtr;
     Displayer                          M_displayer;
 
-    boost::shared_ptr< MatrixElemental > M_elementalMassMatrix;       //!< element mass matrix
-    boost::shared_ptr< MatrixElemental > M_elementalStiffnessMatrix;  //!< element stiffness matrix
-    boost::shared_ptr< MatrixElemental > M_elementalGradientMatrix;   //!< element gradient matrix
-    boost::shared_ptr< MatrixElemental > M_elementalDivergenceMatrix; //!< element divergence matrix
+    boost::shared_ptr< MatrixElemental > M_elementalMassMatrixPtr;       //!< element mass matrix
+    boost::shared_ptr< MatrixElemental > M_elementalStiffnessMatrixPtr;  //!< element stiffness matrix
+    boost::shared_ptr< MatrixElemental > M_elementalGradientMatrixPtr;   //!< element gradient matrix
+    boost::shared_ptr< MatrixElemental > M_elementalDivergenceMatrixPtr; //!< element divergence matrix
 
     //! Right hand sides of the linear system i: "mass * M_Ui = M_rhsi"
     vectorPtrContainer_Type            M_rhs;
@@ -561,26 +561,26 @@ private:
     scalarVectorContainer_Type         M_dSdUVector;
 
     //! tridiagonal mass matrix
-    matrixPtr_Type                     M_homogeneousMassMatrix;
+    matrixPtr_Type                     M_homogeneousMassMatrixPtr;
 
     //! tridiagonal gradient matrix
-    matrixPtr_Type                     M_homogeneousGradientMatrix;
+    matrixPtr_Type                     M_homogeneousGradientMatrixPtr;
 
     //! tridiagonal mass matrices multiplied by diffSrcij
-    matrixPtrContainer_Type            M_dSdUMassMatrix;
+    matrixPtrContainer_Type            M_dSdUMassMatrixPtr;
 
     //! tridiagonal stiffness matrices multiplied by diffFluxij
-    matrixPtrContainer_Type            M_dFdUStiffnessMatrix;
+    matrixPtrContainer_Type            M_dFdUStiffnessMatrixPtr;
 
     //! tridiagonal gradient matrices multiplied by diffFluxij
-    matrixPtrContainer_Type            M_dFdUGradientMatrix;
+    matrixPtrContainer_Type            M_dFdUGradientMatrixPtr;
 
     //! tridiagonal divergence matrices multiplied by diffSrcij
-    matrixPtrContainer_Type            M_dSdUDivergenceMatrix;
+    matrixPtrContainer_Type            M_dSdUDivergenceMatrixPtr;
 
     //! The linear solver
-    linearSolverPtr_Type               M_linearSolver;
-    linearSolverPtr_Type               M_linearViscoelasticSolver;
+    linearSolverPtr_Type               M_linearSolverPtr;
+    linearSolverPtr_Type               M_linearViscoelasticSolverPtr;
 
 private:
 

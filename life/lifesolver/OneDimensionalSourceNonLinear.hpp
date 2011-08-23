@@ -36,7 +36,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalSourceNonLinear_H
@@ -112,9 +112,9 @@ public:
 
     //! Constructor
     /*!
-     * @param physics physics of the problem
+     * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalSourceNonLinear( const physicsPtr_Type physics ) : super( physics ) {}
+    explicit OneDimensionalSourceNonLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {}
 
     //! Do nothing destructor
     virtual ~OneDimensionalSourceNonLinear() {}
