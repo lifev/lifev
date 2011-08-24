@@ -39,7 +39,6 @@
 
 #include <life/lifesolver/BCInterface.hpp>
 
-// Move this to BCInterfaceDefinitions.hpp
 #include <lifemc/lifefem/ZeroDimensionalBCHandler.hpp>
 
 namespace LifeV
@@ -86,6 +85,16 @@ namespace LifeV
  *  All the parameters are case sensitive.
  *
  *  See \c BCInterface base class for more details.
+ *
+ *  <b>TODO LIST</b>
+ *  Due to the splitting of BCInterface between LifeV and Mathcard there are some legacy that we cannot
+ *  remove now. Here there is a list of think that should be done before porting the code to LifeV in
+ *  order to remove these legacies:
+ *
+ *  <ol>
+ *      <li> remove the legacy in LifeV and Mathcard marked with the MULTISCALE_IS_IN_LIFEV macro;
+ *      <li> use (and develop) BCInterfaceData0D in place of BCInterfaceData1D.
+ *  </ol>
  */
 template< class BcHandler, class PhysicalSolverType >
 class BCInterface0D : public virtual BCInterface< BcHandler, PhysicalSolverType >
@@ -97,6 +106,10 @@ public:
 
     typedef BCInterface< BcHandler, PhysicalSolverType >          bcInterface_Type;
 
+    typedef typename bcInterface_Type::factory_Type               factory_Type;
+
+    typedef BCInterfaceData1D                                     data_Type;
+
     //@}
 
 
@@ -104,7 +117,7 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface0D() : bcInterface_Type() {}
+    explicit BCInterface0D() : bcInterface_Type(), M_data() {}
 
     //! Destructor
     virtual ~BCInterface0D() {}
@@ -115,13 +128,37 @@ public:
     //! @name Methods
     //@{
 
+    //! Read a specific boundary condition from a file and add it to the data container
+    /*!
+     * @param fileName Name of the data file
+     * @param dataSection section in the data file
+     * @param name name of the boundary condition
+     */
+    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+    {
+        M_data.readBC( fileName, dataSection, name );
+    }
+
     //! Insert the current boundary condition in the BChandler
     void insertBC()
     {
-        bcInterface_Type::insertBC();
+        factory_Type factory;
+        this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
 
         addBcToHandler();
     }
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the data container
+    /*!
+     * @return the data container
+     */
+    data_Type& dataContainer() { return M_data; }
 
     //@}
 
@@ -132,8 +169,11 @@ private:
         if ( !this->M_handler.get() )
             this->createHandler();
 
-        this->M_handler->setBC( this->M_data.flag(), this->M_data.quantity(), boost::bind( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
+        this->M_handler->setBC( M_data.flag(), M_data.quantity(), boost::bind( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
     }
+
+    // Data
+    data_Type                       M_data;
 };
 
 } // Namespace LifeV
