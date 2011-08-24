@@ -113,7 +113,7 @@ public:
     typedef typename bcInterface_Type::factory_Type               factory_Type;
     typedef typename bcInterface_Type::bcFunctionPtr_Type         bcFunctionPtr_Type;
 
-    typedef typename bcInterface_Type::data_Type                  data_Type;
+    typedef BCInterfaceData3D                                     data_Type;
 
     typedef typename bcInterface_Type::vectorFunction_Type        vectorFunction_Type;
 
@@ -150,6 +150,17 @@ public:
 
     //! @name Methods
     //@{
+
+    //! Read a specific boundary condition from a file and add it to the data container
+    /*!
+     * @param fileName Name of the data file
+     * @param dataSection section in the data file
+     * @param name name of the boundary condition
+     */
+    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+    {
+        M_data.readBC( fileName, dataSection, name );
+    }
 
     //! Insert the current boundary condition in the BChandler
     void insertBC();
@@ -206,6 +217,18 @@ public:
 
     //@}
 
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the data container
+    /*!
+     * @return the data container
+     */
+    data_Type& dataContainer() { return M_data; }
+
+    //@}
+
 private:
 
     //! @name Unimplemented Methods
@@ -236,6 +259,9 @@ private:
 
     //@}
 
+    // Data
+    data_Type                       M_data;
+
     // Functions Robin
     vectorFunctionRobin_Type        M_vectorFunctionRobin;
 
@@ -255,6 +281,7 @@ private:
 template< class BcHandler, class PhysicalSolverType >
 BCInterface3D< BcHandler, PhysicalSolverType >::BCInterface3D() :
         bcInterface_Type          (),
+        M_data                    (),
         M_vectorFunctionRobin     (),
         M_vectorFunctionDirection (),
         M_vectorDataInterpolator  (),
@@ -279,7 +306,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
     Debug( 5020 ) << "BCInterface3D::insertBC\n";
 #endif
 
-    switch ( this->M_data.base().second )
+    switch ( M_data.base().second )
     {
     case BCIFunction:
     case BCIFunctionFile:
@@ -287,13 +314,13 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
     case BCIFunctionFileSolver:
     {
         factory_Type factory;
-        this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
+        this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
 
         BCFunctionBase base;
         this->M_vectorFunction.back()->assignFunction( base );
 
         // Directional BC
-        if ( this->M_data.mode() == Directional )
+        if ( M_data.mode() == Directional )
         {
             createFunctionDirectional( base );
             addBcToHandler( *M_vectorFunctionDirection.back() );
@@ -302,7 +329,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
         }
 
         // Robin BC
-        if ( this->M_data.type() == Robin )
+        if ( M_data.type() == Robin )
         {
             createFunctionRobin( base );
             addBcToHandler( *M_vectorFunctionRobin.back() );
@@ -330,7 +357,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
 
     default:
 
-        std::cout << " !!! Error: " << this->M_data.base().first << " is not valid in BCInterface3D !!!" << std::endl;
+        std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface3D !!!" << std::endl;
 
         break;
     }
@@ -362,10 +389,10 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
 
     for ( typename vectorFSI_Type::const_iterator i = M_vectorFSI.begin() ; i < M_vectorFSI.end() ; ++i )
     {
-        ( *i )->exportData( this->M_data );
+        ( *i )->exportData( M_data );
 
         // Robin BC
-        if ( this->M_data.type() == Robin )
+        if ( M_data.type() == Robin )
         {
             BCVector base;
 
@@ -390,12 +417,12 @@ inline void
 BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionRobin( BCBaseType& base )
 {
     // Parameters for direction BC
-    this->M_data.setName( this->M_data.name() + "_robinMassTerm" );
-    this->M_data.setRobinBaseAlpha();
+    M_data.setName( M_data.name() + "_robinMassTerm" );
+    M_data.setRobinBaseAlpha();
 
     // Create the mass term function
     factory_Type factory;
-    this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
+    this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
 
     BCFunctionBase baseRobin;
     this->M_vectorFunction.back()->assignFunction( baseRobin );
@@ -410,12 +437,12 @@ inline void
 BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDirectional( BCBaseType& base )
 {
     // Parameters for direction BC
-    this->M_data.setName( this->M_data.name() + "_directionalField" );
-    this->M_data.setDirectionalBase();
+    M_data.setName( M_data.name() + "_directionalField" );
+    M_data.setDirectionalBase();
 
     // Create the directional field
     factory_Type factory;
-    this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
+    this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
 
     BCFunctionBase baseDirectional;
     this->M_vectorFunction.back()->assignFunction( baseDirectional );
@@ -431,7 +458,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDataInterpolator()
 {
     // Directional base
     bcFunctionDataInterpolatorPtr_Type dataInterpolatorBase( new bcFunctionDataInterpolator_Type() );
-    dataInterpolatorBase->readData( this->M_data.baseString() );
+    dataInterpolatorBase->readData( M_data.baseString() );
     M_vectorDataInterpolator.push_back( dataInterpolatorBase );
 }
 
@@ -439,7 +466,8 @@ template< class BcHandler, class PhysicalSolverType >
 inline void
 BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionFSI()
 {
-    bcFunctionFSIPtr_Type function( new bcFunctionFSI_Type( this->M_data ) );
+    bcFunctionFSIPtr_Type function( new bcFunctionFSI_Type() );
+    function->setData( M_data );
     M_vectorFSI.push_back( function );
 }
 
@@ -450,7 +478,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
     if ( !this->M_handler.get() ) // If BCHandler has not been created yet, we do it now
         this->createHandler();
 
-    switch ( this->M_data.mode() )
+    switch ( M_data.mode() )
     {
     case Scalar:
     case Normal:
@@ -461,7 +489,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Scalar, Normal, Tangential, Directional" << "\n\n";
 #endif
 
-        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base );
+        this->M_handler->addBC( M_data.name(), M_data.flag(), M_data.type(), M_data.mode(), base );
 
         break;
 
@@ -471,7 +499,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Full" << "\n\n";
 #endif
 
-        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.componentsNumber() );
+        this->M_handler->addBC( M_data.name(), M_data.flag(), M_data.type(), M_data.mode(), base, M_data.componentsNumber() );
 
         break;
 
@@ -481,7 +509,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Component" << "\n\n";
 #endif
 
-        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.componentsVector() );
+        this->M_handler->addBC( M_data.name(), M_data.flag(), M_data.type(), M_data.mode(), base, M_data.componentsVector() );
 
         break;
     }

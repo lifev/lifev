@@ -38,7 +38,13 @@
 #define BCInterfaceFunction_H 1
 
 #include <life/lifesolver/BCInterfaceDefinitions.hpp>
-#include <life/lifesolver/BCInterfaceData.hpp>
+
+#ifdef MULTISCALE_IS_IN_LIFEV
+#include <life/lifesolver/BCInterfaceData0D.hpp>
+#endif
+
+#include <life/lifesolver/BCInterfaceData1D.hpp>
+#include <life/lifesolver/BCInterfaceData3D.hpp>
 
 #include <life/lifecore/Parser.hpp>
 
@@ -99,7 +105,6 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceData                                                       data_Type;
     typedef Parser                                                                parser_Type;
 
     //@}
@@ -110,12 +115,6 @@ public:
 
     //! Empty Constructor
     explicit BCInterfaceFunction();
-
-    //! Constructor
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    explicit BCInterfaceFunction( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterfaceFunction() {}
@@ -182,11 +181,25 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data
+#ifdef MULTISCALE_IS_IN_LIFEV
+    //! Set data for 0D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const data_Type& data );
+    virtual void setData( const BCInterfaceData0D& data );
+#endif
+
+    //! Set data for 1D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    virtual void setData( const BCInterfaceData1D& data );
+
+    //! Set data for 3D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    virtual void setData( const BCInterfaceData3D& data );
 
     //@}
 
@@ -210,6 +223,17 @@ private:
     BCInterfaceFunction( const BCInterfaceFunction& function );
 
     BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
+
+    //@}
+
+    //! @name Private Methods
+    //@{
+
+    //! Setup the parser using the data container
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    void setupParser( const BCInterfaceData& data );
 
     //@}
 
@@ -242,68 +266,8 @@ BCInterfaceFunction< PhysicalSolverType >::BCInterfaceFunction() :
 
 }
 
-template< typename PhysicalSolverType >
-BCInterfaceFunction< PhysicalSolverType >::BCInterfaceFunction( const data_Type& data ) :
-        M_parser    (),
-        M_mapID     ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( data )" << "\n";
-#endif
-
-    this->setData( data );
-}
-
 // ===================================================
-// Set Methods
-// ===================================================
-template< typename PhysicalSolverType >
-void
-BCInterfaceFunction< PhysicalSolverType >::setData( const data_Type& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
-#endif
-
-    if ( M_parser )
-        M_parser->setString( data.baseString() );
-    else
-        M_parser.reset( new parser_Type( data.baseString() ) );
-
-    /*
-     * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
-     * ------------------------------------------|---------------------------------------------------
-     *                                           |
-     * COMPONENT     2             x*y*z         |      1             1             function
-     * FULL          3             x*y*z         |      1             1             function
-     * FULL          1             x*y*z         |      1             1             function
-     * FULL          3             (y*z,x*z,x*y) |      1             3             functionID
-     * FULL          2             (x,y)         |      1             2             functionID
-     * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
-     */
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring( "," ) << "\n";
-#endif
-
-    // Note: the map ID is used only for 3D handler.
-    if ( M_parser->countSubstring( "," ) )
-    {
-        //Create the ID map
-        if ( data.componentsVector().size() > 1 ) // Component
-            for ( ID i( 0 ); i < static_cast< ID > ( data.componentsVector().size() ); ++i )
-                M_mapID[data.componentsVector()[i]] = i + 1;
-        else
-            // if ( data.componentsVector().front() == arguments )  Full
-            for ( ID i( 0 ); i < data.componentsVector().front(); ++i )
-                M_mapID[i+1] = i+1;
-    }
-}
-
-// ===================================================
-// Private Methods
+// Methods
 // ===================================================
 template< typename PhysicalSolverType >
 Real
@@ -379,6 +343,94 @@ BCInterfaceFunction< PhysicalSolverType >::functionTimeSpaceID( const Real& t, c
 #endif
 
     return M_parser->evaluate( M_mapID[id] );
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+#ifdef MULTISCALE_IS_IN_LIFEV
+template< typename PhysicalSolverType >
+void
+BCInterfaceFunction< PhysicalSolverType >::setData( const BCInterfaceData0D& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+#endif
+
+    setupParser( data );
+}
+#endif
+
+template< typename PhysicalSolverType >
+void
+BCInterfaceFunction< PhysicalSolverType >::setData( const BCInterfaceData1D& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+#endif
+
+    setupParser( data );
+}
+
+template< typename PhysicalSolverType >
+void
+BCInterfaceFunction< PhysicalSolverType >::setData( const BCInterfaceData3D& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+#endif
+
+    setupParser( data );
+
+    /*
+     * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
+     * ------------------------------------------|---------------------------------------------------
+     *                                           |
+     * COMPONENT     2             x*y*z         |      1             1             function
+     * FULL          3             x*y*z         |      1             1             function
+     * FULL          1             x*y*z         |      1             1             function
+     * FULL          3             (y*z,x*z,x*y) |      1             3             functionID
+     * FULL          2             (x,y)         |      1             2             functionID
+     * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
+     */
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring( "," ) << "\n";
+#endif
+
+    // Note: the map ID is used only for 3D handler.
+    if ( M_parser->countSubstring( "," ) )
+    {
+        //Create the ID map
+        if ( data.componentsVector().size() > 1 ) // Component
+            for ( ID i( 0 ); i < static_cast< ID > ( data.componentsVector().size() ); ++i )
+                M_mapID[data.componentsVector()[i]] = i + 1;
+        else
+            // if ( data.componentsVector().front() == arguments )  Full
+            for ( ID i( 0 ); i < data.componentsVector().front(); ++i )
+                M_mapID[i+1] = i+1;
+    }
+}
+
+// ===================================================
+// Private Methods
+// ===================================================
+template< typename PhysicalSolverType >
+void
+BCInterfaceFunction< PhysicalSolverType >::setupParser( const BCInterfaceData& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5022 ) << "BCInterfaceFunction::setParser" << "\n";
+#endif
+
+    if ( M_parser )
+        M_parser->setString( data.baseString() );
+    else
+        M_parser.reset( new parser_Type( data.baseString() ) );
 }
 
 } // Namespace LifeV

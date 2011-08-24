@@ -72,7 +72,6 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceData                                                       data_Type;
 
     typedef OneDimensionalBC                                                      bc_Type;
     typedef bc_Type::bcFunctionDefaultPtr_Type                                    bcFunction_Default_PtrType;
@@ -91,12 +90,6 @@ public:
 
     //! Constructor
     explicit BCInterface1DFunctionDefault();
-
-    //! Constructor
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    explicit BCInterface1DFunctionDefault( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterface1DFunctionDefault() {}
@@ -123,7 +116,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    void setData( const data_Type& data );
+    void setData( const BCInterfaceData1D& data );
 
     //! Set flux and source
     /*!
@@ -178,18 +171,6 @@ BCInterface1DFunctionDefault< PhysicalSolverType >::BCInterface1DFunctionDefault
 
 }
 
-template< class PhysicalSolverType >
-BCInterface1DFunctionDefault< PhysicalSolverType >::BCInterface1DFunctionDefault( const data_Type& data ) :
-        M_defaultFunction (),
-        M_function        ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface1DFunctionDefault::BCInterface1DFunctionDefault( data )" << "\n";
-#endif
-
-    this->setData( data );
-}
 
 
 // ===================================================
@@ -236,7 +217,7 @@ BCInterface1DFunctionDefault< PhysicalSolverType >::assignFunction( OneDimension
 // ===================================================
 template< class PhysicalSolverType >
 inline void
-BCInterface1DFunctionDefault< PhysicalSolverType >::setData( const data_Type& data )
+BCInterface1DFunctionDefault< PhysicalSolverType >::setData( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

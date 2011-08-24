@@ -144,7 +144,6 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceData                                                       data_Type;
     typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
     typedef OneDimensionalSolver::solutionPtr_Type                                solutionPtr_Type;
 
@@ -156,12 +155,6 @@ public:
 
     //! Constructor
     explicit BCInterfaceFunctionSolver();
-
-    //! Constructor
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    explicit BCInterfaceFunctionSolver( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterfaceFunctionSolver() {}
@@ -184,11 +177,25 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data
+#ifdef MULTISCALE_IS_IN_LIFEV
+    //! Set data for 0D boundary conditions
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void setData( const data_Type& data );
+    virtual void setData( const BCInterfaceData0D& data );
+#endif
+
+    //! Set data for 1D boundary conditions
+    /*!
+     * @param data BC data loaded from GetPot file
+     */
+    virtual void setData( const BCInterfaceData1D& data );
+
+    //! Set data for 3D boundary conditions
+    /*!
+     * @param data BC data loaded from GetPot file
+     */
+    virtual void setData( const BCInterfaceData3D& data );
 
     //! Set the physical solver
     /*!
@@ -220,7 +227,7 @@ protected:
     /*!
      *  NOTE: A template specialization of this method should be provided for each solver.
      */
-    void createAccessList( const data_Type& /*data*/ ) { std::cout << " !!! WARNING: createAccessList() is not defined for the selected solver. !!!" << std::endl; }
+    void createAccessList( const BCInterfaceData& /*data*/ ) { std::cout << " !!! WARNING: createAccessList() is not defined for the selected solver. !!!" << std::endl; }
 
     //@}
 
@@ -265,7 +272,7 @@ private:
 
     void createFluidMap( std::map< std::string, physicalSolverList >& mapList );
     void createSolidMap( std::map< std::string, physicalSolverList >& mapList );
-    void createList( const std::map< std::string, physicalSolverList >& mapList, const data_Type& data );
+    void createList( const std::map< std::string, physicalSolverList >& mapList, const BCInterfaceData& data );
 
     void switchErrorMessage( const std::string& operatorType ) { std::cout << "ERROR: Invalid variable type for " << operatorType << " FunctionSolver" << std::endl; }
 
@@ -300,23 +307,6 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::BCInterfaceFunctionSolver() :
     Debug( 5023 ) << "BCInterfaceFunctionSolver::BCInterfaceFunctionSolver()" << "\n";
 #endif
 
-}
-
-template< class PhysicalSolverType >
-BCInterfaceFunctionSolver< PhysicalSolverType >::BCInterfaceFunctionSolver( const data_Type& data ) :
-        function_Type                    (),
-        M_physicalSolver                 (),
-        M_solution                       (),
-        M_side                           (),
-        M_flag                           (),
-        M_list                           ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver::BCInterfaceFunctionSolver( data )" << "\n";
-#endif
-
-    this->setData( data );
 }
 
 // ===================================================
@@ -810,9 +800,27 @@ BCInterfaceFunctionSolver< ZeroDimensionalTemporaryData >::updatePhysicalSolverV
 // ===================================================
 // Set Methods
 // ===================================================
+#ifdef MULTISCALE_IS_IN_LIFEV
 template< class PhysicalSolverType >
 inline void
-BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const data_Type& data )
+BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const BCInterfaceData0D& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
+#endif
+
+    M_flag = data.flag();
+
+    function_Type::setData( data );
+
+    createAccessList( data );
+}
+#endif
+
+template< class PhysicalSolverType >
+inline void
+BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -820,6 +828,21 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const data_Type& data 
 #endif
 
     M_side = data.side();
+
+    function_Type::setData( data );
+
+    createAccessList( data );
+}
+
+template< class PhysicalSolverType >
+inline void
+BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const BCInterfaceData3D& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
+#endif
+
     M_flag = data.flag();
 
     function_Type::setData( data );
@@ -832,7 +855,7 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const data_Type& data 
 // ===================================================
 template< >
 inline void
-BCInterfaceFunctionSolver< OneDimensionalSolver >::createAccessList( const data_Type& data )
+BCInterfaceFunctionSolver< OneDimensionalSolver >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -851,7 +874,7 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::createAccessList( const data_
 
 template< >
 inline void
-BCInterfaceFunctionSolver< FSIOperator >::createAccessList( const data_Type& data )
+BCInterfaceFunctionSolver< FSIOperator >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -870,7 +893,7 @@ BCInterfaceFunctionSolver< FSIOperator >::createAccessList( const data_Type& dat
 
 template< >
 inline void
-BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::createAccessList( const data_Type& data )
+BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -888,7 +911,7 @@ BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::createA
 
 template< >
 inline void
-BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::createAccessList( const data_Type& data )
+BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -907,9 +930,9 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
 template< >
 inline void
 #ifdef MULTISCALE_IS_IN_LIFEV
-BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::createAccessList( const data_Type& data )
+BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::createAccessList( const BCInterfaceData& data )
 #else
-BCInterfaceFunctionSolver< ZeroDimensionalTemporaryData >::createAccessList( const data_Type& data )
+BCInterfaceFunctionSolver< ZeroDimensionalTemporaryData >::createAccessList( const BCInterfaceData& data )
 #endif
 {
 
@@ -955,7 +978,7 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::createSolidMap( std::map< std::
 
 template< class PhysicalSolverType >
 inline void
-BCInterfaceFunctionSolver< PhysicalSolverType >::createList( const std::map< std::string, physicalSolverList >& mapList, const data_Type& data )
+BCInterfaceFunctionSolver< PhysicalSolverType >::createList( const std::map< std::string, physicalSolverList >& mapList, const BCInterfaceData& data )
 {
     M_list.clear();
     for ( typename std::map< std::string, physicalSolverList >::const_iterator j = mapList.begin(); j != mapList.end(); ++j )

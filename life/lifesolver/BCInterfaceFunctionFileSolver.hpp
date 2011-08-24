@@ -65,7 +65,6 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceData                                                       data_Type;
     typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
     typedef BCInterfaceFunctionFile< physicalSolver_Type >                        functionFile_Type;
     typedef BCInterfaceFunctionSolver< physicalSolver_Type >                      functionSolver_Type;
@@ -79,12 +78,6 @@ public:
     //! Constructor
     explicit BCInterfaceFunctionFileSolver();
 
-    //! Constructor
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    explicit BCInterfaceFunctionFileSolver( const data_Type& data );
-
     //! Destructor
     virtual ~BCInterfaceFunctionFileSolver() {}
 
@@ -94,11 +87,25 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data
+#ifdef MULTISCALE_IS_IN_LIFEV
+    //! Set data for 0D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const data_Type& data );
+    virtual void setData( const BCInterfaceData0D& data );
+#endif
+
+    //! Set data for 1D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    virtual void setData( const BCInterfaceData1D& data );
+
+    //! Set data for 3D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    virtual void setData( const BCInterfaceData3D& data );
 
     //@}
 
@@ -141,26 +148,30 @@ BCInterfaceFunctionFileSolver< PhysicalSolverType >::BCInterfaceFunctionFileSolv
 
 }
 
-template< class PhysicalSolverType >
-BCInterfaceFunctionFileSolver< PhysicalSolverType >::BCInterfaceFunctionFileSolver( const data_Type& data ) :
-        function_Type          (),
-        functionFile_Type      (),
-        functionSolver_Type    ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterfaceFunctionFileSolver::BCInterfaceFunctionFileSolver( data )" << "\n";
-#endif
-
-    this->setData( data );
-}
-
 // ===================================================
 // Set Methods
 // ===================================================
+#ifdef MULTISCALE_IS_IN_LIFEV
 template< class PhysicalSolverType >
 void
-BCInterfaceFunctionFileSolver< PhysicalSolverType >::setData( const data_Type& data )
+BCInterfaceFunctionFileSolver< PhysicalSolverType >::setData( const BCInterfaceData0D& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
+#endif
+    functionFile_Type::setData( data );
+
+    //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunction::setup( data )
+    functionSolver_Type::M_flag = data.flag();
+
+    functionSolver_Type::createAccessList( data );
+}
+#endif
+
+template< class PhysicalSolverType >
+void
+BCInterfaceFunctionFileSolver< PhysicalSolverType >::setData( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -170,6 +181,21 @@ BCInterfaceFunctionFileSolver< PhysicalSolverType >::setData( const data_Type& d
 
     //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunction::setup( data )
     functionSolver_Type::M_side = data.side();
+
+    functionSolver_Type::createAccessList( data );
+}
+
+template< class PhysicalSolverType >
+void
+BCInterfaceFunctionFileSolver< PhysicalSolverType >::setData( const BCInterfaceData3D& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
+#endif
+    functionFile_Type::setData( data );
+
+    //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunction::setup( data )
     functionSolver_Type::M_flag = data.flag();
 
     functionSolver_Type::createAccessList( data );

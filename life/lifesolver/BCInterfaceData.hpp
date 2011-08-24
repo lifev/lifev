@@ -46,20 +46,12 @@ namespace LifeV
 /*!
  *  @author Cristiano Malossi
  *
- *  The BCInterfaceData class provides a general container to pass information
- *  to all the BCInterface functions.
+ *  The BCInterfaceData class provides a general interface for the data container in order to pass information
+ *  to all the BCInterface classes.
  */
 class BCInterfaceData
 {
 public:
-
-    //! @name Type definitions
-    //@{
-
-    typedef std::vector< Real >                                                        resistanceContainer_Type;
-
-    //@}
-
 
     //! @name Constructors & Destructor
     //@{
@@ -101,16 +93,7 @@ public:
      * @param dataSection BC section
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name );
-
-    //! Set the directional base as the current base
-    void setDirectionalBase() { M_base = M_baseDirectional; M_baseString = M_baseStringDirectional; }
-
-    //! Set the Robin Alpha base as the current base
-    void setRobinBaseAlpha() { M_base = M_baseRobinAlpha; M_baseString = M_baseStringRobinAlpha; }
-
-    //! Set the Robin Beta base as the current base
-    void setRobinBaseBeta() { M_base = M_baseRobinBeta; M_baseString = M_baseStringRobinBeta; }
+    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name );
 
     //! Display general information about the content of the class
     /*!
@@ -136,67 +119,6 @@ public:
      */
     void setBase( const std::pair< std::string, baseList_Type >& base ) { M_base = base; }
 
-    //! Set the side of the boundary condition
-    /*!
-     * @param flag Boundary condition side
-     */
-    void setSide( const OneDimensional::bcSide_Type& side ) { M_side = side; }
-
-    //! Set the line of the boundary condition
-    /*!
-     * @param line Boundary condition line
-     */
-    void setLine( const OneDimensional::bcLine_Type& line ) { M_line = line; }
-
-    //! Set the quantity of the boundary condition
-    /*!
-     * @param quantity Boundary condition quantity
-     */
-    void setQuantity( const OneDimensional::bcType_Type& quantity ) { M_quantity = quantity; }
-
-    //! Set the name of the boundary condition
-    /*!
-     * @param name Boundary condition name
-     */
-    void setName( const bcName_Type& name ) { M_name = name; }
-
-    //! Set the flag of the boundary condition
-    /*!
-     * @param flag Boundary condition flag
-     */
-    void setFlag( const bcFlag_Type& flag ) { M_flag = flag; }
-
-    //! Set the type of the boundary condition
-    /*!
-     * @param type Boundary condition type
-     */
-    void setType( const bcType_Type& type ) { M_type = type; }
-
-    //! Set the mode of the boundary condition
-    /*!
-     * @param mode Boundary condition mode
-     */
-    void setMode( const bcMode_Type& mode ) { M_mode = mode; }
-
-    //! Set the components vector of the boundary condition
-    /*!
-     * @param componentsVector Boundary condition components vector
-     */
-    void setComponentsVector( const bcComponentsVec_Type& componentsVector ) { M_componentsVector = componentsVector; }
-
-    //! Set the i-component of the components vector of the boundary condition
-    /*!
-     * @param componentsVector Boundary condition component
-     * @param index Index value
-     */
-    void setComponentsVector( const UInt& componentsVector, const UInt& index ) { M_componentsVector[index] = componentsVector; }
-
-    //! Add a component to the component vector of the boundary condition
-    /*!
-     * @param componentsVector Boundary condition component
-     */
-    void addComponentsVector( const UInt& componentsVector ) { M_componentsVector.push_back( componentsVector ); }
-
     //@}
 
 
@@ -221,100 +143,12 @@ public:
      */
     const std::map< std::string, baseList_Type >& mapBase() const { return M_mapBase; }
 
-    //! Get the flag of the boundary condition
-    /*!
-     * @return Boundary condition side
-     */
-    const OneDimensional::bcSide_Type& side() const { return M_side; }
-
-    //! Get the mode of the boundary condition
-    /*!
-     * @return Boundary condition line
-     */
-    const OneDimensional::bcLine_Type& line() const { return M_line; }
-
-    //! Get the quantity of the boundary condition
-    /*!
-     * @return Boundary condition quantity
-     */
-    const OneDimensional::bcType_Type& quantity() const { return M_quantity; }
-
-    //! Get the resistance vector {R1, R2, R3 ...}
-    /*!
-     * @return Boundary condition resistance vector
-     */
-    const resistanceContainer_Type& resistance() const { return M_resistance; }
-
-    //! Get the capacitance
-    /*!
-     * @return Boundary condition capacitance
-     */
-    const Real& capacitance() const { return M_capacitance; }
-
-    //! Get the name of the boundary condition
-    /*!
-     * @return Boundary condition name
-     */
-    const bcName_Type& name() const { return M_name; }
-
-    //! Get the flag of the boundary condition
-    /*!
-     * @return Boundary condition flag
-     */
-    const bcFlag_Type& flag() const { return M_flag; }
-
-    //! Get the type of the boundary condition
-    /*!
-     * @return Boundary condition type
-     */
-    const bcType_Type& type() const { return M_type; }
-
-    //! Get the mode of the boundary condition
-    /*!
-     * @return Boundary condition mode
-     */
-    const bcMode_Type& mode() const { return M_mode; }
-
-    //! Get the vector of components of the boundary condition
-    /*!
-     * @return Boundary condition vector of components
-     */
-    const bcComponentsVec_Type& componentsVector() const { return M_componentsVector; }
-
-    //! Get the number of components of the boundary condition
-    /*!
-     * Note that this method should not be called for the case of "Component" boundary conditions,
-     * since it does not return the size of the M_componentsVector. It has to be used only for the case
-     * of "Full" boundary conditions.
-     *
-     * @return Number of components of the boundary condition
-     */
-    const ID& componentsNumber() const { return M_componentsVector.front(); }
-
     //@}
 
-private:
+protected:
 
     //! @name Private Methods
     //@{
-
-    void readSide( const GetPot& dataFile, const char* side ) {  M_side = M_mapSide[dataFile( side, "left" )]; }
-
-    void readLine( const GetPot& dataFile, const char* line ) { M_line = M_mapLine[dataFile( line, "first" )]; }
-
-    void readQuantity( const GetPot& dataFile, const char* quantity ) { M_quantity = M_mapQuantity[dataFile( quantity, "A" )]; }
-
-    void readResistance( const GetPot& dataFile, const char* resistance );
-
-    void readCapacitance( const GetPot& dataFile, const char* capacitance ) { M_capacitance = dataFile( capacitance, 0 ); }
-
-    void readFlag( const GetPot& dataFile, const char* flag ) { M_flag = dataFile( flag, 0 ); }
-
-    void readType( const GetPot& dataFile, const char* type ) { M_type = M_mapType[dataFile( type, "Essential" )]; }
-
-    void readMode( const GetPot& dataFile, const char* mode ) { M_mode = M_mapMode[dataFile( mode, "Full" )]; }
-
-    void readComV( const GetPot& dataFile, const char* component );
 
     void readBase( const GetPot& dataFile, const std::string& path, std::pair< std::string, baseList_Type >& base, std::string& baseString );
 
@@ -329,50 +163,7 @@ private:
     std::pair< std::string, baseList_Type >                        M_base;
     std::string                                                    M_baseString;
 
-    std::pair< std::string, baseList_Type >                        M_baseRobinAlpha;
-    std::string                                                    M_baseStringRobinAlpha;
-
-    std::pair< std::string, baseList_Type >                        M_baseRobinBeta;
-    std::string                                                    M_baseStringRobinBeta;
-
-    std::pair< std::string, baseList_Type >                        M_baseDirectional;
-    std::string                                                    M_baseStringDirectional;
-
     std::map< std::string, baseList_Type >                         M_mapBase;
-
-    //@}
-
-
-    //! @name 1D Private Members
-    //@{
-
-    OneDimensional::bcSide_Type                                    M_side;
-    OneDimensional::bcLine_Type                                    M_line;
-    OneDimensional::bcType_Type                                    M_quantity;
-
-    resistanceContainer_Type                                       M_resistance;
-    Real                                                           M_capacitance;
-
-    // Maps
-    std::map< std::string, OneDimensional::bcSide_Type >           M_mapSide;
-    std::map< std::string, OneDimensional::bcType_Type >           M_mapQuantity;
-    std::map< std::string, OneDimensional::bcLine_Type >           M_mapLine;
-
-    //@}
-
-
-    //! @name 3D Private Members
-    //@{
-
-    bcName_Type                                                    M_name;
-    bcFlag_Type                                                    M_flag;
-    bcType_Type                                                    M_type;
-    bcMode_Type                                                    M_mode;
-    bcComponentsVec_Type                                           M_componentsVector;
-
-    // Maps
-    std::map< std::string, bcType_Type >                           M_mapType;
-    std::map< std::string, bcMode_Type >                           M_mapMode;
 
     //@}
 };

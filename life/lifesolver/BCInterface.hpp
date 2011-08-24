@@ -210,13 +210,10 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
-    {
-        M_data.readBC( fileName, dataSection, name );
-    }
+    virtual void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name ) = 0;
 
     //! Insert the current boundary condition in the BChandler
-    virtual void insertBC();
+    virtual void insertBC() = 0;
 
     //! Update the variables inside the physical solver
     virtual void updatePhysicalSolverVariables();
@@ -255,7 +252,7 @@ public:
     /*!
      * @return the data container
      */
-    data_Type& dataContainer() { return M_data; }
+    virtual data_Type& dataContainer() = 0;
 
     //@}
 
@@ -264,9 +261,6 @@ protected:
 
     // Handler and parameters
     bcHandlerPtr_Type                        M_handler;
-
-    // Data
-    data_Type                                M_data;
 
     // Functions
     vectorFunction_Type                      M_vectorFunction;
@@ -289,7 +283,6 @@ private:
 template< class BcHandler, class PhysicalSolverType >
 BCInterface< BcHandler, PhysicalSolverType >::BCInterface() :
         M_handler                 (),
-        M_data                    (),
         M_vectorFunction          ()
 {
 
@@ -319,19 +312,6 @@ BCInterface< BcHandler, PhysicalSolverType >::fillHandler( const std::string& fi
 
         this->insertBC();
     }
-}
-
-template< class BcHandler, class PhysicalSolverType >
-inline void
-BCInterface< BcHandler, PhysicalSolverType >::insertBC()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface::insertBC\n";
-#endif
-
-    factory_Type factory;
-    M_vectorFunction.push_back( factory.createFunction( M_data ) );
 }
 
 template< class BcHandler, class PhysicalSolverType >

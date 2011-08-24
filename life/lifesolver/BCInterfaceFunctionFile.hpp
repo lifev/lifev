@@ -92,7 +92,6 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                  physicalSolver_Type;
-    typedef BCInterfaceData                                                     data_Type;
     typedef BCInterfaceFunction< physicalSolver_Type >                          function_Type;
 
     //@}
@@ -104,12 +103,6 @@ public:
     //! Empty Constructor
     explicit BCInterfaceFunctionFile();
 
-    //! Constructor
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    explicit BCInterfaceFunctionFile( const data_Type& data );
-
     //! Destructor
     virtual ~BCInterfaceFunctionFile() {}
 
@@ -119,11 +112,25 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data
+#ifdef MULTISCALE_IS_IN_LIFEV
+    //! Set data for 0D boundary conditions
     /*!
-     * @param data boundary condition data loaded from a \c GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const data_Type& data ) { loadData( data ); }
+    virtual void setData( const BCInterfaceData0D& data ) { loadData( data ); }
+#endif
+
+    //! Set data for 1D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    virtual void setData( const BCInterfaceData1D& data ) { loadData( data ); }
+
+    //! Set data for 3D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    virtual void setData( const BCInterfaceData3D& data ) { loadData( data ); }
 
     //@}
 
@@ -144,9 +151,13 @@ private:
 
     //! Load data from a \c GetPot file
     /*!
+     * Note that this method makes a copy of the input data.
+     * This is done on porpuse.
+     *
      * @param data boundary condition data loaded from a \c GetPot file
      */
-    void loadData( data_Type data );
+    template< typename DataType >
+    void loadData( DataType data );
 
     //! Linear interpolation (extrapolation) between two values of the data.
     void dataInterpolation();
@@ -187,28 +198,12 @@ BCInterfaceFunctionFile< PhysicalSolverType >::BCInterfaceFunctionFile() :
 
 }
 
-template< typename PhysicalSolverType >
-BCInterfaceFunctionFile< PhysicalSolverType >::BCInterfaceFunctionFile( const data_Type& data ) :
-        function_Type                    (),
-        M_variables                      (),
-        M_loop                           (),
-        M_data                           (),
-        M_dataIterator                   ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( data )" << "\n";
-#endif
-
-    this->setData( data );
-}
-
 // ===================================================
 // Private Methods
 // ===================================================
-template< typename PhysicalSolverType >
+template< typename PhysicalSolverType > template< typename DataType >
 inline void
-BCInterfaceFunctionFile< PhysicalSolverType >::loadData( data_Type data )
+BCInterfaceFunctionFile< PhysicalSolverType >::loadData( DataType data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -261,8 +256,7 @@ BCInterfaceFunctionFile< PhysicalSolverType >::loadData( data_Type data )
 
     for ( UInt i( 0 ); i < dataLines; ++i )
         for ( UInt j( 0 ); j < variablesNumber; ++j )
-            M_data[M_variables[j]].push_back( scale[j] * dataFile( "data", 0.0, i
-                                                                   * variablesNumber + j ) );
+            M_data[M_variables[j]].push_back( scale[j] * dataFile( "data", 0.0, i * variablesNumber + j ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     output.str("");

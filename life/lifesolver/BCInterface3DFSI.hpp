@@ -64,7 +64,6 @@ public:
     //@{
 
     typedef PhysicalSolverType                                    physicalSolver_Type;
-    typedef BCInterfaceData                                       data_Type;
 
     //@}
 
@@ -73,7 +72,6 @@ public:
     //@{
 
     explicit BCInterface3DFSI() {}
-    explicit BCInterface3DFSI( const data_Type& /*data*/) {}
 
     virtual ~BCInterface3DFSI() {}
 
@@ -83,7 +81,7 @@ public:
     //! @name Methods
     //@{
 
-    void exportData( data_Type& /*data*/ ) {}
+    void exportData( BCInterfaceData3D& /*data*/ ) {}
 
     template< class BCBaseType >
     void assignFunction( const boost::shared_ptr< physicalSolver_Type >& /*physicalSolver*/, BCBaseType& /*base*/ ) {}
@@ -97,7 +95,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void setData( const data_Type& /*data*/) {}
+    void setData( const BCInterfaceData3D& /*data*/) {}
 
     //@}
 
@@ -166,8 +164,6 @@ public:
     typedef BCInterfaceFactory< FSIOperator >                     factory_Type;
     typedef factory_Type::bcFunctionPtr_Type                      bcFunctionPtr_Type;
 
-    typedef BCInterfaceData                                       data_Type;
-
     typedef std::vector< bcFunctionPtr_Type >                     vectorFunction_Type;
 
     //@}
@@ -178,12 +174,6 @@ public:
 
     //! Constructor
     explicit BCInterface3DFSI();
-
-    //! Constructor
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    explicit BCInterface3DFSI( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterface3DFSI() {}
@@ -198,7 +188,7 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void exportData( data_Type& data );
+    void exportData( BCInterfaceData3D& data );
 
     //! Assign a boundary function to the boundary condition vector base
     /*!
@@ -221,7 +211,7 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData( const data_Type& data );
+    void setData( const BCInterfaceData3D& data );
 
     //@}
 

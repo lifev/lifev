@@ -72,7 +72,6 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                                        physicalSolver_Type;
-    typedef BCInterfaceData                                                                           data_Type;
 
     typedef FactorySingleton< Factory< BCInterfaceFunction< physicalSolver_Type > , baseList_Type > > factoryFunction_Type;
 
@@ -101,7 +100,8 @@ public:
     /*!
      * @param data data container
      */
-    bcFunctionPtr_Type createFunction( const data_Type& data );
+    template< typename DataType >
+    bcFunctionPtr_Type createFunction( const DataType& data );
 
     //@}
 
@@ -138,9 +138,9 @@ BCInterfaceFactory< PhysicalSolverType >::BCInterfaceFactory()
 // ===================================================
 // Methods
 // ===================================================
-template< class PhysicalSolverType >
+template< class PhysicalSolverType > template< typename DataType >
 inline typename BCInterfaceFactory< PhysicalSolverType >::bcFunctionPtr_Type
-BCInterfaceFactory< PhysicalSolverType >::createFunction( const data_Type& data )
+BCInterfaceFactory< PhysicalSolverType >::createFunction( const DataType& data )
 {
     bcFunctionPtr_Type function( factoryFunction_Type::instance().createObject( data.base().second, data.mapBase() ) );
 

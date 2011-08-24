@@ -61,11 +61,6 @@
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
 
-// Handlers (they are here because of the data container)
-#include <life/lifefem/BCHandler.hpp>
-#include <life/lifefem/OneDimensionalBCHandler.hpp>
-//#include <life/lifefem/ZeroDimensionalBCHandler.hpp>
-
 namespace LifeV
 {
 

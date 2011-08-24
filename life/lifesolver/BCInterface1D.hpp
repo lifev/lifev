@@ -107,7 +107,7 @@ public:
     typedef typename bcInterface_Type::factory_Type               factory_Type;
     typedef typename bcInterface_Type::bcFunctionPtr_Type         bcFunctionPtr_Type;
 
-    typedef typename bcInterface_Type::data_Type                  data_Type;
+    typedef BCInterfaceData1D                                     data_Type;
 
     typedef typename bcInterface_Type::vectorFunction_Type        vectorFunction_Type;
 
@@ -137,6 +137,17 @@ public:
 
     //! @name Methods
     //@{
+
+    //! Read a specific boundary condition from a file and add it to the data container
+    /*!
+     * @param fileName Name of the data file
+     * @param dataSection section in the data file
+     * @param name name of the boundary condition
+     */
+    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+    {
+        M_data.readBC( fileName, dataSection, name );
+    }
 
     //! Insert the current boundary condition in the BChandler
     void insertBC();
@@ -181,6 +192,18 @@ public:
 
     //@}
 
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the data container
+    /*!
+     * @return the data container
+     */
+    data_Type& dataContainer() { return M_data; }
+
+    //@}
+
 private:
 
     //! @name Unimplemented Methods
@@ -204,8 +227,11 @@ private:
 
     //@}
 
+    // Data
+    data_Type                       M_data;
+
     // Default Functions
-    vectorDefaultFunction_Type               M_vectorDefaultFunction1D;
+    vectorDefaultFunction_Type      M_vectorDefaultFunction1D;
 };
 
 // ===================================================
@@ -214,6 +240,7 @@ private:
 template< class BcHandler, class PhysicalSolverType >
 BCInterface1D< BcHandler, PhysicalSolverType >::BCInterface1D() :
         bcInterface_Type          (),
+        M_data                    (),
         M_vectorDefaultFunction1D ()
 {
 
@@ -235,7 +262,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     Debug( 5020 ) << "BCInterface1D::insertBC\n";
 #endif
 
-    switch ( this->M_data.base().second )
+    switch ( M_data.base().second )
     {
     case BCIFunction:
     case BCIFunctionFile:
@@ -243,7 +270,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     case BCIFunctionFileSolver:
     {
         factory_Type factory;
-        this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
+        this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
 
         OneDimensionalBCFunction base;
         this->M_vectorFunction.back()->assignFunction( base );
@@ -265,7 +292,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     }
     default:
 
-        std::cout << " !!! Error: " << this->M_data.base().first << " is not valid in BCInterface1D !!!" << std::endl;
+        std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface1D !!!" << std::endl;
         break;
     }
 }
@@ -310,7 +337,8 @@ template< class BcHandler, class PhysicalSolverType > template< class BCInterfac
 inline void
 BCInterface1D< BcHandler, PhysicalSolverType >::createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
 {
-    boost::shared_ptr< BCInterfaceBaseType > function( new BCInterfaceBaseType( this->M_data ) );
+    boost::shared_ptr< BCInterfaceBaseType > function( new BCInterfaceBaseType() );
+    function->setData( M_data );
     baseVector.push_back( function );
 }
 
@@ -325,7 +353,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         Debug( 5020 ) << "BCInterface1D::addBCManager" << "\n\n";
 #endif
 
-        this->M_handler->setBC( this->M_data.side(), this->M_data.line(), this->M_data.quantity(), base );
+        this->M_handler->setBC( M_data.side(), M_data.line(), M_data.quantity(), base );
 }
 
 } // Namespace LifeV

@@ -62,32 +62,11 @@ BCInterface3DFSI< FSIOperator >::BCInterface3DFSI() :
 
 }
 
-BCInterface3DFSI< FSIOperator >::BCInterface3DFSI( const data_Type& data ) :
-        M_FSIFunction           (),
-        M_physicalSolver        (),
-        M_name                  (),
-        M_flag                  (),
-        M_type                  (),
-        M_mode                  (),
-        M_comV                  (),
-        M_vectorFunctionRobin   (),
-        M_robinRHS              (),
-        M_robinAlphaCoefficient (),
-        M_robinBetaCoefficient  ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::BCInterface3DFSI( data )" << "\n";
-#endif
-
-    this->setData( data );
-}
-
 // ===================================================
 // Methods
 // ===================================================
 void
-BCInterface3DFSI< FSIOperator >::exportData( data_Type& data )
+BCInterface3DFSI< FSIOperator >::exportData( BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -178,7 +157,7 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
 // Set Methods
 // ===================================================
 void
-BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
+BCInterface3DFSI< FSIOperator >::setData( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -213,7 +192,7 @@ BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
     {
         factory_Type factory;
         M_vectorFunctionRobin.reserve(2);
-        data_Type temporaryData ( data );
+        BCInterfaceData3D temporaryData ( data );
 
         // Create the mass term function
         temporaryData.setRobinBaseAlpha();
