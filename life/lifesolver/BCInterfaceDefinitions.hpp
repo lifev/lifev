@@ -66,10 +66,10 @@ namespace LifeV
 
 enum baseList_Type
 {
-    BCIFunction,
-    BCIFunctionFile,
-    BCIFunctionSolver,
-    BCIFunctionFileSolver,
+    BCIFunctionParser,
+    BCIFunctionParserFile,
+    BCIFunctionParserSolver,
+    BCIFunctionParserFileSolver,
     BCI1DFunctionDefault,
     BCI3DFSI,
     BCI3DDataInterpolator

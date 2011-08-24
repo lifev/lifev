@@ -44,8 +44,8 @@
 #include <life/lifesolver/FSIMonolithicGI.hpp>
 
 #include <life/lifesolver/BCInterfaceDefinitions.hpp>
-#include <life/lifesolver/BCInterfaceData.hpp>
-#include <life/lifesolver/BCInterfaceFactory.hpp>
+#include <life/lifesolver/BCInterfaceData3D.hpp>
+#include <life/lifefunctions/BCInterfaceFactory.hpp>
 
 namespace LifeV
 {
@@ -545,8 +545,8 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVector& base )
         // Set the physical solver in the Robin functions for alpha and beta
         for ( UInt i( 0 ); i < M_vectorFunctionRobin.size(); ++i )
         {
-            boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
-                boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
+            boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
+                boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
 
             if ( castedFunctionSolver != 0 )
                 castedFunctionSolver->setPhysicalSolver( M_physicalSolver );

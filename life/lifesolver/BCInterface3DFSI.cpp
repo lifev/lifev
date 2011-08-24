@@ -98,8 +98,8 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
         // Update the physical solver variables
         for ( UInt i( 0 ); i < M_vectorFunctionRobin.size(); ++i )
         {
-            boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
-                boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
+            boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
+                boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
 
             if ( castedFunctionSolver != 0 )
                 castedFunctionSolver->updatePhysicalSolverVariables();

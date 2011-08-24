@@ -40,7 +40,7 @@
 #include <life/lifesolver/BCInterfaceDefinitions.hpp>
 
 #include <life/lifesolver/BCInterfaceData.hpp>
-#include <life/lifesolver/BCInterfaceFactory.hpp>
+#include <life/lifefunctions/BCInterfaceFactory.hpp>
 
 namespace LifeV
 {
@@ -78,10 +78,10 @@ namespace LifeV
  *  The following functions are available (see the related classes for more information):
  *
  *  <ol>
- *      <li> \c function, which is implemented in \c BCInterfaceFunction;
- *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionFile;
- *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionSolver;
- *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionFileSolver;
+ *      <li> \c function, which is implemented in \c BCInterfaceFunctionParser;
+ *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
+ *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
+ *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
  *  </ol>
  *
  *  All the parameters are case sensitive.
@@ -325,8 +325,8 @@ BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
 
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
+        boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
+            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->updatePhysicalSolverVariables();
@@ -343,8 +343,8 @@ BCInterface< BcHandler, PhysicalSolverType >::setPhysicalSolver( const physicalS
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
+        boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
+            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->setPhysicalSolver( physicalSolver );

@@ -148,7 +148,7 @@ public:
      */
     const Real& evaluate( const ID& id = 0 );
 
-    //! Count how many substrings are present in the string (utility for BCInterfaceFunction)
+    //! Count how many substrings are present in the string (utility for BCInterfaceFunctionParser)
     /*!
      * @param substring string to find
      * @return number of substring

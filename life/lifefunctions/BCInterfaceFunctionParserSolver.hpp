@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterfaceFunctionSolver class
+ *  @brief File containing the BCInterfaceFunctionParserSolver class
  *
  *  @date 24-08-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,15 +34,15 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterfaceFunctionSolver_H
-#define BCInterfaceFunctionSolver_H 1
+#ifndef BCInterfaceFunctionParserSolver_H
+#define BCInterfaceFunctionParserSolver_H 1
 
 #include <life/lifesolver/OneDimensionalSolver.hpp>
 
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
-#include <life/lifesolver/BCInterfaceFunction.hpp>
+#include <life/lifefunctions/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
 {
@@ -97,7 +97,7 @@ private:
 };
 #endif
 
-//! BCInterfaceFunctionSolver - LifeV boundary condition function file wrapper for \c BCInterface
+//! BCInterfaceFunctionParserSolver - LifeV boundary condition function file wrapper for \c BCInterface
 /*!
  *  @author Cristiano Malossi
  *
@@ -113,7 +113,7 @@ private:
  *      <li> manually setting the variables by using the \c setVariable() method.
  *  </ol>
  *
- *  See \c BCInterfaceFunction class for more details.
+ *  See \c BCInterfaceFunctionParser class for more details.
  *
  *  <b>AVAILABLE VARIABLES</b> <BR>
  *  Current available variables are:
@@ -136,7 +136,7 @@ private:
  *    Of course, some of those variables are available only for fluid problems, other only for solid problems.
  */
 template< class PhysicalSolverType >
-class BCInterfaceFunctionSolver: public virtual BCInterfaceFunction< PhysicalSolverType >
+class BCInterfaceFunctionParserSolver: public virtual BCInterfaceFunctionParser< PhysicalSolverType >
 {
 public:
 
@@ -144,7 +144,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
+    typedef BCInterfaceFunctionParser< physicalSolver_Type >                            function_Type;
     typedef OneDimensionalSolver::solutionPtr_Type                                solutionPtr_Type;
 
     //@}
@@ -154,10 +154,10 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterfaceFunctionSolver();
+    explicit BCInterfaceFunctionParserSolver();
 
     //! Destructor
-    virtual ~BCInterfaceFunctionSolver() {}
+    virtual ~BCInterfaceFunctionParserSolver() {}
 
     //@}
 
@@ -260,9 +260,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionSolver( const BCInterfaceFunctionSolver& function );
+    BCInterfaceFunctionParserSolver( const BCInterfaceFunctionParserSolver& function );
 
-    BCInterfaceFunctionSolver& operator=( const BCInterfaceFunctionSolver& function );
+    BCInterfaceFunctionParserSolver& operator=( const BCInterfaceFunctionParserSolver& function );
 
     //@}
 
@@ -285,16 +285,16 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterfaceFunction< PhysicalSolverType >* createBCInterfaceFunctionSolver()
+inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctionParserSolver()
 {
-    return new BCInterfaceFunctionSolver< PhysicalSolverType > ();
+    return new BCInterfaceFunctionParserSolver< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
 template< class PhysicalSolverType >
-BCInterfaceFunctionSolver< PhysicalSolverType >::BCInterfaceFunctionSolver() :
+BCInterfaceFunctionParserSolver< PhysicalSolverType >::BCInterfaceFunctionParserSolver() :
         function_Type                    (),
         M_physicalSolver                 (),
         M_solution                       (),
@@ -314,7 +314,7 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::BCInterfaceFunctionSolver() :
 // ===================================================
 template< >
 inline void
-BCInterfaceFunctionSolver< OneDimensionalSolver >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< OneDimensionalSolver >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -451,7 +451,7 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::updatePhysicalSolverVariables
 
 template< >
 inline void
-BCInterfaceFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -580,7 +580,7 @@ BCInterfaceFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
 
 template< >
 inline void
-BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -658,7 +658,7 @@ BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::updateP
 
 template< >
 inline void
-BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -737,9 +737,9 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
 template< >
 inline void
 #ifdef MULTISCALE_IS_IN_LIFEV
-BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVariables()
 #else
-BCInterfaceFunctionSolver< ZeroDimensionalTemporaryData >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalSolverVariables()
 #endif
 {
 
@@ -803,7 +803,7 @@ BCInterfaceFunctionSolver< ZeroDimensionalTemporaryData >::updatePhysicalSolverV
 #ifdef MULTISCALE_IS_IN_LIFEV
 template< class PhysicalSolverType >
 inline void
-BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const BCInterfaceData0D& data )
+BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfaceData0D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -820,7 +820,7 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const BCInterfaceData0
 
 template< class PhysicalSolverType >
 inline void
-BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const BCInterfaceData1D& data )
+BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -836,7 +836,7 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const BCInterfaceData1
 
 template< class PhysicalSolverType >
 inline void
-BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const BCInterfaceData3D& data )
+BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -855,7 +855,7 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::setData( const BCInterfaceData3
 // ===================================================
 template< >
 inline void
-BCInterfaceFunctionSolver< OneDimensionalSolver >::createAccessList( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< OneDimensionalSolver >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -874,7 +874,7 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::createAccessList( const BCInt
 
 template< >
 inline void
-BCInterfaceFunctionSolver< FSIOperator >::createAccessList( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< FSIOperator >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -893,7 +893,7 @@ BCInterfaceFunctionSolver< FSIOperator >::createAccessList( const BCInterfaceDat
 
 template< >
 inline void
-BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -911,7 +911,7 @@ BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::createA
 
 template< >
 inline void
-BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -930,9 +930,9 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
 template< >
 inline void
 #ifdef MULTISCALE_IS_IN_LIFEV
-BCInterfaceFunctionSolver< Multiscale::MultiscaleData >::createAccessList( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< Multiscale::MultiscaleData >::createAccessList( const BCInterfaceData& data )
 #else
-BCInterfaceFunctionSolver< ZeroDimensionalTemporaryData >::createAccessList( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::createAccessList( const BCInterfaceData& data )
 #endif
 {
 
@@ -954,7 +954,7 @@ BCInterfaceFunctionSolver< ZeroDimensionalTemporaryData >::createAccessList( con
 // ===================================================
 template< class PhysicalSolverType >
 inline void
-BCInterfaceFunctionSolver< PhysicalSolverType >::createFluidMap( std::map< std::string, physicalSolverList >& mapList )
+BCInterfaceFunctionParserSolver< PhysicalSolverType >::createFluidMap( std::map< std::string, physicalSolverList >& mapList )
 {
     mapList["f_timeStep"]       = f_timeStep;
     mapList["f_area"]           = f_area;
@@ -967,7 +967,7 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::createFluidMap( std::map< std::
 
 template< class PhysicalSolverType >
 inline void
-BCInterfaceFunctionSolver< PhysicalSolverType >::createSolidMap( std::map< std::string, physicalSolverList >& mapList )
+BCInterfaceFunctionParserSolver< PhysicalSolverType >::createSolidMap( std::map< std::string, physicalSolverList >& mapList )
 {
     mapList["s_density"]          = s_density;
     mapList["s_poisson"]          = s_poisson;
@@ -978,7 +978,7 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::createSolidMap( std::map< std::
 
 template< class PhysicalSolverType >
 inline void
-BCInterfaceFunctionSolver< PhysicalSolverType >::createList( const std::map< std::string, physicalSolverList >& mapList, const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< PhysicalSolverType >::createList( const std::map< std::string, physicalSolverList >& mapList, const BCInterfaceData& data )
 {
     M_list.clear();
     for ( typename std::map< std::string, physicalSolverList >::const_iterator j = mapList.begin(); j != mapList.end(); ++j )
@@ -988,4 +988,4 @@ BCInterfaceFunctionSolver< PhysicalSolverType >::createList( const std::map< std
 
 } // Namespace LifeV
 
-#endif /* BCInterfaceFunctionSolver_H */
+#endif /* BCInterfaceFunctionParserSolver_H */

@@ -82,10 +82,10 @@ namespace LifeV
  *  The following functions are available (see the related classes for more information):
  *
  *  <ol>
- *      <li> \c function, which is implemented in \c BCInterfaceFunction;
- *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionFile;
- *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionSolver;
- *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionFileSolver;
+ *      <li> \c function, which is implemented in \c BCInterfaceFunctionParser;
+ *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
+ *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
+ *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
  *      <li> \c FSI, which is implemented in \c BCInterface3DFSI;
  *      <li> \c dataInterpolator, which is implemented in\c BCDataInterpolator;
  *  </ol>
@@ -308,10 +308,10 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
 
     switch ( M_data.base().second )
     {
-    case BCIFunction:
-    case BCIFunctionFile:
-    case BCIFunctionSolver:
-    case BCIFunctionFileSolver:
+    case BCIFunctionParser:
+    case BCIFunctionParserFile:
+    case BCIFunctionParserSolver:
+    case BCIFunctionParserFileSolver:
     {
         factory_Type factory;
         this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
