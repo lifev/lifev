@@ -471,7 +471,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Full" << "\n\n";
 #endif
 
-        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.comN() );
+        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.componentsNumber() );
 
         break;
 
@@ -481,7 +481,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Component" << "\n\n";
 #endif
 
-        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.comV() );
+        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.componentsVector() );
 
         break;
     }

@@ -180,22 +180,22 @@ public:
 
     //! Set the components vector of the boundary condition
     /*!
-     * @param comV Boundary condition components vector
+     * @param componentsVector Boundary condition components vector
      */
-    void setComV( const bcComponentsVec_Type& comV ) { M_comV = comV; }
+    void setComponentsVector( const bcComponentsVec_Type& componentsVector ) { M_componentsVector = componentsVector; }
 
     //! Set the i-component of the components vector of the boundary condition
     /*!
-     * @param comV Boundary condition component
+     * @param componentsVector Boundary condition component
      * @param index Index value
      */
-    void setComV( const UInt& comV, const UInt& index ) { M_comV[index] = comV; }
+    void setComponentsVector( const UInt& componentsVector, const UInt& index ) { M_componentsVector[index] = componentsVector; }
 
     //! Add a component to the component vector of the boundary condition
     /*!
-     * @param comV Boundary condition component
+     * @param componentsVector Boundary condition component
      */
-    void addComV( const UInt& comV ) { M_comV.push_back( comV ); }
+    void addComponentsVector( const UInt& componentsVector ) { M_componentsVector.push_back( componentsVector ); }
 
     //@}
 
@@ -279,13 +279,17 @@ public:
     /*!
      * @return Boundary condition vector of components
      */
-    const bcComponentsVec_Type& comV() const { return M_comV; }
+    const bcComponentsVec_Type& componentsVector() const { return M_componentsVector; }
 
     //! Get the number of components of the boundary condition
     /*!
+     * Note that this method should not be called for the case of "Component" boundary conditions,
+     * since it does not return the size of the M_componentsVector. It has to be used only for the case
+     * of "Full" boundary conditions.
+     *
      * @return Number of components of the boundary condition
      */
-    const ID& comN() const { return M_comV.front(); }
+    const ID& componentsNumber() const { return M_componentsVector.front(); }
 
     //@}
 
@@ -364,7 +368,7 @@ private:
     bcFlag_Type                                                    M_flag;
     bcType_Type                                                    M_type;
     bcMode_Type                                                    M_mode;
-    bcComponentsVec_Type                                           M_comV;
+    bcComponentsVec_Type                                           M_componentsVector;
 
     // Maps
     std::map< std::string, bcType_Type >                           M_mapType;

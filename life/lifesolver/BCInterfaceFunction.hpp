@@ -292,12 +292,12 @@ BCInterfaceFunction< PhysicalSolverType >::setData( const data_Type& data )
     if ( M_parser->countSubstring( "," ) )
     {
         //Create the ID map
-        if ( data.comV().size() > 1 ) // Component
-            for ( ID i( 0 ); i < static_cast< ID > ( data.comV().size() ); ++i )
-                M_mapID[data.comV()[i]] = i + 1;
+        if ( data.componentsVector().size() > 1 ) // Component
+            for ( ID i( 0 ); i < static_cast< ID > ( data.componentsVector().size() ); ++i )
+                M_mapID[data.componentsVector()[i]] = i + 1;
         else
-            // if ( data.comV().front() == arguments )  Full
-            for ( ID i( 0 ); i < data.comV().front(); ++i )
+            // if ( data.componentsVector().front() == arguments )  Full
+            for ( ID i( 0 ); i < data.componentsVector().front(); ++i )
                 M_mapID[i+1] = i+1;
     }
 }

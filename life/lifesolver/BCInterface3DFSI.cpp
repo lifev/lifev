@@ -98,7 +98,7 @@ BCInterface3DFSI< FSIOperator >::exportData( data_Type& data )
     data.setFlag( M_flag );
     data.setType( M_type );
     data.setMode( M_mode );
-    data.setComV( M_comV );
+    data.setComponentsVector( M_comV );
 }
 
 void
@@ -207,7 +207,7 @@ BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
     M_flag = data.flag();
     M_type = data.type();
     M_mode = data.mode();
-    M_comV = data.comV();
+    M_comV = data.componentsVector();
 
     if ( M_FSIFunction == RobinWall )
     {

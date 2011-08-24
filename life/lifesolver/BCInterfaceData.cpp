@@ -64,7 +64,7 @@ BCInterfaceData::BCInterfaceData() :
         M_flag                  (),
         M_type                  (),
         M_mode                  (),
-        M_comV                  (),
+        M_componentsVector      (),
         M_mapType               (),
         M_mapMode               ()
 {
@@ -133,7 +133,7 @@ BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :
         M_flag                  ( data.M_flag ),
         M_type                  ( data.M_type ),
         M_mode                  ( data.M_mode ),
-        M_comV                  ( data.M_comV ),
+        M_componentsVector      ( data.M_componentsVector ),
         M_mapType               ( data.M_mapType ),
         M_mapMode               ( data.M_mapMode )
 {
@@ -168,7 +168,7 @@ BCInterfaceData::operator=( const BCInterfaceData& data )
         M_flag                  = data.M_flag;
         M_type                  = data.M_type;
         M_mode                  = data.M_mode;
-        M_comV                  = data.M_comV;
+        M_componentsVector      = data.M_componentsVector;
         M_mapType               = data.M_mapType;
         M_mapMode               = data.M_mapMode;
     }
@@ -229,8 +229,8 @@ BCInterfaceData::showMe( std::ostream& output ) const
     output << "Type       = " << M_type << std::endl;
     output << "Mode       = " << M_mode << std::endl;
     output << "comV:      = ";
-    for ( UInt i(0); i < static_cast<UInt>( M_comV.size() ); ++i )
-        output << M_comV[i] << " ";
+    for ( UInt i(0); i < static_cast<UInt>( M_componentsVector.size() ); ++i )
+        output << M_componentsVector[i] << " ";
     output << "\n";
 }
 
@@ -251,11 +251,9 @@ BCInterfaceData::readResistance( const GetPot& dataFile, const char* resistance 
 {
     UInt resistanceSize = dataFile.vector_variable_size( resistance );
 
-    M_resistance.clear();
-    M_resistance.reserve( resistanceSize );
-
+    M_resistance.resize( resistanceSize );
     for ( UInt j( 0 ); j < resistanceSize; ++j )
-        M_resistance.push_back( dataFile( resistance, 0, j ) );
+        M_resistance[j] = dataFile( resistance, 0, j );
 }
 
 void
@@ -263,11 +261,9 @@ BCInterfaceData::readComV( const GetPot& dataFile, const char* component )
 {
     UInt componentSize = dataFile.vector_variable_size( component );
 
-    M_comV.clear();
-    M_comV.reserve( componentSize );
-
+    M_componentsVector.resize( componentSize );
     for ( UInt j( 0 ); j < componentSize; ++j )
-        M_comV.push_back( dataFile( component, 0, j ) );
+        M_componentsVector[j] = dataFile( component, 0, j );
 }
 
 void
