@@ -76,10 +76,10 @@ namespace LifeV
  *  The following functions are available (see the related classes for more information):
  *
  *  <ol>
- *      <li> \c function, which is implemented in \c BCInterfaceFunction;
- *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionFile;
- *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionSolver;
- *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionFileSolver;
+ *      <li> \c function, which is implemented in \c BCInterfaceFunctionParser;
+ *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
+ *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
+ *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
  *  </ol>
  *
  *  All the parameters are case sensitive.
@@ -142,10 +142,25 @@ public:
     //! Insert the current boundary condition in the BChandler
     void insertBC()
     {
-        factory_Type factory;
-        this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
+        switch ( M_data.base().second )
+        {
+        case BCIFunctionParser:
+        case BCIFunctionParserFile:
+        case BCIFunctionParserSolver:
+        case BCIFunctionParserFileSolver:
+        {
+            factory_Type factory;
+            this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
 
-        addBcToHandler();
+            addBcToHandler();
+
+            return;
+        }
+        default:
+
+            std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface0D !!!" << std::endl;
+            break;
+        }
     }
 
     //@}
@@ -169,7 +184,7 @@ private:
         if ( !this->M_handler.get() )
             this->createHandler();
 
-        this->M_handler->setBC( M_data.flag(), M_data.quantity(), boost::bind( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
+        this->M_handler->setBC( M_data.flag(), M_data.quantity(), boost::bind( &BCInterfaceFunctionParser<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
     }
 
     // Data
