@@ -68,4 +68,5 @@ InternalEntitySelector::operator()(markerID_Type const & test) const
     return (test==markerID_Type(0) || test > M_watermarkFlag );
 }
 
+
 } // Namespace LifeV
