@@ -52,9 +52,9 @@ BCInterfaceData::BCInterfaceData() :
     M_mapBase["functionFile"]       = BCIFunctionParserFile;
     M_mapBase["functionSolver"]     = BCIFunctionParserSolver;
     M_mapBase["functionFileSolver"] = BCIFunctionParserFileSolver;
+    M_mapBase["functionUD"]         = BCIFunctionUserDefined;
     M_mapBase["functionDefault"]    = BCI1DFunctionDefault;
     M_mapBase["dataInterpolator"]   = BCI3DDataInterpolator;
-    M_mapBase["FSI"]                = BCI3DFSI;
 }
 
 BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :

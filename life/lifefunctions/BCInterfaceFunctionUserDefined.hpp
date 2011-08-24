@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3DFSI class
+ *  @brief File containing the BCInterfaceFunctionUserDefined class
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface3DFSI_H
-#define BCInterface3DFSI_H 1
+#ifndef BCInterfaceFunctionUserDefined_H
+#define BCInterfaceFunctionUserDefined_H 1
 
 #include <life/lifesolver/FSIExactJacobian.hpp>
 #include <life/lifesolver/FSIFixedPoint.hpp>
@@ -50,13 +50,14 @@
 namespace LifeV
 {
 
-/// @cond
-//! BCInterface3DFSI Fake class for non-FSI problems.
+//! BCInterfaceFunctionUserDefined - Empty class to be used for solver user defined specializations.
 /*!
  *  @author Cristiano Malossi
+ *
+ *  This class provide the interfaces for the user defined functions.
  */
 template< class PhysicalSolverType >
-class BCInterface3DFSI
+class BCInterfaceFunctionUserDefined
 {
 public:
 
@@ -71,9 +72,9 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    explicit BCInterface3DFSI() {}
+    explicit BCInterfaceFunctionUserDefined() {}
 
-    virtual ~BCInterface3DFSI() {}
+    virtual ~BCInterfaceFunctionUserDefined() {}
 
     //@}
 
@@ -81,11 +82,27 @@ public:
     //! @name Methods
     //@{
 
+    //! Copy the stored parameters in the 1D data container
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    void exportData( BCInterfaceData1D& /*data*/ ) {}
+
+    //! Copy the stored parameters in the 3D data container
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
     void exportData( BCInterfaceData3D& /*data*/ ) {}
 
+    //! Assign a boundary function to the boundary condition vector base
+    /*!
+     * @param physicalSolver FSI physical solver,
+     * @param base boundary condition base
+     */
     template< class BCBaseType >
     void assignFunction( BCBaseType& /*base*/ ) {}
 
+    //! Update the solver variables
     void updatePhysicalSolverVariables() {}
 
 
@@ -95,7 +112,25 @@ public:
     //! @name Set Methods
     //@{
 
-    void setData( const BCInterfaceData3D& /*data*/) {}
+#ifdef MULTISCALE_IS_IN_LIFEV
+    //! Set data for 0D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    void setData( const BCInterfaceData0D& data ) {}
+#endif
+
+    //! Set data for 1D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    void setData( const BCInterfaceData1D& data ) {}
+
+    //! Set data for 3D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    void setData( const BCInterfaceData3D& data ) {}
 
     //! Set the physical solver
     /*!
@@ -110,23 +145,32 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface3DFSI( const BCInterface3DFSI& fsi);
+    BCInterfaceFunctionUserDefined( const BCInterfaceFunctionUserDefined& function);
 
-    BCInterface3DFSI& operator=( const BCInterface3DFSI& fsi );
+    BCInterfaceFunctionUserDefined& operator=( const BCInterfaceFunctionUserDefined& function );
 
     //@}
 
 };
-/// @endcond
+
+// ===================================================
+// Factory
+// ===================================================
+//! Factory create function
+template< typename PhysicalSolverType >
+inline BCInterfaceFunctionUserDefined< PhysicalSolverType >* createBCInterfaceFunctionUserDefined()
+{
+    return new BCInterfaceFunctionUserDefined< PhysicalSolverType > ();
+}
 
 
 
-//! BCInterface3DFSI - LifeV boundary condition function wrapper for \c BCInterface3D and FSI problems
+//! BCInterfaceFunctionUserDefined - Template specialization of BCInterfaceFunctionUserDefined for 3D FSI problems
 /*!
  *  @author Cristiano Malossi
  *
  *
- *  The BCInterface3DFSI class provides a general interface between the
+ *  The BCInterfaceFunctionUserDefined class provides a general interface between the
  *  \c BCInterface3D and the default boundary condition for the \c FSIOperator.
  *
  *  <b>DETAILS:</b> <BR>
@@ -157,7 +201,7 @@ private:
  *  </ol>
  */
 template< >
-class BCInterface3DFSI< FSIOperator >
+class BCInterfaceFunctionUserDefined< FSIOperator >
 {
 public:
 
@@ -179,10 +223,10 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface3DFSI();
+    explicit BCInterfaceFunctionUserDefined();
 
     //! Destructor
-    virtual ~BCInterface3DFSI() {}
+    virtual ~BCInterfaceFunctionUserDefined() {}
 
     //@}
 
@@ -232,9 +276,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface3DFSI( const BCInterface3DFSI& fsi);
+    BCInterfaceFunctionUserDefined( const BCInterfaceFunctionUserDefined& fsi);
 
-    BCInterface3DFSI& operator=( const BCInterface3DFSI& fsi );
+    BCInterfaceFunctionUserDefined& operator=( const BCInterfaceFunctionUserDefined& fsi );
 
     //@}
 
@@ -297,7 +341,7 @@ private:
 // ===================================================
 template< class BCBaseType >
 inline void
-BCInterface3DFSI< FSIOperator >::assignFunction( BCBaseType& base )
+BCInterfaceFunctionUserDefined< FSIOperator >::assignFunction( BCBaseType& base )
 {
     //Set mapMethod
     std::map< std::string, FSIMethod > mapMethod;
@@ -312,7 +356,7 @@ BCInterface3DFSI< FSIOperator >::assignFunction( BCBaseType& base )
     case EXACTJACOBIAN:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkMethod                            exactJacobian" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkMethod                            exactJacobian" << "\n";
 #endif
 
         checkFunction< FSIExactJacobian > ( base );
@@ -322,7 +366,7 @@ BCInterface3DFSI< FSIOperator >::assignFunction( BCBaseType& base )
     case FIXEDPOINT:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkMethod                            fixedPoint" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkMethod                            fixedPoint" << "\n";
 #endif
 
         checkFunction< FSIFixedPoint > ( base );
@@ -332,7 +376,7 @@ BCInterface3DFSI< FSIOperator >::assignFunction( BCBaseType& base )
     case MONOLITHIC_GE:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkMethod                            monolithicGE" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkMethod                            monolithicGE" << "\n";
 #endif
 
         checkFunction< FSIMonolithicGE >( base );
@@ -342,7 +386,7 @@ BCInterface3DFSI< FSIOperator >::assignFunction( BCBaseType& base )
     case MONOLITHIC_GI:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkMethod                            monolithicGI" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkMethod                            monolithicGI" << "\n";
 #endif
 
         checkFunction< FSIMonolithicGI >( base );
@@ -362,7 +406,7 @@ BCInterface3DFSI< FSIOperator >::assignFunction( BCBaseType& base )
 // Private functions
 // ===================================================
 template< class MethodType >
-inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& base )
+inline void BCInterfaceFunctionUserDefined< FSIOperator >::checkFunction( BCVectorInterface& base )
 {
     boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
 
@@ -371,7 +415,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case DerFluidLoadToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          DerFluidLoadToFluid" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          DerFluidLoadToFluid" << "\n";
 #endif
 
         break;
@@ -379,7 +423,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case DerFluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          DerFluidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
         if ( !operMethod->isSolid() )
             return;
@@ -393,7 +437,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case DerHarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -408,7 +452,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case DerStructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          DerStructureDispToSolid" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          DerStructureDispToSolid" << "\n";
 #endif
 
         break;
@@ -416,7 +460,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case FluidInterfaceDisp:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          FluidInterfaceDisp" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
         //operMethod->FluidInterfaceDisp( (LifeV::Vector&) operMethod->lambdaFluidRepeated() );
@@ -428,7 +472,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case FluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          FluidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
         if ( !operMethod->isSolid() )
@@ -443,7 +487,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case HarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -458,7 +502,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case SolidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          SolidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
         if ( !operMethod->isFluid() )
             return;
@@ -472,7 +516,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case StructureDispToHarmonicExtension:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -487,7 +531,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case StructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          StructureDispToSolid" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          StructureDispToSolid" << "\n";
 #endif
 
         break;
@@ -495,7 +539,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
     case StructureToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          StructureToFluid" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          StructureToFluid" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -517,7 +561,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVectorInterface& b
 }
 
 template< class MethodType >
-inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVector& base )
+inline void BCInterfaceFunctionUserDefined< FSIOperator >::checkFunction( BCVector& base )
 {
     boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
 
@@ -526,7 +570,7 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVector& base )
     case RobinWall:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface3DFSI::checkFunction                          RobinWall" << "\n";
+        Debug( 5025 ) << "BCInterfaceFunctionUserDefined::checkFunction                          RobinWall" << "\n";
 #endif
 
         if ( !operMethod->isSolid() )
@@ -564,4 +608,4 @@ inline void BCInterface3DFSI< FSIOperator >::checkFunction( BCVector& base )
 
 } // Namespace LifeV
 
-#endif /* BCInterface3DFSI_H */
+#endif /* BCInterfaceFunctionUserDefined_H */

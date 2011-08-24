@@ -144,7 +144,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >                            function_Type;
+    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      function_Type;
     typedef OneDimensionalSolver::solutionPtr_Type                                solutionPtr_Type;
 
     //@}

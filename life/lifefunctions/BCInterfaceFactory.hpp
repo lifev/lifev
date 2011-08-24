@@ -60,6 +60,7 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
+ *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionUserDefined;
  *  </ol>
  */
 
@@ -71,12 +72,12 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                                        physicalSolver_Type;
+    typedef PhysicalSolverType                                                                              physicalSolver_Type;
 
     typedef FactorySingleton< Factory< BCInterfaceFunctionParser< physicalSolver_Type > , baseList_Type > > factoryFunction_Type;
 
     typedef BCInterfaceFunctionParser< physicalSolver_Type >                                                bcFunction_Type;
-    typedef boost::shared_ptr< bcFunction_Type >                                                      bcFunctionPtr_Type;
+    typedef boost::shared_ptr< bcFunction_Type >                                                            bcFunctionPtr_Type;
 
     //@}
 
@@ -133,6 +134,8 @@ BCInterfaceFactory< PhysicalSolverType >::BCInterfaceFactory()
     factoryFunction_Type::instance().registerProduct( BCIFunctionParserFile,       &createBCInterfaceFunctionParserFile< physicalSolver_Type > );
     factoryFunction_Type::instance().registerProduct( BCIFunctionParserSolver,     &createBCInterfaceFunctionParserSolver< physicalSolver_Type > );
     factoryFunction_Type::instance().registerProduct( BCIFunctionParserFileSolver, &createBCInterfaceFunctionParserFileSolver< physicalSolver_Type > );
+
+    //factoryFunction_Type::instance().registerProduct( BCIFunctionUserDefined,      &createBCInterfaceFunctionUserDefined< physicalSolver_Type > );
 }
 
 // ===================================================

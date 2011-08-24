@@ -70,8 +70,8 @@ enum baseList_Type
     BCIFunctionParserFile,
     BCIFunctionParserSolver,
     BCIFunctionParserFileSolver,
+    BCIFunctionUserDefined,
     BCI1DFunctionDefault,
-    BCI3DFSI,
     BCI3DDataInterpolator
 };
 

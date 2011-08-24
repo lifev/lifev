@@ -41,7 +41,7 @@
 
 #include <life/lifesolver/BCInterface.hpp>
 
-#include <life/lifesolver/BCInterface3DFSI.hpp>
+#include <life/lifefunctions/BCInterfaceFunctionUserDefined.hpp>
 
 namespace LifeV
 {
@@ -86,7 +86,7 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
- *      <li> \c FSI, which is implemented in \c BCInterface3DFSI;
+ *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionUserDefined;
  *      <li> \c dataInterpolator, which is implemented in\c BCDataInterpolator;
  *  </ol>
  *
@@ -129,7 +129,7 @@ public:
     typedef boost::shared_ptr< bcFunctionDataInterpolator_Type >  bcFunctionDataInterpolatorPtr_Type;
     typedef std::vector< bcFunctionDataInterpolatorPtr_Type >     vectorDataInterpolator_Type;
 
-    typedef BCInterface3DFSI< physicalSolver_Type >               bcFunctionFSI_Type;
+    typedef BCInterfaceFunctionUserDefined< physicalSolver_Type >               bcFunctionFSI_Type;
     typedef boost::shared_ptr< bcFunctionFSI_Type >               bcFunctionFSIPtr_Type;
     typedef std::vector< bcFunctionFSIPtr_Type >                  vectorFSI_Type;
 
@@ -349,7 +349,10 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
 
         return;
 
-    case BCI3DFSI:
+    case BCIFunctionUserDefined:
+
+        //factory_Type factory;
+        //this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
 
         createFunctionFSI();
 

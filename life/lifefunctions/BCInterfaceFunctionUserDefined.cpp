@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3DFSI class
+ *  @brief File containing the BCInterfaceFunctionUserDefined class
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/BCInterface3DFSI.hpp>
+#include <life/lifefunctions/BCInterfaceFunctionUserDefined.hpp>
 
 namespace LifeV
 {
@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterface3DFSI< FSIOperator >::BCInterface3DFSI() :
+BCInterfaceFunctionUserDefined< FSIOperator >::BCInterfaceFunctionUserDefined() :
         M_FSIFunction           (),
         M_physicalSolver        (),
         M_name                  (),
@@ -57,7 +57,7 @@ BCInterface3DFSI< FSIOperator >::BCInterface3DFSI() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::BCInterface3DFSI()" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionUserDefined::BCInterfaceFunctionUserDefined()" << "\n";
 #endif
 
 }
@@ -66,11 +66,11 @@ BCInterface3DFSI< FSIOperator >::BCInterface3DFSI() :
 // Methods
 // ===================================================
 void
-BCInterface3DFSI< FSIOperator >::exportData( BCInterfaceData3D& data )
+BCInterfaceFunctionUserDefined< FSIOperator >::exportData( BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::exportData" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionUserDefined::exportData" << "\n";
 #endif
 
     data.setName( M_name );
@@ -81,11 +81,11 @@ BCInterface3DFSI< FSIOperator >::exportData( BCInterfaceData3D& data )
 }
 
 void
-BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
+BCInterfaceFunctionUserDefined< FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::updatePhysicalSolverVariables" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionUserDefined::updatePhysicalSolverVariables" << "\n";
 #endif
 
     switch ( M_FSIFunction )
@@ -157,11 +157,11 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
 // Set Methods
 // ===================================================
 void
-BCInterface3DFSI< FSIOperator >::setData( const BCInterfaceData3D& data )
+BCInterfaceFunctionUserDefined< FSIOperator >::setData( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::setData" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionUserDefined::setData" << "\n";
 #endif
 
     //Set mapFunction

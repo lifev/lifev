@@ -31,7 +31,7 @@ liblifesolver_la_SOURCES   = FSIData.cpp ADRData.cpp VenantKirchhoffElasticData.
 					LevelSetData.cpp VenantKirchhoffViscoelasticData.cpp MonolithicBlock.cpp MonolithicBlockComposed.cpp MonolithicBlockComposedDN.cpp \
                     MonolithicBlockComposedDND.cpp MonolithicBlockComposedDNND.cpp MonolithicBlockComposedNN.cpp MonolithicBlockMatrix.cpp \
                     MonolithicBlockMatrixRN.cpp MonolithicRobinInterface.cpp\
-                    BCInterface3DFSI.cpp BCInterfaceData.cpp BCInterfaceData3D.cpp BCInterfaceData1D.cpp OneDimensionalData.cpp OneDimensionalFluxLinear.cpp OneDimensionalFluxNonLinear.cpp\
+                    BCInterfaceData.cpp BCInterfaceData3D.cpp BCInterfaceData1D.cpp OneDimensionalData.cpp OneDimensionalFluxLinear.cpp OneDimensionalFluxNonLinear.cpp\
                     OneDimensionalSourceLinear.cpp OneDimensionalSourceNonLinear.cpp OneDimensionalPhysics.cpp OneDimensionalPhysicsLinear.cpp\
                     OneDimensionalPhysicsNonLinear.cpp OneDimensionalSolver.cpp
 
