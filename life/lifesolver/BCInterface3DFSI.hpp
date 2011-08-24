@@ -84,7 +84,7 @@ public:
     void exportData( BCInterfaceData3D& /*data*/ ) {}
 
     template< class BCBaseType >
-    void assignFunction( const boost::shared_ptr< physicalSolver_Type >& /*physicalSolver*/, BCBaseType& /*base*/ ) {}
+    void assignFunction( BCBaseType& /*base*/ ) {}
 
     void updatePhysicalSolverVariables() {}
 
@@ -96,6 +96,12 @@ public:
     //@{
 
     void setData( const BCInterfaceData3D& /*data*/) {}
+
+    //! Set the physical solver
+    /*!
+     * @param physicalSolver physical solver
+     */
+    void setPhysicalSolver( const boost::shared_ptr< PhysicalSolverType >& /*physicalSolver*/ ) {}
 
     //@}
 
@@ -196,7 +202,7 @@ public:
      * @param base boundary condition base
      */
     template< class BCBaseType >
-    void assignFunction( const physicalSolverPtr_Type& physicalSolver, BCBaseType& base );
+    void assignFunction( BCBaseType& base );
 
     //! Update the solver variables
     void updatePhysicalSolverVariables();
@@ -212,6 +218,12 @@ public:
      * @param data boundary condition data loaded from \c GetPot file
      */
     void setData( const BCInterfaceData3D& data );
+
+    //! Set the physical solver
+    /*!
+     * @param physicalSolver physical solver
+     */
+    void setPhysicalSolver( const physicalSolverPtr_Type& physicalSolver ) { M_physicalSolver = physicalSolver; }
 
     //@}
 
@@ -264,7 +276,7 @@ private:
     physicalSolverPtr_Type                         M_physicalSolver;
 
     // The following are required since the FSI BC are applied
-    // a posteriori, when setPhysicalSolver is called.
+    // a posteriori, when setPhysicalSolver() is called.
 
     // Classical parameters
     bcName_Type                                    M_name;
@@ -285,11 +297,8 @@ private:
 // ===================================================
 template< class BCBaseType >
 inline void
-BCInterface3DFSI< FSIOperator >::assignFunction( const physicalSolverPtr_Type& physicalSolver, BCBaseType& base )
+BCInterface3DFSI< FSIOperator >::assignFunction( BCBaseType& base )
 {
-    // Set physical solver
-    M_physicalSolver = physicalSolver;
-
     //Set mapMethod
     std::map< std::string, FSIMethod > mapMethod;
 
@@ -342,7 +351,7 @@ BCInterface3DFSI< FSIOperator >::assignFunction( const physicalSolverPtr_Type& p
 
     default:
 
-        std::cout << " !!! Warning:" << mapMethod[physicalSolver->data().method()] << " not assigned !!!" << std::endl;
+        std::cout << " !!! Warning:" << mapMethod[M_physicalSolver->data().method()] << " not assigned !!!" << std::endl;
 
         break;
 

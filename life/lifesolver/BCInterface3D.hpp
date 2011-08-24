@@ -389,6 +389,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
 
     for ( typename vectorFSI_Type::const_iterator i = M_vectorFSI.begin() ; i < M_vectorFSI.end() ; ++i )
     {
+        ( *i )->setPhysicalSolver( physicalSolver );
         ( *i )->exportData( M_data );
 
         // Robin BC
@@ -396,14 +397,14 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
         {
             BCVector base;
 
-            ( *i )->assignFunction( physicalSolver, base );
+            ( *i )->assignFunction( base );
             addBcToHandler( base );
         }
         else
         {
             BCVectorInterface base;
 
-            ( *i )->assignFunction( physicalSolver, base );
+            ( *i )->assignFunction( base );
             addBcToHandler( base );
         }
     }
