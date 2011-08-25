@@ -41,7 +41,7 @@
 #include <life/lifefem/BCHandler.hpp>
 
 // BCInterface includes
-#include <life/lifesolver/BCInterfaceData.hpp>
+#include <life/lifefem/BCInterfaceData.hpp>
 
 namespace LifeV
 {

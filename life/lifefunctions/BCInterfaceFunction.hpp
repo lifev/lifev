@@ -38,11 +38,11 @@
 #define BCInterfaceFunction_H 1
 
 #ifdef MULTISCALE_IS_IN_LIFEV
-#include <life/lifesolver/BCInterfaceData0D.hpp>
+#include <life/lifefem/BCInterfaceData0D.hpp>
 #endif
 
-#include <life/lifesolver/BCInterfaceData1D.hpp>
-#include <life/lifesolver/BCInterfaceData3D.hpp>
+#include <life/lifefem/BCInterfaceData1D.hpp>
+#include <life/lifefem/BCInterfaceData3D.hpp>
 
 namespace LifeV
 {

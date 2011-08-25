@@ -48,8 +48,12 @@
 #include <life/lifesolver/OneDimensionalSolver.hpp>
 
 // BCInterface includes
-#include <life/lifesolver/BCInterfaceData1D.hpp>
-#include <life/lifesolver/BCInterfaceData3D.hpp>
+#ifdef MULTISCALE_IS_IN_LIFEV
+#include <life/lifefem/BCInterfaceData0D.hpp>
+#endif
+
+#include <life/lifefem/BCInterfaceData1D.hpp>
+#include <life/lifefem/BCInterfaceData3D.hpp>
 
 #include <life/lifefunctions/BCInterfaceFactory.hpp>
 

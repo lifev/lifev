@@ -38,7 +38,7 @@
 #define BCInterface_H 1
 
 // BCInterface includes
-#include <life/lifesolver/BCInterfaceData.hpp>
+#include <life/lifefem/BCInterfaceData.hpp>
 #include <life/lifefunctions/BCInterfaceFactory.hpp>
 
 namespace LifeV
