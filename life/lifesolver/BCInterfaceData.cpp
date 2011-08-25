@@ -53,7 +53,6 @@ BCInterfaceData::BCInterfaceData() :
     M_mapBase["functionSolver"]     = BCIFunctionParserSolver;
     M_mapBase["functionFileSolver"] = BCIFunctionParserFileSolver;
     M_mapBase["functionSD"]         = BCIFunctionSolverDefined;
-    M_mapBase["functionDefault"]    = BCI1DFunctionDefault;
     M_mapBase["dataInterpolator"]   = BCI3DDataInterpolator;
 }
 

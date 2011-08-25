@@ -37,8 +37,6 @@
 #ifndef BCInterfaceFunctionParser_H
 #define BCInterfaceFunctionParser_H 1
 
-#include <life/lifesolver/BCInterfaceDefinitions.hpp>
-
 #ifdef MULTISCALE_IS_IN_LIFEV
 #include <life/lifesolver/BCInterfaceData0D.hpp>
 #endif

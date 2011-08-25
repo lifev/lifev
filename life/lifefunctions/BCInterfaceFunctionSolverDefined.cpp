@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterfaceFunctionSolverDefined class
+ *  @brief File containing the BCInterfaceFunctionSolverDefined class and specializations
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -152,7 +152,6 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
     }
 }
 
-
 // ===================================================
 // Set Methods
 // ===================================================
@@ -201,6 +200,110 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::setData( const BCInterfaceData3
         // Create the RHS
         temporaryData.setRobinBaseBeta();
         M_vectorFunctionRobin.push_back( factory.createFunctionParser( temporaryData ) );
+    }
+}
+
+
+
+
+
+// ===================================================
+// Constructors
+// ===================================================
+BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::BCInterfaceFunctionSolverDefined() :
+        M_defaultFunction (),
+        M_function        ()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
+#endif
+
+}
+
+// ===================================================
+// Methods
+// ===================================================
+void
+BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::assignFunction( OneDimensionalBCFunction& base )
+{
+    switch ( M_defaultFunction )
+    {
+    case Riemann:
+
+        base.setFunction( boost::bind( &OneDimensionalBCFunctionRiemann::operator(),
+                                       dynamic_cast<OneDimensionalBCFunctionRiemann *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+
+    case Compatibility:
+
+        base.setFunction( boost::bind( &OneDimensionalBCFunctionCompatibility::operator(),
+                                       dynamic_cast<OneDimensionalBCFunctionCompatibility *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+
+    case Absorbing:
+
+        base.setFunction( boost::bind( &OneDimensionalBCFunctionAbsorbing::operator(),
+                                       dynamic_cast<OneDimensionalBCFunctionAbsorbing *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+
+    case Resistance:
+
+        base.setFunction( boost::bind( &OneDimensionalBCFunctionResistance::operator(),
+                                       dynamic_cast<OneDimensionalBCFunctionResistance *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+    }
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::setData( const BCInterfaceData1D& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::setData( data )" << "\n";
+#endif
+
+    //Set mapFunction
+    std::map< std::string, solverDefinedFunctions > mapFunction;
+    mapFunction["Riemann"]       = Riemann;
+    mapFunction["Compatibility"] = Compatibility;
+    mapFunction["Absorbing"]     = Absorbing;
+    mapFunction["Resistance"]    = Resistance;
+
+    M_defaultFunction = mapFunction[data.baseString()];
+
+    switch ( M_defaultFunction )
+    {
+    case Riemann:
+
+        M_function.reset( new OneDimensionalBCFunctionRiemann( data.side(), data.quantity() ) );
+
+        break;
+
+    case Compatibility:
+
+        M_function.reset( new OneDimensionalBCFunctionCompatibility( data.side(), data.quantity() ) );
+
+        break;
+
+    case Absorbing:
+
+        M_function.reset( new OneDimensionalBCFunctionAbsorbing( data.side(), data.quantity() ) );
+
+        break;
+
+    case Resistance:
+
+        M_function.reset( new OneDimensionalBCFunctionResistance( data.side(), data.quantity(), data.resistance()[0] ) );
+
+        break;
     }
 }
 

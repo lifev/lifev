@@ -37,11 +37,16 @@
 #ifndef BCInterfaceFunctionParserSolver_H
 #define BCInterfaceFunctionParserSolver_H 1
 
-#include <life/lifesolver/OneDimensionalSolver.hpp>
-
-#include <life/lifesolver/FSIOperator.hpp>
+// Oseen includes
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
+// FSI includes
+#include <life/lifesolver/FSIOperator.hpp>
+
+// OneDimensional includes
+#include <life/lifesolver/OneDimensionalSolver.hpp>
+
+// BCInterface includes
 #include <life/lifefunctions/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV

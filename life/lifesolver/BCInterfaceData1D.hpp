@@ -37,8 +37,10 @@
 #ifndef BCInterfaceData1D_H
 #define BCInterfaceData1D_H 1
 
+// OneDimensional includes
 #include <life/lifefem/OneDimensionalBCHandler.hpp>
 
+// BCInterface includes
 #include <life/lifesolver/BCInterfaceData.hpp>
 
 namespace LifeV

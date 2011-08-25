@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterfaceFunctionSolverDefined class
+ *  @brief File containing the BCInterfaceFunctionSolverDefined class and specializations
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -37,24 +37,31 @@
 #ifndef BCInterfaceFunctionSolverDefined_H
 #define BCInterfaceFunctionSolverDefined_H 1
 
+// FSI includes
 #include <life/lifesolver/FSIExactJacobian.hpp>
 #include <life/lifesolver/FSIFixedPoint.hpp>
 
 #include <life/lifesolver/FSIMonolithicGE.hpp>
 #include <life/lifesolver/FSIMonolithicGI.hpp>
 
-#include <life/lifesolver/BCInterfaceDefinitions.hpp>
+// OneDimensional includes
+#include <life/lifesolver/OneDimensionalSolver.hpp>
+
+// BCInterface includes
+#include <life/lifesolver/BCInterfaceData1D.hpp>
 #include <life/lifesolver/BCInterfaceData3D.hpp>
+
 #include <life/lifefunctions/BCInterfaceFactory.hpp>
 
 namespace LifeV
 {
 
-//! BCInterfaceFunctionSolverDefined - Empty class to be used for solver user defined specializations.
+//! BCInterfaceFunctionSolverDefined - Empty class for solver defined specializations.
 /*!
  *  @author Cristiano Malossi
  *
- *  This class provide the interfaces for the user defined functions.
+ *  This class provides the base interfaces for the implementation of solver defined boundary functions
+ *  through template specializations.
  */
 template< class PhysicalSolverType >
 class BCInterfaceFunctionSolverDefined
@@ -65,6 +72,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                    physicalSolver_Type;
+    typedef boost::shared_ptr< physicalSolver_Type >              physicalSolverPtr_Type;
 
     //@}
 
@@ -173,13 +181,15 @@ inline BCInterfaceFunctionSolverDefined< PhysicalSolverType >* createBCInterface
 
 
 
-//! BCInterfaceFunctionSolverDefined - Template specialization of BCInterfaceFunctionSolverDefined for 3D FSI problems
+
+
+//! BCInterfaceFunctionSolverDefined - Template specialization of \c BCInterfaceFunctionSolverDefined for 3D FSI problems
 /*!
  *  @author Cristiano Malossi
  *
  *
- *  The BCInterfaceFunctionSolverDefined class provides a general interface between the
- *  \c BCInterface3D and the default boundary condition for the \c FSIOperator.
+ *  The BCInterfaceFunctionSolverDefined class provides the interface between the
+ *  \c BCInterface3D and the solver defined boundary conditions of the \c FSIOperator.
  *
  *  <b>DETAILS:</b> <BR>
  *  The constructor of the class takes a string contains the ID of the interface condition to impose,
@@ -285,9 +295,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionSolverDefined( const BCInterfaceFunctionSolverDefined& fsi);
+    BCInterfaceFunctionSolverDefined( const BCInterfaceFunctionSolverDefined& function );
 
-    BCInterfaceFunctionSolverDefined& operator=( const BCInterfaceFunctionSolverDefined& fsi );
+    BCInterfaceFunctionSolverDefined& operator=( const BCInterfaceFunctionSolverDefined& function );
 
     //@}
 
@@ -614,6 +624,131 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
         break;
     }
 }
+
+
+
+
+
+//! BCInterfaceFunctionSolverDefined - Template specialization of \c BCInterfaceFunctionSolverDefined for 1D problems
+/*!
+ *  @author Cristiano Malossi
+ *
+ *  The BCInterfaceFunctionSolverDefined class provides a general interface between the
+ *  \c BCInterface1D and the solver defined boundary conditions of the \c OneDimensionalSolver.
+ *
+ *  <b>DETAILS:</b> <BR>
+ *  The list of available conditions is described by the \c solverDefinedFunctions enum type.
+ *
+ *  They are:
+ *  <ol>
+ *      <li> Riemann;
+ *      <li> Compatibility;
+ *      <li> Absorbing;
+ *      <li> Resistance.
+ *  </ol>
+ */
+template< >
+class BCInterfaceFunctionSolverDefined< OneDimensionalSolver >
+{
+public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef OneDimensionalSolver                                  physicalSolver_Type;
+    typedef boost::shared_ptr< physicalSolver_Type >              physicalSolverPtr_Type;
+
+    typedef OneDimensionalBC                                      bc_Type;
+    typedef bc_Type::bcFunctionDefaultPtr_Type                    bcFunctionSolverDefinedPtr_Type;
+
+    typedef bc_Type::vectorPtrContainer_Type                      vectorPtrContainer_Type;
+
+    typedef bc_Type::fluxPtr_Type                                 fluxPtr_Type;
+    typedef bc_Type::sourcePtr_Type                               sourcePtr_Type;
+    typedef bc_Type::solutionPtr_Type                             solutionPtr_Type;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    explicit BCInterfaceFunctionSolverDefined();
+
+    //! Destructor
+    virtual ~BCInterfaceFunctionSolverDefined() {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Assign the function to the base
+    /*!
+     * @param base base of the bc
+     */
+    void assignFunction( OneDimensionalBCFunction& base );
+
+    //! Update the solver variables
+    void updatePhysicalSolverVariables() {}
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Set data
+    /*!
+     * @param data BC data loaded from GetPot file
+     */
+    void setData( const BCInterfaceData1D& data );
+
+    //! Set flux and source
+    /*!
+     * @param flux flux object of the 1D model
+     * @param source source object of the 1D model
+     */
+    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source ) { M_function->setFluxSource( flux, source ); }
+
+    //! Set solution
+    /*!
+     * @param solution solution container of the 1D model
+     */
+    void setSolution( const solutionPtr_Type& solution ) { M_function->setSolution( solution ); }
+
+    //! Set the physical solver
+    /*!
+     * @param physicalSolver physical solver
+     */
+    void setPhysicalSolver( const physicalSolverPtr_Type& /*physicalSolver*/ ) {}
+
+    //@}
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    BCInterfaceFunctionSolverDefined( const BCInterfaceFunctionSolverDefined& function );
+
+    BCInterfaceFunctionSolverDefined& operator=( const BCInterfaceFunctionSolverDefined& function );
+
+    //@}
+
+    enum solverDefinedFunctions
+    {
+        Riemann,
+        Compatibility,
+        Absorbing,
+        Resistance
+    };
+
+    solverDefinedFunctions           M_defaultFunction;
+    bcFunctionSolverDefinedPtr_Type  M_function;
+};
 
 } // Namespace LifeV
 

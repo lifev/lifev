@@ -37,7 +37,6 @@
 #ifndef BCInterfaceFactory_H
 #define BCInterfaceFactory_H 1
 
-#include <life/lifesolver/BCInterfaceDefinitions.hpp>
 #include <life/lifesolver/BCInterfaceData.hpp>
 
 #include <life/lifefunctions/BCInterfaceFunctionParser.hpp>
@@ -71,7 +70,7 @@ inline BCInterfaceFunctionSolverDefined< PhysicalSolverType >* createBCInterface
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
- *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionSolverDefined;
+ *      <li> \c functionSD, which is implemented in \c BCInterfaceFunctionSolverDefined;
  *  </ol>
  */
 
@@ -89,9 +88,9 @@ public:
     typedef boost::shared_ptr< bcFunctionParser_Type >                                                           bcFunctionParserPtr_Type;
     typedef FactorySingleton< Factory< bcFunctionParser_Type , baseList_Type > >                                 factoryFunctionParser_Type;
 
-    typedef BCInterfaceFunctionSolverDefined< physicalSolver_Type >                                                bcFunctionSolverDefined_Type;
-    typedef boost::shared_ptr< bcFunctionSolverDefined_Type >                                                      bcFunctionSolverDefinedPtr_Type;
-    typedef FactorySingleton< Factory< bcFunctionSolverDefined_Type, baseList_Type > >                             factoryFunctionSolverDefined_Type;
+    typedef BCInterfaceFunctionSolverDefined< physicalSolver_Type >                                              bcFunctionSolverDefined_Type;
+    typedef boost::shared_ptr< bcFunctionSolverDefined_Type >                                                    bcFunctionSolverDefinedPtr_Type;
+    typedef FactorySingleton< Factory< bcFunctionSolverDefined_Type, baseList_Type > >                           factoryFunctionSolverDefined_Type;
 
     //@}
 

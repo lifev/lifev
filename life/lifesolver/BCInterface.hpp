@@ -37,8 +37,7 @@
 #ifndef BCInterface_H
 #define BCInterface_H 1
 
-#include <life/lifesolver/BCInterfaceDefinitions.hpp>
-
+// BCInterface includes
 #include <life/lifesolver/BCInterfaceData.hpp>
 #include <life/lifefunctions/BCInterfaceFactory.hpp>
 

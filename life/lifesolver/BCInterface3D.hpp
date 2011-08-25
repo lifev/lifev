@@ -37,8 +37,11 @@
 #ifndef BCInterface3D_H
 #define BCInterface3D_H 1
 
-#include <life/lifesolver/BCInterface.hpp>
+// Data interpolator include
 #include <life/lifefem/BCDataInterpolator.hpp>
+
+// BCInterface includes
+#include <life/lifesolver/BCInterface.hpp>
 
 namespace LifeV
 {
@@ -83,7 +86,7 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
- *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionSolverDefined;
+ *      <li> \c functionSD, which is implemented in \c BCInterfaceFunctionSolverDefined;
  *      <li> \c dataInterpolator, which is implemented in\c BCDataInterpolator;
  *  </ol>
  *

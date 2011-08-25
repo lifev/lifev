@@ -37,8 +37,8 @@
 #ifndef BCInterface1D_H
 #define BCInterface1D_H 1
 
+// BCInterface includes
 #include <life/lifesolver/BCInterface.hpp>
-#include <life/lifesolver/BCInterface1DFunctionDefault.hpp>
 
 namespace LifeV
 {
@@ -81,7 +81,7 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
- *      <li> \c functionDefault, which is implemented in \c BCInterface1DFunctionDefault;
+ *      <li> \c functionSD, which is implemented in \c BCInterfaceFunctionSolverDefined.
  *  </ol>
  *
  *  All the parameters are case sensitive.
@@ -118,10 +118,6 @@ public:
     typedef typename bcHandler_Type::fluxPtr_Type                       fluxPtr_Type;
     typedef typename bcHandler_Type::sourcePtr_Type                     sourcePtr_Type;
     typedef typename bcHandler_Type::vectorPtrContainer_Type            vectorPtrContainer_Type;
-
-    typedef BCInterface1DFunctionDefault< physicalSolver_Type >         bcFunctionDefault_Type;
-    typedef boost::shared_ptr< bcFunctionDefault_Type >                 bcFunctionDefaultPtr_Type;
-    typedef std::vector< bcFunctionDefaultPtr_Type >                    vectorDefaultFunction_Type;
 
     //@}
 
@@ -232,9 +228,6 @@ private:
 
     // Data
     data_Type                       M_data;
-
-    // Default Functions
-    vectorDefaultFunction_Type      M_vectorDefaultFunction1D;
 };
 
 // ===================================================
@@ -243,8 +236,7 @@ private:
 template< class BcHandler, class PhysicalSolverType >
 BCInterface1D< BcHandler, PhysicalSolverType >::BCInterface1D() :
         bcInterface_Type          (),
-        M_data                    (),
-        M_vectorDefaultFunction1D ()
+        M_data                    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -282,12 +274,13 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
 
         return;
     }
-    case BCI1DFunctionDefault:
+    case BCIFunctionSolverDefined:
     {
-        createFunction( M_vectorDefaultFunction1D );
+        factory_Type factory;
+        this->M_vectorFunctionSolverDefined.push_back( factory.createFunctionSolverDefined( M_data ) );
 
         OneDimensionalBCFunction base;
-        M_vectorDefaultFunction1D.back()->assignFunction( base );
+        this->M_vectorFunctionSolverDefined.back()->assignFunction( base );
 
         addBcToHandler( base );
 
@@ -307,7 +300,7 @@ template< class BcHandler, class PhysicalSolverType >
 void
 BCInterface1D< BcHandler, PhysicalSolverType >::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
 {
-    for ( typename vectorDefaultFunction_Type::const_iterator i = M_vectorDefaultFunction1D.begin() ; i < M_vectorDefaultFunction1D.end() ; ++i )
+    for ( typename vectorFunctionSolverDefined_Type::const_iterator i = this->M_vectorFunctionSolverDefined.begin() ; i < this->M_vectorFunctionSolverDefined.end() ; ++i )
         ( *i )->setFluxSource( flux, source );
 
     this->M_handler->setFluxSource( flux, source );
@@ -327,7 +320,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::setSolution( const solutionPtr_T
             castedFunctionSolver->setSolution( solution );
     }
 
-    for ( typename vectorDefaultFunction_Type::const_iterator i = M_vectorDefaultFunction1D.begin() ; i < M_vectorDefaultFunction1D.end() ; ++i )
+    for ( typename vectorFunctionSolverDefined_Type::const_iterator i = this->M_vectorFunctionSolverDefined.begin() ; i < this->M_vectorFunctionSolverDefined.end() ; ++i )
         ( *i )->setSolution( solution );
 
     this->M_handler->setSolution( solution );
