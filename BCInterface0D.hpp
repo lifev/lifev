@@ -80,6 +80,7 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
+ *      <li> \c functionSD, which is implemented in \c BCInterfaceFunctionSolverDefined;
  *  </ol>
  *
  *  All the parameters are case sensitive.
