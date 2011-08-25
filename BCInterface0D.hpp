@@ -104,11 +104,23 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface< BcHandler, PhysicalSolverType >          bcInterface_Type;
+    typedef BCInterface< BcHandler, PhysicalSolverType >                bcInterface_Type;
 
-    typedef typename bcInterface_Type::factory_Type               factory_Type;
+    typedef typename bcInterface_Type::bcHandler_Type                   bcHandler_Type;
+    typedef typename bcInterface_Type::bcHandlerPtr_Type                bcHandlerPtr_Type;
 
-    typedef BCInterfaceData1D                                     data_Type;
+    typedef typename bcInterface_Type::physicalSolver_Type              physicalSolver_Type;
+    typedef typename bcInterface_Type::physicalSolverPtr_Type           physicalSolverPtr_Type;
+
+    typedef typename bcInterface_Type::factory_Type                     factory_Type;
+
+    typedef typename bcInterface_Type::bcFunctionParserPtr_Type         bcFunctionParserPtr_Type;
+    typedef typename bcInterface_Type::vectorFunctionParser_Type        vectorFunctionParser_Type;
+
+    typedef typename bcInterface_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
+    typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
+
+    typedef BCInterfaceData1D                                           data_Type;
 
     //@}
 
@@ -150,12 +162,13 @@ public:
         case BCIFunctionParserFileSolver:
         {
             factory_Type factory;
-            this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
+            this->M_vectorFunctionParser.push_back( factory.createFunctionParser( M_data ) );
 
             addBcToHandler();
 
             return;
         }
+
         default:
 
             std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface0D !!!" << std::endl;
@@ -184,7 +197,7 @@ private:
         if ( !this->M_handler.get() )
             this->createHandler();
 
-        this->M_handler->setBC( M_data.flag(), M_data.quantity(), boost::bind( &BCInterfaceFunctionParser<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
+        this->M_handler->setBC( M_data.flag(), M_data.quantity(), boost::bind( &BCInterfaceFunctionParser<PhysicalSolverType>::functionTime, this->M_vectorFunctionParser.back(), _1 ) );
     }
 
     // Data
