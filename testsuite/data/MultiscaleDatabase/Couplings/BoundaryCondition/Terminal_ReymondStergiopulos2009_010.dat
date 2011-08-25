@@ -21,7 +21,7 @@ list = 'terminalResistance'
     [./terminalResistance]
     quantity            = W2
     line                = first
-    functionDefault     = Resistance
+    functionSD          = Resistance
     resistance          = 8.4500e+05      # dyne s / cm^5
 
     [../]

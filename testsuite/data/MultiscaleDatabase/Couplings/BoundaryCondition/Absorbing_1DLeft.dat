@@ -21,6 +21,6 @@ list = 'OutFlow_absorbing'
     [./OutFlow_absorbing]
     quantity            = W1
     line                = first
-    functionDefault     = Absorbing
+    functionSD          = Absorbing
 
     [../]

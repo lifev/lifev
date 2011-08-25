@@ -255,7 +255,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1004
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
@@ -275,7 +275,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1003
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
@@ -295,7 +295,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1006
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
@@ -315,7 +315,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1001
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
@@ -335,7 +335,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1005
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
@@ -355,7 +355,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1002
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
@@ -375,7 +375,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1000
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R0 - Paolo
@@ -471,7 +471,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 100
         mode       = Full
         component  = 3
-        FSI        = StructureDispToHarmonicExtension
+        functionSD = StructureDispToHarmonicExtension
 
         [../]
 
