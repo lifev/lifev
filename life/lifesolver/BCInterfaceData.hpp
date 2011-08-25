@@ -53,6 +53,14 @@ class BCInterfaceData
 {
 public:
 
+    //! @name Type definitions
+    //@{
+
+    typedef std::vector< Real >                                                 parametersContainer_Type;
+
+    //@}
+
+
     //! @name Constructors & Destructor
     //@{
 
@@ -143,6 +151,12 @@ public:
      */
     const std::map< std::string, baseList_Type >& mapBase() const { return M_mapBase; }
 
+    //! Get the parameters vector {A, B, C, ...}
+    /*!
+     * @return Boundary condition parameters vector
+     */
+    const parametersContainer_Type& parameters() const { return M_parameters; }
+
     //@}
 
 protected:
@@ -154,6 +168,8 @@ protected:
 
     bool isBase( const GetPot& dataFile, const char* base, std::string& baseString );
 
+    void readParameters( const GetPot& dataFile, const char* parameters );
+
     //@}
 
 
@@ -164,6 +180,8 @@ protected:
     std::string                                                    M_baseString;
 
     std::map< std::string, baseList_Type >                         M_mapBase;
+
+    parametersContainer_Type                                       M_parameters;
 
     //@}
 };

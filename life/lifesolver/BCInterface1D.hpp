@@ -81,6 +81,7 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
+ *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionUserDefined;
  *      <li> \c functionSD, which is implemented in \c BCInterfaceFunctionSolverDefined.
  *  </ol>
  *
@@ -106,8 +107,8 @@ public:
 
     typedef typename bcInterface_Type::factory_Type                     factory_Type;
 
-    typedef typename bcInterface_Type::bcFunctionParserPtr_Type         bcFunctionParserPtr_Type;
-    typedef typename bcInterface_Type::vectorFunctionParser_Type        vectorFunctionParser_Type;
+    typedef typename bcInterface_Type::bcFunctionPtr_Type               bcFunctionPtr_Type;
+    typedef typename bcInterface_Type::vectorFunction_Type              vectorFunction_Type;
 
     typedef typename bcInterface_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
@@ -263,12 +264,13 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     case BCIFunctionParserFile:
     case BCIFunctionParserSolver:
     case BCIFunctionParserFileSolver:
+    case BCIFunctionUserDefined:
     {
         factory_Type factory;
-        this->M_vectorFunctionParser.push_back( factory.createFunctionParser( M_data ) );
+        this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
         OneDimensionalBCFunction base;
-        this->M_vectorFunctionParser.back()->assignFunction( base );
+        this->M_vectorFunction.back()->assignFunction( base );
 
         addBcToHandler( base );
 
@@ -310,11 +312,11 @@ template< class BcHandler, class PhysicalSolverType >
 void
 BCInterface1D< BcHandler, PhysicalSolverType >::setSolution( const solutionPtr_Type& solution )
 {
-    //for ( typename vectorFunctionParser_Type::const_iterator i = M_vectorFunctionParser.begin() ; i < M_vectorFunctionParser.end() ; ++i )
-    for ( UInt i( 0 ); i < this->M_vectorFunctionParser.size(); ++i )
+    //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
+    for ( UInt i( 0 ); i < this->M_vectorFunction.size(); ++i )
     {
         boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( this->M_vectorFunctionParser[i] );
+            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( this->M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->setSolution( solution );

@@ -149,7 +149,8 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      function_Type;
+    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
+    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      functionParser_Type;
     typedef OneDimensionalSolver::solutionPtr_Type                                solutionPtr_Type;
 
     //@}
@@ -219,7 +220,7 @@ public:
      * @param name name of the variable
      * @param value value of the variable
      */
-    void setVariable( const std::string& name, const Real& value ) { function_Type::M_parser->setVariable( name, value ); }
+    void setVariable( const std::string& name, const Real& value ) { functionParser_Type::M_parser->setVariable( name, value ); }
 
     //@}
 
@@ -301,6 +302,7 @@ inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctio
 template< class PhysicalSolverType >
 BCInterfaceFunctionParserSolver< PhysicalSolverType >::BCInterfaceFunctionParserSolver() :
         function_Type                    (),
+        functionParser_Type              (),
         M_physicalSolver                 (),
         M_solution                       (),
         M_side                           (),
@@ -817,7 +819,7 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfac
 
     M_flag = data.flag();
 
-    function_Type::setData( data );
+    functionParser_Type::setData( data );
 
     createAccessList( data );
 }
@@ -834,7 +836,7 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfac
 
     M_side = data.side();
 
-    function_Type::setData( data );
+    functionParser_Type::setData( data );
 
     createAccessList( data );
 }
@@ -850,7 +852,7 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfac
 
     M_flag = data.flag();
 
-    function_Type::setData( data );
+    functionParser_Type::setData( data );
 
     createAccessList( data );
 }

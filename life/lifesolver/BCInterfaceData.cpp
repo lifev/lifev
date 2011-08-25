@@ -45,13 +45,15 @@ namespace LifeV
 BCInterfaceData::BCInterfaceData() :
         M_base                  (),
         M_baseString            (),
-        M_mapBase               ()
+        M_mapBase               (),
+        M_parameters            ()
 {
     //Set mapBase
     M_mapBase["function"]           = BCIFunctionParser;
     M_mapBase["functionFile"]       = BCIFunctionParserFile;
     M_mapBase["functionSolver"]     = BCIFunctionParserSolver;
     M_mapBase["functionFileSolver"] = BCIFunctionParserFileSolver;
+    M_mapBase["functionUD"]         = BCIFunctionUserDefined;
     M_mapBase["functionSD"]         = BCIFunctionSolverDefined;
     M_mapBase["dataInterpolator"]   = BCI3DDataInterpolator;
 }
@@ -59,7 +61,8 @@ BCInterfaceData::BCInterfaceData() :
 BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :
         M_base                  ( data.M_base ),
         M_baseString            ( data.M_baseString ),
-        M_mapBase               ( data.M_mapBase )
+        M_mapBase               ( data.M_mapBase ),
+        M_parameters            ( data.M_parameters )
 {
 }
 
@@ -71,9 +74,10 @@ BCInterfaceData::operator=( const BCInterfaceData& data )
 {
     if ( this != &data )
     {
-        M_base                  = data.M_base;
-        M_baseString            = data.M_baseString;
-        M_mapBase               = data.M_mapBase;
+        M_base       = data.M_base;
+        M_baseString = data.M_baseString;
+        M_mapBase    = data.M_mapBase;
+        M_parameters = data.M_parameters;
     }
 
     return *this;
@@ -89,6 +93,9 @@ BCInterfaceData::readBC( const std::string& fileName, const std::string& dataSec
 
     // Read base
     readBase( dataFile, dataSection + name + "/", M_base, M_baseString );
+
+    // Read parameters
+    readParameters( dataFile, ( dataSection + name + "/parameters" ).c_str() );
 }
 
 void
@@ -96,6 +103,11 @@ BCInterfaceData::showMe( std::ostream& output ) const
 {
     output << "baseString        = " << M_baseString << std::endl;
     output << "base              = " << M_base.second << std::endl;
+
+    output << "Parameters        = ";
+    for ( UInt i(0); i < static_cast<UInt>( M_parameters.size() ); ++i )
+        output << M_parameters[i] << " ";
+    output << "\n";
 }
 
 // ===================================================
@@ -129,6 +141,16 @@ BCInterfaceData::isBase( const GetPot& dataFile, const char* base, std::string& 
     baseString = dataFile( base, " " );
 
     return dataFile.checkVariable( base );
+}
+
+void
+BCInterfaceData::readParameters( const GetPot& dataFile, const char* parameters )
+{
+    UInt parametersSize = dataFile.vector_variable_size( parameters );
+
+    M_parameters.resize( parametersSize );
+    for ( UInt j( 0 ); j < parametersSize; ++j )
+        M_parameters[j] = dataFile( parameters, 0, j );
 }
 
 } // Namespace LifeV

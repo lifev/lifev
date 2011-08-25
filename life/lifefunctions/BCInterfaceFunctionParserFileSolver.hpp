@@ -65,9 +65,10 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      function_Type;
-    typedef BCInterfaceFunctionParserFile< physicalSolver_Type >                  functionFile_Type;
-    typedef BCInterfaceFunctionParserSolver< physicalSolver_Type >                functionSolver_Type;
+    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
+    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      functionParser_Type;
+    typedef BCInterfaceFunctionParserFile< physicalSolver_Type >                  functionParserFile_Type;
+    typedef BCInterfaceFunctionParserSolver< physicalSolver_Type >                functionParserSolver_Type;
 
     //@}
 
@@ -137,9 +138,10 @@ inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctio
 // ===================================================
 template< class PhysicalSolverType >
 BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::BCInterfaceFunctionParserFileSolver() :
-        function_Type          (),
-        functionFile_Type      (),
-        functionSolver_Type    ()
+        function_Type                (),
+        functionParser_Type          (),
+        functionParserFile_Type      (),
+        functionParserSolver_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -160,12 +162,12 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData( const BCInte
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
-    functionFile_Type::setData( data );
+    functionParserFile_Type::setData( data );
 
-    //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
-    functionSolver_Type::M_flag = data.flag();
+    //functionParserSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
+    functionParserSolver_Type::M_flag = data.flag();
 
-    functionSolver_Type::createAccessList( data );
+    functionParserSolver_Type::createAccessList( data );
 }
 #endif
 
@@ -177,12 +179,12 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData( const BCInte
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
-    functionFile_Type::setData( data );
+    functionParserFile_Type::setData( data );
 
-    //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
-    functionSolver_Type::M_side = data.side();
+    //functionParserSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
+    functionParserSolver_Type::M_side = data.side();
 
-    functionSolver_Type::createAccessList( data );
+    functionParserSolver_Type::createAccessList( data );
 }
 
 template< class PhysicalSolverType >
@@ -193,12 +195,12 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData( const BCInte
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
-    functionFile_Type::setData( data );
+    functionParserFile_Type::setData( data );
 
-    //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
-    functionSolver_Type::M_flag = data.flag();
+    //functionParserSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
+    functionParserSolver_Type::M_flag = data.flag();
 
-    functionSolver_Type::createAccessList( data );
+    functionParserSolver_Type::createAccessList( data );
 }
 
 } // Namespace LifeV

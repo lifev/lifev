@@ -192,22 +192,22 @@ inline BCInterfaceFunctionSolverDefined< PhysicalSolverType >* createBCInterface
  *  \c BCInterface3D and the solver defined boundary conditions of the \c FSIOperator.
  *
  *  <b>DETAILS:</b> <BR>
- *  The constructor of the class takes a string contains the ID of the interface condition to impose,
- *  and the FSI. The list of available conditions is the FSIFunction variable. These are:
+ *  The constructor of the class takes a string contains the ID of the boundary condition to impose.
+ *  The list of available conditions is the \c FSIFunction enum. These are:
  *
  *  <ol>
- *      <li> DerFluidLoadToFluid,                        (not implemented)
- *        <li> DerFluidLoadToStructure,
- *        <li> DerHarmonicExtensionVelToFluid,
- *        <li> DerStructureDispToSolid,                  (not implemented)
- *        <li> FluidInterfaceDisp,                       (not working)
- *        <li> FluidLoadToStructure,
- *        <li> HarmonicExtensionVelToFluid,
- *        <li> SolidLoadToStructure,
- *        <li> StructureDispToHarmonicExtension,
- *        <li> StructureDispToSolid,                     (not implemented)
- *        <li> StructureToFluid
- *        <li> RobinWall
+ *      <li> DerFluidLoadToFluid,                      (not implemented)
+ *      <li> DerFluidLoadToStructure,
+ *      <li> DerHarmonicExtensionVelToFluid,
+ *      <li> DerStructureDispToSolid,                  (not implemented)
+ *      <li> FluidInterfaceDisp,                       (not working)
+ *      <li> FluidLoadToStructure,
+ *      <li> HarmonicExtensionVelToFluid,
+ *      <li> SolidLoadToStructure,
+ *      <li> StructureDispToHarmonicExtension,
+ *      <li> StructureDispToSolid,                     (not implemented)
+ *      <li> StructureToFluid
+ *      <li> RobinWall
  *  </ol>
  *
  *  The class automatically recognize which FSI algorithm is used among:
@@ -231,9 +231,9 @@ public:
 
     typedef BCInterfaceFactory< FSIOperator >                     factory_Type;
 
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >      bcFunctionParser_Type;
-    typedef boost::shared_ptr< bcFunctionParser_Type >            bcFunctionParserPtr_Type;
-    typedef std::vector< bcFunctionParserPtr_Type >               vectorFunctionParser_Type;
+    typedef BCInterfaceFunction< physicalSolver_Type >            bcFunction_Type;
+    typedef boost::shared_ptr< bcFunction_Type >                  bcFunctionPtr_Type;
+    typedef std::vector< bcFunctionPtr_Type >                     vectorFunction_Type;
 
     //@}
 
@@ -349,7 +349,7 @@ private:
     bcComponentsVec_Type                           M_componentsVector;
 
     // RobinViscoelastic
-    vectorFunctionParser_Type                      M_vectorFunctionRobin;
+    vectorFunction_Type                            M_vectorFunctionRobin;
     FSIOperator::vectorPtr_Type                    M_robinRHS;
     FSIOperator::vectorPtr_Type                    M_robinAlphaCoefficient;
     FSIOperator::vectorPtr_Type                    M_robinBetaCoefficient;

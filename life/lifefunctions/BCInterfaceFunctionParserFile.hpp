@@ -91,8 +91,9 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                  physicalSolver_Type;
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >                    function_Type;
+    typedef PhysicalSolverType                                                    physicalSolver_Type;
+    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
+    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      functionParser_Type;
 
     //@}
 
@@ -186,6 +187,7 @@ inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctio
 template< typename PhysicalSolverType >
 BCInterfaceFunctionParserFile< PhysicalSolverType >::BCInterfaceFunctionParserFile() :
         function_Type                    (),
+        functionParser_Type              (),
         M_variables                      (),
         M_loop                           (),
         M_data                           (),
@@ -287,7 +289,7 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::loadData( DataType data )
     }
 
     // Now data contains the real base string
-    function_Type::setData( data );
+    functionParser_Type::setData( data );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "                                             function: " << data.baseString() << "\n";
@@ -300,7 +302,7 @@ inline void
 BCInterfaceFunctionParserFile< PhysicalSolverType >::dataInterpolation()
 {
     //Get variable
-    Real X = function_Type::M_parser->variable( M_variables[0] );
+    Real X = functionParser_Type::M_parser->variable( M_variables[0] );
 
     //If it is a loop scale the variable: X = X - (ceil( X / Xmax ) -1) * Xmax
     if ( M_loop )
@@ -349,7 +351,7 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::dataInterpolation()
         A  = M_data[M_variables[j]][position];
         B  = M_data[M_variables[j]][position + 1];
 
-        function_Type::M_parser->setVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
+        functionParser_Type::M_parser->setVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";

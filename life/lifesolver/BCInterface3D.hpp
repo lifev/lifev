@@ -86,6 +86,7 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
+ *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionUserDefined;
  *      <li> \c functionSD, which is implemented in \c BCInterfaceFunctionSolverDefined;
  *      <li> \c dataInterpolator, which is implemented in\c BCDataInterpolator;
  *  </ol>
@@ -112,8 +113,8 @@ public:
 
     typedef typename bcInterface_Type::factory_Type                     factory_Type;
 
-    typedef typename bcInterface_Type::bcFunctionParserPtr_Type         bcFunctionParserPtr_Type;
-    typedef typename bcInterface_Type::vectorFunctionParser_Type        vectorFunctionParser_Type;
+    typedef typename bcInterface_Type::bcFunctionPtr_Type               bcFunctionPtr_Type;
+    typedef typename bcInterface_Type::vectorFunction_Type              vectorFunction_Type;
 
     typedef typename bcInterface_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
@@ -303,12 +304,13 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
     case BCIFunctionParserFile:
     case BCIFunctionParserSolver:
     case BCIFunctionParserFileSolver:
+    case BCIFunctionUserDefined:
     {
         factory_Type factory;
-        this->M_vectorFunctionParser.push_back( factory.createFunctionParser( M_data ) );
+        this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
         BCFunctionBase base;
-        this->M_vectorFunctionParser.back()->assignFunction( base );
+        this->M_vectorFunction.back()->assignFunction( base );
 
         // Directional BC
         if ( M_data.mode() == Directional )
@@ -399,10 +401,10 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionRobin( BCBaseType&
 
     // Create the mass term function
     factory_Type factory;
-    this->M_vectorFunctionParser.push_back( factory.createFunctionParser( M_data ) );
+    this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
     BCFunctionBase baseRobin;
-    this->M_vectorFunctionParser.back()->assignFunction( baseRobin );
+    this->M_vectorFunction.back()->assignFunction( baseRobin );
 
     // Robin base
     bcFunctionRobinPtr_Type robinBase( new bcFunctionRobin_Type( base.Function(), baseRobin.Function() ) );
@@ -419,10 +421,10 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDirectional( BCBas
 
     // Create the directional field
     factory_Type factory;
-    this->M_vectorFunctionParser.push_back( factory.createFunctionParser( M_data ) );
+    this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
     BCFunctionBase baseDirectional;
-    this->M_vectorFunctionParser.back()->assignFunction( baseDirectional );
+    this->M_vectorFunction.back()->assignFunction( baseDirectional );
 
     // Directional base
     bcFunctionDirectionalPtr_Type directionalBase( new bcFunctionDirectional_Type( base.Function(), baseDirectional.Function() ) );
