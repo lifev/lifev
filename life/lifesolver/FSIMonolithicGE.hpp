@@ -74,7 +74,8 @@ namespace LifeV
  - DDBlockPrec: specifies the possible preconditioners to use. Can be: AdditiveSchwarz, MonolithicBlockComposedDN, MonolithicBlockComposedDN2,
  MonolithicBlockComposedNN, MonolithicBlockComposedDNND.
  */
-class FSIMonolithicGE : public FSIMonolithic
+   typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
+	class FSIMonolithicGE : public FSIMonolithic
 {
 public:
 
