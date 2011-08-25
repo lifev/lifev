@@ -163,18 +163,21 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BcHandler                                             bcHandler_Type;
-    typedef boost::shared_ptr< bcHandler_Type >                   bcHandlerPtr_Type;
+    typedef BcHandler                                               bcHandler_Type;
+    typedef boost::shared_ptr< bcHandler_Type >                     bcHandlerPtr_Type;
 
-    typedef PhysicalSolverType                                    physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >              physicalSolverPtr_Type;
+    typedef PhysicalSolverType                                      physicalSolver_Type;
+    typedef boost::shared_ptr< physicalSolver_Type >                physicalSolverPtr_Type;
 
-    typedef BCInterfaceFactory< physicalSolver_Type >             factory_Type;
-    typedef typename factory_Type::bcFunctionPtr_Type             bcFunctionPtr_Type;
+    typedef BCInterfaceFactory< physicalSolver_Type >               factory_Type;
 
-    typedef BCInterfaceData                                       data_Type;
+    typedef typename factory_Type::bcFunctionParserPtr_Type         bcFunctionParserPtr_Type;
+    typedef std::vector< bcFunctionParserPtr_Type >                 vectorFunctionParser_Type;
 
-    typedef std::vector< bcFunctionPtr_Type >                     vectorFunction_Type;
+    typedef typename factory_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
+    typedef std::vector< bcFunctionSolverDefinedPtr_Type >          vectorFunctionSolverDefined_Type;
+
+    typedef BCInterfaceData                                         data_Type;
 
     //@}
 
@@ -262,8 +265,11 @@ protected:
     // Handler and parameters
     bcHandlerPtr_Type                        M_handler;
 
-    // Functions
-    vectorFunction_Type                      M_vectorFunction;
+    // Parser functions
+    vectorFunctionParser_Type                M_vectorFunctionParser;
+
+    // User defined functions
+    vectorFunctionSolverDefined_Type           M_vectorFunctionSolverDefined;
 
 private:
 
@@ -283,7 +289,7 @@ private:
 template< class BcHandler, class PhysicalSolverType >
 BCInterface< BcHandler, PhysicalSolverType >::BCInterface() :
         M_handler                 (),
-        M_vectorFunction          ()
+        M_vectorFunctionParser    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -323,14 +329,17 @@ BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
     Debug( 5020 ) << "BCInterface::updatePhysicalSolverVariables\n";
 #endif
 
-    for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
+    for ( UInt i( 0 ); i < M_vectorFunctionParser.size(); ++i )
     {
         boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
+            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionParser[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->updatePhysicalSolverVariables();
     }
+
+    for ( typename vectorFunctionSolverDefined_Type::const_iterator i = M_vectorFunctionSolverDefined.begin() ; i < M_vectorFunctionSolverDefined.end() ; ++i )
+        ( *i )->updatePhysicalSolverVariables();
 }
 
 // ===================================================
@@ -340,15 +349,18 @@ template< class BcHandler, class PhysicalSolverType >
 void
 BCInterface< BcHandler, PhysicalSolverType >::setPhysicalSolver( const physicalSolverPtr_Type& physicalSolver )
 {
-    //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
-    for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
+    //for ( typename vectorFunctionParser_Type::const_iterator i = M_vectorFunctionParser.begin() ; i < M_vectorFunctionParser.end() ; ++i )
+    for ( UInt i( 0 ); i < M_vectorFunctionParser.size(); ++i )
     {
         boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
+            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionParser[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->setPhysicalSolver( physicalSolver );
     }
+
+    for ( typename vectorFunctionSolverDefined_Type::const_iterator i = M_vectorFunctionSolverDefined.begin() ; i < M_vectorFunctionSolverDefined.end() ; ++i )
+        ( *i )->setPhysicalSolver( physicalSolver );
 }
 
 } // Namespace LifeV

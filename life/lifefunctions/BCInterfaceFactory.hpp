@@ -45,8 +45,19 @@
 #include <life/lifefunctions/BCInterfaceFunctionParserSolver.hpp>
 #include <life/lifefunctions/BCInterfaceFunctionParserFileSolver.hpp>
 
+#include <life/lifefunctions/BCInterfaceFunctionUserDefined.hpp>
+
 namespace LifeV
 {
+
+// Forward class declarations
+template< class PhysicalSolverType >
+class BCInterfaceFunctionSolverDefined;
+
+template< typename PhysicalSolverType >
+inline BCInterfaceFunctionSolverDefined< PhysicalSolverType >* createBCInterfaceFunctionSolverDefined();
+
+
 
 //! BCInterfaceFactory - Factory to create \c BCInterface functions
 /*!
@@ -60,7 +71,7 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
- *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionUserDefined;
+ *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionSolverDefined;
  *  </ol>
  */
 
@@ -72,12 +83,15 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                                              physicalSolver_Type;
+    typedef PhysicalSolverType                                                                                   physicalSolver_Type;
 
-    typedef FactorySingleton< Factory< BCInterfaceFunctionParser< physicalSolver_Type > , baseList_Type > > factoryFunction_Type;
+    typedef BCInterfaceFunctionParser< physicalSolver_Type >                                                     bcFunctionParser_Type;
+    typedef boost::shared_ptr< bcFunctionParser_Type >                                                           bcFunctionParserPtr_Type;
+    typedef FactorySingleton< Factory< bcFunctionParser_Type , baseList_Type > >                                 factoryFunctionParser_Type;
 
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >                                                bcFunction_Type;
-    typedef boost::shared_ptr< bcFunction_Type >                                                            bcFunctionPtr_Type;
+    typedef BCInterfaceFunctionSolverDefined< physicalSolver_Type >                                                bcFunctionSolverDefined_Type;
+    typedef boost::shared_ptr< bcFunctionSolverDefined_Type >                                                      bcFunctionSolverDefinedPtr_Type;
+    typedef FactorySingleton< Factory< bcFunctionSolverDefined_Type, baseList_Type > >                             factoryFunctionSolverDefined_Type;
 
     //@}
 
@@ -97,12 +111,19 @@ public:
     //! @name Methods
     //@{
 
-    //! Create a function
+    //! Create a parser function
     /*!
      * @param data data container
      */
     template< typename DataType >
-    bcFunctionPtr_Type createFunction( const DataType& data );
+    bcFunctionParserPtr_Type createFunctionParser( const DataType& data );
+
+    //! Create a user defined function
+    /*!
+     * @param data data container
+     */
+    template< typename DataType >
+    bcFunctionSolverDefinedPtr_Type createFunctionSolverDefined( const DataType& data );
 
     //@}
 
@@ -130,22 +151,33 @@ BCInterfaceFactory< PhysicalSolverType >::BCInterfaceFactory()
 #endif
 
     //Factory registration
-    factoryFunction_Type::instance().registerProduct( BCIFunctionParser,           &createBCInterfaceFunctionParser< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCIFunctionParserFile,       &createBCInterfaceFunctionParserFile< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCIFunctionParserSolver,     &createBCInterfaceFunctionParserSolver< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCIFunctionParserFileSolver, &createBCInterfaceFunctionParserFileSolver< physicalSolver_Type > );
+    factoryFunctionParser_Type::instance().registerProduct( BCIFunctionParser,           &createBCInterfaceFunctionParser< physicalSolver_Type > );
+    factoryFunctionParser_Type::instance().registerProduct( BCIFunctionParserFile,       &createBCInterfaceFunctionParserFile< physicalSolver_Type > );
+    factoryFunctionParser_Type::instance().registerProduct( BCIFunctionParserSolver,     &createBCInterfaceFunctionParserSolver< physicalSolver_Type > );
+    factoryFunctionParser_Type::instance().registerProduct( BCIFunctionParserFileSolver, &createBCInterfaceFunctionParserFileSolver< physicalSolver_Type > );
 
-    //factoryFunction_Type::instance().registerProduct( BCIFunctionUserDefined,      &createBCInterfaceFunctionUserDefined< physicalSolver_Type > );
+    factoryFunctionSolverDefined_Type::instance().registerProduct( BCIFunctionSolverDefined, &createBCInterfaceFunctionSolverDefined< physicalSolver_Type > );
 }
 
 // ===================================================
 // Methods
 // ===================================================
 template< class PhysicalSolverType > template< typename DataType >
-inline typename BCInterfaceFactory< PhysicalSolverType >::bcFunctionPtr_Type
-BCInterfaceFactory< PhysicalSolverType >::createFunction( const DataType& data )
+inline typename BCInterfaceFactory< PhysicalSolverType >::bcFunctionParserPtr_Type
+BCInterfaceFactory< PhysicalSolverType >::createFunctionParser( const DataType& data )
 {
-    bcFunctionPtr_Type function( factoryFunction_Type::instance().createObject( data.base().second, data.mapBase() ) );
+    bcFunctionParserPtr_Type function( factoryFunctionParser_Type::instance().createObject( data.base().second, data.mapBase() ) );
+
+    function->setData( data );
+
+    return function;
+}
+
+template< class PhysicalSolverType > template< typename DataType >
+inline typename BCInterfaceFactory< PhysicalSolverType >::bcFunctionSolverDefinedPtr_Type
+BCInterfaceFactory< PhysicalSolverType >::createFunctionSolverDefined( const DataType& data )
+{
+    bcFunctionSolverDefinedPtr_Type function( factoryFunctionSolverDefined_Type::instance().createObject( data.base().second, data.mapBase() ) );
 
     function->setData( data );
 

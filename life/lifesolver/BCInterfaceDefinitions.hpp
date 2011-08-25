@@ -70,10 +70,14 @@ enum baseList_Type
     BCIFunctionParserFile,
     BCIFunctionParserSolver,
     BCIFunctionParserFileSolver,
-    BCIFunctionUserDefined,
+    BCIFunctionSolverDefined,
     BCI1DFunctionDefault,
     BCI3DDataInterpolator
 };
+
+// Forward class declarations
+template< class PhysicalSolverType >
+class BCInterfaceFactory;
 
 } // Namespace LifeV
 

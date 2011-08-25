@@ -96,29 +96,32 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface< BcHandler, PhysicalSolverType >          bcInterface_Type;
+    typedef BCInterface< BcHandler, PhysicalSolverType >                bcInterface_Type;
 
-    typedef typename bcInterface_Type::bcHandler_Type             bcHandler_Type;
-    typedef typename bcInterface_Type::bcHandlerPtr_Type          bcHandlerPtr_Type;
+    typedef typename bcInterface_Type::bcHandler_Type                   bcHandler_Type;
+    typedef typename bcInterface_Type::bcHandlerPtr_Type                bcHandlerPtr_Type;
 
-    typedef typename bcInterface_Type::physicalSolver_Type        physicalSolver_Type;
-    typedef typename bcInterface_Type::physicalSolverPtr_Type     physicalSolverPtr_Type;
+    typedef typename bcInterface_Type::physicalSolver_Type              physicalSolver_Type;
+    typedef typename bcInterface_Type::physicalSolverPtr_Type           physicalSolverPtr_Type;
 
-    typedef typename bcInterface_Type::factory_Type               factory_Type;
-    typedef typename bcInterface_Type::bcFunctionPtr_Type         bcFunctionPtr_Type;
+    typedef typename bcInterface_Type::factory_Type                     factory_Type;
 
-    typedef BCInterfaceData1D                                     data_Type;
+    typedef typename bcInterface_Type::bcFunctionParserPtr_Type         bcFunctionParserPtr_Type;
+    typedef typename bcInterface_Type::vectorFunctionParser_Type        vectorFunctionParser_Type;
 
-    typedef typename bcInterface_Type::vectorFunction_Type        vectorFunction_Type;
+    typedef typename bcInterface_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
+    typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
 
-    typedef typename bcHandler_Type::solutionPtr_Type             solutionPtr_Type;
-    typedef typename bcHandler_Type::fluxPtr_Type                 fluxPtr_Type;
-    typedef typename bcHandler_Type::sourcePtr_Type               sourcePtr_Type;
-    typedef typename bcHandler_Type::vectorPtrContainer_Type      vectorPtrContainer_Type;
+    typedef BCInterfaceData1D                                           data_Type;
 
-    typedef BCInterface1DFunctionDefault< physicalSolver_Type >   bcFunctionDefault_Type;
-    typedef boost::shared_ptr< bcFunctionDefault_Type >           bcFunctionDefaultPtr_Type;
-    typedef std::vector< bcFunctionDefaultPtr_Type >              vectorDefaultFunction_Type;
+    typedef typename bcHandler_Type::solutionPtr_Type                   solutionPtr_Type;
+    typedef typename bcHandler_Type::fluxPtr_Type                       fluxPtr_Type;
+    typedef typename bcHandler_Type::sourcePtr_Type                     sourcePtr_Type;
+    typedef typename bcHandler_Type::vectorPtrContainer_Type            vectorPtrContainer_Type;
+
+    typedef BCInterface1DFunctionDefault< physicalSolver_Type >         bcFunctionDefault_Type;
+    typedef boost::shared_ptr< bcFunctionDefault_Type >                 bcFunctionDefaultPtr_Type;
+    typedef std::vector< bcFunctionDefaultPtr_Type >                    vectorDefaultFunction_Type;
 
     //@}
 
@@ -270,10 +273,10 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     case BCIFunctionParserFileSolver:
     {
         factory_Type factory;
-        this->M_vectorFunction.push_back( factory.createFunction( M_data ) );
+        this->M_vectorFunctionParser.push_back( factory.createFunctionParser( M_data ) );
 
         OneDimensionalBCFunction base;
-        this->M_vectorFunction.back()->assignFunction( base );
+        this->M_vectorFunctionParser.back()->assignFunction( base );
 
         addBcToHandler( base );
 
@@ -314,11 +317,11 @@ template< class BcHandler, class PhysicalSolverType >
 void
 BCInterface1D< BcHandler, PhysicalSolverType >::setSolution( const solutionPtr_Type& solution )
 {
-    //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
-    for ( UInt i( 0 ); i < this->M_vectorFunction.size(); ++i )
+    //for ( typename vectorFunctionParser_Type::const_iterator i = M_vectorFunctionParser.begin() ; i < M_vectorFunctionParser.end() ; ++i )
+    for ( UInt i( 0 ); i < this->M_vectorFunctionParser.size(); ++i )
     {
         boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( this->M_vectorFunction[i] );
+            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( this->M_vectorFunctionParser[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->setSolution( solution );

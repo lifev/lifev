@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterfaceFunctionUserDefined class
+ *  @brief File containing the BCInterfaceFunctionSolverDefined class
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -42,14 +42,14 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterfaceFunctionUserDefined< FSIOperator >::BCInterfaceFunctionUserDefined() :
+BCInterfaceFunctionSolverDefined< FSIOperator >::BCInterfaceFunctionSolverDefined() :
         M_FSIFunction           (),
         M_physicalSolver        (),
         M_name                  (),
         M_flag                  (),
         M_type                  (),
         M_mode                  (),
-        M_comV                  (),
+        M_componentsVector      (),
         M_vectorFunctionRobin   (),
         M_robinRHS              (),
         M_robinAlphaCoefficient (),
@@ -57,7 +57,7 @@ BCInterfaceFunctionUserDefined< FSIOperator >::BCInterfaceFunctionUserDefined() 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionUserDefined::BCInterfaceFunctionUserDefined()" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
 #endif
 
 }
@@ -66,26 +66,26 @@ BCInterfaceFunctionUserDefined< FSIOperator >::BCInterfaceFunctionUserDefined() 
 // Methods
 // ===================================================
 void
-BCInterfaceFunctionUserDefined< FSIOperator >::exportData( BCInterfaceData3D& data )
+BCInterfaceFunctionSolverDefined< FSIOperator >::exportData( BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionUserDefined::exportData" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::exportData" << "\n";
 #endif
 
     data.setName( M_name );
     data.setFlag( M_flag );
     data.setType( M_type );
     data.setMode( M_mode );
-    data.setComponentsVector( M_comV );
+    data.setComponentsVector( M_componentsVector );
 }
 
 void
-BCInterfaceFunctionUserDefined< FSIOperator >::updatePhysicalSolverVariables()
+BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionUserDefined::updatePhysicalSolverVariables" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::updatePhysicalSolverVariables" << "\n";
 #endif
 
     switch ( M_FSIFunction )
@@ -157,11 +157,11 @@ BCInterfaceFunctionUserDefined< FSIOperator >::updatePhysicalSolverVariables()
 // Set Methods
 // ===================================================
 void
-BCInterfaceFunctionUserDefined< FSIOperator >::setData( const BCInterfaceData3D& data )
+BCInterfaceFunctionSolverDefined< FSIOperator >::setData( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionUserDefined::setData" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::setData" << "\n";
 #endif
 
     //Set mapFunction
@@ -186,7 +186,7 @@ BCInterfaceFunctionUserDefined< FSIOperator >::setData( const BCInterfaceData3D&
     M_flag = data.flag();
     M_type = data.type();
     M_mode = data.mode();
-    M_comV = data.componentsVector();
+    M_componentsVector = data.componentsVector();
 
     if ( M_FSIFunction == RobinWall )
     {
@@ -196,11 +196,11 @@ BCInterfaceFunctionUserDefined< FSIOperator >::setData( const BCInterfaceData3D&
 
         // Create the mass term function
         temporaryData.setRobinBaseAlpha();
-        M_vectorFunctionRobin.push_back( factory.createFunction( temporaryData ) );
+        M_vectorFunctionRobin.push_back( factory.createFunctionParser( temporaryData ) );
 
         // Create the RHS
         temporaryData.setRobinBaseBeta();
-        M_vectorFunctionRobin.push_back( factory.createFunction( temporaryData ) );
+        M_vectorFunctionRobin.push_back( factory.createFunctionParser( temporaryData ) );
     }
 }
 

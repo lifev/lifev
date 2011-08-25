@@ -65,9 +65,9 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >                            function_Type;
-    typedef BCInterfaceFunctionParserFile< physicalSolver_Type >                        functionFile_Type;
-    typedef BCInterfaceFunctionParserSolver< physicalSolver_Type >                      functionSolver_Type;
+    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      function_Type;
+    typedef BCInterfaceFunctionParserFile< physicalSolver_Type >                  functionFile_Type;
+    typedef BCInterfaceFunctionParserSolver< physicalSolver_Type >                functionSolver_Type;
 
     //@}
 
