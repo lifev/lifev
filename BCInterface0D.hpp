@@ -80,6 +80,7 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
+ *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionUserDefined;
  *      <li> \c functionSD, which is implemented in \c BCInterfaceFunctionSolverDefined;
  *  </ol>
  *
@@ -115,8 +116,8 @@ public:
 
     typedef typename bcInterface_Type::factory_Type                     factory_Type;
 
-    typedef typename bcInterface_Type::bcFunctionParserPtr_Type         bcFunctionParserPtr_Type;
-    typedef typename bcInterface_Type::vectorFunctionParser_Type        vectorFunctionParser_Type;
+    typedef typename bcInterface_Type::bcFunctionPtr_Type               bcFunctionPtr_Type;
+    typedef typename bcInterface_Type::vectorFunction_Type              vectorFunction_Type;
 
     typedef typename bcInterface_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
@@ -161,9 +162,10 @@ public:
         case BCIFunctionParserFile:
         case BCIFunctionParserSolver:
         case BCIFunctionParserFileSolver:
+        case BCIFunctionUserDefined:
         {
             factory_Type factory;
-            this->M_vectorFunctionParser.push_back( factory.createFunctionParser( M_data ) );
+            this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
             addBcToHandler();
 
@@ -198,7 +200,7 @@ private:
         if ( !this->M_handler.get() )
             this->createHandler();
 
-        this->M_handler->setBC( M_data.flag(), M_data.quantity(), boost::bind( &BCInterfaceFunctionParser<PhysicalSolverType>::functionTime, this->M_vectorFunctionParser.back(), _1 ) );
+        this->M_handler->setBC( M_data.flag(), M_data.quantity(), boost::bind( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
     }
 
     // Data
