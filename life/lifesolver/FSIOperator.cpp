@@ -694,8 +694,6 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
   std::cout<<"SETUP TIME ADVANCE\n";
   if(this->isFluid())
     {
-        M_data->dataFluid()->dataTime()->setTheta( dataFile( "fluid/time_discretization/theta", 0.5) );
-
         M_fluidTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );
 
 	  //M_fluidMassTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );

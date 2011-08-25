@@ -140,7 +140,6 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
                                const vector_Type& disp,
                                const UInt          iter )
 {
-
     if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
 
@@ -157,8 +156,8 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
         vectorPtr_Type meshDisp( new vector_Type(M_mmFESpace->map()) );
-        vectorPtr_Type meshDispOld( new vector_Type(M_mmFESpace->map()) );
-
+        vectorPtr_Type meshVel( new vector_Type(M_mmFESpace->map()) );
+	vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map()) );
         meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
 
@@ -168,9 +167,13 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
         M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
         //Matteo: per Paolo meshDisp io lo chiamerei meshVelocity da qua in poi !!!!
+  
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
-            *meshDisp = this->M_ALETimeAdvance->velocity( );
+            *meshVel = M_ALETimeAdvance->velocity( );
+	    M_ALETimeAdvance->extrapolation(*mmRep);
+	    // mmRep.reset(new vector_Type(M_ALETimeAdvance->extrapolation(), Repeated)); // just to repeat dispDiff. No way witout copying?
+            moveMesh(*mmRep);// re-initialize the mesh points
             if( iter==0 )
             {
                 M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
@@ -188,21 +191,24 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
             {
                 M_ALETimeAdvance->setSolution(*meshDisp);
             }
-            *meshDisp = M_ALETimeAdvance->velocity();
+            *meshVel = M_ALETimeAdvance->velocity();
+            //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
+	    M_ALETimeAdvance->extrapolation(*mmRep);
+	    //  mmRep.reset(new vector_Type(M_ALETimeAdvance->extrapolation(), Repeated));// just to repeat dispDiff. No way witout copying?
+            moveMesh(*mmRep);// re-initialize the mesh points
             //*meshDispDiff -= *meshDispOld;//relative displacement
         }
 
         //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
 	//	vector_Type mmRep(	M_ALETimeAdvance->extrapolation(), Repeated);
 	// Matteo
-        vector_Type mmRep(meshDisp->map(), Repeated);// just to repeat dispDiff. No way witout copying?
-	M_ALETimeAdvance->extrapolation(mmRep);
-	moveMesh(mmRep);// re-initialize the mesh points
+	//   vector_Type mmRep(meshDisp->map(), Repeated);// just to repeat dispDiff. No way witout copying?
+	M_ALETimeAdvance->extrapolation(*mmRep);
+	moveMesh(*mmRep);// re-initialize the mesh points
 
-        //*meshDisp *= -alpha;// -w, mesh velocity
-        mmRep = *meshDisp;
+        *mmRep = *meshVel;
 
-        interpolateVelocity(mmRep, *M_beta);
+        interpolateVelocity(*mmRep, *M_beta);
         //            *M_beta *= -alpha; //if the HE solution is scaled!
 
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
@@ -223,6 +229,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         assembleFluidBlock( iter, M_uk );
         assembleMeshBlock ( iter );
         *M_rhsFull = *M_rhs;
+        M_rhs->spy("rhs");
         applyBoundaryConditions();
     }
     super_Type::evalResidual( disp, M_rhsFull, res, false );
@@ -275,7 +282,7 @@ FSIMonolithicGI::applyBoundaryConditions()
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
-    //M_monolithicMatrix->matrix()->spy("FMFI");
+    M_monolithicMatrix->matrix()->spy("FMFI");
 }
 
 void FSIMonolithicGI::initialize( fluidPtr_Type::value_type::function_Type const& u0,
