@@ -37,7 +37,7 @@
 #ifndef BCInterface0D_H
 #define BCInterface0D_H 1
 
-#include <life/lifesolver/BCInterface.hpp>
+#include <life/lifefem/BCInterface.hpp>
 
 #include <lifemc/lifefem/ZeroDimensionalBCHandler.hpp>
 
