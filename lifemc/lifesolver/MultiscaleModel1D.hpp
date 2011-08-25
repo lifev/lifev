@@ -61,7 +61,7 @@
 #include <life/lifesolver/OneDimensionalSourceNonLinear.hpp>
 #include <life/lifesolver/OneDimensionalSolver.hpp>
 
-#include <life/lifesolver/BCInterface1D.hpp>
+#include <life/lifefem/BCInterface1D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>

@@ -38,8 +38,8 @@
 #define MultiscaleCouplingBoundaryCondition_H 1
 
 #include <lifemc/lifesolver/BCInterface0D.hpp>
-#include <life/lifesolver/BCInterface1D.hpp>
-#include <life/lifesolver/BCInterface3D.hpp>
+#include <life/lifefem/BCInterface1D.hpp>
+#include <life/lifefem/BCInterface3D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
