@@ -533,8 +533,8 @@ Cylinder::run()
         chrono.start();
 
         double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
-
-        beta = bdf.bdfVelocity().extrapolation();
+	//beta = bdf.bdfVelocity().extrapolation(  beta);
+        bdf.bdfVelocity().extrapolation(beta);
         bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
         rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 

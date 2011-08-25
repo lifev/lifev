@@ -605,8 +605,11 @@ void FSIOperator::couplingVariableExtrap( )
     }
     else
     {
-        transferSolidOnInterface(M_solidTimeAdvance->extrapolation(), *this->M_lambda);
-        transferSolidOnInterface( M_solidTimeAdvance->extrapolationFirstDerivative(), *this->M_lambdaDot);
+      
+        M_solidTimeAdvance->extrapolation(*M_lambdaSolid);
+	M_solidTimeAdvance->extrapolationFirstDerivative(*M_lambdaDotSolid);
+        transferSolidOnInterface(*M_lambdaSolid, *this->M_lambda);
+        transferSolidOnInterface(*M_lambdaDotSolid, *this->M_lambdaDot);
       //*M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
       //*M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
     }

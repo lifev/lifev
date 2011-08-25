@@ -370,6 +370,9 @@ main( int argc, char** argv )
     vectorPtr_type beta;
     beta.reset(new vector_type(solutionMap,Repeated));
 
+    vectorPtr_type convectionTerm;
+    convectionTerm.reset(new vector_type(solutionMap,Unique));
+
     vectorPtr_type velocity;
     velocity.reset(new vector_type(uFESpace->map(),Unique));
 
@@ -539,8 +542,9 @@ main( int argc, char** argv )
 
         if(convectionTerm == SemiImplicit)
         {
-            *beta = bdf.extrapolation(); // Extrapolation for the convective term
-            oseenAssembler.addConvection(systemMatrix,*beta);
+          //  *beta = bdf.extrapolation(); // Extrapolation for the convective term
+          bdf.extrapolation( *beta ); // Extrapolation for the convective term
+	  oseenAssembler.addConvection(systemMatrix,*beta);
         }
         else if(convectionTerm == Explicit)
         {
@@ -548,8 +552,10 @@ main( int argc, char** argv )
         }
         else if(convectionTerm == KIO91)
         {
-            *rhs -= bdfConvection.extrapolation();
-        }
+	  //   *rhs -= bdfConvection.extrapolation();
+	  bdfConvection.extrapolation(convectionTerm);
+	  *rhs -= convectionTerm;
+	}
         if (verbose) std::cout << "done" << std::endl;
 
         if (verbose) std::cout << "Applying BC... " << std::flush;

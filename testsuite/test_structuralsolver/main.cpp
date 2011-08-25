@@ -56,6 +56,10 @@
 //Include fils which were in the structure.cpp file
 #include <life/lifearray/MapEpetra.hpp>
 
+#include <life/lifefem/TimeAdvance.hpp>
+#include <life/lifefem/TimeAdvanceNewmark.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
+
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 
@@ -202,7 +206,8 @@ Structure::run3d()
 {
     typedef StructuralSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
-    
+    typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
+
     bool verbose = (parameters->comm->MyPID() == 0);
     // Number of boundary conditions for the velocity and mesh motion
     //
@@ -236,6 +241,23 @@ Structure::run3d()
     MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
 
     MapEpetra fullMap;
+
+
+    std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
+
+    timeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( timeAdvanceMethod ) );
+
+    UInt OrderDev = 2;
+
+    //! initialization of parameters of time Advance method:
+    if (timeAdvanceMethod =="Newmark")
+        timeAdvance->setup( dataStructure->dataTime()->coefficientsNewmark() , OrderDev);
+
+    if (timeAdvanceMethod =="BDF")
+        timeAdvance->setup(dataStructure->dataTime()->orderBDF() , OrderDev);
+
+    timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
+    timeAdvance->showMe();
 
     for (UInt ii = 0; ii < nDimensions; ++ii)
     {
@@ -291,8 +313,9 @@ Structure::run3d()
                 parameters->comm);
 
     solid.setDataFromGetPot(dataFile);
-    solid.buildSystem();
-    
+
+    double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative( 0 ) / ( dataStructure->dataTime()->timeStep()*dataStructure->dataTime()->timeStep());
+    solid.buildSystem(timeAdvanceCoefficient);
 
     //
     // Temporal data and initial conditions
@@ -300,10 +323,11 @@ Structure::run3d()
 
     Real dt = dataStructure->dataTime()->timeStep();
     Real T  = dataStructure->dataTime()->endTime();
-
+    
+    vectorPtr_Type rhs(new vector_Type(solid.displacement(), Unique)); 
     vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique));
-    vectorPtr_Type vel(new vector_Type(solid.velocity(), Unique));
-    vectorPtr_Type acc(new vector_Type(solid.acceleration(), Unique));
+    vectorPtr_Type vel(new vector_Type(solid.displacement(), Unique));
+    vectorPtr_Type acc(new vector_Type(solid.displacement(), Unique));
 
     dFESpace->interpolate(d0, *disp, 0.0);
     dFESpace->interpolate(w0, *vel , 0.0);
@@ -311,8 +335,33 @@ Structure::run3d()
 
     if (verbose) std::cout << "S- initialization ... ";
 
-    solid.initialize(d0,w0,a0); // displacement, velocity, acceleration
-
+    //solid.initialize(d0,w0,a0); // displacement, velocity, acceleration
+ 
+    std::vector<vector_Type> uv0;
+    
+    
+    if (timeAdvanceMethod =="Newmark")
+      {
+        uv0.push_back(*disp);
+        uv0.push_back(*vel);
+        uv0.push_back(*acc);
+      }
+    if (timeAdvanceMethod =="BDF")
+    {
+      for ( UInt previousPass=0; previousPass < dataStructure->orderBDF() ; previousPass++)
+        {
+	  Real previousTimeStep = -previousPass*dt;
+	  //	  feSpace->interpolate(members->getDisplacementExact(), *disp, previousTimeStep );
+	  uv0.push_back(*disp);
+        }
+    }
+    
+    timeAdvance->setInitialCondition(uv0);
+    
+    timeAdvance-> setTimeStep(dataStructure->dataTime()->timeStep());
+    
+    timeAdvance->updateRHSContribution(dataStructure->dataTime()->timeStep());
+    
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (verbose ) std::cout << "ok." << std::endl;
@@ -347,8 +396,8 @@ Structure::run3d()
 	//vectorPtr_Type solidVel  ( new vector_Type(solid.getVelocity(),  exporter->mapType() ) );
 	
 	vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(), exporter->mapType() ) );
-	vectorPtr_Type solidVel  ( new vector_Type(solid.velocity(),  exporter->mapType() ) );
-	vectorPtr_Type solidAcc  ( new vector_Type(solid.acceleration(),  exporter->mapType() ) );
+	vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
+	vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
 
 	exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "displacement",
                            dFESpace, solidDisp, UInt(0) );
@@ -388,17 +437,27 @@ Structure::run3d()
 		std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
 	      }
 	
+	    *rhs *=0;
+	    
+	    timeAdvance->updateRHSContribution( dt );
+	  
+	    *rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
+
 	    //solid.updateSystem(dZero);    // Computes the rigth hand side
-	    solid.updateSystem();    // Computes the rigth hand side
+	    //  solid.updateSystem(rhs);    // Computes the rigth hand side
+	    solid.updateRightHandSide( *rhs );
+
 
 	    std::cout << "Updated system at " << time << std::endl;
 
 	    solid.iterate( BCh );                  // Computes the matrices and solves the system
 	    //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
+	    timeAdvance->shiftRight(solid.displacement());
+	   
 	    *solidDisp = solid.displacement();
-	    *solidVel  = solid.velocity();
-	    *solidAcc  = solid.acceleration();
+	    //*solidVel  = timeAdvance->velocity();
+	    //*solidAcc  = timeAdvance->accelerate();
 	    
 	    //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 

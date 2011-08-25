@@ -189,8 +189,8 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         this->moveMesh(meshDispDiff);
         */
 
-        *M_beta = this->veloFluidMesh();
-	*M_beta *= -1;
+	// *M_beta = this->veloFluidMesh();
+	//	*M_beta *= -1;
 
         //this->transferMeshMotionOnFluid(M_meshMotion->dispDiff(),  *M_beta);
 
@@ -199,9 +199,11 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         //*M_beta += this->M_bdf->extrapolation();
 
 	if(iter==0)
-	  *M_beta += this->M_fluidTimeAdvance->extrapolation();
+	 this->M_fluidTimeAdvance->extrapolation(  *M_beta);
 	else
 	  *M_beta += *this->M_fluid->solution();
+
+	*M_beta -= this->veloFluidMesh();
 
         double alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
 

@@ -138,7 +138,13 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         //*M_beta *= -1.;
 //         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
 //         fluid->subset(*M_un, (UInt)0);
-        *this->M_beta += M_fluidTimeAdvance->extrapolation();/*M_un*/;//relative velocity beta=un-w
+
+	// Matteo
+	vector_Type uExtrap(M_uFESpace->map(), Repeated );
+	M_fluidTimeAdvance->extrapolation(uExtrap);
+	*this->M_beta += uExtrap;
+        
+	//*this->M_beta += M_fluidTimeAdvance->extrapolation();/*M_un*/;//relative velocity beta=un-w
         //M_monolithicMatrix.reset(new matrix_Type(*M_monolithicMap));
 
         assembleSolidBlock(iter, M_un);

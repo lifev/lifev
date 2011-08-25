@@ -332,15 +332,17 @@ public:
     \f$u^{n+1}\f$ defined by the n stored state vectors
     @returns  extrap of state vector u^*
     */
-    virtual feVectorType extrapolation() const  = 0;
-
+    //virtual feVectorType extrapolation() const  = 0;
+    virtual void extrapolation(feVectorType& extrapolation) const =0;
+    
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     @returns  extrap of state vector u^*
     */
-    virtual feVectorType extrapolationFirstDerivative() const  = 0;
+    // virtual feVectorType extrapolationFirstDerivative() const  = 0;
+    virtual void extrapolationFirstDerivative(feVectorType& extrapolation) const =0;
 
     //! Compute the polynomial extrapolation of velocity
     /*!

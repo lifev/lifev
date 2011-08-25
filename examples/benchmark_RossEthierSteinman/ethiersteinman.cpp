@@ -738,8 +738,8 @@ Ethiersteinman::run()
                 if (verbose) std::cout << "[t = "<< oseenData->dataTime()->time() << " s.]" << std::endl;
 
                 double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
-
-                beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+		bdf.bdfVelocity().extrapolation(beta); // Extrapolation for the convective term
+		// beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
                 bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
                 rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 

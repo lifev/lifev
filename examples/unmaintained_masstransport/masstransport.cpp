@@ -545,7 +545,8 @@ MassTransport::run()
 
 //         betaFluid = bdf.bdfVelocity().extrapolation();
 
-        betaFluid.subset(bdf.bdfVelocity().extrapolation());
+//      betaFluid.subset(bdf.bdfVelocity().extrapolation());
+	bdf.bdfVelocity().extrapolation(  betaFluid);
         rhsFluid  = fluid.matrixMass()*bdf.bdfVelocity().time_der( oseenData.dataTime()->timeStep() );
 
 

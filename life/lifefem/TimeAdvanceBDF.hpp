@@ -272,20 +272,25 @@ public:
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
-    feVectorType extrapolation( ) const;
+    // feVectorType extrapolation( ) const;
+
+    void extrapolation(feVectorType& extrapolation) const;
 
     //! Compute the polynomial extrapolation of velocity
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
-    feVectorType extrapolationFirstDerivative() const;
+  // feVectorType extrapolationFirstDerivative() const;
+    void extrapolationFirstDerivative(feVectorType& extrapolation) const;
 
     //! Return the current velocity
     feVectorType velocity()  const;
-
+    //void velocity(feVectorType& velocity) const;
+ 
     //!Return the current accelerate
-   feVectorType accelerate() const;
+    feVectorType accelerate() const;
+    //void accelerate(feVectorType& accelerate) const;
 
    //@}
 
@@ -597,7 +602,7 @@ TimeAdvanceBDF<feVectorType>::coefficientExtrapolationFirstDerivative (const UIn
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return this->M_betaFirstDerivative[ i ];
 }
-
+/*
 template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::extrapolation() const
@@ -613,8 +618,19 @@ TimeAdvanceBDF<feVectorType>::extrapolation() const
 
     return ue;
 }
+*/
 
+template<typename feVectorType>
+void
+TimeAdvanceBDF<feVectorType>::extrapolation(feVectorType& extrapolation) const
+{
+    extrapolation = this->M_beta[ 0 ]*(*this->M_unknowns[ 0 ]);
 
+    for ( UInt i = 1; i < this->M_order; ++i )
+        extrapolation += this->M_beta[ i ] * (*this->M_unknowns[ i ]);
+}
+
+/*
 template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative() const
@@ -630,9 +646,9 @@ TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative() const
         extrapolation += this->M_betaFirstDerivative[ i ] * (*this->M_unknowns[ i ]);
 
 }
+*/
 
 
-/*
 template<typename feVectorType>
 void
 TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative(feVectorType& extrapolation) const
@@ -645,8 +661,8 @@ TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative(feVectorType& extrapo
     for ( UInt i = 1; i < this->M_order; ++i )
         extrapolation += this->M_betaFirstDerivative[ i ] * (*this->M_unknowns[ i ]);
 }
-*/
 
+/*
 template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::velocity()  const
@@ -656,7 +672,29 @@ TimeAdvanceBDF<feVectorType>::velocity()  const
     velocity  -= (*this->M_rhsContribution[0]);
     return velocity;
 }
+*/
 
+
+template<typename feVectorType>
+feVectorType
+TimeAdvanceBDF<feVectorType>::velocity() const
+{
+    return (*this->M_unknowns[0]) 
+          * this->M_alpha[ 0 ] / this->M_timeStep
+            -  ( *this->M_rhsContribution[0] );   
+}
+
+/*
+template<typename feVectorType>
+void
+TimedvanceBDF<feVectorType>::velocity(feVectorType& velocity) const
+{
+  velocity   = (*this->M_unknowns[0]) * this->M_alpha[ 0 ] / this->M_timeStep;
+  velocity  -= (*this->M_rhsContribution[0]);
+}
+ */
+
+/*
 template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::accelerate() const
@@ -666,6 +704,25 @@ TimeAdvanceBDF<feVectorType>::accelerate() const
     accelerate  -=  ( *this->M_rhsContribution[1] );
     return accelerate;
 }
+*/
+template<typename feVectorType>
+feVectorType
+TimeAdvanceBDF<feVectorType>::accelerate() const
+{
+    return (*this->M_unknowns[0]) 
+            * this->M_xi[ 0 ]/(this->M_timeStep*this->M_timeStep);
+            -  ( *this->M_rhsContribution[1] );   
+}
+
+/*
+template<typename feVectorType>
+void
+TimedvanceBDF<feVectorType>::accelerate(feVectorType& accelerate) const
+{
+    accelerate  = *this->M_unknowns[0]* this->M_xi[ 0 ]  /  (this->M_timeStep*this->M_timeStep);
+    accelerate  -=  ( *this->M_rhsContribution[1] );
+}
+*/
 
 // ===================================================
 // Macros

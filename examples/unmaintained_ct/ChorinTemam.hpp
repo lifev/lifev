@@ -1245,8 +1245,9 @@ void ChorinTemam<Mesh, SolverType>::applyRES_expl(vector_type& vector)
 {
     int nRes = M_resFlag.size();
     vector_type _u_extrap( M_localMap_u );
-    _u_extrap *= 0.;
-    _u_extrap = M_bdf_u.extrapolation();
+    //  _u_extrap *= 0.;
+    // _u_extrap = M_bdf_u.extrapolation();
+    M_bdf_u.extrapolation(_u_extrap);
 
     for (int iRes=0; iRes < nRes; ++iRes)
     {
@@ -1274,8 +1275,9 @@ void ChorinTemam<Mesh, SolverType>::iterate_u( bchandler_raw_type& bch_u)
     // update convective term with extrapolated velocity
     // little bs as usual w/ epetra things
     vector_type _u_extrap( M_localMap_u );
-    _u_extrap *= 0.;
-    _u_extrap = M_bdf_u.extrapolation();
+    // _u_extrap *= 0.;
+    // _u_extrap = M_bdf_u.extrapolation();
+    M_bdf_u.extrapolation(_u_extrap);
     updateSystem_u( _u_extrap );
 
     // set resistance boundary conditions if any
@@ -1440,7 +1442,8 @@ void ChorinTemam<Mesh, SolverType>::time_advance(Real const& time)
     vector_type _p_corr( M_localMap_p );
     _p_corr *= 0.;
     if (M_pBdfOrder > 0)
-        _p_corr = M_bdf_p.extrapolation();
+      //  _p_corr = M_bdf_p.extrapolation( _p_corr );
+       M_bdf_p.extrapolation( _p_corr );
     _p_corr += M_bdf_p_phi.time_der(1);
     _p_corr *= 1./M_bdf_p_phi.coefficientFirstDerivative(0);
 

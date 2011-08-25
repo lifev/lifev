@@ -193,8 +193,11 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         }
 
         //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
-        vector_Type mmRep(M_ALETimeAdvance->extrapolation(), Repeated);// just to repeat dispDiff. No way witout copying?
-        moveMesh(mmRep);// re-initialize the mesh points
+	//	vector_Type mmRep(	M_ALETimeAdvance->extrapolation(), Repeated);
+	// Matteo
+        vector_Type mmRep(meshDisp->map(), Repeated);// just to repeat dispDiff. No way witout copying?
+	M_ALETimeAdvance->extrapolation(mmRep);
+	moveMesh(mmRep);// re-initialize the mesh points
 
         //*meshDisp *= -alpha;// -w, mesh velocity
         mmRep = *meshDisp;
@@ -205,7 +208,9 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
         if (!M_convectiveTermDer)
         {
-            *fluid = M_fluidTimeAdvance->extrapolation();
+	  //Matteo
+	  M_fluidTimeAdvance->extrapolation(*fluid );
+	  // *fluid = M_fluidTimeAdvance->extrapolation();
             //fluid->subset(*M_un, 0);
         }
         else

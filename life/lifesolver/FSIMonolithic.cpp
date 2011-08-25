@@ -464,8 +464,16 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working
     std::map<ID, ID>::const_iterator ITrow;
     //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
+    
+  
     vector_Type lambda(*M_interfaceMap, Unique);
-    this->monolithicToInterface(lambda, M_solidTimeAdvance->extrapolation());
+    vector_Type lambdaSolid(this->lambdaSolid().map());
+    // Inser Matteo  because changed the method extrapolation();
+    M_solidTimeAdvance->extrapolation(lambdaSolid);
+    this->monolithicToInterface(lambda,lambdaSolid); 
+    // comment Matteo
+    //    this->monolithicToInterface(lambda,  M_solidTimeAdvance->extrapolation());
+ 
     UInt interface(M_monolithicMatrix->interface());
     //Real rescale(M_solid->rescaleFactor());
     UInt totalDofs(M_dFESpace->dof().numTotalDof());

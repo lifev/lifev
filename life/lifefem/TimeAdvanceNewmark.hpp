@@ -255,14 +255,16 @@ public:
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
-   feVectorType   extrapolation() const;
+    //feVectorType   extrapolation() const;
+    void extrapolation(feVectorType& extrapolation) const;
 
     //! Compute the polynomial extrapolation of velocity
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
-    feVectorType  extrapolationFirstDerivative( ) const;
+    //feVectorType  extrapolationFirstDerivative( ) const;
+    void extrapolationFirstDerivative(feVectorType& extrapolation) const; 
 
     //! Return the current velocity
     feVectorType velocity()  const;
@@ -632,6 +634,7 @@ TimeAdvanceNewmark<feVectorType>::coefficientExtrapolationFirstDerivative(const 
  return  this->M_betaFirstDerivative(i)*pow( this->M_timeStep, static_cast<Real>(i));
 }
 
+/*
 template<typename feVectorType>
 feVectorType
 TimeAdvanceNewmark<feVectorType>::extrapolation()  const
@@ -642,8 +645,19 @@ TimeAdvanceNewmark<feVectorType>::extrapolation()  const
         extrapolation += ( this->M_timeStep * this->M_timeStep ) / 2.0 * ( *this->M_unknowns[2]);
     return extrapolation;
 }
+*/
+
+template<typename feVectorType>
+void
+TimeAdvanceNewmark<feVectorType>::extrapolation(feVectorType& extrapolation) const
+{
+  extrapolation += this->M_timeStep * ( *this->M_unknowns[ 1 ]);
+  if ( this->M_orderDerivative == 2 )
+    extrapolation += ( this->M_timeStep * this->M_timeStep ) / 2.0 * ( *this->M_unknowns[2]); 
+}
 
 
+/*
 template<typename feVectorType>
 feVectorType
 TimeAdvanceNewmark<feVectorType>::extrapolationFirstDerivative( ) const
@@ -651,8 +665,8 @@ TimeAdvanceNewmark<feVectorType>::extrapolationFirstDerivative( ) const
     feVectorType extrapolation(*this->M_unknowns[1]);
     extrapolation += this->M_timeStep * ( *this->M_unknowns[ 2 ]);
 }
+*/
 
-/*
 template<typename feVectorType>
 void
 TimeAdvanceNewmark<feVectorType>::extrapolationFirstDerivative(feVectorType& extrapolation) const
@@ -663,22 +677,23 @@ TimeAdvanceNewmark<feVectorType>::extrapolationFirstDerivative(feVectorType& ext
     extrapolation = *this->M_unknowns[1];
     extrapolation += this->M_timeStep * ( *this->M_unknowns[ 2 ]);
 }
-*/
+
 
 template<typename feVectorType>
 feVectorType
 TimeAdvanceNewmark<feVectorType>::velocity() const
 {
-    feVectorType velocity( *this->M_unknowns[1]);
-    return velocity;
+  //feVectorType velocity( *this->M_unknowns[1]);
+  return( *this->M_unknowns[1]);// velocity;
 }
 
 template<typename feVectorType>
 feVectorType
 TimeAdvanceNewmark<feVectorType>::accelerate() const
 {
-    feVectorType accelerate( *this->M_unknowns[2]);
-    return accelerate;
+  // feVectorType accelerate( *this->M_unknowns[2]);
+  // return accelerate;
+  return  *this->M_unknowns[2];
 }
 
 // ===================================================
