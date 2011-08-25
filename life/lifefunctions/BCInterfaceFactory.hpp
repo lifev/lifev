@@ -45,7 +45,7 @@
 #include <life/lifefunctions/BCInterfaceFunctionParserSolver.hpp>
 #include <life/lifefunctions/BCInterfaceFunctionParserFileSolver.hpp>
 
-#include <life/lifefunctions/BCInterfaceFunctionUserDefined.hpp>
+#include <life/lifefunctions/BCInterfaceFunctionSolverDefined.hpp>
 
 namespace LifeV
 {

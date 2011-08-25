@@ -13,7 +13,7 @@
 
 lib_LTLIBRARIES	= liblifefunctions.la
 
-liblifefunctions_la_SOURCES   = BCInterfaceFunctionUserDefined.cpp RossEthierSteinmanDec.cpp RossEthierSteinmanInc.cpp Womersley.cpp \
+liblifefunctions_la_SOURCES   = BCInterfaceFunctionSolverDefined.cpp RossEthierSteinmanDec.cpp RossEthierSteinmanInc.cpp Womersley.cpp \
                              bessel/bessik.cpp  bessel/bessjy.cpp \
                              bessel/cbessik.cpp bessel/cbessjy.cpp \
                              bessel/gamma.cpp
