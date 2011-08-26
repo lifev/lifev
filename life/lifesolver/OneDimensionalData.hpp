@@ -183,7 +183,7 @@ public:
      * \end{array}
      * \f]
      */
-    void initializeLinearParameters();
+//    void initializeLinearParameters();
 
     //! Make the vessel stiffer on the left side of interval [xl, xr]
     /*!
@@ -202,10 +202,10 @@ public:
      *
      *  \cond \TODO add doxygen description for the parameters \endcond
      */
-    void stiffenVesselLeft( const Real& xl,          const Real& xr,
-                            const Real& factor,      const Real& alpha,
-                            const Real& delta,       const Real& n,
-                            const Real& minDeltaX=1, const UInt& yesAdaptive=0 );
+//    void stiffenVesselLeft( const Real& xl,          const Real& xr,
+//                            const Real& factor,      const Real& alpha,
+//                            const Real& delta,       const Real& n,
+//                            const Real& minDeltaX=1, const UInt& yesAdaptive=0 );
 
     //! Make the vessel stiffer on the right side of interval [xl, xr]
     /*!
@@ -213,10 +213,10 @@ public:
      *
      *  \cond \TODO add doxygen description for the parameters \endcond
      */
-    void stiffenVesselRight( const Real& xl,          const Real& xr,
-                             const Real& factor,      const Real& alpha,
-                             const Real& delta,       const Real& n,
-                             const Real& minDeltaX=1, const UInt& yesAdaptive=0  );
+//    void stiffenVesselRight( const Real& xl,          const Real& xr,
+//                             const Real& factor,      const Real& alpha,
+//                             const Real& delta,       const Real& n,
+//                             const Real& minDeltaX=1, const UInt& yesAdaptive=0  );
 
     //! Display some information about the model.
     /*!
