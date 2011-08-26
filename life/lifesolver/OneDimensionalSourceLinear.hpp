@@ -57,7 +57,8 @@ namespace LifeV
  *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
  *  \f]
  *
- *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes, and \f$\mathbf S\f$ represents the source terms.
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
  *
  *  In the present implementation we have:
  *
@@ -145,7 +146,8 @@ public:
 
     //! Evaluate the non-conservative form of the source term at the foot of the outgoing characteristic.
     /*!
-     *  This method is used for imposing the compatibility equations at the boundaries. It interpolates the value between to nodes.
+     *  This method is used for imposing the compatibility equations at the boundaries.
+     *  It interpolates the value between to nodes.
      *
      *  @param U1 first unknown
      *  @param U2 second unknown

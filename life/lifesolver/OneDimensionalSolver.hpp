@@ -79,7 +79,8 @@ namespace LifeV
  *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
  *  \f]
  *
- *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes, and \f$\mathbf S\f$ represents the source terms.
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
  *
  *  <b>NUMERICAL DISCRETIZATION:</b> <BR>
  *  We discretize the problem by a second-order Taylor--Galerkin scheme.
@@ -87,7 +88,12 @@ namespace LifeV
  *  Given \f$ \mathbf U_h^n\f$ we compute \f$\mathbf U_h^{n+1}\f$ by using the following scheme
  *
  *  \f[
- *  (\mathbf U^{n+1}_h,\varphi_h) = (\mathbf U^n_h,\varphi_h) + \Delta t \left( \mathbf F(\mathbf U^n_h)-\displaystyle\frac{\Delta t}{2} \displaystyle\frac{\partial \mathbf F(\mathbf U^n_h)}{\partial \mathbf U}\left(\mathbf S(\mathbf U^n_h)+\displaystyle\frac{\partial \mathbf F(\mathbf U^n_h)}{\partial z}\right), \displaystyle\frac{\partial \varphi_h}{\partial z}\right) + \Delta t \left( -\mathbf S(\mathbf U^n_h)+\displaystyle\frac{\Delta t}{2} \displaystyle\frac{\partial \mathbf S(\mathbf U^n_h)}{\partial \mathbf U}\left( \mathbf S(\mathbf U^n_h)+\displaystyle\frac{\partial \mathbf F(\mathbf U^n_h)}{\partial z}\right), \varphi_h\right).
+ *  (\mathbf U^{n+1}_h,\varphi_h) = (\mathbf U^n_h,\varphi_h) + \Delta t \left( \mathbf F(\mathbf U^n_h)-
+ *  \displaystyle\frac{\Delta t}{2} \displaystyle\frac{\partial \mathbf F(\mathbf U^n_h)}{\partial \mathbf U}\left(\mathbf S(\mathbf U^n_h)+
+ *  \displaystyle\frac{\partial \mathbf F(\mathbf U^n_h)}{\partial z}\right), \displaystyle\frac{\partial \varphi_h}{\partial z}\right) +
+ *  \Delta t \left( -\mathbf S(\mathbf U^n_h)+\displaystyle\frac{\Delta t}{2}
+ *  \displaystyle\frac{\partial \mathbf S(\mathbf U^n_h)}{\partial \mathbf U}\left( \mathbf S(\mathbf U^n_h)+
+ *  \displaystyle\frac{\partial \mathbf F(\mathbf U^n_h)}{\partial z}\right), \varphi_h\right).
  *  \f]
  *
  *  <b>IMPLEMENTATION:</b> <BR>
@@ -109,7 +115,8 @@ namespace LifeV
  *  \cond \TODO improve doxygen description with latex equation and other features \endcond
  *  <ol>
  *      <li> (\phi_i)_{i in nodes} is the basis of P1 (the "hat" functions)
- *      <li> (1_{i+1/2})_{i+1/2 in elements} is the basis of P0 (constant per element). The vertices of the element "i+1/2" are the nodes "i" and "i+1".
+ *      <li> (1_{i+1/2})_{i+1/2 in elements} is the basis of P0 (constant per element).
+ *           The vertices of the element "i+1/2" are the nodes "i" and "i+1".
  *  </ol>
  *
  *  Then:
@@ -118,10 +125,12 @@ namespace LifeV
  *  <ol>
  *      <li> Uh    is in P1 : U = sum_{i in nodes} U_i phi_i
  *      <li> Fh(U) is in P1 : F(U) = sum_{i in nodes} F(U_i) phi_i
- *      <li> diffFh(U) is in P0 : diffFlux(U) = sum_{i+1/2 in elements} 1/2 { dF/dU(U_i) + dF/dU(U_i+1) } 1_{i+1/2} (means of the two extremal values of the cell)
+ *      <li> diffFh(U) is in P0 : diffFlux(U) = sum_{i+1/2 in elements} 1/2 { dF/dU(U_i) + dF/dU(U_i+1) } 1_{i+1/2}
+ *           (means of the two extremal values of the cell)
  *      <li> dF/dz(U) = sum_{i in nodes} F(U_i) d(phi_i)/dz
  *      <li> Sh(U) is in P1 : S(U) = sum_{i in nodes} S(U_i) phi_i
- *      <li> diffSh(U) is in P0 : diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2} (means of the two extremal values of the cell)
+ *      <li> diffSh(U) is in P0 : diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
+ *           (means of the two extremal values of the cell)
  *  </ol>
  *
  *  <b>DEVELOPMENT NOTES:</b> <BR>
@@ -278,14 +287,19 @@ public:
      * to compute the contributions in such equation to the right hand side, and then we correct the flow rate by solving the following equation
      *
      *  \f[
-     * \displaystyle\frac{1}{A}\displaystyle\frac{\partial \tilde{Q}}{\partial t} - \displaystyle\frac{\partial}{\partial z}\left(\displaystyle\frac{\gamma}{\rho A^{3/2}}\displaystyle\frac{\partial Q}{\partial z}\right) = 0.
+     * \displaystyle\frac{1}{A}\displaystyle\frac{\partial \tilde{Q}}{\partial t} -
+     * \displaystyle\frac{\partial}{\partial z}\left(\displaystyle\frac{\gamma}{\rho A^{3/2}}\displaystyle\frac{\partial Q}{\partial z}\right) = 0.
      *  \f]
      *
      * More precisely, taking into account the use of the total flow rate \f$Q^n\f$ in the right hand side of the Taylor-Galerking scheme, the FE formulation reads:
      * given \f$A^{n+1}_h\f$ and \f$\hat{Q}^{n+1}_h\f$, find \f$\tilde{Q}^{n+1}_h\f$ such that
      *
      *  \f[
-     * \left(\displaystyle\frac{\tilde{Q}^{n+1}_h}{A^{n+1}_h},\varphi_h\right) + \Delta t \left(\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}\displaystyle\frac{\partial \tilde{Q}^{n+1}_h}{\partial z},\displaystyle\frac{\partial \varphi_h}{\partial z}\right) = - \Delta t \left(\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}\displaystyle\frac{\partial \hat{Q}^{n+1}_h}{\partial z},\displaystyle\frac{\partial \varphi_h}{\partial z}\right)+\Delta t \left[\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}\displaystyle\frac{\partial\hat{Q}^{n+1}_h}{\partial z}\,\varphi_h\right]^L_0.
+     * \left(\displaystyle\frac{\tilde{Q}^{n+1}_h}{A^{n+1}_h},\varphi_h\right) +
+     * \Delta t \left(\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}\displaystyle\frac{\partial \tilde{Q}^{n+1}_h}{\partial z},
+     * \displaystyle\frac{\partial \varphi_h}{\partial z}\right) = - \Delta t \left(\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}
+     * \displaystyle\frac{\partial \hat{Q}^{n+1}_h}{\partial z},\displaystyle\frac{\partial \varphi_h}{\partial z}\right)+
+     * \Delta t \left[\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}\displaystyle\frac{\partial\hat{Q}^{n+1}_h}{\partial z}\,\varphi_h\right]^L_0.
      *  \f]
      *
      * @param area area
@@ -295,7 +309,8 @@ public:
      * @param updateSystemMatrix flag for the recomputation of the system matrix
      * @return the viscoelastic flow rate correction \f$\tilde{Q}\f$
      */
-    vector_Type viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix = true );
+    vector_Type viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep,
+                                                OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix = true );
 
     //! CFL computation (correct for constant mesh)
     /*!

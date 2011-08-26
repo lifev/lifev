@@ -50,9 +50,9 @@ namespace LifeV
 void
 OneDimensionalPhysicsNonLinear::fromUToW( Real& W1, Real& W2, const Real& A,  const Real& Q, const UInt& iNode ) const
 {
-    Real celerity( celerity0( iNode ) * std::sqrt( OneDimensional::pow05( A / M_dataPtr -> area0( iNode ), M_dataPtr -> beta1( iNode ) ) ) );
+    Real celerity( celerity0( iNode ) * std::sqrt( OneDimensional::pow05( A / M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) ) );
 
-    Real add( std::sqrt( M_dataPtr -> robertsonCorrection() ) * ( celerity - celerity0( iNode ) ) * 2 / M_dataPtr -> beta1( iNode ) );
+    Real add( std::sqrt( M_dataPtr->robertsonCorrection() ) * ( celerity - celerity0( iNode ) ) * 2 / M_dataPtr->beta1( iNode ) );
 
     Real QoverA  = Q / A;
 
@@ -63,13 +63,13 @@ OneDimensionalPhysicsNonLinear::fromUToW( Real& W1, Real& W2, const Real& A,  co
 void
 OneDimensionalPhysicsNonLinear::fromWToU( Real& A, Real& Q, const Real& W1, const Real& W2, const UInt& iNode ) const
 {
-    Real rhooverbeta0beta1 ( M_dataPtr -> densityRho() / ( M_dataPtr -> beta0( iNode ) * M_dataPtr -> beta1( iNode ) ) );
+    Real rhooverbeta0beta1 ( M_dataPtr->densityRho() / ( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) ) );
 
-    Real beta1over4SQRTchi( M_dataPtr -> beta1( iNode ) / ( std::sqrt(M_dataPtr -> robertsonCorrection() ) * 4 ) );
+    Real beta1over4SQRTchi( M_dataPtr->beta1( iNode ) / ( std::sqrt(M_dataPtr->robertsonCorrection() ) * 4 ) );
 
-    A = M_dataPtr -> area0( iNode )
-        * OneDimensional::pow20( rhooverbeta0beta1, 1 / M_dataPtr -> beta1( iNode ) )
-        * OneDimensional::pow40( beta1over4SQRTchi * (W1 - W2) + celerity0( iNode ), 2 / M_dataPtr -> beta1( iNode ) );
+    A = M_dataPtr->area0( iNode )
+        * OneDimensional::pow20( rhooverbeta0beta1, 1 / M_dataPtr->beta1( iNode ) )
+        * OneDimensional::pow40( beta1over4SQRTchi * (W1 - W2) + celerity0( iNode ), 2 / M_dataPtr->beta1( iNode ) );
 
     Q = A * ( W1 + W2 ) / 2;
 }
@@ -77,29 +77,30 @@ OneDimensionalPhysicsNonLinear::fromWToU( Real& A, Real& Q, const Real& W1, cons
 Real
 OneDimensionalPhysicsNonLinear::fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const
 {
-    Real rhooverbeta0beta1 ( M_dataPtr -> densityRho() / ( M_dataPtr -> beta0( iNode ) * M_dataPtr -> beta1( iNode ) ) );
+    Real rhooverbeta0beta1 ( M_dataPtr->densityRho() / ( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) ) );
 
-    Real beta1over4SQRTchi( M_dataPtr -> beta1( iNode ) / ( std::sqrt(M_dataPtr -> robertsonCorrection()) * 4 ) );
+    Real beta1over4SQRTchi( M_dataPtr->beta1( iNode ) / ( std::sqrt(M_dataPtr->robertsonCorrection()) * 4 ) );
 
-    return M_dataPtr -> beta0( iNode ) * ( rhooverbeta0beta1 * ( beta1over4SQRTchi * (W1 - W2) + celerity0( iNode ) ) * ( beta1over4SQRTchi * (W1 - W2) + celerity0( iNode ) ) - 1 );
+    return M_dataPtr->beta0( iNode ) * ( rhooverbeta0beta1 * ( beta1over4SQRTchi * (W1 - W2) + celerity0( iNode ) ) *
+                        ( beta1over4SQRTchi * (W1 - W2) + celerity0( iNode ) ) - 1 );
 }
 
 Real
 OneDimensionalPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const
 {
-    Real SQRTbeta0beta1overrho( M_dataPtr -> beta0( iNode ) * M_dataPtr -> beta1( iNode ) / M_dataPtr -> densityRho() );
+    Real SQRTbeta0beta1overrho( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) / M_dataPtr->densityRho() );
     SQRTbeta0beta1overrho = std::sqrt( SQRTbeta0beta1overrho );
 
-    Real SQRTchi4overbeta1( std::sqrt(M_dataPtr -> robertsonCorrection()) * 4 / M_dataPtr -> beta1( iNode ) );
+    Real SQRTchi4overbeta1( std::sqrt(M_dataPtr->robertsonCorrection()) * 4 / M_dataPtr->beta1( iNode ) );
 
     Real add( SQRTchi4overbeta1 * SQRTbeta0beta1overrho
-              * ( std::sqrt( P / M_dataPtr -> beta0( iNode ) + 1 ) - 1 ) );
+              * ( std::sqrt( P / M_dataPtr->beta0( iNode ) + 1 ) - 1 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_fromP] "
     << "SQRTchi4overbeta1 = " << SQRTchi4overbeta1
     << ", beta0beta1overrho = " << SQRTbeta0beta1overrho
-    << ", pow( ( P / M_dataPtr -> beta0( iNode ) + 1 ), 0.5 ) = " << std::sqrt( ( P / M_dataPtr -> beta0( iNode ) + 1 ) ) << "\n";
+    << ", pow( ( P / M_dataPtr->beta0( iNode ) + 1 ), 0.5 ) = " << std::sqrt( ( P / M_dataPtr->beta0( iNode ) + 1 ) ) << "\n";
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_fromP] add term = " << add << "\n";
 #endif
 
@@ -115,25 +116,25 @@ OneDimensionalPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID
 Real
 OneDimensionalPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_tn, const Real& W, const ID& iW, const UInt& iNode ) const
 {
-    Real K0( M_dataPtr -> beta1( iNode ) / ( std::sqrt(M_dataPtr -> robertsonCorrection()) * 4 ) );
+    Real K0( M_dataPtr->beta1( iNode ) / ( std::sqrt(M_dataPtr->robertsonCorrection()) * 4 ) );
 
-    Real K1( (M_dataPtr -> area0( iNode ) / 2) );
-    K1 *= OneDimensional::pow20( M_dataPtr -> densityRho() / (M_dataPtr -> beta0( iNode ) * M_dataPtr -> beta1( iNode )), 1 / M_dataPtr -> beta1( iNode ) );
-    K1 *= OneDimensional::pow40( K0, 2/M_dataPtr -> beta1( iNode ) );
+    Real K1( (M_dataPtr->area0( iNode ) / 2) );
+    K1 *= OneDimensional::pow20( M_dataPtr->densityRho() / (M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode )), 1 / M_dataPtr->beta1( iNode ) );
+    K1 *= OneDimensional::pow40( K0, 2/M_dataPtr->beta1( iNode ) );
 
     Real f_k, df_k, tau_k(0);
 
     if ( iW == 0 ) // W1 given
     {
-        f_k = OneDimensional::pow40( W - W_tn + celerity0( iNode ) / K0, 2/M_dataPtr -> beta1( iNode ) );
-        tau_k = OneDimensional::pow40( W - W_tn + celerity0( iNode ) / K0, 2/M_dataPtr -> beta1( iNode ) );
-        df_k = (-2 / M_dataPtr -> beta1( iNode )) * OneDimensional::pow30( W - W_tn + celerity0( iNode ) / K0, 2/M_dataPtr -> beta1( iNode ) - 1 );
+        f_k = OneDimensional::pow40( W - W_tn + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) );
+        tau_k = OneDimensional::pow40( W - W_tn + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) );
+        df_k = (-2 / M_dataPtr->beta1( iNode )) * OneDimensional::pow30( W - W_tn + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) - 1 );
     }
     if ( iW == 1 ) // W2 given
     {
-        f_k = OneDimensional::pow40( W_tn - W + celerity0( iNode ) / K0, 2/M_dataPtr -> beta1( iNode ) );
-        tau_k = OneDimensional::pow40( W_tn - W + celerity0( iNode ) / K0, 2/M_dataPtr -> beta1( iNode ) );
-        df_k = (-2 / M_dataPtr -> beta1( iNode )) * OneDimensional::pow30( W_tn - W + celerity0( iNode ) / K0, 2/M_dataPtr -> beta1( iNode ) - 1 );
+        f_k = OneDimensional::pow40( W_tn - W + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) );
+        tau_k = OneDimensional::pow40( W_tn - W + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) );
+        df_k = (-2 / M_dataPtr->beta1( iNode )) * OneDimensional::pow30( W_tn - W + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) - 1 );
     }
     f_k *= (W + W_tn);
     f_k += - Q / K1;
@@ -158,9 +159,9 @@ OneDimensionalPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_tn, const
 Real
 OneDimensionalPhysicsNonLinear::dPdW( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const
 {
-    Real rhoover2SQRTchi ( M_dataPtr -> densityRho() / ( std::sqrt(M_dataPtr -> robertsonCorrection()) * 2 ) );
+    Real rhoover2SQRTchi ( M_dataPtr->densityRho() / ( std::sqrt(M_dataPtr->robertsonCorrection()) * 2 ) );
 
-    Real beta1over4SQRTchi( M_dataPtr -> beta1( iNode ) / ( std::sqrt(M_dataPtr -> robertsonCorrection()) * 4 ) );
+    Real beta1over4SQRTchi( M_dataPtr->beta1( iNode ) / ( std::sqrt(M_dataPtr->robertsonCorrection()) * 4 ) );
 
     Real result( beta1over4SQRTchi * (W1 - W2)  );
     result += celerity0( iNode );

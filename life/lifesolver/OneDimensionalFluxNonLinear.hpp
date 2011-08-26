@@ -57,7 +57,8 @@ namespace LifeV
  *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
  *  \f]
  *
- *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes, and \f$\mathbf S\f$ represents the source terms.
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
  *
  *  In the present implementation we have:
  *
@@ -70,7 +71,12 @@ namespace LifeV
  *  \mathbf S(\mathbf U) =  \mathbf B(\mathbf U) -
  *  \left[\begin{array}{c}
  *  0 \\[2ex]
- *  \displaystyle\frac{\partial}{\partial A^0}\displaystyle\int_{0}^A \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial A^0}{\partial z} + \displaystyle\frac{\partial}{\partial \beta_0}\displaystyle\int_{0}^A \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial \beta_0}{\partial z} + \displaystyle\frac{\partial}{\partial \beta_1}\displaystyle\int_{0}^A \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial \beta_1}{\partial z}
+ *  \displaystyle\frac{\partial}{\partial A^0}\displaystyle\int_{0}^A
+ *  \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial A^0}{\partial z} +
+ *  \displaystyle\frac{\partial}{\partial \beta_0}\displaystyle\int_{0}^A
+ *  \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial \beta_0}{\partial z} +
+ *  \displaystyle\frac{\partial}{\partial \beta_1}\displaystyle\int_{0}^A
+ *  \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial \beta_1}{\partial z}
  *  \end{array}\right]
  *  \f]
  *
@@ -80,14 +86,19 @@ namespace LifeV
  *  \mathbf B(\mathbf U) =
  *  \left[\begin{array}{c}
  *  0 \\[2ex]
- *  K_r \displaystyle\frac{Q}{A} + \displaystyle\frac{A}{\rho}\left(\displaystyle\frac{\partial \psi}{\partial A^0}\displaystyle\frac{\partial A^0}{\partial z} + \displaystyle\frac{\partial \psi}{\partial \beta_0}\displaystyle\frac{\partial \beta_0}{\partial z} + \displaystyle\frac{\partial \psi}{\partial \beta_1}\displaystyle\frac{\partial \beta_1}{\partial z}\right) + \displaystyle\frac{Q^2}{A}\displaystyle\frac{\partial \alpha}{\partial z}
+ *  K_r \displaystyle\frac{Q}{A} + \displaystyle\frac{A}{\rho}\left(\displaystyle\frac{\partial \psi}{\partial A^0}\displaystyle\frac{\partial A^0}{\partial z} +
+ *  \displaystyle\frac{\partial \psi}{\partial \beta_0}\displaystyle\frac{\partial \beta_0}{\partial z} +
+ *  \displaystyle\frac{\partial \psi}{\partial \beta_1}\displaystyle\frac{\partial \beta_1}{\partial z}\right) +
+ *  \displaystyle\frac{Q^2}{A}\displaystyle\frac{\partial \alpha}{\partial z}
  *  \end{array}\right]
  *  \f]
  *
  *  The assumed wall-law is
  *
  *  \f[
- *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) = \underbrace{\sqrt{\frac{\pi}{A^0}}\frac{h E}{1-\nu^2}}_{\beta_0} \left(\left(\frac{A}{A^0}\right)^{\beta_1}-1\right) + \underbrace{\frac{T \tan\phi}{4 \sqrt{\pi}}\frac{h E}{1-\nu^2}}_{\displaystyle\gamma} \frac{1}{A\sqrt{A}} \frac{\partial A}{\partial t}.
+ *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) =
+ *  \underbrace{\sqrt{\frac{\pi}{A^0}}\frac{h E}{1-\nu^2}}_{\beta_0} \left(\left(\frac{A}{A^0}\right)^{\beta_1}-1\right) +
+ *  \underbrace{\frac{T \tan\phi}{4 \sqrt{\pi}}\frac{h E}{1-\nu^2}}_{\displaystyle\gamma} \frac{1}{A\sqrt{A}} \frac{\partial A}{\partial t}.
  *  \f]
  *
  *  This class implements all the interfaces required for the computation of \f$\mathbf F\f$ and its derivatives.
@@ -165,7 +176,8 @@ public:
     //! Eigenvalues and eigenvectors of the Jacobian matrix
     /*!
      *  \f[
-     * \lambda_{1,2} = \alpha \displaystyle\frac{Q}{A} \pm \sqrt{\alpha (\alpha - 1)\left(\displaystyle\frac{Q}{A}\right)^2+\displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A}},
+     * \lambda_{1,2} = \alpha \displaystyle\frac{Q}{A} \pm \sqrt{\alpha (\alpha - 1)\left(\displaystyle\frac{Q}{A}\right)^2+
+     * \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A}},
      *  \f]
      *
      *  \f[
@@ -200,7 +212,9 @@ public:
      *  +   \displaystyle\frac{\partial \lambda_{1,2}}{\partial \beta_1}\displaystyle\frac{\partial \beta_1}{\partial z}
      *  +   \displaystyle\frac{\partial \lambda_{1,2}}{\partial \alpha}\displaystyle\frac{\partial \alpha}{\partial z}\\[4ex]
      *  & = & \displaystyle\frac{Q}{A}\displaystyle\frac{\partial \alpha}{\partial z}
-     *  \pm \displaystyle\frac{1}{2}\left(\alpha (\alpha - 1)\left(\displaystyle\frac{Q}{A}\right)^2+\displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A}\right)^{-1/2}\left(\displaystyle\frac{A}{\rho}\left(\displaystyle\frac{\partial^2 \psi}{\partial A \partial A^0}\displaystyle\frac{\partial A^0}{\partial z}
+     *  \pm \displaystyle\frac{1}{2}\left(\alpha (\alpha - 1)\left(\displaystyle\frac{Q}{A}\right)^2+
+     *  \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A}\right)^{-1/2}\left(\displaystyle\frac{A}{\rho}
+     *  \left(\displaystyle\frac{\partial^2 \psi}{\partial A \partial A^0}\displaystyle\frac{\partial A^0}{\partial z}
      *  + \displaystyle\frac{\partial^2 \psi}{\partial A \partial \beta_0}\displaystyle\frac{\partial \beta_0}{\partial z}
      *  + \displaystyle\frac{\partial^2 \psi}{\partial A \partial \beta_1}\displaystyle\frac{\partial \beta_1}{\partial z}\right)
      *  + (2\alpha - 1)\left(\displaystyle\frac{Q}{A}\right)^2 \displaystyle\frac{\partial \alpha}{\partial z}\right).

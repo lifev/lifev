@@ -119,7 +119,8 @@ public:
      *  @param fluxPtr pointer to the flux class.
      *  @param rhs the rhs of the Taylor-Galerking problem.
      */
-    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs );
+    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
+                  const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs );
 
     //! Apply boundary conditions to the rhs of the viscoelastic problem
     /*!
@@ -208,7 +209,8 @@ private:
      * @param rhs rhs of the 2x2 system.
      * @return solution
      */
-    container2D_Type solveLinearSystem( const container2D_Type& line1, const container2D_Type& line2, const container2D_Type& rhs ) const;
+    container2D_Type solveLinearSystem( const container2D_Type& line1,
+                                        const container2D_Type& line2, const container2D_Type& rhs ) const;
 
     //@}
 

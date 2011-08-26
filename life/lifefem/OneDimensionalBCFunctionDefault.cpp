@@ -255,8 +255,10 @@ OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, cons
     U0_interpolated[0] = ( 1 - cfl ) * M_fluxPtr->physics()->data()->area0(bcNodes[0]) + cfl * M_fluxPtr->physics()->data()->area0(bcNodes[1]);
     U0_interpolated[1] = 0;
 
-    U[0] = U_interpolated[0] - U0_interpolated[0] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl ) - M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 0, bcNodes, cfl ) );
-    U[1] = U_interpolated[1] - U0_interpolated[1] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl ) - M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 1, bcNodes, cfl ) );
+    U[0] = U_interpolated[0] - U0_interpolated[0] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl ) -
+                                                                 M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 0, bcNodes, cfl ) );
+    U[1] = U_interpolated[1] - U0_interpolated[1] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl ) -
+                                                                 M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 1, bcNodes, cfl ) );
 
     U_interpolated[0] -= U0_interpolated[0];
     U_interpolated[1] -= U0_interpolated[1];

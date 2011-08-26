@@ -215,7 +215,8 @@ public :
      *  @param timeStep the time step
      *  @param iNode node of the mesh
      *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
-     *  @return \f$\displaystyle\frac{dP_\mathrm{viscoelastic}(A)}{dA} = \displaystyle\frac{\gamma}{A^{3/2}} \left( \displaystyle\frac{1}{\Delta t} - \displaystyle\frac{dA}{dt} \displaystyle\frac{3}{2A} \right)\f$
+     *  @return \f$\displaystyle\frac{dP_\mathrm{viscoelastic}(A)}{dA} = \displaystyle\frac{\gamma}{A^{3/2}} \left( \displaystyle\frac{1}{\Delta t} -
+     *  \displaystyle\frac{dA}{dt} \displaystyle\frac{3}{2A} \right)\f$
      */
 #ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
@@ -229,7 +230,9 @@ public :
      *  @param timeStep the time step
      *  @param iNode node of the mesh
      *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
-     *  @return \f$\displaystyle\frac{dA(P)}{dP} = \displaystyle\frac{dA(P)}{dP_\mathrm{elastic}} + \displaystyle\frac{dA(P)}{dP_\mathrm{viscoelastic}}\f$, with \f$\displaystyle\frac{dA(P)}{dP_\mathrm{elastic}} = \displaystyle\frac{A^0}{\beta_0 \beta_1} \left( 1 + \displaystyle\frac{ P - P_\mathrm{ext} }{ \beta_0 }\right)^{\displaystyle\frac{1}{\beta_1} - 1}\f$
+     *  @return \f$\displaystyle\frac{dA(P)}{dP} = \displaystyle\frac{dA(P)}{dP_\mathrm{elastic}} +
+     *  \displaystyle\frac{dA(P)}{dP_\mathrm{viscoelastic}}\f$, with \f$\displaystyle\frac{dA(P)}{dP_\mathrm{elastic}} = \displaystyle\frac{A^0}{\beta_0 \beta_1} \left( 1 +
+     *  \displaystyle\frac{ P - P_\mathrm{ext} }{ \beta_0 }\right)^{\displaystyle\frac{1}{\beta_1} - 1}\f$
      */
 #ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
@@ -318,39 +321,6 @@ public :
      *  @return \f$P_t = P + \displaystyle\frac{\rho}{2} \left(\displaystyle\frac{Q}{A}\right)^2\f$
      */
     Real totalPressure( const Real& A, const Real& Q, const UInt& iNode ) const;
-
-    //! Make the vessel stiffer on the left side of interval [xl, xr]
-    /*!
-     *  \cond \TODO improve doxygen description with latex equation and other features \endcond
-     *  These routines change the elastic modulus along the vessel
-     *
-     *  When x < alpha - delta/2, the Young modulus is E * factor
-     *  When x > alpha + delta/2, the Young modulus is E
-     *  When alpha - delta/2 < x < alpha + delta/2, the Young modulus changes
-     *  smoothly from the larger to the smaller value, according to a
-     *  polynomial law of order n.
-     *
-     *  The grid size can be adapted (yesadaptive=1) in the nieghborhood of alpha,
-     *  where the spatial derivative of the parameter will be maximum.
-     *  However, the grid size is not allowed to be smaller than min_deltax
-     *
-     *  \cond \TODO add doxygen description for the parameters \endcond
-     */
-    void stiffenVesselLeft( const Real& xl,          const Real& xr,
-                            const Real& factor,      const Real& alpha,
-                            const Real& delta,       const Real& n,
-                            const Real& minDeltaX=1, const UInt& yesAdaptive=0 );
-
-    //! Make the vessel stiffer on the right side of interval [xl, xr]
-    /*!
-     * \sa stiffenVesselLeft
-     *
-     *  \cond \TODO add doxygen description for the parameters \endcond
-     */
-    void stiffenVesselRight( const Real& xl,          const Real& xr,
-                             const Real& factor,      const Real& alpha,
-                             const Real& delta,       const Real& n,
-                             const Real& minDeltaX=1, const UInt& yesAdaptive=0  );
 
     //@}
 

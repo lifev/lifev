@@ -64,7 +64,8 @@ OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& r
                  + Q * Q / A * M_physicsPtr->data()->dAlphadz( iNode )
                  + C  * ( M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->dBeta0dz( iNode )
                           - M_physicsPtr->data()->beta0( iNode ) * M_physicsPtr->data()->beta1( iNode ) * M_physicsPtr->data()->dArea0dz( iNode )
-                          + M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->beta0( iNode ) * ( std::log( AoverA0 ) - 1. / beta1plus1 ) * M_physicsPtr->data()->dBeta1dz( iNode )
+                          + M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->beta0( iNode )
+                          * ( std::log( AoverA0 ) - 1. / beta1plus1 ) * M_physicsPtr->data()->dBeta1dz( iNode )
                         )
                  - C0 * ( M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->dBeta0dz( iNode )
                           - M_physicsPtr->data()->beta0( iNode ) * M_physicsPtr->data()->beta1( iNode ) * M_physicsPtr->data()->dArea0dz( iNode )
@@ -99,7 +100,8 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& row
             return ( -M_physicsPtr->data()->friction() * Q / A / A
                      - Q * Q / ( A * A ) * M_physicsPtr->data()->dAlphadz( iNode )
                      + C  * ( M_physicsPtr->data()->dBeta0dz( iNode )
-                              - M_physicsPtr->data()->beta0( iNode ) * M_physicsPtr->data()->beta1( iNode ) / M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->dArea0dz( iNode )
+                              - M_physicsPtr->data()->beta0( iNode ) * M_physicsPtr->data()->beta1( iNode )
+                              / M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->dArea0dz( iNode )
                               + M_physicsPtr->data()->beta0( iNode ) * std::log( AoverA0 ) * M_physicsPtr->data()->dBeta1dz( iNode )
                             )
                      - 1. / M_physicsPtr->data()->densityRho() * M_physicsPtr->data()->dBeta0dz( iNode )
@@ -107,7 +109,8 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& row
         }
         if ( column == 1 ) // dB2/dQ
         {
-            return M_physicsPtr->data()->robertsonCorrection() * ( M_physicsPtr->data()->friction() / A + 2 * Q / A * M_physicsPtr->data()->dAlphadz( iNode ) );
+            return M_physicsPtr->data()->robertsonCorrection() * ( M_physicsPtr->data()->friction() / A +
+                                                                   2 * Q / A * M_physicsPtr->data()->dAlphadz( iNode ) );
         }
     }
 

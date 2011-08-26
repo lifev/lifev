@@ -59,7 +59,8 @@ OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& row, 
         return ( M_physicsPtr->data()->alpha( iNode ) * Q * Q / A +
                  M_physicsPtr->data()->beta0( iNode ) * M_physicsPtr->data()->beta1( iNode ) *
                  M_physicsPtr->data()->area0( iNode ) / ( ( M_physicsPtr->data()->beta1( iNode ) + 1 ) *
-                 M_physicsPtr->data()->densityRho() ) * ( OneDimensional::pow15( A / M_physicsPtr->data()->area0( iNode ), M_physicsPtr->data()->beta1( iNode ) + 1 ) - 1 ) ) *
+                 M_physicsPtr->data()->densityRho() ) * ( OneDimensional::pow15( A / M_physicsPtr->data()->area0( iNode ),
+                                                                                 M_physicsPtr->data()->beta1( iNode ) + 1 ) - 1 ) ) *
                  M_physicsPtr->data()->robertsonCorrection();
     }
 
@@ -85,7 +86,8 @@ OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& row, 
     {
         return ( M_physicsPtr->data()->beta0( iNode ) *
                  M_physicsPtr->data()->beta1( iNode ) /
-                 M_physicsPtr->data()->densityRho() * OneDimensional::pow05( A / M_physicsPtr->data()->area0( iNode ), M_physicsPtr->data()->beta1( iNode ) ) -
+                 M_physicsPtr->data()->densityRho() * OneDimensional::pow05( A / M_physicsPtr->data()->area0( iNode ),
+                                                                             M_physicsPtr->data()->beta1( iNode ) ) -
                  M_physicsPtr->data()->alpha( iNode ) * Q * Q / A / A ) *
                  M_physicsPtr->data()->robertsonCorrection();
     }
@@ -116,7 +118,8 @@ OneDimensionalFluxNonLinear::eigenValuesEigenVectors( const Real& A,
                                 M_physicsPtr->data()->alpha( iNode ) - 1) * Q * Q / ( A * A ) +
                                 M_physicsPtr->data()->beta0( iNode ) *
                                 M_physicsPtr->data()->beta1( iNode ) /
-                                M_physicsPtr->data()->densityRho() * OneDimensional::pow05( A / M_physicsPtr->data()->area0( iNode ), M_physicsPtr->data()->beta1( iNode ) ) );
+                                M_physicsPtr->data()->densityRho() * OneDimensional::pow05( A / M_physicsPtr->data()->area0( iNode ),
+                                                                                            M_physicsPtr->data()->beta1( iNode ) ) );
 
     eigenvalues[0] = M_physicsPtr->data()->alpha( iNode ) * Q / A + celerity;
     eigenvalues[1] = M_physicsPtr->data()->alpha( iNode ) * Q / A - celerity;

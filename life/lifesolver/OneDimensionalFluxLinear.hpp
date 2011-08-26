@@ -57,7 +57,8 @@ namespace LifeV
  *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
  *  \f]
  *
- *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes, and \f$\mathbf S\f$ represents the source terms.
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
  *
  *  In the present implementation we have:
  *

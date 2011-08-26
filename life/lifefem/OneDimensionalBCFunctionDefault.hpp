@@ -31,6 +31,7 @@
  *  @version 1.0
  *  @date 01-08-2006
  *  @author Lucia Mirabella  <lucia.mirabella@gmail.com>
+ *  @author Tiziano Passerini <tiziano.passerini@gmail.com>
  *
  *  @version 2.0
  *  @date 20-04-2010
@@ -53,7 +54,7 @@ namespace LifeV
 
 //! OneDimensionalModelBCFunctionDefault - Base class for deriving specific 1D boundary functions
 /*!
- *  @author Lucia Mirabella, Cristiano Malossi
+ *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *
  *  This class provide a general interface for implementing some specific boundary conditions
  *  for the 1D segment.
@@ -175,7 +176,7 @@ protected:
 
 //! OneDimensionalBCFunctionRiemann - Class which implements Riemann boundary conditions for the 1D segment
 /*!
- *  @author Lucia Mirabella
+ *  @author Lucia Mirabella, Tiziano Passerini
  *
  *  \cond \TODO Add the equation and some descriptions \endcond
  */
@@ -249,12 +250,14 @@ protected:
 
 //! OneDimensionalBCFunctionCompatibility - Class which implements Compatibility boundary conditions for the 1D segment
 /*!
- *  @author Lucia Mirabella, Cristiano Malossi
+ *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *
  *  The compatibility equations are derived using the pseudo-characteristic teory:
  *
  *  \f[
- *  \mathbf L(\mathbf U^{n+1}-\mathbf U^{n}_\star + \mathbf U^0 - \mathbf U^0_\star) = \Delta t \left( \mathbf \Lambda \displaystyle\frac{\partial \mathbf L}{\partial z}(\mathbf U^n_\star - \mathbf U^0_\star) - \mathbf L \mathbf B(\mathbf U^n_\star) + \mathbf L \mathbf B(\mathbf U^0_\star) \right).
+ *  \mathbf L(\mathbf U^{n+1}-\mathbf U^{n}_\star + \mathbf U^0 - \mathbf U^0_\star) =
+ *  \Delta t \left( \mathbf \Lambda \displaystyle\frac{\partial \mathbf L}{\partial z}(\mathbf U^n_\star -
+ *  \mathbf U^0_\star) - \mathbf L \mathbf B(\mathbf U^n_\star) + \mathbf L \mathbf B(\mathbf U^0_\star) \right).
  *  \f]
  */
 class OneDimensionalBCFunctionCompatibility : public OneDimensionalBCFunctionRiemann
@@ -339,7 +342,8 @@ protected:
      *  @param timeStep the time step.
      *  @return rhs of the problem
      */
-    Real evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector, const container2D_Type& deltaEigenvector, const Real& timeStep );
+    Real evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector,
+                      const container2D_Type& deltaEigenvector, const Real& timeStep );
 
     //! Compute the current CFL
     /*!
@@ -458,7 +462,7 @@ protected:
 
 //! OneDimensionalBCFunctionResistance - Class which implements resistance boundary conditions for the 1D segment
 /*!
- *  @author Lucia Mirabella
+ *  @author Lucia Mirabella, Tiziano Passerini
  *
  *  \cond \TODO Add the equation and some descriptions \endcond
  */
@@ -545,7 +549,7 @@ protected:
  *
  *  dQ(s)/ds = Q(t(n+1)) - Q(t(n)) * (1/dt)
  *
- *  @author Lucia Mirabella
+ *  @author Lucia Mirabella, Tiziano Passerini
  */
 class OneDimensionalBCFunctionWindkessel3 : public OneDimensionalBCFunctionCompatibility
 {

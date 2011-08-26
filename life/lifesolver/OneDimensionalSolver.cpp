@@ -331,7 +331,9 @@ OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type
 }
 
 OneDimensionalSolver::vector_Type
-OneDimensionalSolver::viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix )
+OneDimensionalSolver::viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate,
+                                                      const Real& timeStep, OneDimensionalBCHandler& bcHandler,
+                                                      const bool& updateSystemMatrix )
 {
     // Matrix
     matrix_Type systemMatrix( M_feSpacePtr->map() );

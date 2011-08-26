@@ -31,6 +31,7 @@
  *  @version 1.0
  *  @date 01-08-2006
  *  @author Lucia Mirabella  <lucia.mirabella@gmail.com>
+ *  @author Tiziano Passerini <tiziano.passerini@gmail.com>
  *
  *  @version 2.0
  *  @date 20-04-2010
@@ -49,7 +50,7 @@ namespace LifeV
 
 //! OneDimensionalBCFunction - Base class for 1D BC Functions.
 /*!
- *  @author Lucia Mirabella, Cristiano Malossi
+ *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *
  *  The 1D boundary condition function is evaluated as a function of the current time and of the time step.
  */
@@ -99,7 +100,13 @@ public:
      *  @param bcFunction OneDimensionalBCFunction
      *  @return reference to a copy of the class
      */
-    OneDimensionalBCFunction& operator=( const OneDimensionalBCFunction& bcFunction ) { if( this != &bcFunction ) { M_function = bcFunction.M_function; } return *this; }
+    OneDimensionalBCFunction& operator=( const OneDimensionalBCFunction& bcFunction )
+    {
+        if( this != &bcFunction )
+            M_function = bcFunction.M_function;
+
+        return *this;
+    }
 
     //! Operator()
     /*!

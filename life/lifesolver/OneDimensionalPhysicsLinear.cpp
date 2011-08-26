@@ -85,7 +85,8 @@ OneDimensionalPhysicsLinear::fromWToP( const Real& W1, const Real& W2, const UIn
 Real
 OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const
 {
-    Real add( 2 * celerity0( iNode ) * M_dataPtr -> area0( iNode ) * ( OneDimensional::pow20( P / M_dataPtr -> beta0( iNode ) + 1, 1 / M_dataPtr -> beta1( iNode ) ) - 1 ) );
+    Real add( 2 * celerity0( iNode ) * M_dataPtr -> area0( iNode ) * ( OneDimensional::pow20( P / M_dataPtr -> beta0( iNode ) + 1,
+                                                                                              1 / M_dataPtr -> beta1( iNode ) ) - 1 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug(6320) << "[fromPToW] "
@@ -125,7 +126,8 @@ OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_tn*/, cons
 Real
 OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const
 {
-    Real beta0beta1overA0beta1 ( M_dataPtr->beta0( iNode ) * M_dataPtr -> beta1( iNode ) / OneDimensional::pow05( M_dataPtr -> area0( iNode ), M_dataPtr -> beta1( iNode ) ) );
+    Real beta0beta1overA0beta1 ( M_dataPtr->beta0( iNode ) * M_dataPtr -> beta1( iNode ) / OneDimensional::pow05( M_dataPtr -> area0( iNode ),
+                                                                                                                  M_dataPtr -> beta1( iNode ) ) );
 
     Real oneover2celerity( 1 / ( 2 * celerity0( iNode ) ) );
 

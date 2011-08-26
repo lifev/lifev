@@ -53,7 +53,8 @@ namespace LifeV
  *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
  *  \f]
  *
- *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes, and \f$\mathbf S\f$ represents the source terms.
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
  *
  *  This class implements all the interfaces required for the computation of \f$\mathbf S\f$ and its derivatives.
  */
@@ -116,7 +117,8 @@ public:
 
     //! Evaluate the non-conservative form of the source term at the foot of the outgoing characteristic.
     /*!
-     *  This method is used for imposing the compatibility equations at the boundaries. It interpolates the value between to nodes.
+     *  This method is used for imposing the compatibility equations at the boundaries.
+     *  It interpolates the value between to nodes.
      *
      *  @param A area
      *  @param Q flow rate
@@ -125,7 +127,7 @@ public:
      *  @param cfl cfl used to identify the foot of the characteristic
      */
     virtual Real interpolatedNonConservativeSource( const Real& A, const Real& Q,
-                                                const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const = 0;
+                                                    const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const = 0;
 
     //@}
 

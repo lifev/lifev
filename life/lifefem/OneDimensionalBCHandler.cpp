@@ -94,7 +94,8 @@ OneDimensionalBCHandler::OneDimensionalBCHandler( const OneDimensionalBCHandler&
 // Methods
 // ===================================================
 void
-OneDimensionalBCHandler::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs )
+OneDimensionalBCHandler::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
+                                  const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs )
 {
     M_boundary[ OneDimensional::left  ]->applyBC( time, timeStep, solution, fluxPtr, rhs );
     M_boundary[ OneDimensional::right ]->applyBC( time, timeStep, solution, fluxPtr, rhs );
