@@ -57,6 +57,14 @@ namespace LifeV
  *      <li> utilities for converting Riemann variables to physical quantities (and viceversa);
  *      <li> utilities to compute the different pressure components (and derivatives).
  *  </ol>
+ *
+ *  \cond
+ *  TODO: This class should be splitted in two separate classes
+ *  <ol>
+ *      <li> one class (no derivation) for the wall physics with a name like OneDimensionalWallPhysics
+ *      <li> a set of classes for the Riemann conversions like OneDimensionalRiemannConverter and derived Linear/NonLinear versions.
+ *  </ol>
+ *  \endcond
  */
 class OneDimensionalPhysics
 {
