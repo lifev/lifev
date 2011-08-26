@@ -118,7 +118,16 @@ void parseList( const std::string& slist, std::list<EntryType>& list )
 // Convert a std::string to a number ( Int, bool, Real, ... )
 inline Real string2number( const std::string& s )
 {
-    return boost::lexical_cast< Real >( s );
+    std::stringstream out;
+    out << s;
+
+    Real n;
+    out >> n;
+
+    return n;
+    
+    // Temporary disabled 
+    //return boost::lexical_cast< Real >( s );
 }
 
 // @author Cristiano Malossi
