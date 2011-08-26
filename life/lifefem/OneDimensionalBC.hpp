@@ -44,7 +44,7 @@
 #ifndef OneDimensionalBC_H
 #define OneDimensionalBC_H
 
-#include <life/lifefunctions/OneDimensionalBCFunctionSolverDefined.hpp>
+#include <life/lifefunctions/OneDimensionalFunctionSolverDefined.hpp>
 #include <life/lifesolver/OneDimensionalData.hpp>
 
 namespace LifeV
