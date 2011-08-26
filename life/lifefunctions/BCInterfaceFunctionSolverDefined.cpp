@@ -225,35 +225,35 @@ BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::BCInterfaceFunctionSol
 // Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::assignFunction( OneDimensionalBCFunction& base )
+BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::assignFunction( OneDimensionalFunction& base )
 {
     switch ( M_defaultFunction )
     {
     case Riemann:
 
-        base.setFunction( boost::bind( &OneDimensionalBCFunctionRiemann::operator(),
-                                       dynamic_cast<OneDimensionalBCFunctionRiemann *> ( &( *M_function ) ), _1, _2 ) );
+        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedRiemann::operator(),
+                                       dynamic_cast<OneDimensionalFunctionSolverDefinedRiemann *> ( &( *M_function ) ), _1, _2 ) );
 
         break;
 
     case Compatibility:
 
-        base.setFunction( boost::bind( &OneDimensionalBCFunctionCompatibility::operator(),
-                                       dynamic_cast<OneDimensionalBCFunctionCompatibility *> ( &( *M_function ) ), _1, _2 ) );
+        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedCompatibility::operator(),
+                                       dynamic_cast<OneDimensionalFunctionSolverDefinedCompatibility *> ( &( *M_function ) ), _1, _2 ) );
 
         break;
 
     case Absorbing:
 
-        base.setFunction( boost::bind( &OneDimensionalBCFunctionAbsorbing::operator(),
-                                       dynamic_cast<OneDimensionalBCFunctionAbsorbing *> ( &( *M_function ) ), _1, _2 ) );
+        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedAbsorbing::operator(),
+                                       dynamic_cast<OneDimensionalFunctionSolverDefinedAbsorbing *> ( &( *M_function ) ), _1, _2 ) );
 
         break;
 
     case Resistance:
 
-        base.setFunction( boost::bind( &OneDimensionalBCFunctionResistance::operator(),
-                                       dynamic_cast<OneDimensionalBCFunctionResistance *> ( &( *M_function ) ), _1, _2 ) );
+        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedResistance::operator(),
+                                       dynamic_cast<OneDimensionalFunctionSolverDefinedResistance *> ( &( *M_function ) ), _1, _2 ) );
 
         break;
     }
@@ -283,25 +283,25 @@ BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::setData( const BCInter
     {
     case Riemann:
 
-        M_function.reset( new OneDimensionalBCFunctionRiemann( data.side(), data.quantity() ) );
+        M_function.reset( new OneDimensionalFunctionSolverDefinedRiemann( data.side(), data.quantity() ) );
 
         break;
 
     case Compatibility:
 
-        M_function.reset( new OneDimensionalBCFunctionCompatibility( data.side(), data.quantity() ) );
+        M_function.reset( new OneDimensionalFunctionSolverDefinedCompatibility( data.side(), data.quantity() ) );
 
         break;
 
     case Absorbing:
 
-        M_function.reset( new OneDimensionalBCFunctionAbsorbing( data.side(), data.quantity() ) );
+        M_function.reset( new OneDimensionalFunctionSolverDefinedAbsorbing( data.side(), data.quantity() ) );
 
         break;
 
     case Resistance:
 
-        M_function.reset( new OneDimensionalBCFunctionResistance( data.side(), data.quantity(), data.resistance()[0] ) );
+        M_function.reset( new OneDimensionalFunctionSolverDefinedResistance( data.side(), data.quantity(), data.resistance()[0] ) );
 
         break;
     }

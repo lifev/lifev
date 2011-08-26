@@ -70,8 +70,8 @@ public:
 
     typedef bc_Type::bcFunction_Type            bcFunction_Type;
     typedef bc_Type::bcFunctionPtr_Type         bcFunctionPtr_Type;
-    typedef bc_Type::bcFunctionDefault_Type     bcFunctionDefault_Type;
-    typedef bc_Type::bcFunctionDefaultPtr_Type  bcFunctionDefaultPtr_Type;
+    typedef bc_Type::bcFunctionSolverDefined_Type     bcFunctionSolverDefined_Type;
+    typedef bc_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
 
     typedef bc_Type::fluxPtr_Type               fluxPtr_Type;
     typedef bc_Type::sourcePtr_Type             sourcePtr_Type;
@@ -199,7 +199,7 @@ private:
     std::map< bcSide_Type, bcPtr_Type >                      M_boundary;
     std::map< bcSide_Type, std::map< bcLine_Type, bool > >   M_boundarySet;
 
-    std::vector < bcFunctionDefaultPtr_Type >                M_defaultFunctions;
+    std::vector < bcFunctionSolverDefinedPtr_Type >                M_defaultFunctions;
 };
 
 }

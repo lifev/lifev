@@ -75,10 +75,10 @@ OneDimensionalBCHandler::OneDimensionalBCHandler( const OneDimensionalBCHandler&
     M_boundary[ OneDimensional::left ].reset(  new bc_Type( *bcHandler.M_boundary.find( OneDimensional::left )->second ) );
     M_boundary[ OneDimensional::right ].reset( new bc_Type( *bcHandler.M_boundary.find( OneDimensional::right )->second ) );
 
-    for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = bcHandler.M_defaultFunctions.begin();
+    for ( std::vector < bcFunctionSolverDefinedPtr_Type >::const_iterator i = bcHandler.M_defaultFunctions.begin();
             i != bcHandler.M_defaultFunctions.end() ; ++i )
     {
-        bcFunctionDefaultPtr_Type BCDefaultFunction( new bcFunctionDefault_Type( *i->get() ) );
+        bcFunctionSolverDefinedPtr_Type BCDefaultFunction( new bcFunctionSolverDefined_Type( *i->get() ) );
         M_defaultFunctions.push_back( BCDefaultFunction );
     }
 
@@ -134,14 +134,14 @@ OneDimensionalBCHandler::setDefaultBC()
 
     if ( !M_boundarySet[ OneDimensional::left ][OneDimensional::first] )
     {
-        //bcFunctionDefaultPtr_Type bcFunction( new OneDimensionalBCFunctionDefault( OneDimensional::OneD_left, OneDimensional::OneD_W1 ) );
-        bcFunctionDefaultPtr_Type bcDefaultFunction( new OneDimensionalBCFunctionRiemann( OneDimensional::left, OneDimensional::W1 ) );
+        //bcFunctionSolverDefinedPtr_Type bcFunction( new OneDimensionalFunctionSolverDefined( OneDimensional::OneD_left, OneDimensional::OneD_W1 ) );
+        bcFunctionSolverDefinedPtr_Type bcDefaultFunction( new OneDimensionalFunctionSolverDefinedRiemann( OneDimensional::left, OneDimensional::W1 ) );
         M_defaultFunctions.push_back( bcDefaultFunction );
 
         //bcFunctionPtr_Type bcFunction( new bcFunction_Type() );
         bcFunction_Type bcFunction;
-        bcFunction.setFunction( boost::bind( &OneDimensionalBCFunctionRiemann::operator(),
-                                             dynamic_cast<OneDimensionalBCFunctionRiemann *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
+        bcFunction.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedRiemann::operator(),
+                                             dynamic_cast<OneDimensionalFunctionSolverDefinedRiemann *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] left-first-W1 Invoking setBC.\n";
@@ -151,14 +151,14 @@ OneDimensionalBCHandler::setDefaultBC()
 
     if ( !M_boundarySet[ OneDimensional::left ][OneDimensional::second] )
     {
-        //bcFunctionPtr_Type bcFunction( new OneDimensionalBCFunctionCompatibility( OneDimensional::OneD_left, OneDimensional::OneD_W2 ) );
-        bcFunctionDefaultPtr_Type bcDefaultFunction( new OneDimensionalBCFunctionCompatibility( OneDimensional::left, OneDimensional::W2 ) );
+        //bcFunctionPtr_Type bcFunction( new OneDimensionalFunctionSolverDefinedCompatibility( OneDimensional::OneD_left, OneDimensional::OneD_W2 ) );
+        bcFunctionSolverDefinedPtr_Type bcDefaultFunction( new OneDimensionalFunctionSolverDefinedCompatibility( OneDimensional::left, OneDimensional::W2 ) );
         M_defaultFunctions.push_back( bcDefaultFunction );
 
         //bcFunctionPtr_Type bcFunction ( new bcFunction_Type() );
         bcFunction_Type bcFunction;
-        bcFunction.setFunction( boost::bind( &OneDimensionalBCFunctionCompatibility::operator(),
-                                             dynamic_cast<OneDimensionalBCFunctionCompatibility *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
+        bcFunction.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedCompatibility::operator(),
+                                             dynamic_cast<OneDimensionalFunctionSolverDefinedCompatibility *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] left-second-W2 Invoking setBC.\n";
@@ -168,14 +168,14 @@ OneDimensionalBCHandler::setDefaultBC()
 
     if ( !M_boundarySet[ OneDimensional::right ][ OneDimensional::first ] )
     {
-        //bcFunctionPtr_Type bcFunction( new OneDimensionalBCFunctionRiemann( OneDimensional::OneD_right, OneDimensional::OneD_W2 ) );
-        bcFunctionDefaultPtr_Type bcDefaultFunction( new OneDimensionalBCFunctionRiemann( OneDimensional::right, OneDimensional::W2 ) );
+        //bcFunctionPtr_Type bcFunction( new OneDimensionalFunctionSolverDefinedRiemann( OneDimensional::OneD_right, OneDimensional::OneD_W2 ) );
+        bcFunctionSolverDefinedPtr_Type bcDefaultFunction( new OneDimensionalFunctionSolverDefinedRiemann( OneDimensional::right, OneDimensional::W2 ) );
         M_defaultFunctions.push_back( bcDefaultFunction );
 
         //bcFunctionPtr_Type bcFunction ( new bcFunction_Type() );
         bcFunction_Type bcFunction;
-        bcFunction.setFunction( boost::bind( &OneDimensionalBCFunctionRiemann::operator(),
-                                             dynamic_cast<OneDimensionalBCFunctionRiemann *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
+        bcFunction.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedRiemann::operator(),
+                                             dynamic_cast<OneDimensionalFunctionSolverDefinedRiemann *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] right-first-W2 Invoking setBC.\n";
@@ -185,14 +185,14 @@ OneDimensionalBCHandler::setDefaultBC()
 
     if ( !M_boundarySet[ OneDimensional::right ][ OneDimensional::second ] )
     {
-        //bcFunctionPtr_Type bcFunction( new OneDimensionalBCFunctionCompatibility( OneDimensional::OneD_right, OneDimensional::OneD_W1 ) );
-        bcFunctionDefaultPtr_Type bcDefaultFunction( new OneDimensionalBCFunctionCompatibility( OneDimensional::right, OneDimensional::W1 ) );
+        //bcFunctionPtr_Type bcFunction( new OneDimensionalFunctionSolverDefinedCompatibility( OneDimensional::OneD_right, OneDimensional::OneD_W1 ) );
+        bcFunctionSolverDefinedPtr_Type bcDefaultFunction( new OneDimensionalFunctionSolverDefinedCompatibility( OneDimensional::right, OneDimensional::W1 ) );
         M_defaultFunctions.push_back( bcDefaultFunction );
 
         //bcFunctionPtr_Type bcFunction ( new bcFunction_Type() );
         bcFunction_Type bcFunction;
-        bcFunction.setFunction( boost::bind( &OneDimensionalBCFunctionCompatibility::operator(),
-                                             dynamic_cast<OneDimensionalBCFunctionCompatibility *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
+        bcFunction.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedCompatibility::operator(),
+                                             dynamic_cast<OneDimensionalFunctionSolverDefinedCompatibility *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] right-second-W1 Invoking setBC.\n";
@@ -204,14 +204,14 @@ OneDimensionalBCHandler::setDefaultBC()
 void
 OneDimensionalBCHandler::setFluxSource( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr )
 {
-    for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
+    for ( std::vector < bcFunctionSolverDefinedPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
         ( *i )->setFluxSource( fluxPtr, sourcePtr );
 }
 
 void
 OneDimensionalBCHandler::setSolution( const solutionPtr_Type& solution )
 {
-    for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
+    for ( std::vector < bcFunctionSolverDefinedPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
         ( *i )->setSolution( solution );
 }
 

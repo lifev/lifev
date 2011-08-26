@@ -59,14 +59,14 @@ namespace LifeV
  *  This class provide a general interface for implementing some specific boundary conditions
  *  for the 1D segment.
  */
-class OneDimensionalBCFunctionDefault
+class OneDimensionalFunctionSolverDefined
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalBCFunction                bcFunction_Type;
+    typedef OneDimensionalFunction                  bcFunction_Type;
     typedef boost::shared_ptr<bcFunction_Type>      bcFunctionPtr_Type;
 
     typedef OneDimensionalFlux                      flux_Type;
@@ -105,16 +105,16 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDimensionalBCFunctionDefault( const bcSide_Type& bcSide, const bcType_Type& bcType );
+    explicit OneDimensionalFunctionSolverDefined( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param bcFunctionDefault OneDimensionalBCFunctionDefault
+     * @param bcFunctionDefault OneDimensionalFunctionSolverDefined
      */
-    explicit OneDimensionalBCFunctionDefault( const OneDimensionalBCFunctionDefault& bcFunctionDefault );
+    explicit OneDimensionalFunctionSolverDefined( const OneDimensionalFunctionSolverDefined& bcFunctionDefault );
 
     //! Destructor
-    virtual ~OneDimensionalBCFunctionDefault() {}
+    virtual ~OneDimensionalFunctionSolverDefined() {}
 
     //@}
 
@@ -174,21 +174,21 @@ protected:
 
 
 
-//! OneDimensionalBCFunctionRiemann - Class which implements Riemann boundary conditions for the 1D segment
+//! OneDimensionalFunctionSolverDefinedRiemann - Class which implements Riemann boundary conditions for the 1D segment
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini
  *
  *  \cond \TODO Add the equation and some descriptions \endcond
  */
-class OneDimensionalBCFunctionRiemann : public OneDimensionalBCFunctionDefault
+class OneDimensionalFunctionSolverDefinedRiemann : public OneDimensionalFunctionSolverDefined
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalBCFunctionDefault             super;
-    typedef super::container2D_Type                     container2D_Type;
+    typedef OneDimensionalFunctionSolverDefined             super;
+    typedef super::container2D_Type                         container2D_Type;
 
     //@}
 
@@ -201,16 +201,16 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDimensionalBCFunctionRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
+    explicit OneDimensionalFunctionSolverDefinedRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param bcFunctionRiemann OneDimensionalBCFunctionRiemann
+     * @param bcFunctionRiemann OneDimensionalFunctionSolverDefinedRiemann
      */
-    explicit OneDimensionalBCFunctionRiemann( const OneDimensionalBCFunctionRiemann& bcFunctionRiemann );
+    explicit OneDimensionalFunctionSolverDefinedRiemann( const OneDimensionalFunctionSolverDefinedRiemann& bcFunctionRiemann );
 
     //! Destructor
-    virtual ~OneDimensionalBCFunctionRiemann() {}
+    virtual ~OneDimensionalFunctionSolverDefinedRiemann() {}
 
     //@}
 
@@ -248,7 +248,7 @@ protected:
 };
 
 
-//! OneDimensionalBCFunctionCompatibility - Class which implements Compatibility boundary conditions for the 1D segment
+//! OneDimensionalFunctionSolverDefinedCompatibility - Class which implements Compatibility boundary conditions for the 1D segment
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *
@@ -260,21 +260,21 @@ protected:
  *  \mathbf U^0_\star) - \mathbf L \mathbf B(\mathbf U^n_\star) + \mathbf L \mathbf B(\mathbf U^0_\star) \right).
  *  \f]
  */
-class OneDimensionalBCFunctionCompatibility : public OneDimensionalBCFunctionRiemann
+class OneDimensionalFunctionSolverDefinedCompatibility : public OneDimensionalFunctionSolverDefinedRiemann
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalBCFunctionRiemann              super;
+    typedef OneDimensionalFunctionSolverDefinedRiemann       super;
 
-    typedef super::fluxPtr_Type                          fluxPtr_Type;
-    typedef super::sourcePtr_Type                        sourcePtr_Type;
-    typedef super::solutionPtr_Type                      solutionPtr_Type;
+    typedef super::fluxPtr_Type                              fluxPtr_Type;
+    typedef super::sourcePtr_Type                            sourcePtr_Type;
+    typedef super::solutionPtr_Type                          solutionPtr_Type;
 
-    typedef super::mesh_Type                             mesh_Type;
-    typedef super::container2D_Type                      container2D_Type;
+    typedef super::mesh_Type                                 mesh_Type;
+    typedef super::container2D_Type                          container2D_Type;
 
     //@}
 
@@ -287,16 +287,16 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDimensionalBCFunctionCompatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
+    explicit OneDimensionalFunctionSolverDefinedCompatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param bcFunctionCompatibility OneDimensionalBCFunctionCompatibility
+     * @param bcFunctionCompatibility OneDimensionalFunctionSolverDefinedCompatibility
      */
-    explicit OneDimensionalBCFunctionCompatibility( const OneDimensionalBCFunctionCompatibility& bcFunctionCompatibility );
+    explicit OneDimensionalFunctionSolverDefinedCompatibility( const OneDimensionalFunctionSolverDefinedCompatibility& bcFunctionCompatibility );
 
     //! Destructor
-    virtual ~OneDimensionalBCFunctionCompatibility() {}
+    virtual ~OneDimensionalFunctionSolverDefinedCompatibility() {}
 
     //@}
 
@@ -380,26 +380,26 @@ protected:
 };
 
 
-//! OneDimensionalBCFunctionAbsorbing - Class which implements absorbing boundary conditions for the 1D segment
+//! OneDimensionalFunctionSolverDefinedAbsorbing - Class which implements absorbing boundary conditions for the 1D segment
 /*!
  *  @author Maria Rita de Luca
  *
  *  \cond \TODO Add the equation and some descriptions \endcond
  */
-class OneDimensionalBCFunctionAbsorbing : public OneDimensionalBCFunctionCompatibility
+class OneDimensionalFunctionSolverDefinedAbsorbing : public OneDimensionalFunctionSolverDefinedCompatibility
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalBCFunctionCompatibility        super;
+    typedef OneDimensionalFunctionSolverDefinedCompatibility super;
 
-    typedef super::fluxPtr_Type                          fluxPtr_Type;
-    typedef super::sourcePtr_Type                        sourcePtr_Type;
-    typedef super::solutionPtr_Type                      solutionPtr_Type;
+    typedef super::fluxPtr_Type                              fluxPtr_Type;
+    typedef super::sourcePtr_Type                            sourcePtr_Type;
+    typedef super::solutionPtr_Type                          solutionPtr_Type;
 
-    typedef super::mesh_Type                             mesh_Type;
+    typedef super::mesh_Type                                 mesh_Type;
 
     //@}
 
@@ -412,16 +412,16 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDimensionalBCFunctionAbsorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
+    explicit OneDimensionalFunctionSolverDefinedAbsorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
 
     //! Copy constructor
     /*!
-     * @param bcFunctionAbsorbing OneDimensionalBCFunctionAbsorbing
+     * @param bcFunctionAbsorbing OneDimensionalFunctionSolverDefinedAbsorbing
      */
-    explicit OneDimensionalBCFunctionAbsorbing( const OneDimensionalBCFunctionAbsorbing& bcFunctionAbsorbing ) : super( bcFunctionAbsorbing ) {}
+    explicit OneDimensionalFunctionSolverDefinedAbsorbing( const OneDimensionalFunctionSolverDefinedAbsorbing& bcFunctionAbsorbing ) : super( bcFunctionAbsorbing ) {}
 
     //! Destructor
-    virtual ~OneDimensionalBCFunctionAbsorbing() {}
+    virtual ~OneDimensionalFunctionSolverDefinedAbsorbing() {}
 
     //@}
 
@@ -460,24 +460,24 @@ protected:
 };
 
 
-//! OneDimensionalBCFunctionResistance - Class which implements resistance boundary conditions for the 1D segment
+//! OneDimensionalFunctionSolverDefinedResistance - Class which implements resistance boundary conditions for the 1D segment
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini
  *
  *  \cond \TODO Add the equation and some descriptions \endcond
  */
-class OneDimensionalBCFunctionResistance : public OneDimensionalBCFunctionAbsorbing
+class OneDimensionalFunctionSolverDefinedResistance : public OneDimensionalFunctionSolverDefinedAbsorbing
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalBCFunctionAbsorbing            super;
+    typedef OneDimensionalFunctionSolverDefinedAbsorbing     super;
 
-    typedef super::fluxPtr_Type                          fluxPtr_Type;
-    typedef super::sourcePtr_Type                        sourcePtr_Type;
-    typedef super::solutionPtr_Type                      solutionPtr_Type;
+    typedef super::fluxPtr_Type                              fluxPtr_Type;
+    typedef super::sourcePtr_Type                            sourcePtr_Type;
+    typedef super::solutionPtr_Type                          solutionPtr_Type;
 
     //@}
 
@@ -491,16 +491,16 @@ public:
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      *  @param resistance the terminal resistance.
      */
-    explicit OneDimensionalBCFunctionResistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
+    explicit OneDimensionalFunctionSolverDefinedResistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
 
     //! Copy constructor
     /*!
-     * @param bcFunctionResistance OneDimensionalBCFunctionResistance
+     * @param bcFunctionResistance OneDimensionalFunctionSolverDefinedResistance
      */
-    explicit OneDimensionalBCFunctionResistance( const OneDimensionalBCFunctionResistance& bcFunctionResistance );
+    explicit OneDimensionalFunctionSolverDefinedResistance( const OneDimensionalFunctionSolverDefinedResistance& bcFunctionResistance );
 
     //! Destructor
-    virtual ~OneDimensionalBCFunctionResistance() {}
+    virtual ~OneDimensionalFunctionSolverDefinedResistance() {}
 
     //@}
 
@@ -523,7 +523,7 @@ protected:
 
 
 
-//! OneDimensionalBCFunctionWindkessel3 - Class which implements windkessel RCR boundary conditions for the 1D segment
+//! OneDimensionalFunctionSolverDefinedWindkessel3 - Class which implements windkessel RCR boundary conditions for the 1D segment
 /*!
  *
  *  \cond \TODO Description should be reordered using latex etc... \endcond
@@ -551,14 +551,14 @@ protected:
  *
  *  @author Lucia Mirabella, Tiziano Passerini
  */
-class OneDimensionalBCFunctionWindkessel3 : public OneDimensionalBCFunctionCompatibility
+class OneDimensionalFunctionSolverDefinedWindkessel3 : public OneDimensionalFunctionSolverDefinedCompatibility
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalBCFunctionCompatibility        super;
+    typedef OneDimensionalFunctionSolverDefinedCompatibility        super;
 
     typedef super::fluxPtr_Type                          fluxPtr_Type;
     typedef super::sourcePtr_Type                        sourcePtr_Type;
@@ -580,7 +580,7 @@ public:
      *  @param absorbing is an absorbing boundary condition
      *  @param venousPressure the venous pressure
      */
-    explicit OneDimensionalBCFunctionWindkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
+    explicit OneDimensionalFunctionSolverDefinedWindkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
                                                   const Real& resistance1, const Real& resistance2,
                                                   const Real& compliance,
                                                   const bool& absorbing = false,
@@ -588,12 +588,12 @@ public:
 
     //! Copy constructor
     /*!
-     * @param bcFunctionWindkessel3 OneDimensionalBCFunctionWindkessel3
+     * @param bcFunctionWindkessel3 OneDimensionalFunctionSolverDefinedWindkessel3
      */
-    explicit OneDimensionalBCFunctionWindkessel3( const OneDimensionalBCFunctionWindkessel3& bcFunctionWindkessel3 );
+    explicit OneDimensionalFunctionSolverDefinedWindkessel3( const OneDimensionalFunctionSolverDefinedWindkessel3& bcFunctionWindkessel3 );
 
     //! Destructor
-    virtual ~OneDimensionalBCFunctionWindkessel3() {}
+    virtual ~OneDimensionalFunctionSolverDefinedWindkessel3() {}
 
     //@}
 

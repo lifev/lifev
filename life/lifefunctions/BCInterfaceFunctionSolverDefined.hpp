@@ -663,7 +663,7 @@ public:
     typedef boost::shared_ptr< physicalSolver_Type >              physicalSolverPtr_Type;
 
     typedef OneDimensionalBC                                      bc_Type;
-    typedef bc_Type::bcFunctionDefaultPtr_Type                    bcFunctionSolverDefinedPtr_Type;
+    typedef bc_Type::bcFunctionSolverDefinedPtr_Type                    bcFunctionSolverDefinedPtr_Type;
 
     typedef bc_Type::vectorPtrContainer_Type                      vectorPtrContainer_Type;
 
@@ -693,7 +693,7 @@ public:
     /*!
      * @param base base of the bc
      */
-    void assignFunction( OneDimensionalBCFunction& base );
+    void assignFunction( OneDimensionalFunction& base );
 
     //! Update the solver variables
     void updatePhysicalSolverVariables() {}

@@ -269,7 +269,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
         factory_Type factory;
         this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
-        OneDimensionalBCFunction base;
+        OneDimensionalFunction base;
         this->M_vectorFunction.back()->assignFunction( base );
 
         addBcToHandler( base );
@@ -281,7 +281,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
         factory_Type factory;
         this->M_vectorFunctionSolverDefined.push_back( factory.createFunctionSolverDefined( M_data ) );
 
-        OneDimensionalBCFunction base;
+        OneDimensionalFunction base;
         this->M_vectorFunctionSolverDefined.back()->assignFunction( base );
 
         addBcToHandler( base );

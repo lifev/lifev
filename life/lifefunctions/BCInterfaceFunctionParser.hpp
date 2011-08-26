@@ -128,7 +128,7 @@ public:
     /*!
      * @param base base of the 1D boundary condition
      */
-    void assignFunction( OneDimensionalBCFunction& base ) { base.setFunction( functionSelectorTimeTimeStep() ); }
+    void assignFunction( OneDimensionalFunction& base ) { base.setFunction( functionSelectorTimeTimeStep() ); }
 
     //! Assign the function to the base of the 3D \c BCHandler
     /*!

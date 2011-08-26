@@ -66,26 +66,26 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalBCFunctionDefault              bcFunctionDefault_Type;
-    typedef boost::shared_ptr< bcFunctionDefault_Type >  bcFunctionDefaultPtr_Type;
+    typedef OneDimensionalFunctionSolverDefined                bcFunctionSolverDefined_Type;
+    typedef boost::shared_ptr< bcFunctionSolverDefined_Type >  bcFunctionSolverDefinedPtr_Type;
 
-    typedef bcFunctionDefault_Type::bcFunction_Type      bcFunction_Type;
-    typedef bcFunctionDefault_Type::bcFunctionPtr_Type   bcFunctionPtr_Type;
+    typedef bcFunctionSolverDefined_Type::bcFunction_Type      bcFunction_Type;
+    typedef bcFunctionSolverDefined_Type::bcFunctionPtr_Type   bcFunctionPtr_Type;
 
-    typedef bcFunctionDefault_Type::fluxPtr_Type         fluxPtr_Type;
-    typedef bcFunctionDefault_Type::sourcePtr_Type       sourcePtr_Type;
-    typedef bcFunctionDefault_Type::solution_Type        solution_Type;
-    typedef bcFunctionDefault_Type::solutionPtr_Type     solutionPtr_Type;
+    typedef bcFunctionSolverDefined_Type::fluxPtr_Type         fluxPtr_Type;
+    typedef bcFunctionSolverDefined_Type::sourcePtr_Type       sourcePtr_Type;
+    typedef bcFunctionSolverDefined_Type::solution_Type        solution_Type;
+    typedef bcFunctionSolverDefined_Type::solutionPtr_Type     solutionPtr_Type;
 
-    typedef bcFunctionDefault_Type::container2D_Type     container2D_Type;
-    typedef bcFunctionDefault_Type::vectorPtrContainer_Type vectorPtrContainer_Type;
+    typedef bcFunctionSolverDefined_Type::container2D_Type     container2D_Type;
+    typedef bcFunctionSolverDefined_Type::vectorPtrContainer_Type vectorPtrContainer_Type;
 
-    typedef bcFunctionDefault_Type::vector_Type          vector_Type;
-    typedef bcFunctionDefault_Type::matrix_Type          matrix_Type;
+    typedef bcFunctionSolverDefined_Type::vector_Type          vector_Type;
+    typedef bcFunctionSolverDefined_Type::matrix_Type          matrix_Type;
 
-    typedef bcFunctionDefault_Type::bcLine_Type          bcLine_Type;
-    typedef bcFunctionDefault_Type::bcSide_Type          bcSide_Type;
-    typedef bcFunctionDefault_Type::bcType_Type          bcType_Type;
+    typedef bcFunctionSolverDefined_Type::bcLine_Type          bcLine_Type;
+    typedef bcFunctionSolverDefined_Type::bcSide_Type          bcSide_Type;
+    typedef bcFunctionSolverDefined_Type::bcType_Type          bcType_Type;
 
     //@}
 

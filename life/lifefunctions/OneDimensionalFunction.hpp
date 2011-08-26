@@ -48,13 +48,13 @@
 namespace LifeV
 {
 
-//! OneDimensionalBCFunction - Base class for 1D BC Functions.
+//! OneDimensionalFunction - Base class for 1D BC Functions.
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *
  *  The 1D boundary condition function is evaluated as a function of the current time and of the time step.
  */
-class OneDimensionalBCFunction
+class OneDimensionalFunction
 {
 public:
 
@@ -72,22 +72,22 @@ public:
     //@{
 
     //! Empty Constructor
-    explicit OneDimensionalBCFunction() : M_function() {}
+    explicit OneDimensionalFunction() : M_function() {}
 
     //! Constructor by function
     /*!
      *  @param function the user defined function
      */
-    explicit OneDimensionalBCFunction( const function_Type& function ) : M_function( function ) {}
+    explicit OneDimensionalFunction( const function_Type& function ) : M_function( function ) {}
 
     //! Copy constructor
     /*!
-     *  @param bcFunction OneDimensionalBCFunction
+     *  @param bcFunction OneDimensionalFunction
      */
-    OneDimensionalBCFunction( const OneDimensionalBCFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
+    OneDimensionalFunction( const OneDimensionalFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
 
     //! Destructor
-    virtual ~OneDimensionalBCFunction() {}
+    virtual ~OneDimensionalFunction() {}
 
     //@}
 
@@ -97,10 +97,10 @@ public:
 
     //! Operator=
     /*!
-     *  @param bcFunction OneDimensionalBCFunction
+     *  @param bcFunction OneDimensionalFunction
      *  @return reference to a copy of the class
      */
-    OneDimensionalBCFunction& operator=( const OneDimensionalBCFunction& bcFunction )
+    OneDimensionalFunction& operator=( const OneDimensionalFunction& bcFunction )
     {
         if( this != &bcFunction )
             M_function = bcFunction.M_function;
@@ -151,15 +151,15 @@ private:
 
 /*
 //! Factory create function
-inline OneDimensionalBCFunction*
-Create_OneDimensionalModel_BCFunction( const OneDimensionalBCFunction* bcFunction )
+inline OneDimensionalFunction*
+Create_OneDimensionalModel_BCFunction( const OneDimensionalFunction* bcFunction )
 {
-    return new OneDimensionalBCFunction( (const OneDimensionalBCFunction&)* bcFunction );
+    return new OneDimensionalFunction( (const OneDimensionalFunction&)* bcFunction );
 }
 
 namespace
 {
-    static bool registerOneD_BCFunction = FactoryClone_OneDimensionalModel_BCFunction::instance().registerProduct( typeid(OneDimensionalBCFunction), &Create_OneDimensionalModel_BCFunction );
+    static bool registerOneD_BCFunction = FactoryClone_OneDimensionalModel_BCFunction::instance().registerProduct( typeid(OneDimensionalFunction), &Create_OneDimensionalModel_BCFunction );
 }
 */
 
