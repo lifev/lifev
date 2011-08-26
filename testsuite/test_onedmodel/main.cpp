@@ -173,9 +173,9 @@ Int main(Int argc, char** argv)
     bcFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
 
     // Absorbing
-    bc_Type::bcFunctionDefaultPtr_Type absorbing ( new OneDimensionalBCFunctionAbsorbing( OneDimensional::right, OneDimensional::W2 ) );
-    bcFunction_Type absorbingFunction ( boost::bind( &OneDimensionalBCFunctionAbsorbing::operator(),
-                                                     dynamic_cast<OneDimensionalBCFunctionAbsorbing *> ( &( *absorbing ) ), _1, _2 ) );
+    bc_Type::bcFunctionSolverDefinedPtr_Type absorbing ( new OneDimensionalFunctionSolverDefinedAbsorbing( OneDimensional::right, OneDimensional::W2 ) );
+    bcFunction_Type absorbingFunction ( boost::bind( &OneDimensionalFunctionSolverDefinedAbsorbing::operator(),
+                                                     dynamic_cast<OneDimensionalFunctionSolverDefinedAbsorbing *> ( &( *absorbing ) ), _1, _2 ) );
 
     // BC to test A_from_P conversion
     //Constant constantArea( 1.00 );

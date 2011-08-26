@@ -338,7 +338,7 @@ MultiscaleModel1D::checkSolution() const
 void
 MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
 {
-    OneDimensionalBCFunction base;
+    OneDimensionalFunction base;
    base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
 
     M_bc->handler()->setBC( flagConverter( flag ), OneDimensional::first, OneDimensional::Q, base );
@@ -347,7 +347,7 @@ MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const functi
 void
 MultiscaleModel1D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
 {
-    OneDimensionalBCFunction base;
+    OneDimensionalFunction base;
     base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
 
     M_bc->handler()->setBC( flagConverter( flag ), OneDimensional::first, OneDimensional::S, base );

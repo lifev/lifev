@@ -118,7 +118,7 @@ public:
     typedef BCInterface1D< bc_Type, solver_Type >                  bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
 
-    typedef OneDimensionalBCFunction                               bcFunction_Type;
+    typedef OneDimensionalFunction                                 bcFunction_Type;
 
     typedef OneDimensional::bcType_Type                            bcType_Type;
     typedef OneDimensional::bcSide_Type                            bcSide_Type;
