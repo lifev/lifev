@@ -36,7 +36,7 @@ liblifefem_la_SOURCES	= BCBase.cpp BCDataInterpolator.cpp BCFunction.cpp BCVecto
           ReferenceElement.cpp ReferenceFE.cpp ReferenceFEScalar.cpp ReferenceFEHdiv.cpp \
           ReferenceFEHybrid.cpp CurrentBoundaryFEBase.cpp \
           BCManage.cpp QuadraturePoint.cpp\
-          OneDimensionalBCFunctionDefault.cpp OneDimensionalBC.cpp OneDimensionalBCHandler.cpp
+          OneDimensionalBC.cpp OneDimensionalBCHandler.cpp
 
 liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la
 

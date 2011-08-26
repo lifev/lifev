@@ -44,7 +44,7 @@
 #ifndef OneDimensionalBCFunctionDefault_H
 #define OneDimensionalBCFunctionDefault_H
 
-#include <life/lifefem/OneDimensionalBCFunction.hpp>
+#include <life/lifefunctions/OneDimensionalBCFunction.hpp>
 #include <life/lifesolver/OneDimensionalData.hpp>
 #include <life/lifesolver/OneDimensionalFlux.hpp>
 #include <life/lifesolver/OneDimensionalSource.hpp>

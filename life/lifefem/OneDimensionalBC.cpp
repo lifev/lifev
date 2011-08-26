@@ -174,6 +174,7 @@ OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, c
     case OneDimensional::S:
         // The normal stress has opposite sign with respect to the pressure
         bcRHS *= -1;
+        // The break here is missing on purpose!
     case OneDimensional::P:
         bcRHS = fluxPtr->physics()->fromPToA( bcRHS, timeStep, iNode );
         bcMatrix[line][0] = 1.;

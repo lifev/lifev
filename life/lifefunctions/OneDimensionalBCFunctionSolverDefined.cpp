@@ -40,7 +40,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifefem/OneDimensionalBCFunctionDefault.hpp>
+#include <life/lifefunctions/OneDimensionalBCFunctionSolverDefined.hpp>
 
 namespace LifeV
 {
