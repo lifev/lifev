@@ -1,0 +1,500 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Paolo Crosetto <paolo.crosetto@epfl.ch>
+#                 Jean Bonnemain <jean.bonnemain@epfl.ch>
+#                 Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-07-14
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### MODEL: FSI3D - Aorta ##########################################################################
+###################################################################################################
+
+[Multiscale]
+modelName        = FSI3D_Aorta_BL_Coarse_MonolithicGI
+modelType        = FSI3D
+couplingFlags    = '2 9 8 5 4 3 6 7'
+
+### Note on the flags:
+# 2: Ascending Aorta,        Area = 7.666204022361373e+00 - (RS_001: 6.7886675651 6.7425646930)        - Ratio 1.34 (sqrt: 1.066)
+# 9: Thoracic Aorta,         Area = 2.460573813714928e+00 - (RS_027: 2.1382464998 1.3069810837)
+# 8: Subclavian B (left),    Area = 4.031583374473228e-01 - (RS_007/RS_021: 0.5152997350 0.1734944543) - Ratio 0.81 (sqrt: 0.90)
+# 5: Common Carotid (right), Area = 4.485879453850000e-01 - (RS_005: 1.4313881528 0.3848451001)        - Ratio 0.41 (sqrt: 0.64)
+# 4: Vertebral (right),      Area = 7.038741686883122e-02 - (RS_006: 0.1075210086 0.0615752160)        - Ratio 0.69 (sqrt: 0.83)
+# 3: Subclavian B (right),   Area = 4.804978622581893e-01 - (RS_007/RS_021: 0.5152997350 0.1734944543) - Ratio 1
+# 6: Common Carotid (left),  Area = 4.343466128489345e-01 - (RS_015: 1.1309733553 0.2827433388 )       - Ratio 0.59 (sqrt: 0.77)
+# 7: Vertebral (left),       Area = 1.989038523172571e-01 - (RS_020: 0.1075210086 0.0615752160 )       - Ratio 0.94 (sqrt: 1.39)
+
+### Aorta dimensions (measures taken from the centerline):
+# Arch heigh                    = 18.2 cm
+# Subclavian B (left) lenght    = 2.53 cm (1D length: 42.2 cm) -> 1D estimated area: 0.494807617460403 OK
+# Common Carotid (right) lenght = 3.07 cm (1D length: 9.4 cm)  -> 1D estimated area: 1.089591645162872
+# Vertebral (right) lenght      = 1.66 cm (1D length: 14.9 cm) -> 1D estimated area: 0.102402215598926
+# Subclavian B (right) lenght   = 2.80 cm (1D length: 42.2 cm) -> 1D estimated area: 0.492620711636019
+# Common Carotid (left) lenght  = 6.61 cm (1D length: 13.9 cm) -> 1D estimated area: 0.727606419396043
+# Vertebral (left) lenght       = 1.85 cm (1D length: 14.8 cm) -> 1D estimated area: 0.101816329653020
+# Subclavian A (left) lenght    = 5.03 cm (1D length: 3.4 cm)
+# Brachiocephalic (left) lenght = 5.25 cm (1D length: 3.4 cm)  - Ratio 1.54
+# Subclavian A (right) lenght   = 2.93 cm (1D length: 3.4 cm)
+
+
+
+[exporter]
+start            = 0             # start index for filenames
+save             = 1             # how many time steps per posptrocessing
+multimesh        = false         # true if the mesh has to be saved at each post-processing step
+type             = hdf5
+
+[importer]
+type             = hdf5
+
+
+
+[problem]
+method      = monolithicGI # monolithicGE, monolithicGI
+
+blockOper   = AdditiveSchwarzGI # AdditiveSchwarz   AdditiveSchwarzRN
+                                AdditiveSchwarzGI AdditiveSchwarzRNGI
+
+DDBlockPrec = ComposedDNGI # OPTIONS:
+                         #AdditiveSchwarz: monolithic A-S preconditioner,
+                         #AdditiveSchwarzGI: monolithic A-S preconditioner,
+                         #ComposedDN: modular Dirichlet-Neumann preconditioner
+                         #ComposedDN2: modular Dirichlet-Neumann preconditioner
+                         #ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
+                         #ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
+                         #ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factors
+                         #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factors
+                         #ComposedDNDGI: under testing, do not use
+                         #ComposedDND2DGI: under testing, do not use
+
+
+reducedFluid = 0    # 0 = exact, 1 = inexact
+defOmega     = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
+defOmegaS    = 0.01 # matters only with  precond = 2
+defOmegaF    = 0.01 # matters only with  precond = 2
+
+linesearch   = 0
+updateEvery  = 1
+# NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
+abstol       =  0.    # tolerance in nonLinearRichardson
+reltol       =  1.e-7 # tolerance in nonLinearRichardson
+restart      = 0
+maxSubIter   = 50
+fluidMeshPartitioned = none
+solidMeshPartitioned = none
+
+
+
+[fluid]
+useShapeDerivatives = true
+domainVelImplicit   = true   # tells if the domain vel is to be considered implicitly in the convective term
+convectiveTermDer   = true   # tells if the velocity is to be considered implicitly in the convective term
+semiImplicit        = false  # tells if we advance in time after the first nonlinear iteration or not
+
+    [./physics] # Defined here only if different from the one in the main file.
+    #density         = 1.0             # density   [g/cm^3]
+    #viscosity       = 0.035           # viscosity [g/cm/s]
+
+    [../time_discretization]
+    #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
+    BDF_order       = 1
+
+    [../space_discretization]
+    mesh_dir        = ./Mesh/
+    mesh_file       = Aorta_FSI_MultipleVol_BL_fluid.mesh
+    mesh_type       = .mesh
+    verbose         = 0                # verbose during mesh-reading
+
+    vel_order       = P1               # P1, P1Bubble, P2
+    #vel_order       = P1Bubble         # P1, P1Bubble, P2
+    #vel_order       = P2               # P1, P1Bubble, P2
+    press_order     = P1               # P1, P2
+    stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it
+    div_beta_u_v    = false            # 1=on, 0=off
+    diagonalize     = 0                # weight, 0=off
+    stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
+
+    [../miscellaneous]
+    verbose   = 0
+    velname   = vel
+    steady    = 0
+    factor    = 1
+
+    [../ipstab]
+    gammaBeta       = 1
+    gammaDiv        = 0.2
+    gammaPress      = 0.05
+    max_iter_reuse  = 100
+    reuse           = true
+
+    #[../valuespersection]
+    #computeMeanValuesPerSection    = 0
+    #nb_z_section                   = 2
+    #tol_section                    = 2e-2
+    #x_section_frontier             = .0
+    #z_section_init                 = -1.0
+    #z_section_final                = .0
+    #nb_polygon_edges               = 10
+
+    [../boundary_conditions]
+    list = ' '
+
+    [../]
+
+
+
+
+[solid]
+
+    [./physics]
+    solidType = linearVenantKirchhof # linearVenantKirchhof
+                                     # nonLinearVenantKirchhof
+    # Material list: Outer Wall; Subclavian Right; Vertebral Right; Carotid Right; Carotid Left; Vertebral Left; Subclavian Left
+    material_flag    = '1000 1001 1002 1003 1004 1005 1006'
+    #externalPressure = 0
+    #density          = 1.2
+    young            = '3.19E6 3.19E6 3.19E6 3.19E6 3.19E6 3.19E6 3.19E6' # Computed as 4E6 * (1-nu^2) to match the value of the 1D
+    poisson          = '0.45 0.45 0.45 0.45 0.45 0.45 0.45'
+
+    [../time_discretization]
+    #timestep                   = 0.0001 # [s]
+    BDF_order       = 1
+
+    [../space_discretization]
+    mesh_dir         = ./Mesh/
+    mesh_file        = Aorta_FSI_MultipleVol_solid.mesh  # mesh file
+    order            = P1
+
+    [../miscellaneous]
+    factor     = 12
+    verbose    = 1
+    depname    = dep
+
+    [../newton]
+    maxiter    = 1
+    abstol     = 1.e-8
+    linesearch = 0
+
+    [../boundary_conditions]
+    #list = ' '                                                                          # Free dispacement
+    list = 'AscendingAorta_Clumped                        CeliacA_Clumped
+            SubclavianBLeft_Clumped                       SubclavianBRight_Clumped
+            VertebralLeft_Clumped                         VertebralRight_Clumped
+            CommonCarotidLeft_Clumped                     CommonCarotidRight_Clumped
+            CommonCarotidLeftOuterWall_RobinPhysiological CommonCarotidRightOuterWall_RobinPhysiological
+            SubclavianBLeftOuterWall_RobinPhysiological   SubclavianBRightOuterWall_RobinPhysiological
+            VertebralLeftOuterWall_RobinPhysiological     VertebralRightOuterWall_RobinPhysiological
+            AorticArchOuterWall_RobinPhysiological'                                      # Clumped + Robin on the external Wall
+
+        [./AscendingAorta_Clumped]
+        type       = Essential
+        flag       = 2
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../CeliacA_Clumped]
+        type       = Essential
+        flag       = 9
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../SubclavianBLeft_Clumped]
+        type       = Essential
+        flag       = 8
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../CommonCarotidRight_Clumped]
+        type       = Essential
+        flag       = 5
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../VertebralRight_Clumped]
+        type       = Essential
+        flag       = 4
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../SubclavianBRight_Clumped]
+        type       = Essential
+        flag       = 3
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../CommonCarotidLeft_Clumped]
+        type       = Essential
+        flag       = 6
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../VertebralLeft_Clumped]
+        type       = Essential
+        flag       = 7
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../CommonCarotidLeftOuterWall_RobinPhysiological]
+        type       = Robin
+        flag       = 1004
+        mode       = Full
+        component  = 3
+        FSI        = RobinWall
+
+            [./RobinAlpha]
+            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
+            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
+            functionSolver = '5.5  * 10000 * f_timeStep' # R2
+            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
+            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
+            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+
+            [../RobinBeta]
+            function        = 0
+
+            [../]
+
+        [../CommonCarotidRightOuterWall_RobinPhysiological]
+        type       = Robin
+        flag       = 1003
+        mode       = Full
+        component  = 3
+        FSI        = RobinWall
+
+            [./RobinAlpha]
+            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
+            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
+            functionSolver = '5.5  * 10000 * f_timeStep' # R2
+            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
+            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
+            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+
+            [../RobinBeta]
+            function        = 0
+
+            [../]
+
+          [../SubclavianBLeftOuterWall_RobinPhysiological]
+        type       = Robin
+        flag       = 1006
+        mode       = Full
+        component  = 3
+        FSI        = RobinWall
+
+            [./RobinAlpha]
+            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
+            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
+            functionSolver = '5.5  * 10000 * f_timeStep' # R2
+            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
+            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
+            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+
+            [../RobinBeta]
+            function        = 0
+
+            [../]
+
+           [../SubclavianBRightOuterWall_RobinPhysiological]
+        type       = Robin
+        flag       = 1001
+        mode       = Full
+        component  = 3
+        FSI        = RobinWall
+
+            [./RobinAlpha]
+            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
+            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
+            functionSolver = '5.5  * 10000 * f_timeStep' # R2
+            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
+            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
+            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+
+            [../RobinBeta]
+            function        = 0
+
+            [../]
+
+           [../VertebralLeftOuterWall_RobinPhysiological]
+        type       = Robin
+        flag       = 1005
+        mode       = Full
+        component  = 3
+        FSI        = RobinWall
+
+            [./RobinAlpha]
+            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
+            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
+            functionSolver = '5.5  * 10000 * f_timeStep' # R2
+            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
+            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
+            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+
+            [../RobinBeta]
+            function        = 0
+
+            [../]
+
+           [../VertebralRightOuterWall_RobinPhysiological]
+        type       = Robin
+        flag       = 1002
+        mode       = Full
+        component  = 3
+        FSI        = RobinWall
+
+            [./RobinAlpha]
+            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
+            #functionSolver = '4.0  * 10000 * f_timeStep' # R1
+            functionSolver = '5.5  * 10000 * f_timeStep' # R2
+            #functionSolver = '8.0  * 10000 * f_timeStep' # R3
+            #functionSolver = '9.5  * 10000 * f_timeStep' # R4
+            #functionSolver = '11.0 * 10000 * f_timeStep' # R5
+
+            [../RobinBeta]
+            function        = 0
+
+            [../]
+
+           [../AorticArchOuterWall_RobinPhysiological]
+        type       = Robin
+        flag       = 1000
+        mode       = Full
+        component  = 3
+        FSI        = RobinWall
+
+            [./RobinAlpha]
+            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R0 - Paolo
+            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R1
+            functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R2
+            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R3
+            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R4
+            #functionSolver = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000 * f_timeStep' # R5
+
+            [../RobinBeta]
+            function        = 0
+
+            [../]
+
+        [../]
+
+    [../]
+
+
+
+[mesh_motion]
+
+    [./boundary_conditions]
+    list = ' '                                              # Free dispacement
+
+    [../]
+
+
+
+[linear_system]
+
+    [./solver]                        # Solver Parameters
+    solver          = gmres
+    scaling         = none
+    output          = none # all none
+    conv            = rhs
+    max_iter        = 500
+    reuse           = true
+    max_iter_reuse  = 500
+    kspace          = 500
+    tol             = 1.e-9
+
+    [../prec]
+    #prectype                = AztecOO
+    prectype                = Composed
+    displayList             = false
+
+        [./robin]
+        alphaf = 0.
+        alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+
+        [../Composed]
+        list                = 'Ifpack Ifpack Ifpack'
+        sections            = 'ifpack ifpack ifpack'
+
+        [../AztecOO]
+        precond             = 'dom_decomp'
+        prec_calc           = calc
+        reorder             = 1
+        keep_info           = 1
+        overlap             = 1
+        subdomain_solve     = ILUT
+        ilut_fill           = 4
+        drop                = 1.e-5
+
+        [../ifpack]
+        overlap             = 2
+        prectype            = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+
+            [./relaxation]
+            type                   = Jacobi
+            sweeps                 = 1
+            damping_factor         = 1.
+            min_diagonal_value     = 0
+            zero_starting_solution = true
+
+            [../partitioner]
+            type                   = metis
+            overlap                = 2
+            local_parts            = 1
+            root_node              = 0
+            use_symmetric_graph    = true
+
+            [../amesos]
+            solvertype             = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+            [../fact]
+            level-of-fill          = 4
+            ilut_level-of-fill     = 10
+            absolute_threshold     = 0
+            relative_threshold     = 1
+            relax_value            = 0
+            drop_tolerance         = 1.e-10
+
+            [../schwarz]
+            combine_mode           = 0             # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
+            compute_condest        = true
+            reordering_type        = none          #none, metis, rcm
+            filter_singletons      = true
+
+            [../]
+
+        [../ML]
+            default_parameter_list = DD    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+            prec_type              = two-level-additive
+            displayList            = false
+
+            [./smoother]
+                type               = IFPACK
+            [../]
+
+        [../]
+
+    [../]
+
+
+
+[eigensolver]
+nevec        = 10
+block_size   = 1;
+max_blocks   = 1000;
+max_restarts = 1000;
+tol          = 1e-5;
+which        = ML
+neval        = 5

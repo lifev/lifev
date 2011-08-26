@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -29,7 +29,7 @@ list = 'ZPoiseuilleDynamic'
     type                = Essential
     mode                = Component
     component           = 2
-    functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
-    #OPERfunctionFile    = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
+    #functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
+    functionFileSolver  = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
 
     [../]

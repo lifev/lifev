@@ -119,6 +119,14 @@ private:
 
     void orthogonalizationUpdate( const multiscaleVector_Type& delta );
 
+#ifdef HAVE_HDF5
+    //! Export Jacobian matrix to HDF5 file
+    void exportJacobianToHDF5();
+
+    //! Import Jacobian matrix from an HDF5 file
+    void importJacobianFromHDF5();
+#endif
+
     //@}
 
     SolverAztecOO                            M_solver;
@@ -130,6 +138,7 @@ private:
     bool                                     M_orthogonalization;
     Real                                     M_orthogonalizationSize;
     container_Type                           M_orthogonalizationContainer;
+    bool                                     M_truncate;
 };
 
 //! Factory create function

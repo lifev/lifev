@@ -38,13 +38,6 @@
 #define MultiscaleSolver_H 1
 
 #include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
-
-#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmAitken.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmBroyden.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmExplicit.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmNewton.hpp>
-
 #include <lifemc/lifesolver/MultiscaleModelMultiscale.hpp>
 
 namespace LifeV
@@ -52,11 +45,11 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleSolver - The Multiscale problem solver
+//! MultiscaleSolver - The Multiscale solver
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleSolver class provides a series of functions to create and
+ *  The MultiscaleSolver class provides a series of methods to create and
  *  solve a general Multiscale problem.
  */
 class MultiscaleSolver
@@ -78,18 +71,13 @@ public:
     //! @name Methods
     //@{
 
-    //! Set the epetra communicator for the Multiscale problem
-    /*!
-     * @param comm Epetra communicator
-     */
-    void setCommunicator( const multiscaleCommPtr_Type& comm );
-
     //! Setup the problem
     /*!
-     * @param FileName Name of the data file.
-     * @param problemName the name of the problem (useful for saving data in a specific folder)
+     * @param fileName Name of the data file.
+     * @param problemName the name of the problem (used to save data in a specific folder).
+     * @param coresPerNode number of cores for each node (this is mandatory when running on clusters for a correct distribution of the models among the nodes).
      */
-    void setupProblem( const std::string& fileName, const std::string& problemName );
+    void setupProblem( const std::string& fileName, const std::string& problemName, const UInt& coresPerNode );
 
     //! Run the time-loop to solve the Multiscale problem
     /*!
@@ -99,8 +87,28 @@ public:
      */
     bool solveProblem( const Real& referenceSolution = -1. );
 
-    //! Display some information about the Multiscale problem (to be called after SetupProblem)
-    void showMe();
+    //! Display some information about the Multiscale problem (should be called after setupProblem)
+    void showMe() const;
+
+    //! Save CPU time at each time step
+    /*!
+     * @param buildUpdateCPUTime CPU time to build/update the problem
+     * @param solveCPUTime CPU time to solve the problem
+     * @param saveCPUTime CPU time to save the solution
+     */
+    void saveCPUTime( const Real& buildUpdateCPUTime, const Real& solveCPUTime, const Real& saveCPUTime ) const;
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Set the epetra communicator for the Multiscale problem
+    /*!
+     * @param comm Epetra communicator
+     */
+    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
 
     //@}
 
@@ -118,20 +126,11 @@ private:
     // The main model (can be a specific model or a Multiscale model)
     multiscaleModelPtr_Type          M_model;
 
-    // Algorithm for subiterations
-    multiscaleAlgorithmPtr_Type      M_algorithm;
-
     // Container of global data
     multiscaleDataPtr_Type           M_globalData;
 
     // Communicator
     multiscaleCommPtr_Type           M_comm;
-
-    // Displayer tool for MPI processes
-    boost::shared_ptr< Displayer >   M_displayer;
-
-    // Chrono performances
-    LifeChrono                       M_chrono;
 };
 
 } // Namespace multiscale

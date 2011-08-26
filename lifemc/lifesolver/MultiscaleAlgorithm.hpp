@@ -45,12 +45,15 @@ namespace LifeV
 namespace Multiscale
 {
 
+// Forward declaration
+class MultiscaleModelMultiscale;
+
 //! MultiscaleAlgorithm - The Multiscale Algorithm Interface
 /*!
  *  @author Cristiano Malossi
  *
  *  The MultiscaleAlgorithm class provides a general interface between the
- *  MS_Solver and the specific Algorithm to solve the problem.
+ *  MultiscaleSolver and the specific Algorithm to solve the problem.
  *
  */
 class MultiscaleAlgorithm
@@ -60,7 +63,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef boost::shared_ptr< MultiscaleModelMultiscale >                   multiscaleModelMultiscalePtr_Type;
+    typedef MultiscaleModelMultiscale                                        multiscaleModelMultiscale_Type;
+    typedef multiscaleModelMultiscale_Type*                                  multiscaleModelMultiscalePtr_Type;
 
     //@}
 
@@ -86,11 +90,11 @@ public:
      */
     virtual void setupData( const std::string& fileName );
 
+    //! Setup coupling variables and other quantities of the algorithm
+    virtual void setupAlgorithm();
+
     //! Perform sub-iteration on the coupling variables
     virtual void subIterate();
-
-    //! Update coupling variables for the next time step.
-    virtual void updateCouplingVariables() { M_multiscale->extrapolateCouplingVariables(); }
 
     //! Display some information about the algorithm
     virtual void showMe();
@@ -100,9 +104,6 @@ public:
 
     //! @name Methods
     //@{
-
-    //! Initialize coupling variables for the first time step.
-    void initializeCouplingVariables() { M_multiscale->initializeCouplingVariables(); }
 
     Real computeResidual() const;
 
@@ -116,13 +117,13 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
 
     //! Set the main Multiscale model
     /*!
      * @param model Multiscale model
      */
-    void setModel( const multiscaleModelPtr_Type model );
+    void setMultiscaleModel( const multiscaleModelMultiscalePtr_Type model ) { M_multiscale = model; }
 
     //! Set the maximum number of subiterations
     /*!
@@ -152,25 +153,25 @@ public:
     /*!
      * @return shared_ptr to the Multiscale problem
      */
-    const multiscaleModelMultiscalePtr_Type multiScaleProblem() const { return M_multiscale; }
+    const multiscaleModelMultiscalePtr_Type& multiScaleProblem() const { return M_multiscale; }
 
     //! Get the coupling variables
     /*!
      * @return pointer to the coupling variables vector
      */
-    const multiscaleVectorPtr_Type couplingVariables() const { return M_couplingVariables; }
+    const multiscaleVectorPtr_Type& couplingVariables() const { return M_couplingVariables; }
 
     //! Get the coupling residuals
     /*!
      * @return pointer to the coupling residuals vector
      */
-    const multiscaleVectorPtr_Type couplingResiduals() const { return M_couplingResiduals; }
+    const multiscaleVectorPtr_Type& couplingResiduals() const { return M_couplingResiduals; }
 
     //! Get the communicator
     /*!
      * @return pointer to the communicator
      */
-    const multiscaleCommPtr_Type communicator() const { return M_comm; }
+    const multiscaleCommPtr_Type& communicator() const { return M_comm; }
 
     //! Get the subiterations maximum number
     /*!
@@ -196,14 +197,14 @@ protected:
      * @param subiterationsNumber Number of subiterations performed.
      * @param computeResidual computeResidual.
      */
-    void save( const UInt& subiterationsNumber, const Real& residual );
+    void save( const UInt& subiterationsNumber, const Real& residual ) const;
 
     //! Update the residual and check if the tolerance has been satisfied
     /*!
      * @param subIT subiteration number (for output purpose)
      * @return true if the tolerance is satisfied
      */
-    bool checkResidual( const UInt& subIT = 0 );
+    bool checkResidual( const UInt& subIT = 0 ) const;
 
     //@}
 
@@ -216,7 +217,6 @@ protected:
     multiscaleVectorPtr_Type                 M_couplingResiduals;
 
     multiscaleCommPtr_Type                   M_comm;
-    boost::shared_ptr< Displayer >           M_displayer;
 
     UInt                                     M_subiterationsMaximumNumber;
     Real                                     M_tolerance;

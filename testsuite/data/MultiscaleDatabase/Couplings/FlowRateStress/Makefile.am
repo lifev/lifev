@@ -12,13 +12,11 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Pressure.dat \
-                    LagrangeMultiplier.dat 
-					
-check-local:
-	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
-	 for i in $(dist_pkgdata_DATA); do \
-           $(LN_S) -f $(srcdir)/$$i .; \
-         done; \
-	fi
+# dist_pkgdata_DATA = $(shell find $(srcdir) -name "*.dat") 
 
+# check-local:
+#    @if test "$(top_srcdir)" != "$(top_builddir)"; then\
+#        for i in $(dist_pkgdata_DATA); do \
+#            $(LN_S) -f $(srcdir)/$$i .; \
+#         done; \
+#    fi
