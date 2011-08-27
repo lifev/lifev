@@ -410,7 +410,7 @@ public:
      * in case we need to fix some related id
      *
      * @param refFlag the reference flag against which comparison is made.
-     * @param offset We reorder only elements form offset to the end of the container.
+     * @param offset We reorder only elements from offset to the end of the container.
      * @param policy The policy we use for comparing the flag of the mesh entity with the
      * reference flag.
      * @return A pair with the new offset, i.e the starting point of the elements for which predicate
@@ -434,7 +434,7 @@ public:
      *
      */
     template<typename Functor>
-    void changeAccordingToFunctor(Functor & fun)
+    void changeAccordingToFunctor(Functor const & fun)
     {
         std::for_each(this->begin(),this->end(),fun);
     }
@@ -513,16 +513,46 @@ void fixAfterPermutation(EntityContainer & container, RefEntityContainer const &
     for (UInt i=0;i<newToOld.size();++i) oldToNew[newToOld[i]]=i;
     typedef typename EntityContainer::iterator it;
     typedef typename EntityContainer::value_type meshEntity_Type;
-    const UInt numPoints=meshEntity_Type::geoshape_Type::S_numPoints;
+    const UInt numPoints=meshEntity_Type::geoShape_Type::S_numPoints;
     for (it i=container.begin();i<container.end();++i)
         {
-        for(UInt j=1;j<numPoints;++j)
+        for(UInt j=0;j<numPoints;++j)
         {
             ID oldaddress=i->point(j).id();
             ID newaddress=oldToNew[oldaddress];
-            i->setpoint(j,&(refcontainer[newaddress]));
+            i->setPoint(j,&(refcontainer[newaddress]));
         }
     }
+}
+///! Fix pointers after shallow copy
+/*!
+ *  If a mesh entity contains pointers to other mesh entities (typically Points), after a shallow copy, for instance
+ *  by the automatic copy constructor, the pointers may still refer to a wrong list of Points!
+ *  This utility allows to change the situation and make the pointers to point to the new list of Points.
+ *  By this utility the deep copy of a RegionMesh is now possible!
+ *
+ *  Example:
+ *  @verbatim
+ *  PointList newPoints(mesh.pointList); // deep copy since list stores Point(s)
+ *  FaceList  newFaces(mesh.faceList); // This is a shallow copy since we store Point*
+ *  fixAfterShallowCopy(newFaces,newPoints); now the pointers point to newPoint
+ *  @endverbatim
+ *
+ *  @param container the entity container with the wrong pointers to Point
+ *  @param newPointContainer the container with the list new Points
+ *  @pre container must contain pointers to valid points
+ *  @note For efficiency reason no consistency checks are made
+ */
+template <typename EntityContainer, typename PointContainer >
+void fixAfterShallowCopy(EntityContainer & container, PointContainer const & newPointContainer)
+{
+    typedef typename EntityContainer::iterator it;
+    typedef typename EntityContainer::value_type meshEntity_Type;
+    const UInt numPoints=meshEntity_Type::geoShape_Type::S_numPoints;
+
+    for (it i=container.begin();i<container.end();++i)
+        for(UInt j=0;j<numPoints;++j)
+            i->setPoint( j,&( newPointContainer[ i->point(j).id() ] ) );
 }
 /* @}*/
 }// End namespace Utilities
@@ -615,7 +645,7 @@ std::pair<UInt,std::vector<ID> > MeshEntityContainer<DataType,Allocator>::reorde
                                                                             Policy const & policy,
                                                                             UInt offset)
 {
-    iterator last= std::stable_partition(this->begin(),this->begin()+offset,
+    iterator last= std::stable_partition(this->begin()+offset,this->end(),
                                          Predicates::EntityFlagInterrogator<DataType>(
                                                                   refFlag,
                                                                    policy )
