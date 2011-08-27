@@ -652,7 +652,7 @@ UInt findInternalEdges( const MeshType & mesh,
 //! @defgroup marker_policies Used to manage missing handlers
 
 
-/*! Sets the marker flag of a MeshElementMarked of dimension greater than one
+/*! Sets the marker flag of a MeshElementMarked according to the policy of the marker
 
     @ingroup marker_policies
 
@@ -2080,7 +2080,7 @@ bool buildEdges( MeshType & mesh,
 	@version Version 1.0
 	@pre All compulsory structures in mesh must have been already set: volumes and boundary faces.
 	@pre Points list MUST have been dimensioned correctly!!!
-	@note the function takes advantage of the fact that
+	@note the function takes advantage of the fact that vertex are stored first
     @param mesh[out] A mesh
 	@param logStream[out] Log stream for information on the newly created markers for boundary edges
  */
@@ -2547,11 +2547,13 @@ void MeshTransformer<REGIONMESH>::transformMesh( const function& meshMapping)
 template <typename REGIONMESH>
 MeshStatistics::meshSize MeshStatistics::computeSize(REGIONMESH const & mesh)
 {
-    Real MaxH(0), MinH(0), MeanH(0);
-    Real deltaX(0), deltaY(0), deltaZ(0), sum;
-
+    const double bignumber=std::numeric_limits<double>::max();
+    Real MaxH(0), MinH(bignumber), MeanH(0);
+    Real deltaX(0), deltaY(0), deltaZ(0), sum(0);
     typedef typename REGIONMESH::Edges Edges;
     Edges const & edgeList(mesh.edgeList);
+
+    ASSERT0(edgeList.size()>0,"computeSize requires edges!");
 
     for (typename Edges::const_iterator i=edgeList.begin(); i < edgeList.end() ; ++i )
     {

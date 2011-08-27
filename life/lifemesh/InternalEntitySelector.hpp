@@ -118,7 +118,7 @@ public:
         return a.first < b.first;
     }
 };
-}
+}// end namespace Utility
 /** @defgroup MeshEntityFlagsChangers
  * Useful functors to change Entity Flags according to certain conditions
  *
@@ -152,14 +152,14 @@ public:
 
 template< typename MeshEntity>
 class
-setFlagAccordingToMarkerRanges{
+SetFlagAccordingToMarkerRanges{
 public:
    //! The type of a flag policy
   typedef flag_Type (*flagPolicy_ptr)(flag_Type const &, flag_Type const &);
   //! The type of a range
   typedef Utility::MarkerMapTraits::rangeID_Type rangeID_Type;
   //! Constructor optionally takes a policy
-  setFlagAccordingToMarkerRanges(const flagPolicy_ptr & flagPolicy=&Flag::turnOn):
+  SetFlagAccordingToMarkerRanges(const flagPolicy_ptr & flagPolicy=&Flag::turnOn):
       M_flagPolicy(flagPolicy){};
   //! Inserts a range with associated flag
   /*!
@@ -301,7 +301,7 @@ template<typename MeshEntity, typename Policy=std::greater<markerID_Type> >
  *
  */
 
-template<typename MeshEntity >
+template<typename MeshEntity>
 class SetFlagAccordingToWatermarks{
 public:
     typedef flag_Type (*flagPolicy_ptr)(flag_Type const &, flag_Type const &);
@@ -334,7 +334,7 @@ public:
       }
 private:
     const flag_Type M_flagToSet;
-    const std::vector<markerID_Type> M_watermarks;
+    std::vector<markerID_Type> M_watermarks;
     const flagPolicy_ptr M_flagPolicy;
 };
 
