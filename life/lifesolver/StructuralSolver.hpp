@@ -600,7 +600,7 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
 
   M_rhs.reset                        ( new vector_Type(*M_localMap));
-  M_rhsNoBC.reset                        ( new vector_Type(*M_localMap));	
+  M_rhsNoBC.reset                        ( new vector_Type(*M_localMap));
   M_residual_d.reset                 ( new vector_Type(*M_localMap));
   M_sxx.reset                        ( new vector_Type(*M_localMap) );
   M_syy.reset                        ( new vector_Type(*M_localMap) );

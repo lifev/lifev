@@ -327,13 +327,13 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 
 	    // vector_Type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
             //this->interpolateVelocity(meshDispDiff, *M_beta);
-	   
+
 	    //Matteo
-	    //  beta^k= (u^*- w^k)  
+	    //  beta^k= (u^*- w^k)
 	    //  where u^* is u^k for implicit scheme for greater 0,
 	    //  otherwise it is  extrapolated  (for GCE and first iter of implicit scheme)
 	    //  move this term after compute of fluid velocity;
-	    
+
 	    //  commited this term:
             //*M_beta = this->veloFluidMesh();
 	    //*M_beta *= -1;
@@ -347,7 +347,7 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 
 	     //Matteo
 	     *M_beta -= this->veloFluidMesh();
-	     
+
 	     // *M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
 
 	     //*M_beta  += *this->M_un;
