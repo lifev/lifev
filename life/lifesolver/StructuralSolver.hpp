@@ -519,9 +519,6 @@ protected:
   //! Matrix M: mass
   matrixPtr_Type                       M_mass;
 
-  //! Matrix mass: M * xi /(dt*dt)
-  matrixPtr_Type                       M_massTimeAdvanceCoefficient;
-
   //! Matrix Temp: Temporary matrix to compute residuals, store jacobian
   matrixPtr_Type                       M_tempMatrix;
   //! Jacobian Matrix: Matrix to store the jacobian of the newton method
@@ -570,7 +567,6 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
   M_BCh                        (),
   M_localMap                   ( ),
   M_mass                       ( ),
-  M_massTimeAdvanceCoefficient ( ),
   M_tempMatrix                 ( ),
   M_jacobian                   ( ),
   M_recur                      ( ),
@@ -633,7 +629,6 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   // M_rhsA.reset                      ( new vector_Type(*M_localMap) );
   // M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
   M_mass.reset                      (new matrix_Type(*M_localMap));
-  M_massTimeAdvanceCoefficient.reset(new matrix_Type(*M_localMap));
   M_tempMatrix.reset                (new matrix_Type(*M_localMap));
   M_jacobian.reset                  (new matrix_Type(*M_localMap));
   M_offset                          = offset;
@@ -814,10 +809,6 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& coefficient )
 
   computeMassMatrix( coefficient );
 
-  // Matteo  compute \xi_0 *Mass* \eta/(dt*dt)
-  //*M_massTimeAdvanceCoefficient = *M_mass;
-  //*M_massTimeAdvanceCoefficient *= /*timeAdvanceCoefficient*/1 / ( M_data->dataTime()->timeStep() * M_data->dataTime()->timeStep() );
-
   M_material->computeLinearStiffMatrix(this->M_data);
 
   chrono.stop();
@@ -933,7 +924,7 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   LifeChrono chrono;
 
   matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_tempMatrix->meanNumEntries()));
-\
+
   // matrix and vector assembling communication
   this->M_Displayer->leaderPrint("  S-  Solving the system in iteratLin... \n");
 
@@ -948,7 +939,7 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   *matrFull += *this->M_jacobian;
  // Matteo:
    // *matrFull *= M_zeta;
-  *matrFull += *this->M_massTimeAdvanceCoefficient; // Global Assemble is done inside BCManageMatrix
+  *matrFull += *this->M_mass;  // Global Assemble is done inside BCManageMatrix
 
   this->M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
 
@@ -1012,7 +1003,7 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     //*stiff *= M_zeta;
 
     // Non serve!!!!!
-    // *stiff += *this->M_massTimeAdvanceCoefficient;
+    *stiff += *this->M_mass;
     stiff->globalAssemble();
     chrono.stop();
     this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
@@ -1075,9 +1066,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Ty
   //This is consisten with the previous first approximation in iterateLin
   this->M_tempMatrix.reset (new matrix_Type(*this->M_localMap));
   *this->M_tempMatrix += *this->M_material->linearStiff();
-  // Matteo
-  //*this->M_tempMatrix *= M_zeta;
-  *this->M_tempMatrix += *this->M_massTimeAdvanceCoefficient;
+  *this->M_tempMatrix += *this->M_mass;
   this->M_tempMatrix->globalAssemble();
 
   this->M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
@@ -1330,7 +1319,7 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
     *jacobian += *this->M_material->stiff();
      // Matteo
     //   *jacobian *= M_zeta;
-    //*jacobian += *this->M_massTimeAdvanceCoefficient;
+    *jacobian += *this->M_mass;
     jacobian->globalAssemble();
 
     chrono.stop();
@@ -1364,7 +1353,7 @@ solveJacobian( vector_Type&           step,
 
     this->M_Displayer->leaderPrint("\tS'-  Applying boundary conditions      ... ");
 
-    this->M_rhsNoBC->globalAssemble();
+    // this->M_rhsNoBC->globalAssemble();
    // this->M_rhsW->globalAssemble();
 
     vector_Type rhsFull (res);
@@ -1387,7 +1376,8 @@ solveJacobian( vector_Type&           step,
 
     //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a
     //totally different expression.For structural problems it is not used
-    *this->M_residual_d= *this->M_massTimeAdvanceCoefficient*step;
+    *this->M_residual_d= *this->M_tempMatrix*step;
+    *this->M_residual_d -= res;
 
 }
 
