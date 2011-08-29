@@ -319,7 +319,6 @@ bool checkMesh3D( RegionMesh3D & mesh,
                   std::ostream & err = std::cerr,
                   std::ostream & clog = std::clog )
 {
-    verbose=true;
     std::vector<ID>listOfId;
 
     if ( mesh.storedPoints() == 0 )
