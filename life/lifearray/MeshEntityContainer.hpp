@@ -36,8 +36,8 @@
  *  @mantainer Laura Cattaneo
  */
 
-#ifndef _SIMPLEVECT_HH_
-#define _SIMPLEVECT_HH_
+#ifndef _MESHENTITYCONTAINER_HH_
+#define _MESHENTITYCONTAINER_HH_
 
 #include <cstdlib>
 #include <vector>
@@ -655,5 +655,5 @@ std::pair<UInt,std::vector<ID> > MeshEntityContainer<DataType,Allocator>::reorde
 }
 }/// end of LifeV namespace
 
-#endif /* _SIMPLEVECT_HH_ */
+#endif /* _MESHENTITYCONTAINER_HH_ */
 
