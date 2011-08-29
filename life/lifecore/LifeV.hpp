@@ -174,7 +174,7 @@ typedef uint32_type UInt;
 //! IDs
 typedef uint32_type ID;
 
-//! bit flag with up to 32 different flags
+//! bit-flag with up to 32 different flags
 typedef uint32_type flag_Type;
 
 //! flag related free functions and functors
@@ -184,7 +184,7 @@ namespace Flag
  *  They implement basic operations on boolean flags
  */
 //@{
-//! It returns true if all byte-flags common set in refFlag are also set in inputFlag
+//! It returns true if all bit-flags common set in refFlag are also set in inputFlag
 inline bool testAllSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
 {
     return ( inputFlag  & refFlag ) == refFlag;
@@ -214,9 +214,16 @@ inline flag_Type change ( flag_Type const & inputFlag, flag_Type const & refFlag
     return inputFlag  ^ refFlag;
 }
 
+//! replaces the given flag with the reference one. This method is introduced with the same
+//! signature of the other methods in order to be used as a policy
+inline flag_Type replaceFlag  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return refFlag;
+}
+
 //! showMe method to print out flag status
 //! the flag is converted to its binary form ( right -> left corresponds to first -> last flag )
-void showMe ( flag_Type const & flag, std::ostream & out );
+void showMe ( flag_Type const & flag, std::ostream & out = std::cout );
 //@}
 
 //end namespace Flag
