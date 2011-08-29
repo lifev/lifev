@@ -25,6 +25,10 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_S
     Restart                    = false
     RestartFromStepNumber      = 0
 
+    [../Output]
+    ProblemPrefix              = Multiscale # Problem prefix
+    SaveEach                   = 5          # time steps
+
     [../time_discretization]
     initialtime                = 0.000     # [s]
     endtime                    = 0.050     # [s]

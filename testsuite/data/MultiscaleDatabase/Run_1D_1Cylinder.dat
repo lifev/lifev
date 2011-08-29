@@ -21,12 +21,16 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_1Cylinder-NoParser
 ###################################################################################################
 
     [./Restart]
-    Restart                    = false
+    Restart                    = true
     RestartFromStepNumber      = 0
 
+    [../Output]
+    ProblemPrefix              = Multiscale # Problem prefix
+    SaveEach                   = 5          # time steps
+
     [../time_discretization]
-    initialtime                = 0.0      # [s]
-    endtime                    = 0.1      # [s]
+    initialtime                = 0.02      # [s]
+    endtime                    = 0.040     # [s]
     timestep                   = 0.001    # [s]
 
     [../]

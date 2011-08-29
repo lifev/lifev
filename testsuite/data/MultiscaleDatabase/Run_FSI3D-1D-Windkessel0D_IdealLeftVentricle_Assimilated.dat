@@ -23,6 +23,10 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D-Windkessel0D_Ideal
     Restart                    = false
     RestartFromStepNumber      = 0
 
+    [../Output]
+    ProblemPrefix              = Multiscale # Problem prefix
+    SaveEach                   = 5          # time steps
+
     [../time_discretization]
     initialtime                = 0.000   # [s]
     endtime                    = 0.800   # [s]

@@ -25,6 +25,10 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_Rhombus_FS
     Restart                    = false
     RestartFromStepNumber      = 0
 
+    [../Output]
+    ProblemPrefix              = Multiscale # Problem prefix
+    SaveEach                   = 5          # time steps
+
     [../time_discretization]
     initialtime                = .00      # [s]
     endtime                    = .15      # [s]

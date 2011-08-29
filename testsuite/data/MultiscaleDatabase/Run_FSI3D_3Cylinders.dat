@@ -24,16 +24,14 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_3Cylinders_S
     Restart                    = false
     RestartFromStepNumber      = 0
 
+    [../Output]
+    ProblemPrefix              = Multiscale # Problem prefix
+    SaveEach                   = 5          # time steps
+
     [../time_discretization]
     initialtime                = 0.0000    # [s]
     endtime                    = 0.050     # [s]
     timestep                   = 0.0001    # [s]
-
-    [../Algorithm]
-    type                       = Broyden           # Aitken, Explicit, Newton, Broyden
-    file                       = Default           # File name (without .dat extension)
-    subiterationsMaximumNumber = 100               # Maximum number for coupling subiterations
-    tolerance                  = 1.e-6             # Tolerance on the coupling values
 
     [../]
 
