@@ -205,7 +205,7 @@ public:
   void operator()(MeshEntity & e)const
   {
       std::pair<flag_Type,bool> tmp=this->findFlag(e.marker());
-      if (tmp.second) e.setFlag(M_flagPolicy(e.flag(),tmp.first));
+      if (tmp.second) e.replaceFlag(M_flagPolicy(e.flag(),tmp.first));
   }
 private:
   typedef std::map<rangeID_Type, flag_Type, Utility::MarkerMapTraits> map_Type;
@@ -270,7 +270,7 @@ template<typename MeshEntity, typename Policy=std::greater<markerID_Type> >
       */
        void operator()(MeshEntity & e)const
     {
-        if ( M_policy(e.marker(),M_watermark) ) e.setFlag(M_flagPolicy(e.flag(),M_flagToSet));
+        if ( M_policy(e.marker(),M_watermark) ) e.replaceFlag(M_flagPolicy(e.flag(),M_flagToSet));
     }
     private:
     const flag_Type M_flagToSet;
@@ -330,7 +330,7 @@ public:
       void operator()(MeshEntity & e)const
       {
           if (std::binary_search(M_watermarks.begin(),M_watermarks.end(),e.marker() ) )
-              e.setFlag( M_flagPolicy(e.flag(),M_flagToSet) );
+              e.replaceFlag( M_flagPolicy(e.flag(),M_flagToSet) );
       }
 private:
     const flag_Type M_flagToSet;

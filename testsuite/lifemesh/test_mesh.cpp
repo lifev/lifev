@@ -76,7 +76,7 @@ class ResetFlag
 {
 public:
     void operator()(meshEntity &m){
-        m.setFlag(LifeV::EntityFlags::DEFAULT);
+        m.replaceFlag(LifeV::EntityFlags::DEFAULT);
         m.setMarker(0);
     }
 };
@@ -190,7 +190,7 @@ int main(int argc, char** argv)
             break;
         }
     }
-    aMesh.faceList[2].setFlag(EntityFlags::CUTTED);
+    aMesh.faceList[2].replaceFlag(EntityFlags::CUTTED);
     aMesh.faceList.reorderAccordingToFlag(EntityFlags::CUTTED,Flag::testOneSet);
     if (aMesh.faceList[0].flag() != EntityFlags::CUTTED){
         cerr<<"ERROR: Reordering is not working"<<std::endl;

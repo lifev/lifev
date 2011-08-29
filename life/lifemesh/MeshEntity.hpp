@@ -330,21 +330,21 @@ public:
         else            M_flag = Flag::turnOff ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
     };
 
-    //! Set method for the entity flag
+    //! Replace method for the entity flag
     /*!
       @param flag The value to be set for the entity flag.
-      @note Beware, it sets the entire flag; if you want to add a flag use | or addFlag
+      @note Beware, it sets the entire flag; if you want to add a flag use | or setFlag
     */
-    void setFlag ( const flag_Type& flag )
+    void replaceFlag ( const flag_Type& flag )
     {
         M_flag = flag;
     };
 
-    //! Adds a flag
+    //! Sets a flag
     /**
      * @param flag The flag to be added
      */
-    void addFlag ( const flag_Type& flag )
+    void setFlag ( const flag_Type& flag )
     {
         M_flag = Flag::turnOn(flag,M_flag);
     };

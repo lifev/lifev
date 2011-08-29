@@ -1093,7 +1093,7 @@ fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
             boundaryPoints[mesh.bElement(kFacetId).point(jPointId).id()]=true;
     for (ID  kPointId = 0; kPointId < mesh.storedPoints() ; ++kPointId )
         if(boundaryPoints[kPointId])
-            mesh.point(kPointId).addFlag(EntityFlags::PHYSICAL_BOUNDARY);
+            mesh.point(kPointId).setFlag(EntityFlags::PHYSICAL_BOUNDARY);
         else
             mesh.point(kPointId).unSetFlag(EntityFlags::PHYSICAL_BOUNDARY);
   // anihilate
@@ -1248,7 +1248,7 @@ bool rearrangeFaces( MeshType & mesh,
         if ( boundaryFaceContainerIterator == boundaryFaceContainerPtr->end() )
             mesh.face(facid).unSetFlag(EntityFlags::PHYSICAL_BOUNDARY);
         else
-            mesh.face(facid).addFlag(EntityFlags::PHYSICAL_BOUNDARY);
+            mesh.face(facid).setFlag(EntityFlags::PHYSICAL_BOUNDARY);
     }
         mesh.faceList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,Flag::testOneSet);
 

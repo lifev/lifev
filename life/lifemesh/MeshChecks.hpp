@@ -746,7 +746,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
                  for(UInt j=0;j<mesh.numLocalVertices();++j)
                  {
                      ID k = mesh.element(i).point(j).id();
-                     mesh.pointList(k).addFlag(EntityFlags::VERTEX);
+                     mesh.pointList(k).setFlag(EntityFlags::VERTEX);
                  }
              numVerticesFound = mesh.pointList.countElementsWithFlag(EntityFlags::VERTEX, &Flag::testOneSet);
              mesh.setNumVertices(numVerticesFound);
