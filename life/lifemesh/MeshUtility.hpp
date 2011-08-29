@@ -2323,7 +2323,7 @@ public:
      */
     bool hasOldPoint()const
     {
-        return !(this->_pointList.empty());
+        return !(this->M_pointList.empty());
     }
     //! Saves the mesh points
     /**
@@ -2334,7 +2334,7 @@ public:
     /** Resets movement. Next step is like the mesh has never moved
      */
      void resetMovement(){
-        this->_pointList.clear();
+        this->M_pointList.clear();
     }
 
     /** Returns the i-th mesh Point before the last movement.
@@ -2364,7 +2364,7 @@ public:
      *  works;
      */
     REGIONMESH & M_mesh;
-    typename REGIONMESH::Points _pointList;
+    typename REGIONMESH::Points M_pointList;
 };
 /** Mesh statistics.
  *  Namespace that groups functions which operate on a mesh to extract statistics.
@@ -2394,7 +2394,7 @@ namespace MeshStatistics
 // *****   IMPLEMENTATIONS ****
 //
 template <typename REGIONMESH>
-MeshTransformer<REGIONMESH>::MeshTransformer(REGIONMESH &m):M_mesh(m),_pointList(){};
+MeshTransformer<REGIONMESH>::MeshTransformer(REGIONMESH &m):M_mesh(m),M_pointList(){};
 /**
  * @todo this method should be changed to make sure not to generate invalid elements
  */
@@ -2412,7 +2412,7 @@ void MeshTransformer<REGIONMESH>::moveMesh( const VECTOR & disp, UInt dim )
         {
             int id = pointList[i].id();
             if ( disp.isPresent(id + dim*j))
-                pointList[ i ].coordinate( j ) = _pointList[ i ].coordinate( j ) +
+                pointList[ i ].coordinate( j ) = M_pointList[ i ].coordinate( j ) +
                 disp[ j * dim + id ];
         }
     }
@@ -2425,13 +2425,13 @@ void MeshTransformer<REGIONMESH>::savePoints()
     if (first)
     {
         first=false;
-        _pointList.reserve( M_mesh.numPoints() );
+        M_pointList.reserve( M_mesh.numPoints() );
         std::copy(M_mesh.pointList.begin(),M_mesh.pointList.end(),
-                  std::back_inserter(_pointList));
+                  std::back_inserter(M_pointList));
     }
     else
     {
-        std::copy(M_mesh.pointList.begin(),M_mesh.pointList.end(),_pointList.begin());
+        std::copy(M_mesh.pointList.begin(),M_mesh.pointList.end(),M_pointList.begin());
     }
 }
 
@@ -2440,14 +2440,14 @@ const typename REGIONMESH::point_Type &
 MeshTransformer<REGIONMESH>::pointInitial( ID const i ) const
 {
     ASSERT_BD( i < M_mesh.pointList.size() );
-    return _pointList.empty()? M_mesh.pointList[i]: this->_pointList[i];
+    return M_pointList.empty()? M_mesh.pointList[i]: this->M_pointList[i];
 }
 
 template <typename REGIONMESH>
 const typename REGIONMESH::Points &
 MeshTransformer<REGIONMESH>::pointListInitial() const
 {
-    return _pointList.empty()? M_mesh.Points : _pointList;
+    return M_pointList.empty()? M_mesh.Points : M_pointList;
 }
 
 //! @todo Change using homogeneous coordinates to make it more efficient.
