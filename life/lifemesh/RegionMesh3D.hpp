@@ -2808,37 +2808,33 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee, 
 
     EdgeType edg;
 
-    if ( true)
+    for ( typename Faces::iterator ifa = faceList.begin();
+                    ifa != faceList.begin() + M_numBFaces; ++ifa )
     {
-        for ( typename Faces::iterator ifa = faceList.begin();
-                        ifa != faceList.begin() + M_numBFaces; ++ifa )
+        for ( UInt j = 0; j < numLocalEdgesOfFace(); j++ )
         {
-            for ( UInt j = 0; j < numLocalEdgesOfFace(); j++ )
+            i1 = bele.edgeToPoint( j, 0 );
+            i2 = bele.edgeToPoint( j, 1 );
+            // go to global
+            i1 = ( ifa->point( i1 ) ).id();
+            i2 = ( ifa->point( i2 ) ).id();
+
+            _edge = makeBareEdge( i1, i2 );
+
+            e = _be.addIfNotThere( _edge.first );
+
+            if ( ce && e.second )
             {
-                i1 = bele.edgeToPoint( j, 0 );
-                i2 = bele.edgeToPoint( j, 1 );
-                // go to global
-                i1 = ( ifa->point( i1 ) ).id();
-                i2 = ( ifa->point( i2 ) ).id();
-
-                _edge = makeBareEdge( i1, i2 );
-
-                e = _be.addIfNotThere( _edge.first );
-
-                if ( ce && e.second )
+                //
+                for ( UInt k = 0; k < 2 + FaceShape::S_numPointsPerEdge; k++ )
                 {
-                    //
-                    for ( UInt k = 0; k < 2 + FaceShape::S_numPointsPerEdge; k++ )
-                    {
-                        UInt inode = bele.edgeToPoint(j, k);
-                        edg.setPoint( k, ifa->point( inode ) );
-                    }
-                    MeshUtility::inheritPointsWeakerMarker( edg );
-                    edg.setBoundary(true);
-                    addEdge( edg);
+                    UInt inode = bele.edgeToPoint(j, k);
+                    edg.setPoint( k, ifa->point( inode ) );
                 }
+                MeshUtility::inheritPointsWeakerMarker( edg );
+                edg.setBoundary(true);
+                addEdge( edg);
             }
-
         }
 
     }
