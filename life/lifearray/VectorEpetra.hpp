@@ -157,13 +157,6 @@ public:
 
     //! @name Operators
     //@{
-
-    //! Access operators
-    /**
-     * It returns true if the element is present in the vector
-     * @param row The element to test
-     */
-    bool isPresent(const UInt row) const;
     //! Access operators
     /*!
       @param row Index of the entry to be accessed
@@ -402,6 +395,13 @@ public:
 
     //! @name Methods
     //@{
+
+    //! Access operators
+    /**
+     * It returns true if the element is present in the vector
+     * @param row The element to test
+     */
+    bool isPresent(const UInt row) const;
 
     //! Assemble the vector
     /*!
