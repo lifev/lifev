@@ -26,8 +26,8 @@
 //@HEADER
 
 /*!
-     @file
-     @brief File containing a class for handling temporal discretization
+    @file
+    @brief File containing a class for handling temporal discretization
 
     @author M.A. Fernandez
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -38,8 +38,8 @@
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 
-#ifndef _TimeData_H_
-#define _TimeData_H_ 1
+#ifndef TimeData_H
+#define TimeData_H 1
 
 #include <ostream>
 #include <life/lifefilters/GetPot.hpp>
@@ -48,12 +48,11 @@
 namespace LifeV
 {
 
-
 //! TimeData - Class for handling temporal discretization.
 /*!
  *  @author Cristiano Malossi
  *
- *  The class is a container for time information.
+ *  The class is a data container for the time discretization.
  */
 class TimeData
 {
@@ -119,7 +118,7 @@ public:
     /*!
         @param output - specify the output format (std::cout by default)
      */
-    virtual void showMe( std::ostream& output = std::cout ) const;
+    void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -150,6 +149,12 @@ public:
      * @param timeStep initial time step value
      */
     void setTimeStep( const Real& timeStep ) { M_timeStep = timeStep; }
+
+    //! Set the time step number
+    /*!
+     * @param timeStepNumber time step number
+     */
+    void setTimeStepNumber( const UInt& timeStepNumber ) { M_timeStepNumber = timeStepNumber; }
 
     //! Set the BDF odert to use
     /*!
@@ -204,11 +209,11 @@ public:
      * @return time left value
      */
     Real leftTime() const { return round( M_endTime - M_time ); }
-   // Real getLeftTime() const { return leftTime();}
+
     //! Get the elapsed time
     /*!
      * @return elapsed time value
-    */
+     */
     Real elapsedTime() const { return round( M_time - M_initialTime ); }
 
     //! Get the present time shifted inside the first cycle
@@ -219,25 +224,23 @@ public:
      */
     Real inCycleTime() const { return (M_time - static_cast<int>(floor((M_time-M_timeStep/2)/M_periodTime)) * M_periodTime); }
 
-
-                    //! Get the previous time
+    //! Get the previous time
     /*!
      * @return previous time value
      */
-    Real previousTime()   const { return M_time - M_timeStep; }
-
+    Real previousTime() const { return M_time - M_timeStep; }
 
     //! Get the next time
     /*!
      * @return next time value
      */
-    Real nextTime()       const { return M_time + M_timeStep; }
+    Real nextTime() const { return M_time + M_timeStep; }
 
     //! Get the time step used for advancing
     /*!
      * @return time step value
      */
-    const Real& timeStep()       const { return M_timeStep; }
+    const Real& timeStep() const { return M_timeStep; }
 
     //! Get the number of time step performed
     /*!
@@ -249,42 +252,44 @@ public:
     /*!
      * @return BDF order value
      */
-    const UInt& orderBDF()		 const { return M_orderBDF; }
+    const UInt& orderBDF() const { return M_orderBDF; }
 
     //! Return theta parameter of TimeAdvanceNewmark scheme
     /*!
      * @return theta value
      */
-    const Real& theta()             const { return M_theta; }
+    const Real& theta() const { return M_theta; }
 
     //! Return gamma of TimeAdvanceNewmark scheme
     /*!
      * @return gamma value
      */
-    const Real& gamma()              const { return M_gamma; }
+    const Real& gamma() const { return M_gamma; }
 
-    //! Return TimeAdvanceNewmark parameters (\f$theta\f$, $\gamma$)
-
+    //! Return TimeAdvanceNewmark parameters (\f$theta\f$, \f$\gamma\f$)
+    /*!
+     * @return TimeAdvanceNewmark parameters (\f$theta\f$, \f$\gamma\f$)
+     */
     std::vector<Real> coefficientsNewmark();
 
     //@}
 
 private:
 
-    Real round( const Real n, const Int decimal=10 ) const;
+    Real round( const Real& n, const Int& decimal=10 ) const;
 
-    Real					M_initialTime;	  // initial time
-    Real					M_endTime;		  // end time
-    Real					M_periodTime;	  // period time
-    Real					M_inCycleTime;	  // in cycle time
-    Real					M_time;           // time
-    Real					M_timeStep; 	  // time step
+    Real                    M_initialTime;    // initial time
+    Real                    M_endTime;        // end time
+    Real                    M_periodTime;     // period time
+    Real                    M_inCycleTime;    // in cycle time
+    Real                    M_time;           // time
+    Real                    M_timeStep;       // time step
     UInt                    M_timeStepNumber; // iteration number
-    UInt					M_orderBDF; 	  // order of the time discretization formula
+    UInt                    M_orderBDF;       // order of the time discretization formula
     Real                    M_theta;          // TimeAdvanceNewmark parameter
     Real                    M_gamma;          // TimeAdvanceNewmark parameter
 };
 
 } // namespace LifeV
 
-#endif
+#endif // TimeData_H
