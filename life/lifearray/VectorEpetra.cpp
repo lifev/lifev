@@ -148,10 +148,6 @@ VectorEpetra::VectorEpetra( const VectorEpetra& vector, const Int& reduceToProc)
 // ===================================================
 // Operators
 // ===================================================
-bool VectorEpetra::isPresent(const UInt row) const
-{
-    return blockMap().LID(row)>=0;
-}
 VectorEpetra::data_type&
 VectorEpetra::operator[]( const UInt row )
 {
@@ -567,6 +563,11 @@ VectorEpetra::operator!( void )
 // ===================================================
 // Methods
 // ===================================================
+bool VectorEpetra::isPresent(const UInt row) const
+{
+    return blockMap().LID(row)>=0;
+}
+
 Int VectorEpetra::globalToLocalRowId( const UInt row ) const
 {
     Int lrow = blockMap().LID(row);
