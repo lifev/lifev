@@ -216,7 +216,7 @@ inline flag_Type change ( flag_Type const & inputFlag, flag_Type const & refFlag
 
 //! replaces the given flag with the reference one. This method is introduced with the same
 //! signature of the other methods in order to be used as a policy
-inline flag_Type replaceFlag  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline flag_Type replaceFlag  ( flag_Type const & /*inputFlag*/, flag_Type const & refFlag )
 {
     return refFlag;
 }
