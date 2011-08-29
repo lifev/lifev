@@ -291,12 +291,12 @@ public:
 
     //! The function call operator
     /*!
-        @param meshEntityWithBoundary a mesh entity with boundary indicator
+        @param MeshEntity a mesh entity with boundary indicator
         @return true if the entity is on the boundary, false otherwise
      */
-    bool operator() ( const MeshEntityWithBoundary & meshEntityWithBoundary ) const
+    bool operator() ( const MeshEntity & meshEntity ) const
     {
-        return meshEntityWithBoundary.boundary();
+        return meshEntity.boundary();
     }
     //@}
 

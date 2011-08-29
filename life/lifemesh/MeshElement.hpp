@@ -56,7 +56,7 @@ namespace LifeV
  */
 template <typename GeoShape, typename PointType = MeshVertex>
 class MeshElement :
-        public MeshEntityWithBoundary,
+        public MeshEntity,
         public GeoShape
 {
 public:
@@ -238,21 +238,21 @@ const UInt MeshElement<GeoShape, PointType>::S_numLocalVertices;
 
 template <typename GeoShape, typename PointType>
 MeshElement<GeoShape, PointType>::MeshElement() :
-        MeshEntityWithBoundary( NotAnId )
+        MeshEntity( NotAnId )
 {
 
 }
 
 template <typename GeoShape, typename PointType>
 MeshElement<GeoShape, PointType>::MeshElement( ID identity ) :
-        MeshEntityWithBoundary( identity )
+        MeshEntity( identity )
 {
 
 }
 
 template <typename GeoShape, typename PointType>
 MeshElement<GeoShape, PointType>::MeshElement( MeshElement<GeoShape, PointType> const & element ) :
-        MeshEntityWithBoundary( element )
+        MeshEntity( element )
 {
     setLocalId( element.localId() );
     for ( UInt i = 0; i < MeshElement<GeoShape, PointType>::S_numLocalPoints; ++i )
@@ -273,7 +273,7 @@ MeshElement<GeoShape, PointType>::operator=( MeshElement<GeoShape, PointType> co
 {
     if ( this != &element )
     {
-        MeshEntityWithBoundary::operator= ( element );
+        MeshEntity::operator= ( element );
         for ( UInt i = 0; i < MeshElement<GeoShape, PointType>::S_numLocalPoints; ++i )
         {
             M_points[ i ] = element.M_points[ i ];
