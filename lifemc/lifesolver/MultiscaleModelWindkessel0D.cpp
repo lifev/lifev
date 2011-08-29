@@ -286,10 +286,10 @@ MultiscaleModelWindkessel0D::initializeSolution()
 
     if ( multiscaleProblemStep > 0 )
     {
-        std::string file = multiscaleProblemFolder + "/Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) + ".m";
+        std::string fileName = multiscaleProblemFolder + multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep - 1 ) + ".mfile";
 
         std::ifstream inputFile;
-        inputFile.open( file.c_str(), std::ios::in );
+        inputFile.open( fileName.c_str(), std::ios::in );
 
         if ( inputFile.is_open() )
         {
@@ -301,7 +301,7 @@ MultiscaleModelWindkessel0D::initializeSolution()
             // Read the first line with comments
             std::getline( inputFile, line, '\n' );
 
-            // Read one-by-one all the others lines of the file
+            // Read one-by-one all the others lines of the fileName
             while ( std::getline( inputFile, line, '\n' ) )
             {
                 // Split the three entries
@@ -320,6 +320,8 @@ MultiscaleModelWindkessel0D::initializeSolution()
             // Close file
             inputFile.close();
         }
+        else
+            std::cerr << " !!! Error: cannot open fileName: " << fileName.c_str() << " !!!" << std::endl;
     }
     else
     {
@@ -365,7 +367,7 @@ MultiscaleModelWindkessel0D::setupExporterImporter()
     Debug( 8150 ) << "MultiscaleModelWindkessel0D::setupExporterImporter() \n";
 #endif
 
-    std::string file = multiscaleProblemFolder + "/Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) + ".m";
+    std::string file = multiscaleProblemFolder + multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) + ".mfile";
     M_outputFile.open( file.c_str(), std::ios::trunc );
     M_outputFile << std::scientific << std::setprecision( 15 )
                  << "%   MODEL: " << M_modelName << std::endl

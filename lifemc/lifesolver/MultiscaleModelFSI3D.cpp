@@ -632,7 +632,7 @@ MultiscaleModelFSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dat
 #endif
         exporter.reset( new ensightIOFile_Type( dataFile, label ) );
 
-    exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) + label );
+    exporter->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) + label );
     exporter->setPostDir( multiscaleProblemFolder );
 }
 
@@ -647,7 +647,7 @@ MultiscaleModelFSI3D::setupImporter( IOFilePtr_Type& importer, const GetPot& dat
 #endif
         importer.reset( new ensightIOFile_Type( dataFile, label ) );
 
-    importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) + label );
+    importer->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep - 1 ) + label );
     importer->setPostDir( multiscaleProblemFolder );
 }
 

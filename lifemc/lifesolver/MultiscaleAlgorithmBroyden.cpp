@@ -128,7 +128,7 @@ MultiscaleAlgorithmBroyden::subIterate()
 //        M_couplingVariables->showMe();
 //        std::cout << " MS-  CouplingResiduals:\n" << std::endl;
 //        M_couplingResiduals->showMe();
-    
+
         // Compute the Jacobian
         if ( subIT == 1 )
         {
@@ -272,7 +272,7 @@ MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
         // We create an integer variable to be used as a string for the name of the matrix in the matrix container.
         long long timeInteger = M_multiscale->globalData()->dataTime()->time() * 1E+10;
 
-        M_jacobian->exportToHDF5( multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep ) + "_AlgorithmJacobian", number2string( timeInteger ), M_truncate );
+        M_jacobian->exportToHDF5( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobian" + "_" + number2string( multiscaleProblemStep ), number2string( timeInteger ), M_truncate );
         M_truncate = false;
     }
 }
@@ -290,7 +290,7 @@ MultiscaleAlgorithmBroyden::importJacobianFromHDF5()
     long long timeInteger = M_multiscale->globalData()->dataTime()->time() * 1E+10;
 
     M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50 ) );
-    M_jacobian->importFromHDF5( multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep - 1 ) + "_AlgorithmJacobian", number2string( timeInteger ) );
+    M_jacobian->importFromHDF5( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobian" + "_" + number2string( multiscaleProblemStep - 1 ), number2string( timeInteger ) );
 }
 #endif
 

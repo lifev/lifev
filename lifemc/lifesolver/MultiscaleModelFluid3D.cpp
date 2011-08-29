@@ -471,7 +471,7 @@ MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
         M_exporter.reset( new ensightIOFile_Type() );
 
     M_exporter->setDataFromGetPot( dataFile );
-    M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_exporter->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) );
     M_exporter->setPostDir( multiscaleProblemFolder );
 
     //Importer
@@ -485,7 +485,7 @@ MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
         M_importer.reset( new ensightIOFile_Type() );
 
     M_importer->setDataFromGetPot( dataFile );
-    M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
+    M_importer->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep - 1 ) );
     M_importer->setPostDir( multiscaleProblemFolder );
 }
 

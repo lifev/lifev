@@ -329,8 +329,7 @@ MultiscaleModelMultiscale::saveSolution()
     if ( M_globalData->dataTime()->isFirstTimeStep() )
     {
         // File name
-        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep )
-                                                       + "_Model_" + number2string( M_ID ) + ".mfile";
+        std::string filename = multiscaleProblemFolder + multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) + ".mfile";
 
         // Remove the old file if present
         if ( M_comm->MyPID() == 0 )

@@ -43,6 +43,7 @@ namespace Multiscale
 
 UInt        multiscaleCoresPerNode  = 1;
 std::string multiscaleProblemFolder = "./";
+std::string multiscaleProblemPrefix = "Step";
 UInt        multiscaleProblemStep   = 0;
 bool        multiscaleExitFlag      = EXIT_SUCCESS;
 
@@ -50,9 +51,10 @@ bool        multiscaleExitFlag      = EXIT_SUCCESS;
 // Constructors
 // ===================================================
 MultiscaleSolver::MultiscaleSolver() :
-        M_model             (),
-        M_globalData        ( new multiscaleData_Type() ),
-        M_comm              ()
+        M_model                 (),
+        M_globalData            ( new multiscaleData_Type() ),
+        M_saveEachNTimeSteps    (),
+        M_comm                  ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -94,6 +96,12 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     if ( dataFile( "Solver/Restart/Restart", false ) )
         multiscaleProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
+    // Define the filename prefix for the multiscale output
+    multiscaleProblemPrefix = dataFile( "Solver/Output/ProblemPrefix", "Multiscale" );
+
+    // Define how many time step between two calls of the saveSolution() method
+    M_saveEachNTimeSteps = dataFile( "Solver/Output/SaveEach", 1 );
+
     // Create the main model and set the communicator
     M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "Multiscale" ) ], multiscaleModelsMap ) );
 
@@ -120,6 +128,8 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     // Save the initial solution if it is the very first time step
     if ( !multiscaleProblemStep )
         M_model->saveSolution();
+    else
+        importIterationNumber();
 
     // Move to the "true" first time-step
     M_globalData->dataTime()->updateTime();
@@ -163,7 +173,8 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 
         // Save the solution
         saveChrono.start();
-        M_model->saveSolution();
+        if ( M_globalData->dataTime()->timeStepNumber()%M_saveEachNTimeSteps == 0 || M_globalData->dataTime()->isLastTimeStep() )
+            M_model->saveSolution();
         saveChrono.stop();
 
         // Global chrono stop
@@ -186,7 +197,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     // Check on the last iteration
     Real computedSolution( M_model->checkSolution() );
     if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
-        multiscaleErrorCheck( Solution, "Problem solution: "  + number2string( computedSolution ) +
+        multiscaleErrorCheck( Solution, "Problem solution: "    + number2string( computedSolution ) +
                                         " (External solution: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() == 0 );
 
     return multiscaleExitFlag;
@@ -202,6 +213,7 @@ MultiscaleSolver::showMe() const
 
         std::cout << "Cores per node                = " << multiscaleCoresPerNode << std::endl
                   << "Problem folder                = " << multiscaleProblemFolder << std::endl
+                  << "Problem prefix                = " << multiscaleProblemPrefix << std::endl
                   << "Problem step                  = " << multiscaleProblemStep << std::endl << std::endl;
 
         M_globalData->showMe();
@@ -215,29 +227,79 @@ MultiscaleSolver::showMe() const
         std::cout << "=============================================================" << std::endl << std::endl;
 }
 
+
+// ===================================================
+// Private Methods
+// ===================================================
 void
 MultiscaleSolver::saveCPUTime( const Real& buildUpdateCPUTime, const Real& solveCPUTime, const Real& saveCPUTime ) const
 {
     if ( M_comm->MyPID() == 0 )
     {
-        std::ofstream output;
-        output << std::scientific << std::setprecision( 15 );
+        std::ofstream outputFile;
+        outputFile << std::scientific << std::setprecision( 15 );
 
-        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep )
-                                                       + "_CPUTime.mfile";
+        std::string filename = multiscaleProblemFolder + multiscaleProblemPrefix + "_CPUTime_" + number2string( multiscaleProblemStep ) + ".mfile";
 
         if ( M_globalData->dataTime()->isFirstTimeStep() )
         {
-            output.open( filename.c_str(), std::ios::trunc );
-            output << "% TIME                     TOTAL                    BUILD/UPDATE             SOLVE                    SAVE" << std::endl;
+            outputFile.open( filename.c_str(), std::ios::trunc );
+            outputFile << "% ITERATION                TIME                     TOTAL                    BUILD/UPDATE             SOLVE                    SAVE" << std::endl;
         }
         else
         {
-            output.open( filename.c_str(), std::ios::app );
+            outputFile.open( filename.c_str(), std::ios::app );
         }
-        output << "  " << M_globalData->dataTime()->time() << "    " << buildUpdateCPUTime+solveCPUTime+saveCPUTime
+        outputFile << "  " << number2string( M_globalData->dataTime()->timeStepNumber() )
+               << "                        " << M_globalData->dataTime()->time()
+               << "    " << buildUpdateCPUTime + solveCPUTime + saveCPUTime
                << "    " << buildUpdateCPUTime << "    " << solveCPUTime  << "    " << saveCPUTime << std::endl;
-        output.close();
+        outputFile.close();
+    }
+}
+
+void
+MultiscaleSolver::importIterationNumber()
+{
+    if ( M_comm->MyPID() == 0 )
+    {
+        std::string fileName = multiscaleProblemFolder + multiscaleProblemPrefix + "_CPUTime_" + number2string( multiscaleProblemStep - 1 ) + ".mfile";
+
+        std::ifstream inputFile;
+        inputFile.open( fileName.c_str(), std::ios::in );
+
+        if ( inputFile.is_open() )
+        {
+            // Define some variables
+            std::string line;
+            std::vector<std::string> stringsVector;
+            std::vector< std::pair< Int, Real > > iterationAndTime;
+            std::pair< Int, Real > selectedIterationAndTime;
+
+            // Read the first line with comments
+            std::getline( inputFile, line, '\n' );
+
+            // Read one-by-one all the others lines of the file
+            while ( std::getline( inputFile, line, '\n' ) )
+            {
+                boost::split( stringsVector, line, boost::is_any_of( " " ), boost::token_compress_on );
+                iterationAndTime.push_back( std::make_pair( string2number( stringsVector[1] ), string2number( stringsVector[2] ) ) );
+            }
+
+            // Close file
+            inputFile.close();
+
+            // Find the closest time step
+            selectedIterationAndTime = iterationAndTime.front();
+            for ( std::vector< std::pair< Int, Real > >::const_iterator i = iterationAndTime.begin(); i < iterationAndTime.end() ; ++i )
+                if ( std::fabs( selectedIterationAndTime.second - M_globalData->dataTime()->time() ) >= std::fabs( (*i).second - M_globalData->dataTime()->time() ) )
+                    selectedIterationAndTime = *i;
+
+            // Set the iteration number
+            M_globalData->dataTime()->setTimeStepNumber( selectedIterationAndTime.first );
+        }
+        else
+            std::cerr << " !!! Error: cannot open file: " << fileName.c_str() << " !!!" << std::endl;
     }
 }
 

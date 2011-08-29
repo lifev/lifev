@@ -158,16 +158,16 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 
     //Exporters
     M_data->setPostprocessingDirectory( multiscaleProblemFolder );
-    M_data->setPostprocessingFile( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_data->setPostprocessingFile( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) );
 
 #ifdef HAVE_HDF5
     M_exporter->setDataFromGetPot( dataFile );
-    M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_exporter->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) );
     M_exporter->setPostDir( multiscaleProblemFolder );
     M_exporterMesh->setup( M_data->length(), M_data->numberOfElements() );
 
     M_importer->setDataFromGetPot( dataFile );
-    M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
+    M_importer->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep -1 ) );
     M_importer->setPostDir( multiscaleProblemFolder );
 #endif
 
