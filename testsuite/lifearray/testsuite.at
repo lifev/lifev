@@ -13,9 +13,9 @@
 ### TESTSUITE: LIFEARRAY ##########################################################################
 ###################################################################################################
 
-AT_SETUP([test_simple_vect])
-AT_KEYWORDS([ array simple vect ])
-AT_CHECK([mpirun -n 1 ../../lifearray/test_simple_vect],[0],[ignore],[ignore])
+AT_SETUP([test_meshentitycontainer])
+AT_KEYWORDS([ array container ])
+AT_CHECK([mpirun -n 1 ../../lifearray/test_meshentitycontainer],[0],[ignore],[ignore])
 AT_CLEANUP
 
 AT_SETUP([test_vectorsmall])
