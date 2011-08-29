@@ -177,6 +177,8 @@ FSIOperator::setDataFile( const GetPot& dataFile )
     M_solidTimeAdvanceMethod =  dataFile( "solid/time_discretization/method", "BDF");
     M_ALETimeAdvanceMethod = dataFile("mesh_motion/time_discretization/method", "BDF");
     M_structureNonLinear   = M_data->dataSolid()->getSolidType().compare("linearVenantKirchhof");
+    // insert Mattteo
+    this->setupTimeAdvance( dataFile );
 }
 
 void
@@ -544,10 +546,9 @@ FSIOperator::buildSystem()
 //         if (M_linearFluid)
 //             M_fluidLin->buildSystem();
     }
-
     if ( this->isSolid() )
     {
-      if (M_linearSolid)
+      if (this->isSolid())
 	{
 	  M_data->dataSolid()->showMe();
 	  //initialize xi0 for timaAdvance method for solid
@@ -563,7 +564,7 @@ FSIOperator::updateSystem()
 {
     if ( this->isFluid() )
     {
-      //this->M_bdf->shiftRight( *M_fluid->solution() );
+      M_fluidTimeAdvance->shiftRight( *M_fluid->solution() );
 
       //M_meshMotion->updateSystem(); substituted by:
       M_ALETimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
@@ -575,8 +576,10 @@ FSIOperator::updateSystem()
       if ( M_fluid->solution().get() )
 	M_un.reset( new vector_Type( *M_fluid->solution() ) );
       //M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-      *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
-    }
+
+	*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+ 
+  }
 
     if ( this->isSolid() )
     {
@@ -585,12 +588,12 @@ FSIOperator::updateSystem()
       rhsW *=0;
       rhsW =  M_solidTimeAdvance->rhsContributionSecondDerivative() ;
       rhsW = *M_solid->Mass() *( rhsW );
-
-      M_solid->updateRightHandSide( rhsW );  //for the solid rhs;
-
-          //this->M_solid->updateSystem();
+      this->M_solid->updateSystem();
+      M_solid->updateRightHandSide( rhsW );  //for the solid rhs;  
     }
+  
    this->couplingVariableExtrap( );
+
 }
 
 
@@ -691,7 +694,7 @@ FSIOperator::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
 void
 FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 {
-  std::cout<<"SETUP TIME ADVANCE\n";
+
   if(this->isFluid())
     {
         M_fluidTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );
@@ -744,18 +747,14 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 
       if(this->isLeader())
       {
-          std::cout<<"FLUID time scheme"<<std::endl;
-          M_fluidTimeAdvance->showMe();
-          //M_fluidMassTimeAdvance->showMe();
-          std::cout<<"ALE time scheme"<<std::endl;
-          M_ALETimeAdvance->showMe();
+	M_fluidTimeAdvance->showMe();
+	//M_fluidMassTimeAdvance->showMe();
+	M_ALETimeAdvance->showMe();
       }
     }
   if( this->isSolid() )
   {
       M_solidTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_solidTimeAdvanceMethod ) );
-
-      std::cout<<" M_solidTimeAdvanceMethod  "<< M_solidTimeAdvanceMethod <<"\n";
 
       std::vector<Real> parameters(2);
       parameters[0]  = dataFile("solid/time_discretization/theta", 0.25);
@@ -778,7 +777,6 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
       M_solidTimeAdvance->setTimeStep( M_data->dataSolid()->dataTime()->timeStep());
       if(this->isLeader())
 	{
-	  std::cout<<"SOLID TIME ADVANCE \n";
 	  M_solidTimeAdvance->showMe();
 	}
     }
@@ -807,7 +805,7 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
           ASSERT(initialSolidDisp.size()== M_solidTimeAdvance->size(), "The number of vectors for initializing the time scheme for the structure displacement is not consistent with the discretization chosen" );
 	this->M_solidTimeAdvance->setInitialCondition(initialSolidDisp);
       }
-  }
+ }
 
 void
 FSIOperator::initializeFluid( const vector_Type& velAndPressure,

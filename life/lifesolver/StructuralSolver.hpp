@@ -604,6 +604,7 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
 
   M_rhs.reset                        ( new vector_Type(*M_localMap));
+  M_rhsNoBC.reset                        ( new vector_Type(*M_localMap));	
   M_residual_d.reset                 ( new vector_Type(*M_localMap));
   M_sxx.reset                        ( new vector_Type(*M_localMap) );
   M_syy.reset                        ( new vector_Type(*M_localMap) );
@@ -631,7 +632,6 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   // M_rhsW.reset                      ( new vector_Type(*M_localMap) );
   // M_rhsA.reset                      ( new vector_Type(*M_localMap) );
   // M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
-
   M_mass.reset                      (new matrix_Type(*M_localMap));
   M_massTimeAdvanceCoefficient.reset(new matrix_Type(*M_localMap));
   M_tempMatrix.reset                (new matrix_Type(*M_localMap));
@@ -822,6 +822,7 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& coefficient )
 
   chrono.stop();
   M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
+
 }
 
 
@@ -1005,12 +1006,14 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     M_material->computeMatrix( sol, 1., this->M_data, M_Displayer);
 
     stiff.reset(new matrix_Type(*this->M_localMap));
+
     *stiff +=*this->M_material->stiff();
     // Matteo
     //*stiff *= M_zeta;
-    *stiff += *this->M_massTimeAdvanceCoefficient;
-    stiff->globalAssemble();
 
+    // Non serve!!!!!
+    // *stiff += *this->M_massTimeAdvanceCoefficient;
+    stiff->globalAssemble();
     chrono.stop();
     this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
 
@@ -1327,7 +1330,7 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
     *jacobian += *this->M_material->stiff();
      // Matteo
     //   *jacobian *= M_zeta;
-    *jacobian += *this->M_massTimeAdvanceCoefficient;
+    //*jacobian += *this->M_massTimeAdvanceCoefficient;
     jacobian->globalAssemble();
 
     chrono.stop();

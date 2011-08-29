@@ -157,7 +157,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         vectorPtr_Type meshDisp( new vector_Type(M_mmFESpace->map()) );
         vectorPtr_Type meshVel( new vector_Type(M_mmFESpace->map()) );
-	vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map()) );
+	vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map() ));
         meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
 
@@ -193,8 +193,9 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
             }
             *meshVel = M_ALETimeAdvance->velocity();
             //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
+	    mmRep.reset(new vector_Type(M_mmFESpace->map(), Repeated));// just to repeat dispDiff. No way witout copying?
 	    M_ALETimeAdvance->extrapolation(*mmRep);
-	    //  mmRep.reset(new vector_Type(M_ALETimeAdvance->extrapolation(), Repeated));// just to repeat dispDiff. No way witout copying?
+	   
             moveMesh(*mmRep);// re-initialize the mesh points
             //*meshDispDiff -= *meshDispOld;//relative displacement
         }
@@ -203,6 +204,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 	//	vector_Type mmRep(	M_ALETimeAdvance->extrapolation(), Repeated);
 	// Matteo
 	//   vector_Type mmRep(meshDisp->map(), Repeated);// just to repeat dispDiff. No way witout copying?
+	mmRep.reset(new vector_Type(M_mmFESpace->map(), Repeated));// just to repeat dispDiff. No way witout copying?
 	M_ALETimeAdvance->extrapolation(*mmRep);
 	moveMesh(*mmRep);// re-initialize the mesh points
 

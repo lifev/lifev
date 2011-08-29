@@ -28,7 +28,7 @@ save       = 1
   density   = 1.2               # density
   young     = 8.0E6
   poisson   = 0.4
-  solidType = nonlinearVenantKirchhoff #nonlinearVenantKirchhoff, linearVenantKirchhoff
+  solidType = linearVenantKirchhoff #nonlinearVenantKirchhoff, linearVenantKirchhoff
 
   [../time_discretization]
   initialtime = 0.
@@ -40,7 +40,7 @@ save       = 1
 
   [../space_discretization]
   mesh_dir  = Mesh/     # the directory where the mesh file is
-  mesh_file = cyl1x02_1796_edge.mesh #vessel20.mesh
+  mesh_file =  vessel20.mesh #cyl1x02_1796_edge.mesh #vessel20.mesh
   order     = P1
 
 
@@ -55,7 +55,7 @@ save       = 1
 
 
   [../solver]
-  solver          = gmres
+  solver          = cg 
   scaling         = none
   output          = all # none
   conv            = rhs

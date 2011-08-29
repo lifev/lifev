@@ -314,7 +314,7 @@ Structure::run3d()
 
     solid.setDataFromGetPot(dataFile);
 
-    double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative( 0 ) / ( dataStructure->dataTime()->timeStep()*dataStructure->dataTime()->timeStep());
+    double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative( 0 ) / (dataStructure->dataTime()->timeStep()*dataStructure->dataTime()->timeStep());
     solid.buildSystem(timeAdvanceCoefficient);
 
     //
@@ -358,7 +358,7 @@ Structure::run3d()
     
     timeAdvance->setInitialCondition(uv0);
     
-    timeAdvance-> setTimeStep(dataStructure->dataTime()->timeStep());
+    timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
     
     timeAdvance->updateRHSContribution(dataStructure->dataTime()->timeStep());
     
@@ -436,17 +436,18 @@ Structure::run3d()
 		std::cout << std::endl;
 		std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
 	      }
-	
-	    *rhs *=0;
 	    
+	    std::cout<<"main line 440\n";
+	    *rhs *=0;
+	      std::cout<<"main line 442\n";
 	    timeAdvance->updateRHSContribution( dt );
-	  
+	    std::cout<<"main line 444\n";
 	    *rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
-
+	    std::cout<<"main line 446\n";
 	    //solid.updateSystem(dZero);    // Computes the rigth hand side
-	    //  solid.updateSystem(rhs);    // Computes the rigth hand side
+	    solid.updateSystem();    // Computes the rigth hand side
 	    solid.updateRightHandSide( *rhs );
-
+	    std::cout<<"main line 448\n";
 
 	    std::cout << "Updated system at " << time << std::endl;
 

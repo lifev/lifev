@@ -163,6 +163,8 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
 template <typename Mesh>
 void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiffMatrix(dataPtr_Type& dataMaterial)
 {
+  std::cout<<"compute LinearStiff Matrix start\n";
+
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
     // Number of displacement components
     UInt nc = nDimensions;
@@ -201,6 +203,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiffMatrix(dataPtr_Type&
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
+   std::cout<<"compute LinearStiff Matrix end\n";  
 }
 
 
@@ -231,6 +234,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianMatrix( matrixP
     {
       displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
       std::cout << std::endl;
+      this->M_stiff->globalAssemble();
     }
 
 template <typename Mesh>

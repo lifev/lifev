@@ -467,9 +467,10 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working
     
   
     vector_Type lambda(*M_interfaceMap, Unique);
-    vector_Type lambdaSolid(this->lambdaSolid().map());
+    vector_Type lambdaSolid(M_solid->displacement().map());
     // Inser Matteo  because changed the method extrapolation();
-    M_solidTimeAdvance->extrapolation(lambdaSolid);
+    M_solidTimeAdvance->extrapolation(lambda);
+
     this->monolithicToInterface(lambda,lambdaSolid); 
     // comment Matteo
     //    this->monolithicToInterface(lambda,  M_solidTimeAdvance->extrapolation());
