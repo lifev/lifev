@@ -417,7 +417,7 @@ public:
 //! Specialization
 template <>
 inline ID reversePoint<LinearTetra>( ID const & pointId ){
-    static ID _rid[]={2,1,0,3};
+    static ID _rid[]={1,0,2,3};
     return _rid[pointId];
 }
 
