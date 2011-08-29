@@ -14,7 +14,7 @@
 #define BAREMESH_HPP_
 //! A struct for a bare mesh
 /**
- * A very simple struct which stores an mesh as read from a file, readi to be imported in
+ * A very simple struct which stores an mesh as read from a file, ready to be imported in
  * a regionmesh
  * All SimpleArray have the first dimension the "shortest" one
  */
