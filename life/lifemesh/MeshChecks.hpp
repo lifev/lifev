@@ -647,7 +647,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         if ( fix )
         {
             if(verbose)out<<"Reorder edges so that boundary are first"<<std::endl;
-            mesh.edgeList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,Flag::testOneSet);
+            mesh.edgeList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,&Flag::testOneSet);
 
             sw.create( "FIXED_BEDGES_FIRST" );
         }
