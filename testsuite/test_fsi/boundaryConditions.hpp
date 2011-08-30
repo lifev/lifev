@@ -126,12 +126,12 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
     BCFunctionBase out_flow      (fZero);
 
 
-#ifdef FLUX
-    BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
-#else
-    BCh_fluid->addBC("InFlow" , 2,  Essential, Full, in_vel, 3);
-    //BCh_fluid->addBC("InFlow" , 5,  Natural,   Normal, in_flow_pr);
-#endif
+    //#ifdef FLUX
+      // BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
+    //#else
+      // BCh_fluid->addBC("InFlow" , 2,  Essential, Full, in_vel, 3);
+    BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
+    //#endif
 
     BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
 

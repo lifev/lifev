@@ -15,10 +15,10 @@ SUFFIXES        = .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = rotation.hpp  
-check_PROGRAMS = example_structureWithTimeAdvance
 
-example_structureWithTimeAdvance_SOURCES = main.cpp rotation.cpp
+check_PROGRAMS = example_structureWithTimeAdvance 
+
+example_structureWithTimeAdvance_SOURCES = main.cpp
 
 EXTRA_DIST = data testsuite.at
 
