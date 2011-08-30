@@ -1567,6 +1567,9 @@ bcRobinManage( MatrixType& matrix,
 
                         sum = 0;
 
+                        idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
+                        jdDof = pId->boundaryLocalToGlobalMap( k ) + boundaryCond.component( j ) * totalDof + offset;
+
                         // Loop on quadrature points
                         for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                         {
@@ -1585,10 +1588,6 @@ bcRobinManage( MatrixType& matrix,
                                    currentBdFE.phi( k, l ) * currentBdFE.weightMeas( l );
 
                         }
-
-                        // Globals DOF: row and columns
-                        idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
-                        jdDof = pId->boundaryLocalToGlobalMap( k ) + boundaryCond.component( j ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
                         matrix.addToCoefficient( idDof, jdDof, sum );
@@ -1741,7 +1740,7 @@ bcRobinManageMatrix( MatrixType& matrix,
                     sum = 0;
 
                     // Global Dof
-                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
+                    idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
@@ -1776,8 +1775,8 @@ bcRobinManageMatrix( MatrixType& matrix,
                         }
 
                         // Globals DOF: row and columns
-                        idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
-                        jdDof = pId->boundaryLocalToGlobalMap( k ) + boundaryCond.component( j ) * totalDof + offset;
+                        idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
+                        jdDof = boundaryCond[ k ] ->id() + boundaryCond.component( j ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
                         matrix.addToCoefficient( idDof, jdDof, sum );
