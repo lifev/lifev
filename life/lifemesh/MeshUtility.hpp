@@ -1250,7 +1250,7 @@ bool rearrangeFaces( MeshType & mesh,
         else
             mesh.face(facid).setFlag(EntityFlags::PHYSICAL_BOUNDARY);
     }
-        mesh.faceList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,Flag::testOneSet);
+        mesh.faceList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,&Flag::testOneSet);
 
     return true;
 }
@@ -1685,7 +1685,7 @@ bool buildFaces( MeshType & mesh,
     // If there where faces stored originally I need to be sure that bfaces go first!
     // I need to do it now because of the tests I do later
             if(!existingFacesMap.empty())
-                mesh.faceList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,Flag::testOneSet);
+                mesh.faceList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,&Flag::testOneSet);
 
     if ( ! buildInternalFaces )
     {
