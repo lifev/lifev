@@ -44,7 +44,7 @@
 #include "life/lifesolver/FSIFixedPoint.hpp"
 
 
-#define FLUX = 0
+//#define FLUX = 
 
 namespace LifeV
 {
@@ -128,11 +128,11 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
     BCFunctionBase out_flow      (fZero);
 
 
-    #ifdef FLUX
-     BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
-    #else
+    //  #ifdef FLUX
+    // BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
+    // #else
      BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
-    #endif
+     // #endif
 
     BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
 
@@ -203,12 +203,12 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluidLin(FSIOperator &_oper)
     BCFunctionBase bcf(fZero);
     BCFunctionBase in_flow(u2);
 
-#ifdef FLUX
-    BCh_fluidLin->addBC("InFlow",   2,       Flux, Full, bcf,     3);
-#else
+    #ifdef FLUX
+     BCh_fluidLin->addBC("InFlow",   2,       Flux, Full, bcf,     3);
+    #else
     BCh_fluidLin->addBC("InFlow",  2,  Essential,  Full, bcf, 3);
     // BCh_fluidLin->addBC("InFlow",  5,  Natural, Normal, bcf);
-#endif
+    #endif
 
     BCh_fluidLin->addBC("InletFace",  20,  Essential, Full, bcf,     3);
 
