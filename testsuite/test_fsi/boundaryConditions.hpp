@@ -44,7 +44,7 @@
 #include "life/lifesolver/FSIFixedPoint.hpp"
 
 
-//#define FLUX
+#define FLUX = 0
 
 namespace LifeV
 {
@@ -75,6 +75,8 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
     BCh_he->addBC("Top",         3, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",        2, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",        4, Essential, Full, bcf,   3);
+    BCh_he->addBC("Top",         30, Essential, Full, bcf,   3);
+    BCh_he->addBC("Top",         20, Essential, Full, bcf,   3);
 
     if (_oper.data().method() == "steklovPoincare")
     {
@@ -126,12 +128,11 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
     BCFunctionBase out_flow      (fZero);
 
 
-#ifdef FLUX
-    BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
-#else
-    BCh_fluid->addBC("InFlow" , 2,  Essential, Full, in_vel, 3);
-    //BCh_fluid->addBC("InFlow" , 5,  Natural,   Normal, in_flow_pr);
-#endif
+    #ifdef FLUX
+     BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
+    #else
+     BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
+    #endif
 
     BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
 
@@ -148,7 +149,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
         // _oper.setAlphafbcf(alpha); // if alpha is bcFunction define in ud_function.cpp
 
         _oper.setSolidLoadToStructure( _oper.minusSigmaFluidRepeated());
-        _oper.setStructureToFluidParametres();
+        _oper.setStructureToFluidParameters();
 
         BCh_fluid->addBC("Interface",   1,  Robin, Full,
                          *_oper.bcvStructureToFluid(),  3);
@@ -256,7 +257,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_solid(FSIOperator &_oper)
     BCh_solid->addBC("BaseRingF5",      3, Essential, Full, bcf,  3);
     BCh_solid->addBC("BaseRingF3",      2, Essential, Full, bcf,  3);
     BCh_solid->addBC("Ring6",      20, Essential, Full, bcf,  3);
-
+    BCh_solid->addBC("Ring6",      30, Essential, Full, bcf,  3);
 
     std::vector<ID> zComp(1);
     zComp[0] = 3;

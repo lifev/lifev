@@ -429,11 +429,12 @@ std::cout<<"dataProblem->dataTime()->orderBDF() "<<dataProblem->dataTime()->orde
     dataProblem->setup(dataFile, "solid");
 
     chrono.start();
-
+    std::cout<<"BUILD SYSTEM \n";
     double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative( 0 ) / ( dataProblem->dataTime()->timeStep()*dataProblem->dataTime()->timeStep());
-
+    std::cout<<"timeAdvanceCoefficient "<< timeAdvanceCoefficient << "\n";
     problem.buildSystem(timeAdvanceCoefficient);
 
+  
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -529,6 +530,10 @@ std::cout<<"dataProblem->dataTime()->orderBDF() "<<dataProblem->dataTime()->orde
 
     exporter->postProcess( 0 );
 
+     std::cout<<"UPDATE SYSTEM \n";
+
+     problem.updateSystem( );
+
     for (Real time = dt; time <= T; time += dt)
     {
         dataProblem->setTime(time);
@@ -552,7 +557,7 @@ std::cout<<"dataProblem->dataTime()->orderBDF() "<<dataProblem->dataTime()->orde
         //evaluate rhs
 
         feSpace->l2ScalarProduct(members->getSourceTerm(), rhs, time);
-        rhs += *problem.Mass() *timeAdvance->rhsContributionSecondDerivative();
+        rhs += *problem.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
 
         //update system
         problem.updateRightHandSide(rhs );

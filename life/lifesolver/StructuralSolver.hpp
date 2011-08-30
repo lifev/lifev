@@ -1002,7 +1002,6 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     // Matteo
     //*stiff *= M_zeta;
 
-    // Non serve!!!!!
     *stiff += *this->M_mass;
     stiff->globalAssemble();
     chrono.stop();
@@ -1043,7 +1042,7 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type& solution )
 {
-
+    //MATTEO: compute matrix system without BC.
     computeMatrix(this->M_tempMatrix, solution, 1.);
 
     this->M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");

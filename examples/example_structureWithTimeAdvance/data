@@ -43,7 +43,7 @@ save       = 1
    zeta                    = 0.5 #1
 
    #BDF parameters: order of scheme:
-   BDF_order               = 2  
+   BDF_order               = 1 
 
    	[../space_discretization]	
 	mesh_dir  = ./Mesh/     # the directory where the mesh file is

@@ -65,7 +65,7 @@ filename = solid
 [fluid]
 
 useShapeDerivatives = false
-absorbing_bc	    = true
+absorbing_bc	    = false
 
 [./physics]
 density   = 1.0               # density
@@ -75,7 +75,10 @@ viscosity = 0.035              # viscosity
 initialtime		= 0.
 endtime			= 0.05
 timestep		= 0.001
+method                  = BDF
 BDF_order		= 1
+
+
 
 # end of fluid preconditioner parameters
 [../ipstab]
@@ -212,6 +215,10 @@ thickness	= 0.1
 
 [../time_discretization]
 timestep        = 0.001
+method          = Newmark
+theta           = 0.25
+gamma           = 0.5
+
 
 [../space_discretization]
 mesh_dir  = ./Mesh/  # the directory where the mesh file is
@@ -266,6 +273,14 @@ solvertype      = Amesos_Umfpack
   max_iter_reuse  = 101
   kspace          = 50
   tol             = 1.e-5    # AztecOO tolerance
+
+
+[../time_discretization]
+timestep        = 0.001
+method          = Newmark
+theta           = 0.25
+gamma           = 0.5
+
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
   prectype        = Ifpack

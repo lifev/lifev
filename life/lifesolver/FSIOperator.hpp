@@ -420,7 +420,7 @@ public:
     //! Method to compute the scalar coefficient \f$\alpha\f$ of the Robin--Neumann coupling scheme
     void setAlphafCoef();
     //! Method calling setAlphaf and setAlphafCoef
-    void setStructureToFluidParametres();
+    void setStructureToFluidParameters();
 
     //! Reset the right hand side to zero
     /*!

@@ -76,7 +76,7 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
         break;
     case 2:
         if ( t <= 0.003 ) 
-	  return -13332.2;
+	  return 13332.2;
 	else
 	  return 0.0;
         break;

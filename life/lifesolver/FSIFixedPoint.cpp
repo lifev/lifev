@@ -54,15 +54,16 @@ void  FSIFixedPoint::solveJac(vector_Type        &muk,
                            const vector_Type  &res,
                            const Real   /*_linearRelTol*/)
 {
-    M_nonLinearAitken.restart();
+  //    M_nonLinearAitken.restart();
 
     if (M_data->algorithm()=="RobinNeumann")
     {
-        muk = M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
+      M_nonLinearAitken.restart();
+      muk = res; // M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(),-1*res);
     }
     else
     {
-        muk = M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(), -1.*res);
+      muk = M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
     }
 }
 
@@ -146,12 +147,11 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
               << "; updateEvery = " << M_data->updateEvery() << std::endl;
 
     if (iter == 0 && this->isFluid())
-    {
-        this->M_fluid->resetPreconditioner();
+    {  
+      M_nonLinearAitken.restart();
+      this->M_fluid->resetPreconditioner();
         //this->M_solid->resetPrec();
     }
-
-
 
     M_epetraWorldComm->Barrier();
 
@@ -169,14 +169,16 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     {
         this->M_meshMotion->iterate(*M_BCh_mesh);
 
-        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
-                                        this->veloFluidMesh());
+	//        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
+	//                              this->veloFluidMesh());
+	vector_Type  meshVelocity( M_meshMotion->disp(), Repeated );
 
-
-	this->veloFluidMesh() = M_ALETimeAdvance->velocity( M_meshMotion->disp() );  // w lives in HE fespace
-
-
-        //this->veloFluidMesh()    -= this->dispFluidMeshOld();
+	meshVelocity = M_ALETimeAdvance->velocity( M_meshMotion->disp() );  // w lives in HE fespace
+	
+	this->transferMeshMotionOnFluid(meshVelocity,
+					this->veloFluidMesh());
+        
+	//this->veloFluidMesh()    -= this->dispFluidMeshOld();
 	// this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
 
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
@@ -197,9 +199,11 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         //*M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
 
         //*M_beta += this->M_bdf->extrapolation();
-
+	
+	*M_beta =0;
+	
 	if(iter==0)
-	 this->M_fluidTimeAdvance->extrapolation(  *M_beta);
+	 this->M_fluidTimeAdvance->extrapolation( *M_beta);
 	else
 	  *M_beta += *this->M_fluid->solution();
 
@@ -226,8 +230,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
         std::cout << "Finished iterate, transfering to interface \n" << std::flush;
 
-        this->transferFluidOnInterface(this->M_fluid->residual(), sigmaFluidUnique);
-
+         this->transferFluidOnInterface(this->M_fluid->residual(), sigmaFluidUnique);
     }
 
     M_epetraWorldComm->Barrier();
@@ -244,8 +247,6 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         std::cout << "norm_inf( press ) " << press.normInf() << std::endl;
 
     }
-
-
 
     this->setSigmaFluid( sigmaFluidUnique );
     this->setSigmaSolid( sigmaFluidUnique );
