@@ -41,11 +41,12 @@ namespace LifeV
 namespace Multiscale
 {
 
-UInt        multiscaleCoresPerNode  = 1;
-std::string multiscaleProblemFolder = "./";
-std::string multiscaleProblemPrefix = "Step";
-UInt        multiscaleProblemStep   = 0;
-bool        multiscaleExitFlag      = EXIT_SUCCESS;
+UInt        multiscaleCoresPerNode       = 1;
+std::string multiscaleProblemFolder      = "./";
+std::string multiscaleProblemPrefix      = "Step";
+UInt        multiscaleProblemStep        = 0;
+UInt        multiscaleSaveEachNTimeSteps = 1;
+bool        multiscaleExitFlag           = EXIT_SUCCESS;
 
 // ===================================================
 // Constructors
@@ -53,7 +54,6 @@ bool        multiscaleExitFlag      = EXIT_SUCCESS;
 MultiscaleSolver::MultiscaleSolver() :
         M_model                 (),
         M_globalData            ( new multiscaleData_Type() ),
-        M_saveEachNTimeSteps    (),
         M_comm                  ()
 {
 
@@ -100,7 +100,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     multiscaleProblemPrefix = dataFile( "Solver/Output/ProblemPrefix", "Multiscale" );
 
     // Define how many time step between two calls of the saveSolution() method
-    M_saveEachNTimeSteps = dataFile( "Solver/Output/SaveEach", 1 );
+    multiscaleSaveEachNTimeSteps = dataFile( "Solver/Output/SaveEach", 1 );
 
     // Create the main model and set the communicator
     M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "Multiscale" ) ], multiscaleModelsMap ) );
@@ -173,7 +173,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 
         // Save the solution
         saveChrono.start();
-        if ( M_globalData->dataTime()->timeStepNumber()%M_saveEachNTimeSteps == 0 || M_globalData->dataTime()->isLastTimeStep() )
+        if ( M_globalData->dataTime()->timeStepNumber()%multiscaleSaveEachNTimeSteps == 0 || M_globalData->dataTime()->isLastTimeStep() )
             M_model->saveSolution();
         saveChrono.stop();
 
@@ -214,7 +214,8 @@ MultiscaleSolver::showMe() const
         std::cout << "Cores per node                = " << multiscaleCoresPerNode << std::endl
                   << "Problem folder                = " << multiscaleProblemFolder << std::endl
                   << "Problem prefix                = " << multiscaleProblemPrefix << std::endl
-                  << "Problem step                  = " << multiscaleProblemStep << std::endl << std::endl;
+                  << "Problem step                  = " << multiscaleProblemStep << std::endl
+                  << "Save each                     = " << multiscaleSaveEachNTimeSteps << " time steps" << std::endl << std::endl;
 
         M_globalData->showMe();
 

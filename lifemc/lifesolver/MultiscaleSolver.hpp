@@ -138,7 +138,6 @@ private:
 
     // Container of global data
     multiscaleDataPtr_Type           M_globalData;
-    Int                              M_saveEachNTimeSteps;
 
     // Communicator
     multiscaleCommPtr_Type           M_comm;
