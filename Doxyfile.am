@@ -61,7 +61,9 @@ apidox-am-doxygen:
 	echo "MAN_OUTPUT             = $(subdir)/man" >> Doxyfile; \
 	echo "GENERATE_TAGFILE       = $(top_builddir)/doc/api/$(PACKAGE).tag" >> Doxyfile ;\
 	echo "HAVE_DOT               = $(LIFE_HAS_DOT)" >> Doxyfile ; \
-	echo "CITE_BIB_FILES         = $(top_srcdir)/doc/tex/biblio.bib $(top_srcdir)/doc/tex/lifev.bib" >> Doxyfile ; \
+	echo "CITE_BIB_FILES         = biblio.bib lifev.bib" >> Doxyfile ; \
+	ln -s $(top_srcdir)/doc/tex/biblio.bib; \
+	ln -s $(top_srcdir)/doc/tex/lifev.bib; \
 	$(DOXYGEN) Doxyfile; \
 	cp $(top_srcdir)/doc/common/LifeV.png $(top_builddir)/doc/api/html/LifeV.png; \
 	rm -f Doxyfile;
