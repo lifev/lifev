@@ -66,8 +66,8 @@ class dummyVect:
     public std::vector<double>
     {
     public:
-        dummyVect():vector<double>(){}
-        dummyVect(unsigned const int & n):vector<double>(n){}
+        dummyVect(): std::vector<double>(){}
+        dummyVect(unsigned const int & n): std::vector<double>(n){}
         bool isPresent(int )const {return true;}
     };
 
