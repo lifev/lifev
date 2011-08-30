@@ -69,6 +69,7 @@
 
 #include <life/lifealg/SolverAztecOO.hpp>
 
+#include <life/lifesolver/StructuralAssembler.hpp>
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 
 
@@ -126,15 +127,15 @@ public:
     \param offset: the offset parameter used assembling the matrices
   */
   virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                        const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                        const UInt offset
-                        ) = 0;
+		      const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+		      const UInt offset
+		      ) = 0;
 
   //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
   /*!
     \param dataMaterial the class with Material properties data
   */
-  virtual  void computeLinearStiffMatrix( dataPtr_Type& dataMaterial ) = 0;
+  virtual  void computeLinearStiff( dataPtr_Type& dataMaterial ) = 0;
 
   //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
   /*!
@@ -169,13 +170,12 @@ public:
     */
     virtual  void computeKinematicsVariables( const VectorElemental& dk_loc ) = 0;
 
-
   //! Output of the class
   /*!
     \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
     \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
   */
-  void showMe( std::string const& fileNamelinearStiff, std::string const& fileNameStiff );
+  virtual void showMe( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
 
   //! @name Set Methods
   //@{
@@ -192,11 +192,17 @@ public:
   //! Get the Epetramap
   MapEpetra   const& map()     const { return *M_localMap; }
 
-  //! Get the Stiffness matrix
-  matrixPtr_Type const stiff()    const {return M_stiff; }
-
   //! Get the FESpace object
   FESpace<Mesh, MapEpetra>& dFESpace()  {return M_FESpace;}
+
+  //! Get the Stiffness matrix
+  matrixPtr_Type const jacobian()    const {return M_jacobian; }
+
+  //! Get the Stiffness matrix
+  virtual matrixPtr_Type const stiffMatrix() = 0;
+
+  //! Get the Stiffness matrix
+  virtual vectorPtr_Type const stiffVector() = 0;
 
   //@}
 
@@ -208,8 +214,8 @@ protected:
 
   boost::shared_ptr<const MapEpetra>             M_localMap;
 
-  //! Matrix Knl: stiffness (linear + nonlinear)
-  matrixPtr_Type                                 M_stiff;
+  //! Matrix jacobian
+  matrixPtr_Type                                 M_jacobian;
 
   //! The Offset parameter
   UInt                                           M_offset;
@@ -224,20 +230,10 @@ template <typename Mesh>
 StructuralMaterial<Mesh>::StructuralMaterial( ):
   M_FESpace                    ( ),
   M_localMap                   ( ),
-  M_stiff                      ( ),
+  M_jacobian                   ( ),
   M_offset                     ( 0 )
 {
   std::cout << "I am in the constructor of StructuralMaterial" << std::endl;
-}
-
-template <typename Mesh>
-void
-StructuralMaterial<Mesh>::showMe( std::string const& fileNamelinearStiff,
-				  std::string const& fileNameStiff
-				)
-{
-  this->M_linearStiff(fileNamelinearStiff);
-  this->M_stiff(fileNameStiff);
 }
 
 }

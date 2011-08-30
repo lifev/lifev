@@ -58,6 +58,9 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData():
         M_materialsFlagSet                 ( false ),
         M_poisson                          ( ),
         M_young                            ( ),
+        M_bulk                             ( ),
+        M_alpha                            ( ),
+        M_gamma                            ( ),
         M_order                            ( ),
         M_factor                           ( ),
         M_verbose                          ( )
@@ -72,6 +75,9 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffEla
         M_materialsFlagSet                 ( venantKirchhoffElasticData.M_materialsFlagSet ),
         M_poisson                          ( venantKirchhoffElasticData.M_poisson ),
         M_young                            ( venantKirchhoffElasticData.M_young ),
+        M_bulk                             ( venantKirchhoffElasticData.M_bulk ),
+        M_alpha                            ( venantKirchhoffElasticData.M_alpha ),
+        M_gamma                            ( venantKirchhoffElasticData.M_gamma ),
         M_order                            ( venantKirchhoffElasticData.M_order ),
         M_factor                           ( venantKirchhoffElasticData.M_factor ),
         M_verbose                          ( venantKirchhoffElasticData.M_verbose )
@@ -92,6 +98,9 @@ VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& venantK
         M_materialsFlagSet                 = venantKirchhoffElasticData.M_materialsFlagSet;
         M_poisson                          = venantKirchhoffElasticData.M_poisson;
         M_young                            = venantKirchhoffElasticData.M_young;
+        M_bulk                             = venantKirchhoffElasticData.M_bulk;
+        M_alpha                            = venantKirchhoffElasticData.M_alpha;
+        M_gamma                            = venantKirchhoffElasticData.M_gamma;
         M_order                            = venantKirchhoffElasticData.M_order;
         M_factor                           = venantKirchhoffElasticData.M_factor;
         M_verbose                          = venantKirchhoffElasticData.M_verbose;
@@ -124,6 +133,10 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
 
         M_young[1]   = dataFile( ( section + "/physics/young"   ).data(), 0. );
         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
+
+        M_bulk[1] = dataFile( ( section + "/physics/bulk" ).data(), 0. );
+        M_alpha[1] = dataFile( ( section + "/physics/alpha" ).data(), 0. );
+        M_gamma[1] = dataFile( ( section + "/physics/gamma" ).data(), 0. );
     }
     else
     {
@@ -139,6 +152,10 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
             material            = dataFile( ( section + "/physics/material_flag" ).data(), 0, i );
             M_young[material]   = dataFile( ( section + "/physics/young"         ).data(), 0., i );
             M_poisson[material] = dataFile( ( section + "/physics/poisson"       ).data(), 0., i );
+
+            M_bulk[material] = dataFile( ( section + "/physics/bulk"       ).data(), 0., i );
+            M_alpha[material] = dataFile( ( section + "/physics/alpha"       ).data(), 0., i );
+            M_gamma[material] = dataFile( ( section + "/physics/gamma"       ).data(), 0., i );
         }
     }
 
@@ -162,6 +179,15 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
         output << "young[" << i->first << "]                         = " << i->second << std::endl;
     for ( materialContainerIterator_Type i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
         output << "poisson[" << i->first << "]                       = " << i->second << std::endl;
+
+    for ( materialContainerIterator_Type i = M_bulk.begin() ; i != M_bulk.end() ; ++i )
+        output << "bulk[" << i->first << "]                       = " << i->second << std::endl;
+
+    for ( materialContainerIterator_Type i = M_alpha.begin() ; i != M_alpha.end() ; ++i )
+        output << "alpha[" << i->first << "]                       = " << i->second << std::endl;
+
+    for ( materialContainerIterator_Type i = M_gamma.begin() ; i != M_gamma.end() ; ++i )
+        output << "gamma[" << i->first << "]                       = " << i->second << std::endl;
 
     for ( materialContainerIterator_Type i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
     {
@@ -219,6 +245,61 @@ VenantKirchhoffElasticData::young( const UInt& material ) const
         return 0;
     }
 }
+
+Real
+VenantKirchhoffElasticData::bulk( const UInt& material ) const
+{
+    materialContainer_Type::const_iterator IT;
+    if ( M_materialsFlagSet )
+        IT = M_bulk.find( material );
+    else
+        IT = M_bulk.find( 1 );
+
+    if ( IT != M_bulk.end() )
+        return IT->second;
+    else
+    {
+        std::cout << " !!! Warning: the bulk modulus has not been set !!!" << std::endl;
+        return 0;
+    }
+}
+
+Real
+VenantKirchhoffElasticData::alpha( const UInt& material ) const
+{
+    materialContainer_Type::const_iterator IT;
+    if ( M_materialsFlagSet )
+        IT = M_alpha.find( material );
+    else
+        IT = M_alpha.find( 1 );
+
+    if ( IT != M_alpha.end() )
+        return IT->second;
+    else
+    {
+        std::cout << " !!! Warning: the alpha modulus has not been set !!!" << std::endl;
+        return 0;
+    }
+}
+
+Real
+VenantKirchhoffElasticData::gamma( const UInt& material ) const
+{
+    materialContainer_Type::const_iterator IT;
+    if ( M_materialsFlagSet )
+        IT = M_gamma.find( material );
+    else
+        IT = M_gamma.find( 1 );
+
+    if ( IT != M_gamma.end() )
+        return IT->second;
+    else
+    {
+        std::cout << " !!! Warning: the gamma modulus has not been set !!!" << std::endl;
+        return 0;
+    }
+}
+
 
 Real
 VenantKirchhoffElasticData::lambda( const UInt& material ) const

@@ -59,6 +59,8 @@ class VenantKirchhoffMaterialLinear :
     typedef typename super::matrix_Type              matrix_Type;
 
     typedef typename super::matrixPtr_Type           matrixPtr_Type;
+    typedef typename super::vectorPtr_Type           vectorPtr_Type;
+
     typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
     typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
   
@@ -92,7 +94,7 @@ class VenantKirchhoffMaterialLinear :
     /*!
       \param dataMaterial the class with Material properties data
     */
-    void computeLinearStiffMatrix( dataPtr_Type& dataMaterial );
+    void computeLinearStiff( dataPtr_Type& dataMaterial );
 
     //! Updates the Jacobian matrix in StructualSolver::updateJacobian
     /*!
@@ -126,29 +128,26 @@ class VenantKirchhoffMaterialLinear :
     */
     void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
-    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
-    //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
-    /*!
-      \param sol:  the solution vector
-      \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-    */
-    void computeMatrix( const vector_Type& /*sol*/,
-			Real /*factor*/,
-			const dataPtr_Type& /*dataMaterial*/,
-			const displayerPtr_Type& displayer);
-
     //! Missing Documentation!!!
     void computeKinematicsVariables( const VectorElemental& dk_loc ){}
+
+    //! ShowMe method of the class (saved on a file the two matrices)
+    void showMe( std::string const& fileNameStiff,
+		 std::string const& fileNameJacobian);
 
     //@}
 
     //! @name Get Methods
     //@{
 
-    //! Get the Stiffness matrix
+    //! Get the linear part of the matrix
     matrixPtr_Type const linearStiff()    const {return M_linearStiff; }
+
+    //! Get the Stiffness matrix
+    matrixPtr_Type const stiffMatrix()  {return M_stiff; }
+
+    //! Get the Stiffness matrix
+    vectorPtr_Type const stiffVector(){}
 
     //@}
 
@@ -160,13 +159,17 @@ protected:
 
   //! Matrix Kl: stiffness linear
   matrixPtr_Type                                 M_linearStiff;
+
+  //! Matrix Kl: stiffness linear
+  matrixPtr_Type                                 M_stiff;
 };
 
 template <typename Mesh>
 VenantKirchhoffMaterialLinear<Mesh>::VenantKirchhoffMaterialLinear():
     super			 ( ),
     M_elmatK                     ( ),
-    M_linearStiff                ( )
+    M_linearStiff                ( ),
+    M_stiff                      ( )
 {
 }
 
@@ -192,7 +195,7 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
 }
 
 template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiffMatrix(dataPtr_Type& dataMaterial)
+void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataMaterial)
 {
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
     // Number of displacement components
@@ -266,20 +269,10 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianMatrix( matrixP
 
 
 template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& disp,
-							       Real factor,
-							       const dataPtr_Type& dataMaterial,
+void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& /*disp*/,
+							    Real /*factor*/,
+							       const dataPtr_Type& /*dataMaterial*/,
 							       const displayerPtr_Type& displayer )
-{
-    this->computeMatrix( disp, factor, dataMaterial, displayer );
-}
-
-
-template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::computeMatrix(const vector_Type& /*disp*/,
-							Real /*factor*/,
-							const dataPtr_Type& /*dataMaterial*/,
-							const displayerPtr_Type& displayer)
 {
     std::cout << std::endl;
     std::cout << "*********************************" << std::endl;
@@ -288,6 +281,21 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeMatrix(const vector_Type& /*dis
     std::cout << "*********************************" << std::endl;
 }
 
+
+template <typename Mesh>
+void
+StructuralMaterial<Mesh>::showMe( std::string const& fileNameStiff,
+				  std::string const& fileNameJacobian
+				)
+{
+  //This string is to save the linear part
+  std::string fileNamelinearStiff =  fileNameStiff;
+  fileNamelinearStiff += "linear";
+  
+  this->M_linearStiff.spy(fileNamelinearStiff);
+  this->M_stiff.spy(fileNameStiff);
+  this->M_jacobian.spy(fileNameJacobian);
+}
 
 template <typename Mesh>
 inline StructuralMaterial<Mesh>* createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear<Mesh >(); }
