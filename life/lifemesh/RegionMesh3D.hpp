@@ -1300,6 +1300,7 @@ public:
     /**
      *  @param fct Function of three double arguments.
      *  @param list_pts List of Points.
+     *  @todo Move away, this can be done using the utility of the list of pts
      */
     void getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& list_pts );
 
