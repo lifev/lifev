@@ -601,23 +601,22 @@ FSIOperator::updateSystem()
 void FSIOperator::couplingVariableExtrap( )
 {
     *M_lambda      = lambdaSolid();
-    //  *M_lambdaDot   = lambdaDotSolid();
-    //    if (!M_lambdaDot.get())
-    // {
-    //    M_lambdaDot.reset        ( new vector_Type(*M_fluidInterfaceMap, Unique) );
-    //    *M_lambda     += M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid();
-    // }
-    //   else
-    //     {
-      
-    //         M_solidTimeAdvance->extrapolation(*M_lambdaSolid);
-    // 	M_solidTimeAdvance->extrapolationFirstDerivative(*M_lambdaDotSolid);
-    //         transferSolidOnInterface(*M_lambdaSolid, *this->M_lambda);
-    //         transferSolidOnInterface(*M_lambdaDotSolid, *this->M_lambdaDot);
-    //       //*M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
-    //       //*M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
-    //     }
-
+   
+    if (!M_lambdaDot.get())
+     {
+        M_lambdaDot.reset   ( new vector_Type(*M_fluidInterfaceMap, Unique) );
+        *M_lambda     += M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid();
+     }
+    else
+      {
+	M_solidTimeAdvance->extrapolation(*M_lambdaSolid);
+	M_solidTimeAdvance->extrapolationFirstDerivative(*M_lambdaDotSolid);
+	transferSolidOnInterface(*M_lambdaSolid, *this->M_lambda);
+	transferSolidOnInterface(*M_lambdaDotSolid, *this->M_lambdaDot);
+	//*M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
+	//*M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
+      }
+    
     //*M_lambdaDot   = lambdaDotSolid();
     displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->normInf(), "\n" );
     displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->normInf(), "\n");
@@ -1079,13 +1078,14 @@ void
 FSIOperator::setAlphafCoef( )
 {
     Real h=0.1, R=0.5;
-    M_AlphafCoef  = 2*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->timeStep();
-    M_AlphafCoef += h*this->dataSolid()->young(0)*this->dataFluid()->dataTime()->timeStep() /
-                    (2*pow(R,2) *(1-pow(dataSolid()->poisson(0),2)));
+    M_AlphafCoef  =  M_ALETimeAdvance->coefficientSecondDerivative( 0 )*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->timeStep();
+    M_AlphafCoef += h*M_data->dataSolid()->young(1)*this->dataFluid()->dataTime()->timeStep() /
+      (pow(R,2) *(1-pow(M_data->dataSolid()->poisson(1),2)));
+    M_AlphafCoef /= M_ALETimeAdvance->coefficientFirstDerivative( 0 );
 }
 
 void
-FSIOperator::setStructureToFluidParametres()
+FSIOperator::setStructureToFluidParameters()
 {
     this->setAlphafCoef();
     this->setAlphaf();
