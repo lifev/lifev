@@ -89,7 +89,7 @@ FSIMonolithic::setupFEspace()
 
     // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
     M_dFESpace.reset( new FESpace<mesh_Type, MapEpetra>( M_solidMesh,
-                                                         M_data->dataSolid()->getOrder(),
+                                                         M_data->dataSolid()->order(),
                                                          nDimensions,
                                                          M_epetraComm));
 }
@@ -263,7 +263,7 @@ void
 FSIMonolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->getdataTime()->timeStep()*M_solid->getRescaleFactor());//M_data->dataSolid()->rescaleFactor());
+    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
     M_solidBlock->globalAssemble();
     M_solid->rescaleMatrices();
 }
@@ -333,13 +333,13 @@ FSIMonolithic::solveJac( vector_Type& step, const vector_Type& res, const Real /
     M_precPtr->GlobalAssemble();
 
 #ifdef HAVE_LIFEV_DEBUG
-    M_solid->getDisplayer().leaderPrint("  M-  Residual NormInf:                        ", res.normInf(), "\n");
+    M_solid->displayer().leaderPrint("  M-  Residual NormInf:                        ", res.normInf(), "\n");
 #endif
 
     iterateMonolithic(res, step);
 
 #ifdef HAVE_LIFEV_DEBUG
-    M_solid->getDisplayer().leaderPrint("  M-  Solution NormInf:                        ", step.normInf(), "\n");
+    M_solid->displayer().leaderPrint("  M-  Solution NormInf:                        ", step.normInf(), "\n");
 #endif
 }
 
@@ -372,7 +372,7 @@ FSIMonolithic::initialize( fluidPtr_Type::value_type::function_Type const& u0,
     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
 
     vector_Type d(M_dFESpace->map());
-    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->getdataTime()->time());
+    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->dataTime()->time());
 
     initialize(u, p, d);
 }
@@ -400,8 +400,8 @@ FSIMonolithic::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
     extendedSolidVelocity->subset( *solidVelocity, solidVelocity->map(), static_cast <UInt> ( 0 ), M_offset );
 
     // Rescale the quantities
-    *extendedSolidDisplacement /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
-    *extendedSolidVelocity /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
+    *extendedSolidDisplacement /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
+    *extendedSolidVelocity /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
 
     M_solid->initialize( extendedSolidDisplacement, extendedSolidVelocity );
 }
@@ -444,10 +444,10 @@ FSIMonolithic::iterateMonolithic(const vector_Type& rhs, vector_Type& step)
     {
         chrono.start();
 
-        M_solid->getDisplayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
+        M_solid->displayer().leaderPrint("   Iterative solver failed, numiter = ", -numIter );
 
         if (numIter <= -M_maxIterSolver)
-            M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
+            M_solid->displayer().leaderPrint("   ERROR: Iterative solver failed.\n");
     }
 
     //M_solid->getDisplayer().leaderPrint("  M-  System solved.\n" );
@@ -496,7 +496,7 @@ FSIMonolithic::
 updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     M_solid->updateSystem();
-    *rhsFluidCoupling += *M_solid->getRhsWithoutBC();
+    *rhsFluidCoupling += *M_solid->rhsWithoutBC();
 }
 
 void
