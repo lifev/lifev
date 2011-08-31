@@ -1,0 +1,56 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+                  Jean Bonnemain <jean.bonnemain@epfl.ch>
+#           Date: 2011-08-26
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### MULTISCALE: Main data file ####################################################################
+###################################################################################################
+
+[Problem] #########################################################################################
+ProblemType = Multiscale
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-Windkessel0D_AortaVAD_DescAo_ReymondStergiopulos2009-ArterialTree_S
+
+[Solver] ##########################################################################################
+###################################################################################################
+
+    [./Restart]
+    Restart                    = false
+    RestartFromStepNumber      = 0
+
+    [../time_discretization]
+    initialtime                = .00      # [s]
+    #endtime                    = 0.8      # [s] 1-HB
+    #initialtime                = 0.8      # [s] 2-HB start
+    #endtime                    = 1.6      # [s] 2-HB end
+    #initialtime                = 1.6      # [s] 3-HB start
+    #endtime                    = 2.4      # [s] 3-HB end
+    #initialtime                = 2.4      # [s] 4-HB start
+    #endtime                    = 3.2      # [s] 4-HB end
+    #initialtime                = 3.2      # [s] 5-HB start
+    #endtime                    = 4.0      # [s] 5-HB end
+    #initialtime                = 4.0      # [s] 6-HB start
+    endtime                    = 4.8      # [s] 6-HB end
+    #endtime                    = 0.8      # [s] Absorbing
+    timestep                   = 1e-3     # [s]
+
+    [../]
+
+###################################################################################################
+
+[Physics] #########################################################################################
+###################################################################################################
+FluidDensity                = 1.04          # density        [g/cm^3]
+FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+FluidVenousPressure         = 6.6661195E+03 # ven. pressure  [g/cm/s^2 - dyne/cm^2]
+SolidExternalPressure       = 1E+05         # ref. pressure  [g/cm/s^2 - dyne/cm^2]
+SolidDensity                = 0.0           # density        [g/cm^3]
+SolidPoissonCoefficient     = 0.0           # Poisson coeff. []
+SolidYoungModulus           = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
+###################################################################################################
