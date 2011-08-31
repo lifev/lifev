@@ -152,7 +152,7 @@ public:
     \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
     \param displayer: a pointer to the Dysplaier member in the StructuralSolver class    
   */
-    virtual  void updateNonLinearJacobianMatrix( matrixPtr_Type& /*stiff*/, const vector_Type& /*disp*/, const dataPtr_Type& /*dataMaterial*/, const displayerPtr_Type& /*displayer*/ ) = 0;
+  //    virtual  void updateNonLinearJacobianTerms( matrixPtr_Type& /*stiff*/, const vector_Type& /*disp*/, const dataPtr_Type& /*dataMaterial*/, const displayerPtr_Type& /*displayer*/ ) = 0;
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
@@ -199,10 +199,10 @@ public:
   matrixPtr_Type const jacobian()    const {return M_jacobian; }
 
   //! Get the Stiffness matrix
-  virtual matrixPtr_Type const stiffMatrix() = 0;
+  virtual matrixPtr_Type const stiffMatrix() const = 0;
 
   //! Get the Stiffness matrix
-  virtual vectorPtr_Type const stiffVector() = 0;
+  virtual vectorPtr_Type const stiffVector() const = 0;
 
   //@}
 
@@ -213,6 +213,9 @@ protected:
   boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
 
   boost::shared_ptr<const MapEpetra>             M_localMap;
+
+  //! Elementary matrix for the Jacobian
+  boost::scoped_ptr<MatrixElemental>             M_elmatJac;
 
   //! Matrix jacobian
   matrixPtr_Type                                 M_jacobian;

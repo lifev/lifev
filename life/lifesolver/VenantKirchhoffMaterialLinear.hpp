@@ -113,7 +113,7 @@ class VenantKirchhoffMaterialLinear :
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void updateNonLinearJacobianMatrix( matrixPtr_Type& stiff,
+    void updateNonLinearJacobianTerms(  matrixPtr_Type& stiff,
                                         const vector_Type& /*disp*/,
                                         const dataPtr_Type& /*dataMaterial*/,
                                         const displayerPtr_Type& /*displayer*/);
@@ -141,13 +141,13 @@ class VenantKirchhoffMaterialLinear :
     //@{
 
     //! Get the linear part of the matrix
-    matrixPtr_Type const linearStiff()    const {return M_linearStiff; }
+    matrixPtr_Type const linearStiff() const {return M_linearStiff; }
 
     //! Get the Stiffness matrix
-    matrixPtr_Type const stiffMatrix()  {return M_stiff; }
+    matrixPtr_Type const stiffMatrix() const {return M_stiff; }
 
     //! Get the Stiffness matrix
-    vectorPtr_Type const stiffVector(){}
+    vectorPtr_Type const stiffVector() const {}
 
     //@}
 
@@ -252,13 +252,13 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateJacobianMatrix(const vector_Type
 
     std::cout << std::endl;
     std::cout << "*********************************" << std::endl;
-    updateNonLinearJacobianMatrix(this->M_stiff,disp,dataMaterial,displayer);
+    updateNonLinearJacobianTerms(this->M_stiff,disp,dataMaterial,displayer);
     std::cout << "*********************************" << std::endl;
     std::cout << std::endl;
 }
 
 template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianMatrix( matrixPtr_Type& /*stiff*/,
+void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& /*stiff*/,
                                                                          const  vector_Type& /*disp*/,
                                                                          const dataPtr_Type& /*dataMaterial*/,
                                                                          const displayerPtr_Type& displayer )

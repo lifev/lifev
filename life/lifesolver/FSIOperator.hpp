@@ -88,6 +88,7 @@
 #include <life/lifesolver/StructuralMaterial.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialLinear.hpp>
+#include <life/lifesolver/NeoHookeanMaterialNonLinear.hpp>
 
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
