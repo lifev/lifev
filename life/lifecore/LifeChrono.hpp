@@ -122,6 +122,7 @@ public:
     //! Compute the global difference in time between start and stop for all the processes in the communicator
     /*!
      * @param comm the global communicator
+     * @return elapsed time
      */
     Real globalDiff( const comm_Type& comm )
     {
