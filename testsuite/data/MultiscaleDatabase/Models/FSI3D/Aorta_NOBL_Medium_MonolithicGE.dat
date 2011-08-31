@@ -15,7 +15,7 @@
 ###################################################################################################
 
 [Multiscale]
-modelName        = FSI3D_Aorta_NOBL_Fine_MonolithicGE
+modelName        = FSI3D_Aorta_NOBL_Medium_MonolithicGE
 modelType        = FSI3D
 couplingFlags    = '2 9 8 5 4 3 6 7'
 

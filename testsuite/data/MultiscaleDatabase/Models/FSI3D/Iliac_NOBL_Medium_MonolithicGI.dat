@@ -15,7 +15,7 @@
 ###################################################################################################
 
 [Multiscale]
-modelName        = FSI3D_Iliac_NOBL_Fine_MonolithicGI
+modelName        = FSI3D_Iliac_NOBL_Medium_MonolithicGI
 modelType        = FSI3D
 couplingFlags    = '2 4 3 5 6'
 
