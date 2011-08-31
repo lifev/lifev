@@ -285,8 +285,6 @@ private:
     Real                          M_restartTimeStep;
 };
 
-
-
 } // end namespace LifeV
 
 #endif // end FSIDATA_H
