@@ -823,7 +823,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
     Real etamax  = 0;
     Int NonLinearLineSearch = 0;
 
-    Real time = this->M_data->time();
+    Real time = this->M_data->dataTime()->time();
 
     Int status = 0;
 
