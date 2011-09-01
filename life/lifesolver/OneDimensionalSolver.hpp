@@ -71,6 +71,8 @@ namespace LifeV
 //! OneDimensionalSolver - Solver class for the 1D model.
 /*!
  *  @author Vincent Martin, Tiziano Passerini, Lucia Mirabella, Gilles Fourestey, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  <b>EQUATIONS:</b> <BR>
  *  The conservative form of the generic hyperbolic problem is

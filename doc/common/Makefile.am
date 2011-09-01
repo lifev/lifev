@@ -22,7 +22,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 EXTRA_DIST	= GPL LGPL
 
-dist_pkgdata_DATA = header.html footer.html Home.png
+dist_pkgdata_DATA = header.html footer.html LifeV.png
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

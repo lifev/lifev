@@ -51,6 +51,8 @@ namespace LifeV
 //! OneDimensionalFunction - Base class for 1D BC Functions.
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  The 1D boundary condition function is evaluated as a function of the current time and of the time step.
  */

@@ -69,7 +69,7 @@ namespace LifeV
  *  side                = right          <BR>
  *  quantity            = W2             <BR>
  *  line                = first          <BR>
- *  functionDefault     = Absorbing      <BR>
+ *  functionSD          = Absorbing      <BR>
  *  </CODE>
  *
  *  where \c side, \c quantity, and \c line are the classical parameters for a 1D boundary condition.

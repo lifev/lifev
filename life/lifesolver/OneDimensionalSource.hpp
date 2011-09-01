@@ -46,6 +46,8 @@ namespace LifeV
 //! OneDimensionalSource - Base class for the source term \f$\mathbf S\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  The conservative form of the generic hyperbolic problem is
  *

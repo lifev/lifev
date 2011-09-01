@@ -55,6 +55,8 @@ namespace LifeV
 //! OneDimensionalModelBCFunctionDefault - Base class for deriving specific 1D boundary functions
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  This class provide a general interface for implementing some specific boundary conditions
  *  for the 1D segment.

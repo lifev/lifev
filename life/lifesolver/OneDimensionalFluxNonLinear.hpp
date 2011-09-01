@@ -50,6 +50,8 @@ namespace LifeV
 //! OneDimensionalFluxNonLinear - Class containing the non-linear flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  The conservative form of the generic hyperbolic problem is
  *
