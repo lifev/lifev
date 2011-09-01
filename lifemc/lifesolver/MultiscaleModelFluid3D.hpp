@@ -51,7 +51,7 @@
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
 // Mathcard includes
-#include <lifemc/lifesolver/BCInterface3D.hpp>
+#include <life/lifefem/BCInterface3D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
@@ -99,7 +99,7 @@ public:
     typedef boost::shared_ptr< bcInterface_Type >             bcInterfacePtr_Type;
 
     typedef TimeAdvanceBDFNavierStokes< fluidVector_Type >    bdf_Type;
-    typedef OseenData		                                  data_Type;
+    typedef OseenData                                          data_Type;
 
     typedef FESpace< mesh_Type, MapEpetra >                   FESpace_Type;
     typedef boost::shared_ptr< FESpace_Type >                 FESpacePtr_Type;

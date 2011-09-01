@@ -274,6 +274,8 @@ multiscaleErrorCheck( const errors_Type& error, const std::string& message = "",
         default:
 
             errorMessage << "No error message for this errorType!\n";
+
+            break;
         }
 
         errorMessage << message << "\n";

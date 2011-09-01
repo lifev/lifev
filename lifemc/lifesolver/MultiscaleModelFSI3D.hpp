@@ -59,7 +59,7 @@
 #include <life/lifesolver/MonolithicBlockComposedNN.hpp>
 #include <life/lifesolver/MonolithicBlockComposedDNND.hpp>
 
-#include <lifemc/lifesolver/BCInterface3D.hpp>
+#include <life/lifefem/BCInterface3D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
