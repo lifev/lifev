@@ -143,15 +143,6 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     [../boundary_conditions]
     list = ' '
 
-        [./Rings]
-        type       = Essential
-        flag       = 20
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../]
-
     [../]
 
 
@@ -165,8 +156,8 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     material_flag    = '1 22'
     #externalPressure = 0
     #density          = '1.2 1.2'
-    young            = '3.19E6 3.19E6' # Computed as 4E6 * (1-nu^2) to match the value of the 1D
-    poisson          = '0.45 0.45'
+    young            = '3.0784E6 3.0784E6' # Computed as 4E6 * (1-nu^2) to match the value of the 1D
+    poisson          = '0.48 0.48'
 
     [../time_discretization]
     #timestep                   = 0.0001 # [s]
