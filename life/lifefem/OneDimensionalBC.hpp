@@ -53,6 +53,8 @@ namespace LifeV
 //! OneDimensionalBC - Class featuring methods to handle boundary conditions.
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  We need to impose 2 boundary condition on each side of the 1D segment.
  *  These class stores the boundary conditions on one side.

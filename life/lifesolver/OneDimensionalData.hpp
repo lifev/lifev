@@ -55,6 +55,8 @@ namespace LifeV
 //! OneDimensionalData - Class which read and holds all the data for the One Dimensional Model Solver.
 /*!
  *  @authors Vincent Martin, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  <b>Physical Parameters</b>
  *

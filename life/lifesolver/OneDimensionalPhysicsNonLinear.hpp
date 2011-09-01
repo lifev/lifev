@@ -51,6 +51,8 @@ namespace LifeV
 //! OneDimensionalPhysicsNonLinear - Class providing non linear physical operations for the 1D model data.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  It contains the following methods:
  *  <ol>
