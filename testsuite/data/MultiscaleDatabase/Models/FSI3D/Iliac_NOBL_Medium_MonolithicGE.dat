@@ -229,10 +229,10 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [./RobinAlpha]
             #function = 0
-            #function = '3.0 * 10000' # R0 - Paolo
-            #function = '5.5 * 10000' # R1
-            function = '11.0 * 10000' # R2
-            #function = '22.0 * 10000' # R3
+            function = '5.0 * 10000' # A
+            #function = '6.5 * 10000' # B
+            #function = '8.0 * 10000' # C
+            #function = '10.0 * 10000' # D
 
             [../RobinBeta]
             function = 0
@@ -248,10 +248,10 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [./RobinAlpha]
             #function = 0
-            #function = '5.0 * 10000' # R0 - Paolo
-            #function = '8.5 * 10000' # R1
-            function = '16.0 * 10000' # R2
-            #function = '32.0 * 10000' # R3
+            function = '8.0 * 10000' # A
+            #function = '10.0 * 10000' # B
+            #function = '12.5 * 10000' # C
+            #function = '15.0 * 10000' # D
 
             [../RobinBeta]
             function = 0
@@ -267,10 +267,10 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [./RobinAlpha]
             #function = 0
-            #function = '5.0 * 10000' # R0 - Paolo
-            #function = '8.5 * 10000' # R1
-            function = '16.0 * 10000' # R2
-            #function = '32.0 * 10000' # R3
+            function = '8.0 * 10000' # A
+            #function = '10.0 * 10000' # B
+            #function = '12.5 * 10000' # C
+            #function = '15.0 * 10000' # D
 
             [../RobinBeta]
             function = 0
@@ -286,10 +286,10 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [./RobinAlpha]
             #function = 0
-            #function = '6.0 * 10000' # R0 - Paolo
-            #function = '10.5 * 10000' # R1
-            function = '20.0 * 10000' # R2
-            #function = '40.0 * 10000' # R3
+            function = '10.0 * 10000' # A
+            #function = '12.5 * 10000' # B
+            #function = '15.0 * 10000' # C
+            #function = '17.5 * 10000' # D
 
             [../RobinBeta]
             function = 0
@@ -305,10 +305,10 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [./RobinAlpha]
             #function = 0
-            #function = '6.0 * 10000' # R0 - Paolo
-            #function = '10.5 * 10000' # R1
-            function = '20.0 * 10000' # R2
-            #function = '40.0 * 10000' # R3
+            function = '10.0 * 10000' # A
+            #function = '12.5 * 10000' # B
+            #function = '15.0 * 10000' # C
+            #function = '17.5 * 10000' # D
 
             [../RobinBeta]
             function = 0
@@ -324,10 +324,10 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [./RobinAlpha]
             #function = 0
-            #function = '6.0 * 10000' # R0 - Paolo
-            #function = '10.5 * 10000' # R1
-            function = '20.0 * 10000' # R2
-            #function = '40.0 * 10000' # R3
+            function = '12.5 * 10000' # A
+            #function = '15.0 * 10000' # B
+            #function = '17.5 * 10000' # C
+            #function = '20.0 * 10000' # D
 
             [../RobinBeta]
             function = 0
@@ -343,10 +343,10 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [./RobinAlpha]
             #function = 0
-            #function = '6.0 * 10000' # R0 - Paolo
-            #function = '10.5 * 10000' # R1
-            function = '20.0 * 10000' # R2
-            #function = '40.0 * 10000' # R3
+            function = '12.5 * 10000' # A
+            #function = '15.0 * 10000' # B
+            #function = '17.5 * 10000' # C
+            #function = '20.0 * 10000' # D
 
             [../RobinBeta]
             function = 0
