@@ -99,7 +99,7 @@ public:
     typedef boost::shared_ptr< bcInterface_Type >             bcInterfacePtr_Type;
 
     typedef TimeAdvanceBDFNavierStokes< fluidVector_Type >    bdf_Type;
-    typedef OseenData                                          data_Type;
+    typedef OseenData                                         data_Type;
 
     typedef FESpace< mesh_Type, MapEpetra >                   FESpace_Type;
     typedef boost::shared_ptr< FESpace_Type >                 FESpacePtr_Type;
