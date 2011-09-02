@@ -30,8 +30,7 @@
    \author crosetto <Paolo Crosetto>
    \date 18 Sep 2008
 
-   \include ../../testsuite/test_monolithic/fluidstructure.dox
-   This file implements the Monolithic Geometry--Implicit solver, see \ref CDFQ for details
+   This file implements the Monolithic Geometry--Implicit solver, see \cite CrosettoEtAl2009 for details
 
 */
 #ifndef _MONOLITHICGI_HPP

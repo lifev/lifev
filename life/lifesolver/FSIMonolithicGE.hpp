@@ -31,8 +31,7 @@
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
     @date 26 Jul 2010
 
-    \include ../../testsuite/test_monolithic/fluidstructure.dox
-    This file implements the Monolithic Geometry--Explicit solver, see \ref CDFQ for details
+    This file implements the Monolithic Geometry--Explicit solver, see \cite CrosettoEtAl2009 for details
  */
 
 #ifndef MONOLITHICGE_H
@@ -53,9 +52,8 @@ namespace LifeV
 
 //! FSIMonolithicGE - FSIMonolithic Geometry-Explicit solver
 /*!
-  \include ../../testsuite/test_monolithic/fluidstructure.dox
   @author Paolo Crosetto
-  @see \ref CDFQ
+  @see \cite CrosettoEtAl2009
 
  Important parameters to set properly in the data file:
  - useShapeDerivatives: MUST be false, because in the GE approach the geometry is explicit;
