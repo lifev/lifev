@@ -36,7 +36,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/OneDimensionalSourceLinear.hpp>
@@ -47,66 +47,53 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalSourceLinear::source( const Real& U1, const Real& U2, const ID& ii, const UInt& iNode ) const
+OneDimensionalSourceLinear::source( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const
 {
-    if ( ii == 0 ) // S1
+    if ( row == 0 ) // S1
     {
-        return M_physics->data()->source10( iNode ) +
-               M_physics->data()->source11( iNode ) * U1 +
-               M_physics->data()->source12( iNode ) * U2;
+        return M_physicsPtr->data()->source10( iNode ) +
+               M_physicsPtr->data()->source11( iNode ) * U1 +
+               M_physicsPtr->data()->source12( iNode ) * U2;
     }
-    if ( ii == 1 ) // S2
+    if ( row == 1 ) // S2
     {
-        return M_physics->data()->source20( iNode ) +
-               M_physics->data()->source21( iNode ) * U1 +
-               M_physics->data()->source22( iNode ) * U2;
+        return M_physicsPtr->data()->source20( iNode ) +
+               M_physicsPtr->data()->source21( iNode ) * U1 +
+               M_physicsPtr->data()->source22( iNode ) * U2;
     }
     ERROR_MSG("The flux function has only 2 components.");
     return -1.;
 }
 
 Real
-OneDimensionalSourceLinear::dSdU( const Real& /*_U1*/, const Real& /*_U2*/, const ID& ii, const ID& jj, const UInt& iNode ) const
+OneDimensionalSourceLinear::dSdU( const Real& /*U1*/, const Real& /*U2*/, const ID& row, const ID& column, const UInt& iNode ) const
 {
-    if ( ii == 0 && jj == 0) // dS1/dU1 = 0
+    if ( row == 0 && column == 0) // dS1/dU1 = 0
     {
-        return M_physics->data()->source11( iNode );
+        return M_physicsPtr->data()->source11( iNode );
     }
-    if ( ii == 0 && jj == 1) // dS1/dU2 = 0
+    if ( row == 0 && column == 1) // dS1/dU2 = 0
     {
-        return M_physics->data()->source12( iNode );
+        return M_physicsPtr->data()->source12( iNode );
     }
-    if ( ii == 1 && jj == 0 ) // dS2/dU1
+    if ( row == 1 && column == 0 ) // dS2/dU1
     {
-        return M_physics->data()->source21( iNode );
+        return M_physicsPtr->data()->source21( iNode );
     }
-    if ( ii == 1 && jj == 1 ) // dS2/dU2
+    if ( row == 1 && column == 1 ) // dS2/dU2
     {
-        return M_physics->data()->source22( iNode );
+        return M_physicsPtr->data()->source22( iNode );
     }
     ERROR_MSG("Source's differential function has only 4 components.");
     return -1.;
 }
 
-//Real
-//OneDimensionalSourceLinear::diff2( const Real& /*_U1*/, const Real& /*_U2*/,
-//                                          const ID& ii,        const ID& jj, const ID& kk,
-//                                          const UInt& /*iNode*/ ) const
-//{
-//    if( (0 < ii && ii < 3) && (0 < jj && jj < 3) && (0 < kk && kk < 3) )
-//    {
-//        return 0.;
-//    }
-//    ERROR_MSG("Source's second differential function has only 8 components.");
-//    return -1.;
-//}
-
 Real
-OneDimensionalSourceLinear::interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
-                                                           const ID& ii,   const container2D_Type& bcNodes, const Real& /*cfl*/ ) const
+OneDimensionalSourceLinear::interpolatedNonConservativeSource( const Real& U1, const Real& U2,
+                                                               const ID& row, const container2D_Type& bcNodes, const Real& /*cfl*/ ) const
 {
     //TODO Implement the interpolation as done for the non-linear case
-    return this->source(U1, U2, ii, bcNodes[0]);
+    return this->source(U1, U2, row, bcNodes[0]);
 }
 
 }

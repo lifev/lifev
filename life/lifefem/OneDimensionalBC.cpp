@@ -67,10 +67,10 @@ OneDimensionalBC::OneDimensionalBC( const OneDimensionalBC& bc ) :
 // ===================================================
 void
 OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
-                           const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs )
+                           const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs )
 {
     UInt iNode;
-    ( M_bcSide == OneDimensional::left ) ? iNode = 0 : iNode = flux->physics()->data()->numberOfNodes() - 1;
+    ( M_bcSide == OneDimensional::left ) ? iNode = 0 : iNode = fluxPtr->physics()->data()->numberOfNodes() - 1;
 
     container2D_Type boundaryU;
     boundaryU[0] = (*solution.find("A")->second)(iNode);
@@ -80,8 +80,8 @@ OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solutio
     container2D_Type eigenvalues;
     container2D_Type leftEigenvector1, leftEigenvector2;
 
-    flux->eigenValuesEigenVectors( boundaryU[0], boundaryU[1],
-                                   eigenvalues, leftEigenvector1, leftEigenvector2, iNode );
+    fluxPtr->eigenValuesEigenVectors( boundaryU[0], boundaryU[1],
+                                      eigenvalues, leftEigenvector1, leftEigenvector2, iNode );
 
     std::map<bcLine_Type, container2D_Type> bcMatrix;
     bcMatrix[ OneDimensional::first ]  = container2D_Type();
@@ -90,11 +90,11 @@ OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solutio
     container2D_Type bcRHS;
 
     // First line of Matrix and RHS
-    computeMatrixAndRHS( time, timeStep, flux, OneDimensional::first,
+    computeMatrixAndRHS( time, timeStep, fluxPtr, OneDimensional::first,
                          leftEigenvector1, leftEigenvector2, iNode, bcMatrix, bcRHS[0] );
 
     // Second line of Matrix and RHS
-    computeMatrixAndRHS( time, timeStep, flux, OneDimensional::second,
+    computeMatrixAndRHS( time, timeStep, fluxPtr, OneDimensional::second,
                          leftEigenvector1, leftEigenvector2, iNode, bcMatrix, bcRHS[1] );
 
 
@@ -110,10 +110,10 @@ OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solutio
 }
 
 void
-OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs )
+OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs )
 {
     UInt iNode;
-    ( M_bcSide == OneDimensional::left ) ? iNode = 0 : iNode = flux->physics()->data()->numberOfNodes() - 1;
+    ( M_bcSide == OneDimensional::left ) ? iNode = 0 : iNode = fluxPtr->physics()->data()->numberOfNodes() - 1;
 
     switch ( M_bcType.find( OneDimensional::first )->second )
     {
@@ -146,7 +146,7 @@ OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& ma
 // Private Methods
 // ===================================================
 void
-OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& line,
+OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& fluxPtr, const bcLine_Type& line,
                                        const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
                                        const UInt& iNode, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS )
 {
@@ -174,8 +174,9 @@ OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, c
     case OneDimensional::S:
         // The normal stress has opposite sign with respect to the pressure
         bcRHS *= -1;
+        // The break here is missing on purpose!
     case OneDimensional::P:
-        bcRHS = flux->physics()->fromPToA( bcRHS, timeStep, iNode );
+        bcRHS = fluxPtr->physics()->fromPToA( bcRHS, timeStep, iNode );
         bcMatrix[line][0] = 1.;
         bcMatrix[line][1] = 0.;
         break;

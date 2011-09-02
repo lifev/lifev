@@ -37,7 +37,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/OneDimensionalPhysicsLinear.hpp>
@@ -51,23 +51,23 @@ namespace LifeV
 void
 OneDimensionalPhysicsLinear::fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const
 {
-    W1 = U2 + celerity0( iNode ) * ( U1 - M_data->area0( iNode ) );
+    W1 = U2 + celerity0( iNode ) * ( U1 - M_dataPtr->area0( iNode ) );
 
-    W2 = U2 - celerity0( iNode ) * ( U1 - M_data->area0( iNode ) );
+    W2 = U2 - celerity0( iNode ) * ( U1 - M_dataPtr->area0( iNode ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] Q " << U2 << "\n";
     Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] W1 " << W1 << "\n";
     Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] W2 " << W2 << "\n";
     Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] celerity " << celerity0( iNode ) << "\n";
-    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] ( _U1 - area0( iNode ) ) " << ( U1 - M_data->area0( iNode ) ) << "\n";
+    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] ( _U1 - area0( iNode ) ) " << ( U1 - M_dataPtr->area0( iNode ) ) << "\n";
 #endif
 }
 
 void
 OneDimensionalPhysicsLinear::fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const
 {
-    U1 = M_data -> area0( iNode ) + ( W1 - W2) / ( 2 * celerity0( iNode ) );
+    U1 = M_dataPtr -> area0( iNode ) + ( W1 - W2) / ( 2 * celerity0( iNode ) );
 
     U2 = ( W1 + W2 ) / 2;
 }
@@ -75,29 +75,30 @@ OneDimensionalPhysicsLinear::fromWToU( Real& U1, Real& U2, const Real& W1, const
 Real
 OneDimensionalPhysicsLinear::fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const
 {
-    return ( M_data -> beta0( iNode )
-             * (   OneDimensional::pow05( 1 / M_data->area0( iNode ), M_data -> beta1( iNode ) )
-                 * OneDimensional::pow05( (W1 - W2 ) / ( 2 * celerity0( iNode ) ) + M_data -> area0( iNode ), M_data -> beta1( iNode ) )
+    return ( M_dataPtr -> beta0( iNode )
+             * (   OneDimensional::pow05( 1 / M_dataPtr->area0( iNode ), M_dataPtr -> beta1( iNode ) )
+                 * OneDimensional::pow05( (W1 - W2 ) / ( 2 * celerity0( iNode ) ) + M_dataPtr -> area0( iNode ), M_dataPtr -> beta1( iNode ) )
                  - 1 )
            );
 }
 
 Real
-OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& iNode ) const
+OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const
 {
-    Real add( 2 * celerity0( iNode ) * M_data -> area0( iNode ) * ( OneDimensional::pow20( P / M_data -> beta0( iNode ) + 1, 1 / M_data -> beta1( iNode ) ) - 1 ) );
+    Real add( 2 * celerity0( iNode ) * M_dataPtr -> area0( iNode ) * ( OneDimensional::pow20( P / M_dataPtr -> beta0( iNode ) + 1,
+                                                                                              1 / M_dataPtr -> beta1( iNode ) ) - 1 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug(6320) << "[fromPToW] "
-    << "2 * celerity0( iNode ) * area0( iNode ) = " << 2 * celerity0( iNode ) * M_data -> area0( iNode )
+    << "2 * celerity0( iNode ) * area0( iNode ) = " << 2 * celerity0( iNode ) * M_dataPtr -> area0( iNode )
     << ", pow( ( P / beta0( iNode ) + 1 ), 1 / beta1( iNode ) ) = "
-    << OneDimensional::pow20( P / M_data -> beta0( iNode ) + 1 , 1 / M_data -> beta1( iNode ) ) << "\n";
+    << OneDimensional::pow20( P / M_dataPtr -> beta0( iNode ) + 1 , 1 / M_dataPtr -> beta1( iNode ) ) << "\n";
     Debug(6320) << "[fromPToW] add term = " << add << "\n";
 #endif
 
-    if ( i == 0 )
+    if ( iW == 0 )
         return W - add;
-    if ( i == 1 )
+    if ( iW == 1 )
         return W + add;
 
     ERROR_MSG("You can only find W1 or W2 as function of P");
@@ -105,14 +106,14 @@ OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i
 }
 
 Real
-OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const Real& W, const ID& i, const UInt& /*iNode*/ ) const
+OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_tn*/, const Real& W, const ID& iW, const UInt& /*iNode*/ ) const
 {
     Real add( 2 * Q );
 
-    if ( i == 0 ) // W1 given
+    if ( iW == 0 ) // W1 given
         return add - W;
 
-    if ( i == 1 ) // W2 given
+    if ( iW == 1 ) // W2 given
         return add - W;
 
     ERROR_MSG("You can only find W1 or W2 as function of Q");
@@ -123,19 +124,20 @@ OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const
 // Derivatives Methods
 // ===================================================
 Real
-OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& iNode ) const
+OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const
 {
-    Real beta0beta1overA0beta1 ( M_data->beta0( iNode ) * M_data -> beta1( iNode ) / OneDimensional::pow05( M_data -> area0( iNode ), M_data -> beta1( iNode ) ) );
+    Real beta0beta1overA0beta1 ( M_dataPtr->beta0( iNode ) * M_dataPtr -> beta1( iNode ) / OneDimensional::pow05( M_dataPtr -> area0( iNode ),
+                                                                                                                  M_dataPtr -> beta1( iNode ) ) );
 
     Real oneover2celerity( 1 / ( 2 * celerity0( iNode ) ) );
 
     Real result( beta0beta1overA0beta1 * oneover2celerity );
-    result *= ( ( W1 - W2 ) * oneover2celerity + M_data -> area0( iNode ) );
+    result *= ( ( W1 - W2 ) * oneover2celerity + M_dataPtr -> area0( iNode ) );
 
-    if ( i == 0 ) //! dP/dW1
+    if ( iW == 0 ) //! dP/dW1
         return result;
 
-    if ( i == 1 ) //! dP/dW2
+    if ( iW == 1 ) //! dP/dW2
         return -result;
 
     ERROR_MSG("P(W1,W2)'s differential function has only 2 components.");

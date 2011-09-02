@@ -119,9 +119,33 @@ public:
     //! @name Public Types
     //@{
 
-    typedef IteratorType                                        iterator_Type;
-    typedef boost::iterator_range< iterator_Type >              iteratorRange_Type;
-    typedef ResultsType                                         results_Type;
+    /*! @typedef iterator_Type */
+    //! Type definition for the iterator
+    typedef IteratorType                                                 iterator_Type;
+
+    /*! @typedef iteratorRange_Type */
+    //!Type definition for the iterator range
+    typedef boost::iterator_range< iterator_Type >                       iteratorRange_Type;
+
+    /*! @typedef results_Type */
+    //! Type definition for the results
+    typedef ResultsType                                                  results_Type;
+
+    /*! @typedef qiRuleVoid_Type */
+    //! Type definition for the void rule of the parser
+    typedef qi::rule< iterator_Type, void(), ascii::space_type >         qiRuleVoid_Type;
+
+    /*! @typedef qiRuleReal_Type */
+    //! Type definition for the Real rule of the parser
+    typedef qi::rule< iterator_Type, Real(), ascii::space_type >         qiRuleReal_Type;
+
+    /*! @typedef qiRuleResults_Type */
+    //! Type definition for the result rule of the parser
+    typedef qi::rule< iterator_Type, results_Type(), ascii::space_type > qiRuleResults_Type;
+
+    /*! @typedef qiSymbolReal_Type */
+    //! Type definition for the Real symbol of the parser
+    typedef qi::symbols<char, Real >                                     qiSymbolReal_Type;
 
     //@}
 
@@ -160,20 +184,27 @@ public:
     //! @name Methods
     //@{
 
-    /*! Assign a variable using a \c boost::iterator_range
-     *
+    //! Assign a variable using a \c boost::iterator_range
+    /*!
      * @param stringIteratorRange name of the parameter
      * @param value value of the parameter
      */
-    void assignVariable( const iteratorRange_Type& stringIteratorRange, const Real& value ) { setVariable( std::string( stringIteratorRange.begin(), stringIteratorRange.end() ), value ); }
+    void assignVariable( const iteratorRange_Type& stringIteratorRange, const Real& value )
+    {
+        setVariable( std::string( stringIteratorRange.begin(), stringIteratorRange.end() ), value );
+    }
 
     //! Clear all the variables.
     void clearVariables() { M_variable.clear(); }
 
-    /*
-        //! Show all the variables
-        void ShowMe() { std::cout << "ShowMe called!" << std::endl; }
+    /* TODO Implement the showMe and use the M_command to enable it.
+     * Note that the M_command is a rule to execute commands given in the strings, e.g.:
+     * string = "a=1; b=2; showMe; a*t+b" means that first we set the variables "a" and "b",
+     * then we call the command showMe (to display the variables) and finally we evaluate
+     * the function, i.e., "f=a*t+b", where t is the time.
     */
+//    //! Show all the variables
+//    void ShowMe() { std::cout << "To be implemented" << std::endl; }
 
     //@}
 
@@ -184,8 +215,8 @@ public:
     //! Set default variables
     void setDefaultVariables();
 
-    /*! Set/replace a variable
-     *
+    //! Set/replace a variable
+    /*!
      * @param name name of the parameter
      * @param value value of the parameter
      */
@@ -196,8 +227,8 @@ public:
     //! @name Get Methods
     //@{
 
-    /*! Get variable
-     *
+    //! Get variable
+    /*!
      * @param name name of the parameter
      * @return value of the variable
      */
@@ -210,58 +241,58 @@ private:
     //! @name Private Methods
     //@
 
-    /*! Phoenix wrapper for \c std::sin
-     *
+    //! Phoenix wrapper for \c std::sin
+    /*!
      * @param value input value
      * @return sin( value )
      */
     Real sin( const Real& value ) const { return std::sin( value ); }
 
-    /*! Phoenix wrapper for \c std::cos
-     *
+    //! Phoenix wrapper for \c std::cos
+    /*!
      * @param value input value
      * @return cos( value )
      */
     Real cos( const Real& value ) const { return std::cos( value ); }
 
-    /*! Phoenix wrapper for \c std::tan
-     *
+    //! Phoenix wrapper for \c std::tan
+    /*!
      * @param value input value
      * @return tan( value )
      */
     Real tan( const Real& value ) const { return std::tan( value ); }
 
-    /*! Phoenix wrapper for \c std::pow
-     *
+    //! Phoenix wrapper for \c std::pow
+    /*!
      * @param base input base
      * @param exponent input exponent
      * @return pow( base, exponent )
      */
     Real pow( const Real& Base, const Real& Exponent ) const { return std::pow( Base, Exponent ); }
 
-    /*! Phoenix wrapper for \c std::sqrt
-     *
+    //! Phoenix wrapper for \c std::sqrt
+    /*!
      * @param value input value
      * @return sqrt( value )
      */
     Real sqrt( const Real& value ) const { return std::sqrt( value ); }
 
-    /*! Phoenix wrapper for \c std::exp
-     *
+    //! Phoenix wrapper for \c std::exp
+    /*!
      * @param value input value
      * @return exp( value )
      */
     Real exp( const Real& value ) const { return std::exp( value ); }
 
-    /*! Phoenix wrapper for \c std::log
-     *
+    //! Phoenix wrapper for \c std::log
+    /*!
      * @param value input value
      * @return log( value )
      */
     Real log( const Real& value ) const { return std::log( value ); }
 
-    /*! Phoenix wrapper for \c std::log10
-     *
+    //! Phoenix wrapper for \c std::log10
+    /*!
      * @param value input value
      * @return log10( value )
      */
@@ -269,22 +300,22 @@ private:
 
     //@}
 
-    qi::rule< iterator_Type, results_Type(), ascii::space_type > M_start;
+    qiRuleResults_Type      M_start;
 
-    qi::rule< iterator_Type, void(), ascii::space_type >         M_assignment;
-//    qi::rule< iterator_Type, void(), ascii::space_type >         M_command;
+    qiRuleVoid_Type         M_assignment;
+//    qiRuleVoid_Type         M_command;
 
-    qi::rule< iterator_Type, double(), ascii::space_type >       M_expression;
-    qi::rule< iterator_Type, double(), ascii::space_type >       M_compare;
-    qi::rule< iterator_Type, double(), ascii::space_type >       M_plusMinus;
-    qi::rule< iterator_Type, double(), ascii::space_type >       M_multiplyDivide;
-    qi::rule< iterator_Type, double(), ascii::space_type >       M_elevate;
-    qi::rule< iterator_Type, double(), ascii::space_type >       M_element;
-    qi::rule< iterator_Type, double(), ascii::space_type >       M_number;
-    qi::rule< iterator_Type, double(), ascii::space_type >       M_function;
-    qi::rule< iterator_Type, double(), ascii::space_type >       M_group;
+    qiRuleReal_Type         M_expression;
+    qiRuleReal_Type         M_compare;
+    qiRuleReal_Type         M_plusMinus;
+    qiRuleReal_Type         M_multiplyDivide;
+    qiRuleReal_Type         M_elevate;
+    qiRuleReal_Type         M_element;
+    qiRuleReal_Type         M_number;
+    qiRuleReal_Type         M_function;
+    qiRuleReal_Type         M_group;
 
-    qi::symbols<char, Real >                                     M_variable;
+    qiSymbolReal_Type       M_variable;
 };
 
 
@@ -309,94 +340,93 @@ ParserSpiritGrammar< IteratorType, ResultsType >::ParserSpiritGrammar() :
         M_group                               (),
         M_variable                            ()
 {
-    M_start
-    =
+    M_start =
         (
             M_assignment
-//        |  M_command
+//        |   M_command
         |  ( -qi::lit('[') >> M_expression % ',' >> -qi::lit(']') )
         )
         ;
 
-    M_assignment
-    =
-        (    qi::raw[qi::lexeme[(qi::alpha | '_') >> *(qi::alnum | '_')]]
+    M_assignment =
+        (
+             qi::raw[qi::lexeme[(qi::alpha | '_') >> *(qi::alnum | '_')]]
         >>   qi::lit('=')
         >>   M_expression
-        )              [phoenix::bind(&ParserSpiritGrammar::assignVariable,this, qi::_1, qi::_2)]
+        )                                        [phoenix::bind(&ParserSpiritGrammar::assignVariable,this, qi::_1, qi::_2)]
         ;
     /*
-        M_command
-            =  qi::lit("ShowMe")[phoenix::bind(&ParserSpiritGrammar::ShowMe, this)]
+    M_command =
+        qi::lit("ShowMe")[phoenix::bind(&ParserSpiritGrammar::ShowMe, this)]
         ;
     */
 
-    M_expression
-    =  *M_compare                                        [qi::_val = qi::_1]
+    M_expression =
+       *M_compare                                [qi::_val = qi::_1]
        ;
 
-    M_compare
-    =   M_plusMinus                                      [qi::_val = qi::_1]
+    M_compare =
+        M_plusMinus                              [qi::_val = qi::_1]
         >> *(
-            qi::lit(">=") >> M_plusMinus                 [qi::_val = qi::_val >= qi::_1]
-        |   qi::lit("<=") >> M_plusMinus                 [qi::_val = qi::_val <= qi::_1]
-        |   qi::lit(">") >> M_plusMinus                  [qi::_val = qi::_val > qi::_1]
-        |   qi::lit("<") >> M_plusMinus                  [qi::_val = qi::_val < qi::_1]
-        )
+                qi::lit(">=") >> M_plusMinus     [qi::_val = qi::_val >= qi::_1]
+            |   qi::lit("<=") >> M_plusMinus     [qi::_val = qi::_val <= qi::_1]
+            |   qi::lit(">") >> M_plusMinus      [qi::_val = qi::_val > qi::_1]
+            |   qi::lit("<") >> M_plusMinus      [qi::_val = qi::_val < qi::_1]
+            )
         ;
 
-    M_plusMinus
-    =   M_multiplyDivide                                 [qi::_val = qi::_1]
+    M_plusMinus =
+        M_multiplyDivide                         [qi::_val = qi::_1]
         >> *(
-            qi::lit('+') >> M_multiplyDivide             [qi::_val += qi::_1]
-        |   qi::lit('-') >> M_multiplyDivide             [qi::_val -= qi::_1]
-        )
+                qi::lit('+') >> M_multiplyDivide [qi::_val += qi::_1]
+            |   qi::lit('-') >> M_multiplyDivide [qi::_val -= qi::_1]
+            )
         ;
 
-    M_multiplyDivide
-    =   M_elevate                                        [qi::_val = qi::_1]
+    M_multiplyDivide =
+        M_elevate                                [qi::_val = qi::_1]
         >> *(
-            qi::lit('*') >> M_elevate                    [qi::_val *= qi::_1]
-        |   qi::lit('/') >> M_elevate                    [qi::_val /= qi::_1]
-        )
+                qi::lit('*') >> M_elevate        [qi::_val *= qi::_1]
+            |   qi::lit('/') >> M_elevate        [qi::_val /= qi::_1]
+            )
         ;
 
-    M_elevate
-    =
+    M_elevate =
         (
-            qi::lit('-') >> M_element                    [qi::_val = qi::_1]
+            qi::lit('-') >> M_element            [qi::_val = qi::_1]
             >>  (
-                qi::lit('^') >> M_element                [qi::_val = -phoenix::bind(&ParserSpiritGrammar::pow, this, qi::_val, qi::_1)]
+                qi::lit('^') >> M_element        [qi::_val = -phoenix::bind(&ParserSpiritGrammar::pow,
+                                                                            this, qi::_val, qi::_1)]
             )
             >> *(
-                qi::lit('^') >> M_element                [qi::_val = phoenix::bind(&ParserSpiritGrammar::pow, this, qi::_val, qi::_1)]
+                qi::lit('^') >> M_element        [qi::_val = phoenix::bind(&ParserSpiritGrammar::pow,
+                                                                           this, qi::_val, qi::_1)]
             )
         )
         |
         (
-            M_element                                    [qi::_val = qi::_1]
+            M_element                            [qi::_val = qi::_1]
             >> *(
-                qi::lit('^') >> M_element                [qi::_val = phoenix::bind(&ParserSpiritGrammar::pow, this, qi::_val, qi::_1)]
+                qi::lit('^') >> M_element        [qi::_val = phoenix::bind(&ParserSpiritGrammar::pow,
+                                                                           this, qi::_val, qi::_1)]
             )
         )
         ;
 
-    M_element
-    =
+    M_element =
         (
-            qi::lit('-') >> M_element                    [qi::_val = -qi::_1]
+            qi::lit('-') >> M_element            [qi::_val = -qi::_1]
         )
         |
         (
-            M_number                                     [qi::_val = qi::_1]
-        |   M_function                                   [qi::_val = qi::_1]
-        |   M_variable                                   [qi::_val = qi::_1]
-        |   M_group                                      [qi::_val = qi::_1]
+            M_number                             [qi::_val = qi::_1]
+        |   M_function                           [qi::_val = qi::_1]
+        |   M_variable                           [qi::_val = qi::_1]
+        |   M_group                              [qi::_val = qi::_1]
         )
         ;
 
-    M_number
-    =
+    M_number =
         (
             qi::double_
 //            ||   ('.' >> qi::double_)
@@ -404,21 +434,19 @@ ParserSpiritGrammar< IteratorType, ResultsType >::ParserSpiritGrammar() :
         )
         ;
 
-    M_function
-    =
+    M_function =
         (
-            qi::lit("sin")   >> M_group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::sin, this,   qi::_1)]
-        |   qi::lit("cos")   >> M_group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::cos, this,   qi::_1)]
-        |   qi::lit("tan")   >> M_group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::tan, this,   qi::_1)]
-        |   qi::lit("sqrt")  >> M_group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::sqrt, this,  qi::_1)]
-        |   qi::lit("exp")   >> M_group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::exp, this,   qi::_1)]
-        |   qi::lit("log")   >> M_group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::log, this,   qi::_1)]
-        |   qi::lit("log10") >> M_group                  [qi::_val = phoenix::bind(&ParserSpiritGrammar::log10, this, qi::_1)]
+            qi::lit("sin")   >> M_group          [qi::_val = phoenix::bind(&ParserSpiritGrammar::sin, this,   qi::_1)]
+        |   qi::lit("cos")   >> M_group          [qi::_val = phoenix::bind(&ParserSpiritGrammar::cos, this,   qi::_1)]
+        |   qi::lit("tan")   >> M_group          [qi::_val = phoenix::bind(&ParserSpiritGrammar::tan, this,   qi::_1)]
+        |   qi::lit("sqrt")  >> M_group          [qi::_val = phoenix::bind(&ParserSpiritGrammar::sqrt, this,  qi::_1)]
+        |   qi::lit("exp")   >> M_group          [qi::_val = phoenix::bind(&ParserSpiritGrammar::exp, this,   qi::_1)]
+        |   qi::lit("log")   >> M_group          [qi::_val = phoenix::bind(&ParserSpiritGrammar::log, this,   qi::_1)]
+        |   qi::lit("log10") >> M_group          [qi::_val = phoenix::bind(&ParserSpiritGrammar::log10, this, qi::_1)]
         )
         ;
 
-    M_group
-    =
+    M_group =
         (
             '('
         >>  M_expression                                 [qi::_val = qi::_1]
@@ -456,7 +484,6 @@ ParserSpiritGrammar< IteratorType, ResultsType >::operator=( const ParserSpiritG
     if ( this != &spiritGrammar )
     {
         ParserSpiritGrammar::base_type::operator=( spiritGrammar.M_start );
-//        ParserSpiritGrammar< IteratorType, ResultsType >::operator=( spiritGrammar );
         M_start                               = spiritGrammar.M_start;
         M_assignment                          = spiritGrammar.M_assignment;
 //        M_command                             = spiritGrammar.M_command;

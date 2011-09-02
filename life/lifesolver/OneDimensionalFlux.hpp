@@ -32,7 +32,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalFlux_H
@@ -43,9 +43,22 @@
 namespace LifeV
 {
 
-//! OneDimensionalFlux - Base class for the flux function F of the 1D hyperbolic problem.
+//! OneDimensionalFlux - Base class for the flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *
+ *  The conservative form of the generic hyperbolic problem is
+ *
+ *  \f[
+ *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
+ *  \f]
+ *
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
+ *
+ *  This class implements all the interfaces required for the computation of \f$\mathbf F\f$ and its derivatives.
  */
 class OneDimensionalFlux
 {
@@ -68,10 +81,14 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
-    explicit OneDimensionalFlux() : M_physics() {}
+    //! Empty constructor
+    explicit OneDimensionalFlux() : M_physicsPtr() {}
 
-    explicit OneDimensionalFlux( const physicsPtr_Type physics ) : M_physics( physics ) {}
+    //! Constructor
+    /*!
+     * @param physicsPtr pointer to the physics of the problem
+     */
+    explicit OneDimensionalFlux( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
 
     //! Do nothing destructor
     virtual ~OneDimensionalFlux() {}
@@ -82,42 +99,34 @@ public:
     //! @name Virtual Methods
     //@{
 
-    //! operator()
+    //! Evaluate the flux term
     /*!
-     *  F = [Q, alpha*Q^2/A + beta0*beta1/(rho*(beta1+1)*A0^beta1) * A^(beta1+1) ]
-     *  \param iNode : is the index position for the parameters
-     *  when they are space dependent.
-     *  This is NOT pretty. I should try to remove this dependency. VM 09/04
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the flux term
+     *  @param iNode node of the mesh
      */
-    virtual Real flux( const Real& A, const Real& Q, const ID& ii, const UInt& iNode ) const = 0;
+    virtual Real flux( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const = 0;
 
 
-    //! Jacobian matrix
+    //! Evaluate the derivative of the flux term
     /*!
-     *  Hij = dFi/dxj
-     *
-     *  diff(1,1) = dF1/dx1    diff(1,2) = dF1/dx2
-     *  diff(2,1) = dF2/dx1    diff(2,2) = dF2/dx2
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the derivative of the flux term
+     *  @param column column of the derivative of the flux term
+     *  @param iNode node of the mesh
      */
-    virtual Real dFdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode ) const  = 0;
+    virtual Real dFdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const  = 0;
 
-    //! Second derivative tensor d2Fi/(dxj dxk)
+    //! Eigenvalues and eigenvectors of the Jacobian matrix
     /*!
-     *  diff2(1,1,1) = d2F1/dx1dx1    diff2(1,1,2) = d2F1/dx1dx2
-     *  diff2(1,2,1) = d2F1/dx2dx1    diff2(1,2,2) = d2F1/dx2dx2
-     *  diff2(2,1,1) = d2F2/dx1dx1    diff2(2,1,2) = d2F2/dx1dx2
-     *  diff2(2,2,1) = d2F2/dx2dx1    diff2(2,2,2) = d2F2/dx2dx2
-     *
-     *  with d2Fi/dx1dx2 = d2Fi/dx2dx1
-     */
-//    virtual Real diff2( const Real& A, const Real& Q,
-//                        const ID& ii,   const ID& jj, const ID& kk,
-//                        const UInt& iNode = 0 ) const  = 0;
-
-    //! Eigenvalues and eigenvectors of the Jacobian matrix dFi/dxj
-    /*!
-     * \param eigi is the ith eigen value of the matrix dF/dx (i=1,2).
-     * \param lefteigvecij is the jth component of the left eigen vector associated to eigi. (i,j=1,2)
+     *  @param A area
+     *  @param Q flow rate
+     *  @param eigenvalues eigenvalues of the Jacobian matrix
+     *  @param leftEigenvector1 first row of the left eigenvector matrix
+     *  @param leftEigenvector2 second row of the left eigenvector matrix
+     *  @param iNode node of the mesh
      */
     virtual void eigenValuesEigenVectors( const Real& A, const Real& Q,
                                           container2D_Type& eigenvalues,
@@ -125,7 +134,15 @@ public:
                                           container2D_Type& leftEigenvector2,
                                           const UInt& iNode ) const = 0;
 
-    //! Compute the derivative of the eigenvalues and of the eigenvectors of the Jacobian matrix
+    //! Derivatives of the eigenvalues and eigenvectors of the derivative of the Jacobian matrix
+    /*!
+     *  @param A area
+     *  @param Q flow rate
+     *  @param deltaEigenvalues derivative of the eigenvalues of the derivative of the Jacobian matrix
+     *  @param deltaLeftEigenvector1 derivative of the first row of the left eigenvector matrix
+     *  @param deltaLeftEigenvector2 derivative of the second row of the left eigenvector matrix
+     *  @param iNode node of the mesh
+     */
     virtual void deltaEigenValuesEigenVectors( const Real& A, const Real& Q,
                                                container2D_Type& deltaEigenvalues,
                                                container2D_Type& deltaLeftEigenvector1,
@@ -138,7 +155,11 @@ public:
     //! @name Set Methods
     //@{
 
-    void setPhysics( const physicsPtr_Type& physics ) { M_physics = physics; }
+    //! Set the physics of the problem.
+    /*!
+     * @param physicsPtr pointer to the physics of the problem
+     */
+    void setPhysics( const physicsPtr_Type& physicsPtr ) { M_physicsPtr = physicsPtr; }
 
     //@}
 
@@ -146,20 +167,26 @@ public:
     //! @name Get Methods
     //@{
 
-    physicsPtr_Type physics() const { return M_physics; }
+    //! Get the physics of the problem.
+    /*!
+     * @return physics of the problem
+     */
+    physicsPtr_Type physics() const { return M_physicsPtr; }
 
     //@}
 
 protected:
 
-    physicsPtr_Type                 M_physics;
+    physicsPtr_Type                 M_physicsPtr;
 
 private:
 
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalFlux& operator=( const physicsPtr_Type& physics);
+    explicit OneDimensionalFlux( const OneDimensionalFlux& flux );
+
+    OneDimensionalFlux& operator=( const OneDimensionalFlux& flux );
 
     //@}
 

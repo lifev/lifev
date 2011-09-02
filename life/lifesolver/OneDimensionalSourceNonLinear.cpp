@@ -36,7 +36,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/OneDimensionalSourceNonLinear.hpp>
@@ -47,31 +47,32 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& ii, const UInt& iNode ) const
+OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const
 {
-    if ( ii == 0 ) // B1
+    if ( row == 0 ) // B1
     {
         return 0.;
     }
-    if ( ii == 1 ) // B2
+    if ( row == 1 ) // B2
     {
-        Real beta1plus1( M_physics->data()->beta1( iNode ) + 1 );
-        Real AoverA0( A / M_physics->data()->area0( iNode ) );
-        Real C0( 1 / ( M_physics->data()->densityRho() * beta1plus1 ) );
-        Real C ( 1 / ( M_physics->data()->densityRho() * beta1plus1 ) * OneDimensional::pow15( AoverA0, beta1plus1 ) );
+        Real beta1plus1( M_physicsPtr->data()->beta1( iNode ) + 1 );
+        Real AoverA0( A / M_physicsPtr->data()->area0( iNode ) );
+        Real C0( 1 / ( M_physicsPtr->data()->densityRho() * beta1plus1 ) );
+        Real C ( 1 / ( M_physicsPtr->data()->densityRho() * beta1plus1 ) * OneDimensional::pow15( AoverA0, beta1plus1 ) );
 
-        return ( M_physics->data()->friction() * Q / A
-                 + Q * Q / A * M_physics->data()->dAlphadz( iNode )
-                 + C  * ( M_physics->data()->area0( iNode ) * M_physics->data()->dBeta0dz( iNode )
-                          - M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) * M_physics->data()->dArea0dz( iNode )
-                          + M_physics->data()->area0( iNode ) * M_physics->data()->beta0( iNode ) * ( std::log( AoverA0 ) - 1. / beta1plus1 ) * M_physics->data()->dBeta1dz( iNode )
+        return ( M_physicsPtr->data()->friction() * Q / A
+                 + Q * Q / A * M_physicsPtr->data()->dAlphadz( iNode )
+                 + C  * ( M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->dBeta0dz( iNode )
+                          - M_physicsPtr->data()->beta0( iNode ) * M_physicsPtr->data()->beta1( iNode ) * M_physicsPtr->data()->dArea0dz( iNode )
+                          + M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->beta0( iNode )
+                          * ( std::log( AoverA0 ) - 1. / beta1plus1 ) * M_physicsPtr->data()->dBeta1dz( iNode )
                         )
-                 - C0 * ( M_physics->data()->area0( iNode ) * M_physics->data()->dBeta0dz( iNode )
-                          - M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) * M_physics->data()->dArea0dz( iNode )
-                          - M_physics->data()->area0( iNode ) * M_physics->data()->beta0( iNode ) / beta1plus1 * M_physics->data()->dBeta1dz( iNode )
+                 - C0 * ( M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->dBeta0dz( iNode )
+                          - M_physicsPtr->data()->beta0( iNode ) * M_physicsPtr->data()->beta1( iNode ) * M_physicsPtr->data()->dArea0dz( iNode )
+                          - M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->beta0( iNode ) / beta1plus1 * M_physicsPtr->data()->dBeta1dz( iNode )
                         )
-                 + ( M_physics->data()->area0( iNode ) - A ) / M_physics->data()->densityRho() * M_physics->data()->dBeta0dz( iNode )
-               ) * M_physics->data()->robertsonCorrection();
+                 + ( M_physicsPtr->data()->area0( iNode ) - A ) / M_physicsPtr->data()->densityRho() * M_physicsPtr->data()->dBeta0dz( iNode )
+               ) * M_physicsPtr->data()->robertsonCorrection();
     }
 
     ERROR_MSG("The flux function has only 2 components.");
@@ -80,34 +81,36 @@ OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& i
 }
 
 Real
-OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode) const
+OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode) const
 {
-    if ( ii == 0 ) // B1
+    if ( row == 0 ) // B1
     {
-        if ( jj == 0 || jj == 1 ) // dB2/dUj = 0
+        if ( column == 0 || column == 1 ) // dB2/dUj = 0
         {
             return 0.;
         }
     }
-    if ( ii == 1 ) // B2
+    if ( row == 1 ) // B2
     {
-        if ( jj == 0 ) // dB2/dA
+        if ( column == 0 ) // dB2/dA
         {
-            Real AoverA0( A / M_physics->data()->area0( iNode ) );
-            Real C ( OneDimensional::pow05( AoverA0, M_physics->data()->beta1( iNode ) ) / M_physics->data()->densityRho() );
+            Real AoverA0( A / M_physicsPtr->data()->area0( iNode ) );
+            Real C ( OneDimensional::pow05( AoverA0, M_physicsPtr->data()->beta1( iNode ) ) / M_physicsPtr->data()->densityRho() );
 
-            return ( -M_physics->data()->friction() * Q / A / A
-                     - Q * Q / ( A * A ) * M_physics->data()->dAlphadz( iNode )
-                     + C  * ( M_physics->data()->dBeta0dz( iNode )
-                              - M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) / M_physics->data()->area0( iNode ) * M_physics->data()->dArea0dz( iNode )
-                              + M_physics->data()->beta0( iNode ) * std::log( AoverA0 ) * M_physics->data()->dBeta1dz( iNode )
+            return ( -M_physicsPtr->data()->friction() * Q / A / A
+                     - Q * Q / ( A * A ) * M_physicsPtr->data()->dAlphadz( iNode )
+                     + C  * ( M_physicsPtr->data()->dBeta0dz( iNode )
+                              - M_physicsPtr->data()->beta0( iNode ) * M_physicsPtr->data()->beta1( iNode )
+                              / M_physicsPtr->data()->area0( iNode ) * M_physicsPtr->data()->dArea0dz( iNode )
+                              + M_physicsPtr->data()->beta0( iNode ) * std::log( AoverA0 ) * M_physicsPtr->data()->dBeta1dz( iNode )
                             )
-                     - 1. / M_physics->data()->densityRho() * M_physics->data()->dBeta0dz( iNode )
-                   ) * M_physics->data()->robertsonCorrection();
+                     - 1. / M_physicsPtr->data()->densityRho() * M_physicsPtr->data()->dBeta0dz( iNode )
+                   ) * M_physicsPtr->data()->robertsonCorrection();
         }
-        if ( jj == 1 ) // dB2/dQ
+        if ( column == 1 ) // dB2/dQ
         {
-            return M_physics->data()->robertsonCorrection() * ( M_physics->data()->friction() / A + 2 * Q / A * M_physics->data()->dAlphadz( iNode ) );
+            return M_physicsPtr->data()->robertsonCorrection() * ( M_physicsPtr->data()->friction() / A +
+                                                                   2 * Q / A * M_physicsPtr->data()->dAlphadz( iNode ) );
         }
     }
 
@@ -116,111 +119,36 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii,
     return -1.;
 }
 
-// Second derivative tensor d2Bi/(dxj dxk)
-//Real
-//OneDimensionalSourceNonLinear::diff2( const Real& A, const Real& Q,
-//                                             const ID& ii,   const ID& jj, const ID& kk,
-//                                             const UInt& iNode ) const
-//{
-//    Real d2B2dA2;
-//    Real Area0, beta0, beta1, rho, Kr;
-//    Real AoverA0, AoverA0POWbeta1divA;
-//    Real tmp;
-//
-//    Real dArea0dz = 0.;
-//    Real dbeta0dz = 0.;
-//    Real dbeta1dz = 0.;
-//
-//    // B1 = 0 so ...
-//    if( ii == 1 ) // d2B1/dUjdUk = 0.
-//    {
-//        if( ( jj == 1 || jj == 2 ) && ( kk == 1 || kk == 2 ) )
-//        {
-//            return 0.;
-//        }
-//    }
-//    if( ii == 2 )
-//    {
-//        if( jj == 1 && kk == 1 ) // d2B2/dA2
-//        {
-//            // this term is not strictly necessary as it is always multiplied by 0.
-//            // but for the sake of generality...
-//
-//            Area0 = M_physics->data()->Area0( iNode );
-//            beta0 = M_physics->data()->Beta0( iNode );
-//            beta1 = M_physics->data()->Beta1( iNode );
-//            dArea0dz = M_physics->data()->dArea0dz( iNode );
-//            dbeta0dz = M_physics->data()->dBeta0dz( iNode );
-//            dbeta1dz = M_physics->data()->dBeta1dz( iNode );
-//            Kr    = M_physics->data()->Friction();
-//            rho   = M_physics->data()->densityRho();
-//
-//            AoverA0 = A / Area0;
-//            AoverA0POWbeta1divA = std::pow( AoverA0, beta1 ) / A;
-//
-//            tmp = beta0 / rho * AoverA0POWbeta1divA;
-//
-//            // friction term
-//            d2B2dA2 = 2 * Kr * Q / ( A * A * A);
-//
-//            // term with the derivative of A0 with respect to z
-//            d2B2dA2 += - tmp * beta1 * beta1 / Area0 * dArea0dz;
-//
-//            // term with the derivative of beta0 with respect to z
-//            d2B2dA2 += beta1 / rho * AoverA0POWbeta1divA * dbeta0dz;
-//
-//            // term with the derivative of beta1 with respect to z
-//            d2B2dA2 += tmp * ( beta1 * std::log( AoverA0 ) + 1. ) * dbeta1dz;
-//
-//            return M_physics->data()->robertsonCorrection() * d2B2dA2;
-//        }
-//        // cross terms (equal)
-//        if( (jj == 1 && kk == 2) || (jj == 2 && kk == 1) ) // d2B2/dAdQ=d2B2/dQdA
-//        {
-//            Kr    = M_physics->data()->Friction();
-//            return - M_physics->data()->robertsonCorrection() * Kr / ( A * A );
-//        }
-//
-//        if( jj == 2 && kk == 2 ) // d2B2/dQ2
-//        {
-//            return 0.;
-//        }
-//    }
-//
-//    ERROR_MSG("Source's second differential function has only 8 components.");
-//    return -1.;
-//}
-
 Real
-OneDimensionalSourceNonLinear::interpolatedQuasiLinearSource( const Real& A, const Real& Q,
-                                                              const ID& ii, const container2D_Type& bcNodes, const Real& cfl ) const
+OneDimensionalSourceNonLinear::interpolatedNonConservativeSource( const Real& A, const Real& Q,
+                                                                  const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const
 {
-    if ( ii == 0 ) // QLS1
+    if ( row == 0 ) // QLS1
     {
         return 0.;
     }
-    if ( ii == 1 ) // QLS2
+    if ( row == 1 ) // QLS2
     {
         // Interpolate quantities
-        Real area0      = ( 1 - cfl ) * M_physics->data()->area0(bcNodes[0])    + cfl * M_physics->data()->area0(bcNodes[1]);
-        Real beta0      = ( 1 - cfl ) * M_physics->data()->beta0(bcNodes[0])    + cfl * M_physics->data()->beta0(bcNodes[1]);
-        Real beta1      = ( 1 - cfl ) * M_physics->data()->beta1(bcNodes[0])    + cfl * M_physics->data()->beta1(bcNodes[1]);
-        Real dArea0dz   = ( 1 - cfl ) * M_physics->data()->dArea0dz(bcNodes[0]) + cfl * M_physics->data()->dArea0dz(bcNodes[1]);
-        Real dBeta0dz   = ( 1 - cfl ) * M_physics->data()->dBeta0dz(bcNodes[0]) + cfl * M_physics->data()->dBeta0dz(bcNodes[1]);
-        Real dBeta1dz   = ( 1 - cfl ) * M_physics->data()->dBeta1dz(bcNodes[0]) + cfl * M_physics->data()->dBeta1dz(bcNodes[1]);
-        Real dAlphadz   = ( 1 - cfl ) * M_physics->data()->dAlphadz(bcNodes[0]) + cfl * M_physics->data()->dAlphadz(bcNodes[1]);
+        Real area0      = ( 1 - cfl ) * M_physicsPtr->data()->area0(bcNodes[0])    + cfl * M_physicsPtr->data()->area0(bcNodes[1]);
+        Real beta0      = ( 1 - cfl ) * M_physicsPtr->data()->beta0(bcNodes[0])    + cfl * M_physicsPtr->data()->beta0(bcNodes[1]);
+        Real beta1      = ( 1 - cfl ) * M_physicsPtr->data()->beta1(bcNodes[0])    + cfl * M_physicsPtr->data()->beta1(bcNodes[1]);
+        Real dArea0dz   = ( 1 - cfl ) * M_physicsPtr->data()->dArea0dz(bcNodes[0]) + cfl * M_physicsPtr->data()->dArea0dz(bcNodes[1]);
+        Real dBeta0dz   = ( 1 - cfl ) * M_physicsPtr->data()->dBeta0dz(bcNodes[0]) + cfl * M_physicsPtr->data()->dBeta0dz(bcNodes[1]);
+        Real dBeta1dz   = ( 1 - cfl ) * M_physicsPtr->data()->dBeta1dz(bcNodes[0]) + cfl * M_physicsPtr->data()->dBeta1dz(bcNodes[1]);
+        Real dAlphadz   = ( 1 - cfl ) * M_physicsPtr->data()->dAlphadz(bcNodes[0]) + cfl * M_physicsPtr->data()->dAlphadz(bcNodes[1]);
 
         Real AoverA0( A / area0 );
-        Real C( A / M_physics->data()->densityRho() * OneDimensional::pow05( AoverA0, beta1 ) );
+        Real C( A / M_physicsPtr->data()->densityRho() * OneDimensional::pow05( AoverA0, beta1 ) );
 
-        return ( M_physics->data()->friction() * Q / A
+        return ( M_physicsPtr->data()->friction() * Q / A
                  + Q * Q / A * dAlphadz
                  + C * ( dBeta0dz
                          - beta0 * beta1 / area0 * dArea0dz
                          + beta0 * std::log( AoverA0 ) * dBeta1dz
                        )
-                 - A / M_physics->data()->densityRho() * dBeta0dz
-               ) * M_physics->data()->robertsonCorrection();
+                 - A / M_physicsPtr->data()->densityRho() * dBeta0dz
+               ) * M_physicsPtr->data()->robertsonCorrection();
     }
 
     ERROR_MSG("The QLS function has only 2 components.");

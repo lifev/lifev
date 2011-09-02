@@ -36,7 +36,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/OneDimensionalFluxLinear.hpp>
@@ -48,56 +48,43 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalFluxLinear::flux( const Real& U1, const Real& U2, const ID& ii, const UInt& iNode ) const
+OneDimensionalFluxLinear::flux( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const
 {
-    if ( ii == 0 ) // F1
+    if ( row == 0 ) // F1
     {
-        return M_physics->data()->flux11( iNode ) * U1 + M_physics->data()->flux12( iNode ) * U2;
+        return M_physicsPtr->data()->flux11( iNode ) * U1 + M_physicsPtr->data()->flux12( iNode ) * U2;
     }
-    if ( ii == 1 ) // F2
+    if ( row == 1 ) // F2
     {
-        return M_physics->data()->flux21( iNode ) * U1 + M_physics->data()->flux22( iNode ) * U2;
+        return M_physicsPtr->data()->flux21( iNode ) * U1 + M_physicsPtr->data()->flux22( iNode ) * U2;
     }
     ERROR_MSG("The flux function has only 2 components.");
     return -1.;
 }
 
 Real
-OneDimensionalFluxLinear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID& ii, const ID& jj, const UInt& iNode) const
+OneDimensionalFluxLinear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID& row, const ID& column, const UInt& iNode) const
 {
-    if ( ii == 0 && jj == 0 ) // dF1/dU1
+    if ( row == 0 && column == 0 ) // dF1/dU1
     {
-        return M_physics->data()->flux11( iNode );
+        return M_physicsPtr->data()->flux11( iNode );
     }
-    if ( ii == 0 && jj == 1 ) // dF1/dU2
+    if ( row == 0 && column == 1 ) // dF1/dU2
     {
-        return M_physics->data()->flux12( iNode );
+        return M_physicsPtr->data()->flux12( iNode );
     }
-    if ( ii == 1 && jj == 0 ) // dF2/dU1
+    if ( row == 1 && column == 0 ) // dF2/dU1
     {
-        return M_physics->data()->flux21( iNode );
+        return M_physicsPtr->data()->flux21( iNode );
     }
-    if ( ii == 1 && jj == 1 ) // dF2/dU2
+    if ( row == 1 && column == 1 ) // dF2/dU2
     {
-        return M_physics->data()->flux22( iNode );
+        return M_physicsPtr->data()->flux22( iNode );
     }
 
     ERROR_MSG("Flux's differential function has only 4 components.");
     return -1.;
 }
-
-//Real
-//OneDimensionalFluxLinear::diff2( const Real& /*U1*/, const Real& /*U2*/,
-//                                        const ID& ii, const ID& jj, const ID& kk,
-//                                        const UInt& /*iNode*/ ) const
-//{
-//    if( (0 < ii && ii < 3) && (0 < jj && jj < 3) && (0 < kk && kk < 3) )
-//    {
-//        return 0.;
-//    }
-//    ERROR_MSG("Flux's second differential function has only 8 components.");
-//    return -1.;
-//}
 
 void
 OneDimensionalFluxLinear::eigenValuesEigenVectors( const Real& /*U1*/, const Real& /*U2*/,
@@ -106,13 +93,13 @@ OneDimensionalFluxLinear::eigenValuesEigenVectors( const Real& /*U1*/, const Rea
                                                    container2D_Type& leftEigenvector2,
                                                    const UInt& iNode ) const
 {
-    eigenvalues[0] = M_physics->data()->celerity1( iNode );
-    eigenvalues[1] = M_physics->data()->celerity2( iNode );
+    eigenvalues[0] = M_physicsPtr->data()->celerity1( iNode );
+    eigenvalues[1] = M_physicsPtr->data()->celerity2( iNode );
 
-    leftEigenvector1[0] = M_physics->data()->leftEigenVector11( iNode );
-    leftEigenvector1[1] = M_physics->data()->leftEigenVector12( iNode );
-    leftEigenvector2[0] = M_physics->data()->leftEigenVector21( iNode );
-    leftEigenvector2[1] = M_physics->data()->leftEigenVector22( iNode );
+    leftEigenvector1[0] = M_physicsPtr->data()->leftEigenVector11( iNode );
+    leftEigenvector1[1] = M_physicsPtr->data()->leftEigenVector12( iNode );
+    leftEigenvector2[0] = M_physicsPtr->data()->leftEigenVector21( iNode );
+    leftEigenvector2[1] = M_physicsPtr->data()->leftEigenVector22( iNode );
 }
 
 void

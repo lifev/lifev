@@ -37,7 +37,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalData_H
@@ -55,6 +55,8 @@ namespace LifeV
 //! OneDimensionalData - Class which read and holds all the data for the One Dimensional Model Solver.
 /*!
  *  @authors Vincent Martin, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  <b>Physical Parameters</b>
  *
@@ -65,14 +67,18 @@ namespace LifeV
  *  \f[
  *  \left\{\begin{array}{l}
  *  \displaystyle\frac{\partial A}{\partial t} + \frac{\partial Q}{\partial z} = 0, \\[2ex]
- *  \displaystyle\frac{\partial Q}{\partial t} + \alpha \frac{\partial}{\partial z}\left(\frac{Q^2}{A}\right) + \frac{A}{\rho}\frac{\partial P}{\partial z} + K_r \frac{Q}{A} = 0
+ *  \displaystyle\frac{\partial Q}{\partial t} +
+ *  \alpha \frac{\partial}{\partial z}\left(\frac{Q^2}{A}\right) +
+ *  \frac{A}{\rho}\frac{\partial P}{\partial z} + K_r \frac{Q}{A} = 0
  *  \end{array}\right.
  *  \f]
  *
  *  with
  *
  *  \f[
- *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) = \underbrace{\sqrt{\frac{\pi}{A^0}}\frac{h E}{1-\nu^2}}_{\beta_0} \left(\left(\frac{A}{A^0}\right)^{\beta_1}-1\right) + \underbrace{\frac{T \tan\phi}{4 \sqrt{\pi}}\frac{h E}{1-\nu^2}}_{\displaystyle\gamma} \frac{1}{A\sqrt{A}} \frac{\partial A}{\partial t},
+ *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) =
+ *  \underbrace{\sqrt{\frac{\pi}{A^0}}\frac{h E}{1-\nu^2}}_{\beta_0} \left(\left(\frac{A}{A^0}\right)^{\beta_1}-1\right) +
+ *  \underbrace{\frac{T \tan\phi}{4 \sqrt{\pi}}\frac{h E}{1-\nu^2}}_{\displaystyle\gamma} \frac{1}{A\sqrt{A}} \frac{\partial A}{\partial t},
  *  \f]
  *
  *  <b>Linear Parameters</b>
@@ -89,7 +95,7 @@ namespace LifeV
  *  \f]
  *
  *
- *  The flux matrix \f$F = [F_{11}, F_{12}; F_{21}, F_{22}]\f$ has the eigenvalues \f$\lambda_1, \lambda_2\f$.
+ *  The flux matrix \f$\mathbf F = [F_{11}, F_{12}; F_{21}, F_{22}]\f$ has the eigenvalues \f$\lambda_1, \lambda_2\f$.
  */
 class OneDimensionalData
 {
@@ -179,7 +185,40 @@ public:
      * \end{array}
      * \f]
      */
-    void initializeLinearParameters();
+//    void initializeLinearParameters();
+
+    //! Make the vessel stiffer on the left side of interval [xl, xr]
+    /*!
+     *  \cond \TODO improve doxygen description with latex equation and other features \endcond
+     *  These routines change the elastic modulus along the vessel
+     *
+     *  When x < alpha - delta/2, the Young modulus is E * factor
+     *  When x > alpha + delta/2, the Young modulus is E
+     *  When alpha - delta/2 < x < alpha + delta/2, the Young modulus changes
+     *  smoothly from the larger to the smaller value, according to a
+     *  polynomial law of order n.
+     *
+     *  The grid size can be adapted (yesadaptive=1) in the nieghborhood of alpha,
+     *  where the spatial derivative of the parameter will be maximum.
+     *  However, the grid size is not allowed to be smaller than min_deltax
+     *
+     *  \cond \TODO add doxygen description for the parameters \endcond
+     */
+//    void stiffenVesselLeft( const Real& xl,          const Real& xr,
+//                            const Real& factor,      const Real& alpha,
+//                            const Real& delta,       const Real& n,
+//                            const Real& minDeltaX=1, const UInt& yesAdaptive=0 );
+
+    //! Make the vessel stiffer on the right side of interval [xl, xr]
+    /*!
+     * \sa stiffenVesselLeft
+     *
+     *  \cond \TODO add doxygen description for the parameters \endcond
+     */
+//    void stiffenVesselRight( const Real& xl,          const Real& xr,
+//                             const Real& factor,      const Real& alpha,
+//                             const Real& delta,       const Real& n,
+//                             const Real& minDeltaX=1, const UInt& yesAdaptive=0  );
 
     //! Display some information about the model.
     /*!
@@ -207,9 +246,9 @@ public:
 
     //! Set data time container
     /*!
-     * @param TimeData shared_ptr to TimeData container
+     * @param timeDataPtr shared_ptr to TimeData container
      */
-    void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
+    void setTimeData( const timePtr_Type timeDataPtr ) { M_timeDataPtr = timeDataPtr; }
 
     //! Set the fluid density
     /*!
@@ -309,31 +348,31 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    timePtr_Type dataTime() const { return M_time; }
+    timePtr_Type dataTime() const { return M_timeDataPtr; }
 
     //! Get the mesh container
     /*!
      * @return shared_ptr to the mesh
      */
-    meshPtr_Type mesh() const { return M_mesh; }
+    meshPtr_Type mesh() const { return M_meshPtr; }
 
     //! Get the length of the 1D segment
     /*!
      * @return length of the 1D segment
      */
-    Real length() const { return M_mesh->pointList( M_mesh->numVertices() - 1).x() - M_mesh->pointList( 0 ).x(); }
+    Real length() const { return M_meshPtr->pointList( M_meshPtr->numVertices() - 1).x() - M_meshPtr->pointList( 0 ).x(); }
 
     //! Get the number of elements in the 1D segment
     /*!
      * @return number of elements in the 1D segment
      */
-    UInt numberOfElements() const { return M_mesh->numElements(); }
+    UInt numberOfElements() const { return M_meshPtr->numElements(); }
 
     //! Get the number of nodes in the 1D segment
     /*!
      * @return number of nodes in the 1D segment
      */
-    UInt numberOfNodes() const { return M_mesh->numPoints(); }
+    UInt numberOfNodes() const { return M_meshPtr->numPoints(); }
 
     //! Get the flag identifying if the wall is viscoelastic
     /*!
@@ -665,8 +704,8 @@ private:
     OneDimensional::sourceTerm_Type  M_sourceType;
 
     //! Data containers for time and mesh
-    timePtr_Type M_time;
-    meshPtr_Type M_mesh;
+    timePtr_Type M_timeDataPtr;
+    meshPtr_Type M_meshPtr;
 
     //! Physical Wall Model
     bool M_viscoelasticWall;
@@ -759,15 +798,15 @@ OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, co
         // We use 1° order finite differences at the boundaries to compute the derivatives
         if ( iNode == 0 )
         {
-            return ( -vector[0] + vector[1] ) / ( M_mesh->meanH() );
+            return ( -vector[0] + vector[1] ) / ( M_meshPtr->meanH() );
         }
-        else if ( iNode == M_mesh->numPoints() - 1 )
+        else if ( iNode == M_meshPtr->numPoints() - 1 )
         {
-            return ( vector[iNode] - vector[iNode-1] ) / ( M_mesh->meanH() );
+            return ( vector[iNode] - vector[iNode-1] ) / ( M_meshPtr->meanH() );
         }
         else
         {
-            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_mesh->meanH() );
+            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_meshPtr->meanH() );
         }
 
         break;
@@ -777,15 +816,15 @@ OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, co
         // We use 2° order finite differences at the boundaries to compute the derivatives
         if ( iNode == 0 )
         {
-            return ( -1.5 * vector[0] + 2.0*vector[1] - 0.5 * vector[2] ) / ( M_mesh->meanH() );
+            return ( -1.5 * vector[0] + 2.0*vector[1] - 0.5 * vector[2] ) / ( M_meshPtr->meanH() );
         }
-        else if ( iNode == M_mesh->numPoints() - 1 )
+        else if ( iNode == M_meshPtr->numPoints() - 1 )
         {
-            return ( 1.5 * vector[iNode] - 2.0*vector[iNode-1] + 0.5 * vector[iNode-2] ) / ( M_mesh->meanH() );
+            return ( 1.5 * vector[iNode] - 2.0*vector[iNode-1] + 0.5 * vector[iNode-2] ) / ( M_meshPtr->meanH() );
         }
         else
         {
-            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_mesh->meanH() );
+            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_meshPtr->meanH() );
         }
 
         break;

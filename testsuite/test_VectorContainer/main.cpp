@@ -179,7 +179,7 @@ main( Int argc, char** argv )
 
     // NOTE:
     // To perform a test with BOOST we first have to implement a derived class
-    // from ContainerOfVectors in which re-implement operator= and operator*
+    // from VectorContainer in which re-implement operator= and operator*
 
     //TestFunction( A1_BOOST, B1_BOOST, A2_BOOST, B2_BOOST );
 

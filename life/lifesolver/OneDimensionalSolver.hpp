@@ -43,7 +43,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 
@@ -70,87 +70,81 @@ namespace LifeV
 
 //! OneDimensionalSolver - Solver class for the 1D model.
 /*!
- *  @author Vincent Martin, Tiziano Passerini, Lucia Mirabella, Gilles Fourestey
+ *  @author Vincent Martin, Tiziano Passerini, Lucia Mirabella, Gilles Fourestey, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
- *  ---------------------------------------------------
- *  1 dimensional hyperbolic equation:
- *  ---------------------------------------------------
- *  dU/dt  +  dF(U)/dz  +  S(U) = 0
- *  ---------------------------------------------------
+ *  <b>EQUATIONS:</b> <BR>
+ *  The conservative form of the generic hyperbolic problem is
  *
- *  with U = [U1,U2]^T in R^2.
+ *  \f[
+ *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
+ *  \f]
  *
- *  The non linear flux function F(U) and source function S(U)
- *  are quite independent of this solver : they are taken into
- *  account only via two classes that define a vectorial function
- *  and its derivatives.
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
  *
- *  More precisely:
- *  two functions (M_fluxFun and M_sourceFun) have to be defined
- *  separately to allow the update (_updateFluxDer, _updateSourceDer)
- *  of the corresponding vectors (M_fluxi, M_diffFluxij,
- *  M_sourcei, M_diffSrcij). I also separated the treatment of the
- *  parameters that exist in the functions.
- *  Normally, one should be able to create a template to allow
- *  the user to select between different problems (linear, non-linear,
- *  etc.).
+ *  <b>NUMERICAL DISCRETIZATION:</b> <BR>
+ *  We discretize the problem by a second-order Taylor--Galerkin scheme.
+ *  Let us consider the time interval \f$[t^n, t^{n+1}]\f$, for \f$n=0,1,2,\dots\f$, with \f$t^n=n \Delta t$, $\Delta t\f$ being the time step.
+ *  Given \f$ \mathbf U_h^n\f$ we compute \f$\mathbf U_h^{n+1}\f$ by using the following scheme
  *
- *  -----------------------------------------------------
- *  Solver based on the 2nd order Taylor-Galerkin scheme.
- *  -----------------------------------------------------
- *  (see for instance Formaggia-Veneziani, Mox report no 21 june 2003)
+ *  \f[
+ *  (\mathbf U^{n+1}_h,\varphi_h) = (\mathbf U^n_h,\varphi_h) + \Delta t \left( \mathbf F(\mathbf U^n_h)-
+ *  \displaystyle\frac{\Delta t}{2} \displaystyle\frac{\partial \mathbf F(\mathbf U^n_h)}{\partial \mathbf U}\left(\mathbf S(\mathbf U^n_h)+
+ *  \displaystyle\frac{\partial \mathbf F(\mathbf U^n_h)}{\partial z}\right), \displaystyle\frac{\partial \varphi_h}{\partial z}\right) +
+ *  \Delta t \left( -\mathbf S(\mathbf U^n_h)+\displaystyle\frac{\Delta t}{2}
+ *  \displaystyle\frac{\partial \mathbf S(\mathbf U^n_h)}{\partial \mathbf U}\left( \mathbf S(\mathbf U^n_h)+
+ *  \displaystyle\frac{\partial \mathbf F(\mathbf U^n_h)}{\partial z}\right), \varphi_h\right).
+ *  \f]
  *
- *  ---------------------------------------------------
- *  Taylor-Galerkin scheme: (explicit, U = [U1,U2]^T )
- *  ---------------------------------------------------
+ *  <b>IMPLEMENTATION:</b> <BR>
+ *  The implementation of the Taylor-Galerkin scheme is the following:
  *
- *  (Un+1, phi) =                             //! massFactor^{-1} * Un+1
- *  (Un, phi)                         //!            mass * U
- *  + dt     * (       Fh(Un), dphi/dz )         //!            grad * F(U)
- *  - dt^2/2 * (diffFh(Un) Sh(Un), dphi/dz )     //! gradDiffFlux(U) * S(U)
- *  + dt^2/2 * (diffSh(Un) dFh/dz(Un), phi )     //!   divDiffSrc(U) * F(U)
- *  - dt^2/2 * (diffFh(Un) dFh/dz(Un), dphi/dz ) //!stiffDiffFlux(U) * F(U)
- *  - dt     * (       Sh(Un), phi )             //!            mass * S(U)
- *  + dt^2/2 * (diffSh(Un) Sh(Un), phi )         //!  massDiffSrc(U) * S(U)
- *  ---------------------------------------------------
- *
- *  Approximation of the unknowns and non-linearities:
+ *  <CODE>
+ *  (Un+1, phi) =                               //! massFactor^{-1} * Un+1  <BR>
+ *  (Un, phi)                                   //!            mass * U     <BR>
+ *  +dt     * (       Fh(Un), dphi/dz )         //!            grad * F(U)  <BR>
+ *  -dt^2/2 * (diffFh(Un) Sh(Un), dphi/dz )     //! gradDiffFlux(U) * S(U)  <BR>
+ *  +dt^2/2 * (diffSh(Un) dFh/dz(Un), phi )     //!   divDiffSrc(U) * F(U)  <BR>
+ *  -dt^2/2 * (diffFh(Un) dFh/dz(Un), dphi/dz ) //!stiffDiffFlux(U) * F(U)  <BR>
+ *  -dt     * (       Sh(Un), phi )             //!            mass * S(U)  <BR>
+ *  +dt^2/2 * (diffSh(Un) Sh(Un), phi )         //!  massDiffSrc(U) * S(U)  <BR>
+ *  </CODE>
  *
  *  Let's define:
- *  a) (phi_i)_{i in nodes} is the basis of P1 (the "hat" functions)
- *  b) (1_{i+1/2})_{i+1/2 in elements} is the basis of P0 (constant per
- *  element). The vertices of the element "i+1/2" are the nodes "i" and "i+1".
+ *
+ *  \cond \TODO improve doxygen description with latex equation and other features \endcond
+ *  <ol>
+ *      <li> (\phi_i)_{i in nodes} is the basis of P1 (the "hat" functions)
+ *      <li> (1_{i+1/2})_{i+1/2 in elements} is the basis of P0 (constant per element).
+ *           The vertices of the element "i+1/2" are the nodes "i" and "i+1".
+ *  </ol>
  *
  *  Then:
  *
- *  c) Uh    is in P1 : U = sum_{i in nodes} U_i phi_i
+ *  \cond \TODO improve doxygen description with latex equation and other features \endcond
+ *  <ol>
+ *      <li> Uh    is in P1 : U = sum_{i in nodes} U_i phi_i
+ *      <li> Fh(U) is in P1 : F(U) = sum_{i in nodes} F(U_i) phi_i
+ *      <li> diffFh(U) is in P0 : diffFlux(U) = sum_{i+1/2 in elements} 1/2 { dF/dU(U_i) + dF/dU(U_i+1) } 1_{i+1/2}
+ *           (means of the two extremal values of the cell)
+ *      <li> dF/dz(U) = sum_{i in nodes} F(U_i) d(phi_i)/dz
+ *      <li> Sh(U) is in P1 : S(U) = sum_{i in nodes} S(U_i) phi_i
+ *      <li> diffSh(U) is in P0 : diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
+ *           (means of the two extremal values of the cell)
+ *  </ol>
  *
- *  d) Fh(U) is in P1 : F(U) = sum_{i in nodes} F(U_i) phi_i
- *  e) diffFh(U) is in P0 :
- *  diffFlux(U) = sum_{i+1/2 in elements} 1/2 { dF/dU(U_i) + dF/dU(U_i+1) } 1_{i+1/2}
- *  (means of the two extremal values of the cell)
- *
- *  We note that d) allows us to define easily
- *  f) dF/dz(U) = sum_{i in nodes} F(U_i) d(phi_i)/dz
- *
- *  g) Sh(U) is in P1 : S(U) = sum_{i in nodes} S(U_i) phi_i
- *  h) diffSh(U) is in P0 :
- *  diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
- *  (means of the two extremal values of the cell)
- *
- *  -----------------------------------------------------
+ *  <b>DEVELOPMENT NOTES:</b> <BR>
  *  The option taken here is to define the different tridiagonal matrix
  *  operators (div, grad, mass, stiff) and reconstruct them at each time
  *  step (as they depend on diffFlux and diffSrc). They are thus rebuilt
  *  at the element level and reassembled.
  *  Afterwards, there remains to do only some tridiagonal matrix vector
- *  products to obtain the right hand side.
- *
- *  This procedure might appear a bit memory consuming (there are 18
+ *  products to obtain the right hand side. This procedure might appear a bit memory consuming (there are 18
  *  tridiagonal matrices stored), but it has the advantage of being
  *  very clear. If it is too costly, it should be quite easy to improve
  *  it.
- *  -----------------------------------------------------
  */
 class OneDimensionalSolver
 {
@@ -208,7 +202,7 @@ public:
 
     //! Empty Constructor
     /*!
-     * Need a call to: setCommunicator, setProblem, setFESpace
+     * Need a call to: \c setCommunicator(), \c setProblem(), \c setFESpace()
      */
     explicit OneDimensionalSolver();
 
@@ -228,17 +222,17 @@ public:
     /*!
      * @param solution solution container
      */
-    void setupSolution( solution_Type& solution ) { setupSolution( solution, M_feSpace->map() ); }
+    void setupSolution( solution_Type& solution ) { setupSolution( solution, M_feSpacePtr->map() ); }
 
     //! Setup the solution using user defined FESpace map.
     /*!
      * @param solution solution container
      * @param map map for initializing the solution vectors
-     * @param onlyMainQuantities if true setup only Q, P, and A/A0-1
+     * @param onlyMainQuantities if true setup only \f$Q\f$, \f$P\f$, and \f$\displaystyle\frac{A}{A^0}-1\f$
      */
     void setupSolution( solution_Type& solution, const MapEpetra& map, const bool& onlyMainQuantities = false );
 
-    //! Initialize all the variables of the solution to a reference condition with Q=0, A=A0, and P=P_ext
+    //! Initialize all the variables of the solution to a reference condition with \f$Q=0\f$, \f$A=A^0\f$, and \f$P=P_\mathrm{ext}\f$
     /*!
      * @param solution the solution container
      */
@@ -246,7 +240,7 @@ public:
 
     //! Update the Riemann variables.
     /*!
-     *  @param solution the solution container is passed with A^n, Q^n and it is updated with W1^n, W2^n
+     *  @param solution the solution container is passed with \f$A^n\f$, \f$Q^n\f$ and it is updated with \f$W_1^n\f$, \f$W_2^n\f$
      */
     void computeW1W2( solution_Type& solution );
 
@@ -254,57 +248,84 @@ public:
     /*!
      *  This method compute the value of the pressure (elastic and if necessary also viscoelastic)
      *  adding it to the solution.
-     *  @param solution the solution container is passed with A^n, Q^n, W1^n, W2^n and is updated with P^n
+     *  @param solution the solution container is passed with \f$A^n\f$, \f$Q^n\f$, \f$W_1^n\f$, \f$W_2^n\f$ and is updated with \f$P^n\f$
      *  @param timeStep time step
      */
     void computePressure( solution_Type& solution, const Real& timeStep );
 
-    //! Update the ratio between A and A0.
+    //! Update the ratio between \f$A\f$ and \f$A^0\f$.
     /*!
-     *  @param solution the solution container is passed with A^n, is updated with A^n/A0-1
+     *  @param solution the solution container is passed with \f$A^n\f$, is updated with \f$\displaystyle\frac{A}{A^0}-1\f$
      */
     void computeAreaRatio( solution_Type& solution );
 
-    //! Compute A from the area ratio: A/A0-1.
+    //! Compute A from the area ratio: \f$\displaystyle\frac{A}{A^0}-1\f$.
     /*!
-     *  @param solution the solution container is passed with A^n/A0-1 and is updated with A^n
+     *  @param solution the solution container is passed with \f$\displaystyle\frac{A}{A^0}-1\f$ and is updated with \f$A^n\f$
      */
     void computeArea( solution_Type& solution );
 
     //! Compute the right hand side
     /*!
-     *  @param timeStep The time step.
+     *  @param solution the solution container
+     *  @param timeStep the time step.
      */
     void updateRHS( const solution_Type& solution, const Real& timeStep );
 
-    //! Update convective term and BC. Then solve the linearized NS system
+    //! Update convective term and BC. Then solve the linearized system
     /*!
-     * @param bcH The BC handler
+     * @param bcH the BC handler
      * @param time the time
      * @param timeStep the time step
      */
     void iterate( OneDimensionalBCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
 
-    //! Apply the viscoelastic Flux correction:
+    //! Apply the viscoelastic flow rate correction.
     /*!
-     *  We use a finite element scheme for the correction term:
-     *  given the solution of Taylor-Galerkin scheme, solve
-     *  ( 1/(dt*Ah(n+1)) Qtildeh(n+1), phi) +        //! 1/A * massFactor^{-1} * Un+1
-     *  ( gamma / rho ) *     ( dQtildeh(n+1)/dz, dphi/dz )  //! stiff * Qtilde(U)
-     *  = - ( gamma / rho ) * ( dQhath(n+1)/dz, dphi/dz )  //! stiff * Qhat(U)
+     * To introduce the viscoelastic component of the wall within the formulation, we use an operator-splitting technique,
+     * where the flow rate is splitted into two components such that \f$Q = \hat{Q} + \tilde{Q}\f$, where \f$\hat{Q}\f$ is the solution
+     * of the pure elastic problem and \f$\tilde{Q}\f$ is the viscoelastic correction.
+     * On each time interval \f$[t^n, t^{n+1}]\f$ with \f$n \ge 0\f$, firstly we solve the elastic part for \f$\hat{Q}^{n+1}\f$, using \f$Q^n\f$
+     * to compute the contributions in such equation to the right hand side, and then we correct the flow rate by solving the following equation
      *
-     *  gamma = gamma_tilde / ( 2 sqrt(pi) )
+     *  \f[
+     * \displaystyle\frac{1}{A}\displaystyle\frac{\partial \tilde{Q}}{\partial t} -
+     * \displaystyle\frac{\partial}{\partial z}\left(\displaystyle\frac{\gamma}{\rho A^{3/2}}\displaystyle\frac{\partial Q}{\partial z}\right) = 0.
+     *  \f]
+     *
+     * More precisely, taking into account the use of the total flow rate \f$Q^n\f$ in the right hand side of the Taylor-Galerking scheme, the FE formulation reads:
+     * given \f$A^{n+1}_h\f$ and \f$\hat{Q}^{n+1}_h\f$, find \f$\tilde{Q}^{n+1}_h\f$ such that
+     *
+     *  \f[
+     * \left(\displaystyle\frac{\tilde{Q}^{n+1}_h}{A^{n+1}_h},\varphi_h\right) +
+     * \Delta t \left(\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}\displaystyle\frac{\partial \tilde{Q}^{n+1}_h}{\partial z},
+     * \displaystyle\frac{\partial \varphi_h}{\partial z}\right) = - \Delta t \left(\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}
+     * \displaystyle\frac{\partial \hat{Q}^{n+1}_h}{\partial z},\displaystyle\frac{\partial \varphi_h}{\partial z}\right)+
+     * \Delta t \left[\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}\displaystyle\frac{\partial\hat{Q}^{n+1}_h}{\partial z}\,\varphi_h\right]^L_0.
+     *  \f]
+     *
+     * @param area area
+     * @param flowRate flow rate
+     * @param timeStep the time step
+     * @param bcH the BC handler
+     * @param updateSystemMatrix flag for the recomputation of the system matrix
+     * @return the viscoelastic flow rate correction \f$\tilde{Q}\f$
      */
-    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix = true );
+    vector_Type viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep,
+                                                OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix = true );
 
     //! CFL computation (correct for constant mesh)
     /*!
-     * @param timeStep the time step
-     * @return CFL
+     *  @param solution the solution container
+     *  @param timeStep the time step
+     *  @return CFL
      */
     Real computeCFL( const solution_Type& solution, const Real& timeStep ) const;
 
     //! Reset the output files
+    /*!
+     *  @param solution the solution container
+     */
     void resetOutput( const solution_Type& solution );
 
     //! Save results on output files
@@ -320,34 +341,39 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set problem elements
-    void setProblem( const physicsPtr_Type& physics,
-                     const fluxPtr_Type&    flux,
-                     const sourcePtr_Type&  source );
+    //! Set problem classes
+    /*!
+     * @param physicsPtr pointer to the physics class.
+     * @param fluxPtr pointer to the flux class.
+     * @param sourcePtr pointer to the source class.
+     */
+    void setProblem( const physicsPtr_Type& physicsPtr,
+                     const fluxPtr_Type&    fluxPtr,
+                     const sourcePtr_Type&  sourcePtr );
 
     //! Set the communicator
     /*!
-     * @param comm the Epetra MPI communicator
+     * @param commPtr pointer to the Epetra MPI communicator
      */
-    void setCommunicator( const commPtr_Type& comm );
+    void setCommunicator( const commPtr_Type& commPtr );
 
     //! Set the FEspace
     /*!
-     * @param feSpace the FE space
+     * @param feSpacePtr pointer to the FE space
      */
-    void setFESpace( const feSpacePtr_Type& feSpace );
+    void setFESpace( const feSpacePtr_Type& feSpacePtr );
 
     //! Set the linear solver
     /*!
-     * @param linearSolver the linear solver for the hyperbolic problem
+     * @param linearSolverPtr pointer to the linear solver for the hyperbolic problem
      */
-    void setLinearSolver( const linearSolverPtr_Type& linearSolver );
+    void setLinearSolver( const linearSolverPtr_Type& linearSolverPtr );
 
-    //! Set the linear solver
+    //! Set the viscoelastic linear solver
     /*!
-     * @param linearViscoelasticSolver the linear solver for the viscoelastic problem
+     * @param linearViscoelasticSolverPtr pointer to the linear solver for the viscoelastic problem
      */
-    void setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolver );
+    void setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolverPtr );
 
     //@}
 
@@ -355,14 +381,23 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Get the physics function
-    const physicsPtr_Type& physics() const { return M_physics; }
+    //! Get the physics class
+    /*!
+     *  @return shared pointer to the physics class.
+     */
+    const physicsPtr_Type& physics() const { return M_physicsPtr; }
 
-    //! Get the flux function
-    const fluxPtr_Type& flux() const { return M_flux; }
+    //! Get the flux class
+    /*!
+     *  @return shared pointer to the flux class.
+     */
+    const fluxPtr_Type& flux() const { return M_fluxPtr; }
 
-    //! Get the source function
-    const sourcePtr_Type& source() const { return M_source; }
+    //! Get the source class
+    /*!
+     *  @return shared pointer to the source class.
+     */
+    const sourcePtr_Type& source() const { return M_sourcePtr; }
 
     //! Return the ID of the boundary node given a side.
     /*!
@@ -371,7 +406,7 @@ public:
      */
     UInt boundaryDOF( const bcSide_Type& bcSide ) const;
 
-    //! Return the value of a quantity (P, A, Q, W1, W2) on a specified boundary.
+    //! Return the value of a quantity (\f$P\f$, \f$A\f$, \f$Q\f$, \f$W_1\f$, \f$W_2\f$) on a specified boundary.
     /*!
      *  Given a bcType and a bcSide it return the value of the quantity.
      *  @param bcType Type of the asked boundary value.
@@ -401,9 +436,9 @@ public:
 
     //! Get the system matrix without BC
     /*!
-     * @return system matrix without BC
+     * @return shared pointer to the system matrix without BC
      */
-    const matrixPtr_Type& massMatrix() const { return M_homogeneousMassMatrix; }
+    const matrixPtr_Type& massMatrix() const { return M_homogeneousMassMatrixPtr; }
 
     //@}
 
@@ -413,10 +448,14 @@ private:
     //@{
 
     //! Update the P1 flux vector from U: M_fluxi = F_h(Un) i=1,2 (works only for P1Seg elements)
+    /*!
+     *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
+     */
     void updateFlux( const solution_Type& solution );
 
     //! Call _updateFlux and update the P0 derivative of flux vector from U:
     /*!
+     *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
      *  M_diffFluxij = dF_h/dU(Un) i,j=1,2
      *  M_diffFluxij(elem) = 1/2 [ dF/dU(U(node1(elem))) + dF/dU(U(node2(elem))) ]
      *
@@ -426,10 +465,14 @@ private:
     void updatedFdU( const solution_Type& solution );
 
     //! Update the P1 source vector from U: M_sourcei = S_h(Un) i=1,2 (works only for P1Seg elements)
+    /*!
+     *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
+     */
     void updateSource( const solution_Type& solution );
 
     //! Call _updateSource and update the P0 derivative of source vector from U:
     /*!
+     *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
      *  M_diffSrcij = dS_h/dU(Un) i,j=1,2
      *  M_diffSrcij(elem) = 1/2 [ dS/dU(U(node1(elem))) + dS/dU(U(node2(elem))) ]
      *
@@ -440,6 +483,8 @@ private:
 
     //! Update the matrices
     /*!
+     *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
+     *
      *  M_massMatrixDiffSrcij, M_stiffMatrixDiffFluxij
      *  M_gradMatrixDiffFluxij, and M_divMatrixDiffSrcij (i,j=1,2)
      *
@@ -452,13 +497,20 @@ private:
     void updateMatrices();
 
     //! Update the element matrices with the current element
+    /*!
+     * \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
+     */
     void updateElementalMatrices( const Real& dFdU, const Real& dSdU );
 
     //! Assemble the matrices
+    /*!
+     * \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
+     */
     void matrixAssemble( const UInt& ii, const UInt& jj );
 
     //! Update the matrices to take into account Dirichlet BC.
     /*!
+     *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
      *  Modify the matrix to take into account
      *  the Dirichlet boundary conditions
      *  (works for P1Seg and canonic numbering!)
@@ -467,6 +519,8 @@ private:
 
     //! Apply the inertial Flux correction:
     /*!
+     *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
+     *
      *  We use a finite element scheme for the correction term:
      *  given the solution of Taylor-Galerkin scheme, solve
      *  ( 1/Ah(n+1) Qtildeh(n+1), phi) +             //! 1/A * massFactor^{-1} * Un+1
@@ -475,34 +529,35 @@ private:
      *
      *  m = rho_w h0 / ( 2 sqrt(pi) sqrt(A0) )
      */
-    vector_Type inertialFluxCorrection( const vector_Type& );
+    vector_Type inertialFlowRateCorrection( const vector_Type& );
 
     //! Apply the longitudinal Flux correction:
     /*!
+     *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
      *  We use a finite element scheme for the correction term:
      *  given the solution of Taylor-Galerkin scheme, solve
      *  ( 1/Ah(n+1) Qtildeh(n+1), phi) +             //! 1/A * massFactor^{-1} * Un+1
      *  = ( 1/Ah(n+1) Qtildeh(n), phi) +             //! 1/A * massFactor^{-1} * Un+1
      *  + ( a / rho ) *       ( d3Ahath(n+1)/dz3, phi )  //! mass * d3Ahat(U)/dz
      */
-    vector_Type longitudinalFluxCorrection();
+    vector_Type longitudinalFlowRateCorrection();
 
     //! L2 Projection of the second derivative of Q over P1 space.
     //scalarVector_Type                       _compute_d2Q_dx2( const scalarVector_Type& );
 
     //@}
 
-    physicsPtr_Type                    M_physics;
-    fluxPtr_Type                       M_flux;
-    sourcePtr_Type                     M_source;
-    feSpacePtr_Type                    M_feSpace;
-    commPtr_Type                       M_comm;
+    physicsPtr_Type                    M_physicsPtr;
+    fluxPtr_Type                       M_fluxPtr;
+    sourcePtr_Type                     M_sourcePtr;
+    feSpacePtr_Type                    M_feSpacePtr;
+    commPtr_Type                       M_commPtr;
     Displayer                          M_displayer;
 
-    boost::shared_ptr< MatrixElemental > M_elementalMassMatrix;       //!< element mass matrix
-    boost::shared_ptr< MatrixElemental > M_elementalStiffnessMatrix;  //!< element stiffness matrix
-    boost::shared_ptr< MatrixElemental > M_elementalGradientMatrix;   //!< element gradient matrix
-    boost::shared_ptr< MatrixElemental > M_elementalDivergenceMatrix; //!< element divergence matrix
+    boost::shared_ptr< MatrixElemental > M_elementalMassMatrixPtr;       //!< element mass matrix
+    boost::shared_ptr< MatrixElemental > M_elementalStiffnessMatrixPtr;  //!< element stiffness matrix
+    boost::shared_ptr< MatrixElemental > M_elementalGradientMatrixPtr;   //!< element gradient matrix
+    boost::shared_ptr< MatrixElemental > M_elementalDivergenceMatrixPtr; //!< element divergence matrix
 
     //! Right hand sides of the linear system i: "mass * M_Ui = M_rhsi"
     vectorPtrContainer_Type            M_rhs;
@@ -523,33 +578,33 @@ private:
     scalarVectorContainer_Type         M_dSdUVector;
 
     //! tridiagonal mass matrix
-    matrixPtr_Type                     M_homogeneousMassMatrix;
+    matrixPtr_Type                     M_homogeneousMassMatrixPtr;
 
     //! tridiagonal gradient matrix
-    matrixPtr_Type                     M_homogeneousGradientMatrix;
+    matrixPtr_Type                     M_homogeneousGradientMatrixPtr;
 
     //! tridiagonal mass matrices multiplied by diffSrcij
-    matrixPtrContainer_Type            M_dSdUMassMatrix;
+    matrixPtrContainer_Type            M_dSdUMassMatrixPtr;
 
     //! tridiagonal stiffness matrices multiplied by diffFluxij
-    matrixPtrContainer_Type            M_dFdUStiffnessMatrix;
+    matrixPtrContainer_Type            M_dFdUStiffnessMatrixPtr;
 
     //! tridiagonal gradient matrices multiplied by diffFluxij
-    matrixPtrContainer_Type            M_dFdUGradientMatrix;
+    matrixPtrContainer_Type            M_dFdUGradientMatrixPtr;
 
     //! tridiagonal divergence matrices multiplied by diffSrcij
-    matrixPtrContainer_Type            M_dSdUDivergenceMatrix;
+    matrixPtrContainer_Type            M_dSdUDivergenceMatrixPtr;
 
     //! The linear solver
-    linearSolverPtr_Type               M_linearSolver;
-    linearSolverPtr_Type               M_linearViscoelasticSolver;
+    linearSolverPtr_Type               M_linearSolverPtr;
+    linearSolverPtr_Type               M_linearViscoelasticSolverPtr;
 
 private:
 
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalSolver( const OneDimensionalSolver& solver );
+    explicit OneDimensionalSolver( const OneDimensionalSolver& solver );
 
     OneDimensionalSolver& operator=( const OneDimensionalSolver& solver );
 

@@ -37,10 +37,9 @@
 #ifndef BCInterface_H
 #define BCInterface_H 1
 
-#include <life/lifesolver/BCInterfaceDefinitions.hpp>
-
-#include <life/lifesolver/BCInterfaceData.hpp>
-#include <life/lifesolver/BCInterfaceFactory.hpp>
+// BCInterface includes
+#include <life/lifefem/BCInterfaceData.hpp>
+#include <life/lifefunctions/BCInterfaceFactory.hpp>
 
 namespace LifeV
 {
@@ -78,10 +77,10 @@ namespace LifeV
  *  The following functions are available (see the related classes for more information):
  *
  *  <ol>
- *      <li> \c function, which is implemented in \c BCInterfaceFunction;
- *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionFile;
- *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionSolver;
- *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionFileSolver;
+ *      <li> \c function, which is implemented in \c BCInterfaceFunctionParser;
+ *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
+ *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
+ *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
  *  </ol>
  *
  *  All the parameters are case sensitive.
@@ -163,18 +162,21 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BcHandler                                             bcHandler_Type;
-    typedef boost::shared_ptr< bcHandler_Type >                   bcHandlerPtr_Type;
+    typedef BcHandler                                               bcHandler_Type;
+    typedef boost::shared_ptr< bcHandler_Type >                     bcHandlerPtr_Type;
 
-    typedef PhysicalSolverType                                    physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >              physicalSolverPtr_Type;
+    typedef PhysicalSolverType                                      physicalSolver_Type;
+    typedef boost::shared_ptr< physicalSolver_Type >                physicalSolverPtr_Type;
 
-    typedef BCInterfaceFactory< physicalSolver_Type >             factory_Type;
-    typedef typename factory_Type::bcFunctionPtr_Type             bcFunctionPtr_Type;
+    typedef BCInterfaceFactory< physicalSolver_Type >               factory_Type;
 
-    typedef BCInterfaceData                                       data_Type;
+    typedef typename factory_Type::bcFunctionPtr_Type               bcFunctionPtr_Type;
+    typedef std::vector< bcFunctionPtr_Type >                       vectorFunction_Type;
 
-    typedef std::vector< bcFunctionPtr_Type >                     vectorFunction_Type;
+    typedef typename factory_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
+    typedef std::vector< bcFunctionSolverDefinedPtr_Type >          vectorFunctionSolverDefined_Type;
+
+    typedef BCInterfaceData                                         data_Type;
 
     //@}
 
@@ -210,13 +212,10 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
-    {
-        M_data.readBC( fileName, dataSection, name );
-    }
+    virtual void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name ) = 0;
 
     //! Insert the current boundary condition in the BChandler
-    virtual void insertBC();
+    virtual void insertBC() = 0;
 
     //! Update the variables inside the physical solver
     virtual void updatePhysicalSolverVariables();
@@ -255,7 +254,7 @@ public:
     /*!
      * @return the data container
      */
-    data_Type& dataContainer() { return M_data; }
+    virtual data_Type& dataContainer() = 0;
 
     //@}
 
@@ -265,11 +264,11 @@ protected:
     // Handler and parameters
     bcHandlerPtr_Type                        M_handler;
 
-    // Data
-    data_Type                                M_data;
-
-    // Functions
+    // Parser functions
     vectorFunction_Type                      M_vectorFunction;
+
+    // User defined functions
+    vectorFunctionSolverDefined_Type         M_vectorFunctionSolverDefined;
 
 private:
 
@@ -288,9 +287,9 @@ private:
 // ===================================================
 template< class BcHandler, class PhysicalSolverType >
 BCInterface< BcHandler, PhysicalSolverType >::BCInterface() :
-        M_handler                 (),
-        M_data                    (),
-        M_vectorFunction          ()
+        M_handler                     (),
+        M_vectorFunction              (),
+        M_vectorFunctionSolverDefined ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -322,19 +321,6 @@ BCInterface< BcHandler, PhysicalSolverType >::fillHandler( const std::string& fi
 }
 
 template< class BcHandler, class PhysicalSolverType >
-inline void
-BCInterface< BcHandler, PhysicalSolverType >::insertBC()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface::insertBC\n";
-#endif
-
-    factory_Type factory;
-    M_vectorFunction.push_back( factory.createFunction( M_data ) );
-}
-
-template< class BcHandler, class PhysicalSolverType >
 void
 BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
 {
@@ -345,12 +331,15 @@ BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
 
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
+        boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
+            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->updatePhysicalSolverVariables();
     }
+
+    for ( typename vectorFunctionSolverDefined_Type::const_iterator i = M_vectorFunctionSolverDefined.begin() ; i < M_vectorFunctionSolverDefined.end() ; ++i )
+        ( *i )->updatePhysicalSolverVariables();
 }
 
 // ===================================================
@@ -363,12 +352,15 @@ BCInterface< BcHandler, PhysicalSolverType >::setPhysicalSolver( const physicalS
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
+        boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
+            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
             castedFunctionSolver->setPhysicalSolver( physicalSolver );
     }
+
+    for ( typename vectorFunctionSolverDefined_Type::const_iterator i = M_vectorFunctionSolverDefined.begin() ; i < M_vectorFunctionSolverDefined.end() ; ++i )
+        ( *i )->setPhysicalSolver( physicalSolver );
 }
 
 } // Namespace LifeV

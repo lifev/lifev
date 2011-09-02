@@ -36,7 +36,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalFluxNonLinear_H
@@ -47,12 +47,63 @@
 namespace LifeV
 {
 
-//! OneDimensionalFluxNonLinear - Class containing the non-linear flux function F of the 1D hyperbolic problem.
+//! OneDimensionalFluxNonLinear - Class containing the non-linear flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
- *  dU/dt + dF(U)/dz + B(U) = 0
- *  with U=[A,Q]^T
+ *  The conservative form of the generic hyperbolic problem is
+ *
+ *  \f[
+ *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
+ *  \f]
+ *
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
+ *
+ *  In the present implementation we have:
+ *
+ *  \f[
+ *  \mathbf F(\mathbf U) =
+ *  \left[\begin{array}{c}
+ *  Q \\[2ex]
+ *  \alpha \displaystyle \frac{Q^2}{A} + \displaystyle \displaystyle\int_{0}^A \frac{A}{\rho}\frac{\partial \psi}{\partial A} dA
+ *  \end{array}\right], \quad
+ *  \mathbf S(\mathbf U) =  \mathbf B(\mathbf U) -
+ *  \left[\begin{array}{c}
+ *  0 \\[2ex]
+ *  \displaystyle\frac{\partial}{\partial A^0}\displaystyle\int_{0}^A
+ *  \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial A^0}{\partial z} +
+ *  \displaystyle\frac{\partial}{\partial \beta_0}\displaystyle\int_{0}^A
+ *  \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial \beta_0}{\partial z} +
+ *  \displaystyle\frac{\partial}{\partial \beta_1}\displaystyle\int_{0}^A
+ *  \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} dA \displaystyle\frac{\partial \beta_1}{\partial z}
+ *  \end{array}\right]
+ *  \f]
+ *
+ *  where
+ *
+ *  \f[
+ *  \mathbf B(\mathbf U) =
+ *  \left[\begin{array}{c}
+ *  0 \\[2ex]
+ *  K_r \displaystyle\frac{Q}{A} + \displaystyle\frac{A}{\rho}\left(\displaystyle\frac{\partial \psi}{\partial A^0}\displaystyle\frac{\partial A^0}{\partial z} +
+ *  \displaystyle\frac{\partial \psi}{\partial \beta_0}\displaystyle\frac{\partial \beta_0}{\partial z} +
+ *  \displaystyle\frac{\partial \psi}{\partial \beta_1}\displaystyle\frac{\partial \beta_1}{\partial z}\right) +
+ *  \displaystyle\frac{Q^2}{A}\displaystyle\frac{\partial \alpha}{\partial z}
+ *  \end{array}\right]
+ *  \f]
+ *
+ *  The assumed wall-law is
+ *
+ *  \f[
+ *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) =
+ *  \underbrace{\sqrt{\frac{\pi}{A^0}}\frac{h E}{1-\nu^2}}_{\beta_0} \left(\left(\frac{A}{A^0}\right)^{\beta_1}-1\right) +
+ *  \underbrace{\frac{T \tan\phi}{4 \sqrt{\pi}}\frac{h E}{1-\nu^2}}_{\displaystyle\gamma} \frac{1}{A\sqrt{A}} \frac{\partial A}{\partial t}.
+ *  \f]
+ *
+ *  This class implements all the interfaces required for the computation of \f$\mathbf F\f$ and its derivatives.
  */
 class OneDimensionalFluxNonLinear : public OneDimensionalFlux
 {
@@ -70,10 +121,14 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
+    //! Empty constructor
     explicit OneDimensionalFluxNonLinear() : super() {};
 
-    explicit OneDimensionalFluxNonLinear( const physicsPtr_Type physics ) : super( physics ) {};
+    //! Constructor
+    /*!
+     * @param physicsPtr pointer to the physics of the problem
+     */
+    explicit OneDimensionalFluxNonLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {};
 
     //! Do nothing destructor
     virtual ~OneDimensionalFluxNonLinear() {}
@@ -84,42 +139,64 @@ public:
     //! @name Methods
     //@{
 
-    //! operator()
+    //! Evaluate the flux term
     /*!
-     *  F = [Q, alpha*Q^2/A + beta0*beta1/(rho*(beta1+1)*A0^beta1) * A^(beta1+1) ]
-     *  \param iNode : is the index position for the parameters
-     *  when they are space dependent.
-     *  This is NOT pretty. I should try to remove this dependency. VM 09/04
-     */
-    Real flux( const Real& A, const Real& Q, const ID& ii, const UInt& iNode ) const ;
-
-
-    //! Jacobian matrix
-    /*!
-     *  Hij = dFi/dxj
+     *  \f[
+     *  \mathbf F(\mathbf U) =
+     *  \left[\begin{array}{c}
+     *  Q \\[2ex]
+     *  \alpha \displaystyle \frac{Q^2}{A} + \displaystyle\frac{\beta_0 \beta_1 A^0}{\rho(\beta_1+1)}\left(\displaystyle\frac{A}{A^0}\right)^{\beta_1+1}
+     *  \end{array}\right]
+     *  \f]
      *
-     *  diff(1,1) = dF1/dx1    diff(1,2) = dF1/dx2
-     *  diff(2,1) = dF2/dx1    diff(2,2) = dF2/dx2
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the flux term
+     *  @param iNode node of the mesh
      */
-    Real dFdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode ) const;
+    Real flux( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const;
 
-    //! Second derivative tensor d2Fi/(dxj dxk)
+
+    //! Evaluate the derivative of the flux term
     /*!
-     *  diff2(1,1,1) = d2F1/dx1dx1    diff2(1,1,2) = d2F1/dx1dx2
-     *  diff2(1,2,1) = d2F1/dx2dx1    diff2(1,2,2) = d2F1/dx2dx2
-     *  diff2(2,1,1) = d2F2/dx1dx1    diff2(2,1,2) = d2F2/dx1dx2
-     *  diff2(2,2,1) = d2F2/dx2dx1    diff2(2,2,2) = d2F2/dx2dx2
+     *  \f[
+     * \displaystyle\frac{\partial \mathbf F}{\partial \mathbf U} =
+     *  \left[\begin{array}{cc}
+     * 0 & 1 \\[2ex]
+     * \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A} - \alpha \displaystyle\frac{Q^2}{A^2} & 2 \alpha \displaystyle\frac{Q}{A}
+     *  \end{array}\right]
+     *  \f]
      *
-     *  with d2Fi/dx1dx2 = d2Fi/dx2dx1
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the derivative of the flux term
+     *  @param column column of the derivative of the flux term
+     *  @param iNode node of the mesh
      */
-//    Real diff2( const Real& A, const Real& Q,
-//                const ID& ii,   const ID& jj, const ID& kk,
-//                const UInt& iNode = 0 ) const;
+    Real dFdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const;
 
-    //! Eigenvalues and eigenvectors of the Jacobian matrix dFi/dxj
+    //! Eigenvalues and eigenvectors of the Jacobian matrix
     /*!
-     * \param eigi is the ith eigen value of the matrix dF/dx (i=1,2).
-     * \param lefteigvecij is the jth component of the left eigen vector associated to eigi. (i,j=1,2)
+     *  \f[
+     * \lambda_{1,2} = \alpha \displaystyle\frac{Q}{A} \pm \sqrt{\alpha (\alpha - 1)\left(\displaystyle\frac{Q}{A}\right)^2+
+     * \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A}},
+     *  \f]
+     *
+     *  \f[
+     *  \displaystyle L =
+     *  \varsigma
+     *  \left[\begin{array}{cc}
+     *  -\lambda_2 & 1\\
+     *  -\lambda_1 & 1
+     *  \end{array}\right]
+     *  \f]
+     *
+     *  @param A area
+     *  @param Q flow rate
+     *  @param eigenvalues eigenvalues of the Jacobian matrix
+     *  @param leftEigenvector1 first row of the left eigenvector matrix
+     *  @param leftEigenvector2 second row of the left eigenvector matrix
+     *  @param iNode node of the mesh
      */
     void eigenValuesEigenVectors( const Real& A, const Real& Q,
                                   container2D_Type& eigenvalues,
@@ -127,12 +204,57 @@ public:
                                   container2D_Type& leftEigenvector2,
                                   const UInt& iNode ) const;
 
-    //! Compute the derivative of the eigenvalues and of the eigenvectors of the Jacobian matrix
+    //! Derivatives of the eigenvalues and eigenvectors of the derivative of the Jacobian matrix
+    /*!
+     *
+     *  \f[
+     *  \begin{array}{@{}r@{}c@{}l}
+     *  \displaystyle\frac{\partial \lambda_{1,2}}{\partial z} & = & \displaystyle\frac{\partial \lambda_{1,2}}{\partial A^0}\displaystyle\frac{\partial A^0}{\partial z}
+     *  +   \displaystyle\frac{\partial \lambda_{1,2}}{\partial \beta_0}\displaystyle\frac{\partial \beta_0}{\partial z}
+     *  +   \displaystyle\frac{\partial \lambda_{1,2}}{\partial \beta_1}\displaystyle\frac{\partial \beta_1}{\partial z}
+     *  +   \displaystyle\frac{\partial \lambda_{1,2}}{\partial \alpha}\displaystyle\frac{\partial \alpha}{\partial z}\\[4ex]
+     *  & = & \displaystyle\frac{Q}{A}\displaystyle\frac{\partial \alpha}{\partial z}
+     *  \pm \displaystyle\frac{1}{2}\left(\alpha (\alpha - 1)\left(\displaystyle\frac{Q}{A}\right)^2+
+     *  \displaystyle\frac{A}{\rho}\displaystyle\frac{\partial \psi}{\partial A}\right)^{-1/2}\left(\displaystyle\frac{A}{\rho}
+     *  \left(\displaystyle\frac{\partial^2 \psi}{\partial A \partial A^0}\displaystyle\frac{\partial A^0}{\partial z}
+     *  + \displaystyle\frac{\partial^2 \psi}{\partial A \partial \beta_0}\displaystyle\frac{\partial \beta_0}{\partial z}
+     *  + \displaystyle\frac{\partial^2 \psi}{\partial A \partial \beta_1}\displaystyle\frac{\partial \beta_1}{\partial z}\right)
+     *  + (2\alpha - 1)\left(\displaystyle\frac{Q}{A}\right)^2 \displaystyle\frac{\partial \alpha}{\partial z}\right).
+     *  \end{array}
+     *  \f]
+     *
+     *  \f[
+     *  \displaystyle\frac{\partial L}{\partial z} =
+     *  \varsigma
+     *  \left[\begin{array}{cc}
+     *  -\displaystyle\frac{\partial \lambda_2}{\partial z} & 0\\[4ex]
+     *  -\displaystyle\frac{\partial \lambda_1}{\partial z} & 0
+     *  \end{array}\right]
+     *  \f]
+     *
+     *  @param A area
+     *  @param Q flow rate
+     *  @param deltaEigenvalues derivative of the eigenvalues of the derivative of the Jacobian matrix
+     *  @param deltaLeftEigenvector1 derivative of the first row of the left eigenvector matrix
+     *  @param deltaLeftEigenvector2 derivative of the second row of the left eigenvector matrix
+     *  @param iNode node of the mesh
+     */
     void deltaEigenValuesEigenVectors( const Real& A, const Real& Q,
                                        container2D_Type& deltaEigenvalues,
                                        container2D_Type& deltaLeftEigenvector1,
                                        container2D_Type& deltaLeftEigenvector2,
                                        const UInt& iNode ) const;
+
+    //@}
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    explicit OneDimensionalFluxNonLinear( const OneDimensionalFluxNonLinear& flux );
+
+    OneDimensionalFluxNonLinear& operator=( const OneDimensionalFluxNonLinear& flux );
 
     //@}
 };

@@ -32,7 +32,7 @@
  *  @date 15-04-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
- *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalDefinitions_H

@@ -48,12 +48,10 @@ namespace LifeV
 
 //! FSIModelExactJacobian - Implementation of an  FSI (Operator) with Newton algorithm.
 /*!
-\include ../../doc/api/bibliography/newton.dox
-
     @author Miguel Fernandez
     @author Gilles Fourestey
     @author Paolo Crosetto <paolo.crosetto@epfl.ch>
-    @see  \ref{FM05}
+    @see  \cite FernandezMoubachir2005
     FSIOperator
 
     This class implements an FSIOperator whose Jacobian is computed exacly, i.e., using
@@ -204,23 +202,23 @@ private:
         void setOperator(FSIExactJacobian* ej);
 
         //! apply the jacobian to X and returns the result in Y
-        int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
+        int     Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
 
         //! These are the methods necessary to implement Epetra_Operator but that are not used.
-        int 	SetUseTranspose (bool  /*UseTranspose*/)
+        int     SetUseTranspose (bool  /*UseTranspose*/)
         {std::cout << "********* EJ : transpose not available\n"; return -1;}
 
-        int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
+        int     ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
         {std::cout << "********* EJ : inverse not available\n"; return -1;}
-        double 	NormInf         () const
+        double     NormInf         () const
         {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
         const char * Label      () const {return "exactJacobian";}
-        bool 	UseTranspose    () const {return false;}
-        bool 	HasNormInf      () const {return false;}
+        bool     UseTranspose    () const {return false;}
+        bool     HasNormInf      () const {return false;}
 
         const Epetra_Comm&  Comm () const { return *M_comm; }
-        const Epetra_Map & 	OperatorDomainMap () const {return *M_operatorDomainMap;}
-        const Epetra_Map & 	OperatorRangeMap  () const {return *M_operatorRangeMap;}
+        const Epetra_Map &     OperatorDomainMap () const {return *M_operatorDomainMap;}
+        const Epetra_Map &     OperatorRangeMap  () const {return *M_operatorRangeMap;}
         //@}
 
 

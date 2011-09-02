@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3DFSI class
+ *  @brief File containing the BCInterfaceFunctionSolverDefined class and specializations
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/BCInterface3DFSI.hpp>
+#include <life/lifefunctions/BCInterfaceFunctionSolverDefined.hpp>
 
 namespace LifeV
 {
@@ -42,14 +42,14 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterface3DFSI< FSIOperator >::BCInterface3DFSI() :
+BCInterfaceFunctionSolverDefined< FSIOperator >::BCInterfaceFunctionSolverDefined() :
         M_FSIFunction           (),
         M_physicalSolver        (),
         M_name                  (),
         M_flag                  (),
         M_type                  (),
         M_mode                  (),
-        M_comV                  (),
+        M_componentsVector      (),
         M_vectorFunctionRobin   (),
         M_robinRHS              (),
         M_robinAlphaCoefficient (),
@@ -57,56 +57,35 @@ BCInterface3DFSI< FSIOperator >::BCInterface3DFSI() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::BCInterface3DFSI()" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
 #endif
 
-}
-
-BCInterface3DFSI< FSIOperator >::BCInterface3DFSI( const data_Type& data ) :
-        M_FSIFunction           (),
-        M_physicalSolver        (),
-        M_name                  (),
-        M_flag                  (),
-        M_type                  (),
-        M_mode                  (),
-        M_comV                  (),
-        M_vectorFunctionRobin   (),
-        M_robinRHS              (),
-        M_robinAlphaCoefficient (),
-        M_robinBetaCoefficient  ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::BCInterface3DFSI( data )" << "\n";
-#endif
-
-    this->setData( data );
 }
 
 // ===================================================
 // Methods
 // ===================================================
 void
-BCInterface3DFSI< FSIOperator >::exportData( data_Type& data )
+BCInterfaceFunctionSolverDefined< FSIOperator >::exportData( BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::exportData" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::exportData" << "\n";
 #endif
 
     data.setName( M_name );
     data.setFlag( M_flag );
     data.setType( M_type );
     data.setMode( M_mode );
-    data.setComV( M_comV );
+    data.setComponentsVector( M_componentsVector );
 }
 
 void
-BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
+BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::updatePhysicalSolverVariables" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::updatePhysicalSolverVariables" << "\n";
 #endif
 
     switch ( M_FSIFunction )
@@ -119,8 +98,8 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
         // Update the physical solver variables
         for ( UInt i( 0 ); i < M_vectorFunctionRobin.size(); ++i )
         {
-            boost::shared_ptr< BCInterfaceFunctionSolver< physicalSolver_Type > > castedFunctionSolver =
-                boost::dynamic_pointer_cast< BCInterfaceFunctionSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
+            boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
+                boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
 
             if ( castedFunctionSolver != 0 )
                 castedFunctionSolver->updatePhysicalSolverVariables();
@@ -174,16 +153,15 @@ BCInterface3DFSI< FSIOperator >::updatePhysicalSolverVariables()
     }
 }
 
-
 // ===================================================
 // Set Methods
 // ===================================================
 void
-BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
+BCInterfaceFunctionSolverDefined< FSIOperator >::setData( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface3DFSI::setData" << "\n";
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::setData" << "\n";
 #endif
 
     //Set mapFunction
@@ -208,21 +186,125 @@ BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
     M_flag = data.flag();
     M_type = data.type();
     M_mode = data.mode();
-    M_comV = data.comV();
+    M_componentsVector = data.componentsVector();
 
     if ( M_FSIFunction == RobinWall )
     {
         factory_Type factory;
         M_vectorFunctionRobin.reserve(2);
-        data_Type temporaryData ( data );
+        BCInterfaceData3D temporaryData ( data );
 
         // Create the mass term function
         temporaryData.setRobinBaseAlpha();
-        M_vectorFunctionRobin.push_back( factory.createFunction( temporaryData ) );
+        M_vectorFunctionRobin.push_back( factory.createFunctionParser( temporaryData ) );
 
         // Create the RHS
         temporaryData.setRobinBaseBeta();
-        M_vectorFunctionRobin.push_back( factory.createFunction( temporaryData ) );
+        M_vectorFunctionRobin.push_back( factory.createFunctionParser( temporaryData ) );
+    }
+}
+
+
+
+
+
+// ===================================================
+// Constructors
+// ===================================================
+BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::BCInterfaceFunctionSolverDefined() :
+        M_defaultFunction (),
+        M_function        ()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
+#endif
+
+}
+
+// ===================================================
+// Methods
+// ===================================================
+void
+BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::assignFunction( OneDimensionalFunction& base )
+{
+    switch ( M_defaultFunction )
+    {
+    case Riemann:
+
+        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedRiemann::operator(),
+                                       dynamic_cast<OneDimensionalFunctionSolverDefinedRiemann *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+
+    case Compatibility:
+
+        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedCompatibility::operator(),
+                                       dynamic_cast<OneDimensionalFunctionSolverDefinedCompatibility *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+
+    case Absorbing:
+
+        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedAbsorbing::operator(),
+                                       dynamic_cast<OneDimensionalFunctionSolverDefinedAbsorbing *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+
+    case Resistance:
+
+        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedResistance::operator(),
+                                       dynamic_cast<OneDimensionalFunctionSolverDefinedResistance *> ( &( *M_function ) ), _1, _2 ) );
+
+        break;
+    }
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::setData( const BCInterfaceData1D& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::setData( data )" << "\n";
+#endif
+
+    //Set mapFunction
+    std::map< std::string, solverDefinedFunctions > mapFunction;
+    mapFunction["Riemann"]       = Riemann;
+    mapFunction["Compatibility"] = Compatibility;
+    mapFunction["Absorbing"]     = Absorbing;
+    mapFunction["Resistance"]    = Resistance;
+
+    M_defaultFunction = mapFunction[data.baseString()];
+
+    switch ( M_defaultFunction )
+    {
+    case Riemann:
+
+        M_function.reset( new OneDimensionalFunctionSolverDefinedRiemann( data.side(), data.quantity() ) );
+
+        break;
+
+    case Compatibility:
+
+        M_function.reset( new OneDimensionalFunctionSolverDefinedCompatibility( data.side(), data.quantity() ) );
+
+        break;
+
+    case Absorbing:
+
+        M_function.reset( new OneDimensionalFunctionSolverDefinedAbsorbing( data.side(), data.quantity() ) );
+
+        break;
+
+    case Resistance:
+
+        M_function.reset( new OneDimensionalFunctionSolverDefinedResistance( data.side(), data.quantity(), data.resistance()[0] ) );
+
+        break;
     }
 }
 

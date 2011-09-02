@@ -36,7 +36,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalFluxLinear_H
@@ -47,14 +47,44 @@
 namespace LifeV
 {
 
-//! OneDimensionalFluxLinear - Class containing the linear flux function F of the 1D hyperbolic problem.
+//! OneDimensionalFluxLinear - Class containing the linear flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
- *  dU/dt + dF(U)/dz + S(U) = 0
- *  with U=[U1, U2]^T and F(U) = [F11 U1 + F12 U2 ; F21 U1 + F22 U2]
+ *  The conservative form of the generic hyperbolic problem is
  *
- *  Fij are constant.
+ *  \f[
+ *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
+ *  \f]
+ *
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
+ *
+ *  In the present implementation we have:
+ *
+ *  \f[
+ *  \mathbf F(\mathbf U) =
+ *  \left[\begin{array}{c}
+ *  \dots \\[2ex]
+ *  \dots
+ *  \end{array}\right], \quad
+ *  \mathbf S(\mathbf U) =  \mathbf B(\mathbf U) -
+ *  \left[\begin{array}{c}
+ *  \dots \\[2ex]
+ *  \dots
+ *  \end{array}\right]
+ *  \f]
+ *
+ *
+ *  The assumed wall-law is
+ *
+ *  \f[
+ *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) = \dots
+ *  \f]
+ *
+ *  This class implements all the interfaces required for the computation of \f$\mathbf F\f$ and its derivatives.
  */
 class OneDimensionalFluxLinear : public OneDimensionalFlux
 {
@@ -72,10 +102,14 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
+    //! Empty constructor
     explicit OneDimensionalFluxLinear() : super() {};
 
-    explicit OneDimensionalFluxLinear( const physicsPtr_Type physics ) : super( physics ) {};
+    //! Constructor
+    /*!
+     * @param physicsPtr pointer to the physics of the problem
+     */
+    explicit OneDimensionalFluxLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {};
 
     //! Do nothing destructor
     virtual ~OneDimensionalFluxLinear() {}
@@ -86,41 +120,41 @@ public:
     //! @name Methods
     //@{
 
-    //! operator()
+    //! Evaluate the source term
     /*!
-     *  F = F(U) = [F11 U1 + F12 U2 , F21 U1 + F22 U2]^T
-     *  \param iNode : is the index position for the parameters
-     *  when they are space dependent.
-     *  This is NOT pretty. I should try to remove this dependency. VM 09/04
-     */
-    Real flux( const Real& U1, const Real& U2, const ID& ii, const UInt& iNode ) const ;
-
-    //! Jacobian matrix
-    /*!
-     *  Hij = dFi/dxj
+     *  \f[
+     *  \begin{array}{rcl}
+     *  \mathbf F(\mathbf U)_1 & = & F_{11} U_1 + F_{12} U_2,\\
+     *  \mathbf F(\mathbf U)_2 & = & F_{21} U_1 + F_{22} U_2
+     *  \end{array}
+     *  \f]]
      *
-     *  diff(1,1) = dF1/dx1    diff(1,2) = dF1/dx2
-     *  diff(2,1) = dF2/dx1    diff(2,2) = dF2/dx2
+     *  @param U1 first unknown
+     *  @param U2 second unknown
+     *  @param row row of the source term
+     *  @param iNode node of the mesh
      */
-    Real dFdU( const Real& U1, const Real& U2, const ID& ii, const ID& jj, const UInt& iNode ) const;
+    Real flux( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const ;
 
-    //! Second derivative tensor d2Fi/(dxj dxk)
+    //! Evaluate the derivative of the flux term
     /*!
-     *  diff2(1,1,1) = d2F1/dx1dx1    diff2(1,1,2) = d2F1/dx1dx2
-     *  diff2(1,2,1) = d2F1/dx2dx1    diff2(1,2,2) = d2F1/dx2dx2
-     *  diff2(2,1,1) = d2F2/dx1dx1    diff2(2,1,2) = d2F2/dx1dx2
-     *  diff2(2,2,1) = d2F2/dx2dx1    diff2(2,2,2) = d2F2/dx2dx2
-     *
-     *  with d2Fi/dx1dx2 = d2Fi/dx2dx1
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the derivative of the flux term
+     *  @param column column of the derivative of the flux term
+     *  @param iNode node of the mesh
      */
-//    Real diff2( const Real& U1, const Real& U2,
-//                const ID& ii,    const ID& jj, const ID& kk,
-//                const UInt& iNode = 0 ) const;
+    Real dFdU( const Real& U1, const Real& U2, const ID& row, const ID& column, const UInt& iNode ) const;
 
-    //! Eigenvalues and eigenvectors of the Jacobian matrix dFi/dxj
+
+    //! Eigenvalues and eigenvectors of the Jacobian matrix
     /*!
-     * \param eigi is the ith eigen value of the matrix dF/dx (i=1,2).
-     * \param lefteigvecij is the jth component of the left eigen vector associated to eigi. (i,j=1,2)
+     *  @param A area
+     *  @param Q flow rate
+     *  @param eigenvalues eigenvalues of the Jacobian matrix
+     *  @param leftEigenvector1 first row of the left eigenvector matrix
+     *  @param leftEigenvector2 second row of the left eigenvector matrix
+     *  @param iNode node of the mesh
      */
     void eigenValuesEigenVectors( const Real& U1, const Real& U2,
                                   container2D_Type& eigenvalues,
@@ -128,12 +162,31 @@ public:
                                   container2D_Type& leftEigenvector2,
                                   const UInt& iNode ) const;
 
-    //! Compute the derivative of the eigenvalues and of the eigenvectors of the Jacobian matrix
+    //! Derivatives of the eigenvalues and eigenvectors of the derivative of the Jacobian matrix
+    /*!
+     *  @param A area
+     *  @param Q flow rate
+     *  @param deltaEigenvalues derivative of the eigenvalues of the derivative of the Jacobian matrix
+     *  @param deltaLeftEigenvector1 derivative of the first row of the left eigenvector matrix
+     *  @param deltaLeftEigenvector2 derivative of the second row of the left eigenvector matrix
+     *  @param iNode node of the mesh
+     */
     void deltaEigenValuesEigenVectors( const Real& A, const Real& Q,
                                        container2D_Type& deltaEigenvalues,
                                        container2D_Type& deltaLeftEigenvector1,
                                        container2D_Type& deltaLeftEigenvector2,
                                        const UInt& iNode ) const;
+
+    //@}
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    explicit OneDimensionalFluxLinear( const OneDimensionalFluxLinear& flux );
+
+    OneDimensionalFluxLinear& operator=( const OneDimensionalFluxLinear& flux );
 
     //@}
 

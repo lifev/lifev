@@ -61,24 +61,23 @@
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
 
-// Handlers (they are here because of the data container)
-#include <life/lifefem/BCHandler.hpp>
-#include <life/lifefem/OneDimensionalBCHandler.hpp>
-//#include <life/lifefem/ZeroDimensionalBCHandler.hpp>
-
 namespace LifeV
 {
 
 enum baseList_Type
 {
-    BCIFunction,
-    BCIFunctionFile,
-    BCIFunctionSolver,
-    BCIFunctionFileSolver,
-    BCI1DFunctionDefault,
-    BCI3DFSI,
+    BCIFunctionParser,
+    BCIFunctionParserFile,
+    BCIFunctionParserSolver,
+    BCIFunctionParserFileSolver,
+    BCIFunctionUserDefined,
+    BCIFunctionSolverDefined,
     BCI3DDataInterpolator
 };
+
+// Forward class declarations
+template< class PhysicalSolverType >
+class BCInterfaceFactory;
 
 } // Namespace LifeV
 

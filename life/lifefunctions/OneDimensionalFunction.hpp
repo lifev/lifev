@@ -31,6 +31,7 @@
  *  @version 1.0
  *  @date 01-08-2006
  *  @author Lucia Mirabella  <lucia.mirabella@gmail.com>
+ *  @author Tiziano Passerini <tiziano.passerini@gmail.com>
  *
  *  @version 2.0
  *  @date 20-04-2010
@@ -47,17 +48,23 @@
 namespace LifeV
 {
 
-//! OneDimensionalBCFunction - Base class for One Dimensional BC Functions.
+//! OneDimensionalFunction - Base class for 1D BC Functions.
 /*!
- *  @author Lucia Mirabella
+ *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *
+ *  The 1D boundary condition function is evaluated as a function of the current time and of the time step.
  */
-class OneDimensionalBCFunction
+class OneDimensionalFunction
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
+    /*! @typedef function_Type */
+    //! Type definition for the 1D boundary function
     typedef boost::function<Real ( const Real&, const Real&  )> function_Type;
 
     //@}
@@ -66,20 +73,23 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
-    explicit OneDimensionalBCFunction() : M_function() {}
+    //! Empty Constructor
+    explicit OneDimensionalFunction() : M_function() {}
 
     //! Constructor by function
     /*!
-      @param function the user defined function
-    */
-    explicit OneDimensionalBCFunction( const function_Type& function ) : M_function( function ) {}
+     *  @param function the user defined function
+     */
+    explicit OneDimensionalFunction( const function_Type& function ) : M_function( function ) {}
 
     //! Copy constructor
-    OneDimensionalBCFunction( const OneDimensionalBCFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
+    /*!
+     *  @param bcFunction OneDimensionalFunction
+     */
+    OneDimensionalFunction( const OneDimensionalFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
 
     //! Destructor
-    virtual ~OneDimensionalBCFunction() {}
+    virtual ~OneDimensionalFunction() {}
 
     //@}
 
@@ -87,8 +97,27 @@ public:
     //! @name Operators
     //@{
 
-    OneDimensionalBCFunction& operator=( const OneDimensionalBCFunction& bcFunction ) { if( this != &bcFunction ) { M_function = bcFunction.M_function; } return *this; }
+    //! Operator=
+    /*!
+     *  @param bcFunction OneDimensionalFunction
+     *  @return reference to a copy of the class
+     */
+    OneDimensionalFunction& operator=( const OneDimensionalFunction& bcFunction )
+    {
+        if( this != &bcFunction )
+            M_function = bcFunction.M_function;
 
+        return *this;
+    }
+
+    //! Operator()
+    /*!
+     *  Evaluate the function.
+     *
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @return the value of the function.
+     */
     Real operator()( const Real& time, const Real& timeStep = 0. ) const { return M_function( time, timeStep ); }
 
     //@}
@@ -124,15 +153,15 @@ private:
 
 /*
 //! Factory create function
-inline OneDimensionalBCFunction*
-Create_OneDimensionalModel_BCFunction( const OneDimensionalBCFunction* bcFunction )
+inline OneDimensionalFunction*
+Create_OneDimensionalModel_BCFunction( const OneDimensionalFunction* bcFunction )
 {
-    return new OneDimensionalBCFunction( (const OneDimensionalBCFunction&)* bcFunction );
+    return new OneDimensionalFunction( (const OneDimensionalFunction&)* bcFunction );
 }
 
 namespace
 {
-    static bool registerOneD_BCFunction = FactoryClone_OneDimensionalModel_BCFunction::instance().registerProduct( typeid(OneDimensionalBCFunction), &Create_OneDimensionalModel_BCFunction );
+    static bool registerOneD_BCFunction = FactoryClone_OneDimensionalModel_BCFunction::instance().registerProduct( typeid(OneDimensionalFunction), &Create_OneDimensionalModel_BCFunction );
 }
 */
 

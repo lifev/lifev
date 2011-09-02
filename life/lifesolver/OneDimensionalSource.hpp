@@ -32,7 +32,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalSource_H
@@ -43,12 +43,22 @@
 namespace LifeV
 {
 
-//! OneDimensionalSource - Base class for the source function of the 1D hyperbolic problem.
+//! OneDimensionalSource - Base class for the source term \f$\mathbf S\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
- *  dU/dt + dF(U)/dz + B(U) = 0
- *  with U=[A,Q]^T
+ *  The conservative form of the generic hyperbolic problem is
+ *
+ *  \f[
+ *  \frac{\partial \mathbf U}{\partial t} + \frac{\partial \mathbf F(\mathbf U)}{\partial z} + \mathbf S(\mathbf U) = 0,
+ *  \f]
+ *
+ *  where \f$\mathbf U\f$ are the conservative variables, \f$\mathbf F\f$ the corresponding fluxes,
+ *  and \f$\mathbf S\f$ represents the source terms.
+ *
+ *  This class implements all the interfaces required for the computation of \f$\mathbf S\f$ and its derivatives.
  */
 class OneDimensionalSource
 {
@@ -70,10 +80,14 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
-    explicit OneDimensionalSource() : M_physics() {}
+    //! Empty constructor
+    explicit OneDimensionalSource() : M_physicsPtr() {}
 
-    explicit OneDimensionalSource( const physicsPtr_Type physics ) : M_physics( physics ) {}
+    //! Constructor
+    /*!
+     * @param physicsPtr pointer to the physics of the problem
+     */
+    explicit OneDimensionalSource( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
 
     //! Do nothing destructor
     virtual ~OneDimensionalSource() {}
@@ -81,39 +95,41 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name Virtual methods
     //@{
 
-    //! B = [0, B2]^T
+    //! Evaluate the source term
     /*!
-     *  with B2 such that:
-     *
-     *  B2 = Kr*Q/A
-     *     - beta1 * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)  * dA0/dz
-     *     + A0/rho * [ 1/(beta1+1) * (A/A0)^(beta1+1) - A/A0 ]  * dbeta0/dz
-     *     + A0    * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)
-     *     * [ log(A/A0) - 1/(beta1+1) ]                         * dbeta1/dz
-     *
-     *  \param iNode : is the index position for the parameter
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the source term
+     *  @param iNode node of the mesh
      */
-    virtual Real source( const Real& A, const Real& Q, const ID& ii, const UInt& iNode ) const = 0;
+    virtual Real source( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const = 0;
 
-    //! Jacobian matrix dBi/dxj
-    virtual Real dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode ) const = 0;
-
-    //! Second derivative tensor d2Bi/(dxj dxk)
-//    virtual Real diff2( const Real& _A, const Real& _Q,
-//                        const ID& ii,   const ID& jj, const ID& kk,
-//                        const UInt& iNode = 0 ) const = 0;
-
-    //! Sql = [Sql1, Sql2]^T
+    //! Evaluate the derivative of the source term
     /*!
-     *  Sql source term of the equation under its quasi-linear formulation:
-     *
-     *  dU/dt + H(U) dU/dz + Sql(U) = 0
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the derivative of the source term
+     *  @param column column of the derivative of the source term
+     *  @param iNode node of the mesh
      */
-    virtual Real interpolatedQuasiLinearSource( const Real& _U1, const Real& _U2,
-                                                const ID& ii, const container2D_Type& bcNodes, const Real& cfl ) const = 0;
+    virtual Real dSdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const = 0;
+
+    //! Evaluate the non-conservative form of the source term at the foot of the outgoing characteristic.
+    /*!
+     *  This method is used for imposing the compatibility equations at the boundaries.
+     *  It interpolates the value between to nodes.
+     *
+     *  @param A area
+     *  @param Q flow rate
+     *  @param row row of the source term
+     *  @param bcNodes list of boundary nodes
+     *  @param cfl cfl used to identify the foot of the characteristic
+     */
+    virtual Real interpolatedNonConservativeSource( const Real& A, const Real& Q,
+                                                    const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const = 0;
 
     //@}
 
@@ -121,7 +137,11 @@ public:
     //! @name Set Methods
     //@{
 
-    void setPhysics( const physicsPtr_Type& physics ) { M_physics = physics; }
+    //! Set the physics of the problem.
+    /*!
+     * @param physicsPtr pointer to physics of the problem
+     */
+    void setPhysics( const physicsPtr_Type& physicsPtr ) { M_physicsPtr = physicsPtr; }
 
     //@}
 
@@ -129,20 +149,26 @@ public:
     //! @name Get Methods
     //@{
 
-    physicsPtr_Type physics() const { return M_physics; }
+    //! Get the physics of the problem.
+    /*!
+     * @return physics of the problem
+     */
+    physicsPtr_Type physics() const { return M_physicsPtr; }
 
     //@}
 
 protected:
 
-    physicsPtr_Type                 M_physics;
+    physicsPtr_Type                 M_physicsPtr;
 
 private:
 
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalSource& operator=( const physicsPtr_Type physics );
+    explicit OneDimensionalSource( const OneDimensionalSource& source );
+
+    OneDimensionalSource& operator=( const OneDimensionalSource& source );
 
     //@}
 };

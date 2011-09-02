@@ -37,7 +37,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/OneDimensionalData.hpp>
@@ -52,8 +52,8 @@ OneDimensionalData::OneDimensionalData():
     M_physicsType               (),
     M_fluxType                  (),
     M_sourceType                (),
-    M_time                      (),
-    M_mesh                      ( new mesh_Type() ),
+    M_timeDataPtr               (),
+    M_meshPtr                   ( new mesh_Type() ),
     M_viscoelasticWall          (),
     M_viscoelasticAngle         (),
     M_viscoelasticPeriod        (),
@@ -119,17 +119,17 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     M_sourceType  = OneDimensional::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
-    if ( !M_time.get() )
-        M_time.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
+    if ( !M_timeDataPtr.get() )
+        M_timeDataPtr.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
 
     // Mesh setup - Space Discretization
     Real length = dataFile( ( section + "/space_discretization/Length"           ).data(), 1. );
     Real numberOfElements = dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 );
 
-    M_mesh->setup( length, numberOfElements );
+    M_meshPtr->setup( length, numberOfElements );
 
-    //std::cout << " 1D- Mesh nodes:                               " << M_mesh->numPoints() << std::endl;
-    //std::cout << " 1D- Mesh elements:                            " << M_mesh->numElements() << std::endl;
+    //std::cout << " 1D- Mesh nodes:                               " << M_meshPtr->numPoints() << std::endl;
+    //std::cout << " 1D- Mesh elements:                            " << M_meshPtr->numElements() << std::endl;
 
     // Physical Wall
     M_viscoelasticWall        = dataFile( ( section + "/PhysicalWall/ViscoelasticWall"                ).data(), false );
@@ -188,7 +188,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     {
     case uniform:
 
-        for ( UInt i = 0; i < M_mesh->numPoints() ; ++i )
+        for ( UInt i = 0; i < M_meshPtr->numPoints() ; ++i )
         {
             // Physical Parameters
             M_thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0. );
@@ -251,7 +251,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
 
     case pointwise:
 
-        for ( UInt i = 0; i < M_mesh->numPoints() ; ++i )
+        for ( UInt i = 0; i < M_meshPtr->numPoints() ; ++i )
         {
             // Physical Parameters
             M_thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0., i );
@@ -302,17 +302,17 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     M_sourceType  = OneDimensional::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
-    if ( !M_time.get() )
-        M_time.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
+    if ( !M_timeDataPtr.get() )
+        M_timeDataPtr.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
 
     // Mesh setup - Space Discretization
     Real length = dataFile( ( section + "/discretization/x_right" ).data(), 1. ) -
                   dataFile( ( section + "/discretization/x_left"  ).data(), 0. );
 
-    M_mesh->setup( length, dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
+    M_meshPtr->setup( length, dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
 
-    //std::cout << " 1D- Mesh nodes:                               " << M_mesh->numPoints() << std::endl;
-    //std::cout << " 1D- Mesh elements:                            " << M_mesh->numElements() << std::endl;
+    //std::cout << " 1D- Mesh nodes:                               " << M_meshPtr->numPoints() << std::endl;
+    //std::cout << " 1D- Mesh elements:                            " << M_meshPtr->numElements() << std::endl;
 
     // Physical Wall Model
     M_inertialWall            = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
@@ -359,7 +359,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     resetContainers();
 
     // Linear Parameters
-    for ( UInt i = 0; i < M_mesh->numPoints() ; ++i )
+    for ( UInt i = 0; i < M_meshPtr->numPoints() ; ++i )
     {
         M_viscoelasticCoefficient[i]   = dataFile( ( section + "/PhysicalParameters/gamma" ).data(), 0. );
 
@@ -413,7 +413,7 @@ OneDimensionalData::updateCoefficients()
         // Compute Friction Coefficient: Kr = -2*pi*mu/rho*s'(R)
         M_friction = 2 * M_PI * M_viscosity / M_density * ( M_powerLawCoefficient + 2 ) * std::pow( radius, M_powerLawCoefficient - 1 );
 
-        for ( UInt i = 0; i < M_mesh->numPoints(); ++i )
+        for ( UInt i = 0; i < M_meshPtr->numPoints(); ++i )
         {
             // Compute Coriolis Coefficient: Alpha = 2*pi/Area0*Int(s(r)^2)
             M_alpha[i] = 2 / ( radius * radius ) * profileIntegral;
@@ -422,7 +422,7 @@ OneDimensionalData::updateCoefficients()
             if ( M_thickVessel ) // see Amadori, Ferrari, Formaggia (MOX report 86)
             {
                 M_beta0[i] = - M_thickness[i] * M_young * std::sqrt(M_PI) / ( std::sqrt( M_area0[i] ) * ( (1 - M_poisson * M_poisson )
-                                                                              + M_poisson * ( 1 + M_poisson ) * ( M_thickness[i] * std::sqrt(M_PI) / std::sqrt( M_area0[i] ) ) ) );
+                             + M_poisson * ( 1 + M_poisson ) * ( M_thickness[i] * std::sqrt(M_PI) / std::sqrt( M_area0[i] ) ) ) );
                 M_beta1[i] = - 0.5;
             }
             else
@@ -432,7 +432,8 @@ OneDimensionalData::updateCoefficients()
             }
 
             // Compute Viscoelastic Coefficient: gamma = h * E / ( 1 - nu^2 ) * T * tan(phi) / ( 4 * \sqrt(pi))
-            M_viscoelasticCoefficient[i] = M_thickness[i] * M_young / (1 - M_poisson * M_poisson) * M_viscoelasticPeriod * std::tan( M_viscoelasticAngle ) / ( 4 * std::sqrt(M_PI) );
+            M_viscoelasticCoefficient[i] = M_thickness[i] * M_young / (1 - M_poisson * M_poisson) * M_viscoelasticPeriod *
+                                           std::tan( M_viscoelasticAngle ) / ( 4 * std::sqrt(M_PI) );
         }
     }
 
@@ -440,34 +441,235 @@ OneDimensionalData::updateCoefficients()
     computeSpatialDerivatives();
 }
 
-void
-OneDimensionalData::initializeLinearParameters()
-{
-    for ( UInt indz=0; indz < M_mesh->numPoints(); ++indz )
-    {
-        M_celerity1[indz] = std::sqrt( M_beta0[indz] * M_beta1[indz] / M_density );
-        M_flux21[indz]    =  M_celerity1[indz] *  M_celerity1[indz];
-        M_source22[indz]  = M_friction / M_area0(indz);
-    }
+//void
+//OneDimensionalData::initializeLinearParameters()
+//{
+//    for ( UInt indz=0; indz < M_meshPtr->numPoints(); ++indz )
+//    {
+//        M_celerity1[indz] = std::sqrt( M_beta0[indz] * M_beta1[indz] / M_density );
+//        M_flux21[indz]    =  M_celerity1[indz] *  M_celerity1[indz];
+//        M_source22[indz]  = M_friction / M_area0(indz);
+//    }
+//
+//    M_celerity2 = - M_celerity1;
+//
+//    M_celerity1LeftEigenvector1 = M_celerity1;
+//    M_celerity1LeftEigenvector2 = scalarVector_Type(M_meshPtr->numPoints(), 1.);
+//    M_celerity2LeftEigenvector1 = M_celerity2;
+//    M_celerity2LeftEigenvector2 = scalarVector_Type(M_meshPtr->numPoints(), 1.);
+//
+//    M_flux11 = ZeroVector(M_meshPtr->numPoints());
+//    M_flux12 = scalarVector_Type(M_meshPtr->numPoints(), 1.);
+//    M_flux22 = ZeroVector(M_meshPtr->numPoints());
+//
+//    M_source10 = ZeroVector(M_meshPtr->numPoints());
+//    M_source11 = ZeroVector(M_meshPtr->numPoints());
+//    M_source12 = ZeroVector(M_meshPtr->numPoints());
+//
+//    M_source20 = ZeroVector(M_meshPtr->numPoints());
+//    M_source21 = ZeroVector(M_meshPtr->numPoints());
+//}
 
-    M_celerity2 = - M_celerity1;
+// TODO Many changes to be done in these two methods:
+// 1) variables name is very bad
+// 2) do loop with explicit i++ is bad, use for loop instead
+// 3) rename indices following other classes (iNode, iElement, etc..)
+// 4) probably 3/4 of the code can be shared between the left and right method instead of duplications
+//void
+//OneDimensionalData::stiffenVesselLeft( const Real& xl,        const Real& xr,
+//                                       const Real& factor,    const Real& alpha,
+//                                       const Real& delta,     const Real& n,
+//                                       const Real& minDeltaX, const UInt& yesAdaptive )
+//{
+//    if ( yesAdaptive )
+//    {
+//        UInt iz=0, alpha_iz;
+//        Real ratio, n_elem_delta,n_elem_r,n_elem_l;
+//
+//        alpha_iz = static_cast<Int>( std::floor( (alpha - delta / 2 ) / minDeltaX + 0.5 ) ) + ( ( numberOfElements() - 1 ) -
+//                   static_cast<Int>( std::floor( ( xr - ( alpha + delta / 2 ) ) / minDeltaX + 0.5 ) ) -
+//                   static_cast<Int>( std::floor( ( alpha - delta / 2 ) / minDeltaX + 0.5 ) ) ) / 2;
+//
+//        n_elem_r = ( ( numberOfElements() - 1 ) - alpha_iz ) -
+//                   static_cast<Int>( std::floor( ( xr - ( alpha + delta / 2 ) ) / minDeltaX + 0.5 ) );
+//
+//        n_elem_l = alpha_iz -
+//                   static_cast<Int>( std::floor( ( alpha - delta / 2 ) / minDeltaX + 0.5 ) );
+//
+//        n_elem_delta = static_cast<Real>( numberOfElements() - 1 ) / ( xr - xl ) * delta;
+//
+//        Real x_current,deltax,deltax_adaptive,deltax_uniform;
+//        x_current = alpha;
+//        do
+//        {
+//            ratio = ( alpha + delta / 2 - x_current ) / delta;
+//
+//            M_dBeta0dz[alpha_iz + iz] = M_beta0[alpha_iz + iz] * ( factor * (- n / delta) * ( std::pow(2,(n-1)) * std::pow(ratio, (n-1)) ) );
+//            M_dBeta0dz[alpha_iz - iz] = M_dBeta0dz[alpha_iz + iz];
+//
+//            M_beta0[alpha_iz + iz] = M_beta0[alpha_iz + iz] * ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) );
+//            M_beta0[alpha_iz - iz] = M_beta0[alpha_iz + iz] / ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ) * ( 1 + factor * ( 1 - ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ) );
+//
+//            deltax_adaptive = ( -1 / n_elem_delta ) * ( 1 / ( ( -n / delta) * std::pow(2,(n-1) ) * std::pow( ratio , (n-1) ) ) );
+//            deltax_uniform = ( ( alpha + delta / 2) - x_current ) / ( n_elem_r - iz );
+//
+//            ++iz;
+//            deltax = ( ( deltax_adaptive < deltax_uniform ) && ( iz < n_elem_r ) ) ? deltax_adaptive : deltax_uniform;
+//            ASSERT_PRE( deltax > 0 , "The left point is on the right..." );
+//            x_current += deltax;
+//        }
+//        while ( ( x_current < ( alpha + delta/2 ) ) && ( ( alpha_iz - ( iz - 1 ) ) > 0) );
+//
+//        if ( ( alpha_iz - ( iz - 1 ) ) > 0 )
+//        {
+//            do
+//            {
+//                M_beta0[alpha_iz - iz] = M_beta0[alpha_iz - iz] * ( 1 + factor );
+//                ++iz;
+//            }
+//            while ( (alpha_iz - ( iz - 1 ) ) > 0 );
+//        }
+//        else
+//            std::cout << "[stiffenVesselRight] error! out of left boundary" << std::endl;
+//    }
+//
+//    else
+//    {
+//        UInt iz=0;
+//        Real ratio, x_current=xl, deltax;
+//
+//        deltax = ( xr - xl ) / static_cast<Real>(numberOfElements() - 1);
+//
+//        while ( ( x_current < ( alpha - delta / 2 ) ) && ( iz < numberOfElements() ) )
+//        {
+//            M_beta0[iz] =  M_beta0[iz] * ( 1 + factor );
+//
+//            ++iz;
+//            x_current+=deltax;
+//        }
+//
+//        while ( (x_current < alpha) && (iz < numberOfElements()) )
+//        {
+//            ratio = ( x_current - alpha - delta / 2 ) / delta;
+//
+//            M_dBeta0dz[iz] = M_beta0[iz] * ( factor * (- n / delta ) * ( std::pow(2,(n-1)) * std::pow(ratio,(n-1) ) ) );
+//            M_beta0[iz]    = M_beta0[iz] * ( 1 + factor * ( 1 - std::pow(2,(n-1)) * std::pow(ratio,n) ) );
+//
+//            ++iz;
+//            x_current+=deltax;
+//        }
+//
+//        while ( ( x_current < ( alpha + delta / 2 ) ) && (iz < numberOfElements()) )
+//        {
+//            ratio = ( alpha + delta / 2 - x_current ) / delta;
+//
+//            M_dBeta0dz[iz] = M_beta0[iz] * ( factor * ( -n / delta) * ( std::pow(2,(n-1)) * std::pow(ratio,(n-1) ) ) );
+//            M_beta0[iz]    = M_beta0[iz] * ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) );
+//
+//            ++iz;
+//            x_current += deltax;
+//        }
+//    }
+//}
 
-    M_celerity1LeftEigenvector1 = M_celerity1;
-    M_celerity1LeftEigenvector2 = scalarVector_Type(M_mesh->numPoints(), 1.);
-    M_celerity2LeftEigenvector1 = M_celerity2;
-    M_celerity2LeftEigenvector2 = scalarVector_Type(M_mesh->numPoints(), 1.);
-
-    M_flux11 = ZeroVector(M_mesh->numPoints());
-    M_flux12 = scalarVector_Type(M_mesh->numPoints(), 1.);
-    M_flux22 = ZeroVector(M_mesh->numPoints());
-
-    M_source10 = ZeroVector(M_mesh->numPoints());
-    M_source11 = ZeroVector(M_mesh->numPoints());
-    M_source12 = ZeroVector(M_mesh->numPoints());
-
-    M_source20 = ZeroVector(M_mesh->numPoints());
-    M_source21 = ZeroVector(M_mesh->numPoints());
-}
+//void
+//OneDimensionalData::stiffenVesselRight( const Real& xl,        const Real& xr,
+//                                        const Real& factor,    const Real& alpha,
+//                                        const Real& delta,     const Real& n,
+//                                        const Real& minDeltaX, const UInt& yesAdaptive )
+//{
+//    if ( yesAdaptive )
+//    {
+//        Real ratio, n_elem_delta,n_elem_r,n_elem_l;
+//
+//        UInt iz=0, alpha_iz;
+//
+//        alpha_iz = static_cast<Int>( std::floor( ( alpha - delta / 2 ) / minDeltaX + 0.5 ) ) + ( (numberOfElements() - 1) -
+//                   static_cast<Int>( std::floor( ( xr - ( alpha + delta / 2 ) ) / minDeltaX + 0.5 ) ) -
+//                   static_cast<Int>( std::floor( ( alpha - delta / 2 ) / minDeltaX + 0.5 ) ) ) / 2;
+//
+//        n_elem_delta = static_cast<Real>( numberOfElements() - 1 ) / ( xr - xl ) * delta;
+//
+//        n_elem_r = ( ( numberOfElements() - 1 ) - alpha_iz ) -
+//                   static_cast<Int>( std::floor( ( xr - ( alpha + delta / 2 ) ) / minDeltaX + 0.5 ) );
+//
+//        n_elem_l = alpha_iz -
+//                   static_cast<Int>( std::floor( ( alpha - delta / 2 ) / minDeltaX + 0.5 ) );
+//
+//        Real x_current,deltax,deltax_adaptive,deltax_uniform;
+//        x_current = alpha;
+//        do
+//        {
+//            ratio = ( alpha + delta / 2 - x_current ) / delta;
+//
+//            M_dBeta0dz[alpha_iz + iz] = M_beta0[alpha_iz + iz] * ( factor * ( n / delta) * ( std::pow(2,(n-1)) * std::pow(ratio,(n-1)) ) );
+//            M_dBeta0dz[alpha_iz - iz] = M_dBeta0dz[alpha_iz + iz];
+//
+//            M_beta0[alpha_iz + iz] = M_beta0[alpha_iz + iz] * ( 1 + factor * ( 1 - ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ) );
+//            M_beta0[alpha_iz - iz] = M_beta0[alpha_iz + iz] / ( 1 + factor * ( 1 - ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ) ) * ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) );
+//
+//            deltax_adaptive = ( -1 / n_elem_delta ) * ( 1 / ( ( -n / delta) * std::pow(2,(n-1) ) * std::pow( ratio , (n-1) ) ) );
+//            deltax_uniform = ( ( alpha + delta / 2) - x_current ) / ( n_elem_r - iz );
+//
+//            ++iz;
+//            deltax = ( ( deltax_adaptive < deltax_uniform ) && ( iz < n_elem_r) ) ? deltax_adaptive : deltax_uniform;
+//            ASSERT_PRE( deltax > 0 , "The left point is on the right..." );
+//            x_current += deltax;
+//
+//        }
+//        while ( x_current < ( alpha + delta / 2 ) && ( ( alpha_iz - ( iz - 1 ) ) > 0) );
+//
+//        if ( ( alpha_iz + iz ) <= ( numberOfElements() -1 ) )
+//        {
+//            do
+//            {
+//                M_beta0[alpha_iz + iz] = M_beta0[alpha_iz + iz] * ( 1 + factor );
+//                ++iz;
+//            }
+//            while ( ( alpha_iz + iz - 1 ) < ( numberOfElements() -1 ) );
+//
+//        }
+//        else
+//            std::cout << "\n[stiffenVesselRight] error! out of right boundary" << std::endl;
+//    }
+//    else
+//    {
+//        UInt iz = numberOfElements()-1;
+//        Real ratio, x_current=xr, deltax;
+//
+//        deltax = ( xr - xl ) / static_cast<Real>(numberOfElements() - 1 );
+//
+//        while ( ( x_current > ( alpha + delta / 2 ) ) && ( ( iz + 1 ) > 0 ) )
+//        {
+//            M_beta0[iz] =  M_beta0[iz] * ( 1 + factor );
+//
+//            --iz;
+//            x_current -= deltax;
+//        }
+//
+//        while ( ( x_current > alpha ) && ( ( iz + 1 ) > 0 ) )
+//        {
+//            ratio=( ( ( alpha + delta / 2 ) - x_current ) / delta );
+//
+//            M_dBeta0dz[iz] = M_beta0[iz] * ( factor * ( n / delta) *  ( std::pow(2,(n-1)) * std::pow(ratio,(n-1)) ) );
+//            M_beta0[iz]    = M_beta0[iz] * ( 1 + factor * ( 1 - std::pow(2,(n-1)) * std::pow(ratio,n) ) );
+//
+//            --iz;
+//            x_current -= deltax;
+//        }
+//
+//        while ( ( x_current > ( alpha - delta / 2 ) ) && ( ( iz + 1 ) > 0 ) )
+//        {
+//            ratio = ( x_current - alpha - delta / 2 ) / delta;
+//
+//            M_dBeta0dz[iz] = M_beta0[iz] * ( factor * ( n / delta) * ( std::pow(2,(n-1)) * std::pow(ratio,(n-1)) ) );
+//            M_beta0[iz]    = M_beta0[iz] * ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) );
+//
+//            --iz;
+//            x_current -= deltax;
+//        }
+//    }
+//}
 
 void
 OneDimensionalData::showMe( std::ostream& output ) const
@@ -482,12 +684,12 @@ OneDimensionalData::showMe( std::ostream& output ) const
 
     // Time
     output << "\n*** Values for data [time_discretization]" << std::endl << std::endl;
-    M_time->showMe( output );
+    M_timeDataPtr->showMe( output );
 
     // Space Discretization
     output << "\n*** Values for data [space_discretization]" << std::endl << std::endl;
     output << "Length                 = " << length() << std::endl;
-    output << "NumberOfElements       = " << M_mesh->numElements() << std::endl;
+    output << "NumberOfElements       = " << M_meshPtr->numElements() << std::endl;
 
     // Physical Wall Model
     output << "\n*** Values for data [PhysicalWallModel]" << std::endl << std::endl;
@@ -581,20 +783,21 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
     Real a  = dataFile( quantity.data(), defaultValue, 0 );
     Real b  = dataFile( quantity.data(), a, 1 );
 
-    Real xa = M_mesh->firstPoint().x();
-    Real xb = M_mesh->lastPoint().x();
+    Real xa = M_meshPtr->firstPoint().x();
+    Real xb = M_meshPtr->lastPoint().x();
 
-    for ( UInt i(0) ; i < M_mesh->numPoints() ; ++i )
+    for ( UInt i(0) ; i < M_meshPtr->numPoints() ; ++i )
         if ( isArea )
         {
-            vector[i] = std::sqrt(a / M_PI) + ( std::sqrt(b / M_PI) - std::sqrt(a / M_PI) ) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
+            vector[i] = std::sqrt(a / M_PI) + ( std::sqrt(b / M_PI) - std::sqrt(a / M_PI) ) /
+                                              ( xb - xa ) * ( M_meshPtr->point( i ).x() - xa );
             vector[i] *= vector[i] * M_PI;
         }
         else
-            vector[i] = a + (b - a) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
+            vector[i] = a + (b - a) / ( xb - xa ) * ( M_meshPtr->point( i ).x() - xa );
 
     // linearInterpolation to disable tapering (when needed)
-//    for ( UInt i(0); i < M_mesh->numPoints() ; ++i )
+//    for ( UInt i(0); i < M_meshPtr->numPoints() ; ++i )
 //        if ( isArea )
 //            vector[i] = (a + b + 2 * std::sqrt(a*b)) / 4;
 //        else
@@ -604,7 +807,7 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
 void
 OneDimensionalData::computeSpatialDerivatives()
 {
-    for ( UInt iNode( 0 ) ; iNode < M_mesh->numPoints() ; ++iNode )
+    for ( UInt iNode( 0 ) ; iNode < M_meshPtr->numPoints() ; ++iNode )
     {
         M_dArea0dz[iNode] = computeSpatialDerivativeAtNode( M_area0, iNode );
         M_dBeta0dz[iNode] = computeSpatialDerivativeAtNode( M_beta0, iNode );
@@ -616,36 +819,36 @@ OneDimensionalData::computeSpatialDerivatives()
 void
 OneDimensionalData::resetContainers()
 {
-    M_viscoelasticCoefficient.resize( M_mesh->numPoints() );
-    M_thickness.resize( M_mesh->numPoints() );
+    M_viscoelasticCoefficient.resize( M_meshPtr->numPoints() );
+    M_thickness.resize( M_meshPtr->numPoints() );
 
-    M_area0.resize( M_mesh->numPoints() );
-    M_beta0.resize( M_mesh->numPoints() );
-    M_beta1.resize( M_mesh->numPoints() );
-    M_alpha.resize( M_mesh->numPoints() );
+    M_area0.resize( M_meshPtr->numPoints() );
+    M_beta0.resize( M_meshPtr->numPoints() );
+    M_beta1.resize( M_meshPtr->numPoints() );
+    M_alpha.resize( M_meshPtr->numPoints() );
 
-    M_dArea0dz.resize( M_mesh->numPoints() );
-    M_dBeta0dz.resize( M_mesh->numPoints() );
-    M_dBeta1dz.resize( M_mesh->numPoints() );
-    M_dAlphadz.resize( M_mesh->numPoints() );
+    M_dArea0dz.resize( M_meshPtr->numPoints() );
+    M_dBeta0dz.resize( M_meshPtr->numPoints() );
+    M_dBeta1dz.resize( M_meshPtr->numPoints() );
+    M_dAlphadz.resize( M_meshPtr->numPoints() );
 
     // Linear Parameters defined along the 1D model
-    M_flux11.resize( M_mesh->numPoints() );
-    M_flux12.resize( M_mesh->numPoints() );
-    M_flux21.resize( M_mesh->numPoints() );
-    M_flux22.resize( M_mesh->numPoints() );
-    M_celerity1.resize( M_mesh->numPoints() );
-    M_celerity2.resize( M_mesh->numPoints() );
-    M_celerity1LeftEigenvector1.resize( M_mesh->numPoints() );
-    M_celerity1LeftEigenvector2.resize( M_mesh->numPoints() );
-    M_celerity2LeftEigenvector1.resize( M_mesh->numPoints() );
-    M_celerity2LeftEigenvector2.resize( M_mesh->numPoints() );
-    M_source10.resize( M_mesh->numPoints() );
-    M_source20.resize( M_mesh->numPoints() );
-    M_source11.resize( M_mesh->numPoints() );
-    M_source12.resize( M_mesh->numPoints() );
-    M_source21.resize( M_mesh->numPoints() );
-    M_source22.resize( M_mesh->numPoints() );
+    M_flux11.resize( M_meshPtr->numPoints() );
+    M_flux12.resize( M_meshPtr->numPoints() );
+    M_flux21.resize( M_meshPtr->numPoints() );
+    M_flux22.resize( M_meshPtr->numPoints() );
+    M_celerity1.resize( M_meshPtr->numPoints() );
+    M_celerity2.resize( M_meshPtr->numPoints() );
+    M_celerity1LeftEigenvector1.resize( M_meshPtr->numPoints() );
+    M_celerity1LeftEigenvector2.resize( M_meshPtr->numPoints() );
+    M_celerity2LeftEigenvector1.resize( M_meshPtr->numPoints() );
+    M_celerity2LeftEigenvector2.resize( M_meshPtr->numPoints() );
+    M_source10.resize( M_meshPtr->numPoints() );
+    M_source20.resize( M_meshPtr->numPoints() );
+    M_source11.resize( M_meshPtr->numPoints() );
+    M_source12.resize( M_meshPtr->numPoints() );
+    M_source21.resize( M_meshPtr->numPoints() );
+    M_source22.resize( M_meshPtr->numPoints() );
 }
 
 } // LifeV namespace

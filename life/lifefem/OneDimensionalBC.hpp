@@ -44,7 +44,7 @@
 #ifndef OneDimensionalBC_H
 #define OneDimensionalBC_H
 
-#include <life/lifefem/OneDimensionalBCFunctionDefault.hpp>
+#include <life/lifefunctions/OneDimensionalFunctionSolverDefined.hpp>
 #include <life/lifesolver/OneDimensionalData.hpp>
 
 namespace LifeV
@@ -52,7 +52,14 @@ namespace LifeV
 
 //! OneDimensionalBC - Class featuring methods to handle boundary conditions.
 /*!
- *  @author Lucia Mirabella, Tiziano Passerini
+ *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *
+ *  We need to impose 2 boundary condition on each side of the 1D segment.
+ *  These class stores the boundary conditions on one side.
+ *
+ *  \cond \TODO Improve the description of this class. \endcond
  */
 class OneDimensionalBC
 {
@@ -61,26 +68,26 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalBCFunctionDefault              bcFunctionDefault_Type;
-    typedef boost::shared_ptr< bcFunctionDefault_Type >  bcFunctionDefaultPtr_Type;
+    typedef OneDimensionalFunctionSolverDefined                bcFunctionSolverDefined_Type;
+    typedef boost::shared_ptr< bcFunctionSolverDefined_Type >  bcFunctionSolverDefinedPtr_Type;
 
-    typedef bcFunctionDefault_Type::bcFunction_Type      bcFunction_Type;
-    typedef bcFunctionDefault_Type::bcFunctionPtr_Type   bcFunctionPtr_Type;
+    typedef bcFunctionSolverDefined_Type::bcFunction_Type      bcFunction_Type;
+    typedef bcFunctionSolverDefined_Type::bcFunctionPtr_Type   bcFunctionPtr_Type;
 
-    typedef bcFunctionDefault_Type::fluxPtr_Type         fluxPtr_Type;
-    typedef bcFunctionDefault_Type::sourcePtr_Type       sourcePtr_Type;
-    typedef bcFunctionDefault_Type::solution_Type        solution_Type;
-    typedef bcFunctionDefault_Type::solutionPtr_Type     solutionPtr_Type;
+    typedef bcFunctionSolverDefined_Type::fluxPtr_Type         fluxPtr_Type;
+    typedef bcFunctionSolverDefined_Type::sourcePtr_Type       sourcePtr_Type;
+    typedef bcFunctionSolverDefined_Type::solution_Type        solution_Type;
+    typedef bcFunctionSolverDefined_Type::solutionPtr_Type     solutionPtr_Type;
 
-    typedef bcFunctionDefault_Type::container2D_Type     container2D_Type;
-    typedef bcFunctionDefault_Type::vectorPtrContainer_Type vectorPtrContainer_Type;
+    typedef bcFunctionSolverDefined_Type::container2D_Type     container2D_Type;
+    typedef bcFunctionSolverDefined_Type::vectorPtrContainer_Type vectorPtrContainer_Type;
 
-    typedef bcFunctionDefault_Type::vector_Type          vector_Type;
-    typedef bcFunctionDefault_Type::matrix_Type          matrix_Type;
+    typedef bcFunctionSolverDefined_Type::vector_Type          vector_Type;
+    typedef bcFunctionSolverDefined_Type::matrix_Type          matrix_Type;
 
-    typedef bcFunctionDefault_Type::bcLine_Type          bcLine_Type;
-    typedef bcFunctionDefault_Type::bcSide_Type          bcSide_Type;
-    typedef bcFunctionDefault_Type::bcType_Type          bcType_Type;
+    typedef bcFunctionSolverDefined_Type::bcLine_Type          bcLine_Type;
+    typedef bcFunctionSolverDefined_Type::bcSide_Type          bcSide_Type;
+    typedef bcFunctionSolverDefined_Type::bcType_Type          bcType_Type;
 
     //@}
 
@@ -93,9 +100,9 @@ public:
 
     //! Copy constructor
     /*!
-     * @param BC OneDimensionalBC
+     * @param bc OneDimensionalBC
      */
-    explicit OneDimensionalBC( const OneDimensionalBC& BC );
+    explicit OneDimensionalBC( const OneDimensionalBC& bc );
 
     //! Destructor
     virtual ~OneDimensionalBC() {}
@@ -106,11 +113,24 @@ public:
     //! @name Methods
     //@{
 
-    //! Apply boundary conditions
-    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
+    //! Apply boundary conditions to the rhs of the Taylor-Galerkin problem
+    /*!
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @param solution the solution container.
+     *  @param fluxPtr pointer to the flux class.
+     *  @param rhs the rhs of the Taylor-Galerking problem.
+     */
+    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
+                  const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs );
 
-    //! Apply boundary conditions for the viscoelastic problem
-    void applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs );
+    //! Apply boundary conditions to the rhs of the viscoelastic problem
+    /*!
+     *  @param fluxPtr pointer to the flux class.
+     *  @param matrix the matrix of the viscoelastic problem.
+     *  @param rhs the rhs of the viscoelastic problem.
+     */
+    void applyViscoelasticBC( const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs );
 
     //@}
 
@@ -118,8 +138,18 @@ public:
     //! @name Set Methods
     //@{
 
-    void setType( const bcLine_Type& bcLine, const bcType_Type& bc ) { M_bcType[bcLine] = bc; }
+    //! Set the type of boundary condition
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     */
+    void setType( const bcLine_Type& bcLine, const bcType_Type& bcType ) { M_bcType[bcLine] = bcType; }
 
+    //! Set the boundary condition function
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param bcFunction the boundary condition function.
+     */
     void setBCFunction( const bcLine_Type& bcLine, const bcFunction_Type& rhs ) { M_bcFunction[bcLine] = rhs; }
 
     //@}
@@ -128,8 +158,18 @@ public:
     //! @name Get Methods
     //@{
 
+    //! Get the type of boundary condition
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @return the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
+     */
     const bcType_Type& type( const bcLine_Type& bcLine ) const { return M_bcType.find( bcLine )->second; }
 
+    //! Get the boundary condition function
+    /*!
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @return the boundary condition function.
+     */
     const bcFunction_Type& bcFunction( const bcLine_Type& bcLine ) const { return M_bcFunction.find( bcLine )->second; }
 
     //@}
@@ -148,18 +188,31 @@ private:
     //@{
 
     //! Compute the matrix and the RHS for the BC 2x2 linear system
-    void computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& bcLine,
+    /*!
+     *  @param time the current time.
+     *  @param timeStep the time step.
+     *  @param fluxPtr pointer to the flux class.
+     *  @param bcLine the line of the boundary condition (first or second).
+     *  @param leftEigenvector1 first line of the left eigenvector matrix.
+     *  @param leftEigenvector2 second line of the left eigenvector matrix.
+     *  @param dof degree of freedom of the boundary condition.
+     *  @param bcMatrix the 2x2 matrix problem for the boundary condition computation.
+     *  @param bcRHS the rhs of the 2x2 problem for the boundary condition computation.
+     */
+    void computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& fluxPtr, const bcLine_Type& bcLine,
                               const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
                               const UInt& dof, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS );
 
-    //! Solve a 2x2 linear system by the Cramer method (for the boundary systems)
+    //! Solve a 2x2 linear system by the Cramer method (for the boundary conditions)
     /*!
-     * Matrix A is given by two pairs corresponding to the 2 M_lines.
-     * A = [ M_matrixrow_at_line["first" ] ;
-     *       M_matrixrow_at_line["second"] ]
-     * @return A^{-1} * rhs2d
+     * Matrix A is given by two pairs corresponding to the 2 lines.
+     * @param line1 first line of the 2x2 matrix.
+     * @param line2 second line of the 2x2 matrix.
+     * @param rhs rhs of the 2x2 system.
+     * @return solution
      */
-    container2D_Type solveLinearSystem( const container2D_Type& line1, const container2D_Type& line2, const container2D_Type& rhs ) const;
+    container2D_Type solveLinearSystem( const container2D_Type& line1,
+                                        const container2D_Type& line2, const container2D_Type& rhs ) const;
 
     //@}
 

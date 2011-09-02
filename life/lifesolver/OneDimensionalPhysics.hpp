@@ -37,7 +37,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @contributor Simone Rossi <simone.rossi@epfl.ch>
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef OneDimensionalPhysics_H
@@ -51,6 +51,22 @@ namespace LifeV
 //! OneDimensionalPhysics - Base class providing physical operations for the 1D model data.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
+ *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *
+ *  It contains the following methods:
+ *  <ol>
+ *      <li> utilities for converting Riemann variables to physical quantities (and viceversa);
+ *      <li> utilities to compute the different pressure components (and derivatives).
+ *  </ol>
+ *
+ *  \cond
+ *  TODO: This class should be splitted in two separate classes
+ *  <ol>
+ *      <li> one class (no derivation) for the wall physics with a name like OneDimensionalWallPhysics
+ *      <li> a set of classes for the Riemann conversions like OneDimensionalRiemannConverter and derived Linear/NonLinear versions.
+ *  </ol>
+ *  \endcond
  */
 class OneDimensionalPhysics
 {
@@ -72,10 +88,14 @@ public :
     //! @name Constructors & Destructor
     //@{
 
-    //! Constructor
-    explicit OneDimensionalPhysics() : M_data(), M_previousArea() {}
+    //! Empty constructor
+    explicit OneDimensionalPhysics() : M_dataPtr(), M_previousAreaPtr() {}
 
-    explicit OneDimensionalPhysics( const dataPtr_Type data ) : M_data ( data ), M_previousArea() {}
+    //! Constructor
+    /*!
+     * @param dataPtr pointer to the data container of the problem
+     */
+    explicit OneDimensionalPhysics( const dataPtr_Type dataPtr ) : M_dataPtr ( dataPtr ), M_previousAreaPtr() {}
 
     //! Destructor
     virtual ~OneDimensionalPhysics() {}
@@ -86,26 +106,65 @@ public :
     //! @name Conversion methods
     //@{
 
-    //! Compute U from W
+    //! Compute \f$\mathbf U\f$ from \f$\mathbf W\f$
+    /*!
+     *  @param U1 first physical variable
+     *  @param U2 second physical variable
+     *  @param W1 first Riemann variable
+     *  @param W2 second Riemann variable
+     *  @param iNode node of the mesh
+     */
     virtual void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const = 0;
 
-    //! Compute W from U
+    //! Compute \f$\mathbf W\f$ from \f$\mathbf U\f$
+    /*!
+     *  @param W1 first Riemann variable
+     *  @param W2 second Riemann variable
+     *  @param U1 first physical variable
+     *  @param U2 second physical variable
+     *  @param iNode node of the mesh
+     */
     virtual void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const = 0;
 
-    //! Compute the pressure as a function of W1, W2:
+    //! Compute \f$P\f$ from \f$\mathbf W\f$
+    /*!
+     *  @param W1 first Riemann variable
+     *  @param W2 second Riemann variable
+     *  @param iNode node of the mesh
+     *  @return pressure
+     */
     virtual Real fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const = 0;
 
-    //! Compute W1 or W2 given the pressure:
-    virtual Real fromPToW( const Real& P, const Real& W, const ID& i, const UInt& iNode ) const = 0;
-
-    //! Compute W1 or W2 given the flux
-    virtual Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& iNode ) const = 0;
-
-    //! Compute area given the elastic pressure.
+    //! Compute \f$W_1\f$ or \f$W_2\f$ from \f$P\f$
     /*!
-     *  To be used in initialization, when time derivative of A is supposed null
+     *  @param P pressure
+     *  @param W Riemann variable
+     *  @param iW Riemann variable ID (0 for \f$W_1\f$, 1 or \f$W_2\f$)
+     *  @param iNode node of the mesh
+     *  @return the other Riemann variable
+     */
+    virtual Real fromPToW( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const = 0;
+
+    //! Compute \f$W_1\f$ or \f$W_2\f$ from \f$Q\f$
+    /*!
+     *  @param Q pressure
+     *  @param W_tn Riemann variable at time \f$t^n\f$
+     *  @param W Riemann variable
+     *  @param iW Riemann variable ID (0 for \f$W_1\f$, 1 or \f$W_2\f$)
+     *  @param iNode node of the mesh
+     *  @return the other Riemann variable
+     */
+    virtual Real fromQToW( const Real& Q, const Real& W_tn, const Real& W, const ID& iW, const UInt& iNode ) const = 0;
+
+    //! Compute the area \f$A\f$ given the elastic pressure \f$P_\mathrm{elastic}\f$.
+    /*!
+     *  To be used in initialization, when time derivative of A is supposed equal to zero.
+     *
+     *  @param P elastic pressure
+     *  @param timeStep the time step
+     *  @param iNode node of the mesh
      *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
-     *  @return A = A0 * ( (P - Pext) / beta0 + 1 )^(1/beta1)
+     *  @return \f$ A = A^0 \left( \displaystyle\frac{P_\mathrm{elastic} - P_\mathrm{ext}}{\beta_0} + 1 \right)^{\left(\displaystyle\frac{1}{\beta_1}\right)} \f$
      */
 #ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
@@ -119,54 +178,86 @@ public :
     //! @name Derivatives methods
     //@{
 
-    //! Compute the derivative of the area with respect to the time.
+    //! Compute the derivative of the area with respect to the time using a first order finite difference
     /*!
-     * @return dA(t)/dt
+     *  @param Anp1 area at time \f$t^{n+1}\f$
+     *  @param timeStep the time step
+     *  @param iNode node of the mesh
+     *  @return \f$\displaystyle\frac{dA(t)}{dt}\f$
      */
     Real dAdt( const Real& Anp1, const Real& timeStep, const UInt& iNode ) const;
 
-    //! Compute the derivative of pressure with respect to W1 and W2
-    virtual Real dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& iNode ) const = 0;
-
-    //! Compute the derivative of the pressure with respect to A
+    //! Compute the derivative of pressure with respect to \f$ \mathbf W\f$
     /*!
-     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
-     * @return dP(A)/dA = dPelastic(A)/dA + dPviscoelastic(A)/dA
+     *  @param W1 first Riemann variable
+     *  @param W2 second Riemann variable
+     *  @param iW Riemann derivative ID (0 for \f$\displaystyle\frac{dP}{dW_1}\f$, 1 or \f$\displaystyle\frac{dP}{dW_2}\f$)
+     *  @param iNode node of the mesh
+     *  @return \f$\displaystyle\frac{dP}{dW_1}\f$ or \f$\displaystyle\frac{dP}{dW_2}\f$
+     */
+    virtual Real dPdW( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const = 0;
+
+    //! Compute the derivative of the pressure with respect to \f$A\f$
+    /*!
+     *  @param A area
+     *  @param timeStep the time step
+     *  @param iNode node of the mesh
+     *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
+     *  @return \f$\displaystyle\frac{dP(A)}{dA} = \displaystyle\frac{dP_\mathrm{elastic}(A)}{dA} + \displaystyle\frac{dP_\mathrm{viscoelastic}(A)}{dA}\f$
      */
 #ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 #else
     Real dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 #endif
-    //! Compute the derivative of the elastic pressure with respect to A
+
+    //! Compute the derivative of the elastic pressure with respect to \f$A\f$
     /*!
-     * @return dP(A)/dA = beta1 * beta0 * ( A / Area0 )^beta1 / A
+     *  @param A area
+     *  @param iNode node of the mesh
+     *  @return \f$\displaystyle\frac{dP_\mathrm{elastic}(A)}{dA} = \displaystyle\frac{\beta_1 \beta_0 ( \displaystyle\frac{A}{A^0} )^{\beta_1}}{A}\f$
      */
     Real dPdAelastic( const Real& A, const UInt& iNode ) const;
 
-    //! Compute the derivative of the viscoelastic pressure with respect to A
+    //! Compute the derivative of the viscoelastic pressure with respect to \f$A\f$
     /*!
-     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
-     * @return dP(A)/dA = gamma / ( A^(3/2) ) * ( 1 / deltaT - 3 * dA/dT / ( 2 * A ) )
+     *  @param A area
+     *  @param timeStep the time step
+     *  @param iNode node of the mesh
+     *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
+     *  @return \f$\displaystyle\frac{dP_\mathrm{viscoelastic}(A)}{dA} = \displaystyle\frac{\gamma}{A^{3/2}} \left( \displaystyle\frac{1}{\Delta t} -
+     *  \displaystyle\frac{dA}{dt} \displaystyle\frac{3}{2A} \right)\f$
      */
 #ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 #else
     Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 #endif
-    //! Compute the derivative of the elastic pressure with respect to A
+
+    //! Compute the derivative of the area with respect to \f$P\f$
     /*!
-     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
-     * @return dA(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + ( P - Pext )/ beta0 )^(1/beta1 - 1)
+     *  @param P pressure
+     *  @param timeStep the time step
+     *  @param iNode node of the mesh
+     *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
+     *  @return \f$\displaystyle\frac{dA(P)}{dP} = \displaystyle\frac{dA(P)}{dP_\mathrm{elastic}} +
+     *  \displaystyle\frac{dA(P)}{dP_\mathrm{viscoelastic}}\f$, with \f$\displaystyle\frac{dA(P)}{dP_\mathrm{elastic}} = \displaystyle\frac{A^0}{\beta_0 \beta_1} \left( 1 +
+     *  \displaystyle\frac{ P - P_\mathrm{ext} }{ \beta_0 }\right)^{\displaystyle\frac{1}{\beta_1} - 1}\f$
      */
 #ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 #else
     Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 #endif
-    //! Compute the derivative of total pressure (P is the elastic pressure) with respect to A and Q.
+
+    //! Compute the derivative of total pressure with respect to \f$A\f$ or \f$Q\f$.
     /*!
-     * @return dPt/dU_ii = dP/dU_ii + rho/2 * d(Q/A)^2/dU_ii
+     *  @param A area
+     *  @param Q flow rate
+     *  @param timeStep the time step
+     *  @param variable ID (0 for \f$A\f$, 1 or \f$Q\f$)
+     *  @param iNode node of the mesh
+     *  @return \f$\displaystyle\frac{dP_t}{dA}\f$ or \f$\displaystyle\frac{dP_t}{dQ}\f$
      */
     Real dPTdU( const Real& A, const Real& Q, const Real& timeStep, const ID& id, const UInt& iNode ) const;
 
@@ -176,13 +267,21 @@ public :
     //! @name Methods
     //@{
 
+    //! Compute the reference celerity.
+    /*!
+     *  @param iNode node of the mesh
+     *  @return reference celerity
+     */
     Real celerity0( const UInt& iNode ) const;
 
     //! Compute the pressure.
     /*!
-     * Includes the contribution of the external, elastic and viscoelastic pressure.
-     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
-     * @return P = P_elastic + P_viscoelastic + P_external
+     *  Includes the contribution of the external, elastic and viscoelastic pressure.
+     *  @param A area
+     *  @param timeStep the time step
+     *  @param iNode node of the mesh
+     *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
+     *  @return \f$P = P_\mathrm{elastic} + P_\mathrm{viscoelastic} + P_\mathrm{external}\f$
      */
 #ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real pressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
@@ -192,65 +291,46 @@ public :
 
     //! Return the external pressure.
     /*!
-     * @return P_external
+     * @return \f$P_\mathrm{external}\f$
      */
-    const Real& externalPressure() const { return M_data->externalPressure(); }
+    const Real& externalPressure() const { return M_dataPtr->externalPressure(); }
 
     //! Return the venous pressure.
     /*!
-     * @return P_venous
+     * @return \f$P_\mathrm{venous}\f$
      */
-    const Real& venousPressure() const { return M_data->venousPressure(); }
+    const Real& venousPressure() const { return M_dataPtr->venousPressure(); }
 
     //! Compute the elastic pressure.
     /*!
-     * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 )
+     *  @param A area
+     *  @param iNode node of the mesh
+     *  @return \f$P_\mathrm{elastic} = \beta_0 \left( \left( \displaystyle\frac{A}{A^0} \right)^{\beta_1} - 1 \right)\f$
      */
     Real elasticPressure( const Real& A, const UInt& iNode ) const;
 
     //! Compute the viscoelastic pressure.
     /*!
-     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
-     * @return P = gamma * 1/(2*sqrt(pi*A)) * dA / dt
+     *  @param A area
+     *  @param timeStep the time step
+     *  @param iNode node of the mesh
+     *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
+     *  @return \f$P_\mathrm{viscoelastic} = \gamma \displaystyle\frac{1}{2\sqrt{\pi A}} \displaystyle\frac{dA}{dt}\f$
      */
 #ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 #else
     Real viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 #endif
-    //! Compute the total pressure (P is the elastic pressure)
+
+    //! Compute the total pressure
     /*!
-     * @return Pt = P + rho/2 * (Q/A)^2
+     *  @param A area
+     *  @param Q flow rate
+     *  @param iNode node of the mesh
+     *  @return \f$P_t = P + \displaystyle\frac{\rho}{2} \left(\displaystyle\frac{Q}{A}\right)^2\f$
      */
     Real totalPressure( const Real& A, const Real& Q, const UInt& iNode ) const;
-
-    //! Make the vessel stiffer on the left side of interval [xl, xr]
-    /*!
-     *  These routines change the elastic modulus along the vessel
-     *
-     *  When x < alpha - delta/2, the Young modulus is E * factor
-     *  When x > alpha + delta/2, the Young modulus is E
-     *  When alpha - delta/2 < x < alpha + delta/2, the Young modulus changes
-     *  smoothly from the larger to the smaller value, according to a
-     *  polynomial law of order n.
-     *
-     *  The grid size can be adapted (yesadaptive=1) in the nieghborhood of alpha,
-     *  where the spatial derivative of the parameter will be maximum.
-     *  However, the grid size is not allowed to be smaller than min_deltax
-     */
-    void stiffenVesselLeft( const Real& xl,          const Real& xr,
-                            const Real& factor,      const Real& alpha,
-                            const Real& delta,       const Real& n,
-                            const Real& minDeltaX=1, const UInt& yesAdaptive=0 );
-
-    //! Make the vessel stiffer on the right side of interval [xl, xr]
-    /*!
-     * \sa stiffenVesselLeft
-     */
-    void stiffenVesselRight( const Real& xl,          const Real& xr,
-                             const Real& factor,      const Real& alpha,
-                             const Real& delta,       const Real& n,
-                             const Real& minDeltaX=1, const UInt& yesAdaptive=0  );
 
     //@}
 
@@ -258,33 +338,48 @@ public :
     //! @name Set Methods
     //@{
 
-    void setData( const dataPtr_Type& data ) { M_data = data; }
+    //! Set the data container of the problem.
+    /*!
+     * @param dataPtr pointer to the data container of the problem
+     */
+    void setData( const dataPtr_Type& dataPtr ) { M_dataPtr = dataPtr; }
 
-    void setArea_tn( const vector_Type& area_tn ) { M_previousArea.reset( new vector_Type ( area_tn ) ); }
+    //! Set the area at time \f$t^n\f$.
+    /*!
+     *  This parameter is required for computing the derivative of the area in time.
+     * @param area_tn \f$A^{n}\f$
+     */
+    void setArea_tn( const vector_Type& area_tn ) { M_previousAreaPtr.reset( new vector_Type ( area_tn ) ); }
 
     //@}
 
     //! @name Get Methods
     //@{
 
-    dataPtr_Type data() const { return M_data; }
+    //! Get the data container of the problem.
+    /*!
+     * @return shared pointer to the data container of the problem
+     */
+    dataPtr_Type data() const { return M_dataPtr; }
 
     //@}
 
 protected:
 
-    dataPtr_Type                      M_data;
+    dataPtr_Type                      M_dataPtr;
 
 private:
 
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalPhysics& operator=( const dataPtr_Type data );
+    explicit OneDimensionalPhysics( const OneDimensionalPhysics& physics );
+
+    OneDimensionalPhysics& operator=( const OneDimensionalPhysics& physics );
 
     //@}
 
-    vectorPtr_Type                    M_previousArea;
+    vectorPtr_Type                    M_previousAreaPtr;
 };
 
 // ===================================================
@@ -293,8 +388,8 @@ private:
 inline Real
 OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
-        return ( M_data->area0( iNode ) * OneDimensional::pow20( ( P - externalPressure() ) / M_data->beta0( iNode ) + 1, 1 / M_data->beta1( iNode ) )  );
+    if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+        return ( M_dataPtr->area0( iNode ) * OneDimensional::pow20( ( P - externalPressure() ) / M_dataPtr->beta0( iNode ) + 1, 1 / M_dataPtr->beta1( iNode ) )  );
     else
     {
         // Newton method to solve the non linear equation
@@ -302,7 +397,7 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
         Real maxIT(100);
         UInt i(0);
 
-        Real A( M_data->area0( iNode ) );
+        Real A( M_dataPtr->area0( iNode ) );
         Real newtonUpdate(0);
         for ( ; i < maxIT ; ++i )
         {
@@ -331,7 +426,7 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
 inline Real
 OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& timeStep, const UInt& iNode ) const
 {
-    return ( Anp1 - (*M_previousArea)[iNode] ) / timeStep;
+    return ( Anp1 - (*M_previousAreaPtr)[iNode] ) / timeStep;
 }
 
 inline Real
@@ -343,31 +438,32 @@ OneDimensionalPhysics::dPdA( const Real& A, const Real& timeStep, const UInt& iN
 inline Real
 OneDimensionalPhysics::dPdAelastic( const Real& A, const UInt& iNode ) const
 {
-    return M_data->beta0( iNode ) * M_data->beta1( iNode ) * OneDimensional::pow05( A / M_data->area0( iNode ), M_data->beta1( iNode ) ) / A;
+    return M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) * OneDimensional::pow05( A / M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) / A;
 }
 
 inline Real
 OneDimensionalPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+    if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
         return 0;
     else
-        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
+        return M_dataPtr->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
 }
 
 inline Real
 OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+    if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
     {
-        return M_data->area0( iNode ) / ( M_data->beta0( iNode ) * M_data->beta1( iNode ) )
+        return M_dataPtr->area0( iNode ) / ( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) )
                                       * OneDimensional::pow10( 1 + ( P - externalPressure() )
-                                      / M_data->beta0( iNode ), 1 / M_data->beta1( iNode ) - 1 );
+                                      / M_dataPtr->beta0( iNode ), 1 / M_dataPtr->beta1( iNode ) - 1 );
     }
     else
     {
         // Finite difference approach
-        return ( fromPToA( P + M_data->jacobianPerturbationStress(), timeStep, iNode, elasticExternalNodes ) - fromPToA( P, timeStep, iNode, elasticExternalNodes ) ) / M_data->jacobianPerturbationStress();
+        return ( fromPToA( P + M_dataPtr->jacobianPerturbationStress(), timeStep, iNode, elasticExternalNodes ) - fromPToA( P, timeStep, iNode, elasticExternalNodes ) )
+               / M_dataPtr->jacobianPerturbationStress();
     }
 }
 
@@ -375,10 +471,10 @@ inline Real
 OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const Real& timeStep, const ID& id, const UInt& iNode ) const
 {
     if ( id == 0 ) // dPt/dA
-        return dPdA( A, timeStep, iNode ) - M_data->densityRho() * Q * Q / ( A * A * A );
+        return dPdA( A, timeStep, iNode ) - M_dataPtr->densityRho() * Q * Q / ( A * A * A );
 
     if ( id == 1 ) // dPt/dQ
-        return M_data->densityRho() * Q / ( A * A );
+        return M_dataPtr->densityRho() * Q / ( A * A );
 
     ERROR_MSG("Total pressure's differential function has only 2 components.");
     return -1.;
@@ -390,7 +486,7 @@ OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const Real& timeStep
 inline Real
 OneDimensionalPhysics::celerity0( const UInt& iNode ) const
 {
-    return std::sqrt( M_data->beta0( iNode ) * M_data->beta1( iNode ) / M_data->densityRho() );
+    return std::sqrt( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) / M_dataPtr->densityRho() );
 }
 
 inline Real
@@ -402,22 +498,22 @@ OneDimensionalPhysics::pressure( const Real& A, const Real& timeStep, const UInt
 inline Real
 OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& iNode ) const
 {
-    return ( M_data->beta0( iNode ) * ( OneDimensional::pow05( A/M_data->area0( iNode ), M_data->beta1( iNode ) ) - 1 ) );
+    return ( M_dataPtr->beta0( iNode ) * ( OneDimensional::pow05( A/M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) - 1 ) );
 }
 
 inline Real
 OneDimensionalPhysics::viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+    if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
         return 0;
     else
-        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * dAdt( A, timeStep, iNode );
+        return M_dataPtr->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * dAdt( A, timeStep, iNode );
 }
 
 inline Real
 OneDimensionalPhysics::totalPressure( const Real& A, const Real& Q, const UInt& iNode ) const
 {
-    return elasticPressure( A, iNode ) + M_data->densityRho() / 2 * Q * Q / ( A * A );
+    return elasticPressure( A, iNode ) + M_dataPtr->densityRho() / 2 * Q * Q / ( A * A );
 }
 
 }

@@ -37,11 +37,11 @@
 #ifndef BCInterface3D_H
 #define BCInterface3D_H 1
 
+// Data interpolator include
 #include <life/lifefem/BCDataInterpolator.hpp>
 
-#include <life/lifesolver/BCInterface.hpp>
-
-#include <life/lifesolver/BCInterface3DFSI.hpp>
+// BCInterface includes
+#include <life/lifefem/BCInterface.hpp>
 
 namespace LifeV
 {
@@ -82,11 +82,12 @@ namespace LifeV
  *  The following functions are available (see the related classes for more information):
  *
  *  <ol>
- *      <li> \c function, which is implemented in \c BCInterfaceFunction;
- *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionFile;
- *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionSolver;
- *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionFileSolver;
- *      <li> \c FSI, which is implemented in \c BCInterface3DFSI;
+ *      <li> \c function, which is implemented in \c BCInterfaceFunctionParser;
+ *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
+ *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
+ *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
+ *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionUserDefined;
+ *      <li> \c functionSD, which is implemented in \c BCInterfaceFunctionSolverDefined;
  *      <li> \c dataInterpolator, which is implemented in\c BCDataInterpolator;
  *  </ol>
  *
@@ -102,36 +103,35 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BCInterface< BcHandler, PhysicalSolverType >          bcInterface_Type;
+    typedef BCInterface< BcHandler, PhysicalSolverType >                bcInterface_Type;
 
-    typedef typename bcInterface_Type::bcHandler_Type             bcHandler_Type;
-    typedef typename bcInterface_Type::bcHandlerPtr_Type          bcHandlerPtr_Type;
+    typedef typename bcInterface_Type::bcHandler_Type                   bcHandler_Type;
+    typedef typename bcInterface_Type::bcHandlerPtr_Type                bcHandlerPtr_Type;
 
-    typedef typename bcInterface_Type::physicalSolver_Type        physicalSolver_Type;
-    typedef typename bcInterface_Type::physicalSolverPtr_Type     physicalSolverPtr_Type;
+    typedef typename bcInterface_Type::physicalSolver_Type              physicalSolver_Type;
+    typedef typename bcInterface_Type::physicalSolverPtr_Type           physicalSolverPtr_Type;
 
-    typedef typename bcInterface_Type::factory_Type               factory_Type;
-    typedef typename bcInterface_Type::bcFunctionPtr_Type         bcFunctionPtr_Type;
+    typedef typename bcInterface_Type::factory_Type                     factory_Type;
 
-    typedef typename bcInterface_Type::data_Type                  data_Type;
+    typedef typename bcInterface_Type::bcFunctionPtr_Type               bcFunctionPtr_Type;
+    typedef typename bcInterface_Type::vectorFunction_Type              vectorFunction_Type;
 
-    typedef typename bcInterface_Type::vectorFunction_Type        vectorFunction_Type;
+    typedef typename bcInterface_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
+    typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
 
-    typedef BCFunctionRobin                                       bcFunctionRobin_Type;
-    typedef boost::shared_ptr< bcFunctionRobin_Type >             bcFunctionRobinPtr_Type;
-    typedef std::vector< bcFunctionRobinPtr_Type >                vectorFunctionRobin_Type;
+    typedef BCInterfaceData3D                                           data_Type;
 
-    typedef BCFunctionDirectional                                 bcFunctionDirectional_Type;
-    typedef boost::shared_ptr< bcFunctionDirectional_Type >       bcFunctionDirectionalPtr_Type;
-    typedef std::vector< bcFunctionDirectionalPtr_Type >          vectorFunctionDirectional_Type;
+    typedef BCFunctionRobin                                             bcFunctionRobin_Type;
+    typedef boost::shared_ptr< bcFunctionRobin_Type >                   bcFunctionRobinPtr_Type;
+    typedef std::vector< bcFunctionRobinPtr_Type >                      vectorFunctionRobin_Type;
 
-    typedef BCDataInterpolator                                    bcFunctionDataInterpolator_Type;
-    typedef boost::shared_ptr< bcFunctionDataInterpolator_Type >  bcFunctionDataInterpolatorPtr_Type;
-    typedef std::vector< bcFunctionDataInterpolatorPtr_Type >     vectorDataInterpolator_Type;
+    typedef BCFunctionDirectional                                       bcFunctionDirectional_Type;
+    typedef boost::shared_ptr< bcFunctionDirectional_Type >             bcFunctionDirectionalPtr_Type;
+    typedef std::vector< bcFunctionDirectionalPtr_Type >                vectorFunctionDirectional_Type;
 
-    typedef BCInterface3DFSI< physicalSolver_Type >               bcFunctionFSI_Type;
-    typedef boost::shared_ptr< bcFunctionFSI_Type >               bcFunctionFSIPtr_Type;
-    typedef std::vector< bcFunctionFSIPtr_Type >                  vectorFSI_Type;
+    typedef BCDataInterpolator                                          bcFunctionDataInterpolator_Type;
+    typedef boost::shared_ptr< bcFunctionDataInterpolator_Type >        bcFunctionDataInterpolatorPtr_Type;
+    typedef std::vector< bcFunctionDataInterpolatorPtr_Type >           vectorDataInterpolator_Type;
 
     //@}
 
@@ -151,11 +151,19 @@ public:
     //! @name Methods
     //@{
 
+    //! Read a specific boundary condition from a file and add it to the data container
+    /*!
+     * @param fileName Name of the data file
+     * @param dataSection section in the data file
+     * @param name name of the boundary condition
+     */
+    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+    {
+        M_data.readBC( fileName, dataSection, name );
+    }
+
     //! Insert the current boundary condition in the BChandler
     void insertBC();
-
-    //! Update the variables inside the physical solver
-    void updatePhysicalSolverVariables();
 
     //@}
 
@@ -206,6 +214,18 @@ public:
 
     //@}
 
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the data container
+    /*!
+     * @return the data container
+     */
+    data_Type& dataContainer() { return M_data; }
+
+    //@}
+
 private:
 
     //! @name Unimplemented Methods
@@ -229,12 +249,13 @@ private:
 
     void createFunctionDataInterpolator();
 
-    void createFunctionFSI();
-
     template< class BCBaseType >
     void addBcToHandler( BCBaseType& base );
 
     //@}
+
+    // Data
+    data_Type                       M_data;
 
     // Functions Robin
     vectorFunctionRobin_Type        M_vectorFunctionRobin;
@@ -245,8 +266,6 @@ private:
     // Data Interpolator Functions
     vectorDataInterpolator_Type     M_vectorDataInterpolator;
 
-    // FSI Functions
-    vectorFSI_Type                  M_vectorFSI;
 };
 
 // ===================================================
@@ -255,10 +274,10 @@ private:
 template< class BcHandler, class PhysicalSolverType >
 BCInterface3D< BcHandler, PhysicalSolverType >::BCInterface3D() :
         bcInterface_Type          (),
+        M_data                    (),
         M_vectorFunctionRobin     (),
         M_vectorFunctionDirection (),
-        M_vectorDataInterpolator  (),
-        M_vectorFSI               ()
+        M_vectorDataInterpolator  ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -279,21 +298,22 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
     Debug( 5020 ) << "BCInterface3D::insertBC\n";
 #endif
 
-    switch ( this->M_data.base().second )
+    switch ( M_data.base().second )
     {
-    case BCIFunction:
-    case BCIFunctionFile:
-    case BCIFunctionSolver:
-    case BCIFunctionFileSolver:
+    case BCIFunctionParser:
+    case BCIFunctionParserFile:
+    case BCIFunctionParserSolver:
+    case BCIFunctionParserFileSolver:
+    case BCIFunctionUserDefined:
     {
         factory_Type factory;
-        this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
+        this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
         BCFunctionBase base;
         this->M_vectorFunction.back()->assignFunction( base );
 
         // Directional BC
-        if ( this->M_data.mode() == Directional )
+        if ( M_data.mode() == Directional )
         {
             createFunctionDirectional( base );
             addBcToHandler( *M_vectorFunctionDirection.back() );
@@ -302,7 +322,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
         }
 
         // Robin BC
-        if ( this->M_data.type() == Robin )
+        if ( M_data.type() == Robin )
         {
             createFunctionRobin( base );
             addBcToHandler( *M_vectorFunctionRobin.back() );
@@ -315,6 +335,13 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
 
         return;
     }
+    case BCIFunctionSolverDefined:
+    {
+        factory_Type factory;
+        this->M_vectorFunctionSolverDefined.push_back( factory.createFunctionSolverDefined( M_data ) );
+
+        return;
+    }
     case BCI3DDataInterpolator:
 
         createFunctionDataInterpolator();
@@ -322,33 +349,12 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
 
         return;
 
-    case BCI3DFSI:
-
-        createFunctionFSI();
-
-        return;
-
     default:
 
-        std::cout << " !!! Error: " << this->M_data.base().first << " is not valid in BCInterface3D !!!" << std::endl;
+        std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface3D !!!" << std::endl;
 
         break;
     }
-}
-
-template< class BcHandler, class PhysicalSolverType >
-void
-BCInterface3D< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface3D::updatePhysicalSolverVariables\n";
-#endif
-
-    bcInterface_Type::updatePhysicalSolverVariables();
-
-    for ( typename vectorFSI_Type::const_iterator i = M_vectorFSI.begin() ; i < M_vectorFSI.end() ; ++i )
-        ( *i )->updatePhysicalSolverVariables();
 }
 
 // ===================================================
@@ -360,23 +366,23 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
 {
     bcInterface_Type::setPhysicalSolver( physicalSolver );
 
-    for ( typename vectorFSI_Type::const_iterator i = M_vectorFSI.begin() ; i < M_vectorFSI.end() ; ++i )
+    for ( typename vectorFunctionSolverDefined_Type::const_iterator i = this->M_vectorFunctionSolverDefined.begin() ; i < this->M_vectorFunctionSolverDefined.end() ; ++i )
     {
-        ( *i )->exportData( this->M_data );
+        ( *i )->exportData( M_data );
 
         // Robin BC
-        if ( this->M_data.type() == Robin )
+        if ( M_data.type() == Robin )
         {
             BCVector base;
 
-            ( *i )->assignFunction( physicalSolver, base );
+            ( *i )->assignFunction( base );
             addBcToHandler( base );
         }
         else
         {
             BCVectorInterface base;
 
-            ( *i )->assignFunction( physicalSolver, base );
+            ( *i )->assignFunction( base );
             addBcToHandler( base );
         }
     }
@@ -390,12 +396,12 @@ inline void
 BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionRobin( BCBaseType& base )
 {
     // Parameters for direction BC
-    this->M_data.setName( this->M_data.name() + "_robinMassTerm" );
-    this->M_data.setRobinBaseAlpha();
+    M_data.setName( M_data.name() + "_robinMassTerm" );
+    M_data.setRobinBaseAlpha();
 
     // Create the mass term function
     factory_Type factory;
-    this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
+    this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
     BCFunctionBase baseRobin;
     this->M_vectorFunction.back()->assignFunction( baseRobin );
@@ -410,12 +416,12 @@ inline void
 BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDirectional( BCBaseType& base )
 {
     // Parameters for direction BC
-    this->M_data.setName( this->M_data.name() + "_directionalField" );
-    this->M_data.setDirectionalBase();
+    M_data.setName( M_data.name() + "_directionalField" );
+    M_data.setDirectionalBase();
 
     // Create the directional field
     factory_Type factory;
-    this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
+    this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
     BCFunctionBase baseDirectional;
     this->M_vectorFunction.back()->assignFunction( baseDirectional );
@@ -431,16 +437,8 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDataInterpolator()
 {
     // Directional base
     bcFunctionDataInterpolatorPtr_Type dataInterpolatorBase( new bcFunctionDataInterpolator_Type() );
-    dataInterpolatorBase->readData( this->M_data.baseString() );
+    dataInterpolatorBase->readData( M_data.baseString() );
     M_vectorDataInterpolator.push_back( dataInterpolatorBase );
-}
-
-template< class BcHandler, class PhysicalSolverType >
-inline void
-BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionFSI()
-{
-    bcFunctionFSIPtr_Type function( new bcFunctionFSI_Type( this->M_data ) );
-    M_vectorFSI.push_back( function );
 }
 
 template< class BcHandler, class PhysicalSolverType > template< class BCBaseType >
@@ -450,7 +448,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
     if ( !this->M_handler.get() ) // If BCHandler has not been created yet, we do it now
         this->createHandler();
 
-    switch ( this->M_data.mode() )
+    switch ( M_data.mode() )
     {
     case Scalar:
     case Normal:
@@ -461,7 +459,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Scalar, Normal, Tangential, Directional" << "\n\n";
 #endif
 
-        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base );
+        this->M_handler->addBC( M_data.name(), M_data.flag(), M_data.type(), M_data.mode(), base );
 
         break;
 
@@ -471,7 +469,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Full" << "\n\n";
 #endif
 
-        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.comN() );
+        this->M_handler->addBC( M_data.name(), M_data.flag(), M_data.type(), M_data.mode(), base, M_data.componentsNumber() );
 
         break;
 
@@ -481,7 +479,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Component" << "\n\n";
 #endif
 
-        this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.comV() );
+        this->M_handler->addBC( M_data.name(), M_data.flag(), M_data.type(), M_data.mode(), base, M_data.componentsVector() );
 
         break;
     }

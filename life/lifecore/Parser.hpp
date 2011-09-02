@@ -39,8 +39,6 @@
 #define Parser_H 1
 
 #include <life/lifecore/LifeDebug.hpp>
-
-#include <life/lifecore/ParserDefinitions.hpp>
 #include <life/lifecore/ParserSpiritGrammar.hpp>
 
 namespace LifeV
@@ -82,9 +80,20 @@ public:
     //! @name Public Types
     //@{
 
+    /*! @typedef stringsVector_Type */
+    //! Type definition for the vector containing the string segments
     typedef std::vector< std::string >                       stringsVector_Type;
+
+    /*! @typedef stringIterator_Type */
+    //! Type definition for the iterator over the strings
     typedef std::string::const_iterator                      stringIterator_Type;
+
+    /*! @typedef calculator_Type */
+    //!Type definition for the parser interpreter
     typedef ParserSpiritGrammar< stringIterator_Type >       calculator_Type;
+
+    /*! @typedef results_Type */
+    //! Type definition for the results
     typedef calculator_Type::results_Type                    results_Type;
 
     //@}
@@ -119,6 +128,8 @@ public:
 
     //! Operator =
     /*!
+     * <b> Important note: this method is not working right now. </b>
+     *
      * @param parser Parser
      * @return reference to a copy of the class
      */
@@ -130,14 +141,15 @@ public:
     //! @name Methods
     //@{
 
-    /*! Evaluate the expression
+    //! Evaluate the expression
+    /*!
      * @param id expression index (starting from 0)
      * @return computed value
      */
     const Real& evaluate( const ID& id = 0 );
 
-    /*! Count how many substrings are present in the string (utility for BCInterfaceFunction)
-     *
+    //! Count how many substrings are present in the string (utility for BCInterfaceFunctionParser)
+    /*!
      * @param substring string to find
      * @return number of substring
      */
@@ -152,15 +164,15 @@ public:
     //! @name Set Methods
     //@{
 
-    /*! Set string function
-     *
+    //! Set string function
+    /*!
      * @param string Expression to evaluate
      * @param stringSeparator Separator identifier (default -> ";")
      */
     void setString( const std::string& string, const std::string& stringSeparator = ";" );
 
-    /*! Set/replace a variable
-     *
+    //! Set/replace a variable
+    /*!
      * @param name name of the parameter
      * @param value value of the parameter
      */
@@ -172,8 +184,8 @@ public:
     //! @name Get Methods
     //@{
 
-    /*! Get variable
-     *
+    //! Get variable
+    /*!
      * @param name name of the parameter
      * @return value of the variable
      */

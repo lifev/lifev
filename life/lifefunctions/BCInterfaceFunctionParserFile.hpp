@@ -26,22 +26,22 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterfaceFunctionFile class
+ *  @brief File containing the BCInterfaceFunctionParserFile class
  *
  *  @date 09-07-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
-#ifndef BCInterfaceFunctionFile_H
-#define BCInterfaceFunctionFile_H 1
+#ifndef BCInterfaceFunctionParserFile_H
+#define BCInterfaceFunctionParserFile_H 1
 
-#include <life/lifesolver/BCInterfaceFunction.hpp>
+#include <life/lifefunctions/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
 {
 
-//! BCInterfaceFunctionFile - LifeV boundary condition function file wrapper for \c BCInterface
+//! BCInterfaceFunctionParserFile - LifeV boundary condition function file wrapper for \c BCInterface
 /*!
  *  @author Cristiano Malossi
  *
@@ -49,14 +49,14 @@ namespace LifeV
  *  functions type for boundary conditions, using a \c GetPot file containing a function string and a
  *  table of discrete data (for example a discrete flow rate or pressure as a function of the time).
  *
- *  See \c BCInterfaceFunction class for more details.
+ *  See \c BCInterfaceFunctionParser class for more details.
  *
  *  <b>DETAILS</b> <BR>
  *  The constructor of the class takes a string contains the \c GetPot file name.
  *  The \c GetPot file has the following structure:
  *
  *  <ul>
- *      <li> <b>function:</b> contains the expression of the function (as described in the \c BCInterfaceFunction class).
+ *      <li> <b>function:</b> contains the expression of the function (as described in the \c BCInterfaceFunctionParser class).
  *      <li> <b>variables:</b> contains the list of variables and coefficients present in the function.
  *                             The first one is the variable and should be sorted in a growing order,
  *                             while all the others are coefficients.
@@ -84,16 +84,16 @@ namespace LifeV
  *  </CODE>
  */
 template< typename PhysicalSolverType >
-class BCInterfaceFunctionFile: public virtual BCInterfaceFunction< PhysicalSolverType >
+class BCInterfaceFunctionParserFile: public virtual BCInterfaceFunctionParser< PhysicalSolverType >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                  physicalSolver_Type;
-    typedef BCInterfaceData                                                     data_Type;
-    typedef BCInterfaceFunction< physicalSolver_Type >                          function_Type;
+    typedef PhysicalSolverType                                                    physicalSolver_Type;
+    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
+    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      functionParser_Type;
 
     //@}
 
@@ -102,16 +102,10 @@ public:
     //@{
 
     //! Empty Constructor
-    explicit BCInterfaceFunctionFile();
-
-    //! Constructor
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    explicit BCInterfaceFunctionFile( const data_Type& data );
+    explicit BCInterfaceFunctionParserFile();
 
     //! Destructor
-    virtual ~BCInterfaceFunctionFile() {}
+    virtual ~BCInterfaceFunctionParserFile() {}
 
     //@}
 
@@ -119,11 +113,25 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data
+#ifdef MULTISCALE_IS_IN_LIFEV
+    //! Set data for 0D boundary conditions
     /*!
-     * @param data boundary condition data loaded from a \c GetPot file
+     * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const data_Type& data ) { loadData( data ); }
+    virtual void setData( const BCInterfaceData0D& data ) { loadData( data ); }
+#endif
+
+    //! Set data for 1D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    virtual void setData( const BCInterfaceData1D& data ) { loadData( data ); }
+
+    //! Set data for 3D boundary conditions
+    /*!
+     * @param data boundary condition data loaded from \c GetPot file
+     */
+    virtual void setData( const BCInterfaceData3D& data ) { loadData( data ); }
 
     //@}
 
@@ -132,9 +140,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionFile( const BCInterfaceFunctionFile& function );
+    BCInterfaceFunctionParserFile( const BCInterfaceFunctionParserFile& function );
 
-    BCInterfaceFunctionFile& operator=( const BCInterfaceFunctionFile& function );
+    BCInterfaceFunctionParserFile& operator=( const BCInterfaceFunctionParserFile& function );
 
     //@}
 
@@ -144,9 +152,13 @@ private:
 
     //! Load data from a \c GetPot file
     /*!
+     * Note that this method makes a copy of the input data.
+     * This is done on porpuse.
+     *
      * @param data boundary condition data loaded from a \c GetPot file
      */
-    void loadData( data_Type data );
+    template< typename DataType >
+    void loadData( DataType data );
 
     //! Linear interpolation (extrapolation) between two values of the data.
     void dataInterpolation();
@@ -164,17 +176,18 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterfaceFunction< PhysicalSolverType >* createBCInterfaceFunctionFile()
+inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctionParserFile()
 {
-    return new BCInterfaceFunctionFile< PhysicalSolverType > ();
+    return new BCInterfaceFunctionParserFile< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
 template< typename PhysicalSolverType >
-BCInterfaceFunctionFile< PhysicalSolverType >::BCInterfaceFunctionFile() :
+BCInterfaceFunctionParserFile< PhysicalSolverType >::BCInterfaceFunctionParserFile() :
         function_Type                    (),
+        functionParser_Type              (),
         M_variables                      (),
         M_loop                           (),
         M_data                           (),
@@ -187,28 +200,12 @@ BCInterfaceFunctionFile< PhysicalSolverType >::BCInterfaceFunctionFile() :
 
 }
 
-template< typename PhysicalSolverType >
-BCInterfaceFunctionFile< PhysicalSolverType >::BCInterfaceFunctionFile( const data_Type& data ) :
-        function_Type                    (),
-        M_variables                      (),
-        M_loop                           (),
-        M_data                           (),
-        M_dataIterator                   ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( data )" << "\n";
-#endif
-
-    this->setData( data );
-}
-
 // ===================================================
 // Private Methods
 // ===================================================
-template< typename PhysicalSolverType >
+template< typename PhysicalSolverType > template< typename DataType >
 inline void
-BCInterfaceFunctionFile< PhysicalSolverType >::loadData( data_Type data )
+BCInterfaceFunctionParserFile< PhysicalSolverType >::loadData( DataType data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -261,8 +258,7 @@ BCInterfaceFunctionFile< PhysicalSolverType >::loadData( data_Type data )
 
     for ( UInt i( 0 ); i < dataLines; ++i )
         for ( UInt j( 0 ); j < variablesNumber; ++j )
-            M_data[M_variables[j]].push_back( scale[j] * dataFile( "data", 0.0, i
-                                                                   * variablesNumber + j ) );
+            M_data[M_variables[j]].push_back( scale[j] * dataFile( "data", 0.0, i * variablesNumber + j ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     output.str("");
@@ -283,7 +279,7 @@ BCInterfaceFunctionFile< PhysicalSolverType >::loadData( data_Type data )
     //Initialize iterator
     M_dataIterator = M_data[M_variables[0]].begin();
 
-    //Update the data container (IT IS A COPY!) with the correct base string for the BCInterfaceFunction
+    //Update the data container (IT IS A COPY!) with the correct base string for the BCInterfaceFunctionParser
     if ( stringsVector.size() < 2 )
         data.setBaseString( dataFile( "function", "Undefined" ) );
     else
@@ -293,7 +289,7 @@ BCInterfaceFunctionFile< PhysicalSolverType >::loadData( data_Type data )
     }
 
     // Now data contains the real base string
-    function_Type::setData( data );
+    functionParser_Type::setData( data );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 5022 ) << "                                             function: " << data.baseString() << "\n";
@@ -303,10 +299,10 @@ BCInterfaceFunctionFile< PhysicalSolverType >::loadData( data_Type data )
 
 template< typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionFile< PhysicalSolverType >::dataInterpolation()
+BCInterfaceFunctionParserFile< PhysicalSolverType >::dataInterpolation()
 {
     //Get variable
-    Real X = function_Type::M_parser->variable( M_variables[0] );
+    Real X = functionParser_Type::M_parser->variable( M_variables[0] );
 
     //If it is a loop scale the variable: X = X - (ceil( X / Xmax ) -1) * Xmax
     if ( M_loop )
@@ -355,7 +351,7 @@ BCInterfaceFunctionFile< PhysicalSolverType >::dataInterpolation()
         A  = M_data[M_variables[j]][position];
         B  = M_data[M_variables[j]][position + 1];
 
-        function_Type::M_parser->setVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
+        functionParser_Type::M_parser->setVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";
@@ -365,4 +361,4 @@ BCInterfaceFunctionFile< PhysicalSolverType >::dataInterpolation()
 
 } // Namespace LifeV
 
-#endif /* BCInterfaceFunctionFile_H */
+#endif /* BCInterfaceFunctionParserFile_H */
