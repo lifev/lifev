@@ -173,6 +173,15 @@ public:
     //! Add the convective term with the given offsets
     void addConvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp);
 
+    //! Add the convective term necessary to build the Newton method
+    void addNewtonConvection( matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp );
+
+    //! Add the convective term necessary to build the Newton method
+    void addNewtonConvection( matrix_ptrType matrix, const vector_type& beta )
+    {
+        addNewtonConvection( matrix, beta, 0, 0 );
+    }
+
     //! Add an explicit convection term to the right hand side
     void addConvectionRhs(vector_type& rhs, const vector_type& velocity);
 
@@ -547,7 +556,6 @@ addDivergence(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetU
     }
 }
 
-
 template< typename mesh_type, typename matrix_type, typename vector_type>
 void
 OseenAssembler<mesh_type,matrix_type,vector_type>::
@@ -604,6 +612,78 @@ addConvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offset
                             iFieldDim, iFieldDim,
                             iFieldDim*nbUTotalDof + offsetUp, iFieldDim*nbUTotalDof + offsetLeft);
                             }
+    }
+}
+
+template< typename mesh_type, typename matrix_type, typename vector_type>
+void
+OseenAssembler<mesh_type,matrix_type,vector_type>::
+addNewtonConvection( matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp )
+{
+    // Beta has to be repeated
+    if ( beta.mapType() == Unique )
+    {
+        addNewtonConvection( matrix,vector_type( beta, Repeated ), offsetLeft, offsetUp );
+        return;
+    }
+
+    ASSERT( M_uFESpace != 0, "No velocity FE space for assembling the convection." );
+    ASSERT( M_betaFESpace != 0, "No convective FE space for assembling the convection." );
+    ASSERT( matrix !=0, "Cannot perform the assembly of the convection with no matrix." );
+    ASSERT( offsetLeft + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix->matrixPtr()->NumGlobalCols(),
+            "The matrix is too small (columns) for the assembly of the convection" );
+    ASSERT( offsetUp + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix->matrixPtr()->NumGlobalRows(),
+            " The matrix is too small (rows) for the assembly of the convection" );
+
+    // Some constants
+    const UInt nbElements( M_uFESpace->mesh()->numElements() );
+    const UInt fieldDim( M_uFESpace->fieldDim() );
+    const UInt nbUTotalDof( M_uFESpace->dof().numTotalDof() );
+    const UInt nbQuadPt( M_convectionUCFE->nbQuadPt() );
+
+    // Loop over the elements
+    for ( UInt iterElement( 0 ); iterElement < nbElements; ++iterElement )
+    {
+        // Update the diffusion current FE
+        M_convectionUCFE->update( M_uFESpace->mesh()->element( iterElement ), UPDATE_DPHI | UPDATE_WDET );
+        M_convectionBetaCFE->update( M_uFESpace->mesh()->element( iterElement ), UPDATE_PHI );
+
+        // Clean the local matrix
+        M_localConvection->zero();
+
+        localVector_type betaLocal( M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() );
+
+        // Create local vector
+        for ( UInt iNode = 0 ; iNode < M_uFESpace->fe().nbFEDof() ; iNode++ )
+        {
+            UInt iLocal = M_uFESpace->fe().patternFirst( iNode ); // iLocal = iNode
+
+            for ( Int iComponent = 0; iComponent < fieldDim; ++iComponent )
+            {
+                UInt iGlobal = M_uFESpace->dof().localToGlobalMap( iterElement, iLocal ) + iComponent * nbUTotalDof;
+
+                // un local
+                betaLocal.vec()[ iLocal + iComponent*M_uFESpace->fe().nbFEDof() ] = beta( iGlobal );
+            }
+        }
+
+        // Assembly
+        for ( UInt iFieldDim( 0 ); iFieldDim<nDimensions; ++iFieldDim )
+        {
+            for ( UInt jFieldDim( 0 ); jFieldDim < nDimensions; ++jFieldDim )
+            {
+                AssemblyElemental::advectionNewton( 1.0, betaLocal, *M_localConvection,
+                                                    *M_convectionUCFE, iFieldDim, jFieldDim );
+                assembleMatrix( *matrix,
+                                *M_localConvection,
+                                *M_convectionUCFE,
+                                *M_convectionUCFE,
+                                M_uFESpace->dof(),
+                                M_uFESpace->dof(),
+                                iFieldDim, jFieldDim,
+                                iFieldDim*nbUTotalDof + offsetUp, jFieldDim*nbUTotalDof + offsetLeft );
+            }
+        }
     }
 }
 

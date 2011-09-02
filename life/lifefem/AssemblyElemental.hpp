@@ -188,6 +188,14 @@ void advection(MatrixElemental& localAdv,
     }
 }
 
+/*
+ * Added by Gwenol Grandperrin, August 2011
+ */
+//! Assemble the term \f$ \int_\Omega \ph_j\cdot\mathbf{u}\phi_i\f$
+void advectionNewton( Real coef, VectorElemental& vel,
+                      MatrixElemental& elmat, const CurrentFE& fe,
+                      int iblock, int jblock );
+
 void grad(MatrixElemental& localGrad,
           const CurrentFE& uCFE,
           const CurrentFE& pCFE,
