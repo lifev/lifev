@@ -171,6 +171,9 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         M_model->solveModel();
         solveChrono.stop();
 
+        // Update solution
+        M_model->updateSolution();
+
         // Save the solution
         saveChrono.start();
         if ( M_globalData->dataTime()->timeStepNumber()%multiscaleSaveEachNTimeSteps == 0 || M_globalData->dataTime()->isLastTimeStep() )

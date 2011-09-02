@@ -283,14 +283,36 @@ MultiscaleModelFSI3D::solveModel()
 }
 
 void
+MultiscaleModelFSI3D::updateSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8140 ) << "MultiscaleModelFSI3D::updateSolution() \n";
+#endif
+
+    if ( M_FSIoperator->isFluid() )
+    {
+        M_FSIoperator->exportFluidDisplacement( *M_fluidDisplacement );
+        M_FSIoperator->exportFluidVelocityAndPressure( *M_fluidVelocityAndPressure );
+#ifndef FSI_WITH_EXTERNALPRESSURE
+        *M_fluidVelocityAndPressure += *M_externalPressureVector;
+#endif
+    }
+
+    if ( M_FSIoperator->isSolid() )
+    {
+        M_FSIoperator->exportSolidDisplacement( *M_solidDisplacement );
+        M_FSIoperator->exportSolidVelocity( *M_solidVelocity );
+    }
+}
+
+void
 MultiscaleModelFSI3D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8140 ) << "MultiscaleModelFSI3D::saveSolution() \n";
 #endif
-
-    updateSolution();
 
     if ( M_FSIoperator->isFluid() )
         M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
@@ -594,30 +616,6 @@ MultiscaleModelFSI3D::updateBC()
     if ( M_FSIoperator->isSolid() )
     {
         M_solidBC->updatePhysicalSolverVariables();
-    }
-}
-
-void
-MultiscaleModelFSI3D::updateSolution()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::updateSolution() \n";
-#endif
-
-    if ( M_FSIoperator->isFluid() )
-    {
-        M_FSIoperator->exportFluidDisplacement( *M_fluidDisplacement );
-        M_FSIoperator->exportFluidVelocityAndPressure( *M_fluidVelocityAndPressure );
-#ifndef FSI_WITH_EXTERNALPRESSURE
-        *M_fluidVelocityAndPressure += *M_externalPressureVector;
-#endif
-    }
-
-    if ( M_FSIoperator->isSolid() )
-    {
-        M_FSIoperator->exportSolidDisplacement( *M_solidDisplacement );
-        M_FSIoperator->exportSolidVelocity( *M_solidVelocity );
     }
 }
 

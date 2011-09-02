@@ -51,7 +51,7 @@
 // Matlab post-processing
 #define HAVE_MATLAB_POSTPROCESSING 1
 
-// Mathcard includes
+// LifeV includes
 #include <life/lifefem/OneDimensionalBCHandler.hpp>
 #include <life/lifesolver/OneDimensionalPhysicsLinear.hpp>
 #include <life/lifesolver/OneDimensionalPhysicsNonLinear.hpp>
@@ -63,14 +63,14 @@
 
 #include <life/lifefem/BCInterface1D.hpp>
 
-#include <lifemc/lifesolver/MultiscaleModel.hpp>
-#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
-
-// LifeV includes
 #include <life/lifefem/FESpace.hpp>
 #ifdef HAVE_HDF5
 #include <life/lifefilters/ExporterHDF5.hpp>
 #endif
+
+// Mathcard includes
+#include <lifemc/lifesolver/MultiscaleModel.hpp>
+#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
 
 namespace LifeV
 {
@@ -161,6 +161,9 @@ public:
 
     //! Solve the model.
     void solveModel();
+
+    //! Update the solution.
+    void updateSolution();
 
     //! Save the solution
     void saveSolution();

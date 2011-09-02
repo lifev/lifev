@@ -42,6 +42,7 @@
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifemesh/MeshData.hpp>
+#include <life/lifefem/BCInterface3D.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
 #include <life/lifefilters/ExporterEnsight.hpp>
@@ -51,7 +52,6 @@
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
 // Mathcard includes
-#include <life/lifefem/BCInterface3D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
@@ -139,6 +139,9 @@ public:
 
     //! Solve the model.
     void solveModel();
+
+    //! Update the solution.
+    void updateSolution();
 
     //! Save the solution
     void saveSolution();

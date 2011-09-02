@@ -312,6 +312,18 @@ MultiscaleModelMultiscale::solveModel()
 }
 
 void
+MultiscaleModelMultiscale::updateSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8110 ) << "MultiscaleModelMultiscale::updateSolution() \n";
+#endif
+
+    for ( multiscaleModelsContainerConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+        ( *i )->updateSolution();
+}
+
+void
 MultiscaleModelMultiscale::saveSolution()
 {
 

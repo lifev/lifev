@@ -193,6 +193,16 @@ MultiscaleModelWindkessel0D::solveModel()
 }
 
 void
+MultiscaleModelWindkessel0D::updateSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8150 ) << "MultiscaleModelWindkessel0D::updateSolution() \n";
+#endif
+
+}
+
+void
 MultiscaleModelWindkessel0D::saveSolution()
 {
 

@@ -295,6 +295,17 @@ MultiscaleModelFluid3D::solveModel()
 }
 
 void
+MultiscaleModelFluid3D::updateSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::updateSolution() \n";
+#endif
+
+    *M_solution = *M_fluid->solution();
+}
+
+void
 MultiscaleModelFluid3D::saveSolution()
 {
 
@@ -303,7 +314,6 @@ MultiscaleModelFluid3D::saveSolution()
 #endif
 
     //Post-processing
-    *M_solution = *M_fluid->solution();
     M_exporter->postProcess( M_data->dataTime()->time() );
 
 #ifdef HAVE_HDF5
