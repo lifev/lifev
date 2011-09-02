@@ -139,6 +139,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     LifeChrono buildUpdateChrono;
     LifeChrono solveChrono;
     LifeChrono saveChrono;
+    LifeChrono updateSolutionChrono;
     LifeChrono globalChrono;
     Real       totalSimulationTime(0);
     Real       timeStepTime(0);
@@ -172,7 +173,9 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         solveChrono.stop();
 
         // Update solution
+        updateSolutionChrono.start();
         M_model->updateSolution();
+        updateSolutionChrono.stop();
 
         // Save the solution
         saveChrono.start();
@@ -184,7 +187,8 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         globalChrono.stop();
 
         // Compute time step time
-        saveCPUTime( buildUpdateChrono.globalDiff( *M_comm ), solveChrono.globalDiff( *M_comm ), saveChrono.globalDiff( *M_comm ) );
+        saveCPUTime( buildUpdateChrono.globalDiff( *M_comm ), solveChrono.globalDiff( *M_comm ),
+                     updateSolutionChrono.globalDiff( *M_comm ), saveChrono.globalDiff( *M_comm ) );
         timeStepTime = globalChrono.globalDiff( *M_comm );
 
         if ( M_comm->MyPID() == 0 )
@@ -236,7 +240,8 @@ MultiscaleSolver::showMe() const
 // Private Methods
 // ===================================================
 void
-MultiscaleSolver::saveCPUTime( const Real& buildUpdateCPUTime, const Real& solveCPUTime, const Real& saveCPUTime ) const
+MultiscaleSolver::saveCPUTime( const Real& buildUpdateCPUTime,    const Real& solveCPUTime,
+                               const Real& updateSolutionCPUTime, const Real& saveCPUTime ) const
 {
     if ( M_comm->MyPID() == 0 )
     {
@@ -248,7 +253,8 @@ MultiscaleSolver::saveCPUTime( const Real& buildUpdateCPUTime, const Real& solve
         if ( M_globalData->dataTime()->isFirstTimeStep() )
         {
             outputFile.open( filename.c_str(), std::ios::trunc );
-            outputFile << "% ITERATION                TIME                     TOTAL                    BUILD/UPDATE             SOLVE                    SAVE" << std::endl;
+            outputFile << "% ITERATION                TIME                     TOTAL                    BUILD/UPDATE             "
+                            "SOLVE                    UPDATE SOLUTION          SAVE" << std::endl;
         }
         else
         {
@@ -256,8 +262,9 @@ MultiscaleSolver::saveCPUTime( const Real& buildUpdateCPUTime, const Real& solve
         }
         outputFile << "  " << number2string( M_globalData->dataTime()->timeStepNumber() )
                << "                        " << M_globalData->dataTime()->time()
-               << "    " << buildUpdateCPUTime + solveCPUTime + saveCPUTime
-               << "    " << buildUpdateCPUTime << "    " << solveCPUTime  << "    " << saveCPUTime << std::endl;
+               << "    " << buildUpdateCPUTime + solveCPUTime + updateSolutionCPUTime + saveCPUTime
+               << "    " << buildUpdateCPUTime << "    " << solveCPUTime
+               << "    " << updateSolutionCPUTime  << "    " << saveCPUTime << std::endl;
         outputFile.close();
     }
 }
