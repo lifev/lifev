@@ -245,7 +245,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 10
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function       = 0

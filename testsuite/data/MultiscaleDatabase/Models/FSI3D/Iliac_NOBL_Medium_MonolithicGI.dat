@@ -222,7 +222,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1001
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -241,7 +241,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1002
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -260,7 +260,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1003
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -279,7 +279,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1004
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -298,7 +298,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1007
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -317,7 +317,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1005
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -336,7 +336,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1006
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0

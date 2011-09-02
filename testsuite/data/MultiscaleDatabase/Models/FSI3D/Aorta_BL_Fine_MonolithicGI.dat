@@ -252,7 +252,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1005
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = '3.0  * 10000' # R0 - Paolo
@@ -272,7 +272,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1004
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = '3.0  * 10000' # R0 - Paolo
@@ -292,7 +292,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1007
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = '3.0  * 10000' # R0 - Paolo
@@ -312,7 +312,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1002
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = '3.0  * 10000' # R0 - Paolo
@@ -332,7 +332,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1006
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = '3.0  * 10000' # R0 - Paolo
@@ -352,7 +352,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1003
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = '3.0  * 10000' # R0 - Paolo
@@ -372,7 +372,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1001
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 'L3=1; L4=0; V2=2.0; V3=3.5; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # R0 - Paolo

@@ -225,7 +225,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1001
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -244,7 +244,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1002
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -263,7 +263,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1003
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -282,7 +282,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1004
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -301,7 +301,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1007
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -320,7 +320,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1005
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -339,7 +339,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1006
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 0
@@ -434,7 +434,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 100
         mode       = Full
         component  = 3
-        FSI        = StructureDispToHarmonicExtension
+        functionSD = StructureDispToHarmonicExtension
 
         [../]
 
