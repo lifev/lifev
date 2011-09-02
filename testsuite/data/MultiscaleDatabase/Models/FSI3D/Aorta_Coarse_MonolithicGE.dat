@@ -213,7 +213,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 9
         mode       = Full
         component  = 3
-        FSI        = RobinWall
+        functionSD = RobinWall
 
             [./RobinAlpha]
             #function = 'L1=7.5; L2=6.5; L3=1; L4=0; V1=3.0; V2=1.0; V3=1.9; ((y>=L1)*5.5+(y>=L2)*(y<L1)*(V1+(V2-V1)/(L2-L1)*(y-L1))+(y>=L3)*(y<L2)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # R0 - Paolo
@@ -315,7 +315,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1
         mode       = Full
         component  = 3
-        FSI        = StructureDispToHarmonicExtension
+        functionSD = StructureDispToHarmonicExtension
 
         [../]
 

@@ -318,7 +318,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1
         mode       = Full
         component  = 3
-        FSI        = StructureDispToHarmonicExtension
+        functionSD = StructureDispToHarmonicExtension
 
         [../NoInterface]
         type       = Essential

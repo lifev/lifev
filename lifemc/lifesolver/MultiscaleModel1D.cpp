@@ -338,7 +338,7 @@ MultiscaleModel1D::checkSolution() const
 void
 MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
 {
-    OneDimensionalBCFunction base;
+    OneDimensionalFunction base;
    base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
 
     M_bc->handler()->setBC( flagConverter( flag ), OneDimensional::first, OneDimensional::Q, base );
@@ -347,7 +347,7 @@ MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const functi
 void
 MultiscaleModel1D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
 {
-    OneDimensionalBCFunction base;
+    OneDimensionalFunction base;
     base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
 
     M_bc->handler()->setBC( flagConverter( flag ), OneDimensional::first, OneDimensional::S, base );
@@ -961,7 +961,7 @@ MultiscaleModel1D::solveTangentProblem( solver_Type::vector_Type& rhs, const UIn
         for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
         {
             flowRateDelta[iNode] = 1.;
-            flowRateViscoelasticCorrection += M_solver->viscoelasticFluxCorrection( *(*M_solution)["A"], flowRateDelta, M_data->dataTime()->timeStep(), *M_bc->handler(), false ) * flowRateElasticCorrection[iNode];
+            flowRateViscoelasticCorrection += M_solver->viscoelasticFlowRateCorrection( *(*M_solution)["A"], flowRateDelta, M_data->dataTime()->timeStep(), *M_bc->handler(), false ) * flowRateElasticCorrection[iNode];
             flowRateDelta[iNode] = 0.;
         }
 
