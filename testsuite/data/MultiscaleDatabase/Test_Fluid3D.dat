@@ -25,7 +25,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_F-FS
 
     [../Output]
     ProblemPrefix              = Multiscale # Problem prefix
-    SaveEach                   = 5          # time steps
+    SaveEach                   = 1          # time steps
 
     [../time_discretization]
     initialtime                = 0.0    # [s]
