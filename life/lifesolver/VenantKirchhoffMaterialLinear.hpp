@@ -113,7 +113,7 @@ class VenantKirchhoffMaterialLinear :
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void updateNonLinearJacobianTerms(  matrixPtr_Type& stiff,
+    void updateNonLinearJacobianTerms(  matrixPtr_Type& jacobian,
                                         const vector_Type& /*disp*/,
                                         const dataPtr_Type& /*dataMaterial*/,
                                         const displayerPtr_Type& /*displayer*/);
@@ -129,7 +129,7 @@ class VenantKirchhoffMaterialLinear :
     void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
     //! Missing Documentation!!!
-    void computeKinematicsVariables( const VectorElemental& dk_loc ){}
+    void computeKinematicsVariables( const VectorElemental& /*dk_loc*/ ){}
 
     //! ShowMe method of the class (saved on a file the two matrices)
     void showMe( std::string const& fileNameStiff,
@@ -146,8 +146,8 @@ class VenantKirchhoffMaterialLinear :
     //! Get the Stiffness matrix
     matrixPtr_Type const stiffMatrix() const {return M_stiff; }
 
-    //! Get the Stiffness matrix
-    vectorPtr_Type const stiffVector() const {}
+    //! Get the Stiffness vector
+    vectorPtr_Type const stiffVector() const {};
 
     //@}
 
@@ -192,6 +192,7 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
   this->M_localMap                      = monolithicMap;
   this->M_linearStiff.reset             (new matrix_Type(*this->M_localMap));
   this->M_offset                        = offset;
+  this->M_assembler.reset               (new StructuralAssembler());
 }
 
 template <typename Mesh>
@@ -216,8 +217,8 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 	Real mu = dataMaterial->mu(marker);
 	Real lambda = dataMaterial->lambda(marker);
 
-        stiff_strain(    2.0 * mu, *this->M_elmatK, this->M_FESpace->fe() );
-        stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );
+        this->M_assembler->stiff_strain(    2.0 * mu, *this->M_elmatK, this->M_FESpace->fe() );
+        this->M_assembler->stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );
 
         // assembling
         for ( UInt ic = 0; ic < nc; ic++ )
@@ -235,6 +236,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
+    this->M_jacobian = this->M_linearStiff;
 }
 
 
@@ -252,13 +254,13 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateJacobianMatrix(const vector_Type
 
     std::cout << std::endl;
     std::cout << "*********************************" << std::endl;
-    updateNonLinearJacobianTerms(this->M_stiff,disp,dataMaterial,displayer);
+    updateNonLinearJacobianTerms(this->M_jacobian,disp,dataMaterial,displayer);
     std::cout << "*********************************" << std::endl;
     std::cout << std::endl;
 }
 
 template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& /*stiff*/,
+void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& /*jacobian*/,
                                                                          const  vector_Type& /*disp*/,
                                                                          const dataPtr_Type& /*dataMaterial*/,
                                                                          const displayerPtr_Type& displayer )
@@ -284,7 +286,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& /
 
 template <typename Mesh>
 void
-StructuralMaterial<Mesh>::showMe( std::string const& fileNameStiff,
+VenantKirchhoffMaterialLinear<Mesh>::showMe( std::string const& fileNameStiff,
 				  std::string const& fileNameJacobian
 				)
 {
@@ -292,9 +294,9 @@ StructuralMaterial<Mesh>::showMe( std::string const& fileNameStiff,
   std::string fileNamelinearStiff =  fileNameStiff;
   fileNamelinearStiff += "linear";
   
-  this->M_linearStiff.spy(fileNamelinearStiff);
-  this->M_stiff.spy(fileNameStiff);
-  this->M_jacobian.spy(fileNameJacobian);
+  this->M_linearStiff->spy(fileNamelinearStiff);
+  this->M_stiff->spy(fileNameStiff);
+  this->M_jacobian->spy(fileNameJacobian);
 }
 
 template <typename Mesh>

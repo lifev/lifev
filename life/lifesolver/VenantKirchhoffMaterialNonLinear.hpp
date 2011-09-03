@@ -137,7 +137,7 @@ class VenantKirchhoffMaterialNonLinear :
     void computeNonLinearMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
     //! Missing Documentation !!!
-    void computeKinematicsVariables( const VectorElemental& dk_loc ){}
+    void computeKinematicsVariables( const VectorElemental& /*dk_loc*/ ){}
 
   //@}
 
@@ -176,19 +176,19 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateJacobianMatrix(const vector_T
 								  const dataPtr_Type& dataMaterial,
 								  const displayerPtr_Type& displayer)
 {
-    this->M_stiff.reset(new matrix_Type(*this->M_localMap));
+    this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
 
-    *this->M_stiff += *this->M_linearStiff;
+    *this->M_jacobian += *this->M_linearStiff;
     std::cout << std::endl;
     std::cout << "*********************************" << std::endl;
-    updateNonLinearJacobianTerms(this->M_stiff,disp,dataMaterial,displayer);
+    updateNonLinearJacobianTerms(this->M_jacobian,disp,dataMaterial,displayer);
     std::cout << "*********************************" << std::endl;
     std::cout << std::endl;
-    this->M_stiff->globalAssemble();
+    this->M_jacobian->globalAssemble();
 }
 
 template <typename Mesh>
-void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& stiff,
+void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& jacobian,
                                                                             const  vector_Type& disp,
                                                                             const dataPtr_Type& dataMaterial,
                                                                             const displayerPtr_Type& displayer )
@@ -230,53 +230,52 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
 	    }
 
 	  //  3):  \lambda * ( \tr { [\grad d^k]^T \grad \delta d }, \div v  )
-	  stiff_derdiv( lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
-
+	  this->M_assembler->stiff_derdiv( lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 	  //  4):  \mu * ( [\grad \delta d]^T \grad d^k + [\grad d^k]^T \grad \delta d : \grad v  )
-	  stiff_dergrad( mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_dergrad( mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  // the sum of these terms is the Jacobian of the divgrad term
 	  // 5):  \lambda * ( (\div u_k) \grad \delta u : \grad v  )
-	  stiff_divgrad(  lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_divgrad(  lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  \lambda * ( (\div u) \grad u_k : \grad v  )
-	  stiff_divgrad_2(  lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_divgrad_2(  lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  // the sum of these terms is the Jacobian of the gradgrad term
 	  // 6): 1/2 * \lambda * ( \grad u_k : \grad  u_k) *( \grad \delta u : \grad v  )
-	  stiff_gradgrad(   0.5 * lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_gradgrad(   0.5 * lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //\lambda * ( \grad u_k : \grad \delta u) *( \grad u_k : \grad v  )
-	  stiff_gradgrad_2(  lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_gradgrad_2(  lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  // the sum of these terms is he jacobian of the stiff_dergrad_gradbis term
 	  // 7A) : \mu *  ( \grad u^k \grad \delta u : \grad v  )
-	  stiff_dergrad_gradbis(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_dergrad_gradbis(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  \mu *  ( \grad \delta u \grad u^k : \grad v  )
-	  stiff_dergrad_gradbis_2(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_dergrad_gradbis_2(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  the sum of these terms is he jacobian of the stiff_dergrad_gradbis_Tr term
 	  // 7B) :  \mu *  ( \grad u^k [\grad \delta u]^T : \grad v  )
-	  stiff_dergrad_gradbis_Tr(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_dergrad_gradbis_Tr(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  // \mu *  ( \grad \delta u [\grad u^k]^T : \grad v  )
-	  stiff_dergrad_gradbis_Tr_2( mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_dergrad_gradbis_Tr_2( mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //   the sum of these terms is he jacobian of the stiff_gradgradTr_gradbis term
 	  // 8) :   \mu * (  \grad d^k [\grad d^k]^T \grad \delta d : \grad v  )
-	  stiff_gradgradTr_gradbis(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_gradgradTr_gradbis(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  \mu * (  \grad d^k [\grad \delta d]^T \grad d^k : \grad v  )
-	  stiff_gradgradTr_gradbis_2( mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_gradgradTr_gradbis_2( mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  \mu * (  \grad \delta u [\grad u^k]^T \grad u^k : \grad v  )
-	  stiff_gradgradTr_gradbis_3(  mu , dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  this->M_assembler->stiff_gradgradTr_gradbis_3(  mu , dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  // assembling
 	  for ( UInt ic = 0; ic < nc; ++ic )
             for ( UInt jc = 0; jc < nc; jc++ )
-	      assembleMatrix( *stiff, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof  );
+	      assembleMatrix( *jacobian, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof  );
 	}
 
 
@@ -349,24 +348,24 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
         // non-linear terms of the stiffness matrix
 
         // 3) 1/2 * \lambda  ( \tr { [\grad d^k]^T \grad d }, \div v  )
-        stiff_derdiv( 0.5 * lambda , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        this->M_assembler->stiff_derdiv( 0.5 * lambda , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
 
         //4)  \mu *( [\grad d^k]^T \grad d : \grad v  )
-        stiff_dergradbis( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        this->M_assembler->stiff_dergradbis( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
 
         //  5): \lambda * (div u_k) \grad d : \grad v
-        stiff_divgrad( lambda, dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        this->M_assembler->stiff_divgrad( lambda, dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
 
         // 6) 1/2  * \lambda * ( \grad u_k : \grad u_k) *( \grad u : \grad v  )
-        stiff_gradgrad( 0.5 * lambda , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        this->M_assembler->stiff_gradgrad( 0.5 * lambda , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
 
         // 7A) \mu *  ( \grad d^k \grad d : \grad v  )
-        stiff_dergrad_gradbis( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        this->M_assembler->stiff_dergrad_gradbis( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
         // 7B) \mu *  ( \grad d^k [\grad d]^T : \grad v  )
-        stiff_dergrad_gradbis_Tr( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        this->M_assembler->stiff_dergrad_gradbis_Tr( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
 
         // 8) // \mu *  (  \grad d^k [\grad d^k]^T \grad d : \grad v  )
-        stiff_gradgradTr_gradbis( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        this->M_assembler->stiff_gradgradTr_gradbis( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
 
         for ( UInt ic = 0; ic < nDimensions; ++ic )
         {

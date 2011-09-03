@@ -769,7 +769,7 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( void )
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
+StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& /*factor*/)
 {
   UInt totalDof = M_FESpace->dof().numTotalDof();
 
@@ -930,7 +930,7 @@ StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
 }
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol,  Real const& factor)
+void StructuralSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol,  Real const& /*factor*/)
 {
     this->M_Displayer->leaderPrint( " Computing residual ... \t\t\t");
 
