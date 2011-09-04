@@ -266,6 +266,17 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [../RobinBeta]
             function = 0
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -285,6 +296,17 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [../RobinBeta]
             function = 0
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -304,6 +326,17 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [../RobinBeta]
             function = 0
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -323,6 +356,17 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [../RobinBeta]
             function = 0
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -342,6 +386,17 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [../RobinBeta]
             function = 0
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -361,6 +416,17 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [../RobinBeta]
             function = 0
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -380,6 +446,17 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
             [../RobinBeta]
             function = 0
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
