@@ -2421,16 +2421,17 @@ void MeshTransformer<REGIONMESH>::moveMesh( const VECTOR & disp, UInt dim )
 template<typename REGIONMESH>
 void MeshTransformer<REGIONMESH>::savePoints()
 {
-    static bool first(true);
-    if (first)
+    if (M_pointList.capacity() < M_mesh.pointList.size())
     {
-        first=false;
+        // Create space and add
+        M_pointList.clear();
         M_pointList.reserve( M_mesh.numPoints() );
         std::copy(M_mesh.pointList.begin(),M_mesh.pointList.end(),
                   std::back_inserter(M_pointList));
     }
     else
     {
+        // Overwrite
         std::copy(M_mesh.pointList.begin(),M_mesh.pointList.end(),M_pointList.begin());
     }
 }
