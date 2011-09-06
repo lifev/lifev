@@ -1327,12 +1327,24 @@ void MeshPartitioner<MeshType>::constructFaces()
 
             pf->setLocalId( count );
 
+            for (ID id = 0; id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
+            {
+                inode = pf->point(id).id();
+                im = M_globalToLocalNode[i].find(inode);
+                pf->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
+            }
+
             // true if we are on a subdomain border
             ID ghostElem ( NotAnId );
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
             {
                 // set the flag for faces on the subdomain border
                 pf->setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
+                // set the flag for all points on that face
+                for ( UInt pointOnFace = 0; pointOnFace < MeshType::FaceType::S_numLocalPoints; pointOnFace++ )
+                {
+                    (*M_meshPartitions)[i]->point( pf->point( pointOnFace ).localId() ).setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
+                }
 
                 // build GhostEntityData
                 GhostEntityData ghostFace;
@@ -1464,13 +1476,6 @@ void MeshPartitioner<MeshType>::constructFaces()
             }
 
 */
-
-            for (ID id = 0; id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
-            {
-                inode = pf->point(id).id();
-                im = M_globalToLocalNode[i].find(inode);
-                pf->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
-            }
 
         }
         (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACES");
