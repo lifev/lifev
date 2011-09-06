@@ -16,7 +16,7 @@ LIFESOLVER_HDRS=life/lifesolver/HyperbolicData.hpp life/lifesolver/ADRAssemblerI
 
 LIFEFILTERS_HDRS=life/lifefilters/GetPot.hpp life/lifefilters/ExporterVTK.hpp life/lifefilters/Importer.hpp life/lifefilters/ExporterHDF5Mesh3D.hpp life/lifefilters/ImporterMesh2D.hpp life/lifefilters/ExporterEnsight.hpp life/lifefilters/ExporterEmpty.hpp life/lifefilters/ImporterMesh3D.hpp life/lifefilters/ExporterHDF5.hpp life/lifefilters/Exporter.hpp life/lifefilters/MeshWriter.hpp 
 
-LIFEFUNCTIONS_HDRS=life/lifefunctions/bessel/bessel.hpp life/lifefunctions/BCInterfaceFunctionParserFile.hpp life/lifefunctions/BCInterfaceFactory.hpp life/lifefunctions/BCInterfaceFunctionParserSolver.hpp life/lifefunctions/BCInterfaceFunctionSolverDefined.hpp life/lifefunctions/Womersley.hpp life/lifefunctions/OneDimensionalFunctionSolverDefined.hpp life/lifefunctions/BCInterfaceFunctionUserDefined.hpp life/lifefunctions/OneDimensionalFunction.hpp life/lifefunctions/BCInterfaceFunctionParserFileSolver.hpp life/lifefunctions/RossEthierSteinmanInc.hpp life/lifefunctions/BCInterfaceFunctionParser.hpp life/lifefunctions/BCInterfaceFunction.hpp life/lifefunctions/RossEthierSteinmanDec.hpp 
+LIFEFUNCTIONS_HDRS=life/lifefunctions/bessel/bessel.hpp life/lifefunctions/RossEthierSteinmanInc.hpp life/lifefunctions/RossEthierSteinmanDec.hpp 
 
 nobase_include_HEADERS=lifeconfig.h\
 $(LIFECORE_HDRS)\
