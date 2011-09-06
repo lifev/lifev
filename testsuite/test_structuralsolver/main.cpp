@@ -65,6 +65,7 @@
 #include <life/lifesolver/StructuralSolver.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialLinear.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
+#include <life/lifesolver/NeoHookeanMaterialNonLinear.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
