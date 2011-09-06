@@ -415,36 +415,36 @@ MapEpetra::bubbleSort(Epetra_IntSerialDenseVector& elements)
 void
 MapEpetra::setUp( const ReferenceFE&        refFE,
                   const comm_ptrtype& commPtr,
-                  std::vector<Int>& repeatedNodeVector,
-                  std::vector<Int>& repeatedEdgeVector,
-                  std::vector<Int>& repeatedFaceVector,
-                  std::vector<Int>& repeatedVolumeVector )
+                  std::vector<Int>& repeatedPeakVector,
+                  std::vector<Int>& repeatedRidgeVector,
+                  std::vector<Int>& repeatedFacetVector,
+                  std::vector<Int>& repeatedElementVector )
 {
     if ( refFE.nbDofPerVertex() )
     {
-        Int numNode = repeatedNodeVector.size();
-        MapEpetra repeatedNodeMap( -1, numNode, &repeatedNodeVector[0], commPtr );
-        operator+=(repeatedNodeMap);
+        Int numPeak = repeatedPeakVector.size();
+        MapEpetra repeatedPeakMap( -1, numPeak, &repeatedPeakVector[0], commPtr );
+        operator+=(repeatedPeakMap);
     }
 
-    if ( refFE.nbDofPerEdge() )
+    if ( refFE.nbDofPerRidge() )
     {
-        Int numEdge = repeatedEdgeVector.size();
-        MapEpetra repeatedEdgeMap( -1, numEdge, &repeatedEdgeVector[0], commPtr );
-        operator+=(repeatedEdgeMap);
+        Int numRidge = repeatedRidgeVector.size();
+        MapEpetra repeatedRidgeMap( -1, numRidge, &repeatedRidgeVector[0], commPtr );
+        operator+=(repeatedRidgeMap);
     }
 
-    if ( refFE.nbDofPerFace() )
+    if ( refFE.nbDofPerFacet() )
     {
-        Int numFace = repeatedFaceVector.size();
-        MapEpetra repeatedFaceMap(-1, numFace, &repeatedFaceVector[0], commPtr);
-        operator+=( repeatedFaceMap );
+        Int numFacet = repeatedFacetVector.size();
+        MapEpetra repeatedFacetMap(-1, numFacet, &repeatedFacetVector[0], commPtr);
+        operator+=( repeatedFacetMap );
     }
 
-    if ( refFE.nbDofPerVolume() )
+    if ( refFE.nbDofPerElement() )
     {
-        Int numElem = repeatedVolumeVector.size();
-        MapEpetra repeatedElemMap( -1, numElem, &repeatedVolumeVector[0], commPtr );
+        Int numElem = repeatedElementVector.size();
+        MapEpetra repeatedElemMap( -1, numElem, &repeatedElementVector[0], commPtr );
         operator+=( repeatedElemMap );
     }
 

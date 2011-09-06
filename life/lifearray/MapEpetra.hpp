@@ -318,17 +318,17 @@ private:
       Calls createImportExport
       @param refFE Reference finite element
       @param commPtr Pointer on the communicator
-      @param repeatedNodeVector Vector containing the node ids
-      @param repeatedEdgeVector Vector containing the edge ids
-      @param repeatedFaceVector Vector containing the face ids
-      @param repeatedVolumeVector Vector containing the volume ids
+      @param repeatedPeakVector Vector containing the node ids
+      @param repeatedRidgeVector Vector containing the edge ids
+      @param repeatedFacetVector Vector containing the face ids
+      @param repeatedElementVector Vector containing the volume ids
      */
     void setUp( const ReferenceFE&        refFE,
                 const comm_ptrtype& commPtr,
-                std::vector<Int>& repeatedNodeVector,
-                std::vector<Int>& repeatedEdgeVector,
-                std::vector<Int>& repeatedFaceVector,
-                std::vector<Int>& repeatedVolumeVector );
+                std::vector<Int>& repeatedPeakVector,
+                std::vector<Int>& repeatedRidgeVector,
+                std::vector<Int>& repeatedFacetVector,
+                std::vector<Int>& repeatedElementVector );
 
     //@}
 
@@ -360,10 +360,10 @@ MapEpetra( const ReferenceFE&               refFE,
 
     setUp( refFE,
            commPtr,
-           const_cast<std::vector<Int>&>( meshPart.repeatedNodeVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedEdgeVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedFaceVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedVolumeVector() ) );
+           const_cast<std::vector<Int>&>( meshPart.repeatedPeakVector() ),
+           const_cast<std::vector<Int>&>( meshPart.repeatedRidgeVector() ),
+           const_cast<std::vector<Int>&>( meshPart.repeatedFacetVector() ),
+           const_cast<std::vector<Int>&>( meshPart.repeatedElementVector() ) );
 
 }
 
@@ -379,49 +379,49 @@ MapEpetra( const ReferenceFE&        refFE,
         M_importer(),
         M_commPtr( commPtr )
 {
-    std::vector<Int> repeatedNodeVector;
-    std::vector<Int> repeatedEdgeVector;
-    std::vector<Int> repeatedFaceVector;
-    std::vector<Int> repeatedVolumeVector;
+    std::vector<Int> repeatedPeakVector;
+    std::vector<Int> repeatedRidgeVector;
+    std::vector<Int> repeatedFacetVector;
+    std::vector<Int> repeatedElementVector;
 
-    if ( refFE.nbDofPerVertex() )
+    if ( refFE.nbDofPerPeak() )
     {
-        repeatedNodeVector.reserve(mesh.numPoints());
+        repeatedPeakVector.reserve(mesh.numPoints());
         for ( UInt ii = 0; ii < mesh.numPoints(); ii++ )
-            repeatedNodeVector.push_back( mesh.point(ii).id() );
+            repeatedPeakVector.push_back( mesh.peak(ii).id() );
     }
 
-    if ( refFE.nbDofPerEdge() )
+    if ( refFE.nbDofPerRidge() )
     {
-        repeatedEdgeVector.reserve( mesh.numEdges() );
+        repeatedRidgeVector.reserve( mesh.numRidges() );
 
-        for ( UInt ii = 0; ii < mesh.numEdges(); ii++ )
-            repeatedEdgeVector.push_back( mesh.edge(ii).id() );
+        for ( UInt ii = 0; ii < mesh.numRidges(); ii++ )
+            repeatedRidgeVector.push_back( mesh.ridge(ii).id() );
     }
 
-    if ( refFE.nbDofPerFace() )
+    if ( refFE.nbDofPerFacet() )
     {
-        repeatedFaceVector.reserve( mesh.numFaces() );
+        repeatedFacetVector.reserve( mesh.numFacets() );
 
-        for ( UInt ii = 0; ii < mesh.numFaces(); ii++ )
-            repeatedFaceVector.push_back( mesh.face(ii).id() );
+        for ( UInt ii = 0; ii < mesh.numFacets(); ii++ )
+            repeatedFacetVector.push_back( mesh.facet(ii).id() );
     }
 
-    if ( refFE.nbDofPerVolume() )
+    if ( refFE.nbDofPerElement() )
     {
-        repeatedVolumeVector.reserve( mesh.numVolumes() );
+        repeatedElementVector.reserve( mesh.numElements() );
 
-        for ( UInt ii = 0; ii < mesh.numVolumes(); ii++ )
-            repeatedVolumeVector.push_back( mesh.volume(ii).id() );
+        for ( UInt ii = 0; ii < mesh.numElements(); ii++ )
+            repeatedElementVector.push_back( mesh.element(ii).id() );
     }
 
 
     setUp( refFE,
            commPtr,
-           repeatedNodeVector,
-           repeatedEdgeVector,
-           repeatedFaceVector,
-           repeatedVolumeVector );
+           repeatedPeakVector,
+           repeatedRidgeVector,
+           repeatedFacetVector,
+           repeatedElementVector );
 
     // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
     // never modify them
