@@ -473,7 +473,16 @@ public:
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    //! @return the local ID of the j-th point of the i-th face
+    static ID faceToPoint( ID const& iFace, ID const& jPoint );
+    /*!
+		@return a pair: the local numbering of the j-th edge on the i-th face, and
+				true if the orientation of the edge on the face is consistent
+				with that of the same edge on the element
+    */
+    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
+
 //! Specialization
 template <>
 inline ID reversePoint<QuadraticQuad>( ID const & pointId ){
@@ -509,14 +518,13 @@ public:
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
 
     inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-    	{return edgeToPoint( iFacet, jPoint );}
+    	{return faceToPoint( iFacet, jPoint );}
 
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
-    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return edgeToPoint(iFacet, jRidge);}
-	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
-		{return ID();}
-
+	inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+        {return faceToEdge(iFacet, jRidge).first;}
+    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+    	{return faceToPoint(iFacet, jPeak);}
 };
 
 //! Specialization

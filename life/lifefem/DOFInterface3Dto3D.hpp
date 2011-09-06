@@ -153,8 +153,8 @@ public:
 
     template <typename MeshType>
     void update( MeshType& mesh,
-                 const entityFlag_Type& flag1,
-                 const entityFlag_Type& flag2,
+                 const markerID_Type& flag1,
+                 const markerID_Type& flag2,
                  const fct& coupled, const Real& tol );
 
 
@@ -277,8 +277,8 @@ void DOFInterface3Dto3D::update( MeshType& mesh1, const markerID_Type& flag1,
 
 
 template <typename MeshType>
-void DOFInterface3Dto3D::update( MeshType& mesh, const entityFlag_Type& flag1,
-                                 const entityFlag_Type& flag2, const fct& coupled, const Real& tol )
+void DOFInterface3Dto3D::update( MeshType& mesh, const markerID_Type& flag1,
+                                 const markerID_Type& flag2, const fct& coupled, const Real& tol )
 {
 	// Updating facet connections at the interface
     updateFacetConnections( mesh, flag1, mesh, flag2, tol, coupled );
@@ -545,17 +545,17 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
         feBd1.update( mesh1.bFacet( i->first ) );  // Updating facet information on mesh1
         feBd2.update( mesh2.bFacet( i->second ) );  // Updating facet information on mesh2
 
-        VectorSimple<ID> localToGlobalMapOnBFacet1 = dof1.localToGlobalMapOnBdFacet(i->first);
-        VectorSimple<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet(i->second);
+        std::vector<ID> localToGlobalMapOnBFacet1 = dof1.localToGlobalMapOnBdFacet(i->first);
+        std::vector<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet(i->second);
 
         for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
 		{
-			ID gDof1 = localToGlobalMapOnBFacet1( lDof1);
+			ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
 			feBd1.coorMap( p1[0], p1[1], p1[2], feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
 
 			for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
 			{
-				ID gDof2 = localToGlobalMapOnBFacet2( lDof2);
+				ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
 				feBd2.coorMap( p2[0], p2[1], p2[2], feBd2.refFE.xi( lDof2 ), feBd2.refFE.eta( lDof2 ) );
 
 				if ( coupled( p1, p2, tol ) )

@@ -721,7 +721,10 @@ template <typename MC>
 MeshElementMarked0Din2D<MC> &
 MeshElementMarked0Din2D<MC>::operator = ( MeshElementMarked0Din2D<MC> const & Element )
 {
-	this->MeshElementMarked0D<MC>::operator = ( Element );
+    if ( this != &Element )
+    {
+    	MeshElementMarked0D<MC>::operator=( Element );
+    }
 	return *this;
 }
 

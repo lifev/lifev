@@ -132,7 +132,7 @@ public:
     */
      ID localToGlobalMapByBdFacet(const ID& facetId, const ID& localDof ) const;
 
-    inline VectorSimple<ID> localToGlobalMapOnBdFacet(const ID& facetId) const{
+    inline std::vector<ID> localToGlobalMapOnBdFacet(const ID& facetId) const{
     	return M_localToGlobalByBdFacet[facetId];
     }
 
@@ -240,7 +240,7 @@ private:
     Container_Type M_localToGlobal;
 
     // The local to global table based on the boundary facets
-    std::vector<VectorSimple<ID> > M_localToGlobalByBdFacet;
+    std::vector<std::vector<ID> > M_localToGlobalByBdFacet;
 
     // local array that maps the local dof of the
     facetToPointPtr_Type M_facetToPoint;
@@ -402,7 +402,7 @@ void DOF::update( MeshType& mesh )
     ASSERT_POS( gcount == M_totalDof , "Something wrong in Dof Setup " << gcount  << " " << M_totalDof ) ;
 
 
-    VectorSimple<ID> globalDOFOnBdFacet(nbLocalDofPerPeak*nBElemRidges + nBElemFacets*nbLocalDofPerRidge + nbLocalDofPerFacet);
+    std::vector<ID> globalDOFOnBdFacet(nbLocalDofPerPeak*nBElemRidges + nBElemFacets*nbLocalDofPerRidge + nbLocalDofPerFacet);
     M_localToGlobalByBdFacet.resize(mesh.numBFacets());
 
     for ( ID iBoundaryFacet = 0 ; iBoundaryFacet < mesh.numBFacets(); ++iBoundaryFacet )

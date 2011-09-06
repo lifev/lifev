@@ -601,7 +601,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
 
 
         //vector containing the local to global map on each element
-        VectorSimple<ID> localToGlobalMapOnBElem = dof.localToGlobalMapOnBdFacet(iBoundaryElement);
+        std::vector<ID> localToGlobalMapOnBElem = dof.localToGlobalMapOnBdFacet(iBoundaryElement);
 
         // =============================================================
         // Insertion of boundary conditions defined on boundary Elements

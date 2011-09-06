@@ -921,10 +921,10 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
         {
             for ( UInt jPointId = 0; jPointId < faceShape_Type::S_numPoints; ++jPointId )
             {
-                if ( !isDefinedPointMarker[ facetPtr->point( jPointId ).id() ] )
+                if ( !isDefinedPointMarker[ facePtr->point( jPointId ).id() ] )
                     // A bit involved but it works
                     //todo operate directly on point using setStrongerMarker
-                    facetPtr->setStrongerMarkerAtPoint( jPointId, facetPtr->marker() );
+                    facePtr->setStrongerMarkerAtPoint( jPointId, facePtr->marker() );
             }
         }
     }
@@ -1200,14 +1200,14 @@ bool rearrangeFaces( MeshType & mesh,
         return false;
     }
 
-    if ( mesh.numBElements() == 0 )
+    if ( mesh.numBFaces() == 0 )
     {
         errorStream << "ERROR: Boundary Element counter was not set" << std::endl;
         logStream << "ERROR: Boundary Element counter was not set" << std::endl;
         errorStream << "I Cannot proceed because the situation is ambiguous"
                         << std::endl;
         errorStream << "Please check and eventually either: (a) call buildFaces()" << std::endl;
-        errorStream << "or (b) set the correct number of boundaryFaces in the mesh using mesh.numBElements()" << std::endl;
+        errorStream << "or (b) set the correct number of boundaryFaces in the mesh using mesh.numBFaces()" << std::endl;
         errorStream << "ABORT" << std::endl;
         sw.create( "BELEMENT_COUNTER_UNSET", true );
         return false;
@@ -1232,7 +1232,7 @@ bool rearrangeFaces( MeshType & mesh,
         point2Id = ( faceContainerIterator->point( 1 ) ).id();
         point3Id = ( faceContainerIterator->point( 2 ) ).id();
 
-        if ( MeshType::FaceShape::S_numVertices == 4 )
+        if ( MeshType::faceShape_Type::S_numVertices == 4 )
         {
             point4Id = ( faceContainerIterator->point( 3 ) ).id();
             bareFace = ( makeBareFace( point1Id, point2Id, point3Id, point4Id ) ).first;
@@ -1321,7 +1321,7 @@ bool fixBoundaryFaces( MeshType & mesh,
     typename MeshType::volumeShape_Type        volumeShape;
     temporaryFaceContainer_Type *         boundaryFaceContainerPtr;
     temporaryFaceContainer_Type::iterator boundaryFaceContainerIterator;
-    std::pair<ID, ID>                     volumeIdTolocalFaceIdPair;
+    std::pair<ID, ID>                     volumeIdToLocalFaceIdPair;
     ID                                    jFaceLocalId;
     ID                                    volumeId;
     UInt                                  numInternalFaces;
@@ -1419,10 +1419,10 @@ bool fixBoundaryFaces( MeshType & mesh,
         }
         else
         {
-            volumeIdTolocalFaceIdPair = boundaryFaceContainerIterator->second;
-            volumeId = volumeIdTolocalFaceIdPair.first; // Element ID
+            volumeIdToLocalFaceIdPair = boundaryFaceContainerIterator->second;
+            volumeId = volumeIdToLocalFaceIdPair.first; // Element ID
             volumePtr = &mesh.volume( volumeId ); // Element
-            jFaceLocalId = volumeIdTolocalFaceIdPair.second;       // The local ID of face on element
+            jFaceLocalId = volumeIdToLocalFaceIdPair.second;       // The local ID of face on element
             // Reset face point definition to be consistent with face.
             for ( UInt kPointId = 0; kPointId < face_Type::S_numPoints; ++kPointId )
             {
@@ -1547,7 +1547,7 @@ bool buildFaces( MeshType & mesh,
     temporaryFaceContainer_Type::iterator boundaryFaceContainerIterator;
     bool                                  externalContainerIsProvided( false );
 
-    std::pair<ID, ID>                     volumeIdTolocalFaceIdPair;
+    std::pair<ID, ID>                     volumeIdToLocalFaceIdPair;
     ID                                    jFaceLocalId, newFaceId;
     ID                                    volumeId;
     std::map<BareFace,ID>                 existingFacesMap;
@@ -1571,7 +1571,7 @@ bool buildFaces( MeshType & mesh,
             point1Id = ( mesh.faceList[ jFaceId ].point( 0 ) ).id();
             point2Id = ( mesh.faceList[ jFaceId ].point( 1 ) ).id();
             point3Id = ( mesh.faceList[ jFaceId ].point( 2 ) ).id();
-            if ( MeshType::FaceShape::S_numVertices == 4 )
+            if ( MeshType::faceShape_Type::S_numVertices == 4 )
             {
                 point4Id = ( mesh.faceList[ jFaceId ].point( 3 ) ).id();
                 existingFacesMap_insert= existingFacesMap.insert(
@@ -1636,7 +1636,7 @@ bool buildFaces( MeshType & mesh,
             volumeIdToLocalFaceIdPair = boundaryFaceContainerIterator->second;
             volumeId = volumeIdToLocalFaceIdPair.first; // Element ID
             volumePtr = &mesh.volume( volumeId ); // Element
-            jFaceLocalId = volumeIdTolocalFaceIdPair.second;       // The local ID of face on element
+            jFaceLocalId = volumeIdToLocalFaceIdPair.second;       // The local ID of face on element
 
             for ( UInt kPointId = 0; kPointId < face_Type::S_numPoints; ++kPointId )
                 face.setPoint( kPointId, volumePtr->point( volumeShape.faceToPoint( jFaceLocalId, kPointId ) ) );
@@ -1881,6 +1881,8 @@ bool buildEdges( MeshType & mesh,
     typedef typename MeshType::edge_Type edge_Type;
     typedef typename MeshType::face_Type face_Type;
     typedef typename MeshType::faceShape_Type faceShape_Type;
+    typedef typename MeshType::edges_Type::iterator Edges_Iterator;
+    typename MeshType::face_Type * facePtr;
 
 
     std::map<BareEdge, ID> existingEdges;
@@ -2350,7 +2352,7 @@ public:
       *
       *  @return The list mesh Point before the last movement.
       */
-     typename REGIONMESH::Points const & pointListInitial() const;
+     typename REGIONMESH::points_Type const & pointListInitial() const;
      private:
     /** Appropriately sets internal switches
      *
@@ -2359,7 +2361,7 @@ public:
      *  works;
      */
     REGIONMESH & M_mesh;
-    typename REGIONMESH::Points M_pointList;
+    typename REGIONMESH::points_Type M_pointList;
 };
 /** Mesh statistics.
  *  Namespace that groups functions which operate on a mesh to extract statistics.
@@ -2399,8 +2401,8 @@ void MeshTransformer<REGIONMESH>::moveMesh( const VECTOR & disp, UInt dim )
 {
     if(!this->hasOldPoint())this->savePoints();
 
-    typedef typename REGIONMESH::Points Points;
-    Points & pointList(M_mesh.pointList);
+    typedef typename REGIONMESH::points_Type points_Type;
+    points_Type & pointList(M_mesh.pointList);
     for ( unsigned int i = 0; i < M_mesh.pointList.size(); ++i )
     {
         for ( UInt j = 0; j < nDimensions; ++j )
@@ -2439,10 +2441,10 @@ MeshTransformer<REGIONMESH>::pointInitial( ID const i ) const
 }
 
 template <typename REGIONMESH>
-const typename REGIONMESH::Points &
+const typename REGIONMESH::points_Type &
 MeshTransformer<REGIONMESH>::pointListInitial() const
 {
-    return M_pointList.empty()? M_mesh.Points : M_pointList;
+    return M_pointList.empty()? M_mesh.points_Type : M_pointList;
 }
 
 //! @todo Change using homogeneous coordinates to make it more efficient.
@@ -2451,7 +2453,7 @@ template <typename VECTOR>
 void MeshTransformer<REGIONMESH>::transformMesh( const VECTOR& scale, const VECTOR& rotate, const VECTOR& translate )
 {
     // Make life easier
-    typename REGIONMESH::Points & pointList(M_mesh.pointList);
+    typename REGIONMESH::points_Type & pointList(M_mesh.pointList);
 
     //Create the 3 planar rotation matrix and the scale matrix
     boost::numeric::ublas::matrix<Real> R(3,3), R1(3,3), R2(3,3), R3(3,3), S(3,3);
@@ -2530,7 +2532,7 @@ template <typename function>
 void MeshTransformer<REGIONMESH>::transformMesh( const function& meshMapping)
 {
     // Make life easier
-    typename REGIONMESH::Points & pointList(M_mesh.pointList);
+    typename REGIONMESH::points_Type & pointList(M_mesh.pointList);
 
     for ( unsigned int i = 0; i < pointList.size();++i )
     {
@@ -2545,12 +2547,12 @@ MeshStatistics::meshSize MeshStatistics::computeSize(REGIONMESH const & mesh)
     const double bignumber=std::numeric_limits<double>::max();
     Real MaxH(0), MinH(bignumber), MeanH(0);
     Real deltaX(0), deltaY(0), deltaZ(0), sum(0);
-    typedef typename REGIONMESH::Edges Edges;
-    Edges const & edgeList(mesh.edgeList);
+    typedef typename REGIONMESH::edges_Type edges_Type;
+    edges_Type const & edgeList(mesh.edgeList);
 
     ASSERT0(edgeList.size()>0,"computeSize requires edges!");
 
-    for (typename Edges::const_iterator i=edgeList.begin(); i < edgeList.end() ; ++i )
+    for (typename edges_Type::const_iterator i=edgeList.begin(); i < edgeList.end() ; ++i )
     {
         deltaX =  i->point( 1 ).x() - i->point( 0 ).x();
         deltaY =  i->point( 1 ).y() - i->point( 0 ).y();

@@ -773,7 +773,7 @@ updateGhostValues( MeshPartitioner<Mesh> const & meshPart )
         dataEnd = procIt->second.end();
         for ( dataIt = procIt->second.begin(); dataIt != dataEnd; ++dataIt )
         {
-            ID elementId ( M_FESpace.mesh()->faceElement( dataIt->localFaceId, 0 ) );
+            ID elementId ( M_FESpace.mesh()->faceElement( dataIt->localFacetId, 0 ) );
 
             VectorElemental ghostValue  ( M_FESpace.refFE().nbDof(), 1 );
             extract_vec( *M_uOld, ghostValue, M_FESpace.refFE(), M_FESpace.dof(), elementId, 0 );
@@ -803,7 +803,7 @@ updateGhostValues( MeshPartitioner<Mesh> const & meshPart )
         UInt count ( 0 );
         for ( ghostDataContainer_Type::const_iterator dataIt = procIt->second.begin(); dataIt != procIt->second.end(); ++dataIt, count++ )
         {
-            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFaceId;
+            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFacetId;
             M_ghostDataMap[ ghostFaceId ] = *dataIt;
         }
     }
@@ -819,7 +819,7 @@ updateGhostValues( MeshPartitioner<Mesh> const & meshPart )
 //        UInt count ( 0 );
 //        for ( procData_Type::const_iterator dataIt = procIt->second.begin(); dataIt != procIt->second.end(); ++dataIt, count++ )
 //        {
-//            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFaceId;
+//            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFacetId;
 //            ID elementId ( M_FESpace.mesh()->faceElement( ghostFaceId, 0 ) );
 //            outf << "lid " << elementId << " " << "gid " << ghostDataMap[ procIt->first ][ count ].ghostElementLocalId << " " << *dataIt << std::endl;
 //        }

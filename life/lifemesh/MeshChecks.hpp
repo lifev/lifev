@@ -467,14 +467,14 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
 
     if ( mesh.storedFaces() == 0 ||
-            mesh.numBElements() > mesh.storedFaces() ||
+            mesh.numBFaces() > mesh.storedFaces() ||
             bFacesFound > mesh.storedFaces() || bFacesFound > mesh.numBFaces())
     {
         // Something strange with boundary faces
         if (verbose)
             err << "ERROR: Not all boundary faces stored" << std::endl;
             err << "Found "<<bFacesFound<<" stored "<< mesh.storedFaces()<<
-                            "B faces declared in mesh "<<mesh.numBElements()<<std::endl;
+                            "B faces declared in mesh "<<mesh.numBFaces()<<std::endl;
         if ( fix )
             sw.create( "BUILD_BFACES", true );
         if ( fix )
@@ -486,7 +486,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         if (verbose)
             err << "After buildFaces" << std::endl;
             err << "Found "<<bFacesFound<<" stored "<< mesh.storedFaces()<<
-                            "B faces declared in mesh "<<mesh.numBElements()<<std::endl;
+                            "B faces declared in mesh "<<mesh.numBFaces()<<std::endl;
     }
     else
     {

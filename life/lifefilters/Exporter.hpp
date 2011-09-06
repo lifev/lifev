@@ -608,7 +608,7 @@ void Exporter<MeshType>::readVariable(exporterData_Type& dvar)
 
      for ( UInt iElem( 0 ); iElem < PID_FESpacePtr->mesh()->numElements(); ++iElem )
      {
-         ID globalElem = PID_FESpacePtr->mesh()->volumeList[ iElem ].id();
+         ID globalElem = PID_FESpacePtr->mesh()->element(iElem).id();
          (*PIDData)[ globalElem ] = meshPart.comm()->MyPID();
      }
 
