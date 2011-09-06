@@ -26,7 +26,6 @@
 //@HEADER
 
 /*!
-  \include ../../testsuite/test_monolithic/fluidstructure.dox
     @file
     @brief This file contains a class implementing a preconditioner for the Fluid-Structure Interaction system
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
@@ -79,7 +78,7 @@ namespace LifeV {
 //! MonolithicBlockComposedDN - Short description of the class
 /*!
     @author Paolo Crosetto
-    @see \ref CDFQ
+    @see \cite CrosettoEtAl2009
 
 
  */
