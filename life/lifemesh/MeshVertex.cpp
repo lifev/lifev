@@ -112,8 +112,7 @@ MeshVertex::showMe( bool verbose, std::ostream & out ) const
         }
         out << coordinateVector[ i ] << std::endl << std::endl;
     }
-    out << " ID       = " << id()      << std::endl;
-    out << " local ID = " << localId() << std::endl;
+    MeshEntity::showMe( out );
 
     out << "----- END OF MeshVertex data ---" << std::endl << std::endl;
     return out;
