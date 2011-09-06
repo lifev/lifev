@@ -88,8 +88,7 @@ MeshVertex::operator=( MeshVertex const & Element )
     if (  this == &Element )
         return *this;
 
-    this->setId(Element.id());
-    setBoundary(Element.boundary());
+    MeshEntity::operator= ( Element );
     M_coordinates = Element.M_coordinates;
     return *this;
 }
