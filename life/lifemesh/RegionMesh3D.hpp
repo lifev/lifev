@@ -244,7 +244,7 @@ public:
      */
     void printLtGMap(std::ostream & os);
 
-    //! Return the handle to perform transormations on the mesh
+    //! Return the handle to perform transformations on the mesh
     inline MeshUtility::MeshTransformer<RegionMesh3D<GEOSHAPE, MC> > & meshTransformer();
 
     /** @} */ // End of group Utilities
@@ -654,11 +654,13 @@ public:
      *  @return Global-to-Local map.
      */
     std::map<int,int> & globalToLocalNode() {return M_globalToLocalNode;}
+    std::map<int,int> & globalToLocalPeak() {return M_globalToLocalNode;}
     //! Returns Local-to-Global Node map.
     /**
      *  @return Local-to-Global map.
      */
     std::map<int,int> & localToGlobalNode() {return M_localToGlobalNode;}
+    std::map<int,int> & localToGlobalPeak() {return M_localToGlobalNode;}
 
     /** @} */ // End of group Element Adjacency Methods
 
@@ -763,8 +765,8 @@ public:
      *  @param f Face to be added.
      *  @return Reference to the newly added face.
      */
-    facet_Type & addFace( facet_Type const & f, bool const boundary );
-    facet_Type & addFacet( facet_Type const & f, bool const boundary )  {return addFace(f, boundary);}
+    facet_Type & addFace( face_Type const & f );
+    facet_Type & addFacet( facet_Type const & f )  {return addFace(f);}
 
     //! Adds a face in a certain position.
     /**
@@ -997,8 +999,8 @@ public:
      *  @param f Edge to add.
      *  @return Reference to added edge.
      */
-    ridge_Type & addEdge( ridge_Type const & f, bool const boundary );
-    ridge_Type & addRidge( ridge_Type const & f, bool const boundary ){return addEdge( f, boundary);}
+    ridge_Type & addEdge( ridge_Type const & f );
+    ridge_Type & addRidge( ridge_Type const & f ){return addEdge( f );}
 
     //! Add an Edge to specified position.
     /**
@@ -1278,6 +1280,7 @@ public:
      *  @return i-th mesh Point.
      */
     point_Type const & point( UInt const i ) const;
+    inline point_Type const & peak( UInt const i ) const {return point(i);}
 
     //! Returns a reference to the i-th mesh Point.
     /**
@@ -1287,6 +1290,7 @@ public:
      *  @return Reference i-th mesh Point.
      */
     point_Type & point( UInt const i );
+    inline point_Type & peak( UInt const i ) {return point(i);}
 
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
@@ -1483,6 +1487,8 @@ public:
     elements_Type& elementList() {return volumeList;}
 
     facets_Type& facetList() {return faceList;}
+
+    ridges_Type& ridgeList() {return edgeList;}
 
     int inline dimension() const {return 3;}
 
@@ -1872,7 +1878,7 @@ RegionMesh3D<GEOSHAPE, MC>::addFace( bool const boundary )
 template <typename GEOSHAPE, typename MC>
 inline
 typename RegionMesh3D<GEOSHAPE, MC>::face_Type &
-RegionMesh3D<GEOSHAPE, MC>::addFace( face_Type const & f)
+RegionMesh3D<GEOSHAPE, MC>::addFace( face_Type const & f )
 {
     ASSERT_PRE( faceList.size() < faceList.capacity(), "Face list size exceeded" <<
                 faceList.size() + 1 << " " << faceList.capacity() ) ;
@@ -1917,7 +1923,6 @@ inline
 typename RegionMesh3D<GEOSHAPE, MC>::facet_Type &
 RegionMesh3D<GEOSHAPE, MC>::facet( UInt const i )
 {
-	if(i >= faceList.size() ) exit(1);
     ASSERT_BD( i < faceList.size() ) ;
     return faceList[ i ];
 }
@@ -2027,10 +2032,10 @@ RegionMesh3D<GEOSHAPE, MC>::setNumEdges( UInt const n)
 }
 
 template <typename GEOSHAPE, typename MC>
-inline typename RegionMesh3D<GEOSHAPE, MC>::EdgeType &
+inline typename RegionMesh3D<GEOSHAPE, MC>::edge_Type &
 RegionMesh3D<GEOSHAPE, MC>::addEdge( bool const boundary )
 {
-    EdgeType anEdge;
+    edge_Type anEdge;
     anEdge.setBoundary(boundary);
     return addEdge( anEdge);
 }
@@ -2727,13 +2732,6 @@ RegionMesh3D<GEOSHAPE, MC>::isBoundaryRidge( UInt const & id ) const
     return id < M_numBEdges;
 }
 
-template <typename GEOSHAPE, typename MC>
-inline
-bool
-RegionMesh3D<GEOSHAPE, MC>::isBoundaryFacet( facet_Type const & f ) const
-{
-    return f.id() < M_numBFaces;
-}
 
 template <typename GEOSHAPE, typename MC>
 inline
@@ -2943,7 +2941,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee, 
         M_numEdges = edgeList.size();
         this->M_numBEdges=
         edgeList.countElementsWithFlag(EntityFlags::PHYSICAL_BOUNDARY, &Flag::testOneSet);
-        setLinkSwitch( "HAS_ALL_EDGES" );
+        setLinkSwitch( "HAS_ALL_RIDGES" );
     }
 
     if(renumber && !edgeList.empty())
