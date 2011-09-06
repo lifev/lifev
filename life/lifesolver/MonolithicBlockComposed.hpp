@@ -26,8 +26,7 @@
 //@HEADER
 
 /*!
-  \include ../../testsuite/test_monolithic/fluidstructure.dox
-    @file MonolithicBlockComposed.hpp
+    @file
     @brief this file contains a class which is suited for handling a block-structured matrix that can be written as a
     multiplication of a variable number of factors. It contains a vector of pointers for each factor, BCHandler, FESpace
     and for each coupling part.
@@ -51,7 +50,7 @@ namespace LifeV
 //! MonolithicBlockComposed - Class handling block-structured preconditioners
 /*!
     @author Paolo Crosetto
-    see \ref CDFQ
+    see \cite CrosettoEtAl2009
 
     Pure virtual class which is suited for handling a block-structured matrix that can be written as a
     multiplication of a variable number of factors. It contains a vector of pointers for each factor, BCHandler, FESpace

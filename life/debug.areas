@@ -6,6 +6,16 @@
 4000 -- LifeV::mesh
 5000 -- LifeV::fem
 5010 -- LifeV::BCHandler
+5020 -- LifeV::BCInterface
+5020 -- LifeV::BCInterface1D
+5020 -- LifeV::BCInterface3D
+5021 -- LifeV::BCInterfaceFunctionParser
+5022 -- LifeV::BCInterfaceFunctionParserFile
+5023 -- LifeV::BCInterfaceFunctionParserSolver
+5024 -- LifeV::BCInterfaceFunctionParserFileSolver
+5025 -- LifeV::BCInterfaceFunctionSolverDefined
+5026 -- LifeV::BCInterfaceFunctionUserDefined
+5030 -- LifeV::Parser
 6000 -- LifeV::solver
 6010 -- LifeV::NavierStokesWithFlux
 6020 -- LifeV::NavierStokesSolverPC

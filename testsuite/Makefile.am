@@ -30,13 +30,13 @@ SUBDIRS		= data  \
               test_fsi \
               test_hyperbolic \
               test_LevelSetSolver \
+              test_Parser \
               test_partition \
               test_structure \
               test_TemplateTest \
               test_timeAdvance_orderI \
               test_timeAdvance_orderII \
               test_structuralsolver 
-              test_monolithic
 
 # add newly created testsuite.at scripts to TESTSUITES to allow the automatic generation of the
 # 'testsuite' script upon modification of one of them
@@ -59,7 +59,9 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
            $(srcdir)/test_timeAdvance_orderI/testsuite.at \
            $(srcdir)/test_timeAdvance_orderII/testsuite.at \
            $(srcdir)/test_monolithic/testsuiteGCE.at \
-           $(srcdir)/test_monolithic/testsuiteCE.at
+           $(srcdir)/test_monolithic/testsuiteCE.at \
+           $(srcdir)/test_Parser/testsuite.at \
+           $(srcdir)/test_VectorContainer/testsuite.at
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
