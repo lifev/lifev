@@ -217,7 +217,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 	Real mu = dataMaterial->mu(marker);
 	Real lambda = dataMaterial->lambda(marker);
 
-        this->M_assembler->stiff_strain(    2.0 * mu, *this->M_elmatK, this->M_FESpace->fe() );
+        this->M_assembler->stiff_strain( 2.0 * mu, *this->M_elmatK, this->M_FESpace->fe() );
         this->M_assembler->stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );
 
         // assembling

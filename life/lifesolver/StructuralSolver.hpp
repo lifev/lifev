@@ -229,7 +229,7 @@ public:
   */
   void solveJac( vector_Type&       step,
 		 const vector_Type& residual,
-		 Real&            linear_rel_tol) ;
+		 Real&            linear_rel_tol ) ;
   //    void solveJac( const Vector& res, Real& linear_rel_tol, Vector &step);
 
   //! Solves the tangent problem with custom BC
@@ -434,9 +434,9 @@ protected:
 			       UInt         offset=0);
 
   void applyBoundaryConditionsLin(matrix_Type &matrix,
-			       vector_Type &rhs,
-			       bchandler_Type& BCh,
-			       UInt         offset=0);
+			          vector_Type &rhs,
+			          bchandler_Type& BCh,
+			          UInt         offset=0);
 
 
   UInt dim() const { return M_FESpace->dim(); }
@@ -455,7 +455,7 @@ protected:
   boost::shared_ptr<solver_Type>       M_linearSolver;
 
   //! Elementary matrices and vectors
-  boost::shared_ptr<MatrixElemental>           M_elmatM; // mass
+  boost::shared_ptr<MatrixElemental>   M_elmatM;
 
   //! linearized velocity
   vectorPtr_Type                       M_disp;
@@ -567,8 +567,8 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
 					      const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-					      bchandler_Type&                BCh,
-					      boost::shared_ptr<Epetra_Comm>&              comm)
+					      bchandler_Type&                	BCh,
+					      boost::shared_ptr<Epetra_Comm>&   comm)
 {
   setup(data, dFESpace, comm);
   M_BCh = BCh;
@@ -603,15 +603,15 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   M_me                              = comm->MyPID();
   M_elmatM.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
   M_localMap                        = monolithicMap;
-  M_disp.reset                      (new vector_Type(*M_localMap));
-  M_vel.reset                       (new vector_Type(*M_localMap));
-  M_acc.reset                       (new vector_Type(*M_localMap));
+  M_disp.reset                      ( new vector_Type(*M_localMap) );
+  M_vel.reset                       ( new vector_Type(*M_localMap) );
+  M_acc.reset                       ( new vector_Type(*M_localMap) );
   M_rhsW.reset                      ( new vector_Type(*M_localMap) );
   M_rhsA.reset                      ( new vector_Type(*M_localMap) );
   M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
-  M_mass.reset                      (new matrix_Type(*M_localMap));
-  M_tempMatrix.reset                (new matrix_Type(*M_localMap));
-  M_jacobian.reset                  (new matrix_Type(*M_localMap));
+  M_mass.reset                      ( new matrix_Type(*M_localMap) );
+  M_tempMatrix.reset                ( new matrix_Type(*M_localMap) );
+  M_jacobian.reset                  ( new matrix_Type(*M_localMap) );
 
   //Vector of Stiffness for NH and Exp
   //This vector stores the stiffness vector both in
@@ -655,6 +655,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff
       {
 	vec_stiff.reset(new vector_Type(*this->M_localMap));
 	*vec_stiff += *this->M_material->stiffVector();
+std::cout<<"\n STIFF VECTOR = "<<vec_stiff->norm2()<<std::endl;
 	vec_stiff->globalAssemble();
       }
     
@@ -749,6 +750,14 @@ void StructuralSolver<Mesh, SolverType>::computeRHSNoBC( void )
     std::cout << "rhsW    norm    = " << this->M_rhsW->norm2() << std::endl;
     std::cout << "   W    norm    = " << this->M_vel->norm2() << std::endl;
 
+    std::cout << "\n   ZETA         = " << this->M_zeta  << std::endl;
+    std::cout << "   THETA          = " << this->M_theta << std::endl;
+    std::cout << "   YOUNG          = " << this->M_data->young() << std::endl;
+    std::cout << "   POISSON        = " << this->M_data->poisson() << std::endl;
+    std::cout << "   DENSITY        = " << this->M_data->rho() << std::endl;
+    std::cout << "   BULK MODULUS   = " << this->M_data->bulk() << std::endl;
+    std::cout << "   ALPHA          = " << this->M_data->alpha() << std::endl;
+    std::cout << "   GAMMA          = " << this->M_data->gamma() << std::endl;
 }
 
 
@@ -952,8 +961,11 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol, 
     else
       {
 	M_tempVect.reset(new vector_Type(*this->M_localMap));
-	*M_tempVect +=*this->M_material->stiffVector();
+std::cout<<"\n Stiff vector 1 = "<<M_tempVect->normInf()<<std::endl; 
+	*M_tempVect  +=*this->M_material->stiffVector();
+std::cout<<"\n Stiff vector 2 = "<<M_tempVect->normInf()<<std::endl; 
 	*M_tempVect *= M_zeta;
+std::cout<<"\n Stiff vector 3 = "<<M_tempVect->normInf()<<std::endl; 
 	M_tempVect->globalAssemble();
       }
 
@@ -1005,13 +1017,15 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     	chrono.start();
 	
     	residual = *this->M_mass * solution;
-
+std::cout<<"\n RES1 NOBC = "<<residual.normInf()<<std::endl;
     	residual += *this->M_tempVect;
-
+std::cout<<"\n RES2 NOBC = "<<residual.normInf()<<std::endl;
     	residual -= *this->M_rhsNoBC;
+std::cout<<"\n RES3 NOBC = "<<residual.normInf()<<std::endl;
 
     	//! Apply the boundary conditions
     	bcManageVector( residual, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), this->M_data->dataTime()->time(), 1.0);
+std::cout<<"\n RES4 BC = "<<residual.normInf()<<std::endl;
 
     	chrono.stop();
     	this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );	
@@ -1307,9 +1321,13 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
     *jacobian *= M_zeta;
     *jacobian += *this->M_mass;
     jacobian->globalAssemble();
+std::string stringaP="M_jacobianSSPaolo";
+this->M_jacobian->spy(stringaP);
 
     chrono.stop();
     this->M_Displayer->leaderPrintMax("   ... done in ", chrono.diff() );
+int n;
+std::cin>>n;
 }
 
 //solveJac( const Vector& res, Real& linear_rel_tol, Vector &step)
@@ -1362,7 +1380,7 @@ solveJacobian( vector_Type&           step,
 
     //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a 
     //totally different expression.For structural problems it is not used
-    *this->M_residual_d= *this->M_mass*step;
+    *this->M_residual_d = *this->M_mass*step;
 
 }
 

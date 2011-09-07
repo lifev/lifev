@@ -275,7 +275,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
 	  // assembling
 	  for ( UInt ic = 0; ic < nc; ++ic )
             for ( UInt jc = 0; jc < nc; jc++ )
-	      assembleMatrix( *jacobian, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof  );
+	      assembleMatrix( *jacobian, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset + jc*totalDof );
 	}
 
 

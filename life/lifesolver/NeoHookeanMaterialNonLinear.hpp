@@ -186,6 +186,9 @@ protected:
     //! Local stress vector
     boost::scoped_ptr<VectorElemental>   	      	M_elvecK;
 
+    //! Elementary matrices
+    boost::scoped_ptr<MatrixElemental>             	M_elmatK;
+
     //! Vector: stiffness non-linear
     vectorPtr_Type		     			M_stiff;
 
@@ -207,6 +210,7 @@ template <typename Mesh>
 NeoHookeanMaterialNonLinear<Mesh>::NeoHookeanMaterialNonLinear():
     super			( ),
     M_elvecK 			( ),
+    M_elmatK                    ( ),
     M_stiff	     	        ( ),
     M_FirstPiolaKStress		( )
 {
@@ -234,7 +238,7 @@ NeoHookeanMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh,
 
   M_FirstPiolaKStress.reset		( new vector_Type(*this->M_localMap) );
   M_elvecK.reset			( new VectorElemental (this->M_FESpace->fe().nbFEDof(), nDimensions) );
-
+  this->M_elmatK.reset                  ( new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
 
   //! Local tensors initilization
   M_FirstPiolaKStressEle.reset		( new KNM_Type( nDimensions, nDimensions ) );
@@ -244,6 +248,9 @@ NeoHookeanMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh,
   M_Jack.reset				( new KN_Type( dFESpace->fe().nbQuadPt() ) );
   M_trCisok.reset			( new KN_Type( dFESpace->fe().nbQuadPt() ) );
   M_trCk.reset				( new KN_Type( dFESpace->fe().nbQuadPt() ) );
+
+  //! Reset pointer to assembler
+  this->M_assembler.reset               ( new StructuralAssembler() );
 }
 
 template <typename Mesh>
@@ -258,12 +265,19 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateJacobianMatrix( const vector_Type&
                                                               const dataPtr_Type& dataMaterial,
                                                               const displayerPtr_Type& displayer )
 {
+    this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
 
     std::cout << std::endl;
     std::cout << "*********************************" << std::endl;
     updateNonLinearJacobianTerms(this->M_jacobian, disp, dataMaterial, displayer);
     std::cout << "*********************************" << std::endl;
     std::cout << std::endl;
+	
+    this->M_jacobian->globalAssemble();
+
+std::string stringaP="M_jacobian_in_NHmaterial";
+this->M_jacobian->spy(stringaP);
+
 }
 
 template <typename Mesh>
@@ -287,12 +301,11 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
     	//! loop on volumes: assembling source term
 	for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
     	{
-        	this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
 
-        	this->M_elmatJac->zero();
+        	this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
+        	this->M_elmatK->zero();
 
 		UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
-
 		Real mu     = dataMaterial->mu(marker);
 		//Real lambda = dataMaterial->lambda(marker);
 		Real bulk   = dataMaterial->bulk(marker);
@@ -320,33 +333,33 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 
 		//! VOLUMETRIC PART
 		//! 1. Stiffness matrix: int { 1/2 * bulk * ( 2 - 1/J + 1/J^2 ) * ( CofF : \nabla \delta ) (CofF : \nabla v) }
-		this->M_assembler->stiff_Jac_Pvol_1term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatJac, this->M_FESpace->fe() );
+		this->M_assembler->stiff_Jac_Pvol_1term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	
 		//! 2. Stiffness matrix: int { 1/2 * bulk * ( 1/J- 1 - log(J)/J^2 ) * ( CofF [\nabla \delta]^t CofF ) : \nabla v }
-		this->M_assembler->stiff_Jac_Pvol_2term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatJac, this->M_FESpace->fe() );  		
+//		this->M_assembler->stiff_Jac_Pvol_2term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );  		
 	    
 	    	//! ISOCHORIC PART
 	    	//! 1. Stiffness matrix : int { -2/3 * mu * J^(-5/3) *( CofF : \nabla \delta ) ( F : \nabla \v ) }
-		this->M_assembler->stiff_Jac_P1iso_NH_1term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatJac, this->M_FESpace->fe() );
+//		this->M_assembler->stiff_Jac_P1iso_NH_1term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	    
 	   	//! 2. Stiffness matrix : int { 2/9 * mu * ( Ic_iso / J^2 )( CofF : \nabla \delta ) ( CofF : \nabla \v ) }
-		this->M_assembler->stiff_Jac_P1iso_NH_2term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatJac, this->M_FESpace->fe() );
+//		this->M_assembler->stiff_Jac_P1iso_NH_2term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 	    
 	   	//! 3. Stiffness matrix : int { mu * J^(-2/3) (\nabla \delta : \nabla \v)}
-		this->M_assembler->stiff_Jac_P1iso_NH_3term( mu, (*M_Jack), *this->M_elmatJac, this->M_FESpace->fe() );
+//		this->M_assembler->stiff_Jac_P1iso_NH_3term( mu, (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	    
 	  	//! 4. Stiffness matrix : int { -2/3 * mu * J^(-5/3) ( F : \nabla \delta ) ( CofF : \nabla \v ) }
-		this->M_assembler->stiff_Jac_P1iso_NH_4term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatJac, this->M_FESpace->fe() );
+//		this->M_assembler->stiff_Jac_P1iso_NH_4term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	    
 	  	//! 5. Stiffness matrix : int { 1/3 * mu * J^(-2) * Ic_iso * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
-		this->M_assembler->stiff_Jac_P1iso_NH_5term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatJac, this->M_FESpace->fe() );  
+//		this->M_assembler->stiff_Jac_P1iso_NH_5term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );  
 
         //! assembling
         for ( UInt ic = 0; ic < nc; ++ic )
 	{			
             	for ( UInt jc = 0; jc < nc; jc++ )
 	   	{
-                	assembleMatrix( *jacobian, *this->M_elmatJac, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof  );
+                	assembleMatrix( *jacobian, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof );
 		}
 	}
     }
@@ -402,16 +415,17 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& sol
 
      computeKinematicsVariables( dk_loc );
 
+
      //! Stiffness for non-linear terms of the Neo-Hookean model
      /*! 
      The results of the integrals are stored at each step into elvecK, until to build K matrix of the bilinear form
-     */	
- 		
+     */	 		
      //! Volumetric part
      /*! 
      Source term Pvol: int { bulk /2* (J1^2 - J1  + log(J1) ) * 1/J1 * (CofF1 : \nabla v) } 
      */
-     this->M_assembler->source_Pvol( bulk, (*M_CofFk), (*M_Jack), *this->M_elvecK,  this->M_FESpace->fe());
+     this->M_assembler->source_Pvol( bulk, (*M_CofFk), (*M_Jack), *this->M_elvecK,  this->M_FESpace->fe() );
+
      //! Isochoric part
      /*!
      Source term P1iso_NH
@@ -424,9 +438,11 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& sol
 		M_elvecK is assemble into *vec_stiff vector that is recall
 		from updateSystem(matrix_ptrtype& mat_stiff, vector_ptr_type& vec_stiff) 
         	*/
-		assembleVector( *M_stiff, *this->M_elvecK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+		assembleVector( *this->M_stiff, *this->M_elvecK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
      	}
      }
+
+	this->M_stiff->globalAssemble();
 }
 
 
@@ -454,9 +470,12 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
 			}
 		}
 	}// close loop on ig
+std::cout<<"\nDu_ij_k = "<< s <<std::endl;
+int n;
+std::cin>>n;
     
     //! loop on quadrature points
-    for ( int ig = 0;ig < this->M_FESpace->fe().nbQuadPt(); ig++ )
+    for ( int ig = 0; ig < this->M_FESpace->fe().nbQuadPt(); ig++ )
 	{
 	for ( int  icoor = 0;icoor < nDimensions; icoor++ )
 		(*M_Fk)( icoor , icoor , ig ) +=  1.0;  // deformation gradient Fk
@@ -481,13 +500,13 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
 
 	(*M_CofFk)( 0 , 0 , ig ) =   ( e*i - f*h );
 	(*M_CofFk)( 0 , 1 , ig ) = - ( d*i - g*f );
-	(*M_CofFk)( 0 , 2 , ig ) =   ( d*h - e*g);
+	(*M_CofFk)( 0 , 2 , ig ) =   ( d*h - e*g );
 	(*M_CofFk)( 1 , 0 , ig ) = - ( b*i - c*h );
 	(*M_CofFk)( 1 , 1 , ig ) =   ( a*i - c*g );
 	(*M_CofFk)( 1 , 2 , ig ) = - ( a*h - g*b );
 	(*M_CofFk)( 2 , 0 , ig ) =   ( b*f - c*e );
 	(*M_CofFk)( 2 , 1 , ig ) = - ( a*f - c*d );
-	(*M_CofFk)( 2 , 2 , ig ) =   ( a*e -d*b );
+	(*M_CofFk)( 2 , 2 , ig ) =   ( a*e - d*b );
 	}// close loop on ig
     
     for ( int ig = 0; ig <  this->M_FESpace->fe().nbQuadPt()  ;ig++ )
