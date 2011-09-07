@@ -236,35 +236,46 @@ void symmetrizedAdvection(MatrixElemental& localAdv,
     ASSERT (fieldDim == nDimensions, "Symmetrized operator works only with vectors of the same dimension as the space" );
 
 
-    for (UInt iCoor(0); iCoor<fieldDim; ++iCoor)
+    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
     {
-        for (UInt jCoor(0); jCoor<fieldDim; ++jCoor)
+        // Extract the view of the matrix
+        MatrixElemental::matrix_view localView = localAdv.block(iterFDim,iterFDim);
+
+        // Loop over the basis functions
+        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
         {
-            // Extract the view of the matrix
-            MatrixElemental::matrix_view localView = localAdv.block(iCoor,jCoor);
-
-            // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            // Build the local matrix
+            for (UInt jDof(0); jDof < nbFEDof; ++jDof)
             {
-                // Build the local matrix
-                for (UInt jDof(0); jDof < nbFEDof; ++jDof)
-                {
-                    localValue = 0.0;
+                localValue = 0.0;
 
-                    //Loop on the quadrature nodes
-                    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                //Loop on the quadrature nodes
+                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                {
+                    for (UInt iDim(0); iDim<nDimensions; ++iDim)
                     {
+                        localValue += localValues[iQuadPt][iDim]
+                                      * advCFE.dphi(jDof,iDim,iQuadPt)
+                                      * advCFE.phi(iDof,iQuadPt)
+                                      * advCFE.wDetJacobian(iQuadPt)
+                                      * 0.5;
+
+                        for (UInt jDim(0); iDim<nDimensions; ++iDim)
+                        {
                         localValue +=
-                            localGradient[iQuadPt][iCoor][jCoor]
-                            * advCFE.phi(jDof,iQuadPt)
-                            * advCFE.phi(iDof,iQuadPt)
-                            * advCFE.wDetJacobian(iQuadPt);
+                            localGradient[iQuadPt][jDim][iDim]
+                                      * advCFE.phi(jDof,iQuadPt)
+                                      * advCFE.phi(iDof,iQuadPt)
+                                      * advCFE.wDetJacobian(iQuadPt)
+                                      * 0.5;
+                        }
 
                     }
 
-                    // Add on the local matrix
-                    localView(iDof,jDof)=localValue;
                 }
+
+                // Add on the local matrix
+                localView(iDof,jDof)=localValue;
             }
         }
     }
