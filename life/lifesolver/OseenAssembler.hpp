@@ -198,11 +198,22 @@ public:
     //! Add the convective term with the given offsets
     void addConvection(matrix_type& matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp);
 
+    //! Add the convective term
+    void addSymmetricConvection(matrix_type& matrix, const vector_type& beta)
+    {
+        addSymmetricConvection(matrix,beta,0,0);
+    }
+
+    //! Add the symmetric convective term with the given offset
+    void addSymmetricConvection(matrix_type& matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp);
+
+
     //! Add an explicit convection term to the right hand side
     void addConvectionRhs(vector_type& rhs, const vector_type& velocity);
 
     void addMassRhs(vector_type& rhs, const function_type& f, const Real& t);
 
+    void addFluxTerms(vector_type& vector, BCHandler const& bcHandler);
     //@}
 
 
@@ -717,6 +728,75 @@ addConvection(matrix_type& matrix, const vector_type& beta, const UInt& offsetLe
 template< typename mesh_type, typename matrix_type, typename vector_type>
 void
 OseenAssembler<mesh_type,matrix_type,vector_type>::
+addSymmetricConvection(matrix_type& matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp)
+{
+    // Beta has to be repeated
+    if (beta.mapType() == Unique)
+    {
+        addSymmetricConvection(matrix,vector_type(beta,Repeated),offsetLeft,offsetUp);
+        return;
+    }
+
+    ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the convection.");
+    ASSERT(M_betaFESpace != 0, "No convective FE space for assembling the convection.");
+    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalCols(),
+           "The matrix is too small (columns) for the assembly of the convection");
+    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalRows(),
+           " The matrix is too small (rows) for the assembly of the convection");
+
+    // Some constants
+    const UInt nbElements(M_uFESpace->mesh()->numElements());
+    const UInt fieldDim(M_uFESpace->fieldDim());
+    const UInt nbUTotalDof(M_uFESpace->dof().numTotalDof());
+    const UInt nbQuadPt(M_convectionUCFE->nbQuadPt());
+
+    std::vector< std::vector< Real > > localBetaValue(nbQuadPt,std::vector<Real>(nDimensions,0.0));
+    std::vector< std::vector< std::vector< Real > > >
+        localBetaGradient(nbQuadPt,std::vector<std::vector<Real> > (nDimensions, std::vector<Real>(nDimensions,0.0)));
+
+    // Loop over the elements
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+    {
+        // Update the diffusion current FE
+        M_convectionUCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_PHI |UPDATE_DPHI | UPDATE_WDET );
+        M_convectionBetaCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_PHI | UPDATE_DPHI );
+
+        // Clean the local matrix
+        M_localConvection->zero();
+
+        // Interpolate
+        AssemblyElemental::interpolate(localBetaValue,*M_convectionBetaCFE,nDimensions,M_betaFESpace->dof(),iterElement,beta);
+        // Interpolate
+        AssemblyElemental::interpolateGradient(localBetaGradient,*M_convectionBetaCFE,nDimensions,M_betaFESpace->dof(),iterElement,beta);
+
+        // Local convection
+        // AssemblyElemental::advection(*M_localConvection,*M_convectionUCFE,localBetaValue,fieldDim);
+
+        // Local convection, 1/2 \beta \grad u v + 1/2 u\grad \beta v
+        AssemblyElemental::symmetrizedAdvection(*M_localConvection, *M_convectionUCFE, localBetaValue, localBetaGradient, fieldDim);
+
+        // Assembly
+        for (UInt iFieldDim(0); iFieldDim<nDimensions; ++iFieldDim)
+        {
+            // Assembly
+            for (UInt jFieldDim(0); jFieldDim<nDimensions; ++jFieldDim)
+            {
+                assembleMatrix( matrix,
+                                *M_localConvection,
+                                *M_convectionUCFE,
+                                *M_convectionUCFE,
+                                M_uFESpace->dof(),
+                                M_uFESpace->dof(),
+                                iFieldDim, jFieldDim,
+                                iFieldDim*nbUTotalDof + offsetUp, jFieldDim*nbUTotalDof + offsetLeft);
+            }
+        }
+    }
+}
+
+template< typename mesh_type, typename matrix_type, typename vector_type>
+void
+OseenAssembler<mesh_type,matrix_type,vector_type>::
 addConvectionRhs(vector_type& rhs, const vector_type& velocity)
 {
     // velocity has to be repeated!
@@ -941,6 +1021,69 @@ addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
     }
 
 }
+
+template< typename mesh_type, typename matrix_type, typename vector_type>
+void
+OseenAssembler<mesh_type,matrix_type,vector_type>::
+addFluxTerms( vector_type&     vector,
+	      BCHandler const& bcHandler)
+{
+
+    for ( ID hCounter = 0; hCounter < bcHandler.size(); ++hCounter )
+    {
+      assert( bcHandler[ hCounter ].type()  == Flux );
+
+      const BCBase&    boundaryCond(bcHandler[ hCounter ]);
+
+      // Number of local DOF in this face
+      UInt nDofF = M_uFESpace->feBd().nbNode();
+
+      // Number of total scalar Dof
+      UInt totalDof = M_uFESpace->dof().numTotalDof();
+
+      // Number of components involved in this boundary condition
+      UInt nComp = boundaryCond.numberOfComponents();
+
+      Real sum;
+
+      const BCIdentifierNatural* pId;
+      ID ibF, idDof;
+
+      if ( !boundaryCond.isDataAVector() )
+      {
+          for ( ID i = 0; i < boundaryCond.list_size(); ++i )
+          {
+              pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
+
+              // Number of the current boundary face
+              ibF = pId->id();
+              // Updating face stuff
+              M_uFESpace->feBd().updateMeasNormalQuadPt( M_uFESpace->mesh()->bElement( ibF ) );
+
+              for ( ID idofF = 0; idofF < nDofF; ++idofF )
+              {
+                  for ( int ic = 0; ic < (int)nComp; ++ic)
+                  {
+                      idDof = pId->boundaryLocalToGlobalMap( idofF ) + ic * totalDof;
+
+                      sum = 0.;
+                      for ( int iq = 0; iq < (int)M_uFESpace->feBd().nbQuadPt(); ++iq )
+                      {
+                          sum += M_uFESpace->feBd().phi( int( idofF ), iq )*
+                              M_uFESpace->feBd().normal(ic , iq)*
+                              M_uFESpace->feBd().weightMeas(iq);
+                      }
+
+                      vector.sumIntoGlobalValues(idDof, sum);
+                  }
+              }
+          }
+      }
+
+    }
+    vector.globalAssemble();
+} // bcFluxManageMatrix
+
 
 
 
