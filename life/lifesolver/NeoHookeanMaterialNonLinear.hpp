@@ -336,23 +336,23 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 		this->M_assembler->stiff_Jac_Pvol_1term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	
 		//! 2. Stiffness matrix: int { 1/2 * bulk * ( 1/J- 1 - log(J)/J^2 ) * ( CofF [\nabla \delta]^t CofF ) : \nabla v }
-//		this->M_assembler->stiff_Jac_Pvol_2term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );  		
+		this->M_assembler->stiff_Jac_Pvol_2term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );  		
 	    
 	    	//! ISOCHORIC PART
 	    	//! 1. Stiffness matrix : int { -2/3 * mu * J^(-5/3) *( CofF : \nabla \delta ) ( F : \nabla \v ) }
-//		this->M_assembler->stiff_Jac_P1iso_NH_1term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+		this->M_assembler->stiff_Jac_P1iso_NH_1term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	    
 	   	//! 2. Stiffness matrix : int { 2/9 * mu * ( Ic_iso / J^2 )( CofF : \nabla \delta ) ( CofF : \nabla \v ) }
-//		this->M_assembler->stiff_Jac_P1iso_NH_2term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+		this->M_assembler->stiff_Jac_P1iso_NH_2term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 	    
 	   	//! 3. Stiffness matrix : int { mu * J^(-2/3) (\nabla \delta : \nabla \v)}
-//		this->M_assembler->stiff_Jac_P1iso_NH_3term( mu, (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+		this->M_assembler->stiff_Jac_P1iso_NH_3term( mu, (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	    
 	  	//! 4. Stiffness matrix : int { -2/3 * mu * J^(-5/3) ( F : \nabla \delta ) ( CofF : \nabla \v ) }
-//		this->M_assembler->stiff_Jac_P1iso_NH_4term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+		this->M_assembler->stiff_Jac_P1iso_NH_4term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	    
 	  	//! 5. Stiffness matrix : int { 1/3 * mu * J^(-2) * Ic_iso * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
-//		this->M_assembler->stiff_Jac_P1iso_NH_5term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );  
+		this->M_assembler->stiff_Jac_P1iso_NH_5term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );  
 
         //! assembling
         for ( UInt ic = 0; ic < nc; ++ic )
@@ -451,7 +451,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
 {
 
     Real s;
-    
+
     //! loop on quadrature points
     for ( int ig = 0; ig < this->M_FESpace->fe().nbQuadPt(); ig++ )
 	{
@@ -470,10 +470,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
 			}
 		}
 	}// close loop on ig
-std::cout<<"\nDu_ij_k = "<< s <<std::endl;
-int n;
-std::cin>>n;
-    
+
     //! loop on quadrature points
     for ( int ig = 0; ig < this->M_FESpace->fe().nbQuadPt(); ig++ )
 	{
@@ -509,6 +506,16 @@ std::cin>>n;
 	(*M_CofFk)( 2 , 2 , ig ) =   ( a*e - d*b );
 	}// close loop on ig
     
+    std::cout<<"\n a ="<< a;
+    std::cout<<"\n b = "<< b;
+    std::cout<<"\n c = "<< c;
+    std::cout<<"\n d = "<< d;
+    std::cout<<"\n e = "<< e;
+    std::cout<<"\n f = "<< f;
+    std::cout<<"\n g = "<< g;
+    std::cout<<"\n h = "<< h;
+    std::cout<<"\n i = "<< i;
+
     for ( int ig = 0; ig <  this->M_FESpace->fe().nbQuadPt()  ;ig++ )
 	{
 	if ((*M_Jack)(ig) < 0)
@@ -532,6 +539,7 @@ std::cin>>n;
 		}
 	(*M_trCk)( ig ) = s; // trace of C
 	}// close loop on ig
+    std::cout<<"\n trC = "<<s;
     
     for ( int ig = 0; ig <  this->M_FESpace->fe().nbQuadPt(); ig++ )
 		(*M_trCisok)( ig ) =  pow((*M_Jack)( ig ), -2./3.) * (*M_trCk)( ig ); //  trace of deviatoric C

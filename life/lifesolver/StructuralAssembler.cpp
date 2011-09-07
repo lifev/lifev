@@ -489,10 +489,9 @@ void StructuralAssembler::stiff_gradgradTr_gradbis( Real coef, const VectorEleme
         }
     }
 }
-
 // End of methods for the stiffness matrix (St. Venant-Kirchhoff material)
-//! Methods for the jacobian
 
+//! Methods for the jacobian
 void StructuralAssembler::stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
@@ -664,7 +663,7 @@ void StructuralAssembler::stiff_dergrad_gradbis_2( Real coef, const VectorElemen
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; // \grad u^k at a quadrature point
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -869,39 +868,48 @@ void StructuralAssembler::stiff_gradgradTr_gradbis_3( Real coef, const VectorEle
 }
 // End of St. Venant Kirchhoff model
 
-//! Methods for NeoHookean model
-void StructuralAssembler::source_Pvol( Real			coef, 
-				       const	KNMK<Real> 	CofFk, 
-				       const	KN<Real> 	Jk, 
-				       VectorElemental&		elvec, 
+
+
+
+
+//! ***********************************************************************************************
+//! METHODS FOR NEO-HOOKEAN MATERIAL
+//! ***********************************************************************************************
+
+//! STIFFFNESS VECTOR -----------------------------------------------------------------------------
+//! Volumetric part--------------------------------------------------------------------------------
+void StructuralAssembler::source_Pvol( Real		coef, 
+				       const KNMK<Real> CofFk, 
+				       const KN<Real> 	Jk, 
+				       VectorElemental&	elvec, 
 				       const CurrentFE&	fe )
 {
   double s;
-  // ASSERT_PRE( fe.hasFirstDeriv(),
-  //	"source_stress needs at least the velocity shape functions first derivatives" );
 
-  for ( int icoor = 0; icoor < nDimensions; ++icoor )
-    {
-      // block (icoor) of elvec
-      VectorElemental::vector_view vec =  elvec.block( icoor ); 
-      for ( int i = 0; i < fe.nbFEDof(); ++i )
+  for( int icoor = 0; icoor < nDimensions; ++icoor )
+  {
+  	// block (icoor) of elvec
+  	VectorElemental::vector_view vec =  elvec.block( icoor ); 
+  	for ( int i = 0; i < fe.nbFEDof(); ++i )
 	{
-	  s = 0.0;
-	  for ( int k = 0; k < nDimensions; ++k )
-	    {
-	      for ( int ig = 0; ig < fe.nbQuadPt(); ++ig )
-		{
-		  s += ( pow( Jk(ig),2 ) - Jk(ig) + log( Jk(ig) ) )*pow( Jk(ig),-1)*
-		    CofFk(icoor, k, ig)*fe.phiDer(i, k, ig)*fe.weightDet(ig);  
-		  //s +=( Jk( ig ) - 1.  + pow( Jk( ig ), -1 )  *log( Jk( ig ) )  ) * 
-		  //CofFk( icoor, k, ig ) * fe.phiDer( i, k, ig )  * fe.weightDet( ig );
-		}
-	    }
-	  vec(i) += coef/2.0 * s;
+	  	s = 0.0;
+	  	for ( int k = 0; k < nDimensions; ++k )
+	    	{
+	      		for ( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+			{
+		  	s += ( pow( Jk(ig),2 ) - Jk(ig) + log( Jk(ig) ) )*pow( Jk(ig),-1)*
+		    	CofFk(icoor, k, ig)*fe.phiDer(i, k, ig)*fe.weightDet(ig);  
+		  	//s +=( Jk( ig ) - 1.  + pow( Jk( ig ), -1 )  *log( Jk( ig ) )  ) * 
+		  	//CofFk( icoor, k, ig ) * fe.phiDer( i, k, ig )  * fe.weightDet( ig );
+			}
+	    	}
+	vec(i) += coef/2.0 * s;
 	}
-    }
+  }
 }
 
+
+//! Isochoric part --------------------------------------------------------------------------------
 void StructuralAssembler::source_P1iso_NH(Real coef, 
 					  const KNMK<Real> CofFk, 
 					  const KNMK<Real> Fk,
@@ -941,7 +949,12 @@ void StructuralAssembler::source_P1iso_NH(Real coef,
       }
     }  
 }
+//! -----------------------------------------------------------------------------------------------
 
+
+
+//! JACOBIAN MATRIX -------------------------------------------------------------------------------
+//! Volumetric part--------------------------------------------------------------------------------
 void StructuralAssembler::stiff_Jac_Pvol_1term( Real 	 	 coef, 
 						const KNMK<Real> CofFk, 
 						const KN<Real> 	 Jk, 
@@ -1025,6 +1038,8 @@ void StructuralAssembler::stiff_Jac_Pvol_2term( Real 		  coef,
     }
 }
 
+
+//! Isochoric part --------------------------------------------------------------------------------
 void StructuralAssembler::stiff_Jac_P1iso_NH_1term( Real coef, 
 						    const KNMK<Real> CofFk, 
 						    const KNMK<Real> Fk,
@@ -1227,7 +1242,9 @@ void StructuralAssembler::stiff_Jac_P1iso_NH_5term( Real coef,
 	}
     }
 }
-// End of Neohookean model
+//! ***********************************************************************************************
+//! END OF NEO-HOOKEAN MATERIAL
+//! ***********************************************************************************************
 
 }
 #endif /* _STRUCTURALASSEMBLER_CPP_ */
