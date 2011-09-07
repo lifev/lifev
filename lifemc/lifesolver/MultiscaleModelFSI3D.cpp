@@ -37,8 +37,11 @@
 
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
 
+double bcFunctionZero( const double& /*t*/, const double& /*x*/, const double& /*y*/, const double& /*z*/, const unsigned int& /*id*/ ) { return 0.; }
+
 namespace LifeV
 {
+
 namespace Multiscale
 {
 
@@ -375,6 +378,25 @@ MultiscaleModelFSI3D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const fun
     base.setFunction( function );
 
     M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Flux, Full, base, 3 );
+}
+
+void
+MultiscaleModelFSI3D::imposeBoundaryFlowRateAsValve( const bcFlag_Type& flag, const function_Type& function, const bool& valveIsOpen )
+{
+    BCFunctionBase base;
+
+    if (valveIsOpen)
+    {
+        // Impose as flux condition
+        base.setFunction( function );
+        M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Flux, Full, base, 3 );
+    }
+    else
+    {
+        // Impose as homogeneous Dirichlet (workaround for some valve-related issues)
+        base.setFunction( bcFunctionZero );
+        M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Essential, Full, base, 3 );
+    }
 }
 
 void

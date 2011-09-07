@@ -357,6 +357,13 @@ MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const functi
 }
 
 void
+MultiscaleModel1D::imposeBoundaryFlowRateAsValve( const bcFlag_Type& flag, const function_Type& function, const bool& /*valveIsOpen*/ )
+{
+    // Flow rate from valve imposed as usual in the 1D case
+    imposeBoundaryFlowRate( flag, function );
+}
+
+void
 MultiscaleModel1D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
 {
     OneDimensionalFunction base;

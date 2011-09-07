@@ -42,6 +42,7 @@
 #include <lifemc/lifesolver/MultiscaleAlgorithmNewton.hpp>
 
 #include <lifemc/lifesolver/MultiscaleCouplingBoundaryCondition.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingFlowProfile.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingFlowRateValve.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingFlowRateStress.hpp>
