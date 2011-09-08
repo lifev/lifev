@@ -338,6 +338,12 @@ private:
       M_meshPartitions.
     */
     void constructFaces();
+    //! Mark ghost entities
+    /*!
+      mark all elements and points that are connected to SUBDOMAIN_INTERFACE flagged points
+      as GHOST_ENTITY
+    */
+    void markGhostEntities();
     //! Final setup of local mesh
     /*!
       Updates the partitioned mesh object data members after adding the mesh
@@ -608,6 +614,11 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // faces construction
     // ******************
     constructFaces();
+
+    // ******************
+    // mark ghost entities
+    // ******************
+    markGhostEntities();
 
     // ******************
     // final setup
@@ -1484,6 +1495,39 @@ void MeshPartitioner<MeshType>::constructFaces()
 //        fout << std::endl;
 //    }
 //    ASSERT ( 0, "DEBUG abort" );
+}
+
+template<typename MeshType>
+void MeshPartitioner<MeshType>::markGhostEntities()
+{
+    for (UInt i = 0; i < M_numPartitions; ++i)
+    {
+        // loop on all elements to find which one has a point on the subdomain interface
+        for ( UInt kVol = 0; kVol < (*M_meshPartitions)[i]->volumeList.size(); kVol++ )
+        {
+            typename mesh_Type::VolumeType & volume = (*M_meshPartitions)[i]->volumeList[ kVol ];
+            bool connectedToSubdomainInterface ( false );
+            // check if this volume is connected to a point on SUBDOMAIN_INTERFACE
+            for ( UInt jPoint = 0; jPoint < MeshType::VolumeType::S_numLocalPoints; jPoint++ )
+            {
+                if ( Flag::testOneSet( volume.point ( jPoint ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
+                {
+                    connectedToSubdomainInterface = true; break;
+                }
+            }
+
+            // flag all points (not flagged as SUBDOMAIN_INTERFACE) and the volume as GHOST_ENTITY
+            if ( connectedToSubdomainInterface )
+            {
+                volume.setFlag ( EntityFlags::GHOST_ENTITY );
+                for ( UInt jPoint = 0; jPoint < MeshType::VolumeType::S_numLocalPoints; jPoint++ )
+                {
+                    if ( !Flag::testOneSet( volume.point ( jPoint ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
+                        (*M_meshPartitions)[i]->point( volume.point ( jPoint ).localId() ).setFlag ( EntityFlags::GHOST_ENTITY );
+                }
+            }
+        }
+    }
 }
 
 template<typename MeshType>
