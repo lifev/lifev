@@ -54,6 +54,27 @@ const flag_Type SUBDOMAIN_INTERFACE ( 0x04 );
 const flag_Type OVERLAP             ( 0x08 );
 const flag_Type CUTTED              ( 0x10 );
 const flag_Type VERTEX              ( 0x20 );
+const flag_Type GHOST_ENTITY        ( 0x40 );
+// @note remember to update ALL value in order to encompass all flags
+const flag_Type ALL                 ( 0x7F );
+
+const UInt number                   (    7 );
+
+static std::string name( const flag_Type & flag )
+{
+    switch( flag )
+    {
+        case PHYSICAL_BOUNDARY: return "PHYSICAL_BOUNDARY";
+        case INTERNAL_INTERFACE: return "INTERNAL_INTERFACE";
+        case SUBDOMAIN_INTERFACE: return "SUBDOMAIN_INTERFACE";
+        case OVERLAP: return "OVERLAP";
+        case CUTTED: return "CUTTED";
+        case VERTEX: return "VERTEX";
+        case GHOST_ENTITY: return "GHOST_ENTITY";
+        default: return "FLAG_NOT_FOUND";
+        return "NONE";
+    }
+}
 }
 
 //! This is the base class to store the identifiers.
