@@ -904,6 +904,8 @@ void StructuralAssembler::source_Pvol( Real		coef,
 			}
 	    	}
 	vec(i) += coef/2.0 * s;
+//	std::cout<<"COEF = "<<coef<<std::endl;
+//        std::cout<<"S =    "<<s<<std::endl;
 	}
   }
 }
@@ -983,14 +985,16 @@ void StructuralAssembler::stiff_Jac_Pvol_1term( Real 	 	 coef,
 			{		
 			  for ( int ig = 0;ig < fe.nbQuadPt(); ++ig )
 			    {
-			      s += ( 2.0 -   pow(Jk(ig), -1.) + pow(Jk(ig), -2.)  ) *
+				s += ( 2.0 -   pow(Jk(ig), -1.) + pow(Jk(ig), -2.)  ) *
 				CofFk( jcoor , l , ig ) * fe.phiDer( j, l, ig ) *  
 				CofFk( icoor , k , ig ) * fe.phiDer( i, k, ig ) * 
 				fe.weightDet( ig );
 			    }
 			}
 		    }
-		  mat( i, j ) += s * coef/2.0 ;
+		  mat( i, j ) += s * coef/2.0;
+//                  std::cout<<"COEF = "<<coef<<std::endl;
+//                  std::cout<<"S =    "<<s<<std::endl;
 		}
 	    }
 	}
@@ -1025,13 +1029,15 @@ void StructuralAssembler::stiff_Jac_Pvol_2term( Real 		  coef,
 			{
 			  for ( int ig = 0;ig < fe.nbQuadPt(); ++ig )
 			    {
-			      s +=(  pow(Jk(ig), -1.)   - 1.  - pow(Jk(ig), -2) * log( Jk(ig) )   )*
-				CofFk( icoor , l , ig ) * fe.phiDer( j, l, ig ) * 
-				CofFk( jcoor , k , ig ) * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
+			      s +=( pow( Jk(ig), -1.)   - 1.  - pow( Jk(ig), -2 ) * log( Jk(ig) ) )*
+				CofFk( icoor, l, ig ) * fe.phiDer( j, l, ig ) * 
+				CofFk( jcoor, k, ig ) * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
 			    }
 			}
 		    }
-		  mat( i, j ) += s * coef /2.0 ;
+		  mat( i, j ) += s * coef /2.0;
+//		  std::cout<<"COEF = "<<coef<<std::endl;
+//        	  std::cout<<"S =    "<<s<<std::endl;
 		}
 	    }
 	}
@@ -1077,6 +1083,8 @@ void StructuralAssembler::stiff_Jac_P1iso_NH_1term( Real coef,
 			}
 		    }
 		  mat( i, j ) += -2.0/3.0 * coef * s;
+//                std::cout<<"COEF = "<<coef<<std::endl;
+//                  std::cout<<"S =    "<<s<<std::endl;
 		}
 	    }
 	}
@@ -1119,6 +1127,8 @@ void StructuralAssembler::stiff_Jac_P1iso_NH_2term( Real coef,
 			}
 		    }
 		  mat( i, j ) += 2./9. * coef * s;
+//                  std::cout<<"COEF = "<<coef<<std::endl;
+//                  std::cout<<"S =    "<<s<<std::endl;
 		}
 	    }
 	}
@@ -1150,6 +1160,8 @@ void StructuralAssembler::stiff_Jac_P1iso_NH_3term( Real coef,
 		  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
 	    }
 	  mat_tmp( i, j ) = coef * s;
+//                std::cout<<"COEF = "<<coef<<std::endl;
+//                 std::cout<<"S =    "<<s<<std::endl;
 	}
     }
     
@@ -1194,6 +1206,8 @@ void StructuralAssembler::stiff_Jac_P1iso_NH_4term( Real coef,
 			}
 		    }
 		  mat( i, j ) += - 2./3. * coef * s;
+//                  std::cout<<"COEF = "<<coef<<std::endl;
+//                  std::cout<<"S =    "<<s<<std::endl;
 		}
 	    }
 	}
@@ -1236,7 +1250,9 @@ void StructuralAssembler::stiff_Jac_P1iso_NH_5term( Real coef,
 			    }
 			}
 		    }
-		  mat( i, j ) +=  1./3. * s * coef ;
+		  mat( i, j ) +=  1./3. * s * coef;
+//                  std::cout<<"COEF = "<<coef<<std::endl;
+//                  std::cout<<"S =    "<<s<<std::endl;
 		}
 	    }
 	}

@@ -500,10 +500,18 @@ protected:
 
   //! Matrix Temp: Temporary matrix to compute residuals or rhs
   matrixPtr_Type                       M_tempMatrix;
+
+  //! Matrix Temp: Temporary auxiliary matrix to compute residuals or rhs
+  matrixPtr_Type                       M_tempMatrixWithoutZeta;
+
   //! Jacobian Matrix: Matrix to store the jacobian of the newton method
   matrixPtr_Type                       M_jacobian;
+
   //! Stiffness vector for NH and Exp. It is used to compute residuals or rhs 
   vectorPtr_Type                       M_tempVect;
+
+  //! Stiffness auxiliary vector for NH and Exp. It is used to compute residuals or rhs 
+  vectorPtr_Type                       M_tempVectWithoutZeta;
 
   //! level of recursion for Aztec (has a sens with FSI coupling)
   UInt                                 M_recur;
@@ -546,12 +554,14 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
   M_szz                        (/*M_localMap*/),//useless
   M_out_iter                   ( "out_iter_solid" ),
   M_out_res                    ( "out_res_solid" ),
-  M_BCh                        (),
+  M_BCh                        ( ),
   M_localMap                   ( ),
   M_mass                       ( ),
   M_tempMatrix                 ( ),
+  M_tempMatrixWithoutZeta      ( ),
   M_jacobian                   ( ),
   M_tempVect                   ( ),
+  M_tempVectWithoutZeta        ( ),
   M_recur                      ( ),
   M_source                     ( ),
   M_offset                     ( 0 ),
@@ -611,13 +621,14 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
   M_mass.reset                      ( new matrix_Type(*M_localMap) );
   M_tempMatrix.reset                ( new matrix_Type(*M_localMap) );
+  M_tempMatrixWithoutZeta.reset     ( new matrix_Type(*M_localMap) );
   M_jacobian.reset                  ( new matrix_Type(*M_localMap) );
 
   //Vector of Stiffness for NH and Exp
   //This vector stores the stiffness vector both in
   //updateSystem and in evalresidual. That's why it is called tempVect
   M_tempVect.reset                  (new vector_Type(*M_localMap));
-
+  M_tempVectWithoutZeta.reset       (new vector_Type(*M_localMap));
   M_offset                          = offset;
 
   //M_theta                           = 2.0 * M_data->dataTime()->theta();
@@ -642,7 +653,6 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff
     chrono.start();
 
     //Compute the new Stiffness Matrix
-    //M_material->computeMatrix(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
     M_material->computeStiffness(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
 
     if ( this->M_data->solidType() == "linearVenantKirchhoff" || this->M_data->solidType() == "nonlinearVenantKirchhoff" )
@@ -655,7 +665,6 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff
       {
 	vec_stiff.reset(new vector_Type(*this->M_localMap));
 	*vec_stiff += *this->M_material->stiffVector();
-std::cout<<"\n STIFF VECTOR = "<<vec_stiff->norm2()<<std::endl;
 	vec_stiff->globalAssemble();
       }
     
@@ -720,44 +729,54 @@ template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::computeRHSNoBC( void )
 {
   
+    Real coef;
+    coef= ( 1.0 - M_zeta );
+
     Real DeltaT    = this->M_data->dataTime()->timeStep();
     vector_Type z  = *this->M_disp;
 
     z             +=  DeltaT * (*this->M_vel);
-
-    Real coef;
-    coef= ( 1.0 - M_zeta );
 
     *this->M_rhsNoBC += *this->M_mass * z;
 
     //Are the multiplication optimized in Trilinos? Right I do as if
     //they are not!
     if ( this->M_data->solidType() == "linearVenantKirchhoff" || this->M_data->solidType() == "nonlinearVenantKirchhoff" )
-      *this->M_rhsNoBC -= (*this->M_tempMatrix) * coef * (*this->M_disp);
+	{
+      	*this->M_rhsNoBC -= (*this->M_tempMatrix) * coef * (*this->M_disp);
+	std::cout<<"\nMAT_stiff in UPSYSTEM";
+	std::cout<<"\nrhsNoBC = "<<this->M_rhsNoBC->normInf()<<std::endl;
+	}
     else
-      *this->M_rhsNoBC -= coef * (*this->M_tempVect);
+	{
+      	*this->M_rhsNoBC -= (*this->M_tempVect)*coef;
+	std::cout<<"\nVEC_stiff in UPSYSTEM";
+	std::cout<<"\nrhsNoBC = "<<this->M_rhsNoBC->normInf()<<std::endl;
+	}
 
-    // acceleration rhs
+    //! Acceleration right-hand side
     *M_rhsA = (2.0 / ( M_zeta * pow(DeltaT,2) )) * z + ((1.0 - M_zeta ) / ( M_zeta )) * (*M_acc);
+    std::cout<<"\nrhsA = "<<this->M_rhsA->normInf()<<std::endl;
 
-    // velocity rhs
+    //! Velocity right-hand side
     *this->M_rhsW = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
+    std::cout<<"\nrhsW = "<<this->M_rhsW->normInf()<<std::endl;
 
     std::cout << std::endl;
 
     std::cout << "rhsNoBC norm    = " << this->M_rhsNoBC->norm2() << std::endl;
-    std::cout << "rhsA    norm    = " << this->M_rhsA->norm2() << std::endl;
-    std::cout << "rhsW    norm    = " << this->M_rhsW->norm2() << std::endl;
-    std::cout << "   W    norm    = " << this->M_vel->norm2() << std::endl;
+    std::cout << "rhsA    norm    = " << this->M_rhsA->norm2()    << std::endl;
+    std::cout << "rhsW    norm    = " << this->M_rhsW->norm2()    << std::endl;
+    std::cout << "   W    norm    = " << this->M_vel->norm2() 	  << std::endl;
 
-    std::cout << "\n   ZETA         = " << this->M_zeta  << std::endl;
-    std::cout << "   THETA          = " << this->M_theta << std::endl;
-    std::cout << "   YOUNG          = " << this->M_data->young() << std::endl;
+    std::cout << "\n   ZETA         = " << this->M_zeta  	   << std::endl;
+    std::cout << "   THETA          = " << this->M_theta 	   << std::endl;
+    std::cout << "   YOUNG          = " << this->M_data->young()   << std::endl;
     std::cout << "   POISSON        = " << this->M_data->poisson() << std::endl;
-    std::cout << "   DENSITY        = " << this->M_data->rho() << std::endl;
-    std::cout << "   BULK MODULUS   = " << this->M_data->bulk() << std::endl;
-    std::cout << "   ALPHA          = " << this->M_data->alpha() << std::endl;
-    std::cout << "   GAMMA          = " << this->M_data->gamma() << std::endl;
+    std::cout << "   DENSITY        = " << this->M_data->rho()     << std::endl;
+    std::cout << "   BULK MODULUS   = " << this->M_data->bulk()    << std::endl;
+    std::cout << "   ALPHA          = " << this->M_data->alpha()   << std::endl;
+    std::cout << "   GAMMA          = " << this->M_data->gamma()   << std::endl;
 }
 
 
@@ -891,7 +910,7 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 
   // Use of the complete Jacobian
   *matrFull += *this->M_jacobian; 
-  *matrFull *= M_zeta;
+  //*matrFull *= M_zeta;
   *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
  
   this->M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
@@ -953,25 +972,38 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol, 
     if ( this->M_data->solidType() == "linearVenantKirchhoff" || this->M_data->solidType() == "nonlinearVenantKirchhoff" )
       {
 	M_tempMatrix.reset(new matrix_Type(*this->M_localMap));
-	*M_tempMatrix +=*this->M_material->stiffMatrix();
-	*M_tempMatrix *= M_zeta;
+
+	M_tempMatrixWithoutZeta.reset(new matrix_Type(*this->M_localMap));	
+	*M_tempMatrixWithoutZeta +=*this->M_material->stiffMatrix();
+	M_tempMatrixWithoutZeta->globalAssemble();
+
+	*M_tempMatrixWithoutZeta *= M_zeta;
+
+	//*M_tempMatrix *= M_zeta;
+	*M_tempMatrix += *M_tempMatrixWithoutZeta;	
 	*M_tempMatrix += *this->M_mass;
 	M_tempMatrix->globalAssemble();
       }
     else
       {
 	M_tempVect.reset(new vector_Type(*this->M_localMap));
-std::cout<<"\n Stiff vector 1 = "<<M_tempVect->normInf()<<std::endl; 
-	*M_tempVect  +=*this->M_material->stiffVector();
-std::cout<<"\n Stiff vector 2 = "<<M_tempVect->normInf()<<std::endl; 
-	*M_tempVect *= M_zeta;
-std::cout<<"\n Stiff vector 3 = "<<M_tempVect->normInf()<<std::endl; 
+
+	M_tempVectWithoutZeta.reset(new vector_Type(*this->M_localMap));	
+	*M_tempVectWithoutZeta +=*this->M_material->stiffVector();
+	M_tempVectWithoutZeta->globalAssemble();
+
+	*M_tempVectWithoutZeta *= M_zeta;
+
+	//*M_tempVect *= M_zeta;
+	*M_tempVect  += *M_tempVectWithoutZeta;
+	std::cout<< "\nVEC_stiff pre global = "<<M_tempVect->normInf()<<std::endl;
+
 	M_tempVect->globalAssemble();
+	std::cout<< "\nVEC_stiff post global = "<<M_tempVect->normInf()<<std::endl;
       }
 
     chrono.stop();
     this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
-
 }
 
 
@@ -1066,7 +1098,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Ty
   //This is consisten with the previous first approximation in iterateLin
   this->M_tempMatrix.reset (new matrix_Type(*this->M_localMap));
   *this->M_tempMatrix += *this->M_material->jacobian();
-  *this->M_tempMatrix *= M_zeta;
+  //*this->M_tempMatrix *= M_zeta;
   *this->M_tempMatrix += *this->M_mass;
   this->M_tempMatrix->globalAssemble();
 
@@ -1308,6 +1340,15 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
     LifeChrono chrono;
     chrono.start();
 
+    std::cout << "\n   ZETA         = " << this->M_zeta  << std::endl;
+    std::cout << "   THETA          = " << this->M_theta << std::endl;
+    std::cout << "   YOUNG          = " << this->M_data->young() << std::endl;
+    std::cout << "   POISSON        = " << this->M_data->poisson() << std::endl;
+    std::cout << "   DENSITY        = " << this->M_data->rho() << std::endl;
+    std::cout << "   BULK MODULUS   = " << this->M_data->bulk() << std::endl;
+    std::cout << "   ALPHA          = " << this->M_data->alpha() << std::endl;
+    std::cout << "   GAMMA          = " << this->M_data->gamma() << std::endl;
+
     M_material->updateJacobianMatrix(sol, this->M_data, this->M_Displayer);
 
     M_jacobian.reset(new matrix_Type(*this->M_localMap));
@@ -1318,9 +1359,10 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
     jacobian.reset(new matrix_Type(*this->M_localMap));
     *jacobian += *this->M_material->jacobian();
 
-    *jacobian *= M_zeta;
+    //*jacobian *= M_zeta;
     *jacobian += *this->M_mass;
     jacobian->globalAssemble();
+
 std::string stringaP="M_jacobianSSPaolo";
 this->M_jacobian->spy(stringaP);
 

@@ -31,6 +31,8 @@ poisson   	= 0.45
 bulk		= 1.e+9
 alpha 		= 3e+6
 gamma		= 0.7
+#material_flag           = 1
+
 
 solidType 	= neoHookean
 

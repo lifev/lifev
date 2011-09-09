@@ -137,9 +137,9 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
         M_young[1]   = dataFile( ( section + "/physics/young"   ).data(), 0. );
         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
 
-        M_bulk[1] = dataFile( ( section + "/physics/bulk" ).data(), 0. );
-        M_alpha[1] = dataFile( ( section + "/physics/alpha" ).data(), 0. );
-        M_gamma[1] = dataFile( ( section + "/physics/gamma" ).data(), 0. );
+        M_bulk[1] = dataFile( ( section + "/physics/bulk"   ).data(), 1e9 );
+        M_alpha[1] = dataFile( ( section + "/physics/alpha" ).data(), 3e6 );
+        M_gamma[1] = dataFile( ( section + "/physics/gamma" ).data(), 0.8 );
     }
     else
     {
@@ -152,13 +152,13 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
         UInt material(0);
         for ( UInt i(0) ; i < materialsNumber ; ++i )
         {
-            material            = dataFile( ( section + "/physics/material_flag" ).data(), 0, i );
+            material            = dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
             M_young[material]   = dataFile( ( section + "/physics/young"         ).data(), 0., i );
             M_poisson[material] = dataFile( ( section + "/physics/poisson"       ).data(), 0., i );
 
-            M_bulk[material] = dataFile( ( section + "/physics/bulk"       ).data(), 0., i );
-            M_alpha[material] = dataFile( ( section + "/physics/alpha"       ).data(), 0., i );
-            M_gamma[material] = dataFile( ( section + "/physics/gamma"       ).data(), 0., i );
+            M_bulk[material] = dataFile( ( section + "/physics/bulk"         ).data(), 1e9, i );
+            M_alpha[material] = dataFile( ( section + "/physics/alpha"       ).data(), 3e6, i );
+            M_gamma[material] = dataFile( ( section + "/physics/gamma"       ).data(), 0.8, i );
         }
     }
 
@@ -224,7 +224,7 @@ VenantKirchhoffElasticData::poisson( const UInt& material ) const
         IT = M_poisson.find( 1 );
 
     if ( IT != M_poisson.end() )
-        return M_poisson.find( material )->second;
+        return IT->second;
     else
     {
         std::cout << " !!! Warning: the Poisson modulus has not been set !!!" << std::endl;
