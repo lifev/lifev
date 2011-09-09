@@ -312,7 +312,7 @@ public:
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->dataTime()->updateTime(), ++iter)
         {
             LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
-            if ( valveIsOpen)
+            if ( false && valveIsOpen)
             {
                 if ( iter == 3 /*flux < -100*/)
                 {

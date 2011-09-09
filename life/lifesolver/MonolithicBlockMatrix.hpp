@@ -296,11 +296,18 @@ public:
      */
     void addToGlobalMatrix( const matrixPtr_Type& Mat)
     {
-        matrixPtr_Type tmp(new matrix_Type(M_globalMatrix->map()));
-        *tmp += *M_globalMatrix;
-        *tmp += *Mat;
-        tmp->globalAssemble();
-        M_globalMatrix = tmp;
+        if(M_globalMatrix->matrixPtr()->Filled())
+        {
+            matrixPtr_Type tmp(new matrix_Type(M_globalMatrix->map()));
+            *tmp += *M_globalMatrix;
+            *tmp += *Mat;
+            tmp->globalAssemble();
+            M_globalMatrix = tmp;
+        }
+        else
+        {
+            *M_globalMatrix += *Mat;
+        }
     }
 
     //! adds a coupling block to the coupling matrix

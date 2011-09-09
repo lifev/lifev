@@ -157,7 +157,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         vectorPtr_Type meshDisp( new vector_Type(M_mmFESpace->map()) );
         vectorPtr_Type meshVel( new vector_Type(M_mmFESpace->map()) );
-	vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map() ));
+        vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map(), Repeated ));
         meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
 
@@ -165,14 +165,14 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
         //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
-        M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
+        //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
         //Matteo: per Paolo meshDisp io lo chiamerei meshVelocity da qua in poi !!!!
-  
+
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
             *meshVel = M_ALETimeAdvance->velocity( );
-	    M_ALETimeAdvance->extrapolation(*mmRep);
-	    // mmRep.reset(new vector_Type(M_ALETimeAdvance->extrapolation(), Repeated)); // just to repeat dispDiff. No way witout copying?
+            M_ALETimeAdvance->extrapolation(*mmRep);
+            // mmRep.reset(new vector_Type(M_ALETimeAdvance->extrapolation(), Repeated)); // just to repeat dispDiff. No way witout copying?
             moveMesh(*mmRep);// re-initialize the mesh points
             if( iter==0 )
             {
@@ -193,9 +193,9 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
             }
             *meshVel = M_ALETimeAdvance->velocity();
             //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
-	    mmRep.reset(new vector_Type(M_mmFESpace->map(), Repeated));// just to repeat dispDiff. No way witout copying?
-	    M_ALETimeAdvance->extrapolation(*mmRep);
-	   
+            //mmRep.reset(new vector_Type(M_mmFESpace->map(), Repeated));// just to repeat dispDiff. No way witout copying?
+            M_ALETimeAdvance->extrapolation(*mmRep);
+
             moveMesh(*mmRep);// re-initialize the mesh points
             //*meshDispDiff -= *meshDispOld;//relative displacement
         }
@@ -204,11 +204,11 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 	//	vector_Type mmRep(	M_ALETimeAdvance->extrapolation(), Repeated);
 	// Matteo
 	//   vector_Type mmRep(meshDisp->map(), Repeated);// just to repeat dispDiff. No way witout copying?
-	mmRep.reset(new vector_Type(M_mmFESpace->map(), Repeated));// just to repeat dispDiff. No way witout copying?
-	M_ALETimeAdvance->extrapolation(*mmRep);
-	moveMesh(*mmRep);// re-initialize the mesh points
+        //mmRep.reset(new vector_Type(M_mmFESpace->map(), Repeated));// just to repeat dispDiff. No way witout copying?
+        //M_ALETimeAdvance->extrapolation(*mmRep);
+        //moveMesh(*mmRep);// re-initialize the mesh points
 
-        *mmRep = *meshVel;
+        *mmRep = *meshVel*(-1.);
 
         interpolateVelocity(*mmRep, *M_beta);
         //            *M_beta *= -alpha; //if the HE solution is scaled!
@@ -216,10 +216,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
         if (!M_convectiveTermDer)
         {
-	  //Matteo
-	  M_fluidTimeAdvance->extrapolation(*fluid );
-	  // *fluid = M_fluidTimeAdvance->extrapolation();
-            //fluid->subset(*M_un, 0);
+            M_fluidTimeAdvance->extrapolation(*fluid );
         }
         else
         {
@@ -231,10 +228,11 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         assembleFluidBlock( iter, M_uk );
         assembleMeshBlock ( iter );
         *M_rhsFull = *M_rhs;
-        M_rhs->spy("rhs");
+        //M_rhs->spy("rhs");
         applyBoundaryConditions();
     }
     super_Type::evalResidual( disp, M_rhsFull, res, false );
+
 }
 
 void
@@ -284,7 +282,7 @@ FSIMonolithicGI::applyBoundaryConditions()
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
-    M_monolithicMatrix->matrix()->spy("FMFI");
+    //M_monolithicMatrix->matrix()->spy("FMFI");
 }
 
 void FSIMonolithicGI::initialize( fluidPtr_Type::value_type::function_Type const& u0,
@@ -301,66 +299,86 @@ void FSIMonolithicGI::initialize( fluidPtr_Type::value_type::function_Type const
     M_meshMotion->setDisplacement(df);
 }
 
-void
-FSIMonolithicGI::couplingVariableExtrap( )
-{
-    M_lambda.reset(new vector_Type(solution()));//un
+// void
+// FSIMonolithicGI::couplingVariableExtrap( )
+// {
+//     M_lambda.reset(new vector_Type(solution()));//un
 
-    if (true || !M_lambdaDot.get())//first iteration when not properly initialized
-    {
-        M_lambdaDot.reset        ( new vector_Type(*M_monolithicMap, Unique) );
-    }
-    else
-    {
-        *M_lambda *= 2.;
-        *M_lambda -= (*M_lambdaDot);
-    }
+//     if (true || !M_lambdaDot.get())//first iteration when not properly initialized
+//     {
+//         M_lambdaDot.reset        ( new vector_Type(*M_monolithicMap, Unique) );
+//     }
+//     else
+//     {
+//         *M_lambda *= 2.;
+//         *M_lambda -= (*M_lambdaDot);
+//     }
 
-    //M_lambdaDDot   = M_lambdaDot;//un-1
-    *M_lambdaDot   = *solutionPtr();//un
+//     //M_lambdaDDot   = M_lambdaDot;//un-1
+//     *M_lambdaDot   = *solutionPtr();//un
 
-    //initializeBDF(*M_lambda);
-    setSolution(*M_lambda);
+//     //initializeBDF(*M_lambda);
+//     setSolution(*M_lambda);
 
-    M_solid->displayer().leaderPrint("norm( disp  ) init = ", M_lambda->normInf() );
-    M_solid->displayer().leaderPrint("norm( velo )  init = ", M_lambdaDot->normInf());
-}
+//     M_solid->displayer().leaderPrint("norm( disp  ) init = ", M_lambda->normInf() );
+//     M_solid->displayer().leaderPrint("norm( velo )  init = ", M_lambdaDot->normInf());
+// }
 
 
 //============ Protected Methods ===================
 
 void FSIMonolithicGI::setupBlockPrec()
 {
-    super_Type::setupBlockPrec( );
+
+    //M_solidDerBlock = M_solidBlockPrec; // an inexact Newton approximation of the Jacobian
+
+    //The following part accounts for a possibly nonlinear structure model, should not be run when linear
+    //elasticity is used
+
+    if ( M_data->dataSolid()->getUseExactJacobian() )
+    {
+        M_solid->material()->updateJacobianMatrix( *M_uk*M_data->dataFluid()->dataTime()->timeStep(), dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+        M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
+        *M_solidBlockPrec += *M_solid->Mass();
+        *M_solidBlockPrec += *M_solid->material()->stiff();
+        M_solidBlockPrec->globalAssemble();
+        *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
+
+        *M_monolithicMatrix->matrix() *= 0;
+//         *M_solidBlockPrec += *M_solidDerBlock;
+        //M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
+        M_monolithicMatrix->replace_matrix( M_solidBlockPrec, 0 );
+        M_monolithicMatrix->blockAssembling();
+        //*M_monolithicMatrix->matrix() *= M_data->dataFluid()->dataTime()->timeStep();
+    }
 
     if (M_data->dataFluid()->useShapeDerivatives())
     {
         *M_shapeDerivativesBlock *= 0.;
         M_shapeDerivativesBlock->openCrsMatrix( );
         shapeDerivatives( M_shapeDerivativesBlock );
-
         M_shapeDerivativesBlock->globalAssemble( );
         M_monolithicMatrix->addToGlobalMatrix( M_shapeDerivativesBlock );
     }
 
-    //M_solidDerBlock = M_solidBlockPrec; // an inexact Newton approximation of the Jacobian
-
-    //The following part accounts for a possibly nonlinear structure model, should not be run when linear
-    //elasticity is used
-    if ( M_data->dataSolid()->getUseExactJacobian() )
+    if ( M_data->dataFluid()->useShapeDerivatives() || M_data->dataSolid()->getUseExactJacobian() )
     {
-        M_solid->updateJacobian( *M_uk, M_solidDerBlock ); // computing the derivatives if nonlinear (comment this for inexact Newton);
-        *M_monolithicMatrix->matrix() *= 0;
-        // doing nothing if linear
-        M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
-        *M_solidBlockPrec += *M_solidDerBlock;
-        M_solidBlockPrec->globalAssemble();
-        M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
-        M_monolithicMatrix->blockAssembling();
-        M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->time());
+        if ( !M_BCh_u->bcUpdateDone() )
+            M_BCh_u->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+        M_BCh_d->setOffset(M_offset);
+        if ( !M_BCh_d->bcUpdateDone() )
+            M_BCh_d->bcUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+        M_BCh_mesh->setOffset(M_solidAndFluidDim + nDimensions*M_interface);
+        if ( !M_BCh_mesh->bcUpdateDone() )
+            M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
+
+        M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time());
         M_monolithicMatrix->GlobalAssemble();
-        *M_monolithicMatrix->matrix() *= M_data->dataFluid()->dataTime()->timeStep();
+        //M_monolithicMatrix->matrix()->spy("jacobian");
     }
+
+
+    super_Type::setupBlockPrec( );
 
     if ( M_precPtr->blockVector( ).size( )<3 )
     {

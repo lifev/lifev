@@ -546,7 +546,7 @@ FSIOperator::buildSystem()
 //         if (M_linearFluid)
 //             M_fluidLin->buildSystem();
     }
-  
+
     if (this->isSolid())
       {
 	M_data->dataSolid()->showMe();
@@ -554,7 +554,7 @@ FSIOperator::buildSystem()
 	double  xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep() * M_data->dataSolid()->dataTime()->timeStep() );
 	M_solid->buildSystem(xi);
       }
-    
+
     //M_epetraWorldComm->Barrier();
 }
 
@@ -588,10 +588,10 @@ FSIOperator::updateSystem()
       //rhsW = *M_solid->Mass() *(  M_solidTimeAdvance->rhsContributionSecondDerivative() );
       std::cout<<"updateSystem solid start\n";
       this->M_solid->updateSystem();
-      M_solid->updateRightHandSide( rhsW );  //for the solid rhs; 
+      M_solid->updateRightHandSide( rhsW );  //for the solid rhs;
        std::cout<<"updateSystem solid end\n";
     }
-  
+
    this->couplingVariableExtrap( );
 
 }
@@ -601,7 +601,7 @@ FSIOperator::updateSystem()
 void FSIOperator::couplingVariableExtrap( )
 {
     *M_lambda      = lambdaSolid();
-   
+
     if (!M_lambdaDot.get())
      {
         M_lambdaDot.reset   ( new vector_Type(*M_fluidInterfaceMap, Unique) );
@@ -616,7 +616,7 @@ void FSIOperator::couplingVariableExtrap( )
 	//*M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
 	//*M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
       }
-    
+
     //*M_lambdaDot   = lambdaDotSolid();
     displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->normInf(), "\n" );
     displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->normInf(), "\n");
@@ -735,7 +735,7 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
           M_ALETimeAdvance->setup( M_data->dataALE()->coefficientsNewmark() , 2);
 
       if (M_ALETimeAdvanceMethod =="BDF")
-          M_ALETimeAdvance->setup( M_data->dataALE()->orderBDF(), 2 );
+          M_ALETimeAdvance->setup( M_data->dataALE()->orderBDF(), 1 );
       /*
         if (M_ALETimeAdvanceMethod =="GeneralizedAlpha")
        	M_ALETimeAdvance->setup( M_data->timeMeshMotionRhoInf(), 2, M_data->timeMeshMotionTypeeOfGeneralizedAlpha() );
@@ -806,7 +806,7 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
           ASSERT(initialSolidDisp.size()== M_solidTimeAdvance->size(), "The number of vectors for initializing the time scheme for the structure displacement is not consistent with the discretization chosen" );
 	this->M_solidTimeAdvance->setInitialCondition(initialSolidDisp);
       }
-        std::cout<<"initializeTimeAdvance end\n";  
+        std::cout<<"initializeTimeAdvance end\n";
  }
 
 void

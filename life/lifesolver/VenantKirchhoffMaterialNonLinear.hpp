@@ -289,10 +289,10 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeMatrix(const vector_Type& di
 
     this->M_stiff.reset(new matrix_Type(*this->M_localMap));
 
-    std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
+    std::cout<<std::endl;
+    displayer->leaderPrint( "*********************************");
     computeNonLinearMatrix(this->M_stiff,disp,factor,dataMaterial,displayer);
-    std::cout << "*********************************" << std::endl;
+    displayer->leaderPrint("*********************************");
     std::cout << std::endl;
 
     *this->M_stiff += *this->M_linearStiff;
