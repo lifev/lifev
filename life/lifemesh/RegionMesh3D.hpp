@@ -81,8 +81,7 @@ namespace LifeV
 template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh3D
 :
-public MeshEntity,
-public MC::regionMarker_Type
+public MeshEntity
 {
 public:
     /** @name Marker Types
@@ -326,6 +325,18 @@ public:
      *  @{
      */
 
+    //! get mesh marker.
+    /**
+     *  @return regionmesh marker.
+     */
+    typename MC::regionMarker_Type & markerClass() { return M_marker; }
+
+    //! get only mesh marker id.
+    /**
+     *  @return regionmesh marker id.
+     */
+    markerID_Type marker() const { return M_marker.marker(); }
+
     //! Number of elements in mesh.
     /**
      *  @return Number of elements in mesh.
@@ -446,6 +457,19 @@ public:
      *  @return how many elements may be stored.
      */
     UInt maxNumVolumes() const;
+
+    //! set mesh marker.
+    /**
+     *  @param marker to be set.
+     */
+    void setMarkerClass( typename MC::regionMarker_Type const & marker ) { M_marker = marker; }
+
+
+    //! set only the mesh marker id.
+    /**
+     *  @param marker id to be set.
+     */
+    void setMarker( markerID_Type const & markerId ) { M_marker.setMarker ( markerId ); }
 
     //! Changes Current capacity of Volumes.
     /**
@@ -1470,6 +1494,8 @@ private:
     std::map<int, int>      M_globalToLocalFace;
     std::map<int, int>      M_globalToLocalVolume;
 
+    typename  MC::regionMarker_Type M_marker;
+
     MeshUtility::MeshTransformer<RegionMesh3D<GEOSHAPE, MC> > M_meshTransformer;
 
 }; // End of class RegionMesh3D
@@ -1487,7 +1513,6 @@ void set_switches_for_regionmesh( Switch & sw );
 template <typename GEOSHAPE, typename MC>
 inline RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D() :
 MeshEntity(),
-MC::regionMarker_Type(),
 switches(),
 M_numVolumes( 0 ),
 M_numVertices( 0 ),
@@ -1511,7 +1536,6 @@ M_meshTransformer(*this)
 template <typename GEOSHAPE, typename MC>
 inline RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D( UInt id ) :
 MeshEntity( id ),
-MC::RegionMarker(),
 switches(),
 M_numVolumes( 0 ),
 M_numVertices( 0 ),
