@@ -1,8 +1,8 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Name Surname <name.surname@epfl.ch>
 #           Date: 00-00-0000
@@ -43,7 +43,7 @@ mesh_dir        = ./Mesh/   # the directory where the mesh file is
 mesh_type	= .mesh
 mesh_file       = cube4x4.mesh          # mesh file
 
-transform = '1.0 1.0 1.0 
+transform = '1.0 1.0 1.0
              0.0 0.0 0.0
              0.0 0.0 0.0'
 
