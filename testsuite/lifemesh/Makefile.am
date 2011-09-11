@@ -1,9 +1,9 @@
 # -*- makefile -*-
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Antonio cervone <ant.cervone@gmail.com>
 #           Date: 15-06-2011
@@ -13,7 +13,7 @@
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 check_PROGRAMS		= test_mesh test_baremesh
 
@@ -28,3 +28,8 @@ test_baremesh_LDFLAGS   =
 MOSTLYCLEANFILES	= testBuilders.dat testBuilders_baremesh.dat
 
 EXTRA_DIST = data data_baremesh testsuite.at test_mesh.dox
+
+link:
+	test -a data || ln -s $(srcdir)/data
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/mesh++/ Mesh
+
