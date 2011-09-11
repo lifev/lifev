@@ -1,0 +1,231 @@
+/* Name of package */
+#define PACKAGE_NAME "@PROJECT_NAME@"
+
+/* I think this should be deprecated */
+#define PACKAGE "@PROJECT_NAME@"
+
+/* extra version information: date, cvs, ... */
+#define LIFEV_VERSION_EXTRA
+
+/* major version number */
+#define LIFEV_VERSION_MAJOR @LifeV_VERSION_MAJOR@
+
+/* minor version number */
+#define LIFEV_VERSION_MINOR @LifeV_VERSION_MINOR@
+
+/* micro version number */
+#define LIFEV_VERSION_MICRO @LifeV_VERSION_PATCH@
+
+/* LifeV version string */
+#define LIFEV_VERSION_STRING "@LifeV_VERSION_MAJOR@.@LifeV_VERSION_MINOR@.@LifeV_VERSION_PATCH@"
+
+/* Define to the one symbol short name of this package. */
+#define PACKAGE_TARNAME "@PROJECT_SHORT_NAME@"
+
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING "@PROJECT_SHORT_NAME@ @LifeV_VERSION_MAJOR@.@LifeV_VERSION_MINOR@.@LifeV_VERSION_PATCH@"
+
+/* Define to the address where bug reports for this package should be sent. */
+#define PACKAGE_BUGREPORT "@PROJECT_BUGREPORT@"
+
+/* Define to the home page for this package. */
+#define PACKAGE_URL "@PROJECT_HOMEPAGE@"
+
+/* define prefix dir for life installation */
+#define LIFE_PREFIX "@CMAKE_INSTALL_PREFIX@"
+
+/* Version number of package */
+#define VERSION "@LifeV_VERSION_MAJOR@.@LifeV_VERSION_MINOR@.@LifeV_VERSION_PATCH@"
+#define PACKAGE_VERSION "@LifeV_VERSION_MAJOR@.@LifeV_VERSION_MINOR@.@LifeV_VERSION_PATCH@"
+
+/****************************
+    Real checks start here
+ ****************************/
+
+/* Define if the UMFPACK is linked. */
+#cmakedefine HAVE_UMFPACK
+
+/* Define to 1 if you have the <umfpack.h> header file. */
+#cmakedefine HAVE_UMFPACK_H
+
+/* Define to 1 if you have the <amd.h> header file. */
+#cmakedefine HAVE_AMD_H
+
+/* Define if the HDF5 library is used. */
+#cmakedefine HAVE_HDF5
+
+/* Define to disable the Boost Spirit code */
+#cmakedefine DISABLE_SPIRIT_PARSER
+
+/* have boost */
+#cmakedefine HAVE_BOOST
+
+/* Define if the Boost library version is greater than 1.39 */
+#cmakedefine HAVE_BOOST_GT_1_39
+
+/* define boost spirit qi */
+#cmakedefine HAVE_BOOST_SPIRIT_QI
+
+/* define boost version */
+#cmakedefine HAVE_BOOST_VERSION "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@.@Boost_SUBMINOR_VERSION@"
+
+/* define lifev debug */
+#cmakedefine HAVE_LIFEV_DEBUG
+
+/* define lifev optO3 */
+#cmakedefine HAVE_LIFEV_OPTO3
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#cmakedefine HAVE_DLFCN_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#cmakedefine HAVE_INTTYPES_H
+
+/* Define if the QHULL library is used. */
+#cmakedefine HAVE_QHULL
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#cmakedefine HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#cmakedefine HAVE_STDLIB_H
+
+/* Define to 1 if you have the <memory.h> header file. */
+#cmakedefine HAVE_MEMORY_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#cmakedefine HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#cmakedefine HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#cmakedefine HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#cmakedefine HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#cmakedefine HAVE_UNISTD_H
+
+/* Define if the Trilinos Amesos library is used. */
+#cmakedefine HAVE_TRILINOS_AMESOS
+
+/* Define if the Trilinos Anasazi library is used. */
+#cmakedefine HAVE_TRILINOS_ANASAZI
+
+/* Define if the Trilinos AztecOO library is used. */
+#cmakedefine HAVE_TRILINOS_AZTECOO
+
+/* Define if the Trilinos Belos library is used. */
+#cmakedefine HAVE_TRILINOS_BELOS
+
+/* Define if the Trilinos Epetra library is used. */
+#cmakedefine HAVE_TRILINOS_EPETRA
+
+/* Define if the Trilinos EpetraExt library is used. */
+#cmakedefine HAVE_TRILINOS_EPETRAEXT
+
+/* Define if the Trilinos Galeri library is used. */
+#cmakedefine HAVE_TRILINOS_GALERI
+
+/* Define if the Trilinos Ifpack library is used. */
+#cmakedefine HAVE_TRILINOS_IFPACK
+
+/* Define if the Trilinos Isorropia library is used. */
+#cmakedefine HAVE_TRILINOS_ISORROPIA
+
+/* Define if the Trilinos Loca library is used. */
+#cmakedefine HAVE_TRILINOS_LOCA
+
+/* Define if the Trilinos ML library is used. */
+#cmakedefine HAVE_TRILINOS_ML
+
+/* Define if the Trilinos Nox library is used. */
+#cmakedefine HAVE_TRILINOS_NOX
+
+/* Define if the Trilinos RTOp library is used. */
+#cmakedefine HAVE_TRILINOS_RTOP
+
+/* Define if the Trilinos Sacado library is used. */
+#cmakedefine HAVE_TRILINOS_SACADO
+
+/* Define if the Trilinos Stratimikos library is used. */
+#cmakedefine HAVE_TRILINOS_STRATIMIKOS
+
+/* Define if the Trilinos Teko library is used. */
+#cmakedefine HAVE_TRILINOS_TEKO
+
+/* Define if the Trilinos Teuchos library is used. */
+#cmakedefine HAVE_TRILINOS_TEUCHOS
+
+/* Define if the Trilinos Thyra library is used. */
+#cmakedefine HAVE_TRILINOS_THYRA
+
+/* Define if the Trilinos TriUtils library is used. */
+#cmakedefine HAVE_TRILINOS_TRIUTILS
+
+/* Define if the Trilinos Zoltan library is used. */
+#cmakedefine HAVE_TRILINOS_ZOLTAN
+
+/*******************************************************************
+    The following cannot yet be defined due to limitations in the
+    CMake scripts. Useless defines should be removed
+ *******************************************************************/
+
+/* define boost spirit classic */
+#undef HAVE_BOOST_SPIRIT_CLASSIC
+
+/* define boost spirit classic temp */
+#undef HAVE_BOOST_SPIRIT_CLASSIC_TEMP
+
+/* define lifev optO1 */
+#undef HAVE_LIFEV_OPTO1
+
+/* define lifev optO2 */
+#undef HAVE_LIFEV_OPTO2
+
+/* Define if the Trilinos Loca-epetra library is used. */
+#undef HAVE_LOCA_EPETRA
+
+/* Define if the Trilinos Loca-thyra library is used. */
+#undef HAVE_LOCA_THYRA
+
+/* Define if the Trilinos Nox-epetra library is used. */
+#undef HAVE_NOX_EPETRA
+
+/* Define if the Trilinos Nox-thyra library is used. */
+#undef HAVE_NOX_THYRA
+
+/* Define if the Trilinos Stratimikos-amesos library is used. */
+#undef HAVE_STRATIMIKOS_AMESOS
+
+/* Define if the Trilinos Stratimikos-aztecoo library is used. */
+#undef HAVE_STRATIMIKOS_AZTECOO
+
+/* Define if the Trilinos Stratimikos-belos library is used. */
+#undef HAVE_STRATIMIKOS_BELOS
+
+/* Define if the Trilinos Stratimikos-ifpack library is used. */
+#undef HAVE_STRATIMIKOS_IFPACK
+
+/* Define if the Trilinos Stratimikos-ml library is used. */
+#undef HAVE_STRATIMIKOS_ML
+
+/* Define if the Trilinos Thyra-epetra library is used. */
+#undef HAVE_THYRA_EPETRA
+
+/* Define if the Trilinos Thyra-epetraext library is used. */
+#undef HAVE_THYRA_EPETRAEXT
+
+/* Define if the Trilinos EpetraExt library version is 3.1. */
+#undef HAVE_TRILINOS_EPETRAEXT_31
+
+/* Define if the y12m library is used. */
+#undef HAVE_y12m
+
+/* sizeof(size_t)==sizeof(unsigned int) */
+#undef LIFEV_SIZET_SAME_AS_UINT
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
