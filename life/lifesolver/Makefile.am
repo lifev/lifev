@@ -30,8 +30,11 @@ liblifesolver_la_SOURCES   = FSIData.cpp ADRData.cpp VenantKirchhoffElasticData.
 			                 FSIExactJacobian.cpp FSISolver.cpp HeartIonicData.cpp HeartBidomainData.cpp HeartMonodomainData.cpp HeartFunctors.cpp \
 					LevelSetData.cpp VenantKirchhoffViscoelasticData.cpp MonolithicBlock.cpp MonolithicBlockComposed.cpp MonolithicBlockComposedDN.cpp \
                     MonolithicBlockComposedDND.cpp MonolithicBlockComposedDNND.cpp MonolithicBlockComposedNN.cpp MonolithicBlockMatrix.cpp \
-                    MonolithicBlockMatrixRN.cpp MonolithicRobinInterface.cpp
+                    MonolithicBlockMatrixRN.cpp MonolithicRobinInterface.cpp\
+                    OneDimensionalData.cpp OneDimensionalFluxLinear.cpp OneDimensionalFluxNonLinear.cpp\
+                    OneDimensionalSourceLinear.cpp OneDimensionalSourceNonLinear.cpp OneDimensionalPhysicsLinear.cpp\
+                    OneDimensionalPhysicsNonLinear.cpp OneDimensionalSolver.cpp
 
-liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifearray/liblifearray.la ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs) $(boost_libs)
+liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifearray/liblifearray.la ../lifecore/liblifecore.la ../lifefunctions/liblifefunctions.la $(petsc_libs) $(aztec_libs) $(boost_libs)
 
 include $(top_srcdir)/Doxyfile.am

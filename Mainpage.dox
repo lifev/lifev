@@ -1,10 +1,10 @@
 /*!
- * @mainpage The LifeV API Reference
+ * @mainpage LifeV - A Parallel Finite Element Library
  *
  * This section contains the LifeV online class reference for the current
- * development version of LifeV. 
+ * development version of LifeV.
  *
- * Additionally, you can subscribe or read the <a href="http://www.lifev.org/documentation/lists">mailing lists</a> for any additions and/or 
+ * Additionally, you can subscribe or read the <a href="http://www.lifev.org/documentation/lists">mailing lists</a> for any additions and/or
  * modifications to the API.
  *
  *
