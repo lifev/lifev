@@ -5,5 +5,8 @@ foreach (component ${FOLDER_LIST})
     add_subdirectory(${component})
 endforeach()
 
+# Go down into the data subdirectory too
+add_subdirectory (data)
+
 add_custom_target (all_tests
                    DEPENDS ${TEST_LIST})
