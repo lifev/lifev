@@ -1,0 +1,4 @@
+add_library (lifefunctions BCInterfaceFunctionSolverDefined.cpp OneDimensionalFunctionSolverDefined.cpp RossEthierSteinmanDec.cpp RossEthierSteinmanInc.cpp Womersley.cpp)
+install (TARGETS lifefunctions DESTINATION lib)
+install (FILES BCInterfaceFactory.hpp BCInterfaceFunction.hpp BCInterfaceFunctionParserFile.hpp BCInterfaceFunctionParserFileSolver.hpp BCInterfaceFunctionParser.hpp BCInterfaceFunctionParserSolver.hpp BCInterfaceFunctionSolverDefined.hpp BCInterfaceFunctionUserDefined.hpp OneDimensionalFunction.hpp OneDimensionalFunctionSolverDefined.hpp RossEthierSteinmanDec.hpp RossEthierSteinmanInc.hpp Womersley.hpp DESTINATION include/life/lifefunctions)
+
