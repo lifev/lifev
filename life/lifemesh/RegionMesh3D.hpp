@@ -1732,10 +1732,13 @@ RegionMesh3D<GEOSHAPE, MC>::addVolume( VolumeType const & v )
 {
 //    ASSERT_PRE( volumeList.size() < volumeList.capacity() , "Volume list size exceeded" <<
 //                volumeList.size() + 1 << " " << volumeList.capacity() ) ;
-    volumeList.push_back( v );
 
-    ( volumeList.back() ).setLocalId( volumeList.size() - 1 );
-    return volumeList.back();
+    volumeList.push_back( v );
+    VolumeType & thisVolume(volumeList.back());
+    if (thisVolume.id()==NotAnId)
+        thisVolume.setId(volumeList.size()-1);
+    thisVolume.setLocalId( volumeList.size() - 1 );
+    return thisVolume;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1745,9 +1748,11 @@ RegionMesh3D<GEOSHAPE, MC>::setVolume( VolumeType const & v, UInt const pos )
 {
     ASSERT_PRE( pos < volumeList.capacity() , "position requested exceed capacity" <<
                 pos << " " << volumeList.capacity() ) ;
-    volumeList( pos ) = v;
-    volumeList( pos ).setLocalId( pos );
-    return volumeList( pos );
+    VolumeType & thisVolume(volumeList( pos ));
+    thisVolume.setLocalId( pos );
+    if (thisVolume.id()==NotAnId)
+        thisVolume.setId(pos);
+    return thisVolume;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1856,10 +1861,13 @@ RegionMesh3D<GEOSHAPE, MC>::addFace( FaceType const & f)
 {
  //   ASSERT_PRE( faceList.size() < faceList.capacity(), "Face list size exceeded" <<
  //               faceList.size() + 1 << " " << faceList.capacity() ) ;
-    faceList.push_back( f );
-    faceList.back().setLocalId( faceList.size() -1 );
 
-    return faceList.back();
+
+    faceList.push_back( f );
+    FaceType & thisFace=faceList.back();
+    thisFace.setLocalId( faceList.size() -1 );
+    if (thisFace.id()==NotAnId)thisFace.setId(faceList.size()-1);
+    return thisFace;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1869,9 +1877,11 @@ RegionMesh3D<GEOSHAPE, MC>::setFace( FaceType const & f, UInt position)
 {
     ASSERT_PRE( position < faceList.capacity(), "Face list size exceeded" <<
                 position << " " << faceList.capacity() ) ;
-    faceList( position ) = f;
-    faceList( position ).setLocalId( position );
-    return faceList( position );
+    FaceType & thisFace(faceList( position ));
+    thisFace = f;
+    thisFace.setLocalId( position );
+    if (thisFace.id()==NotAnId)thisFace.setId(position);
+    return thisFace;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2020,9 +2030,10 @@ RegionMesh3D<GEOSHAPE, MC>::addEdge( EdgeType const & f)
 //                edgeList.size() + 1 << " " << edgeList.capacity() ) ;
 
     edgeList.push_back( f );
-    ( edgeList.back() ).setLocalId(edgeList.size() - 1);
-
-    return edgeList.back();
+    EdgeType & thisEdge=edgeList.back();
+    thisEdge.setLocalId(edgeList.size() - 1);
+    if (thisEdge.id()==NotAnId)thisEdge.setId(edgeList.size()-1);
+    return thisEdge;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2033,8 +2044,11 @@ RegionMesh3D<GEOSHAPE, MC>::setEdge( EdgeType const & f, UInt position)
     ASSERT_PRE( position < edgeList.capacity(), "Edge list size exceeded" <<
                 position << " " << edgeList.capacity() ) ;
     edgeList( position ) = f;
-    edgeList( position ).setLocalId( position );
-    return edgeList( position );
+    EdgeType & thisEdge(edgeList( position ) );
+    thisEdge.setLocalId( position );
+    if(thisEdge.id()==NotAnId)
+        thisEdge.setId( position );
+    return thisEdge;
 }
 
 
@@ -2183,7 +2197,7 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
     point_Type aPoint;
     aPoint.setBoundary(boundary);
     aPoint.setId(pointList.size());
-    if(vertex) aPoint.replaceFlag(aPoint.flag() | EntityFlags::VERTEX);
+    if(vertex) aPoint.setFlag(aPoint.flag() | EntityFlags::VERTEX);
     return addPoint(aPoint);
 }
 
@@ -2196,17 +2210,17 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( point_Type const & p)
                 pointList.size() + 1 << " " << pointList.capacity() ) ;
 
     pointList.push_back( p );
-
-    point_Type * pp = & pointList.back();
-    pp->setLocalId(pointList.size()-1);
-
-    if ( pp->boundary() )
+    point_Type & thisPoint(pointList.back());
+    thisPoint.setLocalId(pointList.size()-1);
+    if (thisPoint.id()==NotAnId)thisPoint.setId(pointList.size()-1);
+    //todo This is bug prone!
+    if ( thisPoint.boundary() )
     {
         ASSERT_PRE( _bPoints.size() < _bPoints.capacity(), "Boundary Point list size exceeded" <<
                     _bPoints.size() + 1 << " " << _bPoints.capacity() ) ;
-        _bPoints.push_back( pp );
+        _bPoints.push_back( & pointList.back());
     }
-    return pointList.back();
+    return thisPoint;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2218,17 +2232,18 @@ RegionMesh3D<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position)
                 position << " " << pointList.size() ) ;
 
     bool setToBoundary=p.boundary();
-    bool originalBoundary=pointList[position].boundary();
+    point_Type & thisPoint(pointList[position]);
+    bool originalBoundary=thisPoint.boundary();
 
-    pointList [position]=p;
-    point_Type * pp = & pointList[position];
+    thisPoint=p;
+
     // make sure that localID correspond to the position
-    pp->setLocalId(position);
-
+    thisPoint->setLocalId(position);
+    if (thisPoint.id()==NotAnId)thisPoint.setId(position);
     if (setToBoundary!=originalBoundary){
         if(setToBoundary){
             // add to list of boundary points
-            _bPoints.push_back( pp );
+            _bPoints.push_back( &pointList[position] );
         }
         else
         {
@@ -2245,7 +2260,7 @@ RegionMesh3D<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position)
                 }
             }
         }
-        return pointList[position];
+        return thisPoint;
     }
 }
 template <typename GEOSHAPE, typename MC>
@@ -3038,10 +3053,11 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
                 _face = makeBareFace( i1, i2, i3 );
             }
             _check = _be.addIfNotThere( _face.first );
-            if (j>=this->M_numBFaces)_extraFaces.addIfNotThere( _face.first, j);
+            if (!(j>=this->face(j).boundary()))
+                _extraFaces.addIfNotThere( _face.first, j );
         }
     }
-
+    UInt numFoundBFaces=_be.size();
     for ( typename Volumes::iterator iv = volumeList.begin();
                     iv != volumeList.end(); ++iv )
     {
@@ -3066,9 +3082,10 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
             }
             e = _be.addIfNotThere( _face.first );
             M_VToF( j, vid ) = e.first;
-            bool _isBound=e.first<this->M_numBFaces;
+            bool _isBound=e.first<numFoundBFaces;
             // Is the face an extra face (not on the boundary but originally included in the list)?
-            bool _isExtra = (e.first >=this->M_numBFaces  && e.first < _numOriginalStoredFaces);
+            bool _isExtra = (e.first >=numFoundBFaces
+                            && e.first < _numOriginalStoredFaces);
             if (_isBound)
             {
                 FaceType & _thisFace(faceList[e.first]);
@@ -3111,7 +3128,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
 
                     face.setMarker( this->marker() );
                     face.setBoundary(false);
-                    addFace( face); //The id should be correct
+                    addFace(face); //The id should be correct
                 }
                 else
                 {
