@@ -3,6 +3,26 @@ include (CheckIncludeFiles)
 cmake_minimum_required (VERSION 2.6)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
+# Default compilers
+set (CMAKE_C_COMPILER "mpicc" CACHE STRING "Default C compiler")
+set (CMAKE_CXX_COMPILER "mpicxx" CACHE STRING "Default C++ compiler")
+
+# Default build type
+set (CMAKE_BUILD_TYPE "Debug" CACHE STRING "Default build type")
+
+# Default value for TPL flags
+set (LIFE_USE_HDF5 FALSE CACHE STRING "By default, don't use HDF5")
+set (LIFE_USE_QHULL FALSE CACHE STRING "By default, don't use QHULL")
+set (LIFE_USE_UMFPACK FALSE CACHE STRING "By default, don't use UMFPACK")
+set (LIFE_USE_MPI_WRAPPER TRUE CACHE STRING "By default, use the MPI wrappers")
+
+# Put some other variables in the cache so they can be set with ccmake
+set (PARMETIS_ROOT "PARMETIS_ROOT-NOTFOUND" CACHE STRING "Location of ParMETIS")
+set (UMFPACK_ROOT "UMFPACK_ROOT-NOTFOUND" CACHE STRING "Location of UMFPACK")
+set (HDF5_ROOT "HDF5_ROOT-NOTFOUND" CACHE STRING "Location of HDF5")
+set (QHULL_ROOT "QHULL_ROOT-NOTFOUND" CACHE STRING "Location of QHULL")
+set (BOOST_ROOT "BOOST_ROOT-NOTFOUND" CACHE STRING "Location of Boost")
+
 # Project options
 project (LifeV)
 set (PROJECT_SHORT_NAME "lifev")
