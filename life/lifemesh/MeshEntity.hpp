@@ -60,22 +60,9 @@ const flag_Type ALL                 ( 0x7F );
 
 const UInt number                   (    7 );
 
-static std::string name( const flag_Type & flag )
-{
-    switch( flag )
-    {
-        case PHYSICAL_BOUNDARY: return "PHYSICAL_BOUNDARY";
-        case INTERNAL_INTERFACE: return "INTERNAL_INTERFACE";
-        case SUBDOMAIN_INTERFACE: return "SUBDOMAIN_INTERFACE";
-        case OVERLAP: return "OVERLAP";
-        case CUTTED: return "CUTTED";
-        case VERTEX: return "VERTEX";
-        case GHOST_ENTITY: return "GHOST_ENTITY";
-        default: return "FLAG_NOT_FOUND";
-        return "NONE";
-    }
-}
-}
+std::string name( const flag_Type & flag );
+
+}// namespace EntityFlags
 
 //! This is the base class to store the identifiers.
 /*!
@@ -83,7 +70,9 @@ static std::string name( const flag_Type & flag )
     <ol>
         <li> The global identifier is defined for the whole mesh.
         <li> The local identifier is defined as the identifier for
-             a particular processor.
+             a particular processor. If the entity is stored into a
+             meshEntityContainer, then localId must be the position
+             of the entity in the container.
     </ol>
 
     When running the code in serial (1 processor), the identifiers
@@ -97,11 +86,18 @@ static std::string name( const flag_Type & flag )
 
   The additional flag that is stored is used to specify geometrical properties of the entity
   such as the ones specified above in the EntityFlags namespace.
+  @todo The marker ID should be taken away form marker class and added to the MeshEntity directly
  */
 
 class MeshEntity
 {
 public:
+    //! Indicator for local or global id
+    /*!
+     * This enum helps to develop methods to operate on local or globalID
+     *
+     */
+    enum SwitchId{LOCALID=0,GLOBALID=1};
     //! @name Constructors & Destructor
     //@{
 
@@ -113,13 +109,6 @@ public:
             M_id( NotAnId ),
             M_localId( NotAnId ),
             M_flag ( EntityFlags::DEFAULT )
-    {};
-
-    //! Copy Constructor
-    MeshEntity(const MeshEntity& meshEntity):
-            M_id     ( meshEntity.M_id ),
-            M_localId( meshEntity.M_localId ),
-            M_flag ( meshEntity.M_flag )
     {};
 
     //! Constructor with a single value for both identifiers.
@@ -147,7 +136,6 @@ public:
 
     //! backward-compatible constructor
     /*!
-      This is the "full" constructor for this class.
       @param id The identifier to be set for both (global and local) identifiers. Use
       a set method if you want different identifiers.
       @param boundary The value of the boundary indicator.
@@ -163,21 +151,14 @@ public:
     };
 
     //! Destructor
-    virtual ~MeshEntity()
-    {};
+    virtual ~MeshEntity(){};
 
     //@}
 
     //! @name Methods
     //@{
     //! Displays the informations stored by this class
-    void showMe( std::ostream& output = std::cout ) const
-    {
-        output << " Global ID : " << M_id << " -- " << " Local ID " << M_localId << std::endl;
-        Flag::showMe( M_flag, output );
-        output << std::endl;
-    };
-
+    void showMe( std::ostream& output = std::cout ) const;
     //@}
 
     //! @name Operators
@@ -189,8 +170,7 @@ public:
      */
     bool operator==(const MeshEntity & e ) const
     {
-        bool res = ( ( M_id == e.id() ) && ( M_localId == e.M_localId ));
-        return res;
+        return ( ( M_id == e.id() ) && ( M_localId == e.M_localId ));;
     };
 
     //! Relation operator that performs the same comparison on the GLOBAL identifier.
@@ -325,6 +305,40 @@ private:
     flag_Type M_flag;
 };
 
+namespace MeshEntityUtility{
+/*! @defgroup MeshEntityUtilities Utilities to get local or global ID according to the switch
+ *  The template parameter is in fact a MeshEntity::SwitchId enumerator which takes values
+ *  LOCALID or GLOBALID
+ * @{
+ */
+//! Generic definition of getter
+template<int Selector>
+inline ID getID(MeshEntity const &);
+//! Generic definition of setter
+template<int Selector>
+inline void setID(MeshEntity&,const ID);
+//! Specialization for local id
+template<>
+inline ID getID<MeshEntity::GLOBALID>(MeshEntity const & entity){
+    return entity.id();
+}
+//! Specialization for local id
+template<>
+inline ID getID<MeshEntity::LOCALID>(MeshEntity const & entity){
+    return entity.localId();
+}
+//! Specialization for global id
+template<>
+inline void setID<MeshEntity::GLOBALID>(MeshEntity& entity,const ID id){
+    entity.setId(id);
+}
+//! Specialization for local id
+template<>
+inline void setID<MeshEntity::LOCALID>(MeshEntity& entity,const ID id){
+    entity.setLocalId(id);
+}
+/** @} */ // end of MeshEntityUtilities
+} // end of namespace MeshEntityUtility
 
 //! Mesh Entity with an orientation
 /*! \note Not Used so far! */
