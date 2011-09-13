@@ -409,7 +409,7 @@ Structure::run3d()
     for (Real time = dt; time <= T; time += dt)
     {
 	dataStructure->dataTime()->setTime(time);
-	pI = -10000;
+	pI = -300000;
 	press.epetraVector().PutScalar(pI);
 
 	if (verbose)

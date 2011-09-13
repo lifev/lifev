@@ -25,16 +25,15 @@ save       = 1
 [solid]
 
 [./physics]
-density   	= 1.2           		# density
+density   	= 1.2
 young     	= 8.e+6
-poisson   	= 0.45
-bulk		= 1.e+9
-alpha 		= 3e+6
-gamma		= 0.7
-#material_flag           = 1
+poisson   	= 0.49
+bulk		= 1.3333e+8
+alpha 		= 2.684564e+6
+gamma		= 1.0
+solidType 	= neoHookean
 
-
-solidType 	= exponential
+############## material_flag  = 1 doesn't work properly ################
 
 [../time_discretization]
 initialtime 	= 0.
