@@ -34,7 +34,7 @@ gamma		= 0.7
 #material_flag           = 1
 
 
-solidType 	= neoHookean
+solidType 	= exponential
 
 [../time_discretization]
 initialtime 	= 0.

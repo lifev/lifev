@@ -634,8 +634,8 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   //M_theta                           = 2.0 * M_data->dataTime()->theta();
   //M_zeta                            = M_data->dataTime()->gamma();
 
-  M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->solidType()));
-  M_material->setup(dFESpace,M_localMap,M_offset);
+  M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->solidType() ) );
+  M_material->setup( dFESpace,M_localMap,M_offset );
 }
 
 template <typename Mesh, typename SolverType>

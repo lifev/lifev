@@ -189,9 +189,9 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateJacobianMatrix(const vector_T
 
 template <typename Mesh>
 void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& jacobian,
-                                                                            const  vector_Type& disp,
-                                                                            const dataPtr_Type& dataMaterial,
-                                                                            const displayerPtr_Type& displayer )
+                                                                           const  vector_Type& disp,
+                                                                           const dataPtr_Type& dataMaterial,
+                                                                           const displayerPtr_Type& displayer )
 {
       displayer->leaderPrint("   NonLin S-  Updating non linear terms in the Jacobian Matrix (in updateJacobian)");
       std::cout << std::endl;
@@ -201,7 +201,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
 
       vector_Type dRep(disp, Repeated);
 
-      // Number of displacement components
+      //! Number of displacement components
       UInt nc = nDimensions;
 
 

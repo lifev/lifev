@@ -26,12 +26,12 @@
 
 /*!
  *  @file
- *  @brief  This class has been created only to split the methods for structural problems fr *          om the others methods of AssemblyElemental. It contains all the methods are priv *          ate.
- *          All the methods have been developed to implement the materials which are in Life *          V at the moment of writing: linear elastic, Venant-Kirchhoff, neohookean and exp *          onential.
+ *  @brief  This class has been created only to split the methods for structural problems from the others methods of AssemblyElemental. It contains all the methods are  private. All the methods have been developed to implement the materials which are in LifeV at the moment of writing: linear elastic, Venant-Kirchhoff, neohookean and exponential.
  *
  *  @version 1.0
  *  @date 28-08-2011
  *  @author Paolo Tricerri
+ *  @author Gianmarco Mengaldo
  *
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
@@ -63,77 +63,102 @@ class StructuralAssembler
 {
 public:
 
-    //! @name Constructors & Deconstructor
-    //@{
-      StructuralAssembler();
+  //! @name Constructors & Deconstructor
+  //@{
+  StructuralAssembler();
 
-      ~StructuralAssembler();
-    //@}
+  ~StructuralAssembler();
+  //@}
 
 
-    //! @name Public Methods
-    //@{
+  //! @name Public Methods
+  //@{
   
-    //! Methods for Linear Elastic model
-    void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
-    void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
-
-    //! Methods for St. Venant Kirchhoff model
-    //! Methods for the Stiffness matrix ( evaluate the RHS or the residuals )
-    void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    //! Methods for the jacobian stiffness matrix ( called in StructuralMaterial::updateJacobian )
-    // These first methods are  already implemented for the stiffness matrix
-    //void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    //void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    //void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    //void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    //void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-    //void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-
-   void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-   void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-   void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-   void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-   void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-   void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
-   void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  //! METHODS FOR LINEAR ELASTIC MODEL
+  void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 
 
-    //! Methods for the Neohookean model
-    //! Methods for the stiffness vector
-   void source_Pvol(Real coef, const  KNMK<Real> CofFk, const KN<Real> Jk, VectorElemental& elvec, 
+
+  //! METHODS FOR ST.VENANT-KIRCHHOFF MODEL
+  //! Methods for the Stiffness matrix ( evaluate the RHS or the residuals )
+  void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  //! Methods for the jacobian stiffness matrix ( called in StructuralMaterial::updateJacobian )
+  // These first methods are  already implemented for the stiffness matrix
+  //void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  //void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  //void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  //void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  //void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  //void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+  void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+  void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+
+
+  //! METHODS SHARED BETWEEN NEO-HOOKEAN AND EXPONENTIAL MODELS
+  //! The volumetric part for Neo-Hookean and Exponential models is the same
+  //! Methods for the volumetric part of the stiffness vector
+  void source_Pvol(Real coef, const  KNMK<Real> CofFk, const KN<Real> Jk, VectorElemental& elvec, 
 		    const CurrentFE& fe);
 
-   void source_P1iso_NH(Real coef, const KNMK<Real> CofFk, const KNMK<Real> Fk, const KN<Real> Jk, const KN<Real> Ic_isok , VectorElemental& elvec, const CurrentFE& fe); 
 
-
-
-
-    //! Methods for the Jacobian matrix
-   void stiff_Jac_Pvol_1term( Real coef,  const KNMK<Real> CofFk,  const KN<Real> Jk, 
+  //! Methods for the volumetric part of the Jacobian matrix
+  void stiff_Jac_Pvol_1term( Real coef,  const KNMK<Real> CofFk,  const KN<Real> Jk, 
 			      MatrixElemental& elmat, const CurrentFE& fe );
 
-   void stiff_Jac_Pvol_2term( Real coef, const KNMK<Real> CofFk,  const KN<Real> Jk, 
+  void stiff_Jac_Pvol_2term( Real coef, const KNMK<Real> CofFk,  const KN<Real> Jk, 
   			      MatrixElemental& elmat, const CurrentFE& fe );
 
-   void stiff_Jac_P1iso_NH_1term( Real coef,  const KNMK<Real> CofFk, const KNMK<Real> Fk, 				      const KN<Real> Jk ,  MatrixElemental& elmat, const CurrentFE& fe );
 
-   void stiff_Jac_P1iso_NH_2term( Real coef,  const KNMK<Real> CofFk, const KN<Real> Jk,                                      const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
-   void stiff_Jac_P1iso_NH_3term( Real coef,  const KN<Real> Jk, MatrixElemental& elmat, 
-			          const CurrentFE& fe );
+  //! METHODS FOR NEO-HOOKEAN MODEL
+  //! Methods for the isochoric part of the stiffness vector
+  void source_P1iso_NH(Real coef, const KNMK<Real> CofFk, const KNMK<Real> Fk, const KN<Real> Jk, const KN<Real> Ic_isok , VectorElemental& elvec, const CurrentFE& fe); 
 
-   void stiff_Jac_P1iso_NH_4term( Real coef, const KNMK<Real> CofFk, const KNMK<Real> Fk, 				      const KN<Real> Jk , MatrixElemental& elmat, const CurrentFE& fe );
+  //! Methods for the isochoric part of the Jacobian matrix
+  void stiff_Jac_P1iso_NH_1term( Real coef,  const KNMK<Real> CofFk, const KNMK<Real> Fk, const KN<Real> Jk ,  MatrixElemental& elmat, const CurrentFE& fe );
 
-   void stiff_Jac_P1iso_NH_5term( Real coef, const KNMK<Real> CofFk, const KN<Real> Jk , 
-			          const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
-    //@}
+  void stiff_Jac_P1iso_NH_2term( Real coef,  const KNMK<Real> CofFk, const KN<Real> Jk, const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+  void stiff_Jac_P1iso_NH_3term( Real coef,  const KN<Real> Jk, MatrixElemental& elmat, const CurrentFE& fe );
+
+  void stiff_Jac_P1iso_NH_4term( Real coef, const KNMK<Real> CofFk, const KNMK<Real> Fk, const KN<Real> Jk , MatrixElemental& elmat, const CurrentFE& fe );
+
+  void stiff_Jac_P1iso_NH_5term( Real coef, const KNMK<Real> CofFk, const KN<Real> Jk, const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+
+
+  //! METHODS FOR EXPONENTIAL MODEL
+  //! Methods for the isochoric part of the stiffness vector
+  void source_P1iso_Exp( Real coef, Real coefExp, const KNMK<Real> CofFk, const KNMK<Real> Fk, const KN<Real> Jk, const KN<Real> Ic_isok, VectorElemental& elvec, const CurrentFE& fe );
+
+   //! Methods for the isochoric part of the Jacobian matrix
+  void stiff_Jac_P1iso_Exp_1term( Real coef, Real coefExp, const KNMK<Real> CofFk, const KNMK<Real> Fk, const KN<Real> Jk, const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+  void stiff_Jac_P1iso_Exp_2term( Real coef, Real coefExp, const KNMK<Real> Fk, const KN<Real> Jk, const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+  void stiff_Jac_P1iso_Exp_3term( Real coef, Real coefExp, const KNMK<Real> CofFk, const KN<Real> Jk, const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+  void stiff_Jac_P1iso_Exp_4term( Real coef, Real coefExp, const KNMK<Real> CofFk, const KNMK<Real> Fk,const KN<Real> Jk, const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+  void stiff_Jac_P1iso_Exp_5term( Real coef, Real coefExp, const KN<Real> Jk, const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+  void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const KNMK<Real> CofFk, const KN<Real> Jk, const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+  //@}
 
 
 };

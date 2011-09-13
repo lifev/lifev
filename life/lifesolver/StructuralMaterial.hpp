@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief This file contains an abstract class to implement different kinds of materials for structural dynamic (St. Venant-Kirchhoff, Neo-Hookean and Exponential materials right now )
+ *  @brief This file contains an abstract class to implement different kinds of materials for structural dynamic problems (St. Venant-Kirchhoff, Neo-Hookean and Exponential materials right now )
  *
  *  @version 1.0
  *  @date 01-01-2010
@@ -86,73 +86,70 @@ class StructuralMaterial
 {
 public:
 
-  //!@name Type definitions
-  //@{
+//!@name Type definitions
+//@{
 
-  typedef VenantKirchhoffElasticData             data_Type;
+    typedef VenantKirchhoffElasticData             data_Type;
 
-  typedef StructuralAssembler                    assembler_Type;
-  typedef boost::shared_ptr<assembler_Type>      assemblerPtr_Type;
+    typedef StructuralAssembler                    assembler_Type;
+    typedef boost::shared_ptr<assembler_Type>      assemblerPtr_Type;
 
-  typedef typename LifeV::SolverAztecOO          solver_Type;
+    typedef typename LifeV::SolverAztecOO          solver_Type;
 
-  typedef typename solver_Type::matrix_type      matrix_Type;
-  typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
-  typedef typename solver_Type::vector_type      vector_Type;
-  typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
+    typedef typename solver_Type::matrix_type      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
+    typedef typename solver_Type::vector_type      vector_Type;
+    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
 
-  typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
-  typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
+    typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
+    typedef typename boost::scoped_ptr<Displayer>  displayerPtr_Type;
 
-  typedef FactorySingleton<Factory<StructuralMaterial<Mesh>,std::string> >  StructureMaterialFactory;
-  //@}
+    typedef FactorySingleton<Factory<StructuralMaterial<Mesh>,std::string> >  StructureMaterialFactory;
+
+//@}
 
 
-  //! @name Constructor &  Deconstructor
-  //@{
+
+//! @name Constructor &  Deconstructor
+//@{
 
   StructuralMaterial();
 
   virtual ~StructuralMaterial() {}
 
-  //@}
+//@}
 
-  //!@name Methods
-  //@{
 
-  //! Setup the created object of the class StructuralMaterial
-  /*!
-    \param dFespace: the FiniteElement Space
-    \param monolithicMap: the MapEpetra
-    \param offset: the offset parameter used assembling the matrices
-  */
-  virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-		      const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-		      const UInt offset
-		      ) = 0;
 
-  //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
-  /*!
-    \param dataMaterial the class with Material properties data
-  */
-  virtual  void computeLinearStiff( dataPtr_Type& dataMaterial ) = 0;
+//!@name Methods
+//@{
 
-  //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
-  /*!
-    \param disp: solution at the k-th iteration of NonLinearRichardson Method
-    \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-    \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-  */
-  virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
+    //! Setup the created object of the class StructuralMaterial
+    /*!
+      \param dFespace: the FiniteElement Space
+      \param monolithicMap: the MapEpetra
+      \param offset: the offset parameter used assembling the matrices
+    */
+    virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+	                const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+		        const UInt offset ) = 0;
 
-  //! Updates the nonlinear terms in the Jacobian matrix in StructuralSolver::updateJacobian
-  /*!
-    \param stiff: stiffness matrix provided from outside
-    \param disp: solution at the k-th iteration of NonLinearRichardson Method
-    \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-    \param displayer: a pointer to the Dysplaier member in the StructuralSolver class    
-  */
-  //    virtual  void updateNonLinearJacobianTerms( matrixPtr_Type& /*stiff*/, const vector_Type& /*disp*/, const dataPtr_Type& /*dataMaterial*/, const displayerPtr_Type& /*displayer*/ ) = 0;
+
+    //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
+    /*!
+      \param dataMaterial the class with Material properties data
+    */
+    virtual  void computeLinearStiff( dataPtr_Type& dataMaterial ) = 0;
+
+
+    //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
+    /*!
+      \param disp: solution at the k-th iteration of NonLinearRichardson Method
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
+    */
+    virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
+
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
@@ -164,11 +161,13 @@ public:
     */
     virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
 
+
     //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
     /*!
       \param dk_loc: local displacement vector
     */
     virtual  void computeKinematicsVariables( const VectorElemental& dk_loc ) = 0;
+
 
   //! Output of the class
   /*!
@@ -177,16 +176,17 @@ public:
   */
   virtual void showMe( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
 
-  //! @name Set Methods
-  //@{
+
+//! @name Set Methods
+//@{
 
     //No set Methods
 
-  //@}
+//@}
 
 
-  //! @name Get Methods
-  //@{
+//! @name Get Methods
+//@{
 
   //! Getters
   //! Get the Epetramap
@@ -204,27 +204,27 @@ public:
   //! Get the Stiffness matrix
   virtual vectorPtr_Type const stiffVector() const = 0;
 
-  //@}
+//@}
 
 protected:
 
-  //!Protected Members
+    //!Protected Members
 
-  boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
+    boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
 
-  boost::shared_ptr<const MapEpetra>             M_localMap;
+    boost::shared_ptr<const MapEpetra>             M_localMap;
 
-  //! Elementary matrix for the Jacobian
-  boost::scoped_ptr<MatrixElemental>             M_elmatJac;
+    //! Elementary matrix for the Jacobian
+    boost::scoped_ptr<MatrixElemental>             M_elmatJac;
 
-  //! Matrix jacobian
-  matrixPtr_Type                                 M_jacobian;
+    //! Matrix jacobian
+    matrixPtr_Type                                 M_jacobian;
 
-  //! The Offset parameter
-  UInt                                           M_offset;
+    //! The Offset parameter
+    UInt                                           M_offset;
 
-  //! Pointer to the assembler class
-  assemblerPtr_Type                              M_assembler;
+    //! Pointer to the assembler class
+    assemblerPtr_Type                              M_assembler;
 
 };
 
@@ -234,13 +234,13 @@ protected:
 
 template <typename Mesh>
 StructuralMaterial<Mesh>::StructuralMaterial( ):
-  M_FESpace                    ( ),
-  M_localMap                   ( ),
-  M_jacobian                   ( ),
-  M_offset                     ( 0 ),
-  M_assembler                  ( )
+    M_FESpace                    ( ),
+    M_localMap                   ( ),
+    M_jacobian                   ( ),
+    M_offset                     ( 0 ),
+    M_assembler                  ( )
 {
-  std::cout << "I am in the constructor of StructuralMaterial" << std::endl;
+    std::cout << "I am in the constructor of StructuralMaterial" << std::endl;
 }
 
 }
