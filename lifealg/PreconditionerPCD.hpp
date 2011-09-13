@@ -99,7 +99,7 @@ public:
     //    IfpackPreconditioner( matrixPtr_type& A );
 
     //! default destructor
-    ~PreconditionerPCD();
+    virtual ~PreconditionerPCD();
 
     //@}
 
