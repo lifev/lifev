@@ -15,12 +15,16 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-check_PROGRAMS		= test_mesh
+check_PROGRAMS		= test_mesh test_baremesh
 
 test_mesh_SOURCES	= test_mesh.cpp
- 
+
 test_mesh_LDFLAGS       =
 
-MOSTLYCLEANFILES	= testBuilders.dat
+test_baremesh_SOURCES	= test_baremesh.cpp
 
-EXTRA_DIST = data testsuite.at test_mesh.dox
+test_baremesh_LDFLAGS   =
+
+MOSTLYCLEANFILES	= testBuilders.dat testBuilders_baremesh.dat
+
+EXTRA_DIST = data data_baremesh testsuite.at test_mesh.dox

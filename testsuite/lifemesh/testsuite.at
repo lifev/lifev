@@ -26,3 +26,17 @@ mesh_file  = 'cube_47785.m++'        # mesh file
 AT_CHECK([ln -sf ../../data/mesh/mesh++/cube_47785.m++ && \
           mpirun -n 1 ../../lifemesh/test_mesh],[0],[ignore],[ignore])
 AT_CLEANUP
+
+AT_SETUP([test_baremesh])
+AT_KEYWORDS([mesh])
+AT_DATA([data_baremesh],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for BareMesh test
+#-------------------------------------------------
+
+mesh_dir = ./
+mesh_file  = 'cartesian_cube8.mesh'        # mesh file
+]])
+AT_CHECK([ln -sf ../../data/mesh/inria/cartesian_cube8.mesh && \
+          mpirun -n 1 ../../lifemesh/test_baremesh],[0],[ignore],[ignore])
+AT_CLEANUP

@@ -59,7 +59,6 @@
 #include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
 #include <life/lifemesh/RegionMesh3D.hpp>
-#include <life/lifemesh/BareMesh.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 
 // A dummy class to imitate a VectorEpetra
@@ -223,24 +222,6 @@ int main(int argc, char** argv)
                      aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet)<<std::endl;
     cout<<"Number of internal interface edges (should be 2) "<<
                       aMesh.edgeList.countElementsWithFlag(EntityFlags::INTERNAL_INTERFACE,Flag::testOneSet)<<std::endl;
-
-
-    RegionMeshBare<LinearTetra> bareMesh;
-    readINRIAMeshFile( bareMesh, dirname + "../inria/cartesian_cube8.mesh", m );
-
-    RegionMesh3D<LinearTetra> bMesh;
-    convertBareMesh ( bareMesh, bMesh, m );
-    bMesh.check(0,true,true);
-
-    bMesh.edgeList.clear();
-    bMesh.faceList.clear();
-
-    checkMesh3D(bMesh, sw,
-                true, true,
-                cerr, cout, ofile);
-
-
-    bMesh.showMe();
 
 #ifdef HAVE_MPI
     MPI_Finalize();
