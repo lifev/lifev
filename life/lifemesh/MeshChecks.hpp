@@ -319,7 +319,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
                   std::ostream & err = std::cerr,
                   std::ostream & clog = std::clog )
 {
-    std::vector<ID>listOfId;
+    typedef typename RegionMesh3D::point_Type point_Type;
 
     if ( mesh.storedPoints() == 0 )
     {
@@ -745,15 +745,14 @@ bool checkMesh3D( RegionMesh3D & mesh,
              for (UInt i=0;i<mesh.numElements();++i)
                  for(UInt j=0;j<mesh.numLocalVertices();++j)
                  {
-                     ID k = mesh.element(i).point(j).id();
+                     ID k = mesh.element(i).point(j).localId();
                      mesh.pointList(k).setFlag(EntityFlags::VERTEX);
                  }
-             numVerticesFound = mesh.pointList.countElementsWithFlag(EntityFlags::VERTEX, &Flag::testOneSet);
+             numVerticesFound = mesh.pointList.countElementsWithFlag(
+                             EntityFlags::VERTEX, &Flag::testOneSet);
              mesh.setNumVertices(numVerticesFound);
-             std::vector<ID> allVerticesId=mesh.pointList.extractElementsWithFlag(EntityFlags::VERTEX, &Flag::testOneSet);
-             UInt numBVerticesFound(0);
-             for (std::vector<ID>::iterator iv=allVerticesId.begin();iv<allVerticesId.end();++iv)
-                 if(mesh.isVertex(*iv) && mesh.isBoundaryPoint(*iv)) ++numBVerticesFound;
+             UInt numBVerticesFound=mesh.pointList.countElementsWithFlag(
+                             EntityFlags::VERTEX|EntityFlags::PHYSICAL_BOUNDARY, &Flag::testAllSet);
              mesh.setNumBVertices(numBVerticesFound);
              sw.create( "FIXED_VERTICES_COUNTER", true );
          }
@@ -799,10 +798,15 @@ bool checkMesh3D( RegionMesh3D & mesh,
             {
                 // Maybe boundary points marker is fine, this is enough
                 bool boundaryIsOk(true);
-                std::vector<ID>listOfId=mesh.pointList.extractElementsWithFlag(EntityFlags::PHYSICAL_BOUNDARY, &Flag::testOneSet);
-                for (std::vector<ID>::iterator it=listOfId.begin();it<listOfId.end();++it)
-                    boundaryIsOk=boundaryIsOk | mesh.point(*it).isMarkerSet();
-                std::vector<ID>().swap(listOfId); // save memory
+                std::vector<point_Type const *>
+                listOfPt=mesh.pointList.extractElementsWithFlag(
+                                EntityFlags::PHYSICAL_BOUNDARY, &Flag::testOneSet);
+                for (typename std::vector<point_Type const *>::const_iterator
+                                it=listOfPt.begin();
+                                it < listOfPt.end();
+                                ++it)
+                    boundaryIsOk=boundaryIsOk | (*it)->isMarkerSet();
+                std::vector<point_Type const *>().swap(listOfPt); // save memory
                 clog<<" Marker ID on boundary points is fine. Internal points may have marker unset"<<std::endl;
                 if (verbose)
                     err << "Cannot Fix Points MARKER" << std::endl;
