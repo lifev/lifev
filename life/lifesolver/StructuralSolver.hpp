@@ -965,37 +965,20 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol, 
     LifeChrono chrono;
     chrono.start();
 
-    //It is right to do globalAssemble() inside the M_material class
-    //M_material->computeMatrix( sol, 1., this->M_data, this->M_Displayer);
+    //! It is right to do globalAssemble() inside the M_material class
     M_material->computeStiffness( sol, 1., this->M_data, this->M_Displayer);
 
     if ( this->M_data->solidType() == "linearVenantKirchhoff" || this->M_data->solidType() == "nonlinearVenantKirchhoff" )
       {
 	M_tempMatrix.reset(new matrix_Type(*this->M_localMap));
-
-	M_tempMatrixWithoutZeta.reset(new matrix_Type(*this->M_localMap));	
-	*M_tempMatrixWithoutZeta +=*this->M_material->stiffMatrix();
-	M_tempMatrixWithoutZeta->globalAssemble();
-
-	*M_tempMatrixWithoutZeta *= M_zeta;
-
-	//*M_tempMatrix *= M_zeta;
-	*M_tempMatrix += *M_tempMatrixWithoutZeta;	
+	*M_tempMatrix +=*this->M_material->stiffMatrix()*M_zeta;
 	*M_tempMatrix += *this->M_mass;
 	M_tempMatrix->globalAssemble();
       }
     else
       {
 	M_tempVect.reset(new vector_Type(*this->M_localMap));
-
-	M_tempVectWithoutZeta.reset(new vector_Type(*this->M_localMap));	
-	*M_tempVectWithoutZeta +=*this->M_material->stiffVector();
-	M_tempVectWithoutZeta->globalAssemble();
-
-	*M_tempVectWithoutZeta *= M_zeta;
-
-	//*M_tempVect *= M_zeta;
-	*M_tempVect  += *M_tempVectWithoutZeta;
+	*M_tempVect = *this->M_material->stiffVector()*M_zeta;
 	std::cout<< "\nVEC_stiff pre global = "<<M_tempVect->normInf()<<std::endl;
 
 	M_tempVect->globalAssemble();
@@ -1357,19 +1340,22 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
     M_jacobian->globalAssemble(); 
 
     jacobian.reset(new matrix_Type(*this->M_localMap));
-    *jacobian += *this->M_material->jacobian();
+    M_tempMatrixWithoutZeta.reset(new matrix_Type(*this->M_localMap));
+    *M_tempMatrixWithoutZeta += *this->M_material->jacobian();
+    M_tempMatrixWithoutZeta->globalAssemble();
+    *M_tempMatrixWithoutZeta *= M_zeta;
 
-    //*jacobian *= M_zeta;
+    *jacobian += *M_tempMatrixWithoutZeta;
+
     *jacobian += *this->M_mass;
     jacobian->globalAssemble();
 
-std::string stringaP="M_jacobianSSPaolo";
-this->M_jacobian->spy(stringaP);
+//std::string stringaP="M_jacobianSSPaolo";
+//jacobian->spy(stringaP);
 
     chrono.stop();
     this->M_Displayer->leaderPrintMax("   ... done in ", chrono.diff() );
-int n;
-std::cin>>n;
+
 }
 
 //solveJac( const Vector& res, Real& linear_rel_tol, Vector &step)
@@ -1404,10 +1390,11 @@ solveJacobian( vector_Type&           step,
 
     vector_Type rhsFull (res);
 
-
-//    bcManageMatrix( *this->M_tempMatrix, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), tgv );
+//std::string stringaM_temp="M_tempMatrix";
+//this->M_tempMatrix->spy(stringaM_temp);
     applyBoundaryConditions( *this->M_tempMatrix, rhsFull, BCh);
-
+//std::string stringaPBC="M_jacobianSSPaoloBC";
+//this->M_tempMatrix->spy(stringaPBC);
 
     this->M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
 
@@ -1423,7 +1410,6 @@ solveJacobian( vector_Type&           step,
     //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a 
     //totally different expression.For structural problems it is not used
     *this->M_residual_d = *this->M_mass*step;
-
 }
 
 

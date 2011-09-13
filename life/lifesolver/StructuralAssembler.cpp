@@ -947,7 +947,10 @@ void StructuralAssembler::source_P1iso_NH(Real coef,
 	    
 	      }
 	  }
-	vec( i ) += (s1-s2) * coef  ;
+	vec( i ) += (s1-s2) * coef;
+//	std::cout<<"COEF = "<<coef<<std::endl;
+//        std::cout<<"S1 =    "<<s1<<std::endl;
+//        std::cout<<"S2 =    "<<s2<<std::endl;
       }
     }  
 }

@@ -181,8 +181,8 @@ Structure::run3d()
     //!--------------------------------------------------------------------------------------------
     //! BC for cube 64 tetrahedra, structured mesh
     //!--------------------------------------------------------------------------------------------
-    BCh->addBC("surf4", 4, Essential, Component, Homogeneous, compx);
-    BCh->addBC("surf2", 2, Natural,   Component, Pressure,    compx);
+    BCh->addBC("surf4", 4, Essential, Component, fixed1, compx);
+    BCh->addBC("surf2", 2, Natural,   Component, bcvPress,    compx);
     
 
 

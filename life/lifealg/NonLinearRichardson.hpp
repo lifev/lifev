@@ -121,14 +121,13 @@ Int NonLinearRichardson( VectorEpetra& sol,
 
     if (verbose)
     {
-        //std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << std::endl;
         std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
         std::cout << "      Non-Linear Richardson: starting          " << std::endl;
         std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
         std::cout << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl;
     }
+
     functional.evalResidual( residual, sol, iter );
 
     Real normRes      = residual.normInf();
@@ -160,15 +159,12 @@ Int NonLinearRichardson( VectorEpetra& sol,
         if (verbose)
         {
             std::cout << std::endl;
-            //std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
             std::cout << "      Non-Linear Richardson: iteration  =      " << iter << std::endl
                       << "                             residual   =      " << normRes << std::endl
                       << "                             tolerance  =      " << stop_tol << std::endl;
             std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
             std::cout << std::endl;
-            //std::cout << "------------------------------------------------------------------" << std::endl;
-            //std::cout << std::endl;
         }
 
         iter++;
@@ -236,6 +232,7 @@ Int NonLinearRichardson( VectorEpetra& sol,
                                                            .5 * stop_tol / normRes ) );
             //if (verbose)
             //    std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
+std::cout<<"\nVerbose = "<<verbose<<std::endl;
         }
 
     }
@@ -248,16 +245,15 @@ Int NonLinearRichardson( VectorEpetra& sol,
         return EXIT_FAILURE;
     }
 
+
     if (verbose)
     {
         std::cout << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
         std::cout << "      Non-Linear Richardson: convergence =     " << normRes << std::endl
                   << "                             iterations  =     " << iter << std::endl;
         std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
         std::cout << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl;
     }
     maxit = iter;
 

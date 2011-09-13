@@ -25,7 +25,7 @@ save       = 1
 [solid]
 
 [./physics]
-density   	= 0           		# density
+density   	= 1.2           		# density
 young     	= 8.e+6
 poisson   	= 0.45
 bulk		= 1.e+9
@@ -65,14 +65,14 @@ solver          = gmres
 scaling         = none
 output          = all 			# none
 conv            = rhs
-max_iter        = 100
+max_iter        = 500
 reuse           = true
 max_iter_reuse  = 80
-kspace          = 100
+kspace          = 200
 tol             = 1.e-10    		# AztecOO tolerance
 
 [../prec]
-prectype        = ML 		# Ifpack or ML
+prectype        = Ifpack 		# Ifpack or ML
 displayList     = true
 
 [./ifpack]

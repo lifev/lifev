@@ -71,7 +71,7 @@ Real fzero_scalar(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
 
 Real InternalPressure(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return 1.e+5;
+    return -1.e+4;
 }
 
 // Initial displacement and velocity
@@ -164,7 +164,7 @@ Real g2(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
     switch (i)
     {
     case 0:
-        return 1.e+5;
+        return 0.;
         break;
     case 1:
         return 0.;
@@ -181,22 +181,22 @@ Real g2(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 Real g3(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-    switch (i)
-    {
-    case 0:
+//    switch (i)
+//    {
+//    case 0:
         return 0.;
-        break;
-    case 1:
-        return 0.;
-        break;
-    case 2:
-        return 0.;
-        break;
-    default:
-        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
-        return 0.;
-        break;
-    }
+//        break;
+//    case 1:
+//        return 0.;
+//        break;
+//    case 2:
+//        return 0.;
+//        break;
+//    default:
+//        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+//        return 0.;
+//        break;
+//    }
 }
 
 }
