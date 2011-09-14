@@ -42,8 +42,10 @@
 
 #include <life/lifesolver/StructuralMaterial.hpp>
 
+
 namespace LifeV
 {
+
 template <typename Mesh>
 class NeoHookeanMaterialNonLinear :
         public StructuralMaterial<Mesh>
@@ -274,8 +276,6 @@ NeoHookeanMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh,
     M_trCisok.reset			( new KN_Type( dFESpace->fe().nbQuadPt() ) );
     M_trCk.reset			( new KN_Type( dFESpace->fe().nbQuadPt() ) );
 
-    //! Reset pointer to assembler
-    this->M_assembler.reset             ( new StructuralAssembler() );
 }
 
 
@@ -363,26 +363,26 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 
 	//! VOLUMETRIC PART
 	//! 1. Stiffness matrix: int { 1/2 * bulk * ( 2 - 1/J + 1/J^2 ) * ( CofF : \nabla \delta ) (CofF : \nabla v) }
-	this->M_assembler->stiff_Jac_Pvol_1term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+	AssemblyElementalStructure::stiff_Jac_Pvol_1term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	
 	//! 2. Stiffness matrix: int { 1/2 * bulk * ( 1/J- 1 - log(J)/J^2 ) * ( CofF [\nabla \delta]^t CofF ) : \nabla v }
-	this->M_assembler->stiff_Jac_Pvol_2term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );  		
+	AssemblyElementalStructure::stiff_Jac_Pvol_2term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );  		
 	    
     	//! ISOCHORIC PART
     	//! 1. Stiffness matrix : int { -2/3 * mu * J^(-5/3) *( CofF : \nabla \delta ) ( F : \nabla \v ) }
-	this->M_assembler->stiff_Jac_P1iso_NH_1term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+	AssemblyElementalStructure::stiff_Jac_P1iso_NH_1term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	    
    	//! 2. Stiffness matrix : int { 2/9 * mu * ( Ic_iso / J^2 )( CofF : \nabla \delta ) ( CofF : \nabla \v ) }
-	this->M_assembler->stiff_Jac_P1iso_NH_2term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+	AssemblyElementalStructure::stiff_Jac_P1iso_NH_2term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
     
    	//! 3. Stiffness matrix : int { mu * J^(-2/3) (\nabla \delta : \nabla \v)}
-	this->M_assembler->stiff_Jac_P1iso_NH_3term( mu, (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+	AssemblyElementalStructure::stiff_Jac_P1iso_NH_3term( mu, (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	    
   	//! 4. Stiffness matrix : int { -2/3 * mu * J^(-5/3) ( F : \nabla \delta ) ( CofF : \nabla \v ) }
-	this->M_assembler->stiff_Jac_P1iso_NH_4term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+	AssemblyElementalStructure::stiff_Jac_P1iso_NH_4term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 	    
   	//! 5. Stiffness matrix : int { 1/3 * mu * J^(-2) * Ic_iso * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
-	this->M_assembler->stiff_Jac_P1iso_NH_5term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );  
+	AssemblyElementalStructure::stiff_Jac_P1iso_NH_5term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );  
 
         //! assembling
         for ( UInt ic = 0; ic < nc; ++ic )
@@ -461,13 +461,13 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
      	/*! 
      	Source term Pvol: int { bulk /2* (J1^2 - J1  + log(J1) ) * 1/J1 * (CofF1 : \nabla v) } 
      	*/
-     	this->M_assembler->source_Pvol( bulk, (*M_CofFk), (*M_Jack), *this->M_elvecK,  this->M_FESpace->fe() );
+     	AssemblyElementalStructure::source_Pvol( bulk, (*M_CofFk), (*M_Jack), *this->M_elvecK,  this->M_FESpace->fe() );
 
      	//! Isochoric part
      	/*!
      	Source term P1iso_NH
      	*/ 
-     	this->M_assembler->source_P1iso_NH( mu, (*M_CofFk) ,(*M_Fk),  (*M_Jack),  (*M_trCisok) , *this->M_elvecK,  this->M_FESpace->fe());	
+     	AssemblyElementalStructure::source_P1iso_NH( mu, (*M_CofFk) ,(*M_Fk),  (*M_Jack),  (*M_trCisok) , *this->M_elvecK,  this->M_FESpace->fe());	
 
      	for ( UInt ic = 0; ic < nDimensions; ++ic )
      	{            

@@ -59,8 +59,8 @@
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 
-#include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>
+#include <life/lifefem/AssemblyElementalStructure.hpp>
 #include <life/lifefem/FESpace.hpp>
 
 #include <life/lifecore/Displayer.hpp>
@@ -69,7 +69,6 @@
 
 #include <life/lifealg/SolverAztecOO.hpp>
 
-#include <life/lifesolver/StructuralAssembler.hpp>
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 
 namespace LifeV
@@ -90,9 +89,6 @@ public:
 //@{
 
     typedef VenantKirchhoffElasticData             data_Type;
-
-    typedef StructuralAssembler                    assembler_Type;
-    typedef boost::shared_ptr<assembler_Type>      assemblerPtr_Type;
 
     typedef typename LifeV::SolverAztecOO          solver_Type;
 
@@ -223,9 +219,6 @@ protected:
     //! The Offset parameter
     UInt                                           M_offset;
 
-    //! Pointer to the assembler class
-    assemblerPtr_Type                              M_assembler;
-
 };
 
 //=====================================
@@ -237,8 +230,7 @@ StructuralMaterial<Mesh>::StructuralMaterial( ):
     M_FESpace                    ( ),
     M_localMap                   ( ),
     M_jacobian                   ( ),
-    M_offset                     ( 0 ),
-    M_assembler                  ( )
+    M_offset                     ( 0 )
 {
     std::cout << "I am in the constructor of StructuralMaterial" << std::endl;
 }

@@ -40,6 +40,7 @@
 
 #include <life/lifesolver/StructuralMaterial.hpp>
 
+
 namespace LifeV
 {
 template <typename Mesh>
@@ -192,7 +193,6 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
   this->M_localMap                      = monolithicMap;
   this->M_linearStiff.reset             (new matrix_Type(*this->M_localMap));
   this->M_offset                        = offset;
-  this->M_assembler.reset               (new StructuralAssembler());
 }
 
 template <typename Mesh>
@@ -217,8 +217,8 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 	Real mu = dataMaterial->mu(marker);
 	Real lambda = dataMaterial->lambda(marker);
 
-        this->M_assembler->stiff_strain( 2.0 * mu, *this->M_elmatK, this->M_FESpace->fe() );
-        this->M_assembler->stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );
+        AssemblyElementalStructure::stiff_strain( 2.0 * mu, *this->M_elmatK, this->M_FESpace->fe() );
+        AssemblyElementalStructure::stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );
 
         // assembling
         for ( UInt ic = 0; ic < nc; ic++ )

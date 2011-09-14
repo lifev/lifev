@@ -57,7 +57,7 @@
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 
-#include <life/lifefem/AssemblyElemental.hpp>
+#include <life/lifefem/AssemblyElementalStructure.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/BCManage.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -801,14 +801,14 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& /*factor*/)
 {
   UInt totalDof = M_FESpace->dof().numTotalDof();
 
-  // Number of displacement components
+  //! Number of displacement components
   UInt nc = nDimensions;
 
-  //inverse of dt square:
+  //! inverse of dt square:
   Real dti2 = 2.0 / ( M_data->dataTime()->timeStep() * M_data->dataTime()->timeStep() );
 
-  // Elementary computation and matrix assembling
-  // Loop on elements
+  //! Elementary computation and matrix assembling
+  //! Loop on elements
   for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); i++ )
     {
 
@@ -816,10 +816,10 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& /*factor*/)
 
       M_elmatM->zero();
 
-      // mass
-      mass( dti2 * M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
+      //! mass
+      AssemblyElementalStructure::mass( dti2 * M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
 
-      // assembling
+      //! assembling
       for ( UInt ic = 0; ic < nc; ic++ )
       {
           //mass
