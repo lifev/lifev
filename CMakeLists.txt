@@ -15,6 +15,7 @@ set (LIFE_USE_HDF5 FALSE CACHE STRING "By default, don't use HDF5")
 set (LIFE_USE_QHULL FALSE CACHE STRING "By default, don't use QHULL")
 set (LIFE_USE_UMFPACK FALSE CACHE STRING "By default, don't use UMFPACK")
 set (LIFE_USE_MPI_WRAPPER TRUE CACHE STRING "By default, use the MPI wrappers")
+set (LIFE_USE_SPIRIT_PARSER TRUE CACHE STRING "By default, use the Boost Spirit parser")
 
 # Put some other variables in the cache so they can be set with ccmake
 set (PARMETIS_ROOT "PARMETIS_ROOT-NOTFOUND" CACHE STRING "Location of ParMETIS")
@@ -177,6 +178,9 @@ if (Boost_FOUND)
     include_directories (${Boost_INCLUDE_DIR})
     link_directories (${Boost_LIBRARY_DIRS})
     set (LIBS ${LIBS} ${Boost_LIBRARIES})
+    if (NOT LIFE_USE_SPIRIT_PARSER)
+        set (DISABLE_SPIRIT_PARSER TRUE)
+    endif()
 endif()
 
 # QHULL (optional)
