@@ -60,8 +60,6 @@
 #include <life/lifemesh/MeshPartitioner.hpp>
 
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
-#include <life/lifesolver/StructuralAssembler.hpp>
-#include <life/lifesolver/StructuralMaterial.hpp>
 #include <life/lifesolver/StructuralSolver.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialLinear.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
@@ -409,7 +407,7 @@ Structure::run3d()
     for (Real time = dt; time <= T; time += dt)
     {
 	dataStructure->dataTime()->setTime(time);
-	pI = -300000;
+	pI = -3000000;
 	press.epetraVector().PutScalar(pI);
 
 	if (verbose)
@@ -455,6 +453,7 @@ Structure::run3d()
 		cout <<"*********************************************************"<< std::endl;
 	}
 	file_comp<< endl;
+
 	//!--------------------------------------------------------------------------------------------------
     }
 }

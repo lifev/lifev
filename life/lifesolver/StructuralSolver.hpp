@@ -566,8 +566,8 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
   M_source                     ( ),
   M_offset                     ( 0 ),
   M_rescaleFactor              ( 1. ),
-  M_zeta                       ( 0.75 ),
-  M_theta                      ( 0.7 ),
+  M_zeta                       ( 0. ),
+  M_theta                      ( 0. ),
   M_material                   ( )
 {
   std::cout << "I am in the constructor for the solver" << std::endl;
@@ -631,8 +631,8 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   M_tempVectWithoutZeta.reset       (new vector_Type(*M_localMap));
   M_offset                          = offset;
 
-  //M_theta                           = 2.0 * M_data->dataTime()->theta();
-  //M_zeta                            = M_data->dataTime()->gamma();
+  M_theta                           = M_data->dataTime()->theta();
+  M_zeta                            = M_data->dataTime()->gamma();
 
   M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->solidType() ) );
   M_material->setup( dFESpace,M_localMap,M_offset );
