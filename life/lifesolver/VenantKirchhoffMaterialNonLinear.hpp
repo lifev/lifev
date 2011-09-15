@@ -55,7 +55,7 @@ class VenantKirchhoffMaterialNonLinear :
 
   public:
     typedef VenantKirchhoffMaterialLinear<Mesh>      super;
-  
+
     typedef VenantKirchhoffElasticData               data_Type;
 
     typedef typename super::vector_Type              vector_Type;
@@ -64,7 +64,7 @@ class VenantKirchhoffMaterialNonLinear :
     typedef typename super::matrixPtr_Type           matrixPtr_Type;
     typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
     typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
-  
+
  //@}
 
  //! @name Constructor &  Deconstructor
@@ -115,8 +115,8 @@ class VenantKirchhoffMaterialNonLinear :
 				      const vector_Type& disp,
 				      const dataPtr_Type& dataMaterial,
 				      const displayerPtr_Type& displayer);
-  
-    //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in 
+
+    //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
@@ -126,7 +126,7 @@ class VenantKirchhoffMaterialNonLinear :
     */
     void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
-    //! Computes the nonlinear part of Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
+    //! Computes the nonlinear part of Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same. This is virtual and not pure virtual since in the linear St. Venant-Kirchhoff law it is not needed.
     /*!
       \param sol:  the solution vector
@@ -179,10 +179,11 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateJacobianMatrix(const vector_T
     this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
 
     *this->M_jacobian += *this->M_linearStiff;
+
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
     updateNonLinearJacobianTerms(this->M_jacobian,disp,dataMaterial,displayer);
-    std::cout << "*********************************" << std::endl;
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
     this->M_jacobian->globalAssemble();
 }
@@ -215,7 +216,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
 
 	  Real mu = dataMaterial->mu(marker);
 	  Real lambda = dataMaterial->lambda(marker);
-	  
+
 	  UInt eleID = this->M_FESpace->fe().currentLocalId();
 	  UInt dim = this->M_FESpace->dim();
 
@@ -292,10 +293,10 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeStiffness( const vector_Type
 
     this->M_stiff.reset(new matrix_Type(*this->M_localMap));
 
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
     computeNonLinearMatrix(this->M_stiff,disp,factor,dataMaterial,displayer);
-    std::cout << "*********************************" << std::endl;
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
 
     *this->M_stiff += *this->M_linearStiff;

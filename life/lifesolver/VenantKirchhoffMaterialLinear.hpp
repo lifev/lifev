@@ -52,8 +52,8 @@ class VenantKirchhoffMaterialLinear :
 
   public:
     typedef StructuralMaterial<Mesh>                 super;
-  
-  
+
+
     typedef VenantKirchhoffElasticData               data_Type;
 
     typedef typename super::vector_Type              vector_Type;
@@ -64,7 +64,7 @@ class VenantKirchhoffMaterialLinear :
 
     typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
     typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
-  
+
 
  //@}
 
@@ -119,7 +119,7 @@ class VenantKirchhoffMaterialLinear :
                                         const dataPtr_Type& /*dataMaterial*/,
                                         const displayerPtr_Type& /*displayer*/);
 
-    //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in 
+    //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
@@ -186,7 +186,7 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
                                            const UInt offset
 				)
 {
-  std::cout<<"I am setting up the Material"<<std::endl;
+  std::cout<<"I am setting up the Material "<<std::endl;
 
   this->M_FESpace                       = dFESpace;
   this->M_elmatK.reset                  (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
@@ -247,15 +247,16 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateJacobianMatrix(const vector_Type
 {
 
     std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
+    displayer->leaderPrint(" *********************************  ");
+    std::cout << std::endl;
     displayer->leaderPrint("   Linear S-  Using the Stiffness Matrix (constant) in UpdateJacobian");
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
 
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
     updateNonLinearJacobianTerms(this->M_jacobian,disp,dataMaterial,displayer);
-    std::cout << "*********************************" << std::endl;
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
 }
 
@@ -265,8 +266,8 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms( matrixPt
                                                                          const dataPtr_Type& /*dataMaterial*/,
                                                                          const displayerPtr_Type& displayer )
 {
-      displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
-      std::cout << std::endl;
+        displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
+        std::cout << std::endl;
 }
 
 
@@ -277,10 +278,11 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& /
 							       const displayerPtr_Type& displayer )
 {
     std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
-    displayer->leaderPrint("   Linear S-  Using the linear part of the Stiffness Matrix\n");
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
+    displayer->leaderPrint("   Linear S-  Using the linear part of the Stiffness Matrix\n");
+    displayer->leaderPrint(" *********************************  ");
+    std::cout << std::endl;
 }
 
 
@@ -293,7 +295,7 @@ VenantKirchhoffMaterialLinear<Mesh>::showMe( std::string const& fileNameStiff,
   //This string is to save the linear part
   std::string fileNamelinearStiff =  fileNameStiff;
   fileNamelinearStiff += "linear";
-  
+
   this->M_linearStiff->spy(fileNamelinearStiff);
   this->M_stiff->spy(fileNameStiff);
   this->M_jacobian->spy(fileNameJacobian);

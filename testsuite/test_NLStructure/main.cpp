@@ -107,7 +107,7 @@ std::set<UInt> parseList( const std::string& list )
 
 class Structure
 {
-public:  
+public:
   //@}
   /** @name Constructors, destructor
    */
@@ -207,7 +207,7 @@ Structure::run3d()
 {
     typedef StructuralSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
-    
+
     bool verbose = (parameters->comm->MyPID() == 0);
 
     // Number of boundary conditions for the velocity and mesh motion
@@ -250,14 +250,14 @@ Structure::run3d()
     //!*************************************************************************************************
     //! Modified by Mengaldo
 
-    /*! 
+    /*!
     functional boundary conditions
     Boundary conditions for the displacement
     Essential = Dirichlet
     Natural = Neumann
-    Mixte = Robin 
+    Mixte = Robin
     */
-	
+
     BCFunctionBase fixed1(g1);  		// homogeneous boundary values
     BCFunctionBase fixed2(g2);  		// homogeneous boundary values
     BCFunctionBase fixedE(g3);  		// External pressure
@@ -268,9 +268,9 @@ Structure::run3d()
     compx[0]=0; compy[0]=1, compz[0]=2;
     Real pI=0;
 
-    vector_Type press(fullMap, Repeated);          
-    press.epetraVector().PutScalar(pI); 	       
-    BCVector bcvPress(press, dFESpace->dof().numTotalDof(),1); 
+    vector_Type press(fullMap, Repeated);
+    press.epetraVector().PutScalar(pI);
+    BCVector bcvPress(press, dFESpace->dof().numTotalDof(),1);
 
 
     //!--------------------------------------------------------------------------------------------
@@ -291,7 +291,7 @@ Structure::run3d()
     //! Loading data file and building constant matrices
     solid.setDataFromGetPot(dataFile);
     solid.buildSystem();
-    
+
 
     //!--------------------------------------------------------------------------------------------
     // Temporal data and initial conditions
@@ -310,7 +310,7 @@ Structure::run3d()
     if (verbose) std::cout << "S- initialization ... ";
 
     //! Initializing displacement, velocity and acceleration
-    solid.initialize(d0,w0,a0); 
+    solid.initialize(d0,w0,a0);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -345,7 +345,7 @@ Structure::run3d()
 
     //vectorPtr_Type solidDisp ( new vector_Type(solid.getDisplacement(), exporter->mapType() ) );
     //vectorPtr_Type solidVel  ( new vector_Type(solid.getVelocity(),  exporter->mapType() ) );
-	
+
     vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(), exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type(solid.velocity(),  exporter->mapType() ) );
     vectorPtr_Type solidAcc  ( new vector_Type(solid.acceleration(),  exporter->mapType() ) );
@@ -358,12 +358,12 @@ Structure::run3d()
 
     exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "acceleration",
                            dFESpace, solidAcc, UInt(0) );
-	
+
 
     /*
     exporter->addVariable( ExporterData::Vector, "displacement", solidDisp,
 	                   UInt(0), dFESpace->dof().numTotalDof() );
-	
+
     exporter->addVariable( ExporterData::Vector, "velocity", solidVel,
 			   UInt(0), dFESpace->dof().numTotalDof() );
 
@@ -373,6 +373,7 @@ Structure::run3d()
 
     exporter->postProcess( 0 );
 
+    /*
     //!--------------------------------------------------------------------------------------------
     //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
     //!--------------------------------------------------------------------------------------------
@@ -380,7 +381,7 @@ Structure::run3d()
     ofstream file_comp( "Displacement_components_NL.m" );
     if ( !file_comp )
     {
-  	std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl; 
+  	std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
     }
 
     int IDPoint = 74;
@@ -393,12 +394,12 @@ Structure::run3d()
 
     for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
     {
-    file_comp<< solid.displacement()[ k ] << " "; 
+    file_comp<< solid.displacement()[ k ] << " ";
     }
 
     file_comp<< endl;
     //!--------------------------------------------------------------------------------------------
-
+    */
 
 
     //!--------------------------------------------------------------------------------------------
@@ -415,13 +416,13 @@ Structure::run3d()
 		std::cout << std::endl;
 		std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
 	}
-	
+
     	//! Computing the right-hand side
 	solid.updateSystem();
 	//solid.updateSystem(dZero);
 
 	std::cout << "Updated system at " << time << std::endl;
-        
+
         //! Calling the Newton method
 	solid.iterate( BCh );
 
@@ -431,7 +432,7 @@ Structure::run3d()
 	*solidDisp = solid.displacement();
 	*solidVel  = solid.velocity();
 	*solidAcc  = solid.acceleration();
-	    
+
 	//! Post-processing
 	//if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
@@ -439,15 +440,15 @@ Structure::run3d()
         //this->CheckResults(solid.displacement().norm2(),time);
 
 	exporter->postProcess( time );
-
+    /*
         //!--------------------------------------------------------------------------------------------------
         //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
         //!--------------------------------------------------------------------------------------------------
 	cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
 	for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
 	{
-		file_comp<< solid.displacement()[ k ] << " "; 
-        	cout.precision(16);     
+		file_comp<< solid.displacement()[ k ] << " ";
+        	cout.precision(16);
 		cout <<"*********************************************************"<< std::endl;
 		cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
 		cout <<"*********************************************************"<< std::endl;
@@ -455,6 +456,7 @@ Structure::run3d()
 	file_comp<< endl;
 
 	//!--------------------------------------------------------------------------------------------------
+    */
     }
 }
 

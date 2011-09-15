@@ -8,7 +8,7 @@
     This file is part of LifeV.
 
     LifeV is free software; you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published 
+    it under the terms of the GNU Lesser General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
@@ -30,10 +30,10 @@
  *
  *  @version 1.0
  *  @date 29-07-2010
- *  @author Paolo Tricerri, 
+ *  @author Paolo Tricerri,
  *  @author Gianmarco Mengaldo
  *
- *  @maintainer  Paolo Tricerri      <paolo.tricerri@epfl.ch> 
+ *  @maintainer  Paolo Tricerri      <paolo.tricerri@epfl.ch>
  *  @contributor Gianmarco Mengaldo  <gianmarco.mengaldo@gmail.com>
  */
 
@@ -55,7 +55,7 @@ class NeoHookeanMaterialNonLinear :
 
     public:
     typedef StructuralMaterial<Mesh>                 super;
-    
+
     typedef VenantKirchhoffElasticData               data_Type;
 
     typedef typename super::vector_Type              vector_Type;
@@ -65,7 +65,7 @@ class NeoHookeanMaterialNonLinear :
     typedef typename super::vectorPtr_Type           vectorPtr_Type;
     typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
     typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
-  
+
     //! Definition of local tensors
     typedef KN<Real> 				     KN_Type;
     typedef boost::shared_ptr<KN_Type>		     KNPtr_Type;
@@ -136,7 +136,7 @@ class NeoHookeanMaterialNonLinear :
                                        const displayerPtr_Type& /*displayer*/);
 
 
-    //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in 
+    //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
@@ -147,7 +147,7 @@ class NeoHookeanMaterialNonLinear :
     void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
 
-    //! Computes the new Stiffness vector for Neo-Hookean and Exponential materials in StructuralSolver given a certain displacement field. 
+    //! Computes the new Stiffness vector for Neo-Hookean and Exponential materials in StructuralSolver given a certain displacement field.
     //! This function is used both in StructuralSolver::evalResidual and in StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
@@ -189,7 +189,7 @@ class NeoHookeanMaterialNonLinear :
 
     //! Get the Stiffness matrix
     matrixPtr_Type const stiffMatrix() const { }
-  
+
     //! Get the stiffness vector
     vectorPtr_Type const stiffVector() const {return M_stiff; }
 
@@ -197,7 +197,7 @@ class NeoHookeanMaterialNonLinear :
 
 
 
-protected: 
+protected:
 
     //! Local stress vector
     boost::scoped_ptr<VectorElemental>   	      	M_elvecK;
@@ -270,8 +270,8 @@ NeoHookeanMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh,
     //! Local tensors initilization
     M_FirstPiolaKStressEle.reset	( new KNM_Type( nDimensions, nDimensions ) );
     M_Fk.reset			        ( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
-    M_CofFk.reset			( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );		
-    M_Identity.reset 	         	( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );	
+    M_CofFk.reset			( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
+    M_Identity.reset 	         	( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
     M_Jack.reset			( new KN_Type( dFESpace->fe().nbQuadPt() ) );
     M_trCisok.reset			( new KN_Type( dFESpace->fe().nbQuadPt() ) );
     M_trCk.reset			( new KN_Type( dFESpace->fe().nbQuadPt() ) );
@@ -300,11 +300,13 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateJacobianMatrix( const vector_Type&
     this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
 
     std::cout << std::endl;
-    std::cout << "*************************************************" << std::endl;
-    updateNonLinearJacobianTerms(this->M_jacobian, disp, dataMaterial, displayer);
-    std::cout << "*************************************************" << std::endl;
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
-	
+    updateNonLinearJacobianTerms(this->M_jacobian, disp, dataMaterial, displayer);
+    std::cout << std::endl;
+    displayer->leaderPrint(" *********************************  ");
+    std::cout << std::endl;
+
     this->M_jacobian->globalAssemble();
 }
 
@@ -357,36 +359,36 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 	computeKinematicsVariables( dk_loc );
 
 	//! Stiffness for non-linear terms of the Neo-Hookean model
-	/*! 
+	/*!
 	 The results of the integrals are stored at each step into elmatK, until to build K matrix of the bilinear form
-	*/	
+	*/
 
 	//! VOLUMETRIC PART
 	//! 1. Stiffness matrix: int { 1/2 * bulk * ( 2 - 1/J + 1/J^2 ) * ( CofF : \nabla \delta ) (CofF : \nabla v) }
 	AssemblyElementalStructure::stiff_Jac_Pvol_1term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
-	
+
 	//! 2. Stiffness matrix: int { 1/2 * bulk * ( 1/J- 1 - log(J)/J^2 ) * ( CofF [\nabla \delta]^t CofF ) : \nabla v }
-	AssemblyElementalStructure::stiff_Jac_Pvol_2term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );  		
-	    
+	AssemblyElementalStructure::stiff_Jac_Pvol_2term( bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+
     	//! ISOCHORIC PART
     	//! 1. Stiffness matrix : int { -2/3 * mu * J^(-5/3) *( CofF : \nabla \delta ) ( F : \nabla \v ) }
 	AssemblyElementalStructure::stiff_Jac_P1iso_NH_1term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
-	    
+
    	//! 2. Stiffness matrix : int { 2/9 * mu * ( Ic_iso / J^2 )( CofF : \nabla \delta ) ( CofF : \nabla \v ) }
 	AssemblyElementalStructure::stiff_Jac_P1iso_NH_2term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
-    
+
    	//! 3. Stiffness matrix : int { mu * J^(-2/3) (\nabla \delta : \nabla \v)}
 	AssemblyElementalStructure::stiff_Jac_P1iso_NH_3term( mu, (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
-	    
+
   	//! 4. Stiffness matrix : int { -2/3 * mu * J^(-5/3) ( F : \nabla \delta ) ( CofF : \nabla \v ) }
 	AssemblyElementalStructure::stiff_Jac_P1iso_NH_4term( mu, (*M_CofFk), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
-	    
+
   	//! 5. Stiffness matrix : int { 1/3 * mu * J^(-2) * Ic_iso * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
-	AssemblyElementalStructure::stiff_Jac_P1iso_NH_5term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );  
+	AssemblyElementalStructure::stiff_Jac_P1iso_NH_5term( mu, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
         //! assembling
         for ( UInt ic = 0; ic < nc; ++ic )
-	{			
+	{
             	for ( UInt jc = 0; jc < nc; jc++ )
 	   	{
                 	assembleMatrix( *jacobian, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof );
@@ -408,14 +410,10 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
     this->M_stiff.reset(new vector_Type(*this->M_localMap));
 
     std::cout << std::endl;
-    std::cout << "********************************************************************************" << std::endl;
+    displayer->leaderPrint(" *********************************  ");
+    std::cout << std::endl;
     displayer->leaderPrint(" Non-Linear S-  Computing the Neo-Hookean nonlinear stiffness vector\n");
-    std::cout << "********************************************************************************" << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << "--------------------------------------------------------" << std::endl;
-    std::cout << "\n The Euclidean norm of the solution is:" << sol.norm2() << std::endl;
-    std::cout << "--------------------------------------------------------" << std::endl;
+    displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
 
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
@@ -434,7 +432,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
 
 	//! Getting the proper coefficients
 	Real mu     = dataMaterial->mu(marker);
-	Real bulk   = dataMaterial->bulk(marker); 
+	Real bulk   = dataMaterial->bulk(marker);
 
        	UInt eleID = this->M_FESpace->fe().currentLocalId();
 
@@ -448,32 +446,32 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
                		dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
 		}
 	}
-		
-     	this->M_elvecK->zero(); 
+
+     	this->M_elvecK->zero();
 
      	computeKinematicsVariables( dk_loc );
 
      	//! Stiffness for non-linear terms of the Neo-Hookean model
-     	/*! 
+     	/*!
      	The results of the integrals are stored at each step into elvecK, until to build K matrix of the bilinear form
-     	*/	 		
+     	*/
      	//! Volumetric part
-     	/*! 
-     	Source term Pvol: int { bulk /2* (J1^2 - J1  + log(J1) ) * 1/J1 * (CofF1 : \nabla v) } 
+     	/*!
+     	Source term Pvol: int { bulk /2* (J1^2 - J1  + log(J1) ) * 1/J1 * (CofF1 : \nabla v) }
      	*/
      	AssemblyElementalStructure::source_Pvol( bulk, (*M_CofFk), (*M_Jack), *this->M_elvecK,  this->M_FESpace->fe() );
 
      	//! Isochoric part
      	/*!
      	Source term P1iso_NH
-     	*/ 
-     	AssemblyElementalStructure::source_P1iso_NH( mu, (*M_CofFk) ,(*M_Fk),  (*M_Jack),  (*M_trCisok) , *this->M_elvecK,  this->M_FESpace->fe());	
+     	*/
+     	AssemblyElementalStructure::source_P1iso_NH( mu, (*M_CofFk) ,(*M_Fk),  (*M_Jack),  (*M_trCisok) , *this->M_elvecK,  this->M_FESpace->fe());
 
      	for ( UInt ic = 0; ic < nDimensions; ++ic )
-     	{            
-		/*! 
+     	{
+		/*!
 		M_elvecK is assemble into *vec_stiff vector that is recall
-		from updateSystem(matrix_ptrtype& mat_stiff, vector_ptr_type& vec_stiff) 
+		from updateSystem(matrix_ptrtype& mat_stiff, vector_ptr_type& vec_stiff)
         	*/
 		assembleVector( *this->M_stiff, *this->M_elvecK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
      	}
@@ -506,7 +504,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
 				s += this->M_FESpace->fe().phiDer( i, jcoor, ig ) * dk_loc[ i + icoor * this->M_FESpace->fe().nbFEDof() ]; // \grad u^k at a quadrature point
 			}
 			//! gradient of displacement
-			(*M_Fk)( icoor , jcoor ,ig ) = s;  
+			(*M_Fk)( icoor , jcoor ,ig ) = s;
 		}
 	}
     }
@@ -520,9 +518,9 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
 		(*M_Fk)( icoor , icoor , ig ) +=  1.0;
 	}
     }
-    
+
     Real a,b,c,d,e,f,g,h,i;
-  
+
     for( int ig=0; ig< this->M_FESpace->fe().nbQuadPt(); ig++)
     {
 	a = (*M_Fk)( 0 , 0 , ig );
@@ -534,8 +532,8 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
 	g = (*M_Fk)( 2 , 0 , ig );
 	h = (*M_Fk)( 2 , 1 , ig );
 	i = (*M_Fk)( 2 , 2 , ig );
-      
-	//! determinant of deformation gradient Fk  
+
+	//! determinant of deformation gradient Fk
 	(*M_Jack)(ig) = a*( e*i - f*h ) - b*( d*i - f*g ) + c*( d*h - e*g );
 
 	(*M_CofFk)( 0 , 0 , ig ) =   ( e*i - f*h );
@@ -553,12 +551,10 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
     {
 	if ((*M_Jack)(ig) < 0)
 	{
-		std::cout <<"************************************************************"<<  std::endl;
 		std::cout <<"negative jacobian !!!!!! ERROR in computeKinematicsVariables"<<  std::endl;
-		std::cout <<"************************************************************"<<  std::endl;
 	}
     }
-    
+
     //! loop on quadrature points (ig)
     for ( int ig = 0;ig < this->M_FESpace->fe().nbQuadPt(); ig++ )
     {
@@ -568,13 +564,13 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
 		for ( int j = 0; j < nDimensions; j++ )
 		{
 			//! trace of  C1 = (F1k^t F1k)
-			s +=  (*M_Fk)( i , j , ig ) * (*M_Fk)( i , j , ig ); 
+			s +=  (*M_Fk)( i , j , ig ) * (*M_Fk)( i , j , ig );
 		}
 	}
 	//! trace of C
-	(*M_trCk)( ig ) = s; 
+	(*M_trCk)( ig ) = s;
     }
-    
+
     for ( int ig = 0; ig <  this->M_FESpace->fe().nbQuadPt(); ig++ )
     {
 	//! trace of deviatoric C

@@ -507,10 +507,10 @@ protected:
   //! Jacobian Matrix: Matrix to store the jacobian of the newton method
   matrixPtr_Type                       M_jacobian;
 
-  //! Stiffness vector for NH and Exp. It is used to compute residuals or rhs 
+  //! Stiffness vector for NH and Exp. It is used to compute residuals or rhs
   vectorPtr_Type                       M_tempVect;
 
-  //! Stiffness auxiliary vector for NH and Exp. It is used to compute residuals or rhs 
+  //! Stiffness auxiliary vector for NH and Exp. It is used to compute residuals or rhs
   vectorPtr_Type                       M_tempVectWithoutZeta;
 
   //! level of recursion for Aztec (has a sens with FSI coupling)
@@ -667,7 +667,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff
 	*vec_stiff += *this->M_material->stiffVector();
 	vec_stiff->globalAssemble();
       }
-    
+
     *this->M_rhsNoBC *= 0.0;
 
     computeRHSNoBC();
@@ -728,7 +728,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( source_Type const& source
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::computeRHSNoBC( void )
 {
-  
+
     Real coef;
     coef= ( 1.0 - M_zeta );
 
@@ -744,39 +744,22 @@ void StructuralSolver<Mesh, SolverType>::computeRHSNoBC( void )
     if ( this->M_data->solidType() == "linearVenantKirchhoff" || this->M_data->solidType() == "nonlinearVenantKirchhoff" )
 	{
       	*this->M_rhsNoBC -= (*this->M_tempMatrix) * coef * (*this->M_disp);
-	std::cout<<"\nMAT_stiff in UPSYSTEM";
-	std::cout<<"\nrhsNoBC = "<<this->M_rhsNoBC->normInf()<<std::endl;
 	}
     else
 	{
       	*this->M_rhsNoBC -= (*this->M_tempVect)*coef;
-	std::cout<<"\nVEC_stiff in UPSYSTEM";
-	std::cout<<"\nrhsNoBC = "<<this->M_rhsNoBC->normInf()<<std::endl;
 	}
 
     //! Acceleration right-hand side
     *M_rhsA = (2.0 / ( M_zeta * pow(DeltaT,2) )) * z + ((1.0 - M_zeta ) / ( M_zeta )) * (*M_acc);
-    std::cout<<"\nrhsA = "<<this->M_rhsA->normInf()<<std::endl;
 
     //! Velocity right-hand side
     *this->M_rhsW = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
-    std::cout<<"\nrhsW = "<<this->M_rhsW->normInf()<<std::endl;
-
-    std::cout << std::endl;
 
     std::cout << "rhsNoBC norm    = " << this->M_rhsNoBC->norm2() << std::endl;
     std::cout << "rhsA    norm    = " << this->M_rhsA->norm2()    << std::endl;
     std::cout << "rhsW    norm    = " << this->M_rhsW->norm2()    << std::endl;
     std::cout << "   W    norm    = " << this->M_vel->norm2() 	  << std::endl;
-
-    std::cout << "\n   ZETA         = " << this->M_zeta  	   << std::endl;
-    std::cout << "   THETA          = " << this->M_theta 	   << std::endl;
-    std::cout << "   YOUNG          = " << this->M_data->young()   << std::endl;
-    std::cout << "   POISSON        = " << this->M_data->poisson() << std::endl;
-    std::cout << "   DENSITY        = " << this->M_data->rho()     << std::endl;
-    std::cout << "   BULK MODULUS   = " << this->M_data->bulk()    << std::endl;
-    std::cout << "   ALPHA          = " << this->M_data->alpha()   << std::endl;
-    std::cout << "   GAMMA          = " << this->M_data->gamma()   << std::endl;
 }
 
 
@@ -887,7 +870,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
     //*this->M_residual_d = *this->M_mass*(*this->M_disp);
     //*this->M_residual_d -= *this->M_rhsNoBC;
 
-  
+
 }
 
 template <typename Mesh, typename SolverType>
@@ -909,10 +892,10 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   ///End First Approximantion
 
   // Use of the complete Jacobian
-  *matrFull += *this->M_jacobian; 
+  *matrFull += *this->M_jacobian;
   //*matrFull *= M_zeta;
   *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
- 
+
   this->M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
 
   // for BC treatment (done at each time-step)
@@ -928,14 +911,14 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 
   this->M_Displayer->leaderPrint("\tS'-  Solving system                    ... \n");
   chrono.start();
-    
+
   this->M_linearSolver->setMatrix(*matrFull);
-  
+
   this->M_linearSolver->solveSystem( rhsFull, *M_disp, matrFull );
-  
+
   chrono.stop();
 
-  //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a 
+  //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a
   //totally different expression.For structural problems it is not used
   evalResidualDisplacementLin(*M_disp);
 
@@ -979,10 +962,8 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol, 
       {
 	M_tempVect.reset(new vector_Type(*this->M_localMap));
 	*M_tempVect = *this->M_material->stiffVector()*M_zeta;
-	std::cout<< "\nVEC_stiff pre global = "<<M_tempVect->normInf()<<std::endl;
 
 	M_tempVect->globalAssemble();
-	std::cout<< "\nVEC_stiff post global = "<<M_tempVect->normInf()<<std::endl;
       }
 
     chrono.stop();
@@ -995,12 +976,12 @@ void
 StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const vector_Type& solution, Int /*iter*/)
 {
 
-    //This method call the M_material computeStiffness 
+    //This method call the M_material computeStiffness
     computeMatrix(solution, 1.);
 
     this->M_Displayer->leaderPrint("    S- Updating the boundary conditions ... \t");
     LifeChrono chrono;
-    
+
     //This is the most important issue related with this class.
     //At the moment, the BC are applied on the matrix and on rhsNoBc for VK models
     //but for NH and EXP they are applied on the residual directly. This does not work for
@@ -1018,9 +999,9 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
 	vector_Type rhsFull(*this->M_rhsNoBC, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
 	bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->dataTime()->time(), 1.0 );
-	
+
 	*this->M_rhs = rhsFull;
-    
+
 	residual  = *this->M_tempMatrix * solution;
 	residual -= *this->M_rhs;
 
@@ -1030,20 +1011,19 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     else //NH and Exp
       {
     	chrono.start();
-	
+
     	residual = *this->M_mass * solution;
-std::cout<<"\n RES1 NOBC = "<<residual.normInf()<<std::endl;
+
     	residual += *this->M_tempVect;
-std::cout<<"\n RES2 NOBC = "<<residual.normInf()<<std::endl;
+
     	residual -= *this->M_rhsNoBC;
-std::cout<<"\n RES3 NOBC = "<<residual.normInf()<<std::endl;
 
     	//! Apply the boundary conditions
     	bcManageVector( residual, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), this->M_data->dataTime()->time(), 1.0);
-std::cout<<"\n RES4 BC = "<<residual.normInf()<<std::endl;
+
 
     	chrono.stop();
-    	this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );	
+    	this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
       }
 }
 
@@ -1059,7 +1039,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type&
     chrono.start();
 
     if ( this->M_data->solidType() == "linearVenantKirchhoff" || this->M_data->solidType() == "nonlinearVenantKirchhoff" )
-      {    
+      {
 	*this->M_residual_d  = *this->M_tempMatrix * solution;
 	*this->M_residual_d -= *this->M_rhsNoBC;
       }
@@ -1323,21 +1303,12 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
     LifeChrono chrono;
     chrono.start();
 
-    std::cout << "\n   ZETA         = " << this->M_zeta  << std::endl;
-    std::cout << "   THETA          = " << this->M_theta << std::endl;
-    std::cout << "   YOUNG          = " << this->M_data->young() << std::endl;
-    std::cout << "   POISSON        = " << this->M_data->poisson() << std::endl;
-    std::cout << "   DENSITY        = " << this->M_data->rho() << std::endl;
-    std::cout << "   BULK MODULUS   = " << this->M_data->bulk() << std::endl;
-    std::cout << "   ALPHA          = " << this->M_data->alpha() << std::endl;
-    std::cout << "   GAMMA          = " << this->M_data->gamma() << std::endl;
-
     M_material->updateJacobianMatrix(sol, this->M_data, this->M_Displayer);
 
     M_jacobian.reset(new matrix_Type(*this->M_localMap));
     *M_jacobian += *this->M_material->jacobian();
     //This is necessary since the matrix has to be multiplied by a constant in iterateLin
-    M_jacobian->globalAssemble(); 
+    M_jacobian->globalAssemble();
 
     jacobian.reset(new matrix_Type(*this->M_localMap));
     M_tempMatrixWithoutZeta.reset(new matrix_Type(*this->M_localMap));
@@ -1349,9 +1320,6 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
 
     *jacobian += *this->M_mass;
     jacobian->globalAssemble();
-
-//std::string stringaP="M_jacobianSSPaolo";
-//jacobian->spy(stringaP);
 
     chrono.stop();
     this->M_Displayer->leaderPrintMax("   ... done in ", chrono.diff() );
@@ -1390,11 +1358,7 @@ solveJacobian( vector_Type&           step,
 
     vector_Type rhsFull (res);
 
-//std::string stringaM_temp="M_tempMatrix";
-//this->M_tempMatrix->spy(stringaM_temp);
     applyBoundaryConditions( *this->M_tempMatrix, rhsFull, BCh);
-//std::string stringaPBC="M_jacobianSSPaoloBC";
-//this->M_tempMatrix->spy(stringaPBC);
 
     this->M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
 
@@ -1407,7 +1371,7 @@ solveJacobian( vector_Type&           step,
 
     chrono.stop();
 
-    //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a 
+    //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a
     //totally different expression.For structural problems it is not used
     *this->M_residual_d = *this->M_mass*step;
 }
