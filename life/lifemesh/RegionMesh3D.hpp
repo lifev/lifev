@@ -2149,7 +2149,8 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
 {
     point_Type aPoint;
     aPoint.setBoundary(boundary);
-    if(vertex) aPoint.replaceFlag(aPoint.flag() | EntityFlags::VERTEX);
+    aPoint.setId(pointList.size());
+    if(vertex) aPoint.setFlag( EntityFlags::VERTEX );
     return addPoint(aPoint);
 }
 
