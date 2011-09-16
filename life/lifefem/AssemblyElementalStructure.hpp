@@ -76,57 +76,10 @@ typedef boost::numeric::ublas::zero_matrix<Real> ZeroMatrix;
 namespace AssemblyElementalStructure
 {
 
-//! Elementary mass for constant mass coefficient
-/*!
-  This function assembles the local mass matrix when the mass coefficient is constant.
-
-  @param coef The constant coefficient of the matrix
-  @param elmat The elementary mass matrix of the current volume
-  @param fe The current finite element
-  @param iblock The component of v that is concerned
-  @param jblock The component of v that is concerned
-  @param nb The number of the dimensions of the problem
- */
-void mass( Real coef, MatrixElemental& elmat, const CurrentFE& fe, int iblock, int jblock, UInt nb );
-
-
-//! Elementary mass for not-constant mass coefficient
-/*!
-  This function assembles the local mass matrix when the mass coefficient is variable in time and in space.
-
-  @param qpt_coef The not-constant coefficient of the matrix
-  @param elmat The elementary mass matrix of the current volume
-  @param fe The current finite element
-  @param iblock The component of v that is concerned
-  @param jblock The component of v that is concerned
-  @param nb The number of the dimensions of the problem
- */
-void mass( const std::vector<Real>& qpt_coef, MatrixElemental& elmat, const CurrentFE& fe, int iblock, int jblock, UInt nb );
-
-
-  
 //! METHODS SHARED BETWEEN LINEAR ELASTIC MODEL AND ST.VENANT-KIRCHHOFF MODEL
-
-//! Elementary first term of the linear stiffness matrix for linear elasticity (see the reference)
-/*!
-  This function assembles the local first term of the linear stiffness matrix for linear elasticity.
-
-  @param coef The constant coefficient of the matrix 
-  @param elmat The elementary matrix of the current volume
-  @param fe The current finite element
- */
-void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
-
-
-//! Elementary second term of the linear stiffness matrix for linear elasticity (see the reference)
-/*!
-  This function assembles the local second term of the linear stiffness matrix for linear elasticity.
-
-  @param coef The constant coefficient of the matrix 
-  @param elmat The elementary matrix of the current volume
-  @param fe The current finite element
- */
-void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
+//! These two methods are implemented in AssemblyElemental.cpp.
+//void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
+//void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 
@@ -137,7 +90,7 @@ void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 /*!
   This function assembles the local first term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -149,7 +102,7 @@ void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& el
 /*!
   This function assembles the local second term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -161,7 +114,7 @@ void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental
 /*!
   This function assembles the local third term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -173,7 +126,7 @@ void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 /*!
   This function assembles the local fourth term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the fourth term of the nonlinear stiffness matrix 
+  @param coef The constant coefficient of the fourth term of the nonlinear stiffness matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary stiffness matrix of the current volume
   @param fe The current finite element
@@ -185,7 +138,7 @@ void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
 /*!
   This function assembles the local fifth term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -197,7 +150,7 @@ void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElem
 /*!
   This function assembles the local fifth-2 term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -209,7 +162,7 @@ void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixE
 /*!
   This function assembles the local sixth term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -225,7 +178,7 @@ void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixE
 /*!
   This function assembles the local first term of the Jacobian matrix of the nonlinear stiffness matrix of the St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -237,7 +190,7 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 /*!
   This function assembles the local second term of the Jacobian matrix of the nonlinear stiffness matrix of the St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -249,7 +202,7 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
 /*!
   This function assembles the local third term of the Jacobian matrix of the nonlinear stiffness matrix of the St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -261,7 +214,7 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
 /*!
   This function assembles the local fourth term of the Jacobian matrix of the nonlinear stiffness matrix of the St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -273,7 +226,7 @@ void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixEl
 /*!
   This function assembles the local fifth term of the Jacobian matrix of the nonlinear stiffness matrix of the St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -285,7 +238,7 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
 /*!
   This function assembles the local sixth term of the Jacobian matrix of the nonlinear stiffness matrix of the St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -297,7 +250,7 @@ void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, Matri
 /*!
   This function assembles the local seventh term of the Jacobian matrix of the nonlinear stiffness matrix of the St.Venant-Kirchhoff model.
 
-  @param coef The constant coefficient of the matrix 
+  @param coef The constant coefficient of the matrix
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
@@ -366,7 +319,7 @@ void stiff_Jac_Pvol_2term( Real coef, const KNMK<Real> CofFk, const KN<Real> Jk,
   @param elvec The elementary vector of the current volume
   @param fe The current finite element
  */
-void source_P1iso_NH(Real coef, const KNMK<Real> CofFk, const KNMK<Real> Fk, const KN<Real> Jk, const KN<Real> Ic_isok, VectorElemental& elvec, const CurrentFE& fe); 
+void source_P1iso_NH(Real coef, const KNMK<Real> CofFk, const KNMK<Real> Fk, const KN<Real> Jk, const KN<Real> Ic_isok, VectorElemental& elvec, const CurrentFE& fe);
 
 
 

@@ -40,8 +40,10 @@
 #ifndef _NEOHOOKEANMATERIAL_H_
 #define _NEOHOOKEANMATERIAL_H_
 
-#include <life/lifesolver/StructuralMaterial.hpp>
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#include <life/lifesolver/StructuralMaterial.hpp>
 
 namespace LifeV
 {

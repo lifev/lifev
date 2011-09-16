@@ -60,6 +60,7 @@
 #include <life/lifearray/VectorEpetra.hpp>
 
 #include <life/lifefem/Assembly.hpp>
+#include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/AssemblyElementalStructure.hpp>
 #include <life/lifefem/FESpace.hpp>
 
@@ -147,7 +148,7 @@ public:
     virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
 
 
-    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
+    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector

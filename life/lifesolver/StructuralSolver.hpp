@@ -57,6 +57,7 @@
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 
+#include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/AssemblyElementalStructure.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/BCManage.hpp>
@@ -800,7 +801,8 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& /*factor*/)
       M_elmatM->zero();
 
       //! mass
-      AssemblyElementalStructure::mass( dti2 * M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
+      // The method mass is implemented in AssemblyElementa.cpp
+      mass( dti2 * M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
 
       //! assembling
       for ( UInt ic = 0; ic < nc; ic++ )
