@@ -535,7 +535,10 @@ MultiscaleModel1D::initializeSolution()
         M_solver->computeW1W2( *M_solution );
     }
     else
+    {
         M_solver->initialize( *M_solution );
+        copySolution( *M_solution, *M_exporterSolution );
+    }
 }
 
 void
