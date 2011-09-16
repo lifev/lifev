@@ -114,7 +114,17 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     M_model->setupData( dataFile( "Problem/ProblemFile", "./MultiscaleDatabase/Models/NoModel" ) + ".dat" );
 
     // Setup Models
+    if ( multiscaleProblemStep )
+        importIterationNumber();
     M_model->setupModel();
+
+    // Save the initial solution if it is the very first time step
+    if ( !multiscaleProblemStep )
+        M_model->saveSolution();
+
+    // Move to the "true" first time-step
+    M_globalData->dataTime()->updateTime();
+    M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 }
 
 bool
@@ -124,16 +134,6 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8000 ) << "MultiscaleSolver::solveProblem() \n";
 #endif
-
-    // Save the initial solution if it is the very first time step
-    if ( !multiscaleProblemStep )
-        M_model->saveSolution();
-    else
-        importIterationNumber();
-
-    // Move to the "true" first time-step
-    M_globalData->dataTime()->updateTime();
-    M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 
     // Chrono definitions
     LifeChrono buildUpdateChrono;

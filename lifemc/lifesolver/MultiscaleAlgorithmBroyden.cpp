@@ -283,13 +283,17 @@ MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
         if ( !M_jacobian.get() == 0 )
         {
             if ( M_comm->MyPID() == 0 )
-                std::cout << " MS-  Exporting Jacobian matrix at time        " << number2string( M_multiscale->globalData()->dataTime()->time() ) << std::endl;
+                std::cout << " MS-  Exporting Jacobian matrix ...            " << std::flush;
 
-            // We create an integer variable to be used as a string for the name of the matrix in the matrix container.
-            long long timeInteger = M_multiscale->globalData()->dataTime()->time() * 1E+10;
+            LifeChrono exportJacobianChrono;
+            exportJacobianChrono.start();
 
-            M_jacobian->exportToHDF5( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobian" + "_" + number2string( multiscaleProblemStep ), number2string( timeInteger ), M_truncate );
+            M_jacobian->exportToHDF5( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobian" + "_" + number2string( multiscaleProblemStep ), number2string( M_multiscale->globalData()->dataTime()->timeStepNumber() ), M_truncate );
             M_truncate = false;
+
+            exportJacobianChrono.stop();
+            if ( M_comm->MyPID() == 0 )
+                std::cout << "done in " << exportJacobianChrono.globalDiff( *M_comm ) << " s." << std::endl;
 
             //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianExported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( timeInteger ) );
         }
@@ -299,13 +303,18 @@ void
 MultiscaleAlgorithmBroyden::importJacobianFromHDF5()
 {
     if ( M_comm->MyPID() == 0 )
-        std::cout << " MS-  Importing Jacobian matrix from time      " << number2string( M_multiscale->globalData()->dataTime()->time() ) << std::endl;
+        std::cout << " MS-  Importing Jacobian matrix                " << std::flush;
 
-    // We create an integer variable to be used as a string for the name of the matrix in the matrix container.
-    long long timeInteger = M_multiscale->globalData()->dataTime()->time() * 1E+10;
+    LifeChrono importJacobianChrono;
+    importJacobianChrono.start();
 
     M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50 ) );
-    M_jacobian->importFromHDF5( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobian" + "_" + number2string( multiscaleProblemStep - 1 ), number2string( timeInteger ) );
+    M_jacobian->importFromHDF5( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobian" + "_" + number2string( multiscaleProblemStep - 1 ), number2string( M_multiscale->globalData()->dataTime()->timeStepNumber() ) );
+
+    importJacobianChrono.stop();
+
+    if ( M_comm->MyPID() == 0 )
+        std::cout << "done in " << importJacobianChrono.globalDiff( *M_comm ) << " s. (Time " << M_multiscale->globalData()->dataTime()->time() << ", Iteration " << M_multiscale->globalData()->dataTime()->timeStepNumber() << ")" << std::endl;
 
     //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianImported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( timeInteger ) );
 }
