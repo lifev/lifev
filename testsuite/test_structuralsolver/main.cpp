@@ -108,7 +108,7 @@ std::set<UInt> parseList( const std::string& list )
 
 class Structure
 {
-public:  
+public:
   //@}
   /** @name Constructors, destructor
    */
@@ -203,7 +203,7 @@ Structure::run3d()
 {
     typedef StructuralSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
-    
+
     bool verbose = (parameters->comm->MyPID() == 0);
     // Number of boundary conditions for the velocity and mesh motion
     //
@@ -249,51 +249,24 @@ Structure::run3d()
     BCFunctionBase Homogen(fzero_scalar);
     BCFunctionBase Intern(InternalPressure);
 
-    
+
     // BC for cyl1x02_1796_edge.mesh
     vector <ID> compx(1), compy(1), compz(1);
     compx[0]=0; compy[0]=1, compz[0]=2;
 
-    // lower base
-    BCh->addBC("Base10 ", 2 , Essential, Component, fixed1, compz);
-    BCh->addBC("Base10 ", 20 , Essential, Component, fixed1, compz);
 
-    // upper base
-    BCh->addBC("Base3", 3 , Natural, Normal,Intern); // traction
-    BCh->addBC("Base3", 30 , Natural, Normal,Intern); // traction
-    //BCh->addBC("Base2 ", 3, Natural, Full, fixed1, 3); // free stress
-    //BCh->addBC("Base2 ", 30, Natural, Full, fixed1, 3); // free stress
-
-    //BCh->addBC("Base3", 1 , Natural, Normal,Intern); // compression
-    BCh->addBC("Base3", 1 , Natural, Full, fixed1, 3); // free stress surfac
-    
-    /*
-    // BC for vessel2x4x20_10cm.mesh
-    vector <ID> compx(1), compy(1), compz(1);
-    compx[0]=0; compy[0]=1, compz[0]=2;
-
-    // lower base
-    BCh->addBC("BaseSx ", 2 , Essential, Component, fixed1, compz);
-    BCh->addBC("BaseDx ", 3 , Essential, Component, fixed1, compz);
-
-    // upper base
-    BCh->addBC("BaseEx", 1, Natural, Normal,Intern); // internal pressure
-    ////////////vessel20.mesh////////////////////////////////////////////
-    BCh->addBC("BaseEx", 20, Natural, Normal,Intern); // internal pressure
-
-    BCh->addBC("BaseIn", 10, Natural, Normal,  Homogen); // external pressure
-    //BCh->addBC("BaseEx", 10, Natural, Full, fixed1, 3); // external pressure
-    */
+    BCh->addBC("surf4", 4, EssentialVertices, Component, Homogeneous, compx);
+    BCh->addBC("surf2", 2, Natural,   Component, bcvPress, compx);
 
     StructuralSolver< RegionMesh3D<LinearTetra> > solid;
     solid.setup(dataStructure,
                 dFESpace,
-		BCh,
+                BCh,
                 parameters->comm);
 
     solid.setDataFromGetPot(dataFile);
     solid.buildSystem();
-    
+
 
     //
     // Temporal data and initial conditions
@@ -344,9 +317,6 @@ Structure::run3d()
 	exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
 	exporter->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
-	//vectorPtr_Type solidDisp ( new vector_Type(solid.getDisplacement(), exporter->mapType() ) );
-	//vectorPtr_Type solidVel  ( new vector_Type(solid.getVelocity(),  exporter->mapType() ) );
-	
 	vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(), exporter->mapType() ) );
 	vectorPtr_Type solidVel  ( new vector_Type(solid.velocity(),  exporter->mapType() ) );
 	vectorPtr_Type solidAcc  ( new vector_Type(solid.acceleration(),  exporter->mapType() ) );
@@ -359,18 +329,6 @@ Structure::run3d()
 
 	exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "acceleration",
                            dFESpace, solidAcc, UInt(0) );
-	
-
-	/*
-	exporter->addVariable( ExporterData::Vector, "displacement", solidDisp,
-			       UInt(0), dFESpace->dof().numTotalDof() );
-	
-	exporter->addVariable( ExporterData::Vector, "velocity", solidVel,
-			       UInt(0), dFESpace->dof().numTotalDof() );
-
-	exporter->addVariable( ExporterData::Vector, "acceleration", solidAcc,
-			       UInt(0), dFESpace->dof().numTotalDof() );
-	*/
 
 	exporter->postProcess( 0 );
 
@@ -388,7 +346,7 @@ Structure::run3d()
 		std::cout << std::endl;
 		std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
 	      }
-	
+
 	    //solid.updateSystem(dZero);    // Computes the rigth hand side
 	    solid.updateSystem();    // Computes the rigth hand side
 
@@ -400,7 +358,7 @@ Structure::run3d()
 	    *solidDisp = solid.displacement();
 	    *solidVel  = solid.velocity();
 	    *solidAcc  = solid.acceleration();
-	    
+
 	    //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
             //this->CheckResults(solid.displacement().norm2(),time);
@@ -409,8 +367,8 @@ Structure::run3d()
 	  }
 
 }
-    
-void Structure::CheckResults(const Real& dispNorm,const Real& time)
+
+void Structure::CheckResultsLinearElastic(const Real& dispNorm,const Real& time)
 {
     if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )
         this->resultChanged(time);
@@ -419,6 +377,37 @@ void Structure::CheckResults(const Real& dispNorm,const Real& time)
     if ( time == 0.003  && std::fabs(dispNorm-0.808509)>1e-4 )
         this->resultChanged(time);
 }
+
+void Structure::CheckResultsNonlinearVenantKirchhoff(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.002  && std::fabs(dispNorm-1.10232)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.003  && std::fabs(dispNorm-0.808509)>1e-4 )
+        this->resultChanged(time);
+}
+
+void Structure::CheckResultsNeohookean(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.002  && std::fabs(dispNorm-1.10232)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.003  && std::fabs(dispNorm-0.808509)>1e-4 )
+        this->resultChanged(time);
+}
+
+void Structure::CheckResultsExponential(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.002  && std::fabs(dispNorm-1.10232)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.003  && std::fabs(dispNorm-0.808509)>1e-4 )
+        this->resultChanged(time);
+}
+
 
 void Structure::resultChanged(Real time)
 {

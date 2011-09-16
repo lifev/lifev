@@ -36,7 +36,7 @@ SUBDIRS		= data  \
               test_TemplateTest \
               test_timeAdvance_orderI \
               test_timeAdvance_orderII \
-              test_structuralsolver 
+              test_structuralsolver
 
 # add newly created testsuite.at scripts to TESTSUITES to allow the automatic generation of the
 # 'testsuite' script upon modification of one of them
@@ -54,7 +54,10 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
 	   	   $(srcdir)/test_LevelSetSolver/testsuite.at \
            $(srcdir)/test_partition/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
-           $(srcdir)/test_structuralsolver/testsuite.at \
+           $(srcdir)/test_structuralsolver/testsuiteLE.at \
+           $(srcdir)/test_structuralsolver/testsuiteSVK.at \
+           $(srcdir)/test_structuralsolver/testsuiteNH.at \
+           $(srcdir)/test_structuralsolver/testsuiteEXP.at \
            $(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_timeAdvance_orderI/testsuite.at \
            $(srcdir)/test_timeAdvance_orderII/testsuite.at \
