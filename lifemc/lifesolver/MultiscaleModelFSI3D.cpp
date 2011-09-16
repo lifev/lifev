@@ -625,12 +625,13 @@ MultiscaleModelFSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dat
     const std::string exporterType = dataFile( "exporter/type", "ensight" );
 #ifdef HAVE_HDF5
     if ( exporterType.compare( "hdf5" ) == 0 )
-        exporter.reset( new hdf5IOFile_Type( dataFile, label ) );
+        exporter.reset( new hdf5IOFile_Type() );
     else
 #endif
-        exporter.reset( new ensightIOFile_Type( dataFile, label ) );
+        exporter.reset( new ensightIOFile_Type() );
 
-    exporter->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) + label );
+    exporter->setDataFromGetPot( dataFile );
+    exporter->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) +  label + "_" + number2string( multiscaleProblemStep ) );
     exporter->setPostDir( multiscaleProblemFolder );
 }
 
@@ -640,12 +641,13 @@ MultiscaleModelFSI3D::setupImporter( IOFilePtr_Type& importer, const GetPot& dat
     const std::string importerType = dataFile( "exporter/type", "ensight" );
 #ifdef HAVE_HDF5
     if ( importerType.compare( "hdf5" ) == 0 )
-        importer.reset( new hdf5IOFile_Type( dataFile, label ) );
+        importer.reset( new hdf5IOFile_Type() );
     else
 #endif
-        importer.reset( new ensightIOFile_Type( dataFile, label ) );
+        importer.reset( new ensightIOFile_Type() );
 
-    importer->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep - 1 ) + label );
+    importer->setDataFromGetPot( dataFile );
+    importer->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) +  label + "_" + number2string( multiscaleProblemStep - 1 ) );
     importer->setPostDir( multiscaleProblemFolder );
 }
 
