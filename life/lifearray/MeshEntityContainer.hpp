@@ -55,9 +55,9 @@ namespace Comparers{
  * They define a comparison operators for mesh entities according to some of
  * their attributes
  * The comparison operator is of the form
- * @verbatim
+ * @code
  * bool operator(MeshEntity const & a, MeshEntity const & b)
- * @endverbatim
+ * @endcode
  * and it should generate a well posed comparison.
  * @{
  */
@@ -111,9 +111,9 @@ namespace Predicates
  * Predicates are functors that take MeshEntity as template argument and
  * implement
  *
- * @verbatim
+ * @code
  *  bool operator()(const MeshEntity & entity)const
- * @endverbatim
+ * @endcode
  * @{
  */
 //! A simple predicate to test the boolean flag on a mesh entity
@@ -127,9 +127,11 @@ namespace Predicates
     Usage: if you want a predicate that tests if a boolean flag is equal to a given flag MYFLAG
     you create a object of type
 
+@code
     EntityFlagInterrogator<faceType> interrogator(MYFLAG,Flags::testAllSet)
 
     interrogator(myFace); // true if flags of myface all all equal to MYFLAG
+@endcode
 
     which can now be used on all std algorithms operating on containers of mesh entities
 
@@ -164,7 +166,9 @@ private:
     Usage: if you want a predicate that tests if an markerID is equal to a given flag MYFLAG
     you create a object of type
 
+@code
     EntityMarkerIDInterrogator<face_Type,ComparisonPolicy>(MYFLAG,mycomparisonpolicy())
+@endcode
 
     which can now be used on all std algorithms operating on containers of mesh entities
 
@@ -193,7 +197,7 @@ private:
 
     The class is a wrap up of Standard Library vector class.
     Its role is to held meshEntities.
-    Its old name MeshEntityContainer has been changed to MeshEntityContainer
+    Its old name VectorSimple has been changed to MeshEntityContainer
     Any other use of class is deprecated and it should be replaced by std::vector<T>
 
  */
@@ -255,7 +259,7 @@ public:
     //! @name Operators
     //@{
 
-    //! Assignement operator
+    //! Assignment operator
     /*!
         Copies source MeshEntityContainer vector into "this"
         @param vector MeshEntityContainer vector
@@ -340,20 +344,20 @@ public:
     /** General extractor.
      *  It extracts the a vector of pointers to the stored entities for which a
      *  predicate: i.e. a pointer to function with signature
-     *  @verbatim
+     *  @code
      *  bool predicate(DataType const &)
-     *  @endverbatim
+     *  @endcode
      *  or functor object with
-     *  @verbatim
+     *  @code
      *  bool operator()(DataType const &)
-     *  @endverbatim
+     *  @endcode
      *  returns true
      *
      *  The template parameter is the Predicate type (automatically deduced)
-     *  @verbatim
+     *  @code
      *  aPredicate p; // A certain predicate
      *  vector<face_Type *> theList=mesh.faceList.extractIdAccordingToPredicate(p);
-     *  @endverbatim
+     *  @endcode
      *
      *  @param p The predicate
      *  @return A vector of pointers to constant mesh entities of the same type
@@ -378,10 +382,14 @@ public:
      *  flag_Type flag()  is defined.
      *  Examples:
      *
+     *  @code
      *  #include "MeshEntity.hpp"
-     *  v=sv.extractElementsWithFlag(PHYSICAL_BOUNDARY,testOneSet)
+     *  v=sv.extractElementsWithFlag(PHYSICAL_BOUNDARY,Flag::testOneSet)
+     *  @endcode
      *  will extracts all elements in the boundary
+     *  @code
      *  v=sv.extractElementsWithFlag(PHYSICAL_BOUNDARY|INTERNAL_INTERFACE, testOneSet)
+     *  @endcode
      *  will extracts all elements on the boundary or on an internal interface
      *
      *  @param refFlag the flag against which the test is made
@@ -401,8 +409,10 @@ public:
      *  flag_Type flag() is defined.
      *  Examples:
      *
+     *  @code
      *  #include "MeshEntity.hpp"
-     *  Uint i=sv.countElementsWithFlag(PHYSICAL_BOUNDARY,testOneSet)
+     *  Uint i=sv.countElementsWithFlag(PHYSICAL_BOUNDARY,Flag::testOneSet)
+     *  @endcode
      *  will count all elements on the boundary
      *
      *  @param refFlag the flag against which the test is made
@@ -425,9 +435,9 @@ public:
      * It reorders the container starting from the given offset up to the end of the container
      * so that elements with the given flag set are first. A policy must be passed.
      * Typically either testOneSet or testAllSet. A policy object must have a method
-     * @verbatim
+     * @code
      * bool operator()(DataType const & i, DataType const & r)
-     * @endverbatim
+     * @endcode
      * which compares the boolean flag i with the reference flag r.
      * It fixes the id of the stored entities and it returns the newToOld array
      * in case we need to fix some related id
@@ -449,9 +459,9 @@ public:
     /*!
      * This method is here for people which do not remember how std::for_each works.
      * It takes as argument a functor that must have the method
-     * @verbatim
+     * @code
      * void operator()(DataType & d)
-     * @endverbatim
+     * @endcode
      * and which changes d according to the user will.
      * @param fun The functor which implements the change
      *
@@ -520,13 +530,13 @@ void reorderAccordingToIdPermutation(EntityContainer & container,std::vector<ID>
  *  It has to be called AFTER the reordering of the references mesh entities (i.e. the points) and NOT before.
  *
  *  Example:
- *  @verbatim
+ *  @code
  *  reorderAccordingToIdPermutation(mesh.points(),newToOld);
  *  // Now all entities storing pointers to points are invalid!!
  *  fixAfterPermutation(mesh.faces(),mesh.points(),newToOld);
  *  //FIxed!
 
- *  @endverbatim
+ *  @endcode
  */
 template <typename EntityContainer, typename RefEntityContainer >
 void fixAfterPermutation(EntityContainer & container, RefEntityContainer const & refcontainer,std::vector<ID> const & newToOld)
@@ -555,11 +565,11 @@ void fixAfterPermutation(EntityContainer & container, RefEntityContainer const &
  *  By this utility the deep copy of a RegionMesh is now possible!
  *
  *  Example:
- *  @verbatim
+ *  @code
  *  PointList newPoints(mesh.pointList); // deep copy since list stores Point(s)
  *  FaceList  newFaces(mesh.faceList); // This is a shallow copy since we store Point*
  *  fixAfterShallowCopy(newFaces,newPoints); now the pointers point to newPoint
- *  @endverbatim
+ *  @endcode
  *
  *  @param container the entity container with the wrong pointers to Point
  *  @param newPointContainer the container with the list new Points
