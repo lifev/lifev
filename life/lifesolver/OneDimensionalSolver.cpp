@@ -428,7 +428,7 @@ OneDimensionalSolver::resetOutput( const solution_Type& solution )
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
     {
-        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".m";
+        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".mfile";
         outfile.open( file.c_str(), std::ios::trunc );
         outfile.close();
     }
@@ -440,7 +440,7 @@ OneDimensionalSolver::postProcess( const solution_Type& solution, const Real& ti
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
     {
-        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".m";
+        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".mfile";
         outfile.open( file.c_str(), std::ios::app );
         outfile.setf( ios::scientific, ios::floatfield );
 
