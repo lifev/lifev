@@ -40,6 +40,7 @@
 #include <life/lifecore/LifeDebug.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefilters/GetPot.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 namespace LifeV {
 
@@ -53,7 +54,7 @@ SolverBelosOperator::SolverBelosOperator( boost::shared_ptr<Epetra_Comm> comm ):
 
 }
 
-SolverBelosOperator::~PreconditionerSolverAmesosOperator()
+SolverBelosOperator::~SolverBelosOperator()
 {
     M_solver.reset();
 }
@@ -67,9 +68,8 @@ SolverBelosOperator::buildPreconditioner( operator_type& matrix, const list_Type
 {
     M_matrix = matrix;
     M_solver.reset( new linearSolver_type( M_comm ) );
-    M_solver->setParametersList( list );
-    M_solver->setParameters();
-    M_solver->setMatrix( *M_matrix );
+    M_solver->setParameters( list );
+    M_solver->setMatrix( M_matrix );
 
     return 0;
 }
@@ -112,7 +112,8 @@ SolverBelosOperator::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVect
 {
     if( M_solver )
     {
-        Epetra_MultiVector x(X);
+        VectorEpetra x(X);
+        M_solver->setRightHandSide( x );
         M_solver->solveSystem( x, Y, M_matrix );
     }
     return 0;

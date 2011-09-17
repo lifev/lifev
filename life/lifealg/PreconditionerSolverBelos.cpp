@@ -66,7 +66,7 @@ PreconditionerSolverBelos::createParametersList( list_Type&         list,
                                                   const std::string& section,
                                                   const std::string& subSection )
 {
-    createSolverAmesosList( list, dataFile, section, subSection );
+    createSolverBelosList( list, dataFile, section, subSection );
 }
 
 void
@@ -77,26 +77,76 @@ PreconditionerSolverBelos::createSolverBelosList( list_Type&         list,
 {
     bool displayList = dataFile( ( section + "/displayList" ).data(), false);
 
-    // Status parameters
-    list.set( "OutputLevel",  dataFile( ( section + "/" + subsection + "/outputlevel").data(), 0 ) );
-    list.set( "PrintStatus",  dataFile( ( section + "/" + subsection + "/print_status").data(), false ) );
-    list.set( "PrintTiming",  dataFile( ( section + "/" + subsection + "/print_timing").data(), false ) );
-    list.set( "ComputeVectorNorms", dataFile( ( section + "/" + subsection + "/computevectornorms").data(), false ) );
-    list.set( "ComputeTrueResidual", dataFile( ( section + "/" + subsection + "/computeresidual").data(), false ) );
+    bool found;
 
-    // Control parameters
-    list.set( "AddZeroToDiag",  dataFile( ( section + "/" + subsection + "/addzerotodiag").data(), false ) );
-    list.set( "Refactorize", dataFile( ( section + "/" + subsection + "/refactorize").data(), false ) );
-    list.set( "RcondThreshold", dataFile( ( section + "/" + subsection + "/rcondthreshold").data(), 1.e-2) );
-    list.set( "Redistribute", dataFile( ( section + "/" + subsection + "/redistribute").data(), true ) ); // SuperLU
-    list.set( "MaxProcs", dataFile( ( section + "/" + subsection + "/maxprocs").data(), -1) ); // ScalaPack
-    list.set( "ScaleMethod", dataFile( ( section + "/" + subsection + "/amesos/scalemethod").data(), 1) );
+    // Flexible Gmres will be used to solve this problem
+    bool flexibleGmres = dataFile( ( section + "/" + subsection + "/flexible_gmres" ).data(), false, found );
+    if ( found ) list.set( "Flexible Gmres", flexibleGmres );
 
-    // Type of the matrix: symmetric, SDP, general
-    list.set( "MatrixProperty", dataFile( ( section + "/" + subsection + "/matrixproperty").data(), "general" ) );
+    // Relative convergence tolerance requested
+    Real tolerance = dataFile( ( section + "/" + subsection + "/tol" ).data(), 1.e-6, found );
+    if ( found ) list.set( "Convergence Tolerance", tolerance );
 
-    // Type of the solver
-    list.set( "SolverType", dataFile( ( section + "/" + subsection + "/solvertype"  ).data(), "Klu" ) );
+    // Maximum number of iterations allowed
+    Int maxIter = dataFile( ( section + "/" + subsection + "/max_iter"      ).data(), 200, found );
+    if ( found ) list.set( "Maximum Iterations", maxIter );
+
+    // Output Frequency
+    Int outputFrequency = dataFile( ( section + "/" + subsection + "/output_frequency" ).data(), 1, found );
+    if ( found ) list.set( "Output Frequency", outputFrequency );
+
+    // Blocksize to be used by iterative solver
+    Int blockSize = dataFile( ( section + "/" + subsection + "/block_size" ).data(), 10, found );
+    if ( found ) list.set( "Block Size", blockSize );
+
+    // Maximum number of blocks in Krylov factorization
+    Int numBlocks = dataFile( ( section + "/" + subsection + "/num_blocks" ).data(), 10, found );
+    if ( found ) list.set( "Num Blocks", numBlocks );
+
+    // Maximum number of restarts allowed
+    Int maximumRestarts = dataFile( ( section + "/" + subsection + "/maximum_restarts" ).data(), 0, found );
+    if ( found ) list.set( "Maximum Restarts", maximumRestarts );
+
+    // Set the output style (General Brief)
+    std::string outputStyle = dataFile( ( section + "/" + subsection + "/output_style" ).data(), "brief", found );
+    if ( found )
+    {
+        if ( outputStyle == "brief" )   list.set( "Output Style", Belos::Brief );
+        if ( outputStyle == "general" ) list.set( "Output Style", Belos::General );
+    }
+
+    // Setting the desired output informations
+    int msg = Belos::Errors;
+    dataFile( ( section + "/" + subsection + "/enable_warnings" ).data(), true, found );
+    if ( found ) msg += Belos::Warnings;
+    dataFile( ( section + "/" + subsection + "/enable_iterations_details" ).data(), true, found );
+    if ( found ) msg += Belos::IterationDetails;
+    dataFile( ( section + "/" + subsection + "/enable_ortho_details" ).data(), false, found );
+    if ( found ) msg += Belos::OrthoDetails;
+    dataFile( ( section + "/" + subsection + "/enable_final_summary" ).data(), false, found );
+    if ( found ) msg += Belos::FinalSummary;
+    dataFile( ( section + "/" + subsection + "/enable_timing_details" ).data(), false, found );
+    if ( found ) msg += Belos::TimingDetails;
+    dataFile( ( section + "/" + subsection + "/enable_status_test_details" ).data(), false, found );
+    if ( found ) msg += Belos::StatusTestDetails;
+    dataFile( ( section + "/" + subsection + "/enable_debug" ).data(), false, found );
+    if ( found ) msg += Belos::Debug;
+    list.set( "Verbosity", msg );
+
+    // LifeV features
+
+    // Reuse the preconditioner from one to another call
+    bool reusePreconditioner = dataFile( ( section + "/" + subsection + "/reuse_preconditioner" ).data(), true, found );
+    if ( found ) list.set( "Reuse preconditioner", reusePreconditioner );
+
+    // Max iterations allowed to reuse the preconditioner
+    Int maxItersForReuse = dataFile( ( section + "/" + subsection + "/max_iters_for_reuse" ).data(), static_cast<Int> ( maxIter*8./10. ), found );
+    if ( found ) list.set( "max iteration for reuse", maxItersForReuse );
+
+    // If quitOnFailure is enabled and if some problems occur
+    // the simulation is stopped
+    bool quitOnFailure = dataFile( ( section + "/" + subsection + "/quit_on_failure").data(), false, found );
+    if ( found ) list.set( "Quit on failure", quitOnFailure );
 
     if ( displayList ) list.print( std::cout );
 }
@@ -180,7 +230,7 @@ PreconditionerSolverBelos::OperatorDomainMap() const
 void
 PreconditionerSolverBelos::setDataFromGetPot ( const GetPot& dataFile, const std::string& section )
 {
-    createSolverAmesosList( M_list, dataFile, section, "SolverAmesos" );
+    createSolverBelosList( M_list, dataFile, section, "SolverBelos" );
 }
 
 void

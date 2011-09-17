@@ -227,7 +227,7 @@ private:
 
 };
 
-inline Preconditioner* createSolverBelos() { return new PreconditionerSolverAmesos(); }
+inline Preconditioner* createSolverBelos() { return new PreconditionerSolverBelos(); }
 namespace
 {
     static bool registerSA = PRECFactory::instance().registerProduct( "SolverBelos", &createSolverBelos );
