@@ -100,13 +100,19 @@ SolverBelos::~SolverBelos()
 Int
 SolverBelos::solve( vector_Type& solution )
 {
+    return this->solve( solution.epetraVector() );
+}
+
+Int
+SolverBelos::solve( multiVector_Type& solution )
+{
     // Reset status informations
     M_lossOfPrecision = false;
     M_maxNumItersReached = false;
     bool failure = false;
 
     // Setting the unknown in the system
-    Teuchos::RCP<vector_Type::vector_type> solutionPtr( &( solution.epetraVector() ), false );
+    Teuchos::RCP<vector_Type::vector_type> solutionPtr( &( solution ), false );
     M_problem->setLHS( solutionPtr );
 
     // Build preconditioners if needed
@@ -364,6 +370,13 @@ void
 SolverBelos::setRightHandSide( const vector_Type& rhs )
 {
     Teuchos::RCP<const vector_Type::vector_type> rhsPtr( &( rhs.epetraVector() ), false );
+    M_problem->setRHS( rhsPtr );
+}
+
+void
+SolverBelos::setRightHandSide( const multiVector_Type& rhs )
+{
+    Teuchos::RCP<const vector_Type::vector_type> rhsPtr( &( rhs ), false );
     M_problem->setRHS( rhsPtr );
 }
 

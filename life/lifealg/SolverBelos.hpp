@@ -157,6 +157,18 @@ public:
      */
     Int solve( vector_Type& solution );
 
+    //! Solves the system and returns the number of iterations.
+    /*!
+      The Matrix has already been passed by the method
+      setMatrix or setOperator
+
+      The preconditioner is build starting from the matrix baseMatrixForPreconditioner
+      if it is set otherwise from the problem matrix.
+      @param solution Vector to store the solution
+      @return Number of iterations, M_maxIter+1 if solve failed.
+     */
+    Int solve( multiVector_Type&& solution );
+
     //! Compute the residual
     /*!
       @param solution Solution of the system
@@ -232,6 +244,12 @@ public:
       @param rhs right hand side of the system
      */
     void setRightHandSide( const vector_Type& rhs );
+
+    //! Method to set the right hand side (rhs) of the linear system
+    /*!
+      @param rhs right hand side of the system
+     */
+    void setRightHandSide( const multiVector_Type& rhs );
 
     //! Method to set an Preconditioner preconditioner
     /*!
