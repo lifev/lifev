@@ -112,9 +112,8 @@ SolverBelosOperator::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVect
 {
     if( M_solver )
     {
-        VectorEpetra x(X);
-        M_solver->setRightHandSide( x );
-        M_solver->solveSystem( x, Y, M_matrix );
+        M_solver->setRightHandSide( X );
+        M_solver->solve( Y );
     }
     return 0;
 }
