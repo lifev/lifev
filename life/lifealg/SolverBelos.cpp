@@ -476,17 +476,19 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     // LifeV features
 
     // Reuse the preconditioner from one to another call
-    bool reusePreconditioner = dataFile( ( section + "/reuse_preconditioner" ).data(), true, found );
+    bool reusePreconditioner = dataFile( ( section + "/reuse_preconditioner" ).data(), false, found );
+    if ( found ) M_parameterList.set( "Reuse preconditioner", reusePreconditioner );
     if ( found ) M_reusePreconditioner = reusePreconditioner;
-    //if ( found ) M_parameterList.set( "Reuse preconditioner", true );
 
     // Max iterations allowed to reuse the preconditioner
     Int maxItersForReuse = dataFile( ( section + "/max_iters_for_reuse" ).data(), static_cast<Int> ( maxIter*8./10. ), found );
+    if ( found ) M_parameterList.set( "Max iters for reuse", maxItersForReuse );
     if ( found ) M_maxItersForReuse = maxItersForReuse;
 
     // If quitOnFailure is enabled and if some problems occur
     // the simulation is stopped
     bool quitOnFailure = dataFile( ( section + "/quit_on_failure").data(), false, found );
+    if ( found ) M_parameterList.set( "Quit on failure", quitOnFailure );
     if ( found ) M_quitOnFailure = quitOnFailure;
 }
 
@@ -494,6 +496,10 @@ void
 SolverBelos::setParameters( const Teuchos::ParameterList& list )
 {
     M_parameterList.setParameters( list );
+    M_reusePreconditioner = M_parameterList.get( "Reuse preconditioner", false );
+    Int maxIter           = M_parameterList.get( "Maximum Iterations"  , 200 );
+    M_maxItersForReuse    = M_parameterList.get( "Max iters for reuse" , maxIter*8./10. );
+    M_quitOnFailure       = M_parameterList.get( "Quit on failure"     , false );
 }
 
 void
