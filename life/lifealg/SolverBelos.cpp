@@ -432,7 +432,7 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     if ( found ) M_parameterList.set( "Maximum Iterations", maxIter );
 
     // Output Frequency
-    Int outputFrequency = dataFile( ( section + "/max_iter" ).data(), 1, found );
+    Int outputFrequency = dataFile( ( section + "/output_frequency" ).data(), 1, found );
     if ( found ) M_parameterList.set( "Output Frequency", outputFrequency );
 
     // Blocksize to be used by iterative solver
@@ -596,15 +596,16 @@ SolverBelos::setupSolverManager()
             break;
         case BlockFGmres:
             M_parameterList.set( "Flexible Gmres", true );
+            M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
+            break;
         case BlockGmres:
-            // Create the block GMRes iteration
-            // Create the flexible, block GMRes iteration
             M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case PseudoBlockFGmres:
             M_parameterList.set( "Flexible Gmres", true );
+            M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
+            break;
         case PseudoBlockGmres:
-            // Create the pseudo block GMRes iteration
             M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
             break;
         case GmresPoly:
