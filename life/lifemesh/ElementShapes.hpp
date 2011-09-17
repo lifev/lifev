@@ -546,11 +546,11 @@ public:
     typedef Tetra BasRefSha;
     typedef LinearTriangle GeoBShape;
     //@}
-    static const UInt S_numPoints = 4;      //!< Number of points
+    static const UInt S_numPoints = 5;      //!< Number of points
     static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 0;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 0;   //!< Number of points per face
-    static const UInt S_numPointsPerVolume = 0; //!< Number of points per volume
+    static const UInt S_numPointsPerVolume = 1; //!< Number of points per volume
     static const UInt S_numPointsPerElement = S_numPointsPerVolume; //!< Number of points per element
     static const UInt S_numPointsPerFacet =  S_numPointsPerFace; //!< Number of points per facet
     static const UInt S_numPointsPerRidge = S_numPointsPerEdge;    //!< Number of points per ridge
