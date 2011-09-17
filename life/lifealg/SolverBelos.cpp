@@ -112,7 +112,7 @@ SolverBelos::solve( multiVector_Type& solution )
     bool failure = false;
 
     // Setting the unknown in the system
-    Teuchos::RCP<vector_Type::vector_type> solutionPtr( &( solution ), false );
+    Teuchos::RCP<multiVector_Type> solutionPtr( &( solution ), false );
     M_problem->setLHS( solutionPtr );
 
     // Build preconditioners if needed
@@ -376,7 +376,7 @@ SolverBelos::setRightHandSide( const vector_Type& rhs )
 void
 SolverBelos::setRightHandSide( const multiVector_Type& rhs )
 {
-    Teuchos::RCP<const vector_Type::vector_type> rhsPtr( &( rhs ), false );
+    Teuchos::RCP<const multiVector_Type> rhsPtr( &( rhs ), false );
     M_problem->setRHS( rhsPtr );
 }
 
