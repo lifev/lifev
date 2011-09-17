@@ -167,7 +167,7 @@ public:
       @param solution Vector to store the solution
       @return Number of iterations, M_maxIter+1 if solve failed.
      */
-    Int solve( multiVector_Type&& solution );
+    Int solve( multiVector_Type& solution );
 
     //! Compute the residual
     /*!
