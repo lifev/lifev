@@ -292,8 +292,9 @@ MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
             M_truncate = false;
 
             exportJacobianChrono.stop();
+            Real jacobianChrono( exportJacobianChrono.globalDiff( *M_comm ) );
             if ( M_comm->MyPID() == 0 )
-                std::cout << "done in " << exportJacobianChrono.globalDiff( *M_comm ) << " s." << std::endl;
+                std::cout << "done in " << jacobianChrono << " s." << std::endl;
 
             //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianExported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( timeInteger ) );
         }
@@ -312,9 +313,9 @@ MultiscaleAlgorithmBroyden::importJacobianFromHDF5()
     M_jacobian->importFromHDF5( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobian" + "_" + number2string( multiscaleProblemStep - 1 ), number2string( M_multiscale->globalData()->dataTime()->timeStepNumber() ) );
 
     importJacobianChrono.stop();
-
+    Real jacobianChrono( importJacobianChrono.globalDiff( *M_comm ) );
     if ( M_comm->MyPID() == 0 )
-        std::cout << "done in " << importJacobianChrono.globalDiff( *M_comm ) << " s. (Time " << M_multiscale->globalData()->dataTime()->time() << ", Iteration " << M_multiscale->globalData()->dataTime()->timeStepNumber() << ")" << std::endl;
+        std::cout << "done in " << jacobianChrono << " s. (Time " << M_multiscale->globalData()->dataTime()->time() << ", Iteration " << M_multiscale->globalData()->dataTime()->timeStepNumber() << ")" << std::endl;
 
     //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianImported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( timeInteger ) );
 }
