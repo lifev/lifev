@@ -682,6 +682,12 @@ void ExporterHDF5<MeshType>::writeTopology  ( std::ofstream& xdmf )
     case HEXA:
         FEstring = "Hexahedron";
         break;
+    case TRIANGLE:
+        FEstring = "Triangle";
+        break;
+    case QUAD:
+		FEstring = "Quadrilateral";
+		break;
     case LINE:
         FEstring = "Polyline";
         break;
@@ -791,21 +797,25 @@ void ExporterHDF5<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, co
         break;
     }
 
+    //vectors are threedimensional also in 2D (check)
+    UInt dim = (dvar.fieldDim()==1) ? 1 : nDimensions;
+
+
     // First: hyperslab definition, then description of the data
     xdmf <<
 
         "         <DataStructure ItemType=\"HyperSlab\"\n" <<
-        "                        Dimensions=\"" << globalUnknowns << " " << dvar.fieldDim() << "\"\n" <<
+        "                        Dimensions=\"" << globalUnknowns << " " << dim << "\"\n" <<
         "                        Type=\"HyperSlab\">\n" <<
         "           <DataStructure  Dimensions=\"3 2\"\n" <<
         "                           Format=\"XML\">\n" <<
         "               0    0\n" <<
         "               1    1\n" <<
-        "               " << globalUnknowns << " " << dvar.fieldDim() << "\n" <<
+        "               " << globalUnknowns << " " << dim << "\n" <<
         "           </DataStructure>\n" <<
 
         "           <DataStructure  Format=\"HDF\"\n" <<
-        "                           Dimensions=\"" << dvar.numDOF() << " " << dvar.fieldDim() << "\"\n" <<
+        "                           Dimensions=\"" << dvar.numDOF() << " " << dim << "\"\n" <<
         "                           DataType=\"Float\"\n" <<
         "                           Precision=\"8\">\n" <<
         "               " << M_outputFileName << ":/" << dvar.variableName()
@@ -826,11 +836,11 @@ void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
          << "                        Dimensions=\""
          << this->M_mesh->numGlobalVertices()
          << " "
-         << dvar.fieldDim()
+         << nDimensions
          << "\"\n"
          << "                        Function=\"JOIN($0 , $1, $2)\">\n";
 
-    for (Int i(0); i < dvar.fieldDim(); ++i)
+    for (Int i(0); i < nDimensions; ++i)
     {
         xdmf << "           <DataStructure  Format=\"HDF\"\n"
              << "                           Dimensions=\""
@@ -911,7 +921,7 @@ void ExporterHDF5<MeshType>::writeVector(const exporterData_Type& dvar)
     // content belongs to ArrayOfVectors[0,1,2].
     // ArrayOfVectors[0,1,2] are deleted when ArrayOfVectors is destroyed
 
-    for (UInt d ( 0 ); d < nDimensions; ++d)
+    for (UInt d ( 0 ); d < dvar.fieldDim(); ++d)
     {
         MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start+d*size, size);
         ArrayOfVectors[d].reset(new  vector_Type(subMap));
@@ -919,6 +929,14 @@ void ExporterHDF5<MeshType>::writeVector(const exporterData_Type& dvar)
 
         ArrayOfVectors[d]->epetraVector().ExtractView(&ArrayOfPointers[d], &MyLDA);
     }
+
+    for (UInt d ( dvar.fieldDim() ); d < nDimensions; ++d)
+	{
+    	MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start, size);
+    	ArrayOfVectors[d].reset(new  vector_Type(subMap));
+
+		ArrayOfVectors[d]->epetraVector().ExtractView(&ArrayOfPointers[d], &MyLDA);
+	}
 
     MapEpetra subMap(dvar.storedArrayPtr()->blockMap(), start, size);
     Epetra_MultiVector multiVector(View, *subMap.map(Unique), ArrayOfPointers, nDimensions);
@@ -1002,6 +1020,14 @@ void ExporterHDF5<MeshType>::writeGeometry()
     case TETRA:
     {
         const ReferenceFE & refFEP1 = feTetraP1;
+        MapEpetra tmpMapP1(refFEP1, *this->M_mesh,
+                           this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
+        subMap = tmpMapP1;
+        break;
+    }
+    case TRIANGLE:
+    {
+        const ReferenceFE & refFEP1 = feTriaP1;
         MapEpetra tmpMapP1(refFEP1, *this->M_mesh,
                            this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
         subMap = tmpMapP1;
@@ -1125,7 +1151,7 @@ void ExporterHDF5<MeshType>::readVector( exporterData_Type& dvar)
 
     // then put back value in our VectorEpetra
 
-    for (UInt d ( 0 ); d < nDimensions; ++d)
+    for (UInt d ( 0 ); d < dvar.fieldDim(); ++d)
     {
         dvar.storedArrayPtr()->subset(*subVar, subMap,  0, start+d*size, d );
     }
