@@ -104,27 +104,27 @@ Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, con
 
 Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
 {
-    return Real(i == 0);
+    return (i == 0);
 }
 #endif
 
 #ifdef TEST_RHS
 Real epsilon(1);
 
-Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& z , const ID& /* i */ )
+Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */, const ID& /* i */ )
 {
-    return  sin(x+y)+z*z/2;
+    return  sin(x)+y*y/2;
 }
 
 
 Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ , const ID& /* i */ )
 {
-    return  2*sin(x+y)-1;
+    return  sin(x)-1;
 }
 #endif
 
 
-typedef RegionMesh3D<LinearTetra> mesh_type;
+typedef RegionMesh2D<LinearTriangle> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
 typedef VectorEpetra vector_type;
 
@@ -144,19 +144,16 @@ main( int argc, char** argv )
 // Read first the data needed
 
     if (verbose) std::cout << " -- Reading the data ... " << std::flush;
-    GetPot dataFile( "data" );
+    GetPot dataFile( "data_2d" );
     if (verbose) std::cout << " done ! " << std::endl;
 
-    const UInt Nelements(dataFile("mesh/nelements",10));
-    if (verbose) std::cout << " ---> Number of elements : " << Nelements << std::endl;
 
 // Build and partition the mesh
 
-    if (verbose) std::cout << " -- Building the mesh ... " << std::flush;
-    boost::shared_ptr< mesh_type > fullMeshPtr(new RegionMesh3D<LinearTetra>);
-    regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
-                   2.0,   2.0,   2.0,
-                   -1.0,  -1.0,  -1.0);
+    if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
+    MeshData meshData(dataFile, "mesh");
+    boost::shared_ptr< mesh_type > fullMeshPtr(new mesh_type());
+    readMesh(*fullMeshPtr,meshData);
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
@@ -219,7 +216,7 @@ main( int argc, char** argv )
 #ifdef TEST_RHS
     Real matrixNorm(systemMatrix->norm1());
     if (verbose) std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
-    if ( std::fabs(matrixNorm - 1.68421 ) > 1e-3)
+    if ( std::fabs(matrixNorm - 8 ) > 1e-3)
     {
         std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
         return EXIT_FAILURE;
@@ -319,12 +316,12 @@ main( int argc, char** argv )
     if (verbose) std::cout << " ---> Norm Inf : " << linferror << std::endl;
 
 
-    if (l2error > 0.0055)
+    if (l2error > 0.0026)
     {
         std::cout << " <!> Solution has changed !!! <!> " << std::endl;
         return EXIT_FAILURE;
     }
-    if (linferror > 0.0046)
+    if (linferror > 0.000016)
     {
         std::cout << " <!> Solution has changed !!! <!> " << std::endl;
         return EXIT_FAILURE;
