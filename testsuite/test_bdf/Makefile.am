@@ -20,7 +20,7 @@ check_HEADERS = test_bdf.hpp ud_functions.hpp
 
 check_PROGRAMS = test_bdf test_bdf_2d
 test_bdf_SOURCES = main.cpp  test_bdf.cpp
-test_bdf_2d_SOURCES = main_2d.cpp  test_bdf_2d.cpp
+test_bdf_2d_SOURCES = main.cpp  test_bdf_2d.cpp
 
 link:
 	test -a data || ln -s $(srcdir)/data 
