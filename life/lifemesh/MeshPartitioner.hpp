@@ -1369,8 +1369,7 @@ void MeshPartitioner<MeshType>::constructFacets()
             // true if we are on a subdomain border
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
             {
-            	std::cout<< "CALL: " << M_originalMesh->facet(*is).id() << " "<< M_originalMesh->facet(*is).point(0).id() << " "<< M_originalMesh->facet(*is).point(1).id() << " " << elem1 << " " << elem2 << " " << count << " " << M_localFacets[i].size() << std::endl;
-                // set the flag for facets on the subdomain border
+            	// set the flag for facets on the subdomain border
                 pf->replaceFlag( Flag::turnOn ( pf->flag(), EntityFlags::SUBDOMAIN_INTERFACE ) );
 
                 // build GhostEntityData
