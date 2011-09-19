@@ -171,7 +171,7 @@ void advection(MatrixElemental& localAdv,
                 //Loop on the quadrature nodes
                 for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
-                    for (UInt iDim(0); iDim<3; ++iDim)
+                    for (UInt iDim(0); iDim<advCFE.nbCoor(); ++iDim)
                     {
                         localValue += localValues[iQuadPt][iDim]
                                       * advCFE.dphi(jDof,iDim,iQuadPt)
