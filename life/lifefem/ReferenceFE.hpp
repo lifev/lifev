@@ -83,11 +83,12 @@ enum FE_TYPE
 
     FE_P0_2D = 10,
     FE_P1_2D = 11,
-    FE_P2_2D = 12,
+    FE_P1bubble_2D =12,
+    FE_P2_2D = 13,
 
-    FE_Q0_2D = 13,
-    FE_Q1_2D = 14,
-    FE_Q2_2D = 15,
+    FE_Q0_2D = 15,
+    FE_Q1_2D = 16,
+    FE_Q2_2D = 17,
 
     FE_P0_3D = 20,
     FE_P1_3D = 21,

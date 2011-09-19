@@ -1418,11 +1418,12 @@ feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
 
     // Distinguish the other cases
     else if (((refFE().type() == FE_P1_3D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_3D) || (OriginalSpace.refFE().type() == FE_P2_3D) ) ) ||
+    	((refFE().type() == FE_P1_2D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_2D) || (OriginalSpace.refFE().type() == FE_P2_3D) ) ) ||
     	((refFE().type() == FE_P1_2D) && ( OriginalSpace.refFE().type() == FE_P2_2D ) ) ||
     	((refFE().type() == FE_Q1_3D) && ( OriginalSpace.refFE().type() == FE_Q2_3D ) ) ||
     	((refFE().type() == FE_Q1_2D) && ( OriginalSpace.refFE().type() == FE_Q2_2D ) ) ||
-    	((refFE().type() == FE_P1bubble_3D) && (OriginalSpace.refFE().type() == FE_P1_3D) ) )
-
+    	((refFE().type() == FE_P1bubble_3D) && (OriginalSpace.refFE().type() == FE_P1_3D) ) ||
+    	((refFE().type() == FE_P1bubble_2D) && (OriginalSpace.refFE().type() == FE_P1_2D) ))
     {
     	InterpolatedVectorPtr.reset(new vector_type( linearInterpolate(OriginalSpace,OriginalVector) ) );
     }
@@ -1437,6 +1438,7 @@ feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
         };
 
     	if(((refFE().type() == FE_P2_3D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_3D) || (OriginalSpace.refFE().type() == FE_P1_3D) ) ) ||
+    	   ((refFE().type() == FE_P2_2D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_2D) || (OriginalSpace.refFE().type() == FE_P1_2D) ) ) ||
     	   ((refFE().type() == FE_P2_2D) && ( OriginalSpace.refFE().type() == FE_P1_2D ) ) )
     		InterpolatedVectorPtr.reset(new vector_type( P2Interpolate(OriginalSpace,OriginalVector) ));
 
@@ -1579,6 +1581,9 @@ FESpace<MeshType, MapType>::setSpace( const std::string& space, UInt dimension )
 			break;
 
 		case P1Bubble :
+			M_refFE = &feTriaP1bubble;
+			M_Qr    = &quadRuleTria6pt;
+			M_bdQr  = &quadRuleSeg2pt;
 			break;
 
 		case P2 :
@@ -1949,6 +1954,10 @@ polynomialDegree() const
     case FE_Q2_3D:
         return 2;
         break;
+
+    case FE_P1bubble_2D:
+    	return 3;
+    	break;
 
     case FE_P1bubble_3D:
     case FE_P2tilde_3D:
