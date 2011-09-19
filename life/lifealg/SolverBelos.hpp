@@ -358,6 +358,7 @@ private:
     Int                          M_maxItersForReuse;
     bool                         M_reusePreconditioner;
     bool                         M_quitOnFailure;
+    bool                         M_silent;
 
     // Status information
     bool                         M_lossOfPrecision;

@@ -66,6 +66,7 @@ SolverBelos::SolverBelos() :
         M_maxItersForReuse     ( 0 ),
         M_reusePreconditioner  ( false ),
         M_quitOnFailure        ( false ),
+        M_silent               ( false ),
         M_lossOfPrecision      ( false ),
         M_maxNumItersReached   ( false )
 {
@@ -83,6 +84,7 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_maxItersForReuse     ( 0 ),
         M_reusePreconditioner  ( false ),
         M_quitOnFailure        ( false ),
+        M_silent               ( false ),
         M_lossOfPrecision      ( false ),
         M_maxNumItersReached   ( false )
 {
@@ -126,7 +128,7 @@ SolverBelos::solve( multiVector_Type& solution )
     }
     else
     {
-        M_displayer->leaderPrint( "SLV-  Reusing precond ...\n" );
+        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Reusing precond ...\n" );
     }
 
     bool set = M_problem->setProblem();
@@ -143,7 +145,7 @@ SolverBelos::solve( multiVector_Type& solution )
     chrono.start();
     Belos::ReturnType ret = M_solverManager->solve();
     chrono.stop();
-    M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
+    if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
 
     // Getting informations post-solve
     Int numIters = M_solverManager->getNumIters();
@@ -164,7 +166,7 @@ SolverBelos::solve( multiVector_Type& solution )
         chrono.start();
         ret = M_solverManager->solve();
         chrono.stop();
-        M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
+        if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
     }
 
     if ( M_lossOfPrecision )
@@ -175,7 +177,7 @@ SolverBelos::solve( multiVector_Type& solution )
 
     if ( ret == Belos::Converged )
     {
-        M_displayer->leaderPrint( "SLV-  Convergence in " , numIters, " iterations\n" );
+        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Convergence in " , numIters, " iterations\n" );
     }
     else
     {
@@ -220,17 +222,15 @@ SolverBelos::printStatus()
     std::string str;
 
     /*
-    // AztecOO informations
-    if ( status[AZ_why] == AZ_normal         ) stat << "Normal Convergence    ";
-    else if ( status[AZ_why] == AZ_maxits    ) stat << "Maximum iters reached ";
-    else if ( status[AZ_why] == AZ_loss      ) stat << "Accuracy loss         ";
-    else if ( status[AZ_why] == AZ_ill_cond  ) stat << "Ill-conditioned       ";
-    else if ( status[AZ_why] == AZ_breakdown ) stat << "Breakdown             ";
-
-    stat << setw(12) << "res = " << status[AZ_scaled_r];
-    stat << setw(4)  << " " << (Int)status[AZ_its] << " iters. ";
-    stat << std::endl;
-    */
+     AztecOO informations:
+     - Normal Convergence
+     - Maximum iters reached
+     - Accuracy loss
+     - Ill-conditioned
+     - Breakdown
+     If someone has the time, he may try to find a way to report
+     all these informations for the SolverBelos class as well.
+     */
 
     if ( M_lossOfPrecision )    stat << "Accuracy loss ";
     if ( M_maxNumItersReached ) stat << "Maximum number of iterations reached ";
@@ -265,15 +265,15 @@ SolverBelos::buildPreconditioner()
     if ( M_leftPreconditioner )
     {
         chrono.start();
-        M_displayer->leaderPrint( "SLV-  Computing the left preconditioner...\n" );
+        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the left preconditioner...\n" );
         if ( M_baseMatrixForPreconditioner.get() == 0 )
         {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n" );
+            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n" );
             M_leftPreconditioner->buildPreconditioner( M_matrix );
         }
         else
         {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n" );
+            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n" );
             M_leftPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
         }
         condest = M_leftPreconditioner->condest();
@@ -281,21 +281,21 @@ SolverBelos::buildPreconditioner()
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
         M_problem->setLeftPrec( belosPrec );
         chrono.stop();
-        M_displayer->leaderPrintMax( "SLV-  Left preconditioner computed in " , chrono.diff(), " s." );
-        M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
+        if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Left preconditioner computed in " , chrono.diff(), " s." );
+        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
     }
     if ( M_rightPreconditioner )
     {
         chrono.start();
-        M_displayer->leaderPrint( "SLV-  Computing the right preconditioner...\n" );
+        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the right preconditioner...\n" );
         if ( M_baseMatrixForPreconditioner.get() == 0 )
         {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n" );
+            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n" );
             M_rightPreconditioner->buildPreconditioner( M_matrix );
         }
         else
         {
-            M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n" );
+            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n" );
             M_rightPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
         }
         condest = M_rightPreconditioner->condest();
@@ -303,8 +303,8 @@ SolverBelos::buildPreconditioner()
         Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
         M_problem->setRightPrec( belosPrec );
         chrono.stop();
-        M_displayer->leaderPrintMax( "SLV-  Right preconditioner computed in " , chrono.diff(), " s." );
-        M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
+        if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Right preconditioner computed in " , chrono.diff(), " s." );
+        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
     }
 }
 
@@ -469,21 +469,22 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     }
 
     // Setting the desired output informations
+    bool msgEnable( false );
     int msg = Belos::Errors;
-    dataFile( ( section + "/enable_warnings" ).data(), true, found );
-    if ( found ) msg += Belos::Warnings;
-    dataFile( ( section + "/enable_iterations_details" ).data(), true, found );
-    if ( found ) msg += Belos::IterationDetails;
-    dataFile( ( section + "/enable_ortho_details" ).data(), false, found );
-    if ( found ) msg += Belos::OrthoDetails;
-    dataFile( ( section + "/enable_final_summary" ).data(), false, found );
-    if ( found ) msg += Belos::FinalSummary;
-    dataFile( ( section + "/enable_timing_details" ).data(), false, found );
-    if ( found ) msg += Belos::TimingDetails;
-    dataFile( ( section + "/enable_status_test_details" ).data(), false, found );
-    if ( found ) msg += Belos::StatusTestDetails;
-    dataFile( ( section + "/enable_debug" ).data(), false, found );
-    if ( found ) msg += Belos::Debug;
+    msgEnable = dataFile( ( section + "/enable_warnings" ).data(), true, found );
+    if ( found && msgEnable ) msg += Belos::Warnings;
+    msgEnable = dataFile( ( section + "/enable_iterations_details" ).data(), true, found );
+    if ( found && msgEnable ) msg += Belos::IterationDetails;
+    msgEnable = dataFile( ( section + "/enable_ortho_details" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::OrthoDetails;
+    msgEnable = dataFile( ( section + "/enable_final_summary" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::FinalSummary;
+    msgEnable = dataFile( ( section + "/enable_timing_details" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::TimingDetails;
+    msgEnable = dataFile( ( section + "/enable_status_test_details" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::StatusTestDetails;
+    msgEnable = dataFile( ( section + "/enable_debug" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::Debug;
     M_parameterList.set( "Verbosity", msg );
 
     // LifeV features
@@ -503,6 +504,12 @@ SolverBelos::setParameters( const GetPot& dataFile, const std::string& section )
     bool quitOnFailure = dataFile( ( section + "/quit_on_failure").data(), false, found );
     if ( found ) M_parameterList.set( "Quit on failure", quitOnFailure );
     if ( found ) M_quitOnFailure = quitOnFailure;
+
+    // All the information different from warnings and errors are
+    // not displayed
+    bool silent = dataFile( ( section + "/silent").data(), false, found );
+    if ( found ) M_parameterList.set( "Silent", silent );
+    if ( found ) M_silent = silent;
 }
 
 void
@@ -513,6 +520,7 @@ SolverBelos::setParameters( const Teuchos::ParameterList& list )
     Int maxIter           = M_parameterList.get( "Maximum Iterations"  , 200 );
     M_maxItersForReuse    = M_parameterList.get( "Max iters for reuse" , maxIter*8./10. );
     M_quitOnFailure       = M_parameterList.get( "Quit on failure"     , false );
+    M_silent              = M_parameterList.get( "Silent"              , false );
 }
 
 void
