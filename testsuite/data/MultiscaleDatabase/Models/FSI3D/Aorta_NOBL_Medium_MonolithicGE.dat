@@ -266,7 +266,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '11.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '11.0 * 1000' # E5
             #function = '1.0 * 100000' # 1
             #function = '5.0 * 10000' # 2
             #function = '1.0 * 10000' # 3
@@ -297,7 +298,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '9.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '9.0 * 1000' # E5
             #function = '1.0 * 100000' # 1
             #function = '5.0 * 10000' # 2
             #function = '1.0 * 10000' # 3
@@ -328,7 +330,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '9.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '9.0 * 1000' # E5
             #function = '1.0 * 100000' # 1
             #function = '5.0 * 10000' # 2
             #function = '1.0 * 10000' # 3
@@ -359,7 +362,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '9.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '9.0 * 1000' # E5
             #function = '1.0 * 100000' # 1
             #function = '5.0 * 10000' # 2
             #function = '1.0 * 10000' # 3
@@ -390,7 +394,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '12.5 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '12.5 * 1000' # E5
             #function = '1.0 * 100000' # 1
             #function = '5.0 * 10000' # 2
             #function = '1.0 * 10000' # 3
@@ -421,7 +426,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '17.5 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '17.5 * 1000' # E5
             #function = '1.0 * 100000' # 1
             #function = '5.0 * 10000' # 2
             #function = '1.0 * 10000' # 3
@@ -452,7 +458,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = 'L3=1; L4=0; V2=5.0; V3=6.0; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = 'L3=1; L4=0; V2=5.0; V3=6.0; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 1000' # E5
             #function = '1.0 * 100000' # 1
             #function = '5.0 * 10000' # 2
             #function = '1.0 * 10000' # 3

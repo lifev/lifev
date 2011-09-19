@@ -236,7 +236,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '12.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '12.0 * 1000' # E5
 
             [../]
 
@@ -256,7 +257,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '14.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '14.0 * 1000' # E5
 
             [../]
 
@@ -276,7 +278,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '14.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '14.0 * 1000' # E5
 
             [../]
 
@@ -296,7 +299,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '15.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '15.0 * 1000' # E5
 
             [../]
 
@@ -316,7 +320,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '15.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '15.0 * 1000' # E5
 
             [../]
 
@@ -336,7 +341,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '17.5 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '17.5 * 1000' # E5
 
             [../]
 
@@ -356,7 +362,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
             function = '17.5 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '17.5 * 1000' # E5
 
             [../]
 

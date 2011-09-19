@@ -256,13 +256,26 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
             [./RobinAlpha]
             #function = 0
-            function = '7.0 * 10000' # A
+            #function = '7.0 * 10000' # A
             #function = '9.0 * 10000' # B
             #function = '11.0 * 10000' # C
             #function = '13.0 * 10000' # D
+            function = '11.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '11.0 * 1000' # E5
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -275,13 +288,26 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
             [./RobinAlpha]
             #function = 0
-            function = '4.0 * 10000' # A
+            #function = '4.0 * 10000' # A
             #function = '6.0 * 10000' # B
             #function = '8.0 * 10000' # C
             #function = '10.0 * 10000' # D
+            function = '9.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '9.0 * 1000' # E5
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -294,13 +320,26 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
             [./RobinAlpha]
             #function = 0
-            function = '4.0 * 10000' # A
+            #function = '4.0 * 10000' # A
             #function = '6.0 * 10000' # B
             #function = '8.0 * 10000' # C
             #function = '10.0 * 10000' # D
+            function = '9.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '9.0 * 1000' # E5
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -313,13 +352,26 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
             [./RobinAlpha]
             #function = 0
-            function = '4.0 * 10000' # A
+            #function = '4.0 * 10000' # A
             #function = '6.0 * 10000' # B
             #function = '8.0 * 10000' # C
             #function = '10.0 * 10000' # D
+            function = '9.0 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '9.0 * 1000' # E5
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -332,13 +384,26 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
             [./RobinAlpha]
             #function = 0
-            function = '5.0 * 10000' # A
+            #function = '5.0 * 10000' # A
             #function = '7.0 * 10000' # B
             #function = '9.0 * 10000' # C
             #function = '11.0 * 10000' # D
+            function = '12.5 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '12.5 * 1000' # E5
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -351,13 +416,26 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
             [./RobinAlpha]
             #function = 0
-            function = '7.5 * 10000' # A
+            #function = '7.5 * 10000' # A
             #function = '10.0 * 10000' # B
             #function = '12.5 * 10000' # C
             #function = '15.0 * 10000' # D
+            function = '17.5 * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = '17.5 * 1000' # E5
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
@@ -370,13 +448,26 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
             [./RobinAlpha]
             #function = 0
-            function = 'L3=1; L4=0; V2=2.0; V3=3.0; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # A
+            #function = 'L3=1; L4=0; V2=2.0; V3=3.0; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # A
             #function = 'L3=1; L4=0; V2=3.0; V3=4.0; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # B
             #function = 'L3=1; L4=0; V2=4.0; V3=5.0; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # C
             #function = 'L3=1; L4=0; V2=5.0; V3=6.0; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # D
+            function = 'L3=1; L4=0; V2=5.0; V3=6.0; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 10000' # E
 
             [../RobinBeta]
-            function = 0
+            #function = 0
+            function = 'L3=1; L4=0; V2=5.0; V3=6.0; ((y>=L3)*V2+(y>=L4)*(y<L3)*(V2+(V3-V2)/(L4-L3)*(y-L3))+(y<L4)*V3) * 1000' # E5
+            #function = '1.0 * 100000' # 1
+            #function = '5.0 * 10000' # 2
+            #function = '1.0 * 10000' # 3
+            #function = '5.0 * 1000' # 4
+            #function = '1.0 * 1000' # 5
+            #function = '5.0 * 100' # 6
+            #function = '1.0 * 100' # 7
+            #function = '5.0 * 10' # 8
+            #function = '1.0 * 10' # 9
+            #function = '5.0 * 1' # 10
+            #function = '1.0 * 1' # 11
 
             [../]
 
