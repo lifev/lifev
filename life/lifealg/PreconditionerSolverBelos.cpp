@@ -116,21 +116,22 @@ PreconditionerSolverBelos::createSolverBelosList( list_Type&         list,
     }
 
     // Setting the desired output informations
+    bool msgEnable( false );
     int msg = Belos::Errors;
-    dataFile( ( section + "/" + subsection + "/enable_warnings" ).data(), true, found );
-    if ( found ) msg += Belos::Warnings;
-    dataFile( ( section + "/" + subsection + "/enable_iterations_details" ).data(), true, found );
-    if ( found ) msg += Belos::IterationDetails;
-    dataFile( ( section + "/" + subsection + "/enable_ortho_details" ).data(), false, found );
-    if ( found ) msg += Belos::OrthoDetails;
-    dataFile( ( section + "/" + subsection + "/enable_final_summary" ).data(), false, found );
-    if ( found ) msg += Belos::FinalSummary;
-    dataFile( ( section + "/" + subsection + "/enable_timing_details" ).data(), false, found );
-    if ( found ) msg += Belos::TimingDetails;
-    dataFile( ( section + "/" + subsection + "/enable_status_test_details" ).data(), false, found );
-    if ( found ) msg += Belos::StatusTestDetails;
-    dataFile( ( section + "/" + subsection + "/enable_debug" ).data(), false, found );
-    if ( found ) msg += Belos::Debug;
+    msgEnable = dataFile( ( section + "/" + subsection + "/enable_warnings" ).data(), true, found );
+    if ( found && msgEnable ) msg += Belos::Warnings;
+    msgEnable = dataFile( ( section + "/" + subsection + "/enable_iterations_details" ).data(), true, found );
+    if ( found && msgEnable ) msg += Belos::IterationDetails;
+    msgEnable = dataFile( ( section + "/" + subsection + "/enable_ortho_details" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::OrthoDetails;
+    msgEnable = dataFile( ( section + "/" + subsection + "/enable_final_summary" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::FinalSummary;
+    msgEnable = dataFile( ( section + "/" + subsection + "/enable_timing_details" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::TimingDetails;
+    msgEnable = dataFile( ( section + "/" + subsection + "/enable_status_test_details" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::StatusTestDetails;
+    msgEnable = dataFile( ( section + "/" + subsection + "/enable_debug" ).data(), false, found );
+    if ( found && msgEnable ) msg += Belos::Debug;
     list.set( "Verbosity", msg );
 
     // LifeV features
@@ -148,6 +149,16 @@ PreconditionerSolverBelos::createSolverBelosList( list_Type&         list,
     bool quitOnFailure = dataFile( ( section + "/" + subsection + "/quit_on_failure").data(), false, found );
     if ( found ) list.set( "Quit on failure", quitOnFailure );
 
+    // All the information different from warnings and errors are
+    // not displayed
+    bool silent = dataFile( ( section + "/" + subsection + "/silent").data(), false, found );
+    if ( found ) list.set( "Silent", silent );
+
+    std::string prec = dataFile( ( section + "/" + subsection + "/prec" ).data(), "ML" );
+    list.set( "prec", prec );
+    std::string precDataSection = dataFile( ( section + "/" + subsection + "/prec_data_section" ).data(), "" );
+    list.set( "prec data section", ( section + "/" + subsection+"/"+precDataSection ).data() );
+
     if ( displayList ) list.print( std::cout );
 }
 
@@ -155,7 +166,8 @@ Int
 PreconditionerSolverBelos::buildPreconditioner( operator_type& matrix )
 {
     M_prec.reset( new precOperator_Type( this->M_displayer.comm() ) );
-    M_prec->buildPreconditioner( matrix, M_list );
+    M_prec->buildSolver( matrix, M_list );
+    M_prec->buildPreconditioner( M_dataFile, M_precDataSection );
 
     this->M_preconditionerCreated = true;
 
@@ -231,6 +243,9 @@ void
 PreconditionerSolverBelos::setDataFromGetPot ( const GetPot& dataFile, const std::string& section )
 {
     createSolverBelosList( M_list, dataFile, section, "SolverBelos" );
+    M_solverPrecName    = this->M_list.get( "prec", "ML" );
+    M_precDataSection   = this->M_list.get( "prec data section", "" );
+    M_dataFile = dataFile;
 }
 
 void

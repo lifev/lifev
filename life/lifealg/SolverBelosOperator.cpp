@@ -64,13 +64,21 @@ SolverBelosOperator::~SolverBelosOperator()
 // ===================================================
 
 Int
-SolverBelosOperator::buildPreconditioner( operator_type& matrix, const list_Type& list )
+SolverBelosOperator::buildSolver( operator_type& matrix, const list_Type& list )
 {
     M_matrix = matrix;
     M_solver.reset( new linearSolver_type( M_comm ) );
     M_solver->setParameters( list );
     M_solver->setMatrix( M_matrix );
 
+    return 0;
+}
+
+Int
+SolverBelosOperator::buildPreconditioner( const GetPot& dataFile, const std::string& section )
+{
+    M_solver->setPreconditionerFromGetPot( dataFile, section );
+    M_solver->buildPreconditioner();
     return 0;
 }
 
@@ -83,7 +91,7 @@ SolverBelosOperator::resetPreconditioner()
 void
 SolverBelosOperator::showMe( std::ostream& output ) const
 {
-    if( M_comm->MyPID() == 0) output << "SolverAmesosOperator:\n" << M_solver->parametersList() << std::endl;
+    if( M_comm->MyPID() == 0) output << "SolverBelosOperator:\n" << M_solver->parametersList() << std::endl;
 }
 
 // ===================================================
@@ -127,7 +135,7 @@ SolverBelosOperator::NormInf() const
 const char*
 SolverBelosOperator::Label() const
 {
-    return "SolverAmesosOperator";
+    return "SolverBelosOperator";
 }
 
 bool

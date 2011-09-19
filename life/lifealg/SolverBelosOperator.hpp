@@ -61,6 +61,7 @@
 #include <life/lifecore/Displayer.hpp>
 #include <life/lifealg/SolverBelos.hpp>
 #include <life/lifealg/Preconditioner.hpp>
+#include <life/lifefilters/GetPot.hpp>
 
 class GetPot;
 
@@ -117,7 +118,13 @@ public:
     /*!
       @param matrix Matrix upon which construct the preconditioner
      */
-    Int buildPreconditioner( operator_type& matrix, const list_Type& list );
+    Int buildSolver( operator_type& matrix, const list_Type& list );
+
+    //! Build a preconditioner based on the given matrix
+    /*!
+      @param matrix Matrix upon which construct the preconditioner
+     */
+    Int buildPreconditioner( const GetPot& dataFile, const std::string& section );
 
     //! Reset the preconditioner
     void resetPreconditioner();

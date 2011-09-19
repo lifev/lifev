@@ -55,6 +55,7 @@
 #include <life/lifealg/SolverBelos.hpp>
 #include <life/lifealg/Preconditioner.hpp>
 #include <life/lifealg/SolverBelosOperator.hpp>
+#include <life/lifefilters/GetPot.hpp>
 
 class GetPot;
 
@@ -224,13 +225,16 @@ public:
 private:
 
     precOperatorPtr_Type M_prec;
+    std::string          M_solverPrecName;
+    std::string          M_precDataSection;
+    GetPot               M_dataFile;
 
 };
 
 inline Preconditioner* createSolverBelos() { return new PreconditionerSolverBelos(); }
 namespace
 {
-    static bool registerSA = PRECFactory::instance().registerProduct( "SolverBelos", &createSolverBelos );
+    static bool registerSB = PRECFactory::instance().registerProduct( "SolverBelos", &createSolverBelos );
 }
 
 } // namespace LifeV
