@@ -43,6 +43,38 @@ namespace LifeV
 namespace AssemblyElementalStructure
 {
 
+
+void computeGradientLocalDisplacement( const VectorElemental& uk_loc, const CurrentFE& fe )
+{
+    // \grad u^k at each quadrature point
+    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
+    Real s;
+
+    // loop on quadrature points
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+
+        // loop on space coordinates
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+
+            // loop  on space coordinates
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            {
+                s = 0.0;
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                {
+                    //  \grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
+                guk[ icoor ][ jcoor ][ ig ] = s;
+            }
+        }
+    }
+
+}
+
+
 // The methods for linear elastic model (stiff_strain and stiff_div) are implemented in AssemblyElemental.cpp
 
 //! Methods for St. Venant Kirchhoff model
@@ -326,7 +358,8 @@ void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixE
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
+    // \grad u^k at each quadrature point
+    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
 
 
     // loop on quadrature points
@@ -342,7 +375,10 @@ void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixE
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                {
+                    //  \grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -437,7 +473,7 @@ void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixE
 }
 // End of methods for the stiffness matrix (St. Venant-Kirchhoff material)
 
-//! Methods for the jacobian
+//! Methods for the jacobian (St. Venant-Kirchhoff material)
 
 //! \f$ coef \cdot ( [\nabla u]^T \nabla u^k + [\nabla u^k]^T \nabla u : \nabla v  )\f$
 void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
@@ -461,7 +497,10 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                {
+                    //  \grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -499,7 +538,8 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
+    // \grad u^k at each quadrature point
+    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -512,7 +552,10 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                {
+                     //  \grad u^k at a quadrature point //  \grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -550,7 +593,8 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
+    // \grad u^k at each quadrature point
+    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -563,7 +607,10 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                {
+                    //  \grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -602,7 +649,8 @@ void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixEl
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
+    // \grad u^k at each quadrature point
+    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
 
 
     // loop on quadrature points
@@ -618,7 +666,10 @@ void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixEl
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; // \grad u^k at a quadrature point
+                {
+                    // \grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -656,7 +707,8 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
+    // \grad u^k at each quadrature point
+    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
 
 
     // loop on quadrature points
@@ -672,7 +724,10 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                {
+                    //  \grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -713,7 +768,8 @@ void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, Matri
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
+    // \grad u^k at each quadrature point
+    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
 
 
     // loop on quadrature points
@@ -729,7 +785,10 @@ void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, Matri
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                {
+                    //  \grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
                 guk[ icoor ][ jcoor ][ ig ] = s;
             }
         }
@@ -743,7 +802,7 @@ void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, Matri
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor ); // estrae il blocco (icoor, jcoor)
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor ); // it extracts the (icoor, jcoor) block
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -772,7 +831,8 @@ void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, Matri
 {
 
     double s;
-    Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k  [\grad u^k]^T  at each quadrature point
+    // \grad u^k  [\grad u^k]^T  at each quadrature point
+    Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
     // attenzione in questa funzione si deve usare il trasposto
     // loop on quadrature points                                                // (\grad u^k  [\grad u^k]^T )^T
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -791,7 +851,10 @@ void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, Matri
                     for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     {
                         for ( UInt j = 0; j < fe.nbFEDof(); j++ )
-                            s  += fe.phiDer( i, n, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ] * fe.phiDer( j, n, ig ) * uk_loc.vec() [ j + jcoor * fe.nbFEDof() ] ; // \grad u^k  [\grad u^k]^T  at each quadrature point
+                        {
+                            // \grad u^k  [\grad u^k]^T  at each quadrature point
+                            s  += fe.phiDer( i, n, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ] * fe.phiDer( j, n, ig ) * uk_loc.vec() [ j + jcoor * fe.nbFEDof() ] ;
+                        }
                     }
                 }
                 guk_gukT[ icoor ][ jcoor ][ ig ] = s;
@@ -821,7 +884,7 @@ void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, Matri
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor ) // copia del blocco sulla diagonale
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
         mat += mat_tmp;

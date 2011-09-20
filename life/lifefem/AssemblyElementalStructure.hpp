@@ -76,11 +76,20 @@ typedef boost::numeric::ublas::zero_matrix<Real> ZeroMatrix;
 namespace AssemblyElementalStructure
 {
 
+//! Gradient of the displacement on the local element
+/*!
+  This function assembles the local tensor of the gradient of the displacement field
+
+  @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
+  @param fe The current finite element
+ */
+void computeGradientLocalDisplacement(const VectorElemental& uk_loc, const CurrentFE& fe );
+
+
 //! METHODS SHARED BETWEEN LINEAR ELASTIC MODEL AND ST.VENANT-KIRCHHOFF MODEL
 //! These two methods are implemented in AssemblyElemental.cpp.
 //void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 //void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
-
 
 
 //! METHODS FOR ST.VENANT-KIRCHHOFF MODEL

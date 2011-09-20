@@ -230,6 +230,10 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
 		}
 	    }
 
+      Real guk[ this->M_FESpace->fe().nbCoor() ][ this->M_FESpace->fe().nbCoor() ][ this->M_FESpace->fe().nbQuadPt() ];
+      AssemblyElementalStructure::computeGradientLocalDisplacement(dk_loc, this->M_FESpace->fe());
+
+
 	  //  3):  \lambda * ( \tr { [\grad d^k]^T \grad \delta d }, \div v  )
 	  AssemblyElementalStructure::stiff_derdiv( lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 	  //  4):  \mu * ( [\grad \delta d]^T \grad d^k + [\grad d^k]^T \grad \delta d : \grad v  )
