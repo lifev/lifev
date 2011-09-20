@@ -117,13 +117,13 @@ public:
      */
 
     //! Volume Element (1D)
-    typedef MeshElementMarked1D<EdgeShape, MC>  VolumeType;
+    typedef MeshElementMarked1D<EdgeShape, MC, 1>  VolumeType;
     //! Face Element (1D)
-    typedef MeshElementMarked1D<EdgeShape, MC>  FaceType;
+    typedef MeshElementMarked1D<EdgeShape, MC, 1>  FaceType;
     //! Edge Element (1D)
-    typedef MeshElementMarked1D<EdgeShape, MC>  EdgeType;
+    typedef MeshElementMarked1D<EdgeShape, MC, 1>  EdgeType;
     //! Point Element (0D)
-    typedef MeshElementMarked0D<MC>             point_Type;
+    typedef MeshElementMarked0D<MC, 1>             point_Type;
 
     /** @} */ // End of group Geometric Element Types
 
@@ -158,9 +158,9 @@ public:
     typedef typename GEOSHAPE::GeoBShape BElementShape;
 
     //! Element Geometric Type
-    typedef MeshElementMarked1D<GEOSHAPE, MC>   ElementType;
+    typedef MeshElementMarked1D<GEOSHAPE, MC, 1>   ElementType;
     //! Boundary Element Geometric Type
-    typedef MeshElementMarked0D<MC>             BElementType;
+    typedef MeshElementMarked0D<MC, 1>             BElementType;
 
     //! Element Geometric Shape Container Type
     typedef MeshEntityContainer<EdgeType>         Elements;
