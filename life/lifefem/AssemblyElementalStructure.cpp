@@ -44,10 +44,9 @@ namespace AssemblyElementalStructure
 {
 
 
-void computeGradientLocalDisplacement( const VectorElemental& uk_loc, const CurrentFE& fe )
+void computeGradientLocalDisplacement(KNMK<Real> gradientLocalDisplacement, const VectorElemental& uk_loc, const CurrentFE& fe )
 {
     // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
     Real s;
 
     // loop on quadrature points
@@ -67,7 +66,10 @@ void computeGradientLocalDisplacement( const VectorElemental& uk_loc, const Curr
                     //  \grad u^k at a quadrature point
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
                 }
-                guk[ icoor ][ jcoor ][ ig ] = s;
+		Int iCoor = static_cast< Int > ( icoor );
+		Int jCoor = static_cast< Int > ( jcoor );
+		Int iG = static_cast< Int > ( ig );
+                gradientLocalDisplacement( iCoor , jCoor , iG ) = s;
             }
         }
     }
@@ -81,34 +83,10 @@ void computeGradientLocalDisplacement( const VectorElemental& uk_loc, const Curr
 //! Methods for the stiffness matrix
 
 //! \f$ coef \cdot ( trace { [\nabla u^k]^T \nabla u }, \nabla\cdot  v  ) \f$
-void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_derdiv( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
+  Real s; 
 
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-    Real s;
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
     //
     // blocks (icoor,jcoor) of elmat
     //
@@ -126,7 +104,13 @@ void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& el
                     s = 0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-                            s += fe.phiDer( i, icoor, ig ) * guk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+			  {
+			    Int jCoor = static_cast< Int > (jcoor);
+			    Int K = static_cast< Int > (k);
+			    Int iG = static_cast< Int > (ig);
+
+                            s += fe.phiDer( i, icoor, ig ) * gradientLocalDisplacement( jCoor , K , iG ) * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+			  }
                     mat( i, j ) += coef * s;
                 }
             }
@@ -137,35 +121,11 @@ void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& el
 
 
 //! \f$ coef \cdot ( [\nabla u^k]^T \nabla u : \nabla v  )\f$
-void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergradbis( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
 
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
     //
     // blocks (icoor,jcoor) of elmat
     //
@@ -184,7 +144,13 @@ void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental
                     s = 0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                            s += fe.phiDer( i, k, ig ) * guk[ jcoor ][ icoor ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+			  {
+			    Int iCoor = static_cast<Int> (icoor);
+			    Int jCoor = static_cast<Int> (jcoor);
+			    Int iG = static_cast<Int> (ig);
+			    
+                            s += fe.phiDer( i, k, ig ) * gradientLocalDisplacement( jCoor, iCoor , iG ) * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+			  }
                     mat( i, j ) += coef * s;
                 }
             }
@@ -294,35 +260,11 @@ void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
     }
 }
 
-void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
+    
     //
     // blocks (icoor,jcoor) of elmat
     //
@@ -342,7 +284,13 @@ void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElem
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
                     {
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                            s += guk[ icoor ][ jcoor ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+			  {
+			    Int iCoor = static_cast<Int> (icoor);
+			    Int jCoor = static_cast<Int> (jcoor);
+			    Int iG = static_cast<Int> (ig);
+
+			    s += gradientLocalDisplacement( iCoor , jCoor , iG ) * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+			  }
                     }
                     mat( i, j ) += coef * s;
                 }
@@ -354,35 +302,10 @@ void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElem
 
 
 // coef * ( \grad u^k [\grad u]^T : \grad v )
-void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_Tr( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
     //
     // blocks (icoor,jcoor) of elmat
     //
@@ -402,7 +325,13 @@ void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixE
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
                     {
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                            s += guk[ icoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) * fe.phiDer( i, jcoor, ig ) * fe.weightDet( ig );
+			  {
+			    Int iCoor = static_cast<Int>(icoor);
+			    Int K = static_cast<Int>(k);
+			    Int iG = static_cast<Int>(ig);
+
+                            s += gradientLocalDisplacement( iCoor , K , iG )  * fe.phiDer( j, k, ig ) * fe.phiDer( i, jcoor, ig ) * fe.weightDet( ig );
+			  }
                     }
                     mat( i, j ) += coef * s;
                 }
@@ -476,35 +405,10 @@ void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixE
 //! Methods for the jacobian (St. Venant-Kirchhoff material)
 
 //! \f$ coef \cdot ( [\nabla u]^T \nabla u^k + [\nabla u^k]^T \nabla u : \nabla v  )\f$
-void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    //! \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-
-    //! loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        //! loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            //! loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
 
     for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
     {
@@ -521,8 +425,13 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         {
-                            s += fe.phiDer( i, k, ig ) * ( guk[ jcoor ][ k ][ ig ] * fe.phiDer( j, icoor, ig )
-                                                           + guk[ jcoor ][ icoor ][ ig ] * fe.phiDer( j, k, ig ) ) * fe.weightDet( ig );
+			  Int iCoor = static_cast<Int>(icoor);
+			  Int jCoor = static_cast<Int>(jcoor);
+			  Int K = static_cast<Int>(k);
+			  Int iG = static_cast<Int>(ig);
+
+			  s += fe.phiDer( i, k, ig ) * ( gradientLocalDisplacement( jCoor , K , iG ) * fe.phiDer( j, icoor, ig )
+							 + gradientLocalDisplacement( jCoor , iCoor , iG ) * fe.phiDer( j, k, ig ) ) * fe.weightDet( ig );
                         }
                     mat( i, j ) += coef * s;
                 }
@@ -534,32 +443,10 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 
 
 // coef * ( (\div u) \grad u_k : \grad v  )
-void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_divgrad_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                     //  \grad u^k at a quadrature point //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
 
     //
     // blocks (icoor,jcoor) of elmat
@@ -578,7 +465,13 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
                     s = 0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                            s += fe.phiDer( j, jcoor, ig ) * guk[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
+			  {
+			    Int iCoor = static_cast<Int>(icoor);
+			    Int K = static_cast<Int>(k);
+			    Int iG = static_cast<Int>(ig);
+
+                            s += fe.phiDer( j, jcoor, ig ) * gradientLocalDisplacement( iCoor , K , iG ) * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
+			  }
                     mat( i, j ) += coef * s;
                 }
             }
@@ -589,32 +482,10 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
 
 
 // coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  )
-void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_gradgrad_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
 
     for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
     {
@@ -632,7 +503,15 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
                         for ( UInt l = 0; l < fe.nbCoor(); ++l )
                         {
                             for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                                s += guk[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) * guk[ icoor ][ k ][ ig ] * fe.phiDer(i, k, ig ) * fe.weightDet( ig );
+			      {
+				Int iCoor = static_cast<Int> (icoor);
+				Int jCoor = static_cast<Int> (jcoor);
+				Int L = static_cast<Int> (l);
+				Int K = static_cast<Int> (k);
+				Int iG = static_cast<Int> (ig);
+				
+                                s += gradientLocalDisplacement( jCoor , L , iG ) * fe.phiDer( j, l, ig ) * gradientLocalDisplacement( iCoor , K , iG ) * fe.phiDer(i, k, ig ) * fe.weightDet( ig );
+			      }
                         }
                     }
                     mat( i, j ) += coef  * s;
@@ -645,35 +524,11 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
 
 
 // coef * ( \grad \delta u [\grad u^k]^T : \grad v )
-void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
+    Real s;
 
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    // \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
     //
     // blocks (icoor,jcoor) of elmat
     //
@@ -689,7 +544,12 @@ void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixEl
                 for ( UInt k = 0; k < fe.nbCoor(); ++k )
                 {
                     for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                        s += guk[ l ][ k ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+		      {
+			Int L = static_cast<Int> (l);
+			Int K = static_cast<Int> (k);
+			Int iG = static_cast<Int> (ig);
+                        s += gradientLocalDisplacement( L , K , iG ) * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+		      }
                 }
             }
             mat_tmp( i, j ) = coef * s;
@@ -703,35 +563,10 @@ void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixEl
     }
 }
 
-void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_Tr_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
     //
     // blocks (icoor,jcoor) of elmat
     //
@@ -747,7 +582,13 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
                 for ( UInt k = 0; k < fe.nbCoor(); ++k )
                 {
                     for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                        s += guk[ k ][ l ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+		      {
+			Int K = static_cast<Int>(k);
+			Int L = static_cast<Int>(l);
+			Int iG = static_cast<Int>(ig);
+
+                        s += gradientLocalDisplacement( K , L , iG ) * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+		      }
                 }
             }
             mat_tmp( i, j ) = coef * s;
@@ -764,35 +605,10 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
 
 
 // coef * (  \grad u^k [\grad u]^T \grad u^k : \grad v  )
-void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_gradgradTr_gradbis_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
 
     //
     // blocks (icoor,jcoor) of elmat
@@ -814,7 +630,15 @@ void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, Matri
                         for ( UInt k = 0; k < fe.nbCoor(); ++k )
                         {
                             for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                                s += guk[ icoor ][ l ][ ig ] *guk[ jcoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+			      {
+				Int iCoor = static_cast<Int>(icoor);
+				Int jCoor = static_cast<Int>(jcoor);
+				Int L = static_cast<Int>(l);
+				Int K = static_cast<Int>(k);
+				Int iG = static_cast<Int>(ig);
+				
+                                s += gradientLocalDisplacement( iCoor , L , iG ) *gradientLocalDisplacement( jCoor , K , iG ) * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+			      }
                         }
                     }
                     mat( i, j ) += coef * s;

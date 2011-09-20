@@ -83,7 +83,7 @@ namespace AssemblyElementalStructure
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param fe The current finite element
  */
-void computeGradientLocalDisplacement(const VectorElemental& uk_loc, const CurrentFE& fe );
+  void computeGradientLocalDisplacement (KNMK<Real> gradientLocalDisplacement, const VectorElemental& uk_loc, const CurrentFE& fe );
 
 
 //! METHODS SHARED BETWEEN LINEAR ELASTIC MODEL AND ST.VENANT-KIRCHHOFF MODEL
@@ -104,7 +104,7 @@ void computeGradientLocalDisplacement(const VectorElemental& uk_loc, const Curre
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_derdiv( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary second term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -116,7 +116,7 @@ void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& el
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergradbis( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary third term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -152,7 +152,7 @@ void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fifth-2 term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -164,7 +164,7 @@ void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElem
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis_Tr( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary sixth term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -192,7 +192,7 @@ void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixE
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary second term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -204,7 +204,7 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_divgrad_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary third term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -216,7 +216,7 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgrad_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fourth term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -228,7 +228,7 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fifth term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -240,7 +240,7 @@ void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixEl
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis_Tr_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary sixth term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -252,7 +252,7 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
  */
-void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgradTr_gradbis_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary seventh term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)

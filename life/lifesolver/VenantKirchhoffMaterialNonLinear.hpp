@@ -65,6 +65,9 @@ class VenantKirchhoffMaterialNonLinear :
     typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
     typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
 
+    typedef KNMK<Real> 				     KNMK_Type;
+    typedef boost::shared_ptr<KNMK_Type>	     KNMKPtr_Type;
+
  //@}
 
  //! @name Constructor &  Deconstructor
@@ -141,11 +144,15 @@ class VenantKirchhoffMaterialNonLinear :
 
   //@}
 
+    protected:
+    KNMKPtr_Type					M_gradientLocalDisplacement;
+
 };
 
 template <typename Mesh>
 VenantKirchhoffMaterialNonLinear<Mesh>::VenantKirchhoffMaterialNonLinear():
-    super()
+  super(),
+  M_gradientLocalDisplacement()
 {
 }
 
@@ -161,6 +168,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::setup(const boost::shared_ptr< FESp
 {
     super::setup(dFESpace,monolithicMap,offset);
     this->M_stiff.reset               (new matrix_Type(*this->M_localMap));
+    M_gradientLocalDisplacement.reset ( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
 }
 
 
@@ -230,49 +238,48 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
 		}
 	    }
 
-      Real guk[ this->M_FESpace->fe().nbCoor() ][ this->M_FESpace->fe().nbCoor() ][ this->M_FESpace->fe().nbQuadPt() ];
-      AssemblyElementalStructure::computeGradientLocalDisplacement(dk_loc, this->M_FESpace->fe());
+	  AssemblyElementalStructure::computeGradientLocalDisplacement(*M_gradientLocalDisplacement, dk_loc, this->M_FESpace->fe());
 
 
 	  //  3):  \lambda * ( \tr { [\grad d^k]^T \grad \delta d }, \div v  )
-	  AssemblyElementalStructure::stiff_derdiv( lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  AssemblyElementalStructure::stiff_derdiv( lambda, *M_gradientLocalDisplacement, *this->M_elmatK, this->M_FESpace->fe() );
 	  //  4):  \mu * ( [\grad \delta d]^T \grad d^k + [\grad d^k]^T \grad \delta d : \grad v  )
-	  AssemblyElementalStructure::stiff_dergrad( mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  AssemblyElementalStructure::stiff_dergrad( mu, *M_gradientLocalDisplacement, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  // the sum of these terms is the Jacobian of the divgrad term
 	  // 5):  \lambda * ( (\div u_k) \grad \delta u : \grad v  )
 	  AssemblyElementalStructure::stiff_divgrad(  lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  \lambda * ( (\div u) \grad u_k : \grad v  )
-	  AssemblyElementalStructure::stiff_divgrad_2(  lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  AssemblyElementalStructure::stiff_divgrad_2(  lambda, *M_gradientLocalDisplacement, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  // the sum of these terms is the Jacobian of the gradgrad term
 	  // 6): 1/2 * \lambda * ( \grad u_k : \grad  u_k) *( \grad \delta u : \grad v  )
 	  AssemblyElementalStructure::stiff_gradgrad(   0.5 * lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //\lambda * ( \grad u_k : \grad \delta u) *( \grad u_k : \grad v  )
-	  AssemblyElementalStructure::stiff_gradgrad_2(  lambda, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  AssemblyElementalStructure::stiff_gradgrad_2(  lambda, *M_gradientLocalDisplacement, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  // the sum of these terms is he jacobian of the stiff_dergrad_gradbis term
 	  // 7A) : \mu *  ( \grad u^k \grad \delta u : \grad v  )
-	  AssemblyElementalStructure::stiff_dergrad_gradbis(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  AssemblyElementalStructure::stiff_dergrad_gradbis(  mu, *M_gradientLocalDisplacement, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  \mu *  ( \grad \delta u \grad u^k : \grad v  )
-	  AssemblyElementalStructure::stiff_dergrad_gradbis_2(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  AssemblyElementalStructure::stiff_dergrad_gradbis_2(  mu, *M_gradientLocalDisplacement, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  the sum of these terms is he jacobian of the stiff_dergrad_gradbis_Tr term
 	  // 7B) :  \mu *  ( \grad u^k [\grad \delta u]^T : \grad v  )
-	  AssemblyElementalStructure::stiff_dergrad_gradbis_Tr(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  AssemblyElementalStructure::stiff_dergrad_gradbis_Tr(  mu, *M_gradientLocalDisplacement, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  // \mu *  ( \grad \delta u [\grad u^k]^T : \grad v  )
-	  AssemblyElementalStructure::stiff_dergrad_gradbis_Tr_2( mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  AssemblyElementalStructure::stiff_dergrad_gradbis_Tr_2( mu, *M_gradientLocalDisplacement, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //   the sum of these terms is he jacobian of the stiff_gradgradTr_gradbis term
 	  // 8) :   \mu * (  \grad d^k [\grad d^k]^T \grad \delta d : \grad v  )
 	  AssemblyElementalStructure::stiff_gradgradTr_gradbis(  mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  \mu * (  \grad d^k [\grad \delta d]^T \grad d^k : \grad v  )
-	  AssemblyElementalStructure::stiff_gradgradTr_gradbis_2( mu, dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
+	  AssemblyElementalStructure::stiff_gradgradTr_gradbis_2( mu, *M_gradientLocalDisplacement, *this->M_elmatK, this->M_FESpace->fe() );
 
 	  //  \mu * (  \grad \delta u [\grad u^k]^T \grad u^k : \grad v  )
 	  AssemblyElementalStructure::stiff_gradgradTr_gradbis_3(  mu , dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
@@ -353,10 +360,10 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
         // non-linear terms of the stiffness matrix
 
         // 3) 1/2 * \lambda  ( \tr { [\grad d^k]^T \grad d }, \div v  )
-        AssemblyElementalStructure::stiff_derdiv( 0.5 * lambda , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        AssemblyElementalStructure::stiff_derdiv( 0.5 * lambda , *M_gradientLocalDisplacement, *this->M_elmatK,  this->M_FESpace->fe() );
 
         //4)  \mu *( [\grad d^k]^T \grad d : \grad v  )
-        AssemblyElementalStructure::stiff_dergradbis( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        AssemblyElementalStructure::stiff_dergradbis( mu , *M_gradientLocalDisplacement, *this->M_elmatK,  this->M_FESpace->fe() );
 
         //  5): \lambda * (div u_k) \grad d : \grad v
         AssemblyElementalStructure::stiff_divgrad( lambda, dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
@@ -365,9 +372,9 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
         AssemblyElementalStructure::stiff_gradgrad( 0.5 * lambda , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
 
         // 7A) \mu *  ( \grad d^k \grad d : \grad v  )
-        AssemblyElementalStructure::stiff_dergrad_gradbis( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        AssemblyElementalStructure::stiff_dergrad_gradbis( mu , *M_gradientLocalDisplacement, *this->M_elmatK,  this->M_FESpace->fe() );
         // 7B) \mu *  ( \grad d^k [\grad d]^T : \grad v  )
-        AssemblyElementalStructure::stiff_dergrad_gradbis_Tr( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
+        AssemblyElementalStructure::stiff_dergrad_gradbis_Tr( mu , *M_gradientLocalDisplacement, *this->M_elmatK,  this->M_FESpace->fe() );
 
         // 8) // \mu *  (  \grad d^k [\grad d^k]^T \grad d : \grad v  )
         AssemblyElementalStructure::stiff_gradgradTr_gradbis( mu , dk_loc, *this->M_elmatK,  this->M_FESpace->fe() );
