@@ -607,6 +607,11 @@ public:
     const boost::shared_ptr<const TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
     const boost::shared_ptr<const TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
     const boost::shared_ptr<const TimeAdvance<vector_Type> > solidTimeAdvance()const { return  M_solidTimeAdvance; }
+  
+    const string ALETimeAdvanceMethod() const { return  M_ALETimeAdvanceMethod; }
+    const string fluidTimeAdvanceMethod()const { return  M_fluidTimeAdvanceMethod; }
+    const string solidTimeAdvanceMethod()const { return  M_solidTimeAdvanceMethod; }
+
 
     //! gets the solution vector by reference
     virtual const vector_Type& solution()                           const { return *M_lambda; }
@@ -902,6 +907,7 @@ protected:
     std::string                                          M_fluidTimeAdvanceMethod;
     std::string                                          M_solidTimeAdvanceMethod;
     std::string                                          M_ALETimeAdvanceMethod;
+
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_fluidTimeAdvance;
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_solidTimeAdvance;
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_ALETimeAdvance;
