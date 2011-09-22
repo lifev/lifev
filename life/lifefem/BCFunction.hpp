@@ -28,7 +28,7 @@
     @file
     @brief File contains BCManageNormal class for handling normal essential boundary conditions
 
-	@author Miguel Fernandez <miguel.fernandez@inria.fr>
+    @author Miguel Fernandez <miguel.fernandez@inria.fr>
     @contributor Christophe Prud'homme <christophe.prudhomme@epfl.ch>
     @contributor Mauro Perego <perego.mauro@gmail.com>
     @maintainer Mauro Perego <perego.mauro@gmail.com>
@@ -407,8 +407,8 @@ public:
 
     //! Assignment Operator
     /*!
-    	@param bcFunctionUDepBase The BCFunctionUDepBase
-    	@return Reference to a new BCFunctionUDepBase object with the same content of bcFunctionUDepBase
+        @param bcFunctionUDepBase The BCFunctionUDepBase
+        @return Reference to a new BCFunctionUDepBase object with the same content of bcFunctionUDepBase
      */
     virtual BCFunctionUDepBase& operator=( const BCFunctionUDepBase& bcFunctionUDepBase);
 
@@ -692,7 +692,7 @@ public:
     */
     BCFunctionDirectional( const BCFunctionDirectional& bcFunctionDirectional );
 
-    ~BCFunctionDirectional() {}
+    virtual ~BCFunctionDirectional() {}
 
     //@}
 
