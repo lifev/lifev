@@ -1,0 +1,330 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+    @file
+    @brief
+
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @date 00-00-0000
+ */
+
+#include "ud_functions.hpp"
+#define PI 3.141592653589793
+
+namespace LifeV
+{
+
+
+Real
+ fluidRhs(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+ { 
+   Real rho_f =  this->dataFluid()->density();  
+   
+   Real theta  = 1./5*(1-cos(50*Pi*t)),  
+     dtheta = 10*Pi *sin(50*Pi*t),
+     ddtheta =500 * Pi*Pi*cos(50*Pi*t),
+     dtheta2 = dtheta*dtheta;
+   
+   Real  c1 = 0,   c2 =0,   c3  = 0.0,
+     dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
+     ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
+   
+   switch(i) {
+   case 1:
+     return rho_f*( dtheta2*( c1-x ) + ddtheta*(c2-y) + ddc1 );
+     break;
+   case 2:
+     return rho_f*(dtheta2*(c2-y)  + ddtheta*(x-c1)+ ddc2 );
+     break; 
+   case 3:
+     return rho_f*ddc3;
+     break;
+   default:
+     ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+     break;
+   }
+}
+
+ 
+Real 
+FSIOperator::zero(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{ 
+  return 0;
+}
+
+Real 
+FSIOperator::pressure(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+  Real theta  = 1./5.*(1-cos(50*Pi*t)),
+    dtheta = 10*Pi *sin(50*Pi* t),
+    ddtheta = 500 * Pi*Pi*cos(50*Pi*t),
+    dtheta2 = dtheta*dtheta;
+  return 2*(M_data->dataSolid()->mu()+M_data->dataSolid()->lambda() )*(1-cos(theta));
+}
+
+
+Real
+solidRhs(const Real& t, const Real& X, const Real& Y, const Real& Z, const ID& i)
+{ 
+  Real rho_s =  this->dataSolid()->rho();
+  
+  Real theta  = 1./5*(1-cos(50*Pi*t)),  
+    dtheta = 10*Pi *sin(50*Pi*t),
+    ddtheta =500 * Pi*Pi*cos(50*Pi*t),
+    dtheta2 = dtheta*dtheta;
+  
+  
+  Real  c1 = 0,   c2 =0,   c3  = 0.0,
+    dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
+    ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
+  
+  switch(i) {
+  case 1:
+    return -rho_s*(ddtheta * ( X*sin(theta) + Y*cos(theta) )+ dtheta2*( X*cos(theta) - Y*sin(theta))-ddc1);
+    break;
+  case 2:
+    return rho_s*( ddtheta* (X*cos(theta)-Y*sin(theta) ) - dtheta2 * ( X*sin(theta)+Y*cos(theta))+ddc2);
+    break;
+  case 3:
+    return rho_s*ddc3;
+    break;
+  default:
+    ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+    break;
+  } 
+}
+
+
+Real 
+fluidVelocity(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+  Real theta  = 1./5*(1-cos(50*Pi*t)),
+    dtheta = 10*Pi *sin(50*Pi* t),
+    ddtheta =500 * Pi*Pi*cos(50*Pi*t),
+    dtheta2 = dtheta*dtheta;
+  
+  Real  c1 = 0,   c2 =0,   c3  = 0.0,
+    dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
+    ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
+  
+  switch(i) {
+  case 1:
+    return ( c2- y )* dtheta + dc1;
+    break;
+  case 2:
+    return (x - c1) * dtheta + dc2;
+    break;
+    case 3:
+      return dc3;
+      break;
+  }
+  return 0;
+}
+
+Real FSIOperator::fluidAccelerate(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+  
+  Real theta  = 1./5*(1-cos(50*Pi*t)),
+    dtheta = 10*Pi *sin(50*Pi* t),
+    ddtheta =500 * Pi*Pi*cos(50*Pi*t),
+    dtheta2 = dtheta*dtheta;
+  
+  Real  c1 = 0,   c2 =0,   c3  = 0.0,
+    dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
+    ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
+  
+  switch(i) {
+    case 1:
+      return  dtheta2*( c1-x ) + ddtheta*(c2-y) + ddc1 ; 
+        break;
+    case 2:
+      return dtheta2*(c2-y)  + ddtheta*(x-c1)+ ddc2 ;
+      break;
+    case 3:
+      return ddc3;
+      break;
+    }
+    return 0;
+}
+
+
+Real 
+solidAccelerate(const Real& t, const Real& X, const Real& Y, const Real& Z, const ID& i)
+{
+  Real theta  = 1./5.*(1-cos(50*Pi*M_data->dataFluid()->dataTime()->getTime())),
+      dtheta = 10*Pi *sin(50*Pi* M_data->dataFluid()->dataTime()->getTime()),
+    ddtheta =500 * Pi*Pi*cos(50*Pi* M_data->dataFluid()->dataTime()->getTime() ),
+    dtheta2 = dtheta*dtheta;
+  
+  Real  c1 = 0,   c2 =0,   c3  = 0.0,
+    dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
+    ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
+  
+  switch(i) {
+  case 1:
+    return - ddtheta*( X*sin(theta)+Y*cos(theta) ) + ddc1
+      - dtheta2 *( X*cos(theta) - Y*sin(theta) )	;
+    break;
+  case 2:
+    return ddtheta * ( X*cos(theta) - Y*sin(theta) ) + ddc2
+      - dtheta2 *( X*sin(theta) + Y*cos(theta) )	;
+      break;
+  case 3:
+    return dc3;
+    break;
+  default:
+        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+        break;
+  }
+}
+  
+// Initial velocity
+Real
+solidDisplacement(const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
+ {
+
+//Rotazione 3:
+   Real theta  = 1./5*(1-cos(50*Pi*t)),
+     dtheta = 10*Pi *sin(50*Pi* t),
+     ddtheta = 500 * Pi*Pi*cos(50*Pi*t),
+     dtheta2 = dtheta*dtheta;
+   
+   Real  c1 = 0,   c2 =0,   c3  = 0.0,
+     dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
+     ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
+  
+   switch(i) {
+   case 1:
+     return X * ( cos(theta) - 1 ) - Y * sin( theta ) + c1;
+     break;
+   case 2:
+     return  X * sin(theta) + Y * ( cos( theta ) - 1 ) + c2;
+     break;
+   case 3:
+     return c3;
+     break;   
+   default:
+     ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+     break;
+   }
+}
+
+// Initial velocity
+/*
+Real
+eta(const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
+ {
+   Real theta  = 1./5*(1-cos(50*Pi*M_data->dataFluid()->dataTime()->getTime())),  
+     dtheta = 10*Pi *sin(50*Pi*M_data->dataFluid()->dataTime()->getTime()),
+     ddtheta = 500 * Pi*Pi*cos(50*Pi*M_data->dataFluid()->dataTime()->getTime()),
+     dtheta2 = dtheta*dtheta;
+   
+   //  std::cout<<"ETA theta := "<<theta<<" time "<<M_data->dataFluid()->dataTime()->getTime()<<"\n";
+   Real  c1 = 0,   c2 =0,   c3  = 0.0,
+     dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
+     ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
+   
+  switch(i) {
+  case 1:
+    return X * ( cos(theta) - 1 ) - Y * sin( theta ) + c1;
+    break;
+  case 2:
+    return  X * sin(theta) + Y * ( cos( theta ) - 1 ) + c2;
+    break;
+  case 3:
+    return c3;
+    break;
+    
+  default:
+    ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+    break;
+  }
+}
+*/
+
+Real 
+solidVelocity(const Real& t, const Real& X, const Real& Y, const Real& Z, const ID& i)
+{
+    
+  //Rotazione 3:
+  Real theta  = 1./5.*(1-cos(50*Pi*M_data->dataFluid()->dataTime()->getTime())),
+    dtheta = 10*Pi *sin(50*Pi*M_data->dataFluid()->dataTime()->getTime() ),
+    ddtheta =500 * Pi*Pi*cos(50*Pi*M_data->dataFluid()->dataTime()->getTime()),
+    dtheta2 = dtheta*dtheta;
+  
+  Real  c1 = 0,   c2 =0,   c3  = 0.0,
+    dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
+    ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
+  
+  switch(i) {
+  case 1:
+    return - dtheta*( X*sin(theta) + Y*cos(theta) ) + dc1;
+        break;
+  case 2:
+    return dtheta *( X*cos(theta) - Y*sin(theta) ) + dc2;
+    break;
+  case 3:
+        return dc3;
+        break;
+  default:
+    ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+    break;
+  }
+}
+
+Real solidAccelerate(const Real& t, const Real& X, const Real& Y, const Real& Z, const ID& i)
+{
+
+  Real theta  = 1./5.*(1-cos(50*Pi*M_data->dataFluid()->dataTime()->getTime())),
+      dtheta = 10*Pi *sin(50*Pi* M_data->dataFluid()->dataTime()->getTime()),
+    ddtheta =500 * Pi*Pi*cos(50*Pi* M_data->dataFluid()->dataTime()->getTime() ),
+    dtheta2 = dtheta*dtheta;
+  
+  Real  c1 = 0,   c2 =0,   c3  = 0.0,
+    dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
+    ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
+  
+ switch(i) {
+ case 1:
+   return - ddtheta*( X*sin(theta)+Y*cos(theta) ) + ddc1
+     - dtheta2 *( X*cos(theta) - Y*sin(theta) )	;
+   break;
+ case 2:
+   return ddtheta * ( X*cos(theta) - Y*sin(theta) ) + ddc2
+     - dtheta2 *( X*sin(theta) + Y*cos(theta) )	;
+   break;
+ case 3:
+        return dc3;
+        break;
+ default:
+   ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+   break;
+ }
+}
+  
+}
+
