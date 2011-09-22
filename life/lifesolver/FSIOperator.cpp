@@ -574,8 +574,7 @@ FSIOperator::updateSystem()
 
       if ( M_fluid->solution().get() )
 	M_un.reset( new vector_Type( *M_fluid->solution() ) );
-      //M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-
+     
 	*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
   }
 
@@ -584,12 +583,11 @@ FSIOperator::updateSystem()
       M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
       vector_Type rhsW(M_dFESpace->map(), Repeated);
       rhsW *=0;
-      //  rhsW =  M_solidTimeAdvance->rhsContributionSecondDerivative() ;
-      //rhsW = *M_solid->Mass() *(  M_solidTimeAdvance->rhsContributionSecondDerivative() );
-      std::cout<<"updateSystem solid start\n";
+      rhsW =  M_solidTimeAdvance->rhsContributionSecondDerivative() ;
+      rhsW = *M_solid->Mass() *(  M_solidTimeAdvance->rhsContributionSecondDerivative() );
+    
       this->M_solid->updateSystem();
       M_solid->updateRightHandSide( rhsW );  //for the solid rhs; 
-       std::cout<<"updateSystem solid end\n";
     }
   
    this->couplingVariableExtrap( );
