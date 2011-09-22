@@ -189,6 +189,8 @@ public:
 
     MapEpetra const& getMap() const { return M_localMap; }
 
+    FESpace<Mesh, MapEpetra> const& mFESpace() const{ return M_FESpace; }
+
     const boost::shared_ptr<Epetra_Comm>& comm() const {return M_Displayer.comm();}
     //@}
 
