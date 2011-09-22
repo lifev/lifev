@@ -30,6 +30,7 @@ SUBDIRS		= data  \
               test_fsi \
               test_hyperbolic \
               test_LevelSetSolver \
+              test_Parser \
               test_partition \
               test_structure \
               test_TemplateTest \
@@ -54,12 +55,17 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
 	   	   $(srcdir)/test_LevelSetSolver/testsuite.at \
            $(srcdir)/test_partition/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
-           $(srcdir)/test_structuralsolver/testsuite.at \
+           $(srcdir)/test_structuralsolver/testsuiteLE.at \
+           $(srcdir)/test_structuralsolver/testsuiteSVK.at \
+           $(srcdir)/test_structuralsolver/testsuiteNH.at \
+           $(srcdir)/test_structuralsolver/testsuiteEXP.at \
            $(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_timeAdvance_orderI/testsuite.at \
            $(srcdir)/test_timeAdvance_orderII/testsuite.at \
            $(srcdir)/test_monolithic/testsuiteGCE.at \
-           $(srcdir)/test_monolithic/testsuiteCE.at
+           $(srcdir)/test_monolithic/testsuiteCE.at \
+           $(srcdir)/test_Parser/testsuite.at \
+           $(srcdir)/test_VectorContainer/testsuite.at
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in

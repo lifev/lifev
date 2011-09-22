@@ -69,6 +69,7 @@
 #include <life/lifesolver/StructuralSolver.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialLinear.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
+#include <life/lifesolver/NeoHookeanMaterialNonLinear.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
@@ -111,7 +112,7 @@ std::set<UInt> parseList( const std::string& list )
 
 class Structure
 {
-public:  
+public:
   //@}
   /** @name Constructors, destructor
    */
@@ -270,52 +271,30 @@ Structure::run3d()
     BCFunctionBase Homogen(fzero_scalar);
     BCFunctionBase Intern(InternalPressure);
 
-    
+
     // BC for cyl1x02_1796_edge.mesh
     vector <ID> compx(1), compy(1), compz(1);
     compx[0]=0; compy[0]=1, compz[0]=2;
 
-    // lower base
-    BCh->addBC("Base10 ", 2 , Essential, Component, fixed1, compz);
-    BCh->addBC("Base10 ", 20 , Essential, Component, fixed1, compz);
 
-    // upper base
-    BCh->addBC("Base3", 3 , Natural, Normal,Intern); // traction
-    BCh->addBC("Base3", 30 , Natural, Normal,Intern); // traction
-    //BCh->addBC("Base2 ", 3, Natural, Full, fixed1, 3); // free stress
-    //BCh->addBC("Base2 ", 30, Natural, Full, fixed1, 3); // free stress
-
-    //BCh->addBC("Base3", 1 , Natural, Normal,Intern); // compression
-    BCh->addBC("Base3", 1 , Natural, Full, fixed1, 3); // free stress surfac
-    
-    /*
-    // BC for vessel2x4x20_10cm.mesh
-    vector <ID> compx(1), compy(1), compz(1);
-    compx[0]=0; compy[0]=1, compz[0]=2;
-
-    // lower base
-    BCh->addBC("BaseSx ", 2 , Essential, Component, fixed1, compz);
-    BCh->addBC("BaseDx ", 3 , Essential, Component, fixed1, compz);
-
-    // upper base
-    BCh->addBC("BaseEx", 1, Natural, Normal,Intern); // internal pressure
-    ////////////vessel20.mesh////////////////////////////////////////////
-    BCh->addBC("BaseEx", 20, Natural, Normal,Intern); // internal pressure
-
-    BCh->addBC("BaseIn", 10, Natural, Normal,  Homogen); // external pressure
-    //BCh->addBC("BaseEx", 10, Natural, Full, fixed1, 3); // external pressure
-    */
+    BCh->addBC("surf4", 4, EssentialVertices, Component, Homogeneous, compx);
+    BCh->addBC("surf2", 2, Natural,   Component, bcvPress, compx);
 
     StructuralSolver< RegionMesh3D<LinearTetra> > solid;
     solid.setup(dataStructure,
                 dFESpace,
-		BCh,
+                BCh,
                 parameters->comm);
 
     solid.setDataFromGetPot(dataFile);
+//<<<<<<< HEAD
 
     double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative( 0 ) / (dataStructure->dataTime()->timeStep()*dataStructure->dataTime()->timeStep());
     solid.buildSystem(timeAdvanceCoefficient);
+// =======
+//     solid.buildSystem();
+
+// >>>>>>> 20110728_ExponentialNeohookean
 
     //
     // Temporal data and initial conditions
@@ -323,8 +302,8 @@ Structure::run3d()
 
     Real dt = dataStructure->dataTime()->timeStep();
     Real T  = dataStructure->dataTime()->endTime();
-    
-    vectorPtr_Type rhs(new vector_Type(solid.displacement(), Unique)); 
+
+    vectorPtr_Type rhs(new vector_Type(solid.displacement(), Unique));
     vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique));
     vectorPtr_Type vel(new vector_Type(solid.displacement(), Unique));
     vectorPtr_Type acc(new vector_Type(solid.displacement(), Unique));
@@ -336,10 +315,10 @@ Structure::run3d()
     if (verbose) std::cout << "S- initialization ... ";
 
     //solid.initialize(d0,w0,a0); // displacement, velocity, acceleration
- 
+
     std::vector<vector_Type> uv0;
-    
-    
+
+
     if (timeAdvanceMethod =="Newmark")
       {
         uv0.push_back(*disp);
@@ -355,13 +334,13 @@ Structure::run3d()
 	  uv0.push_back(*disp);
         }
     }
-    
+
     timeAdvance->setInitialCondition(uv0);
-    
+
     timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
-    
+
     timeAdvance->updateRHSContribution(dataStructure->dataTime()->timeStep());
-    
+
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (verbose ) std::cout << "ok." << std::endl;
@@ -392,9 +371,6 @@ Structure::run3d()
 	exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
 	exporter->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
-	//vectorPtr_Type solidDisp ( new vector_Type(solid.getDisplacement(), exporter->mapType() ) );
-	//vectorPtr_Type solidVel  ( new vector_Type(solid.getVelocity(),  exporter->mapType() ) );
-	
 	vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(), exporter->mapType() ) );
 	vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
 	vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
@@ -407,18 +383,6 @@ Structure::run3d()
 
 	exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "acceleration",
                            dFESpace, solidAcc, UInt(0) );
-	
-
-	/*
-	exporter->addVariable( ExporterData::Vector, "displacement", solidDisp,
-			       UInt(0), dFESpace->dof().numTotalDof() );
-	
-	exporter->addVariable( ExporterData::Vector, "velocity", solidVel,
-			       UInt(0), dFESpace->dof().numTotalDof() );
-
-	exporter->addVariable( ExporterData::Vector, "acceleration", solidAcc,
-			       UInt(0), dFESpace->dof().numTotalDof() );
-	*/
 
 	exporter->postProcess( 0 );
 
@@ -436,7 +400,8 @@ Structure::run3d()
 		std::cout << std::endl;
 		std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
 	      }
-	    
+<<<<<<< HEAD
+
 	    std::cout<<"main line 440\n";
 	    *rhs *=0;
 	      std::cout<<"main line 442\n";
@@ -444,6 +409,9 @@ Structure::run3d()
 	    std::cout<<"main line 444\n";
 	    *rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
 	    std::cout<<"main line 446\n";
+=======
+
+>>>>>>> 20110728_ExponentialNeohookean
 	    //solid.updateSystem(dZero);    // Computes the rigth hand side
 	    solid.updateSystem();    // Computes the rigth hand side
 	    solid.updateRightHandSide( *rhs );
@@ -455,11 +423,17 @@ Structure::run3d()
 	    //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
 	    timeAdvance->shiftRight(solid.displacement());
-	   
+
 	    *solidDisp = solid.displacement();
+<<<<<<< HEAD
 	    //*solidVel  = timeAdvance->velocity();
 	    //*solidAcc  = timeAdvance->accelerate();
-	    
+
+=======
+	    *solidVel  = solid.velocity();
+	    *solidAcc  = solid.acceleration();
+
+>>>>>>> 20110728_ExponentialNeohookean
 	    //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
             //this->CheckResults(solid.displacement().norm2(),time);
@@ -468,8 +442,8 @@ Structure::run3d()
 	  }
 
 }
-    
-void Structure::CheckResults(const Real& dispNorm,const Real& time)
+
+void Structure::CheckResultsLinearElastic(const Real& dispNorm,const Real& time)
 {
     if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )
         this->resultChanged(time);
@@ -478,6 +452,37 @@ void Structure::CheckResults(const Real& dispNorm,const Real& time)
     if ( time == 0.003  && std::fabs(dispNorm-0.808509)>1e-4 )
         this->resultChanged(time);
 }
+
+void Structure::CheckResultsNonlinearVenantKirchhoff(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.002  && std::fabs(dispNorm-1.10232)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.003  && std::fabs(dispNorm-0.808509)>1e-4 )
+        this->resultChanged(time);
+}
+
+void Structure::CheckResultsNeohookean(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.002  && std::fabs(dispNorm-1.10232)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.003  && std::fabs(dispNorm-0.808509)>1e-4 )
+        this->resultChanged(time);
+}
+
+void Structure::CheckResultsExponential(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.002  && std::fabs(dispNorm-1.10232)>1e-4 )
+        this->resultChanged(time);
+    if ( time == 0.003  && std::fabs(dispNorm-0.808509)>1e-4 )
+        this->resultChanged(time);
+}
+
 
 void Structure::resultChanged(Real time)
 {

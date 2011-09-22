@@ -25,9 +25,6 @@
 //@HEADER
 
 /*!
- \include ../../doc/api/bibliography/newton
- \include ../../doc/api/bibliography/fluidstructure
-
     @file
     @brief Pure virtual operator class for FSI solvers
 
@@ -39,10 +36,9 @@
     @date 10-12-2010
 
     This is the base class for the FSI solvers in LifeV. It contains the methods to evaluate the residual and compute the
-    Jacobian matrix, which make it suited for the generalized Newton method implemente in NonlinearRichardson. The fluid
-    and structure classes are member of this class and different formulations (e.g. Monolithic \ref CDFQ , segregated
-    Newton \ref FM05 , Dirichlet--Neumann \ref DDFQ06 , Robin Neumann \ref BNV08 )
-
+    Jacobian matrix, which make it suited for the generalized Newton algorithm implemented in NonlinearRichardson.hpp. The fluid
+    and structure classes are members of this class and different formulations (e.g. Monolithic \cite CrosettoEtAl2009 , segregated
+    Newton \cite FernandezMoubachir2005 , Dirichlet--Neumann \cite DeparisDiscacciati2006 , Robin Neumann \cite BadiaNobileVergara2008 ) are implemented in the derived classes.
  */
 
 #include <life/lifecore/LifeV.hpp>

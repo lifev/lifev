@@ -153,10 +153,31 @@ public:
 
     //! Set Young modulus
     /*!
-     * @param Young solid young modulus value
+     * @param Solid Young modulus value
      * @param material material ID (1 by default)
      */
     void setYoung( const Real& young, const UInt& material ) { M_materialsFlagSet = true; M_young[material] = young; }
+ 
+    //! Set bulk modulus (nearly incompressible materials)
+    /*!
+     * @param bulk modulus value
+     * @param material material ID (1 by default)
+     */
+    void setBulk( const Real& bulk, const UInt& material ) { M_materialsFlagSet = true; M_bulk[material] = bulk; }
+
+    //! Set Alfa modulus (nearly incompressible materials)
+    /*!
+     * @param Alfa modulus value
+     * @param material material ID (1 by default)
+     */
+    void setAlpha( const Real& alpha, const UInt& material ) { M_materialsFlagSet = true; M_alpha[material] = alpha; }
+
+    //! Set Gamma (nearly imcompressible materials)
+    /*!
+     * @param Gamma modulus value
+     * @param material material ID (1 by default)
+     */
+    void setGamma( const Real& gamma, const UInt& material ) { M_materialsFlagSet = true; M_gamma[material] = gamma; }
 
     //@}
 
@@ -216,6 +237,27 @@ public:
      */
     Real mu( const UInt& material ) const;
 
+    //! Get bulk modulus (nearly incompressible materials)
+    /*!
+     * @param material material ID (1 by default)
+     * @return bulk modulus
+     */
+    Real bulk( const UInt& material = 1 ) const;
+
+    //! Get alpha parameter (nearly incompressible materials)
+    /*!
+     * @param material material ID (1 by default)
+     * @return alpha parameter (neraly incompressible materials)
+     */
+    Real alpha( const UInt& material = 1 ) const;
+
+    //! Get gamma parameter (nearly incompressible materials)
+    /*!
+     * @param material material ID (1 by default)
+     * @return gamma parameter (nearly incompressible materials)
+     */
+    Real gamma( const UInt& material = 1 ) const;
+
     //! Get FE order
     /*!
      * @return FE order
@@ -238,7 +280,7 @@ public:
     /*!
      * @return solid type
      */
-    const std::string& getSolidType() { return M_solidType; }
+    const std::string& solidType() { return M_solidType; }
 
     //! Get whether to use or not exact Jacobian
     /*!
@@ -259,8 +301,15 @@ private:
     Real                   M_externalPressure;
 
     bool                   M_materialsFlagSet;
+
+    //! Young Modulus and Poisson ratio
     materialContainer_Type M_poisson;
     materialContainer_Type M_young;
+
+    //! Bulk modulus k, alpha, gamma
+    materialContainer_Type M_bulk;
+    materialContainer_Type M_alpha;		
+    materialContainer_Type M_gamma;
 
     //! Space discretization
     std::string            M_order;

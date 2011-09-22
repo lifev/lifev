@@ -25,7 +25,6 @@
 //@HEADER
 
 /*!
- *  @include fluidstructure.dox
  *  @file
  *  @brief File containing the Monolithic Test
  *
@@ -48,17 +47,17 @@
  *  -# Dirichlet
  *  -# Robin
  *  -# Fluxes (defective)
- *  -# absorbing \ref BNV08 :
+ *  -# absorbing \cite BadiaNobileVergara2008 :
  *   through the class flowConditions.
  * - optional: computation of wall shear stress (not properly tested in parallel)
  * - optional: computation of the largest singular values of the preconditioned matrix
  *
  * \b Features:
  * This test by default solves the FSI probem discretized in time using the GCE or CE methods, implemented respectively
- * in the files monolithicGE.hpp and monolithicGI.hpp . The geometry is that of a tube (benchmark test introduced in \ref GV03).
+ * in the files monolithicGE.hpp and monolithicGI.hpp . The geometry is that of a tube (benchmark test introduced in \cite Gerbeau2003).
  * In this test the boundary conditions assigned are of type:
  * - flux (defective b.c.) at the inlet
- * - absorbing (see \ref BNV08) at the outlet
+ * - absorbing (see \cite BadiaNobileVergara2008) at the outlet
  * - Robin b.c. on the solid external wall
  * - Dirichlet homogeneous at the solid rings on the inlet-outlet (clamped tube).
  *

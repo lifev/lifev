@@ -265,8 +265,15 @@ FSIMonolithic::setDispSolid( const vector_Type& solution )
 void
 FSIMonolithic::buildSystem()
 {
+//<<<<<<< HEAD
     M_solid->buildSystem( M_solidTimeAdvance->coefficientSecondDerivative( 0 )/(M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()));
     //M_solid->rescaleMatrices();
+// =======
+//     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
+//     M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
+//     M_solidBlock->globalAssemble();
+//     M_solid->rescaleMatrices();
+// >>>>>>> 20110728_ExponentialNeohookean
 }
 
 #ifdef HAVE_TRILINOS_ANASAZI
@@ -333,9 +340,13 @@ FSIMonolithic::solveJac( vector_Type& step, const vector_Type& res, const Real /
     M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->time() );
     M_precPtr->GlobalAssemble();
 
+#ifdef HAVE_LIFEV_DEBUG
     M_solid->displayer().leaderPrint("  M-  Residual NormInf:                        ", res.normInf(), "\n");
+#endif
     iterateMonolithic(res, step);
+#ifdef HAVE_LIFEV_DEBUG
     M_solid->displayer().leaderPrint("  M-  Solution NormInf:                        ", step.normInf(), "\n");
+#endif
 }
 
 void
@@ -505,9 +516,14 @@ void
 FSIMonolithic::
 updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
+//<<<<<<< HEAD
     M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
     //*rhsFluidCoupling += *M_solid->getRhsWithoutBC();
     *rhsFluidCoupling += (*M_solid->Mass() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()/M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
+// =======
+//     M_solid->updateSystem();
+//     *rhsFluidCoupling += *M_solid->rhsWithoutBC();
+// >>>>>>> 20110728_ExponentialNeohookean
 }
 
 void
