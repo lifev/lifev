@@ -136,6 +136,7 @@ public:
     typedef typename super::feVectorContainer_Type         feVectorContainer_Type ;
     typedef typename super::feVectorContainerPtr_Type      feVectorContainerPtr_Type;
     typedef typename feVectorContainerPtr_Type::iterator   feVectorContainerPtrIterate_Type;
+    typedef typename super::feVectorSharedPtrContainer_Type        feVectorSharedPtrContainer_Type;
 
     //@}
 
@@ -229,7 +230,7 @@ public:
      set of vectors x0
      note: this is taken as a copy (not a reference), since x0 is resized inside the method.
      */
-    void setInitialCondition( const feVectorContainer_Type& x0);
+    void setInitialCondition( const feVectorSharedPtrContainer_Type& x0);
 
    //@}
 
@@ -264,7 +265,7 @@ public:
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
     //feVectorType  extrapolationFirstDerivative( ) const;
-    void extrapolationFirstDerivative(feVectorType& extrapolation) const; 
+    void extrapolationFirstDerivative(feVectorType& extrapolation) const;
 
     //! Return the current velocity
     feVectorType velocity()  const;
@@ -585,7 +586,7 @@ void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVectorType& 
 }
 
 template<typename feVectorType>
-void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
+void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVectorSharedPtrContainer_Type& x0)
 {
     const UInt n0 = x0.size();
 
@@ -597,20 +598,20 @@ void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVectorContai
     UInt i(0);
 
     //!initialize zero
-    feVectorType zero(x0[0]);
+    feVectorType zero(*x0[0]);
     zero *=0;
 
     for ( ; iter != iter_end && i< n0 ; ++iter, ++i )
     {
         delete *iter;
-        *iter = new feVectorType(x0[i]);
+        *iter = new feVectorType(*x0[i]);
     }
 
     for ( i = this->M_unknowns.size() ; i < this->M_size && i< n0; ++i )
-        this->M_unknowns.push_back(new feVectorType(x0[i]));
+        this->M_unknowns.push_back(new feVectorType(*x0[i]));
 
     for ( i = this->M_unknowns.size() ; i < this->M_size; i++ )
-        this->M_unknowns.push_back(new feVectorType( x0[ n0-1 ] ) );
+        this->M_unknowns.push_back(new feVectorType( *x0[ n0-1 ] ) );
 
     this->setInitialRHS(zero);
 }
@@ -653,7 +654,7 @@ TimeAdvanceNewmark<feVectorType>::extrapolation(feVectorType& extrapolation) con
 {
   extrapolation += this->M_timeStep * ( *this->M_unknowns[ 1 ]);
   if ( this->M_orderDerivative == 2 )
-    extrapolation += ( this->M_timeStep * this->M_timeStep ) / 2.0 * ( *this->M_unknowns[2]); 
+    extrapolation += ( this->M_timeStep * this->M_timeStep ) / 2.0 * ( *this->M_unknowns[2]);
 }
 
 

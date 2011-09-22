@@ -230,7 +230,7 @@ public:
                      const std::string& /*velSName*/,
                      const Real&        /*Tstart = 0.*/);
 
-    virtual void initialize(std::vector<vector_Type> u0=std::vector<vector_Type>(0), std::vector<vector_Type> ds0=std::vector<vector_Type>(0), std::vector<vector_Type> df0=std::vector<vector_Type>(0));
+    virtual void initialize(std::vector<vectorPtr_Type> u0=std::vector<vectorPtr_Type>(0), std::vector<vectorPtr_Type> ds0=std::vector<vectorPtr_Type>(0), std::vector<vectorPtr_Type> df0=std::vector<vectorPtr_Type>(0));
 
     void iterate();
 

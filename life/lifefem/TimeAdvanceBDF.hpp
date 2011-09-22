@@ -155,10 +155,11 @@ public:
     //!@name Public Types
     //@{
 
-     typedef TimeAdvance< feVectorType >                   super;
-     typedef typename super::feVectorContainer_Type        feVectorContainer_Type ;
-     typedef typename super::feVectorContainerPtr_Type     feVectorContainerPtr_Type;
-     typedef typename feVectorContainerPtr_Type::iterator  feVectorContainerPtrIterate_Type;
+    typedef TimeAdvance< feVectorType >                   super;
+    typedef typename super::feVectorContainer_Type        feVectorContainer_Type ;
+    typedef typename super::feVectorContainerPtr_Type     feVectorContainerPtr_Type;
+    typedef typename feVectorContainerPtr_Type::iterator  feVectorContainerPtrIterate_Type;
+    typedef typename super::feVectorSharedPtrContainer_Type        feVectorSharedPtrContainer_Type;
 
     //@}
 
@@ -246,7 +247,7 @@ public:
     //! Initialize all the entries of the unknown vector to be derived with a
     //! set of vectors x0
     //! note: this is taken as a copy (not a reference), since x0 is resized inside the method.
-    void setInitialCondition(const feVectorContainer_Type& x0 );
+    void setInitialCondition(const feVectorSharedPtrContainer_Type& x0 );
 
     //@}
 
@@ -287,7 +288,7 @@ public:
     //! Return the current velocity
     feVectorType velocity()  const;
     //void velocity(feVectorType& velocity) const;
- 
+
     //!Return the current accelerate
     feVectorType accelerate() const;
     //void accelerate(feVectorType& accelerate) const;
@@ -390,7 +391,7 @@ TimeAdvanceBDF<feVectorType>::showMe() const
         for ( UInt i = 0; i < this->M_order + this->M_orderDerivative; ++i )
             std::cout << "     xi(" << i << ") = " << this->M_xi[ i ]  << std::endl;
         for ( UInt i = 0;  i < this->M_order + 1; ++i  )
-            std::cout << "       beta of the extrapolation of the first derivative (" 
+            std::cout << "       beta of the extrapolation of the first derivative ("
 		      << i << ") = " << this->M_betaFirstDerivative[ i ]
                       << std::endl;
     }
@@ -536,7 +537,7 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorType& /*x0
 }
 
 template<typename feVectorType>
-void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
+void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorSharedPtrContainer_Type& x0)
 {
     UInt n0 = x0.size();
 
@@ -550,16 +551,16 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorContainer_
     for ( ; iter != iter_end && i< n0 ; ++iter, ++i )
     {
         delete *iter;
-        *iter = new feVectorType(x0[i]);
+        *iter = new feVectorType(*x0[i]);
     }
 
     for ( i = this->M_unknowns.size() ; i < this->M_order && i< n0; ++i )
-        this->M_unknowns.push_back(new feVectorType(x0[i]));
+        this->M_unknowns.push_back(new feVectorType(*x0[i]));
 
     if (this->M_orderDerivative == 1)
     {
         for ( i = this->M_unknowns.size() ; i < this->M_order; ++i )
-            this->M_unknowns.push_back(new feVectorType(x0[n0-1]));
+            this->M_unknowns.push_back(new feVectorType(*x0[n0-1]));
 
         ASSERT ( this->M_unknowns.size() == this->M_order,
                  "M_unknowns.size() and  M_order must be equal" );
@@ -567,14 +568,14 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorContainer_
     if (this->M_orderDerivative == 2)
     {
         for ( i = this->M_unknowns.size() ; i < this->M_order + 1; ++i )
-            this->M_unknowns.push_back(new feVectorType(x0[n0-1]));
+            this->M_unknowns.push_back(new feVectorType(*x0[n0-1]));
 
         ASSERT ( this->M_unknowns.size() == this->M_order + 1,
                  "M_unknowns.size() and  M_order must be equal" );
     }
 
     //!initialize zero
-    feVectorType zero(x0[0]);
+    feVectorType zero(*x0[0]);
     zero *=0;
     this->setInitialRHS(zero);
 }
@@ -679,9 +680,9 @@ template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::velocity() const
 {
-    return (*this->M_unknowns[0]) 
+    return (*this->M_unknowns[0])
           * this->M_alpha[ 0 ] / this->M_timeStep
-            -  ( *this->M_rhsContribution[0] );   
+            -  ( *this->M_rhsContribution[0] );
 }
 
 /*
@@ -709,9 +710,9 @@ template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::accelerate() const
 {
-    return (*this->M_unknowns[0]) 
+    return (*this->M_unknowns[0])
             * this->M_xi[ 0 ]/(this->M_timeStep*this->M_timeStep);
-            -  ( *this->M_rhsContribution[1] );   
+            -  ( *this->M_rhsContribution[1] );
 }
 
 /*

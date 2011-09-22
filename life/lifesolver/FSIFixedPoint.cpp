@@ -147,7 +147,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
               << "; updateEvery = " << M_data->updateEvery() << std::endl;
 
     if (iter == 0 && this->isFluid())
-    {  
+    {
       M_nonLinearAitken.restart();
       this->M_fluid->resetPreconditioner();
         //this->M_solid->resetPrec();
@@ -174,10 +174,10 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 	vector_Type  meshVelocity( M_meshMotion->disp(), Repeated );
 
 	meshVelocity = M_ALETimeAdvance->velocity( M_meshMotion->disp() );  // w lives in HE fespace
-	
+
 	this->transferMeshMotionOnFluid(meshVelocity,
 					this->veloFluidMesh());
-        
+
 	//this->veloFluidMesh()    -= this->dispFluidMeshOld();
 	// this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
 
@@ -199,9 +199,9 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         //*M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
 
         //*M_beta += this->M_bdf->extrapolation();
-	
+
 	*M_beta =0;
-	
+
 	if(iter==0)
 	 this->M_fluidTimeAdvance->extrapolation( *M_beta);
 	else

@@ -349,7 +349,7 @@ public:
     /**
        \todo{a general time advancing class should be used everywhere}
      */
-    void initializeTimeAdvance( const std::vector<vector_Type>& initialFluidVel, const std::vector<vector_Type>& initialSolidDisp,const std::vector<vector_Type>&  initialFluiDisp);
+    void initializeTimeAdvance( const std::vector<vectorPtr_Type>& initialFluidVel, const std::vector<vectorPtr_Type>& initialSolidDisp,const std::vector<vectorPtr_Type>&  initialFluiDisp);
 
     //! initializes the fluid solver with vectors
     /**
@@ -607,7 +607,7 @@ public:
     const boost::shared_ptr<const TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
     const boost::shared_ptr<const TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
     const boost::shared_ptr<const TimeAdvance<vector_Type> > solidTimeAdvance()const { return  M_solidTimeAdvance; }
-  
+
     const string ALETimeAdvanceMethod() const { return  M_ALETimeAdvanceMethod; }
     const string fluidTimeAdvanceMethod()const { return  M_fluidTimeAdvanceMethod; }
     const string solidTimeAdvanceMethod()const { return  M_solidTimeAdvanceMethod; }
@@ -777,14 +777,14 @@ public:
        \small initializes the current solution vector. Note: this is not sufficient for the correct initialization
        of bdf!
     */
-    virtual void initialize( std::vector<vector_Type>& u0Vec, std::vector<vector_Type>& ds0Vec, std::vector<vector_Type>& df0Vec)
+    virtual void initialize( std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec)
     {
         //*M_un=*u0Vec[0];
 
         //TEMPORARY TEST INITIALIZATION//
-        std::vector<vector_Type> structureDisp(0);
-        std::vector<vector_Type> fluidVel(0);
-        std::vector<vector_Type> fluidDisp(0);
+        std::vector<vectorPtr_Type> structureDisp(0);
+        std::vector<vectorPtr_Type> fluidVel(0);
+        std::vector<vectorPtr_Type> fluidDisp(0);
         for(UInt i=0; i< M_solidTimeAdvance->order(); ++i)
         {
             structureDisp.push_back(ds0Vec[i]);
@@ -795,7 +795,7 @@ public:
         }
         for(UInt i=0; i< M_ALETimeAdvance->order(); ++i)
         {
-            fluidVel.push_back(df0Vec[i]);
+            fluidDisp.push_back(df0Vec[i]);
         }
         initializeTimeAdvance(fluidVel, structureDisp, fluidDisp);
         //END OF TEMPORARY TEST INITIALIZATION//

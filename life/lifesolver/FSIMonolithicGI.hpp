@@ -111,10 +111,10 @@ public:
                      fluidPtr_Type::value_type::function_Type const& /*df0*/ );
 
     //! Initializes the system with vectors
-    void initialize(  std::vector<vector_Type>& u0Vec, std::vector<vector_Type>& ds0Vec, std::vector<vector_Type>& df0Vec)
+    void initialize(  std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec)
     {
         super_Type::super_Type::initialize( u0Vec, ds0Vec, df0Vec );
-        M_uk.reset( new vector_Type( u0Vec[0] ) );
+        M_uk.reset( new vector_Type( *u0Vec[0] ) );
     }
 
     /**

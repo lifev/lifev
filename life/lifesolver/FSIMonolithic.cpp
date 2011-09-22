@@ -352,7 +352,7 @@ FSIMonolithic::updateSystem()
     this->M_fluidTimeAdvance->shiftRight(*M_un);
     this->M_solidTimeAdvance->shiftRight(*M_un);
 
-    M_meshMotion->updateSystem();
+    //M_meshMotion->updateSystem();
 
     //M_solidBlock->spy("solid");
 
@@ -410,11 +410,11 @@ FSIMonolithic::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
     M_solid->initialize( extendedSolidDisplacement, extendedSolidVelocity );
 }
 
-void
-FSIMonolithic::initializeMesh(vectorPtr_Type fluid_dispOld)
-{
-    meshMotion().setDisplacement(*fluid_dispOld);
-}
+// void
+//  FSIMonolithic::initializeMesh(vectorPtr_Type fluid_dispOld)
+//  {
+//      M_ALETimeAdvance(*fluid_dispOld);
+//  }
 
 void
 FSIMonolithic::initialize( const vector_Type& u0, const vector_Type& p0, const vector_Type& d0)

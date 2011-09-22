@@ -252,11 +252,11 @@ FSISolver::initialize( const std::string& /*velFName*/,
 
 
 void
-FSISolver::initialize(std::vector< vector_Type> u0, std::vector< vector_Type> ds0, std::vector< vector_Type> df0)
+FSISolver::initialize(std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Type> ds0, std::vector< vectorPtr_Type> df0)
 {
     if (!u0.size()||!ds0.size()||!df0.size())
     {
-        vector_Type vec(*M_oper->couplingVariableMap());
+        vectorPtr_Type vec(new vector_Type(*M_oper->couplingVariableMap()));
         UInt i;
         for(i=0; i<M_oper->fluidTimeAdvance()->size(); ++i)
             u0.push_back(vec);// couplingVariableMap()

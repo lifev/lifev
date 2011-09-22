@@ -574,7 +574,7 @@ FSIOperator::updateSystem()
 
       if ( M_fluid->solution().get() )
 	M_un.reset( new vector_Type( *M_fluid->solution() ) );
-     
+
 	*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
   }
 
@@ -585,10 +585,10 @@ FSIOperator::updateSystem()
       rhsW *=0;
       rhsW =  M_solidTimeAdvance->rhsContributionSecondDerivative() ;
       rhsW = *M_solid->Mass() *(  M_solidTimeAdvance->rhsContributionSecondDerivative() );
-    
+
       this->M_solid->updateSystem();
 
-      M_solid->updateRightHandSide( rhsW );  //for the solid rhs; 
+      M_solid->updateRightHandSide( rhsW );  //for the solid rhs;
 
       M_solid->updateRightHandSide( rhsW );  //for the solid rhs;
     }
@@ -786,7 +786,7 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 // ===================================================
 //  Public Methods
 // ===================================================
-  void FSIOperator::initializeTimeAdvance( const std::vector<vector_Type>& initialFluidVel, const std::vector<vector_Type>& initialSolidDisp,const std::vector<vector_Type>&  initialFluidDisp)
+  void FSIOperator::initializeTimeAdvance( const std::vector<vectorPtr_Type>& initialFluidVel, const std::vector<vectorPtr_Type>& initialSolidDisp,const std::vector<vectorPtr_Type>&  initialFluidDisp)
   {
     std::cout<<"initializeTimeAdvance start\n";
     //M_bdf.reset( new TimeAdvanceBDF<vector_Type>( ));
@@ -794,7 +794,7 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 
     if ( this->isFluid() )
       {
-	ASSERT( initialFluidVel.size() == M_fluidTimeAdvance->size(), "The number of vectors for initializing the time scheme for the fluid velocity is not consistent with the discretization chosen" );
+          ASSERT( initialFluidVel.size() == M_fluidTimeAdvance->size(), "The number of vectors for initializing the time scheme for the fluid velocity is not consistent with the discretization chosen" );
 	ASSERT(initialFluidDisp.size() == M_ALETimeAdvance->size() , "The number of vectors for initializing the time discretization for the ALE map is not consistent with the discretization chosen");
 	this->M_fluidTimeAdvance->setInitialCondition(initialFluidVel);
 

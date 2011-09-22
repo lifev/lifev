@@ -392,6 +392,7 @@ public:
   //! Get the displacement
   vector_Type& displacement()        { return *M_disp; }
 
+  vector_Type& displacementPtr()        { return M_disp; }
   //! Get the velocity
   //vector_Type& velocity()         { return *M_vel; }
 

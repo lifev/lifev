@@ -303,7 +303,7 @@ public:
     /**
        \small initialize the mesh displacement
     */
-    virtual void initializeMesh(vectorPtr_Type fluid_dispOld);
+    //virtual void initializeMesh(vectorPtr_Type fluid_dispOld);
 
 
     //! activates the computation of the wall stress on the boundary with a specified flag.
@@ -416,7 +416,7 @@ public:
     */
     void exportSolidVelocity( vector_Type& solidVelocity )
     {   // Matteo
-        solidVelocity.subset( this->M_solidTimeAdvance->velocity(), M_offset );
+        solidVelocity.subset( M_solidTimeAdvance->velocity(), M_offset );
         solidVelocity *= dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
     }
 

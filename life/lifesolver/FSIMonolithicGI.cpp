@@ -408,38 +408,41 @@ void FSIMonolithicGI::setupBlockPrec()
 
 void FSIMonolithicGI::shapeDerivatives( matrixPtr_Type sdMatrix )
 {
-    Real alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
+        Real alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
     vectorPtr_Type rhsNew(new vector_Type(*M_monolithicMap));
     vector_Type un(M_uFESpace->map());
     vector_Type uk(M_uFESpace->map()+M_pFESpace->map());
 
-    vectorPtr_Type meshVel(new vector_Type(M_mmFESpace->map()));
+    vectorPtr_Type meshVelRep(new vector_Type(M_mmFESpace->map(), Repeated));
 
-    UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
-    if ( M_domainVelImplicit )
-    {
-        vector_Type meshDispOld(M_mmFESpace->map());
-        meshVel->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
-        meshDispOld.subset(*M_un, offset);
-        *meshVel -= meshDispOld;
-    }
-    else
-    {
-        meshVel->subset(*M_un, offset); //if the conv. term is to be condidered partly explicitly
-        *meshVel -= M_meshMotion->dispOld();
-    }
+    //    UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
+//     if ( M_domainVelImplicit )
+//     {
+//         vector_Type meshDispOld(M_mmFESpace->map());
+//         meshVel->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
+//         meshDispOld.subset(*M_un, offset);
+//         *meshVel -= meshDispOld;
+//     }
+//     else
+//     {
+//         meshVel->subset(*M_un, offset); //if the conv. term is to be condidered partly explicitly
+//         *meshVel -= M_meshMotion->dispOld();
+//     }
+    *meshVelRep=M_ALETimeAdvance->velocity();
 
     if ( M_convectiveTermDer )
+    {
         un.subset(*M_uk, 0);
+    }
     else
         un.subset(*M_un, 0);
 
-    *meshVel *= alpha;
-    vectorPtr_Type meshVelRep(new vector_Type(M_mmFESpace->map(), Repeated));
-    *meshVelRep = *meshVel;
+    //*meshVel *= alpha;
+    //vectorPtr_Type meshVelRep(new vector_Type(M_mmFESpace->map(), Repeated));
+    //*meshVelRep = *meshVel;
 
     uk.subset(*M_uk, 0);
-    vector_Type dvfm(M_uFESpace->map(), Repeated);
+    //vector_Type dvfm(M_uFESpace->map(), Repeated);
     vector_Type vfm(M_uFESpace->map(), Repeated);
     this->transferMeshMotionOnFluid(*meshVelRep, vfm);
 

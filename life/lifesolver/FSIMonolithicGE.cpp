@@ -120,7 +120,7 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
     if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
 
-        Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
+        //Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
         // Solve HE
         iterateMesh(disp);
 
@@ -133,18 +133,18 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         this->moveMesh(meshDisp);//initialize the mesh position with the total displacement
 
         //meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
-        meshDisp *= -alpha; //mesh velocity w
+        //meshDisp *= -alpha; //mesh velocity w
         this->interpolateVelocity(M_ALETimeAdvance->velocity( meshDisp ), *this->M_beta);//first order extrapolation of meshDisp (to modify)
         //*M_beta *= -1.;
 //         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
 //         fluid->subset(*M_un, (UInt)0);
 
-	// Matteo
-	vector_Type uExtrap(M_uFESpace->map(), Repeated );
-	M_fluidTimeAdvance->extrapolation(uExtrap);
-	*this->M_beta += uExtrap;
-        
-	//*this->M_beta += M_fluidTimeAdvance->extrapolation();/*M_un*/;//relative velocity beta=un-w
+        // Only possibility: convective explicit, extrapolations for both u and w.
+        vector_Type uExtrap(M_uFESpace->map(), Repeated );
+        M_fluidTimeAdvance->extrapolation(uExtrap);
+        *this->M_beta += uExtrap;
+
+        //*this->M_beta += M_fluidTimeAdvance->extrapolation();/*M_un*/;//relative velocity beta=un-w
         //M_monolithicMatrix.reset(new matrix_Type(*M_monolithicMap));
 
         assembleSolidBlock(iter, M_un);

@@ -144,7 +144,7 @@ public:
     typedef std::vector<feVectorType>                feVectorContainer_Type;
     typedef std::vector<feVectorType*>               feVectorContainerPtr_Type;
     typedef typename feVectorContainerPtr_Type::iterator  feVectorContainerPtrIterate_Type;
-
+    typedef std::vector<boost::shared_ptr<feVectorType> > feVectorSharedPtrContainer_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -276,7 +276,7 @@ public:
     this class is virtual because used in TimeAdvanceNewmark scheme;
     @param x0 is a vector of feVectorType containing the state vector;
     */
-    virtual void setInitialCondition( const feVectorContainer_Type& x0) = 0;
+    virtual void setInitialCondition( const feVectorSharedPtrContainer_Type& x0){}
 
   //!Initialize the RhsVector:
     /*!
@@ -314,7 +314,7 @@ public:
     //!Return the\f$ i-\f$th coefficient of the solution's extrapolation
     /*!
      @param \f$i\f$ index of  extrapolation coefficient
-     @returns the \f$i-\f$th coefficient of the extrapolation of the first order derivative 
+     @returns the \f$i-\f$th coefficient of the extrapolation of the first order derivative
     */
     virtual Real coefficientExtrapolation(const UInt& i )  const = 0;
 
@@ -334,7 +334,7 @@ public:
     */
     //virtual feVectorType extrapolation() const  = 0;
     virtual void extrapolation(feVectorType& extrapolation) const =0;
-    
+
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of

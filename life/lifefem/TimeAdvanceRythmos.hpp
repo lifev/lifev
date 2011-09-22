@@ -79,6 +79,7 @@ namespace LifeV {
 
     For any other kind of information visit www.doxygen.org.
  */
+
 class TimeAdvanceRythmos : public TimeAdvance
 {
 public:
@@ -89,7 +90,7 @@ public:
     //@}
 
     virtual void shiftRight(const feVectorType& solution );
-    virtual  void updateRHSFirstDerivative(const Real& timeStep = 1 );
+    virtual void updateRHSFirstDerivative(const Real& timeStep = 1 );
     virtual void updateRHSSecondDerivative(const Real& timeStep = 1 );
     virtual void showMe()  const ;
 

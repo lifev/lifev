@@ -241,8 +241,8 @@ public:
      */
     virtual void updateRightHandSide( const vector_Type& rightHandSide )
     {
-        M_rightHandSideNoBC = rightHandSide;
-        M_rightHandSideNoBC.globalAssemble();
+        M_rightHandSideNoBC.reset(new vector_Type(rightHandSide));
+        M_rightHandSideNoBC->globalAssemble();
     }
 
     //! Update convective term, boundary condition and solve the linearized ns system
@@ -682,10 +682,10 @@ protected:
     source_Type                    M_source;
 
     //! Right hand side for the velocity component
-    vector_Type                    M_rightHandSideNoBC;
+    vectorPtr_Type                 M_rightHandSideNoBC;
 
     //! Global right hand side
-    vector_Type                    M_rightHandSideFull;
+    //    vectorPtr_Type                 M_rightHandSideFull;
 
     //! Global solution
     vectorPtr_Type                 M_solution;
@@ -733,7 +733,7 @@ protected:
     MatrixElemental                        M_elementMatrixDivergence;
     MatrixElemental                        M_elementMatrixGradient;
     VectorElemental                        M_elementRightHandSide;           // Elementary right hand side
-    matrixPtr_Type                 M_blockPreconditioner;
+    matrixPtr_Type                         M_blockPreconditioner;
     VectorElemental                        M_wLoc;
     VectorElemental                        M_uLoc;
     boost::shared_ptr<vector_Type> M_un;
@@ -763,18 +763,18 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_matrixStokes           ( ),
         M_matrixNoBC             ( ),
         M_matrixStabilization    ( ),
-        M_rightHandSideNoBC      ( M_localMap ),
-        M_rightHandSideFull      ( M_localMap ),
+        M_rightHandSideNoBC      ( ),
+        //        M_rightHandSideFull      ( ),
         M_solution               ( new vector_Type( M_localMap ) ),
         M_residual               ( M_localMap ),
         M_linearSolver           ( communicator ),
         M_steady                 ( ),
-        M_postProcessing         ( new PostProcessingBoundary<mesh_Type>( M_velocityFESpace.mesh(),
+        M_postProcessing         ( /*new PostProcessingBoundary<mesh_Type>( M_velocityFESpace.mesh(),
                                                             &M_velocityFESpace.feBd(),
                                                             &M_velocityFESpace.dof(),
                                                             &M_pressureFESpace.feBd(),
                                                             &M_pressureFESpace.dof(),
-                                                            M_localMap ) ),
+                                                            M_localMap ) */),
         M_stabilization          ( false ),
         M_reuseStabilization     ( false ),
         M_resetStabilization     ( false ),
@@ -827,17 +827,16 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_matrixStokes           ( ),
         M_matrixNoBC             ( ),
         M_matrixStabilization    ( ),
-        M_rightHandSideNoBC      ( M_localMap ),
-        M_rightHandSideFull      ( M_localMap ),
+        M_rightHandSideNoBC      ( ),
         M_solution               ( ),
         M_residual               ( M_localMap ),
         M_linearSolver           ( communicator ),
-        M_postProcessing         ( new PostProcessingBoundary<mesh_Type>(M_velocityFESpace.mesh(),
+        M_postProcessing         ( /*new PostProcessingBoundary<mesh_Type>(M_velocityFESpace.mesh(),
                                                            &M_velocityFESpace.feBd(),
                                                            &M_velocityFESpace.dof(),
                                                            &M_pressureFESpace.feBd(),
                                                            &M_pressureFESpace.dof(),
-                                                           M_localMap ) ),
+                                                           M_localMap )*/ ),
         M_stabilization          ( false ),
         M_reuseStabilization     ( false ),
         M_resetStabilization     ( false ),
@@ -889,17 +888,16 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_matrixStokes           ( ),
         M_matrixNoBC             ( ),
         M_matrixStabilization    ( ),
-        M_rightHandSideNoBC      ( M_localMap ),
-        M_rightHandSideFull      ( M_localMap ),
+        M_rightHandSideNoBC      ( ),
         M_solution               ( new vector_Type( M_localMap ) ),
         M_residual               ( M_localMap ),
         M_linearSolver           ( ),
-        M_postProcessing         ( new PostProcessingBoundary<mesh_Type>(M_velocityFESpace.mesh(),
+        M_postProcessing         ( /*new PostProcessingBoundary<mesh_Type>(M_velocityFESpace.mesh(),
                                                            &M_velocityFESpace.feBd(),
                                                            &M_velocityFESpace.dof(),
                                                            &M_pressureFESpace.feBd(),
                                                            &M_pressureFESpace.dof(),
-                                                           M_localMap ) ),
+                                                           M_localMap )*/ ),
         M_stabilization          ( false ),
         M_reuseStabilization     ( false ),
         M_resetStabilization     ( false ),
@@ -1495,7 +1493,7 @@ OseenSolver<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
     updateStabilization( *matrixFull );
     getFluidMatrix( *matrixFull );
 
-    vector_Type rightHandSideFull ( M_rightHandSideNoBC );
+    vector_Type rightHandSideFull ( *M_rightHandSideNoBC );
 
 //     matrixFull.reset( new matrix_Type( *M_matrixNoBC ) );
 //     M_rightHandSideFull = M_rightHandSideNoBC;
@@ -1526,7 +1524,7 @@ OseenSolver<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
         resetStabilization();
     }
 
-    M_residual  = M_rightHandSideNoBC;
+    M_residual  = *M_rightHandSideNoBC;
     M_residual -= (*M_matrixNoBC) * (*M_solution);
 
     //M_residual.spy("residual");
