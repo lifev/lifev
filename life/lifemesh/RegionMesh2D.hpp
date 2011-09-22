@@ -117,16 +117,16 @@ public:
      */
 
     //! Volume Element (3D)
-	typedef MeshElementMarked3D<GEOSHAPE, MC>  volume_Type;
+	typedef MeshElementMarked<3, 2, GEOSHAPE, MC>  volume_Type;
 	//! Face Element (2D)
-    typedef MeshElementMarked2D<GEOSHAPE, MC, 2> face_Type;
-    typedef MeshElementMarked2D<GEOSHAPE, MC, 2> element_Type;
+    typedef MeshElementMarked<2, 2, GEOSHAPE, MC> face_Type;
+    typedef MeshElementMarked<2, 2, GEOSHAPE, MC> element_Type;
     //! Edge Element (1D)
-    typedef MeshElementMarked1D<edgeShape_Type, MC, 2> edge_Type;
-    typedef MeshElementMarked1D<edgeShape_Type, MC, 2> facet_Type;
+    typedef MeshElementMarked<1, 2, edgeShape_Type, MC> edge_Type;
+    typedef MeshElementMarked<1, 2, edgeShape_Type, MC> facet_Type;
     //! Point Element (0D)
-    typedef MeshElementMarked0D<MC, 2> point_Type;
-    typedef MeshElementMarked0D<MC, 2> ridge_Type;
+    typedef MeshElementMarked<0, 2, nullShape, MC> point_Type;
+    typedef MeshElementMarked<0, 2, nullShape, MC> ridge_Type;
 
     /** @} */ // End of group Geometric Element Types
 

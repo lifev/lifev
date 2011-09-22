@@ -126,6 +126,10 @@ enum ReferenceGeometry
 
 //! @defgroup BasRefSha   Basis Reference Shapes
 
+
+//! @ingroup BasRefSha
+class nullShape{};
+
 //! @ingroup BasRefSha
 class Point
 {

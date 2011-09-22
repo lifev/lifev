@@ -140,19 +140,19 @@ public:
 
     //const int geoDim = GEOSHAPE::S_geoDimensions;
     //! Volume Element (3D)
-    typedef MeshElementMarked3D<GEOSHAPE, MC>  volume_Type;
-    typedef MeshElementMarked3D<GEOSHAPE, MC>  element_Type;
+    typedef MeshElementMarked<3, 3, GEOSHAPE, MC>  volume_Type;
+    typedef MeshElementMarked<3, 3, GEOSHAPE, MC>  element_Type;
     
     //! Face Element (2D)
-    typedef MeshElementMarked2D<facetShape_Type, MC, 3> facet_Type;
-    typedef MeshElementMarked2D<facetShape_Type, MC, 3> face_Type;
+    typedef MeshElementMarked<2, 3, facetShape_Type, MC> facet_Type;
+    typedef MeshElementMarked<2, 3, facetShape_Type, MC> face_Type;
 
     //! Edge Element (1D)
-    typedef MeshElementMarked1D<ridgeShape_Type, MC, 3> ridge_Type;
-    typedef MeshElementMarked1D<ridgeShape_Type, MC, 3> edge_Type;
+    typedef MeshElementMarked<1, 3, ridgeShape_Type, MC> ridge_Type;
+    typedef MeshElementMarked<1, 3, ridgeShape_Type, MC> edge_Type;
     //! Point Element (0D)
-    typedef MeshElementMarked0D<MC, 3>            point_Type;
-    typedef MeshElementMarked0D<MC, 3>            peak_Type;
+    typedef MeshElementMarked<0, 3, nullShape, MC>            point_Type;
+    typedef MeshElementMarked<0, 3, nullShape, MC>            peak_Type;
 
     /** @} */ // End of group Geometric Element Types
 
