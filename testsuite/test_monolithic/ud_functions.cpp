@@ -338,9 +338,9 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
 }
 
 
-Real u2normal(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real u2normal(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    //   if (t<=0.003)
+    if (t<=0.003)
         return -1.3332e4;
 
     return 0.;

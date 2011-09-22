@@ -55,7 +55,7 @@ FSIMonolithic::FSIMonolithic():
         M_offset(0),
         M_solidAndFluidDim(0),
         M_fluidBlock(),
-        M_solidBlock(),
+        //        M_solidBlock(),
         M_solidBlockPrec(),
         M_linearSolver(),
         M_numerationInterface(),
@@ -464,17 +464,14 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working
     std::map<ID, ID>::const_iterator ITrow;
     //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
-    
-  
-    vector_Type lambda(*M_interfaceMap, Unique);
-    vector_Type lambdaSolid(M_solid->displacement().map());
-    // Inser Matteo  because changed the method extrapolation();
-    M_solidTimeAdvance->extrapolation(lambda);
 
-    this->monolithicToInterface(lambda,lambdaSolid); 
-    // comment Matteo
-    //    this->monolithicToInterface(lambda,  M_solidTimeAdvance->extrapolation());
- 
+
+    vector_Type extrapolation(*M_monolithicMap, Unique);
+    vector_Type lambda(*M_interfaceMap, Unique);
+    M_fluidTimeAdvance->extrapolation(extrapolation);/*solid!*/
+
+    this->monolithicToInterface(lambda, extrapolation);
+
     UInt interface(M_monolithicMatrix->interface());
     //Real rescale(M_solid->rescaleFactor());
     UInt totalDofs(M_dFESpace->dof().numTotalDof());
@@ -573,15 +570,15 @@ FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
         updateSolidSystem(this->M_rhs);
     }
 
-    M_solid->material()->computeMatrix(*solution, M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
-    M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));
-    *M_solidBlock += *M_solid->Mass();
-    *M_solidBlock += *M_solid->material()->stiff();
-    M_solidBlock->globalAssemble();
-    *M_solidBlock *= M_data->dataSolid()->dataTime()->timeStep();
+    M_solid->material()->computeMatrix(*solution*M_data->dataFluid()->dataTime()->timeStep(), M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
+    M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
+    *M_solidBlockPrec += *M_solid->Mass();
+    *M_solidBlockPrec += *M_solid->material()->stiff();
+    M_solidBlockPrec->globalAssemble();
+    *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
 
-    M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap, 1 ) );
-    *M_solidBlockPrec += *M_solidBlock;
+//     M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap, 1 ) );
+//     *M_solidBlockPrec += *M_solidBlock;
 }
 
 void
@@ -597,7 +594,7 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
     {
         M_resetPrec=true;
         M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-        *M_rhs += M_fluid->matrixMass()*(*M_un)/M_data->dataFluid()->dataTime()->timeStep();//(M_bdf->rhsContributionFirstDerivative()) ;
+        *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());//(M_bdf->rhsContributionFirstDerivative()) ;
         couplingRhs(M_rhs, M_un);
     }
 }
@@ -605,7 +602,7 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
 void FSIMonolithic::updateRHS()
 {
     M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-    *M_rhs += M_fluid->matrixMass()*(*M_un)*1/M_data->dataFluid()->dataTime()->timeStep();//M_bdf->rhsContributionFirstDerivative() ;
+    *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());//M_bdf->rhsContributionFirstDerivative() ;
     couplingRhs(M_rhs, M_un);
     //M_solid->updateVel();
     updateSolidSystem(M_rhs);

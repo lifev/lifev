@@ -572,7 +572,7 @@ protected:
     UInt                                              M_offset;
     UInt                                              M_solidAndFluidDim;
     matrixPtr_Type                                    M_fluidBlock;
-    matrixPtr_Type                                    M_solidBlock;
+    //    matrixPtr_Type                                    M_solidBlock;
     matrixPtr_Type                                    M_solidBlockPrec;
     matrixPtr_Type                                    M_robinCoupling; //uninitialized if not needed
     matrixPtr_Type                                    M_boundaryMass;

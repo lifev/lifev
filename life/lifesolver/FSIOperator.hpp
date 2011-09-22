@@ -254,7 +254,7 @@ public:
        Extrapolates the solution for the next time step. This method should be handled by a more general time-advance
        class.
      */
-    virtual void couplingVariableExtrap( );
+    void couplingVariableExtrap( );
 
     //! solves the Jacobian system
     /**

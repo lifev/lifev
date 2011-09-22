@@ -40,7 +40,7 @@ updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
 abstol     =  0. # tolerance in nonLinearRichardson
-reltol     =  1.e-5 # tolerance in nonLinearRichardson
+reltol     =  1.e-4 # tolerance in nonLinearRichardson
 
 restart    = 0
 maxSubIter = 20
@@ -63,7 +63,7 @@ filename   = solid2
 
 [importer]
 type       = hdf5
-restart_timestep = 0.001
+##restart_timestep = 0.0001
 [./fluid]
 filename   = fluid
 [../solid]
@@ -72,8 +72,8 @@ filename   = solid
 # [../] # importer
 
 [fluid]
-useShapeDerivatives           = false
-semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
+useShapeDerivatives           = true
+semiImplicit                  = false # tells if we advance in time after the first nonlinear iteration or not
 domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
 convectiveTermDer             = false  # tells if the velocity is to be considered implicitly in the convective term
 
@@ -85,13 +85,12 @@ viscosity = 0.03              # viscosity
 method          = BDF
 initialtime		= 0.
 endtime			= 0.01
-timestep		= 0.001
+timestep		= 0.0001
 BDF_order		= 1
 theta           = 0.5
 zeta            = 0.5
 rhoInf          = 1
 typeOfGeneralizedAlpha            = HHT
-
 
 [../space_discretization]
 mesh_dir  = ./Mesh/
@@ -123,12 +122,12 @@ tolerance       =  0 # how far points are to be considered the same on the inter
 
 [solid]
 
-useExactJacobian = false # always false for linear structure model. Otherwise it allows to chose beween an exact-inexact
+useExactJacobian = true # always false for linear structure model. Otherwise it allows to chose beween an exact-inexact
                          # Newton scheme
 
 [./physics]
 
-solidType = linearVenantKirchhof #NOTE: the nonlinear choice is not available (still in development)
+solidType = nonLinearVenantKirchhof #NOTE: the nonlinear choice is not available (still in development)
 # either linearVenantKirchhof or nonLinearVenantKirchhof (the last one still in development)
 #material_flag = '100 101'
 #density   = '1.2 1.2'               # density
@@ -142,10 +141,10 @@ young     = 4.0E6
 poisson   = 0.45
 
 [../time_discretization]
-method          = Newmark # Newmark or BDF
+method          = BDF # Newmark or BDF
 initialtime		= 0.
 endtime			= 0.01
-timestep		= 0.001
+timestep		= 0.0001
 BDF_order		= 2
 theta           = 0.25
 gamma           = 0.5
@@ -420,7 +419,7 @@ keep_info       = 1
 method          = BDF
 initialtime		= 0.
 endtime			= 0.01
-timestep		= 0.001
+timestep		= 0.0001
 BDF_order		= 1
 theta           = 0.5
 zeta            = 0.5
