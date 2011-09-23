@@ -36,6 +36,11 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef EXPORTER_HDF5_MESH_3D_H
 #define EXPORTER_HDF5_MESH_3D_H 1
 
+
+#include <life/lifecore/LifeV.hpp>
+
+#ifdef HAVE_HDF5
+
 #include <life/lifefilters/ExporterHDF5.hpp>
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
 
@@ -1061,5 +1066,7 @@ void ExporterHDF5Mesh3D<MeshType>::writeInterfaces()
 }
 
 } // Namespace LifeV
+
+#endif // HAVE_HDF5
 
 #endif // EXPORTER_HDF5_MESH_3D_H

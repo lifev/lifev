@@ -34,6 +34,8 @@
 
  */
 
+#ifdef HAVE_HDF5
+
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -582,4 +584,5 @@ Cylinder::run()
 
 //////////////////////
 
+#endif // HAVE_HDF5
 
