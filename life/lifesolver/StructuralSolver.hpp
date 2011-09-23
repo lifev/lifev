@@ -328,7 +328,7 @@ public:
     \param sol the current solution
     \param factor the rescaleFactor
   */
-  void computeMatrix( const vector_Type& sol, Real const& factor );
+    void computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real const& factor );
 
   //void updateMatrix(matrix_Type & bigMatrixStokes);// used for monolithic
   //void updateCoupling(matrix_Type couplingMatrix);// used for monolithic
@@ -525,7 +525,7 @@ protected:
   matrixPtr_Type                       M_tempMatrix;
 
   //! Matrix Temp: Temporary auxiliary matrix to compute residuals or rhs
-  matrixPtr_Type                       M_tempMatrixWithoutZeta;
+    //matrixPtr_Type                       M_tempMatrixWithoutZeta;
 
   //! Jacobian Matrix: Matrix to store the jacobian of the newton method
   matrixPtr_Type                       M_jacobian;
@@ -534,7 +534,7 @@ protected:
   vectorPtr_Type                       M_tempVect;
 
   //! Stiffness auxiliary vector for NH and Exp. It is used to compute residuals or rhs
-  vectorPtr_Type                       M_tempVectWithoutZeta;
+    //vectorPtr_Type                       M_tempVectWithoutZeta;
 
   //! level of recursion for Aztec (has a sens with FSI coupling)
   UInt                                 M_recur;
@@ -580,10 +580,10 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
   M_localMap                   ( ),
   M_mass                       ( ),
   M_tempMatrix                 ( ),
-  M_tempMatrixWithoutZeta      ( ),
+  //M_tempMatrixWithoutZeta      ( ),
   M_jacobian                   ( ),
   M_tempVect                   ( ),
-  M_tempVectWithoutZeta        ( ),
+  //M_tempVectWithoutZeta        ( ),
   M_recur                      ( ),
   M_source                     ( ),
   M_offset                     ( 0 ),
@@ -642,18 +642,19 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   // M_rhsA.reset                      ( new vector_Type(*M_localMap) );
   // M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
   M_mass.reset                      (new matrix_Type(*M_localMap));
-  M_tempMatrixWithoutZeta.reset                (new matrix_Type(*M_localMap));
+  //M_tempMatrixWithoutZeta.reset                (new matrix_Type(*M_localMap));
+  M_tempMatrix.reset                (new matrix_Type(*M_localMap));
   M_jacobian.reset                  (new matrix_Type(*M_localMap));
 
   //Vector of Stiffness for NH and Exp
   //This vector stores the stiffness vector both in
   //updateSystem and in evalresidual. That's why it is called tempVect
   M_tempVect.reset                  (new vector_Type(*M_localMap));
-  M_tempVectWithoutZeta.reset       (new vector_Type(*M_localMap));
+  //M_tempVectWithoutZeta.reset       (new vector_Type(*M_localMap));
   M_offset                          = offset;
 
-  M_theta                           = M_data->dataTime()->theta();
-  M_zeta                            = M_data->dataTime()->gamma();
+//   M_theta                           = M_data->dataTime()->theta();
+//   M_zeta                            = M_data->dataTime()->gamma();
 
   M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->solidType() ) );
   M_material->setup( dFESpace,M_localMap,M_offset );
@@ -882,7 +883,7 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& coefficient )
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& /*factor*/)
+StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
 {
   UInt totalDof = M_FESpace->dof().numTotalDof();
 
@@ -1043,7 +1044,7 @@ StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
 }
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol,  Real const& /*factor*/)
+void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& factor)
 {
     this->M_Displayer->leaderPrint( " Computing residual ... \t\t\t");
 
@@ -1051,20 +1052,19 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol, 
     chrono.start();
 
     //! It is right to do globalAssemble() inside the M_material class
-    M_material->computeStiffness( sol, 1., this->M_data, this->M_Displayer);
+    M_material->computeStiffness( sol, 1., this->M_data, M_Displayer);
 
     if ( this->M_data->solidType() == "linearVenantKirchhoff" || this->M_data->solidType() == "nonlinearVenantKirchhoff" )
       {
-	*stiff +=*this->M_material->stiffMatrix()*M_zeta;
-	*stiff += *this->M_mass;
-	stiff->globalAssemble();
+          *stiff += *this->M_material->stiffMatrix();
+          *stiff += *this->M_mass;
+          stiff->globalAssemble();
       }
     else
       {
-	M_tempVect.reset(new vector_Type(*this->M_localMap));
-	*M_tempVect = *this->M_material->stiffVector()*M_zeta;
-
-	M_tempVect->globalAssemble();
+          M_tempVect.reset(new vector_Type(*this->M_localMap));
+          *M_tempVect = *this->M_material->stiffVector();
+          M_tempVect->globalAssemble();
       }
 
     chrono.stop();
@@ -1078,7 +1078,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
 {
 
     //This method call the M_material computeStiffness
-    computeMatrix(solution, 1.);
+    computeMatrix(M_tempMatrix, solution, 1.);
 
     this->M_Displayer->leaderPrint("    S- Updating the boundary conditions ... \t");
     LifeChrono chrono;
@@ -1091,13 +1091,12 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     if ( !this->M_BCh->bcUpdateDone() )
       this->M_BCh->bcUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
 
+	vector_Type rhsFull(*this->M_rhsNoBC, Unique); // ignoring non-local entries, Otherwise they are summed up lately
     if ( this->M_data->solidType() == "linearVenantKirchhoff" || this->M_data->solidType() == "nonlinearVenantKirchhoff" )
       {
 	chrono.start();
 
 	bcManageMatrix( *this->M_tempMatrix, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), 1.0 );
-
-	vector_Type rhsFull(*this->M_rhsNoBC, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
 	bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->dataTime()->time(), 1.0 );
 
@@ -1113,16 +1112,19 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
       {
     	chrono.start();
 
+    	bcManage( *this->M_mass, rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), this->M_data->dataTime()->time(), 1.0);
+    	bcManageVector( *M_tempVect, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), this->M_data->dataTime()->time(), 1.0);
+
+        *this->M_rhs = rhsFull;
+
     	residual = *this->M_mass * solution;
 
     	residual += *this->M_tempVect;
 
-    	residual -= *this->M_rhsNoBC;
+    	residual -= *this->M_rhs;
 
     	//! Apply the boundary conditions
-    	bcManageVector( residual, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), this->M_data->dataTime()->time(), 1.0);
-
-
+    	//bcManageVector( residual, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), this->M_data->dataTime()->time(), 1.0);
     	chrono.stop();
     	this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
       }
@@ -1134,7 +1136,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type&
 {
 //<<<<<<< HEAD
     //MATTEO: compute matrix system without BC.
-    computeMatrix(this->M_tempMatrix, solution, 1.);
+    computeMatrix(M_tempMatrix, solution, 1.);
 // =======
 
 //     computeMatrix(solution, 1.);
@@ -1391,18 +1393,6 @@ StructuralSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, Vector
 //     //*M_linearStiff *= (M_data->dataTime()->timeStep()*M_rescaleFactor);
 // }
 
-//=======
-/*
-template <typename Mesh, typename SolverType>
-void
-StructuralSolver<Mesh, SolverType>::rescaleMatrices()
-{
-
-  *M_mass *=(M_data->dataTime()->timeStep()*M_rescaleFactor);
-  *M_linearStiff *= (M_data->dataTime()->timeStep()*M_rescaleFactor);
-}
-*/
-//>>>>>>> 20110728_ExponentialNeohookean
 template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
@@ -1436,7 +1426,7 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
 
     jacobian.reset(new matrix_Type(*this->M_localMap));
 //<<<<<<< HEAD
-    *jacobian += *this->M_material->stiff();
+    *jacobian += *this->M_material->stiffMatrix();
      // Matteo
     //   *jacobian *= M_zeta;
 //=======

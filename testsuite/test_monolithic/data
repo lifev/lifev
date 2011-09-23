@@ -55,9 +55,9 @@ type       = hdf5
 nRestart   = 0
 
 [./fluid]
-filename   = fluid2
+filename   = fluid3
 [../solid]
-filename   = solid2
+filename   = solid3
 [../] # solid
 [../] # exporter
 

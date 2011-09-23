@@ -181,6 +181,8 @@ public:
     //! get the solution.
     vectorPtr_Type& solutionPtr() { return M_uk; }
 
+    static bool                          S_register;
+
     //@}
 
 protected:
@@ -234,7 +236,6 @@ private:
     matrixPtr_Type                       M_shapeDerivativesBlock;
     matrixPtr_Type                       M_solidDerBlock;
     //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
-    static bool                          S_register;
     //@}
 
     //! Factory method

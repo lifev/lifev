@@ -65,8 +65,8 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
 
     typedef typename super::matrixPtr_Type           matrixPtr_Type;
     typedef typename super::vectorPtr_Type           vectorPtr_Type;
-    typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
-    typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
+    typedef typename super::dataPtr_Type             dataPtr_Type;
+    typedef typename super::displayerPtr_Type        displayerPtr_Type;
 
     //! Definition of local tensors
     typedef KN<Real> 				     KN_Type;

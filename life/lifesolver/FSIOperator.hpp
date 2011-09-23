@@ -537,7 +537,7 @@ public:
     const FESpace<mesh_Type, MapEpetra>& mmFESpace()              const { return *M_mmFESpace; }
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > mmFESpacePtr() const { return M_mmFESpace; }
     //!getter for the harmonic extension solution
-    virtual const vector_Type& meshDisp()                         const { return M_meshMotion->disp(); }
+    /*virtual*/ const vector_Type& meshDisp()                         const { return *M_ALETimeAdvance->stencil()[0]; }
     //!getter for the harmonic extension solution of the previous time step
     const         vector_Type& dispFluidMeshOld()                 const { return *M_dispFluidMeshOld; }
     //!getter for the mesh velocity

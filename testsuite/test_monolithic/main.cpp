@@ -150,6 +150,9 @@ public:
 
         FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createVenantKirchhoffNonLinear );
 
+        std::cout<<"register MonolithicGE : "<<FSIMonolithicGE::S_register<<std::endl;
+        std::cout<<"register MonolithicGI : "<<FSIMonolithicGI::S_register<<std::endl;
+
         M_data = dataPtr_Type( new data_Type() );
         M_data->setup( data_file );
         //M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
@@ -271,8 +274,8 @@ public:
         }
         dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->mergeBCHandlers();
 
-        FC0.initParameters( *M_fsi->FSIOper(), 3);
-        LH.initParameters( *M_fsi->FSIOper(), "dataHM");
+        //FC0.initParameters( *M_fsi->FSIOper(), 3);
+        //LH.initParameters( *M_fsi->FSIOper(), "dataHM");
         M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart );
         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
         M_data->dataSolid()->dataTime()->setInitialTime( M_Tstart );
@@ -310,30 +313,30 @@ public:
 
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->dataTime()->updateTime(), ++iter)
         {
-            LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
-            if ( false && valveIsOpen)
-            {
-                if ( iter == 3 /*flux < -100*/)
-                {
-                    valveIsOpen=false;
-                    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
-                    //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Essential, LifeV::Full, (const LifeV::UInt) 3);
-                }
-            }
-            // close the valve
-            else
-            {
-                if (false && M_fsi->FSIOper()->fluid().pressure(2, M_fsi->displacement()) < LifeV::LumpedHeart::M_pressure )
-                {
-                    valveIsOpen=true;
-                    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
-                    //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Natural, LifeV::Full, 3);
-                }
-            }
+//             LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
+//             if ( false && valveIsOpen)
+//             {
+//                 if ( iter == 3 /*flux < -100*/)
+//                 {
+//                     valveIsOpen=false;
+//                     M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+//                     //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Essential, LifeV::Full, (const LifeV::UInt) 3);
+//                 }
+//             }
+//             // close the valve
+//             else
+//             {
+//                 if (false && M_fsi->FSIOper()->fluid().pressure(2, M_fsi->displacement()) < LifeV::LumpedHeart::M_pressure )
+//                 {
+//                     valveIsOpen=true;
+//                     M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+//                     //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Natural, LifeV::Full, 3);
+//                 }
+//             }
 
-            int flag =2;
-            FC0.renewParameters( *M_fsi, 3 );
-            LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->time(), flux );
+//             int flag =2;
+//             //FC0.renewParameters( *M_fsi, 3 );
+//             LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->time(), flux );
 
             //                 FC0.renewParameters( *M_fsi, 6 );
             //                 FC1.renewParameters( *M_fsi, 3, 4 );
@@ -360,10 +363,10 @@ public:
             M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
 
 
-            M_fsi->FSIOper()->displayer().leaderPrint( "average inlet pressure  = ", M_fsi->FSIOper()->fluid().pressure(2, *M_velAndPressure));
-            M_fsi->FSIOper()->displayer().leaderPrint( "average outlet pressure = ", M_fsi->FSIOper()->fluid().pressure(3, *M_velAndPressure));
-            M_fsi->FSIOper()->displayer().leaderPrint( "inlet flux              = ", M_fsi->FSIOper()->fluid().flux(2, *M_velAndPressure));
-            M_fsi->FSIOper()->displayer().leaderPrint( "outlet flux             = ", M_fsi->FSIOper()->fluid().flux(3, *M_velAndPressure));
+            //M_fsi->FSIOper()->displayer().leaderPrint( "average inlet pressure  = ", M_fsi->FSIOper()->fluid().pressure(2, *M_velAndPressure));
+            //M_fsi->FSIOper()->displayer().leaderPrint( "average outlet pressure = ", M_fsi->FSIOper()->fluid().pressure(3, *M_velAndPressure));
+            //M_fsi->FSIOper()->displayer().leaderPrint( "inlet flux              = ", M_fsi->FSIOper()->fluid().flux(2, *M_velAndPressure));
+            //M_fsi->FSIOper()->displayer().leaderPrint( "outlet flux             = ", M_fsi->FSIOper()->fluid().flux(3, *M_velAndPressure));
 
             std::cout << "[fsi_run] Iteration " << iter << " was done in : "
                       << _timer.elapsed() << "\n";
@@ -420,8 +423,8 @@ private:
     vectorPtr_Type M_fluidDisp;
     vectorPtr_Type M_solidDisp;
     //    vectorPtr_Type M_solidVel;
-    LifeV::FlowConditions FC0;
-    LifeV::LumpedHeart LH;
+    //LifeV::FlowConditions FC0;
+    //LifeV::LumpedHeart LH;
     LifeV::Real    M_Tstart;
     vectorPtr_Type M_WS;
 
@@ -593,7 +596,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     M_importerSolid->import(M_Tstart-dt, dt);
 
     UniqueVFDOld.reset(new vector_Type(*M_fluidDisp, Unique, Zero));
-    dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->initializeMesh(UniqueVFDOld);
+    //dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->initializeMesh(UniqueVFDOld);
 
     M_importerFluid->import(M_Tstart);
     M_importerSolid->import(M_Tstart);

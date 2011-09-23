@@ -165,6 +165,8 @@ public:
     //! Factory method
     static FSIOperator* instantiate(){ return new FSIMonolithicGE(); }
 
+    static bool S_register;
+
 private:
 
     //!@name Private Methods
@@ -181,7 +183,6 @@ private:
     //!@name Private Members
     //@{
 
-    static bool S_register;
 
     //@}
 };

@@ -132,7 +132,7 @@ FSIMonolithicGI::updateSystem()
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
     M_un.reset(new vector_Type(*M_uk));
     super_Type::updateSystem();
-    M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.`
+    //M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.`
 }
 
 void
@@ -340,7 +340,7 @@ void FSIMonolithicGI::setupBlockPrec()
         M_solid->material()->updateJacobianMatrix( *M_uk*M_data->dataFluid()->dataTime()->timeStep(), dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solid->Mass();
-        *M_solidBlockPrec += *M_solid->material()->stiff();
+        *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
         M_solidBlockPrec->globalAssemble();
         *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
 

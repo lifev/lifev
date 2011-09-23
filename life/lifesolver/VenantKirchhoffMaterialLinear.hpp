@@ -53,7 +53,7 @@ class VenantKirchhoffMaterialLinear :
   public:
     typedef StructuralMaterial<Mesh>                 super;
 
-    typedef typename  super::data_Type                         data_Type;
+    typedef typename super::data_Type                         data_Type;
 
     typedef typename super::vector_Type              vector_Type;
     typedef typename super::matrix_Type              matrix_Type;
@@ -125,11 +125,11 @@ class VenantKirchhoffMaterialLinear :
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual void computeMatrix( const vector_Type& /*sol*/,
-                                Real /*factor*/,
-                                const dataPtr_Type& /*dataMaterial*/,
-                                const displayerPtr_Type& displayer);
-//     void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
+//     virtual void computeMatrix( const vector_Type& /*sol*/,
+//                                 Real /*factor*/,
+//                                 const dataPtr_Type& /*dataMaterial*/,
+//                                 const displayerPtr_Type& displayer);
+    void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
     //! Missing Documentation!!!
     void computeKinematicsVariables( const VectorElemental& /*dk_loc*/ ){}
@@ -242,11 +242,11 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
-<<<<<<< HEAD
+    //<<<<<<< HEAD
    std::cout<<"compute LinearStiff Matrix end\n";
-=======
-    this->M_jacobian = this->M_linearStiff;
->>>>>>> 20110728_ExponentialNeohookean
+   //=======
+   this->M_jacobian = this->M_linearStiff;
+    //>>>>>>> 20110728_ExponentialNeohookean
 }
 
 
@@ -275,25 +275,25 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms( matrixPt
                                                                          const  vector_Type& /*disp*/,
                                                                          const dataPtr_Type& /*dataMaterial*/,
                                                                          const displayerPtr_Type& displayer )
-<<<<<<< HEAD
+//<<<<<<< HEAD
     {
       displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
       std::cout << std::endl;
       this->M_stiff->globalAssemble();
     }
-=======
-{
-        displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
-        std::cout << std::endl;
-}
+// =======
+// {
+//         displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
+//         std::cout << std::endl;
+// }
 
->>>>>>> 20110728_ExponentialNeohookean
+// >>>>>>> 20110728_ExponentialNeohookean
 
 template <typename Mesh>
 void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& /*disp*/,
-							    Real /*factor*/,
-							       const dataPtr_Type& /*dataMaterial*/,
-							       const displayerPtr_Type& displayer )
+                                                            Real /*factor*/,
+                                                            const dataPtr_Type& /*dataMaterial*/,
+                                                            const displayerPtr_Type& displayer )
 {
     std::cout << std::endl;
     displayer->leaderPrint(" *********************************  ");

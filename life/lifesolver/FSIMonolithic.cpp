@@ -586,10 +586,10 @@ FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
         updateSolidSystem(this->M_rhs);
     }
 
-    M_solid->material()->computeMatrix(*solution*M_data->dataFluid()->dataTime()->timeStep(), M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
+    M_solid->material()->computeStiffness(*solution*M_data->dataFluid()->dataTime()->timeStep(), M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
     M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
     *M_solidBlockPrec += *M_solid->Mass();
-    *M_solidBlockPrec += *M_solid->material()->stiff();
+    *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
     M_solidBlockPrec->globalAssemble();
     *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
 

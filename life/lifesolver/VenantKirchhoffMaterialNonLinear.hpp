@@ -104,8 +104,8 @@ class VenantKirchhoffMaterialNonLinear :
     \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
   */
   void updateJacobianMatrix( const vector_Type& disp,
-			     const dataPtr_Type& dataMaterial,
-			     const displayerPtr_Type& displayer);
+                             const dataPtr_Type& dataMaterial,
+                             const displayerPtr_Type& displayer);
   //! Updates the nonlinear terms in the Jacobian matrix
   /*!
     \param stiff: stiffness matrix provided from outside
@@ -118,11 +118,11 @@ class VenantKirchhoffMaterialNonLinear :
 				      const dataPtr_Type& dataMaterial,
 				      const displayerPtr_Type& displayer);
 
-<<<<<<< HEAD
+//<<<<<<< HEAD
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
-=======
+//=======
     //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
->>>>>>> 20110728_ExponentialNeohookean
+//>>>>>>> 20110728_ExponentialNeohookean
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
@@ -303,17 +303,10 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeStiffness( const vector_Type
 
     this->M_stiff.reset(new matrix_Type(*this->M_localMap));
 
-<<<<<<< HEAD
-    std::cout<<std::endl;
-    displayer->leaderPrint( "*********************************");
-    computeNonLinearMatrix(this->M_stiff,disp,factor,dataMaterial,displayer);
-    displayer->leaderPrint("*********************************");
-=======
     displayer->leaderPrint(" *********************************  ");
     std::cout << std::endl;
     computeNonLinearMatrix(this->M_stiff,disp,factor,dataMaterial,displayer);
     displayer->leaderPrint(" *********************************  ");
->>>>>>> 20110728_ExponentialNeohookean
     std::cout << std::endl;
 
     *this->M_stiff += *this->M_linearStiff;
