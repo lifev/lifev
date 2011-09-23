@@ -422,6 +422,7 @@ public:
     */
     inline UInt size() const  {return M_size;}
 
+    const feVectorContainerPtr_Type& stencil() const { return M_unknowns; }
     //@}
 
 protected:
