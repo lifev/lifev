@@ -12,13 +12,14 @@ find_path(
     qhull/qhull_a.h
   /usr/local/include
   /usr/include
+  ${QHULL_ROOT}/include
 )
 
 if( QHULL_INCLUDE_DIR )
   find_library(
     QHULL_LIBRARY
     NAMES qhull
-    PATHS /usr/local/lib /usr/lib
+    PATHS /usr/local/lib /usr/lib ${QHULL_ROOT}/lib
   )
   if( QHULL_LIBRARY )
     set(QHULL_LIBRARY_DIR "")
@@ -29,7 +30,7 @@ if( QHULL_INCLUDE_DIR )
     set(QHULL_LIBRARIES ${QHULL_LIBRARY})
   endif(QHULL_LIBRARY)
 endif(QHULL_INCLUDE_DIR)
-	    
+
 if(QHULL_FOUND)
   if(NOT QHULL_FIND_QUIETLY)
     message(STATUS "FindQHull: Found both qhull_a.h and libqhull.a")
