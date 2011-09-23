@@ -10,6 +10,8 @@ autom4te.cache
 subdirs
 admin
 .gitmodules
+.project
+.cproject
 testsuite/testsuite
 StructuredCube16.mesh
 StructuredCube32.mesh
