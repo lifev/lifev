@@ -1648,18 +1648,8 @@ createMap(const commPtr_Type& commptr)
     // Against dummies
     ASSERT_PRE(this->M_dof->numTotalDof()>0," Cannot create FeSpace with no degrees of freedom");
 
-    std::set<Int> dofNumberSet;
-    // Gather all dofs local to the given mesh (dofs use global numbering)
-    // The set ensures no repetition
-    for (UInt elementId=0; elementId < this->M_mesh->numElements(); ++elementId )
-        for (UInt localDof=0; localDof < this->M_dof->numLocalDof();++localDof )
-            dofNumberSet.insert( static_cast<Int>( this->M_dof->localToGlobalMap(elementId,localDof ) ) );
-    // dump the set into a vector for adjacency
-    // to save memory I use copy() and not the vector constructor directly
-    std::vector<Int> myGlobalElements(dofNumberSet.size());
-    std::copy(dofNumberSet.begin(),dofNumberSet.end(),myGlobalElements.begin());
-    // Save memory
-    dofNumberSet.clear();
+    // get globalElements list from DOF
+    std::vector<Int> myGlobalElements( this->M_dof->globalElements( *this->M_mesh ) );
     // Create the map
     MapType map( -1,myGlobalElements.size(),&myGlobalElements[0],commptr );
     // Store the map. If more than one field is present the map is
