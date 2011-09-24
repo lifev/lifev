@@ -58,6 +58,7 @@
 
 #include <algorithm>
 #include <map>
+#include <set>
 
 namespace LifeV
 {
