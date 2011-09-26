@@ -272,6 +272,9 @@ MultiscaleSolver::saveCPUTime( const Real& buildUpdateCPUTime,    const Real& so
 void
 MultiscaleSolver::importIterationNumber()
 {
+    // Initialize the iteration number
+    Int iterationNumber( 0 );
+
     if ( M_comm->MyPID() == 0 )
     {
         std::string fileName = multiscaleProblemFolder + multiscaleProblemPrefix + "_CPUTime_" + number2string( multiscaleProblemStep - 1 ) + ".mfile";
@@ -306,12 +309,18 @@ MultiscaleSolver::importIterationNumber()
                 if ( std::fabs( selectedIterationAndTime.second - M_globalData->dataTime()->time() ) >= std::fabs( (*i).second - M_globalData->dataTime()->time() ) )
                     selectedIterationAndTime = *i;
 
-            // Set the iteration number
-            M_globalData->dataTime()->setTimeStepNumber( selectedIterationAndTime.first );
+            // Select the iteration number
+            iterationNumber = selectedIterationAndTime.first;
         }
         else
             std::cerr << " !!! Error: cannot open file: " << fileName.c_str() << " !!!" << std::endl;
     }
+
+    // Share the value with the other processes
+    M_comm->Broadcast( &iterationNumber, 1, 0 );
+
+    // Set the iteration number
+    M_globalData->dataTime()->setTimeStepNumber( iterationNumber );
 }
 
 } // Namespace multiscale
