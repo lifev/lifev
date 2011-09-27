@@ -33,7 +33,7 @@ algorithm = '       Broyden             Default'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
-          200       FSI3D               IdealLeftVentricle_Assimilated_MonolithicGE
+          200       FSI3D               IdealLeftVentricle_Assimilated_Displacement_MonolithicGE
             0       Windkessel0D        Terminal_LeftAtrium
             1       OneDimensional      ReymondStergiopulos2009_001
             2       OneDimensional      ReymondStergiopulos2009_002
