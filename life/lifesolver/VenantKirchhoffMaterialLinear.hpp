@@ -163,6 +163,7 @@ protected:
 
   //! Matrix Kl: stiffness linear
   matrixPtr_Type                                 M_stiff;
+
 };
 
 template <typename Mesh>
@@ -248,18 +249,14 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateJacobianMatrix(const vector_Type
                                                                const displayerPtr_Type& displayer)
 {
 
-    std::cout << std::endl;
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
-    displayer->leaderPrint("   Linear S-  Using the Stiffness Matrix (constant) in UpdateJacobian");
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
+    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint("   Linear S-  Updating the Jacobian Matrix (constant, Linear Elastic)");
+    displayer->leaderPrint(" \n*********************************\n  ");
 
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
+    displayer->leaderPrint(" \n*********************************\n  ");
     updateNonLinearJacobianTerms(this->M_jacobian,disp,dataMaterial,displayer);
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
+    displayer->leaderPrint(" \n*********************************\n  ");
+
 }
 
 template <typename Mesh>
@@ -268,8 +265,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms( matrixPt
                                                                          const dataPtr_Type& /*dataMaterial*/,
                                                                          const displayerPtr_Type& displayer )
 {
-        displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
-        std::cout << std::endl;
+        displayer->leaderPrint("   Linear S- Doing nothing - Updating non linear terms in Jacobian Matrix (constant, Linear Elastic)\n");
 }
 
 
@@ -279,12 +275,10 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& /
 							       const dataPtr_Type& /*dataMaterial*/,
 							       const displayerPtr_Type& displayer )
 {
-    std::cout << std::endl;
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
-    displayer->leaderPrint("   Linear S-  Using the linear part of the Stiffness Matrix\n");
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
+    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint("   Linear S-  Using the the Stiffness Matrix (constant, Linear Elastic)");
+    displayer->leaderPrint(" \n*********************************\n  ");
+
 }
 
 

@@ -83,7 +83,7 @@ namespace AssemblyElementalStructure
   @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
   @param fe The current finite element
  */
-  void computeGradientLocalDisplacement (KNMK<Real> gradientLocalDisplacement, const VectorElemental& uk_loc, const CurrentFE& fe );
+  void computeGradientLocalDisplacement (KNMK<Real>& gradientLocalDisplacement, const VectorElemental& uk_loc, const CurrentFE& fe );
 
 
 //! METHODS SHARED BETWEEN LINEAR ELASTIC MODEL AND ST.VENANT-KIRCHHOFF MODEL
