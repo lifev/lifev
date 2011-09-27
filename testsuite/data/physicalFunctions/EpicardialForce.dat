@@ -25,7 +25,7 @@ variables =  't            F'
 # For use with a fine mesh
 #scale     =  '1             -233143'
 # For use with a Lev2 mesh
-scale     =  '1             -111769'
+scale     =  '1             -186600'
 
 loop      = true
 
