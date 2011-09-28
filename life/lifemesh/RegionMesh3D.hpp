@@ -91,6 +91,8 @@ public:
      *  @{
      */
 
+	static const Int geoDimensions = GEOSHAPE::S_nDimensions;
+
     //! Common Markers
     typedef MC MarkerCommon;
     //! Point Marker
@@ -111,25 +113,6 @@ public:
     /** @} */ // End of group Marker Types
 
 
-    /** @name Basic Element Shape Types
-     *  @ingroup public_types
-     *  Volume, Face and Edge geometric shapes.
-     *  @{
-     */
-
-    //! Element Shape.
-    typedef GEOSHAPE volumeShape_Type;
-    typedef GEOSHAPE elementShape_Type;
-    
-    //! Facet Shape (Boundary Facet).
-    typedef typename GEOSHAPE::GeoBShape faceShape_Type;
-    typedef typename GEOSHAPE::GeoBShape facetShape_Type;
-    
-    //! Ridge Shape (Boundary of Boundary Facet)
-    typedef typename faceShape_Type::GeoBShape edgeShape_Type;
-    typedef typename facetShape_Type::GeoBShape ridgeShape_Type;
-
-    /** @} */ // End of group Basic Element Shape Types
 
 
     /** @name Geometric Element Types
@@ -140,21 +123,42 @@ public:
 
     //const int geoDim = GEOSHAPE::S_geoDimensions;
     //! Volume Element (3D)
-    typedef MeshElementMarked<3, 3, GEOSHAPE, MC>  volume_Type;
-    typedef MeshElementMarked<3, 3, GEOSHAPE, MC>  element_Type;
+    typedef MeshElementMarked<3, geoDimensions, GEOSHAPE, MC>  volume_Type;
+    typedef MeshElementMarked<geoDimensions, geoDimensions, GEOSHAPE, MC>  element_Type;
     
     //! Face Element (2D)
-    typedef MeshElementMarked<2, 3, facetShape_Type, MC> facet_Type;
-    typedef MeshElementMarked<2, 3, facetShape_Type, MC> face_Type;
+    typedef MeshElementMarked<geoDimensions-1, geoDimensions, GEOSHAPE, MC> facet_Type;
+    typedef MeshElementMarked<2, geoDimensions, GEOSHAPE, MC> face_Type;
 
     //! Edge Element (1D)
-    typedef MeshElementMarked<1, 3, ridgeShape_Type, MC> ridge_Type;
-    typedef MeshElementMarked<1, 3, ridgeShape_Type, MC> edge_Type;
+    typedef MeshElementMarked<geoDimensions-2, geoDimensions, GEOSHAPE, MC> ridge_Type;
+    typedef MeshElementMarked<1, geoDimensions, GEOSHAPE, MC> edge_Type;
     //! Point Element (0D)
-    typedef MeshElementMarked<0, 3, nullShape, MC>            point_Type;
-    typedef MeshElementMarked<0, 3, nullShape, MC>            peak_Type;
+    typedef MeshElementMarked<0, geoDimensions, GEOSHAPE, MC>	point_Type;
+    typedef MeshElementMarked<geoDimensions-3, geoDimensions, GEOSHAPE, MC>  peak_Type;
 
     /** @} */ // End of group Geometric Element Types
+
+
+    /** @name Basic Element Shape Types
+     *  @ingroup public_types
+     *  Volume, Face and Edge geometric shapes.
+     *  @{
+     */
+
+    //! Element Shape.
+    typedef typename volume_Type::geoShape_Type volumeShape_Type;
+    typedef GEOSHAPE elementShape_Type;
+
+    //! Facet Shape (Boundary Facet).
+    typedef typename face_Type::geoShape_Type faceShape_Type;
+    typedef typename GEOSHAPE::GeoBShape facetShape_Type;
+
+    //! Ridge Shape (Boundary of Boundary Facet)
+    typedef typename edge_Type::geoShape_Type edgeShape_Type;
+    typedef typename facetShape_Type::GeoBShape ridgeShape_Type;
+
+    /** @} */ // End of group Basic Element Shape Types
 
     /** @name Geometric Element Container Types
      *  @ingroup public_types
@@ -756,7 +760,7 @@ public:
      *  @param boundary true if it's a boundary face.
      *  @return Reference to added face.
      */
-    facet_Type & addFace( bool const boundary );
+    face_Type & addFace( bool const boundary );
     facet_Type & addFacet( bool const boundary ) {return addFace(boundary);}
 
     //! Adds a face.
@@ -766,7 +770,7 @@ public:
      *  @param f Face to be added.
      *  @return Reference to the newly added face.
      */
-    facet_Type & addFace( face_Type const & f );
+    face_Type & addFace( face_Type const & f );
     facet_Type & addFacet( facet_Type const & f )  {return addFace(f);}
 
     //! Adds a face in a certain position.
@@ -779,7 +783,7 @@ public:
      *  @return Reference to the newly added face.
      *  @note If you add a face on the boundary you may need to reorder the list of faces
      */
-    facet_Type & setFace( facet_Type const & f, UInt pos);
+    face_Type & setFace( face_Type const & f, UInt pos);
 
     //! Reference to last face stored in list.
     /**
@@ -787,7 +791,7 @@ public:
      *  Useful for mesh readers.
      *  @return reference of the last face in the list.
      */
-    facet_Type & lastFace();
+    face_Type & lastFace();
 
     //! i-th mesh Face.
     /**
@@ -811,14 +815,14 @@ public:
      *  @param i index of the mesh boundary face.
      *  @return the i-th face.
      */
-    facet_Type const & boundaryFace( UInt const i ) const;
+    face_Type const & boundaryFace( UInt const i ) const;
 
     //! i-th mesh boundary face.
     /**
      *  @param i index of the mesh boundary face.
      *  @return the i-th face.
      */
-    facet_Type & boundaryFace( UInt const i );
+    face_Type & boundaryFace( UInt const i );
 
     //! Set counter of faces.
     /**
@@ -988,7 +992,7 @@ public:
      *  @param boundary true if is on boundary.
      *  @return Reference to added edge.
      */
-    ridge_Type & addEdge( bool const boundary );
+    edge_Type & addEdge( bool const boundary );
     ridge_Type & addRidge( bool const boundary ) {return addEdge( boundary);}
 
     //! Adds an Edge.
@@ -1000,7 +1004,7 @@ public:
      *  @param f Edge to add.
      *  @return Reference to added edge.
      */
-    ridge_Type & addEdge( ridge_Type const & f );
+    edge_Type & addEdge( edge_Type const & f );
     ridge_Type & addRidge( ridge_Type const & f ){return addEdge( f );}
 
     //! Add an Edge to specified position.
@@ -1011,7 +1015,7 @@ public:
      *  @param position Position of the edge.
      *  @return Reference to added edge.
      */
-    ridge_Type & setEdge( ridge_Type const & f, UInt position );
+    edge_Type & setEdge( edge_Type const & f, UInt position );
 
     //! Reference to last edge stored in list.
     /**
@@ -1942,7 +1946,7 @@ RegionMesh3D<GEOSHAPE, MC>::boundaryFace( UInt const i ) const
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::facet_Type &
+typename RegionMesh3D<GEOSHAPE, MC>::face_Type &
 RegionMesh3D<GEOSHAPE, MC>::boundaryFace( UInt const i )
 {
     ASSERT_PRE( faceList.size() != 0, "Boundary Faces not stored" ) ;
@@ -2888,7 +2892,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee, 
             if ( ce && e.second )
             {
                 //
-                for ( UInt k = 0; k < 2 + faceShape_Type::S_numPointsPerEdge; k++ )
+                for ( UInt k = 0; k < 2 + facetShape_Type::S_numPointsPerEdge; k++ )
                 {
                     UInt inode = bele.edgeToPoint(j, k);
                     edg.setPoint( k, ifa->point( inode ) );

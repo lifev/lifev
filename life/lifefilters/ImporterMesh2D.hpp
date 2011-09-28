@@ -601,7 +601,7 @@ template <typename GeoShape, typename MC>
 bool
 readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
                  const std::string          & fileName,
-                 markerID_Type              regionFlag, bool useless )
+                 markerID_Type              regionFlag, bool /*useless*/ )
 {
     MeshElementBareHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;

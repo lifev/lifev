@@ -1,6 +1,6 @@
 //@HEADER
 /*
-*******************************************************************************
+ *******************************************************************************
 Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
@@ -18,8 +18,8 @@ Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with LifeV. If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************
-*/
+ *******************************************************************************
+ */
 //@HEADER
 
 /*!
@@ -39,19 +39,27 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #ifndef REGIONMESH1D_H
 #define REGIONMESH1D_H
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/LifeDebug.hpp>
-#include <life/lifecore/Switch.hpp>
-
-#include <life/lifemesh/MeshElementMarked.hpp>
-#include <life/lifemesh/MeshElementBare.hpp>
-#include <life/lifemesh/ElementShapes.hpp>
-#include <life/lifearray/MeshEntityContainer.hpp>
-#include <life/lifearray/ArraySimple.hpp>
-
+#include <cstdlib>
 #include <iomanip>
 #include <fstream>
-#include <cstdlib>
+
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifecore/LifeDebug.hpp>
+#include <life/lifemesh/MeshElementMarked.hpp>
+#include <life/lifecore/Switch.hpp>
+#include <life/lifemesh/MeshElementBare.hpp>
+
+#include <life/lifearray/MeshEntityContainer.hpp>
+#include <life/lifearray/ArraySimple.hpp>
+#include <life/lifemesh/ElementShapes.hpp>
+#include <life/lifemesh/MeshUtility.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+
+#ifdef HAVE_MPI
+//headers useful only for reordering:
+#include "mpi.h"
+#include <parmetis.h>
+#endif
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -90,8 +98,16 @@ public:
     typedef typename MC::pointMarker_Type pointMarker_Type;
     //! Edge Marker
     typedef typename MC::edgeMarker_Type edgeMarker_Type;
+    //! Face Marker
+    typedef typename MC::faceMarker_Type faceMarker_Type;
+    //! Volume Marker
+    typedef typename MC::volumeMarker_Type volumeMarker_Type;
     //! Region Marker
     typedef typename MC::regionMarker_Type regionMarker_Type;
+    //! Region Marker (obsolete)
+    typedef typename MC::regionMarker_Type  Marker;
+    //! Region Marker (generic name)
+    typedef typename MC::regionMarker_Type  marker_Type;
 
     /** @} */ // End of group Marker Types
 
@@ -101,12 +117,17 @@ public:
      *  @{
      */
 
-    //! Volume Shape.
-    typedef GEOSHAPE VolumeShape;
-    //! Face Shape (Boundary Element).
-    typedef GEOSHAPE EdgeShape;
-    //! Edge Shape (Boundary of Boundary Element)
-    typedef typename GEOSHAPE::GeoBShape PointShape;
+    //! Element Shape.
+    //typedef GEOSHAPE volumeShape_Type;
+    typedef GEOSHAPE elementShape_Type;
+    
+    //! Facet Shape (Boundary Facet).
+    //typedef typename GEOSHAPE::GeoBShape faceShape_Type;
+    typedef typename GEOSHAPE::GeoBShape facetShape_Type;
+    
+    //! Ridge Shape (Boundary of Boundary Facet)
+   // typedef typename faceShape_Type::GeoBShape edgeShape_Type;
+    typedef typename facetShape_Type::GeoBShape ridgeShape_Type;
 
     /** @} */ // End of group Basic Element Shape Types
 
@@ -117,13 +138,13 @@ public:
      */
 
     //! Volume Element (1D)
-    typedef MeshElementMarked<1, 1, EdgeShape, MC>  VolumeType;
+    typedef MeshElementMarked<1, 1, GEOSHAPE, MC>  VolumeType;
     //! Face Element (1D)
-    typedef MeshElementMarked<1, 1, EdgeShape, MC>  FaceType;
+    typedef MeshElementMarked<1, 1, GEOSHAPE, MC>  FaceType;
     //! Edge Element (1D)
-    typedef MeshElementMarked<1, 1, EdgeShape, MC>  EdgeType;
+    typedef MeshElementMarked<1, 1, GEOSHAPE, MC>  EdgeType;
     //! Point Element (0D)
-    typedef MeshElementMarked<0, 1, nullShape, MC>             point_Type;
+    typedef MeshElementMarked<0, 1, GEOSHAPE, MC>             point_Type;
 
     /** @} */ // End of group Geometric Element Types
 
@@ -160,7 +181,7 @@ public:
     //! Element Geometric Type
     typedef MeshElementMarked<1, 1, GEOSHAPE, MC>   ElementType;
     //! Boundary Element Geometric Type
-    typedef MeshElementMarked<0, 1, nullShape, MC>             BElementType;
+    typedef MeshElementMarked<0, 1, GEOSHAPE, MC>             BElementType;
 
     //! Element Geometric Shape Container Type
     typedef MeshEntityContainer<EdgeType>         Elements;

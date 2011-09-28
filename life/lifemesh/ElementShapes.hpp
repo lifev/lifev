@@ -128,7 +128,9 @@ enum ReferenceGeometry
 
 
 //! @ingroup BasRefSha
-class nullShape{};
+class nullShape{
+	typedef nullShape GeoBShape;
+};
 
 //! @ingroup BasRefSha
 class Point
@@ -255,6 +257,7 @@ public:
     //! @name Public Types
     //@{
     typedef Point BasRefSha;
+    typedef nullShape GeoBShape;             //!< Geometric shape of the boundary
     //@}
     static const UInt S_numPoints = 1; //!< Number of points
     static const UInt S_numPointsPerElement = 1;   //!< Number of points per element

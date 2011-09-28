@@ -116,7 +116,7 @@ Real checkVolumes( RegionMesh3D const & mesh,
     Real lmeas = 0.0;
     elSign.clear();
     elSign.reserve( mesh.numVolumes() );
-    typedef typename RegionMesh3D::volumeShape_Type GeoShape;
+    typedef typename RegionMesh3D::elementShape_Type GeoShape;
 
     switch ( GeoShape::S_shape )
     {
@@ -204,7 +204,7 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
     vols[ 0 ] = 0.0;
     vols[ 1 ] = 0.0;
     vols[ 2 ] = 0.0;
-    typedef typename RegionMesh3D::faceShape_Type GeoBShape;
+    typedef typename RegionMesh3D::facetShape_Type GeoBShape;
     typedef typename RegionMesh3D::facet_Type facet_Type;
     typedef boost::shared_ptr<CurrentBoundaryFE> current_fe_type;
 
@@ -256,7 +256,7 @@ Real testClosedDomain( RegionMesh3D const & mesh,
     MeshUtility::GetOnes ones;
     Real test( 0.0 );
 
-    switch ( RegionMesh3D::faceShape_Type::S_shape )
+    switch ( RegionMesh3D::facetShape_Type::S_shape )
     {
     case TRIANGLE:
         bdfe = current_fe_type( new CurrentBoundaryFE( feTriaP1, geoLinearTria,

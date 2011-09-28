@@ -1,6 +1,6 @@
 //@HEADER
 /*
-*******************************************************************************
+ *******************************************************************************
 Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
@@ -18,8 +18,8 @@ Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with LifeV. If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************
-*/
+ *******************************************************************************
+ */
 //@HEADER
 
 /*!
@@ -36,20 +36,27 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #ifndef _REGIONMESH2D_HH_
 #define _REGIONMESH2D_HH_
 
+#include <cstdlib>
 #include <iomanip>
 #include <fstream>
-#include <cstdlib>
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/Switch.hpp>
-
+#include <life/lifecore/LifeDebug.hpp>
 #include <life/lifemesh/MeshElementMarked.hpp>
+#include <life/lifecore/Switch.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
-#include <life/lifemesh/ElementShapes.hpp>
+
 #include <life/lifearray/MeshEntityContainer.hpp>
 #include <life/lifearray/ArraySimple.hpp>
-
+#include <life/lifemesh/ElementShapes.hpp>
 #include <life/lifemesh/MeshUtility.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+
+#ifdef HAVE_MPI
+//headers useful only for reordering:
+#include "mpi.h"
+#include <parmetis.h>
+#endif
 
 namespace LifeV
 {
@@ -64,14 +71,18 @@ namespace LifeV
  *  This is the class that stores the mesh entities for a single 2D region.
  *
  *  In a region elements are all of the same type.
+ *
+ *  Note: to provide data useful in a parallel setting some methods
+ *  return either the number of entities in the current mesh region or
+ *  the ones in the global mesh, before partitioning. The latter are identified
+ *  by the keyword Global in the name, e.g. numGlobalFaces() versus numFaces()
  */
 template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh2D
-        :
-        public MeshEntity,
-        public MC::regionMarker_Type
+:
+public MeshEntity,
+public MC::regionMarker_Type
 {
-
 public:
     /** @name Marker Types
      *  @ingroup public_types
@@ -80,18 +91,24 @@ public:
      *  @{
      */
 
+	static const Int geoDimensions = GEOSHAPE::S_nDimensions;
+
+    //! Common Markers
+    typedef MC MarkerCommon;
     //! Point Marker
     typedef typename MC::pointMarker_Type pointMarker_Type;
     //! Edge Marker
     typedef typename MC::edgeMarker_Type edgeMarker_Type;
     //! Face Marker
     typedef typename MC::faceMarker_Type faceMarker_Type;
+    //! Volume Marker
+    typedef typename MC::volumeMarker_Type volumeMarker_Type;
     //! Region Marker
     typedef typename MC::regionMarker_Type regionMarker_Type;
     //! Region Marker (obsolete)
-    typedef typename MC::regionMarker_Type Marker;
+    typedef typename MC::regionMarker_Type  Marker;
     //! Region Marker (generic name)
-    typedef typename MC::regionMarker_Type marker_Type;
+    typedef typename MC::regionMarker_Type  marker_Type;
 
     /** @} */ // End of group Marker Types
 
@@ -104,9 +121,14 @@ public:
     //! Face Shape.
     typedef GEOSHAPE faceShape_Type;
     typedef GEOSHAPE elementShape_Type;
-    //! Edge Shape (Boundary Element).
-    typedef typename GEOSHAPE::GeoBShape edgeShape_Type;
+    
+    //! Facet Shape (Boundary Facet).
+    //typedef typename GEOSHAPE::GeoBShape faceShape_Type;
     typedef typename GEOSHAPE::GeoBShape facetShape_Type;
+    
+    //! Ridge Shape (Boundary of Boundary Facet)
+   // typedef typename faceShape_Type::GeoBShape edgeShape_Type;
+    typedef typename facetShape_Type::GeoBShape ridgeShape_Type;
 
     /** @} */ // End of group Basic Element Shape Types
 
@@ -117,16 +139,19 @@ public:
      */
 
     //! Volume Element (3D)
-	typedef MeshElementMarked<3, 2, GEOSHAPE, MC>  volume_Type;
-	//! Face Element (2D)
-    typedef MeshElementMarked<2, 2, GEOSHAPE, MC> face_Type;
-    typedef MeshElementMarked<2, 2, GEOSHAPE, MC> element_Type;
+    typedef MeshElementMarked<3, geoDimensions, GEOSHAPE, MC>  volume_Type;
+    typedef MeshElementMarked<geoDimensions, geoDimensions, GEOSHAPE, MC>  element_Type;
+    
+    //! Face Element (2D)
+    typedef MeshElementMarked<geoDimensions-1, geoDimensions, GEOSHAPE, MC> facet_Type;
+    typedef MeshElementMarked<2, geoDimensions, GEOSHAPE, MC> face_Type;
+
     //! Edge Element (1D)
-    typedef MeshElementMarked<1, 2, edgeShape_Type, MC> edge_Type;
-    typedef MeshElementMarked<1, 2, edgeShape_Type, MC> facet_Type;
+    typedef MeshElementMarked<geoDimensions-2, geoDimensions, GEOSHAPE, MC> ridge_Type;
+    typedef MeshElementMarked<1, geoDimensions, GEOSHAPE, MC> edge_Type;
     //! Point Element (0D)
-    typedef MeshElementMarked<0, 2, nullShape, MC> point_Type;
-    typedef MeshElementMarked<0, 2, nullShape, MC> ridge_Type;
+    typedef MeshElementMarked<0, geoDimensions, GEOSHAPE, MC>	point_Type;
+    typedef MeshElementMarked<geoDimensions-3, geoDimensions, GEOSHAPE, MC>  peak_Type;
 
     /** @} */ // End of group Geometric Element Types
 

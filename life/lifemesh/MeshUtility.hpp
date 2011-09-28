@@ -101,7 +101,7 @@ public:
     typedef MeshType                            mesh_Type;
     typedef mesh_Type const *                   meshPtr_Type;
     typedef typename mesh_Type::face_Type        face_Type;
-    typedef typename mesh_Type::faceShape_Type       faceShape_Type;
+    typedef typename mesh_Type::facetShape_Type       faceShape_Type;
     typedef temporaryFaceContainer_Type const * temporaryFaceContainerPtr_Type;
     //@}
 
@@ -184,7 +184,6 @@ public:
     typedef MeshType                              mesh_Type;
     typedef mesh_Type const *                     meshPtr_Type;
     typedef typename mesh_Type::edge_Type         edge_Type;
-    typedef typename mesh_Type::edgeShape_Type    edgeShape_Type;
     typedef temporaryEdgeContainer_Type const *   temporaryEdgeContainerPtr_Type;
     //@}
 
@@ -449,7 +448,7 @@ UInt findFaces( const MeshType & mesh, temporaryFaceContainer_Type & boundaryFac
 {
     UInt                                  point1Id, point2Id, point3Id, point4Id;
     BareFace                              bareFace;
-    typename MeshType::volumeShape_Type   volumeShape;
+    typename MeshType::elementShape_Type   volumeShape;
     typedef typename MeshType::volumes_Type    volumeContainer_Type;
     temporaryFaceContainer_Type::iterator faceContainerIterator;
 
@@ -471,7 +470,7 @@ UInt findFaces( const MeshType & mesh, temporaryFaceContainer_Type & boundaryFac
             point1Id = ( volumeContainerIterator->point( point1Id ) ).id();
             point2Id = ( volumeContainerIterator->point( point2Id ) ).id();
             point3Id = ( volumeContainerIterator->point( point3Id ) ).id();
-            if ( MeshType::faceShape_Type::S_numVertices == 4 )
+            if ( MeshType::facetShape_Type::S_numVertices == 4 )
             {
                 point4Id = volumeShape.faceToPoint( jFaceLocalId, 3 );
                 point4Id = ( volumeContainerIterator->point( point4Id ) ).id();
@@ -554,7 +553,7 @@ UInt findBoundaryEdges( const MeshType & mesh, temporaryEdgeContainer_Type & bou
 {
     UInt                                 point1Id, point2Id;
     BareEdge                             bareEdge;
-    typedef typename MeshType::faceShape_Type faceShape_Type;
+    typedef typename MeshType::facetShape_Type facetShape_Type;
     typedef typename MeshType::faces_Type     faceContainer_Type;
 
 
@@ -570,8 +569,8 @@ UInt findBoundaryEdges( const MeshType & mesh, temporaryEdgeContainer_Type & bou
     {
         for ( ID jEdgeLocalId = 0; jEdgeLocalId < mesh.numLocalEdgesOfFace(); ++jEdgeLocalId )
         {
-            point1Id = faceShape_Type::edgeToPoint( jEdgeLocalId, 0 );
-            point2Id = faceShape_Type::edgeToPoint( jEdgeLocalId, 1 );
+            point1Id = facetShape_Type::edgeToPoint( jEdgeLocalId, 0 );
+            point2Id = facetShape_Type::edgeToPoint( jEdgeLocalId, 1 );
             // go to global
             point1Id = ( faceContainerIterator->point( point1Id ) ).id();
             point2Id = ( faceContainerIterator->point( point2Id ) ).id();
@@ -612,7 +611,7 @@ UInt findInternalEdges( const MeshType & mesh,
 {
     UInt                                   point1Id, point2Id;
     BareEdge                               bareEdge;
-    typedef typename MeshType::volumeShape_Type volumeShape_Type;
+    typedef typename MeshType::elementShape_Type volumeShape_Type;
     typedef typename MeshType::volumes_Type     volumeContainer_Type;
     temporaryEdgeContainer_Type            temporaryEdgeContainer;
 
@@ -726,7 +725,7 @@ UInt testDomainTopology( MeshType const & mesh, UInt & numBoundaryEdges )
     localTemporaryEdgeContainer_Type                    localTemporaryEdgeContainer;
     UInt                                                point1Id, point2Id;
     BareEdge                                            bareEdge;
-    typename MeshType::faceShape_Type                       faceShape;
+    typename MeshType::facetShape_Type                       faceShape;
     typedef typename MeshType::faces_Type                    faceContainer_Type;
     typedef typename MeshType::face_Type               face_Type;
     localTemporaryEdgeContainer_Type::iterator          edgeContainerIterator;
@@ -905,7 +904,7 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
     std::vector<bool> isDefinedPointMarker( mesh.storedPoints(), false );
 
     typedef typename MeshType::points_Type::iterator pointContainerIterator_Type;
-    typedef typename MeshType::faceShape_Type    faceShape_Type;
+    typedef typename MeshType::facetShape_Type    faceShape_Type;
 
     std::vector<bool>::iterator isDefinedPointMarkerIterator = isDefinedPointMarker.begin();
 
@@ -1069,7 +1068,7 @@ fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
                 "The boundary faces list should not be empty" );
 
     typedef typename MeshType::faces_Type     faceContainer_Type;
-    typedef typename MeshType::faceShape_Type faceShape_Type;
+    typedef typename MeshType::facetShape_Type faceShape_Type;
 
     if ( verbose ) logStream << "Fixing BPoints" << std::endl;
     std::vector<bool> boundaryPoints(mesh.numPoints(),false);
@@ -1232,7 +1231,7 @@ bool rearrangeFaces( MeshType & mesh,
         point2Id = ( faceContainerIterator->point( 1 ) ).id();
         point3Id = ( faceContainerIterator->point( 2 ) ).id();
 
-        if ( MeshType::faceShape_Type::S_numVertices == 4 )
+        if ( MeshType::facetShape_Type::S_numVertices == 4 )
         {
             point4Id = ( faceContainerIterator->point( 3 ) ).id();
             bareFace = ( makeBareFace( point1Id, point2Id, point3Id, point4Id ) ).first;
@@ -1318,7 +1317,7 @@ bool fixBoundaryFaces( MeshType & mesh,
     BareFace                              bareFace;
     volume_Type *                          volumePtr;
     typename faceContainer_Type::iterator faceContainerIterator;
-    typename MeshType::volumeShape_Type        volumeShape;
+    typename MeshType::elementShape_Type        volumeShape;
     temporaryFaceContainer_Type *         boundaryFaceContainerPtr;
     temporaryFaceContainer_Type::iterator boundaryFaceContainerIterator;
     std::pair<ID, ID>                     volumeIdToLocalFaceIdPair;
@@ -1391,7 +1390,7 @@ bool fixBoundaryFaces( MeshType & mesh,
         point1Id = ( faceContainerIterator->point( 0 ) ).id();
         point2Id = ( faceContainerIterator->point( 1 ) ).id();
         point3Id = ( faceContainerIterator->point( 2 ) ).id();
-        if ( MeshType::faceShape_Type::S_numVertices == 4 )
+        if ( MeshType::facetShape_Type::S_numVertices == 4 )
         {
             point4Id = ( faceContainerIterator->point( 3 ) ).id();
             bareFace = ( makeBareFace( point1Id, point2Id, point3Id, point4Id ) ).first;
@@ -1405,7 +1404,7 @@ bool fixBoundaryFaces( MeshType & mesh,
         {
             if (verbose)
             {
-                if ( MeshType::faceShape_Type::S_numVertices == 3 )
+                if ( MeshType::facetShape_Type::S_numVertices == 3 )
                 {
                     errorStream<<"Face "<<point1Id<<" "<<point2Id<<" "<<point3Id;
                 }
@@ -1537,7 +1536,7 @@ bool buildFaces( MeshType & mesh,
                  temporaryFaceContainer_Type * externalFaceContainer = 0 )
 {
     UInt                                  point1Id, point2Id, point3Id, point4Id;
-    typename MeshType::volumeShape_Type   volumeShape;
+    typename MeshType::elementShape_Type   volumeShape;
     typedef typename MeshType::volumes_Type    volumeContainer_Type;
     typedef typename MeshType::volume_Type volume_Type;
     typedef typename MeshType::faces_Type      faceContainer_Type;
@@ -1571,7 +1570,7 @@ bool buildFaces( MeshType & mesh,
             point1Id = ( mesh.faceList[ jFaceId ].point( 0 ) ).id();
             point2Id = ( mesh.faceList[ jFaceId ].point( 1 ) ).id();
             point3Id = ( mesh.faceList[ jFaceId ].point( 2 ) ).id();
-            if ( MeshType::faceShape_Type::S_numVertices == 4 )
+            if ( MeshType::facetShape_Type::S_numVertices == 4 )
             {
                 point4Id = ( mesh.faceList[ jFaceId ].point( 3 ) ).id();
                 existingFacesMap_insert= existingFacesMap.insert(
@@ -1724,7 +1723,7 @@ bool buildFaces( MeshType & mesh,
         point1Id = ( mesh.faceList[ jFaceId ].point( 0 ) ).id();
         point2Id = ( mesh.faceList[ jFaceId ].point( 1 ) ).id();
         point3Id = ( mesh.faceList[ jFaceId ].point( 2 ) ).id();
-        if ( MeshType::faceShape_Type::S_numVertices == 4 )
+        if ( MeshType::facetShape_Type::S_numVertices == 4 )
         {
             point4Id = ( mesh.faceList[ jFaceId ].point( 3 ) ).id();
             _face = makeBareFace( point1Id, point2Id, point3Id, point4Id );
@@ -1762,7 +1761,7 @@ bool buildFaces( MeshType & mesh,
             point1Id = ( volumeContainerIterator->point( point1Id ) ).id();
             point2Id = ( volumeContainerIterator->point( point2Id ) ).id();
             point3Id = ( volumeContainerIterator->point( point3Id ) ).id();
-            if ( MeshType::faceShape_Type::S_numVertices == 4 )
+            if ( MeshType::facetShape_Type::S_numVertices == 4 )
             {
                 point4Id = volumeShape.faceToPoint( jFaceLocalId, 3 );
                 point4Id = ( volumeContainerIterator->point( point4Id ) ).id();
@@ -1876,11 +1875,11 @@ bool buildEdges( MeshType & mesh,
     typedef typename MeshType::volumes_Type volumeContainer_Type;
     typedef typename MeshType::faces_Type faceContainer_Type;
     typedef typename MeshType::volume_Type volume_Type;
-    typedef typename MeshType::volumeShape_Type volumeShape_Type;
+    typedef typename MeshType::elementShape_Type volumeShape_Type;
     typedef typename MeshType::edges_Type edges_Type;
     typedef typename MeshType::edge_Type edge_Type;
     typedef typename MeshType::face_Type face_Type;
-    typedef typename MeshType::faceShape_Type faceShape_Type;
+    typedef typename MeshType::facetShape_Type faceShape_Type;
     typedef typename MeshType::edges_Type::iterator Edges_Iterator;
     typename MeshType::face_Type * facePtr;
 
@@ -2087,7 +2086,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 {
 
     typedef typename MeshType::elementShape_Type  GeoShape;
-    typedef typename MeshType::faceShape_Type GeoBShape;
+    typedef typename MeshType::facetShape_Type GeoBShape;
     ASSERT_PRE( GeoShape::S_numPoints > 4, "p2MeshFromP1Data ERROR: we need a P2 mesh" );
 
     logStream << "Building P2 mesh points and connectivities from P1 data"
