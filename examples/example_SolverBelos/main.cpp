@@ -45,6 +45,8 @@
 #endif
 
 #include <Teuchos_ParameterList.hpp>
+#include "Teuchos_XMLParameterListHelpers.hpp"
+#include "Teuchos_RCP.hpp"
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -248,21 +250,12 @@ main( int argc, char** argv )
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Setting up SolverBelos... " << std::flush;
-    Teuchos::ParameterList belosList;
-    belosList.set( "Reuse preconditioner", true );   // Reuse preconditioner
-    belosList.set( "Flexible Gmres", true );         // Flexible Gmres will be used to solve this problem
-    belosList.set( "Num Blocks", 20 );               // Maximum number of blocks in Krylov factorization
-    belosList.set( "Block Size", 10 );               // Blocksize to be used by iterative solver
-    belosList.set( "Maximum Iterations", 200 );      // Maximum number of iterations allowed
-    belosList.set( "Maximum Restarts", 1 );          // Maximum number of restarts allowed
-    belosList.set( "Convergence Tolerance", 1e-10 ); // Relative convergence tolerance requested
-    belosList.set( "Verbosity", Belos::Errors + Belos::Warnings + Belos::IterationDetails + Belos::StatusTestDetails );
-    belosList.set( "Output Frequency", 1 );          // Printing frequency
-    belosList.set( "Output Style", Belos::Brief );   // Print only informations about the residual
+    Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
+    belosList = Teuchos::getParametersFromXmlFile( "SolverParamList.xml" );
 
     SolverBelos linearSolver2;
     linearSolver2.setCommunicator(Comm);
-    linearSolver2.setParameters(belosList);
+    linearSolver2.setParameters(*belosList);
     linearSolver2.setPreconditioner(precPtr);
     //linearSolver2.setPreconditionerFromGetPot(dataFile,"prec");
     if (verbose) std::cout << "done" << std::endl;
