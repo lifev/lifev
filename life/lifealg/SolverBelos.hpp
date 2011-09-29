@@ -263,13 +263,6 @@ public:
      */
     void setPreconditioner( operatorPtr_Type& preconditioner, PrecApplicationType precType = RightPreconditioner );
 
-    //! Method to setup the solver using GetPot
-    /*!
-      @param dataFile GetPot object which contains the data about the solver
-      Note: The parameters are added to the existing one. Use resetParameters to clean the parameters list.
-     */
-    void setParameters( const GetPot& dataFile, const std::string& section );
-
     //! Method to setup the solver using Teuchos::ParameterList
     /*!
       @param list Teuchos::ParameterList object
