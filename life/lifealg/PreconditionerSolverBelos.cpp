@@ -138,16 +138,16 @@ PreconditionerSolverBelos::createSolverBelosList( list_Type&         list,
 
     // Reuse the preconditioner from one to another call
     bool reusePreconditioner = dataFile( ( section + "/" + subsection + "/reuse_preconditioner" ).data(), true, found );
-    if ( found ) list.set( "Reuse preconditioner", reusePreconditioner );
+    if ( found ) list.set( "Reuse Preconditioner", reusePreconditioner );
 
     // Max iterations allowed to reuse the preconditioner
     Int maxItersForReuse = dataFile( ( section + "/" + subsection + "/max_iters_for_reuse" ).data(), static_cast<Int> ( maxIter*8./10. ), found );
-    if ( found ) list.set( "max iteration for reuse", maxItersForReuse );
+    if ( found ) list.set( "Max Iterations For Reuse", maxItersForReuse );
 
     // If quitOnFailure is enabled and if some problems occur
     // the simulation is stopped
     bool quitOnFailure = dataFile( ( section + "/" + subsection + "/quit_on_failure").data(), false, found );
-    if ( found ) list.set( "Quit on failure", quitOnFailure );
+    if ( found ) list.set( "Quit On Failure", quitOnFailure );
 
     // All the information different from warnings and errors are
     // not displayed
