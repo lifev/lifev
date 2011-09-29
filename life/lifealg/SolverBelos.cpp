@@ -431,11 +431,11 @@ void
 SolverBelos::setParameters( const Teuchos::ParameterList& list )
 {
     M_parameterList.setParameters( list );
-    M_reusePreconditioner = M_parameterList.get( "Reuse preconditioner", false );
-    Int maxIter           = M_parameterList.get( "Maximum Iterations"  , 200 );
-    M_maxItersForReuse    = M_parameterList.get( "Max iters for reuse" , maxIter*8./10. );
-    M_quitOnFailure       = M_parameterList.get( "Quit on failure"     , false );
-    M_silent              = M_parameterList.get( "Silent"              , false );
+    M_reusePreconditioner = M_parameterList.get( "Reuse preconditioner"     , false );
+    Int maxIter           = M_parameterList.get( "Maximum Iterations"       , 200 );
+    M_maxItersForReuse    = M_parameterList.get( "Max Iterations For Reuse" , static_cast<Int> ( maxIter*8./10. ) );
+    M_quitOnFailure       = M_parameterList.get( "Quit On Failure"          , false );
+    M_silent              = M_parameterList.get( "Silent"                   , false );
 }
 
 void

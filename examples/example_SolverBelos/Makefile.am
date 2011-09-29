@@ -23,6 +23,7 @@ EXTRA_DIST = data
 
 link:
 	test -a data || ln -s $(srcdir)/data
+	test -a SolverParamList.xml || ln -s $(srcdir)/SolverParamList.xml
 
 clean-results:
 	-rm *.vct *.scl *.case *.geo *.xmf *.h5
