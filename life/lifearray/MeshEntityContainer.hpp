@@ -51,7 +51,7 @@ namespace LifeV
 {
 namespace Comparers{
 /** @defgroup ComparisonOperators
- * They define a comparison operators for mesh entities according to some of their attributes
+ * They define comparison operators for mesh entities according to some of their attributes
  * The comparison operator is of the form
  * @verbatim
  * bool operator(MeshEntity const & a, MeshEntity const & b)

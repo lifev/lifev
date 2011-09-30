@@ -105,7 +105,7 @@ namespace Utility
 {
 //! A helper functor
 /*!
- * This is an helper functor not of general use.
+ * This is a helper functor not of general use.
  */
 class MarkerMapTraits
 {
@@ -350,7 +350,7 @@ private:
  *
  * @param locDof Contains a map of int pairs whose second entry contains the entity id to be
  * changed
- * @param TimeAdvanceNewMarker the new marker id
+ * @param newMarker the new marker id
  *
  * @note, it was originally a method of regionemesh3D names edgeMarkers. It has been generalised
  * and taken away from regionmesh
@@ -361,11 +361,11 @@ template <typename MeshEntityList>
 void
 ChangeMarkersAccordingToMap(MeshEntityList & entityList,
                             std::map<UInt, UInt> const& locDof,
-                            UInt const TimeAdvanceNewmarker)
+                            UInt const newMarker)
 {
     typedef std::map<UInt, UInt>::const_iterator it_type;
     for (it_type IT=locDof.begin(); IT!=locDof.end(); ++IT)
-        entityList[IT->second].setMarker(TimeAdvanceNewmarker);
+        entityList[IT->second].setMarker(newMarker);
 }
 /** @}*/
 } // Namespace LifeV

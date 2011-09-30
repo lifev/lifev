@@ -97,9 +97,9 @@ public:
 
     //! Selects the stronger between two flags
     /*! A dimensional geometric entity G_i may inherit the stronger flag
-      among adiacent geometric entities of greater dimensions.  For
+      among adjacent geometric entities of greater dimensions.  For
       example a boundary point Point with an unset Flag may inherit the
-      strongerst Flag of the adjacent boundary faces.
+      strongest Flag of the adjacent boundary faces.
       It returns NULLFLAG if any of the entity a or b is a NULLFLAG.
     */
     static markerID_Type strongerFlag( markerID_Type const & a, markerID_Type const & b );
@@ -127,15 +127,15 @@ public:
 /*!
   It stores an object of markerID_Type which may be used for marking a geometric entity.
   The typical use is to specify boundary conditions or material properties associated with
-  the entity. The actual boundary conditions will be handled in the Dof
+  the entity. The actual boundary conditions will be handled in the DOF
   class. During the creation of a field, the markers are processed to furnish the
   correct boundary conditions.
-  The template argument FlagPolicy defualts to EntityFlagStandardPolicy and it defines the way
+  The template argument FlagPolicy defaults to EntityFlagStandardPolicy and it defines the way
   ambiguities in the flag definition are treated.
 
   Marker is a concrete base class which also implements basic tool to operate on the markerID.
   All geometric entities stored in a mesh derives from it, thus
-  it may be used to extend the capabilities of a goemetric entity, for any purpose.
+  it may be used to extend the capabilities of a geometric entity, for any purpose.
 
   The default markers used by RegionMesh are contained in MarkerDefinitions.hpp
 
@@ -230,11 +230,11 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Extracts the enitytFlag associated to the marked entity
+    //! Extracts the entityFlag associated to the marked entity
     /*!
-     * For hystorical reason this method is called marker, while it should be called
+     * For historical reason this method is called marker, while it should be called
      * markerID() instead. Refactoring however would involve changing too many files and it has been
-     * posponed. Just remember that marker() does not return a Marker!
+     * postponed. Just remember that marker() does not return a Marker!
      */
     inline markerID_Type marker() const;
 
