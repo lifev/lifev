@@ -79,9 +79,7 @@
     In the following we briefly describe some of the main tools inside the library.
 
     <ul>
-        <li> <b>Importers and Exporters:</b> [TODO: 3-4 lines description by Radu Popescu]
-
-
+        <li> <b>Importers and Exporters:</b> LifeV can input mesh files stored in some of the most common formats encountered in this field: GMSH, Inria, Netgen, mesh++. For postprocessing, it's possible to save data in the following formats: Ensight, HDF5, VTK, all useable with Paraview, for creating high quality visualizations. LifeV is designed with large parallel simulations in mind, which are usually performed on high performance computing hardware. In many such cases, the low amount of memory per compute node requires a change in the workflow. LifeV allows to perform the mesh partitioning phase offline, on a workstation where memory isn't an issue and use this data later, during online simulations on modern supercomputers.
 
         <li> <b>Grammar parser for algebraic expression:</b> the class \c Parser provides a general interface to parse any simple algebraic function given as a string.
         This tool is based on \c Spirit which is a set of C++ libraries for parsing and output generation implemented as Domain Specific Embedded Languages (DSEL)
