@@ -48,14 +48,13 @@ namespace LifeV
 
 //! FSIFixedPont - Implementation of an  FSI with fixed point iterations.
 /*!
-\include ../../doc/api/bibliography/fluidstructure
 
     @author Miguel Fernandez
     @author Gilles Fourestey
     @author Paolo Crosetto <paolo.crosetto@epfl.ch>
     @see
-    \ref DDFQ06 (Dirichlet--Neumann )
-    \ref BNV08 (Robin Neumann)
+    \cite DeparisDiscacciati2006 (Dirichlet--Neumann )
+    \cite BadiaNobileVergara2008 (Robin Neumann)
     FSI
 
     This class implements an FSI that will solve the FSI problem by a

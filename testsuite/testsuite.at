@@ -18,11 +18,15 @@ AT_INIT([library sanity check])
 
 #lifecore tests
 AT_BANNER([life/lifecore testsuite ...])
+m4_include([test_TemplateTest/testsuite.at])
 m4_include([lifecore/testsuite.at])
+m4_include([test_Parser/testsuite.at])
+
 
 #lifearray tests
-#AT_BANNER([life/lifearray testsuite ...])
+AT_BANNER([life/lifearray testsuite ...])
 #m4_include([lifearray/testsuite.at])
+m4_include([test_VectorContainer/testsuite.at])
 
 #lifealg tests
 #AT_BANNER([life/lifealg testsuite ...])
@@ -43,7 +47,6 @@ m4_include([lifemesh/testsuite.at])
 
 # solver tests
 AT_BANNER([life/lifesolver testsuite ...])
-m4_include([test_TemplateTest/testsuite.at])
 m4_include([test_ADRAssembler/testsuite.at])
 m4_include([test_bdf/testsuite.at])
 m4_include([test_darcy/testsuite.at])

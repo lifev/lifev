@@ -445,6 +445,7 @@ protected:
     UInt                        M_timeIndex;
     UInt                        M_save;
     bool                        M_multimesh;
+    bool                        M_printConnectivity;
     UInt                        M_timeIndexWidth;
     meshPtr_Type                M_mesh;
     int                         M_procId;
@@ -548,7 +549,8 @@ Exporter<MeshType>::Exporter():
         M_timeIndex     ( M_timeIndexStart ),
         M_save          ( 1 ),
         M_multimesh     ( true ),
-        M_timeIndexWidth( 5 )
+        M_timeIndexWidth( 5 ),
+        M_printConnectivity ( true )
 {}
 
 template<typename MeshType>
@@ -559,7 +561,8 @@ Exporter<MeshType>::Exporter( const GetPot& dfile, const std::string& prefix ):
         M_timeIndex     ( M_timeIndexStart ),
         M_save          ( dfile("exporter/save",1) ),
         M_multimesh     ( dfile("exporter/multimesh",true) ),
-        M_timeIndexWidth( dfile("exporter/time_id_width",5) )
+        M_timeIndexWidth( dfile("exporter/time_id_width",5) ),
+        M_printConnectivity ( true )
 {}
 
 // ===================================================
