@@ -85,7 +85,7 @@ class VenantKirchhoffMaterialLinear :
   */
   void setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-               const UInt offset
+             const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                );
 
 
@@ -152,6 +152,8 @@ class VenantKirchhoffMaterialLinear :
     //! Get the Stiffness vector
     vectorPtr_Type const stiffVector() const {};
 
+    void Apply( const vector_Type& sol, vector_Type& res) {res += *M_stiff*sol;}
+
     //@}
 
 protected:
@@ -185,16 +187,19 @@ template <typename Mesh>
 void
 VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                                           const UInt offset
+                                           const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
 				)
 {
-  std::cout<<"I am setting up the Material "<<std::endl;
+    this->M_displayer = displayer;
+    this->M_dataMaterial  = dataMaterial;
 
-  this->M_FESpace                       = dFESpace;
-  this->M_elmatK.reset                  (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-  this->M_localMap                      = monolithicMap;
-  this->M_linearStiff.reset             (new matrix_Type(*this->M_localMap));
-  this->M_offset                        = offset;
+    std::cout<<"I am setting up the Material "<<std::endl;
+
+    this->M_FESpace                       = dFESpace;
+    this->M_elmatK.reset                  (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    this->M_localMap                      = monolithicMap;
+    this->M_linearStiff.reset             (new matrix_Type(*this->M_localMap));
+    this->M_offset                        = offset;
 }
 
 template <typename Mesh>

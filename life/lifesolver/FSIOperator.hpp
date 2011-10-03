@@ -86,6 +86,7 @@
 #include <life/lifesolver/StructuralMaterial.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialLinear.hpp>
+#include <life/lifesolver/ExponentialMaterialNonLinear.hpp>
 #include <life/lifesolver/NeoHookeanMaterialNonLinear.hpp>
 
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
@@ -319,6 +320,9 @@ public:
     static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear(){ return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >(); }
 
     static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear(){ return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >(); }
+    static StructuralMaterial< FSIOperator::mesh_Type >*    createExponentialMaterialNonLinear(){ return new ExponentialMaterialNonLinear< FSIOperator::mesh_Type >(); }
+
+    static StructuralMaterial< FSIOperator::mesh_Type >*    createNeoHookeanMaterialNonLinear(){ return new NeoHookeanMaterialNonLinear< FSIOperator::mesh_Type >(); }
 
     //!@name Factory Methods
     //@{

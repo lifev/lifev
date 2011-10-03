@@ -147,7 +147,8 @@ public:
         using namespace LifeV;
 
         FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createVenantKirchhoffLinear );
-
+        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "exponential", &FSIOperator::createExponentialMaterialNonLinear );
+        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "neoHookian", &FSIOperator::createNeoHookeanMaterialNonLinear );
         FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createVenantKirchhoffNonLinear );
 
         std::cout<<"register MonolithicGE : "<<FSIMonolithicGE::S_register<<std::endl;

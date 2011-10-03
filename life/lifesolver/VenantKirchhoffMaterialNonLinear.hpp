@@ -88,7 +88,7 @@ class VenantKirchhoffMaterialNonLinear :
   */
   void setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 	     const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-	     const UInt offset
+             const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
 	     );
 
   //! Compute the linear part Stiffness matrix in StructuralSolver::buildSystem()
@@ -162,10 +162,10 @@ VenantKirchhoffMaterialNonLinear<Mesh>::~VenantKirchhoffMaterialNonLinear()
 template <typename Mesh>
 void VenantKirchhoffMaterialNonLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                                    const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                                                   const UInt offset
+                                                   const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                )
 {
-    super::setup(dFESpace,monolithicMap,offset);
+    super::setup(dFESpace,monolithicMap,offset, dataMaterial, displayer);
     this->M_stiff.reset               (new matrix_Type(*this->M_localMap));
 }
 

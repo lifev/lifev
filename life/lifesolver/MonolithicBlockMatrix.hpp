@@ -331,6 +331,8 @@ public:
     //! returns the map built for theLagrange multipliers
     mapPtr_Type interfaceMap() const { return M_interfaceMap; }
 
+    matrixPtr_Type coupling() const { return M_coupling; }
+
     //! returns the numeration of the interface
     /*!
       \param numeration: output vector

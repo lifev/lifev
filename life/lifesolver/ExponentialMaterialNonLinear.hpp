@@ -104,7 +104,7 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
     */
     void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 	        const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-	        const UInt offset );
+                const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
@@ -194,6 +194,8 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
     //! Get the stiffness vector
     vectorPtr_Type const stiffVector() const {return M_stiff; }
 
+    void Apply( const vector_Type& sol, vector_Type& res) ;
+
 //@}
 
 
@@ -253,8 +255,10 @@ template <typename Mesh>
 void
 ExponentialMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                            const boost::shared_ptr<const MapEpetra>&            monolithicMap,
-                                           const UInt                                           offset )
+                                           const UInt                                           offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )
 {
+    this->M_displayer = displayer;
+    this->M_dataMaterial  = dataMaterial;
     std::cout<<"I am setting up the Material"<<std::endl;
 
     this->M_FESpace                     = dFESpace;
@@ -429,9 +433,8 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
     UInt dim = this->M_FESpace->dim();
 
     VectorElemental dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
-    vector_Type disp(sol);
 
-    vector_Type dRep(disp, Repeated);
+    vector_Type dRep(sol, Repeated);
 
     for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); i++ )
     {
@@ -607,7 +610,12 @@ void ExponentialMaterialNonLinear<Mesh>::showMe( std::string const& fileNameStif
 }
 
 
-
+template <typename Mesh>
+void ExponentialMaterialNonLinear<Mesh>::Apply( const vector_Type& sol, vector_Type& res )
+{
+    computeStiffness(sol, 0, this->M_dataMaterial, this->M_displayer);
+    res += *M_stiff;
+}
 
 
 template <typename Mesh>

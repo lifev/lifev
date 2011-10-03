@@ -88,7 +88,6 @@ static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createI
 static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
 
-
 std::set<UInt> parseList( const std::string& list )
 {
     std::string stringList = list;
@@ -108,10 +107,9 @@ std::set<UInt> parseList( const std::string& list )
     return setList;
 }
 
-
 class Structure
 {
-public:  
+public:
   //@}
   /** @name Constructors, destructor
    */
@@ -244,7 +242,7 @@ Real sourceTerm(const Real& t, const Real& X, const Real& Y, const Real& Z, cons
   default:
     ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
     break;
-  } 
+  }
 }
 
     fct_type getDisplacementExact()
@@ -351,7 +349,7 @@ Structure::run3d()
     MapEpetra fullMap;
 
 
- 
+
   /*
      // Traslate function is a Sino:
 
@@ -369,7 +367,7 @@ Structure::run3d()
 
    // Rotation 2:
    /*
-   Real theta  = -1./100*cos(100*Pi*t),  
+   Real theta  = -1./100*cos(100*Pi*t),
             dtheta =Pi *sin(100*Pi*t),
            ddtheta =100* Pi*Pi*cos(100*Pi*t),
            dtheta2 = dtheta*dtheta;
@@ -377,18 +375,18 @@ Structure::run3d()
 
    //Rotation 3:
    /*
-   Real theta  = 1./5.*(1-cos(50*Pi*t)),  
+   Real theta  = 1./5.*(1-cos(50*Pi*t)),
       dtheta = 10*Pi *sin(50*Pi* t),
       ddtheta =500 * Pi*Pi*cos(50*Pi*t),
       dtheta2 = dtheta*dtheta;
     */
 
-  parameters->c1 = 10; 
+  parameters->c1 = 10;
   parameters->c2 = 0;
   parameters->c3 = 0;
-  parameters->dc1 = 0; 
-  parameters->dc2 = 0;  
-  parameters->dc3 = 0; 
+  parameters->dc1 = 0;
+  parameters->dc2 = 0;
+  parameters->dc3 = 0;
   parameters->ddc1 = 0;
   parameters->ddc2 = 0;
   parameters->ddc3 = 0;
@@ -425,7 +423,7 @@ Structure::run3d()
         fullMap += structMap;
     }
 
-   
+
     // BC for cyl1x02_1796_edge.mesh
     vector <ID> compx(1), compy(1), compz(1);
     compx[0]=0; compy[0]=1, compz[0]=2;
@@ -454,7 +452,7 @@ Structure::run3d()
         out_norm.close();
     }
 
-    
+
     StructuralSolver< RegionMesh3D<LinearTetra> > solid;
     solid.setup(dataStructure,
                 dFESpace,
@@ -472,8 +470,8 @@ Structure::run3d()
 
     Real dt = dataStructure->dataTime()->timeStep();
     Real T  = dataStructure->dataTime()->endTime();
-    
-    vectorPtr_Type rhs(new vector_Type(solid.displacement(), Unique)); 
+
+    vectorPtr_Type rhs(new vector_Type(solid.displacement(), Unique));
     vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique));
     vectorPtr_Type vel(new vector_Type(solid.displacement(), Unique));
     vectorPtr_Type acc(new vector_Type(solid.displacement(), Unique));
@@ -486,32 +484,32 @@ Structure::run3d()
 
     //solid.initialize(d0,w0,a0); // displacement, velocity, acceleration
 
-    std::vector<vector_Type> uv0;
-    
-    
+    std::vector<vectorPtr_Type> uv0;
+
+
     if (timeAdvanceMethod =="Newmark")
       {
-        uv0.push_back(*disp);
-        uv0.push_back(*vel);
-        uv0.push_back(*acc);
+        uv0.push_back(disp);
+        uv0.push_back(vel);
+        uv0.push_back(acc);
       }
     if (timeAdvanceMethod =="BDF")
     {
-      for ( UInt previousPass=0; previousPass < dataStructure->orderBDF() ; previousPass++)
+        for ( UInt previousPass=0; previousPass < dataStructure->dataTime()->orderBDF() ; previousPass++)
         {
 	  Real previousTimeStep = -previousPass*dt;
 	  std::cout<<"BDF " <<previousTimeStep<<"\n";
 	  dFESpace->interpolate(parameters->getDisplacementExact(), *disp, previousTimeStep );
-	  uv0.push_back(*disp);
+	  uv0.push_back(disp);
         }
     }
-    
+
     timeAdvance->setInitialCondition(uv0);
-    
+
     timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
-    
+
     timeAdvance->updateRHSContribution(dataStructure->dataTime()->timeStep());
-    
+
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (verbose ) std::cout << "ok." << std::endl;
@@ -544,7 +542,7 @@ Structure::run3d()
 
 	//vectorPtr_Type solidDisp ( new vector_Type(solid.getDisplacement(), exporter->mapType() ) );
 	//vectorPtr_Type solidVel  ( new vector_Type(solid.getVelocity(),  exporter->mapType() ) );
-	
+
 	vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(), exporter->mapType() ) );
 	vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
 	vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
@@ -557,7 +555,7 @@ Structure::run3d()
 
 	exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "acceleration",
                            dFESpace, solidAcc, UInt(0) );
-	
+
 
 
 	exporter->postProcess( 0 );
@@ -576,7 +574,7 @@ Structure::run3d()
 		std::cout << std::endl;
 		std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
 	      }
-	    
+
 	    *rhs *=0;
 	    timeAdvance->updateRHSContribution( dt );
 	    dFESpace->l2ScalarProduct(parameters->getSourceTerm(), *rhs, time);
@@ -587,11 +585,11 @@ Structure::run3d()
 	    //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
 	    timeAdvance->shiftRight(solid.displacement());
-	   
+
 	    *solidDisp = solid.displacement();
 	    *solidVel  = timeAdvance->velocity();
 	    *solidAcc  = timeAdvance->accelerate();
-	    
+
 	    //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
             //this->CheckResults(solid.displacement().norm2(),time);
@@ -611,14 +609,14 @@ Structure::run3d()
         << displacementL2_Error << "   "
         << velocityL2_Error << "   "
         << accelerateL2_Error << " \n";
-      
+
         out_norm.close();
         MPI_Barrier(MPI_COMM_WORLD);
 
 	  }
 
 }
-    
+
 void Structure::CheckResults(const Real& dispNorm,const Real& time)
 {
     if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )

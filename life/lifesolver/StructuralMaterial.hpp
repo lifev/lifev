@@ -64,6 +64,7 @@
 #include <life/lifefem/AssemblyElementalStructure.hpp>
 #include <life/lifefem/FESpace.hpp>
 
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/Displayer.hpp>
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
@@ -128,8 +129,8 @@ public:
       \param offset: the offset parameter used assembling the matrices
     */
     virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-	                const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-		        const UInt offset ) = 0;
+                        const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+                        const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )=0;
 
 
     //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
@@ -209,11 +210,13 @@ public:
   //! Get the Stiffness matrix
   matrixPtr_Type const jacobian()    const {return M_jacobian; }
 
-  //! Get the Stiffness matrix
-  virtual matrixPtr_Type const stiffMatrix() const = 0;
+    //! Get the Stiffness matrix
+    virtual matrixPtr_Type const stiffMatrix() const = 0;
 
-  //! Get the Stiffness matrix
-  virtual vectorPtr_Type const stiffVector() const = 0;
+    //! Get the Stiffness matrix
+    virtual vectorPtr_Type const stiffVector() const = 0;
+
+    virtual void Apply( const vector_Type& sol, vector_Type& res) =0;
 
 //@}
 
@@ -233,6 +236,10 @@ protected:
 
     //! The Offset parameter
     UInt                                           M_offset;
+
+    dataPtr_Type                                   M_dataMaterial;
+
+    displayerPtr_Type                              M_displayer;
 
 };
 

@@ -474,7 +474,7 @@ protected:
        \param res: the output residual
        \param diagonalScaling: flag stating wether to perform diagonal scaling
     */
-    void evalResidual( const vector_Type& sol, const vectorPtr_Type& rhs,  vector_Type& res, bool diagonalScaling=false);
+    void evalResidual( const vector_Type& sol, vectorPtr_Type& rhs,  vector_Type& res, bool diagonalScaling=false);
 
     //!\small says if the preconditioner will be recomputed
     bool recomputePrec() {return(!M_reusePrec || M_resetPrec);}

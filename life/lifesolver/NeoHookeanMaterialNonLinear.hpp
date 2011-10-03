@@ -104,7 +104,7 @@ class NeoHookeanMaterialNonLinear :
     */
     void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 	        const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-	        const UInt offset );
+                const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
@@ -195,6 +195,8 @@ class NeoHookeanMaterialNonLinear :
     //! Get the stiffness vector
     vectorPtr_Type const stiffVector() const {return M_stiff; }
 
+    void Apply( const vector_Type& sol, vector_Type& res);
+
 //@}
 
 
@@ -254,14 +256,20 @@ template <typename Mesh>
 void
 NeoHookeanMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                           const boost::shared_ptr<const MapEpetra>&            monolithicMap,
-                                          const UInt                                           offset )
+                                          const UInt                                           offset,
+                                          const dataPtr_Type& dataMaterial,
+                                          const displayerPtr_Type& displayer )
 {
+    this->M_displayer = displayer;
+    this->M_dataMaterial  = dataMaterial;
+
     std::cout<<"I am setting up the Material"<<std::endl;
 
     this->M_FESpace                     = dFESpace;
     this->M_localMap                    = monolithicMap;
     this->M_offset                      = offset;
-
+    this->M_dataMaterial                      = dataMaterial;
+    this->M_displayer                         = displayer;
     M_stiff.reset                  	( new vector_Type(*this->M_localMap) );
 
 
@@ -399,8 +407,12 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
     }
 }
 
-
-
+template <typename Mesh>
+void NeoHookeanMaterialNonLinear<Mesh>::Apply( const vector_Type& sol, vector_Type& res )
+{
+    computeStiffness(sol, 0., this->M_dataMaterial, this->M_displayer);
+    res += *M_stiff;
+}
 
 
 template <typename Mesh>

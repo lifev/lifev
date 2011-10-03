@@ -168,6 +168,16 @@ bcManageVector( VectorType&                     rightHandSide,
                 const DataType&                 time,
                 const DataType&                 diagonalizeCoef );
 
+
+template <typename VectorType, typename DataType, typename Mesh, typename MapEpetra>
+void
+bcManageResidual( VectorType&                     res,
+                  VectorType&                     rhs,
+                  const VectorType&               sol,
+                  FESpace<Mesh, MapEpetra>&       feSpace,
+                  const BCHandler&                bcHandler,
+                  const DataType&                 time,
+                  const DataType&                 diagonalizeCoef );
 //@}
 
 
@@ -269,6 +279,17 @@ bcEssentialManageVector( VectorType&     rightHandSide,
                          const DataType& diagonalizeCoef,
                          UInt            offset );
 
+
+template <typename VectorType, typename DataType>
+void
+bcEssentialManageResidual(VectorType&     res,
+                          VectorType&     rhs,
+                          const VectorType&     sol,
+                          const DOF&      dof,
+                          const BCBase&   boundaryCond,
+                          const DataType& time,
+                          const DataType& diagonalizeCoef,
+                          UInt            offset );
 
 
 ///! Prescribe Essential boundary conditions.
@@ -835,6 +856,57 @@ bcManageVector( VectorType&      rightHandSide,
 }
 
 
+template <typename VectorType, typename MeshType, typename DataType>
+void
+bcManageResidual( VectorType&                     res,
+                  VectorType&                     rhs,
+                  const VectorType&                     sol,
+                  const MeshType&  mesh,
+                  const DOF&       dof,
+                  const BCHandler& bcHandler,
+                  CurrentBoundaryFE&     currentBdFE,
+                  const DataType&  time,
+                  const DataType&  diagonalizeCoef )
+{
+    VectorType rhsRepeated(rhs.map(),Repeated);
+
+    // Loop on boundary conditions
+    for ( ID i = 0; i < bcHandler.size(); ++i )
+    {
+
+        switch ( bcHandler[ i ].type() )
+        {
+        case Essential:  // Essential boundary conditions (Dirichlet)
+        case EssentialEdges:
+        case EssentialVertices:
+            if ( (bcHandler[ i ].mode() == Tangential) || (bcHandler[ i ].mode() == Normal) || (bcHandler[ i ].mode() == Directional) )
+            {
+                ERROR_MSG( "This BC mode is not yet implemented for this setting" );
+            }
+            bcEssentialManageResidual( res, rhs, sol, dof, bcHandler[ i ], time, diagonalizeCoef, bcHandler.offset() );
+            break;
+        case Natural:  // Natural boundary conditions (Neumann)
+            bcNaturalManage( rhs, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            break;
+        case Robin:  // Robin boundary conditions (Robin) to be implemented
+            ERROR_MSG( "Robin BC is not yet implemented for this setting" );
+            bcRobinManageVector( rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            break;
+        case Flux:  // Flux boundary conditions to be implemented
+            ERROR_MSG( "Flux BC is not yet implemented for this setting" );
+            bcFluxManageVector( rhs, bcHandler[ i ], time, bcHandler.offset()+bcHandler[i].offset() );
+            break;
+        default:
+            ERROR_MSG( "This BC type is not yet implemented" );
+        }
+    }
+
+    //    rhsRepeated.globalAssemble();
+
+    //rhs += rhsRepeated;
+}
+
+
 template <typename VectorType, typename DataType, typename Mesh, typename MapEpetra>
 void
 bcManageVector( VectorType&                     rightHandSide,
@@ -1141,6 +1213,79 @@ bcEssentialManageVector( VectorType&     rightHandSide,
     }
 
     rightHandSide.setCoefficients( idDofVec, datumVec);
+}
+
+
+template <typename VectorType, typename DataType>
+void
+bcEssentialManageResidual(VectorType&     res,
+                          VectorType&     rhs,
+                          const VectorType&     sol,
+                          const DOF&      dof,
+                          const BCBase&   boundaryCond,
+                          const DataType& time,
+                          const DataType& diagonalizeCoef,
+                          UInt            offset )
+{
+    ID idDof;
+    UInt totalDof;
+
+    // Number of total scalar Dof
+    totalDof = dof.numTotalDof();
+
+    // Number of components involved in this boundary condition
+    UInt nComp = boundaryCond.numberOfComponents();
+
+    std::vector<int>   idDofVec(0);
+    idDofVec.reserve(boundaryCond.list_size()*nComp);
+    std::vector<Real> datumVec(0);
+    datumVec.reserve(boundaryCond.list_size()*nComp);
+    std::vector<Real> rhsVec(0);
+    rhsVec.reserve(boundaryCond.list_size()*nComp);
+
+    if ( boundaryCond.isDataAVector() )
+    {  //! If BC is given under a vectorial form
+        // Loop on BC identifiers
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
+        {
+            // Loop on components involved in this boundary condition
+            for ( ID j = 0; j < nComp; ++j )
+            {
+                // Global Dof
+                idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
+                idDofVec.push_back( idDof );
+                datumVec.push_back( diagonalizeCoef*sol(idDof) );
+                rhsVec.push_back(diagonalizeCoef*boundaryCond( boundaryCond[ i ] ->id(), boundaryCond.component( j ) ));
+            }
+        }
+    }
+    else
+    {  //! If BC is given under a functional form
+        DataType x, y, z;
+        // Loop on BC identifiers
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
+        {
+            // Coordinates of the node where we impose the value
+            x = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->x();
+            y = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->y();
+            z = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->z();
+
+            // Loop on components involved in this boundary condition
+            for ( ID j = 0; j < nComp; ++j )
+            {
+                // Global Dof
+
+                idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
+                // Modifying right hand side
+                idDofVec.push_back(idDof);
+                datumVec.push_back( diagonalizeCoef*sol(idDof) );
+                rhsVec.push_back(diagonalizeCoef*boundaryCond( time, x, y, z, boundaryCond.component( j ) ));
+            }
+        }
+    }
+
+    res.setCoefficients( idDofVec, datumVec);
+    rhs.setCoefficients( idDofVec, rhsVec);
 }
 
 // ===================================================

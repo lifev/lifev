@@ -140,6 +140,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
                                const vector_Type& disp,
                                const UInt          iter )
 {
+    res *= 0.;
     if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
 
@@ -229,17 +230,9 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         assembleMeshBlock ( iter );
         *M_rhsFull = *M_rhs;
         //M_rhs->spy("rhs");
-        applyBoundaryConditions();
-    }
-    super_Type::evalResidual( disp, M_rhsFull, res, false );
 
-}
-
-void
-FSIMonolithicGI::applyBoundaryConditions()
-{
-    M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
-    M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
+        M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
+        M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
 
     if (!M_monolithicMatrix->set())
     {
@@ -267,10 +260,39 @@ FSIMonolithicGI::applyBoundaryConditions()
         M_monolithicMatrix->replace_matrix(M_meshBlock, 2);
     }
 
+	M_monolithicMatrix->blockAssembling();
     super_Type::checkIfChangedFluxBC( M_monolithicMatrix );
 
-    M_monolithicMatrix->blockAssembling();
 
+
+    applyBoundaryConditions();
+    }
+    super_Type::evalResidual( disp, M_rhsFull, res, false );
+
+if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookian")) )
+{
+    res += *M_meshBlock*disp;
+
+    if ( !M_BCh_u->bcUpdateDone() )
+        M_BCh_u->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+    M_BCh_d->setOffset(M_offset);
+    if ( !M_BCh_d->bcUpdateDone() )
+        M_BCh_d->bcUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+    M_BCh_mesh->setOffset(M_solidAndFluidDim + nDimensions*M_interface);
+    if ( !M_BCh_mesh->bcUpdateDone() )
+        M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
+
+    vector_Type dispRep(disp, Repeated);
+    bcManageResidual(res, *M_rhsFull, dispRep, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(),  M_data->dataFluid()->dataTime()->time(), 1.);
+    bcManageResidual(res, *M_rhsFull, dispRep, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), M_data->dataSolid()->dataTime()->time(), 1.);
+    bcManageResidual(res, *M_rhsFull, dispRep, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *M_BCh_mesh, M_mmFESpace->feBd(),  M_data->dataFluid()->dataTime()->time(), 1.);
+    res -= *M_rhsFull;
+}
+}
+
+void
+FSIMonolithicGI::applyBoundaryConditions()
+{
     if ( !M_BCh_u->bcUpdateDone() )
         M_BCh_u->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
     M_BCh_d->setOffset(M_offset);
@@ -296,7 +318,7 @@ void FSIMonolithicGI::initialize( fluidPtr_Type::value_type::function_Type const
     M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->dataTime()->time());
 
     M_un->add(df, M_solidAndFluidDim+dimInterface());
-    M_meshMotion->setDisplacement(df);
+    //M_meshMotion->setDisplacement(df);
 }
 
 // void
@@ -335,12 +357,12 @@ void FSIMonolithicGI::setupBlockPrec()
     //The following part accounts for a possibly nonlinear structure model, should not be run when linear
     //elasticity is used
 
-    if ( M_data->dataSolid()->getUseExactJacobian() )
+    if ( M_data->dataSolid()->getUseExactJacobian() && (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookian")))
     {
         M_solid->material()->updateJacobianMatrix( *M_uk*M_data->dataFluid()->dataTime()->timeStep(), dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solid->Mass();
-        *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
+        *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
         M_solidBlockPrec->globalAssemble();
         *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
 

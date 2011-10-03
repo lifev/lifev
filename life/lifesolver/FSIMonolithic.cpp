@@ -503,13 +503,23 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working
 
 void
 FSIMonolithic::
-evalResidual( const vector_Type& sol,const vectorPtr_Type& rhs, vector_Type& res, bool diagonalScaling)
+evalResidual( const vector_Type& sol, vectorPtr_Type& rhs, vector_Type& res, bool diagonalScaling)
 {
     if( diagonalScaling )
         diagonalScale(*rhs, M_monolithicMatrix->matrix());
-
+if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookian")) )
+{
+    M_solid->Apply(sol, res);
+    res *= (M_data->dataSolid()->dataTime()->timeStep());
+    M_fluidBlock->globalAssemble();
+    res += ((*M_fluidBlock)*sol);
+    res += *M_monolithicMatrix->coupling()*sol;
+}
+else
+{
     res = *(M_monolithicMatrix->matrix())*sol;
     res -= *rhs; // Ax-b
+}
 }
 
 void
@@ -586,12 +596,25 @@ FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
         updateSolidSystem(this->M_rhs);
     }
 
-    M_solid->material()->computeStiffness(*solution*M_data->dataFluid()->dataTime()->timeStep(), M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
+    //M_solid->material()->computeStiffness(*solution*M_data->dataFluid()->dataTime()->timeStep(), M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
+
+if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookian"))
+{
     M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
     *M_solidBlockPrec += *M_solid->Mass();
     *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
     M_solidBlockPrec->globalAssemble();
     *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
+}
+else
+{
+    M_solid->material()->updateJacobianMatrix( *solution*M_data->dataFluid()->dataTime()->timeStep(), dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+    M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
+    *M_solidBlockPrec += *M_solid->Mass();
+    *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
+    M_solidBlockPrec->globalAssemble();
+    *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
+}
 
 //     M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap, 1 ) );
 //     *M_solidBlockPrec += *M_solidBlock;
