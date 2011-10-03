@@ -1,18 +1,32 @@
 /*!
     @mainpage LifeV - A Parallel Finite Element Library
 
-    \section introduction Introduction of LifeV
+    \section introduction Introduction
 
-    [TODO: Extend to around 10 lines or more the introduction Simone Deparis, Luca Formaggia, Alessandro Veneziani]
+LifeV (to be read Life Five) is an open source library for the numerical solution of partial differential equations with the finite element method.
+The choice of finite elements is motivated by their rigorous mathematical background,
+with a sound control of the accuracy, coupled with excellent flexibility in managing
+complex geometries.
 
-    LifeV is a finite element (FE) library providing implementations of state of the art mathematical and numerical methods.
-    It serves both as a research and production library. It has been used already in medical and industrial context to simulate fluid structure interaction and mass transport.
+LifeV  is written in C++ and is entirely coded with an Object Oriented approach
+and advanced programming features of scientific computing. The project started in 1999 from the collaboration
+of the Department of Mathematics at EPFL, Lausanne, Switzerland, of the Department of Mathematics at Politecnico di Milano, Italy and the INRIA Rocquencourt, France,
+under the supervision of Alfio Quarteroni.
+Nowadays, LifeV is concurrently  developed and maintained by CMCS@EPFL Lausanne (group coordinator), MOX@Politecnico di Milano, REO and ESTIME@INRIA and
+ the E(CM)2 group @Department of Mathematics and Computer Science at Emory University, Atlanta (GA), USA.
 
+As for now, the library includes solver for incompressible fluid dynamics, linear structure problems, porous media,  fluid-structure interaction,
+electrocardiology. Even though this library is a research code oriented to the development and test of new numerical methods and algorithms,
+it is intended to be an effective tool for solving complex ``real-life'' engineering problems. One of the main field of applications (although not the only one)
+is cardiovascular mathematics.
 
+The code is distributed under the LGPL license and is dowloadable on {\tt http://cmcsforge.epfl.ch}.
 
+There are two distributed version of LifeV, one is parallel, for complex three dimensional engineering problems, the other is serial,
+for two and three dimension problems (prototyping, testing). These pages
+review the parallel version.
 
-
-
+For other details, see {\tt www.lifev.org}.
 
 
     <BR> <BR>
@@ -140,6 +154,8 @@
         <li> Antonio Cervone, MOX - Politecnico di Milano
         <li> Carlo de Falco
         <li> Christian Vergara, MOX - Politecnico di Milano
+        <li> Christoph Winkelmann, formerly at CMCS, École Polytechnique Fédérale de Lausanne
+        <li> Christophe Prud'homme, formerly at CMCS, École Polytechnique Fédérale de Lausanne
         <li> Claudia Colciago, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Cristiano Malossi, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Fabio Nobile, CMCS - École Polytechnique Fédérale de Lausanne
