@@ -64,7 +64,11 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
 
 
 
-        <li> <b>Darcy solver:</b> [TODO: 2-3 lines description by Alessio Fumagalli]
+        <li> <b>Darcy solver:</b> phenomenologically law which describes the flow of a fluid through a porous medium.
+            The implementation of the solver uses the dual-mixed-hybrid formulation, entail good approximation of the
+            velocity field as well the pressure field. The global system in saddle point form is recast to an equivalent
+            positive definite system, using the hybridization and static condensation procedure. The finite elements
+            spaces used are piecewise constant for the pressure and lowest order Raviart-Thomas for the velocity.
 
 
 
