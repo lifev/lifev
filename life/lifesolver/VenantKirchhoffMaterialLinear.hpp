@@ -167,6 +167,7 @@ protected:
 
   //! Matrix Kl: stiffness linear
   matrixPtr_Type                                 M_stiff;
+
 };
 
 template <typename Mesh>
@@ -247,11 +248,8 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
-    //<<<<<<< HEAD
    std::cout<<"compute LinearStiff Matrix end\n";
-   //=======
    this->M_jacobian = this->M_linearStiff;
-    //>>>>>>> 20110728_ExponentialNeohookean
 }
 
 
@@ -261,18 +259,14 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateJacobianMatrix(const vector_Type
                                                                const displayerPtr_Type& displayer)
 {
 
-    std::cout << std::endl;
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
-    displayer->leaderPrint("   Linear S-  Using the Stiffness Matrix (constant) in UpdateJacobian");
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
+    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint("   Linear S-  Updating the Jacobian Matrix (constant, Linear Elastic)");
+    displayer->leaderPrint(" \n*********************************\n  ");
 
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
+    displayer->leaderPrint(" \n*********************************\n  ");
     updateNonLinearJacobianTerms(this->M_jacobian,disp,dataMaterial,displayer);
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
+    displayer->leaderPrint(" \n*********************************\n  ");
+
 }
 
 template <typename Mesh>
@@ -280,19 +274,10 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms( matrixPt
                                                                          const  vector_Type& /*disp*/,
                                                                          const dataPtr_Type& /*dataMaterial*/,
                                                                          const displayerPtr_Type& displayer )
-//<<<<<<< HEAD
-    {
-      displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
-      std::cout << std::endl;
-      this->M_stiff->globalAssemble();
-    }
-// =======
-// {
-//         displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
-//         std::cout << std::endl;
-// }
-
-// >>>>>>> 20110728_ExponentialNeohookean
+{
+    this->M_stiff->globalAssemble();
+    displayer->leaderPrint("   Linear S- Doing nothing - Updating non linear terms in Jacobian Matrix (constant, Linear Elastic)\n");
+}
 
 template <typename Mesh>
 void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& /*disp*/,
@@ -300,12 +285,10 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& /
                                                             const dataPtr_Type& /*dataMaterial*/,
                                                             const displayerPtr_Type& displayer )
 {
-    std::cout << std::endl;
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
-    displayer->leaderPrint("   Linear S-  Using the linear part of the Stiffness Matrix\n");
-    displayer->leaderPrint(" *********************************  ");
-    std::cout << std::endl;
+    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint("   Linear S-  Using the the Stiffness Matrix (constant, Linear Elastic)");
+    displayer->leaderPrint(" \n*********************************\n  ");
+
 }
 
 

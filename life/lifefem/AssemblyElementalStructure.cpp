@@ -44,34 +44,33 @@ namespace AssemblyElementalStructure
 {
 
 
-void computeGradientLocalDisplacement( const VectorElemental& uk_loc, const CurrentFE& fe )
+void computeGradientLocalDisplacement(KNMK<Real>& gradientLocalDisplacement, const VectorElemental& uk_loc, const CurrentFE& fe )
 {
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
+    // \grad u^k at each quadrature poInt
     Real s;
 
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    // loop on quadrature poInts
+    for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+      for ( Int icoor = 0; icoor < static_cast<Int> (nDimensions); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+	  for ( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                for (Int i = 0; i < static_cast<Int> (fe.nbFEDof()); i++ )
                 {
-                    //  \grad u^k at a quadrature point
+                    //  \grad u^k at a quadrature poInt
                     s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
                 }
-                guk[ icoor ][ jcoor ][ ig ] = s;
+                gradientLocalDisplacement( icoor , jcoor , ig ) = s;
+		//std::cout << "Value in icoor: " << icoor << "jcoor " << jcoor << "ig " << ig << "as S: " << s <<std::endl;
             }
         }
     }
-
 }
 
 
@@ -81,52 +80,30 @@ void computeGradientLocalDisplacement( const VectorElemental& uk_loc, const Curr
 //! Methods for the stiffness matrix
 
 //! \f$ coef \cdot ( trace { [\nabla u^k]^T \nabla u }, \nabla\cdot  v  ) \f$
-void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_derdiv( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
+  Real s; 
 
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-    Real s;
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
     //
     // blocks (icoor,jcoor) of elmat
     //
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+  for ( Int icoor = 0; icoor < static_cast<Int> (fe.nbCoor()); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+      for ( Int jcoor = 0; jcoor < static_cast<Int> (fe.nbCoor()); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
-            for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+            for ( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
             {
-                for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+	      for ( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
-                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-                            s += fe.phiDer( i, icoor, ig ) * guk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+                    for ( Int k = 0; k < static_cast<Int> (fe.nbCoor()); ++k )
+		      for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ig++ )
+			  {
+                            s += fe.phiDer( i, icoor, ig ) * gradientLocalDisplacement( jcoor , k , ig ) * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+			  }
                     mat( i, j ) += coef * s;
                 }
             }
@@ -137,54 +114,30 @@ void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& el
 
 
 //! \f$ coef \cdot ( [\nabla u^k]^T \nabla u : \nabla v  )\f$
-void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergradbis( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
+    Real s;
 
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
     //
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( Int icoor = 0; icoor < static_cast<Int> (fe.nbCoor()); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+      for ( Int jcoor = 0; jcoor <  static_cast<Int>  (fe.nbCoor()); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
-            for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+            for ( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
             {
-                for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+	      for ( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
-                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                            s += fe.phiDer( i, k, ig ) * guk[ jcoor ][ icoor ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+                    for ( Int k = 0; k < static_cast<Int> (fe.nbCoor()); ++k )
+		      for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
+			s += fe.phiDer( i, k, ig ) * gradientLocalDisplacement( jcoor, icoor , ig ) * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                     mat( i, j ) += coef * s;
                 }
             }
@@ -198,12 +151,12 @@ void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental
 void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // local vector for \div u^k at each quadrature point
+    Real s;
+    // local vector for \div u^k at each quadrature poInt
     Real duk[ fe.nbQuadPt() ];
 
 
-    // loop on quadrature points
+    // loop on quadrature poInts
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         s=0;
@@ -212,7 +165,7 @@ void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
         {
             for ( UInt i = 0; i < fe.nbFEDof(); i++ )
             {
-                // construction of \div u^k at a quadrature point
+                // construction of \div u^k at a quadrature poInt
                 s += fe.phiDer( i, icoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
             }
         }
@@ -249,11 +202,11 @@ void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s,s1;
-    //    (\grad u_k : \grad u_k) at each quadrature point
+    Real s,s1;
+    //    (\grad u_k : \grad u_k) at each quadrature poInt
     Real gguk[ fe.nbQuadPt() ];
 
-    // loop on quadrature points
+    // loop on quadrature poInts
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         s=0;
@@ -294,42 +247,18 @@ void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
     }
 }
 
-void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
+    
     //
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( Int icoor = 0; icoor < static_cast<Int> (fe.nbCoor()); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+      for ( Int jcoor = 0; jcoor < static_cast<Int> (fe.nbCoor()); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
@@ -341,8 +270,8 @@ void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElem
                     s = 0.0;
                     for ( UInt k = 0; k < fe.nbCoor(); ++k )
                     {
-                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                            s += guk[ icoor ][ jcoor ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+		      for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
+			    s += gradientLocalDisplacement( icoor , jcoor , ig ) * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                     }
                     mat( i, j ) += coef * s;
                 }
@@ -354,40 +283,15 @@ void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElem
 
 
 // coef * ( \grad u^k [\grad u]^T : \grad v )
-void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_Tr( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
     //
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( Int icoor = 0; icoor < static_cast<Int> (fe.nbCoor()); ++icoor )
     {
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
@@ -399,10 +303,10 @@ void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixE
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0.0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( Int k = 0; k < static_cast<Int> (fe.nbCoor()); ++k )
                     {
-                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                            s += guk[ icoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) * fe.phiDer( i, jcoor, ig ) * fe.weightDet( ig );
+		      for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
+                            s += gradientLocalDisplacement( icoor , k , ig )  * fe.phiDer( j, k, ig ) * fe.phiDer( i, jcoor, ig ) * fe.weightDet( ig );
                     }
                     mat( i, j ) += coef * s;
                 }
@@ -417,12 +321,12 @@ void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixE
 void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
+    Real s;
 
-    //! \grad u^k  [\grad u^k]^T  at each quadrature point
+    //! \grad u^k  [\grad u^k]^T  at each quadrature poInt
     Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
 
-    // loop on quadrature points
+    // loop on quadrature poInts
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
@@ -440,7 +344,7 @@ void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixE
                     {
                         for ( UInt j = 0; j < fe.nbFEDof(); j++ )
                         {
-                            //! \grad u^k  [\grad u^k]^T  at each quadrature point
+                            //! \grad u^k  [\grad u^k]^T  at each quadrature poInt
                             s  += fe.phiDer( i, n, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ] * fe.phiDer( j, n, ig ) * uk_loc.vec() [ j + jcoor * fe.nbFEDof() ];
                         }
                     }
@@ -476,39 +380,14 @@ void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixE
 //! Methods for the jacobian (St. Venant-Kirchhoff material)
 
 //! \f$ coef \cdot ( [\nabla u]^T \nabla u^k + [\nabla u^k]^T \nabla u : \nabla v  )\f$
-void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    //! \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
+    Real s;
 
-
-    //! loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    for ( Int icoor = 0; icoor < static_cast<Int> (fe.nbCoor()); ++icoor )
     {
-
-        //! loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            //! loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
-
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
-    {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+      for ( Int jcoor = 0; jcoor < static_cast<Int> (fe.nbCoor()); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
@@ -518,11 +397,11 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
-                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                    for ( Int k = 0; k < static_cast<Int> (fe.nbCoor()); ++k )
+		      for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                         {
-                            s += fe.phiDer( i, k, ig ) * ( guk[ jcoor ][ k ][ ig ] * fe.phiDer( j, icoor, ig )
-                                                           + guk[ jcoor ][ icoor ][ ig ] * fe.phiDer( j, k, ig ) ) * fe.weightDet( ig );
+			  s += fe.phiDer( i, k, ig ) * ( gradientLocalDisplacement( jcoor , k , ig ) * fe.phiDer( j, icoor, ig )
+							 + gradientLocalDisplacement( jcoor , icoor , ig ) * fe.phiDer( j, k, ig ) ) * fe.weightDet( ig );
                         }
                     mat( i, j ) += coef * s;
                 }
@@ -534,38 +413,16 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 
 
 // coef * ( (\div u) \grad u_k : \grad v  )
-void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_divgrad_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                     //  \grad u^k at a quadrature point //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
 
     //
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( Int icoor = 0; icoor < static_cast<Int> (fe.nbCoor()); ++icoor )
     {
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
@@ -576,9 +433,9 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
-                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                            s += fe.phiDer( j, jcoor, ig ) * guk[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
+                    for ( Int k = 0; k < static_cast<Int> (fe.nbCoor()); ++k )
+		      for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
+			s += fe.phiDer( j, jcoor, ig ) * gradientLocalDisplacement( icoor , k , ig ) * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
                     mat( i, j ) += coef * s;
                 }
             }
@@ -589,36 +446,14 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
 
 
 // coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  )
-void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_gradgrad_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
+    Real s;
 
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    for ( Int icoor = 0; icoor < static_cast<Int> (fe.nbCoor()); ++icoor )
     {
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
-
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
-    {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+      for ( Int jcoor = 0; jcoor < static_cast<Int> (fe.nbCoor()); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
@@ -627,12 +462,12 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0.0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( Int k = 0; k < static_cast<Int> (fe.nbCoor()); ++k )
                     {
-                        for ( UInt l = 0; l < fe.nbCoor(); ++l )
+		      for ( Int l = 0; l < static_cast<Int> (fe.nbCoor()); ++l )
                         {
-                            for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                                s += guk[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) * guk[ icoor ][ k ][ ig ] * fe.phiDer(i, k, ig ) * fe.weightDet( ig );
+			  for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
+                                s += gradientLocalDisplacement( jcoor , l , ig ) * fe.phiDer( j, l, ig ) * gradientLocalDisplacement( icoor , k , ig ) * fe.phiDer(i, k, ig ) * fe.weightDet( ig );
                         }
                     }
                     mat( i, j ) += coef  * s;
@@ -645,35 +480,11 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
 
 
 // coef * ( \grad \delta u [\grad u^k]^T : \grad v )
-void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
+    Real s;
 
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    // \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
     //
     // blocks (icoor,jcoor) of elmat
     //
@@ -684,12 +495,12 @@ void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixEl
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            for ( Int l = 0; l < static_cast<Int> (fe.nbCoor()); ++l )
             {
-                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+	      for ( Int k = 0; k < static_cast<Int> (fe.nbCoor()); ++k )
                 {
-                    for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                        s += guk[ l ][ k ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+		  for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
+                        s += gradientLocalDisplacement( l , k , ig ) * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
                 }
             }
             mat_tmp( i, j ) = coef * s;
@@ -703,35 +514,10 @@ void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixEl
     }
 }
 
-void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_Tr_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
     //
     // blocks (icoor,jcoor) of elmat
     //
@@ -742,12 +528,14 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            for ( Int l = 0; l < static_cast<Int> (fe.nbCoor()); ++l )
             {
-                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+	      for ( Int k = 0; k < static_cast<Int> (fe.nbCoor()); ++k )
                 {
-                    for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                        s += guk[ k ][ l ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+		  for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
+		      {
+                        s += gradientLocalDisplacement( k , l , ig ) * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+		      }
                 }
             }
             mat_tmp( i, j ) = coef * s;
@@ -764,42 +552,17 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
 
 
 // coef * (  \grad u^k [\grad u]^T \grad u^k : \grad v  )
-void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+void stiff_gradgradTr_gradbis_2( Real coef, const KNMK<Real> gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k at each quadrature point
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-
-
-    // loop on quadrature points
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
-    {
-
-        // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
-        {
-
-            // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-            {
-                s = 0.0;
-                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
-                {
-                    //  \grad u^k at a quadrature point
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
-                }
-                guk[ icoor ][ jcoor ][ ig ] = s;
-            }
-        }
-    }
+    Real s;
 
     //
     // blocks (icoor,jcoor) of elmat
     //
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( Int icoor = 0; icoor < static_cast<Int> (fe.nbCoor()); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+      for ( Int jcoor = 0; jcoor < static_cast<Int> (fe.nbCoor()); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor ); // it extracts the (icoor, jcoor) block
@@ -809,12 +572,14 @@ void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, Matri
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt l = 0; l < fe.nbCoor(); ++l )
+                    for ( Int l = 0; l < static_cast<Int> (fe.nbCoor()); ++l )
                     {
-                        for ( UInt k = 0; k < fe.nbCoor(); ++k )
+		      for ( Int k = 0; k < static_cast<Int> (fe.nbCoor()); ++k )
                         {
-                            for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                                s += guk[ icoor ][ l ][ ig ] *guk[ jcoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+			  for ( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
+			      {
+                                s += gradientLocalDisplacement( icoor , l , ig ) *gradientLocalDisplacement( jcoor , k , ig ) * fe.phiDer( i, k, ig ) *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+			      }
                         }
                     }
                     mat( i, j ) += coef * s;
@@ -830,11 +595,11 @@ void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, Matri
 void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
-    double s;
-    // \grad u^k  [\grad u^k]^T  at each quadrature point
+    Real s;
+    // \grad u^k  [\grad u^k]^T  at each quadrature poInt
     Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
     // attenzione in questa funzione si deve usare il trasposto
-    // loop on quadrature points                                                // (\grad u^k  [\grad u^k]^T )^T
+    // loop on quadrature poInts                                                // (\grad u^k  [\grad u^k]^T )^T
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
@@ -852,7 +617,7 @@ void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, Matri
                     {
                         for ( UInt j = 0; j < fe.nbFEDof(); j++ )
                         {
-                            // \grad u^k  [\grad u^k]^T  at each quadrature point
+                            // \grad u^k  [\grad u^k]^T  at each quadrature poInt
                             s  += fe.phiDer( i, n, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ] * fe.phiDer( j, n, ig ) * uk_loc.vec() [ j + jcoor * fe.nbFEDof() ] ;
                         }
                     }
@@ -911,24 +676,24 @@ void source_Pvol( Real		coef,
                   VectorElemental&	elvec,
                   const CurrentFE&	fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
         // block (icoor) of elvec
         VectorElemental::vector_view vec =  elvec.block( icoor );
-        for( int i = 0; i < fe.nbFEDof(); ++i )
+        for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
         {
             s = 0.0;
-            for( int k = 0; k < nDimensions; ++k )
+            for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
 	    	{
-	      		for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
-                {
-                    s += ( pow( Jk(ig),2 ) - Jk(ig) + log( Jk(ig) ) )*pow( Jk(ig),-1)*
+		  for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
+		    {
+		      s += ( pow( Jk(ig),2 ) - Jk(ig) + log( Jk(ig) ) )*pow( Jk(ig),-1)*
                         CofFk(icoor, k, ig)*fe.phiDer(i, k, ig)*fe.weightDet(ig);
-                }
+		    }
 	    	}
-            vec(i) += coef/2.0 * s;
+            vec(i) += coef * s;
         }
     }
 }
@@ -944,23 +709,23 @@ void stiff_Jac_Pvol_1term( Real 	 	 coef,
                            MatrixElemental& elmat,
                            const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
       	{
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
 	    	{
-	      		for( int j = 0; j < fe.nbFEDof(); ++j )
+		  for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
                     s = 0.0;
-                    for( int l = 0; l < nDimensions; ++l )
+                    for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
 		    		{
-		      			for( int k = 0; k < nDimensions; ++k )
+				  for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
 			    			{
                                 s += ( 2.0 -   pow(Jk(ig), -1.) + pow(Jk(ig), -2.)  ) *
                                     CofFk( jcoor, l, ig ) * fe.phiDer( j, l, ig ) *
@@ -969,7 +734,7 @@ void stiff_Jac_Pvol_1term( Real 	 	 coef,
 			    			}
                         }
 		    		}
-                    mat( i, j ) += s * coef/2.0;
+                    mat( i, j ) += s * coef;
                 }
 	    	}
         }
@@ -977,30 +742,30 @@ void stiff_Jac_Pvol_1term( Real 	 	 coef,
 }
 
 
-//! 2. Stiffness matrix: int { 1/2 * coef * ( 1/J - 1 - log(J)/J^2 ) * ( CofF [\nabla \delta]^t CofF ) : \nabla v }
+//! 2. Stiffness matrix: Int { 1/2 * coef * ( 1/J - 1 - log(J)/J^2 ) * ( CofF [\nabla \delta]^t CofF ) : \nabla v }
 void stiff_Jac_Pvol_2term( Real 		  coef,
                            const KNMK<Real>  CofFk,
                            const KN<Real> 	  Jk,
                            MatrixElemental&  elmat,
                            const CurrentFE&  fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
 	    	{
-	      		for( int j = 0; j < fe.nbFEDof(); ++j )
+		  for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
                     s = 0.0;
-                    for( int l = 0; l < nDimensions; ++l )
+                    for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
 		    		{
-		      			for( int k = 0; k < nDimensions; ++k )
+				  for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
 			    			{
 			      				s +=( pow( Jk(ig), -1.)   - 1.  - pow( Jk(ig), -2 ) * log( Jk(ig) ) )*
                                     CofFk( icoor, l, ig ) * fe.phiDer( j, l, ig ) *
@@ -1008,7 +773,7 @@ void stiff_Jac_Pvol_2term( Real 		  coef,
 			    			}
                         }
 		    		}
-                    mat( i, j ) += s * coef /2.0;
+                    mat( i, j ) += s * coef;
                 }
 	    	}
         }
@@ -1021,7 +786,7 @@ void stiff_Jac_Pvol_2term( Real 		  coef,
 //! ***********************************************************************************************
 //! Stiffness vector isochoric part ---------------------------------------------------------------
 
-//! Source term source_P1iso_NH: int { coef * (  J^(-2/3) * (F : \nabla v) - 1/3 * (Ic_iso / J) (CofF : \nabla v) ) }
+//! Source term source_P1iso_NH: Int { coef * (  J^(-2/3) * (F : \nabla v) - 1/3 * (Ic_iso / J) (CofF : \nabla v) ) }
 void source_P1iso_NH( Real 	    coef,
                       const KNMK<Real> CofFk,
                       const KNMK<Real> Fk,
@@ -1030,17 +795,17 @@ void source_P1iso_NH( Real 	    coef,
                       VectorElemental& elvec,
                       const CurrentFE& fe )
 {
-    double s1, s2;
+    Real s1, s2;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
         VectorElemental::vector_view vec =  elvec.block( icoor );
-      	for( int i = 0; i < fe.nbFEDof(); ++i )
+      	for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
         {
             s1 = 0.0; s2 = 0.0;
-            for( int k = 0; k < nDimensions; ++k )
+            for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
             {
-	    		for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+	      for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
 	      		{
                     s1 +=  pow( Jk( ig ), (-2.0/3.0) ) * Fk( icoor,  k, ig ) *
                         fe.phiDer( i, k, ig ) * fe.weightDet( ig );
@@ -1062,7 +827,7 @@ void source_P1iso_NH( Real 	    coef,
 
 //! Jacobian matrix isochoric part ----------------------------------------------------------------
 
-//! 1. Jacobian matrix : int { -2/3 * coef * J^(-5/3) *( CofF : \nabla \delta ) ( F : \nabla \v ) }
+//! 1. Jacobian matrix : Int { -2/3 * coef * J^(-5/3) *( CofF : \nabla \delta ) ( F : \nabla \v ) }
 void stiff_Jac_P1iso_NH_1term( Real coef,
                                const KNMK<Real> CofFk,
                                const KNMK<Real> Fk,
@@ -1070,23 +835,23 @@ void stiff_Jac_P1iso_NH_1term( Real coef,
                                MatrixElemental& elmat,
                                const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
 	    	{
-	      		for( int j = 0; j < fe.nbFEDof(); ++j )
+		  for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
                     s = 0.0;
-                    for( int l = 0; l < nDimensions; ++l )
+                    for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
 		    		{
-		      			for( int k = 0; k < nDimensions; ++k )
+				  for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                             {
 			    				s += pow( Jk(ig), -5./3. ) *
                                     Fk( jcoor, l, ig ) * fe.phiDer( j, l, ig ) *
@@ -1094,7 +859,7 @@ void stiff_Jac_P1iso_NH_1term( Real coef,
                             }
                         }
 		    		}
-                    mat( i, j ) += -2.0/3.0 * coef * s;
+                    mat( i, j ) += coef * s;
                 }
 	    	}
         }
@@ -1103,7 +868,7 @@ void stiff_Jac_P1iso_NH_1term( Real coef,
 
 
 
-//! 2. Stiffness matrix: int { 2/9 * coef * ( Ic_iso / J^2 )( CofF : \nabla \delta ) ( CofF : \nabla \v ) }
+//! 2. Stiffness matrix: Int { 2/9 * coef * ( Ic_iso / J^2 )( CofF : \nabla \delta ) ( CofF : \nabla \v ) }
 void stiff_Jac_P1iso_NH_2term( Real coef,
                                const KNMK<Real> CofFk,
                                const KN<Real> Jk ,
@@ -1111,23 +876,23 @@ void stiff_Jac_P1iso_NH_2term( Real coef,
                                MatrixElemental& elmat,
                                const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
 	    	{
-	      		for( int j = 0; j < fe.nbFEDof(); ++j )
+		  for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
                     s = 0.0;
-                    for( int l = 0; l < nDimensions; ++l )
+                    for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
 		    		{
-		      			for( int k = 0; k < nDimensions; ++k )
+				  for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
 			    			{
 			      				s += pow( Jk(ig), -2. ) *  Ic_isok(ig) *
                                     CofFk( jcoor, l, ig )  * fe.phiDer( j, l, ig ) *
@@ -1135,7 +900,7 @@ void stiff_Jac_P1iso_NH_2term( Real coef,
 			    			}
                         }
 		    		}
-                    mat( i, j ) += 2./9. * coef * s;
+                    mat( i, j ) += coef * s;
                 }
 	    	}
         }
@@ -1144,25 +909,25 @@ void stiff_Jac_P1iso_NH_2term( Real coef,
 
 
 
-//! 3. Stiffness matrix : int { coef * J^(-2/3) (\nabla \delta : \nabla \v)}
+//! 3. Stiffness matrix : Int { coef * J^(-2/3) (\nabla \delta : \nabla \v)}
 void stiff_Jac_P1iso_NH_3term( Real 	     coef,
                                const KN<Real>   Jk,
                                MatrixElemental& elmat,
                                const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
     //! assembling diagonal block
     MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
-    for( int i = 0; i < fe.nbFEDof(); ++i )
+    for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
     {
-      	for( int j = 0; j < fe.nbFEDof(); ++j )
+      for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
         {
             s = 0.0;
-            for( int k = 0; k < nDimensions; ++k )
+            for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
 	    	{
-	      		for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+		  for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                 {
                     s += pow( Jk(ig), -2./3.) * fe.phiDer( i, k, ig ) *
                         fe.phiDer( j, k, ig ) * fe.weightDet( ig );
@@ -1172,7 +937,7 @@ void stiff_Jac_P1iso_NH_3term( Real 	     coef,
         }
     }
 
-    for ( int icoor = 0; icoor < nDimensions; ++icoor )
+    for ( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
         //! copy of diagonal block
       	MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
@@ -1182,7 +947,7 @@ void stiff_Jac_P1iso_NH_3term( Real 	     coef,
 
 
 
-//! 4. Stiffness matrix : int { -2/3 * coef * J^(-5/3) ( F : \nabla \delta ) ( CofF : \nabla \v ) }
+//! 4. Stiffness matrix : Int { -2/3 * coef * J^(-5/3) ( F : \nabla \delta ) ( CofF : \nabla \v ) }
 void stiff_Jac_P1iso_NH_4term( Real coef,
                                const KNMK<Real> CofFk,
                                const KNMK<Real> Fk,
@@ -1190,23 +955,23 @@ void stiff_Jac_P1iso_NH_4term( Real coef,
                                MatrixElemental& elmat,
                                const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for ( int i = 0; i < fe.nbFEDof(); ++i )
+            for ( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
 	    	{
-	      		for( int j = 0; j < fe.nbFEDof(); ++j )
+		  for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
                     s = 0.0;
-                    for( int l = 0; l < nDimensions; ++l )
+                    for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
 		    		{
-		      			for( int k = 0; k < nDimensions; ++k )
+				  for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0;ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0;ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                             {
 			    				s += pow( Jk(ig), -5./3. ) *
                                     Fk( icoor, k, ig )  * fe.phiDer( i, k, ig ) *
@@ -1214,7 +979,7 @@ void stiff_Jac_P1iso_NH_4term( Real coef,
                             }
                         }
 		    		}
-                    mat( i, j ) += - 2./3. * coef * s;
+                    mat( i, j ) += coef * s;
                 }
 	    	}
         }
@@ -1223,7 +988,7 @@ void stiff_Jac_P1iso_NH_4term( Real coef,
 
 
 
-//! 5. Stiffness matrix : int { 1/3 * coef * J^(-2) * Ic_iso * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
+//! 5. Stiffness matrix : Int { 1/3 * coef * J^(-2) * Ic_iso * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
 void stiff_Jac_P1iso_NH_5term( Real coef,
                                const KNMK<Real> CofFk,
                                const KN<Real> Jk ,
@@ -1231,23 +996,23 @@ void stiff_Jac_P1iso_NH_5term( Real coef,
                                MatrixElemental& elmat,
                                const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
 	    	{
-	      		for( int j = 0; j < fe.nbFEDof(); ++j )
+		  for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
                     s = 0.0;
-                    for( int l = 0; l < nDimensions; ++l )
+                    for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
 		    		{
-		      			for( int k = 0; k < nDimensions; ++k )
+				  for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0;ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0;ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
 			    			{
 			      				s += pow(Jk(ig), -2.) *  Ic_isok(ig) *
                                     CofFk( icoor , l , ig ) * fe.phiDer( j, l, ig ) *
@@ -1255,7 +1020,7 @@ void stiff_Jac_P1iso_NH_5term( Real coef,
 			    			}
                         }
 		    		}
-                    mat( i, j ) += 1./3. * s * coef;
+                    mat( i, j ) += s * coef;
                 }
 	    	}
         }
@@ -1272,7 +1037,7 @@ void stiff_Jac_P1iso_NH_5term( Real coef,
 
 //! Stiffness vector isochoric part ---------------------------------------------------------------
 
-// Source term : int { coef * exp(coefExp *(  Ic_iso -3 )) * ( J^(-2/3)* (F : \nabla v) - 1/3 * (Ic_iso / J) * (CofF : \nabla v) ) }
+// Source term : Int { coef * exp(coefExp *(  Ic_iso -3 )) * ( J^(-2/3)* (F : \nabla v) - 1/3 * (Ic_iso / J) * (CofF : \nabla v) ) }
 void  source_P1iso_Exp( Real             coef,
                         Real             coefExp,
                         const KNMK<Real> CofFk,
@@ -1282,17 +1047,18 @@ void  source_P1iso_Exp( Real             coef,
                         VectorElemental&         elvec,
                         const CurrentFE& fe )
 {
-    double s;
+    
+  Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+  for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
      	VectorElemental::vector_view vec =  elvec.block( icoor );
-      	for( int i = 0; i < fe.nbFEDof(); ++i )
+      	for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
         {
             s = 0.0;
-            for( int k = 0; k < nDimensions; ++k )
+            for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
             {
-                for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+	      for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                 {
 	    			s += exp( coefExp * ( Ic_isok( ig ) - 3.0 ) ) *
                         (pow( Jk( ig ), (-2.0/3.0) ) * Fk( icoor,  k, ig ) -
@@ -1311,7 +1077,7 @@ void  source_P1iso_Exp( Real             coef,
 
 //! Jacobian matrix isochoric part ----------------------------------------------------------------
 
-//! 1. Stiffness term : int { - 2/3 *coef * J^(-5/3) * exp( coefExp*( Ic_iso - 3) )* ( 1. + coefExp * Ic_iso ) * ( CofF : \nabla \delta ) ( F : \nabla \v ) }
+//! 1. Stiffness term : Int { - 2/3 *coef * J^(-5/3) * exp( coefExp*( Ic_iso - 3) )* ( 1. + coefExp * Ic_iso ) * ( CofF : \nabla \delta ) ( F : \nabla \v ) }
 void  stiff_Jac_P1iso_Exp_1term( Real             coef,
                                  Real             coefExp,
                                  const KNMK<Real> CofFk,
@@ -1321,23 +1087,23 @@ void  stiff_Jac_P1iso_Exp_1term( Real             coef,
                                  MatrixElemental&         elmat,
                                  const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
             {
-                for( int j = 0; j < fe.nbFEDof(); ++j )
+	      for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
 	    			s = 0.0;
-	    			for( int l = 0; l < nDimensions; ++l )
+	    			for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
                     {
-	      				for( int k = 0; k < nDimensions; ++k )
+		      for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0;ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0;ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                             {
                                 s += pow( Jk(ig), -5./3. ) * exp( coefExp*( Ic_isok(ig) - 3 ) ) *
                                     ( 1. + coefExp * Ic_isok(ig) ) *
@@ -1346,14 +1112,14 @@ void  stiff_Jac_P1iso_Exp_1term( Real             coef,
                             }
 	      				}
 	    			}
-	    			mat( i, j ) += -2.0/3.0 * coef * s;
+	    			mat( i, j ) +=  coef * s;
                 }
             }
       	}
     }
 }
 
-//! 2. Stiffness term : int { 2 * coef * coefExp * J^(-4/3) * exp( coefExp*( Ic_iso - 3) ) * ( F : \nabla \delta ) ( F : \nabla \v )}
+//! 2. Stiffness term : Int { 2 * coef * coefExp * J^(-4/3) * exp( coefExp*( Ic_iso - 3) ) * ( F : \nabla \delta ) ( F : \nabla \v )}
 void  stiff_Jac_P1iso_Exp_2term( Real             coef,
                                  Real             coefExp,
                                  const KNMK<Real> Fk,
@@ -1362,23 +1128,23 @@ void  stiff_Jac_P1iso_Exp_2term( Real             coef,
                                  MatrixElemental&         elmat,
                                  const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
             {
-                for( int j = 0; j < fe.nbFEDof(); ++j )
+	      for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
 	    			s = 0.0;
-	    			for( int l = 0; l < nDimensions; ++l )
+	    			for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
                     {
-	      				for( int k = 0; k < nDimensions; ++k )
+		      for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                             {
                                 s += pow( Jk(ig), -4/3 ) * exp( coefExp*(  Ic_isok(ig) -3  ) ) *
                                     Fk( jcoor, l, ig ) * fe.phiDer( j, l, ig ) *
@@ -1386,14 +1152,14 @@ void  stiff_Jac_P1iso_Exp_2term( Real             coef,
                             }
 	      				}
 	    			}
-	    			mat( i, j ) += 2 * coef * s;
+	    			mat( i, j ) += coef * s;
                 }
             }
       	}
     }
 }
 
-//! 3. Stiffness term: int { 2.0/9.0 * coef * J^-2 * Ic_iso * exp( coefExp*( Ic_iso - 3) ) * ( 1. + coefExp * Ic_iso )( CofF : \nabla \delta ) ( CofF : \nabla \v )}
+//! 3. Stiffness term: Int { 2.0/9.0 * coef * J^-2 * Ic_iso * exp( coefExp*( Ic_iso - 3) ) * ( 1. + coefExp * Ic_iso )( CofF : \nabla \delta ) ( CofF : \nabla \v )}
 void  stiff_Jac_P1iso_Exp_3term( Real coef, Real  coefExp,
                                  const KNMK<Real> CofFk,
                                  const KN<Real>   Jk,
@@ -1401,23 +1167,23 @@ void  stiff_Jac_P1iso_Exp_3term( Real coef, Real  coefExp,
                                  MatrixElemental&         elmat,
                                  const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
             {
-                for( int j = 0; j < fe.nbFEDof(); ++j )
+	      for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
 	    			s = 0.0;
-	    			for( int l = 0; l < nDimensions; ++l )
+	    			for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
                     {
-	      				for( int k = 0; k < nDimensions; ++k )
+		      for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0;ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0;ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                             {
                                 s += pow( Jk(ig), -2 ) * exp( coefExp*( Ic_isok(ig) - 3  ) ) *
                                     ( 1. + coefExp * Ic_isok(ig) )* Ic_isok(ig) *
@@ -1427,14 +1193,14 @@ void  stiff_Jac_P1iso_Exp_3term( Real coef, Real  coefExp,
                             }
 	      				}
 	    			}
-	    			mat( i, j ) += 2.0/9.0 * coef * s;
+	    			mat( i, j ) +=  coef * s;
                 }
             }
       	}
     }
 }
 
-//! 4. Stiffness term: int { -2.0/3.0 * coef * J^(-5/3) * exp( coefExp*( Ic_iso - 3) ) * ( 1. + coefExp * Ic_iso )( F : \nabla \delta ) ( CofF : \nabla \v ) }
+//! 4. Stiffness term: Int { -2.0/3.0 * coef * J^(-5/3) * exp( coefExp*( Ic_iso - 3) ) * ( 1. + coefExp * Ic_iso )( F : \nabla \delta ) ( CofF : \nabla \v ) }
 void  stiff_Jac_P1iso_Exp_4term( Real coef, Real  coefExp,
                                  const KNMK<Real> CofFk,
                                  const KNMK<Real> Fk,
@@ -1443,23 +1209,23 @@ void  stiff_Jac_P1iso_Exp_4term( Real coef, Real  coefExp,
                                  MatrixElemental&         elmat,
                                  const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
             {
-                for( int j = 0; j < fe.nbFEDof(); ++j )
+	      for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
 	    			s = 0.0;
-	    			for( int l = 0; l < nDimensions; ++l )
+	    			for( Int l = 0; l < (Int) nDimensions; ++l )
                     {
-	      				for( int k = 0; k < nDimensions; ++k )
+		      for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0;ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0;ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                             {
                                 s += pow( Jk(ig), -5./3. ) * exp( coefExp*( Ic_isok(ig) - 3  ) ) *
                                     ( 1. + coefExp * Ic_isok(ig) ) *
@@ -1468,14 +1234,14 @@ void  stiff_Jac_P1iso_Exp_4term( Real coef, Real  coefExp,
                             }
 	      				}
 	    			}
-	    			mat( i, j ) += -2.0/3.0 *coef * s;
+	    			mat( i, j ) += coef * s;
                 }
             }
       	}
     }
 }
 
-//! 5. Stiffness term : int {coef * J^(-2/3) * exp( coefExp*( Ic_iso - 3)) (\nabla \delta: \nabla \v)}
+//! 5. Stiffness term : Int {coef * J^(-2/3) * exp( coefExp*( Ic_iso - 3)) (\nabla \delta: \nabla \v)}
 void  stiff_Jac_P1iso_Exp_5term( Real             coef,
                                  Real             coefExp,
                                  const KN<Real>   Jk,
@@ -1483,17 +1249,17 @@ void  stiff_Jac_P1iso_Exp_5term( Real             coef,
                                  MatrixElemental&         elmat,
                                  const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
     MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
-    for( int i = 0; i < fe.nbFEDof(); ++i )
+    for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
     {
-        for( int j = 0; j < fe.nbFEDof(); ++j )
+      for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
         {
 	    	s = 0.0;
-	    	for( int k = 0; k < nDimensions; ++k )
+	    	for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
             {
-	      		for( int ig = 0; ig < fe.nbQuadPt(); ++ig )
+	      for( Int ig = 0; ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                 {
                     s += pow(Jk(ig), -2/3) * exp( coefExp*( Ic_isok(ig) -3  ) ) *
                         fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
@@ -1503,7 +1269,7 @@ void  stiff_Jac_P1iso_Exp_5term( Real             coef,
         }
     }
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
         //! copy of diagonal block
         MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
@@ -1511,7 +1277,7 @@ void  stiff_Jac_P1iso_Exp_5term( Real             coef,
     }
 }
 
-//! 6. Stiffness term : int { 1.0/3.0 * coef * J^(-2) * Ic_iso *  exp(coefExp( Ic_iso - 3)) * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
+//! 6. Stiffness term : Int { 1.0/3.0 * coef * J^(-2) * Ic_iso *  exp(coefExp( Ic_iso - 3)) * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
 void  stiff_Jac_P1iso_Exp_6term( Real             coef,
                                  Real             coefExp,
                                  const KNMK<Real> CofFk,
@@ -1520,23 +1286,23 @@ void  stiff_Jac_P1iso_Exp_6term( Real             coef,
                                  MatrixElemental&         elmat,
                                  const CurrentFE& fe )
 {
-    double s;
+    Real s;
 
-    for( int icoor = 0; icoor < nDimensions; ++icoor )
+    for( Int icoor = 0; icoor < static_cast<Int> (nDimensions); ++icoor )
     {
-      	for( int jcoor = 0; jcoor < nDimensions; ++jcoor )
+      for( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
-            for( int i = 0; i < fe.nbFEDof(); ++i )
+            for( Int i = 0; i < static_cast<Int> (fe.nbFEDof()); ++i )
             {
-                for( int j = 0; j < fe.nbFEDof(); ++j )
+	      for( Int j = 0; j < static_cast<Int> (fe.nbFEDof()); ++j )
                 {
                     s = 0.0;
-	    			for( int l = 0; l < nDimensions; ++l )
+		    for( Int l = 0; l < static_cast<Int> (nDimensions); ++l )
                     {
-	      				for( int k = 0; k < nDimensions; ++k )
+		      for( Int k = 0; k < static_cast<Int> (nDimensions); ++k )
                         {
-                            for( int ig = 0;ig < fe.nbQuadPt(); ++ig )
+			  for( Int ig = 0;ig < static_cast<Int> (fe.nbQuadPt()); ++ig )
                             {
                                 s += pow(Jk(ig), -2.) * Ic_isok(ig) *
                                     exp( coefExp*( Ic_isok(ig) -3  ) ) *
@@ -1545,7 +1311,7 @@ void  stiff_Jac_P1iso_Exp_6term( Real             coef,
                             }
 	      				}
 	    			}
-	    			mat( i, j ) += 1.0/3.0 * s * coef;
+	    			mat( i, j ) +=  s * coef;
                 }
             }
       	}

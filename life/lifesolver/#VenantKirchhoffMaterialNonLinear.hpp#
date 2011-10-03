@@ -62,10 +62,8 @@ class VenantKirchhoffMaterialNonLinear :
     typedef typename super::matrix_Type              matrix_Type;
 
     typedef typename super::matrixPtr_Type           matrixPtr_Type;
-    typedef typename super::dataPtr_Type             dataPtr_Type;
-    typedef typename super::displayerPtr_Type        displayerPtr_Type;
-//     typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
-//     typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
+    typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
+    typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
 
     typedef KNMK<Real> 				     KNMK_Type;
     typedef boost::shared_ptr<KNMK_Type>	     KNMKPtr_Type;
@@ -91,7 +89,7 @@ class VenantKirchhoffMaterialNonLinear :
   */
   void setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 	     const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-             const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
+	     const UInt offset
 	     );
 
   //! Compute the linear part Stiffness matrix in StructuralSolver::buildSystem()
@@ -107,8 +105,8 @@ class VenantKirchhoffMaterialNonLinear :
     \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
   */
   void updateJacobianMatrix( const vector_Type& disp,
-                             const dataPtr_Type& dataMaterial,
-                             const displayerPtr_Type& displayer);
+			     const dataPtr_Type& dataMaterial,
+			     const displayerPtr_Type& displayer);
   //! Updates the nonlinear terms in the Jacobian matrix
   /*!
     \param stiff: stiffness matrix provided from outside
@@ -121,11 +119,7 @@ class VenantKirchhoffMaterialNonLinear :
 				      const dataPtr_Type& dataMaterial,
 				      const displayerPtr_Type& displayer);
 
-//<<<<<<< HEAD
-    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
-//=======
     //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
-//>>>>>>> 20110728_ExponentialNeohookean
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
@@ -169,10 +163,10 @@ VenantKirchhoffMaterialNonLinear<Mesh>::~VenantKirchhoffMaterialNonLinear()
 template <typename Mesh>
 void VenantKirchhoffMaterialNonLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                                    const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                                                   const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
+                                                   const UInt offset
                )
 {
-    super::setup(dFESpace,monolithicMap,offset, dataMaterial, displayer);
+    super::setup(dFESpace,monolithicMap,offset);
     this->M_stiff.reset               (new matrix_Type(*this->M_localMap));
     M_gradientLocalDisplacement.reset ( new KNMK_Type( nDimensions, nDimensions, dFESpace->fe().nbQuadPt() ) );
 }
@@ -194,9 +188,11 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateJacobianMatrix(const vector_T
 
     *this->M_jacobian += *this->M_linearStiff;
 
-    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint(" \t*********************************  ");
+    std::cout << std::endl;
     updateNonLinearJacobianTerms(this->M_jacobian,disp,dataMaterial,displayer);
-    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint(" *********************************  ");
+    std::cout << std::endl;
     this->M_jacobian->globalAssemble();
 }
 
@@ -310,9 +306,11 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeStiffness( const vector_Type
 
     this->M_stiff.reset(new matrix_Type(*this->M_localMap));
 
-    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint(" \t*********************************  ");
+    std::cout << std::endl;
     computeNonLinearMatrix(this->M_stiff,disp,factor,dataMaterial,displayer);    
-    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint(" *********************************  ");
+    std::cout << std::endl;
 
     *this->M_stiff += *this->M_linearStiff;
 
@@ -326,7 +324,8 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
 								    const dataPtr_Type& dataMaterial,
 								    const displayerPtr_Type& displayer)
 {
-    displayer->leaderPrint("   NonLin S-  Updating non linear terms in the Stiffness Matrix (Venant-Kirchhoff)");
+    displayer->leaderPrint("   NonLin S-  Updating non linear terms in the Stiffness Matrix");
+    std::cout << std::endl;
 
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
     UInt dim = this->M_FESpace->dim();
