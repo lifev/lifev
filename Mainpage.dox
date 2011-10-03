@@ -84,7 +84,9 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
 
 
 
-        <li> <b>VenantKirchhoff Venant-Kirchhoff solver:</b> [TODO: 2-3 lines description by Paolo Tricerri]
+        <li> <b>VenantKirchhoff Venant-Kirchhoff solver:</b> The material law  model available in LifeV is the linear elastic model. This model is the linear appoximaton of the nonlinear St.         Venant-Kirchhoff model. 
+	 This model is implemented in the Venant-Kirchhoff solver class. It can be used both for purely structural dynamic problems (traction of a cube) or for coupled or multiscale problems.
+	  In fact, it has been englobed in the FSI (both segregated and monolithic) and in the Multiscale frameworks. At the moment, in the LifeV developers community there is a big effort to implement a general interface (i.e. a general solver) for solving structural mechanic problems. In particular, the efforts are focused on the implementation of other material laws and to englobe the general interface in the FSI and Multiscale frameworks.
 
 
 
