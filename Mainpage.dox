@@ -20,13 +20,13 @@ electrocardiology. Even though this library is a research code oriented to the d
 it is intended to be an effective tool for solving complex ``real-life'' engineering problems. One of the main field of applications (although not the only one)
 is cardiovascular mathematics.
 
-The code is distributed under the LGPL license and is dowloadable on {\tt http://cmcsforge.epfl.ch}.
+The code is distributed under the LGPL license and is dowloadable on <a href="http://cmcsforge.epfl.ch">CMCSFORGE</a>.
 
 There are two distributed version of LifeV, one is parallel, for complex three dimensional engineering problems, the other is serial,
 for two and three dimension problems (prototyping, testing). These pages
 review the parallel version.
 
-For other details, see {\tt www.lifev.org}.
+For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
 
 
     <BR> <BR>
@@ -93,7 +93,11 @@ For other details, see {\tt www.lifev.org}.
     In the following we briefly describe some of the main tools inside the library.
 
     <ul>
-        <li> <b>Importers and Exporters:</b> LifeV can input mesh files stored in some of the most common formats encountered in this field: GMSH, Inria, Netgen, mesh++. For postprocessing, it's possible to save data in the following formats: Ensight, HDF5, VTK, all useable with Paraview, for creating high quality visualizations. LifeV is designed with large parallel simulations in mind, which are usually performed on high performance computing hardware. In many such cases, the low amount of memory per compute node requires a change in the workflow. LifeV allows to perform the mesh partitioning phase offline, on a workstation where memory isn't an issue and use this data later, during online simulations on modern supercomputers.
+        <li> <b>Importers and Exporters:</b> LifeV can input mesh files stored in some of the most common formats encountered in this field: GMSH, Inria, Netgen, mesh++.
+        For postprocessing, it's possible to save data in the following formats: Ensight, HDF5, VTK, all usable with ParaView, for creating high quality visualizations.
+        LifeV is designed with large parallel simulations in mind, which are usually performed on high performance computing hardware.
+        In many such cases, the low amount of memory per compute node requires a change in the workflow.
+        LifeV allows to perform the mesh partitioning phase offline, on a workstation where memory isn't an issue and use this data later, during online simulations on modern supercomputers.
 
         <li> <b>Grammar parser for algebraic expression:</b> the class \c Parser provides a general interface to parse any simple algebraic function given as a string.
         This tool is based on \c Spirit which is a set of C++ libraries for parsing and output generation implemented as Domain Specific Embedded Languages (DSEL)
@@ -142,60 +146,64 @@ For other details, see {\tt www.lifev.org}.
         <li> Emory University (Sc. Comp), U.S.A.
     </ul>
 
-    The following people have contributed code to LifeV:
+    The following people are active developers:
     <ul>
         <li> Alessandro Melani, MOX - Politecnico di Milano
         <li> Alessandro Veneziani, Sc. Comp - Emory University
         <li> Alessio Fumagalli, MOX - Politecnico di Milano
-        <li> Alexandra Moura
-        <li> Alexis Aposporidis
-        <li> Andrea Manzoni, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Andreas Fischle
         <li> Antonio Cervone, MOX - Politecnico di Milano
-        <li> Carlo de Falco
-        <li> Christian Vergara, MOX - Politecnico di Milano
-        <li> Christoph Winkelmann, formerly at CMCS, École Polytechnique Fédérale de Lausanne
-        <li> Christophe Prud'homme, formerly at CMCS, École Polytechnique Fédérale de Lausanne
         <li> Claudia Colciago, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Christian Vergara, MOX - Politecnico di Milano
         <li> Cristiano Malossi, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Fabio Nobile, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Federico Bonelli
         <li> Gianmarco Mengaldo, MOX - Politecnico di Milano
-        <li> Gilles Fourestey, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Gwenol Grandperrin, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Jean Bonnemain, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Laura Cattaneo, MOX - Politecnico di Milano
-        <li> Laura Iapichino, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Lorenzo Tamellini, MOX - Politecnico di Milano
         <li> Luca Bertagna, MOX - Politecnico di Milano
         <li> Luca Formaggia, MOX - Politecnico di Milano
-        <li> Luca Gerardo Giorda
         <li> Lucia Mirabella, Sc. Comp - Emory University
-        <li> Marco Discacciati, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Mariarita de Luca
         <li> Marta D'Elia, Sc. Comp - Emory University
-        <li> Matteo Astorino, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Matteo Lesinigo, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Matteo Pozzoli, MOX - Politecnico di Milano
         <li> Mauro Perego, Sc. Comp - Emory University
         <li> Michel Kern, ESTIME - INRIA
-        <li> Nicola Parolini
         <li> Nur Fadel, MOX - Politecnico di Milano
         <li> Paolo Crosetto, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Paolo Ferrandi, MOX - Politecnico di Milano
         <li> Radu Popescu, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Ricardo Ruiz Baier, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Samuel Quinodoz, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Sara Minisini, MOX - Politecnico di Milano
-        <li> Simone Cassani
         <li> Simone Deparis, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Simone Pezzuto, MOX - Politecnico di Milano
         <li> Simone Rossi, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Susanna Carcano, MOX - Politecnico di Milano
         <li> Tiziano Passerini, Sc. Comp - Emory University
         <li> Toni Lassila, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Tricerri Paolo, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Umberto Emanuele Villa, Sc. Comp - Emory University
+    </ul>
+
+    The following people are former developers:
+    <ul>
+        <li> Alexandra Moura
+        <li> Alexis Aposporidis
+        <li> Andrea Manzoni, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Andreas Fischle
+        <li> Carlo de Falco
+        <li> Christoph Winkelmann, formerly at CMCS, École Polytechnique Fédérale de Lausanne
+        <li> Christophe Prud'homme, formerly at CMCS, École Polytechnique Fédérale de Lausanne
+        <li> Fabio Nobile, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Federico Bonelli
+        <li> Gilles Fourestey, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Laura Iapichino, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Lorenzo Tamellini, MOX - Politecnico di Milano
+        <li> Luca Gerardo Giorda
+        <li> Marco Discacciati, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Mariarita de Luca
+        <li> Matteo Astorino, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Matteo Lesinigo, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Nicola Parolini
+        <li> Paolo Ferrandi, MOX - Politecnico di Milano
+        <li> Sara Minisini, MOX - Politecnico di Milano
+        <li> Simone Cassani
+        <li> Susanna Carcano, MOX - Politecnico di Milano
         <li> Zhen Wang, Sc. Comp - Emory University
     </ul>
 
