@@ -1266,6 +1266,12 @@ solveJacobian( vector_Type&           step,
     chrono.stop();
 }
 
+template<typename Mesh, typename SolverType>
+void StructuralSolver<Mesh, SolverType>::Apply( const vector_Type& sol, vector_Type& res) const
+{
+    M_material->Apply(sol, res);
+    res += (*M_mass)*sol;
+}
 
 template<typename Mesh, typename SolverType>
 void
