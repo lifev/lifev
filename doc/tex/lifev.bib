@@ -1,8 +1,19 @@
+%% usage: bibtex2html -a -suffix "" lifev.bib
+%% alphabetical order and without the .html extension
 
 %%
 %% FSI
 %%
 
+@ARTICLE{DeparisDiscacciati2006,
+  AUTHOR =       "Simone Deparis and Marco Discacciati and Gilles Fourestey and Alfio Quarteroni",
+  TITLE =        "Fluid-structure algorithms based on Steklov-Poincar&eacute; operators",
+  JOURNAL =      "Comput. Methods Appl. Mech. Engrg.",
+  YEAR =         "2006",
+  NUMBER =       "41-43",
+  PAGES =        "5797--5812",
+  VOLUME =       "195"
+}
 
 @article{CrosettoEtAl2009,
 title = {Parallel Algorithms for Fluid-Structure Interaction Problems in Haemodynamics},
@@ -15,6 +26,7 @@ coden = {SJOCE3},
 volume = {33},
 number = {4},
 pages = {1598-1622},
+journal = {SIAM J. on Scientific Computing},
 author = {Paolo Crosetto and  Simone Deparis and  Gilles Fourestey and Alfio Quarteroni},
 url = {http://dx.doi.org/doi/10.1137/090772836},
 }
@@ -23,16 +35,14 @@ url = {http://dx.doi.org/doi/10.1137/090772836},
 AUTHOR = {Reymond, Philippe and Crosetto, Paolo and Deparis, Simone and Quarteroni, Alfio and Stergiopulos, Nikos},
 TITLE = {Physiological aspects of fluid structure interaction and their effects on blood flow in a person-specific aorta.},
 year  = {2011},
-note = 	 {Submitted}
+note =      {Submitted}
 }
 
-
-@Unpublished{ReymondCrosettoEtAl2010,
-AUTHOR = {Nobile, Pozzoli and Vergara},
-TITLE = {Time accurate partitioned algorithms for the solution of
-fluid-structure interaction problems in haemodynamics},
+@Unpublished{NobilePozzoliVergara2010,
+AUTHOR = {Nobile, Fabio and Pozzoli, Matteo and Vergara, Christian},
+TITLE = {Time accurate partitioned algorithms for the solution of fluid-structure interaction problems in haemodynamics},
 year  = {2011},
-note = {Submitted}
+note = {Submitted},
 url  = "http://mox.polimi.it/it/progetti/pubblicazioni/quaderni/30-2011.pdf"
 }
 
@@ -52,7 +62,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 
 @incollection{MarchandiseCrosettoEtAl2011,
   title = {Quality open source mesh generation for cardiovascular flow simulations},
-  author = {Marchandise, E. and Crosetto, P. and 	Geuzaine, C. and Remacle, J.-F. and Sauvage, E.},
+  author = {Marchandise, E. and Crosetto, P. and     Geuzaine, C. and Remacle, J.-F. and Sauvage, E.},
   year = 2011,
   booktitle = {Modelling Physiological Flow},
   series = {Springer Series on Modeling, Simulation and Applications},
@@ -60,7 +70,6 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
   publisher = {Springer-Verlag},
   note = {submitted}
 }
-
 
 @PhDThesis{CrosettoThesis2011,
    address     = {Lausanne},
@@ -76,8 +85,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 }
 
 @article {deparisEtAl:steklov,
-    AUTHOR = {Deparis, Simone and Discacciati, Marco and Fourestey, Gilles
-              and Quarteroni, Alfio},
+    AUTHOR = {Deparis, Simone and Discacciati, Marco and Fourestey, Gilles and Quarteroni, Alfio},
      TITLE = {Fluid-structure algorithms based on {S}teklov-{P}oincar\'e
               operators},
    JOURNAL = {Comput. Methods Appl. Mech. Engrg.},
@@ -90,32 +98,51 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
      CODEN = {CMMECC},
 }
 
-@ARTICLE{FerMou04:NewtonFS,
-  AUTHOR       = "M.A. Fern\'andez and M. Moubachir",
-  TITLE        = "A {N}ewton method using exact jacobians for solving fluid-structure coupling",
-  JOURNAL      = "Computers and Structures",
-  YEAR         = 2005,
-  VOLUME       = 83,
-  NUMBER       = {2-3},
-  PAGES        = "127-142"
+%%
+%% GEOMETRICAL MULTISCALE
+%%
+
+@ARTICLE{Malossi2011Algorithms,
+  AUTHOR =       "A.C.I. Malossi and P.J. Blanco and S. Deparis and A. Quarteroni",
+  TITLE =        "Algorithms for the partitioned solution of weakly coupled fluid models for cardiovascular flows",
+  JOURNAL =      "Accepted on Int. J. Num. Meth. Biomed. Engng.",
+  YEAR =         "2011",
+  URL =          "http://onlinelibrary.wiley.com/doi/10.1002/cnm.1457/abstract",
+  doi =          "10.1002/cnm.1457"
 }
 
+@UNPUBLISHED{Malossi2011Algorithms1D,
+  AUTHOR =       "A.C.I. Malossi and P.J. Blanco and S. Deparis",
+  TITLE =        "A two-level time step technique for the partitioned solution of one-dimensional arterial networks",
+  NOTE =         "In preparation",
+  YEAR =         "2011"
+}
 
+%%
+%% LifeV
+%%
 
 @Misc{02:_lifev_projec,
-  key =		 {lifev},
-  author =	 {L. Formaggia  and M. Fernandez and A. Gauthier and J.F. Gerbeau and C. Prud'homme and Alessandro Veneziani},
-  title =	 {The {L}ife{V} {P}roject},
+  author =     {L. Formaggia  and M. Fernandez and A. Gauthier and J.F. Gerbeau and C. Prud'homme and Alessandro Veneziani},
+  title =      {The {L}ife{V} {P}roject},
   howpublished = {Web},
-  year =	 {2002-2004},
-  note =	 {\url{http://www.lifev.org}}
+  year =       {2002-2004},
+  URL =        "http://www.lifev.org",
+  key =        {lifev}
 }
 
 @Manual{formaggia:_lifev_dev_manual,
-  title = 	 {LifeV Developer Manual},
-  key =		 {lifev-dev},
-  author =	 {L. Formaggia  and J.F. Gerbeau and C. Prud'homme},
+  title =      {LifeV Developer Manual},
+  author =     {L. Formaggia  and J.F. Gerbeau and C. Prud'homme},
   organization = {The {L}ife{V} {P}roject},
-  note =	 {\url{http://www.lifev.org/documentation/lifev-dev.pdf}}
+  URL =        "http://www.lifev.org/documentation/LifeV-Developer-Manual.pdf",
+  key =        {lifev-dev}
 }
 
+@MANUAL{LifeVGuidelines,
+  title =      "Life{V} {D}evelopment {G}uidelines",
+  author =     "A.C.I. Malossi and S. Deparis",
+  organization = "The {L}ife{V} {P}roject",
+  URL =        "http://www.lifev.org/documentation/LifeV_Development_Guidelines.pdf",
+  key =        "lifev-coding-guidelines"
+}

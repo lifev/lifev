@@ -945,7 +945,7 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix
 
     for ( Int n = 0; n < nbRows; ++n )
     {
-        delete values[n];
+        delete[] values[n];
     }
 
     M_rotationMatrixPtr->globalAssemble();
