@@ -64,7 +64,7 @@
 namespace LifeV
 {
 
-enum MapEpetraType {Unique = 0, Repeated};
+enum MapEpetraType {Unique = 0, Repeated, Ghost};
 
 
 //! MapEpetra - Wrapper for Epetra_Map
@@ -251,6 +251,10 @@ public:
     //! This method return true if both the unique map and the repeated map are identical
     bool mapsAreSimilar( MapEpetra const& epetraMap ) const;
 
+    //! Generate ghost map
+    template<typename MeshType>
+    void createGhostMap( MeshPartitioner<MeshType> const & meshPart );
+
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
 
@@ -334,6 +338,8 @@ private:
 
     map_ptrtype        M_repeatedMapEpetra;
     map_ptrtype        M_uniqueMapEpetra;
+    map_ptrtype        M_ghostMapEpetra;
+    bool              M_ghostMapCreated;
     exporter_ptrtype   M_exporter;
     importer_ptrtype   M_importer;
     comm_ptrtype       M_commPtr;
@@ -351,6 +357,8 @@ MapEpetra( const ReferenceFE&               refFE,
            const comm_ptrtype&        commPtr ):
         M_repeatedMapEpetra(),
         M_uniqueMapEpetra(),
+        M_ghostMapEpetra(),
+        M_ghostMapCreated( false ),
         M_exporter(),
         M_importer(),
         M_commPtr( commPtr )
@@ -375,6 +383,8 @@ MapEpetra( const ReferenceFE&        refFE,
            const comm_ptrtype& commPtr ):
         M_repeatedMapEpetra(),
         M_uniqueMapEpetra(),
+        M_ghostMapEpetra(),
+        M_ghostMapCreated( false ),
         M_exporter(),
         M_importer(),
         M_commPtr( commPtr )
@@ -428,9 +438,36 @@ MapEpetra( const ReferenceFE&        refFE,
 
 }
 
+template <typename MeshType>
+void MapEpetra::createGhostMap( MeshPartitioner<MeshType> const & meshPart )
+{
+    // use a set to avoid duplicates
+    std::set<Int> myGlobalElementsSet;
+    MeshType const & mesh ( meshPart.meshPartition() ); 
 
+    // iterate on mesh points
+    for ( UInt k = 0; k < mesh.numPoints(); k++ )
+    {
+        // iterate on each node neighborhood
+        for( UInt i = 0; i < mesh.point( k ).nodeNeighbors().size(); i++ )
+        {
+            myGlobalElementsSet.insert( mesh.point( k ).nodeNeighbors()[ i ] );
+        }
+    }
+    
+    std::vector<Int> myGlobalElements( myGlobalElementsSet.begin(), myGlobalElementsSet.end() ); 
+
+    // generate map
+    createMap( -1,
+               myGlobalElements.size(),
+               &myGlobalElements[0],
+               *M_commPtr );
+
+    // set bool control
+    M_ghostMapCreated = true;
 }
 
+}
 
 #endif
 
