@@ -599,7 +599,7 @@ hyperbolic::run()
     bool isLastTimeStep( false );
 
     // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-    for (; dataHyperbolic.dataTime()->canAdvance() && !isLastTimeStep; dataHyperbolic.dataTime()->updateTime() )
+    while ( dataHyperbolic.dataTime()->canAdvance() && !isLastTimeStep )
     {
 
         // Start chronoTimeStep for measure the time for the current time step
@@ -622,6 +622,9 @@ hyperbolic::run()
 
         // Set the last time step for the simulation.
         dataHyperbolic.dataTime()->setTimeStep( timeStep );
+
+        // Update time
+        dataHyperbolic.dataTime()->updateTime();
 
         // The leader process prints the temporal data.
         if ( hyperbolicSolver.getDisplayer().isLeader() )
