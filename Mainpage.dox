@@ -35,9 +35,14 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
 
     <BR>
     \subsection boundaryConditions Boundary Conditions
-    [TODO: 3-4 lines description by Mauro Perego]
-
-    Finally, through the \c BCInterface class is possible to set all the boundary conditions from data files.
+    LifeV provides classes and methods to prescribe the most common boundary conditions (<i>Dirichlet, Neumann, Robin</i>). 
+    Normal and tangential conditions are also provided for vectorial (3D) fields. In addition, a few boundary conditions specific of flow probems are present.
+    Boundary conditions are applied to the system matrix and the right-hand side after the assembling phase.
+    The parameters of the boundary condition can be defined as functions of the space and time, or as finite element fields. 
+    The regions where to apply boundary conditions are determined by markers associated to the boundary faces of the mesh.
+    Boundary conditions settings are stored in the \c BCHandler class, whereas the file BCManage.hpp contains the routines used to apply the conditions.
+    The \c BCInterface class contains tools to set the boundary conditions directly from data files.
+    
 
 
     <BR>
@@ -170,7 +175,7 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
         <li> Lucia Mirabella, Sc. Comp - Emory University
         <li> Marta D'Elia, Sc. Comp - Emory University
         <li> Matteo Pozzoli, MOX - Politecnico di Milano
-        <li> Mauro Perego, Sc. Comp - Emory University
+        <li> Mauro Perego, Sc. Comp - Florida State University
         <li> Michel Kern, ESTIME - INRIA
         <li> Nur Fadel, MOX - Politecnico di Milano
         <li> Paolo Crosetto, CMCS - École Polytechnique Fédérale de Lausanne
