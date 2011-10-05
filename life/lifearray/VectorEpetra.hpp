@@ -401,7 +401,7 @@ public:
      * It returns true if the element is present in the vector
      * @param row The element to test
      */
-    bool isPresent(const UInt row) const;
+    bool isGlobalIDPresent(const UInt row) const;
 
     //! Assemble the vector
     /*!
