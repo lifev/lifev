@@ -187,32 +187,23 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
             {
                 M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
                 M_ALETimeAdvance->shiftRight(*meshDisp);
+                M_ALETimeAdvance->extrapolation(*mmRep);
             }
             else
             {
                 M_ALETimeAdvance->setSolution(*meshDisp);
+                *mmRep = *meshDisp;
             }
             *meshVel = M_ALETimeAdvance->velocity();
             //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
             //mmRep.reset(new vector_Type(M_mmFESpace->map(), Repeated));// just to repeat dispDiff. No way witout copying?
-            M_ALETimeAdvance->extrapolation(*mmRep);
-
             moveMesh(*mmRep);// re-initialize the mesh points
             //*meshDispDiff -= *meshDispOld;//relative displacement
         }
 
-        //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
-	//	vector_Type mmRep(	M_ALETimeAdvance->extrapolation(), Repeated);
-	// Matteo
-	//   vector_Type mmRep(meshDisp->map(), Repeated);// just to repeat dispDiff. No way witout copying?
-        //mmRep.reset(new vector_Type(M_mmFESpace->map(), Repeated));// just to repeat dispDiff. No way witout copying?
-        //M_ALETimeAdvance->extrapolation(*mmRep);
-        //moveMesh(*mmRep);// re-initialize the mesh points
-
         *mmRep = *meshVel*(-1.);
 
         interpolateVelocity(*mmRep, *M_beta);
-        //            *M_beta *= -alpha; //if the HE solution is scaled!
 
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
         if (!M_convectiveTermDer)

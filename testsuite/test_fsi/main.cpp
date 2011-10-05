@@ -538,7 +538,7 @@ public:
                 outFlow.setFunction(bc_adaptor(*M_fsi->FSIOper()));
                 M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlow);
 	      */
-	      
+
 	      BCFunctionBase outFlowFace;
               BCFunctionBase outFlowBrain;
 
@@ -547,7 +547,7 @@ public:
 
 	      outFlowBrain.setFunction(bc_adaptorBrain(*M_fsi->FSIOper()));
 	      M_fsi->FSIOper()->BCh_fluid()->modifyBC(4, outFlowBrain);
-	      
+
                 //std::cout << "  F-  Pressure = " << outFlow(0., 0., 0., 0., 3) << std::endl;
             }
 
@@ -558,21 +558,21 @@ public:
                 if ( isFluidLeader )
                     ofile << M_data->dataFluid()->dataTime()->time() << " ";
 
-                flux = M_fsi->FSIOper()->fluid().flux(2);
-                if ( isFluidLeader )
-                    ofile << flux << " ";
+//                 flux = M_fsi->FSIOper()->fluid().flux(2);
+//                 if ( isFluidLeader )
+//                     ofile << flux << " ";
 
-                flux = M_fsi->FSIOper()->fluid().flux(3);
-                if ( isFluidLeader )
-                    ofile << flux << " ";
+//                 flux = M_fsi->FSIOper()->fluid().flux(3);
+//                 if ( isFluidLeader )
+//                     ofile << flux << " ";
 
-                flux = M_fsi->FSIOper()->fluid().pressure(2);
-                if ( isFluidLeader )
-                    ofile << flux << " ";
+//                 flux = M_fsi->FSIOper()->fluid().pressure(2);
+//                 if ( isFluidLeader )
+//                     ofile << flux << " ";
 
-                flux = M_fsi->FSIOper()->fluid().pressure(3);
-                if ( isFluidLeader )
-                    ofile << flux << " " << std::endl;
+//                 flux = M_fsi->FSIOper()->fluid().pressure(3);
+//                 if ( isFluidLeader )
+//                     ofile << flux << " " << std::endl;
 
                 *M_velAndPressure = *M_fsi->FSIOper()->fluid().solution();
                 *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();

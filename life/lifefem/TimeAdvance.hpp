@@ -611,12 +611,12 @@ TimeAdvance<feVectorType>::singleElement( const UInt& i) const
 
 template<typename feVectorType>
 feVectorType
-TimeAdvance<feVectorType>::velocity( const feVectorType& u)
+TimeAdvance<feVectorType>::velocity( const feVectorType& u )
 {  // you should replace any call to vnk() with a call to vnk()
-    feVectorType velocity( u );
-    velocity  *= M_alpha[ 0 ] /M_timeStep;
-    velocity   -= (*this->M_rhsContribution[ 0 ]);
-    return velocity;
+    feVectorType vel( u );
+    vel  *= M_alpha[ 0 ] /M_timeStep;
+    vel  -= (*this->M_rhsContribution[ 0 ]);
+    return vel;
 }
 
 template<typename feVectorType>

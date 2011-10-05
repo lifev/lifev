@@ -1,10 +1,10 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
-#      Author(s): 
+#      Author(s):
 #           Date: 00-00-0000
 #  License Terms: GNU LGPL
 #
@@ -75,7 +75,7 @@ viscosity = 0.035              # viscosity
 initialtime		= 0.
 endtime			= 0.05
 timestep		= 0.001
-method                  = BDF
+method          = BDF
 BDF_order		= 1
 
 
@@ -222,7 +222,7 @@ gamma           = 0.5
 
 [../space_discretization]
 mesh_dir  = ./Mesh/  # the directory where the mesh file is
-mesh_file = vessel20.mesh #carotid_solid.mesh #vessel_curve20.mesh  # mesh 
+mesh_file = vessel20.mesh #carotid_solid.mesh #vessel_curve20.mesh  # mesh
 order     = P1
 
 [../miscellaneous]
@@ -277,7 +277,8 @@ solvertype      = Amesos_Umfpack
 
 [../time_discretization]
 timestep        = 0.001
-method          = Newmark
+method          = BDF
+BDF_order		= 2
 theta           = 0.25
 gamma           = 0.5
 

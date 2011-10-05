@@ -132,20 +132,23 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
 
         this->moveMesh(meshDisp);//initialize the mesh position with the total displacement
 
-        //meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
-        //meshDisp *= -alpha; //mesh velocity w
-        this->interpolateVelocity(M_ALETimeAdvance->velocity( meshDisp ), *this->M_beta);//first order extrapolation of meshDisp (to modify)
-        //*M_beta *= -1.;
-//         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
-//         fluid->subset(*M_un, (UInt)0);
+        if( iter==0 )
+        {
+            M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
+            M_ALETimeAdvance->shiftRight(meshDisp);
+            M_ALETimeAdvance->extrapolation(meshDisp);//closer initial solution
+        }
+        else
+        {
+            M_ALETimeAdvance->setSolution(meshDisp);
+        }
 
-        // Only possibility: convective explicit, extrapolations for both u and w.
-        vector_Type uExtrap(M_uFESpace->map(), Repeated );
-        M_fluidTimeAdvance->extrapolation(uExtrap);
-        *this->M_beta += uExtrap;
-
-        //*this->M_beta += M_fluidTimeAdvance->extrapolation();/*M_un*/;//relative velocity beta=un-w
-        //M_monolithicMatrix.reset(new matrix_Type(*M_monolithicMap));
+        this->moveMesh(meshDisp);//initialize the mesh position with the total displacement
+        vector_Type vel ( this->M_ALETimeAdvance->velocity( ), Repeated );
+        vector_Type fluid(this->M_uFESpace->map());
+        interpolateVelocity( vel, fluid );
+        M_fluidTimeAdvance->extrapolation(*M_beta);//explicit
+        *M_beta -= fluid;//implicit
 
         assembleSolidBlock(iter, M_un);
         assembleFluidBlock(iter, M_un);

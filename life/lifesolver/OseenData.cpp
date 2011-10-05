@@ -196,9 +196,8 @@ OseenData::setup( const GetPot& dataFile, const std::string& section )
                                           dataFile( ( section + "/space_discretization/stabilization" ).data(), "none") ) );
 
     // Semi-implicit and shape derivatives
-    M_semiImplicit     = dataFile( ( section + "/semiImplicit" ).data(), false ) ;
     M_shapeDerivatives = dataFile( ( section + "/useShapeDerivatives" ).data(), false ) ;
-    setSemiImplicit( M_semiImplicit );
+    setSemiImplicit( dataFile( ( section + "/semiImplicit" ).data(), false ) );
 
     // Mean values per section
     M_computeMeanValuesPerSection = dataFile( ( section + "/valuespersection/computeMeanValuesPerSection" ).data(), 0 );

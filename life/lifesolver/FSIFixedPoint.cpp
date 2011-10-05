@@ -171,21 +171,14 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
 	//        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
 	//                              this->veloFluidMesh());
-	vector_Type  meshVelocity( M_meshMotion->disp(), Repeated );
-
-	meshVelocity = M_ALETimeAdvance->velocity( M_meshMotion->disp() );  // w lives in HE fespace
-
-	this->transferMeshMotionOnFluid(meshVelocity,
-					this->veloFluidMesh());
-
 	//this->veloFluidMesh()    -= this->dispFluidMeshOld();
 	// this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
 
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
 
-        vector_Type const meshDisplacement( M_meshMotion->disp(), Repeated );
-        this->moveMesh(meshDisplacement);
+//         vector_Type const meshDisplacement( M_meshMotion->disp(), Repeated );
+//         this->moveMesh(meshDisplacement);
         /*
         vector_Type const meshDisplacement( M_meshMotion->dispDiff(), Repeated );
         this->moveMesh(meshDispDiff);
@@ -202,17 +195,34 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
 	*M_beta =0;
 
-	if(iter==0)
-	 this->M_fluidTimeAdvance->extrapolation( *M_beta);
-	else
-	  *M_beta += *this->M_fluid->solution();
+    // PAOLO: the mesh motion should be updated here, to compute the nonlinear residual, right?
+    vector_Type meshDisp( M_meshMotion->disp(), Repeated );
+    if( iter==0 )
+    {
+        M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
+        M_ALETimeAdvance->shiftRight(meshDisp);
+    }
+    else
+    {
+        M_ALETimeAdvance->setSolution(meshDisp);
+    }
+
+//	if(iter==0)
+        M_fluidTimeAdvance->extrapolation( *M_beta);//explicit treatment of u
+// 	else
+//         *M_beta += *this->M_fluid->solution();
+
+	vector_Type  meshVelocity( M_meshMotion->disp(), Repeated );
+	meshVelocity = M_ALETimeAdvance->velocity( );//implicit treatment of w (because I already did the shiftRight)
+	this->transferMeshMotionOnFluid(meshVelocity,
+					this->veloFluidMesh());
 
 	*M_beta -= this->veloFluidMesh();
 
-        double alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
+    double alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
 
-        //*M_rhsNew   = *this->M_rhs;
-        //*M_rhsNew  *= alpha;
+    //*M_rhsNew   = *this->M_rhs;
+    //*M_rhsNew  *= alpha;
 
 
         if (recomputeMatrices)

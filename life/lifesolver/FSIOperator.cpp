@@ -158,7 +158,6 @@ FSIOperator::~FSIOperator()
 void
 FSIOperator::setDataFile( const GetPot& dataFile )
 {
-
     M_fluidMesh.reset(new mesh_Type());
     M_meshDataFluid->setup(dataFile, "fluid/space_discretization");
     readMesh(*M_fluidMesh, *M_meshDataFluid);
@@ -547,8 +546,9 @@ FSIOperator::buildSystem()
       {
 	M_data->dataSolid()->showMe();
 	//initialize xi0 for timaAdvance method for solid
-	double  xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep() * M_data->dataSolid()->dataTime()->timeStep() );
+	double  xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep() );
 	M_solid->buildSystem(xi);
+    M_solid->Mass()->globalAssemble();
       }
 
     //M_epetraWorldComm->Barrier();
@@ -562,34 +562,29 @@ FSIOperator::updateSystem()
       M_fluidTimeAdvance->shiftRight( *M_fluid->solution() );
 
       //M_meshMotion->updateSystem(); substituted by:
-      M_ALETimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+      //M_ALETimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
 
       M_fluidTimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
 
       transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
 
       if ( M_fluid->solution().get() )
-	M_un.reset( new vector_Type( *M_fluid->solution() ) );
+          M_un.reset( new vector_Type( *M_fluid->solution() ) );
 
-	*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+      *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
   }
 
     if ( this->isSolid() )
     {
-      M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
-      vector_Type rhsW(M_dFESpace->map(), Repeated);
-      rhsW *=0;
-      rhsW =  M_solidTimeAdvance->rhsContributionSecondDerivative() ;
-      rhsW = *M_solid->Mass() *(  M_solidTimeAdvance->rhsContributionSecondDerivative() );
-
-      this->M_solid->updateSystem();
-
-      M_solid->updateRightHandSide( rhsW );  //for the solid rhs;
-
-      M_solid->updateRightHandSide( rhsW );  //for the solid rhs;
+        M_solid->updateSystem();
+        M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
+        vector_Type rhsW(M_dFESpace->map(), Repeated);
+        rhsW *=0;
+        rhsW = (*M_solid->Mass() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()/M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
+        M_solid->updateRightHandSide( rhsW );  //for the solid rhs;
     }
 
-   this->couplingVariableExtrap( );
+   couplingVariableExtrap( );
 
 }
 
@@ -600,23 +595,31 @@ void FSIOperator::couplingVariableExtrap( )
     *M_lambda      = lambdaSolid();
 
     if (!M_lambdaDot.get())
-     {
+    {
         M_lambdaDot.reset   ( new vector_Type(*M_fluidInterfaceMap, Unique) );
         *M_lambda     += M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid();
-     }
-    else
-      {
-	M_solidTimeAdvance->extrapolation(*M_lambdaSolid);
-	M_solidTimeAdvance->extrapolationFirstDerivative(*M_lambdaDotSolid);
-	transferSolidOnInterface(*M_lambdaSolid, *this->M_lambda);
-	transferSolidOnInterface(*M_lambdaDotSolid, *this->M_lambdaDot);
-	//*M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
-	//*M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
-      }
+    }
+//     else
+//     {
+//         *M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
+//         *M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
+//     }
 
-    //*M_lambdaDot   = lambdaDotSolid();
-    displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->normInf(), "\n" );
-    displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->normInf(), "\n");
+//     *M_lambdaDot   = lambdaDotSolid();
+     else
+      {
+          vector_Type solidDisp(M_solid->displacement());
+          vector_Type solidVel(M_solid->displacement());
+          M_solidTimeAdvance->extrapolation(solidDisp);
+          M_solidTimeAdvance->extrapolationFirstDerivative(solidVel);
+          transferSolidOnInterface(solidDisp, *M_lambda);
+          transferSolidOnInterface(solidVel, *M_lambdaDot);
+          //*M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
+          //*M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
+      }
+      //*M_lambdaDot   = lambdaDotSolid();
+      displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->normInf(), "\n" );
+      displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->normInf(), "\n");
 }
 
 void
@@ -628,7 +631,7 @@ FSIOperator::updateSolution( const vector_Type& solution )
       //this->M_bdf->shiftRight( *M_fluid->solution() );
       M_fluidTimeAdvance->shiftRight( *this->M_un );
       //M_fluidMassTimeAdvance->shiftRight( M_fluid->matrMass() * ( *this->M_un ));
-      M_ALETimeAdvance->shiftRight( M_meshMotion->disp() ) ;
+      //M_ALETimeAdvance->shiftRight( M_meshMotion->disp() ) ;
     }
   if ( this->isSolid())
     M_solidTimeAdvance->shiftRight( M_solid->displacement());
@@ -791,8 +794,8 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
     if ( this->isFluid() )
       {
           ASSERT( initialFluidVel.size() == M_fluidTimeAdvance->size(), "The number of vectors for initializing the time scheme for the fluid velocity is not consistent with the discretization chosen" );
-	ASSERT(initialFluidDisp.size() == M_ALETimeAdvance->size() , "The number of vectors for initializing the time discretization for the ALE map is not consistent with the discretization chosen");
-	this->M_fluidTimeAdvance->setInitialCondition(initialFluidVel);
+          ASSERT(initialFluidDisp.size() == M_ALETimeAdvance->size() , "The number of vectors for initializing the time discretization for the ALE map is not consistent with the discretization chosen");
+          this->M_fluidTimeAdvance->setInitialCondition(initialFluidVel);
 
 	//this->M_fluidMassTimeAdvance->setInitialCondition(initialFluidVel);
 

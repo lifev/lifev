@@ -29,7 +29,7 @@ save       = 1
   density   = 1.2               # density
   young     = 8.0E6
   poisson   = 0.4
-  solidType = nonlinearVenantKirchhoff #nonlinearVenantKirchhoff, linearVenantKirchhoff
+  solidType = linearVenantKirchhoff #nonlinearVenantKirchhoff, linearVenantKirchhoff
 
 
    [../time_discretization]

@@ -230,10 +230,16 @@ public:
 
     //! Update the Jacobian Matrix at each iteration of the nonLinearRichardson method
     /*!
-      \param sol the current solution at each iteration of the nonLinearRichardson method
-      \param jac the Jacobian matrix that must be updated
+      \param solution the current solution at each iteration of the nonLinearRichardson method
+      \param jacobian the Jacobian matrix that must be updated
     */
-    void updateJacobian( vector_Type& solution, matrixPtr_Type& jacobian );
+    void updateJacobian( const vector_Type& solution, matrixPtr_Type& jacobian );
+
+    //! Update the Jacobian Matrix at each iteration of the nonLinearRichardson method
+    /*!
+      \param solution the current solution at each iteration of the nonLinearRichardson method
+    */
+    void updateJacobian(const vector_Type& solution );
 
     //! Solves the tangent problem for newton iterations
     /*!
@@ -790,64 +796,20 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
     //These two lines mut be checked fo FSI. With the linear solver, they have a totally
     //different expression. For structural problems it is not used.
-    //evalResidualDisplacement(*M_disp);
-
-    //*M_residual_d = *M_mass*(*M_disp);
-    //*M_residual_d -= *M_rhsNoBC;
-
-
+    evalResidualDisplacement(*M_disp);//\todo related to FSI. Should be caled from outside
 }
 
 template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 {
-    LifeChrono chrono;
-
-    matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_systemMatrix->meanNumEntries()));
-
-    // matrix and vector assembling communication
-    M_Displayer->leaderPrint("  S-  Solving the system in iteratLin... \n");
-
-    // First Approximation: The Jacobian of P is equal to its linear part.
-    //M_systemMatrix.reset(new matrix_Type(*M_localMap));
-    //*matrFull += *M_material->linearStiff(); //it returns just the linear part
-    //*matrFull *= M_zeta;
-    //*matrFull += *M_mass; // Global Assemble is done inside BCManageMatrix
-    ///End First Approximantion
-
-    // Use of the complete Jacobian
-    *matrFull += *M_jacobian;
-    // Matteo:
-    // *matrFull *= M_zeta;
-    *matrFull += *M_mass;  // Global Assemble is done inside BCManageMatrix
-
-    M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
-
-    // for BC treatment (done at each time-step)
-
-    M_Displayer->leaderPrint("\tS'-  Applying boundary conditions      ... ");
-
     vector_Type rhsFull (M_rhsNoBC->map());
-
-    applyBoundaryConditions( *matrFull, rhsFull, bch);
-
-
-    M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
-
-    M_Displayer->leaderPrint("\tS'-  Solving system                    ... \n");
-    chrono.start();
-
-    M_linearSolver->setMatrix(*matrFull);
-
-    M_linearSolver->solveSystem( rhsFull, *M_disp, matrFull );
-
-    chrono.stop();
-
-    //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a
-    //totally different expression.For structural problems it is not used
-    //evalResidualDisplacementLin(*M_disp);
-
+    Real zero(0.);
+    if ( !bch->bcUpdateDone() )
+        bch->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
+	bcManageVector( rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *bch, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
+    solveJacobian(*M_disp, rhsFull, zero, bch);
+    evalResidualDisplacementLin(*M_disp);
 }
 
 
@@ -944,9 +906,6 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type& solution )
 {
-    //<<<<<<< HEAD
-    //MATTEO: compute matrix system without BC.
-    computeMatrix(M_systemMatrix, solution, 1.);
 
     M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
     LifeChrono chrono;
@@ -954,12 +913,14 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type&
 
     if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
     {
+        matrixPtr_Type matrixNoBC(new matrix_Type(*M_localMap));
+
         M_residual_d.reset(new vector_Type( *M_systemMatrix * solution ));
         *M_residual_d -= *M_rhsNoBC;
     }
     else
     {
-        M_residual_d.reset(new vector_Type( M_material->stiffVector() ));
+        M_residual_d.reset(new vector_Type( *M_material->stiffVector() ));
         *M_residual_d -= *M_rhsNoBC;
     }
     chrono.stop();
@@ -973,22 +934,22 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Ty
 {
 
     //This is consisten with the previous first approximation in iterateLin
-    M_systemMatrix.reset (new matrix_Type(*M_localMap));
+    //matrixPtr_Type matrixNoBC(new matrix_Type(*M_localMap));
     //<<<<<<< HEAD
     //  *M_systemMatrix += *M_material->linearStiff();
     //=======
-    *M_systemMatrix += *M_material->jacobian();
+    //*matrixNoBC += *M_material->jacobian();
     //*M_systemMatrix *= M_zeta;
     //>>>>>>> 20110728_ExponentialNeohookean
-    *M_systemMatrix += *M_mass;
-    M_systemMatrix->globalAssemble();
+    //*matrixNoBC += *M_mass;
+    //matrixNoBC->globalAssemble();
 
     M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
     LifeChrono chrono;
     chrono.start();
 
     //This definition of residual_d is similar to the one of iterateLin in VenantKirchhoffSolver
-    *M_residual_d.reset(new vector_Type(*M_systemMatrix * solution));
+    M_residual_d.reset(new vector_Type((*M_jacobian)*solution));
 
     chrono.stop();
     M_Displayer->leaderPrintMax("done in ", chrono.diff() );
@@ -1207,7 +1168,7 @@ StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
 
 //Method UpdateJacobian
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matrixPtr_Type& jacobian  )
+void StructuralSolver<Mesh, SolverType>::updateJacobian( const vector_Type & sol, matrixPtr_Type& jacobian  )
 {
     M_Displayer->leaderPrint("  S-  Solid: Updating JACOBIAN... ");
 
@@ -1225,11 +1186,19 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matr
 
 }
 
+//Method UpdateJacobian
+template <typename Mesh, typename SolverType>
+void StructuralSolver<Mesh, SolverType>::updateJacobian( const vector_Type & sol)
+{
+    updateJacobian(sol, M_jacobian);
+}
+
 //solveJac( const Vector& res, Real& linear_rel_tol, Vector &step)
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::
 solveJac( vector_Type& step, const vector_Type& res, Real& linear_rel_tol)
 {
+    updateJacobian( *M_disp, M_jacobian );
     solveJacobian(step,  res, linear_rel_tol, M_BCh);
 }
 
@@ -1237,14 +1206,16 @@ solveJac( vector_Type& step, const vector_Type& res, Real& linear_rel_tol)
 //Method SolveJacobian
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::
-solveJacobian( vector_Type&           step,
-               const vector_Type&     res,
-               Real&                /*linear_rel_tol*/,
-               bchandler_Type&        BCh)
+solveJacobian(vector_Type&           step,
+              const vector_Type&     res,
+              Real&                /*linear_rel_tol*/,
+              bchandler_Type&        BCh)
 {
     LifeChrono chrono;
 
-    updateJacobian( *M_disp, M_jacobian );
+    M_jacobian->globalAssemble();
+    matrixPtr_Type matrFull(new matrix_Type(*M_localMap));
+    *matrFull += *M_jacobian;
 
     M_Displayer->leaderPrint("\tS'-  Solving the linear system ... \n");
 
@@ -1253,16 +1224,20 @@ solveJacobian( vector_Type&           step,
 
     if ( !M_BCh->bcUpdateDone() )
         M_BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
-	bcManageMatrix( *M_jacobian, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
+	bcManageMatrix( *matrFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
 
     M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
 
     M_Displayer->leaderPrint("\tS'-  Solving system                    ... \n");
     chrono.start();
 
-    M_linearSolver->setMatrix(*M_jacobian);
+    M_linearSolver->setMatrix(*matrFull);
 
-    M_linearSolver->solveSystem( res, step, M_jacobian );
+    M_linearSolver->solveSystem( res, step, matrFull );
+
+//     matrFull->spy("J");
+//     M_material->stiffMatrix()->spy("S");
+//     M_systemMatrix->spy("M");
     chrono.stop();
 }
 
