@@ -68,9 +68,6 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
            second order problems (<i> m=2</i>), and the <i> theta-methods </i> for the first order problems (<i>m=1</i>).</li>
   </ul>
 
-
-
-
     <BR>
     \subsection spaceDiscretization Space discretization
     [TODO: 4-5 lines description by Samuel Quinodoz]
