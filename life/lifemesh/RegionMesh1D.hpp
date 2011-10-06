@@ -71,7 +71,7 @@ namespace LifeV
  */
 template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh1D : public MeshEntity,
-        public MC::RegionMarker
+        public MC::regionMarker_Type
 {
 public:
     /** @defgroup public_types Public Types
@@ -87,11 +87,11 @@ public:
     //! Common Marker Class
     typedef MC MarkerCommon;
     //! Point Marker
-    typedef typename MC::PointMarker     PointMarker;
+    typedef typename MC::pointMarker_Type  PointMarker;
     //! Edge Marker
-    typedef typename MC::EdgeMarker      EdgeMarker;
+    typedef typename MC::edgeMarker_Type   EdgeMarker;
     //! Region Marker
-    typedef typename MC::RegionMarker    RegionMarker;
+    typedef typename MC::regionMarker_Type RegionMarker;
 
     /** @} */ // End of group Marker Types
 
@@ -1286,7 +1286,7 @@ protected:
 template <typename GEOSHAPE, typename MC>
 RegionMesh1D<GEOSHAPE, MC>::RegionMesh1D( UInt id ) :
         MeshEntity          ( id ),
-        MC::RegionMarker    (),
+        MC::regionMarker_Type (),
         switches            (),
         _numVertices        ( 0 ),
         _numBVertices       ( 0 ),
@@ -2088,7 +2088,7 @@ RegionMesh1D<GEOSHAPE, MC>::setPoint
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for (std::vector<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename std::vector<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {
