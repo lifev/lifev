@@ -1246,7 +1246,7 @@ bcNaturalManage( VectorType& rightHandSide,
                 ibF = pId->id();
 
                 // Updating face stuff
-                currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
+                currentBdFE.updateMeasNormal( mesh.bElement( ibF ) );
 
                 // Loop on total DOF per Face
                 for ( ID l = 0; l < nDofF; ++l )
@@ -1293,7 +1293,7 @@ bcNaturalManage( VectorType& rightHandSide,
                 ibF = pId->id();
 
                 // Updating face stuff
-                currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
+                currentBdFE.updateMeas( mesh.bElement( ibF ) );
 
                 // Loop on total DOF per Face
                 for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -1440,7 +1440,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.boundaryFace( ibF ) );
+            currentBdFE.updateMeasQuadPt( mesh.boundaryFace( ibF ) );
 
             std::vector<Real> locU(nDofF);    //assumes feVec is a vec of reals, TODO: deal with more comp
             Real uPt;            //value in the point
@@ -1851,7 +1851,7 @@ bcRobinManageMatrix( MatrixType& matrix,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.bElement( ibF ) );
+            currentBdFE.updateMeasQuadPt( mesh.bElement( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2012,7 +2012,7 @@ bcRobinManageVector( VectorType& rightHandSide,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.bElement( ibF ) );
+            currentBdFE.updateMeasQuadPt( mesh.bElement( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2121,7 +2121,7 @@ bcFluxManageMatrix( MatrixType&     matrix,
             // Number of the current boundary face
             ibF = pId->id();
             // Updating face stuff
-            currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
+            currentBdFE.updateMeasNormal( mesh.bElement( ibF ) );
 
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
@@ -2204,7 +2204,7 @@ bcResistanceManageVector( VectorType& rightHandSide,
             // Number of the current boundary face
             ibF = pId->id();
 
-            currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+            currentBdFE.updateMeasNormal( mesh.boundaryFace( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
