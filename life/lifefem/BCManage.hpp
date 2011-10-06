@@ -559,7 +559,6 @@ bcManage( MatrixType& matrix,
           DataType const& time )
 {
 
-    VectorType rhsRepeated(rightHandSide.map(), Repeated);
     bool globalassemble=false;
 
 
@@ -585,21 +584,22 @@ bcManage( MatrixType& matrix,
             bcNaturalManage( rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset());
             break;
         case Robin:      // Robin boundary conditions (Robin)
-            bcRobinManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            bcRobinManage( matrix, rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            globalassemble=true;
             break;
         case Flux:       // Flux boundary condition
             bcFluxManage( matrix, rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset()+bcHandler[i].offset());
+            globalassemble=true;
             break;
         case Resistance: // Resistance boundary condition
-            bcResistanceManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            bcResistanceManage( matrix, rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            globalassemble=true;
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
         }
     }
 
-    rhsRepeated.globalAssemble();
-    rightHandSide += rhsRepeated;
     if (globalassemble)
         matrix.globalAssemble();
 
@@ -649,7 +649,6 @@ bcManage( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
           const DataType& time,
           VectorType& feVec )
 {
-    VectorType rhsRepeated(rightHandSide.getMap(),Repeated);
 
     bool globalassemble=false;
     // Loop on boundary conditions
@@ -681,7 +680,7 @@ bcManage( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
             }
             else
             {
-                bcRobinManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+                bcRobinManage( matrix, rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             }
             break;
         default:
@@ -689,9 +688,7 @@ bcManage( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
         }
     }
 
-    rhsRepeated.GlobalAssemble();
 
-    rightHandSide += rhsRepeated;
     if (globalassemble)
         matrix.GlobalAssemble();
 
@@ -752,9 +749,11 @@ bcManageMatrix( MatrixType&      matrix,
             break;
         case Robin:  // Robin boundary conditions (Robin)
             bcRobinManageMatrix( matrix, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            globalassemble=true;
             break;
         case Flux:  // Flux boundary conditions
             bcFluxManageMatrix( matrix, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset()+bcHandler[i].offset());
+            globalassemble=true;
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -798,7 +797,6 @@ bcManageVector( VectorType&      rightHandSide,
                 const DataType&  time,
                 const DataType&  diagonalizeCoef )
 {
-    VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
     // Loop on boundary conditions
     for ( ID i = 0; i < bcHandler.size(); ++i )
@@ -819,7 +817,7 @@ bcManageVector( VectorType&      rightHandSide,
             bcNaturalManage( rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
         case Robin:  // Robin boundary conditions (Robin)
-            bcRobinManageVector( rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            bcRobinManageVector( rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
         case Flux:  // Flux boundary conditions
             bcFluxManageVector( rightHandSide, bcHandler[ i ], time, bcHandler.offset()+bcHandler[i].offset() );
@@ -829,9 +827,6 @@ bcManageVector( VectorType&      rightHandSide,
         }
     }
 
-    rhsRepeated.globalAssemble();
-
-    rightHandSide += rhsRepeated;
 }
 
 
@@ -843,7 +838,6 @@ bcManageVector( VectorType&                     rightHandSide,
                 const DataType&                 time,
                 const DataType&                 diagonalizeCoef )
 {
-    VectorType rhsRepeated(rightHandSide.getMap(),Repeated);
 
     // Loop on boundary conditions
     for ( ID i = 0; i < bcHandler.size(); ++i )
@@ -864,7 +858,7 @@ bcManageVector( VectorType&                     rightHandSide,
             bcNaturalManage( rightHandSide, *feSpace.mesh(), feSpace.dof(), bcHandler[ i ], feSpace.feBd(), time, bcHandler.offset() );
             break;
         case Robin:  // Robin boundary conditions (Robin)
-            bcRobinManageVector( rhsRepeated, *feSpace.mesh(), feSpace.dof(), bcHandler[ i ], feSpace.feBd(), time, bcHandler.offset() );
+            bcRobinManageVector( rightHandSide, *feSpace.mesh(), feSpace.dof(), bcHandler[ i ], feSpace.feBd(), time, bcHandler.offset() );
             break;
         case Flux:  // Flux boundary conditions
             bcFluxManageVector( rightHandSide, bcHandler[ i ], time, bcHandler.offset()+bcHandler[i].offset() );
@@ -874,9 +868,6 @@ bcManageVector( VectorType&                     rightHandSide,
         }
     }
 
-    rhsRepeated.GlobalAssemble();
-
-    rightHandSide += rhsRepeated;
 }
 
 
@@ -1365,8 +1356,7 @@ bcNaturalManage( VectorType& rightHandSide,
         }
         rhsRepeated.globalAssemble();
         ASSERT( rightHandSide.mapType() == Unique , "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
-        //  rightHandSide=rhsRepeated;
-        rightHandSide+= rhsRepeated;
+        rightHandSide += rhsRepeated;
     }
 } // bcNaturalManage
 
@@ -1405,6 +1395,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
     {  //! If BC is given under a functional form
 
         DataType x, y, z;
+        VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
         if (nComp!=0)
         {
@@ -1455,12 +1446,16 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
                         }
 
                         // Adding right hand side contribution
-                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF ), l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ),uPt ) *
+                        rhsRepeated[ idDof ] += currentBdFE.phi( int( idofF ), l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ),uPt ) *
                                                   mu(time,x,y,z,uPt)*currentBdFE.weightMeas( l );
                     }
                 }
             }
         }
+
+        rhsRepeated.globalAssemble();
+        ASSERT( rightHandSide.mapType() == Unique , "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
+        rightHandSide += rhsRepeated;
     }
 }
 
@@ -1919,6 +1914,8 @@ bcRobinManageVector( VectorType& rightHandSide,
     if ( boundaryCond.isDataAVector() )
     {   //! If BC is given under a vectorial form
 
+        VectorType rhsRepeated(rightHandSide.map(),Repeated);
+
         //! Defining the coefficients
         DataType mbcb;
 
@@ -1960,15 +1957,20 @@ bcRobinManageVector( VectorType& rightHandSide,
                         }
 
                         // Adding right hand side contribution
-                        rightHandSide[ idDof ] += currentBdFE.phi( idofF, l ) * mbcb * currentBdFE.weightMeas( l );
+                        rhsRepeated[ idDof ] += currentBdFE.phi( idofF, l ) * mbcb * currentBdFE.weightMeas( l );
                     }
                 }
             }
         }
+        rhsRepeated.globalAssemble();
+        ASSERT( rightHandSide.mapType() == Unique, "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
+        rightHandSide += rhsRepeated;
     }
 
     else
     {  //! If BC is given under a functional form
+
+        VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
         DataType x, y, z;
 
@@ -2001,12 +2003,15 @@ bcRobinManageVector( VectorType& rightHandSide,
                         currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         // Adding right hand side contribution
-                        rightHandSide[ idDof ] += currentBdFE.phi( idofF, l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *
+                        rhsRepeated[ idDof ] += currentBdFE.phi( idofF, l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *
                                                   currentBdFE.weightMeas( l );
                     }
                 }
             }
         }
+        rhsRepeated.globalAssemble();
+        ASSERT( rightHandSide.mapType() == Unique, "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
+        rightHandSide += rhsRepeated;
     }
 } //bcRobinManageVector
 
@@ -2144,6 +2149,8 @@ bcResistanceManage( MatrixType& matrix,
 
     if ( boundaryCond.isDataAVector() )
     {
+        VectorType rhsRepeated(rightHandSide.map(),Repeated);
+
         //auxiliary vector
         VectorType vv(rightHandSide.map(), Repeated);
 
@@ -2184,13 +2191,16 @@ bcResistanceManage( MatrixType& matrix,
                             mbcb += boundaryCond( kdDof, boundaryCond.component( j ) )* currentBdFE.phi( int( n ), l ) ;
                         }
 
-                        rightHandSide[ idDof ] +=  mbcb* currentBdFE.phi( int( idofF ), l ) *  currentBdFE.normal( int( j ), l ) *
+                        rhsRepeated[ idDof ] +=  mbcb* currentBdFE.phi( int( idofF ), l ) *  currentBdFE.normal( int( j ), l ) *
                                                    currentBdFE.weightMeas( l );
 
                     }
                 }
             }
         }
+        rhsRepeated.globalAssemble();
+        ASSERT( rightHandSide.mapType() == Unique, "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
+        rightHandSide += rhsRepeated;
 
 
         for ( std::set<ID>::iterator iDofIt = resistanceDofs.begin();
