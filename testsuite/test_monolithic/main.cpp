@@ -68,6 +68,7 @@
  */
 
 // Tell the compiler to ignore specific kind of warnings:
+#undef HAVE_HDF5
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -109,8 +110,6 @@
 #include "boundaryConditions.hpp"
 #include "flowConditions.hpp"
 #include "lumpedHeart.hpp"
-
-#ifdef HAVE_HDF5
 
 class Problem
 {
@@ -173,6 +172,7 @@ public:
 
         std::string  fluidMeshPartitioned    =  data_file( "problem/fluidMeshPartitioned", "none" );
         std::string  solidMeshPartitioned    =  data_file( "problem/solidMeshPartitioned", "none" );
+#ifdef HAVE_HDF5
         if ( fluidMeshPartitioned.compare( "none" ) )
         {
             FSIOperator::meshFilter_Type fluidMeshFilter( data_file, fluidMeshPartitioned );
@@ -186,6 +186,7 @@ public:
             solidMeshFilter.closeFile( );
         }
         else
+#endif
         {
             M_fsi->FSIOper( )->partitionMeshes( );
             M_fsi->FSIOper( )->setupFEspace( );
@@ -467,7 +468,6 @@ struct FSIChecker
     LifeV::Vector         disp;
 };
 
-#endif // HAVE_HDF5
 
 namespace LifeV
 {
@@ -482,7 +482,6 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 
 int main(int argc, char** argv)
 {
-#ifdef HAVE_HDF5
 
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
@@ -519,13 +518,11 @@ int main(int argc, char** argv)
     MPI_Finalize();
 #endif
 
-#endif // HAVE_HDF5
 
     return 0;
 
 }
 
-#ifdef HAVE_HDF5
 
 void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 {
@@ -656,6 +653,4 @@ void Problem::checkCEResult(const LifeV::Real& time)
     else if (time==0.003 && (dispNorm-836363)/dispNorm*(dispNorm-836363)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.004 && (dispNorm-819303)/dispNorm*(dispNorm-819303)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
-
-#endif // HAVE_HDF5
 
