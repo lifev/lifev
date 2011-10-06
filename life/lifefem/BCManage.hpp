@@ -528,6 +528,24 @@ bcResistanceManage( MatrixType& matrix,
                     CurrentBoundaryFE& currentBdFE,
                     const DataType& /*time*/,
                     UInt offset );
+template <typename VectorType, typename DataType, typename MeshType>
+void
+bcResistanceManageVector( VectorType& rightHandSide,
+                    const MeshType& mesh,
+                    const DOF& dof,
+                    const BCBase& boundaryCond,
+                    CurrentBoundaryFE& currentBdFE,
+                    const DataType& /*time*/,
+                    UInt offset );
+template <typename MatrixType, typename DataType, typename MeshType>
+void
+bcResistanceManageMatrix( MatrixType& matrix,
+                    const MeshType& mesh,
+                    const DOF& dof,
+                    const BCBase& boundaryCond,
+                    CurrentBoundaryFE& currentBdFE,
+                    const DataType& /*time*/,
+                    UInt offset );
 
 // @}
 
@@ -755,6 +773,10 @@ bcManageMatrix( MatrixType&      matrix,
             bcFluxManageMatrix( matrix, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset()+bcHandler[i].offset());
             globalassemble=true;
             break;
+        case Resistance:
+            bcResistanceManageMatrix( matrix, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            globalassemble=true;
+            break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
         }
@@ -780,6 +802,8 @@ bcManageMatrix( MatrixType&      matrix,
             break;
         case Flux:  // Robin boundary conditions (Robin)
             break;
+        case Resistance:
+        	break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
         }
@@ -821,6 +845,9 @@ bcManageVector( VectorType&      rightHandSide,
             break;
         case Flux:  // Flux boundary conditions
             bcFluxManageVector( rightHandSide, bcHandler[ i ], time, bcHandler.offset()+bcHandler[i].offset() );
+            break;
+        case Resistance:
+            bcResistanceManageVector( rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -2130,6 +2157,21 @@ bcResistanceManage( MatrixType& matrix,
                     const DOF& dof,
                     const BCBase& boundaryCond,
                     CurrentBoundaryFE& currentBdFE,
+                    const DataType& time,
+                    UInt offset )
+{
+    bcResistanceManageMatrix( matrix, mesh, dof, boundaryCond, currentBdFE, time, offset );
+    bcResistanceManageVector( rightHandSide, mesh, dof, boundaryCond, currentBdFE, time, offset );
+} //bcResistanceManage
+
+
+template <typename VectorType, typename DataType, typename MeshType>
+void
+bcResistanceManageVector( VectorType& rightHandSide,
+                    const MeshType& mesh,
+                    const DOF& dof,
+                    const BCBase& boundaryCond,
+                    CurrentBoundaryFE& currentBdFE,
                     const DataType& /*time*/,
                     UInt offset )
 {
@@ -2145,14 +2187,11 @@ bcResistanceManage( MatrixType& matrix,
     std::set<ID> resistanceDofs;
 
     const BCIdentifierNatural* pId;
-    ID ibF, idDof, jdDof, kdDof;
+    ID ibF, idDof, kdDof;
 
     if ( boundaryCond.isDataAVector() )
     {
         VectorType rhsRepeated(rightHandSide.map(),Repeated);
-
-        //auxiliary vector
-        VectorType vv(rightHandSide.map(), Repeated);
 
         DataType  mbcb;
 
@@ -2180,8 +2219,6 @@ bcResistanceManage( MatrixType& matrix,
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
-                        vv[idDof] += currentBdFE.phi( int( idofF), l ) *  currentBdFE.normal( int( j ), l ) * currentBdFE.weightMeas( l );
-
                         mbcb=0;
 
                         // data on quadrature point
@@ -2201,31 +2238,151 @@ bcResistanceManage( MatrixType& matrix,
         rhsRepeated.globalAssemble();
         ASSERT( rightHandSide.mapType() == Unique, "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
         rightHandSide += rhsRepeated;
+    }
+    else
+        ERROR_MSG( "This BC type is not yet implemented" );
+} //bcResistanceManageVector
 
 
-        for ( std::set<ID>::iterator iDofIt = resistanceDofs.begin();
-                iDofIt != resistanceDofs.end(); ++iDofIt )
+template <typename MatrixType, typename DataType, typename MeshType>
+void
+bcResistanceManageMatrix( MatrixType& matrix,
+                    const MeshType& mesh,
+                    const DOF& dof,
+                    const BCBase& boundaryCond,
+                    CurrentBoundaryFE& currentBdFE,
+                    const DataType& /*time*/,
+                    UInt offset )
+{
+    // Open the matrix if it is closed:
+    if ( matrix.matrixPtr()->Filled() )
+        matrix.openCrsMatrix();
+
+    // Number of local DOF in this face
+    UInt nDofF = currentBdFE.nbNode();
+
+    // Number of total scalar Dof
+    UInt totalDof = dof.numTotalDof();
+
+    // Number of components involved in this boundary condition
+    UInt nComp = boundaryCond.numberOfComponents();
+
+    std::set<ID> resistanceDofs;
+
+    const BCIdentifierNatural* pId;
+    ID ibF, idDof, jdDof;
+
+    if ( boundaryCond.isDataAVector() )
+    {
+        //auxiliary vector
+        VectorEpetra vv(boundaryCond.pointerToBCVector()->rhsVector().map(), Repeated);
+        vv *= 0.;
+
+        // Loop on BC identifiers
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
-            for ( UInt iComp = 0; iComp < nComp; ++iComp )
-            {
-                idDof = *iDofIt + boundaryCond.component( iComp ) * totalDof + offset;
-                for ( std::set<ID>::iterator jDofIt = resistanceDofs.begin();
-                        jDofIt != resistanceDofs.end(); ++jDofIt )
-                {
-                    for ( UInt jComp = 0; jComp < nComp; ++jComp )
-                    {
-                        jdDof = *jDofIt + boundaryCond.component( jComp ) * totalDof + offset;
+            // Pointer to the i-th identifier in the list
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
-                        matrix.addToCoefficient( idDof,  jdDof, boundaryCond.resistanceCoeff() * vv[idDof] * vv[jdDof] );
+            // Number of the current boundary face
+            ibF = pId->id();
+
+            currentBdFE.updateMeasNormal( mesh.boundaryFace( ibF ) );
+
+            // Loop on total DOF per Face
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
+            {
+                resistanceDofs.insert( pId->boundaryLocalToGlobalMap( idofF ) );
+
+                // Loop on components involved in this boundary condition
+                for ( ID j = 0; j < nComp; ++j )
+                {
+                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
+
+                    // std::cout << "\nDOF " << idDof << " is involved in Resistance BC" << std::endl;
+
+                    // Loop on quadrature points
+                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
+                    {
+                        vv[idDof] += currentBdFE.phi( int( idofF), l ) *  currentBdFE.normal( int( j ), l ) * currentBdFE.weightMeas( l );
                     }
                 }
             }
         }
 
+        // this vector now contains the values needed to modify the matrix
+        vv.globalAssemble();
+
+        // I want it on a unique processor (the root processor) that will take care of modifying
+        // the matrix on the LHS
+        VectorEpetra vvReduced( vv, 0 );
+
+        // I need to tell the root processor what are the IDs of the DOFs on the "resistance" boundary.
+        // Each processor finds numMyResistanceDofs in its own portion of the mesh
+        Int numMyResistanceDofs( resistanceDofs.size() );
+        // Summing together the numMyResistanceDofs values, I obtain the global number of
+        // resistance DOFs, **including repeated DOFs**
+        Int numGlobalResistanceDofs(0);
+        vv.map().comm().SumAll(&numMyResistanceDofs, &numGlobalResistanceDofs, 1);
+
+        // I need to share the list of resistance DOFs, via MPI calls. I will need vectors (arrays), not sets.
+        // Each process will store its resistance DOFs in a vector
+        std::vector<Int> myResistanceDofs( numGlobalResistanceDofs, -1 );
+        // And each processor will receive the other processors' resistance DOFs in a gathered vector
+        // i.e. an "array of arrays", the i-th sub-array being a copy of myResistanceDofs from processor i
+        std::vector<Int> globalResistanceDofs( numGlobalResistanceDofs*vv.map().comm().NumProc(), 0 );
+
+        // Fill myResistanceDofs with the actual DOF IDs (only the first numMyResistanceDofs will be nonzero)
+        UInt iCount(0);
+        for ( std::set<ID>::iterator iDofIt = resistanceDofs.begin();
+                        iDofIt != resistanceDofs.end(); ++iDofIt, ++iCount )
+        {
+            myResistanceDofs[iCount] = *iDofIt;
+        }
+
+        // Gather the lists of resistance DOF IDs from all processors
+        vv.map().comm().GatherAll(&myResistanceDofs[0], &globalResistanceDofs[0], numGlobalResistanceDofs);
+
+        // Create a unique list of IDs: here I make use of a set
+        std::set<ID> globalResistanceDofSet;
+        for( Int iDof = 0; iDof < numGlobalResistanceDofs*vv.map().comm().NumProc(); ++iDof )
+        {
+            if( globalResistanceDofs[iDof] > -1 )
+            {
+                globalResistanceDofSet.insert( globalResistanceDofs[iDof] );
+                // std::cout << "\n(after gathering) DOF " << globalResistanceDofs[iDof] << std::endl;
+            }
+        }
+        // std::cout << "\n(after gathering) number of DOFs = " << globalResistanceDofs.size() << std::endl;
+
+        // Only the root processor has the needed values to modify the matrix
+        if( ! vv.map().comm().MyPID() )
+        {
+            for ( std::set<ID>::iterator iDofIt = globalResistanceDofSet.begin();
+                            iDofIt != globalResistanceDofSet.end(); ++iDofIt )
+            {
+                for ( UInt iComp = 0; iComp < nComp; ++iComp )
+                {
+                    idDof = *iDofIt + boundaryCond.component( iComp ) * totalDof + offset;
+                    for ( std::set<ID>::iterator jDofIt = globalResistanceDofSet.begin();
+                                    jDofIt != globalResistanceDofSet.end(); ++jDofIt )
+                    {
+                        for ( UInt jComp = 0; jComp < nComp; ++jComp )
+                        {
+                            jdDof = *jDofIt + boundaryCond.component( jComp ) * totalDof + offset;
+
+                            matrix.addToCoefficient( idDof,  jdDof, boundaryCond.resistanceCoeff() *
+                                                     vvReduced[idDof] * vvReduced[jdDof] );
+                        }
+                    }
+                }
+            }
+        }
     }
     else
         ERROR_MSG( "This BC type is not yet implemented" );
-} //bcResistanceManage
+
+} //bcResistanceManageMatrix
 
 } // end of namespace LifeV
 #endif
