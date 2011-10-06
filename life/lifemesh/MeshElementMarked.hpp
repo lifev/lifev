@@ -60,6 +60,7 @@ namespace LifeV
 template <int elemDim, int geoDim, typename GeoShape, typename MC>
 class MeshElementMarked{
 public:
+	typedef nullShape geoShape_Type;
 	MeshElementMarked();
 };
 

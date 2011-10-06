@@ -243,7 +243,7 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
 
     // Only Boundary Edges
     mesh.setMaxNumEdges( nBEd );
-    mesh.numEdges() = nEd;
+    mesh.setNumEdges( nEd );
 
     /*
     Here the REAL number of edges (all of them) even if I store only BEdges.
@@ -484,7 +484,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     mesh.setMaxNumEdges( __gt[ 1 ] );
 
     // Here the REAL number of edges (all of them)
-    mesh.numEdges    () = __gt[ 1 ];
+    mesh.setNumEdges(__gt[ 1 ]);
     mesh.setNumBEdges( __gt[ 1 ] );
 
 #ifdef DEBUG
@@ -495,7 +495,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     mesh.setMaxNumFaces( n_elements);
 
     // Here the REAL number of edges (all of them)
-    mesh.numFaces() = n_elements;
+    mesh.setNumFaces( n_elements );
 
 #ifdef DEBUG
     Debug ( 8000 ) << "number of faces= " << n_elements << "\n";
@@ -730,14 +730,14 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     mesh.setMaxNumGlobalEdges( _be.size() );
 
     // Here the REAL number of edges (all of them)
-    mesh.numEdges() = _be.size();
+    mesh.setNumEdges         ( _be.size() );
 
     mesh.setNumBEdges        ( __ne );
     mesh.setMaxNumFaces      ( __nt );
     mesh.setMaxNumGlobalFaces( __nt );
 
     // Here the REAL number of edges (all of them)
-    mesh.numFaces() = __nt;
+    mesh.setNumFaces          ( __nt);
 
     mesh.setMaxNumPoints      ( __nv, true );
     mesh.setMaxNumGlobalPoints( __nv );

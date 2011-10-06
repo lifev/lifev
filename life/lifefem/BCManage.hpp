@@ -1422,7 +1422,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.boundaryFace( ibF ) );
+            currentBdFE.updateMeas( mesh.bFacet( ibF ) );
 
             std::vector<Real> locU(nDofF);    //assumes feVec is a vec of reals, TODO: deal with more comp
             Real uPt;            //value in the point
@@ -2158,7 +2158,7 @@ bcResistanceManage( MatrixType& matrix,
             // Number of the current boundary face
             ibF = pId->id();
 
-            currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+            currentBdFE.updateMeasNormalQuadPt( mesh.bFacet( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )

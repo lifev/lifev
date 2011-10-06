@@ -1498,11 +1498,11 @@ void MeshPartitioner<MeshType>::finalSetup()
         UInt nElements = M_localElements[i].size();
         UInt nNodes   = M_localNodes[i].size();
         UInt nRidges   = M_localRidges[i].size();
-        UInt nFaces   = M_localFacets[i].size();
+        UInt nFacets   = M_localFacets[i].size();
 
         (*M_meshPartitions)[i]->setMaxNumPoints (nNodes, true);
         (*M_meshPartitions)[i]->setMaxNumRidges  (nRidges, true);
-        (*M_meshPartitions)[i]->setMaxNumFacets  (nFaces, true);
+        (*M_meshPartitions)[i]->setMaxNumFacets  (nFacets, true);
         (*M_meshPartitions)[i]->setMaxNumElements( nElements, true);
 
         (*M_meshPartitions)[i]->setMaxNumGlobalPoints (M_originalMesh->numPoints());

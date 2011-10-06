@@ -86,7 +86,7 @@ public MC::regionMarker_Type
 public:
     /** @name Marker Types
      *  @ingroup public_types
-     *  Markers for Point, Edge, Face and Region.
+     *  Markers for Point, Edge, Face, Volume and Region.
      *
      *  @{
      */
@@ -112,29 +112,12 @@ public:
 
     /** @} */ // End of group Marker Types
 
-    /** @name Basic Element Shape Types
-     *  @ingroup public_types
-     *  Face and Edge geometric shapes.
-     *  @{
-     */
 
-    //! Face Shape.
-    typedef GEOSHAPE faceShape_Type;
-    typedef GEOSHAPE elementShape_Type;
-    
-    //! Facet Shape (Boundary Facet).
-    //typedef typename GEOSHAPE::GeoBShape faceShape_Type;
-    typedef typename GEOSHAPE::GeoBShape facetShape_Type;
-    
-    //! Ridge Shape (Boundary of Boundary Facet)
-   // typedef typename faceShape_Type::GeoBShape edgeShape_Type;
-    typedef typename facetShape_Type::GeoBShape ridgeShape_Type;
 
-    /** @} */ // End of group Basic Element Shape Types
 
     /** @name Geometric Element Types
      *  @ingroup public_types
-     *  Faces, Edges and Points.
+     *  Volumes, Faces, Edges and Points.
      *  @{
      */
 
@@ -155,36 +138,51 @@ public:
 
     /** @} */ // End of group Geometric Element Types
 
+
+    /** @name Basic Element Shape Types
+     *  @ingroup public_types
+     *  Volume, Face and Edge geometric shapes.
+     *  @{
+     */
+
+    //! Element Shape.
+    typedef typename volume_Type::geoShape_Type volumeShape_Type;
+    typedef GEOSHAPE elementShape_Type;
+
+    //! Facet Shape (Boundary Facet).
+    typedef typename face_Type::geoShape_Type faceShape_Type;
+    typedef typename GEOSHAPE::GeoBShape facetShape_Type;
+
+    //! Ridge Shape (Boundary of Boundary Facet)
+    typedef typename edge_Type::geoShape_Type edgeShape_Type;
+    typedef typename facetShape_Type::GeoBShape ridgeShape_Type;
+
+    /** @} */ // End of group Basic Element Shape Types
+
     /** @name Geometric Element Container Types
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
      *  @{
      */
+    //! Points Container.
+    typedef MeshEntityContainer<point_Type>   points_Type;
+    typedef MeshEntityContainer<peak_Type>   peaks_Type;
+    
+    //! Elements Container.
+    typedef MeshEntityContainer<volume_Type > volumes_Type;
+    typedef MeshEntityContainer<element_Type>  elements_Type;
+    
+    //! Facets Container: it may contain only Boundary facets.
+    typedef MeshEntityContainer<face_Type>    faces_Type;
+    typedef MeshEntityContainer<facet_Type>    facets_Type;
+    
+    //! Ridges Container: it may be empty.
+    typedef MeshEntityContainer<edge_Type>    edges_Type;
+    typedef MeshEntityContainer<ridge_Type>    ridges_Type;
 
-    //! Points Container
-    typedef MeshEntityContainer<point_Type> points_Type;
-    typedef MeshEntityContainer<point_Type> ridges_Type;
-    //! Faces Container
-    typedef MeshEntityContainer<element_Type> faces_Type;
-    typedef MeshEntityContainer<element_Type> elements_Type;
-    //! Edges Container: at least boundary edges
-    typedef MeshEntityContainer<facet_Type> edges_Type;
-    typedef MeshEntityContainer<facet_Type> facets_Type;
 
     /** @} */ // End of group Geometric Element Container Types
 
-
-    /** @name Generic Types
-     *  @ingroup public_types
-     *
-     *  Generic types for all regionMeshes.
-     *
-     *  These are part of the generic generic interface common for all RegionMeshes (3D -- 1D).
-     *
-     *  @{
-     */
-
-    /** @} */ // End of group Generic Types
 
 
     /** @name Constructors & Destructor
@@ -201,41 +199,19 @@ public:
      */
     explicit RegionMesh2D( UInt id );
 
-    //! Copy constructor
-    /**
-     *  @param m a RegionMesh2D
-     */
-    explicit RegionMesh2D( RegionMesh2D<GEOSHAPE, MC> const & m );
-
     //! Destructor
-    ~RegionMesh2D<GEOSHAPE, MC>();
+    virtual ~RegionMesh2D<GEOSHAPE, MC>();
 
     /** @} */ // End of group Constructors & Destructor
-
-
-    /** @name Operators
-     *  Public Operator Methods
-     *
-     *  @{
-     */
-
-    //! Assignment operator
-    /**
-     *  @param m a RegionMesh2D
-     *  @return the newly copied RegionMesh2D
-     */
-    RegionMesh2D<GEOSHAPE, MC> operator=( RegionMesh2D<GEOSHAPE, MC> const & m );
-
-    /** @} */ // End of group Operators
 
 
     /** @defgroup public_methods Public Methods
      *
      */
 
-    /** @name Debugging Methods
-     *  @ingroup public_methods
-     *  Debugging methods
+    /** @name Utilities
+     *  @ingroup utilities
+     *  Utilities for mesh checking and debugging.
      *
      *  @{
      */
@@ -248,22 +224,34 @@ public:
      *  @param out Output stream (std::cout default);
      *  @return Output stream (for concatenation).
      */
-    std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout );
+    std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
     //! Basic tests for mesh consistency.
     /**
      *  Check consistency of the mesh and fix errors.
      *
-     *  @param level How much deep in the check we should go (not used yet).
-     *  @param fix If true errors will be fixed, not otherwise (default).
+     *  @param level Indicates level.
+     *  - 0 => minimal level, just sets the switches to the appropriate value
+     *  - 1 => launch an external function from mesh_util.h which performs a series of
+     *   sophisticated tests.
+     *  @param fix If true and level=1 it fixes the mesh.
      *  @param verbose If true output is verbose, false otherwise (default);
      *  @param out Output stream (std::cerr default);
-     *  @return Severity of the errors.
+     *  @return Severity level. If different from 0 the mesh has problem. If positive the problems are such that the mesh may not
+     *  work in any case. If less than zero it may work in some cases.
      */
     int check( int level = 0, bool const fix = false, bool const verbose = true, std::ostream & out = std::cerr );
 
-    /** @} */ // End of group Debugging Methods
+    //! Display local to global mapping.
+    /**
+     *  @param os Output stream.
+     */
+    void printLtGMap(std::ostream & os);
 
+    //! Return the handle to perform transformations on the mesh
+    inline MeshUtility::MeshTransformer<RegionMesh2D<GEOSHAPE, MC> > & meshTransformer();
+
+    /** @} */ // End of group Utilities
 
     /** @name Switches Methods
      *  @ingroup public_methods
@@ -273,17 +261,17 @@ public:
      *
      *  The possible Switches are:
      *  - \c HAS_ALL_FACETS
-     *  - \c HAS_ELEMENT_TO_FACETS
-     *  - \c HAS_BEEN_CHECKED
+     *  - \c HAS_ALL_RIDGES
      *  - \c HAS_BOUNDARY_FACETS
+     *  - \c HAS_BOUNDARY_RIDGES
+     *  - \c HAS_ELEMENT_TO_FACETS
+     *  - \c HAS_ELEMENT_TO_RIDGES
+     *  - \c HAS_BEEN_CHECKED
      *  - \c FACETS_HAVE_ADIACENCY
      *
      *  @{
      */
-
-    //! Return the handle to perform transformations on the mesh
-    inline MeshUtility::MeshTransformer<RegionMesh2D<GEOSHAPE, MC> > & meshTransformer();
-
+     
 
     //! Get the number of switch which have been set.
     /**
@@ -312,6 +300,16 @@ public:
      *  @param _s Name of the switch.
      */
     void unsetLinkSwitch( std::string const & _s );
+    //! Output switches contents
+    /**
+     *  @param verbose Verbosity of the output.
+     *  @param out Output stream.
+     *  @return Output stream for concatenation.
+     */
+    std::ostream & showLinkSwitch( bool verbose = false, std::ostream & out = std::cout )
+    {
+        return switches.showMe( verbose, out );
+    }
 
     /** @} */ // End of group Switch Methods
 
@@ -327,9 +325,6 @@ public:
      *  @{
      */
 
-
-    int inline dimension() const {return 2;}
-
     //! Number of elements in mesh.
     /**
      *  @return Number of elements in mesh.
@@ -342,19 +337,19 @@ public:
     /**
      *  @return Number of elements in mesh.
      *  @sa numFaces
-     *  @note Alias to numFaces()
+     *  @note Alias to numElements()
      */
     UInt & numElements();
 
-    //! Number of Boundary faces.
+    //! Number of Boundary facets.
     /**
-     *  @return Number of Boundary faces.
+     *  @return Number of Boundary facets.
      */
     UInt numBFacets() const;
 
     //! Number of boundary faces.
     /**
-     *  @return Number of boundary faces.
+     *  @return Number of boundary facets.
      */
     UInt& numBFacets();
 
@@ -365,8 +360,6 @@ public:
      */
     element_Type& element( const UInt& i );
 
-    volume_Type& volume( const UInt& i ) { return  volume_Type();}
-
     //! Get element at the i-th index.
     /**
      * @param i Index of the element
@@ -374,48 +367,335 @@ public:
      */
     const element_Type& element( const UInt& i ) const;
 
-    const volume_Type volume( const UInt& /*i*/ ) const { return volume_Type();}
-
-    //! Get boundary element at the i-th index.
+    //! Get boundary facet at the i-th index.
     /**
      * @param i Index of the element
-     * @return Boundary element at index i
+     * @return Boundary facet at index i
      */
     facet_Type& bFacet( const UInt& i );
 
-    //! Get boundary element at the i-th index.
+    //! Get boundary facet at the i-th index.
     /**
      * @param i Index of the element
-     * @return Boundary element at index i
+     * @return Boundary facet at index i
      */
     const facet_Type& bFacet( const UInt& i ) const;
+    const facet_Type& bFace( const UInt& i ) const { return bFacet(i); }
+
+    //! Number of global elements.
+    /**
+     * @return Number of global Elements (Volumes).
+     */
+    UInt numGlobalElements() const;
+
+    //! Access to number of global elements.
+    /**
+     * @return Access to number of global Elements (Volumes).
+     */
+    UInt & numGlobalElements();
 
     /** @} */ // End of group Generic Methods
 
 
     /** @name Volume Methods
+     *  @anchor volume_methods
      *  @ingroup public_methods
      *
-     *  These are generic methods related to volumes.
+     *  Methods which operates on 3D elements.
+     *
+     *  There are different way of counting gemetry entities:
+     *  - <strong>Counter</strong>: A counter stored the number of entities (element, faces
+     *    etc) in the mesh. It does NOT necessarily correspond to the numer of entities
+     *    actually stored. Indeed, I may not stor edges, yet having a counter with
+     *    the number of edges in the mesh;
+     *
+     *  - <strong>Stored</strong>: The number of stored entities corresponds to the size()
+     *    of the container.  A container may store all mesh entities (this is the
+     *    default for the Points and the Volumes), only the boundary entities
+     *    (this is the default with the Faces) or even none (this is the default
+     *    with the edges);
+     *
+     *  - <strong>Capacity</strong>: The maximum number of entities that may stored
+     *    before the container is resized.
      *
      *  @{
      */
 
-    //! Returns Number of Volumes (zeros in 2D)
-    UInt numVolumes()       const                { return 0; }
-    //! Returns Global Number of Volumes (zeros in 2D)
-    UInt numGlobalVolumes() const                { return 0; }
-    UInt numGlobalElements() const                { return numGlobalFaces(); }
-    UInt numGlobalFacets() const                { return numGlobalEdges(); }
-    UInt numGlobalRidges() const                { return numGlobalVertices(); }
+    //! Returns Number of Volumes.
+    /**
+     *  Returns number of Volume elements in the mesh as given by the internal counter.
+     *  @return Number of Volumes.
+     */
+    UInt numVolumes()       const;
+
+    //! Returns Global Number of Volumes
+    /**
+     *  Returns number of Global Volume elements in the mesh as given by the internal counter.
+     *  @return Number of Global Volumes.
+     */
+    UInt numGlobalVolumes() const;
+
+    //! Volumes actually stored in list.
+    /**
+     *  @return Number of stored Volumes.
+     */
+    UInt storedVolumes() const {return 0;};
+
+    //! Current capacity of Volumes Container.
+    /**
+     *  @return how many elements may be stored.
+     */
+    UInt maxNumVolumes() const;
+    inline UInt maxNumElements() const {return maxNumFaces();}
+
+    //! Changes Current capacity of Volumes.
+    /**
+     *  Changes Current capacity of Volumes (Optionally sets internal counter).
+     *
+     *  @param n Maximum number of volumes.
+     *  @param setcounter true to set the counter, false otherwise (default).
+     */
+    void setMaxNumVolumes( UInt const /*n*/, bool const /*setcounter*/ = false) {};
+    inline void setMaxNumElements   ( UInt const n, bool const setcounter = false ) {setMaxNumFaces( n, setcounter);}
+
+    //! Changes Current capacity of Global Volumes.
+    /**
+     *  Changes Current capacity of Global Volumes (Optionally sets internal counter).
+     *
+     *  @param n maximum number of global volumes.
+     */
+    void setMaxNumGlobalVolumes( UInt const n ) {};
+    inline void setMaxNumGlobalElements( UInt const n ) {setMaxNumGlobalFaces(n) ;}
+
+    //! Set Number of Volumes.
+    /**
+     *  Set number of Volume elements in the mesh by changing internal counter.
+     *  @param n Number of volumes.
+     */
+    void setNumVolumes      ( UInt const n );
+    inline void setNumElements      ( UInt const n ) {setNumFaces(n);}
+
+    //! Adds volumes.
+    /**
+     *  Adds volume. Id computed automatically.
+     *  @return Reference to added volume.
+     */
+    inline volume_Type & addVolume(){};
+    inline element_Type & addElement() {return addFace();}
+
+    //! Adds volumes.
+    /**
+     *  Adds volume. Id computed automatically.
+     *  @param v Volume to be added.
+     *  @return Reference to the newly added volume.
+     */
+    element_Type & addVolume( element_Type const & v );
+    inline element_Type & addElement( element_Type const & v ) {return addFace(v);}
+
+    //! Adds volume in a certain position.
+    /**
+     *  Adds volume to a specified position.
+     *  @param v Volume to be added.
+     *  @param pos Position of the volume.
+     *  @return Reference to the newly added volume.
+     */
+    element_Type & setVolume( element_Type const & v, UInt const pos );
+    inline element_Type & setElement( element_Type const & elem, UInt const pos ) {return setFace( elem, pos );}
+
+    //! set numVolumes counter.
+    void setVolumeCounter();
+    inline void setElementCounter() {setVolumeCounter();}
+
+    //! Reference to last volume stored in list.
+    /**
+     *  Reference to last volume stored in list.
+     *  Useful for mesh readers.
+     *  @return reference of the last volume in the list.
+     */
+    element_Type & lastVolume();
+
+    //! i-th mesh 3D Element.
+    /**
+     *  @param i index of the mesh 3D Element.
+     *  @return the i-th volume.
+     */
+    element_Type const & volume( UInt const i ) const;
+
+    //! i-th mesh 3D Element.
+    /**
+     *  @param i index of the mesh volume.
+     *  @return reference to the ith mesh volume.
+     */
+    element_Type & volume( UInt const i );
 
     /** @} */ // End of group Volume Methods
 
 
+    /** @name Element Adjacency Methods
+     *  @ingroup public_methods
+     *  Methods to obtain the ID of Face and Edge belonging to an element.
+     *
+     *  Accessing this information requires that the appropriate data
+     *  structures have been set by using the updateElementEdges() or
+     *  updateElementFaces() methods.
+     *
+     *  It is NOT required to have the full information about edges and faces:
+     *  The ID of the Face and Edge entities may be calculated without
+     *  contructing the corresponding Edge of Face Object. This saves
+     *  memory. However the  methods has the capability of
+     *  building the actual internal Faces (the boundary GeoFaces must
+     *  already exist!) of the Edges. In this case the MarkerFlag is inherited using the rules stated in the
+     *  marker_traits class.
+     *
+     *  @{
+     */
+
+    //! Is the array for local Faces set up?
+    /**
+     *  It does not use switches, but interrogates the container directly
+     *
+     *  @return true if array for local Faces in set up.
+     */
+    bool hasLocalFaces() const;
+    inline bool hasLocalFacets() const {return hasLocalEdges();}
+
+    //! Build localFacetId table and optionally fills the list of Faces.
+    /**
+     *  @param createFaces is set true if we want also to create the actual list
+     *  of internal faces. There is another utility (in mesh_util.h), which
+     *  might be used for the same purpose if we want just to create the faces
+     *  and not also the LocaFaceID table.
+     *  @param verbose if true, output is verbose.
+     *  @param estimateFaceNumber is a guess provided by the user of the total
+     *  number of faces. It is relevant only when createFaces=true. Setting it
+     *  to a proper value helps in reducing time and memory.
+     *
+     *  @pre The routine assumes that the boundary facets are properly set, if not use the
+     *  methods in #include MeshChecks.hpp
+     *
+     */
+    void updateElementFaces( bool /*createFaces*/ = false, const bool /*verbose*/ = false, UInt /*estimateFaceNumber*/ = 0 ){};
+    void updateElementFacets( bool createFacets = false, const bool verbose = false, UInt estimateFacetNumber = 0 )
+     		{updateElementEdges( createFacets, verbose, estimateFacetNumber );}
+
+    //! Destroys element-to-face container. Useful to save memory!
+    void cleanElementFacets();
+    inline void cleanElementFaces(){cleanElementFacets();}
+
+    //! Local Face Id.
+    /** @param volId Id of volume (element).
+     *  @param locF local face number 0 \< LocF \< numLocalFaces().
+     *  @return ID of the face.
+     */
+    UInt localFacetId( const UInt elemId, const UInt locE ) const {return localEdgeId( elemId, locE );}
+    inline UInt localFaceId( UInt const volId, UInt const locF ) const {return UInt();}
+
+    //! Local Face Id.
+    /** @param iv Reference to a volume (element).
+     *  @param locF local face number 0 \< LocF \< numLocalFaces().
+     *  @return ID of the face.
+     */
+    UInt localFacetId( const element_Type & iEl, UInt const locF ) const;
+    inline UInt localFaceId( const element_Type & iv, UInt const locF ) const 
+    	{return localFacetId( iv, locF ); }
+    
+
+    //! Is the array for local Edges set up?
+    /**
+     *  It does not use switches, but interrogates the container directly.
+     *
+     *  @return true if edges information are available, false otherwise.
+     */
+    bool hasLocalEdges() const;
+    bool hasLocalRidges() const { return true;}
+
+    //! Build localEdgeId table and optionally fills the list of Edges
+    /**
+     *
+     * @param createEdges is set true if we want also to create the actual list
+     *  of edges. There is another utility (MeshChecks.hpp), which
+     *  might be used for the same purpose if we want just to create the faces
+     *  and not also the LocalEdgeID table.
+     *  @param verbose If true, output is verbose.
+     *  @param estimateEdgeNumber is a guess provided by the user of the total
+     *  number of edges. It is relevant only when createFaces=true. Setting it
+     *  to a proper value helps in reducing time and memory.
+     *  @param renumber Relevant only if createFaces=true.It makes sure that boundary edges are first
+     *  if set to false possibly existing edges are never moved
+     *
+     *  @note This method does not assume that boundary edges are stores, since
+     *  this condition is NOT a a paradigm for a RegionMesh2D.
+     */
+    void updateElementEdges( bool createEdges = false, const bool verbose = false,
+                             UInt estimateEdgeNumber = 0, bool renumber=true);
+    inline void updateElementRidges( bool createEdges = false, const bool verbose = false,
+                             UInt estimateEdgeNumber = 0, bool renumber=true){};
+       //    updateElementEdges( createEdges, verbose, estimateEdgeNumber, renumber); }
+
+    //! Destroys Edge-To-Face lookup table.
+    void cleanElementRidges(){};
+    inline void cleanElementEdges() {cleanElementRidges();}
+
+    //! Local Edge.
+    /** @param volId Id of volume (element).
+     *  @param locE local edge number 0 \< LocE \< numLocalEdges().
+     *  @return ID of the edge.
+     */
+    UInt localEdgeId( const UInt elemId, const UInt locE ) const;
+    inline UInt localRidgeId( UInt const elemId, UInt const locE )
+		const {return element(elemId).point(locE).localId();}
+
+    //! Local Edge.
+    /** @param iv Reference of the volume.
+     *  @param locE local edge number 0 \< LocE \< numLocalEdges().
+     *  @return ID of the edge.
+     */
+    UInt localEdgeId( const element_Type& iElem, const UInt locE ) const;
+    inline UInt localRidgeId( const element_Type & elem, UInt const locE )
+		const {return element(elem.id()).point(locE).localId();}
+
+    //! Returns Global-to-Local Node map.
+    /**
+     *  @return Global-to-Local map.
+     */
+    std::map<int,int> & globalToLocalNode() {return M_globalToLocalNode;}
+    std::map<int,int> & globalToLocalPeak() {return M_globalToLocalNode;}
+    //! Returns Local-to-Global Node map.
+    /**
+     *  @return Local-to-Global map.
+     */
+    std::map<int,int> & localToGlobalNode() {return M_localToGlobalNode;}
+    std::map<int,int> & localToGlobalPeak() {return M_localToGlobalNode;}
+
+    /** @} */ // End of group Element Adjacency Methods
+
+
     /** @name Faces Methods
+     *  @anchor face_methods
      *  @ingroup public_methods
      *
-     *  All methods which operates on 2D elements.
+     *  Methods to access/create/modify faces data
+     *
+     *  There are different way of counting Faces:
+     *  - <strong>Number of Faces</strong>: is the declared number of total faces in the mesh.
+     *  It uses an internal counter.
+     *  @warning A value different from zero does NOT imply that the
+     *  faces are actually stored. This counter declares the number of Faces
+     *  that the mash have not those that are actually stored in the list of
+     *  faces!
+     *  - <strong>Number of Boundary Faces</strong>: is the declared number of boundary faces
+     *  in the mesh. It uses an internal counter.
+     *  @warning A value different from zero does NOT imply that the
+     *  boundary faces are actually stored.
+     *  - <strong>Number of Stored Faces</strong>: It is the number of Faces actually stored
+     *  on the face container.
+     *  - <strong>Maximum number of stored faces</strong>: The number of faces that may stored
+     *  before the container is resized.
+     *  @note This parameter has to be set BEFORE inserting faces
+     *  in the container if we want that pointer into the container maintains
+     *  their validity. The container will also have a better performance.
+     *
+     *  See also \ref volume_methods.
      *
      *  @{
      */
@@ -428,6 +708,8 @@ public:
      *  @return Number of Faces.
      */
     UInt numFaces() const;
+    void setNumFaces( UInt n) {M_numFaces = n; }
+    inline UInt numFacets() const {return numEdges();}
 
     //! Returns Global Number of Faces
     /**
@@ -437,14 +719,7 @@ public:
      *  @return Global Number of Faces.
      */
     UInt numGlobalFaces() const;
-
-    //! Access to the Number of Faces
-    /**
-     *  Access number of Face (internal counter).
-     *
-     *  @return Access number of Face (internal counter).
-     */
-    UInt & numFaces();
+    inline UInt numGlobalFacets() const {return numGlobalEdges();}
 
     //! Number of Faces actually stored.
     /**
@@ -468,7 +743,7 @@ public:
      *  @param setcounter true to set the counter, false otherwise.
      */
     void setMaxNumFaces( UInt const n, bool const setcounter = false );
-    void setMaxNumElements( UInt const n, bool const setcounter = false ) {return setMaxNumFaces( n, setcounter );}
+    void setMaxNumFacets( UInt const n, bool const setcounter = false ) {setMaxNumEdges( n, setcounter );}
 
     //! Changes Current capacity of Global Faces.
     /**
@@ -477,15 +752,15 @@ public:
      *  @param n maximum number of global faces.
      */
     void setMaxNumGlobalFaces( UInt const n );
-    void setMaxNumGlobalElements( UInt const n ) {return setMaxNumGlobalFaces( n );}
+    void setMaxNumGlobalFacets( UInt const n ) {setMaxNumGlobalEdges( n );}
 
     //! Adds faces.
     /**
-     *  Adds faces. Id computed automatically.
+     *  Adds a face (optionally a boundary face). Id computed automatically.
+     *  @param boundary true if it's a boundary face.
      *  @return Reference to added face.
      */
     element_Type & addFace();
-    element_Type & addElement() {return addFace();}
 
     //! Adds faces.
     /**
@@ -494,10 +769,6 @@ public:
      *  @return Reference to the newly added face.
      */
     element_Type & addFace( element_Type const & v );
-    element_Type & addElement( element_Type const & v ) {return addFace( v );}
-
-
-    inline typename RegionMesh2D<GEOSHAPE, MC>::volume_Type & addVolume(){};
 
     //! Add face in a certain position.
     /**
@@ -506,10 +777,7 @@ public:
      *  @param pos Position of the face.
      *  @return Reference to the newly added face.
      */
-    element_Type & setFace( element_Type const & v, UInt const pos );
-
-    //! set numFaces counter.
-    void setFaceCounter();
+    face_Type & setFace( face_Type const & f, UInt pos);
 
     //! Reference to last face stored in list.
     /**
@@ -571,7 +839,7 @@ public:
      *  @return Number of Edges.
      */
     UInt numEdges() const;
-    UInt numFacets() const {return numEdges();}
+    UInt numRidges() const {return numVertices(); }
 
     //! Global number of Edges.
     /**
@@ -581,21 +849,13 @@ public:
      *  @return Global number of Edges.
      */
     UInt numGlobalEdges() const;
+    UInt numGlobalRidges() const {return numGlobalVertices();}
 
     //! Number of local edges for each (2D) element.
     /**
      * @return Number of local edges for each (2D) element
      */
     UInt numLocalEdges() const;
-
-    //! Access number of Edges.
-    /**
-     *  Access to the internal counter.
-     *
-     *  @return Access number of Edges.
-     */
-    UInt & numEdges();
-    UInt & numFacets(){return numEdges();}
 
     //! Number of stored Edges.
     /**
@@ -622,7 +882,6 @@ public:
      *  @param setcounter true to set the counter, false otherwise.
      */
     void setMaxNumEdges( UInt const n, bool const setcounter = false );
-    void setMaxNumFacets( UInt const n, bool const setcounter = false ) {setMaxNumEdges( n, setcounter );}
     void setMaxNumRidges( UInt const /*n*/, bool const /*setcounter*/ = false ) {};
     //! Changes Current capacity of Global Edges.
     /**
@@ -631,7 +890,6 @@ public:
      *  @param n Maximum number of global edges.
      */
     void setMaxNumGlobalEdges( UInt const n );
-    void setMaxNumGlobalFacets( UInt const n ) {setMaxNumGlobalEdges( n );}
     void setMaxNumGlobalRidges( UInt const /*n*/ ) {};
 
     //! Adds Edges.
@@ -722,7 +980,6 @@ public:
     void setNumBFacets( UInt const n ) { setNumBEdges(n);}
     void setNumBRidges( UInt const /*n*/ ) {}
 
-
     //! Do I store mesh edges?
     /**
      *  Returns true if edges are stored.
@@ -730,22 +987,6 @@ public:
      *  @return true if edge are stored, false otherwise.
      */
     bool hasEdges() const;
-
-    //! Do I store mesh internal edges?
-    /**
-     *  Returns true if internal edges are stored.
-     *
-     *  @return true if internal edge are stored, false otherwise.
-     */
-    bool hasInternalEdges() const;
-
-    //! Number of Boundary Edges.
-    /**
-     *  Returns the number of boundary edges.
-     *
-     *  @return Number of boundary Edges.
-     */
-    UInt numBEdges() const;
 
     //! Edge on boundary check.
     /**
@@ -764,6 +1005,7 @@ public:
      *  @return true if the edge is on the boundary, false otherwise.
      */
     bool isBoundaryFacet( UInt const & id ) const;
+    bool isBoundaryRidge( UInt const & id ) const {return isBoundaryPoint(id);}
 
     //! Full Edge check by id.
     /**
@@ -775,6 +1017,34 @@ public:
      *  @return true if the edge is actually stored, false otherwise.
      */
     bool isFullEdge( UInt const & id ) const;
+
+    //! Number of Boundary Edges.
+    /**
+     *  Returns number of boundary edge elements in the mesh
+     *  as given by the internal counter.
+     *
+     *  @return Number of Boundary Edges.
+     */
+    UInt numBEdges() const;
+
+    //! Set internal counter of number of Edges.
+    /**
+     *  @param n Number of Edges.
+     */
+    void setNumEdges ( UInt const n ) {M_numEdges = n;};
+    void setNumRidges ( UInt const n ) {setNumVertices ( n );}
+
+    //! Do I store internal edges?
+    /**
+     *  @return true if internal edges are stored.
+     */
+    bool hasInternalEdges() const;
+
+    //! Number of edges on each face.
+    /**
+     *  @return Number of edges for each face.
+     */
+    UInt numLocalEdgesOfFace() const ;
 
     /** @} */ // End of group Edges Methods
 
@@ -799,7 +1069,7 @@ public:
      *   This is a debatable point!
      *
      *   @note To have more information on the Point methods look at the
-     *   documentation of the analogous Edges methods.
+     *   documentation of the analogous Edges methods (\ref face_methods).
      *
      *  @{
      */
@@ -811,9 +1081,6 @@ public:
      *  @return Number of points in the mesh.
      */
     UInt numPoints() const;
-    UInt numRidges() const {return numPoints(); }
-
-    inline UInt numPeaks() const {return 0; }
 
     //! Returns a reference to number of points in the mesh.
     /**
@@ -822,7 +1089,6 @@ public:
      *  @return Reference to the internal counter of number of points in the mesh.
      */
     UInt & numPoints();
-    UInt & numRidges() {return numPoints(); }
 
     //! Returns number of points in the mesh actually stored.
     /**
@@ -900,6 +1166,20 @@ public:
      */
     point_Type & setPoint( point_Type const & p, UInt const position );
 
+    //! Chang boundary flag of a given point
+    /**
+     * This method is required because in the present implementation of RegionMesh we keep
+     * track of the boundary points, so just doing point(pos).setBoundary(boundary) will not
+     * work since the internal list will  not be updated. We remind, however, that MeshEntityContainer
+     * methods allow to extract all entities with a given flag set, so you may use that
+     * method to extract boundary points irrespectively of the information stored in the
+     * mesh boundary point list.
+     *
+     * @param position The position in the list of the point to be changed
+     * @param boundary true or false if the point is or is not on the boundary
+     * @return a reference to the point
+     */
+    point_Type & changePointBoundaryFlag(UInt const & position, bool const boundary);
     //! Returns the last mesh Point.
     /**
      *  Returns the last Point in the mesh.
@@ -915,11 +1195,9 @@ public:
      *  @param i Id of the Point.
      *  @return i-th mesh Point.
      */
-
-    inline point_Type peak( UInt const /*i*/ ) const {return point_Type();}
-
     point_Type const & point( UInt const i ) const;
     point_Type const & ridge( UInt const i ) const {return point(i);}
+    inline point_Type const & peak( UInt const i ) const {return point(i);}
 
     //! Returns a reference to the i-th mesh Point.
     /**
@@ -930,6 +1208,7 @@ public:
      */
     point_Type & point( UInt const i );
     point_Type & ridge( UInt const i ) {return point(i);}
+    inline peak_Type & peak( UInt const i ) {return peak_Type();}
 
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
@@ -965,23 +1244,30 @@ public:
      */
     void setNumBPoints( UInt const n );
 
-    //! Returns the i-th mesh Point.
-     /**
-      *  Returns the i-th Point in the mesh.
-      *
-      *  @param i Id of the Point.
-      *  @return i-th mesh Point.
-      */
-     point_Type const & pointInitial ( UInt const i ) const ;
+    //! Is this point on boundary?
+    /**
+     *  Is this point on boundary?
+     *
+     *  @param p The Point.
+     *  @return true if the point is on the boundary, false otherwise.
+     */
+    bool isBoundaryPoint( point_Type const & p ) const ;
 
-     //! Returns a reference to the i-th mesh Point.
-     /**
-      *  Returns the i-th Point in the mesh.
-      *
-      *  @param i Id of the Point.
-      *  @return Reference i-th mesh Point.
-      */
-     point_Type & pointInitial( UInt const i ) ;
+    //! Is this point on boundary?
+    /**
+     *  Is this point, of given id, on boundary?
+     *
+     *  @param id Id of the point.
+     *  @return true if the point is on the boundary, false otherwise.
+     */
+    bool isBoundaryPoint( UInt const & id ) const;
+
+    //! List of points
+    /**
+     *  @param fct Function of three double arguments.
+     *  @param list_pts List of Points.
+     */
+    void getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& list_pts );
 
     /** @} */ // End of group Points Methods
 
@@ -1001,13 +1287,21 @@ public:
      */
     UInt  numVertices () const;
 
-    //! Reference to the counter of Vertices in Region.
+    //! Number of Boundary Vertices in Region.
     /**
-     *  Allows to change number of Vertices in Region.
+     *  Returns the number of Boundary Vertices in Region.
      *
-     *  @return Reference to the counter of Vertices in Region.
+     *  @return Number of Vertices in Region.
      */
-    UInt& numVertices ();
+    UInt numBVertices() const;
+
+    //! Reference to the number of Boundary Vertices in Region.
+    /**
+     *  Returns a reference to the number of Boundary Vertices in Region.
+     *
+     *  @return Reference to the number of Vertices in Region.
+     */
+    UInt & numBVertices();
 
     //! Number of local vertices for each (2D) element.
     /**
@@ -1024,21 +1318,6 @@ public:
     UInt numGlobalVertices() const;
     inline UInt numGlobalPeaks() const { return numGlobalVertices();}
 
-    //! Number of Boundary Vertices in Region.
-    /**
-     *  Returns the number of Boundary Vertices in Region.
-     *
-     *  @return Number of Vertices in Region.
-     */
-    UInt numBVertices() const;
-
-    //! Reference to the counter of Boundary Vertices in Region.
-    /**
-     *  Allows to change number of Boundary Vertices in Region.
-     *
-     *  @return Reference to the counter of Boundary Vertices in Region.
-     */
-    UInt& numBVertices();
 
     //! Vertex check.
     /**
@@ -1057,27 +1336,6 @@ public:
      *  @return true if the Point is a Vertex, false otherwise.
      */
     bool isVertex ( point_Type const & p ) const;
-
-    //! Vertex on boundary check.
-    /**
-     *  Is this Point on boundary?
-     *
-     *  @param id Point's id.
-     *  @return true if the Point is on boundary, false otherwise.
-     */
-    bool isBoundaryPoint ( UInt const & id )       const {return isBoundaryRidge(id);}
-    bool isBoundaryRidge ( UInt const & id )       const;
-
-    //! Vertex on boundary check.
-    /**
-     *  Is this Point on boundary?
-     *
-     *  @param p A Point.
-     *  @return true if the Point is on boundary, false otherwise.
-     */
-    bool isBoundaryPoint ( point_Type const & p ) const {return isBoundaryRidge(p);}
-    bool isBoundaryRidge ( point_Type const & p ) const;
-
 
     //! Changes number of Vertices.
     /**
@@ -1106,112 +1364,6 @@ public:
     /** @} */ // End of group Vertices Methods
 
 
-    /** @name Element Adjacency Methods
-     *  @ingroup public_methods
-     *  Methods to obtain the ID of Edges belonging to an element.
-     *
-     *  Accessing this information requires that the appropriate data
-     *  structures have been set up by using the updateElementEdges() method.
-     *
-     *  Often, it is NOT required to have the full information about edges and faces:
-     *  The ID of the Face and Edge entities may be calculated without
-     *  constructing the corresponding Edge of Face Object. This saves memory.
-     *
-     *  @{
-     */
-
-    //! Is the array for local Edges set up?
-    /**
-     *  It does not use switches, but interrogates the container directly.
-     *
-     *  @return true if edges information are available, false otherwise.
-     */
-    bool hasLocalEdges() const;
-    bool hasLocalFacets() const {return hasLocalEdges();}
-    bool hasLocalRidges() const { return true;}
-
-    //! Edge Id of a certain edge number around a Face.
-    /**
-     *  @param iface Reference to Face.
-     *  @param locE Position of the surrounding edges.
-     *  @return Edge Id.
-     */
-    UInt localEdgeId( const element_Type& iface, const UInt locE ) const;
-
-    //! Edge Id of a certain edge number around a Face.
-    /**
-     *  @param facId Face Id.
-     *  @param locE Position of the surrounding edges.
-     *  @return Edge Id.
-     */
-    UInt localEdgeId( const UInt facId, const UInt locE ) const;
-
-    UInt localFacetId( const UInt facId, const UInt locE ) const {return localEdgeId( facId, locE );}
-
-    //! Element adjacent to a Edge.
-    /**
-     *  Returns ID of adjacent Element to a given Edge.
-     *
-     *  The first element is the one <strong>ORIENTED coherently with the edge</strong> (AS
-     *  STORED in Edges). It means that the edge orientation is OUTWARD with
-     *  respect to the element.\n
-     *  The second element is either null (boundary edge) or indicates that
-     *  the normal of the edge appears INWARD with respect to that element.
-     *
-     *  @param edgeId Id of a given edge.
-     *  @param Pos Position equal to 0 or 1 indicates first or second adjacent Element.
-     *  @return Edge ID given.
-     */
-    UInt edgeElement( UInt const edgeId, UInt const Pos ) const;
-
-    //! Element adjacent to a Edge by reference.
-    /**
-     *  Returns ID of adjacent Element to a given Edge.
-     *
-     *  The first element is the one <strong>ORIENTED coherently with the edge</strong> (AS
-     *  STORED in Edges). It means that the edge orientation is OUTWARD with
-     *  respect to the element.\n
-     *  The second element is either null (boundary edge) or indicates that
-     *  the normal of the edge appears INWARD with respect to that element.
-     *
-     *  @param f Reference of a given edge.
-     *  @param Pos Position equal to 0 or 1 indicates first or second adjacent Element.
-     *  @return Edge ID given.
-     */
-    UInt edgeElement( facet_Type const & f, UInt const Pos ) const;
-
-    //! Builds Edge-To-Face lookup table.
-    /**
-     *  Builds the lookup table for adjacency queries.
-     *
-     *  @param ce true if edge Counter is set, false otherwise (default).
-     *  @param ee Edge count for memory reservation (0 default).
-     */
-    void updateElementEdges(bool ce=false,  const bool verbose = false, UInt ee=0 );
-    void updateElementFacets( bool createFaces = false, const bool verbose = false, UInt estimateFaceNumber = 0 )
-    		{updateElementEdges( createFaces, verbose, estimateFaceNumber );}
-
-    void updateElementRidges( bool /*createEdges*/ = false, const bool /*verbose*/ = false, UInt /*estimateEdgeNumber*/ = 0 ) {};
-
-    //! Destroys Edge-To-Face lookup table.
-    void cleanElementFacets();
-    void cleanElementRidges(){};
-    //! Returns Global-to-Local Node map.
-    /**
-     *  @return Global-to-Local map.
-     */
-    std::map<int,int> & globalToLocalNode() {return M_globalToLocalNode;}
-    std::map<int,int> & globalToLocalPeak() {return M_globalToLocalNode;}
-    //! Returns Local-to-Global Node map.
-    /**
-     *  @return Local-to-Global map.
-     */
-    std::map<int,int> & localToGlobalNode() {return M_localToGlobalNode;}
-    std::map<int,int> & localToGlobalPeak() {return M_localToGlobalNode;}
-
-    /** @} */ // End of group Element Adjacency Methods
-
-
     /** @defgroup public_attributes Public Attributes
      *
      */
@@ -1228,7 +1380,6 @@ public:
 
     //! Container of mesh Points/Vertices.
     points_Type pointList;
-
     //! Container of mesh Faces.
     faces_Type faceList;
 
@@ -1236,14 +1387,6 @@ public:
     edges_Type edgeList;
     //! Boundary points list.
     std::vector<point_Type * > _bPoints;
-
-    //! Container of mesh points/vertices (mesh movement)
-    /**
-     *  Used only by mesh node movement routines. It contains the
-     *  mesh nodes with the previous value.
-     */
-    points_Type _pointList;
-
     /** @} */ // End of group Region Containers
 
 
@@ -1258,146 +1401,47 @@ public:
 
     /** @} */ // End of group Switches
 
-    //! Transform the mesh according to a given mapping
-	/** Transform the mesh according to a given meshMapping(Real& x, Real& y, Real& z).
-	 *  @date   12/2010
-	 *  @author Mauro Perego
-	 *  @param meshMapping   function void meshMmapping(Real& x, Real& y, Real& z) which receive
-	 *  				 x, y, z, and transform them according to a certain mapping
-	 */
-	 template <typename function>
-	 void transformMesh( const function& meshMapping);
+    elements_Type& elementList() {return faceList;}
 
+    facets_Type& facetList() {return edgeList;}
 
-    //to be removed
-    void updateElementFaces( bool /*cf*/ =0, const bool /*verbose*/ = 0, UInt /*ef*/ = 0 ){};
-    void setNumEdges ( UInt const n ){M_numEdges = n;}
-    void setNumFaces ( UInt const n ){M_numFaces = n;}
-    void setNumBFaces( UInt const n ){M_numBFaces = n;}
-    void setMaxNumVolumes( UInt const /*n*/, bool const /*setcounter*/ = false) {};
-    void setMaxNumGlobalVolumes( UInt const /*n*/ ){};
-    volume_Type volumeList(UInt /*i*/)const {return volume_Type();};
-    element_Type boundaryFace( UInt  /*i*/ ) const{ return element_Type(); }
-    UInt storedVolumes() const {return UInt();};
-    UInt localRidgeId( UInt facId, UInt locV ) const;
-    UInt localRidgeId( const element_Type & ifac, UInt const locV ) const;
-    faces_Type& elementList() {return faceList;}
-    edges_Type& facetList() {return edgeList;}
     ridges_Type& ridgeList() {return pointList;}
 
+    int inline dimension() const {return 2;}
 
-    bool M_moved;
 
-protected:
+private:
 
-    /** @defgroup protected_methods Protected Methods
-     */
+    /*! Arrays containing the ids of Edges and Faces of each element
+      I use a Define to use localto global array or directly the
+      bareedges */
+    ArraySimple<UInt> M_FToE;
 
-    //! Number of Elements in a list.
-    /**
-     *  Returns the number of elements in a given list.
-     *
-     *  @param list MeshEntityContainer list of elements.
-     *  @return Number of elements in list.
-     */
-    template < typename T >
-    UInt numItems( MeshEntityContainer< T> const & list ) const;
+    UInt M_numVolumes;
 
-    //! Maximum number of Elements in a list.
-    /**
-     *  Returns maximum number of elements in a given list.
-     *
-     *  @param list MeshEntityContainer list of elements.
-     *  @return Maximum number of elements in list.
-     */
-    template < typename T >
-    UInt maxNumItems( MeshEntityContainer< T> const & list ) const;
-
-    //! Set maximum number of Elements in a list.
-    /**
-     *  Set maximum number of elements in a given list.
-     *
-     *  @param list MeshEntityContainer list of elements.
-     *  @param n Number of elements.
-     *  @param title Title for verbose output.
-     */
-    template < typename T >
-    void setMaxNumItems( MeshEntityContainer< T> & list, UInt n, std::string title );
-
-    /** @defgroup protected_attributes Protected Attributes
-     */
-
-    /** @name Face-To-Edge and Boundary Edges Containers
-     *  @ingroup protected_attributes
-     *
-     *  Arrays containing the ids of Edges and Edges of each element
-     *  I use a Define to use localto global array or directly the
-     *  bareedges.
-     *
-     *  - \c SAVEMEMORY defined: Try to save some memory.
-     *  - \c NOT_BDATA_FIRST defined: boundary edge are stored apart.
-     *
-     *  @{
-     */
-#ifdef SAVEMEMORY
-    //! Face-To-Edge Container.
-    MeshElementBareHandler<BareEdge> _FToE;
-#else
-    //! Face-To-Edge Container.
-    ArraySimple<UInt> _FToE;
-#endif
-
-#ifdef NOT_BDATA_FIRST
-    //! Boundary Edges Container
-    VectorSimple<facet_Type * > _bEdges;
-#endif
-
-    /** @} */ // End of group Face-To-Edge and Boundary Containers
-
-    /** @name Internal Counters
-     *  @ingroup protected_attributes
-     *
-     *  @{
-     */
-
-    //! Vertices Number
     UInt M_numVertices;
-    //! Boundary Vertices Number
     UInt M_numBVertices;
-    //! Points Number
+
     UInt M_numPoints;
-    //! Boundary Points Number
     UInt M_numBPoints;
-    //! Edges Number
-    UInt M_numEdges;
-    //! Boundary Edges Number
-    UInt M_numBEdges;
-    //! Faces Number
+
     UInt M_numFaces;
-    //! Boundary Faces Number
     UInt M_numBFaces;
 
-    //! Global Vertices Number
-    UInt M_numGlobalVertices;
-    //! Global Points Number
+    UInt M_numEdges;
+    UInt M_numBEdges;
+
     UInt M_numGlobalPoints;
-    //! Global Edges Number
+    UInt M_numGlobalVertices;
     UInt M_numGlobalEdges;
-    //! Global Faces Number
     UInt M_numGlobalFaces;
+    UInt M_numGlobalVolumes;
 
-    //! Nodes Global to Local map
     std::map<int, int>      M_globalToLocalNode;
-    //! Nodes Local to Global map
     std::map<int, int>      M_localToGlobalNode;
-    //! Edges Global to Local map
     std::map<int, int>      M_globalToLocalEdge;
-    //! Faces Global to Local map
     std::map<int, int>      M_globalToLocalFace;
-    //! Volumes Global to Local map
     std::map<int, int>      M_globalToLocalVolume;
-
-    /** @} */ // End of group Internal Counters
 
     MeshUtility::MeshTransformer<RegionMesh2D<GEOSHAPE, MC> > M_meshTransformer;
 
@@ -1419,7 +1463,6 @@ RegionMesh2D<GEOSHAPE, MC>::RegionMesh2D() :
         MeshEntity(),
         MC::regionMarker_Type(),
         switches(),
-        M_moved(0),
         M_numVertices( 0 ),
         M_numBVertices( 0 ),
         M_numPoints( 0 ),
@@ -1443,7 +1486,6 @@ RegionMesh2D<GEOSHAPE, MC>::RegionMesh2D( UInt id ) :
         MeshEntity( id ),
         MC::regionMarker_Type(),
         switches(),
-        M_moved(0),
         M_numVertices( 0 ),
         M_numBVertices( 0 ),
         M_numPoints( 0 ),
@@ -1458,19 +1500,6 @@ RegionMesh2D<GEOSHAPE, MC>::RegionMesh2D( UInt id ) :
 
 template <typename GEOSHAPE, typename MC>
 RegionMesh2D<GEOSHAPE, MC>::~RegionMesh2D() {}
-
-template <typename GEOSHAPE, typename MC>
-RegionMesh2D<GEOSHAPE, MC>::RegionMesh2D( RegionMesh2D<GEOSHAPE, MC> const & m )
-{
-    ASSERT( true, "Copy Costructor Not Yet Implemented for RegionMesh2D" ) ;
-}
-
-template <typename GEOSHAPE, typename MC>
-RegionMesh2D<GEOSHAPE, MC>
-RegionMesh2D<GEOSHAPE, MC>::operator=( RegionMesh2D<GEOSHAPE, MC> const & m )
-{
-    ASSERT( true, "Assignement Operator  Yet Not Implemented for RegionMesh2D" ) ;
-}
 
 template <typename GEOSHAPE, typename MC>
 inline
@@ -1521,9 +1550,22 @@ UInt RegionMesh2D<GEOSHAPE, MC>::numElements() const
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt & RegionMesh2D<GEOSHAPE, MC>::numElements()
+UInt &RegionMesh2D<GEOSHAPE, MC>::numElements()
 {
     return M_numFaces;
+}
+
+template <typename GEOSHAPE, typename MC>
+inline UInt
+RegionMesh2D<GEOSHAPE, MC>::numGlobalElements() const
+{
+    return M_numGlobalFaces;
+}
+
+template <typename GEOSHAPE, typename MC>
+inline UInt & RegionMesh2D<GEOSHAPE, MC>::numGlobalElements()
+{
+    return M_numGlobalFaces;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1567,40 +1609,6 @@ RegionMesh2D<GEOSHAPE, MC>::bFacet( UInt const & i ) const
 }
 
 
-//-------------------------------------------------------
-// Templates for interrogate and modify list capacities
-// \todo make them global and friends to regionmeshXX.
-//--------------------------------------------------------
-template <typename GEOSHAPE, typename MC>
-template <typename T>
-UInt
-RegionMesh2D<GEOSHAPE, MC>::numItems( MeshEntityContainer< T> const & list ) const
-{
-    return list.size();
-}
-
-template <typename GEOSHAPE, typename MC>
-template <typename T>
-UInt
-RegionMesh2D<GEOSHAPE, MC>::maxNumItems( MeshEntityContainer< T> const & list ) const
-{
-    return list.capacity();
-}
-
-template <typename GEOSHAPE, typename MC>
-template <typename T>
-void
-RegionMesh2D<GEOSHAPE, MC>::setMaxNumItems( MeshEntityContainer< T> & list, UInt n, std::string title )
-{
-    if ( list.capacity() == 0 )
-    {
-        list.reserve( n );
-    }
-    else if ( list.capacity() < n )
-    {
-        list.reserve( n );
-    }
-}
 //-------------------------------------------------------------------
 
 // ***************************** FACES
@@ -1616,13 +1624,6 @@ UInt
 RegionMesh2D<GEOSHAPE, MC>::numGlobalFaces() const
 {
     return M_numGlobalFaces;
-}
-
-template <typename GEOSHAPE, typename MC>
-UInt &
-RegionMesh2D<GEOSHAPE, MC>::numFaces()
-{
-    return M_numFaces;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1643,7 +1644,7 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh2D<GEOSHAPE, MC>::setMaxNumFaces( UInt const n, bool const setcounter )
 {
-    setMaxNumItems( faceList, n, "Face" );
+	faceList.setMaxNumItems(n);
     if ( setcounter )
         M_numFaces = n;
 }
@@ -1679,22 +1680,14 @@ RegionMesh2D<GEOSHAPE, MC>::addFace( element_Type const & v )
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh2D<GEOSHAPE, MC>::element_Type &
-RegionMesh2D<GEOSHAPE, MC>::setFace( element_Type const & v, UInt const pos )
+typename RegionMesh2D<GEOSHAPE, MC>::face_Type &
+RegionMesh2D<GEOSHAPE, MC>::setFace( face_Type const & v, UInt const pos )
 {
     ASSERT_PRE( pos < faceList.capacity() , "position requested exceed capacity" <<
                 pos << " " << faceList.capacity() ) ;
     faceList( pos ) = v;
     faceList( pos ).setId(pos);
     return faceList( pos );
-}
-
-template <typename GEOSHAPE, typename MC>
-inline
-void
-RegionMesh2D<GEOSHAPE, MC>::setFaceCounter()
-{
-    M_numFaces = faceList.size();
 }
 
 
@@ -1740,13 +1733,6 @@ RegionMesh2D<GEOSHAPE, MC>::numGlobalEdges() const
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt &
-RegionMesh2D<GEOSHAPE, MC>::numEdges()
-{
-    return M_numEdges;
-}
-
-template <typename GEOSHAPE, typename MC>
 UInt
 RegionMesh2D<GEOSHAPE, MC>::storedEdges() const
 {
@@ -1764,9 +1750,9 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh2D<GEOSHAPE, MC>::setMaxNumEdges( UInt const n, bool const setcounter )
 {
-    setMaxNumItems( edgeList, n, "Edge" );
-    if ( setcounter )
-        M_numEdges = n;
+	edgeList.setMaxNumItems(n);
+	if ( setcounter )
+		M_numEdges = n;
 }
 
 
@@ -1955,6 +1941,7 @@ RegionMesh2D<GEOSHAPE, MC>::isFullEdge( UInt const & id ) const
     return edgeList.size() >= id;
 }
 
+/*
 template <typename GEOSHAPE, typename MC>
 inline
 UInt
@@ -1981,6 +1968,7 @@ RegionMesh2D<GEOSHAPE, MC>::edgeElement( facet_Type const & f, UInt const Pos ) 
         return f.secondAdjacentElementIdentity();
     }
 };
+*/
 
 // ************************ Points/Vertices
 
@@ -2023,11 +2011,24 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh2D<GEOSHAPE, MC>::setMaxNumPoints( UInt const n, bool const setcounter )
 {
-    setMaxNumItems( pointList, n, "Point" );
+    pointList.setMaxNumItems(n);
     if ( setcounter )
         M_numPoints = n;
 }
 
+template <typename GEOSHAPE, typename MC>
+inline void
+RegionMesh2D<GEOSHAPE, MC>::setNumVertices( UInt const n )
+{
+    M_numVertices = n;
+}
+
+template <typename GEOSHAPE, typename MC>
+inline void
+RegionMesh2D<GEOSHAPE, MC>::setNumBVertices( UInt const n )
+{
+    M_numBVertices = n;
+}
 
 template <typename GEOSHAPE, typename MC>
 void
@@ -2141,35 +2142,6 @@ RegionMesh2D<GEOSHAPE, MC>::point( UInt const i )
 template <typename GEOSHAPE, typename MC>
 inline
 typename RegionMesh2D<GEOSHAPE, MC>::point_Type const &
-RegionMesh2D<GEOSHAPE, MC>::pointInitial( UInt const i ) const
-{
-    ASSERT_BD( i < pointList.size() ) ;
-
-    // If the mesh has not been moved, _pointList is empty, therefore we use pointList.
-    if ( M_moved )
-        return _pointList( i );
-    else
-        return point(i);
-}
-
-template <typename GEOSHAPE, typename MC>
-inline
-typename RegionMesh2D<GEOSHAPE, MC>::point_Type &
-RegionMesh2D<GEOSHAPE, MC>::pointInitial( UInt const i )
-{
-    ASSERT_BD( i < pointList.size() ) ;
-
-    // If the mesh has not been moved, _pointList is empty, therefore we use pointList.
-    if ( M_moved )
-        return _pointList( i );
-    else
-        return point(i);
-}
-
-
-template <typename GEOSHAPE, typename MC>
-inline
-typename RegionMesh2D<GEOSHAPE, MC>::point_Type const &
 RegionMesh2D<GEOSHAPE, MC>::boundaryPoint( UInt const i ) const
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
@@ -2210,32 +2182,10 @@ RegionMesh2D<GEOSHAPE, MC>::numVertices() const
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt &
-RegionMesh2D<GEOSHAPE, MC>::numVertices()
-{
-    return M_numVertices;
-}
-
-template <typename GEOSHAPE, typename MC>
 UInt
 RegionMesh2D<GEOSHAPE, MC>::numGlobalVertices() const
 {
     return M_numGlobalVertices;
-}
-
-
-template <typename GEOSHAPE, typename MC>
-void RegionMesh2D<GEOSHAPE, MC>::setNumVertices(UInt const n)
-{
-    M_numVertices=n;
-}
-
-
-template <typename GEOSHAPE, typename MC>
-UInt
-RegionMesh2D<GEOSHAPE, MC>::numBVertices() const
-{
-    return M_numBVertices;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2243,12 +2193,6 @@ UInt &
 RegionMesh2D<GEOSHAPE, MC>::numBVertices()
 {
     return M_numBVertices;
-}
-
-template <typename GEOSHAPE, typename MC>
-void RegionMesh2D<GEOSHAPE, MC>::setNumBVertices(UInt const n)
-{
-    M_numBVertices=n;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2267,7 +2211,23 @@ RegionMesh2D<GEOSHAPE, MC>::isVertex( UInt const & id ) const
     return id < M_numVertices;
 }
 
+template <typename GEOSHAPE, typename MC>
+inline
+bool
+RegionMesh2D<GEOSHAPE, MC>::isBoundaryPoint( UInt const & id ) const
+{
+    return point( id ).boundary();
+}
 
+template <typename GEOSHAPE, typename MC>
+inline
+bool
+RegionMesh2D<GEOSHAPE, MC>::isBoundaryPoint( point_Type const & p ) const
+{
+    return p.boundary();
+}
+
+/*
 template <typename GEOSHAPE, typename MC>
 inline
 bool
@@ -2283,8 +2243,7 @@ RegionMesh2D<GEOSHAPE, MC>::isBoundaryRidge( point_Type const & p ) const
 {
     return p.boundary();
 }
-
-
+*/
 /********************************************************************************
                         Element Adiacency Methods
 *******************************************************************************/
@@ -2294,7 +2253,7 @@ inline
 bool
 RegionMesh2D<GEOSHAPE, MC>::hasLocalEdges() const
 {
-    return ! _FToE.empty();
+    return ! M_FToE.empty();
 }
 
 #ifdef SAVEMEMORY
@@ -2305,7 +2264,7 @@ inline
 UInt
 RegionMesh2D<GEOSHAPE, MC>::localEdgeId( const element_Type & ifac, UInt const locE ) const
 {
-    ASSERT_PRE( !_FToE.empty(), "Face to Edges array not  set" );
+    ASSERT_PRE( !M_FToE.empty(), "Face to Edges array not  set" );
     ASSERT_BD( locE < element_Type::S_numLocalEdges );
     std::pair<BareEdge, bool> it;
     UInt i1, i2;
@@ -2314,7 +2273,7 @@ RegionMesh2D<GEOSHAPE, MC>::localEdgeId( const element_Type & ifac, UInt const l
     i1 = ( ifac.point( i1 ) ).id();
     i2 = ( ifac.point( i2 ) ).id();
     it = makeBareEdge( i1, i2 );
-    return _FToE.id( it.first );
+    return M_FToE.id( it.first );
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2334,7 +2293,7 @@ UInt
 RegionMesh2D<GEOSHAPE, MC>::localEdgeId( const element_Type & ifac, UInt const locE )
 const
 {
-    return _FToE( ifac.id(), locE );
+    return M_FToE( ifac.id(), locE );
 }
 
 
@@ -2344,35 +2303,18 @@ UInt
 RegionMesh2D<GEOSHAPE, MC>::localEdgeId( UInt const facId, UInt const locE )
 const
 {
-    ASSERT_PRE( !_FToE.empty(), "Face to Edges array not  set" );
+    ASSERT_PRE( !M_FToE.empty(), "Face to Edges array not  set" );
     ASSERT_BD( facId < M_numFaces );
     ASSERT_BD( locE < element_Type::S_numLocalEdges );
-    return _FToE( locE, facId );
+    return M_FToE( locE, facId );
 }
 
-template <typename GEOSHAPE, typename MC>
-inline
-UInt
-RegionMesh2D<GEOSHAPE, MC>::localRidgeId( UInt const facId, UInt const locV )
-const
-{
-    return element(facId).point(locV).localId();
-}
-
-template <typename GEOSHAPE, typename MC>
-inline
-UInt
-RegionMesh2D<GEOSHAPE, MC>::localRidgeId( const element_Type & ifac, UInt const locV )
-const
-{
-    return element(ifac.id()).point(locV).localId();
-}
 
 #endif
 
 template <typename GEOSHAPE, typename MC>
 void
-RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, const bool verbose, UInt ee )
+RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, const bool verbose, UInt ee, bool /*verbose*/ )
 {
 	if (verbose)
 		std::cout << "     Updating element edges ... " << std::flush;
@@ -2396,7 +2338,7 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, const bool verbose, UIn
     // Extra map for faces stored which are not boundary faces
     MeshElementBareHandler<BareEdge> _extraEdges;
     std::pair<UInt, bool> e;
-    _FToE.reshape( numLocalEdges(), numFaces() ); // DIMENSION ARRAY
+    M_FToE.reshape( numLocalEdges(), numFaces() ); // DIMENSION ARRAY
 
     UInt fid, i1, i2;
     std::pair<BareEdge, bool>_edge;
@@ -2407,10 +2349,11 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, const bool verbose, UIn
     {
         for ( typename edges_Type::iterator ite = edgeList.begin(); ite != edgeList.end(); ++ite )
         {
-            if ( ite->firstAdjacentElementPosition() != NotAnId && ite->firstAdjacentElementIdentity() != NotAnId)
-                _FToE( ite->firstAdjacentElementPosition() , ite->firstAdjacentElementIdentity() ) = ite->localId();
+        	if ( ite->firstAdjacentElementPosition() != NotAnId && ite->firstAdjacentElementIdentity() != NotAnId)
+                M_FToE( ite->firstAdjacentElementPosition() , ite->firstAdjacentElementIdentity() ) = ite->localId();
+
             if ( ite->secondAdjacentElementPosition() != NotAnId && ite->secondAdjacentElementIdentity() != NotAnId)
-                _FToE( ite->secondAdjacentElementPosition(), ite->secondAdjacentElementIdentity() ) = ite->localId();
+                M_FToE( ite->secondAdjacentElementPosition(), ite->secondAdjacentElementIdentity() ) = ite->localId();
         }
         // we finish here
         setLinkSwitch( "HAS_ELEMENT_TO_FACETS" );
@@ -2455,7 +2398,7 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, const bool verbose, UIn
             i2 = ( iface->point( i2 ) ).localId();
             _edge = makeBareEdge( i1, i2);
             e = _be.addIfNotThere( _edge.first );
-            _FToE( j, fid ) = e.first;
+            M_FToE( j, fid ) = e.first;
 
             bool _isBound=e.first<this->M_numBEdges;
             // Is the edge an extra edge (not on the boundary but originally included in the list)?
@@ -2532,7 +2475,7 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, const bool verbose, UIn
 }
 
 
-
+/*
 
 
 template <typename GEOSHAPE, typename MC>
@@ -2547,13 +2490,13 @@ void RegionMesh2D<GEOSHAPE, MC>::transformMesh( const function& meshMapping)
 }
 
 
-
+*/
 
 template <typename GEOSHAPE, typename MC>
 void
 RegionMesh2D<GEOSHAPE, MC>::cleanElementFacets()
 {
-    _FToE.clear();
+    M_FToE.clear();
     unsetLinkSwitch( "HAS_ELEMENT_TO_FACETS" );
 }
 
@@ -2561,7 +2504,7 @@ RegionMesh2D<GEOSHAPE, MC>::cleanElementFacets()
 // *************** GENERAL INFO *******************
 
 template <typename GEOSHAPE, typename MC>
-std::ostream & RegionMesh2D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out )
+std::ostream & RegionMesh2D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
 {
     out << "**************************************************" << std::endl;
     out << "**************************************************" << std::endl;

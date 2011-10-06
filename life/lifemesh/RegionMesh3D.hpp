@@ -121,7 +121,6 @@ public:
      *  @{
      */
 
-    //const int geoDim = GEOSHAPE::S_geoDimensions;
     //! Volume Element (3D)
     typedef MeshElementMarked<3, geoDimensions, GEOSHAPE, MC>  volume_Type;
     typedef MeshElementMarked<geoDimensions, geoDimensions, GEOSHAPE, MC>  element_Type;
@@ -167,18 +166,18 @@ public:
      */
     //! Points Container.
     typedef MeshEntityContainer<point_Type>   points_Type;
-    typedef MeshEntityContainer<point_Type>   peaks_Type;
+    typedef MeshEntityContainer<peak_Type>   peaks_Type;
     
     //! Elements Container.
-    typedef MeshEntityContainer<element_Type > volumes_Type;
+    typedef MeshEntityContainer<volume_Type > volumes_Type;
     typedef MeshEntityContainer<element_Type>  elements_Type;
     
     //! Facets Container: it may contain only Boundary facets.
-    typedef MeshEntityContainer<facet_Type>    faces_Type;
+    typedef MeshEntityContainer<face_Type>    faces_Type;
     typedef MeshEntityContainer<facet_Type>    facets_Type;
     
     //! Ridges Container: it may be empty.
-    typedef MeshEntityContainer<ridge_Type>    edges_Type;
+    typedef MeshEntityContainer<edge_Type>    edges_Type;
     typedef MeshEntityContainer<ridge_Type>    ridges_Type;
 
 
@@ -482,7 +481,7 @@ public:
      *  Adds volume. Id computed automatically.
      *  @return Reference to added volume.
      */
-    element_Type & addVolume();
+    volume_Type & addVolume();
     inline element_Type & addElement() {return addVolume();}
 
     //! Adds volumes.
@@ -709,7 +708,6 @@ public:
      */
     UInt numFaces() const;
     inline UInt numFacets() const {return numFaces();}
-
 
     //! Returns Global Number of Faces
     /**
@@ -1295,7 +1293,7 @@ public:
      *  @return Reference i-th mesh Point.
      */
     point_Type & point( UInt const i );
-    inline point_Type & peak( UInt const i ) {return point(i);}
+    inline peak_Type & peak( UInt const i ) {return point(i);}
 
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
@@ -1468,11 +1466,12 @@ public:
     //! Container of mesh Points/Vertices.
     points_Type pointList;
     //! Container of mesh Faces.
-    facets_Type faceList;
+    faces_Type faceList;
+
     //! Container of mesh Edges.
-    ridges_Type edgeList;
+    edges_Type edgeList;
     //! Container of mesh 3D Elements
-    elements_Type volumeList;
+    volumes_Type volumeList;
     //! Boundary points list.
     std::vector<point_Type * > _bPoints;
     /** @} */ // End of group Region Containers
@@ -1752,7 +1751,7 @@ RegionMesh3D<GEOSHAPE, MC>::setMaxNumGlobalVolumes( UInt const n )
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::element_Type &
+typename RegionMesh3D<GEOSHAPE, MC>::volume_Type &
 RegionMesh3D<GEOSHAPE, MC>::addVolume()
 {
     return addVolume( element_Type() );
