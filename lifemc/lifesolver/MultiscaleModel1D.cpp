@@ -796,6 +796,8 @@ MultiscaleModel1D::imposePerturbation()
             default:
 
                 std::cout << "Warning: bcType \"" << M_bcDeltaType << "\"not available!" << std::endl;
+
+                break;
             }
 
             break;
