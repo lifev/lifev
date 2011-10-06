@@ -1,14 +1,245 @@
 /*!
- * @mainpage LifeV - A Parallel Finite Element Library
- *
- * This section contains the LifeV online class reference for the current
- * development version of LifeV.
- *
- * Additionally, you can subscribe or read the <a href="http://www.lifev.org/documentation/lists">mailing lists</a> for any additions and/or
- * modifications to the API.
- *
- *
- * More information about the LifeV architecture, check
- * the <a href="http://www.lifev.org/documentation">LifeV Web Site</a>.
- */
+    @mainpage LifeV - A Parallel Finite Element Library
 
+    \section introduction Introduction
+
+LifeV (to be read Life Five) is an open source library for the numerical solution of partial differential equations with the finite element method.
+The choice of finite elements is motivated by their rigorous mathematical background,
+with a sound control of the accuracy, coupled with excellent flexibility in managing
+complex geometries.
+
+LifeV  is written in C++ and is entirely coded with an Object Oriented approach
+and advanced programming features of scientific computing. The project started in 1999 from the collaboration
+of the Department of Mathematics at EPFL, Lausanne, Switzerland, of the Department of Mathematics at Politecnico di Milano, Italy and the INRIA Rocquencourt, France,
+under the supervision of Alfio Quarteroni.
+Nowadays, LifeV is concurrently  developed and maintained by CMCS@EPFL Lausanne (group coordinator), MOX@Politecnico di Milano, REO and ESTIME@INRIA and
+ the E(CM)2 group @Department of Mathematics and Computer Science at Emory University, Atlanta (GA), USA.
+
+As for now, the library includes solver for incompressible fluid dynamics, linear structure problems, porous media,  fluid-structure interaction,
+electrocardiology. Even though this library is a research code oriented to the development and test of new numerical methods and algorithms,
+it is intended to be an effective tool for solving complex ``real-life'' engineering problems. One of the main field of applications (although not the only one)
+is cardiovascular mathematics.
+
+The code is distributed under the LGPL license and is dowloadable on <a href="http://cmcsforge.epfl.ch">CMCSFORGE</a>.
+
+There are two distributed version of LifeV, one is parallel, for complex three dimensional engineering problems, the other is serial,
+for two and three dimension problems (prototyping, testing). These pages
+review the parallel version.
+
+For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
+
+
+    <BR> <BR>
+    \section overview Overview of LifeV
+    In the following we briefly describe the main features of LifeV.
+
+    <BR>
+    \subsection boundaryConditions Boundary Conditions
+    LifeV provides classes and methods to prescribe the most common boundary conditions (<i>Dirichlet, Neumann, Robin</i>). 
+    Normal and tangential conditions are also provided for vectorial (3D) fields. In addition, a few boundary conditions specific of flow probems are present.
+    Boundary conditions are applied to the system matrix and the right-hand side after the assembling phase.
+    The parameters of the boundary condition can be defined as functions of the space and time, or as finite element fields. 
+    The regions where to apply boundary conditions are determined by markers associated to the boundary faces of the mesh.
+    Boundary conditions settings are stored in the \c BCHandler class, whereas the file BCManage.hpp contains the routines used to apply the conditions.
+    The \c BCInterface class contains tools to set the boundary conditions directly from data files.
+    
+
+
+    <BR>
+    \subsection timeDiscretization Time discretization
+   LifeV provides the class \c TimeAdvance.hpp to integrate in time a generic non-linear PDE with derivates in time up to the <i>m = 1, 2</i>.
+
+    This class is a virtual class, that defines the main features of a generic time advancing scheme:
+    <ul>
+    <li> the unknown and its first, and second if <i>m=2</i>, derivatives;</li>
+    <li> extrapolation of the unknown, and of its first derivative if <i> m=2 </i>;</li>
+    <li> the right-hand side associated to the discretization of the first derivative, and the second derivative for <i>m=2</i>;</li>
+    <li> how to update the unknowns.</li>
+    </ul>
+
+    These quantities are defined as linear combination of previous solution and suitable coefficients.
+
+    The coefficients, variables and the methods are specified in an apposite derived class.
+
+    LifeV provides two different implementations, namely:
+    <ul>
+      <li><i>Backwark Differentiation Formulae (BDF)</i> schemes (\c TimeAdvanceBDF.hpp ) of order <i> p </i> (with <i> p<6</i>)  for <i>m=1,2</i>;</li>
+      <li> the family ( \c TimeAdvanceNewmark.hpp) obtained by the <i>Newmark</i> schemes for
+           second order problems (<i> m=2</i>), and the <i> theta-methods </i> for the first order problems (<i>m=1</i>).</li>
+  </ul>
+
+    <BR>
+    \subsection spaceDiscretization Space discretization
+    [TODO: 4-5 lines description by Samuel Quinodoz]
+
+
+    <BR>
+    \subsection algebraicSolver Algebraic solvers and preconditioners
+    [TODO: 4-5 lines description by Gwenol Grandperrin]
+
+
+    <BR>
+    \subsection physicalSolver Physical solvers
+    In the following we briefly mention all the available physical solvers.
+
+    <ul>
+        <li> <b>Advection Diffusion Reaction solver:</b> [TODO: 2-3 lines description by Samuel Quinodoz]
+
+
+
+        <li> <b>Darcy solver:</b> phenomenologically law which describes the flow of a fluid through a porous medium.
+            The implementation of the solver uses the dual-mixed-hybrid formulation, entail good approximation of the
+            velocity field as well the pressure field. The global system in saddle point form is recast to an equivalent
+            positive definite system, using the hybridization and static condensation procedure. The finite elements
+            spaces used are piecewise constant for the pressure and lowest order Raviart-Thomas for the velocity.
+
+
+
+        <li> <b>1D Fluid-Structure Interaction solver:</b> [TODO: 2-3 lines description by Tiziano Passerini]
+
+
+
+        <li> <b>3D Fluid-Structure Interaction solver:</b> [TODO: 2-3 lines description by Paolo Crosetto]
+
+
+
+        <li> <b>Heart solver:</b> [TODO: 2-3 lines description by Ricardo Ruiz-Baier]
+
+
+
+        <li> <b>VenantKirchhoff Venant-Kirchhoff solver:</b> The material law  model available in LifeV is the linear elastic model. This model is the linear appoximaton of the nonlinear St.         Venant-Kirchhoff model. 
+     This model is implemented in the Venant-Kirchhoff solver class. It can be used both for purely structural dynamic problems (traction of a cube) or for coupled or multiscale problems.
+      In fact, it has been englobed in the FSI (both segregated and monolithic) and in the Multiscale frameworks. At the moment, in the LifeV developers community there is a big effort to implement a general interface (i.e. a general solver) for solving structural mechanic problems. In particular, the efforts are focused on the implementation of other material laws and to englobe the general interface in the FSI and Multiscale frameworks.
+
+
+
+    </ul>
+
+
+
+    <BR>
+    \subsection tools Tools
+    In the following we briefly describe some of the main tools inside the library.
+
+    <ul>
+        <li> <b>Importers and Exporters:</b> LifeV can input mesh files stored in some of the most common formats encountered in this field: GMSH, Inria, Netgen, mesh++.
+        For postprocessing, it's possible to save data in the following formats: Ensight, HDF5, VTK, all usable with ParaView, for creating high quality visualizations.
+        LifeV is designed with large parallel simulations in mind, which are usually performed on high performance computing hardware.
+        In many such cases, the low amount of memory per compute node requires a change in the workflow.
+        LifeV allows to perform the mesh partitioning phase offline, on a workstation where memory isn't an issue and use this data later, during online simulations on modern supercomputers.
+
+        <li> <b>Grammar parser for algebraic expression:</b> the class \c Parser provides a general interface to parse any simple algebraic function given as a string.
+        This tool is based on \c Spirit which is a set of C++ libraries for parsing and output generation implemented as Domain Specific Embedded Languages (DSEL)
+        using Expression templates and Template Meta-Programming.
+    </ul>
+
+
+
+
+
+
+    <BR> <BR>
+    \section license License
+    LifeV is available for download under the terms of the <a href="http://www.gnu.org/copyleft/lesser.html">GNU Lesser General Public License</a>.
+
+
+
+    <BR> <BR>
+    \section downloads Downloads
+    LifeV can be downloaded from the <a href="http://www.lifev.org/downloads">LifeV downloads page</a>.
+    For additional documentation about the LifeV architecture please check the <a href="http://www.lifev.org/documentation">LifeV documentation page</a>.
+
+
+    <BR> <BR>
+    \section email Mailing lists
+    We recommend that users and developers subscribe to the following mailing lists as appropriate.
+    <ul>
+        <li><a href="http://groups.google.com/group/lifev-user">LifeV-Users Mailing List</a> -
+        Discussion forum for users of %LifeV. (Recommended)
+
+        <li><a href="http://groups.google.com/group/lifev-dev">LifeV-Developers Mailing List</a> -
+        Discussion forum for %LifeV developers. (Developers)
+
+        <li><a href="http://groups.google.com/group/lifev-cvs">LifeV-Checkins Mailing List</a> -
+        GIT Commit Messages (Active  Developers)
+    </ul>
+
+
+    <BR> <BR>
+    \section contributors LifeV contributors
+    LifeV is the joint collaboration between four institutions:
+    <ul>
+        <li> École Polytechnique Fédérale de Lausanne (CMCS), Switzerland;
+        <li> Politecnico di Milano (MOX), Italy;
+        <li> INRIA (REO, ESTIME), France;
+        <li> Emory University (Sc. Comp), U.S.A.
+    </ul>
+
+    The following people are active developers:
+    <ul>
+        <li> Alessandro Melani, MOX - Politecnico di Milano
+        <li> Alessandro Veneziani, Sc. Comp - Emory University
+        <li> Alessio Fumagalli, MOX - Politecnico di Milano
+        <li> Antonio Cervone, MOX - Politecnico di Milano
+        <li> Claudia Colciago, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Christian Vergara, MOX - Politecnico di Milano
+        <li> Cristiano Malossi, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Gianmarco Mengaldo, MOX - Politecnico di Milano
+        <li> Guido Iori, MOX - Politecnico di Milano
+        <li> Gwenol Grandperrin, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Jean Bonnemain, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Laura Cattaneo, MOX - Politecnico di Milano
+        <li> Luca Bertagna, MOX - Politecnico di Milano
+        <li> Luca Formaggia, MOX - Politecnico di Milano
+        <li> Lucia Mirabella, Sc. Comp - Emory University
+        <li> Marta D'Elia, Sc. Comp - Emory University
+        <li> Matteo Pozzoli, MOX - Politecnico di Milano
+        <li> Mauro Perego, Sc. Comp - Florida State University
+        <li> Michel Kern, ESTIME - INRIA
+        <li> Nur Fadel, MOX - Politecnico di Milano
+        <li> Paolo Crosetto, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Radu Popescu, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Ricardo Ruiz Baier, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Samuel Quinodoz, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Simone Deparis, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Simone Pezzuto, MOX - Politecnico di Milano
+        <li> Simone Rossi, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Tiziano Passerini, Sc. Comp - Emory University
+        <li> Toni Lassila, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Tricerri Paolo, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Umberto Emanuele Villa, Sc. Comp - Emory University
+    </ul>
+
+    The following people are former developers:
+    <ul>
+        <li> Alexandra Moura
+        <li> Alexis Aposporidis
+        <li> Andrea Manzoni, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Andreas Fischle
+        <li> Carlo de Falco
+        <li> Christoph Winkelmann, formerly at CMCS, École Polytechnique Fédérale de Lausanne
+        <li> Christophe Prud'homme, formerly at CMCS, École Polytechnique Fédérale de Lausanne
+        <li> Fabio Nobile, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Federico Bonelli
+        <li> Gilles Fourestey, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Laura Iapichino, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Lorenzo Tamellini, MOX - Politecnico di Milano
+        <li> Luca Gerardo Giorda
+        <li> Marco Discacciati, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Mariarita de Luca
+        <li> Matteo Astorino, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Matteo Lesinigo, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Nicola Parolini
+        <li> Paolo Ferrandi, MOX - Politecnico di Milano
+        <li> Sara Minisini, MOX - Politecnico di Milano
+        <li> Simone Cassani
+        <li> Susanna Carcano, MOX - Politecnico di Milano
+        <li> Zhen Wang, Sc. Comp - Emory University
+    </ul>
+
+
+
+    <BR> <BR>
+    \section questions For other questions and comments...
+    Please visit the <a href="http://www.lifev.org">LifeV web site</a>.
+ */
