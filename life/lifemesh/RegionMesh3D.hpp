@@ -991,7 +991,9 @@ public:
      *  @return Reference to added edge.
      */
     edge_Type & addEdge( bool const boundary );
-    ridge_Type & addRidge( bool const boundary ) {return addEdge( boundary);}
+    ridge_Type & addRidge( bool const boundary ) {return addRidge( ridge_Type(), boundary);}
+    ridge_Type & addRidge( edge_Type, bool const boundary ) {return addEdge( boundary);}
+    ridge_Type & addRidge( point_Type, bool const boundary ) {return addPoint( boundary);}
 
     //! Adds an Edge.
     /**
@@ -1002,8 +1004,9 @@ public:
      *  @param f Edge to add.
      *  @return Reference to added edge.
      */
-    edge_Type & addEdge( edge_Type const & f );
-    ridge_Type & addRidge( ridge_Type const & f ){return addEdge( f );}
+    edge_Type & addEdge( edge_Type const & r );
+    ridge_Type & addRidge( edge_Type const & e ){return addEdge( e );}
+    ridge_Type & addRidge( point_Type const & p ){return addPoint( p );}
 
     //! Add an Edge to specified position.
     /**
@@ -1030,7 +1033,9 @@ public:
      *  @return The i-th Edge.
      */
     ridge_Type const & edge( UInt const i ) const;
-    ridge_Type const & ridge( UInt const i ) const {return edge(i);}
+    ridge_Type const & ridge( UInt const i ) const {return ridge(edge_Type(), i);}
+    ridge_Type const & ridge( edge_Type, UInt const i ) const {return edge(i);}
+    ridge_Type const & ridge( point_Type, UInt const i ) const {return point(i);}
 
     //! i-th mesh 1D Edge reference.
     /**
@@ -1040,7 +1045,9 @@ public:
      *  @return Reference to the i-th Edge.
      */
     ridge_Type & edge( UInt const i );
-    ridge_Type & ridge( UInt const i ) {return edge(i);}
+    ridge_Type & ridge( UInt const i ) {return ridge( ridge_Type(), i);}
+    ridge_Type & ridge( edge_Type, UInt const i ) {return edge(i);}
+    ridge_Type & ridge( point_Type, UInt const i ) {return point(i);}
 
     //! i-th mesh 1D Boundary Edge.
     /**
@@ -1067,7 +1074,10 @@ public:
      *  @param n Count of Boundary Edge.
      */
     void setNumBEdges( UInt const n );
-    void setNumBRidges( UInt const n ) {setNumBEdges( n );}
+
+    void setNumBRidges( UInt const n ) {setNumBRidges( ridge_Type(), n );}
+    void setNumBRidges( edge_Type, UInt const n ) {setNumBEdges( n );}
+    void setNumBRidges( point_Type, UInt const n ) {setNumBPoints( n );}
 
     //! Do I store mesh edges?
     /**
@@ -1084,8 +1094,10 @@ public:
      *  @param e The Edge.
      *  @return true if the edge is on the boundary, false otherwise.
      */
-    bool isBoundaryRidge( ridge_Type const & e ) const;
-    bool isBoundaryEdge( ridge_Type const & e ) const {return isBoundaryRidge( e );}
+    bool isBoundaryEdge( ridge_Type const & e ) const {return (e.id() < M_numBEdges);}
+    bool isBoundaryRidge( edge_Type const & e ) const {return isBoundaryEdge(e); }
+    bool isBoundaryRidge( point_Type const & p ) const {return isBoundaryPoint(p); }
+
 
     //! Edge on boundary check by id.
     /**
@@ -1094,8 +1106,12 @@ public:
      *  @param id Id of the edge.
      *  @return true if the edge is on the boundary, false otherwise.
      */
-    bool isBoundaryRidge( UInt const & id ) const;
-    bool isBoundaryEdge( UInt const & id ) const {return isBoundaryRidge( id );}
+    bool isBoundaryEdge( UInt const & id ) const {return (id < M_numBEdges );}
+    bool isBoundaryRidge( UInt const & id ) const {return isBoundaryRidge( ridge_Type(), id );}
+    bool isBoundaryRidge( edge_Type, UInt const & id ) const {return isBoundaryEdge( id );}
+    bool isBoundaryRidge( point_Type, UInt const & id ) const {return isBoundaryPoint( id );}
+
+
 
     //! Full Edge check by id.
     /**
@@ -1283,17 +1299,19 @@ public:
      *  @return i-th mesh Point.
      */
     point_Type const & point( UInt const i ) const;
-    inline point_Type const & peak( UInt const i ) const {return point(i);}
+    inline point_Type const & peak( UInt const i ) const {return peak( peak_Type(), i );}
+    inline point_Type const & peak( point_Type, UInt const i ) const {return point(i);}
 
     //! Returns a reference to the i-th mesh Point.
     /**
      *  Returns the i-th Point in the mesh.
-     *
+     *UInt const i
      *  @param i Id of the Point.
      *  @return Reference i-th mesh Point.
      */
     point_Type & point( UInt const i );
-    inline peak_Type & peak( UInt const i ) {return point(i);}
+    inline peak_Type & peak( UInt const i ) {return peak( peak_Type(), i );}
+    inline peak_Type & peak( point_Type, UInt const i ) {return point(i);}
 
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
@@ -1401,7 +1419,9 @@ public:
      *  @return Number of vertices in the mesh.
      */
     UInt numGlobalVertices() const;
-    inline UInt numGlobalPeaks() const { return numGlobalVertices();}
+
+    inline UInt numGlobalPeaks() const { return numGlobalPeaks(peak_Type() );}
+    inline UInt numGlobalPeaks(point_Type) const { return numGlobalVertices();}
 
 
     //! Vertex check.
@@ -1488,13 +1508,22 @@ public:
 
     /** @} */ // End of group Switches
 
-    elements_Type& elementList() {return volumeList;}
+   // elements_Type& elementList() {return volumeList;}
 
-    facets_Type& facetList() {return faceList;}
+    inline facets_Type& facetList() {return facetList(facet_Type());}
+    inline facets_Type& facetList(face_Type) {return faceList;}
+    inline facets_Type& facetList(edge_Type) {return edgeList;}
 
-    ridges_Type& ridgeList() {return edgeList;}
 
-    int inline dimension() const {return 3;}
+    inline ridges_Type& ridgeList() {return ridgeList(ridge_Type() );}
+    inline ridges_Type& ridgeList(edge_Type) {return edgeList;}
+    inline ridges_Type& ridgeList(point_Type) {return pointList;}
+
+
+    inline elements_Type& elementList(){return elementList(element_Type() );};
+    inline elements_Type& elementList(volume_Type) {return volumeList;};
+    inline elements_Type& elementList(face_Type) {return faceList;};
+
 
 
 private:
@@ -2719,23 +2748,6 @@ RegionMesh3D<GEOSHAPE, MC>::isBoundaryPoint( point_Type const & p ) const
 {
     return p.boundary();
 }
-
-template <typename GEOSHAPE, typename MC>
-inline
-bool
-RegionMesh3D<GEOSHAPE, MC>::isBoundaryRidge( ridge_Type const & e ) const
-{
-    return e.id() < M_numBEdges;
-}
-
-template <typename GEOSHAPE, typename MC>
-inline
-bool
-RegionMesh3D<GEOSHAPE, MC>::isBoundaryRidge( UInt const & id ) const
-{
-    return id < M_numBEdges;
-}
-
 
 template <typename GEOSHAPE, typename MC>
 inline

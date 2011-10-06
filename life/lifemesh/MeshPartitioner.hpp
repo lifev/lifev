@@ -604,9 +604,9 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // ******************
 
 
-    if(M_originalMesh->dimension() == 3)
+    if(mesh_Type::geoDimensions == 3)
     	constructRidges();
-    else if(M_originalMesh->dimension() == 2)
+    else if(mesh_Type::geoDimensions == 2)
     	M_nBoundaryRidges = M_nBoundaryPoints;
 
 
