@@ -72,10 +72,6 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
 
     int ig;
 
-    std::map<int, int> localToGlobalNode = mesh.localToGlobalNode();
-    std::map<int, int>::iterator im;
-
-
     for ( UInt i = 0; i < nVertices; ++i )
     {
         ofile << mesh.pointList( i ).x() << " "

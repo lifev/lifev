@@ -284,10 +284,7 @@ readMppFile( Mesh & mesh,
 
                 pointerPoint->setId     ( i );
                 pointerPoint->setLocalId( i );
-
-                mesh.localToGlobalNode().insert( std::make_pair( i, i ) );
-                mesh.globalToLocalNode().insert( std::make_pair( i, i ) );
-            }
+           }
 
             oStr << "Vertices Read " << std::endl;
             done++;
@@ -699,9 +696,6 @@ readINRIAMeshFile( Mesh&      mesh,
                 pointerPoint->y() = y;
                 pointerPoint->z() = z;
                 pointerPoint->setMarker( markerID_Type( ibc ) );
-
-                mesh.localToGlobalNode().insert( std::make_pair( i, i ) );
-                mesh.globalToLocalNode().insert( std::make_pair( i, i ) );
             }
 
             oStr << "Vertices read " << std::endl;
@@ -1200,8 +1194,6 @@ readGmshFile( Mesh & mesh,
         pointerPoint->x() = x[ 3 * i ];
         pointerPoint->y() = x[ 3 * i + 1 ];
         pointerPoint->z() = x[ 3 * i + 2 ];
-        mesh.localToGlobalNode().insert( std::make_pair( i, i ) );
-        mesh.globalToLocalNode().insert( std::make_pair( i, i ) );
     }
 
     Int numberVolumes = 1;
@@ -1689,8 +1681,6 @@ readNetgenMesh(Mesh & mesh,
 
         pointerPoint->setId     ( i );
         pointerPoint->setLocalId( i );
-        mesh.localToGlobalNode().insert( std::make_pair( i, i ) );
-        mesh.globalToLocalNode().insert( std::make_pair( i, i ) );
 
         pointerPoint->setMarker( bcnpoints[ i ] );
         pointerPoint->x() = pointCoordinates[ nDimensions * i ];

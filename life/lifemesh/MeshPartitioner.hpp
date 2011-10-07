@@ -1214,9 +1214,6 @@ void MeshPartitioner<MeshType>::constructNodes()
             *pp = M_originalMesh->point( *it );
 
             pp->setLocalId( inode );
-
-            (*M_meshPartitions)[i]->localToGlobalNode().insert(std::make_pair( pp->localId(), pp->id() ));
-            (*M_meshPartitions)[i]->globalToLocalNode().insert(std::make_pair( pp->id(), pp->localId() ));
         }
     }
 }

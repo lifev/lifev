@@ -512,6 +512,7 @@ public:
     static const UInt S_numLocalVertices = MeshElement<GeoShape, MeshElementMarked<0, 2, GeoShape, MC> >::S_numVertices;
     //! Number of local Faces
     static const UInt S_numLocalEdges = MeshElement<GeoShape, MeshElementMarked<0, 2, GeoShape, MC> >::S_numEdges;
+    static const UInt S_numLocalFacets = S_numLocalEdges;
 
     typedef GeoShape geoShape_Type;
     typedef typename MC::volumeMarker_Type marker_Type;
@@ -567,6 +568,9 @@ public:
     static const UInt S_numLocalFaces = MeshElement<GeoShape, MeshElementMarked<0, 3, GeoShape, MC> >::S_numFaces;
     //! Number of local Edges (using Euler Formula)
     static const UInt S_numLocalEdges = MeshElement<GeoShape, MeshElementMarked<0, 3, GeoShape, MC> >::S_numEdges;
+
+    static const UInt S_numLocalFacets = S_numLocalFaces;
+    static const UInt S_numLocalRidges = S_numLocalEdges;
 
     typedef GeoShape geoShape_Type;
     typedef typename MC::volumeMarker_Type marker_Type;

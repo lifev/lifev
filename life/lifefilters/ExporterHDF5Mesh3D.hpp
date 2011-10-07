@@ -537,9 +537,6 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
         pp->z() = pointCoordinates[2][j];
         pp->setLocalId(j);
         pp->setId(pointGlobalId[j]);
-
-        tempMesh->localToGlobalNode().insert(std::make_pair(j, pointGlobalId[j]));
-        tempMesh->globalToLocalNode().insert(std::make_pair(pointGlobalId[j], j));
     }
 
     pointCoordinates.clear();
@@ -816,14 +813,13 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     std::vector<Int> pointGlobalId(numPoints);
     std::vector<Int> pointBoundaryFlags(numPoints);
 
-    std::map<Int, Int>::iterator it = mesh->localToGlobalNode().begin();
-    for (UInt j = 0; it != mesh->localToGlobalNode().end(); ++it, ++j)
+    for (UInt j = 0; j < numPoints; ++j)
     {
         pointCoordinates[0][j] = mesh->pointList[j].x();
         pointCoordinates[1][j] = mesh->pointList[j].y();
         pointCoordinates[2][j] = mesh->pointList[j].z();
         pointMarkers[j] = mesh->pointList[j].marker();
-        pointGlobalId[j] = it->second;
+        pointGlobalId[j] = mesh->point(j).id();
         if (mesh->isBoundaryPoint(j))
         {
             pointBoundaryFlags[j] = 1;

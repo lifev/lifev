@@ -288,9 +288,6 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
                 pointPtr->setId( nodeID );
                 pointPtr->setLocalId( nodeID );
 
-                mesh.localToGlobalNode().insert( std::make_pair( nodeID, nodeID) );
-                mesh.globalToLocalNode().insert( std::make_pair( nodeID, nodeID) );
-
                 pointPtr->setMarker( nodeFlag );
                 pointPtr->x() = xPosition + t_x;
                 pointPtr->y() = yPosition + t_y;
