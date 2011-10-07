@@ -47,8 +47,26 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
 
     <BR>
     \subsection timeDiscretization Time discretization
-    [TODO: 4-5 lines description by Matteo Pozzoli]
+   LifeV provides the class \c TimeAdvance.hpp to integrate in time a generic non-linear PDE with derivates in time up to the <i>m = 1, 2</i>.
 
+    This class is a virtual class, that defines the main features of a generic time advancing scheme:
+    <ul>
+    <li> the unknown and its first, and second if <i>m=2</i>, derivatives;</li>
+    <li> extrapolation of the unknown, and of its first derivative if <i> m=2 </i>;</li>
+    <li> the right-hand side associated to the discretization of the first derivative, and the second derivative for <i>m=2</i>;</li>
+    <li> how to update the unknowns.</li>
+    </ul>
+
+    These quantities are defined as linear combination of previous solution and suitable coefficients.
+
+    The coefficients, variables and the methods are specified in an apposite derived class.
+
+    LifeV provides two different implementations, namely:
+    <ul>
+      <li><i>Backwark Differentiation Formulae (BDF)</i> schemes (\c TimeAdvanceBDF.hpp ) of order <i> p </i> (with <i> p<6</i>)  for <i>m=1,2</i>;</li>
+      <li> the family ( \c TimeAdvanceNewmark.hpp) obtained by the <i>Newmark</i> schemes for
+           second order problems (<i> m=2</i>), and the <i> theta-methods </i> for the first order problems (<i>m=1</i>).</li>
+  </ul>
 
     <BR>
     \subsection spaceDiscretization Space discretization
