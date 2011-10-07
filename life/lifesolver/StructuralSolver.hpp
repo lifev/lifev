@@ -624,7 +624,7 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
     M_localMap                        = monolithicMap;
     M_disp.reset                      (new vector_Type(*M_localMap));
     M_mass.reset                      (new matrix_Type(*M_localMap));
-    M_systemMatrix.reset                (new matrix_Type(*M_localMap));
+    M_systemMatrix.reset              (new matrix_Type(*M_localMap));
     M_jacobian.reset                  (new matrix_Type(*M_localMap));
 
     //Vector of Stiffness for NH and Exp
@@ -859,8 +859,9 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     //This method call the M_material computeStiffness
     computeMatrix(M_systemMatrix, solution, 1.);
 
-    //M_systemMatrix->globalAssemble();
-    matrix_Type tmpMatrBC(*M_systemMatrix);
+//    //M_systemMatrix->globalAssemble();
+//    matrix_Type tmpMatrBC(*M_systemMatrix);
+
     M_Displayer->leaderPrint("    S- Updating the boundary conditions ... \t");
     LifeChrono chrono;
 
@@ -877,26 +878,30 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     {
         chrono.start();
 
+        //M_systemMatrix->globalAssemble();
+        matrix_Type tmpMatrBC(*M_systemMatrix);
+
         if(iter==0)
         {
             *M_rhs=*M_rhsNoBC;
             bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
         }
+
         bcManageMatrix( tmpMatrBC, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
-        //*M_rhs = rhsFull;
 
         residual  = tmpMatrBC * solution;
         residual -= *M_rhs;
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
     }
+
     else //NH and Exp
     {
         chrono.start();
         residual = *M_mass * solution;
         residual += *M_material->stiffVector();
         residual -= *M_rhs;
-        bcManageResidual( residual, *M_rhs, solution, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0);
+        bcManageResidual( residual, *M_rhs, solution, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
     }

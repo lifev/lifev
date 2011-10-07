@@ -268,8 +268,8 @@ NeoHookeanMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh,
     this->M_FESpace                     = dFESpace;
     this->M_localMap                    = monolithicMap;
     this->M_offset                      = offset;
-    this->M_dataMaterial                      = dataMaterial;
-    this->M_displayer                         = displayer;
+    this->M_dataMaterial                = dataMaterial;
+    this->M_displayer                   = displayer;
     M_stiff.reset                  	( new vector_Type(*this->M_localMap) );
 
 
@@ -323,9 +323,9 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateJacobianMatrix( const vector_Type&
 
 template <typename Mesh>
 void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& 		jacobian,
-                                                                       const vector_Type& 	disp,
-                                                                       const dataPtr_Type& 	dataMaterial,
-                                                                       const displayerPtr_Type& displayer )
+                                                                      const vector_Type& 	disp,
+                                                                      const dataPtr_Type& 	dataMaterial,
+                                                                      const displayerPtr_Type&  displayer )
 {
     displayer->leaderPrint("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Neo-Hookean)");
 
@@ -419,12 +419,12 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
 {
     this->M_stiff.reset(new vector_Type(*this->M_localMap));
 
-    displayer->leaderPrint(" \n*********************************\n  ");
-    displayer->leaderPrint(" Non-Linear S-  Computing the Neo-Hookean nonlinear stiffness vector");
-    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint(" \n******************************************************************\n  ");
+    displayer->leaderPrint(" Non-Linear S-  Computing the Neo-Hookean nonlinear stiffness vector"     );
+    displayer->leaderPrint(" \n******************************************************************\n  ");
 
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
-    UInt dim = this->M_FESpace->dim();
+    UInt dim        = this->M_FESpace->dim();
 
     VectorElemental dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
     vector_Type disp(sol);
@@ -450,7 +450,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
        		for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
 		{
                		UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim + this->M_offset;
-               		dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
+               		dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig];
 		}
 	}
 
