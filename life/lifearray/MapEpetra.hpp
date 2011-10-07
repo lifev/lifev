@@ -132,30 +132,6 @@ public:
     MapEpetra( const Int           size,
                const comm_ptrtype& commPtr );
 
-    //! Constructor
-    /*!
-      Calls createImportExport from setUp()
-      @param refFE Reference finite element
-      @param meshPart Partition of the mesh
-      @param commPtr Pointer to the communicator
-     */
-    template<typename Mesh>
-    MapEpetra( const ReferenceFE&         refFE,
-               const MeshPartitioner<Mesh>& meshPart,
-               const comm_ptrtype&        commPtr );
-
-    //! Constructor
-    /*!
-      Calls createImportExport from setUp()
-      @param refFE Reference finite element
-      @param mesh Mesh
-      @param commPtr Pointer to the communicator
-    */
-    template<typename Mesh>
-    MapEpetra( const ReferenceFE&         refFE,
-               const Mesh&          mesh,
-               const comm_ptrtype&  commPtr );
-
     //! Copy constructor
     /*!
       @param epetraMap An MapEpetra object
@@ -313,23 +289,6 @@ private:
      */
     void  bubbleSort( Epetra_IntSerialDenseVector& elements );
 
-    //! Setup a map using the finite element and using nodes, edges, faces and volumes numbering
-    /*!
-      Calls createImportExport
-      @param refFE Reference finite element
-      @param commPtr Pointer on the communicator
-      @param repeatedPeakVector Vector containing the node ids
-      @param repeatedRidgeVector Vector containing the edge ids
-      @param repeatedFacetVector Vector containing the face ids
-      @param repeatedElementVector Vector containing the volume ids
-     */
-    void setUp( const ReferenceFE&        refFE,
-                const comm_ptrtype& commPtr,
-                std::vector<Int>& repeatedPeakVector,
-                std::vector<Int>& repeatedRidgeVector,
-                std::vector<Int>& repeatedFacetVector,
-                std::vector<Int>& repeatedElementVector );
-
     //@}
 
     map_ptrtype        M_repeatedMapEpetra;
@@ -339,97 +298,11 @@ private:
     comm_ptrtype       M_commPtr;
 
 };
-
+}
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-template<typename Mesh>
-MapEpetra::
-MapEpetra( const ReferenceFE&               refFE,
-           const MeshPartitioner<Mesh>& meshPart,
-           const comm_ptrtype&        commPtr ):
-        M_repeatedMapEpetra(),
-        M_uniqueMapEpetra(),
-        M_exporter(),
-        M_importer(),
-        M_commPtr( commPtr )
-{
-    // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
-    // never modify them
-
-    setUp( refFE,
-           commPtr,
-           const_cast<std::vector<Int>&>( meshPart.repeatedPeakVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedRidgeVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedFacetVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedElementVector() ) );
-
-}
-
-
-template<typename Mesh>
-MapEpetra::
-MapEpetra( const ReferenceFE&        refFE,
-           const Mesh&         mesh,
-           const comm_ptrtype& commPtr ):
-        M_repeatedMapEpetra(),
-        M_uniqueMapEpetra(),
-        M_exporter(),
-        M_importer(),
-        M_commPtr( commPtr )
-{
-    std::vector<Int> repeatedPeakVector;
-    std::vector<Int> repeatedRidgeVector;
-    std::vector<Int> repeatedFacetVector;
-    std::vector<Int> repeatedElementVector;
-
-    if ( refFE.nbDofPerPeak() )
-    {
-        repeatedPeakVector.reserve(mesh.numPoints());
-        for ( UInt ii = 0; ii < mesh.numPoints(); ii++ )
-            repeatedPeakVector.push_back( mesh.peak(ii).id() );
-    }
-
-    if ( refFE.nbDofPerRidge() )
-    {
-        repeatedRidgeVector.reserve( mesh.numRidges() );
-
-        for ( UInt ii = 0; ii < mesh.numRidges(); ii++ )
-            repeatedRidgeVector.push_back( mesh.ridge(ii).id() );
-    }
-
-    if ( refFE.nbDofPerFacet() )
-    {
-        repeatedFacetVector.reserve( mesh.numFacets() );
-
-        for ( UInt ii = 0; ii < mesh.numFacets(); ii++ )
-            repeatedFacetVector.push_back( mesh.facet(ii).id() );
-    }
-
-    if ( refFE.nbDofPerElement() )
-    {
-        repeatedElementVector.reserve( mesh.numElements() );
-
-        for ( UInt ii = 0; ii < mesh.numElements(); ii++ )
-            repeatedElementVector.push_back( mesh.element(ii).id() );
-    }
-
-
-    setUp( refFE,
-           commPtr,
-           repeatedPeakVector,
-           repeatedRidgeVector,
-           repeatedFacetVector,
-           repeatedElementVector );
-
-    // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
-    // never modify them
-
-}
-
-
-}
 
 
 #endif
