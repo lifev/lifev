@@ -296,7 +296,7 @@ MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
             if ( M_comm->MyPID() == 0 )
                 std::cout << "done in " << jacobianChrono << " s." << std::endl;
 
-            //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianExported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( timeInteger ) );
+            //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianExported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( M_multiscale->globalData()->dataTime()->timeStepNumber() ) );
         }
 }
 

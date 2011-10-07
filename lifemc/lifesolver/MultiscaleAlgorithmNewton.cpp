@@ -146,7 +146,7 @@ MultiscaleAlgorithmNewton::assembleJacobianMatrix()
     M_multiscale->exportJacobian( *M_jacobian );
     M_jacobian->globalAssemble();
 
-    //M_jacobian->spy( "Jacobian" );
+    //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianNewtonExported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( M_multiscale->globalData()->dataTime()->timeStepNumber() ) );
 }
 
 } // Namespace Multiscale
