@@ -275,7 +275,13 @@ MultiscaleModelMultiscale::buildModel()
         ( *i )->buildModel();
 
     for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    {
         ( *i )->initializeCouplingVariables();
+
+        // Necessary to perform a correct interpolation at the first time step
+        if ( M_algorithm->type() != Explicit )
+            ( *i )->extrapolateCouplingVariables();
+    }
 }
 
 void
