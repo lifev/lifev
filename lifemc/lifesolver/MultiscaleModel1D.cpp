@@ -221,6 +221,9 @@ MultiscaleModel1D::setupModel()
         createLinearBC();
         updateLinearBC( *M_solution );
         setupLinearModel();
+
+        // Initialize the linear solution
+        copySolution( *M_solution, *M_linearSolution );
     }
 #endif
 
@@ -830,14 +833,17 @@ MultiscaleModel1D::resetPerturbation()
 Real
 MultiscaleModel1D::bcFunctionDelta( const Real& t )
 {
+    // Previous bc size
+    UInt bcPreviousSize( M_bcPreviousTimeSteps.size() );
+
+    // Time container for interpolation
+    std::vector< Real > timeContainer( bcPreviousSize, 0 );
+    for ( UInt i(0) ; i < bcPreviousSize ; ++i )
+        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
+
     // Lagrange interpolation
     Real bcValue(0);
     Real base(1);
-
-    // Time container for interpolation
-    std::vector< Real > timeContainer( M_bcPreviousTimeSteps.size(), 0 );
-    for ( UInt i(0) ; i < M_bcPreviousTimeSteps.size() ; ++i )
-        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
 
     for ( UInt i(0) ; i < M_bcPreviousTimeSteps.size() ; ++i )
     {
@@ -847,9 +853,9 @@ MultiscaleModel1D::bcFunctionDelta( const Real& t )
                 base *= (t - timeContainer[j]) / (timeContainer[i] - timeContainer[j]);
 
         if ( i == 0 )
-            bcValue += ( M_bcDelta + M_bcPreviousTimeSteps[i][M_bcDeltaSide][M_bcDeltaType] ) * base;
+            bcValue += base * ( M_bcPreviousTimeSteps[i][M_bcDeltaSide][M_bcDeltaType] + M_bcDelta );
         else
-            bcValue += M_bcPreviousTimeSteps[i][M_bcDeltaSide][M_bcDeltaType] * base;
+            bcValue += base * M_bcPreviousTimeSteps[i][M_bcDeltaSide][M_bcDeltaType];
     }
 
     return bcValue;
