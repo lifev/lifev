@@ -1002,24 +1002,33 @@ void ExporterHDF5<MeshType>::writeGeometry()
     case TETRA:
     {
         const ReferenceFE & refFEP1 = feTetraP1;
-        MapEpetra tmpMapP1(refFEP1, *this->M_mesh,
-                           this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
+        DOF tmpDof ( *this->M_mesh, refFEP1 );
+        std::vector<Int> myGlobalElements( tmpDof.globalElements( *this->M_mesh ) );
+        // Create the map
+        MapEpetra tmpMapP1( -1, myGlobalElements.size(), &myGlobalElements[0],
+                       this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr() );
         subMap = tmpMapP1;
         break;
     }
     case HEXA:
     {
         const ReferenceFE & refFEQ1 = feHexaQ1;
-        MapEpetra tmpMapQ1(refFEQ1, *this->M_mesh,
-                           this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
+        DOF tmpDof ( *this->M_mesh, refFEQ1 );
+        std::vector<Int> myGlobalElements( tmpDof.globalElements( *this->M_mesh ) );
+        // Create the map
+        MapEpetra tmpMapQ1( -1, myGlobalElements.size(), &myGlobalElements[0],
+                       this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr() );
         subMap = tmpMapQ1;
         break;
     }
     case LINE:
     {
         const ReferenceFE & refFEP11D = feSegP1;
-        MapEpetra tmpMapQ11D(refFEP11D, *this->M_mesh,
-                             this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
+        DOF tmpDof ( *this->M_mesh, refFEP11D );
+        std::vector<Int> myGlobalElements( tmpDof.globalElements( *this->M_mesh ) );
+        // Create the map
+        MapEpetra tmpMapQ11D( -1, myGlobalElements.size(), &myGlobalElements[0],
+                       this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr() );
         subMap = tmpMapQ11D;
         break;
     }
