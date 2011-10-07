@@ -896,7 +896,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
         residual = *M_mass * solution;
         residual += *M_material->stiffVector();
         residual -= *M_rhs;
-        //bcManageResidual( residual, *M_rhs, solution, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0);
+        bcManageResidual( residual, *M_rhs, solution, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0);
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
     }
@@ -913,8 +913,6 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type&
 
     if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
     {
-        matrixPtr_Type matrixNoBC(new matrix_Type(*M_localMap));
-
         M_residual_d.reset(new vector_Type( *M_systemMatrix * solution ));
         *M_residual_d -= *M_rhsNoBC;
     }
