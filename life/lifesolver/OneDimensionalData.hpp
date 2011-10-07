@@ -244,6 +244,24 @@ public:
      */
     void setPostprocessingFile( const std::string& file ) { M_postprocessingFile = file; }
 
+    //! Set the area perturbation parameter to compute the Jacobian matrix (in the Multiscale framework)
+    /*!
+     * @param jacobianPerturbationArea area perturbation parameter
+     */
+    void setJacobianPerturbationArea( const Real& jacobianPerturbationArea ) { M_jacobianPerturbationArea = jacobianPerturbationArea; }
+
+    //! Set the flow rate perturbation parameter to compute the Jacobian matrix (in the Multiscale framework)
+    /*!
+     * @param jacobianPerturbationFlowRate flow rate perturbation parameter
+     */
+    void setJacobianPerturbationFlowRate( const Real& jacobianPerturbationFlowRate ) { M_jacobianPerturbationFlowRate = jacobianPerturbationFlowRate; }
+
+    //! Set the stress perturbation parameter to compute the Jacobian matrix (in the Multiscale framework)
+    /*!
+     * @param jacobianPerturbationStress stress perturbation parameter
+     */
+    void setJacobianPerturbationStress( const Real& jacobianPerturbationStress ) { M_jacobianPerturbationStress = jacobianPerturbationStress; }
+
     //! Set data time container
     /*!
      * @param timeDataPtr shared_ptr to TimeData container
