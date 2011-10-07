@@ -238,18 +238,11 @@ public:
     //! Return a pointer to M_elementDomains
     const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
     graphPtr_Type&           elementDomains()             {return M_elementDomains;}
-    //! Return a reference to M_repeatedPeakVector
-    const std::vector<Int>&  repeatedPeakVector()   const {return M_repeatedPeakVector[0];}
-    //! Return a reference to M_repeatedRidgeVector
-    const std::vector<Int>&  repeatedRidgeVector()   const {return M_repeatedRidgeVector[0];}
-    //! Return a reference to M_repeatedFacetVector
-    const std::vector<Int>&  repeatedFacetVector()   const {return M_repeatedFacetVector[0];}
-    //! Return a reference to M_repeatedElementVector
-    const std::vector<Int>&  repeatedElementVector() const {return M_repeatedElementVector[0];}
+    //! Return the communicator of the mesh
+    boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
     //! Return a reference to M_ghostDataMap
     const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
-
-    const boost::shared_ptr<Epetra_Comm>& comm() const  {return M_comm;}
+    
     //@}
 
 private:
@@ -346,13 +339,6 @@ private:
       Updates M_meshPartitions.
     */
     void finalSetup();
-    //! Create repeated element map
-    /*!
-      Creates a map of the boundary elements (vertices, ridges, facets, volumes).
-      Updates M_repeatedNodeVector, M_repeatedRidgeVector, M_repeatedFacetVector,
-      M_repeatedElementVector.
-    */
-    void createRepeatedMap();
 
     //@}
     //! Private Data Members
@@ -369,10 +355,6 @@ private:
     std::vector<std::set<Int> >          M_localRidges;
     std::vector<std::set<Int> >          M_localFacets;
     std::vector<std::vector<Int> >       M_localElements;
-    std::vector<std::vector<Int> >       M_repeatedPeakVector;
-    std::vector<std::vector<Int> >       M_repeatedRidgeVector;
-    std::vector<std::vector<Int> >       M_repeatedFacetVector;
-    std::vector<std::vector<Int> >       M_repeatedElementVector;
     std::vector<std::map<Int, Int> >     M_globalToLocalNode;
     std::vector<std::map<Int, Int> >     M_globalToLocalElement;
     std::vector<UInt>                    M_nBoundaryPoints;
@@ -435,10 +417,6 @@ init ()
     M_localRidges.resize ( M_numPartitions );
     M_localFacets.resize ( M_numPartitions );
     M_localElements.resize ( M_numPartitions );
-    M_repeatedPeakVector.resize ( M_numPartitions );
-    M_repeatedRidgeVector.resize ( M_numPartitions );
-    M_repeatedFacetVector.resize ( M_numPartitions );
-    M_repeatedElementVector.resize ( M_numPartitions );
     M_globalToLocalNode.resize ( M_numPartitions );
     M_globalToLocalElement.resize ( M_numPartitions );
     M_nBoundaryPoints.resize ( M_numPartitions );
@@ -509,10 +487,6 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
     M_localRidges.resize(M_numPartitions);
     M_localFacets.resize(M_numPartitions);
     M_localElements.resize(M_numPartitions);
-    M_repeatedPeakVector.resize(M_numPartitions);
-    M_repeatedRidgeVector.resize(M_numPartitions);
-    M_repeatedFacetVector.resize(M_numPartitions);
-    M_repeatedElementVector.resize(M_numPartitions);
     M_globalToLocalNode.resize(M_numPartitions);
     M_globalToLocalElement.resize(M_numPartitions);
     M_nBoundaryPoints.resize(M_numPartitions);
@@ -622,11 +596,6 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // final setup
     // ******************
     finalSetup();
-
-    // *********************
-    // repeated map creation
-    // *********************
-    createRepeatedMap();
 }
 
 template<typename MeshType>
@@ -1527,93 +1496,6 @@ void MeshPartitioner<MeshType>::finalSetup()
         else
         {
             Debug(4000) << "Rank " << M_me << " created local mesh.\n";
-        }
-#endif
-    }
-}
-
-template<typename MeshType>
-void MeshPartitioner<MeshType>::createRepeatedMap()
-{
-    std::set<Int>    repeatedPeakList;
-    std::set<Int>    repeatedRidgeList;
-    std::set<Int>    repeatedFacetList;
-
-    if (! M_me)
-    {
-        std::cout << "Building repeated map... " << std::endl;
-    }
-
-    for (UInt i = 0; i < M_numPartitions; ++i)
-    {
-        std::set<Int>::iterator is;
-
-        UInt me = M_serialMode ? i : M_me;
-
-        std::vector<Int> elementList = (*M_elementDomains)[me];
-
-        UInt inode, ielem;
-
-        // repeated element map creation
-
-        // use sets to store each entity only once
-        repeatedPeakList.clear();
-        repeatedRidgeList.clear();
-        repeatedFacetList.clear();
-
-        for (UInt ii = 0; ii < elementList.size(); ++ii)
-        {
-            ielem = elementList[ii];
-            M_repeatedElementVector[i].push_back(ielem);
-            for (UInt jj = 0; jj < M_elementPeaks; ++jj)
-            {
-                inode = M_originalMesh->element(ielem).point(jj).id();
-                repeatedPeakList.insert(inode);
-            }
-            for (UInt jj = 0; jj < M_elementRidges; ++jj)
-            {
-                UInt iridge = M_originalMesh->localRidgeId(ielem, jj);
-                repeatedRidgeList.insert((Int) iridge);
-            }
-            for (UInt jj = 0; jj < M_elementFacets; ++jj)
-            {
-                UInt ifacet = M_originalMesh->localFacetId(ielem, jj);
-                repeatedFacetList.insert(ifacet);
-            }
-        }
-
-        // repeated node map creation
-        M_repeatedPeakVector[i].reserve(repeatedPeakList.size());
-
-        for (is = repeatedPeakList.begin(); is != repeatedPeakList.end(); ++is)
-        {
-            M_repeatedPeakVector[i].push_back(*is);
-        }
-
-        // repeated ridge list creation
-        M_repeatedRidgeVector[i].reserve(repeatedRidgeList.size());
-
-        for (is = repeatedRidgeList.begin(); is != repeatedRidgeList.end(); ++is)
-        {
-            M_repeatedRidgeVector[i].push_back(*is);
-        }
-
-        // repeated facet list creation
-        M_repeatedFacetVector[i].reserve(repeatedFacetList.size());
-
-        for (is = repeatedFacetList.begin(); is != repeatedFacetList.end(); ++is)
-        {
-            M_repeatedFacetVector[i].push_back(*is);
-        }
-
-#ifdef HAVE_LIFEV_DEBUG
-        if (M_serialMode)
-        {
-            Debug(4000) <<  "Created repeated map number " << i << "\n";
-        }
-        else
-        {
-            Debug(4000) << "Rank " << M_me << " created repeated map.\n";
         }
 #endif
     }
