@@ -173,7 +173,7 @@ MultiscaleCoupling::interpolateCouplingVariables( const Real& t, multiscaleVecto
             if ( j != i )
                 base *= (t - timeContainer[j]) / (timeContainer[i] - timeContainer[j]);
 
-        interpolatedCouplingVariables += localCouplingVariables( i ) * base;
+        interpolatedCouplingVariables += base * localCouplingVariables( i );
     }
 }
 
