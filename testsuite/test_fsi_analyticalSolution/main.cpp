@@ -43,12 +43,17 @@
 #include <iomanip>
 #include <cmath>
 
+//#include <life/lifealg/PreconditionerIfpack.hpp>
+//#include <life/lifealg/PreconditionerML.hpp>
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
+//#include "life/lifesolver/exactJacobianBase.hpp"
+//#include "life/lifesolver/fixedPointBase.hpp"
 #include <life/lifesolver/FSIData.hpp>
+//#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <life/lifesolver/StructuralSolver.hpp>
 #include <life/lifesolver/StructuralMaterial.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
@@ -135,26 +140,25 @@ public:
             M_oper   ( Operator )
     {
      flag = 1 ;
-     rhoFluid =  M_oper.fluid().density();
+     rhoFluid =  M_oper.fluid().density();  
      rhoSolid =  M_oper.solid().rho( );
      theta  =  1./5. * (1-cos(50*PI*  M_oper.data().dataFluid()->dataTime()->timeStep()));
      dtheta =  10. *PI *sin(50*PI* M_oper.data().dataFluid()->dataTime()->timeStep());
      ddtheta = 500.* PI*PI * cos(50*PI* M_oper.data().dataFluid()->dataTime()->timeStep());
      dtheta2 = dtheta*dtheta;
      c1 = 0,   c2 =0,   c3  = 0.0,
-     dc1 = 0,  dc2 = 0,  dc3 = 0.0,
+     dc1 = 0,  dc2 = 0,  dc3 = 0.0, 
      ddc1 = 0, ddc2 = 0, ddc3 = 0.0;
     }
 
   typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_Type;
   typedef FSIOperator::vector_Type                        vector_Type;
-  typedef FSIOperator::vectorPtr_Type                     vectorPtr_Type;
 
 Real fluidAccelerate(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
   switch(i) {
     case 0:
-      return  dtheta2*( c1-x ) + ddtheta*(c2-y) + ddc1 ;
+      return  dtheta2*( c1-x ) + ddtheta*(c2-y) + ddc1 ; 
         break;
     case 1:
       return dtheta2*(c2-y)  + ddtheta*(x-c1)+ ddc2 ;
@@ -168,14 +172,14 @@ Real fluidAccelerate(const Real& /*t*/, const Real& x, const Real& y, const Real
 
 Real
 fluidRHS(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
- {
+ {  
    switch(i) {
    case 0:
      return rhoFluid*( dtheta2*( c1-x ) + ddtheta*(c2-y) + ddc1 );
      break;
    case 1:
      return rhoFluid*(dtheta2*(c2-y)  + ddtheta*(x-c1)+ ddc2 );
-     break;
+     break; 
    case 2:
      return rhoFluid*ddc3;
      break;
@@ -185,7 +189,7 @@ fluidRHS(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, con
    }
 }
 
-//Real
+//Real 
 //pressure(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 //{
 //  return 2*(M_oper.solid().mu(flag)+M_oper.solid().lambda(flag) )*(1-cos(theta));
@@ -194,8 +198,8 @@ fluidRHS(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, con
 
 Real
 solidRHS(const Real& /*t*/, const Real& X, const Real& Y, const Real& /*Z*/, const ID& i)
-{
-
+{ 
+ 
   switch(i) {
   case 0:
     return - rhoSolid*(ddtheta * ( X*sin(theta) + Y*cos(theta) )+ dtheta2*( X*cos(theta) - Y*sin(theta))-ddc1);
@@ -209,10 +213,10 @@ solidRHS(const Real& /*t*/, const Real& X, const Real& Y, const Real& /*Z*/, con
   default:
     ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
     break;
-  }
+  } 
 }
 
-Real
+Real 
 fluidVelocity(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
   switch(i) {
@@ -229,7 +233,7 @@ fluidVelocity(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/
   return 0;
 }
 
-Real
+Real 
 solidAccelerate(const Real& /*t*/, const Real& X, const Real& Y, const Real& /*Z*/, const ID& i)
 {
   switch(i) {
@@ -249,7 +253,7 @@ solidAccelerate(const Real& /*t*/, const Real& X, const Real& Y, const Real& /*Z
         break;
   }
 }
-
+  
 // Initial velocity
 Real
 solidDisplacement(const Real& /*t*/, const Real&  X, const Real& Y, const Real& /*Z*/, const ID& i)
@@ -263,14 +267,14 @@ solidDisplacement(const Real& /*t*/, const Real&  X, const Real& Y, const Real& 
      break;
    case 2:
      return c3;
-     break;
+     break;   
    default:
      ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
      break;
    }
 }
 
-Real
+Real 
 solidVelocity(const Real& /*t*/, const Real& X, const Real& Y, const Real& /*Z*/, const ID& i)
 {
   switch(i) {
@@ -288,14 +292,14 @@ solidVelocity(const Real& /*t*/, const Real& X, const Real& Y, const Real& /*Z*/
     break;
   }
 }
-
+          
 fct_Type FluidAccelerate()
     {
         fct_Type f;
         f = boost::bind(&analyticalSolution::fluidAccelerate, this, _1, _2, _3, _4, _5);
         return f;
     }
-
+ 
 fct_Type FluidRHS()
     {
         fct_Type f;
@@ -309,21 +313,21 @@ const fct_Type& FluidVelocity()
         f = boost::bind(&analyticalSolution::fluidVelocity, this, _1, _2, _3, _4, _5);
         return f;
     }
-
+ 
 fct_Type SolidAccelerate()
     {
         fct_Type f;
         f = boost::bind(&analyticalSolution::solidAccelerate, this, _1, _2, _3, _4, _5);
         return f;
     }
-
+ 
 fct_Type SolidDisplacement()
     {
         fct_Type f;
         f = boost::bind(&analyticalSolution::solidDisplacement, this, _1, _2, _3, _4, _5);
         return f;
     }
-
+ 
 fct_Type SolidVelocity()
     {
         fct_Type f;
@@ -338,14 +342,13 @@ fct_Type SolidRHS()
         return f;
     }
 
-void initializeFluid( std::vector <vectorPtr_Type>& fluidStart)
+void initializeFluid( std::vector <vector_Type>& fluidStart, Real tStart )  
   {
-      vectorPtr_Type velocity;
-      vectorPtr_Type accelerate ( new vector_Type(M_oper.fluid().getMap()) );
+    vector_Type velocity ( M_oper.fluid().getMap() );
+    vector_Type accelerate ( M_oper.fluid().getMap() );
 
       if( M_oper.fluidTimeAdvanceMethod() == "Newmark")
         {
-            velocity.reset ( new vector_Type(M_oper.fluid().getMap()) );
 	  // M_oper.uFESpace().interpolate(*this->fluidVelocity,   velocity,  tStart);
           //M_oper.uFESpace().interpolate(this->fluidAccelerate(), accelerate,  tStart);
           fluidStart.push_back(velocity);
@@ -353,86 +356,82 @@ void initializeFluid( std::vector <vectorPtr_Type>& fluidStart)
         }
 
       if(M_oper.fluidTimeAdvanceMethod() == "BDF")
-      {
-          for ( UInt previousPass = 0; previousPass < M_oper.data().dataFluid()->dataTime()->orderBDF() ; previousPass++)
-          {
-              Real previousTimeStep = -previousPass*  M_oper.data().dataFluid()->dataTime()->timeStep() ;
-              velocity.reset ( new vector_Type(M_oper.fluid().getMap()) );
-              // M_oper.uFESpace().interpolate(this->FluidVelocity(), velocity, previousTimeStep);
-              fluidStart.push_back(velocity);
-          }
-      }
+	{
+	  for ( UInt previousPass = tStart; previousPass < M_oper.data().dataFluid()->dataTime()->orderBDF() ; previousPass++)
+	    {
+	      Real previousTimeStep = -previousPass*  M_oper.data().dataFluid()->dataTime()->timeStep() ;
+	      
+	      // M_oper.uFESpace().interpolate(this->FluidVelocity(), velocity, previousTimeStep);
+            }
+        }
+      fluidStart.push_back(velocity);
   }
 
-void initializeALE( std::vector <vectorPtr_Type>& ALEStart )
+void initializeALE( std::vector <vector_Type>& ALEStart, Real& tStart )  
   {
-      vectorPtr_Type displacement ( new vector_Type(M_oper.meshMotion().getMap()) );
-      vectorPtr_Type velocity( new vector_Type(M_oper.meshMotion().getMap()) );
-      //vectorPtr_Type accelerate      ( new vector_Type(M_oper.meshMotion().getMap()) );
-
+    vector_Type displacement ( M_oper.meshMotion().getMap() );
+    vector_Type velocity           ( M_oper.meshMotion().getMap() );
+    vector_Type accelerate      ( M_oper.meshMotion().getMap() );
+    
       if( M_oper.ALETimeAdvanceMethod() == "Newmark")
-      {
-          displacement.reset( new vector_Type(M_oper.meshMotion().getMap()) );
-          // M_oper.meshMotion().mFESpace().interpolate(this->SolidDisplacement(),     displacement,  tStart);
-          // M_oper.meshMotion().mFESpace().interpolate(this->SolidVelocity(), velocity,  tStart);
+        {
+	  // M_oper.meshMotion().mFESpace().interpolate(this->SolidDisplacement(),     displacement,  tStart);
+	  // M_oper.meshMotion().mFESpace().interpolate(this->SolidVelocity(), velocity,  tStart);
           //M_oper.meshMotion().mFESpace().interpolate(this->SolidVelocity(), accelerate,  tStart);
-          ALEStart.push_back(displacement);
+	  ALEStart.push_back(displacement);
           ALEStart.push_back(velocity);
-          //ALEStart.push_back(accelerate);
-      }
+          ALEStart.push_back(accelerate);
+        }
 
       if(M_oper.ALETimeAdvanceMethod() == "BDF")
 	{
-	  for ( UInt previousPass = 0; previousPass < M_oper.data().dataFluid()->dataTime()->orderBDF() ; previousPass++)
+	  for ( UInt previousPass = tStart; previousPass < M_oper.data().dataFluid()->dataTime()->orderBDF() ; previousPass++)
 	    {
-          displacement.reset( new vector_Type(M_oper.meshMotion().getMap()) );
-	      Real previousTimeStep = -previousPass*  M_oper.data().dataFluid()->dataTime()->timeStep() ;
-          //M_oper.meshMotion().mFESpace().interpolate(SolidDisplacement(), displacement, previousTimeStep);
-          ALEStart.push_back( displacement) ;
+	      Real previousTimeStep = -previousPass*  M_oper.data().dataFluid()->dataTime()->timeStep() ;	
+	     //   M_oper.meshMotion().mFESpace().interpolate(SolidDisplacement(), displacement, previousTimeStep);
 	    }
         }
+      ALEStart.push_back( displacement) ; 
 }
 
-void initializeSolid( std::vector <vectorPtr_Type>& solidStart )
+void initializeSolid( std::vector <vector_Type>& solidStart, Real& tStart )  
   {
-      vectorPtr_Type displacement ;
-      vectorPtr_Type velocity     ( new vector_Type(M_oper.solid().map()) );
-      vectorPtr_Type accelerate   ( new vector_Type(M_oper.solid().map()) );
-
+    vector_Type displacement ( M_oper.solid().map() ); 
+    vector_Type velocity     ( M_oper.solid().map() );
+    vector_Type accelerate   ( M_oper.solid().map() );
+    
       if( M_oper.solidTimeAdvanceMethod() == "Newmark")
         {
-            displacement.reset ( new vector_Type(M_oper.solid().map()) );
-
-            //M_oper.meshMotion().mFESpace().interpolate(SolidDisplacement(),     displacement,  tStart);
-            //M_oper.meshMotion().mFESpace().interpolate(SolidVelocity(), velocity,  tStart);
-            //M_oper.meshMotion().mFESpace().interpolate(SolidVelocity(), accelerate,  tStart);
-            solidStart.push_back(displacement);
-            solidStart.push_back(velocity);
-            solidStart.push_back(accelerate);
+          //M_oper.meshMotion().mFESpace().interpolate(SolidDisplacement(),     displacement,  tStart);
+          //M_oper.meshMotion().mFESpace().interpolate(SolidVelocity(), velocity,  tStart);
+          //M_oper.meshMotion().mFESpace().interpolate(SolidVelocity(), accelerate,  tStart);
+	  solidStart.push_back(displacement);
+          solidStart.push_back(velocity);
+          solidStart.push_back(accelerate);
         }
 
       if(M_oper.solidTimeAdvanceMethod() == "BDF")
 	{
-	   for ( UInt previousPass ; previousPass < M_oper.data().dataSolid()->dataTime()->orderBDF() ; previousPass++)
+	   for ( UInt previousPass = tStart; previousPass < M_oper.data().dataSolid()->dataTime()->orderBDF() ; previousPass++)
 	    {
-            displacement.reset ( new vector_Type(M_oper.solid().map()) );
-            Real previousTimeStep = -previousPass*  M_oper.data().dataSolid()->dataTime()->timeStep() ;
-            //  M_oper.meshMotion().mFESpace().interpolate(this->SolidDisplacement(), displacement,previousTimeStep);
-            solidStart.push_back( displacement) ;
+	      Real previousTimeStep = -previousPass*  M_oper.data().dataSolid()->dataTime()->timeStep() ;	
+	      
+	      //  M_oper.meshMotion().mFESpace().interpolate(this->SolidDisplacement(), displacement,previousTimeStep);
 	    }
 	}
-
+      solidStart.push_back( displacement) ;            
+        
 }
 
 
 private:
 
     FSIOperator& M_oper;
-    Real  flag;
+    Real  flag; 
     Real  rhoFluid, rhoSolid;
     Real  theta,  dtheta,  ddtheta,  dtheta2;
     Real  c1,   c2,   c3,
-         dc1,  dc2,  dc3,
+         dc1,  dc2,  dc3, 
         ddc1, ddc2, ddc3;
 
 };
@@ -568,9 +567,9 @@ public:
 
         bool restart = dataFile("problem/restart",false);
         M_Tstart = 0.;
-
+     
 	analyticalSolution M_analyticalSolution(*M_fsi->FSIOper());
-
+	
         if ( restart )
         {
             std::string velFName  = dataFile("fluid/miscellaneous/velname"  ,"vel");
@@ -596,13 +595,13 @@ public:
         }
         else
         {
-            std::vector<vectorPtr_Type> fluidStart(0), ALEStart(0), solidStart(0);
+	  std::vector<vector_Type> fluidStart, ALEStart, solidStart;
 
-//             M_analyticalSolution.initializeFluid(fluidStart);
-//             M_analyticalSolution.initializeALE(ALEStart);
-//             M_analyticalSolution.initializeSolid(solidStart);
+	  M_analyticalSolution.initializeFluid(fluidStart, M_Tstart);
+	  M_analyticalSolution.initializeALE(ALEStart, M_Tstart);
+	  M_analyticalSolution.initializeSolid(solidStart, M_Tstart );
 
-            M_fsi->initialize(/*fluidStart, ALEStart, solidStart*/);
+	  M_fsi->initialize(fluidStart, ALEStart, solidStart);
         }
         M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->timeStep() );
         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
@@ -636,7 +635,7 @@ public:
 
             if ( M_fsi->isFluid() )
             {
-              BCFunctionBase meshDisplacement;
+              BCFunctionBase meshDisplacement;              
 	      // meshDisplacement.setFunction(M_analyticalSolution.SolidDisplacement());
 
 	      M_fsi->FSIOper()->BCh_harmonicExtension()->modifyBC(3,  meshDisplacement);
@@ -655,7 +654,7 @@ public:
 
             if ( M_fsi->isFluid() )
             {
-              BCFunctionBase solidDisplacement;
+              BCFunctionBase solidDisplacement;              
  	      //solidDisplacement.setFunction(M_analyticalSolution.SolidDisplacement());
 
 	      M_fsi->FSIOper()->BCh_solid()->modifyBC(3,  solidDisplacement);
@@ -742,7 +741,7 @@ private:
     }
 
     fsi_solver_ptr M_fsi;
-
+ 
     dataPtr_Type   M_data;
     Real           M_Tstart;
 
