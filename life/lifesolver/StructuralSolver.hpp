@@ -894,14 +894,14 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
     }
-
     else //NH and Exp
     {
         chrono.start();
+        *M_rhs=*M_rhsNoBC;
         residual = *M_mass * solution;
         residual += *M_material->stiffVector();
-        residual -= *M_rhs;
         bcManageResidual( residual, *M_rhs, solution, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
+        residual -= *M_rhs;
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
     }
