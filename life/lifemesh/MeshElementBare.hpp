@@ -424,16 +424,16 @@ struct cmpBareItem<BareEdge> //!< The actual comparison operator
 template <>
 struct cmpBareItem<BareFace>
 {
-    bool operator() ( const BareFace & edge1, const BareFace & edge2 ) const
+    bool operator() ( const BareFace & face1, const BareFace & face2 ) const
     {
-        if ( edge2.first > edge1.first )
+        if ( face2.first > face1.first )
             return true;
-        if ( edge2.first == edge1.first )
+        if ( face2.first == face1.first )
         {
-            if ( edge2.second > edge1.second )
+            if ( face2.second > face1.second )
                 return true;
-            if ( edge2.second == edge1.second )
-                return edge2.third > edge1.third;
+            if ( face2.second == face1.second )
+                return face2.third > face1.third;
         }
         return false;
     }
@@ -445,6 +445,41 @@ operator<( const BareFace & f1 , const BareFace & f2 )
 {
     return cmpBareItem<BareFace>()(f1,f2);
 }
+
+
+
+//! BareEntitySelector class - Select the proper bare entity type (bareEdge or bareFace) based on the number of the entity points.
+/*!
+ * @author Mauro Perego
+    @see
+
+	The proper bare entity type  (BareEdge or BareFace) and
+	the proper function to construct bare entities (makeBareEdge /  makeBareFace)
+	are selected based on the template int numPoints, which is the number of points of the bare entity.
+ */
+
+template<int numPoints>
+class BareEntitySelector {};
+
+template<>
+struct BareEntitySelector<2>{
+	static std::pair<BareEdge, bool> makeBareEntity(const ID points[]) {return makeBareEdge(points[0], points[1]);}
+	typedef BareEdge bareEntity_Type;
+};
+
+template<>
+struct BareEntitySelector<3>{
+	typedef BareFace bareEntity_Type;
+	static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2]);}
+};
+
+template<>
+struct BareEntitySelector<4>{
+	typedef BareFace bareEntity_Type;
+	static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2], points[3]);}
+};
+
+
 
 
 //! MeshElementBareHandler class - Class to handle bare edges and faces construction

@@ -1031,8 +1031,11 @@ void ExporterHDF5<MeshType>::writeGeometry()
     case TRIANGLE:
     {
         const ReferenceFE & refFEP1 = feTriaP1;
-        MapEpetra tmpMapP1(refFEP1, *this->M_mesh,
-                           this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
+        DOF tmpDof ( *this->M_mesh, refFEP1 );
+                std::vector<Int> myGlobalElements( tmpDof.globalElements( *this->M_mesh ) );
+		// Create the map
+		MapEpetra tmpMapP1( -1, myGlobalElements.size(), &myGlobalElements[0],
+					   this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr() );
         subMap = tmpMapP1;
         break;
     }
