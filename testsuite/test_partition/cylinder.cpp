@@ -34,7 +34,6 @@
 
  */
 
-#ifdef HAVE_HDF5
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -68,7 +67,7 @@
 #include "cylinder.hpp"
 #include <iostream>
 
-
+#ifdef HAVE_HDF5
 
 using namespace LifeV;
 
