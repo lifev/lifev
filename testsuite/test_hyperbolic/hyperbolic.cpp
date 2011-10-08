@@ -333,7 +333,7 @@ hyperbolic::hyperbolic( int argc,
 Real
 hyperbolic::run()
 {
-    typedef RegionMesh3D<LinearTetra>                   RegionMesh;
+    typedef RegionMesh3D<LinearTetra,neighborMarkerCommon_Type> RegionMesh;
     typedef SolverAztecOO                               solver_type;
     typedef HyperbolicSolver< RegionMesh, solver_type > hyper;
     typedef hyper::vector_Type                          vector_type;
@@ -386,6 +386,9 @@ hyperbolic::run()
 
     // Set up the mesh
     readMesh( *fullMeshPtr, meshData );
+
+    // create node neighbors
+    createNodeNeighbors ( *fullMeshPtr );
 
     // Partition the mesh using ParMetis
     MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
@@ -453,6 +456,9 @@ hyperbolic::run()
     // Finite element space of the interpolation of dual variable.
     FESpace< RegionMesh, MapEpetra > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate, *pressure_qR_dualInterpolate,
                                                                     *pressure_bdQr_dualInterpolate, 3, Members->comm );
+
+    // create ghost map
+    pressure_uInterpolate_FESpace.map().createGhostMap( meshPart );
 
     // Vector for the interpolated dual solution.
     vector_ptrtype pressure_dualInterpolated( new vector_type ( pressure_uInterpolate_FESpace.map(), Repeated ) );

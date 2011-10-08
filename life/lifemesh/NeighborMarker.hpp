@@ -39,6 +39,7 @@
 #include <life/lifecore/LifeV.hpp>
 
 #include <life/lifemesh/Marker.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
 
 // LifeV namespace
 namespace LifeV
@@ -48,7 +49,8 @@ namespace LifeV
 /*! This class extends the default marker adding containers to store all adjacency informations.
  */
 
-template <typename FlagPolicy = EntityFlagStandardPolicy>
+// template <typename FlagPolicy = EntityFlagStandardPolicy>
+template <typename FlagPolicy = MarkerTraits>
 class NeighborMarker: public Marker<FlagPolicy>
 {
 public:
@@ -59,7 +61,8 @@ public:
 
     NeighborMarker (): Marker<FlagPolicy>() {}
 
-    explicit NeighborMarker ( markerID_Type & p ): Marker<FlagPolicy>( p ) {}
+//    explicit NeighborMarker ( markerID_Type & p ): Marker<FlagPolicy>( p ) {}
+    explicit NeighborMarker ( entityFlag_Type & p ): Marker<FlagPolicy>( p ) {}
 
     neighbors_Type & nodeNeighbors () { return M_nodeNeighbors; }
 //    neighbors_Type & edgeNeighbors () { return M_edgeNeighbors; }
@@ -91,22 +94,56 @@ public:
     //! @name Public Types
     //@{
     //! The marker used for the Points
-    typedef NeighborMarker<MT> pointMarker_Type;
+//    typedef NeighborMarker<MT> pointMarker_Type;
+    typedef NeighborMarker<MT> PointMarker;
     //! The marker used for the Edges
-    typedef Marker<MT> edgeMarker_Type;
+//    typedef Marker<MT> edgeMarker_Type;
+    typedef Marker<MT> EdgeMarker;
     //! The marker used for the Faces
-    typedef Marker<MT> faceMarker_Type;
+//    typedef Marker<MT> faceMarker_Type;
+    typedef Marker<MT> FaceMarker;
     //! The marker used for the Volumes
-    typedef Marker<MT> volumeMarker_Type;
+//    typedef Marker<MT> volumeMarker_Type;
+    typedef Marker<MT> VolumeMarker;
     //! The marker used for the Regions
-    typedef Marker<MT> regionMarker_Type;
+//    typedef Marker<MT> regionMarker_Type;
+    typedef Marker<MT> RegionMarker;
     //@}
 };
 
 //! The NeighborMarkerCommon: uses all defaults except for Points
-typedef NeighborMarkerCommon<EntityFlagStandardPolicy> neighborMarkerCommon_Type;
+// typedef NeighborMarkerCommon<EntityFlagStandardPolicy> neighborMarkerCommon_Type;
+typedef NeighborMarkerCommon<MarkerTraits> neighborMarkerCommon_Type;
 
-}
+//! this routine generates node neighbors for the given mesh
+/*! the routine assumes that the mesh is not yet partitioned or reordered 
+ *  (i.e. the local id and the global id are the same).
+ *  if this is not true the method should be changed to use a less 
+ *  cheap STL find on the mesh points to get the correct point that has 
+ *  the given global id. 
+ */
+template <typename MeshType>
+void createNodeNeighbors( MeshType & mesh )
+{
+    // TODO: ASSERT_COMPILE_TIME that MeshType::pointMarker == NeighborMarker
+    // this guarantees that the nodeNeighbors structure is available. 
+    
+    // generate node neighbors by watching edges
+    // note: this can be based also on faces or volumes
+    for ( UInt ie = 0; ie < mesh.numEdges(); ie++ )
+    {
+        ID id0 = mesh.edge( ie ).point( 0 ).id();
+        ID id1 = mesh.edge( ie ).point( 1 ).id();
 
-#endif // _DATATRACK_H_
+        ASSERT ( mesh.point( id0 ).id() == id0 , "the mesh has been reordered, the point must be found" );
+        ASSERT ( mesh.point( id1 ).id() == id1 , "the mesh has been reordered, the point must be found" );
+
+        mesh.point( id0 ).nodeNeighbors().insert( id1 );
+        mesh.point( id1 ).nodeNeighbors().insert( id0 );
+    }
+}   
+
+} // namespace LifeV
+
+#endif // _NEIGHBORMARKER_H_
 

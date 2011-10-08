@@ -253,7 +253,7 @@ public:
 
     //! Generate ghost map
     template<typename MeshType>
-    void createGhostMap( MeshPartitioner<MeshType> const & meshPart );
+    void createGhostMap( MeshPartitioner<MeshType> & meshPart );
 
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
@@ -439,19 +439,20 @@ MapEpetra( const ReferenceFE&        refFE,
 }
 
 template <typename MeshType>
-void MapEpetra::createGhostMap( MeshPartitioner<MeshType> const & meshPart )
+void MapEpetra::createGhostMap( MeshPartitioner<MeshType> & meshPart )
 {
     // use a set to avoid duplicates
     std::set<Int> myGlobalElementsSet;
-    MeshType const & mesh ( meshPart.meshPartition() ); 
+    MeshType & mesh ( *( meshPart.meshPartition() ) ); 
 
     // iterate on mesh points
     for ( UInt k = 0; k < mesh.numPoints(); k++ )
     {
         // iterate on each node neighborhood
-        for( UInt i = 0; i < mesh.point( k ).nodeNeighbors().size(); i++ )
+        for ( typename MeshType::PointMarker::neighborConstIterator_Type neighborIt = mesh.point( k ).nodeNeighbors().begin(); 
+              neighborIt != mesh.point( k ).nodeNeighbors().end(); ++neighborIt )
         {
-            myGlobalElementsSet.insert( mesh.point( k ).nodeNeighbors()[ i ] );
+            myGlobalElementsSet.insert( *neighborIt );
         }
     }
     

@@ -40,7 +40,8 @@
 
 #include <life/lifecore/LifeV.hpp>
 
-#include <life/lifemesh/RegionMesh3DStructured.hpp>
+#include <life/lifemesh/Marker.hpp>
+#include <life/lifemesh/NeighborMarker.hpp>
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifesolver/HyperbolicSolver.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
