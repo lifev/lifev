@@ -415,10 +415,6 @@ init ()
     M_localEdges.resize ( M_numPartitions );
     M_localFaces.resize ( M_numPartitions );
     M_localVolumes.resize ( M_numPartitions );
-    M_repeatedNodeVector.resize ( M_numPartitions );
-    M_repeatedEdgeVector.resize ( M_numPartitions );
-    M_repeatedFaceVector.resize ( M_numPartitions );
-    M_repeatedVolumeVector.resize ( M_numPartitions );
     M_globalToLocalNode.resize ( M_numPartitions );
     M_globalToLocalVolume.resize ( M_numPartitions );
     M_nBoundaryPoints.resize ( M_numPartitions );
