@@ -97,9 +97,9 @@ int main(int argc, char** argv )
     allQuadRuleSegments.push_back(&quadRuleSeg3pt);
 
     // Check Quadrature Rule on Tetrahedra
-    check = quad_check_doe< RegionMesh3D<LinearTetra> >(feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
+    check = quad_check_doe< RegionMesh<LinearTetra> >(feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
     checkGlobal = checkGlobal & check;
-    check = quad_check_cr< RegionMesh3D<LinearTetra> >(feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
+    check = quad_check_cr< RegionMesh<LinearTetra> >(feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
     checkGlobal = checkGlobal & check;
 
     // Check the quadrature rules for triangles

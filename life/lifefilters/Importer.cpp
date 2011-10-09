@@ -65,7 +65,7 @@ Importer& Importer::operator= ( const Importer& importer )
 
 // Import mesh with tetrahedras
 void
-Importer::import( RegionMesh3D<LinearTetra> & mesh,
+Importer::import( RegionMesh<LinearTetra> & mesh,
                   markerID_Type             regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
@@ -73,7 +73,7 @@ Importer::import( RegionMesh3D<LinearTetra> & mesh,
 
 // Import mesh with linear hexahedras
 void
-Importer::import( RegionMesh3D<LinearHexa> & mesh,
+Importer::import( RegionMesh<LinearHexa> & mesh,
                   markerID_Type            regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );

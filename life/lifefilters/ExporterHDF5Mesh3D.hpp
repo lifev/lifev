@@ -25,7 +25,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 //@HEADER
 /*!
   @file
-  @brief Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh3D only)
+  @brief Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh only)
 
   @date 9-07-2010
   @author Radu Popescu <radu.popescu@epfl.ch>
@@ -42,7 +42,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
-//! Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh3D only)
+//! Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh only)
 /*!
   @author Radu Popescu <radu.popescu@epfl.ch>
 

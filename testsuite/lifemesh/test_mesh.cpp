@@ -100,8 +100,8 @@ int main(int argc, char** argv)
     ofstream ofile(outfile.c_str());
     if (ofile.fail()) {cerr<<" Error: Cannot creat output file"<<endl; abort();}
 
-    RegionMesh3D<LinearTetra> aMesh;
-    typedef RegionMesh3D<LinearTetra> mesh_Type;
+    RegionMesh<LinearTetra> aMesh;
+    typedef RegionMesh<LinearTetra> mesh_Type;
     //    aMesh.test3DBuilder();
     //    aMesh.readMppFile(mystream, id, m);
     ID m=1;

@@ -73,7 +73,7 @@ main( int argc, char** argv )
 //**************** cylinder
 //    MPI_Init(&argc,&argv);
 
-    NavierStokes<RegionMesh3D<LinearTetra>, RossEthierSteinmanUnsteadyDec >
+    NavierStokes<RegionMesh<LinearTetra>, RossEthierSteinmanUnsteadyDec >
 				es( argc, argv, "dataRossEthierSteinman", "rossEthierSteinman" );
 
     es.run();

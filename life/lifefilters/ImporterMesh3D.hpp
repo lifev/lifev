@@ -953,7 +953,7 @@ readINRIAMeshFile( Mesh&      mesh,
 
 //! readGmshFile - it reads a GMSH mesh file
 /*!
-   It reads a 3D gmsh mesh file and store it in a RegionMesh3D.
+   It reads a 3D gmsh mesh file and store it in a RegionMesh.
 
    @param mesh mesh data structure to fill in
    @param fileName name of the gmsh mesh file  to read
@@ -1296,7 +1296,7 @@ readGmshFile( Mesh & mesh,
 
 //! readNetgenMesh - reads mesh++ Tetra meshes.
 /*!
-   It reads a 3D NetGen mesh file and store it in a RegionMesh3D.
+   It reads a 3D NetGen mesh file and store it in a RegionMesh.
 
    @param mesh mesh data structure to fill in.
    @param fileName name of the gmsh mesh file to read.

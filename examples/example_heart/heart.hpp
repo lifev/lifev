@@ -72,11 +72,11 @@ public:
     //@{
 
 #ifdef MONODOMAIN
-    typedef HeartMonodomainSolver< RegionMesh3D<LinearTetra> >::vector_Type  	vector_Type;
-    typedef HeartMonodomainSolver<RegionMesh3D<LinearTetra> >::matrix_Type      	matrix_Type;
+    typedef HeartMonodomainSolver< RegionMesh<LinearTetra> >::vector_Type  	vector_Type;
+    typedef HeartMonodomainSolver<RegionMesh<LinearTetra> >::matrix_Type      	matrix_Type;
 #else
-    typedef HeartBidomainSolver< RegionMesh3D<LinearTetra> >::vector_Type  	vector_Type;
-    typedef HeartBidomainSolver<RegionMesh3D<LinearTetra> >::matrix_Type    	matrix_Type;
+    typedef HeartBidomainSolver< RegionMesh<LinearTetra> >::vector_Type  	vector_Type;
+    typedef HeartBidomainSolver<RegionMesh<LinearTetra> >::matrix_Type    	matrix_Type;
 #endif
     typedef boost::shared_ptr<vector_Type> 					vectorPtr_Type;
     typedef boost::shared_ptr<matrix_Type>     				matrixPtr_Type;
@@ -103,13 +103,13 @@ public:
     //! To compute the righthand side of the system
 #ifdef MONODOMAIN
     void computeRhs( vector_Type& rhs,
-                     HeartMonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-                     boost::shared_ptr< HeartIonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
+                     HeartMonodomainSolver< RegionMesh<LinearTetra> >& electricModel,
+                     boost::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
                      HeartMonodomainData& dataMonodomain );
 #else
     void computeRhs( vector_Type& rhs,
-                     HeartBidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-                     boost::shared_ptr< HeartIonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
+                     HeartBidomainSolver< RegionMesh<LinearTetra> >& electricModel,
+                     boost::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
                      HeartBidomainData& dataBidomain );
 #endif
     //@}

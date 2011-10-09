@@ -61,7 +61,7 @@ template<typename Elt>
 void
 import( std::string const&  fileName,
         MeshFormat const&   format,
-        RegionMesh3D<Elt>&  mesh,
+        RegionMesh<Elt>&  mesh,
         markerID_Type     regionFlag )
 {
     // Select the right mesh format
@@ -175,7 +175,7 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh3D<LinearTetra> & mesh, markerID_Type regionFlag );
+    void import( RegionMesh<LinearTetra> & mesh, markerID_Type regionFlag );
 
 
     //! Import mesh with linear hexahedras
@@ -183,7 +183,7 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh3D<LinearHexa> & mesh, markerID_Type regionFlag );
+    void import( RegionMesh<LinearHexa> & mesh, markerID_Type regionFlag );
 
     //! Import mesh with linear triangles
     /*!

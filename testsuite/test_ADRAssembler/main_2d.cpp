@@ -124,7 +124,7 @@ Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z *
 #endif
 
 
-typedef RegionMesh2D<LinearTriangle> mesh_type;
+typedef RegionMesh<LinearTriangle> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
 typedef VectorEpetra vector_type;
 

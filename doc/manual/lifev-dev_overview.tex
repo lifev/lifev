@@ -662,7 +662,7 @@ The \texttt{MARKER} is a special class used to identify user defined
 attributes, such as boundary conditions. It is a still a rapidly
 evolving feature, which will be better detailed later on.
 \subsubsection{RegionMesh}
-Finally, the public interface of a \texttt{RegionMEsh3D} class, which
+Finally, the public interface of a \texttt{RegionMesh} class, which
 may be used to hold a 3D mesh.  Here we make large use of
 \emph{Standard Template Library} containers (and algorithms). This is
 probably the most complex class so far, at least for the part of the
@@ -672,7 +672,7 @@ Lets look at its public interface piece by piece
 \begin{verbatim}
 template <typename GeoShape, 
 typename MC=MarkerCommon_Base> // Here we will add the Marker_Common class (TO DO)
-class RegionMesh3D : protected MarkerHandler<typename MC::regionMarker>
+class RegionMesh : protected MarkerHandler<typename MC::regionMarker>
 \end{verbatim}
 This is a class template. The second template argument is particular
 and its discussion is postponed until te layout of the Marker classes
@@ -766,7 +766,7 @@ Now we have some methods which return some basic mesh data
    UInt numBEdges() const //Total Number of Boundary Edges
 \end{verbatim}
 We recall that \texttt{Volume} is the name of a 3D geometry element.
-Since \texttt{RegionMEsh3D} handles only 3D problems, we also use the
+Since \texttt{RegionMesh} handles only 3D problems, we also use the
 generic term \texttt{Element} to indicate, in fact, the volumes. That
 is we have \texttt{numElements()=numVolumes()}.
 
@@ -1371,7 +1371,7 @@ means that we are using the default marker classes.
   MeshElementMarked2D<LinearTriangle> tri1;
   MeshElementMarked2D<LinearTriangle> tri2;
   MeshElementMarked3D<LinearTetra> tet;
-  RegionMesh3D<LinearTetra> mesh;
+  RegionMesh<LinearTetra> mesh;
   MeshElementMarked0D<> point;
 \end{verbatim}
 

@@ -53,7 +53,7 @@
 
 using namespace LifeV;
 
-typedef RegionMesh3D<LinearTetra> mesh_Type;
+typedef RegionMesh<LinearTetra> mesh_Type;
 
 //! Identifiers for heart boundaries
 const Int EPICARDIUM    = 40;

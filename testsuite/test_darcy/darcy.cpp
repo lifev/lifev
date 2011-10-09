@@ -289,7 +289,7 @@ darcy::run()
 {
     using boost::dynamic_pointer_cast;
 
-    typedef RegionMesh3D< LinearTetra >                               RegionMesh;
+    typedef RegionMesh< LinearTetra >                               RegionMesh;
     typedef SolverAztecOO                                             solver_type;
 
     typedef DarcySolver< RegionMesh, solver_type >                    darcyLinearSolver_type;

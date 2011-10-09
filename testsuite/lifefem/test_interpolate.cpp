@@ -73,10 +73,10 @@ using namespace LifeV;
 
 int main(int argc, char** argv )
 {
-    typedef FESpace < RegionMesh3D<LinearTetra>, MapEpetra > FESpaceTetra_Type;
+    typedef FESpace < RegionMesh<LinearTetra>, MapEpetra > FESpaceTetra_Type;
     typedef boost::shared_ptr < FESpaceTetra_Type > FESpaceTetraPtr_Type;
 
-    typedef FESpace < RegionMesh3D<LinearHexa>, MapEpetra > FESpaceHexa_Type;
+    typedef FESpace < RegionMesh<LinearHexa>, MapEpetra > FESpaceHexa_Type;
     typedef boost::shared_ptr < FESpaceHexa_Type > FESpaceHexaPtr_Type;
 
 
@@ -118,8 +118,8 @@ int main(int argc, char** argv )
 
     // Import/Generate an hexahedral and  a Tetrahedral mesh.
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshTetraPtr(new RegionMesh3D<LinearTetra>);
-    boost::shared_ptr<RegionMesh3D<LinearHexa> > fullMeshHexaPtr(new RegionMesh3D<LinearHexa>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshTetraPtr(new RegionMesh<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearHexa> > fullMeshHexaPtr(new RegionMesh<LinearHexa>);
     UInt nEl(10);
     GetPot dataFile("./data");
     MeshData meshData(dataFile, "interpolate/space_discretization");
@@ -128,8 +128,8 @@ int main(int argc, char** argv )
 
 
     // Partition the meshes using ParMetis
-    MeshPartitioner < RegionMesh3D<LinearHexa>  >  meshPartHexa( fullMeshHexaPtr, Comm );
-    MeshPartitioner < RegionMesh3D<LinearTetra>  > meshPartTetra( fullMeshTetraPtr, Comm );
+    MeshPartitioner < RegionMesh<LinearHexa>  >  meshPartHexa( fullMeshHexaPtr, Comm );
+    MeshPartitioner < RegionMesh<LinearTetra>  > meshPartTetra( fullMeshTetraPtr, Comm );
 
 
     //Building finite element spaces

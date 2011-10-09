@@ -73,7 +73,7 @@ main( int argc, char** argv )
 //**************** cylinder
 //    MPI_Init(&argc,&argv);
 
-    NavierStokes<RegionMesh2D<LinearTriangle>, KimMoin > 
+    NavierStokes<RegionMesh<LinearTriangle>, KimMoin >
     		es( argc, argv, "dataKimMoin", "kimMoin" );
 
     es.run();

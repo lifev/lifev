@@ -124,7 +124,7 @@ Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z *
 #endif
 
 
-typedef RegionMesh3D<LinearTetra> mesh_type;
+typedef RegionMesh<LinearTetra> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
 typedef VectorEpetra vector_type;
 
@@ -153,7 +153,7 @@ main( int argc, char** argv )
 // Build and partition the mesh
 
     if (verbose) std::cout << " -- Building the mesh ... " << std::flush;
-    boost::shared_ptr< mesh_type > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr< mesh_type > fullMeshPtr(new RegionMesh<LinearTetra>);
     regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                    2.0,   2.0,   2.0,
                    -1.0,  -1.0,  -1.0);

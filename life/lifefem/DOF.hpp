@@ -102,7 +102,7 @@ public:
 
     //! Constructor accepting a mesh as parameter
     /*!
-      \param mesh a RegionMesh3D
+      \param mesh a RegionMesh
       \param _fe is the DOFLocalPattern on which the ref FE is built
       \param Offset: the smallest DOF numbering. It might be used if we want the
       degrees of freedom numbering start from a specific value.
@@ -118,7 +118,7 @@ public:
 
     //! Build the localToGlobal table
     /*!
-      \param mesh A RegionMesh3D
+      \param mesh A RegionMesh
       Updates the LocaltoGlobal array
     */
     template <typename MeshType>
@@ -126,7 +126,7 @@ public:
 
     //! Build the globalElements list
     /*!
-      @param mesh A RegionMesh3D
+      @param mesh A RegionMesh
     */
     template <typename MeshType>
     std::vector<Int> globalElements( MeshType & mesh );

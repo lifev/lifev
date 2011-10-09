@@ -183,7 +183,7 @@ ResistanceProblem::run()
     LifeChrono chronoSet, chrono;
 
     chronoSet.start();
-    typedef RegionMesh3D<LinearTetra> mesh_Type;
+    typedef RegionMesh<LinearTetra> mesh_Type;
     typedef OseenSolver< mesh_Type >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     typedef FESpace< mesh_Type, MapEpetra > feSpace_Type;

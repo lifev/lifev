@@ -157,7 +157,7 @@ void readMesh( RegionMesh2D<GEOSHAPE, MC>& mesh, const MeshData& data )
 }
 
 template <typename MC>
-void readMesh( RegionMesh3D<LinearTriangle, MC>& mesh, const MeshData& data )
+void readMesh( RegionMesh<LinearTriangle, MC>& mesh, const MeshData& data )
 {
     if ( data.verbose() )
         std::cout << "\nBuilding mesh ... ";
@@ -176,7 +176,7 @@ void readMesh( RegionMesh3D<LinearTriangle, MC>& mesh, const MeshData& data )
 }
 
 template <typename GEOSHAPE, typename MC>
-void readMesh( RegionMesh3D<GEOSHAPE, MC>& mesh, const MeshData& data )
+void readMesh( RegionMesh<GEOSHAPE, MC>& mesh, const MeshData& data )
 {
     if ( data.verbose() )
         std::cout << "\nBuilding mesh ... ";

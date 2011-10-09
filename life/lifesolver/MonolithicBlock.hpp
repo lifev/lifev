@@ -80,9 +80,9 @@ public:
     typedef matrix_Type::matrix_type/*matrix_Type*/                    epetraMatrix_Type;
     typedef SolverAztecOO                                              solver_Type;
     typedef boost::shared_ptr< SolverAztecOO >                         solverPtr_Type;
-    typedef boost::shared_ptr< FESpace<RegionMesh3D<LinearTetra>, MapEpetra> >  fespacePtr_Type;
+    typedef boost::shared_ptr< FESpace<RegionMesh<LinearTetra>, MapEpetra> >  fespacePtr_Type;
     //typedef fespacePtr_Type                                     fespacePtr_Type;
-    //    typedef FESpace<RegionMesh3D<LinearTetra>, MapEpetra>*                 fespacePtr_Type;
+    //    typedef FESpace<RegionMesh<LinearTetra>, MapEpetra>*                 fespacePtr_Type;
     //typedef MapEpetra*                                                 mapPtr_Type;
     typedef boost::shared_ptr< MapEpetra >                             mapPtr_Type;
     //typedef BCHandler*                                                 bchandlerPtr_Type;

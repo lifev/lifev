@@ -600,7 +600,7 @@ read a freefem mesh (2D) file and store it in a RegionMesh2D.
 
 template <typename MC>
 bool
-readFreeFemFile( RegionMesh3D<LinearTriangle, MC> & mesh,
+readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
                  const std::string          & fileName,
                  markerID_Type              regionFlag, bool /*useless*/ )
 {

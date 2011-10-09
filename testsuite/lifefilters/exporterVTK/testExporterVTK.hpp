@@ -62,7 +62,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // Object type definitions
-typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_Type;
+typedef LifeV::RegionMesh<LifeV::LinearTetra>       mesh_Type;
 typedef LifeV::RossEthierSteinmanUnsteadyInc          problem_Type;
 typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
 typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
@@ -149,7 +149,7 @@ TestExporterVTK::buildMesh()
     */
     // Split the mesh between processors
     M_meshPartPtr.reset( new MeshPartitioner< mesh_Type >( fullMeshPtr, M_commPtr ) );
-    // Release the original mesh from the MeshPartitioner object and delete the RegionMesh3D object
+    // Release the original mesh from the MeshPartitioner object and delete the RegionMesh object
     M_meshPartPtr->releaseUnpartitionedMesh();
     fullMeshPtr.reset();
 
