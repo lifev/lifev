@@ -915,7 +915,7 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
     typename MeshType::face_Type * facePtr = 0;
     for ( UInt kFaceId = 0; kFaceId < mesh.numBFaces(); ++kFaceId )
     {
-        facePtr = &( mesh.bFace( kFaceId ) );
+        facePtr = &( mesh.boundaryFacet( kFaceId ) );
         if ( facePtr->isMarkerSet() )
         {
             for ( UInt jPointId = 0; jPointId < faceShape_Type::S_numPoints; ++jPointId )
@@ -1086,7 +1086,7 @@ fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
 
     for ( UInt kFaceId = 0; kFaceId < mesh.numBFaces(); ++kFaceId )
         for ( UInt jPointId = 0; jPointId < numitems; ++jPointId )
-            boundaryPoints[mesh.bFace(kFaceId).point(jPointId).id()]=true;
+            boundaryPoints[mesh.boundaryFacet(kFaceId).point(jPointId).id()]=true;
     for (ID  kPointId = 0; kPointId < mesh.storedPoints() ; ++kPointId )
         if(boundaryPoints[kPointId])
             mesh.point(kPointId).setFlag(EntityFlags::PHYSICAL_BOUNDARY);

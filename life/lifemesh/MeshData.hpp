@@ -156,6 +156,25 @@ void readMesh( RegionMesh2D<GEOSHAPE, MC>& mesh, const MeshData& data )
         std::cout << "mesh read.\n" << std::endl;
 }
 
+template <typename MC>
+void readMesh( RegionMesh3D<LinearTriangle, MC>& mesh, const MeshData& data )
+{
+    if ( data.verbose() )
+        std::cout << "\nBuilding mesh ... ";
+
+
+    if ( data.meshType() == ".msh" )
+        readFreeFemFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    else
+        ERROR_MSG( "Sorry, this mesh file can not be loaded" );
+
+    //Update Edges
+    mesh.updateElementFacets(true);
+
+    if ( data.verbose() )
+        std::cout << "mesh read.\n" << std::endl;
+}
+
 template <typename GEOSHAPE, typename MC>
 void readMesh( RegionMesh3D<GEOSHAPE, MC>& mesh, const MeshData& data )
 {

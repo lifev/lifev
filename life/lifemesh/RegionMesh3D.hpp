@@ -255,7 +255,7 @@ public:
 
     /** @name Switches Methods
      *  @ingroup public_methods
-     *  Switches are used to store the status of the RegionMesh The switches
+     *  Switches are used to store the status of the RegionMesh3D The switches
      *  are used internally to control whether some data structures have been
      *  set up.
      *
@@ -371,20 +371,20 @@ public:
      * @param i Index of the element
      * @return Boundary facet at index i
      */
-    face_Type& bFace( const UInt& i );
-    facet_Type& bFacet( const UInt& i ){ return bFacet(facet_Type(), i); }
-    facet_Type& bFacet( face_Type, const UInt& i ){ return bFace(i); }
-    facet_Type& bFacet( edge_Type, const UInt& i ){ return bFace(i); }
+    facet_Type& bFacet( const UInt& i ){ return boundaryFacet(facet_Type(), i); }
+    facet_Type& boundaryFacet( const UInt& i ){ return boundaryFacet(facet_Type(), i); }
+    facet_Type& boundaryFacet( face_Type, const UInt& i ){ return boundaryFace(i); }
+    facet_Type& boundaryFacet( edge_Type, const UInt& i ){ return boundaryEdge(i); }
 
     //! Get boundary facet at the i-th index.
     /**
      * @param i Index of the element
      * @return Boundary facet at index i
      */
-    const face_Type& bFace( const UInt& i ) const;
-    const facet_Type& bFacet( const UInt& i ) const{ return bFacet(facet_Type(), i); }
-    const facet_Type& bFacet( face_Type, const UInt& i ) const { return bFace(i); }
-    const facet_Type& bFacet( edge_Type, const UInt& i ) const { return bFace(i); }
+    const facet_Type& bFacet( const UInt& i ) const { return boundaryFacet(facet_Type(), i); }
+    const facet_Type& boundaryFacet( const UInt& i ) const{ return boundaryFacet(facet_Type(), i); }
+    const facet_Type& boundaryFacet( face_Type, const UInt& i ) const { return boundaryFace(i); }
+    const facet_Type& boundaryFacet( edge_Type, const UInt& i ) const { return boundaryEdge(i); }
     //! Number of global elements.
     /**
      * @return Number of global Elements (Volumes).
@@ -500,7 +500,7 @@ public:
      */
     element_Type & addVolume( element_Type const & vol );
     inline element_Type & addElement( volume_Type const & elem ) {return addVolume(elem);}
-    inline element_Type & addElement( face_Type const & elem ) {return addface(elem);}
+    inline element_Type & addElement( face_Type const & elem ) {return addFace(elem);}
     inline element_Type & addElement( edge_Type const & elem ) {return addEdge(elem);}
 
 
@@ -654,7 +654,15 @@ public:
      *  this condition is NOT a a paradigm for a RegionMesh3D.
      */
     void updateElementRidges( bool createEdges = false, const bool verbose = false,
-                             UInt estimateEdgeNumber = 0, bool renumber=true);
+                                 UInt estimateEdgeNumber = 0, bool renumber=true)
+		{updateElementRidges( ridge_Type(), createEdges, verbose, estimateEdgeNumber, renumber);}
+
+    void updateElementRidges( edge_Type, bool createEdges = false, const bool verbose = false,
+                                 UInt estimateEdgeNumber = 0, bool renumber=true);
+
+    void updateElementRidges( point_Type, bool createEdges = false, const bool verbose = false,
+            UInt estimateEdgeNumber = 0, bool renumber=true){;}
+
     inline void updateElementEdges( bool createEdges = false, const bool verbose = false,
                              UInt estimateEdgeNumber = 0, bool renumber=true){
            updateElementEdges( edge_Type(), createEdges, verbose, estimateEdgeNumber, renumber); }
@@ -676,9 +684,11 @@ public:
      *  @param locE local edge number 0 \< LocE \< numLocalEdges().
      *  @return ID of the edge.
      */
-    inline UInt localRidgeId( UInt const elemId, UInt const locE ) const;
+    inline UInt localRidgeId( UInt const elemId, UInt const locE ) const {return localRidgeId( ridge_Type(), elemId, locE );}
+    inline UInt localRidgeId( point_Type, UInt const elemId, UInt const locR ) const {return element(elemId).point(locR).localId();}
+    UInt localRidgeId( edge_Type,  UInt const elemId, UInt const locR ) const;
     inline UInt localEdgeId( UInt const elemId, UInt const locE ) const {return localRidgeId( elemId, locE );}
-    inline UInt localEdgeId( ridge_Type, UInt const elemId, UInt const locE ) const {return localRidgeId( elemId, locE );}
+    inline UInt localEdgeId( ridge_Type, UInt const elemId, UInt const locE ) const {return localRidgeId( ridge_Type(), elemId, locE );}
     inline UInt localEdgeId( facet_Type, UInt const elemId, UInt const locE ) const {return localFacetId( elemId, locE );}
 
     //! Local Edge.
@@ -795,6 +805,8 @@ public:
      *  @param boundary true if it's a boundary face.
      *  @return Reference to added face.
      */
+
+    face_Type & addFace() {return addFace( face_Type() ); }
     face_Type & addFace( bool const boundary );
     facet_Type & addFacet( bool const boundary ) {return addFacet( facet_Type(), boundary);}
     facet_Type & addFacet( face_Type, bool const boundary ) {return addFace(boundary);}
@@ -876,7 +888,7 @@ public:
      *  @param n Number of faces.
      */
     void setNumFaces( UInt const n ) ;
-    void setNumFacets( UInt const n ) {setNumFaces( facet_Type(), n );}
+    void setNumFacets( UInt const n ) {setNumFacets( facet_Type(), n );}
     void setNumFacets( face_Type, UInt const n ) {setNumFaces( n );}
     void setNumFacets( edge_Type, UInt const n ) {setNumEdges( n );}
 
@@ -1000,8 +1012,10 @@ public:
      *  @return Global number of Edges.
      */
     UInt numGlobalEdges() const;
-    UInt numGlobalRidges() const {return numGlobalRidges(ridge_Type() );}
-    UInt numGlobalRidges(edge_Type) const {return numGlobalEdges();}
+    UInt numGlobalRidges() const {return numGlobalRidges(element_Type() );}
+    UInt numGlobalRidges(volume_Type) const {return numGlobalEdges();}
+    UInt numGlobalRidges(face_Type) const {return numGlobalVertices();}
+    UInt numGlobalRidges(edge_Type) const {return 0;}
 
     //! Number of local edges for each (3D) element.
     /**
@@ -1089,7 +1103,7 @@ public:
      *  Useful for mesh readers
      *  @return reference of the last edge in the list.
      */
-    ridge_Type & lastEdge();
+    edge_Type & lastEdge();
 
     //! i-th mesh Edge.
     /**
@@ -1098,7 +1112,7 @@ public:
      *  @param i Index of the mesh Edge.
      *  @return The i-th Edge.
      */
-    ridge_Type const & edge( UInt const i ) const;
+    edge_Type const & edge( UInt const i ) const;
     ridge_Type const & ridge( UInt const i ) const {return ridge(edge_Type(), i);}
     ridge_Type const & ridge( edge_Type, UInt const i ) const {return edge(i);}
     ridge_Type const & ridge( point_Type, UInt const i ) const {return point(i);}
@@ -1110,7 +1124,7 @@ public:
      *  @param i Index of the mesh 1D Edge.
      *  @return Reference to the i-th Edge.
      */
-    ridge_Type & edge( UInt const i );
+    edge_Type & edge( UInt const i );
     ridge_Type & ridge( UInt const i ) {return ridge( ridge_Type(), i);}
     ridge_Type & ridge( edge_Type, UInt const i ) {return edge(i);}
     ridge_Type & ridge( point_Type, UInt const i ) {return point(i);}
@@ -1122,7 +1136,7 @@ public:
      *  @param i Index of the mesh 1D Boundary Edge.
      *  @return i-th Boundary Edge.
      */
-    ridge_Type const & boundaryEdge( UInt const i ) const;
+    edge_Type const & boundaryEdge( UInt const i ) const;
 
     //! i-th mesh 1D Boundary Edge Reference.
     /**
@@ -1131,7 +1145,7 @@ public:
      *  @param i Index of the mesh 1D Boundary Edge.
      *  @return Reference to the i-th Boundary edge.
      */
-    ridge_Type & boundaryEdge( UInt const i );
+    edge_Type & boundaryEdge( UInt const i );
 
     //! Set boundary Edge counter.
     /**
@@ -1337,7 +1351,7 @@ public:
 
     //! Chang boundary flag of a given point
     /**
-     * This method is required because in the present implementation of RegionMesh we keep
+     * This method is required because in the present implementation of RegionMesh3D we keep
      * track of the boundary points, so just doing point(pos).setBoundary(boundary) will not
      * work since the internal list will  not be updated. We remind, however, that MeshEntityContainer
      * methods allow to extract all entities with a given flag set, so you may use that
@@ -1365,8 +1379,8 @@ public:
      *  @return i-th mesh Point.
      */
     point_Type const & point( UInt const i ) const;
-    inline point_Type const & peak( UInt const i ) const {return peak( peak_Type(), i );}
-    inline point_Type const & peak( point_Type, UInt const i ) const {return point(i);}
+    inline peak_Type const & peak( UInt const i ) const {return peak( peak_Type(), i );}
+    inline peak_Type const & peak( point_Type, UInt const i ) const {return point(i);}
 
     //! Returns a reference to the i-th mesh Point.
     /**
@@ -1486,8 +1500,10 @@ public:
      */
     UInt numGlobalVertices() const;
 
-    inline UInt numGlobalPeaks() const { return numGlobalPeaks(peak_Type() );}
-    inline UInt numGlobalPeaks(point_Type) const { return numGlobalVertices();}
+    inline UInt numGlobalPeaks() const { return numGlobalPeaks(element_Type() );}
+    inline UInt numGlobalPeaks(volume_Type) const { return numGlobalVertices();}
+    inline UInt numGlobalPeaks(face_Type) const { return 0;}
+    inline UInt numGlobalPeaks(edge_Type) const { return 0;}
 
 
     //! Vertex check.
@@ -1705,21 +1721,6 @@ RegionMesh3D<GEOSHAPE, MC>::numLocalEdgesOfFace() const
 {
     return facet_Type::S_numLocalEdges;
 }
-
-template <typename GEOSHAPE, typename MC>
-inline typename RegionMesh3D<GEOSHAPE, MC>::face_Type &
-RegionMesh3D<GEOSHAPE, MC>:: bFace( UInt const & i )
-{
-    return boundaryFace( i );
-}
-
-template <typename GEOSHAPE, typename MC>
-inline typename RegionMesh3D<GEOSHAPE, MC>::face_Type const &
-RegionMesh3D<GEOSHAPE, MC>:: bFace( UInt const & i ) const
-{
-    return boundaryFace( i );
-}
-
 
 // ***************************** VOLUMES
 
@@ -2096,7 +2097,7 @@ RegionMesh3D<GEOSHAPE, MC>::setEdge( edge_Type const & f, UInt position)
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::ridge_Type &
+typename RegionMesh3D<GEOSHAPE, MC>::edge_Type &
 RegionMesh3D<GEOSHAPE, MC>::lastEdge()
 {
     return edgeList.back();
@@ -2106,7 +2107,7 @@ RegionMesh3D<GEOSHAPE, MC>::lastEdge()
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::ridge_Type const &
+typename RegionMesh3D<GEOSHAPE, MC>::edge_Type const &
 RegionMesh3D<GEOSHAPE, MC>::edge( UInt const i ) const
 {
     ASSERT_BD( i < edgeList.size() ) ;
@@ -2115,7 +2116,7 @@ RegionMesh3D<GEOSHAPE, MC>::edge( UInt const i ) const
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::ridge_Type &
+typename RegionMesh3D<GEOSHAPE, MC>::edge_Type &
 RegionMesh3D<GEOSHAPE, MC>::edge( UInt const i )
 {
     ASSERT_BD( i < edgeList.size() ) ;
@@ -2125,7 +2126,7 @@ RegionMesh3D<GEOSHAPE, MC>::edge( UInt const i )
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::ridge_Type const &
+typename RegionMesh3D<GEOSHAPE, MC>::edge_Type const &
 RegionMesh3D<GEOSHAPE, MC>::boundaryEdge( UInt const i ) const
 {
     ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
@@ -2135,7 +2136,7 @@ RegionMesh3D<GEOSHAPE, MC>::boundaryEdge( UInt const i ) const
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::ridge_Type &
+typename RegionMesh3D<GEOSHAPE, MC>::edge_Type &
 RegionMesh3D<GEOSHAPE, MC>::boundaryEdge( UInt const i )
 {
     ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
@@ -2782,7 +2783,7 @@ RegionMesh3D<GEOSHAPE, MC>::localFacetId( UInt const elemId, UInt const locF ) c
 template <typename GEOSHAPE, typename MC>
 inline
 UInt
-RegionMesh3D<GEOSHAPE, MC>::localRidgeId( UInt const elemId, UInt const locR )
+RegionMesh3D<GEOSHAPE, MC>::localRidgeId(edge_Type,  UInt const elemId, UInt const locR )
 const
 {
     ASSERT_PRE( !M_ElemToRidge.empty(), "Volume to Edges array not  set" );
@@ -2814,7 +2815,7 @@ RegionMesh3D<GEOSHAPE, MC>::isFullFace( UInt const & id ) const
 // Forward Declarations
 template <typename GEOSHAPE, typename MC>
 void
-RegionMesh3D<GEOSHAPE, MC>::updateElementRidges( bool ce, bool verbose, UInt ee, bool renumber )
+RegionMesh3D<GEOSHAPE, MC>::updateElementRidges(edge_Type, bool ce, bool verbose, UInt ee, bool renumber )
 {
     // If the counter is set we trust it! Otherwise we use Euler formula
     // this is ok for domains with at most 1 hole!
@@ -2836,7 +2837,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementRidges( bool ce, bool verbose, UInt ee,
     std::pair<UInt, bool> e;
     M_ElemToRidge.reshape( numLocalEdges(), numVolumes() ); // DIMENSION ARRAY
 
-    UInt vid, i1, i2;
+    UInt elemLocalID, i1, i2;
     std::pair<BareEdge, bool> _edge;
     GEOSHAPE ele;
     facetShape_Type bele;
@@ -2896,28 +2897,28 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementRidges( bool ce, bool verbose, UInt ee,
         setLinkSwitch( "HAS_BOUNDARY_RIDGES" );
     }
 
-    for ( typename elements_Type::iterator iv = volumeList.begin();
-            iv != volumeList.end(); ++iv )
+    for ( typename elements_Type::iterator elemIt = volumeList.begin();
+            elemIt != volumeList.end(); ++elemIt )
     {
-        vid = iv->localId();
+        elemLocalID = elemIt->localId();
 
         for ( UInt j = 0; j < numLocalEdges(); j++ )
         {
             i1 = ele.edgeToPoint( j, 0 );
             i2 = ele.edgeToPoint( j, 1 );
             // go to global
-            i1 = ( iv->point( i1 ) ).id();
-            i2 = ( iv->point( i2 ) ).id();
+            i1 = ( elemIt->point( i1 ) ).id();
+            i2 = ( elemIt->point( i2 ) ).id();
             _edge = makeBareEdge( i1, i2 );
 
             e = _be.addIfNotThere( _edge.first );
-            M_ElemToRidge.operator() ( j, vid ) = e.first;
+            M_ElemToRidge.operator() ( j, elemLocalID ) = e.first;
             if ( ce && e.second )
             {
                 for ( UInt k = 0; k < 2 + elementShape_Type::S_numPointsPerEdge; k++ )
                 {
                     UInt inode = ele.edgeToPoint(j, k);
-                    edg.setPoint( k, iv->point( inode ) );
+                    edg.setPoint( k, elemIt->point( inode ) );
                 }
                 MeshUtility::inheritPointsWeakerMarker( edg );
                 edg.setBoundary(true);;
@@ -2962,7 +2963,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementRidges( bool ce, bool verbose, UInt ee,
 
     if (verbose)
         std::cout << n << " edges found";
-    ASSERT_POS( n == M_numEdges , "#Edges found is not equal to that in RegionMesh" << n << " " << M_numEdges ) ;
+    ASSERT_POS( n == M_numEdges , "#Edges found is not equal to that in RegionMesh3D" << n << " " << M_numEdges ) ;
     setLinkSwitch( std::string( "HAS_ELEMENT_TO_RIDGES" ) );
 
     if (verbose)
@@ -2979,41 +2980,44 @@ void
 RegionMesh3D<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt ef )
 {
 
-    if (verbose)
-        std::cout << "     Updating element faces ... " << std::flush;
+	typedef BareEntitySelector<facetShape_Type::S_numVertices> bareEntitySelector_Type;
+	typedef typename bareEntitySelector_Type::bareEntity_Type bareFacet_type;
 
-    ASSERT0( ! cf || M_numBFaces > 0, std::stringstream( std::string("Boundary Facets Must have been set") +
+    if (verbose)
+        std::cout << "     Updating element facets ... " << std::flush;
+
+    ASSERT0( ! cf || numBFacets() > 0, std::stringstream( std::string("Boundary Facets Must have been set") +
                                                          std::string("in order to call updateElementFacets with createFacets=true") +
                                                          std::string("\nUse buildBoundaryFacets(..) from mesh_util.h") ).str().c_str() );
     // If the counter is set we trust it! Otherwise we use Euler formula
 
     if ( cf && ef == 0 )
-        ef = M_numFaces > M_numBFaces ? M_numFaces : ( GEOSHAPE::S_numFaces * numVolumes() + M_numBFaces ) / 2;
+        ef = numFacets() > numBFacets() ? numFacets() : ( elementShape_Type::S_numFacets * numElements() + numBFacets() ) / 2;
 
-    ASSERT( cf || numFaces() > 0 , "Mesh is not properly set!" );
+    ASSERT( cf || numFacets() > 0 , "Mesh is not properly set!" );
 
     if ( cf )
-        faceList.setMaxNumItems( ef );
-
-    facet_Type face;
+        facetList().setMaxNumItems( ef );
 
 
 
-    MeshElementBareHandler<BareFace> _be;
-    // Extra map for faces stored which are not boundary faces
-    MeshElementBareHandler<BareFace> _extraFaces;
+    facet_Type aFacet;
+
+    MeshElementBareHandler<bareFacet_type> _be;
+    // Extra map for facets stored which are not boundary facets
+    MeshElementBareHandler<bareFacet_type> _extraFacets;
     std::pair<UInt, bool> e;
-    M_ElemToFacet.reshape( numLocalFaces(), numVolumes() ); // DIMENSION ARRAY
+    M_ElemToFacet.reshape( element_Type::S_numLocalFacets, numElements() ); // DIMENSION ARRAY
 
-    UInt vid, i1, i2, i3, i4;
-    std::pair<BareFace, bool>_face;
+    UInt elemLocalID;
+    std::pair<bareFacet_type, bool>_facet;
 
     GEOSHAPE ele;
-    // If we have all faces and the faces store all adjacency info
+    // If we have all facets and the facets store all adjacency info
     // everything is easier
-    if ( (faceList.size() == numFaces()) & getLinkSwitch( "FACETS_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_FACETS" ) )
+    if ( (facetList().size() == numFacets()) & getLinkSwitch( "FACETS_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_FACETS" ) )
     {
-        for ( typename facets_Type::iterator itf = faceList.begin(); itf != faceList.end(); ++itf )
+        for ( typename facets_Type::iterator itf = facetList().begin(); itf != facetList().end(); ++itf )
         {
             if ( itf->firstAdjacentElementPosition() != NotAnId && itf->firstAdjacentElementIdentity() != NotAnId)
                 M_ElemToFacet( itf->firstAdjacentElementPosition() , itf->firstAdjacentElementIdentity() ) = itf->localId();
@@ -3030,86 +3034,69 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UI
 
     // If I have only boundary facets I need to process them first to keep the correct numbering
 
-    // First We check if we have already Faces stored
-    UInt _numOriginalStoredFaces=faceList.size();
-    if ( ! faceList.empty() )
+    // First We check if we have already Facets stored
+    UInt _numOriginalStoredFacets=facetList().size();
+    ID points[facetShape_Type::S_numVertices];
+    if ( ! facetList().empty() )
     {
-        // dump all faces in the container, to maintain the correct numbering
-        // if everything is correct the numbering in the bareface structure
-        // will reflect the actual face numbering. However, if I want to create
-        // the internal faces I need to make sure that I am processing only the
+        // dump all facets in the container, to maintain the correct numbering
+        // if everything is correct the numbering in the bareFacet structure
+        // will reflect the actual facet numbering. However, if I want to create
+        // the internal facets I need to make sure that I am processing only the
         // boundary ones in a special way.
         std::pair<UInt, bool> _check;
-        for ( UInt j = 0; j < faceList.size(); ++j )
+        for ( UInt j = 0; j < facetList().size(); ++j )
         {
-            i1 = ( faceList[ j ].point( 0 ) ).localId();
-            i2 = ( faceList[ j ].point( 1 ) ).localId();
-            i3 = ( faceList[ j ].point( 2 ) ).localId();
-            if ( facetShape_Type::S_numVertices == 4 )
-            {
-                i4 = ( faceList[ j ].point( 3 ) ).localId();
-                _face = makeBareFace( i1, i2, i3, i4 );
-            }
-            else
-            {
-                _face = makeBareFace( i1, i2, i3 );
-            }
-            _check = _be.addIfNotThere( _face.first );
-            if (j>=this->M_numBFaces)_extraFaces.addIfNotThere( _face.first, j);
+        	for (UInt k = 0; k < facetShape_Type::S_numVertices; k++)
+        		points[k] = ( facet( j ).point( k ) ).localId();
+           	_facet = bareEntitySelector_Type::makeBareEntity( points );
+            _check = _be.addIfNotThere( _facet.first );
+            if (j>=this->numBFacets() )_extraFacets.addIfNotThere( _facet.first, j);
         }
     }
 
-    for ( typename elements_Type::iterator iv = volumeList.begin();
-            iv != volumeList.end(); ++iv )
+    for ( typename elements_Type::iterator elemIt = elementList().begin();
+    		elemIt != elementList().end(); ++elemIt )
     {
-        vid = iv->localId();
-        for ( UInt j = 0; j < numLocalFaces(); j++ )
+        elemLocalID = elemIt->localId();
+        for ( UInt j = 0; j < element_Type::S_numLocalFacets; j++ )
         {
-            i1 = ele.faceToPoint( j, 0 );
-            i2 = ele.faceToPoint( j, 1 );
-            i3 = ele.faceToPoint( j, 2 );
-            i1 = ( iv->point( i1 ) ).localId();
-            i2 = ( iv->point( i2 ) ).localId();
-            i3 = ( iv->point( i3 ) ).localId();
-            if ( facetShape_Type::S_numVertices == 4 )
-            {
-                i4 = ele.faceToPoint( j, 3 );
-                i4 = ( iv->point( i4 ) ).localId();
-                _face = makeBareFace( i1, i2, i3, i4 );
-            }
-            else
-            {
-                _face = makeBareFace( i1, i2, i3 );
-            }
-            e = _be.addIfNotThere( _face.first );
-            M_ElemToFacet( j, vid ) = e.first;
-            bool _isBound=e.first<this->M_numBFaces;
-            // Is the face an extra face (not on the boundary but originally included in the list)?
-            bool _isExtra = (e.first >=this->M_numBFaces  && e.first < _numOriginalStoredFaces);
+        	for (UInt k = 0; k < facetShape_Type::S_numVertices; k++)
+        	{
+        		UInt id = ele.facetToPoint( j, k );
+        		points[k] = elemIt->point( id ).localId();
+        	}
+            _facet = bareEntitySelector_Type::makeBareEntity( points );
+
+            e = _be.addIfNotThere( _facet.first );
+            M_ElemToFacet( j, elemLocalID ) = e.first;
+            bool _isBound=e.first<this->numBFacets();
+            // Is the facet an extra facet (not on the boundary but originally included in the list)?
+            bool _isExtra = (e.first >=this->numBFacets()  && e.first < _numOriginalStoredFacets);
             if (_isBound)
             {
-                face_Type & _thisFace(faceList[e.first]);
-                _thisFace.firstAdjacentElementIdentity()   = vid;
-                _thisFace.firstAdjacentElementPosition()   = j;
-                _thisFace.secondAdjacentElementIdentity()  = NotAnId;
-                _thisFace.secondAdjacentElementPosition()  = NotAnId;
+                facet_Type & _thisFacet(facet(e.first) );
+                _thisFacet.firstAdjacentElementIdentity()   = elemLocalID;
+                _thisFacet.firstAdjacentElementPosition()   = j;
+                _thisFacet.secondAdjacentElementIdentity()  = NotAnId;
+                _thisFacet.secondAdjacentElementPosition()  = NotAnId;
             }
             else if (_isExtra)
             {
-                // This is not a bfaces and I need to set up all info about adjacency properly
-                face_Type & _thisFace(faceList[e.first]);
+                // This is not a bfacets and I need to set up all info about adjacency properly
+                facet_Type & _thisFacet(facet(e.first) );
                 // I need to check if it is the first time I meet it. Then I delete it from the
                 // map: if it as there it means that it is the first time I am treating this face
-                if(_extraFaces.deleteIfThere(_face.first)){
-                    // I need to be sure about orientation, the easiest thing is to rewrite the face points
-                    for ( UInt k = 0; k < face_Type::S_numPoints; ++k )
-                        _thisFace.setPoint( k, iv->point( ele.faceToPoint( j, k ) ) );
-                    _thisFace.firstAdjacentElementIdentity()  = vid;
-                    _thisFace.firstAdjacentElementPosition()  = j;
+                if(_extraFacets.deleteIfThere(_facet.first)){
+                    // I need to be sure about orientation, the easiest thing is to rewrite the facet points
+                    for ( UInt k = 0; k < facet_Type::S_numPoints; ++k )
+                        _thisFacet.setPoint( k, elemIt->point( ele.facetToPoint( j, k ) ) );
+                    _thisFacet.firstAdjacentElementIdentity()  = elemLocalID;
+                    _thisFacet.firstAdjacentElementPosition()  = j;
 
                 }else{
-                    _thisFace.secondAdjacentElementIdentity()  = vid;
-                    _thisFace.secondAdjacentElementPosition()  = j;
+                    _thisFacet.secondAdjacentElementIdentity()  = elemLocalID;
+                    _thisFacet.secondAdjacentElementPosition()  = j;
                 }
             }
             else if ( cf ) // A face not contained in the original list.
@@ -3119,38 +3106,38 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UI
                 {
                     // a new face It must be internal.
                     for ( UInt k = 0; k < facet_Type::S_numPoints; ++k )
-                        face.setPoint( k, iv->point( ele.faceToPoint( j, k ) ) );
+                        aFacet.setPoint( k, elemIt->point( ele.facetToPoint( j, k ) ) );
 
-                    face.firstAdjacentElementIdentity()  = vid;
-                    face.firstAdjacentElementPosition() = j;
+                    aFacet.firstAdjacentElementIdentity()  = elemLocalID;
+                    aFacet.firstAdjacentElementPosition() = j;
 
-                    // gets the marker from the RegionMesh
+                    // gets the marker from the RegionMesh3D
 
-                    face.setMarker( this->marker() );
-                    face.setBoundary(false);
-                    addFace( face); //The id should be correct
+                    aFacet.setMarker( this->marker() );
+                    aFacet.setBoundary(false);
+                    addFacet( aFacet); //The id should be correct
                 }
                 else
                 {
-                    faceList( e.first ).secondAdjacentElementIdentity() = vid;
-                    faceList( e.first ).secondAdjacentElementPosition() = j;
+                    facet( e.first ).secondAdjacentElementIdentity() = elemLocalID;
+                    facet( e.first ).secondAdjacentElementPosition() = j;
                 }
             }
         }
     }
 
     UInt n = _be.maxId();
-    // LF Fix _numfaces. This part has to be checked. One may want to use
-    // this method on a partitioned mesh, in which case the Global faces are there
-    M_numFaces=n; // We have found the right total number of faces in the mesh
-    if(M_numGlobalFaces==0) M_numGlobalFaces=n; // If not already set fix it.
+    // LF Fix _numfacets. This part has to be checked. One may want to use
+    // this method on a partitioned mesh, in which case the Global facets are there
+    setNumFacets(n); // We have found the right total number of facets in the mesh
+    if(numGlobalFacets()==0) setMaxNumGlobalFacets(n); // If not already set fix it.
 
-    if (verbose) std::cout << n << " faces ";
-    //ASSERT_POS( n == M_numFaces , "#Faces found inconsistent with that stored in RegionMesh" ) ;
+    if (verbose) std::cout << n << " facets ";
+    //ASSERT_POS( n == M_numFacets , "#Facets found inconsistent with that stored in RegionMesh3D" ) ;
     setLinkSwitch( "HAS_ELEMENT_TO_FACETS" );
     if ( cf )
         setLinkSwitch( "HAS_ALL_FACETS" );
-    //if ( cf ) Faces have adjacency in any case!
+    //if ( cf ) Facets have adjacency in any case!
         setLinkSwitch( "FACETS_HAVE_ADIACENCY" );
     if (verbose)
         std::cout << " done." << std::endl;

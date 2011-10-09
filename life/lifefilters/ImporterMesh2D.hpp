@@ -53,6 +53,7 @@
 #include <life/lifecore/FortranWrapper.hpp>
 #include <life/lifecore/StringUtility.hpp>
 
+#include <life/lifemesh/RegionMesh3D.hpp>
 #include <life/lifemesh/RegionMesh2D.hpp>
 
 #include <life/lifemesh/MeshChecks.hpp>
@@ -597,14 +598,16 @@ read a freefem mesh (2D) file and store it in a RegionMesh2D.
 @return true if everything went fine, false otherwise.
  */
 
-template <typename GeoShape, typename MC>
+template <typename MC>
 bool
-readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
+readFreeFemFile( RegionMesh3D<LinearTriangle, MC> & mesh,
                  const std::string          & fileName,
                  markerID_Type              regionFlag, bool /*useless*/ )
 {
     MeshElementBareHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;
+
+    typedef LinearTriangle GeoShape;
 
     typename RegionMesh2D<GeoShape, MC>::point_Type * pp = 0;
     typename RegionMesh2D<GeoShape, MC>::edge_Type * pe = 0;
@@ -757,7 +760,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
 
     for ( UInt __i = 0; __i < __nv; ++__i )
     {
-        pp = &mesh.addPoint( __isonboundary[ __i ] );
+        pp = &mesh.addPoint( __isonboundary[ __i ], false );
         pp->setMarker( __whichboundary[ __i ] );
         pp->x() = __x[ 2 * __i ];
         pp->y() = __x[ 2 * __i + 1 ];
@@ -765,9 +768,6 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         //std::cout << "("<< pp->x() << ", " << pp->y() << ", " << pp->z() << ")"<< std::endl;
         pp->setId( __i );
         pp->setLocalId( __i );
-
-        mesh.localToGlobalNode().insert(std::make_pair( __i, __i ) );
-        mesh.globalToLocalNode().insert(std::make_pair( __i, __i ) );
     }
 
     // add the edges to the mesh
@@ -786,7 +786,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     // add the triangles to the mesh
     for ( UInt __i = 0; __i < __nt; ++__i )
     {
-        pf = &( mesh.addFace() );
+        pf = &( mesh.addFace(true) );
         pf->setId     ( __i );
         pf->setLocalId( __i );
         pf->setMarker( markerID_Type( __triangle_label[ __i ] ) );
