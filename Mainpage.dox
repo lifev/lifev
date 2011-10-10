@@ -70,8 +70,10 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
 
     <BR>
     \subsection spaceDiscretization Space discretization
-    [TODO: 4-5 lines description by Samuel Quinodoz]
-
+	
+	LifeV provides classes to perform easily and quickly the assembly of the most common problems (e.g. advection-diffusion-reaction, Stokes and Navier-Stokes). These classes
+	are called Assemblers and can be considered as building blocks that can be combined at will. The user has moreover access to lower level structures and instructions in
+	order to provide the maximal flexibility.
 
     <BR>
     \subsection algebraicSolver Algebraic solvers and preconditioners
@@ -83,8 +85,10 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
     In the following we briefly mention all the available physical solvers.
 
     <ul>
-        <li> <b>Advection Diffusion Reaction solver:</b> [TODO: 2-3 lines description by Samuel Quinodoz]
-
+        <li> <b>Advection Diffusion Reaction solver:</b> This solver deals with the simplest PDE usually studied, but
+		also maybe the most widely used. Indeed, this is the PDE that governs phenomena where diffusion, transport
+		and reaction are the relevant phenomena. This solver is used to solve this kind of problem in a simple and
+		efficient manner and can also deal with transiant PDEs.
 
 
         <li> <b>Darcy solver:</b> phenomenologically law which describes the flow of a fluid through a porous medium.
