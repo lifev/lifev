@@ -39,6 +39,7 @@
 
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifefem/FESpace.hpp>
 #include <lifemc/lifealg/PreconditionerTeko.hpp>
 
 // Teuchos includes
@@ -77,6 +78,9 @@ public:
 
     typedef Teko::Epetra::EpetraBlockPreconditioner preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
+    typedef RegionMesh3D<LinearTetra>               mesh_Type;
+    typedef MapEpetra                               map_Type;
+    typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
     typedef MatrixEpetra<Real>                      matrix_Type;
     typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
 
@@ -95,7 +99,7 @@ public:
     //    IfpackPreconditioner( matrixPtr_Type& A );
 
     //! default destructor
-    ~PreconditionerLSC();
+    virtual ~PreconditionerLSC();
 
     //@}
 
@@ -111,6 +115,9 @@ public:
      */
     void setDataFromGetPot ( const GetPot&      dataFile,
                              const std::string& section );
+
+    void setFESpace( FESpacePtr_Type uFESpace,
+                     FESpacePtr_Type pFESpace );
 
     void createParametersList( list_Type&         list,
                                const GetPot&      dataFile,

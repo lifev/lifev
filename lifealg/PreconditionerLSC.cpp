@@ -55,20 +55,31 @@ PreconditionerLSC::setDataFromGetPot( const GetPot& dataFile,
                                       const std::string& section )
 {
     createLSCList(M_list, dataFile, section, "LSC");
-
-    M_velocityBlockSize = this->M_list.get( "blocks: velocity block size", -1 );
-    M_pressureBlockSize = this->M_list.get( "blocks: pressure block size", -1 );
     M_precType          = this->M_list.get( "prectype", "LSC" );
+}
+
+void
+PreconditionerLSC::setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace )
+{
+    // We setup the size of the blocks
+    M_velocityBlockSize = uFESpace->fieldDim() * uFESpace->dof().numTotalDof();
+    M_pressureBlockSize = pFESpace->dof().numTotalDof();
 }
 
 int
 PreconditionerLSC::buildPreconditioner( matrixPtr_Type& oper )
 {
+    if ( ( M_velocityBlockSize < 0 ) || ( M_pressureBlockSize < 0 ) )
+    {
+        std::cout << "You must specify manually the pointers to the FESpaces" << std::endl;
+        exit( -1 );
+    }
+
     // Creating the InverseLibrary from Stratimikos
     RCP<Teko::InverseLibrary> invLib = Teko::InverseLibrary::buildFromStratimikos();
 
     // build the inverse factory needed by the example preconditioner
-    RCP<Teko::InverseFactory> inverse = invLib->getInverseFactory( "Amesos" );
+    RCP<Teko::InverseFactory> inverse = invLib->getInverseFactory( "Ifpack" );
 
     // Building the LSC strategy
     RCP<Teko::NS::LSCStrategy> strategy = rcp( new Teko::NS::InvLSCStrategy( inverse, true ) );
@@ -78,8 +89,6 @@ PreconditionerLSC::buildPreconditioner( matrixPtr_Type& oper )
         = rcp(new Teko::NS::LSCPreconditionerFactory( strategy ) );
 
     // Building Block sizes
-    M_velocityBlockSize = this->M_list.get( "blocks: velocity block size", -1 );
-    M_pressureBlockSize = this->M_list.get( "blocks: pressure block size", -1 );
     std::vector<int> blockSizes;
     blockSizes.push_back( M_velocityBlockSize );
     blockSizes.push_back( M_pressureBlockSize );
@@ -119,13 +128,6 @@ PreconditionerLSC::createLSCList( list_Type&         list,
     //list.set( "subsection1: value1", value1 );
     //list.set( "subsection2: value2", value2 );
     //list.set( "subsection3: value3", value3 );
-
-    int velocityBlockSize = dataFile( ( section + "/" + subsection + "/blocks/velocity_block_size" ).data(), -1 );
-    int pressureBlockSize = dataFile( ( section + "/" + subsection + "/blocks/pressure_block_size" ).data(), -1 );
-    std::cout << "section: " << section << std::endl;
-
-    list.set( "blocks: velocity block size", velocityBlockSize );
-    list.set( "blocks: pressure block size", pressureBlockSize );
 
     if ( displayList ) list.print( std::cout );
 }
