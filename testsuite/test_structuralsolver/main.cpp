@@ -281,19 +281,39 @@ Structure::run3d()
     }
 
 
-    //! =================================================================================
-    //! BC for StructuredCube4.mesh
-    //! =================================================================================
-    vector <ID> compx(1), compy(1), compz(1);
+    //! #################################################################################
+    //! BOUNDARY CONDITIONS
+    //! #################################################################################
+    vector <ID> compx(1), compy(1), compz(1), compxy(2), compxz(2), compyz(2);
     compx[0]=0; compy[0]=1, compz[0]=2;
+    compxy[0]=0; compxy[1]=1; 
+    compxz[0]=0; compxz[1]=2;
+    compyz[0]=1; compyz[1]=2; 
 
     BCFunctionBase zero(Private::bcZero);
     BCFunctionBase nonZero(Private::bcNonZero);
 
-    BCh->addBC("EdgesIn",      2,  Natural,           Component, nonZero, compx);
-    BCh->addBC("EdgesIn",      4,  EssentialVertices, Component, zero,    compx);
+    //! =================================================================================
+    //! BC for StructuredCube4_test_structuralsolver.mesh
+    //! =================================================================================
+    BCh->addBC("EdgesIn",      20,  Natural,   Component, nonZero, compx);
+    BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compx);
     //! =================================================================================
 
+    //! =================================================================================
+    //! BC for StructuredCube4_simmetry.mesh
+    //! =================================================================================
+    /*
+    BCh->addBC("surf5",    5,   EssentialVertices,    Component, Homogeneous, compz);
+    BCh->addBC("line10",   10,  EssentialVertices,    Component, Homogeneous, compxz);
+    BCh->addBC("line20",   20,  EssentialVertices,    Component, Homogeneous, compxy);
+    BCh->addBC("line30",   30,  EssentialVertices,    Component, Homogeneous, compyz);
+    BCh->addBC("line40",   40,  EssentialVertices,    Component, Homogeneous, compy);
+    BCh->addBC("line50",   50,  EssentialVertices,    Component, Homogeneous, compz);
+    BCh->addBC("point100", 100, EssentialVertices,    Full,      Homogeneous, 3);
+    */
+    //! =================================================================================
+    //! #################################################################################
 
     //! 1. Constructor of the structuralSolver
     StructuralSolver< RegionMesh3D<LinearTetra> > solid;
@@ -391,6 +411,41 @@ Structure::run3d()
     exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
 
     exporter->postProcess( 0 );
+
+    //!--------------------------------------------------------------------------------------------
+    //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
+    //!--------------------------------------------------------------------------------------------
+    cout.precision(16);
+    ofstream file_comp( "Displacement_components_NL.m" );
+    if ( !file_comp )
+    {
+  	std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl; 
+    }
+    
+    int IDPoint = 73; // StructuredCube4
+    //int IDPoint = 401; // StructuredCube8
+    //int IDPoint = 2593; // StructuredCube16
+
+    //int IDPoint = 74;// cube4x4.mesh
+    //int IDPoint = 315;// cube8x8.mesh
+    //int IDPoint = 1526;// cube16x16.mesh
+
+    file_comp << " % TEST NONLINEAR ELASTICITY" << endl;
+    file_comp << " % Displacement components of ID node  " << IDPoint << " :" << endl;
+    file_comp << " % Each row is a time step" << endl;
+    file_comp << " % First column = comp x, second = comp y and third = comp z. " << endl;
+    file_comp <<  endl;
+    file_comp << " SolidDisp_NL = [ " ;
+
+    for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
+    {
+    file_comp<< solid.displacement()[ k ] << " "; 
+    }
+
+    file_comp<< endl;
+    //!--------------------------------------------------------------------------------------------
+
+    //solid.updateSystem();
     //! =================================================================================   
 
 
@@ -424,6 +479,22 @@ Structure::run3d()
 	*solidAcc  = timeAdvance->accelerate();
 
 	exporter->postProcess( time );
+
+        //!--------------------------------------------------------------------------------------------------
+        //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
+        //!--------------------------------------------------------------------------------------------------
+	cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
+	for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
+	{
+		file_comp<< solid.displacement()[ k ] << " "; 
+        	cout.precision(16);     
+		cout <<"*********************************************************"<< std::endl;
+		cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
+		cout <<"*********************************************************"<< std::endl;
+	}
+	file_comp<< endl;
+
+	//!--------------------------------------------------------------------------------------------------
 
         MPI_Barrier(MPI_COMM_WORLD);
     }
@@ -473,5 +544,3 @@ main( int argc, char** argv )
 #endif
     return returnValue ;
 }
-
-

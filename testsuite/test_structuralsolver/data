@@ -17,7 +17,7 @@
 
 
 [exporter]
-type       		= hdf5 			# ensight # hdf5 (if library compiled with hdf5 support) or ensight
+type       		= ensight 				# ensight # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  		= false
 start      		= 0
 save       		= 1
@@ -26,14 +26,16 @@ save       		= 1
 
 [./physics]
 density   		= 1.2
-young     		= 8.0E6
+young     		= 8.e+6
 poisson   		= 0.49
-bulk			= 1.0E8
-alpha			= 1.0E6
-gamma 			= 1
-solidType 		= neoHookean		 # linearVenantKirchhoff, nonlinearVenantKirchhoff, neohookean, exponential
+bulk			= 1.3333e+8
+alpha 			= 2.684564e+6
+gamma			= 1.0
+solidType 		= nonlinearVenantKirchhoff		# linearVenantKirchhoff / nonlinearVenantKirchhoff / neoHookean / exponential
+
 
 [../time_discretization]
+method                  = BDF
 initialtime 		= 0.
 endtime     		= 4
 timestep    		= 0.1
@@ -43,7 +45,7 @@ BDF_order   		= 1
 
 [../space_discretization]
 mesh_dir  		= Mesh/
-mesh_file 		= StructuredCube4.mesh
+mesh_file 		= StructuredCube4_test_structuralsolver.mesh
 order     		= P1
 
 [../miscellaneous]
@@ -52,7 +54,7 @@ verbose   		= 1
 
 [../newton]
 maxiter 		= 1
-reltol  		= 1.e-8
+reltol  		= 1.e-7
 
 [../solver]
 solver          	= gmres 
@@ -63,7 +65,7 @@ max_iter        	= 100
 reuse           	= true
 max_iter_reuse  	= 80
 kspace          	= 100
-tol             	= 1.e-10    	# AztecOO tolerance
+tol             	= 1.e-12    	# AztecOO tolerance
 
 [../prec]
 prectype                = Ifpack 	# Ifpack or ML
