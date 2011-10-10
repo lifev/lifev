@@ -318,7 +318,7 @@ MultiscaleModelFluid3D::saveSolution()
 
 #ifdef HAVE_HDF5
     if ( M_data->dataTime()->isLastTimeStep() )
-        ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporter ) )->closeFile();
+        M_exporter->closeFile();
 #endif
 
 }
@@ -456,7 +456,7 @@ MultiscaleModelFluid3D::initializeSolution()
         M_exporter->setTimeIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
 
 #ifdef HAVE_HDF5
-        ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importer ) )->closeFile();
+        M_importer->closeFile();
 #endif
     }
     else

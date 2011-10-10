@@ -324,9 +324,9 @@ MultiscaleModelFSI3D::saveSolution()
     if ( M_data->dataFluid()->dataTime()->isLastTimeStep() )
     {
         if ( M_FSIoperator->isFluid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterFluid ) )->closeFile();
+            M_exporterFluid->closeFile();
         if ( M_FSIoperator->isSolid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterSolid ) )->closeFile();
+            M_exporterSolid->closeFile();
     }
 #endif
 
@@ -510,9 +510,9 @@ MultiscaleModelFSI3D::initializeSolution()
 
 #ifdef HAVE_HDF5
         if ( M_FSIoperator->isFluid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importerFluid ) )->closeFile();
+            M_importerFluid->closeFile();
         if ( M_FSIoperator->isSolid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importerSolid ) )->closeFile();
+            M_importerSolid->closeFile();
 #endif
 
         // Assemble the Monolithic solution
