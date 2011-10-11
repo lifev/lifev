@@ -40,34 +40,34 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalBCHandler_H
-#define OneDimensionalBCHandler_H
+#ifndef OneDFSIBCHandler_H
+#define OneDFSIBCHandler_H
 
-#include <life/lifesolver/OneDimensionalDefinitions.hpp>
-#include <life/lifefem/OneDimensionalBC.hpp>
+#include <life/lifesolver/OneDFSIDefinitions.hpp>
+#include <life/lifefem/OneDFSIBC.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalBCHandler - Class featuring methods to handle boundary conditions.
+//! OneDFSIBCHandler - Class featuring methods to handle boundary conditions.
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
  *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
  *
  *  We need to impose 2 boundary condition on each side of the 1D segment.
- *  These boundary conditions are stored in \c OneDimensionalBC objects.
+ *  These boundary conditions are stored in \c OneDFSIBC objects.
  *
  *  \cond \TODO Improve the description of BC. \endcond
  */
-class OneDimensionalBCHandler
+class OneDFSIBCHandler
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalBC                    bc_Type;
+    typedef OneDFSIBC                           bc_Type;
     typedef boost::shared_ptr< bc_Type >        bcPtr_Type;
 
     typedef bc_Type::bcFunction_Type            bcFunction_Type;
@@ -96,16 +96,16 @@ public:
     //@{
 
     //! Empty Constructor
-    explicit OneDimensionalBCHandler();
+    explicit OneDFSIBCHandler();
 
     //! Copy constructor
     /*!
-     * @param bcHandler OneDimensionalBCHandler
+     * @param bcHandler OneDFSIBCHandler
      */
-    explicit OneDimensionalBCHandler( const OneDimensionalBCHandler& bcHandler );
+    explicit OneDFSIBCHandler( const OneDFSIBCHandler& bcHandler );
 
     //! Destructor
-    virtual ~OneDimensionalBCHandler() {}
+    virtual ~OneDFSIBCHandler() {}
 
     //@}
 
@@ -194,7 +194,7 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalBCHandler& operator=( const OneDimensionalBCHandler& bcHandler );
+    OneDFSIBCHandler& operator=( const OneDFSIBCHandler& bcHandler );
 
     //@}
 
@@ -206,4 +206,4 @@ private:
 
 }
 
-#endif //OneDimensionalBCHandler_H
+#endif //OneDFSIBCHandler_H

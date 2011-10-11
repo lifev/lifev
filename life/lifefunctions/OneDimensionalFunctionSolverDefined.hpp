@@ -41,18 +41,18 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalBCFunctionDefault_H
-#define OneDimensionalBCFunctionDefault_H
+#ifndef OneDFSIBCFunctionDefault_H
+#define OneDFSIBCFunctionDefault_H
 
-#include <life/lifefunctions/OneDimensionalFunction.hpp>
-#include <life/lifesolver/OneDimensionalData.hpp>
-#include <life/lifesolver/OneDimensionalFlux.hpp>
-#include <life/lifesolver/OneDimensionalSource.hpp>
+#include <life/lifefunctions/OneDFSIFunction.hpp>
+#include <life/lifesolver/OneDFSIData.hpp>
+#include <life/lifesolver/OneDFSIFlux.hpp>
+#include <life/lifesolver/OneDFSISource.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalModelBCFunctionDefault - Base class for deriving specific 1D boundary functions
+//! OneDFSIModelBCFunctionDefault - Base class for deriving specific 1D boundary functions
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -61,23 +61,23 @@ namespace LifeV
  *  This class provide a general interface for implementing some specific boundary conditions
  *  for the 1D segment.
  */
-class OneDimensionalFunctionSolverDefined
+class OneDFSIFunctionSolverDefined
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalFunction                  bcFunction_Type;
+    typedef OneDFSIFunction                         bcFunction_Type;
     typedef boost::shared_ptr<bcFunction_Type>      bcFunctionPtr_Type;
 
-    typedef OneDimensionalFlux                      flux_Type;
+    typedef OneDFSIFlux                             flux_Type;
     typedef boost::shared_ptr< flux_Type >          fluxPtr_Type;
 
-    typedef OneDimensionalSource                    source_Type;
+    typedef OneDFSISource                           source_Type;
     typedef boost::shared_ptr< source_Type >        sourcePtr_Type;
 
-    typedef OneDimensionalData                      data_Type;
+    typedef OneDFSIData                             data_Type;
     typedef data_Type::mesh_Type                    mesh_Type;
 
     typedef data_Type::container2D_Type             container2D_Type;
@@ -92,9 +92,9 @@ public:
     typedef std::map< std::string, vectorPtr_Type > solution_Type;
     typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
 
-    typedef OneDimensional::bcLine_Type             bcLine_Type;
-    typedef OneDimensional::bcSide_Type             bcSide_Type;
-    typedef OneDimensional::bcType_Type             bcType_Type;
+    typedef OneDFSI::bcLine_Type                    bcLine_Type;
+    typedef OneDFSI::bcSide_Type                    bcSide_Type;
+    typedef OneDFSI::bcType_Type                    bcType_Type;
 
     //@}
 
@@ -107,16 +107,16 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDimensionalFunctionSolverDefined( const bcSide_Type& bcSide, const bcType_Type& bcType );
+    explicit OneDFSIFunctionSolverDefined( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param bcFunctionDefault OneDimensionalFunctionSolverDefined
+     * @param bcFunctionDefault OneDFSIFunctionSolverDefined
      */
-    explicit OneDimensionalFunctionSolverDefined( const OneDimensionalFunctionSolverDefined& bcFunctionDefault );
+    explicit OneDFSIFunctionSolverDefined( const OneDFSIFunctionSolverDefined& bcFunctionDefault );
 
     //! Destructor
-    virtual ~OneDimensionalFunctionSolverDefined() {}
+    virtual ~OneDFSIFunctionSolverDefined() {}
 
     //@}
 
@@ -176,20 +176,20 @@ protected:
 
 
 
-//! OneDimensionalFunctionSolverDefinedRiemann - Class which implements Riemann boundary conditions for the 1D segment
+//! OneDFSIFunctionSolverDefinedRiemann - Class which implements Riemann boundary conditions for the 1D segment
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini
  *
  *  \cond \TODO Add the equation and some descriptions \endcond
  */
-class OneDimensionalFunctionSolverDefinedRiemann : public OneDimensionalFunctionSolverDefined
+class OneDFSIFunctionSolverDefinedRiemann : public OneDFSIFunctionSolverDefined
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalFunctionSolverDefined             super;
+    typedef OneDFSIFunctionSolverDefined                    super;
     typedef super::container2D_Type                         container2D_Type;
 
     //@}
@@ -203,16 +203,16 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDimensionalFunctionSolverDefinedRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
+    explicit OneDFSIFunctionSolverDefinedRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param bcFunctionRiemann OneDimensionalFunctionSolverDefinedRiemann
+     * @param bcFunctionRiemann OneDFSIFunctionSolverDefinedRiemann
      */
-    explicit OneDimensionalFunctionSolverDefinedRiemann( const OneDimensionalFunctionSolverDefinedRiemann& bcFunctionRiemann );
+    explicit OneDFSIFunctionSolverDefinedRiemann( const OneDFSIFunctionSolverDefinedRiemann& bcFunctionRiemann );
 
     //! Destructor
-    virtual ~OneDimensionalFunctionSolverDefinedRiemann() {}
+    virtual ~OneDFSIFunctionSolverDefinedRiemann() {}
 
     //@}
 
@@ -250,7 +250,7 @@ protected:
 };
 
 
-//! OneDimensionalFunctionSolverDefinedCompatibility - Class which implements Compatibility boundary conditions for the 1D segment
+//! OneDFSIFunctionSolverDefinedCompatibility - Class which implements Compatibility boundary conditions for the 1D segment
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *
@@ -262,14 +262,14 @@ protected:
  *  \mathbf U^0_\star) - \mathbf L \mathbf B(\mathbf U^n_\star) + \mathbf L \mathbf B(\mathbf U^0_\star) \right).
  *  \f]
  */
-class OneDimensionalFunctionSolverDefinedCompatibility : public OneDimensionalFunctionSolverDefinedRiemann
+class OneDFSIFunctionSolverDefinedCompatibility : public OneDFSIFunctionSolverDefinedRiemann
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalFunctionSolverDefinedRiemann       super;
+    typedef OneDFSIFunctionSolverDefinedRiemann              super;
 
     typedef super::fluxPtr_Type                              fluxPtr_Type;
     typedef super::sourcePtr_Type                            sourcePtr_Type;
@@ -289,16 +289,16 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDimensionalFunctionSolverDefinedCompatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
+    explicit OneDFSIFunctionSolverDefinedCompatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param bcFunctionCompatibility OneDimensionalFunctionSolverDefinedCompatibility
+     * @param bcFunctionCompatibility OneDFSIFunctionSolverDefinedCompatibility
      */
-    explicit OneDimensionalFunctionSolverDefinedCompatibility( const OneDimensionalFunctionSolverDefinedCompatibility& bcFunctionCompatibility );
+    explicit OneDFSIFunctionSolverDefinedCompatibility( const OneDFSIFunctionSolverDefinedCompatibility& bcFunctionCompatibility );
 
     //! Destructor
-    virtual ~OneDimensionalFunctionSolverDefinedCompatibility() {}
+    virtual ~OneDFSIFunctionSolverDefinedCompatibility() {}
 
     //@}
 
@@ -382,20 +382,20 @@ protected:
 };
 
 
-//! OneDimensionalFunctionSolverDefinedAbsorbing - Class which implements absorbing boundary conditions for the 1D segment
+//! OneDFSIFunctionSolverDefinedAbsorbing - Class which implements absorbing boundary conditions for the 1D segment
 /*!
  *  @author Maria Rita de Luca
  *
  *  \cond \TODO Add the equation and some descriptions \endcond
  */
-class OneDimensionalFunctionSolverDefinedAbsorbing : public OneDimensionalFunctionSolverDefinedCompatibility
+class OneDFSIFunctionSolverDefinedAbsorbing : public OneDFSIFunctionSolverDefinedCompatibility
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalFunctionSolverDefinedCompatibility super;
+    typedef OneDFSIFunctionSolverDefinedCompatibility        super;
 
     typedef super::fluxPtr_Type                              fluxPtr_Type;
     typedef super::sourcePtr_Type                            sourcePtr_Type;
@@ -414,16 +414,16 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDimensionalFunctionSolverDefinedAbsorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
+    explicit OneDFSIFunctionSolverDefinedAbsorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
 
     //! Copy constructor
     /*!
-     * @param bcFunctionAbsorbing OneDimensionalFunctionSolverDefinedAbsorbing
+     * @param bcFunctionAbsorbing OneDFSIFunctionSolverDefinedAbsorbing
      */
-    explicit OneDimensionalFunctionSolverDefinedAbsorbing( const OneDimensionalFunctionSolverDefinedAbsorbing& bcFunctionAbsorbing ) : super( bcFunctionAbsorbing ) {}
+    explicit OneDFSIFunctionSolverDefinedAbsorbing( const OneDFSIFunctionSolverDefinedAbsorbing& bcFunctionAbsorbing ) : super( bcFunctionAbsorbing ) {}
 
     //! Destructor
-    virtual ~OneDimensionalFunctionSolverDefinedAbsorbing() {}
+    virtual ~OneDFSIFunctionSolverDefinedAbsorbing() {}
 
     //@}
 
@@ -462,20 +462,20 @@ protected:
 };
 
 
-//! OneDimensionalFunctionSolverDefinedResistance - Class which implements resistance boundary conditions for the 1D segment
+//! OneDFSIFunctionSolverDefinedResistance - Class which implements resistance boundary conditions for the 1D segment
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini
  *
  *  \cond \TODO Add the equation and some descriptions \endcond
  */
-class OneDimensionalFunctionSolverDefinedResistance : public OneDimensionalFunctionSolverDefinedAbsorbing
+class OneDFSIFunctionSolverDefinedResistance : public OneDFSIFunctionSolverDefinedAbsorbing
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalFunctionSolverDefinedAbsorbing     super;
+    typedef OneDFSIFunctionSolverDefinedAbsorbing            super;
 
     typedef super::fluxPtr_Type                              fluxPtr_Type;
     typedef super::sourcePtr_Type                            sourcePtr_Type;
@@ -493,16 +493,16 @@ public:
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      *  @param resistance the terminal resistance.
      */
-    explicit OneDimensionalFunctionSolverDefinedResistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
+    explicit OneDFSIFunctionSolverDefinedResistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
 
     //! Copy constructor
     /*!
-     * @param bcFunctionResistance OneDimensionalFunctionSolverDefinedResistance
+     * @param bcFunctionResistance OneDFSIFunctionSolverDefinedResistance
      */
-    explicit OneDimensionalFunctionSolverDefinedResistance( const OneDimensionalFunctionSolverDefinedResistance& bcFunctionResistance );
+    explicit OneDFSIFunctionSolverDefinedResistance( const OneDFSIFunctionSolverDefinedResistance& bcFunctionResistance );
 
     //! Destructor
-    virtual ~OneDimensionalFunctionSolverDefinedResistance() {}
+    virtual ~OneDFSIFunctionSolverDefinedResistance() {}
 
     //@}
 
@@ -525,7 +525,7 @@ protected:
 
 
 
-//! OneDimensionalFunctionSolverDefinedWindkessel3 - Class which implements windkessel RCR boundary conditions for the 1D segment
+//! OneDFSIFunctionSolverDefinedWindkessel3 - Class which implements windkessel RCR boundary conditions for the 1D segment
 /*!
  *
  *  \cond \TODO Description should be reordered using latex etc... \endcond
@@ -553,14 +553,14 @@ protected:
  *
  *  @author Lucia Mirabella, Tiziano Passerini
  */
-class OneDimensionalFunctionSolverDefinedWindkessel3 : public OneDimensionalFunctionSolverDefinedCompatibility
+class OneDFSIFunctionSolverDefinedWindkessel3 : public OneDFSIFunctionSolverDefinedCompatibility
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalFunctionSolverDefinedCompatibility        super;
+    typedef OneDFSIFunctionSolverDefinedCompatibility    super;
 
     typedef super::fluxPtr_Type                          fluxPtr_Type;
     typedef super::sourcePtr_Type                        sourcePtr_Type;
@@ -582,7 +582,7 @@ public:
      *  @param absorbing is an absorbing boundary condition
      *  @param venousPressure the venous pressure
      */
-    explicit OneDimensionalFunctionSolverDefinedWindkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
+    explicit OneDFSIFunctionSolverDefinedWindkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
                                                   const Real& resistance1, const Real& resistance2,
                                                   const Real& compliance,
                                                   const bool& absorbing = false,
@@ -590,12 +590,12 @@ public:
 
     //! Copy constructor
     /*!
-     * @param bcFunctionWindkessel3 OneDimensionalFunctionSolverDefinedWindkessel3
+     * @param bcFunctionWindkessel3 OneDFSIFunctionSolverDefinedWindkessel3
      */
-    explicit OneDimensionalFunctionSolverDefinedWindkessel3( const OneDimensionalFunctionSolverDefinedWindkessel3& bcFunctionWindkessel3 );
+    explicit OneDFSIFunctionSolverDefinedWindkessel3( const OneDFSIFunctionSolverDefinedWindkessel3& bcFunctionWindkessel3 );
 
     //! Destructor
-    virtual ~OneDimensionalFunctionSolverDefinedWindkessel3() {}
+    virtual ~OneDFSIFunctionSolverDefinedWindkessel3() {}
 
     //@}
 
@@ -638,4 +638,4 @@ protected:
 
 }
 
-#endif // OneDimensionalBCFunctionDefault_H
+#endif // OneDFSIBCFunctionDefault_H

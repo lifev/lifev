@@ -40,15 +40,15 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalPhysicsLinear_H
-#define OneDimensionalPhysicsLinear_H
+#ifndef OneDFSIPhysicsLinear_H
+#define OneDFSIPhysicsLinear_H
 
-#include <life/lifesolver/OneDimensionalPhysics.hpp>
+#include <life/lifesolver/OneDFSIPhysics.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalPhysicsLinear - Class providing linear physical operations for the 1D model data.
+//! OneDFSIPhysicsLinear - Class providing linear physical operations for the 1D model data.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -60,14 +60,14 @@ namespace LifeV
  *      <li> utilities to compute the different pressure components (and derivatives).
  *  </ol>
  */
-class OneDimensionalPhysicsLinear : public OneDimensionalPhysics
+class OneDFSIPhysicsLinear : public OneDFSIPhysics
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalPhysics           super;
+    typedef OneDFSIPhysics           super;
 
     //@}
 
@@ -76,16 +76,16 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalPhysicsLinear() : super() {}
+    explicit OneDFSIPhysicsLinear() : super() {}
 
     //! Constructor
     /*!
      * @param dataPtr pointer to the data container of the problem
      */
-    explicit OneDimensionalPhysicsLinear( const dataPtr_Type dataPtr ) : super( dataPtr ) {}
+    explicit OneDFSIPhysicsLinear( const dataPtr_Type dataPtr ) : super( dataPtr ) {}
 
     //! Destructor
-    virtual ~OneDimensionalPhysicsLinear() {}
+    virtual ~OneDFSIPhysicsLinear() {}
 
     //@}
 
@@ -193,19 +193,19 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalPhysicsLinear( const OneDimensionalPhysicsLinear& physics );
+    explicit OneDFSIPhysicsLinear( const OneDFSIPhysicsLinear& physics );
 
-    OneDimensionalPhysicsLinear& operator=( const OneDimensionalPhysicsLinear& physics );
+    OneDFSIPhysicsLinear& operator=( const OneDFSIPhysicsLinear& physics );
 
     //@}
 };
 
 //! Factory create function
-inline OneDimensionalPhysics* createOneDimensionalPhysicsLinear()
+inline OneDFSIPhysics* createOneDFSIPhysicsLinear()
 {
-    return new OneDimensionalPhysicsLinear();
+    return new OneDFSIPhysicsLinear();
 }
 
 }
 
-#endif //OneDimensionalPhysicsLinear_H
+#endif //OneDFSIPhysicsLinear_H

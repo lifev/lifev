@@ -35,15 +35,15 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalSource_H
-#define OneDimensionalSource_H
+#ifndef OneDFSISource_H
+#define OneDFSISource_H
 
-#include <life/lifesolver/OneDimensionalPhysics.hpp>
+#include <life/lifesolver/OneDFSIPhysics.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalSource - Base class for the source term \f$\mathbf S\f$ of the 1D hyperbolic problem.
+//! OneDFSISource - Base class for the source term \f$\mathbf S\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -60,19 +60,19 @@ namespace LifeV
  *
  *  This class implements all the interfaces required for the computation of \f$\mathbf S\f$ and its derivatives.
  */
-class OneDimensionalSource
+class OneDFSISource
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef FactorySingleton< Factory< OneDimensionalSource, OneDimensional::sourceTerm_Type > > factorySource_Type;
+    typedef FactorySingleton< Factory< OneDFSISource, OneDFSI::sourceTerm_Type > > factorySource_Type;
 
-    typedef OneDimensionalPhysics                       physics_Type;
+    typedef OneDFSIPhysics                              physics_Type;
     typedef boost::shared_ptr< physics_Type >           physicsPtr_Type;
 
-    typedef OneDimensionalData::container2D_Type        container2D_Type;
+    typedef OneDFSIData::container2D_Type               container2D_Type;
 
     //@}
 
@@ -81,16 +81,16 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalSource() : M_physicsPtr() {}
+    explicit OneDFSISource() : M_physicsPtr() {}
 
     //! Constructor
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalSource( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
+    explicit OneDFSISource( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
 
     //! Do nothing destructor
-    virtual ~OneDimensionalSource() {}
+    virtual ~OneDFSISource() {}
 
     //@}
 
@@ -166,13 +166,13 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalSource( const OneDimensionalSource& source );
+    explicit OneDFSISource( const OneDFSISource& source );
 
-    OneDimensionalSource& operator=( const OneDimensionalSource& source );
+    OneDFSISource& operator=( const OneDFSISource& source );
 
     //@}
 };
 
 }
 
-#endif // OneDimensionalSource_H
+#endif // OneDFSISource_H

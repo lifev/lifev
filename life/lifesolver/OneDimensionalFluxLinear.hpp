@@ -39,15 +39,15 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalFluxLinear_H
-#define OneDimensionalFluxLinear_H
+#ifndef OneDFSIFluxLinear_H
+#define OneDFSIFluxLinear_H
 
-#include <life/lifesolver/OneDimensionalFlux.hpp>
+#include <life/lifesolver/OneDFSIFlux.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalFluxLinear - Class containing the linear flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
+//! OneDFSIFluxLinear - Class containing the linear flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -86,7 +86,7 @@ namespace LifeV
  *
  *  This class implements all the interfaces required for the computation of \f$\mathbf F\f$ and its derivatives.
  */
-class OneDimensionalFluxLinear : public OneDimensionalFlux
+class OneDFSIFluxLinear : public OneDFSIFlux
 {
 
 public:
@@ -94,7 +94,7 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalFlux           super;
+    typedef OneDFSIFlux           super;
 
     //@}
 
@@ -103,16 +103,16 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalFluxLinear() : super() {};
+    explicit OneDFSIFluxLinear() : super() {};
 
     //! Constructor
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalFluxLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {};
+    explicit OneDFSIFluxLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {};
 
     //! Do nothing destructor
-    virtual ~OneDimensionalFluxLinear() {}
+    virtual ~OneDFSIFluxLinear() {}
 
     //@}
 
@@ -184,20 +184,20 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalFluxLinear( const OneDimensionalFluxLinear& flux );
+    explicit OneDFSIFluxLinear( const OneDFSIFluxLinear& flux );
 
-    OneDimensionalFluxLinear& operator=( const OneDimensionalFluxLinear& flux );
+    OneDFSIFluxLinear& operator=( const OneDFSIFluxLinear& flux );
 
     //@}
 
 };
 
 //! Factory create function
-inline OneDimensionalFlux* createOneDimensionalFluxLinear()
+inline OneDFSIFlux* createOneDFSIFluxLinear()
 {
-    return new OneDimensionalFluxLinear();
+    return new OneDFSIFluxLinear();
 }
 
 }
 
-#endif // OneDimensionalFluxLinear_H
+#endif // OneDFSIFluxLinear_H

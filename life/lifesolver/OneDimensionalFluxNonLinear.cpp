@@ -39,7 +39,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/OneDimensionalFluxNonLinear.hpp>
+#include <life/lifesolver/OneDFSIFluxNonLinear.hpp>
 
 namespace LifeV
 {
@@ -47,7 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& row,  const UInt& iNode ) const
+OneDFSIFluxNonLinear::flux( const Real& A, const Real& Q, const ID& row,  const UInt& iNode ) const
 {
     if ( row == 0 ) // F1
     {
@@ -59,7 +59,7 @@ OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& row, 
         return ( M_physicsPtr->data()->alpha( iNode ) * Q * Q / A +
                  M_physicsPtr->data()->beta0( iNode ) * M_physicsPtr->data()->beta1( iNode ) *
                  M_physicsPtr->data()->area0( iNode ) / ( ( M_physicsPtr->data()->beta1( iNode ) + 1 ) *
-                 M_physicsPtr->data()->densityRho() ) * ( OneDimensional::pow15( A / M_physicsPtr->data()->area0( iNode ),
+                 M_physicsPtr->data()->densityRho() ) * ( OneDFSI::pow15( A / M_physicsPtr->data()->area0( iNode ),
                                                                                  M_physicsPtr->data()->beta1( iNode ) + 1 ) - 1 ) ) *
                  M_physicsPtr->data()->robertsonCorrection();
     }
@@ -70,7 +70,7 @@ OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& row, 
 }
 
 Real
-OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const
+OneDFSIFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const
 {
     if ( row == 0 && column == 0 ) // dF1/dA
     {
@@ -86,7 +86,7 @@ OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& row, 
     {
         return ( M_physicsPtr->data()->beta0( iNode ) *
                  M_physicsPtr->data()->beta1( iNode ) /
-                 M_physicsPtr->data()->densityRho() * OneDimensional::pow05( A / M_physicsPtr->data()->area0( iNode ),
+                 M_physicsPtr->data()->densityRho() * OneDFSI::pow05( A / M_physicsPtr->data()->area0( iNode ),
                                                                              M_physicsPtr->data()->beta1( iNode ) ) -
                  M_physicsPtr->data()->alpha( iNode ) * Q * Q / A / A ) *
                  M_physicsPtr->data()->robertsonCorrection();
@@ -102,7 +102,7 @@ OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& row, 
 }
 
 void
-OneDimensionalFluxNonLinear::eigenValuesEigenVectors( const Real& A,
+OneDFSIFluxNonLinear::eigenValuesEigenVectors( const Real& A,
                                                       const Real& Q,
                                                       container2D_Type& eigenvalues,
                                                       container2D_Type& leftEigenvector1,
@@ -110,7 +110,7 @@ OneDimensionalFluxNonLinear::eigenValuesEigenVectors( const Real& A,
                                                       const UInt& iNode ) const
 {
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6312) << "[OneDimensionalModel_Flux_NonLinear]::jacobian_EigenValues_Vectors\n";
+    Debug(6312) << "[OneDFSIModel_Flux_NonLinear]::jacobian_EigenValues_Vectors\n";
 #endif
 
     Real celerity;
@@ -118,7 +118,7 @@ OneDimensionalFluxNonLinear::eigenValuesEigenVectors( const Real& A,
                                 M_physicsPtr->data()->alpha( iNode ) - 1) * Q * Q / ( A * A ) +
                                 M_physicsPtr->data()->beta0( iNode ) *
                                 M_physicsPtr->data()->beta1( iNode ) /
-                                M_physicsPtr->data()->densityRho() * OneDimensional::pow05( A / M_physicsPtr->data()->area0( iNode ),
+                                M_physicsPtr->data()->densityRho() * OneDFSI::pow05( A / M_physicsPtr->data()->area0( iNode ),
                                                                                             M_physicsPtr->data()->beta1( iNode ) ) );
 
     eigenvalues[0] = M_physicsPtr->data()->alpha( iNode ) * Q / A + celerity;
@@ -131,7 +131,7 @@ OneDimensionalFluxNonLinear::eigenValuesEigenVectors( const Real& A,
 }
 
 void
-OneDimensionalFluxNonLinear::deltaEigenValuesEigenVectors( const Real& A,
+OneDFSIFluxNonLinear::deltaEigenValuesEigenVectors( const Real& A,
                                                            const Real& Q,
                                                            container2D_Type& deltaEigenvalues,
                                                            container2D_Type& deltaLeftEigenvector1,
@@ -141,7 +141,7 @@ OneDimensionalFluxNonLinear::deltaEigenValuesEigenVectors( const Real& A,
     Real deltaCelerity;
 
     Real AoverA0( A / M_physicsPtr->data()->area0( iNode ) );
-    Real C ( OneDimensional::pow05(  AoverA0, M_physicsPtr->data()->beta1( iNode ) ) / M_physicsPtr->data()->densityRho() );
+    Real C ( OneDFSI::pow05(  AoverA0, M_physicsPtr->data()->beta1( iNode ) ) / M_physicsPtr->data()->densityRho() );
 
     deltaCelerity  = 0.5 / std::sqrt( M_physicsPtr->data()->alpha( iNode ) * (
                      M_physicsPtr->data()->alpha( iNode ) - 1) * Q * Q / ( A * A ) +

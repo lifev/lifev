@@ -40,7 +40,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifefunctions/OneDimensionalFunctionSolverDefined.hpp>
+#include <life/lifefunctions/OneDFSIFunctionSolverDefined.hpp>
 
 namespace LifeV
 {
@@ -48,7 +48,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalFunctionSolverDefined::OneDimensionalFunctionSolverDefined( const bcSide_Type& bcSide, const bcType_Type& bcType ):
+OneDFSIFunctionSolverDefined::OneDFSIFunctionSolverDefined( const bcSide_Type& bcSide, const bcType_Type& bcType ):
         M_fluxPtr                       (),
         M_sourcePtr                     (),
         M_solutionPtr                   (),
@@ -58,7 +58,7 @@ OneDimensionalFunctionSolverDefined::OneDimensionalFunctionSolverDefined( const 
 {
 }
 
-OneDimensionalFunctionSolverDefined::OneDimensionalFunctionSolverDefined( const OneDimensionalFunctionSolverDefined& bcFunctionDefault ) :
+OneDFSIFunctionSolverDefined::OneDFSIFunctionSolverDefined( const OneDFSIFunctionSolverDefined& bcFunctionDefault ) :
         M_fluxPtr                       ( bcFunctionDefault.M_fluxPtr ),        // Ptr copy
         M_sourcePtr                     ( bcFunctionDefault.M_sourcePtr ),      // Ptr copy
         M_solutionPtr                   ( bcFunctionDefault.M_solutionPtr ),    // Ptr copy
@@ -70,7 +70,7 @@ OneDimensionalFunctionSolverDefined::OneDimensionalFunctionSolverDefined( const 
 // Methods
 // ===================================================
 Real
-OneDimensionalFunctionSolverDefined::operator() ( const Real& /*time*/, const Real& /*timeStep*/ )
+OneDFSIFunctionSolverDefined::operator() ( const Real& /*time*/, const Real& /*timeStep*/ )
 {
 #ifdef HAVE_LIFEV_DEBUG
     assert( false );
@@ -82,7 +82,7 @@ OneDimensionalFunctionSolverDefined::operator() ( const Real& /*time*/, const Re
 // Set Methods
 // ===================================================
 void
-OneDimensionalFunctionSolverDefined::setFluxSource( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr )
+OneDFSIFunctionSolverDefined::setFluxSource( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr )
 {
     M_fluxPtr   = fluxPtr;
     M_sourcePtr = sourcePtr;
@@ -94,9 +94,9 @@ OneDimensionalFunctionSolverDefined::setFluxSource( const fluxPtr_Type& fluxPtr,
 // Protected Methods
 // ===================================================
 void
-OneDimensionalFunctionSolverDefined::setupNode()
+OneDFSIFunctionSolverDefined::setupNode()
 {
-    ( M_bcSide == OneDimensional::left ) ? M_bcNode = 0 : M_bcNode = M_fluxPtr->physics()->data()->numberOfNodes() - 1;
+    ( M_bcSide == OneDFSI::left ) ? M_bcNode = 0 : M_bcNode = M_fluxPtr->physics()->data()->numberOfNodes() - 1;
 }
 
 
@@ -104,13 +104,13 @@ OneDimensionalFunctionSolverDefined::setupNode()
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalFunctionSolverDefinedRiemann::OneDimensionalFunctionSolverDefinedRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType ) :
+OneDFSIFunctionSolverDefinedRiemann::OneDFSIFunctionSolverDefinedRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType ) :
         super                           ( bcSide, bcType ),
         M_bcU                           (),
         M_bcW                           ()
 {}
 
-OneDimensionalFunctionSolverDefinedRiemann::OneDimensionalFunctionSolverDefinedRiemann( const OneDimensionalFunctionSolverDefinedRiemann& bcFunctionRiemann ) :
+OneDFSIFunctionSolverDefinedRiemann::OneDFSIFunctionSolverDefinedRiemann( const OneDFSIFunctionSolverDefinedRiemann& bcFunctionRiemann ) :
         super                           ( bcFunctionRiemann ),
         M_bcU                           ( bcFunctionRiemann.M_bcU ),
         M_bcW                           ( bcFunctionRiemann.M_bcW )
@@ -120,18 +120,18 @@ OneDimensionalFunctionSolverDefinedRiemann::OneDimensionalFunctionSolverDefinedR
 // Methods
 // ===================================================
 Real
-OneDimensionalFunctionSolverDefinedRiemann::operator()( const Real& /*time*/, const Real& /*timeStep*/ )
+OneDFSIFunctionSolverDefinedRiemann::operator()( const Real& /*time*/, const Real& /*timeStep*/ )
 {
     updateBCVariables();
 
-    return ( ( M_bcType == OneDimensional::W1 ) ? M_bcW[0] : M_bcW[1] );
+    return ( ( M_bcType == OneDFSI::W1 ) ? M_bcW[0] : M_bcW[1] );
 }
 
 // ===================================================
 // Protected Methods
 // ===================================================
 void
-OneDimensionalFunctionSolverDefinedRiemann::updateBCVariables()
+OneDFSIFunctionSolverDefinedRiemann::updateBCVariables()
 {
     M_bcU[0] = (*(*M_solutionPtr)["A"])(M_bcNode);
     M_bcU[1] = (*(*M_solutionPtr)["Q"])(M_bcNode);
@@ -144,7 +144,7 @@ OneDimensionalFunctionSolverDefinedRiemann::updateBCVariables()
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalFunctionSolverDefinedCompatibility::OneDimensionalFunctionSolverDefinedCompatibility( const bcSide_Type& bcSide, const bcType_Type& bcType ):
+OneDFSIFunctionSolverDefinedCompatibility::OneDFSIFunctionSolverDefinedCompatibility( const bcSide_Type& bcSide, const bcType_Type& bcType ):
         super                           ( bcSide, bcType ),
         M_bcElement                     (),
         M_bcInternalNode                (),
@@ -157,7 +157,7 @@ OneDimensionalFunctionSolverDefinedCompatibility::OneDimensionalFunctionSolverDe
 {
 }
 
-OneDimensionalFunctionSolverDefinedCompatibility::OneDimensionalFunctionSolverDefinedCompatibility( const OneDimensionalFunctionSolverDefinedCompatibility& bcFunctionCompatibility ) :
+OneDFSIFunctionSolverDefinedCompatibility::OneDFSIFunctionSolverDefinedCompatibility( const OneDFSIFunctionSolverDefinedCompatibility& bcFunctionCompatibility ) :
         super                           ( bcFunctionCompatibility ),
         M_bcElement                     ( bcFunctionCompatibility.M_bcElement ),
         M_bcInternalNode                ( bcFunctionCompatibility.M_bcInternalNode ),
@@ -174,19 +174,19 @@ OneDimensionalFunctionSolverDefinedCompatibility::OneDimensionalFunctionSolverDe
 // Protected Methods
 // ===================================================
 void
-OneDimensionalFunctionSolverDefinedCompatibility::setupNode()
+OneDFSIFunctionSolverDefinedCompatibility::setupNode()
 {
     super::setupNode();
 
     mesh_Type::EdgeType boundaryEdge;
     switch ( M_bcSide )
     {
-    case OneDimensional::left:
+    case OneDFSI::left:
         M_bcElement       = 0;
         M_bcInternalNode  = M_bcNode + 1;
         break;
 
-    case OneDimensional::right:
+    case OneDFSI::right:
         M_bcElement       = M_bcNode - 1;
         M_bcInternalNode  = M_bcNode - 1;
         break;
@@ -198,18 +198,18 @@ OneDimensionalFunctionSolverDefinedCompatibility::setupNode()
 }
 
 Real
-OneDimensionalFunctionSolverDefinedCompatibility::computeRHS( const Real& timeStep )
+OneDFSIFunctionSolverDefinedCompatibility::computeRHS( const Real& timeStep )
 {
     updateBCVariables();
     computeEigenValuesVectors();
 
     switch ( M_bcType )
     {
-    case OneDimensional::W1:
+    case OneDFSI::W1:
         return evaluateRHS( M_eigenvalues[0], M_leftEigenvector1, M_deltaLeftEigenvector1, timeStep );
         break;
 
-    case OneDimensional::W2:
+    case OneDFSI::W2:
         return evaluateRHS( M_eigenvalues[1], M_leftEigenvector2, M_deltaLeftEigenvector2, timeStep );
         break;
 
@@ -220,7 +220,7 @@ OneDimensionalFunctionSolverDefinedCompatibility::computeRHS( const Real& timeSt
 }
 
 void
-OneDimensionalFunctionSolverDefinedCompatibility::computeEigenValuesVectors()
+OneDFSIFunctionSolverDefinedCompatibility::computeEigenValuesVectors()
 {
     M_fluxPtr->eigenValuesEigenVectors( M_bcU[0], M_bcU[1],
                                         M_eigenvalues, M_leftEigenvector1, M_leftEigenvector2,
@@ -232,7 +232,7 @@ OneDimensionalFunctionSolverDefinedCompatibility::computeEigenValuesVectors()
 }
 
 Real
-OneDimensionalFunctionSolverDefinedCompatibility::evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector,
+OneDFSIFunctionSolverDefinedCompatibility::evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector,
                                                     const container2D_Type& deltaEigenvector, const Real& timeStep )
 {
     Real cfl = computeCFL( eigenvalue, timeStep );
@@ -271,7 +271,7 @@ OneDimensionalFunctionSolverDefinedCompatibility::evaluateRHS( const Real& eigen
 }
 
 Real
-OneDimensionalFunctionSolverDefinedCompatibility::computeCFL( const Real& eigenvalue, const Real& timeStep ) const
+OneDFSIFunctionSolverDefinedCompatibility::computeCFL( const Real& eigenvalue, const Real& timeStep ) const
 {
     Real cfl = eigenvalue * timeStep / M_fluxPtr->physics()->data()->mesh()->edgeLength( M_bcElement );
 
@@ -296,7 +296,7 @@ OneDimensionalFunctionSolverDefinedCompatibility::computeCFL( const Real& eigenv
 // Methods
 // ===================================================
 Real
-OneDimensionalFunctionSolverDefinedAbsorbing::operator()( const Real& /*time*/, const Real& timeStep )
+OneDFSIFunctionSolverDefinedAbsorbing::operator()( const Real& /*time*/, const Real& timeStep )
 {
     updateBCVariables();
     computeEigenValuesVectors();
@@ -304,12 +304,12 @@ OneDimensionalFunctionSolverDefinedAbsorbing::operator()( const Real& /*time*/, 
     Real W_out(0.), W_out_old(0.);
     switch ( M_bcType )
     {
-    case OneDimensional::W1:
+    case OneDFSI::W1:
         W_out = M_bcW[1] + evaluateRHS( M_eigenvalues[1], M_leftEigenvector2, M_deltaLeftEigenvector2, timeStep ) - scalarProduct( M_leftEigenvector2, M_bcU );
         W_out_old = -M_bcW[0] + scalarProduct( M_leftEigenvector1, M_bcU );
         break;
 
-    case OneDimensional::W2:
+    case OneDFSI::W2:
         W_out = M_bcW[0] + evaluateRHS( M_eigenvalues[0], M_leftEigenvector1, M_deltaLeftEigenvector1, timeStep ) - scalarProduct( M_leftEigenvector1, M_bcU );
         W_out_old = -M_bcW[1] + scalarProduct( M_leftEigenvector2, M_bcU );
         break;
@@ -342,19 +342,19 @@ OneDimensionalFunctionSolverDefinedAbsorbing::operator()( const Real& /*time*/, 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalFunctionSolverDefinedResistance::OneDimensionalFunctionSolverDefinedResistance( const bcSide_Type& bcSide, const bcType_Type& bcType, const Real& resistance ):
+OneDFSIFunctionSolverDefinedResistance::OneDFSIFunctionSolverDefinedResistance( const bcSide_Type& bcSide, const bcType_Type& bcType, const Real& resistance ):
         super                           ( bcSide, bcType ),
         M_resistance                    ( resistance )
 {}
 
-OneDimensionalFunctionSolverDefinedResistance::OneDimensionalFunctionSolverDefinedResistance( const OneDimensionalFunctionSolverDefinedResistance& bcFunctionResistance ) :
+OneDFSIFunctionSolverDefinedResistance::OneDFSIFunctionSolverDefinedResistance( const OneDFSIFunctionSolverDefinedResistance& bcFunctionResistance ) :
         super                           ( bcFunctionResistance ),
         M_resistance                    ( bcFunctionResistance.M_resistance )
 {}
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalFunctionSolverDefinedWindkessel3::OneDimensionalFunctionSolverDefinedWindkessel3( const bcSide_Type& bcSide,
+OneDFSIFunctionSolverDefinedWindkessel3::OneDFSIFunctionSolverDefinedWindkessel3( const bcSide_Type& bcSide,
                                                                           const bcType_Type& bcType,
                                                                           const Real&        resistance1,
                                                                           const Real&        resistance2,
@@ -373,7 +373,7 @@ OneDimensionalFunctionSolverDefinedWindkessel3::OneDimensionalFunctionSolverDefi
         M_integral_tn                   ( 0. )
 {}
 
-OneDimensionalFunctionSolverDefinedWindkessel3::OneDimensionalFunctionSolverDefinedWindkessel3( const OneDimensionalFunctionSolverDefinedWindkessel3& bcFunctionWindkessel3 ) :
+OneDFSIFunctionSolverDefinedWindkessel3::OneDFSIFunctionSolverDefinedWindkessel3( const OneDFSIFunctionSolverDefinedWindkessel3& bcFunctionWindkessel3 ) :
         super                           ( bcFunctionWindkessel3 ),
         M_resistance1                   ( bcFunctionWindkessel3.M_resistance1 ),
         M_resistance2                   ( bcFunctionWindkessel3.M_resistance2 ),
@@ -390,18 +390,18 @@ OneDimensionalFunctionSolverDefinedWindkessel3::OneDimensionalFunctionSolverDefi
 // Methods
 // ===================================================
 Real
-OneDimensionalFunctionSolverDefinedWindkessel3::operator()( const Real& time, const Real& timeStep )
+OneDFSIFunctionSolverDefinedWindkessel3::operator()( const Real& time, const Real& timeStep )
 {
     UInt W_outID;
     Real W_out;
 
     switch ( M_bcType )
     {
-    case OneDimensional::W1:
+    case OneDFSI::W1:
         W_outID = 1;
         W_out = computeRHS( timeStep );
         break;
-    case OneDimensional::W2:
+    case OneDFSI::W2:
         W_outID = 0;
         W_out = computeRHS( timeStep );
         break;

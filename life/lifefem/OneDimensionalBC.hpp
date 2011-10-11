@@ -41,16 +41,16 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalBC_H
-#define OneDimensionalBC_H
+#ifndef OneDFSIBC_H
+#define OneDFSIBC_H
 
-#include <life/lifefunctions/OneDimensionalFunctionSolverDefined.hpp>
-#include <life/lifesolver/OneDimensionalData.hpp>
+#include <life/lifefunctions/OneDFSIFunctionSolverDefined.hpp>
+#include <life/lifesolver/OneDFSIData.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalBC - Class featuring methods to handle boundary conditions.
+//! OneDFSIBC - Class featuring methods to handle boundary conditions.
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -61,14 +61,14 @@ namespace LifeV
  *
  *  \cond \TODO Improve the description of this class. \endcond
  */
-class OneDimensionalBC
+class OneDFSIBC
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalFunctionSolverDefined                bcFunctionSolverDefined_Type;
+    typedef OneDFSIFunctionSolverDefined                       bcFunctionSolverDefined_Type;
     typedef boost::shared_ptr< bcFunctionSolverDefined_Type >  bcFunctionSolverDefinedPtr_Type;
 
     typedef bcFunctionSolverDefined_Type::bcFunction_Type      bcFunction_Type;
@@ -96,16 +96,16 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalBC( const bcSide_Type& bcSide );
+    explicit OneDFSIBC( const bcSide_Type& bcSide );
 
     //! Copy constructor
     /*!
-     * @param bc OneDimensionalBC
+     * @param bc OneDFSIBC
      */
-    explicit OneDimensionalBC( const OneDimensionalBC& bc );
+    explicit OneDFSIBC( const OneDFSIBC& bc );
 
     //! Destructor
-    virtual ~OneDimensionalBC() {}
+    virtual ~OneDFSIBC() {}
 
     //@}
 
@@ -179,7 +179,7 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalBC& operator=( const OneDimensionalBC& bc );
+    OneDFSIBC& operator=( const OneDFSIBC& bc );
 
     //@}
 
@@ -225,4 +225,4 @@ private:
 
 }
 
-#endif //OneDimensionalBC_H
+#endif //OneDFSIBC_H

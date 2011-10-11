@@ -39,15 +39,15 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalFluxNonLinear_H
-#define OneDimensionalFluxNonLinear_H
+#ifndef OneDFSIFluxNonLinear_H
+#define OneDFSIFluxNonLinear_H
 
-#include <life/lifesolver/OneDimensionalFlux.hpp>
+#include <life/lifesolver/OneDFSIFlux.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalFluxNonLinear - Class containing the non-linear flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
+//! OneDFSIFluxNonLinear - Class containing the non-linear flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -105,7 +105,7 @@ namespace LifeV
  *
  *  This class implements all the interfaces required for the computation of \f$\mathbf F\f$ and its derivatives.
  */
-class OneDimensionalFluxNonLinear : public OneDimensionalFlux
+class OneDFSIFluxNonLinear : public OneDFSIFlux
 {
 
 public:
@@ -113,7 +113,7 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalFlux           super;
+    typedef OneDFSIFlux           super;
 
     //@}
 
@@ -122,16 +122,16 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalFluxNonLinear() : super() {};
+    explicit OneDFSIFluxNonLinear() : super() {};
 
     //! Constructor
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalFluxNonLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {};
+    explicit OneDFSIFluxNonLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {};
 
     //! Do nothing destructor
-    virtual ~OneDimensionalFluxNonLinear() {}
+    virtual ~OneDFSIFluxNonLinear() {}
 
     //@}
 
@@ -252,19 +252,19 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalFluxNonLinear( const OneDimensionalFluxNonLinear& flux );
+    explicit OneDFSIFluxNonLinear( const OneDFSIFluxNonLinear& flux );
 
-    OneDimensionalFluxNonLinear& operator=( const OneDimensionalFluxNonLinear& flux );
+    OneDFSIFluxNonLinear& operator=( const OneDFSIFluxNonLinear& flux );
 
     //@}
 };
 
 //! Factory create function
-inline OneDimensionalFlux* createOneDimensionalFluxNonLinear()
+inline OneDFSIFlux* createOneDFSIFluxNonLinear()
 {
-    return new OneDimensionalFluxNonLinear();
+    return new OneDFSIFluxNonLinear();
 }
 
 }
 
-#endif // OneDimensionalFluxNonLinear_H
+#endif // OneDFSIFluxNonLinear_H

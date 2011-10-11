@@ -40,15 +40,15 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalPhysicsNonLinear_H
-#define OneDimensionalPhysicsNonLinear_H
+#ifndef OneDFSIPhysicsNonLinear_H
+#define OneDFSIPhysicsNonLinear_H
 
-#include <life/lifesolver/OneDimensionalPhysics.hpp>
+#include <life/lifesolver/OneDFSIPhysics.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalPhysicsNonLinear - Class providing non linear physical operations for the 1D model data.
+//! OneDFSIPhysicsNonLinear - Class providing non linear physical operations for the 1D model data.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -60,14 +60,14 @@ namespace LifeV
  *      <li> utilities to compute the different pressure components (and derivatives).
  *  </ol>
  */
-class OneDimensionalPhysicsNonLinear : public OneDimensionalPhysics
+class OneDFSIPhysicsNonLinear : public OneDFSIPhysics
 {
 public :
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalPhysics           super;
+    typedef OneDFSIPhysics           super;
 
     //@}
 
@@ -76,16 +76,16 @@ public :
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalPhysicsNonLinear() : super() {}
+    explicit OneDFSIPhysicsNonLinear() : super() {}
 
     //! Constructor
     /*!
      * @param dataPtr pointer to the data container of the problem
      */
-    explicit OneDimensionalPhysicsNonLinear( const dataPtr_Type dataPtr ) : super( dataPtr ) {}
+    explicit OneDFSIPhysicsNonLinear( const dataPtr_Type dataPtr ) : super( dataPtr ) {}
 
     //! Destructor
-    virtual ~OneDimensionalPhysicsNonLinear() {}
+    virtual ~OneDFSIPhysicsNonLinear() {}
 
     //@}
 
@@ -201,20 +201,20 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalPhysicsNonLinear( const OneDimensionalPhysicsNonLinear& physics );
+    explicit OneDFSIPhysicsNonLinear( const OneDFSIPhysicsNonLinear& physics );
 
-    OneDimensionalPhysicsNonLinear& operator=( const OneDimensionalPhysicsNonLinear& physics );
+    OneDFSIPhysicsNonLinear& operator=( const OneDFSIPhysicsNonLinear& physics );
 
     //@}
 
 };
 
 //! Factory create function
-inline OneDimensionalPhysics* createOneDimensionalPhysicsNonLinear()
+inline OneDFSIPhysics* createOneDFSIPhysicsNonLinear()
 {
-    return new OneDimensionalPhysicsNonLinear();
+    return new OneDFSIPhysicsNonLinear();
 }
 
 }
 
-#endif // OneDimensionalPhysicsNonLinear_H
+#endif // OneDFSIPhysicsNonLinear_H

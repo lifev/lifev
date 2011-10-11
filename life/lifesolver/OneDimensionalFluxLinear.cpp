@@ -39,7 +39,7 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/OneDimensionalFluxLinear.hpp>
+#include <life/lifesolver/OneDFSIFluxLinear.hpp>
 
 namespace LifeV
 {
@@ -48,7 +48,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalFluxLinear::flux( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const
+OneDFSIFluxLinear::flux( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const
 {
     if ( row == 0 ) // F1
     {
@@ -63,7 +63,7 @@ OneDimensionalFluxLinear::flux( const Real& U1, const Real& U2, const ID& row, c
 }
 
 Real
-OneDimensionalFluxLinear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID& row, const ID& column, const UInt& iNode) const
+OneDFSIFluxLinear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID& row, const ID& column, const UInt& iNode) const
 {
     if ( row == 0 && column == 0 ) // dF1/dU1
     {
@@ -87,7 +87,7 @@ OneDimensionalFluxLinear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID
 }
 
 void
-OneDimensionalFluxLinear::eigenValuesEigenVectors( const Real& /*U1*/, const Real& /*U2*/,
+OneDFSIFluxLinear::eigenValuesEigenVectors( const Real& /*U1*/, const Real& /*U2*/,
                                                    container2D_Type& eigenvalues,
                                                    container2D_Type& leftEigenvector1,
                                                    container2D_Type& leftEigenvector2,
@@ -103,7 +103,7 @@ OneDimensionalFluxLinear::eigenValuesEigenVectors( const Real& /*U1*/, const Rea
 }
 
 void
-OneDimensionalFluxLinear::deltaEigenValuesEigenVectors( const Real& /*U1*/, const Real& /*U2*/,
+OneDFSIFluxLinear::deltaEigenValuesEigenVectors( const Real& /*U1*/, const Real& /*U2*/,
                                                         container2D_Type& deltaEigenvalues,
                                                         container2D_Type& deltaLeftEigenvector1,
                                                         container2D_Type& deltaLeftEigenvector2,

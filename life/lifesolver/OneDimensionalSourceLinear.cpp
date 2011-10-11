@@ -39,7 +39,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/OneDimensionalSourceLinear.hpp>
+#include <life/lifesolver/OneDFSISourceLinear.hpp>
 
 namespace LifeV
 {
@@ -47,7 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalSourceLinear::source( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const
+OneDFSISourceLinear::source( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const
 {
     if ( row == 0 ) // S1
     {
@@ -66,7 +66,7 @@ OneDimensionalSourceLinear::source( const Real& U1, const Real& U2, const ID& ro
 }
 
 Real
-OneDimensionalSourceLinear::dSdU( const Real& /*U1*/, const Real& /*U2*/, const ID& row, const ID& column, const UInt& iNode ) const
+OneDFSISourceLinear::dSdU( const Real& /*U1*/, const Real& /*U2*/, const ID& row, const ID& column, const UInt& iNode ) const
 {
     if ( row == 0 && column == 0) // dS1/dU1 = 0
     {
@@ -89,8 +89,8 @@ OneDimensionalSourceLinear::dSdU( const Real& /*U1*/, const Real& /*U2*/, const 
 }
 
 Real
-OneDimensionalSourceLinear::interpolatedNonConservativeSource( const Real& U1, const Real& U2,
-                                                               const ID& row, const container2D_Type& bcNodes, const Real& /*cfl*/ ) const
+OneDFSISourceLinear::interpolatedNonConservativeSource( const Real& U1, const Real& U2,
+                                                        const ID& row, const container2D_Type& bcNodes, const Real& /*cfl*/ ) const
 {
     //TODO Implement the interpolation as done for the non-linear case
     return this->source(U1, U2, row, bcNodes[0]);
