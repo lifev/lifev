@@ -237,6 +237,10 @@ public:
     //! Return a pointer to M_elementDomains
     const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
     graphPtr_Type&           elementDomains()             {return M_elementDomains;}
+    //! Return a pointer to the communicator M_comm
+    const boost::shared_ptr<Epetra_Comm> & comm()   const { return M_comm; }
+    //! Return the ghost data
+    const GhostEntityDataMap_Type & ghostDataMap()  const { return M_ghostDataMap; }
     //@}
 
 private:
