@@ -44,16 +44,16 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
     <BR>
     \subsection boundaryConditions Boundary Conditions
     LifeV provides classes and methods to prescribe the most common boundary conditions
-    (<i>Dirichlet, Neumann, Robin</i>). 
+    (<i>Dirichlet, Neumann, Robin</i>).
     Normal and tangential boundary conditions are also allowed for vectorial (3D) fields.
     In addition, a few kinds of boundary conditions specific for flow problems are available.
     Boundary conditions are prescribed by modifying the system matrix and the right-hand side after the assembling phase.
-    The parameters of the boundary condition can be defined as functions of the space and time, or as finite element fields. 
+    The parameters of the boundary condition can be defined as functions of the space and time, or as finite element fields.
     The regions where to apply boundary conditions are determined by markers associated to the boundary faces of the mesh.
     Boundary conditions settings are stored in the \c BCHandler class, whereas the file
     BCManage.hpp contains the routines used to prescribe the conditions.
     The \c BCInterface class contains tools to set the boundary conditions directly from data files.
-    
+
 
 
     <BR>
@@ -84,7 +84,7 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
 
     <BR>
     \subsection spaceDiscretization Space discretization
-	
+
 	LifeV provides classes to perform easily and quickly the assembly of the most common problems
 	(e.g. advection-diffusion-reaction, Stokes and Navier-Stokes). These classes
 	are called Assemblers and can be considered as building blocks that can be combined at will.
@@ -125,13 +125,18 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
 
 
 
-        <li> <b>Heart solver:</b> [TODO: 2-3 lines description by Ricardo Ruiz-Baier]
-
+        <li> <b>Heart electrophysiological solver:</b>
+          Both bidomain and monodomain models are available as models for the electrophysiology behavior of cardiac tissue.
+         These models consist on anisotropic reaction-diffusion equations governing the propagation of electrical potentials,
+          coupled with a system of ODEs describing the physics of the cellular membrane and time evolution of ionic quantities.
+          Several variants for membrane models are already present in the library: Luo-Rudy phase I, Rogers-McCulloch and
+           Mitchell-Schaeffer models. The solver currently employs piecewise linear finite elements for all involved fields
+            in the coupling.
 
 
         <li> <b>VenantKirchhoff Venant-Kirchhoff solver:</b> The structural model available in LifeV
              is a linear elastic constitutive law. It is the linear approximation of the nonlinear St.
-             Venant-Kirchhoff model. 
+             Venant-Kirchhoff model.
              It is implemented in the \c VenantKirchhoffSolver class. It can be used both for
              purely structural dynamics problems (traction of a cube) or for coupled or multiscale problems.
              In fact, it has been integrated in the FSI (both segregated and monolithic) and in the
