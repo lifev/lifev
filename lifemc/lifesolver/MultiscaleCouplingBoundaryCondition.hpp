@@ -202,7 +202,7 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
     {
         model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right );
+        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneDFSI::left : OneDFSI::right );
 
         model->bcInterface().insertBC();
     }
