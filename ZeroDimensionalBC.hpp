@@ -37,7 +37,7 @@
 #ifndef ZeroDimensionalBC_H
 #define ZeroDimensionalBC_H 1
 
-#include <life/lifesolver/OneDimensionalDefinitions.hpp>
+#include <life/lifesolver/OneDFSIDefinitions.hpp>
 
 namespace LifeV
 {
@@ -57,7 +57,7 @@ public:
     //@{
 
     typedef boost::function<Real ( const Real&  )>                        function_Type;
-    typedef OneDimensional::bcType_Type                                   bcType_Type;
+    typedef OneDFSI::bcType_Type                                          bcType_Type;
 
     //@}
 
