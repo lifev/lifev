@@ -458,7 +458,10 @@ hyperbolic::run()
                                                                     *pressure_bdQr_dualInterpolate, 3, Members->comm );
 
     // create ghost map
-    pressure_uInterpolate_FESpace.map().createGhostMap( meshPart );
+    pressure_uInterpolate_FESpace.map().createGhostMapOnNodes( meshPart );
+
+    // create ghost map
+    pressure_uInterpolate_FESpace.map().createGhostMapOnElements( meshPart );
 
     // Vector for the interpolated dual solution.
     vector_ptrtype pressure_dualInterpolated( new vector_type ( pressure_uInterpolate_FESpace.map(), Repeated ) );

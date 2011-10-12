@@ -251,9 +251,13 @@ public:
     //! This method return true if both the unique map and the repeated map are identical
     bool mapsAreSimilar( MapEpetra const& epetraMap ) const;
 
-    //! Generate ghost map
+    //! Generate ghost map based on nodes neighborhood
     template<typename MeshType>
-    void createGhostMap( MeshPartitioner<MeshType> & meshPart );
+    void createGhostMapOnNodes( MeshPartitioner<MeshType> & meshPart );
+
+    //! Generate ghost map based on elements neighborhood
+    template<typename MeshType>
+    void createGhostMapOnElements( MeshPartitioner<MeshType> & meshPart );
 
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
@@ -339,7 +343,7 @@ private:
     map_ptrtype        M_repeatedMapEpetra;
     map_ptrtype        M_uniqueMapEpetra;
     map_ptrtype        M_ghostMapEpetra;
-    bool              M_ghostMapCreated;
+    bool               M_ghostMapCreated;
     exporter_ptrtype   M_exporter;
     importer_ptrtype   M_importer;
     comm_ptrtype       M_commPtr;
@@ -439,7 +443,7 @@ MapEpetra( const ReferenceFE&        refFE,
 }
 
 template <typename MeshType>
-void MapEpetra::createGhostMap( MeshPartitioner<MeshType> & meshPart )
+void MapEpetra::createGhostMapOnNodes( MeshPartitioner<MeshType> & meshPart )
 {
     // use a set to avoid duplicates
     std::set<Int> myGlobalElementsSet;
@@ -459,10 +463,28 @@ void MapEpetra::createGhostMap( MeshPartitioner<MeshType> & meshPart )
     std::vector<Int> myGlobalElements( myGlobalElementsSet.begin(), myGlobalElementsSet.end() ); 
 
     // generate map
-    createMap( -1,
-               myGlobalElements.size(),
-               &myGlobalElements[0],
-               *M_commPtr );
+    M_ghostMapEpetra.reset( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_commPtr ) );
+
+    // set bool control
+    M_ghostMapCreated = true;
+}
+
+template <typename MeshType>
+void MapEpetra::createGhostMapOnElements( MeshPartitioner<MeshType> & meshPart )
+{
+    Int*          pointer;
+    std::set<Int> map;
+
+    // get all elements from the repeated map
+    pointer = M_repeatedMapEpetra->MyGlobalElements();
+    for ( Int ii = 0; ii < M_repeatedMapEpetra->NumMyElements(); ++ii, ++pointer )
+    {
+        map.insert( *pointer );
+    }
+
+    // add all facing elements
+    // this needs flags!
+    // FacesOnSubdInt (  )
 
     // set bool control
     M_ghostMapCreated = true;
