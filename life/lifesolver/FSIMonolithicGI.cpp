@@ -256,11 +256,12 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
 
 
-    applyBoundaryConditions();
+    if( (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
+        applyBoundaryConditions();
     }
     super_Type::evalResidual( disp, M_rhsFull, res, false );
 
-if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookian")) )
+if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
 {
     res += *M_meshBlock*disp;
 
@@ -348,7 +349,7 @@ void FSIMonolithicGI::setupBlockPrec()
     //The following part accounts for a possibly nonlinear structure model, should not be run when linear
     //elasticity is used
 
-    if ( M_data->dataSolid()->getUseExactJacobian() && (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookian")))
+    if ( M_data->dataSolid()->getUseExactJacobian() && (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")))
     {
         M_solid->material()->updateJacobianMatrix( *M_uk*M_data->dataFluid()->dataTime()->timeStep(), dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));

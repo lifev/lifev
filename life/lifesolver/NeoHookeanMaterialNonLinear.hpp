@@ -427,9 +427,9 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
     UInt dim        = this->M_FESpace->dim();
 
     VectorElemental dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
-    vector_Type disp(sol);
+    //vector_Type disp(sol);
 
-    vector_Type dRep(disp, Repeated);
+    vector_Type dRep(sol, Repeated);
 
     for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); i++ )
     {
@@ -515,7 +515,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vector
 	      }
 	  }
       }
-    
+
     //! loop on quadrature points (ig)
     for ( Int ig = 0; ig < static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
     {

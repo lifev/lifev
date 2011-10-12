@@ -507,10 +507,10 @@ evalResidual( const vector_Type& sol, vectorPtr_Type& rhs, vector_Type& res, boo
 {
     if( diagonalScaling )
         diagonalScale(*rhs, M_monolithicMatrix->matrix());
-if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookian")) )
+if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
 {
-    M_solid->Apply(sol, res);
-    res *= (M_data->dataSolid()->dataTime()->timeStep());
+    M_solid->Apply(sol*M_data->dataFluid()->dataTime()->timeStep(), res);
+    //res *= (M_data->dataSolid()->dataTime()->timeStep());
     M_fluidBlock->globalAssemble();
     res += ((*M_fluidBlock)*sol);
     res += *M_monolithicMatrix->coupling()*sol;
@@ -598,7 +598,7 @@ FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
 
     //M_solid->material()->computeStiffness(*solution*M_data->dataFluid()->dataTime()->timeStep(), M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
 
-if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookian"))
+if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean"))
 {
     M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
     *M_solidBlockPrec += *M_solid->Mass();
