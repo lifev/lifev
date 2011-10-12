@@ -216,9 +216,6 @@ public:
     //! Return a pointer to the mesh partition with rank k
     const meshPtr_Type&      getPartition(Int k)    const {return (*M_meshPartitions)[k];}
 
-    //! Clean structures that are not needed after partitioning
-    void cleanUp();
-
     //! Prints information about the state (data) of the object
     void showMe(std::ostream& output = std::cout) const;
     //@}
@@ -245,11 +242,14 @@ public:
     const std::vector<Int>&  repeatedFaceVector()   const {return M_repeatedFaceVector[0];}
     //! Return a reference to M_repeatedVolumeVector
     const std::vector<Int>&  repeatedVolumeVector() const {return M_repeatedVolumeVector[0];}
-    //! Return the communicator of the mesh
-    boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
+<<<<<<< HEAD
     //! Return a reference to M_ghostDataMap
     const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
+=======
+    //! Return the communicator of the mesh
+    boost::shared_ptr<Epetra_Comm> comm() { return M_comm; }
 
+>>>>>>> ExporterUpdate
     //@}
 
 private:
@@ -362,7 +362,7 @@ private:
     std::vector<Int>                     M_adjacencyGraphKeys;
     std::vector<Int>                     M_adjacencyGraphValues;
     boost::shared_ptr<Epetra_Comm>       M_comm;
-    Int                                  M_me;
+    UInt                                 M_me;
 
     std::vector<std::vector<Int> >       M_localNodes;
     std::vector<std::set<Int> >          M_localEdges;
@@ -1363,7 +1363,7 @@ void MeshPartitioner<MeshType>::constructFaces()
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
             {
                 // set the flag for faces on the subdomain border
-                pf->replaceFlag( Flag::turnOn ( pf->flag(), EntityFlags::SUBDOMAIN_INTERFACE ) );
+                pf->setFlag( Flag::turnOn ( pf->flag(), SUBDOMAIN_INTERFACE ) );
 
                 // build GhostEntityData
                 GhostEntityData ghostFace;
@@ -1391,8 +1391,7 @@ void MeshPartitioner<MeshType>::constructFaces()
                         }
                     }
                 }
-                // check that the ghost element is found on another proc ( this test is acceptable only for online partitioning )
-                ASSERT ( ghostProc != M_me || M_serialMode, "ghost face not found" );
+                ASSERT ( ghostProc != M_me, "ghost face not found" );
                 M_ghostDataMap[ ghostProc ].push_back( ghostFace );
             }
 
@@ -1664,28 +1663,6 @@ void MeshPartitioner<MeshType>::execute()
     // allowing it to be deleted
     // ***************************************
     releaseUnpartitionedMesh();
-
-    // ***************************************
-    // clear all internal structures that are
-    // not needed anymore
-    // ***************************************
-    cleanUp();
-}
-
-template<typename MeshType>
-void MeshPartitioner<MeshType>::cleanUp()
-{
-    clearVector( M_vertexDistribution );
-    clearVector( M_adjacencyGraphKeys );
-    clearVector( M_adjacencyGraphValues );
-    clearVector( M_localNodes );
-    clearVector( M_localEdges );
-    clearVector( M_localFaces );
-    clearVector( M_localVolumes );
-    clearVector( M_nBoundaryPoints );
-    clearVector( M_nBoundaryEdges );
-    clearVector( M_nBoundaryFaces );
-    clearVector( M_graphVertexLocations );
 }
 
 }

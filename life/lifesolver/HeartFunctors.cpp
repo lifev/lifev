@@ -291,7 +291,7 @@ HeartFunctors::setAppliedCurrentZygote(const double& t,
                           const double& y,
                           const double& z,
                           const ID& /*i*/,
-                          const entityFlag_Type& ref)
+                          const markerID_Type& ref)
 {
     // double pi = acos(-1.0);
     Real appliedCurrent = 0.0;

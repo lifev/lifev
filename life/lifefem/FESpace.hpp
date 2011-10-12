@@ -114,13 +114,13 @@ public:
              const QuadratureRule&			Qr,
              const QuadratureRule&			bdQr,
              const Int				fDim,
-             commPtr_Type&			commptr
+             const commPtr_Type&			commptr
            );
 
     FESpace(	MeshPartitioner<MeshType>&	mesh,
              const std::string&		space,
              const Int				fDim,
-             commPtr_Type&			commptr
+             const commPtr_Type&			commptr
            );
 
     FESpace(	meshPtr_Type			mesh,
@@ -128,13 +128,13 @@ public:
              const QuadratureRule&			Qr,
              const QuadratureRule&			bdQr,
              const Int				fDim,
-             commPtr_Type&			commptr
+             const commPtr_Type&			commptr
            );
 
     FESpace( meshPtr_Type			mesh,
              const std::string&		space,
              const Int				fDim,
-             commPtr_Type&			commptr
+             const commPtr_Type&			commptr
            );
 
     //! Do nothing destructor
@@ -528,7 +528,7 @@ FESpace(	MeshPartitioner<MeshType>& 	mesh,
          const QuadratureRule&      	Qr,
          const QuadratureRule&      	bdQr,
          const Int            	fDim,
-         commPtr_Type&         	commptr
+         const commPtr_Type&         	commptr
        ) :
         M_mesh			( mesh.meshPartition() ),
         M_refFE			( &refFE ),
@@ -555,7 +555,7 @@ FESpace<MeshType, MapType>::
 FESpace(	MeshPartitioner<MeshType>&	mesh,
          const std::string&		space,
          const Int				fDim,
-         commPtr_Type&			commptr
+         const commPtr_Type&			commptr
        ) :
         M_mesh			( mesh.meshPartition() ),
         M_fieldDim		( fDim ),
@@ -597,7 +597,7 @@ FESpace(	meshPtr_Type			mesh,
          const QuadratureRule&			Qr,
          const QuadratureRule&			bdQr,
          const Int				fDim,
-         commPtr_Type&			commptr
+         const commPtr_Type&			commptr
        ) :
         M_mesh			( mesh ),
         M_refFE			( &refFE ),
@@ -625,7 +625,7 @@ FESpace<MeshType, MapType>::
 FESpace(	meshPtr_Type			mesh,
          const std::string&		space,
          const Int				fDim,
-         commPtr_Type&			commptr
+         const commPtr_Type&			commptr
        ) :
         M_mesh			( mesh ),
         M_fieldDim		( fDim ),

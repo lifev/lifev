@@ -44,7 +44,7 @@
 namespace LifeV
 {
 
-entityFlag_Type regularMeshPointPosition( const UInt& i_x,
+markerID_Type regularMeshPointPosition( const UInt& i_x,
                                      const UInt& i_y,
                                      const UInt& i_z,
                                      const UInt& n_x,

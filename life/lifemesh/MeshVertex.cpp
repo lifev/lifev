@@ -47,7 +47,7 @@ namespace LifeV
 // Constructor & Destructor
 // ==========================================
 MeshVertex::MeshVertex() :
-		MeshEntityWithBoundary( 0 ),
+		MeshEntity( 0 ),
         M_coordinates()
 {
     M_coordinates.assign( 0 );
@@ -55,7 +55,7 @@ MeshVertex::MeshVertex() :
 
 MeshVertex::MeshVertex( ID identity, bool boundary )
         :
-        MeshEntityWithBoundary( identity, boundary ),
+        MeshEntity( identity, boundary ),
         M_coordinates()
 {
     M_coordinates.assign( 0 );
@@ -63,7 +63,7 @@ MeshVertex::MeshVertex( ID identity, bool boundary )
 
 MeshVertex::MeshVertex( ID identity, Real x, Real y, Real z, bool boundary )
         :
-        MeshEntityWithBoundary( identity, boundary ),
+        MeshEntity( identity, boundary ),
         M_coordinates()
 {
 	M_coordinates[ 0 ] = x;
@@ -73,7 +73,7 @@ MeshVertex::MeshVertex( ID identity, Real x, Real y, Real z, bool boundary )
 
 MeshVertex::MeshVertex( MeshVertex const & Element )
         :
-        MeshEntityWithBoundary( Element.id(), Element.boundary() ),
+        MeshEntity( Element.id(), Element.boundary() ),
         M_coordinates( Element.M_coordinates )
 {
 

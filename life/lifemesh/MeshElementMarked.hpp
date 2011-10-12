@@ -54,13 +54,13 @@ namespace LifeV
     @sa markers.h
  */
 template <typename MC = defaultMarkerCommon_Type>
-class MeshElementMarked0D: public MeshVertex, public MC::PointMarker
+class MeshElementMarked0D: public MeshVertex, public MC::pointMarker_Type
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef typename MC::PointMarker marker_Type;
+    typedef typename MC::pointMarker_Type marker_Type;
 
     //@}
 
@@ -130,7 +130,9 @@ public:
  */
 template
 <typename GeoShape, typename MC = defaultMarkerCommon_Type>
-class MeshElementMarked1D : public MeshElement<GeoShape, MeshElementMarked0D<MC> >, public MC::EdgeMarker
+class MeshElementMarked1D :
+    public MeshElement<GeoShape, MeshElementMarked0D<MC> >,
+    public MC::edgeMarker_Type
 {
 public:
 
@@ -138,7 +140,7 @@ public:
     //@{
 
     typedef GeoShape geoShape_Type;
-    typedef typename MC::EdgeMarker marker_Type;
+    typedef typename MC::edgeMarker_Type marker_Type;
     typedef MeshElementMarked0D<MC> geoBElement_Type;
     typedef MeshElementMarked0D<MC> point_Type;
    //@}
@@ -174,7 +176,9 @@ public:
  */
 template
 <typename GeoShape, typename MC = defaultMarkerCommon_Type>
-class MeshElementMarked2D: public MeshElement<GeoShape, MeshElementMarked0D<MC> >, public MC::FaceMarker
+class MeshElementMarked2D:
+    public MeshElement<GeoShape, MeshElementMarked0D<MC> >,
+    public MC::faceMarker_Type
 {
 
 public:
@@ -186,7 +190,7 @@ public:
     static const UInt S_numLocalEdges = MeshElement<GeoShape, MeshElementMarked0D<MC> >::S_numEdges;
 
     typedef GeoShape geoShape_Type;
-    typedef typename MC::FaceMarker marker_Type;
+    typedef typename MC::faceMarker_Type marker_Type;
     typedef typename GeoShape::GeoBShape edgeShape_Type;
     typedef MeshElementMarked1D<edgeShape_Type, MC> edge_Type;
     typedef MeshElementMarked0D<MC> point_Type;
@@ -310,7 +314,9 @@ private:
  */
 template
 <typename GeoShape, typename MC = defaultMarkerCommon_Type>
-class MeshElementMarked3D: public MeshElement<GeoShape, MeshElementMarked0D<MC> >, public MC::VolumeMarker
+class MeshElementMarked3D:
+    public MeshElement<GeoShape, MeshElementMarked0D<MC> >,
+    public MC::volumeMarker_Type
 {
 public:
 
@@ -325,7 +331,7 @@ public:
     static const UInt S_numLocalEdges = MeshElement<GeoShape, MeshElementMarked0D<MC> >::S_numEdges;
 
     typedef GeoShape geoShape_Type;
-    typedef typename MC::VolumeMarker marker_Type;
+    typedef typename MC::volumeMarker_Type marker_Type;
     typedef typename GeoShape::GeoBShape faceShape_Type;
     typedef typename faceShape_Type::GeoBShape edgeShape_Type;
 
@@ -369,12 +375,12 @@ public:
 // ==========================================
 template <typename MC>
 MeshElementMarked0D<MC>::MeshElementMarked0D() :
-        MeshVertex(), MC::PointMarker()
+        MeshVertex(), MC::pointMarker_Type()
 {}
 
 template <typename MC>
 MeshElementMarked0D<MC>::MeshElementMarked0D( ID identity, bool boundary ) :
-        MeshVertex( identity, boundary ), MC::PointMarker()
+        MeshVertex( identity, boundary ), MC::pointMarker_Type()
 {}
 
 template <typename MC>
@@ -384,7 +390,7 @@ MeshElementMarked0D<MC>::MeshElementMarked0D( ID identity, Real x, Real y, Real 
 
 template <typename MC>
 MeshElementMarked0D<MC>::MeshElementMarked0D( MeshElementMarked0D<MC> const & Element ) :
-        MeshVertex( Element ), MC::PointMarker( Element )
+        MeshVertex( Element ), MC::pointMarker_Type( Element )
 {}
 
 // ==========================================
@@ -422,7 +428,7 @@ MeshElementMarked1D<GeoShape, MC>::MeshElementMarked1D( ID identity ) :
 template <typename GeoShape, typename MC>
 MeshElementMarked1D<GeoShape, MC>::MeshElementMarked1D( const MeshElementMarked1D<GeoShape, MC>& Element ) :
         MeshElement<GeoShape, MeshElementMarked0D<MC> >( Element ),
-        MC::EdgeMarker                    ( Element )
+        MC::edgeMarker_Type                   ( Element )
 {
     ASSERT_PRE( GeoShape::S_nDimensions == 1 , "geoElement2D with incorrect GeoShape" ) ;
 }
@@ -452,7 +458,7 @@ MeshElementMarked2D<GeoShape, MC>::MeshElementMarked2D( ID identity ) :
 template <typename GeoShape, typename MC>
 MeshElementMarked2D<GeoShape, MC>::MeshElementMarked2D( const MeshElementMarked2D<GeoShape, MC>& Element ) :
         MeshElement<GeoShape, MeshElementMarked0D<MC> >( Element ),
-        MC::FaceMarker                    ( Element ),
+        MC::faceMarker_Type               ( Element ),
         M_firstAdjacentElementIdentity    ( Element.M_firstAdjacentElementIdentity),
         M_secondAdjacentElementIdentity   ( Element.M_secondAdjacentElementIdentity),
         M_firstAdjacentElementPosition    ( Element.M_firstAdjacentElementPosition ),
@@ -485,7 +491,7 @@ MeshElementMarked3D<GeoShape, MC>::MeshElementMarked3D( ID identity ) :
 template <typename GeoShape, typename MC>
 MeshElementMarked3D<GeoShape, MC>::MeshElementMarked3D( const MeshElementMarked3D<GeoShape, MC>& Element ) :
         MeshElement<GeoShape, MeshElementMarked0D<MC> >( Element ),
-        MC::VolumeMarker                  ( Element )
+        MC::volumeMarker_Type                ( Element )
 {
     ASSERT_PRE( GeoShape::S_nDimensions == 3 , "geoElement3D with incorrect GeoShape" )
 }
