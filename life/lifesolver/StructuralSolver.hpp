@@ -761,11 +761,11 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
     M_BCh = bch;
 
-    Real abstol  = 1.e-5;
-    Real reltol  = 1.e-5;
+    Real abstol  = 1.e-7;
+    Real reltol  = 1.e-7;
     UInt maxiter = 50;
-    Real etamax  = 1e-5;
-    Int NonLinearLineSearch = 0;
+    Real etamax  = 1e-7;
+    Int NonLinearLineSearch = 2;
 
     Real time = M_data->dataTime()->time();
 

@@ -245,6 +245,12 @@ public:
         M_rightHandSideNoBC->globalAssemble();
     }
 
+    //! Update the source term
+    /*!
+     @param sourceTerm
+    */ 
+    void updateSourceTerm(const source_Type& source );
+
     //! Update convective term, boundary condition and solve the linearized ns system
     /*!
         @param bcHandler BC handler
@@ -1473,6 +1479,34 @@ OseenSolver<MeshType, SolverType>::updateStabilization( matrix_Type& matrixFull 
     }
 
 }
+
+template <typename Mesh, typename SolverType>
+void OseenSolver<Mesh, SolverType>::updateSourceTerm( source_Type const& source )
+{
+    vector_Type rhs(vector_Type(*M_localMap));
+
+    VectorElemental M_elvec(M_velocityFESpace->fe().nbFEDof(), nDimensions);
+    UInt nc = nDimensions;
+
+    // loop on volumes: assembling source term
+    for ( UInt i = 1; i <= M_velocityFESpace->mesh()->numVolumes(); ++i )
+    {
+
+        M_velocityFESpace->fe().updateFirstDerivQuadPt( M_velocityFESpace->mesh()->volumeList( i ) );
+
+        M_elvec.zero();
+
+        for ( UInt ic = 0; ic < nc; ++ic )
+        {
+            compute_vec( source, M_elvec, M_velocityFESpace->fe(),  M_oseenData->dataTime()->time(), ic ); // compute local vector
+            assembleVector( *rhs, M_elvec, M_velocityFESpace->fe(), M_velocityFESpace->dof(), ic, ic*M_velocityFESpace->getDim() ); // assemble local vector into global one
+        }
+    }
+    M_rightHandSideNoBC +=rhs;
+}
+
+
+
 
 template<typename MeshType, typename SolverType>
 void

@@ -74,9 +74,8 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 
     BCh_he->addBC("Top",         3, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",        2, Essential, Full, bcf,   3);
-    BCh_he->addBC("Base",        4, Essential, Full, bcf,   3);
-    BCh_he->addBC("Top",         30, Essential, Full, bcf,   3);
-    BCh_he->addBC("Top",         20, Essential, Full, bcf,   3);
+    BCh_he->addBC("Top",         30, Essential, Full, bcf,  3);
+    BCh_he->addBC("Top",         20, Essential, Full, bcf,  3);
 
     if (_oper.data().method() == "steklovPoincare")
     {
@@ -104,8 +103,6 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
                       *FPOper->bcvStructureDispToHarmonicExtension(), 3);
     }
 
-
-
     return BCh_he;
 }
 
@@ -121,25 +118,11 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
     FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf           (fZero);
-    BCFunctionBase in_flow       (u2);
-    BCFunctionBase in_vel        (u2vel);
-    BCFunctionBase in_flow_pr       (pressure);
-    BCFunctionBase in_flow_flux  (PhysFlux);
-    BCFunctionBase out_flow      (fZero);
-
-
-    //  #ifdef FLUX
-    // BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
-    // #else
-     BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
-     // #endif
-
-    BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
-
-    BCh_fluid->addBC("OutFlowBrain",   3,  Natural,   Full, out_flow, 3);
-    BCh_fluid->addBC("EdgesFace",  30, Essential, Full, bcf,  3);
-    BCh_fluid->addBC("OutFlowBrain",   4,  Natural,   Full, out_flow, 3);
-    BCh_fluid->addBC("EdgesBrain",  40, Essential, Full, bcf,  3);
+   
+    BCh_fluid->addBC("OutFlow",   2, Essential,   Full, bcf, 3);
+    BCh_fluid->addBC("OutFlow",   3, Essential,   Full, bcf, 3);
+    BCh_fluid->addBC("EdgesFace", 30, Essential,  Full, bcf, 3);
+    BCh_fluid->addBC("EdgesIn",   20, Essential,  Full, bcf, 3);
 
     _oper.setStructureToFluid(_oper.veloFluidMesh());
     // _oper.setHarmonicExtensionVelToFluid(_oper.veloFluidMesh());
@@ -158,7 +141,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
     }
     else
     {
-        BCh_fluid->addBC("Interface",   1,  Essential, Full,
+        BCh_fluid->addBC("Interface",   1,  Essential, Full, 
                          *_oper.bcvStructureToFluid(),  3);
     }
     return BCh_fluid;
@@ -211,7 +194,6 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluidLin(FSIOperator &_oper)
     #endif
 
     BCh_fluidLin->addBC("InletFace",  20,  Essential, Full, bcf,     3);
-
     BCh_fluidLin->addBC("outFlowFace",  3,    Natural, Full, bcf,     3);
     BCh_fluidLin->addBC("edgesFace",  30,  Essential, Full, bcf,     3);
     BCh_fluidLin->addBC("outFlowBrain",  4,    Natural, Full, bcf,     3);
@@ -254,8 +236,8 @@ FSIOperator::solidBchandlerPtr_Type BCh_solid(FSIOperator &_oper)
     BCFunctionBase bcf(fZero);
 
 
-    BCh_solid->addBC("BaseRingF5",      3, Essential, Full, bcf,  3);
-    BCh_solid->addBC("BaseRingF3",      2, Essential, Full, bcf,  3);
+    BCh_solid->addBC("Outlet",     3, Essential, Full, bcf,  3);
+    BCh_solid->addBC("Inlet",      2, Essential, Full, bcf,  3);
     BCh_solid->addBC("Ring6",      20, Essential, Full, bcf,  3);
     BCh_solid->addBC("Ring6",      30, Essential, Full, bcf,  3);
 
@@ -288,7 +270,6 @@ FSIOperator::solidBchandlerPtr_Type BCh_solid(FSIOperator &_oper)
         BCh_solid->addBC("Interface", 1, Natural, Full,
                          *FPOper->bcvFluidLoadToStructure(), 3);
     }
-
     return BCh_solid;
 }
 
