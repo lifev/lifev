@@ -26,16 +26,16 @@
 
 /*!
     @file
-    @brief PreconditionerPressureCorrection
+    @brief PreconditionerYosida
 
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 
-    @date 26-05-2011
+    @date 13-10-2011
  */
 
 #include <vector>
-#include "PreconditionerPressureCorrection.hpp"
+#include "PreconditionerYosida.hpp"
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
 #include <life/lifecore/LifeChrono.hpp>
@@ -53,7 +53,7 @@
 
 namespace LifeV {
 
-PreconditionerPressureCorrection::PreconditionerPressureCorrection( const  boost::shared_ptr<Epetra_Comm>& comm ):
+PreconditionerYosida::PreconditionerYosida( const  boost::shared_ptr<Epetra_Comm>& comm ):
     PreconditionerComposition ( comm ),
     M_velocityBlockSize       ( -1 ),
     M_pressureBlockSize       ( -1 ),
@@ -64,26 +64,26 @@ PreconditionerPressureCorrection::PreconditionerPressureCorrection( const  boost
 
 }
 
-PreconditionerPressureCorrection::~PreconditionerPressureCorrection()
+PreconditionerYosida::~PreconditionerYosida()
 {
 
 }
 
 void
-PreconditionerPressureCorrection::createParametersList( list_Type&         list,
-                                                        const GetPot&      dataFile,
-                                                        const std::string& section,
-                                                        const std::string& subSection )
+PreconditionerYosida::createParametersList( list_Type&         list,
+                                            const GetPot&      dataFile,
+                                            const std::string& section,
+                                            const std::string& subSection )
 {
-    createPressureCorrectionList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
+    createYosidaList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
 }
 
 void
-PreconditionerPressureCorrection::createPressureCorrectionList( list_Type&         list,
-                                                                const GetPot&      dataFile,
-                                                                const std::string& section,
-                                                                const std::string& subsection,
-                                                                const bool& verbose )
+PreconditionerYosida::createYosidaList( list_Type&         list,
+                                        const GetPot&      dataFile,
+                                        const std::string& section,
+                                        const std::string& subsection,
+                                        const bool& verbose )
 {
     bool displayList = dataFile( ( section + "/displayList" ).data(), false );
 
@@ -104,13 +104,13 @@ PreconditionerPressureCorrection::createPressureCorrectionList( list_Type&      
 }
 
 Real
-PreconditionerPressureCorrection::condest()
+PreconditionerYosida::condest()
 {
     return 0.0;
 }
 
 int
-PreconditionerPressureCorrection::buildPreconditioner( matrixPtr_Type& oper )
+PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
 {
     if ( ( M_uFESpace.get() == NULL ) || ( M_pFESpace.get() == NULL ) )
     {
@@ -309,19 +309,19 @@ PreconditionerPressureCorrection::buildPreconditioner( matrixPtr_Type& oper )
 }
 
 int
-PreconditionerPressureCorrection::numBlocksRows() const
+PreconditionerYosida::numBlocksRows() const
 {
     return 2;
 }
 
 int
-PreconditionerPressureCorrection::numBlocksColumns() const
+PreconditionerYosida::numBlocksColumns() const
 {
     return 2;
 }
 
 void
-PreconditionerPressureCorrection::setDataFromGetPot( const GetPot& dataFile,
+PreconditionerYosida::setDataFromGetPot( const GetPot& dataFile,
                                                      const std::string& section )
 {
     M_dataFile   = dataFile;
@@ -337,7 +337,7 @@ PreconditionerPressureCorrection::setDataFromGetPot( const GetPot& dataFile,
 }
 
 void
-PreconditionerPressureCorrection::setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace )
+PreconditionerYosida::setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace )
 {
     M_uFESpace = uFESpace;
     M_pFESpace = pFESpace;
@@ -349,19 +349,19 @@ PreconditionerPressureCorrection::setFESpace( FESpacePtr_Type uFESpace, FESpaceP
 }
 
 void
-PreconditionerPressureCorrection::setTimestep( const Real& timestep )
+PreconditionerYosida::setTimestep( const Real& timestep )
 {
     M_timestep = timestep;
 }
 
 void
-PreconditionerPressureCorrection::setViscosity( const Real& viscosity )
+PreconditionerYosida::setViscosity( const Real& viscosity )
 {
     M_viscosity = viscosity;
 }
 
 void
-PreconditionerPressureCorrection::setDensity( const Real& density )
+PreconditionerYosida::setDensity( const Real& density )
 {
     M_density = density;
 }

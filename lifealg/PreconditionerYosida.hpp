@@ -26,16 +26,16 @@
 
 /*!
     @file
-    @brief PreconditionerPressureCorrection
+    @brief PreconditionerYosida
 
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 
-    @date 26-05-2011
+    @date 13-10-2011
  */
 
-#ifndef PRECONDITIONERPRESSURECORRECTION_HPP
-#define PRECONDITIONERPRESSURECORRECTION_HPP 1
+#ifndef PRECONDITIONERYOSIDA_HPP
+#define PRECONDITIONERYOSIDA_HPP 1
 
 #include <boost/shared_ptr.hpp>
 
@@ -51,13 +51,13 @@
 
 namespace LifeV {
 
-//! PreconditionerPressureCorrection
+//! PreconditionerYosida
 /*!
  *  @author Gwenol Grandperrin
  *
- *  The PreconditionerPressureCorrection class provides the Pressure Correction block preconditioner
+ *  The PreconditionerYosida class uses the Yosida method as a preconditioner
  */
-class PreconditionerPressureCorrection:
+class PreconditionerYosida:
         public PreconditionerComposition
 {
 public:
@@ -92,14 +92,14 @@ public:
     //! @name Constructors, destructor
     //@{
     //! default constructor.
-    PreconditionerPressureCorrection( const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerYosida const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     // constructor from matrix A.
     // @param A EpetraMatrix<double> matrix upon which construct the preconditioner
     //    IfpackPreconditioner( matrixPtr_Type& A );
 
     //! default destructor
-    virtual ~PreconditionerPressureCorrection();
+    virtual ~PreconditionerYosida();
 
     //@}
 
@@ -110,11 +110,11 @@ public:
                                const std::string& section,
                                const std::string& subSection );
 
-    static void createPressureCorrectionList( list_Type&         list,
-                                              const GetPot&      dataFile,
-                                              const std::string& section,
-                                              const std::string& subSection = "PCD",
-                                              const bool& verbose = true );
+    static void createYosidaList( list_Type&         list,
+                                  const GetPot&      dataFile,
+                                  const std::string& section,
+                                  const std::string& subSection = "PCD",
+                                  const bool& verbose = true );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();
@@ -196,16 +196,16 @@ protected:
     string      M_pressureMassPrecDataSection;
 
 private:
-    PreconditionerPressureCorrection( const PreconditionerPressureCorrection& P ):
+    PreconditionerYosida( const PreconditionerYosida& P ):
     PreconditionerComposition( P.M_comm ){}
-    PreconditionerPressureCorrection( const boost::shared_ptr<PreconditionerPressureCorrection>& /*P*/ ){}
+    PreconditionerYosida( const boost::shared_ptr<PreconditionerYosida>& /*P*/ ){}
 
 };
 
-inline Preconditioner* createPressureCorrection(){ return new PreconditionerPressureCorrection(); }
+inline Preconditioner* createYosida(){ return new PreconditionerYosida(); }
 namespace
 {
-	static bool registerPressureCorrection = PRECFactory::instance().registerProduct( "PressureCorrection", &createPressureCorrection );
+	static bool registerYosida = PRECFactory::instance().registerProduct( "Yosida", &createYosida );
 }
 
 } // namespace LifeV
