@@ -57,6 +57,7 @@
 
 #include <algorithm>
 #include <map>
+#include <set>
 
 namespace LifeV
 {
@@ -125,6 +126,13 @@ public:
     */
     template <typename MeshType>
     void update( MeshType & );
+
+    //! Build the globalElements list
+    /*!
+      @param mesh A RegionMesh3D
+    */
+    template <typename MeshType>
+    std::vector<Int> globalElements( MeshType & mesh );
 
     /*!
       Returns the global numbering of a DOF, given an internal face and the
@@ -491,6 +499,25 @@ void DOF::update( MeshType& mesh )
             }
         }
     }
+}
+
+template <typename MeshType>
+std::vector<Int> DOF::globalElements( MeshType& mesh )
+{
+    std::set<Int> dofNumberSet;
+    // Gather all dofs local to the given mesh (dofs use global numbering)
+    // The set ensures no repetition
+    for (UInt elementId=0; elementId < mesh.numElements(); ++elementId )
+        for (UInt localDof=0; localDof < this->numLocalDof();++localDof )
+            dofNumberSet.insert( static_cast<Int>( this->localToGlobalMap(elementId,localDof ) ) );
+    // dump the set into a vector for adjacency
+    // to save memory I use copy() and not the vector constructor directly
+    std::vector<Int> myGlobalElements(dofNumberSet.size());
+    std::copy(dofNumberSet.begin(),dofNumberSet.end(),myGlobalElements.begin());
+    // Save memory
+    dofNumberSet.clear();
+
+    return myGlobalElements;
 }
 
 }
