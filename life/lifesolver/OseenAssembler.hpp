@@ -639,7 +639,7 @@ addNewtonConvection( matrix_ptrType matrix, const vector_type& beta, const UInt&
     const UInt nbElements( M_uFESpace->mesh()->numElements() );
     const UInt fieldDim( M_uFESpace->fieldDim() );
     const UInt nbUTotalDof( M_uFESpace->dof().numTotalDof() );
-    const UInt nbQuadPt( M_convectionUCFE->nbQuadPt() );
+    //const UInt nbQuadPt( M_convectionUCFE->nbQuadPt() ); //unused parameter
 
     // Loop over the elements
     for ( UInt iterElement( 0 ); iterElement < nbElements; ++iterElement )
