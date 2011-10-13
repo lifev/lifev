@@ -656,7 +656,7 @@ FSIOperator::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
 */
 
 void
-FSIOperator::initialize( std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec);
+FSIOperator::initialize( std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec)
 {
     //*M_un=*u0Vec[0];
 

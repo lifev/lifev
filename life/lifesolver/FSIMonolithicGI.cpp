@@ -426,7 +426,7 @@ void FSIMonolithicGI::shapeDerivatives( matrixPtr_Type sdMatrix )
 
     uk.subset(*M_uk, 0);
     vector_Type veloFluidMesh(M_uFESpace->map(), Repeated);
-    this->transferMeshMotionOnFluid(*meshVelRep, vfm);
+    this->transferMeshMotionOnFluid(*meshVelRep, veloFluidMesh);
 
     M_fluid->updateShapeDerivatives(*sdMatrix,
                                     alpha,
