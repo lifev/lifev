@@ -82,9 +82,6 @@ PreconditionerYosida::createYosidaList( list_Type&         list,
     std::string precType = dataFile( ( section + "/prectype" ).data(), "Yosida" );
     list.set( "prectype", precType );
 
-    int velocityBlockSize = dataFile( ( section + "/" + subsection + "/blocks/velocity_block_size" ).data(), -1 );
-    int pressureBlockSize = dataFile( ( section + "/" + subsection + "/blocks/pressure_block_size" ).data(), -1 );
-
     std::string fluidPrec = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec" ).data(), "ML" );
     list.set( "subprecs: fluid prec", fluidPrec );
     std::string fluidPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec_data_section" ).data(), "" );
@@ -94,9 +91,6 @@ PreconditionerYosida::createYosidaList( list_Type&         list,
     list.set( "subprecs: Schur prec", schurPrec );
     std::string schurPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/schur_prec_data_section" ).data(), "" );
     list.set( "subprecs: Schur prec data section", ( section + "/" + subsection+"/subprecs/"+schurPrecDataSection ).data() );
-
-    list.set( "blocks: velocity block size", velocityBlockSize );
-    list.set( "blocks: pressure block size", pressureBlockSize );
 
     if ( displayList ) list.print( std::cout );
 }
@@ -175,7 +169,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      * / F 0 \
      * \ 0 I /
      */
-    if ( verbose ) std::cout << "       Block 1 (F)" << std::endl;
+    if ( verbose ) std::cout << "       Block 1 ( F )" << std::endl;
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P1a( new matrixBlock_Type( map ) );
     P1a->setBlockStructure( blockNumRows, blockNumColumns );
@@ -194,7 +188,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      * / I 0 \
      * \ B I /
      */
-    if ( verbose ) std::cout << "       Block 1 (B)" << std::endl;
+    if ( verbose ) std::cout << "       Block 1 ( B )" << std::endl;
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
     P1b->setBlockStructure( blockNumRows, blockNumColumns );
@@ -214,13 +208,14 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      * / I  0 \
      * \ 0 -S /
      */
-    if ( verbose ) std::cout << "       Block 1 (Schur)" << std::endl;
+    if ( verbose ) std::cout << "       Block 1 ( Schur )" << std::endl;
     timer.start();
     // Computing the mass matrix
     boost::shared_ptr<matrixBlock_Type> massMat( new matrixBlock_Type( map ) );
     massMat->setBlockStructure( blockNumRows, blockNumColumns );
     massMat->getMatrixBlockView( 0, 0, M );
-    M_adrPressureAssembler.addMass( massMat, 1.0/M_timestep, M.firstRowIndex(), M.firstColumnIndex() );
+    M_adrVelocityAssembler.addMass( massMat, 1.0/M_timestep, M.firstRowIndex(), M.firstColumnIndex() );
+    massMat->globalAssemble();
 
     boost::shared_ptr<matrixBlock_Type> P1c( new matrixBlock_Type( map ) );
 
@@ -233,14 +228,15 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     invLumpedMassBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
     invLumpedMassBlockMat->getMatrixBlockView( 0, 0, B11 );
     MatrixBlockUtils::createInvLumpedBlock( M, B11 );
+    massMat.reset();               // Free memory
     *invLumpedMassBlockMat *= -1.0;
     invLumpedMassBlockMat->globalAssemble();
     boost::shared_ptr<matrixBlock_Type> tmpResultMat( new matrixBlock_Type( map ) );
     BBlockMat->multiply( false,
                          *invLumpedMassBlockMat, false,
                          *tmpResultMat, true );
-    BBlockMat.reset();
-    invLumpedMassBlockMat.reset();
+    BBlockMat.reset();             // Free memory
+    invLumpedMassBlockMat.reset(); // Free memory
     boost::shared_ptr<matrixBlock_Type> BtBlockMat( new matrixBlock_Type( map ) );
     BtBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
     BtBlockMat->getMatrixBlockView( 0, 1, B12 );
@@ -267,7 +263,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      * / I  F^-1Bt \ = / F^-1 0 \/ I Bt \/ F 0 \
      * \ 0    I    /   \ 0    I /\ 0 I  /\ 0 I /
      */
-    if ( verbose ) std::cout << "       Block 2 (D^-1,alpha I)" << std::endl;
+    if ( verbose ) std::cout << "       Block 2 ( F^-1, I )" << std::endl;
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P2a( new matrixBlock_Type( map ) );
     *P2a *= 0.0;
@@ -285,7 +281,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      * / I Bt \
      * \ 0 I  /
      */
-    if ( verbose ) std::cout << "       Block 2 (Bt)" << std::endl;
+    if ( verbose ) std::cout << "       Block 2 ( Bt )" << std::endl;
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P2b( new matrixBlock_Type( map ) );
     P2b->setBlockStructure( blockNumRows, blockNumColumns );
@@ -305,7 +301,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      * / F 0 \
      * \ 0 I /
      */
-    if ( verbose ) std::cout << "       Block2 (F)" << std::endl;
+    if ( verbose ) std::cout << "       Block2 ( F )" << std::endl;
     timer.start();
     // Here we recycle the first block that we have built (it is the same)
     this->pushBack( p1a,precForBlock1, notInversed, notTransposed );
