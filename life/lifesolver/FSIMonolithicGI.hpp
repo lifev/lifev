@@ -157,9 +157,6 @@ public:
 
     void setSolutionPtr( const vectorPtr_Type& sol) { M_uk = sol; }
 
-    //!Builds an extrapolation of the solution to initialize the Newton scheme
-    //void couplingVariableExtrap( );
-
     //@}
 
 

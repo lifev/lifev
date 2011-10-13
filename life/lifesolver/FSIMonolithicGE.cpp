@@ -72,7 +72,6 @@ void FSIMonolithicGE::setupFluidSolid( UInt const fluxes )
     M_beta.reset  (new vector_Type(M_uFESpace->map()));
 
     M_solid.reset(new solid_Type());
-    //M_solid.reset(new solid_Type()::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType() ));
 
     M_solid->setup(M_data->dataSolid(),
                    M_dFESpace,
@@ -120,7 +119,6 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
     if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
 
-        //Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
         // Solve HE
         iterateMesh(disp);
 

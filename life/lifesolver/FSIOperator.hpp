@@ -121,12 +121,10 @@ public:
     typedef ExporterHDF5Mesh3D<mesh_Type>                                           meshFilter_Type;
 #endif
 
-    typedef OseenSolverShapeDerivative   <mesh_Type>                                      fluid_Type;
-  //typedef VenantKirchhoffSolver  <mesh_Type>                                      solid_Type;
+    typedef OseenSolverShapeDerivative   <mesh_Type>                                fluid_Type;
     typedef StructuralSolver  <mesh_Type>                                           solid_Type;
     typedef HarmonicExtensionSolver<mesh_Type>                                      meshMotion_Type;
-    typedef OseenSolverShapeDerivative   <mesh_Type>                                      fluidLin_Type;
-  //typedef VenantKirchhoffSolver  <mesh_Type>                                      solidLin_Type;
+    typedef OseenSolverShapeDerivative   <mesh_Type>                                fluidLin_Type;
     typedef StructuralSolver  <mesh_Type>                                           solidLin_Type;
     typedef boost::shared_ptr<fluid_Type>                                           fluidPtr_Type;
     typedef boost::shared_ptr<solid_Type>                                           solidPtr_Type;
@@ -292,19 +290,6 @@ public:
                              solidPtr_Type::value_type::Function const& w0,
                              fluidPtr_Type::value_type::function_Type const& df0 );
 
-    //! Initialize all the quantities required by FSI
-    /*!
-     * This method has been designed to initialize all the quantities of the FSI problem.
-     * @param fluidVelocityAndPressure velocity and pressure of the fluid
-     * @param fluidDisplacement displacement of the fluid
-     * @param solidVelocity velocity of the solid
-     * @param solidDisplacement displacement of the solid
-     */
-//     virtual void initializeTimeAdvance( const vectorPtr_Type& fluidVelocityAndPressure,
-//                              const vectorPtr_Type& fluidDisplacement,
-//                              const vectorPtr_Type& solidVelocity,
-//                              const vectorPtr_Type& solidDisplacement );
-
     //@}
 
 
@@ -317,6 +302,9 @@ public:
     virtual void applyBoundaryConditions() {}
     //@}
 
+
+    //!@name Factory Methods
+    //@{
     static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear(){ return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >(); }
 
     static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear(){ return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >(); }
@@ -324,22 +312,11 @@ public:
 
     static StructuralMaterial< FSIOperator::mesh_Type >*    createNeoHookeanMaterialNonLinear(){ return new NeoHookeanMaterialNonLinear< FSIOperator::mesh_Type >(); }
 
-    //!@name Factory Methods
-    //@{
-    //! Factory method for the linear elasticity solver
-
-    //static VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSIOperator::mesh_Type, SolverAztecOO >(); }
-
     //@}
 
 
     //!@name Public Methods
     //@{
-    //!Initializes the BDF which should handle the fluid time discretization
-    /**
-       \todo{a general time advancing class should be used everywhere}
-     */
-    //void initializeBDF( const vector_Type& un );
 
     //!@name Public Methods
     //@{
@@ -541,7 +518,7 @@ public:
     const FESpace<mesh_Type, MapEpetra>& mmFESpace()              const { return *M_mmFESpace; }
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > mmFESpacePtr() const { return M_mmFESpace; }
     //!getter for the harmonic extension solution
-    /*virtual*/ const vector_Type& meshDisp()                         const { return *M_ALETimeAdvance->stencil()[0]; }
+    const vector_Type& meshDisp()                         const { return *M_ALETimeAdvance->stencil()[0]; }
     //!getter for the harmonic extension solution of the previous time step
     const         vector_Type& dispFluidMeshOld()                 const { return *M_dispFluidMeshOld; }
     //!getter for the mesh velocity
@@ -775,57 +752,15 @@ public:
        \small initializes the current solution vector. Note: this is not sufficient for the correct initialization
        of bdf!
     */
-    virtual void initialize( std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec)
-    {
-        //*M_un=*u0Vec[0];
+    virtual void initialize( std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec);
 
-        //TEMPORARY TEST INITIALIZATION//
-        std::vector<vectorPtr_Type> structureDisp(0);
-        std::vector<vectorPtr_Type> fluidVel(0);
-        std::vector<vectorPtr_Type> fluidDisp(0);
-        for(UInt i=0; i< M_solidTimeAdvance->order(); ++i)
-        {
-            structureDisp.push_back(ds0Vec[i]);
-        }
-        for(UInt i=0; i< M_fluidTimeAdvance->order(); ++i)
-        {
-            fluidVel.push_back(u0Vec[i]);
-        }
-        for(UInt i=0; i< M_ALETimeAdvance->order(); ++i)
-        {
-            fluidDisp.push_back(df0Vec[i]);
-        }
-        initializeTimeAdvance(fluidVel, structureDisp, fluidDisp);
-        //END OF TEMPORARY TEST INITIALIZATION//
-    }
-
-    //! Initialize the fluid solution given a vector (calls setSolution)
-
-
-    //! sets the solution time derivative vector by copy
-    //void setSolutionDerivative( vectorPtr_Type& lambdaDot ) { M_lambdaDot = lambdaDot; }
 
     //! Setter for the time derivative of the interface displacement
     void setSolutionDerivative( const vector_Type& solutionDerivative ) { M_lambdaDot.reset( new vector_Type( solutionDerivative ) ); }
 
+    //! Setup of the TimeAdvance classes
     void
     setupTimeAdvance( const dataFile_Type& dataFile );
-
-    //@}
-
-//     void setDerReducedFluidLoadToStructure   ( vector_Type &dload, UInt type = 0 );
-//     void setDerStructureAccToReducedFluid    ( vector_Type &acc,   UInt type = 0 );
-
-//     void setReducedLinFluidBC                (fluidBchandlerPtr_Type bc_dredfluid);
-//     void setInvReducedLinFluidBC             (fluidBchandlerPtr_Type bc_invdredfluid);
-
-//     void setBCh_fluid             ( const fluidBchandlerPtr_Type& BCh_fluid)       { M_BCh_u      = BCh_fluid; }
-//     void setBCh_HarmonicExtension ( const fluidBchandlerPtr_Type& BCh_mesh)        { M_BCh_mesh   = BCh_mesh; }
-//     void setBCh_fluidDer          ( const fluidBchandlerPtr_Type& BCh_fluidDer)    { M_BCh_du     = BCh_fluidDer; }
-//     void setBCh_fluidDerInv       ( const fluidBchandlerPtr_Type& BCh_fluidDerInv) { M_BCh_du_inv = BCh_fluidDerInv; }
-//     void setBCh_solid             ( const solidBchandlerPtr_Type& BCh_solid)       { M_BCh_d      = BCh_solid; }
-//     void setBCh_solidDer          ( const solidBchandlerPtr_Type& BCh_solidDer)    { M_BCh_dz     = BCh_solidDer; }
-//     void setBCh_solidDerInv       ( const solidBchandlerPtr_Type& BCh_solidDerInv) { M_BCh_dz_inv = BCh_solidDerInv; }
 
     //@}
 
@@ -910,11 +845,6 @@ protected:
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_solidTimeAdvance;
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_ALETimeAdvance;
 
-
-//     fluidLinPtr_Type                                     M_fluidLin;
-//     solidLinPtr_Type                                     M_solidLin;
-
-    //boost::shared_ptr<TimeAdvanceBDF<vector_Type> >             M_bdf;
 
     dataFile_Type                                     M_dataFile;
 

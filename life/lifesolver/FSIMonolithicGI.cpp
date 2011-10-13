@@ -105,7 +105,6 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
                                       *M_monolithicMap,
                                       fluxes));
     M_solid.reset(new solid_Type());
-    //M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ));
 
     M_solid->setup(M_data->dataSolid(),
                    M_dFESpace,
@@ -132,7 +131,6 @@ FSIMonolithicGI::updateSystem()
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
     M_un.reset(new vector_Type(*M_uk));
     super_Type::updateSystem();
-    //M_meshMotion->setDisplacement(*meshDispDiff);//M_disp is set to the total mesh disp.`
 }
 
 void
@@ -161,19 +159,13 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map(), Repeated ));
         meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
-
-        //meshDispOld->subset(*M_un, offset);
-
-        //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
-        //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
-        //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
-        //Matteo: per Paolo meshDisp io lo chiamerei meshVelocity da qua in poi !!!!
+        //meshDisp->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
+        //meshDisp->subset(*M_un, offset); //if we linearize in a semi-implicit way
 
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
             *meshVel = M_ALETimeAdvance->velocity( );
             M_ALETimeAdvance->extrapolation(*mmRep);
-            // mmRep.reset(new vector_Type(M_ALETimeAdvance->extrapolation(), Repeated)); // just to repeat dispDiff. No way witout copying?
             moveMesh(*mmRep);// re-initialize the mesh points
             if( iter==0 )
             {
@@ -195,14 +187,10 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
                 *mmRep = *meshDisp;
             }
             *meshVel = M_ALETimeAdvance->velocity();
-            //M_meshMotion->setDisplacement(*meshDisp);//M_disp is set to the total mesh disp.
-            //mmRep.reset(new vector_Type(M_mmFESpace->map(), Repeated));// just to repeat dispDiff. No way witout copying?
             moveMesh(*mmRep);// re-initialize the mesh points
-            //*meshDispDiff -= *meshDispOld;//relative displacement
         }
 
         *mmRep = *meshVel*(-1.);
-
         interpolateVelocity(*mmRep, *M_beta);
 
         vectorPtr_Type fluid(new vector_Type(M_uFESpace->map()));
@@ -220,7 +208,6 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         assembleFluidBlock( iter, M_uk );
         assembleMeshBlock ( iter );
         *M_rhsFull = *M_rhs;
-        //M_rhs->spy("rhs");
 
         M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
         M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
@@ -310,7 +297,6 @@ void FSIMonolithicGI::initialize( fluidPtr_Type::value_type::function_Type const
     M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->dataTime()->time());
 
     M_un->add(df, M_solidAndFluidDim+dimInterface());
-    //M_meshMotion->setDisplacement(df);
 }
 
 // void
@@ -429,19 +415,6 @@ void FSIMonolithicGI::shapeDerivatives( matrixPtr_Type sdMatrix )
 
     vectorPtr_Type meshVelRep(new vector_Type(M_mmFESpace->map(), Repeated));
 
-    //    UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
-//     if ( M_domainVelImplicit )
-//     {
-//         vector_Type meshDispOld(M_mmFESpace->map());
-//         meshVel->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
-//         meshDispOld.subset(*M_un, offset);
-//         *meshVel -= meshDispOld;
-//     }
-//     else
-//     {
-//         meshVel->subset(*M_un, offset); //if the conv. term is to be condidered partly explicitly
-//         *meshVel -= M_meshMotion->dispOld();
-//     }
     *meshVelRep=M_ALETimeAdvance->velocity();
 
     if ( M_convectiveTermDer )
@@ -451,20 +424,15 @@ void FSIMonolithicGI::shapeDerivatives( matrixPtr_Type sdMatrix )
     else
         un.subset(*M_un, 0);
 
-    //*meshVel *= alpha;
-    //vectorPtr_Type meshVelRep(new vector_Type(M_mmFESpace->map(), Repeated));
-    //*meshVelRep = *meshVel;
-
     uk.subset(*M_uk, 0);
-    //vector_Type dvfm(M_uFESpace->map(), Repeated);
-    vector_Type vfm(M_uFESpace->map(), Repeated);
+    vector_Type veloFluidMesh(M_uFESpace->map(), Repeated);
     this->transferMeshMotionOnFluid(*meshVelRep, vfm);
 
     M_fluid->updateShapeDerivatives(*sdMatrix,
                                     alpha,
-                                    un,//un if !domainVelImplicit, otherwise uk
+                                    un,//un if !M_convectiveTermDer, otherwise uk
                                     uk,//uk
-                                    vfm, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
+                                    veloFluidMesh, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
                                     M_solidAndFluidDim+M_interface*nDimensions,
                                     *M_uFESpace,
                                     M_domainVelImplicit,

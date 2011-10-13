@@ -859,8 +859,6 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     //This method call the M_material computeStiffness
     computeMatrix(M_systemMatrix, solution, 1.);
 
-//    //M_systemMatrix->globalAssemble();
-//    matrix_Type tmpMatrBC(*M_systemMatrix);
 
     M_Displayer->leaderPrint("    S- Updating the boundary conditions ... \t");
     LifeChrono chrono;
@@ -878,8 +876,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     {
         chrono.start();
 
-        //M_systemMatrix->globalAssemble();
-        matrix_Type tmpMatrBC(*M_systemMatrix);
+        matrix_Type matrixFull(*M_systemMatrix);
 
         if(iter==0)
         {
@@ -887,9 +884,9 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
             bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
         }
 
-        bcManageMatrix( tmpMatrBC, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
+        bcManageMatrix( matrixFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
 
-        residual  = tmpMatrBC * solution;
+        residual  = matrixFull * solution;
         residual -= *M_rhs;
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );

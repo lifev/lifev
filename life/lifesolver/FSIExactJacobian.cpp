@@ -232,13 +232,6 @@ void FSIExactJacobian::registerMyProducts( )
 
     solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &super::createVenantKirchhoffLinear );
     solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonlinearVenantKirchhoff", &super::createVenantKirchhoffNonLinear );
-
-    //These were the lines before the implementation of the StructuralSolver class.
-
-//    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &super::createVenantKirchhoffLinear );
-
-    //solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
-    //solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
 }
 
 // ===================================================
@@ -305,14 +298,6 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
         M_meshMotion->iterate(*M_BCh_mesh);
         M_meshMotion->updateDispDiff();
 
-//         transferMeshMotionOnFluid(M_meshMotion->disp(),
-//                                   veloFluidMesh());
-//           veloFluidMesh()    -= dispFluidMeshOld();
-//           veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
-
-            //    MATTEO:
-          //this->veloFluidMesh() = this->M_ALETimeAdvance->velocity( M_meshMotion->disp() );
-
 
             // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
             // the value of the displacement for some points
@@ -322,28 +307,6 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
         {
             *M_beta *= 0.;
             vector_Type meshDisp( M_meshMotion->disp(), Repeated );
-            //this->moveMesh(meshDisp);
-
-	    // vector_Type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
-            //this->interpolateVelocity(meshDispDiff, *M_beta);
-
-	    //Matteo
-	    //  beta^k= (u^*- w^k)
-	    //  where u^* is u^k for implicit scheme for greater 0,
-	    //  otherwise it is  extrapolated  (for GCE and first iter of implicit scheme)
-	    //  move this term after compute of fluid velocity;
-
-	    //  commited this term:
-            //*M_beta = this->veloFluidMesh();
-	    //*M_beta *= -1;
-
-            //if(iter==0)
-	        //this->M_fluidTimeAdvance->extrapolation(*M_beta);
-//             else
-//                 *M_beta = *this->M_fluid->solution(); /*Only explicit u*!*/
-	        // *M_beta += *this->M_fluid->solution();
-
-	     //Matteo
 
             if( iter==0 )
             {
@@ -362,10 +325,6 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
             M_fluidTimeAdvance->extrapolation(*M_beta);//explicit
             *M_beta -= veloFluidMesh();//implicit
 
-//             vector_Type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
-//             this->interpolateVelocity(meshDispDiff, *M_beta);
-//             *M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
-//             *M_beta  += *this->M_un;
 
             if (recomputeMatrices)
             {
@@ -419,9 +378,6 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     if (this->isSolid())
     {
         this->M_solid->iterate( M_BCh_d );
-        //         this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
-        //         this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
-        //         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
     M_epetraWorldComm->Barrier();
@@ -434,7 +390,6 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     {
         this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
         this->transferSolidOnInterface( this->M_solidTimeAdvance->velocity( this->M_solid->displacement()), lambdaDotSolidUnique );
-        //        this->transferSolidOnInterface(this->M_solid->velocity(),      lambdaDotSolidUnique);
         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
@@ -445,10 +400,6 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     chronoInterface.stop();
     this->displayer().leaderPrintMax("      Interface transfer total time:           ", chronoInterface.diffCumul() );
 
-//     if ( false && this->isSolid() )
-//     {
-//         //this->solid().postProcess();
-//     }
 
 // possibly unsafe when using more cpus, since both has repeated maps
 

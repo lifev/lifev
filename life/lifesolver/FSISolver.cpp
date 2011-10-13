@@ -279,17 +279,7 @@ FSISolver::initialize(std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Ty
     {
 
         M_oper->initializeTimeAdvance(u0, ds0, df0); // couplingVariableMap()//copy
-        //   M_oper->initializeBDF(*u0);
     }
-//     if (!v0.get())
-//         M_oper->setSolutionDerivative(*u0); // couplingVariableMap()//copy
-//     //        M_oper->setSolutionDerivative(u0); // couplingVariableMap()//copy
-//     else
-//         M_oper->setSolutionDerivative(*v0);
-
-
-    //M_oper->setSolutionDerivative(v0);
-    //M_oper->setupBDF(*M_lambda);
 }
 
 void

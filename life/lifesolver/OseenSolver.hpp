@@ -248,7 +248,7 @@ public:
     //! Update the source term
     /*!
      @param sourceTerm
-    */ 
+    */
     void updateSourceTerm(const source_Type& source );
 
     //! Update convective term, boundary condition and solve the linearized ns system
@@ -690,9 +690,6 @@ protected:
     //! Right hand side for the velocity component
     vectorPtr_Type                 M_rightHandSideNoBC;
 
-    //! Global right hand side
-    //    vectorPtr_Type                 M_rightHandSideFull;
-
     //! Global solution
     vectorPtr_Type                 M_solution;
 
@@ -770,7 +767,6 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_matrixNoBC             ( ),
         M_matrixStabilization    ( ),
         M_rightHandSideNoBC      ( ),
-        //        M_rightHandSideFull      ( ),
         M_solution               ( new vector_Type( M_localMap ) ),
         M_residual               ( M_localMap ),
         M_linearSolver           ( communicator ),
@@ -908,13 +904,6 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_reuseStabilization     ( false ),
         M_resetStabilization     ( false ),
         M_iterReuseStabilization ( -1 ),
-//        M_ipStabilization        ( M_velocityFESpace.mesh(),
-//                                   M_velocityFESpace.dof(),
-//                                   M_velocityFESpace.refFE(),
-//                                   M_velocityFESpace.feBd(),
-//                                   M_velocityFESpace.qr(),
-//                                   0., 0., 0.,
-//                                   M_oseenData->viscosity() ),
         M_betaFunction           ( 0 ),
         M_divBetaUv              ( false ),
         M_stiffStrain            ( false ),
