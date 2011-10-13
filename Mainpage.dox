@@ -126,9 +126,18 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
             or viscoelastic structure. The presence of tapering in the arterial geometry can also be taken into account.
 
 
-        <li> <b>3D Fluid-Structure Interaction solver:</b> [TODO: 2-3 lines description by Paolo Crosetto]
-
-
+        <li> <b>3D Fluid-Structure Interaction (FSI) solver:</b>
+        <li> <b> The FSI model consists of Navier--Stokes equations coupled with an elasticity equation by imposing the continuity of the velocity
+        and of the forces at the interface.
+        In LifeV both partitioned and monolithic FSI solver are implemented. For the formers the coupling obtained with separate fluid and structure
+        solver iterations, while for the latters the fully coupled
+        matrix is assembled and solved using a single "monolithic" solver. Concerning the partitioned strategies the
+        available choices are Dirichlet--Neumann and Robin--Neumann fixed--point algorithms, or the Newton algorithm applied to the
+        "Dirichlet--Neumann" fixed--point formulation. Various monolithic solver variants are obtained depending on the way the
+        various nonlinearities (due mainly to the convective term of the fluid equations and to the domain motion) are treated. The main difference is
+        among the geometric explicit (GE), for which the geometry is extrapolated from the previous time steps, and the geometric implicit (GI).
+        Many parallel preconditioners for the monolithic problem are available, featuring the splitting of the matrix into several factors.
+        </b>
 
         <li> <b>Heart electrophysiological solver:</b>
           Both bidomain and monodomain models are available as models for the electrophysiology behavior of cardiac tissue.
