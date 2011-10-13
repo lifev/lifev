@@ -203,7 +203,7 @@ SolverBelos::solve( multiVector_Type& solution )
 Real
 SolverBelos::computeResidual( vector_Type& solution )
 {
-    if ( M_problem->getOperator() == null || M_problem->getRHS() == null )
+    if ( M_problem->getOperator() == Teuchos::null || M_problem->getRHS() == Teuchos::null )
     {
         M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the operator or the rhs is not set!\n" );
         return -1;
@@ -278,7 +278,7 @@ SolverBelos::buildPreconditioner()
         }
         condest = M_leftPreconditioner->condest();
         Teuchos::RCP<operator_Type> leftPrec( M_leftPreconditioner->preconditioner(), false );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( leftPrec ) );
         M_problem->setLeftPrec( belosPrec );
         chrono.stop();
         if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Left preconditioner computed in " , chrono.diff(), " s." );
@@ -300,7 +300,7 @@ SolverBelos::buildPreconditioner()
         }
         condest = M_rightPreconditioner->condest();
         Teuchos::RCP<operator_Type> rightPrec( M_rightPreconditioner->preconditioner(), false );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( rightPrec ) );
         M_problem->setRightPrec( belosPrec );
         chrono.stop();
         if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Right preconditioner computed in " , chrono.diff(), " s." );
@@ -363,7 +363,7 @@ void SolverBelos::setMatrix( matrixPtr_Type& matrix )
 void
 SolverBelos::setOperator( Epetra_Operator& oper )
 {
-    M_problem->setOperator( rcp( &oper ) );
+    M_problem->setOperator( Teuchos::rcp( &oper ) );
 }
 
 void
@@ -388,7 +388,7 @@ SolverBelos::setPreconditioner( preconditionerPtr_Type& preconditioner, PrecAppl
         // If a right Epetra_Operator exists it must be deleted
         if ( M_problem->isRightPrec() )
         {
-            M_problem->setRightPrec( Teuchos::RCP<operator_Type>( null ) );
+            M_problem->setRightPrec( Teuchos::RCP<operator_Type>( Teuchos::null ) );
         }
 
         M_rightPreconditioner = preconditioner;
@@ -398,7 +398,7 @@ SolverBelos::setPreconditioner( preconditionerPtr_Type& preconditioner, PrecAppl
         // If a left Epetra_Operator exists it must be deleted
         if ( M_problem->isLeftPrec() )
         {
-            M_problem->setLeftPrec( Teuchos::RCP<operator_Type>( null ) );
+            M_problem->setLeftPrec( Teuchos::RCP<operator_Type>( Teuchos::null ) );
         }
         M_leftPreconditioner  = preconditioner;
     }
@@ -413,7 +413,7 @@ SolverBelos::setPreconditioner( operatorPtr_Type& preconditioner, PrecApplicatio
         M_rightPreconditioner.reset();
 
         Teuchos::RCP<operator_Type> rightPrec=Teuchos::rcp( preconditioner );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( rightPrec ) );
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( rightPrec ) );
         M_problem->setRightPrec( belosPrec );
     }
     else
@@ -422,7 +422,7 @@ SolverBelos::setPreconditioner( operatorPtr_Type& preconditioner, PrecApplicatio
         M_leftPreconditioner.reset();
 
         Teuchos::RCP<operator_Type> leftPrec=Teuchos::rcp( preconditioner );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = rcp( new Belos::EpetraPrecOp( leftPrec ) );
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( leftPrec ) );
         M_problem->setLeftPrec( belosPrec );
     }
 }
