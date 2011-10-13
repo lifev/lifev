@@ -47,7 +47,6 @@
 #include <life/lifesolver/ADRAssembler.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifemesh/RegionMesh3D.hpp>
-//#include <life/lifefem/BCVector.hpp>
 
 namespace LifeV {
 
@@ -55,7 +54,7 @@ namespace LifeV {
 /*!
  *  @author Gwenol Grandperrin
  *
- *  The PreconditionerYosida class uses the Yosida method as a preconditioner
+ *  The PreconditionerYosida is inspired by the Yosida method
  */
 class PreconditionerYosida:
         public PreconditionerComposition
@@ -80,22 +79,18 @@ public:
     typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
     typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
-    typedef boost::shared_ptr<BCHandler>            BCHandlerPtr_Type;
 
     typedef Teuchos::ParameterList                  list_Type;
-
-    // BC
-    typedef entityFlag_Type bcFlag_Type;
     //@}
 
 
     //! @name Constructors, destructor
     //@{
     //! default constructor.
-    PreconditionerYosida const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerYosida( const  boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
-    // constructor from matrix A.
-    // @param A EpetraMatrix<double> matrix upon which construct the preconditioner
+    //! constructor from matrix A.
+    //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
     //    IfpackPreconditioner( matrixPtr_Type& A );
 
     //! default destructor
@@ -113,8 +108,7 @@ public:
     static void createYosidaList( list_Type&         list,
                                   const GetPot&      dataFile,
                                   const std::string& section,
-                                  const std::string& subSection = "PCD",
-                                  const bool& verbose = true );
+                                  const std::string& subSection = "Yosida" );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();
@@ -145,32 +139,11 @@ public:
     //! Setter for the FESpace
     /*!
         This method set the pointer for the FESpaces needed
-        for the construction of the operator Mp.
+        for the construction of the operators Ap, Fp and Mp.
         @param uFESpace Boost::shared_ptr on the FESpace for the velocity
         @param pFESpace Boost::shared_ptr on the FESpace for the pressure
      */
     void setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
-
-    //! Setter for the timestep
-    /*!
-        This method set the timestep used to compute Fp.
-        @param timestep Timestep used to compute the solution of the Navier-Stokes equations
-     */
-    void setTimestep( const Real& timestep );
-
-    //! Setter for the viscosity
-    /*!
-        This method set the viscosity used to compute Fp.
-        @param viscosity Viscosity used to compute the solution of the Navier-Stokes equations
-     */
-    void setViscosity( const Real& viscosity );
-
-    //! Setter for the density
-    /*!
-        This method set the density used to compute Fp.
-        @param density Density used to compute the solution of the Navier-Stokes equations
-     */
-    void setDensity( const Real& density );
 
     //@}
 
@@ -179,25 +152,16 @@ protected:
     int         M_velocityBlockSize;
     int         M_pressureBlockSize;
 
-    FESpacePtr_Type M_uFESpace;
-    FESpacePtr_Type M_pFESpace;
-
-    Real        M_timestep;
-    Real        M_viscosity;
-    Real        M_density;
-
-    ADRAssembler<mesh_Type,matrixBlock_Type,vector_Type> M_adrVelocityAssembler;
-
     // todo: Remove the member dataFile (bad programmation)
     GetPot      M_dataFile;
     string      M_fluidPrec;
-    string      M_fluidPrecDataSection;
-    string      M_pressureMassPrec;
-    string      M_pressureMassPrecDataSection;
+    string      M_fluidDataSection;
+    string      M_schurPrec;
+    string      M_schurDataSection;
 
 private:
     PreconditionerYosida( const PreconditionerYosida& P ):
-    PreconditionerComposition( P.M_comm ){}
+        PreconditionerComposition( P.M_comm ){}
     PreconditionerYosida( const boost::shared_ptr<PreconditionerYosida>& /*P*/ ){}
 
 };
@@ -205,9 +169,9 @@ private:
 inline Preconditioner* createYosida(){ return new PreconditionerYosida(); }
 namespace
 {
-	static bool registerYosida = PRECFactory::instance().registerProduct( "Yosida", &createYosida );
+    static bool registerYosida = PRECFactory::instance().registerProduct( "Yosida", &createYosida );
 }
 
 } // namespace LifeV
 
-#endif /* PRECONDITIONERPRESSURECORRECTION_HPP */
+#endif /* PRECONDITIONERYOSIDA_HPP */
