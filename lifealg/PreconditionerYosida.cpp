@@ -48,8 +48,12 @@ namespace LifeV {
 PreconditionerYosida::PreconditionerYosida( const  boost::shared_ptr<Epetra_Comm>& comm ):
     PreconditionerComposition ( comm ),
     M_velocityBlockSize       ( -1 ),
-    M_pressureBlockSize       ( -1 )
+    M_pressureBlockSize       ( -1 ),
+    M_timestep                ( 1.0 )
 {
+
+    M_uFESpace.reset();
+    M_pFESpace.reset();
 
 }
 
@@ -138,7 +142,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      */
     if ( verbose ) std::cout << std::endl << "      >Getting the structure of A... ";
     timer.start();
-    MatrixBlockView F, Bt, B, C;
+    MatrixBlockView F, Bt, B, C, M;
     //oper.getMatrixBlockView( 0, 0, F );
     F.setup( 0, 0, blockNumRows[0], blockNumColumns[0], *oper );
 
@@ -212,6 +216,12 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      */
     if ( verbose ) std::cout << "       Block 1 (Schur)" << std::endl;
     timer.start();
+    // Computing the mass matrix
+    boost::shared_ptr<matrixBlock_Type> massMat( new matrixBlock_Type( map ) );
+    massMat->setBlockStructure( blockNumRows, blockNumColumns );
+    massMat->getMatrixBlockView( 0, 0, M );
+    M_adrPressureAssembler.addMass( massMat, 1.0/M_timestep, M.firstRowIndex(), M.firstColumnIndex() );
+
     boost::shared_ptr<matrixBlock_Type> P1c( new matrixBlock_Type( map ) );
 
     boost::shared_ptr<matrixBlock_Type> BBlockMat( new matrixBlock_Type( map ) );
@@ -219,18 +229,18 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     BBlockMat->getMatrixBlockView( 1, 0, B21 );
     MatrixBlockUtils::copyBlock( B, B21 );
     BBlockMat->globalAssemble();
-    boost::shared_ptr<matrixBlock_Type> invDBlockMat( new matrixBlock_Type( map ) );
-    invDBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
-    invDBlockMat->getMatrixBlockView( 0, 0, B11 );
-    MatrixBlockUtils::createInvLumpedBlock( F, B11 );
-    *invDBlockMat *= -1.0;
-    invDBlockMat->globalAssemble();
+    boost::shared_ptr<matrixBlock_Type> invLumpedMassBlockMat( new matrixBlock_Type( map ) );
+    invLumpedMassBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
+    invLumpedMassBlockMat->getMatrixBlockView( 0, 0, B11 );
+    MatrixBlockUtils::createInvLumpedBlock( M, B11 );
+    *invLumpedMassBlockMat *= -1.0;
+    invLumpedMassBlockMat->globalAssemble();
     boost::shared_ptr<matrixBlock_Type> tmpResultMat( new matrixBlock_Type( map ) );
     BBlockMat->multiply( false,
-                         *invDBlockMat, false,
+                         *invLumpedMassBlockMat, false,
                          *tmpResultMat, true );
     BBlockMat.reset();
-    invDBlockMat.reset();
+    invLumpedMassBlockMat.reset();
     boost::shared_ptr<matrixBlock_Type> BtBlockMat( new matrixBlock_Type( map ) );
     BtBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
     BtBlockMat->getMatrixBlockView( 0, 1, B12 );
@@ -340,6 +350,16 @@ PreconditionerYosida::setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFES
     // We setup the size of the blocks
     M_velocityBlockSize = uFESpace->fieldDim() * uFESpace->dof().numTotalDof();
     M_pressureBlockSize = pFESpace->dof().numTotalDof();
+
+    M_uFESpace = uFESpace;
+    M_pFESpace = pFESpace;
+    M_adrVelocityAssembler.setup( uFESpace, uFESpace ); // u,beta=u
+}
+
+void
+PreconditionerYosida::setTimestep( const Real& timestep )
+{
+    M_timestep = timestep;
 }
 
 } // namespace LifeV

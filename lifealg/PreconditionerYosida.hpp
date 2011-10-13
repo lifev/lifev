@@ -145,19 +145,32 @@ public:
      */
     void setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
 
+    //! Setter for the timestep
+    /*!
+        This method set the timestep used to compute the approximate Schur complement.
+        @param timestep Timestep used to compute the solution of the Navier-Stokes equations
+     */
+    void setTimestep( const Real& timestep );
+
     //@}
 
 protected:
 
-    int         M_velocityBlockSize;
-    int         M_pressureBlockSize;
+    int             M_velocityBlockSize;
+    int             M_pressureBlockSize;
+
+    FESpacePtr_Type M_uFESpace;
+    FESpacePtr_Type M_pFESpace;
+    Real            M_timestep;
+
+    ADRAssembler<mesh_Type,matrixBlock_Type,vector_Type> M_adrVelocityAssembler;
 
     // todo: Remove the member dataFile (bad programmation)
-    GetPot      M_dataFile;
-    string      M_fluidPrec;
-    string      M_fluidDataSection;
-    string      M_schurPrec;
-    string      M_schurDataSection;
+    GetPot          M_dataFile;
+    string          M_fluidPrec;
+    string          M_fluidDataSection;
+    string          M_schurPrec;
+    string          M_schurDataSection;
 
 private:
     PreconditionerYosida( const PreconditionerYosida& P ):
