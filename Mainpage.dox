@@ -93,8 +93,13 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
 
     <BR>
     \subsection algebraicSolver Algebraic solvers and preconditioners
-    [TODO: 4-5 lines description by Gwenol Grandperrin]
-
+    Linear systems are solved using the preconditioned GMRES method. LifeV provides the following preconditioners:
+    <ul>
+        <li>Additive Schwarz;
+        <li>Multilevel Schwarz;
+        <li>Multigrid preconditioner;
+    </ul>
+    It is also possible to develop new preconditioners using the abstract class in Preconditioner.hpp.
 
     <BR>
     \subsection physicalSolver Physical solvers
