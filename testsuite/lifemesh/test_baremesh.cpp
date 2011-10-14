@@ -212,7 +212,7 @@ int main(int argc, char** argv)
     watermarks[ 0 ] = 10;
     watermarks[ 1 ] = 15;
     // change flags according to marker iD
-    SetFlagAccordingToWatermarks<mesh_Type::EdgeType> changeFlags( EntityFlags::CUTTED, watermarks );
+    SetFlagAccordingToWatermarks  changeFlags( EntityFlags::CUTTED, watermarks );
     aMesh.edgeList.changeAccordingToFunctor( changeFlags );
     std::cout << "Number of cutted edges (should be 3) " <<
                      aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet) << std::endl;
@@ -220,7 +220,7 @@ int main(int argc, char** argv)
     aMesh.edge(  0 ).setMarker( 10 );
     aMesh.edge(  5 ).setMarker( 12 );
     aMesh.edge( 10 ).setMarker( 15 );
-    SetFlagAccordingToMarkerRanges<mesh_Type::EdgeType > changer( Flag::turnOn ); //I may use the default constructor
+    SetFlagAccordingToMarkerRanges changer( Flag::turnOn ); //I may use the default constructor
     changer.insert( std::make_pair( 10, 12 ),EntityFlags::INTERNAL_INTERFACE );
     changer.insert( std::make_pair( 15, 18 ),EntityFlags::CUTTED );
     aMesh.edgeList.changeAccordingToFunctor( changer );
