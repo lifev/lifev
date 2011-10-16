@@ -2280,7 +2280,7 @@ public:
      *  then the y-displacements etc.
      *
      *  The VECTOR object must comply with lifeV distributed vector concept EpetraVector
-     *  in particular it must have the methods isPresent(Uint i).
+     *  in particular it must have the methods isGlobalIDPresent(Uint i).
      *
      *  @author Miguel Fernandez
      *  @date 11/2002
@@ -2410,7 +2410,7 @@ void MeshTransformer<REGIONMESH>::moveMesh( const VECTOR & disp, UInt dim )
         for ( UInt j = 0; j < nDimensions; ++j )
         {
             int globalId = pointList[i].id();
-            if ( disp.isPresent(globalId + dim*j))
+            if ( disp.isGlobalIDPresent(globalId + dim*j))
                 pointList[ i ].coordinate( j ) = M_pointList[ i ].coordinate( j ) +
                 disp[ j * dim + globalId ];
         }
