@@ -335,7 +335,7 @@ public:
     /**
      *  @return regionmesh marker id.
      */
-    markerID_Type marker() const { return M_marker.marker(); }
+    markerID_Type markerID() const { return M_marker.markerID(); }
 
     //! Number of elements in mesh.
     /**
@@ -469,7 +469,7 @@ public:
     /**
      *  @param marker id to be set.
      */
-    void setMarker( markerID_Type const & markerId ) { M_marker.setMarker ( markerId ); }
+    void setMarkerID( markerID_Type const & markerId ) { M_marker.setMarkerID ( markerId ); }
 
     //! Changes Current capacity of Volumes.
     /**
@@ -2382,7 +2382,7 @@ RegionMesh3D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
     out << "                      RegionMesh3D                " << std::endl;
     out << "**************************************************" << std::endl;
     out << "**************************************************" << std::endl;
-    out << " Global ID: " << this->id() << " Marker Flag: " << this->marker() << std::endl;
+    out << " Global ID: " << this->id() << " Marker Flag: " << this->markerID() << std::endl;
     //  out <<"Faces local to  volumes stored: "<<hasLocalFaces()<<std::endl;
     //out <<"Edges local to  volumes stored: "<<hasLocalEdges()<<std::endl;
     //out <<"Edges local to  faces   stored:"<<switches.test("FACEtoEDGE")<<std::endl;
@@ -3126,7 +3126,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
 
                     // gets the marker from the RegionMesh
 
-                    face.setMarker( this->marker() );
+                    face.setMarkerID( this->markerID() );
                     face.setBoundary(false);
                     addFace(face); //The id should be correct
                 }

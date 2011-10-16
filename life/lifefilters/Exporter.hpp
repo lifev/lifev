@@ -448,8 +448,8 @@ protected:
     UInt                        M_timeIndex;
     UInt                        M_save;
     bool                        M_multimesh;
-    bool                        M_printConnectivity;
     UInt                        M_timeIndexWidth;
+    bool                        M_printConnectivity;
     meshPtr_Type                M_mesh;
     int                         M_procId;
     std::string                 M_postfix;

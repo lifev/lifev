@@ -49,7 +49,7 @@ namespace LifeV
 
 /** InternalEntitySelector.
  *
- *  Functor class that tells whether an entity flag corresponds to an internal face
+ *  Functor class that tells whether an marker ID corresponds to an internal face
  *  @author Luca Formaggia
  *  @see SetFlagAccordingToWatermarks
  *
@@ -120,7 +120,7 @@ public:
 };
 }// end namespace Utility
 /** @defgroup MeshEntityFlagsChangers
- * Useful functors to change Entity Flags according to certain conditions
+ * Useful functors to change marker IDs according to certain conditions
  *
  * @todo Since all Mesh entities derive from a common base maybe the MeshEntity template
  * parameter may be eliminated!!
@@ -129,9 +129,9 @@ public:
  */
 //!Set the flags of a mesh entity according to predefined ranges
 /*!
-*  This utility allows to associate to ranges [markerID_Type a, markerID_Type b] an entity flag.
+*  This utility allows to associate to ranges [markerID_Type a, markerID_Type b] a marker ID.
 *  Then the operator ()(MeshEntitity const & e) will change the flag according to the following rule
-*  -# if e.marker falls in a stored range (a<=e.marker()<=b) the corresponding flag is used
+*  -# if e.marker falls in a stored range (a<=e.markerID()<=b) the corresponding flag is used
 *     with the given policy (which defaults to turnOn, so the flag is activated)
 *  -# otherwise the flag is left unchanged
 *
@@ -187,7 +187,7 @@ public:
   template<typename MeshEntity>
   void operator()(MeshEntity & e)const
   {
-      std::pair<flag_Type,bool> tmp=this->findFlag(e.marker());
+      std::pair<flag_Type,bool> tmp=this->findFlag(e.markerID());
       if (tmp.second) e.replaceFlag(M_flagPolicy(e.flag(),tmp.first));
   }
 private:
@@ -212,7 +212,7 @@ private:
  *  passed in the constructor and defaulted to Flag::turnOn
  *
  *  Example:
- *  I want to set the flag INTERNAL_INTERFACE to all faces with entity flag > 1000
+ *  I want to set the flag INTERNAL_INTERFACE to all faces with marker ID > 1000
  *
  * @code
     SetFlagAccordingToWatermark
@@ -220,7 +220,7 @@ private:
     // the last argument (turnOn) is not needed
     mesh.faceList.changeAccordingToFunctor(changer);
    @endcode
- *  I want to set the flag INTERNAL_INTERFACE to all faces with entity flag =12000
+ *  I want to set the flag INTERNAL_INTERFACE to all faces with marker ID =12000
  *  @code
     SetFlagAccordingToWatermark<std::equal_to<markerID_Type> >
                             changer(EntityFlags::INTERNAL_INTERFACE,12000,Flag::turnOn)
@@ -254,7 +254,7 @@ template<typename Policy=std::greater<markerID_Type> >
     template<typename MeshEntity>
        void operator()(MeshEntity & e)const
     {
-        if ( M_policy(e.marker(),M_watermark) ) e.replaceFlag(M_flagPolicy(e.flag(),M_flagToSet));
+        if ( M_policy(e.markerID(),M_watermark) ) e.replaceFlag(M_flagPolicy(e.flag(),M_flagToSet));
     }
     private:
     const flag_Type M_flagToSet;
@@ -275,7 +275,7 @@ template<typename Policy=std::greater<markerID_Type> >
  *  passed in the constructor and defaulted to Flag::turnOn
  *
  *  Example:
- *  I want to set the flag INTERNAL_INTERFACE to all faces with entity flag = 1000, 2000 and 3000
+ *  I want to set the flag INTERNAL_INTERFACE to all faces with marker ID = 1000, 2000 and 3000
  * @verbatim
    vector<markerID_Type> fl; fl.push_back(1000); fl.push_back(2000); fl.push_back(3000)
    SetFlagAccordingToWatermarks<face_Type> changer(INTERNAL_INTERFACE,fl,Flag::turnOn)
@@ -307,7 +307,7 @@ public:
       template<typename MeshEntity>
       void operator()(MeshEntity & e)const
       {
-          if (std::binary_search(M_watermarks.begin(),M_watermarks.end(),e.marker() ) )
+          if (std::binary_search(M_watermarks.begin(),M_watermarks.end(),e.markerID() ) )
               e.replaceFlag( M_flagPolicy(e.flag(),M_flagToSet) );
       }
 private:
@@ -343,7 +343,7 @@ ChangeMarkersAccordingToMap(MeshEntityList & entityList,
 {
     typedef std::map<UInt, UInt>::const_iterator it_type;
     for (it_type IT=locDof.begin(); IT!=locDof.end(); ++IT)
-        entityList[IT->second].setMarker(TimeAdvanceNewmarker);
+        entityList[IT->second].setMarkerID(TimeAdvanceNewmarker);
 }
 /** @}*/
 } // Namespace LifeV

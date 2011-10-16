@@ -382,7 +382,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
                     iv != mesh.volumeList.end(); ++iv )
             {
                 if ( iv->isMarkerUnset() )
-                    iv->setMarker( mesh.marker() );
+                    iv->setMarkerID( mesh.markerID() );
             }
         }
     }

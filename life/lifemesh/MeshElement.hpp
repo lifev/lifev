@@ -195,15 +195,15 @@ public:
      */
     bool setPointWithBoundaryCheck( ID const identity, point_Type const * point );
 
-    //! Sets the flag of a point
+    //! Sets the Marker ID of a point
     /*!
-    	Sets the flag to the stronger between the stored one and the one provided by the argument
-    	@param identity Identity of the point to be inserted
+    	Sets the Marker ID the stronger between the stored one and the one provided by the argument
+    	@param identity Elemental numbering of the point to be inserted
         @param point Point to be inserted
         @return TRUE if the point is set
-    	@warning A const_cast to M_points is done in order to change the flag
+    	@warning A const_cast to M_points is done
     */
-    markerID_Type setStrongerMarkerAtPoint( const ID& identity, markerID_Type const & flag );
+    markerID_Type setStrongerMarkerIDAtPoint( const ID& identity, markerID_Type const & flag ) const;
 
     //@}
 
@@ -390,9 +390,10 @@ bool MeshElement<GeoShape, PointType>::setPointWithBoundaryCheck( ID const ident
 }
 
 template <typename GeoShape, typename PointType>
-markerID_Type MeshElement<GeoShape, PointType>::setStrongerMarkerAtPoint( const ID& identity, markerID_Type const & flag )
+markerID_Type MeshElement<GeoShape, PointType>::setStrongerMarkerIDAtPoint( const ID& identity, markerID_Type const & flag )
+const
 {
-    return (const_cast<PointType *> ( M_points[identity]) ) -> setStrongerMarker(flag);
+    return (const_cast<PointType *> ( M_points[identity]) ) -> setStrongerMarkerID(flag);
 }
 
 }

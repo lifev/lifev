@@ -178,7 +178,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
     mesh.setMaxNumVolumes      ( numberElements, true );
     mesh.setMaxNumGlobalVolumes( numberElements );
 
-    mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
+    mesh.setMarkerID           ( regionFlag ); // Add Marker to list of Markers
 
     typedef typename RegionMesh3D<GeoShape, MC>::point_Type  point_Type;
     typedef typename RegionMesh3D<GeoShape, MC>::EdgeType    edge_Type;
@@ -228,7 +228,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
         pointerPoint->x() = x;
         pointerPoint->y() = y;
         pointerPoint->z() = z;
-        pointerPoint->setMarker( markerID_Type( ibc ) );
+        pointerPoint->setMarkerID( markerID_Type( ibc ) );
 
         mesh.localToGlobalNode().insert( std::make_pair( i, i ) );
         mesh.globalToLocalNode().insert( std::make_pair( i, i ) );
@@ -263,7 +263,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
             {
                 pointerFace->setPoint( j, mesh.point( p[ 0 ] ) );
             }
-            pointerFace->setMarker( markerID_Type( ibc ) );
+            pointerFace->setMarkerID( markerID_Type( ibc ) );
         }
         else // additional faces
         {
@@ -285,7 +285,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
         }
         ibc = faceHelpIterator->ibc;
         pointerFace  = &( mesh.addFace( false ) ); // INTERNAL FACE
-        pointerFace->setMarker( markerID_Type( ibc ) );
+        pointerFace->setMarkerID( markerID_Type( ibc ) );
         for ( UInt j = 0; j < GeoShape::GeoBShape::S_numPoints; j++ )
         {
             pointerFace->setPoint( j, mesh.point( p[ j ] ) ); // set face conn.
@@ -304,7 +304,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
             p[ j ] = bareMesh.edges( j, i );
         ibc = bareMesh.edgesMarkers[ i ];
         pointerEdge = &mesh.addEdge( true ); // Only boundary edges.
-        pointerEdge->setMarker( markerID_Type( ibc ) );
+        pointerEdge->setMarkerID( markerID_Type( ibc ) );
         for ( UInt j = 0; j < GeoShape::GeoBShape::GeoBShape::S_numPoints; j++ )
             pointerEdge->setPoint( j, mesh.point( p[ j ] ) ); // set edge conn.
     }
@@ -325,7 +325,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
         pointerVolume->setLocalId( i );
         for ( UInt j = 0; j < GeoShape::S_numPoints; j++ )
             pointerVolume->setPoint( j, mesh.point( p[ j ] ) );
-        pointerVolume->setMarker( markerID_Type( ibc ) );
+        pointerVolume->setMarkerID( markerID_Type( ibc ) );
         count++;
     }
     oStr << "size of the volume storage is " << sizeof( volume_Type ) * count / 1024. / 1024.
@@ -520,7 +520,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     mesh.setMaxNumVolumes      ( numberVolumes, true );
     mesh.setMaxNumGlobalVolumes( numberVolumes );
 
-    mesh.setMarker             ( regionFlag ); // Mark the region
+    mesh.setMarkerID            ( regionFlag ); // Mark the region
 
 
     typename RegionMesh3D<GeoShape, MC>::point_Type  * pointerPoint  = 0;
@@ -560,7 +560,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
 
                   //Boundary point. Boundary switch set by the mesh method.
 
-                    pointerPoint->setMarker( markerID_Type( ibc ) );
+                    pointerPoint->setMarkerID( markerID_Type( ibc ) );
                 }
                 else
                 {
@@ -570,7 +570,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
                 pointerPoint->x() = x;
                 pointerPoint->y() = y;
                 pointerPoint->z() = z;
-                pointerPoint->setMarker( markerID_Type( ibc ) );
+                pointerPoint->setMarkerID( markerID_Type( ibc ) );
 
                 pointerPoint->setId     ( i );
                 pointerPoint->setLocalId( i );
@@ -603,7 +603,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
 
                 pointerFace = &( mesh.addFace( true ) ); // Only boundary faces
 
-                pointerFace->setMarker( markerID_Type( ibc ) );
+                pointerFace->setMarkerID( markerID_Type( ibc ) );
                 pointerFace->setPoint( 0, mesh.point( p1 ) ); // set face conn.
                 pointerFace->setPoint( 1, mesh.point( p2 ) ); // set face conn.
                 pointerFace->setPoint( 2, mesh.point( p3 ) ); // set face conn.
@@ -629,7 +629,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
                 p1 -= idOffset; p2 -= idOffset; //get the 0-based numbering
 
                 pointerEdge = &mesh.addEdge( true ); // Only boundary edges.
-                pointerEdge->setMarker( markerID_Type( ibc ) );
+                pointerEdge->setMarkerID( markerID_Type( ibc ) );
                 pointerEdge->setPoint( 0, mesh.point( p1 ) ); // set edge conn.
                 pointerEdge->setPoint( 1, mesh.point( p2 ) ); // set edge conn.
             }
@@ -933,7 +933,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
     mesh.setMaxNumVolumes      ( numberVolumes, true );
     mesh.setMaxNumGlobalVolumes( numberVolumes );
 
-    mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
+    mesh.setMarkerID           ( regionFlag ); // Add Marker to list of Markers
 
     typedef typename RegionMesh3D<GeoShape, MC>::point_Type  point_Type;
     typedef typename RegionMesh3D<GeoShape, MC>::VolumeType VolumeType;
@@ -975,7 +975,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                     ++count;
                 // Boundary point. Boundary switch set by the mesh method.
                     pointerPoint = &mesh.addPoint( true );
-                    pointerPoint->setMarker( markerID_Type( ibc ) );
+                    pointerPoint->setMarkerID( markerID_Type( ibc ) );
                 }
 
                 else
@@ -988,7 +988,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 pointerPoint->x() = x;
                 pointerPoint->y() = y;
                 pointerPoint->z() = z;
-                pointerPoint->setMarker( markerID_Type( ibc ) );
+                pointerPoint->setMarkerID( markerID_Type( ibc ) );
 
                 mesh.localToGlobalNode().insert( std::make_pair( i, i ) );
                 mesh.globalToLocalNode().insert( std::make_pair( i, i ) );
@@ -1021,7 +1021,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                             mesh.point( p3 ).boundary() )
                     {
                         pointerFace = &( mesh.addFace( true ) ); // Boundary faces
-                        pointerFace->setMarker( markerID_Type( ibc ) );
+                        pointerFace->setMarkerID( markerID_Type( ibc ) );
                         pointerFace->setPoint( 0, mesh.point( p1 ) ); // set face conn.
                         pointerFace->setPoint( 1, mesh.point( p2 ) ); // set face conn.
                         pointerFace->setPoint( 2, mesh.point( p3 ) ); // set face conn.
@@ -1044,7 +1044,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
                     pointerFace = &( mesh.addFace( true ) ); // Only boundary faces
 
-                    pointerFace->setMarker( markerID_Type( ibc ) );
+                    pointerFace->setMarkerID( markerID_Type( ibc ) );
                     pointerFace->setPoint( 0, mesh.point( p1 ) ); // set face conn.
                     pointerFace->setPoint( 1, mesh.point( p2 ) ); // set face conn.
                     pointerFace->setPoint( 2, mesh.point( p3 ) ); // set face conn.
@@ -1059,7 +1059,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
               p3  = faceHelpIterator->i3;
               ibc = faceHelpIterator->ibc;
               pointerFace  = &( mesh.addFace( false ) ); // INTERNAL FACE
-              pointerFace->setMarker( markerID_Type( ibc ) );
+              pointerFace->setMarkerID( markerID_Type( ibc ) );
               pointerFace->setPoint( 0, mesh.point( p1 ) ); // set face conn.
               pointerFace->setPoint( 1, mesh.point( p2 ) ); // set face conn.
               pointerFace->setPoint( 2, mesh.point( p3 ) ); // set face conn.
@@ -1086,7 +1086,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                             mesh.point( p3 ).boundary() )
                     {
                         pointerFace = &( mesh.addFace( true ) ); // Boundary faces
-                        pointerFace->setMarker( markerID_Type( ibc ) );
+                        pointerFace->setMarkerID( markerID_Type( ibc ) );
                         pointerFace->setPoint( 0, mesh.point( p1 ) ); // set face conn.
                         pointerFace->setPoint( 1, mesh.point( p2 ) ); // set face conn.
                         pointerFace->setPoint( 2, mesh.point( p3 ) ); // set face conn.
@@ -1109,7 +1109,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 else
                 {
                     pointerFace = &( mesh.addFace( true ) ); // Only boundary faces
-                    pointerFace->setMarker( markerID_Type( ibc ) );
+                    pointerFace->setMarkerID( markerID_Type( ibc ) );
                     pointerFace->setPoint( 0, mesh.point( p1 ) ); // set face conn.
                     pointerFace->setPoint( 1, mesh.point( p2 ) ); // set face conn.
                     pointerFace->setPoint( 2, mesh.point( p3 ) ); // set face conn.
@@ -1128,7 +1128,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 p4 = faceHelpIterator->i4;
                 ibc = faceHelpIterator->ibc;
                 pointerFace = &( mesh.addFace( false ) ); // INTERNAL FACE
-                pointerFace->setMarker( markerID_Type( ibc ) );
+                pointerFace->setMarkerID( markerID_Type( ibc ) );
                 pointerFace->setPoint( 0, mesh.point( p1 ) ); // set face conn.
                 pointerFace->setPoint( 1, mesh.point( p2 ) ); // set face conn.
                 pointerFace->setPoint( 2, mesh.point( p3 ) ); // set face conn.
@@ -1147,7 +1147,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 myStream >> p1 >> p2 >> ibc;
                 p1 -= idOffset; p2 -= idOffset; //get the 0-based numbering
                 pointerEdge = &mesh.addEdge( true ); // Only boundary edges.
-                pointerEdge->setMarker( markerID_Type( ibc ) );
+                pointerEdge->setMarkerID( markerID_Type( ibc ) );
                 pointerEdge->setPoint( 0, mesh.point( p1 ) ); // set edge conn.
                 pointerEdge->setPoint( 1, mesh.point( p2 ) ); // set edge conn.
             }
@@ -1172,7 +1172,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 pointerVolume->setPoint( 1, mesh.point( p2 ) );
                 pointerVolume->setPoint( 2, mesh.point( p3 ) );
                 pointerVolume->setPoint( 3, mesh.point( p4 ) );
-                pointerVolume->setMarker( markerID_Type( ibc ) );
+                pointerVolume->setMarkerID( markerID_Type( ibc ) );
                 count++;
             }
             oStr << "size of the volume storage is " << sizeof( VolumeType ) * count / 1024. / 1024.
@@ -1202,7 +1202,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 pointerVolume->setPoint( 5, mesh.point( p6 ) );
                 pointerVolume->setPoint( 6, mesh.point( p7 ) );
                 pointerVolume->setPoint( 7, mesh.point( p8 ) );
-                pointerVolume->setMarker( markerID_Type( ibc ) );
+                pointerVolume->setMarkerID( markerID_Type( ibc ) );
 
                 count++;
             }
@@ -1600,7 +1600,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
 #endif
 
     // Add Marker to list of Markers
-    mesh.setMarker( regionFlag );
+    mesh.setMarkerID( regionFlag );
 
 
     std::vector<Real> x( 3 * numberNodes );
@@ -1794,7 +1794,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     for ( UInt i = 0; i < numberNodes; ++i )
     {
         pointerPoint = &mesh.addPoint( isonboundary[ i ], true );
-        pointerPoint->setMarker( whichboundary[ i ] );
+        pointerPoint->setMarkerID( whichboundary[ i ] );
         pointerPoint->setId( i );
         pointerPoint->setLocalId( i );
         pointerPoint->x() = x[ 3 * i ];
@@ -1814,7 +1814,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         case 1:
         {
             pointerEdge = &( mesh.addEdge( true ) );
-            pointerEdge->setMarker( markerID_Type( et[ i ] ) );
+            pointerEdge->setMarkerID( markerID_Type( et[ i ] ) );
             pointerEdge->setPoint( 0, mesh.point( e[ i ][ 0 ] ) );
             pointerEdge->setPoint( 1, mesh.point( e[ i ][ 1 ] ) );
 
@@ -1827,7 +1827,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         case 2:
         {
             pointerFace = &( mesh.addFace( true ) );
-            pointerFace->setMarker( markerID_Type( et[ i ] ) );
+            pointerFace->setMarkerID( markerID_Type( et[ i ] ) );
             pointerFace->setPoint( 0, mesh.point( e[ i ][ 0 ] ) );
             pointerFace->setPoint( 1, mesh.point( e[ i ][ 1 ] ) );
             pointerFace->setPoint( 2, mesh.point( e[ i ][ 2 ] ) );
@@ -1839,7 +1839,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         case 3:
         {
             pointerFace = &( mesh.addFace( true ) );
-            pointerFace->setMarker( markerID_Type( et[ i ] ) );
+            pointerFace->setMarkerID( markerID_Type( et[ i ] ) );
             pointerFace->setPoint( 0, mesh.point( e[ i ][ 0 ] ) );
             pointerFace->setPoint( 1, mesh.point( e[ i ][ 1 ] ) );
             pointerFace->setPoint( 2, mesh.point( e[ i ][ 2 ] ) );
@@ -1853,7 +1853,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
             pointerVolume = &( mesh.addVolume() );
             pointerVolume->setId     ( numberVolumes );
             pointerVolume->setLocalId( numberVolumes++ );
-            pointerVolume->setMarker( markerID_Type( et[ i ] ) );
+            pointerVolume->setMarkerID( markerID_Type( et[ i ] ) );
             pointerVolume->setPoint( 0, mesh.point( e[ i ][ 0 ] ) );
             pointerVolume->setPoint( 1, mesh.point( e[ i ][ 1 ] ) );
             pointerVolume->setPoint( 2, mesh.point( e[ i ][ 2 ] ) );
@@ -1868,7 +1868,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
             pointerVolume->setId     ( i );
             pointerVolume->setLocalId( i );
-            pointerVolume->setMarker( markerID_Type( et[ i ] ) );
+            pointerVolume->setMarkerID( markerID_Type( et[ i ] ) );
             pointerVolume->setPoint( 0, mesh.point( e[ i ][ 0 ] ) );
             pointerVolume->setPoint( 1, mesh.point( e[ i ][ 1 ] ) );
             pointerVolume->setPoint( 2, mesh.point( e[ i ][ 2 ] ) );
@@ -2009,10 +2009,10 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                 pointCoordinates[ i * nDimensions + 1 ] = y;
                 pointCoordinates[ i * nDimensions + 2 ] = z;
                 boundaryPoint  [ i ] = false;
-                bcnpoints[ i ] = pointMarker.nullFlag();
+                bcnpoints[ i ] = pointMarker.nullMarkerID();
             }
             boundaryPoint  [ numberVertices ] = false;
-            bcnpoints[ numberVertices ] =pointMarker.nullFlag();
+            bcnpoints[ numberVertices ] =pointMarker.nullMarkerID();
 
             // done parsing point section
             flag&=~1;
@@ -2128,7 +2128,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 
             facePointID.resize( 3 * numberBoundaryFaces );
             bcnsurf.resize( numberBoundaryFaces + 1 );
-            bcnsurf[ 0 ] = faceMarker.nullFlag();
+            bcnsurf[ 0 ] = faceMarker.nullMarkerID();
 
 
             for ( UInt i = 0; i < numberBoundaryFaces; i++ )
@@ -2166,13 +2166,13 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 
                 /* here I set the boundary points marker
                    note: this works only with my patch
-                   of strongerFlag
+                   of strongerMarkerID
                    Face flag is assigned to face points
                    A point receives the "stronger" flag of the faces it belongs to
                     */
-                bcnpoints[ p1 ] = pointMarker.setStrongerMarker( bcnpoints[ p1 ], bcnr );
-                bcnpoints[ p2 ] = pointMarker.setStrongerMarker( bcnpoints[ p2 ], bcnr );
-                bcnpoints[ p3 ] = pointMarker.setStrongerMarker( bcnpoints[ p3 ], bcnr );
+                bcnpoints[ p1 ] = pointMarker.setStrongerMarkerID( bcnpoints[ p1 ], bcnr );
+                bcnpoints[ p2 ] = pointMarker.setStrongerMarkerID( bcnpoints[ p2 ], bcnr );
+                bcnpoints[ p3 ] = pointMarker.setStrongerMarkerID( bcnpoints[ p3 ], bcnr );
 
                 /* now I have the surface and points, so I can calculate
                    the num of edges on the boundary, useful in case this is
@@ -2185,16 +2185,16 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                 // (I've found this silly but easy way MM)
                 BareEdge bed = setBareEdge( p1, p2 );
 
-                bihBedges.addIfNotThere( bed, edgeMarker.nullFlag() );
-                bihBedges[ bed ] = ( ID )edgeMarker.setStrongerMarker( bihBedges[ bed ], bcnr );
+                bihBedges.addIfNotThere( bed, edgeMarker.nullMarkerID() );
+                bihBedges[ bed ] = ( ID )edgeMarker.setStrongerMarkerID( bihBedges[ bed ], bcnr );
 
                 bed = setBareEdge( p2, p3 );
-                bihBedges.addIfNotThere( bed, edgeMarker.nullFlag() );
-                bihBedges[ bed ] = ( ID )edgeMarker.setStrongerMarker( bihBedges[ bed ], bcnr );
+                bihBedges.addIfNotThere( bed, edgeMarker.nullMarkerID() );
+                bihBedges[ bed ] = ( ID )edgeMarker.setStrongerMarkerID( bihBedges[ bed ], bcnr );
 
                 bed = setBareEdge( p3, p1 );
-                bihBedges.addIfNotThere( bed, edgeMarker.nullFlag() );
-                bihBedges[ bed ] = ( ID )edgeMarker.setStrongerMarker( bihBedges[ bed ], bcnr );
+                bihBedges.addIfNotThere( bed, edgeMarker.nullMarkerID() );
+                bihBedges[ bed ] = ( ID )edgeMarker.setStrongerMarkerID( bihBedges[ bed ], bcnr );
             }
             flag&=~4;
             // in the 3D case the only way to know the number of edges on boundary faces
@@ -2269,7 +2269,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     mesh.setMaxNumVolumes      ( numberVolumes, true );
     mesh.setMaxNumGlobalVolumes( numberVolumes );
 
-    mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
+    mesh.setMarkerID           ( regionFlag ); // Add Marker to list of Markers
 
     typename RegionMesh3D<GeoShape,MC>::point_Type  * pointerPoint  = 0;
     typename RegionMesh3D<GeoShape,MC>::EdgeType   * pointerEdge   = 0;
@@ -2292,7 +2292,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
         mesh.localToGlobalNode().insert( std::make_pair( i, i ) );
         mesh.globalToLocalNode().insert( std::make_pair( i, i ) );
 
-        pointerPoint->setMarker( bcnpoints[ i ] );
+        pointerPoint->setMarkerID( bcnpoints[ i ] );
         pointerPoint->x() = pointCoordinates[ nDimensions * i ];
         pointerPoint->y() = pointCoordinates[ nDimensions * i + 1 ];
         pointerPoint->z() = pointCoordinates[ nDimensions * i + 2 ];
@@ -2312,7 +2312,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
         UInt p1, p2;
 
         pointerEdge = &mesh.addEdge( true ); // Only boundary edges.
-        pointerEdge->setMarker( markerID_Type( bedge->second ) );
+        pointerEdge->setMarkerID( markerID_Type( bedge->second ) );
         p1 = bedge->first.first;
         p2 = bedge->first.second;
         pointerEdge->setPoint( 0, mesh.point( p1 ) ); // set edge conn.
@@ -2351,7 +2351,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
         p2 = facePointID[ 3 * i + 1 ];
         p3 = facePointID[ 3 * i + 2 ];
 
-        pointerFace->setMarker( markerID_Type( bcnsurf[ i + 1 ] ) );
+        pointerFace->setMarkerID( markerID_Type( bcnsurf[ i + 1 ] ) );
         pointerFace->setPoint( 0, mesh.point( p1 ) ); // set face conn.
         pointerFace->setPoint( 1, mesh.point( p2 ) ); // set face conn.
         pointerFace->setPoint( 2, mesh.point( p3 ) ); // set face conn.

@@ -620,7 +620,7 @@ buildSystem(matrix_ptrtype matrSystem, const Real& xi)
     {
         this->M_FESpace->fe().updateFirstDeriv( this->M_FESpace->mesh()->element( iVol ) );
 
-       Int marker    = this->M_FESpace->mesh()->volumeList( iVol ).marker();
+       Int marker    = this->M_FESpace->mesh()->volumeList( iVol ).markerID();
 
         this->M_elmatK->zero();
         this->M_elmatM->zero();
@@ -688,7 +688,7 @@ buildDamping(matrix_ptrtype damping, const Real& alpha)
      {
       this->M_FESpace->fe().updateFirstDeriv( this->M_FESpace->mesh()->element( iVol ) );
 
-      Int marker    = this->M_FESpace->mesh()->volumeList( iVol ).marker();
+      Int marker    = this->M_FESpace->mesh()->volumeList( iVol ).markerID();
 
       Real gamma = M_data->gamma(marker);
       Real beta  = M_data->beta(marker);

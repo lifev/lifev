@@ -427,7 +427,7 @@ void DOFInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const mar
     {
 
         // The face marker
-        marker1 = mesh1.boundaryFace( ibF1 ).marker();
+        marker1 = mesh1.boundaryFace( ibF1 ).markerID();
 
         // Is the face on the interface?
         if ( marker1 == flag1 )
@@ -447,7 +447,7 @@ void DOFInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const mar
             {
 
                 // The face marker
-                marker2 = mesh2.boundaryFace( ibF2 ).marker();
+                marker2 = mesh2.boundaryFace( ibF2 ).markerID();
 
                 // Is the face on the interface?
                 if ( marker2 == flag2 )
@@ -565,7 +565,7 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
 
                 iVeEl1 = GeoShape::faceToPoint( iFaEl1, iVeFa1 ); // local vertex number (in element)
 
-                if ( flag1 != 0 && Int(mesh1.boundaryFace(i->first).point(iVeFa1).marker()) != *flag1) continue;
+                if ( flag1 != 0 && Int(mesh1.boundaryFace(i->first).point(iVeFa1).markerID()) != *flag1) continue;
 
                 // Loop number of DOF per vertex (mesh1)
                 for ( ID l = 0; l < nbDofPerVertex1; ++l )

@@ -78,7 +78,7 @@ class ResetFlag
 public:
     void operator()(meshEntity &m){
         m.replaceFlag(LifeV::EntityFlags::DEFAULT);
-        m.setMarker(0);
+        m.setMarkerID(0);
     }
 };
 
@@ -205,9 +205,9 @@ int main(int argc, char** argv)
                     aMesh.faceList.countElementsWithFlag( EntityFlags::CUTTED,Flag::testOneSet ) << std::endl;
     // Reset all flags to default
     aMesh.edgeList.changeAccordingToFunctor( ResetFlag<mesh_Type::EdgeType>() );
-    aMesh.edge(  0 ).setMarker( 10 );
-    aMesh.edge(  5 ).setMarker( 10 );
-    aMesh.edge( 10 ).setMarker( 15 );
+    aMesh.edge(  0 ).setMarkerID( 10 );
+    aMesh.edge(  5 ).setMarkerID( 10 );
+    aMesh.edge( 10 ).setMarkerID( 15 );
     std::vector<ID> watermarks( 2 );
     watermarks[ 0 ] = 10;
     watermarks[ 1 ] = 15;
@@ -217,9 +217,9 @@ int main(int argc, char** argv)
     std::cout << "Number of cutted edges (should be 3) " <<
                      aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet) << std::endl;
     aMesh.edgeList.changeAccordingToFunctor( ResetFlag<mesh_Type::EdgeType>() );
-    aMesh.edge(  0 ).setMarker( 10 );
-    aMesh.edge(  5 ).setMarker( 12 );
-    aMesh.edge( 10 ).setMarker( 15 );
+    aMesh.edge(  0 ).setMarkerID( 10 );
+    aMesh.edge(  5 ).setMarkerID( 12 );
+    aMesh.edge( 10 ).setMarkerID( 15 );
     SetFlagAccordingToMarkerRanges changer( Flag::turnOn ); //I may use the default constructor
     changer.insert( std::make_pair( 10, 12 ),EntityFlags::INTERNAL_INTERFACE );
     changer.insert( std::make_pair( 15, 18 ),EntityFlags::CUTTED );

@@ -500,7 +500,7 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
                 //if the normal is not already calculated
                 //and the marker correspond to the flag of the point
-                if ((flag == mesh.bElement(iFace).marker())||(flag == 0))
+                if ((flag == mesh.bElement(iFace).markerID())||(flag == 0))
                 {
                     //Warning: the normal is taken in the first Gauss point
                     //since the normal is the same over the triangle

@@ -2267,7 +2267,7 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
 
                     // gets the marker from the RegionMesh
 
-                    edg.setMarker( this->marker() );
+                    edg.setMarker( this->markerID() );
                     //        inheritPointsWeakerMarker( edg );
                     addEdge( edg, false ); //The id should be correct
                 }

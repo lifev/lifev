@@ -946,7 +946,7 @@ localEvolve ( const UInt& iElem )
             }
 
             // Take the boundary marker for the current boundary face
-            const ID faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
+            const ID faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).markerID() );
 
             // Take the corrispective boundary function
             const BCBase& bcBase ( M_BCh->findBCWithFlag( faceMarker ) );

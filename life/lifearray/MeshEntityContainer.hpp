@@ -95,7 +95,7 @@ public:
      */
     CompareAccordingToMarker(Policy const & p=std::less<markerID_Type>()):M_policy(p){};
     bool operator()(MeshEntity const & a, MeshEntity const & b){
-        return M_policy(a.marker(),b.marker());
+        return M_policy(a.markerID(),b.markerID());
     }
 private:
     const Policy M_policy;
@@ -156,7 +156,7 @@ private:
 
 //! A simple predicate to test the marker ID flag
 /*!
-   @prerequisite MeshEntity must have a method markerID_Type marker();
+   @prerequisite MeshEntity must have a method markerID_Type markerID();
 
     The ComparisonPolicy passed as (possible) second template parameter must be a functor
     capable of being constructed from a bool (*)(markerID_Type const&, entityflag_Type const &)
@@ -182,7 +182,7 @@ public:
                                     M_flag(flag),M_policy(p){}
 
     bool operator()(const MeshEntity & entity)const {
-        return M_policy(entity.marker(),M_flag);
+        return M_policy(entity.markerID(),M_flag);
     }
 private:
     markerID_Type const M_flag;

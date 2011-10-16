@@ -337,7 +337,7 @@ void MitchellSchaeffer<Mesh, SolverType>::solveIonicModel( const vector_Type& u,
 	{
         Int ig=u.blockMap().MyGlobalElements()[i];
 		ID 	= ig;
-		/*ref = this->M_mesh->point(ig).marker();
+		/*ref = this->M_mesh->point(ig).markerID();
 		x 	= this->M_mesh->point(ig).x();
         y 	= this->M_mesh->point(ig).y();
         z 	= this->M_mesh->point(ig).z();*/

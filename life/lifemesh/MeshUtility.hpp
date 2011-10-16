@@ -652,18 +652,18 @@ UInt findInternalEdges( const MeshType & mesh,
 //! @defgroup marker_policies Used to manage missing handlers
 
 
-/*! Sets the marker flag of a MeshElementMarked according to the policy of the marker
+/*! Sets the marker ID of a MeshElementMarked according to the policy of the marker
 
     @ingroup marker_policies
 
     It gets the stronger marker of the MeshElementMarked points. The marker
     hierarchy is defined in the MarkerDefinitions.hpp file. It returns the new
     marker id for the MeshElementMarked. If any of the vertices has an unset marker
-    the result is an unset flag for the MeshElementMarked.
+    the result is an unset marked ID for the MeshElementMarked.
 
     @sa MarkerDefinitions.hpp
-    @warning It overrides the original marker flag.
-    @return the new flag for geoElement
+    @warning It overrides the original marker ID.
+    @return the new marker ID for geoElement
 
     @todo LF: It should be made a functor so to give the user a easier way
               to change the policy if needed
@@ -673,39 +673,39 @@ template <typename MeshElementMarkedType>
 markerID_Type inheritPointsStrongerMarker( MeshElementMarkedType & geoElement )
 {
     ASSERT_PRE( MeshElementMarkedType::S_nDimensions > 0,
-                "A MeshElementMarked with ndim == 0 cannot inherit marker flags" );
+                "A MeshElementMarked with ndim == 0 cannot inherit marker IDs" );
 
-    geoElement.setMarker( geoElement.point( 0 ).marker() );
+    geoElement.setMarkerID( geoElement.point( 0 ).markerID() );
     for ( ID jPointId = 1; jPointId < MeshElementMarkedType::S_numVertices; ++jPointId )
-        geoElement.setStrongerMarker( geoElement.point( jPointId ).marker() );
-    return geoElement.marker();
+        geoElement.setStrongerMarker( geoElement.point( jPointId ).markerID() );
+    return geoElement.markerID();
 
 }
 
 
 /*! @ingroup marker_policies
 
-//! @brief Sets the marker flag of a MeshElementMarked of dimension greater one
+//! @brief Sets the marker ID of a MeshElementMarked of dimension greater one
 
     It gets the weaker marker of the MeshElementMarked points. The marker
     hierarchy is defined in the MarkerDefinitions.hpp file. It returns the new
     marker  id for the MeshElementMarked. If any of the vertices has an unset marker
-    the result is an unset flag for the MeshElementMarked.
+    the result is an unset marker ID for the MeshElementMarked.
 
     @sa MarkerDefinitions.hpp
-    @warning It overrides the original marker flag.
-    @return the new flag for geoElement
+    @warning It overrides the original marker ID.
+    @return the new marker ID for geoElement
  */
 template <typename MeshElementMarkedType>
 markerID_Type inheritPointsWeakerMarker( MeshElementMarkedType & geoElement )
 {
     ASSERT_PRE( MeshElementMarkedType::S_nDimensions > 0,
-                "A MeshElementMarked with ndim == 0 cannot inherit marker flags" );
+                "A MeshElementMarked with ndim == 0 cannot inherit marker IDs" );
 
-    geoElement.setMarker( geoElement.point( 0 ).marker() );
+    geoElement.setMarkerID( geoElement.point( 0 ).markerID() );
     for ( ID jPointId = 1; jPointId < MeshElementMarkedType::S_numVertices; ++jPointId )
-        geoElement.setWeakerMarker( geoElement.point( jPointId ).marker() );
-    return geoElement.marker();
+        geoElement.setWeakerMarkerID( geoElement.point( jPointId ).markerID() );
+    return geoElement.markerID();
 
 }
 
@@ -791,9 +791,9 @@ bool checkIsMarkerSet( const MeshEntityListType & meshEntityList )
 //! Sets the marker id for all boundary edges by inheriting them from boundary points.
 /*!
     The paradigm is that an edge <B>WHOSE MARKER HAS NOT ALREADY BEEN
-    SET</B> will get the WEAKER marker flag among its VERTICES. For instance
+    SET</B> will get the WEAKER marker ID among its VERTICES. For instance
     if a vertex is assigned to an Essential BC and the other to a Natural
-    BC the edge will get the flag related to the Natural B.C.
+    BC the edge will get the marker ID related to the Natural B.C.
 
     What is a weaker marker is set in the MarkerPolicy passed through the markers.
 
@@ -825,7 +825,7 @@ setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
             inheritPointsWeakerMarker( *edgePtr );
             if ( verbose )
             {
-                logStream << edgePtr->localId() << " -> " << edgePtr->marker();
+                logStream << edgePtr->localId() << " -> " << edgePtr->markerID();
                 logStream << " ";
                 if ( ++counter % 3 == 0 )
                     logStream << std::endl;
@@ -837,19 +837,19 @@ setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
 }
 
 
-//! Sets the marker flag for all boundary faces by inheriting them from boundary points.
+//! Sets the marker ID for all boundary faces by inheriting them from boundary points.
 /*!
-    The paradigm is that a face <B>WHOSE MARKER HAS NOT ALREADY BEEN SET</B> will
-    get the WEAKER marker flag among its VERTICES. For instance if a vertex
+    The paradigm is that a face <B>WHOSE MARKER ID HAS NOT ALREADY BEEN SET</B> will
+    get the WEAKER marker ID among its VERTICES. For instance if a vertex
     is assigned to a Natural BC and the others to a Natural BC the face
-    will get the flag related to the Natural BC
+    will get the marker ID related to the Natural BC
 
     @param mesh A mesh
     @param logStream stream to which a map faceId -> TimeAdvanceNewmarker will be output
     @param errorStream stream to which error messages will be sent
     @param verbose if false, no messages will be sent to the logStream
 
-    @todo the way to handle missing flags should be passed as a policy
+    @todo the way to handle missing IDs should be passed as a policy
  */
 template <typename MeshType>
 void
@@ -873,7 +873,7 @@ setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
             inheritPointsWeakerMarker( *facePtr );
             if ( verbose )
             {
-                logStream << facePtr->localId() << " -> "<<facePtr->marker();
+                logStream << facePtr->localId() << " -> "<<facePtr->markerID();
                 logStream << "\t";
                 if ( ++counter % 3 == 0 )
                     logStream << std::endl;
@@ -885,11 +885,11 @@ setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
 }
 
 
-//! It sets the marker flag Points, by inheriting it from facets.
+//! It sets the marker ID for Points, by inheriting it from facets.
 /*!
-    The paradigm is that a point whose marker flag is unset will inherit
-    the strongest marker flag of the surrounding facets, with the
-    convention that if the marker flag of one of the surrounding facets is null,
+    The paradigm is that a point whose marker ID is unset will inherit
+    the strongest marker ID of the surrounding facets, with the
+    convention that if the marker ID of one of the surrounding facets is null,
     it is ignored.
 
     @param mesh A mesh
@@ -926,14 +926,14 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
             {
                 if ( !isDefinedPointMarker[ facetPtr->point( jPointId ).localId() ] )
                     // A bit involved but it works
-                    //todo operate directly on point using setStrongerMarker
-                    facetPtr->setStrongerMarkerAtPoint( jPointId, facetPtr->marker() );
+                    //todo operate directly on point using setStrongerMarkerID
+                    facetPtr->setStrongerMarkerIDAtPoint( jPointId, facetPtr->markerID() );
             }
         }
     }
     // now the internal
     for ( UInt i = 0; i < mesh.storedPoints(); ++i )
-        if(!mesh.point(i).boundary() && !isDefinedPointMarker[i])mesh.point(i).setMarker(mesh.marker());
+        if(!mesh.point(i).boundary() && !isDefinedPointMarker[i])mesh.point(i).setMarkerID(mesh.markerID());
     UInt counter( 0 );
 
     if ( verbose )
@@ -947,7 +947,7 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
             if ( *isDefinedPointMarkerIterator++ )
             {
                 logStream << pointContainerIterator->localId() << " -> "<<
-                                pointContainerIterator->marker();
+                                pointContainerIterator->markerID();
                 logStream << "\t";
                 if ( ++counter % 3 )
                     logStream << std::endl;
@@ -1443,7 +1443,7 @@ bool fixBoundaryFaces( MeshType & mesh,
                 if ( verbose )
                 {
                     logStream << faceContainerIterator->localId() << " -> " <<
-                                    faceContainerIterator->marker();
+                                    faceContainerIterator->markerID();
                     logStream << " ";
                     if ( ++counter % 3 == 0 )
                         logStream << std::endl;
@@ -1665,7 +1665,7 @@ bool buildFaces( MeshType & mesh,
             {
                 if ( newFaceId % 3 == 0 )
                     logStream << std::endl;
-                logStream << newFaceId << " -> "<<face.marker();
+                logStream << newFaceId << " -> "<<face.markerID();
                 logStream << " ";
             }
         }
@@ -1750,7 +1750,6 @@ bool buildFaces( MeshType & mesh,
         errorStream << "ABORT CONDITION" << std::endl;
         return false;
     }
-    markerID_Type meshMarker( mesh.marker() );
 
     for ( typename volumeContainer_Type::iterator volumeContainerIterator = mesh.volumeList.begin();
                     volumeContainerIterator != mesh.volumeList.end(); ++volumeContainerIterator )
@@ -1795,8 +1794,8 @@ bool buildFaces( MeshType & mesh,
                     face.setPoint( kPointId, volumeContainerIterator->point( volumeShape.faceToPoint( jFaceLocalId, kPointId ) ) );
                 face.firstAdjacentElementIdentity() = volumeId;
                 face.firstAdjacentElementPosition() = jFaceLocalId;
-                // gets the marker from the MeshType
-                if(!faceExists) face.setMarker( meshMarker );
+                // Marker is unset
+                if(!faceExists) face.setMarkerID(face.nullMarkerID());
                 face.setBoundary(false);
                 if(faceExists)
                 {
@@ -2005,7 +2004,7 @@ bool buildEdges( MeshType & mesh,
             {
                 if ( newEdgeId % 6 == 0 )
                     logStream << std::endl;
-                logStream << newEdgeId << " -> "<<edge.marker();
+                logStream << newEdgeId << " -> "<<edge.markerID();
                 logStream << " ";
             }
         }
@@ -2055,7 +2054,7 @@ bool buildEdges( MeshType & mesh,
         for ( UInt kPointId = 0; kPointId < edge_Type::S_numPoints; ++kPointId )
             edge.setPoint( kPointId, volumePtr->point( volumeShape_Type::edgeToPoint( jEdgeLocalId, kPointId ) ) );
 
-        edge.setMarker( mesh.marker() ); // Get marker value: that of the mesh
+        edge.setMarkerID(edge.nullMarkerID()); // Set marker to null
         edge.setBoundary(false);
         if(edgeExists)
             mesh.setEdge(edge,edge.localId());
@@ -2132,7 +2131,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
          */
         if ( edgePtr->isMarkerUnset() )
             inheritPointsWeakerMarker( *edgePtr );
-        pointPtr->setMarker( edgePtr->marker() );
+        pointPtr->setMarkerID( edgePtr->markerID() );
         // todo check that the localId() of the new point is correctly set
         edgePtr->setPoint( 3, pointPtr ); //use overloaded version that takes a pointer
         bareEdgeToBoolPair = makeBareEdge( point1Id, point2Id );
@@ -2174,7 +2173,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
                                     mesh.point( point2Id ).z() ) * .5;
                     // If we have set a marker for the face, that marker is
                     // inherited by the new created point
-                    pointPtr->setMarker( facetPtr->marker() );
+                    pointPtr->setMarkerID( facetPtr->markerID() );
                 }
                 facetPtr->setPoint( GeoBShape::S_numVertices + jEdgeLocalId, pointPtr );
             }
@@ -2210,7 +2209,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
                                 mesh.point( point2Id ).y() ) * .5;
                 pointPtr->z() = ( mesh.point( point1Id ).z() +
                                 mesh.point( point2Id ).z() ) * .5;
-                pointPtr->setMarker( edgePtr->marker() );
+                pointPtr->setMarkerID( edgePtr->markerID() );
             }
             elementPtr->setPoint( nev + jEdgeLocalId, pointPtr );
         }
