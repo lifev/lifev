@@ -75,7 +75,9 @@
 #include <life/lifefem/TimeAdvanceNewmark.hpp>
 #include <life/lifefem/FESpace.hpp>
 
+#ifdef HAVE_HDF5
 #include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
+#endif
 
 #include <life/lifesolver/FSIData.hpp>
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>

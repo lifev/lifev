@@ -1796,6 +1796,7 @@ OseenSolver<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       m
 
     if ( bcHandler.hasOnlyEssential() && M_diagonalize )
     {
+        matrix.globalAssemble();
         matrix.diagonalize( nDimensions*dimVelocity(),
                             M_diagonalize,
                             rightHandSide,

@@ -120,12 +120,13 @@ FSIMonolithic::setupDOF( void )
     createInterfaceMaps(M_dofStructureToHarmonicExtension->localDofMap());
 }
 
+#ifdef HAVE_HDF5
 void
 FSIMonolithic::setupDOF( meshFilter_Type& filterMesh )
 {
     createInterfaceMaps(*filterMesh.getStoredInterface(0));
 }
-
+#endif
 
 void
 FSIMonolithic::setupSystem( )
@@ -571,6 +572,7 @@ FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
 
 if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean"))
 {
+    M_solid->material()->computeStiffness(*solution*M_data->dataFluid()->dataTime()->timeStep(), M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
     M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
     *M_solidBlockPrec += *M_solid->Mass();
     *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
