@@ -104,7 +104,6 @@ if (PARMETIS_FOUND)
 endif()
 endif()
 
-#FIXME I need to put the set(HAVE_XXX TRUE) outside the NOT XXXX_IS_IN_TRILINOS if
 # UMFPACK (optional)
 if( NOT UMFPACK_IS_IN_TRILINOS)
 if (LIFE_USE_UMFPACK)
