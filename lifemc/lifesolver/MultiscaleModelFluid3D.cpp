@@ -38,7 +38,6 @@
 
 namespace LifeV
 {
-
 namespace Multiscale
 {
 
@@ -362,14 +361,6 @@ MultiscaleModelFluid3D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const f
     base.setFunction( function );
 
     M_bc->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Flux, Full, base, 3 );
-}
-
-void
-MultiscaleModelFluid3D::imposeBoundaryFlowRateAsValve( const bcFlag_Type& flag, const function_Type& function, const bool& valveIsOpen )
-{
-
-    imposeBoundaryFlowRate( flag, function );
-
 }
 
 void

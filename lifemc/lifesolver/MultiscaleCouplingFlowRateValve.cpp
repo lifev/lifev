@@ -69,24 +69,7 @@ MultiscaleCouplingFlowRateValve::setupCoupling()
     Debug( 8240 ) << "MultiscaleCouplingFlowRateValve::setupCoupling() \n";
 #endif
 
-    //super_Type::setupCoupling();
-
-    if ( myModelsNumber() > 0 )
-    {
-        // Set the number of coupling variables
-        M_couplingVariablesNumber = modelsNumber();
-
-        // Impose flow rate boundary condition on all the models
-        for ( UInt i( 0 ); i < modelsNumber(); ++i )
-            if ( myModel( i ) )
-            {
-                M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, i ) );
-                multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryFlowRateAsValve( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ), M_valveIsOpen );
-            }
-    }
-
-    // Create local vectors
-    createLocalVectors();
+    super_Type::setupCoupling();
 
     if ( M_couplingVariablesNumber > 2 )
         std::cout << "!!! WARNING: MultiscaleCouplingFlowRateValve does not work with more than two models !!!" << std::endl;

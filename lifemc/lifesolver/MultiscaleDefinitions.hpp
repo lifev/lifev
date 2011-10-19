@@ -101,7 +101,6 @@ enum models_Type
 enum couplings_Type
 {
     BoundaryCondition,      /*!< Boundary condition */
-    FlowProfile,            /*!< All flow rate coupling condition with prescribed profile*/
     FlowRate,               /*!< All flow rate coupling condition */
     FlowRateValve,          /*!< All flow rate coupling condition with a valve between model 1 and the others*/
     FlowRateStress,         /*!< Flow rate/stress coupling condition */
@@ -196,7 +195,6 @@ multiscaleMapsDefinition()
 
     multiscaleCouplingsMap["BoundaryCondition"] = BoundaryCondition;
     multiscaleCouplingsMap["FlowRate"]          = FlowRate;
-    multiscaleCouplingsMap["FlowProfile"]       = FlowProfile;
     multiscaleCouplingsMap["FlowRateValve"]     = FlowRateValve;
     multiscaleCouplingsMap["FlowRateStress"]    = FlowRateStress;
     multiscaleCouplingsMap["Stress"]            = Stress;

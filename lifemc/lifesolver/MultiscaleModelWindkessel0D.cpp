@@ -247,13 +247,6 @@ MultiscaleModelWindkessel0D::imposeBoundaryFlowRate( const bcFlag_Type& flag, co
 }
 
 void
-MultiscaleModelWindkessel0D::imposeBoundaryFlowRateAsValve( const bcFlag_Type& flag, const function_Type& function, const bool& /*valveIsOpen*/ )
-{
-    // Flow rate from valve imposed as usual in the Windkessel case
-    imposeBoundaryFlowRate( flag, function );
-}
-
-void
 MultiscaleModelWindkessel0D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
 {
     M_bc->handler()->setBC( flag, OneDimensional::S, boost::bind( function, _1, _1, _1, _1, _1 ) );
