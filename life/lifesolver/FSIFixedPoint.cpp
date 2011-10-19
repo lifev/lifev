@@ -177,8 +177,8 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
 
-//         vector_Type const meshDisplacement( M_meshMotion->disp(), Repeated );
-//         this->moveMesh(meshDisplacement);
+	//	vector_Type const meshDisplacement( M_meshMotion->disp(), Repeated );
+	//	this->moveMesh(meshDisplacement);
         /*
         vector_Type const meshDisplacement( M_meshMotion->dispDiff(), Repeated );
         this->moveMesh(meshDispDiff);
@@ -197,6 +197,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
     // PAOLO: the mesh motion should be updated here, to compute the nonlinear residual, right?
     vector_Type meshDisp( M_meshMotion->disp(), Repeated );
+    this->moveMesh(meshDisp);
     if( iter==0 )
     {
         M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
