@@ -93,7 +93,7 @@ public:
     */
     ComposedOperator( const ComposedOperator<operator_Type>& P);
 
-    ~ComposedOperator( );
+    virtual ~ComposedOperator( );
     //@}
 
     //!@name Public Methods
@@ -315,6 +315,7 @@ ComposedOperator<operator_Type>::ComposedOperator( const boost::shared_ptr<Epetr
     M_inverse(),
     M_transpose(),
     M_summed(),
+    M_allTranspose(false),
     M_set(0),
     M_meanIter(0),
     M_numCalled(0),

@@ -119,12 +119,13 @@ FSIMonolithic::setupDOF( void )
     createInterfaceMaps(M_dofStructureToHarmonicExtension->localDofMap());
 }
 
+#ifdef HAVE_HDF5
 void
 FSIMonolithic::setupDOF( meshFilter_Type& filterMesh )
 {
     createInterfaceMaps(*filterMesh.getStoredInterface(0));
 }
-
+#endif
 
 void
 FSIMonolithic::setupSystem( )
