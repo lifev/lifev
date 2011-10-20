@@ -198,7 +198,9 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     // PAOLO: the mesh motion should be updated here, to compute the nonlinear residual, right?
     vector_Type meshDisp( M_meshMotion->disp(), Repeated );
     this->moveMesh(meshDisp);
-    if( iter==0 )
+
+    /*   
+ if( iter==0 )
     {
         M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
         M_ALETimeAdvance->shiftRight(meshDisp);
@@ -207,14 +209,15 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     {
         M_ALETimeAdvance->setSolution(meshDisp);
     }
-
-//	if(iter==0)
-        M_fluidTimeAdvance->extrapolation( *M_beta);//explicit treatment of u
-// 	else
-//         *M_beta += *this->M_fluid->solution();
+    */
+    
+	if(iter==0)
+	  M_fluidTimeAdvance->extrapolation( *M_beta);//explicit treatment of u
+ 	else
+         *M_beta += *this->M_fluid->solution();
 
 	vector_Type  meshVelocity( M_meshMotion->disp(), Repeated );
-	meshVelocity = M_ALETimeAdvance->velocity( );//implicit treatment of w (because I already did the shiftRight)
+	meshVelocity = M_ALETimeAdvance->velocity(meshDisp);//implicit treatment of w (because I already did the shiftRight)
 	this->transferMeshMotionOnFluid(meshVelocity,
 					this->veloFluidMesh());
 

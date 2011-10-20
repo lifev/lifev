@@ -527,9 +527,9 @@ FSIOperator::buildSystem()
       {
 	M_data->dataSolid()->showMe();
 	//initialize xi0 for timaAdvance method for solid
-	double  xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep() );
+	double  xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep() );
 	M_solid->buildSystem(xi);
-    M_solid->Mass()->globalAssemble();
+	M_solid->Mass()->globalAssemble();
       }
 
 }
@@ -539,8 +539,8 @@ FSIOperator::updateSystem()
 {
     if ( this->isFluid() )
     {
-      M_fluidTimeAdvance->shiftRight( *M_fluid->solution() );
-
+      // M_fluidTimeAdvance->shiftRight( *M_fluid->solution() );
+      M_ALETimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
       M_fluidTimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
 
       transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
@@ -594,6 +594,7 @@ FSIOperator::updateSolution( const vector_Type& solution )
     setSolution( solution );
     if ( this->isFluid() )
     {
+      M_ALETimeAdvance->shiftRight( this->M_meshMotion->disp() );
       M_fluidTimeAdvance->shiftRight( *this->M_un );
     }
   if ( this->isSolid())
