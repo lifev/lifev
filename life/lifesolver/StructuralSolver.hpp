@@ -872,7 +872,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
         M_BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
 
     // ignoring non-local entries, Otherwise they are summed up lately
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhof" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
     {
         chrono.start();
 
