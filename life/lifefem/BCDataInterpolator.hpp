@@ -75,7 +75,7 @@ namespace LifeV {
   The format of the data file passed to readData() is the following:
   <quote>
      # HEADER LINE FOR PARAMETERS
-     nof_data_sites nof_data_dimensions t_interval t_period
+     nof_data_sites nof_data_dimensions t_interval t_period filtering_level
      # HEADER LINE FOR DATA SITES
      data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord
      ...
@@ -92,7 +92,8 @@ namespace LifeV {
   The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
   is being interpolated. The variable nof_data_sites has to equal the number of rows passed in
   both the section involving the data_sites and the data values. The data value section has to be
-  repeated t_period / t_interval times.
+  repeated t_period / t_interval times. The value filtering_level >= 0 is used to drop the most
+  oscillatory terms in the trigonometric polynomial, and should be an integer.
 
   Warning: in the current implementation the data sites are assumed fixed in time and they do not move
   with the mesh. Thus they should only be used in a Lagrangian frame of reference, i.e. with structural

@@ -168,6 +168,7 @@ void BCDataInterpolator::readData( const std::string& fileName )
         fin >> RDIM;
         fin >> M_timeInterval;
         fin >> M_timePeriod;
+        fin >> M_filteringLevel;
 
         if ( ( RDIM != 1 ) && ( RDIM != 3 ) )
         {
