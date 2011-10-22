@@ -456,9 +456,9 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working
 
 
 
-    vector_Type extrapolation(*M_monolithicMap, Unique);
+    vector_Type extrapolation(M_solidTimeAdvance->rhsContributionFirstDerivative()*M_data->dataSolid()->dataTime()->timeStep(), Unique);
     vector_Type lambda(*M_interfaceMap, Unique);
-    M_fluidTimeAdvance->extrapolation(extrapolation);/*solid!*/
+    //    M_solidTimeAdvance->extrapolation(extrapolation);
 
     this->monolithicToInterface(lambda, extrapolation);
 
@@ -474,7 +474,7 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working
             if(M_interfaceMap->map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
                 if(rhs.get())
-                    (*rhs)[  (int)(*M_numerationInterface)[ITrow->second ] + dim*interface +M_solidAndFluidDim ] = -lambda( ITrow->second + dim*totalDofs )/**rescale*/;
+		  (*rhs)[  (int)(*M_numerationInterface)[ITrow->second ] + dim*interface +M_solidAndFluidDim ] = -lambda( ITrow->second + dim*totalDofs )/M_solidTimeAdvance->coefficientFirstDerivative( 0 );/**rescale*/;
             }
         }
     }
@@ -598,7 +598,7 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
 {
     M_fluidBlock.reset(new matrix_Type(*M_monolithicMap));
 
-    Real alpha = 1./M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
+    Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 )/M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
     M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
     this->M_fluid->updateStabilization(*M_fluidBlock);
 
