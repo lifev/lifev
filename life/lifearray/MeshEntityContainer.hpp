@@ -608,7 +608,7 @@ MeshEntityContainer<DataType,Allocator>::extractIdAccordingToPredicate(Predicate
 {
     std::vector<ID> tmp;
     for (const_iterator i=this->begin();i<this->end();++i)
-        if (p(*i)) tmp.push_back(i->id());
+        if (p(*i)) tmp.push_back(i->localId());
     return tmp;
 }
 template<typename DataType, class Allocator>
