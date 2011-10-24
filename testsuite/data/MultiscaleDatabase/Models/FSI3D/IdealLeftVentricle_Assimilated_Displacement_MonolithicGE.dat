@@ -297,8 +297,9 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
         [../]
 
     [../boundary_conditions]
-#    list = 'Inlet Outlet Interface InletEdge OutletEdge Top TopEdge'
-    list = 'Inlet Outlet Interface InletEdge OutletEdge'
+#    list = 'Inlet Outlet Interface InletEdge OutletEdge Top TopEdge' # TOP OF THE HEART FIXED
+#    list = 'Inlet Outlet Interface InletEdge OutletEdge'             # BOTH VALVES FIXED
+     list = 'Outlet Interface OutletEdge'                             # ONLY AORTIC VALVE FIXED
 
         [./Inlet]
         type       = Essential

@@ -1,5 +1,5 @@
 # nof_control_points  dimension  delta_t  T_period
-84  3  0.04  0.8
+84  3  0.04  0.8  6
 # control_point_x  control_point_y  control_point_z
 2.8931     0.17508           0
 2.3359      1.4413    -0.08682
