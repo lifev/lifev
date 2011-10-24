@@ -268,8 +268,8 @@ public:
     inline void setSolution ( const vectorPtr_Type& solution )
     {
         // Set both the final step solution and beginning step solution.
-        M_u    = solution;
-        M_uOld = solution;
+        *M_u    = *solution;
+        *M_uOld = *solution;
     }
 
     //@}
