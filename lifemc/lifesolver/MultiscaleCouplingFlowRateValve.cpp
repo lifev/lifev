@@ -180,7 +180,7 @@ MultiscaleCouplingFlowRateValve::updateCoupling()
         M_valveIsOpen = !M_valveIsOpen;
 
         // Reset coupling variable history
-        resetCouplingHistory();
+        //resetCouplingHistory();
     }
     else
         M_topologyChange = false;
