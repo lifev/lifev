@@ -60,8 +60,6 @@ namespace LifeV
 MapEpetra::MapEpetra():
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
-    M_ghostMapEpetra(),
-    M_ghostMapCreated( false ),
     M_exporter(),
     M_importer(),
     M_commPtr()
@@ -73,8 +71,6 @@ MapEpetra::MapEpetra( Int  numGlobalElements,
                       const comm_ptrtype& commPtr ):
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
-    M_ghostMapEpetra(),
-    M_ghostMapCreated( false ),
     M_exporter(),
     M_importer(),
     M_commPtr( commPtr )
@@ -95,8 +91,6 @@ MapEpetra::MapEpetra( const Int numGlobalElements,
                       const comm_ptrtype& commPtr ) :
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
-    M_ghostMapEpetra(),
-    M_ghostMapCreated( false ),
     M_exporter(),
     M_importer(),
     M_commPtr( commPtr )
@@ -114,8 +108,6 @@ MapEpetra::MapEpetra( const Int           size,
                       const comm_ptrtype& commPtr ):
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
-    M_ghostMapEpetra(),
-    M_ghostMapCreated( false ),
     M_exporter(),
     M_importer(),
     M_commPtr( commPtr )
@@ -144,8 +136,6 @@ MapEpetra::MapEpetra( const Int           size,
 MapEpetra::MapEpetra( const map_type map ):
     M_repeatedMapEpetra( new map_type( map ) ),
     M_uniqueMapEpetra(),
-    M_ghostMapEpetra(),
-    M_ghostMapCreated( false ),
     M_exporter(),
     M_importer(),
     M_commPtr()
@@ -156,8 +146,6 @@ MapEpetra::MapEpetra( const map_type map ):
 MapEpetra::MapEpetra( const Epetra_BlockMap& blockMap, const Int offset, const Int maxId) :
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
-    M_ghostMapEpetra(),
-    M_ghostMapCreated( false ),
     M_exporter(),
     M_importer(),
     M_commPtr()
@@ -309,7 +297,10 @@ MapEpetra::mapsAreSimilar( MapEpetra const& epetraMap ) const
 void
 MapEpetra::showMe( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the MapEpetra class" << std::endl;
+    output << "unique map:" << std::endl;
+    output << getUniqueMap();
+    output << "repeated map:" << std::endl;
+    output << getRepeatedMap();
 }
 
 // ===================================================

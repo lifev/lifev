@@ -253,11 +253,11 @@ public:
 
     //! Generate ghost map based on nodes neighborhood
     template<typename MeshType>
-    void createGhostMapOnNodes( MeshPartitioner<MeshType> & meshPart );
+    MapEpetra ghostMapOnNodes( MeshType & meshPart );
 
-    //! Generate ghost map based on elements neighborhood
+    //! Creates a new map with a Repeated map that encompasses ghost values for P0 variables
     template<typename MeshType>
-    void createGhostMapOnElements( MeshPartitioner<MeshType> & meshPart );
+    MapEpetra ghostMapOnElements( MeshType & meshPart );
 
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
@@ -282,7 +282,6 @@ public:
 
     //! Getter for the Epetra_Import
     Epetra_Import const& importer();
-
     //@}
 
 private:
@@ -342,8 +341,6 @@ private:
 
     map_ptrtype        M_repeatedMapEpetra;
     map_ptrtype        M_uniqueMapEpetra;
-    map_ptrtype        M_ghostMapEpetra;
-    bool               M_ghostMapCreated;
     exporter_ptrtype   M_exporter;
     importer_ptrtype   M_importer;
     comm_ptrtype       M_commPtr;
@@ -361,8 +358,6 @@ MapEpetra( const ReferenceFE&               refFE,
            const comm_ptrtype&        commPtr ):
         M_repeatedMapEpetra(),
         M_uniqueMapEpetra(),
-        M_ghostMapEpetra(),
-        M_ghostMapCreated( false ),
         M_exporter(),
         M_importer(),
         M_commPtr( commPtr )
@@ -387,8 +382,6 @@ MapEpetra( const ReferenceFE&        refFE,
            const comm_ptrtype& commPtr ):
         M_repeatedMapEpetra(),
         M_uniqueMapEpetra(),
-        M_ghostMapEpetra(),
-        M_ghostMapCreated( false ),
         M_exporter(),
         M_importer(),
         M_commPtr( commPtr )
@@ -443,13 +436,15 @@ MapEpetra( const ReferenceFE&        refFE,
 }
 
 template <typename MeshType>
-void MapEpetra::createGhostMapOnNodes( MeshPartitioner<MeshType> & meshPart )
+MapEpetra MapEpetra::ghostMapOnNodes( MeshType & mesh )
 {
+    MapEpetra ghostMap ( *this );
+
     // use a set to avoid duplicates
     std::set<Int> myGlobalElementsSet;
-    MeshType & mesh ( *( meshPart.meshPartition() ) ); 
 
     // iterate on mesh points
+    // todo: this can start from the repeated map and add only neighbors for SUBDOMAIN_INTERFACE marked nodes
     for ( UInt k = 0; k < mesh.numPoints(); k++ )
     {
         // iterate on each node neighborhood
@@ -463,15 +458,17 @@ void MapEpetra::createGhostMapOnNodes( MeshPartitioner<MeshType> & meshPart )
     std::vector<Int> myGlobalElements( myGlobalElementsSet.begin(), myGlobalElementsSet.end() ); 
 
     // generate map
-    M_ghostMapEpetra.reset( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_commPtr ) );
+    ghostMap.M_repeatedMapEpetra.reset( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_commPtr ) );
 
-    // set bool control
-    M_ghostMapCreated = true;
+    return ghostMap;
 }
 
+
 template <typename MeshType>
-void MapEpetra::createGhostMapOnElements( MeshPartitioner<MeshType> & meshPart )
+MapEpetra MapEpetra::ghostMapOnElements( MeshType & mesh )
 {
+    MapEpetra ghostMap ( *this );
+
     Int*          pointer;
     std::set<Int> map;
 
@@ -483,11 +480,20 @@ void MapEpetra::createGhostMapOnElements( MeshPartitioner<MeshType> & meshPart )
     }
 
     // add all facing elements
-    // this needs flags!
-    // FacesOnSubdInt (  )
+    std::vector<ID> facesOnSubdInt = mesh.faceList.extractElementsWithFlag(
+                    EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
+    for ( ID faceId = 0; faceId < facesOnSubdInt.size(); faceId++ )
+    {
+        map.insert( mesh.faceList[ facesOnSubdInt [ faceId ] ].secondAdjacentElementIdentity() );
+    }
 
-    // set bool control
-    M_ghostMapCreated = true;
+    // convert unique list to vector to assure continuity in memorization
+    std::vector<Int> myGlobalElements ( map.begin(), map.end() );
+
+    // generate map
+    ghostMap.M_repeatedMapEpetra.reset( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_commPtr ) );
+
+    return ghostMap;
 }
 
 }

@@ -223,15 +223,15 @@ VectorEpetra::operator=( const VectorEpetra& vector )
     }
     switch ( vector.M_mapType )
     {
-    case Repeated:
-        if ( M_mapType != Repeated )
-            return Export(vector.epetraVector(), M_combineMode);
-    case Unique:
-        return Import(vector.epetraVector(), M_combineMode);
+        case Repeated:
+            if ( M_mapType != Repeated )
+                return Export(vector.epetraVector(), M_combineMode);
+        case Unique:
+            return Import(vector.epetraVector(), M_combineMode);
     }
 
     // if we get here, it means that we have two different repeated maps.
-    // To hande this case, we have to create a unique copy first:
+    // To handle this case, we have to create a unique copy first:
 
     std::cout << "Tentative of export import from two repeated vectors based on different maps."
               << std::endl;
