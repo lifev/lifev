@@ -394,9 +394,6 @@ protected:
     //! Solution at previous time step.
     vectorPtr_Type            M_uOld;
 
-    //! Solution at previous time step with ghost values
-    vectorPtr_Type            M_uGhost;
-
     //! Computed numerical flux.
     vectorPtr_Type            M_globalFlux;
 
@@ -457,9 +454,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
         // Algebraic stuff.
         M_rhs             ( new vector_Type ( M_localMap ) ),
         M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uGhost          ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
-        M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uOld			  ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
+        M_globalFlux      ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
         M_elmatMass       ( )
@@ -493,9 +489,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
         // Algebraic stuff.
         M_rhs             ( new vector_Type ( M_localMap ) ),
         M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uGhost          ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
-        M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uOld			  ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
+        M_globalFlux      ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
         M_elmatMass       ( )
@@ -618,15 +613,20 @@ solveOneTimeStep ()
     // Assemble the global hybrid vector.
     M_globalFlux->globalAssemble();
 
+    // alternative: instead of modifying M_globalFlux.map, we can make a local copy with the correct map
+//    // this is needed since M_uOld.map != M_globalFlux.map
+//    vector_Type fluxCopy ( M_uOld->map() );
+//    fluxCopy = *M_globalFlux;
+
     // Update the value of the solution
     (*M_u) = (*M_uOld) - M_data.dataTime()->timeStep() * (*M_globalFlux);
+//    *M_u = *M_uOld - M_data.dataTime()->timeStep() * fluxCopy;
 
     // Clean the vector of fluxes
-    M_globalFlux.reset( new vector_Type( M_FESpace.map(), Repeated ) );
+    M_globalFlux.reset( new vector_Type( M_uOld->map(), Repeated ) );
 
     // Update the solution at previous time step
     *M_uOld = *M_u;
-    *M_uGhost = *M_u;
 
 } // solveOneStep
 
@@ -695,7 +695,7 @@ CFL()
                 // TODO: this works only for P0 elements
                 // but extract_vec works only with lids while RightElement is a gid
 //                rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
-                rightValue[ 0 ] = (*M_uGhost)[ rightElement ];
+                rightValue[ 0 ] = (*M_uOld)[ rightElement ];
             }
             else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
             {
@@ -938,7 +938,7 @@ localEvolve ( const UInt& iElem )
         {
             // TODO: this works only for P0 elements
 //            rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
-            rightValue[ 0 ] = (*M_uGhost)[ rightElement ];
+            rightValue[ 0 ] = (*M_uOld)[ rightElement ];
         }
         else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
         {
