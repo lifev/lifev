@@ -49,8 +49,7 @@ namespace LifeV
 /*! This class extends the default marker adding containers to store all adjacency informations.
  */
 
-// template <typename FlagPolicy = EntityFlagStandardPolicy>
-template <typename FlagPolicy = MarkerTraits>
+template <typename FlagPolicy = EntityFlagStandardPolicy>
 class NeighborMarker: public Marker<FlagPolicy>
 {
 public:
@@ -61,8 +60,7 @@ public:
 
     NeighborMarker (): Marker<FlagPolicy>() {}
 
-//    explicit NeighborMarker ( markerID_Type & p ): Marker<FlagPolicy>( p ) {}
-    explicit NeighborMarker ( entityFlag_Type & p ): Marker<FlagPolicy>( p ) {}
+    explicit NeighborMarker ( markerID_Type & p ): Marker<FlagPolicy>( p ) {}
 
     neighbors_Type & nodeNeighbors () { return M_nodeNeighbors; }
 //    neighbors_Type & edgeNeighbors () { return M_edgeNeighbors; }
@@ -94,26 +92,20 @@ public:
     //! @name Public Types
     //@{
     //! The marker used for the Points
-//    typedef NeighborMarker<MT> pointMarker_Type;
-    typedef NeighborMarker<MT> PointMarker;
+    typedef NeighborMarker<MT> pointMarker_Type;
     //! The marker used for the Edges
-//    typedef Marker<MT> edgeMarker_Type;
-    typedef Marker<MT> EdgeMarker;
+    typedef Marker<MT> edgeMarker_Type;
     //! The marker used for the Faces
-//    typedef Marker<MT> faceMarker_Type;
-    typedef Marker<MT> FaceMarker;
+    typedef Marker<MT> faceMarker_Type;
     //! The marker used for the Volumes
-//    typedef Marker<MT> volumeMarker_Type;
-    typedef Marker<MT> VolumeMarker;
+    typedef Marker<MT> volumeMarker_Type;
     //! The marker used for the Regions
-//    typedef Marker<MT> regionMarker_Type;
-    typedef Marker<MT> RegionMarker;
+    typedef Marker<MT> regionMarker_Type;
     //@}
 };
 
 //! The NeighborMarkerCommon: uses all defaults except for Points
-// typedef NeighborMarkerCommon<EntityFlagStandardPolicy> neighborMarkerCommon_Type;
-typedef NeighborMarkerCommon<MarkerTraits> neighborMarkerCommon_Type;
+typedef NeighborMarkerCommon<EntityFlagStandardPolicy> neighborMarkerCommon_Type;
 
 //! this routine generates node neighbors for the given mesh
 /*! the routine assumes that the mesh is not yet partitioned or reordered 
