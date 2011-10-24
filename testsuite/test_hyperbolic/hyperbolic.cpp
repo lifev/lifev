@@ -380,7 +380,7 @@ hyperbolic::run()
     readMesh( *fullMeshPtr, meshData );
 
     // create node neighbors
-    createNodeNeighbors ( *fullMeshPtr );
+//    createNodeNeighbors ( *fullMeshPtr );
 
     // Partition the mesh using ParMetis
     MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
@@ -448,12 +448,6 @@ hyperbolic::run()
     // Finite element space of the interpolation of dual variable.
     FESpace< RegionMesh, MapEpetra > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate, *pressure_qR_dualInterpolate,
                                                                     *pressure_bdQr_dualInterpolate, 3, Members->comm );
-
-    // create ghost map
-    pressure_uInterpolate_FESpace.map().createGhostMapOnNodes( meshPart );
-
-    // create ghost map
-    pressure_uInterpolate_FESpace.map().createGhostMapOnElements( meshPart );
 
     // Vector for the interpolated dual solution.
     vector_ptrtype pressure_dualInterpolated( new vector_type ( pressure_uInterpolate_FESpace.map(), Repeated ) );
@@ -629,9 +623,6 @@ hyperbolic::run()
 
         // Set the last time step for the simulation.
         dataHyperbolic.dataTime()->setTimeStep( timeStep );
-
-        // Update time
-        dataHyperbolic.dataTime()->updateTime();
 
         // The leader process prints the temporal data.
         if ( hyperbolicSolver.getDisplayer().isLeader() )
