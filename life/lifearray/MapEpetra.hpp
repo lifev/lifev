@@ -438,7 +438,11 @@ MapEpetra( const ReferenceFE&        refFE,
 template <typename MeshType>
 MapEpetra MapEpetra::ghostMapOnNodes( MeshType & mesh )
 {
-    MapEpetra ghostMap ( *this );
+    MapEpetra ghostMap;
+
+    // use the same Unique map and comm of the original map
+    ghostMap.M_uniqueMapEpetra = this->M_uniqueMapEpetra;
+    ghostMap.M_commPtr         = this->M_commPtr;
 
     // use a set to avoid duplicates
     std::set<Int> myGlobalElementsSet;
@@ -467,7 +471,11 @@ MapEpetra MapEpetra::ghostMapOnNodes( MeshType & mesh )
 template <typename MeshType>
 MapEpetra MapEpetra::ghostMapOnElements( MeshType & mesh )
 {
-    MapEpetra ghostMap ( *this );
+    MapEpetra ghostMap;
+
+    // use the same Unique map and comm of the original map
+    ghostMap.M_uniqueMapEpetra = this->M_uniqueMapEpetra;
+    ghostMap.M_commPtr         = this->M_commPtr;
 
     Int*          pointer;
     std::set<Int> map;
