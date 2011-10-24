@@ -1360,17 +1360,18 @@ void MeshPartitioner<MeshType>::constructFaces()
             pf->setLocalId( count );
 
             // true if we are on a subdomain border
+            ID ghostElem ( NotAnId );
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
             {
                 // set the flag for faces on the subdomain border
-                pf->replaceFlag( Flag::turnOn ( pf->flag(), EntityFlags::SUBDOMAIN_INTERFACE ) );
+                pf->setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
 
                 // build GhostEntityData
                 GhostEntityData ghostFace;
                 ghostFace.localFaceId = pf->localId();
 
                 // set the ghostElem to be searched on other subdomains
-                ID ghostElem = ( localElem1 == NotAnId ) ? elem1 : elem2;
+                ghostElem = ( localElem1 == NotAnId ) ? elem1 : elem2;
                 // find which process holds the facing element
                 Int ghostProc ( M_me );
                 for ( Int proc = 0; proc < M_comm->NumProc(); proc++ )
@@ -1407,25 +1408,68 @@ void MeshPartitioner<MeshType>::constructFaces()
             // NEW CODE
             ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging face in mesh partitioner!");
 
-            if (localElem1 == NotAnId)
+            // todo: move this to a switch ( if...else ) on the EntityFlag
+//            switch ( pf->flag() )
+//            {
+//                case ( EntityFlags::DEFAULT ):
+//                {
+//                    pf->firstAdjacentElementIdentity()  = localElem1;
+//                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+//                    pf->secondAdjacentElementIdentity() = localElem2;
+//                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+//                    break;
+//                }
+//                case ( EntityFlags::PHYSICAL_BOUNDARY ):
+//                {
+//                    pf->firstAdjacentElementIdentity()  = localElem1;
+//                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+//                    pf->secondAdjacentElementIdentity() = localElem2;
+//                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+//                    break;
+//                }
+//                case ( EntityFlags::SUBDOMAIN_INTERFACE ):
+//                {
+//                    if ( localElem2 != NotAnId )
+//                    {
+//                        pf->firstAdjacentElementIdentity()  = localElem2;
+//                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
+//                        pf->secondAdjacentElementIdentity() = ghostElem;
+//                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
+//                    }
+//                    else
+//                    {
+//                        pf->firstAdjacentElementIdentity()  = localElem1;
+//                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+//                        pf->secondAdjacentElementIdentity() = ghostElem;
+//                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+//                    }
+//                    break;
+//                }
+//
+//            }
+            if ( localElem1 == NotAnId )
              {
                  pf->firstAdjacentElementIdentity()  = localElem2;
                  pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
-                 pf->secondAdjacentElementIdentity() = NotAnId;
+                 pf->secondAdjacentElementIdentity() = ghostElem;
                  pf->secondAdjacentElementPosition() = NotAnId;
                  pf->reversePoints();
              }
+            else if ( localElem2 == NotAnId )
+            {
+                pf->firstAdjacentElementIdentity()  = localElem1;
+                pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+                pf->secondAdjacentElementIdentity() = ghostElem;
+                pf->secondAdjacentElementPosition() = NotAnId;
+            }
             else
             {
                 pf->firstAdjacentElementIdentity()  = localElem1;
                 pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
                 pf->secondAdjacentElementIdentity() = localElem2;
-                pf->secondAdjacentElementPosition() =
-                                localElem2 != NotAnId ?
-                                                       M_originalMesh->face(*is).secondAdjacentElementPosition():
-                                                       NotAnId;
-
+                pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
             }
+
             // END NEW CODE
             /* OLD CODE
 
