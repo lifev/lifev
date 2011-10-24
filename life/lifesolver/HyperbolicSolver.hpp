@@ -394,6 +394,9 @@ protected:
     //! Solution at previous time step.
     vectorPtr_Type            M_uOld;
 
+    //! Solution at previous time step with ghost values
+    vectorPtr_Type            M_uGhost;
+
     //! Computed numerical flux.
     vectorPtr_Type            M_globalFlux;
 
@@ -455,6 +458,7 @@ HyperbolicSolver ( const data_Type&          dataFile,
         M_rhs             ( new vector_Type ( M_localMap ) ),
         M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         M_uOld			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uGhost          ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
         M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
@@ -490,6 +494,7 @@ HyperbolicSolver ( const data_Type&          dataFile,
         M_rhs             ( new vector_Type ( M_localMap ) ),
         M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         M_uOld			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uGhost          ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
         M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
@@ -581,7 +586,6 @@ void
 HyperbolicSolver< Mesh, SolverType >::
 solveOneTimeStep ()
 {
-
     // Total number of elements in the mesh
     const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
 
@@ -622,6 +626,7 @@ solveOneTimeStep ()
 
     // Update the solution at previous time step
     *M_uOld = *M_u;
+    *M_uGhost = *M_u;
 
 } // solveOneStep
 
@@ -688,7 +693,9 @@ CFL()
             else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
             {
                 // TODO: this works only for P0 elements
-                rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+                // but extract_vec works only with lids while RightElement is a gid
+//                rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+                rightValue[ 0 ] = (*M_uGhost)[ rightElement ];
             }
             else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
             {
@@ -711,7 +718,7 @@ CFL()
                 {
                     quadPoint(icoor) = M_FESpace.feBd().quadPt( ig, icoor );
                     normal(icoor)    = M_FESpace.feBd().normal( icoor, ig ) ;
-		}
+                }
 
                 // Compute the local CFL without the time step
                 localCFL = e / K * M_numericalFlux->normInfinity ( leftValue[0],
@@ -930,7 +937,8 @@ localEvolve ( const UInt& iElem )
         else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
         {
             // TODO: this works only for P0 elements
-            rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+//            rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+            rightValue[ 0 ] = (*M_uGhost)[ rightElement ];
         }
         else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
         {
