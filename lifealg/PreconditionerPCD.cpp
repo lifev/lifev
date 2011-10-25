@@ -38,6 +38,7 @@
 #include "PreconditionerPCD.hpp"
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
+#include <life/lifealg/PreconditionerML2.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefem/BCManage.hpp>
 #include <lifemc/lifearray/MatrixBlock.hpp>
@@ -67,7 +68,8 @@ PreconditionerPCD::PreconditionerPCD( const  boost::shared_ptr<Epetra_Comm>& com
     M_pressureLaplacianOperator  ( "standard" ),
     M_useLumpedPressureMass      ( false ),
     M_setApBoundaryConditions    ( false ),
-    M_setFpBoundaryConditions    ( false )
+    M_setFpBoundaryConditions    ( false ),
+    M_fullFactorization          ( false )
 {
     M_uFESpace.reset();
     M_pFESpace.reset();
@@ -129,6 +131,9 @@ PreconditionerPCD::createPCDList( list_Type&         list,
 
     bool setFpBoundaryConditions = dataFile( ( section + "/" + subsection + "/set_Fp_boundary_conditions" ).data(), false );
     list.set( "set Fp boundary conditions", setFpBoundaryConditions );
+
+    bool fullFactorization = dataFile( ( section + "/" + subsection + "/full_factorization" ).data(), false );
+    list.set( "full factorization", fullFactorization );
 
     if ( displayList && verbose ) list.print( std::cout );
 }
@@ -200,6 +205,9 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     //C.showMe();
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
+    // Getting the block structure of B
+    MatrixBlockView B11, B12, B21, B22, B22base;
+
     /*
      * PCD:
      * / F Bt \   / I  0 \ / I Bt \ / F 0 \
@@ -210,8 +218,73 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
      * \ 0 -S  /    = \ 0    I / \ 0  I  / \ 0 -S^-1 /
      */
 
-    // Getting the block structure of B
-    MatrixBlockView B11, B12, B21, B22, B22base;
+    boost::shared_ptr<matrix_Type> p3;
+    superPtr_Type precForBlock3;
+    if( M_fullFactorization == true )
+    {
+        /*
+         * Building the block
+         * / I      0 \   / F 0 \ / I 0 \ / F^-1 0 \
+         * \ BF^-1  I / = \ 0 I / \ B I / \ 0    I /
+         */
+
+        /*
+         * Building the block
+         * / F 0 \
+         * \ 0 I /
+         */
+        if ( verbose ) std::cout << " Fluid block... ";
+        timer.start();
+        boost::shared_ptr<matrixBlock_Type> P3( new matrixBlock_Type( map ) );
+        P3->setBlockStructure( blockNumRows, blockNumColumns );
+        P3->getMatrixBlockView( 0, 0, B11 );
+        P3->getMatrixBlockView( 1, 1, B22 );
+        MatrixBlockUtils::copyBlock( F, B11 );
+        MatrixBlockUtils::createIdentityBlock( B22 );
+        P3->globalAssemble();
+        //P3->spy( "p3" );
+        p3 = P3;
+        precForBlock3.reset( PRECFactory::instance().createObject( M_fluidPrec ) );
+        precForBlock3->setDataFromGetPot( M_dataFile, M_fluidPrecDataSection );
+        if( M_fluidPrec == "ML2" )
+        {
+            PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*>( precForBlock3.get() );
+            tmpPrecPtr->setFESpace( M_uFESpace, M_pFESpace );
+        }
+        this->pushBack( p3,precForBlock3, notInversed, notTransposed );
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
+        /*
+         * Building the block (the block is inversed)
+         * /  I  0 \
+         * \ -B  I /
+         */
+        if ( verbose ) std::cout << " Divergence block... ";
+        timer.start();
+        boost::shared_ptr<matrixBlock_Type> P2e( new matrixBlock_Type( map ) );
+        P2e->setBlockStructure( blockNumRows, blockNumColumns );
+        P2e->getMatrixBlockView( 0, 0, B11 );
+        P2e->getMatrixBlockView( 1, 0, B21 );
+        P2e->getMatrixBlockView( 1, 1, B22 );
+        MatrixBlockUtils::copyBlock( B, B21 );
+        ( *P2e ) *= -1;
+        MatrixBlockUtils::createIdentityBlock( B11 );
+        MatrixBlockUtils::createIdentityBlock( B22 );
+        P2e->globalAssemble();
+        //P2->spy( "p2" );
+        boost::shared_ptr<matrix_Type> p2e = P2e;
+        this->pushBack( p2e, inversed, notTransposed );
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
+        /*
+         * Building the block
+         * / F^-1 0 \
+         * \ 0    I /
+         */
+        if ( verbose ) std::cout << " Fluid block... ";
+        this->pushBack( p3, inversed, notTransposed );
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    }
 
     /*
      * Building the block
@@ -460,21 +533,36 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
      * / F 0 \
      * \ 0 I /
      */
-    if ( verbose ) std::cout << " Fluid block... ";
-    timer.start();
-    boost::shared_ptr<matrixBlock_Type> P3( new matrixBlock_Type( map ) );
-    P3->setBlockStructure( blockNumRows, blockNumColumns );
-    P3->getMatrixBlockView( 0, 0, B11 );
-    P3->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::copyBlock( F, B11 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
-    P3->globalAssemble();
-    //P3->spy( "p3" );
-    boost::shared_ptr<matrix_Type> p3 = P3;
-    superPtr_Type precForBlock3( PRECFactory::instance().createObject( M_fluidPrec ) );
-    precForBlock3->setDataFromGetPot( M_dataFile, M_fluidPrecDataSection );
-    this->pushBack( p3,precForBlock3, notInversed, notTransposed );
-    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    if( M_fullFactorization == true )
+    {
+        precForBlock3.reset( PRECFactory::instance().createObject( M_fluidPrec ) );
+        precForBlock3->setDataFromGetPot( M_dataFile, M_fluidPrecDataSection );
+        this->pushBack( p3,precForBlock3, notInversed, notTransposed );
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    }
+    else
+    {
+        if ( verbose ) std::cout << " Fluid block... ";
+        timer.start();
+        boost::shared_ptr<matrixBlock_Type> P3( new matrixBlock_Type( map ) );
+        P3->setBlockStructure( blockNumRows, blockNumColumns );
+        P3->getMatrixBlockView( 0, 0, B11 );
+        P3->getMatrixBlockView( 1, 1, B22 );
+        MatrixBlockUtils::copyBlock( F, B11 );
+        MatrixBlockUtils::createIdentityBlock( B22 );
+        P3->globalAssemble();
+        //P3->spy( "p3" );
+        p3 = P3;
+        precForBlock3.reset( PRECFactory::instance().createObject( M_fluidPrec ) );
+        precForBlock3->setDataFromGetPot( M_dataFile, M_fluidPrecDataSection );
+        if( M_fluidPrec == "ML2" )
+        {
+            PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*>( precForBlock3.get() );
+            tmpPrecPtr->setFESpace( M_uFESpace, M_pFESpace );
+        }
+        this->pushBack( p3,precForBlock3, notInversed, notTransposed );
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+    }
 
     this->M_preconditionerCreated = true;
 
@@ -518,6 +606,7 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
     M_useLumpedPressureMass            = this->M_list.get( "use lumped pressure mass", false );
     M_setApBoundaryConditions          = this->M_list.get( "set Ap boundary conditions", false );
     M_setFpBoundaryConditions          = this->M_list.get( "set Fp boundary conditions", false );
+    M_fullFactorization                = this->M_list.get( "full factorization", false );
 }
 
 void
