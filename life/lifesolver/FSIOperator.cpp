@@ -51,7 +51,6 @@ namespace LifeV
 //  Constructors & Destructors
 // ===================================================
 FSIOperator::FSIOperator():
-    M_mesh                               ( ),
     M_uFESpace                           ( ),
     M_pFESpace                           ( ),
     M_dFESpace                           ( ),
@@ -373,7 +372,6 @@ FSIOperator::partitionMeshes()
     {
         M_solidMeshPart.reset( new  MeshPartitioner< mesh_Type > ( M_solidMesh, M_epetraComm ) );
     }
-
 }
 
 #ifdef HAVE_HDF5

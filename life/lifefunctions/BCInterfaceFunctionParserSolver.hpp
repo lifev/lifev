@@ -530,47 +530,48 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_density: " << M_physicalSolver->solid().getRho() << "\n";
+            Debug( 5023 ) << "                                              s_density: " << M_physicalSolver->solid().rho() << "\n";
 #endif
 
-            setVariable( "s_density", M_physicalSolver->solid().getRho() );
+            setVariable( "s_density", M_physicalSolver->solid().rho() );
 
             break;
 
         case s_poisson:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_poisson: " << M_physicalSolver->solid().getPoisson() << "\n";
+
+Debug( 5023 ) << "                                              s_poisson: " << M_physicalSolver->solid().poisson(1) << "\n";
 #endif
 
-            setVariable( "s_poisson", M_physicalSolver->solid().getPoisson() );
+            setVariable( "s_poisson", M_physicalSolver->solid().poisson(1) );
 
             break;
 
         case s_thickness:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_thickness: " << M_physicalSolver->solid().getThickness() << "\n";
+            Debug( 5023 ) << "                                              s_thickness: " << M_physicalSolver->solid().thickness() << "\n";
 #endif
 
-            setVariable( "s_thickness", M_physicalSolver->solid().getThickness() );
+            setVariable( "s_thickness", M_physicalSolver->solid().thickness() );
 
             break;
 
         case s_young:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_young: " << M_physicalSolver->solid().getYoung() << "\n";
+            Debug( 5023 ) << "                                              s_young: " << M_physicalSolver->solid().young(1) << "\n";
 #endif
 
-            setVariable( "s_young", M_physicalSolver->solid().getYoung() );
+            setVariable( "s_young", M_physicalSolver->solid().young(1) );
 
             break;
 
         case s_externalPressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_externalPressure: " << M_physicalSolver->solid().data()->externalPressure() << "\n";
+	  Debug( 5023 ) << "                                              s_externalPressure: " << M_physicalSolver->solid().data()->externalPressure() << "\n";
 #endif
 
             setVariable( "s_externalPressure", M_physicalSolver->solid().data()->externalPressure() );

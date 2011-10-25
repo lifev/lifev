@@ -118,6 +118,11 @@ FSIMonolithic::setupDOF( void )
 
 
     createInterfaceMaps(M_dofStructureToHarmonicExtension->localDofMap());
+
+    M_fluidMeshPart->releaseUnpartitionedMesh();
+    M_solidMeshPart->releaseUnpartitionedMesh();
+    M_fluidMesh.reset();
+    M_solidMesh.reset();
 }
 
 #ifdef HAVE_HDF5
@@ -519,15 +524,6 @@ diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull)
     matrFull->matrixPtr()->InvColMaxs(diagonal);
     matrFull->matrixPtr()->LeftScale(diagonal);
     rhs.epetraVector().Multiply(1, rhs.epetraVector(), diagonal,0);
-}
-
-void
-FSIMonolithic::solidInit(std::string const& dOrder)
-{   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-    M_dFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_solidMesh,
-                                                       dOrder,
-                                                       nDimensions,
-                                                       M_epetraComm));
 }
 
 void

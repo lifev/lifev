@@ -446,6 +446,9 @@ public:
     //! Get the density
     Real rho()       const { return M_data->rho(); }
 
+    //! Get the data container
+    boost::shared_ptr<data_Type> data()       const { return M_data; }
+
     void Apply( const vector_Type& sol, vector_Type& res) const;
 
     //@}
