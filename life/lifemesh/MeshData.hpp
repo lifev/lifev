@@ -47,10 +47,9 @@
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/LifeV.hpp>
 
-#include <life/lifemesh/RegionMesh2D.hpp>
 #include <life/lifefilters/ImporterMesh2D.hpp>
 
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 
@@ -136,25 +135,6 @@ private:
 
     bool            M_verbose;		//!< verbose output?
 };
-
-template <typename GEOSHAPE, typename MC>
-void readMesh( RegionMesh2D<GEOSHAPE, MC>& mesh, const MeshData& data )
-{
-    if ( data.verbose() )
-        std::cout << "\nBuilding mesh ... ";
-
-
-    if ( data.meshType() == ".msh" )
-        readFreeFemFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
-    else
-        ERROR_MSG( "Sorry, this mesh file can not be loaded" );
-
-    //Update Edges
-    mesh.updateElementFacets(true);
-
-    if ( data.verbose() )
-        std::cout << "mesh read.\n" << std::endl;
-}
 
 template <typename MC>
 void readMesh( RegionMesh<LinearTriangle, MC>& mesh, const MeshData& data )

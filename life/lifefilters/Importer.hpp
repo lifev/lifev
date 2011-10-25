@@ -36,8 +36,7 @@
 #ifndef _IMPORTER_H
 #define _IMPORTER_H 1
 
-#include <life/lifemesh/RegionMesh3D.hpp>
-#include <life/lifemesh/RegionMesh2D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 namespace LifeV
 {
@@ -91,7 +90,7 @@ template<typename Elt>
 void
 import( std::string const& fileName,
         MeshFormat const&  format,
-        RegionMesh2D<Elt>& mesh,
+        RegionMesh<Elt>& mesh,
         markerID_Type    regionFlag )
 {
     // Select the right mesh format, only Gmsh allowed
@@ -102,7 +101,7 @@ import( std::string const& fileName,
     case NETGEN:
     {
         std::ostringstream ostr;
-        ostr << "Unsupported file format for RegionMesh2D";
+        ostr << "Unsupported file format for RegionMesh";
         throw std::invalid_argument( ostr.str() );
     }
     break;
@@ -190,7 +189,7 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh2D<LinearTriangle> & mesh, markerID_Type regionFlag );
+    void import( RegionMesh<LinearTriangle> & mesh, markerID_Type regionFlag );
 
 
     //! Import mesh with linear quadrangles
@@ -198,7 +197,7 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh2D<LinearQuad> & mesh, markerID_Type regionFlag );
+    void import( RegionMesh<LinearQuad> & mesh, markerID_Type regionFlag );
 
     //! Print attributes of the class
     /*!

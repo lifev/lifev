@@ -34,7 +34,7 @@
 #define ETHIERSTEINMAN_H 1
 
 #include <life/lifesolver/OseenSolver.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/ElementShapes.hpp>
 
 #include "life/lifefunctions/RossEthierSteinmanDec.hpp"

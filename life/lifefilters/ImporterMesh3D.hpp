@@ -58,7 +58,7 @@
 
 #include <life/lifemesh/MeshChecks.hpp>
 #include <life/lifemesh/InternalEntitySelector.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 namespace LifeV
 {

@@ -39,7 +39,7 @@
 #define REGIONMESH1DBUILDER_HPP 1
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/MeshChecks.hpp>
 #include <fstream>
 

@@ -59,7 +59,7 @@ Also it test the interpolation of an analytical function into a finite element s
 #include <life/lifefem/QuadratureRule.hpp>
 #include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 #include <life/lifefem/DOF.hpp>
 #include <life/lifefilters/MeshWriter.hpp>

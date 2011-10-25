@@ -58,7 +58,7 @@
 
 #include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 
 // A dummy class to imitate a VectorEpetra

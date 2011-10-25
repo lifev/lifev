@@ -62,7 +62,7 @@
 #include <life/lifecore/FactorySingleton.hpp>
 
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 #include <life/lifealg/NonLinearAitken.hpp>
 

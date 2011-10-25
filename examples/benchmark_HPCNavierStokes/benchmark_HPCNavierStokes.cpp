@@ -54,7 +54,7 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/BCManage.hpp>

@@ -239,7 +239,7 @@ public:
     const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
     graphPtr_Type&           elementDomains()             {return M_elementDomains;}
     //! Return the communicator of the mesh
-    boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
+     const boost::shared_ptr<Epetra_Comm> comm() const  {return M_comm;}
     //! Return a reference to M_ghostDataMap
     const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
     
@@ -550,7 +550,7 @@ void MeshPartitioner<MeshType>::doPartitionGraph()
     {
         matchFluidPartitionsFSI();
     }
-    redistributeElements();
+   // redistributeElements();
 }
 
 template<typename MeshType>
@@ -837,8 +837,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
 
     M_comm->Barrier();
 
-    Int nProc;
-    nProc = M_comm->NumProc();
+    Int nProc = M_comm->NumProc();
 
     // distribute the resulting partitioning stored in M_graphVertexLocations to all processors
     for ( Int proc = 0; proc < nProc; proc++ )

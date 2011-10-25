@@ -66,7 +66,7 @@
 #include <life/lifefilters/ExporterEmpty.hpp>
 #include <life/lifefilters/ExporterEnsight.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 #include "ud_functions.hpp"
 #include "test_bdf.hpp"

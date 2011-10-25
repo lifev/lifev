@@ -81,7 +81,7 @@ Importer::import( RegionMesh<LinearHexa> & mesh,
 
 // Import mesh with linear triangles
 void
-Importer::import( RegionMesh2D<LinearTriangle> & mesh,
+Importer::import( RegionMesh<LinearTriangle> & mesh,
                   markerID_Type                regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
@@ -89,7 +89,7 @@ Importer::import( RegionMesh2D<LinearTriangle> & mesh,
 
 // Import mesh with linear quadrangles
 void
-Importer::import( RegionMesh2D<LinearQuad> & mesh,
+Importer::import( RegionMesh<LinearQuad> & mesh,
                   markerID_Type            regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
