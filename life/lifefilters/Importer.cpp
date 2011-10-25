@@ -68,7 +68,7 @@ void
 Importer::import( RegionMesh<LinearTetra> & mesh,
                   markerID_Type             regionFlag )
 {
-    detail::import( M_fileName, M_format, mesh, regionFlag );
+    detail::import3D( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Import mesh with linear hexahedras
@@ -76,7 +76,7 @@ void
 Importer::import( RegionMesh<LinearHexa> & mesh,
                   markerID_Type            regionFlag )
 {
-    detail::import( M_fileName, M_format, mesh, regionFlag );
+    detail::import3D( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Import mesh with linear triangles
@@ -84,7 +84,7 @@ void
 Importer::import( RegionMesh<LinearTriangle> & mesh,
                   markerID_Type                regionFlag )
 {
-    detail::import( M_fileName, M_format, mesh, regionFlag );
+    detail::import2D( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Import mesh with linear quadrangles
@@ -92,7 +92,7 @@ void
 Importer::import( RegionMesh<LinearQuad> & mesh,
                   markerID_Type            regionFlag )
 {
-    detail::import( M_fileName, M_format, mesh, regionFlag );
+   ERROR_MSG("Importer:No importers available for this type of mesh");
 } // import
 
 // Print attributes of the class

@@ -49,7 +49,8 @@ enum MeshFormat
     MESHPP, /*!< Meshpp type mesh */
     INRIA,  /*!< INRIA type mesh */
     GMSH,   /*!< Gmsh type mesh */
-    NETGEN  /*!< NetGen type mesh */
+    NETGEN, /*!< NetGen type mesh */
+    FREEFEM /*!< FreeFem type mesh */
 };
 
 namespace detail
@@ -58,7 +59,7 @@ namespace detail
 // Import function for 3D mesh
 template<typename Elt>
 void
-import( std::string const&  fileName,
+import3D( std::string const&  fileName,
         MeshFormat const&   format,
         RegionMesh<Elt>&  mesh,
         markerID_Type     regionFlag )
@@ -81,14 +82,19 @@ import( std::string const&  fileName,
     case NETGEN:
         readNetgenMesh( mesh, fileName, regionFlag );
         break;
+    default:
+		{
+		std::ostringstream ostr;
+		ostr << "Unsupported 2D file format";
+		throw std::invalid_argument( ostr.str() );
+		}
     }
-
 } // import
 
-// Import function for 2D mesh
+//Import function for 2D mesh
 template<typename Elt>
 void
-import( std::string const& fileName,
+import2D( std::string const& fileName,
         MeshFormat const&  format,
         RegionMesh<Elt>& mesh,
         markerID_Type    regionFlag )
@@ -96,20 +102,16 @@ import( std::string const& fileName,
     // Select the right mesh format, only Gmsh allowed
     switch ( format )
     {
-    case MESHPP:
-    case INRIA:
-    case NETGEN:
-    {
+    case FREEFEM:
+    	readFreeFemFile( mesh, fileName, regionFlag );
+    	break;
+    default:
+		{
         std::ostringstream ostr;
-        ostr << "Unsupported file format for RegionMesh";
+        ostr << "Unsupported 2D file format";
         throw std::invalid_argument( ostr.str() );
+		}
     }
-    break;
-    case GMSH:
-        readGmshFile( mesh, fileName, regionFlag );
-        break;
-    }
-
 } // import
 
 } // Namespace detail
