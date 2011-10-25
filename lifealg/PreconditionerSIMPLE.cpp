@@ -79,9 +79,6 @@ PreconditionerSIMPLE::createSIMPLEList( list_Type&         list,
 
     std::string precType = dataFile( ( section + "/prectype" ).data(), "SIMPLE" );
     list.set( "prectype", precType );
-
-    int velocityBlockSize = dataFile( ( section + "/" + subsection + "/blocks/velocity_block_size" ).data(), -1 );
-    int pressureBlockSize = dataFile( ( section + "/" + subsection + "/blocks/pressure_block_size" ).data(), -1 );
     string SIMPLEType = dataFile( ( section + "/" + subsection + "/SIMPLE_type" ).data(), "SIMPLE" );
 
     std::string fluidPrec = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec" ).data(), "ML" );
@@ -94,8 +91,6 @@ PreconditionerSIMPLE::createSIMPLEList( list_Type&         list,
     std::string schurPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/schur_prec_data_section" ).data(), "" );
     list.set( "subprecs: Schur prec data section", ( section + "/" + subsection+"/subprecs/"+schurPrecDataSection ).data() );
 
-    list.set( "blocks: velocity block size", velocityBlockSize );
-    list.set( "blocks: pressure block size", pressureBlockSize );
     list.set( "SIMPLE Type", SIMPLEType );
 
     if ( displayList ) list.print( std::cout );
@@ -266,8 +261,8 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
 
     /*
      * Building the Second block
-     * / I  -D^-1Bt \ = / D^-1   0    \/ I -Bt \/ D 0 \
-     * \ 0   alphaI /   \ 0    alphaI /\ 0  I  /\ 0 I /
+     * / I D^-1Bt \ = / D^-1   0    \/ I Bt \/ D 0 \
+     * \ 0 alphaI /   \ 0    alphaI /\ 0 I  /\ 0 I /
      */
     if ( verbose ) std::cout << "       Block 2 (D^-1,alpha I)" << std::endl;
     timer.start();

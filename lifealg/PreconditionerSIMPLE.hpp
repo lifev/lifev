@@ -94,7 +94,7 @@ public:
     //    IfpackPreconditioner( matrixPtr_Type& A );
 
     //! default destructor
-    ~PreconditionerSIMPLE();
+    virtual ~PreconditionerSIMPLE();
 
     //@}
 
