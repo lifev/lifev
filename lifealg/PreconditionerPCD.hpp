@@ -220,6 +220,7 @@ protected:
     bool        M_useLumpedPressureMass;
     bool        M_setApBoundaryConditions;
     bool        M_setFpBoundaryConditions;
+    bool        M_fullFactorization;
 
 private:
     PreconditionerPCD( const PreconditionerPCD& P ):
