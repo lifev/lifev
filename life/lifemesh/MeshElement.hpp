@@ -395,6 +395,22 @@ markerID_Type MeshElement<GeoShape, PointType>::setStrongerMarkerAtPoint( const 
     return (const_cast<PointType *> ( M_points[identity]) ) -> setStrongerMarker(flag);
 }
 
+template <typename PointType>
+Real edgeLength( const MeshElement<LinearLine, PointType>& edge )
+{
+    Real deltaX, deltaY, deltaZ;
+
+    deltaX = ( edge.point( 1 ) ).x() - ( edge.point( 0 ) ).x();
+    deltaY = ( edge.point( 1 ) ).y() - ( edge.point( 0 ) ).y();
+    deltaZ = ( edge.point( 1 ) ).z() - ( edge.point( 0 ) ).z();
+
+    deltaX *= deltaX;
+    deltaY *= deltaY;
+    deltaZ *= deltaZ;
+
+    return std::sqrt( deltaX+deltaY+deltaZ );
+}
+
 }
 #endif
 
