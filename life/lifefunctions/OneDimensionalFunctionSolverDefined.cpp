@@ -178,7 +178,7 @@ OneDimensionalFunctionSolverDefinedCompatibility::setupNode()
 {
     super::setupNode();
 
-    mesh_Type::EdgeType boundaryEdge;
+    mesh_Type::edge_Type boundaryEdge;
     switch ( M_bcSide )
     {
     case OneDimensional::left:
@@ -273,7 +273,7 @@ OneDimensionalFunctionSolverDefinedCompatibility::evaluateRHS( const Real& eigen
 Real
 OneDimensionalFunctionSolverDefinedCompatibility::computeCFL( const Real& eigenvalue, const Real& timeStep ) const
 {
-    Real cfl = eigenvalue * timeStep / M_fluxPtr->physics()->data()->mesh()->edgeLength( M_bcElement );
+    Real cfl = eigenvalue * timeStep / edgeLength(M_fluxPtr->physics()->data()->mesh()->edge( M_bcElement ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( M_bcInternalNode == 1 ) // the edge is on the left of the domain

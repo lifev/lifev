@@ -45,7 +45,7 @@
 
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifefem/TimeData.hpp>
-#include <life/lifemesh/RegionMesh1D.hpp>
+#include <life/lifemesh/RegionMesh1DBuilders.hpp>
 
 #include <life/lifesolver/OneDimensionalDefinitions.hpp>
 
@@ -107,7 +107,7 @@ public:
     typedef TimeData                                                  time_Type;
     typedef boost::shared_ptr< time_Type >                            timePtr_Type;
 
-    typedef RegionMesh1D< LinearLine >                                mesh_Type;
+    typedef RegionMesh< LinearLine >                                mesh_Type;
     typedef boost::shared_ptr< mesh_Type >                            meshPtr_Type;
 
     // ScalVec SHOULD BE REPLACED EVERYWHERE BY EPETRAVECTOR FOR PARALLEL COMPUTATION
@@ -791,6 +791,8 @@ inline Real
 OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, const UInt& iNode, const UInt& bcFiniteDifferenceOrder )
 {
     // This method is coded only for homogeneous discretizations
+
+	Real meanH = MeshUtility::MeshStatistics::computeSize(*M_meshPtr).meanH;
     switch ( bcFiniteDifferenceOrder  )
     {
     case 1:
@@ -798,15 +800,15 @@ OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, co
         // We use 1° order finite differences at the boundaries to compute the derivatives
         if ( iNode == 0 )
         {
-            return ( -vector[0] + vector[1] ) / ( M_meshPtr->meanH() );
+            return ( -vector[0] + vector[1] ) / ( meanH );
         }
         else if ( iNode == M_meshPtr->numPoints() - 1 )
         {
-            return ( vector[iNode] - vector[iNode-1] ) / ( M_meshPtr->meanH() );
+            return ( vector[iNode] - vector[iNode-1] ) / ( meanH );
         }
         else
         {
-            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_meshPtr->meanH() );
+            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * meanH );
         }
 
         break;
@@ -816,15 +818,15 @@ OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, co
         // We use 2° order finite differences at the boundaries to compute the derivatives
         if ( iNode == 0 )
         {
-            return ( -1.5 * vector[0] + 2.0*vector[1] - 0.5 * vector[2] ) / ( M_meshPtr->meanH() );
+            return ( -1.5 * vector[0] + 2.0*vector[1] - 0.5 * vector[2] ) / ( meanH );
         }
         else if ( iNode == M_meshPtr->numPoints() - 1 )
         {
-            return ( 1.5 * vector[iNode] - 2.0*vector[iNode-1] + 0.5 * vector[iNode-2] ) / ( M_meshPtr->meanH() );
+            return ( 1.5 * vector[iNode] - 2.0*vector[iNode-1] + 0.5 * vector[iNode-2] ) / ( meanH );
         }
         else
         {
-            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_meshPtr->meanH() );
+            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * meanH );
         }
 
         break;

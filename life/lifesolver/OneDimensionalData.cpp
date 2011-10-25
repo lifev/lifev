@@ -126,7 +126,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     Real length = dataFile( ( section + "/space_discretization/Length"           ).data(), 1. );
     Real numberOfElements = dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 );
 
-    M_meshPtr->setup( length, numberOfElements );
+    uniformMesh1D( *M_meshPtr, 0., length, numberOfElements );
 
     //std::cout << " 1D- Mesh nodes:                               " << M_meshPtr->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_meshPtr->numElements() << std::endl;
@@ -309,7 +309,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     Real length = dataFile( ( section + "/discretization/x_right" ).data(), 1. ) -
                   dataFile( ( section + "/discretization/x_left"  ).data(), 0. );
 
-    M_meshPtr->setup( length, dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
+    uniformMesh1D( *M_meshPtr, 0., length, dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
 
     //std::cout << " 1D- Mesh nodes:                               " << M_meshPtr->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_meshPtr->numElements() << std::endl;

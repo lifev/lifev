@@ -1363,13 +1363,26 @@ public:
      * @return a reference to the point
      */
     point_Type & changePointBoundaryFlag(UInt const & position, bool const boundary);
+
+
+
+    //! Returns the first mesh Point.
+	/**
+	 *  Returns the first Point in the mesh.
+	 *
+	 *  @return const reference to the first mesh Point.
+	 */
+	inline point_Type const & firstPoint() const {return pointList.front();}
+
+
+
     //! Returns the last mesh Point.
     /**
      *  Returns the last Point in the mesh.
      *
-     *  @return Reference to the last mesh Point.
+     *  @return const reference to the last mesh Point.
      */
-    point_Type & lastPoint();
+    inline point_Type const & lastPoint() const {return pointList.back();}
 
     //! Returns the i-th mesh Point.
     /**
@@ -2314,16 +2327,6 @@ changePointBoundaryFlag(UInt const & position, bool const boundary)
     }
     return pointList[position];
 }
-
-
-template <typename GEOSHAPE, typename MC>
-inline
-typename RegionMesh<GEOSHAPE, MC>::point_Type &
-RegionMesh<GEOSHAPE, MC>::lastPoint()
-{
-    return pointList.back();
-}
-
 
 template <typename GEOSHAPE, typename MC>
 inline
