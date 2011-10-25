@@ -227,7 +227,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     boost::shared_ptr<matrixBlock_Type> invLumpedMassBlockMat( new matrixBlock_Type( map ) );
     invLumpedMassBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
     invLumpedMassBlockMat->getMatrixBlockView( 0, 0, B11 );
-    MatrixBlockUtils::createInvLumpedBlock( M, B11 );
+    MatrixBlockUtils::createInvDiagBlock( M, B11 );
     massMat.reset();               // Free memory
     *invLumpedMassBlockMat *= -1.0;
     invLumpedMassBlockMat->globalAssemble();
