@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     // Error of the problem
     LifeV::Real error(0);
     // Error known
-    const LifeV::Real errorKnown( 0.3699099456611913 );
+    const LifeV::Real errorKnown( 0.357740920454703 );
     // Tollerance between the error and the errorKnown
     const LifeV::Real tollerance( 1e-8 );
 
