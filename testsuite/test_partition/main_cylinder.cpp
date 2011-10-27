@@ -57,8 +57,9 @@
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
 
+#ifdef HAVE_HDF5
 #include "cylinder.hpp"
-
+#endif
 
 using namespace LifeV;
 
@@ -74,6 +75,9 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 int
 main( int argc, char** argv )
 {
+
+#ifdef HAVE_HDF5
+
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
 #endif
@@ -103,5 +107,10 @@ main( int argc, char** argv )
 #endif
 
     return return_value;
+
+#endif // HAVE_HDF5
+
+    return 0;
+
 }
 
