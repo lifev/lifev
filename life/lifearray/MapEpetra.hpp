@@ -59,12 +59,13 @@
 #include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
+#include <life/lifemesh/NeighborMarker.hpp>
 
 
 namespace LifeV
 {
 
-enum MapEpetraType {Unique = 0, Repeated, Ghost};
+enum MapEpetraType {Unique = 0, Repeated};
 
 
 //! MapEpetra - Wrapper for Epetra_Map
@@ -253,7 +254,10 @@ public:
 
     //! Generate ghost map based on nodes neighborhood
     template<typename MeshType>
-    MapEpetra ghostMapOnNodes( MeshType & meshPart );
+    MapEpetra ghostMapOnNodes( MeshType & mesh );
+
+    //! Generate ghost map based on neighbor map
+    MapEpetra ghostMapOnNodes( neighborMap_Type & neighborMap, UInt overlap = 1 );
 
     //! Creates a new map with a Repeated map that encompasses ghost values for P0 variables
     template<typename MeshType>
@@ -466,7 +470,6 @@ MapEpetra MapEpetra::ghostMapOnNodes( MeshType & mesh )
 
     return ghostMap;
 }
-
 
 template <typename MeshType>
 MapEpetra MapEpetra::ghostMapOnElements( MeshType & mesh )

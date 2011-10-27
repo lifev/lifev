@@ -273,6 +273,55 @@ MapEpetra::operator +  ( Int const size )
     return map;
 }
 
+MapEpetra MapEpetra::ghostMapOnNodes( neighborMap_Type & neighborMap, UInt overlap )
+{
+    MapEpetra ghostMap;
+
+    // use the same Unique map and comm of the original map
+    ghostMap.M_uniqueMapEpetra = this->M_uniqueMapEpetra;
+    ghostMap.M_commPtr         = this->M_commPtr;
+
+    UInt numRepeated ( this->M_repeatedMapEpetra->NumMyElements() );
+    Int* repeatedList = new Int [ numRepeated ];
+
+    this->M_repeatedMapEpetra->MyGlobalElements( repeatedList );
+
+    // use a set to avoid duplicates
+    std::set<Int> myGlobalElementsSet, myOriginalElementsSet;
+
+    // insert all points on the repeated map
+    for ( UInt k = 0; k < numRepeated; k++ )
+    {
+        myOriginalElementsSet.insert ( repeatedList[ k ] );
+    }
+
+    // todo: optimize this!!
+    // 1: work only on the boundary
+    // 2: copy back only if necessary
+    // repeat on actual nodes to expand overlap
+    for ( UInt i = 0; i < overlap; i++ )
+    {
+        // iterate on points adding all neighbors
+        for ( std::set<Int>::const_iterator nodeIt = myOriginalElementsSet.begin();
+                        nodeIt != myOriginalElementsSet.end(); ++nodeIt )
+        {
+            // iterate on each node neighborhood
+            for ( neighborList_Type::const_iterator neighborIt = neighborMap[ *nodeIt ].begin();
+                            neighborIt != neighborMap[ *nodeIt ].end(); ++neighborIt )
+            {
+                myGlobalElementsSet.insert( *neighborIt );
+            }
+        }
+        myOriginalElementsSet = myGlobalElementsSet;
+    }
+
+    std::vector<Int> myGlobalElements( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
+
+    // generate map
+    ghostMap.M_repeatedMapEpetra.reset( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_commPtr ) );
+
+    return ghostMap;
+}
 
 // ===================================================
 // Methods
