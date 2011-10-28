@@ -295,6 +295,8 @@ MapEpetra MapEpetra::ghostMapOnNodes( neighborMap_Type & neighborMap, UInt overl
         myOriginalElementsSet.insert ( repeatedList[ k ] );
     }
 
+    delete []repeatedList;
+
     // todo: optimize this!!
     // 1: work only on the boundary
     // 2: copy back only if necessary
@@ -382,6 +384,19 @@ MapEpetra::importer()
     return **M_importer;
 }
 
+// ===================================================
+// Set Methods
+// ===================================================
+void MapEpetra::setMap( map_ptrtype map, MapEpetraType mapType )
+{
+    switch ( mapType )
+    {
+    case Unique:
+        M_uniqueMapEpetra = map;
+    case Repeated:
+        M_repeatedMapEpetra = map;
+    }
+}
 
 // ===================================================
 // Private Methods

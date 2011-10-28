@@ -61,7 +61,6 @@
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifemesh/NeighborMarker.hpp>
 
-
 namespace LifeV
 {
 
@@ -288,6 +287,17 @@ public:
     Epetra_Import const& importer();
     //@}
 
+    //! @name Set Methods
+    //@{
+
+    //! Set the communicator
+    void setComm( comm_ptrtype const& commPtr ) { M_commPtr = commPtr; }
+
+    //! set the internal Epetra_Maps
+    void setMap( map_ptrtype map, MapEpetraType mapType );
+
+    //@}
+
 private:
 
     //! @name Private Methods
@@ -348,7 +358,6 @@ private:
     exporter_ptrtype   M_exporter;
     importer_ptrtype   M_importer;
     comm_ptrtype       M_commPtr;
-
 };
 
 
