@@ -62,7 +62,7 @@ void
 import( std::string const&  fileName,
         MeshFormat const&   format,
         RegionMesh3D<Elt>&  mesh,
-        entityFlag_Type     regionFlag )
+        markerID_Type     regionFlag )
 {
     // Select the right mesh format
     switch ( format )
@@ -92,7 +92,7 @@ void
 import( std::string const& fileName,
         MeshFormat const&  format,
         RegionMesh2D<Elt>& mesh,
-        entityFlag_Type    regionFlag )
+        markerID_Type    regionFlag )
 {
     // Select the right mesh format, only Gmsh allowed
     switch ( format )
@@ -175,7 +175,7 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh3D<LinearTetra> & mesh, entityFlag_Type regionFlag );
+    void import( RegionMesh3D<LinearTetra> & mesh, markerID_Type regionFlag );
 
 
     //! Import mesh with linear hexahedras
@@ -183,14 +183,14 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh3D<LinearHexa> & mesh, entityFlag_Type regionFlag );
+    void import( RegionMesh3D<LinearHexa> & mesh, markerID_Type regionFlag );
 
     //! Import mesh with linear triangles
     /*!
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh2D<LinearTriangle> & mesh, entityFlag_Type regionFlag );
+    void import( RegionMesh2D<LinearTriangle> & mesh, markerID_Type regionFlag );
 
 
     //! Import mesh with linear quadrangles
@@ -198,7 +198,7 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh2D<LinearQuad> & mesh, entityFlag_Type regionFlag );
+    void import( RegionMesh2D<LinearQuad> & mesh, markerID_Type regionFlag );
 
     //! Print attributes of the class
     /*!

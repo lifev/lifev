@@ -96,7 +96,7 @@ template <typename RegionMesh2D>
 bool
 importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
             const std::string & fileName,
-            entityFlag_Type     regionFlag )
+            markerID_Type     regionFlag )
 {
     UInt i, i1, i2, i3;
     UInt nVe, nBVe, nFa, nPo, nBPo, nEd, nBEd;
@@ -284,14 +284,14 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
     // now the boundary edges
     ID ia1;
     Int test;
-    entityFlag_Type ibc;
+    markerID_Type ibc;
 
     for ( i = 0; i < nBEd; i++ )
     {
         pe = &mesh.addEdge( true ); // Only boundary edges.
         p1 = ID( ib( 0, i ) ); // Explicit conversion to ID
         p2 = ID( ib( 1, i ) );
-        ibc = entityFlag_Type( bc( i ) ); //Explicit conversion to entity flag
+        ibc = markerID_Type( bc( i ) ); //Explicit conversion to entity flag
 
         // Boundary condition marker
         pe->setMarker( ibc );
@@ -341,7 +341,7 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
         p3 = ID( iel( 2, i ) );
         pf = &( mesh.addFace() ); // Only boundary faces
 
-        pf->setMarker( entityFlag_Type( ibc ) );
+        pf->setMarker( markerID_Type( ibc ) );
         pf->setPoint( 0, mesh.point( p1 ) ); // set face conn.
         pf->setPoint( 1, mesh.point( p2 ) ); // set face conn.
         pf->setPoint( 2, mesh.point( p3 ) ); // set face conn.
@@ -377,7 +377,7 @@ template <typename GeoShape, typename MC>
 bool
 readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
               const std::string          & fileName,
-              entityFlag_Type              regionFlag )
+              markerID_Type              regionFlag )
 {
     std::ifstream __is ( fileName.c_str() );
 
@@ -553,7 +553,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         case 1:
         {
             pe = &( mesh.addEdge( true ) );
-            pe->setMarker( entityFlag_Type( __et[ __i ] ) );
+            pe->setMarker( markerID_Type( __et[ __i ] ) );
             pe->setPoint( 0, mesh.point( __e[ __i ][ 0 ] ) );
             pe->setPoint( 1, mesh.point( __e[ __i ][ 1 ] ) );
         }
@@ -563,7 +563,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         case 2:
         {
             pf = &( mesh.addFace() );
-            pf->setMarker( entityFlag_Type( __et[ __i ] ) );
+            pf->setMarker( markerID_Type( __et[ __i ] ) );
             pf->setPoint( 0, mesh.point( __e[ __i ][ 0 ] ) );
             pf->setPoint( 1, mesh.point( __e[ __i ][ 1 ] ) );
             pf->setPoint( 2, mesh.point( __e[ __i ][ 2 ] ) );
@@ -574,7 +574,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         case 3:
         {
             pf = &( mesh.addFace() );
-            pf->setMarker( entityFlag_Type( __et[ __i ] ) );
+            pf->setMarker( markerID_Type( __et[ __i ] ) );
             pf->setPoint( 0, mesh.point( __e[ __i ][ 0 ] ) );
             pf->setPoint( 1, mesh.point( __e[ __i ][ 1 ] ) );
             pf->setPoint( 2, mesh.point( __e[ __i ][ 2 ] ) );
@@ -601,7 +601,7 @@ template <typename GeoShape, typename MC>
 bool
 readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
                  const std::string          & fileName,
-                 entityFlag_Type              regionFlag, bool useless )
+                 markerID_Type              regionFlag, bool useless )
 {
     MeshElementBareHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;
@@ -755,7 +755,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     for ( UInt __i = 0; __i < __ne; ++__i )
     {
         pe = &( mesh.addEdge( true ) );
-        pe->setMarker( entityFlag_Type( __edge_label[ __i ] ) );
+        pe->setMarker( markerID_Type( __edge_label[ __i ] ) );
         pe->setPoint( 0, mesh.point( __edge_nodes[ 2 * __i ] ) );
         pe->setPoint( 1, mesh.point( __edge_nodes[ 2 * __i + 1 ] ) );
         _edge = makeBareEdge( __edge_nodes[ 2 * __i ], __edge_nodes[ 2 * __i + 1 ] );
@@ -770,7 +770,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         pf = &( mesh.addFace() );
         pf->setId     ( __i );
         pf->setLocalId( __i );
-        pf->setMarker( entityFlag_Type( __triangle_label[ __i ] ) );
+        pf->setMarker( markerID_Type( __triangle_label[ __i ] ) );
         pf->setPoint( 0, mesh.point( __triangle_nodes[ 3 * __i ] ) );
         pf->setPoint( 1, mesh.point( __triangle_nodes[ 3 * __i + 1 ] ) );
         pf->setPoint( 2, mesh.point( __triangle_nodes[ 3 * __i + 2 ] ) );

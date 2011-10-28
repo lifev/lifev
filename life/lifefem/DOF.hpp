@@ -47,7 +47,6 @@
 #ifndef _DOF_HH
 #define _DOF_HH
 
-#include <life/lifearray/VectorSimple.hpp>
 #include <life/lifearray/ArraySimple.hpp>
 
 #include <life/lifecore/LifeV.hpp>
