@@ -141,9 +141,6 @@ typedef std::map< ID, neighborList_Type > neighborMap_Type;
 template <typename MeshType>
 void createNodeNeighbors( MeshType const & mesh, neighborMap_Type & neighborMap )
 {
-    // TODO: ASSERT_COMPILE_TIME that MeshType::pointMarker == NeighborMarker
-    // this guarantees that the nodeNeighbors structure is available.
-
     // generate node neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < mesh.numEdges(); ie++ )
