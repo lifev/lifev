@@ -146,6 +146,7 @@ namespace LifeV
   -# \c UInt an alias to uint32_type used for adressing
   -# \c ID an alias to id_type used to identify local numbering or components
   -# \c size_type an alias to size_t used as indices for arrays, vectors or matrices
+  -# \c flag_Type an alias to uint32_type used for boolean flags
 
 */
 
@@ -173,6 +174,60 @@ typedef uint32_type UInt;
 //! IDs
 typedef uint32_type ID;
 
+//! bit-flag with up to 32 different flags
+typedef uint32_type flag_Type;
+
+//! flag related free functions and functors
+namespace Flag
+{
+/** @name FlagFunctions
+ *  They implement basic operations on boolean flags
+ */
+//@{
+//! It returns true if all bit-flags common set in refFlag are also set in inputFlag
+inline bool testAllSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return ( inputFlag  & refFlag ) == refFlag;
+}
+
+//! returns true if at least one flag set in refFlag is set in inputFlag
+inline bool testOneSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return inputFlag  & refFlag;
+}
+
+//! turns on the refFlag active bits in inputFlag
+inline flag_Type turnOn  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return inputFlag  | refFlag;
+}
+
+//! turns off the refFlag active bits in inputFlag
+inline flag_Type turnOff ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return inputFlag  & ~refFlag;
+}
+
+//! switches the refFlag active bits in inputFlag
+inline flag_Type change ( flag_Type const & inputFlag, flag_Type const & refFlag )
+{
+    return inputFlag  ^ refFlag;
+}
+
+//! replaces the given flag with the reference one. This method is introduced with the same
+//! signature of the other methods in order to be used as a policy
+inline flag_Type replaceFlag  ( flag_Type const & /*inputFlag*/, flag_Type const & refFlag )
+{
+    return refFlag;
+}
+
+//! showMe method to print out flag status
+//! the flag is converted to its binary form ( right -> left corresponds to first -> last flag )
+void showMe ( flag_Type const & flag, std::ostream & out = std::cout );
+//@}
+
+//end namespace Flag
+}
 // For now only 3 dimensional problems.
 extern const UInt nDimensions;
 
@@ -180,6 +235,29 @@ extern const UInt nDimensions;
 // MPI does not have the UInt type.
 const ID NotAnId = std::numeric_limits<Int>::max();
 #define NDIM 3
+
+//! clearVector
+/*!
+ * This is a general purpose utility that clears up a std::vector<T>
+ * making sure that it does not uses up memory after the call
+ * Useful when memory is an issue, since clear() does not free memory
+ * */
+template<typename T>
+void clearVector(T & stdVector){
+    stdVector.clear();
+    T().swap(stdVector);
+}
+//! resizeVector
+/*!
+ * This is a general purpose utility that resizes up a std::vector<T>
+ * making sure that it does not uses up more memory after the call
+ * Useful when memory is an issue, since resize() does not free memory
+ */
+template<typename T>
+void resizeVector(T & stdVector, UInt const & newsize){
+    stdVector.resize(newsize);
+    if (stdVector.capacity() > stdVector.size())  T(stdVector).swap(stdVector);
+}
 
 } // end namespace LifeV
 

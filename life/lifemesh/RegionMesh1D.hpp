@@ -46,7 +46,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifemesh/MeshElementMarked.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 #include <life/lifemesh/ElementShapes.hpp>
-#include <life/lifearray/VectorSimple.hpp>
+#include <life/lifearray/MeshEntityContainer.hpp>
 #include <life/lifearray/ArraySimple.hpp>
 
 #include <iomanip>
@@ -71,7 +71,7 @@ namespace LifeV
  */
 template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh1D : public MeshEntity,
-        public MC::RegionMarker
+        public MC::regionMarker_Type
 {
 public:
     /** @defgroup public_types Public Types
@@ -87,11 +87,11 @@ public:
     //! Common Marker Class
     typedef MC MarkerCommon;
     //! Point Marker
-    typedef typename MC::PointMarker     PointMarker;
+    typedef typename MC::pointMarker_Type  PointMarker;
     //! Edge Marker
-    typedef typename MC::EdgeMarker      EdgeMarker;
+    typedef typename MC::edgeMarker_Type   EdgeMarker;
     //! Region Marker
-    typedef typename MC::RegionMarker    RegionMarker;
+    typedef typename MC::regionMarker_Type RegionMarker;
 
     /** @} */ // End of group Marker Types
 
@@ -131,18 +131,18 @@ public:
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
      *
-     *  I Use VectorSimple container
+     *  I Use MeshEntityContainer container
      *  @{
      */
 
     //! Points Container
-    typedef VectorSimple<point_Type>  Points;
+    typedef MeshEntityContainer<point_Type>  Points;
     //! Elements Container - compatibility
-    typedef VectorSimple<VolumeType> Volumes;
+    typedef MeshEntityContainer<VolumeType> Volumes;
     //! Faces Container - compatibility
-    typedef VectorSimple<FaceType>   Faces;
+    typedef MeshEntityContainer<FaceType>   Faces;
     //! Edges Container: at least boundary edges
-    typedef VectorSimple<EdgeType>   Edges;
+    typedef MeshEntityContainer<EdgeType>   Edges;
 
     /** @} */ // End of group Geometric Element Container Types
 
@@ -163,9 +163,9 @@ public:
     typedef MeshElementMarked0D<MC>             BElementType;
 
     //! Element Geometric Shape Container Type
-    typedef VectorSimple<EdgeType>         Elements;
+    typedef MeshEntityContainer<EdgeType>         Elements;
     //! Boundary Element Geometric Shape Container Type
-    typedef VectorSimple<point_Type>        BElements;
+    typedef MeshEntityContainer<point_Type>        BElements;
 
     /** @} */ // End of group Generic Types
 
@@ -1159,7 +1159,7 @@ public:
     //! Container of mesh Edges.
     Edges   edgeList;
     //! Boundary points list.
-    VectorSimple<point_Type * > _bPoints;
+    std::vector<point_Type * > _bPoints;
 
     /** @} */ // End of group Region Containers
 
@@ -1185,32 +1185,32 @@ protected:
     /**
      *  Returns the number of elements in a given list.
      *
-     *  @param list VectorSimple list of elements.
+     *  @param list MeshEntityContainer list of elements.
      *  @return Number of elements in list.
      */
     template < typename T >
-    UInt numItems( VectorSimple< T> const & list ) const;
+    UInt numItems( MeshEntityContainer< T> const & list ) const;
 
     //! Maximum number of Elements in a list.
     /**
      *  Returns maximum number of elements in a given list.
      *
-     *  @param list VectorSimple list of elements.
+     *  @param list MeshEntityContainer list of elements.
      *  @return Maximum number of elements in list.
      */
     template < typename T >
-    UInt maxNumItems( VectorSimple< T> const & list ) const;
+    UInt maxNumItems( MeshEntityContainer< T> const & list ) const;
 
     //! Set maximum number of Elements in a list.
     /**
      *  Set maximum number of elements in a given list.
      *
-     *  @param list VectorSimple list of elements.
+     *  @param list MeshEntityContainer list of elements.
      *  @param n Number of elements.
      *  @param title Title for verbose output.
      */
     template < typename T >
-    void setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title );
+    void setMaxNumItems( MeshEntityContainer< T> & list, UInt n, std::string title );
 
     /** @defgroup protected_attributes Protected Attributes
      */
@@ -1237,7 +1237,7 @@ protected:
 
 #ifdef NOT_BDATA_FIRST
     //! Boundary Edges Container
-    VectorSimple<EdgeType * > _bEdges;
+    std::vector<EdgeType * > _bEdges;
 #endif
 
     /** @} */ // End of group Face-To-Edge and Boundary Containers
@@ -1286,7 +1286,7 @@ protected:
 template <typename GEOSHAPE, typename MC>
 RegionMesh1D<GEOSHAPE, MC>::RegionMesh1D( UInt id ) :
         MeshEntity          ( id ),
-        MC::RegionMarker    (),
+        MC::regionMarker_Type (),
         switches            (),
         _numVertices        ( 0 ),
         _numBVertices       ( 0 ),
@@ -1633,7 +1633,7 @@ RegionMesh1D<GEOSHAPE, MC>::bElement( UInt const & i ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh1D<GEOSHAPE, MC>::numItems( VectorSimple< T> const & list ) const
+RegionMesh1D<GEOSHAPE, MC>::numItems( MeshEntityContainer< T> const & list ) const
 {
     return list.size();
 }
@@ -1641,7 +1641,7 @@ RegionMesh1D<GEOSHAPE, MC>::numItems( VectorSimple< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh1D<GEOSHAPE, MC>::maxNumItems( VectorSimple< T> const & list ) const
+RegionMesh1D<GEOSHAPE, MC>::maxNumItems( MeshEntityContainer< T> const & list ) const
 {
     return list.capacity();
 }
@@ -1649,7 +1649,7 @@ RegionMesh1D<GEOSHAPE, MC>::maxNumItems( VectorSimple< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 void
-RegionMesh1D<GEOSHAPE, MC>::setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title )
+RegionMesh1D<GEOSHAPE, MC>::setMaxNumItems( MeshEntityContainer< T> & list, UInt n, std::string title )
 {
     if ( list.capacity() == 0 )
     {
@@ -2088,7 +2088,7 @@ RegionMesh1D<GEOSHAPE, MC>::setPoint
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename VectorSimple<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename std::vector<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {

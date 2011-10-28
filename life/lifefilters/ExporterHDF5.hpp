@@ -1044,12 +1044,11 @@ void ExporterHDF5<MeshType>::writeGeometry()
     Int gid;
     for (ID i=0; i < this->M_mesh->numVertices(); ++i)
     {
-        // Saving the initial mesh if M_multimesh is false (this is important for restart)
         typename MeshType::point_Type point;
         if ( this->M_multimesh )
             point = this->M_mesh->point(i);
         else
-            point = this->M_mesh->pointInitial(i);
+            point = this->M_mesh->meshTransformer().pointInitial(i);
 
         gid = point.id();
 
@@ -1071,13 +1070,17 @@ void ExporterHDF5<MeshType>::writeGeometry()
 
     if (this->M_multimesh)
     {
-        connectionsVarname  += this->M_postfix; // see also in writeTopology
         pointsXVarname      += this->M_postfix; // see also in writeGeometry
         pointsYVarname      += this->M_postfix; // see also in writeGeometry
         pointsZVarname      += this->M_postfix; // see also in writeGeometry
     }
 
+    if ( this->M_printConnectivity )
+    {
     M_HDF5->Write(connectionsVarname, connections);
+    this->M_printConnectivity = false;
+    }
+
     // bool writeTranspose (true);
     M_HDF5->Write(pointsXVarname, pointsX.epetraVector(), true);
     M_HDF5->Write(pointsYVarname, pointsY.epetraVector(), true);
