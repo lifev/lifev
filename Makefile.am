@@ -97,8 +97,8 @@ $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/lifev_create_subdirlist.m4])'>>acinclude.m4
 
 
-Makefile.headers: tools/update-headers
-	$(SHELL) tools/update-headers
+$(top_srcdir)/Makefile.headers: $(top_srcdir)/tools/update-headers
+	cd $(top_srcdir) && $(SHELL) tools/update-headers
 
 report:
 	@if test -x tools/inspect/inspect; then\
