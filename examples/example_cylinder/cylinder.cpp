@@ -476,7 +476,7 @@ Cylinder::run()
 #ifdef HAVE_HDF5
     ExporterHDF5<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #else
-    Ensight<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
+    ExporterEnsight<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #endif
 
     vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), ensight.mapType() ) );

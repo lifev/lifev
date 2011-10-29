@@ -178,29 +178,6 @@ public:
                 const bcComponentsVec_Type& components );
 
 
-
-    //! @name Methods
-	//@{
-
-	//! Add new periodic BC to the list
-	/*!
-	  @param name The name of the boundary condition
-	  @param flag1 The mesh flag identifying the part of the mesh where the boundary condition applies
-	  @param flag2 The mesh flag identifying the part of the mesh coupled with the part with flag1
-	  @param type The boundary condition type: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
-	  @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
-	  @param bcFunctionPeriodic  The container holding the user defined periodic function involved in this boundary condition
-	  @param numberOfComponents The number of components involved in this boundary condition
-    */
-    void addBC( const bcName_Type& name,
-			    const bcFlag_Type& flag1,
-			    const bcFlag_Type& flag2,
-			    const bcType_Type& type,
-			    const bcMode_Type& mode,
-			    const std::map<ID, ID>& periodicMap,
-			    const UInt& numComponents );
-
-
     //! Add new BC to the list for Scalar, Tangential or Normal mode problems (user defined function case)
     /*!
       @param name The name of the boundary condition

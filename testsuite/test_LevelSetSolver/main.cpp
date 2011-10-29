@@ -173,11 +173,13 @@ main( int argc, char** argv )
         bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
     }
 
+#ifdef HAVE_HDF5
     ExporterHDF5<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID());
     exporter.setMultimesh(false);
     boost::shared_ptr<vector_type> solutionPtr (new vector_type(level_set.solution(),Repeated));
     exporter.addVariable( ExporterData<mesh_type>::ScalarField, "level-set", uFESpace, solutionPtr, UInt(0) );
     exporter.postProcess(0);
+#endif // HAVE_HDF5
 
     Real current_time( data_level_set->dataTime()->initialTime() );
     Real dt( data_level_set->dataTime()->timeStep() );
@@ -202,8 +204,10 @@ main( int argc, char** argv )
         level_set.reinitializationDirect();
         if (verbose) std::cout << " done " << std::endl;
         if (verbose) std::cout << "[LS] Exporting ... " << std::flush;
+#ifdef HAVE_HDF5
         *solutionPtr = level_set.solution();
         exporter.postProcess(current_time);
+#endif // HAVE_HDF5
         if (verbose) std::cout << " done " << std::endl;
     }
 
@@ -215,7 +219,9 @@ main( int argc, char** argv )
         return (EXIT_FAILURE);
     }
 
+#ifdef HAVE_HDF5
     exporter.closeFile();
+#endif // HAVE_HDF5
 
 #ifdef HAVE_MPI
     MPI_Finalize();

@@ -2948,12 +2948,12 @@ RegionMesh<GEOSHAPE, MC>::updateElementRidges(edge_Type, bool ce, bool verbose, 
         // Save some memory annihilating newToOld
         std::vector<ID>().swap(newToOld);
         // Fix volume to edge array to reflect new edge numbering
-        // M_ElemToRidge is in fact a vector!
-        std::vector<UInt> tmp( M_ElemToRidge.size() );
+        // M_VToE is in fact a vector!
+        std::vector<UInt> tmp( M_VToE.size() );
         std::vector<UInt>::iterator tmp_it=tmp.begin();
-        for (std::vector<UInt>::iterator it=M_ElemToRidge.begin();it<M_ElemToRidge.end();++it,++tmp_it)
+        for (std::vector<UInt>::iterator it=M_VToE.begin();it<M_VToE.end();++it,++tmp_it)
             *tmp_it = oldToNew[*it];
-        std::copy(tmp.begin(),tmp.end(),M_ElemToRidge.begin());
+        std::copy(tmp.begin(),tmp.end(),M_VToE.begin());
     }
 
     UInt n = _be.maxId();

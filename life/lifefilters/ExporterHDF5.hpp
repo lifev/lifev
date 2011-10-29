@@ -1099,13 +1099,17 @@ void ExporterHDF5<MeshType>::writeGeometry()
 
     if (this->M_multimesh)
     {
-        connectionsVarname  += this->M_postfix; // see also in writeTopology
         pointsXVarname      += this->M_postfix; // see also in writeGeometry
         pointsYVarname      += this->M_postfix; // see also in writeGeometry
         pointsZVarname      += this->M_postfix; // see also in writeGeometry
     }
 
+    if ( this->M_printConnectivity )
+    {
     M_HDF5->Write(connectionsVarname, connections);
+    this->M_printConnectivity = false;
+    }
+
     // bool writeTranspose (true);
     M_HDF5->Write(pointsXVarname, pointsX.epetraVector(), true);
     M_HDF5->Write(pointsYVarname, pointsY.epetraVector(), true);

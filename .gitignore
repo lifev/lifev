@@ -7,6 +7,7 @@
 configure
 configure.files
 autom4te.cache
+Makefile.headers
 subdirs
 admin
 .gitmodules

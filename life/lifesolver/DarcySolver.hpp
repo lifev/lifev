@@ -62,8 +62,8 @@ namespace
 struct DarcyDefaultSource
 {
     LifeV::Real operator()( const LifeV::Real&, const LifeV::Real&,
-			    const LifeV::Real&, const LifeV::Real&,
-			    const LifeV::UInt&) const
+                const LifeV::Real&, const LifeV::Real&,
+                const LifeV::UInt&) const
     {
         return static_cast<LifeV::Real>( 0 );
     }
@@ -113,7 +113,7 @@ namespace LifeV
   the dual variable, the fourth for the hybrid variable.
   \f[
   \begin{array}{l}
-  V = L^2 (\Omega ) \,,\vspace{0.2cm} \					\
+  V = L^2 (\Omega ) \,,\vspace{0.2cm} \                 \
   H(div, K) = \displaystyle \left\{ \tau \in ( L^2(K))^n : \nabla \cdot \tau \in L^2(K)\right\}\,, \vspace{0.2cm}\\
   Z = \displaystyle \left\{ \tau \in L^2(\Omega) : \tau\vert_K \in H(div, K) \, \forall K \in  \mathcal{T}_h \right\}\,, \vspace{0.2cm}\\
   \Lambda = \displaystyle \left\{ \lambda \in \prod_{K \in \mathcal{T}_h} H^{1/2} (\partial K): \lambda_K = \lambda_{K'} \
@@ -769,8 +769,8 @@ DarcySolver ( const data_Type&                 dataFile,
         // Algebraic stuff.
         M_matrHybrid             ( new matrix_Type ( M_localMap ) ),
         M_rhs                    ( new vector_Type ( M_localMap ) ),
-        M_primal    		 ( new vector_Type ( M_primal_FESpace.map() ) ),
-        M_dual			 ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
+        M_primal             ( new vector_Type ( M_primal_FESpace.map() ) ),
+        M_dual           ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
         M_hybrid                 ( new vector_Type ( M_hybrid_FESpace.map() ) ),
         M_residual               ( new vector_Type ( M_localMap ) ),
         M_linearSolver           ( ),
@@ -816,8 +816,8 @@ DarcySolver ( const data_Type&                 dataFile,
         // Algebraic stuff.
         M_matrHybrid             ( new matrix_Type ( M_localMap ) ),
         M_rhs                    ( new vector_Type ( M_localMap ) ),
-        M_primal    	    	 ( new vector_Type ( M_primal_FESpace.map() ) ),
-        M_dual	                 ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
+        M_primal                 ( new vector_Type ( M_primal_FESpace.map() ) ),
+        M_dual                   ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
         M_hybrid                 ( new vector_Type ( M_hybrid_FESpace.map() ) ),
         M_residual               ( new vector_Type ( M_localMap ) ),
         M_linearSolver           ( ),
@@ -945,8 +945,6 @@ buildSystem ()
     chronoGlobalAssembleMatrix.start();
 
     // Assemble the global hybrid matrix.
-    M_matrHybrid->spy("Hybrid");
-
     M_matrHybrid->globalAssemble();
 
     chronoGlobalAssembleMatrix.stop();

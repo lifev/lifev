@@ -122,6 +122,12 @@ public:
 
     //! Set the mesh and the processor id
     void setMeshProcId( const meshPtr_Type mesh, const Int& procId );
+
+    //! temporary: the method should work form the Exporter class
+    void exportPID ( MeshPartitioner<MeshType> const & /*meshPart*/ )
+    {
+        std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+    }
     //@}
 
     //! @name Get methods

@@ -68,6 +68,8 @@ using namespace LifeV;
 int main( int argc, char** argv )
 {
 
+#ifdef HAVE_HDF5
+
     boost::shared_ptr<Epetra_Comm> comm;
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
@@ -112,6 +114,8 @@ int main( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
+
+#endif // HAVE_HDF5
 
     return(EXIT_SUCCESS);
 }

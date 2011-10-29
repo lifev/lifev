@@ -489,6 +489,12 @@ public:
     */
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
+//! Specialization
+template <>
+inline ID reversePoint<QuadraticQuad>( ID const & pointId ){
+    static ID _rid[]={3,2,1,0,6,5,4,7,8};
+    return _rid[pointId];
+}
 
 //! Specialization
 template <>

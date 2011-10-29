@@ -847,6 +847,14 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
         M_comm->Broadcast ( &M_graphVertexLocations[ procStart ], procLength, proc );
     }
 
+    // distribute the resulting partitioning stored in M_graphVertexLocations to all processors
+    for ( Int proc = 0; proc < nProc; proc++ )
+    {
+        UInt procStart  = M_vertexDistribution[ proc ];
+        UInt procLength = M_vertexDistribution[ proc + 1 ] - M_vertexDistribution[ proc ];
+        M_comm->Broadcast ( &M_graphVertexLocations[ procStart ], procLength, proc );
+    }
+
     // this is a vector of subdomains: each component is
     // the list of vertices belonging to the specific subdomain
     (*M_elementDomains).resize(numParts);
