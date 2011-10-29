@@ -56,7 +56,7 @@ namespace LifeV
 	A coherent GeoShape has to be provided by the user.
 
  */
-class MeshVertex : public MeshEntityWithBoundary
+class MeshVertex : public MeshEntity
 {
 public:
 

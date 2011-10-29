@@ -1035,12 +1035,11 @@ void ExporterHDF5<MeshType>::writeGeometry()
     Int gid;
     for (ID i=0; i < this->M_mesh->numVertices(); ++i)
     {
-        // Saving the initial mesh if M_multimesh is false (this is important for restart)
         typename MeshType::point_Type point;
         if ( this->M_multimesh )
             point = this->M_mesh->point(i);
         else
-            point = this->M_mesh->pointInitial(i);
+            point = this->M_mesh->meshTransformer().pointInitial(i);
 
         gid = point.id();
 

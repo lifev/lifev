@@ -26,9 +26,10 @@
 
 /*!
     @file
-    @brief This file contains the MeshEntity and MeshEntityWithBoundary classes.
+    @brief This file contains the MeshEntity class.
 
     @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @contributor Antonio Cervone <ant.cervone@gmail.com>
     @maintainer Tiziano Passerini <tiziano@mathcs.emory.edu>
 
     The classes included in this file are useful to store the identifiers of
@@ -42,6 +43,19 @@
 
 namespace LifeV
 {
+
+//! available bit-flags for different geometric properties
+namespace EntityFlags
+{
+const flag_Type DEFAULT             ( 0x00 );
+const flag_Type PHYSICAL_BOUNDARY   ( 0x01 );
+const flag_Type INTERNAL_INTERFACE  ( 0x02 );
+const flag_Type SUBDOMAIN_INTERFACE ( 0x04 );
+const flag_Type OVERLAP             ( 0x08 );
+const flag_Type CUTTED              ( 0x10 );
+const flag_Type VERTEX              ( 0x11 );
+}
+
 //! This is the base class to store the identifiers.
 /*!
    In this class, there are two identifiers stored:
@@ -59,7 +73,11 @@ namespace LifeV
 
     Note: Documentation by Samuel Quinodoz, implementation anterior
     to the documentation, without name of author.
+
+  The additional flag that is stored is used to specify geometrical properties of the entity
+  such as the ones specified above in the EntityFlags namespace.
  */
+
 class MeshEntity
 {
 public:
@@ -72,54 +90,74 @@ public:
      */
     MeshEntity():
             M_id( NotAnId ),
-            M_localId( NotAnId )
+            M_localId( NotAnId ),
+            M_flag ( EntityFlags::DEFAULT )
     {};
 
     //! Copy Constructor
     MeshEntity(const MeshEntity& meshEntity):
-            M_id     (meshEntity.M_id),
-            M_localId(meshEntity.M_localId)
+            M_id     ( meshEntity.M_id ),
+            M_localId( meshEntity.M_localId ),
+            M_flag ( meshEntity.M_flag )
     {};
 
     //! Constructor with a single value for both identifiers.
     /*!
        @param id The value for both identifers.
+       @param flag The value of the flag to assign (optional)
      */
-    MeshEntity( const ID& id ):
+    MeshEntity( const ID& id, const flag_Type& flag = EntityFlags::DEFAULT ):
             M_id( id ),
-            M_localId( id )
+            M_localId( id ),
+            M_flag ( flag )
     {};
 
     //! Full constructor, where both identifiers are specified.
     /*!
        @param id The value for the global ID.
        @param lid The value for the local ID.
+       @param flag The value of the flag to assign (optional)
      */
-    MeshEntity( const ID& id, const ID& lid ):
+    MeshEntity( const ID& id, const ID& lid, const flag_Type& flag = EntityFlags::DEFAULT ):
             M_id( id ),
-            M_localId( lid )
+            M_localId( lid ),
+            M_flag ( flag )
     {};
 
+    //! backward-compatible constructor
+    /*!
+      This is the "full" constructor for this class.
+      @param id The identifier to be set for both (global and local) identifiers. Use
+      a set method if you want different identifiers.
+      @param boundary The value of the boundary indicator.
+    */
+    MeshEntity( const ID& id, const bool& boundary ) :
+        M_id( id ),
+        M_localId( id )
+    {
+        // NOTE: this is conservative, if PHYSICAL_BOUNDARY = 0x01
+        // this can be done as
+        // M_flag = static_cast<flag_Type> boundary;
+        M_flag = boundary ? EntityFlags::PHYSICAL_BOUNDARY : EntityFlags::DEFAULT;
+    };
+
     //! Destructor
-    ~MeshEntity()
+    virtual ~MeshEntity()
     {};
 
     //@}
 
-
     //! @name Methods
     //@{
-
-
     //! Displays the informations stored by this class
     void showMe( std::ostream& output = std::cout ) const
     {
         output << " Global ID : " << M_id << " -- " << " Local ID " << M_localId << std::endl;
+        output << " -- Flags: " << M_flag;
+        output << std::endl;
     };
 
-
     //@}
-
 
     //! @name Operators
     //@{
@@ -154,7 +192,6 @@ public:
 
     //@}
 
-
     //! @name Set Methods
     //@{
 
@@ -174,6 +211,43 @@ public:
     inline void setLocalId( const ID& id)
     {
         M_localId = id;
+    };
+
+    //! Set method for the boundary indicator
+    /*!
+      @param boundary The value to be set for the boundary indicator.
+    */
+    void setBoundary (const bool& boundary)
+    {
+        if ( boundary ) M_flag = Flag::turnOn  ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+        else            M_flag = Flag::turnOff ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+    };
+
+    //! Replace method for the entity flag
+    /*!
+      @param flag The value to be set for the entity flag.
+      @note Beware, it sets the entire flag; if you want to add a flag use | or setFlag
+    */
+    void replaceFlag ( const flag_Type& flag )
+    {
+        M_flag = flag;
+    };
+
+    //! Sets a flag
+    /**
+     * @param flag The flag to be added
+     */
+    void setFlag ( const flag_Type& flag )
+    {
+        M_flag = Flag::turnOn(flag,M_flag);
+    };
+    //! Remove a flag
+    /**
+     * @param flag The flag to be removed
+     */
+    void unSetFlag ( const flag_Type& flag )
+    {
+        M_flag = Flag::turnOff(M_flag,flag);
     };
 
     //@}
@@ -200,113 +274,25 @@ public:
         return M_localId;
     };
 
+    //! Tells if it is on the boundary
+    bool boundary() const
+    {
+        return Flag::testOneSet ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+    };
+
+
+    //! returns the entity flag
+    const flag_Type & flag() const
+    {
+        return M_flag;
+    };
+
     //@}
 
 private:
     ID M_id;
     ID M_localId;
-};
-
-
-
-//! MeshEntityWithBoundary - This is a MeshEntity with an additional information on the boundary.
-/*!
-  The additional boolean that is stored is used to know if the MeshEntity is on the boundary
-  or not. This class provides all the methods needed to handle easily this additional information.
-
-  Note: Documentation by Samuel Quinodoz, implementation anterior
-  to the documentation, without name of author.
- */
-class MeshEntityWithBoundary : public MeshEntity
-{
-public:
-
-    //! @name Constructors & Destructor
-    //@{
-
-    //! Empty constructor
-    /*!
-      This constructor calls the empty constructor of MeshEntity and
-      sets the boundary indicator to false.
-    */
-    MeshEntityWithBoundary() : MeshEntity(), M_boundary( false )
-    {};
-
-    //! Copy constructor
-    MeshEntityWithBoundary( const MeshEntityWithBoundary& meshEntityWithBoundary ) :
-            MeshEntity( meshEntityWithBoundary ),
-            M_boundary( meshEntityWithBoundary.M_boundary )
-    {};
-
-    //! Specific constructor
-    /*!
-      This is the "full" constructor for this class.
-      @param id The identifier to be set for both (global and local) identifiers. Use
-      a set method if you want different identifiers.
-      @param boundary The value of the boundary indicator.
-    */
-    MeshEntityWithBoundary( const ID& id, bool boundary = false ) :
-            MeshEntity( id ),
-            M_boundary( boundary )
-    {};
-
-    //! Destructor
-    ~MeshEntityWithBoundary()
-    {};
-
-    //@}
-
-
-    //! @name Methods
-    //@{
-
-
-    //! Display the informations stored by this class
-    void showMe( std::ostream& output = std::cout ) const
-    {
-        output << " Global ID : " << id() << " -- " << " Local ID " << localId();
-        if (M_boundary)
-        {
-            output << " -- Boundary ";
-        };
-        output << std::endl;
-    };
-
-
-    //@}
-
-
-    //! @name Set Methods
-    //@{
-
-
-    //! Set method for the boundary indicator
-    /*!
-      @param boundary The value to be set for the boundary indicator.
-    */
-    inline void setBoundary(const bool& boundary)
-    {
-        M_boundary = boundary;
-    };
-
-
-    //@}
-
-    //! @name Get Methods
-    //@{
-
-
-    //! Tells if it is on the boundary
-    inline const bool & boundary() const
-    {
-        return M_boundary;
-    };
-
-
-    //@}
-
-private:
-    bool M_boundary;
+    flag_Type M_flag;
 };
 
 

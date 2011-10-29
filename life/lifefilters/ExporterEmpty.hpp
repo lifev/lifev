@@ -66,6 +66,7 @@ public:
     //! @name Public methods
     //@{
     void postProcess(const Real& /*time*/) {}
+    void exportPID ( MeshPartitioner<MeshType> const & /*meshPart*/ ) {}
     UInt importFromTime( const Real& /*time*/ ) { assert(false); return 0; }
     void import(const Real& /*startTime*/, const Real& /*dt*/) {}
     void import(const Real& /*startTime*/) {}

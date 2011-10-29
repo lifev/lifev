@@ -277,14 +277,14 @@ public:
     void getFluidMatrix( matrix_Type& matrixFull );
 
     //! Set up post processing
-    void setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart );
+    void setupPostProc( const markerID_Type& flag, const mesh_Type meshPart );
 
     //! Compute area on a boundary face with given flag
     /*!
         @param  flag
         @return area
      */
-    Real area( const entityFlag_Type& flag );
+    Real area( const markerID_Type& flag );
 
     //! Compute flux on a boundary face with given flag and a given solution
     /*!
@@ -292,14 +292,14 @@ public:
         @param  solution
         @return flux
      */
-    Real flux( const entityFlag_Type& flag, const vector_Type& solution );
+    Real flux( const markerID_Type& flag, const vector_Type& solution );
 
     //! Compute flux on a boundary face with given flag
     /*!
         @param flag
         @return flux
      */
-    Real flux( const entityFlag_Type& flag );
+    Real flux( const markerID_Type& flag );
 
     //! Compute average pressure on a boundary face with given flag and a given solution
     /*!
@@ -307,14 +307,14 @@ public:
         @param  solution
         @return average pressure
      */
-    Real pressure( const entityFlag_Type& flag, const vector_Type& solution );
+    Real pressure( const markerID_Type& flag, const vector_Type& solution );
 
     //! Compute average pressure on a boundary face with given flag
     /*!
         @param flag
         @return average pressure
      */
-    Real pressure( const entityFlag_Type& flag );
+    Real pressure( const markerID_Type& flag );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
@@ -323,7 +323,7 @@ public:
         @param bcHandler BChandler containing the boundary conditions of the problem.
         @return          Lagrange multiplier
      */
-    Real lagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler );
+    Real lagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
@@ -334,7 +334,7 @@ public:
                          (and also the Lagrange multipliers at the end).
         @return          Lagrange multiplier
      */
-    Real lagrangeMultiplier( const entityFlag_Type&  flag,
+    Real lagrangeMultiplier( const markerID_Type&  flag,
                              bcHandler_Type& bcHandler,
                              const vector_Type& solution );
 
@@ -1609,14 +1609,14 @@ OseenSolver<MeshType, SolverType>::postProcessingSetPhi()
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag )
 {
     return flux( flag, *M_solution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag,
                                    const vector_Type& solution )
 {
     vector_Type velocityAndPressure( solution, Repeated );
@@ -1628,21 +1628,21 @@ OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::area( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::area( const markerID_Type& flag )
 {
     return M_postProcessing->measure( flag );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::pressure( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::pressure( const markerID_Type& flag )
 {
     return pressure( flag, *M_solution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::pressure(const markerID_Type& flag,
                                       const vector_Type& solution)
 {
     vector_Type velocityAndPressure( solution, Repeated );
@@ -1656,7 +1656,7 @@ OseenSolver<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type& flag,
                                                  bcHandler_Type& bcHandler )
 {
     return lagrangeMultiplier( flag, bcHandler, *M_solution );
@@ -1664,7 +1664,7 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& fl
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  flag,
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type&  flag,
                                                  bcHandler_Type& bcHandler,
                                                  const vector_Type& solution )
 {
@@ -1789,7 +1789,7 @@ OseenSolver<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       m
 
 template<typename MeshType, typename SolverType>
 void
-OseenSolver<MeshType, SolverType>::setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart )
+OseenSolver<MeshType, SolverType>::setupPostProc( const markerID_Type& flag, const mesh_Type meshPart )
 {
     M_postProcessing.reset( new PostProcessingBoundary<mesh_Type>( M_velocityFESpace.mesh(),
                                                      &M_velocityFESpace.feBd(),

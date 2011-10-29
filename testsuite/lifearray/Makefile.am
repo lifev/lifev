@@ -17,9 +17,9 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 INCLUDES	= -I$(top_srcdir)/life/lifearray
 
-check_PROGRAMS	= test_simple_vect test_vectorsmall
+check_PROGRAMS	= test_meshentitycontainer test_vectorsmall
 
-test_simple_vect_SOURCES= test_simple_vect.cpp
+test_meshentitycontainer_SOURCES= test_meshentitycontainer.cpp
 
 test_vectorsmall_SOURCES= test_vectorsmall.cpp
 

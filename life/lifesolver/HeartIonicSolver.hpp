@@ -78,7 +78,7 @@ public:
                                  const Real&,
                                  const ID& );
 
-    typedef boost::function<Real (const entityFlag_Type& ref,
+    typedef boost::function<Real (const markerID_Type& ref,
                                   const Real& x,
                                   const Real& y,
                                   const Real& z,
@@ -229,7 +229,7 @@ public:
 
     void setHeteroTauClose(functorTauClose_Type);
 
-    Real functorTauClose(const entityFlag_Type& ref,
+    Real functorTauClose(const markerID_Type& ref,
                        const Real& x,
                        const Real& y,
                        const Real& z,
@@ -302,7 +302,7 @@ void MitchellSchaeffer<Mesh, SolverType>::setHeteroTauClose(functorTauClose_Type
 }
 
 template<typename Mesh, typename SolverType>
-Real MitchellSchaeffer<Mesh, SolverType>::functorTauClose(const entityFlag_Type& ref,
+Real MitchellSchaeffer<Mesh, SolverType>::functorTauClose(const markerID_Type& ref,
                                                         const Real& x,
                                                         const Real& y,
                                                         const Real& z, const ID& i) const
