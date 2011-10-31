@@ -573,8 +573,8 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
         // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)
         // ===================================================================================
 
-        boundaryFE.updateMeas( mesh.bFacet( iBoundaryElement ) );  // updating finite element information
-        elementMarker = mesh.bFacet( iBoundaryElement ).marker(); // We keep the element marker
+        boundaryFE.updateMeas( mesh.boundaryFacet( iBoundaryElement ) );  // updating finite element information
+        elementMarker = mesh.boundaryFacet( iBoundaryElement ).marker(); // We keep the element marker
 
 
         //vector containing the local to global map on each element
@@ -667,8 +667,8 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
         //looking for which EssentialEdges are involved in this element.
         if ((beginEssEdges != beginEssVertices)&&(nDofPerVert||nDofPerEdge))
         {
-            ID iAdjacentElem = mesh.bFacet( iBoundaryElement ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
-            ID iElemBElement = mesh.bFacet( iBoundaryElement ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
+            ID iAdjacentElem = mesh.boundaryFacet( iBoundaryElement ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
+            ID iElemBElement = mesh.boundaryFacet( iBoundaryElement ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
             //loop on boundary element edges
             for ( ID iBElemEdge = 0; iBElemEdge < nBElemEdges; ++iBElemEdge )
@@ -733,7 +733,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
             //loop on boundary element vertices
             for ( ID iBElemVert = 0; iBElemVert < nBElemVertices; ++iBElemVert )
             {
-                marker = mesh.bFacet( iBoundaryElement ).point( iBElemVert ).marker(); // vertex marker
+                marker = mesh.boundaryFacet( iBoundaryElement ).point( iBElemVert ).marker(); // vertex marker
 
                 // Finding this marker on the BC list
                 bcBaseIterator = beginEssVertices;

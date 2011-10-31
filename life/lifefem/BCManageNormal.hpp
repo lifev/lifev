@@ -483,8 +483,8 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
     for ( UInt iFace = 0; iFace< mesh.numBFacets(); ++iFace )
     {
         //Update the currentBdFE with the face data
-        currentBdFE.updateMeasNormalQuadPt( mesh.bFacet( iFace ) );
-        ID idFace = mesh.bFacet( iFace ).id();
+        currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( iFace ) );
+        ID idFace = mesh.boundaryFacet( iFace ).id();
         UInt nDofF = currentBdFE.nbNode();
 
         //For each node on the face
@@ -500,7 +500,7 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
                 //if the normal is not already calculated
                 //and the marker correspond to the flag of the point
-                if ((flag == mesh.bFacet(iFace).marker())||(flag == 0))
+                if ((flag == mesh.boundaryFacet(iFace).marker())||(flag == 0))
                 {
                     //Warning: the normal is taken in the first Gauss point
                     //since the normal is the same over the triangle

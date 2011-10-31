@@ -323,8 +323,8 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
 
         ibF = i->second; // Facet number at the interface
 
-        iElAd = mesh2.bFacet( ibF ).firstAdjacentElementIdentity();  // id of the element adjacent to the facet
-        iFaEl = mesh2.bFacet( ibF ).firstAdjacentElementPosition(); // local id of the facet in its adjacent element
+        iElAd = mesh2.boundaryFacet( ibF ).firstAdjacentElementIdentity();  // id of the element adjacent to the facet
+        iFaEl = mesh2.boundaryFacet( ibF ).firstAdjacentElementPosition(); // local id of the facet in its adjacent element
 
         // Updating the local dof of the data vector in the adjacent element
         for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -457,7 +457,7 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
 
     // select facets flagged with flag 2
     for ( ID ibF2 = 0; ibF2 < bdnF2; ++ibF2 )
-    	if ( flag2 == mesh2.bFacet( ibF2 ).marker())
+    	if ( flag2 == mesh2.boundaryFacet( ibF2 ).marker())
     		facetsFlagged2.insert(ibF2);
 
     // Loop on boundary facets on mesh1
@@ -465,7 +465,7 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
     {
 
         // The facet marker
-        marker1 = mesh1.bFacet( ibF1 ).marker();
+        marker1 = mesh1.boundaryFacet( ibF1 ).marker();
 
         // Is the facet on the interface?
         if ( marker1 == flag1 )
@@ -477,7 +477,7 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
 
                 // Loop on vertex coordinates
                 for ( ID j = 0; j < nDimensions; ++j )
-                    v1[ j ] = mesh1.bFacet( ibF1 ).point( iVeFa ).coordinate( j );
+                    v1[ j ] = mesh1.boundaryFacet( ibF1 ).point( iVeFa ).coordinate( j );
                 vertexVector[iVeFa] = v1;
             }
             // Loop on boundary facets on mesh2
@@ -492,7 +492,7 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
 				do{
 					// Loop on vertex coordinates
 					for ( ID j = 0; j < nDimensions; ++j )
-						v2[ j ] = mesh2.bFacet( ibF2 ).point( iVeFa ).coordinate( j );
+						v2[ j ] = mesh2.boundaryFacet( ibF2 ).point( iVeFa ).coordinate( j );
 
 					// Loop on facet vertices on mesh1
 					ID ivefa = 0;
@@ -542,8 +542,8 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
-        feBd1.update( mesh1.bFacet( i->first ) );  // Updating facet information on mesh1
-        feBd2.update( mesh2.bFacet( i->second ) );  // Updating facet information on mesh2
+        feBd1.update( mesh1.boundaryFacet( i->first ) );  // Updating facet information on mesh1
+        feBd2.update( mesh2.boundaryFacet( i->second ) );  // Updating facet information on mesh2
 
         std::vector<ID> localToGlobalMapOnBFacet1 = dof1.localToGlobalMapOnBdFacet(i->first);
         std::vector<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet(i->second);
@@ -624,14 +624,14 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
 
-        feBd1.update( mesh1.bFacet( i->first ) );  // Updating facet information on mesh1
-        feBd2.update( mesh2.bFacet( i->second ) );  // Updating facet information on mesh2
+        feBd1.update( mesh1.boundaryFacet( i->first ) );  // Updating facet information on mesh1
+        feBd2.update( mesh2.boundaryFacet( i->second ) );  // Updating facet information on mesh2
 
-        iElAd1 = mesh1.bFacet( i->first ).firstAdjacentElementIdentity();  // id of the element adjacent to the facet (mesh1)
-        iElAd2 = mesh2.bFacet( i->second ).firstAdjacentElementIdentity();  // id of the element adjacent to the facet (mesh2)
+        iElAd1 = mesh1.boundaryFacet( i->first ).firstAdjacentElementIdentity();  // id of the element adjacent to the facet (mesh1)
+        iElAd2 = mesh2.boundaryFacet( i->second ).firstAdjacentElementIdentity();  // id of the element adjacent to the facet (mesh2)
 
-        iFaEl1 = mesh1.bFacet( i->first ).firstAdjacentElementPosition(); // local id of the facet in its adjacent element (mesh1)
-        iFaEl2 = mesh2.bFacet( i->second ).firstAdjacentElementPosition(); // local id of the facet in its adjacent element (mesh2)
+        iFaEl1 = mesh1.boundaryFacet( i->first ).firstAdjacentElementPosition(); // local id of the facet in its adjacent element (mesh1)
+        iFaEl2 = mesh2.boundaryFacet( i->second ).firstAdjacentElementPosition(); // local id of the facet in its adjacent element (mesh2)
 
         // Vertex based DOF on mesh1
         if ( nbDofPerVertex1 )
@@ -643,7 +643,7 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
 
                 iVeEl1 = GeoShape::facetToPoint( iFaEl1, iVeFa1 ); // local vertex number (in element)
 
-                if ( flag1 != 0 && Int(mesh1.bFacet(i->first).point(iVeFa1).marker()) != *flag1) continue;
+                if ( flag1 != 0 && Int(mesh1.boundaryFacet(i->first).point(iVeFa1).marker()) != *flag1) continue;
 
                 // Loop number of DOF per vertex (mesh1)
                 for ( ID l = 0; l < nbDofPerVertex1; ++l )

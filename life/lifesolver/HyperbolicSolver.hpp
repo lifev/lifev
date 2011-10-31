@@ -658,7 +658,7 @@ CFL()
             const UInt iGlobalFace( M_FESpace.mesh()->localFacetId( iElem, iFace ) );
 
             // Update the normal vector of the current face in each quadrature point
-            M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bFacet( iGlobalFace ) );
+            M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->boundaryFacet( iGlobalFace ) );
 
             // Take the left element to the face, see regionMesh for the meaning of left element
             const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 0 ) );
@@ -903,7 +903,7 @@ localEvolve ( const UInt& iElem )
         const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
 
         // Update the normal vector of the current face in each quadrature point
-        M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bFacet( iGlobalFace ) );
+        M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->boundaryFacet( iGlobalFace ) );
 
         // Local flux of a face times the integration weight
         VectorElemental localFaceFluxWeight ( M_FESpace.refFE().nbDof(), 1 );
@@ -950,7 +950,7 @@ localEvolve ( const UInt& iElem )
             }
 
             // Take the boundary marker for the current boundary face
-            const ID faceMarker ( M_FESpace.mesh()->bFacet( iGlobalFace ).marker() );
+            const ID faceMarker ( M_FESpace.mesh()->boundaryFacet( iGlobalFace ).marker() );
 
             // Take the corrispective boundary function
             const BCBase& bcBase ( M_BCh->findBCWithFlag( faceMarker ) );

@@ -340,7 +340,7 @@ void DOF::update( MeshType& mesh )
     UInt lcount;
     UInt lc;
 
-    bool update_ridges( nbLocalDofPerRidge != 0 && ! mesh.hasLocalRidges() );
+    bool update_ridges( nbLocalDofPerRidge != 0 && ! mesh.hasLocalRidges() && (MeshType::geoDimensions == 3));
     if ( update_ridges )
         mesh.updateElementRidges();
 
@@ -415,8 +415,8 @@ void DOF::update( MeshType& mesh )
 
     for ( ID iBoundaryFacet = 0 ; iBoundaryFacet < mesh.numBFacets(); ++iBoundaryFacet )
 	{
-		ID iAdjacentElem = mesh.bFacet( iBoundaryFacet ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
-		ID iElemBFacet = mesh.bFacet( iBoundaryFacet ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
+		ID iAdjacentElem = mesh.boundaryFacet( iBoundaryFacet ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
+		ID iElemBFacet = mesh.boundaryFacet( iBoundaryFacet ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
 		UInt lDof(0), dofOffset; //local DOF on boundary element
 
