@@ -132,6 +132,24 @@ class nullShape{
 	typedef nullShape GeoBShape;
 };
 
+
+//! dummy class for selecting correct function specializations based on geometry dimensions (1,2,3).
+template<int geoDimensions>
+class GeoDim {};
+
+//! GeoDim: 1D specialization
+template<>
+class GeoDim<1> {};
+
+//! GeoDim, 2D specialization
+template<>
+class GeoDim<2> {};
+
+//! GeoDim, 3D specialization
+template<>
+class GeoDim<3> {};
+
+
 //! @ingroup BasRefSha
 class Point
 {
@@ -489,13 +507,6 @@ public:
     */
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
-//! Specialization
-template <>
-inline ID reversePoint<QuadraticQuad>( ID const & pointId ){
-    static ID _rid[]={3,2,1,0,6,5,4,7,8};
-    return _rid[pointId];
-}
-
 //! Specialization
 template <>
 inline ID reversePoint<QuadraticQuad>( ID const & pointId ){
