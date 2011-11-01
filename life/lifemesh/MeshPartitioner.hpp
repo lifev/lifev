@@ -32,6 +32,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @author Gilles Fourestey <gilles.fourestey@epfl.ch>
 
   @contributor Radu Popescu <radu.popescu@epfl.ch>
+  @contributor Mauro Perego <mperego@fsu.edu>
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
@@ -80,7 +81,7 @@ struct GhostEntityData
 
 inline std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged )
 {
-    out << "ghostEntityData: localFacet " << ged.localFacetId
+    out << "ghostEntityData: localFacet "<< ged.localFacetId
         << " - ghostElem "               << ged.ghostElementLocalId
         << " - ghostPos "                << ged.ghostElementPosition << " ";
     return out;
@@ -239,10 +240,10 @@ public:
     const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
     graphPtr_Type&           elementDomains()             {return M_elementDomains;}
     //! Return the communicator of the mesh
-     const boost::shared_ptr<Epetra_Comm> comm() const  {return M_comm;}
+    boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
     //! Return a reference to M_ghostDataMap
     const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
-    
+
     //@}
 
 private:
@@ -258,7 +259,7 @@ private:
     //! Execute mesh partitioning using the configured MPI processes (online partitioning)
     /*!
       Executed the mesh partitioning using the number of MPI processes as the number of partitions.
-      Sets current mesh element parameters: M_elementNodes, M_elementRidges, M_elementFacets, M_faceNodes
+      Sets current mesh element parameters: M_elementVertices, M_elementRidges, M_elementFacets, M_facetVertices
       Updates: M_elementDomains (indirectly)
       Other data members are changed indirectly by calling other private methods.
     */
@@ -366,12 +367,11 @@ private:
     Epetra_Map*                          M_interfaceMap;
     Epetra_Map*                          M_interfaceMapRep;
     //! Number of partitions handled. 1 for parallel (old way), != 1 for serial
-    UInt                                 M_elementNodes;
-    UInt                                 M_elementPeaks;
+    UInt                                 M_elementVertices;
     UInt                                 M_elementFacets;
     UInt                                 M_elementRidges;
-    UInt                                 M_faceNodes;
-    boost::shared_ptr<std::vector<Int> > M_repeatedFace;
+    UInt                                 M_facetVertices;
+    boost::shared_ptr<std::vector<Int> > M_repeatedFacet;
     boost::shared_ptr<std::vector<Int> > M_isOnProc;
     std::vector<Int>                     M_graphVertexLocations;
     graphPtr_Type                        M_elementDomains;
@@ -428,13 +428,12 @@ init ()
     /*
       Sets element parameters (nodes, faces, ridges and number of nodes on each
       facet according to the type of mesh element used (Mesh::ElementShape::S_shape).
-      Updates M_elementNodes, M_elementFaces, M_elementRidges, M_faceNodes.
+      Updates M_elementVertices, M_elementFaces, M_elementRidges, M_facetVertices.
     */
-    M_elementNodes = MeshType::elementShape_Type::S_numVertices;
-    M_elementPeaks = MeshType::elementShape_Type::S_numPeaks;
-    M_elementFacets = MeshType::elementShape_Type::S_numFacets;
-    M_elementRidges = MeshType::elementShape_Type::S_numRidges;
-    M_faceNodes    = MeshType::facetShape_Type::S_numVertices;
+    M_elementVertices = MeshType::elementShape_Type::S_numVertices;
+    M_elementFacets   = MeshType::elementShape_Type::S_numFacets;
+    M_elementRidges   = MeshType::elementShape_Type::S_numRidges;
+    M_facetVertices   = MeshType::facetShape_Type::S_numVertices;
 
 } // init
 
@@ -550,7 +549,6 @@ void MeshPartitioner<MeshType>::doPartitionGraph()
     {
         matchFluidPartitionsFSI();
     }
-   // redistributeElements();
 }
 
 template<typename MeshType>
@@ -565,7 +563,6 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // ******************
     // nodes construction
     // ******************
-
     constructNodes();
 
     // ********************
@@ -576,8 +573,6 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // ******************
     // ridges construction
     // ******************
-
-
     if(mesh_Type::geoDimensions == 3)
     	constructRidges();
     else if(mesh_Type::geoDimensions == 2)
@@ -637,13 +632,13 @@ void MeshPartitioner<MeshType>::distributeElements(UInt numElements)
 template<typename MeshType>
 void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
 {
-    std::vector<Int>                    myRepeatedFace; // used for the solid partitioning
+    std::vector<Int>                    myRepeatedFacet; // used for the solid partitioning
     boost::shared_ptr<std::vector<Int> > myIsOnProc;     // used for the solid partitioning
 
     myIsOnProc.reset(new std::vector<Int>(M_originalMesh->numElements()));
 
-    bool myFaceRep;
-    bool myFace(false);
+    bool myFacetRep;
+    bool myFacet(false);
     short count;
     for (UInt h = 0; h < M_originalMesh->numElements(); ++h)
     {
@@ -666,49 +661,48 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
             }
             if (vol != NotAnId)
             {
-                myFace = false;
-                myFaceRep = false;
+                myFacet = false;
+                myFacetRep = false;
                 count = 0;
-                for (Int ipoint = 0; ipoint < static_cast<Int>(M_faceNodes); ++ipoint) // vertex-based dofs
+                for (Int ipoint = 0; ipoint < static_cast<Int>(M_facetVertices); ++ipoint) // vertex-based dofs
                 {
-                    myFaceRep = ((M_interfaceMap->LID(M_originalMesh->facet(facet).point(ipoint).id())
+                    myFacetRep = ((M_interfaceMap->LID(M_originalMesh->facet(facet).point(ipoint).id())
                                   /* first is fluid */ == -1) &&
                                  (M_interfaceMapRep->LID(M_originalMesh->facet(facet).point(ipoint).id())
                                   /* first is fluid */ != -1));
-                    myFace = myFace ||
+                    myFacet = myFacet ||
                         (M_interfaceMap->LID(M_originalMesh->facet(facet).point(ipoint).id()) != -1);
-                    if (myFaceRep)
+                    if (myFacetRep)
                     {
                         ++count;
                     }
                 }
                 if (count > 1)
                 {
-                    myRepeatedFace.push_back(1);
+                    myRepeatedFacet.push_back(1);
                 }
                 else
                 {
-                    myRepeatedFace.push_back(0);
+                    myRepeatedFacet.push_back(0);
                 }
             }
-            if (myFace)
+            if (myFacet)
             {
                 (*myIsOnProc)[ie] = M_me;
             }
         }
     }
 
-    M_repeatedFace.reset(new std::vector<Int> (myRepeatedFace.size()));
+    M_repeatedFacet.reset(new std::vector<Int> (myRepeatedFacet.size()));
     M_isOnProc.reset(new std::vector<Int> (*myIsOnProc));
 
     // Lot of communication here!!
     boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> ( M_comm );
-    MPI_Allreduce( &myRepeatedFace[0], &(*M_repeatedFace)[0], myRepeatedFace.size(),
+    MPI_Allreduce( &myRepeatedFacet[0], &(*M_repeatedFacet)[0], myRepeatedFacet.size(),
                   MPI_INT, MPI_SUM, mpiComm->Comm() );
     MPI_Allreduce( &(*myIsOnProc)[0], &(*M_isOnProc)[0], myIsOnProc->size(),
                   MPI_INT, MPI_MAX, mpiComm->Comm() );
 }
-
 
 template<typename MeshType>
 void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
@@ -755,7 +749,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
                 ++sum;
                 if (M_interfaceMap) // if I'm partitioning the solid in FSI
                 {
-                    if ((*M_repeatedFace)[sum])
+                    if ((*M_repeatedFacet)[sum])
                     {
                         ridgeWeights.push_back(0);
                     }
@@ -838,14 +832,6 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     M_comm->Barrier();
 
     Int nProc = M_comm->NumProc();
-
-    // distribute the resulting partitioning stored in M_graphVertexLocations to all processors
-    for ( Int proc = 0; proc < nProc; proc++ )
-    {
-        UInt procStart  = M_vertexDistribution[ proc ];
-        UInt procLength = M_vertexDistribution[ proc + 1 ] - M_vertexDistribution[ proc ];
-        M_comm->Broadcast ( &M_graphVertexLocations[ procStart ], procLength, proc );
-    }
 
     // distribute the resulting partitioning stored in M_graphVertexLocations to all processors
     for ( Int proc = 0; proc < nProc; proc++ )
@@ -1095,7 +1081,6 @@ void MeshPartitioner<MeshType>::redistributeElements()
             }
         }
     }
-
 }
 
 template<typename MeshType>
@@ -1126,7 +1111,7 @@ void MeshPartitioner<MeshType>::constructLocalMesh()
             M_localElements[i].push_back(ielem);
 
             // cycle on element's vertices
-            for (UInt ii = 0; ii < M_elementNodes; ++ii)
+            for (UInt ii = 0; ii < M_elementVertices; ++ii)
             {
                 inode = M_originalMesh->element(ielem).point(ii).id();
                 im    = M_globalToLocalNode[i].find(inode);
@@ -1196,6 +1181,45 @@ void MeshPartitioner<MeshType>::constructNodes()
 
 
 template<typename MeshType>
+void MeshPartitioner<MeshType>::constructElements()
+{
+    Int count;
+    for (UInt i = 0; i < M_numPartitions; ++i)
+    {
+        std::map<Int, Int>::iterator im;
+        std::vector<Int>::iterator it;
+        count = 0;
+        UInt inode;
+
+        typename MeshType::element_Type * pv = 0;
+
+        (*M_meshPartitions)[i]->elementList().reserve(M_localElements[i].size());
+
+        // loop in the list of local elements
+        // CAREFUL! in this loop inode is the global numbering of the points
+        // We insert the local numbering of the vertices in the local volume list
+        for (it = M_localElements[i].begin(); it != M_localElements[i].end(); ++it, ++count)
+        {
+            pv = &((*M_meshPartitions)[i]->addElement());
+            *pv = M_originalMesh->element(*it);
+            pv->setLocalId(count);
+
+            M_globalToLocalElement[i].insert(std::make_pair( pv->id(), pv -> localId() ) );
+
+            for (ID id = 0; id < M_elementVertices; ++id)
+            {
+                inode = M_originalMesh->element(*it).point(id).id();
+                // im is an iterator to a map element
+                // im->first is the key (i. e. the global ID "inode")
+                // im->second is the value (i. e. the local ID "count")
+                im = M_globalToLocalNode[i].find(inode);
+                pv->setPoint(id, (*M_meshPartitions)[i]->point( (*im).second ));
+            }
+        }
+    }
+}
+
+template<typename MeshType>
 void MeshPartitioner<MeshType>::constructRidges()
 {
     Int count;
@@ -1237,47 +1261,6 @@ void MeshPartitioner<MeshType>::constructRidges()
         }
     }
 }
-
-template<typename MeshType>
-void MeshPartitioner<MeshType>::constructElements()
-{
-    Int count;
-    for (UInt i = 0; i < M_numPartitions; ++i)
-    {
-        std::map<Int, Int>::iterator im;
-        std::vector<Int>::iterator it;
-        count = 0;
-        UInt inode;
-
-        typename MeshType::element_Type * pv = 0;
-
-        (*M_meshPartitions)[i]->elementList().reserve(M_localElements[i].size());
-
-        // loop in the list of local elements
-        // CAREFUL! in this loop inode is the global numbering of the points
-        // We insert the local numbering of the vertices in the local volume list
-        for (it = M_localElements[i].begin(); it != M_localElements[i].end(); ++it, ++count)
-        {
-            pv = &((*M_meshPartitions)[i]->addElement());
-            *pv = M_originalMesh->element(*it);
-            pv->setLocalId(count);
-
-            M_globalToLocalElement[i].insert(std::make_pair( pv->id(), pv -> localId() ) );
-
-            for (ID id = 0; id < M_elementNodes; ++id)
-            {
-                inode = M_originalMesh->element(*it).point(id).id();
-                // im is an iterator to a map element
-                // im->first is the key (i. e. the global ID "inode")
-                // im->second is the value (i. e. the local ID "count")
-                im = M_globalToLocalNode[i].find(inode);
-                pv->setPoint(id, (*M_meshPartitions)[i]->point( (*im).second ));
-            }
-        }
-    }
-}
-
-
 
 template<typename MeshType>
 void MeshPartitioner<MeshType>::constructFacets()
@@ -1387,8 +1370,6 @@ void MeshPartitioner<MeshType>::constructFacets()
             // NEW CODE
             ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging facet in mesh partitioner!");
 
-
-
             if (localElem1 == NotAnId)
              {
                  pf->firstAdjacentElementIdentity()  = localElem2;
@@ -1494,6 +1475,7 @@ void MeshPartitioner<MeshType>::finalSetup()
 
         if(MeshType::geoDimensions == 3)
         	(*M_meshPartitions)[i]->updateElementRidges();
+        	
         (*M_meshPartitions)[i]->updateElementFacets();
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1581,6 +1563,8 @@ void MeshPartitioner<MeshType>::cleanUp()
     clearVector( M_nBoundaryRidges );
     clearVector( M_nBoundaryFacets );
     clearVector( M_graphVertexLocations );
+    clearVector( M_globalToLocalNode );
+    clearVector( M_globalToLocalElement );
 }
 
 }

@@ -690,7 +690,6 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
         i2 = __triangle_nodes[ 3 * __i + 1 ];
         i3 = __triangle_nodes[ 3 * __i + 2 ];
 
-
         _edge                             = makeBareEdge( i1, i2 );
         _check                            = _be.addIfNotThere( _edge.first );
         edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i;
@@ -768,7 +767,6 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
         pp->x() = __x[ 2 * __i ];
         pp->y() = __x[ 2 * __i + 1 ];
         pp->z() = 0;
-        //std::cout << "("<< pp->x() << ", " << pp->y() << ", " << pp->z() << ")"<< std::endl;
         pp->setId( __i );
         pp->setLocalId( __i );
     }

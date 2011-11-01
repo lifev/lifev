@@ -566,7 +566,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     tempMesh->edgeList.reserve(numEdges);
 
-    typename MeshType::ridge_Type *pe;
+    typename MeshType::edge_Type *pe;
 
     for (Int j = 0; j < numEdges; ++j)
     {
@@ -618,7 +618,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
                        &faceNeighbourPos[1][0]);
 
 
-    typename MeshType::facet_Type *pf = 0;
+    typename MeshType::face_Type *pf = 0;
 
     tempMesh->faceList.reserve(numFaces);
 
@@ -670,7 +670,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     tempMesh->volumeList.reserve(numVolumes);
 
-    typename MeshType::element_Type *pv = 0;
+    typename MeshType::volume_Type *pv = 0;
 
     for (Int j = 0; j < numVolumes; ++j)
     {
@@ -859,7 +859,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
         edgeMarkers[j] = mesh->edgeList[j].marker();
         edgeGlobalId[j] = mesh->edgeList[j].id();
 
-        if (mesh->isBoundaryRidge(j))
+        if (mesh->isBoundaryEdge(j))
         {
             edgeBoundaryFlags[j] = 1;
         }
@@ -902,7 +902,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
         faceNeighbourPos[0][j] = mesh->faceList[j].firstAdjacentElementPosition();
         faceNeighbourPos[1][j] = mesh->faceList[j].secondAdjacentElementPosition();
 
-        if (mesh->isBoundaryFacet(j))
+        if (mesh->isBoundaryFace(j))
         {
             faceBoundaryFlags[j] = 1;
         }

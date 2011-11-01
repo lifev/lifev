@@ -70,13 +70,10 @@ main( int argc, char** argv )
     verbose = true;
 #endif
 
-//**************** cylinder
-//    MPI_Init(&argc,&argv);
-
     NavierStokes<RegionMesh<LinearTetra>, RossEthierSteinmanUnsteadyDec >
-				es( argc, argv, "dataRossEthierSteinman", "rossEthierSteinman" );
+				ns( argc, argv, "dataRossEthierSteinman", "rossEthierSteinman" );
 
-    es.run();
+    ns.run();
 
 #ifdef HAVE_MPI
     if (verbose) std::cout << "MPI Finalization" << std::endl;

@@ -184,20 +184,31 @@ public:
     //! Return the number of degrees of freedom located on the edges (1D structures)
     const UInt& nbDofPerEdge() const
     {
-        ASSERT(M_dim >=1, "No edge available for that dimension");
         return M_nbDofPerDimEntity[1];
     };
 
-    //! Return the number of degrees of freedom located on the edges (1D structures)
+    //! Return the number of degrees of freedom located on the peak (vertex in 3D).
 	UInt nbDofPerPeak() const
 	{
 		return (M_dim >= 3) ? M_nbDofPerDimEntity[M_dim-3] : 0;
 	};
 
-
+	//! Return the number of degrees of freedom located on the ridge. (edge in 3D)
     UInt nbDofPerRidge() const
 	{
 		return (M_dim >= 2) ? M_nbDofPerDimEntity[M_dim-2] : 0;
+	};
+
+	//! Return the number of degrees of freedom located on the facet. (face in 3D)
+    UInt nbDofPerFacet() const
+	{
+		return (M_dim >= 1) ? M_nbDofPerDimEntity[M_dim-1] : 0;
+	};
+	
+	//! Return the number of degrees of freedom located on the element. (volume in 3D)
+	const UInt& nbDofPerElement() const
+	{
+		return M_nbDofPerDimEntity[M_dim];
 	};
 
     //! Return the number of degrees of freedom located on the faces (2D structures).
@@ -206,27 +217,14 @@ public:
      */
     const UInt& nbDofPerFace() const
     {
-        ASSERT(M_dim >=2, "No face available for that dimension");
         return M_nbDofPerDimEntity[2];
     };
-
-    UInt nbDofPerFacet() const
-	{
-		return (M_dim >= 1) ? M_nbDofPerDimEntity[M_dim-1] : 0;
-	};
 
     //! Return the number of degrees of freedom located in the volume (3D structures).
     const UInt& nbDofPerVolume() const
     {
-//        ASSERT(M_dim >=3, "No volume available for that dimension");
         return M_nbDofPerDimEntity[3];
     };
-
-    //! Return the number of degrees of freedom located in the volume (3D structures).
-	const UInt& nbDofPerElement() const
-	{
-		return M_nbDofPerDimEntity[M_dim];
-	};
 
     //! Return the number of degrees of freedom located per structDim object.
     /*! For example, if we want to access the vertices, structDim should be 0,

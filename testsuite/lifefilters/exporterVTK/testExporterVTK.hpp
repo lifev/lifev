@@ -62,7 +62,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // Object type definitions
-typedef LifeV::RegionMesh<LifeV::LinearTetra>       mesh_Type;
+typedef LifeV::RegionMesh<LifeV::LinearTetra>         mesh_Type;
 typedef LifeV::RossEthierSteinmanUnsteadyInc          problem_Type;
 typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
 typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;

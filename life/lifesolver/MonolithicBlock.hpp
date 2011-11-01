@@ -52,7 +52,6 @@
 
 #include <life/lifemesh/RegionMesh.hpp>
 
-
 namespace LifeV {
 
 //! MonolithicBlock - This is a pure virtual class for the linear operators with a block structure

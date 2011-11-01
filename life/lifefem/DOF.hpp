@@ -314,7 +314,6 @@ void DOF::update( MeshType& mesh )
     UInt i, l, ie;
 
     // Total number of degree of freedom for each element
-
     UInt nldof = nbLocalDofPerElement
         		+ nbLocalDofPerRidge * M_nbLocalRidges
     			+ nbLocalDofPerPeak * M_nbLocalPeaks
@@ -329,17 +328,10 @@ void DOF::update( MeshType& mesh )
 		+ nbGlobalPeaks * nbLocalDofPerPeak
 		+ nbGlobalFacets * nbLocalDofPerFacet;
 
-
     // Reshape the container to fit the needs
     M_localToGlobal.reshape( nldof, M_numElement );
 
     // Make sure the mesh has everything needed
-
-
-    UInt gcount( 0 );
-    UInt lcount;
-    UInt lc;
-
     bool update_ridges( nbLocalDofPerRidge != 0 && ! mesh.hasLocalRidges() && (MeshType::geoDimensions == 3));
     if ( update_ridges )
         mesh.updateElementRidges();
@@ -348,37 +340,49 @@ void DOF::update( MeshType& mesh )
     if ( update_facets )
         mesh.updateElementFacets();
 
+    UInt gcount( 0 );
+    UInt lcount;
+    UInt lc;
+
     // Peak Based DOFs
+    M_dofPositionByEntity[ 0 ] = gcount;
     if ( nbLocalDofPerPeak > 0 )
         for ( ie = 0; ie < M_numElement; ++ie )//for each element
         {
             lc = 0;
             for ( i = 0; i < M_nbLocalPeaks; ++i )//for each vertex in the element
+            {
+            	ID pID = mesh.element( ie ).point( i ).id();
                 for ( l = 0; l < nbLocalDofPerPeak; ++l )//for each degree of freedom per vertex
                 {
                     // label of the ith point of the mesh element
-                    M_localToGlobal( lc++, ie ) = gcount + mesh.element( ie ).point( i ).id() * nbLocalDofPerPeak + l;
+                    M_localToGlobal( lc++, ie ) = gcount +  pID * nbLocalDofPerPeak + l;
                }
+            }
         }
+        
+    // Ridge Based DOFs
     gcount += nbLocalDofPerPeak * nbGlobalPeaks;//dof per vertex * total # vertices
     lcount = nbLocalDofPerPeak * M_nbLocalPeaks;
-
-    // Ridge Based DOFs
+    M_dofPositionByEntity[ 1 ] = gcount;
+    
 	if ( nbLocalDofPerRidge > 0 )
 		for ( ie = 0; ie < M_numElement; ++ie )
 		{
 			lc = lcount;
 			for ( i = 0; i < M_nbLocalRidges; ++i )
 			{
-				UInt eID = mesh.ridge(mesh.localRidgeId(ie, i)).id();
+				UInt rID = mesh.ridge(mesh.localRidgeId(ie, i)).id();
 				for ( l = 0; l < nbLocalDofPerRidge; ++l )
-					M_localToGlobal( lc++, ie ) = gcount + eID * nbLocalDofPerRidge + l;
+					M_localToGlobal( lc++, ie ) = gcount + rID * nbLocalDofPerRidge + l;
 			}
 		}
-	gcount += nbGlobalRidges * nbLocalDofPerRidge;
-	lcount += nbLocalDofPerRidge * M_nbLocalRidges;
 
-    //Facet based DOFs
+    //Facet based DOFs    
+    gcount += nbGlobalRidges * nbLocalDofPerRidge;
+	lcount += nbLocalDofPerRidge * M_nbLocalRidges;
+	M_dofPositionByEntity[ 2 ] = gcount;
+	
     if ( nbLocalDofPerFacet > 0 )
         for ( ie = 0; ie < M_numElement; ++ie )
         {
@@ -391,25 +395,29 @@ void DOF::update( MeshType& mesh )
                     M_localToGlobal( lc++, ie ) = gcount + fID * nbLocalDofPerFacet + l;
             }
         }
+        
+    // Element  Based DOFs
     gcount += nbGlobalFacets * nbLocalDofPerFacet;
     lcount += nbLocalDofPerFacet * M_nbLocalFacets;
-    // Element  Based DOFs
+ 
+ 	M_dofPositionByEntity[ 3 ] = gcount;
     if ( nbLocalDofPerElement > 0 )
         for ( ie = 0; ie < M_numElement; ++ie )
         {
             lc = lcount;
+            ID eID = mesh.element( ie ).id();
             for ( l = 0; l < nbLocalDofPerElement; ++l )
-                M_localToGlobal( lc++, ie ) = gcount + mesh.element( ie ).id() * nbLocalDofPerElement + l;
+                M_localToGlobal( lc++, ie ) = gcount +  eID * nbLocalDofPerElement + l;
        }
     gcount += nbGlobalElements * nbLocalDofPerElement;
-
-    UInt nBElemRidges = geoBShape_Type::S_numRidges; // Number of boundary facet's vertices
-
-    UInt nBElemFacets = geoBShape_Type::S_numFacets;    // Number of boundary facet's edges
+    M_dofPositionByEntity[ 4 ] = gcount;
 
     ASSERT_POS( gcount == M_totalDof , "Something wrong in Dof Setup " << gcount  << " " << M_totalDof ) ;
 
-
+	//Building map of global DOF on boundary facets
+    UInt nBElemRidges = geoBShape_Type::S_numRidges; // Number of boundary facet's vertices
+    UInt nBElemFacets = geoBShape_Type::S_numFacets;    // Number of boundary facet's edges
+    
     std::vector<ID> globalDOFOnBdFacet(nbLocalDofPerPeak*nBElemRidges + nBElemFacets*nbLocalDofPerRidge + nbLocalDofPerFacet);
     M_localToGlobalByBdFacet.resize(mesh.numBFacets());
 
@@ -451,8 +459,8 @@ void DOF::update( MeshType& mesh )
 
 
     if ( update_ridges )
-             mesh.cleanElementRidges();
-	 if ( update_facets )
+         mesh.cleanElementRidges();
+	if ( update_facets )
 		 mesh.cleanElementFacets();
 }
 

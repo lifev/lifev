@@ -126,7 +126,6 @@ enum ReferenceGeometry
 
 //! @defgroup BasRefSha   Basis Reference Shapes
 
-
 //! @ingroup BasRefSha
 class nullShape{
 	typedef nullShape GeoBShape;
@@ -190,7 +189,7 @@ public:
     static const ReferenceGeometry S_geometry = FACE;//!< Identify the geometric entity
     static const UInt S_nDimensions = 2;             //!< Dimensionality
     static const UInt S_numVertices = 3;             //!< Number of vertices.
-    static const UInt S_numEdges = 3;    //!< Number of edges
+    static const UInt S_numEdges = 3;    			 //!< Number of edges
     static const UInt S_numFaces = 1;                //!< Number of faces
     static const UInt S_numFacets = S_numEdges;      //!< Number of facets
     static const UInt S_numRidges = S_numVertices;   //!< Number of ridges

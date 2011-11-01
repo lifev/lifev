@@ -324,7 +324,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type meshPtr,
         M_vectorNumberingPerFacetVector(M_numFESpaces), M_dofGlobalIdVector(M_numFESpaces),
         M_currentBdFEPtrVector(currentBdFEVector), M_dofPtrVector(dofVector),
         M_meshPtr( meshPtr ), M_epetraMapPtr( new MapEpetra(epetraMap) ),
-        M_geoDimension(MeshType::ElementShape_Type::S_nDimensions)
+        M_geoDimension(MeshType::geoDimensions)
 {
     for (UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace)
     {
@@ -363,7 +363,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
         M_vectorNumberingPerFacetVector(M_numFESpaces), M_dofGlobalIdVector(M_numFESpaces),
         M_currentBdFEPtrVector(M_numFESpaces), M_dofPtrVector(M_numFESpaces),
         M_meshPtr( mesh ), M_epetraMapPtr( new MapEpetra(epetraMap) ),
-        M_geoDimension(MeshType::ElementShape_Type::S_nDimensions)
+        M_geoDimension(MeshType::geoDimensions)
 {
     M_currentBdFEPtrVector[0]=currentBdFE;
     M_dofPtrVector[0]=dof;
@@ -401,7 +401,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
         M_vectorNumberingPerFacetVector(M_numFESpaces), M_dofGlobalIdVector(M_numFESpaces),
         M_currentBdFEPtrVector(M_numFESpaces), M_dofPtrVector(M_numFESpaces),
         M_meshPtr( mesh ), M_epetraMapPtr( new MapEpetra(epetraMap) ),
-        M_geoDimension(MeshType::elementShape_Type::S_nDimensions)
+        M_geoDimension(MeshType::geoDimensions)
 {
     M_currentBdFEPtrVector[0] = feBdu;
     M_dofPtrVector[0] = dofu;

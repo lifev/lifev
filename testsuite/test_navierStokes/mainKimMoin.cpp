@@ -70,13 +70,10 @@ main( int argc, char** argv )
     verbose = true;
 #endif
 
-//**************** cylinder
-//    MPI_Init(&argc,&argv);
-
     NavierStokes<RegionMesh<LinearTriangle>, KimMoin >
-    		es( argc, argv, "dataKimMoin", "kimMoin" );
+    		ns( argc, argv, "dataKimMoin", "kimMoin" );
 
-    es.run();
+    ns.run();
 
 #ifdef HAVE_MPI
     if (verbose) std::cout << "MPI Finalization" << std::endl;

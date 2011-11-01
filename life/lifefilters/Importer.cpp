@@ -89,8 +89,7 @@ Importer::import( RegionMesh<LinearTriangle> & mesh,
 
 // Import mesh with linear quadrangles
 void
-Importer::import( RegionMesh<LinearQuad> & mesh,
-                  markerID_Type            regionFlag )
+Importer::import( RegionMesh<LinearQuad> &, markerID_Type )
 {
    ERROR_MSG("Importer:No importers available for this type of mesh");
 } // import

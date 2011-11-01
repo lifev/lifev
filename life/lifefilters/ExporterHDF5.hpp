@@ -797,9 +797,8 @@ void ExporterHDF5<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, co
         break;
     }
 
-    //vectors are threedimensional also in 2D (check)
+    //exported vectors are threedimensional also in 2D (check)
     UInt dim = (dvar.fieldDim()==1) ? 1 : nDimensions;
-
 
     // First: hyperslab definition, then description of the data
     xdmf <<

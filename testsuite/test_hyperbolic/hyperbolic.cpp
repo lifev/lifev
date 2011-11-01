@@ -325,7 +325,7 @@ hyperbolic::hyperbolic( int argc,
 Real
 hyperbolic::run()
 {
-    typedef RegionMesh<LinearTetra>                   RegionMesh;
+    typedef RegionMesh<LinearTetra>                     RegionMesh;
     typedef SolverAztecOO                               solver_type;
     typedef HyperbolicSolver< RegionMesh, solver_type > hyper;
     typedef hyper::vector_Type                          vector_type;

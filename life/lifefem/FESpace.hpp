@@ -327,7 +327,6 @@ public:
     vector_type feToFEInterpolate(const FESpace<mesh_Type,map_Type>& originalSpace,
                                   const vector_type& originalVector, const MapEpetraType& outputMapType = Unique) const;
 
-
     //! This method reconstruct a gradient of a solution in the present FE space.
     /*!
       The goal of this method is to build an approximation of the gradient of a given
@@ -422,7 +421,6 @@ private:
 
     //! @name Private Methods
     //@{
-
 
     //! copy constructor
     FESpace( const FESpace& fespace );
@@ -1919,7 +1917,6 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                 UInt iGlobalFacet( mesh()->localFacetId( elemId, iter_dof ) );
 
                 // Select if the current facet is coherent or not with the orientation. If yes use +, if not use -.
-                //if ( mesh()->faceElement( iGlobalFacet, 0 ) != iElem )
                 if ( mesh()->facet( iGlobalFacet ).firstAdjacentElementIdentity() != iElem )
                 {
                     // Loop on each component of the selected finite element.

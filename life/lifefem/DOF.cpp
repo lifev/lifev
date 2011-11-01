@@ -51,8 +51,7 @@ DOF::DOF( const DOFLocalPattern& fePattern) : M_elementDofPattern( fePattern ), 
         M_numElement( 0 ), M_nbLocalPeaks( 0 ), M_nbLocalRidges( 0 ), M_nbLocalFacets( 0 ), M_localToGlobal(),
         M_localToGlobalByBdFacet()
 {
-    //Getting the face
-    for ( UInt i = 0; i < 5; ++i )
+	for ( UInt i = 0; i < 5; ++i )
         M_dofPositionByEntity[ i ] = 0;
 }
 

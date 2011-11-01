@@ -13,7 +13,7 @@
 ### TESTSUITE: NavierStokes ################################################################################
 ###################################################################################################
 
-AT_SETUP([test_kimMoin (P1-P1, P1bubble-P1, P2-P1)])
+AT_SETUP([test_kimMoin, 2d, (P1-P1, P1bubble-P1, P2-P1)])
 AT_KEYWORDS([test_kimMoin kimmoin navierstokes])
 AT_DATA([dataKimMoin],[[# -*- getpot -*- (GetPot mode activation for emacs)
 # -*- getpot -*- (GetPot mode activation for emacs)
@@ -156,7 +156,7 @@ AT_CHECK([ln -sf ../../data/mesh/freefem/square20x20.msh  && \
           mpirun -n 3 ../../test_navierStokes/test_kimMoin],[0],[ignore],[ignore])
 AT_CLEANUP
 
-AT_SETUP([test_rossEthierSteinman (P1-P1, P1bubble-P1, P2-P1)])
+AT_SETUP([test_ethierSteinman (P1-P1, P1bubble-P1, P2-P1)])
 AT_KEYWORDS([test_rossEthierSteinman rossEthierSteinman])
 AT_DATA([dataRossEthierSteinman],[[# -*- getpot -*- (GetPot mode activation for emacs)
 # -*- getpot -*- (GetPot mode activation for emacs)

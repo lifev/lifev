@@ -848,12 +848,6 @@ void CurrentFE::computeQuadNodes()
     	GeoVector quadNode(coorMap(M_quadRule->quadPointCoor(iterQuadNode)));
     	for(UInt i=0; i< quadNode.size(); i++)
     		M_quadNodes[iterQuadNode][i] = quadNode[i];
-    /*    coorMap( M_quadNodes[iterQuadNode][0],
-                 M_quadNodes[iterQuadNode][1],
-                 M_quadNodes[iterQuadNode][2],
-                 M_quadRule->quadPointCoor( iterQuadNode, 0 ),
-                 M_quadRule->quadPointCoor( iterQuadNode, 1 ),
-                 M_quadRule->quadPointCoor( iterQuadNode, 2 ) );*/
     }
     M_quadNodesUpdated=true;
 }

@@ -111,13 +111,15 @@ readMppFileHead( std::ifstream & myStream,
   @return true if everything went fine, false otherwise.
 */
 
-template <typename Mesh>
+template <typename GeoShape, typename MC>
 bool
-readMppFile( Mesh & mesh,
+readMppFile( RegionMesh<GeoShape, MC> & mesh,
              const std::string          & fileName,
              markerID_Type              regionFlag,
              bool                         verbose = false )
 {
+	typedef RegionMesh<GeoShape,MC> mesh_Type;
+
 	const int idOffset = 1; //IDs in MPP files start from 1
 
     std::string line;
@@ -139,8 +141,8 @@ readMppFile( Mesh & mesh,
 
     std::ostream& oStr = verbose ? std::cout : discardedLog;
 
-    ASSERT_PRE0( Mesh::elementShape_Type::S_shape == TETRA ,  "readMppFiles reads only tetra meshes" ) ;
-    ASSERT_PRE0( Mesh::elementShape_Type::S_numVertices <= 6, "Sorry, readMppFiles handles only liner&quad tetras" );
+    ASSERT_PRE0( GeoShape::S_shape == TETRA,   "Sorry, readMppFiles reads only tetra meshes" );
+    ASSERT_PRE0( GeoShape::S_numVertices <= 6, "Sorry, readMppFiles handles only liner&quad tetras" );
 
     // open stream to read header
 
@@ -180,7 +182,7 @@ readMppFile( Mesh & mesh,
                   ( 3 * numberBoundaryFaces - 2 * numberBoundaryVertices ) / 4;
 
     // Be a little verbose
-    if ( Mesh::elementShape_Type::S_numPoints > 4 )
+    if ( GeoShape::S_numPoints > 4 )
     {
         std::cout << "Quadratic Tetra  Mesh (from Linear geometry)"
                   << std::endl;
@@ -233,10 +235,10 @@ readMppFile( Mesh & mesh,
     mesh.setMarker             ( regionFlag ); // Mark the region
 
 
-    typename Mesh::point_Type  * pointerPoint  = 0;
-    typename Mesh::edge_Type   * pointerEdge   = 0;
-    typename Mesh::face_Type   * pointerFace   = 0;
-    typename Mesh::volume_Type * pointerVolume = 0;
+    typename mesh_Type::point_Type  * pointerPoint  = 0;
+    typename mesh_Type::edge_Type   * pointerEdge   = 0;
+    typename mesh_Type::face_Type   * pointerFace   = 0;
+    typename mesh_Type::volume_Type * pointerVolume = 0;
 
     // addPoint(), Face() and Edge() return a reference to the last stored point
     // I use that information to set all point info, by using a pointer.
@@ -372,7 +374,7 @@ readMppFile( Mesh & mesh,
     }
     // This part is to build a P2 mesh from a P1 geometry
 
-    if ( Mesh::elementShape_Type::S_numPoints > 4 )
+    if ( GeoShape::S_numPoints > 4 )
     {
     	MeshUtility::p2MeshFromP1Data( mesh );
     }
@@ -464,14 +466,16 @@ readINRIAMeshFileHead( std::ifstream &        myStream,
   @return true if everything went fine, false otherwise.
 */
 
-template <typename Mesh>
+template <typename GeoShape, typename MC>
 bool
-readINRIAMeshFile( Mesh&      mesh,
-                   std::string const&               fileName,
+readINRIAMeshFile( RegionMesh<GeoShape, MC>&      mesh,
+                   std::string const&             fileName,
                    markerID_Type                  regionFlag,
-                   bool                             verbose = false,
-                   InternalEntitySelector           iSelect = InternalEntitySelector() )
+                   bool                           verbose = false,
+                   InternalEntitySelector         iSelect = InternalEntitySelector() )
 {
+	typedef RegionMesh<GeoShape,MC> mesh_Type;
+
 	const int idOffset = 1; //IDs in INRIA meshes start from 1
 
 	std::string line;
@@ -540,7 +544,7 @@ readINRIAMeshFile( Mesh&      mesh,
         std::abort();
     }
 
-    ASSERT_PRE0( Mesh::elementShape_Type::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
+    ASSERT_PRE0( GeoShape::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
 
     // Euler formulas to get number of faces and number of edges
     numberFaces = 2 * numberVolumes + ( numberBoundaryFaces / 2 );
@@ -557,16 +561,16 @@ readINRIAMeshFile( Mesh&      mesh,
     {
 
     case HEXA:
-        ASSERT_PRE0( Mesh::elementShape_Type::S_numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
+        ASSERT_PRE0( GeoShape::S_numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
         std::cout << "Linear Hexa mesh" << std::endl;
         numberPoints =  numberVertices;
         numberBoundaryPoints = numberBoundaryVertices;
         break;
 
     case TETRA:
-        if ( Mesh::elementShape_Type::S_numPoints > 4 )
+        if ( GeoShape::S_numPoints > 4 )
         {
-            //if (elementShape_Type::S_numPoints ==6 )
+            //if (GeoShape::S_numPoints ==6 )
             std::cout << "Quadratic Tetra mesh (from linear geometry)" << std::endl;
             numberPoints = numberVertices + numberEdges;
 
@@ -642,14 +646,14 @@ readINRIAMeshFile( Mesh&      mesh,
 
     mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
 
-    typedef typename Mesh::point_Type  point_Type;
-    typedef typename Mesh::volume_Type volume_Type;
+    typedef typename mesh_Type::point_Type  point_Type;
+    typedef typename mesh_Type::volume_Type volume_Type;
 
 
-    typename Mesh::point_Type  * pointerPoint  = 0;
-    typename Mesh::edge_Type   * pointerEdge   = 0;
-    typename Mesh::face_Type   * pointerFace   = 0;
-    typename Mesh::volume_Type * pointerVolume = 0;
+    point_Type  * pointerPoint  = 0;
+    typename mesh_Type::edge_Type   * pointerEdge   = 0;
+    typename mesh_Type::face_Type   * pointerFace   = 0;
+    volume_Type * pointerVolume = 0;
     // addPoint()/Face()/Edge() returns a reference to the last stored point
     // I use that information to set all point info, by using a pointer.
 
@@ -926,7 +930,7 @@ readINRIAMeshFile( Mesh&      mesh,
        }
 
     // This part is to build a P2 mesh from a P1 geometry
-    if ( shape == TETRA && Mesh::elementShape_Type::S_numPoints > 4 )
+    if ( shape == TETRA && GeoShape::S_numPoints > 4 )
     {
         MeshUtility::p2MeshFromP1Data( mesh );
     }
@@ -962,13 +966,15 @@ readINRIAMeshFile( Mesh&      mesh,
    @return true if everything went fine, false otherwise
 */
 
-template <typename Mesh>
+template <typename GeoShape, typename MC>
 bool
-readGmshFile( Mesh & mesh,
+readGmshFile( RegionMesh<GeoShape, MC> & mesh,
               const std::string &          fileName,
               markerID_Type              regionFlag,
               bool                         verbose = false )
 {
+	typedef RegionMesh<GeoShape,MC> mesh_Type;
+
 	const int idOffset = 1; //IDs in GMESH files start from 1
 
     std::ifstream inputFile ( fileName.c_str() );
@@ -1032,9 +1038,9 @@ readGmshFile( Mesh & mesh,
     UInt numberElements;
     inputFile >> numberElements;
 
-    typename Mesh::edge_Type   * pointerEdge   = 0;
-    typename Mesh::face_Type   * pointerFace   = 0;
-    typename Mesh::volume_Type * pointerVolume = 0;
+    typename mesh_Type::edge_Type   * pointerEdge   = 0;
+    typename mesh_Type::face_Type   * pointerFace   = 0;
+    typename mesh_Type::volume_Type * pointerVolume = 0;
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "number of elements: " << numberElements << "\n";
@@ -1171,7 +1177,7 @@ readGmshFile( Mesh & mesh,
         }
     }
     // add the point to the mesh
-    typename Mesh::point_Type * pointerPoint = 0;
+    typename mesh_Type::point_Type * pointerPoint = 0;
 
     mesh.setMaxNumPoints( numberNodes, true );
     mesh.setNumVertices ( numberNodes );
@@ -1305,13 +1311,15 @@ readGmshFile( Mesh & mesh,
    @return true if everything went fine, false otherwise.
 */
 
-template <typename Mesh>
+template<typename GeoShape, typename MC>
 bool
-readNetgenMesh(Mesh & mesh,
+readNetgenMesh(RegionMesh<GeoShape,MC> & mesh,
                const std::string  &        fileName,
                markerID_Type             regionFlag,
                bool                        verbose = false )
 {
+	typedef RegionMesh<GeoShape,MC> mesh_Type;
+
 	const int idOffset = 1; //IDs in netgen starts from 1
 
     // I will extract lines from iostream
@@ -1340,9 +1348,9 @@ readNetgenMesh(Mesh & mesh,
     // bitstream to check which file section has already been visited
     UInt flag;
 
-    typename Mesh::pointMarker_Type pointMarker;
-    typename Mesh::edgeMarker_Type edgeMarker;
-    typename Mesh::faceMarker_Type faceMarker;
+    typename MC::pointMarker_Type pointMarker;
+    typename MC::edgeMarker_Type edgeMarker;
+    typename MC::faceMarker_Type faceMarker;
 
     // open file stream to look for points information
     std::ifstream fstreamp( fileName.c_str() );
@@ -1608,7 +1616,7 @@ readNetgenMesh(Mesh & mesh,
     numberEdges = numberVolumes + numberVertices + ( 3 * numberBoundaryFaces - 2 * numberBoundaryVertices ) / 4;
 
     // Be a little verbose
-    if ( Mesh::elementShape_Type::S_numPoints > 4 )
+    if ( GeoShape::S_numPoints > 4 )
     {
         std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" <<std::endl;
         numberPoints = numberVertices + numberEdges;
@@ -1663,10 +1671,10 @@ readNetgenMesh(Mesh & mesh,
 
     mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
 
-    typename Mesh::point_Type  * pointerPoint  = 0;
-    typename Mesh::edge_Type   * pointerEdge   = 0;
-    typename Mesh::face_Type   * pointerFace   = 0;
-    typename Mesh::volume_Type * pointerVolume = 0;
+    typename mesh_Type::point_Type  * pointerPoint  = 0;
+    typename mesh_Type::edge_Type   * pointerEdge   = 0;
+    typename mesh_Type::face_Type   * pointerFace   = 0;
+    typename mesh_Type::volume_Type * pointerVolume = 0;
 
     // addPoint()/Face()/Edge() returns a reference to the last stored point
     // I use that information to set all point info, by using a pointer.
@@ -1750,7 +1758,7 @@ readNetgenMesh(Mesh & mesh,
 
     // This part is to build a P2 mesh from a P1 geometry
 
-    if ( Mesh::elementShape_Type::S_numPoints > 4 )
+    if ( GeoShape::S_numPoints > 4 )
     {
     MeshUtility::p2MeshFromP1Data( mesh );
     }
