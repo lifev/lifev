@@ -544,7 +544,7 @@ MultiscaleModel1D::setupFESpace()
     NullTransformation[2] = 0.;
 
     //The real mesh can be only scaled due to OneDimensionalSolver conventions
-    M_data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation ); // Scale the x dimension
+    M_data->mesh()->meshTransformer().transformMesh( M_geometryScale, NullTransformation, NullTransformation ); // Scale the x dimension
 
     for ( UInt i(0); i < M_data->numberOfNodes() ; ++i )
         M_data->setArea0( M_data->area0( i ) * M_geometryScale[1] * M_geometryScale[2], i );  // Scale the area (y-z dimensions)
@@ -554,7 +554,7 @@ MultiscaleModel1D::setupFESpace()
 
 #ifdef HAVE_HDF5
     //The mesh for the post-processing can be rotated
-    M_exporterMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_exporterMesh->meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 #endif
 
     //Setup FESpace
