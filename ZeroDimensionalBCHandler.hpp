@@ -61,7 +61,7 @@ public:
     typedef bc_Type::bcType_Type                                          bcType_Type;
     typedef bc_Type::function_Type                                        function_Type;
 
-    typedef entityFlag_Type                                               bcFlag_Type;
+    typedef markerID_Type                                                 bcFlag_Type;
     typedef std::map< bcFlag_Type, bc_Type >                              bcContainer_Type;
 
     //@}
