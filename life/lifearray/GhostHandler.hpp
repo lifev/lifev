@@ -193,8 +193,15 @@ void GhostHandler<Mesh>::createNodeNeighbors()
         ASSERT ( M_fullMesh->point( id0 ).id() == id0 && M_fullMesh->point( id1 ).id() == id1,
                  "the mesh has been reordered, the point must be found" );
 
+        // fill fullMesh points neighboring
         M_fullMesh->point( id0 ).nodeNeighbors().insert( id1 );
         M_fullMesh->point( id1 ).nodeNeighbors().insert( id0 );
+    }
+
+    // update localMesh points
+    for ( UInt ip = 0; ip < M_localMesh->numPoints(); ip++ )
+    {
+        M_localMesh->point( ip ).nodeNeighbors() = M_fullMesh->point( M_localMesh->point( ip ).id() ).nodeNeighbors();
     }
 }
 
