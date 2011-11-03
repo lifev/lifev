@@ -25,7 +25,7 @@
 //@HEADER
 
 /*!
-    @file Ghosthandler
+    @file GhostHandler.hpp
     @brief class to manage ghost data across procs
 
     @author Antonio Cervone <ant.cervone@gmail.com>
@@ -40,11 +40,9 @@
 
 #include <life/lifemesh/NeighborMarker.hpp>
 #include <life/lifearray/MapEpetra.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 namespace LifeV {
-
-// forward declare
-class MapEpetra;
 
 template <typename Mesh>
 class GhostHandler
@@ -60,6 +58,8 @@ public:
     typedef boost::shared_ptr<comm_Type> comm_PtrType;
     typedef std::set<ID> neighborList_Type;
     typedef std::map< ID, neighborList_Type > neighborMap_Type;
+    typedef VectorEpetra vector_Type;
+    typedef boost::shared_ptr<vector_Type> vector_PtrType;
 
     //@}
 
@@ -67,7 +67,10 @@ public:
     //@{
 
     //! Constructor
-    GhostHandler( mesh_PtrType & fullMesh, mesh_PtrType & localMesh, MapEpetra & map, comm_PtrType & comm );
+    GhostHandler( mesh_PtrType & fullMesh,
+                  mesh_PtrType & localMesh,
+                  MapEpetra & map,
+                  comm_PtrType & comm );
 
     //! Destructor
     ~GhostHandler(){}
@@ -115,6 +118,9 @@ public:
     //! create ghost map
     MapEpetra ghostMapOnNodes( UInt overlap );
 
+    //! showMe method
+    void showMe( bool const verbose = false, std::ostream & out = std::cout );
+
     //@}
 
 protected:
@@ -130,6 +136,8 @@ protected:
     neighborMap_Type M_nodeNodeNeighborsMap;
     neighborMap_Type M_nodeElementNeighborsMap;
 
+    const bool M_verbose;
+
     //@}
 };
 
@@ -143,7 +151,8 @@ GhostHandler<Mesh>::GhostHandler( mesh_PtrType & fullMesh,
     M_map ( map ),
     M_comm ( comm ),
     M_nodeNodeNeighborsMap(),
-    M_nodeElementNeighborsMap()
+    M_nodeElementNeighborsMap(),
+    M_verbose( true )
 {
 }
 
@@ -230,7 +239,7 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnNodes()
     // check that the nodeNeighbors have been created
     if ( M_localMesh->point( 0 ).nodeNeighbors().empty()  )
     {
-        std::cerr << "the nodeNeighbors are empty, will be generated now" << std::endl;
+        if ( M_verbose ) std::cerr << "the nodeNeighbors are empty, will be generated now" << std::endl;
         this->createNodeNeighbors();
     }
 
@@ -270,7 +279,7 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnNodes( UInt overlap )
     // check that the nodeNodeNeighborsMap has been created
     if ( M_nodeNodeNeighborsMap.empty()  )
     {
-        std::cerr << "the nodeNodeNeighborsMap is empty, will be generated now" << std::endl;
+        if ( M_verbose ) std::cerr << "the nodeNodeNeighborsMap is empty, will be generated now" << std::endl;
         this->createNodeNodeNeighborsMap();
     }
 
@@ -362,7 +371,7 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1()
     // check that the nodeElementNeighborsMap has been created
     if ( M_nodeElementNeighborsMap.empty()  )
     {
-        std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
+        if ( M_verbose ) std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
         this->createNodeElementNeighborsMap();
     }
 
@@ -404,6 +413,35 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1()
 
     return ghostMap;
 }
+
+template <typename Mesh>
+void GhostHandler<Mesh>::showMe( bool const /*verbose*/, std::ostream & out )
+{
+    out << "GhostHandler<Mesh>showMe" << std::endl;
+    out << "M_nodeNodeNeighborsMap" << std::endl;
+    for ( neighborMap_Type::const_iterator it = M_nodeNodeNeighborsMap.begin();
+                    it != M_nodeNodeNeighborsMap.end(); ++it )
+    {
+        out << it->first << "> ";
+        for ( neighborList_Type::const_iterator nIt = it->second.begin(); nIt != it->second.end(); ++nIt )
+        {
+            out << *nIt << " ";
+        }
+        out << std::endl;
+    }
+    out << "M_nodeElementNeighborsMap" << std::endl;
+    for ( neighborMap_Type::const_iterator it = M_nodeElementNeighborsMap.begin();
+                    it != M_nodeElementNeighborsMap.end(); ++it )
+    {
+        out << it->first << "> ";
+        for ( neighborList_Type::const_iterator nIt = it->second.begin(); nIt != it->second.end(); ++nIt )
+        {
+            out << *nIt << " ";
+        }
+        out << std::endl;
+    }
+}
+
 
 }
 

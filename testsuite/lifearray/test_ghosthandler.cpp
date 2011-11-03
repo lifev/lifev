@@ -160,7 +160,7 @@ int main( int argc, char* argv[] )
 
     GhostHandler<RegionMesh> ghostP0 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP0->map(), comm );
 
-//    ghostP0.setUp();
+    ghostP0.setUp();
 
     MapEpetra mapP0 ( feSpaceP0->map() );
     MapEpetra mapP0P0 ( ghostP0.ghostMapOnElementsP0() );
@@ -174,6 +174,8 @@ int main( int argc, char* argv[] )
     fileOut << *mapP0P0.map( Repeated );
     fileOut << "=================== mapP0P1" << std::endl;
     fileOut << *mapP0P1.map( Repeated );
+
+    ghostP0.showMe( true, fileOut );
 
     ghostP0.clean();
 
