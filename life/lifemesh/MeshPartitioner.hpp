@@ -237,14 +237,6 @@ public:
     //! Return a pointer to M_elementDomains
     const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
     graphPtr_Type&           elementDomains()             {return M_elementDomains;}
-    //! Return a reference to M_repeatedNodeVector
-    const std::vector<Int>&  repeatedNodeVector()   const {return M_repeatedNodeVector[0];}
-    //! Return a reference to M_repeatedEdgeVector
-    const std::vector<Int>&  repeatedEdgeVector()   const {return M_repeatedEdgeVector[0];}
-    //! Return a reference to M_repeatedFaceVector
-    const std::vector<Int>&  repeatedFaceVector()   const {return M_repeatedFaceVector[0];}
-    //! Return a reference to M_repeatedVolumeVector
-    const std::vector<Int>&  repeatedVolumeVector() const {return M_repeatedVolumeVector[0];}
     //! Return the communicator of the mesh
     boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
     //! Return a reference to M_ghostDataMap
@@ -345,13 +337,6 @@ private:
       Updates M_meshPartitions.
     */
     void finalSetup();
-    //! Create repeated element map
-    /*!
-      Creates a map of the boundary elements (nodes, edges, faces, volumes).
-      Updates M_repeatedNodeVector, M_repeatedEdgeVector, M_repeatedFaceVector,
-      M_repeatedVolumeVector.
-    */
-    void createRepeatedMap();
 
     //@}
     //! Private Data Members
@@ -368,10 +353,6 @@ private:
     std::vector<std::set<Int> >          M_localEdges;
     std::vector<std::set<Int> >          M_localFaces;
     std::vector<std::vector<Int> >       M_localVolumes;
-    std::vector<std::vector<Int> >       M_repeatedNodeVector;
-    std::vector<std::vector<Int> >       M_repeatedEdgeVector;
-    std::vector<std::vector<Int> >       M_repeatedFaceVector;
-    std::vector<std::vector<Int> >       M_repeatedVolumeVector;
     std::vector<std::map<Int, Int> >     M_globalToLocalNode;
     std::vector<std::map<Int, Int> >     M_globalToLocalVolume;
     std::vector<UInt>                    M_nBoundaryPoints;
@@ -433,10 +414,6 @@ init ()
     M_localEdges.resize ( M_numPartitions );
     M_localFaces.resize ( M_numPartitions );
     M_localVolumes.resize ( M_numPartitions );
-    M_repeatedNodeVector.resize ( M_numPartitions );
-    M_repeatedEdgeVector.resize ( M_numPartitions );
-    M_repeatedFaceVector.resize ( M_numPartitions );
-    M_repeatedVolumeVector.resize ( M_numPartitions );
     M_globalToLocalNode.resize ( M_numPartitions );
     M_globalToLocalVolume.resize ( M_numPartitions );
     M_nBoundaryPoints.resize ( M_numPartitions );
@@ -506,10 +483,6 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
     M_localEdges.resize(M_numPartitions);
     M_localFaces.resize(M_numPartitions);
     M_localVolumes.resize(M_numPartitions);
-    M_repeatedNodeVector.resize(M_numPartitions);
-    M_repeatedEdgeVector.resize(M_numPartitions);
-    M_repeatedFaceVector.resize(M_numPartitions);
-    M_repeatedVolumeVector.resize(M_numPartitions);
     M_globalToLocalNode.resize(M_numPartitions);
     M_globalToLocalVolume.resize(M_numPartitions);
     M_nBoundaryPoints.resize(M_numPartitions);
@@ -613,11 +586,6 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // final setup
     // ******************
     finalSetup();
-
-    // *********************
-    // repeated map creation
-    // *********************
-    createRepeatedMap();
 }
 
 template<typename MeshType>
@@ -1566,93 +1534,6 @@ void MeshPartitioner<MeshType>::finalSetup()
         else
         {
             Debug(4000) << "Rank " << M_me << " created local mesh.\n";
-        }
-#endif
-    }
-}
-
-template<typename MeshType>
-void MeshPartitioner<MeshType>::createRepeatedMap()
-{
-    std::set<Int>    repeatedNodeList;
-    std::set<Int>    repeatedEdgeList;
-    std::set<Int>    repeatedFaceList;
-
-    if (! M_me)
-    {
-        std::cout << "Building repeated map... " << std::endl;
-    }
-
-    for (UInt i = 0; i < M_numPartitions; ++i)
-    {
-        std::set<Int>::iterator is;
-
-        UInt me = M_serialMode ? i : M_me;
-
-        std::vector<Int> elementList = (*M_elementDomains)[me];
-
-        UInt inode, ielem;
-
-        // repeated element map creation
-
-        // use sets to store each entity only once
-        repeatedNodeList.clear();
-        repeatedEdgeList.clear();
-        repeatedFaceList.clear();
-
-        for (UInt ii = 0; ii < elementList.size(); ++ii)
-        {
-            ielem = elementList[ii];
-            M_repeatedVolumeVector[i].push_back(ielem);
-            for (UInt jj = 0; jj < M_elementNodes; ++jj)
-            {
-                inode = M_originalMesh->volume(ielem).point(jj).id();
-                repeatedNodeList.insert(inode);
-            }
-            for (UInt jj = 0; jj < M_elementEdges; ++jj)
-            {
-                UInt iedge = M_originalMesh->localEdgeId(ielem, jj);
-                repeatedEdgeList.insert((Int) iedge);
-            }
-            for (UInt jj = 0; jj < M_elementFaces; ++jj)
-            {
-                UInt iface = M_originalMesh->localFaceId(ielem, jj);
-                repeatedFaceList.insert(iface);
-            }
-        }
-
-        // repeated node map creation
-        M_repeatedNodeVector[i].reserve(repeatedNodeList.size());
-
-        for (is = repeatedNodeList.begin(); is != repeatedNodeList.end(); ++is)
-        {
-            M_repeatedNodeVector[i].push_back(*is);
-        }
-
-        // repeated edge list creation
-        M_repeatedEdgeVector[i].reserve(repeatedEdgeList.size());
-
-        for (is = repeatedEdgeList.begin(); is != repeatedEdgeList.end(); ++is)
-        {
-            M_repeatedEdgeVector[i].push_back(*is);
-        }
-
-        // repeated face list creation
-        M_repeatedFaceVector[i].reserve(repeatedFaceList.size());
-
-        for (is = repeatedFaceList.begin(); is != repeatedFaceList.end(); ++is)
-        {
-            M_repeatedFaceVector[i].push_back(*is);
-        }
-
-#ifdef HAVE_LIFEV_DEBUG
-        if (M_serialMode)
-        {
-            Debug(4000) <<  "Created repeated map number " << i << "\n";
-        }
-        else
-        {
-            Debug(4000) << "Rank " << M_me << " created repeated map.\n";
         }
 #endif
     }
