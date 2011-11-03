@@ -235,7 +235,7 @@ void GhostHandler<Mesh>::createNodeElementNeighborsMap()
         for ( UInt k = 0; k < Mesh::VolumeType::S_numPoints; k++ )
         {
             ID id ( M_fullMesh->element( ie ).point( k ).id() );
-            M_nodeElementNeighborsMap[ ie ].insert ( id );
+            M_nodeElementNeighborsMap[ id ].insert ( ie );
         }
     }
 }
