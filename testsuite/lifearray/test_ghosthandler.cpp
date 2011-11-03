@@ -60,6 +60,15 @@ using namespace LifeV;
 
 int main( int argc, char* argv[] )
 {
+
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    std::cout << "MPI Initialization" << std::endl;
+#endif
+
+    // this brace is important to destroy the Epetra_Comm object before calling MPI_Finalize
+    {
+
     typedef RegionMesh3D<LinearTetra,neighborMarkerCommon_Type> RegionMesh;
     typedef FESpace< RegionMesh, MapEpetra >            feSpace_Type;
     typedef boost::shared_ptr< feSpace_Type >           feSpacePtr_Type;
@@ -74,11 +83,6 @@ int main( int argc, char* argv[] )
     GetPot command_line(argc, argv);
     const std::string data_file_name = command_line.follow("data_ghosthandler", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
-
-#ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    std::cout << "MPI Initialization" << std::endl;
-#endif
 
 #ifdef EPETRA_MPI
     std::cout << "Epetra Initialization" << std::endl;
@@ -237,6 +241,7 @@ int main( int argc, char* argv[] )
     // The leader process print chronoTotal
     if ( isLeader ) std::cout << "Time total " << chronoTotal.diff() << std::endl;
 
+}
 
 #ifdef HAVE_MPI
     MPI_Finalize();
