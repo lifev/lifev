@@ -107,6 +107,9 @@ public:
     MapEpetra ghostMapOnElementsP0();
 
     //! create ghost map
+    MapEpetra ghostMapOnElementsP1();
+
+    //! create ghost map
     MapEpetra ghostMapOnNodes();
 
     //! create ghost map
@@ -224,6 +227,13 @@ void GhostHandler<Mesh>::createNodeElementNeighborsMap()
 template <typename Mesh>
 MapEpetra GhostHandler<Mesh>::ghostMapOnNodes()
 {
+    // check that the nodeNeighbors have been created
+    if ( M_localMesh->point( 0 ).nodeNeighbors().empty()  )
+    {
+        std::cerr << "the nodeNeighbors are empty, will be generated now" << std::endl;
+        this->createNodeNeighbors();
+    }
+
     MapEpetra ghostMap;
 
     // use the same Unique map and comm of the original map
@@ -334,6 +344,55 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP0()
     for ( ID faceId = 0; faceId < facesOnSubdInt.size(); faceId++ )
     {
         map.insert( M_localMesh->faceList[ facesOnSubdInt [ faceId ] ].secondAdjacentElementIdentity() );
+    }
+
+    // convert unique list to vector to assure continuity in memorization
+    std::vector<Int> myGlobalElements ( map.begin(), map.end() );
+
+    // generate map
+    MapEpetra::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    ghostMap.setMap( repeatedMap, Repeated );
+
+    return ghostMap;
+}
+
+template <typename Mesh>
+MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1()
+{
+    // check that the nodeElementNeighborsMap has been created
+    if ( M_nodeElementNeighborsMap.empty()  )
+    {
+        std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
+        this->createNodeElementNeighborsMap();
+    }
+
+    MapEpetra ghostMap;
+
+    // use the same Unique map and comm of the original map
+    ghostMap.setMap( M_map.map( Unique ), Unique );
+    ghostMap.setComm( M_comm );
+
+    Int*          pointer;
+    std::set<Int> map;
+
+    // get all elements from the repeated map
+    pointer = M_map.map( Repeated )->MyGlobalElements();
+    for ( Int ii = 0; ii < M_map.map( Repeated )->NumMyElements(); ++ii, ++pointer )
+    {
+        map.insert( *pointer );
+    }
+
+    // add all elements with a node on SUBDOMAIN_INTERFACE
+    std::vector<ID> pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag(
+                    EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
+    for ( ID pointId = 0; pointId < pointsOnSubdInt.size(); pointId++ )
+    {
+        // iterate on each node neighborhood
+        for ( neighborList_Type::const_iterator neighborIt = M_nodeElementNeighborsMap[ pointId ].begin();
+                        neighborIt != M_nodeElementNeighborsMap[ pointId ].end(); ++neighborIt )
+        {
+            map.insert( *neighborIt );
+        }
     }
 
     // convert unique list to vector to assure continuity in memorization
