@@ -573,9 +573,9 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // ******************
     // ridges construction
     // ******************
-    if(mesh_Type::geoDimensions == 3)
+    if(mesh_Type::S_geoDimensions == 3)
     	constructRidges();
-    else if(mesh_Type::geoDimensions == 2)
+    else if(mesh_Type::S_geoDimensions == 2)
     	M_nBoundaryRidges = M_nBoundaryPoints;
 
 
@@ -1473,7 +1473,7 @@ void MeshPartitioner<MeshType>::finalSetup()
         (*M_meshPartitions)[i]->setNumVertices (nNodes );
         (*M_meshPartitions)[i]->setNumBVertices(M_nBoundaryPoints[i]);
 
-        if(MeshType::geoDimensions == 3)
+        if(MeshType::S_geoDimensions == 3)
         	(*M_meshPartitions)[i]->updateElementRidges();
         	
         (*M_meshPartitions)[i]->updateElementFacets();

@@ -332,7 +332,7 @@ void DOF::update( MeshType& mesh )
     M_localToGlobal.reshape( nldof, M_numElement );
 
     // Make sure the mesh has everything needed
-    bool update_ridges( nbLocalDofPerRidge != 0 && ! mesh.hasLocalRidges() && (MeshType::geoDimensions == 3));
+    bool update_ridges( nbLocalDofPerRidge != 0 && ! mesh.hasLocalRidges() && (MeshType::S_geoDimensions == 3));
     if ( update_ridges )
         mesh.updateElementRidges();
 

@@ -574,7 +574,7 @@ FESpace(	MeshPartitioner<MeshType>&	mesh,
     M_spaceMap["P2_HIGH"]	= P2_HIGH;
 
     // Set space
-    setSpace( space, mesh_Type::geoDimensions );
+    setSpace( space, mesh_Type::S_geoDimensions );
 
     // Set other quantities
     M_dof.reset( new DOF( *M_mesh, *M_refFE ) );
@@ -630,7 +630,7 @@ FESpace(	meshPtr_Type			mesh,
     M_spaceMap["P2_HIGH"]	= P2_HIGH;
 
     // Set space
-    setSpace( space, mesh_Type::geoDimensions );
+    setSpace( space, mesh_Type::S_geoDimensions );
 
     // Set other quantities
     M_dof.reset( new DOF( *M_mesh, *M_refFE ) );

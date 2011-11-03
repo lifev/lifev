@@ -87,8 +87,8 @@ public MC::regionMarker_Type
 {
 public:
 
-	//! static const geoDimensions: the dimensions (1,2,3) of the geometry
-	static const Int geoDimensions = GEOSHAPE::S_nDimensions;
+	//! static const S_geoDimensions: the dimensions (1,2,3) of the geometry
+	static const Int S_geoDimensions = GEOSHAPE::S_nDimensions;
 
 
     /** @name GeoDim Types
@@ -100,7 +100,7 @@ public:
 	typedef GeoDim<1> oneD_Type;
 	typedef GeoDim<2> twoD_Type;
 	typedef GeoDim<3> threeD_Type;
-	typedef GeoDim<geoDimensions> geoDim_Type;
+	typedef GeoDim<S_geoDimensions> geoDim_Type;
 	 /** @} */ // End of group GeoDim Types
 
     /** @name Marker Types
@@ -140,15 +140,15 @@ public:
 	 */
 
 
-    typedef MeshElementMarked<3, geoDimensions, GEOSHAPE, MC>  volume_Type;
-    typedef MeshElementMarked<2, geoDimensions, GEOSHAPE, MC> face_Type;
-    typedef MeshElementMarked<1, geoDimensions, GEOSHAPE, MC> edge_Type;
-    typedef MeshElementMarked<0, geoDimensions, GEOSHAPE, MC>	point_Type;
+    typedef MeshElementMarked<3, S_geoDimensions, GEOSHAPE, MC>  volume_Type;
+    typedef MeshElementMarked<2, S_geoDimensions, GEOSHAPE, MC> face_Type;
+    typedef MeshElementMarked<1, S_geoDimensions, GEOSHAPE, MC> edge_Type;
+    typedef MeshElementMarked<0, S_geoDimensions, GEOSHAPE, MC>	point_Type;
 
-    typedef MeshElementMarked<geoDimensions, geoDimensions, GEOSHAPE, MC>  element_Type;
-    typedef MeshElementMarked<geoDimensions-1, geoDimensions, GEOSHAPE, MC> facet_Type;
-    typedef MeshElementMarked<geoDimensions-2, geoDimensions, GEOSHAPE, MC> ridge_Type;
-    typedef MeshElementMarked<geoDimensions-3, geoDimensions, GEOSHAPE, MC>  peak_Type;
+    typedef MeshElementMarked<S_geoDimensions, S_geoDimensions, GEOSHAPE, MC>  element_Type;
+    typedef MeshElementMarked<S_geoDimensions-1, S_geoDimensions, GEOSHAPE, MC> facet_Type;
+    typedef MeshElementMarked<S_geoDimensions-2, S_geoDimensions, GEOSHAPE, MC> ridge_Type;
+    typedef MeshElementMarked<S_geoDimensions-3, S_geoDimensions, GEOSHAPE, MC>  peak_Type;
 
     /** @} */ // End of group Geometric Element Types
 
@@ -3156,7 +3156,7 @@ template <typename GEOSHAPE, typename MC>
 inline UInt
 RegionMesh<GEOSHAPE, MC>::localFaceId( UInt const volId, UInt const locF ) const
 {
-	ASSERT_PRE(geoDimensions == 3, "RegionMesh::localFaceId, It is not possible to use this method with 2D and 1D geometries.");
+	ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::localFaceId, It is not possible to use this method with 2D and 1D geometries.");
 	return localFacetId( volId, locF );
 }
 
@@ -3199,7 +3199,7 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verbose, UInt ee, bool renumber )
 {
-	if(geoDimensions != 3)
+	if(S_geoDimensions != 3)
 	{
 		ERROR_MSG("RegionMesh::updateElementRidges, It is not possible to use this method with 2D and 1D geometries.");
 	}
@@ -3367,7 +3367,7 @@ void
 RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt ef )
 {
 
-	if(geoDimensions == 1)
+	if(S_geoDimensions == 1)
 	{
 		ERROR_MSG("RegionMesh::updateElementFacets, Not yet implemented for 1D geometries.");
 	}
@@ -3538,7 +3538,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
 template <typename GEOSHAPE, typename MC>
 void RegionMesh<GEOSHAPE, MC>::updateElementFaces( bool createFaces, const bool verbose, UInt estimateFaceNumber)
 {
-	ASSERT_PRE(geoDimensions == 3, "RegionMesh::updateElementFaces, It is not possible to use this method with 2D and 1D geometries.");
+	ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::updateElementFaces, It is not possible to use this method with 2D and 1D geometries.");
 	updateElementFacets( createFaces , verbose, estimateFaceNumber );
 }
 
@@ -3555,7 +3555,7 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh<GEOSHAPE, MC>::cleanElementFaces()
 {
-	ASSERT_PRE(geoDimensions == 3, "RegionMesh::cleanElementFaces(), It is not possible to use this method with 2D and 1D geometries.");
+	ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::cleanElementFaces(), It is not possible to use this method with 2D and 1D geometries.");
 	cleanElementFacets();
 }
 

@@ -259,7 +259,7 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     LifeChronoFake chronoAssembly9;
     LifeChrono chronoAssembly;
 
-    ID geoDimensions = MeshType::elementShape_Type::S_nDimensions;
+    ID geoDimensions = MeshType::S_geoDimensions;
     MatrixElemental elMatU( M_feOnSide1->nbFEDof(), geoDimensions    , geoDimensions   );
     MatrixElemental elMatP( M_feOnSide1->nbFEDof(), geoDimensions + 1, geoDimensions+1 );
 

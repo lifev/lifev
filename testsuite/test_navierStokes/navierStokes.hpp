@@ -627,7 +627,7 @@ NavierStokes<MeshType, Problem>::run()
 
             boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
 
-            Int geoDimensions = mesh_Type::elementShape_Type::S_nDimensions;
+            Int geoDimensions = mesh_Type::S_geoDimensions;
             // Building the mesh from the source
         /*    if(M_meshSource == RegularMesh) Not yet implemented in 2D
             {
