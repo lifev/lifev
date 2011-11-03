@@ -399,13 +399,16 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1()
     }
 
     // add all elements with a node on SUBDOMAIN_INTERFACE
-    std::vector<ID> pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag(
-                    EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
-    for ( ID pointId = 0; pointId < pointsOnSubdInt.size(); pointId++ )
+    //TODO: run only on points on SUBDOMAIN_INTERFACE
+//    std::vector<ID> pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag(
+//                    EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
+//    for ( ID pointId = 0; pointId < pointsOnSubdInt.size(); pointId++ )
+    for ( ID pointId = 0; pointId < M_localMesh->pointList.size(); pointId++ )
     {
         // iterate on each node neighborhood
-        for ( neighborList_Type::const_iterator neighborIt = M_nodeElementNeighborsMap[ pointId ].begin();
-                        neighborIt != M_nodeElementNeighborsMap[ pointId ].end(); ++neighborIt )
+        for ( neighborList_Type::const_iterator neighborIt =
+                        M_nodeElementNeighborsMap[ M_localMesh->point ( pointId ).id() ].begin();
+                        neighborIt != M_nodeElementNeighborsMap[ M_localMesh->point ( pointId ).id() ].end(); ++neighborIt )
         {
             map.insert( *neighborIt );
         }
