@@ -40,6 +40,7 @@ todo
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifearray/GhostHandler.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifefilters/GetPot.hpp>
@@ -155,6 +156,17 @@ int main( int argc, char* argv[] )
 
     ghostP1.clean();
 
+    boost::shared_ptr<VectorEpetra> vP1( new VectorEpetra( mapP1Overlap1bis, Unique ) );
+
+    // get all elements from the repeated map
+    Int* pointer ( mapP1Overlap1bis.map( Repeated )->MyGlobalElements() );
+    for ( Int ii = 0; ii < mapP1Overlap1bis.map( Repeated )->NumMyElements(); ++ii, ++pointer )
+    {
+        vP1->sumIntoGlobalValues( *pointer, 1 );
+    }
+
+    vP1->globalAssemble();
+
     feSpacePtr_Type feSpaceP0( new feSpace_Type( meshPart,
                                                  feTetraP0,
                                                  quadRuleTetra15pt,
@@ -183,6 +195,21 @@ int main( int argc, char* argv[] )
 
     ghostP0.clean();
 
+    boost::shared_ptr<VectorEpetra> vP0( new VectorEpetra( mapP0P0, Unique ) );
+
+    // get all elements from the repeated map
+    pointer = mapP0P1.map( Repeated )->MyGlobalElements();
+    if ( isLeader )
+    for ( Int ii = 0; ii < mapP0P1.map( Repeated )->NumMyElements(); ++ii, ++pointer )
+    {
+        vP0->sumIntoGlobalValues( *pointer, 1 );
+    }
+
+    vP0->globalAssemble();
+
+    fileOut << "=================== vector" << std::endl;
+    fileOut << vP0->epetraVector();
+
     // Stop chronoGhost
     chronoGhost.stop();
 
@@ -197,17 +224,17 @@ int main( int argc, char* argv[] )
     // Choose the exporter
 #ifdef HAVE_HDF5
     if ( exporterType.compare( "hdf5" ) == 0 )
-        exporter.reset( new ExporterHDF5< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
+        exporter.reset( new ExporterHDF5< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "GH" ) ) );
     else
 #endif
     {
         if ( exporterType.compare("none") == 0 )
         {
-            exporter.reset( new ExporterEmpty< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
+            exporter.reset( new ExporterEmpty< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "GH" ) ) );
         }
         else
         {
-            exporter.reset( new ExporterEnsight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
+            exporter.reset( new ExporterEnsight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "GH" ) ) );
         }
     }
 
@@ -218,22 +245,24 @@ int main( int argc, char* argv[] )
     // Export the partitioning
     exporter->exportPID( meshPart );
 
-    // Set the exporter solution
-//    exporterSolution.reset( new vector_type ( *hyperbolicSolver.solution(),exporter->mapType() ) );
+    // Add the solution to the exporter
+    exporter->addVariable( ExporterData<RegionMesh>::ScalarField,
+                           "MapP1", feSpaceP1,
+                           vP1,
+                           static_cast<UInt>( 0 ),
+                           ExporterData<RegionMesh>::SteadyRegime,
+                           ExporterData<RegionMesh>::Node );
 
     // Add the solution to the exporter
-//    exporter->addVariable( ExporterData<RegionMesh>::ScalarField,
-//                           "Concentration", feSpacePtr,
-//                           exporterSolution,
-//                           static_cast<UInt>( 0 ),
-//                           ExporterData<RegionMesh>::UnsteadyRegime,
-//                           ExporterData<RegionMesh>::Cell );
-
-    // Copy the initial solution to the exporter
-//    *exporterSolution = *hyperbolicSolver.solution();
+    exporter->addVariable( ExporterData<RegionMesh>::ScalarField,
+                           "MapP0", feSpaceP0,
+                           vP0,
+                           static_cast<UInt>( 0 ),
+                           ExporterData<RegionMesh>::SteadyRegime,
+                           ExporterData<RegionMesh>::Cell );
 
     // Save the initial solution into the exporter
-//    exporter->postProcess( dataHyperbolic.dataTime()->initialTime() );
+    exporter->postProcess( 0 );
 
     // Stop chronoTotal
     chronoTotal.stop();
