@@ -161,10 +161,11 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     M_data->setPostprocessingFile( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
 
 #ifdef HAVE_HDF5
+    uniformMesh1D( *M_exporterMesh, 0., M_data->length(), M_data->numberOfElements() );
+
     M_exporter->setDataFromGetPot( dataFile );
     M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
     M_exporter->setPostDir( multiscaleProblemFolder );
-    M_exporterMesh->setup( M_data->length(), M_data->numberOfElements() );
 
     M_importer->setDataFromGetPot( dataFile );
     M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
@@ -321,8 +322,8 @@ MultiscaleModel1D::showMe()
         std::cout << "FE order            = " << "P1" << std::endl
                   << "DOF                 = " << M_data->mesh()->numPoints() << std::endl << std::endl;
 
-        std::cout << "maxH                = " << M_data->mesh()->maxH() << std::endl
-                  << "meanH               = " << M_data->mesh()->meanH() << std::endl << std::endl;
+        std::cout << "maxH                = " << MeshUtility::MeshStatistics::computeSize(*M_data->mesh()).maxH << std::endl
+                  << "meanH               = " << MeshUtility::MeshStatistics::computeSize(*M_data->mesh()).meanH << std::endl << std::endl;
     }
 }
 
