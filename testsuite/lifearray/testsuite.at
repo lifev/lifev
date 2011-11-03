@@ -25,5 +25,27 @@ AT_CLEANUP
 
 AT_SETUP([test_ghosthandler])
 AT_KEYWORDS([ array partition ghosthandler ])
-AT_CHECK([mpirun -n 2 ../../lifearray/test_ghosthandler],[0],[ignore],[ignore])
+AT_DATA([data_ghosthandler],
+[[
+[space_discretization]
+mesh_dir      = ./ # the directory where the mesh file is
+mesh_file     = cartesian_cube8.mesh
+mesh_type     = .mesh #structured #.mesh
+mesh_faces    = all
+verbose       = 0                        # verbose during mesh-reading
+# 0 -> tetra, 1 -> hexa
+element_shape = 0
+[../]
+
+[exporter]
+type       = hdf5
+folder     = ./
+multimesh  = false   # actually we export also the displacement
+start      = 0
+save       = 1
+file_name  = GH
+[../]
+]])
+AT_CHECK([ln -sf ../../data/mesh/inria/cartesian_cube8.mesh;
+mpirun -n 2 ../../lifearray/test_ghosthandler -c],[0],[ignore],[ignore])
 AT_CLEANUP
