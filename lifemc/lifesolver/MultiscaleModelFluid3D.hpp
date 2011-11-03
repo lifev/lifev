@@ -76,7 +76,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef RegionMesh3D< LinearTetra >                       mesh_Type;
+    typedef RegionMesh< LinearTetra >                         mesh_Type;
     typedef MeshPartitioner< mesh_Type >                      MeshPartitioner_Type;
 
 
