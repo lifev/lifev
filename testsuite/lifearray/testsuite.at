@@ -19,6 +19,11 @@ AT_CHECK([mpirun -n 1 ../../lifearray/test_meshentitycontainer],[0],[ignore],[ig
 AT_CLEANUP
 
 AT_SETUP([test_vectorsmall])
-AT_KEYWORDS([vectorsmall])
+AT_KEYWORDS([ array vectorsmall ])
 AT_CHECK([mpirun -n 1 ../../lifearray/test_vectorsmall],[0],[ignore],[ignore])
+AT_CLEANUP
+
+AT_SETUP([test_ghosthandler])
+AT_KEYWORDS([ array partition ghosthandler ])
+AT_CHECK([mpirun -n 2 ../../lifearray/test_ghosthandler],[0],[ignore],[ignore])
 AT_CLEANUP

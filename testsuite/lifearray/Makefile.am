@@ -17,10 +17,16 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 INCLUDES	= -I$(top_srcdir)/life/lifearray
 
-check_PROGRAMS	= test_meshentitycontainer test_vectorsmall
+check_PROGRAMS	= test_meshentitycontainer test_vectorsmall test_ghosthandler
 
 test_meshentitycontainer_SOURCES= test_meshentitycontainer.cpp
 
 test_vectorsmall_SOURCES= test_vectorsmall.cpp
 
+test_ghosthandler_SOURCES= test_ghosthandler.cpp
+
 EXTRA_DIST  = testsuite.at
+
+link:
+	test -a data_ghosthandler || ln -s $(srcdir)/data_ghosthandler
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria Mesh
