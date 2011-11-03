@@ -27,6 +27,9 @@ AT_SETUP([test_ghosthandler])
 AT_KEYWORDS([ array partition ghosthandler ])
 AT_DATA([data_ghosthandler],
 [[
+[ghost]
+overlap = 1
+
 [space_discretization]
 mesh_dir      = ./ # the directory where the mesh file is
 mesh_file     = cartesian_cube8.mesh

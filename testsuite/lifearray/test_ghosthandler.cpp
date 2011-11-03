@@ -138,7 +138,7 @@ int main( int argc, char* argv[] )
 
     MapEpetra mapP1 ( feSpaceP1->map() );
     MapEpetra mapP1Overlap1 ( ghostP1.ghostMapOnNodes() );
-    MapEpetra mapP1Overlap1bis ( ghostP1.ghostMapOnNodes( 1 ) );
+    MapEpetra mapP1Overlap1bis ( ghostP1.ghostMapOnNodes( dataFile( "ghost/overlap", 1 ) ) );
 
     fileOut << "=================== mapP1" << std::endl;
     fileOut << *mapP1.map( Unique );

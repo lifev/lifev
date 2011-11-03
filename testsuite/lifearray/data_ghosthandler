@@ -15,6 +15,9 @@
 #      Data file for a hyperbolic problem
 #-------------------------------------------------
 
+    [ghost]
+    overlap = 2 
+
     [space_discretization]
     mesh_dir      = ./Mesh/ # the directory where the mesh file is
     mesh_file     = test2.mesh
