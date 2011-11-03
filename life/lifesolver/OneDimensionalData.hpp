@@ -107,7 +107,7 @@ public:
     typedef TimeData                                                  time_Type;
     typedef boost::shared_ptr< time_Type >                            timePtr_Type;
 
-    typedef RegionMesh< LinearLine >                                mesh_Type;
+    typedef RegionMesh< LinearLine >                                  mesh_Type;
     typedef boost::shared_ptr< mesh_Type >                            meshPtr_Type;
 
     // ScalVec SHOULD BE REPLACED EVERYWHERE BY EPETRAVECTOR FOR PARALLEL COMPUTATION
