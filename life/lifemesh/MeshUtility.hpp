@@ -2411,7 +2411,7 @@ void MeshTransformer<REGIONMESH>::moveMesh( const VECTOR & disp, UInt dim )
         for ( UInt j = 0; j < nDimensions; ++j )
         {
             int globalId = pointList[i].id();
-            if ( disp.isPresent(globalId + dim*j))
+            if ( disp.isGlobalIDPresent(globalId + dim*j))
                 pointList[ i ].coordinate( j ) = M_pointList[ i ].coordinate( j ) +
                 disp[ j * dim + globalId ];
         }
