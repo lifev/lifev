@@ -199,7 +199,9 @@ MultiscaleModel1D::setupModel()
 #ifdef HAVE_HDF5
     M_exporter->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
-    MapEpetra map( M_feSpace->refFE(), *M_exporterMesh, M_comm );
+    DOF tmpDof ( *M_exporterMesh, M_feSpace->refFE() );
+    std::vector<Int> myGlobalElements( tmpDof.globalElements( *M_exporterMesh ) ); 
+    MapEpetra map( -1, myGlobalElements.size(), &myGlobalElements[0], M_comm );
     M_solver->setupSolution( *M_exporterSolution, map, true );
 
     M_exporter->addVariable( IOData_Type::ScalarField, "Area ratio (fluid)", M_feSpace, (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ) );
