@@ -964,6 +964,13 @@ bcEssentialManage( MatrixType& matrix,
         }
     }
 
+    cout << "boundaryCond.offset() = " << boundaryCond.offset() << '\n';
+    if (boundaryCond.offset() > 0)
+    {
+        // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
+       idDofVec.push_back(offset + boundaryCond.offset());
+    }
+
     // Modifying matrix and right hand side
     matrix.diagonalize( idDofVec, diagonalizeCoef, rightHandSide, datumVec);
 
@@ -1030,6 +1037,13 @@ bcEssentialManageUDep( MatrixType& matrix,
             }
         }
 
+        cout << "boundaryCond.offset() = " << boundaryCond.offset() << '\n';
+        if (boundaryCond.offset() > 0)
+        {
+            // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
+            idDofVec.push_back(offset + boundaryCond.offset());
+        }
+
         // Modifying matrix and right hand side
         matrix.diagonalize( idDofVec, diagonalizeCoef, rightHandSide, datumVec);
     }
@@ -1068,6 +1082,14 @@ bcEssentialManageMatrix( MatrixType& matrix,
             idDofVec.push_back(idDof);
         }
     }
+
+    cout << "boundaryCond.offset() = " << boundaryCond.offset() << '\n';
+    if (boundaryCond.offset() > 0)
+    {
+        // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
+        idDofVec.push_back(offset + boundaryCond.offset());
+    }
+
     // Modifying ONLY matrix
     matrix.diagonalize( idDofVec, diagonalizeCoef, offset);
 
