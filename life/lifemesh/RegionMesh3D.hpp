@@ -1829,10 +1829,10 @@ inline
 typename RegionMesh3D<GEOSHAPE, MC>::FaceType &
 RegionMesh3D<GEOSHAPE, MC>::addFace( FaceType const & f)
 {
- //   ASSERT_PRE( faceList.size() < faceList.capacity(), "Face list size exceeded" <<
- //               faceList.size() + 1 << " " << faceList.capacity() ) ;
+ //    ASSERT_PRE( faceList.size() < faceList.capacity(), "Face list size exceeded" <<
+ //                faceList.size() + 1 << " " << faceList.capacity() ) ;
     faceList.push_back( f );
-    faceList.back().setLocalId( faceList.size() -1 );
+    faceList.back().setId( faceList.size() -1 );
 
     return faceList.back();
 }
