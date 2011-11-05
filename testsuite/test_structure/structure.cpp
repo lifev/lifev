@@ -292,15 +292,6 @@ Structure::run3d()
     solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
 
-    MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
-
-    MapEpetra fullMap;
-
-    for (UInt ii = 0; ii < nDimensions; ++ii)
-    {
-        fullMap += structMap;
-    }
-
     VenantKirchhoffSolverLinear< mesh_Type > solid;
     solid.setup(dataStructure,
                 dFESpace,

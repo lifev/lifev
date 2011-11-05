@@ -237,7 +237,10 @@ main( int argc, char** argv )
         exit(1);
     }
 
-    if (verbose) std::cout << "Mesh size  : " << fullMeshPtr->maxH() << std::endl;
+    if (verbose){
+        std::cout << "Mesh size  : " <<
+                        MeshUtility::MeshStatistics::computeSize(*fullMeshPtr).maxH << std::endl;
+    }
     if (verbose) std::cout << "Partitioning the mesh ... " << std::endl;
     MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, Comm);
     fullMeshPtr.reset(); //Freeing the global mesh to save memory

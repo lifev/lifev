@@ -35,7 +35,7 @@
     This is the simplest implementation of the markers, which just adopts the
     basis marker classes defined in marker_base.h.
 
-    Specialised markers can be implemented using this "template" as
+    Specialised markers can be implemented using this file as a
     reference.
 */
 
@@ -46,15 +46,36 @@
 
 namespace LifeV
 {
+//! MarkerCommon - A trait class that defines the markers used in RegionMesh
+/*!
+ * It takes as template parameter the policy for the entityFlag treatment.
+ * It is a concrete class that may be redefined by the user if different markers are
+ * needed. It is passed as template argument to the RegionMesh classes
+ */
 
-//! The simples MarkerCommon: uses all defaults
-typedef MarkerCommon<MarkerTraits> defaultMarkerCommon_Type;
+template
+<class MT>
+class MarkerCommon
+{
+public:
 
-//!Expose entityFlag_Type
-typedef MarkerTraits::entityFlag_Type entityFlag_Type;
+    //! @name Public Types
+    //@{
+    //! The marker used for the Points
+    typedef Marker<MT> pointMarker_Type;
+    //! The marker used for the Edges
+    typedef Marker<MT> edgeMarker_Type;
+    //! The marker used for the Faces
+    typedef Marker<MT> faceMarker_Type;
+    //! The marker used for the Volumes
+    typedef Marker<MT> volumeMarker_Type;
+    //! The marker used for the Regions
+    typedef Marker<MT> regionMarker_Type;
+    //@}
+};
 
-//!Expose NULLFLAG
-static const entityFlag_Type S_NULLFLAG = MarkerTraits::S_NULLFLAG;
+//! The simplest MarkerCommon: uses all defaults
+typedef MarkerCommon<EntityFlagStandardPolicy> defaultMarkerCommon_Type;
 
 } // Namespace LifeV
 
