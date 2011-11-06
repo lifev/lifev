@@ -60,7 +60,7 @@ namespace LifeV {
 
  */
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 class OseenAssembler
 {
 public:
@@ -68,17 +68,13 @@ public:
     //! @name Public Types
     //@{
 
-    typedef MapEpetra                       map_type;
-
-    typedef FESpace<mesh_type, map_type>    fespace_type;
-    typedef boost::shared_ptr<fespace_type> fespace_ptrType;
-
-    typedef boost::shared_ptr<matrix_type>  matrix_ptrType;
-
-    typedef LifeChrono                      chrono_type;
+    typedef MapEpetra                       map_Type;
+    typedef FESpace<meshType, map_Type>     fespace_Type;
+    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
 
     // Use the portable syntax of the boost function
-    typedef boost::function5<Real, const Real&, const Real&, const Real&, const Real&, const ID&> function_type;
+    typedef boost::function5< const Real&,  const Real&, const Real&,
+                              const Real&, const Real&, const ID&  > function_Type;
 
     //@}
 
@@ -104,13 +100,13 @@ public:
       field is assumed to be the same as the velocity field. If they differ, use another
       setup method.
      */
-    void setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace)
+    void setup(const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace)
     {
         setup(uFESpace,pFESpace,uFESpace);
     }
 
     //! Setup method for the FESpace with a different space for the convective field
-    void setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fespace_ptrType& betaFESpace);
+    void setup(const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const fespacePtr_Type& betaFESpace);
 
     //@}
 
@@ -119,101 +115,102 @@ public:
     //@{
 
     //! Add the viscous stress in the standard block
-    void addViscousStress(matrix_type& matrix, const Real& viscosity)
+    void addViscousStress(matrixType& matrix, const Real& viscosity)
     {
         addViscousStress(matrix,viscosity,0,0);
     };
 
     //! Add the viscous stress using the given offsets
-    void addViscousStress(matrix_type& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp);
+    void addViscousStress(matrixType& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Add the stiff strain in the standard block
-    void addStiffStrain(matrix_type& matrix, const Real& viscosity)
+    void addStiffStrain(matrixType& matrix, const Real& viscosity)
     {
         addStiffStrain(matrix,viscosity,0,0);
     };
 
     //! Add the stiff strain using the given offsets
-    void addStiffStrain(matrix_type& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp);
+    void addStiffStrain(matrixType& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Add the term involved in the gradient of the pressure term
-    void addGradPressure(matrix_type& matrix)
+    void addGradPressure(matrixType& matrix)
     {
         addGradPressure(matrix,M_uFESpace->dof().numTotalDof()*nDimensions,0);
     };
 
     //! Add the term involved in the gradient of the pressure term using the given offsets
-    void addGradPressure(matrix_type& matrix, const UInt& offsetLeft, const UInt& offsetUp);
+    void addGradPressure(matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Add the term corresponding to the divergence free constraint
     /*!
      * The default choice coefficient=1.0 leads to a divergence matrix which is the transpose of the
      * pressure gradient matrix.
      */
-    void addGradientTranspose(matrix_type& matrix,const Real& coefficient=1.0)
+    void addGradientTranspose(matrixType& matrix,const Real& coefficient=1.0)
     {
         addGradientTranspose(matrix,0,M_uFESpace->dof().numTotalDof()*nDimensions,coefficient);
     };
 
     //! Add the divergence free constraint in a given position of the matrix using the grad calls.
-    void addGradientTranspose(matrix_type& matrix, const UInt& offsetLeft, const UInt& offsetUp, const Real& coefficient);
+    void addGradientTranspose(matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp, const Real& coefficient=1.0);
 
     //! Add the term corresponding to the divergence free constraint
     /*!
      * The default choice coefficient=1.0 leads to a divergence matrix which is the transpose of the
      * pressure gradient matrix.
      */
-    void addDivergence(matrix_type& matrix,const Real& coefficient=1.0)
+    void addDivergence(matrixType& matrix,const Real& coefficient=1.0)
     {
         addDivergence(matrix,0,M_uFESpace->dof().numTotalDof()*nDimensions,coefficient);
     };
 
     //! Add the divergence free constraint in a given position of the matrix.
-    void addDivergence(matrix_type& matrix, const UInt& offsetLeft, const UInt& offsetUp,const Real& coefficient=1.0);
+    void addDivergence(matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp,const Real& coefficient=1.0);
 
     //! Add the mass
-    void addMass(matrix_type& matrix, const Real& coefficient)
+    void addMass(matrixType& matrix, const Real& coefficient)
     {
         addMass(matrix,coefficient,0,0);
     };
 
     //! Add the mass using offsets
-    void addMass(matrix_type& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
+    void addMass(matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
 
     //! Add the Pressure mass
-    void addPressureMass(matrix_type& matrix, const Real& coefficient)
+    void addPressureMass(matrixType& matrix, const Real& coefficient)
     {
-        addPressureMass(matrix,coefficient,M_uFESpace->dof().numTotalDof()*nDimensions,M_uFESpace->dof().numTotalDof()*nDimensions);
+        addPressureMass(matrix,coefficient, M_uFESpace->dof().numTotalDof()*nDimensions,
+                        M_uFESpace->dof().numTotalDof()*nDimensions);
     };
 
     //! Add the mass using offsets
-    void addPressureMass(matrix_type& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
+    void addPressureMass(matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
 
     //! Add the convective term
-    void addConvection(matrix_type& matrix, const vector_type& beta)
+    void addConvection(matrixType& matrix, const vectorType& beta)
     {
         addConvection(matrix,beta,0,0);
     }
 
     //! Add the convective term with the given offsets
-    void addConvection(matrix_type& matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp);
+    void addConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp);
 
     //! Add the convective term
-    void addSymmetricConvection(matrix_type& matrix, const vector_type& beta)
+    void addSymmetricConvection(matrixType& matrix, const vectorType& beta)
     {
         addSymmetricConvection(matrix,beta,0,0);
     }
 
     //! Add the symmetric convective term with the given offset
-    void addSymmetricConvection(matrix_type& matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp);
+    void addSymmetricConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp);
 
 
     //! Add an explicit convection term to the right hand side
-    void addConvectionRhs(vector_type& rhs, const vector_type& velocity);
+    void addConvectionRhs(vectorType& rhs, const vectorType& velocity);
 
-    void addMassRhs(vector_type& rhs, const function_type& f, const Real& t);
+    void addMassRhs(vectorType& rhs, const function_Type& fun, const Real& t);
 
-    void addFluxTerms(vector_type& vector, BCHandler const& bcHandler);
+    void addFluxTerms(vectorType& vector, BCHandler const& bcHandler);
     //@}
 
 
@@ -225,7 +222,7 @@ public:
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
     */
-    inline void setQuadRuleForMassRhs(const QuadratureRule& qr)
+    void setQuadRuleForMassRhs(const QuadratureRule& qr)
     {
         ASSERT(M_massRhsCFE != 0,"No Rhs currentFE for setting the quadrature rule!");
         M_massRhsCFE->setQuadRule(qr);
@@ -242,14 +239,14 @@ public:
 
 private:
 
-    typedef CurrentFE                                    currentFE_type;
-    typedef boost::scoped_ptr<currentFE_type>            currentFE_ptrType;
+    typedef CurrentFE                          currentFE_Type;
+    typedef boost::scoped_ptr<currentFE_Type>  currentFEPtr_Type;
 
-    typedef MatrixElemental                              localMatrix_type;
-    typedef boost::scoped_ptr<localMatrix_type>          localMatrix_ptrType;
+    typedef MatrixElemental                    localmatrixType;
+    typedef boost::scoped_ptr<localmatrixType> localMatrixPtr_Type;
 
-    typedef VectorElemental                              localVector_type;
-    typedef boost::scoped_ptr<localVector_type>          localVector_ptrType;
+    typedef VectorElemental                    localvectorType;
+    typedef boost::scoped_ptr<localvectorType> localVectorPtr_Type;
 
 
     //! @name Private Methods
@@ -261,56 +258,56 @@ private:
     //@}
 
     // Velocity FE space
-    fespace_ptrType M_uFESpace;
+    fespacePtr_Type M_uFESpace;
 
     // Pressure FE space
-    fespace_ptrType M_pFESpace;
+    fespacePtr_Type M_pFESpace;
 
     // Beta FE space
-    fespace_ptrType M_betaFESpace;
+    fespacePtr_Type M_betaFESpace;
 
 
     // CurrentFE
-    currentFE_ptrType M_viscousCFE;
+    currentFEPtr_Type M_viscousCFE;
 
-    currentFE_ptrType M_gradPressureUCFE;
-    currentFE_ptrType M_gradPressurePCFE;
+    currentFEPtr_Type M_gradPressureUCFE;
+    currentFEPtr_Type M_gradPressurePCFE;
 
-    currentFE_ptrType M_divergenceUCFE;
-    currentFE_ptrType M_divergencePCFE;
+    currentFEPtr_Type M_divergenceUCFE;
+    currentFEPtr_Type M_divergencePCFE;
 
-    currentFE_ptrType M_massCFE;
-    currentFE_ptrType M_massPressureCFE;
+    currentFEPtr_Type M_massCFE;
+    currentFEPtr_Type M_massPressureCFE;
 
-    currentFE_ptrType M_convectionUCFE;
-    currentFE_ptrType M_convectionBetaCFE;
+    currentFEPtr_Type M_convectionUCFE;
+    currentFEPtr_Type M_convectionBetaCFE;
 
-    currentFE_ptrType M_convectionRhsUCFE;
+    currentFEPtr_Type M_convectionRhsUCFE;
 
     // CurrentFE for the mass rhs
-    currentFE_ptrType M_massRhsCFE;
+    currentFEPtr_Type M_massRhsCFE;
 
 
     // Local matrix
-    localMatrix_ptrType M_localViscous;
+    localMatrixPtr_Type M_localViscous;
 
-    localMatrix_ptrType M_localGradPressure;
+    localMatrixPtr_Type M_localGradPressure;
 
-    localMatrix_ptrType M_localDivergence;
+    localMatrixPtr_Type M_localDivergence;
 
-    localMatrix_ptrType M_localMass;
-    localMatrix_ptrType M_localMassPressure;
+    localMatrixPtr_Type M_localMass;
+    localMatrixPtr_Type M_localMassPressure;
 
-    localMatrix_ptrType M_localConvection;
+    localMatrixPtr_Type M_localConvection;
 
-    localVector_ptrType M_localConvectionRhs;
+    localVectorPtr_Type M_localConvectionRhs;
     // Local vector for the right hand side
-    localVector_ptrType M_localMassRhs;
+    localVectorPtr_Type M_localMassRhs;
 
 };
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
-OseenAssembler<mesh_type,matrix_type,vector_type>::
+template< typename meshType, typename matrixType, typename vectorType>
+OseenAssembler<meshType,matrixType,vectorType>::
 OseenAssembler():
 
     M_uFESpace(),
@@ -341,10 +338,10 @@ OseenAssembler():
 {}
 
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fespace_ptrType& betaFESpace)
+OseenAssembler<meshType,matrixType,vectorType>::
+setup(const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const fespacePtr_Type& betaFESpace)
 {
     ASSERT(uFESpace !=0, "Impossible to set empty FE space for the velocity. ");
     ASSERT(pFESpace !=0, "Impossible to set empty FE space for the pressure. ");
@@ -362,84 +359,84 @@ setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fe
     UInt pDegree(M_pFESpace->polynomialDegree());
     UInt betaDegree(M_betaFESpace->polynomialDegree());
 
-    M_viscousCFE.reset(new currentFE_type(M_uFESpace->refFE(),
+    M_viscousCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                           M_uFESpace->fe().geoMap(),
                                           QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree-2)));
 
-    M_gradPressureUCFE.reset(new currentFE_type(M_uFESpace->refFE(),
+    M_gradPressureUCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                                 M_uFESpace->fe().geoMap(),
                                                 QuadratureRuleProvider::provideExactnessMax(TETRA,uDegree+pDegree-1)));
 
-    M_gradPressurePCFE.reset(new currentFE_type(M_pFESpace->refFE(),
+    M_gradPressurePCFE.reset(new currentFE_Type(M_pFESpace->refFE(),
                                                 M_uFESpace->fe().geoMap(),
                                                 QuadratureRuleProvider::provideExactnessMax(TETRA,uDegree+pDegree-1)));
 
-    M_divergenceUCFE.reset(new currentFE_type(M_uFESpace->refFE(),
+    M_divergenceUCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                               M_uFESpace->fe().geoMap(),
                                               QuadratureRuleProvider::provideExactnessMax(TETRA,uDegree+pDegree-1)));
 
 
-    M_divergencePCFE.reset(new currentFE_type(M_pFESpace->refFE(),
+    M_divergencePCFE.reset(new currentFE_Type(M_pFESpace->refFE(),
                                               M_uFESpace->fe().geoMap(),
                                               QuadratureRuleProvider::provideExactnessMax(TETRA,uDegree+pDegree-1)));
 
-    M_massCFE.reset(new currentFE_type(M_uFESpace->refFE(),
+    M_massCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                        M_uFESpace->fe().geoMap(),
                                        QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree)));
 
-    M_massPressureCFE.reset(new currentFE_type(M_pFESpace->refFE(),
+    M_massPressureCFE.reset(new currentFE_Type(M_pFESpace->refFE(),
                                                M_pFESpace->fe().geoMap(),
                                                QuadratureRuleProvider::provideExactnessMax(TETRA,2*pDegree)));
 
-    M_convectionUCFE.reset(new currentFE_type(M_uFESpace->refFE(),
+    M_convectionUCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                               M_uFESpace->fe().geoMap(),
                                               QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
 
-    M_convectionBetaCFE.reset(new currentFE_type(M_betaFESpace->refFE(),
+    M_convectionBetaCFE.reset(new currentFE_Type(M_betaFESpace->refFE(),
                                                  M_uFESpace->fe().geoMap(),
                                                  QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
 
-    M_convectionRhsUCFE.reset(new currentFE_type(M_betaFESpace->refFE(),
+    M_convectionRhsUCFE.reset(new currentFE_Type(M_betaFESpace->refFE(),
                                                  M_uFESpace->fe().geoMap(),
                                                  QuadratureRuleProvider::provideExactnessMax(TETRA,2*betaDegree+betaDegree-1)));
 
-    M_localViscous.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
+    M_localViscous.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),
                                               M_uFESpace->fieldDim(),
                                               M_uFESpace->fieldDim()));
-    M_localGradPressure.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),nDimensions,0,
+    M_localGradPressure.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),nDimensions,0,
                                                    M_pFESpace->fe().nbFEDof(),0,1));
 
     /*
-    M_localGradPressure.reset(new localMatrix_type(M_pFESpace->fe().nbFEDof(),0,1,
+    M_localGradPressure.reset(new localmatrixType(M_pFESpace->fe().nbFEDof(),0,1,
                                                    M_uFESpace->fe().nbFEDof(),nDimensions,0) );
     */
-    M_localDivergence.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),0,nDimensions,
+    M_localDivergence.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),0,nDimensions,
                                                  M_pFESpace->fe().nbFEDof(),1,0));
-    M_localMass.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
+    M_localMass.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),
                                            M_uFESpace->fieldDim(),
                                            M_uFESpace->fieldDim()));
-    M_localMassPressure.reset(new localMatrix_type(M_pFESpace->fe().nbFEDof(),
+    M_localMassPressure.reset(new localmatrixType(M_pFESpace->fe().nbFEDof(),
                                                    M_pFESpace->fieldDim(),
                                                    M_pFESpace->fieldDim()));
-    M_localConvection.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
+    M_localConvection.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),
                                                  M_uFESpace->fieldDim(),
                                                  M_uFESpace->fieldDim()));
 
-    M_localConvectionRhs.reset(new localVector_type(M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim()));
+    M_localConvectionRhs.reset(new localvectorType(M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim()));
 
-    M_massRhsCFE.reset(new currentFE_type(M_uFESpace->refFE(),M_uFESpace->fe().geoMap(),M_uFESpace->qr()));
+    M_massRhsCFE.reset(new currentFE_Type(M_uFESpace->refFE(),M_uFESpace->fe().geoMap(),M_uFESpace->qr()));
 
-    M_localMassRhs.reset(new localVector_type(M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim()));
+    M_localMassRhs.reset(new localvectorType(M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim()));
 
 
 
 }
 
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addViscousStress(matrix_type& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp)
+OseenAssembler<meshType,matrixType,vectorType>::
+addViscousStress(matrixType& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp)
 {
     ASSERT(M_uFESpace != 0, "No FE space for assembling the viscous stress.");
     ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*(M_uFESpace->fieldDim()) <=
@@ -481,10 +478,10 @@ addViscousStress(matrix_type& matrix, const Real& viscosity, const UInt& offsetL
     }
 }
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addStiffStrain(matrix_type& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp)
+OseenAssembler<meshType,matrixType,vectorType>::
+addStiffStrain(matrixType& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp)
 {
     ASSERT(M_uFESpace != 0, "No FE space for assembling the stiff strain.");
     ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*(M_uFESpace->fieldDim()) <=
@@ -529,10 +526,10 @@ addStiffStrain(matrix_type& matrix, const Real& viscosity, const UInt& offsetLef
     }
 }
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addGradPressure(matrix_type& matrix, const UInt& offsetLeft, const UInt& offsetUp)
+OseenAssembler<meshType,matrixType,vectorType>::
+addGradPressure(matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp)
 {
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the pressure gradient.");
     ASSERT(M_pFESpace != 0, "No pressure FE space for assembling the pressure gradient.");
@@ -576,10 +573,10 @@ addGradPressure(matrix_type& matrix, const UInt& offsetLeft, const UInt& offsetU
     }
 }
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addGradientTranspose(matrix_type& matrix, const UInt& offsetLeft, const UInt& offsetUp, const Real& coefficient)
+OseenAssembler<meshType,matrixType,vectorType>::
+addGradientTranspose(matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp, const Real& coefficient)
 {
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the pressure gradient.");
     ASSERT(M_pFESpace != 0, "No pressure FE space for assembling the pressure gradient.");
@@ -623,10 +620,10 @@ addGradientTranspose(matrix_type& matrix, const UInt& offsetLeft, const UInt& of
         }
     }
 }
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addDivergence(matrix_type& matrix, const UInt& offsetLeft, const UInt& offsetUp, const Real& coefficient)
+OseenAssembler<meshType,matrixType,vectorType>::
+addDivergence(matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp, const Real& coefficient)
 {
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the divergence.");
     ASSERT(M_pFESpace != 0, "No pressure FE space for assembling the divergence.");
@@ -671,15 +668,15 @@ addDivergence(matrix_type& matrix, const UInt& offsetLeft, const UInt& offsetUp,
 }
 
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addConvection(matrix_type& matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp)
+OseenAssembler<meshType,matrixType,vectorType>::
+addConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp)
 {
     // Beta has to be repeated
     if (beta.mapType() == Unique)
     {
-        addConvection(matrix,vector_type(beta,Repeated),offsetLeft,offsetUp);
+        addConvection(matrix,vectorType(beta,Repeated),offsetLeft,offsetUp);
         return;
     }
 
@@ -729,15 +726,15 @@ addConvection(matrix_type& matrix, const vector_type& beta, const UInt& offsetLe
     }
 }
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addSymmetricConvection(matrix_type& matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp)
+OseenAssembler<meshType,matrixType,vectorType>::
+addSymmetricConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp)
 {
     // Beta has to be repeated
     if (beta.mapType() == Unique)
     {
-        addSymmetricConvection(matrix,vector_type(beta,Repeated),offsetLeft,offsetUp);
+        addSymmetricConvection(matrix,vectorType(beta,Repeated),offsetLeft,offsetUp);
         return;
     }
 
@@ -798,15 +795,15 @@ addSymmetricConvection(matrix_type& matrix, const vector_type& beta, const UInt&
     }
 }
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addConvectionRhs(vector_type& rhs, const vector_type& velocity)
+OseenAssembler<meshType,matrixType,vectorType>::
+addConvectionRhs(vectorType& rhs, const vectorType& velocity)
 {
     // velocity has to be repeated!
     if (velocity.mapType() == Unique)
     {
-        addConvectionRhs(rhs, vector_type(velocity,Repeated));
+        addConvectionRhs(rhs, vectorType(velocity,Repeated));
         return;
     }
 
@@ -860,10 +857,10 @@ addConvectionRhs(vector_type& rhs, const vector_type& velocity)
     }
 }
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addMass(matrix_type& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp)
+OseenAssembler<meshType,matrixType,vectorType>::
+addMass(matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp)
 {
 
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the mass.");
@@ -904,10 +901,10 @@ addMass(matrix_type& matrix, const Real& coefficient, const UInt& offsetLeft, co
     }
 }
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addPressureMass(matrix_type& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp)
+OseenAssembler<meshType,matrixType,vectorType>::
+addPressureMass(matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp)
 {
 
     ASSERT(M_pFESpace != 0, "No pressure FE space for assembling the mass.");
@@ -950,10 +947,10 @@ addPressureMass(matrix_type& matrix, const Real& coefficient, const UInt& offset
 }
 
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
+OseenAssembler<meshType,matrixType,vectorType>::
+addMassRhs(vectorType& rhs, const function_Type& fun, const Real& t)
 {
     // Check that the fespace is set
     ASSERT(M_uFESpace != 0, "No FE space for assembling the right hand side (mass)!");
@@ -981,16 +978,16 @@ addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
         // Assemble the local diffusion
         for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
         {
-            localVector_type::vector_view localView = M_localMassRhs->block(iterFDim);
+            localvectorType::vector_view localView = M_localMassRhs->block(iterFDim);
 
             // Compute the value of f in the quadrature nodes
             for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
             {
-                fValues[iQuadPt]= f(t,
-                                    M_massRhsCFE->quadNode(iQuadPt,0),
-                                    M_massRhsCFE->quadNode(iQuadPt,1),
-                                    M_massRhsCFE->quadNode(iQuadPt,2),
-                                    iterFDim);
+                fValues[iQuadPt]= fun(t,
+                                      M_massRhsCFE->quadNode(iQuadPt,0),
+                                      M_massRhsCFE->quadNode(iQuadPt,1),
+                                      M_massRhsCFE->quadNode(iQuadPt,2),
+                                      iterFDim);
             }
 
             // Loop over the basis functions
@@ -1026,10 +1023,10 @@ addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
 
 }
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addFluxTerms( vector_type&     vector,
+OseenAssembler<meshType,matrixType,vectorType>::
+addFluxTerms( vectorType&     vector,
 	      BCHandler const& bcHandler)
 {
 
