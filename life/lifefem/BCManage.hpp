@@ -38,6 +38,7 @@
 #ifndef BCMANAGE_H
 #define BCMANAGE_H 1
 
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/BCManageNormal.hpp>
 
@@ -142,8 +143,8 @@ bcManageMatrix( MatrixType&      matrix,
  * @parma diagonalizeCoef The coefficient used during the system diagonalization
  */
 template <typename VectorType, typename MeshType, typename DataType>
-LIFEV_DEPRECATED(bcManageVector)
-              ( VectorType&      rightHandSide,
+LIFEV_DEPRECATED ( void )
+bcManageVector( VectorType&      rightHandSide,
                 const MeshType&  mesh,
                 const DOF&       dof,
                 const BCHandler& bcHandler,
@@ -187,8 +188,8 @@ bcManageRhs( VectorType&      rightHandSide,
  * @parma diagonalizeCoef The coefficient used during the system diagonalization
  */
 template <typename VectorType, typename DataType, typename Mesh, typename MapEpetra>
-LIFEV_DEPRECATED(bcManageVector)
-              ( VectorType&                     rightHandSide,
+LIFEV_DEPRECATED ( void )
+bcManageVector( VectorType&                     rightHandSide,
                 FESpace<Mesh, MapEpetra>&       feSpace,
                 const BCHandler&                bcHandler,
                 const DataType&                 time,
@@ -307,7 +308,7 @@ bcEssentialManageMatrix( MatrixType& matrix,
  * @param offset The boundary condition offset
  */
 template <typename VectorType, typename DataType>
-void __attribute__ ((__deprecated__))
+LIFEV_DEPRECATED ( void )
 bcEssentialManageVector( VectorType&     rightHandSide,
                          const DOF&      dof,
                          const BCBase&   boundaryCond,
