@@ -142,8 +142,8 @@ bcManageMatrix( MatrixType&      matrix,
  * @parma diagonalizeCoef The coefficient used during the system diagonalization
  */
 template <typename VectorType, typename MeshType, typename DataType>
-void  __attribute__ ((__deprecated__))
-bcManageVector( VectorType&      rightHandSide,
+LIFEV_DEPRECATED(bcManageVector)
+              ( VectorType&      rightHandSide,
                 const MeshType&  mesh,
                 const DOF&       dof,
                 const BCHandler& bcHandler,
@@ -187,8 +187,8 @@ bcManageRhs( VectorType&      rightHandSide,
  * @parma diagonalizeCoef The coefficient used during the system diagonalization
  */
 template <typename VectorType, typename DataType, typename Mesh, typename MapEpetra>
-void __attribute__ ((__deprecated__))
-bcManageVector( VectorType&                     rightHandSide,
+LIFEV_DEPRECATED(bcManageVector)
+              ( VectorType&                     rightHandSide,
                 FESpace<Mesh, MapEpetra>&       feSpace,
                 const BCHandler&                bcHandler,
                 const DataType&                 time,
@@ -1226,7 +1226,8 @@ bcEssentialManageRhs( VectorType&     rightHandSide,
         case Essential:  // Essential boundary conditions (Dirichlet)
         case EssentialEdges:
         case EssentialVertices:
-            if ( (bcHandler[ i ].mode() == Tangential) || (bcHandler[ i ].mode() == Normal) || (bcHandler[ i ].mode() == Directional) )
+            if ( (bcHandler[ i ].mode() == Tangential) ||
+                 (bcHandler[ i ].mode() == Normal) || (bcHandler[ i ].mode() == Directional) )
             {
                 ERROR_MSG( "This BC mode is not yet implemented for this setting" );
             }
