@@ -403,21 +403,21 @@ setup(const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const fe
     M_localViscous.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),
                                               M_uFESpace->fieldDim(),
                                               M_uFESpace->fieldDim()));
+
     M_localGradPressure.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),nDimensions,0,
                                                    M_pFESpace->fe().nbFEDof(),0,1));
 
-    /*
-    M_localGradPressure.reset(new localmatrixType(M_pFESpace->fe().nbFEDof(),0,1,
-                                                   M_uFESpace->fe().nbFEDof(),nDimensions,0) );
-    */
     M_localDivergence.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),0,nDimensions,
                                                  M_pFESpace->fe().nbFEDof(),1,0));
+
     M_localMass.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),
                                            M_uFESpace->fieldDim(),
                                            M_uFESpace->fieldDim()));
+
     M_localMassPressure.reset(new localmatrixType(M_pFESpace->fe().nbFEDof(),
                                                    M_pFESpace->fieldDim(),
                                                    M_pFESpace->fieldDim()));
+
     M_localConvection.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),
                                                  M_uFESpace->fieldDim(),
                                                  M_uFESpace->fieldDim()));
