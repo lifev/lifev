@@ -135,7 +135,6 @@ public:
     /**
        reads the interface map between the fluid and solid meshes from file.
     */
-#ifdef HAVE_HDF5
     void setupDOF( meshFilter_Type& filterMesh );
 #endif
 
@@ -615,4 +614,6 @@ public:
 };
 
 }
+
+
 #endif
