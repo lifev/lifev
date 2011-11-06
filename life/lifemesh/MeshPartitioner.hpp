@@ -1331,7 +1331,7 @@ void MeshPartitioner<MeshType>::constructFaces()
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
             {
                 // set the flag for faces on the subdomain border
-                pf->replaceFlag( Flag::turnOn ( pf->flag(), EntityFlags::SUBDOMAIN_INTERFACE ) );
+                pf->setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
 
                 // build GhostEntityData
                 GhostEntityData ghostFace;
