@@ -255,9 +255,9 @@ Structure::run3d()
     solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
 
-    MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
+    //MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
 
-    MapEpetra fullMap;
+    //MapEpetra fullMap;
 
     std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
 
@@ -275,11 +275,12 @@ Structure::run3d()
     timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
     timeAdvance->showMe();
 
+    /*
     for (UInt ii = 0; ii < nDimensions; ++ii)
     {
         fullMap += structMap;
     }
-
+    */
 
     //! #################################################################################
     //! BOUNDARY CONDITIONS

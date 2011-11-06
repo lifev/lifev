@@ -173,10 +173,10 @@ void
 problem::run()
 {
     typedef RegionMesh3D<LinearTetra>                                   mesh_Type;
-    typedef VenantKirchhoffViscoelasticSolver< mesh_Type >::vector_type vector_type;
-    typedef boost::shared_ptr<vector_type>                              vector_ptrtype;
+    typedef VenantKirchhoffViscoelasticSolver< mesh_Type >::vector_type vector_Type;
+    typedef boost::shared_ptr<vector_Type>                              vector_ptrtype;
 
-    typedef boost::shared_ptr< TimeAdvance< vector_type > >             TimeAdvance_type;
+    typedef boost::shared_ptr< TimeAdvance< vector_Type > >             TimeAdvance_type;
 
     typedef FESpace< mesh_Type, MapEpetra >                             FESpace_type;
     typedef  boost::shared_ptr<FESpace_type>                            FESpace_ptrtype;
@@ -313,8 +313,8 @@ problem::run()
     MapEpetra uMap = problem.solution()->map();
 
     // computing the rhs
-    vector_type rhs ( uMap, Unique );
-    vector_type rhsV( uMap, Unique );
+    vector_Type rhs ( uMap, Unique );
+    vector_Type rhsV( uMap, Unique );
 
     // postProcess
     boost::shared_ptr< Exporter<mesh_Type > > exporter;
@@ -336,11 +336,11 @@ problem::run()
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(),  members->comm->MyPID() );
 
-    vector_ptrtype U ( new vector_type(*problem.solution(), exporter->mapType() ) );
-    vector_ptrtype V  ( new vector_type(*problem.solution(),  exporter->mapType() ) );
-    vector_ptrtype Exact ( new vector_type(*problem.solution(), exporter->mapType() ) );
-    vector_ptrtype vExact  ( new vector_type(*problem.solution(),  exporter->mapType() ) );
-    vector_ptrtype RHS ( new vector_type(*problem.solution(), exporter->mapType() ) );
+    vector_ptrtype U ( new vector_Type(*problem.solution(), exporter->mapType() ) );
+    vector_ptrtype V  ( new vector_Type(*problem.solution(),  exporter->mapType() ) );
+    vector_ptrtype Exact ( new vector_Type(*problem.solution(), exporter->mapType() ) );
+    vector_ptrtype vExact  ( new vector_Type(*problem.solution(),  exporter->mapType() ) );
+    vector_ptrtype RHS ( new vector_Type(*problem.solution(), exporter->mapType() ) );
     exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "displacement",
                            feSpace, U, UInt(0) );
 
@@ -363,7 +363,7 @@ problem::run()
 
 //evaluate disp and vel as interpolate the bcFunction d0 and v0
 
-    std::vector<vector_type> uv0;
+    std::vector<vector_Type> uv0;
 
     if (TimeAdvanceMethod =="Newmark")
     {
@@ -380,7 +380,10 @@ problem::run()
         }
     }
 
-    timeAdvance->setInitialCondition(uv0);
+    //the uv0[0] should be the displacement
+    //the uv0[1] should be the velocity
+
+    timeAdvance->setInitialCondition(uv0[0],uv0[1]);
 
     timeAdvance-> setTimeStep(dataProblem->dataTime()->timeStep());
 
@@ -429,7 +432,7 @@ problem::run()
 
         // Error L2 and H1 Norms
         AnalyticalSol uExact;
-        vector_type u (*problem.solution(), Repeated);
+        vector_Type u (*problem.solution(), Repeated);
 
         Real H1_Error,  H1_RelError,  L2_Error, L2_RelError;
 

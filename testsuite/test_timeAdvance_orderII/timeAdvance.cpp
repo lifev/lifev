@@ -373,7 +373,7 @@ problem::run()
         }
     }
 
-    timeAdvance->setInitialCondition(uv0);
+    timeAdvance->setInitialCondition(uv0[0],uv0[1]);
 
     timeAdvance-> setTimeStep(dataProblem->dataTime()->timeStep());
 
