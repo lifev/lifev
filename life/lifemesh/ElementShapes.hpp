@@ -128,6 +128,7 @@ enum ReferenceGeometry
 
 //! @ingroup BasRefSha
 class nullShape{
+public:
 	typedef nullShape GeoBShape;
 };
 
@@ -304,6 +305,9 @@ public:
     static const UInt S_numPointsPerRidge = 0;   //!< Number of points per ridge
     static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
 
+    //! @return the local ID of the j-th point of the i-th facet
+    inline static ID facetToPoint( ID const& iFacet, ID const& /*jPoint*/ )
+    	{return iFacet;}
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
     inline static ID facetToRidge( ID const& /*iFacet*/, ID const& /*jRidge*/ )
@@ -337,6 +341,9 @@ public:
     static const UInt S_numPointsPerRidge = 0;   //!< Number of points per ridge
     static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
 
+    //! @return the local ID of the j-th point of the i-th facet
+    inline static ID facetToPoint( ID const& iFacet, ID const& /*jPoint*/ )
+		{return iFacet;}
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
     inline static ID facetToRidge( ID const& /*iFacet*/, ID const& /*jRidge*/ )
