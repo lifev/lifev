@@ -37,7 +37,6 @@
 #define _GHOSTHANDLER_HPP_
 
 #include <boost/shared_ptr.hpp>
-#include <bitset>
 
 #include <life/lifemesh/NeighborMarker.hpp>
 #include <life/lifearray/MapEpetra.hpp>
@@ -404,14 +403,12 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1()
     // add all elements with a node on SUBDOMAIN_INTERFACE
     std::vector<ID> pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag(
                     EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
-    for ( ID pointId = 0; pointId < pointsOnSubdInt.size(); pointId++ )
+    for ( std::vector<ID>::const_iterator pointIt = pointsOnSubdInt.begin(); pointIt != pointsOnSubdInt.end(); ++pointIt )
     {
-        if ( M_verbose ) std::cerr << pointId << " (" << M_localMesh->point( pointId ).id() << ") > "
-                                   << std::bitset<10>( M_localMesh->point ( pointId ).flag() ).to_string() << std::endl;
         // iterate on each node neighborhood
         for ( neighborList_Type::const_iterator neighborIt =
-                        M_nodeElementNeighborsMap[ M_localMesh->point ( pointId ).id() ].begin();
-                        neighborIt != M_nodeElementNeighborsMap[ M_localMesh->point ( pointId ).id() ].end(); ++neighborIt )
+                        M_nodeElementNeighborsMap[ M_localMesh->point ( *pointIt ).id() ].begin();
+                        neighborIt != M_nodeElementNeighborsMap[ M_localMesh->point ( *pointIt ).id() ].end(); ++neighborIt )
         {
             map.insert( *neighborIt );
         }
