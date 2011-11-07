@@ -58,7 +58,8 @@ namespace LifeV
  * MC: is the marker
  */
 template <int elemDim, int geoDim, typename GeoShape, typename MC>
-class MeshElementMarked{
+class MeshElementMarked: public MeshVertex
+{
 public:
 	typedef nullShape geoShape_Type;
 	MeshElementMarked();
@@ -142,6 +143,169 @@ public:
 
 };
 
+//! specialization for 1D entities (edges) in 1D Geometry.
+template
+<typename GeoShape, typename MC>
+class MeshElementMarked<0, 1, GeoShape, MC>: public MeshVertex, public MC::pointMarker_Type
+{
+public:
+
+    //! @name Public Types
+    //@{
+    typedef typename MC::pointMarker_Type marker_Type;
+    static const UInt S_numPoints = 1;
+
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
+    MeshElementMarked();
+
+    //! Declares item identity and states if it is on boundary
+    /*!
+    	@param identity Element identity
+        @param boundary True if the element is on boundary
+     */
+    MeshElementMarked( ID identity, bool boundary = false );
+
+    //! Declares item identity, provides coordinate and states if it is on boundary
+    /*!
+    	@param identity Element identity
+    	@param x Element x coordinate
+    	@param y Element y coordinate
+    	@param z Element z coordinate
+    	@param boundary True if the element is on boundary
+     */
+    MeshElementMarked( ID identity, Real x, Real y, Real z, bool boundary = false );
+
+    //! Copy constructor
+    /*!
+        @param Element MeshElementMarked0D to be copied
+     */
+    MeshElementMarked( MeshElementMarked<0, 1, GeoShape, MC> const & Element );
+
+    //! Copy constructor
+    /*!
+        @param Element MeshElementMarked0D to be copied
+        @param Marker Markercommon
+     */
+    MeshElementMarked( MeshVertex const & Element, MC const & Marker );
+
+    //! Destructor
+    virtual ~MeshElementMarked()
+    {
+        // nothing to be done
+    }
+
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! The equivalence operator
+    /*!
+        @param Element Equivalent MeshElementMarked
+        @return Reference to a new MeshElementMarked with the same content of MeshElementMarked Element
+     */
+    MeshElementMarked & operator = ( const MeshElementMarked<0, 1, GeoShape, MC>  & Element );
+
+    //@}
+
+    void setPoint( ID const identity, MeshElementMarked<0, 1, GeoShape, MC> const * point );
+
+    void setPoint( ID const /*identity*/, MeshElementMarked<0, 1, GeoShape, MC> const & point );
+
+    MeshElementMarked<0, 1, GeoShape, MC> const & point ( ID const identity ) const;
+
+    //! @name Get Methods
+    //@{
+
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
+    ID firstAdjacentElementIdentity() const
+    {
+
+    	return M_firstAdjacentElementIdentity;
+    };
+
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
+    ID secondAdjacentElementIdentity() const
+    {
+        return M_secondAdjacentElementIdentity;
+    };
+
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
+    ID & firstAdjacentElementIdentity()
+    {
+        return M_firstAdjacentElementIdentity;
+    };
+
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
+    ID & secondAdjacentElementIdentity()
+    {
+        return M_secondAdjacentElementIdentity;
+    };
+
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
+    ID firstAdjacentElementPosition() const
+    {
+        return M_firstAdjacentElementPosition;
+    };
+
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
+    ID secondAdjacentElementPosition() const
+    {
+        return M_secondAdjacentElementPosition;
+    };
+
+
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
+    ID & firstAdjacentElementPosition()
+    {
+        return M_firstAdjacentElementPosition;
+    };
+
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
+    ID & secondAdjacentElementPosition()
+    {
+        return M_secondAdjacentElementPosition;
+    };
+
+    //@}
+
+private:
+    ID M_firstAdjacentElementIdentity;
+    ID M_secondAdjacentElementIdentity;
+    ID M_firstAdjacentElementPosition;
+    ID M_secondAdjacentElementPosition;
+
+};
+
 
 //! specialization for 1D entities (edges) in 1D Geometry.
 template
@@ -159,6 +323,8 @@ public:
     typedef typename MC::edgeMarker_Type marker_Type;
     typedef MeshElementMarked<0, 1, GeoShape, MC> geoBElement_Type;
     typedef MeshElementMarked<0, 1, GeoShape, MC> point_Type;
+    static const UInt S_numLocalVertices = MeshElement<GeoShape, MeshElementMarked<0, 1, GeoShape, MC> >::S_numVertices;
+    static const UInt S_numLocalFacets = S_numLocalVertices;
    //@}
 
     //! @name Constructor & Destructor
@@ -636,6 +802,7 @@ MeshElementMarked<0, geoDim, GeoShape, MC>::MeshElementMarked( MeshElementMarked
         MeshVertex( Element ), MC::pointMarker_Type( Element )
 {}
 
+
 // ==========================================
 // Operators
 // ==========================================
@@ -673,6 +840,74 @@ MeshElementMarked<0, geoDim, GeoShape, MC>::setPoint( ID const /*identity*/, Mes
 template <int geoDim, typename GeoShape, typename MC>
 void
 MeshElementMarked<0, geoDim, GeoShape, MC>::setPoint( ID const /*identity*/, MeshElementMarked<0, geoDim, GeoShape, MC> const & point )
+{
+	if(this != &point)
+		*this = point;
+}
+
+/*-------------------------------------------------------------------------
+  MeshElementMarked 0D in 1D geometry
+  --------------------------------------------------------------------------*/
+// ==========================================
+// Constructor & Destructor
+// ==========================================
+template <typename GeoShape, typename MC>
+MeshElementMarked<0, 1, GeoShape, MC>::MeshElementMarked() :
+        MeshVertex(), MC::pointMarker_Type()
+{}
+
+template <typename GeoShape, typename MC>
+MeshElementMarked<0, 1, GeoShape, MC>::MeshElementMarked( ID identity, bool boundary ) :
+        MeshVertex( identity, boundary ), MC::pointMarker_Type()
+{}
+
+template <typename GeoShape, typename MC>
+MeshElementMarked<0, 1, GeoShape, MC>::MeshElementMarked( ID identity, Real x, Real y, Real z, bool boundary ) :
+        MeshVertex( identity, x, y, z, boundary ), MC::pointMarker_Type()
+{}
+
+template <typename GeoShape, typename MC>
+MeshElementMarked<0, 1, GeoShape, MC>::MeshElementMarked( MeshElementMarked<0, 1, GeoShape, MC> const & Element ) :
+        MeshVertex( Element ), MC::pointMarker_Type( Element )
+{}
+
+// ==========================================
+// Operators
+// ==========================================
+//! It calls operator= of base classes, just to be sure to do the right thing.
+template <typename GeoShape, typename MC>
+MeshElementMarked<0, 1, GeoShape, MC> &
+MeshElementMarked<0, 1, GeoShape, MC>::operator = ( MeshElementMarked<0, 1, GeoShape, MC> const & Element )
+{
+    if ( this != &Element )
+    {
+        MeshVertex::operator=( Element );
+        marker_Type::operator=( Element );
+    }
+    return *this;
+}
+
+
+// ==========================================
+// Methods
+// ==========================================
+template <typename GeoShape, typename MC>
+MeshElementMarked<0, 1, GeoShape, MC> const &
+MeshElementMarked<0, 1, GeoShape, MC>::point ( ID const /*identity*/ ) const{
+	return *this;
+}
+
+template <typename GeoShape, typename MC>
+void
+MeshElementMarked<0, 1, GeoShape, MC>::setPoint( ID const /*identity*/, MeshElementMarked<0, 1, GeoShape, MC> const * point )
+{
+	if(this != point)
+		this = point;
+}
+
+template <typename GeoShape, typename MC>
+void
+MeshElementMarked<0, 1, GeoShape, MC>::setPoint( ID const /*identity*/, MeshElementMarked<0, 1, GeoShape, MC> const & point )
 {
 	if(this != &point)
 		*this = point;
