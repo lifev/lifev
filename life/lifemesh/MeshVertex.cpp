@@ -46,53 +46,31 @@ namespace LifeV
 // ==========================================
 // Constructor & Destructor
 // ==========================================
-MeshVertex::MeshVertex() :
-		MeshEntity( 0 ),
-        M_coordinates()
+MeshVertex::MeshVertex()
 {
     M_coordinates.assign( 0 );
 }
 
 MeshVertex::MeshVertex( ID identity, bool boundary )
         :
-        MeshEntity( identity, boundary ),
-        M_coordinates()
+        MeshEntity( identity, boundary )
 {
     M_coordinates.assign( 0 );
 }
 
 MeshVertex::MeshVertex( ID identity, Real x, Real y, Real z, bool boundary )
         :
-        MeshEntity( identity, boundary ),
-        M_coordinates()
+        MeshEntity( identity, boundary )
 {
 	M_coordinates[ 0 ] = x;
 	M_coordinates[ 1 ] = y;
 	M_coordinates[ 2 ] = z;
 }
 
-MeshVertex::MeshVertex( MeshVertex const & Element )
-        :
-        MeshEntity( Element.id(), Element.boundary() ),
-        M_coordinates( Element.M_coordinates )
-{
-
-}
-
 // ==========================================
 // Operators
 // ==========================================
-MeshVertex &
-MeshVertex::operator=( MeshVertex const & Element )
-{
-    if (  this == &Element )
-        return *this;
 
-    this->setId(Element.id());
-    setBoundary(Element.boundary());
-    M_coordinates = Element.M_coordinates;
-    return *this;
-}
 
 // ==========================================
 // Methods
@@ -113,8 +91,7 @@ MeshVertex::showMe( bool verbose, std::ostream & out ) const
         }
         out << coordinateVector[ i ] << std::endl << std::endl;
     }
-    out << " ID       = " << id()      << std::endl;
-    out << " local ID = " << localId() << std::endl;
+    MeshEntity::showMe( out );
 
     out << "----- END OF MeshVertex data ---" << std::endl << std::endl;
     return out;

@@ -53,7 +53,7 @@ const flag_Type INTERNAL_INTERFACE  ( 0x02 );
 const flag_Type SUBDOMAIN_INTERFACE ( 0x04 );
 const flag_Type OVERLAP             ( 0x08 );
 const flag_Type CUTTED              ( 0x10 );
-const flag_Type VERTEX              ( 0x11 );
+const flag_Type VERTEX              ( 0x20 );
 }
 
 //! This is the base class to store the identifiers.
@@ -153,7 +153,7 @@ public:
     void showMe( std::ostream& output = std::cout ) const
     {
         output << " Global ID : " << M_id << " -- " << " Local ID " << M_localId << std::endl;
-        output << " -- Flags: " << M_flag;
+        Flag::showMe( M_flag, output );
         output << std::endl;
     };
 
@@ -179,6 +179,15 @@ public:
     bool operator<=(const MeshEntity & e ) const
     {
         return M_id <= e.id();
+    };
+
+    //! Relation operator that performs the same comparison on the GLOBAL identifier.
+    /*!
+      @param e The mesh entity to be compared with.
+    */
+    bool operator<( const MeshEntity & e ) const
+    {
+        return M_id < e.id();
     };
 
     //! Relation operator that performs the same comparison on the GLOBAL identifier.
