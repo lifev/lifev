@@ -412,44 +412,7 @@ MapEpetra::bubbleSort(Epetra_IntSerialDenseVector& elements)
             }
 }
 
-void
-MapEpetra::setUp( const ReferenceFE&        refFE,
-                  const comm_ptrtype& commPtr,
-                  std::vector<Int>& repeatedNodeVector,
-                  std::vector<Int>& repeatedEdgeVector,
-                  std::vector<Int>& repeatedFaceVector,
-                  std::vector<Int>& repeatedVolumeVector )
-{
-    if ( refFE.nbDofPerVertex() )
-    {
-        Int numNode = repeatedNodeVector.size();
-        MapEpetra repeatedNodeMap( -1, numNode, &repeatedNodeVector[0], commPtr );
-        operator+=(repeatedNodeMap);
-    }
 
-    if ( refFE.nbDofPerEdge() )
-    {
-        Int numEdge = repeatedEdgeVector.size();
-        MapEpetra repeatedEdgeMap( -1, numEdge, &repeatedEdgeVector[0], commPtr );
-        operator+=(repeatedEdgeMap);
-    }
-
-    if ( refFE.nbDofPerFace() )
-    {
-        Int numFace = repeatedFaceVector.size();
-        MapEpetra repeatedFaceMap(-1, numFace, &repeatedFaceVector[0], commPtr);
-        operator+=( repeatedFaceMap );
-    }
-
-    if ( refFE.nbDofPerVolume() )
-    {
-        Int numElem = repeatedVolumeVector.size();
-        MapEpetra repeatedElemMap( -1, numElem, &repeatedVolumeVector[0], commPtr );
-        operator+=( repeatedElemMap );
-    }
-
-    createImportExport();
-}
 
 } // end namespace LifeV
 
