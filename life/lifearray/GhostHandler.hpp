@@ -110,7 +110,7 @@ public:
     MapEpetra ghostMapOnElementsP0();
 
     //! create ghost map
-    MapEpetra ghostMapOnElementsP1();
+    MapEpetra ghostMapOnElementsP1( UInt overlap );
 
     //! create ghost map
     MapEpetra ghostMapOnNodes();
@@ -375,7 +375,7 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP0()
 }
 
 template <typename Mesh>
-MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1()
+MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1( UInt overlap )
 {
     // check that the nodeElementNeighborsMap has been created
     if ( M_nodeElementNeighborsMap.empty()  )
@@ -403,15 +403,32 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1()
     // add all elements with a node on SUBDOMAIN_INTERFACE
     std::vector<ID> pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag(
                     EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
-    for ( std::vector<ID>::const_iterator pointIt = pointsOnSubdInt.begin(); pointIt != pointsOnSubdInt.end(); ++pointIt )
+    // must work on global IDs since added elements are not on localMesh
+    for ( UInt i = 0; i < pointsOnSubdInt.size(); i++)
+        pointsOnSubdInt[i] = M_localMesh->pointList( pointsOnSubdInt[i] ).id();
+
+    std::vector<ID> addedPoints;
+
+    for ( UInt n = 0; n < overlap; n++ )
     {
-        // iterate on each node neighborhood
-        for ( neighborList_Type::const_iterator neighborIt =
-                        M_nodeElementNeighborsMap[ M_localMesh->point ( *pointIt ).id() ].begin();
-                        neighborIt != M_nodeElementNeighborsMap[ M_localMesh->point ( *pointIt ).id() ].end(); ++neighborIt )
+        for ( std::vector<ID>::const_iterator globalId = pointsOnSubdInt.begin();
+                        globalId != pointsOnSubdInt.end(); ++globalId )
         {
-            map.insert( *neighborIt );
+            // iterate on each node neighborhood
+            for ( neighborList_Type::const_iterator neighborIt = M_nodeElementNeighborsMap[ *globalId ].begin();
+                            neighborIt != M_nodeElementNeighborsMap[ *globalId ].end(); ++neighborIt )
+            {
+                std::pair<std::set<Int>::iterator, bool> isInserted = map.insert( *neighborIt );
+                if ( isInserted.second )
+                {
+                    typename mesh_Type::VolumeType const & elem = M_fullMesh->element ( *neighborIt );
+                    for ( UInt elemPoint = 0; elemPoint < mesh_Type::VolumeType::S_numPoints; elemPoint++ )
+                        addedPoints.push_back ( elem.point( elemPoint ).id() );
+                }
+            }
         }
+        // TODO: this must be done only if overlap > 1
+        pointsOnSubdInt = addedPoints;
     }
 
     // convert unique list to vector to assure continuity in memorization

@@ -125,7 +125,7 @@ int main( int argc, char* argv[] )
     chronoMesh.stop();
 
     // The leader process print chronoReadAndPartitionMesh
-    if ( isLeader ) std::cout << "C - Time for mesh " << chronoMesh.diff() << std::endl;
+    if ( isLeader ) std::cout << "  C- Time for mesh " << chronoMesh.diff() << std::endl;
 
     // Start chronoGhost for measure the total time for GhostHandler routines
     chronoGhost.start();
@@ -180,7 +180,7 @@ int main( int argc, char* argv[] )
 
     MapEpetra mapP0 ( feSpaceP0->map() );
     MapEpetra mapP0P0 ( ghostP0.ghostMapOnElementsP0() );
-    MapEpetra mapP0P1 ( ghostP0.ghostMapOnElementsP1() );
+    MapEpetra mapP0P1 ( ghostP0.ghostMapOnElementsP1( dataFile( "ghost/overlap", 1 ) ) );
 
     fileOut << "=================== mapP0" << std::endl;
     fileOut << *mapP0.map( Unique );
@@ -214,7 +214,7 @@ int main( int argc, char* argv[] )
     chronoGhost.stop();
 
     // The leader process print chronoGhost
-    if ( isLeader ) std::cout << "C - Time for ghost " << chronoGhost.diff() << std::endl;
+    if ( isLeader ) std::cout << "  C- Time for ghost " << chronoGhost.diff() << std::endl;
 
     boost::shared_ptr< Exporter< RegionMesh > > exporter;
 
@@ -268,7 +268,7 @@ int main( int argc, char* argv[] )
     chronoTotal.stop();
 
     // The leader process print chronoTotal
-    if ( isLeader ) std::cout << "Time total " << chronoTotal.diff() << std::endl;
+    if ( isLeader ) std::cout << "  C- Time total " << chronoTotal.diff() << std::endl;
 
 }
 
