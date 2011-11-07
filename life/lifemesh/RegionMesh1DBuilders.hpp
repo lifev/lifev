@@ -71,17 +71,27 @@ void uniformMesh1D( RegionMesh<LinearLine, MC>& mesh, const Real& x_l, const Rea
 
     for (UInt it = 0; it < numberOfElements + 1; it++)
     {
+    	bool isBoundary = (it == numberOfElements) || ( it == 0);
         // insert a new Point1D in point list
-        pp = &mesh.addPoint( (it == numberOfElements) || ( it == 0) );
+    	pp = &mesh.addPoint( isBoundary, false );
         pp->x() = x_l + it*deltax;
         pp->y() = pp->z() = 0.;
         pp->setId(it);
         pp->setLocalId(it);
+        if(isBoundary)
+        {
+        	pp->firstAdjacentElementIdentity() = it;
+        	pp->firstAdjacentElementPosition() = ID(it == numberOfElements);
+        }
     }
 
     mesh.setMaxNumEdges(numberOfElements, true);
     mesh.setNumGlobalVertices( mesh.pointList.size() );
     mesh.setNumVertices(mesh.pointList.size() );
+    mesh.setMaxNumPoints      ( mesh.pointList.size(), true );
+    mesh.setMaxNumGlobalPoints( mesh.pointList.size() );
+    mesh.numBVertices() = 2;
+    mesh.setNumBPoints( mesh.numBVertices() );
 
     typename mesh_Type::edge_Type* pe = 0;
 
