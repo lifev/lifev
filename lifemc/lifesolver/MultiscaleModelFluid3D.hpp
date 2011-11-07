@@ -40,6 +40,7 @@
 
 // LifeV includes
 #include <life/lifemesh/MeshPartitioner.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifefem/FESpace.hpp>
