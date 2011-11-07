@@ -37,6 +37,7 @@
 #define _GHOSTHANDLER_HPP_
 
 #include <boost/shared_ptr.hpp>
+#include <bitset>
 
 #include <life/lifemesh/NeighborMarker.hpp>
 #include <life/lifearray/MapEpetra.hpp>
@@ -132,6 +133,7 @@ protected:
     mesh_PtrType M_localMesh;
     MapEpetra & M_map;
     comm_PtrType M_comm;
+    UInt M_me;
 
     neighborMap_Type M_nodeNodeNeighborsMap;
     neighborMap_Type M_nodeElementNeighborsMap;
@@ -150,9 +152,10 @@ GhostHandler<Mesh>::GhostHandler( mesh_PtrType & fullMesh,
     M_localMesh ( localMesh ),
     M_map ( map ),
     M_comm ( comm ),
+    M_me ( comm->MyPID() ),
     M_nodeNodeNeighborsMap(),
     M_nodeElementNeighborsMap(),
-    M_verbose( true )
+    M_verbose( !M_me )
 {
 }
 
@@ -399,12 +402,12 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1()
     }
 
     // add all elements with a node on SUBDOMAIN_INTERFACE
-    //TODO: run only on points on SUBDOMAIN_INTERFACE
-//    std::vector<ID> pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag(
-//                    EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
-//    for ( ID pointId = 0; pointId < pointsOnSubdInt.size(); pointId++ )
-    for ( ID pointId = 0; pointId < M_localMesh->pointList.size(); pointId++ )
+    std::vector<ID> pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag(
+                    EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
+    for ( ID pointId = 0; pointId < pointsOnSubdInt.size(); pointId++ )
     {
+        if ( M_verbose ) std::cerr << pointId << " (" << M_localMesh->point( pointId ).id() << ") > "
+                                   << std::bitset<10>( M_localMesh->point ( pointId ).flag() ).to_string() << std::endl;
         // iterate on each node neighborhood
         for ( neighborList_Type::const_iterator neighborIt =
                         M_nodeElementNeighborsMap[ M_localMesh->point ( pointId ).id() ].begin();
