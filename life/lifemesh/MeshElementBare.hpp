@@ -146,6 +146,29 @@ typedef size_t ID;
 typedef unsigned int UInt;
 #endif
 
+
+//! The Vertex basis class
+/*! It contains only the ID of the vertex. It is used in 1D geometries for compatibility with more complex entities in 2D and 3D geometries.
+ */
+struct BareVertex
+{
+    //! @name Constructor & Destructor
+    //@{
+    //! Empty Constructor
+    BareVertex() : first( NotAnId )
+    {}
+    ;
+    //! Constructor that takes the ID's as parameter
+    /*!
+        @param i ID of the point
+     */
+    BareVertex( ID i ) : first( i )
+    {}
+    ;
+    //@}
+    ID first; //!< ID which defines the Point
+};
+
 //! The Edge basis class
 /*! It contains the attributes common to all Edges. In particular, it
 contains the two ID's (first and second) of the points at the two ends
@@ -407,6 +430,18 @@ template <typename T>
 struct cmpBareItem;
 
 /*! \ingroup comparison
+   \brief Specialized functor for Vertices
+ */
+template <>
+struct cmpBareItem<BareVertex> //!< The actual comparison operator
+{
+    bool operator() ( const BareVertex & vertex1, const BareVertex & vertex2 ) const
+    {
+        return vertex2.first > vertex1.first;
+    }
+};
+
+/*! \ingroup comparison
    \brief Specialized functor for Edges
  */
 template <>
@@ -460,6 +495,12 @@ operator<( const BareFace & f1 , const BareFace & f2 )
 
 template<int numPoints>
 class BareEntitySelector {};
+
+template<>
+struct BareEntitySelector<1>{
+	static std::pair<BareVertex, bool> makeBareEntity(const ID points[]) {return std::make_pair(BareVertex(points[0]),true);}
+	typedef BareVertex bareEntity_Type;
+};
 
 template<>
 struct BareEntitySelector<2>{
