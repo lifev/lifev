@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Test VectorSimple class
+    @brief Test MeshEntityContainer class
 
     @author
     @contributor
@@ -34,7 +34,7 @@
 
     @date 00-00-0000
 
-	Test if the template class VectorSimple compiles and works correctly.
+	Test if the template class MeshEntityContainer compiles and works correctly.
  */
 
 // ===================================================
@@ -56,7 +56,7 @@
 
 #include<iostream>
 
-#include <life/lifearray/VectorSimple.hpp>
+#include <life/lifearray/MeshEntityContainer.hpp>
 
 int
 main(int argc, char ** argv)
@@ -68,10 +68,10 @@ using namespace LifeV;
     std::cout << "MPI Initialization" << std::endl;
 #endif
 
-    VectorSimple<int> a;
-    VectorSimple<float> b(10);
+    MeshEntityContainer<int> a;
+    MeshEntityContainer<float> b(10);
 
-    for (VectorSimple<float>::iterator p=b.begin(); p!= b.end(); ++p)
+    for (MeshEntityContainer<float>::iterator p=b.begin(); p!= b.end(); ++p)
     {
         *p=10.0;
     }

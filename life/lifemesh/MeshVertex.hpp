@@ -56,7 +56,7 @@ namespace LifeV
 	A coherent GeoShape has to be provided by the user.
 
  */
-class MeshVertex : public MeshEntityWithBoundary
+class MeshVertex : public MeshEntity
 {
 public:
 
@@ -75,7 +75,9 @@ public:
 
     //! Declares item identity and states if it is on boundary
     /*!
-    	@param identity Element identity
+        Local and global id are set equal. To change global id
+        use setId() method (inherited from MeshEntity)
+    	@param identity Element identity (local and global)
         @param boundary True if the element is on boundary
      */
     explicit MeshVertex( ID identity, bool boundary = false );
@@ -90,12 +92,6 @@ public:
      */
     MeshVertex( ID identity, Real x, Real y, Real z, bool boundary = false );
 
-    //! Copy constructor
-    /*!
-        @param Element MeshVertex to be copied
-     */
-    MeshVertex( MeshVertex const & Element );
-
     //! Destructor
     virtual ~MeshVertex()
     {
@@ -106,14 +102,6 @@ public:
 
     //! @name Operators
     //@{
-
-    //! The equivalence operator
-    /*!
-        @param Element Equivalent MeshElementMarked0D
-        @return Reference to a new MeshElementMarked0D with the same content of MeshElementMarked0D Element
-     */
-    MeshVertex & operator=( MeshVertex const & Element );
-
     //@}
 
     //! @name Methods

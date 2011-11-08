@@ -1002,24 +1002,33 @@ void ExporterHDF5<MeshType>::writeGeometry()
     case TETRA:
     {
         const ReferenceFE & refFEP1 = feTetraP1;
-        MapEpetra tmpMapP1(refFEP1, *this->M_mesh,
-                           this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
+        DOF tmpDof ( *this->M_mesh, refFEP1 );
+        std::vector<Int> myGlobalElements( tmpDof.globalElements( *this->M_mesh ) );
+        // Create the map
+        MapEpetra tmpMapP1( -1, myGlobalElements.size(), &myGlobalElements[0],
+                       this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr() );
         subMap = tmpMapP1;
         break;
     }
     case HEXA:
     {
         const ReferenceFE & refFEQ1 = feHexaQ1;
-        MapEpetra tmpMapQ1(refFEQ1, *this->M_mesh,
-                           this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
+        DOF tmpDof ( *this->M_mesh, refFEQ1 );
+        std::vector<Int> myGlobalElements( tmpDof.globalElements( *this->M_mesh ) );
+        // Create the map
+        MapEpetra tmpMapQ1( -1, myGlobalElements.size(), &myGlobalElements[0],
+                       this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr() );
         subMap = tmpMapQ1;
         break;
     }
     case LINE:
     {
         const ReferenceFE & refFEP11D = feSegP1;
-        MapEpetra tmpMapQ11D(refFEP11D, *this->M_mesh,
-                             this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr());
+        DOF tmpDof ( *this->M_mesh, refFEP11D );
+        std::vector<Int> myGlobalElements( tmpDof.globalElements( *this->M_mesh ) );
+        // Create the map
+        MapEpetra tmpMapQ11D( -1, myGlobalElements.size(), &myGlobalElements[0],
+                       this->M_dataVector.begin()->storedArrayPtr()->mapPtr()->commPtr() );
         subMap = tmpMapQ11D;
         break;
     }
@@ -1035,12 +1044,11 @@ void ExporterHDF5<MeshType>::writeGeometry()
     Int gid;
     for (ID i=0; i < this->M_mesh->numVertices(); ++i)
     {
-        // Saving the initial mesh if M_multimesh is false (this is important for restart)
         typename MeshType::point_Type point;
         if ( this->M_multimesh )
             point = this->M_mesh->point(i);
         else
-            point = this->M_mesh->pointInitial(i);
+            point = this->M_mesh->meshTransformer().pointInitial(i);
 
         gid = point.id();
 

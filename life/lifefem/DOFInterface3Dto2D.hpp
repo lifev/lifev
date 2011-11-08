@@ -102,7 +102,7 @@ public:
       \param flag1 the marker of the interface in the mesh1
     */
     template <typename MeshType>
-    void update( const MeshType& mesh1, const entityFlag_Type& flag1 );
+    void update( const MeshType& mesh1, const markerID_Type& flag1 );
 
     //! Creates an Inria medit type mesh for the interface (pseudo 3D)
     /*! Write the 2D Inria mesh of the interface
@@ -142,7 +142,7 @@ public:
     //@{
 
     //! Returns the reference of the interface
-    const entityFlag_Type& interfaceFlag() const
+    const markerID_Type& interfaceFlag() const
     {
         return M_interfaceFlag;
     }
@@ -171,7 +171,7 @@ private:
       \param flag1 the marker of the interface in the mesh1
     */
     template <typename MeshType>
-    void updateFaceConnections( const MeshType& mesh1, const entityFlag_Type& flag1 );
+    void updateFaceConnections( const MeshType& mesh1, const markerID_Type& flag1 );
 
     //! This method builds the list of vertices at the interface (M_vertexList container)
     /*!
@@ -192,7 +192,7 @@ private:
 
 
     //! reference of the interface
-    entityFlag_Type M_interfaceFlag;
+    markerID_Type M_interfaceFlag;
 
     //! DOFLocalPattern object used in the mesh in which we want to make the computations
     const DOFLocalPattern * M_refFE1;
@@ -244,7 +244,7 @@ void RemoveMultiple( const std::list<ID> & list0, std::list< std::pair<ID, ID> >
 
 template <typename MeshType>
 void DOFInterface3Dto2D::
-update( const MeshType& mesh1, const entityFlag_Type& flag1 )
+update( const MeshType& mesh1, const markerID_Type& flag1 )
 {
 
     // Updating face connections at the interface
@@ -333,12 +333,12 @@ generate2DMesh( std::string fname, const MeshType& mesh1 ) const
 
 template <typename MeshType>
 void DOFInterface3Dto2D::
-updateFaceConnections( const MeshType& mesh1, const entityFlag_Type& flag1 )
+updateFaceConnections( const MeshType& mesh1, const markerID_Type& flag1 )
 {
 
     UInt numBoundaryFace1 = mesh1.numBFaces(); // Number of boundary faces in mesh1
 
-    entityFlag_Type marker1;
+    markerID_Type marker1;
 
     typedef typename MeshType::FaceShape GeoBShape; // Shape of the faces
 

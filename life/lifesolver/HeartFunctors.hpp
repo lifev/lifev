@@ -92,7 +92,7 @@ public:
      */
     Real setAppliedCurrent ( const Real& x, const Real& y, const Real& z, const Real& t ) const;
 
-    Real setAppliedCurrentZygote(const double& t, const double& x, const double& y, const double& z, const ID& /*i*/, const entityFlag_Type& ref );
+    Real setAppliedCurrentZygote(const double& t, const double& x, const double& y, const double& z, const ID& /*i*/, const markerID_Type& ref );
 
     Real setStimulus ( const Real& t, const Real& x, const Real& y, const Real& z, const ID&   id) const;
 
