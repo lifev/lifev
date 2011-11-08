@@ -175,6 +175,7 @@ public:
     */
     HyperbolicSolver ( const data_Type&          dataFile,
                        FESpace<Mesh, MapEpetra>& fESpace,
+                       MapEpetra &               ghostMap,
                        bchandler_Type&           bcHandler,
                        commPtr_Type&             comm );
 
@@ -186,6 +187,7 @@ public:
     */
     HyperbolicSolver ( const data_Type&          dataFile,
                        FESpace<Mesh, MapEpetra>& fESpace,
+                       MapEpetra &               ghostMap,
                        commPtr_Type&             comm );
 
     //! Virtual destructor.
@@ -435,6 +437,7 @@ template< typename Mesh, typename SolverType >
 HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, MapEpetra>& fESpace,
+                   MapEpetra &               ghostMap,
                    bchandler_Type&           bcHandler,
                    commPtr_Type&             comm ):
         // Parallel stuff.
@@ -454,8 +457,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
         // Algebraic stuff.
         M_rhs             ( new vector_Type ( M_localMap ) ),
         M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
-        M_globalFlux      ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
+        M_uOld			  ( new vector_Type ( ghostMap ), Repeated ),
+        M_globalFlux      ( new vector_Type ( ghostMap ), Repeated ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
         M_elmatMass       ( )
@@ -471,6 +474,7 @@ template< typename Mesh, typename SolverType >
 HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, MapEpetra>& fESpace,
+                   MapEpetra &               ghostMap,
                    commPtr_Type&             comm ):
         // Parallel stuff.
         M_me              ( comm->MyPID() ),
@@ -489,8 +493,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
         // Algebraic stuff.
         M_rhs             ( new vector_Type ( M_localMap ) ),
         M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
-        M_globalFlux      ( new vector_Type ( M_FESpace.map().ghostMapOnElements( *( M_FESpace.mesh() ) ), Repeated ) ),
+        M_uOld			  ( new vector_Type ( ghostMap, Repeated ) ),
+        M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
         M_elmatMass       ( )

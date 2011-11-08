@@ -59,7 +59,6 @@
 #include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifemesh/NeighborMarker.hpp>
 
 namespace LifeV
 {
@@ -227,17 +226,6 @@ public:
     //! This method return true if both the unique map and the repeated map are identical
     bool mapsAreSimilar( MapEpetra const& epetraMap ) const;
 
-    //! Generate ghost map based on nodes neighborhood
-    template<typename MeshType>
-    MapEpetra ghostMapOnNodes( MeshType & mesh );
-
-    //! Generate ghost map based on neighbor map
-    MapEpetra ghostMapOnNodes( neighborMap_Type & neighborMap, UInt overlap = 1 );
-
-    //! Creates a new map with a Repeated map that encompasses ghost values for P0 variables
-    template<typename MeshType>
-    MapEpetra ghostMapOnElements( MeshType & meshPart );
-
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
 
@@ -318,74 +306,6 @@ private:
     importer_ptrtype   M_importer;
     comm_ptrtype       M_commPtr;
 };
-
-template <typename MeshType>
-MapEpetra MapEpetra::ghostMapOnNodes( MeshType & mesh )
-{
-    MapEpetra ghostMap;
-
-    // use the same Unique map and comm of the original map
-    ghostMap.M_uniqueMapEpetra = this->M_uniqueMapEpetra;
-    ghostMap.M_commPtr         = this->M_commPtr;
-
-    // use a set to avoid duplicates
-    std::set<Int> myGlobalElementsSet;
-
-    // iterate on mesh points
-    // todo: this can start from the repeated map and add only neighbors for SUBDOMAIN_INTERFACE marked nodes
-    for ( UInt k = 0; k < mesh.numPoints(); k++ )
-    {
-        // iterate on each node neighborhood
-        for ( typename MeshType::PointMarker::neighborConstIterator_Type neighborIt = mesh.point( k ).nodeNeighbors().begin(); 
-              neighborIt != mesh.point( k ).nodeNeighbors().end(); ++neighborIt )
-        {
-            myGlobalElementsSet.insert( *neighborIt );
-        }
-    }
-    
-    std::vector<Int> myGlobalElements( myGlobalElementsSet.begin(), myGlobalElementsSet.end() ); 
-
-    // generate map
-    ghostMap.M_repeatedMapEpetra.reset( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_commPtr ) );
-
-    return ghostMap;
-}
-
-template <typename MeshType>
-MapEpetra MapEpetra::ghostMapOnElements( MeshType & mesh )
-{
-    MapEpetra ghostMap;
-
-    // use the same Unique map and comm of the original map
-    ghostMap.M_uniqueMapEpetra = this->M_uniqueMapEpetra;
-    ghostMap.M_commPtr         = this->M_commPtr;
-
-    Int*          pointer;
-    std::set<Int> map;
-
-    // get all elements from the repeated map
-    pointer = M_repeatedMapEpetra->MyGlobalElements();
-    for ( Int ii = 0; ii < M_repeatedMapEpetra->NumMyElements(); ++ii, ++pointer )
-    {
-        map.insert( *pointer );
-    }
-
-    // add all facing elements
-    std::vector<ID> facesOnSubdInt = mesh.faceList.extractElementsWithFlag(
-                    EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
-    for ( ID faceId = 0; faceId < facesOnSubdInt.size(); faceId++ )
-    {
-        map.insert( mesh.faceList[ facesOnSubdInt [ faceId ] ].secondAdjacentElementIdentity() );
-    }
-
-    // convert unique list to vector to assure continuity in memorization
-    std::vector<Int> myGlobalElements ( map.begin(), map.end() );
-
-    // generate map
-    ghostMap.M_repeatedMapEpetra.reset( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_commPtr ) );
-
-    return ghostMap;
-}
 
 }
 

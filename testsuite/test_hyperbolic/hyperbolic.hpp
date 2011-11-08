@@ -42,7 +42,7 @@
 
 #include <life/lifemesh/Marker.hpp>
 #include <life/lifemesh/NeighborMarker.hpp>
-#include <life/lifearray/MapEpetra.hpp>
+#include <life/lifearray/GhostHandler.hpp>
 #include <life/lifesolver/HyperbolicSolver.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 
