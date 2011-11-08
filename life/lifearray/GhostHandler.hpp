@@ -58,8 +58,8 @@ public:
     typedef boost::shared_ptr<comm_Type> comm_PtrType;
     typedef std::set<ID> neighborList_Type;
     typedef std::map< ID, neighborList_Type > neighborMap_Type;
-    typedef VectorEpetra vector_Type;
-    typedef boost::shared_ptr<vector_Type> vector_PtrType;
+    typedef MapEpetra map_Type;
+    typedef boost::shared_ptr<map_Type> map_PtrType;
 
     //@}
 
@@ -69,7 +69,7 @@ public:
     //! Constructor
     GhostHandler( mesh_PtrType & fullMesh,
                   mesh_PtrType & localMesh,
-                  MapEpetra & map,
+                  map_Type & map,
                   comm_PtrType & comm );
 
     //! Destructor
@@ -82,7 +82,7 @@ public:
 
     mesh_Type const & fullMesh() { return *M_fullMesh; }
     mesh_Type const & localMesh() { return *M_localMesh; }
-    MapEpetra const & map() { return M_map; }
+    map_Type const & map() { return M_map; }
     neighborMap_Type const & nodeNodeNeighborsMap() { return M_nodeNodeNeighborsMap; }
     neighborMap_Type const & nodeElementNeighborsMap() { return M_nodeElementNeighborsMap; }
 
@@ -107,16 +107,16 @@ public:
     void createNodeElementNeighborsMap();
 
     //! create ghost map
-    MapEpetra ghostMapOnElementsP0();
+    map_Type & ghostMapOnElementsP0();
 
     //! create ghost map
-    MapEpetra ghostMapOnElementsP1( UInt overlap );
+    map_Type & ghostMapOnElementsP1( UInt overlap );
 
     //! create ghost map
-    MapEpetra ghostMapOnNodes();
+    map_Type & ghostMapOnNodes();
 
     //! create ghost map
-    MapEpetra ghostMapOnNodes( UInt overlap );
+    map_Type & ghostMapOnNodes( UInt overlap );
 
     //! showMe method
     void showMe( bool const verbose = false, std::ostream & out = std::cout );
@@ -125,12 +125,21 @@ public:
 
 protected:
 
+    //! @name Ghost Maps
+    //@{
+
+    map_PtrType M_ghostMapOnElementsP0;
+    map_PtrType M_ghostMapOnElementsP1;
+    map_PtrType M_ghostMapOnNodes;
+
+    //@}
+
     //! @name Protected Members
     //@{
 
     mesh_PtrType M_fullMesh;
     mesh_PtrType M_localMesh;
-    MapEpetra & M_map;
+    map_Type & M_map;
     comm_PtrType M_comm;
     UInt M_me;
 
@@ -145,7 +154,7 @@ protected:
 template <typename Mesh>
 GhostHandler<Mesh>::GhostHandler( mesh_PtrType & fullMesh,
                                   mesh_PtrType & localMesh,
-                                  MapEpetra & map,
+                                  map_Type & map,
                                   comm_PtrType & comm ):
     M_fullMesh ( fullMesh ),
     M_localMesh ( localMesh ),
@@ -243,8 +252,11 @@ void GhostHandler<Mesh>::createNodeElementNeighborsMap()
 }
 
 template <typename Mesh>
-MapEpetra GhostHandler<Mesh>::ghostMapOnNodes()
+typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes()
 {
+    // if the map has already been created, return it
+    if ( M_ghostMapOnNodes ) return *M_ghostMapOnNodes;
+
     // check that the nodeNeighbors have been created
     if ( M_localMesh->point( 0 ).nodeNeighbors().empty()  )
     {
@@ -252,7 +264,9 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnNodes()
         this->createNodeNeighbors();
     }
 
-    MapEpetra ghostMap;
+    // create map
+    M_ghostMapOnNodes.reset ( new map_Type() );
+    map_Type & ghostMap ( *M_ghostMapOnNodes );
 
     // use the same Unique map and comm of the original map
     ghostMap.setMap( M_map.map( Unique ), Unique );
@@ -276,15 +290,18 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnNodes()
     std::vector<Int> myGlobalElements( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
     // generate map
-    MapEpetra::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
-    return ghostMap;
+    return *M_ghostMapOnNodes;
 }
 
 template <typename Mesh>
-MapEpetra GhostHandler<Mesh>::ghostMapOnNodes( UInt overlap )
+typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UInt overlap )
 {
+    // if the map has already been created, return it
+    if ( M_ghostMapOnNodes ) return *M_ghostMapOnNodes;
+
     // check that the nodeNodeNeighborsMap has been created
     if ( M_nodeNodeNeighborsMap.empty()  )
     {
@@ -292,7 +309,9 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnNodes( UInt overlap )
         this->createNodeNodeNeighborsMap();
     }
 
-    MapEpetra ghostMap;
+    // create map
+    M_ghostMapOnNodes.reset ( new map_Type() );
+    map_Type & ghostMap ( *M_ghostMapOnNodes );
 
     // use the same Unique map and comm of the original map
     ghostMap.setMap( M_map.map( Unique ), Unique );
@@ -331,16 +350,21 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnNodes( UInt overlap )
     std::vector<Int> myGlobalElements( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
     // generate map
-    MapEpetra::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
-    return ghostMap;
+    return *M_ghostMapOnNodes;
 }
 
 template <typename Mesh>
-MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP0()
+typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP0()
 {
-    MapEpetra ghostMap;
+    // if the map has already been created, return it
+    if ( M_ghostMapOnElementsP0 ) return *M_ghostMapOnElementsP0;
+
+    // create the map
+    M_ghostMapOnElementsP0.reset ( new map_Type() );
+    map_Type & ghostMap ( *M_ghostMapOnElementsP0 );
 
     // use the same Unique map and comm of the original map
     ghostMap.setMap( M_map.map( Unique ), Unique );
@@ -368,15 +392,18 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP0()
     std::vector<Int> myGlobalElements ( map.begin(), map.end() );
 
     // generate map
-    MapEpetra::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
-    return ghostMap;
+    return *M_ghostMapOnElementsP0;
 }
 
 template <typename Mesh>
-MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1( UInt overlap )
+typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1( UInt overlap )
 {
+    // if the map has already been created, return it
+    if ( M_ghostMapOnElementsP1 ) return *M_ghostMapOnElementsP1;
+
     // check that the nodeElementNeighborsMap has been created
     if ( M_nodeElementNeighborsMap.empty()  )
     {
@@ -384,7 +411,9 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1( UInt overlap )
         this->createNodeElementNeighborsMap();
     }
 
-    MapEpetra ghostMap;
+    // create the map
+    M_ghostMapOnElementsP1.reset ( new map_Type() );
+    map_Type & ghostMap ( *M_ghostMapOnElementsP1 );
 
     // use the same Unique map and comm of the original map
     ghostMap.setMap( M_map.map( Unique ), Unique );
@@ -435,10 +464,10 @@ MapEpetra GhostHandler<Mesh>::ghostMapOnElementsP1( UInt overlap )
     std::vector<Int> myGlobalElements ( map.begin(), map.end() );
 
     // generate map
-    MapEpetra::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
-    return ghostMap;
+    return *M_ghostMapOnElementsP1;
 }
 
 template <typename Mesh>
