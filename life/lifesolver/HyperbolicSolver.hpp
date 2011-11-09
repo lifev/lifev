@@ -457,8 +457,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
         // Algebraic stuff.
         M_rhs             ( new vector_Type ( M_localMap ) ),
         M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_Type ( ghostMap ), Repeated ),
-        M_globalFlux      ( new vector_Type ( ghostMap ), Repeated ),
+        M_uOld			  ( new vector_Type ( ghostMap, Repeated ) ),
+        M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
         M_elmatMass       ( )
