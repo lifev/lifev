@@ -379,9 +379,6 @@ hyperbolic::run()
     // Set up the mesh
     readMesh( *fullMeshPtr, meshData );
 
-    // create node neighbors
-//    createNodeNeighbors ( *fullMeshPtr );
-
     // Partition the mesh using ParMetis
     MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
 
@@ -626,6 +623,9 @@ hyperbolic::run()
 
         // Set the last time step for the simulation.
         dataHyperbolic.dataTime()->setTimeStep( timeStep );
+
+        // Update time
+        dataHyperbolic.dataTime()->updateTime();
 
         // The leader process prints the temporal data.
         if ( hyperbolicSolver.getDisplayer().isLeader() )
