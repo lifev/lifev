@@ -845,14 +845,17 @@ HyperbolicSolver< Mesh, SolverType >::
 setInitialSolution ( const Function_Type& initialSolution )
 {
 
+    // interpolation must be done on a Unique map
+    vector_Type uUnique( M_u->map(), Unique );
+
     // Interpolate the initial solution.
     M_FESpace.interpolate( initialSolution,
-                           *M_uOld,
+                           uUnique,
                            M_data.dataTime()->initialTime() );
 
-    // Update the solution
-    *M_u = *M_uOld;
-
+    // Update the solutions
+    *M_uOld = uUnique;
+    *M_u    = uUnique;
 } // setInitialSolution
 
 // ===================================================
