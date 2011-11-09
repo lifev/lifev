@@ -257,6 +257,8 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes()
     // if the map has already been created, return it
     if ( M_ghostMapOnNodes ) return *M_ghostMapOnNodes;
 
+    if ( M_verbose ) std::cout << " GH- ghostMapOnNodes()" << std::endl;
+
     // check that the nodeNeighbors have been created
     if ( M_localMesh->point( 0 ).nodeNeighbors().empty()  )
     {
@@ -301,6 +303,8 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UIn
 {
     // if the map has already been created, return it
     if ( M_ghostMapOnNodes ) return *M_ghostMapOnNodes;
+
+    if ( M_verbose ) std::cout << " GH- ghostMapOnNodes( o )" << std::endl;
 
     // check that the nodeNodeNeighborsMap has been created
     if ( M_nodeNodeNeighborsMap.empty()  )
@@ -362,6 +366,8 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP0
     // if the map has already been created, return it
     if ( M_ghostMapOnElementsP0 ) return *M_ghostMapOnElementsP0;
 
+    if ( M_verbose ) std::cout << " GH- ghostMapOnElementsP0()" << std::endl;
+
     // create the map
     M_ghostMapOnElementsP0.reset ( new map_Type() );
     map_Type & ghostMap ( *M_ghostMapOnElementsP0 );
@@ -403,6 +409,8 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
 {
     // if the map has already been created, return it
     if ( M_ghostMapOnElementsP1 ) return *M_ghostMapOnElementsP1;
+
+    if ( M_verbose ) std::cout << " GH- ghostMapOnElementsP1()" << std::endl;
 
     // check that the nodeElementNeighborsMap has been created
     if ( M_nodeElementNeighborsMap.empty()  )
