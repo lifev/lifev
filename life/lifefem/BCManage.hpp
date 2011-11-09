@@ -1357,7 +1357,11 @@ bcNaturalManage( VectorType& rightHandSide,
                     // Loop on quadrature points
                     for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt(); ++iq )
                     {
-                        currentBdFE.coorQuadPt( x, y, z, iq ); // quadrature point coordinates
+                        // quadrature point coordinates
+                        x = currentBdFE.quadPt(iq, 0);
+                        y = currentBdFE.quadPt(iq, 1);
+                        z = currentBdFE.quadPt(iq, 2);
+
                         switch (boundaryCond.mode())
                         {
                         case Full:
@@ -1464,7 +1468,10 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
                     {
-                        currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
+                    	// quadrature point coordinates
+						x = currentBdFE.quadPt(l, 0);
+						y = currentBdFE.quadPt(l, 1);
+						z = currentBdFE.quadPt(l, 2);
 
                         uPt=0.0;
                         for (ID idofLocU=0; idofLocU<nDofF; idofLocU++)
@@ -1646,7 +1653,7 @@ bcRobinManage( MatrixType& matrix,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.bElement( ibF ) );
+            currentBdFE.updateMeasQuadPt( mesh.bElement( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -1662,7 +1669,10 @@ bcRobinManage( MatrixType& matrix,
                     // Loop on quadrature points
                     for ( UInt l = 0; l < currentBdFE.nbQuadPt(); ++l )
                     {
-                        currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
+                    	// quadrature point coordinates
+						x = currentBdFE.quadPt(l, 0);
+						y = currentBdFE.quadPt(l, 1);
+						z = currentBdFE.quadPt(l, 2);
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
                         sum += pBcF->coef( time, x, y, z, boundaryCond.component( j ) ) * currentBdFE.phi( idofF, l ) * currentBdFE.phi( idofF, l ) *
@@ -1689,7 +1699,10 @@ bcRobinManage( MatrixType& matrix,
                         // Loop on quadrature points
                         for ( UInt l = 0; l < currentBdFE.nbQuadPt(); ++l )
                         {
-                            currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
+                        	// quadrature point coordinates
+							x = currentBdFE.quadPt(l, 0);
+							y = currentBdFE.quadPt(l, 1);
+							z = currentBdFE.quadPt(l, 2);
 
                             // Upper diagonal entry of the elementary boundary mass matrix
                             sum += pBcF->coef( time,  x, y, z, boundaryCond.component( j )   ) * currentBdFE.phi( idofF , l ) * currentBdFE.phi( k, l ) *
@@ -1867,7 +1880,10 @@ bcRobinManageMatrix( MatrixType& matrix,
                     // Loop on quadrature points
                     for ( UInt l = 0; l < currentBdFE.nbQuadPt(); ++l )
                     {
-                        currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
+                    	// quadrature point coordinates
+						x = currentBdFE.quadPt(l, 0);
+						y = currentBdFE.quadPt(l, 1);
+						z = currentBdFE.quadPt(l, 2);
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
                         sum += pBcF->coef( time, x, y, z, boundaryCond.component(j) ) * currentBdFE.phi( idofF, l ) * currentBdFE.phi( idofF, l ) *
@@ -1892,7 +1908,10 @@ bcRobinManageMatrix( MatrixType& matrix,
                         for ( UInt l = 0; l < currentBdFE.nbQuadPt(); ++l )
                         {
 
-                            currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
+                        	// quadrature point coordinates
+							x = currentBdFE.quadPt(l, 0);
+							y = currentBdFE.quadPt(l, 1);
+							z = currentBdFE.quadPt(l, 2);
 
                             // Upper diagonal entry of the elementary boundary mass matrix
                             sum += pBcF->coef( time, x, y, z, boundaryCond.component( j )  ) * currentBdFE.phi( idofF, l ) * currentBdFE.phi( k, l ) *
@@ -2027,7 +2046,10 @@ bcRobinManageVector( VectorType& rightHandSide,
                     // Loop on quadrature points
                     for ( UInt l = 0; l < currentBdFE.nbQuadPt(); ++l )
                     {
-                        currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
+                    	// quadrature point coordinates
+						x = currentBdFE.quadPt(l, 0);
+						y = currentBdFE.quadPt(l, 1);
+						z = currentBdFE.quadPt(l, 2);
 
                         // Adding right hand side contribution
                         rhsRepeated[ idDof ] += currentBdFE.phi( idofF, l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *
