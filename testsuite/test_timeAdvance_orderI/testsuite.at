@@ -82,7 +82,7 @@ fill 		= 2
 ]])
 
 AT_CHECK([ln -sf ../../data/mesh/inria/StructuredCube4.mesh;
-          mpirun -np 2 ../../test_timeAdvance_orderI/test_timeAdvance -c],[0],[ignore],[ignore])
+          mpirun -np 2 $abs_top_builddir/testsuite/test_timeAdvance_orderI/test_timeAdvance -c],[0],[ignore],[ignore])
 AT_CLEANUP
 
 

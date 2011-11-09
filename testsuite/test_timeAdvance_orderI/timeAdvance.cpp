@@ -361,14 +361,14 @@ problem::run()
     feSpace->interpolate(d0, *U, 0.0);
     feSpace->interpolate(v0, *V , 0.0);
 
-//evaluate disp and vel as interpolate the bcFunction d0 and v0
+    //evaluate disp and vel as interpolate the bcFunction d0 and v0
 
-    std::vector<vector_Type> uv0;
+    std::vector<vector_ptrtype> uv0;
 
     if (TimeAdvanceMethod =="Newmark")
     {
-        uv0.push_back(*U);
-        uv0.push_back(*V);
+      uv0.push_back(U);
+      uv0.push_back(V);
     }
     if (TimeAdvanceMethod =="BDF")
     {
@@ -376,14 +376,15 @@ problem::run()
         {
             Real previousTimeStep = -previousPass*dt;
             feSpace->interpolate(uexact, *U, previousTimeStep );
-            uv0.push_back(*U);
+            uv0.push_back(U);
         }
     }
 
     //the uv0[0] should be the displacement
     //the uv0[1] should be the velocity
 
-    timeAdvance->setInitialCondition(uv0[0],uv0[1]);
+    //timeAdvance->setInitialCondition(uv0[0],uv0[1]);
+    timeAdvance->setInitialCondition(uv0);
 
     timeAdvance-> setTimeStep(dataProblem->dataTime()->timeStep());
 

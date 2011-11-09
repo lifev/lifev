@@ -352,16 +352,16 @@ problem::run()
 
 //evaluate disp and vel as interpolate the bcFunction d0 and v0 and w0
 
-    std::vector<vector_type> uv0;
+    std::vector<vector_ptrtype> uv0;
 
     Real dt = dataProblem->dataTime()->timeStep();
     Real T  = dataProblem->dataTime()->endTime();
 
     if (TimeAdvanceMethod =="Newmark")
     {
-        uv0.push_back(*U);
-        uv0.push_back(*V);
-        uv0.push_back(*W);
+        uv0.push_back(U);
+        uv0.push_back(V);
+        uv0.push_back(W);
     }
     if (TimeAdvanceMethod =="BDF")
     {
@@ -369,11 +369,11 @@ problem::run()
         {
             Real previousTimeStep = -previousPass*dt;
             feSpace->interpolate(uexact, *U, previousTimeStep );
-            uv0.push_back(*U);
+            uv0.push_back(U);
         }
     }
 
-    timeAdvance->setInitialCondition(uv0[0],uv0[1]);
+    timeAdvance->setInitialCondition(uv0);
 
     timeAdvance-> setTimeStep(dataProblem->dataTime()->timeStep());
 
