@@ -297,9 +297,9 @@ void
 MapEpetra::showMe( std::ostream& output ) const
 {
     output << "unique map:" << std::endl;
-    output << getUniqueMap();
+    output << *getUniqueMap();
     output << "repeated map:" << std::endl;
-    output << getRepeatedMap();
+    output << *getRepeatedMap();
 }
 
 // ===================================================
