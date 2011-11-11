@@ -103,20 +103,26 @@ public:
     //! create node node neighbors map
     void createNodeNodeNeighborsMap();
 
+    //! create node edge neighbors map
+    void createNodeEdgeNeighborsMap();
+
     //! create node element neighbors map
     void createNodeElementNeighborsMap();
-
-    //! create ghost map
-    map_Type & ghostMapOnElementsP0();
-
-    //! create ghost map
-    map_Type & ghostMapOnElementsP1( UInt overlap );
 
     //! create ghost map
     map_Type & ghostMapOnNodes();
 
     //! create ghost map
     map_Type & ghostMapOnNodes( UInt overlap );
+
+    //! create ghost map
+    map_Type & ghostMapOnEdges( UInt overlap );
+
+    //! create ghost map
+    map_Type & ghostMapOnElementsP0();
+
+    //! create ghost map
+    map_Type & ghostMapOnElementsP1( UInt overlap );
 
     //! showMe method
     void showMe( bool const verbose = false, std::ostream & out = std::cout );
@@ -128,9 +134,10 @@ protected:
     //! @name Ghost Maps
     //@{
 
+    map_PtrType M_ghostMapOnNodes;
+    map_PtrType M_ghostMapOnEdges;
     map_PtrType M_ghostMapOnElementsP0;
     map_PtrType M_ghostMapOnElementsP1;
-    map_PtrType M_ghostMapOnNodes;
 
     //@}
 
@@ -144,6 +151,7 @@ protected:
     UInt M_me;
 
     neighborMap_Type M_nodeNodeNeighborsMap;
+    neighborMap_Type M_nodeEdgeNeighborsMap;
     neighborMap_Type M_nodeElementNeighborsMap;
 
     const bool M_verbose;
@@ -162,6 +170,7 @@ GhostHandler<Mesh>::GhostHandler( mesh_PtrType fullMesh,
     M_comm ( comm ),
     M_me ( comm->MyPID() ),
     M_nodeNodeNeighborsMap(),
+    M_nodeEdgeNeighborsMap(),
     M_nodeElementNeighborsMap(),
     M_verbose( !M_me )
 {
@@ -171,6 +180,7 @@ template <typename Mesh>
 void GhostHandler<Mesh>::setUp()
 {
     this->createNodeNodeNeighborsMap();
+    this->createNodeEdgeNeighborsMap();
     this->createNodeElementNeighborsMap();
 }
 
@@ -178,6 +188,7 @@ template <typename Mesh>
 void GhostHandler<Mesh>::clean()
 {
     clearVector( M_nodeNodeNeighborsMap );
+    clearVector( M_nodeEdgeNeighborsMap );
     clearVector( M_nodeElementNeighborsMap );
 }
 
@@ -231,6 +242,24 @@ void GhostHandler<Mesh>::createNodeNodeNeighborsMap()
 
         M_nodeNodeNeighborsMap[ id0 ].insert ( id1 );
         M_nodeNodeNeighborsMap[ id1 ].insert ( id0 );
+    }
+}
+
+template <typename Mesh>
+void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
+{
+    // generate node neighbors by watching edges
+    // note: this can be based also on faces or volumes
+    for ( UInt ie = 0; ie < M_fullMesh->numEdges(); ie++ )
+    {
+        ID id0 = M_fullMesh->edge( ie ).point( 0 ).id();
+        ID id1 = M_fullMesh->edge( ie ).point( 1 ).id();
+
+        ASSERT ( M_fullMesh->point( id0 ).id() == id0 && M_fullMesh->point( id1 ).id() == id1,
+                 "the mesh has been reordered, the point must be found" );
+
+        M_nodeEdgeNeighborsMap[ id0 ].insert ( ie );
+        M_nodeEdgeNeighborsMap[ id1 ].insert ( ie );
     }
 }
 
@@ -358,6 +387,79 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UIn
     ghostMap.setMap( repeatedMap, Repeated );
 
     return *M_ghostMapOnNodes;
+}
+
+template <typename Mesh>
+typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UInt overlap )
+{
+    // if the map has already been created, return it
+    if ( M_ghostMapOnEdges ) return *M_ghostMapOnEdges;
+
+    if ( M_verbose ) std::cout << " GH- ghostMapOnEdges()" << std::endl;
+
+    // check that the nodeEdgeNeighborsMap has been created
+    if ( M_nodeEdgeNeighborsMap.empty()  )
+    {
+        if ( M_verbose ) std::cerr << "the nodeEdgeNeighborsMap is empty, will be generated now" << std::endl;
+        this->createNodeEdgeNeighborsMap();
+    }
+
+    // loop on local mesh edges
+    std::vector<Int> myGlobalElements;
+    myGlobalElements.reserve( M_localMesh->numEdges() );
+    for ( ID ie = 0; ie < M_localMesh->numEdges(); ie++ )
+    {
+        myGlobalElements.push_back( M_localMesh->edge( ie ).id() );
+    }
+
+    // create map
+    M_ghostMapOnEdges.reset ( new map_Type( -1, myGlobalElements.size(), &myGlobalElements[0], M_comm ) );
+
+    if ( overlap > 0 )
+    {
+        map_Type & ghostMap ( *M_ghostMapOnEdges );
+
+        Int*          pointer;
+        std::set<Int> myGlobalElementsSet;
+        std::set<Int> addedElementsSet ( myGlobalElements.begin(), myGlobalElements.end() );
+
+        // todo: optimize this!!
+        // 1: work only on the boundary
+        // 2: copy back only if necessary
+        // repeat on actual nodes to expand overlap
+        for ( UInt i = 0; i < overlap; i++ )
+        {
+            // iterate on points adding all neighbors
+            for ( std::set<Int>::const_iterator nodeIt = addedElementsSet.begin();
+                            nodeIt != addedElementsSet.end(); ++nodeIt )
+            {
+                // iterate on each node neighborhood
+                for ( neighborList_Type::const_iterator neighborIt = M_nodeEdgeNeighborsMap[ *nodeIt ].begin();
+                                neighborIt != M_nodeEdgeNeighborsMap[ *nodeIt ].end(); ++neighborIt )
+                {
+                    std::pair<std::set<Int>::iterator, bool> isInserted = myGlobalElementsSet.insert( *neighborIt );
+                    if ( isInserted.second )
+                    {
+                        typename mesh_Type::EdgeType const & edge = M_fullMesh->edge ( *neighborIt );
+                        for ( UInt edgePoint = 0; edgePoint < mesh_Type::EdgeType::S_numPoints; edgePoint++ )
+                        {
+                            // TODO exclude already included nodes
+//                            if ( edge.point( edgePoint ).id() != *nodeIt )
+                            addedElementsSet.insert ( edge.point( edgePoint ).id() );
+                        }
+                    }
+                }
+            }
+        }
+
+        myGlobalElements.assign( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
+
+        // generate map
+        map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+        ghostMap.setMap( repeatedMap, Repeated );
+    }
+
+    return *M_ghostMapOnEdges;
 }
 
 template <typename Mesh>
