@@ -67,10 +67,10 @@ public:
     //@{
 
     //! Constructor
-    GhostHandler( mesh_PtrType & fullMesh,
-                  mesh_PtrType & localMesh,
+    GhostHandler( mesh_PtrType fullMesh,
+                  mesh_PtrType localMesh,
                   map_Type & map,
-                  comm_PtrType & comm );
+                  comm_PtrType const & comm );
 
     //! Destructor
     ~GhostHandler(){}
@@ -140,7 +140,7 @@ protected:
     mesh_PtrType M_fullMesh;
     mesh_PtrType M_localMesh;
     map_Type & M_map;
-    comm_PtrType M_comm;
+    comm_PtrType const M_comm;
     UInt M_me;
 
     neighborMap_Type M_nodeNodeNeighborsMap;
@@ -152,10 +152,10 @@ protected:
 };
 
 template <typename Mesh>
-GhostHandler<Mesh>::GhostHandler( mesh_PtrType & fullMesh,
-                                  mesh_PtrType & localMesh,
+GhostHandler<Mesh>::GhostHandler( mesh_PtrType fullMesh,
+                                  mesh_PtrType localMesh,
                                   map_Type & map,
-                                  comm_PtrType & comm ):
+                                  comm_PtrType const & comm ):
     M_fullMesh ( fullMesh ),
     M_localMesh ( localMesh ),
     M_map ( map ),
@@ -460,7 +460,10 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
                 {
                     typename mesh_Type::VolumeType const & elem = M_fullMesh->element ( *neighborIt );
                     for ( UInt elemPoint = 0; elemPoint < mesh_Type::VolumeType::S_numPoints; elemPoint++ )
+                    {
+                        // TODO exclude already included nodes
                         addedPoints.push_back ( elem.point( elemPoint ).id() );
+                    }
                 }
             }
         }
