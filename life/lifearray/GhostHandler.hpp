@@ -94,6 +94,9 @@ public:
     //! setup
     void setUp();
 
+    //! release
+    void release();
+
     //! clean
     void clean();
 
@@ -182,6 +185,13 @@ void GhostHandler<Mesh>::setUp()
     this->createNodeNodeNeighborsMap();
     this->createNodeEdgeNeighborsMap();
     this->createNodeElementNeighborsMap();
+}
+
+template <typename Mesh>
+void GhostHandler<Mesh>::release()
+{
+    M_fullMesh.reset();
+    M_localMesh.reset();
 }
 
 template <typename Mesh>
