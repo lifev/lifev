@@ -68,13 +68,10 @@ public:
     //! @name Public Types
     //@{
 
-    typedef MapEpetra                       map_Type;
-    typedef FESpace<meshType, map_Type>     fespace_Type;
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
-
-    // Use the portable syntax of the boost function
-    typedef boost::function5< const Real&,  const Real&, const Real&,
-                              const Real&, const Real&, const ID&  > function_Type;
+    typedef MapEpetra                        map_Type;
+    typedef FESpace<meshType, map_Type>      fespace_Type;
+    typedef boost::shared_ptr<fespace_Type>  fespacePtr_Type;
+    typedef AssemblyElemental::function_Type function_Type;
 
     //@}
 
@@ -959,12 +956,6 @@ addMassRhs(vectorType& rhs, const function_Type& fun, const Real& t)
     const UInt nbElements(M_uFESpace->mesh()->numElements());
     const UInt fieldDim(M_uFESpace->fieldDim());
     const UInt nbFEDof(M_massRhsCFE->nbFEDof());
-    const UInt nbQuadPt(M_massRhsCFE->nbQuadPt());
-    const UInt nbTotalDof(M_uFESpace->dof().numTotalDof());
-
-    // Temporaries
-    Real localValue(0.0);
-    std::vector<Real> fValues(nbQuadPt,0.0);
 
     // Loop over the elements
     for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
@@ -975,38 +966,10 @@ addMassRhs(vectorType& rhs, const function_Type& fun, const Real& t)
         // Clean the local matrix
         M_localMassRhs->zero();
 
-        // Assemble the local diffusion
-        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
-        {
-            localvectorType::vector_view localView = M_localMassRhs->block(iterFDim);
-
-            // Compute the value of f in the quadrature nodes
-            for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-            {
-                fValues[iQuadPt]= fun(t,
-                                      M_massRhsCFE->quadNode(iQuadPt,0),
-                                      M_massRhsCFE->quadNode(iQuadPt,1),
-                                      M_massRhsCFE->quadNode(iQuadPt,2),
-                                      iterFDim);
-            }
-
-            // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
-            {
-                localValue = 0.0;
-
-                //Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
-                    localValue += fValues[iQuadPt]
-                                  * M_massRhsCFE->phi(iDof,iQuadPt)
-                                  * M_massRhsCFE->wDetJacobian(iQuadPt);
-                }
-
-                // Add on the local matrix
-                localView(iDof)=localValue;
-            }
-        }
+        AssemblyElemental::bodyForces( *M_localMassRhs,
+                                       *M_massRhsCFE,
+                                       fun, t,
+                                       fieldDim);
 
         // Here add in the global rhs
         for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
@@ -1083,7 +1046,7 @@ addFluxTerms( vectorType&     vector,
 
     }
     vector.globalAssemble();
-} // bcFluxManageMatrix
+}
 
 
 

@@ -60,6 +60,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/function.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -82,6 +83,13 @@ typedef boost::numeric::ublas::zero_matrix<Real> ZeroMatrix;
  */
 namespace AssemblyElemental
 {
+//! @name Public typedefs
+//@{
+//! Use the portable syntax of the boost function
+typedef boost::function5< const Real&,  const Real&, const Real&,
+                          const Real&, const Real&, const ID&  > function_Type;
+//@}
+
 //! Elementary mass for constant mass coefficient
 /*!
   This function assembles the local mass matrix when the mass coefficient is constant.
@@ -285,6 +293,12 @@ void stiffStrain(MatrixElemental& localStiff,
                  const CurrentFE& stiffCFE,
                  const Real& coefficient,
                  const UInt& fieldDim);
+
+void bodyForces(VectorElemental& localForce,
+                const CurrentFE& massRhsCFE,
+                const function_Type& fun,
+                const Real& t,
+                const UInt& fieldDim);
 }
 
 //----------------------------------------------------------------------
