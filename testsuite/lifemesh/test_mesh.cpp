@@ -191,12 +191,12 @@ int main(int argc, char** argv)
         }
     }
     aMesh.faceList[2].replaceFlag(EntityFlags::CUTTED);
-    aMesh.faceList.reorderAccordingToFlag(EntityFlags::CUTTED,Flag::testOneSet);
+    aMesh.faceList.reorderAccordingToFlag(EntityFlags::CUTTED,&Flag::testOneSet);
     if (aMesh.faceList[0].flag() != EntityFlags::CUTTED){
         cerr<<"ERROR: Reordering is not working"<<std::endl;
     }
     cout<<"Number of cutted faces (should be 1) "<<
-                    aMesh.faceList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet)<<std::endl;
+                    aMesh.faceList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
     // Reset all flags to default
     aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::EdgeType>());
     aMesh.edge(0).setMarker(10);
@@ -209,19 +209,19 @@ int main(int argc, char** argv)
     SetFlagAccordingToWatermarks<mesh_Type::EdgeType> changeFlags(EntityFlags::CUTTED,watermarks);
     aMesh.edgeList.changeAccordingToFunctor(changeFlags);
     cout<<"Number of cutted edges (should be 3) "<<
-                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet)<<std::endl;
+                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
     aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::EdgeType>());
     aMesh.edge(0).setMarker(10);
     aMesh.edge(5).setMarker(12);
     aMesh.edge(10).setMarker(15);
-    SetFlagAccordingToMarkerRanges<mesh_Type::EdgeType > changer(Flag::turnOn); //I may use the default constructor
+    SetFlagAccordingToMarkerRanges<mesh_Type::EdgeType > changer(&Flag::turnOn); //I may use the default constructor
     changer.insert(std::make_pair(10,12),EntityFlags::INTERNAL_INTERFACE);
     changer.insert(std::make_pair(15,18),EntityFlags::CUTTED);
     aMesh.edgeList.changeAccordingToFunctor(changer);
     cout<<"Number of cutted edges (should be 1) "<<
-                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet)<<std::endl;
+                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
     cout<<"Number of internal interface edges (should be 2) "<<
-                      aMesh.edgeList.countElementsWithFlag(EntityFlags::INTERNAL_INTERFACE,Flag::testOneSet)<<std::endl;
+                      aMesh.edgeList.countElementsWithFlag(EntityFlags::INTERNAL_INTERFACE,&Flag::testOneSet)<<std::endl;
 
 
 #ifdef HAVE_MPI
