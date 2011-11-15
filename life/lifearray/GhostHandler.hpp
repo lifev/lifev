@@ -429,7 +429,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
     {
         map_Type & ghostMap ( *M_ghostMapOnEdges );
 
-        Int*          pointer;
         std::set<Int> myGlobalElementsSet;
         std::set<Int> addedElementsSet ( myGlobalElements.begin(), myGlobalElements.end() );
 
