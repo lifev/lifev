@@ -95,6 +95,12 @@ typedef boost::shared_ptr< fespace_type > fespacePtr_type;
 typedef LifeV::RossEthierSteinmanUnsteadyDec problem_Type;
 }
 
+Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return 1;
+}
+
+
 void printErrors(const vector_type& solution, const Real& currentTime, fespacePtr_type uFESpace, fespacePtr_type pFESpace, bool verbose)
 {
     vector_type velocity(uFESpace->map(),Repeated);
@@ -179,13 +185,17 @@ main( int argc, char** argv )
     // Space discretization
     const UInt numDimensions  = 3;
     const MeshType meshSource = RegularMesh;
-    const UInt numMeshElem    = 10;
+    const UInt numMeshElem    = 3;
 
     // Numerical scheme
     const DiffusionType diffusionType = ViscousStress;
           UInt BDFOrder = 3;
     const InitType initializationMethod = Interpolation;
     const ConvectionType convectionTerm = KIO91;
+
+    // Reading settings from file
+    //dataFile;
+
 
     // EthierSteinman data
     problem_Type::setA(1.0);
@@ -350,6 +360,21 @@ main( int argc, char** argv )
     if (verbose) std::cout << "done" << std::endl;
 
     // +-----------------------------------------------+
+    // |  Flux computation: vector initialization      |
+    // +-----------------------------------------------+
+    BCFunctionBase flow (fluxFunction);
+
+    BCHandler fluxHandler;
+    fluxHandler.addBC("Flux" , 1,  Flux, Normal, flow);
+
+    // Update the BCHandler (internal data related to FE)
+    fluxHandler.bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
+
+    vector_type fluxVector(solutionMap);
+    oseenAssembler.addFluxTerms(fluxVector, fluxHandler);
+
+
+    // +-----------------------------------------------+
     // |            Solver initialization              |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Solver initialization]" << std::endl;
@@ -424,6 +449,11 @@ main( int argc, char** argv )
     *solution = *velocity;
     solution->add(*pressure,pressureOffset);
     bdf.setInitialCondition( *solution );
+
+    // Compute initial flux trough face 1
+    Real fluxThrou1 = fluxVector.dot(*solution);
+    if (verbose) std::cout << "Flux through face 1 = "
+                           << fluxThrou1 << std::endl;
 
     // Initial solution (interpolation or projection)
     currentTime += timestep;
