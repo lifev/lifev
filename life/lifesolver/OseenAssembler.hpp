@@ -995,9 +995,11 @@ addFluxTerms( vectorType&     vector,
 
     for ( ID hCounter = 0; hCounter < bcHandler.size(); ++hCounter )
     {
-      assert( bcHandler[ hCounter ].type()  == Flux );
+      ASSERT( bcHandler[ hCounter ].type()  == Flux, "Works only with Flux BC type!");
+      ASSERT( bcHandler.bcUpdateDone () , " Please call bcHandler::Update() before calling this method!");
 
       const BCBase&    boundaryCond(bcHandler[ hCounter ]);
+      //const BCVectorBase* bcVectorBase(boundaryCond.pointerToBCVector());
 
       // Number of local DOF in this face
       UInt nDofF = M_uFESpace->feBd().nbNode();
@@ -1029,6 +1031,10 @@ addFluxTerms( vectorType&     vector,
                   for ( int ic = 0; ic < (int)nComp; ++ic)
                   {
                       idDof = pId->boundaryLocalToGlobalMap( idofF ) + ic * totalDof;
+
+                      // std::cout << " bcVectorBase(idofF, ic) = " << (*bcVectorBase)(idofF, ic)
+                      //           << " idDof = " << idDof
+                      //           << std::endl;
 
                       sum = 0.;
                       for ( int iq = 0; iq < (int)M_uFESpace->feBd().nbQuadPt(); ++iq )
