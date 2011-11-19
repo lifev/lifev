@@ -15,7 +15,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 dist_pkgdata_DATA = cube4x4.mesh cube8x8.mesh cube16x16.mesh \
             cyltetra.mesh\
-		    vessel2x4x20.mesh\
+		    StructuredCube4_test_structuralsolver.mesh\
             tube20.mesh vessel20.mesh \
             lid16.mesh\
 	        StructuredCube4.mesh cartesian_cube8.mesh \
