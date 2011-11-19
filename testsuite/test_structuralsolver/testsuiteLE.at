@@ -65,7 +65,7 @@ zeta        		= 0.75
 BDF_order   		= 2
 
 [../space_discretization]
-mesh_dir  		= ./Mesh/
+mesh_dir  		= ./
 mesh_file 		= StructuredCube4_test_structuralsolver.mesh
 order     		= P1
 
@@ -115,7 +115,7 @@ filter_singletons 	= true
 
 
 ]])
-AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/StructureCube4_test_structuralsolver.mesh &&
+AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/StructuredCube4_test_structuralsolver.mesh &&
           mpirun -np 2 $abs_top_builddir/testsuite/test_structuralsolver/test_structure -c],[0],[ignore],[ignore])
 AT_CLEANUP
 

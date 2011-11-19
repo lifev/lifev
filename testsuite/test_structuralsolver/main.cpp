@@ -550,7 +550,7 @@ void Structure::CheckResultSVK(const Real& dispNorm,const Real& time)
         this->resultChanged(time);
     if ( time == 0.3  && std::fabs(dispNorm-0.263350)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.263551)>1e-5 )
+    if ( time == 0.4  && std::fabs(dispNorm-0.263351)>1e-5 )
         this->resultChanged(time);
 }
 void Structure::CheckResultEXP(const Real& dispNorm,const Real& time)
