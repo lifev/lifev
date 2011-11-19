@@ -28,6 +28,7 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2005-04-16
  */
+#undef HAVE_HDF5
 #ifdef TWODIM
 #error test_structure cannot be compiled in 2D
 #endif
@@ -73,7 +74,9 @@
 #include <life/lifesolver/ExponentialMaterialNonLinear.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
+#ifdef HAVE_HDF5
 #include <life/lifefilters/ExporterHDF5.hpp>
+#endif
 #include <life/lifefilters/ExporterEmpty.hpp>
 
 #include <iostream>
@@ -131,7 +134,10 @@ public:
     {
         run3d();
     }
-    void CheckResults(const Real& dispNorm, const Real& time);
+    void CheckResultLE(const Real& dispNorm, const Real& time);
+    void CheckResultSVK(const Real& dispNorm, const Real& time);
+    void CheckResultEXP(const Real& dispNorm, const Real& time);
+    void CheckResultNH(const Real& dispNorm, const Real& time);
     void resultChanged(Real time);
 //@}
 
@@ -412,7 +418,7 @@ Structure::run3d()
     exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
 
     exporter->postProcess( 0 );
-
+    /*
     //!--------------------------------------------------------------------------------------------
     //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
     //!--------------------------------------------------------------------------------------------
@@ -444,8 +450,9 @@ Structure::run3d()
     }
 
     file_comp<< endl;
+    */
     //!--------------------------------------------------------------------------------------------
-
+    //!The update of the RHS is done by the TimeAdvance class
     //solid.updateSystem();
     //! =================================================================================   
 
@@ -480,7 +487,9 @@ Structure::run3d()
 	*solidAcc  = timeAdvance->accelerate();
 
 	exporter->postProcess( time );
-
+	
+	/* This part lets to save the displacement at one point of the mesh and to check the result
+	   w.r.t. manufactured solution.
         //!--------------------------------------------------------------------------------------------------
         //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
         //!--------------------------------------------------------------------------------------------------
@@ -494,6 +503,24 @@ Structure::run3d()
 		cout <<"*********************************************************"<< std::endl;
 	}
 	file_comp<< endl;
+	*/
+	
+	Real normVect;
+	normVect =  solid.displacement().norm2();
+	std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
+	
+	///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+	    if (!dataStructure->solidType().compare("linearVenantKirchhoff"))
+	      CheckResultLE(normVect,time);
+	    else if (!dataStructure->solidType().compare("nonlinearVenantKirchhoff"))
+	      CheckResultSVK(normVect,time);
+	    else if (!dataStructure->solidType().compare("exponential"))
+	      CheckResultEXP(normVect,time );
+	    else 
+	      CheckResultNH(normVect,time );
+	    
+	///////// END OF CHECK
+
 
 	//!--------------------------------------------------------------------------------------------------
 
@@ -503,13 +530,50 @@ Structure::run3d()
 
 
 
-void Structure::CheckResults(const Real& dispNorm,const Real& time)
+void Structure::CheckResultLE(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.001  && std::fabs(dispNorm-1.18594)>1e-4 )
+    if ( time == 0.1  && std::fabs(dispNorm-0.276527)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.002  && std::fabs(dispNorm-1.10232)>1e-4 )
+    if ( time == 0.2  && std::fabs(dispNorm-0.276536)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.003  && std::fabs(dispNorm-0.808509)>1e-4 )
+    if ( time == 0.3  && std::fabs(dispNorm-0.276529)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.4  && std::fabs(dispNorm-0.276531)>1e-5 )
+        this->resultChanged(time);
+}
+
+void Structure::CheckResultSVK(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.1  && std::fabs(dispNorm-0.263348)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.2  && std::fabs(dispNorm-0.263350)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.3  && std::fabs(dispNorm-0.263350)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.4  && std::fabs(dispNorm-0.263551)>1e-5 )
+        this->resultChanged(time);
+}
+void Structure::CheckResultEXP(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.1  && std::fabs(dispNorm-0.284844)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.2  && std::fabs(dispNorm-0.284853)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.3  && std::fabs(dispNorm-0.284846)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.4  && std::fabs(dispNorm-0.284848)>1e-5 )
+        this->resultChanged(time);
+}
+
+void Structure::CheckResultNH(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.1  && std::fabs(dispNorm-0.286120)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.2  && std::fabs(dispNorm-0.286129)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.3  && std::fabs(dispNorm-0.286122)>1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.4  && std::fabs(dispNorm-0.286123)>1e-5 )
         this->resultChanged(time);
 }
 

@@ -13,8 +13,8 @@
 ### TESTSUITE: STRUCTURE MECHANICS ################################################################
 ###################################################################################################
 
-AT_SETUP([test_structuralsolver])
-AT_KEYWORDS([structure linear elastic])
+AT_SETUP([test_structuralsolver (NH)])
+AT_KEYWORDS([structure neohookean])
 AT_DATA([data],[[
 #-------------------------------------------------
 #      Data file for Structure Solver
@@ -22,7 +22,7 @@ AT_DATA([data],[[
 
 
 [exporter]
-type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
+type       = ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
@@ -42,13 +42,13 @@ solidType 	= neoHookean		# linearVenantKirchhoff / nonlinearVenantKirchhoff / ne
 initialtime 	= 0.
 endtime     	= 0.4
 timestep    	= 0.1
-theta       	= 0.7
+theta       	= 0.35
 zeta        	= 0.75
-BDF_order   	= 1
+BDF_order   	= 2
 
 [../space_discretization]
-mesh_dir  	= Mesh/
-mesh_file 	= StructuredCube4.mesh # StructuredCube4.mesh StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh
+mesh_dir  	= ./Mesh/
+mesh_file 	= StructuredCube4_test_structuralsolver.mesh # StructuredCube4.mesh StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh
 order     	= P1
 
 
@@ -99,7 +99,7 @@ filter_singletons 	= true
 [../]
 
 ]])
-AT_CHECK([ln -sf ../../data/mesh/inria/StructureCube4.mesh &&
+AT_CHECK([ln -sf ../../data/mesh/inria/StructureCube4_test_structuralsolver.mesh &&
           mpirun -np 2 ../../test_structuralsolver/test_structure -c],[0],[ignore],[ignore])
 AT_CLEANUP
 
