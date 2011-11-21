@@ -430,7 +430,14 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
         map_Type & ghostMap ( *M_ghostMapOnEdges );
 
         std::set<Int> myGlobalElementsSet;
-        std::set<Int> addedElementsSet ( myGlobalElements.begin(), myGlobalElements.end() );
+        std::set<Int> addedElementsSet;
+        for (  UInt k ( 0 ); k < myGlobalElements.size(); k++ )
+        {
+            typename mesh_Type::EdgeType const & edge = M_fullMesh->edge ( myGlobalElements[ k ] );
+            for ( UInt edgePoint = 0; edgePoint < mesh_Type::EdgeType::S_numPoints; edgePoint++ )
+                addedElementsSet.insert( edge.point( edgePoint ).id() );
+        }
+        ( myGlobalElements.begin(), myGlobalElements.end() );
 
         // todo: optimize this!!
         // 1: work only on the boundary
