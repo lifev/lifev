@@ -286,6 +286,16 @@ Real u1(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
     return 0.0;
 }
 
+Real vinit(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+    if (i==2)
+        return 10;
+    else
+        return 0.;
+}
+
+
+
 Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;

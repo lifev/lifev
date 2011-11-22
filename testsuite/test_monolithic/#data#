@@ -62,9 +62,9 @@ filename   = solidRestarted
 [../] # exporter
 
 [importer]
-initSol = 0003
+initSol    = 1
 type       = hdf5
-restart_timestep = 0.003
+restart_timestep = 0.0003
 [./fluid]
 filename   = fluidImp
 [../solid]
@@ -84,9 +84,9 @@ viscosity = 0.03              # viscosity
 
 [../time_discretization]
 method          = BDF
-initialtime		= 0.003
-endtime			= 0.006
-timestep		= 0.001
+initialtime		= 0.0004
+endtime			= 0.0008
+timestep		= 0.0001
 BDF_order		= 1
 theta           = 0.5
 zeta            = 0.5
@@ -128,7 +128,13 @@ useExactJacobian = true # always false for linear structure model. Otherwise it 
 
 [./physics]
 
-solidType = linearVenantKirchhoff #NOTE: the nonlinear choice is not available
+solidType = linearVenantKirchhof #NOTE: the nonlinear choice is not available
+# either linearVenantKirchhof, nonLinearVenantKirchhof, exponential, neoHookian
+#material_flag = '100 101'
+#density   = '1.2 1.2'               # density
+#young     = '4.0E6 4.0E6'
+#poisson   = '0.45 0.45'
+# volume flag of the solid mesh
 
 material_flag = 1
 density   = 1.2
@@ -140,9 +146,9 @@ gamma     = 1
 
 [../time_discretization]
 method          = BDF # Newmark or BDF
-initialtime		= 0.003
-endtime			= 0.006
-timestep		= 0.001
+initialtime		= 0.0004
+endtime			= 0.0008
+timestep		= 0.0001
 BDF_order		= 2
 theta           = 0.25
 gamma           = 0.5

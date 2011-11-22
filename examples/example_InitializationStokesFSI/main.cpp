@@ -658,17 +658,25 @@ void Problem::initializeStokes(std::string& /*loadInitSol*/,  GetPot const& data
   filterPtr_Type importer;
   std::string const importerType =  data_file( "importer/type", "hdf5");
   std::string const filename    = data_file( "importer/fluid/filename", "fluid");
+#ifdef HAVE_HDF5
   if (importerType.compare("hdf5") == 0)
     {
       importer.reset( new  hdf5Filter_Type( data_file, filename) );
     }
-
-
+#endif
+   {
+     if (importerType.compare("none") == 0)
+       {
+	 importer.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), "fluid", M_fsi->FSIOper()->uFESpace().map().comm()..MyPID());
+       }
+     else
+       {
+	 importer.reset( new  ensightFilter_Type( data_file, filename) );
+       }
+   }
+   
   //First Part: loading the solution of the fluid domain
   vectorPtr_Type  velAndPressureStokes( new vector_Type( M_fsi->FSIOper()->fluid().getMap(), Unique ));
-  vectorPtr_Type vel           (new LifeV::VectorEpetra(M_fsi->FSIOper()->uFESpace().map(), importer->mapType()));
-  vectorPtr_Type pressure      (new LifeV::VectorEpetra(M_fsi->FSIOper()->pFESpace().map(), importer->mapType()));
-
   
   importer->setMeshProcId( M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
 
