@@ -15,8 +15,7 @@
 [Problem] #########################################################################################
 ProblemType = Multiscale
 #ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_1Cylinder-Stokes-tube20
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_1Cylinder-tube20
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_1Cylinder-tube20-NoParser
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_1Cylinder-tube20
 
 [Solver] ##########################################################################################
 ###################################################################################################

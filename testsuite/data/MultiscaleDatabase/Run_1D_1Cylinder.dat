@@ -14,8 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_1Cylinder
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_1Cylinder-NoParser
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_1Cylinder
 
 [Solver] ##########################################################################################
 ###################################################################################################
