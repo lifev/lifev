@@ -214,9 +214,9 @@ couplings = '
               15    Stress              Lagrange1                       24,25,23        0,0,1
               16    Stress              Lagrange1                       30,31,29        0,0,1
               17    Stress              Lagrange1                       32,33,30        0,0,1
-              18    Stress              Lagrange1                       38,35,28        0,0,1
+              18    Stress              Lagrange1                       34,35,28        0,0,1
               19    Stress              Lagrange1                       36,37,35        0,0,1
-              20    Stress              Lagrange1                       34,39,37        0,0,1
+              20    Stress              Lagrange1                       38,39,37        0,0,1
               21    Stress              Lagrange1                       40,41,39        0,0,1
               22    Stress              Lagrange1                       42,43,41        0,0,1
               23    Stress              Lagrange1                       44,45,43        0,0,1
