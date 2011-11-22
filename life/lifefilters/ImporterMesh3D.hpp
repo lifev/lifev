@@ -454,6 +454,8 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     hstream.close();
 
+    UInt numberStoredEdges = numberBoundaryEdges;
+
     //Reopen the stream: I know it is stupid but this is how it goes
     std::ifstream myStream( fileName.c_str() );
 
@@ -906,7 +908,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
          << "Number of Stored Faces    = "  << std::setw( 10 ) << numberStoredFaces      << std::endl
          << "Number of Edges           = "  << std::setw( 10 ) << numberEdges            << std::endl
          << "Number of Boundary Edges  = "  << std::setw( 10 ) << numberBoundaryEdges    << std::endl
-         << "Number of Points          = "  << std::setw( 10 ) << numberPoints           << std::endl
+         << "Number of Stored Edges    = "  << std::setw( 10 ) << numberStoredEdges      << std::endl
+	 << "Number of Points          = "  << std::setw( 10 ) << numberPoints           << std::endl
          << "Number of Boundary Points = "  << std::setw( 10 ) << numberBoundaryPoints   << std::endl
          << "Number of Volumes         = "  << std::setw( 10 ) << numberVolumes          << std::endl;
 
@@ -1139,10 +1142,10 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
         if ( line.find( "Edges" ) != std::string::npos )
         {
-            nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
-            oStr << "Reading boundary edges " << std::endl;
+            nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            oStr << "Reading stored edges " << std::endl;
 
-            for ( i = 0; i < numberBoundaryEdges; i++ )
+            for ( i = 0; i < numberStoredEdges; i++ )
             {
                 myStream >> p1 >> p2 >> ibc;
                 p1 -= idOffset; p2 -= idOffset; //get the 0-based numbering
@@ -1151,7 +1154,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 pointerEdge->setPoint( 0, mesh.point( p1 ) ); // set edge conn.
                 pointerEdge->setPoint( 1, mesh.point( p2 ) ); // set edge conn.
             }
-            oStr << "Boundary edges read " << std::endl;
+            oStr << " Stored edges read " << std::endl;
             done++;
         }
 

@@ -326,7 +326,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
         // I assume we are storing only boundary edges
         if ( line.find( "Edges" ) != std::string::npos )
         {
-            numberBoundaryEdges = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
+            numberBoundaryEdges = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
             done++;
             for ( i = 0; i < numberBoundaryEdges; i++ )
             {
