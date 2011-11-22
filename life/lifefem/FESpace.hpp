@@ -1647,7 +1647,6 @@ createMap(const commPtr_Type& commptr)
 {
     // Against dummies
     ASSERT_PRE(this->M_dof->numTotalDof()>0," Cannot create FeSpace with no degrees of freedom");
-
     // get globalElements list from DOF
     std::vector<Int> myGlobalElements( this->M_dof->globalElements( *this->M_mesh ) );
     // Create the map

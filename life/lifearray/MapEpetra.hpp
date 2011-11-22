@@ -298,8 +298,6 @@ private:
     comm_ptrtype       M_commPtr;
 
 };
-
 }
-
 #endif
 

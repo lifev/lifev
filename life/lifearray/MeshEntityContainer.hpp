@@ -63,18 +63,18 @@ namespace Comparers{
  */
 /** Compare according to local ID.
  *  It compares according to the ID (local ID) of a MeshEntity and it relies on std comparison operators
- *  It defaults to less<ID>.
- *  We rely on the fact that less<ID>(ID a, ID b) (otherwise the user must supply it).
+ *  It defaults to std::less<ID>.
+ *  We rely on the fact that std::less<ID>(ID a, ID b) is defined (otherwise the user must supply it).
  */
 template <typename MeshEntity, typename Policy=boost::function2<bool,ID,ID> >
-class CompareAccordingToId{
+class CompareAccordingToLocalId{
 public:
     //! Constructor
     /**
      * The constructor can receive anything which is convertible the chosen
      * policy type. This allows great flexibility (maybe too much!)
      */
-    CompareAccordingToId(Policy const & p=std::less<ID>()):M_policy(p){};
+    CompareAccordingToLocalId(Policy const & p=std::less<ID>()):M_policy(p){};
     bool operator()(MeshEntity const & a, MeshEntity const & b){
         return M_policy(a.localId(),b.localId());
     }
