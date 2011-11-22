@@ -1579,7 +1579,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     std::ifstream inputFile ( fileName.c_str() );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "Gmsh reading: " << fileName << "\n";
 #endif
 
@@ -1595,7 +1595,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     UInt numberNodes;
     inputFile >> numberNodes;
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "Number of nodes = " << numberNodes;
 #endif
 
@@ -1607,7 +1607,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::vector<bool> isonboundary( numberNodes );
     std::vector<UInt> whichboundary( numberNodes );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "Reading " << numberNodes << " nodes\n";
 #endif
 
@@ -1625,13 +1625,13 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     }
     inputFile >> buffer;
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "buffer = " << buffer << "\n";
 #endif
 
     inputFile >> buffer;
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "buffer = " << buffer << "\n";
 #endif
 
@@ -1642,7 +1642,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     typename RegionMesh3D<GeoShape, MC>::FaceType   * pointerFace   = 0;
     typename RegionMesh3D<GeoShape, MC>::VolumeType * pointerVolume = 0;
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "number of elements: " << numberElements << "\n";
 #endif
 
@@ -1676,7 +1676,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         default:
             np = 0;
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
             Debug ( 8000 ) << "Element type unknown " << ne << "\n";
 #endif
 
@@ -1733,7 +1733,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     mesh.setNumBEdges  ( gt[ 1 ] );
     mesh.setMaxNumGlobalEdges( gt[ 1 ] );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "number of edges= " << gt[ 1 ] << "\n";
 #endif
 
@@ -1745,14 +1745,14 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     mesh.setNumBFaces  ( n_faces_boundary );
     mesh.setMaxNumGlobalFaces( n_faces_total );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "number of faces = " << n_faces_boundary << "\n";
 #endif
 
     mesh.setMaxNumVolumes( n_volumes, true );
     mesh.setMaxNumGlobalVolumes( n_volumes );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "number of volumes = " << n_volumes << "\n";
 #endif
 
@@ -1784,7 +1784,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     mesh.setNumBVertices( std::count( isonboundary.begin(), isonboundary.end(), true ) );
     mesh.setNumBPoints  ( mesh.numBVertices() );
 
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
     Debug ( 8000 ) << "number of points : "            << mesh.numPoints() << "\n";
     Debug ( 8000 ) << "number of boundary points : "   << mesh.numBPoints() << "\n";
     Debug ( 8000 ) << "number of vertices : "          << mesh.numVertices() << "\n";

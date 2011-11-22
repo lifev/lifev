@@ -521,7 +521,7 @@ void reorderAccordingToIdPermutation(EntityContainer & container,std::vector<ID>
     // Change the id's
     for (it i=container.begin();i<container.end();++i)i->setLocalId(*(start++));
     // Fix the ordering
-    std::sort(container.begin(),container.end(),Comparers::CompareAccordingToId<meshEntity_Type,std::less<ID> >());
+    std::sort(container.begin(),container.end(),Comparers::CompareAccordingToLocalId<meshEntity_Type,std::less<ID> >());
 }
 /** Fix pointers after permutation
  *  If a mesh entity contains pointers to other mesh entities (typically Points), after the renumbering of the

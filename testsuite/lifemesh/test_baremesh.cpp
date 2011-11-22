@@ -69,7 +69,7 @@ class dummyVect:
     public:
         dummyVect(): std::vector<double>(){}
         dummyVect(unsigned const int & n): std::vector<double>(n){}
-        bool isPresent(int )const {return true;}
+        bool isGlobalIDPresent(int )const {return true;}
     };
 
 template<typename meshEntity>

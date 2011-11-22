@@ -37,13 +37,13 @@ AT_DATA([data],
 
         [./time_discretization]
         initialtime   = 0.
-        endtime       = 0.1
+        endtime       = 0.05
         [../]
 
         [./numerical_flux]
 
             [./CFL]
-            brent_toll    = 1e-4
+            brent_toll    = 1e-6
             brent_maxIter = 500
             relax         = 0.8
             [../]
@@ -51,7 +51,7 @@ AT_DATA([data],
             fluxtype = Godunov
 
             [./godunov]
-            brent_toll    = 1e-4
+            brent_toll    = 1e-6
             brent_maxIter = 500
             [../]
 

@@ -1,0 +1,159 @@
+From fb7014766a9ac94863912084361afa1a7ad266e7 Mon Sep 17 00:00:00 2001
+From: Antonio Cervone <ant.cervone@gmail.com>
+Date: Tue, 4 Oct 2011 16:44:53 +0200
+Subject: [PATCH] ghost map introduced in MapEpetra
+
+---
+ life/lifearray/MapEpetra.cpp |   12 ++++++++++++
+ life/lifearray/MapEpetra.hpp |   39 ++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 50 insertions(+), 1 deletions(-)
+
+diff --git a/life/lifearray/MapEpetra.cpp b/life/lifearray/MapEpetra.cpp
+index de41369..44ea70a 100644
+--- a/life/lifearray/MapEpetra.cpp
++++ b/life/lifearray/MapEpetra.cpp
+@@ -60,6 +60,8 @@ namespace LifeV
+ MapEpetra::MapEpetra():
+     M_repeatedMapEpetra(),
+     M_uniqueMapEpetra(),
++    M_ghostMapEpetra(),
++    M_ghostMapcreated( false ),
+     M_exporter(),
+     M_importer(),
+     M_commPtr()
+@@ -71,6 +73,8 @@ MapEpetra::MapEpetra( Int  numGlobalElements,
+                       const comm_ptrtype& commPtr ):
+     M_repeatedMapEpetra(),
+     M_uniqueMapEpetra(),
++    M_ghostMapEpetra(),
++    M_ghostMapcreated( false ),
+     M_exporter(),
+     M_importer(),
+     M_commPtr( commPtr )
+@@ -91,6 +95,8 @@ MapEpetra::MapEpetra( const Int numGlobalElements,
+                       const comm_ptrtype& commPtr ) :
+     M_repeatedMapEpetra(),
+     M_uniqueMapEpetra(),
++    M_ghostMapEpetra(),
++    M_ghostMapcreated( false ),
+     M_exporter(),
+     M_importer(),
+     M_commPtr( commPtr )
+@@ -108,6 +114,8 @@ MapEpetra::MapEpetra( const Int           size,
+                       const comm_ptrtype& commPtr ):
+     M_repeatedMapEpetra(),
+     M_uniqueMapEpetra(),
++    M_ghostMapEpetra(),
++    M_ghostMapcreated( false ),
+     M_exporter(),
+     M_importer(),
+     M_commPtr( commPtr )
+@@ -136,6 +144,8 @@ MapEpetra::MapEpetra( const Int           size,
+ MapEpetra::MapEpetra( const map_type map ):
+     M_repeatedMapEpetra( new map_type( map ) ),
+     M_uniqueMapEpetra(),
++    M_ghostMapEpetra(),
++    M_ghostMapcreated( false ),
+     M_exporter(),
+     M_importer(),
+     M_commPtr()
+@@ -146,6 +156,8 @@ MapEpetra::MapEpetra( const map_type map ):
+ MapEpetra::MapEpetra( const Epetra_BlockMap& blockMap, const Int offset, const Int maxId) :
+     M_repeatedMapEpetra(),
+     M_uniqueMapEpetra(),
++    M_ghostMapEpetra(),
++    M_ghostMapcreated( false ),
+     M_exporter(),
+     M_importer(),
+     M_commPtr()
+diff --git a/life/lifearray/MapEpetra.hpp b/life/lifearray/MapEpetra.hpp
+index 0fbf272..5145932 100644
+--- a/life/lifearray/MapEpetra.hpp
++++ b/life/lifearray/MapEpetra.hpp
+@@ -64,7 +64,7 @@
+ namespace LifeV
+ {
+ 
+-enum MapEpetraType {Unique = 0, Repeated};
++enum MapEpetraType {Unique = 0, Repeated, Ghost};
+ 
+ 
+ //! MapEpetra - Wrapper for Epetra_Map
+@@ -251,6 +251,10 @@ public:
+     //! This method return true if both the unique map and the repeated map are identical
+     bool mapsAreSimilar( MapEpetra const& epetraMap ) const;
+ 
++    //! Generate ghost map
++    template<typename MeshType>
++    void createGhostMap( MeshPartitioner<MeshType> const & meshPart );
++
+     //! Show informations about the map
+     void showMe( std::ostream& output = std::cout ) const;
+ 
+@@ -334,6 +338,8 @@ private:
+ 
+     map_ptrtype        M_repeatedMapEpetra;
+     map_ptrtype        M_uniqueMapEpetra;
++    map_ptrtype        M_ghostMapEpetra;
++    bool              M_ghostMapCreated;
+     exporter_ptrtype   M_exporter;
+     importer_ptrtype   M_importer;
+     comm_ptrtype       M_commPtr;
+@@ -351,6 +357,8 @@ MapEpetra( const ReferenceFE&               refFE,
+            const comm_ptrtype&        commPtr ):
+         M_repeatedMapEpetra(),
+         M_uniqueMapEpetra(),
++        M_ghostMapEpetra(),
++        M_ghostMapcreated( false ),
+         M_exporter(),
+         M_importer(),
+         M_commPtr( commPtr )
+@@ -375,6 +383,8 @@ MapEpetra( const ReferenceFE&        refFE,
+            const comm_ptrtype& commPtr ):
+         M_repeatedMapEpetra(),
+         M_uniqueMapEpetra(),
++        M_ghostMapEpetra(),
++        M_ghostMapcreated( false ),
+         M_exporter(),
+         M_importer(),
+         M_commPtr( commPtr )
+@@ -428,9 +438,36 @@ MapEpetra( const ReferenceFE&        refFE,
+ 
+ }
+ 
++template <typename MeshType>
++void MapEpetra<MeshType>::createGhostMap( MeshPartitioner const & meshPart )
++{
++    // use a set to avoid duplicates
++    std::set<Int> myGlobalElementsSet;
++    typename MeshType const & mesh ( meshPart.meshPartition() ); 
+ 
++    // iterate on mesh points
++    for ( UInt k = 0; k < mesh.numPoints(); k++ )
++    {
++        // iterate on each node neighborhood
++        for( UInt i = 0; i < mesh.point( k ).nodeNeighbors().size(); i++ )
++        {
++            myGlobalElementsSet.insert( mesh.point( k ).nodeNeighbors()[ i ] );
++        }
++    }
++    
++    std::vector<Int> myGlobalElements( myGlobalElementsSet.begin(), myGlobalElementsSet.end() ); 
++
++    // generate map
++    createMap( -1,
++               myGlobalElements.size(),
++               *myGlobalElements[0],
++               *M_commPtr );
++
++    // set bool control
++    M_ghostMapCreated = true;
+ }
+ 
++}
+ 
+ #endif
+ 
+-- 
+1.7.2.2
+

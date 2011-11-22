@@ -346,7 +346,7 @@ HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_Type& 
     }
     else
     {
-        bcManageVector(rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 0., 1.0);
+        bcManageRhs(rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1., 0.0);
     }
 
     bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );

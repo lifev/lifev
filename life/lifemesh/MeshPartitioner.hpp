@@ -596,7 +596,6 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // final setup
     // ******************
     finalSetup();
-
 }
 
 template<typename MeshType>
@@ -1586,7 +1585,6 @@ void MeshPartitioner<MeshType>::execute()
 #ifdef HAVE_LIFEV_DEBUG
     Debug(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
 #endif
-
 
     doPartitionMesh();
 
