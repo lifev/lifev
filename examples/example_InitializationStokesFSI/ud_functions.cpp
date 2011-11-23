@@ -308,6 +308,14 @@ Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*
     return -29;  // (see paper by Liu, Dang, etc.. about the sourrounding tissue effect on arteries)
 }
 
+Real vinit(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+    if (i==2)
+        return 10;
+    else
+        return 0.;
+}
+
 
 Real hydro(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {

@@ -83,6 +83,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
     BCh_he->addBC("Edges", INOUTEDGE, Essential, Full, bcf,   3);
     BCh_he->addBC("Edges", INEDGE, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",  INLET,     Essential, Full, bcf,   3);
+    BCh_he->addBC("Base",  OUTLET,     Essential, Full, bcf,   3);
 
     if (_oper.data().method() == "monolithicGE")
     {
@@ -114,7 +115,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
 //       BCh_fluid->addBC("InFlow" , INLET,  Flux,   Normal, bcf);
 
     //uncomment  to use fluxes
-    BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
+    //BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
 
     return BCh_fluid;
 }
@@ -137,8 +138,9 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool
     BCFunctionBase out_press (FlowConditions::outPressure0);
     BCFunctionBase bcfw0 (w0);
 
+    BCFunctionBase in_vel   ( vinit );
 
-    //BCh_fluid->addBC("InFlow" , INLET,  Essential, Full, bcfw0, 3);
+    BCh_fluid->addBC("InFlow" , INLET,  EssentialVertices, Full, in_vel, 3);
     //BCh_fluid->addBC("InFlow" , INLET,  Natural, Normal, in_flow);
 //     if(!isOpen)
 //         BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, bcf, 3);
@@ -160,7 +162,6 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
     BCFunctionBase bcf(fZero);
 
     BCh_solid->addBC("Top",   RING, Essential, Full, bcf,  3);
-    BCh_solid->addBC("Base",  RING2, Essential, Full, bcf,  3);
 
     aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
     BCFunctionBase hyd(fZero);
