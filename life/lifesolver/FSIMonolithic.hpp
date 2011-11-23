@@ -413,8 +413,18 @@ public:
     */
     void exportSolidVelocity( vector_Type& solidVelocity )
     {   // Matteo
-        solidVelocity.subset( M_solidTimeAdvance->velocity(), M_offset );
+        solidVelocity = M_solidTimeAdvance->velocity();
         solidVelocity *= dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
+    }
+    //!Get the solid accelration 
+    /*!
+      fills an input vector with the solid displacement from the solution.
+      \param solidVelocity: input vector (output solid acceleration)
+    */
+    void exportSolidAcceleration( vector_Type& solidAcceleration )
+    {   // Paolo T.
+        solidAcceleration = M_solidTimeAdvance->accelerate();
+        solidAcceleration *= dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
     }
 
     //! Gets the fluid and pressure
