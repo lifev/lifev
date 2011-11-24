@@ -311,7 +311,8 @@ public:
      * @param updateSystemMatrix flag for the recomputation of the system matrix
      * @return the viscoelastic flow rate correction \f$\tilde{Q}\f$
      */
-    vector_Type viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep,
+    vector_Type viscoelasticFlowRateCorrection( const vector_Type& newArea, const vector_Type& newElasticFlowRate,
+                                                const vector_Type& oldViscoelasticFlowRate, const Real& timeStep,
                                                 OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix = true );
 
     //! CFL computation (correct for constant mesh)
