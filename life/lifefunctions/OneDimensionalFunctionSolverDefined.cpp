@@ -233,13 +233,19 @@ OneDimensionalFunctionSolverDefinedCompatibility::computeEigenValuesVectors()
 
 Real
 OneDimensionalFunctionSolverDefinedCompatibility::evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector,
-                                                    const container2D_Type& deltaEigenvector, const Real& timeStep )
+                                                               const container2D_Type& deltaEigenvector, const Real& timeStep )
 {
     Real cfl = computeCFL( eigenvalue, timeStep );
 
     container2D_Type U_interpolated;
-    U_interpolated[0] = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_solutionPtr)["A"])( M_bcInternalNode );
-    U_interpolated[1] = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_solutionPtr)["Q"])( M_bcInternalNode );
+    Real Qvisco_interpolated;
+    U_interpolated[0]   = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_solutionPtr)["A"])( M_bcInternalNode );
+    U_interpolated[1]   = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_solutionPtr)["Q"])( M_bcInternalNode );
+
+    if ( M_fluxPtr->physics()->data()->viscoelasticWall() )
+        Qvisco_interpolated = ( 1 - cfl ) * (*(*M_solutionPtr)["Q_visc"])(M_bcNode)  + cfl * (*(*M_solutionPtr)["Q_visc"])( M_bcInternalNode );
+    else
+        Qvisco_interpolated = 0;
 
     container2D_Type U;
 
@@ -255,10 +261,12 @@ OneDimensionalFunctionSolverDefinedCompatibility::evaluateRHS( const Real& eigen
     U0_interpolated[0] = ( 1 - cfl ) * M_fluxPtr->physics()->data()->area0(bcNodes[0]) + cfl * M_fluxPtr->physics()->data()->area0(bcNodes[1]);
     U0_interpolated[1] = 0;
 
-    U[0] = U_interpolated[0] - U0_interpolated[0] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl ) -
-                                                                 M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 0, bcNodes, cfl ) );
-    U[1] = U_interpolated[1] - U0_interpolated[1] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl ) -
-                                                                 M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 1, bcNodes, cfl ) );
+    U[0] = U_interpolated[0]
+         - U0_interpolated[0] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl ) -
+                                             M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 0, bcNodes, cfl ) );
+    U[1] = (U_interpolated[1] - Qvisco_interpolated)
+         - U0_interpolated[1] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl ) -
+                                             M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 1, bcNodes, cfl ) );
 
     U_interpolated[0] -= U0_interpolated[0];
     U_interpolated[1] -= U0_interpolated[1];
