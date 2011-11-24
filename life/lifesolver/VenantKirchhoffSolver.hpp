@@ -880,7 +880,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, co
 
   *M_rhs = *M_rhsNoBC;
 
-  bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->getdataTime()->time(), 1.0 );
+  bcManageRhs( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0, M_data->getdataTime()->time() );
   residual  = M_stiff * solution;
   //    res -= M_rhs;
 
