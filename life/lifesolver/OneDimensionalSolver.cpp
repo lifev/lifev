@@ -280,7 +280,10 @@ OneDimensionalSolver::updateRHS( const solution_Type& solution, const Real& time
 
     // rhs = mass * Un + residual
     *M_rhs[0]  = *M_residual[0] + ( *M_homogeneousMassMatrixPtr ) * *solution.find("A")->second;
-    *M_rhs[1]  = *M_residual[1] + ( *M_homogeneousMassMatrixPtr ) * ( *solution.find("Q")->second - *solution.find("Q_visc")->second );
+    *M_rhs[1]  = *M_residual[1] + ( *M_homogeneousMassMatrixPtr ) * *solution.find("Q")->second;
+
+    if ( M_physicsPtr->data()->viscoelasticWall() )
+        *M_rhs[1]  -= ( *M_homogeneousMassMatrixPtr ) * *solution.find("Q_visc")->second;
 }
 
 void
