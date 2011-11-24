@@ -55,9 +55,9 @@ type       = hdf5
 nRestart   = 0
 
 [./fluid]
-filename   = fluidImp
+filename   = fluidSeconda
 [../solid]
-filename   = solidImp
+filename   = solidSeconda
 [../]
 [../] # exporter
 
@@ -68,9 +68,9 @@ initSolFD = 00006
 restart_timestep = 0.004
 type       = hdf5
 [./fluid]
-filename   = fluidRestart
+filename   = fluidPrima
 [../solid]
-filename   = solidRestart
+filename   = solidPrima
 [../]
 
 [fluid]

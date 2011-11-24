@@ -29,10 +29,11 @@
  *  @brief File containing the Monolithic Test
  *
  *  @date 2009-04-09
- *  @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *  @author Paolo Tricerri <paolo.tricerri@epfl.ch>
  *
- *  @contributor Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @maintainer Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *  @contributor Paolo Tricerri <paolo.tricerri@epfl.ch>
+ *  @contributor Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  *
  * Monolithic problem. Features:
  * - fullMonolithic (CE):
@@ -287,11 +288,11 @@ public:
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         //LH.initParameters( *M_fsi->FSIOper(), "dataHM");
-        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->timeStep() );
+        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart  ); //+ M_data->dataFluid()->dataTime()->timeStep()
         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataSolid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->timeStep() );
+        M_data->dataSolid()->dataTime()->setInitialTime( M_Tstart); // + M_data->dataFluid()->dataTime()->timeStep() 
         M_data->dataSolid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataALE()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->timeStep() );
+        M_data->dataALE()->setInitialTime( M_Tstart ); //+ M_data->dataFluid()->dataTime()->timeStep() 
         M_data->dataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     }
 
@@ -398,6 +399,7 @@ public:
             catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
         }
+	/*
         if (M_data->method().compare("monolithicGI"))
         {
             M_fsi->FSIOper()->iterateMesh(M_fsi->displacement());
@@ -411,8 +413,9 @@ public:
             M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
             *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
             M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
-        }
+	    }*/
 
+             FC0.renewParameters( *M_fsi, 3 );
         std::cout << "Total computation time = "
                   << _overall_timer.elapsed() << "s" << "\n";
 
@@ -597,6 +600,9 @@ void Problem::restartFSI(std::string& restartType,  GetPot const& data_file)
   vectorPtr_Type fluidDisplacement      (new vector_Type(M_fsi->FSIOper()->meshMotion().getMap() ));
   vectorPtr_Type fluidDisplacementOld   (new vector_Type(M_fsi->FSIOper()->meshMotion().getMap() ));
 
+  vectorPtr_Type initialSolution        (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap()));
+  vectorPtr_Type temporarySol           (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap()));
+
   UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
 
   /*! These are the vectors wich will contain the loaded data*/
@@ -634,15 +640,16 @@ void Problem::restartFSI(std::string& restartType,  GetPot const& data_file)
   /*! initializing the mesh displacement (GCE case) */
   fluidDisplacementOld.reset(new vector_Type(*fluidDispPrev, Unique, Zero));
 
-
-
   velocityAndPressure.reset( new vector_Type(*pressure, Unique, Zero));
   fluidSolution->subset(*velocityAndPressure, velocityAndPressure->map(), UInt(0), (UInt)3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof());
+  initialSolution->subset(*velocityAndPressure, velocityAndPressure->map(), UInt(0), (UInt)3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof());
 
+ 
   vector_Type tmpVec(*fluidSolution);
   velocityAndPressure.reset( new vector_Type(*vel, Unique, Zero));
   tmpVec=*velocityAndPressure;//possibly an Import here
   *fluidSolution += tmpVec;
+  *initialSolution += tmpVec;
 
   std::vector<vectorPtr_Type> u0;
   u0.push_back(fluidSolution);
@@ -650,6 +657,10 @@ void Problem::restartFSI(std::string& restartType,  GetPot const& data_file)
   //Structure (setting of the pointers + rescaling)
   solidDisplacement.reset( new vector_Type(*solidDisp, Unique, Zero));
   *solidDisplacement *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
+
+  temporarySol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero)); 
+  temporarySol->subset(*solidDisplacement, solidDisplacement->map(), (UInt)0, offset);
+  *initialSolution += *temporarySol;
 
   solidVelocity.reset(new vector_Type(*solidVel, Unique, Zero));
   *solidVelocity *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
@@ -667,42 +678,31 @@ void Problem::restartFSI(std::string& restartType,  GetPot const& data_file)
   if (!M_data->method().compare("monolithicGI"))
     {
       fluidDisplacement.reset( new vector_Type(*fluidDisp, Unique, Zero));
+      temporarySol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero)); 
+      temporarySol->subset(*fluidDisp, fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
+      *initialSolution += *temporarySol;
     }
   else
     {
       *fluidDisplacement=*fluidDisplacementOld;
     }
   std::vector<vectorPtr_Type> df0;
-  df0.push_back(fluidDisplacement);
+  df0.push_back(fluidDisplacementOld);
 
-  //Initialize
+  //Initialize the timeAdvances Procedures
   M_fsi->initialize(u0,ds0,df0);
 
+  // Initialize the solution of the monolithic system
+  M_fsi->FSIOper()->setSolution(*initialSolution);
+
   std::cout << std::endl;
+  std::cout << "The norm inf of the solution for the fluid is              : " << M_fsi->displacement().normInf() << std::endl;
+  std::cout << "The norm 2 of the solution for the fluid is                : " << M_fsi->displacement().norm2() << std::endl;
   std::cout << "The norm of the Fluid solution for the fluid is            : " << fluidSolution->norm2() << std::endl;
   std::cout << "The norm of the Solid displacement for the fluid is        : " << solidDisplacement->norm2() << std::endl;
   std::cout << "The norm of the Solid velocity for the fluid is            : " << solidVelocity->norm2() << std::endl;
   std::cout << "The norm of the Solid acceleration for the fluid is        : " << solidAcceleration->norm2() << std::endl;
   std::cout << "The norm of the HarmonicExtension solution for the fluid is: " << fluidDisplacement->norm2() << std::endl;
-
-
-  /*
-  //Create an Exporter to try
-  filterPtr_Type exporterTry;
-  exporterTry.reset( new  hdf5Filter_Type( data_file, std::string("Try")) );
-
-  exporterTry->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
-
-  exporterTry->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "f-velocity",
-			    M_fsi->FSIOper()->uFESpacePtr(), velAndPressureStokes, UInt(0) );
-  exporterTry->addVariable( ExporterData<FSIOperator::mesh_Type>::ScalarField, "f-pressure",
-			    M_fsi->FSIOper()->pFESpacePtr(), velAndPressureStokes,
-			    UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()) );
-  exporterTry->postProcess( 0.0 );
-  
-  
-  std::cout << "Done." << std::endl;
-  */
 
 }
 
