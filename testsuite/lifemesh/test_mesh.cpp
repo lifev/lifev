@@ -174,7 +174,7 @@ int main(int argc, char** argv)
     setBoundaryPointsMarker(aMesh, ofile,cerr, true);
     cerr<<endl;
     dummyVect disp(3*aMesh.numPoints());
-    MeshUtility::MeshTransformer<mesh_Type > transformer(aMesh);
+    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::MarkerCommon > transformer(aMesh);
     transformer.moveMesh(disp,3);
     MeshUtility::MeshStatistics::meshSize sizes= MeshUtility::MeshStatistics::computeSize(aMesh);
     cerr<<"Hmin ="<< sizes.minH<<" Hmax="<<sizes.maxH<<std::endl;

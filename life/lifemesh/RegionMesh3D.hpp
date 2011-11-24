@@ -254,7 +254,7 @@ public:
     void printLtGMap(std::ostream & os);
 
     //! Return the handle to perform transormations on the mesh
-    inline MeshUtility::MeshTransformer<RegionMesh3D<GEOSHAPE, MC> > & meshTransformer();
+    inline MeshUtility::MeshTransformer<RegionMesh3D<GEOSHAPE, MC>, MC > & meshTransformer();
 
     /** @} */ // End of group Utilities
 
@@ -1469,7 +1469,7 @@ private:
     std::map<int, int>      M_globalToLocalFace;
     std::map<int, int>      M_globalToLocalVolume;
 
-    MeshUtility::MeshTransformer<RegionMesh3D<GEOSHAPE, MC> > M_meshTransformer;
+    MeshUtility::MeshTransformer<RegionMesh3D<GEOSHAPE, MC>, MC > M_meshTransformer;
 
 }; // End of class RegionMesh3D
 
@@ -3137,7 +3137,7 @@ getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& li
 
 
 template <typename GEOSHAPE, typename MC>
-inline MeshUtility::MeshTransformer<RegionMesh3D<GEOSHAPE, MC> > &
+inline MeshUtility::MeshTransformer<RegionMesh3D<GEOSHAPE, MC>, MC > &
 RegionMesh3D<GEOSHAPE, MC>::meshTransformer()
 {
     return this->M_meshTransformer;
