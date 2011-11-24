@@ -65,7 +65,7 @@ Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 Real p0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real hydrostatic(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-
+Real vinit(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 Real hydro(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
@@ -78,7 +78,6 @@ Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 Real uInterpolated(const Real& time, const Real& x, const Real& y, const Real& z, const ID& i);
 
 Real aortaPhisPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real vinit(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
 Real u2normal(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 

@@ -618,6 +618,13 @@ public:
     virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solidTimeAdvance->velocity(); }
 
 
+    //! Export the solid acceleration by copying it to an external vector
+    /*!
+     * @param solidAcc vector to be filled with the solid acceleration
+     */
+    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->accelerate(); }
+
+
     //! Getter for the right hand side
 
     //! Export the fluid velocity and pressure by copying it to an external vector

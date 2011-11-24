@@ -286,16 +286,6 @@ Real u1(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
     return 0.0;
 }
 
-Real vinit(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
-{
-    if (i==2)
-        return 10;
-    else
-        return 0.;
-}
-
-
-
 Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;
@@ -316,6 +306,14 @@ Real p0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return -29;  // (see paper by Liu, Dang, etc.. about the sourrounding tissue effect on arteries)
+}
+
+Real vinit(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+    if (i==2)
+        return 10;
+    else
+        return 0.;
 }
 
 
@@ -401,7 +399,7 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -100;
+    return -29.04;
 }
 
 Real squareSinusoidalFluxFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
