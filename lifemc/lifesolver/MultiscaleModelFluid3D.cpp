@@ -199,7 +199,7 @@ MultiscaleModelFluid3D::buildModel()
     else
     {
         M_alpha = M_bdf->bdfVelocity().coefficientFirstDerivative( 0 ) / M_data->dataTime()->timeStep();
-        *M_beta = M_bdf->bdfVelocity().extrapolation();
+        M_bdf->bdfVelocity().extrapolation(*M_beta);
 
         M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
         *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative();
@@ -225,7 +225,7 @@ MultiscaleModelFluid3D::updateModel()
 
     //Update problem coefficients
     M_alpha = M_bdf->bdfVelocity().coefficientFirstDerivative( 0 ) / M_data->dataTime()->timeStep();
-    *M_beta = M_bdf->bdfVelocity().extrapolation();
+    M_bdf->bdfVelocity().extrapolation(*M_beta);
 
     M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
     *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative();

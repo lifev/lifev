@@ -87,7 +87,7 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarz",   &MonolithicBlockMatrix::createAdditiveSchwarz ) ;
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarzRN", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) ;
 
-    FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
+    //FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
 //    FSIOperator_Type::solid_Type::StructureSolverFactory_Type::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
 }
 
@@ -238,7 +238,16 @@ MultiscaleModelFSI3D::solveModel()
     displayModelStatus( "Solve" );
 
     // Initialize all the quantities in the solver to time tn
-    M_FSIoperator->initialize( M_fluidVelocityAndPressure_tn, M_fluidDisplacement_tn, M_solidVelocity_tn, M_solidDisplacement_tn );
+    //    M_FSIoperator->initialize( M_fluidVelocityAndPressure_tn, M_fluidDisplacement_tn, M_solidVelocity_tn, M_solidDisplacement_tn );
+// #else
+     vectorPtr_Type fluidVelocityAndPressureWithoutExternalPressure_tn( new vector_Type( *M_fluidVelocityAndPressure_tn - *M_externalPressureVector ) );
+     std::vector<vectorPtr_Type> vel(1), fluidDisp(1), solidVel(1), solidDisp(1);
+     vel[0]=fluidVelocityAndPressureWithoutExternalPressure_tn;
+     fluidDisp[0]=M_fluidDisplacement_tn;
+     solidVel[0]=M_solidVelocity_tn;
+     solidDisp[0]=M_solidDisplacement_tn;
+     M_FSIoperator->initialize(vel, fluidDisp, solidDisp);
+// #endif
 
     if ( M_nonLinearRichardsonIteration != 0 )
     {
@@ -287,12 +296,16 @@ MultiscaleModelFSI3D::saveSolution()
     }
 
     if ( M_FSIoperator->isSolid() )
-    {
-        M_FSIoperator->exportSolidVelocity( *M_solidVelocity );
-        M_FSIoperator->exportSolidDisplacement( *M_solidDisplacement );
+// <<<<<<< Updated upstream
+//     {
+//         M_FSIoperator->exportSolidVelocity( *M_solidVelocity );
+//         M_FSIoperator->exportSolidDisplacement( *M_solidDisplacement );
 
-        M_exporterSolid->postProcess( M_data->dataSolid()->getdataTime()->time() );
-    }
+//         M_exporterSolid->postProcess( M_data->dataSolid()->getdataTime()->time() );
+//     }
+// =======
+        M_exporterSolid->postProcess( M_data->dataSolid()->dataTime()->time() );
+//>>>>>>> Stashed changes
 
 #ifdef HAVE_HDF5
     if ( M_data->dataFluid()->dataTime()->isLastTimeStep() )
@@ -317,7 +330,7 @@ MultiscaleModelFSI3D::showMe()
 
         std::cout << "Velocity FE order   = " << M_FSIoperator->dataFluid()->uOrder() << std::endl
                   << "Pressure FE order   = " << M_FSIoperator->dataFluid()->pOrder() << std::endl
-                  << "Structure FE order  = " << M_FSIoperator->dataSolid()->getOrder() << std::endl<< std::endl;
+                  << "Structure FE order  = " << M_FSIoperator->dataSolid()->order() << std::endl<< std::endl;
 
         std::cout << "Velocity DOF        = " << 3 * M_FSIoperator->uFESpace().dof().numTotalDof() << std::endl
                   << "Pressure DOF        = " << M_FSIoperator->pFESpace().dof().numTotalDof() << std::endl
@@ -492,14 +505,132 @@ MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
     if ( !dataFile.checkVariable( "solid/physics/material_flag" ) )
         materialFlag = 1;
     else
-        materialFlag = dataFile( "solid/physics/material_flag", 1 );
+// <<<<<<< Updated upstream
+//         materialFlag = dataFile( "solid/physics/material_flag", 1 );
 
-    if ( !dataFile.checkVariable( "solid/physics/density" ) )
-        M_data->dataSolid()->setDensity( M_globalData->structureDensity() );
-    if ( !dataFile.checkVariable( "solid/physics/poisson" ) )
-        M_data->dataSolid()->setPoisson( M_globalData->structurePoissonCoefficient(), materialFlag );
-    if ( !dataFile.checkVariable( "solid/physics/young" ) )
-        M_data->dataSolid()->setYoung( M_globalData->structureYoungModulus(), materialFlag );
+//     if ( !dataFile.checkVariable( "solid/physics/density" ) )
+//         M_data->dataSolid()->setDensity( M_globalData->structureDensity() );
+//     if ( !dataFile.checkVariable( "solid/physics/poisson" ) )
+//         M_data->dataSolid()->setPoisson( M_globalData->structurePoissonCoefficient(), materialFlag );
+//     if ( !dataFile.checkVariable( "solid/physics/young" ) )
+//         M_data->dataSolid()->setYoung( M_globalData->structureYoungModulus(), materialFlag );
+// =======
+        for ( UInt i( 0 ) ; i < dataFile.vector_variable_size( "solid/physics/material_flag" ) ; ++i )
+            materialFlags.push_back( dataFile( "solid/physics/material_flag", 1, i ) );
+
+    for ( std::vector< UInt >::const_iterator i = materialFlags.begin(); i != materialFlags.end() ; ++i )
+    {
+        if ( !dataFile.checkVariable( "solid/physics/poisson" ) )
+            M_data->dataSolid()->setPoisson( M_globalData->solidPoissonCoefficient(), *i );
+        if ( !dataFile.checkVariable( "solid/physics/young" ) )
+            M_data->dataSolid()->setYoung( M_globalData->solidYoungModulus(), *i );
+    }
+}
+
+void
+MultiscaleModelFSI3D::initializeSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8140 ) << "MultiscaleModelFSI3D::initializeSolution() \n";
+#endif
+
+    // Initialize the external pressure vector
+    vector_Type fluidPressure( M_FSIoperator->pFESpace().mapPtr(), Unique );
+    fluidPressure = M_data->dataSolid()->externalPressure();
+
+    M_externalPressureVector.reset( new vector_Type( *M_fluidVelocityAndPressure, Unique, Zero ) );
+    M_externalPressureVector->subset( fluidPressure, fluidPressure.map(), static_cast <UInt> ( 0 ), static_cast <UInt>( 3 * M_FSIoperator->uFESpace().dof().numTotalDof() ) );
+
+#ifndef FSI_WITH_EXTERNALPRESSURE
+    // Initialize the external pressure scalar
+    M_externalPressureScalar = M_data->dataSolid()->externalPressure();
+    M_data->dataSolid()->setExternalPressure( 0 );
+    updateBC();
+#endif
+
+    if ( multiscaleProblemStep > 0 )
+    {
+        M_importerFluid->setMeshProcId( M_FSIoperator->uFESpace().mesh(), M_FSIoperator->uFESpace().map().comm().MyPID() );
+        M_importerSolid->setMeshProcId( M_FSIoperator->dFESpace().mesh(), M_FSIoperator->dFESpace().map().comm().MyPID() );
+
+        M_importerFluid->addVariable( IOData_Type::VectorField, "Displacement (fluid)", M_FSIoperator->mmFESpacePtr(), M_fluidDisplacement, static_cast <UInt> (0) );
+        M_importerFluid->addVariable( IOData_Type::VectorField, "Velocity (fluid)",     M_FSIoperator->uFESpacePtr(),  M_fluidVelocityAndPressure, static_cast <UInt> (0) );
+        M_importerFluid->addVariable( IOData_Type::ScalarField, "Pressure (fluid)",     M_FSIoperator->pFESpacePtr(),  M_fluidVelocityAndPressure, static_cast <UInt> (3 * M_FSIoperator->uFESpace().dof().numTotalDof() ) );
+
+        M_importerSolid->addVariable( IOData_Type::VectorField, "Displacement (solid)", M_FSIoperator->dFESpacePtr(),  M_solidDisplacement, static_cast <UInt> (0) );
+        M_importerSolid->addVariable( IOData_Type::VectorField, "Velocity (solid)",     M_FSIoperator->dFESpacePtr(),  M_solidVelocity,     static_cast <UInt> (0) );
+
+        // Import
+        M_exporterFluid->setTimeIndex( M_importerFluid->importFromTime( M_data->dataFluid()->dataTime()->initialTime() ) + 1 );
+        M_exporterSolid->setTimeIndex( M_importerSolid->importFromTime( M_data->dataSolid()->dataTime()->initialTime() ) + 1 );
+
+#ifdef HAVE_HDF5
+        if ( M_FSIoperator->isFluid() )
+            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importerFluid ) )->closeFile();
+        if ( M_FSIoperator->isSolid() )
+            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importerSolid ) )->closeFile();
+#endif
+
+        // Assemble the Monolithic solution
+        vector_Type solution( *M_FSIoperator->couplingVariableMap() );
+
+        // Add fluid
+        vector_Type temporaryVector( *M_fluidVelocityAndPressure, Unique, Zero );
+        solution = temporaryVector;
+
+        // Add solid
+        UInt offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->offset();
+
+        temporaryVector = 0;
+        temporaryVector.subset( *M_solidDisplacement, M_solidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
+        temporaryVector /= M_FSIoperator->solid().rescaleFactor() * M_data->dataFluid()->dataTime()->timeStep();
+
+        solution += temporaryVector;
+
+        // Add harmonic extension
+        if ( !M_data->method().compare("monolithicGI") )
+        {
+            offset = boost::dynamic_pointer_cast< FSIMonolithicGI > ( M_FSIoperator )->mapWithoutMesh().map( Unique )->NumGlobalElements();
+
+            temporaryVector = 0;
+            temporaryVector.subset( *M_fluidDisplacement, M_fluidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
+
+            solution += temporaryVector;
+        }
+
+        *M_fluidVelocityAndPressure = solution;
+    }
+    else
+    {
+        // Initialize solution
+        *M_fluidVelocityAndPressure = *M_externalPressureVector;
+        *M_fluidDisplacement        = 0.0;
+        *M_solidVelocity            = 0.0;
+        *M_solidDisplacement        = 0.0;
+    }
+
+    // Initialize solution at time tn
+    M_fluidVelocityAndPressure_tn.reset( new vector_Type( *M_fluidVelocityAndPressure ) );
+    M_fluidDisplacement_tn.reset( new vector_Type( *M_fluidDisplacement ) );
+    M_solidVelocity_tn.reset( new vector_Type( *M_solidVelocity ) );
+    M_solidDisplacement_tn.reset( new vector_Type( *M_solidDisplacement ) );
+
+    vectorPtr_Type fluidVelocityAndPressureWithoutExternalPressure_tn( new vector_Type( *M_fluidVelocityAndPressure_tn - *M_externalPressureVector ) );
+    std::vector<vectorPtr_Type> vel(1), fluidDisp(1), solidDisp(1);
+    fluidDisp[0]=M_fluidDisplacement_tn;
+    solidDisp[0]=M_solidDisplacement_tn;
+    M_FSIoperator->initialize(vel, fluidDisp, solidDisp);
+
+    // Initialize all the quantities in the solver to time tn
+#ifdef FSI_WITH_EXTERNALPRESSURE
+    vel[0]=fluidVelocityAndPressure_tn;
+    M_FSIoperator->initialize( vel, fluidDisp, solidDisp );
+    //M_FSIoperator->initialize( M_fluidVelocityAndPressure_tn, M_fluidDisplacement_tn, M_solidVelocity_tn, M_solidDisplacement_tn );
+#else
+    vel[0]=fluidVelocityAndPressureWithoutExternalPressure_tn;
+    M_FSIoperator->initialize( vel, fluidDisp, solidDisp );
+#endif
 }
 
 void
