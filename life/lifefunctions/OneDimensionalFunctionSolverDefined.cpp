@@ -242,7 +242,8 @@ OneDimensionalFunctionSolverDefinedCompatibility::evaluateRHS( const Real& eigen
     U_interpolated[0]   = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_solutionPtr)["A"])( M_bcInternalNode );
     U_interpolated[1]   = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_solutionPtr)["Q"])( M_bcInternalNode );
 
-    if ( M_fluxPtr->physics()->data()->viscoelasticWall() )
+    // The second condition detects if there is a viscoelastic flow on the bondary.
+    if ( M_fluxPtr->physics()->data()->viscoelasticWall() && (*(*M_solutionPtr)["Q_visc"])(M_bcNode) > 1e-10 )
         Qvisco_interpolated = ( 1 - cfl ) * (*(*M_solutionPtr)["Q_visc"])(M_bcNode)  + cfl * (*(*M_solutionPtr)["Q_visc"])( M_bcInternalNode );
     else
         Qvisco_interpolated = 0;
@@ -264,7 +265,7 @@ OneDimensionalFunctionSolverDefinedCompatibility::evaluateRHS( const Real& eigen
     U[0] = U_interpolated[0]
          - U0_interpolated[0] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl ) -
                                              M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 0, bcNodes, cfl ) );
-    U[1] = (U_interpolated[1] - Qvisco_interpolated)
+    U[1] = (U_interpolated[1] - Qvisco_interpolated) // We consider just the elastic component
          - U0_interpolated[1] - timeStep * ( M_sourcePtr->interpolatedNonConservativeSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl ) -
                                              M_sourcePtr->interpolatedNonConservativeSource( U0_interpolated[0], U0_interpolated[1], 1, bcNodes, cfl ) );
 
