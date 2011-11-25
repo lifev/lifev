@@ -48,7 +48,7 @@ namespace MatrixBlockUtils {
 */
 template< typename DataType>
 void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                 MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+                 const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
@@ -140,7 +140,7 @@ void createZeroBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock )
   @param diagonalValue Value to be inserted in the diagonal
 */
 template< typename DataType >
-void createScalarBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock, const DataType& diagonalValue )
+void createScalarBlock ( const MatrixBlockMonolithicEpetraView<DataType>& destBlock, const DataType& diagonalValue )
 {
     // SQUARE TEST
     // BLOCK PTR TEST
@@ -176,7 +176,7 @@ void createScalarBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock, c
   @param destBlock Block where the data will be stored
 */
 template< typename DataType >
-void createIdentityBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void createIdentityBlock ( const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     createScalarBlock(destBlock,1.0);
 }
@@ -188,7 +188,7 @@ void createIdentityBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock 
 */
 template< typename DataType >
 void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                       MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+                       const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -256,7 +256,7 @@ void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock
 */
 template< typename DataType >
 void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                          MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+                          const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -325,7 +325,7 @@ void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBl
 */
 template< typename DataType >
 void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                                  MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+                                  const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -394,7 +394,7 @@ void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
 */
 template< typename DataType >
 void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                                  MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+                                  const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -464,7 +464,7 @@ void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
 */
 template< typename DataType >
 void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                         MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+                         const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -530,7 +530,7 @@ void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlo
 */
 template< typename DataType >
 void createInvLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                            MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+                            const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST

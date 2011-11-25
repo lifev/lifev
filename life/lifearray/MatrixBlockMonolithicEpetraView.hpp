@@ -98,7 +98,7 @@ public:
     void addToCoefficients( UInt const numRows, UInt const numColumns,
                             std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
                             DataType* const* const localValues,
-                            Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
+                            Int format = Epetra_FECrsMatrix::COLUMN_MAJOR ) const;
     //@}
 
     //! @name  Set Methods
@@ -221,7 +221,7 @@ MatrixBlockMonolithicEpetraView<DataType>::
 addToCoefficients( UInt const numRows, UInt const numColumns,
                             std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
                             DataType* const* const localValues,
-                            Int format)
+                            Int format) const
 {
 	std::vector<Int> rowIndices(blockRowIndices);
     std::vector<Int> columnIndices(blockColumnIndices);
