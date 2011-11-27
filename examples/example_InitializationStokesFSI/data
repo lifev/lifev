@@ -132,7 +132,7 @@ poisson   = 0.45
 initialtime		= 0.004
 endtime			= 0.008
 timestep		= 0.001
-BDF_order		= 2
+BDF_order		= 1
 
 [../space_discretization]
 mesh_dir  = ./Mesh/ #test_tubes/  # the directory where the mesh file is
