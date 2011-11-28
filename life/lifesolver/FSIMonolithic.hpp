@@ -414,7 +414,7 @@ public:
     void exportSolidVelocity( vector_Type& solidVelocity )
     {   // Matteo
         solidVelocity = M_solidTimeAdvance->velocity();
-        solidVelocity *= dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
+        solidVelocity *= dataSolid()->dataTime()->timeStep() * M_solid->rescaleFactor();
     }
     //!Get the solid accelration 
     /*!
@@ -424,7 +424,7 @@ public:
     void exportSolidAcceleration( vector_Type& solidAcceleration )
     {   // Paolo T.
         solidAcceleration = M_solidTimeAdvance->accelerate();
-        solidAcceleration *= dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
+        solidAcceleration *= dataSolid()->dataTime()->timeStep() * M_solid->rescaleFactor();
     }
 
     //! Gets the fluid and pressure

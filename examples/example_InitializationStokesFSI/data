@@ -55,9 +55,9 @@ type       = hdf5
 nRestart   = 0
 
 [./fluid]
-filename   = fluidSeconda
+filename   = fluidseconda
 [../solid]
-filename   = solidSeconda
+filename   = solidseconda
 [../]
 [../] # exporter
 
@@ -68,9 +68,9 @@ initSolFD = 00006
 restart_timestep = 0.004
 type       = hdf5
 [./fluid]
-filename   = fluidPrima
+filename   = fluidprima
 [../solid]
-filename   = solidPrima
+filename   = solidprima
 [../]
 
 [fluid]
@@ -129,10 +129,13 @@ young     = 4.0E6
 poisson   = 0.45
 
 [../time_discretization]
+method                  = Newmark
 initialtime		= 0.004
 endtime			= 0.008
 timestep		= 0.001
-BDF_order		= 1
+BDF_order		= 2
+theta                   = 0.35
+zeta                    = 0.75
 
 [../space_discretization]
 mesh_dir  = ./Mesh/ #test_tubes/  # the directory where the mesh file is
