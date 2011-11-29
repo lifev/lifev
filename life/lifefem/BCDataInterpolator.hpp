@@ -59,11 +59,11 @@ namespace LifeV {
 //! BCDataInterpolator - Class for interpolating boundary functions from scattered data
 /*!
   @author Toni Lassila
+  @see Radial basis function interpolation \cite Buhmann2004
 
   Implements Radial Basis Function (RBF) interpolation of pointwise scalar or vectorial functions defined
   on a set of scattered interpolation points. Currently implements a variety of different basis functions
-  for interpolation. Temporal interpolation done with trigonometric polynomials. For mathematical details
-  see M.D. Buhmann. Radial basis functions: theory and implementations, Cambridge University Press, 2004.
+  for interpolation. Temporal interpolation done with trigonometric polynomials.
 
   Inherits @c BCFunctionBase to facilitate use of interpolated data as boundary condition.
 
@@ -72,23 +72,23 @@ namespace LifeV {
   these time instances is interpolated using Fourier interpolation, i.e. the interpolant is a trigonometric
   polynomial of order 2n and periodic with period M_timePeriod.
 
-  The format of the data file passed to readData() is the following:
-  <quote>
-     # HEADER LINE FOR PARAMETERS
-     nof_data_sites nof_data_dimensions t_interval t_period filtering_level
-     # HEADER LINE FOR DATA SITES
-     data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord
-     ...
-     data_site_n_x_coord data_site_n_y_coord data_site_n_z_coord
-     # HEADER LINE FOR DATA VALUES
-     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
-     ...
-     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
-     # HEADER LINE FOR DATA VALUES
-     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord
-     ...
-     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord
-  </quote>
+  The format of the data file passed to readData() is the following: <BR>
+ <BR>
+     # HEADER LINE FOR PARAMETERS <BR>
+     nof_data_sites nof_data_dimensions t_interval t_period filtering_level <BR>
+     # HEADER LINE FOR DATA SITES <BR>
+     data_site_1_x_coord data_site_1_y_coord data_site_1_z_coord <BR>
+     ... <BR>
+     data_site_n_x_coord data_site_n_y_coord data_site_n_z_coord <BR>
+     # HEADER LINE FOR DATA VALUES <BR>
+     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord <BR>
+     ... <BR>
+     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord <BR>
+     # HEADER LINE FOR DATA VALUES <BR>
+     data_value_1_x_coord data_value_1_y_coord data_value_1_z_coord <BR>
+     ... <BR>
+     data_value_n_x_coord data_value_n_y_coord data_value_n_z_coord <BR>
+  <BR>
   The variable nof_data_dimensions has to equal 1 or 3, depending on whether scalar or vectorial data
   is being interpolated. The variable nof_data_sites has to equal the number of rows passed in
   both the section involving the data_sites and the data values. The data value section has to be
