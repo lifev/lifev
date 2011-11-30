@@ -388,7 +388,6 @@ public:
             std::cout << "solution norm " << iter << " : "
                       << M_fsi->displacement().norm2() << "\n";
 
-
             std::cout << "solution norm " << iter << " : "
                       << M_solidDisp->norm2() << "\n";
 
@@ -406,8 +405,18 @@ public:
 
             std::cout << "VelAndPressure norm " << iter << " : "
                       << M_velAndPressure->norm2() << "\n";
+
+            std::cout << "VelAndPressure norm " << iter << " : "
+                      << M_velAndPressure->size() << "\n";
 	    
 
+	    if ( M_data->dataFluid()->dataTime()->time() == 0.004 )
+	      {
+		std::string sol="solutionGlobal";
+		M_fsi->FSIOper()->solution().spy(sol);
+		std::string vAndP="velAndP";
+		M_velAndPressure->spy(vAndP);
+	      }
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
             try
             {
@@ -665,6 +674,9 @@ void Problem::restartFSI(std::string& restartType,  GetPot const& data_file)
       fluidSol.reset( new vector_Type(*vel, Unique, Zero));
       tmpVec=*fluidSol;
       *initFluid += tmpVec;
+
+      std::string firstFl="firstFluid";
+      initFluid->spy(firstFl);
 
       std::cout << "Norm of first Fluid sol: "<< initFluid->norm2() << std::endl;
       *temporarySol = *initFluid;
