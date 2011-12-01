@@ -270,20 +270,53 @@ public:
 	//M_fsi->FSIOper()->dFESpacePtr(), M_WS, UInt(0) );
 
 
+        dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->mergeBCHandlers();
+
 	/*Initialization*/
 
         // load using ensight/hdf5
-        std::string restartType(data_file("importer/restartType","newSimulation"));
-	std::cout << "The load state is: "<< restartType << std::endl;
+        std::string initializationType(data_file("importer/initType","newSimulation"));
+	std::cout << "The load state is: "<< initializationType << std::endl;
+	
+	if (!initializationType.compare("stokes"))
+	  {
 
-	if (!restartType.compare("Stokes"))
-	  initializeStokes(restartType, data_file);
-        else if (!restartType.compare("restartFSI"))
-	  restartFSI(restartType,data_file);
+	    vectorPtr_Type un (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
+	    *un *= 0.0;
+
+	    vectorPtr_Type initVec (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
+	    *initVec *= 0.0;
+	    //This method takes the stokesSolution, which will be updated and the FSISolver
+	    initializeStokes(un, data_file, M_fsi, M_data);
+
+	    //loading the stencil for the fluid (Pay Attention that this works with BDF 1)
+	    std::vector<vectorPtr_Type> fluidStencil;
+	    std::vector<vectorPtr_Type> solidStencil;
+	    std::vector<vectorPtr_Type> ALEStencil;
+	    for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->fluidTimeAdvance()->size(); iterInit++ )
+	      {
+		fluidStencil.push_back(un);
+	      }
+	    for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->solidTimeAdvance()->size(); iterInit++ )
+	      {
+		solidStencil.push_back(initVec);
+	      }
+	    for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->ALETimeAdvance()->size(); iterInit++ )
+	      {
+		ALEStencil.push_back(initVec);
+	      }
+
+	    M_fsi->initialize(fluidStencil,solidStencil,ALEStencil );
+	    //loading the initialSolution for monolithic
+	    M_fsi->FSIOper()->setSolution(*un);
+	    /*std::cout << "back in the main" << std::endl;
+	    int n;
+	    std::cin >> n;*/
+	    std::cout << "norm of un" << un->norm2() << std::endl;
+	    std::cout << "norm of gotten solution" << M_fsi->FSIOper()->solutionPtr()->norm2() << std::endl;
+	  }
 	else
 	  M_fsi->initialize();
-
-        dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->mergeBCHandlers();
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
 
@@ -325,30 +358,7 @@ public:
 
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->dataTime()->updateTime(), ++iter)
         {
-	  //	  LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
-	  //if ( false && valveIsOpen)
-          //   {
-          //       if ( iter == 3 /*flux < -100*/)
-          //       {
-          //           valveIsOpen=false;
-          //           M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
-                     //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Essential, LifeV::Full, (const LifeV::UInt) 3);
-          //       }
-          //   }
-          //   // close the valve
-          //   else
-          //   {
-          //       if (false && M_fsi->FSIOper()->fluid().pressure(2, M_fsi->displacement()) < LifeV::LumpedHeart::M_pressure )
-	  //                 {
-          //           valveIsOpen=true;
-          //           M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
-          //           //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Natural, LifeV::Full, 3);
-          //       }
-          //   }
-
-          //   int flag =2;
              FC0.renewParameters( *M_fsi, 3 );
-	     //   LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->time(), flux );
 
             //                 FC0.renewParameters( *M_fsi, 6 );
             //                 FC1.renewParameters( *M_fsi, 3, 4 );
@@ -453,8 +463,7 @@ public:
 
 private:
 
-    void initializeStokes(std::string& restartType,  GetPot const& data_file);
-    void restartFSI(std::string& restartType,  GetPot const& data_file);
+  void initializeStokes(vectorPtr_Type& un, GetPot const& data_file, fsi_solver_ptr  fsiSolver, dataPtr_Type fsiData);
 
     void checkCEResult(const LifeV::Real& time);
     void checkGCEResult(const LifeV::Real& time);
@@ -571,311 +580,137 @@ int main(int argc, char** argv)
 }
 
 
-void Problem::restartFSI(std::string& restartType,  GetPot const& data_file)
+
+void Problem::initializeStokes(vectorPtr_Type& un,  GetPot const& data_file, fsi_solver_ptr fsiSolver, dataPtr_Type fsiData)
 {
 
+  //This is a really ugly way to implement this.
   using namespace LifeV;
 
-  typedef FSIOperator::mesh_Type        mesh_Type;
+  typedef RegionMesh3D<LinearTetra>                        Mesh;
 
-  //Creating the pointer to the filter
-  std::string const importerType =  data_file( "importer/type", "ensight");
-  std::string const fluidName     = data_file( "importer/fluid/filename", "fluid");
-  std::string const solidName    =  data_file( "importer/solid/filename", "solid");
+  typedef OseenSolver< RegionMesh3D<LinearTetra> >         fluid_Type;
+  typedef fluid_Type::vector_Type                          vector_Type;
+  typedef boost::shared_ptr<vector_Type>                   vectorPtr_Type;
+  typedef FESpace< Mesh, MapEpetra >                       feSpace_Type;
+  typedef boost::shared_ptr<feSpace_Type>                  feSpacePtr_Type;
+  typedef boost::shared_ptr<Epetra_Comm>                   commPtr_Type; 
+  
+  commPtr_Type comunicator=fsiSolver->FSIOper()->fluid().comm();
 
-  std::string const loadInitSol      = data_file( "importer/initSol", "00000");
-  std::string const loadInitSolFD    = data_file("importer/initSolFD","-1");
-  std::string iterationString; 
+  fsiSolver->FSIOper()->displayer().leaderPrint( " The FSI simulation is going to be initialized by the Stokes solution of the fluid domain \n" );
 
-  M_Tstart=data_file( "fluid/time_discretization/initialtime", 0.);
+  int numLM = 0; //this is the number of fluxes
+  
+  MeshData meshData;
+  meshData.setup(data_file, "fluid/space_discretization");
 
-  if(!loadInitSolFD.compare("-1"))
-      std::cout << "You have to set the iteration of the previous fluid displacement"<< std::endl;
+  boost::shared_ptr<Mesh> fullMeshPtr(new Mesh);
+  readMesh(*fullMeshPtr, meshData);
 
-  std::cout << "The file for fluid is    : " << fluidName << std::endl;
-  std::cout << "The file for solid is    : " << solidName << std::endl;
-  std::cout << "The importerType is      : " << importerType << std::endl;
-  std::cout << "The iteration is         : " << loadInitSol << std::endl;
-  std::cout << "Starting time            : " << M_Tstart << std::endl;
+  MeshPartitioner< Mesh >   meshPart(fullMeshPtr, comunicator);
+
+  std::string uOrder =  data_file( "fluid/space_discretization/vel_order", "P1");
+  std::string pOrder =  data_file( "fluid/space_discretization/press_order", "P1");
+  //Building the functional spaces
+  feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart,uOrder,3,comunicator) );
+  feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart,pOrder,1,comunicator) );
+
+  fsiSolver->FSIOper()->displayer().leaderPrint( " Calling the fluid Solver constructor \n" );
+  fluid_Type stokes(fsiData->dataFluid(),*uFESpacePtr,*pFESpacePtr,comunicator, numLM);
+
+  //Boundary conditions for the fluid problem
+  BCHandler bcH;
+  BCFunctionBase uZero( fZero );
+  BCFunctionBase prInlet( pressure );
+
+  bcH.addBC( "Inlet",    2,    Natural,  Full,  prInlet, 3 );
+  bcH.addBC( "Ringin",   20,   Essential,Full,  uZero, 3 );
+  bcH.addBC( "Ringout",  30,   Essential,Full,  uZero, 3 );
+  bcH.addBC( "Outlet",   3,    Natural,  Full,  uZero, 3 );
+  bcH.addBC( "Wall",     1,    Essential,Full,  uZero, 3 );
+
+  UInt totalVelDof   = uFESpacePtr->map().map(Unique)->NumGlobalElements();
+  UInt totalPressDof = pFESpacePtr->map().map(Unique)->NumGlobalElements();
+
+  bcH.setOffset("Inlet", totalVelDof + totalPressDof);
+
+  MapEpetra fullMap(stokes.getMap());
+
+  stokes.setUp(data_file);
+  stokes.buildSystem();
+
+  vector_Type beta( fullMap ); 
+  vector_Type rhs ( fullMap );
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  beta *= 0.;
+  rhs  *= 0.;
+
+  LifeChrono chrono;
+  chrono.start();
+
+  stokes.updateSystem(0, beta, rhs );
+  stokes.iterate( bcH );
+
+  MPI_Barrier(MPI_COMM_WORLD);
+
+  chrono.stop();
+
+  std::cout << "Norm of the Stokes Solution: "<< stokes.solution()->norm2() << std::endl;
+  un->subset(*stokes.solution(), stokes.solution()->map(), UInt(0), UInt(0));
+
+  std::string vector="un";
+  un->spy(vector);
+
+  fsiSolver->FSIOper()->displayer().leaderPrint( "Total computational time of Stokes solution  =  ", chrono.diff());
+  fsiSolver->FSIOper()->displayer().leaderPrint( "\n" );
+  /*
+  std::cout << "I am here" << std::endl;
+  int n;
+  std::cin >> n;
+  */
+
+  std::string exporterType =  data_file( "exporter/type", "ensight" );
+  std::string fluidName    =  data_file( "exporter/fluid/filename", "fluid" );
+
+  fluidName +="Initialization"; 
+
+  filterPtr_Type exportInitialize;
 
 #ifdef HAVE_HDF5
-  if (importerType.compare("hdf5") == 0)
+  if (exporterType.compare("hdf5") == 0)
     {
-      M_importerFluid.reset( new  hdf5Filter_Type( data_file, fluidName) );
-      M_importerSolid.reset( new  hdf5Filter_Type( data_file, solidName) );
+      exportInitialize.reset( new  hdf5Filter_Type( data_file, fluidName) );
     }
   else
 #endif
     {
-      if (importerType.compare("none") == 0)
+      if (exporterType.compare("none") == 0)
 	{
-	  M_importerFluid.reset( new ExporterEmpty<mesh_Type > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), "fluid", M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
-	  M_importerSolid.reset( new ExporterEmpty<mesh_Type > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), "solid", M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
+	  exportInitialize.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( data_file, uFESpacePtr->mesh(), fluidName, uFESpacePtr->map().comm().MyPID()) );
 	}
       else
 	{
-	  M_importerFluid.reset( new  ensightFilter_Type( data_file, fluidName) );
-	  M_importerSolid.reset( new  ensightFilter_Type ( data_file, solidName) );
+	  exportInitialize.reset( new  ensightFilter_Type( data_file, fluidName) );	 
 	}
     }
-   
-  M_importerFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
-  M_importerSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
+    vectorPtr_Type velAndPressure ( new vector_Type(*stokes.solution(), exportInitialize->mapType() ) );
+    velAndPressure.reset( new vector_Type( stokes.getMap(), exportInitialize->mapType() ));
 
-  //Each of the vectors of the stencils has the dimension of the big vector
-  //Performing a cycle of the size of the timeAdvance classes for each problem
-  //The size of TimeAdvanceClass depends on the order of the BDF (data file)
+    exportInitialize->setMeshProcId(uFESpacePtr->mesh(), uFESpacePtr->map().comm().MyPID());
 
-  //It should work just initializing the timeAdvance classes
-  //Three stencils are needed (Fluid-Structure-Geometric)
-  
-  std::vector<vectorPtr_Type> solidStencil;
-  std::vector<vectorPtr_Type> fluidStencil;
-  std::vector<vectorPtr_Type> ALEStencil;
-  
-  vectorPtr_Type fluidSol         (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique));
-  vectorPtr_Type initFluid         (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-  vectorPtr_Type HarmonicSol      (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-  vectorPtr_Type structureSol      (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-  vectorPtr_Type temporarySol     (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-  vectorPtr_Type un               (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap()));
+    exportInitialize->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "Stokes-velocity",
+				   uFESpacePtr, velAndPressure, UInt(0) );
+    exportInitialize->addVariable( ExporterData<FSIOperator::mesh_Type>::ScalarField, "Stokes-pressure",
+				   pFESpacePtr, velAndPressure,
+				   UInt(3*uFESpacePtr->dof().numTotalDof()) );
 
-  *un *= 0.0;
-
-  UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
-
-    iterationString = loadInitSol;
-    std::cout << "Fluid size TimeAdvance:" << M_fsi->FSIOper()->fluidTimeAdvance()->size() << std::endl;
-    for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->fluidTimeAdvance()->size(); iterInit++ )
-    {
-
-        /*!
-          definition of the vector to fill with the initialization.
-        */
-      temporarySol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-      fluidSol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique));
-      initFluid.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-
-      vectorPtr_Type vel           (new vector_Type(M_fsi->FSIOper()->uFESpace().map(), M_importerFluid->mapType()));
-      vectorPtr_Type pressure      (new vector_Type(M_fsi->FSIOper()->pFESpace().map(), M_importerFluid->mapType()));
-	
-      *vel *= 0.0;
-      *pressure *= 0.0;
-
-      LifeV::ExporterData<mesh_Type> initSolFluidVel   (LifeV::ExporterData<mesh_Type>::VectorField, std::string("f-velocity."+iterationString), M_fsi->FSIOper()->uFESpacePtr(), vel, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-      LifeV::ExporterData<mesh_Type> initSolFluidPress (LifeV::ExporterData<mesh_Type>::ScalarField, std::string("f-pressure."+iterationString), M_fsi->FSIOper()->pFESpacePtr(), pressure, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-
-      /*!load of the solutions*/
-      M_importerFluid->readVariable(initSolFluidVel);
-      M_importerFluid->readVariable(initSolFluidPress);
-
-      fluidSol.reset( new vector_Type(*pressure, Unique, Zero));
-      initFluid->subset(*fluidSol, fluidSol->map(), UInt(0), (UInt)3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof());
-      vector_Type tmpVec(*initFluid);
-      //temporarySol->subset(*fluidSol, fluidSol->map(), UInt(0), (UInt)3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof());
-      fluidSol.reset( new vector_Type(*vel, Unique, Zero));
-      tmpVec=*fluidSol;
-      *initFluid += tmpVec;
-
-      std::string firstFl="firstFluid";
-      initFluid->spy(firstFl);
-
-      std::cout << "Norm of first Fluid sol: "<< initFluid->norm2() << std::endl;
-      *temporarySol = *initFluid;
-
-      if(!iterInit)
-	{
-	  *un += *temporarySol;
-        }
-      
-      fluidStencil.push_back(temporarySol);
-
-      //Updating string name
-      int iterations = std::atoi(iterationString.c_str());
-      iterations--;
-
-      std::ostringstream iter;
-      iter.fill( '0' );
-      iter << std::setw(5) << ( iterations );
-      iterationString=iter.str();
-
-    }
-
-  iterationString = loadInitSol;
-  for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->solidTimeAdvance()->size(); iterInit++ )
-    {
-        /*!
-          definition of the vector to fill with the initialization.
-        */
-      temporarySol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-      structureSol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-
-      vectorPtr_Type solidDisp    (new vector_Type(M_fsi->FSIOper()->dFESpace().map(), M_importerSolid->mapType()));
-      *solidDisp *= 0.0;
-
-      /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-      LifeV::ExporterData<mesh_Type> initSolSolidDisp  (LifeV::ExporterData<mesh_Type>::VectorField,"s-displacement."+iterationString, M_fsi->FSIOper()->dFESpacePtr(), solidDisp, UInt(0)/*offset*/, LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-
-        /*!load of the solutions*/
-        M_importerSolid->readVariable(initSolSolidDisp);
-
-        structureSol->subset(*solidDisp, solidDisp->map(), (UInt)0, offset);
-	*structureSol *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
-
-	*temporarySol = *structureSol;
-	*solidDisp *=  1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
-	if(!iterInit)
-	  {
-	    un->subset(*solidDisp, solidDisp->map(), (UInt)0, offset);
-	    std::cout << "Norm of the restarted displacement "<< structureSol->norm2() << std::endl;
-	  }
-	
-	solidStencil.push_back(temporarySol);
-
-	//Updating the string name for the next iteration
-        UInt iterations = std::atoi(iterationString.c_str());
-        iterations--;
-
-        std::ostringstream iter;
-        iter.fill( '0' );
-        iter << std::setw(5) << ( iterations );
-        iterationString=iter.str();
-	
-    }
-
-    iterationString = loadInitSol;
-    for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->ALETimeAdvance()->size(); iterInit++ )
-    {
-      temporarySol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV:: Unique, Zero));
-        /*!
-          definition of the vector to fill with the initialization.
-        */
-        vectorPtr_Type fluidDisp(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), M_importerFluid->mapType()));
-	*fluidDisp *= 0.0;
-
-        LifeV::ExporterData<mesh_Type> initSolFluidDisp  (LifeV::ExporterData<mesh_Type>::VectorField, "f-displacement."+iterationString, M_fsi->FSIOper()->mmFESpacePtr(), fluidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-
-        /*!load of the solutions*/
-        M_importerFluid->readVariable(initSolFluidDisp);
-
-	HarmonicSol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-        HarmonicSol->subset(*fluidDisp, fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
-	*temporarySol = *HarmonicSol;
-
-	if(!iterInit)
-	  {
-
-	    HarmonicSol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-	    HarmonicSol->subset(*fluidDisp, fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
-	    un->subset(*fluidDisp, fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
-	    std::cout << "Reloaded Harmonin sol norm: "<< HarmonicSol->norm2() << std::endl;
-	  }
-
-        ALEStencil.push_back(temporarySol);
-	//Updating the iteration String name
-        int iterations = std::atoi(iterationString.c_str());
-        iterations--;
-
-        std::ostringstream iter;
-        iter.fill( '0' );
-        iter << std::setw(5) << ( iterations );
-        iterationString=iter.str();
-
-    }
-
-    M_fsi->initialize(fluidStencil, solidStencil, ALEStencil);
-    M_fsi->FSIOper()->setSolution(*un);
-    std::string vettore="vettore";
-    un->spy(vettore);
-
-    std::cout << "The size of the restarting solution is: " << un->size() << std::endl;
-    std::cout << "The norm2 of the restarting solution is: " << un->norm2() << std::endl;
-    std::cout << "The norm of the restarting solution gotten by the FSISolver is: " << M_fsi->displacement().norm2() << std::endl;
-}
+    *velAndPressure = *stokes.solution();
+    exportInitialize->postProcess(0);
 
 
-void Problem::initializeStokes(std::string& restartType,  GetPot const& data_file)
-{
-
-  using namespace LifeV;
-
-  typedef FSIOperator::mesh_Type        mesh_Type;
-
-
-  //Creating the pointer to the filter
-  filterPtr_Type importer;
-  std::string const importerType =  data_file( "importer/type", "hdf5");
-  std::string const filename    = data_file( "importer/fluid/filename", "fluid");
-
-  std::string const loadInitSol      = data_file( "importer/initSol", "00000");
-  std::string const loadInitSolFD    = data_file("importer/initSolFD","-1");
-  std::string iterationString;
-
-  std::cout << "The filename is    : " << filename << std::endl;
-  std::cout << "The importerType is: " << importerType << std::endl;
-
-#ifdef HAVE_HDF5
-  if (importerType.compare("hdf5") == 0)
-    {
-      importer.reset( new  hdf5Filter_Type( data_file, filename) );
-    }
-  else
-#endif
-    {
-      if (importerType.compare("none") == 0)
-	{
-	  importer.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), "fluid", M_fsi->FSIOper()->uFESpace().map().comm().MyPID()));
-	}
-      else
-	{
-	  importer.reset( new  ensightFilter_Type( data_file, filename) );
-	}
-    }
-
-  importer->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
-
-  
-  std::vector<vectorPtr_Type> fluidStencil;;
-
-  vectorPtr_Type temporarySol     (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique));
-
-  UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
-
-    iterationString = loadInitSol;
-    for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->fluidTimeAdvance()->size(); ++iterInit )
-    {
-
-        /*!
-          definition of the vector to fill with the initialization.
-        */
-        temporarySol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique));
-
-        vectorPtr_Type vel           (new vector_Type(M_fsi->FSIOper()->uFESpace().map(), M_importerFluid->mapType()));
-        vectorPtr_Type pressure      (new vector_Type(M_fsi->FSIOper()->pFESpace().map(), M_importerFluid->mapType()));
-
-	*vel *= 0.0;
-	*pressure *= 0.0;
-
-        LifeV::ExporterData<mesh_Type> initSolFluidVel   (LifeV::ExporterData<mesh_Type>::VectorField, std::string("f-velocity."+iterationString), M_fsi->FSIOper()->uFESpacePtr(), vel, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-        LifeV::ExporterData<mesh_Type> initSolFluidPress (LifeV::ExporterData<mesh_Type>::ScalarField, std::string("f-pressure."+iterationString), M_fsi->FSIOper()->pFESpacePtr(), pressure, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-
-        /*!load of the solutions*/
-        importer->readVariable(initSolFluidVel);
-        importer->readVariable(initSolFluidPress);
-
-        int iterations = std::atoi(iterationString.c_str());
-        iterations--;
-
-        std::ostringstream iter;
-        iter.fill( '0' );
-        iter << std::setw(5) << ( iterations );
-        iterationString=iter.str();
-
-        *temporarySol=*vel+*pressure;
-        fluidStencil.push_back(temporarySol);
-    }
-
-    M_fsi->initialize(fluidStencil);
 }
 
 
