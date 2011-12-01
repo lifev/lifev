@@ -35,7 +35,7 @@ solidType 		= neoHookean 		# linearVenantKirchhoff / nonlinearVenantKirchhoff / 
 
 
 [../time_discretization]
-method                  = BDF
+method                  = Newmark
 initialtime 		= 0.
 endtime     		= 0.4
 timestep    		= 0.1

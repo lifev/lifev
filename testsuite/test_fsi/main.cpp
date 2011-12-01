@@ -533,12 +533,12 @@ public:
 
             if ( M_absorbingBC && M_fsi->isFluid() )
             {
-	      /*
+	      
                 BCFunctionBase outFlow;
                 outFlow.setFunction(bc_adaptor(*M_fsi->FSIOper()));
                 M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlow);
-	      */
-
+	      
+		/*
 	      BCFunctionBase outFlowFace;
               BCFunctionBase outFlowBrain;
 
@@ -547,7 +547,7 @@ public:
 
 	      outFlowBrain.setFunction(bc_adaptorBrain(*M_fsi->FSIOper()));
 	      M_fsi->FSIOper()->BCh_fluid()->modifyBC(4, outFlowBrain);
-
+		*/
                 //std::cout << "  F-  Pressure = " << outFlow(0., 0., 0., 0., 3) << std::endl;
             }
 
