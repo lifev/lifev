@@ -664,6 +664,10 @@ void Problem::initializeStokes(vectorPtr_Type& un,  GetPot const& data_file, fsi
   std::string vector="un";
   un->spy(vector);
 
+  std::string solStokes="stokesSolution";
+  stokes.solution()->spy(solStokes);
+  
+
   fsiSolver->FSIOper()->displayer().leaderPrint( "Total computational time of Stokes solution  =  ", chrono.diff());
   fsiSolver->FSIOper()->displayer().leaderPrint( "\n" );
   /*
