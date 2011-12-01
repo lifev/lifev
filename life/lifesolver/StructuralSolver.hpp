@@ -768,7 +768,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
     Real reltol  = 1.e-7;
     UInt maxiter = 50;
     Real etamax  = 1e-7;
-    Int NonLinearLineSearch = 2;
+    Int NonLinearLineSearch = 0;
 
     Real time = M_data->dataTime()->time();
 
@@ -900,7 +900,8 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
         *M_rhs=*M_rhsNoBC;
         residual = *M_mass * solution;
         residual += *M_material->stiffVector();
-        bcManageResidual( residual, *M_rhs, solution, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
+	vector_Type solRep(solution, Repeated);
+        bcManageResidual( residual, *M_rhs, solRep, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
         residual -= *M_rhs;
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
