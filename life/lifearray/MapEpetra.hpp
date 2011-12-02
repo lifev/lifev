@@ -52,6 +52,10 @@
 #include <Epetra_Import.h>
 #include <Epetra_Comm.h>
 
+#ifdef HAVE_HDF5
+#include <EpetraExt_HDF5.h>
+#endif
+
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -225,6 +229,23 @@ public:
 
     //! This method return true if both the unique map and the repeated map are identical
     bool mapsAreSimilar( MapEpetra const& epetraMap ) const;
+
+#ifdef HAVE_HDF5
+    //! Save the matrix into a HDF5 (.h5) file
+    /*!
+      @param fileName Name of the file where the map will be saved, without extension (.h5)
+      @param mapName Name of the map in the HDF5 file
+      @param truncate True if the file has to be truncated; False if the file already exist and should not be truncated
+     */
+    void exportToHDF5( std::string const &fileName, std::string const &mapName = "map", bool const& truncate = true );
+
+    //! Read a matrix from a HDF5 (.h5) file
+    /*!
+      @param fileName Name of the file where the map will be saved, without extension (.h5)
+      @param matrixName Name of the map in the HDF5 file
+     */
+    void importFromHDF5( std::string const &fileName, std::string const &mapName = "map" );
+#endif
 
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;

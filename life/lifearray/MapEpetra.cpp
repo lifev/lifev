@@ -293,6 +293,73 @@ MapEpetra::mapsAreSimilar( MapEpetra const& epetraMap ) const
             getRepeatedMap()->SameAs( *epetraMap.getRepeatedMap() ) );
 }
 
+#ifdef HAVE_HDF5
+
+void MapEpetra::exportToHDF5( std::string const &fileName, std::string const &mapName, bool const &truncate )
+{
+    EpetraExt::HDF5 HDF5( *M_commPtr );
+
+    if ( truncate )
+    {
+        // Create and open the file / Truncate and open the file
+        HDF5.Create( ( fileName + ".h5" ).data() );
+    }
+    else
+    {
+        // Open an existing file without truncating it
+        HDF5.Open( ( fileName + ".h5" ).data() );
+    }
+
+    // Check if the file is created
+    if ( !HDF5.IsOpen () )
+    {
+        std::cerr << "Unable to create " + fileName + ".h5";
+        abort();
+    }
+
+    // Save the maps into the file
+    HDF5.Write( ( mapName + "Unique" ).c_str(), *M_uniqueMapEpetra );
+    HDF5.Write( ( mapName + "Repeated" ).c_str(), *M_repeatedMapEpetra );
+
+    // Close the file
+    HDF5.Close();
+
+} // exportToHDF5
+
+void MapEpetra::importFromHDF5( std::string const &fileName, std::string const &mapName )
+{
+    EpetraExt::HDF5 HDF5( *M_commPtr );
+
+    // Open an existing file
+    HDF5.Open( ( fileName + ".h5" ).data() );
+
+    // Check if the file is created
+    if ( !HDF5.IsOpen () )
+    {
+        std::cerr << "Unable to open " + fileName + ".h5";
+        abort();
+    }
+
+    // Read the unique map from the file
+    Epetra_Map* importedMap( 0 );
+    HDF5.Read( ( mapName + "Unique" ).c_str(), importedMap );
+
+    // Copy the loaded map to the member object
+    M_uniqueMapEpetra.reset( new map_type( *importedMap ) );
+
+    // Read the repeated map from the file
+    HDF5.Read( ( mapName + "Repeated" ).c_str(), importedMap );
+
+    // Copy the loaded matrix to the member object
+    M_repeatedMapEpetra.reset( new map_type( *importedMap ) );
+
+    // Close the file
+    HDF5.Close();
+
+} // importFromHDF5
+
+#endif // HAVE_HDF5
+
 void
 MapEpetra::showMe( std::ostream& output ) const
 {
