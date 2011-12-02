@@ -182,6 +182,118 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
     return BCh_solid;
 }
 
+FSIOperator::fluidBchandlerPtr_Type BCh_steadyHarmonicExtension(FSIOperator &_oper)
+{
+
+    // Boundary condition for the mesh
+    Debug( 10000 ) << "Boundary condition for the harmonic extension\n";
+
+    BCFunctionBase bcf(fZero);
+
+    FSISolver::fluidBchandlerPtr_Type BCh_he(new FSIOperator::fluidBchandler_Type );
+
+    BCh_he->addBC("Edges", INOUTEDGE, Essential, Full, bcf,   3);
+    BCh_he->addBC("Edges", INEDGE, Essential, Full, bcf,   3);
+    BCh_he->addBC("Base",  INLET,     Essential, Full, bcf,   3);
+    BCh_he->addBC("Base",  OUTLET,     Essential, Full, bcf,   3);
+
+    if (_oper.data().method() == "monolithicGE")
+    {
+        Debug(10000) << "FSIMonolithic GCE harmonic extension\n";
+        FSIMonolithicGE *MOper = dynamic_cast<FSIMonolithicGE *>(&_oper);
+        MOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
+        BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
+                      *MOper->bcvStructureDispToHarmonicExtension(), 3);
+    }
+    else if (_oper.data().method() == "monolithicGI")
+    {
+
+    }
+
+    return BCh_he;
+}
+
+
+FSIOperator::fluidBchandlerPtr_Type BCh_steadyMonolithicFlux(bool /*isOpen=true*/)
+{
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
+
+    BCFunctionBase flow_3 (fluxFunction);
+    BCFunctionBase flowNew (tubeNew);
+    BCFunctionBase bcf      (fZero);
+    //uncomment  to use fluxes
+
+      BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flowNew);
+//   if(!isOpen)
+//       BCh_fluid->addBC("InFlow" , INLET,  Flux,   Normal, bcf);
+
+    //uncomment  to use fluxes
+    //BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
+
+    return BCh_fluid;
+}
+
+FSIOperator::fluidBchandlerPtr_Type BCh_steadyMonolithicFluid(FSIOperator &_oper, bool const & isOpen=true)
+{
+    // Boundary conditions for the fluid velocity
+    Debug( 10000 ) << "Boundary condition for the fluid\n";
+
+    if (! _oper.isFluid() )
+        return FSIOperator::fluidBchandlerPtr_Type();
+
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
+
+    BCFunctionBase bcf      (fZero);
+    BCFunctionBase in_flow  (/*uInterpolated*/u2normal/*aortaPhisPress*/);
+    //    BCFunctionBase out_flow (fZero);
+    //BCFunctionBase in_flow  (LumpedHeart::outPressure);
+
+    BCFunctionBase out_press (FlowConditions::outPressure0);
+    BCFunctionBase bcfw0 (w0);
+
+    BCFunctionBase in_vel   ( vinit );
+
+    BCh_fluid->addBC("Edges", INOUTEDGE, Essential, Full, bcf,   3);
+    BCh_fluid->addBC("Edges", INEDGE, Essential, Full, bcf,   3);
+
+
+    //BCh_fluid->addBC("InFlow" , INLET,  , Full, in_vel, 3);
+    //BCh_fluid->addBC("InFlow" , INLET,  Natural, Normal, in_flow);
+//     if(!isOpen)
+//         BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, bcf, 3);
+
+    //BCh_fluid->addBC("OutFlow", OUTLET,  Natural,  Normal, out_press);
+    return BCh_fluid;
+}
+
+FSIOperator::solidBchandlerPtr_Type BCh_steadyMonolithicSolid(FSIOperator &_oper)
+{
+
+    if (! _oper.isSolid() )
+        return FSIOperator::solidBchandlerPtr_Type();
+
+    // Boundary conditions for the solid displacement
+    Debug( 10000 ) << "Boundary condition for the solid\n";
+    FSIOperator::solidBchandlerPtr_Type BCh_solid( new FSIOperator::solidBchandler_Type );
+
+    BCFunctionBase bcf(fZero);
+
+    BCh_solid->addBC("Top",   RING, Essential, Full, bcf,  3);
+    BCh_solid->addBC("Top",   RING2, Essential, Full, bcf,  3);
+    BCh_solid->addBC("Edges", INOUTEDGE, Essential, Full, bcf,   3);
+    BCh_solid->addBC("Edges", INEDGE, Essential, Full, bcf,   3);
+
+
+    aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
+    BCFunctionBase hyd(fZero);
+    BCFunctionBase young (E);
+    //robin condition on the outer wall
+    _oper.setRobinOuterWall(hyd, young);
+    //BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
+
+    return BCh_solid;
+}
+
 }
 
 #endif

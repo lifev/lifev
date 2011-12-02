@@ -31,7 +31,7 @@ test_monolithic_SOURCES = main.cpp ud_functions.cpp flowConditions.cpp lumpedHea
 
 #test_monolithic_LDADD = -llifesolver ## already in Makefile.testsuite
 
-EXTRA_DIST = data testsuiteCE.at testsuiteGCE.at
+EXTRA_DIST = data dataSteady
 
 link:
 	test -a data || ln -s $(srcdir)/data
