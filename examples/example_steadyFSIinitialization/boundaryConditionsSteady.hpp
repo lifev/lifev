@@ -39,8 +39,8 @@
  *  if the functions to assign is vectorial and the boundary condition is of type \c Full \c.
  */
 
-#ifndef BC_HPP
-#define BC_HPP
+#ifndef BCSTEADY_HPP
+#define BCSTEADY_HPP
 
 // LifeV includes
 #include "life/lifecore/LifeV.hpp"
@@ -50,8 +50,6 @@
 #include "life/lifesolver/FSIMonolithicGE.hpp"
 #include "life/lifesolver/FSIMonolithicGI.hpp"
 
-#include "flowConditions.hpp"
-//#include "lumpedHeart.hpp"
 #include "ud_functions.hpp"
 
 #define OUTLET 3
@@ -70,7 +68,8 @@ namespace LifeV
 typedef FSIOperator::fluid_Type fluid;
 typedef FSIOperator::solid_Type solid;
 
-FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
+
+FSIOperator::fluidBchandlerPtr_Type BCh_steadyHarmonicExtension(FSIOperator &_oper)
 {
 
     // Boundary condition for the mesh
@@ -102,7 +101,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 }
 
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
+FSIOperator::fluidBchandlerPtr_Type BCh_steadyMonolithicFlux(bool /*isOpen=true*/)
 {
     FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
 
@@ -121,7 +120,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
     return BCh_fluid;
 }
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool const & isOpen=true)
+FSIOperator::fluidBchandlerPtr_Type BCh_steadyMonolithicFluid(FSIOperator &_oper, bool const & isOpen=true)
 {
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the fluid\n";
@@ -154,7 +153,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool
     return BCh_fluid;
 }
 
-FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
+FSIOperator::solidBchandlerPtr_Type BCh_steadyMonolithicSolid(FSIOperator &_oper)
 {
 
     if (! _oper.isSolid() )

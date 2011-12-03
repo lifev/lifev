@@ -24,7 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = ud_functions.hpp lumpedHeart.hpp flowConditions.hpp boundaryConditions.hpp
+check_HEADERS = ud_functions.hpp lumpedHeart.hpp flowConditions.hpp boundaryConditions.hpp boundaryConditionsSteady.hpp
 
 check_PROGRAMS = test_monolithic
 test_monolithic_SOURCES = main.cpp ud_functions.cpp flowConditions.cpp lumpedHeart.cpp
