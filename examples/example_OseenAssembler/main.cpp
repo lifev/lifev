@@ -95,6 +95,12 @@ typedef boost::shared_ptr< fespace_type > fespacePtr_type;
 typedef LifeV::RossEthierSteinmanUnsteadyDec problem_Type;
 }
 
+Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return 1;
+}
+
+
 void printErrors(const vector_type& solution, const Real& currentTime, fespacePtr_type uFESpace, fespacePtr_type pFESpace, bool verbose)
 {
     vector_type velocity(uFESpace->map(),Repeated);
@@ -179,13 +185,17 @@ main( int argc, char** argv )
     // Space discretization
     const UInt numDimensions  = 3;
     const MeshType meshSource = RegularMesh;
-    const UInt numMeshElem    = 10;
+    const UInt numMeshElem    = 3;
 
     // Numerical scheme
     const DiffusionType diffusionType = ViscousStress;
           UInt BDFOrder = 3;
     const InitType initializationMethod = Interpolation;
     const ConvectionType convectionTerm = KIO91;
+
+    // Reading settings from file
+    //dataFile;
+
 
     // EthierSteinman data
     problem_Type::setA(1.0);
@@ -318,36 +328,51 @@ main( int argc, char** argv )
     {
         case ViscousStress:
             if (verbose) std::cout << "Adding the viscous stress... " << std::flush;
-            oseenAssembler.addViscousStress(baseMatrix,viscosity/density);
+            oseenAssembler.addViscousStress(*baseMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         case StiffStrain:
             if (verbose) std::cout << "Adding the stiff strain... " << std::flush;
-            oseenAssembler.addStiffStrain(baseMatrix,viscosity/density);
+            oseenAssembler.addStiffStrain(*baseMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         default:
             cerr << "[Error] Diffusion type unknown" << std::endl;
-            exit(1);
+            return( EXIT_FAILURE );
             break;
     }
 
     if (verbose) std::cout << "Adding the gradient of the pressure... " << std::flush;
-    oseenAssembler.addGradPressure(baseMatrix);
+    oseenAssembler.addGradPressure(*baseMatrix);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the divergence free constraint... " << std::flush;
-    oseenAssembler.addDivergence(baseMatrix,-1.0);
+    oseenAssembler.addDivergence(*baseMatrix,-1.0);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the mass... " << std::flush;
-    oseenAssembler.addMass(massMatrix,1.0);
+    oseenAssembler.addMass(*massMatrix,1.0);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Closing the matrices... " << std::flush;
     baseMatrix->globalAssemble();
     massMatrix->globalAssemble();
     if (verbose) std::cout << "done" << std::endl;
+
+    // +-----------------------------------------------+
+    // |  Flux computation: vector initialization      |
+    // +-----------------------------------------------+
+    BCFunctionBase flow (fluxFunction);
+
+    BCHandler fluxHandler;
+    fluxHandler.addBC("Flux" , 1,  Flux, Normal, flow);
+
+    // Update the BCHandler (internal data related to FE)
+    fluxHandler.bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
+
+    vector_type fluxVector(solutionMap);
+    oseenAssembler.addFluxTerms(fluxVector, fluxHandler);
+
 
     // +-----------------------------------------------+
     // |            Solver initialization              |
@@ -428,6 +453,11 @@ main( int argc, char** argv )
     solution->add(*pressure,pressureOffset);
     bdf.setInitialCondition( *solution );
 
+    // Compute initial flux trough face 1
+    Real fluxThrou1 = fluxVector.dot(*solution);
+    if (verbose) std::cout << "Flux through face 1 = "
+                           << fluxThrou1 << std::endl;
+
     // Initial solution (interpolation or projection)
     currentTime += timestep;
     for ( ; currentTime <=  initialTime + timestep/2.; currentTime += timestep)
@@ -443,17 +473,16 @@ main( int argc, char** argv )
 
         if (initializationMethod == Projection)
         {
-            uFESpace->interpolate(problem_Type::uderexact, *rhs, currentTime);
-            rhs->globalAssemble();
+            oseenAssembler.addMassRhs(*rhs, problem_Type::uderexact , currentTime);
             *rhs *= -1.;
-            *rhs = (*massMatrix)*(*rhs);
+
 
             if (verbose) std::cout << "Updating the system... " << std::flush;
             systemMatrix.reset(new matrix_type( solutionMap ));
             *systemMatrix += *baseMatrix;
             if(convectionTerm == SemiImplicit)
             {
-                oseenAssembler.addConvection(systemMatrix,*solution);
+                oseenAssembler.addConvection(*systemMatrix,*solution);
             }
             else if(convectionTerm == Explicit)
             {

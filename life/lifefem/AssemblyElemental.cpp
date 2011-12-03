@@ -274,6 +274,53 @@ void stiffStrain(MatrixElemental& localStiff,
     }
 }
 
+void bodyForces(VectorElemental& localForce,
+                const CurrentFE& massRhsCFE,
+                const function_Type& fun,
+                const Real& t,
+                const UInt& fieldDim)
+{
+
+    const UInt nbFEDof(massRhsCFE.nbFEDof());
+    const UInt nbQuadPt(massRhsCFE.nbQuadPt());
+    std::vector<Real> fValues(nbQuadPt,0.0);
+    Real localValue(0.0);
+
+    // Assemble the local diffusion
+    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    {
+        VectorElemental::vector_view localView = localForce.block(iterFDim);
+
+        // Compute the value of f in the quadrature nodes
+        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+        {
+            fValues[iQuadPt]= fun(t,
+                                  massRhsCFE.quadNode(iQuadPt,0),
+                                  massRhsCFE.quadNode(iQuadPt,1),
+                                  massRhsCFE.quadNode(iQuadPt,2),
+                                  iterFDim);
+        }
+
+        // Loop over the basis functions
+        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+        {
+            localValue = 0.0;
+
+            //Loop on the quadrature nodes
+            for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+            {
+                localValue += fValues[iQuadPt]
+                    * massRhsCFE.phi(iDof,iQuadPt)
+                    * massRhsCFE.wDetJacobian(iQuadPt);
+            }
+
+            // Add on the local matrix
+            localView(iDof)=localValue;
+        }
+    }
+
+}
+
 }
 
 //
@@ -4182,7 +4229,7 @@ void source_Hdiv( const Vector& source, VectorElemental& elvec, const CurrentFE&
 
     // Loop over all the degrees of freedom of the dual variable.
     for ( UInt i(0); i < dualFE.nbFEDof(); ++i )
-    { 
+    {
         // Loop over all the quadrature point.
         for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
         {
@@ -4191,7 +4238,7 @@ void source_Hdiv( const Vector& source, VectorElemental& elvec, const CurrentFE&
                e.g. in 3D three times, in 2D two times.*/
             for ( UInt icoor(0); icoor < dualFE.nbCoor(); ++icoor )
             {
-                // sum[icoor] = source[icoor] * phi[icoor] for all icorr.  
+                // sum[icoor] = source[icoor] * phi[icoor] for all icorr.
                 sum += source( icoor ) * dualFE.phi( i, icoor, ig );
 
             }
