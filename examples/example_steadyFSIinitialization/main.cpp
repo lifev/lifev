@@ -302,7 +302,6 @@ public:
 
         int iter = 1;
         LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
-        LifeV::UInt offsetInterface=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->solidAndFluidDim();
 
         dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(1);
 
