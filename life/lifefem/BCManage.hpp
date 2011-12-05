@@ -1036,7 +1036,6 @@ bcEssentialManageUDep( MatrixType& matrix,
             }
         }
 
-        cout << "boundaryCond.offset() = " << boundaryCond.offset() << '\n';
         if (boundaryCond.offset() > 0)
         {
             // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
@@ -1082,7 +1081,6 @@ bcEssentialManageMatrix( MatrixType& matrix,
         }
     }
 
-    cout << "boundaryCond.offset() = " << boundaryCond.offset() << '\n';
     if (boundaryCond.offset() > 0)
     {
         // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
