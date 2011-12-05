@@ -43,6 +43,7 @@ todo
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
+#include <life/lifemesh/NeighborMarker.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifefem/FESpace.hpp>
 
@@ -139,11 +140,10 @@ int main( int argc, char* argv[] )
 
     GhostHandler<RegionMesh> ghostP1 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP1->map(), comm );
 
-//    ghostP1.setUp();
+    ghostP1.setUp();
 
     MapEpetra mapP1 ( feSpaceP1->map() );
-    MapEpetra mapP1Overlap1 ( ghostP1.ghostMapOnNodes() );
-    MapEpetra mapP1Overlap1bis ( ghostP1.ghostMapOnNodes( dataFile( "ghost/overlap", 1 ) ) );
+    MapEpetra mapP1Overlap1 ( ghostP1.ghostMapOnNodes( dataFile( "ghost/overlap", 1 ) ) );
 
     fileOut << "=================== mapP1" << std::endl;
     fileOut << *mapP1.map( Unique );
@@ -151,16 +151,22 @@ int main( int argc, char* argv[] )
     fileOut << *mapP1.map( Repeated );
     fileOut << "=================== mapP1Overlap1" << std::endl;
     fileOut << *mapP1Overlap1.map( Repeated );
-    fileOut << "=================== mapP1Overlap1bis" << std::endl;
-    fileOut << *mapP1Overlap1bis.map( Repeated );
+
+#ifdef HAVE_HDF5
+
+    ghostP1.exportToHDF5();
+
+    ghostP1.importFromHDF5();
+
+#endif // HAVE_HDF5
 
     ghostP1.clean();
 
-    boost::shared_ptr<VectorEpetra> vP1( new VectorEpetra( mapP1Overlap1bis, Unique ) );
+    boost::shared_ptr<VectorEpetra> vP1( new VectorEpetra( mapP1Overlap1, Unique ) );
 
     // get all elements from the repeated map
-    Int* pointer ( mapP1Overlap1bis.map( Repeated )->MyGlobalElements() );
-    for ( Int ii = 0; ii < mapP1Overlap1bis.map( Repeated )->NumMyElements(); ++ii, ++pointer )
+    Int* pointer ( mapP1Overlap1.map( Repeated )->MyGlobalElements() );
+    for ( Int ii = 0; ii < mapP1Overlap1.map( Repeated )->NumMyElements(); ++ii, ++pointer )
     {
         vP1->sumIntoGlobalValues( *pointer, 1 );
     }

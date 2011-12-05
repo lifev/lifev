@@ -100,6 +100,14 @@ public:
     //! clean
     void clean();
 
+#ifdef HAVE_HDF5
+    //! export
+    void exportToHDF5( std::string const & fileName = "ghostmap", bool const &truncate = true );
+
+    //! import
+    void importFromHDF5( std::string const & fileName = "ghostmap" );
+#endif // HAVE_HDF5
+
     //! create node node neighbors on node markers
     void createNodeNeighbors();
 
@@ -201,6 +209,144 @@ void GhostHandler<Mesh>::clean()
     clearVector( M_nodeEdgeNeighborsMap );
     clearVector( M_nodeElementNeighborsMap );
 }
+
+#ifdef HAVE_HDF5
+
+namespace
+{
+
+void writeNeighborMap( EpetraExt::HDF5 & file, neighborMap_Type & map, std::string const & name )
+{
+    // copy the map into vectors
+    ASSERT ( map.size() > 0, "the map " + name + " is empty!" )
+    std::vector<Int> offsets ( map.size() + 1 );
+    std::vector<Int> values;
+    Int sum ( 0 );
+    for ( UInt i ( 0 ); i < map.size(); i++ )
+    {
+        sum += map[ i ].size();
+        offsets[ i + 1 ] = sum;
+        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+        {
+            values.push_back( *j );
+        }
+    }
+
+    // Save the vectors into the file
+    file.Write( name, "offsetSize", static_cast<Int>( offsets.size() ) );
+    file.Write( name, "offsets", H5T_NATIVE_INT, offsets.size(), &offsets[ 0 ] );
+    file.Write( name, "valueSize", static_cast<Int>( values.size() ) );
+    file.Write( name, "values", H5T_NATIVE_INT, values.size(), &values[ 0 ] );
+
+    /*
+    // DEBUG
+    std::cerr << name << std::endl;
+    for ( UInt i ( 0 ); i < map.size(); i++ )
+    {
+        std::cerr << i << "> ";
+        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+        {
+            std::cerr << *j << " ";
+        }
+        std::cerr <<std::endl;
+    }
+    */
+}
+
+void readNeighborMap( EpetraExt::HDF5 & file, neighborMap_Type & map, std::string const & name )
+{
+    // Read the vectors from the file
+    Int offsetSize;
+    file.Read( name, "offsetSize", offsetSize );
+    std::vector<Int> offsets( offsetSize );
+    file.Read( name, "offsets", H5T_NATIVE_INT, offsetSize, &offsets[ 0 ] );
+    Int valueSize;
+    file.Read( name, "valueSize", valueSize );
+    std::vector<Int> values( valueSize );
+    file.Read( name, "values", H5T_NATIVE_INT, valueSize, &values[ 0 ] );
+
+    // setup the map
+    map.clear();
+    for ( Int i ( 0 ); i < offsetSize - 1; i++ )
+    {
+        for ( Int j ( offsets[ i ] ); j < offsets[ i + 1 ]; j++ )
+        {
+            map[ i ].insert( values[ j ] );
+        }
+    }
+
+    /*
+    // DEBUG
+    std::cerr << name << std::endl;
+    for ( UInt i ( 0 ); i < map.size(); i++ )
+    {
+        std::cerr << i << "> ";
+        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+        {
+            std::cerr << *j << " ";
+        }
+        std::cerr <<std::endl;
+    }
+    */
+}
+
+}
+
+template <typename Mesh>
+void GhostHandler<Mesh>::exportToHDF5( std::string const & fileName, bool const &truncate )
+{
+    EpetraExt::HDF5 HDF5( *M_comm );
+
+    if ( truncate )
+    {
+        // Create and open the file / Truncate and open the file
+        HDF5.Create( ( fileName + ".h5" ).data() );
+    }
+    else
+    {
+        // Open an existing file without truncating it
+        HDF5.Open( ( fileName + ".h5" ).data() );
+    }
+
+    // Check if the file is created
+    if ( !HDF5.IsOpen () )
+    {
+        std::cerr << "Unable to create " + fileName + ".h5";
+        abort();
+    }
+
+    writeNeighborMap( HDF5, M_nodeNodeNeighborsMap, "nodeNodeNeighborsMap" );
+    writeNeighborMap( HDF5, M_nodeEdgeNeighborsMap, "nodeEdgeNeighborsMap" );
+    writeNeighborMap( HDF5, M_nodeElementNeighborsMap, "nodeElementNeighborsMap" );
+
+    // Close the file
+    HDF5.Close();
+}
+
+template <typename Mesh>
+void GhostHandler<Mesh>::importFromHDF5( std::string const & fileName )
+{
+    EpetraExt::HDF5 HDF5( *M_comm );
+
+    // Open an existing file
+    HDF5.Open( ( fileName + ".h5" ).data() );
+
+    // Check if the file is created
+    if ( !HDF5.IsOpen () )
+    {
+        std::cerr << "Unable to open " + fileName + ".h5";
+        abort();
+    }
+
+    readNeighborMap( HDF5, M_nodeNodeNeighborsMap, "nodeNodeNeighborsMap" );
+    readNeighborMap( HDF5, M_nodeEdgeNeighborsMap, "nodeEdgeNeighborsMap" );
+    readNeighborMap( HDF5, M_nodeElementNeighborsMap, "nodeElementNeighborsMap" );
+
+    // Close the file
+    HDF5.Close();
+}
+
+#endif // HAVE_HDF5
 
 //! this routine generates node neighbors for the given mesh
 /*! the routine assumes that the mesh is not yet partitioned or reordered
@@ -343,7 +489,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UIn
     // if the map has already been created, return it
     if ( M_ghostMapOnNodes ) return *M_ghostMapOnNodes;
 
-    if ( M_verbose ) std::cout << " GH- ghostMapOnNodes( o )" << std::endl;
+    if ( M_verbose ) std::cout << " GH- ghostMapOnNodes( UInt )" << std::endl;
 
     // check that the nodeNodeNeighborsMap has been created
     if ( M_nodeNodeNeighborsMap.empty()  )
