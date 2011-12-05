@@ -166,7 +166,7 @@ testML( bchandler_raw_Type& bch )
     updateStabilization(*matrFull);
     getFluidMatrix(*matrFull);
 
-    vector_Type rhsFull (this->M_rightHandSideNoBC);
+    vector_Type rhsFull (*this->M_rightHandSideNoBC);
 
 //     matrFull.reset(new matrix_Type(*M_matrixNoBC));
 //     M_rhsFull = M_rhsNoBC;

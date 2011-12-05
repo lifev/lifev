@@ -497,12 +497,12 @@ main( Int argc, char** argv )
         *systemMatrix += *massMatrix*alpha;
         *systemMatrix += *baseMatrix;
 
-        // SemiImplicit 
-        
+        // SemiImplicit
+
         bdf.extrapolation(*beta); // Extrapolation for the convective term
         // committed matteo
         //*beta = bdf.extrapolation(); // Extrapolation for the convective term
-        oseenAssembler.addConvection(systemMatrix,*beta);
+        oseenAssembler.addConvection(*systemMatrix,*beta);
 
         if (verbose) std::cout << "done" << std::endl;
 
