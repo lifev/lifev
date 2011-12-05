@@ -422,7 +422,7 @@ public:
     */
     inline UInt size() const  {return M_size;}
 
-    const feVectorContainerPtr_Type& stencil() const { return M_unknowns; }
+    feVectorContainerPtr_Type& stencil() { return M_unknowns; }
     //@}
 
 protected:
@@ -628,7 +628,6 @@ TimeAdvance<feVectorType>::accelerate(const feVectorType& u)
     accelerate  -= (*this->M_rhsContribution[1]);
     return accelerate;
 }
-
 // ===================================================
 // Macros
 // ===================================================

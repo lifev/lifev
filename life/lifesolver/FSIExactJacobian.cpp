@@ -144,7 +144,7 @@ void  FSIExactJacobian::solveLinearFluid()
 
         this->M_fluid->updateLinearSystem( M_fluid->matrixNoBC(),
                                            alpha,
-                                           *M_un,
+                                           M_fluidTimeAdvance->singleElement(0),
                                            *M_fluid->solution(),
                                            dispFluidMesh,
                                            veloFluidMesh(),
@@ -160,7 +160,7 @@ void  FSIExactJacobian::solveLinearFluid()
             this->M_fluid->updateShapeDerivatives(
                                                   *M_matrShapeDer,
                                                   alpha,
-                                                  *M_un,
+                                                  M_fluidTimeAdvance->singleElement(0),
                                                   *M_fluid->solution(),
                                                   //dispFluidMesh,
                                                   veloFluidMesh(),

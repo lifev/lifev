@@ -143,22 +143,10 @@ public:
     //@{
 
     //! Gets the solution
-    const vector_Type& solution() const { return *M_un; }
+    const vector_Type& solution() const { return M_fluidTimeAdvance->singleElement(0); }
 
     //! Gets the solution ptr
-    vectorPtr_Type& solutionPtr() { return M_un; }
-    //@}
-
-
-    //! @name Set Methods
-    //@{
-
-    //! Sets the solution
-    void setSolution( const vector_Type& solution ) { M_un.reset( new vector_Type( solution ) ); }
-
-    //! Sets the solution ptr
-    void setSolutionPtr( const vectorPtr_Type& sol) { M_un = sol; }
-
+    vector_Type* solutionPtr() { return M_fluidTimeAdvance->stencil()[0]; }
     //@}
 
 

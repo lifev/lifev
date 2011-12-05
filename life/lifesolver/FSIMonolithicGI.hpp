@@ -102,13 +102,6 @@ public:
     //!@name Public Methods
     //@{
 
-    //! Initializes the system with functions
-    void initialize( fluidPtr_Type::value_type::function_Type const& u0,
-                     fluidPtr_Type::value_type::function_Type const& p0,
-                     solidPtr_Type::value_type::Function const& d0,
-                     solidPtr_Type::value_type::Function const& /*w0*/,
-                     fluidPtr_Type::value_type::function_Type const& /*df0*/ );
-
     //! Initializes the system with vectors
     void initialize(  std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec)
     {
@@ -173,10 +166,12 @@ public:
     //const vectorPtr_Type  uk()  const      {return M_uk;}
 
     //! get the current solution vector.
-    const vector_Type& solution() const { return *M_uk; }
+    const vector_Type& solution() const {  return M_fluidTimeAdvance->singleElement(0);
+    }
 
     //! get the solution.
-    vectorPtr_Type& solutionPtr() { return M_uk; }
+    vector_Type* solutionPtr() {  return M_fluidTimeAdvance->stencil()[0];
+    }
 
     static bool                          S_register;
 

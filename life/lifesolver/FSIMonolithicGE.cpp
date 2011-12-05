@@ -66,7 +66,6 @@ void FSIMonolithicGE::setupFluidSolid( UInt const fluxes )
     //                                                                    *M_uFESpace,
     //                                                                    *M_pFESpace,
     //                                                                    *M_epetraComm));
-    M_un.reset (new vector_Type(*this->M_monolithicMap));
     M_rhs.reset(new vector_Type(*this->M_monolithicMap));
     M_rhsFull.reset(new vector_Type(*this->M_monolithicMap));
     M_beta.reset  (new vector_Type(M_uFESpace->map()));
@@ -148,8 +147,8 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         M_fluidTimeAdvance->extrapolation(*M_beta);//explicit
         *M_beta -= fluid;//implicit
 
-        assembleSolidBlock(iter, M_un);
-        assembleFluidBlock(iter, M_un);
+        assembleSolidBlock(iter, M_fluidTimeAdvance->singleElement(0));
+        assembleFluidBlock(iter, M_fluidTimeAdvance->singleElement(0));
         *M_rhsFull = *M_rhs;
 
         applyBoundaryConditions();
@@ -196,7 +195,7 @@ void FSIMonolithicGE::applyBoundaryConditions( )
              M_monolithicMatrix->setConditions(M_BChs);
              M_monolithicMatrix->setSpaces(M_FESpaces);
              M_monolithicMatrix->setOffsets(2, M_offset, 0);
-             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
+             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ));
          }
          else
          {

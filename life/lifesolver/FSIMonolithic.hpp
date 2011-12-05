@@ -202,19 +202,6 @@ public:
     void buildSystem();
 
 
-    //! Initialize all the quantities required by FSI
-    /*!
-     * This method has been designed to initialize all the quantities of the FSI problem.
-     * @param fluidVelocityAndPressure velocity and pressure of the fluid
-     * @param fluidDisplacement displacement of the fluid
-     * @param solidVelocity velocity of the solid
-     * @param solidDisplacement displacement of the solid
-     */
-    void initialize( const vectorPtr_Type& fluidVelocityAndPressure,
-                     const vectorPtr_Type& fluidDisplacement,
-                     const vectorPtr_Type& solidVelocity,
-                     const vectorPtr_Type& solidDisplacement );
-
     //! Merges the flux boundary conditions into the fluid BCHandler
     /*!two separate BCHandlers are initially created for the flux-type boundary conditions, these are later merged with the fluid BCHandler
       automatically, using this method
@@ -287,22 +274,6 @@ public:
     */
     virtual void updateSystem();
 
-    //! Initializes all the quantities using functions
-    /*!
-     * calls the initialize methods for the subproblems. The mesh velocity is used to compute the convective term in the fluid equations
-     * \param u0: initial fluid velocity
-     * \param p0: initial fluid pressure
-     * \param d0: initial solid displacement
-     * \param w0: initial mesh velocity
-     * \param df0: mesh displacement of the previous time step (useful if geometry--explicit)
-     */
-    virtual void initialize( fluidPtr_Type::value_type::function_Type const& u0,
-                             fluidPtr_Type::value_type::function_Type const& p0,
-                             solidPtr_Type::value_type::Function const& d0,
-                             solidPtr_Type::value_type::Function const& w0,
-                             fluidPtr_Type::value_type::function_Type const& df0 );
-
-
     //! activates the computation of the wall stress on the boundary with a specified flag.
     /**
        Notice that the specified flag must be in the coupling fluid-structure interface
@@ -339,13 +310,6 @@ public:
     /*!
       \param sol: input pointer
     */
-    virtual void setSolutionPtr                     ( const vectorPtr_Type& sol)=0;
-
-    //! Initializes the solution M_un by copy
-    virtual void initialize( const vector_Type& un ) { M_un.reset( new vector_Type( un ) ); }
-
-    //! set the solution
-    virtual void setSolution( const vector_Type& solution ) = 0;
 
     void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
     {
@@ -416,7 +380,7 @@ public:
         solidVelocity = M_solidTimeAdvance->velocity();
         solidVelocity *= dataSolid()->dataTime()->timeStep() * M_solid->rescaleFactor();
     }
-    //!Get the solid accelration 
+    //!Get the solid accelration
     /*!
       fills an input vector with the solid displacement from the solution.
       \param solidVelocity: input vector (output solid acceleration)
@@ -445,7 +409,7 @@ public:
     virtual const vector_Type& solution() const = 0;
 
     //! get the solution vector
-    virtual vectorPtr_Type& solutionPtr() = 0;
+    virtual vector_Type* solutionPtr() = 0;
 
     //! set the BCs, this method when the boundary conditions  are changed during the simulation
     //! resets the vector of shared pointers to the boundary conditions in the operator and preconditioner
@@ -472,7 +436,7 @@ protected:
        \param rhs: right hand side
        \param un: current solution
     */
-    void couplingRhs( vectorPtr_Type rhs , vectorPtr_Type un );
+    void couplingRhs( vectorPtr_Type rhs);
 
 
     /**\small evaluates the linear residual
@@ -500,7 +464,9 @@ protected:
      */
     void updateSolution( const vector_Type& solution )
     {
-        setSolution( solution );
+        this->M_fluidTimeAdvance->shiftRight(solution);
+        this->M_solidTimeAdvance->shiftRight(solution);
+        //setSolution( solution );
         setDispSolid( solution );
     }
 
@@ -532,7 +498,7 @@ protected:
       \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
       \param solution: current solution, used for the time advance implementation, and thus for the update of the right hand side
     */
-    void assembleSolidBlock(UInt iter, vectorPtr_Type& solution);
+    void assembleSolidBlock(UInt iter, const vector_Type& solution);
 
 
     //! assembles the fluid problem (the matrix and the rhs due to the time derivative)
@@ -540,7 +506,7 @@ protected:
       \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
       \param solution: current solution, used for the time advance implementation, and thus for the update of the right hand side
     */
-    void assembleFluidBlock(UInt iter, vectorPtr_Type& solution);
+    void assembleFluidBlock(UInt iter, const vector_Type& solution);
 
     //! Updates the right hand side
     /**
@@ -594,10 +560,6 @@ protected:
     //@}
 
 private:
-    //!@name Private methods
-    //!@{
-    void initialize( vector_Type const& u0, vector_Type const& p0, vector_Type const& d0);
-    //!@}
     //!@name Private attributes
     //!@{
     //! operator \f$P^{-1}AA^TP^{-T}\f$, where P is the preconditioner and A is the monolithic matrix
