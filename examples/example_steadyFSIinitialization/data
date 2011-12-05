@@ -55,9 +55,9 @@ type       = hdf5
 nRestart   = 0
 
 [./fluid]
-filename   = fluidThin-Steady
+filename   = fluid
 [../solid]
-filename   = solidThin-Steady
+filename   = solid
 [../]
 [../] # exporter
 
@@ -84,7 +84,7 @@ viscosity = 0.035              # viscosity
 
 [../time_discretization]
 initialtime		= 0
-endtime			= 0.002
+endtime			= 0.008
 timestep		= 0.001
 BDF_order		= 1
 
@@ -130,7 +130,7 @@ poisson   = 0.45
 [../time_discretization]
 method                  = Newmark
 initialtime		= 0
-endtime			= 0.002
+endtime			= 0.008
 timestep		= 0.001
 BDF_order		= 2
 theta                   = 0.35

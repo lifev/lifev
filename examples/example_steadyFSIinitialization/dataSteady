@@ -55,9 +55,9 @@ type       = hdf5
 nRestart   = 0
 
 [./fluid]
-filename   = fluidThin-Steady
+filename   = fluid
 [../solid]
-filename   = solidThin-Steady
+filename   = solid
 [../]
 [../] # exporter
 
