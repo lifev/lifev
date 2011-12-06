@@ -354,8 +354,8 @@ public:
     //! Set the preconditioner
     void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
 
-    //! Set the displacement
-    virtual void setDisp(const vector_Type& disp) {*M_disp = disp;} // used for monolithic
+    // //! Set the displacement
+    // virtual void setDisp(const vector_Type& disp) {*M_disp = disp;} // used for monolithic
 
     //! Set the recur parameter
     void setRecur(UInt recur) {M_recur = recur;}
@@ -581,7 +581,7 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
     M_rescaleFactor              ( 1. ),
     M_material                   ( )
 {
-    std::cout << "I am in the constructor for the solver" << std::endl;
+    //    M_Displayer->leaderPrint("I am in the constructor for the solver");
 }
 
 template <typename Mesh, typename SolverType>
@@ -604,11 +604,12 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
     setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
 
     M_rhs.reset                        ( new vector_Type(*M_localMap));
-    M_rhsNoBC.reset                        ( new vector_Type(*M_localMap));
+    M_rhsNoBC.reset                    ( new vector_Type(*M_localMap));
     M_sxx.reset                        ( new vector_Type(*M_localMap) );
     M_syy.reset                        ( new vector_Type(*M_localMap) );
     M_szz.reset                        ( new vector_Type(*M_localMap) );
     M_linearSolver.reset               ( new SolverType( comm ) );
+    M_disp.reset                       ( new vector_Type(*M_localMap));
 }
 
 template <typename Mesh, typename SolverType>
@@ -625,10 +626,11 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
     M_me                              = comm->MyPID();
     M_elmatM.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     M_localMap                        = monolithicMap;
-    M_disp.reset                      (new vector_Type(*M_localMap));
+    //M_disp.reset                      (new vector_Type(*M_localMap));
     M_mass.reset                      (new matrix_Type(*M_localMap));
     M_systemMatrix.reset              (new matrix_Type(*M_localMap));
     M_jacobian.reset                  (new matrix_Type(*M_localMap));
+    //    M_disp.reset                       ( new vector_Type(*M_localMap));// to kill
 
     //Vector of Stiffness for NH and Exp
     //This vector stores the stiffness vector both in
