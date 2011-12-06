@@ -121,7 +121,8 @@ public:
     virtual void coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep);
+                         const Real& timeStep,
+                         const Real& coefficient);
 
 
     //! Adds a coupling part to the already existing coupling matrix
@@ -142,7 +143,9 @@ public:
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
-                 UInt couplingFlag);
+                 const Real& coefficient,
+                 UInt couplingFlag
+                 );
 
     //! returns true if the operator has at least one block
     /*!

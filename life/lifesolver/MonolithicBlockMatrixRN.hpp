@@ -111,7 +111,8 @@ public:
     void coupler(mapPtr_Type& map,
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
-                 const Real& timeStep);
+                 const Real& timeStep,
+                 const Real& coefficient);
 
     //! Sums all the blocks and the couplings into the system matrix, adds the robin coupling part
     void blockAssembling();
