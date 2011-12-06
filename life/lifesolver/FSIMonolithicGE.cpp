@@ -122,7 +122,7 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         iterateMesh(disp);
 
         // Update displacement
-        M_meshMotion->updateDispDiff();
+        //        M_meshMotion->updateDispDiff();
 
         M_beta.reset(new vector_Type(M_uFESpace->map()));
         vector_Type meshDisp( M_meshMotion->disp(), Repeated );
