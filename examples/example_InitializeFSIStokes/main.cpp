@@ -206,6 +206,7 @@ public:
 
         M_fsi->setup(/*data_file*/);
 
+        M_fsi->FSIOper()->fluid().setupPostProc();
         M_fsi->setFluidBC( BCh_monolithicFluid( *M_fsi->FSIOper( ), true ) );
         M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension( *M_fsi->FSIOper( ) ) );
 
@@ -277,7 +278,7 @@ public:
         // load using ensight/hdf5
         std::string initializationType(data_file("importer/initType","newSimulation"));
 	std::cout << "The load state is: "<< initializationType << std::endl;
-	
+
 	if (!initializationType.compare("stokes"))
 	  {
 
@@ -323,9 +324,9 @@ public:
         //LH.initParameters( *M_fsi->FSIOper(), "dataHM");
         M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart  ); //+ M_data->dataFluid()->dataTime()->timeStep()
         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataSolid()->dataTime()->setInitialTime( M_Tstart); // + M_data->dataFluid()->dataTime()->timeStep() 
+        M_data->dataSolid()->dataTime()->setInitialTime( M_Tstart); // + M_data->dataFluid()->dataTime()->timeStep()
         M_data->dataSolid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataALE()->setInitialTime( M_Tstart ); //+ M_data->dataFluid()->dataTime()->timeStep() 
+        M_data->dataALE()->setInitialTime( M_Tstart ); //+ M_data->dataFluid()->dataTime()->timeStep()
         M_data->dataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     }
 
@@ -340,7 +341,6 @@ public:
     run()
     {
         boost::timer _overall_timer;
-
         int iter = 1;
         LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
 
@@ -418,7 +418,7 @@ public:
 
             std::cout << "VelAndPressure norm " << iter << " : "
                       << M_velAndPressure->size() << "\n";
-	    
+
 
 	    if ( M_data->dataFluid()->dataTime()->time() == 0.004 )
 	      {
@@ -594,14 +594,14 @@ void Problem::initializeStokes(vectorPtr_Type& un,  GetPot const& data_file, fsi
   typedef boost::shared_ptr<vector_Type>                   vectorPtr_Type;
   typedef FESpace< Mesh, MapEpetra >                       feSpace_Type;
   typedef boost::shared_ptr<feSpace_Type>                  feSpacePtr_Type;
-  typedef boost::shared_ptr<Epetra_Comm>                   commPtr_Type; 
-  
+  typedef boost::shared_ptr<Epetra_Comm>                   commPtr_Type;
+
   commPtr_Type comunicator=fsiSolver->FSIOper()->fluid().comm();
 
   fsiSolver->FSIOper()->displayer().leaderPrint( " The FSI simulation is going to be initialized by the Stokes solution of the fluid domain \n" );
 
   int numLM = 0; //this is the number of fluxes
-  
+
   MeshData meshData;
   meshData.setup(data_file, "fluid/space_discretization");
 
@@ -640,7 +640,7 @@ void Problem::initializeStokes(vectorPtr_Type& un,  GetPot const& data_file, fsi
   stokes.setUp(data_file);
   stokes.buildSystem();
 
-  vector_Type beta( fullMap ); 
+  vector_Type beta( fullMap );
   vector_Type rhs ( fullMap );
 
   MPI_Barrier( MPI_COMM_WORLD );
@@ -666,7 +666,7 @@ void Problem::initializeStokes(vectorPtr_Type& un,  GetPot const& data_file, fsi
 
   std::string solStokes="stokesSolution";
   stokes.solution()->spy(solStokes);
-  
+
 
   fsiSolver->FSIOper()->displayer().leaderPrint( "Total computational time of Stokes solution  =  ", chrono.diff());
   fsiSolver->FSIOper()->displayer().leaderPrint( "\n" );
@@ -679,7 +679,7 @@ void Problem::initializeStokes(vectorPtr_Type& un,  GetPot const& data_file, fsi
   std::string exporterType =  data_file( "exporter/type", "ensight" );
   std::string fluidName    =  data_file( "exporter/fluid/filename", "fluid" );
 
-  fluidName +="Initialization"; 
+  fluidName +="Initialization";
 
   filterPtr_Type exportInitialize;
 
@@ -697,7 +697,7 @@ void Problem::initializeStokes(vectorPtr_Type& un,  GetPot const& data_file, fsi
 	}
       else
 	{
-	  exportInitialize.reset( new  ensightFilter_Type( data_file, fluidName) );	 
+	  exportInitialize.reset( new  ensightFilter_Type( data_file, fluidName) );
 	}
     }
     vectorPtr_Type velAndPressure ( new vector_Type(*stokes.solution(), exportInitialize->mapType() ) );
