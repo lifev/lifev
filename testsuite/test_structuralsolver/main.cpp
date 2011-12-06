@@ -293,9 +293,9 @@ Structure::run3d()
     //! #################################################################################
     vector <ID> compx(1), compy(1), compz(1), compxy(2), compxz(2), compyz(2);
     compx[0]=0; compy[0]=1, compz[0]=2;
-    compxy[0]=0; compxy[1]=1; 
+    compxy[0]=0; compxy[1]=1;
     compxz[0]=0; compxz[1]=2;
-    compyz[0]=1; compyz[1]=2; 
+    compyz[0]=1; compyz[1]=2;
 
     BCFunctionBase zero(Private::bcZero);
     BCFunctionBase nonZero(Private::bcNonZero);
@@ -328,7 +328,7 @@ Structure::run3d()
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,
                 dFESpace,
-		BCh,
+                BCh,
                 parameters->comm);
 
     //! 3. Setting data from getPot
@@ -426,9 +426,9 @@ Structure::run3d()
     ofstream file_comp( "Displacement_components_NL.m" );
     if ( !file_comp )
     {
-  	std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl; 
+  	std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
     }
-    
+
     int IDPoint = 73; // StructuredCube4
     //int IDPoint = 401; // StructuredCube8
     //int IDPoint = 2593; // StructuredCube16
@@ -446,7 +446,7 @@ Structure::run3d()
 
     for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
     {
-    file_comp<< solid.displacement()[ k ] << " "; 
+    file_comp<< solid.displacement()[ k ] << " ";
     }
 
     file_comp<< endl;
@@ -454,7 +454,7 @@ Structure::run3d()
     //!--------------------------------------------------------------------------------------------
     //!The update of the RHS is done by the TimeAdvance class
     //solid.updateSystem();
-    //! =================================================================================   
+    //! =================================================================================
 
 
 
@@ -487,7 +487,7 @@ Structure::run3d()
 	*solidAcc  = timeAdvance->accelerate();
 
 	exporter->postProcess( time );
-	
+
 	/* This part lets to save the displacement at one point of the mesh and to check the result
 	   w.r.t. manufactured solution.
         //!--------------------------------------------------------------------------------------------------
@@ -496,19 +496,19 @@ Structure::run3d()
 	cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
 	for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
 	{
-		file_comp<< solid.displacement()[ k ] << " "; 
-        	cout.precision(16);     
+		file_comp<< solid.displacement()[ k ] << " ";
+        	cout.precision(16);
 		cout <<"*********************************************************"<< std::endl;
 		cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
 		cout <<"*********************************************************"<< std::endl;
 	}
 	file_comp<< endl;
 	*/
-	
+
 	Real normVect;
 	normVect =  solid.displacement().norm2();
 	std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
-	
+
 	///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
 	    if (!dataStructure->solidType().compare("linearVenantKirchhoff"))
 	      CheckResultLE(normVect,time);
@@ -516,9 +516,9 @@ Structure::run3d()
 	      CheckResultSVK(normVect,time);
 	    else if (!dataStructure->solidType().compare("exponential"))
 	      CheckResultEXP(normVect,time );
-	    else 
+	    else
 	      CheckResultNH(normVect,time );
-	    
+
 	///////// END OF CHECK
 
 

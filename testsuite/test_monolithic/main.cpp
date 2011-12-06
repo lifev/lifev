@@ -529,7 +529,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     //Setting the initialTime and timeStep
     M_Tstart=data_file( "fluid/time_discretization/initialtime", 0.);
     LifeV::Real dt= M_fsi->FSIOper()->dataFluid()->dataTime()->timeStep();
-    
+
 
     using namespace LifeV;
     std::string const importerType =  data_file( "importer/type", "ensight");
@@ -584,7 +584,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
 				  "f-pressure",
 				  M_fsi->FSIOper()->pFESpacePtr(),
 				  velAndPressure,
-				  UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()) );  
+				  UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()) );
 
     M_importerFluid->addVariable( ExporterData<LifeV::FSIOperator::mesh_Type>::VectorField,
 				  "f-displacement",
@@ -605,8 +605,8 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
 				  solidVel,
 				  UInt ( 0 ) );
 
-    M_importerFluid->importFromTime(M_Tstart-dt); 
-    M_importerSolid->importFromTime(M_Tstart-dt); 
+    M_importerFluid->importFromTime(M_Tstart-dt);
+    M_importerSolid->importFromTime(M_Tstart-dt);
 
     //Second part: initialize the FSI solver
     //Fluid
@@ -619,10 +619,10 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     //ALE
     std::vector<vectorPtr_Type> df0;
     df0.push_back(fluidDisp);
-    
-    
-    M_fsi->initialize(u0,ds0,df0);
-    dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->initialize(velAndPressure,fluidDisp,solidDisp,solidVel);
+
+
+    //M_fsi->initialize(u0,ds0,df0);
+    // dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->initialize(velAndPressure,fluidDisp,solidDisp,solidVel);
     //M_fsi->FSIOper()->initialize(velAndPressure,fluidDisp,solidDisp,solidVel);
     std::cout << "Fluid vector: " << velAndPressure->norm2() << std::endl;
     std::cout << "Solid disp: " << solidDisp->norm2() << std::endl;
@@ -630,7 +630,7 @@ void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
     std::cout << "Fluid disp: " << fluidDisp->norm2() << std::endl;
     //    int n;
     //std::cin >> n;
-    
+
 }
 
 void Problem::checkGCEResult(const LifeV::Real& time)
