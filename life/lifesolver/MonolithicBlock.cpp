@@ -38,13 +38,14 @@ namespace LifeV
 // ===================================================
 
 void MonolithicBlock::couplingMatrix(matrixPtr_Type & bigMatrix,
-                                    Int flag,
-                                    const std::vector<fespacePtr_Type>& problem,
-                                    const std::vector<UInt>& offset,
-                                    const std::map<ID, ID>& locDofMap,
-                                    const vectorPtr_Type& numerationInterface,
-                                    const Real& timeStep,
-                                    const Real& value) // not working with non-matching grids
+                                     Int flag,
+                                     const std::vector<fespacePtr_Type>& problem,
+                                     const std::vector<UInt>& offset,
+                                     const std::map<ID, ID>& locDofMap,
+                                     const vectorPtr_Type& numerationInterface,
+                                     const Real& timeStep,
+                                     const Real& value,
+                                     const Real& coefficient) // not working with non-matching grids
 {// coupling from 1 to 31, working as chmod
     if ( flag-31 > 0 )//recursive call
     {
@@ -53,7 +54,7 @@ void MonolithicBlock::couplingMatrix(matrixPtr_Type & bigMatrix,
         std::vector<fespacePtr_Type> newProblem(problem.begin()+3, problem.end());
         std::vector<UInt> newOffset(offset.begin()+3, offset.end());
 
-        couplingMatrix( bigMatrix, subFlag, newProblem, newOffset, locDofMap, numerationInterface, timeStep, value);
+        couplingMatrix( bigMatrix, subFlag, newProblem, newOffset, locDofMap, numerationInterface, timeStep, value, coefficient);
     }
     std::map<ID, ID>::const_iterator ITrow;
     UInt interface(numerationInterface->map().map(Unique)->NumGlobalElements());
@@ -101,7 +102,7 @@ void MonolithicBlock::couplingMatrix(matrixPtr_Type & bigMatrix,
                     newFlag -= 2;
                 }
                 if (newFlag-1>=0)//low right
-                    bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*interface + totalSize, (offset[0] + ITrow->second) + dim* problem[0]->dof().numTotalDof(), -value);//low right
+                    bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*interface + totalSize, (offset[0] + ITrow->second) + dim* problem[0]->dof().numTotalDof(), -value * coefficient);//low right
 
                 bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*interface + totalSize , (int)(*numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] + dim*interface + totalSize, 0.0);
             }

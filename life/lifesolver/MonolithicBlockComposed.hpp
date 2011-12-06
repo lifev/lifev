@@ -158,7 +158,9 @@ public:
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
-                 UInt couplingBlock);
+                 const Real& coefficient,
+                 UInt couplingBlock
+                 );
 
 
     //! pushes a block at the end of the vector

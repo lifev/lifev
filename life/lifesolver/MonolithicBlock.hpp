@@ -211,7 +211,8 @@ public:
     virtual void coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep)=0;
+                         const Real& timeStep,
+                         const Real& coefficient)=0;
 
 
 
@@ -235,11 +236,12 @@ public:
       @param couplingFlag: flag specifying which block must be coupled whith which block.
      */
     virtual void coupler(mapPtr_Type& map,
-                 const std::map<ID, ID>& locDofMap,
-                 const vectorPtr_Type& numerationInterface,
-                 const Real& timeStep,
-                 UInt couplingFlag
-                 )=0;
+                         const std::map<ID, ID>& locDofMap,
+                         const vectorPtr_Type& numerationInterface,
+                         const Real& timeStep,
+                         const Real& coefficient,
+                         UInt couplingFlag
+                         )=0;
 
     //! returns true if the operator is set
     /*!
@@ -350,7 +352,8 @@ public:
                         const std::map<ID, ID>& locDofMap,
                         const vectorPtr_Type& numerationInterface,
                         const Real& timeStep=1.e-3,
-                        const Real& value=1.); // not working with non-matching grids
+                        const Real& value=1.,
+                        const Real& coefficient=1.); // not working with non-matching grids
 
 
     //!sets the vector of raw pointer to the BCHandler

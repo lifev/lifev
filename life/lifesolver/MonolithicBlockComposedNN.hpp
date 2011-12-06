@@ -118,7 +118,8 @@ public:
     virtual void coupler( mapPtr_Type& map,
                           const std::map<ID, ID>& locDofMap,
                           const vectorPtr_Type& numerationInterface,
-                          const Real& timeStep);
+                          const Real& timeStep,
+                          const Real& coefficient);
 
     //!Applies the correspondent boundary conditions to every block
     /*!
