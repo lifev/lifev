@@ -296,7 +296,7 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     if (isFluid())
     {
         M_meshMotion->iterate(*M_BCh_mesh);
-        M_meshMotion->updateDispDiff();
+        // M_meshMotion->updateDispDiff();
 
 
             // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
