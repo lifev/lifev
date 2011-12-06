@@ -260,13 +260,6 @@ FSIMonolithic::monolithicToX(const vector_Type& disp, vector_Type& dispFluid, Ma
     dispFluid.subset(disp, map, offset, offset);
 }
 
-void
-FSIMonolithic::setDispSolid( const vector_Type& solution )
-{
-    vector_Type disp(*M_monolithicMap);
-    monolithicToX(solution, disp, M_dFESpace->map(), M_offset);
-    this->M_solid->setDisp(disp);
-}
 
 void
 FSIMonolithic::buildSystem()

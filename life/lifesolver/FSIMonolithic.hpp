@@ -191,10 +191,10 @@ public:
     */
     void monolithicToX(const vector_Type& disp, vector_Type& dispFluid, MapEpetra& map, UInt offset=(UInt)0);
 
-    /**
-       sets the vector M_solid->dispSolid() to the monolithic solution M_solid->disp() in the solid nodes, to 0 in the fluid nodes
-    */
-    void setDispSolid(const vector_Type& sol);
+    // /**
+    //    sets the vector M_solid->dispSolid() to the monolithic solution M_solid->disp() in the solid nodes, to 0 in the fluid nodes
+    // */
+    // void setDispSolid(const vector_Type& sol);
 
     /**
        builds the constant part of the monolithic matrix
@@ -467,7 +467,7 @@ protected:
         this->M_fluidTimeAdvance->shiftRight(solution);
         this->M_solidTimeAdvance->shiftRight(solution);
         //setSolution( solution );
-        setDispSolid( solution );
+        //setDispSolid( solution );
     }
 
     //! Constructs the solid FESpace
