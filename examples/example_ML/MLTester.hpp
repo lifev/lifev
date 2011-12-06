@@ -339,20 +339,20 @@ testML( bchandler_raw_Type& bch )
 
                             preconditionerPtr_Type prec( (PRECFactory::instance().createObject( "ML" ) ) );
                             prec->setParametersList(MLList);
-                            this->M_linearSolver.setPreconditioner( prec );
+                            this->M_linearSolver->setPreconditioner( prec );
 
                             Epetra_Time Time(*this->getDisplayer().comm());
 
                             this->M_solution->epetraVector().Scale(0.);
 
-                            this->M_linearSolver.setMatrix(*matrFull);
-                            this->M_linearSolver.solveSystem( rhsFull, *this->M_solution, matrFull );
+                            this->M_linearSolver->setMatrix(*matrFull);
+                            this->M_linearSolver->solveSystem( rhsFull, *this->M_solution, matrFull );
 
 
                             this->resetPreconditioner();
 
                             double status[AZ_STATUS_SIZE];
-                            this->M_linearSolver.aztecStatus( status );
+                            this->M_linearSolver->aztecStatus( status );
 
                             if ( status[AZ_why] == AZ_normal         ) AZstatus = "N";
                             else if ( status[AZ_why] == AZ_maxits    ) AZstatus = "M";
@@ -360,7 +360,7 @@ testML( bchandler_raw_Type& bch )
                             else if ( status[AZ_why] == AZ_ill_cond  ) AZstatus = "I";
                             else if ( status[AZ_why] == AZ_breakdown ) AZstatus = "B";
 
-                            int MLIters   = this->M_linearSolver.numIterations();
+                            int MLIters   = this->M_linearSolver->numIterations();
                             double MLTime = Time.ElapsedTime();
 
                             if (AZstatus == "N")
