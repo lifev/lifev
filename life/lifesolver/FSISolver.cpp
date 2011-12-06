@@ -289,7 +289,6 @@ FSISolver::initialize( fluidFunction_Type const& u0,
                        solidFunction_Type const& w0,
                        fluidFunction_Type const& df0)
 {
-    M_oper->initialize(u0, p0 , d0, w0, df0);
 }
 
 
@@ -304,13 +303,14 @@ FSISolver::iterate()
     // Update the system
     M_oper->updateSystem( );
 
-    // We extract a copy to the solution (\todo{uselessly})
-    vectorPtr_Type lambda(new vector_Type(M_oper->solution()));
+    // We extract a pointer to the solution (\todo{uselessly})
+    //    vector_Type* lambda = M_oper->solutionPtr();
+    vector_Type lambda = M_oper->solution();
     //M_oper->solutionPtr(lambda);//copy of a shared_ptr
 
     // the newton solver
     UInt maxiter = M_data->maxSubIterationNumber();
-    UInt status = NonLinearRichardson( *lambda,
+    UInt status = NonLinearRichardson( lambda,
                                        *M_oper,
                                        M_data->absoluteTolerance(),
                                        M_data->relativeTolerance(),
@@ -320,8 +320,8 @@ FSISolver::iterate()
                                        M_out_res,
                                        M_data->dataFluid()->dataTime()->time() );
 
-    // We update the solution
-    M_oper->updateSolution( *lambda );
+    // We update the solution pointer
+    M_oper->updateSolution( lambda );
 
     if (status == EXIT_FAILURE)
     {
