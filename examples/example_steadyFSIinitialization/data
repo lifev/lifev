@@ -40,7 +40,7 @@ updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
 abstol     =  0. # tolerance in nonLinearRichardson
-reltol     =  1.e-5 # tolerance in nonLinearRichardson
+reltol     =  1.e-4 # tolerance in nonLinearRichardson
 
 restart    = 0
 maxSubIter = 100
