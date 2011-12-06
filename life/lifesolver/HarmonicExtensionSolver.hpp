@@ -135,13 +135,13 @@ public:
     /*!
         @param disp vector of displacements to initialize the simulation
      */
-    void initialize( const vector_Type& disp )  { setDispOld(disp); }
+    //    void initialize( const vector_Type& disp )  { setDispOld(disp); }
 
     //! Update system
     /*!
       No argument is needd to update the system
      */
-    void updateSystem();
+    // void updateSystem();
 
     //! Update convective term, boundary condition and solve the linearized ns system
     /*!
@@ -176,19 +176,19 @@ public:
 
     //@}
 
-    //! @name Set Methods
-    //@{
-    void setDisplacement(const vector_Type &disp) { *M_disp = disp;}
-    void setDispOld(const vector_Type &disp)  {    *M_dispOld=disp;  }
+    // //! @name Set Methods
+    // //@{
+    // void setDisplacement(const vector_Type &disp) { *M_disp = disp;}
+    // void setDispOld(const vector_Type &disp)  {    *M_dispOld=disp;  }
 
     //! @name Get Methods
     //@{
 
-    vector_Type const& dispOld() const  {return *M_dispOld;}
+    //    vector_Type const& dispOld() const  {return *M_dispOld;}
 
-    vector_Type const& dispDiff() const {return *M_dispDiff;}
+    // vector_Type const& dispDiff() const {return *M_dispDiff;}
     vector_Type const& disp()     const {return *M_disp;}
-    vector_Type const& dispPtr()     const {return *M_disp;}
+    // vector_Type const& dispPtr()     const {return *M_disp;}
 
     MapEpetra const& getMap() const { return M_localMap; }
 
@@ -217,9 +217,9 @@ private:
     MatrixElemental                        M_elmat;
 
     //! The actual extension of the displacement
-    vectorPtr_Type                    M_disp;
-    vectorPtr_Type                    M_dispOld;
-    vectorPtr_Type                    M_dispDiff;
+     vectorPtr_Type                    M_disp;
+    // vectorPtr_Type                    M_dispOld;
+    // vectorPtr_Type                    M_dispDiff;
 
     //! Auxiliary vector holding the second right hand of the system
     vectorPtr_Type                    M_secondRHS;
@@ -250,8 +250,8 @@ HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>& mmFESpace,
         M_verbose               ( M_me == 0 ),
         M_elmat                 ( M_FESpace.fe().nbFEDof(), nDimensions, nDimensions ),
         M_disp                  (/* M_localMap*/ ),
-        M_dispOld               (/* M_localMap*/ ),
-        M_dispDiff              (/* M_localMap*/ ),
+        // M_dispOld               (/* M_localMap*/ ),
+        // M_dispDiff              (/* M_localMap*/ ),
         M_secondRHS             (/* M_localMap*/ ),
         M_linearSolver          (/* comm*/ ),
         M_diffusion             ( 1. ),
@@ -272,9 +272,9 @@ HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>& mmFESpace,
         M_me                    ( comm->MyPID() ),
         M_verbose               ( M_me == 0 ),
         M_elmat                 ( M_FESpace.fe().nbFEDof(), nDimensions, nDimensions ),
-        M_disp                  (/* mmFESpace.map()*/ ),
-        M_dispOld               (/* M_disp.map()*/ ),
-        M_dispDiff              (/* M_disp.map()*/ ),
+        // M_disp                  (/* mmFESpace.map()*/ ),
+        // M_dispOld               (/* M_disp.map()*/ ),
+        // M_dispDiff              (/* M_disp.map()*/ ),
         M_secondRHS             (/* M_disp.map()*/ ),
         M_linearSolver          (/* comm*/ ),
         M_diffusion             ( 1. ),
@@ -300,21 +300,21 @@ void HarmonicExtensionSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_linearSolver->setMatrix( *M_matrHE );
     M_secondRHS.reset(new vector_Type(M_FESpace.map()));
     M_disp.reset(new vector_Type(M_FESpace.map()));
-    M_dispDiff.reset(new vector_Type(M_FESpace.map()));
-    M_dispOld.reset(new vector_Type(M_FESpace.map()));
+    // M_dispDiff.reset(new vector_Type(M_FESpace.map()));
+    // M_dispOld.reset(new vector_Type(M_FESpace.map()));
 } // end setUp
 
 
-template <typename Mesh, typename SolverType>
-void
-HarmonicExtensionSolver<Mesh, SolverType>::updateSystem()
-{
-    M_displayer.leaderPrint(" HE-  Updating the system ...                  ");
+// template <typename Mesh, typename SolverType>
+// void
+// HarmonicExtensionSolver<Mesh, SolverType>::updateSystem()
+// {
+//     M_displayer.leaderPrint(" HE-  Updating the system ...                  ");
 
-    *M_dispOld = *M_disp;
+//     //   *M_dispOld = *M_disp;
 
-    M_displayer.leaderPrint("done \n");
-}
+//     M_displayer.leaderPrint("done \n");
+// }
 
 template <typename Mesh, typename SolverType>
 void
@@ -394,13 +394,13 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
 }
 
 
-template <typename Mesh, typename SolverType>
-void
-HarmonicExtensionSolver<Mesh, SolverType>::updateDispDiff()
-{
-    *M_dispDiff =  *M_disp ;
-    *M_dispDiff -= *M_dispOld;
-}
+// template <typename Mesh, typename SolverType>
+// void
+// HarmonicExtensionSolver<Mesh, SolverType>::updateDispDiff()
+// {
+//     *M_dispDiff =  *M_disp ;
+//     *M_dispDiff -= *M_dispOld;
+// }
 
 
 } // namespace LifeV
