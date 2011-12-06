@@ -581,13 +581,13 @@ public:
     //! getter for the fluid velocity
     const vector_Type& un()                                      const { return M_fluidTimeAdvance->solution(); }
 
-    const boost::shared_ptr<const TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
-    const boost::shared_ptr<const TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
-    const boost::shared_ptr<const TimeAdvance<vector_Type> > solidTimeAdvance()const { return  M_solidTimeAdvance; }
+    const boost::shared_ptr<TimeAdvance<vector_Type> > ALETimeAdvance() const { return  M_ALETimeAdvance; }
+    const boost::shared_ptr<TimeAdvance<vector_Type> > fluidTimeAdvance() const { return  M_fluidTimeAdvance; }
+    const boost::shared_ptr<TimeAdvance<vector_Type> > solidTimeAdvance() const { return  M_solidTimeAdvance; }
 
-    const string ALETimeAdvanceMethod() const { return  M_ALETimeAdvanceMethod; }
-    const string fluidTimeAdvanceMethod()const { return  M_fluidTimeAdvanceMethod; }
-    const string solidTimeAdvanceMethod()const { return  M_solidTimeAdvanceMethod; }
+    const string ALETimeAdvanceMethod()  { return  M_ALETimeAdvanceMethod; }
+    const string fluidTimeAdvanceMethod() { return  M_fluidTimeAdvanceMethod; }
+    const string solidTimeAdvanceMethod() { return  M_solidTimeAdvanceMethod; }
 
 
     //! gets the solution vector by reference
@@ -726,6 +726,11 @@ public:
 
     //! Setter for the Robin coefficient of the Robin--Neumann coupling scheme (as a BCFunction)
     void setAlphafbcf  ( const bcFunction_Type& alphafbcf );
+
+    //! Setting the timeAdvance
+    void setTimeAdvances (boost::shared_ptr<TimeAdvance<vector_Type> > fluidTimeAdvance,
+			  boost::shared_ptr<TimeAdvance<vector_Type> > solidTimeAdvance,
+			  boost::shared_ptr<TimeAdvance<vector_Type> > ALETimeAdvance);
 
 //     void setMpi     (bool mpi  ){M_mpi      = mpi;}
 //     void setFluidMpi(bool fluid){M_isFluidMpi = fluid;}

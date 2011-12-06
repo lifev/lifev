@@ -124,6 +124,8 @@ public:
   typedef LifeV::FSIOperator::vector_Type        vector_Type;
   typedef LifeV::FSIOperator::vectorPtr_Type     vectorPtr_Type;
 
+  typedef boost::shared_ptr<LifeV::TimeAdvance<LifeV::VectorEpetra> >  timeAdvancePtr_Type;
+
   typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > filterPtr_Type;
 
   typedef LifeV::ExporterEnsight<LifeV::FSIOperator::mesh_Type>  ensightFilter_Type;
@@ -142,10 +144,15 @@ public:
     -# initialize and setup the FSIsolver
   */
 
+  //This constructor builds the steadyFSI problem
+
   Problem( GetPot const& data_file ):
     M_Tstart(0.),
-    M_solution( ),
-    M_ALESol( )
+    //M_solution( ),
+    //M_ALESol( ),
+    M_fluidTime( ),
+    M_ALETime( ),
+    M_solidTime( )
   {
     using namespace LifeV;
 	
@@ -208,6 +215,9 @@ public:
     M_fsi->setSolidBC( BCh_steadyMonolithicSolid( *M_fsi->FSIOper( ) ) );
 
     M_fsi->setup(/*data_file*/);
+
+    //To activate the postProcessing feature in OseenSolver
+    M_fsi->FSIOper()->fluid().setupPostProc();
     M_fsi->setFluidBC( BCh_steadyMonolithicFluid( *M_fsi->FSIOper( ), true ) );
     M_fsi->setHarmonicExtensionBC( BCh_steadyHarmonicExtension( *M_fsi->FSIOper( ) ) );
 
@@ -243,9 +253,17 @@ public:
 	    M_exporterSolidStokes.reset( new  ensightFilter_Type ( data_file, solidName) );
 	  }
       }
+    //Creating the vector to export variables
+    //Fluid
     M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluidStokes->mapType() ));
     M_fluidDisp.reset     ( new vector_Type( M_fsi->FSIOper()->mmFESpace().map(), M_exporterFluidStokes->mapType() ));
+    //Solid
+    M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolidStokes->mapType() ));
+    M_solidVel.reset(  new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolidStokes->mapType() ));
+    M_solidAcc.reset(  new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolidStokes->mapType() ));
+    //M_WS.reset           ( new vector_Type(  M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
+    //Setting the exporters and defining the variable which has to be saved
     M_exporterFluidStokes->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
     M_exporterSolidStokes->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
     M_exporterFluidStokes->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "f-velocity",
@@ -257,13 +275,6 @@ public:
     M_exporterFluidStokes->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "f-displacement",
 					M_fsi->FSIOper()->mmFESpacePtr(), M_fluidDisp, UInt(0) );
 
-
-
-    M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolidStokes->mapType() ));
-    M_solidVel.reset(  new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolidStokes->mapType() ));
-    M_solidAcc.reset(  new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolidStokes->mapType() ));
-    //        M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-    //M_WS.reset           ( new vector_Type(  M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
     M_exporterSolidStokes->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-displacement",
 					M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
@@ -293,6 +304,7 @@ public:
     M_data->dataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
 
     //initializing the post-process
+    //This saves the zero solution!
     M_exporterFluidStokes->postProcess( M_data->dataFluid()->dataTime()->initialTime() );//ugly way to avoid that hdf5 starts with a deformed mesh
     M_exporterSolidStokes->postProcess( M_data->dataFluid()->dataTime()->initialTime() );//ugly way to avoid that hdf5 starts with a deformed mesh
 
@@ -304,8 +316,10 @@ public:
     using namespace LifeV;
     boost::timer _overall_timer;
 
-    M_solution.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap() ,LifeV::Unique));
-    M_ALESol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap() ,LifeV::Unique));
+    //Resetting the timeAdvance Objects of the class
+    M_fluidTime.reset(TimeAdvanceFactory::instance().createObject( M_fsi->FSIOper()->fluidTimeAdvanceMethod() ));
+    M_solidTime.reset(TimeAdvanceFactory::instance().createObject( M_fsi->FSIOper()->solidTimeAdvanceMethod()  ));
+    M_ALETime.reset(TimeAdvanceFactory::instance().createObject( M_fsi->FSIOper()->ALETimeAdvanceMethod()  ));
 
     int iter = 1;
     LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
@@ -346,18 +360,29 @@ public:
 	      << _overall_timer.elapsed() << "s" << "\n";
 	
     //resetting the pointer to the right type vector
-    M_solution = M_fsi->FSIOper()->solutionPtr();
+    //M_solution = M_fsi->FSIOper()->solutionPtr();
 
     //Setting the vectors for the stencils
-    *M_ALESol = M_fsi->FSIOper()->meshDisp();
+    //*M_ALESol = M_fsi->FSIOper()->meshDisp();
+
+    //The timeAdvance classes are saved to be passed to the other simulation
+    //It can be used only for this case!
+    M_fluidTime = M_fsi->FSIOper()->fluidTimeAdvance();
+    M_solidTime = M_fsi->FSIOper()->solidTimeAdvance();
+    M_ALETime = M_fsi->FSIOper()->ALETimeAdvance();
   }
 
 
-  Problem( GetPot const& data_file, boost::shared_ptr<LifeV::VectorEpetra> soluzione,
-	   boost::shared_ptr<LifeV::VectorEpetra> ALEVector):
+  Problem( GetPot const& data_file,
+	   boost::shared_ptr<LifeV::TimeAdvance<LifeV::VectorEpetra > > fluidTimeAdvance,
+	   boost::shared_ptr<LifeV::TimeAdvance<LifeV::VectorEpetra > > solidTimeAdvance,
+	   boost::shared_ptr<LifeV::TimeAdvance<LifeV::VectorEpetra > > ALETimeAdvance):
     M_Tstart(0.0),
-    M_solution( ),
-    M_ALESol( )
+    //M_solution( ),
+    //M_ALESol( ),
+    M_fluidTime( ),
+    M_solidTime( ),
+    M_ALETime( )
   {
     using namespace LifeV;
 	
@@ -420,6 +445,7 @@ public:
 
     M_fsi->setup(/*data_file*/);
 
+    M_fsi->FSIOper()->fluid().setupPostProc();
     M_fsi->setFluidBC( BCh_monolithicFluid( *M_fsi->FSIOper( ), true ) );
     M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension( *M_fsi->FSIOper( ) ) );
 
@@ -451,16 +477,26 @@ public:
 	    M_exporterSolid.reset( new  ensightFilter_Type ( data_file, solidName) );
 	  }
       }
-    //Saving the solution
-    std::cout << "saving the solution "<< std::endl;
-    M_solution.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap() ,LifeV::Unique));
-    M_ALESol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap() ,LifeV::Unique));
-    M_solution = soluzione;
-    M_ALESol = ALEVector;
-    
+    //resetting the pointers for the timeAdvances
+    M_fluidTime.reset(TimeAdvanceFactory::instance().createObject( M_fsi->FSIOper()->fluidTimeAdvanceMethod() ));
+    M_solidTime.reset(TimeAdvanceFactory::instance().createObject( M_fsi->FSIOper()->solidTimeAdvanceMethod()  ));
+    M_ALETime.reset(TimeAdvanceFactory::instance().createObject(   M_fsi->FSIOper()->ALETimeAdvanceMethod()  ));
+
+    M_fluidTime = fluidTimeAdvance;
+    M_solidTime = solidTimeAdvance;
+    M_ALETime = ALETimeAdvance;
+
+    //Creating vector for post-processing
+    //Fluid
     M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ));
     M_fluidDisp.reset     ( new vector_Type( M_fsi->FSIOper()->mmFESpace().map(), M_exporterFluid->mapType() ));
+    //Solid
+    M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
+    M_solidVel.reset(  new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
+    M_solidAcc.reset(  new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
+    M_WS.reset           ( new vector_Type(  M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
+    //Setting the exporter
     M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
     M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
     M_exporterFluid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "f-velocity",
@@ -472,12 +508,6 @@ public:
     M_exporterFluid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "f-displacement",
 				  M_fsi->FSIOper()->mmFESpacePtr(), M_fluidDisp, UInt(0) );
 
-    M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-    M_solidVel.reset(  new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-    M_solidAcc.reset(  new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-           M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-    M_WS.reset           ( new vector_Type(  M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-
     M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-displacement",
 				  M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
     M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-velocity",
@@ -486,52 +516,25 @@ public:
 				  M_fsi->FSIOper()->dFESpacePtr(), M_solidAcc, UInt(0) );
 
     M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-ws",
-    M_fsi->FSIOper()->dFESpacePtr(), M_WS, UInt(0) );
+				  M_fsi->FSIOper()->dFESpacePtr(), M_WS, UInt(0) );
 
 
     dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->mergeBCHandlers();
 
     //Initialization
     M_fsi->FSIOper()->displayer().leaderPrint( " The Simulation is Unsteady! \n" );
-    //Getting the offset
-    UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
-    UInt offsetLambda = offset + M_fsi->FSIOper()->dFESpace().dof().numTotalDof();
-
-    //Initialization of the stencils
-    std::vector<vectorPtr_Type> fluidStencil;
-    std::vector<vectorPtr_Type> solidStencil;
-    std::vector<vectorPtr_Type> ALEStencil;
-
     M_fsi->FSIOper()->displayer().leaderPrint( " \n " );
 
-    //Create the proper vector for the fluid Stencil
-    vectorPtr_Type copySol(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-    copySol = M_solution;
-    M_fsi->FSIOper()->displayer().leaderPrint( " Saving the solution \n" );
+    //Setting the timeAdvances with timeAdvance classes of the steady Sim
+    M_fsi->FSIOper()->setTimeAdvances(M_fluidTime,M_solidTime,M_ALETime);
 
-    for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->fluidTimeAdvance()->size(); ++iterInit )
-      {
-	fluidStencil.push_back(copySol);
-      }
-
-    for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->solidTimeAdvance()->size(); ++iterInit )
-      {
-	solidStencil.push_back(copySol);
-      }
-     
-    for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->ALETimeAdvance()->size(); ++iterInit )
-      {
-	ALEStencil.push_back(M_ALESol);	    
-      }
-
-
-    M_fsi->initialize(fluidStencil,solidStencil,ALEStencil);
     //Setting the solution
-    M_fsi->FSIOper()->setSolution(*M_solution);
+    //M_fsi->FSIOper()->setSolution(*M_solution);
 
+    //Initializing Absorbing
     FC0.initParameters( *M_fsi->FSIOper(), 3);
 
-    //LH.initParameters( *M_fsi->FSIOper(), "dataHM");
+    //Setting initial time and current time = initialTime
     M_data->dataFluid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime()  ); //+ M_data->dataFluid()->dataTime()->timeStep()
     M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     M_data->dataSolid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() ); // + M_data->dataFluid()->dataTime()->timeStep() 
@@ -539,10 +542,7 @@ public:
     M_data->dataALE()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() ); //+ M_data->dataFluid()->dataTime()->timeStep() 
     M_data->dataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
 
-    //initializing post-process (In this case, the stokes solution is exported)
     M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
-    //M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
-    //M_fsi->FSIOper()->exportSolidAcceleration(*M_solidAcc);//    displacement(), M_offset);
     M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);    
     *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
     M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->initialTime() );
@@ -625,9 +625,9 @@ public:
 
   vectorPtr_Type solutionStokes() {return M_solution;}
 
-  vectorPtr_Type fluidSol() {return M_fluidSol;}
-  vectorPtr_Type solidSol() {return M_solidSol;}
-  vectorPtr_Type ALESol()   {return M_ALESol;}
+  timeAdvancePtr_Type fluidTA() {return M_fluidTime;}
+  timeAdvancePtr_Type solidTA() {return M_solidTime;}
+  timeAdvancePtr_Type ALETA()   {return M_ALETime;}
 
 
 private:
@@ -650,10 +650,11 @@ private:
   vectorPtr_Type M_solidAcc;
 
   vectorPtr_Type M_solution;
-  vectorPtr_Type M_fluidSol;
-  vectorPtr_Type M_solidSol;
-  vectorPtr_Type M_ALESol;
-  //    vectorPtr_Type M_solidVel;
+
+  timeAdvancePtr_Type M_fluidTime;
+  timeAdvancePtr_Type M_ALETime;
+  timeAdvancePtr_Type M_solidTime;
+
   LifeV::FlowConditions FC0;
   LifeV::Real    M_Tstart;
   vectorPtr_Type M_WS;
@@ -678,30 +679,32 @@ struct FSIChecker
 
   void operator()()
   {
-    boost::shared_ptr<Problem>             fsip;
-    boost::shared_ptr<Problem>             fsipSteady;
-    boost::shared_ptr<LifeV::VectorEpetra> soluzione;
-    boost::shared_ptr<LifeV::VectorEpetra> fluidVector;
-    boost::shared_ptr<LifeV::VectorEpetra> solidVector;
-    boost::shared_ptr<LifeV::VectorEpetra> ALEVector;
+
+    typedef boost::shared_ptr<Problem>                                   problemPtr_Type;
+    typedef boost::shared_ptr<LifeV::VectorEpetra>                       vectorPtr_Type;
+    typedef boost::shared_ptr<LifeV::TimeAdvance<LifeV::VectorEpetra> >  timeAdvancePtr_Type;
+
+    problemPtr_Type  fsip;
+    problemPtr_Type  fsipSteady;
+    vectorPtr_Type   soluzione;
+
+    timeAdvancePtr_Type ALETimeAdvance;
+    timeAdvancePtr_Type fluidTimeAdvance;
+    timeAdvancePtr_Type solidTimeAdvance;
 
     try
       {
-	fsipSteady = boost::shared_ptr<Problem>( new Problem( dataSteady ) );
+	fsipSteady = problemPtr_Type( new Problem( dataSteady ) );
 	fsipSteady->runStokes();
 	 
-	soluzione.reset(new LifeV::VectorEpetra(*(fsipSteady->fsiSolver()->FSIOper()->couplingVariableMap()), LifeV::Unique));
-	soluzione = fsipSteady->solutionStokes();
-
-	fluidVector.reset(new LifeV::VectorEpetra(*(fsipSteady->fsiSolver()->FSIOper()->couplingVariableMap()), LifeV::Unique));
-	solidVector.reset(new LifeV::VectorEpetra(*(fsipSteady->fsiSolver()->FSIOper()->couplingVariableMap()), LifeV::Unique));
-	ALEVector.reset(new LifeV::VectorEpetra(*(fsipSteady->fsiSolver()->FSIOper()->couplingVariableMap()), LifeV::Unique));
-
-	//fluidVector = fsipSteady->fluidSol();
-	//solidVector = fsipSteady->solidSol();
-	ALEVector = fsipSteady->ALESol();
-
-	fsip = boost::shared_ptr<Problem>( new Problem( data_file,soluzione, ALEVector ) );
+	//soluzione.reset(new LifeV::VectorEpetra(*(fsipSteady->fsiSolver()->FSIOper()->couplingVariableMap()), LifeV::Unique));
+	//soluzione = fsipSteady->solutionStokes();
+	
+	fluidTimeAdvance = fsipSteady->fluidTA();
+	solidTimeAdvance = fsipSteady->solidTA();
+	ALETimeAdvance   = fsipSteady->ALETA();
+	
+	fsip = problemPtr_Type( new Problem( data_file, fluidTimeAdvance, solidTimeAdvance, ALETimeAdvance ) );
 	fsip->run();
       }
     catch ( std::exception const& _ex )

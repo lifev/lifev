@@ -677,6 +677,17 @@ FSIOperator::initialize( std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorP
 
 
 void
+FSIOperator::setTimeAdvances (const boost::shared_ptr<TimeAdvance<vector_Type> > fluidTimeAdvance,
+			      const boost::shared_ptr<TimeAdvance<vector_Type> > solidTimeAdvance,
+			      const boost::shared_ptr<TimeAdvance<vector_Type> > ALETimeAdvance)
+{
+  M_fluidTimeAdvance = fluidTimeAdvance;
+  M_solidTimeAdvance = solidTimeAdvance;
+  M_ALETimeAdvance = ALETimeAdvance;
+}
+
+
+void
 FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 {
 
