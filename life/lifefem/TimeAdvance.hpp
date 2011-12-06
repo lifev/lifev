@@ -422,6 +422,8 @@ public:
     */
     inline UInt size() const  {return M_size;}
 
+    /*!Returns a pointer to the vector of solutions stored in M_unknowns
+     */
     feVectorContainerPtr_Type& stencil() { return M_unknowns; }
     //@}
 
