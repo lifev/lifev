@@ -520,7 +520,7 @@ public:
     const FESpace<mesh_Type, MapEpetra>& mmFESpace()              const { return *M_mmFESpace; }
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > mmFESpacePtr() const { return M_mmFESpace; }
     //!getter for the harmonic extension solution
-    const vector_Type& meshDisp()                         const { return *M_ALETimeAdvance->stencil()[0]; }
+    const vector_Type& meshDisp()                         const { return M_ALETimeAdvance->singleElement(0); }
     //!getter for the harmonic extension solution of the previous time step
     const         vector_Type& dispFluidMeshOld()                 const { return *M_dispFluidMeshOld; }
     //!getter for the mesh velocity
@@ -579,7 +579,7 @@ public:
     const vectorPtr_Type& getRHS()                                  const { return M_rhs; }
 
     //! getter for the fluid velocity
-    const vectorPtr_Type& un()                                      const { return M_un; }
+    const vector_Type& un()                                      const { return M_fluidTimeAdvance->solution(); }
 
     const boost::shared_ptr<const TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
     const boost::shared_ptr<const TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
@@ -602,7 +602,7 @@ public:
     //! gets the solid velocity by copy
     virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solidTimeAdvance->velocity(); }
 
-    virtual vectorPtr_Type& solutionPtr()                                 { return M_lambda; }
+    virtual vector_Type* solutionPtr()                                 { return M_lambda.get(); }
 
     //! Export the solid displacement by copying it to an external vector
     /*!
@@ -910,7 +910,6 @@ protected:
     vectorPtr_Type                    M_lambdaDot;
 
 
-    vectorPtr_Type                    M_un;
     vectorPtr_Type                    M_rhs;
     vectorPtr_Type                    M_Alphaf;
 

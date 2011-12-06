@@ -113,7 +113,6 @@ FSIOperator::FSIOperator():
     M_lambdaFluidRepeated                ( ),
     M_lambda                             ( ),
     M_lambdaDot                          ( ),
-    M_un                                 ( ),
     M_rhs                                ( ),
     M_Alphaf                             ( ), //vector_Type, for alphaf robin
     M_AlphafCoef                         ( 0 ),
@@ -543,9 +542,6 @@ FSIOperator::updateSystem()
 
       transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
 
-      if ( M_fluid->solution().get() )
-          M_un.reset( new vector_Type( *M_fluid->solution() ) );
-
       *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
   }
 
@@ -589,11 +585,11 @@ void FSIOperator::couplingVariableExtrap( )
 void
 FSIOperator::updateSolution( const vector_Type& solution )
 {
-    setSolution( solution );
     if ( this->isFluid() )
     {
       M_ALETimeAdvance->shiftRight( this->M_meshMotion->disp() );
-      M_fluidTimeAdvance->shiftRight( *this->M_un );
+      M_fluidTimeAdvance->shiftRight( *M_fluid->solution()
+                                      );
     }
   if ( this->isSolid())
     M_solidTimeAdvance->shiftRight( M_solid->displacement());
@@ -783,7 +779,7 @@ FSIOperator::initializeFluid( const vector_Type& velAndPressure,
                               const vector_Type& displacement )
 {
     this->fluid().initialize( velAndPressure );
-    this->meshMotion().initialize( displacement );
+    //this->meshMotion().initialize( displacement );
     this->moveMesh( displacement);
 }
 
