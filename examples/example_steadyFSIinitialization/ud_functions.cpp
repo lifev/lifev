@@ -352,12 +352,13 @@ Real pressure(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Rea
     case 0:
         return 0.0;
         break;
-    case 2:
-        return 1.3332;
-        break;
     case 1:
         return 0.0;
         break;
+    case 2:
+        return 257.47;
+        break;
+
     }
     return 0;
 }
@@ -422,7 +423,7 @@ Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
 
 Real tubeNew(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -2.4116;
+  return -3.7614;
 }
 
 Real squareSinusoidalFluxFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)

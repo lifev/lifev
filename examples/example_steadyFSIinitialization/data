@@ -40,7 +40,7 @@ updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
 abstol     =  0. # tolerance in nonLinearRichardson
-reltol     =  1.e-4 # tolerance in nonLinearRichardson
+reltol     =  1.e-5 # tolerance in nonLinearRichardson
 
 restart    = 0
 maxSubIter = 100
@@ -55,9 +55,9 @@ type       = hdf5
 nRestart   = 0
 
 [./fluid]
-filename   = fluid
+filename   = fluidFlux
 [../solid]
-filename   = solid
+filename   = solidFlux
 [../]
 [../] # exporter
 
@@ -84,13 +84,13 @@ viscosity = 0.035              # viscosity
 
 [../time_discretization]
 initialtime		= 0
-endtime			= 0.008
+endtime			= 0.011
 timestep		= 0.001
 BDF_order		= 1
 
 [../space_discretization]
 mesh_dir  = ./Mesh/
-mesh_file = tube20.mesh #aorta_fluid_scaled.mesh
+mesh_file = stokes_fluid.mesh #aorta_fluid_scaled.mesh
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
 stiff_strain    = true
@@ -103,8 +103,8 @@ steady    = 0
 factor    = 1
 
 [../ipstab]
-gammaBeta  = 1
-gammaDiv   = 0.2
+gammaBeta  = 0.150
+gammaDiv   = 0.125
 gammaPress = 0.05
 reuse = true
 [../] # physics
@@ -130,7 +130,7 @@ poisson   = 0.45
 [../time_discretization]
 method                  = Newmark
 initialtime		= 0
-endtime			= 0.008
+endtime			= 0.011
 timestep		= 0.001
 BDF_order		= 2
 theta                   = 0.35
@@ -138,12 +138,11 @@ zeta                    = 0.75
 
 [../space_discretization]
 mesh_dir  = ./Mesh/ #test_tubes/  # the directory where the mesh file is
-mesh_file = vessel20.mesh  # mesh file
+mesh_file = stokesthin_solid.mesh  # mesh file
 order     = P1
 
-
 [../miscellaneous]
-factor    = 12
+factor    = 1
 verbose   = 1
 depname   = dep
 

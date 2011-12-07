@@ -132,6 +132,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_steadyMonolithicFluid(FSIOperator &_oper
 
     BCFunctionBase bcf      (fZero);
     BCFunctionBase in_flow  (/*uInterpolated*/u2normal/*aortaPhisPress*/);
+    BCFunctionBase in_pres  (pressure);
     //    BCFunctionBase out_flow (fZero);
     //BCFunctionBase in_flow  (LumpedHeart::outPressure);
 
@@ -140,6 +141,8 @@ FSIOperator::fluidBchandlerPtr_Type BCh_steadyMonolithicFluid(FSIOperator &_oper
 
     BCFunctionBase in_vel   ( vinit );
 
+
+    //BCh_fluid->addBC("Edges", INLET, Natural, Full, in_pres,   3);
     BCh_fluid->addBC("Edges", INOUTEDGE, Essential, Full, bcf,   3);
     BCh_fluid->addBC("Edges", INEDGE, Essential, Full, bcf,   3);
 
