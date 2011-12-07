@@ -55,22 +55,22 @@ type       = hdf5
 nRestart   = 0
 
 [./fluid]
-filename   = fluid3
+filename   = fluid
 [../solid]
-filename   = solid3
+filename   = solid
 [../]
 [../] # exporter
 
 [importer]
-restartType=none # restartFSI
-#initSol = 00002
-#initSolFD = 00006
-#restart_timestep = 0.001
+restartType=restartFSI
+initSol=00007
+initSolFD=00006
+restart_timestep=0.005
 type       = hdf5
 [./fluid]
-filename   = fluidtotal
+filename   = fluidtot
 [../solid]
-filename   = solidtotal
+filename   = solidtot
 [../]
 
 [fluid]
@@ -84,10 +84,10 @@ density   = 1.0               # density
 viscosity = 0.035              # viscosity
 
 [../time_discretization]
-initialtime		= 0.004
+initialtime		= 0.005
 endtime			= 0.008
 timestep		= 0.001
-BDF_order		= 3
+BDF_order		= 1
 
 [../space_discretization]
 mesh_dir  = ./Mesh/
@@ -130,10 +130,10 @@ poisson   = 0.45
 
 [../time_discretization]
 method                  = BDF #Newmark
-initialtime		= 0.004
+initialtime		= 0.005
 endtime			= 0.008
 timestep		= 0.001
-BDF_order		= 3
+BDF_order		= 2
 theta                   = 0.35
 zeta                    = 0.75
 

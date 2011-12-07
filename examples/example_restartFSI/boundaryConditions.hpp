@@ -139,13 +139,14 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool
     BCFunctionBase bcfw0 (w0);
 
     BCFunctionBase in_vel   ( vinit );
+    BCFunctionBase in_press   ( u2 );
 
-    BCh_fluid->addBC("InFlow" , INLET,  EssentialVertices, Full, in_vel, 3);
+    BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, in_press, 3);
     //BCh_fluid->addBC("InFlow" , INLET,  Natural, Normal, in_flow);
 //     if(!isOpen)
 //         BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, bcf, 3);
 
-    //BCh_fluid->addBC("OutFlow", OUTLET,  Natural,  Normal, out_press);
+    BCh_fluid->addBC("OutFlow", OUTLET,  Natural,  Normal, out_press);
     return BCh_fluid;
 }
 
@@ -162,6 +163,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
     BCFunctionBase bcf(fZero);
 
     BCh_solid->addBC("Top",   RING, Essential, Full, bcf,  3);
+    BCh_solid->addBC("Top",   RING2, Essential, Full, bcf,  3);
 
     aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
     BCFunctionBase hyd(fZero);

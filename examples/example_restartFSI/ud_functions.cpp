@@ -329,18 +329,14 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
     case 0:
         return 0.0;
         break;
-    case 2:
-        if ( t <= 0.003 )
-            return 1.3332e5;
-        //      return 0.01;
-        return 0.0;
-        break;
     case 1:
         return 0.0;
-        //      return 1.3332e4;
-        //    else
-        //      return 0.0;
         break;
+    case 2:
+        if ( t <= 0.003 )
+	  return 1.3332e5;
+        break;
+
     }
     return 0;
 }
