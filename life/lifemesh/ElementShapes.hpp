@@ -179,6 +179,16 @@ public:
     static const UInt S_numFacets = S_numVertices;   //!< Number of facets
     static const UInt S_numRidges = 0;     		     //!< Number of ridges
     static const UInt S_numPeaks = 0;     		     //!< Number of peaks
+
+    //! @return the local ID of the j-th point of the i-th edge
+    static ID edgeToPoint( ID const& /*iEdge*/, ID const& jPoint ) { return jPoint;}
+
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& /*jPoint*/ ) {return iFacet;}
+
+    static ID facetToRidge( ID const& /*iFacet*/, ID const& /*jRidge*/ ) {return NotAnId;}
+
+    static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ ) {return NotAnId;}
 };
 
 
@@ -195,6 +205,19 @@ public:
     static const UInt S_numFacets = S_numEdges;      //!< Number of facets
     static const UInt S_numRidges = S_numVertices;   //!< Number of ridges
     static const UInt S_numPeaks = 0;     		     //!< Number of peaks
+
+    //! @return the local ID of the j-th point of the i-th face
+    static ID faceToPoint( ID const& /*iFace*/, ID const& jPoint ) {return jPoint;};
+
+    /*!
+        @return a pair: the local numbering of the j-th edge on the i-th face, and
+                true if the orientation of the edge on the face is consistent
+                with that of the same edge on the element
+    */
+    static std::pair<ID, bool> faceToEdge( ID const& /*iFace*/, ID const& jEdge ) {
+            return std::make_pair( jEdge, true ); }
+
+    static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ ) {return NotAnId;}
 };
 
 
@@ -211,6 +234,19 @@ public:
     static const UInt S_numFacets = S_numEdges;      //!< Number of facets
     static const UInt S_numRidges = S_numVertices;   //!< Number of ridges
     static const UInt S_numPeaks = 0;     		     //!< Number of peaks
+
+    //! @return the local ID of the j-th point of the i-th face
+    static ID faceToPoint( ID const& /*iFace*/, ID const& jPoint ) {return jPoint;};
+
+    /*!
+        @return a pair: the local numbering of the j-th edge on the i-th face, and
+                true if the orientation of the edge on the face is consistent
+                with that of the same edge on the element
+    */
+    static std::pair<ID, bool> faceToEdge( ID const& /*iFace*/, ID const& jEdge ) {
+            return std::make_pair( jEdge, true ); }
+
+    static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ ) {return NotAnId;}
 };
 
 
@@ -227,6 +263,13 @@ public:
     static const UInt S_numFacets = S_numFaces;  			 //!< Number of facets
     static const UInt S_numRidges = S_numEdges;  			 //!< Number of ridges
     static const UInt S_numPeaks = S_numVertices;     		     		 //!< Number of peaks
+
+    /*!
+        @return a pair: the local numbering of the j-th edge on the i-th face, and
+                true if the orientation of the edge on the face is consistent
+                with that of the same edge on the element
+     */
+    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
 
 
@@ -243,6 +286,14 @@ public:
     static const UInt S_numFacets = S_numFaces;  			 //!< Number of facets
     static const UInt S_numRidges = S_numEdges;  			 //!< Number of ridges
     static const UInt S_numPeaks = S_numVertices;     		     		 //!< Number of peaks
+
+    /*!
+        @return a pair: the local numbering of the j-th edge on the i-th face, and
+                true if the orientation of the edge on the face is consistent
+                with that of the same edge on the element
+     */
+    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+
 };
 
 
@@ -304,17 +355,8 @@ public:
     static const UInt S_numPointsPerFacet = S_numPointsPerVertex;   //!< Number of points per facet
     static const UInt S_numPointsPerRidge = 0;   //!< Number of points per ridge
     static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
-
-    //! @return the local ID of the j-th point of the i-th facet
-    inline static ID facetToPoint( ID const& iFacet, ID const& /*jPoint*/ )
-    	{return iFacet;}
-    //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
-    inline static ID facetToRidge( ID const& /*iFacet*/, ID const& /*jRidge*/ )
-    	{return ID();}
-	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
-		{return ID();}
 };
+
 template <>
 inline ID reversePoint<LinearLine>( ID const & pointId ){
     static ID _rid[]={1,0};
@@ -341,16 +383,8 @@ public:
     static const UInt S_numPointsPerRidge = 0;   //!< Number of points per ridge
     static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
 
-    //! @return the local ID of the j-th point of the i-th facet
-    inline static ID facetToPoint( ID const& iFacet, ID const& /*jPoint*/ )
-		{return iFacet;}
-    //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
-    inline static ID facetToRidge( ID const& /*iFacet*/, ID const& /*jRidge*/ )
-    	{return ID();}
-	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
-		{return ID();}
 };
+
 template <>
 inline ID reversePoint<QuadraticLine>( ID const & pointId ){
     static ID _rid[]={1,0,2};
@@ -380,17 +414,16 @@ public:
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
-    //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& iFace, ID const& jPoint );
-    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-        {return edgeToPoint( iFacet, jPoint );}
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
-    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-    	{return edgeToPoint(iFacet, jRidge);}
-	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
-		{return ID();}
 
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+        {return edgeToPoint( iFacet, jPoint );}
+
+    //! @return the local ID of the j-th ridge of the i-th facet
+    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+    	{return edgeToPoint(iFacet, jRidge);}
 };
+
 template <>
 inline ID reversePoint<LinearTriangle>( ID const & pointId ){
     static ID _rid[]={1,0,2};
@@ -421,16 +454,11 @@ public:
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
-    //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& iFace, ID const& jPoint );
-    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
         {return edgeToPoint( iFacet, jPoint );}
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
-    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
 		{return edgeToPoint(iFacet, jRidge);}
-	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
-		{return ID();}
-
 };
 
 template <>
@@ -463,15 +491,14 @@ public:
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
-    //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& iFace, ID const& jPoint );
-    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
         {return edgeToPoint( iFacet, jPoint );}
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
-    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+
+    //! @return the local ID of the j-th point of the i-th ridge
+    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
 		{return edgeToPoint(iFacet, jRidge);}
-	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
-		{return ID();}
 };
 
 //! Specialization
@@ -504,14 +531,14 @@ public:
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
-    //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& iFace, ID const& jPoint );
-    /*!
-		@return a pair: the local numbering of the j-th edge on the i-th face, and
-				true if the orientation of the edge on the face is consistent
-				with that of the same edge on the element
-    */
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+        {return edgeToPoint( iFacet, jPoint );}
+
+    //! @return the local ID of the j-th point of the i-th ridge
+    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+        {return edgeToPoint(iFacet, jRidge);}
 };
 //! Specialization
 template <>
@@ -544,16 +571,20 @@ public:
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
 
-    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
     	{return faceToPoint( iFacet, jPoint );}
 
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
-	inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+    //! @return the local ID of the j-th ridge of the i-th facet
+	static ID facetToRidge( ID const& iFacet, ID const& jRidge )
         {return faceToEdge(iFacet, jRidge).first;}
-    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+
+	//! @return the local ID of the j-th peak of the i-th facet
+    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
     	{return faceToPoint(iFacet, jPeak);}
 };
 
@@ -588,20 +619,20 @@ public:
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
 
-    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
     	{return faceToPoint( iFacet, jPoint );}
-    /*!
-        @return a pair: the local numbering of the j-th edge on the i-th face, and
-                true if the orientation of the edge on the face is consistent
-	            with that of the same edge on the element
-     */
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
-    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+
+    //! @return the local ID of the j-th ridge of the i-th facet
+    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
         {return faceToEdge(iFacet, jRidge).first;}
-    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+
+    //! @return the local ID of the j-th peak of the i-th facet
+    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
     	{return faceToPoint(iFacet, jPeak);}
 };
 
@@ -636,23 +667,22 @@ public:
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
 
-    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-    	{return faceToPoint( iFacet, jPoint );}
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+        {return faceToPoint( iFacet, jPoint );}
 
-    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+    //! @return the local ID of the j-th ridge of the i-th facet
+    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
         {return faceToEdge(iFacet, jRidge).first;}
-    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-    	{return faceToPoint(iFacet, jPeak);}
 
-    /*!
-        @return a pair: the local numbering of the j-th edge on the i-th face, and
-                true if the orientation of the edge on the face is consistent
-	            with that of the same edge on the element
-     */
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+    //! @return the local ID of the j-th peak of the i-th facet
+    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+        {return faceToPoint(iFacet, jPeak);}
+
 };
 
 template <>
@@ -689,20 +719,18 @@ public:
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
 
-    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-    		{return faceToPoint( iFacet, jPoint );}
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+         {return faceToPoint( iFacet, jPoint );}
 
-    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return faceToEdge(iFacet, jRidge).first;}
-    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-    	{return faceToPoint(iFacet, jPeak);}
+    //! @return the local ID of the j-th ridge of the i-th facet
+    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+         {return faceToEdge(iFacet, jRidge).first;}
 
-    /*!
-        @return a pair: the local numbering of the j-th edge on the i-th face, and
-                true if the orientation of the edge on the face is consistent
-	            with that of the same edge on the element
-     */
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+    //! @return the local ID of the j-th peak of the i-th facet
+    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+         {return faceToPoint(iFacet, jPeak);}
+
 };
 
 template <>
@@ -736,24 +764,22 @@ public:
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
 
-    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-		{return faceToPoint( iFacet, jPoint );}
+    //! @return the local ID of the j-th point of the i-th facet
+    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+         {return faceToPoint( iFacet, jPoint );}
 
-    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return faceToEdge(iFacet, jRidge).first;}
+    //! @return the local ID of the j-th ridge of the i-th facet
+    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+         {return faceToEdge(iFacet, jRidge).first;}
 
-    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-    	{return faceToPoint(iFacet, jPeak);}
+    //! @return the local ID of the j-th peak of the i-th facet
+    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+         {return faceToPoint(iFacet, jPeak);}
 
-    /*!
-        @return a pair: the local numbering of the j-th edge on the i-th face, and
-                true if the orientation of the edge on the face is consistent
-	            with that of the same edge on the element
-     */
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
 
 template <>
