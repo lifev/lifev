@@ -2680,7 +2680,8 @@ RegionMesh<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position)
 
     pointList [position]=p;
     point_Type * pp = & pointList[position];
-    if (setToBoundary!=originalBoundary){
+    if (setToBoundary!=originalBoundary)
+    {
         if(setToBoundary){
             // add to list of boundary points
             _bPoints.push_back( pp );
@@ -2700,11 +2701,13 @@ RegionMesh<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position)
                 }
             }
         }
-        return pointList[position];
     }
+    return pointList[position];
 }
+
 template <typename GEOSHAPE, typename MC>
-inline typename RegionMesh<GEOSHAPE, MC>::point_Type &
+inline 
+typename RegionMesh<GEOSHAPE, MC>::point_Type &
 RegionMesh<GEOSHAPE, MC>::
 changePointBoundaryFlag(UInt const & position, bool const boundary)
 {
@@ -3370,7 +3373,7 @@ void
 RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt ef )
 {
 
-	typedef BareEntitySelector<facetShape_Type::S_numVertices> bareEntitySelector_Type;
+	typedef BareEntitySelector<typename facetShape_Type::BasRefSha> bareEntitySelector_Type;
 	typedef typename bareEntitySelector_Type::bareEntity_Type bareFacet_type;
 
     if (verbose)
