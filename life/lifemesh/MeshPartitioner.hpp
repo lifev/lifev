@@ -720,9 +720,9 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     UInt localStart = M_vertexDistribution[M_me];
     UInt localEnd   = M_vertexDistribution[M_me + 1];
 
-    // this vector contains the weights for the ridges of the graph,
+    // this vector contains the weights for the edges of the graph,
     // it is set to null if it is not used.
-    std::vector<Int> ridgeWeights;
+    std::vector<Int> graphEdgeWeights;
 
     M_adjacencyGraphKeys.resize(0);
     M_adjacencyGraphKeys.push_back(0);
@@ -751,11 +751,11 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
                 {
                     if ((*M_repeatedFacet)[sum])
                     {
-                        ridgeWeights.push_back(0);
+                        graphEdgeWeights.push_back(0);
                     }
                     else
                     {
-                        ridgeWeights.push_back(10);
+                        graphEdgeWeights.push_back(10);
                     }
                 }
             }
@@ -787,7 +787,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     Int ncon = 1;
     Int numflag = 0;
 
-    Int cutRidges; // here will be stored the number of ridges cut in the partitioning process
+    Int cutGraphEdges; // here will be stored the number of edges cut in the partitioning process
 
     // additional options
     std::vector<Int>  options(3,0);
@@ -817,16 +817,16 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     Int numberParts = (Int) numParts;
 
     Int* adjwgtPtr(0);
-    if (ridgeWeights.size() > 0)
+    if (graphEdgeWeights.size() > 0)
     {
-        adjwgtPtr = static_cast<Int*>(&ridgeWeights[0]);
+        adjwgtPtr = static_cast<Int*>(&graphEdgeWeights[0]);
     }
     ParMETIS_V3_PartKway(static_cast<Int*>(&M_vertexDistribution[0]),
                          static_cast<Int*>(&M_adjacencyGraphKeys[0]),
                          static_cast<Int*>(&M_adjacencyGraphValues[0]),
                          weightVector, adjwgtPtr, &weightFlag, &numflag,
                          &ncon, &numberParts, &tpwgts[0], &ubvec[0],
-                         &options[0], &cutRidges, &M_graphVertexLocations[localStart],
+                         &options[0], &cutGraphEdges, &M_graphVertexLocations[localStart],
                          &MPIcomm);
 
     M_comm->Barrier();
