@@ -125,7 +125,7 @@
 #include<algorithm>
 #include<iostream>
 
-#include <life/lifecore/LifeV.hpp>
+#include<life/lifemesh/ElementShapes.hpp>
 
 namespace LifeV
 {
@@ -493,29 +493,29 @@ operator<( const BareFace & f1 , const BareFace & f2 )
 	are selected based on the template int numPoints, which is the number of points of the bare entity.
  */
 
-template<int numPoints>
+template<typename Shape>
 class BareEntitySelector {};
 
 template<>
-struct BareEntitySelector<1>{
+struct BareEntitySelector<Point>{
 	static std::pair<BareVertex, bool> makeBareEntity(const ID points[]) {return std::make_pair(BareVertex(points[0]),true);}
 	typedef BareVertex bareEntity_Type;
 };
 
 template<>
-struct BareEntitySelector<2>{
+struct BareEntitySelector<Line>{
 	static std::pair<BareEdge, bool> makeBareEntity(const ID points[]) {return makeBareEdge(points[0], points[1]);}
 	typedef BareEdge bareEntity_Type;
 };
 
 template<>
-struct BareEntitySelector<3>{
+struct BareEntitySelector<Triangle>{
 	typedef BareFace bareEntity_Type;
 	static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2]);}
 };
 
 template<>
-struct BareEntitySelector<4>{
+struct BareEntitySelector<Quad>{
 	typedef BareFace bareEntity_Type;
 	static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2], points[3]);}
 };
