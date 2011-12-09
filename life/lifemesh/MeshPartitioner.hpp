@@ -573,11 +573,7 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // ******************
     // ridges construction
     // ******************
-    if(mesh_Type::S_geoDimensions == 3)
-    	constructRidges();
-    else if(mesh_Type::S_geoDimensions == 2)
-    	M_nBoundaryRidges = M_nBoundaryPoints;
-
+    constructRidges();
 
     // new faces can be built only after all local volumes are complete in order to get proper ghost faces data
     M_comm->Barrier();
@@ -1222,45 +1218,51 @@ void MeshPartitioner<MeshType>::constructElements()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::constructRidges()
 {
-    Int count;
-    for (UInt i = 0; i < M_numPartitions; ++i)
+    if(mesh_Type::S_geoDimensions == 2)
+        M_nBoundaryRidges = M_nBoundaryPoints;
+    else if(mesh_Type::S_geoDimensions == 3)
     {
-        std::map<Int, Int>::iterator im;
-        std::set<Int>::iterator is;
-
-        typename MeshType::ridge_Type * pe;
-        UInt inode;
-        count = 0;
-
-        M_nBoundaryRidges[i] = 0;
-        (*M_meshPartitions)[i]->ridgeList().reserve(M_localRidges[i].size());
-
-        // loop in the list of local ridges
-        for (is = M_localRidges[i].begin(); is != M_localRidges[i].end(); ++is, ++count)
+        Int count;
+        for (UInt i = 0; i < M_numPartitions; ++i)
         {
-            // create a boundary ridge in the local mesh, if needed
-            bool boundary = (M_originalMesh->isBoundaryRidge(*is));
+            std::map<Int, Int>::iterator im;
+            std::set<Int>::iterator is;
 
-            // create a boundary ridge in the local mesh, if needed
-            M_nBoundaryRidges[i] += boundary;
+            typename MeshType::ridge_Type * pe;
+            UInt inode;
+            count = 0;
 
-            pe = &(*M_meshPartitions)[i]->addRidge(boundary);
-            *pe = M_originalMesh->ridge( *is );
+            M_nBoundaryRidges[i] = 0;
+            (*M_meshPartitions)[i]->ridgeList().reserve(M_localRidges[i].size());
 
-            pe->setLocalId(count);
-
-            for (ID id = 0; id < 2; ++id)
+            // loop in the list of local ridges
+            for (is = M_localRidges[i].begin(); is != M_localRidges[i].end(); ++is, ++count)
             {
-                inode = M_originalMesh->ridge(*is).point(id).id();
-                // im is an iterator to a map element
-                // im->first is the key (i. e. the global ID "inode")
-                // im->second is the value (i. e. the local ID "count")
-                im = M_globalToLocalNode[i].find(inode);
-                pe->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
+                // create a boundary ridge in the local mesh, if needed
+                bool boundary = (M_originalMesh->isBoundaryRidge(*is));
+
+                // create a boundary ridge in the local mesh, if needed
+                M_nBoundaryRidges[i] += boundary;
+
+                pe = &(*M_meshPartitions)[i]->addRidge(boundary);
+                *pe = M_originalMesh->ridge( *is );
+
+                pe->setLocalId(count);
+
+                for (ID id = 0; id < 2; ++id)
+                {
+                    inode = M_originalMesh->ridge(*is).point(id).id();
+                    // im is an iterator to a map element
+                    // im->first is the key (i. e. the global ID "inode")
+                    // im->second is the value (i. e. the local ID "count")
+                    im = M_globalToLocalNode[i].find(inode);
+                    pe->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
+                }
             }
         }
     }
 }
+
 
 template<typename MeshType>
 void MeshPartitioner<MeshType>::constructFacets()
