@@ -21,5 +21,7 @@ if(DOXYGEN_FOUND)
                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                     COMMENT "Generating API documentation with Doxygen" VERBATIM
                    )
+  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/api DESTINATION share/doc/lifev)
+
 endif(DOXYGEN_FOUND)
 
