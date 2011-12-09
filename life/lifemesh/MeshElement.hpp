@@ -407,7 +407,7 @@ Real edgeLength( const MeshElement<LinearLine, PointType>& edge )
 //
 //    return std::sqrt( deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ );
 
-    VectorSmall<3> dVec = castToVector3D(edge.point( 1 ).coordinates());
+    Vector3D dVec = castToVector3D(edge.point( 1 ).coordinates());
     dVec -= castToVector3D(edge.point( 0 ).coordinates());
 
     return dVec.norm();
