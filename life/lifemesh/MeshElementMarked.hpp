@@ -143,7 +143,7 @@ public:
 
 };
 
-//! specialization for 1D entities (edges) in 1D Geometry.
+//! specialization for 0D entities (points) in 1D Geometry.
 template
 <typename GeoShape, typename MC>
 class MeshElementMarked<0, 1, GeoShape, MC>: public MeshVertex, public MC::pointMarker_Type
