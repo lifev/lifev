@@ -19,3 +19,4 @@ add_dependencies (test_cylinder DEPENDS test_partition_links)
 
 add_test (NAME LifeSolver::Partition_Offline COMMAND mpirun -np 1 test_partition -f data_partition)
 add_test (NAME LifeSolver::Partition_Online COMMAND mpirun -np 4 test_cylinder -f data_cylinder)
+set_tests_properties(LifeSolver::Partition_Online PROPERTIES DEPENDS LifeSolver::Partition_Offline)
