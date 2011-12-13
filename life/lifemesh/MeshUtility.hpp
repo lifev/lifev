@@ -2286,7 +2286,7 @@ public:
      *  @date 11/2002
      *
      *  @param disp Displacement vector. In this version it must be an EpetraVector
-     *  @param dim Dimension.
+     *  @param dim  Length of vector disp.
      */
     template <typename VECTOR>
     void moveMesh( const VECTOR & disp, UInt dim);
@@ -2401,18 +2401,21 @@ template <typename REGIONMESH>
 template <typename VECTOR>
 void MeshTransformer<REGIONMESH>::moveMesh( const VECTOR & disp, UInt dim )
 {
-    if(!this->hasOldPoint())this->savePoints();
+    if ( !this->hasOldPoint() ) this->savePoints();
 
     typedef typename REGIONMESH::Points Points;
-    Points & pointList(M_mesh.pointList);
-    for ( unsigned int i = 0; i < M_mesh.pointList.size(); ++i )
+    Points & pointList( M_mesh.pointList );
+
+    for ( UInt i = 0; i < M_mesh.pointList.size(); ++i )
     {
         for ( UInt j = 0; j < nDimensions; ++j )
         {
-            int globalId = pointList[i].id();
-            if ( disp.isGlobalIDPresent(globalId + dim*j))
+            Int globalId = pointList[i].id();
+            if ( disp.isGlobalIDPresent( globalId + dim*j ) )
+                {
                 pointList[ i ].coordinate( j ) = M_pointList[ i ].coordinate( j ) +
-                disp[ j * dim + globalId ];
+                disp[ j*dim + globalId ];}
+            else {  ASSERT( !disp.isGlobalIDPresent( globalId + dim*j ), "there is not GlobalID!" ); }
         }
     }
 }
@@ -2537,7 +2540,7 @@ void MeshTransformer<REGIONMESH>::transformMesh( const function& meshMapping)
     // Make life easier
     typename REGIONMESH::Points & pointList(M_mesh.pointList);
 
-    for ( unsigned int i = 0; i < pointList.size();++i )
+    for ( UInt i = 0; i < pointList.size();++i )
     {
         typename REGIONMESH::point_Type& p = pointList[ i ];
         meshMapping(p.coordinate(0),p.coordinate(1),p.coordinate(2));
