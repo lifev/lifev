@@ -250,6 +250,6 @@ enable_testing()
 add_subdirectory(testsuite)
 
 # Documentation (not yet working, don't activate)
-if (LIFE_BUILD_DOCS)
+#if (LIFE_BUILD_DOCS)
     add_subdirectory(doc)
-endif()
+#endif()
