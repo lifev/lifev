@@ -312,14 +312,6 @@ hyperbolic::hyperbolic( int argc,
 #ifdef EPETRA_MPI
     std::cout << "Epetra Initialization" << std::endl;
     Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-    int ntasks;
-    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-    if (Members->comm->NumProc() > 1)
-    {
-        std::cout<<"HyperbolicSolver works only in serial \n";
-        MPI_Finalize();
-        exit(1);
-    }
 #else
     Members->comm.reset( new Epetra_SerialComm() );
 #endif
@@ -566,6 +558,9 @@ hyperbolic::run()
         }
     }
 
+    // Export the partitioning
+    exporter->exportPID( meshPart );
+
     // Set the exporter solution
     exporterSolution.reset( new vector_type ( *hyperbolicSolver.solution(),
                                               exporter->mapType() ) );
@@ -605,6 +600,9 @@ hyperbolic::run()
         // Start chronoTimeStep for measure the time for the current time step
         chronoTimeStep.start();
 
+        // update ghost values from neighboring processes
+        hyperbolicSolver.updateGhostValues( meshPart );
+
         // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
         if ( dataHyperbolic.dataTime()->isLastTimeStep() )
         {
@@ -639,6 +637,9 @@ hyperbolic::run()
 
         // Copy the solution to the exporter
         *exporterSolution = *hyperbolicSolver.solution();
+
+        // update the total time
+        dataHyperbolic.dataTime()->updateTime();
 
         // Save the solution into the exporter
         exporter->postProcess( dataHyperbolic.dataTime()->time() );

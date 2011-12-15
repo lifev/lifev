@@ -114,13 +114,13 @@ public:
              const QuadratureRule&			Qr,
              const QuadratureRule&			bdQr,
              const Int				fDim,
-             commPtr_Type&			commptr
+             const commPtr_Type&			commptr
            );
 
     FESpace(	MeshPartitioner<MeshType>&	mesh,
              const std::string&		space,
              const Int				fDim,
-             commPtr_Type&			commptr
+             const commPtr_Type&			commptr
            );
 
     FESpace(	meshPtr_Type			mesh,
@@ -128,13 +128,13 @@ public:
              const QuadratureRule&			Qr,
              const QuadratureRule&			bdQr,
              const Int				fDim,
-             commPtr_Type&			commptr
+             const commPtr_Type&			commptr
            );
 
     FESpace( meshPtr_Type			mesh,
              const std::string&		space,
              const Int				fDim,
-             commPtr_Type&			commptr
+             const commPtr_Type&			commptr
            );
 
     //! Do nothing destructor
@@ -421,9 +421,15 @@ private:
     //! @name Private Methods
     //@{
 
+
     //! copy constructor
     FESpace( const FESpace& fespace );
 
+    //! Creates the map for interprocessor communication
+    void  createMap(const commPtr_Type& commptr);
+
+    //! Resets boundary data if necessary
+    void resetBoundaryFE();
 
     //! Set space
     inline void setSpace( const std::string& space, UInt dimension = 3);
@@ -528,7 +534,7 @@ FESpace(	MeshPartitioner<MeshType>& 	mesh,
          const QuadratureRule&      	Qr,
          const QuadratureRule&      	bdQr,
          const Int            	fDim,
-         commPtr_Type&         	commptr
+         const commPtr_Type&         	commptr
        ) :
         M_mesh			( mesh.meshPartition() ),
         M_refFE			( &refFE ),
@@ -541,13 +547,8 @@ FESpace(	MeshPartitioner<MeshType>& 	mesh,
         M_feBd			( ),
         M_map			( new map_Type() )
 {
-	if (M_refFE->hasBoundaryFE())
-    {
-        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
-    }
-    MapType map( *M_refFE, *M_mesh, commptr );
-    for ( UInt ii = 0; ii < M_fieldDim; ++ii )
-        *M_map += map;
+    resetBoundaryFE();
+    createMap(commptr);
 }
 
 template <typename MeshType, typename MapType>
@@ -555,7 +556,7 @@ FESpace<MeshType, MapType>::
 FESpace(	MeshPartitioner<MeshType>&	mesh,
          const std::string&		space,
          const Int				fDim,
-         commPtr_Type&			commptr
+         const commPtr_Type&			commptr
        ) :
         M_mesh			( mesh.meshPartition() ),
         M_fieldDim		( fDim ),
@@ -578,16 +579,8 @@ FESpace(	MeshPartitioner<MeshType>&	mesh,
     M_dof.reset( new DOF( *M_mesh, *M_refFE ) );
     M_dim = M_dof->numTotalDof();
     M_fe.reset( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) );
-
-    if (M_refFE->hasBoundaryFE())
-    {
-        M_feBd.reset( new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
-    }
-
-    // Build Map
-    MapType map( *M_refFE, *M_mesh, commptr );
-    for ( UInt ii = 0; ii < M_fieldDim; ++ii )
-        *M_map += map;
+    resetBoundaryFE();
+    createMap(commptr);
 }
 
 template <typename MeshType, typename MapType>
@@ -597,7 +590,7 @@ FESpace(	meshPtr_Type			mesh,
          const QuadratureRule&			Qr,
          const QuadratureRule&			bdQr,
          const Int				fDim,
-         commPtr_Type&			commptr
+         const commPtr_Type&			commptr
        ) :
         M_mesh			( mesh ),
         M_refFE			( &refFE ),
@@ -610,14 +603,8 @@ FESpace(	meshPtr_Type			mesh,
         M_feBd			( ),
         M_map			( new map_Type() )
 {
-    MapType map( *M_refFE, *M_mesh, commptr );
-    for ( UInt ii = 0; ii < M_fieldDim; ++ii )
-        *M_map += map;
-
-    if (M_refFE->hasBoundaryFE())
-    {
-        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
-    }
+    createMap(commptr);
+    resetBoundaryFE();
 }
 
 template <typename MeshType, typename MapType>
@@ -625,7 +612,7 @@ FESpace<MeshType, MapType>::
 FESpace(	meshPtr_Type			mesh,
          const std::string&		space,
          const Int				fDim,
-         commPtr_Type&			commptr
+         const commPtr_Type&			commptr
        ) :
         M_mesh			( mesh ),
         M_fieldDim		( fDim ),
@@ -648,16 +635,8 @@ FESpace(	meshPtr_Type			mesh,
     M_dof.reset( new DOF( *M_mesh, *M_refFE ) );
     M_dim = M_dof->numTotalDof();
     M_fe.reset( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) );
-
-    if (M_refFE->hasBoundaryFE())
-    {
-        M_feBd.reset( new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
-    };
-
-    // Build Map
-    MapType map( *M_refFE, *M_mesh, commptr );
-    for ( UInt ii = 0; ii < M_fieldDim; ++ii )
-        *M_map += map;
+    resetBoundaryFE();
+    createMap(commptr);
 }
 
 // ===================================================
@@ -1647,6 +1626,46 @@ setQuadRule(const QuadratureRule& Qr)
 // ===================================================
 // Private Methods
 // ===================================================
+/*
+template<typename MeshType, typename MapType>
+void
+FESpace<MeshType,MapType>::
+createMap(const commPtr_Type& commptr)
+{
+// Build Map
+MapType map( *M_refFE, *M_mesh, commptr );
+// If more than one field is present the map is
+// duplicated by offsetting the DOFs
+for ( UInt ii = 0; ii < M_fieldDim; ++ii )
+    *M_map += map;
+}
+*/
+template<typename MeshType, typename MapType>
+void
+FESpace<MeshType,MapType>::
+createMap(const commPtr_Type& commptr)
+{
+    // Against dummies
+    ASSERT_PRE(this->M_dof->numTotalDof()>0," Cannot create FeSpace with no degrees of freedom");
+
+    // get globalElements list from DOF
+    std::vector<Int> myGlobalElements( this->M_dof->globalElements( *this->M_mesh ) );
+    // Create the map
+    MapType map( -1,myGlobalElements.size(),&myGlobalElements[0],commptr );
+    // Store the map. If more than one field is present the map is
+    // duplicated by offsetting the DOFs
+    for ( UInt ii = 0; ii < M_fieldDim; ++ii )
+        *M_map += map;
+}
+
+
+template<typename MeshType, typename MapType>
+void
+FESpace<MeshType,MapType>::
+resetBoundaryFE(){
+if (M_refFE->hasBoundaryFE())
+M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+}
 
 
 template<typename MeshType, typename MapType>
