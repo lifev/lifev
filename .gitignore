@@ -4,6 +4,9 @@
 !*.in.in
 *.m4
 *.[oa]
+.project
+.cproject
+.settings
 configure
 configure.files
 autom4te.cache
