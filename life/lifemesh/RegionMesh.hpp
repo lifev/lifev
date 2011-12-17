@@ -2235,7 +2235,7 @@ RegionMesh<GEOSHAPE, MC>::setVolume( element_Type const & v, UInt const pos )
     ASSERT_PRE( pos < volumeList.capacity() , "position requested exceed capacity" <<
                 pos << " " << volumeList.capacity() ) ;
     volumeList( pos ) = v;
-    volumeList( pos ).setId( pos );
+    volumeList( pos ).setLocalId( pos );
     return volumeList( pos );
 }
 
@@ -2334,7 +2334,7 @@ RegionMesh<GEOSHAPE, MC>::setFace( face_Type const & f, UInt position)
     ASSERT_PRE( position < faceList.capacity(), "Face list size exceeded" <<
                 position << " " << faceList.capacity() ) ;
     faceList( position ) = f;
-    faceList( position ).setId( position );
+    faceList( position ).setLocalId( position );
     return faceList( position );
 }
 
@@ -2492,7 +2492,7 @@ RegionMesh<GEOSHAPE, MC>::setEdge( edge_Type const & f, UInt position)
     ASSERT_PRE( position < edgeList.capacity(), "Edge list size exceeded" <<
                 position << " " << edgeList.capacity() ) ;
     edgeList( position ) = f;
-    edgeList( position ).setId( position );
+    edgeList( position ).setLocalId( position );
     return edgeList( position );
 }
 
@@ -2679,12 +2679,13 @@ RegionMesh<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position)
     bool originalBoundary=pointList[position].boundary();
 
     pointList [position]=p;
-    point_Type * pp = & pointList[position];
+    pointList[position].setLocalId(position);
+
     if (setToBoundary!=originalBoundary)
     {
         if(setToBoundary){
             // add to list of boundary points
-            _bPoints.push_back( pp );
+            _bPoints.push_back( & pointList[position] );
         }
         else
         {
