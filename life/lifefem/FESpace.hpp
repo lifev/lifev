@@ -695,8 +695,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
                 ID globalDofID(M_dof->localToGlobalMap(iterElement,iterDof) + iDim*M_dim);
 
                 // Compute the value of the function and set it
-                vect.setCoefficient(globalDofID,FEValues[iterDof]);
-
+                vect[globalDofID] = FEValues[iterDof];
             }
         }
     }
@@ -726,10 +725,10 @@ interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real 
     std::vector<Real> FEValues (numberLocalDof, 0);
 
     // Do the loop over the cells
-    for (UInt iterVolume(0); iterVolume < totalNumberElements; ++iterVolume)
+    for (UInt iterElement(0); iterElement < totalNumberElements; ++iterElement)
     {
         // We update the CurrentFE so that we get the coordinates of the nodes
-        interpCFE.update( M_mesh->element(iterVolume), UPDATE_QUAD_NODES );
+        interpCFE.update( M_mesh->element(iterElement), UPDATE_QUAD_NODES );
 
         // Loop over the dimension of the field
         for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
@@ -741,7 +740,7 @@ interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real 
                 point [1] = interpCFE.quadNode( iterDof, 1 );
                 point [2] = interpCFE.quadNode( iterDof, 2 );
                 // Store the nodal value
-                nodalValues[iterDof] =  fEFunction->eval( iterVolume, point, time );
+                nodalValues[iterDof] =  fEFunction->eval( iterElement, point, time );
             }
 
             // Transform the nodal values in FE values
@@ -751,11 +750,10 @@ interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real 
             for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
             {
                 // Find the ID of the considered DOF
-                const ID globalDofID( M_dof->localToGlobalMap ( iterVolume, iterDof ) + iDim * M_dim );
+                const ID globalDofID( M_dof->localToGlobalMap ( iterElement, iterDof ) + iDim * M_dim );
 
                 // Compute the value of the function and set it
-                vector.setCoefficient ( globalDofID, FEValues[iterDof] );
-
+                vector[globalDofID] = FEValues[iterDof];
             }
         }
     }
@@ -802,7 +800,7 @@ FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
                     idDof = BCh[ibc][ i ] ->id() + BCh[ibc].component( j ) * totalDof;
                     Real val = BCh[ibc]( time, x, y, z, BCh[ibc].component( j ) );
 
-                    vect.setCoefficient(idDof,val);
+                    vect[idDof] = val;
                 }
             }
         }
@@ -1732,7 +1730,7 @@ interpolateGeneric( const FESpace<mesh_Type,map_Type>& OriginalSpace,
             	ID globalDofId(M_dof->localToGlobalMap( iElem, iterDof ) + iDim * M_dim);
 
             	// compute the value of the function and set it
-            	Interpolated.setCoefficient(globalDofId,FEValues[iterDof]);
+            	Interpolated[globalDofId] = FEValues[iterDof];
             	nodalValues[iDim][iterDof] = 0;
 			}
         }
