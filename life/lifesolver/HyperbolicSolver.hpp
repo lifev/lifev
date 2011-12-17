@@ -453,8 +453,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
         M_FESpace         ( fESpace ),
         // Algebraic stuff.
         M_rhs             ( new vector_Type ( M_localMap ) ),
-        M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uOld            ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
@@ -488,8 +488,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
         M_FESpace         ( fESpace ),
         // Algebraic stuff.
         M_rhs             ( new vector_Type ( M_localMap ) ),
-        M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uOld            ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
@@ -715,7 +715,7 @@ CFL()
                 {
                     quadPoint(icoor) = M_FESpace.feBd().quadPt( ig, icoor );
                     normal(icoor)    = M_FESpace.feBd().normal( icoor, ig ) ;
-		}
+        }
 
                 // Compute the local CFL without the time step
                 localCFL = e / K * M_numericalFlux->normInfinity ( leftValue[0],
@@ -743,11 +743,16 @@ CFL()
 
     }
 
-    // Compute the timeStep according to CLF
-    const Real timeStep( M_data.getCFLRelaxParameter() / localCFL );
 
-    // Return the correct value of the time step
-    return timeStep;
+    // Compute the time step according to CLF for the current process
+    Real timeStepLocal[]  = { M_data.getCFLRelaxParameter() / localCFLOld };
+    Real timeStepGlobal[] = { 0. };
+
+    // Compute the minimum of the computed time step for all the processes
+    M_displayer.comm()->MinAll( timeStepLocal, timeStepGlobal, 1 );
+
+    // Return the computed value
+    return *timeStepGlobal;
 
 } //CFL
 

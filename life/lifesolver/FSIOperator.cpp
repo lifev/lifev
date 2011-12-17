@@ -912,7 +912,7 @@ FSIOperator::bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& 
     if ( !bch->bcUpdateDone() || M_fluid->recomputeMatrix() )
         bch->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
 
-    bcManageVector( rhs, *M_uFESpace->mesh(), M_uFESpace->dof(),  *bch, M_uFESpace->feBd(), 1., 0. );
+    bcManageRhs( rhs, *M_uFESpace->mesh(), M_uFESpace->dof(),  *bch, M_uFESpace->feBd(), 0., 1. );
 }
 
 void
