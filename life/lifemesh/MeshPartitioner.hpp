@@ -61,6 +61,30 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace LifeV
 {
+
+
+struct GhostEntityData
+{
+    //! ID in the current sub-domain of the face.
+    ID localFaceId;
+
+    //! ID of element that faces the local one on the other sub-domain.
+    ID ghostElementLocalId;
+
+    //! Position on the ghost element.
+    UInt ghostElementPosition;
+
+    friend std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged );
+}; // struct AdjacentEntityData
+
+inline std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged )
+{
+    out << "ghostEntityData: localFace " << ged.localFaceId
+        << " - ghostElem "               << ged.ghostElementLocalId
+        << " - ghostPos "                << ged.ghostElementPosition << " ";
+    return out;
+}
+
 /*!
   @brief Class that handles mesh partitioning
   @author Gilles Fourestey gilles.fourestey@epfl.ch
@@ -73,7 +97,6 @@ namespace LifeV
   partitions are stored and can be saved to disk, using the HDF5 filter,
   for later use during a parallel run.
 */
-
 template<typename MeshType>
 class MeshPartitioner
 {
@@ -86,11 +109,19 @@ public:
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
     typedef std::vector<meshPtr_Type> partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type> partMeshPtr_Type;
+
+    //! Container for the ghost data
+    typedef std::vector < GhostEntityData > GhostEntityDataContainer_Type;
+
+    //! Map processor -> container for the ghost data
+    typedef std::map < UInt,  GhostEntityDataContainer_Type > GhostEntityDataMap_Type;
+
     //@}
     //! \name Constructors & Destructors
     //@{
     //! Default empty constructor
     MeshPartitioner();
+
     //! Constructor
     /*!
       This is a non-empty constructor. It takes as parameters the
@@ -104,14 +135,35 @@ public:
       \param interfaceMap - Epetra_Map*
       \param interfaceMapRep - Epetra_Map*
     */
-    MeshPartitioner(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm, Epetra_Map* interfaceMap = 0,
-                  Epetra_Map* interfaceMapRep = 0);
+    MeshPartitioner ( meshPtr_Type &mesh,
+                      boost::shared_ptr<Epetra_Comm>& comm,
+                      Epetra_Map* interfaceMap = 0,
+                      Epetra_Map* interfaceMapRep = 0 );
+
     //! Empty destructor
     virtual ~MeshPartitioner() {}
     //@}
 
     //! \name Public Methods
     //@{
+    //! Partition the mesh.
+    /*!
+      It takes as parameters the unpartitioned mesh (reference),
+      the Epetra_Comm object in use (reference) and pointers to
+      the Epetra interface and repeated interface maps.
+      The method initializes the data members and calls a private method
+      MeshPartitioner::execute which handles the mesh partitioning.
+      @param mesh - Mesh& - the unpartitioned mesh
+      @param _comm - Epetra_Comm& - Epetra communicator object
+      @param interfaceMap - Epetra_Map*
+      @param interfaceMapRep - Epetra_Map*
+      @note This method is meant to be used with the empty constructor.
+    */
+    void doPartition ( meshPtr_Type &mesh,
+                       boost::shared_ptr<Epetra_Comm>& comm,
+                       Epetra_Map* interfaceMap = 0,
+                       Epetra_Map* interfaceMapRep = 0 );
+
     //! To be used with the new constructor.
     /*!
       Loads the parameters of the partitioning process from the simulation data file.
@@ -121,6 +173,7 @@ public:
       \param _comm - Epetra_Comm& - reference of the Epetra communicator used
     */
     void setup(UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm);
+
     //! Call update() method after loading the graph, to rebuild all data structures
     /*!
       This method is to be called after the partitioned graph is LOADED from a HDF5 file.
@@ -129,6 +182,7 @@ public:
       !!! This method should be the first one to be called after loading the graph. !!!
     */
     void update();
+
     //!  Stores a pointer to the unpartitioned mesh in the M_originalMesh data member.
     /*!
       Stores a pointer to the unpartitioned mesh in the M_originalMesh data member.
@@ -138,17 +192,20 @@ public:
     */
     void attachUnpartitionedMesh(meshPtr_Type &mesh, Epetra_Map* interfaceMap = 0,
                                  Epetra_Map* interfaceMapRep = 0);
+
     //! Releases the original unpartitioned mesh
     /*!
       Releases the unpartitioned mesh so that it can be deleted, freeing A LOT of memory
       in some cases.
     */
     void releaseUnpartitionedMesh();
+
     //! Executes the ParMETIS graph partitioning
     /*!
       Executes the ParMETIS graph partitioning
     */
     void doPartitionGraph();
+
     //! Builds the partitioned mesh using the partitioned graph
     /*!
       Builds the partitioned mesh using the partitioned graph
@@ -158,6 +215,9 @@ public:
     // Next method should be renamed and become a regular method
     //! Return a pointer to the mesh partition with rank k
     const meshPtr_Type&      getPartition(Int k)    const {return (*M_meshPartitions)[k];}
+
+    //! Clean structures that are not needed after partitioning
+    void cleanUp();
 
     //! Prints information about the state (data) of the object
     void showMe(std::ostream& output = std::cout) const;
@@ -177,14 +237,11 @@ public:
     //! Return a pointer to M_elementDomains
     const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
     graphPtr_Type&           elementDomains()             {return M_elementDomains;}
-    //! Return a reference to M_repeatedNodeVector
-    const std::vector<Int>&  repeatedNodeVector()   const {return M_repeatedNodeVector[0];}
-    //! Return a reference to M_repeatedEdgeVector
-    const std::vector<Int>&  repeatedEdgeVector()   const {return M_repeatedEdgeVector[0];}
-    //! Return a reference to M_repeatedFaceVector
-    const std::vector<Int>&  repeatedFaceVector()   const {return M_repeatedFaceVector[0];}
-    //! Return a reference to M_repeatedVolumeVector
-    const std::vector<Int>&  repeatedVolumeVector() const {return M_repeatedVolumeVector[0];}
+    //! Return the communicator of the mesh
+    boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
+    //! Return a reference to M_ghostDataMap
+    const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
+
     //@}
 
 private:
@@ -193,6 +250,10 @@ private:
     MeshPartitioner& operator=(const MeshPartitioner&);
     //! Private Methods
     //@{
+
+    //! Initialize the parameters with default value.
+    void init ();
+
     //! Execute mesh partitioning using the configured MPI processes (online partitioning)
     /*!
       Executed the mesh partitioning using the number of MPI processes as the number of partitions.
@@ -201,13 +262,6 @@ private:
       Other data members are changed indirectly by calling other private methods.
     */
     void execute();
-    //! Sets the element parameters according to the type of mesh element used.
-    /*!
-      Sets element parameters (nodes, faces, edges and number of nodes on each
-      face according to the type of mesh element used (Mesh::ElementShape::S_shape).
-      Updates M_elementNodes, M_elementFaces, M_elementEdges, M_faceNodes.
-    */
-    void setElementParameters();
     //! Build the graph vertex distribution vector
     /*!
       Updates the member M_vertexDistribution according to the number of processors to be
@@ -283,13 +337,6 @@ private:
       Updates M_meshPartitions.
     */
     void finalSetup();
-    //! Create repeated element map
-    /*!
-      Creates a map of the boundary elements (nodes, edges, faces, volumes).
-      Updates M_repeatedNodeVector, M_repeatedEdgeVector, M_repeatedFaceVector,
-      M_repeatedVolumeVector.
-    */
-    void createRepeatedMap();
 
     //@}
     //! Private Data Members
@@ -300,16 +347,12 @@ private:
     std::vector<Int>                     M_adjacencyGraphKeys;
     std::vector<Int>                     M_adjacencyGraphValues;
     boost::shared_ptr<Epetra_Comm>       M_comm;
-    UInt                                 M_me;
+    Int                                  M_me;
 
     std::vector<std::vector<Int> >       M_localNodes;
     std::vector<std::set<Int> >          M_localEdges;
     std::vector<std::set<Int> >          M_localFaces;
     std::vector<std::vector<Int> >       M_localVolumes;
-    std::vector<std::vector<Int> >       M_repeatedNodeVector;
-    std::vector<std::vector<Int> >       M_repeatedEdgeVector;
-    std::vector<std::vector<Int> >       M_repeatedFaceVector;
-    std::vector<std::vector<Int> >       M_repeatedVolumeVector;
     std::vector<std::map<Int, Int> >     M_globalToLocalNode;
     std::vector<std::map<Int, Int> >     M_globalToLocalVolume;
     std::vector<UInt>                    M_nBoundaryPoints;
@@ -330,6 +373,9 @@ private:
     std::vector<Int>                     M_graphVertexLocations;
     graphPtr_Type                        M_elementDomains;
     bool                                 M_serialMode; // how to tell if running serial partition mode
+
+    //! Map for the ghost data
+    GhostEntityDataMap_Type M_ghostDataMap;
     //@}
 }; // class MeshPartitioner
 
@@ -342,45 +388,72 @@ private:
 // Constructors and destructor
 // =================================
 
-template<typename MeshType>
-MeshPartitioner<MeshType>::MeshPartitioner()
+template < typename MeshType >
+MeshPartitioner < MeshType >::
+MeshPartitioner()
 {
-}
+    init ();
+} // constructor
 
-template<typename MeshType>
-MeshPartitioner<MeshType>::MeshPartitioner(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm,
-                                   Epetra_Map* interfaceMap,
-                                   Epetra_Map* interfaceMapRep):
-    M_numPartitions (1),
-    M_comm (comm),
-    M_originalMesh (mesh),
-    M_interfaceMap (interfaceMap),
-    M_interfaceMapRep (interfaceMapRep),
-    M_elementDomains (new graph_Type),
-    M_serialMode (false)
+template < typename MeshType >
+MeshPartitioner < MeshType >::
+MeshPartitioner ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
+                  Epetra_Map* interfaceMap, Epetra_Map* interfaceMapRep)
 {
+    init ();
+    doPartition ( mesh, comm, interfaceMap, interfaceMapRep );
+} // constructor
+
+template < typename MeshType >
+void
+MeshPartitioner < MeshType >::
+init ()
+{
+    M_numPartitions = 1;
+    M_localNodes.resize ( M_numPartitions );
+    M_localEdges.resize ( M_numPartitions );
+    M_localFaces.resize ( M_numPartitions );
+    M_localVolumes.resize ( M_numPartitions );
+    M_globalToLocalNode.resize ( M_numPartitions );
+    M_globalToLocalVolume.resize ( M_numPartitions );
+    M_nBoundaryPoints.resize ( M_numPartitions );
+    M_nBoundaryEdges.resize ( M_numPartitions );
+    M_nBoundaryFaces.resize ( M_numPartitions );
+    M_elementDomains.reset ( new graph_Type );
+    M_serialMode = false;
+
+    /*
+      Sets element parameters (nodes, faces, edges and number of nodes on each
+      face according to the type of mesh element used (Mesh::ElementShape::S_shape).
+      Updates M_elementNodes, M_elementFaces, M_elementEdges, M_faceNodes.
+    */
+    M_elementNodes = MeshType::ElementShape::S_numVertices;
+    M_elementFaces = MeshType::ElementShape::S_numFaces;
+    M_elementEdges = MeshType::ElementShape::S_numEdges;
+    M_faceNodes    = MeshType::BElementShape::S_numVertices;
+
+} // init
+
+template < typename MeshType >
+void
+MeshPartitioner < MeshType >::
+doPartition ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
+              Epetra_Map* interfaceMap, Epetra_Map* interfaceMapRep )
+{
+    M_comm = comm;
+    M_originalMesh = mesh;
+    M_interfaceMap = interfaceMap;
+    M_interfaceMapRep = interfaceMapRep;
+
     M_me = M_comm->MyPID();
 
-    meshPtr_Type newMesh (new MeshType);
-    M_meshPartitions.reset(new partMesh_Type(M_numPartitions, newMesh));
+    meshPtr_Type newMesh ( new MeshType );
+    M_meshPartitions.reset ( new partMesh_Type( M_numPartitions, newMesh ) );
     newMesh.reset();
 
-    M_localNodes.resize(1);
-    M_localEdges.resize(1);
-    M_localFaces.resize(1);
-    M_localVolumes.resize(1);
-    M_repeatedNodeVector.resize(1);
-    M_repeatedEdgeVector.resize(1);
-    M_repeatedFaceVector.resize(1);
-    M_repeatedVolumeVector.resize(1);
-    M_globalToLocalNode.resize(1);
-    M_globalToLocalVolume.resize(1);
-    M_nBoundaryPoints.resize(1);
-    M_nBoundaryEdges.resize(1);
-    M_nBoundaryFaces.resize(1);
-
     execute();
-}
+
+} // doPartiton
 
 // =================================
 // Public methods
@@ -392,7 +465,6 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
     M_serialMode = true;
     M_comm = comm;
     M_me = M_comm->MyPID();
-    setElementParameters();
 
     M_numPartitions = numPartitions;
 
@@ -411,10 +483,6 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
     M_localEdges.resize(M_numPartitions);
     M_localFaces.resize(M_numPartitions);
     M_localVolumes.resize(M_numPartitions);
-    M_repeatedNodeVector.resize(M_numPartitions);
-    M_repeatedEdgeVector.resize(M_numPartitions);
-    M_repeatedFaceVector.resize(M_numPartitions);
-    M_repeatedVolumeVector.resize(M_numPartitions);
     M_globalToLocalNode.resize(M_numPartitions);
     M_globalToLocalVolume.resize(M_numPartitions);
     M_nBoundaryPoints.resize(M_numPartitions);
@@ -484,13 +552,40 @@ void MeshPartitioner<MeshType>::doPartitionGraph()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::doPartitionMesh()
 {
+
+    // ***********************
+    // local mesh construction
+    // ***********************
     constructLocalMesh();
+
+    // ******************
+    // nodes construction
+    // ******************
     constructNodes();
+
+    // ********************
+    // volumes construction
+    // ********************
     constructVolumes();
+
+    // ******************
+    // edges construction
+    // ******************
     constructEdges();
+
+
+    // new faces can be built only after all local volumes are complete in order to get proper ghost faces data
+    M_comm->Barrier();
+
+    // ******************
+    // faces construction
+    // ******************
     constructFaces();
+
+    // ******************
+    // final setup
+    // ******************
     finalSetup();
-    createRepeatedMap();
 }
 
 template<typename MeshType>
@@ -503,28 +598,6 @@ void MeshPartitioner<MeshType>::showMe(std::ostream& output) const
 // =================================
 // Private methods
 // =================================
-
-template<typename MeshType>
-void MeshPartitioner<MeshType>::setElementParameters()
-{
-    switch (MeshType::ElementShape::S_shape)
-    {
-    case HEXA:
-        M_elementNodes = 8;
-        M_elementFaces = 6;
-        M_elementEdges = 12;
-        M_faceNodes    = 4;
-        break;
-    case TETRA:
-        M_elementNodes = 4;
-        M_elementFaces = 4;
-        M_elementEdges = 6;
-        M_faceNodes    = 3;
-        break;
-    default:
-        ERROR_MSG( "Face Shape not implemented in MeshPartitioner" );
-    }
-}
 
 template<typename MeshType>
 void MeshPartitioner<MeshType>::distributeElements(UInt numElements)
@@ -632,7 +705,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     // This array's size is equal to the number of locally-stored vertices:
     // at the end of the partitioning process, "M_graphVertexLocations" will contain the partitioning array:
     // M_graphVertexLocations[m] = n; means that graph vertex m belongs to subdomain n
-    M_graphVertexLocations.resize(M_vertexDistribution[M_me + 1] - M_vertexDistribution[M_me]);
+    M_graphVertexLocations.resize( M_vertexDistribution[M_comm->NumProc()] - M_vertexDistribution[0], M_comm->NumProc() );
 
     // Now each processor will take care of its own graph vertices (i. e. mesh elements).
     // Nothing guarantees about the neighbor elements distribution across the processors,
@@ -748,13 +821,21 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
                          static_cast<Int*>(&M_adjacencyGraphValues[0]),
                          weightVector, adjwgtPtr, &weightFlag, &numflag,
                          &ncon, &numberParts, &tpwgts[0], &ubvec[0],
-                         &options[0], &cutEdges, &M_graphVertexLocations[0],
+                         &options[0], &cutEdges, &M_graphVertexLocations[localStart],
                          &MPIcomm);
 
     M_comm->Barrier();
 
     Int nProc;
     nProc = M_comm->NumProc();
+
+    // distribute the resulting partitioning stored in M_graphVertexLocations to all processors
+    for ( Int proc = 0; proc < nProc; proc++ )
+    {
+        UInt procStart  = M_vertexDistribution[ proc ];
+        UInt procLength = M_vertexDistribution[ proc + 1 ] - M_vertexDistribution[ proc ];
+        M_comm->Broadcast ( &M_graphVertexLocations[ procStart ], procLength, proc );
+    }
 
     // this is a vector of subdomains: each component is
     // the list of vertices belonging to the specific subdomain
@@ -764,7 +845,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     for (UInt ii = 0; ii < M_graphVertexLocations.size(); ++ii)
     {
         // here we are associating the vertex global ID to the subdomain ID
-        (*M_elementDomains)[M_graphVertexLocations[ii]].push_back(ii + M_vertexDistribution[M_me]);
+        (*M_elementDomains)[ M_graphVertexLocations[ ii ] ].push_back( ii );
     }
 }
 
@@ -1090,19 +1171,12 @@ void MeshPartitioner<MeshType>::constructNodes()
             }
 
             pp = &(*M_meshPartitions)[i]->addPoint(boundary);
-            pp->setMarker(M_originalMesh->point(*it).marker());
+            *pp = M_originalMesh->point( *it );
 
-            pp->x() = M_originalMesh->point(*it).x();
-            pp->y() = M_originalMesh->point(*it).y();
-            pp->z() = M_originalMesh->point(*it).z();
+            pp->setLocalId( inode );
 
-            UInt id = M_originalMesh->point(*it).id();
-
-            pp->setId(id);
-            pp->setLocalId(inode);
-
-            (*M_meshPartitions)[i]->localToGlobalNode().insert(std::make_pair(inode, id));
-            (*M_meshPartitions)[i]->globalToLocalNode().insert(std::make_pair(id, inode));
+            (*M_meshPartitions)[i]->localToGlobalNode().insert(std::make_pair( pp->localId(), pp->id() ));
+            (*M_meshPartitions)[i]->globalToLocalNode().insert(std::make_pair( pp->id(), pp->localId() ));
         }
     }
 }
@@ -1128,10 +1202,10 @@ void MeshPartitioner<MeshType>::constructVolumes()
         for (it = M_localVolumes[i].begin(); it != M_localVolumes[i].end(); ++it, ++count)
         {
             pv = &((*M_meshPartitions)[i]->addVolume());
-            pv->setId (M_originalMesh->volume(*it).id());
-            pv->setLocalId(count);
+            *pv = M_originalMesh->volume( *it );
+            pv->setLocalId( count );
 
-            M_globalToLocalVolume[i].insert(std::make_pair(M_originalMesh->volume(*it).id(), count));
+            M_globalToLocalVolume[i].insert(std::make_pair( pv->id(), pv->localId() ) );
 
             for (ID id = 0; id < M_elementNodes; ++id)
             {
@@ -1142,10 +1216,6 @@ void MeshPartitioner<MeshType>::constructVolumes()
                 im = M_globalToLocalNode[i].find(inode);
                 pv->setPoint(id, (*M_meshPartitions)[i]->pointList( (*im).second ));
             }
-
-            Int ibc = M_originalMesh->volume(*it).marker();
-
-            pv->setMarker(entityFlag_Type( ibc ));
         }
     }
 }
@@ -1178,8 +1248,8 @@ void MeshPartitioner<MeshType>::constructEdges()
             }
 
             pe = &(*M_meshPartitions)[i]->addEdge(boundary);
+            *pe = M_originalMesh->edge( *is );
 
-            pe->setId (M_originalMesh->edge(*is).id());
             pe->setLocalId(count);
 
             for (ID id = 0; id < 2; ++id)
@@ -1191,7 +1261,6 @@ void MeshPartitioner<MeshType>::constructEdges()
                 im = M_globalToLocalNode[i].find(inode);
                 pe->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
             }
-            pe->setMarker(M_originalMesh->edge(*is).marker());
         }
     }
 }
@@ -1223,10 +1292,6 @@ void MeshPartitioner<MeshType>::constructFaces()
                 ++M_nBoundaryFaces[i];
             }
 
-            pf =  &(*M_meshPartitions)[i]->addFace(boundary);
-
-            pf->setId (M_originalMesh->face(*is).id());
-            pf->setLocalId(count);
 
             Int elem1 = M_originalMesh->face(*is).firstAdjacentElementIdentity();
             Int elem2 = M_originalMesh->face(*is).secondAdjacentElementIdentity();
@@ -1257,6 +1322,48 @@ void MeshPartitioner<MeshType>::constructFaces()
                 localElem2 = (*im).second;
             }
 
+            pf =  &(*M_meshPartitions)[i]->addFace(boundary);
+            *pf = M_originalMesh->face( *is );
+
+            pf->setLocalId( count );
+
+            // true if we are on a subdomain border
+            if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
+            {
+                // set the flag for faces on the subdomain border
+                pf->setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
+
+                // build GhostEntityData
+                GhostEntityData ghostFace;
+                ghostFace.localFaceId = pf->localId();
+
+                // set the ghostElem to be searched on other subdomains
+                ID ghostElem = ( localElem1 == NotAnId ) ? elem1 : elem2;
+                // find which process holds the facing element
+                Int ghostProc ( M_me );
+                for ( Int proc = 0; proc < M_comm->NumProc(); proc++ )
+                {
+                    if ( proc != M_me )
+                    {
+                        std::vector<Int>::const_iterator ghostIt =
+                                        std::find ( (*M_elementDomains)[ proc ].begin(), (*M_elementDomains)[ proc ].end(), ghostElem );
+                        if ( ghostIt != ( (*M_elementDomains)[ proc ] ).end() )
+                        {
+                            // we have found the proc storing the element
+                            ghostProc = proc;
+                            // we can get its local id
+                            ghostFace.ghostElementLocalId = *ghostIt;
+                            // TODO: the local face id is the same of the original mesh ?!
+                            ghostFace.ghostElementPosition = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                            break;
+                        }
+                    }
+                }
+                // check that the ghost element is found on another proc ( this test is acceptable only for online partitioning )
+                ASSERT ( ghostProc != M_me || M_serialMode, "ghost face not found" );
+                M_ghostDataMap[ ghostProc ].push_back( ghostFace );
+            }
+
             // if this process does not own either of the adjacent elements
             // then the two adjacent elements and the respective face positions coincide in the local mesh
             // possible bug fixed: not only the two adjacent elements face, but also the face
@@ -1264,6 +1371,31 @@ void MeshPartitioner<MeshType>::constructFaces()
             // otherwise it could happen that a pair(element, position) is associated to different faces.
             // This can lead to a wrong treatment of the dofPerFace (in 2D of the dofPerEdge, as occurred
             // with P2)
+
+            // NEW CODE
+            ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging face in mesh partitioner!");
+
+            if (localElem1 == NotAnId)
+             {
+                 pf->firstAdjacentElementIdentity()  = localElem2;
+                 pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                 pf->secondAdjacentElementIdentity() = NotAnId;
+                 pf->secondAdjacentElementPosition() = NotAnId;
+                 pf->reversePoints();
+             }
+            else
+            {
+                pf->firstAdjacentElementIdentity()  = localElem1;
+                pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+                pf->secondAdjacentElementIdentity() = localElem2;
+                pf->secondAdjacentElementPosition() =
+                                localElem2 != NotAnId ?
+                                                       M_originalMesh->face(*is).secondAdjacentElementPosition():
+                                                       NotAnId;
+
+            }
+            // END NEW CODE
+            /* OLD CODE
 
             if ((localElem1 == NotAnId) && !boundary)
             {
@@ -1287,20 +1419,34 @@ void MeshPartitioner<MeshType>::constructFaces()
                 pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
             }
 
+*/
 
             for (ID id = 0; id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
             {
-                inode = M_originalMesh->face(*is).point(id).id();
+                inode = pf->point(id).id();
                 im = M_globalToLocalNode[i].find(inode);
                 pf->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
             }
 
-            pf->setMarker(M_originalMesh->face(*is).marker());
-
-            (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACES");
-            (*M_meshPartitions)[i]->setLinkSwitch("FACES_HAVE_ADIACENCY");
         }
+        (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACES");
+        (*M_meshPartitions)[i]->setLinkSwitch("FACES_HAVE_ADIACENCY");
     }
+
+    // DEBUG
+//    std::ofstream fout ( ("ghostfaces" + boost::lexical_cast<std::string>( M_me ) + ".out").c_str() );
+//
+//    fout << "partition " << M_me << std::endl;
+//    for ( GhostEntityDataMap_Type::iterator pIt = M_ghostDataMap.begin(); pIt != M_ghostDataMap.end(); ++pIt )
+//    {
+//        fout << "proc " << pIt->first << std::endl;
+//        for ( UInt i = 0; i < pIt->second.size(); i++ )
+//        {
+//            fout << pIt->second[i] << std::endl;
+//        }
+//        fout << std::endl;
+//    }
+//    ASSERT ( 0, "DEBUG abort" );
 }
 
 template<typename MeshType>
@@ -1350,98 +1496,8 @@ void MeshPartitioner<MeshType>::finalSetup()
 }
 
 template<typename MeshType>
-void MeshPartitioner<MeshType>::createRepeatedMap()
-{
-    std::set<Int>    repeatedNodeList;
-    std::set<Int>    repeatedEdgeList;
-    std::set<Int>    repeatedFaceList;
-
-    if (! M_me)
-    {
-        std::cout << "Building repeated map... " << std::endl;
-    }
-
-    for (UInt i = 0; i < M_numPartitions; ++i)
-    {
-        std::set<Int>::iterator is;
-
-        UInt me = M_serialMode ? i : M_me;
-
-        std::vector<Int> elementList = (*M_elementDomains)[me];
-
-        UInt inode, ielem;
-
-        // repeated element map creation
-
-        // use sets to store each entity only once
-        repeatedNodeList.clear();
-        repeatedEdgeList.clear();
-        repeatedFaceList.clear();
-
-        for (UInt ii = 0; ii < elementList.size(); ++ii)
-        {
-            ielem = elementList[ii];
-            M_repeatedVolumeVector[i].push_back(ielem);
-            for (UInt jj = 0; jj < M_elementNodes; ++jj)
-            {
-                inode = M_originalMesh->volume(ielem).point(jj).id();
-                repeatedNodeList.insert(inode);
-            }
-            for (UInt jj = 0; jj < M_elementEdges; ++jj)
-            {
-                UInt iedge = M_originalMesh->localEdgeId(ielem, jj);
-                repeatedEdgeList.insert((Int) iedge);
-            }
-            for (UInt jj = 0; jj < M_elementFaces; ++jj)
-            {
-                UInt iface = M_originalMesh->localFaceId(ielem, jj);
-                repeatedFaceList.insert(iface);
-            }
-        }
-
-        // repeated node map creation
-        M_repeatedNodeVector[i].reserve(repeatedNodeList.size());
-
-        for (is = repeatedNodeList.begin(); is != repeatedNodeList.end(); ++is)
-        {
-            M_repeatedNodeVector[i].push_back(*is);
-        }
-
-        // repeated edge list creation
-        M_repeatedEdgeVector[i].reserve(repeatedEdgeList.size());
-
-        for (is = repeatedEdgeList.begin(); is != repeatedEdgeList.end(); ++is)
-        {
-            M_repeatedEdgeVector[i].push_back(*is);
-        }
-
-        // repeated face list creation
-        M_repeatedFaceVector[i].reserve(repeatedFaceList.size());
-
-        for (is = repeatedFaceList.begin(); is != repeatedFaceList.end(); ++is)
-        {
-            M_repeatedFaceVector[i].push_back(*is);
-        }
-
-#ifdef HAVE_LIFEV_DEBUG
-        if (M_serialMode)
-        {
-            Debug(4000) <<  "Created repeated map number " << i << "\n";
-        }
-        else
-        {
-            Debug(4000) << "Rank " << M_me << " created repeated map.\n";
-        }
-#endif
-    }
-}
-
-template<typename MeshType>
 void MeshPartitioner<MeshType>::execute()
 {
-    // Set element parameters (number of nodes, faces, edges and number of nodes
-    // on each face according to the type of mesh element used.
-    setElementParameters();
 
     // Build graph vertex distribution vector. Graph vertex represents one element
     // in the mesh.
@@ -1478,56 +1534,39 @@ void MeshPartitioner<MeshType>::execute()
     }
     ////////////////// END OF SOLID PARTITION PART /////////////////////
 
-
-    // Redistribute elements to appropriate processors before building the
-    // partitioned mesh.
-    redistributeElements();
-
-
 #ifdef HAVE_LIFEV_DEBUG
     Debug(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
 #endif
 
-    // ***********************
-    // local mesh construction
-    // ***********************
-    constructLocalMesh();
-
-    // ******************
-    // nodes construction
-    // ******************
-    constructNodes();
-
-    // ********************
-    // volumes construction
-    // ********************
-    constructVolumes();
-
-    // ******************
-    // edges construction
-    // ******************
-    constructEdges();
-
-    // ******************
-    // faces construction
-    // ******************
-    constructFaces();
-
-    // ******************
-    // final setup
-    // ******************
-    finalSetup();
-
-    // *********************
-    // repeated map creation
-    // *********************
-    createRepeatedMap();
+    doPartitionMesh();
 
     // ***************************************
     // release the original unpartitioned mesh
     // allowing it to be deleted
     // ***************************************
     releaseUnpartitionedMesh();
+
+    // ***************************************
+    // clear all internal structures that are
+    // not needed anymore
+    // ***************************************
+    cleanUp();
+}
+
+template<typename MeshType>
+void MeshPartitioner<MeshType>::cleanUp()
+{
+    clearVector( M_vertexDistribution );
+    clearVector( M_adjacencyGraphKeys );
+    clearVector( M_adjacencyGraphValues );
+    clearVector( M_localNodes );
+    clearVector( M_localEdges );
+    clearVector( M_localFaces );
+    clearVector( M_localVolumes );
+    clearVector( M_nBoundaryPoints );
+    clearVector( M_nBoundaryEdges );
+    clearVector( M_nBoundaryFaces );
+    clearVector( M_graphVertexLocations );
 }
 
 }

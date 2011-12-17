@@ -563,6 +563,11 @@ VectorEpetra::operator!( void )
 // ===================================================
 // Methods
 // ===================================================
+bool VectorEpetra::isGlobalIDPresent(const UInt row) const
+{
+    return blockMap().LID(row)>=0;
+}
+
 Int VectorEpetra::globalToLocalRowId( const UInt row ) const
 {
     Int lrow = blockMap().LID(row);
