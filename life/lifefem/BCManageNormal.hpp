@@ -427,21 +427,18 @@ void BCManageNormal<MatrixType>::bcShiftToNormalTangentialCoordSystem(matrix_Typ
     {
         //Shift to tangential system
 
-        Int errCode(0);
-
         //C = R*A
         matrix_Type C(systemMatrix.map(), systemMatrix.meanNumEntries());
-        errCode = M_rotationMatrixPtr->multiply(false,systemMatrix,false,C);
+        M_rotationMatrixPtr->multiply(false,systemMatrix,false,C);
 
         //A = C*Rt"
         matrix_Type D(systemMatrix.map(), systemMatrix.meanNumEntries());
-        errCode = C.multiply(false,*M_rotationMatrixPtr,true,D);
-        //std::cout<< errCode <<std::endl;
+        C.multiply(false,*M_rotationMatrixPtr,true,D);
         systemMatrix.swapCrsMatrix(D);
 
         //b = R*b
         VectorType c(rightHandSide);
-        errCode = M_rotationMatrixPtr->multiply(false,c,rightHandSide);
+        M_rotationMatrixPtr->multiply(false,c,rightHandSide);
     }
 }
 
@@ -451,20 +448,18 @@ void BCManageNormal<MatrixType>::bcShiftToCartesianCoordSystem(matrix_Type& syst
 {
     if (M_dataBuilt)
     {
-        Int errCode(0);
-
         // C = Rt*A;
         matrix_Type C(systemMatrix.map(), systemMatrix.meanNumEntries());
-        errCode = M_rotationMatrixPtr->multiply(true,systemMatrix,false,C);
+        M_rotationMatrixPtr->multiply(true,systemMatrix,false,C);
 
         // A = C*R";
         matrix_Type D(systemMatrix.map(), systemMatrix.meanNumEntries());
-        errCode = C.multiply(false,*M_rotationMatrixPtr,false,D);
+        C.multiply(false,*M_rotationMatrixPtr,false,D);
         systemMatrix.swapCrsMatrix(D);
 
         // b = Rt*b;
         VectorType c(rightHandSide);
-        errCode = M_rotationMatrixPtr->multiply(true,c,rightHandSide);
+        M_rotationMatrixPtr->multiply(true,c,rightHandSide);
     }
 }
 
