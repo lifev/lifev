@@ -137,18 +137,6 @@ public:
 template<int geoDimensions>
 class GeoDim {};
 
-//! GeoDim: 1D specialization
-template<>
-class GeoDim<1> {};
-
-//! GeoDim, 2D specialization
-template<>
-class GeoDim<2> {};
-
-//! GeoDim, 3D specialization
-template<>
-class GeoDim<3> {};
-
 
 //! @ingroup BasRefSha
 class Point
