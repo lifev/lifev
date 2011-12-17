@@ -695,7 +695,8 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
                 ID globalDofID(M_dof->localToGlobalMap(iterElement,iterDof) + iDim*M_dim);
 
                 // Compute the value of the function and set it
-                vect[globalDofID] = FEValues[iterDof];
+                vect.setCoefficient(globalDofID,FEValues[iterDof]);
+
             }
         }
     }
@@ -753,7 +754,8 @@ interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real 
                 const ID globalDofID( M_dof->localToGlobalMap ( iterElement, iterDof ) + iDim * M_dim );
 
                 // Compute the value of the function and set it
-                vector[globalDofID] = FEValues[iterDof];
+                vector.setCoefficient ( globalDofID, FEValues[iterDof] );
+
             }
         }
     }
@@ -800,7 +802,7 @@ FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
                     idDof = BCh[ibc][ i ] ->id() + BCh[ibc].component( j ) * totalDof;
                     Real val = BCh[ibc]( time, x, y, z, BCh[ibc].component( j ) );
 
-                    vect[idDof] = val;
+                    vect.setCoefficient(idDof,val);
                 }
             }
         }
@@ -1730,7 +1732,7 @@ interpolateGeneric( const FESpace<mesh_Type,map_Type>& OriginalSpace,
             	ID globalDofId(M_dof->localToGlobalMap( iElem, iterDof ) + iDim * M_dim);
 
             	// compute the value of the function and set it
-            	Interpolated[globalDofId] = FEValues[iterDof];
+            	Interpolated.setCoefficient(globalDofId,FEValues[iterDof]);
             	nodalValues[iDim][iterDof] = 0;
 			}
         }
