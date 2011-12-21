@@ -2265,6 +2265,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
  * @author Luca Formaggia
  * @date 2 August 2011
  */
+// The Template RMTYPE is used to compile with IBM compilers
 template <typename REGIONMESH, typename RMTYPE >
 class MeshTransformer{
 public:
@@ -2392,7 +2393,7 @@ namespace MeshStatistics
 }// namespace MeshStatistics
 
 // *****   IMPLEMENTATIONS ****
-//
+// The Template RMTYPE is used to compile with IBM compilers
 template <typename REGIONMESH, typename RMTYPE >
 MeshTransformer<REGIONMESH, RMTYPE >::MeshTransformer(REGIONMESH &m):M_mesh(m),M_pointList(){};
 /**
@@ -2435,7 +2436,7 @@ void MeshTransformer<REGIONMESH, RMTYPE >::savePoints()
         std::copy(M_mesh.pointList.begin(),M_mesh.pointList.end(),M_pointList.begin());
     }
 }
-
+//  The Template RMTYPE is used to compile with IBM compilers
 template <typename REGIONMESH, typename RMTYPE >
 const typename REGIONMESH::point_Type &
 MeshTransformer<REGIONMESH, RMTYPE >::pointInitial( ID const i ) const
@@ -2450,7 +2451,7 @@ MeshTransformer<REGIONMESH, RMTYPE >::pointListInitial() const
 {
     return M_pointList.empty()? M_mesh.Points : M_pointList;
 }
-
+//  The Template RMTYPE is used to compile with IBM compilers
 //! @todo Change using homogeneous coordinates to make it more efficient.
 template <typename REGIONMESH, typename RMTYPE >
 template <typename VECTOR>
@@ -2530,7 +2531,7 @@ void MeshTransformer<REGIONMESH, RMTYPE >::transformMesh( const VECTOR& scale, c
         pointList[ i ].coordinate( 2 ) = P( 2 );
     }
 }
-
+//  The Template RMTYPE is used to compile with IBM compilers
 template <typename REGIONMESH, typename RMTYPE >
 template <typename function>
 void MeshTransformer<REGIONMESH, RMTYPE >::transformMesh( const function& meshMapping)
