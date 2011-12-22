@@ -75,14 +75,25 @@ public:
     //! @name Public Types
     //@{
 
+    //! Type of data stored
     typedef Real data_type;
 
+    //! Type of the map to be used
     typedef MapEpetra map_type;
+
+    //! Type of the MapVector to be used with this class
     typedef MapVector<map_type> mapVector_type;
+
+    //! Type of the map (Unique/Repeated)
     typedef MapEpetraType mapType_type;
+
+    //! Combine mode
     typedef Epetra_CombineMode combine_type;
 
+    //! Type of the view
     typedef VectorBlockMonolithicEpetraView block_type;
+
+    //! Pointer on the view
     typedef boost::shared_ptr<block_type> block_ptrType;
 
     //@}
@@ -133,6 +144,7 @@ public:
       This method does not involve big computation overhead. Remark that
       it is not possible to change the size of the block vector
       through this method, nor its map.
+      @param The MapVector containing the maps
      */
     void setBlockStructure( const mapVector_type& mapVector);
 
@@ -143,6 +155,10 @@ public:
     //@{
 
     //! Getter for the size of the block index
+    /*!
+      @param index Index of the block
+      @return size of the index-th block
+     */
     UInt blockSize(const UInt& index) const
     {
         ASSERT( index < M_blockSize.size(), "Invalid block index");
@@ -150,9 +166,17 @@ public:
     }
 
     //! Getter for the block index
+    /*!
+      @param index Index of the block
+      @param blockView The blockView to be filled
+     */
     void blockView( const UInt& index, block_type& blockView);
 
     //! Getter for the block index
+    /*!
+      @param index Index of the block
+      @return The index-th block
+     */
     block_ptrType block( const UInt& index);
 
     //@}

@@ -84,7 +84,7 @@ public:
 	This is the most complete constructor, as it builds the whole block
 	structure of the matrix, using the maps stored in the vector.
 	*/
-	MatrixBlockMonolithicEpetra( const MapEpetraVector& vector, int numEntries = 50);
+	MatrixBlockMonolithicEpetra( const MapVector<MapEpetra>& vector, int numEntries = 50);
 
     //! Casting constructor
     MatrixBlockMonolithicEpetra( const MatrixEpetra<DataType>& matrix );
@@ -117,7 +117,7 @@ public:
       to be compatible with the global size).
 
      */
-    void setBlockStructure(const MapEpetraVector& mapVector);
+    void setBlockStructure(const MapVector<MapEpetra>& mapVector);
 
     //@}
 
@@ -148,6 +148,12 @@ public:
                     block_type& mbv);
 
 	//! Returns the block (rowIndex,columnIndex) of the matrix
+    /*!
+      Remark that the returned block is a shared pointer. This is
+      a limitation due to the non-copiability of the blocks.
+      @param rowIndex The index of the block w.r. to the block structure
+      @param columnIndex The index of the block w.r. to the block structure
+     */
 	block_ptrType block(const UInt& rowIndex, const UInt& columnIndex);
 
     //@}
@@ -180,7 +186,7 @@ MatrixBlockMonolithicEpetra<DataType>::MatrixBlockMonolithicEpetra(const MapEpet
 
 
 template <typename DataType>
-MatrixBlockMonolithicEpetra<DataType>::MatrixBlockMonolithicEpetra( const MapEpetraVector& vector, int numEntries):
+MatrixBlockMonolithicEpetra<DataType>::MatrixBlockMonolithicEpetra( const MapVector<MapEpetra>& vector, int numEntries):
     MatrixEpetra<DataType>( typename MatrixEpetra<DataType>::matrix_ptrtype())
 {
 	ASSERT( vector.nbMap() > 0 ,"Map vector empty, impossible to construct a MatrixBlockMonolithicEpetra!");
@@ -268,7 +274,7 @@ MatrixBlockMonolithicEpetra<DataType>::setBlockStructure(const std::vector<UInt>
 
 template <typename DataType>
 void
-MatrixBlockMonolithicEpetra<DataType>::setBlockStructure(const MapEpetraVector& mapVector)
+MatrixBlockMonolithicEpetra<DataType>::setBlockStructure(const MapVector<MapEpetra>& mapVector)
 {
     ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to set the block structure");
 

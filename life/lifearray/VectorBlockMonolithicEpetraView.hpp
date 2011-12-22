@@ -61,6 +61,7 @@ public:
     //! @name Public Types
     //@{
 
+    //! Typedef for the underlying vector type
     typedef VectorEpetra vector_Type;
 
     //@}
@@ -69,7 +70,7 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    //! default constructor.
+    //! Default constructor.
     VectorBlockMonolithicEpetraView();
 
     //! Copy constructor
@@ -80,7 +81,7 @@ public:
      */
     VectorBlockMonolithicEpetraView( const VectorBlockMonolithicEpetraView& otherView );
 
-    //! default destructor
+    //! Default destructor
     ~VectorBlockMonolithicEpetraView();
 
     //@}
@@ -103,7 +104,7 @@ public:
       @param GID the global index of the element within the block viewed.
       @param value the value to be added
      */
-    Int sumIntoGlobalValues( const Int GID, const Real value );
+    Int sumIntoGlobalValues( const Int GID, const Real value ) const;
 
     //@}
 
@@ -136,7 +137,7 @@ public:
     UInt lastValidIndex() const { return M_lastValidIndex; }
 
     //! Return the shared_pointer of the Epetra_FEVector
-    vector_Type* vectorPtr() { return M_vector; }
+    vector_Type* vectorPtr() const { return M_vector; }
 
     //@}
 

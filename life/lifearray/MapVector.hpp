@@ -36,8 +36,6 @@
 #ifndef MAP_VECTOR_HPP
 #define MAP_VECTOR_HPP
 
-#include <life/lifearray/MapEpetra.hpp>
-
 #include <life/lifecore/LifeV.hpp>
 
 #include <vector>
@@ -83,24 +81,32 @@ public:
 	MapVector();
 
 	//! Copy constructor
+    /*!
+      @param otherMapVector The vector of maps to copy
+     */
 	MapVector(const MapVector<map_Type>& otherMapVector);
 
 	//! Constructor with one map
 	/*!
       This constructor builds a MapVector with only
       the map given in arguement.
+      @param map The map to be put in the vector
 	*/
-	MapVector(const map_Type& map);
+	explicit MapVector(const map_Type& map);
 
 	//! Constructor with two maps
 	/*!
       The MapVector is filled with the two maps given in argument.
+      @param map1 The first map of the vector
+      @param map2 The second map of the vector
 	*/
 	MapVector(const map_Type& map1, const map_Type& map2);
 
 	//! Concatenation constructor
 	/*!
       This constructor copies the maps in vector and adds the map to it.
+      @param vector The vector to copy
+      @param map The map to add to vector
 	*/
 	MapVector(const MapVector<map_Type>& vector, const map_Type& map);
 
@@ -113,8 +119,35 @@ public:
     //! @name Operators
     //@{
 
-	//! Copy operator
+	//! Assignement operator
+    /*
+      @param vector The MapVector to copy
+      @return This MapVector
+     */
 	MapVector<map_Type> operator=(const MapVector<map_Type>& vector);
+
+    //! Access to the ith map (read only)
+    /*
+      @param i The index of the map
+      @return The ith map stored
+     */
+    const map_Type& operator[](UInt i) const;
+
+    //! Access to the ith map (read-write)
+    /*
+      @param i The index of the map
+      @return The ith map stored
+     */
+    map_Type& operator[](UInt i);
+
+    //! Juxtaposition operator for a vector of maps and a map
+    /*
+      @param map The map to be added
+      @return MapVector resulting of the concatenation of this MapVector and the map
+      given in argument
+     */
+    MapVector<map_Type>
+    operator|(const map_Type& map) const;
 
     //@}
 
@@ -154,27 +187,6 @@ private:
     // The vector containing the maps
 	std::vector<map_Type> M_vector;
 };
-
-
-//! Typedef for the MapVector containing MapEpetra
-typedef MapVector<MapEpetra> MapEpetraVector;
-
-
-//! Juxtaposition operator for the two maps
-template<typename MapType>
-MapVector<MapType>
-operator|(const MapType& map1, const MapType& map2)
-{
-	return MapVector<MapType>(map1,map2);
-}
-
-//! Juxtaposition operator for a vector of maps and a map
-template<typename MapType>
-MapVector<MapType>
-operator|(const MapVector<MapType>& vector, const MapType& map)
-{
-	return MapVector<MapType>(vector,map);
-}
 
 
 // ===================================================
@@ -234,6 +246,32 @@ operator=(const MapVector<map_Type>& vector)
     return *this;
 }
 
+template< typename MapType>
+const MapType &
+MapVector<MapType>::
+operator[](UInt i) const
+{
+    ASSERT( i< M_vector.size() ,"Index out of bound, no map to access (Read only)");
+    return M_vector[i];
+}
+
+template< typename MapType>
+MapType &
+MapVector<MapType>::
+operator[](UInt i)
+{
+    ASSERT( i< M_vector.size() ,"Index out of bound, no map to access (Read write)");
+    return M_vector[i];
+}
+
+template< typename MapType>
+MapVector<MapType>
+MapVector<MapType>::
+operator|(const map_Type& map) const
+{
+    return MapVector<map_Type>(*this,map);
+}
+
 // ===================================================
 // Methods
 // ===================================================
@@ -252,7 +290,7 @@ MapVector<MapType>::
 mapSize(UInt i) const
 {
     ASSERT( i< M_vector.size() ,"Index out of bound, no map to return");
-    return M_vector[i].map(Unique)->NumGlobalElements();
+    return M_vector[i].mapSize();
 }
 
 template< typename MapType>

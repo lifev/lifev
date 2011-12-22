@@ -78,7 +78,7 @@ showMe( std::ostream& output ) const
 
 Int
 VectorBlockMonolithicEpetraView::
-sumIntoGlobalValues( const Int GID, const Real value )
+sumIntoGlobalValues( const Int GID, const Real value ) const
 {
     ASSERT(GID < static_cast<UInt>(M_blockSize), " Error in assembling the block vector: global id to large for the block")
 

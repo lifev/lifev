@@ -16,7 +16,7 @@ There are two ways of implementing block structures
 	this approach, a block matrix is a structure storing many matrices, each of them representing one of the blocks.
 </ol>
 
-As the choice for the most suitable approach depends strongly on the problem at hand, the user is responsible it.
+As the choice for the most suitable approach depends strongly on the problem at hand, the user is responsible for it.
 
 \image html linear_algebra_monolithic_vs_split.png "The two possible approaches"
 

@@ -40,8 +40,6 @@
 
 #include <iostream>
 
-//#include <Epetra_FECrsMatrix.h>
-//#include <life/lifearray/MatrixBlockMonolithicEpetra.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 
 
@@ -56,6 +54,13 @@ namespace LifeV {
   to block of a matrix. It is useful to setup a clean and easy-to-use blocks management.
 
   For more information about the block structures in LifeV, see \ref BlockAlgebraPage "this page".
+
+  <b> Remark </b>
+
+  Using the operator "=" is not valid for this class! Indeed, copying the view
+  would not copy the data stored in the matrix, which can be confusing. If the
+  copy of the block is the intended use, one should use a method from the BlockUtils.
+
  */
 template<typename DataType>
 class MatrixBlockMonolithicEpetraView
@@ -238,18 +243,6 @@ addToCoefficients( UInt const numRows, UInt const numColumns,
     M_matrix->addToCoefficients(numRows,numColumns,
                                 rowIndices,columnIndices,
                                 localValues,format);
-
-// Avoid a warning when compiling in opt
-/*#ifdef NDEBUG
-    M_matrix->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
-                                  &columnIndices[0], localValues, format );
-#else
-    Int ierr = M_matrix->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
-                                             &columnIndices[0], localValues, format );
-#endif
-
-    ASSERT( ierr != -2, " \n <!> Error in block matrix insertion <!> \n Code : -2 \n Possible cause : try to insert a new element in a closed matrix");
-    ASSERT( ierr >= 0 , " \n <!> Unknown error in block matrix insertion <!> ");*/
 }
 
 
