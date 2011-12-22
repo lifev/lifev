@@ -6426,7 +6426,7 @@ extern "C"
     int F77NAME(zupmtr)(char *side, char *uplo, char *trans, integer *m,
                         integer *n, doublecomplex *ap, doublecomplex *tau, doublecomplex *c__,
                         integer *ldc, doublecomplex *work, integer *info);
-
+#ifdef __cplusplus
 } // extern "C"
 
 #endif /* __CLAPACK_H */
