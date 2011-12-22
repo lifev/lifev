@@ -1,5 +1,18 @@
 #! /bin/sh
 
-cp emacs-dirvars ../../.emacs-dirvars
-cp -r Templates ../../Templates
+DIRNAME=`dirname $0`
 
+DESTDIR=$DIRNAME/../..
+
+cd $DESTDIR
+if test -e .emacs-dirvars ; then
+  echo .emacs-dirvars already exists.
+else 
+  ln -s tools/emacs/emacs-dirvars .emacs-dirvars
+fi
+
+if test -e  Templates; then
+  echo directory Templates already exists.
+else 
+ ln -s tools/emacs/Templates .
+fi
