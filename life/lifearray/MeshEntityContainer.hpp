@@ -32,6 +32,7 @@
  *  @date 30-08-1999
  *  @author Luca Formaggia <luca.formaggia@polimi.it>
  *
+ *  @todo TO BE MOVED IN lifemesh!
  *  @contributor Laura Cattaneo
  *  @mantainer Laura Cattaneo
  */
@@ -50,6 +51,7 @@
 
 namespace LifeV
 {
+//! @todo Move to aspecific file meshentityutility
 namespace Comparers{
 /** @defgroup ComparisonOperators
  * They define a comparison operators for mesh entities according to some of
@@ -273,6 +275,8 @@ public:
         Example: a(10)=90; // a[10] will contain 90.0
         @param i index of the element of the MeshEntityContainer vector
         @return a vector reference
+        @note deprecated
+        @todo Eliminate!
      */
     reference operator() ( size_type const i )
     {
@@ -284,6 +288,8 @@ public:
         Example: a(10)=90; // a[10] will contain 90.0
         @param i index of the element of the MeshEntityContainer vector
         @return a vector const reference
+        @note deprecated
+        @todo Eliminate!
      */
     const_reference operator() ( size_type const i ) const
     {
@@ -310,25 +316,25 @@ public:
         @param i index
         @return boolean
      */
-    bool checkIndex( size_type const i ) const
+/*    bool checkIndex( size_type const i ) const
     {
         return i >= 0 && i < this->size() ;
     }
-
+*/
     //! Returns the number of elements in the container
     //! @todo Useless. take away
-    UInt numItems()const
+/*    UInt numItems()const
     {
         return this->size();
     }
-
+*/
     //! Returns the capacity of the container
     //! @todo Useless. Take away
-    UInt maxNumItems()const
+/*    UInt maxNumItems()const
     {
         return this->capacity();
     }
-
+*/
     //! It sets the capacity of the container
     //! It returns a bool to allow to test whether the container data pool
     //! has changed

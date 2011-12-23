@@ -311,7 +311,7 @@ template <typename MarkerIDPolicy>
 markerID_Type Marker<MarkerIDPolicy>::setWeakerMarkerID( markerID_Type const & markerID1,
                                                          markerID_Type const & markerID2 )
 {
-    return setMarkerID( MarkerIDPolicy::weakerFlag( markerID1, markerID2 ) );
+    return setMarkerID( MarkerIDPolicy::weakerMarkerID( markerID1, markerID2 ) );
 }
 
 template <typename MarkerIDPolicy>

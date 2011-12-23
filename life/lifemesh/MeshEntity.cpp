@@ -9,6 +9,7 @@
 namespace LifeV{
 namespace EntityFlags{
 
+//
 std::string name( const flag_Type & flag )
 {
     switch( flag )

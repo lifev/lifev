@@ -49,7 +49,7 @@ namespace LifeV
 
 /** InternalEntitySelector.
  *
- *  Functor class that tells whether an marker ID corresponds to an internal face
+ *  Functor class that tells whether a marker ID corresponds to an internal face
  *  @author Luca Formaggia
  *  @see SetFlagAccordingToWatermarks
  *
@@ -121,9 +121,6 @@ public:
 }// end namespace Utility
 /** @defgroup MeshEntityFlagsChangers
  * Useful functors to change marker IDs according to certain conditions
- *
- * @todo Since all Mesh entities derive from a common base maybe the MeshEntity template
- * parameter may be eliminated!!
  *
  * @{
  */
@@ -201,13 +198,19 @@ private:
 
  //!Sets the flag of a mesh entity according to the value of its Marker id.
  /*!
- *  We compare the marker id with a watermark according to a policy which is a comparison operator
- *  with signature bool operator()(markerID_Type const & mId, markerID_Type const & watermark)
+ *  We compare the marker ID with a watermark according to a policy which is a comparison operator
+ *
+ *   @code
+     bool operator()(markerID_Type const & mId, markerID_Type const & watermark)
+ *   @endcode
+ *
  *  which by default is greater<>  (i.e. returns true if  mId > watermark).
  *  If the comparison is true the given flag is assigned to the entity using a second policy
  *  implemented as a function:
  *
- *  flag_Type flagPolicy  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+ *  @code
+    flag_Type flagPolicy  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+ *  @endcode
  *
  *  passed in the constructor and defaulted to Flag::turnOn
  *
@@ -263,25 +266,25 @@ template<typename Policy=std::greater<markerID_Type> >
     const flagPolicy_ptr M_flagPolicy;
 };
 
-//! Sets the boolean flag of a mesh entity according to the value of a vector of Marker ids.
+//! Sets the flag of a mesh entity according to the value of a vector of Marker IDs.
 /*!
- *  We compare the marker ids with all values contained in the vector using the
- *  equal_to operator.
+ *  We compare the marker IDs with all values contained in the vector using the
+ *  equal_to<> operator.
  *  If the comparison is true the given flag is assigned to the entity using the
  *  policy implemented as a function
- *  @verbatim
- *  flag_Type flagPolicy  ( flag_Type const & inputFlag, flag_Type const & refFlag )
- *  @endverbatim
+ *  @code
+    flag_Type flagPolicy  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+ *  @endcode
  *  passed in the constructor and defaulted to Flag::turnOn
  *
  *  Example:
  *  I want to set the flag INTERNAL_INTERFACE to all faces with marker ID = 1000, 2000 and 3000
- * @verbatim
+ * @code
    vector<markerID_Type> fl; fl.push_back(1000); fl.push_back(2000); fl.push_back(3000)
    SetFlagAccordingToWatermarks<face_Type> changer(INTERNAL_INTERFACE,fl,Flag::turnOn)
    //the last argument is not needed
    mesh.faceList.changeAccordingToFunctor(changer);
-   @endverbatim
+   @code
  *
  */
 
@@ -323,17 +326,17 @@ private:
  */
 //! Set markers according to a map.
 /**
- * This utility is used in some LifeV solvers to change the markers of certain entities on the
+ * This utility is used in some LifeV solvers to change the marker IDs of certain entities on the
  * fly
  *
- * @param locDof Contains a map of int pairs whose second entry contains the entity id to be
+ * @param locDof Contains a map of integers whose second entry contains the entity id to be
  * changed
  * @param newMarker the new marker id
  *
- * @note, it was originally a method of regionemesh3D names edgeMarkers. It has been generalised
- * and taken away from regionmesh
+ * @note  it was originally a method of Regionmesh3D named edgeMarkers. It has been generalised
+ * and taken away from RegionMesh
  *
- * @todo Take away from here and put in another header file (MeshUtility.hpp for instance)
+ * @todo Take away from here and put it in another header file (MeshUtility.hpp for instance)
  */
 template <typename MeshEntityList>
 void

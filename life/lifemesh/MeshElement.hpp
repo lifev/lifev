@@ -39,7 +39,6 @@
 #define MESHELEMENT_H
 
 #include <life/lifemesh/MeshVertex.hpp>
-#include <life/lifemesh/MeshEntity.hpp>
 #include <algorithm>
 
 namespace LifeV
@@ -180,7 +179,6 @@ public:
      */
     bool setPointWithBoundaryCheck( ID const identity, point_Type const & point );
 
-
     //!Inserts a point using pointers
     /*!
         @param identity Identity of the point to be inserted
@@ -212,10 +210,10 @@ public:
 
     //! Returns the points vector
     /*!
-        The method allows to access coordinates and modify them
+        The method allows to access coordinates but not modify them
     	@return Points vector
      */
-    point_Type const* points ()
+    point_Type const* points () const
     {
         return M_points;
     }

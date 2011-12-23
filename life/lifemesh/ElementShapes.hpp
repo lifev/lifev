@@ -75,9 +75,12 @@ namespace LifeV
  *  It must be specialised for the specific GeoShape since the inverse ordering
  *  depends on how points are numbered in the actual GeoShape.
  *  This utility is meant to be used only by procedures that build a mesh, since it operates on
- *  basic mesh structure. It can be dangerous to use, for instance, after a full mesh has been set up.
+ *  basic mesh structures. It can be dangerous to use, for instance, after a full mesh has been set up.
  *  It is useful to invert faces or edges which are incorrectly oriented or to fix a mesh produced by a mesher
  *  which uses a different orientation convention.
+ *
+ *  @param pointId Elemental local id of a point of the GeoShape
+ *  @return the (local) ID of the corresponding point in the reversed GeoShape
  */
 template <typename GeoShapeType>
 inline ID reversePoint( ID const & pointId );
@@ -253,6 +256,7 @@ public:
     static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 0;   //!< Number of points per edge
 };
+//! Inverts a line
 template <>
 inline ID reversePoint<LinearLine>( ID const & pointId ){
     static ID _rid[]={1,0};

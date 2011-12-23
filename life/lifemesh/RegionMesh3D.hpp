@@ -586,6 +586,7 @@ public:
      *  number of faces. It is relevant only when createFaces=true. Setting it
      *  to a proper value helps in reducing time and memory.
      *
+     *  @note Faces are renumbered so that boundary faces are stored first
      *  @pre The routine assumes that the boundary faces are properly set, if not use the
      *  methods in #include MeshChecks.hpp
      *
@@ -617,22 +618,22 @@ public:
      */
     bool hasLocalEdges() const;
 
-    //! Build localEdgeId table and optionally fills the list of Edges
+    //! Builds localEdgeId table and optionally fills the list of Edges
     /**
      *
-     * @param createEdges is set true if we want also to create the actual list
-     *  of edges. There is another utility (MeshChecks.hpp), which
-     *  might be used for the same purpose if we want just to create the faces
-     *  and not also the LocalEdgeID table.
+     * @param createEdges is set true if we want also to create the actual
+     * edges. There is another utility (MeshChecks.hpp),
+     * might be used for the same purpose if we want just to create the edges
+     * and not also the LocalEdgeID table.
      *  @param verbose If true, output is verbose.
      *  @param estimateEdgeNumber is a guess provided by the user of the total
-     *  number of edges. It is relevant only when createFaces=true. Setting it
+     *  number of edges. It is relevant only when createEdges=true. Setting it
      *  to a proper value helps in reducing time and memory.
      *  @param renumber Relevant only if createFaces=true.It makes sure that boundary edges are first
      *  if set to false possibly existing edges are never moved
      *
-     *  @note This method does not assume that boundary edges are stores, since
-     *  this condition is NOT a a paradigm for a RegionMesh3D.
+     *  @note This method does not assume that boundary edges are already stored, since
+     *  this condition is NOT an invariant of a RegionMesh3D.
      */
     void updateElementEdges( bool createEdges = false, const bool verbose = false,
                              UInt estimateEdgeNumber = 0, bool renumber=true);
@@ -640,17 +641,17 @@ public:
     //! Destroys Edge-To-Face lookup table.
     void cleanElementEdges();
 
-    //! Local Edge.
-    /** @param volId Id of volume (element).
-     *  @param locE local edge number 0 \< LocE \< numLocalEdges().
-     *  @return ID of the edge.
+    //! Local Edge ID of an edge in a volume stored in the mesh
+    /** @param volId local ID of the volume
+     *  @param locE local edge number (elemental) 0 \< LocE \< numLocalEdges().
+     *  @return local ID of the edge.
      */
     UInt localEdgeId( UInt const volId, UInt const locE ) const;
 
-    //! Local Edge.
-    /** @param iv Reference of the volume.
-     *  @param locE local edge number 0 \< LocE \< numLocalEdges().
-     *  @return ID of the edge.
+    //! Local Edge ID of an edge in a volume stored in the mesh
+    /** @param iv local ID of the volume
+     *  @param locE local edge number (elemental) 0 \< LocE \< numLocalEdges().
+     *  @return local ID of the edge.
      */
     UInt localEdgeId( const VolumeType & iv, UInt const locE ) const;
 
@@ -1688,7 +1689,7 @@ template <typename GEOSHAPE, typename MC>
 inline UInt
 RegionMesh3D<GEOSHAPE, MC>::storedVolumes() const
 {
-    return volumeList.numItems();
+    return volumeList.size();
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1815,7 +1816,7 @@ template <typename GEOSHAPE, typename MC>
 inline UInt
 RegionMesh3D<GEOSHAPE, MC>::storedFaces() const
 {
-    return faceList.numItems();
+    return faceList.size();
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1979,7 +1980,7 @@ template <typename GEOSHAPE, typename MC>
 inline UInt
 RegionMesh3D<GEOSHAPE, MC>::storedEdges() const
 {
-    return edgeList.numItems();
+    return edgeList.size();
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2135,7 +2136,7 @@ template <typename GEOSHAPE, typename MC>
 inline UInt
 RegionMesh3D<GEOSHAPE, MC>::storedPoints() const
 {
-    return pointList.numItems();
+    return pointList.size();
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2933,6 +2934,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee, 
         this->M_numBEdges=
         edgeList.countElementsWithFlag(EntityFlags::PHYSICAL_BOUNDARY, &Flag::testOneSet);
         setLinkSwitch( "HAS_ALL_EDGES" );
+        if(this->M_numGlobalEdges==0) this->M_numGlobalEdges=M_numEdges;
     }
 
     if(renumber && !edgeList.empty())
