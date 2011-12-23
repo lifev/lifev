@@ -168,6 +168,7 @@ public:
     MapEpetra( const Epetra_BlockMap& blockMap,
                const Int offset,
                const Int maxId);
+
 private:
     //! Constructor from raw Epetra_Map
     /*!
@@ -328,91 +329,7 @@ private:
 
 typedef MapVector<MapEpetra> MapEpetraVector;
 
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-template<typename Mesh>
-MapEpetra::
-MapEpetra( const ReferenceFE&               refFE,
-           const MeshPartitioner<Mesh>& meshPart,
-           const comm_ptrtype&        commPtr ):
-        M_repeatedMapEpetra(),
-        M_uniqueMapEpetra(),
-        M_exporter(),
-        M_importer(),
-        M_commPtr( commPtr )
-{
-    // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
-    // never modify them
-
-    setUp( refFE,
-           commPtr,
-           const_cast<std::vector<Int>&>( meshPart.repeatedNodeVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedEdgeVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedFaceVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedVolumeVector() ) );
-
-}
-
-
-template<typename Mesh>
-MapEpetra::
-MapEpetra( const ReferenceFE&        refFE,
-           const Mesh&         mesh,
-           const comm_ptrtype& commPtr ):
-        M_repeatedMapEpetra(),
-        M_uniqueMapEpetra(),
-        M_exporter(),
-        M_importer(),
-        M_commPtr( commPtr )
-{
-    std::vector<Int> repeatedNodeVector;
-    std::vector<Int> repeatedEdgeVector;
-    std::vector<Int> repeatedFaceVector;
-    std::vector<Int> repeatedVolumeVector;
-
-    if ( refFE.nbDofPerVertex() )
-    {
-        repeatedNodeVector.reserve(mesh.numPoints());
-        for ( UInt ii = 0; ii < mesh.numPoints(); ii++ )
-            repeatedNodeVector.push_back( mesh.pointList(ii).id() );
-    }
-
-    if ( refFE.nbDofPerEdge() )
-    {
-        repeatedEdgeVector.reserve( mesh.numEdges() );
-
-        for ( UInt ii = 0; ii < mesh.numEdges(); ii++ )
-            repeatedEdgeVector.push_back( mesh.edgeList(ii).id() );
-    }
-
-    if ( refFE.nbDofPerFace() )
-    {
-        repeatedFaceVector.reserve( mesh.numFaces() );
-
-        for ( UInt ii = 0; ii < mesh.numFaces(); ii++ )
-            repeatedFaceVector.push_back( mesh.faceList(ii).id() );
-    }
-
-    if ( refFE.nbDofPerVolume() )
-    {
-        repeatedVolumeVector.reserve( mesh.numVolumes() );
-
-        for ( UInt ii = 0; ii < mesh.numVolumes(); ii++ )
-            repeatedVolumeVector.push_back( mesh.volumeList(ii).id() );
-    }
-
-
-    setUp( refFE,
-           commPtr,
-           repeatedNodeVector,
-           repeatedEdgeVector,
-           repeatedFaceVector,
-           repeatedVolumeVector );
-
-    // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
-    // never modify them
-}
+} // end namespace LifeV
 
 #endif
 

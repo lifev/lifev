@@ -62,7 +62,6 @@
 #include <cstdlib>
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifefem/ETIntegrateMatrixElement.hpp>
 #include <vector>
 
 //@@
@@ -170,13 +169,6 @@ public:
       @param scalar Value for the multiplication
      */
     MatrixEpetra  operator *  ( const DataType scalar ) const;
-
-	template< typename MeshType, typename TestSpace, typename SolutionSpace, typename ExpressionType >
-	void operator +=
-	( ETIntegrateMatrixElement<MeshType,TestSpace,SolutionSpace,ExpressionType> integrator )
-	{
-		integrator.addTo(*this);
-	}
 
     //@}
 
