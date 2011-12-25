@@ -64,27 +64,32 @@ std::string name( const flag_Type & flag );
 
 }// namespace EntityFlags
 
-//! This is the base class to store the identifiers.
+//! This is the base class to store basic properties of any mesh entity
 /*!
+ * The basic properties of a mesh entity is to have identifiers and flags.
+ * Identifiers give information about the numbering of the entity (typically in a mesh)
+ * flags are attributes af the entity, like being on the boundary.
+ *
    In this class, there are two identifiers stored:
     <ol>
-        <li> The global identifier is defined for the whole mesh.
-        <li> The local identifier is defined as the identifier for
-             a particular processor. If the entity is stored into a
-             meshEntityContainer, then localId must be the position
-             of the entity in the container.
+        <li> The global identifier, normally used to uniquely identify the
+         entity in the whole mesh.
+        <li> The local identifier, which is usually unique to the entity on a given
+        partition. If the entity is stored into a
+        meshEntityContainer, then localId must be the position
+        of the entity in the container.
     </ol>
 
     When running the code in serial (1 processor), the identifiers
-    are then the same.
+    are then the same (but this is not necessary)
 
-    This class provides the method and operators to handle easily
-    the identifiers.
+    This class provides the method and operators to handle local and global
+    identifiers easily.
 
     Note: Documentation by Samuel Quinodoz, implementation anterior
-    to the documentation, without name of author.
+    to the documentation: Luca Formaggia
 
-  The additional flag that is stored is used to specify geometrical properties of the entity
+  The additional fag that is stored is used to specify geometrical properties of the entity
   such as the ones specified above in the EntityFlags namespace.
   @todo The marker ID should be taken away form marker class and added to the MeshEntity directly
  */
@@ -161,52 +166,13 @@ public:
     void showMe( std::ostream& output = std::cout ) const;
     //@}
 
-    //! @name Operators
-    //@{
-
-    //! Equivalence operator that checks if BOTH identifiers are the same.
-    /*!
-      @param e The mesh entity to be compared with.
-     */
-    bool operator==(const MeshEntity & e ) const
-    {
-        return ( ( M_id == e.id() ) && ( M_localId == e.M_localId ));;
-    };
-
-    //! Relation operator that performs the same comparison on the GLOBAL identifier.
-    /*!
-      @param e The mesh entity to be compared with.
-    */
-    bool operator<=(const MeshEntity & e ) const
-    {
-        return M_id <= e.id();
-    };
-
-    //! Relation operator that performs the same comparison on the GLOBAL identifier.
-    /*!
-      @param e The mesh entity to be compared with.
-    */
-    bool operator<( const MeshEntity & e ) const
-    {
-        return M_id < e.id();
-    };
-
-    //! Relation operator that performs the same comparison on the GLOBAL identifier.
-    /*!
-      @param e The mesh entity to be compared with.
-    */
-    bool operator>=(const MeshEntity & e ) const
-    {
-        return M_id >= e.id();
-    };
-
-    //@}
 
     //! @name Set Methods
     //@{
 
     //! Method to set the global identifier.
     /*!
+     * @todo change the name in setGlobalId
       @param id The new global identifier.
     */
     inline void setId( const ID& id)
@@ -306,37 +272,58 @@ private:
 };
 
 namespace MeshEntityUtility{
-/*! @defgroup MeshEntityUtilities Utilities to get local or global ID according to the switch
- *  The template parameter is in fact a MeshEntity::SwitchId enumerator which takes values
- *  LOCALID or GLOBALID
+/*! @defgroup MeshEntityUtilities
+ *  Utilities to get local or global ID according to a switch
+ *  The template parameter is in fact a MeshEntity::SwitchId
+ *  enumerator which takes values MeshEntity::LOCALID or
+ *  MeshEntity::GLOBALID.
+ *  Getters are also implemented as functors for efficiency reason
+ *  (allow inlining)
+ *  @todo Go to a separate file
  * @{
  */
-//! Generic definition of getter
 template<int Selector>
 inline ID getID(MeshEntity const &);
 //! Generic definition of setter
 template<int Selector>
 inline void setID(MeshEntity&,const ID);
-//! Specialization for local id
+
+//! Specialization for global id
 template<>
 inline ID getID<MeshEntity::GLOBALID>(MeshEntity const & entity){
     return entity.id();
 }
+
 //! Specialization for local id
 template<>
 inline ID getID<MeshEntity::LOCALID>(MeshEntity const & entity){
     return entity.localId();
 }
+
 //! Specialization for global id
 template<>
 inline void setID<MeshEntity::GLOBALID>(MeshEntity& entity,const ID id){
     entity.setId(id);
 }
+
 //! Specialization for local id
 template<>
 inline void setID<MeshEntity::LOCALID>(MeshEntity& entity,const ID id){
     entity.setLocalId(id);
 }
+//! Generic definition of the functor to extract the local or global ID
+/*
+ * The functor is useful for allowing inlining and use it with
+ * std compliant containers.
+ */
+template<int Selector>
+struct IdGetter{
+    inline ID operator() (MeshEntity const & entity) const
+    {return getID<Selector>(entity);};
+};
+
+
+
 /** @} */ // end of MeshEntityUtilities
 } // end of namespace MeshEntityUtility
 
