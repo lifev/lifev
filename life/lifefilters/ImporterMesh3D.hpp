@@ -621,7 +621,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
             //_numberBoundaryEdges=atoi(node_s);
 
-            for ( i = 0; i < numberBoundaryEdges; i++ )
+            for ( i = 0; i < numberStoredEdges; i++ )
             {
 #ifdef OLDMPPFILE
                 myStream >> p1 >> p2 >> ity >> ibc;
@@ -822,10 +822,9 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
         std::cerr << " Error while reading INRIA mesh file headers" << std::endl;
         std::abort() ;
     }
-
+    //! Fix in case mesh file contains only a subset of the edges
+    UInt numberStoredEdges(numberBoundaryEdges);
     hstream.close();
-
-    UInt numberStoredEdges = numberBoundaryEdges;
 
     //Reopen the stream: I know it is stupid but this is how it goes
     std::ifstream myStream( fileName.c_str() );
