@@ -2261,11 +2261,12 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 /** Class to transform a mesh.
  * A class that implements methods to transform a mesh without changing
  * mesh connectivities. It has a constructor that takes the mesh to be transformed
+ * @note The Template RMTYPE is used to compile with IBM AIX compilers
  * @author Luca Formaggia
  * @date 2 August 2011
  */
-// The Template RMTYPE is used to compile with IBM compilers
-template <typename REGIONMESH, typename RMTYPE >
+//
+template <typename REGIONMESH, typename RMTYPE=typename REGIONMESH::MarkerCommon >
 class MeshTransformer{
 public:
     /** the constructor may take a reference to the mesh to be manipulated */
