@@ -247,5 +247,6 @@ extern "C"
     void F77NAME(zher2k)(char*, char*, const int*, const int*, const double *, const double *, const int*, const double *, const int*, const double *, double *, const int*);
     void F77NAME(ztrmm)(char*, char*, char*, char*, const int*, const int*, const double *, const double *, const int*, double *, const int*);
     void F77NAME(ztrsm)(char*, char*, char*, char*, const int*, const int*, const double *, const double *, const int*, double *, const int*);
+#ifdef __cplusplus
 }
 #endif /*  CBLAS_F77_H */

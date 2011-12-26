@@ -145,9 +145,9 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     // Miscellaneous
     M_postprocessingDirectory = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
     M_postprocessingFile      = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
-    M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
+    M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3.)/3. );
 
-    if ( M_CFLmax > std::sqrt(3)/3. )
+    if ( M_CFLmax > std::sqrt(3.)/3. )
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
 
     // Jacobian perturbation
@@ -324,9 +324,9 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     M_postprocessingFile      = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
     M_inertialWall            = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
     M_viscoelasticWall        = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
-    M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
+    M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3.)/3. );
 
-    if ( M_CFLmax > std::sqrt(3)/3. )
+    if ( M_CFLmax > std::sqrt(3.)/3. )
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
 
     // Jacobian perturbation

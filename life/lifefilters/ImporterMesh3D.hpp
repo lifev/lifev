@@ -825,6 +825,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
     hstream.close();
 
+    UInt numberStoredEdges = numberBoundaryEdges;
+
     //Reopen the stream: I know it is stupid but this is how it goes
     std::ifstream myStream( fileName.c_str() );
 

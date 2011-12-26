@@ -78,7 +78,7 @@ public:
     /** @defgroup public_types Public Types
      *
      */
-
+    typedef RegionMesh1D<GEOSHAPE, MC>          mesh_Type;
     /** @name Marker Types
      *  @ingroup public_types
      *  Markers for Point, Edge and Region
@@ -125,6 +125,7 @@ public:
     typedef MeshElementMarked1D<EdgeShape, MC>  EdgeType;
     //! Point Element (0D)
     typedef MeshElementMarked0D<MC>             point_Type;
+
 
     /** @} */ // End of group Geometric Element Types
 
@@ -423,7 +424,7 @@ public:
     const BElementType& bElement( const UInt& i ) const;
 
     //! Return the handle to perform transormations on the mesh
-    MeshUtility::MeshTransformer<RegionMesh1D<GEOSHAPE, MC> > & meshTransformer();
+    MeshUtility::MeshTransformer<RegionMesh1D<GEOSHAPE, MC>,  typename mesh_Type::MarkerCommon > & meshTransformer();
 
     /** @} */ // End of group Generic Methods
 
@@ -1245,7 +1246,7 @@ protected:
 
     /** @} */ // End of group Internal Counters
 
-    MeshUtility::MeshTransformer<RegionMesh1D<GEOSHAPE, MC> > M_meshTransformer;
+    MeshUtility::MeshTransformer<RegionMesh1D<GEOSHAPE, MC>, typename mesh_Type::MarkerCommon > M_meshTransformer;
 
 }; // End of class RegionMesh1D
 
@@ -2300,7 +2301,7 @@ RegionMesh1D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
 }
 
 template <typename GEOSHAPE, typename MC>
-inline MeshUtility::MeshTransformer<RegionMesh1D<GEOSHAPE, MC> > &
+inline MeshUtility::MeshTransformer< RegionMesh1D<GEOSHAPE, MC>, typename RegionMesh1D<GEOSHAPE, MC>::MarkerCommon > &
 RegionMesh1D<GEOSHAPE, MC>::meshTransformer()
 {
     return this->M_meshTransformer;

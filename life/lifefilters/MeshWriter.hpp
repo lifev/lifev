@@ -70,8 +70,6 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     UInt nVertices = mesh.numVertices();
     ofile << nVertices << "\n";
 
-    int ig;
-
     std::map<int, int> localToGlobalNode = mesh.localToGlobalNode();
     std::map<int, int>::iterator im;
 
