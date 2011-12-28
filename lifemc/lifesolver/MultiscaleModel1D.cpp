@@ -198,7 +198,9 @@ MultiscaleModel1D::setupModel()
 #ifdef HAVE_HDF5
     M_exporter->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
-    MapEpetra map( M_feSpace->refFE(), *M_exporterMesh, M_comm );
+    DOF tmpDof ( *M_exporterMesh, M_feSpace->refFE() );
+    std::vector<Int> myGlobalElements( tmpDof.globalElements( *M_exporterMesh ) ); 
+    MapEpetra map( -1, myGlobalElements.size(), &myGlobalElements[0], M_comm );
     M_solver->setupSolution( *M_exporterSolution, map, true );
 
     M_exporter->addVariable( IOData_Type::ScalarField, "Area ratio (fluid)", M_feSpace, (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ) );
@@ -544,7 +546,7 @@ MultiscaleModel1D::setupFESpace()
     NullTransformation[2] = 0.;
 
     //The real mesh can be only scaled due to OneDFSISolver conventions
-    M_data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation ); // Scale the x dimension
+    M_data->mesh()->meshTransformer().transformMesh( M_geometryScale, NullTransformation, NullTransformation ); // Scale the x dimension
 
     for ( UInt i(0); i < M_data->numberOfNodes() ; ++i )
         M_data->setArea0( M_data->area0( i ) * M_geometryScale[1] * M_geometryScale[2], i );  // Scale the area (y-z dimensions)
@@ -554,7 +556,7 @@ MultiscaleModel1D::setupFESpace()
 
 #ifdef HAVE_HDF5
     //The mesh for the post-processing can be rotated
-    M_exporterMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_exporterMesh->meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 #endif
 
     //Setup FESpace

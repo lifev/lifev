@@ -151,13 +151,13 @@ MultiscaleModelFSI3D::setupModel()
 
     // Mesh transformation (before partitioning, ideally should be done after for scalability)
     //M_FSIoperator->fluidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
-    M_FSIoperator->solidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_FSIoperator->solidMesh().meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     // Mesh partitioning
     M_FSIoperator->partitionMeshes();
 
     // Mesh transformation (after partitioning - not working for solid)
-    M_FSIoperator->fluidMeshPart().meshPartition()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_FSIoperator->fluidMeshPart().meshPartition()->meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
     //M_FSIoperator->solidMeshPart().meshPartition()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     // Setup FEspace & DOF
@@ -328,10 +328,10 @@ MultiscaleModelFSI3D::showMe()
                   << "Harmonic ext. DOF   = " << M_FSIoperator->mmFESpace().dof().numTotalDof() << std::endl
                   << "Structure DOF       = " << M_FSIoperator->dFESpace().dof().numTotalDof() << std::endl << std::endl;
 
-        std::cout << "Fluid mesh maxH     = " << M_FSIoperator->uFESpace().mesh()->maxH() << std::endl
-                  << "Fluid mesh meanH    = " << M_FSIoperator->uFESpace().mesh()->meanH() << std::endl
-                  << "Solid mesh maxH     = " << M_FSIoperator->dFESpace().mesh()->maxH() << std::endl
-                  << "Solid mesh meanH    = " << M_FSIoperator->dFESpace().mesh()->meanH() << std::endl << std::endl;
+        std::cout << "Fluid mesh maxH     = " << MeshUtility::MeshStatistics::computeSize( *( M_FSIoperator->uFESpace().mesh() ) ).maxH << std::endl
+                  << "Fluid mesh meanH    = " << MeshUtility::MeshStatistics::computeSize( *( M_FSIoperator->uFESpace().mesh() ) ).meanH << std::endl
+                  << "Solid mesh maxH     = " << MeshUtility::MeshStatistics::computeSize( *( M_FSIoperator->dFESpace().mesh() ) ).maxH << std::endl
+                  << "Solid mesh meanH    = " << MeshUtility::MeshStatistics::computeSize( *( M_FSIoperator->dFESpace().mesh() ) ).meanH << std::endl << std::endl;
     }
 }
 
