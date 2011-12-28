@@ -837,7 +837,7 @@ OneDFSISolver::inertialFlowRateCorrection( const vector_Type& flux )
         meanA0 /= 2;
 
         m = M_physicsPtr->data()->densityWall()*M_physicsPtr->data()->thickness(iElement + 1)/
-            ( 2*std::sqrt(4*std::atan(1))*std::sqrt(meanA0) );
+            ( 2*std::sqrt(4*std::atan(1.))*std::sqrt(meanA0) );
 
         coeffStiff = m/M_physicsPtr->data()->densityRho();
 
@@ -943,7 +943,7 @@ OneDFSISolver::longitudinalFlowRateCorrection()
         coeffMassLHS /= 2;
         coeffMassLHS = 1./ coeffMassLHS;
 
-        a = M_physicsPtr->data()->inertialModulus() / std::sqrt(4*std::atan(1));
+        a = M_physicsPtr->data()->inertialModulus() / std::sqrt(4*std::atan(1.));
         coeffMassRHS = M_physicsPtr->data()->dataTime()->timeStep() * a / M_physicsPtr->data()->densityRho();
 
         // backward differentiation when near to the left boundary

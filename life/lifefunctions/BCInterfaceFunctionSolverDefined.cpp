@@ -115,11 +115,11 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
         Int verticesGlobalNumber( M_physicalSolver->solidMeshPart().meshPartition()->numGlobalVertices() );
         for ( UInt i(0) ; i < M_physicalSolver->solidMeshPart().meshPartition()->numVertices() ; ++i )
         {
-            gid = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).id();
+            gid = M_physicalSolver->solidMeshPart().meshPartition()->meshTransformer().pointInitial( i ).id();
 
-            x   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).x();
-            y   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).y();
-            z   = M_physicalSolver->solidMeshPart().meshPartition()->pointInitial( i ).z();
+            x   = M_physicalSolver->solidMeshPart().meshPartition()->meshTransformer().pointInitial( i ).x();
+            y   = M_physicalSolver->solidMeshPart().meshPartition()->meshTransformer().pointInitial( i ).y();
+            z   = M_physicalSolver->solidMeshPart().meshPartition()->meshTransformer().pointInitial( i ).z();
 
             alpha = M_vectorFunctionRobin[0]->functionTimeSpace( t, x, y, z, 0 );
             beta  = M_vectorFunctionRobin[1]->functionTimeSpace( t, x, y, z, 0 );

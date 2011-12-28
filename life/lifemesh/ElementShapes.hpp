@@ -1,6 +1,6 @@
 //@HEADER
 /*
-*******************************************************************************
+ *******************************************************************************
 
     Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
     Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
@@ -20,8 +20,8 @@
     You should have received a copy of the GNU Lesser General Public License
     along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-*******************************************************************************
-*/
+ *******************************************************************************
+ */
 //@HEADER
 
 /*!
@@ -60,7 +60,7 @@
 	      return the local id number of points on faces and edges (when relevant)
 	@note We follow the convention of indicating THE VERTICES FIRST in the list
 	      of dofs
-*/
+ */
 
 #ifndef ELEMENTSHAPES_H
 #define ELEMENTSHAPES_H 1
@@ -71,30 +71,16 @@
 namespace LifeV
 {
 //! A utility to invert point numbering on a GeoShape
+/*!
+ *  It must be specialised for the specific GeoShape since the inverse ordering
+ *  depends on how points are numbered in the actual GeoShape.
+ *  This utility is meant to be used only by procedures that build a mesh, since it operates on
+ *  basic mesh structure. It can be dangerous to use, for instance, after a full mesh has been set up.
+ *  It is useful to invert faces or edges which are incorrectly oriented or to fix a mesh produced by a mesher
+ *  which uses a different orientation convention.
+ */
 template <typename GeoShapeType>
-class reversePoint
-{
-public:
-    //! @name Operators
-    //@{
-
-    //! The function call operator
-	/*!
-	    <ol>
-	    <li> If the point Id is smaller than GeoShapeType::S_numVertices, return<br>
-    		GeoShapeType::S_numVertices - pointId
-	    <li> If the point Id is bigger than GeoShapeType::S_numVertices, return<br>
-            GeoShapeType::S_numPoints - point + GeoShapeType::S_numVertices;
-	    </ol>
-
-        @note this numbering follows the convention that VERTICES are always numbered first.
-        @param pointId the old point ID
-        @return the new point ID
-	 */
-    inline ID operate( ID const & pointId ) const;
-    //@}
-};
-
+inline ID reversePoint( ID const & pointId );
 
 //                   *********** BASIS REFERENCE SHAPES ****************
 
@@ -110,7 +96,7 @@ enum ReferenceShapes
 // deprecated name
 enum ReferenceShapes
 {
-	NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA
+    NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA
 };
 
 
@@ -134,7 +120,7 @@ enum ReferenceGeometry
 // deprecated name
 enum ReferenceGeometry
 {
-	VERTEX = 0, EDGE = 1, FACE = 2, VOLUME = 3
+    VERTEX = 0, EDGE = 1, FACE = 2, VOLUME = 3
 };
 
 
@@ -220,7 +206,7 @@ public:
 
 /*
  Now the Basis Geometric Shapes, derived from the Reference Shapes
-*/
+ */
 //! @defgroup GeoShape Basis Geometric Shapes
 
 // Forward Declarations.
@@ -241,7 +227,7 @@ class QuadraticHexa;
 //! @ingroup GeoShape
 //! A Geometric Shape
 class GeoPoint:
-        public Point
+public Point
 {
 public:
     //! @name Public Types
@@ -255,7 +241,7 @@ public:
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearLine:
-        public Line
+public Line
 {
 public:
     //! @name Public Types
@@ -267,12 +253,17 @@ public:
     static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 0;   //!< Number of points per edge
 };
+template <>
+inline ID reversePoint<LinearLine>( ID const & pointId ){
+    static ID _rid[]={1,0};
+    return _rid[pointId];
+}
 
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticLine:
-        public Line
+public Line
 {
 public:
     //! @name Public Types
@@ -284,12 +275,17 @@ public:
     static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 1;   //!< Number of points per edge
 };
+template <>
+inline ID reversePoint<QuadraticLine>( ID const & pointId ){
+    static ID _rid[]={1,0,2};
+    return _rid[pointId];
+}
 
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearTriangle:
-        public Triangle
+public Triangle
 {
 public:
     //! @name Public Types
@@ -304,12 +300,17 @@ public:
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
 };
+template <>
+inline ID reversePoint<LinearTriangle>( ID const & pointId ){
+    static ID _rid[]={1,0,2};
+    return _rid[pointId];
+}
 
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticTriangle:
-        public Triangle
+public Triangle
 {
 public:
     //! @name Public Types
@@ -325,11 +326,17 @@ public:
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
 };
 
+template <>
+inline ID reversePoint<QuadraticTriangle>( ID const & pointId ){
+    static ID _rid[]={1,0,2,3,5,4};
+    return _rid[pointId];
+}
+
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearQuad:
-        public Quad
+public Quad
 {
 public:
     //! @name Public Types
@@ -345,11 +352,18 @@ public:
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
 };
 
+//! Specialization
+template <>
+inline ID reversePoint<LinearQuad>( ID const & pointId ){
+    static ID _rid[]={3,2,1,0};
+    return _rid[pointId];
+}
+
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticQuad:
-        public Quad
+public Quad
 {
 public:
     //! @name Public Types
@@ -364,12 +378,18 @@ public:
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
 };
+//! Specialization
+template <>
+inline ID reversePoint<QuadraticQuad>( ID const & pointId ){
+    static ID _rid[]={3,2,1,0,6,5,4,7,8};
+    return _rid[pointId];
+}
 
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearTetra:
-        public Tetra
+public Tetra
 {
 public:
     //! @name Public Types
@@ -394,11 +414,18 @@ public:
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
 
+//! Specialization
+template <>
+inline ID reversePoint<LinearTetra>( ID const & pointId ){
+    static ID _rid[]={1,0,2,3};
+    return _rid[pointId];
+}
+
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearTetraBubble:
-        public Tetra
+public Tetra
 {
 public:
     //! @name Public Types
@@ -423,11 +450,17 @@ public:
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
 
+template <>
+inline ID reversePoint<LinearTetraBubble>( ID const & pointId ){
+    static ID _rid[]={1,0,2,3,4};
+    return _rid[pointId];
+}
+
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticTetra:
-        public Tetra
+public Tetra
 {
 public:
     //! @name Public Types
@@ -452,11 +485,17 @@ public:
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
 
+template <>
+inline ID reversePoint<QuadraticTetra>( ID const & pointId ){
+    static ID _rid[]={1,0,2,3,4,6,5,8,7,9};
+    return _rid[pointId];
+}
+
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearHexa:
-        public Hexa
+public Hexa
 {
 public:
     //! @name Public Types
@@ -481,11 +520,17 @@ public:
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
 
+template <>
+inline ID reversePoint<LinearHexa>( ID const & pointId ){
+    static ID _rid[]={3,2,1,0,7,6,5,4};
+    return _rid[pointId];
+}
+
 
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticHexa:
-        public Hexa
+public Hexa
 {
 public:
     //! @name Public Types
@@ -510,23 +555,15 @@ public:
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
 };
 
-
-/*******************************************************************
-          IMPLEMENTATION
-*******************************************************************/
-
-// ===================================================
-// Operators
-// ===================================================
-template <typename GeoShapeType>
-inline
-ID reversePoint<GeoShapeType>::
-operate( ID const & point ) const
-{
-    return point < GeoShapeType::S_numVertices ?
-    		GeoShapeType::S_numVertices - point :
-            GeoShapeType::S_numPoints - point + GeoShapeType::S_numVertices;
+template <>
+inline ID reversePoint<QuadraticHexa>( ID const & pointId ){
+    static ID _rid[]={3,2,1,0,7,6,5,4,
+                     10,9,8,11,15,14,13,12,
+                     18,17,16,19,20,23,22,21,24,25,26};
+  return _rid[pointId];
 }
+
+
 }
 
 #endif  // ELEMENTSHAPES_H

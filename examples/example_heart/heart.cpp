@@ -189,7 +189,7 @@ Heart::run()
                                                   *qR_u,
                                                   *bdQr_u,
                                                   2,
-                                                  M_heart_fct->M_comm);
+                                                  M_heart_fct->M_comm) );
 #endif
     if (verbose)
         std::cout << "ok." << std::endl;

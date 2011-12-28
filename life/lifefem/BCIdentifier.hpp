@@ -44,7 +44,6 @@
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifearray/VectorSimple.hpp>
 
 namespace LifeV {
 
@@ -282,9 +281,9 @@ public:
     /*!
         Creates an BCIdentifier with a given ID and a given local-to-global map
         @param i The number of the boundary face
-        @param bdltg A VectorSimple holding the local-to-global map on this face
+        @param localToGlobal A vector holding the local-to-global map on this face
     */
-    BCIdentifierNatural( const ID& i, const VectorSimple<ID>& localToGlobal );
+    BCIdentifierNatural( const ID& i, const std::vector<ID>& localToGlobal );
 
     //! Constructor given the ID
     /*!
@@ -320,14 +319,14 @@ public:
     */
     ID boundaryLocalToGlobalMap( const ID& i ) const
     {
-        return M_localToGlobal( i );
+        return M_localToGlobal [i ];
     }
 
     //@}
 
 private:
 
-    VectorSimple<ID> M_localToGlobal;
+    std::vector<ID> M_localToGlobal;
 };
 
 } // Namespace LifeV

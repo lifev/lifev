@@ -46,7 +46,8 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifemesh/MeshElementMarked.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 #include <life/lifemesh/ElementShapes.hpp>
-#include <life/lifearray/VectorSimple.hpp>
+#include <life/lifemesh/MeshUtility.hpp>
+#include <life/lifearray/MeshEntityContainer.hpp>
 #include <life/lifearray/ArraySimple.hpp>
 
 #include <iomanip>
@@ -71,13 +72,13 @@ namespace LifeV
  */
 template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh1D : public MeshEntity,
-        public MC::RegionMarker
+        public MC::regionMarker_Type
 {
 public:
     /** @defgroup public_types Public Types
      *
      */
-
+    typedef RegionMesh1D<GEOSHAPE, MC>          mesh_Type;
     /** @name Marker Types
      *  @ingroup public_types
      *  Markers for Point, Edge and Region
@@ -87,11 +88,11 @@ public:
     //! Common Marker Class
     typedef MC MarkerCommon;
     //! Point Marker
-    typedef typename MC::PointMarker     PointMarker;
+    typedef typename MC::pointMarker_Type  PointMarker;
     //! Edge Marker
-    typedef typename MC::EdgeMarker      EdgeMarker;
+    typedef typename MC::edgeMarker_Type   EdgeMarker;
     //! Region Marker
-    typedef typename MC::RegionMarker    RegionMarker;
+    typedef typename MC::regionMarker_Type RegionMarker;
 
     /** @} */ // End of group Marker Types
 
@@ -125,24 +126,25 @@ public:
     //! Point Element (0D)
     typedef MeshElementMarked0D<MC>             point_Type;
 
+
     /** @} */ // End of group Geometric Element Types
 
     /** @name Geometric Element Container Types
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
      *
-     *  I Use VectorSimple container
+     *  I Use MeshEntityContainer container
      *  @{
      */
 
     //! Points Container
-    typedef VectorSimple<point_Type>  Points;
+    typedef MeshEntityContainer<point_Type>  Points;
     //! Elements Container - compatibility
-    typedef VectorSimple<VolumeType> Volumes;
+    typedef MeshEntityContainer<VolumeType> Volumes;
     //! Faces Container - compatibility
-    typedef VectorSimple<FaceType>   Faces;
+    typedef MeshEntityContainer<FaceType>   Faces;
     //! Edges Container: at least boundary edges
-    typedef VectorSimple<EdgeType>   Edges;
+    typedef MeshEntityContainer<EdgeType>   Edges;
 
     /** @} */ // End of group Geometric Element Container Types
 
@@ -163,9 +165,9 @@ public:
     typedef MeshElementMarked0D<MC>             BElementType;
 
     //! Element Geometric Shape Container Type
-    typedef VectorSimple<EdgeType>         Elements;
+    typedef MeshEntityContainer<EdgeType>         Elements;
     //! Boundary Element Geometric Shape Container Type
-    typedef VectorSimple<point_Type>        BElements;
+    typedef MeshEntityContainer<point_Type>        BElements;
 
     /** @} */ // End of group Generic Types
 
@@ -255,21 +257,6 @@ public:
      *  Mesh construction by hand.
      */
     void setup( const Real& Length, const UInt& NumberOfElements );
-
-    //! Transform the mesh using boost::numeric::ublas.
-    /** Scale, rotate and translate the mesh (operations performed in this order).
-     *  @date   27/04/2010
-     *  @author Cristiano Malossi
-     *  @note - Rotation follows Paraview conventions: first rotate around z-axis,
-     *        then around y-axis and finally around x-axis;
-     *  @note - All the vectors must allow the command: operator[];
-     *  @param scale        vector of three components for (x,y,z) scaling of the mesh
-     *  @param rotate       vector of three components (radiants) for rotating the mesh
-     *  @param translate    vector of three components for (x,y,z) translation the mesh
-     *
-     */
-    template <typename VECTOR>
-    void transformMesh( const VECTOR& scale, const VECTOR& rotate, const VECTOR& translate );
 
     //! Get the maximum H over all the edges of the mesh.
     /**
@@ -435,6 +422,9 @@ public:
      * @return Boundary element at index i
      */
     const BElementType& bElement( const UInt& i ) const;
+
+    //! Return the handle to perform transormations on the mesh
+    MeshUtility::MeshTransformer<RegionMesh1D<GEOSHAPE, MC>,  typename mesh_Type::MarkerCommon > & meshTransformer();
 
     /** @} */ // End of group Generic Methods
 
@@ -887,20 +877,6 @@ public:
      */
     point_Type & point( UInt const i );
 
-    //! Returns the i-th mesh Point at the initial configuration.
-    /*!
-     * Note: this method simply call point();
-     * it has been added for compatibility reasons with RegionMesh3D and the exporters.
-     */
-    point_Type const & pointInitial( UInt const i ) const { return point(i); }
-
-    //! Returns the i-th mesh Point at the initial configuration.
-    /*!
-     * Note: this method simply call point();
-     * it has been added for compatibility reasons with RegionMesh3D and the exporters.
-     */
-    point_Type & pointInitial( UInt const i ) { return point(i); }
-
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
      *  Returns the i-th Boundary Point in the mesh.
@@ -1159,7 +1135,7 @@ public:
     //! Container of mesh Edges.
     Edges   edgeList;
     //! Boundary points list.
-    VectorSimple<point_Type * > _bPoints;
+    std::vector<point_Type * > _bPoints;
 
     /** @} */ // End of group Region Containers
 
@@ -1185,32 +1161,32 @@ protected:
     /**
      *  Returns the number of elements in a given list.
      *
-     *  @param list VectorSimple list of elements.
+     *  @param list MeshEntityContainer list of elements.
      *  @return Number of elements in list.
      */
     template < typename T >
-    UInt numItems( VectorSimple< T> const & list ) const;
+    UInt numItems( MeshEntityContainer< T> const & list ) const;
 
     //! Maximum number of Elements in a list.
     /**
      *  Returns maximum number of elements in a given list.
      *
-     *  @param list VectorSimple list of elements.
+     *  @param list MeshEntityContainer list of elements.
      *  @return Maximum number of elements in list.
      */
     template < typename T >
-    UInt maxNumItems( VectorSimple< T> const & list ) const;
+    UInt maxNumItems( MeshEntityContainer< T> const & list ) const;
 
     //! Set maximum number of Elements in a list.
     /**
      *  Set maximum number of elements in a given list.
      *
-     *  @param list VectorSimple list of elements.
+     *  @param list MeshEntityContainer list of elements.
      *  @param n Number of elements.
      *  @param title Title for verbose output.
      */
     template < typename T >
-    void setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title );
+    void setMaxNumItems( MeshEntityContainer< T> & list, UInt n, std::string title );
 
     /** @defgroup protected_attributes Protected Attributes
      */
@@ -1237,7 +1213,7 @@ protected:
 
 #ifdef NOT_BDATA_FIRST
     //! Boundary Edges Container
-    VectorSimple<EdgeType * > _bEdges;
+    std::vector<EdgeType * > _bEdges;
 #endif
 
     /** @} */ // End of group Face-To-Edge and Boundary Containers
@@ -1270,6 +1246,8 @@ protected:
 
     /** @} */ // End of group Internal Counters
 
+    MeshUtility::MeshTransformer<RegionMesh1D<GEOSHAPE, MC>, typename mesh_Type::MarkerCommon > M_meshTransformer;
+
 }; // End of class RegionMesh1D
 
 
@@ -1286,7 +1264,7 @@ protected:
 template <typename GEOSHAPE, typename MC>
 RegionMesh1D<GEOSHAPE, MC>::RegionMesh1D( UInt id ) :
         MeshEntity          ( id ),
-        MC::RegionMarker    (),
+        MC::regionMarker_Type (),
         switches            (),
         _numVertices        ( 0 ),
         _numBVertices       ( 0 ),
@@ -1296,7 +1274,8 @@ RegionMesh1D<GEOSHAPE, MC>::RegionMesh1D( UInt id ) :
         _numBEdges          ( 0 ),
         M_numGlobalVertices (),
         M_numGlobalPoints   (),
-        M_numGlobalEdges    ()
+        M_numGlobalEdges    (),
+        M_meshTransformer(*this)
 {
     setSwitch( switches );
 }
@@ -1367,82 +1346,6 @@ RegionMesh1D<GEOSHAPE, MC>::setup( const Real& Length, const UInt& NumberOfEleme
 
     setEdgeCounter();
     setNumGlobalEdges(edgeList.size());
-}
-
-template <typename GEOSHAPE, typename MC>
-template <typename VECTOR>
-void RegionMesh1D<GEOSHAPE, MC>::transformMesh( const VECTOR& scale, const VECTOR& rotate, const VECTOR& translate )
-{
-    //Create the 3 planar rotation matrix and the scale matrix
-    boost::numeric::ublas::matrix<Real> R(3,3), R1(3,3), R2(3,3), R3(3,3), S(3,3);
-
-    R1(0,0) =  1.;
-    R1(0,1) =  0.;
-    R1(0,2) =  0.;
-    R1(1,0) =  0.;
-    R1(1,1) =  cos(rotate[0]);
-    R1(1,2) = -sin(rotate[0]);
-    R1(2,0) =  0.;
-    R1(2,1) =  sin(rotate[0]);
-    R1(2,2) =  cos(rotate[0]);
-
-    R2(0,0) =  cos(rotate[1]);
-    R2(0,1) =  0.;
-    R2(0,2) =  sin(rotate[1]);
-    R2(1,0) =  0.;
-    R2(1,1) =  1.;
-    R2(1,2) = 0.;
-    R2(2,0) = -sin(rotate[1]);
-    R2(2,1) =  0.;
-    R2(2,2) =  cos(rotate[1]);
-
-    R3(0,0) =  cos(rotate[2]);
-    R3(0,1) = -sin(rotate[2]);
-    R3(0,2) = 0.;
-    R3(1,0) =  sin(rotate[2]);
-    R3(1,1) =  cos(rotate[2]);
-    R3(1,2) = 0.;
-    R3(2,0) =  0;
-    R3(2,1) =  0.;
-    R3(2,2) = 1.;
-
-    S(0,0) = scale[0];
-    S(0,1) = 0.;
-    S(0,2) = 0.;
-    S(1,0) = 0.;
-    S(1,1) = scale[1];
-    S(1,2) = 0.;
-    S(2,0) = 0.;
-    S(2,1) = 0.;
-    S(2,2) = scale[2];
-
-    //The total rotation is: R = R1*R2*R3 (as in Paraview we rotate first around z, then around y, and finally around x).
-    //We also post-multiply by S to apply the scale before the rotation.
-    R = prod( R3, S );
-    R = prod( R2, R );
-    R = prod( R1, R );
-
-    //Create the 3D translate vector
-    boost::numeric::ublas::vector<Real> P(3), T(3);
-    T(0) = translate[0];
-    T(1) = translate[1];
-    T(2) = translate[2];
-
-    //Apply the transformation
-    for ( UInt i(0); i < pointList.size(); ++i )
-    {
-        //P = pointList[ i ].coordinate(); // Try to avoid double copy if possible
-
-        P( 0 ) = pointList[ i ].coordinate( 0 );
-        P( 1 ) = pointList[ i ].coordinate( 1 );
-        P( 2 ) = pointList[ i ].coordinate( 2 );
-
-        P = T + prod( R, P );
-
-        pointList[ i ].coordinate( 0 ) = P( 0 );
-        pointList[ i ].coordinate( 1 ) = P( 1 );
-        pointList[ i ].coordinate( 2 ) = P( 2 );
-    }
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1633,7 +1536,7 @@ RegionMesh1D<GEOSHAPE, MC>::bElement( UInt const & i ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh1D<GEOSHAPE, MC>::numItems( VectorSimple< T> const & list ) const
+RegionMesh1D<GEOSHAPE, MC>::numItems( MeshEntityContainer< T> const & list ) const
 {
     return list.size();
 }
@@ -1641,7 +1544,7 @@ RegionMesh1D<GEOSHAPE, MC>::numItems( VectorSimple< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh1D<GEOSHAPE, MC>::maxNumItems( VectorSimple< T> const & list ) const
+RegionMesh1D<GEOSHAPE, MC>::maxNumItems( MeshEntityContainer< T> const & list ) const
 {
     return list.capacity();
 }
@@ -1649,7 +1552,7 @@ RegionMesh1D<GEOSHAPE, MC>::maxNumItems( VectorSimple< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 void
-RegionMesh1D<GEOSHAPE, MC>::setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title )
+RegionMesh1D<GEOSHAPE, MC>::setMaxNumItems( MeshEntityContainer< T> & list, UInt n, std::string title )
 {
     if ( list.capacity() == 0 )
     {
@@ -2088,7 +1991,7 @@ RegionMesh1D<GEOSHAPE, MC>::setPoint
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename VectorSimple<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename std::vector<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {
@@ -2395,6 +2298,13 @@ RegionMesh1D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
         "***********************************************" << std::endl;
 
     return severity;
+}
+
+template <typename GEOSHAPE, typename MC>
+inline MeshUtility::MeshTransformer< RegionMesh1D<GEOSHAPE, MC>, typename RegionMesh1D<GEOSHAPE, MC>::MarkerCommon > &
+RegionMesh1D<GEOSHAPE, MC>::meshTransformer()
+{
+    return this->M_meshTransformer;
 }
 
 } // End of namespace LifeV

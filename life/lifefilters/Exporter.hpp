@@ -268,6 +268,7 @@ public:
     typedef ExporterData<mesh_Type>                     exporterData_Type;
     typedef typename exporterData_Type::vector_Type     vector_Type;
     typedef typename exporterData_Type::vectorPtr_Type  vectorPtr_Type;
+    typedef typename exporterData_Type::feSpace_Type    feSpace_Type;
     typedef typename exporterData_Type::feSpacePtr_Type feSpacePtr_Type;
     typedef typename exporterData_Type::WhereEnum       WhereEnum;
     typedef typename exporterData_Type::FieldTypeEnum   FieldTypeEnum;
@@ -344,6 +345,10 @@ public:
     virtual void import(const Real& startTime) = 0;
 
     virtual void readVariable(exporterData_Type& dvar);
+
+    //! Export the Processor ID as P0 variable
+    virtual void exportPID( MeshPartitioner< MeshType > & meshPart );
+
     //@}
 
     //! @name Set Methods
@@ -544,8 +549,8 @@ Exporter<MeshType>::Exporter():
         M_timeIndex     ( M_timeIndexStart ),
         M_save          ( 1 ),
         M_multimesh     ( true ),
-        M_timeIndexWidth( 5 ),
-        M_printConnectivity ( true )
+        M_printConnectivity ( true ),
+        M_timeIndexWidth( 5 )
 {}
 
 template<typename MeshType>
@@ -556,8 +561,8 @@ Exporter<MeshType>::Exporter( const GetPot& dfile, const std::string& prefix ):
         M_timeIndex     ( M_timeIndexStart ),
         M_save          ( dfile("exporter/save",1) ),
         M_multimesh     ( dfile("exporter/multimesh",true) ),
-        M_timeIndexWidth( dfile("exporter/time_id_width",5) ),
-        M_printConnectivity ( true )
+        M_printConnectivity ( true ),
+        M_timeIndexWidth( dfile("exporter/time_id_width",5) )
 {}
 
 // ===================================================
@@ -590,6 +595,34 @@ void Exporter<MeshType>::readVariable(exporterData_Type& dvar)
         break;
     }
 }
+
+
+ template <typename MeshType>
+ void Exporter<MeshType>::exportPID( MeshPartitioner< MeshType > & meshPart )
+ {
+     // TODO: use FESpace M_spacemap for generality
+     const ReferenceFE &    refFE = feTetraP0;
+     const QuadratureRule & qR    = quadRuleTetra15pt;
+     const QuadratureRule & bdQr  = quadRuleTria4pt;
+
+     feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( meshPart, refFE, qR, bdQr, 1, meshPart.comm() ) );
+
+     vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
+
+     for ( UInt iElem( 0 ); iElem < PID_FESpacePtr->mesh()->numElements(); ++iElem )
+     {
+         ID globalElem = PID_FESpacePtr->mesh()->volumeList[ iElem ].id();
+         (*PIDData)[ globalElem ] = meshPart.comm()->MyPID();
+     }
+
+     addVariable( exporterData_Type::ScalarField,
+                  "PID",
+                  PID_FESpacePtr,
+                  PIDData,
+                  0,
+                  exporterData_Type::SteadyRegime,
+                  exporterData_Type::Cell );
+ }
 
 template <typename MeshType>
 void Exporter<MeshType>::computePostfix()

@@ -268,13 +268,13 @@ public:
     /*!
         @return linear flux
      */
-    Real getLinearFlux ( const entityFlag_Type& flag );
+    Real getLinearFlux ( const markerID_Type& flag );
 
     //! Return
     /*!
         @return linear pressure
      */
-    Real getLinearPressure( const entityFlag_Type& flag );
+    Real getLinearPressure( const markerID_Type& flag );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary.
     /*!
@@ -282,7 +282,7 @@ public:
         @param BC BChandler containing the boundary conditions of the problem.
         @return Lagrange multiplier
      */
-    Real getLinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler );
+    Real getLinearLagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler );
 
     //@}
 
@@ -443,21 +443,21 @@ OseenSolverShapeDerivative<MeshType, SolverType>::
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolverShapeDerivative<MeshType, SolverType>::getLinearFlux( const entityFlag_Type& flag )
+OseenSolverShapeDerivative<MeshType, SolverType>::getLinearFlux( const markerID_Type& flag )
 {
     return flux( flag, M_linearSolution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolverShapeDerivative<MeshType, SolverType>::getLinearPressure( const entityFlag_Type& flag )
+OseenSolverShapeDerivative<MeshType, SolverType>::getLinearPressure( const markerID_Type& flag )
 {
     return pressure( flag, M_linearSolution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolverShapeDerivative<MeshType, SolverType>::getLinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
+OseenSolverShapeDerivative<MeshType, SolverType>::getLinearLagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler )
 {
     return lagrangeMultiplier( flag, bcHandler, M_linearSolution );
 }

@@ -277,14 +277,14 @@ public:
     void getFluidMatrix( matrix_Type& matrixFull );
 
     //! Set up post processing
-    void setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart );
+    void setupPostProc( const markerID_Type& flag, const mesh_Type meshPart );
 
     //! Compute area on a boundary face with given flag
     /*!
         @param  flag
         @return area
      */
-    Real area( const entityFlag_Type& flag );
+    Real area( const markerID_Type& flag );
 
     //! Compute flux on a boundary face with given flag and a given solution
     /*!
@@ -292,14 +292,14 @@ public:
         @param  solution
         @return flux
      */
-    Real flux( const entityFlag_Type& flag, const vector_Type& solution );
+    Real flux( const markerID_Type& flag, const vector_Type& solution );
 
     //! Compute flux on a boundary face with given flag
     /*!
         @param flag
         @return flux
      */
-    Real flux( const entityFlag_Type& flag );
+    Real flux( const markerID_Type& flag );
 
     //! Compute average pressure on a boundary face with given flag and a given solution
     /*!
@@ -307,14 +307,14 @@ public:
         @param  solution
         @return average pressure
      */
-    Real pressure( const entityFlag_Type& flag, const vector_Type& solution );
+    Real pressure( const markerID_Type& flag, const vector_Type& solution );
 
     //! Compute average pressure on a boundary face with given flag
     /*!
         @param flag
         @return average pressure
      */
-    Real pressure( const entityFlag_Type& flag );
+    Real pressure( const markerID_Type& flag );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
@@ -323,7 +323,7 @@ public:
         @param bcHandler BChandler containing the boundary conditions of the problem.
         @return          Lagrange multiplier
      */
-    Real lagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler );
+    Real lagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
@@ -334,7 +334,7 @@ public:
                          (and also the Lagrange multipliers at the end).
         @return          Lagrange multiplier
      */
-    Real lagrangeMultiplier( const entityFlag_Type&  flag,
+    Real lagrangeMultiplier( const markerID_Type&  flag,
                              bcHandler_Type& bcHandler,
                              const vector_Type& solution );
 
@@ -559,12 +559,12 @@ public:
      */
     matrix_Type& matrixMass()
     {
-        return *M_matrixMass;
+        return *M_velocityMatrixMass;
     }
 
     const matrix_Type& matrixMass() const
     {
-        return *M_matrixMass;
+        return *M_velocityMatrixMass;
     }
 
     //@}
@@ -661,10 +661,10 @@ protected:
     MapEpetra                      M_localMap;
 
     //! mass matrix
-    matrixPtr_Type                 M_matrixMass;
+    matrixPtr_Type                 M_velocityMatrixMass;
 
     //! mass matrix
-    matrixPtr_Type                 M_matrixMassPtr;
+    matrixPtr_Type                 M_pressureMatrixMass;
 
     //! Stokes matrix: nu*stiff
     matrixPtr_Type                 M_matrixStokes;
@@ -758,8 +758,8 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_pressureFESpace        ( pressureFESpace ),
         M_Displayer              ( communicator ),
         M_localMap               ( M_velocityFESpace.map() + M_pressureFESpace.map() + lagrangeMultiplier),
-        M_matrixMass             ( ),
-        M_matrixMassPtr          ( ),
+        M_velocityMatrixMass     ( ),
+        M_pressureMatrixMass     ( ),
         M_matrixStokes           ( ),
         M_matrixNoBC             ( ),
         M_matrixStabilization    ( ),
@@ -823,7 +823,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_pressureFESpace        ( pressureFESpace ),
         M_Displayer              ( communicator ),
         M_localMap               ( monolithicMap ),
-        M_matrixMass             ( ),
+        M_velocityMatrixMass     ( ),
         M_matrixStokes           ( ),
         M_matrixNoBC             ( ),
         M_matrixStabilization    ( ),
@@ -885,7 +885,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_pressureFESpace        ( pressureFESpace ),
         M_Displayer              ( communicator ),
         M_localMap               ( M_velocityFESpace.map() + M_pressureFESpace.map() + lagrangeMultipliers ),
-        M_matrixMass             ( ),
+        M_velocityMatrixMass     ( ),
         M_matrixStokes           ( ),
         M_matrixNoBC             ( ),
         M_matrixStabilization    ( ),
@@ -1027,7 +1027,7 @@ template<typename MeshType, typename SolverType>
 void
 OseenSolver<MeshType, SolverType>::buildSystem()
 {
-    M_matrixMass.reset  ( new matrix_Type( M_localMap ) );
+    M_velocityMatrixMass.reset  ( new matrix_Type( M_localMap ) );
     M_matrixStokes.reset( new matrix_Type( M_localMap ) );
 
     M_Displayer.leaderPrint( "  F-  Computing constant matrices ...          " );
@@ -1153,7 +1153,7 @@ OseenSolver<MeshType, SolverType>::buildSystem()
             if ( !M_steady )
             {
                 chronoMassAssemble.start();
-                assembleMatrix( *M_matrixMass,
+                assembleMatrix( *M_velocityMatrixMass,
                                 M_elementMatrixMass,
                                 M_velocityFESpace.fe(),
                                 M_velocityFESpace.fe(),
@@ -1216,7 +1216,7 @@ OseenSolver<MeshType, SolverType>::buildSystem()
     chrono.start();
 
     M_matrixStokes->globalAssemble();
-    M_matrixMass->globalAssemble();
+    M_velocityMatrixMass->globalAssemble();
 
     chrono.stop();
     M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
@@ -1266,7 +1266,7 @@ updateSystem( const Real         alpha,
     LifeChrono chrono;
 
     // clearing pressure mass matrix in case we need it in removeMean;
-    M_matrixMassPtr.reset( );
+    M_pressureMatrixMass.reset( );
 
 
     M_Displayer.leaderPrint( "  F-  Updating mass term on right hand side... " );
@@ -1449,7 +1449,7 @@ updateSystem( const Real         alpha,
 
     if ( alpha != 0. )
     {
-        *matrixNoBC += (*M_matrixMass) * alpha;
+        *matrixNoBC += (*M_velocityMatrixMass) * alpha;
         if ( M_isDiagonalBlockPreconditioner == true )
         {
             matrixNoBC->globalAssemble();
@@ -1609,14 +1609,14 @@ OseenSolver<MeshType, SolverType>::postProcessingSetPhi()
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag )
 {
     return flux( flag, *M_solution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag,
                                    const vector_Type& solution )
 {
     vector_Type velocityAndPressure( solution, Repeated );
@@ -1628,21 +1628,21 @@ OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::area( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::area( const markerID_Type& flag )
 {
     return M_postProcessing->measure( flag );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::pressure( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::pressure( const markerID_Type& flag )
 {
     return pressure( flag, *M_solution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::pressure(const markerID_Type& flag,
                                       const vector_Type& solution)
 {
     vector_Type velocityAndPressure( solution, Repeated );
@@ -1656,7 +1656,7 @@ OseenSolver<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type& flag,
                                                  bcHandler_Type& bcHandler )
 {
     return lagrangeMultiplier( flag, bcHandler, *M_solution );
@@ -1664,7 +1664,7 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& fl
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  flag,
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type&  flag,
                                                  bcHandler_Type& bcHandler,
                                                  const vector_Type& solution )
 {
@@ -1698,8 +1698,8 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
     const UInt velocityTotalDof ( M_velocityFESpace.dof().numTotalDof() );
 
 
-    if ( M_matrixMassPtr.get() == 0 )
-        M_matrixMassPtr.reset( new matrix_Type( M_localMap ) );
+    if ( M_pressureMatrixMass.get() == 0 )
+        M_pressureMatrixMass.reset( new matrix_Type( M_localMap ) );
 
     for ( UInt iVolume = 0; iVolume < M_velocityFESpace.mesh()->numVolumes(); iVolume++ )
     {
@@ -1714,7 +1714,7 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
         chrono.stop();
 
         chrono.start();
-        assembleMatrix( *M_matrixMassPtr,
+        assembleMatrix( *M_pressureMatrixMass,
                         M_elementMatrixPreconditioner,
                         M_pressureFESpace.fe(),
                         M_pressureFESpace.fe(),
@@ -1727,16 +1727,16 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
         chrono.stop();
     }
 
-    M_matrixMassPtr->GlobalAssemble();
+    M_pressureMatrixMass->GlobalAssemble();
 
     vector_Type ones( *M_solution );
     ones = 1.0;
 
     Real mean;
-    mean = ones* ( M_matrixMassPtr * x );
+    mean = ones* ( M_pressureMatrixMass * x );
     x += ( -mean );
 
-    ASSERT( std::fabs( ones* ( M_matrixMassPtr * x ) ) < 1e-9 , "after removeMean the mean pressure should be zero!");
+    ASSERT( std::fabs( ones* ( M_pressureMatrixMass * x ) ) < 1e-9 , "after removeMean the mean pressure should be zero!");
 
     return mean;
 
@@ -1789,7 +1789,7 @@ OseenSolver<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       m
 
 template<typename MeshType, typename SolverType>
 void
-OseenSolver<MeshType, SolverType>::setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart )
+OseenSolver<MeshType, SolverType>::setupPostProc( const markerID_Type& flag, const mesh_Type meshPart )
 {
     M_postProcessing.reset( new PostProcessingBoundary<mesh_Type>( M_velocityFESpace.mesh(),
                                                      &M_velocityFESpace.feBd(),
