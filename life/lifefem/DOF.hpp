@@ -419,9 +419,9 @@ void DOF::update( MeshType& mesh )
     UInt nBElemFacets = geoBShape_Type::S_numFacets;    // Number of boundary facet's edges
     
     std::vector<ID> globalDOFOnBdFacet(nbLocalDofPerPeak*nBElemRidges + nBElemFacets*nbLocalDofPerRidge + nbLocalDofPerFacet);
-    M_localToGlobalByBdFacet.resize(mesh.numBFacets());
+    M_localToGlobalByBdFacet.resize(mesh.numBoundaryFacets());
 
-    for ( ID iBoundaryFacet = 0 ; iBoundaryFacet < mesh.numBFacets(); ++iBoundaryFacet )
+    for ( ID iBoundaryFacet = 0 ; iBoundaryFacet < mesh.numBoundaryFacets(); ++iBoundaryFacet )
 	{
 		ID iAdjacentElem = mesh.boundaryFacet( iBoundaryFacet ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
 		ID iElemBFacet = mesh.boundaryFacet( iBoundaryFacet ).firstAdjacentElementPosition(); // local id of the face in its adjacent element

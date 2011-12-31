@@ -276,7 +276,7 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 
     chronoAssembly.start();
     // loop on interior facets
-    for ( UInt iFacet( M_mesh->numBFacets() ); iFacet< M_mesh->numFacets();
+    for ( UInt iFacet( M_mesh->numBoundaryFacets() ); iFacet< M_mesh->numFacets();
             ++iFacet )
     {
         const UInt iElAd1 ( M_mesh->facet( iFacet ).firstAdjacentElementIdentity()  );

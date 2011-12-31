@@ -455,8 +455,8 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
                                                  const MeshType& mesh2, const markerID_Type& flag2, const Real& tol, const fct& coupled )
 {
 
-    UInt bdnF1 = mesh1.numBFacets(); // Number of boundary facets in mesh1
-    UInt bdnF2 = mesh2.numBFacets(); // Number of boundary facets mesh2
+    UInt bdnF1 = mesh1.numBoundaryFacets(); // Number of boundary facets in mesh1
+    UInt bdnF2 = mesh2.numBoundaryFacets(); // Number of boundary facets mesh2
 
     markerID_Type marker1;
     std::set<ID> facetsFlagged2;

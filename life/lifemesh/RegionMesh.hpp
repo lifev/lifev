@@ -1466,7 +1466,7 @@ public:
     /**
      *  @return Number of Boundary facets.
      */
-    UInt numBFacets() const { return numBFacets( M_geoDim);}
+    UInt numBoundaryFacets() const { return numBoundaryFacets( M_geoDim);}
 
     //! Get element at the i-th index.
     /**
@@ -1639,7 +1639,7 @@ public:
     /**
      *  @param n Number of boundary facets.
      */
-    void setNumBFacets( UInt const n ) {setNumBFacets( M_geoDim, n ) ;}
+    void setnumBoundaryFacets( UInt const n ) {setnumBoundaryFacets( M_geoDim, n ) ;}
 
     //! Is facet whose id is given on boundary?
     /**
@@ -1738,7 +1738,7 @@ public:
      *
      *  @param n Count of Boundary Ridge.
      */
-    void setNumBRidges( UInt const n ) {setNumBRidges( M_geoDim, n );}
+    void setNumBoundaryRidges( UInt const n ) {setNumBoundaryRidges( M_geoDim, n );}
 
     //! Ridge on boundary check. Specialization for 3D geometries.
     /**
@@ -1904,9 +1904,9 @@ private:
     UInt numElements(oneD_Type) const  {return numEdges(); }
 
     //! Number of Boundary facets
-    UInt numBFacets(threeD_Type) const { return numBFaces();}
-    UInt numBFacets(twoD_Type) const { return numBEdges();}
-    UInt numBFacets(oneD_Type) const { return numBVertices();}
+    UInt numBoundaryFacets(threeD_Type) const { return numBFaces();}
+    UInt numBoundaryFacets(twoD_Type) const { return numBEdges();}
+    UInt numBoundaryFacets(oneD_Type) const { return numBVertices();}
 
     //! Get element at the i-th index.
     element_Type& element( threeD_Type, const UInt& i ) {return volume(i); }
@@ -1921,8 +1921,7 @@ private:
     //! Get boundary facet at the i-th index.
     facet_Type& boundaryFacet( threeD_Type, const UInt& i ){ return boundaryFace(i); }
     facet_Type& boundaryFacet( twoD_Type, const UInt& i ){ return boundaryEdge(i); }
-    facet_Type& boundaryFacet( oneD_Type, const UInt& i ){ return boundaryPoint(i); }
-
+    inline facet_Type& boundaryFacet( oneD_Type, const UInt& i );
 
     //! Get boundary facet at the i-th index.
     const facet_Type& boundaryFacet( threeD_Type, const UInt& i ) const { return boundaryFace(i); }
@@ -1962,9 +1961,11 @@ private:
     void updateElementEdges( ridge_Type, bool createEdges = false, const bool verbose = false,
                                  UInt estimateEdgeNumber = 0, bool renumber=true){
            updateElementRidges( M_geoDim, createEdges, verbose, estimateEdgeNumber, renumber); }
+
+    //! Build localEdgeId table and optionally fills the list of Edges
     void updateElementEdges( facet_Type, bool createEdges = false, const bool verbose = false,
-                                     UInt estimateEdgeNumber = 0, bool renumber=true){
-           updateElementFacets( createEdges, verbose, estimateEdgeNumber, renumber); }
+                                     UInt estimateEdgeNumber = 0, bool /*renumber*/=true){
+           updateElementFacets( createEdges, verbose, estimateEdgeNumber); }
 
     //! Build localRidgeId table and optionally fills the list of Ridges
     void updateElementRidges( threeD_Type, bool createRidges = false, const bool verbose = false,
@@ -2036,9 +2037,9 @@ private:
     void setNumFacets( oneD_Type, UInt const n ) {setNumVertices( n );}
 
     //! Set counter of boundary facets.
-    void setNumBFacets( threeD_Type, UInt const n ) {setNumBFaces( n ) ;}
-    void setNumBFacets( twoD_Type, UInt const n ) {setNumBEdges( n ) ;}
-    void setNumBFacets( oneD_Type, UInt const n ) {setNumBVertices( n ) ;}
+    void setnumBoundaryFacets( threeD_Type, UInt const n ) {setNumBFaces( n ) ;}
+    void setnumBoundaryFacets( twoD_Type, UInt const n ) {setNumBEdges( n ) ;}
+    void setnumBoundaryFacets( oneD_Type, UInt const n ) {setNumBVertices( n ) ;}
 
     //! Is facet whose id is given on boundary?
     bool isBoundaryFacet( threeD_Type, UInt const & id ) const { return isBoundaryFace( id );};
@@ -2081,9 +2082,9 @@ private:
     ridge_Type & ridge( oneD_Type, UInt const ) {ERROR_MSG("RegionMesh::ridge, No ridges in 1D"); return M_aRidge;}
 
     //! Set boundary ridge counter.
-    void setNumBRidges( threeD_Type, UInt const n ) {setNumBEdges( n );}
-    void setNumBRidges( twoD_Type, UInt const n ) {setNumBPoints( n );}
-    void setNumBRidges( oneD_Type, UInt const ) {ERROR_MSG("RegionMesh::setNumBRidges, No ridges in 1D");}
+    void setNumBoundaryRidges( threeD_Type, UInt const n ) {setNumBEdges( n );}
+    void setNumBoundaryRidges( twoD_Type, UInt const n ) {setNumBPoints( n );}
+    void setNumBoundaryRidges( oneD_Type, UInt const ) {ERROR_MSG("RegionMesh::setNumBoundaryRidges, No ridges in 1D");}
 
     //! Ridge on boundary check by id.
     bool isBoundaryRidge( threeD_Type, UInt const & id ) const {return isBoundaryEdge( id );}
@@ -3189,13 +3190,19 @@ RegionMesh<GEOSHAPE, MC>::isFullEdge( UInt const & id ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-inline
 bool
 RegionMesh<GEOSHAPE, MC>::isFullFace( UInt const & id ) const
 {
     return faceList.size() > id;
 }
 
+template <typename GEOSHAPE, typename MC>
+typename RegionMesh<GEOSHAPE, MC>::facet_Type&
+RegionMesh<GEOSHAPE, MC>::boundaryFacet( oneD_Type, const UInt& i )
+{
+    	ASSERT_BD(i<2);
+    	return point(i*(numPoints()-1));
+}
 
 /********************************************************************************
                      ELEMENT3D:GLOBAL FACES/EDGES
@@ -3380,13 +3387,13 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
     if (verbose)
         std::cout << "     Updating element facets ... " << std::flush;
 
-    ASSERT0( ! cf || numBFacets() > 0, std::stringstream( std::string("Boundary Facets Must have been set") +
+    ASSERT0( ! cf || numBoundaryFacets() > 0, std::stringstream( std::string("Boundary Facets Must have been set") +
                                                          std::string("in order to call updateElementFacets with createFacets=true") +
                                                          std::string("\nUse buildBoundaryFacets(..) from mesh_util.h") ).str().c_str() );
     // If the counter is set we trust it! Otherwise we use Euler formula
 
     if ( cf && ef == 0 )
-        ef = numFacets() > numBFacets() ? numFacets() : ( elementShape_Type::S_numFacets * numElements() + numBFacets() ) / 2;
+        ef = numFacets() > numBoundaryFacets() ? numFacets() : ( elementShape_Type::S_numFacets * numElements() + numBoundaryFacets() ) / 2;
 
     ASSERT( cf || numFacets() > 0 , "Mesh is not properly set!" );
 
@@ -3445,7 +3452,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
         		points[k] = ( facet( j ).point( k ) ).localId();
            	_facet = bareEntitySelector_Type::makeBareEntity( points );
             _check = bareFacet.addIfNotThere( _facet.first );
-            if (j>=this->numBFacets() ) extraBareFacet.addIfNotThere( _facet.first, j);
+            if (j>=this->numBoundaryFacets() ) extraBareFacet.addIfNotThere( _facet.first, j);
         }
     }
 
@@ -3464,9 +3471,9 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
 
             e = bareFacet.addIfNotThere( _facet.first );
             M_ElemToFacet( j, elemLocalID ) = e.first;
-            bool _isBound=e.first<this->numBFacets();
+            bool _isBound=e.first<this->numBoundaryFacets();
             // Is the facet an extra facet (not on the boundary but originally included in the list)?
-            bool _isExtra = (e.first >=this->numBFacets()  && e.first < _numOriginalStoredFacets);
+            bool _isExtra = (e.first >=this->numBoundaryFacets()  && e.first < _numOriginalStoredFacets);
             if (_isBound)
             {
                 facet_Type & _thisFacet(facet(e.first) );
@@ -3588,7 +3595,7 @@ getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& li
 
 template <typename GEOSHAPE, typename MC>
 inline MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > &
-RegionMesh3D<GEOSHAPE, MC>::meshTransformer()
+RegionMesh<GEOSHAPE, MC>::meshTransformer()
 {
     return this->M_meshTransformer;
 }

@@ -567,7 +567,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
     // ===================================================
     // Loop on boundary faces
     // ===================================================
-    for ( ID iBoundaryElement = 0 ; iBoundaryElement < mesh.numBFacets(); ++iBoundaryElement )
+    for ( ID iBoundaryElement = 0 ; iBoundaryElement < mesh.numBoundaryFacets(); ++iBoundaryElement )
     {
         // ===================================================================================
         // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)

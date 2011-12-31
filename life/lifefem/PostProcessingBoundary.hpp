@@ -338,7 +338,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type meshPtr,
     M_numPeaksPerElement = elementGeometricShape_Type::S_numPeaks; // Number of element's vertices
     M_numRidgesPerElement = elementGeometricShape_Type::S_numRidges;    // Number of element's ridges
 
-    M_numBoundaryFacets = M_meshPtr->numBFacets();    // number of faces on boundary
+    M_numBoundaryFacets = M_meshPtr->numBoundaryFacets();    // number of faces on boundary
 
     // Construction of M_vectorNumberingPerFacetVector & other data structures
     buildVectors();
@@ -375,7 +375,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
     M_numPeaksPerElement = elementGeometricShape_Type::S_numPeaks; // Number of element's vertices
     M_numRidgesPerElement = elementGeometricShape_Type::S_numRidges;    // Number of element's ridges
 
-    M_numBoundaryFacets = M_meshPtr->numBFacets();    // number of faces on boundary
+    M_numBoundaryFacets = M_meshPtr->numBoundaryFacets();    // number of faces on boundary
 
     // Construction of M_vectorNumberingPerFacetVector & other data structures
     buildVectors();
@@ -415,7 +415,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
     M_numPeaksPerElement = elementGeometricShape_Type::S_numPeaks; // Number of element's vertices
     M_numRidgesPerElement = elementGeometricShape_Type::S_numRidges;    // Number of element's ridges
 
-    M_numBoundaryFacets = M_meshPtr->numBFacets();    // number of faces on boundary
+    M_numBoundaryFacets = M_meshPtr->numBoundaryFacets();    // number of faces on boundary
 
     // Construction of M_vectorNumberingPerFacetVector & other data structures
     buildVectors();

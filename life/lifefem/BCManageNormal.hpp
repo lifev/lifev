@@ -475,7 +475,7 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
     VectorType repNormals(normals.map(), Repeated);
     //Loop on the Faces
-    for ( UInt iFace = 0; iFace< mesh.numBFacets(); ++iFace )
+    for ( UInt iFace = 0; iFace< mesh.numBoundaryFacets(); ++iFace )
     {
         //Update the currentBdFE with the face data
         currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( iFace ) );
