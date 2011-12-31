@@ -43,7 +43,7 @@
 #ifndef ONED_FUNCTIONS_1D_H
 #define ONED_FUNCTIONS_1D_H
 
-#include <life/lifefunctions/OneDimensionalFunction.hpp>
+#include <life/lifefunctions/OneDFSIFunction.hpp>
 
 namespace LifeV
 {

@@ -52,14 +52,14 @@
 #define HAVE_MATLAB_POSTPROCESSING 1
 
 // Mathcard includes
-#include <life/lifefem/OneDimensionalBCHandler.hpp>
-#include <life/lifesolver/OneDimensionalPhysicsLinear.hpp>
-#include <life/lifesolver/OneDimensionalPhysicsNonLinear.hpp>
-#include <life/lifesolver/OneDimensionalFluxLinear.hpp>
-#include <life/lifesolver/OneDimensionalFluxNonLinear.hpp>
-#include <life/lifesolver/OneDimensionalSourceLinear.hpp>
-#include <life/lifesolver/OneDimensionalSourceNonLinear.hpp>
-#include <life/lifesolver/OneDimensionalSolver.hpp>
+#include <life/lifefem/OneDFSIBCHandler.hpp>
+#include <life/lifesolver/OneDFSIPhysicsLinear.hpp>
+#include <life/lifesolver/OneDFSIPhysicsNonLinear.hpp>
+#include <life/lifesolver/OneDFSIFluxLinear.hpp>
+#include <life/lifesolver/OneDFSIFluxNonLinear.hpp>
+#include <life/lifesolver/OneDFSISourceLinear.hpp>
+#include <life/lifesolver/OneDFSISourceNonLinear.hpp>
+#include <life/lifesolver/OneDFSISolver.hpp>
 
 #include <life/lifefem/BCInterface1D.hpp>
 
@@ -89,16 +89,16 @@ class MultiscaleModel1D: public virtual multiscaleModel_Type,
 {
 public:
 
-    typedef OneDimensionalPhysics                                  physics_Type;
+    typedef OneDFSIPhysics                                         physics_Type;
     typedef boost::shared_ptr< physics_Type >                      physicsPtr_Type;
 
-    typedef OneDimensionalFlux                                     flux_Type;
+    typedef OneDFSIFlux                                            flux_Type;
     typedef boost::shared_ptr< flux_Type >                         fluxPtr_Type;
 
-    typedef OneDimensionalSource                                   source_Type;
+    typedef OneDFSISource                                          source_Type;
     typedef boost::shared_ptr< source_Type >                       sourcePtr_Type;
 
-    typedef OneDimensionalSolver                                   solver_Type;
+    typedef OneDFSISolver                                          solver_Type;
     typedef boost::shared_ptr< solver_Type >                       solverPtr_Type;
 
     typedef solver_Type::data_Type                                 data_Type;
@@ -113,16 +113,16 @@ public:
     typedef solver_Type::feSpace_Type                              feSpace_Type;
     typedef solver_Type::feSpacePtr_Type                           feSpacePtr_Type;
 
-    typedef OneDimensionalBCHandler                                bc_Type;
+    typedef OneDFSIBCHandler                                       bc_Type;
     typedef boost::shared_ptr< bc_Type >                           bcPtr_Type;
     typedef BCInterface1D< bc_Type, solver_Type >                  bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
 
-    typedef OneDimensionalFunction                                 bcFunction_Type;
+    typedef OneDFSIFunction                                        bcFunction_Type;
 
-    typedef OneDimensional::bcType_Type                            bcType_Type;
-    typedef OneDimensional::bcSide_Type                            bcSide_Type;
-    typedef OneDimensional::bcLine_Type                            bcLine_Type;
+    typedef OneDFSI::bcType_Type                                   bcType_Type;
+    typedef OneDFSI::bcSide_Type                                   bcSide_Type;
+    typedef OneDFSI::bcLine_Type                                   bcLine_Type;
 
 #ifdef HAVE_HDF5
     typedef ExporterHDF5< mesh_Type >                              IOFile_Type;
@@ -201,7 +201,7 @@ public:
      * @param flag flag of the boundary face
      * @return flow rate value
      */
-    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::Q, flagConverter( flag ) ); }
+    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::Q, flagConverter( flag ) ); }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
@@ -209,7 +209,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real boundaryStress( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::S, flagConverter( flag ) ); }
+    Real boundaryStress( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::S, flagConverter( flag ) ); }
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -265,14 +265,14 @@ public:
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real boundaryArea( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::A, flagConverter( flag ) ); }
+    Real boundaryArea( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::A, flagConverter( flag ) ); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::P, flagConverter( flag ) ); }
+    Real boundaryPressure( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::P, flagConverter( flag ) ); }
 
     //! Get the data container of the 1D model.
     /*!
@@ -423,7 +423,7 @@ private:
      * @param flag boundary condition flag
      * @return boundary condition side.
      */
-    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
+    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDFSI::left : OneDFSI::right; }
 
 #endif
     //@}
