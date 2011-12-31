@@ -41,7 +41,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifefem/OneDimensionalBC.hpp>
+#include <life/lifefem/OneDFSIBC.hpp>
 
 namespace LifeV
 {
@@ -49,14 +49,14 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalBC::OneDimensionalBC( const bcSide_Type& bcSide ) :
+OneDFSIBC::OneDFSIBC( const bcSide_Type& bcSide ) :
         M_bcType                    (),
         M_bcSide                    ( bcSide ),
         M_bcFunction                ()
 {
 }
 
-OneDimensionalBC::OneDimensionalBC( const OneDimensionalBC& bc ) :
+OneDFSIBC::OneDFSIBC( const OneDFSIBC& bc ) :
         M_bcType                    ( bc.M_bcType ),
         M_bcSide                    ( bc.M_bcSide ),
         M_bcFunction                ( bc.M_bcFunction )
@@ -66,11 +66,11 @@ OneDimensionalBC::OneDimensionalBC( const OneDimensionalBC& bc ) :
 // Methods
 // ===================================================
 void
-OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
-                           const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs )
+OneDFSIBC::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
+                    const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs )
 {
     UInt iNode;
-    ( M_bcSide == OneDimensional::left ) ? iNode = 0 : iNode = fluxPtr->physics()->data()->numberOfNodes() - 1;
+    ( M_bcSide == OneDFSI::left ) ? iNode = 0 : iNode = fluxPtr->physics()->data()->numberOfNodes() - 1;
 
     container2D_Type boundaryU;
     boundaryU[0] = (*solution.find("A")->second)(iNode);
@@ -84,50 +84,50 @@ OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solutio
                                       eigenvalues, leftEigenvector1, leftEigenvector2, iNode );
 
     std::map<bcLine_Type, container2D_Type> bcMatrix;
-    bcMatrix[ OneDimensional::first ]  = container2D_Type();
-    bcMatrix[ OneDimensional::second ] = container2D_Type();
+    bcMatrix[ OneDFSI::first ]  = container2D_Type();
+    bcMatrix[ OneDFSI::second ] = container2D_Type();
 
     container2D_Type bcRHS;
 
     // First line of Matrix and RHS
-    computeMatrixAndRHS( time, timeStep, fluxPtr, OneDimensional::first,
+    computeMatrixAndRHS( time, timeStep, fluxPtr, OneDFSI::first,
                          leftEigenvector1, leftEigenvector2, iNode, bcMatrix, bcRHS[0] );
 
     // Second line of Matrix and RHS
-    computeMatrixAndRHS( time, timeStep, fluxPtr, OneDimensional::second,
+    computeMatrixAndRHS( time, timeStep, fluxPtr, OneDFSI::second,
                          leftEigenvector1, leftEigenvector2, iNode, bcMatrix, bcRHS[1] );
 
 
-    container2D_Type bc = solveLinearSystem( bcMatrix[OneDimensional::first], bcMatrix[OneDimensional::second], bcRHS );
+    container2D_Type bc = solveLinearSystem( bcMatrix[OneDFSI::first], bcMatrix[OneDFSI::second], bcRHS );
 
     // Set the BC in the RHS
     (*rhs[0])( iNode ) = bc[0];
     (*rhs[1])( iNode ) = bc[1];
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6311) << "[OneDimensionalBC::applyBC] on bcSide " << M_bcSide << " imposing [ A, Q ] = [ " << bc[0] << ", " << bc[1] << " ]\n";
+    Debug(6311) << "[OneDFSIBC::applyBC] on bcSide " << M_bcSide << " imposing [ A, Q ] = [ " << bc[0] << ", " << bc[1] << " ]\n";
 #endif
 }
 
 void
-OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs )
+OneDFSIBC::applyViscoelasticBC( const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs )
 {
     UInt iNode;
-    ( M_bcSide == OneDimensional::left ) ? iNode = 0 : iNode = fluxPtr->physics()->data()->numberOfNodes() - 1;
+    ( M_bcSide == OneDFSI::left ) ? iNode = 0 : iNode = fluxPtr->physics()->data()->numberOfNodes() - 1;
 
-    switch ( M_bcType.find( OneDimensional::first )->second )
+    switch ( M_bcType.find( OneDFSI::first )->second )
     {
-    case OneDimensional::A:
-    case OneDimensional::P:
-    case OneDimensional::S:
+    case OneDFSI::A:
+    case OneDFSI::P:
+    case OneDFSI::S:
 
 #ifdef HAVE_NEUMANN_VISCOELASTIC_BC
         break;
 #endif
 
-    case OneDimensional::Q:
-    case OneDimensional::W1:
-    case OneDimensional::W2:
+    case OneDFSI::Q:
+    case OneDFSI::W1:
+    case OneDFSI::W2:
 
         matrix.diagonalize( iNode, 1 );
         rhs( iNode ) = 0;
@@ -136,7 +136,7 @@ OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& fluxPtr, matrix_Type&
 
     default:
 
-        std::cout << "Warning: bcType \"" << M_bcType.find( OneDimensional::first )->second << "\"not available!" << std::endl;
+        std::cout << "Warning: bcType \"" << M_bcType.find( OneDFSI::first )->second << "\"not available!" << std::endl;
 
         break;
     }
@@ -146,9 +146,9 @@ OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& fluxPtr, matrix_Type&
 // Private Methods
 // ===================================================
 void
-OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& fluxPtr, const bcLine_Type& line,
-                                       const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
-                                       const UInt& iNode, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS )
+OneDFSIBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& fluxPtr, const bcLine_Type& line,
+                                const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
+                                const UInt& iNode, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS )
 {
     // This is not general (typical situation):
     //     on first line,  left boundary,  I impose W1
@@ -161,51 +161,51 @@ OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, c
     bcRHS = M_bcFunction[ line ](time, timeStep);
     switch ( M_bcType[line] )
     {
-    case OneDimensional::W1:
+    case OneDFSI::W1:
         bcMatrix[line] = leftEigenvector1;
         break;
-    case OneDimensional::W2:
+    case OneDFSI::W2:
         bcMatrix[line] = leftEigenvector2;
         break;
-    case OneDimensional::A:
+    case OneDFSI::A:
         bcMatrix[line][0] = 1.;
         bcMatrix[line][1] = 0.;
         break;
-    case OneDimensional::S:
+    case OneDFSI::S:
         // The normal stress has opposite sign with respect to the pressure
         bcRHS *= -1;
         // The break here is missing on purpose!
-    case OneDimensional::P:
+    case OneDFSI::P:
         bcRHS = fluxPtr->physics()->fromPToA( bcRHS, timeStep, iNode );
         bcMatrix[line][0] = 1.;
         bcMatrix[line][1] = 0.;
         break;
-    case OneDimensional::Q:
+    case OneDFSI::Q:
         // Flow rate is positive with respect to the outgoing normal
-        if ( M_bcSide == OneDimensional::left )
+        if ( M_bcSide == OneDFSI::left )
             bcRHS *= -1;
         bcMatrix[line][0] = 0.;
         bcMatrix[line][1] = 1.;
         break;
     default:
-        std::cout << "\n[OneDimensionalBC::computeMatrixAndRHS] Wrong boundary variable as " << line << " condition on bcSide " << M_bcSide;
+        std::cout << "\n[OneDFSIBC::computeMatrixAndRHS] Wrong boundary variable as " << line << " condition on bcSide " << M_bcSide;
         break;
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6311) << "[OneDimensionalBC::computeMatrixAndRHS] to impose variable "
+    Debug(6311) << "[OneDFSIBC::computeMatrixAndRHS] to impose variable "
     << M_bcType[line] << ", " << line << " line = " << bcMatrix[line][0] << ", " << bcMatrix[line][1] << "\n";
 #endif
 }
 
-OneDimensionalBC::container2D_Type
-OneDimensionalBC::solveLinearSystem( const container2D_Type& line1,
-                                     const container2D_Type& line2,
-                                     const container2D_Type& rhs ) const
+OneDFSIBC::container2D_Type
+OneDFSIBC::solveLinearSystem( const container2D_Type& line1,
+                              const container2D_Type& line2,
+                              const container2D_Type& rhs ) const
 {
 #ifdef HAVE_LIFEV_DEBUG
     ASSERT_PRE( line1.size() == 2 && line2.size() == 2 && rhs.size() == 2,
-                "OneDimensionalBC::solveLinearSystem works only for 2D vectors");
+                "OneDFSIBC::solveLinearSystem works only for 2D vectors");
 #endif
 
     Real determinant = line1[0] * line2[1] - line1[1] * line2[0];

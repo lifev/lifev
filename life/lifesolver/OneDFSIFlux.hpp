@@ -35,15 +35,15 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalFlux_H
-#define OneDimensionalFlux_H
+#ifndef OneDFSIFlux_H
+#define OneDFSIFlux_H
 
-#include <life/lifesolver/OneDimensionalPhysics.hpp>
+#include <life/lifesolver/OneDFSIPhysics.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalFlux - Base class for the flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
+//! OneDFSIFlux - Base class for the flux term \f$\mathbf F\f$ of the 1D hyperbolic problem.
 /*!
  *  @author Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -60,7 +60,7 @@ namespace LifeV
  *
  *  This class implements all the interfaces required for the computation of \f$\mathbf F\f$ and its derivatives.
  */
-class OneDimensionalFlux
+class OneDFSIFlux
 {
 
 public:
@@ -68,12 +68,12 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef FactorySingleton< Factory< OneDimensionalFlux, OneDimensional::fluxTerm_Type > > factoryFlux_Type;
+    typedef FactorySingleton< Factory< OneDFSIFlux, OneDFSI::fluxTerm_Type > > factoryFlux_Type;
 
-    typedef OneDimensionalPhysics                       physics_Type;
+    typedef OneDFSIPhysics                              physics_Type;
     typedef boost::shared_ptr< physics_Type >           physicsPtr_Type;
 
-    typedef OneDimensionalData::container2D_Type        container2D_Type;
+    typedef OneDFSIData::container2D_Type               container2D_Type;
 
     //@}
 
@@ -82,16 +82,16 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalFlux() : M_physicsPtr() {}
+    explicit OneDFSIFlux() : M_physicsPtr() {}
 
     //! Constructor
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalFlux( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
+    explicit OneDFSIFlux( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
 
     //! Do nothing destructor
-    virtual ~OneDimensionalFlux() {}
+    virtual ~OneDFSIFlux() {}
 
     //@}
 
@@ -184,9 +184,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalFlux( const OneDimensionalFlux& flux );
+    explicit OneDFSIFlux( const OneDFSIFlux& flux );
 
-    OneDimensionalFlux& operator=( const OneDimensionalFlux& flux );
+    OneDFSIFlux& operator=( const OneDFSIFlux& flux );
 
     //@}
 
@@ -194,4 +194,4 @@ private:
 
 }
 
-#endif // OneDimensionalFlux_H
+#endif // OneDFSIFlux_H

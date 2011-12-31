@@ -35,8 +35,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalDefinitions_H
-#define OneDimensionalDefinitions_H
+#ifndef OneDFSIDefinitions_H
+#define OneDFSIDefinitions_H
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -70,7 +70,7 @@ namespace ublas = boost::numeric::ublas;
 
 namespace LifeV
 {
-namespace OneDimensional
+namespace OneDFSI
 {
 
 //#define HAVE_NEUMANN_VISCOELASTIC_BC 1 // Define whether to use homogeneous Neumann/Dirichlet BC for the viscoelastic problem.
@@ -105,10 +105,10 @@ extern std::map< std::string, fluxTerm_Type >    fluxMap;
 extern std::map< std::string, sourceTerm_Type >  sourceMap;
 
 // Forward class declarations
-class OneDimensionalModel_Physics;
-class OneDimensionalModel_Flux;
-class OneDimensionalModel_Source;
-class OneDimensionalModel_BCFunction;
+class OneDFSIModel_Physics;
+class OneDFSIModel_Flux;
+class OneDFSIModel_Source;
+class OneDFSIModel_BCFunction;
 
 enum bcType_Type
 {
@@ -133,10 +133,10 @@ enum bcLine_Type
 };
 
 // ===================================================
-// OneDimensionalModel Utility Methods
+// OneDFSIModel Utility Methods
 // ===================================================
 
-//! Define the map of the OneDimensionalModel objects
+//! Define the map of the OneDFSIModel objects
 inline void
 mapsDefinition()
 {
@@ -210,7 +210,7 @@ pow40( const Real& base, const Real& exponent )
         return std::pow( base, exponent );
 }
 
-} // OneDimensional namespace
+} // OneDFSI namespace
 } // LifeV namespace
 
-#endif // OneDimensionalDefinitions_H
+#endif // OneDFSIDefinitions_H

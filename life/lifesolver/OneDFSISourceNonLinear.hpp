@@ -39,15 +39,15 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalSourceNonLinear_H
-#define OneDimensionalSourceNonLinear_H
+#ifndef OneDFSISourceNonLinear_H
+#define OneDFSISourceNonLinear_H
 
-#include <life/lifesolver/OneDimensionalSource.hpp>
+#include <life/lifesolver/OneDFSISource.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalSourceNonLinear - Class for the non-linear source function B of the 1D hyperbolic problem.
+//! OneDFSISourceNonLinear - Class for the non-linear source function B of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -105,14 +105,14 @@ namespace LifeV
  *
  *  This class implements all the interfaces required for the computation of \f$\mathbf S\f$ and its derivatives.
  */
-class OneDimensionalSourceNonLinear : public OneDimensionalSource
+class OneDFSISourceNonLinear : public OneDFSISource
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalSource         super;
+    typedef OneDFSISource         super;
 
     //@}
 
@@ -121,16 +121,16 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalSourceNonLinear() : super() {}
+    explicit OneDFSISourceNonLinear() : super() {}
 
     //! Constructor
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalSourceNonLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {}
+    explicit OneDFSISourceNonLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {}
 
     //! Do nothing destructor
-    virtual ~OneDimensionalSourceNonLinear() {}
+    virtual ~OneDFSISourceNonLinear() {}
 
     //@}
 
@@ -209,19 +209,19 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalSourceNonLinear( const OneDimensionalSourceNonLinear& source );
+    explicit OneDFSISourceNonLinear( const OneDFSISourceNonLinear& source );
 
-    OneDimensionalSourceNonLinear& operator=( const OneDimensionalSourceNonLinear& source );
+    OneDFSISourceNonLinear& operator=( const OneDFSISourceNonLinear& source );
 
     //@}
 };
 
 //! Factory create function
-inline OneDimensionalSource* createOneDimensionalSourceNonLinear()
+inline OneDFSISource* createOneDFSISourceNonLinear()
 {
-    return new OneDimensionalSourceNonLinear();
+    return new OneDFSISourceNonLinear();
 }
 
 }
 
-#endif // OneDimensionalSourceNonLinear_H
+#endif // OneDFSISourceNonLinear_H

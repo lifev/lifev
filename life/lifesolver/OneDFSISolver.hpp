@@ -48,8 +48,8 @@
 
 
 
-#ifndef OneDimensionalSolver_H
-#define OneDimensionalSolver_H
+#ifndef OneDFSISolver_H
+#define OneDFSISolver_H
 
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifearray/VectorElemental.hpp>
@@ -61,14 +61,14 @@
 
 #include <life/lifefem/FESpace.hpp>
 
-#include <life/lifefem/OneDimensionalBCHandler.hpp>
-#include <life/lifesolver/OneDimensionalDefinitions.hpp>
+#include <life/lifefem/OneDFSIBCHandler.hpp>
+#include <life/lifesolver/OneDFSIDefinitions.hpp>
 
 
 namespace LifeV
 {
 
-//! OneDimensionalSolver - Solver class for the 1D model.
+//! OneDFSISolver - Solver class for the 1D model.
 /*!
  *  @author Vincent Martin, Tiziano Passerini, Lucia Mirabella, Gilles Fourestey, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -146,23 +146,23 @@ namespace LifeV
  *  very clear. If it is too costly, it should be quite easy to improve
  *  it.
  */
-class OneDimensionalSolver
+class OneDFSISolver
 {
 public:
 
     //! @name Typedef & Enumerator
     //@{
 
-    typedef OneDimensionalPhysics                   physics_Type;
+    typedef OneDFSIPhysics                          physics_Type;
     typedef boost::shared_ptr< physics_Type >       physicsPtr_Type;
 
-    typedef OneDimensionalFlux                      flux_Type;
+    typedef OneDFSIFlux                             flux_Type;
     typedef boost::shared_ptr< flux_Type >          fluxPtr_Type;
 
-    typedef OneDimensionalSource                    source_Type;
+    typedef OneDFSISource                           source_Type;
     typedef boost::shared_ptr< source_Type >        sourcePtr_Type;
 
-    typedef OneDimensionalData                      data_Type;
+    typedef OneDFSIData                             data_Type;
     typedef data_Type::mesh_Type                    mesh_Type;
 
     typedef data_Type::container2D_Type             container2D_Type;
@@ -190,9 +190,9 @@ public:
     typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
     typedef solution_Type::const_iterator           solutionConstIterator_Type;
 
-    typedef OneDimensional::bcLine_Type             bcLine_Type;
-    typedef OneDimensional::bcSide_Type             bcSide_Type;
-    typedef OneDimensional::bcType_Type             bcType_Type;
+    typedef OneDFSI::bcLine_Type                    bcLine_Type;
+    typedef OneDFSI::bcSide_Type                    bcSide_Type;
+    typedef OneDFSI::bcType_Type                    bcType_Type;
 
     //@}
 
@@ -204,10 +204,10 @@ public:
     /*!
      * Need a call to: \c setCommunicator(), \c setProblem(), \c setFESpace()
      */
-    explicit OneDimensionalSolver();
+    explicit OneDFSISolver();
 
     //! Destructor
-    virtual ~OneDimensionalSolver() {}
+    virtual ~OneDFSISolver() {}
 
     //@}
 
@@ -278,7 +278,7 @@ public:
      * @param time the time
      * @param timeStep the time step
      */
-    void iterate( OneDimensionalBCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
+    void iterate( OneDFSIBCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
 
     //! Apply the viscoelastic flow rate correction.
     /*!
@@ -312,7 +312,7 @@ public:
      * @return the viscoelastic flow rate correction \f$\tilde{Q}\f$
      */
     vector_Type viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep,
-                                                OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix = true );
+                                                OneDFSIBCHandler& bcHandler, const bool& updateSystemMatrix = true );
 
     //! CFL computation (correct for constant mesh)
     /*!
@@ -604,13 +604,13 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalSolver( const OneDimensionalSolver& solver );
+    explicit OneDFSISolver( const OneDFSISolver& solver );
 
-    OneDimensionalSolver& operator=( const OneDimensionalSolver& solver );
+    OneDFSISolver& operator=( const OneDFSISolver& solver );
 
     //@}
 };
 
 }
 
-#endif // OneDimensionalSolver_H
+#endif // OneDFSISolver_H

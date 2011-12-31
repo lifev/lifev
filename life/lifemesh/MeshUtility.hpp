@@ -2261,7 +2261,8 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
  * @author Luca Formaggia
  * @date 2 August 2011
  */
-template <typename REGIONMESH>
+// The Template RMTYPE is used to compile with IBM compilers
+template <typename REGIONMESH, typename RMTYPE >
 class MeshTransformer{
 public:
     /** the constructor may take a reference to the mesh to be manipulated */
@@ -2388,15 +2389,15 @@ namespace MeshStatistics
 }// namespace MeshStatistics
 
 // *****   IMPLEMENTATIONS ****
-//
-template <typename REGIONMESH>
-MeshTransformer<REGIONMESH>::MeshTransformer(REGIONMESH &m):M_mesh(m),M_pointList(){};
+// The Template RMTYPE is used to compile with IBM compilers
+template <typename REGIONMESH, typename RMTYPE >
+MeshTransformer<REGIONMESH, RMTYPE >::MeshTransformer(REGIONMESH &m):M_mesh(m),M_pointList(){};
 /**
  * @todo this method should be changed to make sure not to generate invalid elements
  */
-template <typename REGIONMESH>
+template <typename REGIONMESH, typename RMTYPE >
 template <typename VECTOR>
-void MeshTransformer<REGIONMESH>::moveMesh( const VECTOR & disp, UInt dim )
+void MeshTransformer<REGIONMESH, RMTYPE >::moveMesh( const VECTOR & disp, UInt dim )
 {
     if(!this->hasOldPoint())this->savePoints();
 
@@ -2414,8 +2415,8 @@ void MeshTransformer<REGIONMESH>::moveMesh( const VECTOR & disp, UInt dim )
     }
 }
 
-template<typename REGIONMESH>
-void MeshTransformer<REGIONMESH>::savePoints()
+template<typename REGIONMESH, typename RMTYPE >
+void MeshTransformer<REGIONMESH, RMTYPE >::savePoints()
 {
     if (M_pointList.capacity() < M_mesh.pointList.size())
     {
@@ -2431,26 +2432,26 @@ void MeshTransformer<REGIONMESH>::savePoints()
         std::copy(M_mesh.pointList.begin(),M_mesh.pointList.end(),M_pointList.begin());
     }
 }
-
-template <typename REGIONMESH>
+//  The Template RMTYPE is used to compile with IBM compilers
+template <typename REGIONMESH, typename RMTYPE >
 const typename REGIONMESH::point_Type &
-MeshTransformer<REGIONMESH>::pointInitial( ID const i ) const
+MeshTransformer<REGIONMESH, RMTYPE >::pointInitial( ID const i ) const
 {
     ASSERT_BD( i < M_mesh.pointList.size() );
     return M_pointList.empty()? M_mesh.pointList[i]: this->M_pointList[i];
 }
 
-template <typename REGIONMESH>
+template <typename REGIONMESH, typename RMTYPE >
 const typename REGIONMESH::points_Type &
-MeshTransformer<REGIONMESH>::pointListInitial() const
+MeshTransformer<REGIONMESH, RMTYPE >::pointListInitial() const
 {
     return M_pointList.empty()? M_mesh.points_Type : M_pointList;
 }
-
+//  The Template RMTYPE is used to compile with IBM compilers
 //! @todo Change using homogeneous coordinates to make it more efficient.
-template <typename REGIONMESH>
+template <typename REGIONMESH, typename RMTYPE >
 template <typename VECTOR>
-void MeshTransformer<REGIONMESH>::transformMesh( const VECTOR& scale, const VECTOR& rotate, const VECTOR& translate )
+void MeshTransformer<REGIONMESH, RMTYPE >::transformMesh( const VECTOR& scale, const VECTOR& rotate, const VECTOR& translate )
 {
     // Make life easier
     typename REGIONMESH::points_Type & pointList(M_mesh.pointList);
@@ -2526,10 +2527,10 @@ void MeshTransformer<REGIONMESH>::transformMesh( const VECTOR& scale, const VECT
         pointList[ i ].coordinate( 2 ) = P( 2 );
     }
 }
-
-template <typename REGIONMESH>
+//  The Template RMTYPE is used to compile with IBM compilers
+template <typename REGIONMESH, typename RMTYPE >
 template <typename function>
-void MeshTransformer<REGIONMESH>::transformMesh( const function& meshMapping)
+void MeshTransformer<REGIONMESH, RMTYPE >::transformMesh( const function& meshMapping)
 {
     // Make life easier
     typename REGIONMESH::points_Type & pointList(M_mesh.pointList);

@@ -94,26 +94,26 @@ int main(int argc, char** argv )
 
     //definition of Array of Errors which will be used to check the correctness of the interpolate test.
 
-    Real errArrayBilinear[2] = { 0.0312819802, 0 };
+    const Real errArrayBilinear[2] = { 0.0312819802, 0. };
 
-    Real errArrayQuadratic[12] = {	0.0136247667, 0.0005088372, 0.0005577494, 0.0005088372,
+    const Real errArrayQuadratic[12] = {	0.0136247667, 0.0005088372, 0.0005577494, 0.0005088372,
 									0.0136172446, 0.0005088372, 0.0004270717, 0.0005088372,
 									0.0136172446, 0.0005088372, 0.0004270717,           0.};
 
-    Real errArrayBubble[12] = {	0.0094702745, 3.584186e-10, 3.67611e-10,  3.584186e-10,
+    const Real errArrayBubble[12] = {	0.0094702745, 3.584186e-10, 3.67611e-10,  3.584186e-10,
 								0.0094702745, 3.584186e-10,           0., 3.584186e-10,
 								0.0094702745, 3.584186e-10, 3.67611e-10,  3.584186e-10};
 
-    Real errArrayLinear[12] = {	0.010437463587, 0., 0., 0.,
+    const Real errArrayLinear[12] = {	0.010437463587, 0., 0., 0.,
 								0.010437463587, 0., 0., 0.,
 								0.010437463587, 0., 0., 0.};
 
 
-    std::string stringArrayP[12] = {	"P1  -> P0 ",  "P1  -> P1 ",  "P1  -> P1b", "P1  -> P2 ",
+    const std::string stringArrayP[12] = {	"P1  -> P0 ",  "P1  -> P1 ",  "P1  -> P1b", "P1  -> P2 ",
 										"P1b -> P0 ",  "P1b -> P1 ",  "P1b -> P1b", "P1b -> P2 ",
 										"P2  -> P0 ",  "P2  -> P1 ",  "P2  -> P1b", "P2  -> P2 "  };
 
-    std::string stringArrayQ[2] = {"Q1  -> Q0 ", "Q1  -> Q1 "};
+    const std::string stringArrayQ[2] = {"Q1  -> Q0 ", "Q1  -> Q1 "};
 
 
     // Import/Generate an hexahedral and  a Tetrahedral mesh.

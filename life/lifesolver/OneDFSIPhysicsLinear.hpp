@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing a class providing non linear physical operations for the 1D model data.
+ *  @brief File containing a class providing linear physical operations for the 1D model data.
  *
  *  @version 1.0
  *  @date 01-07-2004
@@ -40,15 +40,15 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalPhysicsNonLinear_H
-#define OneDimensionalPhysicsNonLinear_H
+#ifndef OneDFSIPhysicsLinear_H
+#define OneDFSIPhysicsLinear_H
 
-#include <life/lifesolver/OneDimensionalPhysics.hpp>
+#include <life/lifesolver/OneDFSIPhysics.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalPhysicsNonLinear - Class providing non linear physical operations for the 1D model data.
+//! OneDFSIPhysicsLinear - Class providing linear physical operations for the 1D model data.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -60,14 +60,14 @@ namespace LifeV
  *      <li> utilities to compute the different pressure components (and derivatives).
  *  </ol>
  */
-class OneDimensionalPhysicsNonLinear : public OneDimensionalPhysics
+class OneDFSIPhysicsLinear : public OneDFSIPhysics
 {
-public :
+public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalPhysics           super;
+    typedef OneDFSIPhysics           super;
 
     //@}
 
@@ -76,16 +76,16 @@ public :
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalPhysicsNonLinear() : super() {}
+    explicit OneDFSIPhysicsLinear() : super() {}
 
     //! Constructor
     /*!
      * @param dataPtr pointer to the data container of the problem
      */
-    explicit OneDimensionalPhysicsNonLinear( const dataPtr_Type dataPtr ) : super( dataPtr ) {}
+    explicit OneDFSIPhysicsLinear( const dataPtr_Type dataPtr ) : super( dataPtr ) {}
 
     //! Destructor
-    virtual ~OneDimensionalPhysicsNonLinear() {}
+    virtual ~OneDFSIPhysicsLinear() {}
 
     //@}
 
@@ -97,9 +97,9 @@ public :
     /*!
      *  \cond \TODO improve doxygen description with latex equation and other features \endcond
      *
-     *  Riemann Invariants corresponding to data (Q, A) at node iNode
-     *  W1,2 = (Q / A) +- (2 / beta1) * sqrt(chi) * (celerity - celerity0)
-     *  being chi the correction coefficient proposed by A. Robertson and H. Zakaria
+     *  Physical variables corresponding to (W1, W2) at node iNode
+     *  A = A0 + (W1 - W2) / (2 * celerity)
+     *  Q = (W1 + W2) / 2
      *
      *  @param U1 first physical variable
      *  @param U2 second physical variable
@@ -107,17 +107,14 @@ public :
      *  @param W2 second Riemann variable
      *  @param iNode node of the mesh
      */
-    void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const;
+    void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const;
 
     //! Compute \f$\mathbf W\f$ from \f$\mathbf U\f$
     /*!
      *  \cond \TODO improve doxygen description with latex equation and other features \endcond
      *
-     *  Physical variables corresponding to (W1, W2) at node iNode
-     *  A = A0 * ( rho / (beta0 * beta1) )^(1/beta1)
-     *    * ( beta1 / (4 * sqrt(chi) ) * (W1 - W2) + celerity0 )^(2/beta1)
-     *
-     *  Q = A (W1 + W2) / 2
+     *  Riemann Invariants corresponding to data (Q, A) at node iNode
+     *  W1,2 = Q +- celerity * ( A - A0 )
      *
      *  @param W1 first Riemann variable
      *  @param W2 second Riemann variable
@@ -125,7 +122,7 @@ public :
      *  @param U2 second physical variable
      *  @param iNode node of the mesh
      */
-    void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const;
+    void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const;
 
     //! Compute \f$P\f$ from \f$\mathbf W\f$
     /*!
@@ -134,7 +131,7 @@ public :
      *  @param W1 first Riemann variable
      *  @param W2 second Riemann variable
      *  @param iNode node of the mesh
-     *  @return P = beta0 * ( rho / (beta0 * beta1) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )^2 - 1 )
+     *  @return pressure P = beta0 * ( ( 1 / Area0 )^(beta1) * ( (W1 - W2) / (2 * celerity0) + Area0 )^(beta1) - 1 )
      */
     Real fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const;
 
@@ -142,8 +139,8 @@ public :
     /*!
      *  \cond \TODO improve doxygen description with latex equation and other features \endcond
      *
-     *  W1 - W2 = (4 * sqrt(chi) / beta1) * sqrt( beta0 * beta1 / rho ) ) * ( sqrt( P / beta0 + 1 ) - 1 )
-     *  W1 - W2 = 4 * sqrt( beta0 / (beta1 * rho ) ) * ( sqrt( P / beta0 + 1 ) - 1 )
+     *  W1 - W2 = (2 * celerity * A0) * ( ( P / beta0 + 1 )^(1/beta1) - 1 )
+     *  W1 - W2 = 4 * sqrt( beta0 / (beta1 * rho ) ) * ( sqrt( P / beta0 + 1 ) - 1
      *
      *  @param P pressure
      *  @param W Riemann variable
@@ -157,12 +154,7 @@ public :
     /*!
      *  \cond \TODO improve doxygen description with latex equation and other features \endcond
      *
-     *  ( W1 - W2 + celerity0/K0 )^(2/beta1) * ( W1 + W2 ) = Q / K1
-     *
-     *  where
-     *
-     *  K0 = beta1 / ( 4 * sqrt(chi) )
-     *  K1 = A0 / 2 * ( rho / (beta0*beta1) )^(1/beta1) * K0^(2/beta1)
+     *  W1 + W2 = 2 * Q
      *
      *  @param Q pressure
      *  @param W_tn Riemann variable at time \f$t^n\f$
@@ -183,8 +175,8 @@ public :
     /*!
      *  \cond \TODO improve doxygen description with latex equation and other features \endcond
      *
-     *  dP(W1,W2)/dW_1 = rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
-     *  dP(W1,W2)/dW_2 = - rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
+     *  dP(W1,W2)/dW_1 = beta0 * beta1 / ( 2 * celerity0 * Area0^(beta1) ) * ( (W1 - W2) / ( 2 * celerity0 ) + Area0 )^(beta1-1)
+     *  dP(W1,W2)/dW_2 = - dP(W1,W2)/dW_1
      *
      *  @param W1 first Riemann variable
      *  @param W2 second Riemann variable
@@ -201,20 +193,19 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalPhysicsNonLinear( const OneDimensionalPhysicsNonLinear& physics );
+    explicit OneDFSIPhysicsLinear( const OneDFSIPhysicsLinear& physics );
 
-    OneDimensionalPhysicsNonLinear& operator=( const OneDimensionalPhysicsNonLinear& physics );
+    OneDFSIPhysicsLinear& operator=( const OneDFSIPhysicsLinear& physics );
 
     //@}
-
 };
 
 //! Factory create function
-inline OneDimensionalPhysics* createOneDimensionalPhysicsNonLinear()
+inline OneDFSIPhysics* createOneDFSIPhysicsLinear()
 {
-    return new OneDimensionalPhysicsNonLinear();
+    return new OneDFSIPhysicsLinear();
 }
 
 }
 
-#endif // OneDimensionalPhysicsNonLinear_H
+#endif //OneDFSIPhysicsLinear_H

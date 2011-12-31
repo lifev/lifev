@@ -40,7 +40,7 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/OneDimensionalData.hpp>
+#include <life/lifesolver/OneDFSIData.hpp>
 
 namespace LifeV
 {
@@ -48,7 +48,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-OneDimensionalData::OneDimensionalData():
+OneDFSIData::OneDFSIData():
     M_physicsType               (),
     M_fluxType                  (),
     M_sourceType                (),
@@ -111,12 +111,12 @@ OneDimensionalData::OneDimensionalData():
 // Methods
 // ===================================================
 void
-OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
+OneDFSIData::setup( const GetPot& dataFile, const std::string& section )
 {
     // Model Type
-    M_physicsType = OneDimensional::physicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
-    M_fluxType    = OneDimensional::fluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
-    M_sourceType  = OneDimensional::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
+    M_physicsType = OneDFSI::physicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
+    M_fluxType    = OneDFSI::fluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
+    M_sourceType  = OneDFSI::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
     if ( !M_timeDataPtr.get() )
@@ -145,9 +145,9 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     // Miscellaneous
     M_postprocessingDirectory = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
     M_postprocessingFile      = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
-    M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
+    M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3.)/3. );
 
-    if ( M_CFLmax > std::sqrt(3)/3. )
+    if ( M_CFLmax > std::sqrt(3.)/3. )
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
 
     // Jacobian perturbation
@@ -294,12 +294,12 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
 }
 
 void
-OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& section )
+OneDFSIData::oldStyleSetup( const GetPot& dataFile, const std::string& section )
 {
     // Model Type
-    M_physicsType = OneDimensional::physicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
-    M_fluxType    = OneDimensional::fluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
-    M_sourceType  = OneDimensional::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
+    M_physicsType = OneDFSI::physicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
+    M_fluxType    = OneDFSI::fluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
+    M_sourceType  = OneDFSI::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
     if ( !M_timeDataPtr.get() )
@@ -324,9 +324,9 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     M_postprocessingFile      = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
     M_inertialWall            = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
     M_viscoelasticWall        = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
-    M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
+    M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3.)/3. );
 
-    if ( M_CFLmax > std::sqrt(3)/3. )
+    if ( M_CFLmax > std::sqrt(3.)/3. )
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
 
     // Jacobian perturbation
@@ -365,7 +365,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
 
         // Physical Parameters
         if ( M_computeCoefficients )
-            M_area0[i]                 = OneDimensional::pow20( dataFile( ( section + "/1d_physics/radius"        ).data(), 0.5 ), 2 ) * M_PI;
+            M_area0[i]                 = OneDFSI::pow20( dataFile( ( section + "/1d_physics/radius"        ).data(), 0.5 ), 2 ) * M_PI;
         else
             M_area0[i]                 = dataFile( ( section + "/parameters/Area0"                   ).data(), M_PI );
         M_beta0[i]                     = dataFile( ( section + "/parameters/beta0"                   ).data(), 1.e6 );
@@ -397,7 +397,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
 }
 
 void
-OneDimensionalData::updateCoefficients()
+OneDFSIData::updateCoefficients()
 {
     if ( M_computeCoefficients )
     {
@@ -442,7 +442,7 @@ OneDimensionalData::updateCoefficients()
 }
 
 //void
-//OneDimensionalData::initializeLinearParameters()
+//OneDFSIData::initializeLinearParameters()
 //{
 //    for ( UInt indz=0; indz < M_meshPtr->numPoints(); ++indz )
 //    {
@@ -476,7 +476,7 @@ OneDimensionalData::updateCoefficients()
 // 3) rename indices following other classes (iNode, iElement, etc..)
 // 4) probably 3/4 of the code can be shared between the left and right method instead of duplications
 //void
-//OneDimensionalData::stiffenVesselLeft( const Real& xl,        const Real& xr,
+//OneDFSIData::stiffenVesselLeft( const Real& xl,        const Real& xr,
 //                                       const Real& factor,    const Real& alpha,
 //                                       const Real& delta,     const Real& n,
 //                                       const Real& minDeltaX, const UInt& yesAdaptive )
@@ -573,7 +573,7 @@ OneDimensionalData::updateCoefficients()
 //}
 
 //void
-//OneDimensionalData::stiffenVesselRight( const Real& xl,        const Real& xr,
+//OneDFSIData::stiffenVesselRight( const Real& xl,        const Real& xr,
 //                                        const Real& factor,    const Real& alpha,
 //                                        const Real& delta,     const Real& n,
 //                                        const Real& minDeltaX, const UInt& yesAdaptive )
@@ -672,15 +672,15 @@ OneDimensionalData::updateCoefficients()
 //}
 
 void
-OneDimensionalData::showMe( std::ostream& output ) const
+OneDFSIData::showMe( std::ostream& output ) const
 {
     //output << std::scientific << std::setprecision(15);
 
     // Model
     output << "\n*** Values for data [Model]" << std::endl << std::endl;
-    output << "Physics Type           = " << enum2String( M_physicsType, OneDimensional::physicsMap ) << std::endl;
-    output << "Flux Type              = " << enum2String( M_fluxType,    OneDimensional::fluxMap    ) << std::endl;
-    output << "Source Type            = " << enum2String( M_sourceType,  OneDimensional::sourceMap  ) << std::endl;
+    output << "Physics Type           = " << enum2String( M_physicsType, OneDFSI::physicsMap ) << std::endl;
+    output << "Flux Type              = " << enum2String( M_fluxType,    OneDFSI::fluxMap    ) << std::endl;
+    output << "Source Type            = " << enum2String( M_sourceType,  OneDFSI::sourceMap  ) << std::endl;
 
     // Time
     output << "\n*** Values for data [time_discretization]" << std::endl << std::endl;
@@ -763,7 +763,7 @@ OneDimensionalData::showMe( std::ostream& output ) const
 // Get Methods - Physical Parameters
 // ===================================================
 const Real&
-OneDimensionalData::robertsonCorrection() const
+OneDFSIData::robertsonCorrection() const
 {
     if ( M_robertsonCorrection != 1. )
         std::cout << "!!! WARNING: Robertson corretion has not been checked in this version of the code !!!" << std::endl;
@@ -774,11 +774,11 @@ OneDimensionalData::robertsonCorrection() const
 // Private methods
 // ===================================================
 void
-OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
-                                         const GetPot& dataFile,
-                                         const std::string& quantity,
-                                         const Real& defaultValue,
-                                         const bool& isArea )
+OneDFSIData::linearInterpolation( scalarVector_Type& vector,
+                                  const GetPot& dataFile,
+                                  const std::string& quantity,
+                                  const Real& defaultValue,
+                                  const bool& isArea )
 {
     Real a  = dataFile( quantity.data(), defaultValue, 0 );
     Real b  = dataFile( quantity.data(), a, 1 );
@@ -805,7 +805,7 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
 }
 
 void
-OneDimensionalData::computeSpatialDerivatives()
+OneDFSIData::computeSpatialDerivatives()
 {
     for ( UInt iNode( 0 ) ; iNode < M_meshPtr->numPoints() ; ++iNode )
     {
@@ -817,7 +817,7 @@ OneDimensionalData::computeSpatialDerivatives()
 }
 
 void
-OneDimensionalData::resetContainers()
+OneDFSIData::resetContainers()
 {
     M_viscoelasticCoefficient.resize( M_meshPtr->numPoints() );
     M_thickness.resize( M_meshPtr->numPoints() );

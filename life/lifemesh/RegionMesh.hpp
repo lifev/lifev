@@ -253,8 +253,8 @@ public:
      */
     void printLtGMap(std::ostream & os);
 
-    //! Return the handle to perform transformations on the mesh
-    MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC> > & meshTransformer();
+    //! Return the handle to perform transormations on the mesh
+    inline MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > & meshTransformer();
 
     /** @} */ // End of group Utilities
 
@@ -1895,7 +1895,7 @@ private:
     //fake peak, used in 1D geometries to avoid compilation errors when a peak& is required in output
     peak_Type M_aPeak;
 
-    MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC> > M_meshTransformer;
+    MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > M_meshTransformer;
 
 
 
@@ -3587,8 +3587,8 @@ getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& li
 
 
 template <typename GEOSHAPE, typename MC>
-inline MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC> > &
-RegionMesh<GEOSHAPE, MC>::meshTransformer()
+inline MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > &
+RegionMesh3D<GEOSHAPE, MC>::meshTransformer()
 {
     return this->M_meshTransformer;
 }

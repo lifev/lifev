@@ -40,15 +40,15 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalPhysics_H
-#define OneDimensionalPhysics_H
+#ifndef OneDFSIPhysics_H
+#define OneDFSIPhysics_H
 
-#include <life/lifesolver/OneDimensionalData.hpp>
+#include <life/lifesolver/OneDFSIData.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalPhysics - Base class providing physical operations for the 1D model data.
+//! OneDFSIPhysics - Base class providing physical operations for the 1D model data.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -63,20 +63,20 @@ namespace LifeV
  *  \cond
  *  TODO: This class should be splitted in two separate classes
  *  <ol>
- *      <li> one class (no derivation) for the wall physics with a name like OneDimensionalWallPhysics
- *      <li> a set of classes for the Riemann conversions like OneDimensionalRiemannConverter and derived Linear/NonLinear versions.
+ *      <li> one class (no derivation) for the wall physics with a name like OneDFSIWallPhysics
+ *      <li> a set of classes for the Riemann conversions like OneDFSIRiemannConverter and derived Linear/NonLinear versions.
  *  </ol>
  *  \endcond
  */
-class OneDimensionalPhysics
+class OneDFSIPhysics
 {
 public :
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef FactorySingleton< Factory< OneDimensionalPhysics, OneDimensional::physicsType_Type > > factoryPhysics_Type;
+    typedef FactorySingleton< Factory< OneDFSIPhysics, OneDFSI::physicsType_Type > > factoryPhysics_Type;
 
-    typedef OneDimensionalData                    data_Type;
+    typedef OneDFSIData                           data_Type;
     typedef boost::shared_ptr< data_Type >        dataPtr_Type;
 
     typedef VectorEpetra                          vector_Type;
@@ -89,16 +89,16 @@ public :
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalPhysics() : M_dataPtr(), M_previousAreaPtr() {}
+    explicit OneDFSIPhysics() : M_dataPtr(), M_previousAreaPtr() {}
 
     //! Constructor
     /*!
      * @param dataPtr pointer to the data container of the problem
      */
-    explicit OneDimensionalPhysics( const dataPtr_Type dataPtr ) : M_dataPtr ( dataPtr ), M_previousAreaPtr() {}
+    explicit OneDFSIPhysics( const dataPtr_Type dataPtr ) : M_dataPtr ( dataPtr ), M_previousAreaPtr() {}
 
     //! Destructor
-    virtual ~OneDimensionalPhysics() {}
+    virtual ~OneDFSIPhysics() {}
 
     //@}
 
@@ -373,9 +373,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalPhysics( const OneDimensionalPhysics& physics );
+    explicit OneDFSIPhysics( const OneDFSIPhysics& physics );
 
-    OneDimensionalPhysics& operator=( const OneDimensionalPhysics& physics );
+    OneDFSIPhysics& operator=( const OneDFSIPhysics& physics );
 
     //@}
 
@@ -386,10 +386,10 @@ private:
 // Inline conversion methods
 // ===================================================
 inline Real
-OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
+OneDFSIPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
     if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
-        return ( M_dataPtr->area0( iNode ) * OneDimensional::pow20( ( P - externalPressure() ) / M_dataPtr->beta0( iNode ) + 1, 1 / M_dataPtr->beta1( iNode ) )  );
+        return ( M_dataPtr->area0( iNode ) * OneDFSI::pow20( ( P - externalPressure() ) / M_dataPtr->beta0( iNode ) + 1, 1 / M_dataPtr->beta1( iNode ) )  );
     else
     {
         // Newton method to solve the non linear equation
@@ -424,25 +424,25 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
 // Inline derivatives methods
 // ===================================================
 inline Real
-OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& timeStep, const UInt& iNode ) const
+OneDFSIPhysics::dAdt( const Real& Anp1, const Real& timeStep, const UInt& iNode ) const
 {
     return ( Anp1 - (*M_previousAreaPtr)[iNode] ) / timeStep;
 }
 
 inline Real
-OneDimensionalPhysics::dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
+OneDFSIPhysics::dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
     return dPdAelastic( A, iNode ) + dPdAviscoelastic( A, timeStep, iNode, elasticExternalNodes );
 }
 
 inline Real
-OneDimensionalPhysics::dPdAelastic( const Real& A, const UInt& iNode ) const
+OneDFSIPhysics::dPdAelastic( const Real& A, const UInt& iNode ) const
 {
-    return M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) * OneDimensional::pow05( A / M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) / A;
+    return M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) * OneDFSI::pow05( A / M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) / A;
 }
 
 inline Real
-OneDimensionalPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
+OneDFSIPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
     if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
         return 0;
@@ -451,12 +451,12 @@ OneDimensionalPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, co
 }
 
 inline Real
-OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
+OneDFSIPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
     if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
     {
         return M_dataPtr->area0( iNode ) / ( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) )
-                                      * OneDimensional::pow10( 1 + ( P - externalPressure() )
+                                      * OneDFSI::pow10( 1 + ( P - externalPressure() )
                                       / M_dataPtr->beta0( iNode ), 1 / M_dataPtr->beta1( iNode ) - 1 );
     }
     else
@@ -468,7 +468,7 @@ OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iN
 }
 
 inline Real
-OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const Real& timeStep, const ID& id, const UInt& iNode ) const
+OneDFSIPhysics::dPTdU( const Real& A, const Real& Q, const Real& timeStep, const ID& id, const UInt& iNode ) const
 {
     if ( id == 0 ) // dPt/dA
         return dPdA( A, timeStep, iNode ) - M_dataPtr->densityRho() * Q * Q / ( A * A * A );
@@ -484,25 +484,25 @@ OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const Real& timeStep
 // Inline methods
 // ===================================================
 inline Real
-OneDimensionalPhysics::celerity0( const UInt& iNode ) const
+OneDFSIPhysics::celerity0( const UInt& iNode ) const
 {
     return std::sqrt( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) / M_dataPtr->densityRho() );
 }
 
 inline Real
-OneDimensionalPhysics::pressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
+OneDFSIPhysics::pressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
     return elasticPressure( A, iNode ) + viscoelasticPressure( A, timeStep, iNode, elasticExternalNodes ) + externalPressure();
 }
 
 inline Real
-OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& iNode ) const
+OneDFSIPhysics::elasticPressure( const Real& A, const UInt& iNode ) const
 {
-    return ( M_dataPtr->beta0( iNode ) * ( OneDimensional::pow05( A/M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) - 1 ) );
+    return ( M_dataPtr->beta0( iNode ) * ( OneDFSI::pow05( A/M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) - 1 ) );
 }
 
 inline Real
-OneDimensionalPhysics::viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
+OneDFSIPhysics::viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
     if ( !M_dataPtr->viscoelasticWall() || ( ( iNode == 0 || iNode == M_dataPtr->numberOfNodes() - 1 ) && elasticExternalNodes ) )
         return 0;
@@ -511,11 +511,11 @@ OneDimensionalPhysics::viscoelasticPressure( const Real& A, const Real& timeStep
 }
 
 inline Real
-OneDimensionalPhysics::totalPressure( const Real& A, const Real& Q, const UInt& iNode ) const
+OneDFSIPhysics::totalPressure( const Real& A, const Real& Q, const UInt& iNode ) const
 {
     return elasticPressure( A, iNode ) + M_dataPtr->densityRho() / 2 * Q * Q / ( A * A );
 }
 
 }
 
-#endif // OneDimensionalPhysics_H
+#endif // OneDFSIPhysics_H

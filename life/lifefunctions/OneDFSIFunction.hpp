@@ -40,15 +40,15 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalBCFunction_H
-#define OneDimensionalBCFunction_H
+#ifndef OneDFSIBCFunction_H
+#define OneDFSIBCFunction_H
 
-#include <life/lifesolver/OneDimensionalDefinitions.hpp>
+#include <life/lifesolver/OneDFSIDefinitions.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalFunction - Base class for 1D BC Functions.
+//! OneDFSIFunction - Base class for 1D BC Functions.
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -56,7 +56,7 @@ namespace LifeV
  *
  *  The 1D boundary condition function is evaluated as a function of the current time and of the time step.
  */
-class OneDimensionalFunction
+class OneDFSIFunction
 {
 public:
 
@@ -74,22 +74,22 @@ public:
     //@{
 
     //! Empty Constructor
-    explicit OneDimensionalFunction() : M_function() {}
+    explicit OneDFSIFunction() : M_function() {}
 
     //! Constructor by function
     /*!
      *  @param function the user defined function
      */
-    explicit OneDimensionalFunction( const function_Type& function ) : M_function( function ) {}
+    explicit OneDFSIFunction( const function_Type& function ) : M_function( function ) {}
 
     //! Copy constructor
     /*!
-     *  @param bcFunction OneDimensionalFunction
+     *  @param bcFunction OneDFSIFunction
      */
-    OneDimensionalFunction( const OneDimensionalFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
+    OneDFSIFunction( const OneDFSIFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
 
     //! Destructor
-    virtual ~OneDimensionalFunction() {}
+    virtual ~OneDFSIFunction() {}
 
     //@}
 
@@ -99,10 +99,10 @@ public:
 
     //! Operator=
     /*!
-     *  @param bcFunction OneDimensionalFunction
+     *  @param bcFunction OneDFSIFunction
      *  @return reference to a copy of the class
      */
-    OneDimensionalFunction& operator=( const OneDimensionalFunction& bcFunction )
+    OneDFSIFunction& operator=( const OneDFSIFunction& bcFunction )
     {
         if( this != &bcFunction )
             M_function = bcFunction.M_function;
@@ -153,18 +153,18 @@ private:
 
 /*
 //! Factory create function
-inline OneDimensionalFunction*
-Create_OneDimensionalModel_BCFunction( const OneDimensionalFunction* bcFunction )
+inline OneDFSIFunction*
+Create_OneDFSIModel_BCFunction( const OneDFSIFunction* bcFunction )
 {
-    return new OneDimensionalFunction( (const OneDimensionalFunction&)* bcFunction );
+    return new OneDFSIFunction( (const OneDFSIFunction&)* bcFunction );
 }
 
 namespace
 {
-    static bool registerOneD_BCFunction = FactoryClone_OneDimensionalModel_BCFunction::instance().registerProduct( typeid(OneDimensionalFunction), &Create_OneDimensionalModel_BCFunction );
+    static bool registerOneD_BCFunction = FactoryClone_OneDFSIModel_BCFunction::instance().registerProduct( typeid(OneDFSIFunction), &Create_OneDFSIModel_BCFunction );
 }
 */
 
 }
 
-#endif // OneDimensionalBCFunction_H
+#endif // OneDFSIBCFunction_H

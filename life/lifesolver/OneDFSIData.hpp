@@ -40,19 +40,19 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalData_H
-#define OneDimensionalData_H
+#ifndef OneDFSIData_H
+#define OneDFSIData_H
 
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifefem/TimeData.hpp>
 #include <life/lifemesh/RegionMesh1DBuilders.hpp>
 
-#include <life/lifesolver/OneDimensionalDefinitions.hpp>
+#include <life/lifesolver/OneDFSIDefinitions.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalData - Class which read and holds all the data for the One Dimensional Model Solver.
+//! OneDFSIData - Class which read and holds all the data for the One Dimensional Model Solver.
 /*!
  *  @authors Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -97,7 +97,7 @@ namespace LifeV
  *
  *  The flux matrix \f$\mathbf F = [F_{11}, F_{12}; F_{21}, F_{22}]\f$ has the eigenvalues \f$\lambda_1, \lambda_2\f$.
  */
-class OneDimensionalData
+class OneDFSIData
 {
 public:
 
@@ -128,10 +128,10 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalData();
+    explicit OneDFSIData();
 
     //! Destructor
-    virtual ~OneDimensionalData() {}
+    virtual ~OneDFSIData() {}
 
     //@}
 
@@ -330,19 +330,19 @@ public:
     /*!
      * @return Physics type
      */
-    const OneDimensional::physicsType_Type& physicsType() const { return M_physicsType; }
+    const OneDFSI::physicsType_Type& physicsType() const { return M_physicsType; }
 
     //! Get the flux type
     /*!
      * @return Flux type
      */
-    const OneDimensional::fluxTerm_Type& fluxType() const { return M_fluxType; }
+    const OneDFSI::fluxTerm_Type& fluxType() const { return M_fluxType; }
 
     //! Get the source type
     /*!
      * @return Source type
      */
-    const OneDimensional::sourceTerm_Type& sourceType() const { return M_sourceType; }
+    const OneDFSI::sourceTerm_Type& sourceType() const { return M_sourceType; }
 
     //! Get data time container
     /*!
@@ -699,9 +699,9 @@ private:
     //@}
 
     //! Model
-    OneDimensional::physicsType_Type M_physicsType;
-    OneDimensional::fluxTerm_Type    M_fluxType;
-    OneDimensional::sourceTerm_Type  M_sourceType;
+    OneDFSI::physicsType_Type M_physicsType;
+    OneDFSI::fluxTerm_Type    M_fluxType;
+    OneDFSI::sourceTerm_Type  M_sourceType;
 
     //! Data containers for time and mesh
     timePtr_Type M_timeDataPtr;
@@ -788,7 +788,7 @@ private:
 // ===================================================
 template< typename VectorType >
 inline Real
-OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, const UInt& iNode, const UInt& bcFiniteDifferenceOrder )
+OneDFSIData::computeSpatialDerivativeAtNode( const VectorType& vector, const UInt& iNode, const UInt& bcFiniteDifferenceOrder )
 {
     // This method is coded only for homogeneous discretizations
 
@@ -840,4 +840,4 @@ OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, co
 
 } // LifeV namespace
 
-#endif //OneDimensionalData_H
+#endif //OneDFSIData_H

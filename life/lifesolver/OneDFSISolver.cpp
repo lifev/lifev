@@ -46,19 +46,19 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/OneDimensionalSolver.hpp>
+#include <life/lifesolver/OneDFSISolver.hpp>
 
 namespace LifeV
 {
 
-std::map< std::string, OneDimensional::physicsType_Type > OneDimensional::physicsMap;
-std::map< std::string, OneDimensional::fluxTerm_Type >    OneDimensional::fluxMap;
-std::map< std::string, OneDimensional::sourceTerm_Type >  OneDimensional::sourceMap;
+std::map< std::string, OneDFSI::physicsType_Type > OneDFSI::physicsMap;
+std::map< std::string, OneDFSI::fluxTerm_Type >    OneDFSI::fluxMap;
+std::map< std::string, OneDFSI::sourceTerm_Type >  OneDFSI::sourceMap;
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalSolver::OneDimensionalSolver():
+OneDFSISolver::OneDFSISolver():
     M_physicsPtr                   (),
     M_fluxPtr                      (),
     M_sourcePtr                    (),
@@ -90,7 +90,7 @@ OneDimensionalSolver::OneDimensionalSolver():
 // Methods
 // ===================================================
 void
-OneDimensionalSolver::buildConstantMatrices()
+OneDFSISolver::buildConstantMatrices()
 {
     std::fill( M_dFdUVector.begin(), M_dFdUVector.end(), ublas::zero_vector<Real>( M_physicsPtr->data()->numberOfNodes()) );
     std::fill( M_dSdUVector.begin(), M_dSdUVector.end(), ublas::zero_vector<Real>( M_physicsPtr->data()->numberOfNodes()) );
@@ -135,7 +135,7 @@ OneDimensionalSolver::buildConstantMatrices()
 }
 
 void
-OneDimensionalSolver::setupSolution( solution_Type& solution, const MapEpetra& map, const bool& onlyMainQuantities )
+OneDFSISolver::setupSolution( solution_Type& solution, const MapEpetra& map, const bool& onlyMainQuantities )
 {
     solution["Q"].reset( new vector_Type( map ) );
     solution["P"].reset( new vector_Type( map ) );
@@ -169,7 +169,7 @@ OneDimensionalSolver::setupSolution( solution_Type& solution, const MapEpetra& m
 }
 
 void
-OneDimensionalSolver::initialize( solution_Type& solution )
+OneDFSISolver::initialize( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
     {
@@ -189,7 +189,7 @@ OneDimensionalSolver::initialize( solution_Type& solution )
 }
 
 void
-OneDimensionalSolver::computeW1W2( solution_Type& solution )
+OneDFSISolver::computeW1W2( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
     {
@@ -199,7 +199,7 @@ OneDimensionalSolver::computeW1W2( solution_Type& solution )
 }
 
 void
-OneDimensionalSolver::computePressure( solution_Type& solution, const Real& timeStep )
+OneDFSISolver::computePressure( solution_Type& solution, const Real& timeStep )
 {
     for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
     {
@@ -215,21 +215,21 @@ OneDimensionalSolver::computePressure( solution_Type& solution, const Real& time
 }
 
 void
-OneDimensionalSolver::computeAreaRatio( solution_Type& solution )
+OneDFSISolver::computeAreaRatio( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
         ( *solution["AoverA0minus1"] ) [iNode] = ( *solution["A"] ) [iNode] / M_physicsPtr->data()->area0( iNode ) - 1;
 }
 
 void
-OneDimensionalSolver::computeArea( solution_Type& solution )
+OneDFSISolver::computeArea( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physicsPtr->data()->numberOfNodes() ; ++iNode )
         ( *solution["A"] ) [iNode] = ( (*solution["AoverA0minus1"] ) [iNode] + 1 ) * M_physicsPtr->data()->area0( iNode );
 }
 
 void
-OneDimensionalSolver::updateRHS( const solution_Type& solution, const Real& timeStep )
+OneDFSISolver::updateRHS( const solution_Type& solution, const Real& timeStep )
 {
     updatedFdU( solution ); // Update the vector containing the values of the flux at the nodes and its jacobian
     updatedSdU( solution ); // Update the vector containing the values of the source term at the nodes and its jacobian
@@ -284,7 +284,7 @@ OneDimensionalSolver::updateRHS( const solution_Type& solution, const Real& time
 }
 
 void
-OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type& solution, const Real& time, const Real& timeStep )
+OneDFSISolver::iterate( OneDFSIBCHandler& bcHandler, solution_Type& solution, const Real& time, const Real& timeStep )
 {
     // Apply BC to RHS
     bcHandler.applyBC( time, timeStep, solution, M_fluxPtr, M_rhs );
@@ -330,10 +330,10 @@ OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type
     computePressure( solution, timeStep );
 }
 
-OneDimensionalSolver::vector_Type
-OneDimensionalSolver::viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate,
-                                                      const Real& timeStep, OneDimensionalBCHandler& bcHandler,
-                                                      const bool& updateSystemMatrix )
+OneDFSISolver::vector_Type
+OneDFSISolver::viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate,
+                                               const Real& timeStep, OneDFSIBCHandler& bcHandler,
+                                               const bool& updateSystemMatrix )
 {
     // Matrix
     matrix_Type systemMatrix( M_feSpacePtr->map() );
@@ -401,7 +401,7 @@ OneDimensionalSolver::viscoelasticFlowRateCorrection( const vector_Type& area, c
 }
 
 Real
-OneDimensionalSolver::computeCFL( const solution_Type& solution, const Real& timeStep ) const
+OneDFSISolver::computeCFL( const solution_Type& solution, const Real& timeStep ) const
 {
     Real lambdaMax( 0. );
 
@@ -424,7 +424,7 @@ OneDimensionalSolver::computeCFL( const solution_Type& solution, const Real& tim
 }
 
 void
-OneDimensionalSolver::resetOutput( const solution_Type& solution )
+OneDFSISolver::resetOutput( const solution_Type& solution )
 {
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
@@ -436,7 +436,7 @@ OneDimensionalSolver::resetOutput( const solution_Type& solution )
 }
 
 void
-OneDimensionalSolver::postProcess( const solution_Type& solution, const Real& time )
+OneDFSISolver::postProcess( const solution_Type& solution, const Real& time )
 {
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
@@ -458,9 +458,9 @@ OneDimensionalSolver::postProcess( const solution_Type& solution, const Real& ti
 // Set Methods
 // ===================================================
 void
-OneDimensionalSolver::setProblem( const physicsPtr_Type& physicsPtr,
-                                  const fluxPtr_Type&    fluxPtr,
-                                  const sourcePtr_Type&  sourcePtr )
+OneDFSISolver::setProblem( const physicsPtr_Type& physicsPtr,
+                           const fluxPtr_Type&    fluxPtr,
+                           const sourcePtr_Type&  sourcePtr )
 {
     M_physicsPtr = physicsPtr;
     M_fluxPtr    = fluxPtr;
@@ -468,14 +468,14 @@ OneDimensionalSolver::setProblem( const physicsPtr_Type& physicsPtr,
 }
 
 void
-OneDimensionalSolver::setCommunicator( const commPtr_Type& commPtr )
+OneDFSISolver::setCommunicator( const commPtr_Type& commPtr )
 {
     M_commPtr = commPtr;
     M_displayer.setCommunicator( commPtr );
 }
 
 void
-OneDimensionalSolver::setFESpace( const feSpacePtr_Type& feSpacePtr )
+OneDFSISolver::setFESpace( const feSpacePtr_Type& feSpacePtr )
 {
     M_feSpacePtr = feSpacePtr;
 
@@ -500,13 +500,13 @@ OneDimensionalSolver::setFESpace( const feSpacePtr_Type& feSpacePtr )
 }
 
 void
-OneDimensionalSolver::setLinearSolver( const linearSolverPtr_Type& linearSolverPtr )
+OneDFSISolver::setLinearSolver( const linearSolverPtr_Type& linearSolverPtr )
 {
     M_linearSolverPtr = linearSolverPtr;
 }
 
 void
-OneDimensionalSolver::setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolverPtr )
+OneDFSISolver::setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolverPtr )
 {
     M_linearViscoelasticSolverPtr = linearViscoelasticSolverPtr;
 }
@@ -515,17 +515,17 @@ OneDimensionalSolver::setLinearViscoelasticSolver( const linearSolverPtr_Type& l
 // Get Methods
 // ===================================================
 UInt
-OneDimensionalSolver::boundaryDOF( const bcSide_Type& bcSide ) const
+OneDFSISolver::boundaryDOF( const bcSide_Type& bcSide ) const
 {
     switch ( bcSide )
     {
-    case OneDimensional::left:
+    case OneDFSI::left:
 
         return 0;
 
         break;
 
-    case OneDimensional::right:
+    case OneDFSI::right:
 
         return M_physicsPtr->data()->numberOfNodes() - 1;
 
@@ -540,34 +540,34 @@ OneDimensionalSolver::boundaryDOF( const bcSide_Type& bcSide ) const
 }
 
 Real
-OneDimensionalSolver::boundaryValue( const solution_Type& solution, const bcType_Type& bcType, const bcSide_Type& bcSide ) const
+OneDFSISolver::boundaryValue( const solution_Type& solution, const bcType_Type& bcType, const bcSide_Type& bcSide ) const
 {
     UInt boundaryDof( boundaryDOF( bcSide ) );
 
     switch ( bcType )
     {
-    case OneDimensional::A:
+    case OneDFSI::A:
 
         return (*solution.find("A")->second)( boundaryDof );
 
-    case OneDimensional::Q:
+    case OneDFSI::Q:
 
         // Flow rate is positive with respect to the outgoing normal
-        return (*solution.find("Q")->second)( boundaryDof ) * ( ( bcSide == OneDimensional::left ) ? -1. : 1. );
+        return (*solution.find("Q")->second)( boundaryDof ) * ( ( bcSide == OneDFSI::left ) ? -1. : 1. );
 
-    case OneDimensional::W1:
+    case OneDFSI::W1:
 
         return (*solution.find("W1")->second)( boundaryDof );
 
-    case OneDimensional::W2:
+    case OneDFSI::W2:
 
         return (*solution.find("W2")->second)( boundaryDof );
 
-    case OneDimensional::P:
+    case OneDFSI::P:
 
         return (*solution.find("P")->second)( boundaryDof );
 
-    case OneDimensional::S:
+    case OneDFSI::S:
 
         return -(*solution.find("P")->second)( boundaryDof );
 
@@ -580,11 +580,11 @@ OneDimensionalSolver::boundaryValue( const solution_Type& solution, const bcType
 }
 
 void
-OneDimensionalSolver::boundaryEigenValuesEigenVectors( const bcSide_Type& bcSide,
-                                                       const solution_Type& solution,
-                                                             container2D_Type& eigenvalues,
-                                                             container2D_Type& leftEigenvector1,
-                                                             container2D_Type& leftEigenvector2 )
+OneDFSISolver::boundaryEigenValuesEigenVectors( const bcSide_Type& bcSide,
+                                                const solution_Type& solution,
+                                                container2D_Type& eigenvalues,
+                                                container2D_Type& leftEigenvector1,
+                                                container2D_Type& leftEigenvector2 )
 {
     UInt boundaryDof( boundaryDOF( bcSide ) );
 
@@ -598,7 +598,7 @@ OneDimensionalSolver::boundaryEigenValuesEigenVectors( const bcSide_Type& bcSide
 // Private Methods
 // ===================================================
 void
-OneDimensionalSolver::updateFlux( const solution_Type& solution )
+OneDFSISolver::updateFlux( const solution_Type& solution )
 {
     Real Ai, Qi;
 
@@ -613,7 +613,7 @@ OneDimensionalSolver::updateFlux( const solution_Type& solution )
 }
 
 void
-OneDimensionalSolver::updatedFdU( const solution_Type& solution )
+OneDFSISolver::updatedFdU( const solution_Type& solution )
 {
     // first update the Flux vector
     updateFlux( solution );
@@ -646,7 +646,7 @@ OneDimensionalSolver::updatedFdU( const solution_Type& solution )
 }
 
 void
-OneDimensionalSolver::updateSource( const solution_Type& solution )
+OneDFSISolver::updateSource( const solution_Type& solution )
 {
     Real Ai, Qi;
 
@@ -661,7 +661,7 @@ OneDimensionalSolver::updateSource( const solution_Type& solution )
 }
 
 void
-OneDimensionalSolver::updatedSdU( const solution_Type& solution )
+OneDFSISolver::updatedSdU( const solution_Type& solution )
 {
     // first update the Source vector
     updateSource( solution );
@@ -693,7 +693,7 @@ OneDimensionalSolver::updatedSdU( const solution_Type& solution )
 }
 
 void
-OneDimensionalSolver::updateMatrices()
+OneDFSISolver::updateMatrices()
 {
     // Matrices initialization
     for ( UInt i(0); i < 4; ++i )
@@ -725,7 +725,7 @@ OneDimensionalSolver::updateMatrices()
 }
 
 void
-OneDimensionalSolver::updateElementalMatrices( const Real& dFdU, const Real& dSdU )
+OneDFSISolver::updateElementalMatrices( const Real& dFdU, const Real& dSdU )
 {
     // Set the elementary matrices to 0.
     M_elementalMassMatrixPtr->zero();
@@ -776,7 +776,7 @@ OneDimensionalSolver::updateElementalMatrices( const Real& dFdU, const Real& dSd
 }
 
 void
-OneDimensionalSolver::matrixAssemble( const UInt& ii, const UInt& jj )
+OneDFSISolver::matrixAssemble( const UInt& ii, const UInt& jj )
 {
     // Assemble the mass matrix
     assembleMatrix( *M_dSdUMassMatrixPtr[ 2*ii + jj ], *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
@@ -792,7 +792,7 @@ OneDimensionalSolver::matrixAssemble( const UInt& ii, const UInt& jj )
 }
 
 void
-OneDimensionalSolver::applyDirichletBCToMatrix( matrix_Type& matrix )
+OneDFSISolver::applyDirichletBCToMatrix( matrix_Type& matrix )
 {
     // Dirichlet BC
     matrix.globalAssemble();
@@ -802,8 +802,8 @@ OneDimensionalSolver::applyDirichletBCToMatrix( matrix_Type& matrix )
     //matrix.spy("SystemMatrix");
 }
 
-OneDimensionalSolver::vector_Type
-OneDimensionalSolver::inertialFlowRateCorrection( const vector_Type& flux )
+OneDFSISolver::vector_Type
+OneDFSISolver::inertialFlowRateCorrection( const vector_Type& flux )
 {
     matrix_Type matrixLHS(M_feSpacePtr->map());
     matrix_Type stiffRHS (M_feSpacePtr->map());
@@ -838,7 +838,7 @@ OneDimensionalSolver::inertialFlowRateCorrection( const vector_Type& flux )
         meanA0 /= 2;
 
         m = M_physicsPtr->data()->densityWall()*M_physicsPtr->data()->thickness(iElement + 1)/
-            ( 2*std::sqrt(4*std::atan(1))*std::sqrt(meanA0) );
+            ( 2*std::sqrt(4*std::atan(1.))*std::sqrt(meanA0) );
 
         coeffStiff = m/M_physicsPtr->data()->densityRho();
 
@@ -896,8 +896,8 @@ OneDimensionalSolver::inertialFlowRateCorrection( const vector_Type& flux )
     return sol;
 }
 
-OneDimensionalSolver::vector_Type
-OneDimensionalSolver::longitudinalFlowRateCorrection()
+OneDFSISolver::vector_Type
+OneDFSISolver::longitudinalFlowRateCorrection()
 {
     matrix_Type massLHS(M_feSpacePtr->map());
     matrix_Type massRHS(M_feSpacePtr->map());
@@ -944,7 +944,7 @@ OneDimensionalSolver::longitudinalFlowRateCorrection()
         coeffMassLHS /= 2;
         coeffMassLHS = 1./ coeffMassLHS;
 
-        a = M_physicsPtr->data()->inertialModulus() / std::sqrt(4*std::atan(1));
+        a = M_physicsPtr->data()->inertialModulus() / std::sqrt(4*std::atan(1.));
         coeffMassRHS = M_physicsPtr->data()->dataTime()->timeStep() * a / M_physicsPtr->data()->densityRho();
 
         // backward differentiation when near to the left boundary
@@ -981,7 +981,7 @@ OneDimensionalSolver::longitudinalFlowRateCorrection()
 #endif
         }
 
-        f(iNode) *= 1 / ( 2 * OneDimensional::pow30(h, 3) );
+        f(iNode) *= 1 / ( 2 * OneDFSI::pow30(h, 3) );
 
         // Update the current element
         M_feSpacePtr->fe().update( M_feSpacePtr->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );

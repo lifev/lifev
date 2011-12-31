@@ -39,15 +39,15 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef OneDimensionalSourceLinear_H
-#define OneDimensionalSourceLinear_H
+#ifndef OneDFSISourceLinear_H
+#define OneDFSISourceLinear_H
 
-#include <life/lifesolver/OneDimensionalSource.hpp>
+#include <life/lifesolver/OneDFSISource.hpp>
 
 namespace LifeV
 {
 
-//! OneDimensionalSourceLinear - Class for the linear source function S of the 1D hyperbolic problem.
+//! OneDFSISourceLinear - Class for the linear source function S of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
@@ -86,7 +86,7 @@ namespace LifeV
  *
  *  This class implements all the interfaces required for the computation of \f$\mathbf S\f$ and its derivatives.
  */
-class OneDimensionalSourceLinear : public OneDimensionalSource
+class OneDFSISourceLinear : public OneDFSISource
 {
 
 public:
@@ -94,7 +94,7 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalSource         super;
+    typedef OneDFSISource         super;
 
     //@}
 
@@ -103,16 +103,16 @@ public:
     //@{
 
     //! Empty constructor
-    explicit OneDimensionalSourceLinear() : super() {}
+    explicit OneDFSISourceLinear() : super() {}
 
     //! Constructor
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDimensionalSourceLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {}
+    explicit OneDFSISourceLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {}
 
     //! Do nothing destructor
-    virtual ~OneDimensionalSourceLinear() {}
+    virtual ~OneDFSISourceLinear() {}
 
     //@}
 
@@ -166,20 +166,20 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDimensionalSourceLinear( const OneDimensionalSourceLinear& source );
+    explicit OneDFSISourceLinear( const OneDFSISourceLinear& source );
 
-    OneDimensionalSourceLinear& operator=( const OneDimensionalSourceLinear& source );
+    OneDFSISourceLinear& operator=( const OneDFSISourceLinear& source );
 
     //@}
 
 };
 
 //! Factory create function
-inline OneDimensionalSource* createOneDimensionalSourceLinear()
+inline OneDFSISource* createOneDFSISourceLinear()
 {
-    return new OneDimensionalSourceLinear();
+    return new OneDFSISourceLinear();
 }
 
 }
 
-#endif // OneDimensionalSourceLinear_H
+#endif // OneDFSISourceLinear_H

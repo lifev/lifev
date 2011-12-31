@@ -70,8 +70,6 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     UInt nVertices = mesh.numVertices();
     ofile << nVertices << "\n";
 
-    int ig;
-
     for ( UInt i = 0; i < nVertices; ++i )
     {
         ofile << mesh.pointList( i ).x() << " "

@@ -39,7 +39,7 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/OneDimensionalSourceNonLinear.hpp>
+#include <life/lifesolver/OneDFSISourceNonLinear.hpp>
 
 namespace LifeV
 {
@@ -47,7 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const
+OneDFSISourceNonLinear::source( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const
 {
     if ( row == 0 ) // B1
     {
@@ -58,7 +58,7 @@ OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& r
         Real beta1plus1( M_physicsPtr->data()->beta1( iNode ) + 1 );
         Real AoverA0( A / M_physicsPtr->data()->area0( iNode ) );
         Real C0( 1 / ( M_physicsPtr->data()->densityRho() * beta1plus1 ) );
-        Real C ( 1 / ( M_physicsPtr->data()->densityRho() * beta1plus1 ) * OneDimensional::pow15( AoverA0, beta1plus1 ) );
+        Real C ( 1 / ( M_physicsPtr->data()->densityRho() * beta1plus1 ) * OneDFSI::pow15( AoverA0, beta1plus1 ) );
 
         return ( M_physicsPtr->data()->friction() * Q / A
                  + Q * Q / A * M_physicsPtr->data()->dAlphadz( iNode )
@@ -81,7 +81,7 @@ OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& r
 }
 
 Real
-OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode) const
+OneDFSISourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode) const
 {
     if ( row == 0 ) // B1
     {
@@ -95,7 +95,7 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& row
         if ( column == 0 ) // dB2/dA
         {
             Real AoverA0( A / M_physicsPtr->data()->area0( iNode ) );
-            Real C ( OneDimensional::pow05( AoverA0, M_physicsPtr->data()->beta1( iNode ) ) / M_physicsPtr->data()->densityRho() );
+            Real C ( OneDFSI::pow05( AoverA0, M_physicsPtr->data()->beta1( iNode ) ) / M_physicsPtr->data()->densityRho() );
 
             return ( -M_physicsPtr->data()->friction() * Q / A / A
                      - Q * Q / ( A * A ) * M_physicsPtr->data()->dAlphadz( iNode )
@@ -120,8 +120,8 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& row
 }
 
 Real
-OneDimensionalSourceNonLinear::interpolatedNonConservativeSource( const Real& A, const Real& Q,
-                                                                  const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const
+OneDFSISourceNonLinear::interpolatedNonConservativeSource( const Real& A, const Real& Q,
+                                                           const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const
 {
     if ( row == 0 ) // QLS1
     {
@@ -139,7 +139,7 @@ OneDimensionalSourceNonLinear::interpolatedNonConservativeSource( const Real& A,
         Real dAlphadz   = ( 1 - cfl ) * M_physicsPtr->data()->dAlphadz(bcNodes[0]) + cfl * M_physicsPtr->data()->dAlphadz(bcNodes[1]);
 
         Real AoverA0( A / area0 );
-        Real C( A / M_physicsPtr->data()->densityRho() * OneDimensional::pow05( AoverA0, beta1 ) );
+        Real C( A / M_physicsPtr->data()->densityRho() * OneDFSI::pow05( AoverA0, beta1 ) );
 
         return ( M_physicsPtr->data()->friction() * Q / A
                  + Q * Q / A * dAlphadz
