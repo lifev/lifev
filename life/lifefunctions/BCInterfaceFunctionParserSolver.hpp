@@ -587,7 +587,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
 
 template< >
 inline void
-BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -665,7 +665,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::u
 
 template< >
 inline void
-BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -900,7 +900,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::createAccessList( const BCInterf
 
 template< >
 inline void
-BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -918,7 +918,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::c
 
 template< >
 inline void
-BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

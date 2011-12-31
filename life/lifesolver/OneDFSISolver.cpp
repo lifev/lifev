@@ -419,7 +419,8 @@ OneDFSISolver::computeCFL( const solution_Type& solution, const Real& timeStep )
         lambdaMax = std::max<Real>( std::max<Real>( std::fabs(eigenvalues[0]), std::fabs(eigenvalues[1]) ), lambdaMax );
     }
 
-    return lambdaMax * timeStep / M_feSpacePtr->mesh()->minH();
+    Real minH = MeshUtility::MeshStatistics::computeSize(*M_feSpacePtr->mesh()).minH;
+    return lambdaMax * timeStep / minH;
 }
 
 void

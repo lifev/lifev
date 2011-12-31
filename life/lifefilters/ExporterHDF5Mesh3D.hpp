@@ -25,7 +25,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 //@HEADER
 /*!
   @file
-  @brief Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh3D only)
+  @brief Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh only)
 
   @date 9-07-2010
   @author Radu Popescu <radu.popescu@epfl.ch>
@@ -47,7 +47,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
-//! Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh3D only)
+//! Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh only)
 /*!
   @author Radu Popescu <radu.popescu@epfl.ch>
 
@@ -435,7 +435,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     meshPtr_Type tempMesh(new MeshType);
 
     UInt elementNodes, faceNodes;
-    switch (MeshType::ElementShape::S_shape)
+    switch (MeshType::elementShape_Type::S_shape)
     {
     case HEXA:
         elementNodes = 8;
@@ -542,9 +542,6 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
         pp->z() = pointCoordinates[2][j];
         pp->setLocalId(j);
         pp->setId(pointGlobalId[j]);
-
-        tempMesh->localToGlobalNode().insert(std::make_pair(j, pointGlobalId[j]));
-        tempMesh->globalToLocalNode().insert(std::make_pair(pointGlobalId[j], j));
     }
 
     pointCoordinates.clear();
@@ -569,7 +566,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     tempMesh->edgeList.reserve(numEdges);
 
-    typename MeshType::EdgeType *pe;
+    typename MeshType::edge_Type *pe;
 
     for (Int j = 0; j < numEdges; ++j)
     {
@@ -621,7 +618,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
                        &faceNeighbourPos[1][0]);
 
 
-    typename MeshType::FaceType *pf = 0;
+    typename MeshType::face_Type *pf = 0;
 
     tempMesh->faceList.reserve(numFaces);
 
@@ -643,8 +640,8 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
         }
     }
 
-    tempMesh->setLinkSwitch("HAS_ALL_FACES");
-    tempMesh->setLinkSwitch("FACES_HAVE_ADIACENCY");
+    tempMesh->setLinkSwitch("HAS_ALL_FACETS");
+    tempMesh->setLinkSwitch("FACETS_HAVE_ADIACENCY");
 
     facePoints.clear();
     faceMarkers.clear();
@@ -673,7 +670,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     tempMesh->volumeList.reserve(numVolumes);
 
-    typename MeshType::VolumeType *pv = 0;
+    typename MeshType::volume_Type *pv = 0;
 
     for (Int j = 0; j < numVolumes; ++j)
     {
@@ -782,7 +779,7 @@ template <typename MeshType>
 void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string& suffix)
 {
     UInt elementNodes, faceNodes;
-    switch (MeshType::ElementShape::S_shape)
+    switch (MeshType::elementShape_Type::S_shape)
     {
     case HEXA:
         elementNodes = 8;
@@ -821,14 +818,13 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     std::vector<Int> pointGlobalId(numPoints);
     std::vector<Int> pointBoundaryFlags(numPoints);
 
-    std::map<Int, Int>::iterator it = mesh->localToGlobalNode().begin();
-    for (UInt j = 0; it != mesh->localToGlobalNode().end(); ++it, ++j)
+    for (UInt j = 0; j < numPoints; ++j)
     {
         pointCoordinates[0][j] = mesh->pointList[j].x();
         pointCoordinates[1][j] = mesh->pointList[j].y();
         pointCoordinates[2][j] = mesh->pointList[j].z();
         pointMarkers[j] = mesh->pointList[j].marker();
-        pointGlobalId[j] = it->second;
+        pointGlobalId[j] = mesh->point(j).id();
         if (mesh->isBoundaryPoint(j))
         {
             pointBoundaryFlags[j] = 1;

@@ -574,6 +574,68 @@ static const ReferenceElement::function_Type der2fct_P1_2D[ 12 ] =
 };
 //======================================================================
 //
+//                            P1bubble  (2D)
+//
+//======================================================================
+/*
+                           3
+                           |\
+                           | \
+                           |4.\
+                           1---2
+*/
+Real fct1_P1bubble_2D( const GeoVector& v );
+Real fct2_P1bubble_2D( const GeoVector& v );
+Real fct3_P1bubble_2D( const GeoVector& v );
+Real fct4_P1bubble_2D( const GeoVector& v );
+
+Real derfct1_1_P1bubble_2D( const GeoVector& );
+Real derfct1_2_P1bubble_2D( const GeoVector& );
+Real derfct2_1_P1bubble_2D( const GeoVector& );
+Real derfct2_2_P1bubble_2D( const GeoVector& );
+Real derfct3_1_P1bubble_2D( const GeoVector& );
+Real derfct3_2_P1bubble_2D( const GeoVector& );
+Real derfct4_1_P1bubble_2D( const GeoVector& );
+Real derfct4_2_P1bubble_2D( const GeoVector& );
+
+// Second derivatives
+Real der2fctx_xx_P1bubble_2D( const GeoVector& );
+Real der2fct4_11_P1bubble_2D( const GeoVector& );
+Real der2fct4_12_P1bubble_2D( const GeoVector& );
+Real der2fct4_21_P1bubble_2D( const GeoVector& );
+Real der2fct4_22_P1bubble_2D( const GeoVector& );
+
+static const Real refcoor_P1bubble_2D[ 12 ] =
+{
+    0. , 0. , 0.,
+    1. , 0. , 0.,
+    0. , 1. , 0.,
+    1./3., 1./3., 1./3.
+};
+
+static const ReferenceElement::function_Type fct_P1bubble_2D[ 4 ] =
+{
+    fct1_P1bubble_2D, fct2_P1bubble_2D, fct3_P1bubble_2D, fct4_P1bubble_2D
+};
+
+static const ReferenceElement::function_Type derfct_P1bubble_2D[ 8 ] =
+{
+    derfct1_1_P1bubble_2D, derfct1_2_P1bubble_2D,
+    derfct2_1_P1bubble_2D, derfct2_2_P1bubble_2D,
+    derfct3_1_P1bubble_2D, derfct3_2_P1bubble_2D,
+    derfct4_1_P1bubble_2D, derfct4_2_P1bubble_2D
+};
+static const ReferenceElement::function_Type der2fct_P1bubble_2D[ 16 ] =
+{
+    der2fctx_xx_P1bubble_2D, der2fctx_xx_P1bubble_2D, der2fctx_xx_P1bubble_2D, der2fctx_xx_P1bubble_2D,
+    der2fctx_xx_P1bubble_2D, der2fctx_xx_P1bubble_2D, der2fctx_xx_P1bubble_2D, der2fctx_xx_P1bubble_2D,
+    der2fctx_xx_P1bubble_2D, der2fctx_xx_P1bubble_2D, der2fctx_xx_P1bubble_2D, der2fctx_xx_P1bubble_2D,
+    der2fct4_11_P1bubble_2D, der2fct4_12_P1bubble_2D, der2fct4_21_P1bubble_2D, der2fct4_22_P1bubble_2D
+};
+
+
+//======================================================================
+//
 //                            P2  (2D)
 //
 //======================================================================

@@ -107,8 +107,8 @@ namespace LifeV
 
   \return It returns the mesh computed volume.
 */
-template <typename RegionMesh3D>
-Real checkVolumes( RegionMesh3D const & mesh,
+template <typename RegionMesh>
+Real checkVolumes( RegionMesh const & mesh,
                    std::vector<bool> & elSign,
                    Switch & sw )
 {
@@ -116,7 +116,7 @@ Real checkVolumes( RegionMesh3D const & mesh,
     Real lmeas = 0.0;
     elSign.clear();
     elSign.reserve( mesh.numVolumes() );
-    typedef typename RegionMesh3D::VolumeShape GeoShape;
+    typedef typename RegionMesh::elementShape_Type GeoShape;
 
     switch ( GeoShape::S_shape )
     {
@@ -169,8 +169,8 @@ Real checkVolumes( RegionMesh3D const & mesh,
 
   \post A mesh with all volumes with positive oreintation.
 */
-template <typename RegionMesh3D>
-void fixVolumes( RegionMesh3D & mesh,
+template <typename RegionMesh>
+void fixVolumes( RegionMesh & mesh,
                  const std::vector<bool> & elSign,
                  Switch & sw )
 {
@@ -193,8 +193,8 @@ void fixVolumes( RegionMesh3D & mesh,
   linear or bilinear elements, with a simple integration rule) \param mesh
   A 3D mesh \param vols returns 3 Real corresponding to the 3 integrals
 */
-template <typename RegionMesh3D>
-void getVolumeFromFaces( RegionMesh3D const & mesh,
+template <typename RegionMesh>
+void getVolumeFromFaces( RegionMesh const & mesh,
                          Real vols[ 3 ],
                          std::ostream & err = std::cerr )
 {
@@ -204,8 +204,8 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
     vols[ 0 ] = 0.0;
     vols[ 1 ] = 0.0;
     vols[ 2 ] = 0.0;
-    typedef typename RegionMesh3D::FaceShape GeoBShape;
-    typedef typename RegionMesh3D::FaceType FaceType;
+    typedef typename RegionMesh::facetShape_Type GeoBShape;
+    typedef typename RegionMesh::facet_Type facet_Type;
     typedef boost::shared_ptr<CurrentBoundaryFE> current_fe_type;
 
     current_fe_type bdfe;
@@ -244,11 +244,11 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
 /*! It computes \f$\sum_{i=0}^2\int_{\partial \Omega} n_i d\gamma\f$.
   The value returned  should be very proximal to zero
  */
-template <typename RegionMesh3D>
-Real testClosedDomain( RegionMesh3D const & mesh,
+template <typename RegionMesh>
+Real testClosedDomain( RegionMesh const & mesh,
                        std::ostream & err = std::cerr )
 {
-    typedef typename RegionMesh3D::FaceType FaceType;
+    typedef typename RegionMesh::facet_Type facet_Type;
 
     typedef boost::shared_ptr<CurrentBoundaryFE> current_fe_type;
     current_fe_type bdfe;
@@ -256,7 +256,7 @@ Real testClosedDomain( RegionMesh3D const & mesh,
     MeshUtility::GetOnes ones;
     Real test( 0.0 );
 
-    switch ( RegionMesh3D::FaceShape::S_shape )
+    switch ( RegionMesh::facetShape_Type::S_shape )
     {
     case TRIANGLE:
         bdfe = current_fe_type( new CurrentBoundaryFE( feTriaP1, geoLinearTria,
@@ -310,8 +310,8 @@ Real testClosedDomain( RegionMesh3D const & mesh,
  mesh is not modified .
 */
 
-template <typename RegionMesh3D>
-bool checkMesh3D( RegionMesh3D & mesh,
+template <typename RegionMesh>
+bool checkMesh3D( RegionMesh & mesh,
                   Switch & sw,
                   bool fix = true,
                   bool verbose = false,
@@ -378,7 +378,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
         if ( fix )
         {   if(verbose)out<<"Fixing volume marker ids"<<std::endl;
-            for ( typename RegionMesh3D::Volumes::iterator iv = mesh.volumeList.begin();
+            for ( typename RegionMesh::volumes_Type::iterator iv = mesh.volumeList.begin();
                     iv != mesh.volumeList.end(); ++iv )
             {
                 if ( iv->isMarkerUnset() )
@@ -463,18 +463,18 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     numFaces = bFacesFound + numInternalFaces;
 
-    MeshUtility::EnquireBFace<RegionMesh3D> enquireBFace(*bfaces );
+    MeshUtility::EnquireBFace<RegionMesh> enquireBFace(*bfaces );
 
 
     if ( mesh.storedFaces() == 0 ||
-            mesh.numBElements() > mesh.storedFaces() ||
-            bFacesFound > mesh.storedFaces() || bFacesFound > mesh.numBElements())
+            mesh.numBFaces() > mesh.storedFaces() ||
+            bFacesFound > mesh.storedFaces() || bFacesFound > mesh.numBFaces())
     {
         // Something strange with boundary faces
         if (verbose)
             err << "ERROR: Not all boundary faces stored" << std::endl;
             err << "Found "<<bFacesFound<<" stored "<< mesh.storedFaces()<<
-                            "B faces declared in mesh "<<mesh.numBElements()<<std::endl;
+                            "B faces declared in mesh "<<mesh.numBFaces()<<std::endl;
         if ( fix )
             sw.create( "BUILD_BFACES", true );
         if ( fix )
@@ -486,7 +486,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         if (verbose)
             err << "After buildFaces" << std::endl;
             err << "Found "<<bFacesFound<<" stored "<< mesh.storedFaces()<<
-                            "B faces declared in mesh "<<mesh.numBElements()<<std::endl;
+                            "B faces declared in mesh "<<mesh.numBFaces()<<std::endl;
     }
     else
     {
@@ -547,7 +547,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
             if ( fix )
                 sw.create( "FIXED_BFACE_COUNTER", true );
             if ( fix )
-                mesh.setLinkSwitch( "HAS_BOUNDARY_FACES" );
+                mesh.setLinkSwitch( "HAS_BOUNDARY_FACETS" );
         }
 
 
@@ -582,7 +582,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
     }
 
     if ( fix && mesh.storedFaces() == bFacesFound + numInternalFaces)
-        mesh.setLinkSwitch( "HAS_ALL_FACES" );
+        mesh.setLinkSwitch( "HAS_ALL_FACETS" );
 
     if (verbose)
     {
@@ -601,7 +601,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
     		new MeshUtility::temporaryEdgeContainer_Type );
 
     UInt bEdgesFound = MeshUtility::findBoundaryEdges( mesh, *bedges );
-    MeshUtility::EnquireBEdge<RegionMesh3D> enquireBEdge(*bedges );
+    MeshUtility::EnquireBEdge<RegionMesh> enquireBEdge(*bedges );
 
     UInt intedge(0);
     UInt Ned(0);
@@ -767,7 +767,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         MeshUtility::fixBoundaryPoints(mesh,clog,err,verbose);
     }
 
-    MeshUtility::EnquireBPoint<RegionMesh3D> enquirebpoint( mesh );
+    MeshUtility::EnquireBPoint<RegionMesh> enquirebpoint( mesh );
 
     UInt foundBPoints = mesh.pointList.countElementsWithFlag(EntityFlags::PHYSICAL_BOUNDARY,
                                                                   &Flag::testOneSet);
@@ -862,7 +862,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     bool eulok2( true );
 
-    if ( RegionMesh3D::ElementShape::S_shape == TETRA )
+    if ( RegionMesh::elementShape_Type::S_shape == TETRA )
     {
         out << std::endl << "Checking Euler formulae: ";
         eulok2 = ( mesh.numEdges() -

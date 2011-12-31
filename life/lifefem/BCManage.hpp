@@ -1401,7 +1401,7 @@ bcNaturalManage( VectorType& rightHandSide,
                 ibF = pId->id();
 
                 // Updating face stuff
-                currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
+                currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( ibF ) );
 
                 // Loop on total DOF per Face
                 for ( ID l = 0; l < nDofF; ++l )
@@ -1448,7 +1448,7 @@ bcNaturalManage( VectorType& rightHandSide,
                 ibF = pId->id();
 
                 // Updating face stuff
-                currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
+                currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( ibF ) );
 
                 // Loop on total DOF per Face
                 for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -1501,7 +1501,7 @@ bcNaturalManage( VectorType& rightHandSide,
             // Number of the current boundary face
             ibF = pId->id();
             // Updating face stuff
-            currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
+            currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( ibF ) );
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
@@ -1595,7 +1595,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.boundaryFace( ibF ) );
+            currentBdFE.updateMeas( mesh.boundaryFacet( ibF ) );
 
             std::vector<Real> locU(nDofF);    //assumes feVec is a vec of reals, TODO: deal with more comp
             Real uPt;            //value in the point
@@ -1691,7 +1691,7 @@ bcRobinManage( MatrixType& matrix,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.bElement( ibF ) );
+            currentBdFE.updateMeas( mesh.boundaryFacet( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -1740,7 +1740,7 @@ bcRobinManage( MatrixType& matrix,
                 for ( ID k = idofF +1 ; k <  nDofF ; ++k )
                 {
 
-                    // Loop on components invoved in this boundary condition
+                    // Loop on components involved in this boundary condition
                     for ( ID j = 0; j < nComp; ++j )
                     {
 
@@ -1797,12 +1797,12 @@ bcRobinManage( MatrixType& matrix,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.bElement( ibF ) );
+            currentBdFE.updateMeas( mesh.boundaryFacet( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
-                // Loop on components invoved in this boundary condition
+                // Loop on components involved in this boundary condition
                 for ( ID j = 0; j < nComp; ++j )
                 {
                     sum = 0;
@@ -1832,7 +1832,7 @@ bcRobinManage( MatrixType& matrix,
                 for ( ID k = idofF + 1 ; k < nDofF ; ++k )
                 {
 
-                    // Loop on components invoved in this boundary condition
+                    // Loop on components involved in this boundary condition
                     for ( ID j = 0; j < nComp; ++j )
                     {
                         sum = 0;
@@ -1851,7 +1851,7 @@ bcRobinManage( MatrixType& matrix,
                         idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
                         jdDof = pId->boundaryLocalToGlobalMap( k ) + boundaryCond.component( j ) * totalDof + offset;
 
-                        // Assembling upper entry.  The boundary mass matrix is symetric
+                        // Assembling upper entry.  The boundary mass matrix is symmetric
                         matrix.addToCoefficient( idDof, jdDof, sum );
                         matrix.addToCoefficient( jdDof, idDof, sum );
                     }
@@ -1907,7 +1907,7 @@ bcRobinManageMatrix( MatrixType& matrix,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.bElement( ibF ) );
+            currentBdFE.updateMeas( mesh.boundaryFacet( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2002,12 +2002,12 @@ bcRobinManageMatrix( MatrixType& matrix,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.bElement( ibF ) );
+            currentBdFE.updateMeas( mesh.boundaryFacet( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
-                // Loop on components invoved in this boundary condition
+                // Loop on components involved in this boundary condition
                 for ( ID j = 0; j < nComp; ++j )
                 {
                     sum = 0;
@@ -2034,7 +2034,7 @@ bcRobinManageMatrix( MatrixType& matrix,
                 for ( ID k = idofF + 1 ; k < nDofF ; ++k )
                 {
 
-                    // Loop on components invoved in this boundary condition
+                    // Loop on components involved in this boundary condition
                     for ( ID j = 0; j < nComp; ++j )
                     {
                         sum = 0;
@@ -2106,7 +2106,7 @@ bcRobinManageVector( VectorType& rightHandSide,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.bElement( ibF ) );
+            currentBdFE.updateMeas( mesh.boundaryFacet( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2156,12 +2156,12 @@ bcRobinManageVector( VectorType& rightHandSide,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas( mesh.bElement( ibF ) );
+            currentBdFE.updateMeas( mesh.boundaryFacet( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
-                // Loop on components invoved in this boundary condition
+                // Loop on components involved in this boundary condition
                 for ( ID j = 0; j < nComp; ++j )
                 {
 
@@ -2262,7 +2262,7 @@ bcFluxManageMatrix( MatrixType&     matrix,
             // Number of the current boundary face
             ibF = pId->id();
             // Updating face stuff
-            currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
+            currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( ibF ) );
 
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
@@ -2331,7 +2331,7 @@ bcResistanceManage( MatrixType& matrix,
             // Number of the current boundary face
             ibF = pId->id();
 
-            currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+            currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( ibF ) );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
