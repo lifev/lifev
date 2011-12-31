@@ -63,19 +63,88 @@ UInt shapeDimension(const ReferenceShapes& shape)
 }
 
 
+
 /*******************************************************************
           IMPLEMENTATION
 *******************************************************************/
 
 /*
+         Tetra
+ */
+
+std::pair<ID, bool>
+Tetra::faceToEdge( ID const& iFace, ID const& jEdge )
+// faceToEdge(i,j) = localId of jth edge on ith local face
+{
+    static const ID _faceToEdge[ 3 * S_numFaces ] =
+    {
+        2, 1, 0,
+        0, 4, 3,
+        1, 5, 4,
+        3, 5, 2
+    };
+
+    static const bool _orient[ 3 * S_numFaces ] =
+    {
+        0, 0, 0,
+        1, 1, 0,
+        1, 1, 0,
+        1, 0, 1
+    };
+
+
+    ASSERT_BD( jEdge < 3 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
+
+    return std::make_pair( _faceToEdge[ 3 * iFace + jEdge ], _orient[ 3 * iFace + jEdge ] );
+}
+
+/*
+         Hexa
+ */
+
+std::pair<ID, bool>
+Hexa::faceToEdge( ID const& iFace, ID const& jEdge )
+// faceToEdge(i,j) = localId of jth edge on ith local face
+{
+    static const ID _faceToEdge[ 4 * S_numFaces ] =
+    {
+        3, 2, 1, 0,
+        4, 11, 7, 3,
+        0, 5, 8, 4,
+        1, 6, 9, 5,
+        2, 7, 10, 6,
+        8, 9, 10, 11
+    };
+
+    static const bool _orient[ 4 * S_numFaces ] =
+    {
+        0, 0, 0, 0,
+        1, 0, 0, 1,
+        1, 1, 0, 0,
+        1, 1, 0, 0,
+        1, 1, 0, 0,
+        1, 1, 1, 1
+    };
+
+    ASSERT_BD( jEdge < 4 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
+
+    return
+        std::make_pair( _faceToEdge[ 4 * iFace + jEdge ] , _orient[ 4 * iFace + jEdge ] );
+}
+
+
+
+/*
           -- LinearTriangle
-                3
+                2
                /
               /  \
              /    \
             /      \
            /        \
-         1 ----------2
+         0 ----------1
 
 */
 ID
@@ -84,7 +153,9 @@ LinearTriangle::edgeToPoint( ID const& iEdge, ID const& jPoint )
 {
     static const ID _edgeToPoint[ 2 * S_numEdges ] =
     {
-        1, 2, 2, 3, 3, 1
+        1, 2,
+        2, 3,
+        3, 1
     };
     ASSERT_BD( jPoint < 2 ) ;
     ASSERT_BD( iEdge < S_numEdges ) ;
@@ -94,13 +165,13 @@ LinearTriangle::edgeToPoint( ID const& iEdge, ID const& jPoint )
 
 /*
           -- QuadraticTriangle
-                3
+                2
                /
               /  \
              5    \
             /      4
            /        \
-         1 -----3----2
+         0 -----3----1
 */
 ID
 QuadraticTriangle::edgeToPoint( ID const& iEdge, ID const& jPoint )
@@ -108,21 +179,23 @@ QuadraticTriangle::edgeToPoint( ID const& iEdge, ID const& jPoint )
 {
     static const ID _edgeToPoint[ 3 * S_numEdges ] =
     {
-        1, 2, 4, 2, 3, 5, 3, 1, 6
+        0, 1, 3,
+        1, 2, 4,
+        2, 0, 5
     };
     ASSERT_BD( jPoint < 3 ) ;
     ASSERT_BD( iEdge < S_numEdges ) ;
-    return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
+    return _edgeToPoint[ 3 * iEdge + jPoint ];
 }
 
 
 /*
           -- LinearQuad
 
-        4-------3
+        3-------2
          !     !
          !     !
-        1-------2
+        0-------1
 
 
 */
@@ -132,22 +205,24 @@ LinearQuad::edgeToPoint( ID const& iEdge, ID const& jPoint )
 {
     static const ID _edgeToPoint[ 2 * S_numEdges ] =
     {
-        1, 2, 2, 3, 3, 4, 4, 1
+        0, 1,
+        1, 2,
+        2, 3,
+        3, 0
     };
     ASSERT_BD( jPoint < 2 ) ;
     ASSERT_BD( iEdge < S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint] - 1;
+    return _edgeToPoint[ 2 * iEdge + jPoint];
 }
-
 
 /*
           -- QuadraticQuad
 
-        4---7---3
+        3---6---2
         !       !
-        8   9   6
+        7   8   5
         !       !
-        1---5---2
+        0---4---1
 
 */
 ID
@@ -156,24 +231,27 @@ QuadraticQuad::edgeToPoint( ID const& iEdge, ID const& jPoint )
 {
     static const ID _edgeToPoint[ 3 * S_numEdges ] =
     {
-        1, 2, 5, 2, 3, 6, 3, 4, 7, 4, 1, 8
+        0, 1, 4,
+        1, 2, 5,
+        2, 3, 6,
+        3, 0, 7
     };
     ASSERT_BD( jPoint < 3 ) ;
     ASSERT_BD( iEdge < S_numEdges ) ;
-    return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
+    return _edgeToPoint[ 3 * iEdge + jPoint ];
 }
 
 
 /*
           -- LinearTetra
 
-                4
+                3
                / .
-              /  \.3
+              /  \.2
              /  . \\
             / .    \\
            /.       \!
-         1 ----------2
+         0 ----------1
 
 
 */
@@ -183,11 +261,16 @@ LinearTetra::edgeToPoint( ID const& iEdge, ID const& jPoint )
 {
     static const ID _edgeToPoint[ 2 * S_numEdges ] =
     {
-        1, 2, 2, 3, 3, 1, 1, 4, 2, 4, 3, 4
+        0, 1,
+        1, 2,
+        2, 0,
+        0, 3,
+        1, 3,
+        2, 3
     };
     ASSERT_BD( jPoint < 2 ) ;
     ASSERT_BD( iEdge < S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint ] - 1;
+    return _edgeToPoint[ 2 * iEdge + jPoint ];
 }
 
 ID
@@ -196,32 +279,16 @@ LinearTetra::faceToPoint( ID const& iFace, ID const& jPoint )
 {
     static const ID _faceToPoint[ 3 * S_numFaces ] =
     {
-        1, 3, 2, 1, 2, 4, 2, 3, 4, 1, 4, 3
+        0, 2, 1,
+        0, 1, 3,
+        1, 2, 3,
+        0, 3, 2
     };
     ASSERT_BD( jPoint < 3 ) ;
     ASSERT_BD( iFace < S_numFaces ) ;
-    return _faceToPoint[ 3 * iFace + jPoint ] -1 ;
+    return _faceToPoint[ 3 * iFace + jPoint ];
 }
 
-std::pair<ID, bool>
-LinearTetra::faceToEdge( ID const& iFace, ID const& jEdge )
-// faceToEdge(i,j) = localId of jth edge on ith local face
-{
-    static const ID _faceToEdge[ 3 * S_numFaces ] =
-    {
-        3, 2, 1, 1, 5, 4, 2, 6, 5, 4, 6, 3
-    };
-
-    static const bool _orient[ 3 * S_numFaces ] =
-    {
-        0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1
-    };
-
-    ASSERT_BD( jEdge < 3 ) ;
-    ASSERT_BD( iFace < S_numFaces ) ;
-
-    return std::make_pair( _faceToEdge[ 3 * iFace + jEdge ] - 1, _orient[ 3 * iFace + jEdge ] );
-}
 
 
 ///////////////////////
@@ -229,13 +296,13 @@ LinearTetra::faceToEdge( ID const& iFace, ID const& jEdge )
 /*
           -- LinearTetraBubble
 
-                4
+                3
                / .
-              /  \.3
+              /  \.2
              /  . \\
-            / . .5 \\
+            / . .4 \\
            /.       \!
-         1 ----------2
+         0 ----------1
 
 
 */
@@ -243,47 +310,7 @@ ID
 LinearTetraBubble::edgeToPoint( ID const& iEdge, ID const& jPoint )
 // edgeToPoint(i,j) = localId of jth point on ith local edge
 {
-    static const ID _edgeToPoint[ 2 * S_numEdges ] =
-    {
-        1, 2, 2, 3, 3, 1, 1, 4, 2, 4, 3, 4
-    };
-    ASSERT_BD( jPoint < 2 ) ;
-    ASSERT_BD( iEdge < S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint ] - 1;
-}
-
-ID
-LinearTetraBubble::faceToPoint( ID const& iFace, ID const& jPoint )
-// faceToPoint(i,j) = localId of jth point on ith local face
-{
-    static const ID _faceToPoint[ 3 * S_numFaces ] =
-    {
-        1, 3, 2, 1, 2, 4, 2, 3, 4, 1, 4, 3
-    }
-    ; // AV - November 2000: fixed a little bug
-    //  {1,3,2, 1,2,4, 2,3,4, 3,1,4};
-    ASSERT_BD( jPoint < 3 ) ;
-    ASSERT_BD( iFace < S_numFaces ) ;
-    return _faceToPoint[ 3 * iFace + jPoint ] - 1;
-}
-
-std::pair<ID, bool>
-LinearTetraBubble::faceToEdge( ID const& iFace, ID const& jEdge )
-// faceToEdge(i,j) = localId of jth edge on ith local face
-{
-    static const ID _faceToEdge[ 3 * S_numFaces ] =
-    {
-        3, 2, 1, 1, 5, 4, 2, 6, 5, 4, 6, 3
-    };
-    static const bool _orient[ 3 * S_numFaces ] =
-    {
-        0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1
-    };
-
-    ASSERT_BD( jEdge < 3 ) ;
-    ASSERT_BD( iFace < S_numFaces ) ;
-
-    return std::make_pair( _faceToEdge[ 3 * iFace + jEdge ] - 1, _orient[ 3 * iFace + jEdge ] );
+    return LinearTetra::faceToPoint(iEdge, jPoint);
 }
 
 
@@ -293,13 +320,13 @@ LinearTetraBubble::faceToEdge( ID const& iFace, ID const& jEdge )
           -- QuadraticTetra
 
 
-                4
-               / .10
-              /  \.3
-             8  . 9\
-            / 7    \6
+                3
+               / .9
+              /  \.2
+             7  . 8\
+            / 6    \5
            /.       \!
-         1 -----5----2
+         0 -----4----1
 */
 ID
 QuadraticTetra::edgeToPoint( ID const& iEdge, ID const& jPoint )
@@ -307,11 +334,16 @@ QuadraticTetra::edgeToPoint( ID const& iEdge, ID const& jPoint )
 {
     static const ID _edgeToPoint[ 3 * S_numEdges ] =
     {
-        1, 2, 5, 2, 3, 6, 3, 1, 7, 1, 4, 8, 2, 4, 9, 3, 4, 10
+        0, 1, 4,
+        1, 2, 5,
+        2, 0, 6,
+        0, 3, 7,
+        1, 3, 8,
+        2, 3, 9
     };
     ASSERT_BD( jPoint < 3 ) ;
     ASSERT_BD( iEdge < S_numEdges ) ;
-    return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
+    return _edgeToPoint[ 3 * iEdge + jPoint ];
 }
 
 ID
@@ -320,21 +352,14 @@ QuadraticTetra::faceToPoint( ID const& iFace, ID const& jPoint )
 {
     static const ID _faceToPoint[ 6 * S_numFaces ] =
     {
-        1, 3, 2, 7, 6, 5,
-        1, 2, 4, 5, 9, 8,
-        2, 3, 4, 6, 10, 9,
-        1, 4, 3, 8, 10, 7
+        0, 2, 1, 6, 5, 4,
+        0, 1, 3, 4, 8, 7,
+        1, 2, 3, 5, 9, 8,
+        0, 3, 2, 7, 9, 6
     };
     ASSERT_BD( jPoint < 6 ) ;
     ASSERT_BD( iFace < S_numFaces ) ;
-    return _faceToPoint[ 6 * iFace + jPoint ] - 1;
-}
-
-std::pair<ID, bool>
-QuadraticTetra::faceToEdge( ID const& iFace, ID const& jEdge )
-// faceToEdge(i,j) = localId of jth edge on ith local face
-{
-    return LinearTetra::faceToEdge( iFace, jEdge );
+    return _faceToPoint[ 6 * iFace + jPoint ];
 }
 
 
@@ -342,15 +367,15 @@ QuadraticTetra::faceToEdge( ID const& iFace, ID const& jEdge )
           -- LinearHexa
 
 
-        8-------7
+        7-------6
        /.      /|
       / .     / |
-     5_______6  |
+     4_______5  |
      |  .    |  |
-     |  4....|..3
+     |  3....|..2
      | .     | /
      |.      |/
-     1_______2
+     0_______1
 */
 ID
 LinearHexa::edgeToPoint( ID const& iEdge, ID const& jPoint )
@@ -358,13 +383,22 @@ LinearHexa::edgeToPoint( ID const& iEdge, ID const& jPoint )
 {
     static const ID _edgeToPoint[ 2 * S_numEdges ] =
     {
-        1, 2, 2, 3, 3, 4, 4, 1,
-        1, 5, 2, 6, 3, 7, 4, 8,
-        5, 6, 6, 7, 7, 8, 8, 5
+        0, 1,
+        1, 2,
+        2, 3,
+        3, 0,
+        0, 4,
+        1, 5,
+        2, 6,
+        3, 7,
+        4, 5,
+        5, 6,
+        6, 7,
+        7, 4
     };
     ASSERT_BD( jPoint < 2 ) ;
     ASSERT_BD( iEdge < S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint ] - 1;
+    return _edgeToPoint[ 2 * iEdge + jPoint ];
 }
 
 ID
@@ -373,41 +407,19 @@ LinearHexa::faceToPoint( ID const& iFace, ID const& jPoint )
 {
     static const ID _faceToPoint[ 4 * S_numFaces ] =
     {
-        1, 4, 3, 2,
-        1, 5, 8, 4,
+        0, 3, 2, 1,
+        0, 4, 7, 3,
+        0, 1, 5, 4,
         1, 2, 6, 5,
         2, 3, 7, 6,
-        3, 4, 8, 7,
-        5, 6, 7, 8
+        4, 5, 6, 7
     };
     ASSERT_BD( jPoint < 4 ) ;
     ASSERT_BD( iFace < S_numFaces ) ;
-    return _faceToPoint[ 4 * iFace + jPoint ] - 1;
+    return _faceToPoint[ 4 * iFace + jPoint ];
 }
 
-std::pair<ID, bool>
-LinearHexa::faceToEdge( ID const& iFace, ID const& jEdge )
-// faceToEdge(i,j) = localId of jth edge on ith local face
-{
-    static const ID _faceToEdge[ 4 * S_numFaces ] =
-    {
-        4, 3, 2, 1, 5, 12, 8, 4, 1, 6, 9, 5,
-        2, 7, 10, 6, 3, 8, 11, 7, 9, 10, 11, 12
-    };
 
-    static const bool _orient[ 4 * S_numFaces ] =
-    {
-        0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0,
-        1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1
-    };
-
-
-    ASSERT_BD( jEdge < 4 ) ;
-    ASSERT_BD( iFace < S_numFaces ) ;
-
-    return
-        std::make_pair( _faceToEdge[ 4 * iFace + jEdge ] -1 , _orient[ 4 * iFace + jEdge ] );
-}
 
 
 /*
@@ -419,13 +431,22 @@ QuadraticHexa::edgeToPoint( ID const& iEdge, ID const& jPoint )
 {
     static const ID _edgeToPoint[ 3 * S_numEdges ] =
     {
-        1, 2, 9, 2, 3, 10, 3, 4, 11, 4, 1, 12,
-        1, 5, 13, 2, 6, 14, 3, 7, 15, 4, 8, 16,
-        5, 6, 17, 6, 7, 18, 7, 8, 19, 8, 5, 20
+        0, 1, 8,
+        1, 2, 9,
+        2, 3, 10,
+        3, 0, 11,
+        0, 4, 12,
+        1, 5, 13,
+        2, 6, 14,
+        3, 7, 15,
+        4, 5, 16,
+        5, 6, 17,
+        6, 7, 18,
+        7, 4, 19
     };
     ASSERT_BD( ( jPoint < 3 ) ) ;
     ASSERT_BD( iEdge < S_numEdges ) ;
-    return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
+    return _edgeToPoint[ 3 * iEdge + jPoint ];
 }
 
 ID
@@ -434,22 +455,16 @@ QuadraticHexa::faceToPoint( ID const& iFace, ID const& jPoint )
 {
     static const ID _faceToPoint[ 9 * S_numFaces ] =
     {
-        1, 4, 3, 2, 12, 11, 10, 9, 21,
-        1, 5, 8, 4, 13, 20, 16, 12, 22,
+        0, 3, 2, 1, 11, 10, 9, 8, 20,
+        0, 4, 7, 3, 12, 19, 15, 11, 21,
+        0, 1, 5, 4, 8, 13, 16, 12, 22,
         1, 2, 6, 5, 9, 14, 17, 13, 23,
         2, 3, 7, 6, 10, 15, 18, 14, 24,
-        3, 4, 8, 7, 11, 16, 19, 15, 25,
-        5, 6, 7, 8, 17, 18, 19, 20, 26
+        4, 5, 6, 7, 16, 17, 18, 19, 25
     };
     ASSERT_BD( jPoint < 9 ) ;
     ASSERT_BD( iFace < S_numFaces ) ;
-    return _faceToPoint[ 9 * iFace + jPoint ] - 1;
+    return _faceToPoint[ 9 * iFace + jPoint ];
 }
 
-std::pair<ID, bool>
-QuadraticHexa::faceToEdge( ID const& iFace, ID const& jEdge )
-// faceToEdge(i,j) = localId of jth edge on ith local face
-{
-    return LinearHexa::faceToEdge( iFace, jEdge );
-}
 }

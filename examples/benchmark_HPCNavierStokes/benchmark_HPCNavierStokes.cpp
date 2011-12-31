@@ -54,7 +54,7 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/BCManage.hpp>
@@ -73,7 +73,7 @@ namespace
 
 enum DiffusionType{ViscousStress, StiffStrain};
 
-typedef RegionMesh3D<LinearTetra>         mesh_type;
+typedef RegionMesh<LinearTetra>         mesh_type;
 typedef MatrixEpetra<Real>                matrix_type;
 typedef VectorEpetra                      vector_type;
 typedef boost::shared_ptr<VectorEpetra>   vectorPtr_type;
@@ -252,7 +252,7 @@ main( Int argc, char** argv )
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>);
 
     // Building the mesh from the source
     MeshData meshData;
@@ -261,9 +261,11 @@ main( Int argc, char** argv )
                            << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
     readMesh(*fullMeshPtr, meshData);
 
-    if (verbose) std::cout << "Mesh size  : " << fullMeshPtr->maxH() << std::endl;
+    if (verbose)
+        std::cout << "Mesh size  : " <<
+        MeshUtility::MeshStatistics::computeSize(*fullMeshPtr).maxH << std::endl;
     if (verbose) std::cout << "Partitioning the mesh ... " << std::endl;
-    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< RegionMesh<LinearTetra> >   meshPart(fullMeshPtr, Comm);
     fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
     // +-----------------------------------------------+
@@ -336,12 +338,12 @@ main( Int argc, char** argv )
     {
         case ViscousStress:
             if (verbose) std::cout << "Adding the viscous stress... " << std::flush;
-            oseenAssembler.addViscousStress(baseMatrix,viscosity/density);
+            oseenAssembler.addViscousStress(*baseMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         case StiffStrain:
             if (verbose) std::cout << "Adding the stiff strain... " << std::flush;
-            oseenAssembler.addStiffStrain(baseMatrix,viscosity/density);
+            oseenAssembler.addStiffStrain(*baseMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         default:
@@ -351,15 +353,15 @@ main( Int argc, char** argv )
     }
 
     if (verbose) std::cout << "Adding the gradient of the pressure... " << std::flush;
-    oseenAssembler.addGradPressure(baseMatrix);
+    oseenAssembler.addGradPressure(*baseMatrix);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the divergence free constraint... " << std::flush;
-    oseenAssembler.addDivergence(baseMatrix,-1.0);
+    oseenAssembler.addDivergence(*baseMatrix,-1.0);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the mass... " << std::flush;
-    oseenAssembler.addMass(massMatrix,1.0);
+    oseenAssembler.addMass(*massMatrix,1.0);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Closing the matrices... " << std::flush;
@@ -497,7 +499,7 @@ main( Int argc, char** argv )
 
         // SemiImplicit
         *beta = bdf.extrapolation(); // Extrapolation for the convective term
-        oseenAssembler.addConvection(systemMatrix,*beta);
+        oseenAssembler.addConvection(*systemMatrix,*beta);
 
         if (verbose) std::cout << "done" << std::endl;
 

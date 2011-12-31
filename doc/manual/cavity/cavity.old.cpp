@@ -46,7 +46,7 @@
 #endif
 
 // Object type definitions
-typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_type;
+typedef LifeV::RegionMesh<LifeV::LinearTetra>       mesh_type;
 typedef LifeV::OseenSolver< mesh_type >                     fluid_type;
 typedef fluid_type::vector_type                       vector_type;
 typedef boost::shared_ptr<vector_type>                vector_ptrtype;   //Pointer
@@ -145,10 +145,10 @@ int main(int argc, char** argv)
     LifeV::MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
     if (verbose) std::cout << "Mesh file: " << meshData.meshDir() << meshData.meshFile() << std::endl;
-    boost::shared_ptr< LifeV::RegionMesh3D<LifeV::LinearTetra> > fullMeshPtr(new LifeV::RegionMesh3D<LifeV::LinearTetra>);
+    boost::shared_ptr< LifeV::RegionMesh<LifeV::LinearTetra> > fullMeshPtr(new LifeV::RegionMesh<LifeV::LinearTetra>);
     LifeV::readMesh(*fullMeshPtr, meshData);
     // Split the mesh between processors
-    LifeV::partitionMesh< LifeV::RegionMesh3D<LifeV::LinearTetra> >   meshPart(fullMeshPtr, comm);
+    LifeV::partitionMesh< LifeV::RegionMesh<LifeV::LinearTetra> >   meshPart(fullMeshPtr, comm);
 
     // +-----------------------------------------------+
     // |            Creating the FE spaces             |
@@ -160,12 +160,12 @@ int main(int argc, char** argv)
                                << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space... " << std::flush;
-    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > uFESpace(meshPart, uOrder, 3, comm);
+    LifeV::FESpace< LifeV::RegionMesh<LifeV::LinearTetra>, LifeV::MapEpetra > uFESpace(meshPart, uOrder, 3, comm);
     if (verbose)
         std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space... " << std::flush;
-    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > pFESpace(meshPart,pOrder,1,comm);
+    LifeV::FESpace< LifeV::RegionMesh<LifeV::LinearTetra>, LifeV::MapEpetra > pFESpace(meshPart,pOrder,1,comm);
     if (verbose) std::cout << "ok." << std::endl;
 
     // Total degrees of freedom (elements of matrix)
@@ -218,7 +218,7 @@ int main(int argc, char** argv)
     if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
     // The problem (matrix and rhs) is packed in an object called fluid
-    LifeV::OseenSolver< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (oseenData,
+    LifeV::OseenSolver< LifeV::RegionMesh<LifeV::LinearTetra> > fluid (oseenData,
                                                                          uFESpace,
                                                                          pFESpace,
                                                                          comm,
@@ -277,7 +277,7 @@ int main(int argc, char** argv)
     // (A new one should be built for Navier-Stokes)
     fluid.resetPrec();
 
-    boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > exporter;
+    boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > exporter;
 
     vector_ptrtype velAndPressure;
 
@@ -286,7 +286,7 @@ int main(int argc, char** argv)
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-        exporter.reset( new LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
+        exporter.reset( new LifeV::Hdf5exporter<LifeV::RegionMesh<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
         exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
         exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
     }
@@ -295,11 +295,11 @@ int main(int argc, char** argv)
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new LifeV::NoExport<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, meshPart.meshPartition(), "cavity_example", comm->MyPID()) );
+            exporter.reset( new LifeV::NoExport<LifeV::RegionMesh<LifeV::LinearTetra> > ( dataFile, meshPart.meshPartition(), "cavity_example", comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new LifeV::Ensight<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, meshPart.meshPartition(), "cavity_example", comm->MyPID()) );
+            exporter.reset( new LifeV::Ensight<LifeV::RegionMesh<LifeV::LinearTetra> > ( dataFile, meshPart.meshPartition(), "cavity_example", comm->MyPID()) );
         }
     }
 

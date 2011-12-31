@@ -484,9 +484,9 @@ eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
 
 } // eval
 
-typedef FEScalarField < RegionMesh3D < LinearTetra >, MapEpetra > FEScalarFieldTetra;
+typedef FEScalarField < RegionMesh < LinearTetra >, MapEpetra > FEScalarFieldTetra;
 
-typedef FEVectorField < RegionMesh3D < LinearTetra >, MapEpetra > FEVectorFieldTetra;
+typedef FEVectorField < RegionMesh < LinearTetra >, MapEpetra > FEVectorFieldTetra;
 
 } // namespace LifeV
 

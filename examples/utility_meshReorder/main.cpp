@@ -6,7 +6,7 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
+#include <life/lifemesh/InternalEntitySelector.hpp>
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <mpi.h>
@@ -68,12 +68,12 @@ int main(int argc, char** argv)
     MeshData mesh_data;
     mesh_data.setup(data_file, "space_discretization");
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > mesh;
-    mesh.reset(new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > mesh;
+    mesh.reset(new RegionMesh<LinearTetra>);
 
     readMesh(*mesh, mesh_data);
 
-    //MeshData<RegionMesh3D<LinearTetra> > solidData(data_file, "solid/space_discretization");
+    //MeshData<RegionMesh<LinearTetra> > solidData(data_file, "solid/space_discretization");
     //const char* mesh_input = command_line.follow(data_file("fluid/space_discretization/mesh_file", "mesh", 0), 2, "-i","--input");
 
     const std::string mesh_output = command_line.follow((data_file("space_discretization/output_mesh_file", "mesh").c_str()), 2, "-o", "--output");
@@ -98,10 +98,11 @@ int main(int argc, char** argv)
         MPI_Comm_create(MPI_COMM_WORLD, newGroup, &MPIcomm);
         if(me==0)
         {
-            mesh->orderMesh( MPIcomm);
+            // LF TAKEN AWAY. IT IS BROKEN
+            // mesh->orderMesh( MPIcomm);
             //solidData.mesh()->orderMesh( MPIcomm);
 
-            MeshWriter::writeMeshMedit<RegionMesh3D<LinearTetra> >( mesh_output , *mesh);
+            MeshWriter::writeMeshMedit<RegionMesh<LinearTetra> >( mesh_output , *mesh);
             //writeMesh( "solid_ord.mesh", *solidData.mesh());
         }
 
@@ -116,16 +117,16 @@ int main(int argc, char** argv)
         MeshData mesh_data2;
         mesh_data2.setup(data_file, "second_mesh/space_discretization");
 
-        boost::shared_ptr<RegionMesh3D<LinearTetra> > mesh2;
-        mesh2.reset(new RegionMesh3D<LinearTetra>);
+        boost::shared_ptr<RegionMesh<LinearTetra> > mesh2;
+        mesh2.reset(new RegionMesh<LinearTetra>);
 
         readMesh(*mesh2, mesh_data2);
 
-        boost::shared_ptr<FESpace<RegionMesh3D<LinearTetra>, MapEpetra> > firstFESpace;
-        firstFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, MapEpetra> (mesh,  "P1", 3, uselessComm));
+        boost::shared_ptr<FESpace<RegionMesh<LinearTetra>, MapEpetra> > firstFESpace;
+        firstFESpace.reset(new FESpace<RegionMesh<LinearTetra>, MapEpetra> (mesh,  "P1", 3, uselessComm));
 
-        boost::shared_ptr<FESpace<RegionMesh3D<LinearTetra>, MapEpetra> > secondFESpace;
-        secondFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, MapEpetra>(mesh2, "P1", 3, uselessComm));
+        boost::shared_ptr<FESpace<RegionMesh<LinearTetra>, MapEpetra> > secondFESpace;
+        secondFESpace.reset(new FESpace<RegionMesh<LinearTetra>, MapEpetra>(mesh2, "P1", 3, uselessComm));
 
 
         boost::shared_ptr<DOFInterface3Dto3D>  dofEdgeFluidToEdgeSolid( new DOFInterface3Dto3D );
@@ -138,8 +139,12 @@ int main(int argc, char** argv)
             *mesh, FluidInterfaceFlag,
             *mesh, SolidInterfaceFlag,
             0., &edgeFlag);
-        mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), TimeAdvanceNewmarker);
-        MeshWriter::writeMeshMedit<RegionMesh3D<LinearTetra> >( mesh_output , *mesh2);
+
+        ChangeMarkersAccordingToMap(mesh2->pointList,
+                                    dofEdgeFluidToEdgeSolid->localDofMap(),
+                                    TimeAdvanceNewmarker);
+        //mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), TimeAdvanceNewmarker);
+        MeshWriter::writeMeshMedit<RegionMesh<LinearTetra> >( mesh_output , *mesh2);
 
     }
     MPI_Finalize();

@@ -289,7 +289,7 @@ darcy::run()
 {
     using boost::dynamic_pointer_cast;
 
-    typedef RegionMesh3D< LinearTetra >                               RegionMesh;
+    typedef RegionMesh< LinearTetra >                                 RegionMesh;
     typedef SolverAztecOO                                             solver_type;
 
     typedef DarcySolver< RegionMesh, solver_type >                    darcyLinearSolver_type;
@@ -373,8 +373,11 @@ darcy::run()
                        dataFile( ( Members->discretization_section + "/space_discretization/lz" ).data(), 1. ) );
     }
 
+    // Create the partitioner
+    MeshPartitioner< RegionMesh >  meshPart;
+
     // Partition the mesh using ParMetis
-    MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
+    meshPart.doPartition ( fullMeshPtr, Members->comm );
 
     // Stop chronoReadAndPartitionMesh
     chronoReadAndPartitionMesh.stop();
@@ -700,6 +703,9 @@ darcy::run()
     // Display the total number of unknowns
     darcySolver->getDisplayer().leaderPrint( "Number of unknowns : ",
                                              hybrid_FESpace.map().map(Unique)->NumGlobalElements(), "\n" );
+
+    // Export the partitioning
+    exporter->exportPID( meshPart );
 
     switch ( solverType )
     {

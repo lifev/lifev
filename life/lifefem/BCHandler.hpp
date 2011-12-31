@@ -521,50 +521,24 @@ template <typename Mesh>
 void
 BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
 {
-    typedef typename Mesh::ElementShape geoShape_Type;
+    typedef typename Mesh::elementShape_Type geoShape_Type;
+    typedef typename geoShape_Type::GeoBShape geoBShape_Type;
 
     // Some useful local variables
     UInt nDofPerVert = dof.localDofPattern().nbDofPerVertex(); // number of DOF per vertices
-    UInt nDofPerEdge = dof.localDofPattern().nbDofPerEdge();   // number of DOF per edges
-    UInt nDofPerFace = dof.localDofPattern().nbDofPerFace();   // number of DOF per faces
+    UInt nBElemVertices = geoBShape_Type::S_numVertices; // Number of boundary element's vertices
 
-    UInt numBElements = mesh.numBElements();    // number of boundary elements
+    UInt nDofPerEdge = dof.localDofPattern().nbDofPerEdge(); // number of DOF per vertices
+    UInt nBElemEdges = geoBShape_Type::S_numEdges; // Number of boundary element's vertices
 
     bcFlag_Type marker; //will store the marker of each geometric entity
     bcFlag_Type elementMarker; //will store the marker of the element
-
-    typedef typename geoShape_Type::GeoBShape geoBShape_Type;
-
-    UInt nBElemVertices = geoBShape_Type::S_numVertices; // Number of boundary element's vertices
-    UInt nBElemEdges = geoBShape_Type::S_numEdges;    // Number of boundary element's edges
-
-    UInt nElemVertices = geoShape_Type::S_numVertices; // Number of element's vertices
-    UInt nElemEdges = geoShape_Type::S_numEdges;    // Number of element's edges
-
-    UInt nDofBElemVertices = nDofPerVert * nBElemVertices; // number of vertex's DOF on a boundary element
-    UInt nDofBElemEdges = nDofPerEdge * nBElemEdges; // number of edge's DOF on a boundary element
-
-    UInt nDofBElem = nDofBElemVertices + nDofBElemEdges + nDofPerFace; // number of total DOF on a boundary element
-
-    UInt  nDofElemVertices = nElemVertices * nDofPerVert; // number of vertex's DOF on a Element
-    UInt nDofElemEdges = nElemEdges * nDofPerEdge; // number of edge's DOF on a Element
-
-    //vector containing the local to global map on each elemenet
-    VectorSimple<ID> localToGlobalMapOnBElem( nDofBElem );
 
     // BCbase Iterator
     bcBaseIterator_Type bcBaseIterator;
 
     // Iterators which point to the beginning of EssentialEdges and EssentialVertices conditions
-    bcBaseIterator_Type beginEssVertices, beginEssEdges;
-
-    ID iAdjacentElem; // index of Adjacent Element
-
-    ID iElemBElement; // index of boundary Element in Element
-
-    ID iElemEdge; // index of Edge in Element
-
-    ID iElemVertex; // index of Vertex in Element
+    bcBaseIterator_Type beginEssential, beginEssVertices, beginEssEdges;
 
     // coordinates of DOFs points
     Real x, y, z;
@@ -578,7 +552,11 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
     //(Notice that essential bc are positioned at the end of M_bcList, in the order
     // Essential, EssentialEdges, EssentialVertices)
 
-    beginEssEdges = M_bcList.begin();
+    beginEssential = M_bcList.begin();
+	while ((beginEssential != M_bcList.end())&&(beginEssential->type() < Essential))
+		beginEssential++;
+
+    beginEssEdges = beginEssential;
     while ((beginEssEdges != M_bcList.end())&&(beginEssEdges->type() < EssentialEdges))
         beginEssEdges++;
 
@@ -589,39 +567,18 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
     // ===================================================
     // Loop on boundary faces
     // ===================================================
-    for ( ID iBoundaryElement = 0 ; iBoundaryElement < numBElements; ++iBoundaryElement )
+    for ( ID iBoundaryElement = 0 ; iBoundaryElement < mesh.numBoundaryFacets(); ++iBoundaryElement )
     {
         // ===================================================================================
         // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)
         // ===================================================================================
 
-        boundaryFE.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
-        elementMarker = mesh.bElement( iBoundaryElement ).marker(); // We keep the element marker
-        iAdjacentElem = mesh.bElement( iBoundaryElement ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
-        iElemBElement = mesh.bElement( iBoundaryElement ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
+        boundaryFE.updateMeas( mesh.boundaryFacet( iBoundaryElement ) );  // updating finite element information
+        elementMarker = mesh.boundaryFacet( iBoundaryElement ).marker(); // We keep the element marker
 
-        UInt lDof = 0; //local DOF on boundary element
 
-        //loop on Dofs associated with vertices
-        for ( ID iBElemVert = 0; iBElemVert < nBElemVertices; ++iBElemVert )
-        {
-            iElemVertex = geoShape_Type::faceToPoint( iElemBElement, iBElemVert ); // local vertex number (in element)
-            for ( ID l = 0; l < nDofPerVert; ++l )
-                localToGlobalMapOnBElem( lDof++) = dof.localToGlobalMap( iAdjacentElem, iElemVertex * nDofPerVert + l );
-        }
-
-        //loop on Dofs associated with Edges
-        for ( ID iBElemEdge = 0; iBElemEdge < nBElemEdges; ++iBElemEdge )
-        {
-            iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first; // local edge number (in element)
-            for ( ID l = 0; l < nDofPerEdge; ++l )
-                localToGlobalMapOnBElem( lDof++) = dof.localToGlobalMap( iAdjacentElem,  nDofElemVertices + iElemEdge * nDofPerEdge + l ); // global Dof
-        }
-
-        //loop on Dofs associated with faces
-        for ( ID l = 0; l < nDofPerFace; ++l )
-            localToGlobalMapOnBElem( lDof++) = dof.localToGlobalMap( iAdjacentElem, nDofElemEdges +  nDofElemVertices + iElemBElement * nDofPerFace + l ); // global Dof
-
+        //vector containing the local to global map on each element
+        std::vector<ID> localToGlobalMapOnBElem = dof.localToGlobalMapOnBdFacet(iBoundaryElement);
 
         // =============================================================
         // Insertion of boundary conditions defined on boundary Elements
@@ -644,7 +601,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
             case Essential:
                 for (ID lDof = 0; lDof< localToGlobalMapOnBElem.size(); lDof++)
                 {
-                    ID gDof = localToGlobalMapOnBElem( lDof); // global DOF
+                    ID gDof = localToGlobalMapOnBElem[ lDof]; // global DOF
 
                     //providing Essential boundary conditions with needed data (global DOF id and their coordinates)
                     if ( bcBaseIterator->isDataAVector())
@@ -665,7 +622,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                     if ( type == 0 )  // if the BC is a vector which values don't need to be integrated
                     {
                         for (ID lDof = 0; lDof< localToGlobalMapOnBElem.size(); lDof++)
-                            bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( localToGlobalMapOnBElem(lDof) ) );
+                            bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( localToGlobalMapOnBElem[lDof] ) );
                     }
                     else if ( type <= 3 )  // FE vector which needed to be integrated on the boundary
                         bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
@@ -710,11 +667,14 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
         //looking for which EssentialEdges are involved in this element.
         if ((beginEssEdges != beginEssVertices)&&(nDofPerVert||nDofPerEdge))
         {
+            ID iAdjacentElem = mesh.boundaryFacet( iBoundaryElement ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
+            ID iElemBElement = mesh.boundaryFacet( iBoundaryElement ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
+
             //loop on boundary element edges
             for ( ID iBElemEdge = 0; iBElemEdge < nBElemEdges; ++iBElemEdge )
             {
                 //index of edge in element
-                iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first;
+                ID iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first;
 
                 //marker on boundary edge
                 marker = mesh.boundaryEdge( mesh.localEdgeId( iAdjacentElem, iElemEdge ) ).marker(); // edge marker
@@ -748,7 +708,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                     for (iTotalEdgeDof =0; iTotalEdgeDof<vecEdgeDofs.size(); iTotalEdgeDof++)
                     {
                         UInt lDof = vecEdgeDofs[iTotalEdgeDof]; //local DOF on boundary element
-                        UInt gDof = localToGlobalMapOnBElem( lDof ); // global DOF
+                        UInt gDof = localToGlobalMapOnBElem[ lDof ]; // global DOF
 
                         //providing the boundary conditions with needed data
                         if ( bcBaseIterator->isDataAVector() )
@@ -773,7 +733,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
             //loop on boundary element vertices
             for ( ID iBElemVert = 0; iBElemVert < nBElemVertices; ++iBElemVert )
             {
-                marker = mesh.bElement( iBoundaryElement ).point( iBElemVert ).marker(); // vertex marker
+                marker = mesh.boundaryFacet( iBoundaryElement ).point( iBElemVert ).marker(); // vertex marker
 
                 // Finding this marker on the BC list
                 bcBaseIterator = beginEssVertices;
@@ -782,7 +742,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                     for ( ID iVertexDof = 0; iVertexDof < nDofPerVert; ++iVertexDof )
                     {
                         UInt lDof = iBElemVert * nDofPerVert + iVertexDof ; // local Dof
-                        UInt gDof = localToGlobalMapOnBElem(lDof); // global Dof
+                        UInt gDof = localToGlobalMapOnBElem[lDof]; // global Dof
 
                         //providing the boundary conditions with needed data
                         if ( bcBaseIterator->isDataAVector() )

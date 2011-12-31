@@ -71,7 +71,7 @@
 
 using namespace LifeV;
 
-typedef RegionMesh3D<LinearTetra> mesh_Type;
+typedef RegionMesh<LinearTetra> mesh_Type;
 
 const int INLET       = 2;
 const int WALL        = 1;

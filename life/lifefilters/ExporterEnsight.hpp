@@ -122,6 +122,12 @@ public:
 
     //! Set the mesh and the processor id
     void setMeshProcId( const meshPtr_Type mesh, const Int& procId );
+
+    //! temporary: the method should work form the Exporter class
+    void exportPID ( MeshPartitioner<MeshType> const & /*meshPart*/ )
+    {
+        std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+    }
     //@}
 
     //! @name Get methods
@@ -297,9 +303,9 @@ void ExporterEnsight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const In
     initNodesMap();
     initProcId();
 
-    typedef typename MeshType::ElementShape ElementShape;
+    typedef typename MeshType::elementShape_Type elementShape_Type;
 
-    switch ( ElementShape::S_shape )
+    switch ( elementShape_Type::S_shape )
     {
     case TETRA:
         M_FEstr = "tetra4";

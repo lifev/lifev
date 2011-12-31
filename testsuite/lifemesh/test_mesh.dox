@@ -47,7 +47,7 @@
 
     First we define a mesh structure, here it is a 3D mesh formed by quadratic tetrahedras,
     it is done like this:
-    \skipline RegionMesh3D
+    \skipline RegionMesh
 
     @subsection io Reading the mesh
 

@@ -59,7 +59,7 @@
 
 using namespace LifeV;
 
-typedef RegionMesh3D<LinearTetra> Mesh;
+typedef RegionMesh<LinearTetra> Mesh;
 
 int main( int argc, char** argv )
 {

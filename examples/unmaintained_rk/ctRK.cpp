@@ -65,7 +65,7 @@ void
 CTRK::run()
 {
 
-    typedef ChorinTemamRK< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
+    typedef ChorinTemamRK< RegionMesh<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
     // Reading from data file
@@ -90,10 +90,10 @@ CTRK::run()
     const QuadratureRule* qR_press;
     const QuadratureRule* bdQr_press;
 
-    OseenData<RegionMesh3D<LinearTetra> > oseenData;
+    OseenData<RegionMesh<LinearTetra> > oseenData;
     oseenData.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*oseenData.meshData()->mesh(), *M_comm);
+    partitionMesh< RegionMesh<LinearTetra> > meshPart(*oseenData.meshData()->mesh(), *M_comm);
 
     // fill in the space and time discretization orders
     std::string uOrder = dataFile( "fluid/discretization/vel_order", "P1");
@@ -146,7 +146,7 @@ CTRK::run()
     // building velocity and pressure FE spaces
     if (verbose)
         std::cout << "  t-  Building the velocity FE space ... " << std::flush;
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,
+    FESpace< RegionMesh<LinearTetra>, MapEpetra > uFESpace(meshPart,
                                                              *refFE_vel,
                                                              *qR_vel,
                                                              *bdQr_vel,
@@ -159,7 +159,7 @@ CTRK::run()
     if (verbose)
         std::cout << "  t-  Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,
+    FESpace< RegionMesh<LinearTetra>, MapEpetra > pFESpace(meshPart,
                                                              *refFE_press,
                                                              *qR_press,
                                                              *bdQr_press,
@@ -180,7 +180,7 @@ CTRK::run()
 
     if (verbose) std::cout << "  t-  Calling the fluid constructor ... ";
 
-    ChorinTemamRK< RegionMesh3D<LinearTetra> > fluid (oseenData,
+    ChorinTemamRK< RegionMesh<LinearTetra> > fluid (oseenData,
                                                       uFESpace,
                                                       pFESpace,
                                                       *bcHu,
@@ -222,7 +222,7 @@ CTRK::run()
 
     fluid.initialize(init_u, init_p);
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "testCTRK", M_comm->MyPID());
+    Ensight<RegionMesh<LinearTetra> > ensight( dataFile, meshPart.mesh(), "testCTRK", M_comm->MyPID());
 
     vector_ptrtype vel ( new vector_type(fluid.solution_u(), Repeated ) );
     vector_ptrtype press ( new vector_type(fluid.solution_p(), Repeated ) );
@@ -256,14 +256,14 @@ CTRK::run()
         if (verbose) std::cout << "\n  l-  Euler explicit step\n" << std::endl;
 
         // predictive velocity step (Euler explicit)
-        fluid.time_advance(time, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_1);
-        fluid.iterate_u(*bcHu, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_1);
+        fluid.time_advance(time, ChorinTemamRK< RegionMesh<LinearTetra> >::STEP_1);
+        fluid.iterate_u(*bcHu, ChorinTemamRK< RegionMesh<LinearTetra> >::STEP_1);
 
         if (verbose) std::cout << "\n  l-  Crank-Nicholson step\n" << std::endl;
 
         // corrective velocity step (Crank-Nicholson)
-        fluid.time_advance(time, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_2);
-        fluid.iterate_u(*bcHu, ChorinTemamRK< RegionMesh3D<LinearTetra> >::STEP_2);
+        fluid.time_advance(time, ChorinTemamRK< RegionMesh<LinearTetra> >::STEP_2);
+        fluid.iterate_u(*bcHu, ChorinTemamRK< RegionMesh<LinearTetra> >::STEP_2);
 
         if (verbose) std::cout << "\n  l-  Projection step\n" << std::endl;
 

@@ -91,7 +91,7 @@ public:
     /*!
      * @param base base of the 1D boundary condition
      */
-    virtual void assignFunction( OneDimensionalFunction& base ) = 0;
+    virtual void assignFunction( OneDFSIFunction& base ) = 0;
 
     //! Assign the function to the base of the 3D \c BCHandler
     /*!
