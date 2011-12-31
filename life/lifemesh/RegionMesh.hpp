@@ -1994,7 +1994,7 @@ private:
     ID localEdgeId( const threeD_Type, UInt const elemId, UInt const locE ) const { return localRidgeId( threeD_Type(), elemId, locE );}
 
     //! Local Edge (specialization for 2D geometries).
-    ID localEdgeId( const twoD_Type& elem, UInt const elemId, UInt const locE ) const { return localFacetId( elemId, locE );}
+    ID localEdgeId( const twoD_Type, UInt const elemId, UInt const locE ) const { return localFacetId( elemId, locE );}
 
     //! specializations for numFacets
     UInt numFacets(threeD_Type) const {return numFaces();}
