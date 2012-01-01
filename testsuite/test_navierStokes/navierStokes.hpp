@@ -987,7 +987,7 @@ NavierStokes<MeshType, Problem>::run()
                 if (urelerr>M_accuracyTol || prelerr>M_accuracyTol)
                 {
                     if (verbose) std::cout << "TEST_NAVIERSTOKES STATUS: ECHEC" << std::endl;
-                    throw NavierStokes::RESULT_CHANGED_EXCEPTION();
+                    throw typename NavierStokes::RESULT_CHANGED_EXCEPTION();
                 }
             }
             // ** END Accuracy test **
@@ -1011,7 +1011,7 @@ NavierStokes<MeshType, Problem>::run()
         if (!success)
         {
             if (verbose) std::cout << "TEST_NAVIERSTOKES STATUS: ECHEC" << std::endl;
-            throw NavierStokes::RESULT_CHANGED_EXCEPTION();
+            throw typename NavierStokes::RESULT_CHANGED_EXCEPTION();
         }
     }
     // ** END Space convergence test **
