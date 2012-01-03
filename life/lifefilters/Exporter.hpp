@@ -600,33 +600,6 @@ void Exporter<MeshType>::readVariable(exporterData_Type& dvar)
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::exportPID( MeshPartitioner< MeshType > & meshPart )
-{
-    // TODO: use FESpace M_spacemap for generality
-    const ReferenceFE &    refFE = feTetraP0;
-    const QuadratureRule & qR    = quadRuleTetra15pt;
-    const QuadratureRule & bdQr  = quadRuleTria4pt;
-
-    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( meshPart, refFE, qR, bdQr, 1, meshPart.comm() ) );
-
-    vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
-
-    for ( UInt iElem( 0 ); iElem < PID_FESpacePtr->mesh()->numElements(); ++iElem )
-    {
-        ID globalElem = PID_FESpacePtr->mesh()->volumeList[ iElem ].id();
-        (*PIDData)[ globalElem ] = meshPart.comm()->MyPID();
-    }
-
-    addVariable( exporterData_Type::ScalarField,
-                 "PID",
-                 PID_FESpacePtr,
-                 PIDData,
-                 0,
-                 exporterData_Type::SteadyRegime,
-                 exporterData_Type::Cell );
-}
-
-template <typename MeshType>
 void Exporter<MeshType>::exportFlags( MeshPartitioner< MeshType > & meshPart, flag_Type const & compareFlag )
 {
     // @todo this is only for point flags, extension to other entity flags is trivial
@@ -663,6 +636,33 @@ void Exporter<MeshType>::exportFlags( MeshPartitioner< MeshType > & meshPart, fl
                          exporterData_Type::Node );
         }
     }
+}
+
+template <typename MeshType>
+void Exporter<MeshType>::exportPID( MeshPartitioner< MeshType > & meshPart )
+{
+    // TODO: use FESpace M_spacemap for generality
+    const ReferenceFE &    refFE = feTetraP0;
+    const QuadratureRule & qR    = quadRuleTetra15pt;
+    const QuadratureRule & bdQr  = quadRuleTria4pt;
+
+    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( meshPart, refFE, qR, bdQr, 1, meshPart.comm() ) );
+
+    vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
+
+    for ( UInt iElem( 0 ); iElem < PID_FESpacePtr->mesh()->numElements(); ++iElem )
+    {
+        ID globalElem = PID_FESpacePtr->mesh()->element(iElem).id();
+        (*PIDData)[ globalElem ] = meshPart.comm()->MyPID();
+    }
+
+    addVariable( exporterData_Type::ScalarField,
+                 "PID",
+                 PID_FESpacePtr,
+                 PIDData,
+                 0,
+                 exporterData_Type::SteadyRegime,
+                 exporterData_Type::Cell );
 }
 
 template <typename MeshType>

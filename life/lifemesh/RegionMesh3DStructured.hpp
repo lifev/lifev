@@ -42,7 +42,7 @@
 #define STRUCTUREDMESH3D_HPP 1
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/MeshChecks.hpp>
 #include <fstream>
 
@@ -123,7 +123,7 @@ markerID_Type regularMeshPointPosition( const UInt& i_x,
   @param verbose Verbose mode enabled/disabled
 */
 template <typename GeoShape, typename MC>
-void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
+void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                     markerID_Type regionFlag,
                     const UInt& m_x,
                     const UInt& m_y,
@@ -248,10 +248,10 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     oStr << "done" << std::endl;
 
     // Declaration of pointers on the different mesh entities
-    typename RegionMesh3D<GeoShape,MC>::point_Type*  pointPtr  = 0;
-    //typename RegionMesh3D<GeoShape,MC>::EdgeType*   edgePtr   = 0;
-    //typename RegionMesh3D<GeoShape,MC>::FaceType*   facePtr   = 0;
-    typename RegionMesh3D<GeoShape,MC>::VolumeType* volumePtr = 0;
+    typename RegionMesh<GeoShape,MC>::point_Type*  pointPtr  = 0;
+    //typename RegionMesh<GeoShape,MC>::edge_Type*   edgePtr   = 0;
+    //typename RegionMesh<GeoShape,MC>::face_Type*   facePtr   = 0;
+    typename RegionMesh<GeoShape,MC>::volume_Type* volumePtr = 0;
 
     // Build the points of the mesh
     oStr << "building the points of the mesh...";
@@ -287,9 +287,6 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
                 nodeID = k * N_z + j * N_y + i;
                 pointPtr->setId( nodeID );
                 pointPtr->setLocalId( nodeID );
-
-                mesh.localToGlobalNode().insert( std::make_pair( nodeID, nodeID) );
-                mesh.globalToLocalNode().insert( std::make_pair( nodeID, nodeID) );
 
                 pointPtr->setMarkerID( nodeMarkerID );
                 pointPtr->x() = xPosition + t_x;

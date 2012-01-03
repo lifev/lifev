@@ -56,8 +56,8 @@ CurrentFE::CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap, cons
         M_quadRule(new QuadratureRule(qr)),
 
 
-        M_cellNodes(boost::extents[geoMap.nbDof()][M_nbCoor]),
-        M_quadNodes(boost::extents[M_nbQuadPt][3]),
+        M_cellNodes(boost::extents[geoMap.nbDof()][nDimensions]),
+        M_quadNodes(boost::extents[M_nbQuadPt][nDimensions]),
 
         M_dphiGeometricMap(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]),
         M_jacobian(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
@@ -173,7 +173,7 @@ CurrentFE::CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap )
         M_quadRule( 0 ),
 
 
-        M_cellNodes(boost::extents[geoMap.nbDof()][M_nbCoor]),
+        M_cellNodes(boost::extents[geoMap.nbDof()][nDimensions]),
 
 
         M_cellNodesUpdated(false),
@@ -670,12 +670,12 @@ GeoVector CurrentFE::coorMap(const GeoVector& P) const
 {
     ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
 
-    GeoVector Pcurrent(M_nbCoor);
+    GeoVector Pcurrent(nDimensions);
     Pcurrent*=0.0;
 
     for ( UInt i(0); i < M_nbGeoNode; ++i )
     {
-        for (UInt j(0); j<M_nbCoor; ++j)
+        for (UInt j(0); j<nDimensions; ++j)
         {
             Pcurrent[j] += M_cellNodes[i][j]* M_geoMap->phi(i,P);
         }
@@ -831,7 +831,7 @@ void CurrentFE::computeCellNodes( const std::vector< std::vector<Real> >& pts)
 {
     for (UInt iterNode(0); iterNode< M_nbGeoNode; ++iterNode)
     {
-        for (UInt iterCoord(0); iterCoord < M_nbCoor; ++iterCoord)
+        for (UInt iterCoord(0); iterCoord < nDimensions; ++iterCoord)
         {
             M_cellNodes[iterNode][iterCoord] = pts[iterNode][iterCoord];
         }
@@ -845,12 +845,9 @@ void CurrentFE::computeQuadNodes()
 
     for ( UInt iterQuadNode (0); iterQuadNode < M_nbQuadPt; ++iterQuadNode)
     {
-        coorMap( M_quadNodes[iterQuadNode][0],
-                 M_quadNodes[iterQuadNode][1],
-                 M_quadNodes[iterQuadNode][2],
-                 M_quadRule->quadPointCoor( iterQuadNode, 0 ),
-                 M_quadRule->quadPointCoor( iterQuadNode, 1 ),
-                 M_quadRule->quadPointCoor( iterQuadNode, 2 ) );
+    	GeoVector quadNode(coorMap(M_quadRule->quadPointCoor(iterQuadNode)));
+    	for(UInt i=0; i< quadNode.size(); i++)
+    		M_quadNodes[iterQuadNode][i] = quadNode[i];
     }
     M_quadNodesUpdated=true;
 }
@@ -936,11 +933,11 @@ void CurrentFE::computeTInverseJacobian()
 
             Real det ( a*d - b*c );
 
-            M_tInverseJacobian[0][0][iterQuad] = ( a ) / det ;
-            M_tInverseJacobian[0][1][iterQuad] = ( -b ) / det ;
+            M_tInverseJacobian[0][0][iterQuad] = d / det ;
+            M_tInverseJacobian[0][1][iterQuad] = -c / det ;
 
-            M_tInverseJacobian[1][0][iterQuad] = ( -c ) / det ;
-            M_tInverseJacobian[1][1][iterQuad] = ( d ) / det ;
+            M_tInverseJacobian[1][0][iterQuad] =  -b / det ;
+            M_tInverseJacobian[1][1][iterQuad] =  a / det ;
 
             break;
         }
@@ -1007,8 +1004,8 @@ void CurrentFE::computeDetJacobian()
         {
             Real a ( M_jacobian[0][0][iterQuad] );
             Real b ( M_jacobian[0][1][iterQuad] );
-            Real c ( M_jacobian[0][2][iterQuad] );
-            Real d ( M_jacobian[1][0][iterQuad] );
+            Real c ( M_jacobian[1][0][iterQuad] );
+            Real d ( M_jacobian[1][1][iterQuad] );
 
             Real det( a*d-b*c);
             M_detJacobian[iterQuad]= det;

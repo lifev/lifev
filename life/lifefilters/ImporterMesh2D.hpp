@@ -53,7 +53,7 @@
 #include <life/lifecore/FortranWrapper.hpp>
 #include <life/lifecore/StringUtility.hpp>
 
-#include <life/lifemesh/RegionMesh2D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 #include <life/lifemesh/MeshChecks.hpp>
 
@@ -84,17 +84,18 @@ SUBROUTINE_F77 F77NAME( readmesh2dhead ) ( I_F77 & ne, I_F77 & np,
 
 //! importerMesh2D - reads a mesh in mesh2D(LF) format.
 /*!
-  It reads a gmsh mesh (2D) file and store it in a RegionMesh2D.
+  It reads a gmsh mesh (2D) file and store it in a RegionMesh.
 
   @param mesh, the mesh data structure to fill in.
   @param fileName, the name of the mesh file  to read.
   @param regionFlag, the identifier for the region.
   @return true if everything went fine, false otherwise.
 */
-template <typename RegionMesh2D>
 
+/*
+template <typename RegionMesh>
 bool
-importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
+importerMesh2D( RegionMesh      & mesh, //importerMesh2D
             const std::string & fileName,
             markerID_Type     regionFlag )
 {
@@ -104,7 +105,7 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
 
     bool p2meshstored, p2meshwanted;
 
-    typedef typename RegionMesh2D::ElementShape ElementShape;
+    typedef typename RegionMesh::ElementShape ElementShape;
 
     if ( ElementShape::S_shape != TRIANGLE )
     {
@@ -178,20 +179,20 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
         std::cerr << " Error in importerMesh2D: file incomplete" << std::endl;
         std::abort();
     }
-    /*
-    I use explicit constructors instead of relying on implicit conversion rules
-    This to make things more explicit: mesh2D files are (so far) single precision!
-    */
+
+    //I use explicit constructors instead of relying on implicit conversion rules
+    //This to make things more explicit: mesh2D files are (so far) single precision!
+
 
     nFa =  UInt( ne );
     nBEd = UInt( nb );
     nVe =  UInt( np );
     nBVe = UInt( nb );
 
-    /*
-    I Assume that the mesh is OK, so the number of boundary vertices coincides
-    with the number of boundary sides: mesh checkers have still to be implemented
-    */
+
+    //I Assume that the mesh is OK, so the number of boundary vertices coincides
+    //with the number of boundary sides: mesh checkers have still to be implemented
+
 
     // Do I want a P2 mesh?
     p2meshwanted = ( ElementShape::S_numPoints == 6 );
@@ -243,11 +244,11 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
 
     // Only Boundary Edges
     mesh.setMaxNumEdges( nBEd );
-    mesh.numEdges() = nEd;
+    mesh.setNumEdges( nEd );
 
-    /*
-    Here the REAL number of edges (all of them) even if I store only BEdges.
-    */
+
+    //Here the REAL number of edges (all of them) even if I store only BEdges.
+
 
     mesh.setNumBEdges( nBEd );
 
@@ -257,10 +258,10 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
     // Add Marker to mesh
     mesh.setMarkerID( regionFlag );
 
-    // Now put the whole lot into the RegionMesh2D structure
-    typename RegionMesh2D::point_Type * pp = 0;
-    typename RegionMesh2D::EdgeType  * pe = 0;
-    typename RegionMesh2D::FaceType  * pf = 0;
+    // Now put the whole lot into the RegionMesh structure
+    typename RegionMesh::point_Type * pp = 0;
+    typename RegionMesh::edge_Type  * pe = 0;
+    typename RegionMesh::face_Type  * pf = 0;
 
 
     // first the vertices
@@ -360,11 +361,12 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
 
     return ierr == 0;
 } // Function importerMesh2D
+*/
 
 
 //! readGmshFile - reads a mesh in GMSH 2D format.
 /*!
-  It reads a gmsh mesh (2D) file and store it in a RegionMesh2D.
+  It reads a gmsh mesh (2D) file and store it in a RegionMesh.
 
   @param mesh, the mesh data structure to fill in.
   @param fileName, the name of the gmsh mesh file  to read.
@@ -372,10 +374,11 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
   @return true if everything went fine, false otherwise.
 */
 
+/*
 template <typename GeoShape, typename MC>
 
 bool
-readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
+readGmshFile( RegionMesh<GeoShape, MC> & mesh,
               const std::string          & fileName,
               markerID_Type              regionFlag )
 {
@@ -433,8 +436,8 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     UInt __nele;
     __is >> __nele;
 
-    typename RegionMesh2D<GeoShape, MC>::EdgeType * pe = 0;
-    typename RegionMesh2D<GeoShape, MC>::FaceType * pf = 0;
+    typename RegionMesh<GeoShape, MC>::edge_Type * pe = 0;
+    typename RegionMesh<GeoShape, MC>::face_Type * pf = 0;
 
 #ifdef DEBUG
     Debug ( 8000 ) << "number of elements: " << __nele << "\n";
@@ -484,7 +487,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     mesh.setMaxNumEdges( __gt[ 1 ] );
 
     // Here the REAL number of edges (all of them)
-    mesh.numEdges    () = __gt[ 1 ];
+    mesh.setNumEdges(__gt[ 1 ]);
     mesh.setNumBEdges( __gt[ 1 ] );
 
 #ifdef DEBUG
@@ -495,7 +498,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     mesh.setMaxNumFaces( n_elements);
 
     // Here the REAL number of edges (all of them)
-    mesh.numFaces() = n_elements;
+    mesh.setNumFaces( n_elements );
 
 #ifdef DEBUG
     Debug ( 8000 ) << "number of faces= " << n_elements << "\n";
@@ -522,7 +525,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         }
     }
     // add the point to the mesh
-    typename RegionMesh2D<GeoShape, MC>::point_Type * pp = 0;
+    typename RegionMesh<GeoShape, MC>::point_Type * pp = 0;
 
     mesh.setMaxNumPoints( __n, true );
     mesh.setNumVertices (__n);
@@ -585,32 +588,42 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     }
     return true;
 } // Function readGmshFile
+*/
 
 //! readFreeFemFile - reads a mesh in FreeFem 2D format.
 /*!
-read a freefem mesh (2D) file and store it in a RegionMesh2D.
+read a freefem mesh (2D) file and store it in a RegionMesh.
 
 @param mesh, the mesh data structure to fill in.
 @param fileName, the name of the freefem mesh file to read.
 @param regionFlag, the identifier for the region.
-@param bool useless, it will be removed.
+@param bool verbose, verbosity (not used)
 @return true if everything went fine, false otherwise.
  */
 
-template <typename GeoShape, typename MC>
+template <typename MC>
 bool
-readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
+readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
                  const std::string          & fileName,
-                 markerID_Type              regionFlag, bool useless )
+                 markerID_Type              regionFlag, bool /*useless*/ = false)
 {
     MeshElementBareHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;
 
-    typename RegionMesh2D<GeoShape, MC>::point_Type * pp = 0;
-    typename RegionMesh2D<GeoShape, MC>::EdgeType * pe = 0;
-    typename RegionMesh2D<GeoShape, MC>::FaceType * pf = 0;
+    typedef LinearTriangle GeoShape;
+
+    typename RegionMesh<GeoShape, MC>::point_Type * pp = 0;
+    typename RegionMesh<GeoShape, MC>::edge_Type * pe = 0;
+    typename RegionMesh<GeoShape, MC>::face_Type * pf = 0;
 
     std::ifstream __is ( fileName.c_str() );
+    if( __is.fail() )
+    {
+        std::cerr << " Error in readFreeFemFile: File " << fileName
+                  << " not found or locked"
+                  << std::endl;
+        abort();
+    }
 
     // first row: how many vertices, triangles, edges
     UInt __nv, __nt, __ne, i1, i2, i3;
@@ -662,7 +675,12 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         >> __triangle_nodes[ 3 * __i + 2 ]
         >> __triangle_label[ __i ];
 
-        // dump first the existing edges, to maintain the correct numbering
+        //from 1-based numbering to 0-based numbering
+		__triangle_nodes[3 * __i]--;
+		__triangle_nodes[3 * __i+1]--;
+		__triangle_nodes[3 * __i+2]--;
+
+		// dump first the existing edges, to maintain the correct numbering
         // if everything is correct the numbering in the bareedge
         // structure will reflect the actual edge numbering
 
@@ -703,24 +721,28 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         __is >> __edge_nodes[ 2 * __i ] >> __edge_nodes[ 2 * __i + 1 ] >> __edge_label[ __i ];
     }
 
+    //from 1-based numbering to 0-based numbering
+    for(UInt i(0); i<__edge_nodes.size(); i++)
+    	__edge_nodes[i]--;
+
     // Set mesh properties
     // Add Marker to list of Markers
     mesh.setMarkerID( regionFlag );
 
     // Till now I only have information about boundary edges - I don't know the MAX num of edges
     // Euler formula: ne = nv + nt - 1
-    mesh.setMaxNumEdges      ( __nv + __nt - 1 );
-    mesh.setMaxNumGlobalEdges( __nv + __nt - 1 );
+    mesh.setMaxNumEdges      ( _be.size() );
+    mesh.setMaxNumGlobalEdges( _be.size() );
 
     // Here the REAL number of edges (all of them)
-    mesh.numEdges() = __nv + __nt - 1;
+    mesh.setNumEdges         ( _be.size() );
 
     mesh.setNumBEdges        ( __ne );
     mesh.setMaxNumFaces      ( __nt );
     mesh.setMaxNumGlobalFaces( __nt );
 
     // Here the REAL number of edges (all of them)
-    mesh.numFaces() = __nt;
+    mesh.setNumFaces          ( __nt);
 
     mesh.setMaxNumPoints      ( __nv, true );
     mesh.setMaxNumGlobalPoints( __nv );
@@ -740,15 +762,13 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
 
     for ( UInt __i = 0; __i < __nv; ++__i )
     {
-        pp = &mesh.addPoint( __isonboundary[ __i ] );
-        pp->setMarker( __whichboundary[ __i ] );
+        pp = &mesh.addPoint( __isonboundary[ __i ], false );
+        pp->setMarkerID( __whichboundary[ __i ] );
         pp->x() = __x[ 2 * __i ];
         pp->y() = __x[ 2 * __i + 1 ];
+        pp->z() = 0;
         pp->setId( __i );
         pp->setLocalId( __i );
-
-        mesh.localToGlobalNode().insert(std::make_pair( __i, __i ) );
-        mesh.globalToLocalNode().insert(std::make_pair( __i, __i ) );
     }
 
     // add the edges to the mesh
@@ -767,7 +787,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     // add the triangles to the mesh
     for ( UInt __i = 0; __i < __nt; ++__i )
     {
-        pf = &( mesh.addFace() );
+        pf = &( mesh.addFace(true) );
         pf->setId     ( __i );
         pf->setLocalId( __i );
         pf->setMarkerID( markerID_Type( __triangle_label[ __i ] ) );

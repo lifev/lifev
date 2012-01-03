@@ -427,21 +427,18 @@ void BCManageNormal<MatrixType>::bcShiftToNormalTangentialCoordSystem(matrix_Typ
     {
         //Shift to tangential system
 
-        Int errCode(0);
-
         //C = R*A
         matrix_Type C(systemMatrix.map(), systemMatrix.meanNumEntries());
-        errCode = M_rotationMatrixPtr->multiply(false,systemMatrix,false,C);
+        M_rotationMatrixPtr->multiply(false,systemMatrix,false,C);
 
         //A = C*Rt"
         matrix_Type D(systemMatrix.map(), systemMatrix.meanNumEntries());
-        errCode = C.multiply(false,*M_rotationMatrixPtr,true,D);
-        //std::cout<< errCode <<std::endl;
+        C.multiply(false,*M_rotationMatrixPtr,true,D);
         systemMatrix.swapCrsMatrix(D);
 
         //b = R*b
         VectorType c(rightHandSide);
-        errCode = M_rotationMatrixPtr->multiply(false,c,rightHandSide);
+        M_rotationMatrixPtr->multiply(false,c,rightHandSide);
     }
 }
 
@@ -451,20 +448,18 @@ void BCManageNormal<MatrixType>::bcShiftToCartesianCoordSystem(matrix_Type& syst
 {
     if (M_dataBuilt)
     {
-        Int errCode(0);
-
         // C = Rt*A;
         matrix_Type C(systemMatrix.map(), systemMatrix.meanNumEntries());
-        errCode = M_rotationMatrixPtr->multiply(true,systemMatrix,false,C);
+        M_rotationMatrixPtr->multiply(true,systemMatrix,false,C);
 
         // A = C*R";
         matrix_Type D(systemMatrix.map(), systemMatrix.meanNumEntries());
-        errCode = C.multiply(false,*M_rotationMatrixPtr,false,D);
+        C.multiply(false,*M_rotationMatrixPtr,false,D);
         systemMatrix.swapCrsMatrix(D);
 
         // b = Rt*b;
         VectorType c(rightHandSide);
-        errCode = M_rotationMatrixPtr->multiply(true,c,rightHandSide);
+        M_rotationMatrixPtr->multiply(true,c,rightHandSide);
     }
 }
 
@@ -480,18 +475,18 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
     VectorType repNormals(normals.map(), Repeated);
     //Loop on the Faces
-    for ( UInt iFace = 0; iFace< mesh.numBElements(); ++iFace )
+    for ( UInt iFace = 0; iFace< mesh.numBoundaryFacets(); ++iFace )
     {
         //Update the currentBdFE with the face data
-        currentBdFE.updateMeasNormalQuadPt( mesh.bElement( iFace ) );
-        ID idFace = mesh.bElement( iFace ).id();
+        currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( iFace ) );
+        ID idFace = mesh.boundaryFacet( iFace ).id();
         UInt nDofF = currentBdFE.nbNode();
 
         //For each node on the face
         for (UInt icheck = 0; icheck< nDofF; ++icheck)
         {
             bool idFaceExist(false); //Is the face in the array?
-            ID idf = dof.localToGlobalByFace(idFace,icheck,idFaceExist);
+            ID idf = dof.localToGlobalMapByBdFacet(idFace,icheck); idFaceExist=true;
 
             //If the face exists and the point is on this processor
             if (idFaceExist && (M_flags.find(idf) != M_flags.end()))
@@ -500,7 +495,7 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
                 //if the normal is not already calculated
                 //and the marker correspond to the flag of the point
-                if ((flag == mesh.bElement(iFace).markerID())||(flag == 0))
+                if ((flag == mesh.boundaryFacet(iFace).markerID())||(flag == 0))
                 {
                     //Warning: the normal is taken in the first Gauss point
                     //since the normal is the same over the triangle

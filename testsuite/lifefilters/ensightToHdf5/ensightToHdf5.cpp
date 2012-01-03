@@ -67,7 +67,7 @@
 
 using namespace LifeV;
 
-typedef RegionMesh3D<LinearTetra>                mesh_Type;
+typedef RegionMesh<LinearTetra>                  mesh_Type;
 typedef OseenSolver< mesh_Type >::vector_Type    vector_Type;
 typedef OseenSolver< mesh_Type >::vectorPtr_Type vectorPtr_Type;
 typedef FESpace< mesh_Type, MapEpetra >          feSpace_Type;
