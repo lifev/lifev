@@ -1,0 +1,17 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+#           Date: 04-01-2012
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### TESTSUITE: MATRIXEPETRABLOCKVIEW ##############################################################
+###################################################################################################
+
+AT_SETUP([test_MatrixEpetraBlockView])
+AT_KEYWORDS([Test of the MatrixEpetraBlockView framework])
+AT_CHECK([mpirun -n 4 ../../test_MatrixEpetraBlockView/test_MatrixEpetraBlockView -c],[0],[ignore],[ignore])
