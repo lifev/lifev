@@ -112,12 +112,22 @@ main( int argc, char** argv )
     A->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
-        for( int j( 0 ); j< problemSize/2; ++j )
+        if( A->matrixPtr()->MyGRID( i ) )
         {
-            A->addToCoefficient( i, j, 1 );
-            A->addToCoefficient( i, j+problemSize/2, 2 );
-            A->addToCoefficient( i+problemSize/2, j, 3 );
-            A->addToCoefficient( i+problemSize/2, j+problemSize/2, 4 );
+            for( int j( 0 ); j< problemSize/2; ++j )
+            {
+                A->addToCoefficient( i, j, 1 );
+                A->addToCoefficient( i, j+problemSize/2, 2 );
+            }
+        }
+
+        if( A->matrixPtr()->MyGRID( i+problemSize/2 ) )
+        {
+            for( int j( 0 ); j< problemSize/2; ++j )
+            {
+                A->addToCoefficient( i+problemSize/2, j, 3 );
+                A->addToCoefficient( i+problemSize/2, j+problemSize/2, 4 );
+            }
         }
     }
     A->globalAssemble();
@@ -166,12 +176,22 @@ main( int argc, char** argv )
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
-        for( int j( 0 ); j< problemSize/2; ++j )
+        if( A->matrixPtr()->MyGRID( i ) )
         {
-            testMatrix->addToCoefficient( i, j, -3 );
-            testMatrix->addToCoefficient( i, j+problemSize/2, -1 );
-            testMatrix->addToCoefficient( i+problemSize/2, j, -4 );
-            testMatrix->addToCoefficient( i+problemSize/2, j+problemSize/2, -2 );
+            for( int j( 0 ); j< problemSize/2; ++j )
+            {
+                testMatrix->addToCoefficient( i, j, -3 );
+                testMatrix->addToCoefficient( i, j+problemSize/2, -1 );
+            }
+        }
+
+        if( A->matrixPtr()->MyGRID( i+problemSize/2 ) )
+        {
+            for( int j( 0 ); j< problemSize/2; ++j )
+            {
+                testMatrix->addToCoefficient( i+problemSize/2, j, -4 );
+                testMatrix->addToCoefficient( i+problemSize/2, j+problemSize/2, -2 );
+            }
         }
     }
     testMatrix->globalAssemble();
@@ -205,12 +225,20 @@ main( int argc, char** argv )
 
     testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
+
     for( int i( 0 ); i < problemSize/2; ++i )
     {
-        testMatrix->addToCoefficient( i, i, -1 );
-        testMatrix->addToCoefficient( i, i+problemSize/2, -1 );
-        testMatrix->addToCoefficient( i+problemSize/2, i, -1 );
-        testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -1 );
+        if( A->matrixPtr()->MyGRID( i ) )
+        {
+            testMatrix->addToCoefficient( i, i, -1 );
+            testMatrix->addToCoefficient( i, i+problemSize/2, -1 );
+        }
+
+        if( A->matrixPtr()->MyGRID( i+problemSize/2 ) )
+        {
+            testMatrix->addToCoefficient( i+problemSize/2, i, -1 );
+            testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -1 );
+        }
     }
     testMatrix->globalAssemble();
     *B += *testMatrix;
@@ -243,12 +271,20 @@ main( int argc, char** argv )
 
     testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
+
     for( int i( 0 ); i < problemSize/2; ++i )
     {
-        testMatrix->addToCoefficient( i, i, -1 );
-        testMatrix->addToCoefficient( i, i+problemSize/2, -2 );
-        testMatrix->addToCoefficient( i+problemSize/2, i, -3 );
-        testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -4 );
+        if( A->matrixPtr()->MyGRID( i ) )
+        {
+            testMatrix->addToCoefficient( i, i, -1 );
+            testMatrix->addToCoefficient( i, i+problemSize/2, -2 );
+        }
+
+        if( A->matrixPtr()->MyGRID( i+problemSize/2 ) )
+        {
+            testMatrix->addToCoefficient( i+problemSize/2, i, -3 );
+            testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -4 );
+        }
     }
     testMatrix->globalAssemble();
     *B += *testMatrix;
@@ -285,10 +321,17 @@ main( int argc, char** argv )
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
-        testMatrix->addToCoefficient( i, i, -1 );
-        testMatrix->addToCoefficient( i, i+problemSize/2, -0.5 );
-        testMatrix->addToCoefficient( i+problemSize/2, i, minusOneThird );
-        testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -0.25 );
+        if( A->matrixPtr()->MyGRID( i ) )
+        {
+            testMatrix->addToCoefficient( i, i, -1 );
+            testMatrix->addToCoefficient( i, i+problemSize/2, -0.5 );
+        }
+
+        if( A->matrixPtr()->MyGRID( i+problemSize/2 ) )
+        {
+            testMatrix->addToCoefficient( i+problemSize/2, i, minusOneThird );
+            testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -0.25 );
+        }
     }
     testMatrix->globalAssemble();
     *B += *testMatrix;
@@ -323,12 +366,22 @@ main( int argc, char** argv )
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
-        for( int j( i ); j< problemSize/2; ++j )
+        if( A->matrixPtr()->MyGRID( i ) )
         {
-            testMatrix->addToCoefficient( i, j, -1 );
-            testMatrix->addToCoefficient( i, j+problemSize/2, -2 );
-            testMatrix->addToCoefficient( i+problemSize/2, j, -3 );
-            testMatrix->addToCoefficient( i+problemSize/2, j+problemSize/2, -4 );
+            for( int j( i ); j< problemSize/2; ++j )
+            {
+                testMatrix->addToCoefficient( i, j, -1 );
+                testMatrix->addToCoefficient( i, j+problemSize/2, -2 );
+            }
+        }
+
+        if( A->matrixPtr()->MyGRID( i+problemSize/2 ) )
+        {
+            for( int j( i ); j< problemSize/2; ++j )
+            {
+                testMatrix->addToCoefficient( i+problemSize/2, j, -3 );
+                testMatrix->addToCoefficient( i+problemSize/2, j+problemSize/2, -4 );
+            }
         }
     }
     testMatrix->globalAssemble();
@@ -364,12 +417,22 @@ main( int argc, char** argv )
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
-        for( int j( 0 ); j<= i; ++j )
+        if( A->matrixPtr()->MyGRID( i ) )
         {
-            testMatrix->addToCoefficient( i, j, -1 );
-            testMatrix->addToCoefficient( i, j+problemSize/2, -2 );
-            testMatrix->addToCoefficient( i+problemSize/2, j, -3 );
-            testMatrix->addToCoefficient( i+problemSize/2, j+problemSize/2, -4 );
+            for( int j( 0 ); j<= i; ++j )
+            {
+                testMatrix->addToCoefficient( i, j, -1 );
+                testMatrix->addToCoefficient( i, j+problemSize/2, -2 );
+            }
+        }
+
+        if( A->matrixPtr()->MyGRID( i+problemSize/2 ) )
+        {
+            for( int j( 0 ); j<= i; ++j )
+            {
+                testMatrix->addToCoefficient( i+problemSize/2, j, -3 );
+                testMatrix->addToCoefficient( i+problemSize/2, j+problemSize/2, -4 );
+            }
         }
     }
     testMatrix->globalAssemble();
@@ -405,10 +468,17 @@ main( int argc, char** argv )
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
-        testMatrix->addToCoefficient( i, i, -problemSize/2 );
-        testMatrix->addToCoefficient( i, i+problemSize/2, -problemSize );
-        testMatrix->addToCoefficient( i+problemSize/2, i, -problemSize*1.5 );
-        testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -problemSize*2 );
+        if( A->matrixPtr()->MyGRID( i ) )
+        {
+            testMatrix->addToCoefficient( i, i, -problemSize/2 );
+            testMatrix->addToCoefficient( i, i+problemSize/2, -problemSize );
+        }
+
+        if( A->matrixPtr()->MyGRID( i+problemSize/2 ) )
+        {
+            testMatrix->addToCoefficient( i+problemSize/2, i, -problemSize*1.5 );
+            testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -problemSize*2 );
+        }
     }
     testMatrix->globalAssemble();
     *B += *testMatrix;
@@ -443,10 +513,17 @@ main( int argc, char** argv )
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
-        testMatrix->addToCoefficient( i, i, -2./problemSize );
-        testMatrix->addToCoefficient( i, i+problemSize/2, -1./problemSize );
-        testMatrix->addToCoefficient( i+problemSize/2, i, -1./(problemSize*1.5) );
-        testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -1./(problemSize*2) );
+        if( A->matrixPtr()->MyGRID( i ) )
+        {
+            testMatrix->addToCoefficient( i, i, -2./problemSize );
+            testMatrix->addToCoefficient( i, i+problemSize/2, -1./problemSize );
+        }
+
+        if( A->matrixPtr()->MyGRID( i+problemSize/2 ) )
+        {
+            testMatrix->addToCoefficient( i+problemSize/2, i, -1./(problemSize*1.5) );
+            testMatrix->addToCoefficient( i+problemSize/2, i+problemSize/2, -1./(problemSize*2) );
+        }
     }
     testMatrix->globalAssemble();
     *B += *testMatrix;
