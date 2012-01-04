@@ -56,7 +56,7 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
     // Processor informations
     const int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
     const int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    int  srcRowElement(0);
+    int        srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
     const int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
@@ -200,11 +200,7 @@ void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock
     // Processor informations
     int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    int  srcRowElement(0);
-
-    //Offset between the first row/column of the source and destination blocks
-    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
-    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+    unsigned int srcRowElement(0);
 
     // Source informations handlers
     int numSrcEntries;
@@ -225,7 +221,7 @@ void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            int diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            unsigned int diagIndex=srcRowElement-srcBlock.firstRowIndex();
             int destRow = destBlock.firstRowIndex()+diagIndex;
             int destIndex = destBlock.firstColumnIndex()+diagIndex;
             DataType diagValue = 0.0;
@@ -268,11 +264,7 @@ void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBl
     // Processor informations
     int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    int  srcRowElement(0);
-
-    //Offset between the first row/column of the source and destination blocks
-    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
-    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+    unsigned int srcRowElement(0);
 
     // Source informations handlers
     int numSrcEntries;
@@ -293,7 +285,7 @@ void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBl
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            int diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            unsigned int diagIndex=srcRowElement-srcBlock.firstRowIndex();
             int destRow = destBlock.firstRowIndex()+diagIndex;
             int destIndex = destBlock.firstColumnIndex()+diagIndex;
             DataType diagValue = 0.0;
@@ -334,7 +326,7 @@ void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
     // Processor informations
     int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    int  srcRowElement(0);
+    unsigned int srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
     int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
@@ -344,7 +336,7 @@ void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
     int numSrcEntries;
     DataType* srcValues;
     int* srcIndices;
-    int srcGlobalIndex(0);
+    unsigned int srcGlobalIndex(0);
     int srcRow(0);
 
     for(int i(0);i<numSrcElements;++i)
@@ -403,7 +395,7 @@ void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
     // Processor informations
     int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    int  srcRowElement(0);
+    unsigned int srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
     int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
@@ -413,7 +405,7 @@ void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
     int numSrcEntries;
     DataType* srcValues;
     int* srcIndices;
-    int srcGlobalIndex(0);
+    unsigned int srcGlobalIndex(0);
     int srcRow(0);
 
     for(int i(0);i<numSrcElements;++i)
@@ -475,17 +467,13 @@ void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlo
     // Processor informations
     int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    int  srcRowElement(0);
-
-    //Offset between the first row/column of the source and destination blocks
-    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
-    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+    unsigned int srcRowElement(0);
 
     // Source informations handlers
     int numSrcEntries;
     DataType* srcValues;
     int* srcIndices;
-    int srcGlobalIndex(0);
+    unsigned int srcGlobalIndex(0);
     int srcRow(0);
 
     for(int i(0);i<numSrcElements;++i)
@@ -542,17 +530,13 @@ void createInvLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& src
     // Processor informations
     int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    int  srcRowElement(0);
-
-    //Offset between the first row/column of the source and destination blocks
-    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
-    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+    unsigned int srcRowElement(0);
 
     // Source informations handlers
     int numSrcEntries;
     DataType* srcValues;
     int* srcIndices;
-    int srcGlobalIndex(0);
+    unsigned int srcGlobalIndex(0);
     int srcRow(0);
 
     for(int i(0);i<numSrcElements;++i)
