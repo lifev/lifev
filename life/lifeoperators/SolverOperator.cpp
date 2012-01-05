@@ -33,7 +33,7 @@
     @date 03-09-2010
  */
 
-#include <life/lifeoperators/InvertibleOperator.hpp>
+#include <life/lifeoperators/SolverOperator.hpp>
 #include <Teuchos_RCPBoostSharedPtrConversions.hpp>
 
 namespace LifeV
@@ -43,7 +43,7 @@ namespace Operators
 {
 
 SolverOperator::SolverOperator():
-	M_name("InvertibleOperator"),
+	M_name("SolverOperator"),
 	M_useTranspose(false)
 { }
 

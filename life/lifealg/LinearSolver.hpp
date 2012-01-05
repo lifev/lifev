@@ -75,13 +75,16 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#include <life/lifecore/LifeDebug.hpp>
+#include <life/lifecore/LifeChrono.hpp>
+#include <life/lifecore/Displayer.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifealg/Preconditioner.hpp>
-#include <life/lifecore/LifeDebug.hpp>
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifecore/Displayer.hpp>
+#include <life/lifeoperators/SolverOperator.hpp>
+#include <life/lifeoperators/BelosOperator.hpp>
+#include <life/lifeoperators/AztecooOperator.hpp>
 
 namespace LifeV
 {
@@ -101,7 +104,7 @@ public:
 
     typedef Real                                                        value_Type;
 
-    typedef LinearSolver                                                 solver_Type;
+    typedef LinearSolver                                                solver_Type;
     typedef Epetra_MultiVector                                          multiVector_Type;
     typedef Epetra_Operator                                             operator_Type;
     typedef boost::shared_ptr<operator_Type>                            operatorPtr_Type;

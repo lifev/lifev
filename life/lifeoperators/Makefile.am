@@ -24,7 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 lib_LTLIBRARIES	= liblifeoperators.la
 
-liblifeoperators_la_SOURCES	= AztecooOperator.cpp BelosOperator.cpp InvertibleOperator.cpp
+liblifeoperators_la_SOURCES	= AztecooOperator.cpp BelosOperator.cpp SolverOperator.cpp
 
 liblifeoperators_la_LIBADD	= 
 

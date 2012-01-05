@@ -45,7 +45,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifealg/SolverBelos.hpp>
+#include <life/lifealg/LinearSolver.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
 

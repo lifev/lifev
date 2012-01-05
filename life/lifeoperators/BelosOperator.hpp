@@ -36,8 +36,6 @@
 #ifndef _BELOSOPERATOR_HPP_
 #define _BELOSOPERATOR_HPP_
 
-
-#include <life/lifeoperators/InvertibleOperator.hpp>
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -52,6 +50,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 #pragma GCC diagnostic warning "-Wextra"
 
+#include <life/lifeoperators/SolverOperator.hpp>
 
 namespace LifeV
 {

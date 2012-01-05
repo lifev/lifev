@@ -41,12 +41,12 @@
 namespace LifeV
 {
 
-Real Laplacian::f( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& i )
+Real Laplacian::f( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
 {
     return  (M_xMode*M_xMode + M_yMode*M_yMode + M_zMode*M_zMode)*4*M_PI*M_PI*sin(M_xMode*2*M_PI*x)*sin(M_yMode*2*M_PI*y)*sin(M_zMode*2*M_PI*z);
 }
 
-Real Laplacian::uexact( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& i )
+Real Laplacian::uexact( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
 {
     return  sin(M_xMode*2*M_PI*x)*sin(M_yMode*2*M_PI*y)*sin(M_zMode*2*M_PI*z);
 }
