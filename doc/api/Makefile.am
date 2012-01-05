@@ -26,7 +26,6 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 include ../../Doxyfile.am
 
 
-
 clean: clean-am clean-local
 
 clean-local:

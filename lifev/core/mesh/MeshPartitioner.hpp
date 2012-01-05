@@ -55,32 +55,13 @@
 #include <lifev/core/util/Switch.hpp>
 #include <lifev/core/mesh/MeshElementMarked.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/GhostEntityData.hpp>
+#include <lifev/core/mesh/MeshEntity.hpp>
 
 namespace LifeV
 {
-
-
-struct GhostEntityData
-{
-    //! ID in the current sub-domain of the facet.
-    ID localFacetId;
-
-    //! ID of element that faces the local one on the other sub-domain.
-    ID ghostElementLocalId;
-
-    //! Position on the ghost element.
-    UInt ghostElementPosition;
-
-    friend std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged );
-}; // struct AdjacentEntityData
-
-inline std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged )
-{
-    out << "ghostEntityData: localFacet "<< ged.localFacetId
-        << " - ghostElem "               << ged.ghostElementLocalId
-        << " - ghostPos "                << ged.ghostElementPosition << " ";
-    return out;
-}
 
 /*!
   @brief Class that handles mesh partitioning
