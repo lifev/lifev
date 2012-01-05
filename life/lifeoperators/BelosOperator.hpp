@@ -113,7 +113,7 @@ protected:
 inline SolverOperator* createBelosOperator() { return new BelosOperator(); }
 namespace
 {
-	static bool registerBelos = InvertibleOperatorFactory::instance().registerProduct( "Belos", &createBelosOperator );
+	static bool registerBelos = SolverOperatorFactory::instance().registerProduct( "Belos", &createBelosOperator );
 }
 
 

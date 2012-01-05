@@ -81,7 +81,7 @@ protected:
 inline SolverOperator* createAztecooOperator() { return new AztecooOperator(); }
 namespace
 {
-	static bool registerAztecoo = InvertibleOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperator );
+	static bool registerAztecoo = SolverOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperator );
 }
 
 

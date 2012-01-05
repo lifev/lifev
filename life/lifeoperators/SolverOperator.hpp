@@ -121,6 +121,7 @@ public:
 	virtual const map_Type & OperatorRangeMap() const {return M_oper->OperatorRangeMap();}
 
 	//@}
+
 protected:
 
 	virtual int doApplyInverse(const vector_Type& X, vector_Type& Y) const = 0;
@@ -140,7 +141,7 @@ protected:
 	bool M_useTranspose;
 };
 
-typedef FactorySingleton<Factory<SolverOperator, std::string> > InvertibleOperatorFactory;
+typedef FactorySingleton<Factory<SolverOperator, std::string> > SolverOperatorFactory;
 
 } // Namespace Operators
 
