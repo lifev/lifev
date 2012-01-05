@@ -7,7 +7,7 @@ namespace Operators
 {
 
 AztecooOperator::AztecooOperator():
-		InvertibleOperator(),
+		SolverOperator(),
 		M_linSolver(new SolverType)
 {
 	M_name = "AztecooOperator";

@@ -34,7 +34,7 @@ namespace Operators
  *
  */
 
-class BelosOperator : public InvertibleOperator
+class BelosOperator : public SolverOperator
 {
 public:
 
@@ -83,7 +83,7 @@ protected:
 	static std::auto_ptr<precSideMap_Type> S_precSideMap;
 };
 
-inline InvertibleOperator* createBelosOperator() { return new BelosOperator(); }
+inline SolverOperator* createBelosOperator() { return new BelosOperator(); }
 namespace
 {
 	static bool registerBelos = InvertibleOperatorFactory::instance().registerProduct( "Belos", &createBelosOperator );

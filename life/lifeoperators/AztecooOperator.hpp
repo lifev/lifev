@@ -30,11 +30,11 @@ namespace LifeV
 {
 namespace Operators
 {
-//! @class InvertibleOperator
+//! @class AztecooOperator
 /*! @brief Abstract class which defines the interface of an Invertible Linear Operator.
  *
  */
-class AztecooOperator : public InvertibleOperator
+class AztecooOperator : public SolverOperator
 {
 public:
 	typedef AztecOO SolverType;
@@ -52,7 +52,7 @@ protected:
 	SolverType_ptr								M_linSolver;
 };
 
-inline InvertibleOperator* createAztecooOperator() { return new AztecooOperator(); }
+inline SolverOperator* createAztecooOperator() { return new AztecooOperator(); }
 namespace
 {
 	static bool registerAztecoo = InvertibleOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperator );

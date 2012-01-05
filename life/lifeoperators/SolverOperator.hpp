@@ -1,12 +1,12 @@
 /*
- * InvertibleOperator.hpp
+ * SolverOperator.hpp
  *
  *  Created on: Sep 3, 2010
  *      Author: uvilla
  */
 
-#ifndef INVERTIBLEOPERATOR_HPP_
-#define INVERTIBLEOPERATOR_HPP_
+#ifndef SOLVEROPERATOR_HPP_
+#define SOLVEROPERATOR_HPP_
 
 
 #include <life/lifeoperators/LinearOperator.hpp>
@@ -33,15 +33,15 @@ namespace LifeV
 {
 namespace Operators
 {
-//! @class InvertibleOperator
+//! @class SolverOperator
 /*! @brief Abstract class which defines the interface of an Invertible Linear Operator.
  *
  */
-class InvertibleOperator : public LinearOperator
+class SolverOperator : public LinearOperator
 {
 public:
 
-	InvertibleOperator();
+	SolverOperator();
 
 	//! @name Attribute set methods
 	//@{
@@ -112,7 +112,7 @@ protected:
 	bool M_useTranspose;
 };
 
-typedef FactorySingleton<Factory<InvertibleOperator, std::string> > InvertibleOperatorFactory;
+typedef FactorySingleton<Factory<SolverOperator, std::string> > InvertibleOperatorFactory;
 
 } // Namespace Operators
 

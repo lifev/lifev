@@ -35,7 +35,7 @@ std::auto_ptr<BelosOperator::solverManagerMap_Type> BelosOperator::S_solverManag
 std::auto_ptr<BelosOperator::precSideMap_Type> BelosOperator::S_precSideMap(BelosOperator::singletonPrecSideMap());
 
 BelosOperator::BelosOperator():
-		InvertibleOperator(),
+		SolverOperator(),
 		M_linProblem(rcp(new LinearProblem))
 {
 	M_name = "BelosOperator";
