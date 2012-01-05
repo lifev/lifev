@@ -169,12 +169,18 @@ public:
     //! Read  only last timestep
     virtual void import(const Real& Tstart);
 
+    //! temporary: the method should work form the Exporter class
+    void exportPID ( MeshPartitioner<MeshType> const & /*meshPart*/ )
+    {
+        std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+    }
+
     //@}
 
     //! @name Get methods
     //@{
     //! returns the type of the map to use for the VectorEpetra
-    virtual MapEpetraType mapType() const;
+    virtual MapEpetraType mapType() const;    
     //@}
 
 private:

@@ -218,7 +218,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             for ( i = 0; i < numberVertices; ++i )
             {
                 myStream >> x >> y >> z >> ibc;
-                if ( ! iSelect( entityFlag_Type( ibc ) ) )
+                if ( ! iSelect( markerID_Type( ibc ) ) )
                 {
                     numberBoundaryVertices++;
                     isboundary[ i ] = true;
@@ -240,7 +240,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                 myStream >> p1 >> p2 >> p3 >> ibc;
                 if ( isboundary[ p1 - idOffset ] && isboundary [ p2 - idOffset ] && isboundary[ p3 - idOffset ])
                 {
-                    if ( iSelect( entityFlag_Type( ibc ) ) )
+                    if ( iSelect( markerID_Type( ibc ) ) )
                     {
                         std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
@@ -252,7 +252,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                 }
                 else
                 {
-                    if ( !iSelect( entityFlag_Type( ibc ) ) )
+                    if ( !iSelect( markerID_Type( ibc ) ) )
                     {
                         std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
@@ -281,7 +281,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                if ( isboundary[ p1 - idOffset ] && isboundary[ p2 - idOffset ]
                     && isboundary[ p3 - idOffset ] && isboundary[ p4 - idOffset ] )
                 {
-                    if ( iSelect( entityFlag_Type( ibc ) ) )
+                    if ( iSelect( markerID_Type( ibc ) ) )
                     {
                         std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
@@ -326,7 +326,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
         // I assume we are storing only boundary edges
         if ( line.find( "Edges" ) != std::string::npos )
         {
-            numberBoundaryEdges = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
+            numberBoundaryEdges = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
             done++;
             for ( i = 0; i < numberBoundaryEdges; i++ )
             {

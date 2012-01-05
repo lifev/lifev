@@ -116,7 +116,7 @@ void stiffness(MatrixElemental& localStiff,
                 //Loop on the quadrature nodes
                 for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
-                    for (UInt iDim(0); iDim<3; ++iDim)
+                    for (UInt iDim(0); iDim<stiffCFE.nbCoor(); ++iDim)
                     {
                         localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
                                       * stiffCFE.dphi(jDof,iDim,iQuadPt)
@@ -258,7 +258,7 @@ void stiffStrain(MatrixElemental& localStiff,
                 //Loop on the quadrature nodes
                 for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
-                    for (UInt iDim(0); iDim<3; ++iDim)
+                    for (UInt iDim(0); iDim< stiffCFE.nbCoor(); ++iDim)
                     {
                         localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
                             * stiffCFE.dphi(jDof,iDim,iQuadPt)
@@ -301,6 +301,53 @@ void stiffStrain(MatrixElemental& localStiff,
             }
         }
     }
+}
+
+void bodyForces(VectorElemental& localForce,
+                const CurrentFE& massRhsCFE,
+                const function_Type& fun,
+                const Real& t,
+                const UInt& fieldDim)
+{
+
+    const UInt nbFEDof(massRhsCFE.nbFEDof());
+    const UInt nbQuadPt(massRhsCFE.nbQuadPt());
+    std::vector<Real> fValues(nbQuadPt,0.0);
+    Real localValue(0.0);
+
+    // Assemble the local diffusion
+    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    {
+        VectorElemental::vector_view localView = localForce.block(iterFDim);
+
+        // Compute the value of f in the quadrature nodes
+        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+        {
+            fValues[iQuadPt]= fun(t,
+                                  massRhsCFE.quadNode(iQuadPt,0),
+                                  massRhsCFE.quadNode(iQuadPt,1),
+                                  massRhsCFE.quadNode(iQuadPt,2),
+                                  iterFDim);
+        }
+
+        // Loop over the basis functions
+        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+        {
+            localValue = 0.0;
+
+            //Loop on the quadrature nodes
+            for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+            {
+                localValue += fValues[iQuadPt]
+                    * massRhsCFE.phi(iDof,iQuadPt)
+                    * massRhsCFE.wDetJacobian(iQuadPt);
+            }
+
+            // Add on the local matrix
+            localView(iDof)=localValue;
+        }
+    }
+
 }
 
 }
@@ -2824,7 +2871,7 @@ void stiff_sd( Real coef, const VectorElemental& vec_loc, MatrixElemental& elmat
     MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt iloc, jloc;
     UInt i, icoor, ig, jcoor;
-    double s, coef_s, coef_v[ nDimensions ];
+    double s, coef_s, coef_v[ fe.nbCoor() ];
     //    int nbN1=fe.nbFEDof();
     UInt nbN2 = fe2.nbFEDof();
     //
@@ -2836,7 +2883,7 @@ void stiff_sd( Real coef, const VectorElemental& vec_loc, MatrixElemental& elmat
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < nDimensions; icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 coef_v[ icoor ] = 0.;
 
             // computation of the convection term in the quadrature nodes
@@ -2867,7 +2914,7 @@ void stiff_sd( Real coef, const VectorElemental& vec_loc, MatrixElemental& elmat
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < nDimensions; icoor++ )
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 coef_v[ icoor ] = 0.;
 
             for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
@@ -2970,8 +3017,8 @@ void grad_div( Real coef_grad, Real coef_div, MatrixElemental& elmat,
 */
 {
     double s;
-    int iblock = block_pres - nDimensions;
-    for ( UInt icoor = 0; icoor < 3; icoor++ )
+    int iblock = block_pres - fe_u.nbCoor();
+    for ( UInt icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
     {
         MatrixElemental::matrix_view mat_grad = elmat.block( iblock + icoor, block_pres );
         MatrixElemental::matrix_view mat_div = elmat.block( block_pres , iblock + icoor );
@@ -3002,7 +3049,7 @@ void stab_stokes( Real visc, Real coef_stab, MatrixElemental& elmat,
             s = 0;
             for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
             {
-                for ( UInt icoor = 0; icoor < 3; icoor++ )
+                for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
                 {
                     s += fe.phiDer( i, icoor, ig ) * fe.phiDer( j, icoor, ig ) * fe.weightDet( ig );
                 }
@@ -3020,10 +3067,10 @@ void advection( Real coef, VectorElemental& vel,
 {
     Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     Real v_grad, s;
-    Matrix v( fe.nbQuadPt(), nDimensions );
+    Matrix v( fe.nbQuadPt(), fe.nbCoor() );
 
     //Evaluate the advective field at the quadrature nodes
-    for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
     {
         VectorElemental::vector_view velicoor = vel.block( icoor );
         for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
@@ -3044,7 +3091,7 @@ void advection( Real coef, VectorElemental& vel,
             for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
             {
                 v_grad = 0.;
-                for ( int icoor = 0; icoor < ( int ) nDimensions; icoor++ )
+                for ( int icoor = 0; icoor < ( int ) fe.nbCoor(); icoor++ )
                     v_grad += v(iq, icoor) * fe.phiDer( j, icoor, iq );
 
                 s += v_grad * fe.phi( i, iq ) * fe.weightDet( iq );
@@ -3382,7 +3429,7 @@ void source_divuq(Real alpha, VectorElemental& uLoc,  VectorElemental& elvec, co
         s = 0;
         for (iq = 0; iq < fe_p.nbQuadPt(); ++iq )
             for (j = 0; j < fe_u.nbFEDof(); ++j)
-                for (ic = 0; ic < nDimensions; ++ic)
+                for (ic = 0; ic < fe_u.nbCoor(); ++ic)
                     s += uLoc[ic*fe_u.nbFEDof()+j]*fe_u.phiDer(j,ic,iq)*fe_p.phi(i,iq)* fe_p.weightDet( iq );
 
         vec( i ) += s*alpha;
@@ -4969,7 +5016,7 @@ void source_Hdiv( const Vector& source, VectorElemental& elvec, const CurrentFE&
 
     // Loop over all the degrees of freedom of the dual variable.
     for ( UInt i(0); i < dualFE.nbFEDof(); ++i )
-    { 
+    {
         // Loop over all the quadrature point.
         for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
         {
@@ -4978,7 +5025,7 @@ void source_Hdiv( const Vector& source, VectorElemental& elvec, const CurrentFE&
                e.g. in 3D three times, in 2D two times.*/
             for ( UInt icoor(0); icoor < dualFE.nbCoor(); ++icoor )
             {
-                // sum[icoor] = source[icoor] * phi[icoor] for all icorr.  
+                // sum[icoor] = source[icoor] * phi[icoor] for all icorr.
                 sum += source( icoor ) * dualFE.phi( i, icoor, ig );
 
             }

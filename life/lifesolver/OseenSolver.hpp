@@ -277,14 +277,14 @@ public:
     void getFluidMatrix( matrix_Type& matrixFull );
 
     //! Set up post processing
-    void setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart );
+    void setupPostProc( const markerID_Type& flag, const mesh_Type meshPart );
 
     //! Compute area on a boundary face with given flag
     /*!
         @param  flag
         @return area
      */
-    Real area( const entityFlag_Type& flag );
+    Real area( const markerID_Type& flag );
 
     //! Compute flux on a boundary face with given flag and a given solution
     /*!
@@ -292,14 +292,14 @@ public:
         @param  solution
         @return flux
      */
-    Real flux( const entityFlag_Type& flag, const vector_Type& solution );
+    Real flux( const markerID_Type& flag, const vector_Type& solution );
 
     //! Compute flux on a boundary face with given flag
     /*!
         @param flag
         @return flux
      */
-    Real flux( const entityFlag_Type& flag );
+    Real flux( const markerID_Type& flag );
 
     //! Compute average pressure on a boundary face with given flag and a given solution
     /*!
@@ -307,14 +307,14 @@ public:
         @param  solution
         @return average pressure
      */
-    Real pressure( const entityFlag_Type& flag, const vector_Type& solution );
+    Real pressure( const markerID_Type& flag, const vector_Type& solution );
 
     //! Compute average pressure on a boundary face with given flag
     /*!
         @param flag
         @return average pressure
      */
-    Real pressure( const entityFlag_Type& flag );
+    Real pressure( const markerID_Type& flag );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
@@ -323,7 +323,7 @@ public:
         @param bcHandler BChandler containing the boundary conditions of the problem.
         @return          Lagrange multiplier
      */
-    Real lagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler );
+    Real lagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
@@ -334,7 +334,7 @@ public:
                          (and also the Lagrange multipliers at the end).
         @return          Lagrange multiplier
      */
-    Real lagrangeMultiplier( const entityFlag_Type&  flag,
+    Real lagrangeMultiplier( const markerID_Type&  flag,
                              bcHandler_Type& bcHandler,
                              const vector_Type& solution );
 
@@ -792,17 +792,17 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_diagonalize            ( false ),
         M_count                  ( 0 ),
         M_recomputeMatrix        ( false ),
-        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
-        M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim(), velocityFESpace.fieldDim() ),
+        M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim(), velocityFESpace.fieldDim() ),
         M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
         M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
-                                    M_velocityFESpace.fe().nbFEDof(), 0, nDimensions ),
-        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), nDimensions, 0,
+                                    M_velocityFESpace.fe().nbFEDof(), 0, velocityFESpace.fieldDim() ),
+        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim(), 0,
                                    M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
-        M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
+        M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
         M_blockPreconditioner    ( ),
-        M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
-        M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
+        M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
+        M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
         M_un                     ( new vector_Type(M_localMap) )
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
@@ -855,17 +855,17 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_diagonalize            ( false ),
         M_count                  ( 0 ),
         M_recomputeMatrix        ( false ),
-        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
-        M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
+        M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
         M_elementMatrixPreconditioner                 ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
         M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
-                                    M_velocityFESpace.fe().nbFEDof(), 0, nDimensions ),
-        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), nDimensions, 0,
+                                    M_velocityFESpace.fe().nbFEDof(), 0, M_velocityFESpace.fieldDim() ),
+        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), 0,
                                    M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
-        M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
+        M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
         M_blockPreconditioner    ( ),
-        M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
-        M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
+        M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
+        M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
         M_un                     ( new vector_Type(M_localMap) )
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
@@ -917,17 +917,17 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_diagonalize            ( false ),
         M_count                  ( 0 ),
         M_recomputeMatrix        ( false ),
-        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
-        M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
+        M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
         M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
         M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
-                                    M_velocityFESpace.fe().nbFEDof(), 0, nDimensions ),
-        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), nDimensions, 0,
+                                    M_velocityFESpace.fe().nbFEDof(), 0, M_velocityFESpace.fieldDim() ),
+        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), 0,
                                    M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
-        M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
+        M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
         M_blockPreconditioner    ( ),
-        M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
-        M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
+        M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
+        M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
         M_un                     ( new vector_Type(M_localMap) )
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
@@ -1006,8 +1006,8 @@ initialize( const vector_Type& velocityInitialGuess, const vector_Type& pressure
 
     *M_solution = velocityInitialGuess;
     *M_un = velocityInitialGuess;
-    M_solution->add( pressureInitialGuess, nDimensions * M_velocityFESpace.dof().numTotalDof() );
-    M_un->add( pressureInitialGuess, nDimensions * M_velocityFESpace.dof().numTotalDof() );
+    M_solution->add( pressureInitialGuess, M_velocityFESpace.fieldDim() * M_velocityFESpace.dof().numTotalDof() );
+    M_un->add( pressureInitialGuess, M_velocityFESpace.fieldDim() * M_velocityFESpace.dof().numTotalDof() );
 
 }
 
@@ -1047,7 +1047,7 @@ OseenSolver<MeshType, SolverType>::buildSystem()
     LifeChrono chronoZero;
 
     // Number of velocity components
-    UInt numVelocityComponent = nDimensions;
+    UInt numVelocityComponent = M_velocityFESpace.fieldDim();
 
     // Elementary computation and matrix assembling
     // Loop on elements
@@ -1061,14 +1061,14 @@ OseenSolver<MeshType, SolverType>::buildSystem()
     }
     chrono.start();
 
-    for ( UInt iVolume = 0; iVolume < M_velocityFESpace.mesh()->numVolumes(); iVolume++ )
+    for ( UInt iElement = 0; iElement < M_velocityFESpace.mesh()->numElements(); iElement++ )
     {
         chronoDer.start();
         // just to provide the id number in the assem_mat_mixed
-        M_pressureFESpace.fe().update( M_velocityFESpace.mesh()->volumeList( iVolume ) );
+        M_pressureFESpace.fe().update( M_velocityFESpace.mesh()->element( iElement ) );
         // just to provide the id number in the assem_mat_mixed
-        // M_pressureFESpace.fe().updateFirstDeriv( M_velocityFESpace.mesh()->volumeList( iVolume ) );
-        M_velocityFESpace.fe().updateFirstDeriv( M_velocityFESpace.mesh()->volumeList( iVolume ) );
+        // M_pressureFESpace.fe().updateFirstDeriv( M_velocityFESpace.mesh()->element( iElement ) );
+        M_velocityFESpace.fe().updateFirstDeriv( M_velocityFESpace.mesh()->element( iElement ) );
 
         chronoDer.stop();
 
@@ -1089,7 +1089,7 @@ OseenSolver<MeshType, SolverType>::buildSystem()
         else
             stiff( M_oseenData->viscosity(),
                    M_elementMatrixStiff,
-                   M_velocityFESpace.fe(), 0, 0, nDimensions );
+                   M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
         //stiff_div( 0.5*M_velocityFESpace.fe().diameter(), M_elementMatrixStiff, M_velocityFESpace.fe() );
         chronoStiff.stop();
 
@@ -1099,7 +1099,7 @@ OseenSolver<MeshType, SolverType>::buildSystem()
             chronoMass.start();
             mass( M_oseenData->density(),
                   M_elementMatrixMass,
-                  M_velocityFESpace.fe(), 0, 0, nDimensions );
+                  M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
             chronoMass.stop();
         }
 
@@ -1198,7 +1198,7 @@ OseenSolver<MeshType, SolverType>::buildSystem()
         }
     }
 
-    //    for (UInt ii = nDimensions*dimVelocity(); ii < nDimensions*dimVelocity() + dimPressure(); ++ii)
+    //    for (UInt ii = M_velocityFESpace.fieldDim()*dimVelocity(); ii < M_velocityFESpace.fieldDim()*dimVelocity() + dimPressure(); ++ii)
     //  M_matrixStokes->set_mat_inc( ii ,ii, 0. ); not scalable!!!
 
     if ( M_isDiagonalBlockPreconditioner == true )
@@ -1307,7 +1307,7 @@ updateSystem( const Real         alpha,
     M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
 
-    UInt numVelocityComponent = nDimensions;
+    UInt numVelocityComponent = M_velocityFESpace.fieldDim();
 
     //! managing the convective term
 
@@ -1330,12 +1330,12 @@ updateSystem( const Real         alpha,
         M_Displayer.leaderPrint( "  F-  Updating the convective terms ...        " );
         chrono.start();
 
-        for ( UInt iVolume = 0; iVolume < M_velocityFESpace.mesh()->numVolumes(); ++iVolume )
+        for ( UInt iElement = 0; iElement < M_velocityFESpace.mesh()->numElements(); ++iElement )
         {
             // just to provide the id number in the assem_mat_mixed
-            M_pressureFESpace.fe().updateFirstDeriv( M_velocityFESpace.mesh()->volumeList( iVolume ) );
+            M_pressureFESpace.fe().updateFirstDeriv( M_velocityFESpace.mesh()->element( iElement ) );
             //as updateFirstDer
-            M_velocityFESpace.fe().updateFirstDeriv( M_velocityFESpace.mesh()->volumeList( iVolume ) );
+            M_velocityFESpace.fe().updateFirstDeriv( M_velocityFESpace.mesh()->element( iElement ) );
 
             M_elementMatrixStiff.zero();
 
@@ -1541,14 +1541,14 @@ OseenSolver<MeshType, SolverType>::reduceSolution( Vector& velocityVector, Vecto
 
     if ( false /*S_verbose*/ )
     {
-        for ( UInt iDof = 0; iDof < nDimensions * dimVelocity(); ++iDof )
+        for ( UInt iDof = 0; iDof < M_velocityFESpace.fieldDim() * dimVelocity(); ++iDof )
         {
             velocityVector[ iDof ] = solution[ iDof ];
         }
 
         for ( UInt iDof = 0; iDof < dimPressure(); ++iDof )
         {
-            pressureVector[ iDof ] = solution[ iDof + nDimensions * dimVelocity() ];
+            pressureVector[ iDof ] = solution[ iDof + M_velocityFESpace.fieldDim() * dimVelocity() ];
         }
     }
 
@@ -1562,7 +1562,7 @@ OseenSolver<MeshType, SolverType>::reduceResidual( Vector& residualVector )
 
     if ( false /*S_verbose*/ )
     {
-        for ( UInt iDof = 0; iDof < nDimensions * dimVelocity(); ++iDof )
+        for ( UInt iDof = 0; iDof < M_velocityFESpace.fieldDim() * dimVelocity(); ++iDof )
         {
             residualVector[ iDof ] = residual[ iDof ];
         }
@@ -1609,14 +1609,14 @@ OseenSolver<MeshType, SolverType>::postProcessingSetPhi()
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag )
 {
     return flux( flag, *M_solution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag,
                                    const vector_Type& solution )
 {
     vector_Type velocityAndPressure( solution, Repeated );
@@ -1628,21 +1628,21 @@ OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::area( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::area( const markerID_Type& flag )
 {
     return M_postProcessing->measure( flag );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::pressure( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::pressure( const markerID_Type& flag )
 {
     return pressure( flag, *M_solution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::pressure(const markerID_Type& flag,
                                       const vector_Type& solution)
 {
     vector_Type velocityAndPressure( solution, Repeated );
@@ -1656,7 +1656,7 @@ OseenSolver<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type& flag,
                                                  bcHandler_Type& bcHandler )
 {
     return lagrangeMultiplier( flag, bcHandler, *M_solution );
@@ -1664,7 +1664,7 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& fl
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  flag,
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type&  flag,
                                                  bcHandler_Type& bcHandler,
                                                  const vector_Type& solution )
 {
@@ -1678,7 +1678,7 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  f
     // Find the index associated to the correct Lagrange multiplier
     for ( UInt lmIndex = 0; lmIndex < static_cast <UInt> ( fluxBCVector.size() ); ++lmIndex )
         if ( fluxbcName_Type.compare( fluxBCVector[ lmIndex ] ) == 0 )
-            return velocityPressureLambda[3 * M_velocityFESpace.dof().numTotalDof()
+            return velocityPressureLambda[M_velocityFESpace.fieldDim() * M_velocityFESpace.dof().numTotalDof()
                                           + M_pressureFESpace.dof().numTotalDof() + lmIndex];
 
     // If lmIndex has not been found a warning message is printed
@@ -1694,23 +1694,23 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
     LifeChrono chrono;
     chrono.start();
 
-    const UInt numVelocityComponent ( nDimensions );
+    const UInt numVelocityComponent ( velocityFESpace.fieldDim() );
     const UInt velocityTotalDof ( M_velocityFESpace.dof().numTotalDof() );
 
 
     if ( M_pressureMatrixMass.get() == 0 )
         M_pressureMatrixMass.reset( new matrix_Type( M_localMap ) );
 
-    for ( UInt iVolume = 0; iVolume < M_velocityFESpace.mesh()->numVolumes(); iVolume++ )
+    for ( UInt iElement = 0; iElement < M_velocityFESpace.mesh()->numElements(); iElement++ )
     {
         chrono.start();
         // just to provide the id number in the assem_mat_mixed
-        M_pressureFESpace.fe().update( M_pressureFESpace.mesh()->volumeList( iVolume ) );
+        M_pressureFESpace.fe().update( M_pressureFESpace.mesh()->element( iElement ) );
 
         M_elementMatrixPreconditioner.zero();
         // mass
         chrono.start();
-        mass( 1, M_elementMatrixPreconditioner, M_pressureFESpace.fe(), 0, 0, nDimensions );
+        mass( 1, M_elementMatrixPreconditioner, M_pressureFESpace.fe(), 0, 0, velocityFESpace.fieldDim() );
         chrono.stop();
 
         chrono.start();
@@ -1775,7 +1775,7 @@ OseenSolver<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       m
 
     if ( bcHandler.hasOnlyEssential() && M_diagonalize )
     {
-        matrix.diagonalize( nDimensions*dimVelocity(),
+        matrix.diagonalize( M_velocityFESpace.fieldDim()*dimVelocity(),
                             M_diagonalize,
                             rightHandSide,
                             0. );
@@ -1789,7 +1789,7 @@ OseenSolver<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       m
 
 template<typename MeshType, typename SolverType>
 void
-OseenSolver<MeshType, SolverType>::setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart )
+OseenSolver<MeshType, SolverType>::setupPostProc( const markerID_Type& flag, const mesh_Type meshPart )
 {
     M_postProcessing.reset( new PostProcessingBoundary<mesh_Type>( M_velocityFESpace.mesh(),
                                                      &M_velocityFESpace.feBd(),

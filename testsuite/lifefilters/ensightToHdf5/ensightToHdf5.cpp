@@ -67,7 +67,7 @@
 
 using namespace LifeV;
 
-typedef RegionMesh3D<LinearTetra>                mesh_Type;
+typedef RegionMesh<LinearTetra>                  mesh_Type;
 typedef OseenSolver< mesh_Type >::vector_Type    vector_Type;
 typedef OseenSolver< mesh_Type >::vectorPtr_Type vectorPtr_Type;
 typedef FESpace< mesh_Type, MapEpetra >          feSpace_Type;
@@ -154,7 +154,8 @@ EnsightToHdf5::run()
     geometryTranslate[1] = dataFile( "fluid/space_discretization/transform", 0., 7);
     geometryTranslate[2] = dataFile( "fluid/space_discretization/transform", 0., 8);
 
-    fullMeshPtr->transformMesh( geometryScale, geometryRotate, geometryTranslate );
+    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::MarkerCommon > _transformMesh(*fullMeshPtr);
+    _transformMesh.transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
     MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
 

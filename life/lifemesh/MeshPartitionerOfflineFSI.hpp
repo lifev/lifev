@@ -2,27 +2,28 @@
 /*
 *******************************************************************************
 
-Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-This file is part of LifeV.
+    This file is part of LifeV.
 
-LifeV is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-LifeV is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 *******************************************************************************
 */
 //@HEADER
+
 /*!
   @file
   @brief Offline mesh partitioning for FSI
@@ -101,7 +102,6 @@ public:
     typedef MeshPartitioner<uncutMesh_Type> meshCutter_Type;
     typedef boost::scoped_ptr<meshCutter_Type> meshCutterPtr_Type;
 
-    typedef MarkerTraits::entityFlag_Type entityFlag_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -129,8 +129,8 @@ public:
       @param solidPartitionNumber Int
       @param velocityOrder std::string
       @param displacementOrder std::string
-      @param fluidInterfaceFlag LifeV::MarkerTraits::EntityFlag (Int)
-      @param solidInterfaceFlag LifeV::MarkerTraits::EntityFlag (Int)
+      @param fluidInterfaceFlag LifeV::EntityFlagStandardPolicy::markerID_Type (Int)
+      @param solidInterfaceFlag LifeV::EntityFlagStandardPolicy::markerID_Type (Int)
       @param interfaceTolerance Real
       @param fluidInterfaceVertexFlag Int
       @param comm boost::shared_ptr to a Epetra_Comm object
@@ -141,8 +141,8 @@ public:
                const Int& solidPartitionNumber,
                const std::string& velocityOrder,
                const std::string& displacementOrder,
-               const entityFlag_Type& fluidInterfaceFlag,
-               const entityFlag_Type& solidInterfaceFlag,
+               const markerID_Type& fluidInterfaceFlag,
+               const markerID_Type& solidInterfaceFlag,
                const Real& interfaceTolerance,
                const Int& fluidInterfaceVertexFlag,
                const Int& solidInterfaceVertexFlag,
@@ -166,11 +166,11 @@ public:
 
     //! @name Get Methods
     //@{
-    const entityFlag_Type& fluidInterfaceFlag() const
+    const markerID_Type& fluidInterfaceFlag() const
     {
         return M_fluidInterfaceFlag;
     }
-    const entityFlag_Type& solidInterfaceFlag() const
+    const markerID_Type& solidInterfaceFlag() const
     {
         return M_solidInterfaceFlag;
     }
@@ -263,8 +263,8 @@ private:
 
     Real M_interfaceTolerance;
 
-    entityFlag_Type M_fluidInterfaceFlag;
-    entityFlag_Type M_solidInterfaceFlag;
+    markerID_Type M_fluidInterfaceFlag;
+    markerID_Type M_solidInterfaceFlag;
 
     boost::scoped_ptr<const Int> M_fluidInterfaceVertexFlag;
     boost::scoped_ptr<const Int> M_solidInterfaceVertexFlag;
@@ -303,8 +303,8 @@ void MeshPartitionerOfflineFSI<MeshType>::setup(const uncutMeshPtr_Type& uncutFl
                                             const Int& solidPartitionNumber,
                                             const std::string& velocityOrder,
                                             const std::string& displacementOrder,
-                                            const entityFlag_Type& fluidInterfaceFlag,
-                                            const entityFlag_Type& solidInterfaceFlag,
+                                            const markerID_Type& fluidInterfaceFlag,
+                                            const markerID_Type& solidInterfaceFlag,
                                             const Real& interfaceTolerance,
                                             const Int& fluidInterfaceVertexFlag,
                                             const Int& solidInterfaceVertexFlag,
