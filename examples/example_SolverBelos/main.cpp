@@ -58,7 +58,8 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
+#include <life/lifemesh/MeshUtility.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/BCManage.hpp>
@@ -74,7 +75,7 @@ using namespace LifeV;
 
 namespace
 {
-typedef RegionMesh3D<LinearTetra>         mesh_type;
+typedef RegionMesh<LinearTetra>           mesh_type;
 typedef MatrixEpetra<Real>                matrix_type;
 typedef VectorEpetra                      vector_type;
 typedef boost::shared_ptr<VectorEpetra>   vectorPtr_type;
@@ -160,7 +161,7 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>);
 
     // Building the mesh from the source
 
@@ -174,9 +175,9 @@ main( int argc, char** argv )
     if (verbose) std::cout << "Mesh source: regular mesh("
                            << numMeshElem << "x" << numMeshElem << "x" << numMeshElem << ")" << std::endl;
 
-    if (verbose) std::cout << "Mesh size  : " << fullMeshPtr->maxH() << std::endl;
+    if (verbose) std::cout << "Mesh size  : " << MeshUtility::MeshStatistics::computeSize( *fullMeshPtr ).maxH << std::endl;
     if (verbose) std::cout << "Partitioning the mesh ... " << std::endl;
-    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< RegionMesh<LinearTetra> >   meshPart( fullMeshPtr, Comm );
     fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
     // +-----------------------------------------------+
