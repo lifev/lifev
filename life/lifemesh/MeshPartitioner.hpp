@@ -57,35 +57,12 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/Switch.hpp>
-#include <life/lifemesh/MeshElementMarked.hpp>
-#include <life/lifecore/LifeDebug.hpp>
+#include <life/lifefem/DOF.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
+#include <life/lifemesh/GhostEntityData.hpp>
 
 namespace LifeV
 {
-
-
-struct GhostEntityData
-{
-    //! ID in the current sub-domain of the facet.
-    ID localFacetId;
-
-    //! ID of element that faces the local one on the other sub-domain.
-    ID ghostElementLocalId;
-
-    //! Position on the ghost element.
-    UInt ghostElementPosition;
-
-    friend std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged );
-}; // struct AdjacentEntityData
-
-inline std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged )
-{
-    out << "ghostEntityData: localFacet "<< ged.localFacetId
-        << " - ghostElem "               << ged.ghostElementLocalId
-        << " - ghostPos "                << ged.ghostElementPosition << " ";
-    return out;
-}
 
 /*!
   @brief Class that handles mesh partitioning

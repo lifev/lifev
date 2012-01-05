@@ -21,11 +21,8 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 lib_LTLIBRARIES		= liblifemesh.la
-liblifemesh_la_SOURCES	= MeshData.cpp MeshElementBare.cpp ElementShapes.cpp MeshVertex.cpp \
-Marker.cpp  MeshUtility.cpp RegionMesh.cpp RegionMesh3DStructured.cpp InternalEntitySelector.cpp
-
+liblifemesh_la_SOURCES	= ElementShapes.cpp GhostEntityData.cpp InternalEntitySelector.cpp Marker.cpp MeshData.cpp MeshElementBare.cpp MeshUtility.cpp MeshVertex.cpp RegionMesh3DStructured.cpp RegionMesh.cpp
 
 liblifemesh_la_LIBADD	= ../lifecore/liblifecore.la
-
 
 include $(top_srcdir)/Doxyfile.am
