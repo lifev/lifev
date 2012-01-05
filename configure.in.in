@@ -132,10 +132,10 @@ AC_CHECK_EXTRA_LDFLAGS
 
 CPPFLAGS="-I\${top_srcdir} ${CPPFLAGS}"
 
-life_libs="\${top_builddir}/life/lifefunctions/liblifefunctions.la \${top_builddir}/life/lifefilters/liblifefilters.la \${top_builddir}/life/lifesolver/liblifesolver.la  \${top_builddir}/life/lifefem/liblifefem.la \${top_builddir}/life/lifealg/liblifealg.la \${top_builddir}/life/lifemesh/liblifemesh.la \${top_builddir}/life/lifearray/liblifearray.la \${top_builddir}/life/lifecore/liblifecore.la"
+life_libs="\${top_builddir}/life/lifeoperators/liblifeoperators.la \${top_builddir}/life/lifefunctions/liblifefunctions.la \${top_builddir}/life/lifefilters/liblifefilters.la \${top_builddir}/life/lifesolver/liblifesolver.la  \${top_builddir}/life/lifefem/liblifefem.la \${top_builddir}/life/lifealg/liblifealg.la \${top_builddir}/life/lifemesh/liblifemesh.la \${top_builddir}/life/lifearray/liblifearray.la \${top_builddir}/life/lifecore/liblifecore.la"
 
 AC_SUBST(life_libs)
-LIFEV_LIBS="-llifefunctions -llifefilters -llifesolver -llifefem -llifealg -llifemesh -llifearray -llifecore"
+LIFEV_LIBS="-llifeoperators -llifefunctions -llifefilters -llifesolver -llifefem -llifealg -llifemesh -llifearray -llifecore"
 
 
 #

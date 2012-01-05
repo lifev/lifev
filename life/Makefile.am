@@ -26,7 +26,7 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 
-SUBDIRS		= lifecore lifearray lifemesh lifealg  lifefem  lifefilters lifefunctions lifesolver
+SUBDIRS		= lifecore lifearray lifemesh lifealg lifeoperators lifefem  lifefilters lifefunctions lifesolver
 
 
 include $(top_srcdir)/Doxyfile.am
