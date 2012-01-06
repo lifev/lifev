@@ -56,10 +56,12 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 LinearSolver::LinearSolver() :
+		M_matrix               (),
+		M_baseMatrixForPreconditioner(),
         M_leftPreconditioner   (),
         M_rightPreconditioner  (),
-        M_solverManagerType    ( BlockGmres ),
-        M_solverManager        (),
+        M_solverType           ( UndefinedSolver ),
+        M_solverOperator       (),
         M_problem              ( new LinearProblem_Type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer() ),
@@ -70,14 +72,16 @@ LinearSolver::LinearSolver() :
         M_lossOfPrecision      ( false ),
         M_maxNumItersReached   ( false )
 {
-    M_problem->setLabel( "SolverBelos" );
+
 }
 
 LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm>& comm ) :
+		M_matrix               (),
+		M_baseMatrixForPreconditioner(),
         M_leftPreconditioner   (),
         M_rightPreconditioner  (),
-        M_solverManagerType    ( BlockGmres ),
-        M_solverManager        (),
+        M_solverType           ( UndefinedSolver ),
+        M_solverOperator       (),
         M_problem              ( new LinearProblem_Type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer( comm ) ),
@@ -88,7 +92,7 @@ LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_lossOfPrecision      ( false ),
         M_maxNumItersReached   ( false )
 {
-    M_problem->setLabel( "SolverBelos" );
+
 }
 
 LinearSolver::~LinearSolver()
@@ -100,23 +104,8 @@ LinearSolver::~LinearSolver()
 // Methods
 // ===================================================
 Int
-LinearSolver::solve( vector_Type& solution )
+LinearSolver::solve( vectorPtr_Type& solution )
 {
-    return this->solve( solution.epetraVector() );
-}
-
-Int
-LinearSolver::solve( multiVector_Type& solution )
-{
-    // Reset status informations
-    M_lossOfPrecision = false;
-    M_maxNumItersReached = false;
-    bool failure = false;
-
-    // Setting the unknown in the system
-    Teuchos::RCP<multiVector_Type> solutionPtr( &( solution ), false );
-    M_problem->setLHS( solutionPtr );
-
     // Build preconditioners if needed
     bool retry( true );
     if ( !isPreconditionerSet() || !M_reusePreconditioner  )
@@ -137,24 +126,31 @@ LinearSolver::solve( multiVector_Type& solution )
         return -1;
     }
 
-    // Setup the Solver Manager
-    setupSolverManager();
+    // Setup the Solver Operator?? Really here??
+    setupSolverOperator();
+
+    // Reset status informations
+    M_lossOfPrecision = false;
+    M_maxNumItersReached = false;
+    bool failure = false;
+	M_solverOperator->resetStatus();
 
     // Solve the linear system
     LifeChrono chrono;
     chrono.start();
-    Belos::ReturnType ret = M_solverManager->solve();
+    M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solution->epetraVector() );
+    SolverOperator_Type::SolverOperatorStatusType convergenceStatus = M_solverOperator->hasConverged();
     chrono.stop();
     if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
 
     // Getting informations post-solve
-    Int numIters = M_solverManager->getNumIters();
-    bool M_lossOfPrecision = M_solverManager->isLOADetected();
+    Int numIters = M_solverOperator->numIterations();
+    M_lossOfPrecision = M_solverOperator->isLossOfAccuracyDetected();
 
     // Second run recomputing the preconditioner
     // This is done only if the preconditioner has not been
     // already recomputed and if it is a LifeV preconditioner.
-    if ( ret != Belos::Converged && retry &&
+    if ( convergenceStatus != SolverOperator_Type::yes && retry &&
        ( M_leftPreconditioner || M_rightPreconditioner ) )
     {
         M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , numIters, "\n" );
@@ -164,24 +160,26 @@ LinearSolver::solve( multiVector_Type& solution )
 
         // Solving again, but only once (retry = false)
         chrono.start();
-        ret = M_solverManager->solve();
+        M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solution->epetraVector() );
+        convergenceStatus = M_solverOperator->hasConverged();
+        M_lossOfPrecision = M_solverOperator->isLossOfAccuracyDetected();
         chrono.stop();
         if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
     }
 
-    if ( M_lossOfPrecision )
+    if ( M_lossOfPrecision == SolverOperator_Type::yes )
     {
         M_displayer->leaderPrint( "SLV-  WARNING: Loss of accuracy detected!\n" );
         failure = true;
     }
 
-    if ( ret == Belos::Converged )
+    if ( convergenceStatus == SolverOperator_Type::yes )
     {
         if( !M_silent ) M_displayer->leaderPrint( "SLV-  Convergence in " , numIters, " iterations\n" );
     }
     else
     {
-        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos failed to converged to the desired precision!\n" );
+        M_displayer->leaderPrint( "SLV-  WARNING: Solver failed to converged to the desired precision!\n" );
         M_maxNumItersReached = true;
         failure = true;
     }
@@ -220,17 +218,6 @@ LinearSolver::printStatus()
 {
     std::ostringstream stat;
     std::string str;
-
-    /*
-     AztecOO informations:
-     - Normal Convergence
-     - Maximum iters reached
-     - Accuracy loss
-     - Ill-conditioned
-     - Breakdown
-     If someone has the time, he may try to find a way to report
-     all these informations for the LinearSolver class as well.
-     */
 
     if ( M_lossOfPrecision )    stat << "Accuracy loss ";
     if ( M_maxNumItersReached ) stat << "Maximum number of iterations reached ";
@@ -331,7 +318,7 @@ LinearSolver::showMe( std::ostream& output ) const
 {
     if ( M_displayer->isLeader() )
     {
-        output << "SolverBelos, parameters list:" << std::endl;
+        output << "Solver parameters list:" << std::endl;
         output << "-----------------------------" << std::endl;
         output << M_parameterList << endl;
         output << "-----------------------------" << std::endl;
@@ -342,9 +329,9 @@ LinearSolver::showMe( std::ostream& output ) const
 // Set Methods
 // ===================================================
 void
-LinearSolver::setSolverManager( const SolverManagerType& solverManager )
+LinearSolver::setSolverType( const SolverType& solverType )
 {
-    M_solverManagerType = solverManager;
+    M_solverType = solverType;
 }
 
 void
@@ -353,36 +340,30 @@ LinearSolver::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
     M_displayer->setCommunicator( comm );
 }
 
-void LinearSolver::setMatrix( matrixPtr_Type& matrix )
+void LinearSolver::setOperator( matrixPtr_Type& matrix )
 {
+	// Does the solverOperator exists?
     M_matrix = matrix;
-    Teuchos::RCP<Epetra_FECrsMatrix> A = Teuchos::rcp( M_matrix->matrixPtr() );
-    M_problem->setOperator( A );
 }
 
 void
-LinearSolver::setOperator( Epetra_Operator& oper )
+LinearSolver::setOperator( operatorPtr_Type& operPtr )
 {
-    M_problem->setOperator( Teuchos::rcp( &oper ) );
+	// Does the solverOperator exists?
+    M_solverOperator->setOperator( operPtr );
 }
 
 void
-LinearSolver::setRightHandSide( const vector_Type& rhs )
+LinearSolver::setRightHandSide( const vectorPtr_Type& rhsPtr )
 {
-    Teuchos::RCP<const vector_Type::vector_type> rhsPtr( &( rhs.epetraVector() ), false );
-    M_problem->setRHS( rhsPtr );
-}
-
-void
-LinearSolver::setRightHandSide( const multiVector_Type& rhs )
-{
-    Teuchos::RCP<const multiVector_Type> rhsPtr( &( rhs ), false );
-    M_problem->setRHS( rhsPtr );
+	// Does the solverOperator exists?
+	M_rhs = rhsPtr;
 }
 
 void
 LinearSolver::setPreconditioner( preconditionerPtr_Type& preconditioner, PrecApplicationType precType )
 {
+	// Does the solverOperator exists?
     if ( precType == RightPreconditioner )
     {
         // If a right Epetra_Operator exists it must be deleted
@@ -407,6 +388,7 @@ LinearSolver::setPreconditioner( preconditionerPtr_Type& preconditioner, PrecApp
 void
 LinearSolver::setPreconditioner( operatorPtr_Type& preconditioner, PrecApplicationType precType )
 {
+	// Does the solverOperator exists?
     if ( precType == RightPreconditioner )
     {
         // If a right LifeV::Preconditioner exists it must be deleted
@@ -431,11 +413,22 @@ void
 LinearSolver::setParameters( const Teuchos::ParameterList& list )
 {
     M_parameterList.setParameters( list );
-    M_reusePreconditioner = M_parameterList.get( "Reuse preconditioner"     , false );
-    Int maxIter           = M_parameterList.get( "Maximum Iterations"       , 200 );
-    M_maxItersForReuse    = M_parameterList.get( "Max Iterations For Reuse" , static_cast<Int> ( maxIter*8./10. ) );
-    M_quitOnFailure       = M_parameterList.get( "Quit On Failure"          , false );
-    M_silent              = M_parameterList.get( "Silent"                   , false );
+    M_solverType = UndefinedSolver;
+    std::string solverName = M_parameterList.get( "Solver Type"              , "none" );
+    if( solverName == "Belos" )
+    {
+    	M_solverType = Belos;
+    }
+    else if( solverName == "Aztecoo" )
+    {
+    	M_solverType = Aztecoo;
+    }
+
+    M_reusePreconditioner  = M_parameterList.get( "Reuse Preconditioner"     , false );
+    Int maxIter            = M_parameterList.get( "Maximum Iterations"       , 200 );
+    M_maxItersForReuse     = M_parameterList.get( "Max Iterations For Reuse" , static_cast<Int> ( maxIter*8./10. ) );
+    M_quitOnFailure        = M_parameterList.get( "Quit On Failure"          , false );
+    M_silent               = M_parameterList.get( "Silent"                   , false );
 }
 
 void
@@ -463,7 +456,7 @@ LinearSolver::setQuitOnFailure( const bool enable )
 Int
 LinearSolver::numIterations() const
 {
-    return M_solverManager->getNumIters();
+    return M_solverOperator->numIterations();
 }
 
 
@@ -498,10 +491,10 @@ LinearSolver::parametersList()
     return M_parameterList;
 }
 
-LinearSolver::SolverManagerPtr_Type
+LinearSolver::SolverOperatorPtr_Type
 LinearSolver::solver()
 {
-    return M_solverManager;
+    return M_solverOperator;
 }
 
 boost::shared_ptr<Displayer>
@@ -515,55 +508,36 @@ LinearSolver::displayer()
 // ===================================================
 
 void
-LinearSolver::setupSolverManager()
+LinearSolver::setupSolverOperator()
 {
-    // If a SolverManager already exists we simply clean it!
-    if ( !M_solverManager.is_null() )
+    // If a SolverOperator already exists we simply clean it!
+    if ( !M_solverOperator.is_null() )
     {
-        M_solverManager.reset();
+        M_solverOperator.reset();
     }
 
-    switch ( M_solverManagerType )
+    switch ( M_solverType )
     {
-        case BlockCG:
-            // Create the block CG iteration
-            M_solverManager = rcp( new Belos::BlockCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
+        case Belos:
+        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
             break;
-        case PseudoBlockCG:
-            // Create the pseudo block CG iteration
-            M_solverManager = rcp( new Belos::PseudoBlockCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false) ) );
+        case Aztecoo:
+        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Aztecoo" ) );
             break;
-        case RCG:
-            M_solverManager = rcp( new Belos::RCGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
-        case BlockFGmres:
-            M_parameterList.set( "Flexible Gmres", true );
-            M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
-        case BlockGmres:
-            M_solverManager = rcp( new Belos::BlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
-        case PseudoBlockFGmres:
-            M_parameterList.set( "Flexible Gmres", true );
-            M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
-        case PseudoBlockGmres:
-            M_solverManager = rcp( new Belos::PseudoBlockGmresSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
-        case GmresPoly:
-            M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList,false ) ) );
-            break;
-        case GCRODR:
-            M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
-        case PCPG:
-            M_solverManager = rcp( new Belos::PCPGSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
-        case TFQMR:
-            // Create TFQMR iteration
-            M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,multiVector_Type,operator_Type>( M_problem, rcp( &M_parameterList, false ) ) );
-            break;
+        default:
+        	// Crash
+        	break;
     }
+    //operatorPtr_Type tmpMatrixPtr;
+    //tmpMatrixPtr = M_matrix;
+    //M_solverOperator->setOperator( tmpMatrixPtr );
+    M_solverOperator->setOperator( M_matrix->matrixPtr() );
+    operatorPtr_Type tmpPrecPtr;
+    //tmpPrecPtr = M_leftPreconditioner;
+    //M_solverOperator->setPreconditioner( tmpPrecPtr );
+    tmpPrecPtr.reset( M_leftPreconditioner->preconditioner() );
+    M_solverOperator->setPreconditioner( tmpPrecPtr );
+    M_solverOperator->setParameterList( M_parameterList );
 }
 
 } // namespace LifeV

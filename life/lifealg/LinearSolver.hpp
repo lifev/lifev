@@ -106,10 +106,11 @@ public:
 
     typedef LinearSolver                                                solver_Type;
     typedef Epetra_MultiVector                                          multiVector_Type;
+    typedef boost::shared_ptr<multiVector_Type>                         multiVectorPtr_Type;
     typedef Epetra_Operator                                             operator_Type;
     typedef boost::shared_ptr<operator_Type>                            operatorPtr_Type;
-    typedef Belos::SolverManager<Real,multiVector_Type,operator_Type>   SolverManager_Type;
-    typedef Teuchos::RCP< SolverManager_Type >                          SolverManagerPtr_Type;
+    typedef Operators::SolverOperator                                   SolverOperator_Type;
+    typedef Teuchos::RCP< SolverOperator_Type >                         SolverOperatorPtr_Type;
     typedef Belos::LinearProblem<double,multiVector_Type,operator_Type> LinearProblem_Type;
     typedef Teuchos::RCP< LinearProblem_Type >                          LinearProblemPtr_Type;
 
@@ -122,10 +123,8 @@ public:
 
 
 
-    enum PrecApplicationType { LeftPreconditioner, RightPreconditioner };
-    enum SolverManagerType { BlockCG, PseudoBlockCG, RCG,
-                             BlockGmres, PseudoBlockGmres, BlockFGmres, PseudoBlockFGmres, GmresPoly,
-                             GCRODR, PCPG, TFQMR };
+    enum PrecApplicationType { UndefinedPrecType, LeftPreconditioner, RightPreconditioner };
+    enum SolverType          { UndefinedSolver, Belos, Aztecoo };
 
     //@}
 
@@ -159,19 +158,7 @@ public:
       @param solution Vector to store the solution
       @return Number of iterations, M_maxIter+1 if solve failed.
      */
-    Int solve( vector_Type& solution );
-
-    //! Solves the system and returns the number of iterations.
-    /*!
-      The Matrix has already been passed by the method
-      setMatrix or setOperator
-
-      The preconditioner is build starting from the matrix baseMatrixForPreconditioner
-      if it is set otherwise from the problem matrix.
-      @param solution Vector to store the solution
-      @return Number of iterations, M_maxIter+1 if solve failed.
-     */
-    Int solve( multiVector_Type& solution );
+    Int solve( vectorPtr_Type& solution );
 
     //! Compute the residual
     /*!
@@ -216,14 +203,13 @@ public:
     //! @name Set Method
     //@{
 
-    //! Set the solver manager which should be used by Belos
+    //! Set the solver which should be used
     /*!
-      @param solverManager type of solver manager
-      The solver manager can be chosen from one of the following:
-      BlockCG, PseudoBlockCG, RCG, BlockGmres, PseudoBlockGmres,
-      BlockFGmres, PseudoBlockFGmres, GCRODR, GmresPoly,PCPG, TFQMR.
+      @param solverOperatorType Type of solver manager
+      The solver type can be chosen from one of the following:
+      Aztecoo, Belos
      */
-    void setSolverManager( const SolverManagerType& solverManager );
+    void setSolverType( const SolverType& solverType );
 
     //! Method to set communicator for Displayer (for empty constructor)
     /*!
@@ -235,25 +221,19 @@ public:
     /*!
       @param matrix Matrix of the system
      */
-    void setMatrix( matrixPtr_Type& matrix );
+    void setOperator( matrixPtr_Type& matrix );
 
     //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
     /*!
-      @param oper Operator for the system
+      @param operPtr Pointer to an operator for the system
      */
-    void setOperator( Epetra_Operator& oper );
+    void setOperator( operatorPtr_Type& operPtr );
 
     //! Method to set the right hand side (rhs) of the linear system
     /*!
       @param rhs right hand side of the system
      */
-    void setRightHandSide( const vector_Type& rhs );
-
-    //! Method to set the right hand side (rhs) of the linear system
-    /*!
-      @param rhs right hand side of the system
-     */
-    void setRightHandSide( const multiVector_Type& rhs );
+    void setRightHandSide( const vectorPtr_Type& rhs );
 
     //! Method to set an Preconditioner preconditioner
     /*!
@@ -322,7 +302,7 @@ public:
     Teuchos::ParameterList& parametersList();
 
     //! Return a pointer on the Belos solver manager
-    SolverManagerPtr_Type solver();
+    SolverOperatorPtr_Type solver();
 
     //! Return a shared pointer on the displayer
     boost::shared_ptr<Displayer> displayer();
@@ -334,18 +314,20 @@ private:
     //! @name Private Methods
     //@{
 
-    //! Setup the solver manager to be used
-    void setupSolverManager();
+    //! Setup the solver operator to be used
+    void setupSolverOperator();
 
     //@}
 
     matrixPtr_Type               M_matrix;
     matrixPtr_Type               M_baseMatrixForPreconditioner;
+    vectorPtr_Type               M_rhs;
+
     preconditionerPtr_Type       M_leftPreconditioner;
     preconditionerPtr_Type       M_rightPreconditioner;
 
-    SolverManagerType            M_solverManagerType;
-    SolverManagerPtr_Type        M_solverManager;
+    SolverType                   M_solverType;
+    SolverOperatorPtr_Type       M_solverOperator;
     LinearProblemPtr_Type        M_problem;
 
     Teuchos::ParameterList       M_parameterList;
