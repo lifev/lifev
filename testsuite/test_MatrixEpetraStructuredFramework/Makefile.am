@@ -13,10 +13,10 @@
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-SUFFIXES                           = .cpp .hpp .idl .c .h .f .F .o .moc
+SUFFIXES                                     = .cpp .hpp .idl .c .h .f .F .o .moc
 
-check_PROGRAMS                     = test_MatrixEpetraBlockView
-test_MatrixEpetraBlockView_SOURCES = main.cpp
+check_PROGRAMS                               = test_MatrixEpetraStructuredFramework
+test_MatrixEpetraStructuredFramework_SOURCES = main.cpp
 
 recheck: clean_PROGRAMS check
 

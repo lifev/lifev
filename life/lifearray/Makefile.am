@@ -25,7 +25,7 @@ lib_LTLIBRARIES	= liblifearray.la
 
 liblifearray_la_SOURCES	= MatrixElemental.cpp VectorElemental.cpp \
 			              VectorEpetra.cpp MapEpetra.cpp \ 
-					VectorBlockMonolithicEpetra.cpp VectorBlockMonolithicEpetraView.cpp
+					      VectorEpetraStructured.cpp VectorEpetraStructuredView.cpp
 
 liblifearray_la_LIBADD	= ../lifecore/liblifecore.la
 

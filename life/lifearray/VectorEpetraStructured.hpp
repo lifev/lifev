@@ -40,7 +40,7 @@
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifearray/MapVector.hpp>
-#include <life/lifearray/VectorBlockMonolithicEpetraView.hpp>
+#include <life/lifearray/VectorEpetraStructuredView.hpp>
 
 #include <boost/shared_ptr.hpp>
 

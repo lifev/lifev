@@ -9,14 +9,14 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### TESTSUITE: MATRIXEPETRABLOCKVIEW ##############################################################
+### TESTSUITE: MATRIXEPETRASTRUCTUREDFRAMEWORK ################################################
 ###################################################################################################
 
-AT_SETUP([test_MatrixEpetraBlockView])
-AT_KEYWORDS([Test of the MatrixEpetraBlockView framework])
+AT_SETUP([test_MatrixEpetraStructured])
+AT_KEYWORDS([Test of the MatrixEpetraStructured framework])
 AT_DATA([data],[[
 
 ]])
-AT_CHECK([mpirun -n 4 ../../test_MatrixEpetraBlockView/test_MatrixEpetraBlockView -c],[0],[ignore],[ignore])
+AT_CHECK([mpirun -n 4 ../../test_MatrixEpetraStructuredFramework/test_MatrixEpetraStructuredFramework -c],[0],[ignore],[ignore])
 AT_CLEANUP
 

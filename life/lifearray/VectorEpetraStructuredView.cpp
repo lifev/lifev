@@ -32,7 +32,7 @@
     @date 07 Jun 2011
  */
 
-#include <VectorBlockMonolithicEpetraView.hpp>
+#include <VectorEpetraStructuredView.hpp>
 
 namespace LifeV {
 

@@ -25,21 +25,21 @@
 //@HEADER
 
 /*!
-   @file MatrixBlockUtils.hpp
-   @brief The file contains utility functions to manipulate BlockMatrixView objects
+   @file MatrixEpetraStructuredUtility.hpp
+   @brief The file contains utility functions to manipulate MatrixEpetraStructuredView objects
 
    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   @date 2010-11-8
+   @date 2010-11-08
  */
 
-#ifndef _MATRIXBLOCKUTILS_HPP_
-#define _MATRIXBLOCKUTILS_HPP_
+#ifndef _MATRIXEPETRASTRUCTUREDUTILITY_HPP_
+#define _MATRIXEPETRASTRUCTUREDUTILITY_HPP_
 
-#include <life/lifearray/MatrixBlockMonolithicEpetraView.hpp>
+#include <life/lifearray/MatrixEpetraStructuredView.hpp>
 
 namespace LifeV {
 
-namespace MatrixBlockUtils {
+namespace MatrixEpetraStructuredUtility {
 
 //! Copy the block specified in another block
 /*!
@@ -576,8 +576,8 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
 }
 
 
-} // namespace MatrixBlockUtils
+} // namespace MatrixEpetraStructuredUtility
 
 } // namespace LifeV
 
-#endif /* _MATRIXBLOCKUTILS_HPP_ */
+#endif /*_MATRIXEPETRASTRUCTUREDUTILITY_HPP_ */

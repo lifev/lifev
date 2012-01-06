@@ -46,9 +46,9 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/Displayer.hpp>
 #include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/MatrixBlockMonolithicEpetra.hpp>
-#include <life/lifearray/MatrixBlockMonolithicEpetraView.hpp>
-#include <life/lifearray/MatrixBlockUtils.hpp>
+#include <life/lifearray/MatrixEpetraStructured.hpp>
+#include <life/lifearray/MatrixEpetraStructuredView.hpp>
+#include <life/lifearray/MatrixEpetraStructuredUtility.hpp>
 
 using namespace LifeV;
 
@@ -67,7 +67,7 @@ main( int argc, char** argv )
     Displayer displayer( comm );
 
     displayer.leaderPrint( " +-----------------------------------------------+\n" );
-    displayer.leaderPrint( " |           BlockView Framework test            |\n" );
+    displayer.leaderPrint( " |    MatrixEpetraStructured Framework test      |\n" );
     displayer.leaderPrint( " +-----------------------------------------------+\n\n" );
     displayer.leaderPrint( " +-----------------------------------------------+\n" );
     displayer.leaderPrint( " |           Author: Gwenol Grandperrin          |\n" );
@@ -152,7 +152,7 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     // |        Core of the test                       |
     // +-----------------------------------------------+
-    displayer.leaderPrint( "\n[Test of the blockview framework]\n" );
+    displayer.leaderPrint( "\n[Test of the framework]\n" );
 
     // +-----------------------------------------------+
     // |           TEST 1: Copy of blocks              |
@@ -165,10 +165,10 @@ main( int argc, char** argv )
     B->blockView( 1, 0, B21 );
     B->blockView( 1, 1, B22 );
 
-    MatrixBlockUtils::copyBlock( A11, B12 );
-    MatrixBlockUtils::copyBlock( A12, B22 );
-    MatrixBlockUtils::copyBlock( A22, B21 );
-    MatrixBlockUtils::copyBlock( A21, B11 );
+    MatrixEpetraStructuredUtility::copyBlock( A11, B12 );
+    MatrixEpetraStructuredUtility::copyBlock( A12, B22 );
+    MatrixEpetraStructuredUtility::copyBlock( A22, B21 );
+    MatrixEpetraStructuredUtility::copyBlock( A21, B11 );
 
     B->globalAssemble();
 
@@ -216,10 +216,10 @@ main( int argc, char** argv )
     B->blockView( 1, 0, B21 );
     B->blockView( 1, 1, B22 );
 
-    MatrixBlockUtils::createIdentityBlock( B11 );
-    MatrixBlockUtils::createIdentityBlock( B12 );
-    MatrixBlockUtils::createIdentityBlock( B21 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B12 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B21 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
 
     B->globalAssemble();
 
@@ -262,10 +262,10 @@ main( int argc, char** argv )
     B->blockView( 1, 0, B21 );
     B->blockView( 1, 1, B22 );
 
-    MatrixBlockUtils::createDiagBlock( A11, B11 );
-    MatrixBlockUtils::createDiagBlock( A12, B12 );
-    MatrixBlockUtils::createDiagBlock( A21, B21 );
-    MatrixBlockUtils::createDiagBlock( A22, B22 );
+    MatrixEpetraStructuredUtility::createDiagBlock( A11, B11 );
+    MatrixEpetraStructuredUtility::createDiagBlock( A12, B12 );
+    MatrixEpetraStructuredUtility::createDiagBlock( A21, B21 );
+    MatrixEpetraStructuredUtility::createDiagBlock( A22, B22 );
 
     B->globalAssemble();
 
@@ -308,10 +308,10 @@ main( int argc, char** argv )
     B->blockView( 1, 0, B21 );
     B->blockView( 1, 1, B22 );
 
-    MatrixBlockUtils::createInvDiagBlock( A11, B11 );
-    MatrixBlockUtils::createInvDiagBlock( A12, B12 );
-    MatrixBlockUtils::createInvDiagBlock( A21, B21 );
-    MatrixBlockUtils::createInvDiagBlock( A22, B22 );
+    MatrixEpetraStructuredUtility::createInvDiagBlock( A11, B11 );
+    MatrixEpetraStructuredUtility::createInvDiagBlock( A12, B12 );
+    MatrixEpetraStructuredUtility::createInvDiagBlock( A21, B21 );
+    MatrixEpetraStructuredUtility::createInvDiagBlock( A22, B22 );
 
     B->globalAssemble();
 
@@ -355,10 +355,10 @@ main( int argc, char** argv )
     B->blockView( 1, 0, B21 );
     B->blockView( 1, 1, B22 );
 
-    MatrixBlockUtils::createUpperTriangularBlock( A11, B11 );
-    MatrixBlockUtils::createUpperTriangularBlock( A12, B12 );
-    MatrixBlockUtils::createUpperTriangularBlock( A21, B21 );
-    MatrixBlockUtils::createUpperTriangularBlock( A22, B22 );
+    MatrixEpetraStructuredUtility::createUpperTriangularBlock( A11, B11 );
+    MatrixEpetraStructuredUtility::createUpperTriangularBlock( A12, B12 );
+    MatrixEpetraStructuredUtility::createUpperTriangularBlock( A21, B21 );
+    MatrixEpetraStructuredUtility::createUpperTriangularBlock( A22, B22 );
 
     B->globalAssemble();
 
@@ -406,10 +406,10 @@ main( int argc, char** argv )
     B->blockView( 1, 0, B21 );
     B->blockView( 1, 1, B22 );
 
-    MatrixBlockUtils::createLowerTriangularBlock( A11, B11 );
-    MatrixBlockUtils::createLowerTriangularBlock( A12, B12 );
-    MatrixBlockUtils::createLowerTriangularBlock( A21, B21 );
-    MatrixBlockUtils::createLowerTriangularBlock( A22, B22 );
+    MatrixEpetraStructuredUtility::createLowerTriangularBlock( A11, B11 );
+    MatrixEpetraStructuredUtility::createLowerTriangularBlock( A12, B12 );
+    MatrixEpetraStructuredUtility::createLowerTriangularBlock( A21, B21 );
+    MatrixEpetraStructuredUtility::createLowerTriangularBlock( A22, B22 );
 
     B->globalAssemble();
 
@@ -457,10 +457,10 @@ main( int argc, char** argv )
     B->blockView( 1, 0, B21 );
     B->blockView( 1, 1, B22 );
 
-    MatrixBlockUtils::createLumpedBlock( A11, B11 );
-    MatrixBlockUtils::createLumpedBlock( A12, B12 );
-    MatrixBlockUtils::createLumpedBlock( A21, B21 );
-    MatrixBlockUtils::createLumpedBlock( A22, B22 );
+    MatrixEpetraStructuredUtility::createLumpedBlock( A11, B11 );
+    MatrixEpetraStructuredUtility::createLumpedBlock( A12, B12 );
+    MatrixEpetraStructuredUtility::createLumpedBlock( A21, B21 );
+    MatrixEpetraStructuredUtility::createLumpedBlock( A22, B22 );
 
     B->globalAssemble();
 
@@ -502,10 +502,10 @@ main( int argc, char** argv )
     B->blockView( 1, 0, B21 );
     B->blockView( 1, 1, B22 );
 
-    MatrixBlockUtils::createInvLumpedBlock( A11, B11 );
-    MatrixBlockUtils::createInvLumpedBlock( A12, B12 );
-    MatrixBlockUtils::createInvLumpedBlock( A21, B21 );
-    MatrixBlockUtils::createInvLumpedBlock( A22, B22 );
+    MatrixEpetraStructuredUtility::createInvLumpedBlock( A11, B11 );
+    MatrixEpetraStructuredUtility::createInvLumpedBlock( A12, B12 );
+    MatrixEpetraStructuredUtility::createInvLumpedBlock( A21, B21 );
+    MatrixEpetraStructuredUtility::createInvLumpedBlock( A22, B22 );
 
     B->globalAssemble();
 
