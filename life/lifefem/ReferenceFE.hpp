@@ -77,33 +77,34 @@ namespace LifeV
 /* Unique FE identifier*/
 enum FE_TYPE
 {
-    FE_P0_0D = 0,
-    FE_P1_1D = 1,
-    FE_P2_1D = 2,
+    FE_P0_0D = 1,
+    FE_P1_1D,
+    FE_P2_1D,
 
-    FE_P0_2D = 10,
-    FE_P1_2D = 11,
-    FE_P2_2D = 12,
+    FE_P0_2D,
+    FE_P1_2D,
+    FE_P1bubble_2D,
+    FE_P2_2D,
 
-    FE_Q0_2D = 13,
-    FE_Q1_2D = 14,
-    FE_Q2_2D = 15,
+    FE_Q0_2D,
+    FE_Q1_2D,
+    FE_Q2_2D,
 
-    FE_P0_3D = 20,
-    FE_P1_3D = 21,
-    FE_P1bubble_3D = 22,
-    FE_P2_3D = 23,
-    FE_P2tilde_3D = 24,
+    FE_P0_3D,
+    FE_P1_3D,
+    FE_P1bubble_3D,
+    FE_P2_3D,
+    FE_P2tilde_3D,
 
-    FE_Q0_3D = 25,
-    FE_Q1_3D = 26,
-    FE_Q2_3D = 27,
+    FE_Q0_3D,
+    FE_Q1_3D,
+    FE_Q2_3D,
 
-    FE_RT0_HEXA_3D = 31,         //!< Vectorial space for Mixed FE
-    FE_RT0_TETRA_3D = 32,
-    FE_RT0_HYB_HEXA_3D = 41,     //!< for hybrid Mixed FE.
-    FE_RT1_HYB_HEXA_3D = 42,
-    FE_RT0_HYB_TETRA_3D = 44
+    FE_RT0_HEXA_3D,         //!< Vectorial space for Mixed FE
+    FE_RT0_TETRA_3D,
+    FE_RT0_HYB_HEXA_3D,     //!< for hybrid Mixed FE.
+    FE_RT1_HYB_HEXA_3D,
+    FE_RT0_HYB_TETRA_3D
 };
 
 

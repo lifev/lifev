@@ -62,7 +62,7 @@
 #include <life/lifecore/FactorySingleton.hpp>
 
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 #include <life/lifealg/NonLinearAitken.hpp>
 
@@ -105,7 +105,7 @@ public:
      */
     //@{
 
-    typedef RegionMesh3D<LinearTetra>                                               mesh_Type;
+    typedef RegionMesh<LinearTetra>                                               mesh_Type;
 #ifdef HAVE_HDF5
     typedef ExporterHDF5Mesh3D<mesh_Type>                                           meshFilter_Type;
 #endif

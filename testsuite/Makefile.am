@@ -26,6 +26,7 @@ SUBDIRS		= data  \
 			  test_MatrixEpetraBlockView \
 			  test_ADRAssembler \
 			  test_bdf \
+			  test_navierStokes \
               test_darcy \
               test_FEFunction \
               test_fsi \
@@ -52,6 +53,7 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
            $(srcdir)/test_MatrixEpetraBlockView \
 		   $(srcdir)/test_ADRAssembler/testsuite.at \
 		   $(srcdir)/test_bdf/testsuite.at \
+		   $(srcdir)/test_navierStokes/testsuite.at \
            $(srcdir)/test_darcy/testsuite.at \
            $(srcdir)/test_fsi/testsuite.at \
            $(srcdir)/test_hyperbolic/testsuite.at \

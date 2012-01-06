@@ -166,7 +166,7 @@ public:
      * @param base base of the condition
      */
     template< class BCBaseType >
-    void setBC( const OneDimensional::bcSide_Type& bcSide, const OneDimensional::bcLine_Type& bcLine, const OneDimensional::bcType_Type& bcType, const BCBaseType& base )
+    void setBC( const OneDFSI::bcSide_Type& bcSide, const OneDFSI::bcLine_Type& bcLine, const OneDFSI::bcType_Type& bcType, const BCBaseType& base )
     {
         this->M_handler->setBC( bcSide, bcLine, bcType, base );
     }
@@ -269,7 +269,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
         factory_Type factory;
         this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
 
-        OneDimensionalFunction base;
+        OneDFSIFunction base;
         this->M_vectorFunction.back()->assignFunction( base );
 
         addBcToHandler( base );
@@ -281,7 +281,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
         factory_Type factory;
         this->M_vectorFunctionSolverDefined.push_back( factory.createFunctionSolverDefined( M_data ) );
 
-        OneDimensionalFunction base;
+        OneDFSIFunction base;
         this->M_vectorFunctionSolverDefined.back()->assignFunction( base );
 
         addBcToHandler( base );

@@ -41,6 +41,7 @@
 #define LINEAREPETRAOPERATORBLOCK_H 1
 
 #include <life/lifealg/LinearEpetraOperator.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

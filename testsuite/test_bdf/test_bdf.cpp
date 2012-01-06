@@ -82,7 +82,7 @@ const int RIGHT = 4;
 const int FRONT = 2;
 const int BACK = 1;
 
-typedef RegionMesh3D<LinearTetra> RegionMesh;
+typedef RegionMesh<LinearTetra> regionMesh;
 
 const std::string discretization_section = "space_discretization";
 
@@ -162,15 +162,15 @@ void test_bdf::run()
     //Mesh stuff
     Members->comm->Barrier();
     MeshData meshData(dataFile, ("bdf/" + discretization_section).c_str());
-    boost::shared_ptr<RegionMesh> meshPtr( new RegionMesh() );
+    boost::shared_ptr<regionMesh> meshPtr( new regionMesh() );
     readMesh(*meshPtr,meshData);
-    MeshPartitioner<RegionMesh> meshPart(meshPtr, Members->comm);
+    MeshPartitioner<regionMesh> meshPart(meshPtr, Members->comm);
 
     //=============================================================================
     //finite element space of the solution
-    boost::shared_ptr<FESpace<RegionMesh, MapEpetra> > feSpacePtr(
-        new FESpace<RegionMesh, MapEpetra> (
-            meshPart, dataFile(("bdf/"+discretization_section).c_str(), "P2"), 1, Members->comm) );
+    boost::shared_ptr<FESpace<regionMesh, MapEpetra> > feSpacePtr(
+        new FESpace<regionMesh, MapEpetra> (
+            meshPart, dataFile(("bdf/"+discretization_section + "/order").c_str(), "P2"), 1, Members->comm) );
 
     if (verbose)
         std::cout << "  Number of unknowns : "
@@ -218,31 +218,31 @@ void test_bdf::run()
     bdf.setup(ord_bdf);
 
     //Initialization
-    bdf.setInitialCondition<Real(*) (Real, Real, Real, Real, UInt), FESpace<RegionMesh, MapEpetra> >(AnalyticalSol::u, u, *feSpacePtr, t0, delta_t);
+    bdf.setInitialCondition<Real(*) (Real, Real, Real, Real, UInt), FESpace<regionMesh, MapEpetra> >(AnalyticalSol::u, u, *feSpacePtr, t0, delta_t);
 
     if (verbose) bdf.showMe();
     Members->comm->Barrier();
 
     //===================================================
     // post processing setup
-    boost::shared_ptr<Exporter<RegionMesh> > exporter;
+    boost::shared_ptr<Exporter<regionMesh> > exporter;
     std::string const exporterType =  dataFile( "exporter/type", "hdf5");
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-        exporter.reset( new ExporterHDF5<RegionMesh > ( dataFile, "bdf_test" ) );
+        exporter.reset( new ExporterHDF5<regionMesh > ( dataFile, "bdf_test" ) );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new ExporterEmpty<RegionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<regionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new ExporterEnsight<RegionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<regionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
         }
     }
 
@@ -251,7 +251,7 @@ void test_bdf::run()
 
     boost::shared_ptr<VectorEpetra> u_display_ptr(new VectorEpetra(
                                                       feSpacePtr->map(), exporter->mapType()));
-    exporter->addVariable(ExporterData<RegionMesh >::ScalarField, "u", feSpacePtr,
+    exporter->addVariable(ExporterData<regionMesh >::ScalarField, "u", feSpacePtr,
                           u_display_ptr, UInt(0));
     *u_display_ptr = u;
     exporter->postProcess(0);

@@ -184,7 +184,8 @@ public:
     //! @name Get Methods
     //@{
 
-
+    //! Return the underlying data structure for the RHS vector
+    inline const vector_Type& rhsVector( ) const {return *M_rightHandSideVectorPtr;};
 
 
     //! Return the number of total DOF

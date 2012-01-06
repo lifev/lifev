@@ -44,6 +44,8 @@ namespace LifeV
 class Epetra_FullMonolithic;
 #endif
 
+   typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
+
 /**
    FSIMonolithic Geomitry-Implicit solver
  * Class handling the nonlinear monolithic solver for FSI problems. The (exact or inexact)

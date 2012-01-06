@@ -59,7 +59,7 @@ enum DofPatternType {STANDARD_PATTERN = 1,
   however, some "advanced" finite elements require this structure.
 
   For example, consider the P1-iso-P2 element in 2D. This finite element is composed of 6 basis functions, based on the
-  nodes with the same numerotation as the P2 element. The reference triangle is split into 4 subtriangles using the
+  nodes with the same numbering as the P2 element. The reference triangle is split into 4 subtriangles using the
   nodes on the faces. Each basis function is build such that it is 1 on its node, 0 on all the other nodes and such that
   it is linear in each subtriangle.
 
@@ -94,7 +94,7 @@ enum DofPatternType {STANDARD_PATTERN = 1,
   elements, this matrix is full (lagrangian FE, lagrangian FE with bubbles,...).
 
   Instead of this representation with a matrix, we usually prefer to get the DoFs that are coupled in a list. This
-  is the implemented in this class and the list of pairs (patternFirst(i),patternSecond(i)) representes all the DoFs
+  is the implemented in this class and the list of pairs (patternFirst(i),patternSecond(i)) represents all the DoFs
   that are coupled.
 
 
@@ -111,17 +111,9 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    //! Full constructor for 3D elements
+    //! Full constructor
     DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
-                     const UInt& nbDofPerFace, const UInt& nbDofPerVolume, const DofPatternType& patternType );
-
-    //! Full constructor for 2D elements
-    DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
-                     const UInt& nbDofPerFace, const DofPatternType& patternType );
-
-    //! Full constructor for 1D elements
-    DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
-                     const DofPatternType& patternType );
+                     const UInt& nbDofPerFace, const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbCoor );
 
     //! Simple copy constructor
     DOFLocalPattern( const DOFLocalPattern& localDofPattern);
@@ -192,9 +184,32 @@ public:
     //! Return the number of degrees of freedom located on the edges (1D structures)
     const UInt& nbDofPerEdge() const
     {
-        ASSERT(M_dim >=1, "No edge available for that dimension");
         return M_nbDofPerDimEntity[1];
     };
+
+    //! Return the number of degrees of freedom located on the peak (vertex in 3D).
+	UInt nbDofPerPeak() const
+	{
+		return (M_dim >= 3) ? M_nbDofPerDimEntity[M_dim-3] : 0;
+	};
+
+	//! Return the number of degrees of freedom located on the ridge. (edge in 3D)
+    UInt nbDofPerRidge() const
+	{
+		return (M_dim >= 2) ? M_nbDofPerDimEntity[M_dim-2] : 0;
+	};
+
+	//! Return the number of degrees of freedom located on the facet. (face in 3D)
+    UInt nbDofPerFacet() const
+	{
+		return (M_dim >= 1) ? M_nbDofPerDimEntity[M_dim-1] : 0;
+	};
+	
+	//! Return the number of degrees of freedom located on the element. (volume in 3D)
+	const UInt& nbDofPerElement() const
+	{
+		return M_nbDofPerDimEntity[M_dim];
+	};
 
     //! Return the number of degrees of freedom located on the faces (2D structures).
     /*!Beware that in the 2D case, the face of a triangle is the triangle itself
@@ -202,14 +217,12 @@ public:
      */
     const UInt& nbDofPerFace() const
     {
-        ASSERT(M_dim >=2, "No face available for that dimension");
         return M_nbDofPerDimEntity[2];
     };
 
     //! Return the number of degrees of freedom located in the volume (3D structures).
     const UInt& nbDofPerVolume() const
     {
-        ASSERT(M_dim >=3, "No volume available for that dimension");
         return M_nbDofPerDimEntity[3];
     };
 
@@ -226,7 +239,7 @@ public:
     //! Return the number of degrees of freedom located per structCodim object.
     /*! The codimension of a structure is the full dimension of the element
       minus the dimension of the structure. For example, in 3D, faces have codimension
-      1, edges 2 and vertices 3. This method could be usefull to code "dimension-free" code.
+      1, edges 2 and vertices 3. This method could be useful to code "dimension-free" code.
       (for example, IP is built on edges in 2D, faces in 3D, so on objects with codimension 1).
      */
     const UInt& nbDofPerCodimStrut(const UInt & structCodim) const
