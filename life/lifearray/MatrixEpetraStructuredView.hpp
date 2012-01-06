@@ -25,16 +25,16 @@
 //@HEADER
 
 /*!
-   @file MatrixBlockMonolithicEpetraView.hpp
-   @brief The file contains the MatrixBlockMonolithicEpetraView class
+   @file MatrixEpetraStructuredView.hpp
+   @brief The file contains the MatrixEpetraStructuredView class
 
    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
    @date 2010-10-09
  */
 
-#ifndef _MATRIX_BLOCK_MONOLITHIC_EPETRA_VIEW_HPP_
-#define _MATRIX_BLOCK_MONOLITHIC_EPETRA_VIEW_HPP_
+#ifndef _MATRIXEPETRASTRUCTUREDVIEW_HPP_
+#define _MATRIXEPETRASTRUCTUREDVIEW_HPP_
 
 #include <boost/shared_ptr.hpp>
 
@@ -45,12 +45,12 @@
 
 namespace LifeV {
 
-//! MatrixBlockMonolithicEpetraView - class representing a block in a MatrixBlockMonolithicEpetra
+//! MatrixEpetraStructuredView - class representing a block in a MatrixEpetraStructured
 /*!
   @author Gwenol Grandperrin
   @author Samuel Quinodoz
 
-  The MatrixBlockMonolithicEpetraView class contains data related
+  The MatrixEpetraStructuredView class contains data related
   to block of a matrix. It is useful to setup a clean and easy-to-use blocks management.
 
   For more information about the block structures in LifeV, see \ref BlockAlgebraPage "this page".
@@ -63,7 +63,7 @@ namespace LifeV {
 
  */
 template<typename DataType>
-class MatrixBlockMonolithicEpetraView
+class MatrixEpetraStructuredView
 {
 public:
 
@@ -72,7 +72,7 @@ public:
     //@{
 
     // Not a block matrix to avoid circular dependancies
-    //typedef MatrixBlockMonolithicEpetra<DataType> matrix_Type;
+    //typedef MatrixEpetraStructured<DataType> matrix_Type;
 
     typedef MatrixEpetra<DataType> matrix_Type;
 
@@ -83,20 +83,20 @@ public:
      */
     //@{
     //! default constructor.
-    MatrixBlockMonolithicEpetraView();
+    MatrixEpetraStructuredView();
 
     //! Copy constructor
-    MatrixBlockMonolithicEpetraView( const MatrixBlockMonolithicEpetraView<DataType>& mbv );
+    MatrixEpetraStructuredView( const MatrixEpetraStructuredView<DataType>& mbv );
 
     //! default virtual destructor
-    ~MatrixBlockMonolithicEpetraView();
+    ~MatrixEpetraStructuredView();
 
     //@}
 
     //! @name Methods
     //@{
 
-    //! Print the informations about the MatrixBlockMonolithicEpetraView
+    //! Print the informations about the MatrixEpetraStructuredView
     void showMe(std::ostream& output = std::cout) const;
 
 	//! Function to assemble an elemental matrix in a block
@@ -154,7 +154,7 @@ private:
     //@{
 
     //! No assignement operator, it is missleading (would copy the views, not the blocks!)
-    MatrixBlockMonolithicEpetraView<DataType> operator=( const MatrixBlockMonolithicEpetraView& otherView);
+    MatrixEpetraStructuredView<DataType> operator=( const MatrixEpetraStructuredView& otherView);
 
     //@}
 
@@ -173,7 +173,7 @@ private:
 // ===================================================
 
 template<typename DataType>
-MatrixBlockMonolithicEpetraView<DataType>::MatrixBlockMonolithicEpetraView() :
+MatrixEpetraStructuredView<DataType>::MatrixEpetraStructuredView() :
     M_numRows( 0 ),
     M_numColumns( 0 ),
     M_firstRowIndex( 0 ),
@@ -186,7 +186,7 @@ MatrixBlockMonolithicEpetraView<DataType>::MatrixBlockMonolithicEpetraView() :
 }
 
 template<typename DataType>
-MatrixBlockMonolithicEpetraView<DataType>::MatrixBlockMonolithicEpetraView( const MatrixBlockMonolithicEpetraView<DataType>& mbv ) :
+MatrixEpetraStructuredView<DataType>::MatrixEpetraStructuredView( const MatrixEpetraStructuredView<DataType>& mbv ) :
     M_numRows( mbv.M_numRows ),
     M_numColumns( mbv.M_numColumns ),
     M_firstRowIndex( mbv.M_firstRowIndex ),
@@ -199,7 +199,7 @@ MatrixBlockMonolithicEpetraView<DataType>::MatrixBlockMonolithicEpetraView( cons
 }
 
 template<typename DataType>
-MatrixBlockMonolithicEpetraView<DataType>::~MatrixBlockMonolithicEpetraView()
+MatrixEpetraStructuredView<DataType>::~MatrixEpetraStructuredView()
 {
     //M_matrix.reset();
 }
@@ -210,7 +210,7 @@ MatrixBlockMonolithicEpetraView<DataType>::~MatrixBlockMonolithicEpetraView()
 
 template<typename DataType>
 void
-MatrixBlockMonolithicEpetraView<DataType>::showMe( std::ostream& output ) const
+MatrixEpetraStructuredView<DataType>::showMe( std::ostream& output ) const
 {
     output << "MatrixBlockMonolithicEpetraView informations:" << std::endl
            << "Size = " << M_numRows << " x " << M_numColumns << std::endl
@@ -222,7 +222,7 @@ MatrixBlockMonolithicEpetraView<DataType>::showMe( std::ostream& output ) const
 
 template<typename DataType>
 void
-MatrixBlockMonolithicEpetraView<DataType>::
+MatrixEpetraStructuredView<DataType>::
 addToCoefficients( UInt const numRows, UInt const numColumns,
                             std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
                             DataType* const* const localValues,
@@ -252,7 +252,7 @@ addToCoefficients( UInt const numRows, UInt const numColumns,
 
 template<typename DataType>
 void
-MatrixBlockMonolithicEpetraView<DataType>::setup( const UInt& firstRow,
+MatrixEpetraStructuredView<DataType>::setup( const UInt& firstRow,
                         const UInt& firstColumn,
                         const UInt& numRows,
                         const UInt& numColumns,
@@ -273,5 +273,5 @@ MatrixBlockMonolithicEpetraView<DataType>::setup( const UInt& firstRow,
 
 } // namespace LifeV
 
-#endif /* MATRIXBLOCKVIEW_HPP */
+#endif /* _MATRIXEPETRASTRUCTUREDVIEW_HPP_ */
 

@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Implementation file for VectorBlockMonolithicEpetra
+    @brief Implementation file for VectorEpetraStructured
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @date 01 Jun 2011
@@ -40,15 +40,15 @@ namespace LifeV {
 // Constructors & Destructor
 // ===================================================
 
-VectorBlockMonolithicEpetra::
-VectorBlockMonolithicEpetra( const map_type& map, const mapType_type& mapType)
+VectorEpetraStructured::
+VectorEpetraStructured( const map_type& map, const mapType_type& mapType)
     : VectorEpetra(map,mapType),
       M_blockSize(1,map.map(Unique)->NumGlobalElements()),
       M_blockFirstIndex(1,0)
 {}
 
-VectorBlockMonolithicEpetra::
-VectorBlockMonolithicEpetra( const mapVector_type& mapVector, const mapType_type& mapType)
+VectorEpetraStructured::
+VectorEpetraStructured( const mapVector_type& mapVector, const mapType_type& mapType)
     : VectorEpetra(mapType),
       M_blockSize(mapVector.nbMap()),
       M_blockFirstIndex(mapVector.nbMap())
@@ -75,22 +75,22 @@ VectorBlockMonolithicEpetra( const mapVector_type& mapVector, const mapType_type
     this->setMap(myMap);
 }
 
-VectorBlockMonolithicEpetra::
-VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector)
+VectorEpetraStructured::
+VectorEpetraStructured( const VectorEpetraStructured& vector)
     : VectorEpetra(vector),
       M_blockSize(vector.M_blockSize),
       M_blockFirstIndex(vector.M_blockFirstIndex)
 {}
 
-VectorBlockMonolithicEpetra::
-VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType)
+VectorEpetraStructured::
+VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType)
     : VectorEpetra(vector,mapType),
       M_blockSize(vector.M_blockSize),
       M_blockFirstIndex(vector.M_blockFirstIndex)
 {}
 
-VectorBlockMonolithicEpetra::
-VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType, const combine_type& combineMode)
+VectorEpetraStructured::
+VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType, const combine_type& combineMode)
     : VectorEpetra(vector,mapType,combineMode),
       M_blockSize(vector.M_blockSize),
       M_blockFirstIndex(vector.M_blockFirstIndex)
@@ -101,7 +101,7 @@ VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const ma
 // ===================================================
 
 void
-VectorBlockMonolithicEpetra::
+VectorEpetraStructured::
 setBlockStructure( const std::vector<UInt>& blockSizes)
 {
     M_blockSize = blockSizes;
@@ -117,7 +117,7 @@ setBlockStructure( const std::vector<UInt>& blockSizes)
 }
 
 void
-VectorBlockMonolithicEpetra::
+VectorEpetraStructured::
 setBlockStructure( const mapVector_type& mapVector)
 {
     ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to set the block structure");
@@ -143,7 +143,7 @@ setBlockStructure( const mapVector_type& mapVector)
 // ===================================================
 
 void
-VectorBlockMonolithicEpetra::
+VectorEpetraStructured::
 blockView( const UInt& index, block_type& blockView )
 {
     ASSERT( index < M_blockFirstIndex.size(), "Invalid block index");
@@ -152,8 +152,8 @@ blockView( const UInt& index, block_type& blockView )
     blockView.setup( M_blockFirstIndex[index], M_blockSize[index], this);
 }
 
-VectorBlockMonolithicEpetra::block_ptrType
-VectorBlockMonolithicEpetra::
+VectorEpetraStructured::block_ptrType
+VectorEpetraStructured::
 block( const UInt& index)
 {
     ASSERT( index < M_blockFirstIndex.size(), "Invalid block index");

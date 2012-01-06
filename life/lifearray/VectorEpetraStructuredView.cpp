@@ -26,12 +26,10 @@
 
 /*!
     @file
-    @brief A short description of the file content
+    @brief  This file contains the the VectorEpetraStructuredView implementation.
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @date 07 Jun 2011
-
-    A more detailed description of the file (if necessary)
  */
 
 #include <VectorBlockMonolithicEpetraView.hpp>
@@ -42,24 +40,24 @@ namespace LifeV {
 // Constructors & Destructor
 // ===================================================
 
-VectorBlockMonolithicEpetraView::
-VectorBlockMonolithicEpetraView()
+VectorEpetraStructuredView::
+VectorEpetraStructuredView()
     : M_blockSize(),
       M_firstIndex(),
       M_lastValidIndex(),
       M_vector()
 {}
 
-VectorBlockMonolithicEpetraView::
-VectorBlockMonolithicEpetraView( const VectorBlockMonolithicEpetraView& otherView)
+VectorEpetraStructuredView::
+VectorEpetraStructuredView( const VectorEpetraStructuredView& otherView)
     : M_blockSize(otherView.M_blockSize),
       M_firstIndex(otherView.M_firstIndex),
       M_lastValidIndex(otherView.M_lastValidIndex),
       M_vector(otherView.M_vector)
 {}
 
-VectorBlockMonolithicEpetraView::
-~VectorBlockMonolithicEpetraView()
+VectorEpetraStructuredView::
+~VectorEpetraStructuredView()
 {}
 
 // ===================================================
@@ -67,7 +65,7 @@ VectorBlockMonolithicEpetraView::
 // ===================================================
 
 void
-VectorBlockMonolithicEpetraView::
+VectorEpetraStructuredView::
 showMe( std::ostream& output ) const
 {
     output << "VectorBlockViewEpetra informations:" << std::endl
@@ -77,7 +75,7 @@ showMe( std::ostream& output ) const
 }
 
 Int
-VectorBlockMonolithicEpetraView::
+VectorEpetraStructuredView::
 sumIntoGlobalValues( const Int GID, const Real value ) const
 {
     ASSERT(GID < static_cast<UInt>(M_blockSize), " Error in assembling the block vector: global id to large for the block")
@@ -93,7 +91,7 @@ sumIntoGlobalValues( const Int GID, const Real value ) const
 // ===================================================
 
 void
-VectorBlockMonolithicEpetraView::
+VectorEpetraStructuredView::
 setup( const UInt& firstIndex, const UInt& blockSize, vector_Type* vector )
 {
 	M_blockSize = blockSize;

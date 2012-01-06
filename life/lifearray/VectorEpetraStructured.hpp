@@ -26,15 +26,14 @@
 
 /*!
     @file
-    @brief File containing the VectorBlockMonolithicEpetra
+    @brief File containing the VectorEpetraStructured class
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @date 01 Jun 2011
-
  */
 
-#ifndef VECTOR_BLOCK_MONOLITHIC_EPETRA_H
-#define VECTOR_BLOCK_MONOLITHIC_EPETRA_H 1
+#ifndef _VECTOREPETRASTRUCTURED_HPP_
+#define _VECTOREPETRASTRUCTURED_HPP_ 1
 
 #include <life/lifecore/LifeV.hpp>
 
@@ -47,16 +46,16 @@
 
 namespace LifeV {
 
-//! VectorBlockMonolithicEpetra - class of block vector
+//! VectorEpetraStructured - class of block vector
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
-  The VectorBlockMonolithicEpetra class contains data related
+  The VectorEpetraStructured class contains data related
   to block vector. It is an extension to VectorEpetra where data about blocks have
   been set. For an introduction to the block structures in LifeV, see
   \ref BlockAlgebraPage "this page".
 
-  There are mainly two ways to define a VectorBlockMonolithicEpetra:
+  There are mainly two ways to define a VectorEpetraStructured:
   <ul>
   <li> Construct it using the same syntax as for LifeV::VectorEpetra and the use
   a setter for the structure.
@@ -67,7 +66,7 @@ namespace LifeV {
   To access the blocks, one uses then the blockView or block methods.
 
  */
-class VectorBlockMonolithicEpetra
+class VectorEpetraStructured
     : public VectorEpetra
 {
 public:
@@ -91,7 +90,7 @@ public:
     typedef Epetra_CombineMode combine_type;
 
     //! Type of the view
-    typedef VectorBlockMonolithicEpetraView block_type;
+    typedef VectorEpetraStructuredView block_type;
 
     //! Pointer on the view
     typedef boost::shared_ptr<block_type> block_ptrType;
@@ -103,27 +102,27 @@ public:
     //@{
 
     //! Constructor with the monolithic map
-    VectorBlockMonolithicEpetra( const map_type& map, const mapType_type& mapType = Unique);
+    VectorEpetraStructured( const map_type& map, const mapType_type& mapType = Unique);
 
     //! Construction with a vector of map
     /*!
       With this constructor, the block structure is automatically deduced from the maps in the
-      vector. The monolithic map and vectors are also built by concanating the different maps
+      vector. The monolithic map and vectors are also built by concatenating the different maps
       in the vector.
      */
-    VectorBlockMonolithicEpetra( const mapVector_type& mapVector, const mapType_type& mapType = Unique);
+    VectorEpetraStructured( const mapVector_type& mapVector, const mapType_type& mapType = Unique);
 
     //! Copy constructor
-    VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector);
+    VectorEpetraStructured( const VectorEpetraStructured& vector);
 
     //! Copy constructor with a specified map type (Repeated/Unique)
-    VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType);
+    VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType);
 
     //! Copy constructor with specified map type and combine mode
-    VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType, const combine_type& combineMode);
+    VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType, const combine_type& combineMode);
 
     //! Destructor
-    ~VectorBlockMonolithicEpetra(){}
+    ~VectorEpetraStructured(){}
 
     //@}
 
@@ -190,4 +189,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* VECTORBLOCKEPETRA_H */
+#endif /* _VECTOREPETRASTRUCTURED_HPP_ */

@@ -107,8 +107,8 @@ main( int argc, char** argv )
     int numEntries( 10 );
     std::vector<UInt> blockNumRows   ( 2, numEntries/2 );
     std::vector<UInt> blockNumColumns( 2, numEntries/2 );
-    boost::shared_ptr< MatrixBlockMonolithicEpetra<double> > A;
-    A.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    boost::shared_ptr< MatrixEpetraStructured<double> > A;
+    A.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     A->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
@@ -134,20 +134,20 @@ main( int argc, char** argv )
     displayer.leaderPrint( "done\n" );
 
     // Getting the block structure of A
-    MatrixBlockMonolithicEpetraView<double> A11, A12, A21, A22;
+    MatrixEpetraStructuredView<double> A11, A12, A21, A22;
     A->blockView( 0, 0, A11 );
     A->blockView( 0, 1, A12 );
     A->blockView( 1, 0, A21 );
     A->blockView( 1, 1, A22 );
 
     // Creating a pointer for B
-    boost::shared_ptr< MatrixBlockMonolithicEpetra<double> > B;
+    boost::shared_ptr< MatrixEpetraStructured<double> > B;
 
     // Defining the view
-    MatrixBlockMonolithicEpetraView<double> B11, B12, B21, B22;
+    MatrixEpetraStructuredView<double> B11, B12, B21, B22;
 
     // Creating a pointer for the test matrix
-    boost::shared_ptr< MatrixBlockMonolithicEpetra<double> > testMatrix;
+    boost::shared_ptr< MatrixEpetraStructured<double> > testMatrix;
 
     // +-----------------------------------------------+
     // |        Core of the test                       |
@@ -158,7 +158,7 @@ main( int argc, char** argv )
     // |           TEST 1: Copy of blocks              |
     // +-----------------------------------------------+
     displayer.leaderPrint( "1) Testing blocks copies... " );
-    B.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    B.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     B->setBlockStructure( blockNumRows, blockNumColumns );
     B->blockView( 0, 0, B11 );
     B->blockView( 0, 1, B12 );
@@ -172,7 +172,7 @@ main( int argc, char** argv )
 
     B->globalAssemble();
 
-    testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    testMatrix.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
@@ -209,7 +209,7 @@ main( int argc, char** argv )
     // |           TEST 2: Identity blocks             |
     // +-----------------------------------------------+
     displayer.leaderPrint( "2) Creating identity blocks... " );
-    B.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    B.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     B->setBlockStructure( blockNumRows, blockNumColumns );
     B->blockView( 0, 0, B11 );
     B->blockView( 0, 1, B12 );
@@ -223,7 +223,7 @@ main( int argc, char** argv )
 
     B->globalAssemble();
 
-    testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    testMatrix.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
 
     for( int i( 0 ); i < problemSize/2; ++i )
@@ -255,7 +255,7 @@ main( int argc, char** argv )
     // |           TEST 3: Diagonal blocks             |
     // +-----------------------------------------------+
     displayer.leaderPrint( "3) Creating diagonal blocks... " );
-    B.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    B.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     B->setBlockStructure( blockNumRows, blockNumColumns );
     B->blockView( 0, 0, B11 );
     B->blockView( 0, 1, B12 );
@@ -269,7 +269,7 @@ main( int argc, char** argv )
 
     B->globalAssemble();
 
-    testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    testMatrix.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
 
     for( int i( 0 ); i < problemSize/2; ++i )
@@ -301,7 +301,7 @@ main( int argc, char** argv )
     // |           TEST 4: Inverse diagonal blocks     |
     // +-----------------------------------------------+
     displayer.leaderPrint( "4) Creating inverse diagonal blocks... " );
-    B.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    B.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     B->setBlockStructure( blockNumRows, blockNumColumns );
     B->blockView( 0, 0, B11 );
     B->blockView( 0, 1, B12 );
@@ -317,7 +317,7 @@ main( int argc, char** argv )
 
     Real minusOneThird( -1./3. );
 
-    testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    testMatrix.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
@@ -348,7 +348,7 @@ main( int argc, char** argv )
     // |           TEST 5: Upper triangular blocks     |
     // +-----------------------------------------------+
     displayer.leaderPrint( "5) Creating upper triangular blocks... " );
-    B.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    B.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     B->setBlockStructure( blockNumRows, blockNumColumns );
     B->blockView( 0, 0, B11 );
     B->blockView( 0, 1, B12 );
@@ -362,7 +362,7 @@ main( int argc, char** argv )
 
     B->globalAssemble();
 
-    testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    testMatrix.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
@@ -399,7 +399,7 @@ main( int argc, char** argv )
     // |           TEST 6: Lower triangular blocks     |
     // +-----------------------------------------------+
     displayer.leaderPrint( "6) Lower triangular blocks... " );
-    B.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    B.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     B->setBlockStructure( blockNumRows, blockNumColumns );
     B->blockView( 0, 0, B11 );
     B->blockView( 0, 1, B12 );
@@ -413,7 +413,7 @@ main( int argc, char** argv )
 
     B->globalAssemble();
 
-    testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    testMatrix.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
@@ -450,7 +450,7 @@ main( int argc, char** argv )
     // |           TEST 7: Lumped blocks               |
     // +-----------------------------------------------+
     displayer.leaderPrint( "7) Creating lumped blocks... " );
-    B.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    B.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     B->setBlockStructure( blockNumRows, blockNumColumns );
     B->blockView( 0, 0, B11 );
     B->blockView( 0, 1, B12 );
@@ -464,7 +464,7 @@ main( int argc, char** argv )
 
     B->globalAssemble();
 
-    testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    testMatrix.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {
@@ -495,7 +495,7 @@ main( int argc, char** argv )
     // |           TEST 8: Inverse lumped blocks       |
     // +-----------------------------------------------+
     displayer.leaderPrint( "8) Creating inverse lumped blocks... " );
-    B.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    B.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     B->setBlockStructure( blockNumRows, blockNumColumns );
     B->blockView( 0, 0, B11 );
     B->blockView( 0, 1, B12 );
@@ -509,7 +509,7 @@ main( int argc, char** argv )
 
     B->globalAssemble();
 
-    testMatrix.reset( new MatrixBlockMonolithicEpetra<double>( map, numEntries )  );
+    testMatrix.reset( new MatrixEpetraStructured<double>( map, numEntries )  );
     testMatrix->setBlockStructure( blockNumRows, blockNumColumns );
     for( int i( 0 ); i < problemSize/2; ++i )
     {

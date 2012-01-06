@@ -47,8 +47,8 @@ namespace MatrixBlockUtils {
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType>
-void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                 const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+                 const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
@@ -128,7 +128,7 @@ void copyBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
 */
 
 template< typename DataType >
-void createZeroBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void createZeroBlock ( MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // This method will maybe be replaced
     // by the method setBlockToZero
@@ -140,7 +140,7 @@ void createZeroBlock ( MatrixBlockMonolithicEpetraView<DataType>& destBlock )
   @param diagonalValue Value to be inserted in the diagonal
 */
 template< typename DataType >
-void createScalarBlock ( const MatrixBlockMonolithicEpetraView<DataType>& destBlock, const DataType& diagonalValue )
+void createScalarBlock ( const MatrixEpetraStructuredView<DataType>& destBlock, const DataType& diagonalValue )
 {
     // SQUARE TEST
     // BLOCK PTR TEST
@@ -176,7 +176,7 @@ void createScalarBlock ( const MatrixBlockMonolithicEpetraView<DataType>& destBl
   @param destBlock Block where the data will be stored
 */
 template< typename DataType >
-void createIdentityBlock ( const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void createIdentityBlock ( const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     createScalarBlock(destBlock,1.0);
 }
@@ -187,8 +187,8 @@ void createIdentityBlock ( const MatrixBlockMonolithicEpetraView<DataType>& dest
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                       const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void createDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+                       const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -251,8 +251,8 @@ void createDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                          const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+                          const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -316,8 +316,8 @@ void createInvDiagBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBl
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                                  const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+                                  const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -385,8 +385,8 @@ void createUpperTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                                  const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+                                  const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -455,8 +455,8 @@ void createLowerTriangularBlock ( const MatrixBlockMonolithicEpetraView<DataType
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                         const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void createLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+                         const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST
@@ -517,8 +517,8 @@ void createLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlo
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createInvLumpedBlock ( const MatrixBlockMonolithicEpetraView<DataType>& srcBlock,
-                            const MatrixBlockMonolithicEpetraView<DataType>& destBlock )
+void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+                            const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
     // BLOCK COMPATIBILITY TEST

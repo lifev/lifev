@@ -26,16 +26,14 @@
 
 /*!
     @file
-    @brief A short description of the file content
+    @brief  This file contains the the VectorEpetraStructuredView implementation.
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @date 07 Jun 2011
-
-    This file contains the the VectorBlockMonolithicEpetraView implementation.
  */
 
-#ifndef VECTOR_BLOCK_MONOLITHIC_EPETRA_VIEW_H
-#define VECTOR_BLOCK_MONOLITHIC_EPETRA_VIEW_H 1
+#ifndef _VECTOREPETRASTRUCTUREDVIEW_HPP_
+#define _VECTOREPETRASTRUCTUREDVIEW_HPP_ 1
 
 #include <life/lifearray/VectorEpetra.hpp>
 
@@ -45,16 +43,16 @@
 
 namespace LifeV {
 
-//! VectorBlockMonolithicEpetraView - class representing a block in a VectorBlockMonolithicEpetra
+//!  VectorEpetraStructuredView - class representing a block in a  VectorEpetraStructuredView
 /*!
   @author Samuel Quinodoz
 
-  The VectorBlockMonolithicEpetraView class contains data related
+  The  VectorEpetraStructuredView class contains data related
   to block of a vector. It is useful to setup a clean and easy-to-use blocks management.
 
   For more information about the block structures in LifeV, see \ref BlockAlgebraPage "this page".
  */
-class VectorBlockMonolithicEpetraView
+class VectorEpetraStructuredView
 {
 public:
 
@@ -71,7 +69,7 @@ public:
     //@{
 
     //! Default constructor.
-    VectorBlockMonolithicEpetraView();
+    VectorEpetraStructuredView();
 
     //! Copy constructor
     /*!
@@ -79,10 +77,10 @@ public:
       but not the underlying vector (both views still look at the
       same vector, not at different copies).
      */
-    VectorBlockMonolithicEpetraView( const VectorBlockMonolithicEpetraView& otherView );
+    VectorEpetraStructuredView( const VectorEpetraStructuredView& otherView );
 
     //! Default destructor
-    ~VectorBlockMonolithicEpetraView();
+    ~VectorEpetraStructuredView();
 
     //@}
 
@@ -90,7 +88,7 @@ public:
     //! @name Methods
     //@{
 
-    //! Print the informations about the VectorBlockMonolithicEpetraView
+    //! Print the informations about the VectorEpetraStructuredView
     /*!
       @param output Stream where to print the informations
      */
@@ -153,7 +151,7 @@ private:
       like vector.block(0) = vector.block(1), that would only copy the views
       and not the blocks.
      */
-    VectorBlockMonolithicEpetraView operator=(const VectorBlockMonolithicEpetraView& otherView);
+    VectorEpetraStructuredView operator=(const VectorEpetraStructuredView& otherView);
 
     //@}
 
@@ -165,4 +163,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* VECTORBLOCKVIEWEPETRA_H */
+#endif /* _VECTOREPETRASTRUCTUREDVIEW_HPP_ */
