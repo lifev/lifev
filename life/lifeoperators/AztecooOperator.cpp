@@ -48,7 +48,7 @@ AztecooOperator::AztecooOperator():
 	M_name = "AztecooOperator";
 }
 
-int AztecooOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
+int AztecooOperator::doApplyInverse(const vector_Type& X, vector_Type& Y)
 {
 	vector_Type Xcopy(X);
 	Y.PutScalar(0.0);
@@ -62,7 +62,35 @@ int AztecooOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 	int maxIter( M_pList->get<int>("max_iter"));
 	double tol(  M_pList->get<double>("tol"));
 
-	return M_linSolver->Iterate(maxIter, tol);
+	// Solving the system
+	int retValue = M_linSolver->Iterate(maxIter, tol);
+
+	// Update the number of performed iterations
+	M_numIterations = M_linSolver->NumIters();
+
+	// Update of the status
+	Real status[AZ_STATUS_SIZE];
+	M_linSolver->GetAllAztecStatus( status );
+
+	if ( status[AZ_why] == AZ_normal )
+	{
+		M_converged = yes;
+	}
+	else
+	{
+		M_converged = no;
+	}
+
+	if ( status[AZ_why] == AZ_loss )
+	{
+		M_lossOfAccuracy = yes;
+	}
+	else
+	{
+		M_lossOfAccuracy = no;
+	}
+
+	return retValue;
 }
 
 } // Namespace Operators

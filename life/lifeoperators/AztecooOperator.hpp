@@ -70,12 +70,12 @@ public:
 
 protected:
 
-	virtual int doApplyInverse(const vector_Type& X, vector_Type& Y) const;
+	virtual int doApplyInverse(const vector_Type& X, vector_Type& Y);
 	virtual void doSetOperator(){};
 	virtual void doSetPreconditioner(){};
 	virtual void doSetParameterList(){};
 
-	SolverType_ptr								M_linSolver;
+	SolverType_ptr M_linSolver;
 };
 
 inline SolverOperator* createAztecooOperator() { return new AztecooOperator(); }

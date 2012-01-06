@@ -69,7 +69,7 @@ BelosOperator::BelosOperator():
 	M_name = "BelosOperator";
 }
 
-int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
+int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y)
 {
 
 	RCP<vector_Type> Xcopy(new vector_Type(X) );
@@ -81,12 +81,32 @@ int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 		return -12;
 	}
 
+	// Solving the system
 	Belos::ReturnType ret = M_solverManager->solve();
 
-	if(ret == Belos::Converged)
-		return 0;
+	// Update the number of performed iterations
+	M_numIterations = M_solverManager->getNumIters();
+
+	// Update of the status
+	if( M_solverManager->isLOADetected() )
+	{
+		M_lossOfAccuracy = yes;
+	}
 	else
+	{
+		M_lossOfAccuracy = no;
+	}
+
+	if(ret == Belos::Converged)
+	{
+		M_converged = yes;
+		return 0;
+	}
+	else
+	{
+		M_converged = no;
 		return -1;
+	}
 
 }
 
@@ -126,8 +146,6 @@ void BelosOperator::doSetParameterList()
 	default:
 		exit(1);
 	}
-
-
 
 	M_solverManager->setProblem(M_linProblem);
 

@@ -61,6 +61,7 @@ namespace LifeV
 {
 namespace Operators
 {
+
 //! @class SolverOperator
 /*! @brief Abstract class which defines the interface of an Invertible Linear Operator.
  *
@@ -68,6 +69,7 @@ namespace Operators
 class SolverOperator : public LinearOperator
 {
 public:
+	enum SolverOperatorStatusType          { undefined, yes, no };
 
 	SolverOperator();
 
@@ -75,70 +77,99 @@ public:
 	//@{
 
 	//! If set true, transpose of this operator will be applied.
-	virtual int SetUseTranspose(bool useTranspose);
+	virtual int SetUseTranspose( bool useTranspose );
 
-	void setOperator(const operatorPtr_Type & _oper);
+	void setOperator( const operatorPtr_Type & _oper );
 
-	void setPreconditioner(const operatorPtr_Type & _prec);
+	void setPreconditioner( const operatorPtr_Type & _prec );
 
-	void setParameterList(const Teuchos::ParameterList & _pList);
+	void setParameterList( const Teuchos::ParameterList & _pList );
 
 	//@}
 
-	//! @name Mathematical functions
+	//! @name Mathematical methods
 	//@{
 
 	//! Returns the result of a Epetra_Operator applied to a vector_Type X in Y.
-	virtual int Apply(const vector_Type& X, vector_Type& Y) const;
+	virtual int Apply( const vector_Type& X, vector_Type& Y ) const;
 
 	//! Returns the result of a Epetra_Operator inverse applied to an vector_Type X in Y.
-	virtual int ApplyInverse(const vector_Type& X, vector_Type& Y) const;
+	virtual int ApplyInverse( const vector_Type& X, vector_Type& Y ) const;
 
 	//! Returns the infinity norm of the global matrix.
-	double NormInf() const {return M_oper->NormInf();}
+	double NormInf() const { return M_oper->NormInf(); }
+
+	//! Reset the status for the state of convergence and loss of accuracy
+	void resetStatus() { M_lossOfAccuracy = undefined; M_converged = undefined; M_numIterations = 0; };
 
 	//@}
 
-	//! @name Attribute access functions
+	//! @name Attribute access methods
 	//@{
 
 	//! Returns a character string describing the operator
-	virtual const char * Label() const {return M_name.c_str();}
+	virtual const char * Label() const { return M_name.c_str(); }
 
 	//! Returns the current UseTranspose setting.
-	virtual bool UseTranspose() const {return M_useTranspose;}
+	virtual bool UseTranspose() const { return M_useTranspose; }
 
 	//! Returns true if the \e this object can provide an approximate Inf-norm, false otherwise.
-	virtual bool HasNormInf() const {return M_oper->HasNormInf();}
+	virtual bool HasNormInf() const { return M_oper->HasNormInf(); }
 
 	//! Returns a pointer to the Epetra_Comm communicator associated with this operator.
 	virtual const comm_Type & Comm() const {return M_oper->Comm();}
 
 	//! Returns the Epetra_Map object associated with the domain of this operator.
-	virtual const map_Type & OperatorDomainMap() const {return M_oper->OperatorDomainMap();}
+	virtual const map_Type & OperatorDomainMap() const { return M_oper->OperatorDomainMap(); }
 
 	//! Returns the Epetra_Map object associated with the range of this operator.
-	virtual const map_Type & OperatorRangeMap() const {return M_oper->OperatorRangeMap();}
+	virtual const map_Type & OperatorRangeMap() const { return M_oper->OperatorRangeMap(); }
+
+	//! Returns if a loss of precision has been detected
+	SolverOperatorStatusType isLossOfAccuracyDetected() const { return M_lossOfAccuracy; }
+
+	//! Returns if the convergence has been achieved
+	SolverOperatorStatusType hasConverged() const { return M_converged; }
+
+	//! Returns the number of iterations
+	/*
+	 * @note Negative value usually indicates problem of convergence
+	 */
+	int numIterations() const { return M_numIterations; }
 
 	//@}
 
 protected:
 
-	virtual int doApplyInverse(const vector_Type& X, vector_Type& Y) const = 0;
+	virtual int doApplyInverse( const vector_Type& X, vector_Type& Y ) = 0;
 	virtual void doSetOperator() = 0;
 	virtual void doSetPreconditioner() = 0;
 	virtual void doSetParameterList() = 0;
 
 	//! The name of the Operator
 	std::string M_name;
+
 	//! The list of Parameter to feed the linear solver
 	Teuchos::RCP<Teuchos::ParameterList> M_pList;
+
 	//! The preconditioner operator
 	Teuchos::RCP<Epetra_Operator> M_prec;
+
 	//! The operator to be solved
 	Teuchos::RCP<Epetra_Operator> M_oper;
+
 	//! Whenever to use the transpose
 	bool M_useTranspose;
+
+	//! Status to see if there is a loss of accuracy
+	SolverOperatorStatusType M_lossOfAccuracy;
+
+	//! Status to see if the solver has converged
+	SolverOperatorStatusType M_converged;
+
+	//! Number of iterations performed by the solver
+	int M_numIterations;
+
 };
 
 typedef FactorySingleton<Factory<SolverOperator, std::string> > SolverOperatorFactory;
