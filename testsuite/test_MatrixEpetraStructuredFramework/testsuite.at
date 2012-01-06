@@ -12,8 +12,8 @@
 ### TESTSUITE: MATRIXEPETRASTRUCTUREDFRAMEWORK ####################################################
 ###################################################################################################
 
-AT_SETUP([test_MatrixEpetraStructured])
-AT_KEYWORDS([Test of the MatrixEpetraStructured framework])
+AT_SETUP([test_MatrixEpetraStructuredFramework])
+AT_KEYWORDS([MatrixEpetraStructured MatrixEpetraStructuredView framework])
 AT_DATA([data],[[
 
 ]])
