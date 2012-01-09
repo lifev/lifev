@@ -435,7 +435,7 @@ public:
      *  Adds volume. Local and global ID computed automatically.
      *  @return Reference to added volume.
      */
-    volume_Type & addVolume() { return addVolume( volume_Type() ); }
+    volume_Type & addVolume();
 
     //! Adds volume
     /**
@@ -643,6 +643,9 @@ public:
     //! Destroys Ridge-To-Facet lookup table.
     void cleanElementRidges();
 
+    //! Destroys edge To facet lookup table.
+    void cleanElementEdges() { cleanElementEdges( edge_Type() ); }
+
     //! Local Ridge ID of a ridge in a volume stored in the mesh
     /** @param volId local ID of the volume
      *  @param locE local edge number (elemental) 0 \< LocE \< numLocalEdges().
@@ -656,7 +659,7 @@ public:
      *  @param locR local ridge number.
      *  @return ID of the ridge.
      */
-    ID localRidgeId( const element_Type & elem, UInt const locR ) const {return localRidgeId( M_geoDim, elem.id(), locR );}
+    ID localRidgeId( const element_Type & elem, UInt const locR ) const {return localRidgeId( M_geoDim, elem.localId(), locR );}
 
 
     //! Local Edge.
@@ -671,7 +674,7 @@ public:
      *  @param locE local edge number 0 \< LocE \< numLocalEdges().
      *  @return ID of the edge.
      */
-    ID localEdgeId( const volume_Type & elem, UInt const locE ) const { return localRidgeId( elem, elem.id(), locE );}
+    ID localEdgeId( const volume_Type & elem, UInt const locE ) const { return localRidgeId( elem, elem.localId(), locE );}
 
 
     //! Local Edge (specialization for 2D geometries).
@@ -679,7 +682,7 @@ public:
      *  @param locE local edge number 0 \< LocE \< numLocalEdges().
      *  @return ID of the edge.
      */
-    ID localEdgeId( const face_Type & elem, UInt const locE ) const { return localFacetId( elem.id(), locE );}
+    ID localEdgeId( const face_Type & elem, UInt const locE ) const { return localFacetId( elem.localId(), locE );}
 
     /** @} */ // End of group Element Adjacency Methods
 
@@ -1105,7 +1108,7 @@ public:
      *  @param e The Edge.
      *  @return true if the edge is on the boundary, false otherwise.
      */
-    bool isBoundaryEdge( ridge_Type const & e ) const {return (e.id() < M_numBEdges);}
+    bool isBoundaryEdge( ridge_Type const & e ) const { return e.boundary(); }
 
     //! Edge on boundary check by id.
     /**
@@ -1924,12 +1927,6 @@ private:
     UInt M_numGlobalEdges;
     UInt M_numGlobalFaces;
     UInt M_numGlobalVolumes;
-// TODO Create delegation to handle this stuff
-    std::map<int, int>      M_globalToLocalNode;
-    std::map<int, int>      M_localToGlobalNode;
-    std::map<int, int>      M_globalToLocalEdge;
-    std::map<int, int>      M_globalToLocalFace;
-    std::map<int, int>      M_globalToLocalVolume;
 
     typename  MC::regionMarker_Type M_marker;
     MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > M_meshTransformer;
@@ -2257,6 +2254,16 @@ RegionMesh<GEOSHAPE, MC>::setMaxNumVolumes( UInt const n, bool const setcounter 
 }
 
 template <typename GEOSHAPE, typename MC>
+typename RegionMesh<GEOSHAPE, MC>::element_Type &
+RegionMesh<GEOSHAPE, MC>::addVolume()
+{
+    // I need to set the global ID
+    element_Type aVolume;
+    aVolume.setId( volumeList.size() );
+    return addVolume( aVolume );
+}
+
+template <typename GEOSHAPE, typename MC>
 inline typename RegionMesh<GEOSHAPE, MC>::element_Type &
 RegionMesh<GEOSHAPE, MC>::addVolume( element_Type const & v )
 {
@@ -2354,6 +2361,8 @@ typename RegionMesh<GEOSHAPE, MC>::face_Type &
 RegionMesh<GEOSHAPE, MC>::addFace( bool const boundary )
 {
     face_Type aFace;
+    +    // It is a new face. I set the global ID.
+    +    aFace.setId(faceList.size());
     aFace.setBoundary(boundary);
     return this->addFace( aFace);
 }
@@ -2738,8 +2747,10 @@ RegionMesh<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position)
     // make sure that localID correspond to the position
     thisPoint->setLocalId(position);
     if (thisPoint.id()==NotAnId)thisPoint.setId(position);
-    if (setToBoundary!=originalBoundary){
-        if(setToBoundary){
+    if (setToBoundary!=originalBoundary)
+    {
+        if(setToBoundary)
+        {
             // add to list of boundary points
             _bPoints.push_back( &pointList[position] );
         }
@@ -3508,10 +3519,11 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
                 points[k] = ( facet( j ).point( k ) ).localId();
             _facet = bareEntitySelector_Type::makeBareEntity( points );
             _check = bareFacet.addIfNotThere( _facet.first );
-            if (j>=this->numBoundaryFacets() ) extraBareFacet.addIfNotThere( _facet.first, j);
+            if ( !( this->face(j).boundary() ) )
+                extraBareFacet.addIfNotThere( _facet.first, j);
         }
     }
-
+    UInt numFoundBFaces = bareFacet.size();
     for ( typename elements_Type::iterator elemIt = elementList().begin();
             elemIt != elementList().end(); ++elemIt )
     {
@@ -3529,7 +3541,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
             M_ElemToFacet( j, elemLocalID ) = e.first;
             bool _isBound=e.first<this->numBoundaryFacets();
             // Is the facet an extra facet (not on the boundary but originally included in the list)?
-            bool _isExtra = (e.first >=this->numBoundaryFacets()  && e.first < _numOriginalStoredFacets);
+            bool _isExtra = (e.first >=this->numBoundaryFacets() && e.first < _numOriginalStoredFacets);
             if ( _isBound )
             {
                 facet_Type & _thisFacet(facet(e.first) );
