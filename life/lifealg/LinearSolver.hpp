@@ -136,9 +136,9 @@ public:
 
     //! Constructor
     /*!
-      @param comm Communicator
+      @param commPtr Communicator
      */
-    LinearSolver( const boost::shared_ptr<Epetra_Comm>& comm );
+    LinearSolver( const boost::shared_ptr<Epetra_Comm>& commPtr );
 
     //! Destructor
     ~LinearSolver();
@@ -155,17 +155,17 @@ public:
 
       The preconditioner is build starting from the matrix baseMatrixForPreconditioner
       if it is set otherwise from the problem matrix.
-      @param solution Vector to store the solution
+      @param solutionPtr Vector to store the solution
       @return Number of iterations, M_maxIter+1 if solve failed.
      */
-    Int solve( vectorPtr_Type& solution );
+    Int solve( vectorPtr_Type& solutionPtr );
 
     //! Compute the residual
     /*!
-      @param solution Solution of the system
+      @param solutionPtr Shared pointer on the solution of the system
       The method returns -1 if an error occurs
      */
-    Real computeResidual( vector_Type& solution );
+    Real computeResidual( vectorPtr_Type& solutionPtr );
 
     //! return the solver status
     std::string printStatus();
@@ -213,15 +213,15 @@ public:
 
     //! Method to set communicator for Displayer (for empty constructor)
     /*!
-      @param comm Communicator for the displayer
+      @param commPtr Communicator for the displayer
      */
-    void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm );
+    void setCommunicator( const boost::shared_ptr<Epetra_Comm>& commPtr );
 
     //! Method to set matrix from MatrixEpetra
     /*!
-      @param matrix Matrix of the system
+      @param matrixPtr Matrix of the system
      */
-    void setOperator( matrixPtr_Type& matrix );
+    void setOperator( matrixPtr_Type& matrixPtr );
 
     //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
     /*!
@@ -231,21 +231,21 @@ public:
 
     //! Method to set the right hand side (rhs) of the linear system
     /*!
-      @param rhs right hand side of the system
+      @param rhsPtr right hand side of the system
      */
-    void setRightHandSide( const vectorPtr_Type& rhs );
+    void setRightHandSide( const vectorPtr_Type& rhsPtr );
 
     //! Method to set an Preconditioner preconditioner
     /*!
-      @param preconditioner Preconditioner to be used to solve the system
+      @param preconditionerPtr Preconditioner to be used to solve the system
      */
-    void setPreconditioner( preconditionerPtr_Type& preconditioner, PrecApplicationType precType = RightPreconditioner );
+    void setPreconditioner( preconditionerPtr_Type& preconditionerPtr, PrecApplicationType precType = RightPreconditioner );
 
     //! Method to set a general Epetra_Operator as preconditioner
     /*!
-      @param preconditioner  Preconditioner to be set of type Epetra_Operator
+      @param preconditionerPtr  Preconditioner to be set of type Epetra_Operator
      */
-    void setPreconditioner( operatorPtr_Type& preconditioner, PrecApplicationType precType = RightPreconditioner );
+    void setPreconditioner( operatorPtr_Type& preconditionerPtr, PrecApplicationType precType = RightPreconditioner );
 
     //! Method to setup the solver using Teuchos::ParameterList
     /*!
@@ -289,14 +289,14 @@ public:
     //! Return the total number of iterations
     Int numIterations() const;
 
-    //! Return the true residual
+    //! Return the recursive residual
     /*!
       The method returns -1 if an error occurs
      */
-    Real trueResidual();
+    Real recursiveResidual();
 
-    //! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
-    preconditionerPtr_Type& preconditioner( PrecApplicationType precType = RightPreconditioner );
+    //! Method to get a shared pointer to the preconditioner
+    preconditionerPtr_Type& preconditioner();
 
     //! Return a Teuchos parameters list
     Teuchos::ParameterList& parametersList();
@@ -319,12 +319,12 @@ private:
 
     //@}
 
+    operatorPtr_Type             M_operator;
     matrixPtr_Type               M_matrix;
     matrixPtr_Type               M_baseMatrixForPreconditioner;
     vectorPtr_Type               M_rhs;
 
-    preconditionerPtr_Type       M_leftPreconditioner;
-    preconditionerPtr_Type       M_rightPreconditioner;
+    preconditionerPtr_Type       M_preconditioner;
 
     SolverType                   M_solverType;
     SolverOperatorPtr_Type       M_solverOperator;

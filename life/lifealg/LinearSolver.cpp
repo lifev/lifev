@@ -56,10 +56,10 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 LinearSolver::LinearSolver() :
+		M_operator             (),
 		M_matrix               (),
 		M_baseMatrixForPreconditioner(),
-        M_leftPreconditioner   (),
-        M_rightPreconditioner  (),
+        M_preconditioner       (),
         M_solverType           ( UndefinedSolver ),
         M_solverOperator       (),
         M_problem              ( new LinearProblem_Type() ),
@@ -75,16 +75,16 @@ LinearSolver::LinearSolver() :
 
 }
 
-LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm>& comm ) :
+LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm>& commPtr ) :
+		M_operator             (),
 		M_matrix               (),
 		M_baseMatrixForPreconditioner(),
-        M_leftPreconditioner   (),
-        M_rightPreconditioner  (),
+        M_preconditioner       (),
         M_solverType           ( UndefinedSolver ),
         M_solverOperator       (),
         M_problem              ( new LinearProblem_Type() ),
         M_parameterList        (),
-        M_displayer            ( new Displayer( comm ) ),
+        M_displayer            ( new Displayer( commPtr ) ),
         M_maxItersForReuse     ( 0 ),
         M_reusePreconditioner  ( false ),
         M_quitOnFailure        ( false ),
@@ -104,7 +104,7 @@ LinearSolver::~LinearSolver()
 // Methods
 // ===================================================
 Int
-LinearSolver::solve( vectorPtr_Type& solution )
+LinearSolver::solve( vectorPtr_Type& solutionPtr )
 {
     // Build preconditioners if needed
     bool retry( true );
@@ -122,7 +122,7 @@ LinearSolver::solve( vectorPtr_Type& solution )
 
     bool set = M_problem->setProblem();
     if ( set == false ) {
-        M_displayer->leaderPrint( "SLV-  ERROR: SolverBelos failed to set up correctly!\n" );
+        M_displayer->leaderPrint( "SLV-  ERROR: LinearSolver failed to set up correctly!\n" );
         return -1;
     }
 
@@ -138,7 +138,7 @@ LinearSolver::solve( vectorPtr_Type& solution )
     // Solve the linear system
     LifeChrono chrono;
     chrono.start();
-    M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solution->epetraVector() );
+    M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solutionPtr->epetraVector() );
     SolverOperator_Type::SolverOperatorStatusType convergenceStatus = M_solverOperator->hasConverged();
     chrono.stop();
     if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
@@ -150,8 +150,9 @@ LinearSolver::solve( vectorPtr_Type& solution )
     // Second run recomputing the preconditioner
     // This is done only if the preconditioner has not been
     // already recomputed and if it is a LifeV preconditioner.
-    if ( convergenceStatus != SolverOperator_Type::yes && retry &&
-       ( M_leftPreconditioner || M_rightPreconditioner ) )
+    if ( convergenceStatus != SolverOperator_Type::yes
+    	 && retry
+    	 && M_preconditioner )
     {
         M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , numIters, "\n" );
         M_displayer->leaderPrint( "SLV-  retrying:\n" );
@@ -160,7 +161,7 @@ LinearSolver::solve( vectorPtr_Type& solution )
 
         // Solving again, but only once (retry = false)
         chrono.start();
-        M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solution->epetraVector() );
+        M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solutionPtr->epetraVector() );
         convergenceStatus = M_solverOperator->hasConverged();
         M_lossOfPrecision = M_solverOperator->isLossOfAccuracyDetected();
         chrono.stop();
@@ -199,18 +200,26 @@ LinearSolver::solve( vectorPtr_Type& solution )
 }
 
 Real
-LinearSolver::computeResidual( vector_Type& solution )
+LinearSolver::computeResidual( vectorPtr_Type& solutionPtr )
 {
-    if ( M_problem->getOperator() == Teuchos::null || M_problem->getRHS() == Teuchos::null )
+    if ( !M_operator || !M_rhs )
     {
-        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the operator or the rhs is not set!\n" );
+        M_displayer->leaderPrint( "SLV-  WARNING: LinearSolver can not compute the residual if the operator and the RHS are not set!\n" );
         return -1;
     }
-    vector_Type res( solution.map() );
-    M_problem->computeCurrResVec( &res.epetraVector(), &solution.epetraVector(), M_problem->getRHS().get() );
-    Real residual;
-    res.norm2( &residual );
-    return residual;
+
+    vector_Type Ax ( solutionPtr->map() );
+    vector_Type residual( *M_rhs );
+
+    M_operator->Apply( solutionPtr->epetraVector(), Ax.epetraVector() );
+
+    residual.epetraVector().Update( 1, Ax.epetraVector(), -1 );
+
+    Real residualNorm;
+
+    residual.norm2( &residualNorm );
+
+    return residualNorm;
 }
 
 std::string
@@ -229,18 +238,22 @@ void
 LinearSolver::setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section, PrecApplicationType precType )
 {
     std::string precName = dataFile( ( section + "/prectype" ).data(), "Ifpack" );
+
+    M_preconditioner.reset( PRECFactory::instance().createObject( precName ) );
+    ASSERT( M_preconditioner.get() != 0, " Preconditioner not set" );
+
+    M_preconditioner->setDataFromGetPot( dataFile, section );
+
+    // To do use the parameter precApplicationType to setup right or left preconditioner
     if ( precType == RightPreconditioner )
     {
-        M_rightPreconditioner.reset( PRECFactory::instance().createObject( precName ) );
-        ASSERT( M_rightPreconditioner.get() != 0, " Preconditioner not set" );
-        M_rightPreconditioner->setDataFromGetPot( dataFile, section );
+
     }
-    else
+    else if ( precType == LeftPreconditioner )
     {
-        M_leftPreconditioner.reset( PRECFactory::instance().createObject( precName ) );
-        ASSERT( M_leftPreconditioner.get() != 0, " Preconditioner not set" );
-        M_leftPreconditioner->setDataFromGetPot( dataFile, section );
+
     }
+
 }
 
 void
@@ -249,48 +262,26 @@ LinearSolver::buildPreconditioner()
     LifeChrono chrono;
     Real condest( -1 );
 
-    if ( M_leftPreconditioner )
+    if ( M_preconditioner )
     {
         chrono.start();
-        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the left preconditioner...\n" );
+        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the preconditioner...\n" );
         if ( M_baseMatrixForPreconditioner.get() == 0 )
         {
-            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n" );
-            M_leftPreconditioner->buildPreconditioner( M_matrix );
+            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the problem matrix\n" );
+            M_preconditioner->buildPreconditioner( M_matrix );
         }
         else
         {
-            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n" );
-            M_leftPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
+            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the base matrix provided\n" );
+            M_preconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
         }
-        condest = M_leftPreconditioner->condest();
-        Teuchos::RCP<operator_Type> leftPrec( M_leftPreconditioner->preconditioner(), false );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( leftPrec ) );
+        condest = M_preconditioner->condest();
+        Teuchos::RCP<operator_Type> tmpPrec( M_preconditioner->preconditioner(), false );
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( tmpPrec ) );
         M_problem->setLeftPrec( belosPrec );
         chrono.stop();
-        if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Left preconditioner computed in " , chrono.diff(), " s." );
-        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
-    }
-    if ( M_rightPreconditioner )
-    {
-        chrono.start();
-        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the right preconditioner...\n" );
-        if ( M_baseMatrixForPreconditioner.get() == 0 )
-        {
-            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build preconditioner using the problem matrix\n" );
-            M_rightPreconditioner->buildPreconditioner( M_matrix );
-        }
-        else
-        {
-            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build preconditioner using the base matrix provided\n" );
-            M_rightPreconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
-        }
-        condest = M_rightPreconditioner->condest();
-        Teuchos::RCP<operator_Type> rightPrec( M_rightPreconditioner->preconditioner(), false );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( rightPrec ) );
-        M_problem->setRightPrec( belosPrec );
-        chrono.stop();
-        if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Right preconditioner computed in " , chrono.diff(), " s." );
+        if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Preconditioner computed in " , chrono.diff(), " s." );
         if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
     }
 }
@@ -298,19 +289,15 @@ LinearSolver::buildPreconditioner()
 void
 LinearSolver::resetPreconditioner()
 {
-    if ( M_leftPreconditioner )
-        M_leftPreconditioner->resetPreconditioner();
+    if ( M_preconditioner )
+        M_preconditioner->resetPreconditioner();
 
-    if ( M_rightPreconditioner )
-        M_rightPreconditioner->resetPreconditioner();
 }
 
 bool
 LinearSolver::isPreconditionerSet() const
 {
-    return ( M_leftPreconditioner.get() != 0 && M_leftPreconditioner->preconditionerCreated() ) ||
-           ( M_rightPreconditioner.get() != 0 && M_rightPreconditioner->preconditionerCreated() ) ||
-             M_problem->isLeftPrec() || M_problem->isRightPrec();
+    return M_preconditioner.get() != 0 && M_preconditioner->preconditionerCreated();
 }
 
 void
@@ -335,77 +322,77 @@ LinearSolver::setSolverType( const SolverType& solverType )
 }
 
 void
-LinearSolver::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
+LinearSolver::setCommunicator( const boost::shared_ptr<Epetra_Comm>& commPtr )
 {
-    M_displayer->setCommunicator( comm );
+    M_displayer->setCommunicator( commPtr );
 }
 
-void LinearSolver::setOperator( matrixPtr_Type& matrix )
+void LinearSolver::setOperator( matrixPtr_Type& matrixPtr )
 {
-	// Does the solverOperator exists?
-    M_matrix = matrix;
+	M_operator = matrixPtr->matrixPtr();
+    M_matrix = matrixPtr;
+    M_baseMatrixForPreconditioner = matrixPtr;
 }
 
 void
 LinearSolver::setOperator( operatorPtr_Type& operPtr )
 {
-	// Does the solverOperator exists?
-    M_solverOperator->setOperator( operPtr );
+	M_matrix.reset();
+	M_operator = operPtr;
 }
 
 void
 LinearSolver::setRightHandSide( const vectorPtr_Type& rhsPtr )
 {
-	// Does the solverOperator exists?
 	M_rhs = rhsPtr;
 }
 
 void
-LinearSolver::setPreconditioner( preconditionerPtr_Type& preconditioner, PrecApplicationType precType )
+LinearSolver::setPreconditioner( preconditionerPtr_Type& preconditionerPtr, PrecApplicationType precType )
 {
-	// Does the solverOperator exists?
+	/*
+	// If a left Epetra_Operator exists it must be deleted
+	if ( M_problem->isLeftPrec() )
+	{
+		M_problem->setLeftPrec( Teuchos::RCP<operator_Type>( Teuchos::null ) );
+	}
+	*/
+
+    M_preconditioner = preconditionerPtr;
+
+    // To do use the parameter precApplicationType to setup right or left preconditioner
     if ( precType == RightPreconditioner )
     {
-        // If a right Epetra_Operator exists it must be deleted
-        if ( M_problem->isRightPrec() )
-        {
-            M_problem->setRightPrec( Teuchos::RCP<operator_Type>( Teuchos::null ) );
-        }
 
-        M_rightPreconditioner = preconditioner;
     }
-    else
+    else if ( precType == LeftPreconditioner )
     {
-        // If a left Epetra_Operator exists it must be deleted
-        if ( M_problem->isLeftPrec() )
-        {
-            M_problem->setLeftPrec( Teuchos::RCP<operator_Type>( Teuchos::null ) );
-        }
-        M_leftPreconditioner  = preconditioner;
+
     }
 }
 
 void
-LinearSolver::setPreconditioner( operatorPtr_Type& preconditioner, PrecApplicationType precType )
+LinearSolver::setPreconditioner( operatorPtr_Type& preconditionerPtr, PrecApplicationType precType )
 {
 	// Does the solverOperator exists?
     if ( precType == RightPreconditioner )
     {
         // If a right LifeV::Preconditioner exists it must be deleted
-        M_rightPreconditioner.reset();
+        M_preconditioner.reset();
 
-        Teuchos::RCP<operator_Type> rightPrec=Teuchos::rcp( preconditioner );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( rightPrec ) );
+        Teuchos::RCP<operator_Type> prec = Teuchos::rcp( preconditionerPtr );
+        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( prec ) );
         M_problem->setRightPrec( belosPrec );
     }
-    else
-    {
-        // If a left LifeV::Preconditioner exists it must be deleted
-        M_leftPreconditioner.reset();
 
-        Teuchos::RCP<operator_Type> leftPrec=Teuchos::rcp( preconditioner );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( leftPrec ) );
-        M_problem->setLeftPrec( belosPrec );
+    // To do use the parameter precApplicationType to setup right or left preconditioner
+    if ( precType == RightPreconditioner )
+    {
+
+    }
+    else if ( precType == LeftPreconditioner )
+    {
+
     }
 }
 
@@ -461,11 +448,11 @@ LinearSolver::numIterations() const
 
 
 Real
-LinearSolver::trueResidual()
+LinearSolver::recursiveResidual()
 {
     if ( !M_problem->isProblemSet() )
     {
-        M_displayer->leaderPrint( "SLV-  WARNING: SolverBelos can not compute the residual if the linear system is not set!\n" );
+        M_displayer->leaderPrint( "SLV-  WARNING: LinearSoler can not compute the residual if the linear system is not set!\n" );
         return -1;
     }
     multiVector_Type res( *( M_problem->getRHS().get() ) );
@@ -476,13 +463,9 @@ LinearSolver::trueResidual()
 }
 
 LinearSolver::preconditionerPtr_Type&
-LinearSolver::preconditioner( PrecApplicationType precType )
+LinearSolver::preconditioner()
 {
-    if ( precType == RightPreconditioner )
-    {
-        return M_rightPreconditioner;
-    }
-    return M_leftPreconditioner;
+    return M_preconditioner;
 }
 
 Teuchos::ParameterList&
@@ -528,15 +511,16 @@ LinearSolver::setupSolverOperator()
         	// Crash
         	break;
     }
-    //operatorPtr_Type tmpMatrixPtr;
-    //tmpMatrixPtr = M_matrix;
-    //M_solverOperator->setOperator( tmpMatrixPtr );
-    M_solverOperator->setOperator( M_matrix->matrixPtr() );
+
+    // Set the operator in the SolverOperator object
+    M_solverOperator->setOperator( M_operator );
+
+    // Set the preconditioner operator in the SolverOperator oject
     operatorPtr_Type tmpPrecPtr;
-    //tmpPrecPtr = M_leftPreconditioner;
-    //M_solverOperator->setPreconditioner( tmpPrecPtr );
-    tmpPrecPtr.reset( M_leftPreconditioner->preconditioner() );
+    tmpPrecPtr.reset( M_preconditioner->preconditioner() );
     M_solverOperator->setPreconditioner( tmpPrecPtr );
+
+    // Set the parameter inside the solver
     M_solverOperator->setParameterList( M_parameterList );
 }
 

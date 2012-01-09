@@ -314,7 +314,7 @@ main( int argc, char** argv )
     linearSolver2.setRightHandSide( *rhsBC );
     linearSolver2.solve( *solution2 );
 
-    if( verbose ) std::cout << "Solving the system with SolverBelos... " << std::endl;
+    if( verbose ) std::cout << "Solving the system with LinearSolver... " << std::endl;
     boost::shared_ptr<vector_type> solution3;
     solution3.reset( new vector_type( uFESpace->map(), Unique ) );
     *solution3 *= 0.0;
@@ -364,7 +364,7 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if( verbose ) std::cout << std::endl << "[Solutions export]" << std::endl;
     if( verbose ) std::cout << "Defining the exporter... " << std::flush;
-    ExporterHDF5<mesh_type> exporter ( dataFile, "test_SolverBelos" );
+    ExporterHDF5<mesh_type> exporter ( dataFile, "test_LinearSolver" );
     exporter.setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter.setMeshProcId( meshPart.meshPartition(), Comm->MyPID() );
     exporter.setMultimesh( false );
