@@ -120,8 +120,7 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
         if( !M_silent ) M_displayer->leaderPrint( "SLV-  Reusing precond ...\n" );
     }
 
-    bool set = M_problem->setProblem();
-    if ( set == false ) {
+    if ( M_rhs.get() == 0 || M_operator == 0 ) {
         M_displayer->leaderPrint( "SLV-  ERROR: LinearSolver failed to set up correctly!\n" );
         return -1;
     }
@@ -264,25 +263,33 @@ LinearSolver::buildPreconditioner()
 
     if ( M_preconditioner )
     {
-        chrono.start();
-        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the preconditioner...\n" );
-        if ( M_baseMatrixForPreconditioner.get() == 0 )
-        {
-            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the problem matrix\n" );
-            M_preconditioner->buildPreconditioner( M_matrix );
-        }
-        else
-        {
-            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the base matrix provided\n" );
-            M_preconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
-        }
-        condest = M_preconditioner->condest();
-        Teuchos::RCP<operator_Type> tmpPrec( M_preconditioner->preconditioner(), false );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( tmpPrec ) );
-        M_problem->setLeftPrec( belosPrec );
-        chrono.stop();
-        if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Preconditioner computed in " , chrono.diff(), " s." );
-        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
+    	if( M_matrix.get() == 0 )
+    	{
+    		M_displayer->leaderPrint( "SLV-  ERROR: LinearSolver requires a matrix to build the preconditioner!\n" );
+    		exit( 1 );
+    	}
+    	else
+    	{
+			chrono.start();
+			if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the preconditioner...\n" );
+			if ( M_baseMatrixForPreconditioner.get() == 0 )
+			{
+				if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the problem matrix\n" );
+				M_preconditioner->buildPreconditioner( M_matrix );
+			}
+			else
+			{
+				if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the base matrix provided\n" );
+				M_preconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
+			}
+			condest = M_preconditioner->condest();
+			Teuchos::RCP<operator_Type> tmpPrec( M_preconditioner->preconditioner(), false );
+			Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( tmpPrec ) );
+			M_problem->setLeftPrec( belosPrec );
+			chrono.stop();
+			if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Preconditioner computed in " , chrono.diff(), " s." );
+			if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
+    	}
     }
 }
 
@@ -331,7 +338,6 @@ void LinearSolver::setOperator( matrixPtr_Type& matrixPtr )
 {
 	M_operator = matrixPtr->matrixPtr();
     M_matrix = matrixPtr;
-    M_baseMatrixForPreconditioner = matrixPtr;
 }
 
 void
@@ -508,7 +514,8 @@ LinearSolver::setupSolverOperator()
         	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Aztecoo" ) );
             break;
         default:
-        	// Crash
+            M_displayer->leaderPrint( "SLV-  ERROR: The type of solver is not recognized!\n" );
+        	exit( 1 );
         	break;
     }
 
@@ -521,7 +528,7 @@ LinearSolver::setupSolverOperator()
     M_solverOperator->setPreconditioner( tmpPrecPtr );
 
     // Set the parameter inside the solver
-    M_solverOperator->setParameterList( M_parameterList );
+    M_solverOperator->setParameters( M_parameterList );
 }
 
 } // namespace LifeV

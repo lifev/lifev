@@ -71,7 +71,8 @@ AT_DATA([data],[[
     tol                          = 1.e-10
 
 ]])
-AT_CHECK([ ln -sf $top_srcdir/testsuite/test_LinearSolver/SolverParamList.xml SolverParamList.xml &&
+AT_CHECK([ ln -sf $top_srcdir/testsuite/test_LinearSolver/SolverParamList1.xml SolverParamList1.xml &&
+           ln -sf $top_srcdir/testsuite/test_LinearSolver/SolverParamList2.xml SolverParamList2.xml &&
            mpirun -n 4 ../../test_LinearSolver/test_LinearSolver -c],[0],[ignore],[ignore])
 AT_CLEANUP
 

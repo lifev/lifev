@@ -83,7 +83,7 @@ public:
 
 	void setPreconditioner( const operatorPtr_Type & _prec );
 
-	void setParameterList( const Teuchos::ParameterList & _pList );
+	void setParameters( const Teuchos::ParameterList & _pList );
 
 	//@}
 

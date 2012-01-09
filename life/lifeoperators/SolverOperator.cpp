@@ -77,7 +77,7 @@ void SolverOperator::setPreconditioner( const operatorPtr_Type& _prec )
 	doSetPreconditioner();
 }
 
-void SolverOperator::setParameterList( const Teuchos::ParameterList& _pList )
+void SolverOperator::setParameters( const Teuchos::ParameterList& _pList )
 {
 	M_pList = Teuchos::rcp( new Teuchos::ParameterList( _pList ), true );
 	doSetParameterList();

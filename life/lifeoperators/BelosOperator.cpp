@@ -77,7 +77,7 @@ int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y)
 	bool set = M_linProblem->setProblem(rcp(&Y, false), Xcopy);
 	if (set == false)
 	{
-		std::cout << std::endl << "ERROR:  Belos::LinearProblem failed to set up correctly!" << std::endl;
+		std::cout << std::endl << "SLV-  ERROR: Belos::LinearProblem failed to set up correctly!" << std::endl;
 		return -12;
 	}
 
@@ -122,13 +122,13 @@ void BelosOperator::doSetPreconditioner()
 
 void BelosOperator::doSetParameterList()
 {
-	if(! M_pList->sublist("options").isParameter("Verbosity"))
-		M_pList->sublist("options").set( "Verbosity", Belos::Errors + Belos::Warnings +
-				Belos::TimingDetails + Belos::StatusTestDetails );
+	if( !M_pList->sublist( "Belos List" ).isParameter( "Verbosity" ) )
+		 M_pList->sublist( "Belos List" ).set( "Verbosity", Belos::Errors + Belos::Warnings +
+											             Belos::TimingDetails + Belos::StatusTestDetails );
 
-	std::string solverType(M_pList->get<std::string>("Solver Type"));
+	std::string solverType(M_pList->get<std::string>("Solver Manager Type"));
 	allocateSolver( (*S_solverManagerMap)[solverType]);
-	M_solverManager->setParameters(sublist(M_pList, "options", true));
+	M_solverManager->setParameters(sublist(M_pList, "Belos List", true));
 
 	std::string precSideStr( M_pList->get<std::string>("Preconditioner Side"));
 	PreconditionerSide precSide((*S_precSideMap)[precSideStr]);
@@ -165,7 +165,7 @@ void BelosOperator::allocateSolver(const SolverManagerType & solverManagerType)
 	    switch ( solverManagerType )
 	    {
 	    	case NotAValidSolverManager:
-	    		std::cout<<"Not a Valid Solver Manager \n";
+	    		std::cout<<"SLV-  ERROR: Not a Valid Solver Manager \n";
 	    		exit(1);
 	    		break;
 	        case BlockCG:

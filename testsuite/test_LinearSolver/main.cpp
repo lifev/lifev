@@ -252,23 +252,24 @@ main( int argc, char** argv )
     if( verbose ) std::cout << "done" << std::endl;
 
     if( verbose ) std::cout << "Setting up SolverBelos... " << std::flush;
-    Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
-    belosList = Teuchos::getParametersFromXmlFile( "SolverParamList.xml" );
+    Teuchos::RCP< Teuchos::ParameterList > belosList1 = Teuchos::rcp ( new Teuchos::ParameterList );
+    belosList1 = Teuchos::getParametersFromXmlFile( "SolverParamList1.xml" );
 
     SolverBelos linearSolver2;
     linearSolver2.setCommunicator( Comm );
-    linearSolver2.setParameters( *belosList );
+    linearSolver2.setParameters( *belosList1 );
     linearSolver2.setPreconditioner( precPtr );
-    //linearSolver2.setPreconditionerFromGetPot( dataFile, "prec" );
     if( verbose ) std::cout << "done" << std::endl;
     linearSolver2.showMe();
 
     if( verbose ) std::cout << "Setting up LinearSolver... " << std::flush;
+    Teuchos::RCP< Teuchos::ParameterList > belosList2 = Teuchos::rcp ( new Teuchos::ParameterList );
+    belosList2 = Teuchos::getParametersFromXmlFile( "SolverParamList2.xml" );
+
     LinearSolver linearSolver3;
     linearSolver3.setCommunicator( Comm );
-    linearSolver3.setParameters( *belosList );
+    linearSolver3.setParameters( *belosList2 );
     linearSolver3.setPreconditioner( precPtr );
-    //linearSolver3.setPreconditionerFromGetPot( dataFile, "prec" );
     if( verbose ) std::cout << "done" << std::endl;
     linearSolver3.showMe();
 
@@ -299,14 +300,14 @@ main( int argc, char** argv )
     bcManage( *systemMatrix, *rhsBC, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
     if( verbose ) std::cout << "done" << std::endl;
 
-    if( verbose ) std::cout << "Solving the system with SolverAztec00... " << std::endl;
+    if( verbose ) std::cout << std::endl << "Solving the system with SolverAztec00... " << std::endl;
     boost::shared_ptr<vector_type> solution;
     solution.reset( new vector_type( uFESpace->map(), Unique ) );
     *solution *= 0.0;
     linearSolver1.setMatrix( *systemMatrix );
     linearSolver1.solveSystem( *rhsBC, *solution, systemMatrix );
 
-    if( verbose ) std::cout << "Solving the system with SolverBelos... " << std::endl;
+    if( verbose ) std::cout << std::endl << "Solving the system with SolverBelos... " << std::endl;
     boost::shared_ptr<vector_type> solution2;
     solution2.reset( new vector_type( uFESpace->map(), Unique ) );
     *solution2 *= 0.0;
@@ -314,7 +315,7 @@ main( int argc, char** argv )
     linearSolver2.setRightHandSide( *rhsBC );
     linearSolver2.solve( *solution2 );
 
-    if( verbose ) std::cout << "Solving the system with LinearSolver... " << std::endl;
+    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver... " << std::endl;
     boost::shared_ptr<vector_type> solution3;
     solution3.reset( new vector_type( uFESpace->map(), Unique ) );
     *solution3 *= 0.0;
