@@ -435,7 +435,7 @@ public:
      *  Adds volume. Local and global ID computed automatically.
      *  @return Reference to added volume.
      */
-    volume_Type & addVolume();
+    element_Type & addVolume();
 
     //! Adds volume
     /**
@@ -2361,8 +2361,8 @@ typename RegionMesh<GEOSHAPE, MC>::face_Type &
 RegionMesh<GEOSHAPE, MC>::addFace( bool const boundary )
 {
     face_Type aFace;
-    +    // It is a new face. I set the global ID.
-    +    aFace.setId(faceList.size());
+    // It is a new face. I set the global ID.
+    aFace.setId(faceList.size());
     aFace.setBoundary(boundary);
     return this->addFace( aFace);
 }
