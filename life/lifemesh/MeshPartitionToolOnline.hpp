@@ -57,7 +57,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifefem/DOF.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/GhostEntityData.hpp>
 
 namespace LifeV
@@ -161,34 +161,34 @@ private:
     //! Construct local mesh
     /*!
       Constructs the data structures for the local mesh partition.
-      Updates M_localNodes, M_localEdges, M_localFaces, M_localVolumes,
-      M_globalToLocalNode.
+      Updates M_localVertices, M_localRidges, M_localFacets, M_localElements,
+      M_globalToLocalVertex.
     */
     void constructLocalMesh();
     //! Construct nodes
     /*!
-      Adds nodes to the partitioned mesh object. Updates M_nBoundaryPoints,
+      Adds nodes to the partitioned mesh object. Updates M_nBoundaryVertices,
       M_meshPartition.
     */
-    void constructNodes();
+    void constructVertices();
     //! Construct volumes
     /*!
-      Adds volumes to the partitioned mesh object. Updates M_globalToLocalVolume,
+      Adds volumes to the partitioned mesh object. Updates M_globalToLocalElement,
       M_meshPartition.
     */
-    void constructVolumes();
+    void constructElements();
     //! Construct edges
     /*!
-      Adds edges to the partitioned mesh object. Updates M_nBoundaryEdges,
+      Adds edges to the partitioned mesh object. Updates M_nBoundaryRidges,
       M_meshPartition.
     */
-    void constructEdges();
+    void constructRidges();
     //! Construct faces
     /*!
-      Adds faces to the partitioned mesh object. Updates M_nBoundaryFaces,
+      Adds faces to the partitioned mesh object. Updates M_nBoundaryFacets,
       M_meshPartition.
     */
-    void constructFaces();
+    void constructFacets();
     //! Final setup of local mesh
     /*!
       Updates the partitioned mesh object data members after adding the mesh
@@ -202,19 +202,19 @@ private:
     //@{
     boost::shared_ptr<Epetra_Comm>             M_comm;
     Int                                        M_myPID;
-    UInt                                       M_nBoundaryPoints;
-    UInt                                       M_nBoundaryEdges;
-    UInt                                       M_nBoundaryFaces;
-    UInt                                       M_elementNodes;
-    UInt                                       M_elementFaces;
-    UInt                                       M_elementEdges;
-    UInt                                       M_faceNodes;
-    std::vector<Int>                           M_localNodes;
-    std::set<Int>                              M_localEdges;
-    std::set<Int>                              M_localFaces;
-    std::vector<Int>                           M_localVolumes;
-    std::map<Int, Int>                         M_globalToLocalNode;
-    std::map<Int, Int>                         M_globalToLocalVolume;
+    UInt                                       M_nBoundaryVertices;
+    UInt                                       M_nBoundaryRidges;
+    UInt                                       M_nBoundaryFacets;
+    UInt                                       M_elementVertices;
+    UInt                                       M_elementFacets;
+    UInt                                       M_elementRidges;
+    UInt                                       M_facetVertices;
+    std::vector<Int>                           M_localVertices;
+    std::set<Int>                              M_localRidges;
+    std::set<Int>                              M_localFacets;
+    std::vector<Int>                           M_localElements;
+    std::map<Int, Int>                         M_globalToLocalVertex;
+    std::map<Int, Int>                         M_globalToLocalElement;
     boost::shared_ptr<std::vector<Int> >       M_myElements;
     Teuchos::ParameterList                     M_parameters;
     meshPtr_Type                               M_originalMesh;
@@ -273,20 +273,20 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::partitionGraph()
 template<typename MeshType, template <typename> class GraphPartitionToolType>
 void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::buildMeshPartition()
 {
-    M_elementNodes = MeshType::ElementShape::S_numVertices;
-    M_elementFaces = MeshType::ElementShape::S_numFaces;
-    M_elementEdges = MeshType::ElementShape::S_numEdges;
-    M_faceNodes    = MeshType::BElementShape::S_numVertices;
+    M_elementVertices = MeshType::elementShape_Type::S_numVertices;
+    M_elementFacets = MeshType::elementShape_Type::S_numFacets;
+    M_elementRidges = MeshType::elementShape_Type::S_numRidges;
+    M_facetVertices    = MeshType::facetShape_Type::S_numVertices;
 
     constructLocalMesh();
-    constructNodes();
-    constructVolumes();
-    constructEdges();
+    constructVertices();
+    constructElements();
+    constructRidges();
 
     // new faces can be built only after all local volumes are complete in order to get proper ghost faces data
     M_comm->Barrier();
 
-    constructFaces();
+    constructFacets();
 
     finalSetup();
 }
@@ -336,57 +336,57 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructLocalMe
     for (UInt jj = 0; jj < myElements.size(); ++jj)
     {
         ielem = myElements[jj];
-        M_localVolumes.push_back(ielem);
+        M_localElements.push_back(ielem);
 
         // cycle on element's nodes
-        for (UInt ii = 0; ii < M_elementNodes; ++ii)
+        for (UInt ii = 0; ii < M_elementVertices; ++ii)
         {
             inode = M_originalMesh->volume(ielem).point(ii).id();
-            im    = M_globalToLocalNode.find(inode);
+            im    = M_globalToLocalVertex.find(inode);
 
             // if the node is not yet present in the list of local nodes, then add it
-            if (im == M_globalToLocalNode.end())
+            if (im == M_globalToLocalVertex.end())
             {
-                M_globalToLocalNode.insert(std::make_pair(inode, count));
+                M_globalToLocalVertex.insert(std::make_pair(inode, count));
                 ++count;
                 // store here the global numbering of the node
-                M_localNodes.push_back(M_originalMesh->volume(ielem).point(ii).id());
+                M_localVertices.push_back(M_originalMesh->volume(ielem).point(ii).id());
             }
         }
 
         // cycle on element's edges
-        for (UInt ii = 0; ii < M_elementEdges; ++ii)
+        for (UInt ii = 0; ii < M_elementRidges; ++ii)
         {
             // store here the global numbering of the edge
-            M_localEdges.insert(M_originalMesh->localEdgeId(ielem, ii));
+            M_localRidges.insert(M_originalMesh->localEdgeId(ielem, ii));
         }
 
         // cycle on element's faces
-        for (UInt ii = 0; ii < M_elementFaces; ++ii)
+        for (UInt ii = 0; ii < M_elementFacets; ++ii)
         {
             // store here the global numbering of the face
-            M_localFaces.insert(M_originalMesh->localFaceId(ielem, ii));
+            M_localFacets.insert(M_originalMesh->localFaceId(ielem, ii));
         }
     }
 }
 
 template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructNodes()
+void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructVertices()
 {
     UInt inode;
     std::vector<Int>::iterator it;
 
-    M_nBoundaryPoints = 0;
-    M_meshPartition->pointList.reserve(M_localNodes.size());
+    M_nBoundaryVertices = 0;
+    M_meshPartition->pointList.reserve(M_localVertices.size());
     // guessing how many boundary points on this processor.
-    M_meshPartition->_bPoints.reserve(M_originalMesh->numBPoints() * M_localNodes.size() /
+    M_meshPartition->_bPoints.reserve(M_originalMesh->numBPoints() * M_localVertices.size() /
                                       M_originalMesh->numBPoints());
     inode = 0;
     typename MeshType::point_Type *pp = 0;
 
     // loop in the list of local nodes:
     // in this loop inode is the local numbering of the points
-    for (it = M_localNodes.begin(); it != M_localNodes.end(); ++it, ++inode)
+    for (it = M_localVertices.begin(); it != M_localVertices.end(); ++it, ++inode)
     {
         typename MeshType::point_Type point = 0;
 
@@ -394,21 +394,18 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructNodes()
         bool boundary = M_originalMesh->isBoundaryPoint(*it);
         if (boundary)
         {
-            ++M_nBoundaryPoints;
+            ++M_nBoundaryVertices;
         }
 
         pp = &(M_meshPartition->addPoint(boundary));
         *pp = M_originalMesh->point( *it );
 
         pp->setLocalId( inode );
-
-        M_meshPartition->localToGlobalNode().insert(std::make_pair( pp->localId(), pp->id() ));
-        M_meshPartition->globalToLocalNode().insert(std::make_pair( pp->id(), pp->localId() ));
     }
 }
 
 template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructVolumes()
+void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructElements()
 {
     Int count;
     std::map<Int, Int>::iterator im;
@@ -416,56 +413,56 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructVolumes
     count = 0;
     UInt inode;
 
-    typename MeshType::VolumeType * pv = 0;
+    typename MeshType::element_Type * pv = 0;
 
-    M_meshPartition->volumeList.reserve(M_localVolumes.size());
+    M_meshPartition->volumeList.reserve(M_localElements.size());
 
     // loop in the list of local elements
     // CAREFUL! in this loop inode is the global numbering of the points
     // We insert the local numbering of the nodes in the local volume list
-    for (it = M_localVolumes.begin(); it != M_localVolumes.end(); ++it, ++count)
+    for (it = M_localElements.begin(); it != M_localElements.end(); ++it, ++count)
     {
         pv = &(M_meshPartition->addVolume());
         *pv = M_originalMesh->volume( *it );
         pv->setLocalId( count );
 
-        M_globalToLocalVolume.insert(std::make_pair( pv->id(), pv->localId() ) );
+        M_globalToLocalElement.insert(std::make_pair( pv->id(), pv->localId() ) );
 
-        for (ID id = 0; id < M_elementNodes; ++id)
+        for (ID id = 0; id < M_elementVertices; ++id)
         {
             inode = M_originalMesh->volume(*it).point(id).id();
             // im is an iterator to a map element
             // im->first is the key (i. e. the global ID "inode")
             // im->second is the value (i. e. the local ID "count")
-            im = M_globalToLocalNode.find(inode);
+            im = M_globalToLocalVertex.find(inode);
             pv->setPoint(id, M_meshPartition->pointList( (*im).second ));
         }
     }
 }
 
 template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructEdges()
+void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructRidges()
 {
     Int count;
     std::map<Int, Int>::iterator im;
     std::set<Int>::iterator is;
 
-    typename MeshType::EdgeType * pe;
+    typename MeshType::ridge_Type * pe;
     UInt inode;
     count = 0;
 
-    M_nBoundaryEdges = 0;
-    M_meshPartition->edgeList.reserve(M_localEdges.size());
+    M_nBoundaryRidges = 0;
+    M_meshPartition->edgeList.reserve(M_localRidges.size());
 
     // loop in the list of local edges
-    for (is = M_localEdges.begin(); is != M_localEdges.end(); ++is, ++count)
+    for (is = M_localRidges.begin(); is != M_localRidges.end(); ++is, ++count)
     {
         // create a boundary edge in the local mesh, if needed
         bool boundary = (M_originalMesh->isBoundaryEdge(*is));
         if (boundary)
         {
             // create a boundary edge in the local mesh, if needed
-            ++M_nBoundaryEdges;
+            ++M_nBoundaryRidges;
         }
 
         pe = &(M_meshPartition->addEdge(boundary));
@@ -479,46 +476,46 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructEdges()
             // im is an iterator to a map element
             // im->first is the key (i. e. the global ID "inode")
             // im->second is the value (i. e. the local ID "count")
-            im = M_globalToLocalNode.find(inode);
+            im = M_globalToLocalVertex.find(inode);
             pe->setPoint(id, M_meshPartition->pointList((*im).second));
         }
     }
 }
 
 template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFaces()
+void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFacets()
 {
     Int count;
     std::map<Int, Int>::iterator im;
     std::set<Int>::iterator      is;
 
-    typename MeshType::FaceType * pf = 0;
+    typename MeshType::facet_Type * pf = 0;
 
     UInt inode;
     count = 0;
 
-    M_nBoundaryFaces = 0;
-    M_meshPartition->faceList.reserve(M_localFaces.size());
+    M_nBoundaryFacets = 0;
+    M_meshPartition->faceList.reserve(M_localFacets.size());
 
     // loop in the list of local faces
-    for (is = M_localFaces.begin(); is != M_localFaces.end(); ++is, ++count)
+    for (is = M_localFacets.begin(); is != M_localFacets.end(); ++is, ++count)
     {
         // create a boundary face in the local mesh, if needed
         bool boundary = (M_originalMesh->isBoundaryFace(*is));
         if (boundary)
         {
-            ++M_nBoundaryFaces;
+            ++M_nBoundaryFacets;
         }
 
         Int elem1 = M_originalMesh->face(*is).firstAdjacentElementIdentity();
         Int elem2 = M_originalMesh->face(*is).secondAdjacentElementIdentity();
 
         // find the mesh elements adjacent to the face
-        im =  M_globalToLocalVolume.find(elem1);
+        im =  M_globalToLocalElement.find(elem1);
 
         ID localElem1;
 
-        if (im == M_globalToLocalVolume.end())
+        if (im == M_globalToLocalElement.end())
         {
             localElem1 = NotAnId;
         }
@@ -527,10 +524,10 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFaces()
             localElem1 = (*im).second;
         }
 
-        im =  M_globalToLocalVolume.find(elem2);
+        im =  M_globalToLocalElement.find(elem2);
 
         ID localElem2;
-        if (im == M_globalToLocalVolume.end())
+        if (im == M_globalToLocalElement.end())
         {
             localElem2 = NotAnId;
         }
@@ -552,7 +549,7 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFaces()
 
             // build GhostEntityData
             GhostEntityData ghostFace;
-            ghostFace.localFaceId = pf->localId();
+            ghostFace.localFacetId = pf->localId();
 
             // TODO: make this work. Zoltan's DD didn't cut it. Find another way.
             //// // set the ghostElem to be searched on other subdomains
@@ -606,7 +603,7 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFaces()
         for (ID id = 0; id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
         {
             inode = pf->point(id).id();
-            im = M_globalToLocalNode.find(inode);
+            im = M_globalToLocalVertex.find(inode);
             pf->setPoint(id, M_meshPartition->pointList((*im).second));
         }
     }
@@ -617,10 +614,10 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFaces()
 template<typename MeshType, template <typename> class GraphPartitionToolType>
 void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::finalSetup()
 {
-    UInt nVolumes = M_localVolumes.size();
-    UInt nNodes   = M_localNodes.size();
-    UInt nEdges   = M_localEdges.size();
-    UInt nFaces   = M_localFaces.size();
+    UInt nVolumes = M_localElements.size();
+    UInt nNodes   = M_localVertices.size();
+    UInt nEdges   = M_localRidges.size();
+    UInt nFaces   = M_localFacets.size();
 
     M_meshPartition->setMaxNumPoints (nNodes, true);
     M_meshPartition->setMaxNumEdges  (nEdges, true);
@@ -633,13 +630,13 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::finalSetup()
     M_meshPartition->setMaxNumGlobalFaces  (M_originalMesh->numFaces());
 
     M_meshPartition->setMaxNumGlobalVolumes(M_originalMesh->numVolumes());
-    M_meshPartition->setNumBFaces    (M_nBoundaryFaces);
+    M_meshPartition->setNumBFaces    (M_nBoundaryFacets);
 
-    M_meshPartition->setNumBPoints   (M_nBoundaryPoints);
-    M_meshPartition->setNumBEdges    (M_nBoundaryEdges);
+    M_meshPartition->setNumBPoints   (M_nBoundaryVertices);
+    M_meshPartition->setNumBEdges    (M_nBoundaryRidges);
 
     M_meshPartition->setNumVertices (nNodes );
-    M_meshPartition->setNumBVertices(M_nBoundaryPoints);
+    M_meshPartition->setNumBVertices(M_nBoundaryVertices);
 
     M_meshPartition->updateElementEdges();
 

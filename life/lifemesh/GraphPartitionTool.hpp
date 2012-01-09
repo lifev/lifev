@@ -504,7 +504,7 @@ void GraphPartitionTool<MeshType>::buildGraph()
     }
 
     // Build the graph of the local elements
-    Int numDimensions = MeshType::VolumeShape::S_nDimensions;
+    Int numDimensions = MeshType::elementShape_Type::S_nDimensions;
     int numNeighbours;
     switch (numDimensions) {
     case 2:
@@ -517,7 +517,7 @@ void GraphPartitionTool<MeshType>::buildGraph()
         numNeighbours = 0;
     }
 
-    UInt numElementFaces = MeshType::ElementShape::S_numFaces;
+    UInt numElementFaces = MeshType::elementShape_Type::S_numFaces;
 
     for (UInt i = 0; i < numStoredElements(); ++i) {
         UInt ie = M_elementList[i];
