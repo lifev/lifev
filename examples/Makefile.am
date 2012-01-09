@@ -38,8 +38,7 @@ SUBDIRS		=  benchmark_RossEthierSteinman \
                utility_meshReorder \
                unmaintained_ct \
                unmaintained_masstransport \
-               unmaintained_rk \
-               example_SolverBelos
+               unmaintained_rk
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in

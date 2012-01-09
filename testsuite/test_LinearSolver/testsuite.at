@@ -1,6 +1,23 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+#
+#      Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+#           Date: 03-08-2011
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### TEST: LINEARSOLVER ############################################################################
+###################################################################################################
+
+AT_SETUP([test_LinearSolver])
+AT_KEYWORDS([Laplacian LinearSolver])
+AT_DATA([data],[[
+
 # -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
-#      Data file for EthierSteinman test case
+#      Data file for the LinearSolver test
 #-------------------------------------------------
 
 [finite_element]
@@ -52,3 +69,9 @@
     max_iter_reuse               = 80
     kspace                       = 100
     tol                          = 1.e-10
+
+]])
+AT_CHECK([ ln -sf $top_srcdir/testsuite/test_LinearSolver/SolverParamList.xml SolverParamList.xml &&
+           mpirun -n 4 ../../test_LinearSolver/test_LinearSolver -c],[0],[ignore],[ignore])
+AT_CLEANUP
+

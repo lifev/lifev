@@ -38,7 +38,8 @@ SUBDIRS		= data  \
               test_timeAdvance_orderI \
               test_timeAdvance_orderII \
               test_monolithic \
-              test_VectorContainer
+              test_VectorContainer \
+              test_LinearSolver
 
 
 # add newly created testsuite.at scripts to TESTSUITES to allow the automatic generation of the
@@ -64,8 +65,8 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
            $(srcdir)/test_monolithic/testsuiteGCE.at \
            $(srcdir)/test_monolithic/testsuiteCE.at \
            $(srcdir)/test_Parser/testsuite.at \
-           $(srcdir)/test_VectorContainer/testsuite.at
-
+           $(srcdir)/test_VectorContainer/testsuite.at \
+           $(srcdir)/test_LinearSolver/testsuite.at
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 	{									   \
