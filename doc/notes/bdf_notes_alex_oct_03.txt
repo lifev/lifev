@@ -1,0 +1,103 @@
+Dear all,
+I finally decided to send you in attachment my directories:
+
+Software/src
+Software/DEVELOPMENT_TESTS
+Software/Meshes
+
+waiting for I will learn to use CVS....
+
+Please, check, if you want: I am here for any
+crticism and suggestion.
+
+In short:
+
+1) BDF: I have implemented a class for an easy managing of
+BDF time discretization of order 1, 2, 3,
+with an automatic handling of the previous solutions needed.
+In the class, there is associated also the structure for "extrapolating":
+
+es. P^{n+1} = 2P^n - P^{n-1} + O (Delta t^2)
+
+
+This class can be used for each time-dependent problem (see Test_BDF)
+
+2) BDF Navier-Stokes
+I have coupled a BDF time discretization of order q
+with a pressure extrapolation of order q-1.
+It is an extension of the old idea of incremental
+methods for the pressure (Van Kan).
+According to recent papers and my (and of Fausto)
+personal experience this coupling improves the solution
+whenever factorization or projections schemes are used.
+I don't know what happens in using for solving
+the preconditioned Schur complement (somehow preconditioned)
+but I don't tkink this is a problem.
+
+In any case, the bdf member in NS will automatically manage
+the time discretization and extrapolation.
+
+When using incremental schemes, you need also an initialization
+not only for the velocity, but also for the pressure.
+I have added it.
+
+3) Post Proc class provides
+some structure that I think are useful in porst processing (and not onl
+for that)
+Es.
+i)Area of the patch of each node
+ii)Average Normal at each node
+iii)\int_{Patch} \phi dx at each node
+
+Well, you can add whatever you want...
+
+4) Based on PostProc I have computed the stresses
+
+Roughly speaking:
+
+a) Residual = \int_{Patch} stress \dot \phi_i
+
+b) (average) stress = (\int_{Patch} stress \dot \phi_i) / (\int_{Patch} \phi)
+
+c) normal_stress =  stress \cdot (average) normal
+
+d) shear stress = stress - normal_stress
+
+This is the way I have followed, but I am not really sure that
+this is the best one. I avoided to use
+pointwise derivatives of the velocity...
+
+In any case, if you have suggestions, or even just references
+on how correctly compute the shear stress, you are very very welcome !!!!
+
+I actually computed the stresses on a Poiseuille flow and I found
+that it works quite well, even if it requires a fine mesh
+in order to have accurate results.
+
+As correctly pointed out by Miguel, I could reduce the
+memory storage in residual computation. At the moment
+I have the whole matrix without b.c.'s and then I
+compute the residual. I should extract from the
+matrix only the  Dirichlet dof's and work with a reduced
+matrix. I know the point, I would like to fix it
+with the "slices" structures...In any case, it seems quite fast in computing.
+
+For the moment, that's all. Thanks for your patience.
+
+Have a good we
+and I am sure that you will all support Ferrari on sunday....
+
+Ciao
+
+-- 
+Alessandro Veneziani
+MOX (Modeling and Scientific Computing)
+Dipartimento di Matematica "F. Brioschi",
+Politecnico di Milano
+"La Nave" Building, 6th Floor
+Via Bonardi 9, I-20133 MILANO, Italy
+Tel. 0039 022399 4706, Fax 0039 022399 4606
+alessandro.veneziani@mate.polimi.it
+
+
+

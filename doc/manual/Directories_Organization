@@ -1,0 +1,68 @@
+NSCode
+|
+ Documentation concerning the project not produced by doxygen. It DEOS NOT 
+ contain documentation of EXTERNAL packages
+|
+|-- Documents
+|
+Doxygen generated documentation
+|
+|-- Doxygen
+|   |-- html
+|   |-- latex
+|   `-- man
+
+Notes of meetings etc.
+|-- Notes
+PAckaged documentation
+|-- Packages_docs
+`-- Software
+    |
+Some meshes
+    |-- Meshes
+    |   `-- Mesh++
+The official test to be used to test stable configurations
+    |-- OFFICIAL_TESTS
+All external packages (tar files)
+    |-- Packages
+The Sources produced by the project which can be either utilities (like Menu)
+or LIBRARY SOURCES (like util)
+    |-- Sources
+    |   |-- Menu
+    |   `-- util
+The includes
+    |-- include
+    |   |-- fe
+    |   |-- fe_old
+    |   |-- mesh
+    |   `-- util
+    |
+In the lib directory we have the library produced from the project sources
+and the lib enad include dirs of external packages (I follow the rule now 
+ab-used in the Linux community of putting everything under lib when it is
+an external package. It is simpler to upgrade than udsing the more traditional
+division between include and libs)
+    |
+    |-- lib
+    |   |-- IML++
+    |   |-- SparseLib++
+    |   |   `-- sp1_5c
+    |   |       |-- spblas
+    |   |       |-- src
+    |   |       `-- testing
+libutil.a is the only project library so far.
+    |   `-- util
+
+Directory for free-lance testing
+    |-- test_fe
+    |   |-- Exact
+    |   |-- Mixed
+    |   |-- Neumann
+    |   `-- old_tests
+    |-- test_general
+    |-- test_mesh
+    `-- test_neumann
+
+makefile.def  the master makefile, to be included in the other makefiles
+
+ 

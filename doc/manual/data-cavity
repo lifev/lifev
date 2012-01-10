@@ -1,0 +1,118 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for cylinder test with Navier-Stokes
+#----------------------------------------------------------------
+
+[exporter]
+multimesh  = false
+start      = 0
+save       = 1
+
+[fluid]
+
+[./physics]
+endtime         = .2
+density         = 1.0          # density
+viscosity       = 0.005         # viscosity
+
+
+[../discretization]
+mesh_dir        = ./Mesh/
+mesh_file       = lid16.mesh
+
+mesh_type       = .mesh
+
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+timestep        = 0.01                   # timestep
+verbose         = 0                     # verbose during mesh-reading
+order_bdf       = 1
+linearized      = 0
+diagonalize     = 0 # weight, 0=off
+div_beta_u_v    = 1 # 1=on, 0=off
+vel_order       = P1		# P1, P1Bubble, P2
+press_order     = P1		# P1, P2
+
+[../solver]
+solver          = gmres
+output          = all_res # all_res
+conv            = r0
+max_iter        = 100
+kspace          = 100
+tol             = 1.e-5
+
+
+#
+# fluid preconditioner parameters
+# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+#
+
+[../prec]
+prectype           = Ifpack
+reuse              = true
+overlap            = 1
+displayList        = true
+
+# Parameters for the Ifpack preconditioner
+
+[./ifpack]
+prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+
+[./relaxation]
+type                   = Jacobi
+damping_factor         = 1.
+sweeps                 = 1
+min_diagonal_value     = 0
+zero_starting_solution = true
+
+[../partitioner]
+type                   = metis
+overlap                = 0
+local_parts            = 1
+root_node              = 0
+use_symmetric_graph    = true
+
+[../amesos]
+solvertype             = Amesos_KLU
+
+[../fact]
+drop_tolerance         = 1.e-5
+level-of-fill          = 1
+ilut_level-of-fill     = 1
+absolute_threshold     = 0.
+relative_threshold     = 0.
+relax_value            = 0.
+
+[../schwarz]
+combine_mode           = true
+reordering_type        = none
+filter_singletons      = false
+
+[../]
+[./ML]
+
+default_parameter_list	= SA
+
+
+
+#
+# end of fluid preconditioner parameters
+#
+
+[../ipstab]
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
+#gammaBeta  = 0.125
+#gammaDiv   = 0.125
+#gammaPress = 0.03125
+
+[../problem]
+
+# for  cyl3D.2.2.00.mesh
+Re 	= 1.0
+nu 	= 1.5
+D  	= 1.
+H  	= 20.
+centered = 1
+scaling         = none

@@ -1,0 +1,22 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#
+#      Author(s): C. Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2009-05-05
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+
+
+[variables]
+
+A = 5        # Integer
+B = 5.12345  # Double
+C = true     # Bool  
+D = LifeV    # String
+E = 'Life V' # String list

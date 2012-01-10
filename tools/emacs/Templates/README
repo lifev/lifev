@@ -1,0 +1,20 @@
+# -*- makefile -*-
+###################################################################################################
+#
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2006, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University  
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 12 Jan 2010
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+LifeV developers which use primarily (x)emacs as their development
+platform should use these template files, which are created using the default ones
+defined in the "LifeV Development Guidelines". 
+
+In order to use these templates properly you should install the
+template elisp package from Christoph Wedler hosted at
+http://emacs-template.sourceforge.net/. It consists in one .el file.

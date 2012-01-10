@@ -1,0 +1,86 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#
+#      Author(s): Umberto Villa <uvilla@emory.edu>
+#           Date: 04-10-2010
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+
+
+[testGetPotFilter]
+	[./IntegerVariable]
+		positiveInt = 10
+		negativeInt = -10
+	[../RealVariable]
+		a01 = 1.0
+		a02 = -1.0
+		a03 = 1e5
+		a04 = 1e-5
+		a05 = 1.0e5
+		a06 = 1.0e-5
+		a07 = 1e+5
+		a08 = -1e5
+		a09 = -1e-5
+		a10 = -1e+5
+		a11 = -1.0e5
+		a12 = -1.0e-5
+		a13 = -1.0e+5
+	[../BoolenVariable]
+		[./trueVariable]
+			allsmall   = true
+			allcapital = TRUE
+			mixed      = TruE
+			onlyOneLetS = t
+			onlyOneLetC = T
+		[../falseVariable]
+			allsmall = false
+			allcapital = FALSE
+			mixed = fAlSe
+			onlyOneLetS = f
+			onlyOneLetC = F
+	[../../StringVariable]
+		author = Umberto
+		date = '5-10-2010'
+		list = '2, 3, 4, 5' 
+
+[testGetPotFilterSemicolon]
+	[./IntegerVariable]
+		positiveInt = 10    #comment
+		negativeInt = -10;
+	[../RealVariable]
+		a01 = 1.0;
+		a02 = -1.0;
+		a03 = 1e5;
+		a04 = 1e-5;
+		a05 = 1.0e5;
+		a06 = 1.0e-5;
+		a07 = 1e+5;
+		a08 = -1e5;
+		a09 = -1e-5;
+		a10 = -1e+5; 
+		a11 = -1.0e5;  #comment
+		a12 = -1.0e-5  #comment
+		a13 = -1.0e+5 ;  #comment
+	[../BoolenVariable]
+		[./trueVariable]
+			allsmall   = true;
+			allcapital = TRUE    #comment
+			mixed      = TruE ; #commet
+			onlyOneLetS = t;
+			onlyOneLetC = T;
+		[../falseVariable]
+			allsmall = false; #comment
+			allcapital = FALSE   #comment
+			mixed = fAlSe;
+			onlyOneLetS = f;
+			onlyOneLetC = F;
+	[../../StringVariable]
+		author = Umberto;
+		date = '5-10-2010';
+		list = '2, 3, 4, 5' 		

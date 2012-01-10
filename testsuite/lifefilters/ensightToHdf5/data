@@ -1,0 +1,62 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#
+#      Author(s): Name Surname <name.surname@epfl.ch>
+#           Date: 00-00-0000
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+
+
+[exporter]
+type       = hdf5
+filename   = filtered
+multimesh  = false
+start      = 0
+save       = 1
+import_dir = ./importDir/
+
+[importer]
+type       = ensight
+filename   = ethiersteinman
+
+
+[fluid]
+
+[./physics]
+density         = 1.0          # density
+viscosity       = .01       # viscosity
+
+[../time_discretization]
+initialtime		= 0.
+endtime			= 0.04
+timestep		= 0.01
+BDF_order		= 1
+
+[../space_discretization]
+mesh_dir        = ./Mesh/   # the directory where the mesh file is
+mesh_type	= .mesh
+mesh_file       = cube4x4.mesh          # mesh file
+
+transform = '1.0 1.0 1.0 
+             0.0 0.0 0.0
+             0.0 0.0 0.0'
+
+verbose         = 0
+linearized      = 0
+diagonalize     = 1 # weight, 0=off
+div_beta_u_v    = 0 # 1=on, 0=off
+vel_order         = P1
+press_order       = P1
+
+initialization  = interp                # initialize using proj: L2 projection
+                                        #                  interp: interpolation
+
+[../miscellaneous]
+verbose         = 1
+steady          = 0

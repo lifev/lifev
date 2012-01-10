@@ -1,0 +1,124 @@
+Dear all,
+
+as promised I have made available (in
+~/Repository/Sources_CVS/NSCode.tar.gz) the latest version of the code + 
+decomantation.
+
+What I have done and what (in my opinion) there is still to do 
+
+Done:
+
+A) I have almost finished the documentation of what done so far. The
+document (ps file) is in teh directory Documents and it is called
+Specifications.tex, but I am annexing also a ps version here.
+Notice that
+
+  1) It is still a lot incomplete. Some header files have not yet been
+commented (it is the next thing a will do), only for question of time (I 
+promised something for the beginning of this wee and a promise is a
+promise..)
+
+  2) It is an "inevitable-out-of-date" document. Particularly in the
+part where it describes the header files that form the library. This is
+inevitable because the library is still in a developing phase. You
+should always look directly at the header files to verify the actual
+class public interfaces.
+
+ 3) I had no time to check the English! Please report to me major mistakes!
+
+B) I have cleaned up (to my taste :-) ) some of the classes developed by
+JFG (who has done an awful lot of work!!). I hope Jean-Fred will not be
+upset!  I am anyway ready to all suggestions and criticism.  I have
+kept, as far as possible, the already existing interfaces. I had to stop
+(always for problems of time) up to the finite element definition
+classes. I did not touch the mixed finite element stuff and the element
+matrix classes.
+
+
+C) I have corrected 1/2 bugs on the specialised class for P1 Tetra with
+exact integration and added the methods for the right hand side definition.
+
+D) I have added the "Basis Reference Shape" classes, in order to use
+them as template parameter for the basis shape function classes, thus
+avoiding duplication of data definition.
+
+E) I have started working on the Marker class, and changed the template
+parameters of the Mesh classes accordingly to this now idea of mine on
+how to use the markers (see next section). Maybe I will change again!.
+
+F) I have written (only on paper, LaTeX version soon), the algebraic
+steps for the implementation of Dirichlet b.c., both for the scalar and
+vector case, with a eye on the computer implementation.
+
+To be done
+
+A LOT, but lets notice the things I think are high priority.
+
+A) Testing. No other words.
+
+B) Enrich a little the set of finite elements now available.
+
+C) Move the mesh constructor out of the RegionMesh class (make it a
+global function), so that a user may add its own mesh reader. This
+requires, among other think, provide the interface for the modification
+of all the mesh data, and definitely clean-up all the switches stuff,
+that at the moment is just an awful mess.
+
+D) Extend the mesh handlers to 2D problems.
+
+E) Develop the markers stuff. Here I need your opinions. The markers are
+attributes associated to all mesh entities (we have vertex markers, Edge
+markers, Region markers etc.) and in my idea they serve as "Trojan
+horses" to make user defined stuff "visible" to the library. The typical
+use is to indicate a boundary condition, but they may be used to pass
+user defined functions, such us the function to calculate the forcing
+term or the variable viscosity. You see now the problem, I need to
+define a set of classes which can be modified by the user but which must
+derive from a minimal set of base classes. I have not decided yet whether
+to use static or dynamic polymorphism for the purpose, course I have no
+idea of how much the computational impact. Therefore, this is still in
+the developing phase and maybe I will try different things before make
+the first releases of the classes for actual test At the moment,
+Marker= int.
+
+F) I don't know whether to implement a Common_Base class, in teh spirit
+of the P2MESH library. It is an interesting idea. Similar to the
+markers, a Common_Base class is a user extendible class used to make
+visible to the library classes user defined data and function. Also here 
+I need your opinion.
+
+G) The FE classes use a lot multidimensional arrays. I would like to see 
+whether it can be possible to substitute them with a derivation from the 
+valarray class. This because the C++ native multidimensional arrays are
+rather a mess (indeed they are not arrays, but pointers to vectors of
+pointers to vectors of......) and prone to errors.
+
+H) The parts where the library interface itself with the linear algebra
+stuff (typically in the build up of the global patterns and the global
+matrices assembly) should be brought better into evidence and the
+interface better nucleated.
+
+I) I think that some more work should be done, for instance to make the
+addition of a new finite element class a little less complicated that it
+is now, maybe redesigning a little bit the class templates. Maybe it is
+not possible if we want to keep generality.
+
+A lot of other things which I am forgetting at the moment. Quite a few
+things are written directly on the header files, marked by a "TO DO".
+
+Have fun.
+
+
+Luca. 
+
+
+ 
+
+
+
+
+
+
+
+
+

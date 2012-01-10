@@ -1,0 +1,10 @@
+#! /bin/sh
+
+find . -name '*.[ch]pp'  | xargs -ithecppfile sed -itabs "s/\t/    /g" thecppfile
+
+exit 0;
+# Local variables:
+# eval: (add-hook 'write-file-hooks 'time-stamp)
+# time-stamp-start: "timestamp='"
+# time-stamp-format: "%:y-%02m-%02d"
+# time-stamp-end: "'"

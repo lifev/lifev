@@ -1,0 +1,417 @@
+%%--------------------------------------------------------------------------------------------------------------
+%%                                              ALGORITHME 1.1
+%%--------------------------------------------------------------------------------------------------------------
+%% Quoi de neuf depuis Algorithm 1.0 / What's new since Algorithm 1.0
+%%
+%% Meilleure boîte de cadrage
+%% Meilleure gestion des largeurs, permettant l'utilisation du mode multicolonnes, et permettant la césure
+%% automatique des longues lignes de pseudo-instructions.
+%% Widths are better handled, allowing the use of multicolumn mode, and also allowing auto line splitting into
+%% long lines of pseudo-code.
+%%--------------------------------------------------------------------------------------------------------------
+%%
+%% Copyleft Pierre Chatelier
+%%       e-mail: pierre.chatelier@club-internet.fr
+%%   page perso: http://perso.club-internet.fr/ktd
+%%
+%%Un package pour ecrire du code algorithmique
+%%Il propose, dans l'environnement "algorithme", d'utiliser
+%%  -Des remarques, pour commenter le code          ( \Rem{Remarque}                                         )
+%%  -Des blocs, pour indenter le code               ( \Block{code}                                           )
+%%  -Des boucles "Tant Que...faire...Fait"          ( \While{condition}{code}                                )
+%%  -Des boucles "Repeter...jusqu'a"                ( \Repeat{code}{condition} ou \RepeatUntil{}{}           )
+%%  -Des boucles "Pour...de...a...faire...Fin Pour" ( \ForFromTo{variable}{valeur début}{valeur fin}{code}   )
+%%  -Des boucles "Pour...faire...Fin Pour"          ( \For{controle de boucle}{code}                         )
+%%  -Des Si...Alors...Fin Si                        ( \If{condition}{code} ou \IfThen{condition}{code}       )
+%%  -Des Si...Alors...Sinon...Fin Si                ( \IfThenElse{condition}{code de alors}{code de sinon}   )
+%%  -Des Selon que ... Fin Selon que                ( \Switch{code}                                          )
+%%  -Des fonctions                                  ( \Function{parametres}{type de retour}{code}            )
+%%  -Des procédures                                 ( \Procedure{parametres}{code}                           )
+%%  -Une instruction de declaration de type         ( \Type{nom ou liste de variable}{nom de type}           )
+%%  -Quelques mots-clefs d'usage courant : \True, \False, \And, \Or et \Not
+%% Les versions étoilées des commandes (\WhileDo*{}, \IfThen*{}, ... ; toutes sauf \Rem, \Block \Switch,
+%% \Function et \Procedure) font tout sur la meme ligne
+%%
+%% Une table des algorithmes est disponible via \listofalgorithms.
+%% Pour introduire un algorithme dans cette table, il faut taper la commande "\caption{texte...}" dans un
+%% environnemment "algorithme"
+%%
+%% On peut passer une option au package : [french] ou [english] pour la langue des mots-clef
+%%
+%%---------------------------------------------------------------------------------------------------------------
+%%This is a package to write some algorithms.
+%%It provides, within an "algorithm" environment, to use
+%%  -Comments                         ( \Rem{text}                                               )
+%%  -Blocks, to indent code           ( \Block{text}                                             )
+%%  -While ... do ... done            ( \While{condition}{code}                                  )
+%%  -Repeat ... until                 ( \Repeat{code}{condition} or \RepeatUntil{}{}             )
+%%  -Repeat ... until                 ( \RepeatUntil{code}{condition}                            )
+%%  -For...from...to...do...done      ( \ForFromTo{variable}{initial value}{final value}{code}   )
+%%  -For...do...done                  ( \For{loop control}{code}                                 )
+%%  -If...then...end if               ( \If{condition}{code} or \IfThen{condition}{code}         )
+%%  -If...then...else...end if        ( \IfThenElse{condition}{then code}{else code}             )
+%%  -Switch                           ( \Switch{code}                                            )
+%%  -Function                         ( \Function{parameters}{return type}{code}                 )
+%%  -Procedure                        ( \Procedure{parametres}{code}                             )
+%%  -A type declaration instruction   ( \Type{name or list of variables}{type name}              )
+%%  -Some useful keywords: \True, \False, \And, \Or and \Not.
+%% Most of these commands have a star-form (\WhileDo*{}, \IfThen*{}, ... ; all but \Rem, \Block \Switch
+%% \Function and \Procedure). These star-forms are single-lined.
+%%
+%% A list of algorithms is provided through \listofalgorithms.
+%% To add an entry in this table, the matching algorithm must have a caption, thanks to "\caption{text}".
+%%
+%% You can specifiy an option to the package : [french] ou [english] for the language of the keywords.
+%%
+%%---------------------------------------------------------------------------------------------------------------
+
+
+%%-----------------------------------------------------------------%%
+%%---------------------- Identification ---------------------------%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesClass{algorithme} %Nom de la classe / Class name
+%%-----------------------------------------------------------------%%
+%%
+%%
+%%-----------------------------------------------------------------%%
+%%------------------------ Inclusions -----------------------------%%
+\RequirePackage{float, ifthen, calc}
+%%
+%%
+%%-----------------------------------------------------------------%%
+%%------------------------ Langage/Language -----------------------%%
+
+%% Changer le langage dans le contexte de babel /Change langage according to babel
+\@ifpackageloaded{babel}
+{
+  \iflanguage{french}{\def\alg@language{french}}{}
+  \iflanguage{english}{\def\alg@language{english}}{}
+  \iflanguage{american}{\def\alg@language{english}}{}
+}
+{
+  \def\alg@language{french} %Langage par defaut / Default language
+}
+
+%% Tenir compte de l'option specifiee explicitement / Handle explicit langage option
+\DeclareOption{french}{\def\alg@language{french}}
+\DeclareOption{english}{\def\alg@language{english}}
+\DeclareOption{american}{\def\alg@language{english}}
+\ProcessOptions\relax
+
+
+%% Declaration des commandes / Commands declaration
+\ifthenelse{\equal{\alg@language}{french}}
+{
+  \def\alg@floatname{Algorithme}
+  \def\alg@listname{Liste des Algorithmes}
+
+  \newcommand{\@TRUE}{\textbf{vrai}}%
+  \newcommand{\@FALSE}{\textbf{faux}}%
+  \newcommand{\@AND}{\textbf{ET }}%
+  \newcommand{\@OR}{\textbf{OU }}%
+  \newcommand{\@NOT}{\textbf{$\neg$}}%
+
+  \newcommand{\@WHILE}{\textbf{Tant que }}%
+  \newcommand{\@DO}{\textbf{faire }}%
+  \newcommand{\@ENDWHILE}{\textbf{Fait}}%
+
+  \newcommand{\@REPEAT}{\textbf{R\'ep\'eter }}%
+  \newcommand{\@UNTIL}{\textbf{jusqu'\`a ce que }}%
+
+  \newcommand{\@FOR}{\textbf{Pour }}%
+  \newcommand{\@FROM}{\textbf{de }}%
+  \newcommand{\@TO}{\textbf{\`a }}%
+  \newcommand{\@ENDFOR}{\textbf{Fin Pour}}%
+ 
+  \newcommand{\@IF}{\textbf{Si }}%
+  \newcommand{\@THEN}{\textbf{Alors }}%
+  \newcommand{\@ELSE}{\textbf{Sinon }}%
+  \newcommand{\@ENDIF}{\textbf{Fin Si}}%
+
+  \newcommand{\@SWITCH}{\textbf{Selon que }}%
+  \newcommand{\@ENDSWITCH}{\textbf{Fin Selon que}}%
+ 
+  \newcommand{\@FUNCTION}{\textbf{Fonction }}%
+  \newcommand{\@RETURN}{\textbf{Retourner }}%
+  \newcommand{\@ENDFUNCTION}{\textbf{Fin}}%
+ 
+  \newcommand{\@PROCEDURE}{\textbf{Proc\'edure }}%
+  \newcommand{\@ENDPROCEDURE}{\textbf{Fin}}%
+}{}
+\ifthenelse{\equal{\alg@language}{english}}
+{
+  \def\alg@floatname{Algorithm}
+  \def\alg@listname{List of Algorithms}
+
+  \newcommand{\@TRUE}{\textbf{true}}%
+  \newcommand{\@FALSE}{\textbf{false}}%
+  \newcommand{\@AND}{\textbf{AND }}%
+  \newcommand{\@OR}{\textbf{OR }}%
+  \newcommand{\@NOT}{\textbf{$\neg$}}%
+
+  \newcommand{\@WHILE}{\textbf{While }}%
+  \newcommand{\@DO}{\textbf{do }}%
+  \newcommand{\@ENDWHILE}{\textbf{done}}%
+
+  \newcommand{\@REPEAT}{\textbf{Repeat }}%
+  \newcommand{\@UNTIL}{\textbf{until }}%
+
+  \newcommand{\@FOR}{\textbf{For }}%
+  \newcommand{\@FROM}{\textbf{from }}%
+  \newcommand{\@TO}{\textbf{to }}%
+  \newcommand{\@ENDFOR}{\textbf{end For}}%
+ 
+  \newcommand{\@IF}{\textbf{If }}%
+  \newcommand{\@THEN}{\textbf{then }}%
+  \newcommand{\@ELSE}{\textbf{else }}%
+  \newcommand{\@ENDIF}{\textbf{end If}}%
+
+  \newcommand{\@SWITCH}{\textbf{Switch }}%
+  \newcommand{\@ENDSWITCH}{\textbf{end Switch}}%
+ 
+  \newcommand{\@FUNCTION}{\textbf{Function }}%
+  \newcommand{\@RETURN}{\textbf{return }}%
+  \newcommand{\@ENDFUNCTION}{\textbf{End}}%
+ 
+  \newcommand{\@PROCEDURE}{\textbf{Procedure }}%
+  \newcommand{\@ENDPROCEDURE}{\textbf{End}}%
+}{}
+
+%%
+%%
+%%-----------------------------------------------------------------%%
+%%----------------------- Commandes/Commands ----------------------%%
+
+%% Adequation au package "float" / Match "float" package
+\newcommand\floatc@alg[2]{\begin{center}{\bfseries\rmfamily #1:} #2\end{center}}
+\newcommand\fs@alg{
+   \let\@fs@capt\floatc@alg
+   \def\@fs@pre{}\def\@fs@post{}\def\@fs@mid{\vspace{3pt}}
+   \let\@fs@iftopcapt\iftrue}
+\newfloat{algorithmfloat}{h}{loa}
+\floatname{algorithmfloat}{\alg@floatname}
+\newcommand{\listofalgorithms}{\listof{algorithmfloat}{\alg@listname}}
+\newlength{\alglength}
+
+%% Les commandes disponibles / Provided commands
+\newenvironment{algorithme}[1][H]
+{
+ \setlength{\alglength}{.95\linewidth}
+ \begin{algorithmfloat}[#1]
+ 
+ %%Rem{texte} : ecrit une remarque
+ %%Rem{text}  : puts a comment
+ \newcommand{\@Rem}[1]{\begin{minipage}[t]{\alglength}
+                        \emph{[##1]}
+                        \vspace*{.5ex}
+                       \end{minipage}
+                      }%
+
+ %%Bloc{code} : Encapsule quelques lignes / encapsulate some lines
+ \newcommand{\@Block}[1]{\begin{minipage}[t]{\alglength}
+                         ##1
+                         \vspace*{.5ex}
+                         \end{minipage}
+                        }%
+
+ %%WhileDo{condition}{code}
+ \newcommand{\@WhileDo}[2]{\begin{minipage}[t]{\alglength}
+                           \@WHILE (##1) \@DO \\
+                           \hspace*{1em}
+                           \addtolength{\alglength}{-2em-\tabcolsep-\arrayrulewidth}
+                           \begin{tabular}{|p{\alglength}} ##2\\ \end{tabular}%
+                           \addtolength{\alglength}{2em+\tabcolsep+\arrayrulewidth}
+                           \\ \@ENDWHILE%
+                           \vspace*{.5ex}
+                          \end{minipage}
+                         }%
+ %%WhileDo{condition}{code} sur une seule ligne / on a single line
+ \newcommand{\@ShortWhileDo}[2]{\begin{minipage}[t]{\alglength}
+                                \@WHILE (##1) \@DO ##2 \@ENDWHILE
+                                \vspace*{.5ex}
+                                \end{minipage}
+                               }%
+
+ %%RepeatUntil{code}{condition}
+ \newcommand{\@RepeatUntil}[2]{\begin{minipage}[t]{\alglength}
+                               \@REPEAT \\
+                               \hspace*{1em}
+                               \addtolength{\alglength}{-2em-\tabcolsep-\arrayrulewidth}
+                               \begin{tabular}{|p{\alglength}} ##1\\ \end{tabular}%
+                               \addtolength{\alglength}{2em+\tabcolsep+\arrayrulewidth}
+                               \\ \@UNTIL (##2)%
+                               \vspace*{.5ex}
+                              \end{minipage}
+                             }%
+ %%RepeatUntil{code}{condition} sur une seule ligne / on a single line
+ \newcommand{\@ShortRepeatUntil}[2]{\begin{minipage}[t]{\alglength}
+                                    \@REPEAT ##1 \@UNTIL (##2)%
+                                    \vspace*{.5ex}
+                                    \end{minipage}
+                                   }%                             
+
+ %%ForFromToDo{variable}{valeur initiale}{valeur finale}{code}
+ %%ForFromToDo{variable}{initial value}{final value}{code}
+ \newcommand{\@ForFromToDo}[4]{\begin{minipage}[t]{\alglength}
+                               \@FOR ##1 \@FROM ##2 \@TO ##3 \@DO \\
+                               \hspace*{.3em}
+                               \addtolength{\alglength}{-2em-\tabcolsep-\arrayrulewidth}
+                               \begin{tabular}{|p{\alglength}} ##4\\ \end{tabular}%
+                               \addtolength{\alglength}{2em+\tabcolsep+\arrayrulewidth}
+                               \\ \@ENDFOR%
+                               \vspace*{.5ex}
+                              \end{minipage}
+                             }%
+ %%ForFromToDo{variable}{valeur initiale}{valeur finale}{code} sur une seule ligne
+ %%ForFromToDo{variable}{initial value}{final value}{code} on a single line
+ \newcommand{\@ShortForFromToDo}[4]{\begin{minipage}[t]{\alglength}
+                                    \@FOR ##1 \@FROM ##2 \@TO ##3 \@DO ##4 \@ENDFOR%
+                                    \vspace*{.5ex}
+                                    \end{minipage}
+                                   }%
+
+ %%For{controle de boucle style C}{code}
+ %%For{C-like loop control}{code}
+ \newcommand{\@ForDo}[2]{\begin{minipage}[t]{\alglength}
+                         \@FOR ##1 \@DO \vspace*{.5ex}\\
+                         \hspace*{.3em}
+                         \addtolength{\alglength}{-2em-\tabcolsep-\arrayrulewidth}
+                         \begin{tabular}{|p{\alglength}} ##2\\ \end{tabular}%
+                         \addtolength{\alglength}{2em+\tabcolsep+\arrayrulewidth}
+                         \\ \@ENDFOR%
+                         \vspace*{.5ex}
+                         \end{minipage}
+                       }%
+ %%For{controle de boucle style C}{code} sur une seule ligne
+ %%For{C-like loop control}{code} on a single line
+ \newcommand{\@ShortForDo}[2]{\begin{minipage}[t]{\alglength}
+                              \@FOR ##1 \@DO ##2 \@ENDFOR%
+                              \vspace*{.5ex}
+                              \end{minipage}
+                             }%
+
+ %%IfThen{condition}{code}
+ \newcommand{\@IfThen}[2]{\begin{minipage}[t]{\alglength}
+                          \@IF (##1) \@THEN \\
+                          \hspace*{.5em}
+                          \addtolength{\alglength}{-1.5em-\tabcolsep-\arrayrulewidth}
+                          \begin{tabular}{|p{\alglength}} ##2\\ \end{tabular}%
+                          \addtolength{\alglength}{1.5em+\tabcolsep+\arrayrulewidth}
+                          \\ \@ENDIF%
+                          \vspace*{.5ex}
+                         \end{minipage}
+                        }%
+ %%IfThen{condition}{code} sur une seule ligne / on a single line
+ \newcommand{\@ShortIfThen}[2]{\begin{minipage}[t]{\alglength}
+                               \@IF (##1) \@THEN ##2 \@ENDIF%
+                               \vspace*{.5ex}
+                               \end{minipage}
+                              }%
+                              
+ %%IfThenElse{condition}{code du then}{code du else} NE PAS CONFONDRE avec le \ifthenelse de LaTeX
+ %%IfThenElse{condition}{then-code}{else-code} DO NOT CONFUSE with \ifthenelse from LaTeX
+ \newcommand{\@IfThenElse}[3]{\begin{minipage}[t]{\alglength}
+                              \@IF (##1) \@THEN \\
+                              \hspace*{.5em}
+                              \addtolength{\alglength}{-2em-\tabcolsep-\arrayrulewidth}
+                              \begin{tabular}{|p{\alglength}} ##2\\ \end{tabular}%
+                              \\ \@ELSE\\
+                              \hspace*{.5em}
+                              \begin{tabular}{|p{\alglength}} ##3\\ \end{tabular}%
+                              \addtolength{\alglength}{2em+\tabcolsep+\arrayrulewidth}
+                              \\ \@ENDIF%
+                              \vspace*{.5ex}
+                              \end{minipage}
+                            }%
+ %%IfThenElse{condition}{code du then}{code du else} sur une seule ligne
+ %%IfThenElse{condition}{then-code}{else-code} on a single line
+ \newcommand{\@ShortIfThenElse}[3]{\begin{minipage}[t]{\alglength}
+                                   \@IF (##1) \@THEN ##2 \@ELSE ##3 \@ENDIF%
+                                   \vspace*{.5ex}
+                                   \end{minipage}
+                                  }%
+
+ %%Switch{code} (C'est le selon que)
+ \newcommand{\@Switch}[1]{\begin{minipage}[t]{\alglength}
+                          \@SWITCH \\
+                          \hspace*{1em}
+                          \addtolength{\alglength}{-2em-\tabcolsep-\arrayrulewidth}
+                          \begin{tabular}{|p{\alglength}} ##1\\ \end{tabular}%
+                          \addtolength{\alglength}{2em+\tabcolsep+\arrayrulewidth}
+                          \\ \@ENDSWITCH%
+                          \vspace*{.5ex}
+                          \end{minipage}
+                        }%
+
+ %%Function{parametres}{type de retour}{code}
+ %%Function{parameters}{return type}{code}
+ \newcommand{\@Function}[4]{\begin{minipage}[t]{\alglength}
+                            \@FUNCTION  ##1(##2) : \textbf{##3}\\
+                            \hspace*{1em}
+                            \addtolength{\alglength}{-2em-\tabcolsep-\arrayrulewidth}
+                            \begin{tabular}{|p{\alglength}} ##4\\ \end{tabular}%
+                            \addtolength{\alglength}{2em+\tabcolsep+\arrayrulewidth}
+                            \\ \@ENDFUNCTION%
+                            \vspace*{.5ex}
+                            \end{minipage}
+                           }%
+
+ %%Procedure{parametres}{code}
+ %%Procedure{parameters}{code}
+ \newcommand{\@Procedure}[3]{\begin{minipage}[t]{\alglength}
+                             \@PROCEDURE ##1(##2)\\
+                             \hspace*{1em}
+                             \addtolength{\alglength}{-2em-\tabcolsep-\arrayrulewidth}
+                             \begin{tabular}{|p{\alglength}} ##3\\ \end{tabular}%
+                             \addtolength{\alglength}{2em+\tabcolsep+\arrayrulewidth}
+                             \\ \@ENDPROCEDURE%
+                             \vspace*{.5ex}
+                             \end{minipage}
+                            }%
+
+ %%Type{nom ou liste de variable}{nom de type}
+ %%Type{name or list of variables}{type name}
+ \newcommand{\@Type}[2]{##1 : \textbf{##2}}                            
+                           
+ %%Definition des macro-commandes pratiques pour l'utilisateur.
+ %%La forme etoilee de certaines commandes est un alias de leur version courte (sur une seule ligne)
+ %%Definition of macro-commands useful for the user.
+ %%The star-from of some commands is an alias towards ther short form (on a single line)
+ \def\True{       \@TRUE}%
+ \def\False{      \@FALSE}%
+ \def\And{        \@AND}%
+ \def\Or{         \@OR}%
+ \def\Not{        \@NOT}%
+ \def\Rem{        \@Rem}
+ \def\Block{      \@Block}
+ \def\While{      \@ifstar{\@ShortWhileDo}     {\@WhileDo}}
+ \def\WhileDo{    \@ifstar{\@ShortWhileDo}     {\@WhileDo}}
+ \def\Repeat{     \@ifstar{\@ShortRepeatUntil} {\@RepeatUntil}}
+ \def\RepeatUntil{\@ifstar{\@ShortRepeatUntil} {\@RepeatUntil}}
+ \def\ForFromTo{  \@ifstar{\@ShortForFromToDo} {\@ForFromToDo}} 
+ \def\ForFromToDo{\@ifstar{\@ShortForFromToDo} {\@ForFromToDo}} 
+ \def\ForDo{      \@ifstar{\@ShortForDo}       {\@ForDo}} 
+ \def\For{        \@ifstar{\@ShortForDo}       {\@ForDo}} 
+ \def\If{         \@ifstar{\@ShortIfThen}      {\@IfThen}} 
+ \def\IfThen{     \@ifstar{\@ShortIfThen}      {\@IfThen}} 
+ \def\IfThenElse{ \@ifstar{\@ShortIfThenElse}  {\@IfThenElse}} 
+ \def\Switch{     \@ifstar{\@Switch}           {\@Switch}} 
+ \def\Function{   \@ifstar{\@Function}         {\@Function}} 
+ \def\Return{     \@RETURN}
+ \def\Procedure{  \@ifstar{\@Procedure}        {\@Procedure}} 
+ \def\Type{       \@Type}
+ 
+ \begin{minipage}[t]{\alglength}
+ \begin{center}\begin{tabular}{|c|}\hline\\
+ \hspace*{.5em}
+ \begin{minipage}[t]{\alglength}
+}
+%% Fin de l'environnement "algorithme" / end of "algorithme" environnment
+{
+ \end{minipage}\hspace*{.5em}
+ \\\\\hline\end{tabular}\end{center}
+ \end{minipage}
+ \end{algorithmfloat}
+}
+
+%% ----------------------------- FIN / END ---------------------------------------

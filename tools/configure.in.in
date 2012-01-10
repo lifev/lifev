@@ -1,0 +1,12 @@
+dnl AC_CHECK_BOOST_PRG_EXEC_MONITOR
+dnl AC_CHECK_BOOST_FILESYSTEM
+
+dnl AC_CHECK_BOOST_GRAPH
+dnl AC_CHECK_BOOST_REGEX
+dnl AC_CHECK_BOOST_UNIT_TEST_FRAMEWORK
+
+
+dnl if test x$boost_filesystem_error = xyes -o x$boost_prg_exec_monitor_error = xyes; then
+dnl  DO_NOT_COMPILE="$DO_NOT_COMPILE tools"
+dnl fi
+
