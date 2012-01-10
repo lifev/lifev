@@ -91,7 +91,7 @@ public:
     PreconditionerML();
 
     //! destructor.
-    ~PreconditionerML();
+    virtual ~PreconditionerML();
 
     //! Constructor from a matrix
     /*!

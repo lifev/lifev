@@ -71,7 +71,7 @@ int main( int argc, char* argv[] )
     // this brace is important to destroy the Epetra_Comm object before calling MPI_Finalize
     {
 
-    typedef RegionMesh3D<LinearTetra,neighborMarkerCommon_Type> RegionMesh;
+    typedef RegionMesh<LinearTetra,neighborMarkerCommon_Type> RegionMesh;
     typedef FESpace< RegionMesh, MapEpetra >            feSpace_Type;
     typedef boost::shared_ptr< feSpace_Type >           feSpacePtr_Type;
 

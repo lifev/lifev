@@ -68,7 +68,7 @@ CT::run()
     Chrono chrono_exec;
     chrono_exec.start();
     std::cout << "\n\t t-  Begin execution time " << std::endl;
-    typedef ChorinTemam< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
+    typedef ChorinTemam< RegionMesh<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
     // Reading from data file
@@ -93,10 +93,10 @@ CT::run()
     const QuadratureRule* qR_press;
     const QuadratureRule* bdQr_press;
 
-    OseenData<RegionMesh3D<LinearTetra> > oseenData;
+    OseenData<RegionMesh<LinearTetra> > oseenData;
     oseenData.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*oseenData.meshData()->mesh(), M_comm);
+    partitionMesh< RegionMesh<LinearTetra> > meshPart(*oseenData.meshData()->mesh(), M_comm);
 
     // fill in the space and time discretization orders
 
@@ -117,7 +117,7 @@ CT::run()
     // building velocity and pressure FE spaces
     if (verbose)
         std::cout << "  t-  Building the velocity FE space ... " << std::flush;
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,
+    FESpace< RegionMesh<LinearTetra>, MapEpetra > uFESpace(meshPart,
                                                              uOrder,
                                                              3,
                                                              *M_comm);
@@ -128,7 +128,7 @@ CT::run()
     if (verbose)
         std::cout << "  t-  Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,
+    FESpace< RegionMesh<LinearTetra>, MapEpetra > pFESpace(meshPart,
                                                              pOrder,
                                                              1,
                                                              *M_comm);
@@ -147,7 +147,7 @@ CT::run()
 
     if (verbose) std::cout << "  t-  Calling the fluid constructor ... ";
 
-    ChorinTemam< RegionMesh3D<LinearTetra> > fluid (oseenData,
+    ChorinTemam< RegionMesh<LinearTetra> > fluid (oseenData,
                                                     uFESpace,
                                                     pFESpace,
                                                     uBdfOrder,
@@ -191,7 +191,7 @@ CT::run()
 
     fluid.initialize(init_u, init_p);
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "testCT", M_comm->MyPID());
+    Ensight<RegionMesh<LinearTetra> > ensight( dataFile, meshPart.mesh(), "testCT", M_comm->MyPID());
 
     vector_ptrtype vel ( new vector_type(fluid.solution_u(), Repeated ) );
     vector_ptrtype press ( new vector_type(fluid.solution_p(), Repeated ) );

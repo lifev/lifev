@@ -39,7 +39,7 @@
 #include <life/lifecore/LifeV.hpp>
 
 #include <life/lifemesh/Marker.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 // LifeV namespace
 namespace LifeV

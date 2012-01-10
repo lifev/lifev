@@ -428,7 +428,7 @@ void GhostHandler<Mesh>::createNodeElementNeighborsMap()
         ASSERT ( M_fullMesh->element( ie ).id() == ie,
                  "the mesh has been reordered, the point must be found" );
 
-        for ( UInt k = 0; k < Mesh::VolumeType::S_numPoints; k++ )
+        for ( UInt k = 0; k < Mesh::element_Type::S_numPoints; k++ )
         {
             ID id ( M_fullMesh->element( ie ).point( k ).id() );
             M_nodeElementNeighborsMap[ id ].insert ( ie );
@@ -722,8 +722,8 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
                 std::pair<std::set<Int>::iterator, bool> isInserted = map.insert( *neighborIt );
                 if ( isInserted.second )
                 {
-                    typename mesh_Type::VolumeType const & elem = M_fullMesh->element ( *neighborIt );
-                    for ( UInt elemPoint = 0; elemPoint < mesh_Type::VolumeType::S_numPoints; elemPoint++ )
+                    typename mesh_Type::element_Type const & elem = M_fullMesh->element ( *neighborIt );
+                    for ( UInt elemPoint = 0; elemPoint < mesh_Type::element_Type::S_numPoints; elemPoint++ )
                     {
                         // TODO exclude already included nodes
                         addedPoints.push_back ( elem.point( elemPoint ).id() );

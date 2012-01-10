@@ -45,7 +45,7 @@ using namespace LifeV;
 // ===================================================
 
 typedef LinearTetra geoElement_Type;
-typedef RegionMesh3D < geoElement_Type > regionMesh_Type;
+typedef RegionMesh < geoElement_Type > regionMesh_Type;
 typedef boost::shared_ptr < regionMesh_Type > regionMeshPtr_Type;
 
 typedef MapEpetra map_Type;

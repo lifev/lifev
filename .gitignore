@@ -4,6 +4,12 @@
 !*.in.in
 *.m4
 *.[oa]
+.project
+.cproject
+.settings
+.emacs-dirvars
+Templates
+life.kdevelop
 configure
 configure.files
 autom4te.cache

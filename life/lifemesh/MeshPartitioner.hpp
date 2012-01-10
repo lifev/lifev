@@ -2,23 +2,23 @@
 /*
 *******************************************************************************
 
-Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-This file is part of LifeV.
+    This file is part of LifeV.
 
-LifeV is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-LifeV is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 *******************************************************************************
 */
@@ -32,6 +32,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @author Gilles Fourestey <gilles.fourestey@epfl.ch>
 
   @contributor Radu Popescu <radu.popescu@epfl.ch>
+  @contributor Mauro Perego <mperego@fsu.edu>
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
@@ -56,8 +57,9 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/DOF.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifecore/Switch.hpp>
+#include <life/lifemesh/MeshElementMarked.hpp>
+#include <life/lifecore/LifeDebug.hpp>
 
 namespace LifeV
 {
@@ -65,8 +67,8 @@ namespace LifeV
 
 struct GhostEntityData
 {
-    //! ID in the current sub-domain of the face.
-    ID localFaceId;
+    //! ID in the current sub-domain of the facet.
+    ID localFacetId;
 
     //! ID of element that faces the local one on the other sub-domain.
     ID ghostElementLocalId;
@@ -79,7 +81,7 @@ struct GhostEntityData
 
 inline std::ostream & operator<< ( std::ostream & out, GhostEntityData const & ged )
 {
-    out << "ghostEntityData: localFace " << ged.localFaceId
+    out << "ghostEntityData: localFacet "<< ged.localFacetId
         << " - ghostElem "               << ged.ghostElementLocalId
         << " - ghostPos "                << ged.ghostElementPosition << " ";
     return out;
@@ -257,7 +259,7 @@ private:
     //! Execute mesh partitioning using the configured MPI processes (online partitioning)
     /*!
       Executed the mesh partitioning using the number of MPI processes as the number of partitions.
-      Sets current mesh element parameters: M_elementNodes, M_elementEdges, M_elementFaces, M_faceNodes
+      Sets current mesh element parameters: M_elementVertices, M_elementRidges, M_elementFacets, M_facetVertices
       Updates: M_elementDomains (indirectly)
       Other data members are changed indirectly by calling other private methods.
     */
@@ -273,7 +275,7 @@ private:
     /*!
       Identifies the element faces that are common to both the fluid and the solid
       meshes and creates a map between the faces that reside on the boundary between
-      the two meshes and the processors used. Updates the members M_repeatedFace and
+      the two meshes and the processors used. Updates the members M_repeatedFacet and
       M_isOnProc.
     */
     void findRepeatedFacesFSI();
@@ -288,6 +290,7 @@ private:
       \param numParts - unsigned int - number of partitions for the graph cutting process
     */
     void partitionConnectivityGraph(UInt numParts);
+    
     //! Updates the map between elements and processors in FSI
     /*!
       Updates M_elementDomains during FSI modeling.
@@ -302,38 +305,38 @@ private:
     //! Construct local mesh
     /*!
       Constructs the data structures for the local mesh partition.
-      Updates M_localNodes, M_localEdges, M_localFaces, M_localVolumes,
+      Updates M_localNodes, M_localRidges, M_localFacets, M_localElements,
       M_globalToLocalNode.
     */
     void constructLocalMesh();
-    //! Construct nodes
+    //! Construct vertices
     /*!
-      Adds nodes to the partitioned mesh object. Updates M_nBoundaryPoints,
+      Adds vertices to the partitioned mesh object. Updates M_nBoundaryPoints,
       M_meshPartitions.
     */
     void constructNodes();
     //! Construct volumes
     /*!
-      Adds volumes to the partitioned mesh object. Updates M_globalToLocalVolume,
+      Adds volumes to the partitioned mesh object. Updates M_globalToLocalElement,
       M_meshPartitions.
     */
-    void constructVolumes();
-    //! Construct edges
+    void constructElements();
+    //! Construct ridges
     /*!
-      Adds edges to the partitioned mesh object. Updates M_nBoundaryEdges,
+      Adds ridges to the partitioned mesh object. Updates M_nBoundaryRidges,
       M_meshPartitions.
     */
-    void constructEdges();
-    //! Construct faces
+    void constructRidges();
+    //! Construct facets
     /*!
-      Adds faces to the partitioned mesh object. Updates M_nBoundaryFaces,
+      Adds facets to the partitioned mesh object. Updates M_nBoundaryFacets,
       M_meshPartitions.
     */
-    void constructFaces();
+    void constructFacets();
     //! Final setup of local mesh
     /*!
       Updates the partitioned mesh object data members after adding the mesh
-      elements (nodes, edges, faces, volumes).
+      elements (vertices, ridges, facets, volumes).
       Updates M_meshPartitions.
     */
     void finalSetup();
@@ -350,25 +353,25 @@ private:
     Int                                  M_me;
 
     std::vector<std::vector<Int> >       M_localNodes;
-    std::vector<std::set<Int> >          M_localEdges;
-    std::vector<std::set<Int> >          M_localFaces;
-    std::vector<std::vector<Int> >       M_localVolumes;
+    std::vector<std::set<Int> >          M_localRidges;
+    std::vector<std::set<Int> >          M_localFacets;
+    std::vector<std::vector<Int> >       M_localElements;
     std::vector<std::map<Int, Int> >     M_globalToLocalNode;
-    std::vector<std::map<Int, Int> >     M_globalToLocalVolume;
+    std::vector<std::map<Int, Int> >     M_globalToLocalElement;
     std::vector<UInt>                    M_nBoundaryPoints;
-    std::vector<UInt>                    M_nBoundaryEdges;
-    std::vector<UInt>                    M_nBoundaryFaces;
+    std::vector<UInt>                    M_nBoundaryRidges;
+    std::vector<UInt>                    M_nBoundaryFacets;
     // The following are utility variables used throughout the partitioning
     // process
     meshPtr_Type                         M_originalMesh;
     Epetra_Map*                          M_interfaceMap;
     Epetra_Map*                          M_interfaceMapRep;
     //! Number of partitions handled. 1 for parallel (old way), != 1 for serial
-    UInt                                 M_elementNodes;
-    UInt                                 M_elementFaces;
-    UInt                                 M_elementEdges;
-    UInt                                 M_faceNodes;
-    boost::shared_ptr<std::vector<Int> > M_repeatedFace;
+    UInt                                 M_elementVertices;
+    UInt                                 M_elementFacets;
+    UInt                                 M_elementRidges;
+    UInt                                 M_facetVertices;
+    boost::shared_ptr<std::vector<Int> > M_repeatedFacet;
     boost::shared_ptr<std::vector<Int> > M_isOnProc;
     std::vector<Int>                     M_graphVertexLocations;
     graphPtr_Type                        M_elementDomains;
@@ -411,26 +414,26 @@ init ()
 {
     M_numPartitions = 1;
     M_localNodes.resize ( M_numPartitions );
-    M_localEdges.resize ( M_numPartitions );
-    M_localFaces.resize ( M_numPartitions );
-    M_localVolumes.resize ( M_numPartitions );
+    M_localRidges.resize ( M_numPartitions );
+    M_localFacets.resize ( M_numPartitions );
+    M_localElements.resize ( M_numPartitions );
     M_globalToLocalNode.resize ( M_numPartitions );
-    M_globalToLocalVolume.resize ( M_numPartitions );
+    M_globalToLocalElement.resize ( M_numPartitions );
     M_nBoundaryPoints.resize ( M_numPartitions );
-    M_nBoundaryEdges.resize ( M_numPartitions );
-    M_nBoundaryFaces.resize ( M_numPartitions );
+    M_nBoundaryRidges.resize ( M_numPartitions );
+    M_nBoundaryFacets.resize ( M_numPartitions );
     M_elementDomains.reset ( new graph_Type );
     M_serialMode = false;
 
     /*
-      Sets element parameters (nodes, faces, edges and number of nodes on each
-      face according to the type of mesh element used (Mesh::ElementShape::S_shape).
-      Updates M_elementNodes, M_elementFaces, M_elementEdges, M_faceNodes.
+      Sets element parameters (nodes, faces, ridges and number of nodes on each
+      facet according to the type of mesh element used (Mesh::ElementShape::S_shape).
+      Updates M_elementVertices, M_elementFaces, M_elementRidges, M_facetVertices.
     */
-    M_elementNodes = MeshType::ElementShape::S_numVertices;
-    M_elementFaces = MeshType::ElementShape::S_numFaces;
-    M_elementEdges = MeshType::ElementShape::S_numEdges;
-    M_faceNodes    = MeshType::BElementShape::S_numVertices;
+    M_elementVertices = MeshType::elementShape_Type::S_numVertices;
+    M_elementFacets   = MeshType::elementShape_Type::S_numFacets;
+    M_elementRidges   = MeshType::elementShape_Type::S_numRidges;
+    M_facetVertices   = MeshType::facetShape_Type::S_numVertices;
 
 } // init
 
@@ -480,14 +483,14 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
     M_elementDomains.reset(new graph_Type);
 
     M_localNodes.resize(M_numPartitions);
-    M_localEdges.resize(M_numPartitions);
-    M_localFaces.resize(M_numPartitions);
-    M_localVolumes.resize(M_numPartitions);
+    M_localRidges.resize(M_numPartitions);
+    M_localFacets.resize(M_numPartitions);
+    M_localElements.resize(M_numPartitions);
     M_globalToLocalNode.resize(M_numPartitions);
-    M_globalToLocalVolume.resize(M_numPartitions);
+    M_globalToLocalElement.resize(M_numPartitions);
     M_nBoundaryPoints.resize(M_numPartitions);
-    M_nBoundaryEdges.resize(M_numPartitions);
-    M_nBoundaryFaces.resize(M_numPartitions);
+    M_nBoundaryRidges.resize(M_numPartitions);
+    M_nBoundaryFacets.resize(M_numPartitions);
 }
 
 template<typename MeshType>
@@ -546,7 +549,6 @@ void MeshPartitioner<MeshType>::doPartitionGraph()
     {
         matchFluidPartitionsFSI();
     }
-    redistributeElements();
 }
 
 template<typename MeshType>
@@ -564,15 +566,14 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     constructNodes();
 
     // ********************
-    // volumes construction
+    // element construction
     // ********************
-    constructVolumes();
+    constructElements();
 
     // ******************
-    // edges construction
+    // ridges construction
     // ******************
-    constructEdges();
-
+    constructRidges();
 
     // new faces can be built only after all local volumes are complete in order to get proper ghost faces data
     M_comm->Barrier();
@@ -580,7 +581,7 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // ******************
     // faces construction
     // ******************
-    constructFaces();
+    constructFacets();
 
     // ******************
     // final setup
@@ -627,15 +628,15 @@ void MeshPartitioner<MeshType>::distributeElements(UInt numElements)
 template<typename MeshType>
 void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
 {
-    std::vector<Int>                    myRepeatedFace; // used for the solid partitioning
+    std::vector<Int>                    myRepeatedFacet; // used for the solid partitioning
     boost::shared_ptr<std::vector<Int> > myIsOnProc;     // used for the solid partitioning
 
-    myIsOnProc.reset(new std::vector<Int>(M_originalMesh->numVolumes()));
+    myIsOnProc.reset(new std::vector<Int>(M_originalMesh->numElements()));
 
-    bool myFaceRep;
-    bool myFace(false);
+    bool myFacetRep;
+    bool myFacet(false);
     short count;
-    for (UInt h = 0; h < M_originalMesh->numVolumes(); ++h)
+    for (UInt h = 0; h < M_originalMesh->numElements(); ++h)
     {
         (*myIsOnProc)[h] = -1;
     }
@@ -644,56 +645,56 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
     // it is expensive and not scalable.
     // Bad, this part should be done offline
 
-    for (UInt ie = 0; ie < M_originalMesh->numVolumes(); ++ie)
+    for (UInt ie = 0; ie < M_originalMesh->numElements(); ++ie)
     {
-        for (UInt iface = 0; iface < M_elementFaces; ++iface)
+        for (UInt ifacet = 0; ifacet < M_elementFacets; ++ifacet)
         {
-            UInt face = M_originalMesh->localFaceId(ie, iface);
-            UInt vol  = M_originalMesh->face(face).firstAdjacentElementIdentity();
+            UInt facet = M_originalMesh->localFacetId(ie, ifacet);
+            UInt vol  = M_originalMesh->facet(facet).firstAdjacentElementIdentity();
             if (vol == ie)
             {
-                vol = M_originalMesh->face(face).secondAdjacentElementIdentity();
+                vol = M_originalMesh->facet(facet).secondAdjacentElementIdentity();
             }
             if (vol != NotAnId)
             {
-                myFace = false;
-                myFaceRep = false;
+                myFacet = false;
+                myFacetRep = false;
                 count = 0;
-                for (Int ipoint = 0; ipoint < static_cast<Int>(M_faceNodes); ++ipoint) // vertex-based dofs
+                for (Int ipoint = 0; ipoint < static_cast<Int>(M_facetVertices); ++ipoint) // vertex-based dofs
                 {
-                    myFaceRep = ((M_interfaceMap->LID(M_originalMesh->face(face).point(ipoint).id())
+                    myFacetRep = ((M_interfaceMap->LID(M_originalMesh->facet(facet).point(ipoint).id())
                                   /* first is fluid */ == -1) &&
-                                 (M_interfaceMapRep->LID(M_originalMesh->face(face).point(ipoint).id())
+                                 (M_interfaceMapRep->LID(M_originalMesh->facet(facet).point(ipoint).id())
                                   /* first is fluid */ != -1));
-                    myFace = myFace ||
-                        (M_interfaceMap->LID(M_originalMesh->face(face).point(ipoint).id()) != -1);
-                    if (myFaceRep)
+                    myFacet = myFacet ||
+                        (M_interfaceMap->LID(M_originalMesh->facet(facet).point(ipoint).id()) != -1);
+                    if (myFacetRep)
                     {
                         ++count;
                     }
                 }
                 if (count > 1)
                 {
-                    myRepeatedFace.push_back(1);
+                    myRepeatedFacet.push_back(1);
                 }
                 else
                 {
-                    myRepeatedFace.push_back(0);
+                    myRepeatedFacet.push_back(0);
                 }
             }
-            if (myFace)
+            if (myFacet)
             {
                 (*myIsOnProc)[ie] = M_me;
             }
         }
     }
 
-    M_repeatedFace.reset(new std::vector<Int> (myRepeatedFace.size()));
+    M_repeatedFacet.reset(new std::vector<Int> (myRepeatedFacet.size()));
     M_isOnProc.reset(new std::vector<Int> (*myIsOnProc));
 
     // Lot of communication here!!
     boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> ( M_comm );
-    MPI_Allreduce( &myRepeatedFace[0], &(*M_repeatedFace)[0], myRepeatedFace.size(),
+    MPI_Allreduce( &myRepeatedFacet[0], &(*M_repeatedFacet)[0], myRepeatedFacet.size(),
                   MPI_INT, MPI_SUM, mpiComm->Comm() );
     MPI_Allreduce( &(*myIsOnProc)[0], &(*M_isOnProc)[0], myIsOnProc->size(),
                   MPI_INT, MPI_MAX, mpiComm->Comm() );
@@ -717,7 +718,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
 
     // this vector contains the weights for the edges of the graph,
     // it is set to null if it is not used.
-    std::vector<Int> edgeWeights;
+    std::vector<Int> graphEdgeWeights;
 
     M_adjacencyGraphKeys.resize(0);
     M_adjacencyGraphKeys.push_back(0);
@@ -726,15 +727,15 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
 
     for (UInt ie = localStart; ie < localEnd; ++ie)
     {
-        for (UInt iface = 0; iface < M_elementFaces; ++iface)
+        for (UInt ifacet = 0; ifacet < M_elementFacets; ++ifacet)
         {
-            // global ID of the iface-th face in element ie
-            UInt face = M_originalMesh->localFaceId(ie, iface);
-            // first adjacent element to face "face"
-            UInt elem = M_originalMesh->face(face).firstAdjacentElementIdentity();
+            // global ID of the ifacet-th facet in element ie
+            UInt facet = M_originalMesh->localFacetId(ie, ifacet);
+            // first adjacent element to face "facet"
+            UInt elem = M_originalMesh->facet(facet).firstAdjacentElementIdentity();
             if (elem == ie)
             {
-                elem = M_originalMesh->face(face).secondAdjacentElementIdentity();
+                elem = M_originalMesh->facet(facet).secondAdjacentElementIdentity();
             }
             if (elem != NotAnId)
             {
@@ -744,13 +745,13 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
                 ++sum;
                 if (M_interfaceMap) // if I'm partitioning the solid in FSI
                 {
-                    if ((*M_repeatedFace)[sum])
+                    if ((*M_repeatedFacet)[sum])
                     {
-                        edgeWeights.push_back(0);
+                        graphEdgeWeights.push_back(0);
                     }
                     else
                     {
-                        edgeWeights.push_back(10);
+                        graphEdgeWeights.push_back(10);
                     }
                 }
             }
@@ -764,7 +765,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     // **************
     // parMetis part
 
-    // this array is to be used for weighted nodes on the graph:
+    // this array is to be used for weighted vertices on the graph:
     // usually we will set it to NULL
 
     Int* weightVector = 0;
@@ -782,7 +783,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     Int ncon = 1;
     Int numflag = 0;
 
-    Int cutEdges; // here will be stored the number of edges cut in the partitioning process
+    Int cutGraphEdges; // here will be stored the number of edges cut in the partitioning process
 
     // additional options
     std::vector<Int>  options(3,0);
@@ -812,22 +813,21 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     Int numberParts = (Int) numParts;
 
     Int* adjwgtPtr(0);
-    if (edgeWeights.size() > 0)
+    if (graphEdgeWeights.size() > 0)
     {
-        adjwgtPtr = static_cast<Int*>(&edgeWeights[0]);
+        adjwgtPtr = static_cast<Int*>(&graphEdgeWeights[0]);
     }
     ParMETIS_V3_PartKway(static_cast<Int*>(&M_vertexDistribution[0]),
                          static_cast<Int*>(&M_adjacencyGraphKeys[0]),
                          static_cast<Int*>(&M_adjacencyGraphValues[0]),
                          weightVector, adjwgtPtr, &weightFlag, &numflag,
                          &ncon, &numberParts, &tpwgts[0], &ubvec[0],
-                         &options[0], &cutEdges, &M_graphVertexLocations[localStart],
+                         &options[0], &cutGraphEdges, &M_graphVertexLocations[localStart],
                          &MPIcomm);
 
     M_comm->Barrier();
 
-    Int nProc;
-    nProc = M_comm->NumProc();
+    Int nProc = M_comm->NumProc();
 
     // distribute the resulting partitioning stored in M_graphVertexLocations to all processors
     for ( Int proc = 0; proc < nProc; proc++ )
@@ -1104,36 +1104,36 @@ void MeshPartitioner<MeshType>::constructLocalMesh()
         for (UInt jj = 0; jj < (*M_elementDomains)[me].size(); ++jj)
         {
             ielem = (*M_elementDomains)[me][jj];
-            M_localVolumes[i].push_back(ielem);
+            M_localElements[i].push_back(ielem);
 
-            // cycle on element's nodes
-            for (UInt ii = 0; ii < M_elementNodes; ++ii)
+            // cycle on element's vertices
+            for (UInt ii = 0; ii < M_elementVertices; ++ii)
             {
-                inode = M_originalMesh->volume(ielem).point(ii).id();
+                inode = M_originalMesh->element(ielem).point(ii).id();
                 im    = M_globalToLocalNode[i].find(inode);
 
-                // if the node is not yet present in the list of local nodes, then add it
+                // if the node is not yet present in the list of local vertices, then add it
                 if (im == M_globalToLocalNode[i].end())
                 {
                     M_globalToLocalNode[i].insert(std::make_pair(inode, count));
                     ++count;
                     // store here the global numbering of the node
-                    M_localNodes[i].push_back(M_originalMesh->volume(ielem).point(ii).id());
+                    M_localNodes[i].push_back(M_originalMesh->element(ielem).point(ii).id());
                 }
             }
 
-            // cycle on element's edges
-            for (UInt ii = 0; ii < M_elementEdges; ++ii)
+            // cycle on element's ridges
+            for (UInt ii = 0; ii < M_elementRidges; ++ii)
             {
-                // store here the global numbering of the edge
-                M_localEdges[i].insert(M_originalMesh->localEdgeId(ielem, ii));
+                // store here the global numbering of the ridge
+                M_localRidges[i].insert(M_originalMesh->localRidgeId(ielem, ii));
             }
 
-            // cycle on element's faces
-            for (UInt ii = 0; ii < M_elementFaces; ++ii)
+            // cycle on element's facets
+            for (UInt ii = 0; ii < M_elementFacets; ++ii)
             {
-                // store here the global numbering of the face
-                M_localFaces[i].insert(M_originalMesh->localFaceId(ielem, ii));
+                // store here the global numbering of the facet
+                M_localFacets[i].insert(M_originalMesh->localFacetId(ielem, ii));
             }
         }
     }
@@ -1157,7 +1157,7 @@ void MeshPartitioner<MeshType>::constructNodes()
 
         typename MeshType::point_Type *pp = 0;
 
-        // loop in the list of local nodes:
+        // loop in the list of local vertices:
         // in this loop inode is the local numbering of the points
         for (it = M_localNodes[i].begin(); it != M_localNodes[i].end(); ++it, ++inode)
         {
@@ -1165,24 +1165,19 @@ void MeshPartitioner<MeshType>::constructNodes()
 
             // create a boundary point in the local mesh, if needed
             bool boundary = M_originalMesh->isBoundaryPoint(*it);
-            if (boundary)
-            {
-                ++M_nBoundaryPoints[i];
-            }
+            M_nBoundaryPoints[i] += boundary;
 
             pp = &(*M_meshPartitions)[i]->addPoint(boundary);
             *pp = M_originalMesh->point( *it );
 
             pp->setLocalId( inode );
-
-            (*M_meshPartitions)[i]->localToGlobalNode().insert(std::make_pair( pp->localId(), pp->id() ));
-            (*M_meshPartitions)[i]->globalToLocalNode().insert(std::make_pair( pp->id(), pp->localId() ));
         }
     }
 }
 
+
 template<typename MeshType>
-void MeshPartitioner<MeshType>::constructVolumes()
+void MeshPartitioner<MeshType>::constructElements()
 {
     Int count;
     for (UInt i = 0; i < M_numPartitions; ++i)
@@ -1192,81 +1187,85 @@ void MeshPartitioner<MeshType>::constructVolumes()
         count = 0;
         UInt inode;
 
-        typename MeshType::VolumeType * pv = 0;
+        typename MeshType::element_Type * pv = 0;
 
-        (*M_meshPartitions)[i]->volumeList.reserve(M_localVolumes[i].size());
+        (*M_meshPartitions)[i]->elementList().reserve(M_localElements[i].size());
 
         // loop in the list of local elements
         // CAREFUL! in this loop inode is the global numbering of the points
-        // We insert the local numbering of the nodes in the local volume list
-        for (it = M_localVolumes[i].begin(); it != M_localVolumes[i].end(); ++it, ++count)
+        // We insert the local numbering of the vertices in the local volume list
+        for (it = M_localElements[i].begin(); it != M_localElements[i].end(); ++it, ++count)
         {
-            pv = &((*M_meshPartitions)[i]->addVolume());
-            *pv = M_originalMesh->volume( *it );
-            pv->setLocalId( count );
+            pv = &((*M_meshPartitions)[i]->addElement());
+            *pv = M_originalMesh->element(*it);
+            pv->setLocalId(count);
 
-            M_globalToLocalVolume[i].insert(std::make_pair( pv->id(), pv->localId() ) );
+            M_globalToLocalElement[i].insert(std::make_pair( pv->id(), pv -> localId() ) );
 
-            for (ID id = 0; id < M_elementNodes; ++id)
+            for (ID id = 0; id < M_elementVertices; ++id)
             {
-                inode = M_originalMesh->volume(*it).point(id).id();
+                inode = M_originalMesh->element(*it).point(id).id();
                 // im is an iterator to a map element
                 // im->first is the key (i. e. the global ID "inode")
                 // im->second is the value (i. e. the local ID "count")
                 im = M_globalToLocalNode[i].find(inode);
-                pv->setPoint(id, (*M_meshPartitions)[i]->pointList( (*im).second ));
+                pv->setPoint(id, (*M_meshPartitions)[i]->point( (*im).second ));
             }
         }
     }
 }
 
 template<typename MeshType>
-void MeshPartitioner<MeshType>::constructEdges()
+void MeshPartitioner<MeshType>::constructRidges()
 {
-    Int count;
-    for (UInt i = 0; i < M_numPartitions; ++i)
+    if(mesh_Type::S_geoDimensions == 2)
+        M_nBoundaryRidges = M_nBoundaryPoints;
+    else if(mesh_Type::S_geoDimensions == 3)
     {
-        std::map<Int, Int>::iterator im;
-        std::set<Int>::iterator is;
-
-        typename MeshType::EdgeType * pe;
-        UInt inode;
-        count = 0;
-
-        M_nBoundaryEdges[i] = 0;
-        (*M_meshPartitions)[i]->edgeList.reserve(M_localEdges[i].size());
-
-        // loop in the list of local edges
-        for (is = M_localEdges[i].begin(); is != M_localEdges[i].end(); ++is, ++count)
+        Int count;
+        for (UInt i = 0; i < M_numPartitions; ++i)
         {
-            // create a boundary edge in the local mesh, if needed
-            bool boundary = (M_originalMesh->isBoundaryEdge(*is));
-            if (boundary)
+            std::map<Int, Int>::iterator im;
+            std::set<Int>::iterator is;
+
+            typename MeshType::ridge_Type * pe;
+            UInt inode;
+            count = 0;
+
+            M_nBoundaryRidges[i] = 0;
+            (*M_meshPartitions)[i]->ridgeList().reserve(M_localRidges[i].size());
+
+            // loop in the list of local ridges
+            for (is = M_localRidges[i].begin(); is != M_localRidges[i].end(); ++is, ++count)
             {
-                // create a boundary edge in the local mesh, if needed
-                ++M_nBoundaryEdges[i];
-            }
+                // create a boundary ridge in the local mesh, if needed
+                bool boundary = (M_originalMesh->isBoundaryRidge(*is));
 
-            pe = &(*M_meshPartitions)[i]->addEdge(boundary);
-            *pe = M_originalMesh->edge( *is );
+                // create a boundary ridge in the local mesh, if needed
+                M_nBoundaryRidges[i] += boundary;
 
-            pe->setLocalId(count);
+                pe = &(*M_meshPartitions)[i]->addRidge(boundary);
+                *pe = M_originalMesh->ridge( *is );
 
-            for (ID id = 0; id < 2; ++id)
-            {
-                inode = M_originalMesh->edge(*is).point(id).id();
-                // im is an iterator to a map element
-                // im->first is the key (i. e. the global ID "inode")
-                // im->second is the value (i. e. the local ID "count")
-                im = M_globalToLocalNode[i].find(inode);
-                pe->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
+                pe->setLocalId(count);
+
+                for (ID id = 0; id < 2; ++id)
+                {
+                    inode = M_originalMesh->ridge(*is).point(id).id();
+                    // im is an iterator to a map element
+                    // im->first is the key (i. e. the global ID "inode")
+                    // im->second is the value (i. e. the local ID "count")
+                    im = M_globalToLocalNode[i].find(inode);
+                    pe->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
+                }
             }
         }
     }
 }
 
+
 template<typename MeshType>
-void MeshPartitioner<MeshType>::constructFaces()
+void MeshPartitioner<MeshType>::constructFacets()
 {
     Int count;
     for (UInt i = 0; i < M_numPartitions; ++i)
@@ -1274,34 +1273,32 @@ void MeshPartitioner<MeshType>::constructFaces()
         std::map<Int, Int>::iterator im;
         std::set<Int>::iterator      is;
 
-        typename MeshType::FaceType * pf = 0;
+        typename MeshType::facet_Type * pf = 0;
 
         UInt inode;
         count = 0;
 
-        M_nBoundaryFaces[i] = 0;
-        (*M_meshPartitions)[i]->faceList.reserve(M_localFaces[i].size());
+        M_nBoundaryFacets[i] = 0;
+        (*M_meshPartitions)[i]->facetList().reserve(M_localFacets[i].size());
 
         // loop in the list of local faces
-        for (is = M_localFaces[i].begin(); is != M_localFaces[i].end(); ++is, ++count)
+        for (is = M_localFacets[i].begin(); is != M_localFacets[i].end(); ++is, ++count)
         {
-            // create a boundary face in the local mesh, if needed
-            bool boundary = (M_originalMesh->isBoundaryFace(*is));
-            if (boundary)
-            {
-                ++M_nBoundaryFaces[i];
-            }
+            // create a boundary facet in the local mesh, if needed
+            bool boundary = (M_originalMesh->isBoundaryFacet(*is));
+
+            M_nBoundaryFacets[i] += boundary;
 
 
-            Int elem1 = M_originalMesh->face(*is).firstAdjacentElementIdentity();
-            Int elem2 = M_originalMesh->face(*is).secondAdjacentElementIdentity();
+            Int elem1 = M_originalMesh->facet(*is).firstAdjacentElementIdentity();
+            Int elem2 = M_originalMesh->facet(*is).secondAdjacentElementIdentity();
 
-            // find the mesh elements adjacent to the face
-            im =  M_globalToLocalVolume[i].find(elem1);
+            // find the mesh elements adjacent to the facet
+            im =  M_globalToLocalElement[i].find(elem1);
 
             ID localElem1;
 
-            if (im == M_globalToLocalVolume[i].end())
+            if (im == M_globalToLocalElement[i].end())
             {
                 localElem1 = NotAnId;
             }
@@ -1310,10 +1307,10 @@ void MeshPartitioner<MeshType>::constructFaces()
                 localElem1 = (*im).second;
             }
 
-            im =  M_globalToLocalVolume[i].find(elem2);
+            im =  M_globalToLocalElement[i].find(elem2);
 
             ID localElem2;
-            if (im == M_globalToLocalVolume[i].end())
+            if (im == M_globalToLocalElement[i].end())
             {
                 localElem2 = NotAnId;
             }
@@ -1322,12 +1319,12 @@ void MeshPartitioner<MeshType>::constructFaces()
                 localElem2 = (*im).second;
             }
 
-            pf =  &(*M_meshPartitions)[i]->addFace(boundary);
-            *pf = M_originalMesh->face( *is );
+            pf =  &(*M_meshPartitions)[i]->addFacet(boundary);
+            *pf = M_originalMesh->facet( *is );
 
             pf->setLocalId( count );
 
-            for (ID id = 0; id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
+            for (ID id = 0; id < M_originalMesh->facet(*is).S_numLocalVertices; ++id)
             {
                 inode = pf->point(id).id();
                 im = M_globalToLocalNode[i].find(inode);
@@ -1341,14 +1338,14 @@ void MeshPartitioner<MeshType>::constructFaces()
                 // set the flag for faces on the subdomain border
                 pf->setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
                 // set the flag for all points on that face
-                for ( UInt pointOnFace = 0; pointOnFace < MeshType::FaceType::S_numLocalPoints; pointOnFace++ )
+                for ( UInt pointOnFacet = 0; pointOnFacet < MeshType::facet_Type::S_numLocalPoints; pointOnFacet++ )
                 {
-                    (*M_meshPartitions)[i]->point( pf->point( pointOnFace ).localId() ).setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
+                    (*M_meshPartitions)[i]->point( pf->point( pointOnFacet ).localId() ).setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
                 }
 
                 // build GhostEntityData
-                GhostEntityData ghostFace;
-                ghostFace.localFaceId = pf->localId();
+                GhostEntityData ghostFacet;
+                ghostFacet.localFacetId = pf->localId();
 
                 // set the ghostElem to be searched on other subdomains
                 ghostElem = ( localElem1 == NotAnId ) ? elem1 : elem2;
@@ -1365,28 +1362,28 @@ void MeshPartitioner<MeshType>::constructFaces()
                             // we have found the proc storing the element
                             ghostProc = proc;
                             // we can get its local id
-                            ghostFace.ghostElementLocalId = *ghostIt;
-                            // TODO: the local face id is the same of the original mesh ?!
-                            ghostFace.ghostElementPosition = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                            ghostFacet.ghostElementLocalId = *ghostIt;
+                            // TODO: the local facet id is the same of the original mesh ?!
+                            ghostFacet.ghostElementPosition = M_originalMesh->facet(*is).secondAdjacentElementPosition();
                             break;
                         }
                     }
                 }
                 // check that the ghost element is found on another proc ( this test is acceptable only for online partitioning )
-                ASSERT ( ghostProc != M_me || M_serialMode, "ghost face not found" );
-                M_ghostDataMap[ ghostProc ].push_back( ghostFace );
+                ASSERT ( ghostProc != M_me || M_serialMode, "ghost facet not found" );
+                M_ghostDataMap[ ghostProc ].push_back( ghostFacet );
             }
 
             // if this process does not own either of the adjacent elements
-            // then the two adjacent elements and the respective face positions coincide in the local mesh
-            // possible bug fixed: not only the two adjacent elements face, but also the face
+            // then the two adjacent elements and the respective facet positions coincide in the local mesh
+            // possible bug fixed: not only the two adjacent elements facet, but also the facet
             // positions should coincide.
             // otherwise it could happen that a pair(element, position) is associated to different faces.
-            // This can lead to a wrong treatment of the dofPerFace (in 2D of the dofPerEdge, as occurred
+            // This can lead to a wrong treatment of the dofPerFace (in 2D of the dofPerRidge, as occurred
             // with P2)
 
             // NEW CODE
-            ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging face in mesh partitioner!");
+            ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging facet in mesh partitioner!");
 
             // todo: move this to a switch ( if...else ) on the EntityFlag
 //            switch ( pf->flag() )
@@ -1430,7 +1427,7 @@ void MeshPartitioner<MeshType>::constructFaces()
             if ( localElem1 == NotAnId )
              {
                  pf->firstAdjacentElementIdentity()  = localElem2;
-                 pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                 pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).secondAdjacentElementPosition();
                  pf->secondAdjacentElementIdentity() = ghostElem;
                  pf->secondAdjacentElementPosition() = NotAnId;
                  pf->reversePoints();
@@ -1445,9 +1442,9 @@ void MeshPartitioner<MeshType>::constructFaces()
             else
             {
                 pf->firstAdjacentElementIdentity()  = localElem1;
-                pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+                pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).firstAdjacentElementPosition();
                 pf->secondAdjacentElementIdentity() = localElem2;
-                pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                pf->secondAdjacentElementPosition() = M_originalMesh->facet(*is).secondAdjacentElementPosition();
             }
 
             // END NEW CODE
@@ -1456,30 +1453,29 @@ void MeshPartitioner<MeshType>::constructFaces()
             if ((localElem1 == NotAnId) && !boundary)
             {
                 pf->firstAdjacentElementIdentity() = localElem2;
-                pf->firstAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                pf->firstAdjacentElementPosition() = M_originalMesh->facet(*is).secondAdjacentElementPosition();
             }
             else
             {
                 pf->firstAdjacentElementIdentity() = localElem1;
-                pf->firstAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
+                pf->firstAdjacentElementPosition() = M_originalMesh->facet(*is).firstAdjacentElementPosition();
             }
 
             if ((localElem2 == NotAnId) && !boundary)
             {
                 pf->secondAdjacentElementIdentity() = localElem1;
-                pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
+                pf->secondAdjacentElementPosition() = M_originalMesh->facet(*is).firstAdjacentElementPosition();
             }
             else
             {
                 pf->secondAdjacentElementIdentity()  = localElem2;
-                pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+                pf->secondAdjacentElementPosition() = M_originalMesh->facet(*is).secondAdjacentElementPosition();
             }
 
 */
-
         }
-        (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACES");
-        (*M_meshPartitions)[i]->setLinkSwitch("FACES_HAVE_ADIACENCY");
+        (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACETS");
+        (*M_meshPartitions)[i]->setLinkSwitch("FACETS_HAVE_ADIACENCY");
     }
 
     // DEBUG
@@ -1503,33 +1499,34 @@ void MeshPartitioner<MeshType>::finalSetup()
 {
     for (UInt i = 0; i < M_numPartitions; ++i)
     {
-        UInt nVolumes = M_localVolumes[i].size();
+        UInt nElements = M_localElements[i].size();
         UInt nNodes   = M_localNodes[i].size();
-        UInt nEdges   = M_localEdges[i].size();
-        UInt nFaces   = M_localFaces[i].size();
+        UInt nRidges   = M_localRidges[i].size();
+        UInt nFacets   = M_localFacets[i].size();
 
         (*M_meshPartitions)[i]->setMaxNumPoints (nNodes, true);
-        (*M_meshPartitions)[i]->setMaxNumEdges  (nEdges, true);
-        (*M_meshPartitions)[i]->setMaxNumFaces  (nFaces, true);
-        (*M_meshPartitions)[i]->setMaxNumVolumes( nVolumes, true);
+        (*M_meshPartitions)[i]->setMaxNumRidges  (nRidges, true);
+        (*M_meshPartitions)[i]->setMaxNumFacets  (nFacets, true);
+        (*M_meshPartitions)[i]->setMaxNumElements( nElements, true);
 
         (*M_meshPartitions)[i]->setMaxNumGlobalPoints (M_originalMesh->numPoints());
-        (*M_meshPartitions)[i]->setNumGlobalVertices  (M_originalMesh->numPoints());
-        (*M_meshPartitions)[i]->setMaxNumGlobalEdges  (M_originalMesh->numEdges());
-        (*M_meshPartitions)[i]->setMaxNumGlobalFaces  (M_originalMesh->numFaces());
+        (*M_meshPartitions)[i]->setNumGlobalVertices  (M_originalMesh->numVertices());
+        (*M_meshPartitions)[i]->setMaxNumGlobalRidges  (M_originalMesh->numRidges());
+        (*M_meshPartitions)[i]->setMaxNumGlobalFacets  (M_originalMesh->numFacets());
 
-        (*M_meshPartitions)[i]->setMaxNumGlobalVolumes(M_originalMesh->numVolumes());
-        (*M_meshPartitions)[i]->setNumBFaces    (M_nBoundaryFaces[i]);
+        (*M_meshPartitions)[i]->setMaxNumGlobalElements(M_originalMesh->numElements());
+        (*M_meshPartitions)[i]->setnumBoundaryFacets    (M_nBoundaryFacets[i]);
 
         (*M_meshPartitions)[i]->setNumBPoints   (M_nBoundaryPoints[i]);
-        (*M_meshPartitions)[i]->setNumBEdges    (M_nBoundaryEdges[i]);
+        (*M_meshPartitions)[i]->setNumBoundaryRidges    (M_nBoundaryRidges[i]);
 
         (*M_meshPartitions)[i]->setNumVertices (nNodes );
         (*M_meshPartitions)[i]->setNumBVertices(M_nBoundaryPoints[i]);
 
-        (*M_meshPartitions)[i]->updateElementEdges();
-
-        (*M_meshPartitions)[i]->updateElementFaces();
+        if(MeshType::S_geoDimensions == 3)
+            (*M_meshPartitions)[i]->updateElementRidges();
+            
+        (*M_meshPartitions)[i]->updateElementFacets();
 
 #ifdef HAVE_LIFEV_DEBUG
         if (M_serialMode)
@@ -1559,8 +1556,8 @@ void MeshPartitioner<MeshType>::execute()
     // *    If the solid mesh is partitioned:
     //      - The fluid is partitioned first
     //      - The solid mesh partition tries to follow the partition of the fluid
-    //      This is achieved by specifying a weight to some edge of the graph.
-    //      The interface between two processors is the set of the nodes that for
+    //      This is achieved by specifying a weight to some ridge of the graph.
+    //      The interface between two processors is the set of the vertices that for
     //      at least one processor are on the repeated map and not on the unique map.
     //      That's why the constructor needs both the unique and repeated maps
     //      on the interface
@@ -1609,13 +1606,15 @@ void MeshPartitioner<MeshType>::cleanUp()
     clearVector( M_adjacencyGraphKeys );
     clearVector( M_adjacencyGraphValues );
     clearVector( M_localNodes );
-    clearVector( M_localEdges );
-    clearVector( M_localFaces );
-    clearVector( M_localVolumes );
+    clearVector( M_localRidges );
+    clearVector( M_localFacets );
+    clearVector( M_localElements );
     clearVector( M_nBoundaryPoints );
-    clearVector( M_nBoundaryEdges );
-    clearVector( M_nBoundaryFaces );
+    clearVector( M_nBoundaryRidges );
+    clearVector( M_nBoundaryFacets );
     clearVector( M_graphVertexLocations );
+    clearVector( M_globalToLocalNode );
+    clearVector( M_globalToLocalElement );
 }
 
 }

@@ -456,8 +456,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
         M_FESpace         ( fESpace ),
         // Algebraic stuff.
         M_rhs             ( new vector_Type ( M_localMap ) ),
-        M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_Type ( ghostMap, Repeated ) ),
+        M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uOld            ( new vector_Type ( ghostMap, Repeated ) ),
         M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
@@ -492,8 +492,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
         M_FESpace         ( fESpace ),
         // Algebraic stuff.
         M_rhs             ( new vector_Type ( M_localMap ) ),
-        M_u    			  ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld			  ( new vector_Type ( ghostMap, Repeated ) ),
+        M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+        M_uOld            ( new vector_Type ( ghostMap, Repeated ) ),
         M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
         // Local matrices and vectors.
         M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
@@ -576,6 +576,10 @@ setup ()
         M_elmatMass.push_back( matElem );
 
     }
+
+    //make sure mesh facets are updated
+    if(! M_FESpace.mesh()->hasLocalFacets() )
+        M_FESpace.mesh()->updateElementFacets();
 
 } // setup
 
@@ -660,10 +664,10 @@ CFL()
         for ( UInt iFace(0); iFace < M_FESpace.mesh()->numLocalFaces(); ++iFace )
         {
 
-            const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
+            const UInt iGlobalFace( M_FESpace.mesh()->localFacetId( iElem, iFace ) );
 
             // Update the normal vector of the current face in each quadrature point
-            M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
+            M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->boundaryFacet( iGlobalFace ) );
 
             // Take the left element to the face, see regionMesh for the meaning of left element
             const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 0 ) );
@@ -750,11 +754,16 @@ CFL()
 
     }
 
-    // Compute the timeStep according to CLF
-    const Real timeStep( M_data.getCFLRelaxParameter() / localCFL );
 
-    // Return the correct value of the time step
-    return timeStep;
+    // Compute the time step according to CLF for the current process
+    Real timeStepLocal[]  = { M_data.getCFLRelaxParameter() / localCFLOld };
+    Real timeStepGlobal[] = { 0. };
+
+    // Compute the minimum of the computed time step for all the processes
+    M_displayer.comm()->MinAll( timeStepLocal, timeStepGlobal, 1 );
+
+    // Return the computed value
+    return *timeStepGlobal;
 
 } //CFL
 
@@ -780,7 +789,7 @@ updateGhostValues( MeshPartitioner<Mesh> const & meshPart )
         dataEnd = procIt->second.end();
         for ( dataIt = procIt->second.begin(); dataIt != dataEnd; ++dataIt )
         {
-            ID elementId ( M_FESpace.mesh()->faceElement( dataIt->localFaceId, 0 ) );
+            ID elementId ( M_FESpace.mesh()->faceElement( dataIt->localFacetId, 0 ) );
 
             VectorElemental ghostValue  ( M_FESpace.refFE().nbDof(), 1 );
             extract_vec( *M_uOld, ghostValue, M_FESpace.refFE(), M_FESpace.dof(), elementId, 0 );
@@ -810,7 +819,7 @@ updateGhostValues( MeshPartitioner<Mesh> const & meshPart )
         UInt count ( 0 );
         for ( ghostDataContainer_Type::const_iterator dataIt = procIt->second.begin(); dataIt != procIt->second.end(); ++dataIt, count++ )
         {
-            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFaceId;
+            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFacetId;
             M_ghostDataMap[ ghostFaceId ] = *dataIt;
         }
     }
@@ -826,7 +835,7 @@ updateGhostValues( MeshPartitioner<Mesh> const & meshPart )
 //        UInt count ( 0 );
 //        for ( procData_Type::const_iterator dataIt = procIt->second.begin(); dataIt != procIt->second.end(); ++dataIt, count++ )
 //        {
-//            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFaceId;
+//            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFacetId;
 //            ID elementId ( M_FESpace.mesh()->faceElement( ghostFaceId, 0 ) );
 //            outf << "lid " << elementId << " " << "gid " << ghostDataMap[ procIt->first ][ count ].ghostElementLocalId << " " << *dataIt << std::endl;
 //        }
@@ -904,7 +913,7 @@ localEvolve ( const UInt& iElem )
     for ( UInt iFace(0); iFace < M_FESpace.mesh()->numLocalFaces(); ++iFace )
     {
         // Id mapping
-        const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
+        const UInt iGlobalFace( M_FESpace.mesh()->localFacetId( iElem, iFace ) );
 
         // Take the left element to the face, see regionMesh for the meaning of left element
         const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 0 ) );
@@ -913,7 +922,7 @@ localEvolve ( const UInt& iElem )
         const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
 
         // Update the normal vector of the current face in each quadrature point
-        M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
+        M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->boundaryFacet( iGlobalFace ) );
 
         // Local flux of a face times the integration weight
         VectorElemental localFaceFluxWeight ( M_FESpace.refFE().nbDof(), 1 );
@@ -961,7 +970,7 @@ localEvolve ( const UInt& iElem )
             }
 
             // Take the boundary marker for the current boundary face
-            const ID faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
+            const ID faceMarker ( M_FESpace.mesh()->boundaryFacet( iGlobalFace ).marker() );
 
             // Take the corrispective boundary function
             const BCBase& bcBase ( M_BCh->findBCWithFlag( faceMarker ) );

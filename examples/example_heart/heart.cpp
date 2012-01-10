@@ -53,7 +53,7 @@
 
 using namespace LifeV;
 
-typedef RegionMesh3D<LinearTetra> mesh_Type;
+typedef RegionMesh<LinearTetra> mesh_Type;
 
 //! Identifiers for heart boundaries
 const Int EPICARDIUM    = 40;
@@ -189,7 +189,7 @@ Heart::run()
                                                   *qR_u,
                                                   *bdQr_u,
                                                   2,
-                                                  M_heart_fct->M_comm);
+                                                  M_heart_fct->M_comm) );
 #endif
     if (verbose)
         std::cout << "ok." << std::endl;

@@ -1000,7 +1000,7 @@ addFluxTerms( vectorType&     vector,
 
       const BCBase&    boundaryCond(bcHandler[ hCounter ]);
 
-      // Number of local DOF in this face
+      // Number of local DOF in this facet
       UInt nDofF = M_uFESpace->feBd().nbNode();
 
       // Number of total scalar Dof
@@ -1020,10 +1020,10 @@ addFluxTerms( vectorType&     vector,
           {
               pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
-              // Number of the current boundary face
+              // Number of the current boundary facet
               ibF = pId->id();
-              // Updating face stuff
-              M_uFESpace->feBd().updateMeasNormalQuadPt( M_uFESpace->mesh()->bElement( ibF ) );
+              // Updating facet stuff
+              M_uFESpace->feBd().updateMeasNormalQuadPt( M_uFESpace->mesh()->boundaryFacet( ibF ) );
 
               for ( ID idofF = 0; idofF < nDofF; ++idofF )
               {
