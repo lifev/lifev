@@ -38,6 +38,7 @@
 #include "PreconditionerSIMPLE.hpp"
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
+#include <life/lifealg/PreconditionerML2.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <lifemc/lifearray/MatrixBlock.hpp>
 #include <lifemc/lifearray/MatrixBlockView.hpp>
@@ -183,6 +184,11 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
     boost::shared_ptr<matrix_Type> p1a = P1a;
     superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_fluidPrec ) );
     precForBlock1->setDataFromGetPot( M_dataFile, M_fluidDataSection );
+    if( M_fluidPrec == "ML2" )
+    {
+        PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*>( precForBlock1.get() );
+        tmpPrecPtr->setFESpace( M_uFESpace, M_pFESpace );
+    }
     this->pushBack( p1a,precForBlock1, notInversed, notTransposed );
     if ( verbose ) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
@@ -370,6 +376,8 @@ void
 PreconditionerSIMPLE::setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace )
 {
     // We setup the size of the blocks
+    M_uFESpace = uFESpace;
+    M_pFESpace = pFESpace;
     M_velocityBlockSize = uFESpace->fieldDim() * uFESpace->dof().numTotalDof();
     M_pressureBlockSize = pFESpace->dof().numTotalDof();
 }
