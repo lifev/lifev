@@ -156,19 +156,21 @@ public:
 
 protected:
 
-    int         M_velocityBlockSize;
-    int         M_pressureBlockSize;
+    int             M_velocityBlockSize;
+    int             M_pressureBlockSize;
+    FESpacePtr_Type M_uFESpace;
+    FESpacePtr_Type M_pFESpace;
 
-    Real        M_dampingFactor;
+    Real            M_dampingFactor;
 
-    string      M_SIMPLEType;
+    string          M_SIMPLEType;
 
     // todo: Remove the member dataFile (bad programmation)
-    GetPot      M_dataFile;
-    string      M_fluidPrec;
-    string      M_fluidDataSection;
-    string      M_schurPrec;
-    string      M_schurDataSection;
+    GetPot          M_dataFile;
+    string          M_fluidPrec;
+    string          M_fluidDataSection;
+    string          M_schurPrec;
+    string          M_schurDataSection;
 
 private:
     PreconditionerSIMPLE( const PreconditionerSIMPLE& P ):
