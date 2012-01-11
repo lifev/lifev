@@ -55,7 +55,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 #pragma GCC diagnostic warning "-Wextra"
 
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefilters/GetPot.hpp>
@@ -87,7 +87,7 @@ public:
     typedef super::operator_raw_type             operator_raw_type;
     typedef super::operator_type                 operator_type;
 
-    typedef RegionMesh3D<LinearTetra>            mesh_Type;
+    typedef RegionMesh<LinearTetra>              mesh_Type;
     typedef MapEpetra                            map_Type;
     typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
     typedef MatrixEpetra<Real>                   matrix_Type;

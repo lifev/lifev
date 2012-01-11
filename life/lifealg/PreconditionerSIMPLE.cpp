@@ -140,18 +140,18 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
      */
     if ( verbose ) std::cout << std::endl << "      >Getting the structure of A... ";
     timer.start();
-    MatrixBlockView F, Bt, B, C;
-    //oper.getMatrixBlockView( 0, 0, F );
-    F.setup( 0, 0, blockNumRows[0], blockNumColumns[0], *oper );
+    matrixBlockView_Type F, Bt, B, C;
+    //oper.blockView( 0, 0, F );
+    F.setup( 0, 0, blockNumRows[0], blockNumColumns[0], oper.get() );
 
-    //oper.getMatrixBlockView( 0, 1, Bt );
-    Bt.setup( 0, blockNumColumns[0], blockNumRows[0], blockNumColumns[1], *oper );
+    //oper.blockView( 0, 1, Bt );
+    Bt.setup( 0, blockNumColumns[0], blockNumRows[0], blockNumColumns[1], oper.get() );
 
-    //oper.getMatrixBlockView( 1, 0, B );
-    B.setup( blockNumRows[0], 0, blockNumRows[1], blockNumColumns[0], *oper );
+    //oper.blockView( 1, 0, B );
+    B.setup( blockNumRows[0], 0, blockNumRows[1], blockNumColumns[0], oper.get() );
 
-    //oper.getMatrixBlockView( 1, 1, C );
-    C.setup( blockNumRows[0], blockNumColumns[0], blockNumRows[1], blockNumColumns[1], *oper );
+    //oper.blockView( 1, 1, C );
+    C.setup( blockNumRows[0], blockNumColumns[0], blockNumRows[1], blockNumColumns[1], oper.get() );
 
     if ( verbose ) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
@@ -162,7 +162,7 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
      */
 
     // Getting the block structure of B
-    MatrixBlockView B11, B12, B21, B22, B22base;
+    matrixBlockView_Type B11, B12, B21, B22, B22base;
 
     /*
      * Building the First block
@@ -176,10 +176,10 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P1a( new matrixBlock_Type( map ) );
     P1a->setBlockStructure( blockNumRows, blockNumColumns );
-    P1a->getMatrixBlockView( 0, 0, B11 );
-    P1a->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::copyBlock( F, B11 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    P1a->blockView( 0, 0, B11 );
+    P1a->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::copyBlock( F, B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P1a->globalAssemble();
     boost::shared_ptr<matrix_Type> p1a = P1a;
     superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_fluidPrec ) );
@@ -200,13 +200,13 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
     P1b->setBlockStructure( blockNumRows, blockNumColumns );
-    P1b->getMatrixBlockView( 0, 0, B11 );
-    P1b->getMatrixBlockView( 1, 0, B21 );
-    P1b->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::copyBlock( B, B21 );
+    P1b->blockView( 0, 0, B11 );
+    P1b->blockView( 1, 0, B21 );
+    P1b->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::copyBlock( B, B21 );
     ( *P1b ) *= -1;
-    MatrixBlockUtils::createIdentityBlock( B11 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P1b->globalAssemble();
     boost::shared_ptr<matrix_Type> p1b = P1b;
     this->pushBack( p1b, inversed, notTransposed );
@@ -222,19 +222,19 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
 
     boost::shared_ptr<matrixBlock_Type> BBlockMat( new matrixBlock_Type( map ) );
     BBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
-    BBlockMat->getMatrixBlockView( 1, 0, B21 );
-    MatrixBlockUtils::copyBlock( B, B21 );
+    BBlockMat->blockView( 1, 0, B21 );
+    MatrixEpetraStructuredUtility::copyBlock( B, B21 );
     BBlockMat->globalAssemble();
     boost::shared_ptr<matrixBlock_Type> invDBlockMat( new matrixBlock_Type( map ) );
     invDBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
-    invDBlockMat->getMatrixBlockView( 0, 0, B11 );
+    invDBlockMat->blockView( 0, 0, B11 );
     if ( M_SIMPLEType == "SIMPLE" )
     {
-        MatrixBlockUtils::createInvDiagBlock( F, B11 );
+    	MatrixEpetraStructuredUtility::createInvDiagBlock( F, B11 );
     }
     else if ( M_SIMPLEType == "SIMPLEC" )
     {
-        MatrixBlockUtils::createInvLumpedBlock( F, B11 );
+    	MatrixEpetraStructuredUtility::createInvLumpedBlock( F, B11 );
     }
     *invDBlockMat *= -1.0;
     invDBlockMat->globalAssemble();
@@ -246,8 +246,8 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
     invDBlockMat.reset();
     boost::shared_ptr<matrixBlock_Type> BtBlockMat( new matrixBlock_Type( map ) );
     BtBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
-    BtBlockMat->getMatrixBlockView( 0, 1, B12 );
-    MatrixBlockUtils::copyBlock( Bt, B12 );
+    BtBlockMat->blockView( 0, 1, B12 );
+    MatrixEpetraStructuredUtility::copyBlock( Bt, B12 );
     BtBlockMat->globalAssemble();
     tmpResultMat->multiply( false,
                             *BtBlockMat, false,
@@ -256,8 +256,8 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
     tmpResultMat.reset();
 
     P1c->setBlockStructure( blockNumRows, blockNumColumns );
-    P1c->getMatrixBlockView( 0, 0, B11 );
-    MatrixBlockUtils::createIdentityBlock( B11 );
+    P1c->blockView( 0, 0, B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
     P1c->globalAssemble();
     boost::shared_ptr<matrix_Type> p1c = P1c;
     superPtr_Type precForBlock2( PRECFactory::instance().createObject( M_schurPrec ) );
@@ -275,17 +275,17 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
     boost::shared_ptr<matrixBlock_Type> P2a( new matrixBlock_Type( map ) );
     *P2a *= 0.0;
     P2a->setBlockStructure( blockNumRows, blockNumColumns );
-    P2a->getMatrixBlockView( 0, 0, B11 );
-    P2a->getMatrixBlockView( 1, 1, B22 );
+    P2a->blockView( 0, 0, B11 );
+    P2a->blockView( 1, 1, B22 );
     if ( M_SIMPLEType == "SIMPLE" )
     {
-        MatrixBlockUtils::createDiagBlock( F, B11 );
+    	MatrixEpetraStructuredUtility::createDiagBlock( F, B11 );
     }
     else if ( M_SIMPLEType == "SIMPLEC" )
     {
-        MatrixBlockUtils::createLumpedBlock( F, B11 );
+    	MatrixEpetraStructuredUtility::createLumpedBlock( F, B11 );
     }
-    MatrixBlockUtils::createScalarBlock( B22, 1/M_dampingFactor );
+    MatrixEpetraStructuredUtility::createScalarBlock( B22, 1/M_dampingFactor );
     P2a->globalAssemble();
     boost::shared_ptr<matrix_Type> p2a = P2a;
     this->pushBack( p2a, inversed, notTransposed );
@@ -299,13 +299,13 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P2b( new matrixBlock_Type( map ) );
     P2b->setBlockStructure( blockNumRows, blockNumColumns );
-    P2b->getMatrixBlockView( 0, 0, B11 );
-    P2b->getMatrixBlockView( 0, 1, B12 );
-    P2b->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::copyBlock( Bt, B12 );
+    P2b->blockView( 0, 0, B11 );
+    P2b->blockView( 0, 1, B12 );
+    P2b->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::copyBlock( Bt, B12 );
     //( *P2b ) *= -1; // We inverse already the block
-    MatrixBlockUtils::createIdentityBlock( B11 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P2b->globalAssemble();
     boost::shared_ptr<matrix_Type> p2b = P2b;
     this->pushBack( p2b,inversed, notTransposed );
@@ -320,17 +320,17 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
     boost::shared_ptr<matrixBlock_Type> P2c( new matrixBlock_Type( map ) );
     *P2c *= 0.0;
     P2c->setBlockStructure( blockNumRows, blockNumColumns );
-    P2c->getMatrixBlockView( 0, 0, B11 );
-    P2c->getMatrixBlockView( 1, 1, B22 );
+    P2c->blockView( 0, 0, B11 );
+    P2c->blockView( 1, 1, B22 );
     if ( M_SIMPLEType == "SIMPLE" )
     {
-        MatrixBlockUtils::createInvDiagBlock( F, B11 );
+    	MatrixEpetraStructuredUtility::createInvDiagBlock( F, B11 );
     }
     else if( M_SIMPLEType == "SIMPLEC" )
     {
-        MatrixBlockUtils::createInvLumpedBlock( F, B11 );
+    	MatrixEpetraStructuredUtility::createInvLumpedBlock( F, B11 );
     }
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P2c->globalAssemble();
     boost::shared_ptr<matrix_Type> p2c = P2c;
     this->pushBack( p2c, inversed, notTransposed );

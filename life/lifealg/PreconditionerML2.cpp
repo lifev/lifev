@@ -34,11 +34,11 @@
     @date 09-11-2006
  */
 
-#include <PreconditionerML2.hpp>
+#include <Teuchos_RCPBoostSharedPtrConversions.hpp>
 
+#include <life/lifealg/PreconditionerML2.hpp>
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifealg/PreconditionerMGOperators.hpp>
-#include <Teuchos_RCPBoostSharedPtrConversions.hpp>
 
 namespace LifeV
 {

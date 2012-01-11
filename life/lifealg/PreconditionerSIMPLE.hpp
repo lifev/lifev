@@ -64,9 +64,10 @@ public:
     /** @name Public Types
      */
     //@{
-    typedef RegionMesh3D<LinearTetra>               mesh_Type;
+    typedef RegionMesh<LinearTetra>                 mesh_Type;
     typedef MapEpetra                               map_Type;
-    typedef MatrixBlock<Real>                       matrixBlock_Type;
+    typedef MatrixEpetraStructured<Real>            matrixBlock_Type;
+    typedef MatrixEpetraStructuredView<Real>        matrixBlockView_Type;
     typedef MatrixEpetra<Real>                      matrix_Type;
     typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
     typedef VectorEpetra                            vector_Type;

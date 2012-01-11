@@ -26,7 +26,7 @@ lib_LTLIBRARIES	= liblifealg.la
 
 liblifealg_la_SOURCES	= LinearEpetraOperatorBlock.cpp Preconditioner.cpp \
                           PreconditionerAztecOO.cpp PreconditionerML.cpp PreconditionerML2.cpp PreconditionerIfpack.cpp \
-                          PreconditionerComposed.cpp PreconditionerComposition.cpp \
+                          PreconditionerComposed.cpp PreconditionerComposition.cpp PreconditionerBlock.cpp \
                           PreconditionerSIMPLE.cpp PreconditionerYosida.cpp PreconditionerPCD.cpp \
                           PreconditionerTeko.cpp PreconditionerLSC.cpp \
                           SolverAmesos.cpp SolverAztecOO.cpp EigenSolver.cpp

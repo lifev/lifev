@@ -41,6 +41,11 @@
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifealg/PreconditionerTeko.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Teuchos includes
 #include "Teuchos_RCP.hpp"
@@ -52,6 +57,10 @@
 #include "Teko_BlockPreconditionerFactory.hpp"
 #include "Teko_InvLSCStrategy.hpp"
 #include "Teko_LSCPreconditionerFactory.hpp"
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // for simplicity
 using Teuchos::RCP;
@@ -78,7 +87,7 @@ public:
 
     typedef Teko::Epetra::EpetraBlockPreconditioner preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
-    typedef RegionMesh3D<LinearTetra>               mesh_Type;
+    typedef RegionMesh<LinearTetra>                 mesh_Type;
     typedef MapEpetra                               map_Type;
     typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
     typedef MatrixEpetra<Real>                      matrix_Type;
@@ -140,6 +149,7 @@ public:
 
     int numBlocksRows() const;
     int numBlocksCols() const;
+
 protected:
 
     std::string M_precType;

@@ -187,26 +187,26 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
      */
     if ( verbose ) std::cout << std::endl << "      >Getting the structure of A... ";
     timer.start();
-    MatrixBlockView F, Bt, B, C;
-    //oper.getMatrixBlockView( 0, 0, F );
-    F.setup( 0 ,0, blockNumRows[0], blockNumColumns[0], *oper );
+    matrixBlockView_Type F, Bt, B, C;
+    //oper.blockView( 0, 0, F );
+    F.setup( 0 ,0, blockNumRows[0], blockNumColumns[0], oper.get() );
     //F.showMe();
 
-    //oper.getMatrixBlockView( 0, 1, Bt );
-    Bt.setup( 0, blockNumColumns[0], blockNumRows[0], blockNumColumns[1], *oper );
+    //oper.blockView( 0, 1, Bt );
+    Bt.setup( 0, blockNumColumns[0], blockNumRows[0], blockNumColumns[1], oper.get() );
     //Bt.showMe();
 
-    //oper.getMatrixBlockView( 1, 0, B );
-    B.setup( blockNumRows[0], 0, blockNumRows[1], blockNumColumns[0], *oper );
+    //oper.blockView( 1, 0, B );
+    B.setup( blockNumRows[0], 0, blockNumRows[1], blockNumColumns[0], oper.get() );
     //B.showMe();
 
-    //oper.getMatrixBlockView( 1, 1, C );
-    C.setup( blockNumRows[0], blockNumColumns[0], blockNumRows[1], blockNumColumns[1], *oper );
+    //oper.blockView( 1, 1, C );
+    C.setup( blockNumRows[0], blockNumColumns[0], blockNumRows[1], blockNumColumns[1], oper.get() );
     //C.showMe();
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     // Getting the block structure of B
-    MatrixBlockView B11, B12, B21, B22, B22base;
+    matrixBlockView_Type B11, B12, B21, B22, B22base;
 
     /*
      * PCD:
@@ -237,10 +237,10 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         timer.start();
         boost::shared_ptr<matrixBlock_Type> P3( new matrixBlock_Type( map ) );
         P3->setBlockStructure( blockNumRows, blockNumColumns );
-        P3->getMatrixBlockView( 0, 0, B11 );
-        P3->getMatrixBlockView( 1, 1, B22 );
-        MatrixBlockUtils::copyBlock( F, B11 );
-        MatrixBlockUtils::createIdentityBlock( B22 );
+        P3->blockView( 0, 0, B11 );
+        P3->blockView( 1, 1, B22 );
+        MatrixEpetraStructuredUtility::copyBlock( F, B11 );
+        MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
         P3->globalAssemble();
         //P3->spy( "p3" );
         p3 = P3;
@@ -263,13 +263,13 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         timer.start();
         boost::shared_ptr<matrixBlock_Type> P2e( new matrixBlock_Type( map ) );
         P2e->setBlockStructure( blockNumRows, blockNumColumns );
-        P2e->getMatrixBlockView( 0, 0, B11 );
-        P2e->getMatrixBlockView( 1, 0, B21 );
-        P2e->getMatrixBlockView( 1, 1, B22 );
-        MatrixBlockUtils::copyBlock( B, B21 );
+        P2e->blockView( 0, 0, B11 );
+        P2e->blockView( 1, 0, B21 );
+        P2e->blockView( 1, 1, B22 );
+        MatrixEpetraStructuredUtility::copyBlock( B, B21 );
         ( *P2e ) *= -1;
-        MatrixBlockUtils::createIdentityBlock( B11 );
-        MatrixBlockUtils::createIdentityBlock( B22 );
+        MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+        MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
         P2e->globalAssemble();
         //P2->spy( "p2" );
         boost::shared_ptr<matrix_Type> p2e = P2e;
@@ -296,7 +296,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     boost::shared_ptr<matrixBlock_Type> PFp( new matrixBlock_Type( map ) );
     *PFp *= 0.0;
     PFp->setBlockStructure( blockNumRows, blockNumColumns );
-    PFp->getMatrixBlockView( 1, 1, B22 );
+    PFp->blockView( 1, 1, B22 );
     M_adrPressureAssembler.addDiffusion( PFp, -M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
     M_adrPressureAssembler.addAdvection( PFp, *M_beta, B22.firstRowIndex(), B22.firstColumnIndex() );
     M_adrPressureAssembler.addMass( PFp, 1.0/M_timestep, B22.firstRowIndex(), B22.firstColumnIndex() );
@@ -309,8 +309,8 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     boost::shared_ptr<matrixBlock_Type> PAp( new matrixBlock_Type( map ) );
     *PAp *= 0.0;
     PAp->setBlockStructure( blockNumRows, blockNumColumns );
-    PAp->getMatrixBlockView( 0, 0, B11 );
-    PAp->getMatrixBlockView( 1, 1, B22 );
+    PAp->blockView( 0, 0, B11 );
+    PAp->blockView( 1, 1, B22 );
 
     if ( M_pressureLaplacianOperator == "symmetric" )
     {
@@ -321,13 +321,13 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
                                       *( pFp->matrixPtr() ), true,  0.5*M_density/M_viscosity,
                                       tmpCrsMatrix );
 
-        MatrixBlockUtils::createScalarBlock( B11, 1 );
+        MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
     }
     else
     {
         if ( verbose ) std::cout << "... ";
         M_adrPressureAssembler.addDiffusion( PAp, 1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
-        MatrixBlockUtils::createIdentityBlock( B11 );
+        MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
     }
     PAp->globalAssemble();
     boost::shared_ptr<matrix_Type> pAp = PAp;
@@ -339,9 +339,9 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     boost::shared_ptr<matrixBlock_Type> PMp( new matrixBlock_Type( map ) );
     *PMp *= 0.0;
     PMp->setBlockStructure( blockNumRows, blockNumColumns );
-    PMp->getMatrixBlockView( 0, 0, B11 );
-    PMp->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::createIdentityBlock( B11 );
+    PMp->blockView( 0, 0, B11 );
+    PMp->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
     if ( M_useLumpedPressureMass )
     {
         if ( verbose ) std::cout << " (Lumped version)... ";
@@ -349,8 +349,8 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         M_adrPressureAssembler.addMass( tmpMass, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
         tmpMass->globalAssemble();
         tmpMass->setBlockStructure( blockNumRows, blockNumColumns );
-        tmpMass->getMatrixBlockView( 1, 1, B11 );
-        MatrixBlockUtils::createInvLumpedBlock( B11, B22 );
+        tmpMass->blockView( 1, 1, B11 );
+        MatrixEpetraStructuredUtility::createInvLumpedBlock( B11, B22 );
         tmpMass.reset();
 
     }
@@ -483,8 +483,8 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
     P1b->setBlockStructure( blockNumRows, blockNumColumns );
     *P1b += *PFp;
-    P1b->getMatrixBlockView( 0, 0, B11 );
-    MatrixBlockUtils::createIdentityBlock( B11 );
+    P1b->blockView( 0, 0, B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
     P1b->globalAssemble();
     boost::shared_ptr<matrix_Type> p1b = P1b;
     //p1b->spy( "p1b" );
@@ -515,13 +515,13 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P2( new matrixBlock_Type( map ) );
     P2->setBlockStructure( blockNumRows, blockNumColumns );
-    P2->getMatrixBlockView( 0, 0, B11 );
-    P2->getMatrixBlockView( 0, 1, B12 );
-    P2->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::copyBlock( Bt, B12 );
+    P2->blockView( 0, 0, B11 );
+    P2->blockView( 0, 1, B12 );
+    P2->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::copyBlock( Bt, B12 );
     ( *P2 ) *= -1;
-    MatrixBlockUtils::createIdentityBlock( B11 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P2->globalAssemble();
     //P2->spy( "p2" );
     boost::shared_ptr<matrix_Type> p2 = P2;
@@ -546,10 +546,10 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         timer.start();
         boost::shared_ptr<matrixBlock_Type> P3( new matrixBlock_Type( map ) );
         P3->setBlockStructure( blockNumRows, blockNumColumns );
-        P3->getMatrixBlockView( 0, 0, B11 );
-        P3->getMatrixBlockView( 1, 1, B22 );
-        MatrixBlockUtils::copyBlock( F, B11 );
-        MatrixBlockUtils::createIdentityBlock( B22 );
+        P3->blockView( 0, 0, B11 );
+        P3->blockView( 1, 1, B22 );
+        MatrixEpetraStructuredUtility::copyBlock( F, B11 );
+        MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
         P3->globalAssemble();
         //P3->spy( "p3" );
         p3 = P3;

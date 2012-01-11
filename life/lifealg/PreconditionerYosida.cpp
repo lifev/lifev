@@ -137,18 +137,18 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      */
     if ( verbose ) std::cout << std::endl << "      >Getting the structure of A... ";
     timer.start();
-    MatrixBlockView F, Bt, B, C, M;
-    //oper.getMatrixBlockView( 0, 0, F );
-    F.setup( 0, 0, blockNumRows[0], blockNumColumns[0], *oper );
+    matrixBlockView_Type F, Bt, B, C, M;
+    //oper.blockView( 0, 0, F );
+    F.setup( 0, 0, blockNumRows[0], blockNumColumns[0], oper.get() );
 
-    //oper.getMatrixBlockView( 0, 1, Bt );
-    Bt.setup( 0, blockNumColumns[0], blockNumRows[0], blockNumColumns[1], *oper );
+    //oper.blockView( 0, 1, Bt );
+    Bt.setup( 0, blockNumColumns[0], blockNumRows[0], blockNumColumns[1], oper.get() );
 
-    //oper.getMatrixBlockView( 1, 0, B );
-    B.setup( blockNumRows[0], 0, blockNumRows[1], blockNumColumns[0], *oper );
+    //oper.blockView( 1, 0, B );
+    B.setup( blockNumRows[0], 0, blockNumRows[1], blockNumColumns[0], oper.get() );
 
-    //oper.getMatrixBlockView( 1, 1, C );
-    C.setup( blockNumRows[0], blockNumColumns[0], blockNumRows[1], blockNumColumns[1], *oper );
+    //oper.blockView( 1, 1, C );
+    C.setup( blockNumRows[0], blockNumColumns[0], blockNumRows[1], blockNumColumns[1], oper.get() );
 
     if ( verbose ) std::cout << "       done in " << timer.diff() << " s." << std::endl;
 
@@ -160,7 +160,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      */
 
     // Getting the block structure of B
-    MatrixBlockView B11, B12, B21, B22, B22base;
+    matrixBlockView_Type B11, B12, B21, B22, B22base;
 
     /*
      * Building the First block
@@ -174,10 +174,10 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P1a( new matrixBlock_Type( map ) );
     P1a->setBlockStructure( blockNumRows, blockNumColumns );
-    P1a->getMatrixBlockView( 0, 0, B11 );
-    P1a->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::copyBlock( F, B11 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    P1a->blockView( 0, 0, B11 );
+    P1a->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::copyBlock( F, B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P1a->globalAssemble();
     boost::shared_ptr<matrix_Type> p1a = P1a;
     superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_fluidPrec ) );
@@ -198,13 +198,13 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
     P1b->setBlockStructure( blockNumRows, blockNumColumns );
-    P1b->getMatrixBlockView( 0, 0, B11 );
-    P1b->getMatrixBlockView( 1, 0, B21 );
-    P1b->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::copyBlock( B, B21 );
+    P1b->blockView( 0, 0, B11 );
+    P1b->blockView( 1, 0, B21 );
+    P1b->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::copyBlock( B, B21 );
     ( *P1b ) *= -1;
-    MatrixBlockUtils::createIdentityBlock( B11 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P1b->globalAssemble();
     boost::shared_ptr<matrix_Type> p1b = P1b;
     this->pushBack( p1b, inversed, notTransposed );
@@ -219,7 +219,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     // Computing the mass matrix
     boost::shared_ptr<matrixBlock_Type> massMat( new matrixBlock_Type( map ) );
     massMat->setBlockStructure( blockNumRows, blockNumColumns );
-    massMat->getMatrixBlockView( 0, 0, M );
+    massMat->blockView( 0, 0, M );
     M_adrVelocityAssembler.addMass( massMat, 1.0/M_timestep, M.firstRowIndex(), M.firstColumnIndex() );
     massMat->globalAssemble();
 
@@ -227,13 +227,13 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
 
     boost::shared_ptr<matrixBlock_Type> BBlockMat( new matrixBlock_Type( map ) );
     BBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
-    BBlockMat->getMatrixBlockView( 1, 0, B21 );
-    MatrixBlockUtils::copyBlock( B, B21 );
+    BBlockMat->blockView( 1, 0, B21 );
+    MatrixEpetraStructuredUtility::copyBlock( B, B21 );
     BBlockMat->globalAssemble();
     boost::shared_ptr<matrixBlock_Type> invLumpedMassBlockMat( new matrixBlock_Type( map ) );
     invLumpedMassBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
-    invLumpedMassBlockMat->getMatrixBlockView( 0, 0, B11 );
-    MatrixBlockUtils::createInvDiagBlock( M, B11 );
+    invLumpedMassBlockMat->blockView( 0, 0, B11 );
+    MatrixEpetraStructuredUtility::createInvDiagBlock( M, B11 );
     massMat.reset();               // Free memory
     *invLumpedMassBlockMat *= -1.0;
     invLumpedMassBlockMat->globalAssemble();
@@ -245,8 +245,8 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     invLumpedMassBlockMat.reset(); // Free memory
     boost::shared_ptr<matrixBlock_Type> BtBlockMat( new matrixBlock_Type( map ) );
     BtBlockMat->setBlockStructure( blockNumRows, blockNumColumns );
-    BtBlockMat->getMatrixBlockView( 0, 1, B12 );
-    MatrixBlockUtils::copyBlock( Bt, B12 );
+    BtBlockMat->blockView( 0, 1, B12 );
+    MatrixEpetraStructuredUtility::copyBlock( Bt, B12 );
     BtBlockMat->globalAssemble();
     tmpResultMat->multiply( false,
                             *BtBlockMat, false,
@@ -255,8 +255,8 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     tmpResultMat.reset();
 
     P1c->setBlockStructure( blockNumRows, blockNumColumns );
-    P1c->getMatrixBlockView( 0, 0, B11 );
-    MatrixBlockUtils::createIdentityBlock( B11 );
+    P1c->blockView( 0, 0, B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
     P1c->globalAssemble();
     boost::shared_ptr<matrix_Type> p1c = P1c;
     superPtr_Type precForBlock2( PRECFactory::instance().createObject( M_schurPrec ) );
@@ -274,10 +274,10 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     boost::shared_ptr<matrixBlock_Type> P2a( new matrixBlock_Type( map ) );
     *P2a *= 0.0;
     P2a->setBlockStructure( blockNumRows, blockNumColumns );
-    P2a->getMatrixBlockView( 0, 0, B11 );
-    P2a->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::copyBlock( F, B11 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    P2a->blockView( 0, 0, B11 );
+    P2a->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::copyBlock( F, B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P2a->globalAssemble();
     boost::shared_ptr<matrix_Type> p2a = P2a;
     this->pushBack( p2a, inversed, notTransposed );
@@ -291,13 +291,13 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P2b( new matrixBlock_Type( map ) );
     P2b->setBlockStructure( blockNumRows, blockNumColumns );
-    P2b->getMatrixBlockView( 0, 0, B11 );
-    P2b->getMatrixBlockView( 0, 1, B12 );
-    P2b->getMatrixBlockView( 1, 1, B22 );
-    MatrixBlockUtils::copyBlock( Bt, B12 );
+    P2b->blockView( 0, 0, B11 );
+    P2b->blockView( 0, 1, B12 );
+    P2b->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::copyBlock( Bt, B12 );
     ( *P2b ) *= -1; // We inverse already the block
-    MatrixBlockUtils::createIdentityBlock( B11 );
-    MatrixBlockUtils::createIdentityBlock( B22 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+    MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P2b->globalAssemble();
     boost::shared_ptr<matrix_Type> p2b = P2b;
     this->pushBack( p2b,inversed, notTransposed );

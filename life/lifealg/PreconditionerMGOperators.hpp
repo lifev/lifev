@@ -45,14 +45,14 @@
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 namespace LifeV
 {
 
 namespace{
 typedef MapEpetra                        map_Type;
-typedef RegionMesh3D<LinearTetra>        mesh_Type;
+typedef RegionMesh<LinearTetra>          mesh_Type;
 typedef MatrixEpetra<Real>               matrix_Type;
 typedef boost::shared_ptr<matrix_Type>   matrixPtr_Type;
 typedef FESpace<mesh_Type,map_Type>      FESpace_Type;

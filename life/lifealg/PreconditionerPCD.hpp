@@ -64,9 +64,10 @@ public:
     /** @name Public Types
      */
     //@{
-    typedef RegionMesh3D<LinearTetra>               mesh_Type;
+    typedef RegionMesh<LinearTetra>                 mesh_Type;
     typedef MapEpetra                               map_Type;
-    typedef MatrixBlock<Real>                       matrixBlock_Type;
+    typedef MatrixEpetraStructured<Real>            matrixBlock_Type;
+    typedef MatrixEpetraStructuredView<Real>        matrixBlockView_Type;
     typedef MatrixEpetra<Real>                      matrix_Type;
     typedef boost::shared_ptr<matrix_Type>          matrixPtr_type;
     typedef VectorEpetra                            vector_Type;
@@ -82,9 +83,6 @@ public:
     typedef boost::shared_ptr<BCHandler>            BCHandlerPtr_Type;
 
     typedef Teuchos::ParameterList                  list_Type;
-
-    // BC
-    typedef entityFlag_Type bcFlag_Type;
     //@}
 
 
