@@ -25,7 +25,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 lib_LTLIBRARIES	= liblifealg.la
 
 liblifealg_la_SOURCES	= LinearEpetraOperatorBlock.cpp Preconditioner.cpp \
-                          PreconditionerAztecOO.cpp PreconditionerML.cpp PreconditionerIfpack.cpp \
+                          PreconditionerAztecOO.cpp PreconditionerML.cpp PreconditionerML2.cpp PreconditionerIfpack.cpp \
                           PreconditionerComposed.cpp PreconditionerComposition.cpp \
                           PreconditionerSIMPLE.cpp PreconditionerYosida.cpp PreconditionerPCD.cpp \
                           PreconditionerTeko.cpp PreconditionerLSC.cpp \
@@ -33,5 +33,3 @@ liblifealg_la_SOURCES	= LinearEpetraOperatorBlock.cpp Preconditioner.cpp \
 
 liblifealg_la_LIBADD	= ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(aztec_libs)
 include $(top_srcdir)/Doxyfile.am
-
-
