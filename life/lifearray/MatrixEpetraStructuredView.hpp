@@ -25,40 +25,57 @@
 //@HEADER
 
 /*!
-   @file MatrixBlockView.hpp
-   @brief The file contains the MatrixBlockView class
+   @file MatrixEpetraStructuredView.hpp
+   @brief The file contains the MatrixEpetraStructuredView class
 
    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+   @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
    @date 2010-10-09
  */
 
-#ifndef _MATRIXBLOCKVIEW_HPP_
-#define _MATRIXBLOCKVIEW_HPP_
+#ifndef _MATRIXEPETRASTRUCTUREDVIEW_HPP_
+#define _MATRIXEPETRASTRUCTUREDVIEW_HPP_
 
 #include <boost/shared_ptr.hpp>
+
 #include <iostream>
-#include <Epetra_FECrsMatrix.h>
+
 #include <life/lifearray/MatrixEpetra.hpp>
+
 
 namespace LifeV {
 
-//! MatrixBlockView - class to manage the block in a block matrix
+//! MatrixEpetraStructuredView - class representing a block in a MatrixEpetraStructured
 /*!
- *  @author Gwenol Grandperrin
- *
- *  The BlockMatrixView class contains data related
- *  to block of a matrix. It is useful to setup a
- *  clean and easy-to-use blocks management
+  @author Gwenol Grandperrin
+  @author Samuel Quinodoz
+
+  The MatrixEpetraStructuredView class contains data related
+  to block of a matrix. It is useful to setup a clean and easy-to-use blocks management.
+
+  For more information about the block structures in LifeV, see \ref BlockAlgebraPage "this page".
+
+  <b> Remark </b>
+
+  Using the operator "=" is not valid for this class! Indeed, copying the view
+  would not copy the data stored in the matrix, which can be confusing. If the
+  copy of the block is the intended use, one should use a method from the BlockUtils.
+
  */
-class MatrixBlockView
+template<typename DataType>
+class MatrixEpetraStructuredView
 {
 public:
 
     /** @name Typedefs
      */
     //@{
-    typedef MatrixEpetra<double> matrix_type;
-    typedef boost::shared_ptr<Epetra_FECrsMatrix>  matrix_ptrtype;
+
+    // Not a block matrix to avoid circular dependancies
+    //typedef MatrixEpetraStructured<DataType> matrix_Type;
+
+    typedef MatrixEpetra<DataType> matrix_Type;
+
     //@}
 
 
@@ -66,21 +83,27 @@ public:
      */
     //@{
     //! default constructor.
-    MatrixBlockView();
+    MatrixEpetraStructuredView();
 
     //! Copy constructor
-    MatrixBlockView( MatrixBlockView& mbv );
+    MatrixEpetraStructuredView( const MatrixEpetraStructuredView<DataType>& mbv );
 
     //! default virtual destructor
-    ~MatrixBlockView();
+    ~MatrixEpetraStructuredView();
 
     //@}
 
     //! @name Methods
     //@{
 
-    //! Print the informations about the MatrixBlockView
+    //! Print the informations about the MatrixEpetraStructuredView
     void showMe(std::ostream& output = std::cout) const;
+
+	//! Function to assemble an elemental matrix in a block
+    void addToCoefficients( UInt const numRows, UInt const numColumns,
+                            std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
+                            DataType* const* const localValues,
+                            Int format = Epetra_FECrsMatrix::COLUMN_MAJOR ) const;
 
     //@}
 
@@ -97,49 +120,157 @@ public:
                 const UInt& firstColumn,
                 const UInt& numRows,
                 const UInt& numColumns,
-                const matrix_type& A );
+                matrix_Type* A );
 
     //@}
 
     //! @name  Get Methods
     //@{
     //! Returns the number of rows in the block
-    UInt numRows() const;
+    UInt numRows() const {return M_numRows; }
 
     //! Returns the number of columns in the block
-    UInt numColumns() const;
+    UInt numColumns() const {return M_numColumns; }
 
     //! Returns the index of the first row in the block
-    UInt firstRowIndex() const;
+    UInt firstRowIndex() const {return M_firstRowIndex; }
 
     //! Returns the index of the last row in the block
-    UInt lastRowIndex() const;
+    UInt lastRowIndex() const {return M_lastRowIndex; }
 
     //! Returns the index of the first column in the block
-    UInt firstColumnIndex() const;
+    UInt firstColumnIndex() const {return M_firstColumnIndex; }
 
     //! Returns the index of the last column in the block
-    UInt lastColumnIndex() const;
+    UInt lastColumnIndex() const {return M_lastColumnIndex; }
 
-    //! Return the shared_pointer of the Epetra_FECrsMatrix
-    matrix_ptrtype& getMatrixPtr(){return M_matrix;}
-
-    //! Return the const shared_pointer of the Epetra_FECrsMatrix
-    const matrix_ptrtype& getMatrixPtr() const{return M_matrix;}
+    //! Return the pointer of the full matrix
+    matrix_Type* matrixPtr() const {return M_matrix; }
 
     //@}
 
 private:
+
+    //! @name Private Methods
+    //@{
+
+    //! No assignement operator, it is missleading (would copy the views, not the blocks!)
+    MatrixEpetraStructuredView<DataType> operator=( const MatrixEpetraStructuredView& otherView);
+
+    //@}
+
     UInt M_numRows;
     UInt M_numColumns;
     UInt M_firstRowIndex;
     UInt M_lastRowIndex;
     UInt M_firstColumnIndex;
     UInt M_lastColumnIndex;
-    matrix_ptrtype M_matrix;
+    matrix_Type* M_matrix;
 };
+
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
+template<typename DataType>
+MatrixEpetraStructuredView<DataType>::MatrixEpetraStructuredView() :
+    M_numRows( 0 ),
+    M_numColumns( 0 ),
+    M_firstRowIndex( 0 ),
+    M_lastRowIndex( 0 ),
+    M_firstColumnIndex( 0 ),
+    M_lastColumnIndex( 0 ),
+    M_matrix()
+{
+
+}
+
+template<typename DataType>
+MatrixEpetraStructuredView<DataType>::MatrixEpetraStructuredView( const MatrixEpetraStructuredView<DataType>& mbv ) :
+    M_numRows( mbv.M_numRows ),
+    M_numColumns( mbv.M_numColumns ),
+    M_firstRowIndex( mbv.M_firstRowIndex ),
+    M_lastRowIndex( mbv.M_lastRowIndex ),
+    M_firstColumnIndex( mbv.M_firstColumnIndex ),
+    M_lastColumnIndex( mbv.M_lastColumnIndex ),
+    M_matrix( mbv.M_matrix )
+{
+
+}
+
+template<typename DataType>
+MatrixEpetraStructuredView<DataType>::~MatrixEpetraStructuredView()
+{
+    //M_matrix.reset();
+}
+
+// ===================================================
+// Methods
+// ===================================================
+
+template<typename DataType>
+void
+MatrixEpetraStructuredView<DataType>::showMe( std::ostream& output ) const
+{
+    output << "MatrixBlockMonolithicEpetraView informations:" << std::endl
+           << "Size = " << M_numRows << " x " << M_numColumns << std::endl
+           << "firstRow = " << M_firstRowIndex << std::endl
+           << "lastRow = " << M_lastRowIndex << std::endl
+           << "firstColumn = " << M_firstColumnIndex << std::endl
+           << "lastColumn = " << M_lastColumnIndex << std::endl;
+}
+
+template<typename DataType>
+void
+MatrixEpetraStructuredView<DataType>::
+addToCoefficients( UInt const numRows, UInt const numColumns,
+                            std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
+                            DataType* const* const localValues,
+                            Int format) const
+{
+	std::vector<Int> rowIndices(blockRowIndices);
+    std::vector<Int> columnIndices(blockColumnIndices);
+
+    for (UInt i(0); i<numRows; ++i)
+    {
+        rowIndices[i]+=M_firstRowIndex;
+    }
+    for (UInt i(0); i<numColumns; ++i)
+    {
+        columnIndices[i]+=M_firstColumnIndex;
+    }
+
+    M_matrix->addToCoefficients(numRows,numColumns,
+                                rowIndices,columnIndices,
+                                localValues,format);
+}
+
+
+// ===================================================
+// Set Methods
+// ===================================================
+
+template<typename DataType>
+void
+MatrixEpetraStructuredView<DataType>::setup( const UInt& firstRow,
+                        const UInt& firstColumn,
+                        const UInt& numRows,
+                        const UInt& numColumns,
+                        matrix_Type* A )
+{
+    M_numRows          = numRows;
+    M_numColumns       = numColumns;
+    M_firstRowIndex    = firstRow;
+    M_lastRowIndex     = firstRow+numRows-1;
+    M_firstColumnIndex = firstColumn;
+    M_lastColumnIndex  = firstColumn+numColumns-1;
+    M_matrix           = A;
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
 
 } // namespace LifeV
 
-#endif /* MATRIXBLOCKVIEW_HPP */
-
+#endif /* _MATRIXEPETRASTRUCTUREDVIEW_HPP_ */

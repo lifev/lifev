@@ -24,7 +24,8 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 lib_LTLIBRARIES	= liblifearray.la
 
 liblifearray_la_SOURCES	= MatrixElemental.cpp VectorElemental.cpp \
-			              VectorEpetra.cpp MapEpetra.cpp
+			              VectorEpetra.cpp MapEpetra.cpp \ 
+					      VectorEpetraStructured.cpp VectorEpetraStructuredView.cpp
 
 liblifearray_la_LIBADD	= ../lifecore/liblifecore.la
 
