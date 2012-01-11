@@ -41,9 +41,9 @@
 #include <life/lifealg/PreconditionerML2.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefem/BCManage.hpp>
-#include <lifemc/lifearray/MatrixBlock.hpp>
-#include <lifemc/lifearray/MatrixBlockView.hpp>
-#include <lifemc/lifearray/MatrixBlockUtils.hpp>
+#include <life/lifearray/MatrixEpetraStructured.hpp>
+#include <life/lifearray/MatrixEpetraStructuredView.hpp>
+#include <life/lifearray/MatrixEpetraStructuredUtility.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"

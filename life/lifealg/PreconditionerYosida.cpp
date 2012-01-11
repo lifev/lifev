@@ -40,9 +40,9 @@
 #include <life/lifealg/PreconditionerML.hpp>
 #include <life/lifealg/PreconditionerML2.hpp>
 #include <life/lifecore/LifeChrono.hpp>
-#include <lifemc/lifearray/MatrixBlock.hpp>
-#include <lifemc/lifearray/MatrixBlockView.hpp>
-#include <lifemc/lifearray/MatrixBlockUtils.hpp>
+#include <life/lifearray/MatrixEpetraStructured.hpp>
+#include <life/lifearray/MatrixEpetraStructuredView.hpp>
+#include <life/lifearray/MatrixEpetraStructuredUtility.hpp>
 
 namespace LifeV {
 

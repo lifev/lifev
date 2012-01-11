@@ -42,11 +42,11 @@
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
-#include <lifemc/lifealg/PreconditionerComposition.hpp>
-#include <lifemc/lifearray/MatrixBlock.hpp>
+#include <life/lifealg/PreconditionerComposition.hpp>
+#include <life/lifearray/MatrixEpetraStructured.hpp>
 #include <life/lifesolver/ADRAssembler.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 namespace LifeV {
 

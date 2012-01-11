@@ -41,7 +41,7 @@
 #include <boost/shared_ptr.hpp>
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifealg/Preconditioner.hpp>
-#include <lifemc/lifealg/PreconditionerBlock.hpp>
+#include <life/lifealg/PreconditionerBlock.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"

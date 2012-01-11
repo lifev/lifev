@@ -40,7 +40,7 @@
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <lifemc/lifealg/PreconditionerTeko.hpp>
+#include <life/lifealg/PreconditionerTeko.hpp>
 
 // Teuchos includes
 #include "Teuchos_RCP.hpp"
