@@ -67,6 +67,14 @@ DOFInterface3Dto3D::DOFInterface3Dto3D( const ReferenceFE& refFE1, const DOF& do
         M_dof( new DOF( refFE1 ) )
 {}
 
+DOFInterface3Dto3D::DOFInterface3Dto3D( const ReferenceFE& refFE, const DOF& dof )
+        :
+        M_refFE1( & refFE ),
+        M_dof1( &dof ),
+        M_refFE2( & refFE ),
+        M_dof2( &dof )
+{}
+
 // ===================================================
 // Methods
 // ===================================================
@@ -95,40 +103,12 @@ DOFInterface3Dto3D::setup( const ReferenceFE& refFE1, const DOF& dof1, const Ref
 // Helpers
 // ===================================================
 
-bool coincide( const KN_<Real>& v1, const KN_<Real>& v2, const Real& tol )
+bool
+coincide( const std::vector<Real>& p1, const std::vector<Real>& p2, const Real& tol )
 {
+	 Real normDiff = fabs( p1[ 0 ] - p2[ 0 ]) + fabs( p1[ 1 ] - p2[ 1 ]) + fabs( p1[ 2 ] - p2[ 2 ]);
 
-    Real normDiff(0.0);
-
-    for ( UInt i(0); i < nDimensions; ++i )
-    {
-        normDiff += std::fabs( v1[ i ] - v2[ i ] );
-    }
-
-    if ( normDiff <= tol )
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
-bool coincide( const Real& x1, const Real& y1, const Real& z1, const Real& x2, const Real& y2, const Real& z2, const Real& tol )
-{
-
-    Real normDiff (std::fabs( x1 - x2 ) + std::fabs( y1 - y2 ) + std::fabs( z1 - z2 ));
-
-    if ( normDiff <= tol )
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+	return ( normDiff <= tol );
 }
 
 }

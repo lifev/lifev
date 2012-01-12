@@ -92,7 +92,7 @@ public:
     PreconditionerIfpack();
 
     //! Destructor
-    ~PreconditionerIfpack();
+    virtual ~PreconditionerIfpack();
 
     //@}
 

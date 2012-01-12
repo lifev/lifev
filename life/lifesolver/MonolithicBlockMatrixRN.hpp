@@ -60,7 +60,7 @@ namespace LifeV
     choices available are in principle automatically adapted to the RN case. The preconditioners tested for this case
     are the modular composedDN and the algebraic additive Schwarz AdditiveSchwarz.
  */
-class MonolithicBlockMatrixRN : public MonolithicBlockMatrix, MonolithicRobinInterface
+class MonolithicBlockMatrixRN : public MonolithicBlockMatrix, private MonolithicRobinInterface
 {
 public:
 

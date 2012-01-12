@@ -140,6 +140,7 @@ extern const ReferenceFEScalar feSegP2;
 
 extern const ReferenceFEScalar feTriaP0;
 extern const ReferenceFEScalar feTriaP1;
+extern const ReferenceFEScalar feTriaP1bubble;
 extern const ReferenceFEScalar feTriaP2;
 
 extern const ReferenceFEScalar feQuadQ0;

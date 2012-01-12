@@ -74,7 +74,7 @@ public:
     PreconditionerAztecOO();
 
     //! Destructor
-    ~PreconditionerAztecOO() {}
+    virtual ~PreconditionerAztecOO() {}
 
     //@}
 

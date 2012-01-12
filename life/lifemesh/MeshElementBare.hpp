@@ -1,6 +1,6 @@
 //@HEADER
 /*
- *******************************************************************************
+*******************************************************************************
 
     Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
     Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
@@ -20,8 +20,8 @@
     You should have received a copy of the GNU Lesser General Public License
     along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
- *******************************************************************************
- */
+*******************************************************************************
+*/
 //@HEADER
 
 /*!
@@ -125,7 +125,7 @@
 #include<algorithm>
 #include<iostream>
 
-#include <life/lifecore/LifeV.hpp>
+#include<life/lifemesh/ElementShapes.hpp>
 
 namespace LifeV
 {
@@ -145,6 +145,29 @@ typedef size_t ID;
 // original version
 typedef unsigned int UInt;
 #endif
+
+
+//! The Vertex basis class
+/*! It contains only the ID of the vertex. It is used in 1D geometries for compatibility with more complex entities in 2D and 3D geometries.
+ */
+struct BareVertex
+{
+    //! @name Constructor & Destructor
+    //@{
+    //! Empty Constructor
+    BareVertex() : first( NotAnId )
+    {}
+    ;
+    //! Constructor that takes the ID's as parameter
+    /*!
+        @param i ID of the point
+     */
+    BareVertex( ID i ) : first( i )
+    {}
+    ;
+    //@}
+    ID first; //!< ID which defines the Point
+};
 
 //! The Edge basis class
 /*! It contains the attributes common to all Edges. In particular, it
@@ -407,6 +430,18 @@ template <typename T>
 struct cmpBareItem;
 
 /*! \ingroup comparison
+   \brief Specialized functor for Vertices
+ */
+template <>
+struct cmpBareItem<BareVertex> //!< The actual comparison operator
+{
+    bool operator() ( const BareVertex & vertex1, const BareVertex & vertex2 ) const
+    {
+        return vertex2.first > vertex1.first;
+    }
+};
+
+/*! \ingroup comparison
    \brief Specialized functor for Edges
  */
 template <>
@@ -424,16 +459,16 @@ struct cmpBareItem<BareEdge> //!< The actual comparison operator
 template <>
 struct cmpBareItem<BareFace>
 {
-    bool operator() ( const BareFace & edge1, const BareFace & edge2 ) const
+    bool operator() ( const BareFace & face1, const BareFace & face2 ) const
     {
-        if ( edge2.first > edge1.first )
+        if ( face2.first > face1.first )
             return true;
-        if ( edge2.first == edge1.first )
+        if ( face2.first == face1.first )
         {
-            if ( edge2.second > edge1.second )
+            if ( face2.second > face1.second )
                 return true;
-            if ( edge2.second == edge1.second )
-                return edge2.third > edge1.third;
+            if ( face2.second == face1.second )
+                return face2.third > face1.third;
         }
         return false;
     }
@@ -445,6 +480,47 @@ operator<( const BareFace & f1 , const BareFace & f2 )
 {
     return cmpBareItem<BareFace>()(f1,f2);
 }
+
+
+
+//! BareEntitySelector class - Select the proper bare entity type (bareEdge or bareFace) based on the number of the entity points.
+/*!
+ * @author Mauro Perego
+    @see
+
+	The proper bare entity type  (BareEdge or BareFace) and
+	the proper function to construct bare entities (makeBareEdge /  makeBareFace)
+	are selected based on the template int numPoints, which is the number of points of the bare entity.
+ */
+
+template<typename Shape>
+class BareEntitySelector {};
+
+template<>
+struct BareEntitySelector<Point>{
+	static std::pair<BareVertex, bool> makeBareEntity(const ID points[]) {return std::make_pair(BareVertex(points[0]),true);}
+	typedef BareVertex bareEntity_Type;
+};
+
+template<>
+struct BareEntitySelector<Line>{
+	static std::pair<BareEdge, bool> makeBareEntity(const ID points[]) {return makeBareEdge(points[0], points[1]);}
+	typedef BareEdge bareEntity_Type;
+};
+
+template<>
+struct BareEntitySelector<Triangle>{
+	typedef BareFace bareEntity_Type;
+	static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2]);}
+};
+
+template<>
+struct BareEntitySelector<Quad>{
+	typedef BareFace bareEntity_Type;
+	static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2], points[3]);}
+};
+
+
 
 
 //! MeshElementBareHandler class - Class to handle bare edges and faces construction

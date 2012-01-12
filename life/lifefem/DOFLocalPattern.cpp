@@ -41,11 +41,11 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-// This is the 3D constructor
+// constructor
 DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
                                   const UInt& nbDofPerEdge, const UInt& nbDofPerFace,
-                                  const UInt& nbDofPerVolume, const DofPatternType& patternType ) :
-        M_dim(3), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (4)),
+                                  const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbCoor  ) :
+        M_dim(nbCoor), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (4)),
         M_patternType( patternType )
 {
     // Store the location of the dofs
@@ -71,76 +71,6 @@ DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVe
     };
 }
 
-
-// This is the 2D constructor
-
-DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
-                                  const UInt& nbDofPerEdge, const UInt& nbDofPerFace,
-                                  const DofPatternType& patternType ) :
-        M_dim(2), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (3)),
-        M_patternType( patternType )
-{
-    // Store the location of the dofs
-    M_nbDofPerDimEntity[0]=nbDofPerVertex;
-    M_nbDofPerDimEntity[1]=nbDofPerEdge;
-    M_nbDofPerDimEntity[2]=nbDofPerFace;
-
-    // Decide the pattern depending on the type
-    switch ( M_patternType )
-    {
-    case STANDARD_PATTERN:
-    {
-        setupStandardPattern();
-        break;
-    }
-    case P1ISOP2_TRIA_PATTERN:
-    {
-        setupP1isoP2TriaPattern();
-        break;
-    }
-    default:
-    {
-        std::ostringstream errorMessage;
-        errorMessage << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
-        ERROR_MSG( errorMessage.str().c_str() );
-    };
-    };
-}
-
-
-// This is the 1D constructor
-
-DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
-                                  const UInt& nbDofPerEdge, const DofPatternType& patternType ) :
-        M_dim(1), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (2)),
-        M_patternType( patternType )
-{
-    // Store the location of the dofs
-    M_nbDofPerDimEntity[0]=nbDofPerVertex;
-    M_nbDofPerDimEntity[1]=nbDofPerEdge;
-
-    // Decide the pattern depending on the type
-    switch ( M_patternType )
-    {
-    case STANDARD_PATTERN:
-    {
-        setupStandardPattern();
-        break;
-    }
-    case P1ISOP2_SEG_PATTERN:
-    {
-        setupP1isoP2SegPattern();
-        break;
-    }
-    default:
-    {
-        std::ostringstream errorMessage;
-        errorMessage << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
-        ERROR_MSG( errorMessage.str().c_str() );
-
-    };
-    }; // end of the switch
-};
 
 
 // The copy constructor

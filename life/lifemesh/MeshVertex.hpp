@@ -148,12 +148,7 @@ public:
      */
     Real & z()
     {
-#ifdef TWODIM
-        ERROR_MSG( "z coordinate may be modified only in a 3D problem" );
-#else
         return M_coordinates[ 2 ];
-#endif
-
     }
     //! Returns the x-coordinate
     /*!
@@ -177,12 +172,7 @@ public:
      */
     Real z() const
     {
-#ifdef TWODIM
-        return 0;
-#else
         return M_coordinates[ 2 ];
-#endif
-
     }
 
     //! Returns the coordinate specified in the argument
@@ -212,6 +202,12 @@ public:
 
     //! @name Get Methods
     //@{
+
+    //! Returns the coordinates vector
+    const boost::array<Real,NDIM>& coordinates ( void ) const
+        {
+            return M_coordinates;
+        }
 
     //! Returns the coordinates vector
     /*!
