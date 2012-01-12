@@ -86,7 +86,7 @@ namespace AssemblyElemental
 //! @name Public typedefs
 //@{
 //! Use the portable syntax of the boost function
-typedef boost::function5< const Real&,  const Real&, const Real&,
+typedef boost::function5< const Real,  const Real&, const Real&,
                           const Real&, const Real&, const ID&  > function_Type;
 //@}
 
@@ -212,7 +212,7 @@ void advection(MatrixElemental& localAdv,
                 //Loop on the quadrature nodes
                 for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
-                    for (UInt iDim(0); iDim<nDimensions; ++iDim)
+                    for (UInt iDim(0); iDim<advCFE.nbCoor(); ++iDim)
                     {
                         localValue += localValues[iQuadPt][iDim]
                                       * advCFE.dphi(jDof,iDim,iQuadPt)

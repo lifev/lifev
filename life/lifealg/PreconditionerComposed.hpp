@@ -99,7 +99,7 @@ public:
 
     //! default destructor
 
-    ~PreconditionerComposed();
+    virtual ~PreconditionerComposed();
 
     //@}
 

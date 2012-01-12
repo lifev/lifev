@@ -161,7 +161,7 @@ Structure::run2d()
 void
 Structure::run3d()
 {
-    typedef RegionMesh3D<LinearTetra> mesh_Type;
+    typedef RegionMesh<LinearTetra> mesh_Type;
     typedef VenantKirchhoffSolver< mesh_Type >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
 

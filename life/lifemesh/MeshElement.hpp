@@ -40,6 +40,7 @@
 
 #include <life/lifemesh/MeshVertex.hpp>
 #include <life/lifemesh/MeshEntity.hpp>
+#include <life/lifearray/VectorSmall.hpp>
 #include <algorithm>
 
 namespace LifeV
@@ -393,6 +394,23 @@ template <typename GeoShape, typename PointType>
 markerID_Type MeshElement<GeoShape, PointType>::setStrongerMarkerAtPoint( const ID& identity, markerID_Type const & flag )
 {
     return (const_cast<PointType *> ( M_points[identity]) ) -> setStrongerMarker(flag);
+}
+
+template <typename PointType>
+Real edgeLength( const MeshElement<LinearLine, PointType>& edge )
+{
+//    Real deltaX, deltaY, deltaZ;
+//
+//    deltaX = ( edge.point( 1 ) ).x() - ( edge.point( 0 ) ).x();
+//    deltaY = ( edge.point( 1 ) ).y() - ( edge.point( 0 ) ).y();
+//    deltaZ = ( edge.point( 1 ) ).z() - ( edge.point( 0 ) ).z();
+//
+//    return std::sqrt( deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ );
+
+    Vector3D dVec = castToVector3D(edge.point( 1 ).coordinates());
+    dVec -= castToVector3D(edge.point( 0 ).coordinates());
+
+    return dVec.norm();
 }
 
 }
