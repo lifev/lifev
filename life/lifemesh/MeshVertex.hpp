@@ -204,17 +204,11 @@ public:
     //@{
 
     //! Returns the coordinates vector
-    const boost::array<Real,NDIM>& coordinates ( void ) const
-        {
-            return M_coordinates;
-        }
-
-    //! Returns the coordinates vector
     /*!
         The method allows to access coordinates and modify them
         @return Coordinates array
     */
-    Vector3D & coordinates ()
+    Vector3D const & coordinates () const
     {
         return M_coordinates;
     }
