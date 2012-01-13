@@ -44,6 +44,7 @@
 #include <BelosEpetraAdapter.hpp>
 #include <BelosSolverManager.hpp>
 #include <Teuchos_ParameterList.hpp>
+#include <Teuchos_RefCountPtr.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -80,8 +81,8 @@ public:
 	typedef Epetra_Operator    OP;
 	typedef Belos::LinearProblem<double,MV,OP> LinearProblem;
 	typedef Belos::SolverManager<double,MV,OP> SolverType;
-	typedef RCP<LinearProblem> LinearProblem_ptr;
-	typedef RCP<SolverType>    SolverType_ptr;
+	typedef Teuchos::RCP<LinearProblem> LinearProblem_ptr;
+	typedef Teuchos::RCP<SolverType>    SolverType_ptr;
 
 	//@}
 
@@ -105,7 +106,7 @@ protected:
 	//! The linearSolver
 	SolverType_ptr M_solverManager;
 	//! Cast to a Belos Preconditioner
-	RCP<Belos::EpetraPrecOp> M_belosPrec;
+	Teuchos::RCP<Belos::EpetraPrecOp> M_belosPrec;
 	static std::auto_ptr< solverManagerMap_Type > S_solverManagerMap;
 	static std::auto_ptr<precSideMap_Type> S_precSideMap;
 };

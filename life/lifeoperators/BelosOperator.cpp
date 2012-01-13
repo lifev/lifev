@@ -64,7 +64,7 @@ std::auto_ptr<BelosOperator::precSideMap_Type> BelosOperator::S_precSideMap(Belo
 
 BelosOperator::BelosOperator():
 		SolverOperator(),
-		M_linProblem(rcp(new LinearProblem))
+		M_linProblem(Teuchos::rcp(new LinearProblem))
 {
 	M_name = "BelosOperator";
 }
@@ -72,9 +72,9 @@ BelosOperator::BelosOperator():
 int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y)
 {
 
-	RCP<vector_Type> Xcopy(new vector_Type(X) );
+	Teuchos::RCP<vector_Type> Xcopy(new vector_Type(X) );
 	Y.PutScalar(0.0);
-	bool set = M_linProblem->setProblem(rcp(&Y, false), Xcopy);
+	bool set = M_linProblem->setProblem(Teuchos::rcp(&Y, false), Xcopy);
 	if (set == false)
 	{
 		std::cout << std::endl << "SLV-  ERROR: Belos::LinearProblem failed to set up correctly!" << std::endl;
@@ -117,7 +117,7 @@ void BelosOperator::doSetOperator()
 
 void BelosOperator::doSetPreconditioner()
 {
-	M_belosPrec = rcp( new Belos::EpetraPrecOp( M_prec ) );
+	M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( M_prec ) );
 }
 
 void BelosOperator::doSetParameterList()
