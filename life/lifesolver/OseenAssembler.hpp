@@ -193,10 +193,10 @@ public:
     void addConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp);
 
     //! Add the convective term necessary to build the Newton method
-    void addNewtonConvection( matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp );
+    void addNewtonConvection( matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp );
 
     //! Add the convective term necessary to build the Newton method
-    void addNewtonConvection( matrix_ptrType matrix, const vector_type& beta )
+    void addNewtonConvection( matrixType& matrix, const vectorType& beta )
     {
         addNewtonConvection( matrix, beta, 0, 0 );
     }
@@ -731,15 +731,15 @@ addConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft
     }
 }
 
-template< typename mesh_type, typename matrix_type, typename vector_type>
+template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<mesh_type,matrix_type,vector_type>::
-addNewtonConvection( matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp )
+OseenAssembler<meshType,matrixType,vectorType>::
+addNewtonConvection( matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp )
 {
     // Beta has to be repeated
     if ( beta.mapType() == Unique )
     {
-        addNewtonConvection( matrix,vector_type( beta, Repeated ), offsetLeft, offsetUp );
+        addNewtonConvection( matrix,vectorType( beta, Repeated ), offsetLeft, offsetUp );
         return;
     }
 
@@ -766,7 +766,7 @@ addNewtonConvection( matrix_ptrType matrix, const vector_type& beta, const UInt&
         // Clean the local matrix
         M_localConvection->zero();
 
-        localVector_type betaLocal( M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() );
+        localvectorType betaLocal( M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() );
 
         // Create local vector
         for ( UInt iNode = 0 ; iNode < M_uFESpace->fe().nbFEDof() ; iNode++ )
@@ -789,7 +789,7 @@ addNewtonConvection( matrix_ptrType matrix, const vector_type& beta, const UInt&
             {
                 AssemblyElemental::advectionNewton( 1.0, betaLocal, *M_localConvection,
                                                     *M_convectionUCFE, iFieldDim, jFieldDim );
-                assembleMatrix( *matrix,
+                assembleMatrix( matrix,
                                 *M_localConvection,
                                 *M_convectionUCFE,
                                 *M_convectionUCFE,
