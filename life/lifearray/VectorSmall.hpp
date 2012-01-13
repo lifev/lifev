@@ -37,7 +37,6 @@
 #define _VECTORSMALL_H_ 1
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifemesh/MeshVertex.hpp>
 #include <life/lifearray/RNM.hpp>
 
 #include <vector>
@@ -522,16 +521,6 @@ inline VectorSmall<3> operator* ( Real const & factor, VectorSmall<3> const & ve
 
 //! @name Conversion free-functions
 //@{
-
-//! Conversion of a MeshVertex to a VectorSmall
-/*!
-@param vertex MeshVertex original object to be copied
-@return the VectorSmall that corresponds to the input
-*/
-inline VectorSmall<3> castToVector3D ( MeshVertex const & vertex )
-{
-    return VectorSmall<3> ( vertex.x(), vertex.y(), vertex.z() );
-}
 
 //! Conversion of an array (std::vector, KNM, ecc.) to a VectorSmall
 /*!
