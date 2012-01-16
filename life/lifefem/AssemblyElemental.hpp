@@ -86,7 +86,7 @@ namespace AssemblyElemental
 //! @name Public typedefs
 //@{
 //! Use the portable syntax of the boost function
-typedef boost::function5< const Real&,  const Real&, const Real&,
+typedef boost::function5< const Real,  const Real&, const Real&,
                           const Real&, const Real&, const ID&  > function_Type;
 //@}
 
