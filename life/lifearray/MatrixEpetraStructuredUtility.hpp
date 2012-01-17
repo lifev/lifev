@@ -309,6 +309,70 @@ void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 
 }
 
+//! Copy the inverse of the square root of the diagonal of the block specified to another block
+/*!
+  @param srcBlock Source block
+  @param destBlock Destination block where the data will be stored
+*/
+template< typename DataType >
+void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+								 const MatrixEpetraStructuredView<DataType>& destBlock )
+{
+    // SQUARE TEST
+    // BLOCK COMPATIBILITY TEST
+    // BLOCK PTR TEST
+    // ZERO ON DIAGONAL TEST
+
+    int indexBase(0);
+
+    // Processor informations
+    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    unsigned int  srcRowElement(0);
+
+    // Source informations handlers
+    int numSrcEntries;
+    double* srcValues;
+    int* srcIndices;
+    unsigned int srcGlobalIndex(0);
+    int srcRow(0);
+
+    for(int i(0);i<numSrcElements;++i)
+    {
+        // Collecting the data from the source
+        srcRowElement = srcGlobalElements[i];
+
+        // Test if the rows are in the source block
+        if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
+        {
+            // Get the data of the row
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
+            srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
+
+            unsigned int diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            int destRow = destBlock.firstRowIndex()+diagIndex;
+            int destIndex = destBlock.firstColumnIndex()+diagIndex;
+            double diagValue = 0.0;
+
+            for(int j(0);j<numSrcEntries;++j)
+            {
+                srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
+
+                // Test if the coefficient is on the diagonal of the source block
+                if(srcGlobalIndex-srcBlock.firstColumnIndex()==diagIndex)
+                {
+                    diagValue = 1/sqrt(srcValues[j]);
+                    j=numSrcEntries; //Exit the loop
+                }
+            }
+            if(srcBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,1,&diagValue,&destIndex);
+            else
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,1,&diagValue,&destIndex);
+        }
+    }
+}
+
 //! Copy the upper part of the block specified to another block
 /*!
   @param srcBlock Source block
