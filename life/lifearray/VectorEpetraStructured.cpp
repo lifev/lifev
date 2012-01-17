@@ -159,11 +159,11 @@ block( const UInt& index)
     ASSERT( index < M_blockFirstIndex.size(), "Invalid block index");
     ASSERT( index < M_blockSize.size(), "Invalid block index");
 
-    block_ptrType mbv(new block_type);
+    block_ptrType vectorBlockView(new block_type);
 
-    mbv->setup( M_blockFirstIndex[index], M_blockSize[index], this);
+    vectorBlockView->setup( M_blockFirstIndex[index], M_blockSize[index], this);
 
-    return mbv;
+    return vectorBlockView;
 }
 
 

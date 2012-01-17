@@ -345,15 +345,15 @@ MatrixEpetraStructured<DataType>::block(const UInt& rowIndex, const UInt& column
 	ASSERT(rowIndex < M_blockFirstRows.size(), "Row index out of bound. No block to return");
 	ASSERT(columnIndex < M_blockFirstColumns.size(), "Column index out of bound. No block to return");
 
-	block_ptrType mbv(new block_type);
+	block_ptrType matrixBlockView(new block_type);
 
-    mbv->setup(M_blockFirstRows[rowIndex],
-              M_blockFirstColumns[columnIndex],
-              M_blockNumRows[rowIndex],
-              M_blockNumColumns[columnIndex],
-              this);
+    matrixBlockView->setup( M_blockFirstRows[rowIndex],
+                            M_blockFirstColumns[columnIndex],
+                            M_blockNumRows[rowIndex],
+                            M_blockNumColumns[columnIndex],
+                            this );
 
-	return mbv;
+	return matrixBlockView;
 }
 
 
