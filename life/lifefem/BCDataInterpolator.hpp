@@ -124,11 +124,11 @@ public:
      */
     enum BCInterpolationMethod
     {
-        RBF_ThinPlateSpline,    /*!< Thin plate splines */
-        RBF_MultiQuadric,       /*!< Multiquadrics */
-        RBF_Cubic,              /*!< Cubics */
-        RBF_Gaussian,           /*!< Gaussians */
-        RBF_InverseMultiQuadric /*!< Inverse multiquadrics */
+        RBF_InverseMultiQuadric, /*!< Inverse multiquadrics */
+        RBF_Gaussian,            /*!< Gaussians */
+        RBF_ThinPlateSpline,     /*!< Thin plate splines */
+        RBF_MultiQuadric,        /*!< Multiquadrics */
+        RBF_Cubic,               /*!< Cubics */
     };
 
     //@}
