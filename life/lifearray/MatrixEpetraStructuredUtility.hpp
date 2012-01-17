@@ -51,7 +51,12 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
                  const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // BLOCK COMPATIBILITY TEST
+	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+
     // BLOCK PTR TEST
+	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
+	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     // Processor informations
     const int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
@@ -126,12 +131,12 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 /*!
   @param destBlock Block where the data will be stored
 */
-
 template< typename DataType >
 void createZeroBlock ( MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // This method will maybe be replaced
     // by the method setBlockToZero
+	ASSERT( false, "The method is not yet implemented");
 }
 
 //! Create a block with an identical value on the diagonal
@@ -143,7 +148,10 @@ template< typename DataType >
 void createScalarBlock ( const MatrixEpetraStructuredView<DataType>& destBlock, const DataType& diagonalValue )
 {
     // SQUARE TEST
+	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+
     // BLOCK PTR TEST
+	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     int destIndex(0);
 
@@ -191,9 +199,16 @@ void createDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
                        const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
+	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
+	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+
     // BLOCK COMPATIBILITY TEST
+	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+
     // BLOCK PTR TEST
-    // ZERO ON DIAGONAL TEST
+	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
+	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     int indexBase(0);
 
@@ -255,9 +270,16 @@ void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
                           const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
+	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
+	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+
     // BLOCK COMPATIBILITY TEST
+	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+
     // BLOCK PTR TEST
-    // ZERO ON DIAGONAL TEST
+	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
+	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     int indexBase(0);
 
@@ -297,7 +319,10 @@ void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
                 // Test if the coefficient is on the diagonal of the source block
                 if(srcGlobalIndex-srcBlock.firstColumnIndex()==diagIndex)
                 {
-                    diagValue = 1/srcValues[j];
+                    // ZERO ON DIAGONAL TEST
+                	ASSERT( srcValues[j] != 0, "You cannot ask for inverse diagonal block when there are zeros on the diagonal" );
+
+                    diagValue = 1./srcValues[j];
                     j=numSrcEntries; //Exit the loop
                 }
             }
@@ -320,9 +345,16 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
 								 const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
+	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
+	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+
     // BLOCK COMPATIBILITY TEST
+	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+
     // BLOCK PTR TEST
-    // ZERO ON DIAGONAL TEST
+	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
+	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     int indexBase(0);
 
@@ -362,6 +394,9 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
                 // Test if the coefficient is on the diagonal of the source block
                 if(srcGlobalIndex-srcBlock.firstColumnIndex()==diagIndex)
                 {
+                    // ZERO ON DIAGONAL TEST
+                	ASSERT( srcValues[j] != 0, "You cannot ask for inverse squared diagonal block when there are zeros on the diagonal" );
+
                     diagValue = 1/sqrt(srcValues[j]);
                     j=numSrcEntries; //Exit the loop
                 }
@@ -384,8 +419,16 @@ void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
                                   const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
+	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
+	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+
     // BLOCK COMPATIBILITY TEST
+	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+
     // BLOCK PTR TEST
+	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
+	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     // Processor informations
     int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
@@ -453,8 +496,16 @@ void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
                                   const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
+	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
+	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+
     // BLOCK COMPATIBILITY TEST
+	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+
     // BLOCK PTR TEST
+	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
+	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     // Processor informations
     int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
@@ -523,8 +574,16 @@ void createLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
                          const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
+	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
+	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+
     // BLOCK COMPATIBILITY TEST
+	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+
     // BLOCK PTR TEST
+	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
+	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     int indexBase(0);
 
@@ -585,9 +644,16 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
                             const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // SQUARE TEST
+	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
+	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+
     // BLOCK COMPATIBILITY TEST
+	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+
     // BLOCK PTR TEST
-    // ZERO ON DIAGONAL TEST
+	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
+	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     int indexBase(0);
 
@@ -630,7 +696,11 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
                     srcBlockRowSum += abs(srcValues[j]);
                 }
             }
-            srcBlockRowSum = 1/srcBlockRowSum;
+
+            // ZERO ON DIAGONAL TEST
+        	ASSERT( srcValues[j] != 0, "You cannot ask for inverse lumped block when there are rows of zeros" );
+
+            srcBlockRowSum = 1./srcBlockRowSum;
             if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
                 destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,1,&srcBlockRowSum,&destIndex);
             else

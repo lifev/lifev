@@ -248,7 +248,7 @@ MatrixEpetraStructured<DataType>::setBlockStructure(const std::vector<UInt>& blo
                                          const std::vector<UInt>& blockNumColumns)
 {
 	ASSERT( blockNumRows.size() > 0, "No way to build a matrix with 0 block rows");
-    ASSERT( blockNumColumns.size() > 0, "No way to build a matrix with 0 block columns")
+    ASSERT( blockNumColumns.size() > 0, "No way to build a matrix with 0 block columns");
 
 
     M_blockNumRows    = blockNumRows;
