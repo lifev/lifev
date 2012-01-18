@@ -150,7 +150,7 @@ template< typename DataType >
 void createScalarBlock ( const MatrixEpetraStructuredView<DataType>& destBlock, const DataType& diagonalValue )
 {
     // SQUARE TEST
-	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+	ASSERT( destBlock.numRows() == destBlock.numColumns() , "The destination block must be square" );
 
     // BLOCK PTR TEST
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
@@ -202,7 +202,7 @@ void createDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 {
     // SQUARE TEST
 	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
-	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+	ASSERT( destBlock.numRows() == destBlock.numColumns() , "The destination block must be square" );
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
@@ -273,7 +273,7 @@ void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 {
     // SQUARE TEST
 	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
-	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+	ASSERT( destBlock.numRows() == destBlock.numColumns() , "The destination block must be square" );
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
@@ -348,7 +348,7 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
 {
     // SQUARE TEST
 	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
-	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+	ASSERT( destBlock.numRows() == destBlock.numColumns() , "The destination block must be square" );
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
@@ -422,7 +422,7 @@ void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
 {
     // SQUARE TEST
 	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
-	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+	ASSERT( destBlock.numRows() == destBlock.numColumns() , "The destination block must be square" );
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
@@ -499,7 +499,7 @@ void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
 {
     // SQUARE TEST
 	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
-	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+	ASSERT( destBlock.numRows() == destBlock.numColumns() , "The destination block must be square" );
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
@@ -577,7 +577,7 @@ void createLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 {
     // SQUARE TEST
 	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
-	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+	ASSERT( destBlock.numRows() == destBlock.numColumns() , "The destination block must be square" );
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
@@ -647,7 +647,7 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
 {
     // SQUARE TEST
 	ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
-	ASSERT( destBlock.numRows() == desBlock.numColumns() , "The destination block must be square" );
+	ASSERT( destBlock.numRows() == destBlock.numColumns() , "The destination block must be square" );
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
@@ -700,7 +700,7 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
             }
 
             // ZERO ON DIAGONAL TEST
-        	ASSERT( srcValues[j] != 0, "You cannot ask for inverse lumped block when there are rows of zeros" );
+        	ASSERT( srcBlockRowSum != 0, "You cannot ask for inverse lumped block when there are rows of zeros" );
 
             srcBlockRowSum = 1./srcBlockRowSum;
             if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
