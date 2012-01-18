@@ -30,6 +30,8 @@
 
    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
    @date 2010-11-08
+
+   @todo createDiagBlock() and createInvDiagBlock() can be reduced to a single function to avoid copy duplication with the aid of a bit of template meta programming. In fact, a lot of routines in this file bring back to a common block and a specialized work on the single line.
  */
 
 #ifndef _MATRIXEPETRASTRUCTUREDUTILITY_HPP_

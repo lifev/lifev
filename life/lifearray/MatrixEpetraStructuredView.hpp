@@ -86,7 +86,7 @@ public:
     MatrixEpetraStructuredView();
 
     //! Copy constructor
-    MatrixEpetraStructuredView( const MatrixEpetraStructuredView<DataType>& mbv );
+    MatrixEpetraStructuredView( const MatrixEpetraStructuredView<DataType>& matrixEpetraStructured );
 
     //! default virtual destructor
     ~MatrixEpetraStructuredView();
@@ -186,14 +186,14 @@ MatrixEpetraStructuredView<DataType>::MatrixEpetraStructuredView() :
 }
 
 template<typename DataType>
-MatrixEpetraStructuredView<DataType>::MatrixEpetraStructuredView( const MatrixEpetraStructuredView<DataType>& mbv ) :
-    M_numRows( mbv.M_numRows ),
-    M_numColumns( mbv.M_numColumns ),
-    M_firstRowIndex( mbv.M_firstRowIndex ),
-    M_lastRowIndex( mbv.M_lastRowIndex ),
-    M_firstColumnIndex( mbv.M_firstColumnIndex ),
-    M_lastColumnIndex( mbv.M_lastColumnIndex ),
-    M_matrix( mbv.M_matrix )
+MatrixEpetraStructuredView<DataType>::MatrixEpetraStructuredView( const MatrixEpetraStructuredView<DataType>& matrixEpetraStructured ) :
+    M_numRows( matrixEpetraStructured.M_numRows ),
+    M_numColumns( matrixEpetraStructured.M_numColumns ),
+    M_firstRowIndex( matrixEpetraStructured.M_firstRowIndex ),
+    M_lastRowIndex( matrixEpetraStructured.M_lastRowIndex ),
+    M_firstColumnIndex( matrixEpetraStructured.M_firstColumnIndex ),
+    M_lastColumnIndex( matrixEpetraStructured.M_lastColumnIndex ),
+    M_matrix( matrixEpetraStructured.M_matrix )
 {
 
 }
