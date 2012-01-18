@@ -191,7 +191,7 @@ MatrixEpetraStructured<DataType>::MatrixEpetraStructured( const MapVector<MapEpe
 {
 	ASSERT( vector.nbMap() > 0 ,"Map vector empty, impossible to construct a MatrixBlockMonolithicEpetra!");
 
-	MapEpetra myMap(vector.map(0));
+	MapEpetra myMap(vector.totalMap());
 	M_blockNumRows.push_back(vector.mapSize(0));
 	M_blockNumColumns.push_back(vector.mapSize(0));
 	M_blockFirstRows.push_back(0);
@@ -202,7 +202,6 @@ MatrixEpetraStructured<DataType>::MatrixEpetraStructured( const MapVector<MapEpe
 
 	for (UInt i(1); i<vector.nbMap(); ++i)
 	{
-		myMap += vector.map(i);
 		M_blockNumRows.push_back(vector.mapSize(i));
 		M_blockNumColumns.push_back(vector.mapSize(i));
 		M_blockFirstRows.push_back(totalRows);

@@ -249,7 +249,7 @@ MapEpetra::operator + ( const MapEpetra& epetraMap ) const
 {
     MapEpetra map( *this );
     map += epetraMap;
-    //createImportExport();
+    createImportExport();
     return map;
 }
 
@@ -269,7 +269,7 @@ MapEpetra::operator +  ( Int const size ) const
 {
     MapEpetra map( *this );
     map += size;
-    //createImportExport();
+    createImportExport();
     return map;
 }
 

@@ -55,7 +55,7 @@ VectorEpetraStructured( const mapVector_type& mapVector, const mapType_type& map
 {
     ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to construct a VectorBlockMonolithicEpetra!");
 
-    map_type myMap(mapVector.map(0));
+    map_type myMap(mapVector.totalMap());
 
 	M_blockSize[0]=mapVector.mapSize(0);
 	M_blockFirstIndex[0]=0;
@@ -64,7 +64,6 @@ VectorEpetraStructured( const mapVector_type& mapVector, const mapType_type& map
 
 	for (UInt i(1); i<mapVector.nbMap(); ++i)
 	{
-		myMap += mapVector.map(i);
 		M_blockSize[i]=mapVector.mapSize(i);
 		M_blockFirstIndex[i]=totalSize;
 
