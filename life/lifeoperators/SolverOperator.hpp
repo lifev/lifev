@@ -141,7 +141,7 @@ public:
 
 protected:
 
-	virtual int doApplyInverse( const vector_Type& X, vector_Type& Y ) = 0;
+	virtual int doApplyInverse( const vector_Type& X, vector_Type& Y ) const = 0;
 	virtual void doSetOperator() = 0;
 	virtual void doSetPreconditioner() = 0;
 	virtual void doSetParameterList() = 0;
@@ -162,13 +162,13 @@ protected:
 	bool M_useTranspose;
 
 	//! Status to see if there is a loss of accuracy
-	SolverOperatorStatusType M_lossOfAccuracy;
+	mutable SolverOperatorStatusType M_lossOfAccuracy;
 
 	//! Status to see if the solver has converged
-	SolverOperatorStatusType M_converged;
+	mutable SolverOperatorStatusType M_converged;
 
 	//! Number of iterations performed by the solver
-	int M_numIterations;
+	mutable int M_numIterations;
 
 };
 

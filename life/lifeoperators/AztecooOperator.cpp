@@ -48,7 +48,7 @@ AztecooOperator::AztecooOperator():
 	M_name = "AztecooOperator";
 }
 
-int AztecooOperator::doApplyInverse(const vector_Type& X, vector_Type& Y)
+int AztecooOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 {
 	vector_Type Xcopy(X);
 	Y.PutScalar(0.0);

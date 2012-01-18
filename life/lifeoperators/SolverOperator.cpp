@@ -101,7 +101,7 @@ int SolverOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 	if ( M_useTranspose )
 		return -1;
 
-	return const_cast<SolverOperator*>(this)->doApplyInverse( X, Y );
+	return doApplyInverse( X, Y );
 }
 
 } // Namespace Operators

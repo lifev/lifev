@@ -69,7 +69,7 @@ BelosOperator::BelosOperator():
 	M_name = "BelosOperator";
 }
 
-int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y)
+int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 {
 
 	Teuchos::RCP<vector_Type> Xcopy(new vector_Type(X) );
