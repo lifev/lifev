@@ -420,6 +420,9 @@ public:
     //! @name Set Methods
     //@{
 
+    //! set zero in all the matrix entries
+    void zero() {M_epetraCrs->PutScalar(0.);}
+
     //! Set a coefficient of the matrix
     /*!
       @param row Row index of the coefficient
@@ -1221,14 +1224,13 @@ void MatrixEpetra<DataType>::showMe( std::ostream& output ) const
 template <typename DataType>
 Int MatrixEpetra<DataType>::globalAssemble()
 {
-    if ( M_epetraCrs->Filled() )
+    if ( !M_epetraCrs->Filled() )
     {
-        return -1;
+    	insertZeroDiagonal();
+    	M_domainMap = M_map;
+    	M_rangeMap  = M_map;
     }
 
-    insertZeroDiagonal();
-    M_domainMap = M_map;
-    M_rangeMap  = M_map;
     return  M_epetraCrs->GlobalAssemble();
 }
 
@@ -1335,8 +1337,12 @@ addToCoefficient( UInt row, UInt column, DataType localValue )
 
     Int irow(    row );
     Int icol( column );
+    Int ierr;
 
-    Int ierr = M_epetraCrs->InsertGlobalValues( 1, &irow, 1, &icol, &localValue );
+    if ( M_epetraCrs->Filled() )
+    	ierr = M_epetraCrs->SumIntoGlobalValues( 1, &irow, 1, &icol, &localValue );
+    else
+    	ierr = M_epetraCrs->InsertGlobalValues( 1, &irow, 1, &icol, &localValue );
 
     if ( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
 }
@@ -1348,8 +1354,14 @@ addToCoefficients( Int const numRows, Int const numColumns,
                    DataType* const* const localValues,
                    Int format )
 {
-    Int ierr = M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
-                                                &columnIndices[0], localValues, format );
+    Int ierr;
+
+    if ( M_epetraCrs->Filled() )
+        ierr = M_epetraCrs->SumIntoGlobalValues( numRows, &rowIndices[0], numColumns,
+                                                    &columnIndices[0], localValues, format );
+    else
+        ierr = M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
+                                                        &columnIndices[0], localValues, format );
 
     if ( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
 }
