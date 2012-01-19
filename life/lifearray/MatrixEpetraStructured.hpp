@@ -189,7 +189,7 @@ MatrixEpetraStructured<DataType>::MatrixEpetraStructured( const MapVector<MapEpe
 {
 	ASSERT( vector.nbMap() > 0 ,"Map vector empty, impossible to construct a MatrixBlockMonolithicEpetra!");
 
-	MapEpetra myMap(vector.map(0));
+	MapEpetra myMap(vector.totalMap());
 	M_blockNumRows.push_back(vector.mapSize(0));
 	M_blockNumColumns.push_back(vector.mapSize(0));
 	M_blockFirstRows.push_back(0);
@@ -200,7 +200,6 @@ MatrixEpetraStructured<DataType>::MatrixEpetraStructured( const MapVector<MapEpe
 
 	for (UInt i(1); i<vector.nbMap(); ++i)
 	{
-		myMap += vector.map(i);
 		M_blockNumRows.push_back(vector.mapSize(i));
 		M_blockNumColumns.push_back(vector.mapSize(i));
 		M_blockFirstRows.push_back(totalRows);
@@ -246,7 +245,7 @@ MatrixEpetraStructured<DataType>::setBlockStructure(const std::vector<UInt>& blo
                                          const std::vector<UInt>& blockNumColumns)
 {
 	ASSERT( blockNumRows.size() > 0, "No way to build a matrix with 0 block rows");
-    ASSERT( blockNumColumns.size() > 0, "No way to build a matrix with 0 block columns")
+    ASSERT( blockNumColumns.size() > 0, "No way to build a matrix with 0 block columns");
 
 
     M_blockNumRows    = blockNumRows;
@@ -343,15 +342,15 @@ MatrixEpetraStructured<DataType>::block(const UInt& rowIndex, const UInt& column
 	ASSERT(rowIndex < M_blockFirstRows.size(), "Row index out of bound. No block to return");
 	ASSERT(columnIndex < M_blockFirstColumns.size(), "Column index out of bound. No block to return");
 
-	block_ptrType mbv(new block_type);
+	block_ptrType matrixBlockView(new block_type);
 
-    mbv->setup(M_blockFirstRows[rowIndex],
-              M_blockFirstColumns[columnIndex],
-              M_blockNumRows[rowIndex],
-              M_blockNumColumns[columnIndex],
-              this);
+    matrixBlockView->setup( M_blockFirstRows[rowIndex],
+                            M_blockFirstColumns[columnIndex],
+                            M_blockNumRows[rowIndex],
+                            M_blockNumColumns[columnIndex],
+                            this );
 
-	return mbv;
+	return matrixBlockView;
 }
 
 

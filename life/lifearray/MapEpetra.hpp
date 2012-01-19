@@ -207,7 +207,7 @@ public:
       The addition operator combines two map together to create a new map
       @param epetraMap MapEpetra to be combined with the current map
      */
-    MapEpetra operator +  ( const MapEpetra& epetraMap ) const;
+    MapEpetra operator +  ( const MapEpetra& epetraMap );
 
     //! Addition operator
     /*!
@@ -222,7 +222,7 @@ public:
       to create a new map
       @param size Size of the map to be added to the current map
      */
-    MapEpetra operator +  ( Int const size ) const;
+    MapEpetra operator +  ( Int const size );
 
     //! Juxtaposition operator
     /*!
