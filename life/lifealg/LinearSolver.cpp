@@ -522,10 +522,8 @@ LinearSolver::setupSolverOperator()
     // Set the operator in the SolverOperator object
     M_solverOperator->setOperator( M_operator );
 
-    // Set the preconditioner operator in the SolverOperator oject
-    operatorPtr_Type tmpPrecPtr;
-    tmpPrecPtr.reset( M_preconditioner->preconditioner() );
-    M_solverOperator->setPreconditioner( tmpPrecPtr );
+    // Set the preconditioner operator in the SolverOperator object
+    M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
 
     // Set the parameter inside the solver
     M_solverOperator->setParameters( M_parameterList );
