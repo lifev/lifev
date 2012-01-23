@@ -59,23 +59,23 @@ namespace LifeV
 namespace Operators
 {
 
-std::auto_ptr<BelosOperator::solverManagerMap_Type> BelosOperator::S_solverManagerMap(BelosOperator::singletonSolverManagerMap());
-std::auto_ptr<BelosOperator::precSideMap_Type> BelosOperator::S_precSideMap(BelosOperator::singletonPrecSideMap());
+std::auto_ptr<BelosOperator::solverManagerMap_Type> BelosOperator::S_solverManagerMap( BelosOperator::singletonSolverManagerMap() );
+std::auto_ptr<BelosOperator::precSideMap_Type> BelosOperator::S_precSideMap( BelosOperator::singletonPrecSideMap() );
 
 BelosOperator::BelosOperator():
 		SolverOperator(),
-		M_linProblem(Teuchos::rcp(new LinearProblem))
+		M_linProblem( Teuchos::rcp( new LinearProblem ) )
 {
 	M_name = "BelosOperator";
 }
 
-int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
+int BelosOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
 {
 
-	Teuchos::RCP<vector_Type> Xcopy(new vector_Type(X) );
-	Y.PutScalar(0.0);
-	bool set = M_linProblem->setProblem(Teuchos::rcp(&Y, false), Xcopy);
-	if (set == false)
+	Teuchos::RCP<vector_Type> Xcopy( new vector_Type( X ) );
+	Y.PutScalar( 0.0 );
+	bool set = M_linProblem->setProblem( Teuchos::rcp( &Y, false ), Xcopy );
+	if ( set == false )
 	{
 		std::cout << std::endl << "SLV-  ERROR: Belos::LinearProblem failed to set up correctly!" << std::endl;
 		return -12;
@@ -97,7 +97,7 @@ int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 		M_lossOfAccuracy = no;
 	}
 
-	if(ret == Belos::Converged)
+	if( ret == Belos::Converged )
 	{
 		M_converged = yes;
 		return 0;
@@ -112,7 +112,7 @@ int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 
 void BelosOperator::doSetOperator()
 {
-	M_linProblem->setOperator(M_oper);
+	M_linProblem->setOperator( M_oper );
 }
 
 void BelosOperator::doSetPreconditioner()
@@ -122,39 +122,39 @@ void BelosOperator::doSetPreconditioner()
 
 void BelosOperator::doSetParameterList()
 {
-	if( !M_pList->sublist( "Belos List" ).isParameter( "Verbosity" ) )
-		 M_pList->sublist( "Belos List" ).set( "Verbosity", Belos::Errors + Belos::Warnings +
+	if( !M_pList->sublist( "Trilinos: Belos List" ).isParameter( "Verbosity" ) )
+		 M_pList->sublist( "Trilinos: Belos List" ).set( "Verbosity", Belos::Errors + Belos::Warnings +
 											             Belos::TimingDetails + Belos::StatusTestDetails );
 
-	std::string solverType(M_pList->get<std::string>("Solver Manager Type"));
-	allocateSolver( (*S_solverManagerMap)[solverType]);
-	M_solverManager->setParameters(sublist(M_pList, "Belos List", true));
+	std::string solverType( M_pList->get<std::string>( "Solver Manager Type" ) );
+	allocateSolver( ( *S_solverManagerMap)[solverType] );
+	M_solverManager->setParameters( sublist( M_pList, "Trilinos: Belos List", true ) );
 
-	std::string precSideStr( M_pList->get<std::string>("Preconditioner Side"));
-	PreconditionerSide precSide((*S_precSideMap)[precSideStr]);
+	std::string precSideStr( M_pList->get<std::string>( "Preconditioner Side" ) );
+	PreconditionerSide precSide( (*S_precSideMap)[precSideStr] );
 
 	switch(precSide)
 	{
 	case None:
 		break;
 	case Left:
-		M_linProblem->setLeftPrec(M_belosPrec);
+		M_linProblem->setLeftPrec( M_belosPrec );
 		break;
 	case Right:
-		M_linProblem->setRightPrec(M_belosPrec);
+		M_linProblem->setRightPrec( M_belosPrec );
 		break;
 	default:
 		exit(1);
 	}
 
-	M_solverManager->setProblem(M_linProblem);
+	M_solverManager->setProblem( M_linProblem );
 
 }
 
 //============================================================================//
 //                     Protected or Private Methods                           //
 //============================================================================//
-void BelosOperator::allocateSolver(const SolverManagerType & solverManagerType)
+void BelosOperator::allocateSolver( const SolverManagerType & solverManagerType )
 {
 	   // If a SolverManager already exists we simply clean it!
 	    if ( !M_solverManager.is_null() )
@@ -202,9 +202,9 @@ void BelosOperator::allocateSolver(const SolverManagerType & solverManagerType)
 
 }
 
-BelosOperator::solverManagerMap_Type * BelosOperator::singletonSolverManagerMap()
+BelosOperator::solverManagerMap_Type* BelosOperator::singletonSolverManagerMap()
 {
-	solverManagerMap_Type * map(new solverManagerMap_Type);
+	solverManagerMap_Type * map( new solverManagerMap_Type );
     (*map)["BlockCG"] = BlockCG;
     (*map)["PseudoBlockCG"] = PseudoBlockCG;
     (*map)["RCG"] = RCG;
@@ -218,9 +218,9 @@ BelosOperator::solverManagerMap_Type * BelosOperator::singletonSolverManagerMap(
     return map;
 }
 
-BelosOperator::precSideMap_Type * BelosOperator::singletonPrecSideMap()
+BelosOperator::precSideMap_Type* BelosOperator::singletonPrecSideMap()
 {
-	precSideMap_Type * map(new precSideMap_Type);
+	precSideMap_Type * map( new precSideMap_Type );
     (*map)["None"] = None;
     (*map)["Right"] = Right;
     (*map)["Left"] = Left;

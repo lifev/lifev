@@ -69,7 +69,7 @@ public:
 	//! @name Public Typedefs and Enumerators
 	//@{
 
-	enum PreconditionerSide{None, Left, Right};
+	enum PreconditionerSide{ None, Left, Right };
 
     enum SolverManagerType { NotAValidSolverManager, BlockCG, PseudoBlockCG, RCG,
                              BlockGmres, PseudoBlockGmres, GmresPoly,
@@ -91,16 +91,16 @@ public:
 	BelosOperator();
 	~BelosOperator() {};
 	//@}
-	static solverManagerMap_Type * singletonSolverManagerMap();
-	static precSideMap_Type      * singletonPrecSideMap();
+	static solverManagerMap_Type* singletonSolverManagerMap();
+	static precSideMap_Type*      singletonPrecSideMap();
 
 protected:
 
-	virtual int doApplyInverse(const vector_Type& X, vector_Type& Y) const;
+	virtual int doApplyInverse( const vector_Type& X, vector_Type& Y ) const;
 	virtual void doSetOperator();
 	virtual void doSetPreconditioner();
 	virtual void doSetParameterList();
-	void allocateSolver(const SolverManagerType & solverManagerType);
+	void allocateSolver( const SolverManagerType & solverManagerType );
 	//! The linearProblem
 	LinearProblem_ptr M_linProblem;
 	//! The linearSolver

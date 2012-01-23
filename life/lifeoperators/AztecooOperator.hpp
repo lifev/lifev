@@ -70,7 +70,7 @@ public:
 
 protected:
 
-	virtual int doApplyInverse(const vector_Type& X, vector_Type& Y) const;
+	virtual int doApplyInverse( const vector_Type& X, vector_Type& Y ) const;
 	virtual void doSetOperator(){};
 	virtual void doSetPreconditioner(){};
 	virtual void doSetParameterList(){};

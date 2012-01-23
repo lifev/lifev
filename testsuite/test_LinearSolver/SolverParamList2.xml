@@ -7,19 +7,21 @@
 	<Parameter name="Solver Type" type="string" value="Belos"/>
 	
 	<!-- Operator specific parameters (Belos) -->
-	<Parameter name="Solver Manager Type" type="string" value="BlockGmres"/>
-	<Parameter name="Preconditioner Side" type="string" value="Right"/>
+	<ParameterList name="Solver: Operator List">
+		<Parameter name="Solver Manager Type" type="string" value="BlockGmres"/>
+		<Parameter name="Preconditioner Side" type="string" value="Right"/>
 
-	<!-- Trilinos parameters -->
-	<ParameterList name="Belos List">
-    	<Parameter name="Flexible Gmres" type="bool" value="false"/>
-	    <Parameter name="Convergence Tolerance" type="double" value="1e-10"/>
-    	<Parameter name="Maximum Iterations" type="int" value="200"/>
-	    <Parameter name="Output Frequency" type="int" value="1"/>
-    	<Parameter name="Block Size" type="int" value="1"/>
-	    <Parameter name="Num Blocks" type="int" value="20"/>
-    	<Parameter name="Maximum Restarts" type="int" value="1"/>
-	    <Parameter name="Output Style" type="int" value="1"/>
-    	<Parameter name="Verbosity" type="int" value="35"/>
+		<!-- Trilinos parameters -->
+		<ParameterList name="Trilinos: Belos List">
+    		<Parameter name="Flexible Gmres" type="bool" value="false"/>
+	    	<Parameter name="Convergence Tolerance" type="double" value="1e-10"/>
+    		<Parameter name="Maximum Iterations" type="int" value="200"/>
+	    	<Parameter name="Output Frequency" type="int" value="1"/>
+    		<Parameter name="Block Size" type="int" value="1"/>
+	    	<Parameter name="Num Blocks" type="int" value="20"/>
+    		<Parameter name="Maximum Restarts" type="int" value="1"/>
+	    	<Parameter name="Output Style" type="int" value="1"/>
+    		<Parameter name="Verbosity" type="int" value="35"/>
+    	</ParameterList>
     </ParameterList>
 </ParameterList>

@@ -234,7 +234,7 @@ LinearSolver::printStatus()
 }
 
 void
-LinearSolver::setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section, PrecApplicationType precType )
+LinearSolver::setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section )
 {
     std::string precName = dataFile( ( section + "/prectype" ).data(), "Ifpack" );
 
@@ -242,17 +242,6 @@ LinearSolver::setPreconditionerFromGetPot( const GetPot& dataFile, const std::st
     ASSERT( M_preconditioner.get() != 0, " Preconditioner not set" );
 
     M_preconditioner->setDataFromGetPot( dataFile, section );
-
-    // To do use the parameter precApplicationType to setup right or left preconditioner
-    if ( precType == RightPreconditioner )
-    {
-
-    }
-    else if ( precType == LeftPreconditioner )
-    {
-
-    }
-
 }
 
 void
@@ -354,52 +343,22 @@ LinearSolver::setRightHandSide( const vectorPtr_Type& rhsPtr )
 }
 
 void
-LinearSolver::setPreconditioner( preconditionerPtr_Type& preconditionerPtr, PrecApplicationType precType )
+LinearSolver::setPreconditioner( preconditionerPtr_Type& preconditionerPtr )
 {
-	/*
-	// If a left Epetra_Operator exists it must be deleted
-	if ( M_problem->isLeftPrec() )
-	{
-		M_problem->setLeftPrec( Teuchos::RCP<operator_Type>( Teuchos::null ) );
-	}
-	*/
-
     M_preconditioner = preconditionerPtr;
-
-    // To do use the parameter precApplicationType to setup right or left preconditioner
-    if ( precType == RightPreconditioner )
-    {
-
-    }
-    else if ( precType == LeftPreconditioner )
-    {
-
-    }
 }
 
 void
-LinearSolver::setPreconditioner( operatorPtr_Type& preconditionerPtr, PrecApplicationType precType )
+LinearSolver::setPreconditioner( operatorPtr_Type& preconditionerPtr )
 {
 	// Does the solverOperator exists?
-    if ( precType == RightPreconditioner )
-    {
-        // If a right LifeV::Preconditioner exists it must be deleted
-        M_preconditioner.reset();
 
-        Teuchos::RCP<operator_Type> prec = Teuchos::rcp( preconditionerPtr );
-        Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( prec ) );
-        M_problem->setRightPrec( belosPrec );
-    }
+	// If a LifeV::Preconditioner exists it must be deleted
+	M_preconditioner.reset();
 
-    // To do use the parameter precApplicationType to setup right or left preconditioner
-    if ( precType == RightPreconditioner )
-    {
-
-    }
-    else if ( precType == LeftPreconditioner )
-    {
-
-    }
+	Teuchos::RCP<operator_Type> prec = Teuchos::rcp( preconditionerPtr );
+	Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( prec ) );
+	M_problem->setRightPrec( belosPrec );
 }
 
 void
@@ -526,7 +485,7 @@ LinearSolver::setupSolverOperator()
     M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
 
     // Set the parameter inside the solver
-    M_solverOperator->setParameters( M_parameterList );
+    M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List" ) );
 }
 
 } // namespace LifeV

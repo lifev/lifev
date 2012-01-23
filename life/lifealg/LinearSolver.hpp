@@ -121,9 +121,6 @@ public:
     typedef Preconditioner                                              preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>                      preconditionerPtr_Type;
 
-
-
-    enum PrecApplicationType { UndefinedPrecType, LeftPreconditioner, RightPreconditioner };
     enum SolverType          { UndefinedSolver, Belos, Aztecoo };
 
     //@}
@@ -175,7 +172,7 @@ public:
       @param dataFile GetPot object which contains the data about the preconditioner
       @param section Section the GetPot structure where to find the informations about the preconditioner
      */
-    void setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section, PrecApplicationType precType = RightPreconditioner );
+    void setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section );
 
     //! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
     /*!
@@ -239,13 +236,13 @@ public:
     /*!
       @param preconditionerPtr Preconditioner to be used to solve the system
      */
-    void setPreconditioner( preconditionerPtr_Type& preconditionerPtr, PrecApplicationType precType = RightPreconditioner );
+    void setPreconditioner( preconditionerPtr_Type& preconditionerPtr );
 
     //! Method to set a general Epetra_Operator as preconditioner
     /*!
       @param preconditionerPtr  Preconditioner to be set of type Epetra_Operator
      */
-    void setPreconditioner( operatorPtr_Type& preconditionerPtr, PrecApplicationType precType = RightPreconditioner );
+    void setPreconditioner( operatorPtr_Type& preconditionerPtr );
 
     //! Method to setup the solver using Teuchos::ParameterList
     /*!
