@@ -124,9 +124,9 @@ public:
     void setMeshProcId( const meshPtr_Type mesh, const Int& procId );
 
     //! temporary: the method should work form the Exporter class
-    void exportPID ( MeshPartitioner<MeshType> const & /*meshPart*/ )
+    void exportPID( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/ )
     {
-        std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+        std::cerr << "  X-  exportPID is not working with Ensight (missing P0 element support)" << std::endl;
     }
     //@}
 

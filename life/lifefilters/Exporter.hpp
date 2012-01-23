@@ -347,7 +347,7 @@ public:
     virtual void readVariable(exporterData_Type& dvar);
 
     //! Export the Processor ID as P0 variable
-    virtual void exportPID( MeshPartitioner< MeshType > & meshPart );
+    virtual void exportPID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm );
 
     //! Export entity flags
     virtual void exportFlags( MeshPartitioner< MeshType > & meshPart, flag_Type const & flag = EntityFlags::ALL );
@@ -639,21 +639,21 @@ void Exporter<MeshType>::exportFlags( MeshPartitioner< MeshType > & meshPart, fl
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::exportPID( MeshPartitioner< MeshType > & meshPart )
+void Exporter<MeshType>::exportPID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
 {
     // TODO: use FESpace M_spacemap for generality
     const ReferenceFE &    refFE = feTetraP0;
     const QuadratureRule & qR    = quadRuleTetra15pt;
     const QuadratureRule & bdQr  = quadRuleTria4pt;
 
-    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( meshPart, refFE, qR, bdQr, 1, meshPart.comm() ) );
+    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( mesh, refFE, qR, bdQr, 1, comm ) );
 
     vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
 
     for ( UInt iElem( 0 ); iElem < PID_FESpacePtr->mesh()->numElements(); ++iElem )
     {
         ID globalElem = PID_FESpacePtr->mesh()->element(iElem).id();
-        (*PIDData)[ globalElem ] = meshPart.comm()->MyPID();
+        (*PIDData)[ globalElem ] = comm->MyPID();
     }
 
     addVariable( exporterData_Type::ScalarField,
