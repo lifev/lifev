@@ -58,8 +58,8 @@ FSIOperator::FSIOperator():
     M_mmFESpace                          ( ),
     M_fluidMesh                          ( ),
     M_solidMesh                          ( ),
-    M_fluidMeshPart                      ( ),
-    M_solidMeshPart                      ( ),
+    M_fluidLocalMesh                     ( ),
+    M_solidLocalMesh                     ( ),
     M_BCh_u                              ( ),
     M_BCh_d                              ( ),
     M_BCh_mesh                           ( ),
@@ -273,7 +273,7 @@ FSIOperator::setupFEspace()
     if (this->isFluid())
     {
 
-        M_mmFESpace.reset(new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
+        M_mmFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_fluidLocalMesh,
                                                             //dOrder,
                                                             *refFE_mesh,
                                                             *qR_mesh,
@@ -281,7 +281,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_uFESpace.reset( new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
+        M_uFESpace.reset( new FESpace<mesh_Type, MapEpetra>(M_fluidLocalMesh,
                                                             //uOrder,
                                                             *refFE_vel,
                                                             *qR_vel,
@@ -289,7 +289,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_pFESpace.reset( new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
+        M_pFESpace.reset( new FESpace<mesh_Type, MapEpetra>(M_fluidLocalMesh,
                                                             //pOrder,
                                                             *refFE_press,
                                                             *qR_press,
@@ -328,7 +328,7 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSI-  Building solid FESpace ...               \n");
     if (this->isSolid())
     {
-        M_dFESpace.reset( new FESpace<mesh_Type, MapEpetra>( *M_solidMeshPart,
+        M_dFESpace.reset( new FESpace<mesh_Type, MapEpetra>( M_solidLocalMesh,
                                                              dOrder,
                                                              //*refFE_struct,
                                                              //*qR_struct,
@@ -355,11 +355,13 @@ FSIOperator::partitionMeshes()
 {
     if (this->isFluid())
     {
-        M_fluidMeshPart.reset(new  MeshPartitioner< mesh_Type > (M_fluidMesh, M_epetraComm));
+        MeshPartitioner< mesh_Type > fluidPartitioner(M_fluidMesh, M_epetraComm);
+        M_fluidLocalMesh = fluidPartitioner.meshPartition();
     }
     if (this->isSolid())
     {
-        M_solidMeshPart.reset( new  MeshPartitioner< mesh_Type > ( M_solidMesh, M_epetraComm ) );
+        MeshPartitioner< mesh_Type > solidPartitioner(M_solidMesh, M_epetraComm);
+        M_solidLocalMesh = solidPartitioner.meshPartition();
     }
 
 }
@@ -670,7 +672,7 @@ void
 FSIOperator::moveMesh( const vector_Type& dep )
 {
     displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
-    M_fluidMeshPart->meshPartition()->meshTransformer().moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
+    M_fluidLocalMesh->meshTransformer().moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
     displayer().leaderPrint( "done\n" );
     M_fluid->setRecomputeMatrix( true );
 }
