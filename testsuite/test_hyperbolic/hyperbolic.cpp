@@ -561,6 +561,9 @@ hyperbolic::run()
     // Export the partitioning
     exporter->exportPID( meshPart.meshPartition(), Members->comm );
 
+    // export the flags set on the mesh
+    exporter->exportFlags( meshPart.meshPartition(), Members->comm );
+
     // Set the exporter solution
     exporterSolution.reset( new vector_type ( *hyperbolicSolver.solution(),
                                               exporter->mapType() ) );

@@ -350,7 +350,7 @@ public:
     virtual void exportPID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm );
 
     //! Export entity flags
-    virtual void exportFlags( MeshPartitioner< MeshType > & meshPart, flag_Type const & flag = EntityFlags::ALL );
+    virtual void exportFlags( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const & flag = EntityFlags::ALL );
 
     //@}
 
@@ -600,7 +600,7 @@ void Exporter<MeshType>::readVariable(exporterData_Type& dvar)
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::exportFlags( MeshPartitioner< MeshType > & meshPart, flag_Type const & compareFlag )
+void Exporter<MeshType>::exportFlags( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const & compareFlag )
 {
     // @todo this is only for point flags, extension to other entity flags is trivial
 
@@ -611,7 +611,7 @@ void Exporter<MeshType>::exportFlags( MeshPartitioner< MeshType > & meshPart, fl
     const QuadratureRule & qR    = quadRuleTetra15pt;
     const QuadratureRule & bdQr  = quadRuleTria4pt;
 
-    feSpacePtr_Type FlagFESpacePtr( new feSpace_Type( meshPart, refFE, qR, bdQr, 1, meshPart.comm() ) );
+    feSpacePtr_Type FlagFESpacePtr( new feSpace_Type( mesh, refFE, qR, bdQr, 1, comm ) );
 
     std::vector< vectorPtr_Type > FlagData ( EntityFlags::number );
 
