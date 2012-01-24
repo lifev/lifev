@@ -71,6 +71,8 @@ SolverBelos::SolverBelos() :
         M_maxNumItersReached   ( false )
 {
     M_problem->setLabel( "SolverBelos" );
+	M_displayer->leaderPrint( "Warning: SolverBelos is deprecated!\n" );
+	M_displayer->leaderPrint( "         You should use LinearSolver intead!\n" );
 }
 
 SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
@@ -89,6 +91,8 @@ SolverBelos::SolverBelos( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_maxNumItersReached   ( false )
 {
     M_problem->setLabel( "SolverBelos" );
+	M_displayer->leaderPrint( "Warning: SolverBelos is deprecated!\n" );
+	M_displayer->leaderPrint( "         You should use LinearSolver intead!\n" );
 }
 
 SolverBelos::~SolverBelos()
