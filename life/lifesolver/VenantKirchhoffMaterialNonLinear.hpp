@@ -207,7 +207,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
                                                                            const displayerPtr_Type& displayer )
 {
       displayer->leaderPrint("   NonLin S-  Updating non linear terms in the Jacobian Matrix (in updateJacobian)");
-      std::cout << std::endl;
+      // std::cout << std::endl;
 
       UInt totalDof = this->M_FESpace->dof().numTotalDof();
       VectorElemental dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
@@ -311,7 +311,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeStiffness( const vector_Type
     this->M_stiff.reset(new matrix_Type(*this->M_localMap));
 
     displayer->leaderPrint(" \n*********************************\n  ");
-    computeNonLinearMatrix(this->M_stiff,disp,factor,dataMaterial,displayer);    
+    computeNonLinearMatrix(this->M_stiff,disp,factor,dataMaterial,displayer);
     displayer->leaderPrint(" \n*********************************\n  ");
 
     *this->M_stiff += *this->M_linearStiff;
@@ -399,7 +399,7 @@ template <typename Mesh>
 inline StructuralMaterial<Mesh>* createVenantKirchhoffNonLinear() { return new VenantKirchhoffMaterialNonLinear<Mesh >(); }
 namespace
 {
-static bool registerVKNL = StructuralMaterial<LifeV::RegionMesh3D<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonlinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh3D<LinearTetra> > );
+static bool registerVKNL = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonlinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

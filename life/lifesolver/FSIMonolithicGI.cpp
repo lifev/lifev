@@ -88,7 +88,7 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
     M_rhs.reset(new vector_Type(*M_monolithicMap));
     M_rhsFull.reset(new vector_Type(*M_monolithicMap));
     if(M_data->dataFluid()->useShapeDerivatives())
-        M_shapeDerivativesBlock.reset(new matrix_Type(*M_monolithicMap));
+        M_shapeDerivativesBlock.reset(new FSIOperator::fluidPtr_Type::value_type::matrix_Type(*M_monolithicMap));
     M_uk.reset (new vector_Type(*M_monolithicMap));
 
     M_meshMotion.reset(new meshMotion_Type(*M_mmFESpace,
@@ -123,11 +123,6 @@ FSIMonolithicGI::buildSystem()
 void
 FSIMonolithicGI::updateSystem()
 {
-    //M_meshMotion->dispOld() is at time n-1 !!
-
-    UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
-    vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
-    meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
     super_Type::updateSystem();
 }
 
@@ -136,7 +131,6 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
                                const vector_Type& disp,
                                const UInt          iter )
 {
-    res *= 0.;
     if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
 
@@ -226,8 +220,8 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         M_monolithicMatrix->setConditions(M_BChs);
         M_monolithicMatrix->setSpaces(M_FESpaces);
         M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
-        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ));
-        M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), 16);
+        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor());
+        M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
     }
     else
     {
@@ -259,10 +253,12 @@ if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSoli
     if ( !M_BCh_mesh->bcUpdateDone() )
         M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
-    vector_Type dispRep(disp, Repeated);
-    bcManageResidual(res, *M_rhsFull, dispRep, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(),  M_data->dataFluid()->dataTime()->time(), 1.);
-    bcManageResidual(res, *M_rhsFull, dispRep, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), M_data->dataSolid()->dataTime()->time(), 1.);
-    bcManageResidual(res, *M_rhsFull, dispRep, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *M_BCh_mesh, M_mmFESpace->feBd(),  M_data->dataFluid()->dataTime()->time(), 1.);
+    M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time()/*, M_rhsFull*/);
+    M_monolithicMatrix->GlobalAssemble();
+
+    bcManageResidual(res, *M_rhsFull, disp, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(),  M_data->dataFluid()->dataTime()->time(), 1.);
+    bcManageResidual(res, *M_rhsFull, disp, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), M_data->dataSolid()->dataTime()->time(), 1.);
+    bcManageResidual(res, *M_rhsFull, disp, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *M_BCh_mesh, M_mmFESpace->feBd(),  M_data->dataFluid()->dataTime()->time(), 1.);
     res -= *M_rhsFull;
 }
 }
@@ -281,7 +277,7 @@ FSIMonolithicGI::applyBoundaryConditions()
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
-    //M_monolithicMatrix->matrix()->spy("FMFI");
+    //    M_monolithicMatrix->matrix()->spy("FMFI");
 }
 
 
@@ -297,20 +293,22 @@ void FSIMonolithicGI::setupBlockPrec()
 
     if ( M_data->dataSolid()->getUseExactJacobian() && (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")))
     {
-        M_solid->material()->updateJacobianMatrix( *M_uk*M_data->dataFluid()->dataTime()->timeStep(), dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+        M_solid->material()->updateJacobianMatrix( *M_uk*M_solid->rescaleFactor()/**M_data->dataFluid()->dataTime()->timeStep()*/, dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solid->Mass();
         *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
         M_solidBlockPrec->globalAssemble();
-        *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
+        //        *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
+        *M_solidBlockPrec *= M_solid->rescaleFactor();
 
-        *M_monolithicMatrix->matrix() *= 0;
 //         *M_solidBlockPrec += *M_solidDerBlock;
         //M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
         M_monolithicMatrix->replace_matrix( M_solidBlockPrec, 0 );
+    }
+
+        // *M_monolithicMatrix->matrix() *= 0;
         M_monolithicMatrix->blockAssembling();
         //*M_monolithicMatrix->matrix() *= M_data->dataFluid()->dataTime()->timeStep();
-    }
 
     if (M_data->dataFluid()->useShapeDerivatives())
     {
@@ -334,7 +332,7 @@ void FSIMonolithicGI::setupBlockPrec()
 
         M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time());
         M_monolithicMatrix->GlobalAssemble();
-        //M_monolithicMatrix->matrix()->spy("jacobian");
+        //        M_monolithicMatrix->matrix()->spy("jacobian");
     }
 
 
@@ -346,11 +344,12 @@ void FSIMonolithicGI::setupBlockPrec()
         M_precPtr->setConditions( M_BChs );
         M_precPtr->setSpaces( M_FESpaces );
         M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
-        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep() ,M_solidTimeAdvance->coefficientFirstDerivative( 0 ), 2);
+        M_precPtr->coupler( M_monolithicMap, M_dofStructureToFluid/*HarmonicExtension*/->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep() ,M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
 
         if (M_data->dataFluid()->useShapeDerivatives())
         {
-            M_precPtr->push_back_coupling( M_shapeDerivativesBlock );
+            boost::shared_ptr<MatrixEpetra<Real> > staticCast=boost::static_pointer_cast<MatrixEpetra<Real> >(M_shapeDerivativesBlock);
+            M_precPtr->push_back_coupling( staticCast );
         }
     }
     else
@@ -366,9 +365,9 @@ void FSIMonolithicGI::setupBlockPrec()
     }
 }
 
-void FSIMonolithicGI::shapeDerivatives( matrixPtr_Type sdMatrix )
+void FSIMonolithicGI::shapeDerivatives( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix )
 {
-        Real alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
+    Real alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
     vectorPtr_Type rhsNew(new vector_Type(*M_monolithicMap));
     vector_Type un(M_uFESpace->map());
     vector_Type uk(M_uFESpace->map()+M_pFESpace->map());
@@ -443,7 +442,7 @@ bool FSIMonolithicGI::S_register =  BlockPrecFactory::instance().registerProduct
     &&
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct( "AdditiveSchwarzRNGI", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN )
     &&
-    FSIFactory_Type::instance().registerProduct( "monolithicGI", &FSIMonolithicGI::instantiate )
+    FSIOperator::FSIFactory_Type::instance().registerProduct( "monolithicGI", &FSIMonolithicGI::instantiate )
     &&
     BlockPrecFactory::instance().registerProduct("ComposedDNDGI"  , &MonolithicBlockComposedDND::createComposedDNDGI )
     &&

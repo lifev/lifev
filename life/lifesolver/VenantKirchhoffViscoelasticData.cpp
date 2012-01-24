@@ -52,7 +52,7 @@ VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData() :
         M_beta                           ( ),
         M_factor                         ( ),
 	M_verbose                        ( ),
-	M_order                          ( ),                       
+	M_order                          ( ),
       	M_damping                        ( )
 {
 }
@@ -111,9 +111,9 @@ VenantKirchhoffViscoelasticData::setup( const GetPot& dataFile, const std::strin
     // physics
     M_density   = dataFile( ( section + "/physics/density" ).data(), 1. );
     M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
-    
+
     UInt materialsNumber = dataFile.vector_variable_size( ( section + "/physics/material_flag" ).data() );
- std::cout<<"materialNumber "<<materialsNumber<<"\n";
+ // std::cout<<"materialNumber "<<materialsNumber<<"\n";
     if ( materialsNumber == 0 )
       {
 	std::cout<<"The material flag was not set from data file. Its value will be dedced from the first volume marker."<<"\n";
@@ -124,7 +124,7 @@ VenantKirchhoffViscoelasticData::setup( const GetPot& dataFile, const std::strin
       {
         ASSERT( materialsNumber == dataFile.vector_variable_size( ( section + "/physics/young" ).data()),   "!!! ERROR: Inconsistent size for Young Modulus !!!");
         ASSERT( materialsNumber == dataFile.vector_variable_size( ( section + "/physics/poisson" ).data() ), "!!! ERROR: Inconsistent size for Poisson Coeff. !!!");
-	
+
         UInt material(0);
         for ( UInt i(0) ; i < materialsNumber ; ++i )
 	  {
@@ -280,7 +280,7 @@ Real
            ( ( 1.0 + M_poisson.find( material )->second ) * ( 1.0 - 2.0 * M_poisson.find( material )->second ) );
 }
 
-Real 
+Real
 VenantKirchhoffViscoelasticData::mu( const UInt& material ) const
 {
     return M_young.find( material )->second/( 2.0 * ( 1.0 + M_poisson.find( material )->second ) );

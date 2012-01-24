@@ -59,7 +59,7 @@ Also it test the interpolation of an analytical function into a finite element s
 #include <life/lifefem/QuadratureRule.hpp>
 #include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 #include <life/lifefem/DOF.hpp>
 #include <life/lifefilters/MeshWriter.hpp>
@@ -73,10 +73,10 @@ using namespace LifeV;
 
 int main(int argc, char** argv )
 {
-    typedef FESpace < RegionMesh3D<LinearTetra>, MapEpetra > FESpaceTetra_Type;
+    typedef FESpace < RegionMesh<LinearTetra>, MapEpetra > FESpaceTetra_Type;
     typedef boost::shared_ptr < FESpaceTetra_Type > FESpaceTetraPtr_Type;
 
-    typedef FESpace < RegionMesh3D<LinearHexa>, MapEpetra > FESpaceHexa_Type;
+    typedef FESpace < RegionMesh<LinearHexa>, MapEpetra > FESpaceHexa_Type;
     typedef boost::shared_ptr < FESpaceHexa_Type > FESpaceHexaPtr_Type;
 
 
@@ -94,32 +94,32 @@ int main(int argc, char** argv )
 
     //definition of Array of Errors which will be used to check the correctness of the interpolate test.
 
-    Real errArrayBilinear[2] = { 0.0312819802, 0 };
+    const Real errArrayBilinear[2] = { 0.0312819802, 0. };
 
-    Real errArrayQuadratic[12] = {	0.0136247667, 0.0005088372, 0.0005577494, 0.0005088372,
+    const Real errArrayQuadratic[12] = {	0.0136247667, 0.0005088372, 0.0005577494, 0.0005088372,
 									0.0136172446, 0.0005088372, 0.0004270717, 0.0005088372,
 									0.0136172446, 0.0005088372, 0.0004270717,           0.};
 
-    Real errArrayBubble[12] = {	0.0094702745, 3.584186e-10, 3.67611e-10,  3.584186e-10,
+    const Real errArrayBubble[12] = {	0.0094702745, 3.584186e-10, 3.67611e-10,  3.584186e-10,
 								0.0094702745, 3.584186e-10,           0., 3.584186e-10,
 								0.0094702745, 3.584186e-10, 3.67611e-10,  3.584186e-10};
 
-    Real errArrayLinear[12] = {	0.010437463587, 0., 0., 0.,
+    const Real errArrayLinear[12] = {	0.010437463587, 0., 0., 0.,
 								0.010437463587, 0., 0., 0.,
 								0.010437463587, 0., 0., 0.};
 
 
-    std::string stringArrayP[12] = {	"P1  -> P0 ",  "P1  -> P1 ",  "P1  -> P1b", "P1  -> P2 ",
+    const std::string stringArrayP[12] = {	"P1  -> P0 ",  "P1  -> P1 ",  "P1  -> P1b", "P1  -> P2 ",
 										"P1b -> P0 ",  "P1b -> P1 ",  "P1b -> P1b", "P1b -> P2 ",
 										"P2  -> P0 ",  "P2  -> P1 ",  "P2  -> P1b", "P2  -> P2 "  };
 
-    std::string stringArrayQ[2] = {"Q1  -> Q0 ", "Q1  -> Q1 "};
+    const std::string stringArrayQ[2] = {"Q1  -> Q0 ", "Q1  -> Q1 "};
 
 
     // Import/Generate an hexahedral and  a Tetrahedral mesh.
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshTetraPtr(new RegionMesh3D<LinearTetra>);
-    boost::shared_ptr<RegionMesh3D<LinearHexa> > fullMeshHexaPtr(new RegionMesh3D<LinearHexa>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshTetraPtr(new RegionMesh<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearHexa> > fullMeshHexaPtr(new RegionMesh<LinearHexa>);
     UInt nEl(10);
     GetPot dataFile("./data");
     MeshData meshData(dataFile, "interpolate/space_discretization");
@@ -128,8 +128,8 @@ int main(int argc, char** argv )
 
 
     // Partition the meshes using ParMetis
-    MeshPartitioner < RegionMesh3D<LinearHexa>  >  meshPartHexa( fullMeshHexaPtr, Comm );
-    MeshPartitioner < RegionMesh3D<LinearTetra>  > meshPartTetra( fullMeshTetraPtr, Comm );
+    MeshPartitioner < RegionMesh<LinearHexa>  >  meshPartHexa( fullMeshHexaPtr, Comm );
+    MeshPartitioner < RegionMesh<LinearTetra>  > meshPartTetra( fullMeshTetraPtr, Comm );
 
 
     //Building finite element spaces

@@ -232,7 +232,7 @@ Int NonLinearRichardson( VectorEpetra& sol,
                                                            .5 * stop_tol / normRes ) );
             //if (verbose)
             //    std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
-std::cout<<"\nVerbose = "<<verbose<<std::endl;
+	    //std::cout<<"\nVerbose = "<<verbose<<std::endl;
         }
 
     }

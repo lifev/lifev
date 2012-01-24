@@ -151,7 +151,8 @@ public:
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep,
-                         const Real& coefficient);
+                         const Real& coefficient,
+                         const Real& rescaleFactor);
 
     //!pushes back the preconditioner for a block
     /*!
@@ -175,6 +176,8 @@ public:
         M_comm = comm;
         M_blockPrecs.reset( new PreconditionerComposed(M_comm));
     }
+
+    const std::vector<boost::shared_ptr<Preconditioner> >& blockPrecs() const { return M_blockPrecs->composedPreconditionerPtr()->Operator();}
 
     //@}
     //!@name Factory Methods

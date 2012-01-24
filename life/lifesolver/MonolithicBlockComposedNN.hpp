@@ -119,7 +119,8 @@ public:
                           const std::map<ID, ID>& locDofMap,
                           const vectorPtr_Type& numerationInterface,
                           const Real& timeStep,
-                          const Real& coefficient);
+                          const Real& coefficient,
+                          const Real& rescaleFactor);
 
     //!Applies the correspondent boundary conditions to every block
     /*!
@@ -145,6 +146,9 @@ public:
     void replace_matrix( const matrixPtr_Type& oper, UInt position );
 
     bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->number();}
+
+    //const std::vector<boost::shared_ptr<Preconditioner> >& blockPrecs() const { return boost::static_pointer_cast<std::vector<boost::shared_ptr<Preconditioner> > >(M_blockPrecs->Operator()[0]->Operator());}
+
 
     //@}
     //!@name Factory Method

@@ -93,7 +93,7 @@ public:
     */
     ComposedOperator( const ComposedOperator<operator_Type>& P);
 
-    ~ComposedOperator( );
+    virtual ~ComposedOperator( );
     //@}
 
     //!@name Public Methods
@@ -315,6 +315,7 @@ ComposedOperator<operator_Type>::ComposedOperator( const boost::shared_ptr<Epetr
     M_inverse(),
     M_transpose(),
     M_summed(),
+    M_allTranspose(false),
     M_set(0),
     M_meanIter(0),
     M_numCalled(0),
@@ -377,8 +378,8 @@ push_back( operatorPtr_Type  P,
         return(M_set);
     }
 
-    M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
-    M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
+//     M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
+//     M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
 
     M_meanIter=0;
     M_numCalled=0;

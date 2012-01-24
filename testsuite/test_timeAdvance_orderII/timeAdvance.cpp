@@ -170,7 +170,7 @@ problem::problem( int          argc,
 void
 problem::run()
 {
-    typedef RegionMesh3D<LinearTetra>                                   mesh_Type;
+    typedef RegionMesh<LinearTetra>                                   mesh_Type;
     typedef VenantKirchhoffViscoelasticSolver< mesh_Type >::vector_type vector_type;
     typedef boost::shared_ptr<vector_type>                              vector_ptrtype;
 

@@ -57,20 +57,20 @@ BCInterfaceData1D::BCInterfaceData1D() :
         M_mapLine               ()
 {
     //Set mapSide
-    M_mapSide["left"]   = OneDimensional::left;
-    M_mapSide["right"]  = OneDimensional::right;
+    M_mapSide["left"]   = OneDFSI::left;
+    M_mapSide["right"]  = OneDFSI::right;
 
     //Set mapQuantity
-    M_mapQuantity["A"]  = OneDimensional::A;
-    M_mapQuantity["Q"]  = OneDimensional::Q;
-    M_mapQuantity["W1"] = OneDimensional::W1;
-    M_mapQuantity["W2"] = OneDimensional::W2;
-    M_mapQuantity["P"]  = OneDimensional::P;
-    M_mapQuantity["S"]  = OneDimensional::S;
+    M_mapQuantity["A"]  = OneDFSI::A;
+    M_mapQuantity["Q"]  = OneDFSI::Q;
+    M_mapQuantity["W1"] = OneDFSI::W1;
+    M_mapQuantity["W2"] = OneDFSI::W2;
+    M_mapQuantity["P"]  = OneDFSI::P;
+    M_mapQuantity["S"]  = OneDFSI::S;
 
     //Set mapLine
-    M_mapLine["first"]  = OneDimensional::first;
-    M_mapLine["second"] = OneDimensional::second;
+    M_mapLine["first"]  = OneDFSI::first;
+    M_mapLine["second"] = OneDFSI::second;
 }
 
 BCInterfaceData1D::BCInterfaceData1D( const BCInterfaceData1D& data ) :

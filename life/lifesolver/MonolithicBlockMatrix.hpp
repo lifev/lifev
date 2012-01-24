@@ -37,6 +37,7 @@
 #define BLOCKMATRIX_H 1
 
 #include <life/lifesolver/MonolithicBlock.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace LifeV
 {
@@ -73,13 +74,13 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    MonolithicBlockMatrix(UInt coupling):
+    MonolithicBlockMatrix(const std::vector<Int>& flags/*UInt coupling*/):
             super_Type(),
             M_globalMatrix(),
             M_coupling(),
             M_interfaceMap(),
             M_interface(0),
-            M_couplingFlag(coupling),
+            M_couplingFlags(new std::vector<Int>(flags)),
             M_numerationInterface()
     {}
 
@@ -94,6 +95,8 @@ public:
         @param section string specifying the path in the data file where to find the options for the operator
      */
     virtual void  setDataFromGetPot( const GetPot& data, const std::string& section);
+
+    virtual void setupSolver(solver_Type& solver, const GetPot& data);
 
     //! runs GlobalAssemble on the blocks
     /*!
@@ -122,7 +125,8 @@ public:
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep,
-                         const Real& coefficient);
+                         const Real& coefficient,
+                         const Real& rescaleFactor);
 
 
     //! Adds a coupling part to the already existing coupling matrix
@@ -144,7 +148,8 @@ public:
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
                  const Real& coefficient,
-                 UInt couplingFlag
+                 const Real& rescaleFactor,
+                 UInt couplingBlock
                  );
 
     //! returns true if the operator has at least one block
@@ -213,6 +218,8 @@ public:
     /*!
     */
     matrixPtr_Type& matrix( ){return M_globalMatrix;}
+
+    const std::vector<matrixPtr_Type>& couplingVector() const {return std::vector<matrixPtr_Type>(1, M_coupling);}
 
     //! multiplies the whole system times a matrix
     /*!
@@ -342,13 +349,17 @@ public:
      */
     void numerationInterface( vectorPtr_Type& numeration ) { numeration =  M_numerationInterface; }
 
+    const UInt whereIsBlock( UInt position )const {return 0;}
+
     //@}
 
     //!@name Factory Method
     //@{
     static MonolithicBlockMatrix*    createAdditiveSchwarz()
     {
-        return new MonolithicBlockMatrix(15);
+        const Int couplings[] = { 15, 0, 16 };//to modify (15 to 7) to neglect the coupling (and solve Navier--Stokes)
+        const std::vector<Int> couplingVector(couplings, couplings+3);
+        return new MonolithicBlockMatrix(couplingVector);
     }
 
     //@}
@@ -360,7 +371,7 @@ protected:
     //@{
     matrixPtr_Type                              M_globalMatrix;
     matrixPtr_Type                              M_coupling;
-    mapPtr_Type                          M_interfaceMap;
+    mapPtr_Type                                 M_interfaceMap;
     UInt                                        M_interface;
     //@}
 
@@ -368,7 +379,7 @@ private:
 
     //! @name Private Members
     //@{
-    const UInt                                  M_couplingFlag;
+    boost::scoped_ptr<std::vector<Int> >        M_couplingFlags;
     vectorPtr_Type                              M_numerationInterface;
     //@}
 };

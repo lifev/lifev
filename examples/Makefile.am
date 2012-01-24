@@ -22,28 +22,29 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-SUBDIRS		=  benchmark_RossEthierSteinman \
+SUBDIRS		=  benchmark_GreenshieldsWeller \
+		benchmark_RossEthierSteinman \
                example_cavity \
 			   benchmark_HPCNavierStokes \
                example_cylinder \
                example_heart \
                example_impes \
-               example_incompressibleStructure \
                example_ML \
                example_NavierStokesRestart \
                example_ns_flux \
                example_nsResistanceBC \
-               example_OseenAssembler \
                utility_converterGetPot2Teuchos \
                utility_fsiCutter \
                utility_meshReorder \
+		application_aortaFSI \
                unmaintained_ct \
                unmaintained_masstransport \
                unmaintained_rk
 
 
 
-
+##               example_OseenAssembler \
+##               example_incompressibleStructure \
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 	{									   \

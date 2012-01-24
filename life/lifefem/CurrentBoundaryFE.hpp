@@ -143,7 +143,7 @@ update( const GeometricType& geometricEntity )
     // update the definition of the geo points
     for ( UInt i(0); i < M_nbGeoNode; i++ )
     {
-        for (UInt icoor(0); icoor < nDimensions; icoor++)
+        for (UInt icoor(0); icoor < M_nbCoor+1; icoor++)
         {
             M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
         }
@@ -168,7 +168,7 @@ updateMeas( const GeometricType& geometricEntity )
 
     for ( UInt i = 0; i < M_nbGeoNode; i++ )
     {
-        for (UInt icoor=0; icoor<nDimensions; icoor++)
+        for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
         {
             M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
         }
@@ -196,7 +196,7 @@ updateMeasQuadPt( const GeometricType& geometricEntity )
 
     for ( UInt i = 0; i < M_nbGeoNode; i++ )
     {
-        for (UInt icoor=0; icoor<nDimensions; icoor++)
+        for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
         {
             M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
         }
@@ -226,7 +226,7 @@ updateMeasNormal( const GeometricType& geometricEntity )
 
     for ( UInt i = 0; i < M_nbGeoNode; i++ )
     {
-        for (UInt icoor=0; icoor<nDimensions; icoor++)
+        for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
         {
             M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
         }
@@ -254,7 +254,7 @@ updateMeasNormalQuadPt( const GeometricType& geometricEntity )
 
     for ( UInt i = 0; i < M_nbGeoNode; i++ )
     {
-        for (UInt icoor=0; icoor<nDimensions; icoor++)
+    	for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
         {
             M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
         }

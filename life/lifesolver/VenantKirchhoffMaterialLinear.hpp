@@ -194,7 +194,7 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
 
-    std::cout<<"I am setting up the Material "<<std::endl;
+    //    std::cout<<"I am setting up the Material "<<std::endl;
 
     this->M_FESpace                       = dFESpace;
     this->M_elmatK.reset                  (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
@@ -206,7 +206,7 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
 template <typename Mesh>
 void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataMaterial)
 {
-  std::cout<<"compute LinearStiff Matrix start\n";
+  //  std::cout<<"compute LinearStiff Matrix start\n";
 
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
     // Number of displacement components
@@ -248,7 +248,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
-   std::cout<<"compute LinearStiff Matrix end\n";
+    //   std::cout<<"compute LinearStiff Matrix end\n";
    this->M_jacobian = this->M_linearStiff;
 }
 
@@ -311,7 +311,7 @@ template <typename Mesh>
 inline StructuralMaterial<Mesh>* createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear<Mesh >(); }
 namespace
 {
-static bool registerVKL = StructuralMaterial<LifeV::RegionMesh3D<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear<LifeV::RegionMesh3D<LinearTetra> > );
+static bool registerVKL = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

@@ -786,18 +786,18 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
     }
     else // if status == 0 NonLinearrRichardson converges
     {
-        std::cout << std::endl;
+        // std::cout << std::endl;
 
-        std::cout <<" Number of inner iterations       : " << maxiter <<  std::endl;
+        // std::cout <<" Number of inner iterations       : " << maxiter <<  std::endl;
 
-        std::cout <<" We are at the time step          : "  << M_data->dataTime()->time() << std::endl;
+        // std::cout <<" We are at the time step          : "  << M_data->dataTime()->time() << std::endl;
 
         M_out_iter << time << " " << maxiter << std::endl;
     }
 
     // updateVelAndAcceleration();
 
-    std::cout << "iterate: d norm       = " << M_disp->norm2() << std::endl;
+    // std::cout << "iterate: d norm       = " << M_disp->norm2() << std::endl;
 
     //These two lines mut be checked fo FSI. With the linear solver, they have a totally
     //different expression. For structural problems it is not used.
@@ -1163,7 +1163,7 @@ StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
 {
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
     M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
-
+    M_rescaleFactor=dataFile( "solid/rescaleFactor", 0. );
     UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
     if (!M_data->young(marker))
         M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);

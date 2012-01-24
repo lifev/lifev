@@ -50,12 +50,10 @@ FSIMonolithic::FSIMonolithic():
         M_precPtr(),
         M_rhsFull(),
         M_BCh_flux(),
-        M_BCh_Robin(),
         M_BChWS(),
         M_offset(0),
         M_solidAndFluidDim(0),
         M_fluidBlock(),
-        //        M_solidBlock(),
         M_solidBlockPrec(),
         M_linearSolver(),
         M_numerationInterface(),
@@ -147,12 +145,12 @@ FSIMonolithic::setUp( const GetPot& dataFile )
     M_linearSolver.reset(new solver_Type(M_epetraComm));
 
     M_linearSolver->setDataFromGetPot( dataFile, "linear_system/solver" );
-    M_linearSolver->setupPreconditioner(dataFile, "linear_system/prec");//to avoid if we have already a prec.
     std::string prectype = dataFile("problem/DDBlockPrec", "NULL");
     std::string opertype = dataFile("problem/blockOper", "NULL");
 
     M_precPtr.reset(BlockPrecFactory::instance().createObject( prectype ));
 
+    M_precPtr->setupSolver(*M_linearSolver, dataFile);
     std::string section("linear_system/prec");
     M_precPtr->setComm(M_epetraComm);
     M_precPtr->setDataFromGetPot(dataFile, section);//to avoid if we build the prec from a matrix.
@@ -162,8 +160,6 @@ FSIMonolithic::setUp( const GetPot& dataFile )
     M_maxIterSolver = dataFile( "linear_system/solver/max_iter", -1);
     M_diagonalScale    = dataFile( "linear_system/prec/diagonalScaling",  false );
     M_restarts         = dataFile( "exporter/start"  ,  0   );
-
-    setupTimeAdvance( dataFile );
 }
 
 void
@@ -179,8 +175,6 @@ FSIMonolithic::setupFluidSolid( )
     for ( UInt i = 0; i < M_fluxes; ++i, ++fluxIt )
         fluxIt->setOffset( i );
 
-    M_BCh_Robin = M_BCh_d;// For the moment M_BCh_d contains only the Robin b.c..
-    M_BCh_Robin->setOffset(M_offset);
 }
 
 void
@@ -205,7 +199,7 @@ FSIMonolithic::setupFluidSolid( UInt const fluxes )
     *M_monolithicMap+= fluxes;
     *M_monolithicMap+= M_dFESpace->map();
 
-    M_monolithicMatrix->createInterfaceMap( *M_interfaceMap, M_dofStructureToFluid/*HarmonicExtension*/->localDofMap(), M_dFESpace->map().map(Unique)->NumGlobalElements()/nDimensions, M_epetraWorldComm );
+    M_monolithicMatrix->createInterfaceMap( *M_interfaceMap, M_dofStructureToFluid->localDofMap(), M_dFESpace->map().map(Unique)->NumGlobalElements()/nDimensions, M_epetraWorldComm );
     *M_monolithicMap += *M_monolithicMatrix->interfaceMap();
 
     //the map for the interface coupling matrices should be done with respect to the coarser mesh.
@@ -279,10 +273,10 @@ FSIMonolithic::computeMaxSingularValue( )
 
     //M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
     boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->matrix()->matrixPtr()));
-    M_preconditionedSymmetrizedMatrix->push_back(boost::dynamic_pointer_cast<operatorPtr_Type>(/*ComposedPrecPtr*/matrCrsPtr));
-    M_preconditionedSymmetrizedMatrix->push_back(boost::dynamic_pointer_cast<operatorPtr_Type>(ComposedPrecPtr/*matrCrsPtr*/), true);
-    M_preconditionedSymmetrizedMatrix->push_back(boost::dynamic_pointer_cast<operatorPtr_Type>(ComposedPrecPtr/*matrCrsPtr*/), true, true);
-    M_preconditionedSymmetrizedMatrix->push_back(boost::dynamic_pointer_cast<operatorPtr_Type>(/*ComposedPrecPtr*/matrCrsPtr), false, true);
+    M_preconditionedSymmetrizedMatrix->push_back(boost::static_pointer_cast<operatorPtr_Type>(/*ComposedPrecPtr*/matrCrsPtr));
+    M_preconditionedSymmetrizedMatrix->push_back((ComposedPrecPtr/*matrCrsPtr*/), true);
+    M_preconditionedSymmetrizedMatrix->push_back((ComposedPrecPtr/*matrCrsPtr*/), true, true);
+    M_preconditionedSymmetrizedMatrix->push_back(boost::static_pointer_cast<operatorPtr_Type>(/*ComposedPrecPtr*/matrCrsPtr), false, true);
 
     std::vector<LifeV::Real> real;
     std::vector<LifeV::Real> imaginary;
@@ -351,63 +345,6 @@ FSIMonolithic::updateSystem()
     this->M_fluid->resetStabilization();
 }
 
-// void
-// FSIMonolithic::initialize( fluidPtr_Type::value_type::function_Type const& u0,
-//                            fluidPtr_Type::value_type::function_Type const& p0,
-//                            solidPtr_Type::value_type::Function const& d0,
-//                            solidPtr_Type::value_type::Function const& /*w0*/,
-//                            fluidPtr_Type::value_type::function_Type const& /*df0*/ )
-// {
-//     vector_Type u(M_uFESpace->map());
-//     M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->time());
-
-//     vector_Type p(M_pFESpace->map());
-//     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
-
-//     vector_Type d(M_dFESpace->map());
-//     M_dFESpace->interpolate(d0, d, M_data->dataSolid()->dataTime()->time());
-
-//     initialize(u, p, d);
-// }
-
-// void
-// FSIMonolithic::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
-//                            const vectorPtr_Type& fluidDisplacement,
-//                            const vectorPtr_Type& solidVelocity,
-//                            const vectorPtr_Type& solidDisplacement )
-// {
-//     // Solution
-//     setSolution( *fluidVelocityAndPressure );
-
-//     // Fluid
-//     M_fluid->initialize( *fluidVelocityAndPressure );
-//     M_meshMotion->initialize( *fluidDisplacement );
-
-//     // Solid
-//     // Extend the external solid vectors to have the monolithic map
-//     vectorPtr_Type extendedSolidDisplacement( new vector_Type( *M_monolithicMap ) );
-//     vectorPtr_Type extendedSolidVelocity( new vector_Type( *M_monolithicMap ) );
-
-//     extendedSolidDisplacement->subset( *solidDisplacement, solidDisplacement->map(), static_cast <UInt> ( 0 ), M_offset );
-//     extendedSolidVelocity->subset( *solidVelocity, solidVelocity->map(), static_cast <UInt> ( 0 ), M_offset );
-
-//     // Rescale the quantities
-//     *extendedSolidDisplacement /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
-//     *extendedSolidVelocity /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
-
-//     M_solid->initialize( extendedSolidDisplacement, extendedSolidVelocity );
-// }
-
-
-// void
-// FSIMonolithic::initialize( const vector_Type& u0, const vector_Type& p0, const vector_Type& d0)
-// {
-//     *M_un=u0;
-//     M_un->add(p0, nDimensions*M_uFESpace->dof().numTotalDof());
-//     M_un->add(d0, M_offset);
-// }
-
-
 
 // ===================================================
 // Protected Methods
@@ -441,17 +378,14 @@ FSIMonolithic::iterateMonolithic(const vector_Type& rhs, vector_Type& step)
 }
 
 void
-FSIMonolithic::couplingRhs(vectorPtr_Type rhs/*, vector_Type& un*/) // not working with non-matching grids
+FSIMonolithic::couplingRhs(vectorPtr_Type rhs) // not working with non-matching grids
 {
-    std::map<ID, ID> const& localDofMap = M_dofStructureToFluid/*HarmonicExtension*/->localDofMap();
+    std::map<ID, ID> const& localDofMap = M_dofStructureToFluid->localDofMap();
     std::map<ID, ID>::const_iterator ITrow;
     //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
-
-
-    vector_Type extrapolation(M_solidTimeAdvance->rhsContributionFirstDerivative()*M_data->dataSolid()->dataTime()->timeStep(), Unique);
+    vector_Type extrapolation(M_solidTimeAdvance->rhsContributionFirstDerivative()*M_solid->rescaleFactor(), Unique);
     vector_Type lambda(*M_interfaceMap, Unique);
-    //    M_solidTimeAdvance->extrapolation(extrapolation);
 
     this->monolithicToInterface(lambda, extrapolation);
 
@@ -467,7 +401,7 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs/*, vector_Type& un*/) // not worki
             if(M_interfaceMap->map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
                 if(rhs.get())
-                    (*rhs)[  (int)(*M_numerationInterface)[ITrow->second ] + dim*interface +M_solidAndFluidDim ] = -lambda( ITrow->second + dim*totalDofs );///M_solidTimeAdvance->coefficientFirstDerivative( 0 );/**rescale*/;
+                    (*rhs)[  (int)(*M_numerationInterface)[ITrow->second ] + dim*interface +M_solidAndFluidDim ] = -lambda( ITrow->second + dim*totalDofs );
             }
         }
     }
@@ -481,9 +415,11 @@ evalResidual( const vector_Type& sol, vectorPtr_Type& rhs, vector_Type& res, boo
         diagonalScale(*rhs, M_monolithicMatrix->matrix());
 if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
 {
-    M_solid->Apply(sol*M_data->dataFluid()->dataTime()->timeStep(), res);
+    M_solid->Apply(sol*M_solid->rescaleFactor(), res);
     M_fluidBlock->globalAssemble();
+
     res += ((*M_fluidBlock)*sol);
+
     res += *M_monolithicMatrix->coupling()*sol;
 }
 else
@@ -498,7 +434,7 @@ FSIMonolithic::
 updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
-    *rhsFluidCoupling += (*M_solid->Mass() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()/M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
+    *rhsFluidCoupling += (*M_solid->Mass() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor()/**M_data->dataSolid()->dataTime()->timeStep()*//M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
 }
 
 void
@@ -535,13 +471,36 @@ void FSIMonolithic::setupBlockPrec( )
          M_precPtr->setConditions(M_BChs);
          M_precPtr->setSpaces(M_FESpaces);
          M_precPtr->setOffsets(2, M_offset, 0);
-         M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ));
+         M_precPtr->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor());
      }
     else
     {
         M_precPtr->replace_matrix(M_fluidBlock, 1);
         M_precPtr->replace_matrix(M_solidBlockPrec, 0);
     }
+
+#ifdef HAVE_NS_PREC
+    if(M_precPtr->blockPrecs().size()>1)
+    {
+        std::string PCD("PCD");
+        UInt fluidPosition = M_precPtr->whereIsBlock(MonolithicBlockComposed::fluid);
+        std::string precType(M_precPtr->blockPrecs()[fluidPosition]->preconditionerType());
+        if(!precType.compare(PCD))
+        {
+            Preconditioner* prec=(M_precPtr->blockPrecs()[fluidPosition].get());
+            PreconditionerPCD* prec_PCD = dynamic_cast<PreconditionerPCD*>(prec);
+            ASSERT(prec, "The preconditioner corresponding to the fluid block is probably not PCD. Check in the data file");
+            prec_PCD->setFESpace(M_uFESpace, M_pFESpace);
+            prec_PCD->setBCHandler(M_BCh_u);
+            prec_PCD->setTimestep(M_data->dataFluid()->dataTime()->timeStep());
+            prec_PCD->setViscosity(M_data->dataFluid()->viscosity());
+            prec_PCD->setDensity(M_data->dataFluid()->density());
+            prec_PCD->setCouplingMatrixView(M_precPtr->couplingVector()[MonolithicBlockComposed::fluid]);
+            prec_PCD->setMapStructure(&M_dFESpace->map());
+            prec_PCD->updateBeta(M_fluidTimeAdvance->singleElement(0));
+        }
+    }
+#endif
 }
 
 void
@@ -552,25 +511,24 @@ FSIMonolithic::assembleSolidBlock( UInt iter, const vector_Type& solution )
         updateSolidSystem(this->M_rhs);
     }
 
-    //M_solid->material()->computeStiffness(*solution*M_data->dataFluid()->dataTime()->timeStep(), M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
 
 if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean"))
 {
-    M_solid->material()->computeStiffness(solution*M_data->dataFluid()->dataTime()->timeStep(), M_solid->rescaleFactor(), M_data->dataSolid(), M_solid->displayerPtr());
+    M_solid->material()->computeStiffness(solution*M_solid->rescaleFactor()/**M_data->dataFluid()->dataTime()->timeStep()*/, 1./*M_solid->rescaleFactor()*/, M_data->dataSolid(), M_solid->displayerPtr());
     M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
     *M_solidBlockPrec += *M_solid->Mass();
     *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
     M_solidBlockPrec->globalAssemble();
-    *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
+    *M_solidBlockPrec *= M_solid->rescaleFactor();
 }
 else
 {
-    M_solid->material()->updateJacobianMatrix( solution*M_data->dataFluid()->dataTime()->timeStep(), dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+    M_solid->material()->updateJacobianMatrix( solution*M_solid->rescaleFactor()/**M_data->dataFluid()->dataTime()->timeStep()*/, dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
     M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
     *M_solidBlockPrec += *M_solid->Mass();
     *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
     M_solidBlockPrec->globalAssemble();
-    *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
+    *M_solidBlockPrec *= M_solid->rescaleFactor();
 }
 
 //     M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap, 1 ) );
@@ -580,7 +538,7 @@ else
 void
 FSIMonolithic::assembleFluidBlock(UInt iter, const vector_Type& solution)
 {
-    M_fluidBlock.reset(new matrix_Type(*M_monolithicMap));
+    M_fluidBlock.reset(new  FSIOperator::fluidPtr_Type::value_type::matrix_Type(*M_monolithicMap));
 
     Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 )/M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
     M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );

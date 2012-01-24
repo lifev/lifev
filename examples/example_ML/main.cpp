@@ -78,7 +78,7 @@ using namespace LifeV;
 
 typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_Type;
 
-typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+typedef OseenSolver< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
 typedef boost::shared_ptr<vector_Type>                   vector_ptrtype;
 
 Real zero_scalar( const Real& /* t */,
@@ -175,11 +175,11 @@ main( int argc, char** argv )
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr (new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra>);
     readMesh(*fullMeshPtr, meshData);
 
     // Partition the mesh
-    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, comm);
+    MeshPartitioner< RegionMesh<LinearTetra> >   meshPart(fullMeshPtr, comm);
 
     // Now we proceed with the FESpace definition
     // here we decided to use P2/P1 elements
@@ -189,16 +189,16 @@ main( int argc, char** argv )
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    boost::shared_ptr<FESpace< RegionMesh3D<LinearTetra>, MapEpetra > > uFESpacePtr(
-                    new FESpace< RegionMesh3D<LinearTetra>, MapEpetra >(meshPart,"P2",3,comm) );
+    boost::shared_ptr<FESpace< RegionMesh<LinearTetra>, MapEpetra > > uFESpacePtr(
+                    new FESpace< RegionMesh<LinearTetra>, MapEpetra >(meshPart,"P2",3,comm) );
 
     // then the pressure FE space
 
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    boost::shared_ptr<FESpace< RegionMesh3D<LinearTetra>, MapEpetra > > pFESpacePtr(
-                    new FESpace< RegionMesh3D<LinearTetra>, MapEpetra >(meshPart,"P1",1,comm) );
+    boost::shared_ptr<FESpace< RegionMesh<LinearTetra>, MapEpetra > > pFESpacePtr(
+                    new FESpace< RegionMesh<LinearTetra>, MapEpetra >(meshPart,"P1",1,comm) );
 
 
     if (verbose)
@@ -217,7 +217,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    MLTester< RegionMesh3D<LinearTetra> > fluid (oseenData,
+    MLTester< RegionMesh<LinearTetra> > fluid (oseenData,
                                                  *uFESpacePtr,
                                                  *pFESpacePtr,
                                                  comm);
@@ -241,18 +241,18 @@ main( int argc, char** argv )
     // finally, let's create an exporter in order to view the results
     // here, we use the ensight exporter
 
-    ExporterEnsight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cavity", comm->MyPID());
+    ExporterEnsight<RegionMesh<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cavity", comm->MyPID());
 
     // we have to define a variable that will store the solution
     vector_ptrtype velAndPressure ( new vector_Type(*fluid.solution(), Repeated ) );
 
     // and we add the variables to be saved
     // the velocity
-    ensight.addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "velocity",
+    ensight.addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",
                          uFESpacePtr, velAndPressure, UInt(0) );
 
     // and the pressure
-    ensight.addVariable( ExporterData<RegionMesh3D<LinearTetra> >::ScalarField, "pressure",
+    ensight.addVariable( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "pressure",
                          pFESpacePtr, velAndPressure, UInt(3*uFESpacePtr->dof().numTotalDof() ) );
 
     // everything is ready now

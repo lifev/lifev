@@ -159,6 +159,7 @@ public:
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
                  const Real& coefficient,
+                 const Real& rescaleFactor,
                  UInt couplingBlock
                  );
 
@@ -228,7 +229,9 @@ public:
     const std::vector<bool>& recompute() {return M_recompute;}
 
     //! returns the vector of pointers to the coupling blocks (by const reference).
-    const std::vector<matrixPtr_Type> couplingVector(){return M_coupling;}
+    const std::vector<matrixPtr_Type>& couplingVector() const {return M_coupling;}
+
+    //const std::vector<Int>& blockReordering(){return M_blockReordering;}
 
     //@}
 
@@ -237,6 +240,8 @@ public:
 
     //! turns on/off the recomputation of the preconditioner for a specified factor
     void setRecompute( UInt position, bool flag ) { M_recompute[position] = flag; }
+
+    const UInt whereIsBlock( UInt position )const;
 
     //@}
 protected:
@@ -283,6 +288,7 @@ protected:
     M_blocks of blocks. This vector is assigned in the coupler method of each class.
     */
     boost::scoped_ptr<std::vector<Int> >                      M_blockReordering;
+
     //@}
 
 private:

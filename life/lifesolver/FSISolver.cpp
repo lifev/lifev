@@ -323,6 +323,9 @@ FSISolver::iterate()
     // We update the solution pointer
     M_oper->updateSolution( lambda );
 
+    // Update the system
+    M_oper->updateSystem( );
+
     if (status == EXIT_FAILURE)
     {
         std::ostringstream __ex;

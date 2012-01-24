@@ -796,6 +796,96 @@ Real der2fctx_xx_P1_2D( const GeoVector& )
 
 //======================================================================
 //
+//                            P1bubble  (2D)
+//
+//======================================================================
+/*
+                           3
+                           |\
+                           | \
+                           |4.\
+                           1---2
+*/
+
+Real fct1_P1bubble_2D( const GeoVector& v )
+{
+    return ( 1. - v[0] - v[1] );
+}
+Real fct2_P1bubble_2D( const GeoVector& v )
+{
+    return v[0] ;
+}
+Real fct3_P1bubble_2D( const GeoVector& v )
+{
+    return v[1] ;
+}
+
+Real fct4_P1bubble_2D( const GeoVector& v )
+{
+    return ( 1. - v[0] - v[1] ) * v[0] * v[1];
+}
+
+Real derfct1_1_P1bubble_2D( const GeoVector& )
+{
+    return -1 ;
+}
+Real derfct1_2_P1bubble_2D( const GeoVector& )
+{
+    return -1 ;
+}
+Real derfct2_1_P1bubble_2D( const GeoVector& )
+{
+    return 1 ;
+}
+Real derfct2_2_P1bubble_2D( const GeoVector& )
+{
+    return 0 ;
+}
+Real derfct3_1_P1bubble_2D( const GeoVector& )
+{
+    return 0 ;
+}
+Real derfct3_2_P1bubble_2D( const GeoVector& )
+{
+    return 1 ;
+}
+
+Real derfct4_1_P1bubble_2D( const GeoVector& v )
+{
+    return ( 1 -2 * v[0] - v[1] ) * v[1];
+}
+Real derfct4_2_P1bubble_2D( const GeoVector& v )
+{
+    return ( 1 - v[0] - 2 * v[1] ) * v[0];
+}
+
+// Second derivatives
+Real der2fctx_xx_P1bubble_2D( const GeoVector& )
+{
+    return 0;
+}
+
+Real der2fct4_11_P1bubble_2D( const GeoVector& v )
+{
+    return -2 * v[1];
+}
+Real der2fct4_12_P1bubble_2D( const GeoVector& v )
+{
+    return 1 -2 * v[0] - 2 * v[1];
+}
+Real der2fct4_21_P1bubble_2D( const GeoVector& v )
+{
+    return 1 -2 * v[0] - 2 * v[1];
+}
+Real der2fct4_22_P1bubble_2D( const GeoVector& v )
+{
+    return -2 * v[0];
+}
+
+
+
+//======================================================================
+//
 //                            P2  (2D)
 //
 //======================================================================
@@ -3489,6 +3579,13 @@ std::vector<Real> P1Bubble3DTransform(const std::vector<Real>& nodalValues)
     return FEValues;
 }
 
+std::vector<Real> P1Bubble2DTransform(const std::vector<Real>& nodalValues)
+{
+    std::vector<Real> FEValues(nodalValues);
+    FEValues[3]=27*nodalValues[3] - 9*(nodalValues[0]+nodalValues[1]+nodalValues[2]);
+    return FEValues;
+}
+
 
 //======================================================================
 //
@@ -3575,6 +3672,25 @@ const ReferenceFEScalar feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGL
 const ReferenceFEScalar feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 0, 3, 2,
                             fct_P1_2D, derfct_P1_2D, der2fct_P1_2D, refcoor_P1_2D,
                             STANDARD_PATTERN, &feSegP1,&lagrangianTransform );
+
+
+//======================================================================
+//
+//                            P1bubble  (2D)
+//
+//======================================================================
+/*
+						   3
+						   |\
+						   | \
+						   |4.\
+						   1---2
+*/
+
+const ReferenceFEScalar feTriaP1bubble( "P1bubble on a triangle", FE_P1bubble_2D, TRIANGLE, 1, 0, 1, 0, 4, 2,
+								   fct_P1bubble_2D, derfct_P1bubble_2D, der2fct_P1bubble_2D, refcoor_P1bubble_2D,
+								   STANDARD_PATTERN, &feSegP1,&P1Bubble2DTransform );
+
 
 //======================================================================
 //

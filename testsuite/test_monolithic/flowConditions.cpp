@@ -131,8 +131,8 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
     // if imposing the absorbing boundary condition through the pressure:
     if (bcOnFluid)
     {
-        M_outP =  pow((M_rhos/(2.*sqrt(2))*qn/area + sqrt(M_beta*sqrt(M_area0))),2)
-                  - M_beta*sqrt(M_area0);
+        M_outP =  std::pow((M_rhos/(2.*std::sqrt(2.))*qn/area + std::sqrt(M_beta*std::sqrt(M_area0))),2.)
+                  - M_beta*std::sqrt(M_area0);
         FlowConditions::outputVector[conditionNumber]=M_outP;
 
         Oper->displayer().leaderPrint( " Flow rate = " , qn );
@@ -149,7 +149,7 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
         M_outP = Pout;
 
         area = qn * std::sqrt(M_rhos) / ( (2.*std::sqrt(2)) *
-                                          std::sqrt( M_outP + M_beta*sqrt(M_area0) ) - std::sqrt( M_beta*sqrt(M_area0) ) );
+                                          std::sqrt( M_outP + M_beta*std::sqrt(M_area0) ) - std::sqrt( M_beta*std::sqrt(M_area0) ) );
 
         assert(area >= 0 );
         if (area < 1e-8*M_area0) area = M_area0;
@@ -212,7 +212,7 @@ Real FlowConditions::inDeltaRadius (const Real& /*t*/, const Real& x, const Real
 {
     if (i == 2) return 0;
 
-    Real r ( sqrt(x*x + y*y) );
+    Real r ( std::sqrt(x*x + y*y) );
 
     switch (i)
     {
@@ -230,7 +230,7 @@ Real FlowConditions::outDeltaRadius(const Real& /*t*/, const Real& x, const Real
 {
     if (i == 2) return 0;
 
-    Real r ( sqrt(x*x + y*y) );
+    Real r ( std::sqrt(x*x + y*y) );
 
     switch (i)
     {

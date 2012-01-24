@@ -254,7 +254,7 @@ StructuralMaterial<Mesh>::StructuralMaterial( ):
     M_jacobian                   ( ),
     M_offset                     ( 0 )
 {
-    std::cout << "I am in the constructor of StructuralMaterial" << std::endl;
+  //    std::cout << "I am in the constructor of StructuralMaterial" << std::endl;
 }
 
 }

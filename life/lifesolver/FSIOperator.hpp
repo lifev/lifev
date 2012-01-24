@@ -62,7 +62,7 @@
 #include <life/lifecore/FactorySingleton.hpp>
 
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 
 #include <life/lifealg/NonLinearAitken.hpp>
 
@@ -118,7 +118,7 @@ public:
      */
     //@{
 
-    typedef RegionMesh3D<LinearTetra>                                               mesh_Type;
+    typedef RegionMesh<LinearTetra>                                               mesh_Type;
 #ifdef HAVE_HDF5
     typedef ExporterHDF5Mesh3D<mesh_Type>                                           meshFilter_Type;
 #endif
@@ -581,13 +581,13 @@ public:
     //! getter for the fluid velocity
     const vector_Type& un()                                      const { return M_fluidTimeAdvance->solution(); }
 
-    const boost::shared_ptr<TimeAdvance<vector_Type> > ALETimeAdvance() const { return  M_ALETimeAdvance; }
-    const boost::shared_ptr<TimeAdvance<vector_Type> > fluidTimeAdvance() const { return  M_fluidTimeAdvance; }
-    const boost::shared_ptr<TimeAdvance<vector_Type> > solidTimeAdvance() const { return  M_solidTimeAdvance; }
+    const boost::shared_ptr<const TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
+    const boost::shared_ptr<const TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
+    const boost::shared_ptr<const TimeAdvance<vector_Type> > solidTimeAdvance()const { return  M_solidTimeAdvance; }
 
-    const string ALETimeAdvanceMethod()  { return  M_ALETimeAdvanceMethod; }
-    const string fluidTimeAdvanceMethod() { return  M_fluidTimeAdvanceMethod; }
-    const string solidTimeAdvanceMethod() { return  M_solidTimeAdvanceMethod; }
+    const string ALETimeAdvanceMethod() const { return  M_ALETimeAdvanceMethod; }
+    const string fluidTimeAdvanceMethod()const { return  M_fluidTimeAdvanceMethod; }
+    const string solidTimeAdvanceMethod()const { return  M_solidTimeAdvanceMethod; }
 
 
     //! gets the solution vector by reference
@@ -727,11 +727,6 @@ public:
     //! Setter for the Robin coefficient of the Robin--Neumann coupling scheme (as a BCFunction)
     void setAlphafbcf  ( const bcFunction_Type& alphafbcf );
 
-    //! Setting the timeAdvance
-    void setTimeAdvances (boost::shared_ptr<TimeAdvance<vector_Type> > fluidTimeAdvance,
-			  boost::shared_ptr<TimeAdvance<vector_Type> > solidTimeAdvance,
-			  boost::shared_ptr<TimeAdvance<vector_Type> > ALETimeAdvance);
-
 //     void setMpi     (bool mpi  ){M_mpi      = mpi;}
 //     void setFluidMpi(bool fluid){M_isFluidMpi = fluid;}
 //     void setSolidMpi(bool solid){M_issolidMpi = solid;}
@@ -759,14 +754,6 @@ public:
 
     //! sets the solution vector by copy
     virtual void setSolution                 ( const vector_Type& solution ) { M_lambda.reset( new vector_Type( solution ) ); }
-
-
-    //! Initializer for the solution M_un
-    /**
-       \small initializes the current solution vector. Note: this is not sufficient for the correct initialization
-       of bdf!
-    */
-    virtual void initialize( std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec);
 
 
     //! Setter for the time derivative of the interface displacement
@@ -820,7 +807,6 @@ protected:
 
     //!@name Protected Attributes
     //@{
-    boost::shared_ptr<mesh_Type>                      M_mesh;
 
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_uFESpace;
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_pFESpace;

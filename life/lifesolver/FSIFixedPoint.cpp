@@ -199,7 +199,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     vector_Type meshDisp( M_meshMotion->disp(), Repeated );
     this->moveMesh(meshDisp);
 
-    /*   
+    /*
  if( iter==0 )
     {
         M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
@@ -210,7 +210,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         M_ALETimeAdvance->setSolution(meshDisp);
     }
     */
-    
+
 	if(iter==0)
 	  M_fluidTimeAdvance->extrapolation( *M_beta);//explicit treatment of u
  	else
@@ -340,11 +340,6 @@ void FSIFixedPoint::registerMyProducts( )
     solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
     solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonlinearVenantKirchhoff", &createVenantKirchhoffNonLinear );
 
-    ///These were the lines before the implementation of the StructuralSolver class
-
-//    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
-    //solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
-    //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSI::createNonLinearStructure );
 }
 
 }   // Namespace LifeV

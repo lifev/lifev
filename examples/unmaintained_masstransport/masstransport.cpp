@@ -256,7 +256,7 @@ MassTransport::MassTransport( int argc,
 void
 MassTransport::run()
 {
-    typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
+    typedef OseenSolver< RegionMesh<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
 
     // Reading from data file
@@ -290,13 +290,13 @@ MassTransport::run()
     bcH.addBC( "wall",     WALL,     Essential,   Full,      uZero, 3 );
     bcH.addBC( "spliwall", SLIPWALL, Essential,   Full,      uZero, 3 );
 
-    OseenData<RegionMesh3D<LinearTetra> > oseenData;
+    OseenData<RegionMesh<LinearTetra> > oseenData;
     oseenData.setup( dataFile );
 
     oseenData.viscosity( d->nu/dataFile( "fluid/physics/density", 1. ));
 
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*oseenData.meshData()->mesh(), *d->comm);
+    partitionMesh< RegionMesh<LinearTetra> >   meshPart(*oseenData.meshData()->mesh(), *d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << oseenData.dataTime()->orderBDF() << std::endl;
@@ -307,7 +307,7 @@ MassTransport::run()
         std::cout << "Building the velocity FE space ... " << std::flush;
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,uOrder,3,*d->comm);
+    FESpace< RegionMesh<LinearTetra>, MapEpetra > uFESpace(meshPart,uOrder,3,*d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -316,7 +316,7 @@ MassTransport::run()
         std::cout << "Building the pressure FE space ... " << std::flush;
 
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,pOrder,1,*d->comm);
+    FESpace< RegionMesh<LinearTetra>, MapEpetra > pFESpace(meshPart,pOrder,1,*d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -330,7 +330,7 @@ MassTransport::run()
 
     if (verbose) std::cout << "Calling the fluid solver constructor ... ";
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
+    OseenSolver< RegionMesh<LinearTetra> > fluid (oseenData,
                                                     uFESpace,
                                                     pFESpace,
                                                     *d->comm);
@@ -361,7 +361,7 @@ MassTransport::run()
     bcADR.addBC( "wall",     WALL,     Essential,   Full,      uZero, 1 );
     bcADR.addBC( "Splipwall",SLIPWALL, Essential,   Full,      uZero, 1 );
 
-    DataADR<RegionMesh3D<LinearTetra> > dataADR( dataFile );
+    DataADR<RegionMesh<LinearTetra> > dataADR( dataFile );
 
     std::string adrOrder =  dataFile( "adr/space_discretization/order", "P1");
 
@@ -389,7 +389,7 @@ MassTransport::run()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataADR.orderBDF() << std::endl;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > adrFESpace(meshPart,
+    FESpace< RegionMesh<LinearTetra>, MapEpetra > adrFESpace(meshPart,
                                                                *refFE_adr,
                                                                *qR_adr,
                                                                *bdQr_adr,
@@ -400,7 +400,7 @@ MassTransport::run()
 
     if (verbose) std::cout << "Calling the ADR solver constructor ... \n";
 
-    ADRSolver< RegionMesh3D<LinearTetra> > adr (dataADR,
+    ADRSolver< RegionMesh<LinearTetra> > adr (dataADR,
                                                 adrFESpace,
                                                 uFESpace,
                                                 *d->comm);
@@ -467,13 +467,13 @@ MassTransport::run()
 
     fluid.resetPreconditioner();
 
-    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
-    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "rclux", d->comm->MyPID()) );
+    exporter.reset( new Ensight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "rclux", d->comm->MyPID()) );
     // hdf5 exporter, still under development
-    //    exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
+    //    exporter.reset( new Hdf5exporter<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
 
-    //    Ensight<RegionMesh3D<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID());
+    //    Ensight<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID());
 
 
     // adr solver initial solution

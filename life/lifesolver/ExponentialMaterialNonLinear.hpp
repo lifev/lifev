@@ -616,7 +616,7 @@ template <typename Mesh>
 inline StructuralMaterial<Mesh>* createExponentialMaterialNonLinear() { return new ExponentialMaterialNonLinear<Mesh >(); }
 namespace
 {
-static bool registerEXP = StructuralMaterial<LifeV::RegionMesh3D<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh3D<LinearTetra> > );
+static bool registerEXP = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

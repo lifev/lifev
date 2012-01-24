@@ -520,7 +520,8 @@ void OseenSolverShapeDerivative<MeshType, SolverType>::solveLinearSystem( bcHand
     matrixFull->globalAssemble();
     this->M_linearSolver->setMatrix( *matrixFull );
     this->M_linearSolver->setReusePreconditioner( M_reuseLinearPreconditioner );
-    this->M_linearSolver->solveSystem( rightHandSideFull, M_linearSolution, matrixFull );
+    boost::shared_ptr<MatrixEpetra<Real> > staticCast=boost::static_pointer_cast<MatrixEpetra<Real> >(matrixFull);
+    this->M_linearSolver->solveSystem( rightHandSideFull, M_linearSolution, staticCast );
 
     *this->M_residual  = M_linearRightHandSideNoBC;
     *this->M_residual -= *this->M_matrixNoBC*this->M_linearSolution;

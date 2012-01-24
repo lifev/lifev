@@ -628,64 +628,6 @@ FSIOperator::initialize( fluidPtr_Type::value_type::function_Type const& u0,
     if (this->isFluid())
         fluid().initialize(u0, p0);
 }
-/*
-void
-FSIOperator::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
-                         const vectorPtr_Type& fluidDisplacement,
-                         const vectorPtr_Type& solidVelocity,
-                         const vectorPtr_Type& solidDisplacement )
-{
-    if ( M_isFluid )
-    {
-        M_fluid->initialize( *fluidVelocityAndPressure );
-        initializeBDF( *fluidVelocityAndPressure );
-
-        M_meshMotion->initialize( *fluidDisplacement );
-        moveMesh( *fluidDisplacement);
-    }
-    if ( M_isSolid )
-    {
-        M_solid->initialize( solidDisplacement, solidVelocity );
-    }
-}
-*/
-
-void
-FSIOperator::initialize( std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec)
-{
-    //*M_un=*u0Vec[0];
-
-    //TEMPORARY TEST INITIALIZATION//
-    std::vector<vectorPtr_Type> structureDisp(0);
-    std::vector<vectorPtr_Type> fluidVel(0);
-    std::vector<vectorPtr_Type> fluidDisp(0);
-    for(UInt i=0; i< M_solidTimeAdvance->order(); ++i)
-    {
-        structureDisp.push_back(ds0Vec[i]);
-    }
-    for(UInt i=0; i< M_fluidTimeAdvance->order(); ++i)
-    {
-        fluidVel.push_back(u0Vec[i]);
-    }
-    for(UInt i=0; i< M_ALETimeAdvance->order(); ++i)
-    {
-        fluidDisp.push_back(df0Vec[i]);
-    }
-    initializeTimeAdvance(fluidVel, structureDisp, fluidDisp);
-    //END OF TEMPORARY TEST INITIALIZATION//
-}
-
-
-void
-FSIOperator::setTimeAdvances (const boost::shared_ptr<TimeAdvance<vector_Type> > fluidTimeAdvance,
-			      const boost::shared_ptr<TimeAdvance<vector_Type> > solidTimeAdvance,
-			      const boost::shared_ptr<TimeAdvance<vector_Type> > ALETimeAdvance)
-{
-  M_fluidTimeAdvance = fluidTimeAdvance;
-  M_solidTimeAdvance = solidTimeAdvance;
-  M_ALETimeAdvance = ALETimeAdvance;
-}
-
 
 void
 FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
@@ -1519,7 +1461,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
     assert(_vec1.mapType() == Repeated);
     assert(_vec2.mapType() == Unique);
 
-    typedef mesh_Type::VolumeShape GeoShape; // Element shape
+    typedef mesh_Type::elementShape_Type GeoShape; // Element shape
 
     UInt nDofpV = M_uFESpace->refFE().nbDofPerVertex(); // number of DOF per vertex
     UInt nDofpE = M_uFESpace->refFE().nbDofPerEdge();   // number of DOF per edge
@@ -1545,8 +1487,8 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
     for ( ID iElem = 0; iElem < M_uFESpace->mesh()->numVolumes(); ++iElem )
     {
         UInt elemId = M_uFESpace->mesh()->volume( iElem ).localId();
-        if (elemId != iElem)
-            std::cout << " elemId = " << elemId << " iElem = " << iElem << std::endl;
+        //if (elemId != iElem)
+            // std::cout << " elemId = " << elemId << " iElem = " << iElem << std::endl;
 
         // Updating the local mesh velocity in this mesh elment
         for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1710,7 +1652,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
     assert(_vec1.mapType() == Repeated);
     assert(_vec2.mapType() == Unique);
 
-    typedef mesh_Type::VolumeShape GeoShape; // Element shape
+    typedef mesh_Type::elementShape_Type GeoShape; // Element shape
 
 
     UInt nDofPerVert1  = _fespace1.refFE().nbDofPerVertex(); // number of DOF per vertex

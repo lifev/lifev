@@ -61,10 +61,10 @@ Real bilinearFunction(const Real& /*t*/, const Real& x, const Real& y, const Rea
 //! Compute the errors between these FE vectors and the analytical solution, and compare them with the ones provided in the array errorArray.
 //! return true if all the errors are equal to the errors in errorArray, within a tolerance eps. return false otherwise.
 template<typename MeshType, typename MapType, typename Fct>
-bool check_interpolate(const std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& originalFeSpaceVecPtr,
-					  const std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& finalFeSpaceVecPtr,
-					  const MapEpetraType& outputMapType, const Fct& function,
-					  const Real* errorArray, const string* stringArray, Real eps, Real time, UInt verbose)
+bool check_interpolate( std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& originalFeSpaceVecPtr,
+					  std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& finalFeSpaceVecPtr,
+					  const MapEpetraType& outputMapType,  Fct& function,
+					  const Real errorArray [], const string stringArray [], Real eps, Real time, UInt verbose)
 {
 	std::vector< boost::shared_ptr <VectorEpetra> > interpVecPtr(originalFeSpaceVecPtr.size());
 	bool check(true);

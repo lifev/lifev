@@ -50,6 +50,7 @@
 
 #include <life/lifealg/ComposedOperator.hpp>
 
+#include <life/lifemesh/RegionMesh.hpp>
 
 namespace LifeV {
 
@@ -78,9 +79,9 @@ public:
     typedef matrix_Type::matrix_type/*matrix_Type*/                    epetraMatrix_Type;
     typedef SolverAztecOO                                              solver_Type;
     typedef boost::shared_ptr< SolverAztecOO >                         solverPtr_Type;
-    typedef boost::shared_ptr< FESpace<RegionMesh3D<LinearTetra>, MapEpetra> >  fespacePtr_Type;
+    typedef boost::shared_ptr< FESpace<RegionMesh<LinearTetra>, MapEpetra> >  fespacePtr_Type;
     //typedef fespacePtr_Type                                     fespacePtr_Type;
-    //    typedef FESpace<RegionMesh3D<LinearTetra>, MapEpetra>*                 fespacePtr_Type;
+    //    typedef FESpace<RegionMesh<LinearTetra>, MapEpetra>*                 fespacePtr_Type;
     //typedef MapEpetra*                                                 mapPtr_Type;
     typedef boost::shared_ptr< MapEpetra >                             mapPtr_Type;
     //typedef BCHandler*                                                 bchandlerPtr_Type;
@@ -136,6 +137,14 @@ public:
         @param section string specifying the path in the data file where to find the options for the operator
      */
     virtual void setDataFromGetPot(const GetPot& data, const std::string& section)=0;
+
+
+    //! Sets the parameters needed by the preconditioner from data file
+    /*!
+        @param data GetPot object reading the text data file
+        @param section string specifying the path in the data file where to find the options for the operator
+     */
+    virtual void setupSolver(solver_Type& solver, const GetPot& data){}
 
     //! pushes a block at the end of the vector
     /*!
@@ -212,7 +221,8 @@ public:
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep,
-                         const Real& coefficient)=0;
+                         const Real& coefficient,
+                         const Real& rescaleFactor)=0;
 
 
 
@@ -240,6 +250,7 @@ public:
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep,
                          const Real& coefficient,
+                         const Real& rescaleFactor,
                          UInt couplingFlag
                          )=0;
 
@@ -353,7 +364,8 @@ public:
                         const vectorPtr_Type& numerationInterface,
                         const Real& timeStep=1.e-3,
                         const Real& value=1.,
-                        const Real& coefficient=1.); // not working with non-matching grids
+                        const Real& coefficient=1.,
+                        const Real& rescaleFactor=1.); // not working with non-matching grids
 
 
     //!sets the vector of raw pointer to the BCHandler
@@ -439,6 +451,13 @@ public:
 
     //! returns the vector of the offsets (by const reference).
     const std::vector<UInt>&              offsetVector() {return M_offset;}
+
+    virtual const std::vector<boost::shared_ptr<Preconditioner> >& blockPrecs() const {return std::vector<boost::shared_ptr<Preconditioner> >(0); }
+
+    virtual const std::vector<matrixPtr_Type>& couplingVector() const =0;
+
+    virtual const UInt whereIsBlock( UInt position )const =0;
+
     //@}
 
 protected:

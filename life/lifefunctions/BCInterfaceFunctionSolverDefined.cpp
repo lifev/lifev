@@ -109,8 +109,8 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
         Int gid;
         Real x, y, z;
         Real alpha, beta;
-        Real t( M_physicalSolver->dataSolid()->getdataTime()->time() );
-        Real timeStep( M_physicalSolver->dataSolid()->getdataTime()->timeStep() );
+        Real t( M_physicalSolver->dataSolid()->dataTime()->time() );
+        Real timeStep( M_physicalSolver->dataSolid()->dataTime()->timeStep() );
 
         Int verticesGlobalNumber( M_physicalSolver->solidMeshPart().meshPartition()->numGlobalVertices() );
         for ( UInt i(0) ; i < M_physicalSolver->solidMeshPart().meshPartition()->numVertices() ; ++i )
@@ -210,7 +210,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::setData( const BCInterfaceData3
 // ===================================================
 // Constructors
 // ===================================================
-BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::BCInterfaceFunctionSolverDefined() :
+BCInterfaceFunctionSolverDefined< OneDFSISolver >::BCInterfaceFunctionSolverDefined() :
         M_defaultFunction (),
         M_function        ()
 {
@@ -225,35 +225,35 @@ BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::BCInterfaceFunctionSol
 // Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::assignFunction( OneDimensionalFunction& base )
+BCInterfaceFunctionSolverDefined< OneDFSISolver >::assignFunction( OneDFSIFunction& base )
 {
     switch ( M_defaultFunction )
     {
     case Riemann:
 
-        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedRiemann::operator(),
-                                       dynamic_cast<OneDimensionalFunctionSolverDefinedRiemann *> ( &( *M_function ) ), _1, _2 ) );
+        base.setFunction( boost::bind( &OneDFSIFunctionSolverDefinedRiemann::operator(),
+                                       dynamic_cast<OneDFSIFunctionSolverDefinedRiemann *> ( &( *M_function ) ), _1, _2 ) );
 
         break;
 
     case Compatibility:
 
-        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedCompatibility::operator(),
-                                       dynamic_cast<OneDimensionalFunctionSolverDefinedCompatibility *> ( &( *M_function ) ), _1, _2 ) );
+        base.setFunction( boost::bind( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
+                                       dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility *> ( &( *M_function ) ), _1, _2 ) );
 
         break;
 
     case Absorbing:
 
-        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedAbsorbing::operator(),
-                                       dynamic_cast<OneDimensionalFunctionSolverDefinedAbsorbing *> ( &( *M_function ) ), _1, _2 ) );
+        base.setFunction( boost::bind( &OneDFSIFunctionSolverDefinedAbsorbing::operator(),
+                                       dynamic_cast<OneDFSIFunctionSolverDefinedAbsorbing *> ( &( *M_function ) ), _1, _2 ) );
 
         break;
 
     case Resistance:
 
-        base.setFunction( boost::bind( &OneDimensionalFunctionSolverDefinedResistance::operator(),
-                                       dynamic_cast<OneDimensionalFunctionSolverDefinedResistance *> ( &( *M_function ) ), _1, _2 ) );
+        base.setFunction( boost::bind( &OneDFSIFunctionSolverDefinedResistance::operator(),
+                                       dynamic_cast<OneDFSIFunctionSolverDefinedResistance *> ( &( *M_function ) ), _1, _2 ) );
 
         break;
     }
@@ -263,7 +263,7 @@ BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::assignFunction( OneDim
 // Set Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::setData( const BCInterfaceData1D& data )
+BCInterfaceFunctionSolverDefined< OneDFSISolver >::setData( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -283,25 +283,25 @@ BCInterfaceFunctionSolverDefined< OneDimensionalSolver >::setData( const BCInter
     {
     case Riemann:
 
-        M_function.reset( new OneDimensionalFunctionSolverDefinedRiemann( data.side(), data.quantity() ) );
+        M_function.reset( new OneDFSIFunctionSolverDefinedRiemann( data.side(), data.quantity() ) );
 
         break;
 
     case Compatibility:
 
-        M_function.reset( new OneDimensionalFunctionSolverDefinedCompatibility( data.side(), data.quantity() ) );
+        M_function.reset( new OneDFSIFunctionSolverDefinedCompatibility( data.side(), data.quantity() ) );
 
         break;
 
     case Absorbing:
 
-        M_function.reset( new OneDimensionalFunctionSolverDefinedAbsorbing( data.side(), data.quantity() ) );
+        M_function.reset( new OneDFSIFunctionSolverDefinedAbsorbing( data.side(), data.quantity() ) );
 
         break;
 
     case Resistance:
 
-        M_function.reset( new OneDimensionalFunctionSolverDefinedResistance( data.side(), data.quantity(), data.resistance()[0] ) );
+        M_function.reset( new OneDFSIFunctionSolverDefinedResistance( data.side(), data.quantity(), data.resistance()[0] ) );
 
         break;
     }

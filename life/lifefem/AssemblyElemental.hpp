@@ -86,7 +86,7 @@ namespace AssemblyElemental
 //! @name Public typedefs
 //@{
 //! Use the portable syntax of the boost function
-typedef boost::function5< const Real&,  const Real&, const Real&,
+typedef boost::function5< const Real,  const Real&, const Real&,
                           const Real&, const Real&, const ID&  > function_Type;
 //@}
 
@@ -212,7 +212,7 @@ void advection(MatrixElemental& localAdv,
                 //Loop on the quadrature nodes
                 for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
-                    for (UInt iDim(0); iDim<nDimensions; ++iDim)
+                    for (UInt iDim(0); iDim<advCFE.nbCoor(); ++iDim)
                     {
                         localValue += localValues[iQuadPt][iDim]
                                       * advCFE.dphi(jDof,iDim,iQuadPt)
@@ -338,15 +338,65 @@ void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 //! \f$ coef \cdot ( div u , div v )\f$
 void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 
+//! \f$ coef \cdot ( [\nabla u^k]^T \nabla u : \nabla v  )\f$
+void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! \f$ coef \cdot ( [\nabla u]^T \nabla u^k + [\nabla u^k]^T \nabla u : \nabla v  )\f$ for Newton on St-Venant
+void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! \f$ coef \cdot ( trace { [\nabla u^k]^T \nabla u }, \nabla\cdot  v  ) \f$ for Newton on St-Venant
+void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// -----------added Rita 2008   for non linear St-Venant----------------------------------------------------------
+
+// coef * ( (\div u_k) \grad u : \grad v  )--------------------------------------------------------------------controllato!!!
+void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// coef * ( (\div u) \grad u_k : \grad v  )
+// part of the jacobian of stiff_divgrad
+void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// coef * ( \grad u_k : \grad u_k) * ( \grad u : \grad v  )---------------------------------------------controllato!!!
+void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  )
+// part of the jacobian stiff_gradgrad
+void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// coef * ( \grad u^k \grad u : \grad v  )------------------------------------------------------------------controllato!!!
+void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// coef * ( \grad \delta u \grad u^k : \grad v  )
+// part of the jacobian of stiff_dergrad_gradbis
+void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// coef * ( \grad u^k [\grad u]^T : \grad v  )------------------------------------------------------------controllato!!!
+void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// coef * ( \grad \delta u [\grad u^k]^T : \grad v  )------------------------------------------------------------controllato!!!
+// part of the jacobian of stiff_dergrad_gradbis_Tr
+void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// coef * (  \grad u^k [\grad u^k]^T \grad u : \grad v  )------------------------------------------------------------controllato!!!
+void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+// coef * (  \grad u^k [\grad u]^T \grad u^k : \grad v  )------------------------------------------------------------controllato!!!
+// part of the jacobian of  stiff_gradgradTr_gradbis
+void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+//  coef * (  \grad u [\grad u^k]^T \grad u^k : \grad v  )------------------------------------------------------------controllato!!!
+// secondo part of the jacobian of stiff_gradgradTr_gradbis
+void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 
 void grad( const int icoor, Real coef, MatrixElemental& elmat,
            const CurrentFE& fe_u, const CurrentFE& fe_p,
            int iblock = 0, int jblock = 0 );
-
 void div( const int icoor, Real coef, MatrixElemental& elmat,
           const CurrentFE& fe_u, const CurrentFE& fe_p,
           int iblock = 0, int jblock = 0 );
-
 void grad_div( Real coef_grad, Real coef_div, MatrixElemental& elmat,
                const CurrentFE& fe_u, const CurrentFE& fe_p,
                int block_pres );

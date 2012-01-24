@@ -44,6 +44,8 @@ namespace LifeV
 class Epetra_FullMonolithic;
 #endif
 
+   typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
+
 /**
    FSIMonolithic Geomitry-Implicit solver
  * Class handling the nonlinear monolithic solver for FSI problems. The (exact or inexact)
@@ -101,13 +103,6 @@ public:
 
     //!@name Public Methods
     //@{
-
-    //! Initializes the system with vectors
-    void initialize(  std::vector<vectorPtr_Type>& u0Vec, std::vector<vectorPtr_Type>& ds0Vec, std::vector<vectorPtr_Type>& df0Vec)
-    {
-        super_Type::super_Type::initialize( u0Vec, ds0Vec, df0Vec );
-        M_uk.reset( new vector_Type( *u0Vec[0] ) );
-    }
 
     /**
        Sets the parameters read from data file
@@ -204,7 +199,7 @@ private:
        (not in a right hand side representing the matrix-vector multiplication)
        \param sdMatrix: output. Shape derivatives block to be summed to the Jacobian matrix.
     */
-    void shapeDerivatives( matrixPtr_Type sdMatrix );
+    void shapeDerivatives( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix );
 
     //! assembles the mesh motion matrix.
     /*!In Particular it diagonalize the part of the matrix corresponding to the
@@ -225,7 +220,7 @@ private:
     bool                                 M_convectiveTermDer;
     UInt                                 M_interface;
     matrixPtr_Type                       M_meshBlock;
-    matrixPtr_Type                       M_shapeDerivativesBlock;
+    FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type M_shapeDerivativesBlock;
     matrixPtr_Type                       M_solidDerBlock;
     //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
     //@}

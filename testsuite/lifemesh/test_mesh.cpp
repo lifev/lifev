@@ -58,7 +58,7 @@
 
 #include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 
 // A dummy class to imitate a VectorEpetra
@@ -100,8 +100,8 @@ int main(int argc, char** argv)
     ofstream ofile(outfile.c_str());
     if (ofile.fail()) {cerr<<" Error: Cannot creat output file"<<endl; abort();}
 
-    RegionMesh3D<LinearTetra> aMesh;
-    typedef RegionMesh3D<LinearTetra> mesh_Type;
+    RegionMesh<LinearTetra> aMesh;
+    typedef RegionMesh<LinearTetra> mesh_Type;
     //    aMesh.test3DBuilder();
     //    aMesh.readMppFile(mystream, id, m);
     ID m=1;
@@ -135,8 +135,8 @@ int main(int argc, char** argv)
     aMesh.updateElementFaces();
     aMesh.showMe();
     cout<< " Now cleaning local Edges/faces Stuff"<<endl<<endl;
-    aMesh.cleanElementEdges();
-    aMesh.cleanElementFaces();
+    aMesh.cleanElementRidges();
+    aMesh.cleanElementFacets();
     aMesh.showMe();
     cout <<" **********************************************************"<<endl;
 
@@ -174,14 +174,14 @@ int main(int argc, char** argv)
     setBoundaryPointsMarker(aMesh, ofile,cerr, true);
     cerr<<endl;
     dummyVect disp(3*aMesh.numPoints());
-    MeshUtility::MeshTransformer<mesh_Type > transformer(aMesh);
+    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::MarkerCommon > transformer(aMesh);
     transformer.moveMesh(disp,3);
     MeshUtility::MeshStatistics::meshSize sizes= MeshUtility::MeshStatistics::computeSize(aMesh);
     cerr<<"Hmin ="<< sizes.minH<<" Hmax="<<sizes.maxH<<std::endl;
-    mesh_Type::Points newPointList=aMesh.pointList;
-    mesh_Type::Faces newFaceList=aMesh.faceList;
+    mesh_Type::points_Type newPointList=aMesh.pointList;
+    mesh_Type::faces_Type newFaceList=aMesh.faceList;
     Utilities::fixAfterShallowCopy(newFaceList,newPointList);
-    for (mesh_Type::Faces::iterator i=newFaceList.begin();i<newFaceList.end();++i)
+    for (mesh_Type::faces_Type::iterator i=newFaceList.begin();i<newFaceList.end();++i)
     {
         ID theId=i->point(0).id();
         if(&(i->point(0)) != &(newPointList[theId]) )
@@ -191,14 +191,14 @@ int main(int argc, char** argv)
         }
     }
     aMesh.faceList[2].replaceFlag(EntityFlags::CUTTED);
-    aMesh.faceList.reorderAccordingToFlag(EntityFlags::CUTTED,Flag::testOneSet);
+    aMesh.faceList.reorderAccordingToFlag(EntityFlags::CUTTED,&Flag::testOneSet);
     if (aMesh.faceList[0].flag() != EntityFlags::CUTTED){
         cerr<<"ERROR: Reordering is not working"<<std::endl;
     }
     cout<<"Number of cutted faces (should be 1) "<<
-                    aMesh.faceList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet)<<std::endl;
+                    aMesh.faceList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
     // Reset all flags to default
-    aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::EdgeType>());
+    aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::edge_Type>());
     aMesh.edge(0).setMarker(10);
     aMesh.edge(5).setMarker(10);
     aMesh.edge(10).setMarker(15);
@@ -206,22 +206,22 @@ int main(int argc, char** argv)
     watermarks[0]=10;
     watermarks[1]=15;
     // change flags according to marker iD
-    SetFlagAccordingToWatermarks<mesh_Type::EdgeType> changeFlags(EntityFlags::CUTTED,watermarks);
+    SetFlagAccordingToWatermarks<mesh_Type::edge_Type> changeFlags(EntityFlags::CUTTED,watermarks);
     aMesh.edgeList.changeAccordingToFunctor(changeFlags);
     cout<<"Number of cutted edges (should be 3) "<<
-                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet)<<std::endl;
-    aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::EdgeType>());
+                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
+    aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::edge_Type>());
     aMesh.edge(0).setMarker(10);
     aMesh.edge(5).setMarker(12);
     aMesh.edge(10).setMarker(15);
-    SetFlagAccordingToMarkerRanges<mesh_Type::EdgeType > changer(Flag::turnOn); //I may use the default constructor
+    SetFlagAccordingToMarkerRanges<mesh_Type::edge_Type > changer(&Flag::turnOn); //I may use the default constructor
     changer.insert(std::make_pair(10,12),EntityFlags::INTERNAL_INTERFACE);
     changer.insert(std::make_pair(15,18),EntityFlags::CUTTED);
     aMesh.edgeList.changeAccordingToFunctor(changer);
     cout<<"Number of cutted edges (should be 1) "<<
-                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet)<<std::endl;
+                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
     cout<<"Number of internal interface edges (should be 2) "<<
-                      aMesh.edgeList.countElementsWithFlag(EntityFlags::INTERNAL_INTERFACE,Flag::testOneSet)<<std::endl;
+                      aMesh.edgeList.countElementsWithFlag(EntityFlags::INTERNAL_INTERFACE,&Flag::testOneSet)<<std::endl;
 
 
 #ifdef HAVE_MPI
