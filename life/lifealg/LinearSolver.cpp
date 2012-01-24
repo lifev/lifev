@@ -60,9 +60,9 @@ LinearSolver::LinearSolver() :
 		M_matrix               (),
 		M_baseMatrixForPreconditioner(),
         M_preconditioner       (),
+        M_preconditionerOperator(),
         M_solverType           ( UndefinedSolver ),
         M_solverOperator       (),
-        M_problem              ( new LinearProblem_Type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer() ),
         M_maxItersForReuse     ( 0 ),
@@ -81,9 +81,9 @@ LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm>& commPtr ) :
 		M_matrix               (),
 		M_baseMatrixForPreconditioner(),
         M_preconditioner       (),
+        M_preconditionerOperator(),
         M_solverType           ( UndefinedSolver ),
         M_solverOperator       (),
-        M_problem              ( new LinearProblem_Type() ),
         M_parameterList        (),
         M_displayer            ( new Displayer( commPtr ) ),
         M_maxItersForReuse     ( 0 ),
@@ -276,9 +276,6 @@ LinearSolver::buildPreconditioner()
 				M_preconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
 			}
 			condest = M_preconditioner->condest();
-			Teuchos::RCP<operator_Type> tmpPrec( M_preconditioner->preconditioner(), false );
-			Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( tmpPrec ) );
-			M_problem->setLeftPrec( belosPrec );
 			chrono.stop();
 			if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Preconditioner computed in " , chrono.diff(), " s." );
 			if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
@@ -297,6 +294,9 @@ LinearSolver::resetPreconditioner()
 bool
 LinearSolver::isPreconditionerSet() const
 {
+	if( M_preconditionerOperator )
+		return true;
+
     return M_preconditioner.get() != 0 && M_preconditioner->preconditionerCreated();
 }
 
@@ -357,6 +357,9 @@ LinearSolver::setRightHandSide( const vectorPtr_Type& rhsPtr )
 void
 LinearSolver::setPreconditioner( preconditionerPtr_Type& preconditionerPtr )
 {
+	// If a preconditioner operator exists it must be deleted
+	M_preconditionerOperator.reset();
+
     M_preconditioner = preconditionerPtr;
 }
 
@@ -368,9 +371,7 @@ LinearSolver::setPreconditioner( operatorPtr_Type& preconditionerPtr )
 	// If a LifeV::Preconditioner exists it must be deleted
 	M_preconditioner.reset();
 
-	Teuchos::RCP<operator_Type> prec = Teuchos::rcp( preconditionerPtr );
-	Teuchos::RCP<Belos::EpetraPrecOp> belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( prec ) );
-	M_problem->setRightPrec( belosPrec );
+	M_preconditionerOperator = preconditionerPtr;
 }
 
 void
@@ -427,6 +428,9 @@ LinearSolver::numIterations() const
 Real
 LinearSolver::recursiveResidual()
 {
+    M_displayer->leaderPrint( "SLV-  WARNING: LinearSoler::recursiveResidual is not yet implemented\n" );
+
+    /*
     if ( !M_problem->isProblemSet() )
     {
         M_displayer->leaderPrint( "SLV-  WARNING: LinearSoler can not compute the residual if the linear system is not set!\n" );
@@ -437,6 +441,7 @@ LinearSolver::recursiveResidual()
     Real residual;
     res.Norm2( &residual );
     return residual;
+    */
 }
 
 LinearSolver::preconditionerPtr_Type&
@@ -536,7 +541,10 @@ LinearSolver::setupSolverOperator()
     M_solverOperator->setOperator( M_operator );
 
     // Set the preconditioner operator in the SolverOperator object
-    M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
+    if ( M_preconditioner )
+    	M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
+    else
+    	M_solverOperator->setPreconditioner( M_preconditionerOperator );
 
     // Set the parameter inside the solver
     M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List" ) );

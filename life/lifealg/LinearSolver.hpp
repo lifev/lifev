@@ -111,8 +111,6 @@ public:
     typedef boost::shared_ptr<operator_Type>                            operatorPtr_Type;
     typedef Operators::SolverOperator                                   SolverOperator_Type;
     typedef Teuchos::RCP< SolverOperator_Type >                         SolverOperatorPtr_Type;
-    typedef Belos::LinearProblem<double,multiVector_Type,operator_Type> LinearProblem_Type;
-    typedef Teuchos::RCP< LinearProblem_Type >                          LinearProblemPtr_Type;
 
     typedef MatrixEpetra<Real>                                          matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                              matrixPtr_Type;
@@ -346,10 +344,10 @@ private:
     vectorPtr_Type               M_rhs;
 
     preconditionerPtr_Type       M_preconditioner;
+    operatorPtr_Type             M_preconditionerOperator;
 
     SolverType                   M_solverType;
     SolverOperatorPtr_Type       M_solverOperator;
-    LinearProblemPtr_Type        M_problem;
 
     Teuchos::ParameterList       M_parameterList;
     boost::shared_ptr<Displayer> M_displayer;
