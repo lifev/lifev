@@ -4,7 +4,7 @@
 #                       This file is part of the LifeV Applications
 #                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 #
-#      Author(s): Name Surname <gwenol.grandperrin@epfl.ch>
+#      Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 #           Date: 09-01-2012
 #  License Terms: GNU GPL
 #
@@ -25,6 +25,7 @@ link:
 	test -a data || ln -s $(srcdir)/data
 	test -a SolverParamList1.xml || ln -s $(srcdir)/SolverParamList1.xml
 	test -a SolverParamList2.xml || ln -s $(srcdir)/SolverParamList2.xml
+	test -a SolverParamList3.xml || ln -s $(srcdir)/SolverParamList3.xml
 
 clean-results:
 	-rm *.vct *.scl *.case *.geo *.xmf *.h5

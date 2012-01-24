@@ -262,7 +262,7 @@ main( int argc, char** argv )
     if( verbose ) std::cout << "done" << std::endl;
     linearSolver2.showMe();
 
-    if( verbose ) std::cout << "Setting up LinearSolver... " << std::flush;
+    if( verbose ) std::cout << "Setting up LinearSolver (Belos)... " << std::flush;
     Teuchos::RCP< Teuchos::ParameterList > belosList2 = Teuchos::rcp ( new Teuchos::ParameterList );
     belosList2 = Teuchos::getParametersFromXmlFile( "SolverParamList2.xml" );
 
@@ -272,6 +272,17 @@ main( int argc, char** argv )
     linearSolver3.setPreconditioner( precPtr );
     if( verbose ) std::cout << "done" << std::endl;
     linearSolver3.showMe();
+
+    if( verbose ) std::cout << "Setting up LinearSolver (AztecOO)... " << std::flush;
+    Teuchos::RCP< Teuchos::ParameterList > belosList3 = Teuchos::rcp ( new Teuchos::ParameterList );
+    belosList3 = Teuchos::getParametersFromXmlFile( "SolverParamList3.xml" );
+
+    LinearSolver linearSolver4;
+    linearSolver4.setCommunicator( Comm );
+    linearSolver4.setParameters( *belosList3 );
+    linearSolver4.setPreconditioner( precPtr );
+    if( verbose ) std::cout << "done" << std::endl;
+    linearSolver4.showMe();
 
     // +-----------------------------------------------+
     // |                   Simulation                  |
@@ -315,13 +326,21 @@ main( int argc, char** argv )
     linearSolver2.setRightHandSide( *rhsBC );
     linearSolver2.solve( *solution2 );
 
-    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver... " << std::endl;
+    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (Belos)... " << std::endl;
     boost::shared_ptr<vector_type> solution3;
     solution3.reset( new vector_type( uFESpace->map(), Unique ) );
     *solution3 *= 0.0;
     linearSolver3.setOperator( systemMatrix );
     linearSolver3.setRightHandSide( rhsBC );
     linearSolver3.solve( solution3 );
+
+    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (AztecOO)... " << std::endl;
+    boost::shared_ptr<vector_type> solution4;
+    solution4.reset( new vector_type( uFESpace->map(), Unique ) );
+    *solution4 *= 0.0;
+    linearSolver4.setOperator( systemMatrix );
+    linearSolver4.setRightHandSide( rhsBC );
+    linearSolver4.solve( solution4 );
 
     // +-----------------------------------------------+
     // |             Computing the error               |
@@ -345,9 +364,23 @@ main( int argc, char** argv )
     solution3Err -= *solution3;
     solution3Err.abs();
 
+    vector_type solution4Err( *solution4 );
+    solution4Err *= 0.0;
+    uFESpace->interpolate( Laplacian::uexact, solution4Err, 0.0 );
+    solution4Err -= *solution4;
+    solution4Err.abs();
+
     vector_type solutionsDiff( *solution2 );
     solutionsDiff -= *solution;
     Real solutionsDiffNorm = solutionsDiff.norm2();
+
+    vector_type solutionsDiff2( *solution2 );
+    solutionsDiff2 -= *solution3;
+    Real solutionsDiffNorm2 = solutionsDiff2.norm2();
+
+    vector_type solutionsDiff3( *solution );
+    solutionsDiff3 -= *solution4;
+    Real solutionsDiffNorm3 = solutionsDiff3.norm2();
 
     if( verbose ) std::cout << "AztecOO solver" << std::endl;
     printErrors( *solution, uFESpace,verbose );
@@ -355,10 +388,15 @@ main( int argc, char** argv )
     if( verbose ) std::cout << "Belos solver" << std::endl;
     printErrors( *solution2, uFESpace,verbose );
 
-    if( verbose ) std::cout << "Linear solver" << std::endl;
+    if( verbose ) std::cout << "Linear solver Belos" << std::endl;
     printErrors( *solution3, uFESpace,verbose );
 
-    if( verbose ) std::cout << "Difference between the two solutions: " << solutionsDiffNorm << std::endl;
+    if( verbose ) std::cout << "Linear solver AztecOO" << std::endl;
+    printErrors( *solution4, uFESpace,verbose );
+
+    if( verbose ) std::cout << "Difference between the two solvers solutions: " << solutionsDiffNorm << std::endl;
+    if( verbose ) std::cout << "Difference between the two Belos solvers solutions: " << solutionsDiffNorm2 << std::endl;
+    if( verbose ) std::cout << "Difference between the two AztecOO solvers solutions: " << solutionsDiffNorm3 << std::endl;
 
     // +-----------------------------------------------+
     // |             Setting the exporter              |
