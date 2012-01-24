@@ -383,9 +383,9 @@ LinearSolver::setParameters( const Teuchos::ParameterList& list )
     {
     	M_solverType = Belos;
     }
-    else if( solverName == "Aztecoo" )
+    else if( solverName == "AztecOO" )
     {
-    	M_solverType = Aztecoo;
+    	M_solverType = AztecOO;
     }
 
     M_reusePreconditioner  = M_parameterList.get( "Reuse Preconditioner"     , false );
@@ -523,8 +523,8 @@ LinearSolver::setupSolverOperator()
         case Belos:
         	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
             break;
-        case Aztecoo:
-        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Aztecoo" ) );
+        case AztecOO:
+        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "AztecOO" ) );
             break;
         default:
             M_displayer->leaderPrint( "SLV-  ERROR: The type of solver is not recognized!\n" );

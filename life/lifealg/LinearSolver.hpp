@@ -121,7 +121,7 @@ public:
     typedef Preconditioner                                              preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>                      preconditionerPtr_Type;
 
-    enum SolverType          { UndefinedSolver, Belos, Aztecoo };
+    enum SolverType          { UndefinedSolver, Belos, AztecOO };
 
     //@}
 
