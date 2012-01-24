@@ -51,6 +51,7 @@ solidMeshPartitioned = none
 multimesh  = false   # actually we export also the displacement
 start      = 0
 save       = 1
+saveEvery       = 1
 type       = hdf5
 nRestart   = 0
 
@@ -62,7 +63,6 @@ filename   = solidRestarted
 [../] # exporter
 
 [importer]
-#initSol = 0003
 type       = hdf5
 restart_timestep = 0.003
 [./fluid]
@@ -73,9 +73,9 @@ filename   = solidImp
 # [../] # importer
 
 [fluid]
-useShapeDerivatives           = false
-semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
-domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
+useShapeDerivatives           = true
+semiImplicit                  = false # tells if we advance in time after the first nonlinear iteration or not
+domainVelImplicit             = true  # tells if the domain vel is to be considered implicitly in the convective term
 convectiveTermDer             = false  # tells if the velocity is to be considered implicitly in the convective term
 
 [./physics]
@@ -96,7 +96,7 @@ typeOfGeneralizedAlpha            = HHT
 [../space_discretization]
 mesh_dir  = ./Mesh/
 mesh_file = tube20.mesh # bypass_fluid_coarse_BL_2vols.mesh
-order     = P1
+mesh_order     = P1
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
 stiff_strain    = true
@@ -109,6 +109,7 @@ steady    = 0
 factor    = 1
 
 [../ipstab]
+use        = 1
 gammaBeta  = 1
 gammaDiv   = 0.2
 gammaPress = 0.05
@@ -125,7 +126,7 @@ tolerance       =  0 # how far points are to be considered the same on the inter
 
 useExactJacobian = true # always false for linear structure model. Otherwise it allows to chose beween an exact-inexact
                          # Newton scheme
-
+rescaleFactor    = 1. # this factor can be used to rescale the structure block
 [./physics]
 
 solidType = exponential #NOTE: the nonlinear choice is not available
@@ -133,8 +134,8 @@ solidType = exponential #NOTE: the nonlinear choice is not available
 material_flag = 1
 density   = 1.2
 young     = 4.0E6
-poisson   = 0.45
-bulk      = 1e9
+poisson   = 0.3
+bulk      = 1e7
 alpha     = 2.5e6
 gamma     = 1
 
@@ -153,10 +154,11 @@ typeOfGeneralizedAlpha            = HHT
 mesh_dir  = ./Mesh/ #test_tubes/  # the directory where the mesh file is
 mesh_file = vessel20.mesh #bypass_solid_coarse_BL_2vols.mesh  # mesh file
 order     = P1
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
 
 
 [../miscellaneous]
-factor    = 12
 verbose   = 1
 depname   = dep
 
@@ -165,8 +167,6 @@ depname   = dep
 maxiter = 1
 abstol  = 1.e-8
 linesearch = 0
-
-
 
 [linear_system]
 
@@ -197,7 +197,6 @@ displayList        = false
 [../prec]
 reuse           = false
 prectype        = Composed
-rescale_factor = 1. # solid matrix rescale factor
 displayList     = false
 entry           = 0.0
 
@@ -427,7 +426,6 @@ typeOfGeneralizedAlpha            = HHT
 
 [../prec]
 prectype        = Ifpack
-rescale_factor  = 1.e-2 # solid matrix rescale factor
 displayList     = false
 
 [./ifpack]
