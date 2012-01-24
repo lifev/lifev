@@ -86,7 +86,7 @@ private:
     commPtr_Type                                             M_commPtr;
     LifeV::Displayer                                         M_displayer;
     GetPot                                                   M_dataFile;
-    boost::shared_ptr< LifeV::MeshPartitioner< mesh_Type > > M_meshPartPtr;
+    boost::shared_ptr< mesh_Type >                           M_localMeshPtr;
 
     feSpacePtr_Type                                          M_velFESpacePtr;
     feSpacePtr_Type                                          M_pressFESpacePtr;
@@ -148,9 +148,11 @@ TestExporterVTK::buildMesh()
     readMesh(*fullMeshPtr, dataMesh);
     */
     // Split the mesh between processors
-    M_meshPartPtr.reset( new MeshPartitioner< mesh_Type >( fullMeshPtr, M_commPtr ) );
+    MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, M_commPtr );
+    M_localMeshPtr = meshPart.meshPartition();
+
     // Release the original mesh from the MeshPartitioner object and delete the RegionMesh object
-    M_meshPartPtr->releaseUnpartitionedMesh();
+    meshPart.releaseUnpartitionedMesh();
     fullMeshPtr.reset();
 
     chrono.stop();
@@ -176,7 +178,7 @@ TestExporterVTK::buildFESpaces()
 
     M_displayer.leaderPrint( "\t-o Building the velocity FE space...\n" );
 
-    M_velFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, velFE, nDimensions, M_commPtr) );
+    M_velFESpacePtr.reset( new feSpace_Type(M_localMeshPtr, velFE, nDimensions, M_commPtr) );
 
     M_displayer.leaderPrint( "\t\t...ok.\n" );
 
@@ -185,7 +187,7 @@ TestExporterVTK::buildFESpaces()
 
     M_displayer.leaderPrint( "\t-o Building the pressure FE space...\n" );
 
-    M_pressFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, pressFE, 1, M_commPtr) );
+    M_pressFESpacePtr.reset( new feSpace_Type(M_localMeshPtr, pressFE, 1, M_commPtr) );
 
     M_displayer.leaderPrint( "\t\t...ok.\n" );
 
@@ -217,7 +219,7 @@ TestExporterVTK::buildExporter( boost::shared_ptr< LifeV::ExporterVTK< mesh_Type
 
     exporterPtr.reset( new ExporterVTK<mesh_Type > ( M_dataFile, "testExporterVTK" ) );
     exporterPtr->setPostDir( "./" );
-    exporterPtr->setMeshProcId( M_meshPartPtr->meshPartition(), M_commPtr->MyPID() );
+    exporterPtr->setMeshProcId( M_localMeshPtr, M_commPtr->MyPID() );
 
     chrono.stop();
     M_displayer.leaderPrint( "[...done in ", chrono.diff(), "s]\n" );

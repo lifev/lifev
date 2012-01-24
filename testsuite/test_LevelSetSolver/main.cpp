@@ -129,7 +129,11 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    MeshPartitioner< mesh_type >   meshPart(fullMeshPtr, Comm);
+    boost::shared_ptr< mesh_type > localMeshPtr;
+    {
+        MeshPartitioner< mesh_type >   meshPart(fullMeshPtr, Comm);
+        localMeshPtr = meshPart.meshPartition();
+    }
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
@@ -141,8 +145,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
     std::string uOrder("P1");
     std::string bOrder("P1");
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, 1, Comm));
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,bOrder, 3, Comm));
+    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(localMeshPtr,uOrder, 1, Comm));
+    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >(localMeshPtr,bOrder, 3, Comm));
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
@@ -174,7 +178,7 @@ main( int argc, char** argv )
     }
 
 #ifdef HAVE_HDF5
-    ExporterHDF5<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID());
+    ExporterHDF5<mesh_type> exporter ( dataFile, localMeshPtr, "solution", Comm->MyPID());
     exporter.setMultimesh(false);
     boost::shared_ptr<vector_type> solutionPtr (new vector_type(level_set.solution(),Repeated));
     exporter.addVariable( ExporterData<mesh_type>::ScalarField, "level-set", uFESpace, solutionPtr, UInt(0) );

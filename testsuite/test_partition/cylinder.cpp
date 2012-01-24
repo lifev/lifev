@@ -423,7 +423,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart,uOrder,3,d->comm) );
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart.meshPartition(),uOrder,3,d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -434,7 +434,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart,pOrder,1,d->comm) );
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart.meshPartition(),pOrder,1,d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
