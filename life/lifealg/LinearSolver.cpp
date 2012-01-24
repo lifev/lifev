@@ -69,8 +69,9 @@ LinearSolver::LinearSolver() :
         M_reusePreconditioner  ( false ),
         M_quitOnFailure        ( false ),
         M_silent               ( false ),
-        M_lossOfPrecision      ( false ),
-        M_maxNumItersReached   ( false )
+        M_lossOfPrecision      ( SolverOperator_Type::undefined ),
+        M_maxNumItersReached   ( SolverOperator_Type::undefined ),
+        M_converged            ( SolverOperator_Type::undefined )
 {
 
 }
@@ -89,8 +90,9 @@ LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm>& commPtr ) :
         M_reusePreconditioner  ( false ),
         M_quitOnFailure        ( false ),
         M_silent               ( false ),
-        M_lossOfPrecision      ( false ),
-        M_maxNumItersReached   ( false )
+        M_lossOfPrecision      ( SolverOperator_Type::undefined ),
+        M_maxNumItersReached   ( SolverOperator_Type::undefined ),
+        M_converged            ( SolverOperator_Type::undefined )
 {
 
 }
@@ -129,27 +131,26 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
     setupSolverOperator();
 
     // Reset status informations
-    M_lossOfPrecision = false;
-    M_maxNumItersReached = false;
     bool failure = false;
+    this->resetStatus();
 	M_solverOperator->resetStatus();
 
     // Solve the linear system
     LifeChrono chrono;
     chrono.start();
     M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solutionPtr->epetraVector() );
-    SolverOperator_Type::SolverOperatorStatusType convergenceStatus = M_solverOperator->hasConverged();
+    M_converged         = M_solverOperator->hasConverged();
+    M_lossOfPrecision   = M_solverOperator->isLossOfAccuracyDetected();
     chrono.stop();
     if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
 
     // Getting informations post-solve
     Int numIters = M_solverOperator->numIterations();
-    M_lossOfPrecision = M_solverOperator->isLossOfAccuracyDetected();
 
     // Second run recomputing the preconditioner
     // This is done only if the preconditioner has not been
     // already recomputed and if it is a LifeV preconditioner.
-    if ( convergenceStatus != SolverOperator_Type::yes
+    if ( M_converged != SolverOperator_Type::yes
     	 && retry
     	 && M_preconditioner )
     {
@@ -161,8 +162,8 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
         // Solving again, but only once (retry = false)
         chrono.start();
         M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solutionPtr->epetraVector() );
-        convergenceStatus = M_solverOperator->hasConverged();
-        M_lossOfPrecision = M_solverOperator->isLossOfAccuracyDetected();
+        M_converged         = M_solverOperator->hasConverged();
+        M_lossOfPrecision   = M_solverOperator->isLossOfAccuracyDetected();
         chrono.stop();
         if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
     }
@@ -173,14 +174,15 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
         failure = true;
     }
 
-    if ( convergenceStatus == SolverOperator_Type::yes )
+    if ( M_converged == SolverOperator_Type::yes )
     {
         if( !M_silent ) M_displayer->leaderPrint( "SLV-  Convergence in " , numIters, " iterations\n" );
+        M_maxNumItersReached = SolverOperator_Type::no;
     }
     else
     {
         M_displayer->leaderPrint( "SLV-  WARNING: Solver failed to converged to the desired precision!\n" );
-        M_maxNumItersReached = true;
+        M_maxNumItersReached = SolverOperator_Type::yes;
         failure = true;
     }
 
@@ -227,8 +229,10 @@ LinearSolver::printStatus()
     std::ostringstream stat;
     std::string str;
 
-    if ( M_lossOfPrecision )    stat << "Accuracy loss ";
-    if ( M_maxNumItersReached ) stat << "Maximum number of iterations reached ";
+    if( M_lossOfPrecision == SolverOperator_Type::yes )    stat << "Accuracy loss ";
+    if( M_maxNumItersReached == SolverOperator_Type::yes ) stat << "Maximum number of iterations reached ";
+    if( M_converged == SolverOperator_Type::yes ) stat << "The solver has converged ";
+    else if( M_converged == SolverOperator_Type::no ) stat << "The solver has not ";
     str = stat.str();
     return str;
 }
@@ -294,6 +298,14 @@ bool
 LinearSolver::isPreconditionerSet() const
 {
     return M_preconditioner.get() != 0 && M_preconditioner->preconditionerCreated();
+}
+
+void
+LinearSolver::resetStatus()
+{
+    M_lossOfPrecision    = SolverOperator_Type::undefined;
+    M_maxNumItersReached = SolverOperator_Type::undefined;
+    M_converged          = SolverOperator_Type::undefined;
 }
 
 void
@@ -449,6 +461,48 @@ boost::shared_ptr<Displayer>
 LinearSolver::displayer()
 {
     return M_displayer;
+}
+
+Int
+LinearSolver::maxItersForReuse() const
+{
+    return M_maxItersForReuse;
+}
+
+bool
+LinearSolver::reusePreconditioner() const
+{
+    return M_reusePreconditioner;
+}
+
+bool
+LinearSolver::quitOnFailure() const
+{
+    return M_quitOnFailure;
+}
+
+bool
+LinearSolver::silent() const
+{
+    return M_silent;
+}
+
+LinearSolver::SolverOperator_Type::SolverOperatorStatusType
+LinearSolver::hasReachedMaxNumIters() const
+{
+    return M_maxNumItersReached;
+}
+
+LinearSolver::SolverOperator_Type::SolverOperatorStatusType
+LinearSolver::isLossOfAccuracyDetected() const
+{
+    return M_lossOfPrecision;
+}
+
+LinearSolver::SolverOperator_Type::SolverOperatorStatusType
+LinearSolver::hasConverged() const
+{
+    return M_converged;
 }
 
 // ===================================================

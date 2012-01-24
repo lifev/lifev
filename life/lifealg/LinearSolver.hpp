@@ -192,6 +192,9 @@ public:
     //! Return true if preconditioner has been setted
     bool isPreconditionerSet() const;
 
+    //! Reset the status for the state of convergence and loss of accuracy
+    void resetStatus();
+
     //! Print informations about the solver
     void showMe( std::ostream& output = std::cout ) const;
 
@@ -304,6 +307,27 @@ public:
     //! Return a shared pointer on the displayer
     boost::shared_ptr<Displayer> displayer();
 
+    //! Returns the maximum of iterations tolerate to avoid recomputing the preconditioner
+    Int maxItersForReuse() const;
+
+    //! Returns if the preconditioner can be reused
+    bool reusePreconditioner() const;
+
+    //! Returns if the application should stop if a problem occurs
+    bool quitOnFailure() const;
+
+    //! Returns if the solver is in silent mode
+    bool silent() const;
+
+	//! Returns if the maximum number of iterations has been reached
+    SolverOperator_Type::SolverOperatorStatusType hasReachedMaxNumIters() const;
+
+	//! Returns if a loss of precision has been detected
+    SolverOperator_Type::SolverOperatorStatusType isLossOfAccuracyDetected() const;
+
+	//! Returns if the convergence has been achieved
+    SolverOperator_Type::SolverOperatorStatusType hasConverged() const;
+
     //@}
 
 private:
@@ -330,15 +354,16 @@ private:
     Teuchos::ParameterList       M_parameterList;
     boost::shared_ptr<Displayer> M_displayer;
 
-    // LifeV features for Belos
+    // LifeV features
     Int                          M_maxItersForReuse;
     bool                         M_reusePreconditioner;
     bool                         M_quitOnFailure;
     bool                         M_silent;
 
-    // Status information
-    bool                         M_lossOfPrecision;
-    bool                         M_maxNumItersReached;
+    // Status informations
+    SolverOperator_Type::SolverOperatorStatusType M_lossOfPrecision;
+    SolverOperator_Type::SolverOperatorStatusType M_maxNumItersReached;
+    SolverOperator_Type::SolverOperatorStatusType M_converged;
 
 };
 
