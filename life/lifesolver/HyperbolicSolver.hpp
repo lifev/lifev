@@ -206,7 +206,7 @@ public:
     Real CFL();
 
     //! Get solution values across subdomain interfaces.
-    void updateGhostValues( MeshPartitioner<Mesh> const & meshPart );
+    void updateGhostValues( typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type & ghostDataMap );
 
     //@}
 
@@ -759,14 +759,13 @@ CFL()
 template< typename Mesh, typename SolverType >
 void
 HyperbolicSolver< Mesh, SolverType >::
-updateGhostValues( MeshPartitioner<Mesh> const & meshPart )
+updateGhostValues( typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type & ghostDataMap )
 {
 
     // fill send buffer
     buffer_Type sendBuffer;
 
     // TODO: move this to a const reference
-    typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type ghostDataMap = meshPart.ghostDataMap();
     typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type::const_iterator procIt  = ghostDataMap.begin();
     typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type::const_iterator procEnd = ghostDataMap.end();
     typename MeshPartitioner<Mesh>::GhostEntityDataContainer_Type::const_iterator dataIt;
