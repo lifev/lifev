@@ -85,12 +85,12 @@ PreconditionerSIMPLE::createSIMPLEList( list_Type&         list,
     std::string fluidPrec = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec" ).data(), "ML" );
     list.set( "subprecs: fluid prec", fluidPrec );
     std::string fluidPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec_data_section" ).data(), "" );
-    list.set( "subprecs: fluid prec data section", ( section + "/" + subsection+"/subprecs/"+fluidPrecDataSection ).data() );
+    list.set( "subprecs: fluid prec data section", ( fluidPrecDataSection ).data() );
 
     std::string schurPrec = dataFile( ( section + "/" + subsection + "/subprecs/schur_prec" ).data(), "ML" );
     list.set( "subprecs: Schur prec", schurPrec );
     std::string schurPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/schur_prec_data_section" ).data(), "" );
-    list.set( "subprecs: Schur prec data section", ( section + "/" + subsection+"/subprecs/"+schurPrecDataSection ).data() );
+    list.set( "subprecs: Schur prec data section", ( schurPrecDataSection ).data() );
 
     list.set( "SIMPLE Type", SIMPLEType );
 

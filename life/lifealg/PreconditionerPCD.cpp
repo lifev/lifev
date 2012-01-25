@@ -105,17 +105,17 @@ PreconditionerPCD::createPCDList( list_Type&         list,
     std::string fluidPrec = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec" ).data(), "ML" );
     list.set( "subprecs: fluid prec", fluidPrec );
     std::string fluidPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec_data_section" ).data(), "" );
-    list.set( "subprecs: fluid prec data section", ( section + "/" + subsection+"/subprecs/"+fluidPrecDataSection ).data() );
+    list.set( "subprecs: fluid prec data section", ( fluidPrecDataSection ).data() );
 
     std::string pressureLaplacianPrec = dataFile( ( section + "/" + subsection + "/subprecs/pressure_laplacian_prec" ).data(), "ML" );
     list.set( "subprecs: pressure laplacian prec", pressureLaplacianPrec );
     std::string pressureLaplacianPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/pressure_laplacian_prec_data_section" ).data(), "" );
-    list.set( "subprecs: pressure laplacian prec data section", ( section + "/" + subsection+"/subprecs/"+pressureLaplacianPrecDataSection ).data() );
+    list.set( "subprecs: pressure laplacian prec data section", ( pressureLaplacianPrecDataSection ).data() );
 
     std::string pressureMassPrec = dataFile( ( section + "/" + subsection + "/subprecs/pressure_mass_prec" ).data(), "ML" );
     list.set( "subprecs: pressure mass prec", pressureMassPrec );
     std::string pressureMassPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/pressure_mass_prec_data_section" ).data(), "" );
-    list.set( "subprecs: pressure mass prec data section", ( section + "/" + subsection+"/subprecs/"+pressureMassPrecDataSection ).data() );
+    list.set( "subprecs: pressure mass prec data section", ( pressureMassPrecDataSection ).data() );
 
     std::string pressureBoundaryConditions = dataFile( ( section + "/" + subsection + "/pressure_boundary_conditions").data(), "none" );
     list.set( "pressure boundary conditions", pressureBoundaryConditions );
