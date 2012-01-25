@@ -465,16 +465,17 @@ bool checkMesh3D( RegionMesh & mesh,
 
     MeshUtility::EnquireBFace<RegionMesh> enquireBFace(*bfaces );
 
+    UInt meshNumBoundaryFaces ( mesh.numBFaces() + mesh.faceList.countElementsWithFlag( EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet ) );
 
     if ( mesh.storedFaces() == 0 ||
-            mesh.numBFaces() > mesh.storedFaces() ||
-            bFacesFound > mesh.storedFaces() || bFacesFound > mesh.numBFaces())
+         meshNumBoundaryFaces > mesh.storedFaces() ||
+         bFacesFound > mesh.storedFaces() || bFacesFound > meshNumBoundaryFaces )
     {
         // Something strange with boundary faces
         if (verbose)
             err << "ERROR: Not all boundary faces stored" << std::endl;
-            err << "Found "<<bFacesFound<<" stored "<< mesh.storedFaces()<<
-                            "B faces declared in mesh "<<mesh.numBFaces()<<std::endl;
+            err << "Found " << bFacesFound << " stored " << mesh.storedFaces() <<
+                            "B faces declared in mesh "<< meshNumBoundaryFaces <<std::endl;
         if ( fix )
             sw.create( "BUILD_BFACES", true );
         if ( fix )
@@ -486,7 +487,7 @@ bool checkMesh3D( RegionMesh & mesh,
         if (verbose)
             err << "After buildFaces" << std::endl;
             err << "Found "<<bFacesFound<<" stored "<< mesh.storedFaces()<<
-                            "B faces declared in mesh "<<mesh.numBFaces()<<std::endl;
+                            "B faces declared in mesh "<< meshNumBoundaryFaces << std::endl;
     }
     else
     {
@@ -508,7 +509,7 @@ bool checkMesh3D( RegionMesh & mesh,
             MeshUtility::rearrangeFaces( mesh, clog, err, sw, numFaces, bFacesFound,
                                            verbose, bfaces.get() );
         }
-        if ( mesh.numBFaces() !=  bFacesFound)
+        if ( meshNumBoundaryFaces !=  bFacesFound)
         {
             err<<" ERROR: Number of B faces does not correspond to real one"<<std::endl;
             if (fix)
