@@ -3519,11 +3519,11 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
                 points[k] = ( facet( j ).point( k ) ).localId();
             _facet = bareEntitySelector_Type::makeBareEntity( points );
             _check = bareFacet.addIfNotThere( _facet.first );
-            if ( !( this->face(j).boundary() ) )
+            if ( !( this->facet( j ).boundary() ) )
                 extraBareFacet.addIfNotThere( _facet.first, j);
         }
     }
-    UInt numFoundBFaces = bareFacet.size();
+    UInt numFoundBoundaryFacets = bareFacet.size();
     for ( typename elements_Type::iterator elemIt = elementList().begin();
             elemIt != elementList().end(); ++elemIt )
     {
@@ -3539,9 +3539,9 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
 
             e = bareFacet.addIfNotThere( _facet.first );
             M_ElemToFacet( j, elemLocalID ) = e.first;
-            bool _isBound=e.first<this->numBoundaryFacets();
+            bool _isBound=e.first < numFoundBoundaryFacets;
             // Is the facet an extra facet (not on the boundary but originally included in the list)?
-            bool _isExtra = (e.first >=this->numBoundaryFacets() && e.first < _numOriginalStoredFacets);
+            bool _isExtra = (e.first >= numFoundBoundaryFacets && e.first < _numOriginalStoredFacets);
             if ( _isBound )
             {
                 facet_Type & _thisFacet(facet(e.first) );
@@ -3568,12 +3568,12 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
                     _thisFacet.secondAdjacentElementPosition()  = j;
                 }
             }
-            else if ( cf ) // A face not contained in the original list.
+            else if ( cf ) // A facet not contained in the original list.
                 // I process it only if requested!
             {
                 if ( e.second )
                 {
-                    // a new face It must be internal.
+                    // a new facet It must be internal.
                     for ( UInt k = 0; k < facet_Type::S_numPoints; ++k )
                         aFacet.setPoint( k, elemIt->point( ele.facetToPoint( j, k ) ) );
 
