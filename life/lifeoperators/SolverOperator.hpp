@@ -72,6 +72,7 @@ public:
 	enum SolverOperatorStatusType          { undefined, yes, no };
 
 	SolverOperator();
+	virtual ~SolverOperator();
 
 	//! @name Attribute set methods
 	//@{

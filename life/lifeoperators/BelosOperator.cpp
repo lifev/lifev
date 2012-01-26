@@ -117,7 +117,7 @@ void BelosOperator::doSetOperator()
 
 void BelosOperator::doSetPreconditioner()
 {
-	M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( M_prec ) );
+	M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( M_prec ), false );
 }
 
 void BelosOperator::doSetParameterList()

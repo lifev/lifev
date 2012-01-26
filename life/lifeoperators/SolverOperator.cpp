@@ -50,6 +50,11 @@ SolverOperator::SolverOperator():
     M_numIterations( 0 )
 { }
 
+SolverOperator::~SolverOperator()
+{
+
+}
+
 int SolverOperator::SetUseTranspose( bool useTranspose )
 {
 	M_useTranspose = useTranspose;
@@ -65,7 +70,7 @@ void SolverOperator::setOperator( const operatorPtr_Type& _oper )
 {
 	ASSERT_PRE( _oper.get() != this, "Can't self assign" );
 	ASSERT_PRE( _oper.get() != 0, "Can't assign a null pointer" );
-	M_oper = Teuchos::rcp( _oper );
+	M_oper = Teuchos::rcp( _oper.get(), false );
 	doSetOperator();
 }
 
@@ -73,7 +78,7 @@ void SolverOperator::setPreconditioner( const operatorPtr_Type& _prec )
 {
 	ASSERT_PRE( _prec.get() != this, "Self Assignment is forbidden" );
 	ASSERT_PRE( _prec.get() != 0, "Can't assign a null pointer" );
-	M_prec = Teuchos::rcp( _prec );
+	M_prec = Teuchos::rcp( _prec.get(), false ); // Not the best option
 	doSetPreconditioner();
 }
 
