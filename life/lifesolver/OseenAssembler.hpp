@@ -745,10 +745,9 @@ addNewtonConvection( matrixType& matrix, const vectorType& beta, const UInt& off
 
     ASSERT( M_uFESpace != 0, "No velocity FE space for assembling the convection." );
     ASSERT( M_betaFESpace != 0, "No convective FE space for assembling the convection." );
-    ASSERT( matrix !=0, "Cannot perform the assembly of the convection with no matrix." );
-    ASSERT( offsetLeft + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix->matrixPtr()->NumGlobalCols(),
+    ASSERT( offsetLeft + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalCols(),
             "The matrix is too small (columns) for the assembly of the convection" );
-    ASSERT( offsetUp + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix->matrixPtr()->NumGlobalRows(),
+    ASSERT( offsetUp + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalRows(),
             " The matrix is too small (rows) for the assembly of the convection" );
 
     // Some constants
