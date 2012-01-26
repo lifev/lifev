@@ -80,9 +80,9 @@ public:
 	//! If set true, transpose of this operator will be applied.
 	virtual int SetUseTranspose( bool useTranspose );
 
-	void setOperator( const operatorPtr_Type & _oper );
+	void setOperator( operatorPtr_Type _oper );
 
-	void setPreconditioner( const operatorPtr_Type & _prec );
+	void setPreconditioner( operatorPtr_Type _prec );
 
 	void setParameters( const Teuchos::ParameterList & _pList );
 
@@ -154,10 +154,10 @@ protected:
 	Teuchos::RCP<Teuchos::ParameterList> M_pList;
 
 	//! The preconditioner operator
-	Teuchos::RCP<Epetra_Operator> M_prec;
+	operatorPtr_Type M_prec;
 
 	//! The operator to be solved
-	Teuchos::RCP<Epetra_Operator> M_oper;
+	operatorPtr_Type M_oper;
 
 	//! Whenever to use the transpose
 	bool M_useTranspose;

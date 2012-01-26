@@ -48,6 +48,7 @@
 #include <BelosPseudoBlockGmresSolMgr.hpp>
 #include <BelosRCGSolMgr.hpp>
 #include <BelosTFQMRSolMgr.hpp>
+#include "Teuchos_RCPBoostSharedPtrConversions.hpp"
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -112,12 +113,12 @@ int BelosOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
 
 void BelosOperator::doSetOperator()
 {
-	M_linProblem->setOperator( M_oper );
+	M_linProblem->setOperator( Teuchos::rcp( M_oper ) );
 }
 
 void BelosOperator::doSetPreconditioner()
 {
-	M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( M_prec ), false );
+	M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( Teuchos::rcp( M_prec ) ), false );
 }
 
 void BelosOperator::doSetParameterList()

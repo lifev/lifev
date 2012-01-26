@@ -66,19 +66,19 @@ int SolverOperator::SetUseTranspose( bool useTranspose )
 	return ierr;
 }
 
-void SolverOperator::setOperator( const operatorPtr_Type& _oper )
+void SolverOperator::setOperator( operatorPtr_Type _oper )
 {
 	ASSERT_PRE( _oper.get() != this, "Can't self assign" );
 	ASSERT_PRE( _oper.get() != 0, "Can't assign a null pointer" );
-	M_oper = Teuchos::rcp( _oper.get(), false );
+	M_oper = _oper;
 	doSetOperator();
 }
 
-void SolverOperator::setPreconditioner( const operatorPtr_Type& _prec )
+void SolverOperator::setPreconditioner( operatorPtr_Type _prec )
 {
 	ASSERT_PRE( _prec.get() != this, "Self Assignment is forbidden" );
 	ASSERT_PRE( _prec.get() != 0, "Can't assign a null pointer" );
-	M_prec = Teuchos::rcp( _prec.get(), false ); // Not the best option
+	M_prec = _prec;
 	doSetPreconditioner();
 }
 
