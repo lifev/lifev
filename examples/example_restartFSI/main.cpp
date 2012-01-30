@@ -563,6 +563,7 @@ void Problem::restartFSI(  GetPot const& data_file)
   vectorPtr_Type solidDisp    (new vector_Type(M_fsi->FSIOper()->dFESpace().map(), M_importerSolid->mapType()));
   vectorPtr_Type fluidDisp(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), M_importerFluid->mapType()));
 
+  vectorPtr_Type firstFluidDisp(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), M_importerFluid->mapType()));
         //  vectorPtr_Type un               (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap()));
 
   // *un *= 0.0;
@@ -637,9 +638,9 @@ void Problem::restartFSI(  GetPot const& data_file)
         M_importerSolid->readVariable(initSolSolidDisp);
 
         structureSol->subset(*solidDisp, solidDisp->map(), (UInt)0, offset);
-        //        *structureSol *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
+        //        *structureSol *= 1/(M_fsi->FSIOper()->solid().rescaleFactor());
 
-	*temporarySol = *structureSol/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
+	*temporarySol = *structureSol/(M_fsi->FSIOper()->solid().rescaleFactor());
 	// *solidDisp *=  1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
 	// if(!iterInit)
 	//   {
@@ -660,8 +661,14 @@ void Problem::restartFSI(  GetPot const& data_file)
 
     }
 
+  UInt semiImplicit(0); //loadInitSol;
+  if(M_data->dataFluid()->isSemiImplicit())
+    semiImplicit=1;
+  HarmonicSol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
+
   iterationString = loadInitSolFD; //loadInitSol;
-  for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->ALETimeAdvance()->size(); iterInit++ )
+
+  for(UInt iterInit=0; iterInit<M_fsi->FSIOper()->ALETimeAdvance()->size()+semiImplicit+1; iterInit++ )
   {
       temporarySol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV:: Unique, Zero));
       /*!
@@ -674,7 +681,7 @@ void Problem::restartFSI(  GetPot const& data_file)
         /*!load of the solutions*/
         M_importerFluid->readVariable(initSolFluidDisp);
 
-	HarmonicSol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
+	// HarmonicSol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
     //     HarmonicSol->subset(*fluidDisp, fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
 	// *temporarySol = *HarmonicSol;
 
@@ -687,24 +694,44 @@ void Problem::restartFSI(  GetPot const& data_file)
 	//     std::cout << "Reloaded Harmonic sol norm: "<< HarmonicSol->norm2() << std::endl;
 	//   }
     std::cout << "Reloaded Harmonic sol norm: "<< fluidDisp->norm2() << std::endl;
-    M_ALEStencil.push_back(/*temporarySol*/fluidDisp);
-	//Updating the iteration String name
-        int iterations = std::atoi(iterationString.c_str());
-        iterations--;
+    if(iterInit == 0)
+      {
+	HarmonicSol->subset(*fluidDisp, fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
+	if(!semiImplicit)
+	  {
+	    //M_ALEStencil.push_back(/*temporarySol*/fluidDisp);
+	    *firstFluidDisp = *fluidDisp;
+	  }
+      }
+    else
+      if(semiImplicit && iterInit == 1)
+	*firstFluidDisp = *fluidDisp;
+      else
+	M_ALEStencil.push_back(/*temporarySol*/fluidDisp);
+    //Updating the iteration String name
+    int iterations = std::atoi(iterationString.c_str());
+    iterations--;
 
-        std::ostringstream iter;
-        iter.fill( '0' );
-        iter << std::setw(5) << ( iterations );
-        iterationString=iter.str();
-
+    std::ostringstream iter;
+    iter.fill( '0' );
+    iter << std::setw(5) << ( iterations );
+    iterationString=iter.str();
     }
-    HarmonicSol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-    HarmonicSol->subset(*M_ALEStencil[0], M_ALEStencil[0]->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
+
+   // HarmonicSol.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
+   // HarmonicSol->subset(*M_ALEStencil[0], M_ALEStencil[0]->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
+
     *M_fluidStencil[0]+=*M_solidStencil[0];
     *M_fluidStencil[0]+=*HarmonicSol;
     //this is going to be the global solutions returned by the method solution()
 
     M_fsi->initialize(M_fluidStencil, M_solidStencil, M_ALEStencil);
+
+    //if(semiImplicit)
+      {
+	M_fsi->FSIOper()->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataSolid()->dataTime()->timeStep() );
+	M_fsi->FSIOper()->ALETimeAdvance()->shiftRight(*firstFluidDisp);
+      }
     //M_fsi->FSIOper()->setSolution(*un);
     //std::string vettore="vettore";
     //un->spy(vettore);
@@ -873,7 +900,7 @@ Problem::errors( GetPot const& dataFile)
                 }
             }
 
-  velAndPressure.reset(  new vector_Type( M_fsi->FSIOper()->fluid().getMap(), M_importerFluid->mapType()  ));
+  velAndPressure.reset(  new vector_Type( M_fsi->FSIOper()->fluid().getMap(), importer->mapType()  ));
 
             importer->addVariable( ExporterData<mesh_Type>::VectorField, "f-velocity", uFESpace,
                                   velAndPressure, UInt(0));
@@ -895,48 +922,48 @@ Problem::errors( GetPot const& dataFile)
                 }
                 else
                 {
-                    importer2.reset( new ExporterEnsight<mesh_Type > ( dataFile, M_fsi->FSIOper()->uFESpace().mesh(), name2.c_str(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
+		  importer2.reset( new ExporterEnsight<mesh_Type > ( dataFile, M_fsi->FSIOper()->uFESpace().mesh(), name2.c_str(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
                 }
             }
 
-  velAndPressure2.reset(  new vector_Type( M_fsi->FSIOper()->fluid().getMap(), M_importerFluid->mapType()  ));
+  velAndPressure2.reset(  new vector_Type( M_fsi->FSIOper()->fluid().getMap(), importer2->mapType()  ));
 
             importer2->addVariable( ExporterData<mesh_Type>::VectorField, "f-velocity", uFESpace,
                                   velAndPressure2, UInt(0));
             importer2->addVariable( ExporterData<mesh_Type>::ScalarField, "f-pressure", pFESpace,
                                   velAndPressure2, pressureOffset );
 
-	    std::string tstart1 =  dataFile( "exporter/tstart1", "00000");
-	    std::string tstart2 =  dataFile( "exporter/tstart2", "00000");
+  	    std::string tstart1 =  dataFile( "importer/tstart1", "00000");
+  	    std::string tstart2 =  dataFile( "importer/tstart2", "00000");
 
 
-	    LifeV::ExporterData<mesh_Type> initSolVel(LifeV::ExporterData<mesh_Type>::VectorField,
-						      std::string("f-velocity." + tstart1),
-						      uFESpace,
-						      velAndPressure,
-						      UInt(0),
-						      LifeV::ExporterData<mesh_Type>::UnsteadyRegime,
-						      LifeV::ExporterData<mesh_Type>::Node );
+  	    LifeV::ExporterData<mesh_Type> initSolVel(LifeV::ExporterData<mesh_Type>::VectorField,
+  						      std::string("f-velocity." + tstart1),
+  						      uFESpace,
+  						      velAndPressure,
+  						      UInt(0),
+  						      LifeV::ExporterData<mesh_Type>::UnsteadyRegime,
+  						      LifeV::ExporterData<mesh_Type>::Node );
 
         importer->readVariable(initSolVel  );
 
 
         LifeV::ExporterData<mesh_Type> initSolVel2(LifeV::ExporterData<mesh_Type>::VectorField,
-						   std::string("f-velocity." + tstart2),
-						   uFESpace,
-						   velAndPressure2,
-						   UInt(0),
-						   LifeV::ExporterData<mesh_Type>::UnsteadyRegime,
-						   LifeV::ExporterData<mesh_Type>::Node );
+  						   std::string("f-velocity." + tstart2),
+  						   uFESpace,
+  						   velAndPressure2,
+  						   UInt(0),
+  						   LifeV::ExporterData<mesh_Type>::UnsteadyRegime,
+  						   LifeV::ExporterData<mesh_Type>::Node );
 
         importer2->readVariable(initSolVel2  );
 
 
-	    std::cout<< "norm 2 vel1 \n " <<velAndPressure->norm2()<<std::endl;
+  	    std::cout<< "norm 2 vel1 \n " <<velAndPressure->norm2()<<std::endl;
 
-	    vector_Type vel  (uFESpace->map(), Repeated);
-	    vector_Type velpressure ( *velAndPressure, Repeated );
-	    vel.subset(velpressure);
+  	    vector_Type vel  (uFESpace->map(), Repeated);
+  	    vector_Type velpressure ( *velAndPressure, Repeated );
+  	    vel.subset(velpressure);
 
     vector_Type vel2  (uFESpace->map(), Repeated);
     vector_Type velpressure2 ( *velAndPressure2, Repeated );
