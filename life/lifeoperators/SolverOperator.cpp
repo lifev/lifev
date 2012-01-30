@@ -90,7 +90,6 @@ void SolverOperator::setParameters( const Teuchos::ParameterList& _pList )
 
 int SolverOperator::Apply( const vector_Type& X, vector_Type& Y ) const
 {
-	ASSERT_PRE( M_oper.assert_valid_ptr().get() != 0, "M_oper must be assigned" );
 	ASSERT_PRE( X.Map().SameAs( M_oper->OperatorDomainMap() ), "X and domain map do no coincide \n" );
 	ASSERT_PRE( Y.Map().SameAs( M_oper->OperatorRangeMap() ) , "Y and range map do no coincide \n" );
 
@@ -99,7 +98,6 @@ int SolverOperator::Apply( const vector_Type& X, vector_Type& Y ) const
 
 int SolverOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 {
-	ASSERT_PRE( M_oper.assert_valid_ptr().get() != 0, "M_oper must be assigned \n" );
 	ASSERT_PRE( Y.Map().SameAs( M_oper->OperatorDomainMap() ), "Y and domain map do no coincide \n" );
 	ASSERT_PRE( X.Map().SameAs( M_oper->OperatorRangeMap() ) , "X and range map do no coincide \n" );
 
