@@ -279,6 +279,10 @@ MultiscaleAlgorithmBroyden::orthogonalizationUpdate( const multiscaleVector_Type
 void
 MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
 {
+    // If no coupling variable are present, the Jacobian is 0x0
+    if ( M_couplingVariables->size() == 0 )
+        return;
+
     if ( M_multiscale->globalData()->dataTime()->timeStepNumber()%multiscaleSaveEachNTimeSteps == 0 || M_multiscale->globalData()->dataTime()->isLastTimeStep() )
         if ( !M_jacobian.get() == 0 )
         {
@@ -303,6 +307,10 @@ MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
 void
 MultiscaleAlgorithmBroyden::importJacobianFromHDF5()
 {
+    // If no coupling variable are present, the Jacobian is 0x0
+    if ( M_couplingVariables->size() == 0 )
+        return;
+
     if ( M_comm->MyPID() == 0 )
         std::cout << " MS-  Importing Jacobian matrix                " << std::flush;
 
