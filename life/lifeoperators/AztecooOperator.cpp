@@ -48,16 +48,14 @@ AztecooOperator::AztecooOperator():
 	M_name = "AztecOOOperator";
 }
 
-int AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
+int
+AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
 {
 	vector_Type Xcopy( X );
 	Y.PutScalar( 0.0 );
-	M_linSolver->SetUserOperator( M_oper.get() );
 	M_linSolver->SetParameters( M_pList->sublist( "Trilinos: AztecOO List" ) );
 	M_linSolver->SetRHS( &Xcopy );
 	M_linSolver->SetLHS( &Y );
-	if( M_prec.get() != 0 )
-		EPETRA_CHK_ERR( M_linSolver->SetPrecOperator( (Epetra_Operator*) M_prec.get() ) );
 
 	int maxIter( M_pList->sublist( "Trilinos: AztecOO List" ).get<int>( "max_iter" ) );
 	double tol(  M_pList->sublist( "Trilinos: AztecOO List" ).get<double>( "tol" ) );
@@ -91,6 +89,25 @@ int AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) cons
 	}
 
 	return retValue;
+}
+
+void
+AztecooOperator::doSetOperator()
+{
+	M_linSolver->SetUserOperator( M_oper.get() );
+}
+
+void
+AztecooOperator::doSetPreconditioner()
+{
+	if( M_prec.get() != 0 )
+		M_linSolver->SetPrecOperator( (Epetra_Operator*) M_prec.get() );
+}
+
+void
+AztecooOperator::doSetParameterList()
+{
+	M_linSolver->SetParameters( M_pList->sublist( "Trilinos: AztecOO List" ) );
 }
 
 } // Namespace Operators
