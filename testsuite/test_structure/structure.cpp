@@ -161,7 +161,7 @@ Structure::run2d()
 void
 Structure::run3d()
 {
-    typedef RegionMesh3D<LinearTetra> mesh_Type;
+    typedef RegionMesh<LinearTetra> mesh_Type;
     typedef VenantKirchhoffSolver< mesh_Type >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
 
@@ -200,15 +200,6 @@ Structure::run3d()
     typedef boost::shared_ptr<solidFESpace_type> solidFESpace_ptrtype;
     solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
-
-    MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
-
-    MapEpetra fullMap;
-
-    for (UInt ii = 0; ii < nDimensions; ++ii)
-    {
-        fullMap += structMap;
-    }
 
     VenantKirchhoffSolverLinear< mesh_Type > solid;
     solid.setup(dataStructure,

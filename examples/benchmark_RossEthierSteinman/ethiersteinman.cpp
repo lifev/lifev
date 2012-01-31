@@ -454,7 +454,7 @@ Ethiersteinman::run()
             // +-----------------------------------------------+
             if (verbose) std::cout << "[Loading the mesh]" << std::endl;
 
-            boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+            boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>);
 
             // Building the mesh from the source
             if(M_meshSource == RegularMesh)
@@ -485,7 +485,7 @@ Ethiersteinman::run()
             }
 
             if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
-            MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, M_data->comm);
+            MeshPartitioner< RegionMesh<LinearTetra> >   meshPart(fullMeshPtr, M_data->comm);
             fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
             // +-----------------------------------------------+
@@ -553,7 +553,7 @@ Ethiersteinman::run()
 
             if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
-            OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
+            OseenSolver< RegionMesh<LinearTetra> > fluid (oseenData,
                                                       *uFESpace,
                                                       *pFESpace,
                                                       M_data->comm);

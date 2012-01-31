@@ -60,6 +60,8 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 
+#include <life/lifearray/MapVector.hpp>
+
 
 namespace LifeV
 {
@@ -86,8 +88,16 @@ public:
 
     typedef Epetra_Map                                            map_type;
     typedef boost::shared_ptr<map_type>                           map_ptrtype;
+
+    /* Double shared_ptr are used here to ensure that all the similar MapEpetra
+       point to the same exporter/importer. If double shared_ptr were not used, a
+       map initialized without importer/exporter (i.e. with a shared_ptr
+       pointing to 0) would not "gain" the importer/exporter created by another
+       map.*/
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Export> > exporter_ptrtype;
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importer_ptrtype;
+
+
     typedef Epetra_Comm                                           comm_type;
     typedef boost::shared_ptr<comm_type>                          comm_ptrtype;
 
@@ -132,30 +142,6 @@ public:
     MapEpetra( const Int           size,
                const comm_ptrtype& commPtr );
 
-    //! Constructor
-    /*!
-      Calls createImportExport from setUp()
-      @param refFE Reference finite element
-      @param meshPart Partition of the mesh
-      @param commPtr Pointer to the communicator
-     */
-    template<typename Mesh>
-    MapEpetra( const ReferenceFE&         refFE,
-               const MeshPartitioner<Mesh>& meshPart,
-               const comm_ptrtype&        commPtr );
-
-    //! Constructor
-    /*!
-      Calls createImportExport from setUp()
-      @param refFE Reference finite element
-      @param mesh Mesh
-      @param commPtr Pointer to the communicator
-    */
-    template<typename Mesh>
-    MapEpetra( const ReferenceFE&         refFE,
-               const Mesh&          mesh,
-               const comm_ptrtype&  commPtr );
-
     //! Copy constructor
     /*!
       @param epetraMap An MapEpetra object
@@ -182,6 +168,7 @@ public:
     MapEpetra( const Epetra_BlockMap& blockMap,
                const Int offset,
                const Int maxId);
+
 private:
     //! Constructor from raw Epetra_Map
     /*!
@@ -237,6 +224,17 @@ public:
      */
     MapEpetra operator +  ( Int const size );
 
+    //! Juxtaposition operator
+    /*!
+      This operator is used when block structures are used. Indeed, it creates
+      from two different maps a MapVector that can be used to initialize
+      block structures, such as matrices and vectors (see \ref BlockAlgebraPage "this page" for examples).
+     */
+    MapVector<MapEpetra> operator| (const MapEpetra& map) const
+    {
+        return MapVector<MapEpetra>(*this,map);
+    }
+
     //@}
 
     //! @name Methods
@@ -253,6 +251,12 @@ public:
 
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
+
+    //! Getter for the global number of entries
+    UInt mapSize() const
+    {
+        return map(Unique)->NumGlobalElements();
+    }
 
     //@}
 
@@ -313,23 +317,6 @@ private:
      */
     void  bubbleSort( Epetra_IntSerialDenseVector& elements );
 
-    //! Setup a map using the finite element and using nodes, edges, faces and volumes numbering
-    /*!
-      Calls createImportExport
-      @param refFE Reference finite element
-      @param commPtr Pointer on the communicator
-      @param repeatedNodeVector Vector containing the node ids
-      @param repeatedEdgeVector Vector containing the edge ids
-      @param repeatedFaceVector Vector containing the face ids
-      @param repeatedVolumeVector Vector containing the volume ids
-     */
-    void setUp( const ReferenceFE&        refFE,
-                const comm_ptrtype& commPtr,
-                std::vector<Int>& repeatedNodeVector,
-                std::vector<Int>& repeatedEdgeVector,
-                std::vector<Int>& repeatedFaceVector,
-                std::vector<Int>& repeatedVolumeVector );
-
     //@}
 
     map_ptrtype        M_repeatedMapEpetra;
@@ -340,97 +327,9 @@ private:
 
 };
 
+typedef MapVector<MapEpetra> MapEpetraVector;
 
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-template<typename Mesh>
-MapEpetra::
-MapEpetra( const ReferenceFE&               refFE,
-           const MeshPartitioner<Mesh>& meshPart,
-           const comm_ptrtype&        commPtr ):
-        M_repeatedMapEpetra(),
-        M_uniqueMapEpetra(),
-        M_exporter(),
-        M_importer(),
-        M_commPtr( commPtr )
-{
-    // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
-    // never modify them
-
-    setUp( refFE,
-           commPtr,
-           const_cast<std::vector<Int>&>( meshPart.repeatedNodeVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedEdgeVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedFaceVector() ),
-           const_cast<std::vector<Int>&>( meshPart.repeatedVolumeVector() ) );
-
-}
-
-
-template<typename Mesh>
-MapEpetra::
-MapEpetra( const ReferenceFE&        refFE,
-           const Mesh&         mesh,
-           const comm_ptrtype& commPtr ):
-        M_repeatedMapEpetra(),
-        M_uniqueMapEpetra(),
-        M_exporter(),
-        M_importer(),
-        M_commPtr( commPtr )
-{
-    std::vector<Int> repeatedNodeVector;
-    std::vector<Int> repeatedEdgeVector;
-    std::vector<Int> repeatedFaceVector;
-    std::vector<Int> repeatedVolumeVector;
-
-    if ( refFE.nbDofPerVertex() )
-    {
-        repeatedNodeVector.reserve(mesh.numPoints());
-        for ( UInt ii = 0; ii < mesh.numPoints(); ii++ )
-            repeatedNodeVector.push_back( mesh.pointList(ii).id() );
-    }
-
-    if ( refFE.nbDofPerEdge() )
-    {
-        repeatedEdgeVector.reserve( mesh.numEdges() );
-
-        for ( UInt ii = 0; ii < mesh.numEdges(); ii++ )
-            repeatedEdgeVector.push_back( mesh.edgeList(ii).id() );
-    }
-
-    if ( refFE.nbDofPerFace() )
-    {
-        repeatedFaceVector.reserve( mesh.numFaces() );
-
-        for ( UInt ii = 0; ii < mesh.numFaces(); ii++ )
-            repeatedFaceVector.push_back( mesh.faceList(ii).id() );
-    }
-
-    if ( refFE.nbDofPerVolume() )
-    {
-        repeatedVolumeVector.reserve( mesh.numVolumes() );
-
-        for ( UInt ii = 0; ii < mesh.numVolumes(); ii++ )
-            repeatedVolumeVector.push_back( mesh.volumeList(ii).id() );
-    }
-
-
-    setUp( refFE,
-           commPtr,
-           repeatedNodeVector,
-           repeatedEdgeVector,
-           repeatedFaceVector,
-           repeatedVolumeVector );
-
-    // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
-    // never modify them
-
-}
-
-
-}
-
+} // end namespace LifeV
 
 #endif
 

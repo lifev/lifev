@@ -40,7 +40,7 @@
 #ifndef MESHVERTEX_H
 #define MESHVERTEX_H
 
-#include <boost/array.hpp>
+#include <life/lifearray/VectorSmall.hpp>
 #include <life/lifemesh/MeshEntity.hpp>
 #include <life/lifemesh/ElementShapes.hpp>
 
@@ -49,14 +49,14 @@ namespace LifeV
 //! MeshVertex -  Zero dimensional entity.
 /*!
     @author
-	Intermediate class used to build the actual Geometry classes; it stores boundary information.
+    Intermediate class used to build the actual Geometry classes; it stores boundary information.
 
-	@warning MeshVertex is a template class; in fact, information might not be known a priori.
-	All vector dimensions are determined at compile time to enhance memory access time.
-	A coherent GeoShape has to be provided by the user.
+    @warning MeshVertex is a template class; in fact, information might not be known a priori.
+    All vector dimensions are determined at compile time to enhance memory access time.
+    A coherent GeoShape has to be provided by the user.
 
  */
-class MeshVertex : public MeshEntityWithBoundary
+class MeshVertex : public MeshEntity
 {
 public:
 
@@ -75,26 +75,22 @@ public:
 
     //! Declares item identity and states if it is on boundary
     /*!
-    	@param identity Element identity
+        Local and global id are set equal. To change global id
+        use setId() method (inherited from MeshEntity)
+        @param identity Element identity (local and global)
         @param boundary True if the element is on boundary
      */
     explicit MeshVertex( ID identity, bool boundary = false );
 
     //! Declares item identity, provides coordinate and states if it is on boundary
     /*!
-    	@param identity Element identity
-    	@param x Element x coordinate
-    	@param y Element y coordinate
-    	@param z Element z coordinate
-    	@param boundary True if the element is on boundary
+        @param identity Element identity
+        @param x Element x coordinate
+        @param y Element y coordinate
+        @param z Element z coordinate
+        @param boundary True if the element is on boundary
      */
     MeshVertex( ID identity, Real x, Real y, Real z, bool boundary = false );
-
-    //! Copy constructor
-    /*!
-        @param Element MeshVertex to be copied
-     */
-    MeshVertex( MeshVertex const & Element );
 
     //! Destructor
     virtual ~MeshVertex()
@@ -106,14 +102,6 @@ public:
 
     //! @name Operators
     //@{
-
-    //! The equivalence operator
-    /*!
-        @param Element Equivalent MeshElementMarked0D
-        @return Reference to a new MeshElementMarked0D with the same content of MeshElementMarked0D Element
-     */
-    MeshVertex & operator=( MeshVertex const & Element );
-
     //@}
 
     //! @name Methods
@@ -128,17 +116,17 @@ public:
 
     //! Returns the pointer to the coordinates vector
     /*!
-    	@return Pointer to coordinate vector
+        @return Pointer to coordinate vector
      */
     Real const * coordinatesArray() const
     {
-        return M_coordinates.data();
+        return &M_coordinates[0];
     };
 
     //! Returns the reference to the x-coordinate
     /*!
-    	Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
-    	@return Reference to element x-coordinate
+        Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
+        @return Reference to element x-coordinate
      */
     Real & x()
     {
@@ -146,8 +134,8 @@ public:
     }
     //! Returns the reference to the y-coordinate
     /*!
-      	Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
-    	@return Reference to element y-coordinate
+        Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
+        @return Reference to element y-coordinate
      */
     Real & y()
     {
@@ -155,21 +143,16 @@ public:
     }
     //! Returns the reference to the z-coordinate and checks if working in two dimensions
     /*!
-    	Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
-    	@return Reference to element z-coordinate
+        Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
+        @return Reference to element z-coordinate
      */
     Real & z()
     {
-#ifdef TWODIM
-        ERROR_MSG( "z coordinate may be modified only in a 3D problem" );
-#else
         return M_coordinates[ 2 ];
-#endif
-
     }
     //! Returns the x-coordinate
     /*!
-    	@return Element x-coordinate
+        @return Element x-coordinate
      */
     Real x() const
     {
@@ -177,7 +160,7 @@ public:
     }
     //! Returns the y-coordinate
     /*!
-    	@return Element y-coordinate
+        @return Element y-coordinate
      */
     Real y() const
     {
@@ -185,23 +168,18 @@ public:
     };
     //! Returns the z-coordinate and checks if working in two dimensions
     /*!
-    	@return Element z-coordinate
+        @return Element z-coordinate
      */
     Real z() const
     {
-#ifdef TWODIM
-        return 0;
-#else
         return M_coordinates[ 2 ];
-#endif
-
     }
 
     //! Returns the coordinate specified in the argument
     /*!
         The method allows to access the coordinate specified in the argument
-    	@param coordinate x, y, or z coordinate to be returned
-    	@return Coordinate specified in the argument
+        @param coordinate x, y, or z coordinate to be returned
+        @return Coordinate specified in the argument
      */
     Real coordinate ( ID const coordinate ) const
     {
@@ -211,8 +189,8 @@ public:
     //! Returns the reference to the coordinate specified in the argument
     /*!
         The method allows to modify the coordinate specified in the argument
-    	@param coordinate x, y, or z coordinate to be returned
-    	@return Reference to the coordinate specified in the argument
+        @param coordinate x, y, or z coordinate to be returned
+        @return Reference to the coordinate specified in the argument
      */
     Real & coordinate ( ID const coordinate )
     {
@@ -228,9 +206,9 @@ public:
     //! Returns the coordinates vector
     /*!
         The method allows to access coordinates and modify them
-    	@return Coordinates array
-     */
-    boost::array<Real,NDIM>& coordinates ( void )
+        @return Coordinates array
+    */
+    Vector3D const & coordinates () const
     {
         return M_coordinates;
     }
@@ -238,7 +216,7 @@ public:
     //@}
 
 private:
-    boost::array<Real,NDIM> M_coordinates;
+    Vector3D M_coordinates;
 };
 
 }

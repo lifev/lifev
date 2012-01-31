@@ -233,7 +233,7 @@ impes::impes( int argc,
 Real
 impes::run()
 {
-    typedef RegionMesh3D<LinearTetra>                                RegionMesh;
+    typedef RegionMesh<LinearTetra>                                RegionMesh;
     typedef SolverAztecOO                                            solver_type;
     typedef DarcySolver< RegionMesh, solver_type >                   ds;
     typedef DarcySolverTransientNonLinear< RegionMesh, solver_type > dstnl;

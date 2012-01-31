@@ -585,11 +585,13 @@ BCBase & BCBase::operator=( const BCBase& BCb )
     M_finalized = BCb.M_finalized;
     M_isStored_BcVector = BCb.M_isStored_BcVector;
     M_bcFunctionFEVectorDependent=BCb.M_bcFunctionFEVectorDependent;
-    M_bcVector = BCb.M_bcVector;
     M_bcFunction = BCb.M_bcFunction;
+    M_bcVector = BCb.M_bcVector;
+    M_isStored_BcVector = BCb.M_isStored_BcVector;
+    M_isStored_BcFunctionVectorDependent = BCb.M_isStored_BcFunctionVectorDependent;
     M_offset  = BCb.M_offset;
+    M_finalized = BCb.M_finalized;
     M_components = BCb.M_components;
-    M_isStored_BcFunctionVectorDependent=BCb.M_isStored_BcFunctionVectorDependent;
 
     // Important!!: The set member M_idSet is always empty at this
     // point, it is just an auxiliary container used at the moment of

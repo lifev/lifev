@@ -60,6 +60,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/function.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -82,6 +83,13 @@ typedef boost::numeric::ublas::zero_matrix<Real> ZeroMatrix;
  */
 namespace AssemblyElemental
 {
+//! @name Public typedefs
+//@{
+//! Use the portable syntax of the boost function
+typedef boost::function5< const Real,  const Real&, const Real&,
+                          const Real&, const Real&, const ID&  > function_Type;
+//@}
+
 //! Elementary mass for constant mass coefficient
 /*!
   This function assembles the local mass matrix when the mass coefficient is constant.
@@ -144,7 +152,40 @@ void interpolate(localVector& localValues,
     }
 }
 
-//! Elementary advection
+//! Interpolation of the gradient
+template<typename localVector, typename globalVector>
+void interpolateGradient(localVector& localGradient,
+                         const CurrentFE& interpCFE,
+                         const UInt& spaceDim,
+                         const DOF& betaDof,
+                         const UInt& elementID,
+                         const globalVector& beta)
+{
+    const UInt nbQuadPt(interpCFE.nbQuadPt());
+    const UInt nbFEDof(interpCFE.nbFEDof());
+    const UInt totalDof(betaDof.numTotalDof());
+
+    for (UInt iterDim(0); iterDim<spaceDim; ++iterDim)
+    {
+        //Loop on the quadrature nodes
+        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+        {
+
+            for (UInt jDim(0); jDim<nDimensions; ++jDim)
+                //for ( jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+            {
+                localGradient[ iQuadPt ][ iterDim ][ jDim ] = 0.0;
+                for ( UInt i = 0; i < nbFEDof; ++i )
+                    localGradient[ iQuadPt ][ iterDim ][ jDim ] += interpCFE.phiDer( i, jDim, iQuadPt ) *
+                        beta[ betaDof.localToGlobalMap(elementID,i) + iterDim*totalDof];
+            }
+        }
+    }
+
+}
+
+
+//! Elementary advection \beta \grad u v
 template<typename localVector>
 void advection(MatrixElemental& localAdv,
                const CurrentFE& advCFE,
@@ -171,7 +212,7 @@ void advection(MatrixElemental& localAdv,
                 //Loop on the quadrature nodes
                 for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
-                    for (UInt iDim(0); iDim<3; ++iDim)
+                    for (UInt iDim(0); iDim<advCFE.nbCoor(); ++iDim)
                     {
                         localValue += localValues[iQuadPt][iDim]
                                       * advCFE.dphi(jDof,iDim,iQuadPt)
@@ -183,6 +224,55 @@ void advection(MatrixElemental& localAdv,
 
                 // Add on the local matrix
                 localView(iDof,jDof)=localValue;
+            }
+        }
+    }
+}
+
+//! Elementary advection, term u\grad \beta v
+template<typename localVector, typename localTensor>
+void symmetrizedAdvection(MatrixElemental& localAdv,
+                          const CurrentFE& advCFE,
+                          const localVector& localValues,
+                          const localTensor& localGradient,
+                          const UInt& fieldDim)
+{
+    const UInt nbFEDof(advCFE.nbFEDof());
+    const UInt nbQuadPt(advCFE.nbQuadPt());
+    Real localValue(0.0);
+
+    ASSERT (fieldDim == nDimensions, "Symmetrized operator works only with vectors of the same dimension as the space" );
+
+
+    for (UInt iCoor(0); iCoor<fieldDim; ++iCoor)
+    {
+        for (UInt jCoor(0); jCoor<fieldDim; ++jCoor)
+        {
+            // Extract the view of the matrix
+            MatrixElemental::matrix_view localView = localAdv.block(iCoor,jCoor);
+
+            // Loop over the basis functions
+            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            {
+                // Build the local matrix
+                for (UInt jDof(0); jDof < nbFEDof; ++jDof)
+                {
+                    localValue = 0.0;
+
+                    //Loop on the quadrature nodes
+                    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                    {
+                        localValue +=
+                            localGradient[iQuadPt][iCoor][jCoor]
+                            * advCFE.phi(jDof,iQuadPt)
+                            * advCFE.phi(iDof,iQuadPt)
+                            * advCFE.wDetJacobian(iQuadPt);
+
+                    }
+
+                    // Add on the local matrix
+                    localView(iDof,jDof)=localValue;
+                }
             }
         }
     }
@@ -203,6 +293,12 @@ void stiffStrain(MatrixElemental& localStiff,
                  const CurrentFE& stiffCFE,
                  const Real& coefficient,
                  const UInt& fieldDim);
+
+void bodyForces(VectorElemental& localForce,
+                const CurrentFE& massRhsCFE,
+                const function_Type& fun,
+                const Real& t,
+                const UInt& fieldDim);
 }
 
 //----------------------------------------------------------------------

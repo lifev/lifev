@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief The file contains two classes implementing a wrap up 
+ *  @brief The file contains two classes implementing a wrap up
            of Standard Library vector class to allow indexing from one.
  *
  *  @date 30-08-1999
@@ -50,13 +50,14 @@ namespace LifeV
     @author Luca Formaggia
 
     The class is a wrap up of Standard Library vector class.
-    It defines vectors of n x m size.
-    This class is deprecated and it should be removed when the discussion is over.
+    It defines arrays of n x m size.
+    This class is deprecated and it should be removed when the
+    discussion is over. It is with COLUMNWISE ORDERING
 
     Example:
 
     ArraySimple<int> b(3,5) is an array with 3 rows and 5 columns
-   
+
  */
 
 template <typename DataType>
@@ -115,7 +116,7 @@ public:
     /*!
         ArraySimple is seen as vector (index from one)
         @param i index of the element of the ArraySimple vector
-        @return a vector reference 
+        @return a vector reference
      */
     vectorReference_Type operator() ( vectorSize_Type const i )
     {
@@ -126,29 +127,29 @@ public:
     /*!
         ArraySimple is seen as vector
         @param i index of the element of the ArraySimple vector
-        @return a vector const reference 
+        @return a vector const reference
      */
     vectorConstReference_Type operator() ( vectorSize_Type const i ) const
     {
         return *( this->begin() + ( i ) );
-    } 
+    }
 
     //! Access operator
     /*!
         @param i row index
-        @param j column index 
-        @return a vector reference 
+        @param j column index
+        @return a vector reference
      */
     vectorReference_Type operator() ( vectorSize_Type const i, vectorSize_Type const j )
     {
         return *( this->begin() + ( j ) * M_numberOfRows + ( i ) );
-    } 
+    }
 
     //! Const access operator
     /*!
         @param i row index
-        @param j column index 
-        @return a vector const reference 
+        @param j column index
+        @return a vector const reference
      */
     vectorConstReference_Type operator() ( vectorSize_Type const i, vectorSize_Type const j ) const
     {
@@ -163,7 +164,7 @@ public:
 
     //!Return the iterator of the column passed by argument
     /*!
-        @param column column index 
+        @param column column index
         @return ArraySimple iterator
      */
     inline typename ArraySimple<DataType>::iterator columnIterator( vectorSize_Type const column );
@@ -171,14 +172,14 @@ public:
     //!Resize the ArraySimple vector
     /*!
         @param numberOfRows number of rows
-        @param numberOfColumns number of columns 
+        @param numberOfColumns number of columns
      */
     void reshape( vectorSize_Type const numberOfRows, vectorSize_Type const numberOfColumns );
 
     //! Completely clear out the container, returning memory to the system
     inline void clearArray();
 
-    //! Check if the VectorSimple vector contains an element with row index i and column index j
+    //! Check if the MeshEntityContainer vector contains an element with row index i and column index j
     /*!
         @param i row index
         @param j column index
@@ -222,7 +223,7 @@ private:
 
     //! Number of rows
     vectorSize_Type M_numberOfRows;
-    
+
     //! Number of columns
     vectorSize_Type M_numberOfColumns;
 };
@@ -259,7 +260,7 @@ ArraySimple<DataType>::ArraySimple( vectorSize_Type numberOfRows, vectorSize_Typ
 // Methods
 //============================================================================
 template <typename DataType>
-typename ArraySimple<DataType>::iterator 
+typename ArraySimple<DataType>::iterator
 ArraySimple<DataType>::columnIterator( vectorSize_Type const column )
 {
     if ( column > M_numberOfColumns )
@@ -279,7 +280,7 @@ ArraySimple<DataType>::reshape( vectorSize_Type numberOfRows, vectorSize_Type nu
 }
 
 template <typename DataType>
-void 
+void
 ArraySimple<DataType>::clearArray()
 {
     vector_Type tmp;
@@ -290,7 +291,7 @@ ArraySimple<DataType>::clearArray()
 }
 
 template <typename DataType>
-void 
+void
 ArraySimple<DataType>::showMe() const
 {
     std::cout << " Number of rows: " << M_numberOfRows << std::endl;

@@ -17,13 +17,16 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS = 
 
-check_PROGRAMS = test_ADRAssembler
+check_PROGRAMS = test_ADRAssembler test_ADRAssembler_2d
 test_ADRAssembler_SOURCES = main.cpp
+test_ADRAssembler_2d_SOURCES = main_2d.cpp
 
 EXTRA_DIST = data testsuite.at
 
 link:
 	test -a data || ln -s $(srcdir)/data
+	test -a data_2d || ln -s $(srcdir)/data_2d
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh Mesh
 
 clean-results:
 	-rm *.vct *.scl *.case *.geo

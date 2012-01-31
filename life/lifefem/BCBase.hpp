@@ -111,7 +111,7 @@ enum bcMode_Type
  */
 typedef std::string bcName_Type;
 
-typedef entityFlag_Type bcFlag_Type;
+typedef markerID_Type bcFlag_Type;
 
 typedef std::vector<ID> bcComponentsVec_Type;
 

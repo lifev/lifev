@@ -85,7 +85,7 @@ public:
 
     //! Empty Constructor
     /*!
-      @param mapType Specify wether the map is Unique or Repeated
+      @param mapType Specify whether the map is Unique or Repeated
      */
     VectorEpetra( const MapEpetraType& mapType = Unique );
 
@@ -157,7 +157,6 @@ public:
 
     //! @name Operators
     //@{
-
     //! Access operators
     /*!
       @param row Index of the entry to be accessed
@@ -396,6 +395,13 @@ public:
 
     //! @name Methods
     //@{
+
+    //! Access operators
+    /**
+     * It returns true if the element is present in the vector
+     * @param row The element to test
+     */
+    bool isGlobalIDPresent(const UInt row) const;
 
     //! Assemble the vector
     /*!
@@ -691,6 +697,12 @@ public:
     const vector_type& epetraVector() const
     {
         return *M_epetraVector;
+    }
+
+    //! Return the shared pointer on the raw VectorEpetra
+    const Vector_PtrType& epetraVectorPtr() const
+    {
+        return M_epetraVector;
     }
 
     //! Return the Epetra_BlockMap of the vector

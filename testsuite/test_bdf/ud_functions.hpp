@@ -39,8 +39,7 @@ namespace LifeV
 //! User functions
 // ===================================================
 
-#ifdef TWODIM
-class SourceFct
+class SourceFct_2d
 {
 public:
     inline Real operator()(Real /*x*/,Real /*y*/,Real /*z*/,Real /*t*/,int /*ic*/) const
@@ -49,7 +48,7 @@ public:
     }
 };
 
-class AnalyticalSol
+class AnalyticalSol_2d
 {
     // ic stands for a component index (unuseful in the scalar case)
 public:
@@ -77,7 +76,6 @@ public:
     }
 };
 
-#elif defined THREEDIM
 class SourceFct
 {
 public:
@@ -112,7 +110,6 @@ public:
     }
 };
 
-#endif
 
 Real nu(const Real& t)
 {

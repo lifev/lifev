@@ -75,14 +75,14 @@ Faces= 4702  Volumes=47785
 *******         STATUS OF SWITCHES    ************
 
  Status of switches
-Switch named: FACES_HAVE_ADIACENCY Value= 1
-Switch named: HAS_ALL_EDGES Value= 0
-Switch named: HAS_ALL_FACES Value= 0
+Switch named: FACETS_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_RIDGES Value= 0
+Switch named: HAS_ALL_FACETS Value= 0
 Switch named: HAS_BEEN_CHECKED Value= 1
-Switch named: HAS_BOUNDARY_EDGES Value= 1
-Switch named: HAS_BOUNDARY_FACES Value= 1
-Switch named: HAS_VOLUME_TO_EDGES Value= 0
-Switch named: HAS_VOLUME_TO_FACES Value= 0
+Switch named: HAS_BOUNDARY_RIDGES Value= 1
+Switch named: HAS_BOUNDARY_FACETS Value= 1
+Switch named: HAS_ELEMENT_TO_RIDGES Value= 0
+Switch named: HAS_ELEMENT_TO_FACETS Value= 0
 **************************************************
 **************************************************
  Now building local Edges/faces Stuff
@@ -107,14 +107,14 @@ Faces= 4702  Volumes=47785
 *******         STATUS OF SWITCHES    ************
 
  Status of switches
-Switch named: FACES_HAVE_ADIACENCY Value= 1
-Switch named: HAS_ALL_EDGES Value= 0
-Switch named: HAS_ALL_FACES Value= 0
+Switch named: FACETS_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_RIDGES Value= 0
+Switch named: HAS_ALL_FACETS Value= 0
 Switch named: HAS_BEEN_CHECKED Value= 1
-Switch named: HAS_BOUNDARY_EDGES Value= 1
-Switch named: HAS_BOUNDARY_FACES Value= 1
-Switch named: HAS_VOLUME_TO_EDGES Value= 1
-Switch named: HAS_VOLUME_TO_FACES Value= 1
+Switch named: HAS_BOUNDARY_RIDGES Value= 1
+Switch named: HAS_BOUNDARY_FACETS Value= 1
+Switch named: HAS_ELEMENT_TO_RIDGES Value= 1
+Switch named: HAS_ELEMENT_TO_FACETS Value= 1
 **************************************************
 **************************************************
  Now cleaning local Edges/faces Stuff
@@ -139,14 +139,14 @@ Faces= 4702  Volumes=47785
 *******         STATUS OF SWITCHES    ************
 
  Status of switches
-Switch named: FACES_HAVE_ADIACENCY Value= 1
-Switch named: HAS_ALL_EDGES Value= 0
-Switch named: HAS_ALL_FACES Value= 0
+Switch named: FACETS_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_RIDGES Value= 0
+Switch named: HAS_ALL_FACETS Value= 0
 Switch named: HAS_BEEN_CHECKED Value= 1
-Switch named: HAS_BOUNDARY_EDGES Value= 1
-Switch named: HAS_BOUNDARY_FACES Value= 1
-Switch named: HAS_VOLUME_TO_EDGES Value= 0
-Switch named: HAS_VOLUME_TO_FACES Value= 0
+Switch named: HAS_BOUNDARY_RIDGES Value= 1
+Switch named: HAS_BOUNDARY_FACETS Value= 1
+Switch named: HAS_ELEMENT_TO_RIDGES Value= 0
+Switch named: HAS_ELEMENT_TO_FACETS Value= 0
 **************************************************
 **************************************************
  **********************************************************
@@ -173,14 +173,14 @@ Faces= 97921  Volumes=47785
 *******         STATUS OF SWITCHES    ************
 
  Status of switches
-Switch named: FACES_HAVE_ADIACENCY Value= 1
-Switch named: HAS_ALL_EDGES Value= 1
-Switch named: HAS_ALL_FACES Value= 1
+Switch named: FACETS_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_RIDGES Value= 1
+Switch named: HAS_ALL_FACETS Value= 1
 Switch named: HAS_BEEN_CHECKED Value= 1
-Switch named: HAS_BOUNDARY_EDGES Value= 1
-Switch named: HAS_BOUNDARY_FACES Value= 1
-Switch named: HAS_VOLUME_TO_EDGES Value= 0
-Switch named: HAS_VOLUME_TO_FACES Value= 0
+Switch named: HAS_BOUNDARY_RIDGES Value= 1
+Switch named: HAS_BOUNDARY_FACETS Value= 1
+Switch named: HAS_ELEMENT_TO_RIDGES Value= 0
+Switch named: HAS_ELEMENT_TO_FACETS Value= 0
 **************************************************
 **************************************************
  Now building again local Edges/faces Stuff
@@ -205,13 +205,13 @@ Faces= 97921  Volumes=47785
 *******         STATUS OF SWITCHES    ************
 
  Status of switches
-Switch named: FACES_HAVE_ADIACENCY Value= 1
-Switch named: HAS_ALL_EDGES Value= 1
-Switch named: HAS_ALL_FACES Value= 1
+Switch named: FACETS_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_RIDGES Value= 1
+Switch named: HAS_ALL_FACETS Value= 1
 Switch named: HAS_BEEN_CHECKED Value= 1
-Switch named: HAS_BOUNDARY_EDGES Value= 1
-Switch named: HAS_BOUNDARY_FACES Value= 1
-Switch named: HAS_VOLUME_TO_EDGES Value= 1
-Switch named: HAS_VOLUME_TO_FACES Value= 1
+Switch named: HAS_BOUNDARY_RIDGES Value= 1
+Switch named: HAS_BOUNDARY_FACETS Value= 1
+Switch named: HAS_ELEMENT_TO_RIDGES Value= 1
+Switch named: HAS_ELEMENT_TO_FACETS Value= 1
 **************************************************
 **************************************************
