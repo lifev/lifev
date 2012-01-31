@@ -68,7 +68,6 @@
 #include <BelosRCGSolMgr.hpp>
 #include <BelosTFQMRSolMgr.hpp>
 
-#include <Teuchos_RCP.hpp>
 #include <Teuchos_ParameterList.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -110,8 +109,7 @@ public:
     typedef Epetra_Operator                                             operator_Type;
     typedef boost::shared_ptr<operator_Type>                            operatorPtr_Type;
     typedef Operators::SolverOperator                                   SolverOperator_Type;
-    typedef Teuchos::RCP< SolverOperator_Type >                         SolverOperatorPtr_Type;
-
+    typedef boost::shared_ptr< SolverOperator_Type >                    SolverOperatorPtr_Type;
     typedef MatrixEpetra<Real>                                          matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                              matrixPtr_Type;
     typedef VectorEpetra                                                vector_Type;

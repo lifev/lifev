@@ -34,16 +34,6 @@
     @date 03-08-2011
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include "Teuchos_RCPBoostSharedPtrConversions.hpp"
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifealg/LinearSolver.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>
@@ -518,7 +508,7 @@ void
 LinearSolver::setupSolverOperator()
 {
     // If a SolverOperator already exists we simply clean it!
-    if ( !M_solverOperator.is_null() )
+    if ( M_solverOperator )
     {
         M_solverOperator.reset();
     }
