@@ -100,7 +100,7 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
 {
     // Build preconditioners if needed
     bool retry( true );
-    if ( !isPreconditionerSet() || !M_reusePreconditioner  )
+    if( !isPreconditionerSet() || !M_reusePreconditioner  )
     {
         buildPreconditioner();
 
@@ -112,7 +112,7 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
         if( !M_silent ) M_displayer->leaderPrint( "SLV-  Reusing precond ...\n" );
     }
 
-    if ( M_rhs.get() == 0 || M_operator == 0 ) {
+    if( M_rhs.get() == 0 || M_operator == 0 ) {
         M_displayer->leaderPrint( "SLV-  ERROR: LinearSolver failed to set up correctly!\n" );
         return -1;
     }
@@ -140,7 +140,7 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
     // Second run recomputing the preconditioner
     // This is done only if the preconditioner has not been
     // already recomputed and if it is a LifeV preconditioner.
-    if ( M_converged != SolverOperator_Type::yes
+    if( M_converged != SolverOperator_Type::yes
     	 && retry
     	 && M_preconditioner )
     {
@@ -158,13 +158,13 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
         if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
     }
 
-    if ( M_lossOfPrecision == SolverOperator_Type::yes )
+    if( M_lossOfPrecision == SolverOperator_Type::yes )
     {
         M_displayer->leaderPrint( "SLV-  WARNING: Loss of accuracy detected!\n" );
         failure = true;
     }
 
-    if ( M_converged == SolverOperator_Type::yes )
+    if( M_converged == SolverOperator_Type::yes )
     {
         if( !M_silent ) M_displayer->leaderPrint( "SLV-  Convergence in " , numIters, " iterations\n" );
         M_maxNumItersReached = SolverOperator_Type::no;
@@ -178,14 +178,23 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
 
     // If quitOnFailure is enabled and if some problems occur
     // the simulation is stopped
-    if ( M_quitOnFailure && failure )
+    if( M_quitOnFailure && failure )
         exit( -1 );
 
     // If the number of iterations reaches the threshold of maxIterForReuse
     // we reset the preconditioners to force to solver to recompute it next
     // time
-    if ( numIters > M_maxItersForReuse )
+    if( numIters > M_maxItersForReuse )
         resetPreconditioner();
+
+    // <!-- TO BE RECODED IF POSSIBLE
+	// AztecOO contains pointers to some operators
+	// ML is crashing for this reason.
+    if( M_solverType == AztecOO )
+    {
+        M_solverOperator.reset();
+    }
+    // -->
 
     return numIters;
 }
@@ -193,7 +202,7 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
 Real
 LinearSolver::computeResidual( vectorPtr_Type& solutionPtr )
 {
-    if ( !M_operator || !M_rhs )
+    if( !M_operator || !M_rhs )
     {
         M_displayer->leaderPrint( "SLV-  WARNING: LinearSolver can not compute the residual if the operator and the RHS are not set!\n" );
         return -1;
@@ -244,7 +253,7 @@ LinearSolver::buildPreconditioner()
     LifeChrono chrono;
     Real condest( -1 );
 
-    if ( M_preconditioner )
+    if( M_preconditioner )
     {
     	if( M_matrix.get() == 0 )
     	{
@@ -276,9 +285,8 @@ LinearSolver::buildPreconditioner()
 void
 LinearSolver::resetPreconditioner()
 {
-    if ( M_preconditioner )
+    if( M_preconditioner )
         M_preconditioner->resetPreconditioner();
-
 }
 
 bool
@@ -301,7 +309,7 @@ LinearSolver::resetStatus()
 void
 LinearSolver::showMe( std::ostream& output ) const
 {
-    if ( M_displayer->isLeader() )
+    if( M_displayer->isLeader() )
     {
         output << "Solver parameters list:" << std::endl;
         output << "-----------------------------" << std::endl;
@@ -508,12 +516,12 @@ void
 LinearSolver::setupSolverOperator()
 {
     // If a SolverOperator already exists we simply clean it!
-    if ( M_solverOperator )
+    if( M_solverOperator )
     {
         M_solverOperator.reset();
     }
 
-    switch ( M_solverType )
+    switch( M_solverType )
     {
         case Belos:
         	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
@@ -531,7 +539,7 @@ LinearSolver::setupSolverOperator()
     M_solverOperator->setOperator( M_operator );
 
     // Set the preconditioner operator in the SolverOperator object
-    if ( M_preconditioner )
+    if( M_preconditioner )
     	M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
     else
     	M_solverOperator->setPreconditioner( M_preconditionerOperator );
