@@ -86,6 +86,8 @@ public:
 
 	void setParameters( const Teuchos::ParameterList & _pList );
 
+	void setTolerance( const Real& tolerance );
+
 	//@}
 
 	//! @name Mathematical methods
@@ -170,6 +172,9 @@ protected:
 
 	//! Number of iterations performed by the solver
 	mutable int M_numIterations;
+
+	//! Solver tolerance
+	Real M_tolerance;
 
 };
 

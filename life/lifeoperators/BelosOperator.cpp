@@ -127,6 +127,9 @@ void BelosOperator::doSetParameterList()
 		 M_pList->sublist( "Trilinos: Belos List" ).set( "Verbosity", Belos::Errors + Belos::Warnings +
 											             Belos::TimingDetails + Belos::StatusTestDetails );
 
+	if( M_tolerance > 0 )
+	    M_pList->sublist( "Trilinos: Belos List" ).set( "Convergence Tolerance", M_tolerance );
+
 	std::string solverType( M_pList->get<std::string>( "Solver Manager Type" ) );
 	allocateSolver( ( *S_solverManagerMap)[solverType] );
 	M_solverManager->setParameters( sublist( M_pList, "Trilinos: Belos List", true ) );

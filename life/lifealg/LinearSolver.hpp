@@ -277,6 +277,12 @@ public:
      */
     void setQuitOnFailure( const bool enable );
 
+    //! Set the tolerance of the solver
+	/*!
+	  @param tolerance Tolerance used by the solver
+	 */
+    void setTolerance( const Real& tolerance );
+
     //@}
 
     //! @name Get Method
@@ -360,6 +366,8 @@ private:
     SolverOperator_Type::SolverOperatorStatusType M_lossOfPrecision;
     SolverOperator_Type::SolverOperatorStatusType M_maxNumItersReached;
     SolverOperator_Type::SolverOperatorStatusType M_converged;
+
+    Real                        M_tolerance;
 
 };
 

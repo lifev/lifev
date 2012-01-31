@@ -47,7 +47,8 @@ SolverOperator::SolverOperator():
 	M_useTranspose( false ),
 	M_lossOfAccuracy( undefined ),
     M_converged( undefined ),
-    M_numIterations( 0 )
+    M_numIterations( 0 ),
+    M_tolerance( -1. )
 { }
 
 SolverOperator::~SolverOperator()
@@ -86,6 +87,11 @@ void SolverOperator::setParameters( const Teuchos::ParameterList& _pList )
 {
 	M_pList = Teuchos::rcp( new Teuchos::ParameterList( _pList ), true );
 	doSetParameterList();
+}
+
+void SolverOperator::setTolerance( const Real& tolerance )
+{
+	M_tolerance = tolerance;
 }
 
 int SolverOperator::Apply( const vector_Type& X, vector_Type& Y ) const

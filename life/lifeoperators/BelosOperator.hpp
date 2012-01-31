@@ -91,6 +91,7 @@ public:
 	BelosOperator();
 	~BelosOperator() {};
 	//@}
+
 	static solverManagerMap_Type* singletonSolverManagerMap();
 	static precSideMap_Type*      singletonPrecSideMap();
 

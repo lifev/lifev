@@ -53,6 +53,8 @@ AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
 {
 	vector_Type Xcopy( X );
 	Y.PutScalar( 0.0 );
+	if( M_tolerance > 0 )
+	    M_pList->sublist( "Trilinos: AztecOO List" ).set( "tol", M_tolerance );
 	M_linSolver->SetParameters( M_pList->sublist( "Trilinos: AztecOO List" ) );
 	M_linSolver->SetRHS( &Xcopy );
 	M_linSolver->SetLHS( &Y );

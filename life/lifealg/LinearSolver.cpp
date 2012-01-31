@@ -61,7 +61,8 @@ LinearSolver::LinearSolver() :
         M_silent               ( false ),
         M_lossOfPrecision      ( SolverOperator_Type::undefined ),
         M_maxNumItersReached   ( SolverOperator_Type::undefined ),
-        M_converged            ( SolverOperator_Type::undefined )
+        M_converged            ( SolverOperator_Type::undefined ),
+        M_tolerance            ( -1. )
 {
 
 }
@@ -82,7 +83,8 @@ LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm>& commPtr ) :
         M_silent               ( false ),
         M_lossOfPrecision      ( SolverOperator_Type::undefined ),
         M_maxNumItersReached   ( SolverOperator_Type::undefined ),
-        M_converged            ( SolverOperator_Type::undefined )
+        M_converged            ( SolverOperator_Type::undefined ),
+        M_tolerance            ( -1. )
 {
 
 }
@@ -412,6 +414,12 @@ LinearSolver::setQuitOnFailure( const bool enable )
     M_quitOnFailure = enable;
 }
 
+void
+LinearSolver::setTolerance( const Real& tolerance )
+{
+	M_tolerance = tolerance;
+}
+
 // ===================================================
 // Get Methods
 // ===================================================
@@ -543,6 +551,10 @@ LinearSolver::setupSolverOperator()
     	M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
     else
     	M_solverOperator->setPreconditioner( M_preconditionerOperator );
+
+    // Set the tolerance if it has been set
+    if( M_tolerance > 0 )
+        M_solverOperator->setTolerance( M_tolerance );
 
     // Set the parameter inside the solver
     M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List" ) );
