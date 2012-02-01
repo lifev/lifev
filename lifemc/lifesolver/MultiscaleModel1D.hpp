@@ -383,7 +383,7 @@ private:
      * @param flag boundary condition flag
      * @return boundary condition side.
      */
-    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
+    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDFSI::left : OneDFSI::right; }
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
