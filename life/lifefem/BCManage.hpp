@@ -1099,6 +1099,7 @@ bcEssentialManage( MatrixType& matrix,
         }
     }
 
+    // If there is an offset than there is a Lagrange multiplier (flux BC)
     if (boundaryCond.offset() > 0)
     {
         // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
@@ -1171,6 +1172,7 @@ bcEssentialManageUDep( MatrixType& matrix,
             }
         }
 
+    // If there is an offset than there is a Lagrange multiplier (flux BC)
         if (boundaryCond.offset() > 0)
         {
             // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
@@ -1216,6 +1218,7 @@ bcEssentialManageMatrix( MatrixType& matrix,
         }
     }
 
+    // If there is an offset than there is a Lagrange multiplier (flux BC)
     if (boundaryCond.offset() > 0)
     {
         // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
