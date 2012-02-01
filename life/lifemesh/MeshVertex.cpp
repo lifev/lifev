@@ -46,25 +46,18 @@ namespace LifeV
 // ==========================================
 // Constructor & Destructor
 // ==========================================
-MeshVertex::MeshVertex()
+MeshVertex::MeshVertex():M_coordinates()
 {
-    M_coordinates.assign( 0 );
 }
 
 MeshVertex::MeshVertex( ID identity, bool boundary )
-        :
-        MeshEntity( identity, boundary )
+        :MeshEntity( identity, boundary ), M_coordinates()
 {
-    M_coordinates.assign( 0 );
 }
 
 MeshVertex::MeshVertex( ID identity, Real x, Real y, Real z, bool boundary )
-        :
-        MeshEntity( identity, boundary )
+        :MeshEntity( identity, boundary ), M_coordinates( x, y, z )
 {
-	M_coordinates[ 0 ] = x;
-	M_coordinates[ 1 ] = y;
-	M_coordinates[ 2 ] = z;
 }
 
 // ==========================================

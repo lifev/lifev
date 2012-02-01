@@ -736,10 +736,11 @@ bool checkMesh3D( RegionMesh & mesh,
     if(verbose) out<<"Checking vertexes"<<std::endl;
     UInt numVerticesFound = mesh.pointList.countElementsWithFlag(EntityFlags::VERTEX, &Flag::testOneSet);
     if (numVerticesFound != mesh.numVertices())
-     {
-         err<< "The number of Points with vertex flags does not coincide with the declared one."<<std::endl;
-         if(fix)
+    {
+        err << "warning: The number of Points with vertex flag on does not coincide with the declared one." << std::endl;
+        if(fix)
          {
+             err << "It will be fixed now" << std::endl;
              // unset the flag. It will be remade
              for (UInt i=0;i<mesh.numPoints();++i)mesh.point(i).unSetFlag(EntityFlags::VERTEX);
              // Find the real vertices and set the flag

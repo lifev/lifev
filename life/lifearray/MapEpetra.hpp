@@ -60,6 +60,8 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 
+#include <life/lifearray/MapVector.hpp>
+
 
 namespace LifeV
 {
@@ -86,8 +88,16 @@ public:
 
     typedef Epetra_Map                                            map_type;
     typedef boost::shared_ptr<map_type>                           map_ptrtype;
+
+    /* Double shared_ptr are used here to ensure that all the similar MapEpetra
+       point to the same exporter/importer. If double shared_ptr were not used, a
+       map initialized without importer/exporter (i.e. with a shared_ptr
+       pointing to 0) would not "gain" the importer/exporter created by another
+       map.*/
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Export> > exporter_ptrtype;
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importer_ptrtype;
+
+
     typedef Epetra_Comm                                           comm_type;
     typedef boost::shared_ptr<comm_type>                          comm_ptrtype;
 
@@ -158,6 +168,7 @@ public:
     MapEpetra( const Epetra_BlockMap& blockMap,
                const Int offset,
                const Int maxId);
+
 private:
     //! Constructor from raw Epetra_Map
     /*!
@@ -213,6 +224,17 @@ public:
      */
     MapEpetra operator +  ( Int const size );
 
+    //! Juxtaposition operator
+    /*!
+      This operator is used when block structures are used. Indeed, it creates
+      from two different maps a MapVector that can be used to initialize
+      block structures, such as matrices and vectors (see \ref BlockAlgebraPage "this page" for examples).
+     */
+    MapVector<MapEpetra> operator| (const MapEpetra& map) const
+    {
+        return MapVector<MapEpetra>(*this,map);
+    }
+
     //@}
 
     //! @name Methods
@@ -229,6 +251,12 @@ public:
 
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
+
+    //! Getter for the global number of entries
+    UInt mapSize() const
+    {
+        return map(Unique)->NumGlobalElements();
+    }
 
     //@}
 
@@ -298,6 +326,10 @@ private:
     comm_ptrtype       M_commPtr;
 
 };
-}
+
+typedef MapVector<MapEpetra> MapEpetraVector;
+
+} // end namespace LifeV
+
 #endif
 
