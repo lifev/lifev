@@ -146,7 +146,7 @@ class MultiscaleModel;
 class MultiscaleCoupling;
 
 // Type definitions
-typedef entityFlag_Type                                                          bcFlag_Type;
+typedef markerID_Type                                                            bcFlag_Type;
 
 typedef Displayer::commPtr_Type                                                  multiscaleCommPtr_Type;
 

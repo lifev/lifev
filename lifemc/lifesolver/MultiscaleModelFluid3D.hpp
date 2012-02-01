@@ -40,6 +40,7 @@
 
 // LifeV includes
 #include <life/lifemesh/MeshPartitioner.hpp>
+#include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifefem/BCInterface3D.hpp>
@@ -76,7 +77,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef RegionMesh3D< LinearTetra >                       mesh_Type;
+    typedef RegionMesh< LinearTetra >                         mesh_Type;
     typedef MeshPartitioner< mesh_Type >                      MeshPartitioner_Type;
 
 

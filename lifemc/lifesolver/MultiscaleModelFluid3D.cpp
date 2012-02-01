@@ -337,8 +337,8 @@ MultiscaleModelFluid3D::showMe()
                   << "Pressure DOF        = " << M_pFESpace->dof().numTotalDof() << std::endl
                   << "lmDOF               = " << M_lmDOF << std::endl << std::endl;
 
-        std::cout << "Fluid mesh maxH     = " << M_mesh->meshPartition()->maxH() << std::endl
-                  << "Fluid mesh meanH    = " << M_mesh->meshPartition()->meanH() << std::endl << std::endl;
+        std::cout << "Fluid mesh maxH     = " << MeshUtility::MeshStatistics::computeSize( *M_mesh->meshPartition() ).maxH << std::endl
+                  << "Fluid mesh meanH    = " << MeshUtility::MeshStatistics::computeSize( *M_mesh->meshPartition() ).meanH << std::endl << std::endl;
 
         std::cout << "NS SubITMax         = " << M_subiterationsMaximumNumber << std::endl
                   << "NS Tolerance        = " << M_tolerance << std::endl << std::endl << std::endl << std::endl;
@@ -507,7 +507,7 @@ MultiscaleModelFluid3D::setupMesh()
     readMesh( *fluidMesh, *M_meshData );
 
     //Transform mesh
-    fluidMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    fluidMesh->meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     //Partition mesh
     M_mesh.reset( new MeshPartitioner_Type( fluidMesh, M_comm ) );
