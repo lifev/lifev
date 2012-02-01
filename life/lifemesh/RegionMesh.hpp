@@ -3581,7 +3581,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
                     aFacet.firstAdjacentElementPosition() = j;
 
                     // gets the marker from the RegionMesh
-                    aFacet.setMarkerID( this->markerID() );
+                    aFacet.setMarkerID( NotAnId );
                     aFacet.setBoundary(false);
                     addFacet( aFacet); //The id should be correct
                 }
