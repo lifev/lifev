@@ -75,12 +75,10 @@ int main()
     v1.normalize();
     std::cout << v1              << std::endl << std::endl;
 
-    MeshVertex v4( 0, 1., 2., 3. );
+    std::vector<Real> v4( 3, 1. );
     std::cout << castToVector3D ( v4 ) << std::endl << std::endl;
-    std::vector<Real> v5( 3, 1. );
+    KN<Real> v5( 3, 2. );
     std::cout << castToVector3D ( v5 ) << std::endl << std::endl;
-    KN<Real> v6( 3, 2. );
-    std::cout << castToVector3D ( v6 ) << std::endl << std::endl;
 
 
     // test for dim = 5
