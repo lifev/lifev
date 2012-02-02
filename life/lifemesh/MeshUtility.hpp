@@ -1223,9 +1223,8 @@ bool rearrangeFaces( MeshType & mesh,
     }
 
 
-    faceContainerIterator = mesh.faceList.begin();
-
-    for ( UInt facid = 0; facid < mesh.storedFaces(); ++facid )
+    for ( faceContainerIterator = mesh.faceList.begin(); faceContainerIterator != mesh.faceList.end();
+                    ++faceContainerIterator )
     {
         point1Id = ( faceContainerIterator->point( 0 ) ).localId();
         point2Id = ( faceContainerIterator->point( 1 ) ).localId();
@@ -1242,11 +1241,11 @@ bool rearrangeFaces( MeshType & mesh,
         }
         boundaryFaceContainerIterator = boundaryFaceContainerPtr->find( bareFace );
         if ( boundaryFaceContainerIterator == boundaryFaceContainerPtr->end() )
-            mesh.face(facid).unSetFlag(EntityFlags::PHYSICAL_BOUNDARY);
+            faceContainerIterator->unSetFlag(EntityFlags::PHYSICAL_BOUNDARY);
         else
-            mesh.face(facid).setFlag(EntityFlags::PHYSICAL_BOUNDARY);
+            faceContainerIterator->setFlag(EntityFlags::PHYSICAL_BOUNDARY);
     }
-        mesh.faceList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,&Flag::testOneSet);
+    mesh.faceList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,&Flag::testOneSet);
 
     return true;
 }
