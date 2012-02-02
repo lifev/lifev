@@ -336,11 +336,11 @@ problem::run()
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(),  members->comm->MyPID() );
 
-    vector_ptrtype U ( new vector_Type(*problem.solution(), exporter->mapType() ) );
-    vector_ptrtype V  ( new vector_Type(*problem.solution(),  exporter->mapType() ) );
-    vector_ptrtype Exact ( new vector_Type(*problem.solution(), exporter->mapType() ) );
-    vector_ptrtype vExact  ( new vector_Type(*problem.solution(),  exporter->mapType() ) );
-    vector_ptrtype RHS ( new vector_Type(*problem.solution(), exporter->mapType() ) );
+    vectorPtr_Type U ( new vector_Type(*problem.solution(), exporter->mapType() ) );
+    vectorPtr_Type V  ( new vector_Type(*problem.solution(),  exporter->mapType() ) );
+    vectorPtr_Type Exact ( new vector_Type(*problem.solution(), exporter->mapType() ) );
+    vectorPtr_Type vExact  ( new vector_Type(*problem.solution(),  exporter->mapType() ) );
+    vectorPtr_Type RHS ( new vector_Type(*problem.solution(), exporter->mapType() ) );
     exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "displacement",
                            feSpace, U, UInt(0) );
 
@@ -363,7 +363,7 @@ problem::run()
 
     //evaluate disp and vel as interpolate the bcFunction d0 and v0
 
-    std::vector<vector_ptrtype> uv0;
+    std::vector<vectorPtr_Type> uv0;
 
     if (TimeAdvanceMethod =="Newmark")
     {

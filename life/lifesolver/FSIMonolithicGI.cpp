@@ -59,8 +59,8 @@ namespace LifeV
   {
     super_Type::setUp( dataFile );
 
-    M_domainVelImplicit = dataFile( "fluid/domainVelImplicit", true );
-    M_convectiveTermDer = dataFile( "fluid/convectiveTermDer", false );
+    M_domainVelImplicit = M_data->dataFluid()->domainVelImplicit(); //dataFile( "fluid/domainVelImplicit", true );
+    M_convectiveTermDer = M_data->dataFluid()->convectiveImplicit(); //dataFile( "fluid/convectiveTermDer", false );
   }
 
   void
@@ -77,13 +77,9 @@ namespace LifeV
        M_epetraOper.reset( new Epetra_FullMonolithic(this));
        M_solid->setOperator(*M_epetraOper);
        }*/
-    //std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
+
     M_interface=M_monolithicMatrix->interface();
 
-    //     vector_Type u0(*M_monolithicMap);
-    //     M_bdf.reset(new TimeAdvanceBDF<vector_Type>());
-    //     M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF());
-    //     M_bdf->setInitialCondition(u0);
     M_beta.reset( new vector_Type(M_uFESpace->map()) );
     M_rhs.reset(new vector_Type(*M_monolithicMap));
     M_rhsFull.reset(new vector_Type(*M_monolithicMap));
@@ -132,7 +128,7 @@ namespace LifeV
 				 const UInt          iter )
   {
     res *= 0.;//this is important. Don't remove it!
-    if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
+    if ((iter==0)|| !M_data->dataFluid()->isSemiImplicit())
       {
 
 	Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
@@ -151,9 +147,6 @@ namespace LifeV
 	vectorPtr_Type meshVel( new vector_Type(M_mmFESpace->map()) );
 	vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map(), Repeated ));
 	meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
-
-	//meshDisp->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
-	//meshDisp->subset(*M_un, offset); //if we linearize in a semi-implicit way
 
 	if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
 	  {

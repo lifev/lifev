@@ -5,6 +5,8 @@
 
 [problem]
 
+method     = monolithicGI # monolithicGE, monolithicGI
+
 blockOper   = AdditiveSchwarzGI
 # OPTIONS:
 #AdditiveSchwarz
@@ -24,8 +26,6 @@ DDBlockPrec = ComposedDN2GI
 #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factors
 #ComposedDNDGI: under testing, do not use
 #ComposedDND2GI: under testing, do not use
-
-method     = monolithicGI # monolithicGE, monolithicGI
 
 reducedFluid = 0 # 0 = exact, 1 = inexact
 defOmega   = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
@@ -51,7 +51,7 @@ solidMeshPartitioned = none
 multimesh  = false   # actually we export also the displacement
 start      = 0
 save       = 1
-saveEvery       = 1
+saveEvery  = 1
 type       = hdf5
 nRestart   = 0
 
@@ -63,6 +63,10 @@ filename   = solid
 [../] # exporter
 
 [importer]
+##restartType=restartFSI
+initSol=00005
+initSolFD=00006
+##restart_timestep=0.005
 type       = hdf5
 ##restart_timestep = 0.0001
 [./fluid]
@@ -74,9 +78,9 @@ filename   = solid
 
 [fluid]
 useShapeDerivatives           = false
-semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
-domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
-convectiveTermDer             = false  # tells if the velocity is to be considered implicitly in the convective term
+semiImplicit                  = false # tells if we advance in time after the first nonlinear iteration or not
+domainVelImplicit             = true  # tells if the domain vel is to be considered implicitly in the convective term
+convectiveImplicit            = false  # tells if the velocity is to be considered implicitly in the convective term
 
 [./physics]
 density   = 1.0               # density
@@ -89,7 +93,7 @@ endtime			= 0.01
 timestep		= 0.0001
 BDF_order		= 1
 theta           = 0.5
-zeta            = 0.5
+gamma            = 0.5
 rhoInf          = 1
 typeOfGeneralizedAlpha            = HHT
 
@@ -110,7 +114,7 @@ factor    = 1
 
 [../ipstab]
 use        = 1
-gammaBeta  = 0.
+gammaBeta  = 0.1
 gammaDiv   = 0.
 gammaPress = 0.0005
 reuse = true
@@ -159,7 +163,6 @@ mesh_edges      = all                   # update all faces elements
 
 
 [../miscellaneous]
-factor    = 1
 verbose   = 1
 depname   = dep
 
@@ -168,8 +171,6 @@ depname   = dep
 maxiter = 1
 abstol  = 1.e-8
 linesearch = 0
-
-
 
 [linear_system]
 
@@ -201,7 +202,7 @@ displayList        = false
 reuse           = false
 prectype        = Composed
 displayList     = false
-entry           = 0.0
+entry           = 0.
 
 [./robin]
 alphaf = 0.
@@ -458,14 +459,13 @@ endtime			= 0.01
 timestep		= 0.0001
 BDF_order		= 1
 theta           = 0.5
-zeta            = 0.5
+gamma            = 0.5
 rhoInf          = 1
 typeOfGeneralizedAlpha            = HHT
 
 
 [../prec]
 prectype        = Ifpack
-rescale_factor  = 1.e-2 # solid matrix rescale factor
 displayList     = false
 
 [./ifpack]

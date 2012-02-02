@@ -314,6 +314,22 @@ public:
      */
     bool            useShapeDerivatives()         const { return M_shapeDerivatives; }
 
+
+    //!Get the flag for considering implicitly the fluid domain (when it is moving, e.g. ALE)
+    /*!
+     *@return M_domainVelImplicit Flag for shape derivatives
+     *
+     */
+    bool            domainVelImplicit()         const { return M_domainVelImplicit; }
+
+
+    //!Get the flag for considering implicitly the fluid convective term
+    /*!
+     *@return M_convectiveImplicit Flag for shape derivatives
+     *
+     */
+    bool            convectiveImplicit()         const { return M_convectiveImplicit; }
+
     //! Get the number of mean valuNes per section
     /*!
      * @return M_computeMeanValuesPerSection number of mean values
@@ -423,6 +439,8 @@ private:
     //! To extract Mean Values at a given section z
     bool             M_semiImplicit;
     bool             M_shapeDerivatives;
+    bool             M_domainVelImplicit;
+    bool             M_convectiveImplicit;
     UInt             M_computeMeanValuesPerSection; // switch: 0 don't compute it, 1 compute
     UInt             M_NbZSections;
     Real             M_ToleranceSection;

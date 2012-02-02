@@ -115,7 +115,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
 //       BCh_fluid->addBC("InFlow" , INLET,  Flux,   Normal, bcf);
 
     //uncomment  to use fluxes
-    //BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
+    BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
 
     return BCh_fluid;
 }
@@ -141,7 +141,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool
     BCFunctionBase in_vel   ( vinit );
     BCFunctionBase in_press   ( u2 );
 
-    BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, in_press, 3);
+    //BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, in_press, 3);
     //BCh_fluid->addBC("InFlow" , INLET,  Natural, Normal, in_flow);
 //     if(!isOpen)
 //         BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, bcf, 3);

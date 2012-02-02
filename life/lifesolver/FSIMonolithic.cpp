@@ -145,8 +145,8 @@ FSIMonolithic::setUp( const GetPot& dataFile )
     M_linearSolver.reset(new solver_Type(M_epetraComm));
 
     M_linearSolver->setDataFromGetPot( dataFile, "linear_system/solver" );
-    std::string prectype = dataFile("problem/DDBlockPrec", "NULL");
-    std::string opertype = dataFile("problem/blockOper", "NULL");
+    std::string prectype = dataFile("problem/DDBlockPrec", "PRECTYPE_UNDEFINED");
+    std::string opertype = dataFile("problem/blockOper", "PRECTYPE_UNDEFINED");
 
     M_precPtr.reset(BlockPrecFactory::instance().createObject( prectype ));
 

@@ -63,6 +63,8 @@ OseenData::OseenData( ) :
         M_stabMethod                       ( ),
         M_semiImplicit                     ( false ),
         M_shapeDerivatives                 ( false ),
+	M_domainVelImplicit                ( false ),
+	M_convectiveImplicit               ( false ),
         M_computeMeanValuesPerSection      ( ),
         M_NbZSections                      ( ),
         M_ToleranceSection                 ( ),
@@ -90,6 +92,8 @@ OseenData::OseenData( const OseenData& oseenData ) :
         M_stabMethod                       ( oseenData.M_stabMethod ),
         M_semiImplicit                     ( false ),
         M_shapeDerivatives                 ( false ),
+	M_domainVelImplicit                ( false ),
+	M_convectiveImplicit               ( false ),
         M_computeMeanValuesPerSection      ( oseenData.M_computeMeanValuesPerSection ),
         M_NbZSections                      ( oseenData.M_NbZSections ),
         M_ToleranceSection                 ( oseenData.M_ToleranceSection ),
@@ -129,6 +133,8 @@ OseenData::operator=( const OseenData& oseenData )
         M_stabMethod                       = oseenData.M_stabMethod;
         M_semiImplicit                     = oseenData.M_semiImplicit;
         M_shapeDerivatives                 = oseenData.M_shapeDerivatives;
+	M_domainVelImplicit                = oseenData.M_domainVelImplicit;
+	M_convectiveImplicit               = oseenData.M_convectiveImplicit;
         M_computeMeanValuesPerSection      = oseenData.M_computeMeanValuesPerSection;
         M_NbZSections                      = oseenData.M_NbZSections;
         M_ToleranceSection                 = oseenData.M_ToleranceSection;
@@ -198,6 +204,8 @@ OseenData::setup( const GetPot& dataFile, const std::string& section )
     // Semi-implicit and shape derivatives
     M_shapeDerivatives = dataFile( ( section + "/useShapeDerivatives" ).data(), false ) ;
     setSemiImplicit( dataFile( ( section + "/semiImplicit" ).data(), false ) );
+    M_domainVelImplicit= dataFile( (section + "/domainVelImplicit").data(), false );
+    M_convectiveImplicit= dataFile( (section + "/convectiveImplicit").data(), false );
 
     // Mean values per section
     M_computeMeanValuesPerSection = dataFile( ( section + "/valuespersection/computeMeanValuesPerSection" ).data(), 0 );

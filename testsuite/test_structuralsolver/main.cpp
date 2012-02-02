@@ -231,7 +231,7 @@ Structure::run2d()
 void
 Structure::run3d()
 {
-    typedef StructuralSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef StructuralSolver< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
 
@@ -249,14 +249,14 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>);
     readMesh(*fullMeshPtr, meshData);
 
-    MeshPartitioner< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
+    MeshPartitioner< RegionMesh<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
-    typedef FESpace< RegionMesh3D<LinearTetra>, MapEpetra > solidFESpace_type;
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra > solidFESpace_type;
     typedef boost::shared_ptr<solidFESpace_type> solidFESpace_ptrtype;
     solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
@@ -323,7 +323,7 @@ Structure::run3d()
     //! #################################################################################
 
     //! 1. Constructor of the structuralSolver
-    StructuralSolver< RegionMesh3D<LinearTetra> > solid;
+    StructuralSolver< RegionMesh<LinearTetra> > solid;
 
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,
@@ -384,25 +384,25 @@ Structure::run3d()
 
     if (verbose ) std::cout << "ok." << std::endl;
 
-    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-      exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, "structure" ) );
+      exporter.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "structure" ) );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
 	{
-	    exporter.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+	    exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
 	}
 
         else
         {
-	    exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+	    exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
 	}
     }
 
@@ -413,9 +413,9 @@ Structure::run3d()
     vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
 
-    exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
-    exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
-    exporter->addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
+    exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
+    exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
+    exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
 
     exporter->postProcess( 0 );
     /*

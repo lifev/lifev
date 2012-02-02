@@ -581,9 +581,9 @@ public:
     //! getter for the fluid velocity
     const vector_Type& un()                                      const { return M_fluidTimeAdvance->solution(); }
 
-    const boost::shared_ptr<const TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
-    const boost::shared_ptr<const TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
-    const boost::shared_ptr<const TimeAdvance<vector_Type> > solidTimeAdvance()const { return  M_solidTimeAdvance; }
+    const boost::shared_ptr<TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
+    const boost::shared_ptr<TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
+    const boost::shared_ptr<TimeAdvance<vector_Type> > solidTimeAdvance()const { return  M_solidTimeAdvance; }
 
     const string ALETimeAdvanceMethod() const { return  M_ALETimeAdvanceMethod; }
     const string fluidTimeAdvanceMethod()const { return  M_fluidTimeAdvanceMethod; }
