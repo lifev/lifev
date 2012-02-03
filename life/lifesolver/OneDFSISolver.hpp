@@ -287,22 +287,25 @@ public:
      * of the pure elastic problem and \f$\tilde{Q}\f$ is the viscoelastic correction.
      * On each time interval \f$[t^n, t^{n+1}]\f$ with \f$n \ge 0\f$, firstly we solve the elastic part for \f$\hat{Q}^{n+1}\f$, using \f$Q^n\f$
      * to compute the contributions in such equation to the right hand side, and then we correct the flow rate by solving the following equation
+     * By using the mass conservation equation, we remove the time dependence from the viscoelastic wall term. The resulting problem is
      *
-     *  \f[
+     * \f[
      * \displaystyle\frac{1}{A}\displaystyle\frac{\partial \tilde{Q}}{\partial t} -
-     * \displaystyle\frac{\partial}{\partial z}\left(\displaystyle\frac{\gamma}{\rho A^{3/2}}\displaystyle\frac{\partial Q}{\partial z}\right) = 0.
-     *  \f]
+     * \displaystyle\frac{\partial}{\partial z}\left(\displaystyle\frac{\gamma}{\rho A^{3/2}}\displaystyle\frac{\partial Q}{\partial z}\right) = 0,
+     * \f]
      *
-     * More precisely, taking into account the use of the total flow rate \f$Q^n\f$ in the right hand side of the Taylor-Galerking scheme, the FE formulation reads:
-     * given \f$A^{n+1}_h\f$ and \f$\hat{Q}^{n+1}_h\f$, find \f$\tilde{Q}^{n+1}_h\f$ such that
+     *  which is closed by a proper set of homogeneous boundary conditions for \f$\tilde{Q}\f$.
+     *  The corresponding finite element formulation reads: given \f$(A_h^{n+1},\hat{Q}_h^{n+1})\f$,
+     *  find \f$\tilde{Q}_h^{n+1}\f$ such that
      *
-     *  \f[
+     *
+     * \f[
      * \left(\displaystyle\frac{\tilde{Q}^{n+1}_h}{A^{n+1}_h},\varphi_h\right) +
      * \Delta t \left(\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}\displaystyle\frac{\partial \tilde{Q}^{n+1}_h}{\partial z},
-     * \displaystyle\frac{\partial \varphi_h}{\partial z}\right) = - \Delta t \left(\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}
+     * \displaystyle\frac{\partial \varphi_h}{\partial z}\right) = \left(\displaystyle\frac{\tilde{Q}^{n}_h}{A^{n+1}_h},\varphi_h\right) - \Delta t \left(\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}
      * \displaystyle\frac{\partial \hat{Q}^{n+1}_h}{\partial z},\displaystyle\frac{\partial \varphi_h}{\partial z}\right)+
      * \Delta t \left[\displaystyle\frac{\gamma}{\rho \left(A^{n+1}_h\right)^{3/2}}\displaystyle\frac{\partial\hat{Q}^{n+1}_h}{\partial z}\,\varphi_h\right]^L_0.
-     *  \f]
+     * \f]
      *
      * @param area area
      * @param flowRate flow rate
