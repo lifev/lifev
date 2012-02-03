@@ -88,7 +88,11 @@ public:
     //! @name Constructors & Destructor
     //@{
     //! Empty constructor.
-    PreconditionerML();
+#ifdef HAVE_MPI
+    PreconditionerML( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+    PreconditionerML( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 
     //! destructor.
     virtual ~PreconditionerML();
@@ -124,9 +128,9 @@ public:
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
     virtual void createParametersList( list_Type& list,
-                             const GetPot& dataFile,
-                             const std::string& section,
-                             const std::string& subSection ) { createMLList( list, dataFile, section, subSection ); }
+                                       const GetPot& dataFile,
+                                       const std::string& section,
+                                       const std::string& subSection ) { createMLList( list, dataFile, section, subSection, M_comm->MyPID() == 0 ); }
 
     //! Create the list of parameters of the preconditioner
     /*!
@@ -138,7 +142,8 @@ public:
     static void createMLList( list_Type& list,
                               const GetPot& dataFile,
                               const std::string& section,
-                              const std::string& subSection = "ML" );
+                              const std::string& subSection = "ML",
+                              const bool& verbose = true );
 
     //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
     /*!
@@ -238,6 +243,7 @@ public:
 protected:
 
     list_Type  M_IfpackSubList;
+    boost::shared_ptr<Epetra_Comm> M_comm;
 
 private:
 
