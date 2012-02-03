@@ -593,7 +593,7 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
                                            const std::string& section )
 {
     M_dataFile   = dataFile;
-    createPCDList( M_list, dataFile, section, "PCD" );
+    createPCDList( M_list, dataFile, section, "PCD", M_comm->MyPID() == 0 );
 
     M_precType                         = this->M_list.get( "prectype", "PCD" );
 

@@ -367,7 +367,7 @@ PreconditionerSIMPLE::setDataFromGetPot( const GetPot& dataFile,
                                          const std::string& section )
 {
     M_dataFile   = dataFile;
-    createSIMPLEList( M_list, dataFile, section, "SIMPLE" );
+    createSIMPLEList( M_list, dataFile, section, "SIMPLE", M_comm->MyPID() == 0 );
 
     M_precType         = this->M_list.get( "prectype", "SIMPLE" );
     M_SIMPLEType       = this->M_list.get( "SIMPLE Type", "SIMPLE" );

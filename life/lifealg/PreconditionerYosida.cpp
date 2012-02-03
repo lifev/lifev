@@ -344,7 +344,7 @@ PreconditionerYosida::setDataFromGetPot( const GetPot& dataFile,
                                          const std::string& section )
 {
     M_dataFile   = dataFile;
-    createYosidaList( M_list, dataFile, section, "Yosida" );
+    createYosidaList( M_list, dataFile, section, "Yosida", M_comm->MyPID() == 0 );
 
     M_fluidPrec        = this->M_list.get( "subprecs: fluid prec", "ML" );
     M_fluidDataSection = this->M_list.get( "subprecs: fluid prec data section", "" );
