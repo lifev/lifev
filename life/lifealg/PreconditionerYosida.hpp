@@ -109,7 +109,8 @@ public:
     static void createYosidaList( list_Type&         list,
                                   const GetPot&      dataFile,
                                   const std::string& section,
-                                  const std::string& subSection = "Yosida" );
+                                  const std::string& subSection = "Yosida",
+                                  const bool& verbose = true );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();

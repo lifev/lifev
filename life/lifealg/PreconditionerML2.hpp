@@ -97,8 +97,12 @@ public:
 
     //! @name Constructors & Destructor
     //@{
-    //! Empty constructor.
-    PreconditionerML2();
+    //! Empty constructor
+#ifdef HAVE_MPI
+    PreconditionerML2( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+    PreconditionerML2( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 
     //! destructor.
     virtual ~PreconditionerML2();
@@ -223,6 +227,7 @@ protected:
     bool                              M_useP2ToP1Wrapper;
     FESpacePtr_Type                   M_uFESpace;
     FESpacePtr_Type                   M_pFESpace;
+    boost::shared_ptr<Epetra_Comm>    M_comm;
 
 };
 

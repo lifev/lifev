@@ -46,7 +46,7 @@
 
 namespace LifeV {
 
-PreconditionerSIMPLE::PreconditionerSIMPLE( const  boost::shared_ptr<Epetra_Comm>& comm ):
+PreconditionerSIMPLE::PreconditionerSIMPLE( boost::shared_ptr<Epetra_Comm> comm ):
     PreconditionerComposition ( comm ),
     M_velocityBlockSize       ( -1 ),
     M_pressureBlockSize       ( -1 ),
@@ -67,14 +67,15 @@ PreconditionerSIMPLE::createParametersList( list_Type&         list,
                                             const std::string& section,
                                             const std::string& subSection )
 {
-    createSIMPLEList( list, dataFile, section, subSection );
+    createSIMPLEList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
 }
 
 void
 PreconditionerSIMPLE::createSIMPLEList( list_Type&         list,
                                         const GetPot&      dataFile,
                                         const std::string& section,
-                                        const std::string& subsection )
+                                        const std::string& subsection,
+                                        const bool&        verbose )
 {
     bool displayList = dataFile( ( section + "/displayList" ).data(), false);
 
@@ -94,7 +95,13 @@ PreconditionerSIMPLE::createSIMPLEList( list_Type&         list,
 
     list.set( "SIMPLE Type", SIMPLEType );
 
-    if ( displayList ) list.print( std::cout );
+    if ( displayList && verbose )
+    {
+    	std::cout << "SIMPLE parameters list:" << std::endl;
+    	std::cout << "-----------------------------" << std::endl;
+    	list.print( std::cout );
+    	std::cout << "-----------------------------" << std::endl;
+    }
 }
 
 Real

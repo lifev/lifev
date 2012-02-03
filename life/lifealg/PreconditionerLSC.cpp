@@ -36,11 +36,12 @@
 
 namespace LifeV {
 
-PreconditionerLSC::PreconditionerLSC():
+PreconditionerLSC::PreconditionerLSC( boost::shared_ptr<Epetra_Comm> comm ):
         PreconditionerTeko  (),
         M_precType          ( "" ),
         M_velocityBlockSize ( -1 ),
-        M_pressureBlockSize ( -1 )
+        M_pressureBlockSize ( -1 ),
+        M_comm( comm )
 {
 
 }
@@ -54,7 +55,7 @@ void
 PreconditionerLSC::setDataFromGetPot( const GetPot& dataFile,
                                       const std::string& section )
 {
-    createLSCList(M_list, dataFile, section, "LSC");
+    createLSCList( M_list, dataFile, section, "LSC", M_comm->MyPID() == 0 );
     M_precType          = this->M_list.get( "prectype", "LSC" );
 }
 
@@ -105,14 +106,15 @@ PreconditionerLSC::createParametersList( list_Type&         list,
                                          const std::string& section,
                                          const std::string& subSection )
 {
-    createLSCList( list, dataFile, section, subSection );
+    createLSCList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
 }
 
 void
 PreconditionerLSC::createLSCList( list_Type&         list,
                                   const GetPot&      dataFile,
                                   const std::string& section,
-                                  const std::string& subsection )
+                                  const std::string& subsection,
+                                  const bool&        verbose )
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
@@ -122,14 +124,13 @@ PreconditionerLSC::createLSCList( list_Type&         list,
     std::string precType = dataFile( ( section + "/prectype" ).data(), "LSC" );
     list.set( "prectype", precType );
 
-    //std::string value1 = dataFile( (section + "/" + subsection + "/subsection1/value1" ).data(), "string example" );
-    //int         value2 = dataFile( (section + "/" + subsection + "/subsection2/value2" ).data(), 1 );
-    //double      value3 = dataFile( (section + "/" + subsection + "/subsection3/value3" ).data(), 1.0 );
-    //list.set( "subsection1: value1", value1 );
-    //list.set( "subsection2: value2", value2 );
-    //list.set( "subsection3: value3", value3 );
-
-    if ( displayList ) list.print( std::cout );
+    if ( displayList && verbose )
+    {
+    	std::cout << "LSC parameters list:" << std::endl;
+    	std::cout << "-----------------------------" << std::endl;
+    	list.print( std::cout );
+    	std::cout << "-----------------------------" << std::endl;
+    }
 }
 
 Real

@@ -88,8 +88,12 @@ public:
 
     //! @name Constructors, destructor
     //@{
-    //! default constructor.
-    PreconditionerPCD( const  boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    //! default constructor
+#ifdef HAVE_MPI
+    PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+    PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner

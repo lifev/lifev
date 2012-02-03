@@ -87,8 +87,12 @@ public:
 
     //! @name Constructors, destructor
     //@{
-    //! default constructor.
-    PreconditionerSIMPLE( const  boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    //! default constructor
+#ifdef HAVE_MPI
+    PreconditionerSIMPLE( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+    PreconditionerSIMPLE( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
@@ -109,7 +113,8 @@ public:
     static void createSIMPLEList( list_Type&         list,
                                   const GetPot&      dataFile,
                                   const std::string& section,
-                                  const std::string& subSection = "SIMPLE" );
+                                  const std::string& subSection = "SIMPLE",
+                                  const bool& verbose = true );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();

@@ -57,7 +57,7 @@
 
 namespace LifeV {
 
-PreconditionerPCD::PreconditionerPCD( const  boost::shared_ptr<Epetra_Comm>& comm ):
+PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     PreconditionerComposition    ( comm ),
     M_velocityBlockSize          ( -1 ),
     M_pressureBlockSize          ( -1 ),
@@ -135,7 +135,13 @@ PreconditionerPCD::createPCDList( list_Type&         list,
     bool fullFactorization = dataFile( ( section + "/" + subsection + "/full_factorization" ).data(), false );
     list.set( "full factorization", fullFactorization );
 
-    if ( displayList && verbose ) list.print( std::cout );
+    if ( displayList && verbose )
+    {
+    	std::cout << "PCD parameters list:" << std::endl;
+    	std::cout << "-----------------------------" << std::endl;
+    	list.print( std::cout );
+    	std::cout << "-----------------------------" << std::endl;
+    }
 }
 
 Real

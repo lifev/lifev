@@ -81,7 +81,11 @@ public:
     /*!
         @param comm Communicator (boost::shared_ptr<Epetra_Comm>() by default)
      */
-    PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+#ifdef HAVE_MPI
+    PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+    PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 
 private:
 

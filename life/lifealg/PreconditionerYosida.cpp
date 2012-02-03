@@ -69,14 +69,15 @@ PreconditionerYosida::createParametersList( list_Type&         list,
                                             const std::string& section,
                                             const std::string& subSection )
 {
-    createYosidaList( list, dataFile, section, subSection );
+    createYosidaList( list, dataFile, section, subSection,  M_comm->MyPID() == 0 );
 }
 
 void
 PreconditionerYosida::createYosidaList( list_Type&         list,
                                         const GetPot&      dataFile,
                                         const std::string& section,
-                                        const std::string& subsection )
+                                        const std::string& subsection,
+                                        const bool&        verbose )
 {
     bool displayList = dataFile( ( section + "/displayList" ).data(), false);
 
@@ -93,7 +94,13 @@ PreconditionerYosida::createYosidaList( list_Type&         list,
     std::string schurPrecDataSection = dataFile( ( section + "/" + subsection + "/subprecs/schur_prec_data_section" ).data(), "" );
     list.set( "subprecs: Schur prec data section", ( schurPrecDataSection ).data() );
 
-    if ( displayList ) list.print( std::cout );
+    if ( displayList && verbose )
+    {
+    	std::cout << "Yosida parameters list:" << std::endl;
+    	std::cout << "-----------------------------" << std::endl;
+    	list.print( std::cout );
+    	std::cout << "-----------------------------" << std::endl;
+    }
 }
 
 Real

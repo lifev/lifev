@@ -101,7 +101,11 @@ public:
      */
     //@{
     //! default constructor.
-    PreconditionerLSC();
+#ifdef HAVE_MPI
+    PreconditionerLSC( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+    PreconditionerLSC( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
@@ -136,7 +140,8 @@ public:
     static void createLSCList( list_Type&         list,
                                const GetPot&      dataFile,
                                const std::string& section,
-                               const std::string& subSection = "LSC" );
+                               const std::string& subSection = "LSC",
+                               const bool& verbose = true );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();
@@ -155,6 +160,7 @@ protected:
     std::string M_precType;
     int         M_velocityBlockSize;
     int         M_pressureBlockSize;
+    boost::shared_ptr<Epetra_Comm> M_comm;
 
 };
 

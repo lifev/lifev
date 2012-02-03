@@ -46,7 +46,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-PreconditionerML2::PreconditionerML2():
+PreconditionerML2::PreconditionerML2( boost::shared_ptr<Epetra_Comm> comm ):
         super(),
         M_operator(),
         M_preconditioner(),
@@ -54,7 +54,8 @@ PreconditionerML2::PreconditionerML2():
         M_prolongation(),
         M_useP2ToP1Wrapper( false ),
         M_uFESpace(),
-        M_pFESpace()
+        M_pFESpace(),
+        M_comm( comm )
 {
 
 }
@@ -85,23 +86,25 @@ PreconditionerML2::buildPreconditioner( operator_type& matrix )
     M_preconditioner.reset();
     M_operator = matrix->matrixPtr();
 
+    bool verbose = M_comm->MyPID() == 0;
+
     if( M_useP2ToP1Wrapper )
     {
         if ( ( M_uFESpace.get() == NULL ) || ( M_pFESpace.get() == NULL ) )
         {
-            std::cout << "You must specified manually the pointers to the FESpaces" << std::endl;
+            if( verbose) std::cout << "You must specified manually the pointers to the FESpaces" << std::endl;
             exit( -1 );
         }
 
         if( M_restriction.get() == 0 )
         {
-            std::cout << "Building the restriction" << std::endl;
+        	if( verbose) std::cout << "Building the restriction" << std::endl;
             M_restriction.reset( new matrix_Type( matrix->map() ) );
             buildRestrictionP2ToP1( M_uFESpace, M_pFESpace, M_restriction );
         }
         if( M_prolongation.get() == 0 )
         {
-            std::cout << "Building the prolongation" << std::endl;
+        	if( verbose) std::cout << "Building the prolongation" << std::endl;
             M_prolongation.reset( new matrix_Type( matrix->map() ) );
             buildProlongationP1ToP2( M_uFESpace, M_pFESpace, M_prolongation );
         }
@@ -137,7 +140,7 @@ PreconditionerML2::resetPreconditioner()
 
 void PreconditionerML2::showMe( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the PreconditionerML class" << std::endl;
+    output << "showMe must be implemented for the PreconditionerML2 class" << std::endl;
 }
 
 // ===================================================
@@ -145,7 +148,7 @@ void PreconditionerML2::showMe( std::ostream& output ) const
 // ===================================================
 void
 PreconditionerML2::setDataFromGetPot( const GetPot&      dataFile,
-                                     const std::string& section )
+                                      const std::string& section )
 {
     bool displayList = dataFile( ( section + "/displayList" ).data(), false );
     const std::string MLParamFile = dataFile( ( section + "/ML2/parameters_file" ).data(), "MLParamList.xml" );
@@ -153,7 +156,15 @@ PreconditionerML2::setDataFromGetPot( const GetPot&      dataFile,
     MLParameters = Teuchos::getParametersFromXmlFile( MLParamFile );
     this->setParameters( *MLParameters );
 
-    if ( displayList ) M_MLList.print( std::cout );
+    bool verbose = M_comm->MyPID() == 0;
+
+    if ( displayList && verbose )
+    {
+    	std::cout << "ML2 parameters list:" << std::endl;
+    	std::cout << "-----------------------------" << std::endl;
+    	M_MLList.print( std::cout );
+    	std::cout << "-----------------------------" << std::endl;
+    }
 }
 
 void
