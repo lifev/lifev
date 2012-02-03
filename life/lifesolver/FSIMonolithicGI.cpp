@@ -250,7 +250,10 @@ namespace LifeV
 	M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time()/*, M_rhsFull*/);
 	M_monolithicMatrix->GlobalAssemble();
 
+
 	bcManageResidual(res, *M_rhsFull, disp, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(),  M_data->dataFluid()->dataTime()->time(), 1.);
+
+	// below sol is repeated by BCManageResidual
 	bcManageResidual(res, *M_rhsFull, disp, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), M_data->dataSolid()->dataTime()->time(), 1.);
 	bcManageResidual(res, *M_rhsFull, disp, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *M_BCh_mesh, M_mmFESpace->feBd(),  M_data->dataFluid()->dataTime()->time(), 1.);
 	res -= *M_rhsFull;

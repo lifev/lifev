@@ -152,11 +152,14 @@ VectorEpetra::data_type&
 VectorEpetra::operator[]( const UInt row )
 {
     Int lrow = blockMap().LID(row);
+
+#ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG( "VectorEpetra::operator [] ERROR : !! lrow < 0\n" );
     }
+#endif
 
     return (*M_epetraVector)[0][lrow];
 }
@@ -165,12 +168,15 @@ const VectorEpetra::data_type&
 VectorEpetra::operator[]( const UInt row ) const
 {
     Int lrow = blockMap().LID(row);
+
+#ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG( "VectorEpetra::operator () ERROR : !! lrow < 0\n" );
-
+	throw -1;
     }
+#endif
 
     return ((*M_epetraVector)[0][lrow]);
 }
@@ -572,11 +578,13 @@ Int VectorEpetra::globalToLocalRowId( const UInt row ) const
 {
     Int lrow = blockMap().LID(row);
 
+#ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 && blockMap().Comm().NumProc() == 1 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG( "VectorEpetra::globalToLocalRowId ERROR : !! lrow < 0\n" );
     }
+#endif
 
     return lrow;
 }
@@ -584,8 +592,11 @@ Int VectorEpetra::globalToLocalRowId( const UInt row ) const
 bool VectorEpetra::setCoefficient( const UInt row, const data_type& value, UInt offset )
 {
     Int lrow = globalToLocalRowId(row + offset);
+
+#ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
         return false;
+#endif
 
     (*M_epetraVector)[0][lrow] = value;
     return true;

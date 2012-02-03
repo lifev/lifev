@@ -1497,6 +1497,22 @@ bcEssentialManageResidual(VectorType&     res,
                           const DataType& diagonalizeCoef,
                           UInt            offset )
 {
+
+    if(sol.mapType()==Unique)
+    {
+        std::cout<<"pass me a repeated solution"<<std::endl;
+        VectorType repeatedSolution(sol, Repeated);
+        bcEssentialManageResidual(  res,
+				    rhs,
+				    repeatedSolution,
+				    dof,
+				    boundaryCond,
+				    time,
+				    diagonalizeCoef,
+				    offset );
+        return;
+    }
+
     ID idDof;
     UInt totalDof;
 
