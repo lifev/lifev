@@ -593,10 +593,10 @@ bool VectorEpetra::setCoefficient( const UInt row, const data_type& value, UInt 
 {
     Int lrow = globalToLocalRowId(row + offset);
 
-#ifdef HAVE_LIFEV_DEBUG
+    //#ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
         return false;
-#endif
+    //#endif
 
     (*M_epetraVector)[0][lrow] = value;
     return true;
