@@ -23,6 +23,7 @@ SUBDIRS		= data  \
 			  lifefem \
 			  lifefilters \
 			  lifemesh \
+			  test_MatrixEpetraStructuredFramework \
 			  test_ADRAssembler \
 			  test_bdf \
 			  test_navierStokes \
@@ -49,6 +50,7 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
            $(srcdir)/lifefem/testsuite.at \
            $(srcdir)/lifefilters/testsuite.at \
            $(srcdir)/lifemesh/testsuite.at \
+           $(srcdir)/test_MatrixEpetraStructuredFramework \
 		   $(srcdir)/test_ADRAssembler/testsuite.at \
 		   $(srcdir)/test_bdf/testsuite.at \
 		   $(srcdir)/test_navierStokes/testsuite.at \
