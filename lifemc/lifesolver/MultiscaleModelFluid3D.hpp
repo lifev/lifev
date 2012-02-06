@@ -43,6 +43,7 @@
 #include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifemesh/MeshData.hpp>
+#include <life/lifefem/BCInterface3D.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
 #include <life/lifefilters/ExporterEnsight.hpp>
@@ -52,7 +53,6 @@
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
 // Mathcard includes
-#include <life/lifefem/BCInterface3D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
@@ -100,7 +100,7 @@ public:
     typedef boost::shared_ptr< bcInterface_Type >             bcInterfacePtr_Type;
 
     typedef TimeAdvanceBDFNavierStokes< fluidVector_Type >    bdf_Type;
-    typedef OseenData                                          data_Type;
+    typedef OseenData                                         data_Type;
 
     typedef FESpace< mesh_Type, MapEpetra >                   FESpace_Type;
     typedef boost::shared_ptr< FESpace_Type >                 FESpacePtr_Type;
@@ -140,6 +140,9 @@ public:
 
     //! Solve the model.
     void solveModel();
+
+    //! Update the solution.
+    void updateSolution();
 
     //! Save the solution
     void saveSolution();

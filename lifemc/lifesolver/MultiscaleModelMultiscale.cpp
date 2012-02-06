@@ -275,7 +275,13 @@ MultiscaleModelMultiscale::buildModel()
         ( *i )->buildModel();
 
     for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    {
         ( *i )->initializeCouplingVariables();
+
+        // Necessary to perform a correct interpolation at the first time step
+        if ( M_algorithm->type() != Explicit )
+            ( *i )->extrapolateCouplingVariables();
+    }
 }
 
 void
@@ -312,6 +318,18 @@ MultiscaleModelMultiscale::solveModel()
 }
 
 void
+MultiscaleModelMultiscale::updateSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8110 ) << "MultiscaleModelMultiscale::updateSolution() \n";
+#endif
+
+    for ( multiscaleModelsContainerConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+        ( *i )->updateSolution();
+}
+
+void
 MultiscaleModelMultiscale::saveSolution()
 {
 
@@ -329,8 +347,7 @@ MultiscaleModelMultiscale::saveSolution()
     if ( M_globalData->dataTime()->isFirstTimeStep() )
     {
         // File name
-        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep )
-                                                       + "_Model_" + number2string( M_ID ) + ".mfile";
+        std::string filename = multiscaleProblemFolder + multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) + ".mfile";
 
         // Remove the old file if present
         if ( M_comm->MyPID() == 0 )

@@ -90,14 +90,6 @@ public:
     //! Display some information about the Multiscale problem (should be called after setupProblem)
     void showMe() const;
 
-    //! Save CPU time at each time step
-    /*!
-     * @param buildUpdateCPUTime CPU time to build/update the problem
-     * @param solveCPUTime CPU time to solve the problem
-     * @param saveCPUTime CPU time to save the solution
-     */
-    void saveCPUTime( const Real& buildUpdateCPUTime, const Real& solveCPUTime, const Real& saveCPUTime ) const;
-
     //@}
 
 
@@ -122,6 +114,26 @@ private:
     MultiscaleSolver& operator=( const MultiscaleSolver& solver );
 
     //@}
+
+
+    //! @name Private methods
+    //@{
+
+    //! Save CPU time at each time step
+    /*!
+     * @param buildUpdateCPUTime CPU time to build/update the problem
+     * @param solveCPUTime CPU time to solve the problem
+     * @param updateSolutionCPUTime CPU time to update the solution of the problem
+     * @param saveCPUTime CPU time to save the solution
+     */
+    void saveCPUTime( const Real& buildUpdateCPUTime, const Real& solveCPUTime,
+                      const Real& updateSolutionCPUTime, const Real& saveCPUTime ) const;
+
+    //! Import iteration number from the CPU file
+    void importIterationNumber();
+
+    //@}
+
 
     // The main model (can be a specific model or a Multiscale model)
     multiscaleModelPtr_Type          M_model;

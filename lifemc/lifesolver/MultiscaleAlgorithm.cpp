@@ -145,7 +145,7 @@ MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual
 
     if ( M_comm->MyPID() == 0 )
     {
-        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep ) + "_Algorithm.mfile";
+        std::string filename = multiscaleProblemFolder + multiscaleProblemPrefix + "_Algorithm_" + number2string( multiscaleProblemStep ) + ".mfile";
 
         if ( M_multiscale->globalData()->dataTime()->isFirstTimeStep() )
         {

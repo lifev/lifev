@@ -88,11 +88,24 @@ MultiscaleAlgorithmBroyden::setupData( const std::string& fileName )
     M_solver.setCommunicator( M_comm );
     M_solver.setDataFromGetPot( dataFile, "Solver/AztecOO" );
     //M_solver.setupPreconditioner( DataFile, "Solver/Preconditioner" );
+}
+
+void
+MultiscaleAlgorithmBroyden::setupAlgorithm()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8014 ) << "MultiscaleAlgorithmBroyden::setupAlgorithm() \n";
+#endif
+
+    multiscaleAlgorithm_Type::setupAlgorithm();
 
 #ifdef HAVE_HDF5
+#if ( H5_VERS_MAJOR > 1 || ( H5_VERS_MAJOR == 1 && H5_VERS_MINOR > 8 ) || ( H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 8 && H5_VERS_RELEASE >= 7 ) )
     // Import Jacobian from previous simulation
     if ( multiscaleProblemStep > 0 )
         importJacobianFromHDF5();
+#endif
 #endif
 }
 
@@ -110,7 +123,9 @@ MultiscaleAlgorithmBroyden::subIterate()
     if ( checkResidual( 0 ) )
     {
 #ifdef HAVE_HDF5
+#if ( H5_VERS_MAJOR > 1 || ( H5_VERS_MAJOR == 1 && H5_VERS_MINOR > 8 ) || ( H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 8 && H5_VERS_RELEASE >= 7 ) )
         exportJacobianToHDF5();
+#endif
 #endif
         return;
     }
@@ -128,7 +143,7 @@ MultiscaleAlgorithmBroyden::subIterate()
 //        M_couplingVariables->showMe();
 //        std::cout << " MS-  CouplingResiduals:\n" << std::endl;
 //        M_couplingResiduals->showMe();
-    
+
         // Compute the Jacobian
         if ( subIT == 1 )
         {
@@ -164,7 +179,9 @@ MultiscaleAlgorithmBroyden::subIterate()
         if ( checkResidual( subIT ) )
         {
 #ifdef HAVE_HDF5
+#if ( H5_VERS_MAJOR > 1 || ( H5_VERS_MAJOR == 1 && H5_VERS_MINOR > 8 ) || ( H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 8 && H5_VERS_RELEASE >= 7 ) )
             exportJacobianToHDF5();
+#endif
 #endif
             return;
         }
@@ -258,40 +275,59 @@ MultiscaleAlgorithmBroyden::orthogonalizationUpdate( const multiscaleVector_Type
 }
 
 #ifdef HAVE_HDF5
+
 void
 MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
 {
-    //TODO: Fix this method when there are processors with null entries.
-    return;
+    // If no coupling variable are present, the Jacobian is 0x0
+    if ( M_couplingVariables->size() == 0 )
+        return;
 
-    if ( !M_jacobian.get() == 0 )
-    {
-        if ( M_comm->MyPID() == 0 )
-            std::cout << " MS-  Exporting Jacobian matrix at time        " << number2string( M_multiscale->globalData()->dataTime()->time() ) << std::endl;
+    if ( M_multiscale->globalData()->dataTime()->timeStepNumber()%multiscaleSaveEachNTimeSteps == 0 || M_multiscale->globalData()->dataTime()->isLastTimeStep() )
+        if ( !M_jacobian.get() == 0 )
+        {
+            if ( M_comm->MyPID() == 0 )
+                std::cout << " MS-  Exporting Jacobian matrix ...            " << std::flush;
 
-        // We create an integer variable to be used as a string for the name of the matrix in the matrix container.
-        long long timeInteger = M_multiscale->globalData()->dataTime()->time() * 1E+10;
+            LifeChrono exportJacobianChrono;
+            exportJacobianChrono.start();
 
-        M_jacobian->exportToHDF5( multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep ) + "_AlgorithmJacobian", number2string( timeInteger ), M_truncate );
-        M_truncate = false;
-    }
+            M_jacobian->exportToHDF5( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobian" + "_" + number2string( multiscaleProblemStep ), number2string( M_multiscale->globalData()->dataTime()->timeStepNumber() ), M_truncate );
+            M_truncate = false;
+
+            exportJacobianChrono.stop();
+            Real jacobianChrono( exportJacobianChrono.globalDiff( *M_comm ) );
+            if ( M_comm->MyPID() == 0 )
+                std::cout << "done in " << jacobianChrono << " s." << std::endl;
+
+            //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianExported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( M_multiscale->globalData()->dataTime()->timeStepNumber() ) );
+        }
 }
 
 void
 MultiscaleAlgorithmBroyden::importJacobianFromHDF5()
 {
-    //TODO: Fix this method when there are processors with null entries.
-    return;
+    // If no coupling variable are present, the Jacobian is 0x0
+    if ( M_couplingVariables->size() == 0 )
+        return;
 
     if ( M_comm->MyPID() == 0 )
-        std::cout << " MS-  Importing Jacobian matrix from time      " << number2string( M_multiscale->globalData()->dataTime()->time() ) << std::endl;
+        std::cout << " MS-  Importing Jacobian matrix                " << std::flush;
 
-    // We create an integer variable to be used as a string for the name of the matrix in the matrix container.
-    long long timeInteger = M_multiscale->globalData()->dataTime()->time() * 1E+10;
+    LifeChrono importJacobianChrono;
+    importJacobianChrono.start();
 
     M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50 ) );
-    M_jacobian->importFromHDF5( multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep - 1 ) + "_AlgorithmJacobian", number2string( timeInteger ) );
+    M_jacobian->importFromHDF5( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobian" + "_" + number2string( multiscaleProblemStep - 1 ), number2string( M_multiscale->globalData()->dataTime()->timeStepNumber() ) );
+
+    importJacobianChrono.stop();
+    Real jacobianChrono( importJacobianChrono.globalDiff( *M_comm ) );
+    if ( M_comm->MyPID() == 0 )
+        std::cout << "done in " << jacobianChrono << " s. (Time " << M_multiscale->globalData()->dataTime()->time() << ", Iteration " << M_multiscale->globalData()->dataTime()->timeStepNumber() << ")" << std::endl;
+
+    //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianImported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( timeInteger ) );
 }
+
 #endif
 
 } // Namespace Multiscale

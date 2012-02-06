@@ -43,7 +43,7 @@
 #define MultiscaleModel1D_H 1
 
 // Jacobian coefficient approximation
-//#define JACOBIAN_WITH_FINITEDIFFERENCE
+#define JACOBIAN_WITH_FINITEDIFFERENCE
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 //#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 #endif
@@ -51,7 +51,7 @@
 // Matlab post-processing
 #define HAVE_MATLAB_POSTPROCESSING 1
 
-// Mathcard includes
+// LifeV includes
 #include <life/lifefem/OneDFSIBCHandler.hpp>
 #include <life/lifesolver/OneDFSIPhysicsLinear.hpp>
 #include <life/lifesolver/OneDFSIPhysicsNonLinear.hpp>
@@ -63,14 +63,14 @@
 
 #include <life/lifefem/BCInterface1D.hpp>
 
-#include <lifemc/lifesolver/MultiscaleModel.hpp>
-#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
-
-// LifeV includes
 #include <life/lifefem/FESpace.hpp>
 #ifdef HAVE_HDF5
 #include <life/lifefilters/ExporterHDF5.hpp>
 #endif
+
+// Mathcard includes
+#include <lifemc/lifesolver/MultiscaleModel.hpp>
+#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
 
 namespace LifeV
 {
@@ -161,6 +161,9 @@ public:
 
     //! Solve the model.
     void solveModel();
+
+    //! Update the solution.
+    void updateSolution();
 
     //! Save the solution
     void saveSolution();
@@ -375,6 +378,13 @@ private:
      */
     void solve( bc_Type& bc, solution_Type& solution, const std::string& solverType = " 1D-" );
 
+    //! Convert the flag from a bcFlag type to a bcSide type
+    /*!
+     * @param flag boundary condition flag
+     * @return boundary condition side.
+     */
+    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDFSI::left : OneDFSI::right; }
+
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
     //! Update linear BC
@@ -417,13 +427,6 @@ private:
      * @return solution of the tangent problem at specific node.
      */
     Real solveTangentProblem( solver_Type::vector_Type& rhs, const UInt& bcNode );
-
-    //! Convert the flag from a bcFlag type to a bcSide type
-    /*!
-     * @param flag boundary condition flag
-     * @return boundary condition side.
-     */
-    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDFSI::left : OneDFSI::right; }
 
 #endif
     //@}

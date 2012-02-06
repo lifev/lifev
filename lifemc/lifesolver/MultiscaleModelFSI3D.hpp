@@ -41,15 +41,16 @@
 //#define FSI_WITH_EXTERNALPRESSURE
 
 // LifeV includes
-#include <life/lifesolver/FSIOperator.hpp>
-#include <life/lifealg/NonLinearRichardson.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
 #include <life/lifefilters/ExporterHDF5.hpp>
 #endif
 
-// Mathcard includes
+#include <life/lifefem/BCInterface3D.hpp>
+#include <life/lifealg/NonLinearRichardson.hpp>
+
+#include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/FSIMonolithicGE.hpp>
 #include <life/lifesolver/FSIMonolithicGI.hpp>
 
@@ -59,8 +60,7 @@
 #include <life/lifesolver/MonolithicBlockComposedNN.hpp>
 #include <life/lifesolver/MonolithicBlockComposedDNND.hpp>
 
-#include <life/lifefem/BCInterface3D.hpp>
-
+// Mathcard includes
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
 
@@ -156,6 +156,9 @@ public:
 
     //! Solve the model.
     void solveModel();
+
+    //! Update the solution.
+    void updateSolution();
 
     //! Save the solution
     void saveSolution();
@@ -295,8 +298,6 @@ private:
 
     void setupBC( const std::string& fileName );
     void updateBC();
-
-    void updateSolution();
 
     void setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
     void setupImporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );

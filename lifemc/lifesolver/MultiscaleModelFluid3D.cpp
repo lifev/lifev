@@ -295,6 +295,17 @@ MultiscaleModelFluid3D::solveModel()
 }
 
 void
+MultiscaleModelFluid3D::updateSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::updateSolution() \n";
+#endif
+
+    *M_solution = *M_fluid->solution();
+}
+
+void
 MultiscaleModelFluid3D::saveSolution()
 {
 
@@ -303,12 +314,11 @@ MultiscaleModelFluid3D::saveSolution()
 #endif
 
     //Post-processing
-    *M_solution = *M_fluid->solution();
     M_exporter->postProcess( M_data->dataTime()->time() );
 
 #ifdef HAVE_HDF5
     if ( M_data->dataTime()->isLastTimeStep() )
-        ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporter ) )->closeFile();
+        M_exporter->closeFile();
 #endif
 
 }
@@ -446,7 +456,7 @@ MultiscaleModelFluid3D::initializeSolution()
         M_exporter->setTimeIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
 
 #ifdef HAVE_HDF5
-        ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importer ) )->closeFile();
+        M_importer->closeFile();
 #endif
     }
     else
@@ -471,7 +481,7 @@ MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
         M_exporter.reset( new ensightIOFile_Type() );
 
     M_exporter->setDataFromGetPot( dataFile );
-    M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_exporter->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) );
     M_exporter->setPostDir( multiscaleProblemFolder );
 
     //Importer
@@ -485,7 +495,7 @@ MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
         M_importer.reset( new ensightIOFile_Type() );
 
     M_importer->setDataFromGetPot( dataFile );
-    M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
+    M_importer->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep - 1 ) );
     M_importer->setPostDir( multiscaleProblemFolder );
 }
 

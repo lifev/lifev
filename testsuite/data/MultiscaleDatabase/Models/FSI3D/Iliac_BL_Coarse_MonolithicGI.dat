@@ -225,10 +225,10 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         functionSD = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '3.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '5.5  * 10000 * f_timeStep' # R1
-            functionSolver = '11.0  * 10000 * f_timeStep' # R2
-            #functionSolver = '22.0  * 10000 * f_timeStep' # R3
+            #function = '3.0  * 10000' # R0 - Paolo
+            #function = '5.5  * 10000' # R1
+            function = '11.0  * 10000' # R2
+            #function = '22.0  * 10000' # R3
 
             [../RobinBeta]
             function       = 0
@@ -243,10 +243,10 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         functionSD = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '5.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '8.5  * 10000 * f_timeStep' # R1
-            functionSolver = '16.0  * 10000 * f_timeStep' # R2
-            #functionSolver = '32.0  * 10000 * f_timeStep' # R3
+            #function = '5.0  * 10000' # R0 - Paolo
+            #function = '8.5  * 10000' # R1
+            function = '16.0  * 10000' # R2
+            #function = '32.0  * 10000' # R3
 
             [../RobinBeta]
             function       = 0
@@ -261,10 +261,10 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         functionSD = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '5.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '8.5  * 10000 * f_timeStep' # R1
-            functionSolver = '16.0  * 10000 * f_timeStep' # R2
-            #functionSolver = '32.0  * 10000 * f_timeStep' # R3
+            #function = '5.0  * 10000' # R0 - Paolo
+            #function = '8.5  * 10000' # R1
+            function = '16.0  * 10000' # R2
+            #function = '32.0  * 10000' # R3
 
             [../RobinBeta]
             function       = 0
@@ -279,10 +279,10 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         functionSD = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '6.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '10.5  * 10000 * f_timeStep' # R1
-            functionSolver = '20.0  * 10000 * f_timeStep' # R2
-            #functionSolver = '40.0  * 10000 * f_timeStep' # R3
+            #function = '6.0  * 10000' # R0 - Paolo
+            #function = '10.5  * 10000' # R1
+            function = '20.0  * 10000' # R2
+            #function = '40.0  * 10000' # R3
 
             [../RobinBeta]
             function       = 0
@@ -297,10 +297,10 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         functionSD = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '6.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '10.5  * 10000 * f_timeStep' # R1
-            functionSolver = '20.0  * 10000 * f_timeStep' # R2
-            #functionSolver = '40.0  * 10000 * f_timeStep' # R3
+            #function = '6.0  * 10000' # R0 - Paolo
+            #function = '10.5  * 10000' # R1
+            function = '20.0  * 10000' # R2
+            #function = '40.0  * 10000' # R3
 
             [../RobinBeta]
             function       = 0
@@ -315,10 +315,10 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         functionSD = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '6.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '10.5  * 10000 * f_timeStep' # R1
-            functionSolver = '20.0  * 10000 * f_timeStep' # R2
-            #functionSolver = '40.0  * 10000 * f_timeStep' # R3
+            #function = '6.0  * 10000' # R0 - Paolo
+            #function = '10.5  * 10000' # R1
+            function = '20.0  * 10000' # R2
+            #function = '40.0  * 10000' # R3
 
             [../RobinBeta]
             function       = 0
@@ -333,10 +333,10 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         functionSD = RobinWall
 
             [./RobinAlpha]
-            #functionSolver = '6.0  * 10000 * f_timeStep' # R0 - Paolo
-            #functionSolver = '10.5  * 10000 * f_timeStep' # R1
-            functionSolver = '20.0  * 10000 * f_timeStep' # R2
-            #functionSolver = '40.0  * 10000 * f_timeStep' # R3
+            #function = '6.0  * 10000' # R0 - Paolo
+            #function = '10.5  * 10000' # R1
+            function = '20.0  * 10000' # R2
+            #function = '40.0  * 10000' # R3
 
             [../RobinBeta]
             function       = 0
@@ -346,6 +346,13 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         [../]
 
     [../]
+
+
+
+[interface] # mesh dependent flags for the interface.
+fluid_flag      =  100   # default: 1
+solid_flag      =  100   # default: 1
+tolerance       =  0   # how far points are to be considered the same on the interface
 
 
 

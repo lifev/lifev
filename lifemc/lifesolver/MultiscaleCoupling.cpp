@@ -173,7 +173,7 @@ MultiscaleCoupling::interpolateCouplingVariables( const Real& t, multiscaleVecto
             if ( j != i )
                 base *= (t - timeContainer[j]) / (timeContainer[i] - timeContainer[j]);
 
-        interpolatedCouplingVariables += localCouplingVariables( i ) * base;
+        interpolatedCouplingVariables += base * localCouplingVariables( i );
     }
 }
 
@@ -240,9 +240,9 @@ MultiscaleCoupling::saveSolution()
                     std::ofstream output;
                     output << std::scientific << std::setprecision( 15 );
 
-                    std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep )
-                                                                   + "_Coupling_" + number2string( M_ID ) +
-                                                                   + "_Flag_" + number2string( i ) + ".mfile";
+                    std::string filename = multiscaleProblemFolder + multiscaleProblemPrefix + "_Coupling_" + number2string( M_ID )
+                                                                                             + "_Flag_" + number2string( i )
+                                                                                             + "_" + number2string( multiscaleProblemStep ) + ".mfile";
 
                     if ( M_globalData->dataTime()->isFirstTimeStep() )
                     {

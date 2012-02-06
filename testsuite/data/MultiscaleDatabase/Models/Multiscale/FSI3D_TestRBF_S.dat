@@ -48,7 +48,7 @@ mpiGroups = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
              1    BoundaryCondition   Stress_Atrium                      0               0
-             2    BoundaryCondition   FlowRate_Heart                     0               1
+             2    BoundaryCondition   FlowRate_HeartReymondStergiopulos2009 0               1
             '
 ###################################################################################################
 

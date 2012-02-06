@@ -9,23 +9,24 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Sinusoidal FlowRate #############################################
+### COUPLING: BoundaryCondition - Heart Redaelli 2011 #############################################
 ###################################################################################################
 
 [Multiscale]
-couplingName    = BoundaryCondition_FlowRate_Sinusoidal
+couplingName    = BoundaryCondition_FlowRate_HeartRedaelli2011
 
 [boundary_conditions]
-list = 'FlowRate_Sinusoidal'  # Sinusoidal FlowRate
+list = 'FlowRate_HeartRedaelli2011'
 
-    [./FlowRate_Sinusoidal]
+    [./FlowRate_HeartRedaelli2011]
     type                = Flux
     mode                = Full
     component           = 3
-    function            = 'a=1; T=0.05; -a*sin(2*pi*t/T)'
+    functionFile        = physicalFunctions/FlowRate_HeartRedaelli2011.dat
 
     # Additional parameters for 1D BC
     quantity            = Q
     line                = first
 
     [../]
+

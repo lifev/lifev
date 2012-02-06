@@ -98,6 +98,9 @@ public:
     //! Solve the model.
     void solveModel();
 
+    //! Update the solution.
+    void updateSolution();
+
     //! Save the solution
     void saveSolution();
 

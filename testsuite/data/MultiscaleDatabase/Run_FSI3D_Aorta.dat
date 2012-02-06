@@ -23,6 +23,10 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_Aorta-coarse
     Restart                    = false
     RestartFromStepNumber      = 0
 
+    [../Output]
+    ProblemPrefix              = Multiscale # Problem prefix
+    SaveEach                   = 5          # time steps
+
     [../time_discretization]
     initialtime                = 0.070   # [s]
     endtime                    = 0.100   # [s]

@@ -132,7 +132,14 @@ public:
      */
     virtual void solveModel() = 0;
 
-    //! save the solution.
+    //! Update the solution.
+    /*!
+     * This method is called after the last call to solveModel.
+     * It updates the solution both for the next time step and for the call to saveSolution.
+     */
+    virtual void updateSolution() = 0;
+
+    //! Save the solution.
     /*!
      * This method wrote to file the solution computed during the last call of solveModel.
      */
