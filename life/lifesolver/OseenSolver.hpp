@@ -53,6 +53,7 @@
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifearray/VectorElemental.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifearray/MatrixEpetraStructured.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 
 #include <life/lifecore/LifeChrono.hpp>
@@ -109,9 +110,9 @@ public:
     typedef boost::shared_ptr<bcHandler_Type>           bcHandlerPtr_Type;
 
 #ifdef HAVE_NS_PREC
-    typedef MatrixBlock<Real>                                 matrix_Type;
+    typedef MatrixEpetraStructured<Real>                matrix_Type;
 #else
-  typedef typename linearSolver_Type::matrix_type     matrix_Type;
+  typedef typename linearSolver_Type::matrix_type       matrix_Type;
 #endif
     typedef boost::shared_ptr<matrix_Type>              matrixPtr_Type;
     typedef typename linearSolver_Type::vector_type     vector_Type;
@@ -1548,7 +1549,9 @@ OseenSolver<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
     // solving the system
     M_linearSolver->setMatrix( *matrixFull );
 
-    Int numIter = M_linearSolver->solveSystem( rightHandSideFull, *M_solution, matrixFull );
+    boost::shared_ptr<MatrixEpetra<Real> > staticCast=boost::static_pointer_cast<MatrixEpetra<Real> >(matrixFull);
+
+    Int numIter = M_linearSolver->solveSystem( rightHandSideFull, *M_solution, staticCast );
 
     // if the preconditioner has been rese the stab terms are to be updated
     if ( numIter < 0 || numIter > M_iterReuseStabilization )
@@ -1757,7 +1760,7 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
         chrono.stop();
     }
 
-    M_pressureMatrixMass->GlobalAssemble();
+    M_pressureMatrixMass->globalAssemble();
 
     vector_Type ones( *M_solution );
     ones = 1.0;
