@@ -1238,6 +1238,10 @@ template <typename DataType>
 Int MatrixEpetra<DataType>::globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
                                             const boost::shared_ptr<const MapEpetra> & rangeMap )
 {
+    if ( !M_epetraCrs->Filled() )
+    {
+    	insertZeroDiagonal();
+    }
     M_domainMap = domainMap;
     M_rangeMap  = rangeMap;
     return  M_epetraCrs->GlobalAssemble( *domainMap->map(Unique), *rangeMap->map(Unique) );
