@@ -379,7 +379,7 @@ LinearSolver::setParameters( const Teuchos::ParameterList& list )
 {
     M_parameterList.setParameters( list );
     M_solverType = UndefinedSolver;
-    std::string solverName = M_parameterList.get( "Solver Type"              , "none" );
+    std::string solverName = M_parameterList.get<std::string>( "Solver Type" );
     if( solverName == "Belos" )
     {
     	M_solverType = Belos;
@@ -557,7 +557,7 @@ LinearSolver::setupSolverOperator()
         M_solverOperator->setTolerance( M_tolerance );
 
     // Set the parameter inside the solver
-    M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List" ) );
+    M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List", true, "" ) );
 }
 
 } // namespace LifeV
