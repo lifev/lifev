@@ -125,6 +125,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
             beta  = M_vectorFunctionRobin[1]->functionTimeSpace( t, x, y, z, 0 );
 
             alpha += 2 / timeStep * beta;
+            alpha *= timeStep; // This is due to the structural scaling on the timeStep
 
             (*M_robinAlphaCoefficient)[gid] = alpha;
             (*M_robinBetaCoefficient)[gid]  = beta;

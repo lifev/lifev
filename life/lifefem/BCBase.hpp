@@ -516,6 +516,12 @@ public:
        @param bcOffset to be set in BCBase class
      */
     void setOffset(int bcOffset) {M_offset = bcOffset;}
+
+    //! Set the BC type
+    /*!
+       @param bcOffset to be set in BCBase class
+    */
+    void setType(const bcType_Type& bcType) {M_type = bcType;}
     //@}
 
     //! @name Get Methods

@@ -57,34 +57,34 @@ TimeData::TimeData( ) :
 {
 }
 
-TimeData::TimeData( const GetPot& dfile, const std::string& section ) :
+TimeData::TimeData( const GetPot& dataFile, const std::string& section ) :
         M_timeStepNumber( 0 )
 {
-    setup( dfile, section );
+    setup( dataFile, section );
 }
 
-TimeData::TimeData( const TimeData& TimeData )
+TimeData::TimeData( const TimeData& timeData )
 {
-    M_initialTime	= TimeData.M_initialTime;
-    M_endTime		= TimeData.M_endTime;
-    M_periodTime    = TimeData.M_periodTime;
-    M_time			= TimeData.M_time;
-    M_timeStep		= TimeData.M_timeStep;
-    M_timeStepNumber= TimeData.M_timeStepNumber;
-    M_orderBDF		= TimeData.M_orderBDF;
-    M_theta	        = TimeData.M_theta;
-    M_gamma         = TimeData.M_gamma;
+    M_initialTime    = timeData.M_initialTime;
+    M_endTime        = timeData.M_endTime;
+    M_periodTime    = timeData.M_periodTime;
+    M_time            = timeData.M_time;
+    M_timeStep        = timeData.M_timeStep;
+    M_timeStepNumber= timeData.M_timeStepNumber;
+    M_orderBDF        = timeData.M_orderBDF;
+    M_theta            = timeData.M_theta;
+    M_gamma         = timeData.M_gamma;
 }
 
 // ===================================================
 // Methods
 // ===================================================
 void
-TimeData::setup( const GetPot& dfile, const std::string& section )
+TimeData::setup( const GetPot& dataFile, const std::string& section )
 {
-    M_initialTime = dfile(( section + "/initialtime"  ).data(), 0.);
-    M_endTime = dfile(( section + "/endtime"      ).data(), 1.);
-    M_periodTime = dfile(( section + "/periodtime"      ).data(), 1.);
+    M_initialTime = dataFile(( section + "/initialtime"  ).data(), 0.);
+    M_endTime = dataFile(( section + "/endtime"      ).data(), 1.);
+    M_periodTime = dataFile(( section + "/periodtime"      ).data(), 1.);
     M_time = M_initialTime;
     M_timeStep = dfile(( section + "/timestep" ).data(), M_endTime );
     M_orderBDF = dfile(( section + "/BDF_order" ).data(), 1 );
@@ -99,9 +99,9 @@ TimeData::showMe( std::ostream& output ) const
 
     output << "\n[/time_discretization]" << std::endl;
     output << "Initial time   = " << M_initialTime    << std::endl;
-    output << "End time       = " << M_endTime	      << std::endl;
-    output << "Time           = " << M_time		      << std::endl;
-    output << "TimeStep       = " << M_timeStep	      << std::endl;
+    output << "End time       = " << M_endTime          << std::endl;
+    output << "Time           = " << M_time              << std::endl;
+    output << "TimeStep       = " << M_timeStep          << std::endl;
     output << "TimeStepNumber = " << M_timeStepNumber << std::endl;
     output << "BDF order      = " << M_orderBDF       << std::endl;
     output << "theta          = " << M_theta          << std::endl;
@@ -109,7 +109,7 @@ TimeData::showMe( std::ostream& output ) const
 }
 
 // ===================================================
-// Methods
+// Get Methods
 // ===================================================
 std::vector<Real>
 TimeData::coefficientsNewmark()
@@ -126,7 +126,7 @@ TimeData::coefficientsNewmark()
 // Private Methods
 // ===================================================
 Real
-TimeData::round( const Real n, const Int decimal ) const
+TimeData::round( const Real& n, const Int& decimal ) const
 {
     return std::floor( n * std::pow(10.0, decimal) + 0.5 )  / std::pow(10.0, decimal);
 }

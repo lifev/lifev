@@ -228,6 +228,7 @@ BCBase::BCBase( const bcName_Type& name,
         M_bcVector( bcVector.clone() ),
         M_isStored_BcVector( true ),
         M_isStored_BcFunctionVectorDependent(false),
+        M_offset( 0 ), // The others are initialize to -1 we should follow a common convention.
         M_finalized( false )
 {
     UInt numberOfComponents;
@@ -310,6 +311,7 @@ BCBase::BCBase( const bcName_Type&     name,
         M_bcVector(),
         M_isStored_BcVector( false ),
         M_isStored_BcFunctionVectorDependent(true),
+        M_offset( 0 ), // The others are initialize to -1 we should follow a common convention.
         M_finalized( false )
 {
 	if ( M_mode != Component )
