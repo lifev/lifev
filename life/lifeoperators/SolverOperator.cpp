@@ -34,7 +34,6 @@
  */
 
 #include <life/lifeoperators/SolverOperator.hpp>
-#include <Teuchos_RCPBoostSharedPtrConversions.hpp>
 
 namespace LifeV
 {
