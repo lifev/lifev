@@ -1280,7 +1280,7 @@ void MatrixEpetra<DataType>::insertValueDiagonal( const DataType& value, Int fro
 
         ierr = M_epetraCrs->InsertGlobalValues( 1, p, 1, p, &value );
 
-        if( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
+        if( ierr < 0 ) std::cerr << " error in matrix insertion " << ierr << std::endl;
     }
 }
 
@@ -1321,7 +1321,7 @@ setCoefficient( UInt row, UInt column, DataType localValue )
 
     Int ierr=M_epetraCrs->ReplaceGlobalValues( 1, &irow, 1, &icol, &localValue );
     if (ierr!=0)
-        { std::cout << " error in matrix replacement " << ierr << std::endl; }
+        { std::cerr << " error in matrix replacement " << ierr << std::endl; }
 
 }
 
@@ -1339,7 +1339,7 @@ addToCoefficient( UInt row, UInt column, DataType localValue )
     else
     	ierr = M_epetraCrs->InsertGlobalValues( 1, &irow, 1, &icol, &localValue );
 
-    if ( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
+    if ( ierr < 0 ) std::cerr << " error in matrix insertion " << ierr << std::endl;
 }
 
 template <typename DataType>
@@ -1358,7 +1358,7 @@ addToCoefficients( Int const numRows, Int const numColumns,
         ierr = M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
                                                         &columnIndices[0], localValues, format );
 
-    if ( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
+    if ( ierr < 0 ) std::cerr << " error in matrix insertion " << ierr << std::endl;
 }
 
 // ===================================================
