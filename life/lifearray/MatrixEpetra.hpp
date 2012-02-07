@@ -538,9 +538,13 @@ public:
 
     //! Friend Functions
     //@{
+    //! RAP matrix matrix multiplication result = R * A * P
+    //! User is responsible to wrap the row pointer returned by this method with his favorite pointer
     template <typename DType>
     friend MatrixEpetra<DType> * RAP(const MatrixEpetra<DType> & R, const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P);
 
+    //! PtAP matrix matrix multiplication result = Pt * A * P
+    //! User is responsible to wrap the row pointer returned by this method with his favorite pointer
     template <typename DType>
     friend MatrixEpetra<DType> * PtAP(const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P);
     //@}
@@ -812,10 +816,10 @@ Int MatrixEpetra<DataType>::multiply( bool transposeCurrent, const vector_type& 
 {
     ASSERT_PRE( M_epetraCrs->Filled(),
                 "MatrixEpetra<DataType>::Multiply: GlobalAssemble(...) must be called first" );
-    ASSERT_PRE( vector1.map().mapsAreSimilar(*M_domainMap),
-                "MatrixEpetra<DataType>::Multiply: x map is different from M_domainMap" );
-    ASSERT_PRE( vector2.map().mapsAreSimilar(*M_rangeMap),
-                "MatrixEpetra<DataType>::Multiply: y map is different from M_rangeMap" );
+    ASSERT_PRE( transposeCurrent ? vector1.map().mapsAreSimilar(*M_rangeMap) : vector1.map().mapsAreSimilar(*M_domainMap),
+                "MatrixEpetra<DataType>::Multiply: x map is different from M_domainMap (or M_rangeMap if transposeCurrent == true)" );
+    ASSERT_PRE( transposeCurrent ? vector2.map().mapsAreSimilar(*M_domainMap) : vector2.map().mapsAreSimilar(*M_rangeMap),
+                "MatrixEpetra<DataType>::Multiply: y map is different from M_rangeMap (or M_domainMap if transposeCurrent == true)" );
 
 
     return M_epetraCrs->Multiply( transposeCurrent, vector1.epetraVector(), vector2.epetraVector() );
