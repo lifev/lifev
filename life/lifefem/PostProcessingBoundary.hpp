@@ -863,6 +863,14 @@ Vector PostProcessingBoundary<MeshType>::normal( const markerID_Type& flag, UInt
     // Scale normal to unity length
     Real nn = sqrt(pow(normal(0),2) + pow(normal(1),2) + pow(normal(2),2));
 
+#ifdef DEBUG
+    if (abs(nn) < 1e-6)
+    {
+        Debug( 5000 ) << "Approximate surface normal could not be reliably computed.\n";
+        Debug( 5000 ) << "Modulus of the integrated normal vector was: " << nn  << "\n";
+    }
+#endif
+
     return (normal / nn);
 }
 
