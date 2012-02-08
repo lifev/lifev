@@ -123,8 +123,14 @@ extern UInt multiscaleCoresPerNode;
 // Folder of the problem
 extern std::string multiscaleProblemFolder;
 
+// Prefix of the problem
+extern std::string multiscaleProblemPrefix;
+
 // Step of the problem ( > 0 when performing a restart )
 extern UInt multiscaleProblemStep;
+
+// Save each N time steps
+extern UInt multiscaleSaveEachNTimeSteps;
 
 // Exit Flag
 extern bool multiscaleExitFlag;

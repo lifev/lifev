@@ -81,6 +81,9 @@ public:
      */
     void setupData( const std::string& fileName );
 
+    //! Setup coupling variables and other quantities of the algorithm
+    void setupAlgorithm();
+
     //! Perform sub-iteration on the coupling variables
     void subIterate();
 

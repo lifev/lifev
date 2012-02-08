@@ -158,17 +158,17 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 
     //Exporters
     M_data->setPostprocessingDirectory( multiscaleProblemFolder );
-    M_data->setPostprocessingFile( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_data->setPostprocessingFile( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) );
 
 #ifdef HAVE_HDF5
     uniformMesh1D( *M_exporterMesh, 0., M_data->length(), M_data->numberOfElements() );
 
     M_exporter->setDataFromGetPot( dataFile );
-    M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_exporter->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) );
     M_exporter->setPostDir( multiscaleProblemFolder );
 
     M_importer->setDataFromGetPot( dataFile );
-    M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
+    M_importer->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep -1 ) );
     M_importer->setPostDir( multiscaleProblemFolder );
 #endif
 
@@ -200,7 +200,7 @@ MultiscaleModel1D::setupModel()
     M_exporter->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
     DOF tmpDof ( *M_exporterMesh, M_feSpace->refFE() );
-    std::vector<Int> myGlobalElements( tmpDof.globalElements( *M_exporterMesh ) ); 
+    std::vector<Int> myGlobalElements( tmpDof.globalElements( *M_exporterMesh ) );
     MapEpetra map( -1, myGlobalElements.size(), &myGlobalElements[0], M_comm );
     M_solver->setupSolution( *M_exporterSolution, map, true );
 
@@ -224,6 +224,9 @@ MultiscaleModel1D::setupModel()
         createLinearBC();
         updateLinearBC( *M_solution );
         setupLinearModel();
+
+        // Initialize the linear solution
+        copySolution( *M_solution, *M_linearSolution );
     }
 #endif
 
@@ -290,15 +293,24 @@ MultiscaleModel1D::solveModel()
 }
 
 void
+MultiscaleModel1D::updateSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MultiscaleModel1D::updateSolution() \n";
+#endif
+
+    // Update exporter solution removing ghost nodes
+    copySolution( *M_solution, *M_exporterSolution );
+}
+
+void
 MultiscaleModel1D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MultiscaleModel1D::saveSolution() \n";
 #endif
-
-    // Update exporter solution removing ghost nodes
-    copySolution( *M_solution, *M_exporterSolution );
 
 #ifdef HAVE_HDF5
     M_exporter->postProcess( M_data->dataTime()->time() );
@@ -342,7 +354,7 @@ void
 MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
 {
     OneDFSIFunction base;
-   base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
+    base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
 
     M_bc->handler()->setBC( flagConverter( flag ), OneDFSI::first, OneDFSI::Q, base );
 }
@@ -529,7 +541,10 @@ MultiscaleModel1D::initializeSolution()
         M_solver->computeW1W2( *M_solution );
     }
     else
+    {
         M_solver->initialize( *M_solution );
+        copySolution( *M_solution, *M_exporterSolution );
+    }
 }
 
 void
@@ -787,6 +802,8 @@ MultiscaleModel1D::imposePerturbation()
             default:
 
                 std::cout << "Warning: bcType \"" << M_bcDeltaType << "\"not available!" << std::endl;
+
+                break;
             }
 
             break;
@@ -819,14 +836,17 @@ MultiscaleModel1D::resetPerturbation()
 Real
 MultiscaleModel1D::bcFunctionDelta( const Real& t )
 {
+    // Previous bc size
+    UInt bcPreviousSize( M_bcPreviousTimeSteps.size() );
+
+    // Time container for interpolation
+    std::vector< Real > timeContainer( bcPreviousSize, 0 );
+    for ( UInt i(0) ; i < bcPreviousSize ; ++i )
+        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
+
     // Lagrange interpolation
     Real bcValue(0);
     Real base(1);
-
-    // Time container for interpolation
-    std::vector< Real > timeContainer( M_bcPreviousTimeSteps.size(), 0 );
-    for ( UInt i(0) ; i < M_bcPreviousTimeSteps.size() ; ++i )
-        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
 
     for ( UInt i(0) ; i < M_bcPreviousTimeSteps.size() ; ++i )
     {
@@ -836,9 +856,9 @@ MultiscaleModel1D::bcFunctionDelta( const Real& t )
                 base *= (t - timeContainer[j]) / (timeContainer[i] - timeContainer[j]);
 
         if ( i == 0 )
-            bcValue += ( M_bcDelta + M_bcPreviousTimeSteps[i][M_bcDeltaSide][M_bcDeltaType] ) * base;
+            bcValue += base * ( M_bcPreviousTimeSteps[i][M_bcDeltaSide][M_bcDeltaType] + M_bcDelta );
         else
-            bcValue += M_bcPreviousTimeSteps[i][M_bcDeltaSide][M_bcDeltaType] * base;
+            bcValue += base * M_bcPreviousTimeSteps[i][M_bcDeltaSide][M_bcDeltaType];
     }
 
     return bcValue;
@@ -964,7 +984,7 @@ MultiscaleModel1D::solveTangentProblem( solver_Type::vector_Type& rhs, const UIn
         for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
         {
             flowRateDelta[iNode] = 1.;
-            flowRateViscoelasticCorrection += M_solver->viscoelasticFlowRateCorrection( *(*M_solution)["A"], flowRateDelta, M_data->dataTime()->timeStep(), *M_bc->handler(), false ) * flowRateElasticCorrection[iNode];
+            flowRateViscoelasticCorrection += M_solver->viscoelasticFluxCorrection( *(*M_solution)["A"], flowRateDelta, M_data->dataTime()->timeStep(), *M_bc->handler(), false ) * flowRateElasticCorrection[iNode];
             flowRateDelta[iNode] = 0.;
         }
 

@@ -243,16 +243,30 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         [../OuterWall_Robin]
         type       = Robin
         flag       = 10
-        mode       = Normal
-        function   = 0
+        mode       = Full
+        component  = 3
+        functionSD = RobinWall
 
             [./RobinAlpha]
-            functionSolver = '29000 * f_timeStep'
+            #function       = 0
+            function = '29  * 10000'
+
+            [../RobinBeta]
+            function       = 0
+            #function = '29  * 0.5'
+
             [../]
 
         [../]
 
     [../]
+
+
+
+[interface] # mesh dependent flags for the interface.
+fluid_flag      =  1   # default: 1
+solid_flag      =  1   # default: 1
+tolerance       =  0   # how far points are to be considered the same on the interface
 
 
 

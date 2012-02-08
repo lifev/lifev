@@ -158,12 +158,6 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
 
 
-[interface] # mesh dependent flags for the interface.
-fluid_flag      =  5   # default: 1
-tolerance       =  0.0005   # how far points are to be considered the same on the interface
-
-
-
 [solid]
 
     [./physics]
@@ -223,6 +217,13 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
         [../]
 
     [../]
+
+
+
+[interface] # mesh dependent flags for the interface.
+fluid_flag      =  5   # default: 1
+solid_flag      =  5   # default: 1
+tolerance       =  0.0005   # how far points are to be considered the same on the interface
 
 
 
