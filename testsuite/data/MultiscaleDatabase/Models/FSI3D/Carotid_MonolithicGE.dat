@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -33,7 +33,6 @@ type             = hdf5
 
 [problem]
 method      = monolithicGE # monolithicGE, monolithicGI
-                           # exactJaobilan, fixedPoint
 
 blockOper   = AdditiveSchwarz # AdditiveSchwarz   AdditiveSchwarzRN
                                 AdditiveSchwarzGI AdditiveSchwarzRNGI
@@ -93,7 +92,7 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     #vel_order       = P2               # P1, P1Bubble, P2
     press_order     = P1               # P1, P2
     stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it
-    div_beta_u_v    = false                # 1=on, 0=off
+    div_beta_u_v    = false            # 1=on, 0=off
     diagonalize     = 0                # weight, 0=off
     stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
 
@@ -122,14 +121,14 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     [../boundary_conditions]
     list = ' '
     #list = 'InletRing OutletRingOne OutletRingTwo'
-        
+
         [./InletRing]
         type       = Essential
         flag       = 20
         mode       = Full
         component  = 3
         function   = 0
-        
+
         [../OutletRingOne]
         type       = Essential
         flag       = 30
@@ -161,10 +160,11 @@ tolerance       =  0   # how far points are to be considered the same on the int
     [./physics]
     solidType = linearVenantKirchhof # linearVenantKirchhof
                                      # nonLinearVenantKirchhof
-    #material_flag = 1
-    #density   = 1.2    # density
-    #young     = 4.0E6
-    #poisson   = 0.48
+    material_flag    = 1
+    #externalPressure = 0
+    #density          = 1.2
+    #young            = 4.0E6
+    #poisson          = 0.48
 
     [../time_discretization]
     #timestep                   = 0.0001 # [s]
@@ -321,8 +321,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1
         mode       = Full
         component  = 3
-        FSI        = StructureDispToHarmonicExtension
-        
+        functionSD = StructureDispToHarmonicExtension
+
         [../NoInterface]
         type       = Essential
         flag       = 1
@@ -357,7 +357,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
-        
+
         [../Composed]
         list                = 'Ifpack Ifpack'
         sections            = 'ifpack ifpack'

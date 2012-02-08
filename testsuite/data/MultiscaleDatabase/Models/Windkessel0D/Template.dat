@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -15,6 +15,10 @@
 [Multiscale]
 modelName        = Windkessel0D_Template
 modelType        = Windkessel0D
-couplingFlags    = '0'
+couplingFlags    = '0 1'
 
+[Coefficients]
 
+Resistance1    = 5e+05
+Resistance2    = 5e+05
+Capacitance    = 1e-4

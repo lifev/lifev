@@ -46,6 +46,7 @@ namespace Multiscale
 // ===================================================
 MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
         multiscaleModel_Type           (),
+        MultiscaleInterfaceFluid       (),
         M_exporter                     (),
         M_importer                     (),
         M_fileName                     (),
@@ -78,7 +79,7 @@ MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
 }
 
 // ===================================================
-// Multiscale PhysicalModel Virtual Methods
+// MultiscaleModel Methods
 // ===================================================
 void
 MultiscaleModelFluid3D::setupData( const std::string& fileName )
@@ -161,8 +162,8 @@ MultiscaleModelFluid3D::setupModel()
     if ( M_exporter->mapType() == Unique )
         M_solution->setCombineMode( Zero );
 
-    M_exporter->addVariable( ExporterData<mesh_Type>::VectorField, "Fluid Velocity", M_uFESpace, M_solution, static_cast<UInt> ( 0 ) );
-    M_exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "Fluid Pressure", M_pFESpace, M_solution, 3 * M_uFESpace->dof().numTotalDof() );
+    M_exporter->addVariable( IOData_Type::VectorField, "Velocity (fluid)", M_uFESpace, M_solution, static_cast<UInt> ( 0 ) );
+    M_exporter->addVariable( IOData_Type::ScalarField, "Pressure (fluid)", M_pFESpace, M_solution, static_cast<UInt> ( 3 * M_uFESpace->dof().numTotalDof() ) );
 
     //Setup linear model
     setupLinearModel();
@@ -180,7 +181,7 @@ MultiscaleModelFluid3D::buildModel()
 #endif
 
     // Display data
-//    if ( M_displayer->isLeader() )
+//    if ( M_comm->MyPID() == 0 )
 //        M_data->showMe();
 
     //Build constant matrices
@@ -260,7 +261,7 @@ MultiscaleModelFluid3D::solveModel()
     {
         Real residual = ( *M_beta - *M_fluid->solution() ).norm2(); // residual is computed on the whole solution vector;
 
-        if ( M_displayer->isLeader() )
+        if ( M_comm->MyPID() == 0 )
             std::cout << "  F-  Residual:                                " << residual << std::endl;
 
         M_generalizedAitken.restart();
@@ -284,7 +285,7 @@ MultiscaleModelFluid3D::solveModel()
             residual = ( *M_beta - *M_fluid->solution() ).norm2(); // residual is computed on the whole solution vector
 
             // Display subiteration information
-            if ( M_displayer->isLeader() )
+            if ( M_comm->MyPID() == 0 )
             {
                 std::cout << "  F-  Sub-iteration n.:                        " << subIT << std::endl;
                 std::cout << "  F-  Residual:                                " << residual << std::endl;
@@ -315,7 +316,7 @@ MultiscaleModelFluid3D::saveSolution()
 void
 MultiscaleModelFluid3D::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleModel_Type::showMe();
 
@@ -326,18 +327,274 @@ MultiscaleModelFluid3D::showMe()
                   << "Pressure DOF        = " << M_pFESpace->dof().numTotalDof() << std::endl
                   << "lmDOF               = " << M_lmDOF << std::endl << std::endl;
 
-        std::cout << "Fluid mesh maxH     = " << M_mesh->meshPartition()->maxH() << std::endl
-                  << "Fluid mesh meanH    = " << M_mesh->meshPartition()->meanH() << std::endl << std::endl;
+        std::cout << "Fluid mesh maxH     = " << MeshUtility::MeshStatistics::computeSize( *M_mesh->meshPartition() ).maxH << std::endl
+                  << "Fluid mesh meanH    = " << MeshUtility::MeshStatistics::computeSize( *M_mesh->meshPartition() ).meanH << std::endl << std::endl;
 
         std::cout << "NS SubITMax         = " << M_subiterationsMaximumNumber << std::endl
                   << "NS Tolerance        = " << M_tolerance << std::endl << std::endl << std::endl << std::endl;
     }
 }
 
+Real
+MultiscaleModelFluid3D::checkSolution() const
+{
+    return M_solution->norm2();
+}
 
 // ===================================================
-// Methods
+// MultiscaleInterfaceFluid Methods
 // ===================================================
+void
+MultiscaleModelFluid3D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
+{
+    BCFunctionBase base;
+    base.setFunction( function );
+
+    M_bc->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Flux, Full, base, 3 );
+}
+
+void
+MultiscaleModelFluid3D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
+{
+    BCFunctionBase base;
+    base.setFunction( function );
+
+    M_bc->handler()->addBC( "CouplingStress_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Natural, Normal, base );
+}
+
+Real
+MultiscaleModelFluid3D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
+{
+    solveLinearModel( solveLinearSystem );
+
+    return M_fluid->getLinearFlux( flag );
+}
+
+Real
+MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+{
+    solveLinearModel( solveLinearSystem );
+
+    if ( M_linearBC->findBCWithFlag( flag ).type() == Flux )
+        return -M_fluid->getLinearLagrangeMultiplier( flag, *M_linearBC );
+    else
+        return -M_fluid->getLinearPressure( flag );
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+MultiscaleModelFluid3D::setSolution( const fluidVectorPtr_Type& solution )
+{
+    M_solution = solution;
+
+    M_fluid->initialize( *M_solution );
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+Real
+MultiscaleModelFluid3D::boundaryPressure( const bcFlag_Type& flag ) const
+{
+    if ( M_bc->handler()->findBCWithFlag( flag ).type() == Flux )
+        return M_fluid->lagrangeMultiplier( flag, *M_bc->handler() );
+    else
+        return M_fluid->pressure( flag );
+}
+
+// ===================================================
+// Private Methods
+// ===================================================
+void
+MultiscaleModelFluid3D::setupGlobalData( const std::string& fileName )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupGlobalData( fileName ) \n";
+#endif
+
+    GetPot dataFile( fileName );
+
+    //Global data time
+    M_data->setTimeData( M_globalData->dataTime() );
+
+    //Global physical quantities
+    if ( !dataFile.checkVariable( "fluid/physics/density" ) )
+        M_data->setDensity( M_globalData->fluidDensity() );
+    if ( !dataFile.checkVariable( "fluid/physics/viscosity" ) )
+        M_data->setViscosity( M_globalData->fluidViscosity() );
+}
+
+void
+MultiscaleModelFluid3D::initializeSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::initializeSolution() \n";
+#endif
+
+    if ( multiscaleProblemStep > 0 )
+    {
+        M_importer->setMeshProcId( M_mesh->meshPartition(), M_comm->MyPID() );
+
+        M_importer->addVariable( IOData_Type::VectorField, "Velocity (fluid)", M_uFESpace, M_solution, static_cast <UInt> ( 0 ) );
+        M_importer->addVariable( IOData_Type::ScalarField, "Pressure (fluid)", M_pFESpace, M_solution, static_cast <UInt> ( 3 * M_uFESpace->dof().numTotalDof() ) );
+
+        // Import
+        M_exporter->setTimeIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
+
+#ifdef HAVE_HDF5
+        ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importer ) )->closeFile();
+#endif
+    }
+    else
+        *M_solution = 0.0;
+
+    M_fluid->initialize( *M_solution );
+}
+
+void
+MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
+{
+    GetPot dataFile( fileName );
+
+    //Exporter
+    const std::string exporterType = dataFile( "exporter/type", "ensight" );
+
+#ifdef HAVE_HDF5
+    if ( !exporterType.compare( "hdf5" ) )
+        M_exporter.reset( new hdf5IOFile_Type() );
+    else
+#endif
+        M_exporter.reset( new ensightIOFile_Type() );
+
+    M_exporter->setDataFromGetPot( dataFile );
+    M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_exporter->setPostDir( multiscaleProblemFolder );
+
+    //Importer
+    const std::string importerType = dataFile( "importer/type", "ensight" );
+
+#ifdef HAVE_HDF5
+    if ( !importerType.compare( "hdf5" ) )
+        M_importer.reset( new hdf5IOFile_Type() );
+    else
+#endif
+        M_importer.reset( new ensightIOFile_Type() );
+
+    M_importer->setDataFromGetPot( dataFile );
+    M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
+    M_importer->setPostDir( multiscaleProblemFolder );
+}
+
+void
+MultiscaleModelFluid3D::setupMesh()
+{
+    //Read fluid mesh from file
+    boost::shared_ptr< mesh_Type > fluidMesh( new mesh_Type );
+    readMesh( *fluidMesh, *M_meshData );
+
+    //Transform mesh
+    fluidMesh->meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+
+    //Partition mesh
+    M_mesh.reset( new MeshPartitioner_Type( fluidMesh, M_comm ) );
+}
+
+void
+MultiscaleModelFluid3D::setupFEspace()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupFEspace() \n";
+#endif
+
+    //Velocity FE Space
+    const ReferenceFE* u_refFE;
+    const QuadratureRule* u_qR;
+    const QuadratureRule* u_bdQr;
+
+    if ( M_data->uOrder().compare( "P2" ) == 0 )
+    {
+        u_refFE = &feTetraP2;
+        u_qR = &quadRuleTetra15pt; // DoE 5
+        u_bdQr = &quadRuleTria3pt; // DoE 2
+    }
+    else if ( M_data->uOrder().compare( "P1" ) == 0 )
+    {
+        u_refFE = &feTetraP1;
+        u_qR = &quadRuleTetra4pt;  // DoE 2
+        u_bdQr = &quadRuleTria3pt; // DoE 2
+    }
+    else if ( M_data->uOrder().compare( "P1Bubble" ) == 0 )
+    {
+        u_refFE = &feTetraP1bubble;
+        u_qR = &quadRuleTetra64pt; // DoE 2
+        u_bdQr = &quadRuleTria3pt; // DoE 2
+    }
+    else
+    {
+        if ( M_comm->MyPID() == 0 )
+            std::cout << M_data->uOrder() << " Velocity FE not implemented yet." << std::endl;
+        exit( EXIT_FAILURE );
+    }
+
+    //Pressure FE Space
+    const ReferenceFE* p_refFE;
+    const QuadratureRule* p_qR;
+    const QuadratureRule* p_bdQr;
+
+    if ( M_data->pOrder().compare( "P2" ) == 0 )
+    {
+        p_refFE = &feTetraP2;
+        p_qR = u_qR;
+        p_bdQr = &quadRuleTria3pt; // DoE 2
+    }
+    else if ( M_data->pOrder().compare( "P1" ) == 0 )
+    {
+        p_refFE = &feTetraP1;
+        p_qR = u_qR;
+        p_bdQr = &quadRuleTria3pt; // DoE 2
+    }
+    else
+    {
+        if ( M_comm->MyPID() == 0 )
+            std::cout << M_data->pOrder() << " pressure FE not implemented yet." << std::endl;
+        exit( EXIT_FAILURE );
+    }
+
+    M_uFESpace.reset( new FESpace_Type( *M_mesh, *u_refFE, *u_qR, *u_bdQr, 3, M_comm ) );
+    M_pFESpace.reset( new FESpace_Type( *M_mesh, *p_refFE, *p_qR, *p_bdQr, 1, M_comm ) );
+}
+
+void
+MultiscaleModelFluid3D::setupDOF()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupDOF \n";
+#endif
+
+    M_lmDOF = M_bc->handler()->numberOfBCWithType( Flux );
+}
+
+void
+MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& bc )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupBCOffset( BC ) \n";
+#endif
+
+    UInt offset = M_uFESpace->map().map( Unique )->NumGlobalElements() + M_pFESpace->map().map( Unique )->NumGlobalElements();
+
+    std::vector< bcName_Type > fluxVector = bc->findAllBCWithType( Flux );
+    for ( UInt i = 0; i < M_lmDOF; ++i )
+        bc->setOffset( fluxVector[i], offset + i );
+}
+
 void
 MultiscaleModelFluid3D::setupLinearModel()
 {
@@ -346,17 +603,15 @@ MultiscaleModelFluid3D::setupLinearModel()
     Debug( 8120 ) << "MultiscaleModelFluid3D::setupLinearModel( ) \n";
 #endif
 
-    // Define BCFunctions for tangent problem
-    M_bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
-    M_bcBaseDeltaOne.setFunction(  boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
-
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
-    bcPtr_Type LinearBCHandler ( new bc_Type( *M_bc->handler() ) );
-    M_linearBC = LinearBCHandler;
+    M_linearBC.reset( new bc_Type( *M_bc->handler() ) );
 
     // Set all the BCFunctions to zero
+    BCFunctionBase bcBaseDeltaZero;
+    bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+
     for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
-        i->setBCFunction( M_bcBaseDeltaZero );
+        i->setBCFunction( bcBaseDeltaZero );
 }
 
 void
@@ -405,277 +660,6 @@ MultiscaleModelFluid3D::solveLinearModel( bool& solveLinearSystem )
     solveLinearSystem = false;
 }
 
-// ===================================================
-// Set Methods
-// ===================================================
-void
-MultiscaleModelFluid3D::setSolution( const fluidVectorPtr_Type& solution )
-{
-    M_solution = solution;
-
-    M_fluid->initialize( *M_solution );
-}
-
-// ===================================================
-// Get Methods (couplings)
-// ===================================================
-Real
-MultiscaleModelFluid3D::boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType ) const
-{
-    switch ( stressType )
-    {
-    case Pressure:
-    {
-        return -boundaryPressure( flag );
-    }
-
-    case LagrangeMultiplier:
-    {
-        return -boundaryLagrangeMultiplier( flag );
-    }
-
-    default:
-
-        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
-
-        return 0.0;
-    }
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
-{
-    solveLinearModel( solveLinearSystem );
-
-    return M_fluid->getLinearFlux( flag );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
-{
-    solveLinearModel( solveLinearSystem );
-
-    return M_fluid->getLinearPressure( flag );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDeltaLagrangeMultiplier( const bcFlag_Type& flag, bool& solveLinearSystem )
-{
-    solveLinearModel( solveLinearSystem );
-
-    return M_fluid->getLinearLagrangeMultiplier( flag, *M_linearBC );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType )
-{
-    switch ( stressType )
-    {
-    case Pressure:
-    {
-        return -boundaryDeltaPressure( flag, solveLinearSystem );
-    }
-
-    case LagrangeMultiplier:
-    {
-        return -boundaryDeltaLagrangeMultiplier( flag, solveLinearSystem );
-    }
-
-    default:
-
-        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
-
-        return 0.0;
-    }
-}
-
-// ===================================================
-// Private Methods
-// ===================================================
-void
-MultiscaleModelFluid3D::setupGlobalData( const std::string& fileName )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::setupGlobalData( fileName ) \n";
-#endif
-
-    GetPot dataFile( fileName );
-
-    //Global data time
-    M_data->setTimeData( M_globalData->dataTime() );
-
-    //Global physical quantities
-    if ( !dataFile.checkVariable( "fluid/physics/density" ) )
-        M_data->setDensity( M_globalData->fluidDensity() );
-    if ( !dataFile.checkVariable( "fluid/physics/viscosity" ) )
-        M_data->setViscosity( M_globalData->fluidViscosity() );
-}
-
-void
-MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
-{
-    GetPot dataFile( fileName );
-
-    //Exporter
-    const std::string exporterType = dataFile( "exporter/type", "ensight" );
-
-#ifdef HAVE_HDF5
-    if ( !exporterType.compare( "hdf5" ) )
-        M_exporter.reset( new hdf5IOFile_Type() );
-    else
-#endif
-        M_exporter.reset( new ensightIOFile_Type() );
-
-    M_exporter->setDataFromGetPot( dataFile );
-    M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
-    M_exporter->setPostDir( multiscaleProblemFolder );
-
-    //Importer
-    const std::string importerType = dataFile( "importer/type", "ensight" );
-
-#ifdef HAVE_HDF5
-    if ( !importerType.compare( "hdf5" ) )
-        M_importer.reset( new hdf5IOFile_Type() );
-    else
-#endif
-        M_importer.reset( new ensightIOFile_Type() );
-
-    M_importer->setDataFromGetPot( dataFile );
-    M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
-    M_importer->setPostDir( multiscaleProblemFolder );
-}
-
-void
-MultiscaleModelFluid3D::setupMesh()
-{
-    //Read fluid mesh from file
-    boost::shared_ptr< mesh_Type > fluidMesh( new mesh_Type );
-    readMesh( *fluidMesh, *M_meshData );
-
-    //Transform mesh
-    fluidMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
-
-    //Partition mesh
-    M_mesh.reset( new MeshPartitioner_Type( fluidMesh, M_comm ) );
-}
-
-void
-MultiscaleModelFluid3D::setupFEspace()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::setupFEspace() \n";
-#endif
-
-    //Velocity FE Space
-    const ReferenceFE* u_refFE;
-    const QuadratureRule* u_qR;
-    const QuadratureRule* u_bdQr;
-
-    if ( M_data->uOrder().compare( "P2" ) == 0 )
-    {
-        u_refFE = &feTetraP2;
-        u_qR = &quadRuleTetra15pt; // DoE 5
-        u_bdQr = &quadRuleTria3pt; // DoE 2
-    }
-    else if ( M_data->uOrder().compare( "P1" ) == 0 )
-    {
-        u_refFE = &feTetraP1;
-        u_qR = &quadRuleTetra4pt;  // DoE 2
-        u_bdQr = &quadRuleTria3pt; // DoE 2
-    }
-    else if ( M_data->uOrder().compare( "P1Bubble" ) == 0 )
-    {
-        u_refFE = &feTetraP1bubble;
-        u_qR = &quadRuleTetra64pt; // DoE 2
-        u_bdQr = &quadRuleTria3pt; // DoE 2
-    }
-    else
-    {
-        if ( M_displayer->isLeader() )
-            std::cout << M_data->uOrder() << " Velocity FE not implemented yet." << std::endl;
-        exit( EXIT_FAILURE );
-    }
-
-    //Pressure FE Space
-    const ReferenceFE* p_refFE;
-    const QuadratureRule* p_qR;
-    const QuadratureRule* p_bdQr;
-
-    if ( M_data->pOrder().compare( "P2" ) == 0 )
-    {
-        p_refFE = &feTetraP2;
-        p_qR = u_qR;
-        p_bdQr = &quadRuleTria3pt; // DoE 2
-    }
-    else if ( M_data->pOrder().compare( "P1" ) == 0 )
-    {
-        p_refFE = &feTetraP1;
-        p_qR = u_qR;
-        p_bdQr = &quadRuleTria3pt; // DoE 2
-    }
-    else
-    {
-        if ( M_displayer->isLeader() )
-            std::cout << M_data->pOrder() << " pressure FE not implemented yet." << std::endl;
-        exit( EXIT_FAILURE );
-    }
-
-    M_uFESpace.reset( new FESpace_Type( *M_mesh, *u_refFE, *u_qR, *u_bdQr, 3, M_comm ) );
-    M_pFESpace.reset( new FESpace_Type( *M_mesh, *p_refFE, *p_qR, *p_bdQr, 1, M_comm ) );
-}
-
-void
-MultiscaleModelFluid3D::setupDOF()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::setupDOF \n";
-#endif
-
-    M_lmDOF = M_bc->handler()->numberOfBCWithType( Flux );
-}
-
-void
-MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& BC )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::setupBCOffset( BC ) \n";
-#endif
-
-    UInt offset = M_uFESpace->map().map( Unique )->NumGlobalElements() + M_pFESpace->map().map( Unique )->NumGlobalElements();
-
-    std::vector< bcName_Type > FluxVector = BC->findAllBCWithType( Flux );
-    for ( UInt i = 0; i < M_lmDOF; ++i )
-        BC->setOffset( FluxVector[i], offset + i );
-}
-
-void
-MultiscaleModelFluid3D::initializeSolution()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::initializeSolution() \n";
-#endif
-
-    if ( multiscaleProblemStep > 0 )
-    {
-        M_importer->setMeshProcId( M_mesh->meshPartition(), M_comm->MyPID() );
-
-        M_importer->addVariable( ExporterData<mesh_Type>::VectorField, "Fluid Velocity", M_uFESpace, M_solution, static_cast <UInt> ( 0 ) );
-        M_importer->addVariable( ExporterData<mesh_Type>::ScalarField, "Fluid Pressure", M_pFESpace, M_solution, 3 * M_uFESpace->dof().numTotalDof() );
-
-        // Import
-        M_exporter->setTimeIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
-    }
-    else
-        *M_solution = 0.0;
-
-    M_fluid->initialize( *M_solution );
-}
-
 void
 MultiscaleModelFluid3D::imposePerturbation()
 {
@@ -684,10 +668,13 @@ MultiscaleModelFluid3D::imposePerturbation()
     Debug( 8120 ) << "MultiscaleModelFluid3D::imposePerturbation() \n";
 #endif
 
-    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
+            BCFunctionBase bcBaseDeltaOne;
+            bcBaseDeltaOne.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaOne, this, _1, _2, _3, _4, _5 ) );
+
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaOne );
 
             break;
         }
@@ -701,10 +688,13 @@ MultiscaleModelFluid3D::resetPerturbation()
     Debug( 8120 ) << "MultiscaleModelFluid3D::resetPerturbation() \n";
 #endif
 
-    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
+            BCFunctionBase bcBaseDeltaZero;
+            bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaZero );
 
             break;
         }

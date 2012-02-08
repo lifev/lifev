@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -35,20 +35,18 @@ SourceType           = OneD_NonLinearSource
 
 [../PhysicalWall]
 ViscoelasticWall     = true        # Enable/Disable viscoelastic effects
-ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree) 
+ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree)
 ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
 
 [../PhysicalParameters]
 ComputeCoefficients  = true
 PowerlawCoefficient  = 9           # 2: Parabolic; 9: Typical value
 
-DistributionLaw      = linear              # Coefficients distribution law: uniform, linear, pointwise
-Area0                = '0.1134114948 0.1134114948' # Area of tube
-#Area0                = '0.1134114948 0.1134114948' # Area of tube - averaged
+DistributionLaw      = uniform             # Coefficients distribution law: uniform, linear, pointwise
+Area0                = 0.1134114948 # Area of tube
 
 thickVessel          = false
-thickness            = '0.0190000000 0.0190000000' # Thickness of tube
-#thickness            = '0.0190000000 0.0190000000' # Thickness of tube - averaged
+thickness            = 0.0190000000 # Thickness of tube
 
 # Avolio elastin
 young                = 16.0E6 # g/cm/s^2 (dyne/cm^2)
@@ -67,19 +65,19 @@ deltaStress          = 10           # perturbation on the pressure
 post_dir             = ./           # the directory for postprocessing files
 post_file            = sol          # the file name
 verbose              = 1
-CFLmax               = 0.5          # Maximum admissible value of the CFL 
+CFLmax               = 0.5          # Maximum admissible value of the CFL
 
 [../solver]
 
     [./amesos]
     solvertype            = Umfpack
-    
+
     outputlevel           = 0
     print_status          = false
     print_timing          = false
     computevectornorms    = false
     computeresidual       = false
-    
+
     addzerotodiag         = false
     refactorize           = false
     rcondthreshold        = 1e-2
@@ -87,6 +85,5 @@ CFLmax               = 0.5          # Maximum admissible value of the CFL
     maxprocs              = -1
     matrixproperty        = general
     scalemethod           = 1
-    
+
     [../]
- 

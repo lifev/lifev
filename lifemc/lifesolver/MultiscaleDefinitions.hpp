@@ -44,6 +44,7 @@
 // STL classes
 #include <string>
 #include <fstream>
+#include <sstream>
 
 // Boost classes
 #include <boost/array.hpp>
@@ -61,11 +62,12 @@
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
-#include <life/lifefem/TimeData.hpp>
 
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
+
+#include <lifemc/lifesolver/MultiscaleData.hpp>
 
 namespace LifeV
 {
@@ -99,16 +101,10 @@ enum models_Type
 enum couplings_Type
 {
     BoundaryCondition,      /*!< Boundary condition */
-    FlowRateStress,         /*!< Flow Rate/stress coupling condition */
+    FlowRate,               /*!< All flow rate coupling condition */
+    FlowRateValve,          /*!< All flow rate coupling condition with a valve between model 1 and the others*/
+    FlowRateStress,         /*!< Flow rate/stress coupling condition */
     Stress                  /*!< All stress coupling condition */
-};
-
-/*! @enum stressTypes
- */
-enum stress_Type
-{
-    Pressure,                /*!< Use static pressure */
-    LagrangeMultiplier       /*!< Use the Lagrange multiplier */
 };
 
 enum errors_Type
@@ -120,6 +116,9 @@ enum errors_Type
     ModelType,               /*!< Model type not recognized */
     CouplingType             /*!< Coupling type not recognized */
 };
+
+// Folder of the problem
+extern UInt multiscaleCoresPerNode;
 
 // Folder of the problem
 extern std::string multiscaleProblemFolder;
@@ -134,16 +133,14 @@ extern bool multiscaleExitFlag;
 extern std::map< std::string, algorithms_Type > multiscaleAlgorithmsMap;
 extern std::map< std::string, models_Type >     multiscaleModelsMap;
 extern std::map< std::string, couplings_Type >  multiscaleCouplingsMap;
-extern std::map< std::string, stress_Type >     multiscaleStressesMap;
 
 // Forward class declarations
 class MultiscaleAlgorithm;
 class MultiscaleModel;
 class MultiscaleCoupling;
-class MultiscaleData;
 
 // Type definitions
-typedef entityFlag_Type                                                          bcFlag_Type;
+typedef markerID_Type                                                            bcFlag_Type;
 
 typedef Displayer::commPtr_Type                                                  multiscaleCommPtr_Type;
 
@@ -165,19 +162,19 @@ typedef MultiscaleCoupling                                                      
 typedef boost::shared_ptr< multiscaleCoupling_Type >                             multiscaleCouplingPtr_Type;
 typedef FactorySingleton< Factory< multiscaleCoupling_Type, couplings_Type > >   multiscaleCouplingFactory_Type;
 
-typedef std::vector< multiscaleModelPtr_Type >                                   multiscaleModelsVector_Type;
-typedef multiscaleModelsVector_Type::iterator                                    multiscaleModelsVectorIterator_Type;
-typedef multiscaleModelsVector_Type::const_iterator                              multiscaleModelsVectorConstIterator_Type;
+typedef std::vector< multiscaleModelPtr_Type >                                   multiscaleModelsContainer_Type;
+typedef multiscaleModelsContainer_Type::iterator                                 multiscaleModelsContainerIterator_Type;
+typedef multiscaleModelsContainer_Type::const_iterator                           multiscaleModelsContainerConstIterator_Type;
 
-typedef std::vector< multiscaleCouplingPtr_Type >                                multiscaleCouplingsVector_Type;
-typedef multiscaleCouplingsVector_Type::iterator                                 multiscaleCouplingsVectorIterator_Type;
-typedef multiscaleCouplingsVector_Type::const_iterator                           multiscaleCouplingsVectorConstIterator_Type;
+typedef std::vector< multiscaleCouplingPtr_Type >                                multiscaleCouplingsContainer_Type;
+typedef multiscaleCouplingsContainer_Type::iterator                              multiscaleCouplingsContainerIterator_Type;
+typedef multiscaleCouplingsContainer_Type::const_iterator                        multiscaleCouplingsContainerConstIterator_Type;
 
 typedef MultiscaleData                                                           multiscaleData_Type;
 typedef boost::shared_ptr< multiscaleData_Type >                                 multiscaleDataPtr_Type;
 
 // ===================================================
-// MS Utility Methods
+// Multiscale Utility Methods
 // ===================================================
 
 //! Define the map of the MS objects
@@ -191,6 +188,8 @@ multiscaleMapsDefinition()
     multiscaleModelsMap["Windkessel0D"]         = Windkessel0D;
 
     multiscaleCouplingsMap["BoundaryCondition"] = BoundaryCondition;
+    multiscaleCouplingsMap["FlowRate"]          = FlowRate;
+    multiscaleCouplingsMap["FlowRateValve"]     = FlowRateValve;
     multiscaleCouplingsMap["FlowRateStress"]    = FlowRateStress;
     multiscaleCouplingsMap["Stress"]            = Stress;
 
@@ -198,9 +197,6 @@ multiscaleMapsDefinition()
     multiscaleAlgorithmsMap["Broyden"]          = Broyden;
     multiscaleAlgorithmsMap["Explicit"]         = Explicit;
     multiscaleAlgorithmsMap["Newton"]           = Newton;
-
-    multiscaleStressesMap["LagrangeMultiplier"] = LagrangeMultiplier;
-    multiscaleStressesMap["Pressure"]           = Pressure;
 }
 
 //! Perform a dynamic cast from a base class to a derived class
@@ -278,6 +274,8 @@ multiscaleErrorCheck( const errors_Type& error, const std::string& message = "",
         default:
 
             errorMessage << "No error message for this errorType!\n";
+
+            break;
         }
 
         errorMessage << message << "\n";

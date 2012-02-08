@@ -141,6 +141,13 @@ public:
     //! Display some information about the model.
     virtual void showMe();
 
+    //! Return a specific scalar quantity to be used for a comparison with a reference value.
+    /*!
+     * This method is meant to be used for night checks.
+     * @return reference quantity.
+     */
+    virtual Real checkSolution() const = 0;
+
     //@}
 
 
@@ -165,6 +172,19 @@ public:
      * @param id Model ID
      */
     void setID( const UInt& id ) { M_ID = id; }
+
+    //! Set the number of couplings attached to this model
+    /*!
+     * @param couplingsNumber number of couplings attached to this model
+     */
+    void setCouplingsNumber( const UInt& couplingsNumber ) { M_couplings.resize( couplingsNumber ); }
+
+    //! Add a pointer to one of the couplings attached to this model
+    /*!
+     * @param localCouplingID local coupling ID
+     * @param coupling shared_ptr of the coupling
+     */
+    void setCoupling( const UInt& localCouplingID, const multiscaleCouplingPtr_Type& coupling ) { M_couplings[localCouplingID] = coupling ; }
 
     //! Add a pointer to one of the couplings which couple the model
     /*!
@@ -196,7 +216,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
 
     //@}
 
@@ -261,6 +281,12 @@ public:
      */
     const multiscaleDataPtr_Type& globalData() const { return M_globalData; }
 
+    //! Get the communicator of the model.
+    /*!
+     * @return Communicator of the model.
+     */
+    const multiscaleCommPtr_Type& communicator() const { return M_comm; }
+
     //@}
 
 protected:
@@ -271,12 +297,10 @@ protected:
      */
     void displayModelStatus( const std::string& tag ) const;
 
-    static UInt                          M_modelsNumber;       // Total number of models
-
     UInt                                 M_ID;                 // Global ID of the model
     models_Type                          M_type;               // Type of the model (depends on the derived class)
 
-    multiscaleCouplingsVector_Type       M_couplings;          // Container for the couplings
+    multiscaleCouplingsContainer_Type    M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model
     std::vector< bcFlag_Type >           M_flags;              // Free flags, available for the couplings
 
@@ -287,7 +311,6 @@ protected:
     boost::array< Real, NDIM >           M_geometryTranslate;  // Global geometrical translation
 
     multiscaleCommPtr_Type               M_comm;               // Communicator
-    boost::shared_ptr< Displayer >       M_displayer;          // Displayer
 
 private:
 
@@ -307,7 +330,7 @@ private:
 inline void
 MultiscaleModel::displayModelStatus( const std::string& tag ) const
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << " MS-  " << tag << " model " << M_ID << " - " << M_modelName << std::endl;
 }
 

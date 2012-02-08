@@ -43,8 +43,6 @@ namespace Multiscale
 
 std::map< std::string, models_Type > multiscaleModelsMap;
 
-UInt MultiscaleModel::M_modelsNumber = 0;
-
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -58,15 +56,12 @@ MultiscaleModel::MultiscaleModel() :
         M_geometryScale     (),
         M_geometryRotate    (),
         M_geometryTranslate (),
-        M_comm              (),
-        M_displayer         ()
+        M_comm              ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8100 ) << "MultiscaleModel::MultiscaleModel() \n";
 #endif
-
-    M_ID = M_modelsNumber++;
 
     //Initialization of geometry arrays
     for ( UInt i( 0 ); i < nDimensions; ++i )
@@ -153,18 +148,6 @@ MultiscaleModel::setGeometry( const boost::array< Real, NDIM >& scale,
     M_geometryTranslate = translate;
 }
 
-void
-MultiscaleModel::setCommunicator( const multiscaleCommPtr_Type& comm )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MultiscaleModel::SetCommunicator( comm ) \n";
-#endif
-
-    M_comm = comm;
-    M_displayer.reset( new Displayer( M_comm ) );
-}
-
 // ===================================================
 // Get Methods
 // ===================================================
@@ -175,7 +158,7 @@ MultiscaleModel::couplingLocalID( const UInt& ID ) const
         if ( M_couplings[localID]->ID() == ID )
             return localID;
 
-    return -1;
+    return 0;
 }
 
 } // Namespace multiscale

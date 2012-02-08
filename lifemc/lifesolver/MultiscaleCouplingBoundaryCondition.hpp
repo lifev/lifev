@@ -37,8 +37,9 @@
 #ifndef MultiscaleCouplingBoundaryCondition_H
 #define MultiscaleCouplingBoundaryCondition_H 1
 
-#include <lifemc/lifesolver/BCInterface1D.hpp>
-#include <lifemc/lifesolver/BCInterface3D.hpp>
+#include <lifemc/lifesolver/BCInterface0D.hpp>
+#include <life/lifefem/BCInterface1D.hpp>
+#include <life/lifefem/BCInterface3D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
@@ -89,14 +90,17 @@ public:
     //! Initialize the values of the coupling variables (DO NOTHING)
     void initializeCouplingVariables() {}
 
+    //! Update the coupling
+    /*!
+     * Nothing to do for boundary conditions
+     */
+    void updateCoupling() {};
+
     //! Export the values of the local coupling residuals into a global vector (DO NOTHING)
     /*!
      * @param couplingResiduals Global vector of variables
      */
     void exportCouplingResiduals( multiscaleVector_Type& /*couplingResiduals*/ ) {}
-
-    //! Display some information about the coupling
-    void showMe();
 
     //@}
 
@@ -120,7 +124,7 @@ private:
      * @param localCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    multiscaleModelsVector_Type listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ );
+    multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ );
 
     //! Insert constant coefficients into the Jacobian matrix (DO NOTHING)
     /*!
@@ -136,12 +140,6 @@ private:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
     void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& /*jacobian*/, const UInt& /*column*/, const UInt& /*ID*/, bool& /*solveLinearSystem*/ ) {}
-
-    //! Display some information about the coupling
-    /*!
-     * @param output specify the output stream
-     */
-    void displayCouplingValues( std::ostream& output );
 
     //@}
 
@@ -163,10 +161,10 @@ private:
 
     //@}
 
-    std::string           M_fileName;
+    std::string                M_fileName;
 
     std::vector< bcName_Type > M_list;
-    UInt                  M_listSize;
+    UInt                       M_listSize;
 };
 
 //! Factory create function
@@ -188,6 +186,8 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D( const UInt& i )
     {
         model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
+        model->bcInterface().dataContainer().setFlag( M_flags[i] );
+
         model->bcInterface().insertBC();
     }
 }
@@ -202,7 +202,7 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
     {
         model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right );
+        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneDFSI::left : OneDFSI::right );
 
         model->bcInterface().insertBC();
     }

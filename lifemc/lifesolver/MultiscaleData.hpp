@@ -37,7 +37,20 @@
 #ifndef MultiscaleData_H
 #define MultiscaleData_H 1
 
-#include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+// Boost classes
+#include <boost/shared_ptr.hpp>
+
+// Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifefilters/GetPot.hpp>
+#include <life/lifefem/TimeData.hpp>
 
 namespace LifeV
 {
@@ -52,8 +65,11 @@ namespace Multiscale
  *  <ul>
  *      <li> Fluid density
  *      <li> Fluid viscosity
- *      <li> Structure Young modulus
- *      <li> Structure Poisson coefficient
+ *      <li> Fluid venous pressure
+ *      <li> Solid external pressure
+ *      <li> Solid density
+ *      <li> Solid Young modulus
+ *      <li> Solid Poisson coefficient
  *  </ul>
  */
 class MultiscaleData
@@ -136,35 +152,41 @@ public:
      */
     const Real& fluidViscosity() const { return M_fluidViscosity; }
 
+    //! Get the global fluid venous pressure.
+    /*!
+     * @return venous pressure of the fluid.
+     */
+    const Real& fluidVenousPressure() const { return M_fluidVenousPressure; }
+
     //! Get the global fluid reference pressure (used by 1D model).
     /*!
      * @return reference pressure of the fluid.
      */
-    const Real& fluidReferencePressure() const { return M_fluidReferencePressure; }
+    const Real& solidExternalPressure() const { return M_solidExternalPressure; }
 
     //! Get the global structural Poisson coefficient.
     /*!
-     * @return Poisson coefficient of the structure.
+     * @return Poisson coefficient of the solid.
      */
-    const Real& structureDensity() const { return M_structureDensity; }
+    const Real& solidDensity() const { return M_solidDensity; }
 
     //! Get the global structural density.
     /*!
-     * @return density of the structure.
+     * @return density of the solid.
      */
-    const Real& structurePoissonCoefficient() const { return M_structurePoissonCoefficient; }
+    const Real& solidPoissonCoefficient() const { return M_solidPoissonCoefficient; }
 
     // //! Get the global structural thickness.
     // /*!
-    // * @return thickness of the structure.
+    // * @return thickness of the solid.
     // */
-    // const Real& GetStructureThickness() const { return M_structureThickness; }
+    // const Real& solidThickness() const { return M_structureThickness; }
 
     //! Get the global structural Young modulus.
     /*!
-     * @return Young modulus of the structure.
+     * @return Young modulus of the solid.
      */
-    const Real& structureYoungModulus() const { return M_structureYoungModulus; }
+    const Real& solidYoungModulus() const { return M_solidYoungModulus; }
 
     //@}
 
@@ -174,12 +196,13 @@ private:
 
     Real                                M_fluidDensity;
     Real                                M_fluidViscosity;
-    Real                                M_fluidReferencePressure;
+    Real                                M_fluidVenousPressure;
 
-    Real                                M_structureDensity;
-    Real                                M_structurePoissonCoefficient;
+    Real                                M_solidExternalPressure;
+    Real                                M_solidDensity;
+    Real                                M_solidPoissonCoefficient;
 //    Real                                M_structureThickness;
-    Real                                M_structureYoungModulus;
+    Real                                M_solidYoungModulus;
 
 };
 

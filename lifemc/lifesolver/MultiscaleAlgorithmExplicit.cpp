@@ -55,5 +55,14 @@ MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() :
     M_type = Explicit;
 }
 
+// ===================================================
+// Multiscale Algorithm Virtual Methods
+// ===================================================
+void
+MultiscaleAlgorithmExplicit::subIterate()
+{
+    checkResidual( 0 );
+}
+
 } // Namespace Multiscale
 } // Namespace LifeV

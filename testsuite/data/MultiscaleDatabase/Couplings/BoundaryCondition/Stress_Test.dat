@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -17,16 +17,16 @@ couplingName    = BoundaryCondition_Stress_Test
 
 [boundary_conditions]
 list = 'Stress_Test'
-    
+
     [./Stress_Test]
     type                = Natural
     mode                = Full
     component           = 3
     #function            = '[0, 0, 13332*(t<0.00300000001)]'
     functionFile        = physicalFunctions/test_Flux2.dat
-    
+
     # Additional parameters for 1D BC
     quantity            = S
     line                = first
-    
+
     [../]

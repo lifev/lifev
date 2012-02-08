@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -17,15 +17,15 @@ couplingName    = BoundaryCondition_FlowRate_One
 
 [boundary_conditions]
 list = 'FlowRate_One'  # Unitary Flux
-    
+
     [./FlowRate_One]
     type                = Flux
     mode                = Full
     component           = 3
-    function            = '-1' 
-    
+    function            = '-1'
+
     # Additional parameters for 1D BC
     quantity            = Q
     line                = first
-    
+
     [../]

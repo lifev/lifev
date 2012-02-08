@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -17,11 +17,11 @@ couplingName    = '1D ReymondStergiopulos 031 (terminal resistance)'
 
 [boundary_conditions]
 list = 'terminalResistance'
-    
+
     [./terminalResistance]
     quantity            = W2
     line                = first
-    Default             = Resistance
+    functionSD          = Resistance
     resistance          = 3.6397e+04      # dyne s / cm^5
-    
+
     [../]

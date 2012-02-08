@@ -93,21 +93,20 @@ MultiscaleAlgorithmNewton::subIterate()
 
     M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
-    multiscaleVector_Type delta( *M_couplingResiduals );
+    multiscaleVector_Type delta( *M_couplingResiduals, Unique );
     delta = 0.0;
-    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals );
+    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals, Unique );
     minusCouplingResidual = 0.0;
 
     for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
+//        std::cout << " MS-  CouplingVariables:\n" << std::endl;
+//        M_couplingVariables->showMe();
+//        std::cout << " MS-  CouplingResiduals:\n" << std::endl;
+//        M_couplingResiduals->showMe();
+
         // Compute the Jacobian (we completery delete the previous matrix)
         assembleJacobianMatrix();
-
-        // To be moved in a post-processing class
-        //std::cout << " MS-  CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->showMe();
-        //std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-        //M_couplingResiduals->showMe();
 
         //Compute delta using -R
         minusCouplingResidual = -( *M_couplingResiduals );
@@ -119,14 +118,11 @@ MultiscaleAlgorithmNewton::subIterate()
         // Update Coupling Variables using the Newton Method
         *M_couplingVariables += delta;
 
-        //std::cout << " MS-  New CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->showMe();
+//        std::cout << " MS-  New CouplingVariables:\n" << std::endl;
+//        M_couplingVariables->showMe();
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );
-
-        // solveModel
-        M_multiscale->solveModel();
 
         // Verify tolerance
         if ( checkResidual( subIT ) )
@@ -136,7 +132,7 @@ MultiscaleAlgorithmNewton::subIterate()
     save( M_subiterationsMaximumNumber, M_couplingResiduals->norm2() );
 
     multiscaleErrorCheck( Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->norm2() ) +
-                        " (required: " + number2string( M_tolerance ) + ")\n" );
+                        " (required: " + number2string( M_tolerance ) + ")\n", M_multiscale->communicator() == 0 );
 }
 
 // ===================================================
@@ -150,7 +146,7 @@ MultiscaleAlgorithmNewton::assembleJacobianMatrix()
     M_multiscale->exportJacobian( *M_jacobian );
     M_jacobian->globalAssemble();
 
-    //M_jacobian->spy( "Jacobian" )
+    //M_jacobian->spy( "Jacobian" );
 }
 
 } // Namespace Multiscale
