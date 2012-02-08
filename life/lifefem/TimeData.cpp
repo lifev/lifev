@@ -86,10 +86,10 @@ TimeData::setup( const GetPot& dataFile, const std::string& section )
     M_endTime = dataFile(( section + "/endtime"      ).data(), 1.);
     M_periodTime = dataFile(( section + "/periodtime"      ).data(), 1.);
     M_time = M_initialTime;
-    M_timeStep = dfile(( section + "/timestep" ).data(), M_endTime );
-    M_orderBDF = dfile(( section + "/BDF_order" ).data(), 1 );
-    M_theta = dfile((section + "/theta").data(),0.25);
-    M_gamma = dfile(( section + "/gamma").data(),0.5);
+    M_timeStep = dataFile(( section + "/timestep" ).data(), M_endTime );
+    M_orderBDF = dataFile(( section + "/BDF_order" ).data(), 1 );
+    M_theta = dataFile((section + "/theta").data(),0.25);
+    M_gamma = dataFile(( section + "/gamma").data(),0.5);
 }
 
 void
