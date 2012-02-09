@@ -1,24 +1,97 @@
-add_library (lifesolver ADRData.cpp FSIData.cpp FSIExactJacobian.cpp FSIFixedPoint.cpp FSIMonolithic.cpp FSIMonolithicGE.cpp FSIMonolithicGI.cpp FSIOperator.cpp FSISolver.cpp HeartBidomainData.cpp HeartFunctors.cpp HeartIonicData.cpp HeartMonodomainData.cpp LevelSetData.cpp MonolithicBlockComposed.cpp MonolithicBlockComposedDN.cpp MonolithicBlockComposedDND.cpp MonolithicBlockComposedDNND.cpp MonolithicBlockComposedNN.cpp MonolithicBlock.cpp MonolithicBlockMatrix.cpp MonolithicBlockMatrixRN.cpp MonolithicRobinInterface.cpp OneDFSIData.cpp OneDFSIFluxLinear.cpp OneDFSIFluxNonLinear.cpp OneDFSIPhysicsLinear.cpp OneDFSIPhysicsNonLinear.cpp OneDFSISolver.cpp OneDFSISourceLinear.cpp OneDFSISourceNonLinear.cpp OseenData.cpp VenantKirchhoffElasticData.cpp VenantKirchhoffViscoelasticData.cpp)
-install (TARGETS lifesolver DESTINATION lib)
-install (FILES ADRAssembler.hpp ADRAssemblerIP.hpp ADRData.hpp DarcyData.hpp
-DarcySolver.hpp DarcySolverNonLinear.hpp DarcySolverTransient.hpp
-DarcySolverTransientNonLinear.hpp FSIData.hpp FSIExactJacobian.hpp
-FSIFixedPoint.hpp FSIMonolithicGE.hpp FSIMonolithicGI.hpp FSIMonolithic.hpp
-FSIOperator.hpp FSISolver.hpp HarmonicExtensionSolver.hpp
-HeartBidomainData.hpp HeartBidomainSolver.hpp HeartFunctors.hpp
-HeartIonicData.hpp HeartIonicSolver.hpp HeartMonodomainData.hpp
-HeartMonodomainSolver.hpp HeartStiffnessFibers.hpp HyperbolicData.hpp
-HyperbolicSolver.hpp LevelSetData.hpp LevelSetSolver.hpp
-MonolithicBlockComposedDND.hpp MonolithicBlockComposedDN.hpp
-MonolithicBlockComposedDNND.hpp MonolithicBlockComposed.hpp
-MonolithicBlockComposedNN.hpp MonolithicBlock.hpp MonolithicBlockMatrix.hpp
-MonolithicBlockMatrixRN.hpp MonolithicRobinInterface.hpp
-OneDFSIData.hpp OneDFSIDefinitions.hpp OneDFSIFlux.hpp
-OneDFSIFluxLinear.hpp OneDFSIFluxNonLinear.hpp
-OneDFSIPhysics.hpp OneDFSIPhysicsLinear.hpp
-OneDFSIPhysicsNonLinear.hpp OneDFSISolver.hpp
-OneDFSISource.hpp OneDFSISourceLinear.hpp
-OneDFSISourceNonLinear.hpp OseenAssembler.hpp OseenData.hpp
-OseenSolver.hpp OseenSolverShapeDerivative.hpp StabilizationIP.hpp
-StabilizationSD.hpp TrackData.hpp TrackSolver.hpp VenantKirchhoffElasticData.hpp VenantKirchhoffElasticHandler.hpp VenantKirchhoffSolver.hpp VenantKirchhoffSolverLinear.hpp VenantKirchhoffViscoelasticData.hpp VenantKirchhoffViscoelasticSolver.hpp DESTINATION include/life/lifesolver)
-
+add_library ( lifesolver OneDFSISourceNonLinear.cpp
+MonolithicBlockMatrix.cpp
+ADRData.cpp
+MonolithicBlockComposedDNND.cpp
+OneDFSIFluxLinear.cpp
+FSIMonolithicGE.cpp
+HeartIonicData.cpp
+MonolithicRobinInterface.cpp
+FSIOperator.cpp
+OneDFSIData.cpp
+MonolithicBlockComposed.cpp
+OneDFSIFluxNonLinear.cpp
+MonolithicBlockComposedDN.cpp
+MonolithicBlockMatrixRN.cpp
+MonolithicBlockComposedDND.cpp
+OneDFSISourceLinear.cpp
+OneDFSISolver.cpp
+FSIMonolithic.cpp
+HeartFunctors.cpp
+HeartBidomainData.cpp
+VenantKirchhoffElasticData.cpp
+MonolithicBlockComposedNN.cpp
+FSIExactJacobian.cpp
+OseenData.cpp
+OneDFSIPhysicsNonLinear.cpp
+FSISolver.cpp
+LevelSetData.cpp
+FSIFixedPoint.cpp
+HeartMonodomainData.cpp
+FSIMonolithicGI.cpp
+MonolithicBlock.cpp
+FSIData.cpp
+OneDFSIPhysicsLinear.cpp
+VenantKirchhoffViscoelasticData.cpp )
+install ( TARGETS lifesolver DESTINATION lib )
+install ( FILES ADRAssembler.hpp
+ADRAssemblerIP.hpp
+ADRData.hpp
+DarcyData.hpp
+DarcySolver.hpp
+DarcySolverNonLinear.hpp
+DarcySolverTransient.hpp
+DarcySolverTransientNonLinear.hpp
+FSIData.hpp
+FSIExactJacobian.hpp
+FSIFixedPoint.hpp
+FSIMonolithicGE.hpp
+FSIMonolithicGI.hpp
+FSIMonolithic.hpp
+FSIOperator.hpp
+FSISolver.hpp
+HarmonicExtensionSolver.hpp
+HeartBidomainData.hpp
+HeartBidomainSolver.hpp
+HeartFunctors.hpp
+HeartIonicData.hpp
+HeartIonicSolver.hpp
+HeartMonodomainData.hpp
+HeartMonodomainSolver.hpp
+HeartStiffnessFibers.hpp
+HyperbolicData.hpp
+HyperbolicSolver.hpp
+LevelSetData.hpp
+LevelSetSolver.hpp
+MonolithicBlockComposedDND.hpp
+MonolithicBlockComposedDN.hpp
+MonolithicBlockComposedDNND.hpp
+MonolithicBlockComposed.hpp
+MonolithicBlockComposedNN.hpp
+MonolithicBlock.hpp
+MonolithicBlockMatrix.hpp
+MonolithicBlockMatrixRN.hpp
+MonolithicRobinInterface.hpp
+OneDFSIData.hpp
+OneDFSIDefinitions.hpp
+OneDFSIFlux.hpp
+OneDFSIFluxLinear.hpp
+OneDFSIFluxNonLinear.hpp
+OneDFSIPhysics.hpp
+OneDFSIPhysicsLinear.hpp
+OneDFSIPhysicsNonLinear.hpp
+OneDFSISolver.hpp
+OneDFSISource.hpp
+OneDFSISourceLinear.hpp
+OneDFSISourceNonLinear.hpp
+OseenAssembler.hpp
+OseenData.hpp
+OseenSolver.hpp
+OseenSolverShapeDerivative.hpp
+StabilizationIP.hpp
+StabilizationSD.hpp
+VenantKirchhoffElasticData.hpp
+VenantKirchhoffElasticHandler.hpp
+VenantKirchhoffSolver.hpp
+VenantKirchhoffSolverLinear.hpp
+VenantKirchhoffViscoelasticData.hpp
+VenantKirchhoffViscoelasticSolver.hpp DESTINATION include/life/lifesolver)

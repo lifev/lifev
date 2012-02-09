@@ -1,17 +1,81 @@
-add_library (lifefem AssemblyElemental.cpp BCBase.cpp BCDataInterpolator.cpp
-BCFunction.cpp BCHandler.cpp BCIdentifier.cpp BCInterfaceData1D.cpp
-BCInterfaceData3D.cpp BCInterfaceData.cpp BCManage.cpp BCVector.cpp
-CurrentBoundaryFEBase.cpp CurrentBoundaryFE.cpp CurrentFE.cpp DOF.cpp
-DOFInterface3Dto2D.cpp DOFInterface3Dto3D.cpp DOFInterface.cpp
-DOFLocalPattern.cpp FEDefinitions.cpp GeometricMap.cpp OneDFSIBC.cpp OneDFSIBCHandler.cpp QuadraturePoint.cpp QuadratureRule.cpp QuadratureRuleProvider.cpp ReferenceElement.cpp ReferenceFE.cpp ReferenceFEHdiv.cpp ReferenceFEHybrid.cpp ReferenceFEScalar.cpp TimeData.cpp)
-install (TARGETS lifefem DESTINATION lib)
-install (FILES AssemblyElemental.hpp Assembly.hpp BCBase.hpp
-BCDataInterpolator.hpp BCFunction.hpp BCHandler.hpp BCIdentifier.hpp
-BCInterface1D.hpp BCInterface3D.hpp BCInterfaceData1D.hpp
-BCInterfaceData3D.hpp BCInterfaceData.hpp BCInterfaceDefinitions.hpp
-BCInterface.hpp BCManage.hpp BCManageNormal.hpp BCVector.hpp
-CurrentBoundaryFEBase.hpp CurrentBoundaryFE.hpp CurrentFE.hpp DOF.hpp
-DOFInterface3Dto2D.hpp DOFInterface3Dto3D.hpp DOFInterface.hpp
-DOFLocalPattern.hpp FEField.hpp FEFunction.hpp FESpace.hpp GeometricMap.hpp
-HyperbolicFluxNumerical.hpp OneDFSIBCHandler.hpp OneDFSIBC.hpp PostProcessingBoundary.hpp QuadraturePoint.hpp QuadratureRule.hpp QuadratureRuleProvider.hpp ReferenceElement.hpp ReferenceFEHdiv.hpp ReferenceFE.hpp ReferenceFEHybrid.hpp ReferenceFEScalar.hpp SobolevNorms.hpp TimeAdvanceBDF.hpp TimeAdvanceBDFNavierStokes.hpp TimeAdvanceBDFVariableStep.hpp TimeAdvance.hpp TimeAdvanceNewmark.hpp TimeData.hpp DESTINATION include/life/lifefem)
-
+add_library ( lifefem QuadraturePoint.cpp
+FEDefinitions.cpp
+OneDFSIBC.cpp
+CurrentBoundaryFE.cpp
+ReferenceFE.cpp
+ReferenceFEHybrid.cpp
+BCFunction.cpp
+AssemblyElemental.cpp
+CurrentFE.cpp
+BCInterfaceData3D.cpp
+BCInterfaceData.cpp
+CurrentBoundaryFEBase.cpp
+OneDFSIBCHandler.cpp
+DOF.cpp
+BCVector.cpp
+GeometricMap.cpp
+BCDataInterpolator.cpp
+ReferenceFEHdiv.cpp
+DOFInterface3Dto2D.cpp
+DOFInterface3Dto3D.cpp
+BCIdentifier.cpp
+BCInterfaceData1D.cpp
+BCManage.cpp
+BCHandler.cpp
+ReferenceFEScalar.cpp
+DOFInterface.cpp
+DOFLocalPattern.cpp
+QuadratureRule.cpp
+ReferenceElement.cpp
+TimeData.cpp
+BCBase.cpp
+QuadratureRuleProvider.cpp )
+install ( TARGETS lifefem DESTINATION lib )
+install ( FILES AssemblyElemental.hpp
+Assembly.hpp
+BCBase.hpp
+BCDataInterpolator.hpp
+BCFunction.hpp
+BCHandler.hpp
+BCIdentifier.hpp
+BCInterface1D.hpp
+BCInterface3D.hpp
+BCInterfaceData1D.hpp
+BCInterfaceData3D.hpp
+BCInterfaceData.hpp
+BCInterfaceDefinitions.hpp
+BCInterface.hpp
+BCManage.hpp
+BCManageNormal.hpp
+BCVector.hpp
+CurrentBoundaryFEBase.hpp
+CurrentBoundaryFE.hpp
+CurrentFE.hpp
+DOF.hpp
+DOFInterface3Dto2D.hpp
+DOFInterface3Dto3D.hpp
+DOFInterface.hpp
+DOFLocalPattern.hpp
+FEField.hpp
+FEFunction.hpp
+FESpace.hpp
+GeometricMap.hpp
+HyperbolicFluxNumerical.hpp
+OneDFSIBCHandler.hpp
+OneDFSIBC.hpp
+PostProcessingBoundary.hpp
+QuadraturePoint.hpp
+QuadratureRule.hpp
+QuadratureRuleProvider.hpp
+ReferenceElement.hpp
+ReferenceFEHdiv.hpp
+ReferenceFE.hpp
+ReferenceFEHybrid.hpp
+ReferenceFEScalar.hpp
+SobolevNorms.hpp
+TimeAdvanceBDF.hpp
+TimeAdvanceBDFNavierStokes.hpp
+TimeAdvanceBDFVariableStep.hpp
+TimeAdvance.hpp
+TimeAdvanceNewmark.hpp
+TimeData.hpp DESTINATION include/life/lifefem)
