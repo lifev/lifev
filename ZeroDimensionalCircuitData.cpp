@@ -323,8 +323,8 @@ ZeroDimensionalElementPassiveCapacitor::buildABC(matrix_Type& A,__attribute__((u
 // Constructors
 // ===================================================
 ZeroDimensionalElementPassiveInductor::ZeroDimensionalElementPassiveInductor():
-   M_equationRow			 (),
-   M_variableIndex			 ()
+   M_equationRow             (),
+   M_variableIndex             ()
 {
     M_type      =  inductor;
 }
@@ -340,7 +340,7 @@ ZeroDimensionalElementPassiveInductor::showMe(Int flag)
 }
 
 void
-ZeroDimensionalElementPassiveInductor::assignVariableIndex(const Int & index) 
+ZeroDimensionalElementPassiveInductor::assignVariableIndex(const Int & index)
 {
     M_equationRow       =       index;
     M_variableIndex     =       index;
@@ -546,7 +546,7 @@ ZeroDimensionalNode::showMe(Int flag)
     cout<<enum2string(type())<<"\t";
     if (flag==0)
        {
-	for (UInt i=0; i < M_elementListIndex.size();i++)
+    for (UInt i=0; i < M_elementListIndex.size();i++)
           cout<<"{"<<M_elementListIndex.at(i)<<","<<M_nodeListIndex.at(i)<<"}  ";
         cout<<std::endl;
        }
@@ -596,11 +596,11 @@ ZeroDimensionalNodeUnknown::ZeroDimensionalNodeUnknown():
 {
     M_type = unknownNode;
 }
-void 
-ZeroDimensionalNodeUnknown::assignVariableIndex(const Int & index) 
+void
+ZeroDimensionalNodeUnknown::assignVariableIndex(const Int & index)
 {
-    M_equationRow	=	index;
-    M_variableIndex	=	index;
+    M_equationRow    =    index;
+    M_variableIndex    =    index;
 
 }
 
@@ -609,7 +609,7 @@ ZeroDimensionalNodeUnknown::showMe(Int flag)
 {
     ZeroDimensionalNode::showMe(flag);
     if (flag==1)
-	cout<<"\t EquationRow= "<<M_equationRow<<"\t VariableIndex= "<<M_variableIndex;
+    cout<<"\t EquationRow= "<<M_equationRow<<"\t VariableIndex= "<<M_variableIndex;
 }
 
 // ===================================================
@@ -742,7 +742,7 @@ using namespace std;
             nodeId = std::atoi(stringtmp.c_str());
             terminalNodes.push_back(nodeId);
         }
-	//---------------------------------------------------------
+    //---------------------------------------------------------
         for (int i=0;i<numberOfNodes;i++){
             nodesType.push_back(unknownNode);
             nodesConnectingSource.push_back(-1);
@@ -815,11 +815,11 @@ using namespace std;
                     theNodeId != terminalNodes.end(); theNodeId++ ){
       // create Source Elements -----------------------------------------------
       switch (bc->handler()->bc(*theNodeId).bcType()) {
-          case OneDimensional::S://create voltage source
+          case OneDFSI::S://create voltage source
               nodesConnectingSource.at(*theNodeId) = createElementVoltageSource(*theNodeId);
               nodesType.at(*theNodeId)=knownNode;
               break;
-          case OneDimensional::Q:// current source
+          case OneDFSI::Q:// current source
               createElementCurrentSource(*theNodeId);
               break;
           default:
@@ -832,11 +832,11 @@ using namespace std;
         if (nodesType.at(i)==knownNode)
         {
           //Create known Node and connect the voltage source to the node
-	  createKnownNode(i,M_Elements->voltageSourceMap(nodesConnectingSource.at(i))); 
+      createKnownNode(i,M_Elements->voltageSourceMap(nodesConnectingSource.at(i)));
         }
         else
         {
-	  createUnknownNode(i);
+      createUnknownNode(i);
         }
     }
     //connect elements to the nodes
@@ -844,10 +844,10 @@ using namespace std;
         M_Elements->elementListAt(i)->connectElement(M_Nodes);
     }
     //set BC to source elements
-    fixBC(bc);   
+    fixBC(bc);
 }
 
-void  
+void
 ZeroDimensionalCircuitData::createElementResistor(Int ID,Int node1,Int node2,Real parameter)
 {
     zeroDimensionalElementPassiveResistorPtr_Type theElement(new ZeroDimensionalElementPassiveResistor());
@@ -1073,9 +1073,9 @@ ZeroDimensionalCircuitData::updateCircuitDataFromY(const double& t, const Epetra
                     theNode != knownNodeList->end(); theNode++) {
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 8151 )<< (*theNode)->id()<<"   ---------\n";
-       
-#endif 
-	(*theNode)->setvoltageByTime(t);
+
+#endif
+    (*theNode)->setvoltageByTime(t);
         (*theNode)->setdeltaVoltageByTime(t);
     }
     const ptrVecZeroDimensionalElementCurrentSourcePtr_Type& currentElementList = M_Elements->currentSourceList();
