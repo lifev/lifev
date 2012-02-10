@@ -1,0 +1,5 @@
+3		4	2
+0 3
+0	resistor	0	1	100
+1	capacitor	1	2	0.5
+2	inductor	2	3	0.1
