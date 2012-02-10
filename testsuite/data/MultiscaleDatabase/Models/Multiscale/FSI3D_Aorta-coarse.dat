@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -26,14 +26,14 @@ algorithmsPath   = './MultiscaleDatabase/Algorithms/'
 
 # Algorithm #######################################################################################
 ################### Type ############## File (without .dat) #######################################
-algorithm = '       Explicit            Default'    
+algorithm = '       Explicit            Default'
 ###################################################################################################
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
-           300      FSI3D               Aorta_BL_Coarse_MonolithicGE
-         '  
+           300      FSI3D               Aorta_NOBL_Medium_MonolithicGE
+         '
 ###################################################################################################
 
 # List of MPI groups ##############################################################################
@@ -46,7 +46,7 @@ mpiGroups = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
-            0       BoundaryCondition   FlowRate_Heart                  300             0
+            0       BoundaryCondition   FlowRate_HeartReymondStergiopulos2009 300       0
             1       BoundaryCondition   Stress_ExternalPressure         300,300,300,300,300,300,300  1,2,3,4,5,6,7
             '
 ###################################################################################################

@@ -37,8 +37,9 @@
 #ifndef MultiscaleCouplingBoundaryCondition_H
 #define MultiscaleCouplingBoundaryCondition_H 1
 
-#include <lifemc/lifesolver/BCInterface1D.hpp>
-#include <lifemc/lifesolver/BCInterface3D.hpp>
+#include <lifemc/lifesolver/BCInterface0D.hpp>
+#include <life/lifefem/BCInterface1D.hpp>
+#include <life/lifefem/BCInterface3D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
@@ -201,7 +202,7 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
     {
         model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right );
+        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneDFSI::left : OneDFSI::right );
 
         model->bcInterface().insertBC();
     }

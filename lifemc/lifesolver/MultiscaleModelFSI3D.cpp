@@ -151,13 +151,13 @@ MultiscaleModelFSI3D::setupModel()
 
     // Mesh transformation (before partitioning, ideally should be done after for scalability)
     //M_FSIoperator->fluidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
-    M_FSIoperator->solidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_FSIoperator->solidMesh().meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     // Mesh partitioning
     M_FSIoperator->partitionMeshes();
 
     // Mesh transformation (after partitioning - not working for solid)
-    M_FSIoperator->fluidMeshPart().meshPartition()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_FSIoperator->fluidMeshPart().meshPartition()->meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
     //M_FSIoperator->solidMeshPart().meshPartition()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     // Setup FEspace & DOF
@@ -283,14 +283,36 @@ MultiscaleModelFSI3D::solveModel()
 }
 
 void
+MultiscaleModelFSI3D::updateSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8140 ) << "MultiscaleModelFSI3D::updateSolution() \n";
+#endif
+
+    if ( M_FSIoperator->isFluid() )
+    {
+        M_FSIoperator->exportFluidDisplacement( *M_fluidDisplacement );
+        M_FSIoperator->exportFluidVelocityAndPressure( *M_fluidVelocityAndPressure );
+#ifndef FSI_WITH_EXTERNALPRESSURE
+        *M_fluidVelocityAndPressure += *M_externalPressureVector;
+#endif
+    }
+
+    if ( M_FSIoperator->isSolid() )
+    {
+        M_FSIoperator->exportSolidDisplacement( *M_solidDisplacement );
+        M_FSIoperator->exportSolidVelocity( *M_solidVelocity );
+    }
+}
+
+void
 MultiscaleModelFSI3D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8140 ) << "MultiscaleModelFSI3D::saveSolution() \n";
 #endif
-
-    updateSolution();
 
     if ( M_FSIoperator->isFluid() )
         M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
@@ -302,9 +324,9 @@ MultiscaleModelFSI3D::saveSolution()
     if ( M_data->dataFluid()->dataTime()->isLastTimeStep() )
     {
         if ( M_FSIoperator->isFluid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterFluid ) )->closeFile();
+            M_exporterFluid->closeFile();
         if ( M_FSIoperator->isSolid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterSolid ) )->closeFile();
+            M_exporterSolid->closeFile();
     }
 #endif
 
@@ -328,10 +350,10 @@ MultiscaleModelFSI3D::showMe()
                   << "Harmonic ext. DOF   = " << M_FSIoperator->mmFESpace().dof().numTotalDof() << std::endl
                   << "Structure DOF       = " << M_FSIoperator->dFESpace().dof().numTotalDof() << std::endl << std::endl;
 
-        std::cout << "Fluid mesh maxH     = " << M_FSIoperator->uFESpace().mesh()->maxH() << std::endl
-                  << "Fluid mesh meanH    = " << M_FSIoperator->uFESpace().mesh()->meanH() << std::endl
-                  << "Solid mesh maxH     = " << M_FSIoperator->dFESpace().mesh()->maxH() << std::endl
-                  << "Solid mesh meanH    = " << M_FSIoperator->dFESpace().mesh()->meanH() << std::endl << std::endl;
+        std::cout << "Fluid mesh maxH     = " << MeshUtility::MeshStatistics::computeSize( *( M_FSIoperator->uFESpace().mesh() ) ).maxH << std::endl
+                  << "Fluid mesh meanH    = " << MeshUtility::MeshStatistics::computeSize( *( M_FSIoperator->uFESpace().mesh() ) ).meanH << std::endl
+                  << "Solid mesh maxH     = " << MeshUtility::MeshStatistics::computeSize( *( M_FSIoperator->dFESpace().mesh() ) ).maxH << std::endl
+                  << "Solid mesh meanH    = " << MeshUtility::MeshStatistics::computeSize( *( M_FSIoperator->dFESpace().mesh() ) ).meanH << std::endl << std::endl;
     }
 }
 
@@ -488,9 +510,9 @@ MultiscaleModelFSI3D::initializeSolution()
 
 #ifdef HAVE_HDF5
         if ( M_FSIoperator->isFluid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importerFluid ) )->closeFile();
+            M_importerFluid->closeFile();
         if ( M_FSIoperator->isSolid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importerSolid ) )->closeFile();
+            M_importerSolid->closeFile();
 #endif
 
         // Assemble the Monolithic solution
@@ -501,7 +523,7 @@ MultiscaleModelFSI3D::initializeSolution()
         solution = temporaryVector;
 
         // Add solid
-        UInt offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->getOffset();
+        UInt offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->offset();
 
         temporaryVector = 0;
         temporaryVector.subset( *M_solidDisplacement, M_solidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
@@ -598,41 +620,18 @@ MultiscaleModelFSI3D::updateBC()
 }
 
 void
-MultiscaleModelFSI3D::updateSolution()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::updateSolution() \n";
-#endif
-
-    if ( M_FSIoperator->isFluid() )
-    {
-        M_FSIoperator->exportFluidDisplacement( *M_fluidDisplacement );
-        M_FSIoperator->exportFluidVelocityAndPressure( *M_fluidVelocityAndPressure );
-#ifndef FSI_WITH_EXTERNALPRESSURE
-        *M_fluidVelocityAndPressure += *M_externalPressureVector;
-#endif
-    }
-
-    if ( M_FSIoperator->isSolid() )
-    {
-        M_FSIoperator->exportSolidDisplacement( *M_solidDisplacement );
-        M_FSIoperator->exportSolidVelocity( *M_solidVelocity );
-    }
-}
-
-void
 MultiscaleModelFSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label )
 {
     const std::string exporterType = dataFile( "exporter/type", "ensight" );
 #ifdef HAVE_HDF5
     if ( exporterType.compare( "hdf5" ) == 0 )
-        exporter.reset( new hdf5IOFile_Type( dataFile, label ) );
+        exporter.reset( new hdf5IOFile_Type() );
     else
 #endif
-        exporter.reset( new ensightIOFile_Type( dataFile, label ) );
+        exporter.reset( new ensightIOFile_Type() );
 
-    exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) + label );
+    exporter->setDataFromGetPot( dataFile );
+    exporter->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) +  label + "_" + number2string( multiscaleProblemStep ) );
     exporter->setPostDir( multiscaleProblemFolder );
 }
 
@@ -642,12 +641,13 @@ MultiscaleModelFSI3D::setupImporter( IOFilePtr_Type& importer, const GetPot& dat
     const std::string importerType = dataFile( "exporter/type", "ensight" );
 #ifdef HAVE_HDF5
     if ( importerType.compare( "hdf5" ) == 0 )
-        importer.reset( new hdf5IOFile_Type( dataFile, label ) );
+        importer.reset( new hdf5IOFile_Type() );
     else
 #endif
-        importer.reset( new ensightIOFile_Type( dataFile, label ) );
+        importer.reset( new ensightIOFile_Type() );
 
-    importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) + label );
+    importer->setDataFromGetPot( dataFile );
+    importer->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) +  label + "_" + number2string( multiscaleProblemStep - 1 ) );
     importer->setPostDir( multiscaleProblemFolder );
 }
 

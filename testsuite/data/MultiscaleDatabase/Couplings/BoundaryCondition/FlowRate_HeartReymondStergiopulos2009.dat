@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -9,22 +9,24 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Stress_Zero ########################################################
+### COUPLING: BoundaryCondition - Heart Reymond Stergiopulos 2009 #################################
 ###################################################################################################
 
 [Multiscale]
-couplingName    = BoundaryCondition_Stress_Zero
+couplingName    = BoundaryCondition_FlowRate_HeartReymondStergiopulos2009
 
 [boundary_conditions]
-list = 'Stress_Zero' # Stress_Zero
+list = 'FlowRate_HeartReymondStergiopulos2009'
 
-    [./Stress_Zero]
-    type                = Natural
-    mode                = Normal
-    function            = 0
-    
+    [./FlowRate_HeartReymondStergiopulos2009]
+    type                = Flux
+    mode                = Full
+    component           = 3
+    functionFile        = physicalFunctions/FlowRate_HeartReymondStergiopulos2009.dat
+
     # Additional parameters for 1D BC
-    quantity            = S
+    quantity            = Q
     line                = first
-    
+
     [../]
+

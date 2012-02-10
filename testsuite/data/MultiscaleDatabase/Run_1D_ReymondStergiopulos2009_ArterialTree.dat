@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -23,7 +23,11 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_ReymondStergiopulos2009-
     [./Restart]
     Restart                    = false
     RestartFromStepNumber      = 0
-    
+
+    [../Output]
+    ProblemPrefix              = Multiscale # Problem prefix
+    SaveEach                   = 5          # time steps
+
     [../time_discretization]
     initialtime                = .00      # [s]
     #endtime                    = 0.8      # [s] 1-HB

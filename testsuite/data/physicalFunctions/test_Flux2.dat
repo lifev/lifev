@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -20,16 +20,16 @@
 # '(0, 0, 13332*(t<0.00300000001))'
 ###################################################################################################
 
-#function	= 'q'
-function	= '[0,0,q]'
+#function  = 'q'
+function  = '[0,0,q]'
 
-variables	=   't				q'
-scale		= 	'1				1'
+variables = 't                q'
+scale     = '1                1'
 
 loop        = false
 
 # Items must be sorted by the first column value!
-data		=  '0.000000000		13332
-				0.003000000		13332
-				0.003000001		0
-				1.000000000		0'
+data        =  '0.000000000        13332
+                0.003000000        13332
+                0.003000001        0
+                1.000000000        0'

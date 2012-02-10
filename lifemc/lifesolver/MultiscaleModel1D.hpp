@@ -43,7 +43,7 @@
 #define MultiscaleModel1D_H 1
 
 // Jacobian coefficient approximation
-//#define JACOBIAN_WITH_FINITEDIFFERENCE
+#define JACOBIAN_WITH_FINITEDIFFERENCE
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 //#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 #endif
@@ -51,26 +51,26 @@
 // Matlab post-processing
 #define HAVE_MATLAB_POSTPROCESSING 1
 
-// Mathcard includes
-#include <lifemc/lifefem/OneDimensionalBCHandler.hpp>
-#include <lifemc/lifesolver/OneDimensionalPhysicsLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalPhysicsNonLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalFluxLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalFluxNonLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalSourceLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalSourceNonLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalSolver.hpp>
-
-#include <lifemc/lifesolver/BCInterface1D.hpp>
-
-#include <lifemc/lifesolver/MultiscaleModel.hpp>
-#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
-
 // LifeV includes
+#include <life/lifefem/OneDFSIBCHandler.hpp>
+#include <life/lifesolver/OneDFSIPhysicsLinear.hpp>
+#include <life/lifesolver/OneDFSIPhysicsNonLinear.hpp>
+#include <life/lifesolver/OneDFSIFluxLinear.hpp>
+#include <life/lifesolver/OneDFSIFluxNonLinear.hpp>
+#include <life/lifesolver/OneDFSISourceLinear.hpp>
+#include <life/lifesolver/OneDFSISourceNonLinear.hpp>
+#include <life/lifesolver/OneDFSISolver.hpp>
+
+#include <life/lifefem/BCInterface1D.hpp>
+
 #include <life/lifefem/FESpace.hpp>
 #ifdef HAVE_HDF5
 #include <life/lifefilters/ExporterHDF5.hpp>
 #endif
+
+// Mathcard includes
+#include <lifemc/lifesolver/MultiscaleModel.hpp>
+#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
 
 namespace LifeV
 {
@@ -89,16 +89,16 @@ class MultiscaleModel1D: public virtual multiscaleModel_Type,
 {
 public:
 
-    typedef OneDimensionalPhysics                                  physics_Type;
+    typedef OneDFSIPhysics                                         physics_Type;
     typedef boost::shared_ptr< physics_Type >                      physicsPtr_Type;
 
-    typedef OneDimensionalFlux                                     flux_Type;
+    typedef OneDFSIFlux                                            flux_Type;
     typedef boost::shared_ptr< flux_Type >                         fluxPtr_Type;
 
-    typedef OneDimensionalSource                                   source_Type;
+    typedef OneDFSISource                                          source_Type;
     typedef boost::shared_ptr< source_Type >                       sourcePtr_Type;
 
-    typedef OneDimensionalSolver                                   solver_Type;
+    typedef OneDFSISolver                                          solver_Type;
     typedef boost::shared_ptr< solver_Type >                       solverPtr_Type;
 
     typedef solver_Type::data_Type                                 data_Type;
@@ -113,16 +113,16 @@ public:
     typedef solver_Type::feSpace_Type                              feSpace_Type;
     typedef solver_Type::feSpacePtr_Type                           feSpacePtr_Type;
 
-    typedef OneDimensionalBCHandler                                bc_Type;
+    typedef OneDFSIBCHandler                                       bc_Type;
     typedef boost::shared_ptr< bc_Type >                           bcPtr_Type;
     typedef BCInterface1D< bc_Type, solver_Type >                  bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
 
-    typedef OneDimensionalBCFunction                               bcFunction_Type;
+    typedef OneDFSIFunction                                        bcFunction_Type;
 
-    typedef OneDimensional::bcType_Type                            bcType_Type;
-    typedef OneDimensional::bcSide_Type                            bcSide_Type;
-    typedef OneDimensional::bcLine_Type                            bcLine_Type;
+    typedef OneDFSI::bcType_Type                                   bcType_Type;
+    typedef OneDFSI::bcSide_Type                                   bcSide_Type;
+    typedef OneDFSI::bcLine_Type                                   bcLine_Type;
 
 #ifdef HAVE_HDF5
     typedef ExporterHDF5< mesh_Type >                              IOFile_Type;
@@ -161,6 +161,9 @@ public:
 
     //! Solve the model.
     void solveModel();
+
+    //! Update the solution.
+    void updateSolution();
 
     //! Save the solution
     void saveSolution();
@@ -201,7 +204,7 @@ public:
      * @param flag flag of the boundary face
      * @return flow rate value
      */
-    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::Q, flagConverter( flag ) ); }
+    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::Q, flagConverter( flag ) ); }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
@@ -209,7 +212,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real boundaryStress( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::S, flagConverter( flag ) ); }
+    Real boundaryStress( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::S, flagConverter( flag ) ); }
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -265,14 +268,14 @@ public:
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real boundaryArea( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::A, flagConverter( flag ) ); }
+    Real boundaryArea( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::A, flagConverter( flag ) ); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::P, flagConverter( flag ) ); }
+    Real boundaryPressure( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::P, flagConverter( flag ) ); }
 
     //! Get the data container of the 1D model.
     /*!
@@ -375,6 +378,13 @@ private:
      */
     void solve( bc_Type& bc, solution_Type& solution, const std::string& solverType = " 1D-" );
 
+    //! Convert the flag from a bcFlag type to a bcSide type
+    /*!
+     * @param flag boundary condition flag
+     * @return boundary condition side.
+     */
+    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDFSI::left : OneDFSI::right; }
+
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
     //! Update linear BC
@@ -417,13 +427,6 @@ private:
      * @return solution of the tangent problem at specific node.
      */
     Real solveTangentProblem( solver_Type::vector_Type& rhs, const UInt& bcNode );
-
-    //! Convert the flag from a bcFlag type to a bcSide type
-    /*!
-     * @param flag boundary condition flag
-     * @return boundary condition side.
-     */
-    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
 
 #endif
     //@}

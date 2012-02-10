@@ -63,8 +63,8 @@
 #include <life/lifearray/MapEpetra.hpp>
 
 // Mathcard includes
-#include <lifemc/lifefem/OneDimensionalBCHandler.hpp>
-#include <lifemc/lifesolver/OneDimensionalSolver.hpp>
+#include <life/lifefem/OneDFSIBCHandler.hpp>
+#include <life/lifesolver/OneDFSISolver.hpp>
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 
 #include "ud_functions.hpp"
@@ -173,9 +173,9 @@ Int main(Int argc, char** argv)
     bcFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
 
     // Absorbing
-    bc_Type::bcFunctionDefaultPtr_Type absorbing ( new OneDimensionalBCFunctionAbsorbing( OneDimensional::right, OneDimensional::W2 ) );
-    bcFunction_Type absorbingFunction ( boost::bind( &OneDimensionalBCFunctionAbsorbing::operator(),
-                                                     dynamic_cast<OneDimensionalBCFunctionAbsorbing *> ( &( *absorbing ) ), _1, _2 ) );
+    bc_Type::bcFunctionSolverDefinedPtr_Type absorbing ( new OneDFSIFunctionSolverDefinedAbsorbing( OneDFSI::right, OneDFSI::W2 ) );
+    bcFunction_Type absorbingFunction ( boost::bind( &OneDFSIFunctionSolverDefinedAbsorbing::operator(),
+                                                     dynamic_cast<OneDFSIFunctionSolverDefinedAbsorbing *> ( &( *absorbing ) ), _1, _2 ) );
 
     // BC to test A_from_P conversion
     //Constant constantArea( 1.00 );
@@ -184,11 +184,11 @@ Int main(Int argc, char** argv)
     //Constant constantPressure( 24695.0765959599 );
     //bcFunction_Type constantPressureFunction( boost::bind( &Constant::operator(), &constantPressure, _1 ) );
 
-    oneDModel.bc().setBC( OneDimensional::left,  OneDimensional::first, OneDimensional::Q,  sinusoidalFunction  );
-    oneDModel.bc().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::W2, absorbingFunction );
+    oneDModel.bc().setBC( OneDFSI::left,  OneDFSI::first, OneDFSI::Q,  sinusoidalFunction  );
+    oneDModel.bc().setBC( OneDFSI::right, OneDFSI::first, OneDFSI::W2, absorbingFunction );
 
-    //oneDModel.bc().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::A, constantAreaFunction );
-    //oneDModel.bc().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::P,   constantPressureFunction );
+    //oneDModel.bc().setBC( OneDFSI::right, OneDFSI::first, OneDFSI::A, constantAreaFunction );
+    //oneDModel.bc().setBC( OneDFSI::right, OneDFSI::first, OneDFSI::P,   constantPressureFunction );
 
     oneDModel.setupModel();
 
@@ -243,7 +243,7 @@ Int main(Int argc, char** argv)
     if ( check )
     {
         bool ok = true;
-        Int rightNodeID = oneDModel.solver()->boundaryDOF( OneDimensional::right );
+        Int rightNodeID = oneDModel.solver()->boundaryDOF( OneDFSI::right );
 
         ok = ok && checkValue( 0.999998  , (*oneDModel.solution("A"))[rightNodeID]);
         ok = ok && checkValue(-0.00138076, (*oneDModel.solution("Q"))[rightNodeID]);

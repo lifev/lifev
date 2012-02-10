@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -17,13 +17,14 @@
 # One loop correspond to one heart pulse (pulse / minute: 75)
 ###################################################################################################
 
-function    = 'F*(8-y)/4'
+function  = 'F*(-y)/4'
 
-variables    =  't            F'
-#scale        =  '1            -450000'
-scale        =  '1             -600000'
+variables =  't            F'
+#scale     =  '1             -450000'
+#scale     =  '1             -300000'
+scale     =  '1             -150000'
 
-loop        = true
+loop      = true
 
 # Items must be sorted by the first column value!
 data        =  '0         0

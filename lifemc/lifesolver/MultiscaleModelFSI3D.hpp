@@ -41,26 +41,26 @@
 //#define FSI_WITH_EXTERNALPRESSURE
 
 // LifeV includes
-#include <life/lifesolver/FSIOperator.hpp>
-#include <life/lifealg/NonLinearRichardson.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
 #include <life/lifefilters/ExporterHDF5.hpp>
 #endif
 
+#include <life/lifefem/BCInterface3D.hpp>
+#include <life/lifealg/NonLinearRichardson.hpp>
+
+#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/FSIMonolithicGE.hpp>
+#include <life/lifesolver/FSIMonolithicGI.hpp>
+
+#include <life/lifesolver/MonolithicBlockMatrix.hpp>
+#include <life/lifesolver/MonolithicBlockMatrixRN.hpp>
+#include <life/lifesolver/MonolithicBlockComposedDN.hpp>
+#include <life/lifesolver/MonolithicBlockComposedNN.hpp>
+#include <life/lifesolver/MonolithicBlockComposedDNND.hpp>
+
 // Mathcard includes
-#include <lifemc/lifesolver/FSIMonolithicGE.hpp>
-#include <lifemc/lifesolver/FSIMonolithicGI.hpp>
-
-#include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
-#include <lifemc/lifesolver/MonolithicBlockMatrixRN.hpp>
-#include <lifemc/lifesolver/MonolithicBlockComposedDN.hpp>
-#include <lifemc/lifesolver/MonolithicBlockComposedNN.hpp>
-#include <lifemc/lifesolver/MonolithicBlockComposedDNND.hpp>
-
-#include <lifemc/lifesolver/BCInterface3D.hpp>
-
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
 
@@ -156,6 +156,9 @@ public:
 
     //! Solve the model.
     void solveModel();
+
+    //! Update the solution.
+    void updateSolution();
 
     //! Save the solution
     void saveSolution();
@@ -295,8 +298,6 @@ private:
 
     void setupBC( const std::string& fileName );
     void updateBC();
-
-    void updateSolution();
 
     void setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
     void setupImporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );

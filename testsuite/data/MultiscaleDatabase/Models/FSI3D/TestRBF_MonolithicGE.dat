@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -158,12 +158,6 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
 
 
-[interface] # mesh dependent flags for the interface.
-fluid_flag      =  5   # default: 1
-tolerance       =  0.0005   # how far points are to be considered the same on the interface
-
-
-
 [solid]
 
     [./physics]
@@ -197,7 +191,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
 
     [../boundary_conditions]
 #    list = 'Top Epicardium'
-    list = 'Top InnerRing Epicardium'      
+    list = 'Top InnerRing Epicardium'
 
         [./Top]
         type       = EssentialVertices
@@ -217,7 +211,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
         type             = Essential
         flag             = 10
         mode             = Full
-	component        = 3
+    component        = 3
         dataInterpolator = physicalFunctions/PatientVentricleRBF.dat
 
 #        type         = Natural
@@ -228,6 +222,13 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
         [../]
 
     [../]
+
+
+
+[interface] # mesh dependent flags for the interface.
+fluid_flag      =  5   # default: 1
+solid_flag      =  5   # default: 1
+tolerance       =  0.0005   # how far points are to be considered the same on the interface
 
 
 
@@ -348,7 +349,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
         flag       = 5
         mode       = Full
         component  = 3
-        FSI        = StructureDispToHarmonicExtension
+        functionSD = StructureDispToHarmonicExtension
 
         [../]
 
@@ -378,7 +379,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
         [./robin]
         alphaf = 0.
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
-        
+
         [../Composed]
         list                = 'Ifpack Ifpack'
         sections            = 'ifpack ifpack'

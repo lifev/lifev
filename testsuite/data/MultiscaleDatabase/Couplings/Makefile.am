@@ -15,7 +15,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 SUBDIRS		=   BoundaryCondition\
                 FlowRate\
                 FlowRateStress\
-                FlowRateStress\
+                FlowRateValve\
                 Stress
 
 # dist_pkgdata_DATA = $(shell find $(srcdir) -name "*.dat") 

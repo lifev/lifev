@@ -130,6 +130,8 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
                 default:
 
                     switchErrorMessage( M_models[i] );
+
+                    break;
                 }
     }
 

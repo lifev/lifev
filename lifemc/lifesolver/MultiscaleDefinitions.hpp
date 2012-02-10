@@ -123,8 +123,14 @@ extern UInt multiscaleCoresPerNode;
 // Folder of the problem
 extern std::string multiscaleProblemFolder;
 
+// Prefix of the problem
+extern std::string multiscaleProblemPrefix;
+
 // Step of the problem ( > 0 when performing a restart )
 extern UInt multiscaleProblemStep;
+
+// Save each N time steps
+extern UInt multiscaleSaveEachNTimeSteps;
 
 // Exit Flag
 extern bool multiscaleExitFlag;
@@ -140,7 +146,7 @@ class MultiscaleModel;
 class MultiscaleCoupling;
 
 // Type definitions
-typedef entityFlag_Type                                                          bcFlag_Type;
+typedef markerID_Type                                                            bcFlag_Type;
 
 typedef Displayer::commPtr_Type                                                  multiscaleCommPtr_Type;
 
@@ -274,6 +280,8 @@ multiscaleErrorCheck( const errors_Type& error, const std::string& message = "",
         default:
 
             errorMessage << "No error message for this errorType!\n";
+
+            break;
         }
 
         errorMessage << message << "\n";

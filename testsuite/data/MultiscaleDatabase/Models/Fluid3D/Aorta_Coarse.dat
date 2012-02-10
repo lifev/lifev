@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -17,7 +17,7 @@ modelName        = Fluid3D_Aorta_Coarse
 modelType        = Fluid3D
 couplingFlags    = '2 3 4 5 6 7 8 9'
 
-### Note on the flags: 
+### Note on the flags:
 # 2: Ascending Aorta,        Area = 7.666204022361373e+00 - (RS_001: 6.7886675651 6.7425646930)        - Ratio 1.34 (sqrt: 1.066)
 # 3: Thoracic Aorta,         Area = 2.460573813714928e+00 - (RS_027: 2.1382464998 1.3069810837)
 # 4: Subclavian B (left),    Area = 4.031583374473228e-01 - (RS_007/RS_021: 0.5152997350 0.1734944543) - Ratio 0.81 (sqrt: 0.90)
@@ -28,7 +28,7 @@ couplingFlags    = '2 3 4 5 6 7 8 9'
 # 9: Vertebral (left),       Area = 1.989038523172571e-01 - (RS_020: 0.1075210086 0.0615752160 )       - Ratio 0.94 (sqrt: 1.39)
 
 ### Aorta dimensions (measures taken from the centerline):
-# Arch heigh                    = 18.2 cm 
+# Arch heigh                    = 18.2 cm
 # Subclavian B (left) lenght    = 2.53 cm (1D length: 42.2 cm) -> 1D estimated area: 0.494807617460403 OK
 # Common Carotid (right) lenght = 3.07 cm (1D length: 9.4 cm)  -> 1D estimated area: 1.089591645162872
 # Vertebral (right) lenght      = 1.66 cm (1D length: 14.9 cm) -> 1D estimated area: 0.102402215598926
@@ -80,7 +80,7 @@ diagonalBlockPrec   = false
 
     [../miscellaneous]
     Stokes          = false            # Solve a Stokes problem
-    SubITMax        = 0                # Maximum number of iterations 
+    SubITMax        = 0                # Maximum number of iterations
     Tolerance       = 1e-6             # Tolerance
     Omega           = 0.001            # Relaxation parameter
     #range           = '0.1 1.5'        # Range coefficient: OmegaMin < Omega < OmegaMax
