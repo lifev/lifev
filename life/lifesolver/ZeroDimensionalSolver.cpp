@@ -32,12 +32,16 @@
  *  @date 16-11-2011
  *  @author Mahmoud Jafargholi
  *
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributors Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/ZeroDimensionalSolver.hpp>
 
-ZeroDimensionalSolver::ZeroDimensionalSolver(int numGlobalElements,
+namespace LifeV
+{
+
+ZeroDimensionalSolver::ZeroDimensionalSolver(Int numGlobalElements,
                                              boost::shared_ptr< Epetra_Comm> comm,
                                              LifeV::zeroDimensionalCircuitDataPtr_Type circuitData){
     M_comm.swap(comm);
@@ -64,11 +68,10 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
     commandLine.append(data.linearSolverParamsFile);
     char * argv[1];
     argv[0] =  new char[commandLine.size()];
-    for (int i = 0; i < ((int)commandLine.size()); ++i) {
+    for (Int i = 0; i < ((Int)commandLine.size()); ++i) {
         (argv[0])[i] = commandLine[i];
     }
-    int argc = 1;
-    bool verbose;
+    Int argc = 1;
     bool  success = true; // determine if the run was successfull
     try { // catch exceptions
       if (data.fixTimeStep){
@@ -78,12 +81,12 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
       }
 
 
-    int numElements = M_modelInterface->numGlobalElements(); // number of elements in vector
+    Int numElements = M_modelInterface->numGlobalElements(); // number of elements in vector
     EMethod method_val = METHOD_BE;
-    double maxError ;
-    double reltol;
-    double abstol;
-    int maxOrder ;
+    Real maxError ;
+    Real reltol;
+    Real abstol;
+    Int maxOrder ;
     bool useNOX ;
 
     if (!data.method.compare("BE"))
@@ -98,7 +101,6 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
     reltol = data.reltol;
     abstol = data.abstol;
     maxOrder = data.maxOrder;
-    verbose = data.verbose;
     M_outputLevel = data.verbosLevel;
     M_outputLevel = min(max(M_outputLevel,-1),4);
     useNOX = data.useNOX;
@@ -143,7 +145,7 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
     Teuchos::ParameterList params;
     params.set( "NumElements", numElements );
     // Create the factory for the LinearOpWithSolveBase object
-    Teuchos::RCP<Thyra::LinearOpWithSolveFactoryBase<double> >
+    Teuchos::RCP<Thyra::LinearOpWithSolveFactoryBase<Real> >
       W_factory;
       W_factory = lowsfCreator.createLinearSolveStrategy("");
       *M_out
@@ -151,30 +153,30 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
         << Teuchos::describe(*W_factory,Teuchos::VERB_MEDIUM);
 
     // create interface to problem
-    Teuchos::RCP<Thyra::ModelEvaluator<double> >
+    Teuchos::RCP<Thyra::ModelEvaluator<Real> >
       model = Teuchos::rcp(new Thyra::EpetraModelEvaluator(M_solverInterfaceRCP,W_factory));
 
-   Thyra::ModelEvaluatorBase::InArgs<double> model_ic = model->getNominalValues();
+   Thyra::ModelEvaluatorBase::InArgs<Real> model_ic = model->getNominalValues();
 
     std::string method;
     if (method_val == METHOD_BE) {
-      Teuchos::RCP<Thyra::NonlinearSolverBase<double> > nonlinearSolver;
+      Teuchos::RCP<Thyra::NonlinearSolverBase<Real> > nonlinearSolver;
       if (useNOX) {
         Teuchos::RCP<Thyra::NOXNonlinearSolver> _nonlinearSolver = Teuchos::rcp(new Thyra::NOXNonlinearSolver);
         nonlinearSolver = _nonlinearSolver;
       }
       else {
-        Teuchos::RCP<Rythmos::TimeStepNonlinearSolver<double> >
-          _nonlinearSolver = Teuchos::rcp(new Rythmos::TimeStepNonlinearSolver<double>());
+        Teuchos::RCP<Rythmos::TimeStepNonlinearSolver<Real> >
+          _nonlinearSolver = Teuchos::rcp(new Rythmos::TimeStepNonlinearSolver<Real>());
         Teuchos::RCP<Teuchos::ParameterList>
           nonlinearSolverPL = Teuchos::parameterList();
-        nonlinearSolverPL->set("Default Tol",double(maxError));
+        nonlinearSolverPL->set("Default Tol",Real(maxError));
         _nonlinearSolver->setParameterList(nonlinearSolverPL);
         nonlinearSolver = _nonlinearSolver;
       }
       model->setDefaultVerbLevel(M_outputLevelTeuchos);
       nonlinearSolver->setVerbLevel(M_outputLevelTeuchos);
-      M_stepperPtr = Teuchos::rcp(new Rythmos::BackwardEulerStepper<double>(model,nonlinearSolver));
+      M_stepperPtr = Teuchos::rcp(new Rythmos::BackwardEulerStepper<Real>(model,nonlinearSolver));
       M_stepperPtr->setVerbLevel(M_outputLevelTeuchos);
       model->describe(*M_out,M_outputLevelTeuchos);
       model->description();
@@ -184,17 +186,17 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
       M_stepperPtr->description();
       method = "Backward Euler";
     } else if (method_val == METHOD_BDF) {
-      Teuchos::RCP<Thyra::NonlinearSolverBase<double> > nonlinearSolver;
+      Teuchos::RCP<Thyra::NonlinearSolverBase<Real> > nonlinearSolver;
       if (useNOX) {
         Teuchos::RCP<Thyra::NOXNonlinearSolver> _nonlinearSolver = Teuchos::rcp(new Thyra::NOXNonlinearSolver);
         nonlinearSolver = _nonlinearSolver;
       }
       else {
-        Teuchos::RCP<Rythmos::TimeStepNonlinearSolver<double> >
-          _nonlinearSolver = Teuchos::rcp(new Rythmos::TimeStepNonlinearSolver<double>());
+        Teuchos::RCP<Rythmos::TimeStepNonlinearSolver<Real> >
+          _nonlinearSolver = Teuchos::rcp(new Rythmos::TimeStepNonlinearSolver<Real>());
         Teuchos::RCP<Teuchos::ParameterList>
           nonlinearSolverPL = Teuchos::parameterList();
-        nonlinearSolverPL->set("Default Tol",double(maxError));
+        nonlinearSolverPL->set("Default Tol",Real(maxError));
         _nonlinearSolver->setParameterList(nonlinearSolverPL);
         nonlinearSolver = _nonlinearSolver;
       }
@@ -204,28 +206,28 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
       BDFStepControlPL->set( "maxOrder", maxOrder );
       BDFStepControlPL->set( "relErrTol", reltol );
       BDFStepControlPL->set( "absErrTol", abstol );
-      M_stepperPtr = Teuchos::rcp(new Rythmos::ImplicitBDFStepper<double>(model,nonlinearSolver,BDFparams));
+      M_stepperPtr = Teuchos::rcp(new Rythmos::ImplicitBDFStepper<Real>(model,nonlinearSolver,BDFparams));
       method = "Implicit BDF";
     } else if (method_val == METHOD_IRK) {
-      Teuchos::RCP<Thyra::NonlinearSolverBase<double> > nonlinearSolver;
+      Teuchos::RCP<Thyra::NonlinearSolverBase<Real> > nonlinearSolver;
       if (useNOX) {
         Teuchos::RCP<Thyra::NOXNonlinearSolver> _nonlinearSolver = Teuchos::rcp(new Thyra::NOXNonlinearSolver);
         nonlinearSolver = _nonlinearSolver;
       }
       else {
-        Teuchos::RCP<Rythmos::TimeStepNonlinearSolver<double> >
-          _nonlinearSolver = Teuchos::rcp(new Rythmos::TimeStepNonlinearSolver<double>());
+        Teuchos::RCP<Rythmos::TimeStepNonlinearSolver<Real> >
+          _nonlinearSolver = Teuchos::rcp(new Rythmos::TimeStepNonlinearSolver<Real>());
         Teuchos::RCP<Teuchos::ParameterList>
           nonlinearSolverPL = Teuchos::parameterList();
-        nonlinearSolverPL->set("Default Tol",double(maxError));
+        nonlinearSolverPL->set("Default Tol",Real(maxError));
         _nonlinearSolver->setParameterList(nonlinearSolverPL);
         nonlinearSolver = _nonlinearSolver;
       }
       nonlinearSolver->setVerbLevel(M_outputLevelTeuchos);
-      Teuchos::RCP<Thyra::LinearOpWithSolveFactoryBase<double> > irk_W_factory
+      Teuchos::RCP<Thyra::LinearOpWithSolveFactoryBase<Real> > irk_W_factory
         = lowsfCreator.createLinearSolveStrategy("");
-      Teuchos::RCP<Rythmos::RKButcherTableauBase<double> > rkbt = Rythmos::createRKBT<double>("Implicit 3 Stage 6th order Gauss");
-      M_stepperPtr = Rythmos::implicitRKStepper<double>(model,nonlinearSolver,irk_W_factory,rkbt);
+      Teuchos::RCP<Rythmos::RKButcherTableauBase<Real> > rkbt = Rythmos::createRKBT<Real>("Implicit 3 Stage 6th order Gauss");
+      M_stepperPtr = Rythmos::implicitRKStepper<Real>(model,nonlinearSolver,irk_W_factory,rkbt);
       method = "Implicit RK";
     } else {
       TEST_FOR_EXCEPT(true);
@@ -240,23 +242,22 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
 
 }
 void
-ZeroDimensionalSolver::takeStep(double t0,double t1){
+ZeroDimensionalSolver::takeStep(Real t0,Real t1){
 
     M_finalTime = t1;
     M_startTime = t0;
-    double dt = (t1-t0)/M_numberTimeStep;
-    double time = t0;
-    int numSteps = 0;
-    Thyra::ModelEvaluatorBase::InArgs< double >  myIn = M_stepperPtr->getInitialCondition();
+    Real dt = (t1-t0)/M_numberTimeStep;
+    Real time = t0;
+    Int numSteps = 0;
+    Thyra::ModelEvaluatorBase::InArgs< Real >  myIn = M_stepperPtr->getInitialCondition();
     myIn.describe(*M_out, M_outputLevelTeuchos);
 
-    std::cout<<"numSteps = " <<numSteps << std::endl;
     if (M_step_method == STEP_METHOD_FIXED)
     {
       // Integrate forward with fixed step sizes:
-      for (int i=1 ; i<=M_numberTimeStep ; ++i)
+      for (Int i=1 ; i<=M_numberTimeStep ; ++i)
       {
-        double dt_taken = M_stepperPtr->takeStep(dt,Rythmos::STEP_TYPE_FIXED);
+        Real dt_taken = M_stepperPtr->takeStep(dt,Rythmos::STEP_TYPE_FIXED);
         numSteps++;
         if (dt_taken != dt)
         {
@@ -270,7 +271,7 @@ ZeroDimensionalSolver::takeStep(double t0,double t1){
     {
       while (time < M_finalTime)
       {
-        double dt_taken = M_stepperPtr->takeStep(0.0,Rythmos::STEP_TYPE_VARIABLE);
+        Real dt_taken = M_stepperPtr->takeStep(0.0,Rythmos::STEP_TYPE_VARIABLE);
         numSteps++;
         if (dt_taken < 0)
         {
@@ -281,24 +282,23 @@ ZeroDimensionalSolver::takeStep(double t0,double t1){
         *M_out << "Took stepsize of: " << dt_taken << " time = " << time << endl;
       }
     }
-    *M_out << "Integrated to time = " << time << endl;
     // Get solution M_out of M_stepper:
-    Rythmos::TimeRange< double > timeRange =M_stepperPtr->getTimeRange();
-    Rythmos::Array< double > time_vec;
-    double timeToEvaluate = timeRange.upper();
+    Rythmos::TimeRange< Real > timeRange =M_stepperPtr->getTimeRange();
+    Rythmos::Array< Real > time_vec;
+    Real timeToEvaluate = timeRange.upper();
     time_vec.push_back(timeToEvaluate);
-    Rythmos::Array< Teuchos::RCP< const Thyra::VectorBase< double > > >  x_vec;
-    Rythmos::Array< Teuchos::RCP< const Thyra::VectorBase< double > > >  xdot_vec;
-    Rythmos::Array< Teuchos::ScalarTraits<double>::magnitudeType >  accuracy_vec;
+    Rythmos::Array< Teuchos::RCP< const Thyra::VectorBase< Real > > >  x_vec;
+    Rythmos::Array< Teuchos::RCP< const Thyra::VectorBase< Real > > >  xdot_vec;
+    Rythmos::Array< Teuchos::ScalarTraits<Real>::magnitudeType >  accuracy_vec;
 
     M_stepperPtr->getPoints(time_vec,
               &x_vec,
               &xdot_vec,
               &accuracy_vec
                 );
-    const Rythmos::StepStatus<double> stepStatus = M_stepperPtr->getStepStatus();
-    Teuchos::RCP<const Thyra::VectorBase<double> > &x_computed_thyra_ptr = x_vec[0];
-    Teuchos::RCP<const Thyra::VectorBase<double> > &x_dot_computed_thyra_ptr = xdot_vec[0];
+    const Rythmos::StepStatus<Real> stepStatus = M_stepperPtr->getStepStatus();
+    Teuchos::RCP<const Thyra::VectorBase<Real> > &x_computed_thyra_ptr = x_vec[0];
+    Teuchos::RCP<const Thyra::VectorBase<Real> > &x_dot_computed_thyra_ptr = xdot_vec[0];
 
     // Convert Thyra::VectorBase to Epetra_Vector
     Teuchos::RCP<const Epetra_Vector>   x_computed_ptr = Thyra::get_Epetra_Vector(*(M_solverInterfaceRCP->get_x_map()),x_computed_thyra_ptr);
@@ -315,18 +315,10 @@ ZeroDimensionalSolver::takeStep(double t0,double t1){
     *M_out << "X_dot_computed" << endl;
     x_dot_computed.Print(*M_out);
 #endif
+
     M_modelInterface->initializeSolnY(x_computed);
     M_modelInterface->initializeSolnYp(x_dot_computed);
     M_modelInterface->deepUpdate(time,x_computed , x_dot_computed);
-//---------------update the Circuit data from the the final solution
-    int MyPID = x_computed.Comm().MyPID();
-    if (MyPID == 0)
-    {
-      *M_out << "Integrating 1DfemTransient t = " << t0
-                << " to t = " << t1 << std::endl;
-      *M_out << "using " << M_method << "." << std::endl;
-      *M_out << "Took " << numSteps << " steps." << std::endl;
-    }
-     *M_out << "\nEnd Result: TEST PASSED" << endl;
-
 }
+
+} // LifeV namespace

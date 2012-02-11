@@ -125,6 +125,10 @@ main( Int argc, char** argv )
     zeroDimensionalData->dataTime()->setInitialTime(0);
     zeroDimensionalData->initializeSolution();
 
+    // Create output folder
+    if ( comm->MyPID() == 0 )
+        mkdir( "output", 0777 );
+
     // Save initial solution
     zeroDimensionalData->saveSolution();
 

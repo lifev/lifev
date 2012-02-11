@@ -32,7 +32,8 @@
  *  @date 16-11-2011
  *  @author Mahmoud Jafargholi
  *
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributors Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ZeroDimensionalSolver_H
@@ -42,7 +43,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Includes for Rythmos:
-#include <Rythmos_ConfigDefs.h>
+//#include <Rythmos_ConfigDefs.h>
 #include <Rythmos_StepperBase.hpp>
 #include <Rythmos_ForwardEulerStepper.hpp>
 #include <Rythmos_BackwardEulerStepper.hpp>
@@ -83,6 +84,9 @@
 #include <life/lifesolver/ZeroDimensionalRythmosSolverInterface.hpp>
 #include <life/lifesolver/ZeroDimensionalData.hpp>
 
+namespace LifeV
+{
+
 //! Rhytmos methods
 enum EMethod { METHOD_FE, METHOD_BE, METHOD_ERK, METHOD_BDF, METHOD_IRK };
 
@@ -95,7 +99,7 @@ class ZeroDimensionalSolver
 public:
 
     //! Constructor
-    explicit ZeroDimensionalSolver(int numGlobalElements,
+    explicit ZeroDimensionalSolver(Int numGlobalElements,
                                    boost::shared_ptr< Epetra_Comm> comm,
                                    LifeV::zeroDimensionalCircuitDataPtr_Type circuitData);
     //! Destructor
@@ -105,7 +109,8 @@ public:
     void setup(const LifeV::ZeroDimensionalData::solverData_Type&  data);
 
     //! integrate the system between t1 and t2
-    void takeStep(double t1, double t2);
+    void takeStep(Real t1, Real t2);
+
 private:
 
     LifeV::rythmosSolverInterfacePtr_Type      M_solverInterface;
@@ -114,16 +119,18 @@ private:
     LifeV::rythmosModelInterfacePtrRCP_Type    M_modelInterfaceRCP;
     boost::shared_ptr< Epetra_Comm>            M_comm;
     Teuchos::RCP< Epetra_Comm>                 M_commRCP;
-    Teuchos::RCP<Rythmos::StepperBase<double> >M_stepperPtr;
+    Teuchos::RCP<Rythmos::StepperBase<Real> >  M_stepperPtr;
     Teuchos::RCP<Teuchos::FancyOStream>        M_out;
     STEP_METHOD                                M_step_method;
-    double                                     M_finalTime;
-    double                                     M_startTime;
-    int                                        M_numberTimeStep;
-    int                                        M_outputLevel;
+    Real                                       M_finalTime;
+    Real                                       M_startTime;
+    Int                                        M_numberTimeStep;
+    Int                                        M_outputLevel;
     Teuchos::EVerbosityLevel                   M_outputLevelTeuchos;
     std::string                                M_method;
 
 };
+
+} // LifeV namespace
 
 #endif //ZeroDimensionalSolver_H

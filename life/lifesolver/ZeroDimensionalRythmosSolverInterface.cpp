@@ -32,7 +32,8 @@
  *  @date 21-11-2011
  *  @author Mahmoud Jafargholi
  *
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributors Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/ZeroDimensionalRythmosSolverInterface.hpp>
@@ -43,11 +44,11 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-RythmosSolverInterface::RythmosSolverInterface(int numGlobalElements,
+RythmosSolverInterface::RythmosSolverInterface(Int numGlobalElements,
                                                Teuchos::RCP<Epetra_Comm> &epetra_comm_ptr,
                                                rythmosModelInterfacePtrRCP_Type theModel):
-                M_numElements                           (numGlobalElements),
                 M_epetraCommPtr                         (epetra_comm_ptr),
+                M_numElements                           (numGlobalElements),
                 M_problemInterfacePtr                   (theModel),
                 M_comm                                  (epetra_comm_ptr)
 {
@@ -130,7 +131,7 @@ void RythmosSolverInterface::evalModel( const InArgs& inArgs, const OutArgs& out
 {
   Teuchos::RCP<const Epetra_Vector> x = inArgs.get_x();
   Teuchos::RCP<const Epetra_Vector> xdot = inArgs.get_x_dot();
-  double t =inArgs.get_t();
+  Real t =inArgs.get_t();
 #ifdef HAVE_LIFEV_DEBUG
   std::cout << "RythmosSolverInterface::evalModel ---------------------------{" << std::endl;
   std::cout << "x = " << std::endl;
@@ -150,8 +151,8 @@ void RythmosSolverInterface::evalModel( const InArgs& inArgs, const OutArgs& out
   Teuchos::RCP<Epetra_Operator> W;
   if( (W = outArgs.get_W()).get() )
   {
-    const double alpha = inArgs.get_alpha();
-    const double beta = inArgs.get_beta();
+    const Real alpha = inArgs.get_alpha();
+    const Real beta = inArgs.get_beta();
     Epetra_CrsMatrix& jac = Teuchos::dyn_cast<Epetra_CrsMatrix>(*W);
     M_problemInterfacePtr->evaluateWImplicit(t,alpha,beta,&*x,&*xdot,&jac);
 #ifdef HAVE_LIFEV_DEBUG

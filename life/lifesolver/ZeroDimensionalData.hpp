@@ -32,7 +32,8 @@
  *  @date 16-11-2011
  *  @author Mahmoud Jafargholi
  *
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributors Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ZeroDimensionalData_H
@@ -91,13 +92,13 @@ public:
     //! Rhytmos solver data container
     struct SolverData {
         std::string        method;
-        int                numberTimeStep;
-        double             maxError;
-        double             reltol;
-        double             abstol;
-        int                maxOrder;
+        Int                numberTimeStep;
+        Real             maxError;
+        Real             reltol;
+        Real             abstol;
+        Int                maxOrder;
         bool               verbose;
-        int                verbosLevel;
+        Int                verbosLevel;
         bool               useNOX;
         bool               fixTimeStep;
         std::string        extraLSParamsFile;
@@ -115,12 +116,12 @@ private:
     void assignVaribleIndex();
 
     timePtr_Type                         M_time;
+    OutPutFormat                         M_outPutFormat;
     zeroDimensionalCircuitDataPtr_Type   M_circuitData      ;
     std::ofstream                        M_voltageFileStream;
     std::ofstream                        M_currentFileStream;
     std::ofstream                        M_balanceFileStream;
     Int                                  M_unknownCounter   ;
-    OutPutFormat                         M_outPutFormat;
     solverData_Type                      M_solverData;
 };
 

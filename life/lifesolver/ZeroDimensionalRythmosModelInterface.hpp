@@ -32,7 +32,8 @@
  *  @date 21-11-2011
  *  @author Mahmoud Jafargholi
  *
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributors Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ZeroDimensionalRythmosModelInterface_H
@@ -79,7 +80,7 @@ class RythmosModelInterface : public NOX::Epetra::Interface::Required,
 public:
 
   //! Constructor
-    RythmosModelInterface(int NumGlobalElements,
+    RythmosModelInterface(Int NumGlobalElements,
                           Epetra_Comm* comm,
                           zeroDimensionalCircuitDataPtr_Type circuitData);
 
@@ -111,13 +112,13 @@ public:
   Epetra_CrsGraph& getGraph();
 
   //! this method empty.
-  virtual bool evaluate(double t, const Epetra_Vector* x, Epetra_Vector* f );
+  virtual bool evaluate(Real t, const Epetra_Vector* x, Epetra_Vector* f );
 
   //! compute Implicit residual.
-  virtual bool evaluateFImplicit(const double& t, const Epetra_Vector* x,const Epetra_Vector* x_dot, Epetra_Vector* f );
+  virtual bool evaluateFImplicit(const Real& t, const Epetra_Vector* x,const Epetra_Vector* x_dot, Epetra_Vector* f );
 
   //! compute jacobian.
-  virtual bool evaluateWImplicit(const double& t, const double& alpha,const double& beta,const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_CrsMatrix* W );
+  virtual bool evaluateWImplicit(const Real& t, const Real& alpha,const Real& beta,const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_CrsMatrix* W );
 
   virtual bool initializeSolnY();
 
@@ -129,15 +130,15 @@ public:
 
 
   //! hafter complete Rythmos step, this method will update circuit data.
-  void deepUpdate(const double &t1,const vectorEpetra_Type& y , const vectorEpetra_Type& yp );
+  void deepUpdate(const Real &t1,const vectorEpetra_Type& y , const vectorEpetra_Type& yp );
 
-  int numGlobalElements(){return M_numGlobalElements;}
+  Int numGlobalElements(){return M_numGlobalElements;}
 
 protected:
-  int M_numGlobalElements;  // Total Number of elements
-  int M_numMyElements;      // Number of elements owned by this process
-  int M_myPID;              // Process number
-  int M_numProc;            // Total number of processes
+  Int M_numGlobalElements;  // Total Number of elements
+  Int M_numMyElements;      // Number of elements owned by this process
+  Int M_myPID;              // Process number
+  Int M_numProc;            // Total number of processes
 
   Epetra_CrsGraph*                   M_graph;
   boost::shared_ptr<Epetra_CrsGraph> M_graphSharedPtr;

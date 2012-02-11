@@ -69,8 +69,35 @@
 #include <life/lifefem/TimeData.hpp>
 #include <life/lifefilters/GetPot.hpp>
 
+#define BC_CONSTANT 1000
+
+#define ZERO_DIMENTIONAL_DEFINED_ELEMENTS 6
+#define ZERO_DIMENTIONAL_DEFINED_NODES    2
+
 namespace LifeV
 {
+
+enum ZeroDimentionalElementType
+    {
+	resistor,
+	capacitor,
+	inductor,
+	diode,
+	voltageSource,
+	currentSource
+};
+
+enum ZeroDimentionalNodeType
+{
+	knownNode,
+	unknownNode
+};
+
+enum ZeroDimensionalBCType
+{
+    Current,
+    Voltage
+};
 
 } // LifeV namespace
 

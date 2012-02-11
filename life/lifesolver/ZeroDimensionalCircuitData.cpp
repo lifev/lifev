@@ -47,17 +47,14 @@ namespace LifeV
 
 
 // ===================================================
-// Constructors
+// Methods
 // ===================================================
-ZeroDimensionalElement::ZeroDimensionalElement()
-{
-}
 void
-ZeroDimensionalElement::showMe(__attribute__((unused)) Int flag)
+ZeroDimensionalElement::showMe( const Int& /*flag*/ )
 {
-    cout<<"Id = "<<id();
-    cout<<"\t type = ";
-    cout<<enum2string(type());
+    cout << "Id = " << id();
+    cout << "\t type = ";
+    cout << enum2string( type() );
 }
 
 const std::string
@@ -112,7 +109,7 @@ ZeroDimensionalElementPassive::ZeroDimensionalElementPassive():
 }
 
 void
-ZeroDimensionalElementPassive::showMe(Int flag)
+ZeroDimensionalElementPassive::showMe( const Int& flag )
 {
     ZeroDimensionalElement::showMe(flag);
     cout<<"\t Node1= "<<nodeIndex(0)<<"\t Node2= "<<nodeIndex(1);
@@ -153,18 +150,18 @@ ZeroDimensionalElementPassiveResistor::ZeroDimensionalElementPassiveResistor()
 }
 
 void
-ZeroDimensionalElementPassiveResistor::showMe(Int flag)
+ZeroDimensionalElementPassiveResistor::showMe( const Int& flag )
 {
     ZeroDimensionalElementPassive::showMe(flag);
     cout<<"\t parameter = "<<parameter()<<std::endl;
 }
 
 void
-ZeroDimensionalElementPassiveResistor::buildABC(__attribute__((unused)) matrix_Type& A,matrix_Type& B,vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes)
+ZeroDimensionalElementPassiveResistor::buildABC( matrix_Type& /*A*/, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes )
 {
-    for (int i = 0; i < 2; i++) {
-        const int& theNodeCounter =  (i)%2;
-        const int& theOtherNodeCounter =  (i+1)%2;
+    for (Int i = 0; i < 2; i++) {
+        const Int& theNodeCounter =  (i)%2;
+        const Int& theOtherNodeCounter =  (i+1)%2;
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 8151 )<< theNodeCounter << "\t"<< theOtherNodeCounter << "\n";
 #endif
@@ -172,7 +169,7 @@ ZeroDimensionalElementPassiveResistor::buildABC(__attribute__((unused)) matrix_T
         const ZeroDimensionalNode& theOtherNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theOtherNodeCounter]));
         if (theNodeTest.type() == unknownNode ){
             const ZeroDimensionalNodeUnknown& theNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theNodeCounter]));
-            const int& equationRow = theNode.equationRow();
+            const Int& equationRow = theNode.equationRow();
             B.addToCoefficient(equationRow,theNode.variableIndex(), -M_parameter);
 #ifdef HAVE_LIFEV_DEBUG
           Debug( 8151 )<< equationRow << "\t"<< theNode.variableIndex() << "\t"<< M_parameter << "\t""\n";
@@ -201,7 +198,8 @@ ZeroDimensionalElementPassiveResistor::buildABC(__attribute__((unused)) matrix_T
 }
 
 void
-ZeroDimensionalElementPassiveResistor::deepUpdate(const ZeroDimensionalNodeS& Nodes){
+ZeroDimensionalElementPassiveResistor::deepUpdate( const ZeroDimensionalNodeS& Nodes )
+{
     M_current       = ( Nodes.nodeListAt(M_nodeIndex.at(0))->voltage()      - Nodes.nodeListAt(M_nodeIndex.at(1))->voltage()       )     * M_parameter;
     M_deltaCurrent  = ( Nodes.nodeListAt(M_nodeIndex.at(0))->deltaVoltage() - Nodes.nodeListAt(M_nodeIndex.at(1))->deltaVoltage()  )     * M_parameter;
 }
@@ -217,37 +215,38 @@ ZeroDimensionalElementPassiveDiode::ZeroDimensionalElementPassiveDiode():
 }
 
 void
-ZeroDimensionalElementPassiveDiode::showMe(Int flag)
+ZeroDimensionalElementPassiveDiode::showMe( const Int& flag )
 {
     ZeroDimensionalElementPassiveResistor::showMe(flag);
     cout<<"\t FB = "<<forwardBias()<<"\t alpha = "<<alpha()<<"\t beta = "<<beta()<<std::endl;
 }
 void
-ZeroDimensionalElementPassiveDiode::calculateEffectiveResistance(const double& voltage){
+ZeroDimensionalElementPassiveDiode::calculateEffectiveResistance(const Real& voltage){
 
-    double e0     =(M_beta*exp(M_alpha*(0-M_forwardBias)));
+    Real e0     =(M_beta*exp(M_alpha*(0-M_forwardBias)));
 
     if (voltage == 0){
         M_parameter=e0;
     } else {
-        double current    = (M_beta*exp(M_alpha*(voltage-M_forwardBias)))-e0;
+        Real current    = (M_beta*exp(M_alpha*(voltage-M_forwardBias)))-e0;
         M_parameter = abs(current / voltage) ;
     }
 }
 void
-ZeroDimensionalElementPassiveDiode::deepUpdate(const ZeroDimensionalNodeS& Nodes){
-    double deltaVoltage = ( Nodes.nodeListAt(M_nodeIndex.at(0))->voltage()      - Nodes.nodeListAt(M_nodeIndex.at(1))->voltage()       );
+ZeroDimensionalElementPassiveDiode::deepUpdate( const ZeroDimensionalNodeS& Nodes )
+{
+    Real deltaVoltage = ( Nodes.nodeListAt(M_nodeIndex.at(0))->voltage()      - Nodes.nodeListAt(M_nodeIndex.at(1))->voltage()       );
     calculateEffectiveResistance(deltaVoltage);
     M_current           = deltaVoltage * M_parameter;
     M_deltaCurrent      = ( Nodes.nodeListAt(M_nodeIndex.at(0))->deltaVoltage() - Nodes.nodeListAt(M_nodeIndex.at(1))->deltaVoltage() ) * M_parameter;
 }
 
 void
-ZeroDimensionalElementPassiveDiode::buildABC(matrix_Type& A,matrix_Type& B,vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes)
+ZeroDimensionalElementPassiveDiode::buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes )
 {
 
-    const int& theNodeCounter =  0;
-    const int& theOtherNodeCounter =  1;
+    const Int& theNodeCounter =  0;
+    const Int& theOtherNodeCounter =  1;
     const ZeroDimensionalNode& theNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theNodeCounter]));
     const ZeroDimensionalNode& theOtherNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theOtherNodeCounter]));
     Real deltaVoltage = theNodeTest.voltage() - theOtherNodeTest.voltage();
@@ -267,24 +266,24 @@ ZeroDimensionalElementPassiveCapacitor::ZeroDimensionalElementPassiveCapacitor()
 }
 
 void
-ZeroDimensionalElementPassiveCapacitor::showMe(Int flag)
+ZeroDimensionalElementPassiveCapacitor::showMe( const Int& flag )
 {
     ZeroDimensionalElementPassive::showMe(flag);
     cout<<"\t parameter = "<<parameter()<<std::endl;
 }
 
 void
-ZeroDimensionalElementPassiveCapacitor::deepUpdate(const ZeroDimensionalNodeS& Nodes){
-
-    M_current       = ( Nodes.nodeListAt(M_nodeIndex.at(0))->deltaVoltage()      - Nodes.nodeListAt(M_nodeIndex.at(1))->deltaVoltage()       )     * M_parameter;
+ZeroDimensionalElementPassiveCapacitor::deepUpdate( const ZeroDimensionalNodeS& Nodes )
+{
+    M_current = ( Nodes.nodeListAt(M_nodeIndex.at(0))->deltaVoltage() - Nodes.nodeListAt(M_nodeIndex.at(1))->deltaVoltage()       )     * M_parameter;
 }
 
 void
-ZeroDimensionalElementPassiveCapacitor::buildABC(matrix_Type& A,__attribute__((unused)) matrix_Type& B,vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes)
+ZeroDimensionalElementPassiveCapacitor::buildABC( matrix_Type& A, matrix_Type& /*B*/, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes )
 {
-    for (int i = 0; i < 2; i++) {
-        const int& theNodeCounter =  (i)%2;
-        const int& theOtherNodeCounter =  (i+1)%2;
+    for (Int i = 0; i < 2; i++) {
+        const Int& theNodeCounter =  (i)%2;
+        const Int& theOtherNodeCounter =  (i+1)%2;
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 8151 )<< theNodeCounter << "\t"<< theOtherNodeCounter << "\n";
 #endif
@@ -292,7 +291,7 @@ ZeroDimensionalElementPassiveCapacitor::buildABC(matrix_Type& A,__attribute__((u
         const ZeroDimensionalNode& theOtherNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theOtherNodeCounter]));
         if (theNodeTest.type() == unknownNode ){
             const ZeroDimensionalNodeUnknown& theNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theNodeCounter]));
-            const int& equationRow = theNode.equationRow();
+            const Int& equationRow = theNode.equationRow();
             A.addToCoefficient(equationRow,theNode.variableIndex(), -M_parameter);
 #ifdef HAVE_LIFEV_DEBUG
             Debug( 8151 )<< equationRow << "\t"<< theNode.variableIndex() << "\t"<< M_parameter << "\t""\n";
@@ -330,7 +329,7 @@ ZeroDimensionalElementPassiveInductor::ZeroDimensionalElementPassiveInductor():
 }
 
 void
-ZeroDimensionalElementPassiveInductor::showMe(Int flag)
+ZeroDimensionalElementPassiveInductor::showMe( const Int& flag )
 {
     ZeroDimensionalElementPassive::showMe(flag);
     if (flag==0)
@@ -347,14 +346,14 @@ ZeroDimensionalElementPassiveInductor::assignVariableIndex(const Int & index)
 
 }
 void
-ZeroDimensionalElementPassiveInductor::buildABC(matrix_Type& A,matrix_Type& B,vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes)
+ZeroDimensionalElementPassiveInductor::buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes )
 {
-    for (int i = 0; i < 2; i++) {
-        const int& theNodeCounter =  (i)%2;
+    for (Int i = 0; i < 2; i++) {
+        const Int& theNodeCounter =  (i)%2;
         const ZeroDimensionalNode& theNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theNodeCounter]));
         if (theNodeTest.type() == unknownNode ){
             const ZeroDimensionalNodeUnknown& theNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theNodeCounter]));
-            const int& equationRow = theNode.equationRow();
+            const Int& equationRow = theNode.equationRow();
             B.addToCoefficient(equationRow,M_variableIndex, direction(theNode.id()));
 #ifdef HAVE_LIFEV_DEBUG
             Debug( 8151 )<< equationRow << "\t"<< M_variableIndex << "\t"<< direction(theNode.id()) << "\t""\n";
@@ -372,9 +371,9 @@ ZeroDimensionalElementPassiveInductor::buildABC(matrix_Type& A,matrix_Type& B,ve
     //----------------------------write the Inductor Equations
     A.addToCoefficient(M_equationRow, M_variableIndex, 1.0);
     {
-        int i = 0;
-        const int& theNodeCounter =  (i)%2;
-        const int& theOtherNodeCounter =  (i+1)%2;
+        Int i = 0;
+        const Int& theNodeCounter =  (i)%2;
+        const Int& theOtherNodeCounter =  (i+1)%2;
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 8151 )<< theNodeCounter << "\t"<< theOtherNodeCounter << "\n";
 #endif
@@ -431,7 +430,7 @@ ZeroDimensionalElementSource::ZeroDimensionalElementSource():
 }
 
 void
-ZeroDimensionalElementSource::showMe(Int flag)
+ZeroDimensionalElementSource::showMe( const Int& flag )
 {
     ZeroDimensionalElement::showMe(flag);
     cout<<"\t Node1= "<<nodeIndex()<<std::endl;
@@ -465,7 +464,7 @@ ZeroDimensionalElementVoltageSource::calculateCurrent(const ZeroDimensionalNodeS
     const vecInt_Type& indexList = theNode.elementListIndex();
     Real current = 0.0 ;
     Int length = indexList.size();
-    for (int i = 0; i < length; ++i) {
+    for (Int i = 0; i < length; ++i) {
         const ZeroDimensionalElement& theElement = *Elements.elementListAt(indexList.at(i));
         if (theElement.id()  != M_id){
             Real tmp = theElement.current() * theElement.direction(theNode.id());
@@ -500,12 +499,12 @@ ZeroDimensionalElementCurrentSource::connectElement(zeroDimensionalNodeSPtr_Type
 }
 
 void
-ZeroDimensionalElementCurrentSource::buildABC(__attribute__((unused)) matrix_Type& A,__attribute__((unused)) matrix_Type& B,vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes)
+ZeroDimensionalElementCurrentSource::buildABC( matrix_Type& /*A*/, matrix_Type& /*B*/, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes )
 {
     const ZeroDimensionalNode& theNodeTest = *(Nodes->nodeListAt(M_nodeIndex));
     if (theNodeTest.type() == unknownNode ){
         const ZeroDimensionalNodeUnknown& theNode = *(Nodes->unknownNodeMapAt(M_nodeIndex));
-        const int& equationRow = theNode.equationRow();
+        const Int& equationRow = theNode.equationRow();
         C[equationRow] += (-M_current) ;
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 8151 )<< "\n"<<equationRow << "\t"<< M_current <<"\n";
@@ -539,7 +538,7 @@ ZeroDimensionalNode::ZeroDimensionalNode():
 }
 
 void
-ZeroDimensionalNode::showMe(Int flag)
+ZeroDimensionalNode::showMe( const Int& flag )
 {
     cout<<"Id = "<<id();
     cout<<"\t type = ";
@@ -577,7 +576,7 @@ void
 ZeroDimensionalNode::calculateCurrentBalance(const ZeroDimensionalElementS& Elements){
     Real currentBalance = 0.0 ;
     Int length = M_elementListIndex.size();
-    for (int i = 0; i < length ; ++i) {
+    for (Int i = 0; i < length ; ++i) {
         const ZeroDimensionalElement& theElement = *Elements.elementListAt(M_elementListIndex.at(i));
         currentBalance += theElement.current() * theElement.direction(M_id);
     }
@@ -605,7 +604,7 @@ ZeroDimensionalNodeUnknown::assignVariableIndex(const Int & index)
 }
 
 void
-ZeroDimensionalNodeUnknown::showMe(Int flag)
+ZeroDimensionalNodeUnknown::showMe( const Int& flag )
 {
     ZeroDimensionalNode::showMe(flag);
     if (flag==1)
@@ -639,7 +638,7 @@ ZeroDimensionalElementS::ZeroDimensionalElementS():
 }
 
 void
-ZeroDimensionalElementS::showMe(Int flag)
+ZeroDimensionalElementS::showMe( const Int& flag )
 {
     cout<<"=============== Show all ZeroDimentional Elements ==========="<<std::endl;
     for (iterZeroDimensionalElement_Type theElement = M_elementList->begin();
@@ -662,7 +661,7 @@ ZeroDimensionalNodeS::ZeroDimensionalNodeS():
 }
 
 void
-ZeroDimensionalNodeS::showMe(Int flag)
+ZeroDimensionalNodeS::showMe( const Int& flag )
 {
     cout<<"=============== Show all ZeroDimentional Nodes    ==========="<<std::endl;
     for (iterZeroDimensionalNode_Type theNode = M_nodeList->begin();
@@ -683,7 +682,7 @@ ZeroDimensionalCircuitData::ZeroDimensionalCircuitData():
 }
 
 void
-ZeroDimensionalCircuitData::showMe(Int flag)
+ZeroDimensionalCircuitData::showMe( const Int& flag )
 {
     M_Elements->showMe(flag);
     M_Nodes->showMe(flag);
@@ -734,21 +733,21 @@ using namespace std;
         stringStreamLine1 >> stringtmp;
         numberOfTerminalNodes = std::atoi(stringtmp.c_str());
         getline(infile,stringline2);
-        int nodeId = -1;
+        Int nodeId = -1;
       // ----------Read the second line---------------------------
         stringStreamLine2 << stringline2;
-        for (int i=0;i<numberOfTerminalNodes;i++){
+        for (Int i=0;i<numberOfTerminalNodes;i++){
             stringStreamLine2 >> stringtmp;
             nodeId = std::atoi(stringtmp.c_str());
             terminalNodes.push_back(nodeId);
         }
     //---------------------------------------------------------
-        for (int i=0;i<numberOfNodes;i++){
+        for (Int i=0;i<numberOfNodes;i++){
             nodesType.push_back(unknownNode);
             nodesConnectingSource.push_back(-1);
         }
       // ----------Read Elements-----------------------------------
-        for(int i=0;i<numberOfElements;i++)
+        for(Int i=0;i<numberOfElements;i++)
         {
             stringstream stringStreamLine3 (stringstream::in | stringstream::out);
             getline(infile,stringline3);
@@ -827,7 +826,7 @@ using namespace std;
         }
     }
     //create Nodes --------------------------------------------------------
-    for (int i=0;i<numberOfNodes;i++)
+    for (Int i=0;i<numberOfNodes;i++)
     {
         if (nodesType.at(i)==knownNode)
         {
@@ -986,7 +985,7 @@ OutPutFormat::OutPutFormat(
                 std::string  width,
                 std::string  precision,
                 std::string  whiteSpace,
-                int bufferSize){
+                Int bufferSize){
     M_width = width;
     M_precision = precision;
     M_whiteSpace = whiteSpace;
@@ -995,7 +994,7 @@ OutPutFormat::OutPutFormat(
     M_formatInteger = "% " + M_width + "d";
 }
 void
-OutPutFormat::writeDataFormat(const double& number,std::ofstream & stream, const EndLine& flag){
+OutPutFormat::writeDataFormat(const Real& number,std::ofstream & stream, const EndLine& flag){
     sprintf (M_buffer, M_formatDouble.data(), number);
     stream << M_buffer;
     switch (flag) {
@@ -1013,7 +1012,7 @@ OutPutFormat::writeDataFormat(const double& number,std::ofstream & stream, const
     }
 }
 void
-OutPutFormat::writeDataFormat(const int& number,std::ofstream & stream, const EndLine& flag){
+OutPutFormat::writeDataFormat(const Int& number,std::ofstream & stream, const EndLine& flag){
     sprintf (M_buffer, M_formatInteger.data(), number);
     stream << M_buffer;
     switch (flag) {
@@ -1039,13 +1038,13 @@ OutPutFormat::~OutPutFormat(){
 }
 
 void
-ZeroDimensionalCircuitData::updateCircuitDataFromY(const double& t, const Epetra_Vector* x,const Epetra_Vector* x_dot){
+ZeroDimensionalCircuitData::updateCircuitDataFromY(const Real& t, const Epetra_Vector* x,const Epetra_Vector* x_dot){
     const ptrVecZeroDimensionalNodeUnknownPtr_Type& unknownNodeList = M_Nodes->unknownNodeList();
 
     //update unknown Nodes from solution.
     for (iterZeroDimensionalNodeUnknown_Type theNode = unknownNodeList ->begin();
                     theNode != unknownNodeList->end(); theNode++) {
-        const int& variableIndex = (*theNode)->variableIndex();
+        const Int& variableIndex = (*theNode)->variableIndex();
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 8151 )<< (*theNode)->id()<<"   ---------\n";
         Debug( 8151 )<< variableIndex<<"   ---------\n";
@@ -1058,7 +1057,7 @@ ZeroDimensionalCircuitData::updateCircuitDataFromY(const double& t, const Epetra
     const ptrVecZeroDimensionalElementPassiveInductorPtr_Type& inductorList = M_Elements->inductorList();
     for (iterZeroDimensionalElementPassiveInductor_Type theInductor = inductorList ->begin();
                     theInductor != inductorList->end(); theInductor++) {
-        const int& variableIndex = (*theInductor)->variableIndex();
+        const Int& variableIndex = (*theInductor)->variableIndex();
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 8151 )<< (*theInductor)->id()<<"   ---------\n";
         Debug( 8151 )<< variableIndex<<"   ---------\n";
@@ -1088,7 +1087,8 @@ ZeroDimensionalCircuitData::updateCircuitDataFromY(const double& t, const Epetra
     }
 }
 void
-ZeroDimensionalCircuitData::deepUpdateFromY(const double& t, const Epetra_Vector& y,const Epetra_Vector& yp){
+ZeroDimensionalCircuitData::deepUpdateFromY(const Real& t, const Epetra_Vector& y,const Epetra_Vector& yp)
+{
   //First invoke the updateCircuitDataFromY method (light update)
     updateCircuitDataFromY(t,&y,&yp);
 #ifdef HAVE_LIFEV_DEBUG

@@ -32,7 +32,8 @@
  *  @date 21-11-2011
  *  @author Mahmoud Jafargholi
  *
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributors Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ZeroDimensionalRythmosSolverInterface_H
@@ -50,7 +51,7 @@ class RythmosSolverInterface : public EpetraExt::ModelEvaluator {
 public:
 
   // Constructor
-  RythmosSolverInterface(int numGlobalElements,
+  RythmosSolverInterface(Int numGlobalElements,
                          Teuchos::RCP<Epetra_Comm> &epetra_comm_ptr,
                          rythmosModelInterfacePtrRCP_Type theModel);
 
@@ -83,7 +84,7 @@ private:
   Teuchos::RCP<const Epetra_Map>      M_epetraMapPtr;
 
   // Global number of unknowns:
-  int                                 M_numElements;
+  Int                                 M_numElements;
 
   Teuchos::RCP<Epetra_CrsGraph>       M_Wgraph;
 

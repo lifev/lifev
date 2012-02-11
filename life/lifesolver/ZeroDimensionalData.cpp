@@ -32,7 +32,8 @@
  *  @date 16-11-2011
  *  @author Mahmoud Jafargholi
  *
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributors Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/ZeroDimensionalData.hpp>
@@ -146,11 +147,11 @@ ZeroDimensionalData::writeHeaders(){
         M_outPutFormat.writeDataFormat((*theElement)->id(),M_currentFileStream,M_outPutFormat.space);
     }
     M_outPutFormat.writeNewLine(M_currentFileStream);
-    M_outPutFormat.writeDataFormat((int) -999,M_balanceFileStream,M_outPutFormat.space);
+    M_outPutFormat.writeDataFormat((Int) -999,M_balanceFileStream,M_outPutFormat.space);
 
     //write header for voltage and current balance at each node (voltage file and balance file)
     ptrVecZeroDimensionalNodePtr_Type nodeList     = M_circuitData->Nodes() ->nodeList();
-    M_outPutFormat.writeDataFormat((int) -999, M_voltageFileStream,M_outPutFormat.space);
+    M_outPutFormat.writeDataFormat((Int) -999, M_voltageFileStream,M_outPutFormat.space);
     for (iterZeroDimensionalNode_Type theNode = nodeList->begin(); theNode != nodeList->end(); theNode++) {
         M_outPutFormat.writeDataFormat((*theNode)->id(),M_voltageFileStream,M_outPutFormat.space);
         M_outPutFormat.writeDataFormat((*theNode)->id(),M_balanceFileStream,M_outPutFormat.space);

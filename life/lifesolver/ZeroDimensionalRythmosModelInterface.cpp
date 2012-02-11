@@ -32,7 +32,8 @@
  *  @date 21-11-2011
  *  @author Mahmoud Jafargholi
  *
- *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributors Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <life/lifesolver/ZeroDimensionalRythmosModelInterface.hpp>
@@ -43,7 +44,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-RythmosModelInterface::RythmosModelInterface(int numGlobalElements,
+RythmosModelInterface::RythmosModelInterface(Int numGlobalElements,
                                              Epetra_Comm* comm,
                                              zeroDimensionalCircuitDataPtr_Type circuitData) :
   M_numGlobalElements(numGlobalElements),
@@ -65,14 +66,8 @@ RythmosModelInterface::RythmosModelInterface(int numGlobalElements,
   M_A.reset(new matrix_Type(*M_mapEpetraPtr,M_numGlobalElements)  );
   M_B.reset(new matrix_Type(*M_mapEpetraPtr,M_numGlobalElements)  );
 
-  int numCol[M_numGlobalElements] ;
-  int myindex[M_numGlobalElements];
-  for (int i = 0; i < M_numGlobalElements; i++) {
-    numCol[i] = M_numGlobalElements;
-    myindex[i] = i;
-  }
-  for (int i = 0; i < M_numGlobalElements; i++) {
-    for (int j = 0; j < M_numGlobalElements; j++) {
+  for (Int i = 0; i < M_numGlobalElements; i++) {
+    for (Int j = 0; j < M_numGlobalElements; j++) {
       M_A->addToCoefficient(i,j,1.0);
       M_B->addToCoefficient(i,j,1.0);
     }
@@ -139,7 +134,7 @@ bool RythmosModelInterface::computePreconditioner(__attribute__((unused))  const
   throw "Interface Error";
 }
 
-bool RythmosModelInterface::evaluate(__attribute__((unused))  double t, __attribute__((unused)) const Epetra_Vector* x,__attribute__((unused))  Epetra_Vector* f)
+bool RythmosModelInterface::evaluate(__attribute__((unused))  Real t, __attribute__((unused)) const Epetra_Vector* x,__attribute__((unused))  Epetra_Vector* f)
 {
   std::cout<<"Warning: I should not be here. 0D, Rythmos Inreface, ::evaluate"<<std::endl;
   return true;
@@ -190,7 +185,7 @@ Epetra_CrsGraph& RythmosModelInterface::getGraph()
   return *M_graph;
 }
 
-bool RythmosModelInterface::evaluateFImplicit(const double& t, const Epetra_Vector* x,const Epetra_Vector* x_dot, Epetra_Vector* f ){
+bool RythmosModelInterface::evaluateFImplicit(const Real& t, const Epetra_Vector* x,const Epetra_Vector* x_dot, Epetra_Vector* f ){
 
 //updateCircuitData from Y and Yp
 #ifdef HAVE_LIFEV_DEBUG
@@ -215,7 +210,7 @@ bool RythmosModelInterface::evaluateFImplicit(const double& t, const Epetra_Vect
 #ifdef HAVE_LIFEV_DEBUG
   M_B->matrixPtr()->Print(std::cout);
 #endif
-  for (int i = 0; i < M_numGlobalElements;i++){
+  for (Int i = 0; i < M_numGlobalElements;i++){
     (*f)[i] = (*M_fA)[i] +  (*M_fB)[i] + (*M_C)[i] ;
   }
 #ifdef HAVE_LIFEV_DEBUG
@@ -224,7 +219,7 @@ bool RythmosModelInterface::evaluateFImplicit(const double& t, const Epetra_Vect
   return true;
 }
 
-bool RythmosModelInterface::evaluateWImplicit(const double& t, const double& alpha,const double& beta,const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_CrsMatrix* W ){
+bool RythmosModelInterface::evaluateWImplicit(const Real& t, const Real& alpha,const Real& beta,const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_CrsMatrix* W ){
   //updateCircuitData from Y and Yp
 #ifdef HAVE_LIFEV_DEBUG
   x->Print(std::cout);
@@ -249,7 +244,7 @@ bool RythmosModelInterface::evaluateWImplicit(const double& t, const double& alp
 }
 
 void
-RythmosModelInterface::deepUpdate(const double &t,const vectorEpetra_Type& y , const vectorEpetra_Type& yp ){
+RythmosModelInterface::deepUpdate(const Real &t,const vectorEpetra_Type& y , const vectorEpetra_Type& yp ){
   M_circuitData->deepUpdateFromY(t,y,yp);
 }
 } // LifeV namespace
