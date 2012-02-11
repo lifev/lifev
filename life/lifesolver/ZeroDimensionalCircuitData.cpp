@@ -162,38 +162,21 @@ ZeroDimensionalElementPassiveResistor::buildABC( matrix_Type& /*A*/, matrix_Type
     for (Int i = 0; i < 2; i++) {
         const Int& theNodeCounter =  (i)%2;
         const Int& theOtherNodeCounter =  (i+1)%2;
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 8151 )<< theNodeCounter << "\t"<< theOtherNodeCounter << "\n";
-#endif
         const ZeroDimensionalNode& theNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theNodeCounter]));
         const ZeroDimensionalNode& theOtherNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theOtherNodeCounter]));
         if (theNodeTest.type() == unknownNode ){
             const ZeroDimensionalNodeUnknown& theNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theNodeCounter]));
             const Int& equationRow = theNode.equationRow();
             B.addToCoefficient(equationRow,theNode.variableIndex(), -M_parameter);
-#ifdef HAVE_LIFEV_DEBUG
-          Debug( 8151 )<< equationRow << "\t"<< theNode.variableIndex() << "\t"<< M_parameter << "\t""\n";
-#endif
             if (theOtherNodeTest.type() == unknownNode){
                 const ZeroDimensionalNodeUnknown& theOtherNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theOtherNodeCounter]));
                 B.addToCoefficient(equationRow, theOtherNode.variableIndex(), M_parameter);
-#ifdef HAVE_LIFEV_DEBUG
-            Debug( 8151 )<< equationRow << "\t"<< theOtherNode.variableIndex() << "\n";
-#endif
             } else {
                 const ZeroDimensionalNodeKnown & theOtherNode = *(Nodes->knownNodeMapAt(M_nodeIndex[theOtherNodeCounter]));
                 C[equationRow] += (M_parameter * theOtherNode.voltage());
 
             }
         }
-#ifdef HAVE_LIFEV_DEBUG
-        A.matrixPtr()->Print(cout);
-        cout<< "------------------\n";
-        B.matrixPtr()->Print(cout);
-        cout<< "------------------\n";
-        C.epetraVector().Print(cout);
-        cout<< "------------------\n";
-#endif
     }
 }
 
@@ -251,9 +234,6 @@ ZeroDimensionalElementPassiveDiode::buildABC( matrix_Type& A, matrix_Type& B, ve
     const ZeroDimensionalNode& theOtherNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theOtherNodeCounter]));
     Real deltaVoltage = theNodeTest.voltage() - theOtherNodeTest.voltage();
     calculateEffectiveResistance(deltaVoltage);
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8151 )<< "------------------\n"<<deltaVoltage<<"------------------\n"<<M_parameter;
-#endif
     ZeroDimensionalElementPassiveResistor::buildABC(A,B,C,Nodes);
 }
 
@@ -284,38 +264,20 @@ ZeroDimensionalElementPassiveCapacitor::buildABC( matrix_Type& A, matrix_Type& /
     for (Int i = 0; i < 2; i++) {
         const Int& theNodeCounter =  (i)%2;
         const Int& theOtherNodeCounter =  (i+1)%2;
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 8151 )<< theNodeCounter << "\t"<< theOtherNodeCounter << "\n";
-#endif
         const ZeroDimensionalNode& theNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theNodeCounter]));
         const ZeroDimensionalNode& theOtherNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theOtherNodeCounter]));
         if (theNodeTest.type() == unknownNode ){
             const ZeroDimensionalNodeUnknown& theNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theNodeCounter]));
             const Int& equationRow = theNode.equationRow();
             A.addToCoefficient(equationRow,theNode.variableIndex(), -M_parameter);
-#ifdef HAVE_LIFEV_DEBUG
-            Debug( 8151 )<< equationRow << "\t"<< theNode.variableIndex() << "\t"<< M_parameter << "\t""\n";
-#endif
             if (theOtherNodeTest.type() == unknownNode){
                 const ZeroDimensionalNodeUnknown& theOtherNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theOtherNodeCounter]));
                 A.addToCoefficient(equationRow, theOtherNode.variableIndex(), M_parameter);
-#ifdef HAVE_LIFEV_DEBUG
-            Debug( 8151 )<< equationRow << "\t"<< theOtherNode.variableIndex() << "\n";
-#endif
             } else {
                 const ZeroDimensionalNodeKnown & theOtherNode = *(Nodes->knownNodeMapAt(M_nodeIndex[theOtherNodeCounter]));
                 C[equationRow] += (M_parameter * theOtherNode.deltaVoltage());
             }
         }
-#ifdef HAVE_LIFEV_DEBUG
-        A.matrixPtr()->Print(cout);
-        cout<< "------------------\n";
-        B.matrixPtr()->Print(cout);
-        cout<< "------------------\n";
-        C.epetraVector().Print(cout);
-        cout<< "------------------\n";
-#endif
-
     }
 }
 // ===================================================
@@ -355,18 +317,7 @@ ZeroDimensionalElementPassiveInductor::buildABC( matrix_Type& A, matrix_Type& B,
             const ZeroDimensionalNodeUnknown& theNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theNodeCounter]));
             const Int& equationRow = theNode.equationRow();
             B.addToCoefficient(equationRow,M_variableIndex, direction(theNode.id()));
-#ifdef HAVE_LIFEV_DEBUG
-            Debug( 8151 )<< equationRow << "\t"<< M_variableIndex << "\t"<< direction(theNode.id()) << "\t""\n";
-#endif
         }
-#ifdef HAVE_LIFEV_DEBUG
-        A.matrixPtr()->Print(cout);
-        cout<< "------------------\n";
-        B.matrixPtr()->Print(cout);
-        cout<< "------------------\n";
-        C.epetraVector().Print(cout);
-        cout<< "------------------\n";
-#endif
     }
     //----------------------------write the Inductor Equations
     A.addToCoefficient(M_equationRow, M_variableIndex, 1.0);
@@ -374,47 +325,23 @@ ZeroDimensionalElementPassiveInductor::buildABC( matrix_Type& A, matrix_Type& B,
         Int i = 0;
         const Int& theNodeCounter =  (i)%2;
         const Int& theOtherNodeCounter =  (i+1)%2;
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 8151 )<< theNodeCounter << "\t"<< theOtherNodeCounter << "\n";
-#endif
         const ZeroDimensionalNode& theNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theNodeCounter]));
         const ZeroDimensionalNode& theOtherNodeTest = *(Nodes->nodeListAt(M_nodeIndex[theOtherNodeCounter]));
         if (theNodeTest.type() == unknownNode ){
             const ZeroDimensionalNodeUnknown& theNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theNodeCounter]));
             B.addToCoefficient(M_equationRow,theNode.variableIndex(), -M_parameter);
-#ifdef HAVE_LIFEV_DEBUG
-            Debug( 8151 )<< theNode.voltage() << "\t"<< theNode.variableIndex() << "\n";
-#endif
         }else{
             const ZeroDimensionalNodeKnown & theNode = *(Nodes->knownNodeMapAt(M_nodeIndex[theNodeCounter]));
             C[M_equationRow] += (-M_parameter * theNode.voltage() );
-#ifdef HAVE_LIFEV_DEBUG
-            Debug( 8151 )<< theNode.voltage() << "\n";
-#endif
         }
 
         if (theOtherNodeTest.type() == unknownNode ){
             const ZeroDimensionalNodeUnknown& theOtherNode = *(Nodes->unknownNodeMapAt(M_nodeIndex[theOtherNodeCounter]));
             B.addToCoefficient(M_equationRow,theOtherNode.variableIndex(), M_parameter);
-#ifdef HAVE_LIFEV_DEBUG
-            Debug( 8151 )<< theOtherNode.voltage() << "\t"<< theOtherNode.variableIndex() << "\n";
-#endif
         }else{
             const ZeroDimensionalNodeKnown& theOtherNode = *(Nodes->knownNodeMapAt(M_nodeIndex[theOtherNodeCounter]));
             C[M_equationRow] += (+M_parameter * theOtherNode.voltage() );
-#ifdef HAVE_LIFEV_DEBUG
-            Debug( 8151 )<< theOtherNode.voltage() <<  "\n";
-#endif
         }
-#ifdef HAVE_LIFEV_DEBUG
-        A.matrixPtr()->Print(cout);
-        cout<< "------------------\n";
-        B.matrixPtr()->Print(cout);
-        cout<< "------------------\n";
-        C.epetraVector().Print(cout);
-        cout<< "------------------\n";
-#endif
-
     }
 
 }
@@ -468,15 +395,9 @@ ZeroDimensionalElementVoltageSource::calculateCurrent(const ZeroDimensionalNodeS
         const ZeroDimensionalElement& theElement = *Elements.elementListAt(indexList.at(i));
         if (theElement.id()  != M_id){
             Real tmp = theElement.current() * theElement.direction(theNode.id());
-#ifdef HAVE_LIFEV_DEBUG
-           Debug( 8151 ) << "\n ZeroDimensionalElementVoltageSource::calculateCurrent"<< i <<"\t"<<tmp;
-#endif
            current += tmp;
         }
     }
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8151 ) << "\n current is" <<"\t"<<current;
-#endif
     M_current = current;
 }
 // ===================================================
@@ -506,16 +427,6 @@ ZeroDimensionalElementCurrentSource::buildABC( matrix_Type& /*A*/, matrix_Type& 
         const ZeroDimensionalNodeUnknown& theNode = *(Nodes->unknownNodeMapAt(M_nodeIndex));
         const Int& equationRow = theNode.equationRow();
         C[equationRow] += (-M_current) ;
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 8151 )<< "\n"<<equationRow << "\t"<< M_current <<"\n";
-        Debug( 8151 )<< "------------------\n"<<M_nodeIndex;
-        A.matrixPtr()->Print(cout);
-        Debug( 8151 )<< "------------------\n";
-        B.matrixPtr()->Print(cout);
-        Debug( 8151 )<< "------------------\n";
-        C.epetraVector().Print(cout);
-        Debug( 8151 )<< "------------------\n";
-#endif
     } else {
         std::cerr<<"Error at ZeroDimensionalElementCurrentSource::buildABC, source connected to voltage";
         std::exit(-1);
@@ -580,9 +491,6 @@ ZeroDimensionalNode::calculateCurrentBalance(const ZeroDimensionalElementS& Elem
         const ZeroDimensionalElement& theElement = *Elements.elementListAt(M_elementListIndex.at(i));
         currentBalance += theElement.current() * theElement.direction(M_id);
     }
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8151 ) << "\n ZeroDimensionalNode::calculateCurrentBalance"<< currentBalance ;
-#endif
     M_currentBalance = currentBalance;
 }
 
@@ -1045,10 +953,6 @@ ZeroDimensionalCircuitData::updateCircuitDataFromY(const Real& t, const Epetra_V
     for (iterZeroDimensionalNodeUnknown_Type theNode = unknownNodeList ->begin();
                     theNode != unknownNodeList->end(); theNode++) {
         const Int& variableIndex = (*theNode)->variableIndex();
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 8151 )<< (*theNode)->id()<<"   ---------\n";
-        Debug( 8151 )<< variableIndex<<"   ---------\n";
-#endif
         (*theNode)->setvoltage((*x)[variableIndex]);
         (*theNode)->setdeltaVoltage((*x_dot)[variableIndex]);
     }
@@ -1058,10 +962,6 @@ ZeroDimensionalCircuitData::updateCircuitDataFromY(const Real& t, const Epetra_V
     for (iterZeroDimensionalElementPassiveInductor_Type theInductor = inductorList ->begin();
                     theInductor != inductorList->end(); theInductor++) {
         const Int& variableIndex = (*theInductor)->variableIndex();
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 8151 )<< (*theInductor)->id()<<"   ---------\n";
-        Debug( 8151 )<< variableIndex<<"   ---------\n";
-#endif
         (*theInductor)->setcurrent((*x)[variableIndex]);
         (*theInductor)->setdeltaCurrent((*x_dot)[variableIndex]);
     }
@@ -1070,19 +970,12 @@ ZeroDimensionalCircuitData::updateCircuitDataFromY(const Real& t, const Epetra_V
     const ptrVecZeroDimensionalNodeKnownPtr_Type& knownNodeList = M_Nodes->knownNodeList();
     for (iterZeroDimensionalNodeKnown_Type theNode = knownNodeList ->begin();
                     theNode != knownNodeList->end(); theNode++) {
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 8151 )<< (*theNode)->id()<<"   ---------\n";
-
-#endif
     (*theNode)->setvoltageByTime(t);
         (*theNode)->setdeltaVoltageByTime(t);
     }
     const ptrVecZeroDimensionalElementCurrentSourcePtr_Type& currentElementList = M_Elements->currentSourceList();
     for (iterZeroDimensionalElementCurrentSource_Type theElement = currentElementList ->begin();
                     theElement != currentElementList->end(); theElement++) {
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 8151 )<< (*theElement)->id()<<"   ---------\n";
-#endif
         (*theElement)->setcurrentByTime(t);
     }
 }
@@ -1091,10 +984,6 @@ ZeroDimensionalCircuitData::deepUpdateFromY(const Real& t, const Epetra_Vector& 
 {
   //First invoke the updateCircuitDataFromY method (light update)
     updateCircuitDataFromY(t,&y,&yp);
-#ifdef HAVE_LIFEV_DEBUG
-    y.Print(cout);
-    yp.Print(cout);
-#endif
 
     //deep update (mainly currents), iterate over all elements
     const ptrVecZeroDimensionalElementPtr_Type& elementList = M_Elements->elementList();

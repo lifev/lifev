@@ -187,10 +187,6 @@ ZeroDimensionalData::saveSolution(){
 void
 ZeroDimensionalData::initializeSolution()
 {
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8151 ) << "MultiscaleModel0D::initializeSolution() \n";
-#endif
     ptrVecZeroDimensionalElementPtr_Type elementList   = M_circuitData->Elements() ->elementList();
     for (iterZeroDimensionalElement_Type theElement = elementList->begin(); theElement != elementList->end(); theElement++) {
         (*theElement)->setcurrent(0.0);
