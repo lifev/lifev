@@ -48,6 +48,7 @@
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
+#include <lifemc/lifesolver/MultiscaleModel0D.hpp>
 
 namespace LifeV
 {

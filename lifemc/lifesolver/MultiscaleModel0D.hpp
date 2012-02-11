@@ -32,20 +32,20 @@
  *  @date 01-10-2011
  *  @author Mahmoud Jafargholi <mahmoud.jafargholi@epfl.ch>
  *
- *
- *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @contributors Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef MultiscaleModel0D_H
 #define MultiscaleModel0D_H 1
 
+// LifeV includes
+#include <life/lifefem/BCInterface0D.hpp>
+#include <life/lifesolver/ZeroDimensionalData.hpp>
+#include <life/lifesolver/ZeroDimensionalSolver.hpp>
 
 // Mathcard includes
-
-#include <lifemc/lifesolver/ZeroDimensionalData.hpp>
-#include <lifemc/lifesolver/ZeroDimensionalSolver.hpp>
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
-#include <lifemc/lifesolver/BCInterface0D.hpp>
 
 // LIFEV
 namespace LifeV
@@ -53,14 +53,15 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleModel0D - Multiscale model for 0D  simulations
+//! MultiscaleModel0D - Multiscale model for 0D simulations
 /*!
  *  @author Mahmoud Jafargholi
  *
+ *  The MultiscaleModel0D class is an implementation of the multiscaleModel_Type
+ *  for 0D problems.
  */
 
 class MultiscaleModel0D: public virtual multiscaleModel_Type
-
 {
 public:
 
@@ -68,25 +69,26 @@ public:
     //@{
 
     typedef ZeroDimensionalBCHandler                                        bc_Type;
-
     typedef boost::shared_ptr< bc_Type >                                    bcPtr_Type;
-
     typedef BCInterface0D< bc_Type, MultiscaleData >                        bcInterface_Type;
-
     typedef boost::shared_ptr< bcInterface_Type >                           bcInterfacePtr_Type;
 
     typedef ZeroDimensionalData                                             data_Type;
-
+    typedef boost::shared_ptr< data_Type >                                  dataPtr_Type;
     typedef ZeroDimensionalSolver                                           solver_Type;
+    typedef boost::shared_ptr< solver_Type >                                solverPtr_Type;
+
     //@}
-        //! @name Constructors & Destructor
+
+
+    //! @name Constructors & Destructor
     //@{
 
     //! Constructor
     explicit MultiscaleModel0D();
 
     //! Destructor
-    virtual ~MultiscaleModel0D();
+    virtual ~MultiscaleModel0D() {}
 
     //@}
 
@@ -113,7 +115,7 @@ public:
     void solveModel();
 
     //! Update the solution.
-    void updateSolution() {};
+    void updateSolution();
 
     //! Save the solution
     void saveSolution();
@@ -121,31 +123,67 @@ public:
     //! Display some information about the model.
     void showMe();
 
-    //! show some more deteil data
-    void showMeVariables();
-
-    //! this method is empty
+    //! Return a specific scalar quantity to be used for a comparison with a reference value.
+    /*!
+     * This method is meant to be used for night checks.
+     * @return reference quantity.
+     */
     Real checkSolution() const;
 
-    //! get model data container
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the BCInterface container of the boundary conditions of the model
+    /*!
+     * @return BCInterface container
+     */
+    bcInterface_Type& bcInterface() { return *M_bc; }
+
+    //! Get the data container of the model
+    /*!
+     * @return data container
+     */
     data_Type& data() const { return *M_data; }
 
-    //! get 0D solver
-    solver_Type& solver() const {return *M_solver;}
+    //! Get the solver of the model
+    /*!
+     * @return solver
+     */
+    solver_Type& solver() const { return *M_solver; }
+
+    //@}
 
 private:
 
-    boost::shared_ptr< data_Type >         M_data;
+    //! @name Private Methods
+    //@{
 
-    boost::shared_ptr< solver_Type >       M_solver;
+    //! Setup the global data of the model.
+    /*!
+     * In particular, it replaces the default local values with the ones in the global container.
+     * If a value is already specified in the data file, do not perform the replacement.
+     *
+     * @param fileName File name of the specific model.
+     */
+    void setupGlobalData( const std::string& fileName );
 
-    Real                                   M_Tn;
+    //@}
 
-    Real                                   M_TnPlus;
 
+    dataPtr_Type                           M_data;
+    solverPtr_Type                         M_solver;
     bcInterfacePtr_Type                    M_bc;
-
 };
+
+//! Factory create function
+inline multiscaleModel_Type* createMultiscaleModelZeroDimensional()
+{
+    return new MultiscaleModel0D();
+}
+
 } // Namespace Multiscale
 } // Namespace LifeV
 

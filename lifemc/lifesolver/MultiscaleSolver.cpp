@@ -70,6 +70,7 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleModelFactory_Type::instance().registerProduct   (  Multiscale,          &createMultiscaleModelMultiscale );
     multiscaleModelFactory_Type::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
     multiscaleModelFactory_Type::instance().registerProduct   (  Windkessel0D,        &createMultiscaleModelWindkessel0D );
+    multiscaleModelFactory_Type::instance().registerProduct   (  ZeroDimensional,     &createMultiscaleModelZeroDimensional );
 }
 
 // ===================================================

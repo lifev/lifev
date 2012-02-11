@@ -32,7 +32,7 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @author Mahmoud Jafargholi <mahmoud.jafargholi@epfl.ch>
  *
- *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
