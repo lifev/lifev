@@ -29,4 +29,7 @@ list = 'FlowRate_PoiseuilleDynamic'
     quantity            = Q
     line                = first
 
+    # Additional parameters for 0D BC
+    type0D              = Current
+
     [../]

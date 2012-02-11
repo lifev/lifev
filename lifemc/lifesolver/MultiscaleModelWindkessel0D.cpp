@@ -119,7 +119,7 @@ MultiscaleModelWindkessel0D::setupModel()
 #endif
 
     // Safety check
-    if ( M_bc->handler()->bc( 1 ).bcType() != OneDFSI::S )
+    if ( M_bc->handler()->bc( 1 ).bcType() != Voltage )
         std::cout << "!!! Error: the Windkessel model support only stress boundary conditions on the right at the present time !!!" << std::endl;
 }
 
@@ -163,21 +163,14 @@ MultiscaleModelWindkessel0D::solveModel()
 
     switch ( M_bc->handler()->bc( 0 ).bcType() )
     {
-    case OneDFSI::Q:
+    case Current:
 
         M_flowRateLeft = M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() );
         M_pressureLeft = solveForPressure();
 
         break;
 
-    case OneDFSI::P:
-
-        M_pressureLeft = M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() );
-        M_flowRateLeft = solveForFlowRate();
-
-        break;
-
-    case OneDFSI::S:
+    case Voltage:
 
         M_pressureLeft = -M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() );
         M_flowRateLeft = solveForFlowRate();
@@ -243,13 +236,13 @@ MultiscaleModelWindkessel0D::checkSolution() const
 void
 MultiscaleModelWindkessel0D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
 {
-    M_bc->handler()->setBC( flag, OneDFSI::Q, boost::bind( function, _1, _1, _1, _1, _1 ) );
+    M_bc->handler()->setBC( flag, Current, boost::bind( function, _1, _1, _1, _1, _1 ) );
 }
 
 void
 MultiscaleModelWindkessel0D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
 {
-    M_bc->handler()->setBC( flag, OneDFSI::S, boost::bind( function, _1, _1, _1, _1, _1 ) );
+    M_bc->handler()->setBC( flag, Voltage, boost::bind( function, _1, _1, _1, _1, _1 ) );
 }
 
 Real
@@ -340,20 +333,13 @@ MultiscaleModelWindkessel0D::initializeSolution()
 
         switch ( M_bc->handler()->bc( 0 ).bcType() )
         {
-        case OneDFSI::Q:
+        case Current:
 
             M_flowRateLeft = M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() );
 
             break;
 
-        case OneDFSI::P:
-
-//            if ( std::abs( M_globalData->solidExternalPressure() - M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
-//                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
-
-            break;
-
-        case OneDFSI::S:
+        case Voltage:
 
 //            if ( std::abs( M_globalData->solidExternalPressure() + M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
 //                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
@@ -445,21 +431,14 @@ MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
     displayModelStatus( "Solve linear" );
     switch ( M_bc->handler()->bc( 0 ).bcType() )
     {
-    case OneDFSI::Q: // dP/dQ
+    case Current: // dP/dQ
 
         M_tangentFlowRateLeft = 1.;
         M_tangentPressureLeft = tangentSolveForPressure();
 
         break;
 
-    case OneDFSI::P: // dQ/dP
-
-        M_tangentPressureLeft = 1.;
-        M_tangentFlowRateLeft = tangentSolveForFlowRate();
-
-        break;
-
-    case OneDFSI::S: // dQ/dS
+    case Voltage: // dQ/dS
 
         M_tangentPressureLeft = 1.;
         M_tangentFlowRateLeft = -tangentSolveForFlowRate();

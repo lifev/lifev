@@ -29,4 +29,7 @@ list = 'Stress_Atrium'
     quantity            = S
     line                = first
 
+    # Additional parameters for 0D BC
+    type0D              = Voltage
+
     [../]

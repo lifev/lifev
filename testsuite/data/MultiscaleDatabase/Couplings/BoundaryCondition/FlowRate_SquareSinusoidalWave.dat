@@ -28,4 +28,7 @@ list = 'FlowRate_SquareSinusoidalWave'  # Sinusoidal Square Flux Wave
     quantity            = Q
     line                = first
 
+    # Additional parameters for 0D BC
+    type0D              = Current
+
     [../]
