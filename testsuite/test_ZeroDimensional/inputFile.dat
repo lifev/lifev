@@ -1,35 +1,35 @@
 [Files]
-	[./InputFiles]
-		CircuitFile       	 = ./circuitFile.dat 
+    [./InputFiles]
+    CircuitFile       = ./circuitFile.dat
 
-	[../OutputFiles]	   
-		Folder			 = ./output
-		VoltageFile		 = voltage.txt
-		CurrentFile		 = current.txt
-		BalanceCurrentinNode	 = balance.txt
+    [../OutputFiles]
+        Folder                   = ./output
+        VoltageFile              = voltage.txt
+        CurrentFile              = current.txt
+        BalanceCurrentinNode     = balance.txt
 
         [../boundary_conditions]
         list = 'VoltageSource_0 VoltageSource_1 VoltageSource_0_1000 VoltageSource_1_1000'
-    
+
             [./VoltageSource_0]
-            function            = 'sin(10*t)*(1-exp(-t))' 
-            quantity            = S
+            function            = 'sin(10*t)*(1-exp(-t))'
+            type0D              = Voltage
             flag                = 0
 
             [../VoltageSource_1]
-            function            = '0' 
-            quantity            = S
+            function            = '0'
+            type0D              = Voltage
             flag                = 3
 
             [../VoltageSource_0_1000]
-            function            = '0' 
-            quantity            = S
+            function            = '0'
+            type0D              = Voltage
             flag                = 1000
 
             [../VoltageSource_1_1000]
-            function            = '0' 
-            quantity            = S
+            function            = '0'
+            type0D              = Voltage
             flag                = 1003
-    
+
             [../]
-	[../]
+    [../]

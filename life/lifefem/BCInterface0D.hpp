@@ -40,9 +40,6 @@
 // BCInterface includes
 #include <life/lifefem/BCInterface.hpp>
 
-// ZeroDimensional includes
-#include <life/lifefem/ZeroDimensionalBCHandler.hpp>
-
 namespace LifeV
 {
 
@@ -64,16 +61,16 @@ namespace LifeV
  *  <CODE>
  *  [InFlow]                             <BR>
  *  flag                = 0              <BR>
- *  quantity            = Q              <BR>
+ *  type0D              = Current        <BR>
  *  function            = 'sin(2*pi*t)'  <BR>
  *
  *  [OutFlow]                            <BR>
  *  flag                = 1              <BR>
- *  quantity            = S              <BR>
+ *  type0D              = Voltage        <BR>
  *  function            = 0              <BR>
  *  </CODE>
  *
- *  where \c flag, and \c quantity are the classical parameters for a 0D boundary condition.
+ *  where \c flag, and \c type0D are the classical parameters for a 0D boundary condition.
  *  The string \c function represents the base module and can be replaced by other derived/alternative modules.
  *  The following functions are available (see the related classes for more information):
  *
@@ -97,7 +94,6 @@ namespace LifeV
  *
  *  <ol>
  *      <li> remove the legacy in LifeV and Mathcard marked with the MULTISCALE_IS_IN_LIFEV macro;
- *      <li> use (and develop) BCInterfaceData0D in place of BCInterfaceData1D.
  *  </ol>
  */
 template< class BcHandler, class PhysicalSolverType >
@@ -124,7 +120,7 @@ public:
     typedef typename bcInterface_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
 
-    typedef BCInterfaceData1D                                           data_Type;
+    typedef BCInterfaceData0D                                           data_Type;
 
     //@}
 
@@ -202,7 +198,7 @@ private:
         if ( !this->M_handler.get() )
             this->createHandler();
 
-        this->M_handler->setBC( M_data.flag(), M_data.quantity(), boost::bind( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
+        this->M_handler->setBC( M_data.flag(), M_data.type(), boost::bind( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
     }
 
     // Data

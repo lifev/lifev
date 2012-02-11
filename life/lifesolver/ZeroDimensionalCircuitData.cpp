@@ -814,11 +814,11 @@ using namespace std;
                     theNodeId != terminalNodes.end(); theNodeId++ ){
       // create Source Elements -----------------------------------------------
       switch (bc->bc(*theNodeId).bcType()) {
-          case OneDFSI::S://create voltage source
+          case Voltage://create voltage source
               nodesConnectingSource.at(*theNodeId) = createElementVoltageSource(*theNodeId);
               nodesType.at(*theNodeId)=knownNode;
               break;
-          case OneDFSI::Q:// current source
+          case Current:// current source
               createElementCurrentSource(*theNodeId);
               break;
           default:

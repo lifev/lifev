@@ -44,9 +44,6 @@ namespace LifeV
 // ===================================================
 BCInterfaceData1D::BCInterfaceData1D() :
         BCInterfaceData         (),
-#ifndef MULTISCALE_IS_IN_LIFEV
-        M_flag                  (),
-#endif
         M_side                  (),
         M_line                  (),
         M_quantity              (),
@@ -75,9 +72,6 @@ BCInterfaceData1D::BCInterfaceData1D() :
 
 BCInterfaceData1D::BCInterfaceData1D( const BCInterfaceData1D& data ) :
         BCInterfaceData         ( data ),
-#ifndef MULTISCALE_IS_IN_LIFEV
-        M_flag                  ( data.M_flag ),
-#endif
         M_side                  ( data.M_side ),
         M_line                  ( data.M_line ),
         M_quantity              ( data.M_quantity ),
@@ -98,9 +92,6 @@ BCInterfaceData1D::operator=( const BCInterfaceData1D& data )
     if ( this != &data )
     {
         BCInterfaceData::operator=( data );
-#ifndef MULTISCALE_IS_IN_LIFEV
-        M_flag                  = data.M_flag;
-#endif
         M_side                  = data.M_side;
         M_line                  = data.M_line;
         M_quantity              = data.M_quantity;
@@ -126,10 +117,6 @@ BCInterfaceData1D::readBC( const std::string& fileName, const std::string& dataS
     // Read 3D data
     GetPot dataFile( fileName );
 
-#ifndef MULTISCALE_IS_IN_LIFEV
-    readFlag( dataFile, ( dataSection + name + "/flag" ).c_str() );
-#endif
-
     readSide( dataFile, ( dataSection + name + "/side" ).c_str() );
     readQuantity( dataFile, ( dataSection + name + "/quantity" ).c_str() );
     readLine( dataFile, ( dataSection + name + "/line" ).c_str() );
@@ -144,9 +131,6 @@ BCInterfaceData1D::showMe( std::ostream& output ) const
     dataContainer_Type::showMe( output );
 
     // Show 1D data
-#ifndef MULTISCALE_IS_IN_LIFEV
-    output << "Flag              = " << static_cast< Real > ( M_flag ) << std::endl;
-#endif
     output << "Side              = " << M_side << std::endl;
     output << "Line              = " << M_line << std::endl;
     output << "Quantity          = " << M_quantity << std::endl;
