@@ -1,26 +1,29 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University   
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
 #           Date: 24-09-2009
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### TESTSUITE: MULTISCALE (1D) ####################################################################
+### TESTSUITE: ZeroDimensional ####################################################################
 ###################################################################################################
 
-AT_SETUP([test_Multiscale (1D)])
-AT_KEYWORDS([test_MS 1D])
+AT_SETUP([test_ZeroDimensional])
+AT_KEYWORDS([test_ZeroDimensional 0D])
 AT_DATA([data],[[
 
 ]])
 
-AT_CHECK([ln -sf $top_srcdir/testsuite/data/mesh/inria Mesh &&
-          ln -sf $top_srcdir/testsuite/data/physicalFunctions physicalFunctions &&
-		  ln -sf $top_srcdir/testsuite/data/MultiscaleDatabase MultiscaleDatabase &&
-		  mpirun -n 4 $abs_top_builddir/testsuite/test_Multiscale/test_MS -s 1 -f MultiscaleDatabase/Test_1D.dat -c 88.582269590507565],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_srcdir/testsuite/test_ZeroDimensional/RythmosAztecOOParams.xml RythmosAztecOOParams.xml &&
+          ln -sf $top_srcdir/testsuite/test_ZeroDimensional/RythmosAztecOOParamsLowsf.xml RythmosAztecOOParamsLowsf.xml &&
+          ln -sf $top_srcdir/testsuite/test_ZeroDimensional/RythmosBelosParams.xml RythmosBelosParams.xml &&
+          ln -sf $top_srcdir/testsuite/test_ZeroDimensional/data.dat data.dat &&
+          ln -sf $top_srcdir/testsuite/test_ZeroDimensional/circuitFile.dat circuitFile.dat &&
+          ln -sf $top_srcdir/testsuite/test_ZeroDimensional/inputFile.dat inputFile.dat &&
+          mpirun -n 1 $abs_top_builddir/testsuite/test_ZeroDimensional/test_ZeroDimensional -c],[0],[ignore],[ignore])
 AT_CLEANUP
 

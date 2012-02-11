@@ -79,9 +79,9 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-// LIFEV - MATHCARD
-#include <lifemc/lifesolver/ZeroDimensionalRythmosSolverInterface.hpp>
-#include <lifemc/lifesolver/ZeroDimensionalData.hpp>
+// LIFEV includes
+#include <life/lifesolver/ZeroDimensionalRythmosSolverInterface.hpp>
+#include <life/lifesolver/ZeroDimensionalData.hpp>
 
 //! Rhytmos methods
 enum EMethod { METHOD_FE, METHOD_BE, METHOD_ERK, METHOD_BDF, METHOD_IRK };

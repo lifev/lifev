@@ -35,7 +35,7 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/ZeroDimensionalRythmosModelInterface.hpp>
+#include <life/lifesolver/ZeroDimensionalRythmosModelInterface.hpp>
 
 namespace LifeV
 {
@@ -47,7 +47,7 @@ RythmosModelInterface::RythmosModelInterface(int numGlobalElements,
                                              Epetra_Comm* comm,
                                              zeroDimensionalCircuitDataPtr_Type circuitData) :
   M_numGlobalElements(numGlobalElements),
-  M_numMyElements(0), 
+  M_numMyElements(0),
   M_myPID(comm->MyPID()),
   M_numProc(comm->NumProc()),
 

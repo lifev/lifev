@@ -38,8 +38,7 @@
 #ifndef ZeroDimensionalRythmosSolverInterface_H
 #define ZeroDimensionalRythmosSolverInterface_H 1
 
-// LIFEV - MATHCARD
-#include <lifemc/lifesolver/ZeroDimensionalRythmosModelInterface.hpp>
+#include <life/lifesolver/ZeroDimensionalRythmosModelInterface.hpp>
 
 namespace LifeV
 {

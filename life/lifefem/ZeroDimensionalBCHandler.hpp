@@ -37,8 +37,7 @@
 #ifndef ZeroDimensionalBCHandler_H
 #define ZeroDimensionalBCHandler_H 1
 
-// Mathcard includes
-#include <lifemc/lifefem/ZeroDimensionalBC.hpp>
+#include <life/lifefem/ZeroDimensionalBC.hpp>
 
 namespace LifeV
 {

@@ -57,8 +57,8 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-// LIFEV - MATHCARD
-#include <lifemc/lifesolver/ZeroDimensionalCircuitData.hpp>
+// LIFEV
+#include <life/lifesolver/ZeroDimensionalCircuitData.hpp>
 
 namespace NOX {
   namespace Parameter {
@@ -70,7 +70,7 @@ namespace LifeV
   //! Rhytmos model interface.
   /*!
    * Rhytmos solver interface will communicate with this class.
-   * this class have access to circuit data. The main task of this class is to 
+   * this class have access to circuit data. The main task of this class is to
    * provide the residual and jacobian at every step to Rhythmos solver interface.
    */
 class RythmosModelInterface : public NOX::Epetra::Interface::Required,
@@ -103,14 +103,14 @@ public:
   //! get solution vector
   Epetra_Vector& getSolutionY();
 
-  //! get derivative of solution vector respect to time 
+  //! get derivative of solution vector respect to time
   Epetra_Vector& getSolutionYp();
 
   Epetra_Map& getMap();
 
   Epetra_CrsGraph& getGraph();
 
-  //! this method empty. 
+  //! this method empty.
   virtual bool evaluate(double t, const Epetra_Vector* x, Epetra_Vector* f );
 
   //! compute Implicit residual.
@@ -120,7 +120,7 @@ public:
   virtual bool evaluateWImplicit(const double& t, const double& alpha,const double& beta,const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_CrsMatrix* W );
 
   virtual bool initializeSolnY();
- 
+
   bool initializeSolnY(const vectorEpetra_Type& y);
 
   virtual bool initializeSolnYp();
@@ -128,7 +128,7 @@ public:
   bool initializeSolnYp(const vectorEpetra_Type& yp);
 
 
-  //! hafter complete Rythmos step, this method will update circuit data.  
+  //! hafter complete Rythmos step, this method will update circuit data.
   void deepUpdate(const double &t1,const vectorEpetra_Type& y , const vectorEpetra_Type& yp );
 
   int numGlobalElements(){return M_numGlobalElements;}

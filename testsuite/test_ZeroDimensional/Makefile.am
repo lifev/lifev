@@ -22,12 +22,12 @@ test_ZeroDimensional_SOURCES = main.cpp
 EXTRA_DIST = testsuite.at
 
 link:
-	test -a RythmosAztecOOParams.xml || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/RythmosAztecOOParams.xml RythmosAztecOOParams.xml
+	test -a RythmosAztecOOParams.xml      || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/RythmosAztecOOParams.xml RythmosAztecOOParams.xml
 	test -a RythmosAztecOOParamsLowsf.xml || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/RythmosAztecOOParamsLowsf.xml RythmosAztecOOParamsLowsf.xml
-	test -a RythmosBelosParams.xml || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/RythmosBelosParams.xml RythmosBelosParams.xml
-	test -a data.dat || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/data.dat data.dat
-	test -a circuitFile.dat || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/circuitFile.dat circuitFile.dat
-	test -a inputFile.dat || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/inputFile.dat inputFile.dat
+	test -a RythmosBelosParams.xml        || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/RythmosBelosParams.xml RythmosBelosParams.xml
+	test -a data.dat                      || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/data.dat data.dat
+	test -a circuitFile.dat               || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/circuitFile.dat circuitFile.dat
+	test -a inputFile.dat                 || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/inputFile.dat inputFile.dat
 
 recheck: clean_PROGRAMS check
 

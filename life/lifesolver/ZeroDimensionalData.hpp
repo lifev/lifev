@@ -19,7 +19,7 @@
 
     You should have received a copy of the GNU Lesser General Public License
     along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
-    
+
 *******************************************************************************
 */
 //@HEADER
@@ -39,7 +39,7 @@
 #define ZeroDimensionalData_H
 
 // LIFEV
-#include <lifemc/lifesolver/ZeroDimensionalCircuitData.hpp>
+#include <life/lifesolver/ZeroDimensionalCircuitData.hpp>
 
 namespace LifeV
 {
@@ -60,7 +60,7 @@ public:
     virtual ~ZeroDimensionalData();
 
     //! setup model
-    void setup( const GetPot& dataFile, bcInterfacePtr_Type bc, const std::string& section = "0D_Model" );
+    void setup( const GetPot& dataFile, bcPtr_Type bc, const std::string& section = "0D_Model" );
 
     //! show some information
     void showMe( ) const;
@@ -74,14 +74,14 @@ public:
     //! initialize Solution
     void initializeSolution() ;
 
-    //! save solution 
+    //! save solution
     void saveSolution() ;
 
     //! update source elements
     void updateBC();
 
     timePtr_Type dataTime() const { return M_time; }
-    
+
     //! get circuit data container
     zeroDimensionalCircuitDataPtr_Type circuitData() const {return M_circuitData;}
 
@@ -103,7 +103,7 @@ public:
         std::string        extraLSParamsFile;
         std::string        linearSolverParamsFile;
     };
-    
+
     typedef struct SolverData       solverData_Type;
 
     solverData_Type solverData() const {return M_solverData;}

@@ -40,7 +40,7 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/ZeroDimensionalCircuitData.hpp>
+#include <life/lifesolver/ZeroDimensionalCircuitData.hpp>
 
 namespace LifeV
 {
@@ -693,7 +693,7 @@ ZeroDimensionalCircuitData::showMe(Int flag)
 // Methods
 // ===================================================
 void
-ZeroDimensionalCircuitData::buildCircuit(const  char *fileName, bcInterfacePtr_Type bc)
+ZeroDimensionalCircuitData::buildCircuit(const  char *fileName, bcPtr_Type bc)
 {
 using namespace std;
     ifstream infile;
@@ -814,7 +814,7 @@ using namespace std;
     for(iterVecInt_Type theNodeId = terminalNodes.begin();
                     theNodeId != terminalNodes.end(); theNodeId++ ){
       // create Source Elements -----------------------------------------------
-      switch (bc->handler()->bc(*theNodeId).bcType()) {
+      switch (bc->bc(*theNodeId).bcType()) {
           case OneDFSI::S://create voltage source
               nodesConnectingSource.at(*theNodeId) = createElementVoltageSource(*theNodeId);
               nodesType.at(*theNodeId)=knownNode;
@@ -968,7 +968,7 @@ ZeroDimensionalCircuitData::createKnownNode(const Int & id)
     M_Nodes->setknownNodeMap(theNode->id() , theNode);
 }
 void
-ZeroDimensionalCircuitData::fixBC(bcInterfacePtr_Type bc){
+ZeroDimensionalCircuitData::fixBC(bcPtr_Type bc){
     M_bc = bc;
     //set BC hander in source elements
 

@@ -35,7 +35,7 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/ZeroDimensionalData.hpp>
+#include <life/lifesolver/ZeroDimensionalData.hpp>
 
 namespace LifeV
 {
@@ -60,7 +60,7 @@ ZeroDimensionalData::~ZeroDimensionalData()
 // Methods
 // ===================================================
 void
-ZeroDimensionalData::setup( const GetPot& dataFile, bcInterfacePtr_Type bc, const std::string   & section )
+ZeroDimensionalData::setup( const GetPot& dataFile, bcPtr_Type bc, const std::string   & section )
 {
     if ( !M_time.get() )
         M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
@@ -214,7 +214,7 @@ ZeroDimensionalData::showMeVariables()
                     theUnknownNode != Nodes->unknownNodeList()->end(); theUnknownNode++) {
         (*theUnknownNode)->showMe(1);
     }
-   
+
      for (iterZeroDimensionalElementPassiveInductor_Type theInductor = Elements->inductorList() ->begin();
                     theInductor != Elements->inductorList() ->end(); theInductor++) {
             (*theInductor)->showMe(1);
@@ -226,12 +226,12 @@ void
 ZeroDimensionalData::updateBC(){
     Real time = M_time->time();
     ptrVecZeroDimensionalElementCurrentSourcePtr_Type currentElementList   = M_circuitData->Elements()-> currentSourceList();
-    
+
     for (iterZeroDimensionalElementCurrentSource_Type theElement = currentElementList->begin(); theElement != currentElementList->end(); theElement++) {
         (*theElement)->setcurrentByTime(time);
         std::cout<< (*theElement)->current() << std::endl;
     }
-    
+
     ptrVecZeroDimensionalElementVoltageSourcePtr_Type voltageElementList   = M_circuitData->Elements()-> voltageSourceList();
     for (iterZeroDimensionalElementVoltageSourcePtr_Type theElement = voltageElementList->begin(); theElement != voltageElementList->end(); theElement++) {
         (*theElement)->setvoltageByTime(time);

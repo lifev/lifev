@@ -37,9 +37,11 @@
 #ifndef BCInterface0D_H
 #define BCInterface0D_H 1
 
+// BCInterface includes
 #include <life/lifefem/BCInterface.hpp>
 
-#include <lifemc/lifefem/ZeroDimensionalBCHandler.hpp>
+// ZeroDimensional includes
+#include <life/lifefem/ZeroDimensionalBCHandler.hpp>
 
 namespace LifeV
 {

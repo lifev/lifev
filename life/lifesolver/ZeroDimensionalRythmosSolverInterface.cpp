@@ -35,7 +35,7 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/ZeroDimensionalRythmosSolverInterface.hpp>
+#include <life/lifesolver/ZeroDimensionalRythmosSolverInterface.hpp>
 
 namespace LifeV
 {
@@ -120,7 +120,7 @@ RythmosSolverInterface::createOutArgs() const
           DerivativeProperties(
                   DERIV_LINEARITY_NONCONST
                  ,DERIV_RANK_UNKNOWN
-                 ,true 
+                 ,true
                   )
         );
   return outArgs;

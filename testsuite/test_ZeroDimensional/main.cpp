@@ -26,40 +26,12 @@
 
 /*!
  *  @file
- *  @brief File containing the Multiscale Test
+ *  @brief File containing the ZeroDimensional test
  *
- *  @date 12-03-2009
+ *  @date 10-02-2012
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
- *
- *  This is a very general main file to run a Multiscale simulation.
- *
- *  Models available:
- *  <ol>
- *      <li> Fluid3D
- *      <li> FSI3D
- *      <li> OneDimensional
- *      <li> Multiscale
- *      <li> Windkessel0D
- *  </ol>
- *
- *  Couplings available:
- *  <ol>
- *      <li> BoundaryCondition
- *      <li> Stress
- *      <li> FlowRateStress
- *      <li> FlowRate
- *      <li> FlowRateValve
- *  </ol>
- *
- *  Algorithms available:
- *  <ol>
- *      <li> Aitken
- *      <li> Explicit
- *      <li> Newton
- *      <li> Broyden
- *  </ol>
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -83,19 +55,18 @@
 
 // LifeV includes
 #include <life/lifecore/LifeV.hpp>
-
-// Mathcard includes
-#include <lifemc/lifesolver/MultiscaleModel0D.hpp>
+#include <life/lifefem/BCInterface0D.hpp>
+#include <life/lifesolver/ZeroDimensionalData.hpp>
+#include <life/lifesolver/ZeroDimensionalSolver.hpp>
 
 using namespace LifeV;
-using namespace Multiscale;
 
 bool checkValue(const Real val, const Real test, const Real tol = 1.e-5, const bool verbose = true)
 {
-  Real norm = abs(val - test);
+  Real norm = std::abs(val - test);
 
   if ( verbose )
-    std::cout << "value = " << val << " computed value = " << test << " diff = " << norm << std::endl;
+    std::cout << " value = " << val << " computed value = " << test << " diff = " << norm << std::endl;
 
   return (norm < tol);
 }
@@ -129,60 +100,58 @@ main( Int argc, char** argv )
     comm.reset( new Epetra_SerialComm() );
 #endif
 
+    // Command line parameters
+    GetPot commandLine( argc, argv );
+    const bool check = commandLine.search( 2, "-c", "--check" );
+    string fileName  = commandLine.follow( "data", 2, "-f","--file" );
 
-// *********************************
-// Reading from data file
-// *********************************
-    GetPot command_line(argc,argv);
+    // SetupData
+    GetPot dataFile( fileName  + ".dat" );
 
-    // checking if we are checking for the nightly build
-    const bool check = command_line.search(2, "-c", "--check");
-    string fileName = command_line.follow("data", 2, "-f","--file");
-    //-----------------------------------Test 3 : make Data Container---------------
-    MultiscaleModel0D zeroDmodel;
-    zeroDmodel.setCommunicator( comm );
-    zeroDmodel.setupData(fileName + ".dat");
-    zeroDmodel.showMe();
+    std::string circuitDataFile = dataFile( "0D_Model/CircuitDataFile", "./inputFile.dat" );
+    BCInterface0D< ZeroDimensionalBCHandler, ZeroDimensionalData >  zeroDimensionalBC;
+    zeroDimensionalBC.createHandler();
+    zeroDimensionalBC.fillHandler( circuitDataFile, "Files" );
 
-    // *********************************
-    // Tempolar loop
-    // *********************************
-    std::cout << "\nTemporal loop:" << std::endl;
+    boost::shared_ptr< ZeroDimensionalData > zeroDimensionalData( new ZeroDimensionalData );
+    zeroDimensionalData->setup( dataFile, zeroDimensionalBC.handler() );
 
+    boost::shared_ptr< ZeroDimensionalSolver > zeroDimensionalSolver( new ZeroDimensionalSolver( zeroDimensionalData->unknownCounter(), comm, zeroDimensionalData->circuitData() ) );
+    zeroDimensionalSolver->setup( zeroDimensionalData->solverData() );
+
+    zeroDimensionalData->showMe();
+
+    // SetupModel
+    zeroDimensionalData->dataTime()->setInitialTime(0);
+    zeroDimensionalData->initializeSolution();
+
+    // Save initial solution
+    zeroDimensionalData->saveSolution();
+
+    zeroDimensionalData->dataTime()->updateTime();
+    zeroDimensionalData->dataTime()->setInitialTime(zeroDimensionalData->dataTime()->time());
+
+    // Definitions for the time loop
     LifeChrono chronoTotal;
     LifeChrono chronoSystem;
     LifeChrono chronoIteration;
 
     Int count = 0;
     chronoTotal.start();
-    zeroDmodel.data().dataTime()->setInitialTime(0);
-    zeroDmodel.setupModel();
-    zeroDmodel.saveSolution();
 
-    zeroDmodel.data().dataTime()->updateTime();
-    zeroDmodel.data().dataTime()->setInitialTime(zeroDmodel.data().dataTime()->time());
-
-   // Move to the "true" first time-step
-
-    for ( ; zeroDmodel.data().dataTime()->canAdvance() ; zeroDmodel.data().dataTime()->updateTime(), ++count )
+    for ( ; zeroDimensionalData->dataTime()->canAdvance() ; zeroDimensionalData->dataTime()->updateTime(), ++count )
     {
-        std::cout << std::endl << "--------- Iteration " << count << " time = " << zeroDmodel.data().dataTime()->time() << std::endl;
+        std::cout << std::endl << "--------- Iteration " << count << " time = " << zeroDimensionalData->dataTime()->time() << std::endl;
 
         chronoIteration.start();
-
-        if ( zeroDmodel.data().dataTime()->isFirstTimeStep() )
-            zeroDmodel.buildModel();
-        else
-            zeroDmodel.updateModel();
-
         chronoSystem.start();
 
-        zeroDmodel.solveModel();
+        zeroDimensionalSolver->takeStep( zeroDimensionalData->dataTime()->previousTime(), zeroDimensionalData->dataTime()->time() );
 
         chronoSystem.stop();
 
         //Save solution
-        zeroDmodel.saveSolution();
+        zeroDimensionalData->saveSolution();
 
         chronoIteration.stop();
 
@@ -191,36 +160,32 @@ main( Int argc, char** argv )
 
     chronoTotal.stop();
     std::cout << std::endl << " Simulation ended successfully in " << chronoTotal.diff()  << " s" << std::endl;
-    //-------------------------------------------------------------------------------------
 
-    if ( check )
-      {
-        bool ok = true;
-    
-        ok = ok && checkValue( 0.001329039627  , zeroDmodel.data().circuitData() ->Nodes() ->nodeListAt(1) ->voltage());
-        ok = ok && checkValue( 0.000787475119  , zeroDmodel.data().circuitData() ->Elements() ->elementListAt(1) ->current());
-        if (ok)
-	  {
-	    std::cout << "Test succesful" << std::endl;
-            return 0;
-	  }
-        else
-	  {
-	    std::cout << "Test unseccesful" << std::endl;
-            return -1;
-	  }
-      }
-
-
+    // Final check
     bool exitFlag = EXIT_SUCCESS;
+    if ( check )
+    {
+        bool ok = true;
 
+        ok = ok && checkValue( 0.001329039627, zeroDimensionalData->circuitData()->Nodes()->nodeListAt(1)->voltage() );
+        ok = ok && checkValue( 0.000787475119, zeroDimensionalData->circuitData()->Elements()->elementListAt(1)->current() );
+        if (ok)
+        {
+            std::cout << " Test succesful" << std::endl;
+            exitFlag = EXIT_SUCCESS;
+        }
+        else
+        {
+            std::cout << " Test unseccesful" << std::endl;
+            exitFlag = EXIT_FAILURE;
+        }
+    }
 
 #ifdef HAVE_MPI
     if ( rank == 0 )
         std::cout << "MPI Finalization" << std::endl;
     MPI_Finalize();
 #endif
-    std::cout << "Finished" << std::endl;
 
     return exitFlag;
 }

@@ -35,7 +35,7 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/ZeroDimensionalSolver.hpp>
+#include <life/lifesolver/ZeroDimensionalSolver.hpp>
 
 ZeroDimensionalSolver::ZeroDimensionalSolver(int numGlobalElements,
                                              boost::shared_ptr< Epetra_Comm> comm,
@@ -68,15 +68,15 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
         (argv[0])[i] = commandLine[i];
     }
     int argc = 1;
-    bool verbose; 
+    bool verbose;
     bool  success = true; // determine if the run was successfull
     try { // catch exceptions
       if (data.fixTimeStep){
-         M_step_method = STEP_METHOD_FIXED;	
+         M_step_method = STEP_METHOD_FIXED;
       }else{
-	 M_step_method = STEP_METHOD_VARIABLE;
+     M_step_method = STEP_METHOD_VARIABLE;
       }
-    
+
 
     int numElements = M_modelInterface->numGlobalElements(); // number of elements in vector
     EMethod method_val = METHOD_BE;
@@ -234,7 +234,7 @@ ZeroDimensionalSolver::setup(const LifeV::ZeroDimensionalData::solverData_Type& 
     M_stepperPtr->setInitialCondition(model_ic);
 
     M_method = method;
-   } 
+   }
     TEUCHOS_STANDARD_CATCH_STATEMENTS(true,*M_out,success)
     return ;
 
@@ -283,23 +283,23 @@ ZeroDimensionalSolver::takeStep(double t0,double t1){
     }
     *M_out << "Integrated to time = " << time << endl;
     // Get solution M_out of M_stepper:
-    Rythmos::TimeRange< double > timeRange =M_stepperPtr->getTimeRange(); 
+    Rythmos::TimeRange< double > timeRange =M_stepperPtr->getTimeRange();
     Rythmos::Array< double > time_vec;
     double timeToEvaluate = timeRange.upper();
     time_vec.push_back(timeToEvaluate);
     Rythmos::Array< Teuchos::RCP< const Thyra::VectorBase< double > > >  x_vec;
     Rythmos::Array< Teuchos::RCP< const Thyra::VectorBase< double > > >  xdot_vec;
-    Rythmos::Array< Teuchos::ScalarTraits<double>::magnitudeType >  accuracy_vec; 
+    Rythmos::Array< Teuchos::ScalarTraits<double>::magnitudeType >  accuracy_vec;
 
     M_stepperPtr->getPoints(time_vec,
-    	      &x_vec,
-    	      &xdot_vec,
-    	      &accuracy_vec 
-			    );
+              &x_vec,
+              &xdot_vec,
+              &accuracy_vec
+                );
     const Rythmos::StepStatus<double> stepStatus = M_stepperPtr->getStepStatus();
     Teuchos::RCP<const Thyra::VectorBase<double> > &x_computed_thyra_ptr = x_vec[0];
     Teuchos::RCP<const Thyra::VectorBase<double> > &x_dot_computed_thyra_ptr = xdot_vec[0];
-    
+
     // Convert Thyra::VectorBase to Epetra_Vector
     Teuchos::RCP<const Epetra_Vector>   x_computed_ptr = Thyra::get_Epetra_Vector(*(M_solverInterfaceRCP->get_x_map()),x_computed_thyra_ptr);
     const Epetra_Vector &x_computed = *x_computed_ptr;
