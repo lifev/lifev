@@ -52,7 +52,6 @@ using namespace LifeV;
 // ===================================================
 int main()
 {
-
     // test for dim = 3
     Vector3D v1( 1., 1., 2. ), v2( 0., 1., 0. ), v3;
 
@@ -104,6 +103,11 @@ int main()
     std::cout << castToVectorSmall<5> ( c ) << std::endl << std::endl;
     KN<Real> d( 5, 2. );
     std::cout << castToVectorSmall<5> ( d ) << std::endl << std::endl;
+
+    VectorSmall<10> v6 = VectorSmall<10>::Constant( 3. );
+    std::cout << v6 << std::endl << std::endl;
+    v6 = VectorSmall<10>::Zero();
+    std::cout << v6 << std::endl << std::endl;
 
     return 0;
 }
