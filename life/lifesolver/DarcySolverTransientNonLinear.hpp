@@ -50,6 +50,7 @@ namespace LifeV
 
 /*!
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+  @see For applications related to two-phase flow see \cite Fumagalli2011a
 
   This class implements a nolinear (possibly degenerate) Darcy solver. <br>
   The classical time dependant, non-linmar, Darcy formulation is a couple of differential equations of first order with
