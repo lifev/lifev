@@ -312,6 +312,11 @@ MultiscaleModelFSI3D::saveSolution()
     }
 #endif
 
+#ifdef FSI_WITH_BOUNDARYAREA
+    for ( boundaryAreaFunctionsContainerIterator_Type i = M_boundaryAreaFunctions.begin(); i < M_boundaryAreaFunctions.end(); ++i )
+        ( *i )->save();
+#endif
+
 }
 
 void

@@ -547,19 +547,16 @@ public:
         switch ( id )
         {
         case 0:
-
             return -( rhs[0] * ( M_t1[2] * M_t2[1] - M_t1[1] * M_t2[2] ) + rhs[1] * ( M_n[1] * M_t2[2] - M_n[2] * M_t2[1] ) + rhs[2] * ( M_n[2] * M_t1[1] - M_n[1] * M_t1[2] ) )
-                   / determinant * M_FSI3D->globalData()->dataTime()->timeStep();
+                   / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
 
         case 1:
-
             return  ( rhs[0] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] ) + rhs[1] * ( M_n[0] * M_t2[2] - M_n[2] * M_t2[0] ) + rhs[2] * ( M_n[2] * M_t1[0] - M_n[0] * M_t1[2] ) )
-                   / determinant * M_FSI3D->globalData()->dataTime()->timeStep();
+                   / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
 
         case 2:
-
             return -( rhs[0] * ( M_t1[1] * M_t2[0] - M_t1[0] * M_t2[1] ) + rhs[1] * ( M_n[0] * M_t2[1] - M_n[1] * M_t2[0] ) + rhs[2] * ( M_n[1] * M_t1[0] - M_n[0] * M_t1[1] ) )
-                   / determinant * M_FSI3D->globalData()->dataTime()->timeStep();
+                   / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
 
         default:
 
@@ -601,6 +598,35 @@ public:
                   << "Tangent 2           = " << M_t2[0] << " " << M_t2[1] << " " << M_t2[2] << std::endl
                   << "Beta                = " << M_beta << std::endl
                   << "Scale factor        = " << M_scaleFactor << std::endl << std::endl;
+    }
+
+    //! Save to file
+    void save()
+    {
+        std::ofstream output;
+        output << std::scientific << std::setprecision( 15 );
+
+        std::string filename = multiscaleProblemFolder + multiscaleProblemPrefix + "_Area_Model_" + number2string( M_FSI3D->ID() )
+                                                                                 + "_Flag_" + number2string( M_fluidFlag )
+                                                                                 + "_" + number2string( multiscaleProblemStep ) + ".mfile";
+
+        if ( M_FSI3D->globalData()->dataTime()->isFirstTimeStep() )
+        {
+            output.open( filename.c_str(), std::ios::trunc );
+            output << "% Model:         " << number2string( M_FSI3D->ID() ) << std::endl;
+            output << "% Reference A:   " << number2string( M_referenceArea ) << std::endl;
+            output << "% Fluid flag:    " << number2string( M_fluidFlag ) << std::endl;
+            output << "% Solid flag:    " << number2string( M_solidFlag ) << std::endl << std::endl;
+            output << "% TIME                     AREA                     SCALE FACTOR" << std::endl;
+        }
+        else
+        {
+            output.open( filename.c_str(), std::ios::app );
+        }
+
+        Real area = ( M_scaleFactor + 1 ) * ( M_scaleFactor + 1 ) * M_referenceArea;
+        output << "  " << M_FSI3D->globalData()->dataTime()->time() << "    " << area << "    " << M_scaleFactor << std::endl;
+        output.close();
     }
 
     //@}
