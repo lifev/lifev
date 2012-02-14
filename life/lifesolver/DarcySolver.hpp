@@ -78,6 +78,7 @@ namespace LifeV
 
 /*!
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+  @see For applications related to two-phase flow see \cite Fumagalli2011a
 
   This class implements a Darcy solver.
   <br>
@@ -239,6 +240,7 @@ namespace LifeV
   conditions are imposed via BCHandler class.
   @todo Insert any scientific publications that use this solver.
   @bug If the save flag for the exporter is setted to 0 the program fails.
+
 */
 
 template< typename Mesh, typename SolverType = LifeV::SolverAztecOO >
