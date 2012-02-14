@@ -80,8 +80,11 @@ MultiscaleModel0D::setupData( const std::string& fileName )
     if ( M_globalData.get() )
         setupGlobalData( fileName );
 
+    // The 0D solver requires Rythmos/NOX/Thyra for now
+    #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
     M_solver.reset( new solver_Type( M_data->unknownCounter(), M_comm, M_data->circuitData()  ) );
     M_solver->setup( M_data->solverData() );
+    #endif
 }
 
 void
@@ -123,7 +126,11 @@ MultiscaleModel0D::solveModel()
     Debug( 8160 ) << "MultiscaleModel0D::solveModel() \n";
 #endif
 
+// The 0D solver requires Rythmos/NOX/Thyra for now
+#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
     M_solver->takeStep( M_data->dataTime()->previousTime(), M_data->dataTime()->time() );
+#endif
+
 }
 
 void
