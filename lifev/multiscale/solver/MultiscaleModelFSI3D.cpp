@@ -58,6 +58,9 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
         M_stressCouplingFunction       (),
         M_externalPressureScalar       (),
 #endif
+#ifdef FSI_WITH_BOUNDARYAREA
+        M_boundaryAreaFunctions        (),
+#endif
         M_fluidVelocity                (),
         M_fluidPressure                (),
         M_fluidDisplacement            (),
@@ -173,6 +176,11 @@ MultiscaleModelFSI3D::setupModel()
     // Setup Fluid & Solid solver
     M_FSIoperator->setupFluidSolid( M_FSIoperator->imposedFluxes() );
     M_FSIoperator->setupSystem();
+
+#ifdef FSI_WITH_BOUNDARYAREA
+    for ( boundaryAreaFunctionsContainerIterator_Type i = M_boundaryAreaFunctions.begin(); i < M_boundaryAreaFunctions.end(); ++i )
+        ( *i )->computeReferenceArea();
+#endif
 
     // Setup Exporters
     if ( M_FSIoperator->isFluid() )
@@ -607,6 +615,43 @@ MultiscaleModelFSI3D::setupBC( const std::string& fileName )
 
         M_FSIoperator->setSolidBC( M_solidBC->handler() );
     }
+
+#ifdef FSI_WITH_BOUNDARYAREA
+    GetPot dataFile( fileName );
+
+    UInt scaledAreaColumnsNumber = 9.0;
+    UInt scaledAreaLinesNumber   = dataFile.vector_variable_size( "solid/scaledAreaSolidRing/data" ) / scaledAreaColumnsNumber;
+
+    boost::array< Real, 3 > tempVector;
+    for ( UInt fileScaledAreaLine( 0 ); fileScaledAreaLine < scaledAreaLinesNumber; ++fileScaledAreaLine )
+    {
+        boundaryAreaFunctionPtr_Type boundaryAreaFunction( new boundaryAreaFunction_Type() );
+
+        boundaryAreaFunction->setModel( this );
+        boundaryAreaFunction->setFluidFlag(     dataFile( "solid/scaledAreaSolidRing/data", 1, fileScaledAreaLine * scaledAreaColumnsNumber ) );
+        boundaryAreaFunction->setSolidFlag(     dataFile( "solid/scaledAreaSolidRing/data", 1, fileScaledAreaLine * scaledAreaColumnsNumber + 1 ) );
+        //boundaryAreaFunction->setReferenceArea( dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 2 ) );
+
+        tempVector[0] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 2 );
+        tempVector[1] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 3 );
+        tempVector[2] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 4 );
+        boundaryAreaFunction->setGeometricCenter( tempVector );
+
+        tempVector[0] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 5 );
+        tempVector[1] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 6 );
+        tempVector[2] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 7 );
+        boundaryAreaFunction->setNormal( tempVector );
+
+        boundaryAreaFunction->setBeta(          dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 8 ) );
+
+        M_boundaryAreaFunctions.push_back( boundaryAreaFunction );
+
+        // Add boundary condition to solid bcHandler
+        BCFunctionBase bcBase;
+        bcBase.setFunction( boost::bind( &FSI3DBoundaryAreaFunction::function, M_boundaryAreaFunctions.back(), _1, _2, _3, _4, _5 ) );
+        M_solidBC->addBC( "BoundaryArea_Flag_" + number2string( boundaryAreaFunction->solidFlag() ), boundaryAreaFunction->solidFlag(), EssentialEdges, Full, bcBase, 3 );
+    }
+#endif
 }
 
 void
