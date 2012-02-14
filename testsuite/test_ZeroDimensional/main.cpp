@@ -91,6 +91,19 @@ main( Int argc, char** argv )
     if ( rank == 0 )
         std::cout << "MPI Processes: " << numberOfProcesses << std::endl;
 
+    if ( numberOfProcesses > 1 )
+    {
+
+#ifdef HAVE_MPI
+    	if ( rank == 0 )
+            std::cout << "test_ZeroDimensional not enabled in parallel, failing gracefully." << std::endl;
+            std::cout << "MPI Finalization" << std::endl;
+	    MPI_Finalize();
+#endif
+
+       return 0;
+    }
+
 #ifdef EPETRA_MPI
     if ( rank == 0 )
         std::cout << "MPI Epetra Initialization ... " << std::endl;
@@ -100,6 +113,9 @@ main( Int argc, char** argv )
     comm.reset( new Epetra_SerialComm() );
 #endif
 
+    bool exitFlag = EXIT_SUCCESS;
+
+#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
     // Command line parameters
     GetPot commandLine( argc, argv );
     const bool check = commandLine.search( 2, "-c", "--check" );
@@ -166,7 +182,6 @@ main( Int argc, char** argv )
     std::cout << std::endl << " Simulation ended successfully in " << chronoTotal.diff()  << " s" << std::endl;
 
     // Final check
-    bool exitFlag = EXIT_SUCCESS;
     if ( check )
     {
         bool ok = true;
@@ -180,10 +195,14 @@ main( Int argc, char** argv )
         }
         else
         {
-            std::cout << " Test unseccesful" << std::endl;
+            std::cout << " Test unsuccesful" << std::endl;
             exitFlag = EXIT_FAILURE;
         }
     }
+#else
+    std::cout << "ZeroDimensional requires configuring Trilinos with Rythmos/NOX/Thyra. Skipping test." << std::endl;
+    exitFlag = EXIT_SUCCESS;
+#endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
 #ifdef HAVE_MPI
     if ( rank == 0 )

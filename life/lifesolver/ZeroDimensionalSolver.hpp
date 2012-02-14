@@ -43,27 +43,33 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Includes for Rythmos:
-//#include <Rythmos_ConfigDefs.h>
-#include <Rythmos_StepperBase.hpp>
-#include <Rythmos_ForwardEulerStepper.hpp>
-#include <Rythmos_BackwardEulerStepper.hpp>
-#include <Rythmos_ExplicitRKStepper.hpp>
-#include <Rythmos_ImplicitBDFStepper.hpp>
-#include <Rythmos_ImplicitRKStepper.hpp>
-#include <Rythmos_RKButcherTableau.hpp>
-#include <Rythmos_RKButcherTableauBuilder.hpp>
-#include <Rythmos_TimeStepNonlinearSolver.hpp>
 
-// Includes for Thyra:
-#include <Thyra_EpetraThyraWrappers.hpp>
-#include <Thyra_EpetraLinearOp.hpp>
-#include <Thyra_EpetraModelEvaluator.hpp>
-#include <Thyra_NonlinearSolver_NOX.hpp>
 
-#include <Thyra_DiagonalEpetraLinearOpWithSolveFactory.hpp>
+#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
+    //#include <Rythmos_ConfigDefs.h>
+    #include <Rythmos_StepperBase.hpp>
+    #include <Rythmos_ForwardEulerStepper.hpp>
+    #include <Rythmos_BackwardEulerStepper.hpp>
+    #include <Rythmos_ExplicitRKStepper.hpp>
+    #include <Rythmos_ImplicitBDFStepper.hpp>
+    #include <Rythmos_ImplicitRKStepper.hpp>
+    #include <Rythmos_RKButcherTableau.hpp>
+    #include <Rythmos_RKButcherTableauBuilder.hpp>
+    #include <Rythmos_TimeStepNonlinearSolver.hpp>
 
-// Includes for Stratimikos:
-#include <Stratimikos_DefaultLinearSolverBuilder.hpp>
+    // Includes for Thyra:
+    #include <Thyra_EpetraThyraWrappers.hpp>
+    #include <Thyra_EpetraLinearOp.hpp>
+    #include <Thyra_EpetraModelEvaluator.hpp>
+    #include <Thyra_NonlinearSolver_NOX.hpp>
+
+    #include <Thyra_DiagonalEpetraLinearOpWithSolveFactory.hpp>
+
+    // Includes for Stratimikos:
+    #include <Stratimikos_DefaultLinearSolverBuilder.hpp>
+
+#endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
+
 
 // Includes for Teuchos:
 #include <Teuchos_Array.hpp>
@@ -94,6 +100,7 @@ enum EMethod { METHOD_FE, METHOD_BE, METHOD_ERK, METHOD_BDF, METHOD_IRK };
 enum STEP_METHOD { STEP_METHOD_FIXED, STEP_METHOD_VARIABLE };
 
 //! ZeroDimentional Solver
+#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 class ZeroDimensionalSolver
 {
 public:
@@ -130,6 +137,30 @@ private:
     std::string                                M_method;
 
 };
+#else
+class ZeroDimensionalSolver
+{
+public:
+
+    //! Constructor
+    explicit ZeroDimensionalSolver(Int numGlobalElements,
+                                   boost::shared_ptr< Epetra_Comm> comm,
+                                   LifeV::zeroDimensionalCircuitDataPtr_Type circuitData);
+    //! Destructor
+    virtual ~ZeroDimensionalSolver() {}
+
+    //! setup solver
+    void setup(const LifeV::ZeroDimensionalData::solverData_Type&  data);
+
+    //! integrate the system between t1 and t2
+    void takeStep(Real t1, Real t2);
+
+private:
+
+
+
+};
+#endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
 } // LifeV namespace
 

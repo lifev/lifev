@@ -43,12 +43,14 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 #include <NOX.H>
 #include <NOX_Epetra.H>
 #include <NOX_Epetra_Interface_Required.H> // base class
 #include <NOX_Epetra_Interface_Jacobian.H> // base class
 #include <NOX_Epetra_Interface_Preconditioner.H> // base class
 #include <NOX_Thyra.H>
+#endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
 // Trilinos Objects
 //#include <Epetra_LinearProblem.h>
@@ -68,7 +70,8 @@ namespace NOX {
 }
 namespace LifeV
 {
-  //! Rhytmos model interface.
+#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
+   //! Rhytmos model interface.
   /*!
    * Rhytmos solver interface will communicate with this class.
    * this class have access to circuit data. The main task of this class is to
@@ -160,5 +163,7 @@ protected:
 };
   typedef boost::shared_ptr< RythmosModelInterface >     rythmosModelInterfacePtr_Type;
   typedef Teuchos::RCP< RythmosModelInterface >          rythmosModelInterfacePtrRCP_Type;
+#endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
+
 } // LifeV namespace
 #endif //ZeroDimensionalRythmosModelInterface_H
