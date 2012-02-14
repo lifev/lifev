@@ -39,18 +39,22 @@
 #ifndef ZeroDimensionalRythmosModelInterface_H
 #define ZeroDimensionalRythmosModelInterface_H 1
 
+// Include definitions
+#include <life/lifesolver/ZeroDimensionalDefinitions.hpp>
+
+#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
+
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 #include <NOX.H>
 #include <NOX_Epetra.H>
 #include <NOX_Epetra_Interface_Required.H> // base class
 #include <NOX_Epetra_Interface_Jacobian.H> // base class
 #include <NOX_Epetra_Interface_Preconditioner.H> // base class
 #include <NOX_Thyra.H>
-#endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
+
 
 // Trilinos Objects
 //#include <Epetra_LinearProblem.h>
@@ -70,7 +74,7 @@ namespace NOX {
 }
 namespace LifeV
 {
-#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
+
    //! Rhytmos model interface.
   /*!
    * Rhytmos solver interface will communicate with this class.
@@ -163,7 +167,8 @@ protected:
 };
   typedef boost::shared_ptr< RythmosModelInterface >     rythmosModelInterfacePtr_Type;
   typedef Teuchos::RCP< RythmosModelInterface >          rythmosModelInterfacePtrRCP_Type;
+} // LifeV namespace
+
 #endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
-} // LifeV namespace
 #endif //ZeroDimensionalRythmosModelInterface_H

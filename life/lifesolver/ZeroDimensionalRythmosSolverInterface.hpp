@@ -39,19 +39,15 @@
 #ifndef ZeroDimensionalRythmosSolverInterface_H
 #define ZeroDimensionalRythmosSolverInterface_H 1
 
-#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 #include <life/lifesolver/ZeroDimensionalRythmosModelInterface.hpp>
-#endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
+#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 namespace LifeV
 {
-#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
-
 //! Rythmos solver interface.
   /*!
    * This class will communicate with with Rythmos solver and model interface.
    */
-
 class RythmosSolverInterface : public EpetraExt::ModelEvaluator {
 public:
 
@@ -100,10 +96,10 @@ private:
 };
 
   typedef boost::shared_ptr< RythmosSolverInterface >     rythmosSolverInterfacePtr_Type;
-
   typedef Teuchos::RCP< RythmosSolverInterface >          rythmosSolverInterfacePtrRCP_Type;
-#endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
 } // LifeV namespace
+
+#endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
 #endif //ZeroDimensionalRythmosSolverInterface_H

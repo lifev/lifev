@@ -42,9 +42,10 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+// Include definitions
+#include <life/lifesolver/ZeroDimensionalDefinitions.hpp>
+
 // Includes for Rythmos:
-
-
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
     //#include <Rythmos_ConfigDefs.h>
     #include <Rythmos_StepperBase.hpp>
@@ -143,17 +144,17 @@ class ZeroDimensionalSolver
 public:
 
     //! Constructor
-    explicit ZeroDimensionalSolver(Int numGlobalElements,
-                                   boost::shared_ptr< Epetra_Comm> comm,
-                                   LifeV::zeroDimensionalCircuitDataPtr_Type circuitData);
+    explicit ZeroDimensionalSolver(Int /*numGlobalElements*/,
+                                   boost::shared_ptr< Epetra_Comm> /*comm*/,
+                                   LifeV::zeroDimensionalCircuitDataPtr_Type /*circuitData*/) {}
     //! Destructor
     virtual ~ZeroDimensionalSolver() {}
 
     //! setup solver
-    void setup(const LifeV::ZeroDimensionalData::solverData_Type&  data);
+    void setup(const LifeV::ZeroDimensionalData::solverData_Type&  /*data*/) {}
 
     //! integrate the system between t1 and t2
-    void takeStep(Real t1, Real t2);
+    void takeStep(Real /*t1*/, Real /*t2*/) {}
 
 private:
 
