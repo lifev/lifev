@@ -258,6 +258,11 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     debugStream( 5020 ) << "BCInterface1D::insertBC\n";
 #endif
 
+    // Definitions
+    factory_Type factory;
+    OneDFSIFunction base;
+
+    // Define correct BCI type
     switch ( M_data.base().second )
     {
     case BCIFunctionParser:
@@ -266,33 +271,26 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     case BCIFunctionParserFileSolver:
     case BCIFunctionUserDefined:
     {
-        factory_Type factory;
         this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
-
-        OneDFSIFunction base;
         this->M_vectorFunction.back()->assignFunction( base );
 
-        addBcToHandler( base );
-
-        return;
+        break;
     }
     case BCIFunctionSolverDefined:
     {
-        factory_Type factory;
         this->M_vectorFunctionSolverDefined.push_back( factory.createFunctionSolverDefined( M_data ) );
-
-        OneDFSIFunction base;
         this->M_vectorFunctionSolverDefined.back()->assignFunction( base );
 
-        addBcToHandler( base );
-
-        return;
+        break;
     }
     default:
 
         std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface1D !!!" << std::endl;
-        break;
+        return;
     }
+
+    // Add base to BCHandler
+    addBcToHandler( base );
 }
 
 // ===================================================

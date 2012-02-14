@@ -200,6 +200,40 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::setData( const BCInterfaceData3
 }
 
 
+// ===================================================
+// Get Methods
+// ===================================================
+baseContainer_Type
+BCInterfaceFunctionSolverDefined< FSIOperator >::baseType() const
+{
+    switch ( M_FSIFunction )
+    {
+    case DerFluidLoadToFluid:
+    case DerFluidLoadToStructure:
+    case DerHarmonicExtensionVelToFluid:
+    case DerStructureDispToSolid:
+    case FluidInterfaceDisp:
+    case FluidLoadToStructure:
+    case HarmonicExtensionVelToFluid:
+    case SolidLoadToStructure:
+    case StructureDispToHarmonicExtension:
+    case StructureDispToSolid:
+    case StructureToFluid:
+
+        return BASEVectorInterface3D;
+
+    case RobinWall:
+
+        return BASEVector3D;
+
+    default:
+
+        std::cout << " !!! Error: " << M_FSIFunction << " is not available as a FSIFunction !!!" << std::endl;
+        return BASEDefault;
+    }
+}
+
+
 
 
 
