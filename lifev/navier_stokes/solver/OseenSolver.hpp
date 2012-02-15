@@ -297,6 +297,20 @@ public:
      */
     Real area( const markerID_Type& flag );
 
+    //! Compute the outgoing normal of a boundary face with given flag
+    /*!
+        @param  flag
+        @return boundary normal
+     */
+    Vector normal( const markerID_Type& flag );
+
+    //! Compute the geometric center of a boundary face with given flag
+    /*!
+        @param  flag
+        @return geometric center
+     */
+    Vector geometricCenter( const markerID_Type& flag );
+
     //! Compute flux on a boundary face with given flag and a given solution
     /*!
         @param  flag
@@ -1656,7 +1670,7 @@ OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag )
 template<typename MeshType, typename SolverType>
 Real
 OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag,
-                                   const vector_Type& solution )
+                                         const vector_Type& solution )
 {
     vector_Type velocityAndPressure( solution, Repeated );
     vector_Type velocity( this->M_velocityFESpace.map(), Repeated );
@@ -1673,6 +1687,20 @@ OseenSolver<MeshType, SolverType>::area( const markerID_Type& flag )
 }
 
 template<typename MeshType, typename SolverType>
+Vector
+OseenSolver<MeshType, SolverType>::normal( const markerID_Type& flag )
+{
+    return M_postProcessing->normal( flag );
+}
+
+template<typename MeshType, typename SolverType>
+Vector
+OseenSolver<MeshType, SolverType>::geometricCenter( const markerID_Type& flag )
+{
+    return M_postProcessing->geometricCenter( flag );
+}
+
+template<typename MeshType, typename SolverType>
 Real
 OseenSolver<MeshType, SolverType>::pressure( const markerID_Type& flag )
 {
@@ -1682,7 +1710,7 @@ OseenSolver<MeshType, SolverType>::pressure( const markerID_Type& flag )
 template<typename MeshType, typename SolverType>
 Real
 OseenSolver<MeshType, SolverType>::pressure(const markerID_Type& flag,
-                                      const vector_Type& solution)
+                                            const vector_Type& solution)
 {
     vector_Type velocityAndPressure( solution, Repeated );
     vector_Type pressure( this->M_pressureFESpace.map(), Repeated );
