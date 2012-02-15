@@ -644,30 +644,33 @@ public:
     //! Save to file
     void save()
     {
-        std::ofstream output;
-        output << std::scientific << std::setprecision( 15 );
-
-        std::string filename = multiscaleProblemFolder + multiscaleProblemPrefix + "_Area_Model_" + number2string( M_FSI3D->ID() )
-                                                                                 + "_Flag_" + number2string( M_fluidFlag )
-                                                                                 + "_" + number2string( multiscaleProblemStep ) + ".mfile";
-
-        if ( M_FSI3D->globalData()->dataTime()->isFirstTimeStep() )
+        if ( M_FSI3D->communicator()->MyPID() == 0 )
         {
-            output.open( filename.c_str(), std::ios::trunc );
-            output << "% Model:         " << number2string( M_FSI3D->ID() ) << std::endl;
-            output << "% Reference A:   " << number2string( M_referenceArea ) << std::endl;
-            output << "% Fluid flag:    " << number2string( M_fluidFlag ) << std::endl;
-            output << "% Solid flag:    " << number2string( M_solidFlag ) << std::endl << std::endl;
-            output << "% TIME                     AREA                     SCALE FACTOR" << std::endl;
-        }
-        else
-        {
-            output.open( filename.c_str(), std::ios::app );
-        }
+            std::ofstream output;
+            output << std::scientific << std::setprecision( 15 );
 
-        Real area = ( M_scaleFactor + 1 ) * ( M_scaleFactor + 1 ) * M_referenceArea;
-        output << "  " << M_FSI3D->globalData()->dataTime()->time() << "    " << area << "    " << M_scaleFactor << std::endl;
-        output.close();
+            std::string filename = multiscaleProblemFolder + multiscaleProblemPrefix + "_Area_Model_" + number2string( M_FSI3D->ID() )
+                                                                                     + "_Flag_" + number2string( M_fluidFlag )
+                                                                                     + "_" + number2string( multiscaleProblemStep ) + ".mfile";
+
+            if ( M_FSI3D->globalData()->dataTime()->isFirstTimeStep() )
+            {
+                output.open( filename.c_str(), std::ios::trunc );
+                output << "% Model:         " << number2string( M_FSI3D->ID() ) << std::endl;
+                output << "% Reference A:   " << number2string( M_referenceArea ) << std::endl;
+                output << "% Fluid flag:    " << number2string( M_fluidFlag ) << std::endl;
+                output << "% Solid flag:    " << number2string( M_solidFlag ) << std::endl << std::endl;
+                output << "% TIME                     AREA                     SCALE FACTOR" << std::endl;
+            }
+            else
+            {
+                output.open( filename.c_str(), std::ios::app );
+            }
+
+            Real area = ( M_scaleFactor + 1 ) * ( M_scaleFactor + 1 ) * M_referenceArea;
+            output << "  " << M_FSI3D->globalData()->dataTime()->time() << "    " << area << "    " << M_scaleFactor << std::endl;
+            output.close();
+        }
     }
 
     //@}
