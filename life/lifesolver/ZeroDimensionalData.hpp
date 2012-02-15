@@ -28,7 +28,6 @@
  *  @file
  *  @brief File containing a class for 0D model data handling.
  *
- *  @version 1.0
  *  @date 16-11-2011
  *  @author Mahmoud Jafargholi
  *

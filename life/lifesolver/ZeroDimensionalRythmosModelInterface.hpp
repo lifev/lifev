@@ -26,9 +26,8 @@
 
 /*!
  *  @file
- *  @Rythmos Model Inreface
+ *  @brief Rythmos Model Interface
  *
- *  @version 1.0
  *  @date 21-11-2011
  *  @author Mahmoud Jafargholi
  *

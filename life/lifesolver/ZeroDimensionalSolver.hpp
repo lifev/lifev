@@ -26,9 +26,8 @@
 
 /*!
  *  @file
- *  @Rythmos solver
+ *  @brief Rythmos solver
  *
- *  @version 1.0
  *  @date 16-11-2011
  *  @author Mahmoud Jafargholi
  *

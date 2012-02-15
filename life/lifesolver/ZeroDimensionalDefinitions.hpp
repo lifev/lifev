@@ -28,7 +28,6 @@
  *  @file
  *  @brief Zero Dimensional Model Global Definitions
  *
- *  @version 1.0
  *  @date 06-02-2012
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
