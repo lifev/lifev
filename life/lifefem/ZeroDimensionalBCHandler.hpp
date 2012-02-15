@@ -47,7 +47,6 @@ namespace LifeV
  *  @author Cristiano Malossi
  *
  *  This simple class handles the boundary conditions for zero-dimensional models.
- *  NOTE: due to its simplicity, we use some 1D features in order to minimize the implementation.
  */
 class ZeroDimensionalBCHandler
 {

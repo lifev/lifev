@@ -76,7 +76,7 @@
 namespace LifeV
 {
 
-enum ZeroDimentionalElementType
+enum ZeroDimensionalElementType
     {
 	resistor,
 	capacitor,
@@ -86,7 +86,7 @@ enum ZeroDimentionalElementType
 	currentSource
 };
 
-enum ZeroDimentionalNodeType
+enum ZeroDimensionalNodeType
 {
 	knownNode,
 	unknownNode

@@ -220,15 +220,15 @@ void ZeroDimensionalData::initializeSolution()
     ptrVecZeroDimensionalElementPtr_Type elementList = M_circuitData->Elements() ->elementList();
     for ( iterZeroDimensionalElement_Type theElement = elementList->begin(); theElement != elementList->end(); theElement++ )
     {
-        ( *theElement )->setcurrent( 0.0 );
-        ( *theElement )->setdeltaCurrent( 0.0 );
+        ( *theElement )->setCurrent( 0.0 );
+        ( *theElement )->setDeltaCurrent( 0.0 );
     }
 
     ptrVecZeroDimensionalNodePtr_Type nodeList = M_circuitData->Nodes() ->nodeList();
     for ( iterZeroDimensionalNode_Type theNode = nodeList->begin(); theNode != nodeList->end(); theNode++ )
     {
-        ( *theNode )->setvoltage( 0.0 );
-        ( *theNode )->setdeltaVoltage( 0.0 );
+        ( *theNode )->setVoltage( 0.0 );
+        ( *theNode )->setDeltaVoltage( 0.0 );
     }
 }
 
@@ -258,15 +258,16 @@ void ZeroDimensionalData::updateBC()
 
     for ( iterZeroDimensionalElementCurrentSource_Type theElement = currentElementList->begin(); theElement != currentElementList->end(); theElement++ )
     {
-        ( *theElement )->setcurrentByTime( time );
+        ( *theElement )->setCurrentByTime( time );
         std::cout << ( *theElement )->current() << std::endl;
     }
 
     ptrVecZeroDimensionalElementVoltageSourcePtr_Type voltageElementList = M_circuitData->Elements()-> voltageSourceList();
     for ( iterZeroDimensionalElementVoltageSourcePtr_Type theElement = voltageElementList->begin(); theElement != voltageElementList->end(); theElement++ )
     {
-        ( *theElement )->setvoltageByTime( time );
+        ( *theElement )->setVoltageByTime( time );
         std::cout << ( *theElement )->voltage() << std::endl;
     }
 }
+
 } // LifeV namespace

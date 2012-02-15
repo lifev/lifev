@@ -54,11 +54,6 @@
 #include <NOX_Epetra_Interface_Preconditioner.H> // base class
 #include <NOX_Thyra.H>
 
-
-// Trilinos Objects
-//#include <Epetra_LinearProblem.h>
-//#include <Teuchos_dyn_cast.hpp>
-
 // Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -66,106 +61,105 @@
 // LIFEV
 #include <life/lifesolver/ZeroDimensionalCircuitData.hpp>
 
-namespace NOX {
-  namespace Parameter {
-    class List;
-  }
+namespace NOX
+{
+    namespace Parameter
+    {
+        class List;
+    }
 }
 namespace LifeV
 {
 
-   //! Rhytmos model interface.
-  /*!
-   * Rhytmos solver interface will communicate with this class.
-   * this class have access to circuit data. The main task of this class is to
-   * provide the residual and jacobian at every step to Rhythmos solver interface.
-   */
+    //! Rhytmos model interface.
+    /*!
+     * Rhytmos solver interface will communicate with this class.
+     * this class have access to circuit data. The main task of this class is to
+     * provide the residual and jacobian at every step to Rhythmos solver interface.
+     */
 class RythmosModelInterface : public NOX::Epetra::Interface::Required,
-                              public NOX::Epetra::Interface::Jacobian,
-                              public NOX::Epetra::Interface::Preconditioner {
+public NOX::Epetra::Interface::Jacobian,
+public NOX::Epetra::Interface::Preconditioner
+{
 public:
 
-  //! Constructor
-    RythmosModelInterface(Int NumGlobalElements,
-                          Epetra_Comm* comm,
-                          zeroDimensionalCircuitDataPtr_Type circuitData);
+    //! Constructor
+    RythmosModelInterface(Int NumGlobalElements, Epetra_Comm* comm, zeroDimensionalCircuitDataPtr_Type circuitData);
 
-  //! Destructor
-  virtual ~RythmosModelInterface();
+    //! Destructor
+    virtual ~RythmosModelInterface();
 
-  //! This method is empty.
-  virtual bool computeF(const Epetra_Vector& x, Epetra_Vector& FVec,
-                        FillType fillType = Residual);
-  //! This method is empty.
-  virtual bool computeJacobian(const Epetra_Vector& x, Epetra_Operator& Jac);
+    //! This method is empty.
+    virtual bool computeF(const Epetra_Vector& x, Epetra_Vector& FVec, FillType fillType = Residual);
 
-  //! This method is empty
-  virtual bool computePrecMatrix(const Epetra_Vector& x);
+    //! This method is empty.
+    virtual bool computeJacobian(const Epetra_Vector& x, Epetra_Operator& Jac);
 
-  //! This method is empty
-  virtual bool computePreconditioner(const Epetra_Vector& x,
-                                     Epetra_Operator& Prec,
-                                     Teuchos::ParameterList* precParams = 0);
+    //! This method is empty
+    virtual bool computePrecMatrix(const Epetra_Vector& x);
 
-  //! get solution vector
-  Epetra_Vector& getSolutionY();
+    //! This method is empty
+    virtual bool computePreconditioner(const Epetra_Vector& x, Epetra_Operator& Prec, Teuchos::ParameterList* precParams = 0);
 
-  //! get derivative of solution vector respect to time
-  Epetra_Vector& getSolutionYp();
+    //! get solution vector
+    Epetra_Vector& getSolutionY();
 
-  Epetra_Map& getMap();
+    //! get derivative of solution vector respect to time
+    Epetra_Vector& getSolutionYp();
 
-  Epetra_CrsGraph& getGraph();
+    Epetra_Map& getMap();
 
-  //! this method empty.
-  virtual bool evaluate(Real t, const Epetra_Vector* x, Epetra_Vector* f );
+    Epetra_CrsGraph& getGraph();
 
-  //! compute Implicit residual.
-  virtual bool evaluateFImplicit(const Real& t, const Epetra_Vector* x,const Epetra_Vector* x_dot, Epetra_Vector* f );
+    //! this method empty.
+    virtual bool evaluate(Real t, const Epetra_Vector* x, Epetra_Vector* f );
 
-  //! compute jacobian.
-  virtual bool evaluateWImplicit(const Real& t, const Real& alpha,const Real& beta,const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_CrsMatrix* W );
+    //! compute Implicit residual.
+    virtual bool evaluateFImplicit(const Real& t, const Epetra_Vector* x,const Epetra_Vector* x_dot, Epetra_Vector* f );
 
-  virtual bool initializeSolnY();
+    //! compute jacobian.
+    virtual bool evaluateWImplicit(const Real& t, const Real& alpha,const Real& beta,const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_CrsMatrix* W );
 
-  bool initializeSolnY(const vectorEpetra_Type& y);
+    virtual bool initializeSolnY();
 
-  virtual bool initializeSolnYp();
+    bool initializeSolnY(const vectorEpetra_Type& y);
 
-  bool initializeSolnYp(const vectorEpetra_Type& yp);
+    virtual bool initializeSolnYp();
 
+    bool initializeSolnYp(const vectorEpetra_Type& yp);
 
-  //! hafter complete Rythmos step, this method will update circuit data.
-  void deepUpdate(const Real &t1,const vectorEpetra_Type& y , const vectorEpetra_Type& yp );
+    //! hafter complete Rythmos step, this method will update circuit data.
+    void extractSolution(const Real &t1,const vectorEpetra_Type& y , const vectorEpetra_Type& yp );
 
-  Int numGlobalElements(){return M_numGlobalElements;}
+    Int numGlobalElements() { return M_numGlobalElements; }
 
 protected:
-  Int M_numGlobalElements;  // Total Number of elements
-  Int M_numMyElements;      // Number of elements owned by this process
-  Int M_myPID;              // Process number
-  Int M_numProc;            // Total number of processes
+    Int                                             M_numGlobalElements; // Total Number of elements
+    Int                                             M_numMyElements; // Number of elements owned by this process
+    Int                                             M_myPID; // Process number
+    Int                                             M_numProc; // Total number of processes
 
-  Epetra_CrsGraph*                   M_graph;
-  boost::shared_ptr<Epetra_CrsGraph> M_graphSharedPtr;
-  Epetra_Comm*                       M_comm;
-  boost::shared_ptr<Epetra_Comm>     M_commSharedPtr;
-  Epetra_Map*                        M_standardMap;
-  Epetra_Vector*                     M_initialSolutionY;
-  Epetra_Vector*                     M_initialSolutionYp;
+    Epetra_CrsGraph*                                M_graph;
+    boost::shared_ptr<Epetra_CrsGraph>              M_graphSharedPtr;
+    Epetra_Comm*                                    M_comm;
+    boost::shared_ptr<Epetra_Comm>                  M_commSharedPtr;
+    Epetra_Map*                                     M_standardMap;
+    Epetra_Vector*                                  M_initialSolutionY;
+    Epetra_Vector*                                  M_initialSolutionYp;
 
-  zeroDimensionalCircuitDataPtr_Type M_circuitData;
-  matrixPtr_Type                     M_A;
-  matrixPtr_Type                     M_B;
-  vectorPtr_Type                     M_C;
-  vectorEpetraPtr_Type               M_Y0;
-  vectorEpetraPtr_Type               M_Yp0;
-  boost::shared_ptr<MapEpetra>       M_mapEpetraPtr;
-  vectorEpetraPtr_Type               M_fA;//dummy variable
-  vectorEpetraPtr_Type               M_fB;//dummy variable
+    zeroDimensionalCircuitDataPtr_Type              M_circuitData;
+    matrixPtr_Type                                  M_A;
+    matrixPtr_Type                                  M_B;
+    vectorPtr_Type                                  M_C;
+    vectorEpetraPtr_Type                            M_Y0;
+    vectorEpetraPtr_Type                            M_Yp0;
+    boost::shared_ptr<MapEpetra>                    M_mapEpetraPtr;
+    vectorEpetraPtr_Type                            M_fA;//dummy variable
+    vectorEpetraPtr_Type                            M_fB;//dummy variable
 };
-  typedef boost::shared_ptr< RythmosModelInterface >     rythmosModelInterfacePtr_Type;
-  typedef Teuchos::RCP< RythmosModelInterface >          rythmosModelInterfacePtrRCP_Type;
+
+typedef boost::shared_ptr< RythmosModelInterface >  rythmosModelInterfacePtr_Type;
+typedef Teuchos::RCP< RythmosModelInterface >       rythmosModelInterfacePtrRCP_Type;
 } // LifeV namespace
 
 #endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */

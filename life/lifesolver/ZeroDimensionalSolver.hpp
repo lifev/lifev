@@ -46,30 +46,26 @@
 
 // Includes for Rythmos:
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
-    //#include <Rythmos_ConfigDefs.h>
-    #include <Rythmos_StepperBase.hpp>
-    #include <Rythmos_ForwardEulerStepper.hpp>
-    #include <Rythmos_BackwardEulerStepper.hpp>
-    #include <Rythmos_ExplicitRKStepper.hpp>
-    #include <Rythmos_ImplicitBDFStepper.hpp>
-    #include <Rythmos_ImplicitRKStepper.hpp>
-    #include <Rythmos_RKButcherTableau.hpp>
-    #include <Rythmos_RKButcherTableauBuilder.hpp>
-    #include <Rythmos_TimeStepNonlinearSolver.hpp>
+#include <Rythmos_StepperBase.hpp>
+#include <Rythmos_ForwardEulerStepper.hpp>
+#include <Rythmos_BackwardEulerStepper.hpp>
+#include <Rythmos_ExplicitRKStepper.hpp>
+#include <Rythmos_ImplicitBDFStepper.hpp>
+#include <Rythmos_ImplicitRKStepper.hpp>
+#include <Rythmos_RKButcherTableau.hpp>
+#include <Rythmos_RKButcherTableauBuilder.hpp>
+#include <Rythmos_TimeStepNonlinearSolver.hpp>
 
-    // Includes for Thyra:
-    #include <Thyra_EpetraThyraWrappers.hpp>
-    #include <Thyra_EpetraLinearOp.hpp>
-    #include <Thyra_EpetraModelEvaluator.hpp>
-    #include <Thyra_NonlinearSolver_NOX.hpp>
+// Includes for Thyra:
+#include <Thyra_DiagonalEpetraLinearOpWithSolveFactory.hpp>
+#include <Thyra_EpetraThyraWrappers.hpp>
+#include <Thyra_EpetraLinearOp.hpp>
+#include <Thyra_EpetraModelEvaluator.hpp>
+#include <Thyra_NonlinearSolver_NOX.hpp>
 
-    #include <Thyra_DiagonalEpetraLinearOpWithSolveFactory.hpp>
-
-    // Includes for Stratimikos:
-    #include <Stratimikos_DefaultLinearSolverBuilder.hpp>
-
+// Includes for Stratimikos:
+#include <Stratimikos_DefaultLinearSolverBuilder.hpp>
 #endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
-
 
 // Includes for Teuchos:
 #include <Teuchos_Array.hpp>
@@ -90,8 +86,7 @@
 #include <life/lifesolver/ZeroDimensionalRythmosSolverInterface.hpp>
 #include <life/lifesolver/ZeroDimensionalData.hpp>
 
-namespace LifeV
-{
+namespace LifeV {
 
 //! Rhytmos methods
 enum EMethod { METHOD_FE, METHOD_BE, METHOD_ERK, METHOD_BDF, METHOD_IRK };
@@ -99,67 +94,65 @@ enum EMethod { METHOD_FE, METHOD_BE, METHOD_ERK, METHOD_BDF, METHOD_IRK };
 //! time step method
 enum STEP_METHOD { STEP_METHOD_FIXED, STEP_METHOD_VARIABLE };
 
-//! ZeroDimentional Solver
+//! ZeroDimensional Solver
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 class ZeroDimensionalSolver
 {
 public:
 
     //! Constructor
-    explicit ZeroDimensionalSolver(Int numGlobalElements,
-                                   boost::shared_ptr< Epetra_Comm> comm,
-                                   LifeV::zeroDimensionalCircuitDataPtr_Type circuitData);
+    explicit ZeroDimensionalSolver( Int numGlobalElements,
+                                    boost::shared_ptr< Epetra_Comm> comm,
+                                    zeroDimensionalCircuitDataPtr_Type circuitData );
     //! Destructor
     virtual ~ZeroDimensionalSolver() {}
 
     //! setup solver
-    void setup(const LifeV::ZeroDimensionalData::solverData_Type&  data);
+    void setup( const ZeroDimensionalData::solverData_Type& data );
 
     //! integrate the system between t1 and t2
     void takeStep(Real t1, Real t2);
 
 private:
 
-    LifeV::rythmosSolverInterfacePtr_Type      M_solverInterface;
-    LifeV::rythmosModelInterfacePtr_Type       M_modelInterface;
-    LifeV::rythmosSolverInterfacePtrRCP_Type   M_solverInterfaceRCP;
-    LifeV::rythmosModelInterfacePtrRCP_Type    M_modelInterfaceRCP;
-    boost::shared_ptr< Epetra_Comm>            M_comm;
-    Teuchos::RCP< Epetra_Comm>                 M_commRCP;
-    Teuchos::RCP<Rythmos::StepperBase<Real> >  M_stepperPtr;
-    Teuchos::RCP<Teuchos::FancyOStream>        M_out;
-    STEP_METHOD                                M_step_method;
-    Real                                       M_finalTime;
-    Real                                       M_startTime;
-    Int                                        M_numberTimeStep;
-    Int                                        M_outputLevel;
-    Teuchos::EVerbosityLevel                   M_outputLevelTeuchos;
-    std::string                                M_method;
+    rythmosSolverInterfacePtr_Type                M_solverInterface;
+    rythmosModelInterfacePtr_Type                 M_modelInterface;
+    rythmosSolverInterfacePtrRCP_Type             M_solverInterfaceRCP;
+    rythmosModelInterfacePtrRCP_Type              M_modelInterfaceRCP;
+    boost::shared_ptr< Epetra_Comm>               M_comm;
+    Teuchos::RCP< Epetra_Comm>                    M_commRCP;
+    Teuchos::RCP<Rythmos::StepperBase<Real> >     M_stepperPtr;
+    Teuchos::RCP<Teuchos::FancyOStream>           M_out;
+    STEP_METHOD                                   M_step_method;
+    Real                                          M_finalTime;
+    Real                                          M_startTime;
+    Int                                           M_numberTimeStep;
+    Int                                           M_outputLevel;
+    Teuchos::EVerbosityLevel                      M_outputLevelTeuchos;
+    std::string                                   M_method;
 
 };
+
 #else
+
 class ZeroDimensionalSolver
 {
 public:
 
     //! Constructor
     explicit ZeroDimensionalSolver(Int /*numGlobalElements*/,
-                                   boost::shared_ptr< Epetra_Comm> /*comm*/,
-                                   LifeV::zeroDimensionalCircuitDataPtr_Type /*circuitData*/) {}
+                                   boost::shared_ptr<Epetra_Comm> /*comm*/,
+                                   zeroDimensionalCircuitDataPtr_Type /*circuitData*/) {}
     //! Destructor
     virtual ~ZeroDimensionalSolver() {}
 
     //! setup solver
-    void setup(const LifeV::ZeroDimensionalData::solverData_Type&  /*data*/) {}
+    void setup(const ZeroDimensionalData::solverData_Type& /*data*/) {}
 
     //! integrate the system between t1 and t2
     void takeStep(Real /*t1*/, Real /*t2*/) {}
-
-private:
-
-
-
 };
+
 #endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
 } // LifeV namespace

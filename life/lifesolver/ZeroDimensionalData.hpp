@@ -69,7 +69,7 @@ public:
     void showMeVariables() ;
 
     //! set time
-    void setTimeData( const timePtr_Type TimeData ) { M_time = TimeData; }
+    void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
 
     //! initialize Solution
     void initializeSolution() ;
@@ -83,7 +83,7 @@ public:
     timePtr_Type dataTime() const { return M_time; }
 
     //! get circuit data container
-    zeroDimensionalCircuitDataPtr_Type circuitData() const {return M_circuitData;}
+    zeroDimensionalCircuitDataPtr_Type circuitData() const { return M_circuitData; }
 
     //!total number of unknowns
     Int unknownCounter() const {return  M_unknownCounter;}
@@ -92,9 +92,9 @@ public:
     struct SolverData {
         std::string        method;
         Int                numberTimeStep;
-        Real             maxError;
-        Real             reltol;
-        Real             abstol;
+        Real               maxError;
+        Real               reltol;
+        Real               abstol;
         Int                maxOrder;
         bool               verbose;
         Int                verbosLevel;
@@ -116,11 +116,11 @@ private:
 
     timePtr_Type                         M_time;
     OutPutFormat                         M_outPutFormat;
-    zeroDimensionalCircuitDataPtr_Type   M_circuitData      ;
+    zeroDimensionalCircuitDataPtr_Type   M_circuitData;
     std::ofstream                        M_voltageFileStream;
     std::ofstream                        M_currentFileStream;
     std::ofstream                        M_balanceFileStream;
-    Int                                  M_unknownCounter   ;
+    Int                                  M_unknownCounter;
     solverData_Type                      M_solverData;
 };
 

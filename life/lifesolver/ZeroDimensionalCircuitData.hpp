@@ -97,7 +97,7 @@ public:
     //! Display some information.
     virtual void showMe( const Int& flag = 0 );
 
-    const std::string enum2string( const ZeroDimentionalElementType & type );
+    const std::string enum2string( const ZeroDimensionalElementType & type );
 
     //! Connect elements to the nodes.
     /*!
@@ -118,7 +118,7 @@ public:
      * After each time step, when Rythmos solver is succesfully finishes, this method will compute
      * finial outputs ( for exmple currents) from the finial solution vector.
      */
-    virtual void deepUpdate( const ZeroDimensionalNodeS& /*nodes*/ ) {}
+    virtual void extractSolution( const ZeroDimensionalNodeS& /*nodes*/ ) {}
 
     //! This method specifies the convention of current direction in an element.
     /*!
@@ -133,12 +133,12 @@ public:
     //! @name Set Methods
     //@{
 
-    void setid(const Int& id ) { M_id = id; }
+    void setId(const Int& id ) { M_id = id; }
 
-    void setcurrent(const Real& current ) { M_current = current; }
+    void setCurrent(const Real& current ) { M_current = current; }
 
     //! Set derivative of current respect to time.
-    void setdeltaCurrent(const Real& deltaCurrent ) { M_deltaCurrent= deltaCurrent; }
+    void setDeltaCurrent(const Real& deltaCurrent ) { M_deltaCurrent= deltaCurrent; }
 
     //@}
 
@@ -148,7 +148,7 @@ public:
 
     const Int& id() const { return M_id; }
 
-    const ZeroDimentionalElementType& type() const { return M_type; }
+    const ZeroDimensionalElementType& type() const { return M_type; }
 
     const Real& current() const { return M_current; }
 
@@ -160,7 +160,7 @@ public:
 protected:
 
     Int                             M_id;
-    ZeroDimentionalElementType      M_type; //= 'Resistor';%'Capacitor' ,'Inductor','Voltage Source','Current Source' 'Diode'
+    ZeroDimensionalElementType      M_type; //= 'Resistor';%'Capacitor' ,'Inductor','Voltage Source','Current Source' 'Diode'
     Real                            M_current;
     Real                            M_deltaCurrent;
 };
@@ -208,13 +208,13 @@ public:
     //@{
 
     //! set parameter (1/R, 1/L, C, 1/R_{eff})
-    void setparameter( const Real & parameter ) { M_parameter = parameter; }
+    void setParameter( const Real & parameter ) { M_parameter = parameter; }
 
     //! add the node to the list.
     /*!
      * @param node index.
      */
-    void setnodeIndex( const Int& index ) { M_nodeIndex.push_back(index); }
+    void setNodeIndex( const Int& index ) { M_nodeIndex.push_back(index); }
 
     //@}
 
@@ -248,7 +248,7 @@ protected:
 
 
 
-//! ZeroDimentionalElementPassiveResistor - Resistor.
+//! ZeroDimensionalElementPassiveResistor - Resistor.
 /*!
  *  @authors Mahmoud Jafargholi
  */
@@ -275,7 +275,7 @@ public:
 
     void buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
 
-    void deepUpdate( const ZeroDimensionalNodeS& nodes );
+    void extractSolution( const ZeroDimensionalNodeS& nodes );
 
     //@}
 };
@@ -307,7 +307,7 @@ public:
 
     void showMe( const Int& flag = 0 );
 
-    void deepUpdate( const ZeroDimensionalNodeS& nodes );
+    void extractSolution( const ZeroDimensionalNodeS& nodes );
 
     void buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
 
@@ -379,7 +379,7 @@ public:
 
     void showMe( const Int& flag = 0 );
 
-    void deepUpdate( const ZeroDimensionalNodeS& nodes );
+    void extractSolution( const ZeroDimensionalNodeS& nodes );
 
     void buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
 
@@ -387,7 +387,7 @@ public:
 };
 
 
-//! ZeroDimentionalElementPassiveInductor - Inductor.
+//! ZeroDimensionalElementPassiveInductor - Inductor.
 /*!
  *  @authors Mahmoud Jafargholi
  */
@@ -441,7 +441,7 @@ protected:
 
 
 
-//! ZeroDimentionalElementSource - Base class for source elements.
+//! ZeroDimensionalElementSource - Base class for source elements.
 /*!
  *  @authors Mahmoud Jafargholi
  */
@@ -473,10 +473,10 @@ public:
     //! @name Set Methods
     //@{
 
-    void setnodeIndex(const Real & index ) { M_nodeIndex = index; }
+    void setNodeIndex(const Real & index ) { M_nodeIndex = index; }
 
     //! Set BC handler.
-    void setbc( const bcPtr_Type& bc) { M_bc = bc; }
+    void setBC( const bcPtr_Type& bc) { M_bc = bc; }
 
     //@}
 
@@ -498,7 +498,7 @@ protected:
 
 
 
-//! ZeroDimentionalElementVoltageSource - Voltage Source.
+//! ZeroDimensionalElementVoltageSource - Voltage Source.
 /*!
  *  @authors Mahmoud Jafargholi
  */
@@ -526,7 +526,7 @@ public:
 
     //! calculate current passing outward in voltage source.
     /*!
-     *  This method can be called after all elements invoked deepUpdate method.
+     *  This method can be called after all elements invoked extractSolution method.
      */
     void calculateCurrent( const ZeroDimensionalNodeS& Nodes,const ZeroDimensionalElementS& Elements );
 
@@ -537,10 +537,10 @@ public:
     //@{
 
     //! Update voltage source by time.
-    void setvoltageByTime( const Real& time ) { M_voltage = M_bc->bc( M_nodeIndex ).evaluate(time); }
+    void setVoltageByTime( const Real& time ) { M_voltage = M_bc->bc( M_nodeIndex ).evaluate(time); }
 
     //! Update \frac{\partial voltage}{\partial t} by time.
-    void setdeltaVoltageByTime( const Real& time ) { M_deltaVoltage = M_bc->bc( M_nodeIndex + BC_CONSTANT ).evaluate(time); }
+    void setDeltaVoltageByTime( const Real& time ) { M_deltaVoltage = M_bc->bc( M_nodeIndex + BC_CONSTANT ).evaluate(time); }
 
     //@}
 
@@ -566,7 +566,7 @@ protected:
 
 
 
-//! ZeroDimentionalElementCurrentSource - Current Source.
+//! ZeroDimensionalElementCurrentSource - Current Source.
 /*!
  *  @authors Mahmoud Jafargholi
  */
@@ -600,7 +600,7 @@ public:
     //! @name set Methods
     //@{
 
-    void setcurrentByTime(const Real& time ) { M_current = M_bc->bc( M_nodeIndex ).evaluate(time); }
+    void setCurrentByTime(const Real& time ) { M_current = M_bc->bc( M_nodeIndex ).evaluate(time); }
 
     //@}
 
@@ -697,23 +697,23 @@ public:
     //! @name Set Methods
     //@{
 
-    const std::string enum2string( const ZeroDimentionalNodeType & type ) const;
+    const std::string enum2string( const ZeroDimensionalNodeType & type ) const;
 
-    void setid( const Int& id ) { M_id = id; }
+    void setId( const Int& id ) { M_id = id; }
 
     //! add an element index to the elelemt list.
-    void setelementListIndex( const Int& index ) { M_elementListIndex.push_back(index); }
+    void setElementListIndex( const Int& index ) { M_elementListIndex.push_back(index); }
 
     //! add an node index which is connected by an element in element list.
     /*!
      * Each elelemnt in element list, coonects this node to another node ( except source elementt). nodeList is a container for conecting nodes.
      * If the element connected to this node has only one terminal ( like voltage source and current source), the connecting index would be -1.
      */
-    void setnodeListIndex(const Int& index ) { M_nodeListIndex.push_back(index); }
+    void setNodeListIndex(const Int& index ) { M_nodeListIndex.push_back(index); }
 
-    virtual void setvoltage(const Real& voltage ) { M_voltage = voltage; }
+    virtual void setVoltage(const Real& voltage ) { M_voltage = voltage; }
 
-    virtual void setdeltaVoltage(const Real& deltaVoltage ) { M_deltaVoltage = deltaVoltage; }
+    virtual void setDeltaVoltage(const Real& deltaVoltage ) { M_deltaVoltage = deltaVoltage; }
 
     //@}
 
@@ -723,7 +723,7 @@ public:
 
     const Int& id() const { return M_id; }
 
-    const ZeroDimentionalNodeType& type() const { return M_type; }
+    const ZeroDimensionalNodeType& type() const { return M_type; }
 
     const Int& elementListIndexAt( const Int& position ) const { return M_elementListIndex.at(position); }
 
@@ -742,7 +742,7 @@ public:
 protected:
 
     Int                             M_id;
-    ZeroDimentionalNodeType         M_type;             //= 'Known';%'Unknown'
+    ZeroDimensionalNodeType         M_type;             //= 'Known';%'Unknown'
     Real                            M_currentBalance;   //sum of currents over all branches
     vecInt_Type                     M_elementListIndex; // List of id(s) of connected Elements to this Node
     vecInt_Type                     M_nodeListIndex;    // List of id(s) of connected Nodes to this Node
@@ -835,11 +835,11 @@ public:
     //@{
 
     //!Set the VoltageSource Element which is connected to the Node
-    void setelement( const zeroDimensionalElementVoltageSourcePtr_Type &element ) { M_element=element; }
+    void setElement( const zeroDimensionalElementVoltageSourcePtr_Type &element ) { M_element=element; }
 
-    void setvoltageByTime(const Real& time ) { M_voltage = M_element->voltageByTime(time); M_element->setvoltageByTime(time); }
+    void setVoltageByTime(const Real& time ) { M_voltage = M_element->voltageByTime(time); M_element->setVoltageByTime(time); }
 
-    void setdeltaVoltageByTime(const Real& time ) { M_deltaVoltage = M_element->deltaVoltageByTime(time); M_element->setdeltaVoltageByTime(time); }
+    void setDeltaVoltageByTime(const Real& time ) { M_deltaVoltage = M_element->deltaVoltageByTime(time); M_element->setDeltaVoltageByTime(time); }
 
     const Real& voltage() const { return M_element->voltage(); }
 
@@ -933,25 +933,25 @@ public:
    Int currentSourceCounter() const { return M_currentSourceList->size(); }
 
    //! add resistor to the resistor list.
-    void  setresistorList(const zeroDimensionalElementPassiveResistorPtr_Type & resistorPtr ) { M_resistorList->push_back(resistorPtr); }
+    void  setResistorList(const zeroDimensionalElementPassiveResistorPtr_Type & resistorPtr ) { M_resistorList->push_back(resistorPtr); }
 
     //! add capacitor to the capacitor list.
-    void  setcapacitorList(const zeroDimensionalElementPassiveCapacitorPtr_Type & capacitorPtr ) { M_capacitorList->push_back(capacitorPtr); }
+    void  setCapacitorList(const zeroDimensionalElementPassiveCapacitorPtr_Type & capacitorPtr ) { M_capacitorList->push_back(capacitorPtr); }
 
     //! add inductor to the inductor list.
-    void  setinductorList(const zeroDimensionalElementPassiveInductorPtr_Type& inductorPtr ) { M_inductorList->push_back(inductorPtr); }
+    void  setInductorList(const zeroDimensionalElementPassiveInductorPtr_Type& inductorPtr ) { M_inductorList->push_back(inductorPtr); }
 
     //! add diode to the diode list.
-    void  setdiodeList(const zeroDimensionalElementPassiveDiodePtr_Type& diodePtr ) { M_diodeList->push_back(diodePtr); }
+    void  setDiodeList(const zeroDimensionalElementPassiveDiodePtr_Type& diodePtr ) { M_diodeList->push_back(diodePtr); }
 
     //! add currentSource to the current Source list.
-    void  setcurrentSourceList(const zeroDimensionalElementCurrentSourcePtr_Type& currentSourcePtr ) { M_currentSourceList->push_back(currentSourcePtr); }
+    void  setCurrentSourceList(const zeroDimensionalElementCurrentSourcePtr_Type& currentSourcePtr ) { M_currentSourceList->push_back(currentSourcePtr); }
 
     //! add voltgeSource to the voltage source list.
-    void  setvoltageSourceList(const zeroDimensionalElementVoltageSourcePtr_Type& voltageSourcePtr ) { M_voltageSourceList->push_back(voltageSourcePtr); }
+    void  setVoltageSourceList(const zeroDimensionalElementVoltageSourcePtr_Type& voltageSourcePtr ) { M_voltageSourceList->push_back(voltageSourcePtr); }
 
     //! add object to the map from voltage source index to the voltage source object.
-    void setvoltageSourceMap(const Int & id, const zeroDimensionalElementVoltageSourcePtr_Type & voltageSource) {(*M_voltageSourceMap)[id]= voltageSource;}
+    void setVoltageSourceMap(const Int & id, const zeroDimensionalElementVoltageSourcePtr_Type & voltageSource) {(*M_voltageSourceMap)[id]= voltageSource;}
 
     const zeroDimensionalElementVoltageSourcePtr_Type voltageSourceMap(Int& id) const {return (*M_voltageSourceMap)[id] ;}
 
@@ -1100,7 +1100,7 @@ public:
     /*!
      * This methed is invoked after Rythoms step is finished. This method computes currents.
      */
-    void deepUpdateFromY(const Real& t, const Epetra_Vector& y,const Epetra_Vector& yp);
+    void extractSolutionFromY(const Real& t, const Epetra_Vector& y,const Epetra_Vector& yp);
 
 protected:
 

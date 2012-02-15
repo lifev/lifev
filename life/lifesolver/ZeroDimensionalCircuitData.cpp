@@ -49,7 +49,7 @@ void ZeroDimensionalElement::showMe( const Int& /*flag*/)
     cout << enum2string( type() );
 }
 
-const std::string ZeroDimensionalElement::enum2string( const ZeroDimentionalElementType & type )
+const std::string ZeroDimensionalElement::enum2string( const ZeroDimensionalElementType & type )
 {
     std::string output;
     switch ( type )
@@ -108,16 +108,16 @@ void ZeroDimensionalElementPassive::connectElement( zeroDimensionalNodeSPtr_Type
     Int Index = M_nodeIndex.at( 0 );
     zeroDimensionalNodePtr_Type theNode = Nodes->nodeListAt( Index );
 
-    theNode->setelementListIndex( M_id );
+    theNode->setElementListIndex( M_id );
     Int otherEndIndex = M_nodeIndex.at( 1 );
-    theNode->setnodeListIndex( otherEndIndex );
+    theNode->setNodeListIndex( otherEndIndex );
 
     Index = M_nodeIndex.at( 1 );
     theNode = Nodes->nodeListAt( Index );
 
-    theNode->setelementListIndex( M_id );
+    theNode->setElementListIndex( M_id );
     otherEndIndex = M_nodeIndex.at( 0 );
-    theNode->setnodeListIndex( otherEndIndex );
+    theNode->setNodeListIndex( otherEndIndex );
 }
 
 Real ZeroDimensionalElementPassive::direction( const Int & nodeId ) const
@@ -180,7 +180,7 @@ void ZeroDimensionalElementPassiveResistor::buildABC( matrix_Type& /*A*/,
     }
 }
 
-void ZeroDimensionalElementPassiveResistor::deepUpdate( const ZeroDimensionalNodeS& Nodes )
+void ZeroDimensionalElementPassiveResistor::extractSolution( const ZeroDimensionalNodeS& Nodes )
 {
     M_current = ( Nodes.nodeListAt( M_nodeIndex.at( 0 ) )->voltage() - Nodes.nodeListAt( M_nodeIndex.at( 1 ) )->voltage() ) * M_parameter;
     M_deltaCurrent = ( Nodes.nodeListAt( M_nodeIndex.at( 0 ) )->deltaVoltage() - Nodes.nodeListAt( M_nodeIndex.at( 1 ) )->deltaVoltage() )
@@ -215,7 +215,7 @@ void ZeroDimensionalElementPassiveDiode::calculateEffectiveResistance( const Rea
         M_parameter = abs( current / voltage );
     }
 }
-void ZeroDimensionalElementPassiveDiode::deepUpdate( const ZeroDimensionalNodeS& Nodes )
+void ZeroDimensionalElementPassiveDiode::extractSolution( const ZeroDimensionalNodeS& Nodes )
 {
     Real deltaVoltage = ( Nodes.nodeListAt( M_nodeIndex.at( 0 ) )->voltage() - Nodes.nodeListAt( M_nodeIndex.at( 1 ) )->voltage() );
     calculateEffectiveResistance( deltaVoltage );
@@ -253,7 +253,7 @@ void ZeroDimensionalElementPassiveCapacitor::showMe( const Int& flag )
     cout << "\t parameter = " << parameter() << std::endl;
 }
 
-void ZeroDimensionalElementPassiveCapacitor::deepUpdate( const ZeroDimensionalNodeS& Nodes )
+void ZeroDimensionalElementPassiveCapacitor::extractSolution( const ZeroDimensionalNodeS& Nodes )
 {
     M_current = ( Nodes.nodeListAt( M_nodeIndex.at( 0 ) )->deltaVoltage() - Nodes.nodeListAt( M_nodeIndex.at( 1 ) )->deltaVoltage() ) * M_parameter;
 }
@@ -400,9 +400,9 @@ ZeroDimensionalElementVoltageSource::ZeroDimensionalElementVoltageSource() :
 void ZeroDimensionalElementVoltageSource::connectElement( zeroDimensionalNodeSPtr_Type & Nodes )
 {
     zeroDimensionalNodeKnownPtr_Type theNode = Nodes->knownNodeMapAt( M_nodeIndex );
-    theNode->setelementListIndex( M_id );
+    theNode->setElementListIndex( M_id );
     Int otherEndIndex = -1;// In fact this element is not connecting this node to a new node, only filling the vector
-    theNode->setnodeListIndex( otherEndIndex );
+    theNode->setNodeListIndex( otherEndIndex );
 }
 void ZeroDimensionalElementVoltageSource::calculateCurrent( const ZeroDimensionalNodeS& Nodes,
                                                             const ZeroDimensionalElementS& Elements )
@@ -434,9 +434,9 @@ void ZeroDimensionalElementCurrentSource::connectElement( zeroDimensionalNodeSPt
 {
     Int Index = M_nodeIndex;
     zeroDimensionalNodePtr_Type theNode = Nodes->nodeListAt( Index );
-    theNode->setelementListIndex( M_id );
+    theNode->setElementListIndex( M_id );
     Int otherEndIndex = -1;// In fact this element is not connecting this node to a new node, only filling the vector
-    theNode->setnodeListIndex( otherEndIndex );
+    theNode->setNodeListIndex( otherEndIndex );
 }
 
 void ZeroDimensionalElementCurrentSource::buildABC( matrix_Type& /*A*/,
@@ -479,7 +479,7 @@ void ZeroDimensionalNode::showMe( const Int& flag )
     }
 }
 
-const std::string ZeroDimensionalNode::enum2string( const ZeroDimentionalNodeType & type ) const
+const std::string ZeroDimensionalNode::enum2string( const ZeroDimensionalNodeType & type ) const
 {
     std::string output;
     switch ( type )
@@ -561,7 +561,7 @@ ZeroDimensionalElementS::ZeroDimensionalElementS() :
 
 void ZeroDimensionalElementS::showMe( const Int& flag )
 {
-    cout << "=============== Show all ZeroDimentional Elements ===========" << std::endl;
+    cout << "=============== Show all ZeroDimensional Elements ===========" << std::endl;
     for ( iterZeroDimensionalElement_Type theElement = M_elementList->begin(); theElement != M_elementList->end(); theElement++ )
     {
         ( *theElement )->showMe( flag );
@@ -580,7 +580,7 @@ ZeroDimensionalNodeS::ZeroDimensionalNodeS() :
 
 void ZeroDimensionalNodeS::showMe( const Int& flag )
 {
-    cout << "=============== Show all ZeroDimentional Nodes    ===========" << std::endl;
+    cout << "=============== Show all ZeroDimensional Nodes    ===========" << std::endl;
     for ( iterZeroDimensionalNode_Type theNode = M_nodeList->begin(); theNode != M_nodeList->end(); theNode++ )
     {
         ( *theNode )->showMe( flag );
@@ -630,7 +630,7 @@ void ZeroDimensionalCircuitData::buildCircuit( const char *fileName,
     Real beta = 0.0;
 
 
-    std::vector< ZeroDimentionalNodeType > nodesType;
+    std::vector< ZeroDimensionalNodeType > nodesType;
     vecInt_Type nodesConnectingSource;
     vecInt_Type terminalNodes;
 
@@ -772,22 +772,22 @@ void ZeroDimensionalCircuitData::createElementResistor( Int ID,
                                                         Real parameter )
 {
     zeroDimensionalElementPassiveResistorPtr_Type theElement( new ZeroDimensionalElementPassiveResistor() );
-    theElement->setid( ID );
+    theElement->setId( ID );
     if ( M_Elements->elementCounter() != ID )
     {
         cerr << "Error: Element Id error at  " << ID;
         exit( -1 );
     }
-    theElement->setnodeIndex( node1 );
-    theElement->setnodeIndex( node2 );
+    theElement->setNodeIndex( node1 );
+    theElement->setNodeIndex( node2 );
     if ( parameter <= 0 )
     {
         cerr << "Error: Resistance value <=0, ID =  " << ID;
         exit( -1 );
     }
-    theElement->setparameter( 1.0 / parameter );
+    theElement->setParameter( 1.0 / parameter );
     M_Elements->setelementList( theElement );
-    M_Elements->setresistorList( theElement );
+    M_Elements->setResistorList( theElement );
 }
 void ZeroDimensionalCircuitData::createElementCapacitor( Int ID,
                                                          Int node1,
@@ -795,17 +795,17 @@ void ZeroDimensionalCircuitData::createElementCapacitor( Int ID,
                                                          Real parameter )
 {
     zeroDimensionalElementPassiveCapacitorPtr_Type theElement( new ZeroDimensionalElementPassiveCapacitor() );
-    theElement->setid( ID );
+    theElement->setId( ID );
     if ( M_Elements->elementCounter() != ID )
     {
         cerr << "Error: Element Id error at  " << ID;
         exit( -1 );
     }
-    theElement->setnodeIndex( node1 );
-    theElement->setnodeIndex( node2 );
-    theElement->setparameter( parameter );
+    theElement->setNodeIndex( node1 );
+    theElement->setNodeIndex( node2 );
+    theElement->setParameter( parameter );
     M_Elements->setelementList( theElement );
-    M_Elements->setcapacitorList( theElement );
+    M_Elements->setCapacitorList( theElement );
 }
 void ZeroDimensionalCircuitData::createElementInductor( Int ID,
                                                         Int node1,
@@ -813,18 +813,18 @@ void ZeroDimensionalCircuitData::createElementInductor( Int ID,
                                                         Real parameter )
 {
     zeroDimensionalElementPassiveInductorPtr_Type theElement( new ZeroDimensionalElementPassiveInductor() );
-    theElement->setid( ID );
+    theElement->setId( ID );
 
     if ( M_Elements->elementCounter() != ID )
     {
         cerr << "Error: Element Id error at  " << ID;
         exit( -1 );
     }
-    theElement->setnodeIndex( node1 );
-    theElement->setnodeIndex( node2 );
-    theElement->setparameter( 1.0 / parameter );
+    theElement->setNodeIndex( node1 );
+    theElement->setNodeIndex( node2 );
+    theElement->setParameter( 1.0 / parameter );
     M_Elements->setelementList( theElement );
-    M_Elements->setinductorList( theElement );
+    M_Elements->setInductorList( theElement );
 }
 void ZeroDimensionalCircuitData::createElementDiode( Int ID,
                                                      Int node1,
@@ -834,45 +834,45 @@ void ZeroDimensionalCircuitData::createElementDiode( Int ID,
                                                      Real beta )
 {
     zeroDimensionalElementPassiveDiodePtr_Type theElement( new ZeroDimensionalElementPassiveDiode() );
-    theElement->setid( ID );
+    theElement->setId( ID );
     if ( M_Elements->elementCounter() != ID )
     {
         cerr << "Error: Element Id error at  " << ID;
         exit( -1 );
     }
-    theElement->setnodeIndex( node1 );
-    theElement->setnodeIndex( node2 );
-    theElement->setparameter( 0 );
+    theElement->setNodeIndex( node1 );
+    theElement->setNodeIndex( node2 );
+    theElement->setParameter( 0 );
     theElement->setforwardBias( forwardBias );
     theElement->setalpha( alpha );
     theElement->setbeta( beta );
     M_Elements->setelementList( theElement );
-    M_Elements->setdiodeList( theElement );
+    M_Elements->setDiodeList( theElement );
 }
 
 Int ZeroDimensionalCircuitData::createElementVoltageSource( Int node1 )
 {
     zeroDimensionalElementVoltageSourcePtr_Type theElement( new ZeroDimensionalElementVoltageSource() );
-    theElement->setid( M_Elements->elementCounter() );
-    theElement->setnodeIndex( node1 );
+    theElement->setId( M_Elements->elementCounter() );
+    theElement->setNodeIndex( node1 );
     M_Elements->setelementList( theElement );
-    M_Elements->setvoltageSourceList( theElement );
-    M_Elements->setvoltageSourceMap( theElement->id(), theElement );
+    M_Elements->setVoltageSourceList( theElement );
+    M_Elements->setVoltageSourceMap( theElement->id(), theElement );
     return theElement->id();
 }
 void ZeroDimensionalCircuitData::createElementCurrentSource( Int node1 )
 {
     zeroDimensionalElementCurrentSourcePtr_Type theElement( new ZeroDimensionalElementCurrentSource() );
-    theElement->setid( M_Elements->elementCounter() );
-    theElement->setnodeIndex( node1 );
+    theElement->setId( M_Elements->elementCounter() );
+    theElement->setNodeIndex( node1 );
     M_Elements->setelementList( theElement );
-    M_Elements->setcurrentSourceList( theElement );
+    M_Elements->setCurrentSourceList( theElement );
 }
 
 void ZeroDimensionalCircuitData::createUnknownNode( const Int & id )
 {
     zeroDimensionalNodeUnknownPtr_Type theNode( new ZeroDimensionalNodeUnknown() );
-    theNode->setid( id );
+    theNode->setId( id );
     M_Nodes->setnodeList( theNode );
     M_Nodes->setunknownNodeList( theNode );
     M_Nodes->setunknownNodeMap( theNode->id(), theNode );
@@ -882,7 +882,7 @@ void ZeroDimensionalCircuitData::createKnownNode( const Int & id,
                                                   const zeroDimensionalElementVoltageSourcePtr_Type & theElement )
 {
     zeroDimensionalNodeKnownPtr_Type theNode( new ZeroDimensionalNodeKnown( theElement ) );
-    theNode->setid( id );
+    theNode->setId( id );
     M_Nodes->setnodeList( theNode );
     M_Nodes->setknownNodeList( theNode );
     M_Nodes->setknownNodeMap( theNode->id(), theNode );
@@ -891,7 +891,7 @@ void ZeroDimensionalCircuitData::createKnownNode( const Int & id,
 void ZeroDimensionalCircuitData::createKnownNode( const Int & id )
 {
     zeroDimensionalNodeKnownPtr_Type theNode( new ZeroDimensionalNodeKnown() );
-    theNode->setid( id );
+    theNode->setId( id );
     M_Nodes->setnodeList( theNode );
     M_Nodes->setknownNodeList( theNode );
     M_Nodes->setknownNodeMap( theNode->id(), theNode );
@@ -905,12 +905,12 @@ void ZeroDimensionalCircuitData::fixBC( bcPtr_Type bc )
     ptrVecZeroDimensionalElementCurrentSourcePtr_Type currentElementList = M_Elements->currentSourceList();
     for ( iterZeroDimensionalElementCurrentSource_Type theElement = currentElementList->begin(); theElement != currentElementList->end(); theElement++ )
     {
-        ( *theElement )->setbc( bc );
+        ( *theElement )->setBC( bc );
     }
     ptrVecZeroDimensionalElementVoltageSourcePtr_Type voltageElementList = M_Elements->voltageSourceList();
     for ( iterZeroDimensionalElementVoltageSourcePtr_Type theElement = voltageElementList->begin(); theElement != voltageElementList->end(); theElement++ )
     {
-        ( *theElement )->setbc( bc );
+        ( *theElement )->setBC( bc );
     }
 }
 
@@ -991,8 +991,8 @@ void ZeroDimensionalCircuitData::updateCircuitDataFromY( const Real& t,
     for ( iterZeroDimensionalNodeUnknown_Type theNode = unknownNodeList ->begin(); theNode != unknownNodeList->end(); theNode++ )
     {
         const Int& variableIndex = ( *theNode )->variableIndex();
-        ( *theNode )->setvoltage( ( *x )[variableIndex] );
-        ( *theNode )->setdeltaVoltage( ( *x_dot )[variableIndex] );
+        ( *theNode )->setVoltage( ( *x )[variableIndex] );
+        ( *theNode )->setDeltaVoltage( ( *x_dot )[variableIndex] );
     }
 
     //unpdate inductor unknown current
@@ -1000,24 +1000,24 @@ void ZeroDimensionalCircuitData::updateCircuitDataFromY( const Real& t,
     for ( iterZeroDimensionalElementPassiveInductor_Type theInductor = inductorList ->begin(); theInductor != inductorList->end(); theInductor++ )
     {
         const Int& variableIndex = ( *theInductor )->variableIndex();
-        ( *theInductor )->setcurrent( ( *x )[variableIndex] );
-        ( *theInductor )->setdeltaCurrent( ( *x_dot )[variableIndex] );
+        ( *theInductor )->setCurrent( ( *x )[variableIndex] );
+        ( *theInductor )->setDeltaCurrent( ( *x_dot )[variableIndex] );
     }
 
     //update BCs by time
     const ptrVecZeroDimensionalNodeKnownPtr_Type& knownNodeList = M_Nodes->knownNodeList();
     for ( iterZeroDimensionalNodeKnown_Type theNode = knownNodeList ->begin(); theNode != knownNodeList->end(); theNode++ )
     {
-        ( *theNode )->setvoltageByTime( t );
-        ( *theNode )->setdeltaVoltageByTime( t );
+        ( *theNode )->setVoltageByTime( t );
+        ( *theNode )->setDeltaVoltageByTime( t );
     }
     const ptrVecZeroDimensionalElementCurrentSourcePtr_Type& currentElementList = M_Elements->currentSourceList();
     for ( iterZeroDimensionalElementCurrentSource_Type theElement = currentElementList ->begin(); theElement != currentElementList->end(); theElement++ )
     {
-        ( *theElement )->setcurrentByTime( t );
+        ( *theElement )->setCurrentByTime( t );
     }
 }
-void ZeroDimensionalCircuitData::deepUpdateFromY( const Real& t,
+void ZeroDimensionalCircuitData::extractSolutionFromY( const Real& t,
                                                   const Epetra_Vector& y,
                                                   const Epetra_Vector& yp )
 {
@@ -1028,7 +1028,7 @@ void ZeroDimensionalCircuitData::deepUpdateFromY( const Real& t,
     const ptrVecZeroDimensionalElementPtr_Type& elementList = M_Elements->elementList();
     for ( iterZeroDimensionalElement_Type theElement = elementList ->begin(); theElement != elementList->end(); theElement++ )
     {
-        ( *theElement )->deepUpdate( *M_Nodes );
+        ( *theElement )->extractSolution( *M_Nodes );
     }
 
     // Now we can compute voltage source current

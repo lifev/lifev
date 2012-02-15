@@ -265,11 +265,11 @@ bool RythmosModelInterface::evaluateWImplicit( const Real& t,
     return true;
 }
 
-void RythmosModelInterface::deepUpdate( const Real &t,
+void RythmosModelInterface::extractSolution( const Real &t,
                                         const vectorEpetra_Type& y,
                                         const vectorEpetra_Type& yp )
 {
-    M_circuitData->deepUpdateFromY( t, y, yp );
+    M_circuitData->extractSolutionFromY( t, y, yp );
 }
 
 #endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */

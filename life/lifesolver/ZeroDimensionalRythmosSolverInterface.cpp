@@ -92,31 +92,21 @@ Teuchos::RCP< Epetra_Operator > RythmosSolverInterface::create_W() const
 EpetraExt::ModelEvaluator::InArgs RythmosSolverInterface::createInArgs() const
 {
     InArgsSetup inArgs;
-    inArgs.setSupports( IN_ARG_x,
-                        true );
-    inArgs.setSupports( IN_ARG_x_dot,
-                        true );
-    inArgs.setSupports( IN_ARG_alpha,
-                        true );
-    inArgs.setSupports( IN_ARG_beta,
-                        true );
-    inArgs.setSupports( IN_ARG_t,
-                        true );
+    inArgs.setSupports( IN_ARG_x, true );
+    inArgs.setSupports( IN_ARG_x_dot, true );
+    inArgs.setSupports( IN_ARG_alpha, true );
+    inArgs.setSupports( IN_ARG_beta, true );
+    inArgs.setSupports( IN_ARG_t, true );
     return inArgs;
 }
 
 EpetraExt::ModelEvaluator::OutArgs RythmosSolverInterface::createOutArgs() const
 {
     OutArgsSetup outArgs;
-    outArgs.setSupports( OUT_ARG_f,
-                         true );
-    outArgs.setSupports( OUT_ARG_W,
-                         true );
-    outArgs.setSupports( OUT_ARG_W,
-                         true );
-    outArgs.set_W_properties( DerivativeProperties( DERIV_LINEARITY_NONCONST,
-                                                    DERIV_RANK_UNKNOWN,
-                                                    true ) );
+    outArgs.setSupports( OUT_ARG_f, true );
+    outArgs.setSupports( OUT_ARG_W, true );
+    outArgs.setSupports( OUT_ARG_W, true );
+    outArgs.set_W_properties( DerivativeProperties( DERIV_LINEARITY_NONCONST, DERIV_RANK_UNKNOWN, true ) );
     return outArgs;
 }
 
@@ -138,10 +128,7 @@ void RythmosSolverInterface::evalModel( const InArgs& inArgs,
     Teuchos::RCP< Epetra_Vector > f;
     if ( ( f = outArgs.get_f() ).get() )
     {
-        M_problemInterfacePtr->evaluateFImplicit( t,
-                                                  &*x,
-                                                  &*xdot,
-                                                  &*f );
+        M_problemInterfacePtr->evaluateFImplicit( t, &*x, &*xdot, &*f );
 #ifdef HAVE_LIFEV_DEBUG
         std::cout << "f = " << std::endl;
         f->Print(std::cout);
@@ -154,12 +141,7 @@ void RythmosSolverInterface::evalModel( const InArgs& inArgs,
         const Real alpha = inArgs.get_alpha();
         const Real beta = inArgs.get_beta();
         Epetra_CrsMatrix& jac = Teuchos::dyn_cast< Epetra_CrsMatrix >( *W );
-        M_problemInterfacePtr->evaluateWImplicit( t,
-                                                  alpha,
-                                                  beta,
-                                                  &*x,
-                                                  &*xdot,
-                                                  &jac );
+        M_problemInterfacePtr->evaluateWImplicit( t, alpha, beta, &*x, &*xdot, &jac );
 #ifdef HAVE_LIFEV_DEBUG
         std::cout << "jac = " << std::endl;
         jac.Print(std::cout);
