@@ -53,6 +53,7 @@
 #include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifemesh/MeshEntity.hpp>
 #include <life/lifearray/MeshEntityContainer.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 
 namespace LifeV
 {
