@@ -179,7 +179,7 @@ MultiscaleModelFSI3D::setupModel()
 
 #ifdef FSI_WITH_BOUNDARYAREA
     for ( boundaryAreaFunctionsContainerIterator_Type i = M_boundaryAreaFunctions.begin(); i < M_boundaryAreaFunctions.end(); ++i )
-        ( *i )->computeReferenceArea();
+        ( *i )->setup();
 #endif
 
     // Setup Exporters
@@ -369,11 +369,22 @@ MultiscaleModelFSI3D::imposeBoundaryStress( const bcFlag_Type& flag, const funct
 #ifdef FSI_WITH_EXTERNALPRESSURE
     base.setFunction( function );
 #else
-    FSI3DCouplingFunction couplingFunction( function, M_data->dataSolid()->externalPressure() );
+    couplingFunctionPtr_Type couplingFunction( new couplingFunction_Type( function, M_data->dataSolid()->externalPressure()) );
     M_stressCouplingFunction.push_back( couplingFunction );
     base.setFunction( boost::bind( &FSI3DCouplingFunction::function, M_stressCouplingFunction.back(), _1, _2, _3, _4, _5 ) );
 #endif
     M_fluidBC->handler()->addBC( "CouplingStress_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Natural, Normal, base );
+
+#ifdef FSI_WITH_BOUNDARYAREA
+    for ( boundaryAreaFunctionsContainerIterator_Type i = M_boundaryAreaFunctions.begin(); i < M_boundaryAreaFunctions.end(); ++i )
+        if ( ( *i )->fluidFlag() == flag )
+        {
+            ( *i )->setFunction( function );
+            return;
+        }
+    if ( M_comm->MyPID() == 0 )
+        std::cerr << "!!! WARNING: No function assigned at flag: " << flag << " !!!" << std::endl;
+#endif
 }
 
 Real
@@ -624,30 +635,17 @@ MultiscaleModelFSI3D::setupBC( const std::string& fileName )
 #ifdef FSI_WITH_BOUNDARYAREA
     GetPot dataFile( fileName );
 
-    UInt scaledAreaColumnsNumber = 9.0;
+    UInt scaledAreaColumnsNumber = 3.0;
     UInt scaledAreaLinesNumber   = dataFile.vector_variable_size( "solid/scaledAreaSolidRing/data" ) / scaledAreaColumnsNumber;
 
-    boost::array< Real, 3 > tempVector;
     for ( UInt fileScaledAreaLine( 0 ); fileScaledAreaLine < scaledAreaLinesNumber; ++fileScaledAreaLine )
     {
         boundaryAreaFunctionPtr_Type boundaryAreaFunction( new boundaryAreaFunction_Type() );
 
         boundaryAreaFunction->setModel( this );
-        boundaryAreaFunction->setFluidFlag(     dataFile( "solid/scaledAreaSolidRing/data", 1, fileScaledAreaLine * scaledAreaColumnsNumber ) );
-        boundaryAreaFunction->setSolidFlag(     dataFile( "solid/scaledAreaSolidRing/data", 1, fileScaledAreaLine * scaledAreaColumnsNumber + 1 ) );
-        //boundaryAreaFunction->setReferenceArea( dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 2 ) );
-
-        tempVector[0] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 2 );
-        tempVector[1] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 3 );
-        tempVector[2] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 4 );
-        boundaryAreaFunction->setGeometricCenter( tempVector );
-
-        tempVector[0] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 5 );
-        tempVector[1] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 6 );
-        tempVector[2] = dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 7 );
-        boundaryAreaFunction->setNormal( tempVector );
-
-        boundaryAreaFunction->setBeta(          dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 8 ) );
+        boundaryAreaFunction->setFluidFlag( dataFile( "solid/scaledAreaSolidRing/data", 1, fileScaledAreaLine * scaledAreaColumnsNumber ) );
+        boundaryAreaFunction->setSolidFlag( dataFile( "solid/scaledAreaSolidRing/data", 1, fileScaledAreaLine * scaledAreaColumnsNumber + 1 ) );
+        boundaryAreaFunction->setBeta(      dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 2 ) );
 
         M_boundaryAreaFunctions.push_back( boundaryAreaFunction );
 
