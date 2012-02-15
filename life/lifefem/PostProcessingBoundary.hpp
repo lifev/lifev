@@ -810,6 +810,15 @@ Vector PostProcessingBoundary<MeshType>::normal( const markerID_Type& flag, UInt
     // At the end I'll reduce the process normals --> normal
     Vector normalScatter(3), normal(3);
 
+    // Initialize vectors to zero
+    normal[0] = 0;
+	normal[1] = 0;
+	normal[2] = 0;
+
+	normalScatter[0] = 0;
+	normalScatter[1] = 0;
+	normalScatter[2] = 0;
+
     // I need the global DOF ID to query the vector
     // dofVectorIndex is the index of the dof in the data structure of PostProcessingBoundary class
     // dofGlobalId is the corresponding ID in the GLOBAL mesh (prior to partitioning)
