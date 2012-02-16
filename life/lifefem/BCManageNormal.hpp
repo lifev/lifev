@@ -479,17 +479,15 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
     {
         //Update the currentBdFE with the face data
         currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( iFace ) );
-        ID idFace = mesh.boundaryFacet( iFace ).id();
         UInt nDofF = currentBdFE.nbNode();
 
         //For each node on the face
         for (UInt icheck = 0; icheck< nDofF; ++icheck)
         {
-            bool idFaceExist(false); //Is the face in the array?
-            ID idf = dof.localToGlobalMapByBdFacet(idFace,icheck); idFaceExist=true;
+            ID idf = dof.localToGlobalMapByBdFacet(iFace,icheck);
 
             //If the face exists and the point is on this processor
-            if (idFaceExist && (M_flags.find(idf) != M_flags.end()))
+            if (M_flags.find(idf) != M_flags.end())
             {
                 ID flag = M_flags[idf];
 
