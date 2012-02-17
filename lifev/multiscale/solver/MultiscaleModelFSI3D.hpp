@@ -595,6 +595,9 @@ public:
         M_geometricCenter[1] = geometricCenter[1];
         M_geometricCenter[2] = geometricCenter[2];
 
+        // Initialize scale factor
+        M_scaleFactor = 0;
+
         // ShowMe
         showMe();
     }
