@@ -370,8 +370,24 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
     {
         ( *i )->exportData( M_data );
 
-        // Switch to know the type of base (TODO remove this requirement)
-        switch ( ( *i )->baseType() )
+        // Robin BC
+        if ( M_data.type() == Robin )
+        {
+            BCVector base;
+
+            ( *i )->assignFunction( base );
+            addBcToHandler( base );
+        }
+        else
+        {
+            BCVectorInterface base;
+
+            ( *i )->assignFunction( base );
+            addBcToHandler( base );
+        }
+
+        // Switch to know the type of base (TODO Fix a problem with this implementation)
+/*        switch ( ( *i )->baseType() )
         {
         case BASEFunction3D:
         {
@@ -405,7 +421,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
             std::cout << " !!! Error: " << ( *i )->baseType() << " is not available as a base !!!" << std::endl;
 
             return;
-        }
+        }*/
     }
 }
 
