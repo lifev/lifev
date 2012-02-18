@@ -1014,6 +1014,7 @@ OutPutFormat::OutPutFormat( std::string width,
     M_buffer = new char[bufferSize];
     M_formatDouble = "% " + M_width + "." + M_precision + "f";
     M_formatInteger = "% " + M_width + "d";
+    M_formatString = "% " + M_width + "s";
 }
 void OutPutFormat::writeDataFormat( const Real& number,
                                     std::ofstream & stream,
@@ -1042,9 +1043,48 @@ void OutPutFormat::writeDataFormat( const Int& number,
                                     std::ofstream & stream,
                                     const EndLine& flag )
 {
+    //format string to align "Node ..." in the output header;
+    UInt integerWidth(atoi(M_width.c_str()));                   //integer storing the length of the output values
+
+    std::ostringstream numberToWrite;
+    numberToWrite << number;
+
+    UInt integerWidthToUse(integerWidth);
+    integerWidthToUse-=numberToWrite.str().size();             //the new width is obtained subtracting the length of the integer to write in the header (index of the node)
+
+    std::ostringstream nodeStringWidth;
+    nodeStringWidth << integerWidthToUse;
+
+    std::string formatNodeString("% " + nodeStringWidth.str() + "s");   //this guarantees the alignment of the header's fields to the output values in the following lines (regardless of the node index's length)
+
     sprintf( M_buffer,
-             M_formatInteger.data(),
-             number );
+    		 formatNodeString.data(),
+             "Node " );
+
+    stream << M_buffer<<number;
+    switch ( flag )
+    {
+        case newLine:
+            stream << std::endl;
+            break;
+        case space:
+            stream << M_whiteSpace;
+            break;
+        case nothing:
+            break;
+        default:
+            std::cerr << "no flag at OutPutFormat::writeDataFormat";
+            break;
+    }
+}
+
+void OutPutFormat::writeDataFormat( const string& text,
+                                    std::ofstream & stream,
+                                    const EndLine& flag )
+{
+    sprintf( M_buffer,
+             M_formatString.data(),
+             text.c_str() );
     stream << M_buffer;
     switch ( flag )
     {
@@ -1061,6 +1101,7 @@ void OutPutFormat::writeDataFormat( const Int& number,
             break;
     }
 }
+
 void OutPutFormat::writeNewLine( std::ofstream & stream )
 {
     stream << std::endl;

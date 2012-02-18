@@ -1148,15 +1148,18 @@ public:
 
     void writeDataFormat(const Real& number, std::ofstream & stream, const EndLine& flag);
     void writeDataFormat(const Int& number,std::ofstream & stream, const EndLine& flag);
+    void writeDataFormat(const string& text,std::ofstream & stream, const EndLine& flag);
     void writeNewLine(std::ofstream & stream);
 
 private:
 
     std::string  M_width;
+    UInt         M_integerWidth;
     std::string  M_precision ;
     std::string  M_whiteSpace ;
     std::string  M_formatDouble;
     std::string  M_formatInteger;
+    std::string  M_formatString;
     char         *M_buffer;
 };
 

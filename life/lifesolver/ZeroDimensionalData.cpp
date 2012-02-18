@@ -235,7 +235,7 @@ void ZeroDimensionalData::writeHeaders()
 {
     //write header for current file
     ptrVecZeroDimensionalElementPtr_Type elementList = M_circuitData->Elements() ->elementList();
-    M_outPutFormat.writeDataFormat( -999, M_currentFileStream, M_outPutFormat.space );
+    M_outPutFormat.writeDataFormat( "% time", M_currentFileStream, M_outPutFormat.space );
     for ( iterZeroDimensionalElement_Type theElement = elementList->begin(); theElement != elementList->end(); theElement++ )
     {
         M_outPutFormat.writeDataFormat( ( *theElement )->id(), M_currentFileStream, M_outPutFormat.space );
@@ -244,8 +244,8 @@ void ZeroDimensionalData::writeHeaders()
 
     //write header for voltage and current balance at each node (voltage file and balance file)
     ptrVecZeroDimensionalNodePtr_Type nodeList = M_circuitData->Nodes() ->nodeList();
-    M_outPutFormat.writeDataFormat( (Int) -999, M_balanceFileStream, M_outPutFormat.space );
-    M_outPutFormat.writeDataFormat( (Int) -999, M_voltageFileStream, M_outPutFormat.space );
+    M_outPutFormat.writeDataFormat( "% time", M_balanceFileStream, M_outPutFormat.space );
+    M_outPutFormat.writeDataFormat( "% time", M_voltageFileStream, M_outPutFormat.space );
     for ( iterZeroDimensionalNode_Type theNode = nodeList->begin(); theNode != nodeList->end(); theNode++ )
     {
         M_outPutFormat.writeDataFormat( ( *theNode )->id(), M_voltageFileStream, M_outPutFormat.space );
