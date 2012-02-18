@@ -27,6 +27,7 @@
 /*!
  *  @file
  *  @brief Rythmos Model Interface
+ *  @version alpha (experimental)
  *
  *  @date 21-11-2011
  *  @author Mahmoud Jafargholi
@@ -131,10 +132,10 @@ public:
     //! hafter complete Rythmos step, this method will update circuit data.
     void extractSolution(const Real &t1,const vectorEpetra_Type& y , const vectorEpetra_Type& yp );
 
-    Int numGlobalElements() { return M_numGlobalElements; }
+    Int numCircuitElements() { return M_numCircuitElements; }
 
 protected:
-    Int                                             M_numGlobalElements; // Total Number of elements
+    Int                                             M_numCircuitElements; // Total Number of elements
     Int                                             M_numMyElements; // Number of elements owned by this process
     Int                                             M_myPID; // Process number
     Int                                             M_numProc; // Total number of processes

@@ -99,7 +99,7 @@ void ZeroDimensionalData::setup( const GetPot& dataFile,
     M_solverData.abstol = dataFile( ( section + "/Solver/abstol" ).data(), 1.0 );
     M_solverData.maxOrder = dataFile( ( section + "/Solver/maxOrder" ).data(), 1 );
     M_solverData.verbose = dataFile( ( section + "/Solver/verbose" ).data(), false );
-    M_solverData.verbosLevel = dataFile( ( section + "/Solver/verboseLevel" ).data(), 0 );
+    M_solverData.verboseLevel = dataFile( ( section + "/Solver/verboseLevel" ).data(), 0 );
     M_solverData.useNOX = dataFile( ( section + "/Solver/useNOX" ).data(), false );
     M_solverData.fixTimeStep = dataFile( ( section + "/Solver/fixTimeStep" ).data(), true );
     M_solverData.extraLSParamsFile = dataFile( ( section + "/Solver/extraLinearSolverParamsFile" ).data(), "./Extra_AztecOO_Params.xml" );
@@ -113,68 +113,41 @@ void ZeroDimensionalData::setup( const GetPot& dataFile,
     writeHeaders();
 }
 
-void ZeroDimensionalData::showMe() const
+void ZeroDimensionalData::initializeSolution()
 {
-    M_circuitData->showMe();
-}
-void ZeroDimensionalData::assignVaribleIndex()
-{
-    zeroDimensionalNodeSPtr_Type Nodes = M_circuitData->Nodes();
-    ptrVecZeroDimensionalNodeUnknownPtr_Type unKnownList = Nodes->unknownNodeList();
-    zeroDimensionalElementSPtr_Type Elements = M_circuitData->Elements();
-    ptrVecZeroDimensionalElementPassiveInductorPtr_Type inductorList = Elements->inductorList();
-    M_unknownCounter = 0;
-
-    //set variable index for unknown nodes
-    for ( iterZeroDimensionalNodeUnknown_Type theUnknownNode = unKnownList->begin(); theUnknownNode != unKnownList->end(); theUnknownNode++ )
-    {
-        ( *theUnknownNode )->assignVariableIndex( M_unknownCounter );
-        M_unknownCounter++;
-    }
-
-    //set variable index for inductor current
-    for ( iterZeroDimensionalElementPassiveInductor_Type theInductor = inductorList->begin(); theInductor != inductorList->end(); theInductor++ )
-    {
-        ( *theInductor )->assignVariableIndex( M_unknownCounter );
-        M_unknownCounter++;
-    }
-}
-
-void ZeroDimensionalData::writeHeaders()
-{
-
-    //write header for current file
     ptrVecZeroDimensionalElementPtr_Type elementList = M_circuitData->Elements() ->elementList();
-    M_outPutFormat.writeDataFormat( -999,
-                                    M_currentFileStream,
-                                    M_outPutFormat.space );
     for ( iterZeroDimensionalElement_Type theElement = elementList->begin(); theElement != elementList->end(); theElement++ )
     {
-        M_outPutFormat.writeDataFormat( ( *theElement )->id(),
-                                        M_currentFileStream,
-                                        M_outPutFormat.space );
+        ( *theElement )->setCurrent( 0.0 );
+        ( *theElement )->setDeltaCurrent( 0.0 );
     }
-    M_outPutFormat.writeNewLine( M_currentFileStream );
-    M_outPutFormat.writeDataFormat( (Int) -999,
-                                    M_balanceFileStream,
-                                    M_outPutFormat.space );
 
-    //write header for voltage and current balance at each node (voltage file and balance file)
     ptrVecZeroDimensionalNodePtr_Type nodeList = M_circuitData->Nodes() ->nodeList();
-    M_outPutFormat.writeDataFormat( (Int) -999,
-                                    M_voltageFileStream,
-                                    M_outPutFormat.space );
     for ( iterZeroDimensionalNode_Type theNode = nodeList->begin(); theNode != nodeList->end(); theNode++ )
     {
-        M_outPutFormat.writeDataFormat( ( *theNode )->id(),
-                                        M_voltageFileStream,
-                                        M_outPutFormat.space );
-        M_outPutFormat.writeDataFormat( ( *theNode )->id(),
-                                        M_balanceFileStream,
-                                        M_outPutFormat.space );
+        ( *theNode )->setVoltage( 0.0 );
+        ( *theNode )->setDeltaVoltage( 0.0 );
     }
-    M_outPutFormat.writeNewLine( M_voltageFileStream );
-    M_outPutFormat.writeNewLine( M_balanceFileStream );
+}
+
+//! update source elements
+void ZeroDimensionalData::updateBC()
+{
+    Real time = M_time->time();
+    ptrVecZeroDimensionalElementCurrentSourcePtr_Type currentElementList = M_circuitData->Elements()-> currentSourceList();
+
+    for ( iterZeroDimensionalElementCurrentSource_Type theElement = currentElementList->begin(); theElement != currentElementList->end(); theElement++ )
+    {
+        ( *theElement )->setCurrentByTime( time );
+        std::cout << ( *theElement )->current() << std::endl;
+    }
+
+    ptrVecZeroDimensionalElementVoltageSourcePtr_Type voltageElementList = M_circuitData->Elements()-> voltageSourceList();
+    for ( iterZeroDimensionalElementVoltageSourcePtr_Type theElement = voltageElementList->begin(); theElement != voltageElementList->end(); theElement++ )
+    {
+        ( *theElement )->setVoltageByTime( time );
+        std::cout << ( *theElement )->voltage() << std::endl;
+    }
 }
 
 void ZeroDimensionalData::saveSolution()
@@ -215,22 +188,7 @@ void ZeroDimensionalData::saveSolution()
     M_outPutFormat.writeNewLine( M_voltageFileStream );
     M_outPutFormat.writeNewLine( M_balanceFileStream );
 }
-void ZeroDimensionalData::initializeSolution()
-{
-    ptrVecZeroDimensionalElementPtr_Type elementList = M_circuitData->Elements() ->elementList();
-    for ( iterZeroDimensionalElement_Type theElement = elementList->begin(); theElement != elementList->end(); theElement++ )
-    {
-        ( *theElement )->setCurrent( 0.0 );
-        ( *theElement )->setDeltaCurrent( 0.0 );
-    }
 
-    ptrVecZeroDimensionalNodePtr_Type nodeList = M_circuitData->Nodes() ->nodeList();
-    for ( iterZeroDimensionalNode_Type theNode = nodeList->begin(); theNode != nodeList->end(); theNode++ )
-    {
-        ( *theNode )->setVoltage( 0.0 );
-        ( *theNode )->setDeltaVoltage( 0.0 );
-    }
-}
 
 void ZeroDimensionalData::showMeVariables()
 {
@@ -250,24 +208,51 @@ void ZeroDimensionalData::showMeVariables()
     }
 }
 
-//! update source elements
-void ZeroDimensionalData::updateBC()
+void ZeroDimensionalData::assignVaribleIndex()
 {
-    Real time = M_time->time();
-    ptrVecZeroDimensionalElementCurrentSourcePtr_Type currentElementList = M_circuitData->Elements()-> currentSourceList();
+    zeroDimensionalNodeSPtr_Type Nodes = M_circuitData->Nodes();
+    ptrVecZeroDimensionalNodeUnknownPtr_Type unKnownList = Nodes->unknownNodeList();
+    zeroDimensionalElementSPtr_Type Elements = M_circuitData->Elements();
+    ptrVecZeroDimensionalElementPassiveInductorPtr_Type inductorList = Elements->inductorList();
+    M_unknownCounter = 0;
 
-    for ( iterZeroDimensionalElementCurrentSource_Type theElement = currentElementList->begin(); theElement != currentElementList->end(); theElement++ )
+    //set variable index for unknown nodes
+    for ( iterZeroDimensionalNodeUnknown_Type theUnknownNode = unKnownList->begin(); theUnknownNode != unKnownList->end(); theUnknownNode++ )
     {
-        ( *theElement )->setCurrentByTime( time );
-        std::cout << ( *theElement )->current() << std::endl;
+        ( *theUnknownNode )->assignVariableIndex( M_unknownCounter );
+        M_unknownCounter++;
     }
 
-    ptrVecZeroDimensionalElementVoltageSourcePtr_Type voltageElementList = M_circuitData->Elements()-> voltageSourceList();
-    for ( iterZeroDimensionalElementVoltageSourcePtr_Type theElement = voltageElementList->begin(); theElement != voltageElementList->end(); theElement++ )
+    //set variable index for inductor current
+    for ( iterZeroDimensionalElementPassiveInductor_Type theInductor = inductorList->begin(); theInductor != inductorList->end(); theInductor++ )
     {
-        ( *theElement )->setVoltageByTime( time );
-        std::cout << ( *theElement )->voltage() << std::endl;
+        ( *theInductor )->assignVariableIndex( M_unknownCounter );
+        M_unknownCounter++;
     }
+}
+
+void ZeroDimensionalData::writeHeaders()
+{
+    //write header for current file
+    ptrVecZeroDimensionalElementPtr_Type elementList = M_circuitData->Elements() ->elementList();
+    M_outPutFormat.writeDataFormat( -999, M_currentFileStream, M_outPutFormat.space );
+    for ( iterZeroDimensionalElement_Type theElement = elementList->begin(); theElement != elementList->end(); theElement++ )
+    {
+        M_outPutFormat.writeDataFormat( ( *theElement )->id(), M_currentFileStream, M_outPutFormat.space );
+    }
+    M_outPutFormat.writeNewLine( M_currentFileStream );
+
+    //write header for voltage and current balance at each node (voltage file and balance file)
+    ptrVecZeroDimensionalNodePtr_Type nodeList = M_circuitData->Nodes() ->nodeList();
+    M_outPutFormat.writeDataFormat( (Int) -999, M_balanceFileStream, M_outPutFormat.space );
+    M_outPutFormat.writeDataFormat( (Int) -999, M_voltageFileStream, M_outPutFormat.space );
+    for ( iterZeroDimensionalNode_Type theNode = nodeList->begin(); theNode != nodeList->end(); theNode++ )
+    {
+        M_outPutFormat.writeDataFormat( ( *theNode )->id(), M_voltageFileStream, M_outPutFormat.space );
+        M_outPutFormat.writeDataFormat( ( *theNode )->id(), M_balanceFileStream, M_outPutFormat.space );
+    }
+    M_outPutFormat.writeNewLine( M_voltageFileStream );
+    M_outPutFormat.writeNewLine( M_balanceFileStream );
 }
 
 } // LifeV namespace

@@ -43,28 +43,28 @@ namespace LifeV {
 // ===================================================
 // Constructors
 // ===================================================
-RythmosModelInterface::RythmosModelInterface( Int numGlobalElements,
+RythmosModelInterface::RythmosModelInterface( Int numCircuitElements,
                                               Epetra_Comm* comm,
                                               zeroDimensionalCircuitDataPtr_Type circuitData ) :
-    M_numGlobalElements( numGlobalElements ), M_numMyElements( 0 ), M_myPID( comm->MyPID() ), M_numProc( comm->NumProc() ),
+    M_numCircuitElements( numCircuitElements ), M_numMyElements( 0 ), M_myPID( comm->MyPID() ), M_numProc( comm->NumProc() ),
 
     M_standardMap( 0 ), M_initialSolutionY( 0 ), M_initialSolutionYp( 0 ), M_circuitData( circuitData )
 {
     M_comm = comm->Clone();
     ( *M_comm ).PrintInfo( std::cout );
     M_commSharedPtr.reset( M_comm );
-    M_mapEpetraPtr.reset( new MapEpetra( M_numGlobalElements,
+    M_mapEpetraPtr.reset( new MapEpetra( M_numCircuitElements,
                                          M_commSharedPtr ) );
     M_standardMap = ( M_mapEpetraPtr->map( Unique ) ).get();
     M_numMyElements = M_standardMap->NumMyElements();
     M_A.reset( new matrix_Type( *M_mapEpetraPtr,
-                                M_numGlobalElements ) );
+                                M_numCircuitElements ) );
     M_B.reset( new matrix_Type( *M_mapEpetraPtr,
-                                M_numGlobalElements ) );
+                                M_numCircuitElements ) );
 
-    for ( Int i = 0; i < M_numGlobalElements; i++ )
+    for ( Int i = 0; i < M_numCircuitElements; i++ )
     {
-        for ( Int j = 0; j < M_numGlobalElements; j++ )
+        for ( Int j = 0; j < M_numCircuitElements; j++ )
         {
             M_A->addToCoefficient( i, j, 1.0 );
             M_B->addToCoefficient( i, j, 1.0 );
@@ -221,7 +221,7 @@ bool RythmosModelInterface::evaluateFImplicit( const Real& t,
 #ifdef HAVE_LIFEV_DEBUG
     M_B->matrixPtr()->Print(std::cout);
 #endif
-    for ( Int i = 0; i < M_numGlobalElements; i++ )
+    for ( Int i = 0; i < M_numCircuitElements; i++ )
     {
         ( *f )[i] = ( *M_fA )[i] + ( *M_fB )[i] + ( *M_C )[i];
     }

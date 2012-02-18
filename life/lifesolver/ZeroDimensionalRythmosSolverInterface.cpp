@@ -43,10 +43,10 @@ namespace LifeV {
 // ===================================================
 // Constructors
 // ===================================================
-RythmosSolverInterface::RythmosSolverInterface( Int numGlobalElements,
+RythmosSolverInterface::RythmosSolverInterface( Int numCircuitElements,
                                                 Teuchos::RCP< Epetra_Comm > &epetra_comm_ptr,
                                                 rythmosModelInterfacePtrRCP_Type theModel ) :
-    M_epetraCommPtr( epetra_comm_ptr ), M_numElements( numGlobalElements ), M_problemInterfacePtr( theModel ), M_comm( epetra_comm_ptr )
+    M_epetraCommPtr( epetra_comm_ptr ), M_numElements( numCircuitElements ), M_problemInterfacePtr( theModel ), M_comm( epetra_comm_ptr )
 {
     initialize();
 }

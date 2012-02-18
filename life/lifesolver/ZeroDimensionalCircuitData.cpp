@@ -914,73 +914,6 @@ void ZeroDimensionalCircuitData::fixBC( bcPtr_Type bc )
     }
 }
 
-OutPutFormat::OutPutFormat( std::string width,
-                            std::string precision,
-                            std::string whiteSpace,
-                            Int bufferSize )
-{
-    M_width = width;
-    M_precision = precision;
-    M_whiteSpace = whiteSpace;
-    M_buffer = new char[bufferSize];
-    M_formatDouble = "% " + M_width + "." + M_precision + "f";
-    M_formatInteger = "% " + M_width + "d";
-}
-void OutPutFormat::writeDataFormat( const Real& number,
-                                    std::ofstream & stream,
-                                    const EndLine& flag )
-{
-    sprintf( M_buffer,
-             M_formatDouble.data(),
-             number );
-    stream << M_buffer;
-    switch ( flag )
-    {
-        case newLine:
-            stream << std::endl;
-            break;
-        case space:
-            stream << M_whiteSpace;
-            break;
-        case nothing:
-            break;
-        default:
-            std::cerr << "no flag at OutPutFormat::writeDataFormat";
-            break;
-    }
-}
-void OutPutFormat::writeDataFormat( const Int& number,
-                                    std::ofstream & stream,
-                                    const EndLine& flag )
-{
-    sprintf( M_buffer,
-             M_formatInteger.data(),
-             number );
-    stream << M_buffer;
-    switch ( flag )
-    {
-        case newLine:
-            stream << std::endl;
-            break;
-        case space:
-            stream << M_whiteSpace;
-            break;
-        case nothing:
-            break;
-        default:
-            std::cerr << "no flag at OutPutFormat::writeDataFormat";
-            break;
-    }
-}
-void OutPutFormat::writeNewLine( std::ofstream & stream )
-{
-    stream << std::endl;
-}
-OutPutFormat::~OutPutFormat()
-{
-    delete[] M_buffer;
-}
-
 void ZeroDimensionalCircuitData::updateCircuitDataFromY( const Real& t,
                                                          const Epetra_Vector* x,
                                                          const Epetra_Vector* x_dot )
@@ -1067,6 +1000,74 @@ void ZeroDimensionalCircuitData::updateABC( matrix_Type& A,
     }
     A.globalAssemble();
     B.globalAssemble();
+}
+
+
+OutPutFormat::OutPutFormat( std::string width,
+                            std::string precision,
+                            std::string whiteSpace,
+                            Int bufferSize )
+{
+    M_width = width;
+    M_precision = precision;
+    M_whiteSpace = whiteSpace;
+    M_buffer = new char[bufferSize];
+    M_formatDouble = "% " + M_width + "." + M_precision + "f";
+    M_formatInteger = "% " + M_width + "d";
+}
+void OutPutFormat::writeDataFormat( const Real& number,
+                                    std::ofstream & stream,
+                                    const EndLine& flag )
+{
+    sprintf( M_buffer,
+             M_formatDouble.data(),
+             number );
+    stream << M_buffer;
+    switch ( flag )
+    {
+        case newLine:
+            stream << std::endl;
+            break;
+        case space:
+            stream << M_whiteSpace;
+            break;
+        case nothing:
+            break;
+        default:
+            std::cerr << "no flag at OutPutFormat::writeDataFormat";
+            break;
+    }
+}
+void OutPutFormat::writeDataFormat( const Int& number,
+                                    std::ofstream & stream,
+                                    const EndLine& flag )
+{
+    sprintf( M_buffer,
+             M_formatInteger.data(),
+             number );
+    stream << M_buffer;
+    switch ( flag )
+    {
+        case newLine:
+            stream << std::endl;
+            break;
+        case space:
+            stream << M_whiteSpace;
+            break;
+        case nothing:
+            break;
+        default:
+            std::cerr << "no flag at OutPutFormat::writeDataFormat";
+            break;
+    }
+}
+void OutPutFormat::writeNewLine( std::ofstream & stream )
+{
+    stream << std::endl;
+}
+OutPutFormat::~OutPutFormat()
+{
+    delete[] M_buffer;
 }
 
 } // LifeV namespace

@@ -27,6 +27,7 @@
 /*!
  *  @file
  *  @brief File containing a class for 0D model data handling.
+ *  @version alpha (experimental)
  *
  *  @date 16-11-2011
  *  @author Mahmoud Jafargholi
@@ -49,8 +50,25 @@ class ZeroDimensionalData
 {
 public:
 
-    typedef TimeData                                                  time_Type;
+    // TODO This should be a separate class and not a struct here
+    //! Rhytmos solver data container
+    struct SolverData {
+        std::string        method;
+        Int                numberTimeStep;
+        Real               maxError;
+        Real               reltol;
+        Real               abstol;
+        Int                maxOrder;
+        bool               verbose;
+        Int                verboseLevel;
+        bool               useNOX;
+        bool               fixTimeStep;
+        std::string        extraLSParamsFile;
+        std::string        linearSolverParamsFile;
+    };
 
+    typedef struct SolverData                                         solverData_Type;
+    typedef TimeData                                                  time_Type;
     typedef boost::shared_ptr < time_Type >                           timePtr_Type;
 
     //! Constructor
@@ -62,8 +80,17 @@ public:
     //! setup model
     void setup( const GetPot& dataFile, bcPtr_Type bc, const std::string& section = "0D_Model" );
 
+    //! initialize Solution
+    void initializeSolution() ;
+
+    //! update source elements
+    void updateBC();
+
+    //! save solution
+    void saveSolution() ;
+
     //! show some information
-    void showMe( ) const;
+    void showMe() const { M_circuitData->showMe(); }
 
     //! show variables
     void showMeVariables() ;
@@ -71,45 +98,19 @@ public:
     //! set time
     void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
 
-    //! initialize Solution
-    void initializeSolution() ;
-
-    //! save solution
-    void saveSolution() ;
-
-    //! update source elements
-    void updateBC();
-
-    timePtr_Type dataTime() const { return M_time; }
+    const timePtr_Type& dataTime() const { return M_time; }
 
     //! get circuit data container
     zeroDimensionalCircuitDataPtr_Type circuitData() const { return M_circuitData; }
 
     //!total number of unknowns
-    Int unknownCounter() const {return  M_unknownCounter;}
+    const Int& unknownCounter() const { return M_unknownCounter; }
 
-    //! Rhytmos solver data container
-    struct SolverData {
-        std::string        method;
-        Int                numberTimeStep;
-        Real               maxError;
-        Real               reltol;
-        Real               abstol;
-        Int                maxOrder;
-        bool               verbose;
-        Int                verbosLevel;
-        bool               useNOX;
-        bool               fixTimeStep;
-        std::string        extraLSParamsFile;
-        std::string        linearSolverParamsFile;
-    };
-
-    typedef struct SolverData       solverData_Type;
-
-    solverData_Type solverData() const {return M_solverData;}
+    const solverData_Type& solverData() const { return M_solverData; }
 
 private:
 
+    // TODO: The output part should be rewritten following the example in the OneDFSI solver
     void writeHeaders();
 
     void assignVaribleIndex();

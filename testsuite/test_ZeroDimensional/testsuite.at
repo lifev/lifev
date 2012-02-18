@@ -12,7 +12,7 @@
 ### TESTSUITE: ZeroDimensional ####################################################################
 ###################################################################################################
 
-AT_SETUP([test_ZeroDimensional])
+AT_SETUP([test_ZeroDimensional (alpha version)])
 AT_KEYWORDS([test_ZeroDimensional 0D])
 AT_DATA([data],[[
 

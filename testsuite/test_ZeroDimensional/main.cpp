@@ -63,12 +63,12 @@ using namespace LifeV;
 
 bool checkValue(const Real val, const Real test, const Real tol = 1.e-5, const bool verbose = true)
 {
-  Real norm = std::abs(val - test);
+    Real norm = std::abs(val - test);
 
-  if ( verbose )
-    std::cout << " value = " << val << " computed value = " << test << " diff = " << norm << std::endl;
+    if ( verbose )
+        std::cout << " value = " << val << " computed value = " << test << " diff = " << norm << std::endl;
 
-  return (norm < tol);
+    return (norm < tol);
 }
 
 Int
@@ -89,20 +89,27 @@ main( Int argc, char** argv )
 #endif
 
     if ( rank == 0 )
-        std::cout << "MPI Processes: " << numberOfProcesses << std::endl;
-
-    if ( numberOfProcesses > 1 )
     {
+        std::cout << std::endl;
+        std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
+        std::cout << " THE ZERO DIMENSIONAL SOLVER IS AN ALPHA VERSION UNDER STRONG DEVELOPMENT" << std::endl;
+        std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
+
+        std::cout << "MPI Processes: " << numberOfProcesses << std::endl;
+    }
 
 #ifdef HAVE_MPI
-    	if ( rank == 0 )
+    if ( numberOfProcesses > 1 )
+    {
+        if ( rank == 0 )
+        {
             std::cout << "test_ZeroDimensional not enabled in parallel, failing gracefully." << std::endl;
             std::cout << "MPI Finalization" << std::endl;
-	    MPI_Finalize();
-#endif
-
-       return 0;
+        }
+        MPI_Finalize();
+        return EXIT_FAILURE;
     }
+#endif
 
 #ifdef EPETRA_MPI
     if ( rank == 0 )

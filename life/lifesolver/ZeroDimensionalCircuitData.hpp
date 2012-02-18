@@ -27,6 +27,7 @@
 /*!
  *  @file
  *  @brief File containing a class for 0D model circuit data handling.
+ *  @version alpha (experimental)
  *
  *  @date 26-09-2011
  *  @author Mahmoud Jafargholi <mahmoud.jafargholi@epfl.ch>

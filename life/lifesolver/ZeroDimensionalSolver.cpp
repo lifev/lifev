@@ -41,19 +41,19 @@ namespace LifeV {
 
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 
-ZeroDimensionalSolver::ZeroDimensionalSolver( Int numGlobalElements,
+ZeroDimensionalSolver::ZeroDimensionalSolver( Int numCircuitElements,
                 boost::shared_ptr< Epetra_Comm > comm,
                 zeroDimensionalCircuitDataPtr_Type circuitData )
 {
     M_comm.swap( comm );
     M_commRCP.reset();
     M_commRCP = Teuchos::rcp( M_comm );
-    M_modelInterface.reset( new RythmosModelInterface( numGlobalElements,
+    M_modelInterface.reset( new RythmosModelInterface( numCircuitElements,
                                     M_comm.operator ->(),
                                     circuitData ) );
     M_modelInterfaceRCP = Teuchos::rcp( M_modelInterface );
 
-    M_solverInterface.reset( new RythmosSolverInterface( numGlobalElements,
+    M_solverInterface.reset( new RythmosSolverInterface( numCircuitElements,
                                     M_commRCP,
                                     M_modelInterfaceRCP ) );
 
@@ -79,14 +79,14 @@ void ZeroDimensionalSolver::setup( const ZeroDimensionalData::solverData_Type& d
     { // catch exceptions
         if (data.fixTimeStep)
         {
-            M_step_method = STEP_METHOD_FIXED;
+            M_stepMethod = STEP_METHOD_FIXED;
         }
         else
         {
-            M_step_method = STEP_METHOD_VARIABLE;
+            M_stepMethod = STEP_METHOD_VARIABLE;
         }
 
-        Int numElements = M_modelInterface->numGlobalElements(); // number of elements in vector
+        Int numElements = M_modelInterface->numCircuitElements(); // number of elements in vector
         EMethod method_val = METHOD_BE;
         Real maxError;
         Real reltol;
@@ -106,7 +106,7 @@ void ZeroDimensionalSolver::setup( const ZeroDimensionalData::solverData_Type& d
         reltol = data.reltol;
         abstol = data.abstol;
         maxOrder = data.maxOrder;
-        M_outputLevel = data.verbosLevel;
+        M_outputLevel = data.verboseLevel;
         M_outputLevel = min(max(M_outputLevel,-1),4);
         useNOX = data.useNOX;
 
@@ -275,7 +275,7 @@ ZeroDimensionalSolver::takeStep(Real t0,Real t1)
     Thyra::ModelEvaluatorBase::InArgs< Real > myIn = M_stepperPtr->getInitialCondition();
     myIn.describe(*M_out, M_outputLevelTeuchos);
 
-    if (M_step_method == STEP_METHOD_FIXED)
+    if (M_stepMethod == STEP_METHOD_FIXED)
     {
         // Integrate forward with fixed step sizes:
         for (Int i=1; i<=M_numberTimeStep; ++i)
@@ -290,7 +290,7 @@ ZeroDimensionalSolver::takeStep(Real t0,Real t1)
             time += dt_taken;
         }
     }
-    else // M_step_method == STEP_METHOD_VARIABLE
+    else // M_stepMethod == STEP_METHOD_VARIABLE
 
     {
         while (time < M_finalTime)

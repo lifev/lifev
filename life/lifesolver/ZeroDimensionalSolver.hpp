@@ -27,6 +27,7 @@
 /*!
  *  @file
  *  @brief Rythmos solver
+ *  @version alpha (experimental)
  *
  *  @date 16-11-2011
  *  @author Mahmoud Jafargholi
@@ -101,7 +102,7 @@ class ZeroDimensionalSolver
 public:
 
     //! Constructor
-    explicit ZeroDimensionalSolver( Int numGlobalElements,
+    explicit ZeroDimensionalSolver( Int numCircuitElements,
                                     boost::shared_ptr< Epetra_Comm> comm,
                                     zeroDimensionalCircuitDataPtr_Type circuitData );
     //! Destructor
@@ -123,7 +124,7 @@ private:
     Teuchos::RCP< Epetra_Comm>                    M_commRCP;
     Teuchos::RCP<Rythmos::StepperBase<Real> >     M_stepperPtr;
     Teuchos::RCP<Teuchos::FancyOStream>           M_out;
-    STEP_METHOD                                   M_step_method;
+    STEP_METHOD                                   M_stepMethod;
     Real                                          M_finalTime;
     Real                                          M_startTime;
     Int                                           M_numberTimeStep;
@@ -140,7 +141,7 @@ class ZeroDimensionalSolver
 public:
 
     //! Constructor
-    explicit ZeroDimensionalSolver(Int /*numGlobalElements*/,
+    explicit ZeroDimensionalSolver(Int /*numCircuitElements*/,
                                    boost::shared_ptr<Epetra_Comm> /*comm*/,
                                    zeroDimensionalCircuitDataPtr_Type /*circuitData*/) {}
     //! Destructor

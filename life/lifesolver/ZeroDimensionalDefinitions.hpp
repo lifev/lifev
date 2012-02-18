@@ -27,6 +27,7 @@
 /*!
  *  @file
  *  @brief Zero Dimensional Model Global Definitions
+ *  @version alpha (experimental)
  *
  *  @date 06-02-2012
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -78,18 +79,18 @@ namespace LifeV
 
 enum ZeroDimensionalElementType
     {
-	resistor,
-	capacitor,
-	inductor,
-	diode,
-	voltageSource,
-	currentSource
+    resistor,
+    capacitor,
+    inductor,
+    diode,
+    voltageSource,
+    currentSource
 };
 
 enum ZeroDimensionalNodeType
 {
-	knownNode,
-	unknownNode
+    knownNode,
+    unknownNode
 };
 
 enum ZeroDimensionalBCType

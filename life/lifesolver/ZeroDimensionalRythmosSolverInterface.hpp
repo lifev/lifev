@@ -27,6 +27,7 @@
 /*!
  *  @file
  *  @brief Rythmos solver Interface.
+ *  @version alpha (experimental)
  *
  *  @date 21-11-2011
  *  @author Mahmoud Jafargholi
@@ -51,7 +52,7 @@ class RythmosSolverInterface : public EpetraExt::ModelEvaluator {
 public:
 
     // Constructor
-    RythmosSolverInterface(Int numGlobalElements,
+    RythmosSolverInterface(Int numCircuitElements,
             Teuchos::RCP<Epetra_Comm> &epetra_comm_ptr,
             rythmosModelInterfacePtrRCP_Type theModel);
 
