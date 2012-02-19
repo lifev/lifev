@@ -203,11 +203,11 @@ void ZeroDimensionalElementPassiveDiode::showMe( const Int& flag )
 void ZeroDimensionalElementPassiveDiode::calculateEffectiveResistance( const Real& voltage )
 {
 
-    Real e0 = ( M_beta * exp( M_alpha * ( 0 - M_forwardBias ) ) );
-
+    Real e0 = ( M_beta * exp( M_alpha * ( - M_forwardBias ) ) );
+    Real e1 = M_alpha * e0;
     if ( voltage == 0 )
     {
-        M_parameter = e0;
+        M_parameter = e1;
     }
     else
     {
@@ -1058,7 +1058,7 @@ void OutPutFormat::writeDataFormat( const Int& number,
     std::string formatNodeString("% " + nodeStringWidth.str() + "s");   //this guarantees the alignment of the header's fields to the output values in the following lines (regardless of the node index's length)
 
     sprintf( M_buffer,
-    		 formatNodeString.data(),
+             formatNodeString.data(),
              "Node " );
 
     stream << M_buffer<<number;
