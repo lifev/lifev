@@ -37,10 +37,7 @@
 #ifndef BCInterfaceFunction_H
 #define BCInterfaceFunction_H 1
 
-#ifdef MULTISCALE_IS_IN_LIFEV
 #include <life/lifefem/BCInterfaceData0D.hpp>
-#endif
-
 #include <life/lifefem/BCInterfaceData1D.hpp>
 #include <life/lifefem/BCInterfaceData3D.hpp>
 
@@ -142,13 +139,12 @@ public:
     //! @name Set Methods
     //@{
 
-#ifdef MULTISCALE_IS_IN_LIFEV
     //! Set data for 0D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
     virtual void setData( const BCInterfaceData0D& data ) = 0;
-#endif
+
 
     //! Set data for 1D boundary conditions
     /*!

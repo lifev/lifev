@@ -37,7 +37,7 @@
 #ifndef BCInterfaceData3D_H
 #define BCInterfaceData3D_H 1
 
-// 3D includes
+// 3D BCHandler include
 #include <life/lifefem/BCHandler.hpp>
 
 // BCInterface includes

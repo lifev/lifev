@@ -37,7 +37,7 @@
 #ifndef BCInterfaceData1D_H
 #define BCInterfaceData1D_H 1
 
-// OneDFSI includes
+// 1D BCHandler include
 #include <life/lifefem/OneDFSIBCHandler.hpp>
 
 // BCInterface includes
@@ -120,14 +120,6 @@ public:
     //! @name Set Methods
     //@{
 
-#ifndef MULTISCALE_IS_IN_LIFEV
-    //! Set the flag of the boundary condition
-    /*!
-     * @param flag Boundary condition flag
-     */
-    void setFlag( const bcFlag_Type& flag ) { M_flag = flag; }
-#endif
-
     //! Set the side of the boundary condition
     /*!
      * @param flag Boundary condition side
@@ -151,14 +143,6 @@ public:
 
     //! @name Get Methods
     //@{
-
-#ifndef MULTISCALE_IS_IN_LIFEV
-    //! Get the flag of the boundary condition
-    /*!
-     * @return Boundary condition flag
-     */
-    const bcFlag_Type& flag() const { return M_flag; }
-#endif
 
     //! Get the flag of the boundary condition
     /*!
@@ -197,10 +181,6 @@ private:
     //! @name Private Methods
     //@{
 
-#ifndef MULTISCALE_IS_IN_LIFEV
-    void readFlag( const GetPot& dataFile, const char* flag ) { M_flag = dataFile( flag, 0 ); }
-#endif
-
     void readSide( const GetPot& dataFile, const char* side ) {  M_side = M_mapSide[dataFile( side, "left" )]; }
 
     void readLine( const GetPot& dataFile, const char* line ) { M_line = M_mapLine[dataFile( line, "first" )]; }
@@ -216,10 +196,6 @@ private:
 
     //! @name Private Members
     //@{
-
-#ifndef MULTISCALE_IS_IN_LIFEV
-    bcFlag_Type                                                    M_flag;
-#endif
 
     OneDFSI::bcSide_Type                                           M_side;
     OneDFSI::bcLine_Type                                           M_line;
