@@ -89,6 +89,9 @@ class MultiscaleModel1D: public virtual multiscaleModel_Type,
 {
 public:
 
+    //! @name Type definitions
+    //@{
+
     typedef OneDFSIPhysics                                         physics_Type;
     typedef boost::shared_ptr< physics_Type >                      physicsPtr_Type;
 
@@ -128,6 +131,9 @@ public:
     typedef ExporterHDF5< mesh_Type >                              IOFile_Type;
     typedef ExporterData< mesh_Type >                              IOData_Type;
 #endif
+
+    //@}
+    
 
     //! @name Constructors & Destructor
     //@{

@@ -32,17 +32,18 @@
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @author Mahmoud Jafargholi <mahmoud.jafargholi@epfl.ch>
  *
- *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef MultiscaleModelWindkessel0D_H
 #define MultiscaleModelWindkessel0D_H 1
 
+// LifeV includes
+#include <life/lifefem/BCInterface0D.hpp>
+
 // Mathcard includes
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
-
-#include <lifemc/lifesolver/BCInterface0D.hpp>
 
 namespace LifeV
 {
@@ -54,7 +55,7 @@ namespace Multiscale
  *  @author Cristiano Malossi, Mahmoud Jafargholi
  *
  *  The MultiscaleModelWindkessel0D class is an implementation of the multiscaleModel_Type
- *  for 1D Fluid problem.
+ *  for 0D problems.
  */
 class MultiscaleModelWindkessel0D: public virtual multiscaleModel_Type,
                                    public virtual MultiscaleInterfaceFluid

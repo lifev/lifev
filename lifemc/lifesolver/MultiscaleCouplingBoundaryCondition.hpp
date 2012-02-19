@@ -37,7 +37,7 @@
 #ifndef MultiscaleCouplingBoundaryCondition_H
 #define MultiscaleCouplingBoundaryCondition_H 1
 
-#include <lifemc/lifesolver/BCInterface0D.hpp>
+#include <life/lifefem/BCInterface0D.hpp>
 #include <life/lifefem/BCInterface1D.hpp>
 #include <life/lifefem/BCInterface3D.hpp>
 
@@ -46,6 +46,7 @@
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
+#include <lifemc/lifesolver/MultiscaleModel0D.hpp>
 
 namespace LifeV
 {

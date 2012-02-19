@@ -28,5 +28,8 @@ list = 'FlowRate_HeartReymondStergiopulos2009'
     quantity            = Q
     line                = first
 
+    # Additional parameters for 0D BC
+    type0D              = Current
+
     [../]
 
