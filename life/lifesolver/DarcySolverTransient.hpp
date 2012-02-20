@@ -61,6 +61,7 @@ namespace LifeV
 
 /*!
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+  @see For applications related to two-phase flow see \cite Fumagalli2011a
 
   This class implements a transient Darcy solver in the finite time interval \f$ [0, T] \f$.
   <br>
