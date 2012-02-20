@@ -551,7 +551,7 @@ public:
         rhs[2] = M_scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t2[0] + ( y - M_geometricCenter[1] ) * M_t2[1] + ( z - M_geometricCenter[2] ) * M_t2[2] );
 
         // Compute displacement
-        Real determinant = M_n[0] * ( M_t1[1] * M_t2[2] - M_t1[2] * M_t2[1] ) + M_n[1] * ( M_t1[0] * M_t2[2] - M_t1[2] * M_t2[0] ) + M_n[2] * ( M_t1[0] * M_t2[1] - M_t1[1] * M_t2[0] );
+        Real determinant = M_n[0] * ( M_t1[1] * M_t2[2] - M_t1[2] * M_t2[1] ) + M_n[1] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] ) + M_n[2] * ( M_t1[0] * M_t2[1] - M_t1[1] * M_t2[0] );
         switch ( id )
         {
         case 0:
