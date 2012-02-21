@@ -53,6 +53,7 @@
 #include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifemesh/MeshEntity.hpp>
 #include <life/lifearray/MeshEntityContainer.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 
 namespace LifeV
 {
@@ -2398,18 +2399,28 @@ template <typename REGIONMESH, typename RMTYPE >
 template <typename VECTOR>
 void MeshTransformer<REGIONMESH, RMTYPE >::moveMesh( const VECTOR & disp, UInt dim )
 {
-    if(!this->hasOldPoint())this->savePoints();
+    // the method must be called with a Repeated vector
+    if ( disp.mapType() == Unique )
+    {
+#ifdef HAVE_LIFEV_DEBUG
+        std::cerr << "Info: moveMesh() requires a Repeated vector, a copy of the passed Unique vector will be created.\n"
+                  << "To optimize your code, you should pass a repeated vector to avoid the conversion." << std::endl;
+#endif
+        this->moveMesh( VECTOR( disp, Repeated ), dim );
+        return;
+    }
+
+    if( !this->hasOldPoint() ) this->savePoints();
 
     typedef typename REGIONMESH::points_Type points_Type;
-    points_Type & pointList(M_mesh.pointList);
+    points_Type & pointList( M_mesh.pointList );
     for ( unsigned int i = 0; i < M_mesh.pointList.size(); ++i )
     {
         for ( UInt j = 0; j < nDimensions; ++j )
         {
             int id = pointList[i].id();
-            if ( disp.isGlobalIDPresent(id + dim*j))
-                pointList[ i ].coordinate( j ) = M_pointList[ i ].coordinate( j ) +
-                disp[ j * dim + id ];
+            ASSERT ( disp.isGlobalIDPresent( id + dim*j ), "global ID missing" );
+            pointList[ i ].coordinate( j ) = M_pointList[ i ].coordinate( j ) + disp[ j * dim + id ];
         }
     }
 }

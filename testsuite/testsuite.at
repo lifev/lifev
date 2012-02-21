@@ -25,7 +25,7 @@ m4_include([test_Parser/testsuite.at])
 
 #lifearray tests
 AT_BANNER([life/lifearray testsuite ...])
-#m4_include([lifearray/testsuite.at])
+m4_include([lifearray/testsuite.at])
 m4_include([test_VectorContainer/testsuite.at])
 m4_include([test_MatrixEpetraStructuredFramework/testsuite.at])
 
@@ -61,3 +61,4 @@ m4_include([test_timeAdvance_orderI/testsuite.at])
 m4_include([test_timeAdvance_orderII/testsuite.at])
 m4_include([test_monolithic/testsuiteGCE.at])
 m4_include([test_monolithic/testsuiteCE.at])
+m4_include([test_ZeroDimensional/testsuite.at])
