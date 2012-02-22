@@ -187,9 +187,7 @@ public:
        This method computes an approximate normal vector on the boundary section "flag"
        @ingroup boundary_methods
 
-      \param this method computes the approximate normal vector on section "flag"
-
-       \return the approximate normal vector
+      \return the approximate normal vector
      */
     Vector normal( const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
 
