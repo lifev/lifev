@@ -167,7 +167,7 @@ public:
       \param nDim is the dimension of vectorField
      */
     template< typename VectorType >
-    Real flux( const VectorType& vectorField, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions);
+    Real flux( const VectorType& vectorField, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
 
     /*!
        This method computes the average value of a field on the boundary section "flag"
@@ -181,20 +181,17 @@ public:
        \return the averaged vector
      */
     template< typename VectorType >
-    Vector average( const VectorType& field, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = 1);
+    Vector average( const VectorType& field, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = 1 );
 
     /*!
-       This method computes an average of a scalar field on the boundary section "flag"
+       This method computes an approximate normal vector on the boundary section "flag"
        @ingroup boundary_methods
 
-      \tparam VectorType Vector type. Basic policy for type VectorType: operator[] available
-
-      \param field is intended to be a vector or a scalar (pressure in NS problem),
-       this method computes the average value of field on section "flag"
+      \param this method computes the approximate normal vector on section "flag"
 
        \return the approximate normal vector
      */
-    Vector normal( const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions);
+    Vector normal( const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
 
 // NOT READY!
 #if 0
@@ -633,7 +630,7 @@ Real PostProcessingBoundary<MeshType>::measure( const markerID_Type& flag )
     //
     // Loop on flagged processor facets
     //
-    for (Iterator j=facetList.begin(); j != facetList.end(); ++j)
+    for ( Iterator j=facetList.begin(); j != facetList.end(); ++j )
     {
 
         M_currentBdFEPtrVector[0]->updateMeas( M_meshPtr->boundaryFacet( *j ) );  // updating finite element information
@@ -808,7 +805,7 @@ Vector PostProcessingBoundary<MeshType>::normal( const markerID_Type& flag, UInt
 {
     // Each processor computes the normal on his own flagged facets --> normalScatter
     // At the end I'll reduce the process normals --> normal
-    Vector normalScatter(3), normal(3);
+    Vector normalScatter(3) , normal(3);
 
     // Initialize vectors to zero
     normal[0] = 0;
@@ -829,37 +826,37 @@ Vector PostProcessingBoundary<MeshType>::normal( const markerID_Type& flag, UInt
     typedef std::list<ID>::iterator Iterator;
 
     // Nodal values of field in the current facet
-    Vector localFieldVector(nDim * M_numTotalDofPerFacetVector[feSpace]);
+    Vector localFieldVector( nDim * M_numTotalDofPerFacetVector[feSpace] );
 
     // Loop on facetList
     for (Iterator j=facetList.begin(); j != facetList.end(); ++j)
     {
 
         // Updating quadrature data on the current facet
-        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->boundaryFacet(*j) );
+        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt( M_meshPtr->boundaryFacet(*j) );
 
         // Quadrature formula
         // Loop on quadrature points
-        for (UInt iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq)
+        for ( UInt iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq )
         {
 
             // Dot product
             // Loop on components
-            for (UInt iComponent =0; iComponent<nDim; ++iComponent)
+            for ( UInt iComponent =0; iComponent<nDim; ++iComponent )
             {
 
                 // Interpolation
                 // Loop on local dof
-                for (ID iDof=0; iDof<M_numTotalDofPerFacetVector[feSpace]; ++iDof)
+                for (ID iDof=0; iDof<M_numTotalDofPerFacetVector[ feSpace ]; ++iDof)
                 {
 
                     // Extracting nodal values of field in the current facet
                     dofVectorIndex = M_vectorNumberingPerFacetVector[feSpace][ ( UInt ) *j ][ iDof ];
                     dofGlobalId = M_dofGlobalIdVector[feSpace][dofVectorIndex]; // this is in the GLOBAL mesh
 
-                    normalScatter(iComponent) += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
-                                    * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
-                                    * M_currentBdFEPtrVector[feSpace]->normal(Int(iComponent),iq);
+                    normalScatter(iComponent) += M_currentBdFEPtrVector[feSpace]->weightMeas( iq )
+                                    * M_currentBdFEPtrVector[feSpace]->phi( Int(iDof), iq )
+                                    * M_currentBdFEPtrVector[feSpace]->normal( Int(iComponent), iq );
                 }
             }
         }
@@ -870,17 +867,17 @@ Vector PostProcessingBoundary<MeshType>::normal( const markerID_Type& flag, UInt
     M_epetraMapPtr->comm().SumAll( &normalScatter(2), &normal(2), 1 );
 
     // Scale normal to unity length
-    Real nn = sqrt(pow(normal(0),2) + pow(normal(1),2) + pow(normal(2),2));
+    Real nn = sqrt( normal(0) * normal(0) + normal(1) * normal(1) + normal(2) * normal(2) );
 
 #ifdef DEBUG
-    if (abs(nn) < 1e-6)
+    if ( abs( nn ) < 1e-6 )
     {
         Debug( 5000 ) << "Approximate surface normal could not be reliably computed.\n";
         Debug( 5000 ) << "Modulus of the integrated normal vector was: " << nn  << "\n";
     }
 #endif
 
-    return (normal / nn);
+    return ( normal / nn );
 }
 
 
