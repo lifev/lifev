@@ -1,6 +1,6 @@
-add_library ( lifefilters ImporterMesh3D.cpp
-Exporter.cpp
-Importer.cpp )
+add_library ( lifefilters Exporter.cpp
+Importer.cpp
+ImporterMesh3D.cpp )
 install ( TARGETS lifefilters DESTINATION lib )
 install ( FILES ExporterEmpty.hpp
 ExporterEnsight.hpp

@@ -1,12 +1,12 @@
-add_library ( lifealg SolverAmesos.cpp
-PreconditionerML.cpp
-PreconditionerComposed.cpp
-LinearEpetraOperatorBlock.cpp
-EigenSolver.cpp
-PreconditionerIfpack.cpp
-PreconditionerAztecOO.cpp
+add_library ( lifealg LinearEpetraOperatorBlock.cpp
 SolverAztecOO.cpp
-Preconditioner.cpp )
+EigenSolver.cpp
+Preconditioner.cpp
+PreconditionerIfpack.cpp
+PreconditionerComposed.cpp
+PreconditionerML.cpp
+SolverAmesos.cpp
+PreconditionerAztecOO.cpp )
 install ( TARGETS lifealg DESTINATION lib )
 install ( FILES ComposedOperator.hpp
 EigenSolver.hpp

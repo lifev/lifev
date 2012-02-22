@@ -1,14 +1,14 @@
 add_library ( lifecore LifeVersion.cpp
 LifeV.cpp
-LifeDebug.cpp
-EncoderBase64.cpp
 Displayer.cpp
-StringUtility.cpp
-Parser.cpp
+EncoderBase64.cpp
 StringData.cpp
+StringUtility.cpp
+LifeAssertSmart.cpp
+LifeDebug.cpp
 Switch.cpp
-FactoryTypeInfo.cpp
-LifeAssertSmart.cpp )
+Parser.cpp
+FactoryTypeInfo.cpp )
 install ( TARGETS lifecore DESTINATION lib )
 install ( FILES CBlas.hpp
 CLapack.hpp
