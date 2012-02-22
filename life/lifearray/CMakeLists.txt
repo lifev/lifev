@@ -1,9 +1,9 @@
-add_library ( lifearray MapEpetra.cpp
+add_library ( lifearray VectorEpetra.cpp
 MatrixElemental.cpp
 VectorEpetraStructuredView.cpp
 VectorElemental.cpp
-VectorEpetraStructured.cpp
-VectorEpetra.cpp )
+MapEpetra.cpp
+VectorEpetraStructured.cpp )
 install ( TARGETS lifearray DESTINATION lib )
 install ( FILES ArraySimple.hpp
 MapEpetra.hpp

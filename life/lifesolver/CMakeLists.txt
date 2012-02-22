@@ -1,37 +1,42 @@
-add_library ( lifesolver OneDFSISourceNonLinear.cpp
+add_library ( lifesolver OseenData.cpp
+MonolithicBlockComposedDNND.cpp
+FSISolver.cpp
 MonolithicBlockMatrix.cpp
 ADRData.cpp
-MonolithicBlockComposedDNND.cpp
-OneDFSIFluxLinear.cpp
+ZeroDimensionalData.cpp
+OneDFSISourceLinear.cpp
+FSIMonolithic.cpp
+MonolithicBlockComposed.cpp
+HeartMonodomainData.cpp
+MonolithicBlockComposedNN.cpp
+OneDFSIData.cpp
 FSIMonolithicGE.cpp
+FSIData.cpp
+OneDFSIPhysicsNonLinear.cpp
+LevelSetData.cpp
+MonolithicBlockMatrixRN.cpp
+MonolithicBlock.cpp
+OneDFSIPhysicsLinear.cpp
+OneDFSIFluxNonLinear.cpp
+ZeroDimensionalCircuitData.cpp
+HeartBidomainData.cpp
+FSIFixedPoint.cpp
+HeartFunctors.cpp
+OneDFSIFluxLinear.cpp
+FSIOperator.cpp
+FSIMonolithicGI.cpp
+MonolithicBlockComposedDND.cpp
+OneDFSISolver.cpp
+ZeroDimensionalRythmosModelInterface.cpp
+VenantKirchhoffElasticData.cpp
+FSIExactJacobian.cpp
 HeartIonicData.cpp
 MonolithicRobinInterface.cpp
-FSIOperator.cpp
-OneDFSIData.cpp
-MonolithicBlockComposed.cpp
-OneDFSIFluxNonLinear.cpp
+OneDFSISourceNonLinear.cpp
+ZeroDimensionalSolver.cpp
 MonolithicBlockComposedDN.cpp
-MonolithicBlockMatrixRN.cpp
-MonolithicBlockComposedDND.cpp
-OneDFSISourceLinear.cpp
-OneDFSISolver.cpp
-FSIMonolithic.cpp
-HeartFunctors.cpp
-HeartBidomainData.cpp
-VenantKirchhoffElasticData.cpp
-MonolithicBlockComposedNN.cpp
-FSIExactJacobian.cpp
-OseenData.cpp
-OneDFSIPhysicsNonLinear.cpp
-FSISolver.cpp
-LevelSetData.cpp
-FSIFixedPoint.cpp
-HeartMonodomainData.cpp
-FSIMonolithicGI.cpp
-MonolithicBlock.cpp
-FSIData.cpp
-OneDFSIPhysicsLinear.cpp
-VenantKirchhoffViscoelasticData.cpp )
+VenantKirchhoffViscoelasticData.cpp
+ZeroDimensionalRythmosSolverInterface.cpp )
 install ( TARGETS lifesolver DESTINATION lib )
 install ( FILES ADRAssembler.hpp
 ADRAssemblerIP.hpp
@@ -94,4 +99,10 @@ VenantKirchhoffElasticHandler.hpp
 VenantKirchhoffSolver.hpp
 VenantKirchhoffSolverLinear.hpp
 VenantKirchhoffViscoelasticData.hpp
-VenantKirchhoffViscoelasticSolver.hpp DESTINATION include/life/lifesolver)
+VenantKirchhoffViscoelasticSolver.hpp
+ZeroDimensionalCircuitData.hpp
+ZeroDimensionalData.hpp
+ZeroDimensionalDefinitions.hpp
+ZeroDimensionalRythmosModelInterface.hpp
+ZeroDimensionalRythmosSolverInterface.hpp
+ZeroDimensionalSolver.hpp DESTINATION include/life/lifesolver)

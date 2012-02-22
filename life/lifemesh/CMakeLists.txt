@@ -1,12 +1,12 @@
 add_library ( lifemesh RegionMesh3DStructured.cpp
-ElementShapes.cpp
-MeshElementBare.cpp
 InternalEntitySelector.cpp
-MeshData.cpp
-RegionMesh.cpp
 MeshVertex.cpp
+ElementShapes.cpp
+RegionMesh.cpp
+MeshElementBare.cpp
 MeshUtility.cpp
-Marker.cpp )
+Marker.cpp
+MeshData.cpp )
 install ( TARGETS lifemesh DESTINATION lib )
 install ( FILES BareMesh.hpp
 ElementShapes.hpp
