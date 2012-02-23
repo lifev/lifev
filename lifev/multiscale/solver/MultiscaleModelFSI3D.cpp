@@ -426,6 +426,16 @@ MultiscaleModelFSI3D::boundaryPressure( const bcFlag_Type& flag ) const
 #endif
 }
 
+Real
+MultiscaleModelFSI3D::externalPressure() const
+{
+#ifndef FSI_WITH_EXTERNALPRESSURE
+    return M_externalPressureScalar;
+#else
+    return M_data->dataSolid()->externalPressure();
+#endif
+}
+
 // ===================================================
 // Private Methods
 // ===================================================

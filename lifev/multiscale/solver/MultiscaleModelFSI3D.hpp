@@ -306,6 +306,12 @@ public:
      */
     Real boundaryPressure( const bcFlag_Type& flag ) const;
 
+    //! Get the external wall pressure
+    /*!
+     * @return external pressure value
+     */
+    Real externalPressure() const;
+
     //@}
 
 private:
@@ -613,12 +619,9 @@ public:
         }
         else
         {
-#ifdef FSI_WITH_EXTERNALPRESSURE
-            deltaP = M_FSI3D->boundaryPressure( M_fluidFlag ) - M_FSI3D->data()->dataSolid()->externalPressure();
-#else
-            deltaP = M_FSI3D->boundaryPressure( M_fluidFlag );
-#endif
+            deltaP = M_FSI3D->boundaryPressure( M_fluidFlag ) - M_FSI3D->externalPressure();
         }
+
         // Compute area with 1D elastic law (from pressure and assuming beta1 = 0.5)
         Real area = M_referenceArea * ( deltaP / M_beta + 1 ) * ( deltaP / M_beta + 1 );
 
