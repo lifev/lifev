@@ -127,7 +127,7 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface1D();
+    explicit BCInterface1D() : bcInterface_Type(), M_data() {}
 
     //! Destructor
     virtual ~BCInterface1D() {}
@@ -232,21 +232,6 @@ private:
 };
 
 // ===================================================
-// Constructors & Destructor
-// ===================================================
-template< class BcHandler, class PhysicalSolverType >
-BCInterface1D< BcHandler, PhysicalSolverType >::BCInterface1D() :
-        bcInterface_Type          (),
-        M_data                    ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5020 ) << "BCInterface1D::BCInterface1D" << "\n";
-#endif
-
-}
-
-// ===================================================
 // Methods
 // ===================================================
 template< class BcHandler, class PhysicalSolverType >
@@ -349,7 +334,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         debugStream( 5020 ) << "BCInterface1D::addBCManager" << "\n\n";
 #endif
 
-        this->M_handler->setBC( M_data.side(), M_data.line(), M_data.quantity(), base );
+    this->M_handler->setBC( M_data.side(), M_data.line(), M_data.quantity(), base );
 }
 
 } // Namespace LifeV
