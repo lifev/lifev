@@ -24,4 +24,4 @@ OneDFSIFunctionSolverDefined.hpp
 RossEthierSteinmanDec.hpp
 RossEthierSteinmanInc.hpp
 Womersley.hpp DESTINATION include/life/lifefunctions)
-install ( FILES bessel.hpp DESTINATION include/life/lifefunctions/bessel)
+install ( FILES bessel/bessel.hpp DESTINATION include/life/lifefunctions/bessel)
