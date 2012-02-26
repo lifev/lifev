@@ -12,7 +12,7 @@ if(DOXYGEN_FOUND)
   # file(COPY yourDir DESTINATION yourDestination)
  
   # generate Doxyfile
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake
                  ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 
   # add doc target
