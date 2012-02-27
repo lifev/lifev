@@ -379,7 +379,7 @@ MultiscaleModelFSI3D::imposeBoundaryStress( const bcFlag_Type& flag, const funct
     for ( boundaryAreaFunctionsContainerIterator_Type i = M_boundaryAreaFunctions.begin(); i < M_boundaryAreaFunctions.end(); ++i )
         if ( ( *i )->fluidFlag() == flag )
         {
-            ( *i )->setFunction( function );
+            ( *i )->setFunctionStress( function );
             return;
         }
     if ( M_comm->MyPID() == 0 )
@@ -658,6 +658,15 @@ MultiscaleModelFSI3D::setupBC( const std::string& fileName )
         boundaryAreaFunction->setBeta(      dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 2 ) );
 
         M_boundaryAreaFunctions.push_back( boundaryAreaFunction );
+
+        // TODO: This part of the code is not general! ---------------------------------------------------------
+        // It assumes that we have put an area BC with flag = fluidFlag + 5000.
+        BCBase stressBase = M_solidBC->handler()->findBCWithFlag( boundaryAreaFunction->fluidFlag() + 5000 );
+        if ( stressBase.flag() == ( boundaryAreaFunction->fluidFlag() + 5000 ) ) // Double check required!
+        {
+            boundaryAreaFunction->setFunctionScaleFactor( stressBase.pointerToFunctor()->Function() );
+        }
+        // -----------------------------------------------------------------------------------------------------
 
         // Add boundary condition to solid bcHandler
         BCFunctionBase bcBase;

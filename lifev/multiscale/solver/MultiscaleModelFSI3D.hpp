@@ -529,11 +529,7 @@ public:
     //@{
 
     //! Constructor
-    /*!
-     * @param couplingFunction original coupling function
-     * @param delta delta to be applied
-     */
-    explicit FSI3DBoundaryAreaFunction() : M_functionSet( false ) {}
+    explicit FSI3DBoundaryAreaFunction() : M_functionStressSet( false ), M_functionScaleFactorSet( false ) {}
 
     //! Destructor
     virtual ~FSI3DBoundaryAreaFunction() { /* M_FSI3D is deleted outside */ }
@@ -611,22 +607,27 @@ public:
     //! Update the scale factor
     void updateScaleFactor()
     {
-        // Compute delta pressure
-        Real deltaP( 0 );
-        if ( M_functionSet )
-        {
-            deltaP = -M_function( M_FSI3D->globalData()->dataTime()->time(), 0, 0, 0, 0 ) - M_FSI3D->globalData()->solidExternalPressure();
-        }
+        if ( M_functionScaleFactorSet )
+            M_scaleFactor = M_functionScaleFactor( M_FSI3D->globalData()->dataTime()->time(), 0, 0, 0, 0 );
         else
         {
-            deltaP = M_FSI3D->boundaryPressure( M_fluidFlag ) - M_FSI3D->externalPressure();
+            // Compute delta pressure
+            Real deltaP( 0 );
+            if ( M_functionStressSet )
+            {
+                deltaP = -M_functionStress( M_FSI3D->globalData()->dataTime()->time(), 0, 0, 0, 0 ) - M_FSI3D->globalData()->solidExternalPressure();
+            }
+            else
+            {
+                deltaP = M_FSI3D->boundaryPressure( M_fluidFlag ) - M_FSI3D->externalPressure();
+            }
+
+            // Compute area with 1D elastic law (from pressure and assuming beta1 = 0.5)
+            Real area = M_referenceArea * ( deltaP / M_beta + 1 ) * ( deltaP / M_beta + 1 );
+
+            // Compute scale factor
+            M_scaleFactor = std::sqrt( area / M_referenceArea ) - 1; // Note that M_scaleFactor = deltaP / M_beta
         }
-
-        // Compute area with 1D elastic law (from pressure and assuming beta1 = 0.5)
-        Real area = M_referenceArea * ( deltaP / M_beta + 1 ) * ( deltaP / M_beta + 1 );
-
-        // Compute scale factor
-        M_scaleFactor = std::sqrt( area / M_referenceArea ) - 1;
     }
 
     //! ShowMe
@@ -642,7 +643,8 @@ public:
                       << "Tangent 1           = " << M_t1[0] << " " << M_t1[1] << " " << M_t1[2] << std::endl
                       << "Tangent 2           = " << M_t2[0] << " " << M_t2[1] << " " << M_t2[2] << std::endl
                       << "Beta                = " << M_beta << std::endl
-                      << "Function set        = " << M_functionSet << std::endl
+                      << "Function stress set = " << M_functionStressSet << std::endl
+                      << "Function scale set  = " << M_functionScaleFactorSet << std::endl
                       << "Scale factor        = " << M_scaleFactor << std::endl << std::endl;
         }
     }
@@ -727,11 +729,17 @@ public:
      */
     void setBeta( const Real& beta ) { M_beta = beta; }
 
-    //! Set the elastic coefficient of the near 1-D model
+    //! Set the stress function from the coupling conditions
     /*!
-     * @param beta elastic coefficient beta of the near 1-D model
+     * @param stress function from the coupling condition
      */
-    void setFunction( const function_Type& function ) { M_function = function; M_functionSet = true; }
+    void setFunctionStress( const function_Type& functionStress ) { M_functionStress = functionStress; M_functionStressSet = true; }
+
+    //! Set the scale factor function
+    /*!
+     * @param functionScaleFactor scale factor function
+     */
+    void setFunctionScaleFactor( const function_Type& functionScaleFactor ) { M_functionScaleFactor = functionScaleFactor; M_functionScaleFactorSet = true; }
 
     //@}
 
@@ -791,18 +799,20 @@ private:
     //@}
 
 
-    const MultiscaleModelFSI3D*       M_FSI3D;            // A pointer to the model class
-    bcFlag_Type                       M_fluidFlag;        // Boundary flag
-    bcFlag_Type                       M_solidFlag;        // Boundary flag
-    Real                              M_referenceArea;    // Reference area
-    boost::array< Real, 3 >           M_geometricCenter;  // Geometric center
-    boost::array< Real, 3 >           M_n;                // Normal direction
-    boost::array< Real, 3 >           M_t1;               // Tangential direction 1
-    boost::array< Real, 3 >           M_t2;               // Tangential direction 2
-    Real                              M_beta;             // Beta coefficient
-    Real                              M_scaleFactor;      // Scale factor
-    bool                              M_functionSet;      // Tell if the function has been set
-    function_Type                     M_function;         // Function
+    const MultiscaleModelFSI3D*       M_FSI3D;             // A pointer to the model class
+    bcFlag_Type                       M_fluidFlag;         // Boundary flag
+    bcFlag_Type                       M_solidFlag;         // Boundary flag
+    Real                              M_referenceArea;     // Reference area
+    boost::array< Real, 3 >           M_geometricCenter;   // Geometric center
+    boost::array< Real, 3 >           M_n;                 // Normal direction
+    boost::array< Real, 3 >           M_t1;                // Tangential direction 1
+    boost::array< Real, 3 >           M_t2;                // Tangential direction 2
+    Real                              M_beta;              // Beta coefficient
+    Real                              M_scaleFactor;       // Scale factor
+    bool                              M_functionStressSet; // Tells if the function pressure has been set
+    function_Type                     M_functionStress;    // Function
+    bool                              M_functionScaleFactorSet; // Tells if the function scale factor has been set
+    function_Type                     M_functionScaleFactor;    // Function scale factor
 };
 
 #endif
