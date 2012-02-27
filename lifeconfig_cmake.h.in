@@ -117,6 +117,9 @@
 /* Define if the Trilinos RTOp library is used. */
 #cmakedefine HAVE_TRILINOS_RTOP
 
+/* Define if the Trilinos Rythmos library is used. */
+#cmakedefine HAVE_TRILINOS_RYTHMOS
+
 /* Define if the Trilinos Sacado library is used. */
 #cmakedefine HAVE_TRILINOS_SACADO
 
@@ -137,6 +140,9 @@
 
 /* Define if the Trilinos Zoltan library is used. */
 #cmakedefine HAVE_TRILINOS_ZOLTAN
+
+/* Define if the Trilinos Nox-thyra library is used. */
+#cmakedefine HAVE_NOX_THYRA
 
 /*******************************************************************
     The following cannot yet be defined due to limitations in the
@@ -163,9 +169,6 @@
 
 /* Define if the Trilinos Nox-epetra library is used. */
 #undef HAVE_NOX_EPETRA
-
-/* Define if the Trilinos Nox-thyra library is used. */
-#undef HAVE_NOX_THYRA
 
 /* Define if the Trilinos Stratimikos-amesos library is used. */
 #undef HAVE_STRATIMIKOS_AMESOS

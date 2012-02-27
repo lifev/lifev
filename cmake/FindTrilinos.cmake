@@ -49,6 +49,33 @@ FOREACH( PACKAGE ${REQUIRED_PACKAGES})
     ENDIF()
 ENDFOREACH(PACKAGE ${REQUIRED_PACKAGES})
 
+#optional packages
+SET( OPTIONAL_PACKAGES "rythmos")
+#Now I check if all the required packages are in the list of Trilinos Packages. (This might be done better with a find...)
+FOREACH( PACKAGE ${OPTIONAL_PACKAGES})
+    STRING(TOUPPER ${PACKAGE} UPACK)
+    FOREACH(Tpack ${Trilinos_PACKAGE_LIST})
+        STRING(TOUPPER ${Tpack} TPACK)
+        IF(${UPACK} STREQUAL ${TPACK})
+            SET(${UPACK}_FOUND TRUE)
+        ENDIF()
+    ENDFOREACH(Tpack ${Trilinos_PACKAGE_LIST})
+    IF(${UPACK}_FOUND)
+        set( HAVE_TRILINOS_${UPACK} TRUE)
+    ELSE()
+        MESSAGE( STATUS "Could not find ${PACKAGE}")
+    ENDIF()
+ENDFOREACH(PACKAGE ${REQUIRED_PACKAGES})
+
+#temporary hack to prperly set HAVE_NOX_THYRA
+    FOREACH(Tpack ${Trilinos_PACKAGE_LIST})
+        STRING(TOUPPER ${Tpack} TPACK)
+        IF(${UPACK} STREQUAL "noxthyra")
+            SET(HAVE_NOX_THYRA TRUE)
+        ENDIF()
+    ENDFOREACH(Tpack ${Trilinos_PACKAGE_LIST})
+
+
 #If XXX is already linked through Trilinos. If so I set the variable XXX_IS_IN_TRILINOS to true
 FOREACH(tpl ${Trilinos_TPL_LIST})
     STRING(TOUPPER ${tpl} TPL)
