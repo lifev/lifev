@@ -68,12 +68,11 @@ FOREACH( PACKAGE ${OPTIONAL_PACKAGES})
 ENDFOREACH(PACKAGE ${REQUIRED_PACKAGES})
 
 #temporary hack to properly set HAVE_NOX_THYRA
-FOREACH(Tpack ${Trilinos_PACKAGE_LIST})
-    STRING(TOUPPER ${Tpack} TPACK)
-    IF(${TPACK} STREQUAL "NOXTHYRA")
+FOREACH(Tpack ${NOX_LIBRARIES})
+    IF(${Tpack} STREQUAL "noxthyra")
         SET(HAVE_NOX_THYRA TRUE)
     ENDIF()
-ENDFOREACH(Tpack ${Trilinos_PACKAGE_LIST})
+ENDFOREACH(Tpack ${NOX_LIBRARIES})
 
 #If XXX is already linked through Trilinos. If so I set the variable XXX_IS_IN_TRILINOS to true
 FOREACH(tpl ${Trilinos_TPL_LIST})
