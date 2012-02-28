@@ -110,3 +110,6 @@ type = ensight #hdf5
 multimesh  =    false   # actually we export also the displacement
 start      = 0
 save       = 1
+
+[errorNorms]
+    l2Error = 1e-7

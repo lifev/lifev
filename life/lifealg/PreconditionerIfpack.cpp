@@ -44,9 +44,10 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-PreconditionerIfpack::PreconditionerIfpack():
+PreconditionerIfpack::PreconditionerIfpack( boost::shared_ptr<Epetra_Comm> comm ):
         super (),
         M_preconditioner(),
+        M_comm( comm ),
         M_overlapLevel(0),
         M_operator()
 {
@@ -106,14 +107,15 @@ PreconditionerIfpack::createParametersList( list_Type&         list,
                                   const std::string& section,
                                   const std::string& subSection )
 {
-    createIfpackList( list, dataFile, section, subSection );
+    createIfpackList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
 }
 
 void
 PreconditionerIfpack::createIfpackList( list_Type&         list,
                                         const GetPot&      dataFile,
                                         const std::string& section,
-                                        const std::string& subSection )
+                                        const std::string& subSection,
+                                        const bool&        verbose )
 {
     // See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     // for more informations on the parameters
@@ -202,7 +204,13 @@ PreconditionerIfpack::createIfpackList( list_Type&         list,
     list.set( "schwarz: reordering type", schwarzReorderingType);
     list.set( "schwarz: filter singletons", schwarzFilterSingletons);
 
-    if ( displayList ) list.print( std::cout );
+    if ( displayList && verbose )
+    {
+    	std::cout << "Ifpack parameters list:" << std::endl;
+    	std::cout << "-----------------------------" << std::endl;
+    	list.print( std::cout );
+    	std::cout << "-----------------------------" << std::endl;
+    }
 }
 
 Int
@@ -230,7 +238,7 @@ void
 PreconditionerIfpack::setDataFromGetPot( const GetPot&      dataFile,
                                          const std::string& section )
 {
-    createIfpackList( this->M_list, dataFile, section, "ifpack" );
+    createIfpackList( this->M_list, dataFile, section, "ifpack", M_comm->MyPID() == 0 );
 }
 
 Int

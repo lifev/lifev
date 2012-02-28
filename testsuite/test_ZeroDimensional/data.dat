@@ -1,0 +1,37 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### MULTISCALE: Main data file ####################################################################
+###################################################################################################
+
+[0D_Model] #########################################################################################
+    CircuitDataFile = ./inputFile.dat
+
+    [./time_discretization]
+    initialtime                 = .00         # [s]
+    endtime                     = .10         # [s]
+    timestep                    = .01         # [s]
+
+    [../Solver]
+    method                      = BE          # BE BDF  IRK
+    numberTimeStep              = 6           # Number of inner time steps
+    maxError                    = 0.0000001
+    reltol                      = 0.000001
+    abstol                      = 0.00000001
+    maxOrder                    = 5           # Order of the method
+    verbose                     = true
+    verboseLevel                = 0           # 0 1 2 3 4
+    useNOX                      = false
+    fixTimeStep                 = true        # false only with BDF
+    extraLinearSolverParamsFile = ./RythmosAztecOOParams.xml
+    linearSolverParamsUsedFile  = ./RythmosAztecOOParamsLowsf.xml
+    [../]
+

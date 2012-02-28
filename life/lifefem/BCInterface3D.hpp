@@ -438,6 +438,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDataInterpolator()
     // Directional base
     bcFunctionDataInterpolatorPtr_Type dataInterpolatorBase( new bcFunctionDataInterpolator_Type() );
     dataInterpolatorBase->readData( M_data.baseString() );
+    dataInterpolatorBase->setInterpolationMethod( LifeV::BCDataInterpolator::RBF_InverseMultiQuadric);
     M_vectorDataInterpolator.push_back( dataInterpolatorBase );
 }
 

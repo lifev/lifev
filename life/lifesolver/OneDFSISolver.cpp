@@ -281,6 +281,9 @@ OneDFSISolver::updateRHS( const solution_Type& solution, const Real& timeStep )
     // rhs = mass * Un + residual
     *M_rhs[0]  = *M_residual[0] + ( *M_homogeneousMassMatrixPtr ) * *solution.find("A")->second;
     *M_rhs[1]  = *M_residual[1] + ( *M_homogeneousMassMatrixPtr ) * *solution.find("Q")->second;
+
+    if ( M_physicsPtr->data()->viscoelasticWall() )
+        *M_rhs[1]  -= ( *M_homogeneousMassMatrixPtr ) * *solution.find("Q_visc")->second;
 }
 
 void
@@ -306,7 +309,7 @@ OneDFSISolver::iterate( OneDFSIBCHandler& bcHandler, solution_Type& solution, co
 
     if ( M_physicsPtr->data()->viscoelasticWall() )
     {
-        *solution["Q_visc"] = viscoelasticFlowRateCorrection( area, flowRate, timeStep, bcHandler );
+        *solution["Q_visc"] = viscoelasticFlowRateCorrection( area, flowRate, *solution.find("Q_visc")->second, timeStep, bcHandler );
         flowRate += *solution["Q_visc"];
     }
 
@@ -331,12 +334,13 @@ OneDFSISolver::iterate( OneDFSIBCHandler& bcHandler, solution_Type& solution, co
 }
 
 OneDFSISolver::vector_Type
-OneDFSISolver::viscoelasticFlowRateCorrection( const vector_Type& area, const vector_Type& flowRate,
+OneDFSISolver::viscoelasticFlowRateCorrection( const vector_Type& newArea, const vector_Type& newElasticFlowRate,
+                                               const vector_Type& oldViscoelasticFlowRate,
                                                const Real& timeStep, OneDFSIBCHandler& bcHandler,
                                                const bool& updateSystemMatrix )
 {
     // Matrix
-    matrix_Type systemMatrix( M_feSpacePtr->map() );
+    matrix_Type massMatrix( M_feSpacePtr->map() );
     matrix_Type stiffnessMatrix( M_feSpacePtr->map() );
 
     Real massCoefficient;
@@ -353,8 +357,8 @@ OneDFSISolver::viscoelasticFlowRateCorrection( const vector_Type& area, const ve
         M_feSpacePtr->fe().update( M_feSpacePtr->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
 
         // Compute mass coefficient
-        massCoefficient = 1 / ( 0.5 * ( area[ iElement ] + area[ iElement + 1 ] ) );
-//      massCoefficient = 1 / ( 0.5 * ( M_physicsPtr->data()->area0( iElement ) + M_physicsPtr->data()->area0( iElement + 1 ) ) );
+        massCoefficient = 1 / ( 0.5 * ( newArea[ iElement ] + newArea[ iElement + 1 ] ) );
+//      massCoefficient = 1 / ( 0.5 * ( M_physicsPtr->data()->area0( iElement ) + M_physicsPtr->data()->area0( iElement + 1 ) ) ); // For debug purposes
 
         // Compute stiffness coefficient
         stiffnessCoefficient  = timeStep * 0.5 * ( M_physicsPtr->data()->viscoelasticCoefficient( iElement ) + M_physicsPtr->data()->viscoelasticCoefficient( iElement + 1 ) )
@@ -369,35 +373,37 @@ OneDFSISolver::viscoelasticFlowRateCorrection( const vector_Type& area, const ve
         stiff( stiffnessCoefficient, *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
 
         // Assemble the stiffness matrix
-        assembleMatrix( systemMatrix,    *M_elementalMassMatrixPtr,      M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
+        assembleMatrix( massMatrix,      *M_elementalMassMatrixPtr,      M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
         assembleMatrix( stiffnessMatrix, *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
 
         // Natural BC
         if ( iElement == 0 )
-            rhs( 0 )            -= stiffnessCoefficient * M_fluxPtr->physics()->data()->computeSpatialDerivativeAtNode( flowRate, 0, 1 );
+            rhs( 0 )            -= stiffnessCoefficient * M_fluxPtr->physics()->data()->computeSpatialDerivativeAtNode( newElasticFlowRate, 0, 1 );
         if ( iElement == M_physicsPtr->data()->numberOfElements() - 1 )
-            rhs( iElement + 1 ) += stiffnessCoefficient * M_fluxPtr->physics()->data()->computeSpatialDerivativeAtNode( flowRate, iElement + 1, 1 );
+            rhs( iElement + 1 ) += stiffnessCoefficient * M_fluxPtr->physics()->data()->computeSpatialDerivativeAtNode( newElasticFlowRate, iElement + 1, 1 );
     }
 
-    // System Matrix = MassMatrix + stiffnessCoefficient * StiffnessMatrix
+    // Matrices global assemble
+    massMatrix.globalAssemble();
     stiffnessMatrix.globalAssemble();
-    systemMatrix.globalAssemble();
-    systemMatrix += stiffnessMatrix;
 
     // RHS
-    rhs += stiffnessMatrix * (-flowRate);
+    rhs += massMatrix * (oldViscoelasticFlowRate) + stiffnessMatrix * (-newElasticFlowRate);
+
+    // System matrix
+    massMatrix += stiffnessMatrix;
 
     // Apply BC to Matrix and RHS
-    bcHandler.applyViscoelasticBC( M_fluxPtr, systemMatrix, rhs );
+    bcHandler.applyViscoelasticBC( M_fluxPtr, massMatrix, rhs );
 
     // Compute flow rate correction at t^n+1
-    vector_Type flowRateCorrection( rhs );
+    vector_Type newViscoelasticFlowRate( rhs );
 
     if ( updateSystemMatrix )
-        M_linearViscoelasticSolverPtr->setMatrix( systemMatrix );
-    M_linearViscoelasticSolverPtr->solveSystem( rhs, flowRateCorrection, M_homogeneousMassMatrixPtr );
+        M_linearViscoelasticSolverPtr->setMatrix( massMatrix );
+    M_linearViscoelasticSolverPtr->solveSystem( rhs, newViscoelasticFlowRate, M_homogeneousMassMatrixPtr );
 
-    return flowRateCorrection;
+    return newViscoelasticFlowRate;
 }
 
 Real
@@ -429,7 +435,7 @@ OneDFSISolver::resetOutput( const solution_Type& solution )
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
     {
-        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".m";
+        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".mfile";
         outfile.open( file.c_str(), std::ios::trunc );
         outfile.close();
     }
@@ -441,7 +447,7 @@ OneDFSISolver::postProcess( const solution_Type& solution, const Real& time )
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
     {
-        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".m";
+        std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".mfile";
         outfile.open( file.c_str(), std::ios::app );
         outfile.setf( ios::scientific, ios::floatfield );
 

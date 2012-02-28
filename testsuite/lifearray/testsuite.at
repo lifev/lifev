@@ -20,5 +20,5 @@ AT_CLEANUP
 
 AT_SETUP([test_vectorsmall])
 AT_KEYWORDS([vectorsmall])
-AT_CHECK([mpirun -n 1 ../../lifemesh/test_vectorsmall],[0],[ignore],[ignore])
+AT_CHECK([mpirun -n 1 ../../lifearray/test_vectorsmall],[0],[ignore],[ignore])
 AT_CLEANUP

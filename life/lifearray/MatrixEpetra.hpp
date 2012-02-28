@@ -49,7 +49,9 @@
 #include <Epetra_MpiComm.h>
 #include <Epetra_FECrsMatrix.h>
 #include <EpetraExt_MatrixMatrix.h>
+#include <EpetraExt_Transpose_RowMatrix.h>
 #include <EpetraExt_RowMatrixOut.h>
+#include <ml_epetra_utils.h>
 
 #ifdef HAVE_HDF5
 #include <EpetraExt_HDF5.h>
@@ -60,6 +62,8 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <cstdlib>
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 #include <vector>
 
 //@@
@@ -97,6 +101,13 @@ public:
     //! @name Constructors & Destructor
     //@{
 
+    //! Constructor from a graph
+    /*!
+      @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
+      @param graph A sparse compressed row graph.
+     */
+    MatrixEpetra( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues=false );
+
     //! Constructor for square and rectangular matrices
     /*!
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
@@ -123,7 +134,16 @@ public:
       using a method of the class MatrixEpetra
       @param crsMatrixPtr Pointer on a Epetra_FECrsMatrix of Trilinos
      */
-    MatrixEpetra( matrix_ptrtype crsMatrixPtr );
+    LIFEV_DEPRECATED() MatrixEpetra( matrix_ptrtype crsMatrixPtr);
+
+    //! Constructs an MatrixEpetra view of an Epetra_FECrsMatrix.
+    /*!
+      This constructor can be used when we need to modify an Epetra_FECrsMatrix
+      using a method of the class MatrixEpetra
+      @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
+      @param crsMatrixPtr Pointer on a Epetra_FECrsMatrix of Trilinos
+     */
+    MatrixEpetra( const MapEpetra & map, matrix_ptrtype crsMatrixPtr);
 
     //! Destructor
     ~MatrixEpetra() {};
@@ -231,6 +251,9 @@ public:
       @param matrix Matrix to be added
      */
     void add( const DataType scalar, const MatrixEpetra& matrix );
+
+	  //! Returns a pointer to a new matrix which contains the transpose of the current matrix
+	 boost::shared_ptr<MatrixEpetra<DataType> > transpose( );
 
     //! Set entries (rVec(i),rVec(i)) to coefficient and the rest of the row entries to zero
     /*!
@@ -418,6 +441,23 @@ public:
     //! @name Set Methods
     //@{
 
+    //! set zero in all the matrix entries
+    void zero() {M_epetraCrs->PutScalar(0.);}
+
+    //! Set a set of values to the corresponding set of coefficient in the matrix
+    /*!
+      @param numRows Number of rows into the list given in "localValues"
+      @param numColumns Number of columns into the list given in "localValues"
+      @param rowIndices List of row indices
+      @param columnIndices List of column indices
+      @param localValues 2D array containing the coefficient related to "rowIndices" and "columnIndices"
+      @param format Format of the matrix (Epetra_FECrsMatrix::COLUMN_MAJOR or Epetra_FECrsMatrix::ROW_MAJOR)
+     */
+    void setCoefficients( Int const numRows, Int const numColumns,
+                            std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
+                            DataType* const* const localValues,
+                            Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
+
     //! Set a coefficient of the matrix
     /*!
       @param row Row index of the coefficient
@@ -462,6 +502,9 @@ public:
     //! Return the shared_pointer of the Epetra_FECrsMatrix
     matrix_ptrtype& matrixPtr(){ return M_epetraCrs; }
 
+    //! Return the shared_pointer of the Epetra_Map
+    boost::shared_ptr<MapEpetra> mapPtr(){ return M_map; }
+
     //! Return the const shared_pointer of the Epetra_FECrsMatrix
     const matrix_ptrtype& matrixPtr() const{ return M_epetraCrs; }
 
@@ -493,6 +536,18 @@ public:
 
     //@}
 
+    //! Friend Functions
+    //@{
+    //! RAP matrix matrix multiplication result = R * A * P
+    //! User is responsible to wrap the row pointer returned by this method with his favorite pointer
+    template <typename DType>
+    friend MatrixEpetra<DType> * RAP(const MatrixEpetra<DType> & R, const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P);
+
+    //! PtAP matrix matrix multiplication result = Pt * A * P
+    //! User is responsible to wrap the row pointer returned by this method with his favorite pointer
+    template <typename DType>
+    friend MatrixEpetra<DType> * PtAP(const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P);
+    //@}
 private:
 
 
@@ -525,6 +580,14 @@ private:
 // ===================================================
 // Constructors & Destructor
 // ===================================================
+template <typename DataType>
+MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues ) :
+    M_map       ( new MapEpetra( map ) ),
+    M_epetraCrs ( new matrix_type( Copy, graph, ignoreNonLocalValues ) )
+{
+
+}
+
 template <typename DataType>
 MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, Int numEntries ) :
     M_map       ( new MapEpetra( map ) ),
@@ -562,12 +625,22 @@ MatrixEpetra<DataType>::MatrixEpetra( const MatrixEpetra& matrix, const UInt red
 
 template <typename DataType>
 MatrixEpetra<DataType>::MatrixEpetra( matrix_ptrtype CRSMatrixPtr ):
-    M_map(),
+    M_map( ),
     M_domainMap(),
     M_rangeMap()
 {
     M_epetraCrs = CRSMatrixPtr;
 }
+
+template <typename DataType>
+MatrixEpetra<DataType>::MatrixEpetra(const MapEpetra& map, matrix_ptrtype CRSMatrixPtr ):
+    M_map( new MapEpetra(map) ),
+    M_domainMap(),
+    M_rangeMap()
+{
+    M_epetraCrs = CRSMatrixPtr;
+}
+
 
 
 // ===================================================
@@ -607,8 +680,10 @@ MatrixEpetra<DataType>::operator * ( const vector_type& vector ) const
                 "MatrixEpetra::Operator*: globalAssemble(...) should be called first" );
     ASSERT_PRE( vector.map().mapsAreSimilar(*M_domainMap),
                 "MatrixEpetra::Operator*: the map of vec is not the same of domainMap" );
-    vector_type result(vector);
+    ASSERT_PRE( M_rangeMap.get(),
+                "MatrixEpetra::Operator*: the rangeMap is not set" );
 
+	 vector_type result(*M_rangeMap);
     M_epetraCrs->Apply( vector.epetraVector(), result.epetraVector() );
 
     return result;
@@ -718,7 +793,20 @@ Int MatrixEpetra<DataType>::multiply( bool transposeCurrent,
                                                      *matrix.matrixPtr(), transposeMatrix,
                                                      *result.matrixPtr(), false );
     if (callFillCompleteOnResult)
-        result.globalAssemble();
+    {
+    	boost::shared_ptr<const MapEpetra> domainMap, rangeMap;
+    	if(transposeCurrent)
+    		rangeMap = M_domainMap;
+    	else
+    		rangeMap = M_rangeMap;
+
+    	if(transposeMatrix)
+    		domainMap = matrix.M_rangeMap;
+    	else
+    		domainMap  = matrix.M_domainMap;
+
+        result.globalAssemble(domainMap, rangeMap);
+    }
 
     return errCode;
 }
@@ -728,10 +816,10 @@ Int MatrixEpetra<DataType>::multiply( bool transposeCurrent, const vector_type& 
 {
     ASSERT_PRE( M_epetraCrs->Filled(),
                 "MatrixEpetra<DataType>::Multiply: GlobalAssemble(...) must be called first" );
-    ASSERT_PRE( vector1.map().mapsAreSimilar(*M_domainMap),
-                "MatrixEpetra<DataType>::Multiply: x map is different from M_domainMap" );
-    ASSERT_PRE( vector2.map().mapsAreSimilar(*M_rangeMap),
-                "MatrixEpetra<DataType>::Multiply: y map is different from M_rangeMap" );
+    ASSERT_PRE( transposeCurrent ? vector1.map().mapsAreSimilar(*M_rangeMap) : vector1.map().mapsAreSimilar(*M_domainMap),
+                "MatrixEpetra<DataType>::Multiply: x map is different from M_domainMap (or M_rangeMap if transposeCurrent == true)" );
+    ASSERT_PRE( transposeCurrent ? vector2.map().mapsAreSimilar(*M_domainMap) : vector2.map().mapsAreSimilar(*M_rangeMap),
+                "MatrixEpetra<DataType>::Multiply: y map is different from M_rangeMap (or M_domainMap if transposeCurrent == true)" );
 
 
     return M_epetraCrs->Multiply( transposeCurrent, vector1.epetraVector(), vector2.epetraVector() );
@@ -774,6 +862,22 @@ void MatrixEpetra<DataType>::add ( const DataType scalar, const MatrixEpetra& ma
 #else
 #error error: do not have nor EpetraExt  8+
 #endif
+}
+
+template <typename DataType>
+boost::shared_ptr<MatrixEpetra<DataType> > MatrixEpetra<DataType>::transpose( )
+{
+	ASSERT_PRE(M_epetraCrs->Filled(),"The transpose can be formed only if the matrix is already filled!");
+	boost::shared_ptr<Epetra_FECrsMatrix> transposedFE;
+	transposedFE.reset(new Epetra_FECrsMatrix(Copy,M_epetraCrs->OperatorDomainMap(),M_epetraCrs->OperatorRangeMap(),0,false));
+	EpetraExt::RowMatrix_Transpose transposer;
+	*dynamic_cast<Epetra_CrsMatrix*>(&(*transposedFE)) = dynamic_cast<Epetra_CrsMatrix&>(transposer(*M_epetraCrs));
+	transposedFE->FillComplete();
+	boost::shared_ptr<MatrixEpetra<DataType> > transposedMatrix(new MatrixEpetra<DataType>(*M_domainMap));
+	transposedMatrix->globalAssemble(M_rangeMap,M_domainMap);
+	transposedMatrix->matrixPtr() = transposedFE;
+	
+	return transposedMatrix;
 }
 
 template <typename DataType>
@@ -1173,7 +1277,7 @@ void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::str
 
     // Save the matrix into the file
     HDF5.Write( matrixName.data(), *M_epetraCrs );
-    
+
     // Close the file
     HDF5.Close();
 
@@ -1216,12 +1320,10 @@ void MatrixEpetra<DataType>::showMe( std::ostream& output ) const
 template <typename DataType>
 Int MatrixEpetra<DataType>::globalAssemble()
 {
-    if ( M_epetraCrs->Filled() )
+    if ( !M_epetraCrs->Filled() )
     {
-        return -1;
+        insertZeroDiagonal();
     }
-
-    insertZeroDiagonal();
     M_domainMap = M_map;
     M_rangeMap  = M_map;
     return  M_epetraCrs->GlobalAssemble();
@@ -1231,10 +1333,12 @@ template <typename DataType>
 Int MatrixEpetra<DataType>::globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
                                             const boost::shared_ptr<const MapEpetra> & rangeMap )
 {
-    if ( M_epetraCrs->Filled() )
+
+    if ( !M_epetraCrs->Filled() && domainMap->mapsAreSimilar( *rangeMap) )
     {
-        return -1;
+        insertZeroDiagonal();
     }
+
 
     M_domainMap = domainMap;
     M_rangeMap  = rangeMap;
@@ -1278,7 +1382,7 @@ void MatrixEpetra<DataType>::insertValueDiagonal( const DataType& value, Int fro
 
         ierr = M_epetraCrs->InsertGlobalValues( 1, p, 1, p, &value );
 
-        if( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
+        if( ierr < 0 ) std::cerr << " error in matrix insertion " << ierr << std::endl;
     }
 }
 
@@ -1312,6 +1416,22 @@ Real MatrixEpetra<DataType>::normInf() const
 // ===================================================
 template <typename DataType>
 void MatrixEpetra<DataType>::
+setCoefficients( Int const numRows, Int const numColumns,
+                   std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
+                   DataType* const* const localValues,
+                   Int format )
+{
+    Int ierr;
+    ierr = M_epetraCrs->ReplaceGlobalValues( numRows, &rowIndices[0], numColumns, &columnIndices[0], localValues, format );
+
+    if ( ierr < 0 ) std::cout << " error in matrix insertion [setCoefficients] " << ierr
+                    << " when inserting in (" << rowIndices[0] << ", " << columnIndices[0] << ")" << std::endl;
+}
+
+
+
+template <typename DataType>
+void MatrixEpetra<DataType>::
 setCoefficient( UInt row, UInt column, DataType localValue )
 {
     Int irow(    row );
@@ -1319,7 +1439,7 @@ setCoefficient( UInt row, UInt column, DataType localValue )
 
     Int ierr=M_epetraCrs->ReplaceGlobalValues( 1, &irow, 1, &icol, &localValue );
     if (ierr!=0)
-        { std::cout << " error in matrix replacement " << ierr << std::endl; }
+        { std::cerr << " error in matrix replacement " << ierr << std::endl; }
 
 }
 
@@ -1330,10 +1450,15 @@ addToCoefficient( UInt row, UInt column, DataType localValue )
 
     Int irow(    row );
     Int icol( column );
+    Int ierr;
 
-    Int ierr = M_epetraCrs->InsertGlobalValues( 1, &irow, 1, &icol, &localValue );
+    if ( M_epetraCrs->Filled() )
+    	ierr = M_epetraCrs->SumIntoGlobalValues( 1, &irow, 1, &icol, &localValue );
+    else
+    	ierr = M_epetraCrs->InsertGlobalValues( 1, &irow, 1, &icol, &localValue );
 
-    if ( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
+    if ( ierr < 0 ) std::cerr << " error in matrix insertion [addToCoefficient] " << ierr
+                    << " when inserting " << localValue << " in (" << irow << ", " << icol << ")" << std::endl;
 }
 
 template <typename DataType>
@@ -1343,10 +1468,17 @@ addToCoefficients( Int const numRows, Int const numColumns,
                    DataType* const* const localValues,
                    Int format )
 {
-    Int ierr = M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
-                                                &columnIndices[0], localValues, format );
+    Int ierr;
 
-    if ( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
+    if ( M_epetraCrs->Filled() )
+        ierr = M_epetraCrs->SumIntoGlobalValues( numRows, &rowIndices[0], numColumns,
+                                                    &columnIndices[0], localValues, format );
+    else
+        ierr = M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
+                                                        &columnIndices[0], localValues, format );
+
+    if ( ierr < 0 ) std::cerr << " error in matrix insertion [addToCoefficients] " << ierr
+                    << " when inserting in (" << rowIndices[0] << ", " << columnIndices[0] << ")" << std::endl;
 }
 
 // ===================================================
@@ -1391,6 +1523,48 @@ const MapEpetra& MatrixEpetra<DataType>::rangeMap() const
     ASSERT( M_rangeMap.get() != 0, "MatrixEpetra::getRangeMap: Error: M_rangeMap pointer is null" );
     return *M_rangeMap;
 }
+
+template <typename DType>
+MatrixEpetra<DType> * RAP(const MatrixEpetra<DType> & R, const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P)
+{
+	//Optimized implementation requires Trilinos 10.8
+/*
+	typename MatrixEpetra<DType>::matrix_type * result = NULL;
+	ML_Epetra::ML_Epetra_RAP (*A.matrixPtr(), *P.matrixPtr(), *R.matrixPtr(), result, true);
+
+	MatrixEpetra<DType> * matrix(new MatrixEpetra<DType>(P.map()));
+	matrix->M_epetraCrs.reset(result);
+	matrix->M_domainMap = P.M_domainMap;
+	matrix->M_rangeMap = R.M_rangeMap;
+
+	return result;
+
+*/
+// Slower implementation (no prerequisites on Trilinos)
+	MatrixEpetra<DType> * result(new MatrixEpetra<DType>( *R.M_rangeMap ) );
+	MatrixEpetra<DType> tmp(A.map());
+	EpetraExt::MatrixMatrix::Multiply(*A.matrixPtr(), false, *P.matrixPtr(), false, *tmp.matrixPtr(), true);
+	EpetraExt::MatrixMatrix::Multiply(*R.matrixPtr(), false, *tmp.matrixPtr(), false, *(result->matrixPtr()), true);
+
+	result->M_domainMap = P.M_domainMap;
+	result->M_rangeMap = R.M_rangeMap;
+
+	return result;
+}
+
+template <typename DType>
+MatrixEpetra<DType> * PtAP(const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P)
+{
+	typename MatrixEpetra<DType>::matrix_type * result = NULL;
+	ML_Epetra::ML_Epetra_PtAP (*A.matrixPtr(), *P.matrixPtr(), result, true);
+	MatrixEpetra<DType> * matrix(new MatrixEpetra<DType>(P.M_domainMap));
+	matrix->M_epetraCrs.reset(result);
+	matrix->M_domainMap = P.M_domainMap;
+	matrix->M_rangeMap = P.M_domainMap;
+
+	return matrix;
+}
+
 
 } // end namespace LifeV
 //@@

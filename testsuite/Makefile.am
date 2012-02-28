@@ -1,4 +1,3 @@
-# -*- makefile -*-
 ###################################################################################################
 #
 #                       This file is part of the LifeV Applications
@@ -23,6 +22,7 @@ SUBDIRS		= data  \
 			  lifefem \
 			  lifefilters \
 			  lifemesh \
+			  test_MatrixEpetraStructuredFramework \
 			  test_ADRAssembler \
 			  test_bdf \
 			  test_navierStokes \
@@ -38,7 +38,8 @@ SUBDIRS		= data  \
               test_timeAdvance_orderI \
               test_timeAdvance_orderII \
               test_monolithic \
-              test_VectorContainer
+              test_VectorContainer\
+              test_ZeroDimensional
 
 
 # add newly created testsuite.at scripts to TESTSUITES to allow the automatic generation of the
@@ -49,6 +50,7 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
            $(srcdir)/lifefem/testsuite.at \
            $(srcdir)/lifefilters/testsuite.at \
            $(srcdir)/lifemesh/testsuite.at \
+           $(srcdir)/test_MatrixEpetraStructuredFramework \
 		   $(srcdir)/test_ADRAssembler/testsuite.at \
 		   $(srcdir)/test_bdf/testsuite.at \
 		   $(srcdir)/test_navierStokes/testsuite.at \
@@ -64,7 +66,8 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
            $(srcdir)/test_monolithic/testsuiteGCE.at \
            $(srcdir)/test_monolithic/testsuiteCE.at \
            $(srcdir)/test_Parser/testsuite.at \
-           $(srcdir)/test_VectorContainer/testsuite.at
+           $(srcdir)/test_VectorContainer/testsuite.at\
+           $(srcdir)/test_ZeroDimensional/testsuite.at
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in

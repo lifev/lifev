@@ -60,8 +60,8 @@ namespace
 struct DarcyDefaultStartUpFunction
 {
     LifeV::Real operator()( const LifeV::Real&, const LifeV::Real&,
-			    const LifeV::Real&, const LifeV::Real&,
-			    const LifeV::UInt&) const
+                const LifeV::Real&, const LifeV::Real&,
+                const LifeV::UInt&) const
     {
         return static_cast<LifeV::Real>( 0 );
     }
@@ -76,6 +76,7 @@ namespace LifeV
 
 /*!
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+  @see For applications related to two-phase flow see \cite Fumagalli2011a
 
   This class implements a non-linear Darcy solver with fixed point scheme to handle the non-linearity.
   <br>
@@ -595,7 +596,7 @@ setup ()
 
     // Set the maximum number of iteration for the fixed point iteration scheme.
     setFixedPointMaxIteration(static_cast<UInt>( dataFile( ( this->M_data.section()
-							     + "/non-linear/fixed_point_iteration" ).data(), 10 ) ));
+                                 + "/non-linear/fixed_point_iteration" ).data(), 10 ) ));
 
     // Set the tollerance for the fixed point iteration scheme.
     setFixedPointTolerance(dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 ));
@@ -618,7 +619,7 @@ fixedPointScheme ()
     /* A loop for the fixed point scheme, with exit condition based on stagnate of the
        primal variable and the maximum iteration. */
     while (    fixedPointResidual() > fixedPointTolerance()
-	       && fixedPointNumIteration() < fixedPointMaxIteration() )
+           && fixedPointNumIteration() < fixedPointMaxIteration() )
     {
         // Increment the iteration number.
         ++M_fixedPointNumIteration;
