@@ -661,11 +661,11 @@ MultiscaleModelFSI3D::setupBC( const std::string& fileName )
 
         // TODO: This part of the code is not general! ---------------------------------------------------------
         // It assumes that we have put an area BC with flag = fluidFlag + 5000.
-        BCBase stressBase = M_solidBC->handler()->findBCWithFlag( boundaryAreaFunction->fluidFlag() + 5000 );
-        if ( stressBase.flag() == ( boundaryAreaFunction->fluidFlag() + 5000 ) ) // Double check required!
-        {
-            boundaryAreaFunction->setFunctionScaleFactor( stressBase.pointerToFunctor()->Function() );
-        }
+        for ( bc_Type::bcBaseIterator_Type i = M_solidBC->handler()->begin(); i != M_solidBC->handler()->end(); ++i )
+            if ( i->flag() == ( boundaryAreaFunction->fluidFlag() + 5000 ) )
+            {
+                boundaryAreaFunction->setFunctionScaleFactor( i->pointerToFunctor()->Function() );
+            }
         // -----------------------------------------------------------------------------------------------------
 
         // Add boundary condition to solid bcHandler
