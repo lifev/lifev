@@ -441,7 +441,7 @@ Cylinder::run()
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    bcH.setOffset("Inlet", totalVelDof + totalPressDof);
+    //bcH.setOffset("Inlet", totalVelDof + totalPressDof);
 
     OseenSolver< RegionMesh<LinearTetra> > fluid (oseenData,
                                                     *uFESpacePtr,
