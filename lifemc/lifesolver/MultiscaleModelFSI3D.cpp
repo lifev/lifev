@@ -91,6 +91,12 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarz",   &MonolithicBlockMatrix::createAdditiveSchwarz ) ;
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarzRN", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) ;
 
+    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createVenantKirchhoffLinear );
+    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "exponential", &FSIOperator::createExponentialMaterialNonLinear );
+    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "neoHookean", &FSIOperator::createNeoHookeanMaterialNonLinear );
+    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createVenantKirchhoffNonLinear );
+
+
     //FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
 //    FSIOperator_Type::solid_Type::StructureSolverFactory_Type::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
 }
@@ -185,6 +191,8 @@ MultiscaleModelFSI3D::setupModel()
 
     //Setup linear model
     setupLinearModel();
+
+    M_FSIoperator->fluid().setupPostProc(); //this has to be called if we want to initialize the postProcess
 }
 
 void
@@ -284,7 +292,10 @@ MultiscaleModelFSI3D::solveModel()
 // #else
 //     vectorPtr_Type solution( new vector_Type( *fluidVelocityAndPressureWithoutExternalPressure_tn ) );
 // #endif
-    vectorPtr_Type solution( new vector_Type( *M_FSIoperator->fluidTimeAdvance()->stencil()[1] ) );// solution at the previous time step
+    vectorPtr_Type solution( new vector_Type( *M_FSIoperator->fluidTimeAdvance()->stencil()[0] ) );// solution at the previous time step
+    //why not an extrapolation?
+
+    solution->spy("sol");
 
     std::ofstream outRes; // Unuseful variable - NonLinearRichardson interface must be clean..
 
@@ -522,6 +533,8 @@ MultiscaleModelFSI3D::initializeSolution()
     M_solidDisplacement_tn.resize( M_FSIoperator->solidTimeAdvance()->size() );
     vectorPtr_Type firstFluidDisp( new vector_Type(*M_FSIoperator->couplingVariableMap()) );
 
+    vectorPtr_Type solution( new vector_Type(*M_FSIoperator->couplingVariableMap()) );
+
     if ( multiscaleProblemStep > 0 )
     {
         M_importerFluid->setMeshProcId( M_FSIoperator->uFESpace().mesh(), M_FSIoperator->uFESpace().map().comm().MyPID() );
@@ -534,7 +547,6 @@ MultiscaleModelFSI3D::initializeSolution()
         M_importerSolid->addVariable( IOData_Type::VectorField, "Displacement (solid)", M_FSIoperator->dFESpacePtr(),  M_solidDisplacement, static_cast <UInt> (0) );
         M_importerSolid->addVariable( IOData_Type::VectorField, "Velocity (solid)",     M_FSIoperator->dFESpacePtr(),  M_solidVelocity,     static_cast <UInt> (0) );
 
-        vectorPtr_Type solution( new vector_Type(*M_FSIoperator->couplingVariableMap()) );
         vectorPtr_Type temporaryVector;
 
 
@@ -613,9 +625,9 @@ MultiscaleModelFSI3D::initializeSolution()
         for(UInt iteration(0); iteration<M_FSIoperator->fluidTimeAdvance()->size() ; ++iteration)
         {
             // Initialize solution
-            *M_fluidVelocityAndPressure = *M_externalPressureVector;
+            *solution = *M_externalPressureVector;
             // Initialize solution at time tn
-            M_fluidVelocityAndPressure_tn[iteration]=M_fluidVelocityAndPressure;
+            M_fluidVelocityAndPressure_tn[iteration]=solution;
         }
         for(UInt iteration(0); iteration<M_FSIoperator->ALETimeAdvance()->size() ; ++iteration)
         {
@@ -624,9 +636,8 @@ MultiscaleModelFSI3D::initializeSolution()
         }
         for(UInt iteration(0); iteration<M_FSIoperator->solidTimeAdvance()->size() ; ++iteration)
         {
-            *M_solidVelocity            = 0.0;
-            *M_solidDisplacement        = 0.0;
-            M_solidDisplacement_tn[iteration]=M_solidDisplacement;
+            *solution                        = 0.0;
+            M_solidDisplacement_tn[iteration]=solution;
         }
     }
 
@@ -634,11 +645,11 @@ MultiscaleModelFSI3D::initializeSolution()
     //    std::vector<vectorPtr_Type> vel(1), fluidDisp(1), solidDisp(1);
     //    fluidDisp[0]=M_fluidDisplacement_tn;
     //    solidDisp[0]=M_solidDisplacement_tn;
-    M_FSIoperator->initializeTimeAdvance(M_fluidVelocityAndPressure_tn, M_fluidDisplacement_tn, M_solidDisplacement_tn);
+    M_FSIoperator->initializeTimeAdvance(M_fluidVelocityAndPressure_tn, M_solidDisplacement_tn, M_fluidDisplacement_tn);
 
-    if(!M_data->dataFluid()->domainVelImplicit())
+    if(!M_data->dataFluid()->domainVelImplicit() &&  multiscaleProblemStep == 0)
       {
-          //The following is needed because (and if) of the extrapolation of the fluid domain velocity is used, i.e. M_domainVelImplicit
+          //The following is needed because (and if) of the extrapolation of the fluid domain velocity is used, i.e. M_domainVelImplicit==false
           M_FSIoperator->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataSolid()->dataTime()->timeStep() );
           M_FSIoperator->ALETimeAdvance()->shiftRight(*firstFluidDisp);
       }

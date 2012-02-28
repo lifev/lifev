@@ -78,8 +78,13 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     #viscosity       = 0.035           # viscosity [g/cm/s]
 
     [../time_discretization]
-    #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
+    #timestep                   = 0.0001 # [s]
+    method          = BDF # Newmark or BDF
     BDF_order       = 1
+    theta                   = 0.35
+    gamma                    = 0.75
+    rhoInf          = 1
+    typeOfGeneralizedAlpha            = HHT
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
@@ -153,10 +158,18 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     #density          = 1.2
     #young            = 3.0784E6
     #poisson          = 0.48
+    bulk      = 1e7
+    alpha     = 2.5e6
+    gamma     = 1
 
     [../time_discretization]
     #timestep                   = 0.0001 # [s]
+    method          = BDF # Newmark or BDF
     BDF_order       = 1
+    theta                   = 0.35
+    gamma                    = 0.75
+    rhoInf          = 1
+    typeOfGeneralizedAlpha            = HHT
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
