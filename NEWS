@@ -1,5 +1,17 @@
 # -*- readme-debian -*-
 
+LifeV  2.2.0:
+=============
+
+* This is a major release, the last one in the 2.x.x series
+
+* For the next release, LifeV will be modularized, allower finer grained control over what parts of the library to install
+
+* This release allows configuration either with the configure script, either with CMake. The CMake based configuration (undergoing a refactoring) will be the prefered configuration method and starting with the next release, the autoconf based configuration will be deprecated
+
+* Check out the new features in LifeV: the monolithic FSI solver, the one dimensional model and solver, an experimental zero dimensional solver and others
+
+
 LifeV  2.0.0:
 =============
 
