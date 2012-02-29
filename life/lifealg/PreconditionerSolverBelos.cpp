@@ -157,7 +157,7 @@ PreconditionerSolverBelos::createSolverBelosList( list_Type&         list,
     std::string prec = dataFile( ( section + "/" + subsection + "/prec" ).data(), "ML" );
     list.set( "prec", prec );
     std::string precDataSection = dataFile( ( section + "/" + subsection + "/prec_data_section" ).data(), "" );
-    list.set( "prec data section", ( section + "/" + subsection+"/"+precDataSection ).data() );
+    list.set( "prec data section", ( precDataSection ).data() );
 
     if ( displayList ) list.print( std::cout );
 }
