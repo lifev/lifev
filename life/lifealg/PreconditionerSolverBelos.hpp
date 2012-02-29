@@ -62,11 +62,11 @@ class GetPot;
 namespace LifeV
 {
 
-//! PreconditionerSolverBelos - Class to wrap linear solver
+//! PreconditionerLinearSolver - Class to wrap linear solver
 /*!
   @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 */
-class PreconditionerSolverBelos
+class PreconditionerLinearSolver
     : public Preconditioner
 {
 public:
@@ -98,10 +98,10 @@ public:
     /*!
      * @param comm The communicator.
      */
-    PreconditionerSolverBelos( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerLinearSolver( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! Destructor
-    virtual ~PreconditionerSolverBelos();
+    virtual ~PreconditionerLinearSolver();
 
     //@}
 
@@ -127,10 +127,10 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    static void createSolverBelosList( list_Type&         list,
-                                       const GetPot&      dataFile,
-                                       const std::string& section,
-                                       const std::string& subSection = "SolverAmesos" );
+    static void createLinearSolverList( list_Type&         list,
+                                        const GetPot&      dataFile,
+                                        const std::string& section,
+                                        const std::string& subSection = "SolverAmesos" );
 
     //! Build a preconditioner based on the given matrix
     /*!
@@ -231,10 +231,10 @@ private:
 
 };
 
-inline Preconditioner* createSolverBelos() { return new PreconditionerSolverBelos(); }
+inline Preconditioner* createLinearSolverPreconditioner() { return new PreconditionerLinearSolver(); }
 namespace
 {
-    static bool registerSB = PRECFactory::instance().registerProduct( "SolverBelos", &createSolverBelos );
+    static bool registerSB = PRECFactory::instance().registerProduct( "LinearSolver", &createLinearSolverPreconditioner );
 }
 
 } // namespace LifeV

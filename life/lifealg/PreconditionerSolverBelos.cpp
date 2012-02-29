@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Solver Belos Operator
+    @brief LinearSolver preconditioner
 
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
@@ -34,7 +34,7 @@
     @date 17-09-2011
  */
 
-#include <life/lifealg/PreconditionerSolverBelos.hpp>
+#include <life/lifealg/PreconditionerLinearSolver.hpp>
 #include <life/lifecore/LifeDebug.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefilters/GetPot.hpp>
@@ -45,13 +45,13 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-PreconditionerSolverBelos::PreconditionerSolverBelos( boost::shared_ptr<Epetra_Comm> comm ) :
+PreconditionerLinearSolver::PreconditionerLinearSolver( boost::shared_ptr<Epetra_Comm> comm ) :
         Preconditioner( comm )
 {
 
 }
 
-PreconditionerSolverBelos::~PreconditionerSolverBelos()
+PreconditionerLinearSolver::~PreconditionerLinearSolver()
 {
     M_prec.reset();
 }
@@ -61,16 +61,16 @@ PreconditionerSolverBelos::~PreconditionerSolverBelos()
 // ===================================================
 
 void
-PreconditionerSolverBelos::createParametersList( list_Type&         list,
+PreconditionerLinearSolver::createParametersList( list_Type&         list,
                                                   const GetPot&      dataFile,
                                                   const std::string& section,
                                                   const std::string& subSection )
 {
-    createSolverBelosList( list, dataFile, section, subSection );
+    createLinearSolverList( list, dataFile, section, subSection );
 }
 
 void
-PreconditionerSolverBelos::createSolverBelosList( list_Type&         list,
+PreconditionerLinearSolver::createLinearSolverList( list_Type&         list,
                                                   const GetPot&      dataFile,
                                                   const std::string& section,
                                                   const std::string& subsection )
@@ -163,7 +163,7 @@ PreconditionerSolverBelos::createSolverBelosList( list_Type&         list,
 }
 
 Int
-PreconditionerSolverBelos::buildPreconditioner( operator_type& matrix )
+PreconditionerLinearSolver::buildPreconditioner( operator_type& matrix )
 {
     M_prec.reset( new precOperator_Type( this->M_displayer.comm() ) );
     M_prec->buildSolver( matrix, M_list );
@@ -175,20 +175,20 @@ PreconditionerSolverBelos::buildPreconditioner( operator_type& matrix )
 }
 
 void
-PreconditionerSolverBelos::resetPreconditioner()
+PreconditionerLinearSolver::resetPreconditioner()
 {
     M_prec.reset();
     this->M_preconditionerCreated = false;
 }
 
 Real
-PreconditionerSolverBelos::condest()
+PreconditionerLinearSolver::condest()
 {
     return 0.0;
 }
 
 void
-PreconditionerSolverBelos::showMe( std::ostream& output ) const
+PreconditionerLinearSolver::showMe( std::ostream& output ) const
 {
     M_prec->showMe(output);
 }
@@ -197,25 +197,25 @@ PreconditionerSolverBelos::showMe( std::ostream& output ) const
 // Epetra Operator Interface Methods
 // ===================================================
 Int
-PreconditionerSolverBelos::SetUseTranspose( const bool useTranspose )
+PreconditionerLinearSolver::SetUseTranspose( const bool useTranspose )
 {
     return M_prec->SetUseTranspose(useTranspose);
 }
 
 bool
-PreconditionerSolverBelos::UseTranspose()
+PreconditionerLinearSolver::UseTranspose()
 {
     return M_prec->UseTranspose();
 }
 
 Int
-PreconditionerSolverBelos::Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
+PreconditionerLinearSolver::Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
     return M_prec->Apply( X, Y );
 }
 
 Int
-PreconditionerSolverBelos::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
+PreconditionerLinearSolver::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
     if( M_prec )
     {
@@ -225,13 +225,13 @@ PreconditionerSolverBelos::ApplyInverse( const Epetra_MultiVector& X, Epetra_Mul
 }
 
 const Epetra_Map&
-PreconditionerSolverBelos::OperatorRangeMap() const
+PreconditionerLinearSolver::OperatorRangeMap() const
 {
     return M_prec->OperatorRangeMap();
 }
 
 const Epetra_Map&
-PreconditionerSolverBelos::OperatorDomainMap() const
+PreconditionerLinearSolver::OperatorDomainMap() const
 {
     return M_prec->OperatorDomainMap();
 }
@@ -240,16 +240,16 @@ PreconditionerSolverBelos::OperatorDomainMap() const
 // Set Methods
 // ===================================================
 void
-PreconditionerSolverBelos::setDataFromGetPot ( const GetPot& dataFile, const std::string& section )
+PreconditionerLinearSolver::setDataFromGetPot ( const GetPot& dataFile, const std::string& section )
 {
-    createSolverBelosList( M_list, dataFile, section, "SolverBelos" );
+    createLinearSolverList( M_list, dataFile, section, "LinearSolver" );
     M_solverPrecName    = this->M_list.get( "prec", "ML" );
     M_precDataSection   = this->M_list.get( "prec data section", "" );
     M_dataFile = dataFile;
 }
 
 void
-PreconditionerSolverBelos::setSolver( SolverAztecOO& /*solver*/ )
+PreconditionerLinearSolver::setSolver( SolverAztecOO& /*solver*/ )
 {
 
 }
@@ -259,27 +259,27 @@ PreconditionerSolverBelos::setSolver( SolverAztecOO& /*solver*/ )
 // ===================================================
 //! Return true if the preconditioner is set
 bool
-PreconditionerSolverBelos::isPreconditionerSet() const
+PreconditionerLinearSolver::isPreconditionerSet() const
 {
     return M_prec;
 }
 
-PreconditionerSolverBelos::prec_raw_type*
-PreconditionerSolverBelos::preconditioner()
+PreconditionerLinearSolver::prec_raw_type*
+PreconditionerLinearSolver::preconditioner()
 {
     return M_prec.get();
 }
 
-PreconditionerSolverBelos::prec_type
-PreconditionerSolverBelos::preconditionerPtr()
+PreconditionerLinearSolver::prec_type
+PreconditionerLinearSolver::preconditionerPtr()
 {
     return M_prec;
 }
 
 std::string
-PreconditionerSolverBelos::preconditionerType()
+PreconditionerLinearSolver::preconditionerType()
 {
-    return "SolverBelos preconditioner";
+    return "LinearSolver preconditioner";
 }
 
 // ===================================================
