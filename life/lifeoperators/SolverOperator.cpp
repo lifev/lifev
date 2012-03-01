@@ -42,13 +42,15 @@ namespace LifeV
 namespace Operators
 {
 
-SolverOperator::SolverOperator():
+SolverOperator::SolverOperator( boost::shared_ptr<Epetra_Comm> comm ):
 	M_name( "SolverOperator" ),
 	M_useTranspose( false ),
 	M_lossOfAccuracy( undefined ),
     M_converged( undefined ),
     M_numIterations( 0 ),
-    M_tolerance( -1. )
+    M_tolerance( -1. ),
+    M_printSubiterationCount( false ),
+    M_comm( comm )
 { }
 
 SolverOperator::~SolverOperator()
@@ -94,6 +96,11 @@ void SolverOperator::setTolerance( const Real& tolerance )
 	M_tolerance = tolerance;
 }
 
+void SolverOperator::setUsedForPreconditioning( const bool& enable )
+{
+	M_printSubiterationCount = enable;
+}
+
 int SolverOperator::Apply( const vector_Type& X, vector_Type& Y ) const
 {
 	ASSERT_PRE( X.Map().SameAs( M_oper->OperatorDomainMap() ), "X and domain map do no coincide \n" );
@@ -109,8 +116,14 @@ int SolverOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 
 	if ( M_useTranspose )
 		return -1;
+	int result = doApplyInverse( X, Y );
 
-	return doApplyInverse( X, Y );
+    if( M_comm->MyPID() == 0 && M_printSubiterationCount )
+    {
+	    std::cout << "> " << numIterations() << " subiterations" << std::endl;
+    }
+
+	return result;
 }
 
 } // Namespace Operators

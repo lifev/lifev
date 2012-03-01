@@ -71,7 +71,11 @@ class SolverOperator : public LinearOperator
 public:
 	enum SolverOperatorStatusType          { undefined, yes, no };
 
-	SolverOperator();
+#ifdef HAVE_MPI
+	SolverOperator( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+	SolverOperator( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 	virtual ~SolverOperator();
 
 	//! @name Attribute set methods
@@ -87,6 +91,8 @@ public:
 	void setParameters( const Teuchos::ParameterList & _pList );
 
 	void setTolerance( const Real& tolerance );
+
+	void setUsedForPreconditioning( const bool& enable );
 
 	//@}
 
@@ -175,6 +181,12 @@ protected:
 
 	//! Solver tolerance
 	Real M_tolerance;
+
+	//! Print the number of iteration (used only for preconditioner LinearSolver)
+	bool M_printSubiterationCount;
+
+	//! Communicator
+	boost::shared_ptr<Epetra_Comm> M_comm;
 
 };
 

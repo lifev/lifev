@@ -46,14 +46,18 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 PreconditionerLinearSolver::PreconditionerLinearSolver( boost::shared_ptr<Epetra_Comm> comm ) :
-        Preconditioner( comm )
+        Preconditioner          ( comm ),
+        M_printSubiterationCount( false ),
+        M_precName              ( "" ),
+        M_precDataSection       ( "" )
 {
 
 }
 
 PreconditionerLinearSolver::~PreconditionerLinearSolver()
 {
-    M_prec.reset();
+    M_solver.reset();
+    M_preconditioner.reset();
 }
 
 // ===================================================
@@ -66,108 +70,47 @@ PreconditionerLinearSolver::createParametersList( list_Type&         list,
                                                   const std::string& section,
                                                   const std::string& subSection )
 {
-    createLinearSolverList( list, dataFile, section, subSection );
+    createLinearSolverList( list, dataFile, section, subSection, M_displayer.comm()->MyPID() == 0 );
 }
 
 void
 PreconditionerLinearSolver::createLinearSolverList( list_Type&         list,
-                                                  const GetPot&      dataFile,
-                                                  const std::string& section,
-                                                  const std::string& subsection )
+                                                    const GetPot&      dataFile,
+                                                    const std::string& section,
+                                                    const std::string& subsection,
+                                                    const bool&        verbose )
 {
     bool displayList = dataFile( ( section + "/displayList" ).data(), false);
 
-    bool found;
+    // If this option is true, the solver will print the iteration count
+    const std::string solverParamFile = dataFile( ( section + "/" + subsection + "/parameters_file" ).data(), "none" );
+	list = *( Teuchos::getParametersFromXmlFile( solverParamFile ) );
 
-    // Flexible Gmres will be used to solve this problem
-    bool flexibleGmres = dataFile( ( section + "/" + subsection + "/flexible_gmres" ).data(), false, found );
-    if ( found ) list.set( "Flexible Gmres", flexibleGmres );
-
-    // Relative convergence tolerance requested
-    Real tolerance = dataFile( ( section + "/" + subsection + "/tol" ).data(), 1.e-6, found );
-    if ( found ) list.set( "Convergence Tolerance", tolerance );
-
-    // Maximum number of iterations allowed
-    Int maxIter = dataFile( ( section + "/" + subsection + "/max_iter"      ).data(), 200, found );
-    if ( found ) list.set( "Maximum Iterations", maxIter );
-
-    // Output Frequency
-    Int outputFrequency = dataFile( ( section + "/" + subsection + "/output_frequency" ).data(), 1, found );
-    if ( found ) list.set( "Output Frequency", outputFrequency );
-
-    // Blocksize to be used by iterative solver
-    Int blockSize = dataFile( ( section + "/" + subsection + "/block_size" ).data(), 10, found );
-    if ( found ) list.set( "Block Size", blockSize );
-
-    // Maximum number of blocks in Krylov factorization
-    Int numBlocks = dataFile( ( section + "/" + subsection + "/num_blocks" ).data(), 10, found );
-    if ( found ) list.set( "Num Blocks", numBlocks );
-
-    // Maximum number of restarts allowed
-    Int maximumRestarts = dataFile( ( section + "/" + subsection + "/maximum_restarts" ).data(), 0, found );
-    if ( found ) list.set( "Maximum Restarts", maximumRestarts );
-
-    // Set the output style (General Brief)
-    std::string outputStyle = dataFile( ( section + "/" + subsection + "/output_style" ).data(), "brief", found );
-    if ( found )
+    if ( displayList && verbose )
     {
-        if ( outputStyle == "brief" )   list.set( "Output Style", Belos::Brief );
-        if ( outputStyle == "general" ) list.set( "Output Style", Belos::General );
+    	std::cout << "PreconditionerLinearSolver parameters list:" << std::endl;
+    	std::cout << "-----------------------------" << std::endl;
+    	list.print( std::cout );
+    	std::cout << "-----------------------------" << std::endl;
     }
-
-    // Setting the desired output informations
-    bool msgEnable( false );
-    int msg = Belos::Errors;
-    msgEnable = dataFile( ( section + "/" + subsection + "/enable_warnings" ).data(), true, found );
-    if ( found && msgEnable ) msg += Belos::Warnings;
-    msgEnable = dataFile( ( section + "/" + subsection + "/enable_iterations_details" ).data(), true, found );
-    if ( found && msgEnable ) msg += Belos::IterationDetails;
-    msgEnable = dataFile( ( section + "/" + subsection + "/enable_ortho_details" ).data(), false, found );
-    if ( found && msgEnable ) msg += Belos::OrthoDetails;
-    msgEnable = dataFile( ( section + "/" + subsection + "/enable_final_summary" ).data(), false, found );
-    if ( found && msgEnable ) msg += Belos::FinalSummary;
-    msgEnable = dataFile( ( section + "/" + subsection + "/enable_timing_details" ).data(), false, found );
-    if ( found && msgEnable ) msg += Belos::TimingDetails;
-    msgEnable = dataFile( ( section + "/" + subsection + "/enable_status_test_details" ).data(), false, found );
-    if ( found && msgEnable ) msg += Belos::StatusTestDetails;
-    msgEnable = dataFile( ( section + "/" + subsection + "/enable_debug" ).data(), false, found );
-    if ( found && msgEnable ) msg += Belos::Debug;
-    list.set( "Verbosity", msg );
-
-    // LifeV features
-
-    // Reuse the preconditioner from one to another call
-    bool reusePreconditioner = dataFile( ( section + "/" + subsection + "/reuse_preconditioner" ).data(), true, found );
-    if ( found ) list.set( "Reuse Preconditioner", reusePreconditioner );
-
-    // Max iterations allowed to reuse the preconditioner
-    Int maxItersForReuse = dataFile( ( section + "/" + subsection + "/max_iters_for_reuse" ).data(), static_cast<Int> ( maxIter*8./10. ), found );
-    if ( found ) list.set( "Max Iterations For Reuse", maxItersForReuse );
-
-    // If quitOnFailure is enabled and if some problems occur
-    // the simulation is stopped
-    bool quitOnFailure = dataFile( ( section + "/" + subsection + "/quit_on_failure").data(), false, found );
-    if ( found ) list.set( "Quit On Failure", quitOnFailure );
-
-    // All the information different from warnings and errors are
-    // not displayed
-    bool silent = dataFile( ( section + "/" + subsection + "/silent").data(), false, found );
-    if ( found ) list.set( "Silent", silent );
-
-    std::string prec = dataFile( ( section + "/" + subsection + "/prec" ).data(), "ML" );
-    list.set( "prec", prec );
-    std::string precDataSection = dataFile( ( section + "/" + subsection + "/prec_data_section" ).data(), "" );
-    list.set( "prec data section", ( precDataSection ).data() );
-
-    if ( displayList ) list.print( std::cout );
 }
 
 Int
 PreconditionerLinearSolver::buildPreconditioner( operator_type& matrix )
 {
-    M_prec.reset( new precOperator_Type( this->M_displayer.comm() ) );
-    M_prec->buildSolver( matrix, M_list );
-    M_prec->buildPreconditioner( M_dataFile, M_precDataSection );
+	// Setup the solver
+    M_solver.reset( new solver_Type( this->M_displayer.comm() ) );
+    M_solver->setParameters( M_list.sublist( "LinearSolver" ) );
+    M_solver->setOperator( matrix );
+
+    // Setup the preconditioner for the solver
+    M_preconditioner.reset( PRECFactory::instance().createObject( M_precName ) );
+    ASSERT( M_preconditioner.get() != 0, " Preconditioner not set" );
+    M_preconditioner->setDataFromGetPot( M_dataFile, M_precDataSection );
+    M_solver->setPreconditioner( M_preconditioner );
+    M_solver->buildPreconditioner();
+    M_solver->setupSolverOperator();
+    M_solver->solver()->setUsedForPreconditioning( M_printSubiterationCount );
 
     this->M_preconditionerCreated = true;
 
@@ -177,7 +120,7 @@ PreconditionerLinearSolver::buildPreconditioner( operator_type& matrix )
 void
 PreconditionerLinearSolver::resetPreconditioner()
 {
-    M_prec.reset();
+    M_solver.reset();
     this->M_preconditionerCreated = false;
 }
 
@@ -190,7 +133,7 @@ PreconditionerLinearSolver::condest()
 void
 PreconditionerLinearSolver::showMe( std::ostream& output ) const
 {
-    M_prec->showMe(output);
+    M_solver->showMe(output);
 }
 
 // ===================================================
@@ -199,27 +142,31 @@ PreconditionerLinearSolver::showMe( std::ostream& output ) const
 Int
 PreconditionerLinearSolver::SetUseTranspose( const bool useTranspose )
 {
-    return M_prec->SetUseTranspose(useTranspose);
+    return M_solver->solver()->SetUseTranspose(useTranspose);
 }
 
 bool
 PreconditionerLinearSolver::UseTranspose()
 {
-    return M_prec->UseTranspose();
+    return M_solver->solver()->UseTranspose();
 }
 
 Int
 PreconditionerLinearSolver::Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    return M_prec->Apply( X, Y );
+    return M_solver->solver()->Apply( X, Y );
 }
 
 Int
 PreconditionerLinearSolver::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    if( M_prec )
+    if( M_solver )
     {
-        M_prec->ApplyInverse( X, Y );
+    	M_solver->solver()->ApplyInverse( X, Y );
+        if( M_printSubiterationCount )
+        {
+    	    M_displayer.leaderPrint( "> ", M_solver->numIterations(), " subiterations\n" );
+        }
     }
     return 0;
 }
@@ -227,13 +174,13 @@ PreconditionerLinearSolver::ApplyInverse( const Epetra_MultiVector& X, Epetra_Mu
 const Epetra_Map&
 PreconditionerLinearSolver::OperatorRangeMap() const
 {
-    return M_prec->OperatorRangeMap();
+    return M_solver->solver()->OperatorRangeMap();
 }
 
 const Epetra_Map&
 PreconditionerLinearSolver::OperatorDomainMap() const
 {
-    return M_prec->OperatorDomainMap();
+    return M_solver->solver()->OperatorDomainMap();
 }
 
 // ===================================================
@@ -242,10 +189,11 @@ PreconditionerLinearSolver::OperatorDomainMap() const
 void
 PreconditionerLinearSolver::setDataFromGetPot ( const GetPot& dataFile, const std::string& section )
 {
-    createLinearSolverList( M_list, dataFile, section, "LinearSolver" );
-    M_solverPrecName    = this->M_list.get( "prec", "ML" );
-    M_precDataSection   = this->M_list.get( "prec data section", "" );
-    M_dataFile = dataFile;
+	createLinearSolverList( M_list, dataFile, section, "LinearSolver", M_displayer.comm()->MyPID() == 0 );
+    M_printSubiterationCount = this->M_list.get( "Print Subiteration Count", false );
+    M_precName               = this->M_list.get( "prec", "ML" );
+    M_precDataSection        = this->M_list.get( "prec data section", "" );
+    M_dataFile               = dataFile;
 }
 
 void
@@ -261,19 +209,19 @@ PreconditionerLinearSolver::setSolver( SolverAztecOO& /*solver*/ )
 bool
 PreconditionerLinearSolver::isPreconditionerSet() const
 {
-    return M_prec;
+    return M_solver;
 }
 
 PreconditionerLinearSolver::prec_raw_type*
 PreconditionerLinearSolver::preconditioner()
 {
-    return M_prec.get();
+    return M_solver->solver().get();
 }
 
 PreconditionerLinearSolver::prec_type
 PreconditionerLinearSolver::preconditionerPtr()
 {
-    return M_prec;
+    return M_solver->solver();
 }
 
 std::string

@@ -42,6 +42,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Teuchos_ParameterList.hpp>
+#include "Teuchos_XMLParameterListHelpers.hpp"
 #include <Epetra_Operator.h>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -54,7 +55,7 @@
 #include <life/lifecore/Displayer.hpp>
 #include <life/lifealg/SolverBelos.hpp>
 #include <life/lifealg/Preconditioner.hpp>
-#include <life/lifealg/SolverBelosOperator.hpp>
+#include <life/lifealg/LinearSolver.hpp>
 #include <life/lifefilters/GetPot.hpp>
 
 class GetPot;
@@ -74,19 +75,22 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Epetra_Operator                      prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>     prec_type;
+    typedef Epetra_Operator                        prec_raw_type;
+    typedef boost::shared_ptr<prec_raw_type>       prec_type;
 
-    typedef SolverBelosOperator                  precOperator_Type;
-    typedef boost::shared_ptr<SolverBelosOperator> precOperatorPtr_Type;
+    typedef LinearSolver                           solver_Type;
+    typedef boost::shared_ptr<solver_Type>         solverPtr_Type;
 
-    typedef MatrixEpetra<Real>                   operator_raw_type;
-    typedef boost::shared_ptr<operator_raw_type> operator_type;
+    typedef MatrixEpetra<Real>                     operator_raw_type;
+    typedef boost::shared_ptr<operator_raw_type>   operator_type;
 
-    typedef Displayer::comm_Type                 comm_Type;
-    typedef Displayer::commPtr_Type              commPtr_Type;
+    typedef Preconditioner                         preconditioner_Type;
+    typedef boost::shared_ptr<preconditioner_Type> preconditionerPtr_Type;
 
-    typedef Teuchos::ParameterList               list_Type;
+    typedef Displayer::comm_Type                   comm_Type;
+    typedef Displayer::commPtr_Type                commPtr_Type;
+
+    typedef Teuchos::ParameterList                 list_Type;
 
     //@}
 
@@ -98,7 +102,11 @@ public:
     /*!
      * @param comm The communicator.
      */
-    PreconditionerLinearSolver( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+#ifdef HAVE_MPI
+    PreconditionerLinearSolver( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+    PreconditionerLinearSolver( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 
     //! Destructor
     virtual ~PreconditionerLinearSolver();
@@ -130,7 +138,8 @@ public:
     static void createLinearSolverList( list_Type&         list,
                                         const GetPot&      dataFile,
                                         const std::string& section,
-                                        const std::string& subSection = "SolverAmesos" );
+                                        const std::string& subSection = "SolverLinear",
+                                        const bool&        verbose = true );
 
     //! Build a preconditioner based on the given matrix
     /*!
@@ -224,10 +233,13 @@ public:
 
 private:
 
-    precOperatorPtr_Type M_prec;
-    std::string          M_solverPrecName;
-    std::string          M_precDataSection;
-    GetPot               M_dataFile;
+    solverPtr_Type                 M_solver;
+    preconditionerPtr_Type         M_preconditioner;
+    GetPot                         M_dataFile;
+
+    bool                           M_printSubiterationCount;
+    std::string                    M_precName;
+    std::string                    M_precDataSection;
 
 };
 

@@ -194,6 +194,9 @@ public:
     //! Print informations about the solver
     void showMe( std::ostream& output = std::cout ) const;
 
+    //! Setup the solver operator to be used
+    void setupSolverOperator();
+
     //@}
 
     //! @name Set Method
@@ -336,9 +339,6 @@ private:
 
     //! @name Private Methods
     //@{
-
-    //! Setup the solver operator to be used
-    void setupSolverOperator();
 
     //@}
 

@@ -320,6 +320,46 @@ LinearSolver::showMe( std::ostream& output ) const
     }
 }
 
+void
+LinearSolver::setupSolverOperator()
+{
+    // If a SolverOperator already exists we simply clean it!
+    if( M_solverOperator )
+    {
+        M_solverOperator.reset();
+    }
+
+    switch( M_solverType )
+    {
+        case Belos:
+        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
+            break;
+        case AztecOO:
+        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "AztecOO" ) );
+            break;
+        default:
+            M_displayer->leaderPrint( "SLV-  ERROR: The type of solver is not recognized!\n" );
+        	exit( 1 );
+        	break;
+    }
+
+    // Set the operator in the SolverOperator object
+    M_solverOperator->setOperator( M_operator );
+
+    // Set the preconditioner operator in the SolverOperator object
+    if( M_preconditioner )
+    	M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
+    else
+    	M_solverOperator->setPreconditioner( M_preconditionerOperator );
+
+    // Set the tolerance if it has been set
+    if( M_tolerance > 0 )
+        M_solverOperator->setTolerance( M_tolerance );
+
+    // Set the parameter inside the solver
+    M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List" ) );
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
@@ -519,45 +559,5 @@ LinearSolver::hasConverged() const
 // ===================================================
 // Private Methods
 // ===================================================
-
-void
-LinearSolver::setupSolverOperator()
-{
-    // If a SolverOperator already exists we simply clean it!
-    if( M_solverOperator )
-    {
-        M_solverOperator.reset();
-    }
-
-    switch( M_solverType )
-    {
-        case Belos:
-        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
-            break;
-        case AztecOO:
-        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "AztecOO" ) );
-            break;
-        default:
-            M_displayer->leaderPrint( "SLV-  ERROR: The type of solver is not recognized!\n" );
-        	exit( 1 );
-        	break;
-    }
-
-    // Set the operator in the SolverOperator object
-    M_solverOperator->setOperator( M_operator );
-
-    // Set the preconditioner operator in the SolverOperator object
-    if( M_preconditioner )
-    	M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
-    else
-    	M_solverOperator->setPreconditioner( M_preconditionerOperator );
-
-    // Set the tolerance if it has been set
-    if( M_tolerance > 0 )
-        M_solverOperator->setTolerance( M_tolerance );
-
-    // Set the parameter inside the solver
-    M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List" ) );
-}
 
 } // namespace LifeV
