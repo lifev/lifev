@@ -14,3 +14,5 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 SUBDIRS     = ensightToHdf5 exporterVTK
+
+EXTRA_DIST  = testsuite.at

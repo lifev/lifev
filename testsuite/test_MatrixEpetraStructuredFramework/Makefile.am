@@ -18,6 +18,8 @@ SUFFIXES                                     = .cpp .hpp .idl .c .h .f .F .o .mo
 check_PROGRAMS                               = test_MatrixEpetraStructuredFramework
 test_MatrixEpetraStructuredFramework_SOURCES = main.cpp
 
+EXTRA_DIST = testsuite.at
+
 recheck: clean_PROGRAMS check
 
 clean_PROGRAMS:
