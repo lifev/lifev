@@ -64,8 +64,9 @@ namespace LifeV
 //! HyperbolicSolver Implements an hyperbolic solver.
 /*!
 
-@author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
-@author Michel Kern       <michel.kern@inria.fr>
+  @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+  @author Michel Kern       <michel.kern@inria.fr>
+  @see For applications related to two-phase flow see \cite Fumagalli2011a
 
   This class implements an hyperbolic solver.
   <br>

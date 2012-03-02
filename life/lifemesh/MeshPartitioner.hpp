@@ -1435,7 +1435,7 @@ void MeshPartitioner<MeshType>::constructFacets()
             else if ( localElem2 == NotAnId )
             {
                 pf->firstAdjacentElementIdentity()  = localElem1;
-                pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+                pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).firstAdjacentElementPosition();
                 pf->secondAdjacentElementIdentity() = ghostElem;
                 pf->secondAdjacentElementPosition() = NotAnId;
             }

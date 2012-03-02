@@ -1,6 +1,7 @@
 *~
 ._*
 *.in
+!lifeconfig_cmake.h.in
 !*.in.in
 *.m4
 *.[oa]

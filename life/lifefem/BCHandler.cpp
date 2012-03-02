@@ -235,6 +235,14 @@ BCHandler::modifyBC( bcFlag_Type const& aFlag, BCFunctionUDepBase const& bcFunct
 }
 
 void
+BCHandler::modifyBC( bcFlag_Type const& aFlag, bcType_Type const& bcType )
+{
+    BCBase* bcBasePtr = findBC( aFlag );
+
+    bcBasePtr->setType( bcType );
+}
+
+void
 BCHandler::merge( BCHandler& bcHandler )
 {
     M_sumOffsets();

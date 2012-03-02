@@ -317,6 +317,12 @@ public:
      */
     void modifyBC( bcFlag_Type const& aFlag, BCFunctionUDepBase const&  bcFunctionFEVectorDependent );
 
+    //! Modify the boundary condition associated with flag @c aFlag, assigning the type in @c bcType
+        /*!
+          @param aFlag The flag associated with the boundary condition to be modified
+          @param bcVector The type of b.c. which will replace the existing one
+         */
+    void modifyBC( bcFlag_Type const& aFlag, bcType_Type const& bcType );
 
     //! Update all the boundary conditions
     /*!
