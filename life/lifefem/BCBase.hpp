@@ -64,6 +64,7 @@
 #ifndef BCBASE_H
 #define BCBASE_H
 
+#include <life/lifecore/LifeDebug.hpp>
 #include <life/lifefem/BCIdentifier.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifefem/DOF.hpp>
