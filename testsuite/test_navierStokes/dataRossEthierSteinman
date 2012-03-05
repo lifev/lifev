@@ -11,7 +11,7 @@ start      = 0
 save       = 1
 
 [NavierStokes]
-initialization         = interpolation #projection   # initialization (L2 projection) or interpolation
+initialization         = projection #projection   # initialization (L2 projection) or interpolation
 export_norms           = false
 export_exact_solutions = true
 test                   = accuracy
@@ -26,8 +26,8 @@ mesh_source            = file
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 4e-5
-    timestep        = 8e-5
+    endtime         = 8e-5
+    timestep        = 4e-5
 
     BDF_order		= 1
 

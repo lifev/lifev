@@ -45,8 +45,9 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-PreconditionerML::PreconditionerML():
+PreconditionerML::PreconditionerML( boost::shared_ptr<Epetra_Comm> comm ):
         super(),
+        M_comm( comm ),
         M_operator(),
         M_preconditioner(),
         M_analyze(false),
@@ -112,7 +113,8 @@ void
 PreconditionerML::createMLList( list_Type& list,
                                 const GetPot&       dataFile,
                                 const std::string&  section,
-                                const std::string&  subSection )
+                                const std::string&  subSection,
+                                const bool&         verbose )
 {
     list.setName( "ML paramters list" );
 
@@ -331,11 +333,12 @@ PreconditionerML::createMLList( list_Type& list,
     Int RepartitionZoltanDimensions    = dataFile( (section + "/" + subSection + "/repartition/Zoltan_dimensions").data(), 2, found );
     if ( found ) list.set( "repartition: Zoltan dimensions", RepartitionZoltanDimensions );
 
-    if ( MLPrintParameterList )
+    if ( MLPrintParameterList && verbose )
     {
-        std::cout << "  Parameters List: " << std::endl;
-        list.print( std::cout );
-        std::cout << std::endl;
+    	std::cout << "ML parameters list:" << std::endl;
+    	std::cout << "-----------------------------" << std::endl;
+    	list.print( std::cout );
+    	std::cout << "-----------------------------" << std::endl;
     }
 }
 
@@ -351,10 +354,12 @@ void
 PreconditionerML::setDataFromGetPot( const GetPot&      dataFile,
                                      const std::string& section )
 {
+	bool verbose = M_comm->MyPID() == 0;
+
     M_analyze = dataFile( (section + "/" + "ML" + "/analyze_smoother" ).data(), false); // To be moved in createMLList
 
     // ML List
-    createMLList( M_list, dataFile, section, "ML" );
+    createMLList( M_list, dataFile, section, "ML", verbose );
 
     // visualization
     bool found(false);
@@ -381,8 +386,10 @@ PreconditionerML::setDataFromGetPot( const GetPot&      dataFile,
     }
 
     // IfPack list
+    bool MLPrintParameterList = dataFile( (section + "/displayList").data(), false );
+    if( MLPrintParameterList && verbose ) std::cout << "Smoother: ";
     list_Type& SmootherIFSubList = M_list.sublist( "smoother: ifpack list" );
-    PreconditionerIfpack::createIfpackList( SmootherIFSubList, dataFile, section, "ML" );
+    PreconditionerIfpack::createIfpackList( SmootherIFSubList, dataFile, section, "ML", verbose );
 }
 
 void

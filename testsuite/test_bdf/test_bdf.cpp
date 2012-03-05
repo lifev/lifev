@@ -266,13 +266,14 @@ void test_bdf::run()
     //===================================================
     // TIME LOOP
     //===================================================
+
+    matA_ptr.reset(new MatrixEpetra<double> (feSpacePtr->map()));
+
     for (Real t = t0 + delta_t; t <= Tfin; t += delta_t)
     {
         Members->comm->Barrier();
         if (verbose)
             cout << "Now we are at time " << t << endl;
-
-        matA_ptr.reset(new MatrixEpetra<double> (feSpacePtr->map()));
 
         chrono.start();
         //Assemble A
@@ -340,6 +341,9 @@ void test_bdf::run()
 
         //transfer the solution at time t.
         *u_display_ptr = u;
+        
+        matA_ptr->zero();
+        
         exporter->postProcess(t);
     }
 

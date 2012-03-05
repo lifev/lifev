@@ -65,7 +65,7 @@ BCDataInterpolator::BCDataInterpolator(  ) :
         M_coeffs_y(),
         M_coeffs_z(),
         M_denseSolver(),
-        M_interpolationMethod( RBF_MultiQuadric ),
+        M_interpolationMethod( RBF_InverseMultiQuadric ),
         M_dataSites(), M_dataValues(),
         M_dataValues_timeSamples(),
         M_nofControlPoints(),
@@ -168,6 +168,7 @@ void BCDataInterpolator::readData( const std::string& fileName )
         fin >> RDIM;
         fin >> M_timeInterval;
         fin >> M_timePeriod;
+        fin >> M_filteringLevel;
 
         if ( ( RDIM != 1 ) && ( RDIM != 3 ) )
         {

@@ -699,6 +699,12 @@ public:
         return *M_epetraVector;
     }
 
+    //! Return the shared pointer on the raw VectorEpetra
+    const Vector_PtrType& epetraVectorPtr() const
+    {
+        return M_epetraVector;
+    }
+
     //! Return the Epetra_BlockMap of the vector
     const Epetra_BlockMap& blockMap() const
     {

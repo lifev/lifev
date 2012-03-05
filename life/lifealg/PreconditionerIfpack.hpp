@@ -88,8 +88,12 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Empty constructor.
-    PreconditionerIfpack();
+    //! Empty constructor
+#ifdef HAVE_MPI
+    PreconditionerIfpack( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+    PreconditionerIfpack( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 
     //! Destructor
     virtual ~PreconditionerIfpack();
@@ -117,9 +121,9 @@ public:
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
     virtual void createParametersList( list_Type&         list,
-                             const GetPot&      dataFile,
-                             const std::string& section,
-                             const std::string& subSection );
+                                       const GetPot&      dataFile,
+                                       const std::string& section,
+                                       const std::string& subSection );
 
     //! Create the list of parameters of the preconditioner
     /*!
@@ -131,7 +135,8 @@ public:
     static void createIfpackList( list_Type&         list,
                                   const GetPot&      dataFile,
                                   const std::string& section,
-                                  const std::string& subSection = "ifpack" );
+                                  const std::string& subSection = "ifpack",
+                                  const bool& verbose = true );
 
     //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
     /*!
@@ -208,6 +213,7 @@ public:
 protected:
 
     prec_type M_preconditioner;
+    boost::shared_ptr<Epetra_Comm> M_comm;
 
 private:
 
