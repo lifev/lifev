@@ -57,8 +57,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/DOF.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
+#include <life/lifemesh/MeshEntity.hpp>
 #include <life/lifemesh/GhostEntityData.hpp>
 
 namespace LifeV

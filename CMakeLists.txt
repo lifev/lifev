@@ -37,7 +37,7 @@ set (LAPACK_LIBRARIES "LAPACK_LIBRARIES-NOTFOUND" CACHE STRING "LAPACK libraries
 project (LifeV)
 set (PROJECT_SHORT_NAME "lifev")
 set (LifeV_VERSION_MAJOR 2)
-set (LifeV_VERSION_MINOR 0)
+set (LifeV_VERSION_MINOR 2)
 set (LifeV_VERSION_PATCH 0)
 set (PROJECT_BUGREPORT "lifev-user@googlegroups.com")
 set (PROJECT_HOMEPAGE "www.lifev.org")

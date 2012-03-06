@@ -19,7 +19,7 @@ check_PROGRAMS = test_ZeroDimensional
 
 test_ZeroDimensional_SOURCES = main.cpp
 
-EXTRA_DIST = testsuite.at
+EXTRA_DIST = testsuite.at RythmosAztecOOParams.xml RythmosAztecOOParamsLowsf.xml RythmosBelosParams.xml data.dat circuitFile.dat inputFile.dat                
 
 link:
 	test -a RythmosAztecOOParams.xml      || ln -s $(top_srcdir)/testsuite/test_ZeroDimensional/RythmosAztecOOParams.xml RythmosAztecOOParams.xml

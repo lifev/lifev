@@ -31,7 +31,7 @@ check_PROGRAMS = test_rossEthierSteinman test_kimMoin
 test_rossEthierSteinman_SOURCES = mainRossEthierSteinman.cpp ../../life/lifefunctions/RossEthierSteinmanDec.cpp
 test_kimMoin_SOURCES = mainKimMoin.cpp ../../life/lifefunctions/KimMoin.cpp
 
-EXTRA_DIST = data testsuite.at
+EXTRA_DIST = testsuite.at
 
 link:
 	test -a dataRossEthierSteinman || ln -s $(srcdir)/dataRossEthierSteinman
