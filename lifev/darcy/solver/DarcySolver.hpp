@@ -48,7 +48,7 @@
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
 //
-#include <life/lifesolver/DarcyData.hpp>
+#include <lifev/darcy/solver/DarcyData.hpp>
 //
 
 
