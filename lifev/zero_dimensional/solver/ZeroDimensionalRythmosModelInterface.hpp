@@ -40,7 +40,7 @@
 #define ZeroDimensionalRythmosModelInterface_H 1
 
 // Include definitions
-#include <life/lifesolver/ZeroDimensionalDefinitions.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalDefinitions.hpp>
 
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 
@@ -60,7 +60,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LIFEV
-#include <life/lifesolver/ZeroDimensionalCircuitData.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalCircuitData.hpp>
 
 namespace NOX
 {

@@ -37,7 +37,7 @@
 #ifndef ZeroDimensionalBCHandler_H
 #define ZeroDimensionalBCHandler_H 1
 
-#include <life/lifefem/ZeroDimensionalBC.hpp>
+#include <lifev/zero_dimensional/fem/ZeroDimensionalBC.hpp>
 
 namespace LifeV
 {

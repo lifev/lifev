@@ -39,7 +39,7 @@
 #ifndef ZeroDimensionalRythmosSolverInterface_H
 #define ZeroDimensionalRythmosSolverInterface_H 1
 
-#include <life/lifesolver/ZeroDimensionalRythmosModelInterface.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalRythmosModelInterface.hpp>
 
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 namespace LifeV

@@ -35,7 +35,7 @@
  *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/ZeroDimensionalData.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
 
 namespace LifeV {
 

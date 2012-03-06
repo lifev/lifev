@@ -38,7 +38,7 @@
 #define BCInterfaceData0D_H 1
 
 // 1D BCHandler include
-#include <life/lifefem/ZeroDimensionalBCHandler.hpp>
+#include <lifev/zero_dimensional/fem/ZeroDimensionalBCHandler.hpp>
 
 // BCInterface includes
 #include <lifev/core/fem/BCInterfaceData.hpp>

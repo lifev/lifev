@@ -35,7 +35,7 @@
  *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/ZeroDimensionalRythmosSolverInterface.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalRythmosSolverInterface.hpp>
 
 namespace LifeV {
 

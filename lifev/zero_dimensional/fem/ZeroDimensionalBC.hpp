@@ -37,7 +37,7 @@
 #ifndef ZeroDimensionalBC_H
 #define ZeroDimensionalBC_H 1
 
-#include <life/lifesolver/ZeroDimensionalDefinitions.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalDefinitions.hpp>
 
 namespace LifeV
 {

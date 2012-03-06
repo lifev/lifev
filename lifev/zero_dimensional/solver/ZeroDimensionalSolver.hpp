@@ -43,7 +43,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Include definitions
-#include <life/lifesolver/ZeroDimensionalDefinitions.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalDefinitions.hpp>
 
 // Includes for Rythmos:
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
@@ -84,8 +84,8 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LIFEV includes
-#include <life/lifesolver/ZeroDimensionalRythmosSolverInterface.hpp>
-#include <life/lifesolver/ZeroDimensionalData.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalRythmosSolverInterface.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
 
 namespace LifeV {
 

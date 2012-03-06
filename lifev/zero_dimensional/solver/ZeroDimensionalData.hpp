@@ -40,7 +40,7 @@
 #define ZeroDimensionalData_H
 
 // LIFEV
-#include <life/lifesolver/ZeroDimensionalCircuitData.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalCircuitData.hpp>
 
 namespace LifeV
 {
