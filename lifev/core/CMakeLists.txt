@@ -50,75 +50,42 @@ FOREACH(Tpack ${NOX_LIBRARIES})
   ENDIF()
 ENDFOREACH()
 
-TRIBITS_ADD_OPTION_AND_DEFINE(${PACKAGE_NAME}_USING_HDF5
-  HAVE_EPETRAEXT_HDF5
-  "Enable EpetraExt interface support for HDF5. This interface requires an already installed HDF5 library\; the include, the library path and the library name must be specified as well."
-  ${${PACKAGE_NAME}_ENABLE_HDF5_DEFAULT} )
+TRIBITS_ADD_TEST_DIRECTORIES(testsuite)
+TRIBITS_ADD_EXAMPLE_DIRECTORIES(examples)
 
-#Adding a define for when PyTrilinos is enabled.
-#This replaces an option that was reusing an existing name.
-SET(HAVE_PYTRILINOS "${${PROJECT_NAME}_ENABLE_PyTrilinos}")
+TRIBITS_CONFIGURE_FILE(${PACKAGE_NAME}_config.h)
 
-#
-# C) Add the libraries, tests, and examples
-#
+SET(HEADERS "")
+SET(SOURCES "")
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+SET(HEADERS ${HEADERS}
+ ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}_config.h
+)
 
-ADD_SUBDIRECTORY(src)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-TRIBITS_ADD_TEST_DIRECTORIES(test)
-
-#
-# Exclude files for source package.
-#
-
-TRIBITS_EXCLUDE_AUTOTOOLS_FILES()
-
-TRIBITS_EXCLUDE_FILES(
-  doc/UserGuide
-  doc/inout
-  doc/matlab.README
-  example/MapColoring/sample_map
-  example/MapColoring/sample_matrix
-  example/inout/build
-  example/model_evaluator/GLpApp/Parallel2DMeshGeneratorFormat.pdf
-  example/model_evaluator/GLpApp/README
-  example/model_evaluator/GLpApp/data/square/generate-serial-meshes-1-2.sh
-  example/model_evaluator/GLpApp/data/square/generate-serial-meshes-1-2.sh.out
-  example/model_evaluator/GLpApp/data/square/square.1.2
-  example/model_evaluator/GLpApp/data/square/square.1.2.000
-  example/model_evaluator/GLpApp/data/square/square.1.2.001
-  example/model_evaluator/GLpApp/data/square/square.1.2.edge
-  example/model_evaluator/GLpApp/data/square/square.1.2.ele
-  example/model_evaluator/GLpApp/data/square/square.1.2.epart.2
-  example/model_evaluator/GLpApp/data/square/square.1.2.node
-  example/model_evaluator/GLpApp/data/square/square.1.2.npart.2
-  example/model_evaluator/GLpApp/data/square/square.1.2.poly
-  example/model_evaluator/GLpApp/data/square/square.1.edge
-  example/model_evaluator/GLpApp/data/square/square.1.ele
-  example/model_evaluator/GLpApp/data/square/square.1.node
-  example/model_evaluator/GLpApp/data/square/square.1.poly
-  example/model_evaluator/GLpApp/data/square/square.2.edge
-  example/model_evaluator/GLpApp/data/square/square.2.ele
-  example/model_evaluator/GLpApp/data/square/square.2.node
-  example/model_evaluator/GLpApp/data/square/square.2.poly
-  example/model_evaluator/GLpApp/data/square/square.poly
-  example/model_evaluator/GLpApp/from-triangle-to-serial-input-mesh.pl
-  src/btf/pothen/btf_notes
-  src/btf/pothen/main.f
-  src/distdir
-  src/transform/EpetraExt_Dirichlet_.*
-  src/transform/EpetraExt_StaticCondensation_LinearProblem..*
-  src/transform/EpetraExt_SubCopy_CrsMatrix..*
-  src/zoltan/EpetraExt_ZoltanMpi.*
-  test/Copy
-  test/Makefile.template
-  test/Zoltan/Dummy
-  test/inout/build
-  test/testAll.*
+SET(HEADERS ${HEADERS}
+  EpetraExt_ConfigDefs.h
+  EpetraExt_MMHelpers.h
+  EpetraExt_MatrixMatrix.h
+  EpetraExt_ProductOperator.h
+  EpetraExt_TimedEpetraOperator.hpp
+  EpetraExt_Version.h
   )
 
+SET(SOURCES ${SOURCES}
+  EpetraExt_ProductOperator.cpp
+  EpetraExt_MMHelpers.cpp
+  EpetraExt_MatrixMatrix.cpp
+  EpetraExt_TimedEpetraOperator.cpp
+  )
+
+TRIBITS_EXCLUDE_AUTOTOOLS_FILES()
+# This is the list of files excluded from the tarball
+TRIBITS_EXCLUDE_FILES()
+
 #
-# D) Do standard postprocessing
+# Do standard postprocessing
 #
 
 TRIBITS_PACKAGE_POSTPROCESS()
