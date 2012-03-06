@@ -35,7 +35,7 @@
     @mantainer Simone Rossi <simone.rossi@epfl.ch>
  */
 
-#include<life/lifesolver/HeartBidomainData.hpp>
+#include<lifev/heart/solver/HeartBidomainData.hpp>
 
 
 namespace LifeV

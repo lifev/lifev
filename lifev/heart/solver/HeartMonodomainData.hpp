@@ -40,7 +40,7 @@
 
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/fem/TimeData.hpp>
-#include <life/lifesolver/HeartFunctors.hpp>
+#include <lifev/heart/solver/HeartFunctors.hpp>
 
 
 namespace LifeV

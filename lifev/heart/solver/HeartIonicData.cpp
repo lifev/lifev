@@ -36,7 +36,7 @@
     @mantainer Simone Rossi <simone.rossi@epfl.ch>
  */
 
-#include <life/lifesolver/HeartIonicData.hpp>
+#include <lifev/heart/solver/HeartIonicData.hpp>
 
 
 namespace LifeV

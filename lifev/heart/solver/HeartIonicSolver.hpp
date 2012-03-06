@@ -50,7 +50,7 @@
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/fem/SobolevNorms.hpp>
 #include <lifev/core/fem/GeometricMap.hpp>
-#include <life/lifesolver/HeartIonicData.hpp>
+#include <lifev/heart/solver/HeartIonicData.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 #include <boost/shared_ptr.hpp>
 #include <lifev/core/fem/FESpace.hpp>

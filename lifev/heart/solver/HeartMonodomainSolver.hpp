@@ -50,11 +50,11 @@
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/fem/SobolevNorms.hpp>
 #include <lifev/core/fem/GeometricMap.hpp>
-#include <life/lifesolver/HeartMonodomainData.hpp>
+#include <lifev/heart/solver/HeartMonodomainData.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 #include <boost/shared_ptr.hpp>
 #include <lifev/core/fem/FESpace.hpp>
-#include <life/lifesolver/HeartStiffnessFibers.hpp>
+#include <lifev/heart/solver/HeartStiffnessFibers.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
 namespace LifeV
