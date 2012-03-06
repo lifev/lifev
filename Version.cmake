@@ -54,25 +54,17 @@
 # @HEADER
 
 #
-# A) Define your project name and set up major project options
+# Single file that needs to be changed on a release branch
+# or on the development branch in order to configure Trilinos
+# for release mode and set the version.
 #
 
-# Must set the project name as a varaible at very beginning before including anything else
-# We set the project name in a separate file so CTest scripts can use it.
-INCLUDE(${CMAKE_SOURCE_DIR}/ProjectName.cmake)
+SET(Trilinos_VERSION 10.10.1)
+SET(Trilinos_MAJOR_VERSION 10)
+SET(Trilinos_MAJOR_MINOR_VERSION 101001)
+SET(Trilinos_VERSION_STRING "10.10.1")
+SET(Trilinos_ENABLE_DEVELOPMENT_MODE_DEFAULT OFF) # Change to 'OFF' for a release
 
-# CMake requires that you declare the CMake project in the top-level file and
-# not in an include file :-(
-PROJECT(${PROJECT_NAME} NONE)
-
-#
-# B) Pull in the TriBITS system and execute
-#
-
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/tribits/package_arch/TribitsProject.cmake)
-
-# CMake requires this be in the top file and not in an include file :-(
-CMAKE_MINIMUM_REQUIRED(VERSION ${TRIBITS_CMAKE_MINIMUM_REQUIRED})
-
-# Do all of the processing for this Tribits project
-TRIBITS_PROJECT()
+# Used by testing scripts and should not be used elsewhere
+SET(Trilinos_REPOSITORY_BRANCH "trilinos-release-10-10-branch" CACHE INTERNAL "")
+SET(Trilinos_TESTING_TRACK "Nightly Release 10.10" CACHE INTERNAL "")
