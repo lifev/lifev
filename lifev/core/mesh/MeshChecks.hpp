@@ -39,10 +39,10 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifemesh/MeshUtility.hpp>
-#include <life/lifefem/GeometricMap.hpp>
-#include <life/lifefem/CurrentFE.hpp>
-#include <life/lifefem/CurrentBoundaryFE.hpp>
+#include <lifev/core/mesh/MeshUtility.hpp>
+#include <lifev/core/fem/GeometricMap.hpp>
+#include <lifev/core/fem/CurrentFE.hpp>
+#include <lifev/core/fem/CurrentBoundaryFE.hpp>
 
 //! \file mesh_util.h
 //! \file mesh_util.h

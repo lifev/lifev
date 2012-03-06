@@ -67,9 +67,9 @@
 #ifndef COMPOSEDDN_H
 #define COMPOSEDDN_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifealg/PreconditionerComposed.hpp>
+#include <lifev/core/algorithm/PreconditionerComposed.hpp>
 
 #include <life/lifesolver/MonolithicBlockComposed.hpp>
 

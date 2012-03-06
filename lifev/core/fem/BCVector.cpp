@@ -37,7 +37,7 @@
     */
 
 
-#include <life/lifefem/BCVector.hpp>
+#include <lifev/core/fem/BCVector.hpp>
 namespace LifeV
 {
 // ===================================

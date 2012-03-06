@@ -40,11 +40,11 @@
 #ifndef QUADRULE_H
 #define QUADRULE_H
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifemesh/ElementShapes.hpp>
+#include <lifev/core/mesh/ElementShapes.hpp>
 
-#include <life/lifefem/QuadraturePoint.hpp>
+#include <lifev/core/fem/QuadraturePoint.hpp>
 
 #include <iostream>
 #include <fstream>

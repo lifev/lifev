@@ -34,7 +34,7 @@
  *  @maintainer Toni Lassila <toni.lassila@epfl.ch>
  */
 
-#include <life/lifefem/BCDataInterpolator.hpp>
+#include <lifev/core/fem/BCDataInterpolator.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

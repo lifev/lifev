@@ -42,7 +42,7 @@
 #ifndef MARKERDEFINITIONS_H
 #define MARKERDEFINITIONS_H 1
 
-#include <life/lifemesh/Marker.hpp>
+#include <lifev/core/mesh/Marker.hpp>
 
 namespace LifeV
 {

@@ -40,13 +40,13 @@
 #ifndef HARMONICEXTENSIONSOLVER_H_
 #define HARMONICEXTENSIONSOLVER_H_
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/DOF.hpp>
-#include <life/lifearray/MatrixElemental.hpp>
-#include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/Assembly.hpp>
-#include <life/lifefem/BCManage.hpp>
-#include <life/lifefem/FESpace.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/array/MatrixElemental.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
+#include <lifev/core/fem/Assembly.hpp>
+#include <lifev/core/fem/BCManage.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 
 
 namespace LifeV

@@ -25,7 +25,7 @@
 */
 //@HEADER
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <MonolithicBlockComposedDND.hpp>
 

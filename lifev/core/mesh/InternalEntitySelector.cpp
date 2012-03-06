@@ -37,7 +37,7 @@
     A more detailed description of the file (if necessary)
  */
 
-#include <life/lifemesh/InternalEntitySelector.hpp>
+#include <lifev/core/mesh/InternalEntitySelector.hpp>
 
 namespace LifeV
 {

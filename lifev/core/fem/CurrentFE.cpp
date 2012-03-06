@@ -36,7 +36,7 @@
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#include <life/lifefem/CurrentFE.hpp>
+#include <lifev/core/fem/CurrentFE.hpp>
 
 namespace LifeV
 {

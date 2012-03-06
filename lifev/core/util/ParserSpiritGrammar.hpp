@@ -37,7 +37,7 @@
 #ifndef Parser_SpiritGrammar_H
 #define Parser_SpiritGrammar_H 1
 
-#include <life/lifecore/ParserDefinitions.hpp>
+#include <lifev/core/util/ParserDefinitions.hpp>
 
 namespace LifeV
 {

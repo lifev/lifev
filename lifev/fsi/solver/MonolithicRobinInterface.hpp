@@ -38,10 +38,10 @@
 #ifndef MONOLITHICROBININTERFACE_H
 #define MONOLITHICROBININTERFACE_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 #include <life/lifesolver/MonolithicBlock.hpp>
 
-#include <life/lifearray/MatrixEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
 
 namespace LifeV
 {

@@ -43,8 +43,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef EXPORTERVTK_H
 #define EXPORTERVTK_H 1
 
-#include <life/lifefilters/Exporter.hpp>
-#include <life/lifecore/EncoderBase64.hpp>
+#include <lifev/core/filter/Exporter.hpp>
+#include <lifev/core/util/EncoderBase64.hpp>
 
 namespace LifeV
 {

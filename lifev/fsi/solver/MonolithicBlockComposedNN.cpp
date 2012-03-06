@@ -25,9 +25,9 @@
 */
 //@HEADER
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/BCManage.hpp>
+#include <lifev/core/fem/BCManage.hpp>
 
 #include <life/lifesolver/MonolithicBlockComposedNN.hpp>
 

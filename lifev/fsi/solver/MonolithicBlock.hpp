@@ -39,18 +39,18 @@
 #define BLOCKINTERFACE_H 1
 
 #include <cstdarg>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/BCManage.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/BCManage.hpp>
 
-#include <life/lifealg/ComposedOperator.hpp>
+#include <lifev/core/algorithm/ComposedOperator.hpp>
 
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
 namespace LifeV {
 

@@ -36,9 +36,9 @@
 #ifndef _HYPERBOLICDATA_H_
 #define _HYPERBOLICDATA_H_ 1
 
-#include <life/lifemesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
 
-#include <life/lifefem/TimeData.hpp>
+#include <lifev/core/fem/TimeData.hpp>
 
 // LifeV namespace
 namespace LifeV

@@ -60,8 +60,8 @@
 
  */
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/BCBase.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/BCBase.hpp>
 
 namespace LifeV
 {

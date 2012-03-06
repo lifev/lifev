@@ -41,7 +41,7 @@
 #ifndef _DOFINTERFACEBASE_HH
 #define _DOFINTERFACEBASE_HH
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <map>
 

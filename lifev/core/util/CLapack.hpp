@@ -39,7 +39,7 @@
 #ifndef __CLAPACK_H
 #define __CLAPACK_H
 
-#include <life/lifecore/CBlas.hpp>
+#include <lifev/core/util/CBlas.hpp>
 
 typedef int integer;
 typedef unsigned long uinteger;

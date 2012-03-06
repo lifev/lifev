@@ -39,9 +39,9 @@
 #ifndef _DATADARCY_H_
 #define _DATADARCY_H_ 1
 
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifefem/TimeData.hpp>
-#include <life/lifefem/Assembly.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/Assembly.hpp>
 
 // LifeV namespace
 namespace LifeV

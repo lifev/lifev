@@ -52,13 +52,13 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/StringUtility.hpp>
+#include <lifev/core/util/StringUtility.hpp>
 
-#include <life/lifemesh/MeshElementBare.hpp>
+#include <lifev/core/mesh/MeshElementBare.hpp>
 
-#include <life/lifemesh/MeshChecks.hpp>
-#include <life/lifemesh/InternalEntitySelector.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshChecks.hpp>
+#include <lifev/core/mesh/InternalEntitySelector.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
 namespace LifeV
 {

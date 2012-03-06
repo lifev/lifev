@@ -52,14 +52,14 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifefem/FESpace.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
 
-#include <life/lifealg/PreconditionerComposed.hpp>
-#include <life/lifealg/ComposedOperator.hpp>
+#include <lifev/core/algorithm/PreconditionerComposed.hpp>
+#include <lifev/core/algorithm/ComposedOperator.hpp>
 #ifdef HAVE_TRILINOS_ANASAZI
-#include <life/lifealg/EigenSolver.hpp>
+#include <lifev/core/algorithm/EigenSolver.hpp>
 #endif
 
 #include <life/lifesolver/MonolithicBlockMatrix.hpp>

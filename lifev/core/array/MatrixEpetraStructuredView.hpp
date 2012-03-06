@@ -40,7 +40,7 @@
 
 #include <iostream>
 
-#include <life/lifearray/MatrixEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
 
 
 namespace LifeV {

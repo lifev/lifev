@@ -37,9 +37,9 @@
 #ifndef QUADRATURERULEPROVIDER_H
 #define QUADRATURERULEPROVIDER_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/QuadratureRule.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
 
 namespace LifeV {
 

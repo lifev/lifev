@@ -40,10 +40,10 @@
 #define ZeroDimensionalCircuitData_H 1
 
 // LIFEV
-#include <life/lifearray/MatrixEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
 
 // MATHCARD
-#include <life/lifefem/BCInterface0D.hpp>
+#include <lifev/core/fem/BCInterface0D.hpp>
 #include <life/lifesolver/ZeroDimensionalDefinitions.hpp>
 #include <life/lifefem/ZeroDimensionalBC.hpp>
 

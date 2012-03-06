@@ -39,7 +39,7 @@
 #ifndef QUADPOINT_H
 #define QUADPOINT_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <boost/array.hpp>
 #include <boost/numeric/ublas/vector.hpp>

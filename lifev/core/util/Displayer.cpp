@@ -35,7 +35,7 @@
  * @maintainer Radu Popescu <radu.popescu@epfl.ch>
  */
 
-#include<life/lifecore/Displayer.hpp>
+#include<lifev/core/util/Displayer.hpp>
 
 namespace LifeV
 {

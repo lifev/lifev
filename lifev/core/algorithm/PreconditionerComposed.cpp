@@ -23,9 +23,9 @@
 *******************************************************************************
 */
 
-#include <life/lifealg/PreconditionerComposed.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
+#include <lifev/core/algorithm/PreconditionerComposed.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 
 namespace LifeV
 {

@@ -44,8 +44,8 @@
 #include <iostream>
 #include <algorithm>
 
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifefem/TimeAdvanceBDF.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
 
 namespace LifeV

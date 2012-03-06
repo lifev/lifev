@@ -47,7 +47,7 @@
 #include <numeric>
 #include <boost/numeric/ublas/vector.hpp>
 
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 
 namespace LifeV

@@ -64,15 +64,15 @@
 #ifndef BCBASE_H
 #define BCBASE_H
 
-#include <life/lifefem/BCIdentifier.hpp>
-#include <life/lifemesh/MarkerDefinitions.hpp>
-#include <life/lifefem/DOF.hpp>
-#include <life/lifefem/CurrentFE.hpp>
-#include <life/lifefem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/BCIdentifier.hpp>
+#include <lifev/core/mesh/MarkerDefinitions.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/fem/CurrentFE.hpp>
+#include <lifev/core/fem/CurrentBoundaryFE.hpp>
 
-#include <life/lifefem/BCVector.hpp>
-#include <life/lifefem/BCFunction.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/fem/BCVector.hpp>
+#include <lifev/core/fem/BCFunction.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 
 namespace LifeV

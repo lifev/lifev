@@ -48,11 +48,11 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/Displayer.hpp>
-#include <life/lifefem/BCBase.hpp>
-#include <life/lifefem/BCFunction.hpp>
-#include <life/lifefem/BCManage.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/Displayer.hpp>
+#include <lifev/core/fem/BCBase.hpp>
+#include <lifev/core/fem/BCFunction.hpp>
+#include <lifev/core/fem/BCManage.hpp>
 
 namespace LifeV {
 

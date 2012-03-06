@@ -1547,7 +1547,7 @@ inline int SameAdress( const KN_<R> &a, const KN_<R> &b )
     return & a[ 0 ] == &b[ 0 ];
 }
 }
-#include <life/lifearray/RNMTemplate.hpp>
+#include <lifev/core/array/RNMTemplate.hpp>
 #ifdef K_assert
 #undef K_assert
 #endif

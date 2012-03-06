@@ -60,14 +60,14 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LIFEV
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifecore/StringUtility.hpp>
-#include <life/lifecore/Factory.hpp>
-#include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/TimeData.hpp>
-#include <life/lifefilters/GetPot.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/util/StringUtility.hpp>
+#include <lifev/core/util/Factory.hpp>
+#include <lifev/core/util/FactorySingleton.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/filter/GetPot.hpp>
 
 #define BC_CONSTANT 1000
 

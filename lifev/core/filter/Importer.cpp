@@ -34,9 +34,9 @@
  */
 
 
-#include <life/lifefilters/ImporterMesh3D.hpp>
-#include <life/lifefilters/ImporterMesh2D.hpp>
-#include <life/lifefilters/Importer.hpp>
+#include <lifev/core/filter/ImporterMesh3D.hpp>
+#include <lifev/core/filter/ImporterMesh2D.hpp>
+#include <lifev/core/filter/Importer.hpp>
 
 
 namespace LifeV

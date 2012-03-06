@@ -39,8 +39,8 @@
 #ifndef _EPETRAMATRIX_HPP_
 #define _EPETRAMATRIX_HPP_
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -62,8 +62,8 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <cstdlib>
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 #include <vector>
 
 //@@

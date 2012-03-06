@@ -11,7 +11,7 @@
 #include <boost/shared_ptr.hpp>
 #include <map>
 
-#include <life/lifearray/MatrixEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
 #include <Teuchos_ParameterList.hpp>
 
 namespace LifeV

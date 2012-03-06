@@ -38,9 +38,9 @@
 #ifndef MESHELEMENT_H
 #define MESHELEMENT_H
 
-#include <life/lifemesh/MeshVertex.hpp>
-#include <life/lifemesh/MeshEntity.hpp>
-#include <life/lifearray/VectorSmall.hpp>
+#include <lifev/core/mesh/MeshVertex.hpp>
+#include <lifev/core/mesh/MeshEntity.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 #include <algorithm>
 
 namespace LifeV

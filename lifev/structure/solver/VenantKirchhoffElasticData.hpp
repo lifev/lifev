@@ -49,10 +49,10 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/StringUtility.hpp>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifefem/TimeData.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/StringUtility.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/fem/TimeData.hpp>
 
 namespace LifeV
 {

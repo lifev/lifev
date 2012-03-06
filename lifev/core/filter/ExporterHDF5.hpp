@@ -38,7 +38,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #define EXPORTER_HDF5_H 1
 
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #ifndef HAVE_HDF5
 
@@ -66,12 +66,12 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/StringUtility.hpp>
-#include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifefem/ReferenceFEScalar.hpp>
-#include <life/lifefilters/Exporter.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/StringUtility.hpp>
+#include <lifev/core/fem/ReferenceFE.hpp>
+#include <lifev/core/fem/ReferenceFEScalar.hpp>
+#include <lifev/core/filter/Exporter.hpp>
 
 namespace LifeV
 {

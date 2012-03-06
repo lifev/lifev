@@ -51,9 +51,9 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifecore/Displayer.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/util/Displayer.hpp>
 
 class GetPot;
 

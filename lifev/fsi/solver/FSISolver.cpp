@@ -33,10 +33,10 @@
 
 #ifndef TWODIM
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 #include <life/lifesolver/FSISolver.hpp>
 //!\todo remove this header
-#include <life/lifealg/NonLinearRichardson.hpp>
+#include <lifev/core/algorithm/NonLinearRichardson.hpp>
 
 namespace LifeV
 {

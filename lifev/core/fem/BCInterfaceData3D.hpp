@@ -38,10 +38,10 @@
 #define BCInterfaceData3D_H 1
 
 // 3D BCHandler include
-#include <life/lifefem/BCHandler.hpp>
+#include <lifev/core/fem/BCHandler.hpp>
 
 // BCInterface includes
-#include <life/lifefem/BCInterfaceData.hpp>
+#include <lifev/core/fem/BCInterfaceData.hpp>
 
 namespace LifeV
 {

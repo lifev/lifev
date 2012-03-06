@@ -49,11 +49,11 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/GeometricMap.hpp>
-#include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifearray/RNM.hpp>
-#include <life/lifefem/QuadratureRule.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/GeometricMap.hpp>
+#include <lifev/core/fem/ReferenceFE.hpp>
+#include <lifev/core/array/RNM.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
 
 namespace LifeV
 {

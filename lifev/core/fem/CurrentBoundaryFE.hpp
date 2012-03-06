@@ -39,11 +39,11 @@
 #ifndef _CURRENTBDFE_H
 #define _CURRENTBDFE_H
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/GeometricMap.hpp>
-#include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifefem/CurrentBoundaryFEBase.hpp>
+#include <lifev/core/fem/GeometricMap.hpp>
+#include <lifev/core/fem/ReferenceFE.hpp>
+#include <lifev/core/fem/CurrentBoundaryFEBase.hpp>
 
 namespace LifeV
 {

@@ -38,7 +38,7 @@
 #define BCInterfaceFunctionUserDefined_H 1
 
 // Includes BCInterface classes
-#include <life/lifefunctions/BCInterfaceFunction.hpp>
+#include <lifev/core/function/BCInterfaceFunction.hpp>
 
 namespace LifeV
 {

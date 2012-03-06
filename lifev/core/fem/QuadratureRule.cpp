@@ -37,7 +37,7 @@
  */
 
 
-#include <life/lifefem/QuadratureRule.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
 
 namespace LifeV
 {

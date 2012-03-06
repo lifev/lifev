@@ -39,9 +39,9 @@
 #ifndef DATALEVELSET_H
 #define DATALEVELSET_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/TimeData.hpp>
+#include <lifev/core/fem/TimeData.hpp>
 
 #include <boost/shared_ptr.hpp>
 

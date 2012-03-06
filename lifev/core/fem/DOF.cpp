@@ -38,7 +38,7 @@
  */
 
 
-#include <life/lifefem/DOF.hpp>
+#include <lifev/core/fem/DOF.hpp>
 
 namespace LifeV
 {

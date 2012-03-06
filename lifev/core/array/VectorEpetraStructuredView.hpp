@@ -35,9 +35,9 @@
 #ifndef _VECTOREPETRASTRUCTUREDVIEW_HPP_
 #define _VECTOREPETRASTRUCTUREDVIEW_HPP_ 1
 
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <boost/shared_ptr.hpp>
 

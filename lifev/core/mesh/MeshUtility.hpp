@@ -47,13 +47,13 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/Switch.hpp>
-#include <life/lifemesh/MeshElementBare.hpp>
-#include <life/lifemesh/MarkerDefinitions.hpp>
-#include <life/lifemesh/MeshEntity.hpp>
-#include <life/lifearray/MeshEntityContainer.hpp>
-#include <life/lifearray/MapEpetra.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/Switch.hpp>
+#include <lifev/core/mesh/MeshElementBare.hpp>
+#include <lifev/core/mesh/MarkerDefinitions.hpp>
+#include <lifev/core/mesh/MeshEntity.hpp>
+#include <lifev/core/mesh/MeshEntityContainer.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 
 namespace LifeV
 {

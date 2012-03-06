@@ -41,10 +41,10 @@
 #ifndef PreconditionerComposed_HPP
 #define PreconditionerComposed_HPP
 
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifealg/Preconditioner.hpp>
-#include <life/lifealg/ComposedOperator.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/algorithm/ComposedOperator.hpp>
 
 namespace LifeV
 {

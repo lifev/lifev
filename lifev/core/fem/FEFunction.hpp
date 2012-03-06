@@ -36,7 +36,7 @@
 
 */
 
-#include <life/lifefem/FEField.hpp>
+#include <lifev/core/fem/FEField.hpp>
 
 namespace LifeV
 {

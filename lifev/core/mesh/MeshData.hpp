@@ -44,14 +44,14 @@
 
 #include <string>
 #include <ostream>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefilters/ImporterMesh2D.hpp>
+#include <lifev/core/filter/ImporterMesh2D.hpp>
 
-#include <life/lifemesh/RegionMesh.hpp>
-#include <life/lifefilters/ImporterMesh3D.hpp>
-#include <life/lifemesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/filter/ImporterMesh3D.hpp>
+#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 
 namespace LifeV
 {

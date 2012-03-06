@@ -42,8 +42,8 @@
 //#include <string>
 //#include <iostream>
 //#include <sstream>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {

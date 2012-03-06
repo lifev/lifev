@@ -41,8 +41,8 @@
 
 #include <cstdlib>
 #include <vector>
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifemesh/Marker.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/mesh/Marker.hpp>
 #include <algorithm>
 #include <iterator>
 #include <boost/function.hpp>

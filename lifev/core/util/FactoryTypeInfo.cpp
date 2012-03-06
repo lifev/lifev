@@ -35,8 +35,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cassert>
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/FactoryTypeInfo.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/FactoryTypeInfo.hpp>
 
 namespace LifeV
 {

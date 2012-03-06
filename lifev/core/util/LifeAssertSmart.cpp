@@ -40,7 +40,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <stdexcept>
 
-#include <life/lifecore/LifeAssertSmart.hpp>
+#include <lifev/core/util/LifeAssertSmart.hpp>
 
 // TODO: TO BE REMOVED: ARGUABLY USELESS AND BREAKS COMPILATION ON SOME
 // SYSTEMS (BG/P etc.)

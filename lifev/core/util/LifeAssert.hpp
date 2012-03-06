@@ -62,7 +62,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef LIFE_ASSERT_H
 #define LIFE_ASSERT_H 1
 
-#include <life/lifecore/LifeAssertSmart.hpp>
+#include <lifev/core/util/LifeAssertSmart.hpp>
 
 #define ABORT() std::abort()
 

@@ -37,7 +37,7 @@
 #ifndef _MATRIXEPETRASTRUCTUREDUTILITY_HPP_
 #define _MATRIXEPETRASTRUCTUREDUTILITY_HPP_
 
-#include <life/lifearray/MatrixEpetraStructuredView.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredView.hpp>
 
 namespace LifeV {
 

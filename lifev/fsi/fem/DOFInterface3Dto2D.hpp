@@ -47,9 +47,9 @@
 #define _DOFINTERFACE3DTO2D_HH
 
 #include <life/lifefem/DOFInterface.hpp>
-#include <life/lifefem/DOFLocalPattern.hpp>
-#include <life/lifefem/DOF.hpp>
-#include <life/lifemesh/MarkerDefinitions.hpp>
+#include <lifev/core/fem/DOFLocalPattern.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/mesh/MarkerDefinitions.hpp>
 
 #include <iostream>
 #include <fstream>

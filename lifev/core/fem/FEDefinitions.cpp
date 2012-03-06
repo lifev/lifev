@@ -33,11 +33,11 @@
  */
 
 
-#include <life/lifefem/QuadratureRule.hpp>
-#include <life/lifefem/ReferenceFEScalar.hpp>
-#include <life/lifefem/ReferenceFEHdiv.hpp>
-#include <life/lifefem/ReferenceFEHybrid.hpp>
-#include <life/lifefem/GeometricMap.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
+#include <lifev/core/fem/ReferenceFEScalar.hpp>
+#include <lifev/core/fem/ReferenceFEHdiv.hpp>
+#include <lifev/core/fem/ReferenceFEHybrid.hpp>
+#include <lifev/core/fem/GeometricMap.hpp>
 
 namespace LifeV
 {

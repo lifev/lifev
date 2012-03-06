@@ -40,7 +40,7 @@
 #define REFFESCALAR_H 1
 
 
-#include <life/lifefem/ReferenceFE.hpp>
+#include <lifev/core/fem/ReferenceFE.hpp>
 
 namespace LifeV
 {

@@ -40,9 +40,9 @@
 #ifndef MESHVERTEX_H
 #define MESHVERTEX_H
 
-#include <life/lifearray/VectorSmall.hpp>
-#include <life/lifemesh/MeshEntity.hpp>
-#include <life/lifemesh/ElementShapes.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
+#include <lifev/core/mesh/MeshEntity.hpp>
+#include <lifev/core/mesh/ElementShapes.hpp>
 
 namespace LifeV
 {

@@ -38,13 +38,13 @@
 
 #include <Epetra_LAPACK.h>
 
-#include <life/lifealg/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/BCManage.hpp>
-#include <life/lifefem/HyperbolicFluxNumerical.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
+#include <lifev/core/fem/BCManage.hpp>
+#include <lifev/core/fem/HyperbolicFluxNumerical.hpp>
 
-#include <life/lifesolver/HyperbolicData.hpp>
+#include <lifev/core/solver/HyperbolicData.hpp>
 
 namespace
 {

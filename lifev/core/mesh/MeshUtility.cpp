@@ -34,7 +34,7 @@
     @sa MeshUtility.hpp
  */
 
-#include <life/lifemesh/MeshUtility.hpp>
+#include <lifev/core/mesh/MeshUtility.hpp>
 
 namespace LifeV
 {

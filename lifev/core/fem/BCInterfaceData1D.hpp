@@ -41,7 +41,7 @@
 #include <life/lifefem/OneDFSIBCHandler.hpp>
 
 // BCInterface includes
-#include <life/lifefem/BCInterfaceData.hpp>
+#include <lifev/core/fem/BCInterfaceData.hpp>
 
 namespace LifeV
 {

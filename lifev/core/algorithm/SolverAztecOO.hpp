@@ -62,14 +62,14 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifealg/Preconditioner.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifecore/LifeDebug.hpp>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifecore/Displayer.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/util/Displayer.hpp>
 
 namespace LifeV
 {

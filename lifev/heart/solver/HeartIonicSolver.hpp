@@ -39,22 +39,22 @@
 #ifndef _IONICSOLVER_H_
 #define _IONICSOLVER_H_
 
-#include <life/lifearray/MatrixElemental.hpp>
-#include <life/lifearray/VectorElemental.hpp>
-#include <life/lifefem/Assembly.hpp>
-#include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/BCManage.hpp>
-#include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifefem/SobolevNorms.hpp>
-#include <life/lifefem/GeometricMap.hpp>
+#include <lifev/core/array/MatrixElemental.hpp>
+#include <lifev/core/array/VectorElemental.hpp>
+#include <lifev/core/fem/Assembly.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
+#include <lifev/core/fem/BCManage.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/fem/SobolevNorms.hpp>
+#include <lifev/core/fem/GeometricMap.hpp>
 #include <life/lifesolver/HeartIonicData.hpp>
-#include <life/lifecore/LifeChrono.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 #include <boost/shared_ptr.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/TimeAdvanceBDF.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
 namespace LifeV
 {

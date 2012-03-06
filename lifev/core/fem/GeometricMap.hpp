@@ -41,9 +41,9 @@
 #ifndef GEOMAP_H
 #define GEOMAP_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/ReferenceElement.hpp>
+#include <lifev/core/fem/ReferenceElement.hpp>
 
 namespace LifeV
 {

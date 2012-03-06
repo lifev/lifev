@@ -43,9 +43,9 @@
 #ifndef OneDFSIData_H
 #define OneDFSIData_H
 
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifefem/TimeData.hpp>
-#include <life/lifemesh/RegionMesh1DBuilders.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/mesh/RegionMesh1DBuilders.hpp>
 
 #include <life/lifesolver/OneDFSIDefinitions.hpp>
 

@@ -25,7 +25,7 @@
 */
 //@HEADER
 
-#include <life/lifealg/EigenSolver.hpp>
+#include <lifev/core/algorithm/EigenSolver.hpp>
 
 #ifdef HAVE_TRILINOS_ANASAZI
 

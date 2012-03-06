@@ -51,13 +51,13 @@
 #ifndef _ASSEMBLY
 #define _ASSEMBLY
 
-#include <life/lifearray/MatrixElemental.hpp>
-#include <life/lifearray/VectorElemental.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/array/MatrixElemental.hpp>
+#include <lifev/core/array/VectorElemental.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
-#include <life/lifefem/CurrentFE.hpp>
-#include <life/lifefem/DOFLocalPattern.hpp>
+#include <lifev/core/fem/CurrentFE.hpp>
+#include <lifev/core/fem/DOFLocalPattern.hpp>
 
 #include <vector>
 

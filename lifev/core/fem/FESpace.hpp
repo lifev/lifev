@@ -52,15 +52,15 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/BCHandler.hpp>
-#include <life/lifefem/CurrentFE.hpp>
-#include <life/lifefem/CurrentBoundaryFE.hpp>
-#include <life/lifefem/DOF.hpp>
-#include <life/lifefem/SobolevNorms.hpp>
+#include <lifev/core/fem/BCHandler.hpp>
+#include <lifev/core/fem/CurrentFE.hpp>
+#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/fem/SobolevNorms.hpp>
 
-#include <life/lifemesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
 
 
 namespace LifeV

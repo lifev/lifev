@@ -40,12 +40,12 @@
 #ifndef ADRASSEMBLERIP_H
 #define ADRASSEMBLERIP_H 1
 
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/Assembly.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/AssemblyElemental.hpp>
+#include <lifev/core/fem/Assembly.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>

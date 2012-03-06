@@ -44,8 +44,8 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 namespace LifeV
 {

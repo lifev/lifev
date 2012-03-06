@@ -39,7 +39,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
     </ol>
 */
 
-#include <life/lifefilters/Exporter.hpp>
+#include <lifev/core/filter/Exporter.hpp>
 
 namespace LifeV
 {

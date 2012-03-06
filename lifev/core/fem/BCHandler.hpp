@@ -39,7 +39,7 @@
 #ifndef BCHANDLER_H
 #define BCHANDLER_H 1
 
-#include <life/lifefem/BCBase.hpp>
+#include <lifev/core/fem/BCBase.hpp>
 
 namespace LifeV
 {

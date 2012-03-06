@@ -48,11 +48,11 @@
 #include <life/lifesolver/OneDFSISolver.hpp>
 
 // BCInterface includes
-#include <life/lifefem/BCInterfaceData0D.hpp>
-#include <life/lifefem/BCInterfaceData1D.hpp>
-#include <life/lifefem/BCInterfaceData3D.hpp>
+#include <lifev/core/fem/BCInterfaceData0D.hpp>
+#include <lifev/core/fem/BCInterfaceData1D.hpp>
+#include <lifev/core/fem/BCInterfaceData3D.hpp>
 
-#include <life/lifefunctions/BCInterfaceFactory.hpp>
+#include <lifev/core/function/BCInterfaceFactory.hpp>
 
 namespace LifeV
 {

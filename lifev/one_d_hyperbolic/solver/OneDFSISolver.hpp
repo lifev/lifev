@@ -51,15 +51,15 @@
 #ifndef OneDFSISolver_H
 #define OneDFSISolver_H
 
-#include <life/lifearray/MatrixElemental.hpp>
-#include <life/lifearray/VectorElemental.hpp>
-#include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/Assembly.hpp>
+#include <lifev/core/array/MatrixElemental.hpp>
+#include <lifev/core/array/VectorElemental.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
+#include <lifev/core/fem/Assembly.hpp>
 
-#include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/SolverAmesos.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/SolverAmesos.hpp>
 
-#include <life/lifefem/FESpace.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 
 #include <life/lifefem/OneDFSIBCHandler.hpp>
 #include <life/lifesolver/OneDFSIDefinitions.hpp>

@@ -125,7 +125,7 @@
 #include<algorithm>
 #include<iostream>
 
-#include<life/lifemesh/ElementShapes.hpp>
+#include<lifev/core/mesh/ElementShapes.hpp>
 
 namespace LifeV
 {

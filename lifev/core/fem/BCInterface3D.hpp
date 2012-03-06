@@ -38,10 +38,10 @@
 #define BCInterface3D_H 1
 
 // Data interpolator include
-#include <life/lifefem/BCDataInterpolator.hpp>
+#include <lifev/core/fem/BCDataInterpolator.hpp>
 
 // BCInterface includes
-#include <life/lifefem/BCInterface.hpp>
+#include <lifev/core/fem/BCInterface.hpp>
 
 namespace LifeV
 {

@@ -38,9 +38,9 @@
 #ifndef REGIONMESH1DBUILDER_HPP
 #define REGIONMESH1DBUILDER_HPP 1
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
-#include <life/lifemesh/MeshChecks.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshChecks.hpp>
 #include <fstream>
 
 namespace LifeV

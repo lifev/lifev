@@ -42,10 +42,10 @@
 #ifndef _NSIPTERMS_HPP
 #define _NSIPTERMS_HPP
 
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifearray/MatrixElemental.hpp>
-#include <life/lifearray/VectorElemental.hpp>
-#include <life/lifefem/AssemblyElemental.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/array/MatrixElemental.hpp>
+#include <lifev/core/array/VectorElemental.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
 #include <boost/shared_ptr.hpp>
 
 #define USE_OLD_PARAMETERS 0

@@ -55,8 +55,8 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifefem/TimeAdvance.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/fem/TimeAdvance.hpp>
 
 namespace LifeV
 {

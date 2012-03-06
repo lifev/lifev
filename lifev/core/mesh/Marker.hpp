@@ -67,7 +67,7 @@
 #define MARKER_H 1
 
 #include <iostream>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 namespace LifeV
 {
 

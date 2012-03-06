@@ -44,26 +44,26 @@
 #ifndef OSEENSOLVER_H
 #define OSEENSOLVER_H 1
 
-#include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/Preconditioner.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerAztecOO.hpp>
-#include <life/lifearray/MapEpetra.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerAztecOO.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 
-#include <life/lifearray/MatrixElemental.hpp>
-#include <life/lifearray/VectorElemental.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/array/MatrixElemental.hpp>
+#include <lifev/core/array/VectorElemental.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
-#include <life/lifecore/LifeChrono.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 
-#include <life/lifefem/Assembly.hpp>
-#include <life/lifefem/BCManage.hpp>
-#include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/SobolevNorms.hpp>
-#include <life/lifefem/GeometricMap.hpp>
-#include <life/lifefem/PostProcessingBoundary.hpp>
-#include <life/lifefem/FESpace.hpp>
+#include <lifev/core/fem/Assembly.hpp>
+#include <lifev/core/fem/BCManage.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
+#include <lifev/core/fem/SobolevNorms.hpp>
+#include <lifev/core/fem/GeometricMap.hpp>
+#include <lifev/core/fem/PostProcessingBoundary.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 
 #include <life/lifesolver/StabilizationIP.hpp>
 #include <life/lifesolver/OseenData.hpp>

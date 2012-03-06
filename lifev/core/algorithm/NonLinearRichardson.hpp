@@ -48,8 +48,8 @@
 #define _NONLINEARRICHARDSON_HPP
 
 #include <algorithm> // for min and max
-#include <life/lifealg/NonLinearLineSearch.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/algorithm/NonLinearLineSearch.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 namespace LifeV
 {

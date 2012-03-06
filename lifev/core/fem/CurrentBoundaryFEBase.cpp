@@ -36,7 +36,7 @@
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#include <life/lifefem/CurrentBoundaryFEBase.hpp>
+#include <lifev/core/fem/CurrentBoundaryFEBase.hpp>
 
 namespace LifeV
 {

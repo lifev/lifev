@@ -37,10 +37,10 @@
 #define _HYPERBOLICNUMERICALFLUXES_H_ 1
 
 #include <boost/bind.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifefem/Assembly.hpp>
-#include <life/lifealg/NonLinearBrent.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/fem/Assembly.hpp>
+#include <lifev/core/algorithm/NonLinearBrent.hpp>
 
 namespace
 {

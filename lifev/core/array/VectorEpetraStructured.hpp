@@ -35,12 +35,12 @@
 #ifndef _VECTOREPETRASTRUCTURED_HPP_
 #define _VECTOREPETRASTRUCTURED_HPP_ 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifearray/MapVector.hpp>
-#include <life/lifearray/VectorEpetraStructuredView.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/array/MapVector.hpp>
+#include <lifev/core/array/VectorEpetraStructuredView.hpp>
 
 #include <boost/shared_ptr.hpp>
 

@@ -105,7 +105,7 @@
 #define LIFEV_DEPRECATED( func ) func
 #endif
 
-#include <life/lifecore/LifeAssert.hpp>
+#include <lifev/core/util/LifeAssert.hpp>
 
 namespace LifeV
 {

@@ -35,7 +35,7 @@
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#include <life/lifefem/ReferenceElement.hpp>
+#include <lifev/core/fem/ReferenceElement.hpp>
 
 namespace LifeV
 {

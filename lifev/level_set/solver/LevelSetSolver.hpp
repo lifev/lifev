@@ -57,14 +57,14 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 
-#include <life/lifealg/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/TimeAdvanceBDF.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
-#include <life/lifesolver/ADRAssembler.hpp>
-#include <life/lifesolver/ADRAssemblerIP.hpp>
+#include <lifev/core/solver/ADRAssembler.hpp>
+#include <lifev/core/solver/ADRAssemblerIP.hpp>
 
 #include <life/lifesolver/LevelSetData.hpp>
 

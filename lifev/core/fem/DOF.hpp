@@ -47,13 +47,13 @@
 #ifndef _DOF_HH
 #define _DOF_HH
 
-#include <life/lifearray/ArraySimple.hpp>
+#include <lifev/core/array/ArraySimple.hpp>
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/DOFLocalPattern.hpp>
+#include <lifev/core/fem/DOFLocalPattern.hpp>
 
-#include <life/lifemesh/ElementShapes.hpp>
+#include <lifev/core/mesh/ElementShapes.hpp>
 
 #include <algorithm>
 #include <map>

@@ -35,7 +35,7 @@
  *  @mantainer Simone Pezzuto <simone.pezzuto@mail.polimi.it>
  */
 
-#include <life/lifecore/Switch.hpp>
+#include <lifev/core/util/Switch.hpp>
 
 namespace LifeV
 {

@@ -44,11 +44,11 @@
 #include <cstdlib>
 
 #include <life/lifesolver/dataElasticStructure.hpp>
-#include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifefem/DOF.hpp>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/fem/ReferenceFE.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/LifeV.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
-#include <life/lifefem/BCHandler.hpp>
+#include <lifev/core/fem/BCHandler.hpp>
 
 namespace LifeV
 {

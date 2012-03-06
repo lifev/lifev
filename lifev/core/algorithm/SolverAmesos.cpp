@@ -35,10 +35,10 @@
     @date 29-08-2004
  */
 
-#include <life/lifealg/SolverAmesos.hpp>
-#include <life/lifecore/LifeDebug.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifefilters/GetPot.hpp>
+#include <lifev/core/algorithm/SolverAmesos.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/filter/GetPot.hpp>
 
 namespace LifeV
 {

@@ -33,8 +33,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/Switch.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/Switch.hpp>
 
 namespace LifeV
 {

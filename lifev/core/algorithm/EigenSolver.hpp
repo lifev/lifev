@@ -39,7 +39,7 @@
 
 // #endif
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #ifdef  HAVE_TRILINOS_ANASAZI
 
@@ -72,7 +72,7 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifefilters/GetPot.hpp>
+#include <lifev/core/filter/GetPot.hpp>
 
 namespace LifeV
 {

@@ -55,22 +55,22 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 
-#include <life/lifearray/MatrixElemental.hpp>
-#include <life/lifearray/VectorElemental.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/array/MatrixElemental.hpp>
+#include <lifev/core/array/VectorElemental.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
-#include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/Assembly.hpp>
-#include <life/lifefem/BCManage.hpp>
-#include <life/lifefem/FESpace.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
+#include <lifev/core/fem/Assembly.hpp>
+#include <lifev/core/fem/BCManage.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 
-#include <life/lifecore/LifeChrono.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 
-#include <life/lifealg/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
 
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
-#include <life/lifecore/Displayer.hpp>
+#include <lifev/core/util/Displayer.hpp>
 
 namespace LifeV
 {

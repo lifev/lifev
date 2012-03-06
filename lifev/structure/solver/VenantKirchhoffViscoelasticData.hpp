@@ -51,9 +51,9 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/TimeData.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/TimeData.hpp>
 
 
 namespace LifeV

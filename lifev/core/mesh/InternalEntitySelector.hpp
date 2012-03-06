@@ -41,8 +41,8 @@
 #define _SELECTMARKER_HH_ 1
 
 #include <functional>
-#include <life/lifemesh/Marker.hpp>
-#include <life/lifearray/MeshEntityContainer.hpp>
+#include <lifev/core/mesh/Marker.hpp>
+#include <lifev/core/mesh/MeshEntityContainer.hpp>
 
 namespace LifeV
 {

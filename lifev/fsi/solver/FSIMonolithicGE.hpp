@@ -37,7 +37,7 @@
 #ifndef MONOLITHICGE_H
 #define MONOLITHICGE_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <life/lifesolver/MonolithicBlockMatrix.hpp>
 #include <life/lifesolver/MonolithicBlockMatrixRN.hpp>

@@ -38,9 +38,9 @@
 
 #include <vector>
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 #include <iomanip>
-#include <life/lifearray/RNM.hpp>
+#include <lifev/core/array/RNM.hpp>
 
 namespace LifeV
 {

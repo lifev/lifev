@@ -42,16 +42,16 @@
 #include <iomanip>
 #include <fstream>
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/LifeDebug.hpp>
-#include <life/lifemesh/MeshElementMarked.hpp>
-#include <life/lifecore/Switch.hpp>
-#include <life/lifemesh/MeshElementBare.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/mesh/MeshElementMarked.hpp>
+#include <lifev/core/util/Switch.hpp>
+#include <lifev/core/mesh/MeshElementBare.hpp>
 
-#include <life/lifearray/MeshEntityContainer.hpp>
-#include <life/lifearray/ArraySimple.hpp>
-#include <life/lifemesh/ElementShapes.hpp>
-#include <life/lifemesh/MeshUtility.hpp>
+#include <lifev/core/mesh/MeshEntityContainer.hpp>
+#include <lifev/core/array/ArraySimple.hpp>
+#include <lifev/core/mesh/ElementShapes.hpp>
+#include <lifev/core/mesh/MeshUtility.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
 

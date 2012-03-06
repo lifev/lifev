@@ -36,8 +36,8 @@
 
 */
 
-#include <life/lifemesh/MeshVertex.hpp>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/mesh/MeshVertex.hpp>
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {

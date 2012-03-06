@@ -50,12 +50,12 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/FortranWrapper.hpp>
-#include <life/lifecore/StringUtility.hpp>
+#include <lifev/core/util/FortranWrapper.hpp>
+#include <lifev/core/util/StringUtility.hpp>
 
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
-#include <life/lifemesh/MeshChecks.hpp>
+#include <lifev/core/mesh/MeshChecks.hpp>
 
 namespace LifeV
 {

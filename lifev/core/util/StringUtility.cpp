@@ -33,7 +33,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#include <life/lifecore/StringUtility.hpp>
+#include <lifev/core/util/StringUtility.hpp>
 
 namespace LifeV
 {

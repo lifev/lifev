@@ -62,7 +62,7 @@
 
  */
 
-#include <life/lifecore/EncoderBase64.hpp>
+#include <lifev/core/util/EncoderBase64.hpp>
 #include <iostream>
 
 namespace LifeV

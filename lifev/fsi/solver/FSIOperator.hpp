@@ -58,22 +58,22 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 
-#include <life/lifecore/Factory.hpp>
-#include <life/lifecore/FactorySingleton.hpp>
+#include <lifev/core/util/Factory.hpp>
+#include <lifev/core/util/FactorySingleton.hpp>
 
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
-#include <life/lifealg/NonLinearAitken.hpp>
+#include <lifev/core/algorithm/NonLinearAitken.hpp>
 
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
 #include <life/lifefem/DOFInterface3Dto2D.hpp>
-#include <life/lifefem/BCHandler.hpp>
-#include <life/lifefem/BCFunction.hpp>
-#include <life/lifefem/TimeAdvanceBDF.hpp>
-#include <life/lifefem/FESpace.hpp>
+#include <lifev/core/fem/BCHandler.hpp>
+#include <lifev/core/fem/BCFunction.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 
-#include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
+#include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
 
 #include <life/lifesolver/FSIData.hpp>
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>

@@ -32,11 +32,11 @@
     @author: luca formaggia
 */
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 #include <map>
 #include <vector>
-#include <life/lifemesh/ElementShapes.hpp>
-#include <life/lifearray/ArraySimple.hpp>
+#include <lifev/core/mesh/ElementShapes.hpp>
+#include <lifev/core/array/ArraySimple.hpp>
 
 #ifndef BAREMESH_HPP_
 #define BAREMESH_HPP_

@@ -42,10 +42,10 @@
 #include <Epetra_LAPACK.h>
 #include <Epetra_BLAS.h>
 
-#include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/BCManage.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
+#include <lifev/core/fem/BCManage.hpp>
 
-#include <life/lifealg/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
 
 //
 #include <life/lifesolver/DarcyData.hpp>

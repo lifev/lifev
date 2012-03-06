@@ -34,7 +34,7 @@
     @contributor Tiziano Passerini <tiziano@mathcs.emory.edu>
 */
 
-#include <life/lifemesh/ElementShapes.hpp>
+#include <lifev/core/mesh/ElementShapes.hpp>
 
 namespace LifeV
 {

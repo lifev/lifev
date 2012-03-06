@@ -38,8 +38,8 @@
 #ifndef Parser_H
 #define Parser_H 1
 
-#include <life/lifecore/LifeDebug.hpp>
-#include <life/lifecore/ParserSpiritGrammar.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/util/ParserSpiritGrammar.hpp>
 
 namespace LifeV
 {

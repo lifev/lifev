@@ -38,10 +38,10 @@
 #define BCInterfaceFunctionParser_H 1
 
 // Includes parser classes
-#include <life/lifecore/Parser.hpp>
+#include <lifev/core/util/Parser.hpp>
 
 // Includes BCInterface classes
-#include <life/lifefunctions/BCInterfaceFunction.hpp>
+#include <lifev/core/function/BCInterfaceFunction.hpp>
 
 namespace LifeV
 {

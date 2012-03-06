@@ -35,7 +35,7 @@
     @date 09-11-2006
  */
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 #include "Preconditioner.hpp"
 
 namespace LifeV

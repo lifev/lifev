@@ -40,7 +40,7 @@
 #ifndef FSIFIXEDPOINT_HPP
 #define FSIFIXEDPOINT_HPP
 
-#include <life/lifealg/NonLinearAitken.hpp>
+#include <lifev/core/algorithm/NonLinearAitken.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV

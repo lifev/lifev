@@ -47,7 +47,7 @@
 #include <life/lifesolver/OneDFSISolver.hpp>
 
 // BCInterface includes
-#include <life/lifefunctions/BCInterfaceFunctionParser.hpp>
+#include <lifev/core/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
 {

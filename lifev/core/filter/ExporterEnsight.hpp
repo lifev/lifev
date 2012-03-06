@@ -39,7 +39,7 @@
 #ifndef EXPORTER_ENSIGHT_H
 #define EXPORTER_ENSIGHT_H
 
-#include <life/lifefilters/Exporter.hpp>
+#include <lifev/core/filter/Exporter.hpp>
 
 namespace LifeV
 {

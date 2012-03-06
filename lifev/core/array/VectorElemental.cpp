@@ -33,7 +33,7 @@
 
  */
 
-#include <life/lifearray/VectorElemental.hpp>
+#include <lifev/core/array/VectorElemental.hpp>
 
 namespace LifeV
 {

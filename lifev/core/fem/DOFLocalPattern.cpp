@@ -32,7 +32,7 @@
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#include <life/lifefem/DOFLocalPattern.hpp>
+#include <lifev/core/fem/DOFLocalPattern.hpp>
 
 namespace LifeV
 {

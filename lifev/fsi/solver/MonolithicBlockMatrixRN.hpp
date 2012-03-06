@@ -37,9 +37,9 @@
 #ifndef BLOCKMATRIXRN_H
 #define BLOCKMATRIXRN_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <life/lifesolver/MonolithicBlockMatrix.hpp>
 #include <life/lifesolver/MonolithicRobinInterface.hpp>

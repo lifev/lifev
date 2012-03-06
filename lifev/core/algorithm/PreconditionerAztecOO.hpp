@@ -38,8 +38,8 @@
 #ifndef AZTECOOPRECONDITIONER_HPP
 #define AZTECOOPRECONDITIONER_HPP 1
 
-#include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/Preconditioner.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
 
 namespace LifeV
 {

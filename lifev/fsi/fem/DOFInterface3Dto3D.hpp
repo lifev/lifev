@@ -51,13 +51,13 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/function.hpp>
 
-#include <life/lifemesh/MarkerDefinitions.hpp>
+#include <lifev/core/mesh/MarkerDefinitions.hpp>
 
 #include <life/lifefem/DOFInterface.hpp>
-#include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifefem/DOF.hpp>
-#include <life/lifefem/CurrentBoundaryFE.hpp>
-#include <life/lifecore/LifeChrono.hpp>
+#include <lifev/core/fem/ReferenceFE.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 
 namespace LifeV
 {

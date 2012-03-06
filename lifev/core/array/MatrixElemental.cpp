@@ -33,7 +33,7 @@
 
  */
 
-#include <life/lifearray/MatrixElemental.hpp>
+#include <lifev/core/array/MatrixElemental.hpp>
 
 namespace LifeV
 {

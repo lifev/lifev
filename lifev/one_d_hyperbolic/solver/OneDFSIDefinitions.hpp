@@ -58,13 +58,13 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LIFEV
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/StringUtility.hpp>
-#include <life/lifecore/Factory.hpp>
-#include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifealg/SolverAmesos.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/StringUtility.hpp>
+#include <lifev/core/util/Factory.hpp>
+#include <lifev/core/util/FactorySingleton.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/algorithm/SolverAmesos.hpp>
 
 namespace ublas = boost::numeric::ublas;
 

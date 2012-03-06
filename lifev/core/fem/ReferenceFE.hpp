@@ -38,9 +38,9 @@
 #ifndef _REFFE_H
 #define _REFFE_H
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/ReferenceElement.hpp>
-#include <life/lifefem/DOFLocalPattern.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/ReferenceElement.hpp>
+#include <lifev/core/fem/DOFLocalPattern.hpp>
 
 namespace LifeV
 {

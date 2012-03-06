@@ -41,7 +41,7 @@
     Newton \cite FernandezMoubachir2005 , Dirichlet--Neumann \cite DeparisDiscacciati2006 , Robin Neumann \cite BadiaNobileVergara2008 ) are implemented in the derived classes.
  */
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV

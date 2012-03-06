@@ -36,7 +36,7 @@
 #ifndef MAP_VECTOR_HPP
 #define MAP_VECTOR_HPP
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <vector>
 

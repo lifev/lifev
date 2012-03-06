@@ -41,7 +41,7 @@
 
 #include <cstdlib>
 #include <vector>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {

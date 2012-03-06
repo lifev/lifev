@@ -40,10 +40,10 @@
 #ifndef MESHELEMENTMARKED_H
 #define MESHELEMENTMARKED_H
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifemesh/MarkerDefinitions.hpp>
-#include <life/lifemesh/MeshElement.hpp>
-#include <life/lifemesh/MeshElementBare.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/mesh/MarkerDefinitions.hpp>
+#include <lifev/core/mesh/MeshElement.hpp>
+#include <lifev/core/mesh/MeshElementBare.hpp>
 
 namespace LifeV
 {

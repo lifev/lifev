@@ -37,10 +37,10 @@
 #define _MATRIXEPETRASTRUCTURED_HPP_
 
 #include <boost/shared_ptr.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/MapVector.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/MatrixEpetraStructuredView.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/MapVector.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredView.hpp>
 
 namespace LifeV {
 

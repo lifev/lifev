@@ -41,15 +41,15 @@
 #define CURRENTFE_H 1
 
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/GeometricMap.hpp>
+#include <lifev/core/fem/GeometricMap.hpp>
 
-#include <life/lifefem/ReferenceFEScalar.hpp>
-#include <life/lifefem/ReferenceFEHdiv.hpp>
-#include <life/lifefem/ReferenceFEHybrid.hpp>
+#include <lifev/core/fem/ReferenceFEScalar.hpp>
+#include <lifev/core/fem/ReferenceFEHdiv.hpp>
+#include <lifev/core/fem/ReferenceFEHybrid.hpp>
 
-#include <life/lifefem/QuadratureRule.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
 
 #include <boost/multi_array.hpp>
 

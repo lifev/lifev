@@ -39,7 +39,7 @@
 #ifndef MONOLITHICBLOCKCOMPOSED_H
 #define MONOLITHICBLOCKCOMPOSED_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 #include <life/lifesolver/MonolithicBlock.hpp>
 
 #include <boost/scoped_ptr.hpp>

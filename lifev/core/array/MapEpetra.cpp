@@ -48,8 +48,8 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifearray/MapEpetra.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 
 namespace LifeV
 {

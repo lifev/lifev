@@ -33,8 +33,8 @@
 #ifndef __KIM_MOIN_HPP
 #define __KIM_MOIN_HPP 1
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefilters/GetPot.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/filter/GetPot.hpp>
 
 namespace LifeV
 {

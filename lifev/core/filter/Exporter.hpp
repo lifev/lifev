@@ -58,12 +58,12 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifemesh/MarkerDefinitions.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/mesh/MarkerDefinitions.hpp>
 
 namespace LifeV
 {
