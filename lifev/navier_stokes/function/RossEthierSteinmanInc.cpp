@@ -38,7 +38,7 @@
 	Implementation.
 */
 
-#include <lifeconfig.h>
+#include <lifevconfig.h>
 
 #include <lifev/navier_stokes/function/RossEthierSteinmanInc.hpp>
 

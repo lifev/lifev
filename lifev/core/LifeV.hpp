@@ -76,7 +76,7 @@
 #undef VERSION
 #endif
 
-#include <lifeconfig.h>
+#include <lifevconfig.h>
 
 #ifndef __cplusplus
 #error You must use C++ for LifeV

@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
    \author Mauro Perego <mauro@mathcs.emory.edu>
    \date 2009-10-02
 */
-#include <lifeconfig.h>
+#include <lifevconfig.h>
 
 #include <lifev/navier_stokes/function/KimMoin.hpp>
 

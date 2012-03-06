@@ -37,7 +37,7 @@
     Implementation
  */
 
-#include <lifeconfig.h>
+#include <lifevconfig.h>
 #include <lifev/navier_stokes/function/Womersley.hpp>
 #include <lifev/navier_stokes/function/bessel/bessel.hpp>
 
