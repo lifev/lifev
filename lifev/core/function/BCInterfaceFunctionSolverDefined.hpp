@@ -45,7 +45,7 @@
 #include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
 // OneDFSI includes
-#include <life/lifesolver/OneDFSISolver.hpp>
+#include <lifev/one_d_hyperbolic/solver/OneDFSISolver.hpp>
 
 // BCInterface includes
 #include <lifev/core/fem/BCInterfaceData0D.hpp>

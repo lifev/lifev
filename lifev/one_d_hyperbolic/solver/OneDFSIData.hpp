@@ -47,7 +47,7 @@
 #include <lifev/core/fem/TimeData.hpp>
 #include <lifev/core/mesh/RegionMesh1DBuilders.hpp>
 
-#include <life/lifesolver/OneDFSIDefinitions.hpp>
+#include <lifev/one_d_hyperbolic/solver/OneDFSIDefinitions.hpp>
 
 namespace LifeV
 {

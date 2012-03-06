@@ -44,8 +44,8 @@
 #ifndef OneDFSIBC_H
 #define OneDFSIBC_H
 
-#include <life/lifefunctions/OneDFSIFunctionSolverDefined.hpp>
-#include <life/lifesolver/OneDFSIData.hpp>
+#include <lifev/one_d_hyperbolic/function/OneDFSIFunctionSolverDefined.hpp>
+#include <lifev/one_d_hyperbolic/solver/OneDFSIData.hpp>
 
 namespace LifeV
 {

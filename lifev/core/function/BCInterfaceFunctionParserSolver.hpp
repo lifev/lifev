@@ -44,7 +44,7 @@
 #include <lifev/fsi/solver/FSIOperator.hpp>
 
 // OneDFSI includes
-#include <life/lifesolver/OneDFSISolver.hpp>
+#include <lifev/one_d_hyperbolic/solver/OneDFSISolver.hpp>
 
 // BCInterface includes
 #include <lifev/core/function/BCInterfaceFunctionParser.hpp>

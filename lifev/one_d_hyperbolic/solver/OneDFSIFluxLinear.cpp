@@ -39,7 +39,7 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <life/lifesolver/OneDFSIFluxLinear.hpp>
+#include <lifev/one_d_hyperbolic/solver/OneDFSIFluxLinear.hpp>
 
 namespace LifeV
 {

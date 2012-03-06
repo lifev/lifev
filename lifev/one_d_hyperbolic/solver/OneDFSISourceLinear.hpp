@@ -42,7 +42,7 @@
 #ifndef OneDFSISourceLinear_H
 #define OneDFSISourceLinear_H
 
-#include <life/lifesolver/OneDFSISource.hpp>
+#include <lifev/one_d_hyperbolic/solver/OneDFSISource.hpp>
 
 namespace LifeV
 {

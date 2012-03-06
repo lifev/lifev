@@ -43,7 +43,7 @@
 #ifndef OneDFSIPhysicsNonLinear_H
 #define OneDFSIPhysicsNonLinear_H
 
-#include <life/lifesolver/OneDFSIPhysics.hpp>
+#include <lifev/one_d_hyperbolic/solver/OneDFSIPhysics.hpp>
 
 namespace LifeV
 {

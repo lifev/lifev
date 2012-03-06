@@ -38,7 +38,7 @@
 #ifndef OneDFSIFlux_H
 #define OneDFSIFlux_H
 
-#include <life/lifesolver/OneDFSIPhysics.hpp>
+#include <lifev/one_d_hyperbolic/solver/OneDFSIPhysics.hpp>
 
 namespace LifeV
 {
