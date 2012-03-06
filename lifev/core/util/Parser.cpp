@@ -116,12 +116,12 @@ Parser::evaluate( const ID& id )
             start = M_strings[i].begin();
             end   = M_strings[i].end();
 #ifdef HAVE_BOOST_SPIRIT_QI
-#ifndef DISABLE_SPIRIT_PARSER
+#ifdef ENABLE_SPIRIT_PARSER
             qi::phrase_parse( start, end, M_calculator, ascii::space, M_results );
 #else
             std::cerr << "!!! ERROR: The Boost Spirit parser has been disabled !!!" << std::endl;
             std::exit( EXIT_FAILURE );
-#endif /* DISABLE_SPIRIT_PARSER */
+#endif /* ENABLE_SPIRIT_PARSER */
 #else
             std::cerr << "!!! ERROR: Boost version < 1.41 !!!" << std::endl;
             std::exit( EXIT_FAILURE );

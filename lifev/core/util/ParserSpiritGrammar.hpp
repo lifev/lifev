@@ -42,7 +42,7 @@
 namespace LifeV
 {
 
-#if ( !defined(HAVE_BOOST_SPIRIT_QI) || defined(DISABLE_SPIRIT_PARSER) )
+#if ( !defined(HAVE_BOOST_SPIRIT_QI) || !defined(ENABLE_SPIRIT_PARSER) )
 
 /// @cond
 //! ParserSpiritGrammar - An empty implementation for boost version < 1.41
@@ -524,7 +524,7 @@ ParserSpiritGrammar< IteratorType, ResultsType >::setVariable( const std::string
         M_variable.add( name, value );
 }
 
-#endif /* HAVE_BOOST_SPIRIT_QI || DISABLE_SPIRIT_PARSER */
+#endif /* HAVE_BOOST_SPIRIT_QI || !ENABLE_SPIRIT_PARSER */
 
 } // Namespace LifeV
 
