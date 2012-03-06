@@ -650,13 +650,7 @@ template <typename DataType>
 MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator += ( const MatrixEpetra& matrix )
 {
-#ifdef HAVE_TRILINOS_EPETRAEXT_31 // trilinos6
-    EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), 1., false );
-#elif defined HAVE_TRILINOS_EPETRAEXT // trilinos8
     EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), 1. );
-#else
-#error error: do not have nor EpetraExt 6 nor 7 or 8
-#endif
 
     return *this;
 }
@@ -718,13 +712,8 @@ void MatrixEpetra<DataType>::openCrsMatrix()
         matrix_ptrtype tmp( M_epetraCrs );
         M_epetraCrs.reset( new matrix_type( Copy, M_epetraCrs->RowMap(), meanNumEntries ) );
 
-#ifdef HAVE_TRILINOS_EPETRAEXT_31 // trilinos6
-        EpetraExt::MatrixMatrix::Add( *tmp, false, 1., *M_epetraCrs, 1., false );
-#elif defined HAVE_TRILINOS_EPETRAEXT // trilinos8
         EpetraExt::MatrixMatrix::Add( *tmp, false, 1., *M_epetraCrs, 1. );
-#else
-#error error: do not have nor EpetraExt 6 nor 7 or 8
-#endif
+
         M_domainMap.reset();
         M_rangeMap.reset();
 
@@ -857,11 +846,7 @@ void MatrixEpetra<DataType>::addDyadicProduct( const vector_type& uniqueVector1,
 template <typename DataType>
 void MatrixEpetra<DataType>::add ( const DataType scalar, const MatrixEpetra& matrix )
 {
-#if defined HAVE_TRILINOS_EPETRAEXT // trilinos8
     EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, scalar, *this->matrixPtr(), 1. );
-#else
-#error error: do not have nor EpetraExt  8+
-#endif
 }
 
 template <typename DataType>

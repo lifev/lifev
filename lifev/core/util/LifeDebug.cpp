@@ -119,7 +119,7 @@ void initDebugAreas ()
 
         // read entries in sdebug.areas
         std::ostringstream path;
-        path << LIFE_PREFIX << "/share/" << PACKAGE << "/debug.areas";
+        path << LIFEV_PREFIX << "/share/lifev/debug.areas";
 
         std::ifstream fin ( path.str().c_str() );
         if ( fin.fail () )
