@@ -38,7 +38,7 @@
     on two matching meshes.
  */
 
-#include <life/lifefem/DOFInterface3Dto3D.hpp>
+#include <lifev/fsi/fem/DOFInterface3Dto3D.hpp>
 
 namespace LifeV
 {

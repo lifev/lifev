@@ -71,7 +71,7 @@
 
 #include <lifev/core/algorithm/PreconditionerComposed.hpp>
 
-#include <life/lifesolver/MonolithicBlockComposed.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposed.hpp>
 
 namespace LifeV {
 

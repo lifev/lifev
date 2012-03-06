@@ -54,7 +54,7 @@
 
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/fem/FESpace.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+#include <lifev/fsi/solver/FSIOperator.hpp>
 
 #include <lifev/core/algorithm/PreconditionerComposed.hpp>
 #include <lifev/core/algorithm/ComposedOperator.hpp>
@@ -62,7 +62,7 @@
 #include <lifev/core/algorithm/EigenSolver.hpp>
 #endif
 
-#include <life/lifesolver/MonolithicBlockMatrix.hpp>
+#include <lifev/fsi/solver/MonolithicBlockMatrix.hpp>
 
 namespace LifeV
 {

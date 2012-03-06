@@ -41,7 +41,7 @@
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 
 // FSI includes
-#include <life/lifesolver/FSIOperator.hpp>
+#include <lifev/fsi/solver/FSIOperator.hpp>
 
 // OneDFSI includes
 #include <life/lifesolver/OneDFSISolver.hpp>

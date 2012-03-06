@@ -38,11 +38,11 @@
 #define BCInterfaceFunctionSolverDefined_H 1
 
 // FSI includes
-#include <life/lifesolver/FSIExactJacobian.hpp>
-#include <life/lifesolver/FSIFixedPoint.hpp>
+#include <lifev/fsi/solver/FSIExactJacobian.hpp>
+#include <lifev/fsi/solver/FSIFixedPoint.hpp>
 
-#include <life/lifesolver/FSIMonolithicGE.hpp>
-#include <life/lifesolver/FSIMonolithicGI.hpp>
+#include <lifev/fsi/solver/FSIMonolithicGE.hpp>
+#include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
 // OneDFSI includes
 #include <life/lifesolver/OneDFSISolver.hpp>

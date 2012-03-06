@@ -34,7 +34,7 @@
 #ifndef TWODIM
 
 #include <lifev/core/LifeV.hpp>
-#include <life/lifesolver/FSISolver.hpp>
+#include <lifev/fsi/solver/FSISolver.hpp>
 //!\todo remove this header
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
 

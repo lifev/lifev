@@ -28,10 +28,10 @@
 #include <lifev/core/LifeV.hpp>
 #include <life/lifesolver/VenantKirchhoffSolver.hpp>
 
-#include <life/lifesolver/FSIMonolithicGI.hpp>
-#include <life/lifesolver/MonolithicBlockComposedDN.hpp>
-#include <life/lifesolver/MonolithicBlockComposedDND.hpp>
-#include <life/lifesolver/MonolithicBlockMatrixRN.hpp>
+#include <lifev/fsi/solver/FSIMonolithicGI.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedDN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedDND.hpp>
+#include <lifev/fsi/solver/MonolithicBlockMatrixRN.hpp>
 
 namespace LifeV
 {

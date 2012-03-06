@@ -24,7 +24,7 @@
 */
 //@HEADER
 
-#include <life/lifesolver/FSIFixedPoint.hpp>
+#include <lifev/fsi/solver/FSIFixedPoint.hpp>
 
 namespace LifeV
 {

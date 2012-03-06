@@ -24,7 +24,7 @@
 */
 //@HEADER
 
-#include <life/lifesolver/FSIExactJacobian.hpp>
+#include <lifev/fsi/solver/FSIExactJacobian.hpp>
 
 namespace LifeV
 {

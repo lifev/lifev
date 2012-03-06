@@ -43,7 +43,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <lifev/core/LifeV.hpp>
-#include <life/lifefem/DOFInterface.hpp>
+#include <lifev/fsi/fem/DOFInterface.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 
 

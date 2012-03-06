@@ -39,13 +39,13 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <life/lifesolver/MonolithicBlockMatrix.hpp>
-#include <life/lifesolver/MonolithicBlockMatrixRN.hpp>
-#include <life/lifesolver/MonolithicBlockComposedDN.hpp>
-#include <life/lifesolver/MonolithicBlockComposedNN.hpp>
-#include <life/lifesolver/MonolithicBlockComposedDNND.hpp>
+#include <lifev/fsi/solver/MonolithicBlockMatrix.hpp>
+#include <lifev/fsi/solver/MonolithicBlockMatrixRN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedDN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedNN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedDNND.hpp>
 
-#include <life/lifesolver/FSIMonolithic.hpp>
+#include <lifev/fsi/solver/FSIMonolithic.hpp>
 
 namespace LifeV
 {

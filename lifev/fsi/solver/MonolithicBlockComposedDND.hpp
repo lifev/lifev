@@ -38,7 +38,7 @@
 #define COMPOSEDDND_H 1
 
 #include <lifev/core/LifeV.hpp>
-#include <life/lifesolver/MonolithicBlockComposedDN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedDN.hpp>
 
 namespace LifeV
 {

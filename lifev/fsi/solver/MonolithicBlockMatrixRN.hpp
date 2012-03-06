@@ -41,8 +41,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <life/lifesolver/MonolithicBlockMatrix.hpp>
-#include <life/lifesolver/MonolithicRobinInterface.hpp>
+#include <lifev/fsi/solver/MonolithicBlockMatrix.hpp>
+#include <lifev/fsi/solver/MonolithicRobinInterface.hpp>
 
 namespace LifeV
 {

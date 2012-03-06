@@ -36,7 +36,7 @@
 #ifndef BLOCKMATRIX_H
 #define BLOCKMATRIX_H 1
 
-#include <life/lifesolver/MonolithicBlock.hpp>
+#include <lifev/fsi/solver/MonolithicBlock.hpp>
 
 namespace LifeV
 {

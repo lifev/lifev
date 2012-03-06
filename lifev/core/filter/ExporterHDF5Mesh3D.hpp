@@ -42,7 +42,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef HAVE_HDF5
 
 #include <lifev/core/filter/ExporterHDF5.hpp>
-#include <life/lifefem/DOFInterface3Dto3D.hpp>
+#include <lifev/fsi/fem/DOFInterface3Dto3D.hpp>
 
 namespace LifeV
 {

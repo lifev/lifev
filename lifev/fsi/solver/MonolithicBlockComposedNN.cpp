@@ -29,7 +29,7 @@
 
 #include <lifev/core/fem/BCManage.hpp>
 
-#include <life/lifesolver/MonolithicBlockComposedNN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedNN.hpp>
 
 namespace LifeV
 {

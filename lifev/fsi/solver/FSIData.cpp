@@ -37,7 +37,7 @@
  */
 
 
-#include <life/lifesolver/FSIData.hpp>
+#include <lifev/fsi/solver/FSIData.hpp>
 
 namespace LifeV
 {

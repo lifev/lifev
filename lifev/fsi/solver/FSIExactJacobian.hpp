@@ -41,7 +41,7 @@
 #ifndef FSIEXACTJACOBIAN_HPP
 #define FSIEXACTJACOBIAN_HPP
 
-#include <life/lifesolver/FSIOperator.hpp>
+#include <lifev/fsi/solver/FSIOperator.hpp>
 
 namespace LifeV
 {

@@ -41,7 +41,7 @@
 #define FSIFIXEDPOINT_HPP
 
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+#include <lifev/fsi/solver/FSIOperator.hpp>
 
 namespace LifeV
 {

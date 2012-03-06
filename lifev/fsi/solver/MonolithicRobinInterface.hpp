@@ -39,7 +39,7 @@
 #define MONOLITHICROBININTERFACE_H 1
 
 #include <lifev/core/LifeV.hpp>
-#include <life/lifesolver/MonolithicBlock.hpp>
+#include <lifev/fsi/solver/MonolithicBlock.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 

@@ -66,8 +66,8 @@
 
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
 
-#include <life/lifefem/DOFInterface3Dto3D.hpp>
-#include <life/lifefem/DOFInterface3Dto2D.hpp>
+#include <lifev/fsi/fem/DOFInterface3Dto3D.hpp>
+#include <lifev/fsi/fem/DOFInterface3Dto2D.hpp>
 #include <lifev/core/fem/BCHandler.hpp>
 #include <lifev/core/fem/BCFunction.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
@@ -75,10 +75,10 @@
 
 #include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
 
-#include <life/lifesolver/FSIData.hpp>
+#include <lifev/fsi/solver/FSIData.hpp>
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
-#include <life/lifesolver/HarmonicExtensionSolver.hpp>
+#include <lifev/fsi/solver/HarmonicExtensionSolver.hpp>
 
 namespace LifeV
 {
