@@ -43,7 +43,7 @@
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
-#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 
 namespace LifeV
 {

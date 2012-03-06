@@ -77,7 +77,7 @@
 
 #include <lifev/fsi/solver/FSIData.hpp>
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
-#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
+#include <lifev/structure/solver/VenantKirchhoffSolverLinear.hpp>
 #include <lifev/fsi/solver/HarmonicExtensionSolver.hpp>
 
 namespace LifeV

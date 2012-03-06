@@ -67,7 +67,7 @@
 
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <life/lifesolver/VenantKirchhoffViscoelasticData.hpp>
+#include <lifev/structure/solver/VenantKirchhoffViscoelasticData.hpp>
 #include <lifev/core/util/Displayer.hpp>
 
 

@@ -40,7 +40,7 @@
 #define FSIDATA_H
 
 #include <lifev/navier_stokes/solver/OseenData.hpp>
-#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>

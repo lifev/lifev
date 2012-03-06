@@ -33,7 +33,7 @@
   @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 
-#include <life/lifesolver/VenantKirchhoffViscoelasticData.hpp>
+#include <lifev/structure/solver/VenantKirchhoffViscoelasticData.hpp>
 
 namespace LifeV
 {

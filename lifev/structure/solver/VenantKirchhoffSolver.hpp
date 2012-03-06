@@ -69,7 +69,7 @@
 
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 #include <lifev/core/util/Displayer.hpp>
 
 namespace LifeV

@@ -39,7 +39,7 @@
 #define LINEARVENANTKIRCHHOFSOLVER_H 1
 
 #include <lifev/core/LifeV.hpp>
-#include <life/lifesolver/VenantKirchhoffSolver.hpp>
+#include <lifev/structure/solver/VenantKirchhoffSolver.hpp>
 
 
 namespace LifeV
