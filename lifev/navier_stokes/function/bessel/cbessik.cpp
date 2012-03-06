@@ -5,7 +5,7 @@
 //  (C) 2003, C. Bond. All rights reserved.
 //
 #include <complex>
-#include <life/lifefunctions/bessel/bessel.hpp>
+#include <lifev/navier_stokes/function/bessel/bessel.hpp>
 
 namespace bessel{
 

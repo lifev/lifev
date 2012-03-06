@@ -44,7 +44,7 @@
 #ifndef OSEENSOLVERSHAPEDERIVATIVE_H
 #define OSEENSOLVERSHAPEDERIVATIVE_H 1
 
-#include <life/lifesolver/OseenSolver.hpp>
+#include <lifev/navier_stokes/solver/OseenSolver.hpp>
 
 namespace LifeV
 {

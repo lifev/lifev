@@ -65,8 +65,8 @@
 #include <lifev/core/fem/PostProcessingBoundary.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 
-#include <life/lifesolver/StabilizationIP.hpp>
-#include <life/lifesolver/OseenData.hpp>
+#include <lifev/navier_stokes/solver/StabilizationIP.hpp>
+#include <lifev/navier_stokes/solver/OseenData.hpp>
 
 #include <boost/shared_ptr.hpp>
 

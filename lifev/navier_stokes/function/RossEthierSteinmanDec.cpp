@@ -40,7 +40,7 @@
 
 #include <lifeconfig.h>
 
-#include <life/lifefunctions/RossEthierSteinmanDec.hpp>
+#include <lifev/navier_stokes/function/RossEthierSteinmanDec.hpp>
 
 namespace LifeV
 {

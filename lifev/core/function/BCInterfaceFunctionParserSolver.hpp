@@ -38,7 +38,7 @@
 #define BCInterfaceFunctionParserSolver_H 1
 
 // Oseen includes
-#include <life/lifesolver/OseenSolverShapeDerivative.hpp>
+#include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 
 // FSI includes
 #include <life/lifesolver/FSIOperator.hpp>

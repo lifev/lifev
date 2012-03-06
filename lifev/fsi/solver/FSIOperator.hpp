@@ -76,7 +76,7 @@
 #include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
 
 #include <life/lifesolver/FSIData.hpp>
-#include <life/lifesolver/OseenSolverShapeDerivative.hpp>
+#include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 

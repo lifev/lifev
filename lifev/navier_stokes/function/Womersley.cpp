@@ -38,8 +38,8 @@
  */
 
 #include <lifeconfig.h>
-#include <life/lifefunctions/Womersley.hpp>
-#include <life/lifefunctions/bessel/bessel.hpp>
+#include <lifev/navier_stokes/function/Womersley.hpp>
+#include <lifev/navier_stokes/function/bessel/bessel.hpp>
 
 namespace LifeV
 {

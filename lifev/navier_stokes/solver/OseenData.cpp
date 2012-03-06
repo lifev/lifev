@@ -37,7 +37,7 @@
  */
 
 
-#include <life/lifesolver/OseenData.hpp>
+#include <lifev/navier_stokes/solver/OseenData.hpp>
 #include <lifev/core/LifeV.hpp>
 
 
