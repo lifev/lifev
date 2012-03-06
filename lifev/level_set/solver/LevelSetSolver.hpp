@@ -66,7 +66,7 @@
 #include <lifev/core/solver/ADRAssembler.hpp>
 #include <lifev/core/solver/ADRAssemblerIP.hpp>
 
-#include <life/lifesolver/LevelSetData.hpp>
+#include <lifev/level_set/solver/LevelSetData.hpp>
 
 #include <vector>
 #include <limits>
