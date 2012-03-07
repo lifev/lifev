@@ -69,22 +69,22 @@ solidMeshPartitioned = none
 
 [fluid]
 useShapeDerivatives = false
-semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
-domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
-convectiveImplicit            = false  # tells if the velocity is to be considered implicitly in the convective term
+domainVelImplicit   = false  # tells if the domain vel is to be considered implicitly in the convective term
+convectiveImplicit  = false  # tells if the velocity is to be considered implicitly in the convective term
+semiImplicit        = true   # tells if we advance in time after the first nonlinear iteration or not
 
     [./physics] # Defined here only if different from the one in the main file.
     #density         = 1.0             # density   [g/cm^3]
     #viscosity       = 0.035           # viscosity [g/cm/s]
 
     [../time_discretization]
-    #timestep                   = 0.0001 # [s]
+    #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
     method          = BDF # Newmark or BDF
     BDF_order       = 1
-    theta                   = 0.35
-    gamma                    = 0.75
+    theta           = 0.35
+    gamma           = 0.75
     rhoInf          = 1
-    typeOfGeneralizedAlpha            = HHT
+    typeOfGeneralizedAlpha = HHT
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
@@ -162,13 +162,13 @@ convectiveImplicit            = false  # tells if the velocity is to be consider
     gamma     = 1
 
     [../time_discretization]
-    #timestep                   = 0.0001 # [s]
+    #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
     method          = BDF # Newmark or BDF
     BDF_order       = 1
-    theta                   = 0.35
-    gamma                    = 0.75
+    theta           = 0.35
+    gamma           = 0.75
     rhoInf          = 1
-    typeOfGeneralizedAlpha            = HHT
+    typeOfGeneralizedAlpha = HHT
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
