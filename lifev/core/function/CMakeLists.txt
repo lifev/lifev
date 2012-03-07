@@ -1,3 +1,5 @@
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
 SET(HEADERS ${HEADERS}
 BCInterfaceFactory.hpp
 BCInterfaceFunction.hpp
