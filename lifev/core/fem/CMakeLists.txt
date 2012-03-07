@@ -22,6 +22,9 @@ fem/CurrentBoundaryFEBase.hpp
 fem/CurrentBoundaryFE.hpp
 fem/CurrentFE.hpp
 fem/DOF.hpp
+fem/DOFInterface3Dto2D.hpp
+fem/DOFInterface3Dto3D.hpp
+fem/DOFInterface.hpp
 fem/DOFLocalPattern.hpp
 fem/FEField.hpp
 fem/FEFunction.hpp
@@ -63,6 +66,9 @@ fem/CurrentBoundaryFEBase.cpp
 fem/CurrentBoundaryFE.cpp
 fem/CurrentFE.cpp
 fem/DOF.cpp
+fem/DOFInterface3Dto2D.cpp
+fem/DOFInterface3Dto3D.cpp
+fem/DOFInterface.cpp
 fem/DOFLocalPattern.cpp
 fem/FEDefinitions.cpp
 fem/GeometricMap.cpp
