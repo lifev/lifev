@@ -8,6 +8,7 @@ INCLUDE(TribitsLibraryMacros)
 #
 
 TRIBITS_PACKAGE(Core)
+SET(${PACKAGE_NAME}_VERSION "3.0")
 
 #
 # B) Set up package-specific options
@@ -51,7 +52,7 @@ FOREACH(Tpack ${NOX_LIBRARIES})
   ENDIF()
 ENDFOREACH()
 
-# TRIBITS_ADD_TEST_DIRECTORIES(testsuite)
+TRIBITS_ADD_TEST_DIRECTORIES(testsuite)
 # TRIBITS_ADD_EXAMPLE_DIRECTORIES(examples)
 
 TRIBITS_CONFIGURE_FILE(${PACKAGE_NAME}_config.h)
@@ -108,10 +109,6 @@ SET(SOURCES ${SOURCES} ${util_SOURCES})
 TRIBITS_EXCLUDE_AUTOTOOLS_FILES()
 # This is the list of files excluded from the tarball
 TRIBITS_EXCLUDE_FILES()
-
-# Debug output
-MESSAGE("Core headers: " ${HEADERS})
-MESSAGE("Core source: " ${SOURCES})
 
 # Add library target
 TRIBITS_ADD_LIBRARY(

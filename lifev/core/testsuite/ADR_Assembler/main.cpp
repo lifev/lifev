@@ -48,28 +48,27 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 
-#include <life/lifealg/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <life/lifearray/MatrixEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
 
-#include <life/lifefilters/ExporterEnsight.hpp>
-//#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
 
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/BCManage.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/BCManage.hpp>
 
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifemesh/RegionMesh3DStructured.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
-#include <life/lifesolver/ADRAssembler.hpp>
-#include <life/lifemesh/MeshData.hpp>
+#include <lifev/core/solver/ADRAssembler.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
 
 using namespace LifeV;
 

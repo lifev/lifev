@@ -82,8 +82,8 @@ SET( LifeV_TPLS_FINDMODS_CLASSIFICATIONS
   LAPACK          "cmake/TPLs/"    PS
   Boost           "cmake/TPLs/"    PS
   ParMETIS        "cmake/TPLs/"    PS
-  Trilinos        "cmake/TPLs/"    PS
   QHull           "cmake/TPLs/"    SS
+  Trilinos        "cmake/TPLs/"    PS
   )
 
 # NOTES:
