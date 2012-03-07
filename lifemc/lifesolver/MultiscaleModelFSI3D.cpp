@@ -324,6 +324,8 @@ MultiscaleModelFSI3D::updateSolution()
     Debug( 8140 ) << "MultiscaleModelFSI3D::updateSolution() \n";
 #endif
 
+// TODO Fix postprocessing (remove the 4 variables and use M_stateVariables)
+// TODO Remove M_solidVelocity
     if ( M_FSIoperator->isFluid() )
     {
         M_FSIoperator->exportFluidDisplacement( *M_fluidDisplacement );

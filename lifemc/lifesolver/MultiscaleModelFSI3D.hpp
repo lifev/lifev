@@ -350,7 +350,7 @@ private:
     // Vectorial external pressure
     vectorPtr_Type                         M_externalPressureVector;
 
-    // Post processing members
+    // Post processing members TODO NOW SHOULD BE REMOVED
     vectorPtr_Type                         M_fluidVelocityAndPressure;
     vectorPtr_Type                         M_fluidDisplacement;
     vectorPtr_Type                         M_solidVelocity;
@@ -362,7 +362,7 @@ private:
     std::vector<vectorPtr_Type>            M_solidVelocity_tn;
     std::vector<vectorPtr_Type>            M_solidDisplacement_tn;
 
-    vectorPtr_Type                            M_stateVariable;
+    vectorPtr_Type                         M_stateVariable;
 
     UInt                                   M_nonLinearRichardsonIteration;
 
