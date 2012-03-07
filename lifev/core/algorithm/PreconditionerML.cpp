@@ -35,7 +35,7 @@
     @date 09-11-2006
  */
 
-#include <PreconditionerML.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 
 #include <lifev/core/LifeV.hpp>
 
