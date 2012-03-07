@@ -1,35 +1,33 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+SET(util_HEADERS
+util/CBlas.hpp
+util/CLapack.hpp
+util/Displayer.hpp
+util/EncoderBase64.hpp
+util/Factory.hpp
+util/FactoryPolicy.hpp
+util/FactorySingleton.hpp
+util/FactoryTypeInfo.hpp
+util/FortranWrapper.hpp
+util/LifeAssert.hpp
+util/LifeAssertSmart.hpp
+util/LifeChrono.hpp
+util/LifeDebug.hpp
+util/ParserDefinitions.hpp
+util/Parser.hpp
+util/ParserSpiritGrammar.hpp
+util/StringData.hpp
+util/StringUtility.hpp
+util/Switch.hpp
+CACHE INTERNAL "")
 
-SET(HEADERS ${HEADERS}
-CBlas.hpp
-CLapack.hpp
-Displayer.hpp
-EncoderBase64.hpp
-Factory.hpp
-FactoryPolicy.hpp
-FactorySingleton.hpp
-FactoryTypeInfo.hpp
-FortranWrapper.hpp
-LifeAssert.hpp
-LifeAssertSmart.hpp
-LifeChrono.hpp
-LifeDebug.hpp
-ParserDefinitions.hpp
-Parser.hpp
-ParserSpiritGrammar.hpp
-StringData.hpp
-StringUtility.hpp
-Switch.hpp
-)
-
-SET(SOURCES ${SOURCES}
-Displayer.cpp
-EncoderBase64.cpp
-FactoryTypeInfo.cpp
-LifeAssertSmart.cpp
-LifeDebug.cpp
-Parser.cpp
-StringData.cpp
-StringUtility.cpp
-Switch.cpp
-)
+SET(util_SOURCES
+util/Displayer.cpp
+util/EncoderBase64.cpp
+util/FactoryTypeInfo.cpp
+util/LifeAssertSmart.cpp
+util/LifeDebug.cpp
+util/Parser.cpp
+util/StringData.cpp
+util/StringUtility.cpp
+util/Switch.cpp
+CACHE INTERNAL "")

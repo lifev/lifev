@@ -1,32 +1,30 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+SET(array_HEADERS
+array/ArraySimple.hpp
+array/MapEpetra.hpp
+array/MapVector.hpp
+array/MatrixContainer.hpp
+array/MatrixElemental.hpp
+array/MatrixEpetra.hpp
+array/MatrixEpetraStructured.hpp
+array/MatrixEpetraStructuredUtility.hpp
+array/MatrixEpetraStructuredView.hpp
+array/RNM.hpp
+array/RNMOperatorConstant.hpp
+array/RNMOperator.hpp
+array/RNMTemplate.hpp
+array/VectorContainer.hpp
+array/VectorElemental.hpp
+array/VectorEpetra.hpp
+array/VectorEpetraStructured.hpp
+array/VectorEpetraStructuredView.hpp
+array/VectorSmall.hpp
+CACHE INTERNAL "")
 
-SET(HEADERS ${HEADERS}
-ArraySimple.hpp
-MapEpetra.hpp
-MapVector.hpp
-MatrixContainer.hpp
-MatrixElemental.hpp
-MatrixEpetra.hpp
-MatrixEpetraStructured.hpp
-MatrixEpetraStructuredUtility.hpp
-MatrixEpetraStructuredView.hpp
-RNM.hpp
-RNMOperatorConstant.hpp
-RNMOperator.hpp
-RNMTemplate.hpp
-VectorContainer.hpp
-VectorElemental.hpp
-VectorEpetra.hpp
-VectorEpetraStructured.hpp
-VectorEpetraStructuredView.hpp
-VectorSmall.hpp
-)
-
-SET(SOURCES ${SOURCES}
-MapEpetra.cpp
-MatrixElemental.cpp
-VectorElemental.cpp
-VectorEpetra.cpp
-VectorEpetraStructured.cpp
-VectorEpetraStructuredView.cpp
-)
+SET(array_SOURCES
+array/MapEpetra.cpp
+array/MatrixElemental.cpp
+array/VectorElemental.cpp
+array/VectorEpetra.cpp
+array/VectorEpetraStructured.cpp
+array/VectorEpetraStructuredView.cpp
+CACHE INTERNAL "")

@@ -1,13 +1,11 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+SET(solver_HEADERS
+solver/ADRAssembler.hpp
+solver/ADRAssemblerIP.hpp
+solver/ADRData.hpp
+solver/HyperbolicData.hpp
+solver/HyperbolicSolver.hpp
+CACHE INTERNAL "")
 
-SET(HEADERS ${HEADERS}
-ADRAssembler.hpp
-ADRAssemblerIP.hpp
-ADRData.hpp
-HyperbolicData.hpp
-HyperbolicSolver.hpp
-)
-
-SET(SOURCES ${SOURCES}
-ADRData.cpp
-)
+SET(solver_SOURCES
+solver/ADRData.cpp
+CACHE INTERNAL "")
