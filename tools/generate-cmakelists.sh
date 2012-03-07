@@ -2,7 +2,8 @@
 # this script generates the list of include files and source files 
 # to be used with TriBITS build system
 
-for dir in $(find . -type d); do
+orig_dir=`pwd`
+for dir in $(find ./* -type d -not -path '*/.*/*'); do
   echo "$dir"
   cd $dir
   echo "INCLUDE_DIRECTORIES(\${CMAKE_CURRENT_SOURCE_DIR})" >> CMakeLists.txt
@@ -14,5 +15,5 @@ for dir in $(find . -type d); do
   echo "SET(SOURCES \${SOURCES}"  >> CMakeLists.txt
   ls -1 *.cpp >> CMakeLists.txt
   echo ")" >> CMakeLists.txt
-  cd ..
+  cd $orig_dir
 done
