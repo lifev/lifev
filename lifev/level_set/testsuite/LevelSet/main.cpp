@@ -49,22 +49,22 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
+#include <lifev/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/algorithm/PreconditionerML.hpp>
 
-#include <life/lifefilters/ExporterEnsight.hpp>
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/filter/ExporterEnsight.hpp>
+#include <lifev/filter/ExporterHDF5.hpp>
 
-#include <life/lifefem/BCManage.hpp>
+#include <lifev/fem/BCManage.hpp>
 
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifemesh/RegionMesh3DStructured.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/mesh/MeshPartitioner.hpp>
+#include <lifev/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/mesh/RegionMesh.hpp>
 
-#include <life/lifesolver/LevelSetSolver.hpp>
-#include <life/lifemesh/MeshData.hpp>
+#include <lifev/solver/LevelSetSolver.hpp>
+#include <lifev/mesh/MeshData.hpp>
 
 using namespace LifeV;
 
