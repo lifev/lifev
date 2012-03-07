@@ -183,13 +183,11 @@ public:
     //! @name Set Methods
     //@{
 
-#ifdef MULTISCALE_IS_IN_LIFEV
     //! Set data for 0D boundary conditions
     /*!
      * @param data BC data loaded from GetPot file
      */
     virtual void setData( const BCInterfaceData0D& data );
-#endif
 
     //! Set data for 1D boundary conditions
     /*!
@@ -808,7 +806,6 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
 // ===================================================
 // Set Methods
 // ===================================================
-#ifdef MULTISCALE_IS_IN_LIFEV
 template< class PhysicalSolverType >
 inline void
 BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfaceData0D& data )
@@ -824,7 +821,6 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfac
 
     createAccessList( data );
 }
-#endif
 
 template< class PhysicalSolverType >
 inline void

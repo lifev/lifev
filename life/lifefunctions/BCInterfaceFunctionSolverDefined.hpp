@@ -48,10 +48,7 @@
 #include <life/lifesolver/OneDFSISolver.hpp>
 
 // BCInterface includes
-#ifdef MULTISCALE_IS_IN_LIFEV
 #include <life/lifefem/BCInterfaceData0D.hpp>
-#endif
-
 #include <life/lifefem/BCInterfaceData1D.hpp>
 #include <life/lifefem/BCInterfaceData3D.hpp>
 
@@ -94,13 +91,11 @@ public:
     //! @name Methods
     //@{
 
-#ifdef MULTISCALE_IS_IN_LIFEV
     //! Copy the stored parameters in the 0D data container
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
     void exportData( BCInterfaceData0D& /*data*/ ) {}
-#endif
 
     //! Copy the stored parameters in the 1D data container
     /*!
@@ -132,13 +127,11 @@ public:
     //! @name Set Methods
     //@{
 
-#ifdef MULTISCALE_IS_IN_LIFEV
     //! Set data for 0D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
     void setData( const BCInterfaceData0D& /*data*/ ) {}
-#endif
 
     //! Set data for 1D boundary conditions
     /*!

@@ -50,12 +50,17 @@ namespace LifeV
 /*!
   @author A. Cervone <ant.cervone@gmail.com>
 
-  This class implements a simple R^n vector.
+  This class implements a simple \f$ R^n \f$ vector.
   <br>
   It allows all kind of geometric operations on the node,
   such as summation, multiplication by scalar, scalar product,
   cross product, norm, etc.
-  The implementation is oriented to best perform with small (less than 30) n
+  <br>
+  The implementation is oriented to best perform with small (less than 30)
+  values of \f$ n \f$.
+  <br>
+  The interface of the class is designed to stay compatible with the Eigen
+  library Matrix class.
 
 */
 
@@ -86,6 +91,26 @@ public:
     VectorSmall( VectorSmall<Dim> const & vector )
     {
         *this = vector;
+    }
+
+    //@}
+
+    //! @name Static initializations
+    //@{
+
+    //! Constant initialization
+    static VectorSmall<Dim> Constant ( Real const & value )
+    {
+        VectorSmall<Dim> v;
+        for ( UInt i = 0; i < Dim; i++ )
+            v[ i ] = value;
+        return v;
+    }
+
+    //! Zero initialization
+    static VectorSmall<Dim> Zero ()
+    {
+        return VectorSmall<Dim>::Constant( 0. );
     }
 
     //@}
@@ -289,10 +314,7 @@ inline VectorSmall<Dim> castToVectorSmall ( Vector const & coords )
 
 //@}
 
-// =====================================
-// class specialization for Dim = 3
-// =====================================
-
+//! class VectorSmall<3>   Partial specialization for the 3D case
 template <>
 class VectorSmall<3>
 {

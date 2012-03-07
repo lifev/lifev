@@ -1,8 +1,8 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s):
 #           Date: 00-00-0000
@@ -17,7 +17,7 @@
 	endtime  = 1.5
     timestep = 0.1
     order    = 2
-	
+
 	[./space_discretization]
 	order     = P2
 	mesh_dir  = ./Mesh/inria/  # the directory where the mesh file is

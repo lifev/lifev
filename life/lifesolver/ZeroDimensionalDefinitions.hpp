@@ -1,0 +1,104 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief Zero Dimensional Model Global Definitions
+ *  @version alpha (experimental)
+ *
+ *  @date 06-02-2012
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ */
+
+#ifndef ZeroDimensionalDefinitions_H
+#define ZeroDimensionalDefinitions_H
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+// STD
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <cmath>
+#include <vector>
+
+#ifdef _MSC_VER
+    #include <iso646.h>
+#endif
+
+// BOOST
+#include <boost/shared_ptr.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+// LIFEV
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifecore/LifeChrono.hpp>
+#include <life/lifecore/StringUtility.hpp>
+#include <life/lifecore/Factory.hpp>
+#include <life/lifecore/FactorySingleton.hpp>
+#include <life/lifefem/FESpace.hpp>
+#include <life/lifefem/TimeData.hpp>
+#include <life/lifefilters/GetPot.hpp>
+
+#define BC_CONSTANT 1000
+
+#define ZERO_DIMENTIONAL_DEFINED_ELEMENTS 6
+#define ZERO_DIMENTIONAL_DEFINED_NODES    2
+
+namespace LifeV
+{
+
+enum ZeroDimensionalElementType
+    {
+    resistor,
+    capacitor,
+    inductor,
+    diode,
+    voltageSource,
+    currentSource
+};
+
+enum ZeroDimensionalNodeType
+{
+    knownNode,
+    unknownNode
+};
+
+enum ZeroDimensionalBCType
+{
+    Current,
+    Voltage
+};
+
+} // LifeV namespace
+
+#endif // ZeroDimensionalDefinitions_H

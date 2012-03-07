@@ -98,7 +98,7 @@ $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/ac_check_hypre.m4])'>>acinclude.m4
 
 
-$(top_srcdir)/Makefile.headers: $(top_srcdir)/tools/update-headers
+$(top_srcdir)/Makefile.headers:
 	cd $(top_srcdir) && $(SHELL) tools/update-headers
 
 report:
