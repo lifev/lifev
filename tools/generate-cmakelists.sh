@@ -2,18 +2,14 @@
 # this script generates the list of include files and source files 
 # to be used with TriBITS build system
 
-orig_dir=`pwd`
-for dir in $(find ./* -type d -not -path '*/.*/*'); do
+for find_dir in $(find ./* -type d -not -path '*/.*/*' -not -path "./cmake"); do
+  dir=$(echo $find_dir | sed -e "s:\./::g")
   echo "$dir"
-  cd $dir
-  echo "INCLUDE_DIRECTORIES(\${CMAKE_CURRENT_SOURCE_DIR})" >> CMakeLists.txt
-  echo >> CMakeLists.txt
-  echo "SET(HEADERS \${HEADERS}" >> CMakeLists.txt
-  ls -1 *.hpp >> CMakeLists.txt
-  echo ")" >> CMakeLists.txt
-  echo >> CMakeLists.txt
-  echo "SET(SOURCES \${SOURCES}"  >> CMakeLists.txt
-  ls -1 *.cpp >> CMakeLists.txt
-  echo ")" >> CMakeLists.txt
-  cd $orig_dir
+  echo "SET(${dir}_HEADERS" > $dir/CMakeLists.txt
+  ls -1 $dir/*.hpp >> $dir/CMakeLists.txt
+  echo "CACHE INTERNAL \"\")" >> $dir/CMakeLists.txt
+  echo >> $dir/CMakeLists.txt
+  echo "SET(${dir}_SOURCES"  >> $dir/CMakeLists.txt
+  ls -1 $dir/*.cpp >> $dir/CMakeLists.txt
+  echo "CACHE INTERNAL \"\")" >> $dir/CMakeLists.txt
 done
