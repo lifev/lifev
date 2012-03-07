@@ -64,21 +64,14 @@ SET(HEADERS ${HEADERS}
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-SET(HEADERS ${HEADERS}
-  EpetraExt_ConfigDefs.h
-  EpetraExt_MMHelpers.h
-  EpetraExt_MatrixMatrix.h
-  EpetraExt_ProductOperator.h
-  EpetraExt_TimedEpetraOperator.hpp
-  EpetraExt_Version.h
-  )
-
-SET(SOURCES ${SOURCES}
-  EpetraExt_ProductOperator.cpp
-  EpetraExt_MMHelpers.cpp
-  EpetraExt_MatrixMatrix.cpp
-  EpetraExt_TimedEpetraOperator.cpp
-  )
+ADD_SUBDIRECTORY(algorithm)
+ADD_SUBDIRECTORY(array)
+ADD_SUBDIRECTORY(fem)
+ADD_SUBDIRECTORY(filter)
+ADD_SUBDIRECTORY(function)
+ADD_SUBDIRECTORY(mesh)
+ADD_SUBDIRECTORY(solver)
+ADD_SUBDIRECTORY(util)
 
 TRIBITS_EXCLUDE_AUTOTOOLS_FILES()
 # This is the list of files excluded from the tarball
