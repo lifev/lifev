@@ -1,28 +1,30 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-SET(HEADERS ${HEADERS}
-ComposedOperator.hpp
-EigenSolver.hpp
-NonLinearAitken.hpp
-NonLinearBrent.hpp
-NonLinearLineSearch.hpp
-NonLinearRichardson.hpp
-PreconditionerAztecOO.hpp
-PreconditionerComposed.hpp
-Preconditioner.hpp
-PreconditionerIfpack.hpp
-PreconditionerML.hpp
-SolverAmesos.hpp
-SolverAztecOO.hpp
+SET(ALGORITHM_HEADERS
+algorithm/ComposedOperator.hpp
+algorithm/EigenSolver.hpp
+algorithm/NonLinearAitken.hpp
+algorithm/NonLinearBrent.hpp
+algorithm/NonLinearLineSearch.hpp
+algorithm/NonLinearRichardson.hpp
+algorithm/PreconditionerAztecOO.hpp
+algorithm/PreconditionerComposed.hpp
+algorithm/Preconditioner.hpp
+algorithm/PreconditionerIfpack.hpp
+algorithm/PreconditionerML.hpp
+algorithm/SolverAmesos.hpp
+algorithm/SolverAztecOO.hpp
+CACHE INTERNAL ""
 )
 
-SET(SOURCES ${SOURCES}
-EigenSolver.cpp
-PreconditionerAztecOO.cpp
-PreconditionerComposed.cpp
-Preconditioner.cpp
-PreconditionerIfpack.cpp
-PreconditionerML.cpp
-SolverAmesos.cpp
-SolverAztecOO.cpp
+SET(ALGORITHM_SOURCES
+algorithm/EigenSolver.cpp
+algorithm/PreconditionerAztecOO.cpp
+algorithm/PreconditionerComposed.cpp
+algorithm/Preconditioner.cpp
+algorithm/PreconditionerIfpack.cpp
+algorithm/PreconditionerML.cpp
+algorithm/SolverAmesos.cpp
+algorithm/SolverAztecOO.cpp
+CACHE INTERNAL ""
 )

@@ -5,10 +5,13 @@
 #define LIFEV_VERSION_MINOR @LifeV_MINOR_VERSION@
                                                 
 /* micro version number */                      
-#define LIFEV_VERSION_MICRO @LifeV_PATCH_VERSION@
+#define LIFEV_VERSION_MICRO @LifeV_MICRO_VERSION@
+
+/* LifeV version number */
+#define LIFEV_VERSION @LifeV_MAJOR_MINOR_VERSION@
 
 /* LifeV version string */
-#define LIFEV_VERSION_STRING @LifeV_VERSION_STRING
+#define LIFEV_VERSION_STRING "@LifeV_VERSION_STRING@"
 
 /* define prefix dir for life installation */
 #define LIFEV_PREFIX "@CMAKE_INSTALL_PREFIX@"
