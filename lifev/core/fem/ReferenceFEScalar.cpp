@@ -35,7 +35,7 @@
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#include <ReferenceFEScalar.hpp>
+#include <lifev/core/fem/ReferenceFEScalar.hpp>
 
 namespace LifeV
 {

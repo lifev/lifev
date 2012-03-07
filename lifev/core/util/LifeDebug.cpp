@@ -70,7 +70,7 @@ enum DebugLevels
     DEBUG_INFO  = 0,
     DEBUG_WARN  = 1,
     DEBUG_ERROR = 2,
-    DEBUG_FATAL = 3,
+    DEBUG_FATAL = 3
 };
 
 // ===============================================

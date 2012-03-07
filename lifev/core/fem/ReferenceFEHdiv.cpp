@@ -36,7 +36,7 @@
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#include <ReferenceFEHdiv.hpp>
+#include <lifev/core/fem/ReferenceFEHdiv.hpp>
 
 namespace LifeV
 {

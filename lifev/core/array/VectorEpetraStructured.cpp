@@ -32,7 +32,7 @@
     @date 01 Jun 2011
  */
 
-#include <VectorEpetraStructured.hpp>
+#include <lifev/core/array/VectorEpetraStructured.hpp>
 
 namespace LifeV {
 

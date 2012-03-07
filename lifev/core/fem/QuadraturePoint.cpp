@@ -36,7 +36,7 @@
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#include <QuadraturePoint.hpp>
+#include <lifev/core/fem/QuadraturePoint.hpp>
 
 namespace LifeV
 {
