@@ -36,7 +36,7 @@
 
  */
 
-#include <LevelSetData.hpp>
+#include <lifev/level_set/solver/LevelSetData.hpp>
 
 namespace LifeV
 {

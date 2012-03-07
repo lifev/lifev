@@ -74,13 +74,13 @@ INCLUDE(TribitsListHelpers)
 
 SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   Core                  lifev/core                        PS
+  Level_Set             lifev/level_set                   PS
   )
   #Navier_Stokes         lifev/navier_stokes               PS
   #FSI                   lifev/fsi                         PS
   #Darcy                 lifev/darcy                       PS
   #Zero_Dimensional      lifev/zero_dimensional            PS
   #Structure             lifev/structure                   PS
-  #Level_Set             lifev/level_set                   PS
   #One_D_Hyperbolic      lifev/one_d_hyperbolic            PS
   #Heart                 lifev/heart                       PS
   #)

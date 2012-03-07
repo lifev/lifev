@@ -51,20 +51,21 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/algorithm/PreconditionerIfpack.hpp>
-#include <lifev/algorithm/PreconditionerML.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 
-#include <lifev/filter/ExporterEnsight.hpp>
-#include <lifev/filter/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 
-#include <lifev/fem/BCManage.hpp>
+#include <lifev/core/fem/BCManage.hpp>
 
-#include <lifev/mesh/MeshPartitioner.hpp>
-#include <lifev/mesh/RegionMesh3DStructured.hpp>
-#include <lifev/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
-#include <lifev/solver/LevelSetSolver.hpp>
-#include <lifev/mesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+
+#include <lifev/level_set/solver/LevelSetSolver.hpp>
 
 using namespace LifeV;
 

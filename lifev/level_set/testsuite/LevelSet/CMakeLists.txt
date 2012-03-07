@@ -1,0 +1,14 @@
+
+INCLUDE(TribitsAddExecutableAndTest)
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+
+TRIBITS_ADD_EXECUTABLE_AND_TEST(
+  LevelSet
+  SOURCES main.cpp
+  ARGS -c
+  NUM_MPI_PROCS 3
+  COMM serial mpi
+  STANDARD_PASS_OUTPUT
+  )
+
