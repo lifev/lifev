@@ -1210,17 +1210,11 @@ bcEssentialManage( MatrixType& matrix,
         for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
 
-            if ( !pId->dofInterface().isMyInterfaceDof(boundaryCond[ i ] ->id()))
-            {
-                continue;
-            }
-
             // Loop on components involved in this boundary condition
             for ( ID j = 0; j < nComp; ++j )
             {
                 // Global Dof
                 idDof = boundaryCond[ i ]->id() + boundaryCond.component( j ) * totalDof + offset;
-
                 datumVec.push_back(boundaryCond( boundaryCond[ i ] ->id(), boundaryCond.component( j ) ));
                 idDofVec.push_back(idDof);
             }
@@ -1345,7 +1339,6 @@ bcEssentialManageMatrix( MatrixType& matrix,
                          const DataType& diagonalizeCoef,
                          UInt offset )
 {
-
     ID idDof;
     UInt totalDof;
 
@@ -1372,14 +1365,13 @@ bcEssentialManageMatrix( MatrixType& matrix,
 
     // If there is an offset than there is a Lagrange multiplier (flux BC)
     if (boundaryCond.offset() > 0)
-    {
+      {
         // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
         idDofVec.push_back(offset + boundaryCond.offset());
-    }
+      }
 
     // Modifying ONLY matrix
     matrix.diagonalize( idDofVec, diagonalizeCoef, offset);
-
 }
 
 
