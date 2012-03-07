@@ -47,7 +47,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/fsi/fem/DOFInterface3Dto3D.hpp>
+#include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 #include <lifev/core/mesh/Marker.hpp>
 
 namespace LifeV

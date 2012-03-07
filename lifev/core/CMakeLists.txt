@@ -118,6 +118,8 @@ TRIBITS_ADD_TEST_DIRECTORIES(testsuite)
 # TRIBITS_ADD_EXAMPLE_DIRECTORIES(examples)
 
 
+MESSAGE ( "Core_libraries: " ${Core_LIBRARIES} ) 
+
 #
 # Do standard postprocessing
 #

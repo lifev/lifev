@@ -66,8 +66,8 @@
 
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
 
-#include <lifev/fsi/fem/DOFInterface3Dto3D.hpp>
-#include <lifev/fsi/fem/DOFInterface3Dto2D.hpp>
+#include <lifev/core/fem/DOFInterface3Dto3D.hpp>
+#include <lifev/core/fem/DOFInterface3Dto2D.hpp>
 #include <lifev/core/fem/BCHandler.hpp>
 #include <lifev/core/fem/BCFunction.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>

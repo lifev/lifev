@@ -46,7 +46,7 @@
 #ifndef _DOFINTERFACE3DTO2D_HH
 #define _DOFINTERFACE3DTO2D_HH
 
-#include <lifev/fsi/fem/DOFInterface.hpp>
+#include <lifev/core/fem/DOFInterface.hpp>
 #include <lifev/core/fem/DOFLocalPattern.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
