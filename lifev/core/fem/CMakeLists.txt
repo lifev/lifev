@@ -6,11 +6,7 @@ fem/BCDataInterpolator.hpp
 fem/BCFunction.hpp
 fem/BCHandler.hpp
 fem/BCIdentifier.hpp
-fem/BCInterface0D.hpp
-fem/BCInterface1D.hpp
 fem/BCInterface3D.hpp
-fem/BCInterfaceData0D.hpp
-fem/BCInterfaceData1D.hpp
 fem/BCInterfaceData3D.hpp
 fem/BCInterfaceData.hpp
 fem/BCInterfaceDefinitions.hpp
@@ -56,8 +52,6 @@ fem/BCDataInterpolator.cpp
 fem/BCFunction.cpp
 fem/BCHandler.cpp
 fem/BCIdentifier.cpp
-fem/BCInterfaceData0D.cpp
-fem/BCInterfaceData1D.cpp
 fem/BCInterfaceData3D.cpp
 fem/BCInterfaceData.cpp
 fem/BCManage.cpp
