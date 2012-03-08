@@ -54,10 +54,10 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/BCInterface0D.hpp>
-#include <life/lifesolver/ZeroDimensionalData.hpp>
-#include <life/lifesolver/ZeroDimensionalSolver.hpp>
+#include <lifev/core/LifeV.hpp>
+//#include <lifev/core/fem/BCInterface0D.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalSolver.hpp>
 
 using namespace LifeV;
 

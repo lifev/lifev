@@ -43,7 +43,7 @@
 #include <lifev/core/array/MatrixEpetra.hpp>
 
 // MATHCARD
-#include <lifev/core/fem/BCInterface0D.hpp>
+#include <lifev/zero_dimensional/fem/ZeroDimensionalBCHandler.hpp>
 #include <lifev/zero_dimensional/solver/ZeroDimensionalDefinitions.hpp>
 #include <lifev/zero_dimensional/fem/ZeroDimensionalBC.hpp>
 

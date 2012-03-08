@@ -35,6 +35,7 @@
  *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
+#include <Epetra_Vector.h>
 #include <lifev/zero_dimensional/solver/ZeroDimensionalCircuitData.hpp>
 
 namespace LifeV {
@@ -924,7 +925,7 @@ void ZeroDimensionalCircuitData::updateCircuitDataFromY( const Real& t,
     for ( iterZeroDimensionalNodeUnknown_Type theNode = unknownNodeList ->begin(); theNode != unknownNodeList->end(); theNode++ )
     {
         const Int& variableIndex = ( *theNode )->variableIndex();
-        ( *theNode )->setVoltage( ( *x )[variableIndex] );
+        ( *theNode )->setVoltage( (*x)[variableIndex] );
         ( *theNode )->setDeltaVoltage( ( *x_dot )[variableIndex] );
     }
 
