@@ -224,9 +224,12 @@ main( int argc, char** argv )
     exporter.closeFile();
 #endif // HAVE_HDF5
 
+    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
+
     return( EXIT_SUCCESS );
 }
 
