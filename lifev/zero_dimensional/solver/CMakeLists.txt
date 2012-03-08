@@ -1,0 +1,16 @@
+SET(solver_HEADERS
+solver/ZeroDimensionalCircuitData.hpp
+solver/ZeroDimensionalData.hpp
+solver/ZeroDimensionalDefinitions.hpp
+solver/ZeroDimensionalRythmosModelInterface.hpp
+solver/ZeroDimensionalRythmosSolverInterface.hpp
+solver/ZeroDimensionalSolver.hpp
+CACHE INTERNAL "")
+
+SET(solver_SOURCES
+solver/ZeroDimensionalCircuitData.cpp
+solver/ZeroDimensionalData.cpp
+solver/ZeroDimensionalRythmosModelInterface.cpp
+solver/ZeroDimensionalRythmosSolverInterface.cpp
+solver/ZeroDimensionalSolver.cpp
+CACHE INTERNAL "")
