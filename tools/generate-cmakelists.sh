@@ -2,7 +2,7 @@
 # this script generates the list of include files and source files 
 # to be used with TriBITS build system
 
-for find_dir in $(find ./* -type d -not -path '*/.*/*' -not -path "./cmake"); do
+for find_dir in $(find ./* -type d -not -path '*/.*/*' -not -path "./cmake" -not -path "./testsuite" -not -path "./example"); do
   dir=$(echo $find_dir | sed -e "s:\./::g")
   echo "$dir"
   echo "SET(${dir}_HEADERS" > $dir/CMakeLists.txt
