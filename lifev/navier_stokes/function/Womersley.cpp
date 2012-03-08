@@ -37,7 +37,7 @@
     Implementation
  */
 
-#include <lifevconfig.h>
+#include <lifev/core/LifeV.hpp>
 #include <lifev/navier_stokes/function/Womersley.hpp>
 #include <lifev/navier_stokes/function/bessel/bessel.hpp>
 
@@ -47,18 +47,18 @@ const Real Pi = 3.14159265358979323846264338328;
 
 Real Womersley::uexact( const Real& t, const Real& /*x*/, const Real& y, const Real& z, const ID& i)
 {
-	Real r=std::sqrt(z*z+y*y);
-	std::complex<Real> z2, b2;
-	z2 = 2.*r/S_D*S_z1;
-	bessel::cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
-	Real u = real(S_A/S_L/S_rho/S_wi*(1.-b2/S_b1)*std::exp(S_wi*t));
+    Real r=std::sqrt(z*z+y*y);
+    std::complex<Real> z2, b2;
+    z2 = 2.*r/S_D*S_z1;
+    bessel::cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
+    Real u = real(S_A/S_L/S_rho/S_wi*(1.-b2/S_b1)*std::exp(S_wi*t));
     switch(i) {
         case 0:  //u_1
             return u;//-4*x*y*y; //u-4*x*y*y;
         case 1:  //u_2
             return 0.;//y*y*y;
         case 2:
-        	return 0.;
+            return 0.;
         default:
             exit(1);
     }
@@ -72,68 +72,68 @@ Real Womersley::pexact( const Real& t, const Real& x, const Real& /*y*/, const R
 
 Real Womersley::grad_u( const UInt& icoor, const Real& t, const Real& /*x*/, const Real& y, const Real& z, const ID& i )
 {
-	Real r=std::sqrt(y*y+z*z);
-	std::complex<Real> z2, b2;
-	z2 = 2.*r/S_D*S_z1;
-	bessel::cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
-	b2 = -2./S_D*S_z1*S_cj0p;
-	Real u_r = real(S_A/S_L/S_rho/S_wi*+b2/S_b1*std::exp(S_wi*t));
+    Real r=std::sqrt(y*y+z*z);
+    std::complex<Real> z2, b2;
+    z2 = 2.*r/S_D*S_z1;
+    bessel::cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
+    b2 = -2./S_D*S_z1*S_cj0p;
+    Real u_r = real(S_A/S_L/S_rho/S_wi*+b2/S_b1*std::exp(S_wi*t));
 
-	switch(icoor) {
-		case 0:
-			switch(i) {
-			case 0:
-				return 0.;
-			case 1:
-				return 0.;
-			case 2:
-				return 0.;
-			default:
-				exit(1);
-			 }
-		case 1:   // u_y
-			switch(i) {
-	        case 0:
-	            return u_r/r*y;
-	        case 1:
-	            return 0.;
-	        case 2:
-	        	return 0.;
-	        default:
-	            exit(1);
-			}
-		case 2:
-			switch(i) {
-	        case 0:
-	            return u_r/r*z;
-	        case 1:
-	            return 0.;
-	        case 2:
-	        	return 0.;
-	        default:
-	            exit(1);
-			}
-		default:
-			exit(1);
-	}
-	return 1.;
+    switch(icoor) {
+        case 0:
+            switch(i) {
+            case 0:
+                return 0.;
+            case 1:
+                return 0.;
+            case 2:
+                return 0.;
+            default:
+                exit(1);
+             }
+        case 1:   // u_y
+            switch(i) {
+            case 0:
+                return u_r/r*y;
+            case 1:
+                return 0.;
+            case 2:
+                return 0.;
+            default:
+                exit(1);
+            }
+        case 2:
+            switch(i) {
+            case 0:
+                return u_r/r*z;
+            case 1:
+                return 0.;
+            case 2:
+                return 0.;
+            default:
+                exit(1);
+            }
+        default:
+            exit(1);
+    }
+    return 1.;
 }
 
 Real Womersley::f( const Real& /* t */, const Real&  /*x*/ , const Real&  /*y*/ , const Real& /* z */, const ID& i ) {
-	switch(i) {
-	        case 0:
-	            return 0.;
-	        case 1:
-	            return 0.;
-	        case 2:
-	        	return 0.;
-	        default:
-	            exit(1);
-	    }
-	return 1.; }
+    switch(i) {
+            case 0:
+                return 0.;
+            case 1:
+                return 0.;
+            case 2:
+                return 0.;
+            default:
+                exit(1);
+        }
+    return 1.; }
 
 Real Womersley::xexact( const Real& t,
-					const Real& x,
+                    const Real& x,
                     const Real& y,
                     const Real& z,
                     const ID& i )
@@ -141,7 +141,7 @@ Real Womersley::xexact( const Real& t,
     switch(i) {
         case 0:  //u_1
         case 1:  //u_2
-        	return uexact(t, x, y, z, i);
+            return uexact(t, x, y, z, i);
         case 2:  //pressure
             return pexact(t, x, y, z, 1);
             break;
@@ -174,7 +174,7 @@ Real Womersley::p0( const Real& t, const Real& x, const Real& y, const Real& z, 
 //we suppose that the problem geometry is the cylinder having axis x, origin (0,0,0), diameter D and height L
 Real Womersley::fNeumann( const Real& t, const Real& x, const Real& y, const Real& z, const ID& i )
 {
-	Real r=std::sqrt(y*y+z*z);
+    Real r=std::sqrt(y*y+z*z);
     Real n[3] = {0., 0., 0.}; Real out=0.;
     if        ( x < 1e-6/S_L ) {
         n[0] = -1.;
@@ -192,8 +192,8 @@ Real Womersley::fNeumann( const Real& t, const Real& x, const Real& y, const Rea
         out += S_mu* grad_u(k, t, x, y, z, i)*n[k];
 
     if(S_flagStrain)
-    	for (UInt k =0; k< nDimensions; k++)  //mu gradu^T n
-    		out += S_mu* grad_u(i, t, x, y, z, k)*n[k];
+        for (UInt k =0; k< nDimensions; k++)  //mu gradu^T n
+            out += S_mu* grad_u(i, t, x, y, z, k)*n[k];
 
     out -= pexact(t, x, y, z, i) * n[i];
 
@@ -299,11 +299,11 @@ void Womersley::setParamsFromGetPot( const GetPot& dataFile )
 
 void Womersley::showMe()
 {
-	std::cout << "Kynetic viscosity " << S_nu << std::endl;
-	std::cout << "Pipe radius " << S_D/2. << " Pipe lenght " << S_L << std::endl;
-	std::cout << "Oscillation period " << S_T << std::endl;
-	std::cout << "Pressure Drop " << S_A << std::endl;
-	std::cout << "Womersley Number " << S_D/2.*std::sqrt(S_w/S_nu) << std::endl;
+    std::cout << "Kynetic viscosity " << S_nu << std::endl;
+    std::cout << "Pipe radius " << S_D/2. << " Pipe lenght " << S_L << std::endl;
+    std::cout << "Oscillation period " << S_T << std::endl;
+    std::cout << "Pressure Drop " << S_A << std::endl;
+    std::cout << "Womersley Number " << S_D/2.*std::sqrt(S_w/S_nu) << std::endl;
 }
 
 Real Womersley::S_nu;
@@ -317,6 +317,6 @@ Real Womersley::S_L;
 Real Womersley::S_A;
 Real Womersley::S_w;
 std::complex<Real> Womersley::S_cj1, Womersley::S_cy0, Womersley::S_cy1,
-	Womersley::S_cj0p, Womersley::S_cj1p, Womersley::S_cy0p, Womersley::S_cy1p ,
-	Womersley::S_z1, Womersley::S_b1 , Womersley::S_ii, Womersley::S_wi;
+    Womersley::S_cj0p, Womersley::S_cj1p, Womersley::S_cy0p, Womersley::S_cy1p ,
+    Womersley::S_z1, Womersley::S_b1 , Womersley::S_ii, Womersley::S_wi;
 } // namespace LifeV

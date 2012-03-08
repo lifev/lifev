@@ -33,19 +33,19 @@
 #ifndef NAVIERSTOKES_H
 #define NAVIERSTOKES_H 1
 
-#include <life/lifesolver/OseenSolver.hpp>
-#include <life/lifemesh/ElementShapes.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifesolver/OseenData.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
-#include <life/lifefilters/ExporterEnsight.hpp>
-#include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifefilters/ExporterEmpty.hpp>
+#include <lifev/navier_stokes/solver/OseenSolver.hpp>
+#include <lifev/core/mesh/ElementShapes.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/navier_stokes/solver/OseenData.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterEmpty.hpp>
 
 /*! @enum TimeScheme
     Order of the BDF
@@ -100,8 +100,8 @@ template<typename MeshType, typename Problem>
 class NavierStokes
 {
 public:
-    typedef MeshType      								  mesh_Type;
-    typedef Problem      								  problem_Type;
+    typedef MeshType                                      mesh_Type;
+    typedef Problem                                       problem_Type;
     typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
     typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
     typedef LifeV::OseenSolver< mesh_Type >               fluid_Type;
@@ -495,7 +495,7 @@ NavierStokes<MeshType, Problem>::run()
     MPI_Comm_size(MPI_COMM_WORLD,&nproc);
     if (verbose)
     {
-    	std::cout << "[[BEGIN_SIMULATION]]" << std::endl << std::endl;
+        std::cout << "[[BEGIN_SIMULATION]]" << std::endl << std::endl;
 
         std::cout << "[Initilization of MPI]" << std::endl;
 #ifdef HAVE_MPI

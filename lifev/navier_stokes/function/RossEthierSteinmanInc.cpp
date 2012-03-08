@@ -35,10 +35,10 @@
 
     @date 2004-11-12
 
-	Implementation.
+    Implementation.
 */
 
-#include <lifevconfig.h>
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/navier_stokes/function/RossEthierSteinmanInc.hpp>
 
@@ -52,19 +52,19 @@ Real RossEthierSteinmanUnsteadyInc::uexact( const Real& t,
                                      const Real& z,
                                      const ID& i)
 {
-	Real e = std::exp(2.*(S_a*S_a + S_d*S_d + S_a*S_d)*S_nu * t);
-	switch(i)
-	{
-	case 0:
-		return e * ( S_d*std::exp(S_a*(x-z)+S_d*(y-z)) - S_a*std::exp(S_a*(z-y)+S_d*(x-y)) );
-	case 1:
-	    return e * ( S_d*std::exp(S_a*(y-x)+S_d*(z-x)) - S_a*std::exp(S_a*(x-z)+S_d*(y-z)) );
-	case 2:
-	    return e * ( S_d*std::exp(S_a*(z-y)+S_d*(x-y)) - S_a*std::exp(S_a*(y-x)+S_d*(z-x)) );
-	default:
-	exit(1);
-	}
-	return 1.;
+    Real e = std::exp(2.*(S_a*S_a + S_d*S_d + S_a*S_d)*S_nu * t);
+    switch(i)
+    {
+    case 0:
+        return e * ( S_d*std::exp(S_a*(x-z)+S_d*(y-z)) - S_a*std::exp(S_a*(z-y)+S_d*(x-y)) );
+    case 1:
+        return e * ( S_d*std::exp(S_a*(y-x)+S_d*(z-x)) - S_a*std::exp(S_a*(x-z)+S_d*(y-z)) );
+    case 2:
+        return e * ( S_d*std::exp(S_a*(z-y)+S_d*(x-y)) - S_a*std::exp(S_a*(y-x)+S_d*(z-x)) );
+    default:
+    exit(1);
+    }
+    return 1.;
 }
 
 Real RossEthierSteinmanUnsteadyInc::uderexact( const Real& t,
@@ -86,51 +86,51 @@ Real RossEthierSteinmanUnsteadyInc::pexact( const Real& t,
                                      const Real& z,
                                      const ID& /* i */ )
 {
-	return S_rho*(S_a*S_a+S_d*S_d+S_a*S_d)*std::exp(4.*(S_a*S_a + S_d*S_d + S_a*S_d)*S_nu * t)*
-			(std::exp(S_a*(x-y)+S_d*(x-z)) + std::exp(S_a*(y-z)+S_d*(y-x)) + std::exp(S_a*(z-x)+S_d*(z-y))  );
+    return S_rho*(S_a*S_a+S_d*S_d+S_a*S_d)*std::exp(4.*(S_a*S_a + S_d*S_d + S_a*S_d)*S_nu * t)*
+            (std::exp(S_a*(x-y)+S_d*(x-z)) + std::exp(S_a*(y-z)+S_d*(y-x)) + std::exp(S_a*(z-x)+S_d*(z-y))  );
 }
 
 Real RossEthierSteinmanUnsteadyInc::grad_u( const UInt& icoor, const Real& t, const Real& x, const Real& y, const Real& z, const ID& i )
 {
-	Real e = std::exp(2.*(S_a*S_a + S_d*S_d + S_a*S_d)*S_nu * t);
-	switch(icoor) {
-			case 0:    // u_x
-			switch(i) {
-				case 0:
-					return S_a*S_d*e * ( std::exp(S_a*(x-z)+S_d*(y-z)) - std::exp(S_a*(z-y)+S_d*(x-y)) );
-				case 1:
-					return e * ( -(S_a+S_d)*S_d*std::exp(S_a*(y-x)+S_d*(z-x)) - S_a*S_a*std::exp(S_a*(x-z)+S_d*(y-z)) );
-				case 2:
-					return e * ( S_d*S_d*std::exp(S_a*(z-y)+S_d*(x-y)) + S_a*(S_a+S_d)*std::exp(S_a*(y-x)+S_d*(z-x)) );
-				default:
-					exit(1);
-			 }
-			case 1:   // u_y
-			switch(i) {
-				case 0:
-					return e * ( S_d*S_d*std::exp(S_a*(x-z)+S_d*(y-z)) + S_a*(S_a+S_d)*std::exp(S_a*(z-y)+S_d*(x-y)) );
-				case 1:
-					return e * ( S_a*S_d*std::exp(S_a*(y-x)+S_d*(z-x)) - S_a*S_d*std::exp(S_a*(x-z)+S_d*(y-z)) );
-				case 2:
-					return e * ( -S_d*(S_a+S_d)*std::exp(S_a*(z-y)+S_d*(x-y)) - S_a*S_a*std::exp(S_a*(y-x)+S_d*(z-x)) );
-				default:
-					exit(1);
-			}
-			case 2:
-			switch(i) {
-			    case 0:
-			        return e * ( -S_d*(S_a+S_d)*std::exp(S_a*(x-z)+S_d*(y-z)) - S_a*S_a*std::exp(S_a*(z-y)+S_d*(x-y)) );
-			    case 1:
-			        return e * ( S_d*S_d*std::exp(S_a*(y-x)+S_d*(z-x)) + S_a*(S_a+S_d)*std::exp(S_a*(x-z)+S_d*(y-z)) );
-			    case 2:
-			        return e * ( S_a*S_d*std::exp(S_a*(z-y)+S_d*(x-y)) - S_a*S_d*std::exp(S_a*(y-x)+S_d*(z-x)) );
-			    default:
-			    exit(1);
-			}
-			default:
-				exit(1);
-			}
-	return 1.;
+    Real e = std::exp(2.*(S_a*S_a + S_d*S_d + S_a*S_d)*S_nu * t);
+    switch(icoor) {
+            case 0:    // u_x
+            switch(i) {
+                case 0:
+                    return S_a*S_d*e * ( std::exp(S_a*(x-z)+S_d*(y-z)) - std::exp(S_a*(z-y)+S_d*(x-y)) );
+                case 1:
+                    return e * ( -(S_a+S_d)*S_d*std::exp(S_a*(y-x)+S_d*(z-x)) - S_a*S_a*std::exp(S_a*(x-z)+S_d*(y-z)) );
+                case 2:
+                    return e * ( S_d*S_d*std::exp(S_a*(z-y)+S_d*(x-y)) + S_a*(S_a+S_d)*std::exp(S_a*(y-x)+S_d*(z-x)) );
+                default:
+                    exit(1);
+             }
+            case 1:   // u_y
+            switch(i) {
+                case 0:
+                    return e * ( S_d*S_d*std::exp(S_a*(x-z)+S_d*(y-z)) + S_a*(S_a+S_d)*std::exp(S_a*(z-y)+S_d*(x-y)) );
+                case 1:
+                    return e * ( S_a*S_d*std::exp(S_a*(y-x)+S_d*(z-x)) - S_a*S_d*std::exp(S_a*(x-z)+S_d*(y-z)) );
+                case 2:
+                    return e * ( -S_d*(S_a+S_d)*std::exp(S_a*(z-y)+S_d*(x-y)) - S_a*S_a*std::exp(S_a*(y-x)+S_d*(z-x)) );
+                default:
+                    exit(1);
+            }
+            case 2:
+            switch(i) {
+                case 0:
+                    return e * ( -S_d*(S_a+S_d)*std::exp(S_a*(x-z)+S_d*(y-z)) - S_a*S_a*std::exp(S_a*(z-y)+S_d*(x-y)) );
+                case 1:
+                    return e * ( S_d*S_d*std::exp(S_a*(y-x)+S_d*(z-x)) + S_a*(S_a+S_d)*std::exp(S_a*(x-z)+S_d*(y-z)) );
+                case 2:
+                    return e * ( S_a*S_d*std::exp(S_a*(z-y)+S_d*(x-y)) - S_a*S_d*std::exp(S_a*(y-x)+S_d*(z-x)) );
+                default:
+                exit(1);
+            }
+            default:
+                exit(1);
+            }
+    return 1.;
 }
 
 Real RossEthierSteinmanUnsteadyInc::f( const Real& /* t */,
@@ -176,33 +176,33 @@ Real RossEthierSteinmanUnsteadyInc::fNeumann( const Real& t,
                                        const Real& z,
                                        const ID& i )
 {
-	Real n[3] = {0., 0., 0.}; Real out=0.;
-	if        ( x == -1. ) {
-		n[0] = -1.;
-	} else if ( x ==  1. ) {
-		n[0] =  1.;
-	} else if ( y == -1. ) {
-		n[1] = -1.;
-	} else if ( y ==  1. ) {
-		n[1] =  1.;
-	} else if ( z == -1. ) {
-		n[2] = -1.;
-	} else if ( z ==  1. ) {
-		n[2] =  1.;
-	} else {
-		std::cout << "strange point: x=" << x << " y=" << y << " z=" << z
-				  << std::endl;
-	}
+    Real n[3] = {0., 0., 0.}; Real out=0.;
+    if        ( x == -1. ) {
+        n[0] = -1.;
+    } else if ( x ==  1. ) {
+        n[0] =  1.;
+    } else if ( y == -1. ) {
+        n[1] = -1.;
+    } else if ( y ==  1. ) {
+        n[1] =  1.;
+    } else if ( z == -1. ) {
+        n[2] = -1.;
+    } else if ( z ==  1. ) {
+        n[2] =  1.;
+    } else {
+        std::cout << "strange point: x=" << x << " y=" << y << " z=" << z
+                  << std::endl;
+    }
 
-	for (UInt k =0; k< 3; k++)  //mu grad_u n
-		out += S_mu* grad_u(k, t, x, y, z, i)*n[k];
+    for (UInt k =0; k< 3; k++)  //mu grad_u n
+        out += S_mu* grad_u(k, t, x, y, z, i)*n[k];
 
-	if(S_flagStrain)
-		for (UInt k =0; k< 3; k++)  //mu grad_u^T n
-			out += S_mu* grad_u(i, t, x, y, z, k)*n[k];
+    if(S_flagStrain)
+        for (UInt k =0; k< 3; k++)  //mu grad_u^T n
+            out += S_mu* grad_u(i, t, x, y, z, k)*n[k];
 
-	out -= pexact(t, x, y, z, i) * n[i]; //grad_p n
-	return out;
+    out -= pexact(t, x, y, z, i) * n[i]; //grad_p n
+    return out;
 }
 
 

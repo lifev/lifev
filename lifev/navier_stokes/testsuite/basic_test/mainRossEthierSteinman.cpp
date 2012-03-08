@@ -46,11 +46,11 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
-#include <life/lifefunctions/RossEthierSteinmanDec.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
+#include <lifev/navier_stokes/function/RossEthierSteinmanDec.hpp>
 
 #include "navierStokes.hpp"
 
@@ -71,12 +71,13 @@ main( int argc, char** argv )
 #endif
 
     NavierStokes<RegionMesh<LinearTetra>, RossEthierSteinmanUnsteadyDec >
-				ns( argc, argv, "dataRossEthierSteinman", "rossEthierSteinman" );
+                ns( argc, argv, "dataRossEthierSteinman", "rossEthierSteinman" );
 
     ns.run();
 
 #ifdef HAVE_MPI
     if (verbose) std::cout << "MPI Finalization" << std::endl;
+    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
     MPI_Finalize();
 #endif
     return( EXIT_SUCCESS );
