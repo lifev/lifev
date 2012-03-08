@@ -349,11 +349,11 @@ main( int argc, char** argv )
     exporter.postProcess(0);
     if (verbose) std::cout << " done ! " << std::endl;
 
+    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
-
-    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
 
     return( EXIT_SUCCESS );
 }
