@@ -75,9 +75,10 @@ main( int argc, char** argv )
 
     ns.run();
 
+    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
+
 #ifdef HAVE_MPI
     if (verbose) std::cout << "MPI Finalization" << std::endl;
-    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
     MPI_Finalize();
 #endif
     return( EXIT_SUCCESS );
