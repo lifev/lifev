@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [mesh]
-mesh_dir  = Mesh/freefem/  # the directory where the mesh file is
+mesh_dir  = ./  # the directory where the mesh file is
 mesh_file = square20x20.msh      # mesh file
 mesh_type = '.msh'
 mesh_edges = 'all'

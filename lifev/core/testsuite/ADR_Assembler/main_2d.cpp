@@ -349,6 +349,9 @@ main( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
+
+    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
+
     return( EXIT_SUCCESS );
 }
 
