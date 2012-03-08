@@ -38,19 +38,19 @@
 //! Includes
 // ===================================================
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifemesh/RegionMesh3DStructured.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
 
-#include <life/lifesolver/DarcySolverTransientNonLinear.hpp>
+#include <lifev/darcy/solver/DarcySolverTransientNonLinear.hpp>
 
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
-#include <life/lifefilters/ExporterEmpty.hpp>
-#include <life/lifefilters/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterEmpty.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
 
 /*!
  @class darcy

@@ -64,10 +64,10 @@ Solve the problem
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 
 #include "darcy.hpp"
 
@@ -106,22 +106,25 @@ int main(int argc, char** argv)
 
     // Error of the problem
     const LifeV::Real error = Darcy.run();
-
-#ifdef HAVE_MPI
-
-    MPI_Finalize();
-
-    std::cout << "MPI Finalization" << std::endl;
-
-#endif
-
-    if ( std::fabs( error - errorKnown ) > tolerance )
-    {
-        return ( EXIT_FAILURE );
-    }
+    bool unsuccess=std::fabs( error - errorKnown ) > tolerance;
+    // For tribits handling of success/failure
+    //! @todo Add verbose to avoid all processes printing this stuff
+    if (unsuccess)
+      std::cout << "End Result: TEST NOT PASSED" << std::endl;
     else
-    {
+      std::cout << "End Result: TEST PASSED" << std::endl;
+#ifdef HAVE_MPI
+    std::cout << "MPI Finalization" << std::endl;
+    MPI_Finalize();
+#endif
+    
+    if (unsuccess)
+      {
+        return ( EXIT_FAILURE );
+      }
+    else
+      {
         return ( EXIT_SUCCESS );
-    }
+      }
 }
 
