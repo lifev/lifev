@@ -9,6 +9,10 @@ derives from exporterHDF5.
 Activation of BOOST spirit should depend on standard 
 defined cmake variables.
 
+(I've made Boost spirit enabled by default. It can be disabled
+by the user: -D LifeV_Core_ENABLE_SPIRIT_PARSER:BOOL=OFF
+or if the detected Boost version is too old. --Radu)
+
 Do we want to move to the pedantic compilation?
 Right now, it is activated by default, to remove it specify:
  -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=OFF \
