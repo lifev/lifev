@@ -6,11 +6,6 @@ fem/BCDataInterpolator.hpp
 fem/BCFunction.hpp
 fem/BCHandler.hpp
 fem/BCIdentifier.hpp
-fem/BCInterface3D.hpp
-fem/BCInterfaceData3D.hpp
-fem/BCInterfaceData.hpp
-fem/BCInterfaceDefinitions.hpp
-fem/BCInterface.hpp
 fem/BCManage.hpp
 fem/BCManageNormal.hpp
 fem/BCVector.hpp
@@ -52,8 +47,6 @@ fem/BCDataInterpolator.cpp
 fem/BCFunction.cpp
 fem/BCHandler.cpp
 fem/BCIdentifier.cpp
-fem/BCInterfaceData3D.cpp
-fem/BCInterfaceData.cpp
 fem/BCManage.cpp
 fem/BCVector.cpp
 fem/CurrentBoundaryFEBase.cpp
