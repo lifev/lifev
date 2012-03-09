@@ -177,7 +177,7 @@ private:
 inline FSIOperator* createFP() { return new FSIFixedPoint();}
 namespace
 {
-static bool registerFP = FSIOperator::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
+//static bool registerFP = FSIOperator::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
 }
 
 }   // Namespace LifeV
