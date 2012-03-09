@@ -45,3 +45,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION ${TRIBITS_CMAKE_MINIMUM_REQUIRED})
 
 # Do all of the processing for this Tribits project
 TRIBITS_PROJECT()
+
+# Add documentation
+ADD_SUBDIRECTORY(doc)
+

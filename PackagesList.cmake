@@ -80,7 +80,7 @@ SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   Navier_Stokes         lifev/navier_stokes               PS
   Structure             lifev/structure                   PS
   Heart                 lifev/heart                       PS
-  FSI                   lifev/fsi                         PS
+  FSI                   lifev/fsi                         EX
   Zero_Dimensional      lifev/zero_dimensional            EX
   )
 

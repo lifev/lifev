@@ -1,6 +1,3 @@
-# Macros for LaTeX
-#include (UseLATEX)
-#add_subdirectory (manual)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -24,4 +21,6 @@ if(DOXYGEN_FOUND)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/api DESTINATION share/doc/lifev)
 
 endif(DOXYGEN_FOUND)
+
+#ADD_SUBDIRECTORY(CodingGuidelines)
 

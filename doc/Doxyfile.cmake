@@ -32,7 +32,7 @@ PROJECT_NAME           = "LifeV"
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER         = "2.2"
+PROJECT_NUMBER         = "@LifeV_VERSION_STRING@"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
@@ -633,7 +633,7 @@ WARN_LOGFILE           = Doxylog
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/..
+INPUT                  = @CMAKE_SOURCE_DIR@
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
