@@ -39,11 +39,11 @@
 #define __LUMPEDHEART_HPP
 
 // LifeV includes
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifefem/BCHandler.hpp>
-#include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/fem/BCHandler.hpp>
+#include <lifev/fsi/solver/FSISolver.hpp>
+#include <lifev/fsi/solver/FSIOperator.hpp>
 
 // Mathcard includes
 //#include <life/lifesolver/BCInterface3D.hpp>

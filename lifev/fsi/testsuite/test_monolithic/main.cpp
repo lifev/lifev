@@ -90,21 +90,22 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifefem/BCHandler.hpp>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 
-#include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
-#include <life/lifesolver/FSIMonolithicGI.hpp>
+#include <lifev/core/fem/BCHandler.hpp>
 
-#include <life/lifefilters/ExporterEnsight.hpp>
-#include <life/lifefilters/ExporterEmpty.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterEmpty.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
+
+#include <lifev/structure/solver/VenantKirchhoffSolverLinear.hpp>
+#include <lifev/fsi/solver/FSISolver.hpp>
+#include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
