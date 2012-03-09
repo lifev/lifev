@@ -503,6 +503,8 @@ int main(int argc, char** argv)
         FSIChecker _CE_check(data_fileCE);
         _CE_check();
 
+        std::cout << "End Result: TEST PASSED" << std::endl;
+
 #ifdef HAVE_MPI
         MPI_Finalize();
 #endif
@@ -514,11 +516,13 @@ int main(int argc, char** argv)
         GetPot data_file(data_file_name);
         FSIChecker _sp_check( data_file );
         _sp_check();
+
+        std::cout << "End Result: TEST PASSED" << std::endl;
     }
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
-
 
     return 0;
 

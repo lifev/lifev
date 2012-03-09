@@ -559,10 +559,14 @@ int main( int argc, char** argv )
         }
     */
 
+    // Person who "envisioned" the next two lines should be ashamed
+    // of himself
     FSIChecker FSIProblem( dataFileName );
     FSIProblem();
 
     std::cout << "Total sum up " << chrono.diffCumul() << " s." << std::endl;
+
+    std::cout << "End Result: TEST PASSED" << std::endl;
 
 #ifdef HAVE_MPI
     std::cout << "MPI Finalization" << std::endl;

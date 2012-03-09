@@ -211,6 +211,8 @@ main( Int argc, char** argv )
     exitFlag = EXIT_SUCCESS;
 #endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
+    if (rank == 0) std::cout << "End Result: TEST PASSED" << std::endl;
+
 #ifdef HAVE_MPI
     if ( rank == 0 )
         std::cout << "MPI Finalization" << std::endl;
