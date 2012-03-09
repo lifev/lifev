@@ -1,0 +1,13 @@
+SET(function_HEADERS
+function/BCInterfaceFactory.hpp
+function/BCInterfaceFunction.hpp
+function/BCInterfaceFunctionParserFile.hpp
+function/BCInterfaceFunctionParserFileSolver.hpp
+function/BCInterfaceFunctionParser.hpp
+function/BCInterfaceFunctionParserSolver.hpp
+function/BCInterfaceFunctionSolverDefined.hpp
+function/BCInterfaceFunctionUserDefined.hpp
+CACHE INTERNAL "")
+
+SET(function_SOURCES
+CACHE INTERNAL "")

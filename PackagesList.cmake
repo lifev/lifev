@@ -74,6 +74,7 @@ INCLUDE(TribitsListHelpers)
 
 SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   Core                  lifev/core                        PS
+  BC_Interface          lifev/bc_interface                PS
   Level_Set             lifev/level_set                   PS
   Darcy                 lifev/darcy                       PS
   Navier_Stokes         lifev/navier_stokes               PS
