@@ -37,9 +37,9 @@
 #ifndef BCInterfaceFunction_H
 #define BCInterfaceFunction_H 1
 
-#include <lifev/core/fem/BCInterfaceData0D.hpp>
-#include <lifev/core/fem/BCInterfaceData1D.hpp>
-#include <lifev/core/fem/BCInterfaceData3D.hpp>
+#include <lifev/bc_interface/fem/BCInterfaceData0D.hpp>
+#include <lifev/bc_interface/fem/BCInterfaceData1D.hpp>
+#include <lifev/bc_interface/fem/BCInterfaceData3D.hpp>
 
 namespace LifeV
 {

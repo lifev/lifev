@@ -41,7 +41,7 @@
 #include <lifev/one_d_hyperbolic/fem/OneDFSIBCHandler.hpp>
 
 // BCInterface includes
-#include <lifev/core/fem/BCInterfaceData.hpp>
+#include <lifev/bc_interface/fem/BCInterfaceData.hpp>
 
 namespace LifeV
 {

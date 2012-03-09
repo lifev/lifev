@@ -47,7 +47,7 @@
 #include <lifev/one_d_hyperbolic/solver/OneDFSISolver.hpp>
 
 // BCInterface includes
-#include <lifev/core/function/BCInterfaceFunctionParser.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
 {

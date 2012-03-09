@@ -37,14 +37,14 @@
 #ifndef BCInterfaceFactory_H
 #define BCInterfaceFactory_H 1
 
-#include <lifev/core/fem/BCInterfaceData.hpp>
+#include <lifev/bc_interface/fem/BCInterfaceData.hpp>
 
-#include <lifev/core/function/BCInterfaceFunctionParser.hpp>
-#include <lifev/core/function/BCInterfaceFunctionParserFile.hpp>
-#include <lifev/core/function/BCInterfaceFunctionParserSolver.hpp>
-#include <lifev/core/function/BCInterfaceFunctionParserFileSolver.hpp>
-#include <lifev/core/function/BCInterfaceFunctionUserDefined.hpp>
-#include <lifev/core/function/BCInterfaceFunctionSolverDefined.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionParser.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionParserFile.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionParserFileSolver.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionUserDefined.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefined.hpp>
 
 namespace LifeV
 {

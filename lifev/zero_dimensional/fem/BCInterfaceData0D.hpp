@@ -41,7 +41,7 @@
 #include <lifev/zero_dimensional/fem/ZeroDimensionalBCHandler.hpp>
 
 // BCInterface includes
-#include <lifev/core/fem/BCInterfaceData.hpp>
+#include <lifev/bc_interface/fem/BCInterfaceData.hpp>
 
 namespace LifeV
 {
