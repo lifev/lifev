@@ -397,7 +397,7 @@ public:
     static const UInt S_numPointsPerFace = 0;   //!< Number of points per face
     static const UInt S_numPointsPerElement = S_numPointsPerFace;  //!< Number of points per element
     static const UInt S_numPointsPerFacet = S_numPointsPerEdge;  //!< Number of points per facet
-    static const UInt S_numPointsPerRidge = S_numPointsPerVertex; ;   //!< Number of points per ridge
+    static const UInt S_numPointsPerRidge = S_numPointsPerVertex;   //!< Number of points per ridge
     static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
 
     //! @return the local ID of the j-th point of the i-th edge
