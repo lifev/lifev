@@ -19,7 +19,8 @@ for module_name in ['bc_interface'] : #, 'core', 'navier_stokes', 'fsi', 'darcy'
             #os.system("git mv " + old_include + " " + new_include)
 
             if (file_name.find("hpp") > -1) :
-                os.system("find ./lifev/ -type f  -not -path '*/.*/*' -not -name '.*' -name '*.{c,h}pp' -exec sed -e 's:" + old_include + ":" + new_include + ":' -i '{}' \;")
+                os.system("find ./lifev/ -type f -not -path '*/.*/*' -not -name '.*' -name '*.cpp' -or -name '*.hpp' -exec sed -e 's:" + old_include + ":" + new_include + ":' -i '{}' \;")
+                #print "find ./lifev/ -type f  -not -path '*/.*/*' -not -name '.*' -name '*.{c,h}pp' -exec sed -e 's:" + old_include + ":" + new_include + ":' -i '{}' \;"
 
     #os.system("git commit -m '" + "Moving files to " + module_name + " module'")
     os.system("git commit -a -m '" + "Updating headers for " + module_name + " module'")
