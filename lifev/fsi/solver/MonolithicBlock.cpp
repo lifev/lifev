@@ -27,7 +27,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <MonolithicBlock.hpp>
+#include <lifev/fsi/solver/MonolithicBlock.hpp>
 
 namespace LifeV
 {

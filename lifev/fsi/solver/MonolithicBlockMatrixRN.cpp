@@ -27,7 +27,7 @@
 
 #include <EpetraExt_MatrixMatrix.h>
 
-#include <MonolithicBlockMatrixRN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockMatrixRN.hpp>
 ;
 namespace LifeV {
 

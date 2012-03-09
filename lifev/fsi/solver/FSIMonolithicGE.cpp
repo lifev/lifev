@@ -37,7 +37,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <FSIMonolithicGE.hpp>
+#include <lifev/fsi/solver/FSIMonolithicGE.hpp>
 
 namespace LifeV
 {

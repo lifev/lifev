@@ -27,7 +27,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <MonolithicBlockComposedDND.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedDND.hpp>
 
 namespace LifeV
 {
