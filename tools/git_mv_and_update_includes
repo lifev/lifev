@@ -2,11 +2,11 @@
 
 import os
 
-list_of_files = open('../list_of_files.txt', 'r')
+list_of_files = open('./tools/list_of_files.txt', 'r')
 
 all_lines = list_of_files.readlines()
 
-for module_name in ['core', 'navier_stokes', 'fsi', 'darcy', 'zero_dimensional', 'structure', 'level_set', 'one_d_hyperbolic', 'heart'] :
+for module_name in ['bc_interface'] : #, 'core', 'navier_stokes', 'fsi', 'darcy', 'zero_dimensional', 'structure', 'level_set', 'one_d_hyperbolic', 'heart'] :
     for line in all_lines :
         [new_path, old_path, old_include] = line.strip('\n').split(' ')
 
