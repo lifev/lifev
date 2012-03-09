@@ -55,7 +55,7 @@
 
 // LifeV includes
 #include <lifev/core/LifeV.hpp>
-//#include <lifev/core/fem/BCInterface0D.hpp>
+#include <lifev/bc_interface/fem/BCInterface0D.hpp>
 #include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
 #include <lifev/zero_dimensional/solver/ZeroDimensionalSolver.hpp>
 
