@@ -7,4 +7,6 @@ solver/DarcySolverTransientNonLinear.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
+solver/DarcyDummy.cpp
 CACHE INTERNAL "")
+
