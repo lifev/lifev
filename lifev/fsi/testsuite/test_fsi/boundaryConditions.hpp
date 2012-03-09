@@ -35,13 +35,13 @@
 #ifndef BC_HPP
 #define BC_HPP
 
-#include "life/lifecore/LifeV.hpp"
+#include "lifev/core/LifeV.hpp"
 #include "ud_functions.hpp"
-#include "life/lifefem/BCHandler.hpp"
-#include "life/lifefem/BCFunction.hpp"
+#include "lifev/core/fem/BCHandler.hpp"
+#include "lifev/core/fem/BCFunction.hpp"
 
-#include "life/lifesolver/FSIExactJacobian.hpp"
-#include "life/lifesolver/FSIFixedPoint.hpp"
+#include "lifev/fsi/solver/FSIExactJacobian.hpp"
+#include "lifev/fsi/solver/FSIFixedPoint.hpp"
 
 
 //#define FLUX
