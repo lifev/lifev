@@ -37,7 +37,7 @@
  */
 
 #ifndef _BIDOMAINSOLVER_H_
-#define _BIODOMAINSOLVER_H_
+#define _BIDOMAINSOLVER_H_
 
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>
@@ -267,13 +267,13 @@ protected:
     //! Boolean that indicates if the matrix has to be recomputed
     bool                           M_recomputeMatrix;
 
-    TimeAdvanceBDF<vector_Type>		       M_BDFIntraExtraPotential;
+    TimeAdvanceBDF<vector_Type>            M_BDFIntraExtraPotential;
 private:
 
     //! Elementary matrices
     MatrixElemental                        M_elmatStiff;
     MatrixElemental                        M_elmatMass;
-    Real 			   			   massCoeff;
+    Real                           massCoeff;
     UInt potentialFESpaceDimension() const { return M_uFESpace.dim(); }
 }; // class BidomainSolver
 
@@ -302,7 +302,7 @@ HeartBidomainSolver( const data_type&          dataType,
     M_localMap_u             ( uFESpace.map()),
     M_localMapVec            (M_localMap_u+M_localMap_u+M_localMap_u),
     M_matrMass               ( ),
-    M_matrStiff	             ( ),
+    M_matrStiff              ( ),
     M_matrNoBC               ( ),
     M_rhsNoBC                ( M_localMap ),
     M_solutionIntraExtraPotential               ( M_localMap ),
