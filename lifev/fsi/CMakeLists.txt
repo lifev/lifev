@@ -8,7 +8,7 @@ INCLUDE(TribitsLibraryMacros)
 #
 
 TRIBITS_PACKAGE(FSI)
-SET(${PACKAGE_NAME}_VERSION "3.0")
+SET(${PACKAGE_NAME}_VERSION "3.1")
 
 #
 # B) Set up package-specific options
