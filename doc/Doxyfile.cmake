@@ -570,8 +570,8 @@ LAYOUT_FILE            =
 # http://en.wikipedia.org/wiki/BibTeX for more info. For LaTeX the style
 # of the bibliography can be controlled using LATEX_BIB_STYLE.
 
-CITE_BIB_FILES         = @CMAKE_CURRENT_SOURCE_DIR@/tex/lifev.bib \
-                         @CMAKE_CURRENT_SOURCE_DIR@/tex/biblio.bib
+CITE_BIB_FILES         = lifev.bib \
+                         biblio.bib
 
 #---------------------------------------------------------------------------
 # configuration options related to warning and progress messages
