@@ -3,6 +3,7 @@
 # date: 11-03-2012
 
 import os
+import re
 
 # modules to work on
 module_list = [
@@ -51,9 +52,9 @@ for module in module_list:
       headers = []
       sources = []
       for file in os.listdir( src_dir ):
-        if ( file.find( '.hpp' ) > -1 ):
+        if ( re.search( '\.hpp$', file ) ):
           headers.append( file )
-        elif ( file.find( '.cpp' )> -1 ):
+        elif ( re.search( '\.cpp$', file ) ):
           sources.append( file )
       #print headers
       #print sources
