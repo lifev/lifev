@@ -1,7 +1,20 @@
 SET(fem_HEADERS
-fem/ZeroDimensionalBC.hpp
-fem/ZeroDimensionalBCHandler.hpp
+  fem/ZeroDimensionalBC.hpp
+  fem/ZeroDimensionalBCHandler.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES
 CACHE INTERNAL "")
+
+
+SET(LOCAL_HEADERS)
+FOREACH(INC ${fem_HEADERS})
+  STRING(REPLACE "fem/" "" LOCAL_INC ${INC})
+  SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
+ENDFOREACH()
+
+INSTALL(
+  FILES ${LOCAL_HEADERS}
+  DESTINATION "${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/lifev/zero_dimensional/fem"
+  COMPONENT ${PACKAGE_NAME}
+)

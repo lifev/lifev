@@ -1,40 +1,53 @@
 SET(solver_HEADERS
-solver/FSIData.hpp
-solver/FSIExactJacobian.hpp
-solver/FSIFixedPoint.hpp
-solver/FSIMonolithic.hpp
-solver/FSIMonolithicGE.hpp
-solver/FSIMonolithicGI.hpp
-solver/FSIOperator.hpp
-solver/FSISolver.hpp
-solver/HarmonicExtensionSolver.hpp
-solver/MonolithicBlock.hpp
-solver/MonolithicBlockComposed.hpp
-solver/MonolithicBlockComposedDN.hpp
-solver/MonolithicBlockComposedDND.hpp
-solver/MonolithicBlockComposedDNND.hpp
-solver/MonolithicBlockComposedNN.hpp
-solver/MonolithicBlockMatrix.hpp
-solver/MonolithicBlockMatrixRN.hpp
-solver/MonolithicRobinInterface.hpp
+  solver/MonolithicRobinInterface.hpp
+  solver/MonolithicBlock.hpp
+  solver/MonolithicBlockComposedDNND.hpp
+  solver/FSIMonolithicGI.hpp
+  solver/FSIOperator.hpp
+  solver/MonolithicBlockMatrixRN.hpp
+  solver/FSISolver.hpp
+  solver/MonolithicBlockComposedNN.hpp
+  solver/MonolithicBlockComposedDND.hpp
+  solver/FSIMonolithic.hpp
+  solver/FSIExactJacobian.hpp
+  solver/MonolithicBlockComposedDN.hpp
+  solver/FSIData.hpp
+  solver/MonolithicBlockComposed.hpp
+  solver/HarmonicExtensionSolver.hpp
+  solver/MonolithicBlockMatrix.hpp
+  solver/FSIMonolithicGE.hpp
+  solver/FSIFixedPoint.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
-solver/FSIData.cpp
-solver/FSIExactJacobian.cpp
-solver/FSIFixedPoint.cpp
-solver/FSIMonolithic.cpp
-solver/FSIMonolithicGE.cpp
-solver/FSIMonolithicGI.cpp
-solver/FSIOperator.cpp
-solver/FSISolver.cpp
-solver/MonolithicBlock.cpp
-solver/MonolithicBlockComposed.cpp
-solver/MonolithicBlockComposedDN.cpp
-solver/MonolithicBlockComposedDND.cpp
-solver/MonolithicBlockComposedDNND.cpp
-solver/MonolithicBlockComposedNN.cpp
-solver/MonolithicBlockMatrix.cpp
-solver/MonolithicBlockMatrixRN.cpp
-solver/MonolithicRobinInterface.cpp
+  solver/FSIMonolithicGI.cpp
+  solver/MonolithicBlockComposedDND.cpp
+  solver/MonolithicRobinInterface.cpp
+  solver/MonolithicBlockMatrix.cpp
+  solver/MonolithicBlockComposedNN.cpp
+  solver/FSIMonolithic.cpp
+  solver/MonolithicBlock.cpp
+  solver/FSIOperator.cpp
+  solver/FSIExactJacobian.cpp
+  solver/MonolithicBlockComposed.cpp
+  solver/MonolithicBlockComposedDNND.cpp
+  solver/FSISolver.cpp
+  solver/FSIMonolithicGE.cpp
+  solver/FSIFixedPoint.cpp
+  solver/MonolithicBlockComposedDN.cpp
+  solver/FSIData.cpp
+  solver/MonolithicBlockMatrixRN.cpp
 CACHE INTERNAL "")
+
+
+SET(LOCAL_HEADERS)
+FOREACH(INC ${solver_HEADERS})
+  STRING(REPLACE "solver/" "" LOCAL_INC ${INC})
+  SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
+ENDFOREACH()
+
+INSTALL(
+  FILES ${LOCAL_HEADERS}
+  DESTINATION "${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/lifev/fsi/solver"
+  COMPONENT ${PACKAGE_NAME}
+)

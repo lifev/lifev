@@ -1,32 +1,45 @@
 SET(mesh_HEADERS
-mesh/BareMesh.hpp
-mesh/ElementShapes.hpp
-mesh/InternalEntitySelector.hpp
-mesh/MarkerDefinitions.hpp
-mesh/Marker.hpp
-mesh/MeshChecks.hpp
-mesh/MeshData.hpp
-mesh/MeshElementBare.hpp
-mesh/MeshElement.hpp
-mesh/MeshElementMarked.hpp
-mesh/MeshEntityContainer.hpp
-mesh/MeshEntity.hpp
-mesh/MeshPartitioner.hpp
-mesh/MeshUtility.hpp
-mesh/MeshVertex.hpp
-mesh/RegionMesh1DBuilders.hpp
-mesh/RegionMesh3DStructured.hpp
-mesh/RegionMesh.hpp
+  mesh/MeshEntityContainer.hpp
+  mesh/MeshData.hpp
+  mesh/RegionMesh.hpp
+  mesh/Marker.hpp
+  mesh/InternalEntitySelector.hpp
+  mesh/MeshEntity.hpp
+  mesh/MeshVertex.hpp
+  mesh/RegionMesh3DStructured.hpp
+  mesh/ElementShapes.hpp
+  mesh/MeshPartitioner.hpp
+  mesh/MarkerDefinitions.hpp
+  mesh/MeshUtility.hpp
+  mesh/BareMesh.hpp
+  mesh/MeshElement.hpp
+  mesh/MeshElementBare.hpp
+  mesh/RegionMesh1DBuilders.hpp
+  mesh/MeshChecks.hpp
+  mesh/MeshElementMarked.hpp
 CACHE INTERNAL "")
 
 SET(mesh_SOURCES
-mesh/ElementShapes.cpp
-mesh/InternalEntitySelector.cpp
-mesh/Marker.cpp
-mesh/MeshData.cpp
-mesh/MeshElementBare.cpp
-mesh/MeshUtility.cpp
-mesh/MeshVertex.cpp
-mesh/RegionMesh3DStructured.cpp
-mesh/RegionMesh.cpp
+  mesh/Marker.cpp
+  mesh/RegionMesh3DStructured.cpp
+  mesh/MeshVertex.cpp
+  mesh/RegionMesh.cpp
+  mesh/MeshElementBare.cpp
+  mesh/ElementShapes.cpp
+  mesh/MeshUtility.cpp
+  mesh/MeshData.cpp
+  mesh/InternalEntitySelector.cpp
 CACHE INTERNAL "")
+
+
+SET(LOCAL_HEADERS)
+FOREACH(INC ${mesh_HEADERS})
+  STRING(REPLACE "mesh/" "" LOCAL_INC ${INC})
+  SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
+ENDFOREACH()
+
+INSTALL(
+  FILES ${LOCAL_HEADERS}
+  DESTINATION "${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/lifev/core/mesh"
+  COMPONENT ${PACKAGE_NAME}
+)

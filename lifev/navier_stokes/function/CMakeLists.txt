@@ -1,15 +1,30 @@
 SET(function_HEADERS
-function/KimMoin.hpp
-function/RossEthierSteinmanDec.hpp
-function/RossEthierSteinmanInc.hpp
-function/Womersley.hpp
+  function/Womersley.hpp
+  function/RossEthierSteinmanDec.hpp
+  function/KimMoin.hpp
+  function/RossEthierSteinmanInc.hpp
 CACHE INTERNAL "")
 
 SET(function_SOURCES
-function/KimMoin.cpp
-function/RossEthierSteinmanDec.cpp
-function/RossEthierSteinmanInc.cpp
-function/Womersley.cpp
+  function/RossEthierSteinmanDec.cpp~
+  function/Womersley.cpp
+  function/RossEthierSteinmanInc.cpp~
+  function/RossEthierSteinmanInc.cpp
+  function/KimMoin.cpp
+  function/Womersley.cpp~
+  function/KimMoin.cpp~
+  function/RossEthierSteinmanDec.cpp
 CACHE INTERNAL "")
 
-ADD_SUBDIRECTORY(bessel)
+
+SET(LOCAL_HEADERS)
+FOREACH(INC ${function_HEADERS})
+  STRING(REPLACE "function/" "" LOCAL_INC ${INC})
+  SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
+ENDFOREACH()
+
+INSTALL(
+  FILES ${LOCAL_HEADERS}
+  DESTINATION "${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/lifev/navier_stokes/function"
+  COMPONENT ${PACKAGE_NAME}
+)
