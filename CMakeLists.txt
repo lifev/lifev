@@ -34,6 +34,9 @@ INCLUDE(${CMAKE_SOURCE_DIR}/ProjectName.cmake)
 # not in an include file :-(
 PROJECT(${PROJECT_NAME} NONE)
 
+# we do not need Fortran
+SET(${PROJECT_NAME}_ENABLE_Fortran OFF CACHE BOOL "Disable Fortran compiler")
+
 #
 # B) Pull in the TriBITS system and execute
 #
