@@ -5,7 +5,6 @@ SET(solver_HEADERS
   solver/HeartBidomainData.hpp
   solver/HeartIonicSolver.hpp
   solver/HeartBidomainSolver.hpp
-  solver/HeartBidomainSolver.hpp~
   solver/HeartFunctors.hpp
   solver/HeartMonodomainSolver.hpp
 CACHE INTERNAL "")

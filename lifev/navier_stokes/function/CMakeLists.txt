@@ -6,13 +6,9 @@ SET(function_HEADERS
 CACHE INTERNAL "")
 
 SET(function_SOURCES
-  function/RossEthierSteinmanDec.cpp~
   function/Womersley.cpp
-  function/RossEthierSteinmanInc.cpp~
   function/RossEthierSteinmanInc.cpp
   function/KimMoin.cpp
-  function/Womersley.cpp~
-  function/KimMoin.cpp~
   function/RossEthierSteinmanDec.cpp
 CACHE INTERNAL "")
 
