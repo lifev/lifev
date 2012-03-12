@@ -38,9 +38,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifemesh/NeighborMarker.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/mesh/NeighborMarker.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 namespace LifeV {
 

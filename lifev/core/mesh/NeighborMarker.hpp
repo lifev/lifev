@@ -36,10 +36,10 @@
 #ifndef _NEIGHBORMARKER_H_
 #define _NEIGHBORMARKER_H_ 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifemesh/Marker.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/mesh/Marker.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
 // LifeV namespace
 namespace LifeV
