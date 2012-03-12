@@ -48,8 +48,8 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifearray/VectorContainer.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/array/VectorContainer.hpp>
 
 using namespace LifeV;
 
