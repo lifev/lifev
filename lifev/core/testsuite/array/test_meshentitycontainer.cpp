@@ -34,7 +34,7 @@
 
     @date 00-00-0000
 
-	Test if the template class MeshEntityContainer compiles and works correctly.
+    Test if the template class MeshEntityContainer compiles and works correctly.
  */
 
 // ===================================================
@@ -56,7 +56,7 @@
 
 #include<iostream>
 
-#include <life/lifearray/MeshEntityContainer.hpp>
+#include <lifev/core/mesh/MeshEntityContainer.hpp>
 
 int
 main(int argc, char ** argv)

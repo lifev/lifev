@@ -42,8 +42,8 @@ Simple VectorSmall class test
 //! Includes
 // ===================================================
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifearray/VectorSmall.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 
 using namespace LifeV;
 
