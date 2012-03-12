@@ -93,6 +93,7 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     verbose         = 0                # verbose during mesh-reading
 
     vel_order       = P1               # P1, P1Bubble, P2
+    mesh_order     = P1
     #vel_order       = P1Bubble         # P1, P1Bubble, P2
     #vel_order       = P2               # P1, P1Bubble, P2
     press_order     = P1               # P1, P2
@@ -148,6 +149,9 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
 
 [solid]
+useExactJacobian = true # always false for linear structure model. Otherwise it allows to chose beween an exact-inexact
+                         # Newton scheme
+rescaleFactor    = 1. # this factor can be used to rescale the structure block
 
     [./physics]
     solidType = linearVenantKirchhof # linearVenantKirchhof
@@ -367,6 +371,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../prec]
     #prectype                = AztecOO
+    reuse           = false
     prectype                = Composed
     displayList             = false
 
