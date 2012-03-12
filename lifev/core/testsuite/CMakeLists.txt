@@ -10,7 +10,8 @@ ADD_SUBDIRECTORIES(
   filter
   hyperbolic
   matrix_epetra_structured_framework
+  mesh
   parser
   template_test
   vector_container
-  )
+)

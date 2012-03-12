@@ -54,13 +54,13 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifefilters/GetPot.hpp>
+#include <lifev/core/filter/GetPot.hpp>
 
-#include <life/lifemesh/MarkerDefinitions.hpp>
-#include <life/lifefilters/ImporterMesh3D.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
-#include <life/lifemesh/MeshElementBare.hpp>
-#include <life/lifearray/MapEpetra.hpp>
+#include <lifev/core/mesh/MarkerDefinitions.hpp>
+#include <lifev/core/filter/ImporterMesh3D.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshElementBare.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 
 // A dummy class to imitate a VectorEpetra
 class dummyVect:

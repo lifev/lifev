@@ -12,5 +12,5 @@
 ### DATA FILE #####################################################################################
 ###################################################################################################
 
-mesh_dir   = './Mesh/'  # the directory where the mesh file is
+mesh_dir   = './'  # the directory where the mesh file is
 mesh_file  = 'cube_47785.m++'        # mesh file
