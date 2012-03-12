@@ -16,7 +16,8 @@ cointain source and header files.
 
 lifev/<package_name>/<sub_dir>/CMakeLists.txt
 This file should contain the list of source and header files, along with a cmake
-rule for their installation.
+rule for their installation. The script in tools/generate-cmakelists can
+automate this step.
 
 lifev/<package_name>/cmake/Dependencies.cmake
 This file lists module dependencies from other modules. In LifeV every module
