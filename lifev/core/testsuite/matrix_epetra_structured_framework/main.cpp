@@ -43,12 +43,12 @@
     #include <Epetra_SerialComm.h>
 #endif
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/Displayer.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/MatrixEpetraStructured.hpp>
-#include <life/lifearray/MatrixEpetraStructuredView.hpp>
-#include <life/lifearray/MatrixEpetraStructuredUtility.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/Displayer.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredView.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredUtility.hpp>
 
 using namespace LifeV;
 
