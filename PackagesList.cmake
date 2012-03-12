@@ -83,6 +83,7 @@ SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   FSI                   lifev/fsi                         PS
   One_D_Hyperbolic      lifev/one_d_hyperbolic            EX
   Zero_Dimensional      lifev/zero_dimensional            EX
+  Dummy                 lifev/dummy                       EX
   )
 
 
