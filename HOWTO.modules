@@ -33,3 +33,6 @@ This file lists the tests to be performed.
 lifev/<package_name>/testsuite/<test_name>/CMakeLists.txt
 this file sets up the test. All necessary external files should be copied with
 this cmake script.
+
+The test should print to std::out the string "End Result: TEST PASSED" to be
+recognized as a successful test.
