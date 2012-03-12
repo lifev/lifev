@@ -33,7 +33,7 @@
 #ifndef __user_fun_H
 #define __user_fun_H 1
 
-#include <fefct.hpp>
+#include "fefct.hpp"
 
 namespace dataProblem
 {

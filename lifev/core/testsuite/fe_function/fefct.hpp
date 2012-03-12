@@ -37,21 +37,21 @@
 //! Includes
 // ===================================================
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/Displayer.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/Displayer.hpp>
 
-#include <life/lifearray/MapEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
 
-#include <life/lifefem/FEFunction.hpp>
+#include <lifev/core/fem/FEFunction.hpp>
 
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
-#include <life/lifefilters/ExporterEmpty.hpp>
-#include <life/lifefilters/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterEmpty.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
 
 /*!
  @class fefct
