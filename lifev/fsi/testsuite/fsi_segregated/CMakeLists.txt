@@ -1,5 +1,5 @@
-
 INCLUDE(TribitsAddExecutableAndTest)
+INCLUDE(TribitsCopyFilesToBinaryDir)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
