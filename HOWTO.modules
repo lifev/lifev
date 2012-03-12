@@ -1,5 +1,6 @@
 This file explains how to add a new module to the LifeV library, following the
-TriBITS package specifications.
+TriBITS package specifications. The Dummy module is an example of a minimal
+set of files to add.
 
 the list of files that should be edited is:
 
