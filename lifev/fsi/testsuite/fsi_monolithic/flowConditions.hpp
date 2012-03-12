@@ -49,10 +49,10 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/fsi/solver/FSISolver.hpp>
+#include <lifev/fsi/solver/FSIOperator.hpp>
 
 namespace LifeV
 {
