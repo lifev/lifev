@@ -34,7 +34,7 @@
 
     @date 2009-05-05
 
-	Check if GetPot is able to read correctly an integer, real, boolean, string value
+    Check if GetPot is able to read correctly an integer, real, boolean, string value
  */
 
 // ===================================================
@@ -57,8 +57,8 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/filter/GetPot.hpp>
 
 
 
