@@ -38,7 +38,7 @@
 #define BCInterfaceData1D_H 1
 
 // 1D BCHandler include
-#include <lifev/one_d_hyperbolic/fem/OneDFSIBCHandler.hpp>
+#include <lifev/one_d_fsi/fem/OneDFSIBCHandler.hpp>
 
 // BCInterface includes
 #include <lifev/bc_interface/fem/BCInterfaceData.hpp>

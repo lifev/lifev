@@ -42,7 +42,7 @@
 #ifndef OneDFSISourceNonLinear_H
 #define OneDFSISourceNonLinear_H
 
-#include <lifev/one_d_hyperbolic/solver/OneDFSISource.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSISource.hpp>
 
 namespace LifeV
 {

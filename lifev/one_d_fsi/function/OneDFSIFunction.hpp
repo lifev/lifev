@@ -43,7 +43,7 @@
 #ifndef OneDFSIBCFunction_H
 #define OneDFSIBCFunction_H
 
-#include <lifev/one_d_hyperbolic/solver/OneDFSIDefinitions.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIDefinitions.hpp>
 
 namespace LifeV
 {

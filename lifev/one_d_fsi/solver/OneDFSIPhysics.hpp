@@ -43,7 +43,7 @@
 #ifndef OneDFSIPhysics_H
 #define OneDFSIPhysics_H
 
-#include <lifev/one_d_hyperbolic/solver/OneDFSIData.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIData.hpp>
 
 namespace LifeV
 {

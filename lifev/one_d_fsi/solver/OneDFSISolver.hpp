@@ -61,8 +61,8 @@
 
 #include <lifev/core/fem/FESpace.hpp>
 
-#include <lifev/one_d_hyperbolic/fem/OneDFSIBCHandler.hpp>
-#include <lifev/one_d_hyperbolic/solver/OneDFSIDefinitions.hpp>
+#include <lifev/one_d_fsi/fem/OneDFSIBCHandler.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIDefinitions.hpp>
 
 
 namespace LifeV

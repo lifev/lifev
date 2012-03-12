@@ -43,8 +43,8 @@
 #ifndef OneDFSIBCHandler_H
 #define OneDFSIBCHandler_H
 
-#include <lifev/one_d_hyperbolic/solver/OneDFSIDefinitions.hpp>
-#include <lifev/one_d_hyperbolic/fem/OneDFSIBC.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIDefinitions.hpp>
+#include <lifev/one_d_fsi/fem/OneDFSIBC.hpp>
 
 namespace LifeV
 {

@@ -44,10 +44,10 @@
 #ifndef OneDFSIBCFunctionDefault_H
 #define OneDFSIBCFunctionDefault_H
 
-#include <lifev/one_d_hyperbolic/function/OneDFSIFunction.hpp>
-#include <lifev/one_d_hyperbolic/solver/OneDFSIData.hpp>
-#include <lifev/one_d_hyperbolic/solver/OneDFSIFlux.hpp>
-#include <lifev/one_d_hyperbolic/solver/OneDFSISource.hpp>
+#include <lifev/one_d_fsi/function/OneDFSIFunction.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIData.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIFlux.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSISource.hpp>
 
 namespace LifeV
 {

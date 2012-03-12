@@ -42,7 +42,7 @@
 #ifndef OneDFSIFluxLinear_H
 #define OneDFSIFluxLinear_H
 
-#include <lifev/one_d_hyperbolic/solver/OneDFSIFlux.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIFlux.hpp>
 
 namespace LifeV
 {
