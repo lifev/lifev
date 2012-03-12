@@ -328,11 +328,12 @@ MultiscaleModelFSI3D::updateSolution()
 // TODO Remove M_solidVelocity
     if ( M_FSIoperator->isFluid() )
     {
-        M_FSIoperator->exportFluidDisplacement( *M_fluidDisplacement );
+        *M_fluidDisplacement      = M_FSIoperator->meshDisp();
+        //M_FSIoperator->exportFluidDisplacement( *M_fluidDisplacement );
         M_FSIoperator->exportFluidVelocityAndPressure( *M_fluidVelocityAndPressure );
-#ifndef FSI_WITH_EXTERNALPRESSURE
+        #ifndef FSI_WITH_EXTERNALPRESSURE
         *M_fluidVelocityAndPressure += *M_externalPressureVector;
-#endif
+        #endif
     }
 
     if ( M_FSIoperator->isSolid() )
