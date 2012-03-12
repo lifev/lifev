@@ -30,7 +30,7 @@ timestep        = 0.01
 BDF_order		= 1
 
 [../space_discretization]
-mesh_dir        = ./Mesh/
+mesh_dir        = ./
 mesh_file       = tube20.mesh
 mesh_type       = .mesh
 

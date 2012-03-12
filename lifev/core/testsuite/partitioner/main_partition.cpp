@@ -51,13 +51,13 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifesolver/OseenData.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
-#include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/solver/OseenData.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
 
 #include <iostream>
 #include <string>
