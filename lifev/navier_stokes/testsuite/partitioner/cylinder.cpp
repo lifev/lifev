@@ -55,13 +55,13 @@
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/core/solver/OseenData.hpp>
+#include <lifev/navier_stokes/solver/OseenData.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 
-#include <lifev/core/solver/OseenSolver.hpp>
+#include <lifev/navier_stokes/solver/OseenSolver.hpp>
 
 #include "cylinder.hpp"
 #include <iostream>

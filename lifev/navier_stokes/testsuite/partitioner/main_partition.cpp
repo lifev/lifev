@@ -54,7 +54,7 @@
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/core/solver/OseenData.hpp>
+#include <lifev/navier_stokes/solver/OseenData.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
