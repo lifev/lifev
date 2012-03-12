@@ -232,6 +232,8 @@ namespace LifeV
 	if( (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
 	  applyBoundaryConditions();
       }
+    M_monolithicMatrix->GlobalAssemble();
+    //M_monolithicMatrix->matrix()->spy("FMFI");
     super_Type::evalResidual( disp, M_rhsFull, res, false );
 
     if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
@@ -273,8 +275,8 @@ namespace LifeV
       M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
-    M_monolithicMatrix->GlobalAssemble();
-    //    M_monolithicMatrix->matrix()->spy("FMFI");
+    // M_monolithicMatrix->GlobalAssemble();
+    // M_monolithicMatrix->matrix()->spy("FMFI");
   }
 
 
