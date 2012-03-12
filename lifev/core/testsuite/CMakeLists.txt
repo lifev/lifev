@@ -7,5 +7,6 @@ ADD_SUBDIRECTORIES(
   array
   matrix_epetra_structured_framework
   parser
+  template_test
   vector_container
   )
