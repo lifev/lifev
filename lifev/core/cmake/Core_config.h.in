@@ -1,10 +1,10 @@
 /* major version number */
 #define LIFEV_VERSION_MAJOR @LifeV_MAJOR_VERSION@
-                                                
-/* minor version number */                      
+
+/* minor version number */
 #define LIFEV_VERSION_MINOR @LifeV_MINOR_VERSION@
-                                                
-/* micro version number */                      
+
+/* micro version number */
 #define LIFEV_VERSION_MICRO @LifeV_MICRO_VERSION@
 
 /* LifeV version number */
