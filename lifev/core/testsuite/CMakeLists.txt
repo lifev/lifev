@@ -7,6 +7,7 @@ ADD_SUBDIRECTORIES(
   array
   bdf
   fe_function
+  hyperbolic
   matrix_epetra_structured_framework
   parser
   template_test
