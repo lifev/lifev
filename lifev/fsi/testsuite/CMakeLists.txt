@@ -3,6 +3,6 @@ INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
-  test_fsi
+  fsi_segregated
   test_monolithic
   )
