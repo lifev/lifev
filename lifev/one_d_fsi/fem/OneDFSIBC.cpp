@@ -41,7 +41,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/one_d_hyperbolic/fem/OneDFSIBC.hpp>
+#include <lifev/one_d_fsi/fem/OneDFSIBC.hpp>
 
 namespace LifeV
 {

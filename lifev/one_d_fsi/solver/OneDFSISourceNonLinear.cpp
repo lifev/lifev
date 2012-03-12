@@ -39,7 +39,7 @@
  *  @maintainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/one_d_hyperbolic/solver/OneDFSISourceNonLinear.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSISourceNonLinear.hpp>
 
 namespace LifeV
 {

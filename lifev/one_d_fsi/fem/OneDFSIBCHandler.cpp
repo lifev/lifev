@@ -40,7 +40,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/one_d_hyperbolic/fem/OneDFSIBCHandler.hpp>
+#include <lifev/one_d_fsi/fem/OneDFSIBCHandler.hpp>
 
 namespace LifeV
 {

@@ -46,7 +46,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/one_d_hyperbolic/solver/OneDFSISolver.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
 
 namespace LifeV
 {

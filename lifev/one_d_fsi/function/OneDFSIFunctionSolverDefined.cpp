@@ -40,7 +40,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/one_d_hyperbolic/function/OneDFSIFunctionSolverDefined.hpp>
+#include <lifev/one_d_fsi/function/OneDFSIFunctionSolverDefined.hpp>
 
 namespace LifeV
 {
