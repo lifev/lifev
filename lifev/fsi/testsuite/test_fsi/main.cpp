@@ -43,20 +43,20 @@
 #include <iomanip>
 #include <cmath>
 
-//#include <life/lifealg/PreconditionerIfpack.hpp>
-//#include <life/lifealg/PreconditionerML.hpp>
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/LifeChrono.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 
-#include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
-//#include "life/lifesolver/exactJacobianBase.hpp"
-//#include "life/lifesolver/fixedPointBase.hpp"
-#include <life/lifesolver/FSIData.hpp>
-#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
+#include <lifev/fsi/solver/FSISolver.hpp>
+#include <lifev/fsi/solver/FSIOperator.hpp>
+#include <lifev/fsi/solver/FSIExactJacobian.hpp>
+#include <lifev/fsi/solver/FSIFixedPoint.hpp>
+#include <lifev/fsi/solver/FSIData.hpp>
+#include <lifev/structure/solver/VenantKirchhoffSolverLinear.hpp>
 
-#include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifefilters/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -77,18 +77,18 @@
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
 
-/*
+
 namespace LifeV
 {
 namespace
 {
 	static bool regIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
 	static bool regML = PRECFactory::instance().registerProduct( "ML", &createML );
-	static bool regFP = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
-	static bool regEJ = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
+	static bool regFP = FSIOperator::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
+	static bool regEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
 }
 }
-*/
+
 
 namespace LifeV
 {

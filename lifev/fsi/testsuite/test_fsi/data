@@ -88,7 +88,7 @@ reuse      = true
 max_iter_reuse = 100
 
 [../space_discretization]
-mesh_dir  = ./Mesh/ # the directory where the mesh file is
+mesh_dir  = ./ # the directory where the mesh file is
 #mesh_file = stent-fluid-coarse.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube.mesh  # mesh file
@@ -219,7 +219,7 @@ thickness		= 0.1
 timestep		= 0.001
 
 [../space_discretization]
-mesh_dir  = ./Mesh/  # the directory where the mesh file is
+mesh_dir  = ./  # the directory where the mesh file is
 #mesh_file = stent-solid-coarse.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
 #mesh_file = vessel.mesh  # mesh file
