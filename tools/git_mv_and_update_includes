@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+
+import os
+
+list_of_files = open('./tools/list_of_files.txt', 'r')
+
+all_lines = list_of_files.readlines()
+
+for module_name in ['bc_interface'] : #, 'core', 'navier_stokes', 'fsi', 'darcy', 'zero_dimensional', 'structure', 'level_set', 'one_d_hyperbolic', 'heart'] :
+    for line in all_lines :
+        [new_path, old_path, old_include] = line.strip('\n').split(' ')
+
+        temp = old_include.split('/')
+        file_name = temp[len(temp) - 1]
+        new_include = new_path + '/' + file_name
+
+        if (new_path.find(module_name) > -1) :
+            #os.system("mkdir -p " + new_path)
+            #os.system("git mv " + old_include + " " + new_include)
+
+            if (file_name.find("hpp") > -1) :
+                os.system("find ./lifev/ -type f -not -path '*/.*/*' -not -name '.*' -name '*.cpp' -or -name '*.hpp' -exec sed -e 's:" + old_include + ":" + new_include + ":' -i '{}' \;")
+                #print "find ./lifev/ -type f  -not -path '*/.*/*' -not -name '.*' -name '*.{c,h}pp' -exec sed -e 's:" + old_include + ":" + new_include + ":' -i '{}' \;"
+
+    #os.system("git commit -m '" + "Moving files to " + module_name + " module'")
+    os.system("git commit -a -m '" + "Updating headers for " + module_name + " module'")

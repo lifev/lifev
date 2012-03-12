@@ -1,16 +1,17 @@
-# Macros for LaTeX
-#include (UseLATEX)
-#add_subdirectory (manual)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
   # copy LifeV logo
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/common/LifeV.png
-                 ${CMAKE_CURRENT_BINARY_DIR}/api/html/LifeV.png COPYONLY)
-  # this can be substituted only with cmake >= 2.8
-  # file(COPY yourDir DESTINATION yourDestination)
- 
+  FILE(COPY        ${CMAKE_CURRENT_SOURCE_DIR}/common/LifeV.png
+       DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/api/html)
+
+  # due to doxygen bug, these files must be copied
+  FILE(COPY        ${CMAKE_CURRENT_SOURCE_DIR}/tex/lifev.bib
+       DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  FILE(COPY        ${CMAKE_CURRENT_SOURCE_DIR}/tex/biblio.bib
+       DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
   # generate Doxyfile
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake
                  ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
@@ -25,3 +26,12 @@ if(DOXYGEN_FOUND)
 
 endif(DOXYGEN_FOUND)
 
+FIND_PACKAGE(LATEX)
+
+IF(PDFLATEX_COMPILER)
+
+  ADD_CUSTOM_TARGET(pdf echo)
+
+  ADD_SUBDIRECTORY(CodingGuidelines)
+
+ENDIF()

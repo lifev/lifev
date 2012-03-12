@@ -1,255 +1,63 @@
-# CMake options
-include (CheckIncludeFiles)
-cmake_minimum_required (VERSION 2.6)
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+# @HEADER
+# *******************************************************************************
+# 
+#     Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#     Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+# 
+#     This file is part of LifeV.
+# 
+#     LifeV is free software; you can redistribute it and/or modify
+#     it under the terms of the GNU Lesser General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+# 
+#     LifeV is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#     Lesser General Public License for more details.
+# 
+#     You should have received a copy of the GNU Lesser General Public License
+#     along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+#
+# *******************************************************************************
+# @HEADER
 
-# Default compilers
-set (CMAKE_C_COMPILER "mpicc" CACHE STRING "Default C compiler")
-set (CMAKE_CXX_COMPILER "mpicxx" CACHE STRING "Default C++ compiler")
+#
+# A) Define your project name and set up major project options
+#
 
-# Default build type
-set (CMAKE_BUILD_TYPE "Debug" CACHE STRING "Default build type")
+# Must set the project name as a varaible at very beginning before including anything else
+# We set the project name in a separate file so CTest scripts can use it.
+INCLUDE(${CMAKE_SOURCE_DIR}/ProjectName.cmake)
 
-# Default value for TPL flags
-set (LIFE_USE_HDF5 FALSE CACHE BOOL "By default, don't use HDF5")
-set (LIFE_USE_QHULL FALSE CACHE BOOL "By default, don't use QHULL")
-set (LIFE_USE_SuperLU FALSE CACHE BOOL "By default, don't use SuperLU")
-set (LIFE_USE_SuperLUMT FALSE CACHE BOOL "By default, don't use SuperLUMT")
-set (LIFE_USE_SuperLUDist FALSE CACHE BOOL "By default, don't use SuperLUDist")
-set (LIFE_USE_UMFPACK FALSE CACHE BOOL "By default, don't use UMFPACK")
-set (LIFE_USE_MPI_WRAPPER TRUE CACHE BOOL "By default, use the MPI wrappers")
-set (LIFE_USE_SPIRIT_PARSER TRUE CACHE BOOL "By default, use the Boost Spirit parser")
+# CMake requires that you declare the CMake project in the top-level file and
+# not in an include file :-(
+PROJECT(${PROJECT_NAME} NONE)
 
-# Put some other variables in the cache so they can be set with ccmake
-set (PARMETIS_ROOT "PARMETIS_ROOT-NOTFOUND" CACHE PATH "Location of ParMETIS")
-set (UMFPACK_ROOT "UMFPACK_ROOT-NOTFOUND" CACHE PATH "Location of UMFPACK")
-set (HDF5_ROOT "HDF5_ROOT-NOTFOUND" CACHE PATH "Location of HDF5")
-set (QHULL_ROOT "QHULL_ROOT-NOTFOUND" CACHE PATH "Location of QHULL")
-set (SuperLU_ROOT "SuperLU_ROOT-NOTFOUND" CACHE PATH "Location of SuperLU")
-set (SuperLUMT_ROOT "SuperLUMT_ROOT-NOTFOUND" CACHE PATH "Location of SuperLUMT")
-set (SuperLUDist_ROOT "SuperLUDist_ROOT-NOTFOUND" CACHE PATH "Location of SuperLUDist")
-set (BOOST_ROOT "BOOST_ROOT-NOTFOUND" CACHE PATH "Location of Boost")
-set (Trilinos_ROOT "Trilinos_ROOT-NOTFOUND" CACHE PATH "Location of Trilinos")
-set (BLAS_LIBRARIES "BLAS_LIBRARIES-NOTFOUND" CACHE STRING "BLAS libraries")
-set (LAPACK_LIBRARIES "LAPACK_LIBRARIES-NOTFOUND" CACHE STRING "LAPACK libraries")
+# we do not need Fortran
+SET(${PROJECT_NAME}_ENABLE_Fortran OFF CACHE BOOL "Disable Fortran compiler")
 
-# Project options
-project (LifeV)
-set (PROJECT_SHORT_NAME "lifev")
-set (LifeV_VERSION_MAJOR 2)
-set (LifeV_VERSION_MINOR 2)
-set (LifeV_VERSION_PATCH 0)
-set (PROJECT_BUGREPORT "lifev-user@googlegroups.com")
-set (PROJECT_HOMEPAGE "www.lifev.org")
+#
+# B) Pull in the TriBITS system and execute
+#
 
-# Languages
-enable_language (C CXX Fortran)
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/tribits/package_arch/TribitsProject.cmake)
 
-# Here we add CXXFLAGS, LDFLAGS that are set by the user
-# It's a peculiar hack: needed to reset the CMAKE_LANG_FLAGS
-# variables in order to place user specified flags at the end
-# (this is useful for overriding an optimization level and
-# possibly other things)
-set (CMAKE_C_FLAGS_SAVED ${CMAKE_C_FLAGS})
-set (CMAKE_C_FLAGS "")
-set (CMAKE_CXX_FLAGS_SAVED ${CMAKE_CXX_FLAGS})
-set (CMAKE_CXX_FLAGS "")
+# CMake requires this be in the top file and not in an include file :-(
+CMAKE_MINIMUM_REQUIRED(VERSION ${TRIBITS_CMAKE_MINIMUM_REQUIRED})
 
-set (CMAKE_C_FLAGS_DEBUG "-Wall -g")
-set (CMAKE_C_FLAGS_RELEASE "-O2")
-set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${CMAKE_C_FLAGS_SAVED}")
-set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${CMAKE_C_FLAGS_SAVED}")
-set (CMAKE_CXX_FLAGS_DEBUG "-Wall -g")
-set (CMAKE_CXX_FLAGS_RELEASE "-O2")
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_SAVED}")
-set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS_SAVED}")
+# Do all of the processing for this Tribits project
+TRIBITS_PROJECT()
 
-add_definitions (-DTHREEDIM)
+# Add documentation
+ADD_SUBDIRECTORY(doc)
 
-# Dependencies
+# Adding a new CMake variable for each of the enabled packages
+STRING(REPLACE " " ";" LOCAL_PACKAGE_LIST ${${PROJECT_NAME}_ENABLED_PACKAGES})
+FOREACH(LifeV_PACKAGE IN ITEMS ${LOCAL_PACKAGE_LIST})
+  STRING(TOUPPER ${LifeV_PACKAGE} UPPER_PACKAGE)
+  SET(LIFEV_HAS_${UPPER_PACKAGE} ON CACHE BOOL "LifeV has ${LifeV_PACKAGE}")
+ENDFOREACH()
 
-# The list of dependencies will end up being quite long, as it will contain all
-# the dependencies of LifeV. Current list:
-#   * MPI (v)
-#   * Trilinos (v)
-#   * ParMETIS (v)
-#   * UMFPACK (should be optional) (v)
-#   * HDF5 (should be optional) (v)
-#   * BLAS, LAPACK (v)
-#   * Boost (v)
-#   * Qhull (should be optional) (v)
-
-# MPI
-if (NOT LIFE_USE_MPI_WRAPPER)
-    find_package (MPI REQUIRED)
-    if (MPI_FOUND)
-        include_directories (${MPI_CXX_INCLUDE_PATH})
-        set (LIBS ${LIBS} ${MPI_CXX_LIBRARIES})
-    endif()
-endif()
-
-# Trilinos
-find_package (Trilinos REQUIRED)
-if (Trilinos_FOUND)
-    include_directories (${Trilinos_INCLUDE_DIR})
-    set (LIBS ${LIBS} ${Trilinos_LIBRARIES})
-endif()
-
-# ParMETIS
-if( NOT PARMETIS_IS_IN_TRILINOS)
-find_package (PARMETIS REQUIRED)
-if (PARMETIS_FOUND)
-    include_directories (${PARMETIS_INCLUDE_DIR})
-    set (LIBS ${LIBS} ${PARMETIS_LIBRARIES})
-endif()
-endif()
-
-# UMFPACK (optional)
-if( NOT UMFPACK_IS_IN_TRILINOS)
-if (LIFE_USE_UMFPACK)
-    find_package (UMFPACK)
-    if (UMFPACK_FOUND)
-        set (HAVE_UMFPACK TRUE)
-        set (HAVE_UMFPACK_H TRUE)
-        set (HAVE_AMD_H TRUE)
-        include_directories (${UMFPACK_INCLUDE_DIR})
-        set (LIBS ${LIBS} ${UMFPACK_LIBRARIES})
-    endif()
-endif(LIFE_USE_UMFPACK)
-endif()
-
-# SuperLU (optional)
-if( NOT SUPERLU_IS_IN_TRILINOS)
-if (LIFE_USE_SuperLU)
-    find_package (SuperLU)
-    if (SuperLU_FOUND)
-        set (HAVE_SuperLU TRUE)
-        include_directories (${SuperLU_INCLUDE_DIRS})
-        set (LIBS ${LIBS} ${SuperLU_LIBRARIES})
-    endif()
-endif(LIFE_USE_SuperLU)
-endif()
-
-# SuperLUMT (optional)
-if (NOT SUPERLUMT_IS_IN_TRILINOS)
-if (LIFE_USE_SuperLUMT)
-    find_package (SuperLUMT)
-    if (SuperLUMT_FOUND)
-        set (HAVE_SuperLUMT TRUE)
-        include_directories (${SuperLUMT_INCLUDE_DIRS})
-        set (LIBS ${LIBS} ${SuperLUMT_LIBRARIES})
-    endif()
-endif(LIFE_USE_SuperLUMT)
-endif()
-
-# SuperLUDist (optional)
-if (NOT SUPERLUDIST_IS_IN_TRILINOS)
-if (LIFE_USE_SuperLUDist)
-    find_package (SuperLUDist)
-    if (SuperLUDist_FOUND)
-        set (HAVE_SuperLUDist TRUE)
-        include_directories (${SuperLUDist_INCLUDE_DIRS})
-        set (LIBS ${LIBS} ${SuperLUDist_LIBRARIES})
-    endif()
-endif(LIFE_USE_SuperLUDist)
-endif()
-
-# LAPACK
-if (NOT LAPACK_IS_IN_TRILINOS)
-find_package (LAPACK REQUIRED)
-if (LAPACK_FOUND)
-    include_directories (${LAPACK_INCLUDE_DIR})
-    set (LIBS ${LIBS} ${LAPACK_LIBRARIES})
-endif()
-endif()
-
-# BLAS
-if (NOT BLAS_IS_IN_TRILINOS)
-find_package (BLAS REQUIRED)
-if (BLAS_FOUND)
-    include_directories (${BLAS_INCLUDE_DIR})
-    set (LIBS ${LIBS} ${BLAS_LIBRARIES})
-endif()
-endif()
-
-# HDF5 (optional)
-if (NOT HDF5_IS_IN_TRILINOS)
-if (LIFE_USE_HDF5)
-    if (HDF5_ROOT)
-        set (HDF5_INCLUDE_DIRS ${HDF5_ROOT}/include)
-        set (HDF5_INCLUDE_DIR ${HDF5_ROOT}/include)
-        set (HDF5_LIBRARIES "-L${HDF5_ROOT}/lib -lhdf5 -lz -lm")
-    endif()
-    find_package (HDF5)
-    if (HDF5_FOUND)
-        set (HAVE_HDF5 TRUE)
-        include_directories (${HDF5_INCLUDE_DIRS})
-        link_directories (${HDF5_LIBRARY_DIRS})
-        set (LIBS ${LIBS} ${HDF5_LIBRARIES})
-    endif()
-endif(LIFE_USE_HDF5)
-endif()
-
-# Boost
-find_package (Boost REQUIRED)
-if (Boost_FOUND)
-    set (HAVE_BOOST TRUE)
-    set (HAVE_BOOST_VERSION ${Boost_VERSION})
-    if (Boost_MINOR_VERSION GREATER 39)
-        set (HAVE_BOOST_GT_1_39 TRUE)
-    endif(Boost_MINOR_VERSION GREATER 39)
-    if (Boost_MINOR_VERSION GREATER 40)
-        set (HAVE_BOOST_SPIRIT_QI TRUE)
-    endif(Boost_MINOR_VERSION GREATER 40)
-    include_directories (${Boost_INCLUDE_DIR})
-    link_directories (${Boost_LIBRARY_DIRS})
-    set (LIBS ${LIBS} ${Boost_LIBRARIES})
-    if (NOT LIFE_USE_SPIRIT_PARSER)
-        set (DISABLE_SPIRIT_PARSER TRUE)
-    endif()
-endif()
-
-# QHULL (optional)
-if (LIFE_USE_QHULL)
-    find_package (QHULL)
-    if (QHULL_FOUND)
-        set (HAVE_QHULL TRUE)
-        include_directories (${QHULL_INCLUDE_DIRS})
-        set (LIBS ${LIBS} ${QHULL_LIBRARIES})
-    endif()
-endif(LIFE_USE_QHULL)
-
-# Make sure that all headers are in the include path
-include_directories (${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR})
-set (LIFEV_PACKAGES core array mesh alg fem filters functions solver)
-foreach (component ${LIFEV_PACKAGES})
-    include_directories (${PROJECT_SOURCE_DIR}/life/life${component})
-    set (LIBS life${component} ${LIBS})
-endforeach(component)
-
-# Here we add the user-define value of LIBS
-set (LIBS ${LIBS} ${LIFE_EXTRA_LINK_LINE})
-
-# lifeconfig.h
-string (COMPARE EQUAL ${CMAKE_BUILD_TYPE} "Debug" HAVE_LIFEV_DEBUG)
-string (COMPARE EQUAL ${CMAKE_BUILD_TYPE} "Release" HAVE_LIFEV_OPTO3)
-
-configure_file(
-  "${PROJECT_SOURCE_DIR}/lifeconfig_cmake.h.in"
-  "${PROJECT_BINARY_DIR}/lifeconfig.h"
-)
-install(FILES "${PROJECT_BINARY_DIR}/lifeconfig.h"
-        DESTINATION include)
-
-# The following subdirectories are part of the project
-add_subdirectory(life)
-add_subdirectory(examples)
-
-include (CTest)
-enable_testing()
-add_subdirectory(testsuite)
-
-# Documentation (not yet working, don't activate)
-#if (LIFE_BUILD_DOCS)
-    add_subdirectory(doc)
-#endif()
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/${PROJECT_NAME}_config.h.in
+               ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_config.h)

@@ -1,0 +1,34 @@
+#! /usr/bin/env python
+
+import os
+import sys
+
+include_old_new = {
+'<life/lifecore':'<lifev/core/util',
+'<life/lifearray':'<lifev/core/array',
+'<life/lifealg':'<lifev/core/algorithm',
+'<life/lifefilters':'<lifev/core/filter',
+'<life/lifemesh':'<lifev/core/mesh',
+'<life/lifefem':'<lifev/core/fem'
+}
+
+if ( len( sys.argv ) < 2 ):
+  print "missing file"
+  sys.exit()
+
+filename = sys.argv[1]
+filename_in = filename + '.bak'
+
+os.system('mv ' + filename + ' ' + filename_in)
+
+f = open( filename_in,'r')
+f_out = open( filename,'w')
+
+for line in f:
+  for old,new in include_old_new.iteritems():
+    line = line.replace(old,new)
+  f_out.write(line)
+
+print 'diff -u ' + filename_in + ' ' + filename
+os.system('diff -u ' + filename_in + ' ' + filename)
+
