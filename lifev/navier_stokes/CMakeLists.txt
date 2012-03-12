@@ -7,7 +7,7 @@ INCLUDE(TribitsLibraryMacros)
 # A) Define the package
 #
 
-TRIBITS_PACKAGE(Navier_Stokes)
+TRIBITS_PACKAGE(NavierStokes)
 SET(${PACKAGE_NAME}_VERSION "3.1")
 
 #
@@ -35,7 +35,7 @@ TRIBITS_EXCLUDE_FILES()
 
 # Add library target
 TRIBITS_ADD_LIBRARY(
-  lifevnavier_stokes
+  lifevnavierstokes
   HEADERS ${HEADERS}
   SOURCES ${SOURCES}
 )

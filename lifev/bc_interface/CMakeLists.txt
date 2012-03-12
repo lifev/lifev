@@ -7,7 +7,7 @@ INCLUDE(TribitsLibraryMacros)
 # A) Define the package
 #
 
-TRIBITS_PACKAGE(BC_Interface)
+TRIBITS_PACKAGE(BCInterface)
 SET(${PACKAGE_NAME}_VERSION "3.1")
 
 #

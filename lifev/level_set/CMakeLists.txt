@@ -7,7 +7,7 @@ INCLUDE(TribitsLibraryMacros)
 # A) Define the package
 #
 
-TRIBITS_PACKAGE(Level_Set)
+TRIBITS_PACKAGE(LevelSet)
 SET(${PACKAGE_NAME}_VERSION "3.1")
 
 #

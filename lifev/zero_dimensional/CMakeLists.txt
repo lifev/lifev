@@ -7,7 +7,7 @@ INCLUDE(TribitsLibraryMacros)
 # A) Define the package
 #
 
-TRIBITS_PACKAGE(Zero_Dimensional)
+TRIBITS_PACKAGE(ZeroDimensional)
 SET(${PACKAGE_NAME}_VERSION "3.1")
 
 #

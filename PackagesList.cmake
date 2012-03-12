@@ -74,17 +74,17 @@ INCLUDE(TribitsListHelpers)
 
 SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   Core                  lifev/core                        PS
-  BC_Interface          lifev/bc_interface                PS
-  Level_Set             lifev/level_set                   PS
+  BCInterface           lifev/bc_interface                PS
+  LevelSet              lifev/level_set                   PS
   Darcy                 lifev/darcy                       PS
-  Navier_Stokes         lifev/navier_stokes               PS
+  NavierStokes          lifev/navier_stokes               PS
   Structure             lifev/structure                   PS
   Heart                 lifev/heart                       PS
   FSI                   lifev/fsi                         PS
-  One_D_Hyperbolic      lifev/one_d_hyperbolic            EX
-  Zero_Dimensional      lifev/zero_dimensional            EX
+  OneDFSI               lifev/one_d_fsi                   EX
+  ZeroDimensional       lifev/zero_dimensional            EX
   Dummy                 lifev/dummy                       EX
-  )
+)
 
 
 #
