@@ -7,6 +7,7 @@ ADD_SUBDIRECTORIES(
   array
   bdf
   exporter_vtk
+  exporter_ensight_to_hdf5
   fe_function
   filter
   hyperbolic

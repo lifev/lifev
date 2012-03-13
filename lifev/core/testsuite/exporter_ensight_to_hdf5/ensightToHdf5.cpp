@@ -48,18 +48,18 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifesolver/OseenData.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
-#include <life/lifefilters/ExporterEnsight.hpp>
-#include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifesolver/OseenSolver.hpp>
-#include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifefem/QuadratureRule.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#include <lifev/core/fem/ReferenceFE.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
+#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/navier_stokes/solver/OseenSolver.hpp>
+#include <lifev/navier_stokes/solver/OseenData.hpp>
 
 #include <iostream>
 
@@ -146,9 +146,9 @@ EnsightToHdf5::run()
     geometryScale[1] = dataFile( "fluid/space_discretization/transform", 1., 1);
     geometryScale[2] = dataFile( "fluid/space_discretization/transform", 1., 2);
 
-    geometryRotate[0] = dataFile( "fluid/space_discretization/transform", 0., 3) * Pi / 180;
-    geometryRotate[1] = dataFile( "fluid/space_discretization/transform", 0., 4) * Pi / 180;
-    geometryRotate[2] = dataFile( "fluid/space_discretization/transform", 0., 5) * Pi / 180;
+    geometryRotate[0] = dataFile( "fluid/space_discretization/transform", 0., 3) * M_PI / 180;
+    geometryRotate[1] = dataFile( "fluid/space_discretization/transform", 0., 4) * M_PI / 180;
+    geometryRotate[2] = dataFile( "fluid/space_discretization/transform", 0., 5) * M_PI / 180;
 
     geometryTranslate[0] = dataFile( "fluid/space_discretization/transform", 0., 6);
     geometryTranslate[1] = dataFile( "fluid/space_discretization/transform", 0., 7);
@@ -302,7 +302,7 @@ computeP0pressure(const feSpacePtr_Type& pFESpacePtr,
                   Real /*time*/)
 {
 
-	int MyPID;
+    int MyPID;
     MPI_Comm_rank(MPI_COMM_WORLD, &MyPID);
     UInt offset = 3*uFESpacePtr->dof().numTotalDof();
 
