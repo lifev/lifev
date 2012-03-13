@@ -27,7 +27,7 @@
 #ifndef LF_HPP
 #define LF_HPP
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 // ===================================================
 //! User functions

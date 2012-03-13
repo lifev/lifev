@@ -45,7 +45,7 @@
 // ===================================================
 //! Includes
 // ===================================================
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 /*!
  * \class problem
