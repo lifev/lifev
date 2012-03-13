@@ -61,7 +61,7 @@
 #include <life/lifesolver/OneDFSISourceNonLinear.hpp>
 #include <life/lifesolver/OneDFSISolver.hpp>
 
-#include <life/lifefem/BCInterface1D.hpp>
+#include <lifev/bc_interface/fem/BCInterface1D.hpp>
 
 #include <life/lifefem/FESpace.hpp>
 #ifdef HAVE_HDF5

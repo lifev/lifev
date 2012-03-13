@@ -47,7 +47,7 @@
 #include <life/lifefilters/ExporterHDF5.hpp>
 #endif
 
-#include <life/lifefem/BCInterface3D.hpp>
+#include <lifev/bc_interface/fem/BCInterface3D.hpp>
 #include <life/lifealg/NonLinearRichardson.hpp>
 
 #include <life/lifesolver/FSIOperator.hpp>

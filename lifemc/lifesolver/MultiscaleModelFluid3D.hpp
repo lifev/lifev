@@ -43,7 +43,7 @@
 #include <life/lifemesh/RegionMesh.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifefem/BCInterface3D.hpp>
+#include <lifev/bc_interface/fem/BCInterface3D.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
 #include <life/lifefilters/ExporterEnsight.hpp>
