@@ -67,7 +67,11 @@
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 
+<<<<<<< HEAD:lifev/multiscale/solver/MultiscaleDefinitions.hpp
 #include <lifev/multiscale/solver/MultiscaleData.hpp>
+=======
+#include <lifemc/lifesolver/MultiscaleData.hpp>
+>>>>>>> Updating headers for core module:lifemc/lifesolver/MultiscaleDefinitions.hpp
 
 namespace LifeV
 {
