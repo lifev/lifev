@@ -41,7 +41,7 @@
 // LifeV includes
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
-#include <life/lifesolver/OseenData.hpp>
+#include <lifev/navier_stokes/solver/OseenData.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/bc_interface/fem/BCInterface3D.hpp>
 #include <lifev/core/fem/FESpace.hpp>
@@ -50,7 +50,7 @@
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
-#include <life/lifesolver/OseenSolverShapeDerivative.hpp>
+#include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 
 // Mathcard includes
 
