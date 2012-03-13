@@ -37,10 +37,10 @@
 #ifndef MultiscaleAlgorithmNewton_H
 #define MultiscaleAlgorithmNewton_H 1
 
-#include <life/lifealg/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <life/lifealg/Preconditioner.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 
 #include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 

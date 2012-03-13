@@ -63,9 +63,9 @@
 
 #include <lifev/bc_interface/fem/BCInterface1D.hpp>
 
-#include <life/lifefem/FESpace.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 
 // Mathcard includes

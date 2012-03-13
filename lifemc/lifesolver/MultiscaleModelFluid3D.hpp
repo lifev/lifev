@@ -39,16 +39,16 @@
 #define MultiscaleModelFluid3D_H 1
 
 // LifeV includes
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 #include <life/lifesolver/OseenData.hpp>
-#include <life/lifemesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/bc_interface/fem/BCInterface3D.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
-#include <life/lifefilters/ExporterEnsight.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 

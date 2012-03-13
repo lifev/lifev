@@ -42,13 +42,13 @@
 
 // LifeV includes
 
-#include <life/lifefilters/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 
 #include <lifev/bc_interface/fem/BCInterface3D.hpp>
-#include <life/lifealg/NonLinearRichardson.hpp>
+#include <lifev/core/algorithm/NonLinearRichardson.hpp>
 
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/FSIMonolithicGE.hpp>
