@@ -33,14 +33,14 @@ density         = 1.0          # density
 viscosity       = .01       # viscosity
 
 [../time_discretization]
-initialtime		= 0.
-endtime			= 0.04
-timestep		= 0.01
-BDF_order		= 1
+initialtime     = 0.
+endtime         = 0.04
+timestep        = 0.01
+BDF_order       = 1
 
 [../space_discretization]
-mesh_dir        = ./Mesh/   # the directory where the mesh file is
-mesh_type	= .mesh
+mesh_dir        = ./   # the directory where the mesh file is
+mesh_type   = .mesh
 mesh_file       = cube4x4.mesh          # mesh file
 
 transform = '1.0 1.0 1.0

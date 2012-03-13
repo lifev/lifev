@@ -17,8 +17,17 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(data_ExporterEnsightToHDF5
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_ExporterEnsightToHDF5
+  SOURCE_FILES cube4x4.mesh
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/navier_stokes/data/mesh/inria
+)
+
+FILE(GLOB dataFiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} importDir/*)
+
+file(MAKE_DIRECTORY importDir)
+
 TRIBITS_COPY_FILES_TO_BINARY_DIR(importDir_ExporterEnsightToHDF5
-  SOURCE_FILES importDir
+  SOURCE_FILES "${dataFiles}"
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
