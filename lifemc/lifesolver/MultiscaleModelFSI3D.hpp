@@ -50,15 +50,15 @@
 #include <lifev/bc_interface/fem/BCInterface3D.hpp>
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
 
-#include <life/lifesolver/FSIOperator.hpp>
-#include <life/lifesolver/FSIMonolithicGE.hpp>
-#include <life/lifesolver/FSIMonolithicGI.hpp>
+#include <lifev/fsi/solver/FSIOperator.hpp>
+#include <lifev/fsi/solver/FSIMonolithicGE.hpp>
+#include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
-#include <life/lifesolver/MonolithicBlockMatrix.hpp>
-#include <life/lifesolver/MonolithicBlockMatrixRN.hpp>
-#include <life/lifesolver/MonolithicBlockComposedDN.hpp>
-#include <life/lifesolver/MonolithicBlockComposedNN.hpp>
-#include <life/lifesolver/MonolithicBlockComposedDNND.hpp>
+#include <lifev/fsi/solver/MonolithicBlockMatrix.hpp>
+#include <lifev/fsi/solver/MonolithicBlockMatrixRN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedDN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedNN.hpp>
+#include <lifev/fsi/solver/MonolithicBlockComposedDNND.hpp>
 
 // Mathcard includes
 #include <lifemc/lifesolver/MultiscaleModel.hpp>

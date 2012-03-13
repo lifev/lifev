@@ -52,14 +52,14 @@
 #define HAVE_MATLAB_POSTPROCESSING 1
 
 // LifeV includes
-#include <life/lifefem/OneDFSIBCHandler.hpp>
-#include <life/lifesolver/OneDFSIPhysicsLinear.hpp>
-#include <life/lifesolver/OneDFSIPhysicsNonLinear.hpp>
-#include <life/lifesolver/OneDFSIFluxLinear.hpp>
-#include <life/lifesolver/OneDFSIFluxNonLinear.hpp>
-#include <life/lifesolver/OneDFSISourceLinear.hpp>
-#include <life/lifesolver/OneDFSISourceNonLinear.hpp>
-#include <life/lifesolver/OneDFSISolver.hpp>
+#include <lifev/one_d_fsi/fem/OneDFSIBCHandler.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIPhysicsLinear.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIPhysicsNonLinear.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIFluxLinear.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSIFluxNonLinear.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSISourceLinear.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSISourceNonLinear.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
 
 #include <lifev/bc_interface/fem/BCInterface1D.hpp>
 
