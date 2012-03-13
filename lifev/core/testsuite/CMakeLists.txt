@@ -6,6 +6,7 @@ ADD_SUBDIRECTORIES(
   adr_assembler
   array
   bdf
+  exporter_vtk
   fe_function
   filter
   hyperbolic
