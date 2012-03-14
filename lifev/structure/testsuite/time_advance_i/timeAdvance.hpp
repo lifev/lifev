@@ -24,43 +24,56 @@
 */
 //@HEADER
 /**
-   \file ensightToHdf5.hpp
-   \author  <simone.deparis@epfl.ch>
-   \date 2008-08-08
+   \file timeAdvance.hpp
+   \date 2010-02-15
+  Author(s):  F. Nobile  <fabio.nobile@polimi.it>
+              M. Pozzoli    <matteo1.pozzoli@mail.polimi.it>
+              C. Vergara    <christian.vergara@polimi.it>
  */
 
 
-#ifndef __EnsightToHdf5_H
-#define __EnsightToHdf5_H 1
 
-#include <boost/shared_ptr.hpp>
 
-// Didn't know where to put this
-const double Pi = 3.14159265358979323846264338328;
 
-class EnsightToHdf5
+#ifndef __timeAdvance_H
+#define __timeAdvance_H
 
+
+
+
+
+// ===================================================
+//! Includes
+// ===================================================
+#include <lifev/core/LifeV.hpp>
+
+/*!
+ * \class problem
+ * \brief LifeV problem test case
+ *
+ *  @author F. Nobile, M. Pozzoli, C. Vergara
+ *  @see
+ */
+class problem
+//
 {
 public:
-
-
-    /** @name Typedefs
-     */
-    //@{
-
-//    typedef LifeV::Application super;
-
-    //@}
 
     /** @name Constructors, destructor
      */
     //@{
+    problem( int          argc,
+             char**                argv,
+             boost::shared_ptr<Epetra_Comm>        structComm );
 
-    EnsightToHdf5( int argc,
-                   char** argv );
-
-    ~EnsightToHdf5()
+    ~problem()
     {}
+
+    //@}
+
+    /** @name  Methods
+     */
+    //@{
 
     void run();
 
@@ -69,7 +82,7 @@ public:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> d;
+    boost::shared_ptr<Private> members;
 };
 
-#endif /* __EnsightToHdf5_H */
+#endif /* __timeAdvance_H */

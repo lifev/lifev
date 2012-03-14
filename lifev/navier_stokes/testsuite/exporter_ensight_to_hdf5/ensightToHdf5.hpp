@@ -24,56 +24,40 @@
 */
 //@HEADER
 /**
-   \file timeAdvance.hpp
-   \date 2010-02-15
-  Author(s):  F. Nobile  <fabio.nobile@polimi.it>
-              M. Pozzoli    <matteo1.pozzoli@mail.polimi.it>
-              C. Vergara    <christian.vergara@polimi.it>
+   \file ensightToHdf5.hpp
+   \author  <simone.deparis@epfl.ch>
+   \date 2008-08-08
  */
 
 
+#ifndef __EnsightToHdf5_H
+#define __EnsightToHdf5_H 1
 
+#include <boost/shared_ptr.hpp>
 
+class EnsightToHdf5
 
-#ifndef __timeAdvance_H
-#define __timeAdvance_H
-
-
-
-
-
-// ===================================================
-//! Includes
-// ===================================================
-#include <life/lifecore/LifeV.hpp>
-
-/*!
- * \class problem
- * \brief LifeV problem test case
- *
- *  @author F. Nobile, M. Pozzoli, C. Vergara
- *  @see
- */
-class problem
-//
 {
 public:
+
+
+    /** @name Typedefs
+     */
+    //@{
+
+//    typedef LifeV::Application super;
+
+    //@}
 
     /** @name Constructors, destructor
      */
     //@{
-    problem( int          argc,
-             char**                argv,
-             boost::shared_ptr<Epetra_Comm>        structComm );
 
-    ~problem()
+    EnsightToHdf5( int argc,
+                   char** argv );
+
+    ~EnsightToHdf5()
     {}
-
-    //@}
-
-    /** @name  Methods
-     */
-    //@{
 
     void run();
 
@@ -82,7 +66,7 @@ public:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> members;
+    boost::shared_ptr<Private> d;
 };
 
-#endif /* __timeAdvance_H */
+#endif /* __EnsightToHdf5_H */

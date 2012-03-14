@@ -1,21 +1,21 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Applications                        
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
 #
-#      Author(s): Umberto Villa <uvilla@emory.edu>
-#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
-#           Date: 10-12-2010
+#      Author(s): Name Surname <name.surname@epfl.ch>
+#           Date: 00-00-0000
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### TESTSUITE: TIME ADVANCE #######################################################################
+### DATA FILE #####################################################################################
 ###################################################################################################
+#----------------------------------------------------------------
+#      Data file for cube with SecondOrderSolver
+#----------------------------------------------------------------
 
-AT_SETUP([test_timeAdvance])
-AT_KEYWORDS([test_timeAdvance orderI])
-AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+
 [exporter]
 type       = hdf5 # ensight # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
@@ -26,15 +26,14 @@ save       = 1
 
 [./physics]
 material_flag =1
-density   = 1.
+density   = 1.             
 poisson   = 0
 young     = 1
 
-
 [../time_discretization]
-initialtime		= 0.
-endtime			= 2
-timestep		= 0.1
+initialtime     = 0.
+endtime         = 2
+timestep        = 0.1
 method                  =  BDF  #BDF
 # Newmark parameters:
 theta                   = 0.5  #0.5
@@ -52,7 +51,7 @@ order     = P1
 [../miscellaneous]
 factor    = 1
 verbose   = 1
-
+damping   = false
 
 [../newton]
 maxiter = 1
@@ -74,15 +73,5 @@ precond         = Amesos
 reuse           = true
 overlap         = 10
 droptol         = 1.e-5
-fill 		= 2
-
-      [../]
-   [../]
-
-]])
-
-AT_CHECK([ln -sf ../../data/mesh/inria/StructuredCube4.mesh;
-          mpirun -np 2 ../../test_timeAdvance_orderI/test_timeAdvance -c],[0],[ignore],[ignore])
-AT_CLEANUP
-
+fill        = 2
 

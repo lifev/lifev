@@ -75,23 +75,23 @@ nonlinear_function.hpp:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
 
-#include <life/lifesolver/VenantKirchhoffViscoelasticSolver.hpp>
-#include <life/lifesolver/VenantKirchhoffViscoelasticData.hpp>
+#include <lifev/structure/solver/VenantKirchhoffViscoelasticSolver.hpp>
+#include <lifev/structure/solver/VenantKirchhoffViscoelasticData.hpp>
 
-#include <life/lifefem/TimeData.hpp>
-#include <life/lifefem/FESpace.hpp>
+#include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 
-#include <life/lifefem/TimeAdvance.hpp>
-#include <life/lifefem/TimeAdvanceNewmark.hpp>
-#include <life/lifefem/TimeAdvanceBDF.hpp>
+#include <lifev/core/fem/TimeAdvance.hpp>
+#include <lifev/core/fem/TimeAdvanceNewmark.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
-#include <life/lifefilters/ExporterEnsight.hpp>
-#include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifefilters/ExporterEmpty.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterEmpty.hpp>
 
 #include <iostream>
 

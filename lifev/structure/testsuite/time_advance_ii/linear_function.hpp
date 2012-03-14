@@ -24,10 +24,10 @@
 */
 //@HEADER
 
-#ifndef NLF_HPP
-#define NLF_HPP
+#ifndef LF_HPP
+#define LF_HPP
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 // ===================================================
 //! User functions
@@ -35,27 +35,26 @@
 
 namespace LifeV
 {
-
-double alpha = 1;
-Real Pi2 = Pi*Pi;
+const Real Pi = 3.14159265358979323846264338328;
+Real Pi2=Pi*Pi;
 
 class AnalyticalSol
 {
 public:
     inline Real operator()(Real t, Real x,Real y,Real z, UInt /*ic*/=0) const
     {
-        return alpha*exp(-sin(Pi/2*t))*cos(Pi*x)*cos(Pi*y)*cos(Pi*z);
+        return exp(-sin(Pi/2*t))*(x+y+z);
     }
-    inline Real grad(UInt icoor, Real t, Real x,Real y,Real z, UInt /*ic*/=0) const
+    inline Real grad(UInt icoor, Real t , Real , Real , Real , UInt /*ic*/=0) const
     {
         switch (icoor)
         {
         case 1: // der_x
-            return -alpha *Pi*exp(-sin(Pi/2*t))*sin(Pi*x)*cos(Pi*y)*cos(Pi*z);
+            return exp(-sin(Pi/2*t));
         case 2: // der_y
-            return -alpha*Pi*exp(-sin(Pi/2*t))*cos(Pi*x)*sin(Pi*y)*cos(Pi*z);
+            return exp(-sin(Pi/2*t));
         case 3: // der_z
-            return -alpha*Pi*exp(-sin(Pi/2*t))*cos(Pi*x)*cos(Pi*y)*sin(Pi*z);
+            return exp(-sin(Pi/2*t));
         default:
             return 0;
         }
@@ -67,51 +66,56 @@ Real uexact( const Real&  t ,
              const Real& x,
              const Real& y,
              const Real& z,
-             const ID&  icomp)
+             const ID&  )
 {
-    return  alpha*exp(-sin(Pi/2*t))*cos(Pi*x)*cos(Pi*y)*cos(Pi*z);
+    return exp(-sin(Pi/2*t))*(x+y+z);
 }
 
-// u = alpha*exp(-sin(Pi/2*t))*cos(Pi*x)*cos(Pi*y)*cos(Pi*z
-// v = -Pi/2*cos(Pi/2*t)*u;
-// w =  Pi2/4*sin(Pi/2*t)*u+Pi2/4cos(Pi/2*t)*u
 
 Real source_in( const Real&  t ,
                 const Real& x,
                 const Real& y,
                 const Real& z,
-                const ID&  icomp)
+                const ID&  )
 {
-    return (3 + 1./4.*( sin(Pi/2*t) + cos(Pi/2 * t) * cos(Pi/2 * t) ) )
-           * Pi2 * exp(-sin(Pi/2*t)) *cos(Pi*x) *cos(Pi*y) *cos(Pi*z);
+    return Pi2/4*( sin(Pi/2*t)+cos(Pi/2*t)*cos(Pi/2*t) )*exp(-sin(Pi/2*t))*(x+y+z);
 }
 
-Real d0( const Real&  t ,
-         const Real& x,
-         const Real& y,
-         const Real& z,
-         const ID&  icomp)
+
+Real d0 ( const Real&  ,
+          const Real& x,
+          const Real& y,
+          const Real& z,
+          const ID& )
 {
-    return alpha*cos(Pi*x)*cos(Pi*y)*cos(Pi*z);
+    return x+y+z;
 }
 
 Real v0( const Real&  t ,
          const Real& x,
          const Real& y,
          const Real& z,
-         const ID&  icomp)
+         const ID&  )
 {
-    return -alpha*Pi/2*cos(Pi*x)*cos(Pi*y)*cos(Pi*z) * cos(Pi/2*t) * exp(-sin(Pi/2*t));
+    return -Pi/2*cos(Pi/2*t)*exp(-sin(Pi/2*t))*(x+y+z);
 }
 
 Real a0( const Real&  t ,
          const Real& x,
          const Real& y,
          const Real& z,
-         const ID&  icomp)
+         const ID&  )
 {
-    return + 1./4.*( sin(Pi/2*t) + cos(Pi/2 * t) * cos(Pi/2 * t) )
-           * Pi2 * exp(-sin(Pi/2*t)) *cos(Pi*x) *cos(Pi*y) *cos(Pi*z);
+    return Pi2/4*( sin(Pi/2*t)+cos(Pi/2*t)*cos(Pi/2*t) )*exp(-sin(Pi/2*t))*(x+y+z);
+}
+
+Real UOne( const Real& /* t */,
+           const Real& ,
+           const Real& ,
+           const Real& ,
+           const ID&   )
+{
+    return 1.;
 }
 
 Real UZero( const Real& /* t */,
@@ -123,7 +127,6 @@ Real UZero( const Real& /* t */,
     return 0.;
 }
 
-
-
 }
+
 #endif
