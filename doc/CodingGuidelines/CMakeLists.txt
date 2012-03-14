@@ -15,7 +15,7 @@ FOREACH(TEX_FILE ${TEX_FILES})
 
   ADD_CUSTOM_COMMAND(
     OUTPUT    ${TEX_FILE}.pdf
-    COMMAND   ltxcompile
+    COMMAND   /bin/sh ltxcompile
     ARGS      ${TEX_FILE}.tex
     DEPENDS   ${TEX_FILE}.tex
   )
