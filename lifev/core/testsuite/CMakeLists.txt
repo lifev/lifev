@@ -8,6 +8,7 @@ ADD_SUBDIRECTORIES(
   bdf
   exporter_vtk
   fe_function
+  fem
   filter
   hyperbolic
   matrix_epetra_structured_framework

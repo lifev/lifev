@@ -28,7 +28,7 @@
     @file
     @brief Interpolate test
 
-	@author Mauro Perego <mperego@fsu.edu>
+    @author Mauro Perego <mperego@fsu.edu>
     @contributor
     @maintainer Mauro Perego <mperego@fsu.edu>
 
@@ -38,10 +38,10 @@ The program tests the interpolation methods between different finite elements (m
 Also it test the interpolation of an analytical function into a finite element space.
  */
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/QuadratureRule.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 #include <string>
 #include <fstream>
 
@@ -62,37 +62,37 @@ Real bilinearFunction(const Real& /*t*/, const Real& x, const Real& y, const Rea
 //! return true if all the errors are equal to the errors in errorArray, within a tolerance eps. return false otherwise.
 template<typename MeshType, typename MapType, typename Fct>
 bool check_interpolate( std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& originalFeSpaceVecPtr,
-					  std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& finalFeSpaceVecPtr,
-					  const MapEpetraType& outputMapType,  Fct& function,
-					  const Real errorArray [], const string stringArray [], Real eps, Real time, UInt verbose)
+                      std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& finalFeSpaceVecPtr,
+                      const MapEpetraType& outputMapType,  Fct& function,
+                      const Real errorArray [], const string stringArray [], Real eps, Real time, UInt verbose)
 {
-	std::vector< boost::shared_ptr <VectorEpetra> > interpVecPtr(originalFeSpaceVecPtr.size());
-	bool check(true);
+    std::vector< boost::shared_ptr <VectorEpetra> > interpVecPtr(originalFeSpaceVecPtr.size());
+    bool check(true);
 
-	for(UInt i=0; i< originalFeSpaceVecPtr.size(); i++)
-	{
-		boost::shared_ptr <VectorEpetra> tmp(new VectorEpetra(originalFeSpaceVecPtr[i]->map(), outputMapType));
-		originalFeSpaceVecPtr[i]->interpolate(function, *tmp, time);
-		interpVecPtr[i] = tmp;
-	}
+    for(UInt i=0; i< originalFeSpaceVecPtr.size(); i++)
+    {
+        boost::shared_ptr <VectorEpetra> tmp(new VectorEpetra(originalFeSpaceVecPtr[i]->map(), outputMapType));
+        originalFeSpaceVecPtr[i]->interpolate(function, *tmp, time);
+        interpVecPtr[i] = tmp;
+    }
 
-	Real err_rel(0);
-	for(UInt i=0; i< originalFeSpaceVecPtr.size(); i++)
-		for(UInt j=0; j< finalFeSpaceVecPtr.size(); j++)
-		{
-			VectorEpetra interpolated = finalFeSpaceVecPtr[j]->feToFEInterpolate(*originalFeSpaceVecPtr[i], *interpVecPtr[i], outputMapType);
-			finalFeSpaceVecPtr[j]->l2Error( function, VectorEpetra(interpolated, Repeated), time, &err_rel );
-			check &= fabs(err_rel - errorArray[finalFeSpaceVecPtr.size() * i+ j]) < eps;
+    Real err_rel(0);
+    for(UInt i=0; i< originalFeSpaceVecPtr.size(); i++)
+        for(UInt j=0; j< finalFeSpaceVecPtr.size(); j++)
+        {
+            VectorEpetra interpolated = finalFeSpaceVecPtr[j]->feToFEInterpolate(*originalFeSpaceVecPtr[i], *interpVecPtr[i], outputMapType);
+            finalFeSpaceVecPtr[j]->l2Error( function, VectorEpetra(interpolated, Repeated), time, &err_rel );
+            check &= fabs(err_rel - errorArray[finalFeSpaceVecPtr.size() * i+ j]) < eps;
 
-			if(verbose)
-			{
-				UInt index = finalFeSpaceVecPtr.size() * i+ j;
-				cout.precision(7);
-				std::cout << stringArray[index] << ": " << std::setw(15) << std::setprecision(10) << err_rel << " (expected " << errorArray[index] << ")\t";
-				std::cout << "\n";
-			}
-		}
-	if(verbose)
-		std::cout << std::endl;
-	return check;
+            if(verbose)
+            {
+                UInt index = finalFeSpaceVecPtr.size() * i+ j;
+                cout.precision(7);
+                std::cout << stringArray[index] << ": " << std::setw(15) << std::setprecision(10) << err_rel << " (expected " << errorArray[index] << ")\t";
+                std::cout << "\n";
+            }
+        }
+    if(verbose)
+        std::cout << std::endl;
+    return check;
 }

@@ -52,9 +52,9 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifefem/CurrentFE.hpp>
+#include <lifev/core/fem/CurrentFE.hpp>
 
 #include <boost/shared_ptr.hpp>
 

@@ -28,7 +28,7 @@
     @file
     @brief Quadrature Rule test
 
-	@author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @author Umberto Villa <uvilla@emory.edu>
     @contributor
     @maintainer Umberto Villa <uvilla@emory.edu>
@@ -50,13 +50,13 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
 #include <mpi.h>
 #endif
 
-#include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifefem/QuadratureRule.hpp>
-#include <life/lifefem/CurrentFE.hpp>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
-#include <life/lifemesh/RegionMesh3DStructured.hpp>
-#include <life/lifefem/DOF.hpp>
+#include <lifev/core/fem/ReferenceFE.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
+#include <lifev/core/fem/CurrentFE.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/fem/DOF.hpp>
 
 #include "test_quadrule.hpp"
 

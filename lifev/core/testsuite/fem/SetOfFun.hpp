@@ -28,7 +28,7 @@
     @file
     @brief Quadrature Rule test
 
-	@author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @author Umberto Villa <uvilla@emory.edu>
     @contributor
     @maintainer Umberto Villa <uvilla@emory.edu>
@@ -42,7 +42,7 @@ The last function is an exponential function to check the convergence rate
 */
 
 #ifndef SETOFFUN_HPP_
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {

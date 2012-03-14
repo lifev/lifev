@@ -28,7 +28,7 @@
     @file
     @brief Quadrature Rule test
 
-	@author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @author Umberto Villa <uvilla@emory.edu>
     @contributor
     @maintainer Umberto Villa <uvilla@emory.edu>
@@ -45,8 +45,8 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
                                using gnuplot
  */
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/QuadratureRule.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
 #include <string>
 #include <fstream>
 
@@ -131,7 +131,7 @@ bool quad_check_doe(const ReferenceFE &refFE, const GeometricMap & geoMap, const
 
 // This function checks the convergence rate (CR) of the quadrature rules
 template<typename Mesh>
-bool quad_check_cr(	const ReferenceFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_name)
+bool quad_check_cr( const ReferenceFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_name)
 {
     SetofFun fct;
     int fun(fct.nfun());
