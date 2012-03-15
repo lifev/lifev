@@ -80,8 +80,8 @@ SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   Structure             lifev/structure                   PS
   Heart                 lifev/heart                       PS
   FSI                   lifev/fsi                         PS
-  BCInterface           lifev/bc_interface                EX
-  OneDFSI               lifev/one_d_fsi                   EX
+  BCInterface           lifev/bc_interface                PS
+  OneDFSI               lifev/one_d_fsi                   PS
   ZeroDimensional       lifev/zero_dimensional            EX
   Dummy                 lifev/dummy                       EX
 )
