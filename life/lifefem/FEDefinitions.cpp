@@ -1071,6 +1071,72 @@ Real der2fct6_22_P2_2D( const GeoVector& )
 {
     return -8;
 }
+
+//======================================================================
+//
+//                            RT0 Tetra  (3D)
+//
+//======================================================================
+/*
+                           3
+                           |\
+                           | \
+                           |  \
+                           1---2
+*/
+Real fct1_RT0_1_TRIA_2D( const GeoVector& v )
+{
+    return ;
+}
+Real fct1_RT0_2_TRIA_2D( const GeoVector& v )
+{
+    return v[1];
+}
+Real fct1_RT0_3_TRIA_2D( const GeoVector& v )
+{
+    return 
+}
+
+Real fct2_RT0_1_TRIA_2D( const GeoVector& v )
+{
+    return
+}
+Real fct2_RT0_2_TRIA_2D( const GeoVector& v )
+{
+    return
+}
+Real fct2_RT0_3_TRIA_2D( const GeoVector& v )
+{
+    return
+}
+
+Real fct3_RT0_1_TRIA_2D( const GeoVector& v )
+{
+    return
+}
+Real fct3_RT0_2_TRIA_2D( const GeoVector& v )
+{
+    return
+}
+Real fct3_RT0_3_TRIA_2D( const GeoVector& v )
+{
+    return
+}
+
+Real fct1_DIV_RT0_TRIA_2D( const GeoVector& v )
+{
+    return 2.;
+}
+Real fct2_DIV_RT0_TRIA_2D( const GeoVector& v )
+{
+    return 2.;
+}
+Real fct3_DIV_RT0_TRIA_2D( const GeoVector& v )
+{
+    return 2.;
+}
+
+
 //======================================================================
 //
 //                            Q0  (2D)
@@ -3680,16 +3746,16 @@ const ReferenceFEScalar feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGL
 //
 //======================================================================
 /*
-						   3
-						   |\
-						   | \
-						   |4.\
-						   1---2
+                           3
+                           |\
+                           | \
+                           |4.\
+                           1---2
 */
 
 const ReferenceFEScalar feTriaP1bubble( "P1bubble on a triangle", FE_P1bubble_2D, TRIANGLE, 1, 0, 1, 0, 4, 2,
-								   fct_P1bubble_2D, derfct_P1bubble_2D, der2fct_P1bubble_2D, refcoor_P1bubble_2D,
-								   STANDARD_PATTERN, &feSegP1,&P1Bubble2DTransform );
+                                   fct_P1bubble_2D, derfct_P1bubble_2D, der2fct_P1bubble_2D, refcoor_P1bubble_2D,
+                                   STANDARD_PATTERN, &feSegP1,&P1Bubble2DTransform );
 
 
 //======================================================================
@@ -3708,6 +3774,24 @@ const ReferenceFEScalar feTriaP1bubble( "P1bubble on a triangle", FE_P1bubble_2D
 const ReferenceFEScalar feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 1, 0, 0, 6, 2,
                             fct_P2_2D, derfct_P2_2D, der2fct_P2_2D, refcoor_P2_2D,
                             STANDARD_PATTERN, &feSegP2,&lagrangianTransform );
+
+//======================================================================
+//
+//                            RT0 (2D)
+//
+//======================================================================
+/*
+                           3
+                           |\
+                           | \
+                           |  \
+                           1---2
+*/
+
+const ReferenceFEHdiv feTriaRT0( "Lagrange RT0 on a triangle", FE_RT0_TRIA_2D, TRIA, 0, 1, 0, 0, 3, 2,
+                                 fct_RT0_TRIA_2D, fct_DIV_RT0_TRIA_2D, refcoor_RT0_TRIA_2D,
+                                 STANDARD_PATTERN, &feSegP0 );
+
 
 //======================================================================
 //
@@ -3956,6 +4040,55 @@ const ReferenceFEHdiv feTetraRT0( "Lagrange RT0 on a tetraedra", FE_RT0_TETRA_3D
 
 //======================================================================
 //
+//                           RT0 TRIA HYBRID (2D)
+//                Element defined on SEG :  P0 on each TRIA face.
+//
+//======================================================================
+/*!
+
+
+*/
+// N.B. : the hybrid classes and arrays depend on the quadrature rules,
+//        geometric mappings and other reference elements :
+//        thus they must be defined AFTER the definitions of quadrule, geomap, refFE...
+
+//! Total number of Boundary elements for the hybrid MFE for TRIA (= Number of faces. common for RT0,RT1...)
+#define NB_BDFE_RT0_HYB_TRIA 3
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TRIA_1( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+                                                        refcoor_HYB_TRIA_SEG_1, 0 );
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TRIA_2( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+                                                        refcoor_HYB_TRIA_SEG_2, 1 );
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TRIA_3( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+                                                        refcoor_HYB_TRIA_SEG_3, 2 );
+
+static const CurrentBoundaryFEBase HybRT0TriaList[ NB_BDFE_RT0_HYB_TRIA ] =
+{
+    BdFE_RT0_HYB_TRIA_1, BdFE_RT0_HYB_TRIA_2, BdFE_RT0_HYB_TRIA_3
+};
+
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TRIA_VdotN_1( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+                                                               refcoor_HYB_TRIA_SEG_1, 0, 1. );
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TRIA_VdotN_2( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+                                                              refcoor_HYB_TRIA_SEG_2, 1, 1. );
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TRIA_VdotN_3( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+                                                              refcoor_HYB_TRIA_SEG_3, 2, std::sqrt( 2. ) );
+
+static const CurrentBoundaryFEBase HybRT0TriaVdotNList[ NB_BDFE_RT0_HYB_TRIA ] =
+{
+    BdFE_RT0_HYB_TRIA_VdotN_1, BdFE_RT0_HYB_TRIA_VdotN_2, BdFE_RT0_HYB_TRIA_VdotN_3
+};
+
+const ReferenceFEHybrid feTriaRT0Hyb ( "Hybrid RT0 elements on a triangle", FE_RT0_HYB_TRIA_2D, TRIA,
+                                        0, 1, 0, 0, 3, 2, NB_BDFE_RT0_HYB_TRIA, HybRT0TriaList,
+                                        refcoor_RT0HYB_TRIA, STANDARD_PATTERN );
+
+const ReferenceFEHybrid feTriaRT0VdotNHyb ( "Hybrid RT0 elements on a triangle", FE_RT0_HYB_TRIA_2D, TRIA,
+                                            0, 1, 0, 0, 3, 3, NB_BDFE_RT0_HYB_TRIA, HybRT0TriaVdotNList,
+                                            refcoor_RT0HYB_TRIA, STANDARD_PATTERN );
+
+
+//======================================================================
+//
 //                           RT0 HYBRID (3D)
 //                Element defined on FACES :  Q0 on each QUAD face.
 //
@@ -4100,7 +4233,7 @@ static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_VdotN_1( feTriaP0, geoLine
 static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_VdotN_2( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                                     refcoor_HYB_TETRA_FACE_2, 1, 2. );
 static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_VdotN_3( feTriaP0, geoLinearTria, quadRuleTria4pt,
-                                                    refcoor_HYB_TETRA_FACE_3, 2, 2. / sqrt( 3. ) );
+                                                    refcoor_HYB_TETRA_FACE_3, 2, 2. / std::sqrt( 3. ) );
 static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_VdotN_4( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                                     refcoor_HYB_TETRA_FACE_4, 3, 2. );
 
