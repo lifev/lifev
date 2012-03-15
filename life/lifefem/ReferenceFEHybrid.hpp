@@ -103,7 +103,7 @@ static const CurrentBoundaryFEBase HybPIPOList[ NB_BDFE_PIPO ] =
   @li In defQuadRuleFE.cc: you define your new element with a command like:
   \code
 const ReferenceFEHybrid feTriaPipo("Pipo elements on a tetrahedron", FE_PIPO, TETRA,
-							 0, 0, 1, 0, 4, 3, NB_BDFE_PIPO, HybPIPOList, refcoor_PIPO, STANDARD_PATTERN );
+                             0, 0, 1, 0, 4, 3, NB_BDFE_PIPO, HybPIPOList, refcoor_PIPO, STANDARD_PATTERN );
   \endcode
   See documentation of ReferenceFEHybrid::ReferenceFEHybrid(...) for a precise description of all arguments.
 */
@@ -204,12 +204,56 @@ private:
 
 //======================================================================
 //     DECLARATION OF FINITE ELEMENTS (defined in defQuadRule.cc)
+extern const ReferenceFEHybrid feTriaRT0Hyb;
+extern const ReferenceFEHybrid feTriaRT0VdotNHyb;
 
 extern const ReferenceFEHybrid feHexaRT0Hyb;
 extern const ReferenceFEHybrid feHexaRT0VdotNHyb;
 
 extern const ReferenceFEHybrid feTetraRT0Hyb;
 extern const ReferenceFEHybrid feTetraRT0VdotNHyb;
+
+//======================================================================
+//
+//                           RT0 TRIA HYBRID (2D)
+//                Element defined on SEGMENTS :  P0 on each TRIA face.
+//
+//======================================================================
+/*
+
+
+*/
+
+static const Real refcoor_RT0HYB_TRIA [ 9 ] =
+{
+    1. / 2. , 0.      , 0. ,
+    1. / 2. , 1. / 2. , 0. ,
+    0.      , 1. / 2. , 0.
+};
+
+
+/* refcoor_HYB_TRIA_SEG_I
+   Coordinates of the vertices of the 4 segments. They are used for the definition of the POINT in the bdfe.
+   The same arrays can be used for all the Hybrid elements that have the same shape.
+   E.g. refcoor_HYB_TRIA_SEG_I are used for all the TRIA Hybrid elements. */
+
+static const Real refcoor_HYB_TRIA_SEG_1[ 6 ] =
+{
+    0. , 0. , 0. ,
+    1. , 0. , 0.
+};
+
+static const Real refcoor_HYB_TRIA_SEG_2[ 6 ] =
+{
+    1. , 0. , 0. ,
+    0. , 1. , 0. ,
+};
+
+static const Real refcoor_HYB_TRIA_SEG_3[ 6 ] =
+{
+    0. , 1. , 0. ,
+    0. , 0. , 0.
+};
 
 //======================================================================
 //
