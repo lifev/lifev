@@ -411,6 +411,38 @@ static const ReferenceElement::function_Type der2fct_P0_0D[ 1 ] =
 
 //======================================================================
 //
+//                            P0  (1D)
+//
+//======================================================================
+/*
+                           --1--
+*/
+Real fct1_P0_1D( const GeoVector& v );
+
+Real derfct1_1_P0_1D( const GeoVector & );
+
+Real der2fct1_P0_1D( const GeoVector& );
+
+static const Real refcoor_P0_1D[ 3 ] =
+{
+    1. / 2. , 0. , 0.,
+};
+
+static const ReferenceElement::function_Type fct_P0_1D[ 1 ] =
+{
+    fct1_P0_1D
+};
+static const ReferenceElement::function_Type derfct_P0_1D[ 1 ] =
+{
+    derfct1_1_P0_1D
+};
+static const ReferenceElement::function_Type der2fct_P0_1D[ 1 ] =
+{
+    der2fct1_P0_1D
+};
+
+//======================================================================
+//
 //                            P1  (1D)
 //
 //======================================================================

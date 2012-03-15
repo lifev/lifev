@@ -78,6 +78,7 @@ namespace LifeV
 enum FE_TYPE
 {
     FE_P0_0D = 1,
+    FE_P0_1D,
     FE_P1_1D,
     FE_P2_1D,
 

@@ -631,6 +631,30 @@ Real der2fct1_P0_0D( const GeoVector& )
 {
     return 0.;
 }
+
+//======================================================================
+//
+//                            P0  (1D)
+//
+//======================================================================
+/*
+                           --1--
+*/
+Real fct1_P0_1D( const GeoVector& v )
+{
+    return 1.;
+}
+
+Real derfct1_1_P0_1D( const GeoVector& )
+{
+    return 0.;
+}
+
+Real der2fct1_P0_1D( const GeoVector& )
+{
+    return 0.;
+}
+
 //======================================================================
 //
 //                            P1  (1D)
@@ -1086,41 +1110,41 @@ Real der2fct6_22_P2_2D( const GeoVector& )
 */
 Real fct1_RT0_1_TRIA_2D( const GeoVector& v )
 {
-    return ;
+    return 1.;
 }
 Real fct1_RT0_2_TRIA_2D( const GeoVector& v )
 {
-    return v[1];
+    return 1.;
 }
 Real fct1_RT0_3_TRIA_2D( const GeoVector& v )
 {
-    return 
+    return 1.;
 }
 
 Real fct2_RT0_1_TRIA_2D( const GeoVector& v )
 {
-    return
+    return 1.;
 }
 Real fct2_RT0_2_TRIA_2D( const GeoVector& v )
 {
-    return
+    return 1.;
 }
 Real fct2_RT0_3_TRIA_2D( const GeoVector& v )
 {
-    return
+    return 1.;
 }
 
 Real fct3_RT0_1_TRIA_2D( const GeoVector& v )
 {
-    return
+    return 1.;
 }
 Real fct3_RT0_2_TRIA_2D( const GeoVector& v )
 {
-    return
+    return 1.;
 }
 Real fct3_RT0_3_TRIA_2D( const GeoVector& v )
 {
-    return
+    return 1.;
 }
 
 Real fct1_DIV_RT0_TRIA_2D( const GeoVector& v )
@@ -3681,6 +3705,19 @@ const ReferenceFEScalar fePointP0( "Lagrange P0 on a point",
 
 //======================================================================
 //
+//                            P0  (1D)
+//
+//======================================================================
+/*
+                           --1--
+*/
+
+const ReferenceFEScalar feSegP0( "Lagrange P0 on a segment", FE_P0_1D, LINE, 0, 1, 0, 0, 1, 1,
+                                 fct_P0_1D, derfct_P0_1D, der2fct_P0_1D, refcoor_P0_1D,
+                                 STANDARD_PATTERN, &fePointP0, &lagrangianTransform );
+
+//======================================================================
+//
 //                            P1  (1D)
 //
 //======================================================================
@@ -3788,7 +3825,7 @@ const ReferenceFEScalar feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGL
                            1---2
 */
 
-const ReferenceFEHdiv feTriaRT0( "Lagrange RT0 on a triangle", FE_RT0_TRIA_2D, TRIA, 0, 1, 0, 0, 3, 2,
+const ReferenceFEHdiv feTriaRT0( "Lagrange RT0 on a triangle", FE_RT0_TRIA_2D, TRIANGLE, 0, 1, 0, 0, 3, 2,
                                  fct_RT0_TRIA_2D, fct_DIV_RT0_TRIA_2D, refcoor_RT0_TRIA_2D,
                                  STANDARD_PATTERN, &feSegP0 );
 
@@ -4078,11 +4115,11 @@ static const CurrentBoundaryFEBase HybRT0TriaVdotNList[ NB_BDFE_RT0_HYB_TRIA ] =
     BdFE_RT0_HYB_TRIA_VdotN_1, BdFE_RT0_HYB_TRIA_VdotN_2, BdFE_RT0_HYB_TRIA_VdotN_3
 };
 
-const ReferenceFEHybrid feTriaRT0Hyb ( "Hybrid RT0 elements on a triangle", FE_RT0_HYB_TRIA_2D, TRIA,
+const ReferenceFEHybrid feTriaRT0Hyb ( "Hybrid RT0 elements on a triangle", FE_RT0_HYB_TRIA_2D, TRIANGLE,
                                         0, 1, 0, 0, 3, 2, NB_BDFE_RT0_HYB_TRIA, HybRT0TriaList,
                                         refcoor_RT0HYB_TRIA, STANDARD_PATTERN );
 
-const ReferenceFEHybrid feTriaRT0VdotNHyb ( "Hybrid RT0 elements on a triangle", FE_RT0_HYB_TRIA_2D, TRIA,
+const ReferenceFEHybrid feTriaRT0VdotNHyb ( "Hybrid RT0 elements on a triangle", FE_RT0_HYB_TRIA_2D, TRIANGLE,
                                             0, 1, 0, 0, 3, 3, NB_BDFE_RT0_HYB_TRIA, HybRT0TriaVdotNList,
                                             refcoor_RT0HYB_TRIA, STANDARD_PATTERN );
 
