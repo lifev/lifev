@@ -646,6 +646,30 @@ Real der2fct1_P0_0D( const GeoVector& )
 {
     return 0.;
 }
+
+//======================================================================
+//
+//                            P0  (1D)
+//
+//======================================================================
+/*
+                           --1--
+*/
+Real fct1_P0_1D( const GeoVector& v )
+{
+    return 1.;
+}
+
+Real derfct1_1_P0_1D( const GeoVector& )
+{
+    return 0.;
+}
+
+Real der2fct1_P0_1D( const GeoVector& )
+{
+    return 0.;
+}
+
 //======================================================================
 //
 //                            P1  (1D)
@@ -1086,6 +1110,8 @@ Real der2fct6_22_P2_2D( const GeoVector& )
 {
     return -8;
 }
+
+
 //======================================================================
 //
 //                            Q0  (2D)
@@ -3630,6 +3656,19 @@ const ReferenceFEScalar fePointP0( "Lagrange P0 on a point",
 
 //======================================================================
 //
+//                            P0  (1D)
+//
+//======================================================================
+/*
+                           --1--
+*/
+
+const ReferenceFEScalar feSegP0( "Lagrange P0 on a segment", FE_P0_1D, LINE, 0, 1, 0, 0, 1, 1,
+                                 fct_P0_1D, derfct_P0_1D, der2fct_P0_1D, refcoor_P0_1D,
+                                 STANDARD_PATTERN, &fePointP0, &lagrangianTransform );
+
+//======================================================================
+//
 //                            P1  (1D)
 //
 //======================================================================
@@ -3695,16 +3734,16 @@ const ReferenceFEScalar feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGL
 //
 //======================================================================
 /*
-						   3
-						   |\
-						   | \
-						   |4.\
-						   1---2
+                           3
+                           |\
+                           | \
+                           |4.\
+                           1---2
 */
 
 const ReferenceFEScalar feTriaP1bubble( "P1bubble on a triangle", FE_P1bubble_2D, TRIANGLE, 1, 0, 1, 0, 4, 2,
-								   fct_P1bubble_2D, derfct_P1bubble_2D, der2fct_P1bubble_2D, refcoor_P1bubble_2D,
-								   STANDARD_PATTERN, &feSegP1,&P1Bubble2DTransform );
+                                   fct_P1bubble_2D, derfct_P1bubble_2D, der2fct_P1bubble_2D, refcoor_P1bubble_2D,
+                                   STANDARD_PATTERN, &feSegP1,&P1Bubble2DTransform );
 
 
 //======================================================================
