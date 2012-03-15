@@ -289,7 +289,15 @@ darcy::run()
 {
     using boost::dynamic_pointer_cast;
 
-    typedef RegionMesh< LinearTetra >                                 RegionMesh;
+#define THREE_D
+
+#ifdef THREE_D
+    typedef LinearTetra                                               geoElement_Type;
+#else
+    typedef LinearTria                                                geoElement_Type;
+#endif
+
+    typedef RegionMesh< geoElement_Type >                             RegionMesh;
     typedef SolverAztecOO                                             solver_type;
 
     typedef DarcySolver< RegionMesh, solver_type >                    darcyLinearSolver_type;
@@ -362,6 +370,7 @@ darcy::run()
     }
     else
     {
+#ifdef THREE_D
         // Set up the structured mesh
         regularMesh3D( *fullMeshPtr, 0,
                        dataFile( ( Members->discretization_section + "/space_discretization/nx" ).data(), 4 ),
@@ -371,6 +380,9 @@ darcy::run()
                        dataFile( ( Members->discretization_section + "/space_discretization/lx" ).data(), 1. ),
                        dataFile( ( Members->discretization_section + "/space_discretization/ly" ).data(), 1. ),
                        dataFile( ( Members->discretization_section + "/space_discretization/lz" ).data(), 1. ) );
+#else
+        exit ( EXIT_FAILURE );
+#endif
     }
 
     // Create the partitioner
@@ -436,18 +448,30 @@ darcy::run()
     const QuadratureRule* qR_primal    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_primal  ( static_cast<QuadratureRule*>(NULL) );
 
+#ifdef THREE_D
     refFE_primal = &feTetraP0;
     qR_primal    = &quadRuleTetra15pt;
     bdQr_primal  = &quadRuleTria4pt;
+#else
+    refFE_primal = &feTriaP0;
+    qr_primal    = &quadRuleTria1pt;
+    bdQr_primal  = &quadRuleSeg1pt;
+#endif
 
     // Dual solution parameters
     const ReferenceFE*    refFE_dual ( static_cast<ReferenceFE*>(NULL) );
     const QuadratureRule* qR_dual    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_dual  ( static_cast<QuadratureRule*>(NULL) );
 
+#ifdef THREE_D
     refFE_dual = &feTetraRT0;
     qR_dual    = &quadRuleTetra15pt;
     bdQr_dual  = &quadRuleTria4pt;
+#else
+    refFE_dual = &feTriaRT0;
+    qR_dual    = &quadRuleTria4pt;
+    bdQr_dual  = &quadRuleSeg1pt;
+#endif
 
     // Interpolate of dual solution parameters
     const ReferenceFE*    refFE_dualInterpolate ( static_cast<ReferenceFE*>(NULL) );
