@@ -90,20 +90,20 @@ public:
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
       @param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
-    ReferenceFEHdiv( std::string          name,
-               FE_TYPE              type,
-               ReferenceShapes      shape,
-               Int                  nbDofPerVertex,
-               Int                  nbDofPerEdge,
-               Int                  nbDofPerFace,
-               Int                  nbDofPerVolume,
-               Int                  nbDof,
-               Int                  nbCoor,
-               const function_Type*           phi,
-               const function_Type*           divPhi,
-               const Real*          refCoor,
-               DofPatternType       patternType,
-               const ReferenceFE*         bdRefFE );
+    ReferenceFEHdiv ( std::string          name,
+                      FE_TYPE              type,
+                      ReferenceShapes      shape,
+                      Int                  nbDofPerVertex,
+                      Int                  nbDofPerEdge,
+                      Int                  nbDofPerFace,
+                      Int                  nbDofPerVolume,
+                      Int                  nbDof,
+                      Int                  nbCoor,
+                      const function_Type*           phi,
+                      const function_Type*           divPhi,
+                      const Real*          refCoor,
+                      DofPatternType       patternType,
+                      const ReferenceFE*         bdRefFE );
 
     ~ReferenceFEHdiv(){};
 
@@ -111,6 +111,9 @@ public:
 };
 
 // Vector finite elements
+
+extern const ReferenceFEHdiv feTriaRT0;
+
 extern const ReferenceFEHdiv feHexaRT0;
 extern const ReferenceFEHdiv feTetraRT0;
 
