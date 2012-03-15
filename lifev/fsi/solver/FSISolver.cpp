@@ -97,7 +97,7 @@ FSISolver::setData( const dataPtr_Type& data )
         }
         else
         {
-            int members[numtasks];
+            std::vector<int> members(numtasks);
 
             solidLeader = 0;
             fluidLeader = 1-solidLeader;
@@ -106,7 +106,7 @@ FSISolver::setData( const dataPtr_Type& data )
             {
                 members[0] = solidLeader;
                 /* int ierr = */
-                MPI_Group_incl(originGroup, 1, members, &newGroup);
+                MPI_Group_incl(originGroup, 1, &members[0], &newGroup);
                 solid = true;
             }
             else
@@ -119,7 +119,7 @@ FSISolver::setData( const dataPtr_Type& data )
                         members[ii - 1] = ii;
                 }
 
-                /* int ierr = */ MPI_Group_incl(originGroup, numtasks - 1, members, &newGroup);
+                /* int ierr = */ MPI_Group_incl(originGroup, numtasks - 1, &members[0], &newGroup);
                 fluid = true;
             }
 

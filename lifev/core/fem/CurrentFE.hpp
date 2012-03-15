@@ -798,7 +798,7 @@ void CurrentFE::update(const MeshElementMarked& geoele, const flag_Type& upFlag)
         }
     }
     update(pts,upFlag);
-};
+}
 
 
 template<typename MeshElementMarked>
@@ -815,7 +815,7 @@ void CurrentFE::computeCellNodes(const MeshElementMarked& geoele)
 
     }
     computeCellNodes(pts);
-};
+}
 
 //---------------------------------------
 //! IMPLEMENTATION of the CurrentFE::update methods

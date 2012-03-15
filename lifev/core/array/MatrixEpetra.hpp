@@ -134,7 +134,7 @@ public:
       using a method of the class MatrixEpetra
       @param crsMatrixPtr Pointer on a Epetra_FECrsMatrix of Trilinos
      */
-    LIFEV_DEPRECATED() MatrixEpetra( matrix_ptrtype crsMatrixPtr);
+    LIFEV_DEPRECATED( MatrixEpetra( matrix_ptrtype crsMatrixPtr) );
 
     //! Constructs an MatrixEpetra view of an Epetra_FECrsMatrix.
     /*!

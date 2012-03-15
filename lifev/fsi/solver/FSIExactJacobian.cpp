@@ -440,7 +440,7 @@ FSIExactJacobian::Epetra_ExactJacobian::Epetra_ExactJacobian() :
     M_operatorRangeMap(),
     M_comm()
 {
-};
+}
 
 // ===================================================
 // Methods

@@ -95,7 +95,7 @@ public:
     enum FieldTypeEnum
     {
         ScalarField, /*!< ScalarField stands for scalar field */
-        VectorField, /*!< VectorField stands for vector field */
+        VectorField /*!< VectorField stands for vector field */
     };
 
     //! Where is data centered? /

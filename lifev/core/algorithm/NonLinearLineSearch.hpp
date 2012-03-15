@@ -212,7 +212,6 @@ Int NonLinearLineSearchCubic( Fct& f, VectorType& residual, VectorType& sol, Vec
     f.evalResidual( residual, sol, iter );
     normResTest = residual.normInf();
     ftest = 0.5 * normResTest * normResTest;
-    fold = ftest;
     iterLinesearch = 0;
     while ( ftest < f0 + m2 * slope * lambda // lambda is too small: extrapolation
             && iterLinesearch < maxIterations )

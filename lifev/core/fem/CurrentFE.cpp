@@ -296,9 +296,9 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
     else
     {
         ERROR_MSG("Impossible dimension to invert coordinates");
-    };
+    }
 
-};
+}
 
 // Compute the Jacobian at the given point
 // this means that jacobian(P1,P2,P3,i,j)
@@ -321,7 +321,7 @@ Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& 
     };
 
     return jac;
-};
+}
 
 // Compute the determinant of the Jacobian at the given point
 Real CurrentFE::pointDetJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z) const
@@ -447,7 +447,7 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
         ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
     };
     return 0.;
-};
+}
 
 //----------------------------------------------------------------------
 

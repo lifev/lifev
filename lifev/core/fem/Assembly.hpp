@@ -212,7 +212,7 @@ assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
     std::vector<Int> jList(fe2NbDof);
 
     // Raw data to insert in the matrix
-    Real* matPtr[fe2NbDof];
+    std::vector<Real*> matPtr(fe2NbDof);
 
 
     for ( UInt k1 (0) ; k1 < fe1NbDof ; k1++ )
@@ -228,7 +228,7 @@ assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
 
     assert(localMatrix.indexij( Int (1), Int(0) ) == 1);
 
-    globalMatrix.addToCoefficients( fe1NbDof, fe2NbDof, iList, jList, matPtr, Epetra_FECrsMatrix::COLUMN_MAJOR );
+    globalMatrix.addToCoefficients( fe1NbDof, fe2NbDof, iList, jList, &matPtr[0], Epetra_FECrsMatrix::COLUMN_MAJOR );
 }
 
 //! Assembly procedure for the matrix
@@ -296,7 +296,7 @@ assembleTransposeMatrix( MatrixEpetra<Real>&   globalMatrix,
     std::vector<Int> ilist(currentFE1.nbFEDof());
     std::vector<Int> jlist(currentFE2.nbFEDof());
 
-    Real* matPtr[currentFE1.nbFEDof()];
+    std::vector<Real*> matPtr(currentFE1.nbFEDof());
 
     for ( k1 = 0 ; k1 < currentFE1.nbFEDof() ; k1++ )
     {
@@ -314,7 +314,7 @@ assembleTransposeMatrix( MatrixEpetra<Real>&   globalMatrix,
     assert(localView.indexij( Int (1), Int(0) ) == 1);
 
     globalMatrix.addToCoefficients( currentFE1.nbFEDof(), currentFE2.nbFEDof(),
-                              ilist, jlist, matPtr, Epetra_FECrsMatrix::ROW_MAJOR );
+                              ilist, jlist, &matPtr[0], Epetra_FECrsMatrix::ROW_MAJOR );
 
 }
 

@@ -523,7 +523,7 @@ Cylinder::run()
     LifeChrono chrono;
     int iter = 1;
 
-    double norm;
+    double norm(0.0);
     double ref_norms = 2.21952;
     double tolerance = 1e-5;
 

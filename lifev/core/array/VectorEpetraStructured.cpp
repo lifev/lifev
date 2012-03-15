@@ -134,7 +134,7 @@ setBlockStructure( const mapVector_type& mapVector)
 		totalSize+= M_blockSize[i];
 	}
 
-    ASSERT( totalSize == this->size()," Incompatible block structure (global size does not match) ");
+    ASSERT( totalSize == static_cast<UInt>(this->size())," Incompatible block structure (global size does not match) ");
 }
 
 // ===================================================

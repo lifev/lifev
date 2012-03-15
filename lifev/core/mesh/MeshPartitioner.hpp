@@ -857,10 +857,10 @@ void MeshPartitioner<MeshType>::matchFluidPartitionsFSI()
     Int numProcesses;
     MPI_Comm_size(MPIcomm, &numProcesses);
 
-    Int procOrder[numProcesses];
+    std::vector<Int> procOrder(numProcesses);
     std::vector<std::vector<UInt> > myMatchesForProc(numProcesses);
     std::vector<std::vector<UInt> > matchesForProc(numProcesses);
-    bool orderingError[numProcesses];
+    std::vector<bool> orderingError(numProcesses);
 
     for (Int i=0; i<numProcesses ; ++i)
     {

@@ -2391,7 +2391,7 @@ namespace MeshStatistics
 // *****   IMPLEMENTATIONS ****
 // The Template RMTYPE is used to compile with IBM compilers
 template <typename REGIONMESH, typename RMTYPE >
-MeshTransformer<REGIONMESH, RMTYPE >::MeshTransformer(REGIONMESH &m):M_mesh(m),M_pointList(){};
+MeshTransformer<REGIONMESH, RMTYPE >::MeshTransformer(REGIONMESH &m):M_mesh(m),M_pointList(){}
 /**
  * @todo this method should be changed to make sure not to generate invalid elements
  */

@@ -203,27 +203,15 @@ problem::run()
     // Scalar Solution Space:
 
     std::string Order =  dataFile( "problem/space_discretization/order", "P1");
-    const ReferenceFE*    refFE(0);
-    const QuadratureRule* qR(0);
-    const QuadratureRule* bdQr(0);
 
     if ( Order.compare("P1") == 0 )
     {
         if (verbose) std::cout << "  Space order : P1" << std::flush;
 
-        refFE = &feTetraP1;
-        qR    = &quadRuleTetra15pt; // DoE 5
-        bdQr  = &quadRuleTria4pt;   // DoE 2
-
     }
     else if ( Order.compare("P2") == 0 )
     {
         if (verbose) std::cout << " Space order : P2";
-
-        refFE = &feTetraP2;
-        qR    = &quadRuleTetra64pt; // DoE 6
-        bdQr = &quadRuleTria4pt;   // DoE 2
-
     }
     if (verbose) std::cout << std::endl;
 

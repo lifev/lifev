@@ -52,11 +52,11 @@ const markerID_Type InternalEntitySelector::defMarkFlag(markerID_Type(100000));
 
 InternalEntitySelector::InternalEntitySelector():
 M_watermarkFlag( defMarkFlag )
-{};
+{}
 
 InternalEntitySelector::InternalEntitySelector(const markerID_Type & w):
 M_watermarkFlag( w )
-{};
+{}
 
 // ===================================================
 // Operators

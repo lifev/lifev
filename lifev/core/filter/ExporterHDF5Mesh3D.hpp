@@ -810,7 +810,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     this->M_HDF5->Write("Mesh", "Counters.NumGlobalVolumes" + suffix,
                         static_cast<Int>(mesh->numGlobalVolumes()));
 
-    Int numPoints = mesh->numPoints();
+    UInt numPoints = mesh->numPoints();
     std::vector<Real> tmpVectorDouble(numPoints);
     std::vector<std::vector<Real> > pointCoordinates(3, tmpVectorDouble);
 

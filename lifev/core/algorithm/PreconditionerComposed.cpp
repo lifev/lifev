@@ -60,7 +60,7 @@ void
 PreconditionerComposed::setDataFromGetPot( const GetPot&      dataFile,
                                            const std::string& section )
 {
-	list_Type LIFEV_DEPRECATED(uselessList);
+    list_Type LIFEV_DEPRECATED(uselessList);
     createParametersList( uselessList, dataFile, section, "Composed" );
 }
 

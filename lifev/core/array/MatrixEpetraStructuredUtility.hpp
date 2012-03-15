@@ -89,8 +89,8 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            int destIndices[numSrcEntries];
-            DataType destValues[numSrcEntries];
+            std::vector<int> destIndices(numSrcEntries);
+            std::vector<DataType> destValues(numSrcEntries);
             int numDestEntries(0);
             int destRow(srcRowElement+rowsOffset);
 
@@ -110,18 +110,18 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
             if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
             {
 #ifdef NDEBUG
-                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,&destValues[0],&destIndices[0]);
 #else
-                Int errorCode = destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                Int errorCode = destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,&destValues[0],&destIndices[0]);
                 ASSERT(errorCode >=0, " Error in block copy: insertion failed");
 #endif
             }
             else
             {
 #ifdef NDEBUG
-                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,&destValues[0],&destIndices[0]);
 #else
-                Int errorCode = destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                Int errorCode = destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,&destValues[0],&destIndices[0]);
                 ASSERT(errorCode >=0, " Error in block copy: sum failed");
 #endif
             }
@@ -460,8 +460,8 @@ void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            int destIndices[numSrcEntries];
-            DataType destValues[numSrcEntries];
+            std::vector<int> destIndices(numSrcEntries);
+            std::vector<DataType> destValues(numSrcEntries);
             int numDestEntries(0);
             int destRow(srcRowElement+rowsOffset);
             for(int j(0);j<numSrcEntries;++j)
@@ -481,9 +481,9 @@ void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
                 }
             }
             if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
-                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,&destValues[0],&destIndices[0]);
             else
-                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,&destValues[0],&destIndices[0]);
         }
     }
 }
@@ -537,8 +537,8 @@ void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            int destIndices[numSrcEntries];
-            DataType destValues[numSrcEntries];
+            std::vector<int> destIndices(numSrcEntries);
+            std::vector<DataType> destValues(numSrcEntries);
             int numDestEntries(0);
             int destRow(srcRowElement+rowsOffset);
             for(int j(0);j<numSrcEntries;++j)
@@ -558,9 +558,9 @@ void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
                 }
             }
             if(destBlock.matrixPtr()->matrixPtr()->Map().MyGID(destRow))
-                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->InsertGlobalValues(destRow,numDestEntries,&destValues[0],&destIndices[0]);
             else
-                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,destValues,destIndices);
+                destBlock.matrixPtr()->matrixPtr()->SumIntoGlobalValues(destRow,numDestEntries,&destValues[0],&destIndices[0]);
         }
     }
 }

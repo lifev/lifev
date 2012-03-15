@@ -131,22 +131,20 @@ main( int argc, char** argv )
 
     CurrentFE test_CFE(feTetraP2,geoLinearTetra,quadRuleTetra4pt);
 
-    Real notInterestedIn(0.0);
-
     test_CFE.update(Tetra1,UPDATE_QUAD_NODES);
-    notInterestedIn = test_CFE.quadNode(0,0);
+    test_CFE.quadNode(0,0);
 
     test_CFE.update(Tetra1,UPDATE_PHI);
-    notInterestedIn = test_CFE.phi(1,1);
+    test_CFE.phi(1,1);
 
     test_CFE.update(Tetra1,UPDATE_DPHI);
-    notInterestedIn = test_CFE.dphi(2,0,3);
+    test_CFE.dphi(2,0,3);
 
     test_CFE.update(Tetra1,UPDATE_D2PHI);
-    notInterestedIn = test_CFE.d2phi(1,0,1,2);
+    test_CFE.d2phi(1,0,1,2);
 
     test_CFE.update(Tetra1,UPDATE_WDET);
-    notInterestedIn = test_CFE.wDetJacobian(0);
+    test_CFE.wDetJacobian(0);
 
 // 2. Part: check values
 
@@ -200,19 +198,19 @@ main( int argc, char** argv )
     test_CFE.setQuadRule(quadRuleTetra5pt);
 
     test_CFE.update(Tetra1,UPDATE_QUAD_NODES);
-    notInterestedIn = test_CFE.quadNode(3,0);
+    test_CFE.quadNode(3,0);
 
     test_CFE.update(Tetra1,UPDATE_PHI);
-    notInterestedIn = test_CFE.phi(1,4);
+    test_CFE.phi(1,4);
 
     test_CFE.update(Tetra1,UPDATE_DPHI);
-    notInterestedIn = test_CFE.dphi(2,0,4);
+    test_CFE.dphi(2,0,4);
 
     test_CFE.update(Tetra1,UPDATE_D2PHI);
-    notInterestedIn = test_CFE.d2phi(1,0,1,4);
+    test_CFE.d2phi(1,0,1,4);
 
     test_CFE.update(Tetra1,UPDATE_WDET);
-    notInterestedIn = test_CFE.wDetJacobian(4);
+    test_CFE.wDetJacobian(4);
 
 
     // ----- End of test calls -----

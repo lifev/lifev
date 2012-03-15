@@ -279,7 +279,7 @@ ADRAssemblerIP():
         M_localIPGalerkin_22(),
         M_localIPExtended_12(),
         M_localIPExtended_21()
-{};
+{}
 
 // ===================================================
 // Methods
