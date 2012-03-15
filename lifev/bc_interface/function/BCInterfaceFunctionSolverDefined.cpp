@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/core/function/BCInterfaceFunctionSolverDefined.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefined.hpp>
 
 namespace LifeV
 {
