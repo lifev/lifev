@@ -13,7 +13,10 @@ ADD_SUBDIRECTORIES(
   hyperbolic
   matrix_epetra_structured_framework
   mesh
-  parser
   template_test
   vector_container
 )
+
+IF(LifeV_${PACKAGE_NAME}_ENABLE_SPIRIT_PARSER)
+  ADD_SUBDIRECTORY(parser)
+ENDIF()
