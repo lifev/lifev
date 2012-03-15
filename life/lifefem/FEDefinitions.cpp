@@ -3845,7 +3845,7 @@ const ReferenceFEHdiv feTriaRT0( "Lagrange RT0 on a triangle", FE_RT0_TRIA_2D, T
 
 const ReferenceFEScalar feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0, 1, 0, 1, 2,
                             fct_Q0_2D, derfct_Q0_2D, der2fct_Q0_2D, refcoor_Q0_2D,
-                            STANDARD_PATTERN, ( ReferenceFE* ) NULL,&lagrangianTransform );
+                            STANDARD_PATTERN, &feSegP0, &lagrangianTransform );
 
 //======================================================================
 //
