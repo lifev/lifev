@@ -1,0 +1,42 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Name Surname <name.surname@epfl.ch>
+#           Date: 00-00-0000
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+#-------------------------------------------------
+#          Data file for a Darcy problem
+#-------------------------------------------------
+
+[exporter]
+type        = hdf5
+folder      = ./
+multimesh   = false   # actually we export also the displacement
+start       = 0
+save        = 1
+file_name   = FieldFunction
+name_field  = Field
+name_fct    = Function
+[../]
+
+[fefct]
+
+    [./space_discretization]
+    mesh_dir      = ./ # the directory where the mesh file is
+    mesh_file     = cartesian_cube8.mesh #cartesian_cube8.mesh #mesh48603.mesh #cartesian_cube8.mesh
+    mesh_type     = .mesh #structured #.mesh
+    mesh_faces    = all
+    verbose       = 0                        # verbose during mesh-reading
+    #0 -> tetra, 1 -> hexa
+    element_shape = 0
+
+    [../]
+
+[../]

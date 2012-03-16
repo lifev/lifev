@@ -1179,7 +1179,7 @@ feInterpolateValue(const ID& elementID, const vector_type& solutionVector, const
     {
         vector_type repeatedSolutionVector(solutionVector,Repeated);
         return feInterpolateValue(elementID, repeatedSolutionVector, pt, component);
-    };
+    }
 
     // Make sur everything is up to date
     M_fe->update( M_mesh->element( elementID ), UPDATE_PHI);
@@ -1216,10 +1216,10 @@ feInterpolateValue(const ID& elementID, const vector_type& solutionVector, const
         // Make the accumulation
 //        std::cout << M_refFE->phi(iter_dof, hat_x, hat_y, hat_z) << " " << iter_dof << " " << hat_x << " " << hat_y << " " << hat_z << std::endl;
         value += solutionVector[globalDofID] * M_refFE->phi(iter_dof, hat_x, hat_y, hat_z);
-    };
+    }
 
     return value;
-};
+}
 
 
 template<typename MeshType, typename MapType>
@@ -1257,10 +1257,10 @@ feInterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, 
     {
         // Make the accumulation
         value += solutionVector[iter_dof] * M_refFE->phi(iter_dof, hat_x, hat_y, hat_z);
-    };
+    }
 
     return value;
-};
+}
 
 
 template<typename MeshType, typename MapType>
@@ -1275,7 +1275,7 @@ feInterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
     {
         vector_type repeatedSolutionVector(solutionVector,Repeated);
         return feInterpolateGradient(elementID, repeatedSolutionVector, pt, gradientElement, component);
-    };
+    }
 
 
     // Make sur everything is up to date
@@ -1317,11 +1317,11 @@ feInterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
         {
             grad+= solutionVector(globalDofID) * M_refFE->dPhi(iter_dof,iter_dim,hat_x,hat_y,hat_z)
                    * invJac[iter_dim];
-        };
-    };
+        }
+    }
 
     return grad;
-};
+}
 
 
 template<typename MeshType, typename MapType>
@@ -1362,11 +1362,11 @@ feInterpolateGradientLocal(const ID& elementID, const vector_type& solutionVecto
         {
             grad+= solutionVector[iter_dof] * M_refFE->dPhi(iter_dof,iter_dim,hat_x,hat_y,hat_z)
                    * M_fe->pointInverseJacobian(hat_x,hat_y,hat_z,gradientElement,iter_dim);
-        };
-    };
+        }
+    }
 
     return grad;
-};
+}
 
 
 template<typename MeshType, typename MapType>
@@ -1412,7 +1412,7 @@ feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
         {
             const vector_type OriginalRepeated(OriginalVector,Repeated);
             return feToFEInterpolate(OriginalSpace,OriginalRepeated);
-        };
+        }
 
     	if(((refFE().type() == FE_P2_3D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_3D) || (OriginalSpace.refFE().type() == FE_P1_3D) ) ) ||
     	   ((refFE().type() == FE_P2_2D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_2D) || (OriginalSpace.refFE().type() == FE_P1_2D) ) ) ||
@@ -1440,7 +1440,7 @@ feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
 		// finite element).
     	return vector_type(*InterpolatedVectorPtr, outputMapType, Insert);
     }
-};
+}
 
 
 template<typename MeshType, typename MapType>
@@ -1452,7 +1452,7 @@ gradientRecovery(const vector_type& solution, const UInt& dxi) const
     if (solution.mapType() != Repeated)
     {
         return gradientRecovery(vector_type(solution,Repeated),dxi);
-    };
+    }
 
     Real refElemArea(0); //area of reference element
 
@@ -1468,7 +1468,7 @@ gradientRecovery(const vector_type& solution, const UInt& dxi) const
     for (UInt i(0); i<M_refFE->nbDof(); ++i) //nbRefCoor
     {
         interpQuad.addPoint(QuadraturePoint(M_refFE->xi(i),M_refFE->eta(i),M_refFE->zeta(i),wQuad));
-    };
+    }
 
     // Initialization of the vectors
     vector_type patchArea(solution,Repeated);
@@ -1626,7 +1626,7 @@ setQuadRule(const QuadratureRule& Qr)
 {
     M_Qr = &Qr;
     M_fe.reset( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) );
-};
+}
 
 
 // ===================================================
@@ -1773,7 +1773,7 @@ linearInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
 	}
 
 	return Interpolated;
-};
+}
 
 
 //P1 -> P2
@@ -1819,7 +1819,7 @@ P2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                 ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobalMap(elemId,iP1dof));
 
                 DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
-            };
+            }
 
             // Compute the values in the faces
             DofValues[4] = 0.5*(DofValues[0]+DofValues[1]);
@@ -1835,13 +1835,13 @@ P2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                 ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobalMap(elemId,iP2dof));
 
                 Interpolated[globalDofID_present] = DofValues[iP2dof];
-            };
+            }
 
-        };
-    };
+        }
+    }
 
     return Interpolated;
-};
+}
 
 
 

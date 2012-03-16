@@ -128,7 +128,7 @@ public:
         RBF_Gaussian,            /*!< Gaussians */
         RBF_ThinPlateSpline,     /*!< Thin plate splines */
         RBF_MultiQuadric,        /*!< Multiquadrics */
-        RBF_Cubic,               /*!< Cubics */
+        RBF_Cubic               /*!< Cubics */
     };
 
     //@}

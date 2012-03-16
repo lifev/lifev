@@ -218,7 +218,7 @@ Real Womersley::normalVector( const Real& /*t*/, const Real& x, const Real& y,
         //          << std::endl;
     }
     return n[i];
-};
+}
 
 //we suppose that the problem geometry is the cylinder having axis x, origin (0,0,0), diameter D and height L
 Real Womersley::fShearStress( const Real& t, const Real& x, const Real& y, const Real& z, const ID& i )

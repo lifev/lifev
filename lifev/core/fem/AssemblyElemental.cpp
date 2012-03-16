@@ -36,6 +36,7 @@
 #define ELEMOPER_CPP 1
 
 #include <lifev/core/fem/AssemblyElemental.hpp>
+#include <boost/multi_array.hpp>
 
 namespace LifeV
 {
@@ -501,8 +502,8 @@ void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 {
 
     double s;
-    Real duk[ fe.nbQuadPt() ];      // definizione del vettore che conterra \div u^k at each quadrature point
-
+    // div u^k at quad pts
+    std::vector<Real> duk(fe.nbQuadPt());
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -549,7 +550,7 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
+    boost::multi_array<Real, 3> guk(boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -598,7 +599,7 @@ void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
 {
 
     double s,s1;
-    Real gguk[ fe.nbQuadPt() ]; //    (\grad u_k : \grad u_k) at each quadrature point
+    std::vector<Real> gguk(fe.nbQuadPt());
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -646,7 +647,8 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -696,8 +698,8 @@ void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElem
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
-
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -750,8 +752,8 @@ void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixE
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
-
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -804,8 +806,8 @@ void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixEl
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
-
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -859,8 +861,8 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
-
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -914,8 +916,9 @@ void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixE
 {
 
     double s;
-    Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k  [\grad u^k]^T  at each quadrature point
-
+    boost::multi_array<Real, 3> guk_gukT(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+    
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
@@ -971,8 +974,8 @@ void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, Matri
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
-
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -1028,7 +1031,9 @@ void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, Matri
 {
 
     double s;
-    Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k  [\grad u^k]^T  at each quadrature point
+    boost::multi_array<Real, 3> guk_gukT(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+
     // attenzione in questa funzione si deve usare il trasposto
     // loop on quadrature points                                                // (\grad u^k  [\grad u^k]^T )^T
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -1109,8 +1114,12 @@ void ipstab_grad( const Real         coef,
     UInt icoor,jcoor,i,j;
     UInt ig;
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
+    
+    boost::multi_array<Real, 3> phid1(
+      boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+    boost::multi_array<Real, 3> phid2(
+      boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+
     Real b1[ 3 ], b2[ 3 ];
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
@@ -1204,8 +1213,12 @@ void ipstab_grad( const Real         coef,
     UInt icoor,jcoor,i,j;
     UInt ig;
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
+
+    boost::multi_array<Real, 3> phid1(
+      boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+    boost::multi_array<Real, 3> phid2(
+      boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+
     Real b1[ 3 ], b2[ 3 ];
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
@@ -1307,7 +1320,8 @@ void ipstab_bgrad( const Real         coef,
     //
     // convection velocity \beta on the boundary quadrature points
     //
-    Real b[ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
+    boost::multi_array<Real, 2> b(
+      boost::extents[fe1.nbCoor()][bdfe.nbQuadPt()]);
 
     for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
     {
@@ -1330,8 +1344,12 @@ void ipstab_bgrad( const Real         coef,
     //
 
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
+    
+    boost::multi_array<Real, 3> phid1(
+      boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+    boost::multi_array<Real, 3> phid2(
+      boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+
     Real b1[ 3 ], b2[ 3 ];
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
@@ -1423,8 +1441,12 @@ void ipstab_div( const Real coef, MatrixElemental& elmat, const CurrentFE& fe1, 
     UInt i,j,icoor,jcoor;
     UInt ig;
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
+    
+    boost::multi_array<Real, 3> phid1(
+      boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+    boost::multi_array<Real, 3> phid2(
+      boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+
     Real b1[ 3 ], b2[ 3 ];
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
@@ -1510,8 +1532,11 @@ void ipstab_bagrad( const Real coef, MatrixElemental& elmat,
     Real sum, sum1, sum2;
     UInt icoor,jcoor;
     UInt i, j, ig;
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
+    
+    boost::multi_array<Real, 3> phid1(
+      boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+    boost::multi_array<Real, 3> phid2(
+      boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
 
     std::vector<Real> x(3), rx1(3), drp1(3), rx2(3), drp2(3);
     std::vector<Real> b1(3), b2(3);
@@ -1523,7 +1548,7 @@ void ipstab_bagrad( const Real coef, MatrixElemental& elmat,
     // convection velocity term |\beta . n|^2 / |\beta|
     // on the boundary quadrature points
     //
-    Real ba2[ bdfe.nbQuadPt() ];
+    std::vector<Real> ba2(bdfe.nbQuadPt());
 
     for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
     {
@@ -1633,8 +1658,11 @@ void ipstab_bagrad( const Real         coef,
     Real sum, sum1, sum2;
     UInt icoor,jcoor;
     UInt i, j, ig;
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
+    
+    boost::multi_array<Real, 3> phid1(
+      boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+    boost::multi_array<Real, 3> phid2(
+      boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
 
     std::vector<Real> x(3), rx1(3), drp1(3), rx2(3), drp2(3);
     std::vector<Real> b1(3), b2(3);
@@ -1646,7 +1674,7 @@ void ipstab_bagrad( const Real         coef,
     // convection velocity term |\beta . n|
     // on the boundary quadrature points
     //
-    Real bn[ bdfe.nbQuadPt() ];
+    std::vector<Real> bn(bdfe.nbQuadPt());
 
     for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
     {
@@ -2425,8 +2453,8 @@ void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
-
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -2482,9 +2510,10 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 {
 
     double s;
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
-
-
+    
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+    
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
@@ -2542,8 +2571,9 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 //
 void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
 
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
     Real s;
 
     // loop on quadrature points
@@ -2651,7 +2681,8 @@ void mass_divw( Real coef, const VectorElemental& w_loc, MatrixElemental& elmat,
     mat_tmp = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
 
     UInt i, icomp, ig, icoor, iloc, jloc;
-    Real s, coef_s, divw[ fe.nbQuadPt() ];
+    Real s, coef_s;
+    std::vector<Real> divw(fe.nbQuadPt());
 
     // divw at quadrature nodes
     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -2720,7 +2751,8 @@ void mass_divw(const std::vector<Real>& coef, const VectorElemental& w_loc, Matr
     mat_tmp = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
 
     UInt i, icomp, ig, icoor, iloc, jloc;
-    Real s, divw[ fe.nbQuadPt() ]; // , coef_s
+    Real s;
+    std::vector<Real> divw(fe.nbQuadPt());
 
     // divw at quadrature nodes
     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -2787,8 +2819,9 @@ void mass_gradu( Real coef, const VectorElemental& u0_loc, MatrixElemental& elma
 
     UInt ig, icoor, jcoor, i, j;
     Real s;
-    Real gu0[ fe.nbQuadPt() ][ fe.nbCoor() ][ fe.nbCoor() ];
-
+    
+    boost::multi_array<Real, 3> gu0(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()]);
 
     //
     // grad u0 at quadrature nodes
@@ -2842,7 +2875,9 @@ void stiff_sd( Real coef, const VectorElemental& vec_loc, MatrixElemental& elmat
     MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt iloc, jloc;
     UInt i, icoor, ig, jcoor;
-    double s, coef_s, coef_v[ fe.nbCoor() ];
+    std::vector<Real> coef_v(fe.nbCoor());
+    
+    double s, coef_s;
     //    int nbN1=fe.nbFEDof();
     UInt nbN2 = fe2.nbFEDof();
     //
@@ -3366,9 +3401,9 @@ void source_mass(const std::vector<Real>& constant, VectorElemental& elvec, cons
             vec(iterNode) += constant[iterQuadNode]
                              * currentFe.phi( iterNode, iterQuadNode )
                              * currentFe.weightDet( iterQuadNode );
-        };
-    };
-};
+        }
+    }
+}
 
 void source_stiff(const std::vector<Real>& constant, VectorElemental& elvec, const CurrentFE& currentFe, const int& iblock)
 {
@@ -3383,10 +3418,10 @@ void source_stiff(const std::vector<Real>& constant, VectorElemental& elvec, con
                 vec(iterNode) += constant[iterQuadNode + iterGradComp*nbQuadPt]
                                  * currentFe.phiDer( iterNode,iterGradComp, iterQuadNode )
                                  * currentFe.weightDet( iterQuadNode );
-            };
-        };
-    };
-};
+            }
+        }
+    }
+}
 
 
 
@@ -3460,10 +3495,12 @@ void source_fhn( Real coef_f, Real coef_a, VectorElemental& u, VectorElemental& 
 void source_advection( const VectorElemental& beta_loc, const VectorElemental& uk_loc,
                        VectorElemental& elvec, const CurrentFE& fe )
 {
-
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ];      // \grad u^k at a quadrature point
-    Real beta[ fe.nbCoor() ];                    // beta at a quadrature point
-    Real conv[ fe.nbQuadPt() ][ fe.nbCoor() ];    // beta(\grad u^k) at each quadrature point
+    boost::multi_array<Real, 2> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    boost::multi_array<Real, 2> conv(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+    std::vector<Real> beta(fe.nbCoor());
+    
     Real s;
 
     UInt ig, icoor, jcoor, i;
@@ -3539,13 +3576,20 @@ void source_advection( const VectorElemental& beta_loc, const VectorElemental& u
 void source_mass1( Real coef, const VectorElemental& uk_loc, const VectorElemental& wk_loc, const VectorElemental& convect_loc,
                    const VectorElemental& d_loc, VectorElemental& elvec, const CurrentFE& fe )
 {
-    Real B[ fe.nbCoor() ][ fe.nbCoor() ];                 // \grad (convect) at a quadrature point
-    Real A[ fe.nbCoor() ][ fe.nbCoor() ];                 // I\div d - (\grad d)^T at a quadrature point
-    Real aux[ fe.nbQuadPt() ];                        // grad (- w^k):[I\div d - (\grad d)^T] at  quadrature points
-    Real uk[ fe.nbQuadPt() ][ fe.nbCoor() ];              // u^k quadrature points
-    Real guk[ fe.nbQuadPt() ][ fe.nbCoor() ][ fe.nbCoor() ];  // \grad u^k at quadrature points
-    Real convect[ fe.nbCoor() ];                      // convect at quadrature points
-    Real convect_A[ fe.nbQuadPt() ][ fe.nbCoor() ];       // (convect)^T [I\div d - (\grad d)^T] at quadrature points
+  
+    boost::multi_array<Real, 2> A(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    boost::multi_array<Real, 2> B(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    boost::multi_array<Real, 2> uk(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()]);
+    std::vector<Real> dw(fe.nbCoor());
+    std::vector<Real> aux(fe.nbQuadPt());
+    std::vector<Real> convect(fe.nbCoor());
+    boost::multi_array<Real, 2> convect_A(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
 
     Real s, sA, sB, sG;
 
@@ -3668,9 +3712,12 @@ void source_mass2( Real coef, const VectorElemental& uk_loc, const VectorElement
                    VectorElemental& elvec, const CurrentFE& fe )
 {
 
-    Real guk[ fe.nbCoor() ][ fe.nbCoor() ];      // \grad u^k at a quadrature point
-    Real dw[ fe.nbCoor() ];                  // dw at a quadrature point
-    Real aux[ fe.nbQuadPt() ][ fe.nbCoor() ];    // (\grad u^k)dw at each quadrature point
+    boost::multi_array<Real, 2> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    std::vector<Real> dw(fe.nbCoor());
+    boost::multi_array<Real, 2> aux(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+
     Real s;
 
     UInt ig, icoor, jcoor, i;
@@ -3741,10 +3788,14 @@ void source_mass2( Real coef, const VectorElemental& uk_loc, const VectorElement
 void source_mass3( Real coef, const VectorElemental& un_loc, const VectorElemental& uk_loc, const VectorElemental& d_loc,
                    VectorElemental& elvec, const CurrentFE& fe )
 {
-    Real B[ fe.nbCoor() ][ fe.nbCoor() ];                 // \grad u^n at a quadrature point
-    Real A[ fe.nbCoor() ][ fe.nbCoor() ];                 // I\div d - (\grad d)^T at a quadrature point
-    Real aux[ fe.nbQuadPt() ];                        //  \div d  \div u^n  + grad u^n:[I\div d - (\grad d)^T] at  quadrature points
-    Real uk[ fe.nbQuadPt() ][ fe.nbCoor() ];              // u^k quadrature points
+  
+    boost::multi_array<Real, 2> B(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    boost::multi_array<Real, 2> A(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    boost::multi_array<Real, 2> uk(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+    std::vector<Real> aux(fe.nbQuadPt());
 
     Real s, sA, sB;
 
@@ -3836,10 +3887,15 @@ void source_stress( Real coef, Real mu, const VectorElemental& uk_loc, const Vec
                     const CurrentFE& fe_p )
 {
 
-    Real A[ fe_u.nbCoor() ][ fe_u.nbCoor() ];                 // I\div d - (\grad d)^T at a quadrature point
-    Real guk[ fe_u.nbCoor() ][ fe_u.nbCoor() ];               // \grad u^k at a quadrature point
-    Real sigma[ fe_u.nbCoor() ][ fe_u.nbCoor() ];             // [-p^k I + 2*mu e(u^k)] a quadrature point
-    Real B[ fe_u.nbQuadPt() ][ fe_u.nbCoor() ][ fe_u.nbCoor() ];  // [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] at each quadrature point
+    boost::multi_array<Real, 3> B(
+      boost::extents[fe_u.nbQuadPt()][fe_u.nbCoor()][fe_u.nbCoor()]);
+    boost::multi_array<Real, 2> A(
+      boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+    boost::multi_array<Real, 2> guk(
+      boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+    boost::multi_array<Real, 2> sigma(
+      boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+
     Real s, sA, sG, pk;
 
     UInt icoor, jcoor, kcoor, ig, i;
@@ -3950,9 +4006,13 @@ void source_stress( Real coef, Real mu, const VectorElemental& uk_loc, const Vec
 void source_stress2( Real coef, const VectorElemental& uk_loc, const VectorElemental& d_loc, VectorElemental& elvec, const CurrentFE& fe_u )
 {
 
-    Real guk[ fe_u.nbCoor() ][ fe_u.nbCoor() ];               // \grad u^k at a quadrature point
-    Real gd[ fe_u.nbCoor() ][ fe_u.nbCoor() ];                // \grad d at a quadrature point
-    Real A[ fe_u.nbQuadPt() ][ fe_u.nbCoor() ][ fe_u.nbCoor() ];  // \grad u^k \grad d + [\grad d]^T[\grad u^k]^T  at each quadrature point
+    boost::multi_array<Real, 3> A(
+      boost::extents[fe_u.nbQuadPt()][fe_u.nbCoor()][fe_u.nbCoor()]);
+    boost::multi_array<Real, 2> guk(
+      boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+    boost::multi_array<Real, 2> gd(
+      boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+    
     Real su, sd, s;
 
     UInt icoor, jcoor, kcoor, ig, i;
@@ -4038,10 +4098,12 @@ void source_stress2( Real coef, const VectorElemental& uk_loc, const VectorEleme
 void source_press( Real coef, const VectorElemental& uk_loc, const VectorElemental& d_loc, VectorElemental& elvec,
                    const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock )
 {
+    boost::multi_array<Real, 2> A(
+      boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+    boost::multi_array<Real, 2> guk(
+      boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+    std::vector<Real> aux(fe_u.nbQuadPt());
 
-    Real A[ fe_u.nbCoor() ][ fe_u.nbCoor() ];     //  I\div d - (\grad d)^T at a quadrature point
-    Real guk[ fe_u.nbCoor() ][ fe_u.nbCoor() ];   // \grad u^k at a quadrature point
-    Real aux[ fe_u.nbQuadPt() ];              // grad u^k:[I\div d - (\grad d)^T] at each quadrature point
     VectorElemental::vector_view vec = elvec.block( iblock );
 
     Real s, sA, sG;
@@ -4111,11 +4173,13 @@ void source_press( Real coef, const VectorElemental& uk_loc, const VectorElement
 void source_press2( Real coef, const VectorElemental& p_loc, const VectorElemental& d_loc, VectorElemental& elvec,
                     const CurrentFE& fe, int iblock )
 {
-
-    Real A[ fe.nbCoor() ][ fe.nbCoor() ];     //  I\div d - (\grad d)^T - \grad d at a quadrature point
-    Real B[ fe.nbCoor() ][ fe.nbCoor() ];     // - \grad d
-    Real gpk[ fe.nbCoor() ];   // \grad p^k at a quadrature point
-    Real aux[ fe.nbQuadPt() ][fe.nbCoor()];              // [I\div d - (\grad d)^T - \grad d ]\grad p^k at each quadrature point
+    boost::multi_array<Real, 2> A(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    boost::multi_array<Real, 2> B(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    boost::multi_array<Real, 2> aux(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+    std::vector<Real> gpk(fe.nbCoor());
 
     VectorElemental::vector_view vec = elvec.block( iblock );
 
@@ -4240,14 +4304,14 @@ void cholsl( KNM<Real> &a, KN<Real> &p, KN<Real> &b, KN<Real> &x )
 void source_press( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat,
                    const CurrentFE& fe_u, const CurrentFE& fe_p, ID mmDim , int iblock )
 {
+    boost::multi_array<Real, 4> A(
+      boost::extents[fe_u.nbCoor()][fe_u.nbCoor()][fe_u.nbFEDof()][fe_u.nbCoor()]);
+    boost::multi_array<Real, 2> guk(
+      boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+    boost::multi_array<Real, 3> aux(
+      boost::extents[fe_u.nbQuadPt()][fe_u.nbFEDof()][fe_u.nbCoor()]);
 
-    Real A[ fe_u.nbCoor() ][ fe_u.nbCoor() ][fe_u.nbFEDof()][ fe_u.nbCoor() ];     //  I\div d - (\grad d)^T at a quadrature point
-    Real guk[ fe_u.nbCoor() ][ fe_u.nbCoor() ];   // \grad u^k at a quadrature point
-    Real aux[ fe_u.nbQuadPt() ][fe_u.nbFEDof()][ fe_u.nbCoor() ];              // grad u^k:[I\div d - (\grad d)^T] at each quadrature point
-
-    //    double A[ fe_u.nbCoor() ][ fe_u.nbCoor() ][fe_u.nbFEDof()][ fe_u.nbCoor() ];
-
-    Real /*s,*/ l/*[fe_u.nbFEDof()][fe_u.nbCoor()]*/, sA/*[fe_u.nbFEDof()][fe_u.nbCoor()]*/, sG;
+    Real l, sA, sG;
     UInt icoor, jcoor, ig;
 
 
@@ -4299,7 +4363,7 @@ void source_press( Real coef, const VectorElemental& uk_loc, MatrixElemental& el
 
 
 
-        double z[fe_u.nbCoor()];
+        std::vector<Real> z(fe_u.nbCoor());
         for ( UInt i = 0; i < fe_u.nbFEDof(); i++ )
         {
             //                for ( int kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
@@ -4443,24 +4507,50 @@ void shape_terms(
     boost::shared_ptr<MatrixElemental> elmat_convect
 )
 {
-    //Real BGrConv[ fe.nbCoor() ][ fe.nbCoor() ]/*[fe.nbFEDof()]*/;                 // \grad (convect) at a quadrature point
-    Real eta[ fe.nbCoor() ][ fe.nbCoor() ][fe.nbFEDof()][ fe.nbCoor() ];                 // I\div d - (\grad d)^T at a quadrature point
-    Real etaMass3[ fe.nbCoor() ][ fe.nbCoor() ][fe.nbFEDof()][ fe.nbCoor() ];                 // I\div d - (\grad d)^T at a quadrature point
-    Real uk[ fe.nbQuadPt() ][ fe.nbCoor() ];              // u^k quadrature points
-    Real guk[ fe.nbQuadPt() ][ fe.nbCoor() ][ fe.nbCoor() ];  // \grad u^k at quadrature points
-    Real duk[ fe.nbQuadPt() ];  // \div u^k at quadrature points
-    Real gun[ fe.nbQuadPt() ][ fe.nbCoor() ][ fe.nbCoor() ];  // \grad u^k at quadrature points
-    Real convect[ fe.nbCoor() ];                      // convect at quadrature points
-    Real convect_eta[ fe.nbQuadPt() ][ fe.nbCoor() ][fe.nbFEDof()][ fe.nbCoor() ];       // (convect)^T [I\div d - (\grad d)^T] at quadrature points
-    Real sigma[ fe.nbCoor() ][ fe.nbCoor() ];             // [-p^k I + 2*mu e(u^k)] a quadrature point
-    Real B[ fe.nbQuadPt() ][ fe.nbCoor() ][ fe.nbCoor() ][fe.nbFEDof()][ fe.nbCoor() ];  // [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] at each quadrature point
-    Real gd[ fe.nbCoor() ][ fe.nbCoor() ][fe.nbFEDof()][ fe.nbCoor() ];                // \grad d at a quadrature point
-    Real A2[ fe.nbQuadPt() ][ fe.nbCoor() ][ fe.nbCoor() ][fe.nbFEDof()][ fe.nbCoor() ];  // \grad u^k \grad d + [\grad d]^T[\grad u^k]^T  at each quadrature point
-    Real aux[ fe.nbQuadPt() ][ fe.nbCoor() ][fe.nbFEDof()][fe.nbCoor()];
-    Real BMass[ fe.nbCoor() ][ fe.nbCoor() ];
-    Real auxMass[ fe.nbQuadPt() ][fe.nbFEDof()][fe.nbCoor()];
-    Real auxMass3[ fe.nbQuadPt() ][fe.nbFEDof()][fe.nbCoor()];
+    // I div d - (grad d)^T
+    boost::multi_array<Real, 4> eta(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+    // I div d - (grad d)^T
+    boost::multi_array<Real, 4> etaMass3(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+    // u^k
+    boost::multi_array<Real, 2> uk(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+    // grad u^k
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()]);
+    // div u^k
+    std::vector<Real> duk(fe.nbQuadPt());
+    // grad u^k
+    boost::multi_array<Real, 3> gun(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()]);
+    // convect
+    std::vector<Real> convect(fe.nbCoor());
+    // convect^T [ I div d - (grad d)^T ]
+    boost::multi_array<Real, 4> convect_eta(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+    // - p^k I + 2 mu e(u^k)
+    boost::multi_array<Real, 2> sigma(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    // ( - p^k I + 2 mu e(u^k) )( I div d - (grad d)^T )
+    boost::multi_array<Real, 5> B(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+    // gd
+    boost::multi_array<Real, 4> gd(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+    // grad u^k grad d + (grad d)^T (grad u^k)^T
+    boost::multi_array<Real, 5> A2(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
 
+    boost::multi_array<Real, 4> aux(
+      boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+    boost::multi_array<Real, 2> BMass(
+      boost::extents[fe.nbCoor()][fe.nbCoor()]);
+    boost::multi_array<Real, 3> auxMass(
+      boost::extents[fe.nbQuadPt()][fe.nbFEDof()][fe.nbCoor()]);
+    boost::multi_array<Real, 3> auxMass3(
+      boost::extents[fe.nbQuadPt()][fe.nbFEDof()][fe.nbCoor()]);
+    
     Real s,  sA, sB, sGk, sGn, pk;
 
     UInt icoor, jcoor, ig, kcoor, i, j;
@@ -4558,7 +4648,7 @@ void shape_terms(
         for ( i = 0; i < fe.nbFEDof(); i++ )
         {
 
-            Real z[fe.nbCoor()];
+            std::vector<Real> z(fe.nbCoor());
             for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
                 //if(icoor==jcoor)

@@ -646,7 +646,7 @@ reinitializationDirect()
 
     M_solution = vector_type(repSol,Unique,Zero);
 
-};
+}
 
 // ===================================================
 // Private Methods
@@ -862,7 +862,7 @@ updateFacesNormalsRadius()
     ASSERT(M_faces.size() == M_radius.size(),"Internal non coerance");
     ASSERT(M_faces.size() == M_normals.size(),"Internal non coerance");
 
-};
+}
 
 template<typename mesh_type, typename solver_type>
 Real
@@ -1017,7 +1017,7 @@ computeUnsignedDistance(const std::vector< Real >& point)
     };
 
     return absdist;
-};
+}
 
 template<typename mesh_type, typename solver_type>
 void
@@ -1027,7 +1027,7 @@ cleanFacesData()
     M_faces.clear();
     M_normals.clear();
     M_radius.clear();
-};
+}
 
 } // Namespace LifeV
 

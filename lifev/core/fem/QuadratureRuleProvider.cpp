@@ -100,7 +100,7 @@ provideExactness(const ReferenceShapes& shape, const UInt& exactness)
     // In case you have found nothing, return the maximal
     // quadrature rule.
     return provideMaximal(shape);
-};
+}
 
 const QuadratureRule&
 QuadratureRuleProvider::
@@ -151,7 +151,7 @@ provideExactnessMax(const ReferenceShapes& shape, const UInt& exactness)
     // In case you have found nothing, return the maximal
     // quadrature rule.
     return provideMaximal(shape);
-};
+}
 
 const QuadratureRule&
 QuadratureRuleProvider::
@@ -191,7 +191,7 @@ provideMaximal(const ReferenceShapes& shape)
     };
 
     return quadRuleTetra64pt;
-};
+}
 
 // ===================================================
 // Set Methods
@@ -236,7 +236,7 @@ provideExactnessTetra(const UInt& exactness)
     };
 
     return quadRuleTetra64pt;
-};
+}
 
 const QuadratureRule&
 QuadratureRuleProvider::
@@ -256,7 +256,7 @@ provideExactnessPrism(const UInt& exactness)
      * the prism will be available!
      */
     return quadRuleTetra64pt;
-};
+}
 
 const QuadratureRule&
 QuadratureRuleProvider::
@@ -279,7 +279,7 @@ provideExactnessHexa(const UInt& exactness)
     };
 
     return quadRuleHexa8pt;
-};
+}
 
 const QuadratureRule&
 QuadratureRuleProvider::
@@ -306,7 +306,7 @@ provideExactnessQuad(const UInt& exactness)
     };
 
     return quadRuleQuad9pt;
-};
+}
 
 const QuadratureRule&
 QuadratureRuleProvider::
@@ -337,7 +337,7 @@ provideExactnessTriangle(const UInt& exactness)
     };
 
     return quadRuleTria7pt;
-};
+}
 
 const QuadratureRule&
 QuadratureRuleProvider::
@@ -362,7 +362,7 @@ provideExactnessLine(const UInt& exactness)
     };
 
     return quadRuleTria3pt;
-};
+}
 
 const QuadratureRule&
 QuadratureRuleProvider::
@@ -373,8 +373,7 @@ provideExactnessPoint(const UInt& exactness)
     default:
         return quadRuleNode1pt;
     };
-};
-
+}
 
 
 

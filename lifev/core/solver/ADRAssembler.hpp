@@ -461,7 +461,7 @@ ADRAssembler():
         M_massAssemblyChrono(),
         M_setupChrono(),
         M_massRhsAssemblyChrono()
-{};
+{}
 
 // ===================================================
 // Constructors & Destructor

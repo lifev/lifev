@@ -22,8 +22,8 @@ SET(HEADERS "")
 SET(SOURCES "")
 
 ADD_SUBDIRECTORY(function)
-SET(HEADERS ${HEADERS} ${function_HEADERS})
-SET(SOURCES ${SOURCES} ${function_SOURCES})
+SET(HEADERS ${HEADERS} ${function_HEADERS} ${function_bessel_HEADERS})
+SET(SOURCES ${SOURCES} ${function_SOURCES} ${function_bessel_SOURCES})
 
 ADD_SUBDIRECTORY(solver)
 SET(HEADERS ${HEADERS} ${solver_HEADERS})
@@ -41,7 +41,7 @@ TRIBITS_ADD_LIBRARY(
 )
 
 TRIBITS_ADD_TEST_DIRECTORIES(testsuite)
-# TRIBITS_ADD_EXAMPLE_DIRECTORIES(examples)
+TRIBITS_ADD_EXAMPLE_DIRECTORIES(examples)
 
 #
 # Do standard postprocessing

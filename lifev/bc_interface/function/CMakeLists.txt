@@ -10,6 +10,7 @@ SET(function_HEADERS
 CACHE INTERNAL "")
 
 SET(function_SOURCES
+  function/BCInterfaceFunctionSolverDefined.cpp
 CACHE INTERNAL "")
 
 

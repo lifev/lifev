@@ -325,7 +325,7 @@ public:
    */
 
     virtual Real coefficientExtrapolationVelocity(const UInt& i ) const =0;
-;
+
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of

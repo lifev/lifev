@@ -67,8 +67,8 @@ DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVe
         std::ostringstream errorMessage;
         errorMessage << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
         ERROR_MSG( errorMessage.str().c_str() );
-    };
-    };
+    }
+    }
 }
 
 
@@ -84,7 +84,7 @@ DOFLocalPattern::DOFLocalPattern( const DOFLocalPattern& localDofPattern) :
         M_nbPattern(localDofPattern.M_nbPattern),
         M_nbDiag (localDofPattern.M_nbDiag ),
         M_nbUpper (localDofPattern.M_nbUpper )
-{};
+{}
 
 // ===================================================
 // Methods
@@ -99,7 +99,7 @@ void DOFLocalPattern::showMe( std::ostream& output) const
     for (UInt iter(0); iter< M_nbPattern; ++iter)
     {
         output << iter << " : " << M_pattern[iter].first << " - " << M_pattern[iter].second << std::endl;
-    };
+    }
 }
 
 // ===================================================
@@ -145,8 +145,8 @@ void DOFLocalPattern::setupStandardPattern()
             M_pattern[ip] = std::pair<UInt,UInt> (i,j);
             ip++;
         }
-    };
-};
+    }
+}
 
 
 void DOFLocalPattern::setupP1isoP2SegPattern()
@@ -165,7 +165,7 @@ void DOFLocalPattern::setupP1isoP2SegPattern()
     for (UInt diag(0); diag<3; ++diag)
     {
         M_pattern[diag] = std::pair<UInt,UInt> (diag,diag);
-    };
+    }
 
     // Upper diagonal entries
     M_pattern[3]  = std::pair<UInt,UInt> (0,2);

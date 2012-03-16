@@ -1,5 +1,6 @@
 This file explains how to add a new module to the LifeV library, following the
-TriBITS package specifications.
+TriBITS package specifications. The Dummy module is an example of a minimal
+set of files to add.
 
 the list of files that should be edited is:
 
@@ -37,3 +38,7 @@ this cmake script.
 
 The test should print to std::out the string "End Result: TEST PASSED" to be
 recognized as a successful test.
+
+After the new module is configured, erase the CMakeCache.txt file in the build
+directory to unsure that the new module is picked up correctly in the next
+build.

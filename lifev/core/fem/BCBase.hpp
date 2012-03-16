@@ -89,7 +89,7 @@ enum bcType_Type
     Resistance,			/*!< Resistance boundary conditions */
     Essential, 			/*!< Dirichlet boundary conditions */
     EssentialEdges, 	/*!< Dirichlet boundary conditions on edges */
-    EssentialVertices, 	/*!< Dirichlet boundary conditions on vertices */
+    EssentialVertices 	/*!< Dirichlet boundary conditions on vertices */
 };
 
 /*! @enum bcMode_Type

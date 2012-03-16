@@ -52,7 +52,7 @@ DataLevelSet():
         M_stabilization(),
         M_IPTreatment(),
         M_IPCoef()
-{};
+{}
 
 
 // ===================================================
@@ -70,7 +70,7 @@ setup( const GetPot& dataFile, const std::string& section)
     std::string ipName = dataFile((section+"/ip/treatment").data(),"implicit");
     setIPTreatment(ipName);
     M_IPCoef = dataFile((section+"/ip/coefficient").data(),0.0);
-};
+}
 
 void
 DataLevelSet::
@@ -89,7 +89,7 @@ showMe(std::ostream& out) const
     if (M_IPTreatment == EXPLICIT) out << "explicit" << std::endl;
 
     out << " IP coefficient : " << M_IPCoef << std::endl;
-};
+}
 
 // ===================================================
 // Set Methods
@@ -108,7 +108,7 @@ setStabilization(const std::string& stab)
         ASSERT( stab.compare("none") ==0, " Unknown stabilization! ");
         M_stabilization = NONE;
     }
-};
+}
 
 void
 DataLevelSet::
@@ -127,7 +127,7 @@ setIPTreatment(const std::string& treat)
         ASSERT( treat.compare("explicit") ==0, " Unknown IP treatment! ");
         M_IPTreatment = EXPLICIT;
     }
-};
+}
 
 
 } // Namespace LifeV

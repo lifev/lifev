@@ -379,7 +379,7 @@ void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,Curr
         //First we build the map
         UInt nbPoints(M_flags.size()+M_givenVersors.size());
         UInt i(0);
-        Int idList[3*nbPoints]; //3 times because we want 3 coordinates
+        std::vector<Int> idList(3*nbPoints); //3 times because we want 3 coordinates
 
         //We store the number of Degrees of Freedom
         M_numDof = dof.numTotalDof();
@@ -404,7 +404,7 @@ void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,Curr
             ++i;
         }
 
-        M_localMapEpetraPtr.reset( new MapEpetra(-1,3*nbPoints,idList,commPtr) );
+        M_localMapEpetraPtr.reset( new MapEpetra(-1,3*nbPoints,&idList[0],commPtr) );
 
         //-----------------------------------------------------
         // STEP 2: Compute normals and tangents
@@ -526,8 +526,8 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
     //We obtain the ID of the element
     Int NumMyElements = normals.map().map(Unique)->NumMyElements();
-    Int MyGlobalElements[NumMyElements];
-    normals.map().map(Unique)->MyGlobalElements(MyGlobalElements);
+    std::vector<Int> MyGlobalElements(NumMyElements);
+    normals.map().map(Unique)->MyGlobalElements(&(MyGlobalElements[0]));
 
     //We normalize the normal
     Real norm;
@@ -570,8 +570,8 @@ void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
         {
             //We obtain the ID of the element
             Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-            Int MyGlobalElements[NumMyElements];
-            M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+            std::vector<Int> MyGlobalElements(NumMyElements);
+            M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
             ID idof(0);
 
             //Writing the header
@@ -657,8 +657,8 @@ void BCManageNormal<MatrixType>::M_calculateCoordinates(MeshType const& mesh)
 
     //We obtain the ID of the element
     Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-    Int MyGlobalElements[NumMyElements];
-    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+    std::vector<Int> MyGlobalElements(NumMyElements);
+    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
 
     UInt id;
 
@@ -728,8 +728,8 @@ void BCManageNormal<MatrixType>::M_storeGivenVersors()
 
     //We obtain the ID of the element
     Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-    Int MyGlobalElements[NumMyElements];
-    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+    std::vector<Int> MyGlobalElements(NumMyElements);
+    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
 
     //We normalize the normal
     Real norm;
@@ -770,8 +770,8 @@ void BCManageNormal<MatrixType>::M_calculateTangentVectors()
 
     //We obtain the ID of the element
     Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-    Int MyGlobalElements[NumMyElements];
-    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+    std::vector<Int> MyGlobalElements(NumMyElements);
+    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
 
     //Building the tangential vectors
     M_firstTangentPtr.reset ( new VectorEpetra(*M_localMapEpetraPtr,Unique) );
@@ -862,8 +862,8 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix
     //Adding one to the diagonal
     M_rotationMatrixPtr->insertOneDiagonal();
 
-    Int nbRows(3);
-    Int nbCols(3);
+    static const Int nbRows(3);
+    static const Int nbCols(3);
     Real* values[nbCols];
     Int Indices[3];
     for ( Int n = 0; n < nbCols; ++n )
@@ -880,8 +880,8 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix
 
     //We obtain the ID of the element
     Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-    Int MyGlobalElements[NumMyElements];
-    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+    std::vector<Int> MyGlobalElements(NumMyElements);
+    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
 
     UInt id;
 

@@ -178,7 +178,7 @@ public:
     {
         addPressureMass(matrix,coefficient, M_uFESpace->dof().numTotalDof()*nDimensions,
                         M_uFESpace->dof().numTotalDof()*nDimensions);
-    };
+    }
 
     //! Add the mass using offsets
     void addPressureMass(matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
@@ -679,9 +679,9 @@ addConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft
 
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the convection.");
     ASSERT(M_betaFESpace != 0, "No convective FE space for assembling the convection.");
-    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalCols(),
+    ASSERT(static_cast<Int>(offsetLeft + M_uFESpace->dof().numTotalDof()*nDimensions) <= matrix.matrixPtr()->NumGlobalCols(),
            "The matrix is too small (columns) for the assembly of the convection");
-    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalRows(),
+    ASSERT(static_cast<Int>(offsetUp + M_uFESpace->dof().numTotalDof()*nDimensions) <= matrix.matrixPtr()->NumGlobalRows(),
            " The matrix is too small (rows) for the assembly of the convection");
 
     // Some constants
@@ -861,9 +861,9 @@ addMass(matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, con
 {
 
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the mass.");
-    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalCols(),
+    ASSERT(static_cast<Int>(offsetLeft + M_uFESpace->dof().numTotalDof()*nDimensions) <= matrix.matrixPtr()->NumGlobalCols(),
            "The matrix is too small (columns) for the assembly of the mass");
-    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalRows(),
+    ASSERT(static_cast<Int>(offsetUp + M_uFESpace->dof().numTotalDof()*nDimensions) <= matrix.matrixPtr()->NumGlobalRows(),
            " The matrix is too small (rows) for the assembly of the mass");
 
     // Some constants

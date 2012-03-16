@@ -116,7 +116,7 @@ Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Rea
 }
 
 
-Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ , const ID& /* i */ )
+Real fRhs( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
     return  sin(x)-1;
 }
