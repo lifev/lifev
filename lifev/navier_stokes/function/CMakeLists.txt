@@ -26,5 +26,3 @@ INSTALL(
   COMPONENT ${PACKAGE_NAME}
 )
 
-SET(function_HEADERS ${function_HEADERS} ${function_bessel_HEADERS})
-SET(function_SOURCES ${function_SOURCES} ${function_bessel_SOURCES})

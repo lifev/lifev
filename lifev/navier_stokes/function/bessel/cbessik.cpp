@@ -155,7 +155,7 @@ int cbessikna(int n,std::complex<double> z,int &nm,std::complex<double> *ci,
 {
     std::complex<double> ci0,ci1,ck0,ck1,ckk,cf,cf1,cf2,cs;
     double a0;
-    int k,m,ecode;
+    int k,m;
     a0 = std::abs(z);
     nm = n;
     if (a0 < 1.0e-100) {
@@ -169,7 +169,7 @@ int cbessikna(int n,std::complex<double> z,int &nm,std::complex<double> *ci,
         cip[1] = std::complex<double>(0.5,0.0);
         return 0;
     }
-    ecode = cbessik01(z,ci[0],ci[1],ck[0],ck[1],cip[0],cip[1],ckp[0],ckp[1]);
+    cbessik01(z,ci[0],ci[1],ck[0],ck[1],cip[0],cip[1],ckp[0],ckp[1]);
     if (n < 2) return 0;
     ci0 = ci[0];
     ci1 = ci[1];
