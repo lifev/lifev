@@ -33,3 +33,5 @@ link:
 	test -a data || ln -s $(srcdir)/data
 	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/mesh++/ Mesh
 
+EXTRA_DIST = data testsuite.at test_mesh.dox
+
