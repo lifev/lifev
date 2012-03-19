@@ -27,21 +27,15 @@
 
 Simple hyperbolic test with Dirichlet, Neumann and Robin boundary conditions
 
-Solve the problem
-
-               div u - f = 0            in \Omega
-
-               K^{-1} u + \nabla p = 0  in \Omega
-
 */
 
 
 /**
    @file
    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+   @author M. Kern <michel.kern@inria.fr>
    @date 2010-07-29
 
-   NOTE: HyperbolicSolver works only in serial.
 */
 
 
@@ -93,18 +87,26 @@ int main(int argc, char** argv)
     // Error known
     const LifeV::Real errorKnown( 0.357740920454703 );
     // Tollerance between the error and the errorKnown
-    const LifeV::Real tollerance( 1e-8 );
+    const LifeV::Real tolerance( 1e-8 );
 
     hyperbolic Hyperbolic( argc, argv );
-    error = Hyperbolic.run();
 
+    // Error of the problem
+    error = Hyperbolic.run();
+    bool unsuccess=std::fabs( error - errorKnown ) > tolerance;
+    // For tribits handling of success/failure
+    //! @todo Add verbose to avoid all processes printing this stuff
+    if (unsuccess)
+      std::cout << "End Result: TEST NOT PASSED" << std::endl;
+    else
+      std::cout << "End Result: TEST PASSED" << std::endl;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
     std::cout << "MPI Finalization" << std::endl;
 #endif
 
-    if ( std::fabs( error - errorKnown ) > tollerance )
+    if ( unsuccess )
         return ( EXIT_FAILURE );
     else
         return ( EXIT_SUCCESS );
