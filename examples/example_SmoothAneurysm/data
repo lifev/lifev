@@ -56,22 +56,22 @@ type       = hdf5
 nRestart   = 0
 
 [./fluid]
-filename   = fluid-Total
+filename   = fluid-SecondTotal
 [../solid]
-filename   = solid-Total
+filename   = solid-SecondTotal
 [../] # solid
 [../] # exporter
 
 [importer]
-#restartType=restartFSI
-#initSol=00060
-#initSolFD=00061
-#type       = hdf5
-#restart_timestep = 0.001
+restartType=restartFSI
+initSol=00700
+initSolFD=00701
+type       = hdf5
+restart_timestep = 0.001
 [./fluid]
-filename   = fluid-Restarted
+filename   = fluid-Total
 [../solid]
-filename   = solid-Restarted
+filename   = solid-Total
 [../] # solid
 # [../] # importer
 
@@ -87,7 +87,7 @@ viscosity = 0.035              # viscosity
 
 [../time_discretization]
 method          = BDF
-initialtime		= 0.0
+initialtime		= 0.7
 endtime			= 1.2
 timestep		= 0.001
 BDF_order		= 2
@@ -147,7 +147,7 @@ thickness = 0.045
 
 [../time_discretization]
 method          = BDF # Newmark or BDF
-initialtime		= 0.0
+initialtime		= 0.7
 endtime			= 1.2
 timestep		= 0.001
 BDF_order		= 2
@@ -374,7 +374,7 @@ keep_info       = 1
 
 [../time_discretization]
 method          = BDF
-initialtime		= 0.0
+initialtime		= 0.7
 endtime			= 1.2
 timestep		= 0.001
 BDF_order		= 1
