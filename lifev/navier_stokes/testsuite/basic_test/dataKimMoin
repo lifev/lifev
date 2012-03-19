@@ -15,7 +15,7 @@ initialization         = projection #initialization (projection) or interpolatio
 export_norms           = false
 export_exact_solutions = true
 test                   = accuracy
-accuracy_tolerance     = 0.015
+accuracy_tolerance     = 0.016
 mesh_source            = file
 
 [fluid]

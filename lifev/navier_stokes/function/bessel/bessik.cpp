@@ -194,7 +194,7 @@ int bessikna(int n,double x,int &nm,double *in,double *kn,
     double *inp,double *knp)
 {
     double bi0,bi1,bk0,bk1,g,g0,g1,f,f0,f1,h,h0,h1,s0;
-    int k,m,ecode;
+    int k,m;
 
     if ((x < 0.0) || (n < 0)) return 1;
     if (x < eps) {
@@ -209,7 +209,7 @@ int bessikna(int n,double x,int &nm,double *in,double *kn,
         return 0;
     }
     nm = n;
-    ecode = bessik01a(x,in[0],in[1],kn[0],kn[1],inp[0],inp[1],knp[0],knp[1]);
+    bessik01a(x,in[0],in[1],kn[0],kn[1],inp[0],inp[1],knp[0],knp[1]);
     if (n < 2) return 0;
     bi0 = in[0];
     bi1 = in[1];

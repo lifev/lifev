@@ -335,7 +335,7 @@ int bessjyna(int n,double x,int &nm,double *jn,double *yn,
     double *jnp,double *ynp)
 {
     double bj0,bj1,f(0),f0,f1,f2,cs;
-    int i,k,m,ecode;
+    int i,k,m;
 
     nm = n;
     if ((x < 0.0) || (n < 0)) return 1;
@@ -350,7 +350,7 @@ int bessjyna(int n,double x,int &nm,double *jn,double *yn,
         jnp[1] = 0.5;
         return 0;
     }
-    ecode = bessjy01a(x,jn[0],jn[1],yn[0],yn[1],jnp[0],jnp[1],ynp[0],ynp[1]);
+    bessjy01a(x,jn[0],jn[1],yn[0],yn[1],jnp[0],jnp[1],ynp[0],ynp[1]);
     if (n < 2) return 0;
     bj0 = jn[0];
     bj1 = jn[1];
