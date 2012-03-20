@@ -84,8 +84,8 @@
 // LifeV includes
 #include <lifev/core/LifeV.hpp>
 
-// Mathcard includes
-#include <lifemc/lifesolver/MultiscaleSolver.hpp>
+// Multiscale includes
+#include <lifev/multiscale/solver/MultiscaleSolver.hpp>
 
 using namespace LifeV;
 using namespace Multiscale;
