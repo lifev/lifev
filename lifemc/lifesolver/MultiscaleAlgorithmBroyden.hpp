@@ -42,7 +42,7 @@
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 
-#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
+#include <lifev/multiscale/solver/MultiscaleAlgorithm.hpp>
 
 namespace LifeV
 {

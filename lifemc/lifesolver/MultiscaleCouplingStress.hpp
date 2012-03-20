@@ -37,12 +37,12 @@
 #ifndef MultiscaleCouplingStress_H
 #define MultiscaleCouplingStress_H 1
 
-#include <lifemc/lifesolver/MultiscaleCoupling.hpp>
-#include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
-#include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
-#include <lifemc/lifesolver/MultiscaleModel1D.hpp>
-#include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
-#include <lifemc/lifesolver/MultiscaleModel0D.hpp>
+#include <lifev/multiscale/solver/MultiscaleCoupling.hpp>
+#include <lifev/multiscale/solver/MultiscaleModelFluid3D.hpp>
+#include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
+#include <lifev/multiscale/solver/MultiscaleModel1D.hpp>
+#include <lifev/multiscale/solver/MultiscaleModelWindkessel0D.hpp>
+#include <lifev/multiscale/solver/MultiscaleModel0D.hpp>
 
 namespace LifeV
 {

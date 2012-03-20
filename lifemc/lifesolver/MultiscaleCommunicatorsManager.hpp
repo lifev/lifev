@@ -37,7 +37,7 @@
 #ifndef MultiscaleCommunicatorsManager_H
 #define MultiscaleCommunicatorsManager_H 1
 
-#include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
+#include <lifev/multiscale/solver/MultiscaleDefinitions.hpp>
 
 namespace LifeV
 {

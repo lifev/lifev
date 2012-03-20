@@ -37,7 +37,7 @@
 #ifndef MultiscaleCouplingFlowRateValve_H
 #define MultiscaleCouplingFlowRateValve_H 1
 
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingFlowRate.hpp>
 
 namespace LifeV
 {

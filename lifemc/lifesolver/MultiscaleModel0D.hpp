@@ -45,7 +45,7 @@
 #include <lifev/zero_dimensional/solver/ZeroDimensionalSolver.hpp>
 
 // Mathcard includes
-#include <lifemc/lifesolver/MultiscaleModel.hpp>
+#include <lifev/multiscale/solver/MultiscaleModel.hpp>
 
 // LIFEV
 namespace LifeV

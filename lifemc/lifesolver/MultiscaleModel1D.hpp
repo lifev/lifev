@@ -69,8 +69,8 @@
 #endif
 
 // Mathcard includes
-#include <lifemc/lifesolver/MultiscaleModel.hpp>
-#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
+#include <lifev/multiscale/solver/MultiscaleModel.hpp>
+#include <lifev/multiscale/solver/MultiscaleInterfaceFluid.hpp>
 
 namespace LifeV
 {
