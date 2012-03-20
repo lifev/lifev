@@ -1,0 +1,44 @@
+/* major version number */
+#define LIFEV_VERSION_MAJOR @LifeV_MAJOR_VERSION@
+
+/* minor version number */
+#define LIFEV_VERSION_MINOR @LifeV_MINOR_VERSION@
+
+/* micro version number */
+#define LIFEV_VERSION_MICRO @LifeV_MICRO_VERSION@
+
+/* LifeV version number */
+#define LIFEV_VERSION @LifeV_MAJOR_MINOR_VERSION@
+
+/* LifeV version string */
+#define LIFEV_VERSION_STRING "@LifeV_VERSION_STRING@"
+
+/* define prefix dir for life installation */
+#define LIFEV_PREFIX "@CMAKE_INSTALL_PREFIX@"
+
+/* Define if the HDF5 library is used. */
+#cmakedefine HAVE_HDF5
+
+/* Define to disable the Boost Spirit code */
+#cmakedefine ENABLE_SPIRIT_PARSER
+
+/* Define if the Boost library version is greater than 1.39 */
+#cmakedefine HAVE_BOOST_GT_1_39
+
+/* define boost spirit qi */
+#cmakedefine HAVE_BOOST_SPIRIT_QI
+
+/* define boost version */
+#cmakedefine HAVE_BOOST_VERSION "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@.@Boost_SUBMINOR_VERSION@"
+
+/* define lifev debug */
+#cmakedefine HAVE_LIFEV_DEBUG
+
+/* Define if the QHULL library is used. */
+#cmakedefine HAVE_QHULL
+
+/* Define if the Trilinos Rythmos library is used. */
+#cmakedefine HAVE_TRILINOS_RYTHMOS
+
+/* Define if the Trilinos Nox-thyra library is used. */
+#cmakedefine HAVE_NOX_THYRA
