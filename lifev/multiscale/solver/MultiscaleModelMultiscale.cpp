@@ -34,18 +34,18 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MultiscaleModelMultiscale.hpp>
+#include <lifev/multiscale/solver/MultiscaleModelMultiscale.hpp>
 
-#include <lifemc/lifesolver/MultiscaleAlgorithmAitken.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmBroyden.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmExplicit.hpp>
-#include <lifemc/lifesolver/MultiscaleAlgorithmNewton.hpp>
+#include <lifev/multiscale/solver/MultiscaleAlgorithmAitken.hpp>
+#include <lifev/multiscale/solver/MultiscaleAlgorithmBroyden.hpp>
+#include <lifev/multiscale/solver/MultiscaleAlgorithmExplicit.hpp>
+#include <lifev/multiscale/solver/MultiscaleAlgorithmNewton.hpp>
 
-#include <lifemc/lifesolver/MultiscaleCouplingBoundaryCondition.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRateValve.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRateStress.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingStress.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingBoundaryCondition.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingFlowRate.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingFlowRateValve.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingFlowRateStress.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingStress.hpp>
 
 namespace LifeV
 {

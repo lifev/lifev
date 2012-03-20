@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingFlowRate.hpp>
 
 namespace LifeV
 {

@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MultiscaleCouplingFlowRateValve.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingFlowRateValve.hpp>
 
 namespace LifeV
 {

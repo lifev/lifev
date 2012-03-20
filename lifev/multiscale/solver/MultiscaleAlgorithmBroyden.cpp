@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MultiscaleAlgorithmBroyden.hpp>
+#include <lifev/multiscale/solver/MultiscaleAlgorithmBroyden.hpp>
 
 namespace LifeV
 {

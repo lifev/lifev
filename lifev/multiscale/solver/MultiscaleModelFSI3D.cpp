@@ -35,7 +35,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
+#include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
 
 namespace LifeV
 {

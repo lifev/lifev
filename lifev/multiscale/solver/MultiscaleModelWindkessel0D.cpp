@@ -35,7 +35,7 @@
  *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
+#include <lifev/multiscale/solver/MultiscaleModelWindkessel0D.hpp>
 
 namespace LifeV
 {
