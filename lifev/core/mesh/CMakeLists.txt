@@ -29,6 +29,7 @@ SET(mesh_SOURCES
   mesh/MeshUtility.cpp
   mesh/MeshData.cpp
   mesh/InternalEntitySelector.cpp
+  mesh/MeshEntity.cpp
 CACHE INTERNAL "")
 
 
