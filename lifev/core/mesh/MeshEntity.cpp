@@ -4,7 +4,7 @@
  *  Created on: 11 Sep 2011
  *      Author: formaggia
  */
-#include <life/lifemesh/MeshEntity.hpp>
+#include <lifev/core/mesh/MeshEntity.hpp>
 #include <iostream>
 namespace LifeV{
 namespace EntityFlags{
