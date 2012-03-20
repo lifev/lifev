@@ -56,16 +56,16 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV classes
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/StringUtility.hpp>
-#include <life/lifecore/Displayer.hpp>
-#include <life/lifecore/Factory.hpp>
-#include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifemesh/MarkerDefinitions.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/StringUtility.hpp>
+#include <lifev/core/util/Displayer.hpp>
+#include <lifev/core/util/Factory.hpp>
+#include <lifev/core/util/FactorySingleton.hpp>
+#include <lifev/core/mesh/MarkerDefinitions.hpp>
 
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
 
 #include <lifemc/lifesolver/MultiscaleData.hpp>
 

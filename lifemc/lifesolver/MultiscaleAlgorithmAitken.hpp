@@ -37,7 +37,7 @@
 #ifndef MultiscaleAlgorithmAitken_H
 #define MultiscaleAlgorithmAitken_H 1
 
-#include <life/lifealg/NonLinearAitken.hpp>
+#include <lifev/core/algorithm/NonLinearAitken.hpp>
 
 #include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 

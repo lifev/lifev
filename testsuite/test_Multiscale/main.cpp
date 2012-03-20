@@ -82,7 +82,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 // Mathcard includes
 #include <lifemc/lifesolver/MultiscaleSolver.hpp>

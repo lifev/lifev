@@ -40,9 +40,9 @@
 #define MultiscaleModel0D_H 1
 
 // LifeV includes
-#include <life/lifefem/BCInterface0D.hpp>
-#include <life/lifesolver/ZeroDimensionalData.hpp>
-#include <life/lifesolver/ZeroDimensionalSolver.hpp>
+#include <lifev/bc_interface/fem/BCInterface0D.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
+#include <lifev/zero_dimensional/solver/ZeroDimensionalSolver.hpp>
 
 // Mathcard includes
 #include <lifemc/lifesolver/MultiscaleModel.hpp>

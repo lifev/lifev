@@ -57,14 +57,14 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifearray/MapEpetra.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 
 // Mathcard includes
-#include <life/lifefem/OneDFSIBCHandler.hpp>
-#include <life/lifesolver/OneDFSISolver.hpp>
+#include <lifev/one_d_fsi/fem/OneDFSIBCHandler.hpp>
+#include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 
 #include "ud_functions.hpp"
