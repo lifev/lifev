@@ -12,5 +12,5 @@
 ### DATA FILE #####################################################################################
 ###################################################################################################
 
-mesh_dir   = '../data/mesh/inria/'  # the directory where the mesh file is
-mesh_file  = 'cartesian_cube8.mesh'        # mesh file
+mesh_dir   = './'                   # the directory where the mesh file is
+mesh_file  = 'cartesian_cube8.mesh' # mesh file
