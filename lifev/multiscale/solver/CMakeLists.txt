@@ -1,5 +1,4 @@
 SET(solver_HEADERS
-  solver/HeartNonLinearMonodomainSolver.hpp
   solver/MultiscaleAlgorithm.hpp
   solver/MultiscaleAlgorithmAitken.hpp
   solver/MultiscaleAlgorithmBroyden.hpp
@@ -23,7 +22,6 @@ SET(solver_HEADERS
   solver/MultiscaleModelMultiscale.hpp
   solver/MultiscaleModelWindkessel0D.hpp
   solver/MultiscaleSolver.hpp
-  solver/VenantKirchhoffSolverNonLinear.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
