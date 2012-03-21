@@ -886,7 +886,7 @@ buildSystem ()
     M_displayer.leaderPrintMax( "done in " , chronoConstantLocalMatrix.diff() );
 
     // If setted print the constant matrices computed.
-    if ( M_displayer.isLeader() &&  M_data.verbose() > static_cast<UInt>(1) )
+    //if ( M_displayer.isLeader() &&  M_data.verbose() > static_cast<UInt>(1) )
     {
         M_displayer.leaderPrint( "elmatHyb :\n\n" );
         M_elmatHyb.showMe();
@@ -1069,10 +1069,11 @@ computePrimalAndDual ()
                         M_primal_FESpace.dof(), 0 );
 
 
-        for ( UInt iLocalFace(0); iLocalFace <  M_dual_FESpace.mesh()->element( iElem ).S_numLocalFaces; ++iLocalFace )
+        for ( UInt iLocalFace(0); iLocalFace <  Mesh::element_Type::S_numFacets; ++iLocalFace )
         {
             UInt iGlobalFace( M_dual_FESpace.mesh()->localFacetId( iElem, iLocalFace ) );
-            if ( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 0 ) != iElem )
+            if ( M_dual_FESpace.mesh()->facet( iGlobalFace ).firstAdjacentElementIdentity() != iElem )
+//M_dual_FESpace.mesh()->faceElement( iGlobalFace, 0 ) != iElem )
             {
                 M_elvecFlux[ iLocalFace ] = 0;
             }
