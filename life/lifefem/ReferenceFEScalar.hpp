@@ -135,6 +135,7 @@ private:
 
 //--------------------------------------------------
 
+extern const ReferenceFEScalar feSegP0;
 extern const ReferenceFEScalar feSegP1;
 extern const ReferenceFEScalar feSegP2;
 
