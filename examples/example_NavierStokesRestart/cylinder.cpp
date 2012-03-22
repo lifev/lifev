@@ -59,6 +59,8 @@
 #include <life/lifesolver/OseenSolver.hpp>
 
 #include "cylinder.hpp"
+#include "exactSolution.hpp"
+
 #include <iostream>
 
 
@@ -87,22 +89,57 @@ Real zero_scalar( const Real& /* t */,
 
 Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
+
+  //Parameters
+  Real R = 0.5; //radius
+  Real mu = 0.035; //Dynamic viscosity (The density = 1.0 )
+  Real Re = 300; //Reynols
+  Real L = 10; //Length
+  Real Vavg = ( Re * mu ) / ( 2 * R ); //Characteristic velocity
+  Real Vmax = 2 * Vavg; //Maximum velocity
+  Real DeltaP = - ( 8 * Vavg * mu * L ) / ( R * R ); //Pressure drop
+
+  /*
+  std::cout << "The average velocity: "<< Vavg << std::endl;
+  std::cout << "The maximum velocity: "<< Vmax << std::endl;
+  std::cout << "The length: "<< L << std::endl;
+  std::cout << "The viscosity is: "<< mu << std::endl;
+  std::cout << "The Reynolds is: "<< Re << std::endl;
+  std::cout << "The Applied pressure drop is: "<< DeltaP << std::endl;
+  */
+
+  switch (i)
+    {
+    case 0:
+      return 0.0;
+      break;
+    case 1:
+      return 0.0;
+      break;
+    case 2:
+      //return -(1/(4*mu))*(DeltaP/L)*(R*R- (x*x + y*y));
+      return -DeltaP;
+    }
+    return 0;
+}
+
+Real zeroVectorial(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
     switch (i)
     {
     case 0:
         return 0.0;
         break;
-    case 2:
-        if ( t <= 0.003 )
-            return 1.3332e4;
+    case 1:
         return 0.0;
         break;
-    case 1:
+    case 2:
         return 0.0;
         break;
     }
     return 0;
 }
+
 
 void
 postProcessFluxesPressures( OseenSolver< RegionMesh<LinearTetra> >& nssolver,
@@ -375,22 +412,52 @@ Cylinder::run()
 
     // Boundary conditions
     BCHandler bcH;
-    BCFunctionBase uZero( zero_scalar );
-    std::vector<ID> zComp(1);
-    zComp[0] = 3;
+
+    std::vector<ID> compxy(2);
+    compxy[0]=0;compxy[1]=1;
 
     BCFunctionBase uIn  (  d->getU_2d() );
     BCFunctionBase uOne (  d->getU_one() );
     BCFunctionBase uPois(  d->getU_pois() );
 
+    BCFunctionBase uZero( zero_scalar );
+    BCFunctionBase zeroVect(  zeroVectorial );
+    BCFunctionBase Stress(  u2 );
 
-    bcH.addBC( "Inlet",    INLET,    Essential,     Full,     uPois  , 3 );
+    bcH.addBC( "Inlet",   INLET,   Natural,   Full,   Stress, 3 );
+    bcH.addBC( "DirichletInlet",    INLET,   Essential, Component, uZero, compxy );
     bcH.addBC( "Ringin",   RINGIN,   Essential,     Full,     uZero  , 3 );
     bcH.addBC( "Ringout",  RINGOUT,  Essential,     Full,     uZero  , 3 );
-    bcH.addBC( "Outlet",   OUTLET,   Natural,     Full,     uZero, 3 );
+    bcH.addBC( "Outlet",   OUTLET,   Natural,   Full,  zeroVect, 3 );
+    bcH.addBC( "DirichletOutlet",   OUTLET,  Essential, Component, uZero, compxy );
     bcH.addBC( "Wall",     WALL,     Essential,   Full,     uZero, 3 );
 
-    int numLM = 0;
+    
+    // File where the errors are registered
+    std::ofstream out_norm;
+    std::ofstream out_normP;
+    if (verbose)
+    {
+        out_norm.open("norm.txt");
+        out_norm << "  time   "
+        <<"  L2_errorVel    "
+        <<"  H1_errorVel    "
+        <<"  L2_relErrorVel "
+        <<"  H1_relErrorVel \n";
+        out_norm.close();
+
+        out_normP.open("norm.txt");
+        out_normP << "  time   "
+        <<"  L2_errorP    "
+        <<"  H1_errorP    "
+        <<"  L2_relErrorP "
+        <<"  H1_relErrorP \n";
+        out_normP.close();
+
+
+    }
+
+    int numLM = 0; //Because there are not fluxes BCs
 
     boost::shared_ptr<OseenData> oseenData(new OseenData() );
     oseenData->setup( dataFile );
@@ -437,8 +504,6 @@ Cylinder::run()
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    //bcH.setOffset("Inlet", totalVelDof + totalPressDof);
-
     OseenSolver< RegionMesh<LinearTetra> > fluid (oseenData,
                                                     *uFESpacePtr,
                                                     *pFESpacePtr,
@@ -463,6 +528,25 @@ Cylinder::run()
 
     TimeAdvanceBDFNavierStokes<vector_Type> bdf;
     bdf.setup(oseenData->dataTime()->orderBDF());
+
+    // exactSolution
+    AnalyticalSolVelocity uExact;
+    AnalyticalSolPressure pExact;
+    
+    vector_Type u (*fluid.solution(),Repeated);
+    vector_Type velocityComp(uFESpacePtr->map(),Repeated);
+    vector_Type pressureComp(pFESpacePtr->map(),Repeated);
+
+    Real H1_errorVel(0);
+    Real H1_relErrorVel(0);
+    Real L2_errorVel(0);
+    Real L2_relErrorVel(0);
+
+    Real H1_errorP(0);
+    Real H1_relErrorP(0);
+    Real L2_errorP(0);
+    Real L2_relErrorP(0);
+
 
     vector_Type beta( fullMap );
     vector_Type rhs ( fullMap );
@@ -608,9 +692,47 @@ Cylinder::run()
         bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
         *velAndPressure = *fluid.solution();
+	u = *fluid.solution();
+
         exporter.postProcess( time );
 
+	//computation of the errors
+	velocityComp.subset(u,0); //Extracting the velocity
+	pressureComp.subset(u, uFESpacePtr->dim() );  //Extracting the pressure
+
+        L2_errorVel = uFESpacePtr->l2Error(uexact, velocityComp, time ,&L2_relErrorVel);
+	H1_errorVel = uFESpacePtr->h1Error(uExact, velocityComp, time ,&H1_relErrorVel);
+
+        L2_errorP = pFESpacePtr->l2Error(pexact, pressureComp, time ,&L2_relErrorP);
+	H1_errorP = pFESpacePtr->h1Error(pExact, pressureComp, time ,&H1_relErrorP);
+
+
+        //save the norm
+        if (verbose)
+        {
+            out_norm.open("normVel.txt", std::ios::app);
+            out_norm << time             << "   "
+            << L2_errorVel       << "   "
+            << H1_errorVel      << "   "
+            << L2_relErrorVel << "   "
+            << H1_relErrorVel << "\n";
+            out_norm.close();
+
+
+            out_normP.open("normP.txt", std::ios::app);
+            out_normP << time             << "   "
+            << L2_errorP       << "   "
+            << H1_errorP      << "   "
+            << L2_relErrorP << "   "
+            << H1_relErrorP << "\n";
+            out_normP.close();
+
+        }
+	
+
         MPI_Barrier(MPI_COMM_WORLD);
+
+	
 
         chrono.stop();
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;

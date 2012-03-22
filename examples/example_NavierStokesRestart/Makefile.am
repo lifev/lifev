@@ -24,7 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = cylinder.hpp
+check_HEADERS = cylinder.hpp exactSolution.hpp
 
 check_PROGRAMS = test_restartFluid
 test_restartFluid_SOURCES = main.cpp cylinder.cpp
