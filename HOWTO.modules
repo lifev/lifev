@@ -1,0 +1,44 @@
+This file explains how to add a new module to the LifeV library, following the
+TriBITS package specifications. The Dummy module is an example of a minimal
+set of files to add.
+
+the list of files that should be edited is:
+
+(root_dir) PackageList.cmake
+This file contains the list of all the available modules. A new line should be
+added with module name, module location and development status.
+If the module is marked as PS (Primary Stable) or SS (Secondary Stable), it
+will be activated when the cmake flag LifeV_ENABLE_ALL_PACKAGES is set to ON. If
+the module is marked EX (Experimental), it will not be included.
+
+lifev/<package_name>/CMakeLists.txt
+This file defines standard module properties and the list of subdirectories that
+cointain source and header files.
+
+lifev/<package_name>/<sub_dir>/CMakeLists.txt
+This file should contain the list of source and header files, along with a cmake
+rule for their installation. The script in tools/generate-cmakelists can
+automate this step.
+
+lifev/<package_name>/cmake/Dependencies.cmake
+This file lists module dependencies from other modules. In LifeV every module
+should depend on the Core module.
+
+if the module has some tests to be performed, they can be added to the testsuite
+directory (the proper line should be uncommented in
+lifev/<package_name>/CMakeLists.txt). Inside the testsuite directory there
+should be
+
+lifev/<package_name>/testsuite/CMakeLists.txt
+This file lists the tests to be performed.
+
+lifev/<package_name>/testsuite/<test_name>/CMakeLists.txt
+this file sets up the test. All necessary external files should be copied with
+this cmake script.
+
+The test should print to std::out the string "End Result: TEST PASSED" to be
+recognized as a successful test.
+
+After the new module is configured, erase the CMakeCache.txt file in the build
+directory to unsure that the new module is picked up correctly in the next
+build.
