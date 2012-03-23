@@ -446,7 +446,7 @@ Cylinder::run()
         <<"  H1_relErrorVel \n";
         out_norm.close();
 
-        out_normP.open("norm.txt");
+        out_normP.open("normP.txt");
         out_normP << "  time   "
         <<"  L2_errorP    "
         <<"  H1_errorP    "
