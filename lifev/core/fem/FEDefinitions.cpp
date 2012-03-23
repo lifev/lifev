@@ -3706,7 +3706,7 @@ const ReferenceFEScalar feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 
                             ---
 */
 
-const ReferenceFEScalar feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 1, 1, 2,
+const ReferenceFEScalar feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 1, 0, 1, 2,
                             fct_P0_2D, derfct_P0_2D, der2fct_P0_2D, refcoor_P0_2D,
                             STANDARD_PATTERN, ( ReferenceFE* ) NULL,&lagrangianTransform );
 
