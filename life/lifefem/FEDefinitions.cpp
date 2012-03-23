@@ -3833,11 +3833,11 @@ const ReferenceFEScalar feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGL
 //
 //======================================================================
 /*
-                           3
+                           +
                            |\
-                           | \
+                           3 2
                            |  \
-                           1---2
+                           +-1-+
 */
 
 const ReferenceFEHdiv feTriaRT0( "Lagrange RT0 on a triangle", FE_RT0_TRIA_2D, TRIANGLE, 0, 1, 0, 0, 3, 2,
@@ -4119,11 +4119,11 @@ static const CurrentBoundaryFEBase HybRT0TriaList[ NB_BDFE_RT0_HYB_TRIA ] =
 };
 
 static const CurrentBoundaryFEBase BdFE_RT0_HYB_TRIA_VdotN_1( feSegP0, geoLinearSeg, quadRuleSeg1pt,
-                                                               refcoor_HYB_TRIA_SEG_1, 0, 1. );
+                                                              refcoor_HYB_TRIA_SEG_1, 0, 1. );
 static const CurrentBoundaryFEBase BdFE_RT0_HYB_TRIA_VdotN_2( feSegP0, geoLinearSeg, quadRuleSeg1pt,
-                                                              refcoor_HYB_TRIA_SEG_2, 1, 1. );
+                                                              refcoor_HYB_TRIA_SEG_2, 1, 1. / std::sqrt ( 2. ) );
 static const CurrentBoundaryFEBase BdFE_RT0_HYB_TRIA_VdotN_3( feSegP0, geoLinearSeg, quadRuleSeg1pt,
-                                                              refcoor_HYB_TRIA_SEG_3, 2, std::sqrt( 2. ) );
+                                                              refcoor_HYB_TRIA_SEG_3, 2, 1. );
 
 static const CurrentBoundaryFEBase HybRT0TriaVdotNList[ NB_BDFE_RT0_HYB_TRIA ] =
 {
@@ -4135,7 +4135,7 @@ const ReferenceFEHybrid feTriaRT0Hyb ( "Hybrid RT0 elements on a triangle", FE_R
                                         refcoor_RT0HYB_TRIA, STANDARD_PATTERN );
 
 const ReferenceFEHybrid feTriaRT0VdotNHyb ( "Hybrid RT0 elements on a triangle", FE_RT0_HYB_TRIA_2D, TRIANGLE,
-                                            0, 1, 0, 0, 3, 3, NB_BDFE_RT0_HYB_TRIA, HybRT0TriaVdotNList,
+                                            0, 1, 0, 0, 3, 2, NB_BDFE_RT0_HYB_TRIA, HybRT0TriaVdotNList,
                                             refcoor_RT0HYB_TRIA, STANDARD_PATTERN );
 
 
