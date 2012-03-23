@@ -456,7 +456,7 @@ std::cout << meshData.meshType() << std::endl;
     bdQr_primal  = &quadRuleTria4pt;
 #else
     refFE_primal = &feTriaP0;
-    qR_primal    = &quadRuleTria1pt;
+    qR_primal    = &quadRuleTria4pt;
     bdQr_primal  = &quadRuleSeg1pt;
 #endif
 
