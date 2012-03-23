@@ -682,7 +682,7 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
                         {
                             for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                                 s += guk[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) * guk[ icoor ][ k ][ ig ] * fe.phiDer(i, k, ig ) * fe.weightDet( ig ); // il ciclo sui nodi di quadratura
-                        }       																																							 // fa l'integrale
+                        }                                                                                                                                                                    // fa l'integrale
                     }
                     mat( i, j ) += coef  * s;
                 }
@@ -4823,11 +4823,12 @@ void TP_VdotN_Hdiv( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& 
                 sum = 0.;
                 // Loop over all the quadrature point.
                 for ( UInt ig(0); ig < boundaryElementHybridFE.nbQuadPt(); ++ig )
+                {
                     // Using the Piola transform properties.
                     sum += boundaryElementHybridFE.phi( j , ig ) *
                            boundaryElementDualDotNFE.phi( i , ig ) *
                            boundaryElementHybridFE.weightMeas( ig );
-
+                }
                 // The matrix is block diagonal, so the size of the blocks is bdfe.nbNode.
                 mat( nf * nbnode + i, nf * nbnode + j ) += sum * coef;
             }
