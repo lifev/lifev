@@ -44,6 +44,22 @@ namespace LifeV
 
 /*======================================================================
  *
+ *                          Dummy Quadrature Rules
+ *
+ *=======================================================================*/
+
+//! id of the quadrature rules on nodes
+const int QUAD_RULE_DUMMY = 1;
+
+
+static const QuadraturePoint pt_node_0pt[ 0 ];
+
+const QuadratureRule quadRuleDummy ( pt_node_0pt,
+                                     QUAD_RULE_DUMMY,
+                                     "Dummy quadrature rule", NONE, 0, 0 );
+
+/*======================================================================
+ *
  *                          Quadrature Rules on Nodes
  *
  *=======================================================================*/
@@ -84,7 +100,6 @@ const QuadratureRule quadRuleSeg1pt( pt_seg_1pt,
                                QUAD_RULE_SEG_1PT,
                                "Gauss Legendre 1 point on a segment", LINE, 1, 1 );
 //
-const QuadratureRule quadRuleDummy( pt_seg_1pt, 1, "Dummy quadrature rule", LINE, 1, 1 );
 //----------------------------------------------------------------------
 const Real q2ptx1 = ( 1 - sqrt( 1. / 3. ) ) / 2., q2ptx2 = ( 1 + sqrt( 1. / 3. ) ) / 2.;
 const Real q2ptw1 = 0.5, q2ptw2 = 0.5;
@@ -725,7 +740,7 @@ Real der2fct2_11_P2_1D(  const GeoVector& )
 Real fct1_P0_2D( const GeoVector& )
 {
     return 1. ;
-}   //check this : 1. or 2. (\int fct1 = 0.5 or 1.)  ???
+}
 // First and Second derivatives are both equal (to 0).
 Real derfct1_P0_2D( const GeoVector& )
 {
