@@ -305,7 +305,7 @@ Real p0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -100;  // (see paper by Liu, Dang, etc.. about the sourrounding tissue effect on arteries)
+    return -10000;  // (see paper by Liu, Dang, etc.. about the sourrounding tissue effect on arteries)
 }
 
 
