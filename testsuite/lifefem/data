@@ -1,8 +1,0 @@
-#-------------------------------------------------
-#      Data file for INTERPOLATE test
-#-------------------------------------------------
-[interpolate]
-
-[./space_discretization]
-mesh_dir = 'Mesh/'
-mesh_file = hexahexa_4x4x4.mesh
