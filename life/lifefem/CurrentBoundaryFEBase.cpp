@@ -174,8 +174,10 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
 
     for ( UInt iGeoNode(0); iGeoNode < M_nbGeoNode; iGeoNode++ )
     {
-    	for ( UInt icoor = 0; icoor < M_nbCoor+1; icoor++)
-			M_point( iGeoNode, icoor ) = refcoor[ (M_nbCoor+1) * iGeoNode + icoor];
+        for ( UInt icoor = 0; icoor < nDimensions; icoor++)
+        {
+            M_point( iGeoNode, icoor ) = refcoor[ nDimensions * iGeoNode + icoor];
+        }
     }
 
 #ifdef TEST_PRE
