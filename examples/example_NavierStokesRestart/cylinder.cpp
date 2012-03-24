@@ -438,7 +438,7 @@ Cylinder::run()
     std::ofstream out_normP;
     if (verbose)
     {
-        out_norm.open("norm.txt");
+        out_norm.open("normVel.txt");
         out_norm << "  time   "
         <<"  L2_errorVel    "
         <<"  H1_errorVel    "
@@ -699,6 +699,11 @@ Cylinder::run()
 	//computation of the errors
 	velocityComp.subset(u,0); //Extracting the velocity
 	pressureComp.subset(u, uFESpacePtr->dim() );  //Extracting the pressure
+	
+	/*
+	std::cout << "Norm of the velocity field "<< velocityComp.norm2() << std::endl;
+	std::cout << "Norm of the pressure field "<< pressureComp.norm2() << std::endl;
+	*/
 
         L2_errorVel = uFESpacePtr->l2Error(uexact, velocityComp, time ,&L2_relErrorVel);
 	H1_errorVel = uFESpacePtr->h1Error(uExact, velocityComp, time ,&H1_relErrorVel);
