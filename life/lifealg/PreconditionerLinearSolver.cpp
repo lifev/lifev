@@ -191,8 +191,8 @@ PreconditionerLinearSolver::setDataFromGetPot ( const GetPot& dataFile, const st
 {
 	createLinearSolverList( M_list, dataFile, section, "LinearSolver", M_displayer.comm()->MyPID() == 0 );
     M_printSubiterationCount = this->M_list.get( "Print Subiteration Count", false );
-    M_precName               = this->M_list.get( "prec", "ML" );
-    M_precDataSection        = this->M_list.get( "prec data section", "" );
+    M_precName               = this->M_list.get( "Preconditioner", "ML" );
+    M_precDataSection        = this->M_list.get( "Preconditioner Data Section", "" );
     M_dataFile               = dataFile;
 }
 

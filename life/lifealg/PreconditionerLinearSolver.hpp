@@ -53,7 +53,6 @@
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifecore/Displayer.hpp>
-#include <life/lifealg/SolverBelos.hpp>
 #include <life/lifealg/Preconditioner.hpp>
 #include <life/lifealg/LinearSolver.hpp>
 #include <life/lifefilters/GetPot.hpp>
