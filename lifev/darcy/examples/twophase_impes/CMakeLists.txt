@@ -1,11 +1,19 @@
-# Add the executable
-add_executable (example_impes EXCLUDE_FROM_ALL main.cpp impes.cpp user_fun.cpp)
-target_link_libraries (example_impes ${LIBS})
 
-add_custom_target (example_impes_links
-                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/testsuite/data/mesh/inria;Mesh
-                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/data;data
-                   VERBATIM)
+INCLUDE(TribitsAddExecutableAndTest)
 
-add_dependencies (example_impes DEPENDS example_impes_links)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+
+TRIBITS_ADD_EXECUTABLE_AND_TEST(
+  TwoPhaseImpes
+  SOURCES main.cpp impes.cpp user_fun.cpp
+  ARGS -c
+  NUM_MPI_PROCS 3
+  COMM serial mpi
+#  STANDARD_PASS_OUTPUT
+  )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(data_TwoPhaseImpes
+  SOURCE_FILES data
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
