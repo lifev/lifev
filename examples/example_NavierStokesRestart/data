@@ -16,7 +16,7 @@
 
         [exporter]
         multimesh  = false
-        save       = 10
+        save       = 100
         filename   = cylinder
 
 
@@ -40,13 +40,13 @@
 
 	[../time_discretization]
 	initialtime		= 0.
-	endtime			= 100.01
+	endtime			= 50.01
 	timestep		= 0.01
 	BDF_order		= 1
 
 	[../space_discretization]
 	mesh_dir        = ./Mesh/
-	mesh_file       = CarreauFine.mesh
+	mesh_file       = ValidationNSCarreau_3.mesh
 	mesh_type       = .mesh
 
 	verbose         = 0             # verbose during mesh-reading

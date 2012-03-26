@@ -43,6 +43,7 @@ const Real L = 10; //Length
 const Real Vavg = ( Re * mu ) / ( 2 * R ); //Characteristic velocity
 const Real Vmax = 2 * Vavg; //Maximum velocity
 const Real DeltaP = - ( 8 * Vavg * mu * L ) / ( R * R ); //Pressure drop
+const Real Konstant = -(1/(4*mu))*(DeltaP/L);
 
 
 class AnalyticalSolVelocity
@@ -51,7 +52,7 @@ public:
     inline Real operator()(Real t, Real x,Real y,Real z, UInt /*ic*/=0) const
     {
 
-      return Vmax*( sqrt( x*x + y*y ) );
+      return Konstant*( R*R- (x*x + y*y) );
 
     }
     inline Real grad(UInt icoor, Real t, Real x,Real y,Real z, UInt /*ic*/=0) const
@@ -59,11 +60,11 @@ public:
 
       switch (icoor)
         {
-        case 1: // der_x
-	  return 2 * Vmax * x;
-        case 2: // der_y
-	  return 2 * Vmax * y; 
-        case 3: // der_z
+        case 0: // der_x
+	  return - 2 * Konstant * x;
+        case 1: // der_y
+	  return - 2 * Konstant * y; 
+        case 2: // der_z
    	    return 0;
         default:
             return 0;
@@ -79,7 +80,7 @@ Real uexact( const Real&  t ,
              const ID&  /*icomp*/)
 {
 
-  return Vmax*( sqrt( x*x + y*y ) );
+  return Konstant*( R*R- (x*x + y*y) );
 }
 
 
@@ -95,11 +96,11 @@ public:
 
       switch (icoor)
         {
-        case 1: // der_x
+        case 0: // der_x
 	  return 0;
-        case 2: // der_y
+        case 1: // der_y
 	  return 0;
-        case 3: // der_z
+        case 2: // der_z
 	  return DeltaP;
         default:
 	  return 0;
