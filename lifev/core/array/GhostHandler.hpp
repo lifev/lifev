@@ -53,13 +53,13 @@ public:
     //@{
 
     typedef Mesh mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> mesh_PtrType;
+    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
     typedef Epetra_Comm comm_Type;
-    typedef boost::shared_ptr<comm_Type> comm_PtrType;
+    typedef boost::shared_ptr<comm_Type> commPtr_Type;
     typedef std::set<ID> neighborList_Type;
     typedef std::map< ID, neighborList_Type > neighborMap_Type;
     typedef MapEpetra map_Type;
-    typedef boost::shared_ptr<map_Type> map_PtrType;
+    typedef boost::shared_ptr<map_Type> mapPtr_Type;
 
     //@}
 
@@ -67,10 +67,10 @@ public:
     //@{
 
     //! Constructor
-    GhostHandler( mesh_PtrType fullMesh,
-                  mesh_PtrType localMesh,
+    GhostHandler( meshPtr_Type fullMesh,
+                  meshPtr_Type localMesh,
                   map_Type & map,
-                  comm_PtrType const & comm );
+                  commPtr_Type const & comm );
 
     //! Destructor
     ~GhostHandler(){}
@@ -145,20 +145,20 @@ protected:
     //! @name Ghost Maps
     //@{
 
-    map_PtrType M_ghostMapOnNodes;
-    map_PtrType M_ghostMapOnEdges;
-    map_PtrType M_ghostMapOnElementsP0;
-    map_PtrType M_ghostMapOnElementsP1;
+    mapPtr_Type M_ghostMapOnNodes;
+    mapPtr_Type M_ghostMapOnEdges;
+    mapPtr_Type M_ghostMapOnElementsP0;
+    mapPtr_Type M_ghostMapOnElementsP1;
 
     //@}
 
     //! @name Protected Members
     //@{
 
-    mesh_PtrType M_fullMesh;
-    mesh_PtrType M_localMesh;
+    meshPtr_Type M_fullMesh;
+    meshPtr_Type M_localMesh;
     map_Type & M_map;
-    comm_PtrType const M_comm;
+    commPtr_Type const M_comm;
     UInt M_me;
 
     neighborMap_Type M_nodeNodeNeighborsMap;
@@ -171,10 +171,10 @@ protected:
 };
 
 template <typename Mesh>
-GhostHandler<Mesh>::GhostHandler( mesh_PtrType fullMesh,
-                                  mesh_PtrType localMesh,
+GhostHandler<Mesh>::GhostHandler( meshPtr_Type fullMesh,
+                                  meshPtr_Type localMesh,
                                   map_Type & map,
-                                  comm_PtrType const & comm ):
+                                  commPtr_Type const & comm ):
     M_fullMesh ( fullMesh ),
     M_localMesh ( localMesh ),
     M_map ( map ),
