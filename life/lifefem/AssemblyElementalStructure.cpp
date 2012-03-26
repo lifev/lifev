@@ -29,6 +29,7 @@
     @brief File containing the procedures for the local assembly of the differential operators for the structural problem
 
     @author Gianmarco Mengaldo <gianmarco.mengaldo@gmail.com>
+    @author Paolo Tricerri <gianmarco.mengaldo@gmail.com>
     @mantainer Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 

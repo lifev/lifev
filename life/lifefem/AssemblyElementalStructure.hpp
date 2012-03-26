@@ -28,10 +28,11 @@
     @file
     @brief File containing the procedures for the local assembly of the differential operators
 
-    @contributor Gianmarco Mengaldo <gianmarco.mengaldo@gmail.ch>
+    @author Gianmarco Mengaldo <gianmarco.mengaldo@gmail.com>
+    @author Paolo Tricerri <gianmarco.mengaldo@gmail.com>
     @mantainer Paolo Tricerri <paolo.tricerri@epfl.ch>
 
-    All the methods are described in Mengaldo G. Master Thesis "Nonlinear Fluid-Structure Interaction with applications in computational haemodynamics" Politecnico di Milano 2011
+    All the methods are described in the report StructuralSolver framework in LifeV: Description and Usage
  */
 
 
