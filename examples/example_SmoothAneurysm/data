@@ -56,9 +56,9 @@ type       = hdf5
 nRestart   = 0
 
 [./fluid]
-filename   = fluid-newRobin
+filename   = fluid-homNeumann
 [../solid]
-filename   = solid-newRobin
+filename   = solid-homNeumann
 [../] # solid
 [../] # exporter
 

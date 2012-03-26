@@ -204,12 +204,12 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
     BCFunctionBase young (E);
     //robin condition on the outer wall
     _oper.setRobinOuterWall(hyd, young);
-    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
+    //BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
     
-    /*
+    
     //First try: Homogeneous Neumann
     BCh_solid->addBC("OuterWall", OUTERWALL, Natural, Normal, bcf);
-    */
+    
     return BCh_solid;
 }
 
