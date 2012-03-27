@@ -658,11 +658,11 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP0
     }
 
     // add all facing elements
-    std::vector<ID> facesOnSubdInt = M_localMesh->faceList.extractElementsWithFlag(
+    std::vector<ID> facesOnSubdInt = M_localMesh->facetList().extractElementsWithFlag(
                     EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
     for ( ID faceId = 0; faceId < facesOnSubdInt.size(); faceId++ )
     {
-        map.insert( M_localMesh->faceList[ facesOnSubdInt [ faceId ] ].secondAdjacentElementIdentity() );
+        map.insert( M_localMesh->facet( facesOnSubdInt [ faceId ] ).secondAdjacentElementIdentity() );
     }
 
     // convert unique list to vector to assure continuity in memorization
