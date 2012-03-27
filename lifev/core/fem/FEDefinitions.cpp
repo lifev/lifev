@@ -52,7 +52,7 @@ namespace LifeV
 const int QUAD_RULE_DUMMY = 1;
 
 
-static const QuadraturePoint pt_node_0pt[ 0 ];
+static const QuadraturePoint pt_node_0pt[ 1 ];
 
 const QuadratureRule quadRuleDummy ( pt_node_0pt,
                                      QUAD_RULE_DUMMY,
@@ -1125,52 +1125,40 @@ Real der2fct6_22_P2_2D( const GeoVector& )
 */
 Real fct1_RT0_1_TRIA_2D( const GeoVector& v )
 {
-    return 1.;
+    return v[0];
 }
 Real fct1_RT0_2_TRIA_2D( const GeoVector& v )
 {
-    return 1.;
-}
-Real fct1_RT0_3_TRIA_2D( const GeoVector& v )
-{
-    return 1.;
+    return v[1] - 1.;
 }
 
 Real fct2_RT0_1_TRIA_2D( const GeoVector& v )
 {
-    return 1.;
+    return v[0];
 }
 Real fct2_RT0_2_TRIA_2D( const GeoVector& v )
 {
-    return 1.;
-}
-Real fct2_RT0_3_TRIA_2D( const GeoVector& v )
-{
-    return 1.;
+    return v[1];
 }
 
 Real fct3_RT0_1_TRIA_2D( const GeoVector& v )
 {
-    return 1.;
+    return v[0] - 1.;
 }
 Real fct3_RT0_2_TRIA_2D( const GeoVector& v )
 {
-    return 1.;
-}
-Real fct3_RT0_3_TRIA_2D( const GeoVector& v )
-{
-    return 1.;
+    return v[1];
 }
 
-Real fct1_DIV_RT0_TRIA_2D( const GeoVector& v )
+Real fct1_DIV_RT0_TRIA_2D( const GeoVector& /*v*/ )
 {
     return 2.;
 }
-Real fct2_DIV_RT0_TRIA_2D( const GeoVector& v )
+Real fct2_DIV_RT0_TRIA_2D( const GeoVector& /*v*/ )
 {
     return 2.;
 }
-Real fct3_DIV_RT0_TRIA_2D( const GeoVector& v )
+Real fct3_DIV_RT0_TRIA_2D( const GeoVector& /*v*/ )
 {
     return 2.;
 }
