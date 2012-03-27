@@ -96,8 +96,13 @@ int main( int argc, char* argv[] )
     // Create the leader process, i.e. the process with MyPID equal to zero
     bool isLeader = ( comm->MyPID() == 0 );
 
+#ifdef HAVE_LIFEV_DEBUG
     // Create a stream that is different for each process
     std::ofstream fileOut ( ( "gh." + boost::lexical_cast<std::string>( comm->MyPID() ) + ".out" ).c_str() );
+#else
+    // discard file output in opt mode
+    std::ofstream fileOut ( "/dev/null" );
+#endif
 
     if ( isLeader ) std::cout << "GhostHendler test" << std::endl;
 
