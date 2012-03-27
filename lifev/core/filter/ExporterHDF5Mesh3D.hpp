@@ -772,6 +772,10 @@ void ExporterHDF5Mesh3D<MeshType>::writeGraph()
                             &(*M_graph)[i][0]);
         index.str(std::string());
         index.clear();
+
+        this->M_HDF5->Flush();
+
+        std::cout << "Wrote graph for partition " << i << std::endl;
     }
 }
 
@@ -810,6 +814,8 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     this->M_HDF5->Write("Mesh", "Counters.NumGlobalVolumes" + suffix,
                         static_cast<Int>(mesh->numGlobalVolumes()));
 
+    this->M_HDF5->Flush();
+
     UInt numPoints = mesh->numPoints();
     std::vector<Real> tmpVectorDouble(numPoints);
     std::vector<std::vector<Real> > pointCoordinates(3, tmpVectorDouble);
@@ -838,6 +844,8 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     this->M_HDF5->Write("Mesh", "Points.GlobalId" + suffix, H5T_NATIVE_INT, numPoints, &pointGlobalId[0]);
     this->M_HDF5->Write("Mesh", "Points.BoundaryFlag" + suffix, H5T_NATIVE_INT, numPoints,
                         &pointBoundaryFlags[0]);
+
+    this->M_HDF5->Flush();
 
     pointCoordinates.clear();
     pointMarkers.clear();
@@ -871,6 +879,8 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     this->M_HDF5->Write("Mesh", "Edges.GlobalId" + suffix, H5T_NATIVE_INT, numEdges, &edgeGlobalId[0]);
     this->M_HDF5->Write("Mesh", "Edges.BoundaryFlag" + suffix, H5T_NATIVE_INT, numEdges,
                         &edgeBoundaryFlags[0]);
+
+    this->M_HDF5->Flush();
 
     edgePoints.clear();
     edgeMarkers.clear();
@@ -931,6 +941,8 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     this->M_HDF5->Write("Mesh", "Faces.NeighbourPos2" + suffix, H5T_NATIVE_INT, numFaces,
                         &faceNeighbourPos[1][0]);
 
+    this->M_HDF5->Flush();
+
     facePoints.clear();
     faceMarkers.clear();
     faceGlobalId.clear();
@@ -966,6 +978,8 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     this->M_HDF5->Write("Mesh", "Volumes.f" + suffix, H5T_NATIVE_INT, numVolumes, &volumeMarkers[0]);
     this->M_HDF5->Write("Mesh", "Volumes.GlobalId" + suffix, H5T_NATIVE_INT, numVolumes, &volumeGlobalId[0]);
 
+    this->M_HDF5->Flush();
+
     volumePoints.clear();
     volumeMarkers.clear();
     volumeGlobalId.clear();
@@ -986,6 +1000,8 @@ void ExporterHDF5Mesh3D<MeshType>::writeSerialMesh()
 
         index.str(std::string());
         index.clear();
+
+        std::cout << "Wrote mesh partition " << i << std::endl;
     }
 }
 
