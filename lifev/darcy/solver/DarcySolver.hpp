@@ -915,6 +915,7 @@ buildSystem ()
         /* Assemble the global hybrid matrix.
            M_primal_FESpace is used instead of M_hybrid_FESpace for currentLocalId,
            because currentFE cannot store a ReferenceFEHybrid. */
+
         assembleMatrix( *M_matrHybrid,
                         M_primal_FESpace.fe().currentLocalId(),
                         M_elmatHyb,
@@ -1073,7 +1074,6 @@ computePrimalAndDual ()
         {
             UInt iGlobalFace( M_dual_FESpace.mesh()->localFacetId( iElem, iLocalFace ) );
             if ( M_dual_FESpace.mesh()->facet( iGlobalFace ).firstAdjacentElementIdentity() != iElem )
-//M_dual_FESpace.mesh()->faceElement( iGlobalFace, 0 ) != iElem )
             {
                 M_elvecFlux[ iLocalFace ] = 0;
             }
