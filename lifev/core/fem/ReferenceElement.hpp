@@ -807,11 +807,11 @@ static const Real refcoor_RT0_TRIA_2D[ 9 ] =
     0.      , 1. / 2. , 0.
 };
 
-static const ReferenceElement::function_Type fct_RT0_TRIA_2D[ 9 ] =
+static const ReferenceElement::function_Type fct_RT0_TRIA_2D[ 6 ] =
 {
-    fct1_RT0_1_TRIA_2D, fct1_RT0_2_TRIA_2D, fct1_RT0_3_TRIA_2D,
-    fct2_RT0_1_TRIA_2D, fct2_RT0_2_TRIA_2D, fct2_RT0_3_TRIA_2D,
-    fct3_RT0_1_TRIA_2D, fct3_RT0_2_TRIA_2D, fct3_RT0_3_TRIA_2D
+    fct1_RT0_1_TRIA_2D, fct1_RT0_2_TRIA_2D,
+    fct2_RT0_1_TRIA_2D, fct2_RT0_2_TRIA_2D,
+    fct3_RT0_1_TRIA_2D, fct3_RT0_2_TRIA_2D
 };
 
 static const ReferenceElement::function_Type fct_DIV_RT0_TRIA_2D[ 3 ] =
