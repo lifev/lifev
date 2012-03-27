@@ -71,9 +71,9 @@ int main( int argc, char* argv[] )
     // this brace is important to destroy the Epetra_Comm object before calling MPI_Finalize
     {
 
-    typedef RegionMesh<LinearTetra,neighborMarkerCommon_Type> RegionMesh;
-    typedef FESpace< RegionMesh, MapEpetra >            feSpace_Type;
-    typedef boost::shared_ptr< feSpace_Type >           feSpacePtr_Type;
+    typedef RegionMesh<LinearTriangle,neighborMarkerCommon_Type> RegionMesh;
+    typedef FESpace< RegionMesh, MapEpetra > feSpace_Type;
+    typedef boost::shared_ptr< feSpace_Type > feSpacePtr_Type;
 
     LifeChrono chronoTotal;
     LifeChrono chronoMesh;
@@ -137,25 +137,49 @@ int main( int argc, char* argv[] )
     chronoGhost.start();
 
     feSpacePtr_Type feSpaceP1( new feSpace_Type( meshPart,
-                                                 feTetraP1,
-                                                 quadRuleTetra15pt,
-                                                 quadRuleTria1pt,
+                                                 feTriaP1,
+                                                 quadRuleTria4pt,
+                                                 quadRuleSeg2pt,
                                                  1,
                                                  comm ) );
+
+    fileOut << "=================== P1" << std::endl;
+    fileOut << "9---8---7---6---5" << std::endl;
+    fileOut << "|  /|  /|  /|  /|" << std::endl;
+    fileOut << "| / | / | / | / |" << std::endl;
+    fileOut << "|/  |/  |/  |/  |" << std::endl;
+    fileOut << "0---1---2---3---4" << std::endl;
 
     GhostHandler<RegionMesh> ghostP1 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP1->map(), comm );
 
     ghostP1.setUp();
 
     MapEpetra mapP1 ( feSpaceP1->map() );
-    MapEpetra mapP1Overlap1 ( ghostP1.ghostMapOnNodes( dataFile( "ghost/overlap", 1 ) ) );
+    MapEpetra mapP1Overlap ( ghostP1.ghostMapOnNodes( dataFile( "ghost/overlap", 2 ) ) );
 
-    fileOut << "=================== mapP1" << std::endl;
+    fileOut << "=================== mapP1 Unique" << std::endl;
+    fileOut << "9---8---7---+---+    +---+---+---6---5" << std::endl;
+    fileOut << "|  /|  /|  /|  /|    |  /|  /|  /|  /|" << std::endl;
+    fileOut << "| / | / | / | / |    | / | / | / | / |" << std::endl;
+    fileOut << "|/  |/  |/  |/  |    |/  |/  |/  |/  |" << std::endl;
+    fileOut << "0---1---2---+---+    +---+---+---3---4" << std::endl;
     fileOut << *mapP1.map( Unique );
-    fileOut << "=================== mapP1" << std::endl;
+
+    fileOut << "=================== mapP1 Repeated" << std::endl;
+    fileOut << "9---8---7---+---+    +---+---7---6---5" << std::endl;
+    fileOut << "|  /|  /|  /|  /|    |  /|  /|  /|  /|" << std::endl;
+    fileOut << "| / | / | / | / |    | / | / | / | / |" << std::endl;
+    fileOut << "|/  |/  |/  |/  |    |/  |/  |/  |/  |" << std::endl;
+    fileOut << "0---1---2---+---+    +---+---2---3---4" << std::endl;
     fileOut << *mapP1.map( Repeated );
-    fileOut << "=================== mapP1Overlap1" << std::endl;
-    fileOut << *mapP1Overlap1.map( Repeated );
+
+    fileOut << "=================== mapP1 Repeated overlap 2" << std::endl;
+    fileOut << "9---8---7---6---5    9---8---7---6---5" << std::endl;
+    fileOut << "|  /|  /|  /|  /|    |  /|  /|  /|  /|" << std::endl;
+    fileOut << "| / | / | / | / |    | / | / | / | / |" << std::endl;
+    fileOut << "|/  |/  |/  |/  |    |/  |/  |/  |/  |" << std::endl;
+    fileOut << "0---1---2---3---4    0---1---2---3---4" << std::endl;
+    fileOut << *mapP1Overlap.map( Repeated );
 
 #ifdef HAVE_HDF5
 
@@ -167,23 +191,34 @@ int main( int argc, char* argv[] )
 
     ghostP1.clean();
 
-    boost::shared_ptr<VectorEpetra> vP1( new VectorEpetra( mapP1Overlap1, Unique ) );
+    boost::shared_ptr<VectorEpetra> vP1( new VectorEpetra( mapP1Overlap, Unique ) );
 
     // get all elements from the repeated map
-    Int* pointer ( mapP1Overlap1.map( Repeated )->MyGlobalElements() );
-    for ( Int ii = 0; ii < mapP1Overlap1.map( Repeated )->NumMyElements(); ++ii, ++pointer )
+    Int* pointer ( mapP1Overlap.map( Repeated )->MyGlobalElements() );
+    for ( Int ii = 0; ii < mapP1Overlap.map( Repeated )->NumMyElements(); ++ii, ++pointer )
     {
         vP1->sumIntoGlobalValues( *pointer, 1 );
     }
 
     vP1->globalAssemble();
 
+    // check that the overlapping map has all the nodes in the mesh
+    if( mapP1Overlap.map( Repeated )->NumMyElements() != 10 )
+        return 1;
+
     feSpacePtr_Type feSpaceP0( new feSpace_Type( meshPart,
-                                                 feTetraP0,
-                                                 quadRuleTetra15pt,
+                                                 feTriaP0,
                                                  quadRuleTria1pt,
+                                                 quadRuleSeg1pt,
                                                  1,
                                                  comm ) );
+
+    fileOut << "=================== P0" << std::endl;
+    fileOut << "+---+---+---+---+" << std::endl;
+    fileOut << "|1 /|3 /|5 /|7 /|" << std::endl;
+    fileOut << "| / | / | / | / |" << std::endl;
+    fileOut << "|/ 0|/ 2|/ 4|/ 6|" << std::endl;
+    fileOut << "+---+---+---+---+" << std::endl;
 
     GhostHandler<RegionMesh> ghostP0 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP0->map(), comm );
 
@@ -191,15 +226,38 @@ int main( int argc, char* argv[] )
 
     MapEpetra mapP0 ( feSpaceP0->map() );
     MapEpetra mapP0P0 ( ghostP0.ghostMapOnElementsP0() );
-    MapEpetra mapP0P1 ( ghostP0.ghostMapOnElementsP1( dataFile( "ghost/overlap", 1 ) ) );
+    MapEpetra mapP0P1 ( ghostP0.ghostMapOnElementsP1( dataFile( "ghost/overlap", 2 ) ) );
 
-    fileOut << "=================== mapP0" << std::endl;
+    fileOut << "=================== mapP0 Unique" << std::endl;
+    fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
+    fileOut << "|1 /|3 /|  /|  /|   |  /|  /|5 /|7 /|" << std::endl;
+    fileOut << "| / | / | / | / |   | / | / | / | / |" << std::endl;
+    fileOut << "|/ 0|/ 2|/  |/  |   |/  |/  |/ 4|/ 6|" << std::endl;
+    fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
     fileOut << *mapP0.map( Unique );
-    fileOut << "=================== mapP0" << std::endl;
+
+    fileOut << "=================== mapP0 Repeated" << std::endl;
+    fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
+    fileOut << "|1 /|3 /|  /|  /|   |  /|  /|5 /|7 /|" << std::endl;
+    fileOut << "| / | / | / | / |   | / | / | / | / |" << std::endl;
+    fileOut << "|/ 0|/ 2|/  |/  |   |/  |/  |/ 4|/ 6|" << std::endl;
+    fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
     fileOut << *mapP0.map( Repeated );
-    fileOut << "=================== mapP0P0" << std::endl;
+
+    fileOut << "=================== mapP0 Repeated face neighbors" << std::endl;
+    fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
+    fileOut << "|1 /|3 /|5 /|  /|   |  /|  /|5 /|7 /|" << std::endl;
+    fileOut << "| / | / | / | / |   | / | / | / | / |" << std::endl;
+    fileOut << "|/ 0|/ 2|/  |/  |   |/  |/ 2|/ 4|/ 6|" << std::endl;
+    fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
     fileOut << *mapP0P0.map( Repeated );
-    fileOut << "=================== mapP0P1" << std::endl;
+
+    fileOut << "=================== mapP0 Repeated node neighbors overlap 2" << std::endl;
+    fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
+    fileOut << "|1 /|3 /|5 /|7 /|   |1 /|3 /|5 /|7 /|" << std::endl;
+    fileOut << "| / | / | / | / |   | / | / | / | / |" << std::endl;
+    fileOut << "|/ 0|/ 2|/ 4|/ 6|   |/ 0|/ 2|/ 4|/ 6|" << std::endl;
+    fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
     fileOut << *mapP0P1.map( Repeated );
 
     ghostP0.showMe( true, fileOut );
@@ -220,6 +278,10 @@ int main( int argc, char* argv[] )
 
     fileOut << "=================== vector" << std::endl;
     fileOut << vP0->epetraVector();
+
+    // check that the overlapping map has all the elements in the mesh
+    if( mapP0P1.map( Repeated )->NumMyElements() != 8 )
+        return 1;
 
     // Stop chronoGhost
     chronoGhost.stop();

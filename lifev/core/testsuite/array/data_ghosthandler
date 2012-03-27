@@ -20,8 +20,8 @@
 
     [space_discretization]
     mesh_dir      = ./ # the directory where the mesh file is
-    mesh_file     = cartesian_cube8.mesh
-    mesh_type     = .mesh #structured #.mesh
+    mesh_file     = mesh_ghosthandler.msh
+    mesh_type     = .msh
     mesh_faces    = all
     verbose       = 0                        # verbose during mesh-reading
     # 0 -> tetra, 1 -> hexa
@@ -31,7 +31,7 @@
     [exporter]
     type       = hdf5
     folder     = ./
-    multimesh  = false   # actually we export also the displacement
+    multimesh  = false
     start      = 0
     save       = 1
     file_name  = GH 
