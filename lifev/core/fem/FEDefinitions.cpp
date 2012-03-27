@@ -655,17 +655,17 @@ Real der2fct1_P0_0D( const GeoVector& )
 /*
                            --1--
 */
-Real fct1_P0_1D( const GeoVector& v )
+Real fct1_P0_1D( const GeoVector& /*v*/ )
 {
     return 1.;
 }
 
-Real derfct1_1_P0_1D( const GeoVector& )
+Real derfct1_1_P0_1D( const GeoVector& /*v*/ )
 {
     return 0.;
 }
 
-Real der2fct1_P0_1D( const GeoVector& )
+Real der2fct1_P0_1D( const GeoVector& /*v*/ )
 {
     return 0.;
 }
