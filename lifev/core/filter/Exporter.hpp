@@ -618,6 +618,7 @@ void Exporter<MeshType>::exportPID( MeshPartitioner< MeshType > & meshPart )
             break;
         default:
             ASSERT ( 0, "Dimension not supported " );
+            break;
     }
 
     // Useless quadrature rule
