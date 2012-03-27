@@ -36,8 +36,6 @@
 #ifndef _GHOSTHANDLER_HPP_
 #define _GHOSTHANDLER_HPP_
 
-#include <boost/shared_ptr.hpp>
-
 #include <lifev/core/mesh/NeighborMarker.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
@@ -80,10 +78,19 @@ public:
     //! @name Get Methods
     //@{
 
+    //! Full mesh getter
     mesh_Type const & fullMesh() { return *M_fullMesh; }
+
+    //! Local mesh getter
     mesh_Type const & localMesh() { return *M_localMesh; }
+
+    //! Standard map getter
     map_Type const & map() { return M_map; }
+
+    //! Node to node neighbor map
     neighborMap_Type const & nodeNodeNeighborsMap() { return M_nodeNodeNeighborsMap; }
+
+    //! Node to element neighbor map
     neighborMap_Type const & nodeElementNeighborsMap() { return M_nodeElementNeighborsMap; }
 
     //@}
@@ -358,7 +365,7 @@ void GhostHandler<Mesh>::importFromHDF5( std::string const & fileName )
 template <typename Mesh>
 void GhostHandler<Mesh>::createNodeNeighbors()
 {
-    // TODO: ASSERT_COMPILE_TIME that MeshType::pointMarker == NeighborMarker
+    // @TODO: ASSERT_COMPILE_TIME that MeshType::pointMarker == NeighborMarker
     // this guarantees that the nodeNeighbors structure is available.
 
     // generate node neighbors by watching edges
@@ -463,7 +470,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes()
     std::set<Int> myGlobalElementsSet;
 
     // iterate on local mesh points
-    // todo: this can start from the repeated map and add only neighbors for SUBDOMAIN_INTERFACE marked nodes
+    // @todo: this can start from the repeated map and add only neighbors for SUBDOMAIN_INTERFACE marked nodes
     for ( UInt k = 0; k < M_localMesh->numPoints(); k++ )
     {
         // iterate on each node neighborhood
@@ -585,7 +592,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
         }
         ( myGlobalElements.begin(), myGlobalElements.end() );
 
-        // todo: optimize this!!
+        // @todo: optimize this!!
         // 1: work only on the boundary
         // 2: copy back only if necessary
         // repeat on actual nodes to expand overlap
