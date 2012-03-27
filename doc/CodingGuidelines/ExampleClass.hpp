@@ -40,7 +40,7 @@
 #ifndef EXAMPLECLASS_H
 #define EXAMPLECLASS_H 1
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {
