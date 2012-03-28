@@ -11,6 +11,10 @@ If the module is marked as PS (Primary Stable) or SS (Secondary Stable), it
 will be activated when the cmake flag LifeV_ENABLE_ALL_PACKAGES is set to ON. If
 the module is marked EX (Experimental), it will not be included.
 
+(root_dir) LifeV_config.h.in
+This file contains variables linked to activated modules. A new #cmakedefine
+line can be added with the new module name (this step is not mandatory).
+
 lifev/<package_name>/CMakeLists.txt
 This file defines standard module properties and the list of subdirectories that
 cointain source and header files.

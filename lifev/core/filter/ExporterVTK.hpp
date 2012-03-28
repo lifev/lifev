@@ -140,7 +140,7 @@ private:
 
 public:
     //! Destructor
-    ~ExporterVTK();
+    virtual ~ExporterVTK();
     //@}
 
     //! @name Public Methods
@@ -561,7 +561,7 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
             if (!this->M_procId)
                 std::cout << "WARNING: the element is not yet implemented in ExporterVTK\n";
             abort();
-
+            break;
     }
 
     return vtkCellType;
@@ -601,6 +601,7 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             break;
         default:
             abort();
+            break;
     }
 
     int32_type lengthOfRawData( dvar.fieldDim()*numMyDOF*sizeOfFloat );
@@ -797,7 +798,7 @@ ExporterVTK<Mesh>::readBinaryData( const std::string& line, std::vector<Real>& v
 {
     std::stringstream decodedData, dataToBeDecoded; dataToBeDecoded.str("");
     std::string decodedDataString;
-    UInt sizeOfFloat, sizeOfVector( values.size() ), lengthOfRawData;
+    UInt sizeOfFloat( 0 ), sizeOfVector( values.size() ), lengthOfRawData;
 
     switch( numBits )
     {
@@ -979,6 +980,7 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
             break;
         default:
             abort();
+            break;
     }
 
     //header part of the file
