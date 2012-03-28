@@ -36,9 +36,9 @@
 
 #include <Teuchos_RCPBoostSharedPtrConversions.hpp>
 
-#include <life/lifealg/PreconditionerML2.hpp>
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifealg/PreconditionerMGOperators.hpp>
+#include <lifev/core/algorithm/PreconditionerML2.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/algorithm/PreconditionerMGOperators.hpp>
 
 namespace LifeV
 {

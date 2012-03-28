@@ -55,13 +55,13 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 #pragma GCC diagnostic warning "-Wextra"
 
-#include <life/lifemesh/RegionMesh.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifealg/Preconditioner.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 
 namespace LifeV
 {

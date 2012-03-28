@@ -39,9 +39,9 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifealg/Preconditioner.hpp>
-#include <life/lifealg/PreconditionerBlock.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/algorithm/PreconditionerBlock.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"

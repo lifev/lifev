@@ -36,13 +36,13 @@
 
 #include <vector>
 #include "PreconditionerSIMPLE.hpp"
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
-#include <life/lifealg/PreconditionerML2.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifearray/MatrixEpetraStructured.hpp>
-#include <life/lifearray/MatrixEpetraStructuredView.hpp>
-#include <life/lifearray/MatrixEpetraStructuredUtility.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
+#include <lifev/core/algorithm/PreconditionerML2.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredView.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredUtility.hpp>
 
 namespace LifeV {
 

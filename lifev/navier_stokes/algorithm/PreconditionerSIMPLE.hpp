@@ -39,14 +39,14 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifealg/PreconditionerComposition.hpp>
-#include <life/lifearray/MatrixEpetraStructured.hpp>
-#include <life/lifesolver/ADRAssembler.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/algorithm/PreconditionerComposition.hpp>
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
+#include <lifev/core/solver/ADRAssembler.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
 namespace LifeV {
 

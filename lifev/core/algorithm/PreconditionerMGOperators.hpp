@@ -41,11 +41,11 @@
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
 namespace LifeV
 {

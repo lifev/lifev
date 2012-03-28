@@ -39,8 +39,8 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <life/lifealg/Preconditioner.hpp>
-#include <life/lifearray/MapEpetra.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 
 namespace LifeV {
 

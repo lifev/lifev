@@ -41,9 +41,9 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <Teuchos_ParameterList.hpp>
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifealg/Preconditioner.hpp>
-#include <life/lifealg/ComposedOperator.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/algorithm/ComposedOperator.hpp>
 
 namespace LifeV {
 
