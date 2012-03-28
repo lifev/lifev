@@ -289,15 +289,7 @@ darcy::run()
 {
     using boost::dynamic_pointer_cast;
 
-//#define THREE_D
-
-#ifdef THREE_D
-    typedef LinearTetra                                               geoElement_Type;
-#else
-    typedef LinearTriangle                                            geoElement_Type;
-#endif
-
-    typedef RegionMesh< geoElement_Type >                             RegionMesh;
+    typedef RegionMesh< LinearTetra >                                 RegionMesh;
     typedef SolverAztecOO                                             solver_type;
 
     typedef DarcySolver< RegionMesh, solver_type >                    darcyLinearSolver_type;
@@ -362,8 +354,6 @@ darcy::run()
     // Create the the mesh
     boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh );
 
-std::cout << meshData.meshType() << std::endl;
-
     // Select if the mesh is structured or not
     if ( meshData.meshType() != "structured" )
     {
@@ -372,7 +362,6 @@ std::cout << meshData.meshType() << std::endl;
     }
     else
     {
-#ifdef THREE_D
         // Set up the structured mesh
         regularMesh3D( *fullMeshPtr, 0,
                        dataFile( ( Members->discretization_section + "/space_discretization/nx" ).data(), 4 ),
@@ -382,9 +371,6 @@ std::cout << meshData.meshType() << std::endl;
                        dataFile( ( Members->discretization_section + "/space_discretization/lx" ).data(), 1. ),
                        dataFile( ( Members->discretization_section + "/space_discretization/ly" ).data(), 1. ),
                        dataFile( ( Members->discretization_section + "/space_discretization/lz" ).data(), 1. ) );
-#else
-        exit ( EXIT_FAILURE );
-#endif
     }
 
     // Create the partitioner
@@ -418,15 +404,15 @@ std::cout << meshData.meshType() << std::endl;
 
     BCHandler bcDarcy;
 
-    //bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumannBDfun1, 1 );
-    //bcDarcy.addBC( "Bottom",  BOTTOM,  Robin,      Scalar,  robinBDfun      );
+    bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumannBDfun1, 1 );
+    bcDarcy.addBC( "Bottom",  BOTTOM,  Robin,      Scalar,  robinBDfun      );
     //bcDarcy.addBC(   "Top",    TOP,    Essential,  Scalar,  dirichletBDfun  );
     //bcDarcy.addBC("Bottom", BOTTOM,    Essential,  Scalar,  dirichletBDfun  );
-    //bcDarcy.addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichletBDfun  );
-    //bcDarcy.addBC( "Right",  RIGHT,    Essential,  Scalar,  dirichletBDfun  );
-    //bcDarcy.addBC( "Front",  FRONT,    Essential,  Scalar,  dirichletBDfun  );
+    bcDarcy.addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichletBDfun  );
+    bcDarcy.addBC( "Right",  RIGHT,    Essential,  Scalar,  dirichletBDfun  );
+    bcDarcy.addBC( "Front",  FRONT,    Essential,  Scalar,  dirichletBDfun  );
     //bcDarcy.addBC(  "Back",   BACK,    Essential,  Scalar,  dirichletBDfun  );
-    //bcDarcy.addBC( "Back",    BACK,    Natural,    Full,    neumannBDfun2, 1 );
+    bcDarcy.addBC( "Back",    BACK,    Natural,    Full,    neumannBDfun2, 1 );
 
 
     // Stop chronoBoundaryCondition
@@ -450,45 +436,27 @@ std::cout << meshData.meshType() << std::endl;
     const QuadratureRule* qR_primal    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_primal  ( static_cast<QuadratureRule*>(NULL) );
 
-#ifdef THREE_D
     refFE_primal = &feTetraP0;
     qR_primal    = &quadRuleTetra15pt;
     bdQr_primal  = &quadRuleTria4pt;
-#else
-    refFE_primal = &feTriaP0;
-    qR_primal    = &quadRuleTria4pt;
-    bdQr_primal  = &quadRuleSeg1pt;
-#endif
 
     // Dual solution parameters
     const ReferenceFE*    refFE_dual ( static_cast<ReferenceFE*>(NULL) );
     const QuadratureRule* qR_dual    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_dual  ( static_cast<QuadratureRule*>(NULL) );
 
-#ifdef THREE_D
     refFE_dual = &feTetraRT0;
     qR_dual    = &quadRuleTetra15pt;
     bdQr_dual  = &quadRuleTria4pt;
-#else
-    refFE_dual = &feTriaRT0;
-    qR_dual    = &quadRuleTria4pt;
-    bdQr_dual  = &quadRuleSeg1pt;
-#endif
 
     // Interpolate of dual solution parameters
     const ReferenceFE*    refFE_dualInterpolate ( static_cast<ReferenceFE*>(NULL) );
     const QuadratureRule* qR_dualInterpolate    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_dualInterpolate  ( static_cast<QuadratureRule*>(NULL) );
 
-#ifdef THREE_D
     refFE_dualInterpolate = &feTetraP0;
     qR_dualInterpolate    = &quadRuleTetra15pt;
     bdQr_dualInterpolate  = &quadRuleTria4pt;
-#else
-    refFE_dualInterpolate = &feTriaP0;
-    qR_dualInterpolate    = &quadRuleTria4pt;
-    bdQr_dualInterpolate  = &quadRuleSeg1pt;
-#endif
 
     // Hybrid solution parameters
     // hybrid
@@ -496,30 +464,19 @@ std::cout << meshData.meshType() << std::endl;
     const QuadratureRule* qR_hybrid    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_hybrid  ( static_cast<QuadratureRule*>(NULL) );
 
-#ifdef THREE_D
     refFE_hybrid = &feTetraRT0Hyb;
     qR_hybrid    = &quadRuleTetra15pt;
     bdQr_hybrid  = &quadRuleTria4pt;
-#else
-    refFE_hybrid = &feTriaRT0Hyb;
-    qR_hybrid    = &quadRuleTria4pt;
-    bdQr_hybrid  = &quadRuleSeg1pt;
-#endif
 
     // dual dot outward unit normal
     const ReferenceFE*    refFE_VdotN ( static_cast<ReferenceFE*>(NULL) );
     const QuadratureRule* qR_VdotN    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_VdotN  ( static_cast<QuadratureRule*>(NULL) );
 
-#ifdef THREE_D
     refFE_VdotN = &feTetraRT0VdotNHyb;
     qR_VdotN    = &quadRuleTetra15pt;
     bdQr_VdotN  = &quadRuleTria4pt;
-#else
-    refFE_VdotN = &feTriaRT0VdotNHyb;
-    qR_VdotN    = &quadRuleTria4pt;
-    bdQr_VdotN  = &quadRuleSeg1pt;
-#endif
+
 
     // Finite element space of the primal variable
     feSpacePtr_Type p_FESpacePtr( new feSpace_Type( meshPart,
@@ -542,11 +499,7 @@ std::cout << meshData.meshType() << std::endl;
                                                                *refFE_dualInterpolate,
                                                                *qR_dualInterpolate,
                                                                *bdQr_dualInterpolate,
-#ifdef THREE_D
                                                                3,
-#else
-                                                               2,
-#endif
                                                                Members->comm ) );
 
     // Vector for the interpolated dual solution
