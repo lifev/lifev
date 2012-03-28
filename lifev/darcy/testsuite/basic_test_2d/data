@@ -27,26 +27,11 @@ name_dual   = Velocity
 [../]
 
 [darcy]
-# linear = 1, nonLinear = 2, transient = 3, transientNonLinear = 4
-problem_type = 1
-
-    # used for nonLinear and transientNonLinear
-    [./non-linear]
-    fixed_point_iteration = 200
-    fixed_point_toll      = 1.e-6
-    [../]
-
-    # used for transient and transientNonLinear
-    [./time_discretization]
-    initialtime   = 0.
-    endtime       = 1.
-    timestep      = 0.0625
-    [../]
 
     [./space_discretization]
     mesh_dir      = ./ # the directory where the mesh file is
-    mesh_file     = cartesian_cube8.mesh #cartesian_cube8.mesh #mesh48603.mesh #cartesian_cube8.mesh
-    mesh_type     = .mesh #structured #.mesh
+    mesh_file     = square20x20.msh
+    mesh_type     = .msh #structured #.mesh
     mesh_faces    = all
     verbose       = 0                        # verbose during mesh-reading
     #0 -> tetra, 1 -> hexa
