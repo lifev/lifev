@@ -1,6 +1,6 @@
 *~
 ._*
-*.in
+!lifeconfig_cmake.h.in
 !*.in.in
 *.m4
 *.[oa]
@@ -91,3 +91,5 @@ doc/CodingGuidelines/LifeV_Development_Guidelines.pdf
 doc/CodingGuidelines/LifeV_Development_Guidelines.aux
 doc/CodingGuidelines/LifeV_Development_Guidelines.log
 doc/CodingGuidelines/LifeV_Development_Guidelines.out
+cmake/
+

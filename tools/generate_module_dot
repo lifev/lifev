@@ -1,0 +1,43 @@
+#! /usr/bin/env python
+
+import os
+
+# initialize output file
+module_dot = open( 'modules.dot', 'w' )
+module_dot.write( 'digraph G {\n' )
+
+# open file with package list
+package_file = open( 'PackagesList.cmake', 'r' )
+
+# discard lines before the package list
+line = package_file.readline()
+while ( line != 'SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS\n' ):
+  line = package_file.readline()
+
+for line in package_file:
+  # exit when the package list is closed
+  if ( line.find( ')' ) > -1 ):
+    break
+
+  # get values from package line
+  [package_name, package_path, package_status] = line.strip( '\n' ).split()
+  print 'package name: {pn}, dir: {pp}, status: {ps}\n'.format(pn=package_name,pp=package_path,ps=package_status)
+
+  # open dependency list for the package
+  dep_file = open( os.path.join( package_path, 'cmake/Dependencies.cmake' ) )
+  dep_list = dep_file.readline().split()
+
+  # package_name = package_name + ' (' + package_status + ')'
+
+  # cycle on package dependencies
+  for dep in dep_list[ 1: ]:
+    # avoid eventual closing )
+    dep = dep.strip( ')' )
+
+    # add dependency line in dot file
+    module_dot.write( package_name + ' -> ' + dep + '\n' )
+
+module_dot.write( '}\n' )
+
+# doesn't work from python... why!?!?!?
+os.system( 'dot -Tsvg modules.dot -o modules.svg' )
