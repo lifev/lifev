@@ -374,6 +374,7 @@ Real CurrentFE::pointDetJacobian(const Real& hat_x, const Real& hat_y, const Rea
     }
     default:
         ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+        break;
     }
 
     return det;
@@ -569,6 +570,7 @@ void CurrentFE::barycenter( Real& x, Real& y, Real& z ) const
         break;
     default:
         ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+        break;
     }
 
     x /= M_nbGeoNode;
@@ -663,6 +665,7 @@ void CurrentFE::coorMap( Real& x, Real& y, Real& z,
         break;
     default:
         ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+        break;
     }
 }
 
@@ -977,6 +980,7 @@ void CurrentFE::computeTInverseJacobian()
         }
         default:
             ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+            break;
         }
 
     }
@@ -1036,6 +1040,7 @@ void CurrentFE::computeDetJacobian()
         }
         default:
             ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+            break;
         }
     }
     M_detJacobianUpdated=true;
