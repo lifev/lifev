@@ -284,6 +284,8 @@ darcy::run()
     typedef LinearTriangle geoElement_Type;
 
     typedef RegionMesh< geoElement_Type > regionMesh_Type;
+    typedef boost::shared_ptr< regionMesh_Type > regionMeshPtr_Type;
+
     typedef SolverAztecOO solver_Type;
 
     typedef DarcySolver< regionMesh_Type, solver_Type > darcyLinearSolver_Type;
@@ -493,20 +495,20 @@ darcy::run()
     vectorPtr_Type dualInterpolated( new vector_Type ( uInterpolate_FESpacePtr->map(), Repeated ) );
 
     // Finite element space of the hybrid variable
-    FESpace< regionMesh_Type, MapEpetra > hybrid_FESpace( meshPart,
-                                                     *refFE_hybrid,
-                                                     *qR_hybrid,
-                                                     *bdQr_hybrid,
-                                                     1,
-                                                     Members->comm );
+    feSpacePtr_Type hybrid_FESpace( new feSpace_Type( meshPart,
+                                                      *refFE_hybrid,
+                                                      *qR_hybrid,
+                                                      *bdQr_hybrid,
+                                                      1,
+                                                      Members->comm ) );
 
     // Finite element space of the  outward unit normal variable
-    FESpace< regionMesh_Type, MapEpetra > VdotN_FESpace( meshPart,
-                                                    *refFE_VdotN,
-                                                    *qR_VdotN,
-                                                    *bdQr_VdotN,
-                                                    1,
-                                                    Members->comm );
+    feSpacePtr_Type VdotN_FESpace( new feSpace_Type( meshPart,
+                                                     *refFE_VdotN,
+                                                     *qR_VdotN,
+                                                     *bdQr_VdotN,
+                                                     1,
+                                                     Members->comm ) );
 
     // Stop chronoFiniteElementSpace
     chronoFiniteElementSpace.stop();
@@ -523,8 +525,8 @@ darcy::run()
     darcyLinearSolverPtr_Type darcySolver;
 
     darcySolver.reset( new darcyLinearSolver_Type( darcyData, *p_FESpacePtr,
-                                                   *u_FESpacePtr, hybrid_FESpace,
-                                                   VdotN_FESpace,
+                                                   *u_FESpacePtr, *hybrid_FESpace,
+                                                   *VdotN_FESpace,
                                                    Members->comm ) );
 
     // Stop chronoProblem
@@ -575,11 +577,6 @@ darcy::run()
     if ( exporterType.compare("hdf5") == 0 )
     {
         exporter.reset( new ExporterHDF5< regionMesh_Type > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
-
-        // Set directory where to save the solution
-        exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
-
-        exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
     }
     else
 #endif
@@ -587,22 +584,17 @@ darcy::run()
         if ( exporterType.compare("none") == 0 )
         {
             exporter.reset( new ExporterEmpty< regionMesh_Type > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
-
-            // Set directory where to save the solution
-            exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
-
-            exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
         }
         else
         {
             exporter.reset( new ExporterEnsight< regionMesh_Type > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
-
-            // Set directory where to save the solution
-            exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
-
-            exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
         }
     }
+
+    // Set directory where to save the solution
+    exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
+
+    exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
 
     // Set the exporter primal pointer
     primalExporter.reset( new vector_Type ( *( darcySolver->primalSolution() ),
@@ -631,7 +623,7 @@ darcy::run()
 
     // Display the total number of unknowns
     darcySolver->getDisplayer().leaderPrint( "Number of unknowns : ",
-                                             hybrid_FESpace.map().map(Unique)->NumGlobalElements(), "\n" );
+                                             hybrid_FESpace->map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Export the partitioning
     exporter->exportPID( meshPart );
