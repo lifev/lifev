@@ -37,11 +37,11 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/core/filter/GetPot.hpp>
-#include <life/core/array/MatrixEpetra.hpp>
-#include <life/core/fem/FESpace.hpp>
-#include <life/core/algorithm/PreconditionerTeko.hpp>
-#include <life/core/mesh/RegionMesh.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/algorithm/PreconditionerTeko.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
