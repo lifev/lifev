@@ -50,6 +50,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
@@ -398,8 +399,7 @@ main( int argc, char** argv )
     vectorPtr_type beta;
     beta.reset(new vector_type(solutionMap,Repeated));
 
-    vectorPtr_type convectionTerm;
-    convectionTerm.reset(new vector_type(solutionMap,Unique));
+    vector_type convect(rhs->map());
 
     vectorPtr_type velocity;
     velocity.reset(new vector_type(uFESpace->map(),Unique));
@@ -490,10 +490,11 @@ main( int argc, char** argv )
             }
             else if(convectionTerm == KIO91)
             {
-                *rhs -= bdfConvectionInit.extrapolation();
-                *beta *= 0;
-                oseenAssembler.addConvectionRhs(*beta,*solution);
-                bdfConvectionInit.shiftRight(*beta);
+	      bdfConvectionInit.extrapolation(convect);
+	      *rhs -= convect;
+	      *beta *= 0;
+	      oseenAssembler.addConvectionRhs(*beta,*solution);
+	      bdfConvectionInit.shiftRight(*beta);
             }
 
             if (verbose) std::cout << "done" << std::endl;
@@ -576,7 +577,7 @@ main( int argc, char** argv )
         {
           //  *beta = bdf.extrapolation(); // Extrapolation for the convective term
           bdf.extrapolation( *beta ); // Extrapolation for the convective term
-	  oseenAssembler.addConvection(systemMatrix,*beta);
+	  oseenAssembler.addConvection(*systemMatrix,*beta);
         }
         else if(convectionTerm == Explicit)
         {
@@ -585,8 +586,9 @@ main( int argc, char** argv )
         else if(convectionTerm == KIO91)
         {
 	  //   *rhs -= bdfConvection.extrapolation();
-	  bdfConvection.extrapolation(convectionTerm);
-	  *rhs -= convectionTerm;
+	  convect *= 0.;
+	  bdfConvection.extrapolation(convect);
+	  *rhs -= convect;
 	}
         if (verbose) std::cout << "done" << std::endl;
 
