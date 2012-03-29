@@ -1,3 +1,0 @@
-
-all:
-	@admin/cvs.sh cvs
