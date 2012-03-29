@@ -742,7 +742,7 @@ addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
     const UInt fieldDim(M_fespace->fieldDim());
     const UInt nbFEDof(M_massRhsCFE->nbFEDof());
     const UInt nbQuadPt(M_massRhsCFE->nbQuadPt());
-    const UInt nbTotalDof(M_fespace->dof().numTotalDof());
+    //const UInt nbTotalDof(M_fespace->dof().numTotalDof());
 
     // Temporaries
     Real localValue(0.0);

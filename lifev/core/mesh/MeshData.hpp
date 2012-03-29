@@ -35,6 +35,7 @@
     @author Gilles Fourestey
     @date 06-2010
     @contributor Lucia Mirabella <lucia.mirabell@gmail.com>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @maintainer Lucia Mirabella <lucia.mirabell@gmail.com>
 
  */
@@ -111,6 +112,12 @@ public:
     //! @name Set Methods
     //@{
 
+    void setMeshDir  ( const std::string& dir )   { M_meshDir  = dir; }
+    void setMeshFile ( const std::string& file )  { M_meshFile = file; }
+    void setMeshType ( const std::string& type )  { M_meshType = type; }
+    void setMOrder   ( const std::string& order ) { M_order    = order; }
+    void setVerbose  ( const bool& isVerbose )    { M_verbose  = isVerbose; }
+
     //@}
 
 
@@ -121,7 +128,6 @@ public:
     const std::string&   meshFile()  const { return M_meshFile; }
     const std::string&   meshType()  const { return M_meshType; }
     const std::string&   mOrder()    const { return M_order; }
-
     const bool&          verbose()   const { return M_verbose; }
 
     //@}

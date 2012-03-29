@@ -139,6 +139,35 @@ void stiffness(MatrixElemental& localStiff,
     }
 }
 
+void advectionNewton( Real coef, VectorElemental& vel,
+                      MatrixElemental& elmat, const CurrentFE& fe,
+                      int iblock, int jblock )
+{
+    Real sum, sumDerivative;
+    MatrixElemental::matrix_view mat_icomp = elmat.block( iblock, jblock );
+
+    //Assemble the local matrix
+    for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+    {
+        for ( UInt j = 0; j < fe.nbFEDof(); j++ )
+        {
+            sum = 0.;
+            for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
+            {
+                //evaluate derivative
+                VectorElemental::vector_view velicoor = vel.block( iblock );
+                sumDerivative = 0.;
+                for ( UInt k = 0; k < fe.nbFEDof(); k++ )
+                    sumDerivative += velicoor( k ) * fe.phiDer( k, jblock, iq );
+                //end evaluate derivative
+
+                sum += fe.phi(j,iq)*sumDerivative*fe.phi(i,iq) * fe.weightDet( iq );
+            }
+            mat_icomp( i, j ) += sum*coef;
+        }
+    }
+}
+
 void grad( MatrixElemental& elmat,
            const CurrentFE& uCFE,
            const CurrentFE& pCFE,
@@ -3119,7 +3148,6 @@ void advection( Real coef, VectorElemental& vel,
         }
     }
 }
-
 
 void grad( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elmat,
            const CurrentFE& fe1, const CurrentFE& fe2,

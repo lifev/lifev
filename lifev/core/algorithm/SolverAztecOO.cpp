@@ -55,6 +55,11 @@ SolverAztecOO::SolverAztecOO() :
         M_maxIterForReuse      ( 0 ),
         M_reusePreconditioner  (false)
 {
+	if( M_displayer->isLeader() )
+	{
+		std::cerr << "Warning: SolverAztecOO is deprecated!" << std::endl
+		          << "         You should use LinearSolver intead!" << std::endl;
+	}
 }
 
 SolverAztecOO::SolverAztecOO( const boost::shared_ptr<Epetra_Comm>& comm ) :
@@ -67,6 +72,11 @@ SolverAztecOO::SolverAztecOO( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_maxIterForReuse      ( 0 ),
         M_reusePreconditioner  (false)
 {
+	if( M_displayer->isLeader() )
+	{
+		std::cerr << "Warning: SolverAztecOO is deprecated!" << std::endl
+		          << "         You should use LinearSolver intead!" << std::endl;
+	}
 }
 
 // ===================================================
