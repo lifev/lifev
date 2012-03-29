@@ -1,14 +1,14 @@
-SET(array_HEADERS
+SET(function_HEADERS
   function/Laplacian.hpp
 CACHE INTERNAL "")
 
-SET(array_SOURCES
+SET(function_SOURCES
   function/Laplacian.cpp
 CACHE INTERNAL "")
 
 
 SET(LOCAL_HEADERS)
-FOREACH(INC ${array_HEADERS})
+FOREACH(INC ${function_HEADERS})
   STRING(REPLACE "function/" "" LOCAL_INC ${INC})
   SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
 ENDFOREACH()
