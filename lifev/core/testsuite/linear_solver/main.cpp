@@ -45,8 +45,8 @@
 #endif
 
 #include <Teuchos_ParameterList.hpp>
-#include "Teuchos_XMLParameterListHelpers.hpp"
-#include "Teuchos_RCP.hpp"
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -55,22 +55,20 @@
 #include<math.h>
 #include <string>
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifemesh/RegionMesh3DStructured.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
-#include <life/lifemesh/MeshUtility.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/BCManage.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifesolver/ADRAssembler.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/SolverBelos.hpp>
-#include <life/lifealg/LinearSolver.hpp>
-#include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifefunctions/Laplacian.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshUtility.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/BCManage.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/solver/ADRAssembler.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
+#include <lifev/core/function/Laplacian.hpp>
 
 using namespace LifeV;
 
@@ -251,38 +249,27 @@ main( int argc, char** argv )
     linearSolver1.setPreconditioner( precPtr );
     if( verbose ) std::cout << "done" << std::endl;
 
-    if( verbose ) std::cout << "Setting up SolverBelos... " << std::flush;
-    Teuchos::RCP< Teuchos::ParameterList > belosList1 = Teuchos::rcp ( new Teuchos::ParameterList );
-    belosList1 = Teuchos::getParametersFromXmlFile( "SolverParamList1.xml" );
-
-    SolverBelos linearSolver2;
-    linearSolver2.setCommunicator( Comm );
-    linearSolver2.setParameters( *belosList1 );
-    linearSolver2.setPreconditioner( precPtr );
-    if( verbose ) std::cout << "done" << std::endl;
-    linearSolver2.showMe();
-
     if( verbose ) std::cout << "Setting up LinearSolver (Belos)... " << std::flush;
     Teuchos::RCP< Teuchos::ParameterList > belosList2 = Teuchos::rcp ( new Teuchos::ParameterList );
     belosList2 = Teuchos::getParametersFromXmlFile( "SolverParamList2.xml" );
 
-    LinearSolver linearSolver3;
-    linearSolver3.setCommunicator( Comm );
-    linearSolver3.setParameters( *belosList2 );
-    linearSolver3.setPreconditioner( precPtr );
+    LinearSolver linearSolver2;
+    linearSolver2.setCommunicator( Comm );
+    linearSolver2.setParameters( *belosList2 );
+    linearSolver2.setPreconditioner( precPtr );
     if( verbose ) std::cout << "done" << std::endl;
-    linearSolver3.showMe();
+    linearSolver2.showMe();
 
     if( verbose ) std::cout << "Setting up LinearSolver (AztecOO)... " << std::flush;
     Teuchos::RCP< Teuchos::ParameterList > belosList3 = Teuchos::rcp ( new Teuchos::ParameterList );
     belosList3 = Teuchos::getParametersFromXmlFile( "SolverParamList3.xml" );
 
-    LinearSolver linearSolver4;
-    linearSolver4.setCommunicator( Comm );
-    linearSolver4.setParameters( *belosList3 );
-    linearSolver4.setPreconditioner( precPtr );
+    LinearSolver linearSolver3;
+    linearSolver3.setCommunicator( Comm );
+    linearSolver3.setParameters( *belosList3 );
+    linearSolver3.setPreconditioner( precPtr );
     if( verbose ) std::cout << "done" << std::endl;
-    linearSolver4.showMe();
+    linearSolver3.showMe();
 
     // +-----------------------------------------------+
     // |                   Simulation                  |
@@ -318,29 +305,21 @@ main( int argc, char** argv )
     linearSolver1.setMatrix( *systemMatrix );
     linearSolver1.solveSystem( *rhsBC, *solution, systemMatrix );
 
-    if( verbose ) std::cout << std::endl << "Solving the system with SolverBelos... " << std::endl;
+    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (Belos)... " << std::endl;
     boost::shared_ptr<vector_type> solution2;
     solution2.reset( new vector_type( uFESpace->map(), Unique ) );
     *solution2 *= 0.0;
-    linearSolver2.setMatrix( systemMatrix );
-    linearSolver2.setRightHandSide( *rhsBC );
-    linearSolver2.solve( *solution2 );
+    linearSolver2.setOperator( systemMatrix );
+    linearSolver2.setRightHandSide( rhsBC );
+    linearSolver2.solve( solution2 );
 
-    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (Belos)... " << std::endl;
+    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (AztecOO)... " << std::endl;
     boost::shared_ptr<vector_type> solution3;
     solution3.reset( new vector_type( uFESpace->map(), Unique ) );
     *solution3 *= 0.0;
     linearSolver3.setOperator( systemMatrix );
     linearSolver3.setRightHandSide( rhsBC );
     linearSolver3.solve( solution3 );
-
-    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (AztecOO)... " << std::endl;
-    boost::shared_ptr<vector_type> solution4;
-    solution4.reset( new vector_type( uFESpace->map(), Unique ) );
-    *solution4 *= 0.0;
-    linearSolver4.setOperator( systemMatrix );
-    linearSolver4.setRightHandSide( rhsBC );
-    linearSolver4.solve( solution4 );
 
     // +-----------------------------------------------+
     // |             Computing the error               |
@@ -364,12 +343,6 @@ main( int argc, char** argv )
     solution3Err -= *solution3;
     solution3Err.abs();
 
-    vector_type solution4Err( *solution4 );
-    solution4Err *= 0.0;
-    uFESpace->interpolate( Laplacian::uexact, solution4Err, 0.0 );
-    solution4Err -= *solution4;
-    solution4Err.abs();
-
     vector_type solutionsDiff( *solution2 );
     solutionsDiff -= *solution;
     Real solutionsDiffNorm = solutionsDiff.norm2();
@@ -378,59 +351,21 @@ main( int argc, char** argv )
     solutionsDiff2 -= *solution3;
     Real solutionsDiffNorm2 = solutionsDiff2.norm2();
 
-    vector_type solutionsDiff3( *solution );
-    solutionsDiff3 -= *solution4;
-    Real solutionsDiffNorm3 = solutionsDiff3.norm2();
-
     if( verbose ) std::cout << "AztecOO solver" << std::endl;
     printErrors( *solution, uFESpace,verbose );
 
-    if( verbose ) std::cout << "Belos solver" << std::endl;
+    if( verbose ) std::cout << "Linear solver Belos" << std::endl;
     printErrors( *solution2, uFESpace,verbose );
 
-    if( verbose ) std::cout << "Linear solver Belos" << std::endl;
+    if( verbose ) std::cout << "Linear solver AztecOO" << std::endl;
     printErrors( *solution3, uFESpace,verbose );
 
-    if( verbose ) std::cout << "Linear solver AztecOO" << std::endl;
-    printErrors( *solution4, uFESpace,verbose );
-
-    if( verbose ) std::cout << "Difference between the two solvers solutions: " << solutionsDiffNorm << std::endl;
-    if( verbose ) std::cout << "Difference between the two Belos solvers solutions: " << solutionsDiffNorm2 << std::endl;
-    if( verbose ) std::cout << "Difference between the two AztecOO solvers solutions: " << solutionsDiffNorm3 << std::endl;
-
-    // +-----------------------------------------------+
-    // |             Setting the exporter              |
-    // +-----------------------------------------------+
-    if( verbose ) std::cout << std::endl << "[Solutions export]" << std::endl;
-    if( verbose ) std::cout << "Defining the exporter... " << std::flush;
-    ExporterHDF5<mesh_type> exporter ( dataFile, "test_LinearSolver" );
-    exporter.setPostDir( "./" ); // This is a test to see if M_post_dir is working
-    exporter.setMeshProcId( meshPart.meshPartition(), Comm->MyPID() );
-    exporter.setMultimesh( false );
-    if( verbose ) std::cout << "done" << std::endl;
-
-    if( verbose ) std::cout << "Updating the exporter... " << std::flush;
-    boost::shared_ptr<vector_type> solutionPtr ( new vector_type( *solution, Repeated ) );
-    exporter.addVariable( ExporterData<mesh_type>::VectorField, "velocity", uFESpace,
-                          solutionPtr, UInt( 0 ) );
-    boost::shared_ptr<vector_type> solutionErrPtr ( new vector_type( solutionErr, Repeated ) );
-    exporter.addVariable( ExporterData<mesh_type>::VectorField, "error", uFESpace,
-                          solutionErrPtr, UInt( 0 ) );
-    boost::shared_ptr<vector_type> solution2Ptr ( new vector_type( *solution2, Repeated ) );
-    exporter.addVariable( ExporterData<mesh_type>::VectorField, "velocity2", uFESpace,
-                          solution2Ptr, UInt(0));
-    boost::shared_ptr<vector_type> solution2ErrPtr ( new vector_type( solution2Err, Repeated ) );
-    exporter.addVariable( ExporterData<mesh_type>::VectorField, "error2", uFESpace,
-                          solution2ErrPtr, UInt( 0 ) );
-
-    if( verbose ) std::cout << "done" << std::endl;
-    exporter.postProcess( 0 );
+    if( verbose ) std::cout << "Difference between the Azteco and the Belos solutions: " << solutionsDiffNorm << std::endl;
+    if( verbose ) std::cout << "Difference between the two AztecOO solvers solutions: " << solutionsDiffNorm2 << std::endl;
 
     // +-----------------------------------------------+
     // |            Ending the simulation              |
     // +-----------------------------------------------+
-    exporter.closeFile();
-
     globalChrono.stop();
     if( verbose ) std::cout << std::endl << "Total simulation time: " << globalChrono.diff() << " s." << std::endl;
     if( verbose ) std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
