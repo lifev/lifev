@@ -29,6 +29,7 @@
     @brief Solver Operator
 
     @author Umberto Villa <umberto.villa@gmail.com>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 
     @date 03-09-2010
  */
@@ -37,10 +38,10 @@
 #define _SOLVEROPERATOR_HPP_
 
 
-#include <life/lifeoperators/LinearOperator.hpp>
-#include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifecore/Factory.hpp>
-
+#include <lifev/core/operator/LinearOperator.hpp>
+#include <lifev/core/util/FactorySingleton.hpp>
+#include <lifev/core/util/Factory.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -54,8 +55,6 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 #pragma GCC diagnostic warning "-Wextra"
-
-#include <life/lifearray/VectorEpetra.hpp>
 
 namespace LifeV
 {

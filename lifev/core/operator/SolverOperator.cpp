@@ -29,11 +29,12 @@
     @brief SolverOperator
 
     @author Umberto Villa <umberto.villa@gmail.com>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 
     @date 03-09-2010
  */
 
-#include <life/lifeoperators/SolverOperator.hpp>
+#include <lifev/core/operator/SolverOperator.hpp>
 
 namespace LifeV
 {

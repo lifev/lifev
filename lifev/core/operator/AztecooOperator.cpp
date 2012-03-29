@@ -33,7 +33,7 @@
     @date 03-09-2010
  */
 
-#include <life/lifeoperators/AztecooOperator.hpp>
+#include <lifev/core/operator/AztecooOperator.hpp>
 
 namespace LifeV
 {

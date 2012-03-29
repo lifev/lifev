@@ -49,8 +49,8 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 #pragma GCC diagnostic warning "-Wextra"
 
-#include <life/lifeoperators/SolverOperator.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
+#include <lifev/core/operator/SolverOperator.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 namespace LifeV
 {

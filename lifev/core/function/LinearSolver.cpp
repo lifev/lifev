@@ -34,10 +34,10 @@
     @date 03-08-2011
  */
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifealg/LinearSolver.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 
 namespace LifeV
 {

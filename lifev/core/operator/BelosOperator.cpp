@@ -33,7 +33,7 @@
     @date 28-09-2010
  */
 
-#include<life/lifeoperators/BelosOperator.hpp>
+#include<lifev/core/operator/BelosOperator.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
