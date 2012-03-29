@@ -29,7 +29,7 @@
             relax_value          = 0
 
         [../amesos]
-            solvertype           = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+            solvertype           = Amesos_KLU # Amesos_KLU or Amesos_Umfpack
 
         [../partitioner]
             overlap              = 2
