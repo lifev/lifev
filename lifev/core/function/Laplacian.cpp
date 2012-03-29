@@ -36,7 +36,7 @@
 	Implementation.
 */
 
-#include <lifev/function/Laplacian.hpp>
+#include <lifev/core/function/Laplacian.hpp>
 
 namespace LifeV
 {

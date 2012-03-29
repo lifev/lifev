@@ -1,11 +1,11 @@
-SET(array_HEADERS
+SET(operator_HEADERS
   operator/AztecooOperator.hpp
   operator/BelosOperator.hpp
   operator/LinearOperator.hpp
   operator/SolverOperator.hpp
 CACHE INTERNAL "")
 
-SET(array_SOURCES
+SET(operator_SOURCES
   operator/AztecooOperator.cpp
   operator/BelosOperator.cpp
   operator/SolverOperator.cpp
@@ -13,7 +13,7 @@ CACHE INTERNAL "")
 
 
 SET(LOCAL_HEADERS)
-FOREACH(INC ${array_HEADERS})
+FOREACH(INC ${operator_HEADERS})
   STRING(REPLACE "operator/" "" LOCAL_INC ${INC})
   SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
 ENDFOREACH()
