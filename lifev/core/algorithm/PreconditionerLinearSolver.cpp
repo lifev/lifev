@@ -34,10 +34,10 @@
     @date 17-09-2011
  */
 
-#include <life/lifealg/PreconditionerLinearSolver.hpp>
-#include <life/lifecore/LifeDebug.hpp>
-#include <life/lifecore/LifeChrono.hpp>
-#include <life/lifefilters/GetPot.hpp>
+#include <lifev/core/algorithm/PreconditionerLinearSolver.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/filter/GetPot.hpp>
 
 namespace LifeV
 {
