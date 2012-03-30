@@ -1379,7 +1379,9 @@ feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     // appropriate method __To__Interpolate if needed.
 
     // First, check that the interpolation is possible
-    ASSERT(fieldDim() == OriginalSpace.fieldDim() || OriginalSpace.refFE().type() == FE_RT0_TETRA_3D, "Incompatible field dimension for interpolation");
+    ASSERT(fieldDim() == OriginalSpace.fieldDim() ||
+           OriginalSpace.refFE().type() == FE_RT0_TETRA_3D ||
+           OriginalSpace.refFE().type() == FE_RT0_TRIA_2D, "Incompatible field dimension for interpolation");
     ASSERT(refFE().shape() == OriginalSpace.refFE().shape() , "Incompatible element shape for interpolation");
 
 
@@ -1413,21 +1415,22 @@ feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             return feToFEInterpolate(OriginalSpace,OriginalRepeated);
         }
 
-    	if(((refFE().type() == FE_P2_3D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_3D) || (OriginalSpace.refFE().type() == FE_P1_3D) ) ) ||
-    	   ((refFE().type() == FE_P2_2D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_2D) || (OriginalSpace.refFE().type() == FE_P1_2D) ) ) ||
-    	   ((refFE().type() == FE_P2_2D) && ( OriginalSpace.refFE().type() == FE_P1_2D ) ) )
-    		InterpolatedVectorPtr.reset(new vector_type( P2Interpolate(OriginalSpace,OriginalVector) ));
+        if(((refFE().type() == FE_P2_3D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_3D) || (OriginalSpace.refFE().type() == FE_P1_3D) ) ) ||
+           ((refFE().type() == FE_P2_2D) && ( (OriginalSpace.refFE().type() == FE_P1bubble_2D) || (OriginalSpace.refFE().type() == FE_P1_2D) ) ) ||
+           ((refFE().type() == FE_P2_2D) && ( OriginalSpace.refFE().type() == FE_P1_2D ) ) )
+            InterpolatedVectorPtr.reset(new vector_type( P2Interpolate(OriginalSpace,OriginalVector) ));
 
-		else if (( OriginalSpace.refFE().type() == FE_RT0_TETRA_3D) || (refFE().type() == FE_RT0_TETRA_3D) )
-		{
-			if (refFE().type() == FE_P0_3D)
-				InterpolatedVectorPtr.reset(new vector_type( RT0ToP0Interpolate(OriginalSpace, OriginalVector) ) );
-			else
-				ERROR_MSG(" The interpolation with this host space has not been yet implemented. Please, add it!");
-		}
-		else
-			InterpolatedVectorPtr.reset(new vector_type( interpolateGeneric( OriginalSpace, OriginalVector) ) );
-	}
+        else if (( OriginalSpace.refFE().type() == FE_RT0_TETRA_3D) || (refFE().type() == FE_RT0_TETRA_3D) ||
+                 ( OriginalSpace.refFE().type() == FE_RT0_TRIA_2D) || (refFE().type() == FE_RT0_TRIA_2D))
+        {
+            if (refFE().type() == FE_P0_3D || refFE().type() == FE_P0_2D)
+                InterpolatedVectorPtr.reset(new vector_type( RT0ToP0Interpolate(OriginalSpace, OriginalVector) ) );
+            else
+                ERROR_MSG(" The interpolation with this host space has not been yet implemented. Please, add it!");
+        }
+        else
+            InterpolatedVectorPtr.reset(new vector_type( interpolateGeneric( OriginalSpace, OriginalVector) ) );
+    }
 
     if(InterpolatedVectorPtr->mapType() == outputMapType)
         return *InterpolatedVectorPtr;
@@ -1857,32 +1860,29 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     Interpolated *= 0.0;
 
     // Field dimension of the problem.
-    UInt FieldDim(fieldDim());
+    const UInt FieldDim(fieldDim());
 
     // Total number of mesh elements.
-    UInt numElements(mesh()->numElements());
+    const UInt numElements(mesh()->numElements());
 
     // Total d.o.f. in the present FESpace.
-    UInt totalDofsPresent(dof().numTotalDof());
+    const UInt totalDofsPresent(dof().numTotalDof());
 
     // Loop over the elements to get the values. To compute the value we use the Piola transformation.
     for ( ID iElem(0); iElem < numElements ; ++iElem )
     {
 
         // Map between local and global mesh.
-        UInt elemId (mesh()->element(iElem).localId());
+        const UInt elemId (mesh()->element(iElem).localId());
 
         // Current and reference barycenter, Jacobian of the map.
-        std::vector<Real> barCurrentFE(3,0), barRefFE(3,0), Jac(3,0);
-
-        // Determinant of the Jacobian.
-        Real det(0);
+        Vector3D barCurrentFE, barRefFE, Jac;
 
         // Update the current element of the P0 vector space.
         M_fe->update(this->mesh()->element(elemId), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
 
         // Store the number of local DoF
-        UInt nDof(OriginalSpace.dof().numLocalDof());
+        const UInt nDof(OriginalSpace.dof().numLocalDof());
 
         // Get the coordinate of the barycenter of the current element of ID iElem.
         M_fe->barycenter( barCurrentFE[0], barCurrentFE[1], barCurrentFE[2] );
@@ -1892,7 +1892,7 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                            barRefFE[0], barRefFE[1], barRefFE[2] );
 
         // Compute the determinant of the Jacobian in the barycenter of the reference finite element.
-        det = M_fe->pointDetJacobian(barRefFE[0], barRefFE[1], barRefFE[2]);
+        const Real det = M_fe->pointDetJacobian(barRefFE[0], barRefFE[1], barRefFE[2]);
 
         // Loop on the vector component of P0 element.
         for (UInt iComponent(0); iComponent< FieldDim; ++iComponent)
@@ -1900,20 +1900,22 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             Real value(0);
 
             // The Jacobian evaluated in the three points of the barycenter of each component.
-            Jac[0]= M_fe->pointJacobian(barRefFE[0], barRefFE[1], barRefFE[2], iComponent, 0);
-            Jac[1]= M_fe->pointJacobian(barRefFE[0], barRefFE[1], barRefFE[2], iComponent, 1);
-            Jac[2]= M_fe->pointJacobian(barRefFE[0], barRefFE[1], barRefFE[2], iComponent, 2);
+            for ( UInt localComponent(0); localComponent < FieldDim; ++localComponent )
+            {
+                Jac[localComponent] = M_fe->pointJacobian ( barRefFE[0], barRefFE[1], barRefFE[2],
+                                                            iComponent, localComponent);
+            }
 
-            UInt iGlobalFacePresent( iComponent*totalDofsPresent + dof().localToGlobalMap(elemId, 0) );
+            const UInt iGlobalFacePresent( iComponent*totalDofsPresent + dof().localToGlobalMap(elemId, 0) );
 
             // At each face loop on all the d.o.f.
             for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
             {
                 // Map between local d.o.f. and global d.o.f.
-                ID globalDofID( OriginalSpace.dof().localToGlobalMap( elemId, iter_dof) );
+                const ID globalDofID( OriginalSpace.dof().localToGlobalMap( elemId, iter_dof) );
 
                 // Find the correct position in the final vector.
-                UInt iGlobalFacet( mesh()->localFacetId( elemId, iter_dof ) );
+                const UInt iGlobalFacet( mesh()->localFacetId( elemId, iter_dof ) );
 
                 // Select if the current facet is coherent or not with the orientation. If yes use +, if not use -.
                 if ( mesh()->facet( iGlobalFacet ).firstAdjacentElementIdentity() != iElem )
