@@ -342,8 +342,8 @@ Real CurrentFE::pointDetJacobian(const Real& hat_x, const Real& hat_y, const Rea
     {
         Real a ( pointJacobian(hat_x, hat_y, hat_z, 0, 0) );
         Real b ( pointJacobian(hat_x, hat_y, hat_z, 0, 1) );
-        Real c ( pointJacobian(hat_x, hat_y, hat_z, 0, 2) );
-        Real d ( pointJacobian(hat_x, hat_y, hat_z, 1, 0) );
+        Real c ( pointJacobian(hat_x, hat_y, hat_z, 1, 0) );
+        Real d ( pointJacobian(hat_x, hat_y, hat_z, 1, 1) );
 
         det = a * d - b * c;
 
