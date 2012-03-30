@@ -28,19 +28,15 @@
 
 Simple Darcy test with Dirichlet, Neumann and Robin boundary conditions
 
-Solve the problem
-
-               div u - f = 0            in \Omega
-
-               K^{-1} u + \nabla p = 0  in \Omega
-
 */
 
 
 /**
-   @file main.hpp
-   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   @date 2010-07-29
+    @file
+    @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+    @author Anna Scotti <anna.scotti@mail.polimi.it>
+
+   @date 2012-03-30
 */
 
 
@@ -95,7 +91,7 @@ int main(int argc, char** argv)
 #endif
 
     // Error known
-    const LifeV::Real errorKnown( 0.2003822844278755 );
+    const LifeV::Real errorKnown( 0.02524839561357813 );
 
     // Tolerance between the error and the errorKnown
     const LifeV::Real tolerance( 1e-8 );

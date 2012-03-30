@@ -25,9 +25,11 @@
 //@HEADER
 
 /**
-   @file
-   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   @date 2010-07-29
+    @file
+    @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+    @author Anna Scotti <anna.scotti@mail.polimi.it>
+
+    @date 2012-03-30
 */
 
 #ifndef __user_fun_H
@@ -66,15 +68,6 @@ Real source ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Vector source term
 Vector vectorSource ( const Real&, const Real&, const Real&, const Real&, const ID& );
-
-// Initial time primal variable for transient and non-linear transient solvers
-Real initialPrimal ( const Real&, const Real&, const Real&, const Real&, const ID& );
-
-// Zero iteration primal variable for non-linear solver
-Real primalZeroIteration ( const Real&, const Real&, const Real&, const Real&, const ID& );
-
-// Mass function for time dependent problem
-Real mass ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // ===================================================
 //!                    Boundary data

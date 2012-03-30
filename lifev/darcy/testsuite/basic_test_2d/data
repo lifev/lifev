@@ -38,8 +38,8 @@ name_dual   = Velocity
     element_shape = 0
 
     # For structured mesh
-    nx = 20
-    ny = 20
+    nx = 15
+    ny = 15
     lx = 1.
     ly = 1.
     [../]

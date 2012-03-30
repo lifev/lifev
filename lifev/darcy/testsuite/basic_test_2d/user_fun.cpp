@@ -25,9 +25,11 @@
 //@HEADER
 
 /**
-   @file
-   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   @date 2010-07-29
+    @file
+    @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+    @author Anna Scotti <anna.scotti@mail.polimi.it>
+
+    @date 2012-03-30
 */
 
 #include "user_fun.hpp"
@@ -41,39 +43,28 @@ namespace dataProblem
 
 // Inverse of permeability matrix
 /* In this case the permeability matrix is
-K = [2 1 0
-     1 1 0
-     0 0 1]
+K = [2 1
+     1 2]
 */
 Matrix inversePermeability ( const Real& /*t*/,
                              const Real& /*x*/,
                              const Real& /*y*/,
                              const Real& /*z*/, const std::vector<Real>& )
 {
-    Matrix invK ( static_cast<UInt>(3), static_cast<UInt>(3) );
+    Matrix invK ( static_cast<UInt>(2), static_cast<UInt>(2) );
 
     // First row
-    const Real Entry00 = 1.;
-    const Real Entry01 = -1.;
-    const Real Entry02 = 0.;
+    const Real Entry00 = 2./3.;
+    const Real Entry01 = -1./3.;
 
     // Second row
-    const Real Entry11 = 2.;
-    const Real Entry12 = 0.;
-
-    // Third row
-    const Real Entry22 = 1.;
+    const Real Entry11 = 2./3.;
 
     // Fill in of the inversePermeabilityMatrix
     invK ( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
     invK ( static_cast<UInt>(0), static_cast<UInt>(1) ) = Entry01;
-    invK ( static_cast<UInt>(0), static_cast<UInt>(2) ) = Entry02;
     invK ( static_cast<UInt>(1), static_cast<UInt>(0) ) = Entry01;
     invK ( static_cast<UInt>(1), static_cast<UInt>(1) ) = Entry11;
-    invK ( static_cast<UInt>(1), static_cast<UInt>(2) ) = Entry12;
-    invK ( static_cast<UInt>(2), static_cast<UInt>(0) ) = Entry02;
-    invK ( static_cast<UInt>(2), static_cast<UInt>(1) ) = Entry12;
-    invK ( static_cast<UInt>(2), static_cast<UInt>(2) ) = Entry22;
 
     return invK;
 
@@ -81,64 +72,31 @@ Matrix inversePermeability ( const Real& /*t*/,
 
 // Source term
 Real source ( const Real& /*t*/,
-              const Real& x,
+              const Real& /*x*/,
               const Real& y,
               const Real& /*z*/,
               const ID&  /*icomp*/ )
 {
-    return -2. * x * x - 4. * y * y - 8. * x * y + 6. + 6. * x * x ;
+    return -1. + 4. * y ;
 }
 
 // Vector source term
 Vector vectorSource ( const Real& /*t*/,
                       const Real& x,
                       const Real& y,
-                      const Real& z,
+                      const Real& /*z*/,
                       const ID& /*icomp*/ )
 {
-    Vector vectorSource( static_cast<UInt>(3) );
+    Vector vectorSource( static_cast<UInt>(2) );
 
-    const Real Entry0 = x * x * x; 
-    const Real Entry1 = 2. * y;
-    const Real Entry2 = 4. * z;
+    const Real Entry0 = x - y;
+    const Real Entry1 = y * y;
 
     vectorSource ( static_cast<UInt>(0) ) = Entry0;
     vectorSource ( static_cast<UInt>(1) ) = Entry1;
-    vectorSource ( static_cast<UInt>(2) ) = Entry2;
 
     return vectorSource;
 }
-
-// Initial time primal variable for transient and non-linear transient solvers
-Real initialPrimal ( const Real& /*t*/,
-                     const Real& /*x*/,
-                     const Real& /*y*/,
-                     const Real& z,
-                     const ID& /*ic*/ )
-{
-    return 5.*z;//6. * x;
-}
-
-// Zero iteration primal variable for non-linear solver
-Real primalZeroIteration ( const Real& /*t*/,
-                           const Real& /*x*/,
-                           const Real& /*y*/,
-                           const Real& /*z*/,
-                           const ID& /*ic*/ )
-{
-    return 1.;
-}
-
-// Mass function for time dependent problem
-Real mass ( const Real& /*t*/,
-            const Real& /*x*/,
-            const Real& /*y*/,
-            const Real& /*z*/,
-            const ID&   /*ic*/ )
-{
-    return 1.;
-}
-
 
 // ===================================================
 //!                    Boundary data
@@ -148,10 +106,10 @@ Real mass ( const Real& /*t*/,
 Real dirichlet ( const Real& /*t*/,
                  const Real& x,
                  const Real& y,
-                 const Real& z,
+                 const Real& /*z*/,
                  const ID&   /*icomp*/ )
 {
-    return x * x * y * y + 6. * x + 5. * z;
+    return x * x + x * y - y * y;
 }
 
 // Boundary condition of Neumann
@@ -163,14 +121,11 @@ Real neumann1 ( const Real& /*t*/,
 {
     switch ( icomp )
     {
-    case 0:   //! Dx
-        return  -1. * ( 4.* x * y * y + 2. * x * x * y + 12. - 2. * x * x * x - 2. * y );
+    case 0:   // Dx
+        return  -3. * x - 2. * y + y * y;
         break;
-    case 1:   //! Dy
-        return 0.;
-        break;
-    case 2:   //! Dz
-        return 0.;
+    case 1:   // Dy
+        return  0;
         break;
     }
     return 0.;
@@ -184,13 +139,10 @@ Real neumann2 ( const Real& /*t*/,
 {
     switch ( icomp )
     {
-    case 0:   //! Dx
-        return   4. * x * y * y + 2. * x * x * y + 12. - 2. * x * x * x - 2. * y;
+    case 0:   // Dx
+        return -3. * x + 2. * y + 2. * y * y;
         break;
-    case 1:   //! Dy
-        return 0.;
-        break;
-    case 2:   //! Dz
+    case 1:   // Dy
         return 0.;
         break;
     }
@@ -201,10 +153,10 @@ Real neumann2 ( const Real& /*t*/,
 Real robin ( const Real& /* t */,
              const Real& x,
              const Real& y,
-             const Real& z,
+             const Real& /*z*/,
              const ID&   /*icomp*/ )
 {
-    return -2. * y * x * x - 2. * x * y * y - 6. + 2. * y + x * x * x + x * x * y * y + 6. * x + 5. * z;
+    return x * x + x * y - y * y - ( - 3. * x + 2. * y + 2. * y * y );
 }
 
 // ===================================================
@@ -215,11 +167,11 @@ Real robin ( const Real& /* t */,
 Real analyticalSolution ( const Real& /*t*/,
                           const Real& x,
                           const Real& y,
-                          const Real& z,
+                          const Real& /*z*/,
                           const ID& /*ic*/ )
 {
 
-    return x * x * y * y + 6. * x + 5. * z;
+    return x * x + x * y - y * y;
 
 }
 
@@ -227,20 +179,17 @@ Real analyticalSolution ( const Real& /*t*/,
 Real analyticalFlux ( const Real& /*t*/,
                       const Real& x,
                       const Real& y,
-                      const Real& z,
+                      const Real& /*z*/,
                       const ID& icomp )
 {
 
     switch ( icomp )
     {
     case 0:
-        return -1. * ( 4. * x * y * y + 2. * x * x * y + 12. - 2. * x * x * x - 2. * y );
+        return - 3. * x - 2. * y + y * y;
 
     case 1:
-        return -1. * ( 2. * y * x * x + 2. * x * y * y + 6. - 2. * y - x * x * x );
-
-    case 2:
-        return -1. * ( 5. - 4. * z );
+        return - 3. * x + 2. * y + 2. * y * y;
 
     default:
         return 0.;
