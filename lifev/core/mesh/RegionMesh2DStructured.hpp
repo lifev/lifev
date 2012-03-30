@@ -310,7 +310,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
      }
 
     // edges update
-    mesh.updateElementFacets( true, false, edgesNumber );
+    mesh.updateElementFacets( true, verbose, edgesNumber );
 
 }
 
