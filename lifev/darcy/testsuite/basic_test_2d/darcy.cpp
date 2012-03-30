@@ -644,9 +644,9 @@ darcy::run()
     // Copy the primal solution to the exporter
     *primalExporter = *( darcySolver->primalSolution() );
 
-        // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-/*        *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
-                                                                        *( darcySolver->dualSolution() ) );*/
+    // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
+    *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
+                                                                    *( darcySolver->dualSolution() ) );
 
     // Copy the dual interpolated solution to the exporter
     *dualExporter = *dualInterpolated;
