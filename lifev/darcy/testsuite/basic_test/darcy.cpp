@@ -270,7 +270,6 @@ darcy::darcy( int argc,
     Members->discretization_section = "darcy";
 
 #ifdef EPETRA_MPI
-    std::cout << "Epetra Initialization" << std::endl;
     Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);

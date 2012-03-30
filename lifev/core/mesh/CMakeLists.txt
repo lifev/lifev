@@ -17,6 +17,7 @@ SET(mesh_HEADERS
   mesh/RegionMesh1DBuilders.hpp
   mesh/MeshChecks.hpp
   mesh/MeshElementMarked.hpp
+  mesh/RegionMesh2DStructured.hpp
 CACHE INTERNAL "")
 
 SET(mesh_SOURCES
@@ -29,6 +30,7 @@ SET(mesh_SOURCES
   mesh/MeshUtility.cpp
   mesh/MeshData.cpp
   mesh/InternalEntitySelector.cpp
+  mesh/RegionMesh2DStructured.cpp
 CACHE INTERNAL "")
 
 

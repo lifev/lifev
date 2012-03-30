@@ -262,7 +262,6 @@ darcy::darcy( int argc,
     Members->discretization_section = "darcy";
 
 #ifdef EPETRA_MPI
-    std::cout << "Epetra Initialization" << std::endl;
     Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
@@ -348,19 +347,13 @@ darcy::run()
     }
     else
     {
-#ifdef THREE_D
         // Set up the structured mesh
-        regularMesh3D( *fullMeshPtr, 0,
+        regularMesh2D( *fullMeshPtr, 0,
                        dataFile( ( Members->discretization_section + "/space_discretization/nx" ).data(), 4 ),
                        dataFile( ( Members->discretization_section + "/space_discretization/ny" ).data(), 4 ),
-                       dataFile( ( Members->discretization_section + "/space_discretization/nz" ).data(), 4 ),
                        dataFile( ( Members->discretization_section + "/space_discretization/verbose" ).data(), false ),
                        dataFile( ( Members->discretization_section + "/space_discretization/lx" ).data(), 1. ),
-                       dataFile( ( Members->discretization_section + "/space_discretization/ly" ).data(), 1. ),
-                       dataFile( ( Members->discretization_section + "/space_discretization/lz" ).data(), 1. ) );
-#else
-        exit ( EXIT_FAILURE );
-#endif
+                       dataFile( ( Members->discretization_section + "/space_discretization/ly" ).data(), 1. ) );
     }
 
     // Create the partitioner
@@ -606,7 +599,7 @@ darcy::run()
                            p_FESpacePtr,
                            primalExporter,
                            static_cast<UInt>( 0 ),
-                           ExporterData< regionMesh_Type >::UnsteadyRegime,
+                           ExporterData< regionMesh_Type >::SteadyRegime,
                            ExporterData< regionMesh_Type >::Cell );
 
     // Set the exporter dual pointer
@@ -618,7 +611,7 @@ darcy::run()
                            uInterpolate_FESpacePtr,
                            dualExporter,
                            static_cast<UInt>( 0 ),
-                           ExporterData< regionMesh_Type >::UnsteadyRegime,
+                           ExporterData< regionMesh_Type >::SteadyRegime,
                            ExporterData< regionMesh_Type >::Cell );
 
     // Display the total number of unknowns

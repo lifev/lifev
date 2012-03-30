@@ -40,11 +40,11 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh2DStructured.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
-#include <lifev/darcy/solver/DarcySolverTransientNonLinear.hpp>
+#include <lifev/darcy/solver/DarcySolver.hpp>
 
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>

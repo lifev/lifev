@@ -31,19 +31,17 @@ name_dual   = Velocity
     [./space_discretization]
     mesh_dir      = ./ # the directory where the mesh file is
     mesh_file     = square20x20.msh
-    mesh_type     = .msh #structured #.mesh
+    mesh_type     = structured #structured #.msh
     mesh_faces    = all
     verbose       = 0                        # verbose during mesh-reading
     #0 -> tetra, 1 -> hexa
     element_shape = 0
 
     # For structured mesh
-    nx = 32
-    ny = 32
-    nz = 32
+    nx = 20
+    ny = 20
     lx = 1.
     ly = 1.
-    lz = 1.
     [../]
 
     [./miscellaneous]

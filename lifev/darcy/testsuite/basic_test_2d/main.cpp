@@ -105,24 +105,18 @@ int main(int argc, char** argv)
     // Error of the problem
     const LifeV::Real error = Darcy.run();
     bool unsuccess=std::fabs( error - errorKnown ) > tolerance;
-    // For tribits handling of success/failure
-    //! @todo Add verbose to avoid all processes printing this stuff
-    if (unsuccess)
-      std::cout << "End Result: TEST NOT PASSED" << std::endl;
-    else
-      std::cout << "End Result: TEST PASSED" << std::endl;
+
 #ifdef HAVE_MPI
-    std::cout << "MPI Finalization" << std::endl;
     MPI_Finalize();
 #endif
-    
+
     if (unsuccess)
-      {
+    {
         return ( EXIT_FAILURE );
-      }
+    }
     else
-      {
+    {
         return ( EXIT_SUCCESS );
-      }
+    }
 }
 
