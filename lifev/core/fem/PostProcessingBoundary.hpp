@@ -169,6 +169,21 @@ public:
     template< typename VectorType >
     Real flux( const VectorType& vectorField, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
 
+    /*! Compute the kinetic energy on a boundary face.
+     *
+     *  @ingroup boundary_methods
+     *  This method computes the kinetic energy on a boundary section "flag"
+     *
+     *  @param velocity velocity
+     *  @param density density of the fluid
+     *  @param flag the flag of the boundary face
+     *  @param feSpace the FE space
+     *  @param nDim the dimension size
+     *  @return the kinetic energy
+     */
+    template< typename VectorType >
+    Real kineticEnergy( const VectorType& velocity, const Real& density, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
+
     /*!
        This method computes the average value of a field on the boundary section "flag"
        @ingroup boundary_methods
@@ -721,12 +736,74 @@ Real PostProcessingBoundary<MeshType>::flux( const VectorType& field, const mark
     return flux;
 }
 
+template<typename MeshType>
+template<typename VectorType>
+Real PostProcessingBoundary<MeshType>::kineticEnergy( const VectorType& velocity, const Real& density, const markerID_Type& flag, UInt feSpace, UInt nDim )
+{
+    // Each processor computes the quantities across his own flagged facets
+    Real kineticEnergyScatter(0.0), kineticEnergy(0.0);
+    Real areaScatter(0.0), area(0.0);
+    Real temp(0.0);
+
+    // I need the global DOF ID to query the vector
+    // dofVectorIndex is the index of the dof in the data structure of PostProcessingBoundary class
+    // dofGlobalId is the corresponding ID in the GLOBAL mesh (prior to partitioning)
+    UInt dofVectorIndex, dofGlobalId;
+
+    // List of flagged facets on current processor
+    std::list<ID> facetList( M_boundaryMarkerToFacetIdMap[flag] );
+
+    // Nodal values of velocity in the current facet
+    Vector localVelocityVector( nDim * M_numTotalDofPerFacetVector[feSpace] );
+
+    // Loop on facetList
+    for ( std::list<ID>::iterator j(facetList.begin()); j != facetList.end(); ++j )
+    {
+        // Updating quadrature data on the current facet
+        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt( M_meshPtr->boundaryFacet( *j ) );
+
+        // Computing the area
+        areaScatter += M_currentBdFEPtrVector[0]->measure();
+
+        // Quadrature formula (loop on quadrature points)
+        for ( UInt iq(0); iq < M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq )
+        {
+            // Loop on local dof
+            for ( ID iDof(0); iDof<M_numTotalDofPerFacetVector[feSpace]; ++iDof )
+            {
+                temp = 0.0;
+
+                // Loop on components
+                for ( UInt iComponent(0); iComponent<nDim; ++iComponent )
+                {
+                    // Extracting nodal values of field in the current facet
+                    dofVectorIndex = M_vectorNumberingPerFacetVector[feSpace][ ( UInt ) *j ][ iDof ];
+                    dofGlobalId    = M_dofGlobalIdVector[feSpace][dofVectorIndex]; // this is in the GLOBAL mesh
+
+                    localVelocityVector[iComponent*M_numTotalDofPerFacetVector[feSpace]+iDof] = velocity[iComponent*M_numTotalDofVector[feSpace]+dofGlobalId];
+
+                    temp += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
+                          * localVelocityVector[iComponent*M_numTotalDofPerFacetVector[feSpace]+iDof]
+                          * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
+                          * M_currentBdFEPtrVector[feSpace]->normal(Int(iComponent),iq);
+                }
+
+                kineticEnergyScatter += temp * temp;
+            }
+        }
+    }
+
+    // Reducing per-processor values
+    M_epetraMapPtr->comm().SumAll( &areaScatter, &area, 1 );
+    M_epetraMapPtr->comm().SumAll( &kineticEnergyScatter, &kineticEnergy, 1 );
+
+    return 0.5 * density * kineticEnergy / area;
+}
 
 // Average value of field on facets with a certain marker
 template<typename MeshType>
 template<typename VectorType>
-Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const markerID_Type& flag,
-                                UInt feSpace, UInt nDim )
+Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const markerID_Type& flag, UInt feSpace, UInt nDim )
 {
     // Each processor computes the average value on his own flagged facets --> fieldAverageScatter
     // At the end I'll reduce the process values --> fieldAverage
@@ -800,11 +877,8 @@ Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const
     M_epetraMapPtr->comm().SumAll( &measureScatter, &measure, 1 );
 
     // Reducing per-processor values
-    for ( UInt iComponent=0; iComponent < nDim; ++iComponent )
-    {
-//      fieldAverageScatter[iComponent] /= measure;
+    for ( UInt iComponent(0); iComponent < nDim; ++iComponent )
         M_epetraMapPtr->comm().SumAll( &fieldAverageScatter[iComponent], &fieldAverage[iComponent], 1 );
-    }
 
     return fieldAverage / measure;
 }
@@ -818,21 +892,13 @@ Vector PostProcessingBoundary<MeshType>::normal( const markerID_Type& flag, UInt
     Vector normalScatter(3) , normal(3);
 
     // Initialize vectors to zero
-    normal[0] = 0;
-    normal[1] = 0;
-    normal[2] = 0;
+    normal[0] = 0.0;
+    normal[1] = 0.0;
+    normal[2] = 0.0;
 
-    normalScatter[0] = 0;
-    normalScatter[1] = 0;
-    normalScatter[2] = 0;
-
-    normal[0] = 0;
-    normal[1] = 0;
-    normal[2] = 0;
-
-    normalScatter[0] = 0;
-    normalScatter[1] = 0;
-    normalScatter[2] = 0;
+    normalScatter[0] = 0.0;
+    normalScatter[1] = 0.0;
+    normalScatter[2] = 0.0;
 
     // list of flagged facets on current processor
     std::list<ID> facetList( M_boundaryMarkerToFacetIdMap[flag] );
@@ -844,23 +910,17 @@ Vector PostProcessingBoundary<MeshType>::normal( const markerID_Type& flag, UInt
     // Loop on facetList
     for (Iterator j=facetList.begin(); j != facetList.end(); ++j)
     {
-
         // Updating quadrature data on the current facet
         M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt( M_meshPtr->boundaryFacet(*j) );
 
-        // Quadrature formula
-        // Loop on quadrature points
-        for ( UInt iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq )
+        // Quadrature formula (loop on quadrature points)
+        for ( UInt iq(0); iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq )
         {
-
-            // Dot product
-            // Loop on components
-            for ( UInt iComponent =0; iComponent<nDim; ++iComponent )
+            // Dot product (loop on components)
+            for ( UInt iComponent(0); iComponent<nDim; ++iComponent )
             {
-
-                // Interpolation
-                // Loop on local dof
-                for (ID iDof=0; iDof<M_numTotalDofPerFacetVector[ feSpace ]; ++iDof)
+                // Interpolation (loop on local dof)
+                for (ID iDof(0); iDof<M_numTotalDofPerFacetVector[ feSpace ]; ++iDof)
                 {
                     normalScatter(iComponent) += M_currentBdFEPtrVector[feSpace]->weightMeas( iq )
                                                * M_currentBdFEPtrVector[feSpace]->phi( Int(iDof), iq )
@@ -895,16 +955,16 @@ Vector PostProcessingBoundary<MeshType>::geometricCenter( const markerID_Type& f
 {
     // Each processor computes the geometric center on his own flagged facets --> geometricCenterScatter
     // At the end I'll reduce the process geometricCenterScatter --> geometricCenter
-    Real measureScatter(0.0), measure(0.);
+    Real areaScatter(0.0), area(0.0);
     Vector geometricCenterScatter(3), geometricCenter(3);
 
-    geometricCenter[0] = 0;
-    geometricCenter[1] = 0;
-    geometricCenter[2] = 0;
+    geometricCenter[0] = 0.0;
+    geometricCenter[1] = 0.0;
+    geometricCenter[2] = 0.0;
 
-    geometricCenterScatter[0] = 0;
-    geometricCenterScatter[1] = 0;
-    geometricCenterScatter[2] = 0;
+    geometricCenterScatter[0] = 0.0;
+    geometricCenterScatter[1] = 0.0;
+    geometricCenterScatter[2] = 0.0;
 
     // list of flagged facets on current processor
     std::list<ID> facetList( M_boundaryMarkerToFacetIdMap[flag] );
@@ -916,26 +976,20 @@ Vector PostProcessingBoundary<MeshType>::geometricCenter( const markerID_Type& f
     // Loop on facetList
     for (Iterator j=facetList.begin(); j != facetList.end(); ++j)
     {
-
         // Updating quadrature data on the current facet
         M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->boundaryFacet(*j) );
 
-        // Compute the measure of the facet
-        measureScatter += M_currentBdFEPtrVector[0]->measure();
+        // Compute the area of the facet
+        areaScatter += M_currentBdFEPtrVector[0]->measure();
 
-        // Quadrature formula
-        // Loop on quadrature points
-        for (UInt iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq)
+        // Quadrature formula (loop on quadrature points)
+        for (UInt iq(0); iq < M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq)
         {
-
-            // Dot product
-            // Loop on components
-            for (UInt iComponent =0; iComponent<nDim; ++iComponent)
+            // Dot product (loop on components)
+            for (UInt iComponent(0); iComponent < nDim; ++iComponent)
             {
-
-                // Interpolation
-                // Loop on local dof
-                for (ID iDof=0; iDof<M_numTotalDofPerFacetVector[feSpace]; ++iDof)
+                // Interpolation (loop on local dof)
+                for (ID iDof(0); iDof<M_numTotalDofPerFacetVector[feSpace]; ++iDof)
                 {
                     geometricCenterScatter(iComponent) += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
                                                         * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
@@ -950,10 +1004,10 @@ Vector PostProcessingBoundary<MeshType>::geometricCenter( const markerID_Type& f
     M_epetraMapPtr->comm().SumAll( &geometricCenterScatter(1), &geometricCenter(1), 1 );
     M_epetraMapPtr->comm().SumAll( &geometricCenterScatter(2), &geometricCenter(2), 1 );
 
-    M_epetraMapPtr->comm().SumAll( &measureScatter, &measure, 1 );
+    M_epetraMapPtr->comm().SumAll( &areaScatter, &area, 1 );
 
-    // Didive by the measure
-    geometricCenter /= measure;
+    // Didive by the area
+    geometricCenter /= area;
 
     return geometricCenter;
 }
