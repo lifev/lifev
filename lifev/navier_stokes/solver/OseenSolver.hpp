@@ -326,6 +326,21 @@ public:
      */
     Real flux( const markerID_Type& flag );
 
+    //! Compute flux on a boundary face with given flag and a given solution
+    /*!
+        @param  flag
+        @param  solution
+        @return kinetic energy
+     */
+    Real kineticEnergy( const markerID_Type& flag, const vector_Type& solution );
+
+    //! Compute flux on a boundary face with given flag
+    /*!
+        @param flag
+        @return kinetic energy
+     */
+    Real kineticEnergy( const markerID_Type& flag );
+
     //! Compute average pressure on a boundary face with given flag and a given solution
     /*!
         @param  flag
@@ -1677,6 +1692,25 @@ OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag,
     velocity.subset( velocityAndPressure );
 
     return M_postProcessing->flux( velocity, flag );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::kineticEnergy( const markerID_Type& flag )
+{
+    return kineticEnergy( flag, *M_solution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::kineticEnergy( const markerID_Type& flag,
+                                                  const vector_Type& solution )
+{
+    vector_Type velocityAndPressure( solution, Repeated );
+    vector_Type velocity( this->M_velocityFESpace.map(), Repeated );
+    velocity.subset( velocityAndPressure );
+
+    return M_postProcessing->kineticEnergy( velocity, flag, M_oseenData->density() );
 }
 
 template<typename MeshType, typename SolverType>
