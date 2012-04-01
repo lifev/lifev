@@ -577,6 +577,12 @@ OneDFSISolver::boundaryValue( const solution_Type& solution, const bcType_Type& 
 
         return -(*solution.find("P")->second)( boundaryDof );
 
+    case OneDFSI::T:
+
+        return -(*solution.find("P")->second)( boundaryDof ) - 0.5 * M_physicsPtr->data()->densityRho() * M_physicsPtr->data()->alpha( boundaryDof )
+                * (*solution.find("Q")->second)( boundaryDof ) * (*solution.find("Q")->second)( boundaryDof )
+                / ( (*solution.find("A")->second)( boundaryDof ) * (*solution.find("A")->second)( boundaryDof ) );
+
     default:
 
         std::cout << "Warning: bcType \"" << bcType << "\"not available!" << std::endl;
