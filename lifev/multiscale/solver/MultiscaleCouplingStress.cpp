@@ -151,13 +151,15 @@ MultiscaleCouplingStress::exportCouplingResiduals( multiscaleVector_Type& coupli
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
         if ( myModel( i ) )
         {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
-            if ( isModelLeaderProcess( i ) )
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryTotalStress( M_flags[0] );
+            if ( isModelLeaderProcess( 0 ) )
                 ( *M_localCouplingResiduals )[i] += myValue;
         }
 
     for ( UInt i( 1 ); i < modelsNumber(); ++i )
         if ( myModel( i ) )
+        {
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryTotalStress( M_flags[i] );
             if ( isModelLeaderProcess( i ) )
             {
                 ( *M_localCouplingResiduals )[0]  += localCouplingVariables( 0 )[i];
@@ -234,7 +236,7 @@ MultiscaleCouplingStress::insertJacobianDeltaCoefficients( multiscaleMatrix_Type
     if ( myModel( modelLocalID ) )
     {
         // Compute the coefficient
-        Real coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );;
+        Real coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaTotalStress( M_flags[modelLocalID], solveLinearSystem );
 
         // Add the coefficient to the matrix
         if ( isModelLeaderProcess( modelLocalID ) )

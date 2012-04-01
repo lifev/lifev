@@ -163,6 +163,15 @@ public:
      */
     Real boundaryStress( const bcFlag_Type& flag ) const { return -boundaryPressure( flag ); }
 
+    //! Get the integral of the normal stress (on a specific boundary face)
+    /*!
+     *  TODO TOTAL STRESS DO NOT EXIST IN THIS MODEL!!!
+     *
+     * @param flag flag of the boundary face
+     * @return stress value
+     */
+    Real boundaryTotalStress( const bcFlag_Type& /*flag*/ ) const { return NaN; }
+
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
      * @param flag flag of the boundary face on which quantity should be computed
@@ -178,6 +187,14 @@ public:
      * @return variation of the stress
      */
     Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem );
+
+    //! Get the variation of the integral of the total normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the total normal stress
+     */
+    Real boundaryDeltaTotalStress( const bcFlag_Type& /*flag*/, bool& /*solveLinearSystem*/ ) { return NaN; }
 
     //@}
 

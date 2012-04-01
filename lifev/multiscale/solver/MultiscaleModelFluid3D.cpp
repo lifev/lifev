@@ -391,6 +391,13 @@ MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solv
         return -M_fluid->getLinearPressure( flag );
 }
 
+Real
+MultiscaleModelFluid3D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+{
+    // TODO FIX THIS: FOR NOW IT IS APPROXIMATED WITH THE DELTASTRESS
+    return boundaryDeltaStress( flag, solveLinearSystem );
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
@@ -412,6 +419,12 @@ MultiscaleModelFluid3D::boundaryPressure( const bcFlag_Type& flag ) const
         return M_fluid->lagrangeMultiplier( flag, *M_bc->handler() );
     else
         return M_fluid->pressure( flag );
+}
+
+Real
+MultiscaleModelFluid3D::boundaryTotalPressure( const bcFlag_Type& flag ) const
+{
+    return boundaryPressure( flag ) + M_fluid->kineticEnergy( flag );
 }
 
 // ===================================================

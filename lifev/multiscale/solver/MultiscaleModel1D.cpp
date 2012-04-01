@@ -388,24 +388,7 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLi
     Debug( 8130 ) << "Qdelta:     " << Qdelta << "\n";
 #endif
 
-#ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
-
-    if ( M_bcDeltaType == OneDFSI::A )
-    {
-        // dQ/dP
-        return ( (Qdelta - Q) / M_bcDelta ) * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDFSI::P, bcSide ), M_data->dataTime()->timeStep(), 0 );
-    }
-    else
-    {
-        // dQ/dQ
-        return (Qdelta - Q) / M_bcDelta;
-    }
-
-#else
-
     return (Qdelta - Q) / M_bcDelta;
-
-#endif
 
 }
 
@@ -415,31 +398,6 @@ MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLine
     bcSide_Type bcSide = flagConverter( flag );
 
     solveLinearModel( solveLinearSystem );
-
-#ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
-
-    Real A      = M_solver->boundaryValue( *M_solution, OneDFSI::A, bcSide );
-    Real Adelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::A, bcSide );
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaStress( flag, solveLinearSystem ) \n";
-    Debug( 8130 ) << "A:          " << A <<  "\n";
-    Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
-#endif
-
-    if ( M_bcDeltaType == OneDFSI::A )
-    {
-        // dP/dP
-        return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDFSI::A, bcSide ), M_data->dataTime()->timeStep(), 0 )
-               * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDFSI::P, bcSide ), M_data->dataTime()->timeStep(), 0 );
-    }
-    else
-    {
-        // dP/dQ
-        return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDFSI::A, bcSide ), M_data->dataTime()->timeStep(), 0 );
-    }
-
-#else
 
     Real S      = M_solver->boundaryValue( *M_solution, OneDFSI::S, bcSide );
     Real Sdelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::S, bcSide );
@@ -451,7 +409,25 @@ MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLine
 #endif
 
     return (Sdelta - S) / M_bcDelta;
+}
+
+Real
+MultiscaleModel1D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+{
+    bcSide_Type bcSide = flagConverter( flag );
+
+    solveLinearModel( solveLinearSystem );
+
+    Real T      = M_solver->boundaryValue( *M_solution, OneDFSI::T, bcSide );
+    Real Tdelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::T, bcSide );
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaTotalStress( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "T:          " << T <<  "\n";
+    Debug( 8130 ) << "Tdelta:     " << Tdelta <<  "\n";
 #endif
+
+    return (Tdelta - T) / M_bcDelta;
 }
 
 #else
@@ -466,6 +442,12 @@ Real
 MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
 {
     return tangentProblem( flagConverter( flag ), OneDFSI::S );
+}
+
+Real
+MultiscaleModel1D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
+{
+    return tangentProblem( flagConverter( flag ), OneDFSI::T );
 }
 
 #endif
@@ -771,15 +753,6 @@ MultiscaleModel1D::imposePerturbation()
             // Compute the range
             M_bcDeltaType = M_linearBC->bc( M_bcDeltaSide )->type( OneDFSI::first );
 
-#ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
-            // We replace stress BC with area BC for the perturbed problem
-            if ( M_bcDeltaType == OneDFSI::S )
-            {
-                M_linearBC->bc( M_bcDeltaSide )->setType( OneDFSI::first, OneDFSI::A );
-                M_bcDeltaType = OneDFSI::A;
-            }
-#endif
-
             //M_BCDelta = ( *i )->residual()[( *i )->perturbedCoupling()] * 10000;
             //M_BCDelta = ( M_BCDelta[1] - M_BCDelta[0] ) / 100;
 
@@ -829,13 +802,6 @@ MultiscaleModel1D::resetPerturbation()
 #endif
 
     M_linearBC->bc( M_bcDeltaSide )->setBCFunction( OneDFSI::first, M_bc->handler()->bc( M_bcDeltaSide )->bcFunction( OneDFSI::first ) );
-
-#ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
-    // Restoring the original BC
-    if ( M_bcDeltaType == OneDFSI::A )
-        M_linearBC->bc( M_bcDeltaSide )->setType( OneDFSI::first, OneDFSI::P );
-#endif
-
 }
 
 Real

@@ -44,9 +44,6 @@
 
 // Jacobian coefficient approximation
 #define JACOBIAN_WITH_FINITEDIFFERENCE
-#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
-//#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
-#endif
 
 // Matlab post-processing
 #define HAVE_MATLAB_POSTPROCESSING 1
@@ -133,7 +130,7 @@ public:
 #endif
 
     //@}
-    
+
 
     //! @name Constructors & Destructor
     //@{
@@ -215,10 +212,16 @@ public:
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
-     * @param stressType Type of approximation for the stress
      * @return stress value
      */
     Real boundaryStress( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::S, flagConverter( flag ) ); }
+
+    //! Get the integral of the total normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @return stress value
+     */
+    Real boundaryTotalStress( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::T, flagConverter( flag ) ); }
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -236,6 +239,15 @@ public:
      * @return variation of the stress
      */
     Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem );
+
+    //! Get the variation of the integral of the total normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param stressType Type of approximation for the stress
+     * @return variation of the total normal stress
+     */
+    Real boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //@}
 
