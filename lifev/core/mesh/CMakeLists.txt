@@ -17,6 +17,7 @@ SET(mesh_HEADERS
   mesh/RegionMesh1DBuilders.hpp
   mesh/MeshChecks.hpp
   mesh/MeshElementMarked.hpp
+  mesh/NeighborMarker.hpp
 CACHE INTERNAL "")
 
 SET(mesh_SOURCES
