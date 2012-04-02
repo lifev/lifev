@@ -1710,7 +1710,7 @@ OseenSolver<MeshType, SolverType>::kineticEnergy( const markerID_Type& flag,
     vector_Type velocity( this->M_velocityFESpace.map(), Repeated );
     velocity.subset( velocityAndPressure );
 
-    return M_postProcessing->kineticEnergy( velocity, flag, M_oseenData->density() );
+    return M_postProcessing->kineticEnergy( velocity, M_oseenData->density(), flag );
 }
 
 template<typename MeshType, typename SolverType>
