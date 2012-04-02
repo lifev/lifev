@@ -48,15 +48,15 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Teuchos includes
-#include "Teuchos_RCP.hpp"
+#include <Teuchos_RCP.hpp>
 
 // Teko-Package includes
-#include "Teko_Utilities.hpp"
-#include "Teko_InverseFactory.hpp"
-#include "Teko_InverseLibrary.hpp"
-#include "Teko_BlockPreconditionerFactory.hpp"
-#include "Teko_InvLSCStrategy.hpp"
-#include "Teko_LSCPreconditionerFactory.hpp"
+#include <Teko_Utilities.hpp>
+#include <Teko_InverseFactory.hpp>
+#include <Teko_InverseLibrary.hpp>
+#include <Teko_BlockPreconditionerFactory.hpp>
+#include <Teko_InvLSCStrategy.hpp>
+#include <Teko_LSCPreconditionerFactory.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"

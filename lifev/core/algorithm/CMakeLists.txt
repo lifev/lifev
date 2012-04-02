@@ -27,13 +27,14 @@ SET(algorithm_SOURCES
   algorithm/Preconditioner.cpp
   algorithm/PreconditionerAztecOO.cpp
   algorithm/PreconditionerComposed.cpp
+  algorithm/PreconditionerComposition.cpp
   algorithm/PreconditionerIfpack.cpp
   algorithm/PreconditionerBlock.cpp
   algorithm/PreconditionerML2.cpp
-  algorithm/PreconditionerTeko.cpp
   algorithm/SolverAztecOO.cpp
   algorithm/EigenSolver.cpp
   algorithm/LinearSolver.cpp
+  algorithm/PreconditionerTeko.cpp
   algorithm/PreconditionerLinearSolver.cpp
 CACHE INTERNAL "")
 

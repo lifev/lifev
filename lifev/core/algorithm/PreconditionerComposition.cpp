@@ -35,7 +35,7 @@
     composed as a multiplication of matrices.
  */
 
-#include <PreconditionerComposition.hpp>
+#include <lifev/core/algorithm/PreconditionerComposition.hpp>
 
 // <--Check for necessity
 #include <Ifpack_config.h>
