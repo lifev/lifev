@@ -65,7 +65,7 @@
 // Mathcard includes
 #include <lifev/one_d_fsi/fem/OneDFSIBCHandler.hpp>
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
-#include <lifemc/lifesolver/MultiscaleModel1D.hpp>
+#include <lifev/multiscale/solver/MultiscaleModel1D.hpp>
 
 #include "ud_functions.hpp"
 
