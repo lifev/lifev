@@ -175,7 +175,7 @@ darcy::darcy( int argc,
 
 #ifdef EPETRA_MPI
     Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-    int ntasks;
+    Int ntasks;
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     Members->comm.reset( new Epetra_SerialComm() );
