@@ -1567,7 +1567,7 @@ GetPot::__match_starting_string(const char* StartString)
             { cursor = c; search_failed_f = false; return &(argv[c].c_str()[N]); }
     }
 
-    if ( ! search_loop_f ) return false;
+    assert( search_loop_f );
 
     // (*) second loop from 0 to old cursor position
     for (c = 1; c < OldCursor; c++)

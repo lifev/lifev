@@ -255,7 +255,7 @@ ExporterHDF5<MeshType>::ExporterHDF5(const GetPot& dfile, meshPtr_Type mesh, con
         M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
         M_outputFileName    ( "noninitialisedFileName" )
 {
-    setMeshProcId( mesh, procId );
+    this->setMeshProcId( mesh, procId );
 }
 
 template<typename MeshType>
