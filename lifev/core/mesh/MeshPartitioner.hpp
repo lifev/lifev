@@ -228,7 +228,7 @@ public:
     //! \name Get Methods
     //@{
     //! Return a reference to M_vertexDistribution
-    const std::vector<Int>&  vertexDistribution()   const {return M_vertexDistribution;};
+    const std::vector<Int>&  vertexDistribution()   const {return M_vertexDistribution;}
     //! Return a const pointer to M_meshPartitions[0] - for parallel
     const meshPtr_Type&      meshPartition()        const {return (*M_meshPartitions)[0];}
     meshPtr_Type&            meshPartition()              {return (*M_meshPartitions)[0];}
