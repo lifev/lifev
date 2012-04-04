@@ -44,6 +44,7 @@ Also it test the interpolation of an analytical function into a finite element s
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <string>
 #include <fstream>
+#include <boost/bind.hpp>
 
 using namespace LifeV;
 
@@ -66,13 +67,14 @@ bool check_interpolate( std::vector< boost::shared_ptr < FESpace<MeshType, MapTy
                       const MapEpetraType& outputMapType,  Fct& function,
                       const Real errorArray [], const string stringArray [], Real eps, Real time, UInt verbose)
 {
+    auto fBoost = boost::bind(function,_1,_2,_3,_4,_5);
     std::vector< boost::shared_ptr <VectorEpetra> > interpVecPtr(originalFeSpaceVecPtr.size());
     bool check(true);
 
     for(UInt i=0; i< originalFeSpaceVecPtr.size(); i++)
     {
         boost::shared_ptr <VectorEpetra> tmp(new VectorEpetra(originalFeSpaceVecPtr[i]->map(), outputMapType));
-        originalFeSpaceVecPtr[i]->interpolate(function, *tmp, time);
+        originalFeSpaceVecPtr[i]->interpolate(fBoost, *tmp, time);
         interpVecPtr[i] = tmp;
     }
 

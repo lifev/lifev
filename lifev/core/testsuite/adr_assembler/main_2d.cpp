@@ -232,7 +232,8 @@ main( int argc, char** argv )
 #ifdef TEST_RHS
     vector_type fInterpolated(uFESpace->map(),Repeated);
     fInterpolated*=0.0;
-    uFESpace->interpolate(fRhs,fInterpolated,0.0);
+    auto fRhsBoost = boost::bind(fRhs,_1,_2,_3,_4,_5);
+    uFESpace->interpolate(fRhsBoost,fInterpolated,0.0);
     adrAssembler.addMassRhs(rhs,fInterpolated);
     rhs.globalAssemble();
 #endif
@@ -243,6 +244,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
     BCHandler bchandler;
+    auto exactSolutionBoost = boost::bind(exactSolution,_1,_2,_3,_4,_5);
     BCFunctionBase BCu( exactSolution );
     bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
     for (UInt i(2); i<=6; ++i)
@@ -305,7 +307,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Computing the error ... " << std::flush;
     vector_type solutionErr(solution);
     solutionErr*=0.0;
-    uFESpace->interpolate(exactSolution,solutionErr,0.0);
+    uFESpace->interpolate(exactSolutionBoost,solutionErr,0.0);
     solutionErr-=solution;
     solutionErr.abs();
     Real l2error(uFESpace->l2Error(exactSolution,vector_type(solution,Repeated),0.0));
