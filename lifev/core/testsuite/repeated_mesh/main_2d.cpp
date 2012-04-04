@@ -50,15 +50,14 @@
 
 #include <lifev/core/LifeV.hpp>
 
-
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
-
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/BCManage.hpp>
@@ -66,9 +65,9 @@
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
 
 #include <lifev/core/solver/ADRAssembler.hpp>
-#include <lifev/core/mesh/MeshData.hpp>
 
 using namespace LifeV;
 
@@ -133,6 +132,13 @@ main( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
+#endif
+
+    // introducing a local scope in order to properly destroy all objects
+    // before calling MPI_Finalize()
+    {
+
+#ifdef HAVE_MPI
     boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
 #else
     boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
@@ -329,7 +335,11 @@ main( int argc, char** argv )
 // Exporter definition and use
 
     if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
+#ifdef HAVE_HDF5
+    ExporterHDF5<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID()) ;
+#else
     ExporterEnsight<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID()) ;
+#endif
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;
@@ -343,11 +353,12 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Exporting ... " << std::flush;
-    exporter.postProcess(0);
+    exporter.postProcess( 0 );
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
 
+    }
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
