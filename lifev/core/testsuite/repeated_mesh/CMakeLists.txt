@@ -7,7 +7,7 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
   RepeatedMesh2D
   SOURCES main_2d.cpp
   ARGS -c
-  NUM_MPI_PROCS 3
+  NUM_MPI_PROCS 2
   COMM serial mpi
   STANDARD_PASS_OUTPUT
   )
