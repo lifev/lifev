@@ -1,0 +1,26 @@
+
+INCLUDE(TribitsAddExecutableAndTest)
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+
+TRIBITS_ADD_EXECUTABLE_AND_TEST(
+  BasicExample
+  SOURCES main.cpp heart.cpp
+  ARGS -c
+  NUM_MPI_PROCS 3
+  COMM serial mpi
+#  STANDARD_PASS_OUTPUT
+  )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(data_heart_basic_examples_data
+  CREATE_SYMLINK
+  SOURCE_FILES data
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(data_heart_basic_examples_mesh
+  CREATE_SYMLINK
+  SOURCE_FILES lid16.mesh
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../data/mesh/inria
+)
+
