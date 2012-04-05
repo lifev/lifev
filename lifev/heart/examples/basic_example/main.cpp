@@ -55,7 +55,7 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
-#include <heart.hpp>
+#include "heart.hpp"
 
 using namespace LifeV;
 
