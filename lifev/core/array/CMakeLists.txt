@@ -1,4 +1,5 @@
 SET(array_HEADERS
+  array/EnumMapEpetra.hpp
   array/VectorEpetra.hpp
   array/MapVector.hpp
   array/VectorSmall.hpp

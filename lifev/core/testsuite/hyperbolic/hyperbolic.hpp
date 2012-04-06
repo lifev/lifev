@@ -42,7 +42,6 @@
 
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/array/GhostHandler.hpp>
-#include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/solver/HyperbolicSolver.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 

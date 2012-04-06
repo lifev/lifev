@@ -62,14 +62,11 @@
 
 #include <lifev/core/fem/ReferenceFE.hpp>
 #include <lifev/core/LifeV.hpp>
-#include <lifev/core/mesh/MeshPartitioner.hpp>
-
+#include <lifev/core/array/EnumMapEpetra.hpp>
 #include <lifev/core/array/MapVector.hpp>
 
 namespace LifeV
 {
-
-enum MapEpetraType {Unique = 0, Repeated};
 
 
 //! MapEpetra - Wrapper for Epetra_Map

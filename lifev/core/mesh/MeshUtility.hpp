@@ -53,7 +53,7 @@
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
 #include <lifev/core/mesh/MeshEntity.hpp>
 #include <lifev/core/mesh/MeshEntityContainer.hpp>
-#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/EnumMapEpetra.hpp>
 
 namespace LifeV
 {
@@ -1261,39 +1261,39 @@ bool rearrangeFaces( MeshType & mesh,
     In particular, it assures that the boundary faces are correctly set w.r.t. the adjacent volumes
 
 
-	@param[out] mesh a mesh
+    @param[out] mesh a mesh
 
-	@param[out] logStream stream that will receive all information regarding the markers
+    @param[out] logStream stream that will receive all information regarding the markers
 
-	@param[out] errorStream stream for error messages
+    @param[out] errorStream stream for error messages
 
-	@param[out] sw A switch that will contain information on what has been done
-	Possible values are
-	<ol>
-	<li>NUM_FACES_MISMATCH</li>
-	<li>FIXED_FACE_COUNTER</li>
-	<li>BFACE_MISSING</li>
-	<li>BFACE_STORED_MISMATCH</li>
-	<li>BFACE_COUNTER_UNSET</li>
-	<li>BFACE_STORED_MISMATCH</li>
-	<li>FIXED_MAX_NUM_FACES</li>
-	</ol>
+    @param[out] sw A switch that will contain information on what has been done
+    Possible values are
+    <ol>
+    <li>NUM_FACES_MISMATCH</li>
+    <li>FIXED_FACE_COUNTER</li>
+    <li>BFACE_MISSING</li>
+    <li>BFACE_STORED_MISMATCH</li>
+    <li>BFACE_COUNTER_UNSET</li>
+    <li>BFACE_STORED_MISMATCH</li>
+    <li>FIXED_MAX_NUM_FACES</li>
+    </ol>
 
-	@param numFaces[out] It returns the number of faces found by the function
+    @param numFaces[out] It returns the number of faces found by the function
 
-	@param numBoundaryFaces[out] It returns the number of boundary faces found by the function
+    @param numBoundaryFaces[out] It returns the number of boundary faces found by the function
 
-	@param fixMarker[in] If set to the true value, all faces without a markerFlag set will inherit it from the points.
-	    todo remove this parameter (unused)
+    @param fixMarker[in] If set to the true value, all faces without a markerFlag set will inherit it from the points.
+        todo remove this parameter (unused)
 
-	@param[in] verbose if false nothing is written to logStream
+    @param[in] verbose if false nothing is written to logStream
 
-	@param[out] externalFaceContainer. If not NULL it is a pointer to an external map of boundary faces, already
-	  produced by a call to findBoundaryFaces(). This parameter may be used to save a lot of computational work, since
-	  findBoundaryFaces() is rather expensive.
+    @param[out] externalFaceContainer. If not NULL it is a pointer to an external map of boundary faces, already
+      produced by a call to findBoundaryFaces(). This parameter may be used to save a lot of computational work, since
+      findBoundaryFaces() is rather expensive.
 
-	@pre Boundary faces list must be properly set.
-	@todo The policy to treat missing markers should be passed in the argument, so to allow changes
+    @pre Boundary faces list must be properly set.
+    @todo The policy to treat missing markers should be passed in the argument, so to allow changes
  */
 
 template <class MeshType>
@@ -1827,38 +1827,38 @@ bool buildFaces( MeshType & mesh,
 //! It builds edges.
 /*!
     This function may alternatively be used to build the boundary edges,
-	all the mesh edges, or just add the internal edges to an existing list of
-	just boundary edges.
+    all the mesh edges, or just add the internal edges to an existing list of
+    just boundary edges.
 
-	@param mesh A mesh
+    @param mesh A mesh
 
-	@param logStream Log stream for information on the newly created markers for boundary edges
+    @param logStream Log stream for information on the newly created markers for boundary edges
 
-	@param errorStream Error stream
+    @param errorStream Error stream
 
-	@param numBoundaryEdgesFound Returns the number of boundary edges
+    @param numBoundaryEdgesFound Returns the number of boundary edges
 
-	@param numInternalEdgesFound Returns the number of internal edges
+    @param numInternalEdgesFound Returns the number of internal edges
 
-	@param buildBoundaryEdges if true the function builds boundary edges
+    @param buildBoundaryEdges if true the function builds boundary edges
 
-	@param buildInternalEdges if true the function builds internal edges
+    @param buildInternalEdges if true the function builds internal edges
 
-	@param verbose. If true markerFlags info is written on logStream.
+    @param verbose. If true markerFlags info is written on logStream.
 
-	@param externalEdgeContainer. If not NULL it is a pointer to an external map of bondary edges, already
-	produced by a call to findBoundaryEdges(). This parameter may be used to save al lot of computational work, since
-	findBoundaryEdges() is rather expensive.
+    @param externalEdgeContainer. If not NULL it is a pointer to an external map of bondary edges, already
+    produced by a call to findBoundaryEdges(). This parameter may be used to save al lot of computational work, since
+    findBoundaryEdges() is rather expensive.
 
-	@return true if successful
+    @return true if successful
 
-	@pre If buildInternalEdges=true and buildBoundaryEdges=false the mesh must contain a proper list
-	of boundary edges
+    @pre If buildInternalEdges=true and buildBoundaryEdges=false the mesh must contain a proper list
+    of boundary edges
 
-	@pre The mesh must contain a proper list of boundary faces
+    @pre The mesh must contain a proper list of boundary faces
 
-	@note By setting buildInternalEdges=true and buildBoundaryEdges=true the function just fixes the counters
-	with the number of edges in the mesh
+    @note By setting buildInternalEdges=true and buildBoundaryEdges=true the function just fixes the counters
+    with the number of edges in the mesh
  */
 
 template <typename MeshType>
@@ -2072,13 +2072,13 @@ bool buildEdges( MeshType & mesh,
  */
 //! It builds a P2 mesh from P1 data.
 /*!
-	@author L.Formaggia.
-	@version Version 1.0
-	@pre All compulsory structures in mesh must have been already set: volumes and boundary faces.
-	@pre Points list MUST have been dimensioned correctly!!!
-	@note the function takes advantage of the fact that vertex are stored first
+    @author L.Formaggia.
+    @version Version 1.0
+    @pre All compulsory structures in mesh must have been already set: volumes and boundary faces.
+    @pre Points list MUST have been dimensioned correctly!!!
+    @note the function takes advantage of the fact that vertex are stored first
     @param mesh[out] A mesh
-	@param logStream[out] Log stream for information on the newly created markers for boundary edges
+    @param logStream[out] Log stream for information on the newly created markers for boundary edges
  */
 template <typename MeshType>
 void
