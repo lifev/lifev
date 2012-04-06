@@ -38,7 +38,6 @@
 
 #include <lifev/core/mesh/NeighborMarker.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
-#include <lifev/core/array/VectorEpetra.hpp>
 
 namespace LifeV {
 
@@ -59,6 +58,8 @@ public:
     typedef MapEpetra map_Type;
     typedef boost::shared_ptr<map_Type> mapPtr_Type;
     typedef std::map< UInt, mapPtr_Type > mapList_Type;
+    typedef std::vector<std::vector<Int> > graph_Type;
+    typedef boost::shared_ptr<graph_Type> graphPtr_Type;
 
     //@}
 
@@ -144,6 +145,9 @@ public:
     map_Type & ghostMapOnElementsP1( UInt overlap );
 
     //! create ghost map
+    void ghostMapOnElementsP1( graphPtr_Type elemGraph, UInt overlap );
+
+    //! create ghost map
     map_Type & ghostMapOnNodesMap( UInt overlap );
 
     //! create ghost map
@@ -183,13 +187,15 @@ protected:
     meshPtr_Type M_localMesh;
     map_Type & M_map;
     commPtr_Type const M_comm;
-    UInt M_me;
+    UInt const M_me;
 
     neighborMap_Type M_nodeNodeNeighborsMap;
     neighborMap_Type M_nodeEdgeNeighborsMap;
     neighborMap_Type M_nodeElementNeighborsMap;
 
     const bool M_verbose;
+
+    std::ofstream M_debugOut;
 
     //@}
 };
@@ -207,7 +213,12 @@ GhostHandler<Mesh>::GhostHandler( meshPtr_Type fullMesh,
     M_nodeNodeNeighborsMap(),
     M_nodeEdgeNeighborsMap(),
     M_nodeElementNeighborsMap(),
-    M_verbose( !M_me )
+    M_verbose( !M_me ),
+#ifdef HAVE_LIFEV_DEBUG
+    M_debugOut( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string>( M_me ) : "s" ) + ".out" ).c_str() )
+#else
+    M_debugOut()
+#endif
 {
 }
 
@@ -782,6 +793,125 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
     M_ghostMapOnElementsP1Map[ overlap ] = M_ghostMapOnElementsP1;
 
     return *M_ghostMapOnElementsP1;
+}
+
+template <typename Mesh>
+void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, UInt overlap )
+{
+    if ( M_verbose ) std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
+
+    // check that the nodeElementNeighborsMap has been created
+    if ( M_nodeElementNeighborsMap.empty()  )
+    {
+        if ( M_verbose ) std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
+        this->createNodeElementNeighborsMap();
+    }
+
+    std::vector<int> & myElems = (*elemGraph)[M_me];
+#ifdef HAVE_LIFEV_DEBUG
+    // show own elements
+    M_debugOut << "own elements on proc " << M_me << std::endl;
+    for( UInt i = 0; i < myElems.size(); i++ )
+        M_debugOut << myElems[ i ] << std::endl;
+#endif
+
+    // generate graph of points
+    graph_Type pointGraph( M_comm->NumProc() );
+
+    // @todo: check if parallel building + comm is faster
+    for( Int p = 0; p < M_comm->NumProc(); p++ )
+    {
+        std::set<int> localPointsSet;
+        for( UInt e = 0; e < (*elemGraph)[ p ].size(); e++ )
+        {
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+                localPointsSet.insert( M_fullMesh->element( (*elemGraph)[ p ][ e ] ).point( k ).id() );
+        }
+        pointGraph[ p ].assign( localPointsSet.begin(), localPointsSet.end() );
+    }
+
+    std::vector<int> const & myPoints = pointGraph[ M_me ];
+#ifdef HAVE_LIFEV_DEBUG
+    M_debugOut << "own points on proc " << M_me << std::endl;
+    for( UInt i = 0; i < myPoints.size(); i++ )
+        M_debugOut << myPoints[ i ] << std::endl;
+#endif
+
+    // find subdomain interface nodes
+    std::vector<int> mySubdIntPoints;
+    for( UInt k = 0; k < myPoints.size(); k++ )
+    {
+        int const & currentPoint = myPoints[ k ];
+        // cycle on all other processes
+        for( Int p = 0; p < M_comm->NumProc(); p++ )
+        {
+            if ( p != M_me )
+            {
+                // cycle on all points of that proc
+                for( UInt j = 0; j < pointGraph[ p ].size(); j++ )
+                    // if i find currentPoint on other procs it means it is on SUBDOMAIN_INTERFACE
+                    if ( pointGraph[ p ][ j ] == currentPoint ) mySubdIntPoints.push_back( currentPoint );
+            }
+        }
+    }
+
+#ifdef HAVE_LIFEV_DEBUG
+    M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << M_me << std::endl;
+    for( UInt i = 0; i < mySubdIntPoints.size(); i++ )
+        M_debugOut << mySubdIntPoints[ i ] << std::endl;
+#endif
+
+    std::vector<int> workingPoints( mySubdIntPoints.begin(), mySubdIntPoints.end() );
+    std::set<int> newPoints;
+    std::set<int> augmentedElemsSet( myElems.begin(), myElems.end() );
+
+    for( UInt o = 0; o < overlap; o++ )
+    {
+#ifdef HAVE_LIFEV_DEBUG
+        M_debugOut << "workingPoints" << std::endl;
+        for( UInt i = 0; i < workingPoints.size(); i++ )
+            M_debugOut << workingPoints[ i ] << std::endl;
+#endif
+        for( UInt k = 0; k < workingPoints.size(); k++ )
+        {
+            const int & currentPoint = workingPoints[ k ];
+            // iterate on point neighborhood
+            for ( neighborList_Type::const_iterator neighborIt = M_nodeElementNeighborsMap[ currentPoint ].begin();
+                            neighborIt != M_nodeElementNeighborsMap[ currentPoint ].end(); ++neighborIt )
+            {
+                std::pair<std::set<Int>::iterator, bool> isInserted = augmentedElemsSet.insert( *neighborIt );
+                if( isInserted.second )
+                {
+                    // if the element is inserted in the list, we add its points to the ones
+                    // to be checked for next overlap value
+                    for ( UInt j = 0; j < mesh_Type::element_Type::S_numPoints; j++ )
+                        newPoints.insert( M_fullMesh->element( *neighborIt ).point( j ).id() );
+                }
+            }
+        }
+#ifdef HAVE_LIFEV_DEBUG
+        M_debugOut << "augmentedElemsSet" << std::endl;
+        for( std::set<int>::const_iterator i = augmentedElemsSet.begin(); i != augmentedElemsSet.end(); ++i )
+            M_debugOut << *i << std::endl;
+#endif
+
+        // clean up newPoints from already analized points
+        for( UInt k = 0; k < workingPoints.size(); k++ )
+        {
+            newPoints.erase( newPoints.find( workingPoints[ k ] ) );
+        }
+#ifdef HAVE_LIFEV_DEBUG
+        M_debugOut << "newPoints" << std::endl;
+        for( std::set<int>::const_iterator i = newPoints.begin(); i != newPoints.end(); ++i )
+            M_debugOut << *i << std::endl;
+#endif
+        // set up workingPoints if we are not exiting
+        if( o + 1 < overlap  )
+            workingPoints.assign( newPoints.begin(), newPoints.end() );
+    }
+
+    // assign the augmentedElems to the element graph
+    myElems.assign( augmentedElemsSet.begin(), augmentedElemsSet.end() );
 }
 
 template <typename Mesh>
