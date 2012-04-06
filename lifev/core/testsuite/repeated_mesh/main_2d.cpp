@@ -162,7 +162,12 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    MeshPartitioner< mesh_type >   meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< mesh_type >   meshPart;
+    meshPart.setBuildOverlappingPartitions( true );
+    meshPart.doPartition( fullMeshPtr, Comm );
+    boost::shared_ptr< mesh_type > localMesh = meshPart.meshPartition();
+    std::ofstream debugOut( ( "rm." + ( Comm->NumProc() > 1 ? boost::lexical_cast<std::string>( Comm->MyPID() ) : "s" ) + ".out" ).c_str() );
+    localMesh->mesh_type::showMe( true, debugOut );
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
@@ -224,7 +229,7 @@ main( int argc, char** argv )
     if ( std::fabs(matrixNorm - 8 ) > 1e-3)
     {
         std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
-//        return EXIT_FAILURE;
+        return EXIT_FAILURE;
     }
 #endif
 
