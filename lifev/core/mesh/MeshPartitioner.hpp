@@ -60,6 +60,7 @@
 #include <lifev/core/util/Switch.hpp>
 #include <lifev/core/mesh/MeshElementMarked.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/array/GhostHandler.hpp>
 
 namespace LifeV
 {
@@ -166,6 +167,7 @@ public:
                        Epetra_Map* interfaceMap = 0,
                        Epetra_Map* interfaceMapRep = 0 );
 
+
     //! To be used with the new constructor.
     /*!
       Loads the parameters of the partitioning process from the simulation data file.
@@ -243,6 +245,14 @@ public:
     boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
     //! Return a reference to M_ghostDataMap
     const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
+
+    //@}
+
+    //! @name Set methos
+    //@{
+
+    //! Set M_buildOverlappingPartitions
+    void setBuildOverlappingPartitions( bool bop ) { M_buildOverlappingPartitions = bop; }
 
     //@}
 
@@ -376,6 +386,7 @@ private:
     std::vector<Int>                     M_graphVertexLocations;
     graphPtr_Type                        M_elementDomains;
     bool                                 M_serialMode; // how to tell if running serial partition mode
+    bool                                 M_buildOverlappingPartitions;
 
     //! Map for the ghost data
     GhostEntityDataMap_Type M_ghostDataMap;
@@ -424,6 +435,7 @@ init ()
     M_nBoundaryFacets.resize ( M_numPartitions );
     M_elementDomains.reset ( new graph_Type );
     M_serialMode = false;
+    M_buildOverlappingPartitions = false;
 
     /*
       Sets element parameters (nodes, faces, ridges and number of nodes on each
@@ -1583,6 +1595,16 @@ void MeshPartitioner<MeshType>::execute()
 #ifdef HAVE_LIFEV_DEBUG
     Debug(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
 #endif
+
+    if ( M_buildOverlappingPartitions )
+    {
+        meshPtr_Type dummyMesh( new mesh_Type() );
+        MapEpetra dummyMap;
+        GhostHandler<mesh_Type> gh( M_originalMesh, dummyMesh, dummyMap, M_comm );
+
+        gh.createNodeElementNeighborsMap();
+        gh.ghostMapOnElementsP1( M_elementDomains, 1 );
+     }
 
     doPartitionMesh();
 
