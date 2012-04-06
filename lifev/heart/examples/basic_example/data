@@ -14,41 +14,41 @@ type = hdf5
 [./physics]
 
 test_case   = 2             # in particular for b.c. condition
-ion_model = 2				# 1: RM 	2: LR
-u0 = -84.					# 0.: RM	-84.: LR
+ion_model = 2               # 1: RM     2: LR
+u0 = -84.                   # 0.: RM    -84.: LR
 
-Chi		= 1e3				#cm^-1
-Cm		= 1e-3				#mF/cm^2
+Chi     = 1e3               #cm^-1
+Cm      = 1e-3              #mF/cm^2
 
 #Monodomain conductivity
 #RM
-#sigmal		= 0.0328		#O^-1cm^-1
-#sigmat		=  0.00699		#O^-1cm^-1
+#sigmal     = 0.0328        #O^-1cm^-1
+#sigmat     =  0.00699      #O^-1cm^-1
 #LR
-#sigmal		= 1.2e-3		#O^-1cm^-1
-#sigmat		=  2.56e-4		#O^-1cm^-1
+#sigmal     = 1.2e-3        #O^-1cm^-1
+#sigmat     =  2.56e-4      #O^-1cm^-1
 
 #Bidomain conductivity
 #RM
-#sigmal_i		= 8.19e-2		#O^-1cm^-1
-#sigmat_i		= 8.6e-3 		#O^-1cm^-1
-#sigmal_e		= 5.46e-2 		#O^-1cm^-1
-#sigmat_e		= 3.69e-2 		#O^-1cm^-1
+#sigmal_i       = 8.19e-2       #O^-1cm^-1
+#sigmat_i       = 8.6e-3        #O^-1cm^-1
+#sigmal_e       = 5.46e-2       #O^-1cm^-1
+#sigmat_e       = 3.69e-2       #O^-1cm^-1
 
 #LR
-sigmal_i		= 3.0e-3  		#O^-1cm^-1
-sigmat_i		= 3.1525e-4 	#O^-1cm^-1
-sigmal_e		= 2.0e-3  		#O^-1cm^-1
-sigmat_e		= 1.3514e-3 	#O^-1cm^-1
+sigmal_i        = 3.0e-3        #O^-1cm^-1
+sigmat_i        = 3.1525e-4     #O^-1cm^-1
+sigmal_e        = 2.0e-3        #O^-1cm^-1
+sigmat_e        = 1.3514e-3     #O^-1cm^-1
 
 
 
 ##***********************************************************************##
 #Mitchell & Schaeffer: (active only with #define REO_CASE)
-#sigmal_i		= 3.0e-3 		#O^-1cm^-1
-#sigmal_e		= 3.0e-3 		#O^-1cm^-1
-#sigmat_i		= 3.0e-4 		#O^-1cm^-1
-#sigmat_e		= 1.2e-3 		#O^-1cm^-1
+#sigmal_i       = 3.0e-3        #O^-1cm^-1
+#sigmal_e       = 3.0e-3        #O^-1cm^-1
+#sigmat_i       = 3.0e-4        #O^-1cm^-1
+#sigmat_e       = 1.2e-3        #O^-1cm^-1
 
 tau_in    = 0.8
 tau_out   = 18.0
@@ -75,32 +75,32 @@ heart_diff_fct = 0
 # case 2: reduced diffusion in cyl region
 # case 3: reduced diffusion in box region
 
-stim_center_1 	= '-0.137 0.64 -3.27'
-stim_radius_1 	= 1.5
-stim_start_1 	= 0
-stim_stop_1 	= 1
-stim_value_1 	= 100
-stim_period_1 	= 500 #350
+stim_center_1   = '-0.137 0.64 -3.27'
+stim_radius_1   = 1.5
+stim_start_1    = 0
+stim_stop_1     = 1
+stim_value_1    = 100
+stim_period_1   = 500 #350
 
 #per reduced_sigma_sphere (heart_diff_fct=1)
-sigma_reduction	= '0.1, 1.'
-sphere_center 	= '0., 0., 0.'
-sphere_radius 	= 0.5
+sigma_reduction = '0.1, 1.'
+sphere_center   = '0., 0., 0.'
+sphere_radius   = 0.5
 
 #per reduced_sigma_box (heart_diff_fct=3)
-#sigma_reduction  	= '0.001, 1.'
-#box_vertex_min 	= '0., 0., 0.'
-#box_vertex_max 	= '1., 1., 1.'
+#sigma_reduction    = '0.001, 1.'
+#box_vertex_min     = '0., 0., 0.'
+#box_vertex_max     = '1., 1., 1.'
 
 
 [../time_discretization]
-initialtime		= 0.
-endtime			= 2
-timestep		= 1
-BDF_order		= 1
+initialtime     = 0.
+endtime         = 2
+timestep        = 1
+BDF_order       = 1
 
 [../space_discretization]
-mesh_dir        = ./Mesh/
+mesh_dir        = ./
 mesh_file       = lid16.mesh #ellipsoid5272.mesh
 mesh_type       = .mesh
 has_fibers = 0
@@ -114,57 +114,57 @@ diagonalize     = 1 #0 # weight, 0=off
 [../miscellaneous]
 verbose         = 1
 
-		[./smoother]
-			# smoother type
-			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
-			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
-			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
-			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
-			# IC, ICT, ILU, ILUT
-			type                    = IFPACK
-			pre_or_post             = pre
-			sweeps                  = 3
-			damping_factor          = 1
+        [./smoother]
+            # smoother type
+            # Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+            # ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+            # Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+            # user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+            # IC, ICT, ILU, ILUT
+            type                    = IFPACK
+            pre_or_post             = pre
+            sweeps                  = 3
+            damping_factor          = 1
 
-			[../coarse]
-			type                    = Amesos-UMFPACK
-			#type                    = Amesos-KLU
-			sweeps                  = 1
-			pre_or_post             = both
-			max_size                = 200
+            [../coarse]
+            type                    = Amesos-UMFPACK
+            #type                    = Amesos-KLU
+            sweeps                  = 1
+            pre_or_post             = both
+            max_size                = 200
 
-			[../repartition]
-			enable                  = 1
-			partitioner             = ParMETIS
-			max_min_ration          = 1.3
-			min_per_proc            = 500
+            [../repartition]
+            enable                  = 1
+            partitioner             = ParMETIS
+            max_min_ration          = 1.3
+            min_per_proc            = 500
 
-			[../energy_minimization]
-			enable			= true
-			type			= 3
-			[../]
+            [../energy_minimization]
+            enable          = true
+            type            = 3
+            [../]
 
         # ifpack
         [../ifpack]
-        overlap		= 2
+        overlap     = 2
 
-           	[./fact]
-           	ilut_level-of-fill            = 1
-           	drop_tolerance                = 1.e-5
-           	relax_value                   = 0
+            [./fact]
+            ilut_level-of-fill            = 1
+            drop_tolerance                = 1.e-5
+            relax_value                   = 0
 
-           	[../amesos]
-           	solvertype =  Amesos_UMFPACK # Amesos_KLU or Amesos_Umfpack
+            [../amesos]
+            solvertype =  Amesos_UMFPACK # Amesos_KLU or Amesos_Umfpack
 
-           	[../partitioner]
-           	overlap = 2
+            [../partitioner]
+            overlap = 2
 
-           	[../schwarz]
-           	reordering_type = none #metis, rcm, none
-           	filter_singletons = true
+            [../schwarz]
+            reordering_type = none #metis, rcm, none
+            filter_singletons = true
 
-			[../]
-		[../]
+            [../]
+        [../]
 
 
 
@@ -189,5 +189,5 @@ keep_info       = 1
 reuse           = true
 overlap         = 1
 droptol         = 1.e-7 #1.e-5
-fill 			= 2 #1
+fill            = 2 #1
 prectype        = Ifpack
