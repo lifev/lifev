@@ -15,7 +15,7 @@
     [impes]
 
         [./space_discretization]
-    	mesh_dir      = ./Mesh/old/ # the directory where the mesh file is
+    	mesh_dir      = ./ # the directory where the mesh file is
     	mesh_file     = mesh48603.mesh #twoTetrahedra.mesh #aTetrahedra.mesh #cartesian_cube1.mesh
     	mesh_type     = .mesh #structured #.mesh
         mesh_faces    = all
