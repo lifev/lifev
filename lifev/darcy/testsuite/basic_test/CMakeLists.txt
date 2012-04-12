@@ -20,6 +20,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(data_darcy_basic_test
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(cartesian_cube8.mesh
+  CREATE_SYMLINK
   SOURCE_FILES cartesian_cube8.mesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/darcy/data/mesh/inria
 )
