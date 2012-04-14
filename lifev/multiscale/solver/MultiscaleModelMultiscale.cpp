@@ -46,6 +46,7 @@
 #include <lifev/multiscale/solver/MultiscaleCouplingFlowRateValve.hpp>
 #include <lifev/multiscale/solver/MultiscaleCouplingFlowRateStress.hpp>
 #include <lifev/multiscale/solver/MultiscaleCouplingStress.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingMeanTotalNormalStress.hpp>
 
 namespace LifeV
 {
@@ -79,6 +80,7 @@ MultiscaleModelMultiscale::MultiscaleModelMultiscale() :
     multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateValve,       &createMultiscaleCouplingFlowRateValve );
     multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
     multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  MeanTotalNormalStress, &createMultiscaleCouplingMeanTotalNormalStress );
 }
 
 MultiscaleModelMultiscale::~MultiscaleModelMultiscale()

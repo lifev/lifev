@@ -105,7 +105,8 @@ enum couplings_Type
     FlowRate,               /*!< All flow rate coupling condition */
     FlowRateValve,          /*!< All flow rate coupling condition with a valve between model 1 and the others*/
     FlowRateStress,         /*!< Flow rate/stress coupling condition */
-    Stress                  /*!< All stress coupling condition */
+    Stress,                 /*!< All stress coupling condition */
+    MeanTotalNormalStress   /*!< Mean total normal stress coupling condition */
 };
 
 enum errors_Type
@@ -200,6 +201,7 @@ multiscaleMapsDefinition()
     multiscaleCouplingsMap["FlowRateValve"]     = FlowRateValve;
     multiscaleCouplingsMap["FlowRateStress"]    = FlowRateStress;
     multiscaleCouplingsMap["Stress"]            = Stress;
+    multiscaleCouplingsMap["MeanTotalNormalStress"] = MeanTotalNormalStress;
 
     multiscaleAlgorithmsMap["Aitken"]           = Aitken;
     multiscaleAlgorithmsMap["Broyden"]          = Broyden;
