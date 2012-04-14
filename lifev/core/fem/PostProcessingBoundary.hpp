@@ -745,6 +745,9 @@ Real PostProcessingBoundary<MeshType>::kineticEnergy( const VectorType& velocity
     Real areaScatter(0.0), area(0.0);
     Real temp(0.0);
 
+    // Compute the normal
+    Vector faceNormal = normal( flag );
+
     // I need the global DOF ID to query the vector
     // dofVectorIndex is the index of the dof in the data structure of PostProcessingBoundary class
     // dofGlobalId is the corresponding ID in the GLOBAL mesh (prior to partitioning)
@@ -752,9 +755,6 @@ Real PostProcessingBoundary<MeshType>::kineticEnergy( const VectorType& velocity
 
     // List of flagged facets on current processor
     std::list<ID> facetList( M_boundaryMarkerToFacetIdMap[flag] );
-
-    // Nodal values of velocity in the current facet
-    Vector localVelocityVector( nDim * M_numTotalDofPerFacetVector[feSpace] );
 
     // Loop on facetList
     for ( std::list<ID>::iterator j(facetList.begin()); j != facetList.end(); ++j )
@@ -771,25 +771,18 @@ Real PostProcessingBoundary<MeshType>::kineticEnergy( const VectorType& velocity
             // Loop on local dof
             for ( ID iDof(0); iDof<M_numTotalDofPerFacetVector[feSpace]; ++iDof )
             {
-                temp = 0.0;
+                // Extracting nodal values of field in the current facet
+                dofVectorIndex = M_vectorNumberingPerFacetVector[feSpace][ ( UInt ) *j ][ iDof ];
+                dofGlobalId    = M_dofGlobalIdVector[feSpace][dofVectorIndex]; // this is in the GLOBAL mesh
 
-                // Loop on components
-                for ( UInt iComponent(0); iComponent<nDim; ++iComponent )
-                {
-                    // Extracting nodal values of field in the current facet
-                    dofVectorIndex = M_vectorNumberingPerFacetVector[feSpace][ ( UInt ) *j ][ iDof ];
-                    dofGlobalId    = M_dofGlobalIdVector[feSpace][dofVectorIndex]; // this is in the GLOBAL mesh
+                temp = velocity[0*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[0]  // u_x * n_x
+                     + velocity[1*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[1]  // u_y * n_y
+                     + velocity[2*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[2]; // u_z * n_z
 
-                    localVelocityVector[iComponent*M_numTotalDofPerFacetVector[feSpace]+iDof] = velocity[iComponent*M_numTotalDofVector[feSpace]+dofGlobalId];
-
-                    temp += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
-                          * localVelocityVector[iComponent*M_numTotalDofPerFacetVector[feSpace]+iDof]
-                          * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
-                          * M_currentBdFEPtrVector[feSpace]->normal(Int(iComponent),iq);
+                kineticEnergyScatter += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
+                                      * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
+                                      * temp * temp;
                 }
-
-                kineticEnergyScatter += temp * temp;
-            }
         }
     }
 
