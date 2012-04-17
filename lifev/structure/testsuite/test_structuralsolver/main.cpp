@@ -49,35 +49,35 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 
 
 //Include fils which were in the structure.cpp file
-#include <life/lifearray/MapEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 
-#include <life/lifefem/TimeAdvance.hpp>
-#include <life/lifefem/TimeAdvanceNewmark.hpp>
-#include <life/lifefem/TimeAdvanceBDF.hpp>
+#include <lifev/core/fem/TimeAdvance.hpp>
+#include <lifev/core/fem/TimeAdvanceNewmark.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
 
-#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 
-#include <life/lifesolver/StructuralMaterial.hpp>
-#include <life/lifesolver/StructuralSolver.hpp>
-#include <life/lifesolver/VenantKirchhoffMaterialLinear.hpp>
-#include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
-#include <life/lifesolver/NeoHookeanMaterialNonLinear.hpp>
-#include <life/lifesolver/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/StructuralMaterial.hpp>
+#include <lifev/structure/solver/StructuralSolver.hpp>
+#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
+#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 
-#include <life/lifefilters/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
-#include <life/lifefilters/ExporterEmpty.hpp>
+#include <lifev/core/filter/ExporterEmpty.hpp>
 
 #include <iostream>
 

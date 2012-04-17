@@ -12,26 +12,6 @@
 ###################################################################################################
 ### TESTSUITE: STRUCTURE MECHANICS ################################################################
 ###################################################################################################
-
-AT_SETUP([test_structuralsolver (LE)])
-AT_KEYWORDS([structure linear elastic])
-AT_DATA([data],[[
-#-------------------------------------------------
-#      Data file for Structure Solver
-#-------------------------------------------------
-###################################################################################################
-#
-#                       This file is part of the LifeV Applications
-#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
-#
-#      Author(s): Name Surname <name.surname@epfl.ch>
-#           Date: 00-00-0000
-#  License Terms: GNU LGPL
-#
-###################################################################################################
-### DATA FILE #####################################################################################
-###################################################################################################
 #-------------------------------------------------
 #      Data file for Structure Solver
 #-------------------------------------------------
@@ -112,12 +92,6 @@ filter_singletons 	= true
 
 [../]
 [../]
-
-
-]])
-AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/StructuredCube4_test_structuralsolver.mesh &&
-          mpirun -np 2 $abs_top_builddir/testsuite/test_structuralsolver/test_structure -c],[0],[ignore],[ignore])
-AT_CLEANUP
 
 
 

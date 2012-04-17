@@ -12,10 +12,6 @@
 ###################################################################################################
 ### TESTSUITE: STRUCTURE MECHANICS ################################################################
 ###################################################################################################
-
-AT_SETUP([test_structuralsolver (NH)])
-AT_KEYWORDS([structure neohookean])
-AT_DATA([data],[[
 #-------------------------------------------------
 #      Data file for Structure Solver
 #-------------------------------------------------
@@ -48,7 +44,7 @@ BDF_order   	= 2
 
 [../space_discretization]
 mesh_dir  	= ./
-mesh_file 	= StructuredCube4_test_structuralsolver.mesh # StructuredCube4.mesh StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh
+mesh_file 	= StructuredCube4_test_structuralsolver.mesh
 order     	= P1
 
 
@@ -97,11 +93,6 @@ filter_singletons 	= true
 
 [../]
 [../]
-
-]])
-AT_CHECK([ln -sf ../../data/mesh/inria/StructuredCube4_test_structuralsolver.mesh &&
-          mpirun -np 2 ../../test_structuralsolver/test_structure -c],[0],[ignore],[ignore])
-AT_CLEANUP
 
 
 
