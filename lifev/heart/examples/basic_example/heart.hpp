@@ -38,20 +38,20 @@
 
 #define MONODOMAIN
 
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
 
 #ifdef MONODOMAIN
-#include <life/lifesolver/HeartMonodomainSolver.hpp>
+#include <lifev/heart/solver/HeartMonodomainSolver.hpp>
 #else
-#include <life/lifesolver/HeartBidomainSolver.hpp>
+#include <lifev/heart/solver/HeartBidomainSolver.hpp>
 #endif
-#include <life/lifesolver/HeartIonicSolver.hpp>
-#include <life/lifefilters/ExporterEnsight.hpp>
-#include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifefilters/ExporterEmpty.hpp>
+#include <lifev/heart/solver/HeartIonicSolver.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterEmpty.hpp>
 
 
 
