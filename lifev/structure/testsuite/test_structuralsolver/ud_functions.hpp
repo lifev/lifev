@@ -41,7 +41,7 @@
 #ifndef UDF_HPP
 #define UDF_HPP
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {
