@@ -3,7 +3,7 @@ INCLUDE(TribitsAddExecutable)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
-TRIBITS_ADD_EXECUTABLE(
+TRIBITS_ADD_EXECUTABLE_AND_TEST(
   SmoothAneurysm
   SOURCES main.cpp ud_functions.cpp lumpedHeart.cpp flowConditions.cpp
   NAME Aneurysm
