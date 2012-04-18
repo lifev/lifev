@@ -3,12 +3,9 @@ INCLUDE(TribitsAddExecutable)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
-TRIBITS_ADD_EXECUTABLE_AND_TEST(
+TRIBITS_ADD_EXECUTABLE(
   SmoothAneurysm
   SOURCES main.cpp ud_functions.cpp lumpedHeart.cpp flowConditions.cpp
-  NAME Aneurysm
-  ARGS "-f data" 
-  NUM_MPI_PROCS 4
   COMM serial mpi
   )
 
