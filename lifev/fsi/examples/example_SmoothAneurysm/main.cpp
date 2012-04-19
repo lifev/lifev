@@ -144,7 +144,9 @@ public:
     */
 
     Problem( GetPot const& data_file ):
-        M_Tstart(0.)
+    M_Tstart(0.),
+    M_tolSave(1),
+    M_saveEvery(1)
     {
         using namespace LifeV;
 
@@ -235,7 +237,10 @@ public:
             }
         }
 
-
+	//reading the saveEvery
+	M_saveEvery=data_file("exporter/saveEvery",1);
+	M_tolSave=data_file("exporter/tolSave",1);
+	
         // load using ensight/hdf5
         std::string restartType(data_file("importer/restartType","newSimulation"));
         std::cout << "The load state is: "<< restartType << std::endl;
@@ -306,7 +311,7 @@ public:
     {
         boost::timer _overall_timer;
 
-        int iter = 1;
+	LifeV::UInt iter = 0;
         LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
 
         dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(1);
@@ -319,8 +324,15 @@ public:
         }
 #endif
 
+	//Quantities related to the save
+	LifeV::UInt r(0);
+	LifeV::UInt d(0);
+	//This is the size of the TimeAdvaces classes. It uses the size of the solid. 
+	//It could be changed and it's better to set it up as the highest size of TA
+	LifeV::UInt sizeTA(M_fsi->FSIOper()->solidTimeAdvance()->size());
+	LifeV::UInt tol(sizeTA + M_tolSave);
 
-        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); ++iter)
+        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); iter++)
 	  {
 	    M_data->dataFluid()->dataTime()->updateTime();
 	    M_data->dataSolid()->dataTime()->updateTime();
@@ -333,19 +345,24 @@ public:
 
             M_fsi->iterate();
 
+	    r = iter%M_saveEvery;
+	    d = iter - r;
 
-            *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
-            M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
-            //M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
-            M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
+	    if ( (iter - d) <= tol || ( (std::floor(d/M_saveEvery) + 1)*M_saveEvery - iter ) <= tol )
+	      {
+		*M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
+		M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
+		//M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
+		M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
 
-            M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
-            M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
+		M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
+		M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
+	      }
 
-            std::cout << "[fsi_run] Iteration " << iter << " was done in : "
+            std::cout << "[fsi_run] Iteration " << iter+1 << " was done in : "
                       << _timer.elapsed() << "\n";
 
-            std::cout << "solution norm " << iter << " : "
+            std::cout << "solution norm " << iter+1 << " : "
                       << M_fsi->displacement().norm2() << "\n";
 
 	  }
@@ -398,6 +415,10 @@ private:
 
     //LifeV::LumpedHeart LH;
     LifeV::Real    M_Tstart;
+
+    LifeV::UInt    M_tolSave;
+    LifeV::UInt    M_saveEvery;
+
     vectorPtr_Type M_WS;
 
     struct RESULT_CHANGED_EXCEPTION
