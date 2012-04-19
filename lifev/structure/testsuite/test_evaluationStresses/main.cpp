@@ -50,16 +50,8 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
-#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
-#include <lifev/core/algorithm/PreconditionerML.hpp>
 
-
-//Include fils which were in the structure.cpp file
 #include <lifev/core/array/MapEpetra.hpp>
-
-#include <lifev/core/fem/TimeAdvance.hpp>
-#include <lifev/core/fem/TimeAdvanceNewmark.hpp>
-#include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
@@ -72,6 +64,7 @@
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/WallTensionEstimator.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
@@ -85,13 +78,13 @@
 using namespace LifeV;
 
 int returnValue = EXIT_SUCCESS;
-enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
+// enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
 
-namespace
-{
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
-}
+// namespace
+// {
+// static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+// static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+// }
 
 
 std::set<UInt> parseList( const std::string& list )
@@ -134,10 +127,10 @@ public:
     {
         run3d();
     }
-    void CheckResultLE(const Real& dispNorm, const Real& time);
-    void CheckResultSVK(const Real& dispNorm, const Real& time);
-    void CheckResultEXP(const Real& dispNorm, const Real& time);
-    void CheckResultNH(const Real& dispNorm, const Real& time);
+    void CheckResult(const Real& dispNorm, const Real& time);
+    // void CheckResultSVK(const Real& dispNorm, const Real& time);
+    // void CheckResultEXP(const Real& dispNorm, const Real& time);
+    // void CheckResultNH(const Real& dispNorm, const Real& time);
     void resultChanged(Real time);
 //@}
 
@@ -174,15 +167,15 @@ struct Structure::Private
 
     boost::shared_ptr<Epetra_Comm>     comm;
 
-static Real bcZero(const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
-{
-    return  0.;
-}
+// static Real bcZero(const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
+// {
+//     return  0.;
+// }
 
-static Real bcNonZero(const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
-{
-    return  300000.;
-}
+// static Real bcNonZero(const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
+// {
+//     return  300000.;
+// }
 
 };
 
@@ -232,13 +225,14 @@ void
 Structure::run3d()
 {
     typedef StructuralSolver< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
+    
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
 
     bool verbose = (parameters->comm->MyPID() == 0);
 
-    //! Number of boundary conditions for the velocity and mesh motion
-    boost::shared_ptr<BCHandler> BCh( new BCHandler() );
+    // //! Number of boundary conditions for the velocity and mesh motion
+    // boost::shared_ptr<BCHandler> BCh( new BCHandler() );
 
     //! dataElasticStructure
     GetPot dataFile( parameters->data_file_name.c_str() );
