@@ -571,12 +571,15 @@ void FSIOperator::couplingVariableExtrap( )
     }
      else
       {
-          vector_Type solidDisp(M_solid->displacement());
-          vector_Type solidVel(M_solid->displacement());
-          M_solidTimeAdvance->extrapolation(solidDisp);
-          M_solidTimeAdvance->extrapolationFirstDerivative(solidVel);
-          transferSolidOnInterface(solidDisp, *M_lambda);
-          transferSolidOnInterface(solidVel, *M_lambdaDot);
+	if ( this->isSolid() )
+	  {
+	    vector_Type solidDisp(M_solid->displacement());
+	    vector_Type solidVel(M_solid->displacement());
+	    M_solidTimeAdvance->extrapolation(solidDisp);
+	    M_solidTimeAdvance->extrapolationFirstDerivative(solidVel);
+	    transferSolidOnInterface(solidDisp, *M_lambda);
+	    transferSolidOnInterface(solidVel, *M_lambdaDot);
+	  }
       }
       displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->normInf(), "\n" );
       displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->normInf(), "\n");

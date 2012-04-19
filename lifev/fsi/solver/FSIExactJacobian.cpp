@@ -94,7 +94,9 @@ void FSIExactJacobian::evalResidual(vector_Type&       res,
 
     res  = this->lambdaSolid();
     res -=  disp;
-    M_solid->updateJacobian(M_solid->displacement());
+
+    if (this->isSolid())
+      M_solid->updateJacobian(M_solid->displacement());
 
     this->displayer().leaderPrint("FSI ---      NormInf res        =                     " , res.normInf(), "\n" );
     if (this->isSolid())

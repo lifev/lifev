@@ -275,7 +275,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms( matrixPt
                                                                          const dataPtr_Type& /*dataMaterial*/,
                                                                          const displayerPtr_Type& displayer )
 {
-    this->M_stiff->globalAssemble();
+  //    this->M_stiff->globalAssemble();
     displayer->leaderPrint("   Linear S- Doing nothing - Updating non linear terms in Jacobian Matrix (constant, Linear Elastic)\n");
 }
 
