@@ -330,7 +330,8 @@ public:
 	//This is the size of the TimeAdvaces classes. It uses the size of the solid. 
 	//It could be changed and it's better to set it up as the highest size of TA
 	LifeV::UInt sizeTA(M_fsi->FSIOper()->solidTimeAdvance()->size());
-	
+	LifeV::UInt tol(sizeTA + M_tolSave);
+
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); iter++)
 	  {
 	    M_data->dataFluid()->dataTime()->updateTime();
