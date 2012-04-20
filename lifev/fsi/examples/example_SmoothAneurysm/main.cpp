@@ -311,7 +311,6 @@ public:
     {
         boost::timer _overall_timer;
 
-	LifeV::UInt iter = 0;
         LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
 
         dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(1);
@@ -330,7 +329,9 @@ public:
 	//This is the size of the TimeAdvaces classes. It uses the size of the solid. 
 	//It could be changed and it's better to set it up as the highest size of TA
 	LifeV::UInt sizeTA(M_fsi->FSIOper()->solidTimeAdvance()->size());
+
 	LifeV::UInt tol(sizeTA + M_tolSave);
+	LifeV::UInt iter = 1;
 	
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); iter++)
 	  {
@@ -359,10 +360,10 @@ public:
 		M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
 	      }
 
-            std::cout << "[fsi_run] Iteration " << iter+1 << " was done in : "
+            std::cout << "[fsi_run] Iteration " << iter << " was done in : "
                       << _timer.elapsed() << "\n";
 
-            std::cout << "solution norm " << iter+1 << " : "
+            std::cout << "solution norm " << iter << " : "
                       << M_fsi->displacement().norm2() << "\n";
 
 	  }
