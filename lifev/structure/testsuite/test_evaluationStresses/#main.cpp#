@@ -51,7 +51,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hp>
 
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>

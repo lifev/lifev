@@ -54,22 +54,33 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+// LifeV core includes
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
-
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/AssemblyElemental.hpp>
-#include <lifev/structure/fem/AssemblyElementalStructure.hpp>
 #include <lifev/core/fem/FESpace.hpp>
-
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/Displayer.hpp>
 #include <lifev/core/util/Factory.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
+#include <lifev/core/array/MapEpetra.hp>
 
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#ifdef HAVE_HDF5
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#endif
+#include <lifev/core/filter/ExporterEmpty.hpp>
+
+
+// Structure module include
+#include <lifev/structure/fem/AssemblyElementalStructure.hpp>
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/WallTensionEstimatorData.hpp>
+
+
 
 namespace LifeV
 {
@@ -89,18 +100,27 @@ public:
 //!@name Type definitions
 //@{
 
-    typedef VenantKirchhoffElasticData             data_Type;
-    typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
+    // Data classes
+    typedef VenantKirchhoffElasticData                   data_Type;
+    typedef WallTensionEstimatorData                     analysisData_Type;
+    typedef typename boost::shared_ptr<data_Type>        dataPtr_Type;
+    typedef typename boost::shared_ptr<data_Type>        analysisDataPtr_Type;
 
-    typedef Epetra_SerialDenseMatrix               matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
-    typedef std::vector                            vector_Type;
-    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
+    //Matrices 3x3 and std::vector for the invariants
+    typedef Epetra_SerialDenseMatrix                     matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>               matrixPtr_Type;
+    typedef std::vector                                  vector_Type;
+    typedef boost::shared_ptr<vector_Type>               vectorPtr_Type;
 
-    typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
+    // These two are to handle the vector displacement read from hdf5
+    typedef VectorEpetra                                 solutionVect_Type;
+    typedef boost::share_ptr<VectorEpetra>               solutionVectPtr_Type;
+
+    // Displayer and Exporter classes
+    typedef typename boost::shared_ptr<const Displayer>   displayerPtr_Type;
+    typedef typename boost::shared_ptr< Exporter<Mesh> >  exporterPtr_Type;
 
 //@}
-
 
 
 //! @name Constructor &  Deconstructor
@@ -117,15 +137,21 @@ public:
 //!@name Methods
 //@{
 
-    //! Setup the created object of the class StructuralMaterial
+    //! Setup the created object of the class WallTensionEstimator
     /*!
       \param dFespace: the FiniteElement Space
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
+      \param dataMaterial: the class containing the VenantKirchhoffElasticData
+      \param analysisData: the class containing the WallTensionEstimatorData
+      \param displayer: the displayer object
     */
-    virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                        const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                        const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )=0;
+    void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+		const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+		const UInt offset, 
+		const dataPtr_Type& dataMaterial, 
+		const analysisDataPtr_Type& analysisData, 
+		const displayerPtr_Type& displayer);
 
 
     //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
@@ -214,17 +240,17 @@ protected:
     //! Elementary matrix for the tensor P
     matrixPtr_Type                                 M_FirstPiola;
 
-    //! Elementary matrix for the tensor \sigma (Cuachy tensor on the current config)
+    //! Elementary matrix for the tensor \sigma (Cauchy tensor on the current config)
     matrixPtr_Type                                 M_sigma;
 
     //! Vector of the invariants of C
     vector_Type                                    M_invariants;
 
+    //! Vector for the displacement field
+    solutionVecPtr_Type                            M_displ;
+
     //! Determinant of the deformation gradient F
     Real                                           M_detF;
-
-    //! Matrix jacobian
-    matrixPtr_Type                                 M_jacobian;
   
     //! The Offset parameter
     UInt                                           M_offset;
@@ -232,11 +258,14 @@ protected:
     //Class for material parameter
     dataPtr_Type                                   M_dataMaterial;
 
+    //Class for analysis parameter
+    analysisDataPtr_Type                           M_analysisData;
+
     //Displayer
     displayerPtr_Type                              M_displayer;
 
-    //Post-Processing file
-    std::string                                    M_nameFile;
+    //Importer
+    exporterPtr_Type                                M_importer;
 
 };
 
