@@ -127,6 +127,7 @@ assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
                 Int                   iblock,
                 Int                   jblock,
                 Int                   iOffset,
+                Int                   jOffset)
 
 {
 
@@ -319,20 +320,21 @@ assembleTransposeMatrix( MatrixEpetra<Real>&   globalMatrix,
 
 template <typename DOF, typename VectorElemental>
 void
-extract_vec( VectorEpetra& V,
+extract_vec( const VectorEpetra& V,
              VectorElemental& elvec,
              const DOFLocalPattern& fe,
              const DOF& dof,
              const UInt feId,
-             Int iblock )
+             const UInt elvecBlock,
+             const UInt epetraBlock = 0 )
 {
-    UInt totdof (dof.numTotalDof());
-    typename VectorElemental::vector_view vec = elvec.block( iblock );
-    UInt ig;
+    typename VectorElemental::vector_view vec = elvec.block ( elvecBlock );
+    const UInt totDof ( dof.numTotalDof() );
+
     for ( UInt i (0) ; i < fe.nbLocalDof() ; ++i )
     {
-        ig = dof.localToGlobalMap( feId, i ) + iblock * totdof;
-        vec( i ) = V[ ig ];
+        const UInt ig = dof.localToGlobalMap( feId, i ) + epetraBlock * totDof;
+        vec ( i ) = V [ ig ];
     }
 }
 
