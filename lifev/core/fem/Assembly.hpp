@@ -120,14 +120,13 @@ assembleVector( VectorEpetra&    globalVector,
 template <typename DofType>
 void
 assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
-                const UInt&      	  elementID,
-                MatrixElemental&          	  localMatrix,
+                const UInt&           elementID,
+                MatrixElemental&              localMatrix,
                 const UInt&           feNbDof,
-                const DofType&    	  dof,
+                const DofType&        dof,
                 Int                   iblock,
                 Int                   jblock,
-                Int              	  iOffset,
-                Int              	  jOffset)
+                Int                   iOffset,
 
 {
 
