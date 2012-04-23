@@ -46,6 +46,7 @@
 
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 
 namespace LifeV
 {
@@ -93,7 +94,7 @@ public:
     typedef VectorEpetra vector_Type;
     typedef boost::shared_ptr < vector_Type > vectorPtr_Type;
 
-    typedef std::vector < Real > point_Type;
+    typedef Vector3D point_Type;
 
     //@}
 
