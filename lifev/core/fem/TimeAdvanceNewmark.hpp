@@ -48,7 +48,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
-#include <math.h>
+#include <cmath>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
