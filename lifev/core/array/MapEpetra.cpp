@@ -75,10 +75,6 @@ MapEpetra::MapEpetra( Int  numGlobalElements,
     M_importer(),
     M_commPtr( commPtr )
 {
-
-    //Sort MyGlobalElements to avoid a bug in Trilinos (9?) when multiplying two matrices (A * B^T)
-    std::sort ( myGlobalElements, myGlobalElements + numMyElements );
-
     createMap( numGlobalElements,
                numMyElements,
                myGlobalElements,
