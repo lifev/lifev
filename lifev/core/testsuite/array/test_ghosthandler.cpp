@@ -316,7 +316,7 @@ int main( int argc, char* argv[] )
     exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
 
     // Export the partitioning
-    exporter->exportPID( meshPart );
+    exporter->exportPID( meshPart.meshPartition(), comm );
 
     // Add the solution to the exporter
     exporter->addVariable( ExporterData<RegionMesh>::ScalarField,

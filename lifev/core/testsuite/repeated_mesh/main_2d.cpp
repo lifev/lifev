@@ -358,6 +358,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Exporting ... " << std::flush;
+    exporter.exportPID( localMesh, Comm, false );
+    exporter.exportPID( localMeshR, Comm, true );
     exporter.postProcess( 0 );
     if (verbose) std::cout << " done ! " << std::endl;
 

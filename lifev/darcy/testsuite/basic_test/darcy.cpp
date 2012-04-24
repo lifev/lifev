@@ -705,7 +705,7 @@ darcy::run()
                                              hybrid_FESpace.map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Export the partitioning
-    exporter->exportPID( meshPart );
+    exporter->exportPID( meshPart.meshPartition(), Members->comm );
 
     switch ( solverType )
     {
