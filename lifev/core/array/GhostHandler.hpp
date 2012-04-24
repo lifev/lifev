@@ -39,6 +39,8 @@
 #include <lifev/core/mesh/NeighborMarker.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 
+#include <EpetraExt_HDF5.h>
+
 namespace LifeV {
 
 template <typename Mesh>
@@ -145,7 +147,7 @@ public:
     map_Type & ghostMapOnElementsP1( UInt overlap );
 
     //! create ghost map
-    void ghostMapOnElementsP1( graphPtr_Type elemGraph, UInt overlap );
+    void ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID, UInt overlap );
 
     //! create ghost map
     map_Type & ghostMapOnNodesMap( UInt overlap );
@@ -796,7 +798,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
 }
 
 template <typename Mesh>
-void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, UInt overlap )
+void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID, UInt overlap )
 {
     if ( M_verbose ) std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
 
@@ -818,14 +820,54 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, UInt ove
     // generate graph of points
     graph_Type pointGraph( M_comm->NumProc() );
 
+    // initialize pointPID to NumProc
+    std::vector<UInt> & pointPID = entityPID[ 3 ];
+    std::vector<UInt> & elemPID = entityPID[ 0 ];
+    std::vector<UInt> & facetPID = entityPID[ 1 ];
+    std::vector<UInt> & ridgePID = entityPID[ 2 ];
+    pointPID.resize( M_fullMesh->numPoints(), M_comm->NumProc() );
+    elemPID.resize( M_fullMesh->numElements(), M_comm->NumProc() );
+    facetPID.resize( M_fullMesh->numFacets(), M_comm->NumProc() );
+    ridgePID.resize( M_fullMesh->numRidges(), M_comm->NumProc() );
+
     // @todo: check if parallel building + comm is faster
     for( Int p = 0; p < M_comm->NumProc(); p++ )
     {
         std::set<int> localPointsSet;
         for( UInt e = 0; e < (*elemGraph)[ p ].size(); e++ )
         {
+            // point block
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
-                localPointsSet.insert( M_fullMesh->element( (*elemGraph)[ p ][ e ] ).point( k ).id() );
+            {
+                const ID pointID = M_fullMesh->element( (*elemGraph)[ p ][ e ] ).point( k ).id();
+                localPointsSet.insert( pointID );
+                const UInt pointCurrentPID = pointPID[ pointID ];
+                // pointPID should be the minimum between the proc that own it
+                if( M_me < pointCurrentPID ) pointPID[ pointID ] = p;
+            }
+
+            // elem block
+            const ID elemID = M_fullMesh->element( (*elemGraph)[ p ][ e ] ).id();
+            // elemPID is always at its initialization value
+            elemPID[ elemID ] = p;
+
+            // facet block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
+            {
+                const ID facetID = M_fullMesh->facet( M_fullMesh->localFacetId( e, k ) ).id();
+                const UInt facetCurrentPID = facetPID[ facetID ];
+                // facetPID should be the minimum between the proc that own it
+                if( M_me < facetCurrentPID ) facetPID[ facetID ] = p;
+            }
+
+            // ridge block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
+            {
+                const ID ridgeID = M_fullMesh->ridge( M_fullMesh->localRidgeId( e, k ) ).id();
+                const UInt ridgeCurrentPID = ridgePID[ ridgeID ];
+                // ridgePID should be the minimum between the proc that own it
+                if( M_me < ridgeCurrentPID ) ridgePID[ ridgeID ] = p;
+            }
         }
         pointGraph[ p ].assign( localPointsSet.begin(), localPointsSet.end() );
     }
@@ -835,30 +877,37 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, UInt ove
     M_debugOut << "own points on proc " << M_me << std::endl;
     for( UInt i = 0; i < myPoints.size(); i++ )
         M_debugOut << myPoints[ i ] << std::endl;
+    M_debugOut << "pointPID on proc " << M_me << std::endl;
+    for( UInt i = 0; i < pointPID.size(); i++ )
+        M_debugOut << pointPID[ i ] << std::endl;
 #endif
 
     // find subdomain interface nodes
-    std::vector<int> mySubdIntPoints;
+    std::set<Int> mySubdIntPoints;
     for( UInt k = 0; k < myPoints.size(); k++ )
     {
         int const & currentPoint = myPoints[ k ];
-        // cycle on all other processes
-        for( Int p = 0; p < M_comm->NumProc(); p++ )
+        // mark as SUBD_INT point only if the point is owned by current process
+        if( pointPID[ currentPoint ] == M_me )
         {
-            if ( p != M_me )
+            // cycle on all other processes
+            for( UInt p = 0; p < static_cast<UInt>( M_comm->NumProc() ); p++ )
             {
-                // cycle on all points of that proc
-                for( UInt j = 0; j < pointGraph[ p ].size(); j++ )
-                    // if i find currentPoint on other procs it means it is on SUBDOMAIN_INTERFACE
-                    if ( pointGraph[ p ][ j ] == currentPoint ) mySubdIntPoints.push_back( currentPoint );
+                if ( p != M_me )
+                {
+                    // cycle on all points of that proc
+                    for( UInt j = 0; j < pointGraph[ p ].size(); j++ )
+                        // if i find currentPoint on other procs it means it is on SUBDOMAIN_INTERFACE
+                        if ( pointGraph[ p ][ j ] == currentPoint ) mySubdIntPoints.insert( currentPoint );
+                }
             }
         }
     }
 
 #ifdef HAVE_LIFEV_DEBUG
     M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << M_me << std::endl;
-    for( UInt i = 0; i < mySubdIntPoints.size(); i++ )
-        M_debugOut << mySubdIntPoints[ i ] << std::endl;
+    for( std::set<Int>::const_iterator i = mySubdIntPoints.begin(); i != mySubdIntPoints.end(); ++i )
+        M_debugOut << *i << std::endl;
 #endif
 
     std::vector<int> workingPoints( mySubdIntPoints.begin(), mySubdIntPoints.end() );
@@ -891,7 +940,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, UInt ove
         }
 #ifdef HAVE_LIFEV_DEBUG
         M_debugOut << "augmentedElemsSet" << std::endl;
-        for( std::set<int>::const_iterator i = augmentedElemsSet.begin(); i != augmentedElemsSet.end(); ++i )
+        for( std::set<Int>::const_iterator i = augmentedElemsSet.begin(); i != augmentedElemsSet.end(); ++i )
             M_debugOut << *i << std::endl;
 #endif
 

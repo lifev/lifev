@@ -55,6 +55,8 @@
 
 #include <lifev/core/mesh/ElementShapes.hpp>
 
+#include <lifev/core/mesh/MeshEntity.hpp>
+
 #include <algorithm>
 #include <map>
 #include <set>
@@ -467,18 +469,72 @@ void DOF::update( MeshType& mesh )
 template <typename MeshType>
 std::vector<Int> DOF::globalElements( MeshType& mesh )
 {
+/*
     std::set<Int> dofNumberSet;
     // Gather all dofs local to the given mesh (dofs use global numbering)
     // The set ensures no repetition
     for (UInt elementId=0; elementId < mesh.numElements(); ++elementId )
         for (UInt localDof=0; localDof < this->numLocalDof();++localDof )
-            dofNumberSet.insert( static_cast<Int>( this->localToGlobalMap(elementId,localDof ) ) );
+            dofNumberSet.insert( static_cast<Int>( this->localToGlobalMap( elementId, localDof ) ) );
     // dump the set into a vector for adjacency
     // to save memory I use copy() and not the vector constructor directly
-    std::vector<Int> myGlobalElements(dofNumberSet.size());
-    std::copy(dofNumberSet.begin(),dofNumberSet.end(),myGlobalElements.begin());
+    std::vector<Int> myGlobalElements( dofNumberSet.size() );
+    std::copy( dofNumberSet.begin(), dofNumberSet.end(), myGlobalElements.begin() );
     // Save memory
     dofNumberSet.clear();
+*/
+
+    std::vector<Int> myGlobalElements;
+
+    UInt globalCount = 0;
+    // peak entities owned by current process
+    if( M_elementDofPattern.nbDofPerPeak() > 0 )
+    {
+        for( UInt i = 0; i < mesh.numPoints(); i++ )
+        {
+            const typename MeshType::peak_Type & peak = mesh.peak( i );
+            if( Flag::testOneSet( peak.flag(), EntityFlags::OWNED ) )
+                myGlobalElements.push_back( peak.id() );
+        }
+        globalCount += M_elementDofPattern.nbDofPerPeak() * mesh.numGlobalPoints();
+    }
+    // ridge entities owned by current process
+    if( M_elementDofPattern.nbDofPerRidge() > 0 )
+    {
+        for( UInt i = 0; i < mesh.numRidges(); i++ )
+        {
+            const typename MeshType::ridge_Type & ridge = mesh.ridge( i );
+            if( Flag::testOneSet( ridge.flag(), EntityFlags::OWNED ) )
+                myGlobalElements.push_back( globalCount + ridge.id() );
+        }
+        globalCount += M_elementDofPattern.nbDofPerRidge() * mesh.numGlobalRidges();
+    }
+    // facet entities owned by current process
+    if( M_elementDofPattern.nbDofPerFacet() > 0 )
+    {
+        for( UInt i = 0; i < mesh.numFacets(); i++ )
+        {
+            const typename MeshType::facet_Type & facet = mesh.facet( i );
+            if( Flag::testOneSet( facet.flag(), EntityFlags::OWNED ) )
+                myGlobalElements.push_back( globalCount + facet.id() );
+        }
+        globalCount += M_elementDofPattern.nbDofPerFacet() * mesh.numGlobalFacets();
+    }
+    // element entities owned by current process
+    if( M_elementDofPattern.nbDofPerElement() > 0 )
+    {
+        for( UInt i = 0; i < mesh.numElements(); i++ )
+        {
+            const typename MeshType::element_Type & element = mesh.element( i );
+            if( Flag::testOneSet( element.flag(), EntityFlags::OWNED ) )
+                myGlobalElements.push_back( globalCount + element.id() );
+        }
+    }
+    // reset memory to actual size
+    std::vector<Int> ( myGlobalElements ).swap( myGlobalElements );
+
+    //@todo: is it faster with set + copy or vector + swap + sort?
+    std::sort( myGlobalElements.begin(), myGlobalElements.end() );
 
     return myGlobalElements;
 }

@@ -54,6 +54,7 @@ const flag_Type SUBDOMAIN_INTERFACE ( 0x04 );
 const flag_Type OVERLAP             ( 0x08 );
 const flag_Type CUTTED              ( 0x10 );
 const flag_Type VERTEX              ( 0x20 );
+const flag_Type OWNED               ( 0x40 );
 }
 
 //! This is the base class to store the identifiers.
