@@ -94,9 +94,9 @@ Real exactSolution( const Real& t, const Real& x, const Real& y, const Real& z, 
 }
 
 
-typedef RegionMesh<LinearTetra> mesh_type;
-typedef MatrixEpetra<Real> matrix_type;
-typedef VectorEpetra vector_type;
+typedef RegionMesh<LinearTetra> mesh_Type;
+typedef MatrixEpetra<Real> matrix_Type;
+typedef VectorEpetra vector_Type;
 
 int
 main( int argc, char** argv )
@@ -123,14 +123,14 @@ main( int argc, char** argv )
 // Build and partition the mesh
 
     if (verbose) std::cout << " -- Building the mesh ... " << std::flush;
-    boost::shared_ptr< mesh_type > fullMeshPtr(new RegionMesh<LinearTetra>);
+    boost::shared_ptr< mesh_Type > fullMeshPtr(new RegionMesh<LinearTetra>);
     regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                    2.0,   2.0,   2.0,
                    -1.0,  -1.0,  -1.0);
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    MeshPartitioner< mesh_type >   meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
@@ -142,8 +142,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
     std::string uOrder("P1");
     std::string bOrder("P1");
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, 1, Comm));
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,bOrder, 3, Comm));
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 1, Comm));
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,bOrder, 3, Comm));
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
@@ -154,16 +154,16 @@ main( int argc, char** argv )
 
 // Build the solver
 
-    LevelSetSolver<mesh_type> level_set(uFESpace,betaFESpace);
+    LevelSetSolver<mesh_Type> level_set(uFESpace,betaFESpace);
     level_set.setup(data_level_set);
 
-    vector_type initLS(level_set.map());
+    vector_Type initLS(level_set.map());
     uFESpace->interpolate(initLSFct,initLS,0.0);
     level_set.initialize(initLS);
 
     level_set.setupLinearSolver(dataFile,"");
 
-    vector_type beta(betaFESpace->map());
+    vector_Type beta(betaFESpace->map());
     betaFESpace->interpolate(betaFct,beta,0.0);
 
     BCHandler bchandler;
@@ -175,10 +175,10 @@ main( int argc, char** argv )
     }
 
 #ifdef HAVE_HDF5
-    ExporterHDF5<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID());
+    ExporterHDF5<mesh_Type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID());
     exporter.setMultimesh(false);
-    boost::shared_ptr<vector_type> solutionPtr (new vector_type(level_set.solution(),Repeated));
-    exporter.addVariable( ExporterData<mesh_type>::ScalarField, "level-set", uFESpace, solutionPtr, UInt(0) );
+    boost::shared_ptr<vector_Type> solutionPtr (new vector_Type(level_set.solution(),Repeated));
+    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "level-set", uFESpace, solutionPtr, UInt(0) );
     exporter.postProcess(0);
 #endif // HAVE_HDF5
 
