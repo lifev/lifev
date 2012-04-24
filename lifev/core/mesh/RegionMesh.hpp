@@ -2843,7 +2843,7 @@ RegionMesh<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
     out << "**************************************************" << std::endl;
     if ( verbose )
     {
-        out << "list of points" << std::endl;
+        out << "list of points " << this->numPoints() << std::endl;
         for( UInt i = 0; i < this->numPoints(); i++ )
         {
             out << "p " << i << " (" << this->point( i ).id() << "): "
@@ -2852,7 +2852,7 @@ RegionMesh<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
                 << this->point( i ).coordinate( 2 ) << std::endl;
         }
 
-        out << "list of elements" << std::endl;
+        out << "list of elements " << this->numElements() << std::endl;
         for( UInt i = 0; i < this->numElements(); i++ )
         {
             out << "e " << i << " (" << this->element( i ).id() << "): ";
@@ -2861,7 +2861,7 @@ RegionMesh<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
             out << std::endl;
         }
 
-        out << "list of facets" << std::endl;
+        out << "list of facets " << this->numFacets() << std::endl;
         for( UInt i = 0; i < this->numFacets(); i++ )
         {
             out << "f " << i << " (" << this->facet( i ).id() << "): ";
@@ -2870,10 +2870,10 @@ RegionMesh<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
             out << std::endl;
         }
 
-        // @todo the ridge part cannot be pirnted since in 2d ridges
+        // @todo the ridge part cannot be printed since in 2d ridges
         // do not have S_numPoints
 /*
-        out << "list of ridges" << std::endl;
+        out << "list of ridges " << this->numRidges() << std::endl;
         for( UInt i = 0; i < this->numRidges(); i++ )
         {
             out << "r " << i << " (" << this->ridge( i ).id() << "): ";
