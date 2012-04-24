@@ -45,6 +45,9 @@
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
 #endif
 
 // Tell the compiler to restore the warning previously silented
