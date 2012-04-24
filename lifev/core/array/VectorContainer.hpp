@@ -48,6 +48,9 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
+
 namespace LifeV
 {
 
