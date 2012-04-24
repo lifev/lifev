@@ -113,7 +113,7 @@ public:
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param numEntries The average number of entries for each row.
      */
-    MatrixEpetra( const MapEpetra& map, Int numEntries = 50 );
+    MatrixEpetra( const MapEpetra& map, Int numEntries = 50, bool ignoreNonLocalValues=false );
 
     //! Copy Constructor
     /*!
@@ -146,7 +146,7 @@ public:
     MatrixEpetra( const MapEpetra & map, matrix_ptrtype crsMatrixPtr);
 
     //! Destructor
-    ~MatrixEpetra() {};
+    ~MatrixEpetra() {}
 
     //@}
 
@@ -589,9 +589,9 @@ MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, const Epetra_CrsGrap
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, Int numEntries ) :
+MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, Int numEntries, bool ignoreNonLocalValues ) :
     M_map       ( new MapEpetra( map ) ),
-    M_epetraCrs ( new matrix_type( Copy, *M_map->map( Unique ), numEntries, false) )
+    M_epetraCrs ( new matrix_type( Copy, *M_map->map( Unique ), numEntries, ignoreNonLocalValues) )
 {
 
 }
