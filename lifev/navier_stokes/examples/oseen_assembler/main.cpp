@@ -422,7 +422,7 @@ main( int argc, char** argv )
 
     if(convectionTerm == KIO91)
     {
-        uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
+        uFESpace->interpolate( static_cast<FESpace< mesh_type, MapEpetra >::function_Type>( problem_Type::uexact ), *velocity, currentTime );
         *solution *= 0;
         *solution = *velocity;
         *beta *= 0;
@@ -434,7 +434,7 @@ main( int argc, char** argv )
         {
             for(UInt i(0);i<BDFOrder;++i)
             {
-                uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime-(3-i)*timestep);
+                uFESpace->interpolate( static_cast<FESpace< mesh_type, MapEpetra >::function_Type>( problem_Type::uexact ), *velocity, currentTime-(3-i)*timestep );
                 *solution = *velocity;
                 *beta *= 0;
                 oseenAssembler.addConvectionRhs(*beta,*solution);
@@ -443,8 +443,8 @@ main( int argc, char** argv )
         }
     }
 
-    uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
-    pFESpace->interpolate(problem_Type::pexact,*pressure,currentTime);
+    uFESpace->interpolate( static_cast<FESpace< mesh_type, MapEpetra >::function_Type>( problem_Type::uexact ), *velocity, currentTime );
+    pFESpace->interpolate( static_cast<FESpace< mesh_type, MapEpetra >::function_Type>( problem_Type::pexact ), *pressure, currentTime );
     *solution *= 0;
     *solution = *velocity;
     solution->add(*pressure,pressureOffset);
@@ -463,8 +463,8 @@ main( int argc, char** argv )
         *beta *= 0.;
         *solution *= 0;
 
-        uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
-        pFESpace->interpolate(problem_Type::pexact,*pressure,currentTime);
+        uFESpace->interpolate( static_cast<FESpace< mesh_type, MapEpetra >::function_Type>( problem_Type::uexact ), *velocity, currentTime );
+        pFESpace->interpolate( static_cast<FESpace< mesh_type, MapEpetra >::function_Type>( problem_Type::pexact ), *pressure, currentTime );
         *solution = *velocity;
         solution->add(*pressure,pressureOffset);
 
