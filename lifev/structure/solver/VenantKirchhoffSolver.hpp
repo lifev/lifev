@@ -753,10 +753,8 @@ VenantKirchhoffSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, c
 }
 
 template <typename Mesh, typename SolverType>
-void VenantKirchhoffSolver<Mesh, SolverType>::iterate(vector_Type& solution)
+void VenantKirchhoffSolver<Mesh, SolverType>::iterate(vector_Type& /*solution*/ )
 {
-  Int status;
-
   vector_Type sol(*M_localMap);
 
   *M_vel  = ( 2.0 / M_data->getdataTime()->timeStep() ) * (*M_disp);

@@ -1789,7 +1789,7 @@ OseenSolver<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       m
 
 template<typename MeshType, typename SolverType>
 void
-OseenSolver<MeshType, SolverType>::setupPostProc( const markerID_Type& flag, const mesh_Type meshPart )
+OseenSolver<MeshType, SolverType>::setupPostProc( const markerID_Type& /*flag*/, const mesh_Type /*meshPart*/ )
 {
     M_postProcessing.reset( new PostProcessingBoundary<mesh_Type>( M_velocityFESpace.mesh(),
                                                      &M_velocityFESpace.feBd(),

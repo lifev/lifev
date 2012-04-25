@@ -161,7 +161,7 @@ public:
       partitionMesh::mesh() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMyMeshPartition(const meshPtr_Type& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
+    void addMyMeshPartition( const meshPtr_Type& /*meshPointer*/, boost::shared_ptr<Epetra_Comm>& /*comm*/ )
     {/*M_parallelMesh = meshPointer; M_serialMesh.reset(); M_comm = comm;*/}
 
     //! Add a DOF interface for writing to file
