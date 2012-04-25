@@ -1694,7 +1694,7 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
     LifeChrono chrono;
     chrono.start();
 
-    const UInt numVelocityComponent ( velocityFESpace.fieldDim() );
+    const UInt numVelocityComponent ( M_velocityFESpace.fieldDim() );
     const UInt velocityTotalDof ( M_velocityFESpace.dof().numTotalDof() );
 
 
@@ -1710,7 +1710,7 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
         M_elementMatrixPreconditioner.zero();
         // mass
         chrono.start();
-        mass( 1, M_elementMatrixPreconditioner, M_pressureFESpace.fe(), 0, 0, velocityFESpace.fieldDim() );
+        mass( 1, M_elementMatrixPreconditioner, M_pressureFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
         chrono.stop();
 
         chrono.start();
