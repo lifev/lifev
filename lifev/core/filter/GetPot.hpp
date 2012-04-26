@@ -189,7 +189,7 @@ public:
     inline void            set(const char* VarName, const int Value, const bool Requested = true);
 
     // BEGIN Cristiano Malossi - 03/04/2009
-    inline bool 	       checkVariable(const char* VarName) const;
+    inline bool            checkVariable(const char* VarName) const;
     // END   Cristiano Malossi - 03/04/2009
 
     inline unsigned        vector_variable_size(const char* VarName) const;
