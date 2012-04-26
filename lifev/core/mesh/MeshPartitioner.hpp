@@ -351,6 +351,17 @@ private:
     */
     void finalSetup();
 
+    //! Mark entity ownership
+    /*!
+      Mark all owned entities in the partition with EntityFlag::OWNED
+      to properly build map members in DOF::GlobalElements().
+      If the assembly is parallel( M_buildOverlappingPartitions == false ),
+      all partition entities are marked as OWNED, while with
+      M_buildOverlappingPartitions == true only the partition that
+      will perform the assembly on that entity has it marked.
+    */
+    void markEntityOwnership();
+
     //@}
     //! Private Data Members
     //@{
@@ -387,6 +398,10 @@ private:
     graphPtr_Type                        M_elementDomains;
     bool                                 M_serialMode; // how to tell if running serial partition mode
     bool                                 M_buildOverlappingPartitions;
+
+    //! Store ownership for each entity, subdivided by entity type
+    //! 0: elements, 1: facets, 2: ridges, 3: points
+    std::vector<std::vector<UInt> >      M_entityPID;
 
     //! Map for the ghost data
     GhostEntityDataMap_Type M_ghostDataMap;
@@ -434,6 +449,7 @@ init ()
     M_nBoundaryRidges.resize ( M_numPartitions );
     M_nBoundaryFacets.resize ( M_numPartitions );
     M_elementDomains.reset ( new graph_Type );
+    M_entityPID.resize( 4 );
     M_serialMode = false;
     M_buildOverlappingPartitions = false;
 
@@ -599,6 +615,8 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // final setup
     // ******************
     finalSetup();
+
+    markEntityOwnership();
 }
 
 template<typename MeshType>
@@ -1596,9 +1614,6 @@ void MeshPartitioner<MeshType>::execute()
     Debug(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
 #endif
 
-    // vector that store the PID owning each point in the mesh
-    std::vector< std::vector<UInt> > entityPID( 4 );
-
     if ( M_buildOverlappingPartitions )
     {
         meshPtr_Type dummyMesh( new mesh_Type() );
@@ -1606,36 +1621,59 @@ void MeshPartitioner<MeshType>::execute()
         GhostHandler<mesh_Type> gh( M_originalMesh, dummyMesh, dummyMap, M_comm );
 
         gh.createNodeElementNeighborsMap();
-        gh.ghostMapOnElementsP1( M_elementDomains, entityPID, 1 );
+        gh.ghostMapOnElementsP1( M_elementDomains, M_entityPID, 1 );
      }
 
     doPartitionMesh();
 
+    // ***************************************
+    // release the original unpartitioned mesh
+    // allowing it to be deleted
+    // ***************************************
+    releaseUnpartitionedMesh();
+
+    // ***************************************
+    // clear all internal structures that are
+    // not needed anymore
+    // ***************************************
+    cleanUp();
+}
+
+template<typename MeshType>
+void MeshPartitioner<MeshType>::markEntityOwnership()
+{
     if( M_buildOverlappingPartitions )
     {
-        // mark owned entities by each partition as described in entityPID
+        // mark owned entities by each partition as described in M_entityPID
         //@todo: does not work for offline partitioning!
-        //entityPID or flags should be exported and read back to make it work
+        //M_entityPID or flags should be exported and read back to make it work
         for( UInt e = 0; e < (*M_meshPartitions)[ 0 ]->numElements(); e++ )
         {
             typename MeshType::element_Type & element = (*M_meshPartitions)[ 0 ]->element( e );
-            if( entityPID[ 0 ][ element.id() ] == static_cast<UInt>( M_me ) ) element.setFlag( EntityFlags::OWNED );
+            if( M_entityPID[ 0 ][ element.id() ] == static_cast<UInt>( M_me ) ) element.setFlag( EntityFlags::OWNED );
         }
+//        clearVector( M_entityPID[ 0 ] );
+
         for( UInt f = 0; f < (*M_meshPartitions)[ 0 ]->numFacets(); f++ )
         {
             typename MeshType::facet_Type & facet = (*M_meshPartitions)[ 0 ]->facet( f );
-            if( entityPID[ 1 ][ facet.id() ] == static_cast<UInt>( M_me ) ) facet.setFlag( EntityFlags::OWNED );
+            if( M_entityPID[ 1 ][ facet.id() ] == static_cast<UInt>( M_me ) ) facet.setFlag( EntityFlags::OWNED );
         }
+//        clearVector( M_entityPID[ 1 ] );
+
         for( UInt r = 0; r < (*M_meshPartitions)[ 0 ]->numRidges(); r++ )
         {
             typename MeshType::ridge_Type & ridge = (*M_meshPartitions)[ 0 ]->ridge( r );
-            if( entityPID[ 2 ][ ridge.id() ] == static_cast<UInt>( M_me ) ) ridge.setFlag( EntityFlags::OWNED );
+            if( M_entityPID[ 2 ][ ridge.id() ] == static_cast<UInt>( M_me ) ) ridge.setFlag( EntityFlags::OWNED );
         }
+//        clearVector( M_entityPID[ 2 ] );
+
         for( UInt p = 0; p < (*M_meshPartitions)[ 0 ]->numPoints(); p++ )
         {
             typename MeshType::point_Type & point = (*M_meshPartitions)[ 0 ]->point( p );
-            if( entityPID[ 3 ][ point.id() ] == static_cast<UInt>( M_me ) ) point.setFlag( EntityFlags::OWNED );
+            if( M_entityPID[ 3 ][ point.id() ] == static_cast<UInt>( M_me ) ) point.setFlag( EntityFlags::OWNED );
         }
+//        clearVector( M_entityPID[ 3 ] );
     }
     else
     {
@@ -1661,18 +1699,6 @@ void MeshPartitioner<MeshType>::execute()
             point.setFlag( EntityFlags::OWNED );
         }
     }
-
-    // ***************************************
-    // release the original unpartitioned mesh
-    // allowing it to be deleted
-    // ***************************************
-    releaseUnpartitionedMesh();
-
-    // ***************************************
-    // clear all internal structures that are
-    // not needed anymore
-    // ***************************************
-    cleanUp();
 }
 
 template<typename MeshType>
