@@ -642,7 +642,6 @@ void Exporter<MeshType>::exportPID( meshPtr_Type & mesh, commPtr_Type & comm, bo
             const ID globalElem = mesh->element(iElem).id();
             Int PIDValue = 1;
             PIDValue <<= comm->MyPID();
-            std::cerr << comm->MyPID() << ": " << globalElem << " " << PIDValue << std::endl;
             PIDData->sumIntoGlobalValues( globalElem, PIDValue );
         }
         PIDData->globalAssemble();
@@ -656,7 +655,6 @@ void Exporter<MeshType>::exportPID( meshPtr_Type & mesh, commPtr_Type & comm, bo
             (*PIDData)[ globalElem ] = comm->MyPID();
         }
     }
-    std::cerr << PIDData->epetraVector();
 
     addVariable( exporterData_Type::ScalarField,
                  name,
