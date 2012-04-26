@@ -831,7 +831,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
     ridgePID.resize( M_fullMesh->numRidges(), M_comm->NumProc() );
 
     // @todo: check if parallel building + comm is faster
-    for( Int p = 0; p < M_comm->NumProc(); p++ )
+    for( UInt p = 0; p < static_cast<UInt>( M_comm->NumProc() ); p++ )
     {
         std::set<int> localPointsSet;
         for( UInt e = 0; e < (*elemGraph)[ p ].size(); e++ )
@@ -843,7 +843,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
                 localPointsSet.insert( pointID );
                 const UInt pointCurrentPID = pointPID[ pointID ];
                 // pointPID should be the minimum between the proc that own it
-                if( M_me < pointCurrentPID ) pointPID[ pointID ] = p;
+                if( p < pointCurrentPID ) pointPID[ pointID ] = p;
             }
 
             // elem block
@@ -854,19 +854,19 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
             // facet block
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
             {
-                const ID facetID = M_fullMesh->facet( M_fullMesh->localFacetId( e, k ) ).id();
+                const ID facetID = M_fullMesh->facet( M_fullMesh->localFacetId( elemID, k ) ).id();
                 const UInt facetCurrentPID = facetPID[ facetID ];
                 // facetPID should be the minimum between the proc that own it
-                if( M_me < facetCurrentPID ) facetPID[ facetID ] = p;
+                if( p < facetCurrentPID ) facetPID[ facetID ] = p;
             }
 
             // ridge block
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
             {
-                const ID ridgeID = M_fullMesh->ridge( M_fullMesh->localRidgeId( e, k ) ).id();
+                const ID ridgeID = M_fullMesh->ridge( M_fullMesh->localRidgeId( elemID, k ) ).id();
                 const UInt ridgeCurrentPID = ridgePID[ ridgeID ];
                 // ridgePID should be the minimum between the proc that own it
-                if( M_me < ridgeCurrentPID ) ridgePID[ ridgeID ] = p;
+                if( p < ridgeCurrentPID ) ridgePID[ ridgeID ] = p;
             }
         }
         pointGraph[ p ].assign( localPointsSet.begin(), localPointsSet.end() );
