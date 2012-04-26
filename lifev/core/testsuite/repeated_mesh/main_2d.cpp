@@ -109,14 +109,14 @@ Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, con
 #ifdef TEST_RHS
 Real epsilon(1);
 
-Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */, const ID& /* i */ )
+Real exactSolution( const Real& /* t */, const Real& /*x*/, const Real& /*y*/, const Real& /* z */, const ID& /* i */ )
 {
 //    return  sin(x)+y*y/2;
     return  0.;
 }
 
 
-Real fRhs( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
+Real fRhs( const Real& /* t */, const Real& /*x*/, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
 //    return  sin(x)-1;
     return  1.;
@@ -210,8 +210,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done! " << std::endl;
 
     if (verbose) std::cout << " -- Setting up assembler ... " << std::flush;
-    adrAssembler.setup(uFESpace,betaFESpace);
-    adrAssemblerR.setup(uFESpaceR,betaFESpaceR);
+    adrAssembler.setup( uFESpace, betaFESpace);
+    adrAssemblerR.setup( uFESpaceR, betaFESpaceR);
     if (verbose) std::cout << " done! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
@@ -244,12 +244,14 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << " -- Closing the matrix ... " << std::flush;
     systemMatrix->globalAssemble();
-    systemMatrix->spy( "sysMat" );
-
     systemMatrixR->matrixPtr()->FillComplete();
 //    systemMatrixR->globalAssemble();
-    systemMatrixR->spy( "sysMatR" );
     if (verbose) std::cout << " done ! " << std::endl;
+
+    //************* SPY ***********
+    systemMatrix->spy("matrixNoBC");
+    systemMatrixR->spy("matrixNoBCR");
+    //*****************************
 
 //#ifdef TEST_RHS
 //    Real matrixNorm(systemMatrix->norm1());
@@ -274,7 +276,7 @@ main( int argc, char** argv )
     adrAssembler.addMassRhs( rhs, fRhs, 0. );
     rhs.globalAssemble();
     adrAssemblerR.addMassRhs( rhsR, fRhs, 0. );
-    rhsR.globalAssemble( Zero );
+//    rhsR.globalAssemble( Zero );
 #endif
 
     if (verbose) std::cout << " done ! " << std::endl;
@@ -307,8 +309,10 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     //************* SPY ***********
-    //systemMatrix->spy("matrix");
-    //rhs.spy("vector");
+    systemMatrix->spy("matrix");
+    systemMatrixR->spy("matrixR");
+    rhs.spy("rhs");
+    rhsR.spy("rhsR");
     //*****************************
 
 // Definition of the solver
@@ -350,8 +354,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     //************* SPY ***********
-//    solution.spy("solution");
-//    solutionR.spy("solutionR");
+    solution.spy("solution");
+    solutionR.spy("solutionR");
     //*****************************
 
 // Error computation
