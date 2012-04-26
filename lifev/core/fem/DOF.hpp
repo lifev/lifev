@@ -494,10 +494,14 @@ std::vector<Int> DOF::globalElements( MeshType& mesh )
         {
             const typename MeshType::peak_Type & peak = mesh.peak( i );
             if( Flag::testOneSet( peak.flag(), EntityFlags::OWNED ) )
-                myGlobalElements.push_back( peak.id() );
+            {
+                for( UInt d = 0; d < M_elementDofPattern.nbDofPerPeak(); d++ )
+                    myGlobalElements.push_back( peak.id() + d * mesh.numGlobalPoints() );
+            }
         }
         globalCount += M_elementDofPattern.nbDofPerPeak() * mesh.numGlobalPoints();
     }
+
     // ridge entities owned by current process
     if( M_elementDofPattern.nbDofPerRidge() > 0 )
     {
@@ -505,10 +509,14 @@ std::vector<Int> DOF::globalElements( MeshType& mesh )
         {
             const typename MeshType::ridge_Type & ridge = mesh.ridge( i );
             if( Flag::testOneSet( ridge.flag(), EntityFlags::OWNED ) )
-                myGlobalElements.push_back( globalCount + ridge.id() );
+            {
+                for( UInt d = 0; d < M_elementDofPattern.nbDofPerRidge(); d++ )
+                    myGlobalElements.push_back( globalCount + ridge.id() + d * mesh.numGlobalRidges() );
+            }
         }
         globalCount += M_elementDofPattern.nbDofPerRidge() * mesh.numGlobalRidges();
     }
+
     // facet entities owned by current process
     if( M_elementDofPattern.nbDofPerFacet() > 0 )
     {
@@ -516,10 +524,14 @@ std::vector<Int> DOF::globalElements( MeshType& mesh )
         {
             const typename MeshType::facet_Type & facet = mesh.facet( i );
             if( Flag::testOneSet( facet.flag(), EntityFlags::OWNED ) )
-                myGlobalElements.push_back( globalCount + facet.id() );
+            {
+                for( UInt d = 0; d < M_elementDofPattern.nbDofPerFacet(); d++ )
+                    myGlobalElements.push_back( globalCount + facet.id() + d * mesh.numGlobalFacets() );
+            }
         }
         globalCount += M_elementDofPattern.nbDofPerFacet() * mesh.numGlobalFacets();
     }
+
     // element entities owned by current process
     if( M_elementDofPattern.nbDofPerElement() > 0 )
     {
@@ -527,7 +539,10 @@ std::vector<Int> DOF::globalElements( MeshType& mesh )
         {
             const typename MeshType::element_Type & element = mesh.element( i );
             if( Flag::testOneSet( element.flag(), EntityFlags::OWNED ) )
-                myGlobalElements.push_back( globalCount + element.id() );
+            {
+                for( UInt d = 0; d < M_elementDofPattern.nbDofPerElement(); d++ )
+                    myGlobalElements.push_back( globalCount + element.id() + d * mesh.numGlobalFacets() );
+            }
         }
     }
     // reset memory to actual size
