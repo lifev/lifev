@@ -204,7 +204,7 @@ public:
     explicit RegionMesh( UInt id );
 
     //! Destructor
-    virtual ~RegionMesh<GEOSHAPE, MC>();
+    virtual ~RegionMesh();
 
     /** @} */ // End of group Constructors & Destructor
 
