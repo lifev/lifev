@@ -594,7 +594,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
 
         marker_found = false;
         bcBaseIterator = M_bcList.begin();
-        while ( ( bcBaseIterator = find( bcBaseIterator, beginEssEdges, elementMarker ) ) != beginEssEdges )
+        while ( ( bcBaseIterator = std::find( bcBaseIterator, beginEssEdges, elementMarker ) ) != beginEssEdges )
         {
             marker_found = true;
             switch ( bcBaseIterator->type() )
@@ -691,7 +691,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
 
                 // Finding this marker on the BC list
                 bcBaseIterator = beginEssEdges;
-                while ( ( bcBaseIterator = find( bcBaseIterator, beginEssVertices, marker ) ) != beginEssVertices )
+                while ( ( bcBaseIterator = std::find( bcBaseIterator, beginEssVertices, marker ) ) != beginEssVertices )
                 {
                     //vector of boundary element DOFs on current edge
                     std::vector<ID> vecEdgeDofs(nDofPerEdge+2*nDofPerVert);
@@ -743,7 +743,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
 
                 // Finding this marker on the BC list
                 bcBaseIterator = beginEssVertices;
-                while ( ( bcBaseIterator = find( bcBaseIterator, M_bcList.end(), marker ) ) != M_bcList.end() )
+                while ( ( bcBaseIterator = std::find( bcBaseIterator, M_bcList.end(), marker ) ) != M_bcList.end() )
                 {
                     for ( ID iVertexDof = 0; iVertexDof < nDofPerVert; ++iVertexDof )
                     {

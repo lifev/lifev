@@ -49,7 +49,7 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <heart.hpp>
+#include "heart.hpp"
 
 using namespace LifeV;
 

@@ -123,9 +123,9 @@ Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z *
 #endif
 
 
-typedef RegionMesh<LinearTetra> mesh_type;
-typedef MatrixEpetra<Real> matrix_type;
-typedef VectorEpetra vector_type;
+typedef RegionMesh<LinearTetra> mesh_Type;
+typedef MatrixEpetra<Real> matrix_Type;
+typedef VectorEpetra vector_Type;
 
 int
 main( int argc, char** argv )
@@ -152,16 +152,16 @@ main( int argc, char** argv )
 // Build and partition the mesh
 
     if (verbose) std::cout << " -- Building the mesh ... " << std::flush;
-    boost::shared_ptr< mesh_type > fullMeshPtr(new RegionMesh<LinearTetra>);
+    boost::shared_ptr< mesh_Type > fullMeshPtr(new RegionMesh<LinearTetra>);
     regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                    2.0,   2.0,   2.0,
                    -1.0,  -1.0,  -1.0);
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    boost::shared_ptr< mesh_type > localMeshPtr;
+    boost::shared_ptr< mesh_Type > localMeshPtr;
     {
-        MeshPartitioner< mesh_type >   meshPart(fullMeshPtr, Comm);
+        MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
         localMeshPtr = meshPart.meshPartition();
     }
     if (verbose) std::cout << " done ! " << std::endl;
@@ -175,15 +175,15 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
     std::string uOrder("P1");
     std::string bOrder("P1");
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(localMeshPtr,uOrder, 1, Comm));
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >(localMeshPtr,bOrder, 3, Comm));
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace( new FESpace< mesh_Type, MapEpetra >(localMeshPtr,uOrder, 1, Comm));
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaFESpace( new FESpace< mesh_Type, MapEpetra >(localMeshPtr,bOrder, 3, Comm));
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
 // Build the assembler and the matrices
 
     if (verbose) std::cout << " -- Building assembler ... " << std::flush;
-    ADRAssembler<mesh_type,matrix_type,vector_type> adrAssembler;
+    ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
     if (verbose) std::cout << " done! " << std::endl;
 
     if (verbose) std::cout << " -- Setting up assembler ... " << std::flush;
@@ -191,7 +191,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
-    boost::shared_ptr<matrix_type> systemMatrix(new matrix_type( uFESpace->map() ));
+    boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uFESpace->map() ));
     *systemMatrix *=0.0;
     if (verbose) std::cout << " done! " << std::endl;
 
@@ -233,11 +233,11 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << " -- Building the RHS ... " << std::flush;
     //vector_type rhs(uFESpace->map(),Unique);
-    vector_type rhs(uFESpace->map(),Repeated);
+    vector_Type rhs(uFESpace->map(),Repeated);
     rhs*=0.0;
 
 #ifdef TEST_RHS
-    vector_type fInterpolated(uFESpace->map(),Repeated);
+    vector_Type fInterpolated(uFESpace->map(),Repeated);
     fInterpolated*=0.0;
     uFESpace->interpolate(fRhs,fInterpolated,0.0);
     adrAssembler.addMassRhs(rhs,fInterpolated);
@@ -263,7 +263,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
-    vector_type rhsBC(rhs,Unique);
+    vector_Type rhsBC(rhs,Unique);
     bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
     rhs = rhsBC;
     if (verbose) std::cout << " done ! " << std::endl;
@@ -293,7 +293,7 @@ main( int argc, char** argv )
 // Definition of the solution
 
     if (verbose) std::cout << " -- Defining the solution ... " << std::flush;
-    vector_type solution(uFESpace->map(),Unique);
+    vector_Type solution(uFESpace->map(),Unique);
     solution*=0.0;
     if (verbose) std::cout << " done ! " << std::endl;
 
@@ -310,12 +310,12 @@ main( int argc, char** argv )
 // Error computation
 
     if (verbose) std::cout << " -- Computing the error ... " << std::flush;
-    vector_type solutionErr(solution);
+    vector_Type solutionErr(solution);
     solutionErr*=0.0;
     uFESpace->interpolate(exactSolution,solutionErr,0.0);
     solutionErr-=solution;
     solutionErr.abs();
-    Real l2error(uFESpace->l2Error(exactSolution,vector_type(solution,Repeated),0.0));
+    Real l2error(uFESpace->l2Error(exactSolution,vector_Type(solution,Repeated),0.0));
     if (verbose) std::cout << " -- done ! " << std::endl;
     if (verbose) std::cout << " ---> Norm L2  : " << l2error << std::endl;
     Real linferror( solutionErr.normInf());
@@ -336,17 +336,17 @@ main( int argc, char** argv )
 // Exporter definition and use
 
     if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
-    ExporterEnsight<mesh_type> exporter ( dataFile, localMeshPtr, "solution", Comm->MyPID()) ;
+    ExporterEnsight<mesh_Type> exporter ( dataFile, localMeshPtr, "solution", Comm->MyPID()) ;
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;
-    boost::shared_ptr<vector_type> solutionPtr (new vector_type(solution,Repeated));
-    boost::shared_ptr<vector_type> solutionErrPtr (new vector_type(solutionErr,Repeated));
+    boost::shared_ptr<vector_Type> solutionPtr (new vector_Type(solution,Repeated));
+    boost::shared_ptr<vector_Type> solutionErrPtr (new vector_Type(solutionErr,Repeated));
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Updating the exporter ... " << std::flush;
-    exporter.addVariable( ExporterData<mesh_type>::ScalarField, "solution", uFESpace, solutionPtr, UInt(0) );
-    exporter.addVariable( ExporterData<mesh_type>::ScalarField, "error", uFESpace, solutionErrPtr, UInt(0) );
+    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "solution", uFESpace, solutionPtr, UInt(0) );
+    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "error", uFESpace, solutionErrPtr, UInt(0) );
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Exporting ... " << std::flush;
