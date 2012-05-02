@@ -623,7 +623,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
         pf->secondAdjacentElementPosition() = faceNeighbourPos[1][j];
 
         pf->setMarker(faceMarkers[j]);
-        pf->setMarker(faceFlags[j]);
+        pf->setFlag(faceFlags[j]);
         for (UInt k = 0; k < faceNodes; ++k)
         {
             pf->setPoint(k, tempMesh->point(facePoints[k][j]));
@@ -675,7 +675,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
             pv->setPoint(k, tempMesh->point(volumePoints[k][j]) );
         }
         pv->setMarker(volumeMarkers[j]);
-        pv->setMarker(volumeFlags[j]);
+        pv->setFlag(volumeFlags[j]);
     }
 
     volumePoints.clear();
