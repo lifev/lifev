@@ -130,7 +130,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    boost::shared_ptr< mesh_type > localMeshPtr;
+    boost::shared_ptr< mesh_Type > localMeshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
         localMeshPtr = meshPart.meshPartition();
@@ -146,8 +146,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
     std::string uOrder("P1");
     std::string bOrder("P1");
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_Type, MapEpetra >(localMeshPtr,uOrder, 1, Comm));
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_Type, MapEpetra >(localMeshPtr,bOrder, 3, Comm));
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace( new FESpace< mesh_Type, MapEpetra >(localMeshPtr,uOrder, 1, Comm));
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaFESpace( new FESpace< mesh_Type, MapEpetra >(localMeshPtr,bOrder, 3, Comm));
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
