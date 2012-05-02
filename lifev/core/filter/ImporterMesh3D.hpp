@@ -229,6 +229,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
         pointerPoint->y() = y;
         pointerPoint->z() = z;
         pointerPoint->setMarkerID( markerID_Type( ibc ) );
+        pointerPoint->setFlag( EntityFlags::VERTEX );
     }
 
     oStr << "Vertices read " << std::endl;
