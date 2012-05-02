@@ -484,72 +484,61 @@ std::vector<Int> DOF::globalElements( MeshType& mesh )
     dofNumberSet.clear();
 */
 
-    std::vector<Int> myGlobalElements;
+    std::set<Int> myGlobalElementsSet;
 
-    UInt globalCount = 0;
-    // peak entities owned by current process
-    if( M_elementDofPattern.nbDofPerPeak() > 0 )
+    // insert dof associated to geometric entities owned by current proc
+    const UInt pointOffset( 0 );
+    const UInt ridgeOffset( pointOffset + M_elementDofPattern.nbDofPerPeak() * mesh.numGlobalPoints() );
+    const UInt facetOffset( ridgeOffset + M_elementDofPattern.nbDofPerRidge() * mesh.numGlobalRidges() );
+    const UInt elementOffset( facetOffset + M_elementDofPattern.nbDofPerFacet() * mesh.numGlobalFacets() );
+
+    for( UInt i = 0; i < mesh.numElements(); i++ )
     {
-        for( UInt i = 0; i < mesh.numPoints(); i++ )
+        const typename MeshType::element_Type & element = mesh.element( i );
+
+        // point block
+        for ( UInt k = 0; k < element.S_numPoints; k++ )
         {
-            const typename MeshType::peak_Type & peak = mesh.peak( i );
-            if( Flag::testOneSet( peak.flag(), EntityFlags::OWNED ) )
+            const typename MeshType::point_Type point = element.point( k );
+            if( Flag::testOneSet( point.flag(), EntityFlags::OWNED ) )
             {
                 for( UInt d = 0; d < M_elementDofPattern.nbDofPerPeak(); d++ )
-                    myGlobalElements.push_back( peak.id() + d * mesh.numGlobalPoints() );
+                    myGlobalElementsSet.insert( pointOffset + point.id() + d * mesh.numGlobalPoints() );
             }
         }
-        globalCount += M_elementDofPattern.nbDofPerPeak() * mesh.numGlobalPoints();
-    }
 
-    // ridge entities owned by current process
-    if( M_elementDofPattern.nbDofPerRidge() > 0 )
-    {
-        for( UInt i = 0; i < mesh.numRidges(); i++ )
+        // ridge block
+        for ( UInt k = 0; k < element.S_numRidges; k++ )
         {
-            const typename MeshType::ridge_Type & ridge = mesh.ridge( i );
+            const typename MeshType::ridge_Type ridge = mesh.ridge( mesh.localRidgeId( i, k ) );
             if( Flag::testOneSet( ridge.flag(), EntityFlags::OWNED ) )
             {
                 for( UInt d = 0; d < M_elementDofPattern.nbDofPerRidge(); d++ )
-                    myGlobalElements.push_back( globalCount + ridge.id() + d * mesh.numGlobalRidges() );
+                    myGlobalElementsSet.insert( ridgeOffset + ridge.id() + d * mesh.numGlobalRidges() );
             }
         }
-        globalCount += M_elementDofPattern.nbDofPerRidge() * mesh.numGlobalRidges();
-    }
 
-    // facet entities owned by current process
-    if( M_elementDofPattern.nbDofPerFacet() > 0 )
-    {
-        for( UInt i = 0; i < mesh.numFacets(); i++ )
+        // facet block
+        for ( UInt k = 0; k < element.S_numFacets; k++ )
         {
-            const typename MeshType::facet_Type & facet = mesh.facet( i );
+            const typename MeshType::facet_Type facet = mesh.facet( mesh.localFacetId( i, k ) );
             if( Flag::testOneSet( facet.flag(), EntityFlags::OWNED ) )
             {
                 for( UInt d = 0; d < M_elementDofPattern.nbDofPerFacet(); d++ )
-                    myGlobalElements.push_back( globalCount + facet.id() + d * mesh.numGlobalFacets() );
+                    myGlobalElementsSet.insert( facetOffset + facet.id() + d * mesh.numGlobalFacets() );
             }
         }
-        globalCount += M_elementDofPattern.nbDofPerFacet() * mesh.numGlobalFacets();
-    }
 
-    // element entities owned by current process
-    if( M_elementDofPattern.nbDofPerElement() > 0 )
-    {
-        for( UInt i = 0; i < mesh.numElements(); i++ )
+        // elem block
+        if( Flag::testOneSet( element.flag(), EntityFlags::OWNED ) )
         {
-            const typename MeshType::element_Type & element = mesh.element( i );
-            if( Flag::testOneSet( element.flag(), EntityFlags::OWNED ) )
-            {
-                for( UInt d = 0; d < M_elementDofPattern.nbDofPerElement(); d++ )
-                    myGlobalElements.push_back( globalCount + element.id() + d * mesh.numGlobalFacets() );
-            }
+            for( UInt d = 0; d < M_elementDofPattern.nbDofPerElement(); d++ )
+                myGlobalElementsSet.insert( elementOffset + element.id() + d * mesh.numGlobalFacets() );
         }
     }
-    // reset memory to actual size
-    std::vector<Int> ( myGlobalElements ).swap( myGlobalElements );
 
-    //@todo: is it faster with set + copy or vector + swap + sort?
-    std::sort( myGlobalElements.begin(), myGlobalElements.end() );
+    std::vector<Int> myGlobalElements( myGlobalElementsSet.size() );
+    std::copy( myGlobalElementsSet.begin(), myGlobalElementsSet.end(), myGlobalElements.begin() );
 
     return myGlobalElements;
 }
