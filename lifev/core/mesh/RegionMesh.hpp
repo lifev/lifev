@@ -1654,7 +1654,7 @@ public:
      *  @param i index of the mesh facet.
      *  @return the i-th facet.
      */
-    facet_Type const & facet( UInt const i ) const {return facet( M_geoDim, i);};
+    facet_Type const & facet( UInt const i ) const {return facet( M_geoDim, i);}
 
 
     //! i-th mesh facet.
@@ -1681,7 +1681,7 @@ public:
      *  @param id Facet Id.
      *  @return true if f in on boundary.
      */
-    bool isBoundaryFacet( UInt const & id ) const { return isBoundaryFacet( M_geoDim, id );};
+    bool isBoundaryFacet( UInt const & id ) const { return isBoundaryFacet( M_geoDim, id );}
 
     //! Number of Ridges.
     /**
@@ -1864,7 +1864,7 @@ public:
      */
 
     //! returns a reference to the elements' container
-    elements_Type& elementList(){return elementList(M_geoDim );};
+    elements_Type& elementList(){return elementList(M_geoDim );}
 
     //! returns a reference to the facets' container
     facets_Type& facetList() {return facetList(M_geoDim);}
@@ -2055,14 +2055,14 @@ private:
     facet_Type & addFacet( oneD_Type, bool const boundary ) {return addPoint(boundary);}
 
     //! i-th mesh Facet.
-    facet_Type const & facet( threeD_Type, UInt const i ) const {return face(i);};
-    facet_Type const & facet( twoD_Type, UInt const i ) const {return edge(i);};
-    facet_Type const & facet( oneD_Type, UInt const i ) const {return point(i);};
+    facet_Type const & facet( threeD_Type, UInt const i ) const {return face(i);}
+    facet_Type const & facet( twoD_Type, UInt const i ) const {return edge(i);}
+    facet_Type const & facet( oneD_Type, UInt const i ) const {return point(i);}
 
     //! i-th mesh facet.
-    facet_Type & facet( threeD_Type, UInt const i ) {return face(i);};
-    facet_Type & facet( twoD_Type, UInt const i ) {return edge(i);};
-    facet_Type & facet( oneD_Type, UInt const i ) {return point(i);};
+    facet_Type & facet( threeD_Type, UInt const i ) {return face(i);}
+    facet_Type & facet( twoD_Type, UInt const i ) {return edge(i);}
+    facet_Type & facet( oneD_Type, UInt const i ) {return point(i);}
 
     //! Set counter of facets.
     void setNumFacets( threeD_Type, UInt const n ) {setNumFaces( n );}
@@ -2075,9 +2075,9 @@ private:
     void setnumBoundaryFacets( oneD_Type, UInt const n ) {setNumBVertices( n ) ;}
 
     //! Is facet whose id is given on boundary?
-    bool isBoundaryFacet( threeD_Type, UInt const & id ) const { return isBoundaryFace( id );};
-    bool isBoundaryFacet( twoD_Type, UInt const & id ) const { return isBoundaryEdge( id );};
-    bool isBoundaryFacet( oneD_Type, UInt const & id ) const { return isBoundaryPoint( id );};
+    bool isBoundaryFacet( threeD_Type, UInt const & id ) const { return isBoundaryFace( id );}
+    bool isBoundaryFacet( twoD_Type, UInt const & id ) const { return isBoundaryEdge( id );}
+    bool isBoundaryFacet( oneD_Type, UInt const & id ) const { return isBoundaryPoint( id );}
 
     //! Number of Ridges.
     UInt numRidges(threeD_Type) const {return numEdges(); }
@@ -2140,9 +2140,9 @@ private:
     UInt numGlobalPeaks(oneD_Type) const { return 0;}
 
     //! returns a reference to the elements' container
-    elements_Type& elementList(threeD_Type) {return volumeList;};
-    elements_Type& elementList(twoD_Type) {return faceList;};
-    elements_Type& elementList(oneD_Type) {return edgeList;};
+    elements_Type& elementList(threeD_Type) {return volumeList;}
+    elements_Type& elementList(twoD_Type) {return faceList;}
+    elements_Type& elementList(oneD_Type) {return edgeList;}
 
     //! returns a reference to the facets' container
     facets_Type& facetList(threeD_Type) {return faceList;}
