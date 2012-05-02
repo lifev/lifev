@@ -54,13 +54,6 @@
 #include <lifev/core/mesh/MeshUtility.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
-
-#ifdef HAVE_MPI
-//headers useful only for reordering:
-#include "mpi.h"
-#include <parmetis.h>
-#endif
-
 namespace LifeV
 {
 
