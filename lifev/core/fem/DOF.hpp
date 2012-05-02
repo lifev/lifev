@@ -488,7 +488,7 @@ std::vector<Int> DOF::globalElements( MeshType& mesh )
 
     // insert dof associated to geometric entities owned by current proc
     const UInt pointOffset( 0 );
-    const UInt ridgeOffset( pointOffset + M_elementDofPattern.nbDofPerPeak() * mesh.numGlobalPoints() );
+    const UInt ridgeOffset( pointOffset + M_elementDofPattern.nbDofPerPeak() * mesh.numGlobalPeaks() );
     const UInt facetOffset( ridgeOffset + M_elementDofPattern.nbDofPerRidge() * mesh.numGlobalRidges() );
     const UInt elementOffset( facetOffset + M_elementDofPattern.nbDofPerFacet() * mesh.numGlobalFacets() );
 
