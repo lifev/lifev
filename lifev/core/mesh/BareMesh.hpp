@@ -53,6 +53,7 @@ namespace LifeV
 template <typename GeoShape>
 struct RegionMeshBare{
     UInt nDimensions;
+    ID regionMarkerID;
     ReferenceShapes refShape;
     ReferenceShapes bRefShape;
     ArraySimple<Real> points;

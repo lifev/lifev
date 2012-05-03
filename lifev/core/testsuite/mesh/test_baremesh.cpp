@@ -114,7 +114,7 @@ int main(int argc, char** argv)
     readINRIAMeshFile( bareMesh, fname, m );
 
     mesh_Type aMesh;
-    convertBareMesh ( bareMesh, aMesh, m );
+    convertBareMesh ( bareMesh, aMesh );
 
     std::cout << " **********************************************************" << std::endl;
 

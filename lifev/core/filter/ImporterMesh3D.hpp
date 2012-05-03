@@ -99,7 +99,6 @@ template <typename GeoShape, typename MC>
 bool
 convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
                   RegionMesh<GeoShape, MC>& mesh,
-                  markerID_Type               regionFlag,
                   bool                        verbose = false,
                   InternalEntitySelector      iSelect = InternalEntitySelector() )
 {
@@ -178,7 +177,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
     mesh.setMaxNumVolumes      ( numberElements, true );
     mesh.setMaxNumGlobalVolumes( numberElements );
 
-    mesh.setMarkerID           ( regionFlag ); // Add Marker to list of Markers
+    mesh.setMarkerID           ( bareMesh.regionMarkerID );
 
     typedef typename RegionMesh<GeoShape, MC>::point_Type  point_Type;
     typedef typename RegionMesh<GeoShape, MC>::edge_Type   edge_Type;
@@ -1394,6 +1393,8 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
 
     bareMesh.elements.reshape ( GeoShape::S_numPoints, numberVolumes );
     bareMesh.elementsMarkers.resize ( numberVolumes );
+
+    bareMesh.regionMarkerID = regionFlag;
 
     UInt count = 0;
     Int  ibc;
