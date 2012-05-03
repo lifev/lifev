@@ -32,7 +32,7 @@ void MeshEntity::showMe( std::ostream& output) const
     output << " Global ID : " << M_id << " -- " << " Local ID " << M_localId << std::endl;
     Flag::showMe( M_flag, output );
     output << std::endl;
-};
+}
 
 }// namespace LifeV
 
