@@ -151,7 +151,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
     MeshData meshData(dataFile, "mesh");
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type());
+    boost::shared_ptr< mesh_Type > fullMeshPtr( new mesh_Type( *Comm ) );
     readMesh(*fullMeshPtr,meshData);
     if (verbose) std::cout << " done ! " << std::endl;
 

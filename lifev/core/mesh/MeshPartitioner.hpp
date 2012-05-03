@@ -455,7 +455,7 @@ doPartition ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
 
     M_me = M_comm->MyPID();
 
-    meshPtr_Type newMesh ( new MeshType );
+    meshPtr_Type newMesh ( new MeshType( *comm ) );
     M_meshPartitions.reset ( new partMesh_Type( M_numPartitions, newMesh ) );
     newMesh.reset();
 
@@ -480,7 +480,7 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
     meshPtr_Type newMesh;
     for (UInt i = 0; i < M_numPartitions; ++i)
     {
-        newMesh.reset(new MeshType);
+        newMesh.reset( new MeshType( *comm ) );
         M_meshPartitions->push_back(newMesh);
     }
     newMesh.reset();

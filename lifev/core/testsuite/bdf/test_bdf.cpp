@@ -162,7 +162,7 @@ void test_bdf::run()
     //Mesh stuff
     Members->comm->Barrier();
     MeshData meshData(dataFile, ("bdf/" + discretization_section).c_str());
-    boost::shared_ptr<regionMesh> meshPtr( new regionMesh() );
+    boost::shared_ptr<regionMesh> meshPtr( new regionMesh( *( Members->comm ) ) );
     readMesh(*meshPtr,meshData);
     boost::shared_ptr<regionMesh> localMeshPtr;
     {

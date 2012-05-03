@@ -120,7 +120,7 @@ Heart::run()
 
     MeshData meshData;
     meshData.setup(M_heart_fct->M_dataFile, "electric/space_discretization");
-    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( *( M_heart_fct->M_comm ) ) );
     readMesh(*fullMeshPtr, meshData);
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
 

@@ -373,7 +373,7 @@ hyperbolic::run()
     meshData.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the mesh
-    boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh );
+    boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh( *( Members->comm ) ) );
 
     // Set up the mesh
     readMesh( *fullMeshPtr, meshData );

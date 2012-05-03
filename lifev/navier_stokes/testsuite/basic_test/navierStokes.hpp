@@ -625,7 +625,7 @@ NavierStokes<MeshType, Problem>::run()
             // +-----------------------------------------------+
             if (verbose) std::cout << "[Loading the mesh]" << std::endl;
 
-            boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
+            boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( *( M_data->comm ) ) );
 
             Int geoDimensions = mesh_Type::S_geoDimensions;
             // Building the mesh from the source

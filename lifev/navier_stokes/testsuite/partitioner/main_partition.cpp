@@ -90,7 +90,7 @@ int main( int argc, char** argv )
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr( new RegionMesh<LinearTetra>( *comm ) );
     readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner<RegionMesh<LinearTetra> > meshPart;

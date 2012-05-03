@@ -432,7 +432,7 @@ typename ExporterHDF5Mesh3D<MeshType>::graphPtr_Type ExporterHDF5Mesh3D<MeshType
 template <typename MeshType>
 typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>::getMeshPartition()
 {
-    meshPtr_Type tempMesh(new MeshType);
+    meshPtr_Type tempMesh( new MeshType ( *M_comm ) );
 
     UInt elementNodes, faceNodes;
     switch (MeshType::elementShape_Type::S_shape)

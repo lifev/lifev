@@ -48,6 +48,9 @@
 #include <Epetra_ConfigDefs.h>
 #ifdef HAVE_MPI
 #include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
 #endif
 
 //Tell the compiler to restore the warning previously silented
@@ -92,6 +95,9 @@ int main(int argc, char** argv)
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
+    boost::shared_ptr<Epetra_Comm> comm( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+#else
+    boost::shared_ptr<Epetra_Comm> comm( new Epetra_SerialComm );
 #endif
 
     GetPot datafile( "data_baremesh" );
@@ -113,7 +119,7 @@ int main(int argc, char** argv)
     bareMesh_Type bareMesh;
     readINRIAMeshFile( bareMesh, fname, m );
 
-    mesh_Type aMesh;
+    mesh_Type aMesh( *comm );
     convertBareMesh ( bareMesh, aMesh );
 
     std::cout << " **********************************************************" << std::endl;

@@ -188,13 +188,13 @@ public:
      */
 
     //! Default constructor
-    explicit RegionMesh();
+    explicit RegionMesh( const Epetra_Comm & comm );
 
     //! Default constructor
     /**
      *  @param id marker of the RegionMesh
      */
-    explicit RegionMesh( UInt id );
+    explicit RegionMesh( UInt id, const Epetra_Comm & comm );
 
     //! Destructor
     virtual ~RegionMesh();
@@ -1924,6 +1924,9 @@ private:
     typename  MC::regionMarker_Type M_marker;
     MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > M_meshTransformer;
 
+    // communicator
+    Epetra_Comm const & M_comm;
+
     //used to select the correct method specialization
     geoDim_Type M_geoDim;
 
@@ -2166,26 +2169,27 @@ private:
 void set_switches_for_regionmesh( Switch & sw );
 
 template <typename GEOSHAPE, typename MC>
-inline RegionMesh<GEOSHAPE, MC>::RegionMesh() :
-MeshEntity(),
-switches(),
-M_numVolumes( 0 ),
-M_numVertices( 0 ),
-M_numBVertices( 0 ),
-M_numPoints( 0 ),
-M_numBPoints( 0 ),
-M_numFaces( 0 ),
-M_numBFaces( 0 ),
-M_numEdges( 0 ),
-M_numBEdges( 0 ),
-M_meshTransformer(*this)
+inline RegionMesh<GEOSHAPE, MC>::RegionMesh( Epetra_Comm const & comm ):
+    MeshEntity(),
+    switches(),
+    M_numVolumes( 0 ),
+    M_numVertices( 0 ),
+    M_numBVertices( 0 ),
+    M_numPoints( 0 ),
+    M_numBPoints( 0 ),
+    M_numFaces( 0 ),
+    M_numBFaces( 0 ),
+    M_numEdges( 0 ),
+    M_numBEdges( 0 ),
+    M_meshTransformer( *this ),
+    M_comm( comm )
 { //Modif Miguel:11/2002
     set_switches_for_regionmesh( switches );
 }
 
 
 template <typename GEOSHAPE, typename MC>
-inline RegionMesh<GEOSHAPE, MC>::RegionMesh( UInt id ) :
+inline RegionMesh<GEOSHAPE, MC>::RegionMesh( UInt id, Epetra_Comm const & comm ) :
 MeshEntity( id ),
 switches(),
 M_numVolumes( 0 ),

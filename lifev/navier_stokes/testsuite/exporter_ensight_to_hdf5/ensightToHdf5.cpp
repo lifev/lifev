@@ -133,7 +133,7 @@ EnsightToHdf5::run()
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type ( *( d->comm ) ) );
     readMesh(*fullMeshPtr, meshData);
 
     // writeMesh("test.mesh", *fullMeshPtr);

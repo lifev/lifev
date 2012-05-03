@@ -352,7 +352,7 @@ darcy::run()
     meshData.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the the mesh
-    boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh );
+    boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh( *( Members->comm ) ) );
 
     // Select if the mesh is structured or not
     if ( meshData.meshType() != "structured" )

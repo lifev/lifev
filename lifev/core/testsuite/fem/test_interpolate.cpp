@@ -118,8 +118,8 @@ int main(int argc, char** argv )
 
     // Import/Generate an hexahedral and  a Tetrahedral mesh.
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshTetraPtr(new RegionMesh<LinearTetra>);
-    boost::shared_ptr<RegionMesh<LinearHexa> > fullMeshHexaPtr(new RegionMesh<LinearHexa>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshTetraPtr( new RegionMesh<LinearTetra>( *Comm ) );
+    boost::shared_ptr<RegionMesh<LinearHexa> > fullMeshHexaPtr( new RegionMesh<LinearHexa>( *Comm ) );
     UInt nEl(10);
     GetPot dataFile("./data");
     MeshData meshData(dataFile, "interpolate/space_discretization");

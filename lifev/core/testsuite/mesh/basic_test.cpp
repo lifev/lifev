@@ -48,6 +48,9 @@
 #include <Epetra_ConfigDefs.h>
 #ifdef HAVE_MPI
 #include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
 #endif
 
 //Tell the compiler to restore the warning previously silented
@@ -89,6 +92,9 @@ int main(int argc, char** argv)
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
+    boost::shared_ptr<Epetra_Comm> comm( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+#else
+    boost::shared_ptr<Epetra_Comm> comm( new Epetra_SerialComm );
 #endif
 
 
@@ -103,7 +109,7 @@ int main(int argc, char** argv)
     ofstream ofile(outfile.c_str());
     if (ofile.fail()) {cerr<<" Error: Cannot creat output file"<<endl; abort();}
 
-    RegionMesh<LinearTetra> aMesh;
+    RegionMesh<LinearTetra> aMesh( *comm );
     typedef RegionMesh<LinearTetra> mesh_Type;
     //    aMesh.test3DBuilder();
     //    aMesh.readMppFile(mystream, id, m);

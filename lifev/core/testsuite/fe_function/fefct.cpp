@@ -133,7 +133,7 @@ fefct::run()
     meshData.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the the mesh
-    regionMeshPtr_Type fullMeshPtr( new regionMesh_Type );
+    regionMeshPtr_Type fullMeshPtr( new regionMesh_Type( *( Members->comm ) ) );
 
     // Set up the mesh
     readMesh( *fullMeshPtr, meshData );

@@ -191,7 +191,7 @@ problem::run()
     MeshData             meshData;
     meshData.setup(dataFile, "problem/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( *( members->comm ) ) );
     readMesh(*fullMeshPtr, meshData);
 
     boost::shared_ptr<mesh_Type > localMeshPtr;
