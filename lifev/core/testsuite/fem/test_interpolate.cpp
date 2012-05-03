@@ -128,34 +128,53 @@ int main(int argc, char** argv )
 
 
     // Partition the meshes using ParMetis
-    MeshPartitioner < RegionMesh<LinearHexa>  >  meshPartHexa( fullMeshHexaPtr, Comm );
-    MeshPartitioner < RegionMesh<LinearTetra>  > meshPartTetra( fullMeshTetraPtr, Comm );
+    boost::shared_ptr<RegionMesh<LinearHexa> > localMeshHexaPtr;
+    {
+        // Create the partitioner
+        MeshPartitioner< RegionMesh<LinearHexa> >  meshPartHexa;
 
+        // Partition the mesh using ParMetis
+        meshPartHexa.doPartition ( fullMeshHexaPtr, Comm );
+
+        // Get the local mesh
+        localMeshHexaPtr = meshPartHexa.meshPartition();
+    }
+    boost::shared_ptr<RegionMesh<LinearTetra> > localMeshTetraPtr;
+    {
+        // Create the partitioner
+        MeshPartitioner< RegionMesh<LinearTetra> >  meshPartTetra;
+
+        // Partition the mesh using ParMetis
+        meshPartTetra.doPartition ( fullMeshTetraPtr, Comm );
+
+        // Get the local mesh
+        localMeshTetraPtr = meshPartTetra.meshPartition();
+    }
 
     //Building finite element spaces
 
     //Finite element space of the first scalar field - P0
-    FESpaceTetraPtr_Type feSpaceP0 ( new FESpaceTetra_Type ( meshPartTetra, feTetraP0, quadRuleTetra4pt,
+    FESpaceTetraPtr_Type feSpaceP0 ( new FESpaceTetra_Type ( localMeshTetraPtr, feTetraP0, quadRuleTetra4pt,
                                                               quadRuleTria4pt, 3, Comm ) );
 
     //Finite element space of the second scalar field - P1
-    FESpaceTetraPtr_Type feSpaceP1 ( new FESpaceTetra_Type ( meshPartTetra, feTetraP1, quadRuleTetra4pt,
+    FESpaceTetraPtr_Type feSpaceP1 ( new FESpaceTetra_Type ( localMeshTetraPtr, feTetraP1, quadRuleTetra4pt,
                                                               quadRuleTria4pt, 3, Comm ) );
 
     // Finite element space of the second scalar field - P1bubble
-    FESpaceTetraPtr_Type feSpaceP1Bubble ( new FESpaceTetra_Type ( meshPartTetra, feTetraP1bubble, quadRuleTetra15pt,
+    FESpaceTetraPtr_Type feSpaceP1Bubble ( new FESpaceTetra_Type ( localMeshTetraPtr, feTetraP1bubble, quadRuleTetra15pt,
                                                                   quadRuleTria4pt, 3, Comm ) );
 
     // Finite element space of the second scalar field - P2
-    FESpaceTetraPtr_Type feSpaceP2 ( new FESpaceTetra_Type ( meshPartTetra, feTetraP2, quadRuleTetra4pt,
+    FESpaceTetraPtr_Type feSpaceP2 ( new FESpaceTetra_Type ( localMeshTetraPtr, feTetraP2, quadRuleTetra4pt,
                                                                   quadRuleTria4pt, 3, Comm ) );
 
     // Finite element space of the first scalar field - Q0
-    FESpaceHexaPtr_Type feSpaceQ0 ( new FESpaceHexa_Type ( meshPartHexa, feHexaQ0, quadRuleHexa8pt,
+    FESpaceHexaPtr_Type feSpaceQ0 ( new FESpaceHexa_Type ( localMeshHexaPtr, feHexaQ0, quadRuleHexa8pt,
                                                               quadRuleQuad4pt, 2, Comm ) );
 
     // Finite element space of the second scalar field - Q1
-    FESpaceHexaPtr_Type feSpaceQ1 ( new FESpaceHexa_Type ( meshPartHexa, feHexaQ1, quadRuleHexa8pt,
+    FESpaceHexaPtr_Type feSpaceQ1 ( new FESpaceHexa_Type ( localMeshHexaPtr, feHexaQ1, quadRuleHexa8pt,
                                                               quadRuleQuad4pt, 2, Comm ) );
 
     //vectors containing the original and final  FE spaces
