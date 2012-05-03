@@ -527,7 +527,7 @@ public:
      *  methods in #include MeshChecks.hpp
      *
      */
-    void updateElementFacets( bool createFaces = false, const bool verbose = false, UInt estimateFacetNumber = 0 );
+    void updateElementFacets( bool createFaces = false, bool verbose = false, UInt estimateFacetNumber = 0 );
 
 
 
@@ -3276,6 +3276,8 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verbose, UInt ee, bool renumber )
 {
+    verbose = verbose && ( M_comm.MyPID() == 0 );
+
     if(S_geoDimensions != 3)
     {
         ERROR_MSG("RegionMesh::updateElementRidges, It is not possible to use this method with 2D and 1D geometries.");
@@ -3442,8 +3444,9 @@ RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verbose
 
 template <typename GEOSHAPE, typename MC>
 void
-RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt ef )
+RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, bool verbose, UInt ef )
 {
+    verbose = verbose && ( M_comm.MyPID() == 0 );
 
     typedef BareEntitySelector<typename facetShape_Type::BasRefSha> bareEntitySelector_Type;
     typedef typename bareEntitySelector_Type::bareEntity_Type bareFacet_type;
