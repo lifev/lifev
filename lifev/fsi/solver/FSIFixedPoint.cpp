@@ -229,14 +229,19 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     //*M_rhsNew  *= alpha;
 
 
-        if (recomputeMatrices)
-        {
-            this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
+    if(M_data->dataFluid()->conservativeFormulation())
+      *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+    if (recomputeMatrices)
+      {
+
+	this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
         }
-        else
-        {
-            this->M_fluid->updateRightHandSide( *M_rhs );
-        }
+    else
+      {
+	this->M_fluid->updateRightHandSide( *M_rhs );
+      }
+    if(!M_data->dataFluid()->conservativeFormulation())
+      *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
 
         //	if(this->algorithm()=="RobinNeumann") this->updatealphaf(this->veloFluidMesh());// this->setAlphaf();
 

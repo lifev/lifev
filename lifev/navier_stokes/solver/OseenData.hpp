@@ -372,6 +372,12 @@ public:
      */
     UInt            nbPolygonEdges()              const { return M_NbPolygonEdges; }
 
+    //! Returns wether the formulation of the momentum conservation equation is written in conservative form or not.
+    /*!
+     * @return M_conservativeFormulation the output flag
+     */
+    bool            conservativeFormulation()              const { return M_conservativeFormulation; }
+
     //@}
 
 protected:
@@ -450,6 +456,7 @@ private:
     UInt             M_NbPolygonEdges; // number of edges of the polygon (in mesh) describing the circle
 
     StringDataList   M_stabilizationList;
+    bool             M_conservativeFormulation;
 };
 
 

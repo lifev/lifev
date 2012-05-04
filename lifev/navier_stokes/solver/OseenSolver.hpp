@@ -812,7 +812,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
         M_un                     ( new vector_Type(M_localMap) )
 {
-    if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
+    // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
         M_ipStabilization.setFeSpaceVelocity(M_velocityFESpace);
         M_ipStabilization.setViscosity(M_oseenData->viscosity() );
@@ -869,7 +869,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
         M_un                     ( /*new vector_Type(M_localMap)*/ )
 {
-    if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
+    // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
         M_ipStabilization.setFeSpaceVelocity(M_velocityFESpace);
         M_ipStabilization.setViscosity(M_oseenData->viscosity() );
@@ -925,7 +925,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
         M_un                     ( new vector_Type(M_localMap) )
 {
-    if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
+    // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
         M_ipStabilization.setFeSpaceVelocity(M_velocityFESpace);
         M_ipStabilization.setViscosity(M_oseenData->viscosity() );
@@ -954,7 +954,7 @@ OseenSolver<MeshType, SolverType>::setUp( const GetPot& dataFile )
         M_linearSolver->setDataFromGetPot( dataFile, "fluid/solver" );
     }
 
-    M_stabilization = dataFile( "fluid/ipstab/use", 0 );
+    M_stabilization = dataFile( "fluid/ipstab/use",  (&M_velocityFESpace.refFE() == &M_pressureFESpace.refFE()) );
     M_steady        = dataFile( "fluid/miscellaneous/steady", 0 );
     if(M_stabilization)
     {
@@ -1361,12 +1361,14 @@ updateSystem( const Real         alpha,
                 }
             }
 
-
-            // ALE term: - rho div w u v
-            mass_divw( - M_oseenData->density(),
-                       M_wLoc,
-                       M_elementMatrixStiff,
-                       M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+	    if(M_oseenData->conservativeFormulation())
+	      {
+		// ALE term: - rho div(w) u v
+		mass_divw( - M_oseenData->density(),
+			   M_wLoc,
+			   M_elementMatrixStiff,
+			   M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+	      }
 
             // ALE stab implicit: 0.5 rho div u w v
             mass_divw( 0.5*M_oseenData->density(),
@@ -1374,12 +1376,12 @@ updateSystem( const Real         alpha,
                        M_elementMatrixStiff,
                        M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
-            // Stabilising term: div u^n u v
+            // Stabilising term: -rho div(u^n) u v
             if ( M_divBetaUv )
-                mass_divw( 0.5*M_oseenData->density(),
-                           M_elementRightHandSide,
-                           M_elementMatrixStiff,
-                           M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+	      mass_divw( -0.5*M_oseenData->density(),
+			 M_uLoc,
+			 M_elementMatrixStiff,
+			 M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // compute local convective terms
             advection( M_oseenData->density(),

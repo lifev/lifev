@@ -727,9 +727,9 @@ NavierStokes<MeshType, Problem>::run()
             if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
             OseenSolver< mesh_Type > fluid (oseenData,
-                                                      *uFESpace,
-                                                      *pFESpace,
-                                                      M_data->comm);
+					    *uFESpace,
+					    *pFESpace,
+					    M_data->comm);
 
             MapEpetra fullMap(fluid.getMap());
 
@@ -914,7 +914,6 @@ NavierStokes<MeshType, Problem>::run()
 
                 bdf.bdfVelocity().extrapolation(beta); // Extrapolation for the convective term
                 bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
-                rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
                 fluid.getDisplayer().leaderPrint("alpha ", alpha);
                 fluid.getDisplayer().leaderPrint("\n");
@@ -923,7 +922,14 @@ NavierStokes<MeshType, Problem>::run()
                 fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.norm2());
                 fluid.getDisplayer().leaderPrint("\n");
 
+		if(oseenData->conservativeFormulation())
+		  rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+
                 fluid.updateSystem( alpha, beta, rhs );
+
+		if(!oseenData->conservativeFormulation())
+		  rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+
                 fluid.iterate( bcH );
 
                 bdf.bdfVelocity().shiftRight( *fluid.solution() );

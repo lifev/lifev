@@ -541,16 +541,22 @@ FSIMonolithic::assembleFluidBlock(UInt iter, const vector_Type& solution)
     M_fluidBlock.reset(new  FSIOperator::fluidPtr_Type::value_type::matrix_Type(*M_monolithicMap));
 
     Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 )/M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
-    M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
-    this->M_fluid->updateStabilization(*M_fluidBlock);
-
+    if(!M_data->dataFluid()->conservativeFormulation())
+      {
+	M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
+      }
     if (iter==0)
-    {
+      {
         M_resetPrec=true;
         M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
         *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());//(M_bdf->rhsContributionFirstDerivative()) ;
         couplingRhs(M_rhs/*, M_fluidTimeAdvance->stencil()[0]*/);
-    }
+      }
+    if(M_data->dataFluid()->conservativeFormulation())
+      {
+	M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
+      }
+    this->M_fluid->updateStabilization(*M_fluidBlock);
 }
 
 void FSIMonolithic::updateRHS()

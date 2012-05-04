@@ -70,7 +70,8 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
+#define BL 1
+#define HAVE_NS_PREC 1
 #include <cassert>
 #include <cstdlib>
 
@@ -97,6 +98,9 @@
 
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
+#ifdef HAVE_NS_PREC
+#include <life/lifealg/PreconditionerPCD.hpp>
+#endif
 
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/StructuralSolver.hpp>
@@ -157,6 +161,10 @@ public:
 
         std::cout<<"register MonolithicGE : "<<FSIMonolithicGE::S_register<<std::endl;
         std::cout<<"register MonolithicGI : "<<FSIMonolithicGI::S_register<<std::endl;
+#ifdef HAVE_NS_PREC
+        std::cout<<"register PCD : "<<PreconditionerPCD::S_register<<std::endl;
+#endif
+
 	//bool reg=FSIMonolithicGI::S_register&&FSIMonolithicGE::S_register;
 
         M_data = dataPtr_Type( new data_Type() );
