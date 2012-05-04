@@ -807,6 +807,8 @@ void
 setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                         std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
+    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+
     typename MeshType::edge_Type * edgePtr = 0;
     UInt                  counter( 0 );
 
@@ -853,6 +855,8 @@ void
 setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                         std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
+    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+
     typename MeshType::face_Type * facePtr = 0;
     UInt                  counter( 0 );
 
@@ -901,6 +905,8 @@ void
 setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                          std::ostream& /*errorStream*/ = std::cerr, bool verbose = false )
 {
+    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+
     // First looks at points whose marker has already been set
     std::vector<bool> isDefinedPointMarker( mesh.storedPoints(), false );
 
@@ -1064,6 +1070,8 @@ void
 fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
                    std::ostream & /* errorStream */ = std::cerr, bool verbose = true )
 {
+    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+
     ASSERT_PRE( mesh.numPoints() > 0, "The point list should not be empty" );
     ASSERT_PRE( mesh.numBFaces() > 0,
                 "The boundary faces list should not be empty" );
@@ -1159,7 +1167,7 @@ bool rearrangeFaces( MeshType & mesh,
                        bool verbose = false,
                        temporaryFaceContainer_Type * externalFaceContainer = 0 )
 {
-
+    verbose = verbose && ( mesh.comm().MyPID() == 0 );
     typedef typename MeshType::faces_Type faceContainer_Type;
     typedef typename MeshType::face_Type face_Type;
 
@@ -1203,7 +1211,7 @@ bool rearrangeFaces( MeshType & mesh,
     if ( mesh.numBFaces() == 0 )
     {
         errorStream << "ERROR: Boundary Element counter was not set" << std::endl;
-        logStream << "ERROR: Boundary Element counter was not set" << std::endl;
+        if( verbose ) logStream << "ERROR: Boundary Element counter was not set" << std::endl;
         errorStream << "I Cannot proceed because the situation is ambiguous"
                         << std::endl;
         errorStream << "Please check and eventually either: (a) call buildFaces()" << std::endl;
@@ -1307,7 +1315,7 @@ bool fixBoundaryFaces( MeshType & mesh,
                        bool verbose = false,
                        temporaryFaceContainer_Type * externalFaceContainer = 0 )
 {
-
+    verbose = verbose && ( mesh.comm().MyPID() == 0 );
     typedef typename MeshType::volumes_Type volumeContainer_Type;
     typedef typename MeshType::volume_Type volume_Type;
     typedef typename MeshType::faces_Type faceContainer_Type;
@@ -1535,6 +1543,7 @@ bool buildFaces( MeshType & mesh,
                  bool verbose = false,
                  temporaryFaceContainer_Type * externalFaceContainer = 0 )
 {
+    verbose = verbose && ( mesh.comm().MyPID() == 0 );
     UInt                                  point1Id, point2Id, point3Id, point4Id;
     typename MeshType::elementShape_Type   volumeShape;
     typedef typename MeshType::volumes_Type    volumeContainer_Type;
@@ -1871,6 +1880,7 @@ bool buildEdges( MeshType & mesh,
                  bool verbose = false,
                  temporaryEdgeContainer_Type * externalEdgeContainer = 0 )
 {
+    verbose = verbose && ( mesh.comm().MyPID() == 0 );
     typedef typename MeshType::volumes_Type volumeContainer_Type;
     typedef typename MeshType::faces_Type faceContainer_Type;
     typedef typename MeshType::volume_Type volume_Type;
@@ -2083,12 +2093,13 @@ template <typename MeshType>
 void
 p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 {
+    bool verbose ( mesh.comm().MyPID() == 0 );
 
     typedef typename MeshType::elementShape_Type  GeoShape;
     typedef typename MeshType::facetShape_Type GeoBShape;
     ASSERT_PRE( GeoShape::S_numPoints > 4, "p2MeshFromP1Data ERROR: we need a P2 mesh" );
 
-    logStream << "Building P2 mesh points and connectivities from P1 data"
+    if ( verbose ) logStream << "Building P2 mesh points and connectivities from P1 data"
                     << std::endl;
 
 
@@ -2105,7 +2116,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
     std::pair<BareEdge, bool>            bareEdgeToBoolPair;
     typename MeshType::elementShape_Type      elementShape;
 
-    logStream << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
+    if ( verbose ) logStream << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
     UInt numBoundaryEdges = mesh.numBEdges();
     for ( UInt jEdgeId = 0; jEdgeId < mesh.storedEdges(); ++jEdgeId )
     {
@@ -2139,7 +2150,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
     {
         UInt numBoundaryFaces = mesh.numBFaces();
 
-        logStream << "Processing " << mesh.storedFaces() << " Face Edges"
+        if ( verbose ) logStream << "Processing " << mesh.storedFaces() << " Face Edges"
                         << std::endl;
         for ( UInt kFaceId = 0; kFaceId < mesh.storedFaces(); ++kFaceId )
         {
@@ -2176,7 +2187,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
         }
     }
 
-    logStream << "Processing " << mesh.numElements() << " Mesh Elements"
+    if ( verbose ) logStream << "Processing " << mesh.numElements() << " Mesh Elements"
                     << std::endl;
     UInt nev = GeoShape::S_numVertices;
     for ( UInt kElementId = 0; kElementId < mesh.numElements(); ++kElementId )
@@ -2211,7 +2222,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
         }
     }
     /*=============================*/
-    logStream << " ******* Done Construction of P2 Mesh *******"
+    if ( verbose ) logStream << " ******* Done Construction of P2 Mesh *******"
                     << std::endl << std::endl;
 }
 
