@@ -237,7 +237,7 @@ public:
      *  @return Severity level. If different from 0 the mesh has problem. If positive the problems are such that the mesh may not
      *  work in any case. If less than zero it may work in some cases.
      */
-    int check( int level = 0, bool const fix = false, bool const verbose = true, std::ostream & out = std::cerr );
+    int check( int level = 0, bool const fix = false, bool verbose = true, std::ostream & out = std::cerr );
 
     //! Display local to global mapping.
     /**
@@ -2921,8 +2921,9 @@ RegionMesh<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
 
 template <typename GEOSHAPE, typename MC>
 inline int
-RegionMesh<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, std::ostream & out )
+RegionMesh<GEOSHAPE, MC>::check( int level, bool const fix, bool verb, std::ostream & out )
 {
+    verb = verb && ( M_comm.MyPID() == 0 );
     int severity = 0;
     Switch testsw;
     if ( verb )
@@ -2950,22 +2951,25 @@ RegionMesh<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, std
 
     if ( pointList.size() != M_numPoints )
     {
-        out << " Point list size " << pointList.size() << " not equal to internal counter value "
+        if ( verb ) out << " Point list size " << pointList.size() << " not equal to internal counter value "
                         << M_numPoints << std::endl;
         if ( fix )
         {
             M_numPoints = pointList.size();
-            out << "Fixed";
-            out.flush();
+            if ( verb )
+            {
+                out << "Fixed"; out.flush();
+            }
         }
     }
 
     if ( edgeList.size() == 0 )
     {
         if ( verb )
+        {
             out << "WARNING: No Edges Stored" << std::endl;
-        if ( verb )
             out << "MAY NOT WORK IF WE HAVE DOF ON EDGES AND ESSENTIAL BC!!!!" << std::endl;
+        }
         severity = -1;
         unsetLinkSwitch( "HAS_ALL_RIDGES" );
         unsetLinkSwitch( "HAS_BOUNDARY_RIDGES" );
@@ -2998,9 +3002,10 @@ RegionMesh<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, std
     if ( faceList.size() == 0 )
     {
         if ( verb )
+        {
             out << "ERROR: No Faces Stored: at least boundary faces are needed" << std::endl;
-        if ( verb )
             out << "" << std::endl;
+        }
         severity = 1;
         unsetLinkSwitch( "HAS_ALL_FACETS" );
         unsetLinkSwitch( "HAS_BOUNDARY_FACETS" );
@@ -3037,13 +3042,16 @@ RegionMesh<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, std
         severity = 4;
     if ( count != M_numBPoints )
     {
-        out << "Num Boundary points " << count << " not equal to internal counter value "
+        if ( verb ) out << "Num Boundary points " << count << " not equal to internal counter value "
                         << M_numBPoints << std::endl;
         if ( ( count != 0 ) & fix )
         {
             M_numBPoints = count;
-            out << "Fixed Counter";
-            out.flush();
+            if ( verb )
+            {
+                out << "Fixed Counter";
+                out.flush();
+            }
         }
     }
 
@@ -3051,28 +3059,28 @@ RegionMesh<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, std
     {
         severity = 6;
 
-        out << " SEVERITY ERROR: internal Vertices Counter unset";
+        if ( verb ) out << " SEVERITY ERROR: internal Vertices Counter unset";
     }
 
     if ( M_numPoints == 0 )
     {
         severity = 6;
-        out << " SEVERITY ERROR: internal Points Counter unset";
+        if ( verb ) out << " SEVERITY ERROR: internal Points Counter unset";
     }
     if ( M_numPoints == 0 )
     {
         severity = 6;
-        out << " SEVERITY ERROR: internal Points Counter unset";
+        if ( verb ) out << " SEVERITY ERROR: internal Points Counter unset";
     }
     if ( M_numBPoints == 0 )
     {
         severity = 6;
-        out << " SEVERITY ERROR: boundary Points Counter unset";
+        if ( verb ) out << " SEVERITY ERROR: boundary Points Counter unset";
     }
     if ( M_numBVertices == 0 )
     {
         severity = 6;
-        out << " SEVERITY ERROR: boundary Vertices Counter unset";
+        if ( verb ) out << " SEVERITY ERROR: boundary Vertices Counter unset";
     }
 
     if ( verb )
