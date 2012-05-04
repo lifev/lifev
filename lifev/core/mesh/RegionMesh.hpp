@@ -248,6 +248,9 @@ public:
     //! Return the handle to perform transormations on the mesh
     inline MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > & meshTransformer();
 
+    //! Return the communicator
+    const Epetra_Comm & comm();
+
     /** @} */ // End of group Utilities
 
     /** @name Switches Methods
@@ -3665,6 +3668,13 @@ inline MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > &
 RegionMesh<GEOSHAPE, MC>::meshTransformer()
 {
     return this->M_meshTransformer;
+}
+
+template <typename GEOSHAPE, typename MC>
+inline Epetra_Comm const &
+RegionMesh<GEOSHAPE, MC>::comm()
+{
+    return this->M_comm;
 }
 
 } // End of namespace LifeV
