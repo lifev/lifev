@@ -1,0 +1,255 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief DataStructure - File containing a data container for wall tension analysis
+ *
+ *  @version 1.0
+ *  @date 19-04-2012
+ *  @author Paolo Tricerri
+ *
+ *  @contributor Paolo Tricerri <paolo.tricerri@epfl.ch>
+ *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
+ */
+
+#ifndef WallTensionEstimatorData_H
+#define WallTensionEstimatorData_H
+
+#include <string>
+#include <iostream>
+#include <map>
+
+#include <boost/shared_ptr.hpp>
+
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/StringUtility.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+
+namespace LifeV
+{
+
+//! DataElasticStructure - Data container for solid problems with elastic structure
+class WallTensionEstimatorData
+{
+public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef typename std::vector<std::string > iteration_Types:
+    typedef typename std::vector<Real > time_Types:
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Empty Constructor
+    WallTensionEvaluatorData();
+
+    //! Copy constructor
+    /*!
+     * @param WallTensionEstimatorData - WallTensionEstimatorData
+     */
+    WallTensionEstimatorData( const WallTensionEstimatorData& wallTensionEstimatorData );
+
+    //! Destructor
+    virtual ~WallTensionEstimatorData(){};
+
+    //@}
+
+
+    //! @name Operators
+    //@{
+
+    //! Operator=
+    /*!
+     * @param WallTensionEstimatorData - WallTensionEstimatorData
+     */
+    WallTensionEstimatorData& operator=( const WallTensionEstimatorData& wallTensionEstimatorData );
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Read the dataFile and set all the quantities
+    /*!
+     * @param dataFile data file
+     * @param section section of the file
+     */
+    void setup( const GetPot& dataFile, const std::string& section = "analysis" );
+
+    //! Display the values
+    void showMe( std::ostream& output = std::cout ) const;
+
+    //@}
+
+
+    //! @name Set methods
+    //@{
+
+    //! Set nameFile
+    /*!
+     * @param nameFile name of the post-processing file to be opened
+     */
+    void setNameFile( const  std::string& nameFile) { M_nameFile = nameFile; }
+
+    //! Set Analysis Type
+    /*!
+     * @param analysis Type of analysis that can be performed
+     */
+    void setAnalysisType( const std::string& analysisType) { M_analysisType = analysisType; }
+
+    //! Set initialTime
+    /*!
+     * @param initial Time initial of the analysis
+     */
+    void setInitialTime( const Real& initialTime ) { M_initialTime = initialTime; }
+
+    //! Set final Time
+    /*!
+     * @param final Time final time of the analysis
+     */
+    void setFinalTime( const Real& finalTime ) { M_finalTime = finalTime; }
+
+    //! Set starting iteration
+    /*!
+     * @param starting iteration
+     */
+    void setIterationStart( const Real& iterStart ) { M_iterStart = iterStart; }
+
+    //! Set final Time
+    /*!
+     * @param final Time final time of the analysis
+     */
+    void setIterationEnd ( const Real& iterEnd ) { M_iterEnd = iterEnd; }
+
+    //@}
+
+
+    //! @name Get methods
+    //@{
+
+    //! Get nameFile
+    /*!
+     * @return std::string with the name of the file used for the analysis
+     */
+     const std::string&& nameFile() const { return M_nameFile; }
+
+    //! Get analysisType
+    /*!
+     * @return std::string with the type of analysis that has to be performed
+     */
+    const std::string& analysisType() const { return M_analysisType; }
+
+    //! Get initial Time
+    /*!
+     * @return initial Time of the analysis
+     */
+    const time_Type& initialTime() const { return M_initialTime; }
+
+    //! Get initial Time of the interval i
+    /*!
+     * @return initial Time of the i-th interval
+     */
+    const Real initialTime(const UInt i) const { return M_initialTime[i]; }
+
+    //! Get final Time
+    /*!
+     * @return final time of the anaysis
+     */
+    const time_Type& finalTime() const { return M_finalTime; }
+
+    //! Get final Time of the i-th interval
+    /*!
+     * @return final time of the i-th interval
+     */
+    const Real finalTime(const UInt i) const { return M_finalTime[i]; }
+
+    //! Get starting iteration
+    /*!
+     * @return starting iteration
+     */
+    const iteration_Type& iterStart() const { return M_iterStart; }
+
+    //! Get starting iteration of the i-th interval
+    /*!
+     * @return starting iteration of the i-th interval
+     */
+    const std::string& iterStart(const UInt i) const { return M_iterStart[i]; }
+
+
+    //! Get ending iteration
+    /*!
+     * @return ending iteration
+     */
+    const iteration_Type& iterEnd() const { return M_iterEnd; }
+
+    //! Get starting iteration
+    /*!
+     * @return starting iteration
+     */
+    const std::string& iterEnd(const UInt i) const { return M_iterEnd[i]; }
+
+
+    // //! Get solid poisson coefficient
+    // /*!
+    //  * @param material material ID (1 by default)
+    //  * @return Solid poisson coefficient
+    //  */
+    // Real poisson( const UInt& material ) const;
+
+    //@}
+
+private:
+
+    enum M_analysisType {istant,interval};
+
+    //! Name of the file
+    std::string           M_nameFile;
+
+    //! Type of Analysis
+    std::string           M_analysisType;
+
+    //! Initial Time
+    time_Type             M_initialTime;
+    //! Final Time
+    time_Type             M_finalTime;
+
+    //! Initial Time
+    iteration_Type        M_iterStart;
+    //! Final Time
+    iteration_Type        M_iterEnd;
+
+
+};
+
+} // end namespace LifeV
+
+#endif // WallTensionEstimatorData_H
