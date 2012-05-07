@@ -79,7 +79,13 @@
 #include <lifev/structure/fem/AssemblyElementalStructure.hpp>
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 #include <lifev/structure/solver/WallTensionEstimatorData.hpp>
+#include <lifev/structure/solver/StructuralMaterial.hpp>
 
+//Materials
+#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 
 
 namespace LifeV
@@ -120,6 +126,10 @@ public:
     typedef typename boost::shared_ptr<const Displayer>   displayerPtr_Type;
     typedef typename boost::shared_ptr< Exporter<Mesh> >  exporterPtr_Type;
 
+    // Materials
+    typedef StructuralMaterial<Mesh>               material_Type;
+    typedef boost::shared_ptr<material_Type>       materialPtr_Type;
+
 //@}
 
 
@@ -139,19 +149,15 @@ public:
 
     //! Setup the created object of the class WallTensionEstimator
     /*!
-      \param dFespace: the FiniteElement Space
-      \param monolithicMap: the MapEpetra
-      \param offset: the offset parameter used assembling the matrices
       \param dataMaterial: the class containing the VenantKirchhoffElasticData
-      \param analysisData: the class containing the WallTensionEstimatorData
+      \param tensionData: the class containing the WallTensionEstimatorData
+      \param dFESpace: the FiniteElement Space
       \param displayer: the displayer object
     */
-    void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-		const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-		const UInt offset, 
-		const dataPtr_Type& dataMaterial, 
-		const analysisDataPtr_Type& analysisData, 
-		const displayerPtr_Type& displayer);
+    void setup( const dataPtr_Type& dataMaterial,
+		const analysisDataPtr_Type& tensionData,
+	        const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+		boost::shared_ptr<Epetra_Comm>&     comm);
 
 
     //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
@@ -211,19 +217,23 @@ public:
   MapEpetra   const& map()     const { return *M_localMap; }
 
   //! Get the FESpace object
-  FESpace<Mesh, MapEpetra>& dFESpace()  {return M_FESpace;}
+  FESpace<Mesh, MapEpetra>& dFESpace()  {return *M_FESpace;}
+
+  //! Get the pointer to the FESpace object
+  boost::shared_ptr<FESpace<Mesh, MapEpetra> > dFESpacePtr()  {return M_FESpace;}
+
 
   //! Get the Stiffness matrix
   matrixPtr_Type const jacobian()    const {return M_jacobian; }
 
-    //! Get the Stiffness matrix
-    virtual matrixPtr_Type const stiffMatrix() const = 0;
+  //! Get the Stiffness matrix
+  virtual matrixPtr_Type const stiffMatrix() const = 0;
 
-    //! Get the Stiffness matrix
-    virtual vectorPtr_Type const stiffVector() const = 0;
+  //! Get the Stiffness matrix
+  virtual vectorPtr_Type const stiffVector() const = 0;
 
-    virtual void Apply( const vector_Type& sol, vector_Type& res) =0;
-
+  virtual void Apply( const vector_Type& sol, vector_Type& res) =0;
+  
 //@}
 
 protected:
@@ -264,8 +274,12 @@ protected:
     //Displayer
     displayerPtr_Type                              M_displayer;
 
+
+    //! Material class
+    materialPtr_Type                               M_material;
+
     //Importer
-    exporterPtr_Type                                M_importer;
+    //exporterPtr_Type                                M_importer;
 
 };
 
@@ -274,14 +288,64 @@ protected:
 //=====================================
 
 template <typename Mesh>
-StructuralMaterial<Mesh>::StructuralMaterial( ):
+WallTensionEstimator<Mesh>::WallTensionEstimator( ):
     M_FESpace                    ( ),
     M_localMap                   ( ),
-    M_jacobian                   ( ),
-    M_offset                     ( 0 )
+    M_offset                     ( 0 ),
+    M_dataMaterial               ( ),
+    M_analysisData               ( ),
+    M_displayer                  ( ),
+    //    M_importer                   ( ),
+    M_detF                       ( 0 ),
+    M_sigma                      ( ),
+    M_deformationF               ( ),
+    M_rightCauchyG               ( ),
+    M_FirstPiola                 ( ),
+    M_invariants                 ( ),
+    M_displ                      ( ),
+    M_material                   ( )
 {
-  //    std::cout << "I am in the constructor of StructuralMaterial" << std::endl;
+  
 }
+
+
+
+//====================================
+// Public Methods
+//===================================
+template <typename Mesh>
+void 
+WallTensionEstimator<Mesh > :: WallTensionEstimator<Mesh > setup( const dataPtr_Type& dataMaterial,
+								  const analysisDataPtr_Type& tensionData,
+								  const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+								  boost::shared_ptr<Epetra_Comm>&     comm)
+
+{
+
+  // Data classes
+  M_dataMaterial = dataMaterial;
+  M_analysisData = tensionData;
+
+  // FESpace and EpetraMap
+  M_FESpace      = dFESpace;
+  M_localMap     = dFESpace->mapPtr();
+
+  // Displayer
+  M_Displayer.reset    (new Displayer(comm));
+
+  // Vector and Tensors
+  M_sigma.reset        (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_deformationF.reset (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_rightCauchyC.reset (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_firstPiola.reset   (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_displ.reset        (new vector_Type(*M_localMap) );
+
+  // Materials
+  M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_dataMaterial->solidType() ) );
+  M_material->setup( dFESpace,M_localMap,M_offset, M_dataMaterial, M_Displayer );
+}
+
+
 
 }
 #endif /*_STRUCTURALMATERIAL_H*/

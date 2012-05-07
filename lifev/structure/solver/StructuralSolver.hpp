@@ -1164,11 +1164,15 @@ StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
     M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
     M_rescaleFactor=dataFile( "solid/rescaleFactor", 0. );
-    UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
-    if (!M_data->young(marker))
-        M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
-    if (!M_data->poisson(marker))
-        M_data->setPoisson(dataFile( "solid/physics/poisson", 0. ), marker);
+    
+    //To be consistent with the master, this has to be removed.
+    //It can interfere with other maps built for the same parameters in VKED
+
+    // UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
+    // if (!M_data->young(marker))
+    //     M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
+    // if (!M_data->poisson(marker))
+    //     M_data->setPoisson(dataFile( "solid/physics/poisson", 0. ), marker);
 }
 
 
