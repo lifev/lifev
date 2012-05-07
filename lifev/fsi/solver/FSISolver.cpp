@@ -254,26 +254,32 @@ FSISolver::initialize( const std::string& /*velFName*/,
 void
 FSISolver::initialize(std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Type> ds0, std::vector< vectorPtr_Type> df0)
 {
-    if (!u0.size()||!ds0.size()||!df0.size())
+  UInt i;
+  if (!u0.size()||!ds0.size()||!df0.size())
     {
-        UInt i;
+      if ( this->isFluid() )
+      {
         for(i=0; i<M_oper->fluidTimeAdvance()->size(); ++i)
-        {
+	  {
             vectorPtr_Type vec(new vector_Type(M_oper->fluid().getMap()));
             u0.push_back(vec);// couplingVariableMap()
-        }
-        for(i=0; i<M_oper->solidTimeAdvance()->size(); ++i)
-        {
-            vectorPtr_Type vec(new vector_Type(M_oper->solid().map()));
-            ds0.push_back(vec);// couplingVariableMap()
-        }
+	  }
         for(i=0; i<M_oper->ALETimeAdvance()->size(); ++i)
-        {
+	  {
             vectorPtr_Type vec(new vector_Type(M_oper->meshMotion().getMap()));
             df0.push_back(vec);// couplingVariableMap()
-        }
-        M_oper->initializeTimeAdvance(u0, ds0, df0);
-        //  M_oper->initializeBDF(*u0);
+	  }
+      }
+      if ( this->isSolid() )
+      {
+        for(i=0; i<M_oper->solidTimeAdvance()->size(); ++i)
+	  {
+            vectorPtr_Type vec(new vector_Type(M_oper->solid().map()));
+            ds0.push_back(vec);// couplingVariableMap()
+	  }
+      }
+      M_oper->initializeTimeAdvance(u0, ds0, df0);
+      //  M_oper->initializeBDF(*u0);
     }
     else
     {

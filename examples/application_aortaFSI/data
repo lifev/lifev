@@ -77,8 +77,8 @@ filename   = solid
 
 [fluid]
 useShapeDerivatives           = false
-semiImplicit                  = false # tells if we advance in time after the first nonlinear iteration or not
-domainVelImplicit             = true  # tells if the domain vel is to be considered implicitly in the convective term
+semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
+domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
 convectiveImplicit            = false  # tells if the velocity is to be considered implicitly in the convective term
 
 [./physics]
@@ -97,10 +97,10 @@ rhoInf          = 1
 typeOfGeneralizedAlpha            = HHT
 
 [../space_discretization]
-mesh_dir  = ./Mesh/
-mesh_file = tube20.mesh #aorta_fluid_scaled.mesh
+mesh_dir  = ./
+mesh_file = fluid3M.mesh #fluid_GreenshieldWeller_20-10-2.mesh # bypass_fluid_coarse_BL_2vols.mesh
+vel_order       = P1Bubble            # P1, P1Bubble, P2
 mesh_order     = P1
-vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
 stiff_strain    = true
 
@@ -112,17 +112,19 @@ steady    = 0
 factor    = 1
 
 [../ipstab]
-use        = 1
-gammaBeta  = 1.
+use        = 0
+gammaBeta  = 0.1
 gammaDiv   = 0.
-gammaPress = 0.005
+gammaPress = 0.0005
 reuse = true
 [../] # physics
 [../] # fluid
 
 [interface]
-fluid_flag      =  1 # default: 1
+fluid_flag      =  200 # default: 1
 tolerance       =  0 # how far points are to be considered the same on the interface
+##fluid_vertex_flag = 1
+
 [../] # interface
 
 [solid]
@@ -134,10 +136,10 @@ rescaleFactor    = 1. # this factor can be used to rescale the structure block
 
 solidType = exponential
 # either linearVenantKirchhof,  nonLinearVenantKirchhof, exponential...
-material_flag = '22 1'
-density   = 1.2               # density
-young     = '4.0E6 4.0E6'
-poisson   = '0.45 0.45'
+material_flag = 1
+density   = 1.               # density
+young     = 1.e7
+poisson   = 0.3
 bulk      = 1e7
 alpha     = 2.5e6
 gamma     = 1
@@ -154,8 +156,8 @@ rhoInf          = 1
 typeOfGeneralizedAlpha            = HHT
 
 [../space_discretization]
-mesh_dir  = ./Mesh/  # the directory where the mesh file is
-mesh_file = vessel20.mesh #aorta_solid_withEdges.mesh  # mesh file
+mesh_dir  = ./ #test_tubes/  # the directory where the mesh file is
+mesh_file = solid3M.mesh #solid_GreenshieldWeller_20-10-2.mesh #bypass_solid_coarse_BL_2vols.mesh  # mesh file
 order     = P1
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
@@ -175,13 +177,13 @@ linesearch = 0
 
 [./solver]
 output          = all # none
-max_iter        = 200
+max_iter        = 800
 poly_ord        = 5
-kspace          = 200
+kspace          = 800
 precond         = dom_decomp
 drop            = 1.00e-4
 ilut_fill       = 2
-tol             = 1.e-6
+tol             = 1.e-5
 
 
 [./aztecoo]
@@ -207,27 +209,29 @@ entry           = 0.
 alphaf = 0.
 alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
 
-[../Composed] #structure, fluid, mesh
+[../Composed] #fluid, structure, mesh
 list                = 'Ifpack Ifpack Ifpack'
-sections            = 'Ifpack1 Ifpack1 Ifpack2'
+sections            = 'Ifpack2 Ifpack1 Ifpack1'
+#list                = 'Ifpack ML ML'
+#sections            = 'Ifpack2 PCDLaplacian PCDLaplacian'
 
 
 
 [../PCD1]
 
- pressure_boundary_conditions        = neumann_to_dirichlet
- set_Ap_boundary_conditions          = true
- set_Fp_boundary_conditions          = true
- pressure_laplacian_operator         = standard
- use_lumped_pressure_mass            = true
+                        pressure_boundary_conditions        = neumann_to_dirichlet
+                        set_Ap_boundary_conditions          = true
+                        set_Fp_boundary_conditions          = true
+                        pressure_laplacian_operator         = standard
+                        use_lumped_pressure_mass            = true
 
- [./subprecs]
- pressure_laplacian_prec = Ifpack
- pressure_laplacian_prec_data_section = Ifpack
- fluid_prec = Ifpack
- fluid_prec_data_section = Ifpack
- pressure_mass_prec = Ifpack
- pressure_mass_prec_data_section = Ifpack
+                [./subprecs]
+                pressure_laplacian_prec = Ifpack
+                pressure_laplacian_prec_data_section = Ifpack
+                fluid_prec = Ifpack
+                fluid_prec_data_section = Ifpack
+                pressure_mass_prec = Ifpack
+                pressure_mass_prec_data_section = Ifpack
 
 [../]
 
@@ -238,6 +242,8 @@ set_Ap_boundary_conditions           = true
 set_Fp_boundary_conditions           = true
 pressure_laplacian_operator          = standard
 use_lumped_pressure_mass             = true
+use_StiffStrain                      = true
+enable_transient                     = true
 
 [./subprecs]
 fluid_prec                           = ML
@@ -245,8 +251,90 @@ fluid_prec_data_section              = DD2Levels2 #linear_system/prec
 pressure_laplacian_prec              = ML
 pressure_laplacian_prec_data_section = PCDLaplacian #linear_system/prec
 pressure_mass_prec                   = ML
-pressure_mass_prec_data_section      = DD2Levels2 #linear_system/prec
+pressure_mass_prec_data_section      = PCDLaplacian #linear_system/prec
 [../]
+
+[../ML1] # preconditioner for the first factor in case our choice was ML
+displayList = false
+default_parameter_list = SA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+prec_type =  MGV # MGV
+    # one-level-postsmoothing , two-level-additive
+    # two-level-hybrid , two-level-hybrid2
+max_levels = 10
+inc_or_dec = increasing
+
+[./energy_minimization]
+enable = true
+type   = 2
+
+#####THE FOLLOWING IS TAKEN BY THE MAXWELL EXAMPLE#########
+[../repartition]
+enable              = 1
+node_max_min_reatio = 1.1
+node_min_per_proc   = 64
+max_min_ratio       = 1.1
+min_per_proc        = 20
+partitioner         = ParMETIS #Zoltan: to be implemented
+##Zoltan_dimensions = 3
+
+[../aggregation]
+type                = Uncoupled # Zoltan
+treshold            = 0.0
+nodes_per_aggregate = 32
+
+[../coarse]
+max_size            = 60
+type                = Amesos-KLU
+################
+
+[../smoother]
+type = IFPACK # IFPACK, Aztec
+pre_or_post = pre
+[../] # end of ML1
+
+
+
+[../ML2]  # preconditioner for the second factor in case our choice was ML
+default_parameter_list = NSSA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+displayList = false
+prec_type = MGV # MGV, MGW
+          # one-level-postsmoothing , two-level-additive
+          # two-level-hybrid , two-level-hybrid2
+
+max_levels = 3
+inc_or_dec = increasing
+
+[./energy_minimization]
+enable = true
+type   = 2
+
+#####THE FOLLOWING IS TAKEN BY THE MAXWELL EXAMPLE#########
+[../repartition]
+enable              = true
+node_max_min_reatio = 1.1
+node_min_per_proc   = 64
+max_min_ratio       = 1.1
+min_per_proc        = 20
+partitioner         = ParMETIS #Zoltan: to be implemented
+##Zoltan_dimensions   = 3
+
+[../aggregation]
+type                = Uncoupled #Zoltan
+treshold            = 0.0
+nodes_per_aggregate = 32
+
+[../coarse]
+max_size            = 60
+#type                = Amesos-KLU
+################
+
+[../smoother]
+type = IFPACK # Aztec, IFPACK
+##pre_or_post = pre
+
+[../] # end of ML2
+
+
 
 
 [../Ifpack1]  # preconditioner for the first factor in case our choice was Ifpack
@@ -339,7 +427,7 @@ partitioner         = ParMETIS #Zoltan: to be implemented
 ##Zoltan_dimensions   = 3
 
 [../aggregation]
-type                = METIS
+type                = Uncoupled #Zoltan
 treshold            = 0.0
 nodes_per_aggregate = 32
 
@@ -372,8 +460,8 @@ keep_info       = 1
 [../time_discretization]
 method          = BDF
 initialtime		= 0.
-endtime			= 0.01
-timestep		= 0.0001
+endtime			= 0.75
+timestep		= 0.001
 BDF_order		= 1
 theta           = 0.5
 gamma            = 0.5
@@ -425,16 +513,47 @@ displayList                 = false
   max_levels              = 2
   inc_or_dec              = increasing
     [./smoother]
-    type                    = IFPACK
+    type                    = 'ML Gauss-Seidel'
+
+    # "Aztec"
+    # "IFPACK"
+    # "Jacobi"
+    # "ML symmetric Gauss-Seidel"
+    # "symmetric Gauss-Seidel"
+    # "ML Gauss-Seidel"
+    # "Gauss-Seidel"
+    # "block Gauss-Seidel"
+    # "symmetric block Gauss-Seidel"
+    # "Chebyshev"
+    # "MLS"
+    # "Hiptmair"
+    # "Amesos-KLU"
+    # "Amesos-Superlu"
+    # "Amesos-UMFPACK"
+    # "Amesos-Superludist"
+    # "Amesos-MUMPS"
+    # "user-defined"
+    # "SuperLU"
+    # "IFPACK-Chebyshev"
+    # "self"
+    # "do-nothing"
+    # "IC"
+    # "ICT"
+    # "ILU"
+    # "ILUT"
+    # "Block Chebyshev"
+    # "IFPACK-Block Chebyshev"
+
     pre_or_post             = pre
-    ifpack_overlap          = 0
+    ifpack_overlap          = 1
+    sweeps                  = 3
     [../coarse]
     type                    = Gauss-Seidel
     sweeps                  = 1
     pre_or_post             = both
     [../aggregation]
-    type                    = Zoltan #METIS
-    nodes_per_aggregate     = 200
+    type                    = Uncoupled #METIS
+    nodes_per_aggregate     = 32 #200
   [../]
 [../]
 
@@ -448,15 +567,31 @@ displayList                 = false
     [./smoother]
     type                    = IFPACK
     pre_or_post             = pre
-    ifpack_overlap          = 0
-    [../coarse]
-    type                    = Gauss-Seidel
+    ifpack_overlap          = 2
+    ifpack_type		    = Amesos #SORa
     sweeps                  = 1
-    pre_or_post             = both
+    [../coarse]
+    type                    = IFPACK
+    sweeps                  = 1
+    pre_or_post             = pre
     [../aggregation]
-    type                    = METIS
-    nodes_per_aggregate     = 200
+    type                    = Uncoupled #METIS
+##    nodes_per_aggregate     = 64 #200
   [../]
+ [../Ifpack]
+ prectype        = Amesos
+ overlap         = 2
+
+ [./fact]
+ level-of-fill                 = 10
+ ilut_level-of-fill            = 4
+ drop_tolerance                = 1.e-10
+ relax_value                   = 0
+
+ [../amesos]
+ solvertype = Amesos_KLU
+
+ [../]
 [../]
 
 
@@ -468,7 +603,8 @@ displayList                 = false
     [./smoother]
     type                    = 'symmetric Gauss-Seidel'
     pre_or_post             = pre
-    ifpack_overlap          = 0
+    sweeps                  = 4
+    ifpack_overlap          = 2
     [../coarse]
     type                    = Amesos-KLU
     max_size                = 500
