@@ -108,10 +108,10 @@ public:
   typedef LifeV::RegionMesh<LinearTetra>                                       mesh_Type;
 
   // Filters
-  typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > filterPtr_Type;
+  typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >                filterPtr_Type;
     
   typedef LifeV::ExporterEmpty<mesh_Type >    emptyFilter_Type;
-  typedef boost::share_ptr<emptyFilter_Type>                              emptyFilterPtr_Type;                         
+  typedef boost::shared_ptr<emptyFilter_Type>                              emptyFilterPtr_Type;                         
   typedef LifeV::ExporterEnsight<mesh_Type >  ensightFilter_Type;
   typedef boost::shared_ptr<ensightFilter_Type>                           ensightFilterPtr_Type;
 
@@ -230,7 +230,7 @@ void
 Structure::run3d()
 {
     // General typedefs
-    typedef WallTensionEvaluator< mesh_Type >::vector_Type  vector_Type;
+    typedef WallTensionEvaluator< mesh_Type >::solutionVect_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type>                                vectorPtr_Type;
     typedef FESpace< mesh_Type, MapEpetra >                 solidFESpace_Type;
     typedef boost::shared_ptr<solidFESpace_Type>                          solidFESpacePtr_Type;    
@@ -268,7 +268,7 @@ Structure::run3d()
 
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,
-		tensionData,
+    		tensionData,
                 dFESpace,
                 parameters->comm);
 

@@ -56,7 +56,7 @@ WallTensionEstimatorData::WallTensionEstimatorData():
 
 WallTensionEstimatorData::WallTensionEstimatorData( const WallTensionEstimatorData& wallTensionEstimatorData ):
         M_nameFile                         ( wallTensionEstimatorData.M_nameFile ),
-        M_analysistype                     ( wallTensionEstimatorData.M_analysisType ),
+        M_analysisType                     ( wallTensionEstimatorData.M_analysisType ),
         M_initialTime                      ( wallTensionEstimatorData.M_initialTime ),
         M_finalTime                        ( wallTensionEstimatorData.M_finalTime ),
         M_iterStart                        ( wallTensionEstimatorData.M_iterStart ),
@@ -72,7 +72,7 @@ WallTensionEstimatorData::operator=( const WallTensionEstimatorData& wallTension
 {
     if ( this != &wallTensionEstimatorData )
     {
-        M_nameFile                         = wallTensionEstimatorData.M_time;
+        M_nameFile                         = wallTensionEstimatorData.M_nameFile;
         M_analysisType                     = wallTensionEstimatorData.M_analysisType;
         M_initialTime                      = wallTensionEstimatorData.M_initialTime;
         M_finalTime                        = wallTensionEstimatorData.M_finalTime;

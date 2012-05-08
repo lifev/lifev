@@ -60,8 +60,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef typename std::vector<std::string > iteration_Types:
-    typedef typename std::vector<Real > time_Types:
+    typedef typename std::vector<std::string > iteration_Type;
+    typedef typename std::vector<LifeV::Real > time_Type;
     //@}
 
 
@@ -69,7 +69,7 @@ public:
     //@{
 
     //! Empty Constructor
-    WallTensionEvaluatorData();
+    WallTensionEstimatorData();
 
     //! Copy constructor
     /*!
@@ -130,25 +130,25 @@ public:
     /*!
      * @param initial Time initial of the analysis
      */
-    void setInitialTime( const Real& initialTime ) { M_initialTime = initialTime; }
+    void setInitialTime(const UInt i, const Real initialTime ) { M_initialTime[i] = initialTime; }
 
     //! Set final Time
     /*!
      * @param final Time final time of the analysis
      */
-    void setFinalTime( const Real& finalTime ) { M_finalTime = finalTime; }
+    void setFinalTime( const UInt i, const Real finalTime ) { M_finalTime[i] = finalTime; }
 
     //! Set starting iteration
     /*!
      * @param starting iteration
      */
-    void setIterationStart( const Real& iterStart ) { M_iterStart = iterStart; }
+    void setIterationStart( const UInt i, const std::string& iterStart ) { M_iterStart[i] = iterStart; }
 
     //! Set final Time
     /*!
      * @param final Time final time of the analysis
      */
-    void setIterationEnd ( const Real& iterEnd ) { M_iterEnd = iterEnd; }
+    void setIterationEnd ( const UInt i, const std::string& iterEnd ) { M_iterEnd[i] = iterEnd; }
 
     //@}
 
@@ -160,7 +160,7 @@ public:
     /*!
      * @return std::string with the name of the file used for the analysis
      */
-     const std::string&& nameFile() const { return M_nameFile; }
+     const std::string& nameFile() const { return M_nameFile; }
 
     //! Get analysisType
     /*!
