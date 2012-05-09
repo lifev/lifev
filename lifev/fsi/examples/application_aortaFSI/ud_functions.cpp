@@ -10,7 +10,7 @@
 
 #include "ud_functions.hpp"
 //#include "flowConditions.hpp"
-#include "life/lifearray/VectorEpetra.hpp"
+#include "lifev/core/array/VectorEpetra.hpp"
 
 //#define ANEURISM100170
 #define AORTA

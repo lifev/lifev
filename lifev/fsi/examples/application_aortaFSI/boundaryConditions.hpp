@@ -44,12 +44,12 @@
 
 #include "ud_functions.hpp"
 // LifeV includes
-#include "life/lifecore/LifeV.hpp"
-#include "life/lifefem/BCHandler.hpp"
+#include "lifev/core/LifeV.hpp"
+#include "lifev/core/fem/BCHandler.hpp"
 
 // Mathcard includes
-#include "life/lifesolver/FSIMonolithicGE.hpp"
-#include "life/lifesolver/FSIMonolithicGI.hpp"
+#include "lifev/fsi/solver/FSIMonolithicGE.hpp"
+#include "lifev/fsi/solver/FSIMonolithicGI.hpp"
 
 #ifndef BL
 #define OUTLET 3

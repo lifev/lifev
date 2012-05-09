@@ -71,7 +71,8 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #define BL 1
-#define HAVE_NS_PREC 1
+//#define HAVE_NS_PREC 0
+#undef HAVE_NS_PREC 1
 #include <cassert>
 #include <cstdlib>
 
@@ -91,25 +92,25 @@
 
 #include "ud_functions.hpp"
 // LifeV includes
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifefem/BCHandler.hpp>
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/fem/BCHandler.hpp>
+#include <lifev/core/LifeV.hpp>
 
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 #ifdef HAVE_NS_PREC
-#include <life/lifealg/PreconditionerPCD.hpp>
+#include <lifev/core/algorithm/PreconditionerPCD.hpp>
 #endif
 
-#include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/StructuralSolver.hpp>
-#include <life/lifesolver/FSIMonolithicGI.hpp>
+#include <lifev/fsi/solver/FSISolver.hpp>
+#include <lifev/structure/solver/StructuralSolver.hpp>
+#include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
-#include <life/lifefilters/ExporterEnsight.hpp>
-#include <life/lifefilters/ExporterEmpty.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterEmpty.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 
 #include "ud_functions.hpp"

@@ -4,4 +4,5 @@ INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
   example_SmoothAneurysm
+  application_aortaFSI
 )
