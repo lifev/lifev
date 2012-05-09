@@ -175,7 +175,7 @@ class NeoHookeanMaterialNonLinear :
     /*!
       \param dk_loc: local displacement vector
     */
-    void computeStress( const vector_Type& sol);
+    //void computeStress( const vector_Type& sol);
 
 
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)

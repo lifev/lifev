@@ -399,7 +399,7 @@ main( int argc, char** argv )
     vectorPtr_type beta;
     beta.reset(new vector_Type(solutionMap,Repeated));
 
-    vector_type convect(rhs->map());
+    vector_Type convect(rhs->map());
 
     vectorPtr_type velocity;
     velocity.reset(new vector_Type(uFESpace->map(),Unique));
