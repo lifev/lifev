@@ -139,17 +139,12 @@ public:
         Real area	= area0;
 	UInt flag       = 1;
 
-        //Real beta	= M_oper.solid().thickness()*M_oper.solid().young() / (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
-
-	//Alexandra's Abc
-	Real exp  = 5/4;
-	Real beta = ( std::sqrt(PI) * M_oper.solid().thickness() * M_oper.solid().young( flag ) ) / (1 - M_oper.solid().poisson( flag ) * M_oper.solid().poisson( flag ) );
-	Real R    = ( std::sqrt(M_oper.solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
+        Real beta	= M_oper.solid().thickness()*M_oper.solid().young( flag ) /
+                    (1 - M_oper.solid().poisson(  flag )*M_oper.solid().poisson( flag )) * PI/area0;
 
         Real qn		= M_oper.fluid().flux(3);
 
-	M_outflow       = R * qn;
-        //M_outflow	= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2) - beta*std::sqrt(area0);
+        M_outflow	= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2) - beta*std::sqrt(area0);
 
         std::cout << "--------------- Absorbing boundary condition ---------------" << std::endl;
         std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
@@ -382,7 +377,7 @@ public:
         M_data->setup( dataFile );
         M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
         M_data->showMe();
-	M_data->dataSolid()->showMe();
+	//	M_data->dataSolid()->showMe();
         MPI_Barrier( MPI_COMM_WORLD );
 
         Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
@@ -553,21 +548,21 @@ public:
                 if ( isFluidLeader )
                     ofile << M_data->dataFluid()->dataTime()->time() << " ";
 
-//                 flux = M_fsi->FSIOper()->fluid().flux(2);
-//                 if ( isFluidLeader )
-//                     ofile << flux << " ";
+                flux = M_fsi->FSIOper()->fluid().flux(2);
+                if ( isFluidLeader )
+                    ofile << flux << " ";
 
-//                 flux = M_fsi->FSIOper()->fluid().flux(3);
-//                 if ( isFluidLeader )
-//                     ofile << flux << " ";
+                flux = M_fsi->FSIOper()->fluid().flux(3);
+                if ( isFluidLeader )
+                    ofile << flux << " ";
 
-//                 flux = M_fsi->FSIOper()->fluid().pressure(2);
-//                 if ( isFluidLeader )
-//                     ofile << flux << " ";
+                flux = M_fsi->FSIOper()->fluid().pressure(2);
+                if ( isFluidLeader )
+                    ofile << flux << " ";
 
-//                 flux = M_fsi->FSIOper()->fluid().pressure(3);
-//                 if ( isFluidLeader )
-//                     ofile << flux << " " << std::endl;
+                flux = M_fsi->FSIOper()->fluid().pressure(3);
+                if ( isFluidLeader )
+                    ofile << flux << " " << std::endl;
 
                 *M_velAndPressure = *M_fsi->FSIOper()->fluid().solution();
                 *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
@@ -589,7 +584,7 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            //checkResult( M_data->dataFluid()->dataTime()->time() );
+            checkResult( M_data->dataFluid()->dataTime()->time() );
         }
         std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
         ofile.close();
