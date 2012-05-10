@@ -45,6 +45,38 @@
 namespace LifeV
 {
 
+// Labels for the structured 2D mesh
+namespace Structured2DLabel
+{
+    //! Label for the internal entities
+    const markerID_Type INTERNAL = 0;
+
+    //! Label for the bottom boundary edge
+    const markerID_Type BOTTOM = 1;
+
+    //! Label for the left boundary edge
+    const markerID_Type LEFT = 2;
+
+    //! Label for the top boundary edge
+    const markerID_Type TOP = 3;
+
+    //! Label for the right boundary edge
+    const markerID_Type RIGHT = 4;
+
+    //! Label for the top and left boundary corner
+    const markerID_Type TOP_LEFT = 7;
+
+    //! Label for the bottom and right boundary corner
+    const markerID_Type BOTTOM_RIGHT = 5;
+
+    //! Label for the bottom and left boundary corner
+    const markerID_Type BOTTOM_LEFT = 8;
+
+    //! Label for the top and right boundary corner
+    const markerID_Type TOP_RIGHT = 6;
+
+}
+
 /*!
   @brief This method gives the flags for a rectangle
 

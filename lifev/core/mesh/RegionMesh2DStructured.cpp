@@ -82,27 +82,27 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
     {
         // We are inside
         case 0:
-            return 0;
+            return Structured2DLabel::INTERNAL;
         // We are on 1 edge
         case 1:
-            return 1;
+            return Structured2DLabel::BOTTOM;
         case 2:
-            return 2;
+            return Structured2DLabel::LEFT;
         case 4:
-            return 3;
+            return Structured2DLabel::RIGHT;
         case 8:
-            return 4;
+            return Structured2DLabel::TOP;
         // We are on a corner
         case 5:
-            return 5;
+            return Structured2DLabel::BOTTOM_RIGHT;
         case 6:
-            return 6;
+            return Structured2DLabel::TOP_RIGHT;
         case 9:
-            return 7;
+            return Structured2DLabel::BOTTOM_LEFT;
         case 10:
-            return 8;
+            return Structured2DLabel::TOP_LEFT;
         default:
-            return 0;
+            return Structured2DLabel::INTERNAL;
     }
 
 }
