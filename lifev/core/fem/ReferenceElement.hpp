@@ -779,9 +779,9 @@ point 1: 0, 0, 0
 point 2: 1, 0, 0
 point 3: 0, 1, 0
 
-face 1: 1, 2
-face 2: 2, 3
-face 3: 3, 1
+facet 1: 1, 2
+facet 2: 2, 3
+facet 3: 3, 1
 */
 
 Real fct1_RT0_1_TRIA_2D( const GeoVector& v );
