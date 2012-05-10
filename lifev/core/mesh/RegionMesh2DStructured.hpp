@@ -136,14 +136,11 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
     typedef LinearTriangle geoShape_Type;
     typedef RegionMesh < geoShape_Type, MC > mesh_Type;
 
-
-    ASSERT( geoShape_Type::S_numRidges == 3,"Not creating a P1 structured mesh" );
-
     // discretization
     const Real dx( l_x / m_x );
     const Real dy( l_y / m_y );
 
-    // Number of nodes along the side of the unit cube
+    // Number of nodes along the side of the rectangle
     const UInt n_x( m_x + 1 );
     const UInt n_y( m_y + 1 );
 
