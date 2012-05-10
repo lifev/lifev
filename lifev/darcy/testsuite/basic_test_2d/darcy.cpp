@@ -44,15 +44,6 @@
 
 using namespace LifeV;
 
-enum BCNAME
-{
-    LEFT   = 2,
-    RIGHT  = 3,
-    BOTTOM = 1,
-    TOP    = 4
-
-};
-
 // ===================================================
 //!              Standard functions
 // ===================================================
@@ -191,6 +182,7 @@ Real
 darcy::run()
 {
     using boost::dynamic_pointer_cast;
+    using namespace Structured2DLabel;
 
     typedef LinearTriangle geoElement_Type;
 
