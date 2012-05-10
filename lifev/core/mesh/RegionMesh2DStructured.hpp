@@ -298,7 +298,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             nodeID = i;
             P0 = nodeID;
             P1 = nodeID + 1;
-            edgeLabel = 1; //BOTTOMEDGE
+            edgeLabel = Structured2DLabel::BOTTOM; //BOTTOMEDGE
             adjID = 2*i;
             pos = 2;
 
@@ -307,7 +307,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             nodeID = (i + 1 - m_x)*n_x -1;
             P0 = nodeID;
             P1 = nodeID + n_x;
-            edgeLabel = 3; //RIGHTEDGE
+            edgeLabel = Structured2DLabel::RIGHT; //RIGHTEDGE
             adjID =  ((i - m_x)*m_x + m_x - 1)*2;
             pos = 0;
         }
@@ -316,7 +316,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             nodeID = n_x*n_y - 1 - (i - m_x - m_y);
             P0 = nodeID;
             P1 = nodeID - 1;
-            edgeLabel = 4; //TOPEDGE
+            edgeLabel = Structured2DLabel::TOP; //TOPEDGE
             adjID = 2*m_x*m_y-(i - m_x - m_y)*2 -1;
             pos = 2;
         }
@@ -324,7 +324,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             nodeID =  n_x*n_y - 1 - m_x - (i - 2*m_x - m_y)*n_x ;
             P0 = nodeID;
             P1 = nodeID - n_x ;
-            edgeLabel = 2; //LEFTEDGE
+            edgeLabel = Structured2DLabel::LEFT; //LEFTEDGE
             adjID = -(i - 2*m_x - m_y)*(2*m_x) + (m_x*(m_y-1))*2 + 1;
             pos = 0;
         }
