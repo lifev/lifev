@@ -222,8 +222,8 @@ public:
         std::cerr << " Trying to access nodal values via nodalToFEValues function. " << std::endl;
         std::cerr << " This FE is not nodal, impossible operation! " << std::endl;
         abort();
-	std::vector<Real> dummy;
-	return dummy;
+    std::vector<Real> dummy;
+    return dummy;
     }
 
     //@}
@@ -761,6 +761,63 @@ static const ReferenceElement::function_Type der2fct_P2_2D[ 24 ] =
     der2fct4_11_P2_2D, der2fct4_12_P2_2D, der2fct4_21_P2_2D, der2fct4_22_P2_2D,
     der2fct5_11_P2_2D, der2fct5_12_P2_2D, der2fct5_21_P2_2D, der2fct5_22_P2_2D,
     der2fct6_11_P2_2D, der2fct6_12_P2_2D, der2fct6_21_P2_2D, der2fct6_22_P2_2D
+};
+
+//!======================================================================
+//
+//                            RT0  Triangle (2D)
+//
+//!======================================================================
+/*
+                           3
+                           |\
+                           | \
+                           |  \
+                           1---2
+SEE ElementShapes.cc   for the ORIENTATION CONVENTIONS
+point 1: 0, 0, 0
+point 2: 1, 0, 0
+point 3: 0, 1, 0
+
+facet 1: 1, 2
+facet 2: 2, 3
+facet 3: 3, 1
+*/
+
+Real fct1_RT0_1_TRIA_2D( const GeoVector& v );
+Real fct1_RT0_2_TRIA_2D( const GeoVector& v );
+Real fct1_RT0_3_TRIA_2D( const GeoVector& v );
+
+Real fct2_RT0_1_TRIA_2D( const GeoVector& v );
+Real fct2_RT0_2_TRIA_2D( const GeoVector& v );
+Real fct2_RT0_3_TRIA_2D( const GeoVector& v );
+
+Real fct3_RT0_1_TRIA_2D( const GeoVector& v );
+Real fct3_RT0_2_TRIA_2D( const GeoVector& v );
+Real fct3_RT0_3_TRIA_2D( const GeoVector& v );
+
+Real fct1_DIV_RT0_TRIA_2D( const GeoVector& v );
+Real fct2_DIV_RT0_TRIA_2D( const GeoVector& v );
+Real fct3_DIV_RT0_TRIA_2D( const GeoVector& v );
+
+static const Real refcoor_RT0_TRIA_2D[ 9 ] =
+{
+    1. / 2. , 0.      , 0. ,
+    1. / 2. , 1. / 2. , 0. ,
+    0.      , 1. / 2. , 0.
+};
+
+static const ReferenceElement::function_Type fct_RT0_TRIA_2D[ 6 ] =
+{
+    fct1_RT0_1_TRIA_2D, fct1_RT0_2_TRIA_2D,
+    fct2_RT0_1_TRIA_2D, fct2_RT0_2_TRIA_2D,
+    fct3_RT0_1_TRIA_2D, fct3_RT0_2_TRIA_2D
+};
+
+static const ReferenceElement::function_Type fct_DIV_RT0_TRIA_2D[ 3 ] =
+{
+    fct1_DIV_RT0_TRIA_2D, fct2_DIV_RT0_TRIA_2D,
+    fct3_DIV_RT0_TRIA_2D
 };
 
 

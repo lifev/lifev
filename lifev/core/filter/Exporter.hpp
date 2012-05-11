@@ -603,20 +603,20 @@ template <typename MeshType>
 void Exporter<MeshType>::exportPID( meshPtr_Type & mesh, commPtr_Type & comm, bool const binaryFormat )
 {
     // TODO: use FESpace M_spacemap for generality
-    const ReferenceFE* refFE;
+    const ReferenceFE* refFEPtr;
 
     // Need a factory!!!!
     // @todo Need a factory!
     switch ( MeshType::S_geoDimensions )
     {
         case 3:
-            refFE = &feTetraP0;
+            refFEPtr = &feTetraP0;
             break;
         case 2:
-            refFE = &feTriaP0;
+            refFEPtr = &feTriaP0;
             break;
         case 1:
-            refFE = &feSegP0;
+            refFEPtr = &feSegP0;
             break;
         default:
             ASSERT ( 0, "Dimension not supported " );
@@ -627,7 +627,7 @@ void Exporter<MeshType>::exportPID( meshPtr_Type & mesh, commPtr_Type & comm, bo
     const QuadratureRule & qR   = quadRuleDummy;
     const QuadratureRule & bdQr = quadRuleDummy;
 
-    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( mesh, *refFE, qR, bdQr, 1, comm ) );
+    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( mesh, *refFEPtr, qR, bdQr, 1, comm ) );
 
     vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
     *PIDData = 0.;
