@@ -771,8 +771,8 @@ DarcySolver ( const data_Type&                 dataFile,
         // Algebraic stuff.
         M_matrHybrid             ( new matrix_Type ( M_localMap ) ),
         M_rhs                    ( new vector_Type ( M_localMap ) ),
-        M_primal             ( new vector_Type ( M_primal_FESpace.map() ) ),
-        M_dual           ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
+        M_primal                 ( new vector_Type ( M_primal_FESpace.map() ) ),
+        M_dual                   ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
         M_hybrid                 ( new vector_Type ( M_hybrid_FESpace.map() ) ),
         M_residual               ( new vector_Type ( M_localMap ) ),
         M_linearSolver           ( ),
@@ -915,6 +915,7 @@ buildSystem ()
         /* Assemble the global hybrid matrix.
            M_primal_FESpace is used instead of M_hybrid_FESpace for currentLocalId,
            because currentFE cannot store a ReferenceFEHybrid. */
+
         assembleMatrix( *M_matrHybrid,
                         M_primal_FESpace.fe().currentLocalId(),
                         M_elmatHyb,
@@ -1069,10 +1070,10 @@ computePrimalAndDual ()
                         M_primal_FESpace.dof(), 0 );
 
 
-        for ( UInt iLocalFace(0); iLocalFace <  M_dual_FESpace.mesh()->element( iElem ).S_numLocalFaces; ++iLocalFace )
+        for ( UInt iLocalFace(0); iLocalFace <  Mesh::element_Type::S_numFacets; ++iLocalFace )
         {
             UInt iGlobalFace( M_dual_FESpace.mesh()->localFacetId( iElem, iLocalFace ) );
-            if ( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 0 ) != iElem )
+            if ( M_dual_FESpace.mesh()->facet( iGlobalFace ).firstAdjacentElementIdentity() != iElem )
             {
                 M_elvecFlux[ iLocalFace ] = 0;
             }
@@ -1171,12 +1172,12 @@ localElementComputation ( const UInt & iElem )
     // Clear the source vectors.
     M_elvecSource.zero();
     M_elvecSourceVector.zero();
-    
+
     // Compute the source term.
     source( M_source, M_elvecSource, M_primal_FESpace.fe(), M_data.dataTime()->time(), 0 );
 
     // Compute the vector source term.
-    source_Hdiv ( M_vectorSource( M_data.dataTime()->time(), xg, yg, zg, 0), 
+    source_Hdiv ( M_vectorSource( M_data.dataTime()->time(), xg, yg, zg, 0),
                   M_elvecSourceVector, M_dual_FESpace.fe(), 0 );
 
 } // localElementComputation
@@ -1319,13 +1320,13 @@ staticCondensation ()
        M_elvecSource fully stored.
        For more details see http://www.netlib.org/blas/dgemm.f */
     blas.GEMM ( TRANS, TRANS, NBP, NBRHS, NBU, ONE, B, NBU, M_elvecSourceVector, NBRHS, ZERO, M_elvecSource, NBRHS );
-  
+
     /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * B^T * A^{-1} * M_elvecSource
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBRHS, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = LB^{-1} rhs is not achieved." );
 
-    /* Add in M_elvecHyb the vector M_BtC^T * M_elvecSource = 
+    /* Add in M_elvecHyb the vector M_BtC^T * M_elvecSource =
        C^T * A^{-1} * B^T * (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * M_elvecSource
        M_elvecHyb is fully stored.
        For more details see http://www.netlib.org/blas/dgemm.f */
@@ -1487,17 +1488,17 @@ localComputePrimalAndDual ()
     lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, M_elvecFlux, NBU, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecFlux = L^{-1} M_elvecFlux is not achieved." );
 
-    /* Put in M_elvecFlux the vector B * M_elvecSource - M_elvecFlux = 
+    /* Put in M_elvecFlux the vector B * M_elvecSource - M_elvecFlux =
        = L^{-1} * B * primal_K - M_elvecVectorSource
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
     blas.GEMV ( NOTRANS, NBU, NBP, ONE, B, NBU, M_elvecSource, MINUSONE, M_elvecFlux );
 
-    /* Put in M_elvecFlux the vector - C * M_elvecHyb - M_elvecFlux = 
+    /* Put in M_elvecFlux the vector - C * M_elvecHyb - M_elvecFlux =
        = - L^{-1} * C * lambda_K - L^{-1} * B * primal_K + L^{-1} * M_elvecVectorSource
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
     blas.GEMV ( NOTRANS, NBU, NBL, MINUSONE, C, NBL, M_elvecHyb, MINUSONE, M_elvecFlux );
 
-    /* Put in flux the vector L^{-T} * M_elvecFlux = 
+    /* Put in flux the vector L^{-T} * M_elvecFlux =
        = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K + A^{-1} * M_elvecVectorSource
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, TRANS, NODIAG, NBU, NBRHS, A, NBU, M_elvecFlux, NBU, INFO );
