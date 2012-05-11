@@ -61,22 +61,22 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     // Processor informations
-    const int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    const int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    int        srcRowElement(0);
+    const Int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    const Int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    Int        srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
-    const int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
-    const int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+    const Int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
+    const Int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
 
     // Source informations handlers
-    int numSrcEntries;
+    Int numSrcEntries;
     DataType* srcValues;
-    int* srcIndices;
-    int srcGlobalIndex(0);
-    int srcRow(0);
+    Int* srcIndices;
+    Int srcGlobalIndex(0);
+    Int srcRow(0);
 
-    for(int i(0);i<numSrcElements;++i)
+    for(Int i(0);i<numSrcElements;++i)
     {
         // Collecting the data from the source
         srcRowElement = srcGlobalElements[i];
@@ -89,12 +89,12 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            std::vector<int> destIndices(numSrcEntries);
+            std::vector<Int> destIndices(numSrcEntries);
             std::vector<DataType> destValues(numSrcEntries);
-            int numDestEntries(0);
-            int destRow(srcRowElement+rowsOffset);
+            Int numDestEntries(0);
+            Int destRow(srcRowElement+rowsOffset);
 
-            for(int j(0);j<numSrcEntries;++j)
+            for(Int j(0);j<numSrcEntries;++j)
             {
                 srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
@@ -155,20 +155,20 @@ void createScalarBlock ( const MatrixEpetraStructuredView<DataType>& destBlock, 
     // BLOCK PTR TEST
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
-    int destIndex(0);
+    Int destIndex(0);
 
-    int indexBase(0);
+    Int indexBase(0);
 
-    int firstRowIndex(destBlock.firstRowIndex()+indexBase);
-    int lastRowIndex(destBlock.lastRowIndex()+indexBase);
-    int firstColumnIndex(destBlock.firstColumnIndex()+indexBase);
+    Int firstRowIndex(destBlock.firstRowIndex()+indexBase);
+    Int lastRowIndex(destBlock.lastRowIndex()+indexBase);
+    Int firstColumnIndex(destBlock.firstColumnIndex()+indexBase);
 
     // Processor informations
-    int  numDestElements    = destBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    int* destGlobalElements = destBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    int  destRowElement(0);
+    Int  numDestElements    = destBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    Int* destGlobalElements = destBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    Int  destRowElement(0);
 
-    for(int i(0);i<numDestElements;++i)
+    for(Int i(0);i<numDestElements;++i)
     {
         destRowElement = destGlobalElements[i];
 
@@ -212,21 +212,21 @@ void createDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
-    int indexBase(0);
+    Int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    unsigned int srcRowElement(0);
+    Int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    Int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    UInt srcRowElement(0);
 
     // Source informations handlers
-    int numSrcEntries;
+    Int numSrcEntries;
     DataType* srcValues;
-    int* srcIndices;
-    int srcGlobalIndex(0);
-    int srcRow(0);
+    Int* srcIndices;
+    Int srcGlobalIndex(0);
+    Int srcRow(0);
 
-    for(int i(0);i<numSrcElements;++i)
+    for(Int i(0);i<numSrcElements;++i)
     {
         // Collecting the data from the source
         srcRowElement = srcGlobalElements[i];
@@ -238,12 +238,12 @@ void createDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            unsigned int diagIndex=srcRowElement-srcBlock.firstRowIndex();
-            int destRow = destBlock.firstRowIndex()+diagIndex;
-            int destIndex = destBlock.firstColumnIndex()+diagIndex;
+            UInt diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            Int destRow = destBlock.firstRowIndex()+diagIndex;
+            Int destIndex = destBlock.firstColumnIndex()+diagIndex;
             DataType diagValue = 0.0;
 
-            for(int j(0);j<numSrcEntries;++j)
+            for(Int j(0);j<numSrcEntries;++j)
             {
                 srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
@@ -283,21 +283,21 @@ void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
-    int indexBase(0);
+    Int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    unsigned int srcRowElement(0);
+    Int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    Int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    UInt srcRowElement(0);
 
     // Source informations handlers
-    int numSrcEntries;
+    Int numSrcEntries;
     DataType* srcValues;
-    int* srcIndices;
-    int srcGlobalIndex(0);
-    int srcRow(0);
+    Int* srcIndices;
+    Int srcGlobalIndex(0);
+    Int srcRow(0);
 
-    for(int i(0);i<numSrcElements;++i)
+    for(Int i(0);i<numSrcElements;++i)
     {
         // Collecting the data from the source
         srcRowElement = srcGlobalElements[i];
@@ -309,12 +309,12 @@ void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            unsigned int diagIndex=srcRowElement-srcBlock.firstRowIndex();
-            int destRow = destBlock.firstRowIndex()+diagIndex;
-            int destIndex = destBlock.firstColumnIndex()+diagIndex;
+            UInt diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            Int destRow = destBlock.firstRowIndex()+diagIndex;
+            Int destIndex = destBlock.firstColumnIndex()+diagIndex;
             DataType diagValue = 0.0;
 
-            for(int j(0);j<numSrcEntries;++j)
+            for(Int j(0);j<numSrcEntries;++j)
             {
                 srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
@@ -358,21 +358,21 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
-    int indexBase(0);
+    Int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    unsigned int  srcRowElement(0);
+    Int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    Int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    UInt  srcRowElement(0);
 
     // Source informations handlers
-    int numSrcEntries;
-    double* srcValues;
-    int* srcIndices;
-    unsigned int srcGlobalIndex(0);
-    int srcRow(0);
+    Int numSrcEntries;
+    Real* srcValues;
+    Int* srcIndices;
+    UInt srcGlobalIndex(0);
+    Int srcRow(0);
 
-    for(int i(0);i<numSrcElements;++i)
+    for(Int i(0);i<numSrcElements;++i)
     {
         // Collecting the data from the source
         srcRowElement = srcGlobalElements[i];
@@ -384,12 +384,12 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            unsigned int diagIndex=srcRowElement-srcBlock.firstRowIndex();
-            int destRow = destBlock.firstRowIndex()+diagIndex;
-            int destIndex = destBlock.firstColumnIndex()+diagIndex;
-            double diagValue = 0.0;
+            UInt diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            Int destRow = destBlock.firstRowIndex()+diagIndex;
+            Int destIndex = destBlock.firstColumnIndex()+diagIndex;
+            Real diagValue = 0.0;
 
-            for(int j(0);j<numSrcEntries;++j)
+            for(Int j(0);j<numSrcEntries;++j)
             {
                 srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
@@ -433,22 +433,22 @@ void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     // Processor informations
-    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    unsigned int srcRowElement(0);
+    Int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    Int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    UInt srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
-    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
-    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+    Int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
+    Int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
 
     // Source informations handlers
-    int numSrcEntries;
+    Int numSrcEntries;
     DataType* srcValues;
-    int* srcIndices;
-    unsigned int srcGlobalIndex(0);
-    int srcRow(0);
+    Int* srcIndices;
+    UInt srcGlobalIndex(0);
+    Int srcRow(0);
 
-    for(int i(0);i<numSrcElements;++i)
+    for(Int i(0);i<numSrcElements;++i)
     {
         // Collecting the data from the source
         srcRowElement = srcGlobalElements[i];
@@ -460,11 +460,11 @@ void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            std::vector<int> destIndices(numSrcEntries);
+            std::vector<Int> destIndices(numSrcEntries);
             std::vector<DataType> destValues(numSrcEntries);
-            int numDestEntries(0);
-            int destRow(srcRowElement+rowsOffset);
-            for(int j(0);j<numSrcEntries;++j)
+            Int numDestEntries(0);
+            Int destRow(srcRowElement+rowsOffset);
+            for(Int j(0);j<numSrcEntries;++j)
             {
                 srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
@@ -510,22 +510,22 @@ void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
     // Processor informations
-    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    unsigned int srcRowElement(0);
+    Int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    Int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    UInt srcRowElement(0);
 
     //Offset between the first row/column of the source and destination blocks
-    int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
-    int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
+    Int rowsOffset(destBlock.firstRowIndex()-srcBlock.firstRowIndex());
+    Int columnsOffset(destBlock.firstColumnIndex()-srcBlock.firstColumnIndex());
 
     // Source informations handlers
-    int numSrcEntries;
+    Int numSrcEntries;
     DataType* srcValues;
-    int* srcIndices;
-    unsigned int srcGlobalIndex(0);
-    int srcRow(0);
+    Int* srcIndices;
+    UInt srcGlobalIndex(0);
+    Int srcRow(0);
 
-    for(int i(0);i<numSrcElements;++i)
+    for(Int i(0);i<numSrcElements;++i)
     {
         // Collecting the data from the source
         srcRowElement = srcGlobalElements[i];
@@ -537,11 +537,11 @@ void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            std::vector<int> destIndices(numSrcEntries);
+            std::vector<Int> destIndices(numSrcEntries);
             std::vector<DataType> destValues(numSrcEntries);
-            int numDestEntries(0);
-            int destRow(srcRowElement+rowsOffset);
-            for(int j(0);j<numSrcEntries;++j)
+            Int numDestEntries(0);
+            Int destRow(srcRowElement+rowsOffset);
+            for(Int j(0);j<numSrcEntries;++j)
             {
                 srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
@@ -587,21 +587,21 @@ void createLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
-    int indexBase(0);
+    Int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    unsigned int srcRowElement(0);
+    Int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    Int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    UInt srcRowElement(0);
 
     // Source informations handlers
-    int numSrcEntries;
+    Int numSrcEntries;
     DataType* srcValues;
-    int* srcIndices;
-    unsigned int srcGlobalIndex(0);
-    int srcRow(0);
+    Int* srcIndices;
+    UInt srcGlobalIndex(0);
+    Int srcRow(0);
 
-    for(int i(0);i<numSrcElements;++i)
+    for(Int i(0);i<numSrcElements;++i)
     {
         // Collecting the data from the source
         srcRowElement = srcGlobalElements[i];
@@ -613,11 +613,11 @@ void createLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            int diagIndex=srcRowElement-srcBlock.firstRowIndex();
-            int destRow = destBlock.firstRowIndex()+diagIndex;
-            int destIndex = destBlock.firstColumnIndex()+diagIndex;
+            Int diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            Int destRow = destBlock.firstRowIndex()+diagIndex;
+            Int destIndex = destBlock.firstColumnIndex()+diagIndex;
             DataType srcBlockRowSum = 0.0;
-            for(int j(0);j<numSrcEntries;++j)
+            for(Int j(0);j<numSrcEntries;++j)
             {
                 srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
@@ -657,21 +657,21 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
 	ASSERT( destBlock.matrixPtr() != 0 , "The destination block does not have a valid pointer" );
 
-    int indexBase(0);
+    Int indexBase(0);
 
     // Processor informations
-    int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
-    int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
-    unsigned int srcRowElement(0);
+    Int  numSrcElements    = srcBlock.matrixPtr()->matrixPtr()->RowMap().NumMyElements();
+    Int* srcGlobalElements = srcBlock.matrixPtr()->matrixPtr()->RowMap().MyGlobalElements();
+    UInt srcRowElement(0);
 
     // Source informations handlers
-    int numSrcEntries;
+    Int numSrcEntries;
     DataType* srcValues;
-    int* srcIndices;
-    unsigned int srcGlobalIndex(0);
-    int srcRow(0);
+    Int* srcIndices;
+    UInt srcGlobalIndex(0);
+    Int srcRow(0);
 
-    for(int i(0);i<numSrcElements;++i)
+    for(Int i(0);i<numSrcElements;++i)
     {
         // Collecting the data from the source
         srcRowElement = srcGlobalElements[i];
@@ -683,11 +683,11 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
             srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID(srcRowElement);
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView(srcRow, numSrcEntries, srcValues, srcIndices);
 
-            int diagIndex=srcRowElement-srcBlock.firstRowIndex();
-            int destRow = destBlock.firstRowIndex()+diagIndex;
-            int destIndex = destBlock.firstColumnIndex()+diagIndex;
+            Int diagIndex=srcRowElement-srcBlock.firstRowIndex();
+            Int destRow = destBlock.firstRowIndex()+diagIndex;
+            Int destIndex = destBlock.firstColumnIndex()+diagIndex;
             DataType srcBlockRowSum = 0.0;
-            for(int j(0);j<numSrcEntries;++j)
+            for(Int j(0);j<numSrcEntries;++j)
             {
                 srcGlobalIndex = srcBlock.matrixPtr()->matrixPtr()->GCID(srcIndices[j]);
 
