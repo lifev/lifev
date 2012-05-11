@@ -24,64 +24,11 @@
 */
 //@HEADER
 /**
-   \file darcy.cpp
-   \author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   \date 2010-07-29
- */
+    @file
+    @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+    @author Anna Scotti <anna.scotti@mail.polimi.it>
 
-/*!
-  Simple 3D Darcy test with Dirichlet, Neumann and Robin Boundary condition.
-  <br>
-  Solve the problem in dual-mixed form
-  \f[
-  \left\{
-  \begin{array}{l l l }
-  \Lambda^{-1} \sigma + \nabla p = 0 & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
-  \nabla \cdot \sigma - f = 0        & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
-  p = g_D                            & \mathrm{on} & \Gamma_D\,,\vspace{0.2cm} \\
-  \sigma \cdot n + h p = g_R         & \mathrm{on} & \Gamma_R\,, \vspace{0.2cm} \\
-  \sigma \cdot n = g_n               & \mathrm{on} & \Gamma_N\,.
-  \end{array}
-  \right.
-  \f]
-where \f$ \Omega \f$ is the unit cube with
-  \f[
-  \begin{array}{l}
-  \Gamma_R = \left\{ y = 1 \right\}\,, \vspace{0.2cm} \\
-  \Gamma_N = \left\{ x = 1 \right\} \cup \left\{ x = 0 \right\}\,, \vspace{0.2cm} \\
-  \Gamma_D = \partial [0,1]^3 \setminus \left( \Gamma_R \cup \Gamma_D \right)\,,
-  \end{array}
-  \f]
-and the data are
-  \f[
-  \left\{
-  \begin{array}{l}
-  f(x,y,z) = -2x^2 - 4y^2 - 8xy\,, \vspace{0.2cm} \\
-  g_D(x,y,z) = x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
-  h(x,y,z) = 1\,, \vspace{0.2cm} \\
-  g_R(x,y,z) = -2yx^2 - 2xy^2 - 6 + x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
-  g_N(x,y,z) = \pm (4xy^2 + 2x^2y + 12)\,, \vspace{0.2cm} \\
-  K(x,y,z) = \left[
-  \begin{array}{c c c}
-  2 & 1 & 0 \\
-  1 & 1 & 0 \\
-  0 & 0 & 1
-  \end{array}
-  \right]
-  \end{array}
-  \right.
-  \f]
-The analytical solutions are
-  \f[
-  p(x,y,z) = x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
-  \sigma(x,y,z) = \left(
-  \begin{array}{l}
-  - 4xy^2 - 12 - 2x^2y \\
-  -2xy^2 - 6 - 2x^2y \\
-  - 5
-  \end{array}
-  \right)\,.
-  \f]
+    @date 2012-03-30
 */
 
 // ===================================================
@@ -96,37 +43,6 @@ The analytical solutions are
 // ===================================================
 
 using namespace LifeV;
-
-enum BCNAME
-{
-    // Flags for cartesian_cube* meshes
-    BACK   = 1,
-    FRONT  = 2,
-    LEFT   = 3,
-    RIGHT  = 4,
-    BOTTOM = 5,
-    TOP    = 6
-
-
-/*
-    // Falgs for structured meshes
-    LEFT   = 4,
-    RIGHT  = 2,
-    FRONT  = 1,
-    BACK   = 3,
-    TOP    = 6,
-    BOTTOM = 5
-*/
-
-};
-
-enum DARCY_SOLVER_TYPE
-{
-    DARCY_LINEAR               = 1,
-    DARCY_NON_LINEAR           = 2,
-    DARCY_TRANSIENT            = 3,
-    DARCY_TRANSIENT_NON_LINEAR = 4
-};
 
 // ===================================================
 //!              Standard functions
@@ -231,27 +147,6 @@ struct darcy::Private
         return f;
     }
 
-    fct_type getPrimalZeroIteration ( )
-    {
-        fct_type f;
-        f = boost::bind( &dataProblem::primalZeroIteration, _1, _2, _3, _4, _5 );
-        return f;
-    }
-
-    fct_type getInitialPrimal ( )
-    {
-        fct_type f;
-        f = boost::bind( &dataProblem::initialPrimal, _1, _2, _3, _4, _5 );
-        return f;
-    }
-
-    fct_type getMass ( )
-    {
-        fct_type f;
-        f = boost::bind( &dataProblem::mass, _1, _2, _3, _4, _5 );
-        return f;
-    }
-
 };
 
 // ===================================================
@@ -287,24 +182,23 @@ Real
 darcy::run()
 {
     using boost::dynamic_pointer_cast;
+    using namespace Structured2DLabel;
 
-    typedef RegionMesh< LinearTetra >            regionMesh_Type;
+    typedef LinearTriangle geoElement_Type;
+
+    typedef RegionMesh< geoElement_Type > regionMesh_Type;
     typedef boost::shared_ptr< regionMesh_Type > regionMeshPtr_Type;
 
     typedef SolverAztecOO solver_Type;
 
-    typedef DarcySolver< regionMesh_Type, solver_Type >                    darcyLinearSolver_Type;
-    typedef DarcySolverNonLinear< regionMesh_Type, solver_Type >           darcyNonLinearSolver_Type;
-    typedef DarcySolverTransient< regionMesh_Type, solver_Type >           darcyTransientSolver_Type;
-    typedef DarcySolverTransientNonLinear< regionMesh_Type, solver_Type >  darcyTransientNonLinearSolver_Type;
-
-    typedef boost::shared_ptr< darcyLinearSolver_Type >                    darcyLinearSolverPtr_Type;
+    typedef DarcySolver< regionMesh_Type, solver_Type > darcyLinearSolver_Type;
+    typedef boost::shared_ptr< darcyLinearSolver_Type > darcyLinearSolverPtr_Type;
 
     typedef darcyLinearSolver_Type::vector_Type vector_Type;
-    typedef boost::shared_ptr< vector_Type >    vectorPtr_Type;
+    typedef boost::shared_ptr< vector_Type > vectorPtr_Type;
 
     typedef FESpace< regionMesh_Type, MapEpetra > feSpace_Type;
-    typedef boost::shared_ptr< feSpace_Type >     feSpacePtr_Type;
+    typedef boost::shared_ptr< feSpace_Type > feSpacePtr_Type;
 
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
@@ -323,12 +217,6 @@ darcy::run()
     // Create the leader process, i.e. the process with MyPID equal to zero
     bool isLeader = ( Members->comm->MyPID() == 0 );
 
-    // Darcy solver type from file
-    const UInt solverTypeKey =  dataFile( ( Members->discretization_section + "/problem_type" ).data(),
-                                          DARCY_LINEAR );
-
-    // Darcy solver type
-    DARCY_SOLVER_TYPE solverType( static_cast<DARCY_SOLVER_TYPE>( solverTypeKey ) );
 
     //
     // The Darcy Solver
@@ -364,14 +252,12 @@ darcy::run()
     else
     {
         // Set up the structured mesh
-        regularMesh3D( *fullMeshPtr, 0,
+        regularMesh2D( *fullMeshPtr, 0,
                        dataFile( ( Members->discretization_section + "/space_discretization/nx" ).data(), 4 ),
                        dataFile( ( Members->discretization_section + "/space_discretization/ny" ).data(), 4 ),
-                       dataFile( ( Members->discretization_section + "/space_discretization/nz" ).data(), 4 ),
                        dataFile( ( Members->discretization_section + "/space_discretization/verbose" ).data(), false ),
                        dataFile( ( Members->discretization_section + "/space_discretization/lx" ).data(), 1. ),
-                       dataFile( ( Members->discretization_section + "/space_discretization/ly" ).data(), 1. ),
-                       dataFile( ( Members->discretization_section + "/space_discretization/lz" ).data(), 1. ) );
+                       dataFile( ( Members->discretization_section + "/space_discretization/ly" ).data(), 1. ) );
     }
 
     // Create the local mesh ( local scope used to delete the meshPart object )
@@ -412,16 +298,10 @@ darcy::run()
 
     BCHandler bcDarcy;
 
-    bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumannBDfun1, 1 );
-    bcDarcy.addBC( "Bottom",  BOTTOM,  Robin,      Scalar,  robinBDfun      );
-    //bcDarcy.addBC(   "Top",    TOP,    Essential,  Scalar,  dirichletBDfun  );
-    //bcDarcy.addBC("Bottom", BOTTOM,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy.addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy.addBC( "Right",  RIGHT,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy.addBC( "Front",  FRONT,    Essential,  Scalar,  dirichletBDfun  );
-    //bcDarcy.addBC(  "Back",   BACK,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy.addBC( "Back",    BACK,    Natural,    Full,    neumannBDfun2, 1 );
-
+    bcDarcy.addBC(    "Top",    TOP,    Natural,    Full,    neumannBDfun2, 1 );
+    bcDarcy.addBC( "Bottom", BOTTOM,    Robin,      Scalar,  robinBDfun       );
+    bcDarcy.addBC(   "Left",   LEFT,    Essential,  Scalar,  dirichletBDfun   );
+    bcDarcy.addBC(  "Right",  RIGHT,    Natural,    Full,    neumannBDfun1, 1 );
 
     // Stop chronoBoundaryCondition
     chronoBoundaryCondition.stop();
@@ -444,27 +324,27 @@ darcy::run()
     const QuadratureRule* qR_primal    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_primal  ( static_cast<QuadratureRule*>(NULL) );
 
-    refFE_primal = &feTetraP0;
-    qR_primal    = &quadRuleTetra15pt;
-    bdQr_primal  = &quadRuleTria4pt;
+    refFE_primal = &feTriaP0;
+    qR_primal    = &quadRuleTria4pt;
+    bdQr_primal  = &quadRuleSeg1pt;
 
     // Dual solution parameters
     const ReferenceFE*    refFE_dual ( static_cast<ReferenceFE*>(NULL) );
     const QuadratureRule* qR_dual    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_dual  ( static_cast<QuadratureRule*>(NULL) );
 
-    refFE_dual = &feTetraRT0;
-    qR_dual    = &quadRuleTetra15pt;
-    bdQr_dual  = &quadRuleTria4pt;
+    refFE_dual = &feTriaRT0;
+    qR_dual    = &quadRuleTria4pt;
+    bdQr_dual  = &quadRuleSeg1pt;
 
     // Interpolate of dual solution parameters
     const ReferenceFE*    refFE_dualInterpolate ( static_cast<ReferenceFE*>(NULL) );
     const QuadratureRule* qR_dualInterpolate    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_dualInterpolate  ( static_cast<QuadratureRule*>(NULL) );
 
-    refFE_dualInterpolate = &feTetraP0;
-    qR_dualInterpolate    = &quadRuleTetra15pt;
-    bdQr_dualInterpolate  = &quadRuleTria4pt;
+    refFE_dualInterpolate = &feTriaP0;
+    qR_dualInterpolate    = &quadRuleTria4pt;
+    bdQr_dualInterpolate  = &quadRuleSeg1pt;
 
     // Hybrid solution parameters
     // hybrid
@@ -472,19 +352,18 @@ darcy::run()
     const QuadratureRule* qR_hybrid    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_hybrid  ( static_cast<QuadratureRule*>(NULL) );
 
-    refFE_hybrid = &feTetraRT0Hyb;
-    qR_hybrid    = &quadRuleTetra15pt;
-    bdQr_hybrid  = &quadRuleTria4pt;
+    refFE_hybrid = &feTriaRT0Hyb;
+    qR_hybrid    = &quadRuleTria4pt;
+    bdQr_hybrid  = &quadRuleSeg1pt;
 
     // dual dot outward unit normal
     const ReferenceFE*    refFE_VdotN ( static_cast<ReferenceFE*>(NULL) );
     const QuadratureRule* qR_VdotN    ( static_cast<QuadratureRule*>(NULL) );
     const QuadratureRule* bdQr_VdotN  ( static_cast<QuadratureRule*>(NULL) );
 
-    refFE_VdotN = &feTetraRT0VdotNHyb;
-    qR_VdotN    = &quadRuleTetra15pt;
-    bdQr_VdotN  = &quadRuleTria4pt;
-
+    refFE_VdotN = &feTriaRT0VdotNHyb;
+    qR_VdotN    = &quadRuleTria4pt;
+    bdQr_VdotN  = &quadRuleSeg1pt;
 
     // Finite element space of the primal variable
     feSpacePtr_Type p_FESpacePtr( new feSpace_Type( localMeshPtr,
@@ -507,7 +386,7 @@ darcy::run()
                                                                *refFE_dualInterpolate,
                                                                *qR_dualInterpolate,
                                                                *bdQr_dualInterpolate,
-                                                               3,
+                                                               2,
                                                                Members->comm ) );
 
     // Vector for the interpolated dual solution
@@ -543,45 +422,10 @@ darcy::run()
     // Instantiation of the DarcySolver class
     darcyLinearSolverPtr_Type darcySolver;
 
-    switch ( solverType )
-    {
-    case DARCY_LINEAR:
-
-        darcySolver.reset( new darcyLinearSolver_Type( darcyData, *p_FESpacePtr,
-                                                       *u_FESpacePtr, *hybrid_FESpace,
-                                                       *VdotN_FESpace,
-                                                       Members->comm ) );
-
-        break;
-
-    case DARCY_NON_LINEAR:
-
-        darcySolver.reset( new darcyNonLinearSolver_Type( darcyData, *p_FESpacePtr,
-                                                          *u_FESpacePtr, *hybrid_FESpace,
-                                                          *VdotN_FESpace,
-                                                          Members->comm ) );
-
-        break;
-
-    case DARCY_TRANSIENT:
-
-        darcySolver.reset( new darcyTransientSolver_Type( darcyData, *p_FESpacePtr,
-                                                          *u_FESpacePtr, *hybrid_FESpace,
-                                                          *VdotN_FESpace,
-                                                          Members->comm ) );
-
-        break;
-
-    case DARCY_TRANSIENT_NON_LINEAR:
-
-        darcySolver.reset( new darcyTransientNonLinearSolver_Type( darcyData, *p_FESpacePtr,
-                                                                   *u_FESpacePtr, *hybrid_FESpace,
-                                                                   *VdotN_FESpace,
-                                                                   Members->comm ) );
-
-        break;
-
-    }
+    darcySolver.reset( new darcyLinearSolver_Type( darcyData, *p_FESpacePtr,
+                                                   *u_FESpacePtr, *hybrid_FESpace,
+                                                   *VdotN_FESpace,
+                                                   Members->comm ) );
 
     // Stop chronoProblem
     chronoProblem.stop();
@@ -613,29 +457,6 @@ darcy::run()
 
     // Set the boudary conditions
     darcySolver->setBC ( bcDarcy );
-
-    switch ( solverType )
-    {
-    case DARCY_LINEAR:
-        break;
-
-    case DARCY_NON_LINEAR:
-        // Set the initial primal variable
-        ( dynamic_pointer_cast< darcyNonLinearSolver_Type >( darcySolver ) )->setPrimalZeroIteration( Members->getPrimalZeroIteration() );
-
-        break;
-
-    case DARCY_TRANSIENT_NON_LINEAR:
-    case DARCY_TRANSIENT:
-
-        // Set the initial primal variable
-        ( dynamic_pointer_cast< darcyTransientSolver_Type >( darcySolver ) )->setInitialPrimal( Members->getInitialPrimal() );
-
-        // Set the mass function
-        ( dynamic_pointer_cast< darcyTransientSolver_Type >( darcySolver ) )->setMass( Members->getMass() );
-
-        break;
-    }
 
     // Set the exporter for the solution
     boost::shared_ptr< Exporter< regionMesh_Type > > exporter;
@@ -683,7 +504,7 @@ darcy::run()
                            p_FESpacePtr,
                            primalExporter,
                            static_cast<UInt>( 0 ),
-                           ExporterData< regionMesh_Type >::UnsteadyRegime,
+                           ExporterData< regionMesh_Type >::SteadyRegime,
                            ExporterData< regionMesh_Type >::Cell );
 
     // Set the exporter dual pointer
@@ -695,7 +516,7 @@ darcy::run()
                            uInterpolate_FESpacePtr,
                            dualExporter,
                            static_cast<UInt>( 0 ),
-                           ExporterData< regionMesh_Type >::UnsteadyRegime,
+                           ExporterData< regionMesh_Type >::SteadyRegime,
                            ExporterData< regionMesh_Type >::Cell );
 
     // Display the total number of unknowns
@@ -705,180 +526,31 @@ darcy::run()
     // Export the partitioning
     exporter->exportPID( localMeshPtr, Members->comm );
 
-    switch ( solverType )
-    {
-    case DARCY_LINEAR:
-    {
-        // Solve the problem
+    // Solve the problem
 
-        // Build the linear system and the right hand side
-        darcySolver->buildSystem();
+    // Build the linear system and the right hand side
+    darcySolver->buildSystem();
 
-        // Solve the linear system
-        darcySolver->solve();
+    // Solve the linear system
+    darcySolver->solve();
 
-        // Post process of the primal and dual variables
-        darcySolver->computePrimalAndDual();
+    // Post process of the primal and dual variables
+    darcySolver->computePrimalAndDual();
 
-        // Save the solution
+    // Save the solution
 
-        // Copy the primal solution to the exporter
-        *primalExporter = *( darcySolver->primalSolution() );
+    // Copy the primal solution to the exporter
+    *primalExporter = *( darcySolver->primalSolution() );
 
-        // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-        *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
-                                                                        *( darcySolver->dualSolution() ) );
+    // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
+    *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
+                                                                    *( darcySolver->dualSolution() ) );
 
-        // Copy the dual interpolated solution to the exporter
-        *dualExporter = *dualInterpolated;
+    // Copy the dual interpolated solution to the exporter
+    *dualExporter = *dualInterpolated;
 
-        // Save the solution into the exporter
-        exporter->postProcess( static_cast<Real>(0) );
-    }
-    break;
-
-    case DARCY_NON_LINEAR:
-    {
-        // Solve the problem
-
-        // Start the fixed point simulation
-        ( dynamic_pointer_cast< darcyNonLinearSolver_Type >( darcySolver ) )->fixedPointScheme();
-
-        // Save the solution
-
-        // Copy the primal solution to the exporter
-        *primalExporter = *( darcySolver->primalSolution() );
-
-        // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-        *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
-                                                                        *( darcySolver->dualSolution() ) );
-
-        // Copy the dual interpolated solution to the exporter
-        *dualExporter = *dualInterpolated;
-
-        // Save the solution into the exporter
-        exporter->postProcess( static_cast<Real>(0) );
-    }
-    break;
-
-    case DARCY_TRANSIENT:
-    {
-        // Solve the problem
-
-        // Save the initial primal
-
-        // Copy the initial primal to the exporter
-        *primalExporter = *( darcySolver->primalSolution() );
-
-        // Save the initial primal solution into the exporter
-        exporter->postProcess( darcyData.dataTime()->initialTime() );
-
-        // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-        for ( ; darcyData.dataTime()->time() < darcyData.dataTime()->endTime(); )
-        {
-
-            // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
-            if ( darcyData.dataTime()->isLastTimeStep() )
-            {
-                // Compute the last time step.
-                darcyData.dataTime()->setTimeStep( darcyData.dataTime()->leftTime() );
-            }
-
-            // Advance the current time of \Delta t.
-            darcyData.dataTime()->updateTime();
-
-            // The leader process prints the temporal data.
-            if ( darcySolver->getDisplayer().isLeader() )
-            {
-                darcyData.dataTime()->showMe();
-            }
-
-            // Build the linear system and the right hand side
-            darcySolver->buildSystem();
-
-            // Solve the linear system
-            darcySolver->solve();
-
-            // Post process of the primal and dual variables
-            darcySolver->computePrimalAndDual();
-
-            // Save the solution
-
-            // Copy the primal solution to the exporter
-            *primalExporter = *( darcySolver->primalSolution() );
-
-            // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-            *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
-                                                                            *( darcySolver->dualSolution() ) );
-
-            // Copy the dual interpolated solution to the exporter
-            *dualExporter = *dualInterpolated;
-
-            // Save the solution into the exporter
-            exporter->postProcess( darcyData.dataTime()->time() );
-
-        }
-    }
-    break;
-
-    case DARCY_TRANSIENT_NON_LINEAR:
-    {
-        // Solve the problem
-
-        // Save the initial primal
-
-        // Copy the initial primal to the exporter
-        *primalExporter = *( darcySolver->primalSolution() );
-
-        // Save the initial primal solution into the exporter
-        exporter->postProcess( darcyData.dataTime()->initialTime() );
-
-        // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-        for ( ; darcyData.dataTime()->time() < darcyData.dataTime()->endTime(); )
-        {
-
-            // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
-            if ( darcyData.dataTime()->isLastTimeStep() )
-            {
-                // Compute the last time step.
-                darcyData.dataTime()->setTimeStep( darcyData.dataTime()->leftTime() );
-            }
-
-            // Advance the current time of \Delta t.
-            darcyData.dataTime()->updateTime();
-
-            // The leader process prints the temporal data.
-            if ( darcySolver->getDisplayer().isLeader() )
-            {
-                darcyData.dataTime()->showMe();
-            }
-
-            // Update the primal old solution for the fixed point scheme
-            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_Type >( darcySolver ) )->updatePrimalOldSolution();
-
-            // Start the fixed point simulation
-            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_Type >( darcySolver ) )->fixedPointScheme();
-
-            // Save the solution
-
-            // Copy the primal solution to the exporter
-            *primalExporter = *( darcySolver->primalSolution() );
-
-            // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-            *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
-                                                                            *( darcySolver->dualSolution() ) );
-
-            // Copy the dual interpolated solution to the exporter
-            *dualExporter = *dualInterpolated;
-
-            // Save the solution into the exporter
-            exporter->postProcess( darcyData.dataTime()->time() );
-
-        }
-    }
-    break;
-
-    }
+    // Save the solution into the exporter
+    exporter->postProcess( static_cast<Real>(0) );
 
     // Stop chronoProcess
     chronoProcess.stop();
@@ -888,8 +560,6 @@ darcy::run()
                                              chronoProcess.diff(), "\n" );
 
     // Compute the errors
-    // For non time dependences problem the time where the errors are computed is useless,
-    // but thanks to common interface we handle both cases.
 
     // Start chronoError for measure the total time for computing the errors.
     chronoError.start();

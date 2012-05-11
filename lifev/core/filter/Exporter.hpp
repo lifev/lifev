@@ -642,15 +642,34 @@ template <typename MeshType>
 void Exporter<MeshType>::exportPID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
 {
     // TODO: use FESpace M_spacemap for generality
-    const ReferenceFE &    refFE = feTetraP0;
-    const QuadratureRule & qR    = quadRuleTetra15pt;
-    const QuadratureRule & bdQr  = quadRuleTria4pt;
+    const ReferenceFE* refFEPtr;
 
-    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( mesh, refFE, qR, bdQr, 1, comm ) );
+    // Need a factory!!!!
+    // @todo Need a factory!
+    switch ( MeshType::S_geoDimensions )
+    {
+        case 3:
+            refFEPtr = &feTetraP0;
+            break;
+        case 2:
+            refFEPtr = &feTriaP0;
+            break;
+        case 1:
+            refFEPtr = &feSegP0;
+            break;
+        default:
+            ASSERT ( 0, "Dimension not supported " );
+    }
+
+    // Useless quadrature rule
+    const QuadratureRule & qR   = quadRuleDummy;
+    const QuadratureRule & bdQr = quadRuleDummy;
+
+    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( mesh, *refFEPtr, qR, bdQr, 1, comm ) );
 
     vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
 
-    for ( UInt iElem( 0 ); iElem < PID_FESpacePtr->mesh()->numElements(); ++iElem )
+    for ( UInt iElem( 0 ); iElem < mesh->numElements(); ++iElem )
     {
         ID globalElem = PID_FESpacePtr->mesh()->element(iElem).id();
         (*PIDData)[ globalElem ] = comm->MyPID();
