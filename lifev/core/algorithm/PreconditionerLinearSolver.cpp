@@ -224,6 +224,12 @@ PreconditionerLinearSolver::preconditionerPtr()
     return M_solver->solver();
 }
 
+PreconditionerLinearSolver::solverPtr_Type
+PreconditionerLinearSolver::solverPtr()
+{
+    return M_solver;
+}
+
 std::string
 PreconditionerLinearSolver::preconditionerType()
 {

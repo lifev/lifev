@@ -225,6 +225,9 @@ public:
     //! Return a shared pointer on the preconditioner
     prec_type preconditionerPtr();
 
+    //! Return a shared pointer on the solver
+    solverPtr_Type solverPtr();
+
     //! Return the type of preconditioner
     std::string preconditionerType();
 
