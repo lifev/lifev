@@ -130,7 +130,7 @@ public:
 
     Int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
 
-    Int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    virtual Int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
 
     bool UseTranspose();
 
