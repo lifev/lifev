@@ -150,7 +150,7 @@ int main( int argc, char* argv[] )
     fileOut << "|/  |/  |/  |/  |" << std::endl;
     fileOut << "0---1---2---3---4" << std::endl;
 
-    GhostHandler<RegionMesh> ghostP1 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP1->map(), comm );
+    GhostHandler<RegionMesh> ghostP1 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP1->mapPtr(), comm );
 
     ghostP1.setUp();
 
@@ -220,7 +220,7 @@ int main( int argc, char* argv[] )
     fileOut << "|/ 0|/ 2|/ 4|/ 6|" << std::endl;
     fileOut << "+---+---+---+---+" << std::endl;
 
-    GhostHandler<RegionMesh> ghostP0 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP0->map(), comm );
+    GhostHandler<RegionMesh> ghostP0 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP0->mapPtr(), comm );
 
     ghostP0.setUp();
 
