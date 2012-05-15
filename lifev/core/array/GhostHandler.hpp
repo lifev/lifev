@@ -71,7 +71,7 @@ public:
     //! Constructor
     GhostHandler( meshPtr_Type fullMesh,
                   meshPtr_Type localMesh,
-                  map_Type & map,
+                  mapPtr_Type map,
                   commPtr_Type const & comm );
 
     //! Destructor
@@ -89,7 +89,7 @@ public:
     mesh_Type const & localMesh() { return *M_localMesh; }
 
     //! Standard map getter
-    map_Type const & map() { return M_map; }
+    map_Type const & map() { return *M_map; }
 
     //! Node to node neighbor map
     neighborMap_Type const & nodeNodeNeighborsMap() { return M_nodeNodeNeighborsMap; }
@@ -187,7 +187,7 @@ protected:
 
     meshPtr_Type M_fullMesh;
     meshPtr_Type M_localMesh;
-    map_Type & M_map;
+    mapPtr_Type const M_map;
     commPtr_Type const M_comm;
     UInt const M_me;
 
@@ -205,7 +205,7 @@ protected:
 template <typename Mesh>
 GhostHandler<Mesh>::GhostHandler( meshPtr_Type fullMesh,
                                   meshPtr_Type localMesh,
-                                  map_Type & map,
+                                  mapPtr_Type map,
                                   commPtr_Type const & comm ):
     M_fullMesh ( fullMesh ),
     M_localMesh ( localMesh ),
@@ -493,7 +493,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes()
     map_Type & ghostMap ( *M_ghostMapOnNodes );
 
     // use the same Unique map and comm of the original map
-    ghostMap.setMap( M_map.map( Unique ), Unique );
+    ghostMap.setMap( M_map->map( Unique ), Unique );
     ghostMap.setComm( M_comm );
 
     // use a set to avoid duplicates
@@ -543,15 +543,15 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UIn
     map_Type & ghostMap ( *M_ghostMapOnNodes );
 
     // use the same Unique map and comm of the original map
-    ghostMap.setMap( M_map.map( Unique ), Unique );
+    ghostMap.setMap( M_map->map( Unique ), Unique );
     ghostMap.setComm( M_comm );
 
     Int*          pointer;
     std::set<Int> myGlobalElementsSet, myOriginalElementsSet;;
 
     // get all elements from the repeated map
-    pointer = M_map.map( Repeated )->MyGlobalElements();
-    for ( Int ii = 0; ii < M_map.map( Repeated )->NumMyElements(); ++ii, ++pointer )
+    pointer = M_map->map( Repeated )->MyGlobalElements();
+    for ( Int ii = 0; ii < M_map->map( Repeated )->NumMyElements(); ++ii, ++pointer )
     {
         myOriginalElementsSet.insert( *pointer );
     }
@@ -683,15 +683,15 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP0
     map_Type & ghostMap ( *M_ghostMapOnElementsP0 );
 
     // use the same Unique map and comm of the original map
-    ghostMap.setMap( M_map.map( Unique ), Unique );
+    ghostMap.setMap( M_map->map( Unique ), Unique );
     ghostMap.setComm( M_comm );
 
     Int*          pointer;
     std::set<Int> map;
 
     // get all elements from the repeated map
-    pointer = M_map.map( Repeated )->MyGlobalElements();
-    for ( Int ii = 0; ii < M_map.map( Repeated )->NumMyElements(); ++ii, ++pointer )
+    pointer = M_map->map( Repeated )->MyGlobalElements();
+    for ( Int ii = 0; ii < M_map->map( Repeated )->NumMyElements(); ++ii, ++pointer )
     {
         map.insert( *pointer );
     }
@@ -737,15 +737,15 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
     map_Type & ghostMap ( *M_ghostMapOnElementsP1 );
 
     // use the same Unique map and comm of the original map
-    ghostMap.setMap( M_map.map( Unique ), Unique );
+    ghostMap.setMap( M_map->map( Unique ), Unique );
     ghostMap.setComm( M_comm );
 
     Int*          pointer;
     std::set<Int> map;
 
     // get all elements from the repeated map
-    pointer = M_map.map( Repeated )->MyGlobalElements();
-    for ( Int ii = 0; ii < M_map.map( Repeated )->NumMyElements(); ++ii, ++pointer )
+    pointer = M_map->map( Repeated )->MyGlobalElements();
+    for ( Int ii = 0; ii < M_map->map( Repeated )->NumMyElements(); ++ii, ++pointer )
     {
         map.insert( *pointer );
     }
