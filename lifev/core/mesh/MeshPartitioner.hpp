@@ -1616,10 +1616,7 @@ void MeshPartitioner<MeshType>::execute()
 
     if ( M_buildOverlappingPartitions )
     {
-        meshPtr_Type dummyMesh( new mesh_Type() );
-        MapEpetra dummyMap;
-        GhostHandler<mesh_Type> gh( M_originalMesh, dummyMesh, dummyMap, M_comm );
-
+        GhostHandler<mesh_Type> gh( M_originalMesh, M_comm );
         gh.createNodeElementNeighborsMap();
         gh.ghostMapOnElementsP1( M_elementDomains, M_entityPID, 1 );
      }
