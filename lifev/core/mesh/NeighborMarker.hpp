@@ -135,12 +135,13 @@ void createNodeNeighbors( MeshType & mesh )
     }
 }   
 
-typedef std::set<ID> neighborList_Type;
-typedef std::map< ID, neighborList_Type > neighborMap_Type;
+typedef std::set<ID> neighbors_Type;
+typedef std::vector<neighbors_Type> neighborList_Type;
 
 template <typename MeshType>
-void createNodeNeighbors( MeshType const & mesh, neighborMap_Type & neighborMap )
+void createNodeNeighbors( MeshType const & mesh, neighborList_Type & neighborList )
 {
+    neighborList.resize( mesh.numGlobalPoints() );
     // generate node neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < mesh.numEdges(); ie++ )
@@ -151,8 +152,8 @@ void createNodeNeighbors( MeshType const & mesh, neighborMap_Type & neighborMap 
         ASSERT ( mesh.point( id0 ).id() == id0 && mesh.point( id1 ).id() == id1,
                  "the mesh has been reordered, the point must be found" );
 
-        neighborMap[ id0 ].insert ( id1 );
-        neighborMap[ id1 ].insert ( id0 );
+        neighborList[ id0 ].insert ( id1 );
+        neighborList[ id1 ].insert ( id0 );
     }
 }
 
