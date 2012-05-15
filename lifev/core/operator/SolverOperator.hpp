@@ -93,6 +93,8 @@ public:
 
 	void setUsedForPreconditioning( const bool& enable );
 
+	void resetCumulIterations() { M_numCumulIterations = 0; }
+
 	//@}
 
 	//! @name Mathematical methods
@@ -145,6 +147,9 @@ public:
 	 */
 	int numIterations() const { return M_numIterations; }
 
+	//! Returns the cumul of iterations
+	int numCumulIterations() const { return M_numCumulIterations; }
+
 	//@}
 
 protected:
@@ -177,6 +182,9 @@ protected:
 
 	//! Number of iterations performed by the solver
 	mutable int M_numIterations;
+
+	//! Number of cumulated iterations performed by the solver
+	mutable int M_numCumulIterations;
 
 	//! Solver tolerance
 	Real M_tolerance;
