@@ -55,8 +55,8 @@ public:
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
     typedef Epetra_Comm comm_Type;
     typedef boost::shared_ptr<comm_Type> commPtr_Type;
-    typedef std::set<ID> neighborList_Type;
-    typedef std::map< ID, neighborList_Type > neighborMap_Type;
+    typedef std::set<ID> neighbors_Type;
+    typedef std::vector<neighbors_Type> neighborList_Type;
     typedef MapEpetra map_Type;
     typedef boost::shared_ptr<map_Type> mapPtr_Type;
     typedef std::map< UInt, mapPtr_Type > mapList_Type;
@@ -92,10 +92,10 @@ public:
     map_Type const & map() { return *M_map; }
 
     //! Node to node neighbor map
-    neighborMap_Type const & nodeNodeNeighborsMap() { return M_nodeNodeNeighborsMap; }
+    neighborList_Type const & nodeNodeNeighborsList() { return M_nodeNodeNeighborsList; }
 
     //! Node to element neighbor map
-    neighborMap_Type const & nodeElementNeighborsMap() { return M_nodeElementNeighborsMap; }
+    neighborList_Type const & nodeElementNeighborsList() { return M_nodeElementNeighborsList; }
 
     //@}
 
@@ -191,9 +191,9 @@ protected:
     commPtr_Type const M_comm;
     UInt const M_me;
 
-    neighborMap_Type M_nodeNodeNeighborsMap;
-    neighborMap_Type M_nodeEdgeNeighborsMap;
-    neighborMap_Type M_nodeElementNeighborsMap;
+    neighborList_Type M_nodeNodeNeighborsList;
+    neighborList_Type M_nodeEdgeNeighborsList;
+    neighborList_Type M_nodeElementNeighborsList;
 
     const bool M_verbose;
 
@@ -212,9 +212,9 @@ GhostHandler<Mesh>::GhostHandler( meshPtr_Type fullMesh,
     M_map ( map ),
     M_comm ( comm ),
     M_me ( comm->MyPID() ),
-    M_nodeNodeNeighborsMap(),
-    M_nodeEdgeNeighborsMap(),
-    M_nodeElementNeighborsMap(),
+    M_nodeNodeNeighborsList(),
+    M_nodeEdgeNeighborsList(),
+    M_nodeElementNeighborsList(),
     M_verbose( !M_me ),
 #ifdef HAVE_LIFEV_DEBUG
     M_debugOut( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string>( M_me ) : "s" ) + ".out" ).c_str() )
@@ -242,9 +242,9 @@ void GhostHandler<Mesh>::release()
 template <typename Mesh>
 void GhostHandler<Mesh>::clean()
 {
-    clearVector( M_nodeNodeNeighborsMap );
-    clearVector( M_nodeEdgeNeighborsMap );
-    clearVector( M_nodeElementNeighborsMap );
+    clearVector( M_nodeNodeNeighborsList );
+    clearVector( M_nodeEdgeNeighborsList );
+    clearVector( M_nodeElementNeighborsList );
 }
 
 #ifdef HAVE_HDF5
@@ -252,18 +252,18 @@ void GhostHandler<Mesh>::clean()
 namespace
 {
 
-void writeNeighborMap( EpetraExt::HDF5 & file, neighborMap_Type & map, std::string const & name )
+void writeNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::string const & name )
 {
     // copy the map into vectors
-    ASSERT ( map.size() > 0, "the map " + name + " is empty!" )
-    std::vector<Int> offsets ( map.size() + 1 );
+    ASSERT ( list.size() > 0, "the map " + name + " is empty!" )
+    std::vector<Int> offsets ( list.size() + 1 );
     std::vector<Int> values;
     Int sum ( 0 );
-    for ( UInt i ( 0 ); i < map.size(); i++ )
+    for ( UInt i ( 0 ); i < list.size(); i++ )
     {
-        sum += map[ i ].size();
+        sum += list[ i ].size();
         offsets[ i + 1 ] = sum;
-        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+        for ( neighbors_Type::const_iterator j ( list[ i ].begin() ); j != list[ i ].end(); ++j )
         {
             values.push_back( *j );
         }
@@ -290,7 +290,7 @@ void writeNeighborMap( EpetraExt::HDF5 & file, neighborMap_Type & map, std::stri
     */
 }
 
-void readNeighborMap( EpetraExt::HDF5 & file, neighborMap_Type & map, std::string const & name )
+void readNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::string const & name )
 {
     // Read the vectors from the file
     Int offsetSize;
@@ -303,12 +303,12 @@ void readNeighborMap( EpetraExt::HDF5 & file, neighborMap_Type & map, std::strin
     file.Read( name, "values", H5T_NATIVE_INT, valueSize, &values[ 0 ] );
 
     // setup the map
-    map.clear();
+    list.resize( offsetSize - 1 );
     for ( Int i ( 0 ); i < offsetSize - 1; i++ )
     {
         for ( Int j ( offsets[ i ] ); j < offsets[ i + 1 ]; j++ )
         {
-            map[ i ].insert( values[ j ] );
+            list[ i ].insert( values[ j ] );
         }
     }
 
@@ -352,9 +352,9 @@ void GhostHandler<Mesh>::exportToHDF5( std::string const & fileName, bool const 
         abort();
     }
 
-    writeNeighborMap( HDF5, M_nodeNodeNeighborsMap, "nodeNodeNeighborsMap" );
-    writeNeighborMap( HDF5, M_nodeEdgeNeighborsMap, "nodeEdgeNeighborsMap" );
-    writeNeighborMap( HDF5, M_nodeElementNeighborsMap, "nodeElementNeighborsMap" );
+    writeNeighborMap( HDF5, M_nodeNodeNeighborsList, "nodeNodeNeighborsMap" );
+    writeNeighborMap( HDF5, M_nodeEdgeNeighborsList, "nodeEdgeNeighborsMap" );
+    writeNeighborMap( HDF5, M_nodeElementNeighborsList, "nodeElementNeighborsMap" );
 
     // Close the file
     HDF5.Close();
@@ -375,9 +375,9 @@ void GhostHandler<Mesh>::importFromHDF5( std::string const & fileName )
         abort();
     }
 
-    readNeighborMap( HDF5, M_nodeNodeNeighborsMap, "nodeNodeNeighborsMap" );
-    readNeighborMap( HDF5, M_nodeEdgeNeighborsMap, "nodeEdgeNeighborsMap" );
-    readNeighborMap( HDF5, M_nodeElementNeighborsMap, "nodeElementNeighborsMap" );
+    readNeighborMap( HDF5, M_nodeNodeNeighborsList, "nodeNodeNeighborsMap" );
+    readNeighborMap( HDF5, M_nodeEdgeNeighborsList, "nodeEdgeNeighborsMap" );
+    readNeighborMap( HDF5, M_nodeElementNeighborsList, "nodeElementNeighborsMap" );
 
     // Close the file
     HDF5.Close();
@@ -423,6 +423,7 @@ void GhostHandler<Mesh>::createNodeNeighbors()
 template <typename Mesh>
 void GhostHandler<Mesh>::createNodeNodeNeighborsMap()
 {
+    M_nodeNodeNeighborsList.resize( M_fullMesh->numGlobalPoints() );
     // generate node neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < M_fullMesh->numEdges(); ie++ )
@@ -433,14 +434,15 @@ void GhostHandler<Mesh>::createNodeNodeNeighborsMap()
         ASSERT ( M_fullMesh->point( id0 ).id() == id0 && M_fullMesh->point( id1 ).id() == id1,
                  "the mesh has been reordered, the point must be found" );
 
-        M_nodeNodeNeighborsMap[ id0 ].insert ( id1 );
-        M_nodeNodeNeighborsMap[ id1 ].insert ( id0 );
+        M_nodeNodeNeighborsList[ id0 ].insert( id1 );
+        M_nodeNodeNeighborsList[ id1 ].insert( id0 );
     }
 }
 
 template <typename Mesh>
 void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
 {
+    M_nodeEdgeNeighborsList.resize( M_fullMesh->numGlobalPoints() );
     // generate node neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < M_fullMesh->numEdges(); ie++ )
@@ -451,14 +453,15 @@ void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
         ASSERT ( M_fullMesh->point( id0 ).id() == id0 && M_fullMesh->point( id1 ).id() == id1,
                  "the mesh has been reordered, the point must be found" );
 
-        M_nodeEdgeNeighborsMap[ id0 ].insert ( ie );
-        M_nodeEdgeNeighborsMap[ id1 ].insert ( ie );
+        M_nodeEdgeNeighborsList[ id0 ].insert ( ie );
+        M_nodeEdgeNeighborsList[ id1 ].insert ( ie );
     }
 }
 
 template <typename Mesh>
 void GhostHandler<Mesh>::createNodeElementNeighborsMap()
 {
+    M_nodeElementNeighborsList.resize( M_fullMesh->numGlobalPoints() );
     // generate element neighbors by cycling on elements
     for ( UInt ie = 0; ie < M_fullMesh->numElements(); ie++ )
     {
@@ -468,7 +471,7 @@ void GhostHandler<Mesh>::createNodeElementNeighborsMap()
         for ( UInt k = 0; k < Mesh::element_Type::S_numPoints; k++ )
         {
             ID id ( M_fullMesh->element( ie ).point( k ).id() );
-            M_nodeElementNeighborsMap[ id ].insert ( ie );
+            M_nodeElementNeighborsList[ id ].insert ( ie );
         }
     }
 }
@@ -532,7 +535,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UIn
     if ( M_verbose ) std::cout << " GH- ghostMapOnNodes( UInt )" << std::endl;
 
     // check that the nodeNodeNeighborsMap has been created
-    if ( M_nodeNodeNeighborsMap.empty()  )
+    if ( M_nodeNodeNeighborsList.empty()  )
     {
         if ( M_verbose ) std::cerr << "the nodeNodeNeighborsMap is empty, will be generated now" << std::endl;
         this->createNodeNodeNeighborsMap();
@@ -567,8 +570,8 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UIn
                         nodeIt != myOriginalElementsSet.end(); ++nodeIt )
         {
             // iterate on each node neighborhood
-            for ( neighborList_Type::const_iterator neighborIt = M_nodeNodeNeighborsMap[ *nodeIt ].begin();
-                            neighborIt != M_nodeNodeNeighborsMap[ *nodeIt ].end(); ++neighborIt )
+            for ( neighbors_Type::const_iterator neighborIt = M_nodeNodeNeighborsList[ *nodeIt ].begin();
+                            neighborIt != M_nodeNodeNeighborsList[ *nodeIt ].end(); ++neighborIt )
             {
                 myGlobalElementsSet.insert( *neighborIt );
             }
@@ -597,7 +600,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
     if ( M_verbose ) std::cout << " GH- ghostMapOnEdges()" << std::endl;
 
     // check that the nodeEdgeNeighborsMap has been created
-    if ( M_nodeEdgeNeighborsMap.empty()  )
+    if ( M_nodeEdgeNeighborsList.empty()  )
     {
         if ( M_verbose ) std::cerr << "the nodeEdgeNeighborsMap is empty, will be generated now" << std::endl;
         this->createNodeEdgeNeighborsMap();
@@ -639,8 +642,8 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
                             nodeIt != addedElementsSet.end(); ++nodeIt )
             {
                 // iterate on each node neighborhood
-                for ( neighborList_Type::const_iterator neighborIt = M_nodeEdgeNeighborsMap[ *nodeIt ].begin();
-                                neighborIt != M_nodeEdgeNeighborsMap[ *nodeIt ].end(); ++neighborIt )
+                for ( neighbors_Type::const_iterator neighborIt = M_nodeEdgeNeighborsList[ *nodeIt ].begin();
+                                neighborIt != M_nodeEdgeNeighborsList[ *nodeIt ].end(); ++neighborIt )
                 {
                     std::pair<std::set<Int>::iterator, bool> isInserted = myGlobalElementsSet.insert( *neighborIt );
                     if ( isInserted.second )
@@ -726,7 +729,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
     if ( M_verbose ) std::cout << " GH- ghostMapOnElementsP1()" << std::endl;
 
     // check that the nodeElementNeighborsMap has been created
-    if ( M_nodeElementNeighborsMap.empty()  )
+    if ( M_nodeElementNeighborsList.empty()  )
     {
         if ( M_verbose ) std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
         this->createNodeElementNeighborsMap();
@@ -765,8 +768,8 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
                         globalId != pointsOnSubdInt.end(); ++globalId )
         {
             // iterate on each node neighborhood
-            for ( neighborList_Type::const_iterator neighborIt = M_nodeElementNeighborsMap[ *globalId ].begin();
-                            neighborIt != M_nodeElementNeighborsMap[ *globalId ].end(); ++neighborIt )
+            for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ *globalId ].begin();
+                            neighborIt != M_nodeElementNeighborsList[ *globalId ].end(); ++neighborIt )
             {
                 std::pair<std::set<Int>::iterator, bool> isInserted = map.insert( *neighborIt );
                 if ( isInserted.second )
@@ -803,7 +806,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
     if ( M_verbose ) std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
 
     // check that the nodeElementNeighborsMap has been created
-    if ( M_nodeElementNeighborsMap.empty()  )
+    if ( M_nodeElementNeighborsList.empty()  )
     {
         if ( M_verbose ) std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
         this->createNodeElementNeighborsMap();
@@ -925,8 +928,8 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
         {
             const int & currentPoint = workingPoints[ k ];
             // iterate on point neighborhood
-            for ( neighborList_Type::const_iterator neighborIt = M_nodeElementNeighborsMap[ currentPoint ].begin();
-                            neighborIt != M_nodeElementNeighborsMap[ currentPoint ].end(); ++neighborIt )
+            for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ currentPoint ].begin();
+                            neighborIt != M_nodeElementNeighborsList[ currentPoint ].end(); ++neighborIt )
             {
                 std::pair<std::set<Int>::iterator, bool> isInserted = augmentedElemsSet.insert( *neighborIt );
                 if( isInserted.second )
@@ -966,24 +969,24 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
 template <typename Mesh>
 void GhostHandler<Mesh>::showMe( bool const /*verbose*/, std::ostream & out )
 {
-    out << "GhostHandler<Mesh>showMe" << std::endl;
+    out << "GhostHandler::showMe()" << std::endl;
     out << "M_nodeNodeNeighborsMap" << std::endl;
-    for ( neighborMap_Type::const_iterator it = M_nodeNodeNeighborsMap.begin();
-                    it != M_nodeNodeNeighborsMap.end(); ++it )
+    for ( UInt i = 0; i < M_nodeNodeNeighborsList.size(); i++ )
     {
-        out << it->first << "> ";
-        for ( neighborList_Type::const_iterator nIt = it->second.begin(); nIt != it->second.end(); ++nIt )
+        out << i << " > ";
+        for ( neighbors_Type::const_iterator nIt = M_nodeNodeNeighborsList[ i ].begin();
+              nIt != M_nodeNodeNeighborsList[ i ].end(); ++nIt )
         {
             out << *nIt << " ";
         }
         out << std::endl;
     }
     out << "M_nodeElementNeighborsMap" << std::endl;
-    for ( neighborMap_Type::const_iterator it = M_nodeElementNeighborsMap.begin();
-                    it != M_nodeElementNeighborsMap.end(); ++it )
+    for ( UInt i = 0; i < M_nodeNodeNeighborsList.size(); i++ )
     {
-        out << it->first << "> ";
-        for ( neighborList_Type::const_iterator nIt = it->second.begin(); nIt != it->second.end(); ++nIt )
+        out << i << " > ";
+        for ( neighbors_Type::const_iterator nIt = M_nodeNodeNeighborsList[ i ].begin();
+              nIt != M_nodeNodeNeighborsList[ i ].end(); ++nIt )
         {
             out << *nIt << " ";
         }
