@@ -39,6 +39,11 @@
 #ifndef _ELEMOPERSTRUCTURE_H_INCLUDED
 #define _ELEMOPERSTRUCTURE_H_INCLUDED
 
+//Trilinos includ
+#include <Epetra_LAPACK.h>
+#include <Epetra_BLAS.h>
+#include <Epetra_SerialDenseMatrix.h>
+
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>
 
@@ -514,6 +519,45 @@ void stiff_Jac_P1iso_Exp_5term( Real coef, Real coefExp, const KN<Real> Jk, cons
   @param fe The current finite element
  */
 void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const KNMK<Real> CofFk, const KN<Real> Jk, const KN<Real> Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+
+//! METHODS FOR TENSORIAL CALCULUS
+//! In this part of the namespace, the methods to perform basics operations on tensors are defined.
+//! The operations are: tensorial products, computations of invariants
+/*!
+  This function computes the invariants of the right Cauchy Green tensor and the cofactor of F
+
+  @param invariants vector of invariants of C
+  @param tensorF deformation gradient tensor
+ */
+  void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real >& invariants, 
+					       Epetra_SerialDenseMatrix& tensorF,
+					       Epetra_SerialDenseMatrix& cofactorF);
+
+/*!
+  This function computes the Cauchy stress tensor given the detF, first Piola Kirchhoff and tensorF
+
+  @param cauchy Cauchy stress tensor
+  @param firstPiola first Piola-Kirchhoff tensor
+  @param invariants vector of invariants of C
+  @param tensorF deformation gradient tensor
+ */
+  void computeCauchyStressTensor(Epetra_SerialDenseMatrix& cauchy,
+				 Epetra_SerialDenseMatrix& firstPiola,
+				 LifeV::Real det,
+				 Epetra_SerialDenseMatrix& tensorF);
+
+/*!
+  This function computes the eigenvalues of \sigma
+
+  @param cauchy Cauchy stress tensor
+  @param eigenvalues vector of principal tensions
+ */
+  void computeEigenvalues(Epetra_SerialDenseMatrix& cauchy,
+			  std::vector<LifeV::Real >& eigenvaluesR,
+			  std::vector<LifeV::Real >& eigenvaluesI);
+
+
 
 } //! End namespace AssemblyElementalStructure
 

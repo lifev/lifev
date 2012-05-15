@@ -26,7 +26,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
  *  @file
- *  @brief This file contains solvers for different materials. WARNING!!!!This is the most important issue related with this class. At the moment, the BC are applied on the matrix and on rhsNoBc for VK models but for NH and EXP they are applied on the residual directly. This does not work for nonhomogeneus Dirichlet conditions!!
+ *  @brief This file contains solvers for different materials. 
 *
 *  @version 1.0
 *  @date 01-01-2010

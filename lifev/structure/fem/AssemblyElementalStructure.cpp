@@ -1323,6 +1323,110 @@ void  stiff_Jac_P1iso_Exp_6term( Real             coef,
 //! END OF EXPONENTIAL MODEL
 //! ***********************************************************************************************
 
+//! ***********************************************************************************************
+//! METHODS FOR TENSORIAL CALCULUS
+//! ***********************************************************************************************
+
+//! Computation of the Right Cauchy Green tensor given the tensor F.
+void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real >& invariants, 
+					     Epetra_SerialDenseMatrix& tensorF,
+					     Epetra_SerialDenseMatrix& cofactorF) 
+{
+  
+  //Computation of the invariants 
+  //At the moment, only the first one is really computed.
+  //The others are not still used in the constitutive laws
+
+  Real C11(0);
+  Real C22(0);
+  Real C33(0);
+
+  C11 = tensorF(0,0)*tensorF(0,0) + tensorF(1,0)*tensorF(1,0) + tensorF(2,0)*tensorF(2,0);
+  C22 = tensorF(0,1)*tensorF(0,1) + tensorF(1,1)*tensorF(1,1) + tensorF(2,1)*tensorF(2,1);
+  C33 = tensorF(0,2)*tensorF(0,2) + tensorF(1,2)*tensorF(1,2) + tensorF(2,2)*tensorF(2,2);
+
+  invariants[0]=C11 + C22 + C33; //First invariant C
+  invariants[1]=0.0; //Second invariant C
+  invariants[2]=0.0; //Third invariant C
+  invariants[3]=tensorF(0,0) * ( tensorF(1,1)*tensorF(2,2) - tensorF(1,2)*tensorF(2,1) ) - tensorF(0,1) * ( tensorF(1,0)*tensorF(2,2) - tensorF(1,2)*tensorF(2,0) ) + tensorF(0,2) * ( tensorF(1,0)*tensorF(2,1) - tensorF(1,1)*tensorF(2,0) ); //Determinant F
+  
+  
+  //Computation of the Cofactor of F
+  cofactorF( 0 , 0 ) =   ( tensorF(1,1)*tensorF(2,2) - tensorF(1,2)*tensorF(2,1) );
+  cofactorF( 0 , 1 ) = - ( tensorF(1,0)*tensorF(2,2) - tensorF(2,0)*tensorF(1,2) );
+  cofactorF( 0 , 2 ) =   ( tensorF(1,0)*tensorF(2,1) - tensorF(1,1)*tensorF(2,0) );
+  cofactorF( 1 , 0 ) = - ( tensorF(0,1)*tensorF(2,2) - tensorF(0,2)*tensorF(2,1) );
+  cofactorF( 1 , 1 ) =   ( tensorF(0,0)*tensorF(2,2) - tensorF(0,2)*tensorF(2,0) );
+  cofactorF( 1 , 2 ) = - ( tensorF(0,0)*tensorF(2,1) - tensorF(2,0)*tensorF(0,1) );
+  cofactorF( 2 , 0 ) =   ( tensorF(0,1)*tensorF(1,2) - tensorF(0,2)*tensorF(1,1) );
+  cofactorF( 2 , 1 ) = - ( tensorF(0,0)*tensorF(1,2) - tensorF(0,2)*tensorF(1,0) );
+  cofactorF( 2 , 2 ) =   ( tensorF(0,0)*tensorF(1,1) - tensorF(1,0)*tensorF(0,1) );  
+}
+
+void computeCauchyStressTensor(Epetra_SerialDenseMatrix& cauchy,
+			       Epetra_SerialDenseMatrix& firstPiola,
+			       LifeV::Real det,
+			       Epetra_SerialDenseMatrix& tensorF)
+{
+  
+  firstPiola.Scale( 1/det );
+  cauchy.Multiply('N','T',1.0,firstPiola,tensorF,0.0);
+
+}
+
+void computeEigenvalues(Epetra_SerialDenseMatrix& cauchy,
+			std::vector<LifeV::Real >& eigenvaluesR,
+			std::vector<LifeV::Real >& eigenvaluesI)
+
+{
+  // LAPACK wrapper of Epetra
+  Epetra_LAPACK lapack;
+
+  //List of flags for Lapack Function
+  //For documentation, have a look at http://www.netlib.org/lapack/double/dgeev.f
+
+  char JOBVL = 'N';
+  char JOBVR = 'N';
+
+  Int N = cauchy.RowDim();
+  Int LDA = cauchy.RowDim();
+  std::vector<LifeV::Real > WR(3,0.0);
+  std::vector<LifeV::Real > WI(3,0.0);
+
+  std::vector<LifeV::Real > VR(9,0.0);
+  Int LDVR = 3;
+  std::vector<LifeV::Real > VL(9,0.0);
+  Int LDVL = 3;
+  
+  std::vector<LifeV::Real > WORK(9, 0.0);
+
+  Int LWORK = 9;
+  Int INFO;
+
+  //Conversion matrix Cauchy to Vector 
+  //  /*std::vector<LifeV::Real >*/ double A[3][3]; /*,0.0);*/
+
+ 
+  std::vector<LifeV::Real> A(9, 0.0);
+
+  for (int i(0); i< 3; i++)
+    {
+      for (int j(0);j<3; j++)
+  	{
+  	  A[3 * i + j] = cauchy(i,j);
+  	}
+    }
+
+
+  lapack.GEEV(JOBVL, JOBVR, N, &A[0] /*cauchy*/, LDA, &WR[0], &WI[0], &VL[0], LDVL, &VR[0], LDVR, &WORK[0], LWORK, INFO);
+  ASSERT_PRE( !INFO, "Calculation of the Eigenvalues failed!!!" );
+
+  eigenvaluesR = WR;
+  eigenvaluesI = WI;
+
+
+}
+
 } //! End namespace AssemblyElementalStructure
 
 } //! End namespace LifeV

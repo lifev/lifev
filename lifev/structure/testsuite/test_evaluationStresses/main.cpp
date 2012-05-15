@@ -230,7 +230,7 @@ void
 Structure::run3d()
 {
     // General typedefs
-    typedef WallTensionEvaluator< mesh_Type >::solutionVect_Type  vector_Type;
+    typedef WallTensionEstimator< mesh_Type >::solutionVect_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type>                                vectorPtr_Type;
     typedef FESpace< mesh_Type, MapEpetra >                 solidFESpace_Type;
     typedef boost::shared_ptr<solidFESpace_Type>                          solidFESpacePtr_Type;    
@@ -264,7 +264,7 @@ Structure::run3d()
     if (verbose) std::cout << std::endl;
 
     //! 1. Constructor of the structuralSolver
-    WallTensionEvaluator< mesh_Type > solid;
+    WallTensionEstimator< mesh_Type > solid;
 
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,
@@ -273,8 +273,8 @@ Structure::run3d()
                 parameters->comm);
 
     //! 3. Creation of the importers to read the displacement field
-    std::string const importerType =  data_file( "importer/type", "hdf5");
-    std::string const filename    = data_file( "importer/fluid/filename", "solid");
+    std::string const importerType =  dataFile( "importer/type", "hdf5");
+    std::string const filename    = dataFile( "importer/fluid/filename", "solid");
     std::string iterationString; //useful to iterate over the strings
 
     if (verbose) 
@@ -286,25 +286,56 @@ Structure::run3d()
 #ifdef HAVE_HDF5
     if (importerType.compare("hdf5") == 0)
       {
-	M_importer.reset( new  hdf5Filter_Type( data_file, filename) );
+	M_importer.reset( new  hdf5Filter_Type( dataFile, filename) );
       }
     else
 #endif
       {
 	if (importerType.compare("none") == 0)
 	  {
-	    M_importer.reset( new ExporterEmpty<mesh_Type > ( data_file, solid.dFESpace().mesh(), "solid", solid.dFESpace().map().comm().MyPID()) );
+	    M_importer.reset( new ExporterEmpty<mesh_Type > ( dataFile, solid.dFESpace().mesh(), "solid", solid.dFESpace().map().comm().MyPID()) );
 	  }
 	else
 	  {
-	    M_importer.reset( new  ensightFilter_Type ( data_file, fileName) );
+	    M_importer.reset( new  ensightFilter_Type ( dataFile, filename) );
 	  }
       }
+    M_importer->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
 
     // The vector where the solution will be stored
     vectorPtr_Type solidDisp (new vector_Type(solid.dFESpace().map(),M_importer->mapType() ));
 
-    //! 4. Creation of the expoters to save the tensions
+
+    //! 6. Post-processing setting
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
+
+    std::string const exporterType =  dataFile( "exporter/type", "hdf5");
+#ifdef HAVE_HDF5
+    if (exporterType.compare("hdf5") == 0)
+    {
+      M_exporter.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "structure" ) );
+    }
+    else
+#endif
+    {
+        if (exporterType.compare("none") == 0)
+	{
+	    M_exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+	}
+
+        else
+        {
+	    M_exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+	}
+    }
+
+    M_exporter->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
+
+    vectorPtr_Type solidTensions ( new vector_Type(solid.displacement(),  M_exporter->mapType() ) );
+
+    M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tensions", dFESpace, solidTensions, UInt(0) );
+    M_exporter->postProcess( 0.0 );
+
 
 
 
@@ -315,15 +346,19 @@ Structure::run3d()
 
     //! 5. For each interval, the analysis is performed
 
+    LifeV::Real dt =  dataFile( "fluid/time_discretization/timestep", 0.0);
+    LifeV::Real startTime =  dataFile( "fluid/time_discretization/initialtime", 0.0);
+
     //Cycle of the intervals
     for ( UInt i(0); i< tensionData->iterStart().size(); i++ )
       {
-	std::string initial = tensionData->iterStart(i);
-	std::string last    = tensionData->iterEnd(i);
+	const std::string initial = tensionData->iterStart(i);
+	const std::string last    = tensionData->iterEnd(i);
 
 	//! Todo: A check on the existence of the initial and last strings would be appreciated
 	
 	iterationString = initial;
+	UInt iterDone = 0;
 
 	while( iterationString.compare(last)  )
 	  {
@@ -331,132 +366,49 @@ Structure::run3d()
 	    //Read variable at iterationString
 
 	    /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-	    LifeV::ExporterData<mesh_Type> solidDisp  (LifeV::ExporterData<mesh_Type>::VectorField,"s-displacement."+iterationString, solid.dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+	    LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,"s-displacement."+iterationString, solid.dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
+	    //Read the variable
+	    M_importer->readVariable(solutionDispl);
+
+	    //Set the current solution as the displacement vector to use
+	    solid.setDisplacement(*solidDisp);
+
+	    //Perform the analysis
+	    solid.analyzeTensions();
+
+	    //Export the principal stresses
+	    M_exporter->postProcess( startTime + iterDone*dt );
 
 
 	    //Increment the iterationString
-	    
+	    int iterations = std::atoi(iterationString.c_str());
+	    iterations++;
+
+	    std::ostringstream iter;
+	    iter.fill( '0' );
+	    iter << std::setw(5) << ( iterations );
+	    iterationString=iter.str();
+
+	    //Increment the iteration for the postProcess
+	    iterDone++;
+
 	  }
-	
+
+	if (verbose ) 
+	  std::cout << "Analysis of the "<< i << "-th interval completed!" << std::endl;
       }
 
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if (verbose ) std::cout << "ok." << std::endl;
-
-
-    //! 6. Post-processing setting
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
-
-    std::string const exporterType =  dataFile( "exporter/type", "ensight");
-#ifdef HAVE_HDF5
-    if (exporterType.compare("hdf5") == 0)
-    {
-      exporter.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "structure" ) );
-    }
-    else
-#endif
-    {
-        if (exporterType.compare("none") == 0)
-	{
-	    exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
-	}
-
-        else
-        {
-	    exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
-	}
-    }
-
-    exporter->setPostDir( "./" );
-    exporter->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
-
-    vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
-
-    exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
-    exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
-    exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
-
-    exporter->postProcess( 0 );
-
+    if (verbose ) std::cout << "finished" << std::endl;
 
     
-    //! 7. For each of the iterations (which correspond to a time) the analysis is performed.
-    vectorPtr_Type rhs (new vector_Type(solid.displacement(), Unique));
-    vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique));
-    vectorPtr_Type vel (new vector_Type(solid.displacement(), Unique));
-    vectorPtr_Type acc (new vector_Type(solid.displacement(), Unique));
+    //!--------------------------------------------------------------------------------------------------
 
-    //! 8. Loop on the iterations
-
-    exporter->postProcess( time ); //a time is needed!
-
-
-	Real normVect;
-	normVect =  solid.displacement().norm2();
-	std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
-
-
-
-	//!--------------------------------------------------------------------------------------------------
-
-        MPI_Barrier(MPI_COMM_WORLD);
-    }
+    MPI_Barrier(MPI_COMM_WORLD);
 }
-
-
-
-void Structure::CheckResultLE(const Real& dispNorm,const Real& time)
-{
-    if ( time == 0.1  && std::fabs(dispNorm-0.276527)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.276536)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.276529)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.276531)>1e-5 )
-        this->resultChanged(time);
-}
-
-void Structure::CheckResultSVK(const Real& dispNorm,const Real& time)
-{
-    if ( time == 0.1  && std::fabs(dispNorm-0.263348)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.263350)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.263350)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.263351)>1e-5 )
-        this->resultChanged(time);
-}
-void Structure::CheckResultEXP(const Real& dispNorm,const Real& time)
-{
-    if ( time == 0.1  && std::fabs(dispNorm-0.284844)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.284853)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.284846)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.284848)>1e-5 )
-        this->resultChanged(time);
-}
-
-void Structure::CheckResultNH(const Real& dispNorm,const Real& time)
-{
-    if ( time == 0.1  && std::fabs(dispNorm-0.286120)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.286129)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.286122)>1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.286123)>1e-5 )
-        this->resultChanged(time);
-}
-
 
 
 void Structure::resultChanged(Real time)

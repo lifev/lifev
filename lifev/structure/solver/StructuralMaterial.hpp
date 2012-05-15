@@ -50,6 +50,7 @@
 
 #include <Epetra_Vector.h>
 #include <EpetraExt_MatrixMatrix.h>
+#include <Epetra_SerialDenseMatrix.h>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -166,12 +167,27 @@ public:
     virtual  void computeKinematicsVariables( const VectorElemental& dk_loc ) = 0;
 
 
-  //! Output of the class
-  /*!
-    \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
-    \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
-  */
-  virtual void showMe( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
+    //! Output of the class
+    /*!
+       \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
+       \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
+    */
+    virtual void showMe( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
+
+
+    //! Compute the First Piola Kirchhoff Tensor
+    /*! 
+       \param firstPiola Epetra_SerialDenseMatrix that has to be filled
+       \param tensorF Epetra_SerialDenseMatrix the deformation gradient 
+       \param cofactorF Epetra_SerialDenseMatrix cofactor of F 
+       \param invariants std::vector with the invariants of C and the detF
+       \param material UInt number to get the material parameteres form the VenantElasticData class
+    */
+    virtual void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
+							const Epetra_SerialDenseMatrix& tensorF,
+							const Epetra_SerialDenseMatrix& cofactorF,
+							const std::vector<Real>& invariants,
+							const UInt material) = 0;
 
 
 //! @name Set Methods

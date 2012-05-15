@@ -49,7 +49,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 //Trilinos include
-#include "Epetra_SerialDenseMatrix.h"
+#include <Epetra_SerialDenseMatrix.h>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -64,8 +64,6 @@
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/Displayer.hpp>
-#include <lifev/core/util/Factory.hpp>
-#include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -107,10 +105,10 @@ public:
 //@{
 
     // Data classes
-    typedef VenantKirchhoffElasticData                   data_Type;
-    typedef WallTensionEstimatorData                     analysisData_Type;
-    typedef typename boost::shared_ptr<data_Type>        dataPtr_Type;
-    typedef typename boost::shared_ptr<data_Type>        analysisDataPtr_Type;
+    typedef VenantKirchhoffElasticData                    data_Type;
+    typedef WallTensionEstimatorData                      analysisData_Type;
+    typedef typename boost::shared_ptr<data_Type>         dataPtr_Type;
+    typedef typename boost::shared_ptr<analysisData_Type> analysisDataPtr_Type;
 
     //Matrices 3x3 and std::vector for the invariants
     typedef Epetra_SerialDenseMatrix                     matrix_Type;
@@ -160,52 +158,18 @@ public:
 		boost::shared_ptr<Epetra_Comm>&     comm);
 
 
-    //! Computes the principal tensions for each DOF of each volume
+    //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
-      \param no parameters
+      \param NONE
     */
-     void analizeTensions( void );
-
-    //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
-    /*!
-      \param disp: solution at the k-th iteration of NonLinearRichardson Method
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-    */
-    virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
-
-    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
-    //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
-    //!This is virtual and not pure virtual since in the linear St. Venant-Kirchhoff law it is not needed.
-    /*!
-      \param sol:  the solution vector
-      \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-    */
-    virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
-
-
-    //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
-    /*!
-      \param dk_loc: local displacement vector
-    */
-    virtual  void computeKinematicsVariables( const VectorElemental& dk_loc ) = 0;
-
-
-  //! Output of the class
-  /*!
-    \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
-    \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
-  */
-  virtual void showMe( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
+    void analyzeTensions( void );
 
 
 //! @name Set Methods
 //@{
 
-  //! Set the displacement vector
-  void setDisplacement(solutionVect_Type& displVect) {M_displ = displVect;}
+     //! Set the displacement vector
+     void setDisplacement(solutionVect_Type& displVect) {*M_displ = displVect;}
 
 //@}
 
@@ -222,42 +186,58 @@ public:
 
   //! Get the pointer to the FESpace object
   boost::shared_ptr<FESpace<Mesh, MapEpetra> > dFESpacePtr()  {return M_FESpace;}
-
-  //! Get the Stiffness matrix
-  virtual matrixPtr_Type const stiffMatrix() const = 0;
-
-  //! Get the Stiffness matrix
-  virtual vectorPtr_Type const stiffVector() const = 0;
-
-  virtual void Apply( const vector_Type& sol, vector_Type& res) =0;
   
+  //! Get the displacement solution
+  solutionVect_Type displacement() {return *M_displ;}
 //@}
 
 protected:
 
-    //!Protected Members
+//! @name Protected methods
+//@{
+    //! computeDeformation: This method computes the tensor F given the displacement on the element.
+    /*!
+      \param M_deformationF the local 3x3 tensor F to be filled
+      \param dk_loc the local displacement field
+    */
+   void computeDisplacementGradient( void );    
+    
+//@}
+
+//! @name Protected members
+//@{
+    
     boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
 
     boost::shared_ptr<const MapEpetra>             M_localMap;
 
     //! Elementary matrix for the tensor F
     matrixPtr_Type                                 M_deformationF;
-    //! Elementary matrix for the tensor C
-    matrixPtr_Type                                 M_rightCauchyC;
+
+    //! Elementary matrix for the tensor F
+    matrixPtr_Type                                 M_cofactorF;
     //! Elementary matrix for the tensor P
     matrixPtr_Type                                 M_firstPiola;
 
     //! Elementary matrix for the tensor \sigma (Cauchy tensor on the current config)
     matrixPtr_Type                                 M_sigma;
 
-    //! Vector of the invariants of C
-    vector_Type                                    M_invariants;
+    //! Vector of the invariants of C and detF
+    vectorPtr_Type                                 M_invariants;
+
+    //! Vector of the eigenvalues of \sigma
+    vectorPtr_Type                                 M_eigenvaluesR;
+    vectorPtr_Type                                 M_eigenvaluesI;
 
     //! Vector for the displacement field
     solutionVectPtr_Type                            M_displ;
 
-    //! Determinant of the deformation gradient F
-    Real                                           M_detF;
+    //! Vector for the gradient along X of the displacement field
+    solutionVectPtr_Type                            M_displX;
+    //! Vector for the gradient along Y of the displacement field
+    solutionVectPtr_Type                            M_displY;
+    //! Vector for the gradient along Z of the displacement field
+    solutionVectPtr_Type                            M_displZ;
   
     //! The Offset parameter
     UInt                                           M_offset;
@@ -274,9 +254,9 @@ protected:
 
     //! Material class
     materialPtr_Type                               M_material;
+//@}
 
-    //Importer
-    //exporterPtr_Type                                M_importer;
+
 
 };
 
@@ -292,14 +272,17 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ):
     M_dataMaterial               ( ),
     M_analysisData               ( ),
     M_displayer                  ( ),
-    //    M_importer                   ( ),
-    M_detF                       ( 0 ),
     M_sigma                      ( ),
     M_deformationF               ( ),
-    M_rightCauchyC               ( ),
+    M_cofactorF                  ( ),
     M_firstPiola                 ( ),
     M_invariants                 ( ),
+    M_eigenvaluesR               ( ),   
+    M_eigenvaluesI               ( ),   
     M_displ                      ( ),
+    M_displX                     ( ),
+    M_displY                     ( ),
+    M_displZ                     ( ),
     M_material                   ( )
 {
   
@@ -331,23 +314,109 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
   M_displayer.reset    (new Displayer(comm));
 
   // Vector and Tensors
-  M_sigma.reset        (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
-  M_deformationF.reset (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
-  M_rightCauchyC.reset (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
-  M_firstPiola.reset   (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
-  M_displ.reset        (new solutionVect_Type(*M_localMap) );
+  M_sigma.reset         (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_deformationF.reset  (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_cofactorF.reset  (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_firstPiola.reset    (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_displ.reset         (new solutionVect_Type(*M_localMap) );
+  M_displX.reset        (new solutionVect_Type(*M_localMap) );
+  M_displY.reset        (new solutionVect_Type(*M_localMap) );
+  M_displZ.reset        (new solutionVect_Type(*M_localMap) );
+  M_invariants.reset    (new vector_Type(4,0.0) );
+  M_eigenvaluesR.reset   (new vector_Type(3,0.0) );
+  M_eigenvaluesI.reset   (new vector_Type(3,0.0) );
 
   // Materials
   M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_dataMaterial->solidType() ) );
   M_material->setup( dFESpace,M_localMap,M_offset, M_dataMaterial, M_displayer );
 }
 
+
+
+
+
 template <typename Mesh>
 void 
 WallTensionEstimator<Mesh >::analyzeTensions( void )
 {
+  //Compute the deformation gradient tensor F of the displ field
+  computeDisplacementGradient();
+
+  solutionVect_Type dXRep(*M_displX, Repeated);
+  solutionVect_Type dYRep(*M_displY, Repeated);
+  solutionVect_Type dZRep(*M_displZ, Repeated);
+
+  //For each of the DOF, the Cauchy tensor is computed. 
+  //Therefore the tensor C,P, \sigma are computed for each DOF
+  UInt dim = M_FESpace->dim();  
+  for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
+    {
+      this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
+      UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+      UInt eleID = this->M_FESpace->fe().currentLocalId();
+
+      //Extract the local deformation gradient F
+      vector_Type gradientDisplX(3,0.0);      
+      vector_Type gradientDisplY(3,0.0);      
+      vector_Type gradientDisplZ(3,0.0);      
+
+
+      for ( UInt iNode = 0; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof(); iNode++ )
+       	{
+       	    	UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
+		
+       	    	for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+		  {
+		    UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*this->M_FESpace->dim() + this->M_offset;
+		    
+		    gradientDisplX[iComp] = dXRep[ig];
+		    gradientDisplY[iComp] = dYRep[ig];
+		    gradientDisplZ[iComp] = dZRep[ig];
+		  }
+		
+		      
+		//Fill the matrix F
+		for( UInt icoor=0; icoor < M_FESpace->fieldDim(); icoor++ )
+		  {
+		    (*M_deformationF)(icoor,0)=gradientDisplX[1];
+		    (*M_deformationF)(icoor,1)=gradientDisplY[1];
+		    (*M_deformationF)(icoor,2)=gradientDisplZ[1];
+		    
+		    (*M_deformationF)(icoor,icoor) += 1.0;
+		  }
+
+
+		//Compute the rightCauchyC tensor
+		AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(*M_invariants, *M_deformationF, *M_cofactorF);
+		
+		//Compute the first Piola-Kirchhoff tensor
+		M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, *M_invariants, marker);
+
+		//Compute the Cauchy tensor
+		AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, (*M_invariants)[3], *M_deformationF);
+      
+		//Compute the eigenvalue
+		AssemblyElementalStructure::computeEigenvalues(*M_sigma,*M_eigenvaluesR,*M_eigenvaluesI);
+	}
+    }
 
 }
 
+template <typename Mesh>
+void 
+WallTensionEstimator<Mesh >::computeDisplacementGradient( void )
+{
+  //The map of the displacement field is not transformed in a Repeated map
+  //because it is done inside the gradientRecovery method
+
+  //Compute the gradient along X of the displacement field
+  *M_displX = M_FESpace->gradientRecovery(*M_displ, 0);
+  //Compute the gradient along Y of the displacement field
+  *M_displY = M_FESpace->gradientRecovery(*M_displ, 1);
+  //Compute the gradient along Z of the displacement field
+  *M_displZ = M_FESpace->gradientRecovery(*M_displ, 2);
+}  
+
+
 }
-#endif /*_STRUCTURALMATERIAL_H*/
+#endif /*_WALLTENSION_H_ 1*/

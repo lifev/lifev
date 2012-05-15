@@ -148,6 +148,21 @@ class VenantKirchhoffMaterialNonLinear :
     //! Missing Documentation !!!
     void computeKinematicsVariables( const VectorElemental& /*dk_loc*/ ){}
 
+    //! Compute the First Piola Kirchhoff Tensor
+    /*! 
+       \param firstPiola Epetra_SerialDenseMatrix that has to be filled
+       \param tensorF Epetra_SerialDenseMatrix the deformation gradient 
+       \param cofactorF Epetra_SerialDenseMatrix cofactor of F 
+       \param invariants std::vector with the invariants of C and the detF
+       \param material UInt number to get the material parameteres form the VenantElasticData class
+    */
+    void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
+					       const Epetra_SerialDenseMatrix& tensorF,
+					       const Epetra_SerialDenseMatrix& cofactorF,
+					       const std::vector<Real>& invariants,
+					       const UInt marker) {}
+ 
+
   //@}
 
     protected:
@@ -394,6 +409,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
 
     }
 }
+
 
 template <typename Mesh>
 inline StructuralMaterial<Mesh>* createVenantKirchhoffNonLinear() { return new VenantKirchhoffMaterialNonLinear<Mesh >(); }
