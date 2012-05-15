@@ -60,6 +60,7 @@ SolverOperator::SolverOperator( boost::shared_ptr<Epetra_Comm> comm ):
 	M_lossOfAccuracy( undefined ),
     M_converged( undefined ),
     M_numIterations( 0 ),
+    M_numCumulIterations( 0 ),
     M_tolerance( -1. ),
     M_printSubiterationCount( false ),
     M_comm( comm )
@@ -129,6 +130,8 @@ int SolverOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 	if ( M_useTranspose )
 		return -1;
 	int result = doApplyInverse( X, Y );
+
+	M_numCumulIterations += M_numIterations;
 
     if( M_comm->MyPID() == 0 && M_printSubiterationCount )
     {
