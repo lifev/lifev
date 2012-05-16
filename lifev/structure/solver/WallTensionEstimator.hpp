@@ -189,6 +189,9 @@ public:
   
   //! Get the displacement solution
   solutionVect_Type displacement() {return *M_displ;}
+
+  //! Get the global vector for the eigenvalues
+  solutionVect_Type principalStresses() {return *M_globalEigen;}
 //@}
 
 protected:
@@ -238,6 +241,8 @@ protected:
     solutionVectPtr_Type                            M_displY;
     //! Vector for the gradient along Z of the displacement field
     solutionVectPtr_Type                            M_displZ;
+    //! Vector for the eigenvalues of the Cauchy stress tensor
+    solutionVectPtr_Type                            M_globalEigen;
   
     //! The Offset parameter
     UInt                                           M_offset;
@@ -280,6 +285,7 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ):
     M_eigenvaluesR               ( ),   
     M_eigenvaluesI               ( ),   
     M_displ                      ( ),
+    M_globalEigen                ( ),
     M_displX                     ( ),
     M_displY                     ( ),
     M_displZ                     ( ),
@@ -316,15 +322,16 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
   // Vector and Tensors
   M_sigma.reset         (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
   M_deformationF.reset  (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
-  M_cofactorF.reset  (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_cofactorF.reset     (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
   M_firstPiola.reset    (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
   M_displ.reset         (new solutionVect_Type(*M_localMap) );
   M_displX.reset        (new solutionVect_Type(*M_localMap) );
   M_displY.reset        (new solutionVect_Type(*M_localMap) );
   M_displZ.reset        (new solutionVect_Type(*M_localMap) );
   M_invariants.reset    (new vector_Type(4,0.0) );
-  M_eigenvaluesR.reset   (new vector_Type(3,0.0) );
-  M_eigenvaluesI.reset   (new vector_Type(3,0.0) );
+  M_eigenvaluesR.reset  (new vector_Type(3,0.0) );
+  M_eigenvaluesI.reset  (new vector_Type(3,0.0) );
+  M_globalEigen.reset   (new solutionVect_Type(*M_localMap) );
 
   // Materials
   M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_dataMaterial->solidType() ) );
@@ -342,65 +349,64 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
   //Compute the deformation gradient tensor F of the displ field
   computeDisplacementGradient();
 
-  solutionVect_Type dXRep(*M_displX, Repeated);
-  solutionVect_Type dYRep(*M_displY, Repeated);
-  solutionVect_Type dZRep(*M_displZ, Repeated);
-
   //For each of the DOF, the Cauchy tensor is computed. 
   //Therefore the tensor C,P, \sigma are computed for each DOF
   UInt dim = M_FESpace->dim();  
-  for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
-    {
-      this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
-      UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
-      UInt eleID = this->M_FESpace->fe().currentLocalId();
 
-      //Extract the local deformation gradient F
-      vector_Type gradientDisplX(3,0.0);      
-      vector_Type gradientDisplY(3,0.0);      
-      vector_Type gradientDisplZ(3,0.0);      
-
-
-      for ( UInt iNode = 0; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof(); iNode++ )
-       	{
-       	    	UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
-		
-       	    	for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
-		  {
-		    UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*this->M_FESpace->dim() + this->M_offset;
-		    
-		    gradientDisplX[iComp] = dXRep[ig];
-		    gradientDisplY[iComp] = dYRep[ig];
-		    gradientDisplZ[iComp] = dZRep[ig];
-		  }
+  for ( UInt iDOF = 0; iDOF < ( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
+    {      
+      std::vector<LifeV::Real> dX(3,0.0); 
+      std::vector<LifeV::Real> dY(3,0.0); 
+      std::vector<LifeV::Real> dZ(3,0.0);
+ 
+      for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+	{		    
+	  dX[iComp] = (*M_displX)(iDOF + iComp * dim + this->M_offset);
+	  dY[iComp] = (*M_displY)(iDOF + iComp * dim + this->M_offset);
+	  dZ[iComp] = (*M_displZ)(iDOF + iComp * dim + this->M_offset);
+	}
 		
 		      
-		//Fill the matrix F
-		for( UInt icoor=0; icoor < M_FESpace->fieldDim(); icoor++ )
-		  {
-		    (*M_deformationF)(icoor,0)=gradientDisplX[1];
-		    (*M_deformationF)(icoor,1)=gradientDisplY[1];
-		    (*M_deformationF)(icoor,2)=gradientDisplZ[1];
+      //Fill the matrix F
+      for( UInt icoor = 0; icoor < M_FESpace->fieldDim(); icoor++ )
+	{
+	  (*M_deformationF)(icoor,0)=dX[icoor];
+	  (*M_deformationF)(icoor,1)=dY[icoor];
+	  (*M_deformationF)(icoor,2)=dZ[icoor];
 		    
-		    (*M_deformationF)(icoor,icoor) += 1.0;
-		  }
+	  (*M_deformationF)(icoor,icoor) += 1.0;
+	}
 
 
-		//Compute the rightCauchyC tensor
-		AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(*M_invariants, *M_deformationF, *M_cofactorF);
+      //Compute the rightCauchyC tensor
+      AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(*M_invariants, *M_deformationF, *M_cofactorF);
 		
-		//Compute the first Piola-Kirchhoff tensor
-		M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, *M_invariants, marker);
+      //Compute the first Piola-Kirchhoff tensor
+      M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, *M_invariants, 1);
 
-		//Compute the Cauchy tensor
-		AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, (*M_invariants)[3], *M_deformationF);
+      //Compute the Cauchy tensor
+      AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, (*M_invariants)[3], *M_deformationF);
       
-		//Compute the eigenvalue
-		AssemblyElementalStructure::computeEigenvalues(*M_sigma,*M_eigenvaluesR,*M_eigenvaluesI);
+      //Compute the eigenvalue
+      AssemblyElementalStructure::computeEigenvalues(*M_sigma,*M_eigenvaluesR,*M_eigenvaluesI);
+
+      //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
+      //Check on the imaginary part of eigen values given by the Lapack method
+      LifeV::Real sum(0);
+      for( std::vector<LifeV::Real >::iterator i=(*M_eigenvaluesI).begin(); i!= (*M_eigenvaluesI).end(); ++i )
+	sum += *i;
+
+      ASSERT_PRE( sum < 1.0e-6, "The eigenvalues of the Cauchy stress tensors have to be real!" );
+
+      //Save the eigenvalues in the global vector
+      for( UInt icoor = 0; icoor < nDimensions; icoor++ )
+	{
+	  (*M_globalEigen)(iDOF + iComp * dim + this->M_offset) = (*M_eigenvaluesR)[icoor];
 	}
     }
-
 }
+
+
 
 template <typename Mesh>
 void 

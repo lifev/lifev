@@ -377,6 +377,7 @@ Structure::run3d()
 	    //Perform the analysis
 	    solid.analyzeTensions();
 
+	    *solidTension = solid.pricipalStresses();
 	    //Export the principal stresses
 	    M_exporter->postProcess( startTime + iterDone*dt );
 
