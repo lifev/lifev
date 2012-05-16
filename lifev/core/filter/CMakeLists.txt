@@ -10,6 +10,7 @@ SET(filter_HEADERS
   filter/ExporterVTK.hpp
   filter/ExporterHDF5.hpp
   filter/ImporterMesh2D.hpp
+  filter/PartitionIO.hpp
 CACHE INTERNAL "")
 
 SET(filter_SOURCES
