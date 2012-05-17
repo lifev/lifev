@@ -48,10 +48,10 @@ mesh_dir  		= Mesh/
 mesh_file 		= StructuredCube4_test_structuralsolver.mesh
 order     		= P1
 
-[../analysis]
-nameFile                = 
-type                    =
-start                   =
+[../importer]
+nameFile                = solid
+type                    = hdf5
+start                   =  #Number of iteration
 end                     =
 
 [../miscellaneous]

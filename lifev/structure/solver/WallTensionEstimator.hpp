@@ -125,8 +125,8 @@ public:
     typedef typename boost::shared_ptr< Exporter<Mesh> >  exporterPtr_Type;
 
     // Materials
-    typedef StructuralMaterial<Mesh>               material_Type;
-    typedef boost::shared_ptr<material_Type>       materialPtr_Type;
+    typedef StructuralMaterial<Mesh>                       material_Type;
+    typedef boost::shared_ptr<material_Type>               materialPtr_Type;
 
 //@}
 
@@ -155,7 +155,8 @@ public:
     void setup( const dataPtr_Type& dataMaterial,
 		const analysisDataPtr_Type& tensionData,
 	        const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-		boost::shared_ptr<Epetra_Comm>&     comm);
+		boost::shared_ptr<Epetra_Comm>&     comm,
+		UInt marker);
 
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
@@ -241,11 +242,15 @@ protected:
     solutionVectPtr_Type                            M_displY;
     //! Vector for the gradient along Z of the displacement field
     solutionVectPtr_Type                            M_displZ;
+
     //! Vector for the eigenvalues of the Cauchy stress tensor
     solutionVectPtr_Type                            M_globalEigen;
   
     //! The Offset parameter
     UInt                                           M_offset;
+
+    //! The volume marker
+    UInt                                           M_marker;
 
     //Class for material parameter
     dataPtr_Type                                   M_dataMaterial;
@@ -255,7 +260,6 @@ protected:
 
     //Displayer
     displayerPtr_Type                              M_displayer;
-
 
     //! Material class
     materialPtr_Type                               M_material;
@@ -274,6 +278,7 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ):
     M_FESpace                    ( ),
     M_localMap                   ( ),
     M_offset                     ( 0 ),
+    M_marker                     ( 1 ),
     M_dataMaterial               ( ),
     M_analysisData               ( ),
     M_displayer                  ( ),
@@ -304,13 +309,15 @@ void
 WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
 				    const analysisDataPtr_Type& tensionData,
 				    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-				    boost::shared_ptr<Epetra_Comm>&     comm)
+				    boost::shared_ptr<Epetra_Comm>&     comm,
+				    UInt marker)
   
 {
 
-  // Data classes
+  // Data classes & Volumes markers
   M_dataMaterial = dataMaterial;
   M_analysisData = tensionData;
+  M_marker = marker;
 
   // FESpace and EpetraMap
   M_FESpace      = dFESpace;
@@ -382,7 +389,7 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(*M_invariants, *M_deformationF, *M_cofactorF);
 		
       //Compute the first Piola-Kirchhoff tensor
-      M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, *M_invariants, 1);
+      M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, *M_invariants, M_marker);
 
       //Compute the Cauchy tensor
       AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, (*M_invariants)[3], *M_deformationF);

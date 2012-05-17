@@ -25,8 +25,8 @@
 //@HEADER
 /**
    \file main.cpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2005-04-16
+   \author Paolo Tricerri <paolo.tricerri@epfl.ch>
+   \date 2012-05-01
  */
 #undef HAVE_HDF5
 #ifdef TWODIM
@@ -59,7 +59,6 @@
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 
 #include <lifev/structure/solver/StructuralMaterial.hpp>
-#include <lifev/structure/solver/StructuralSolver.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
@@ -105,19 +104,19 @@ class Structure
 {
 public:
 
-  typedef LifeV::RegionMesh<LinearTetra>                                       mesh_Type;
+  typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
 
   // Filters
-  typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >                filterPtr_Type;
+  typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
     
-  typedef LifeV::ExporterEmpty<mesh_Type >    emptyFilter_Type;
-  typedef boost::shared_ptr<emptyFilter_Type>                              emptyFilterPtr_Type;                         
-  typedef LifeV::ExporterEnsight<mesh_Type >  ensightFilter_Type;
-  typedef boost::shared_ptr<ensightFilter_Type>                           ensightFilterPtr_Type;
+  typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
+  typedef boost::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;                         
+  typedef LifeV::ExporterEnsight<mesh_Type >                          ensightFilter_Type;
+  typedef boost::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
 
 #ifdef HAVE_HDF5
-  typedef LifeV::ExporterHDF5<mesh_Type >     hdf5Filter_Type;
-  typedef boost::shared_ptr<hdf5Filter_Type>                              hdf5FilterPtr_Type;
+  typedef LifeV::ExporterHDF5<mesh_Type >                             hdf5Filter_Type;
+  typedef boost::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
 #endif
 
 
@@ -231,9 +230,9 @@ Structure::run3d()
 {
     // General typedefs
     typedef WallTensionEstimator< mesh_Type >::solutionVect_Type  vector_Type;
-    typedef boost::shared_ptr<vector_Type>                                vectorPtr_Type;
-    typedef FESpace< mesh_Type, MapEpetra >                 solidFESpace_Type;
-    typedef boost::shared_ptr<solidFESpace_Type>                          solidFESpacePtr_Type;    
+    typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
+    typedef FESpace< mesh_Type, MapEpetra >                       solidFESpace_Type;
+    typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;    
 
 
     bool verbose = (parameters->comm->MyPID() == 0);
@@ -248,7 +247,6 @@ Structure::run3d()
     boost::shared_ptr<WallTensionEstimatorData> tensionData(new WallTensionEstimatorData( ));
     tensionData->setup(dataFile);
 
-    
     //! Read and partition mesh
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
@@ -263,14 +261,18 @@ Structure::run3d()
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
 
-    //! 1. Constructor of the structuralSolver
+    //! Setting the marker for the volumes
+    UInt marker = dataFile( "solid/physics/material_flag", 1);
+
+    //! 1. Constructor of the class to compute the tensions
     WallTensionEstimator< mesh_Type > solid;
 
-    //! 2. Setup of the structuralSolver
+    //! 2. Its setup
     solid.setup(dataStructure,
     		tensionData,
                 dFESpace,
-                parameters->comm);
+                parameters->comm,
+		marker);
 
     //! 3. Creation of the importers to read the displacement field
     std::string const importerType =  dataFile( "importer/type", "hdf5");
@@ -333,9 +335,8 @@ Structure::run3d()
 
     vectorPtr_Type solidTensions ( new vector_Type(solid.displacement(),  M_exporter->mapType() ) );
 
-    M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tensions", dFESpace, solidTensions, UInt(0) );
+    M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", dFESpace, solidTensions, UInt(0) );
     M_exporter->postProcess( 0.0 );
-
 
 
 
@@ -347,13 +348,13 @@ Structure::run3d()
     //! 5. For each interval, the analysis is performed
 
     LifeV::Real dt =  dataFile( "fluid/time_discretization/timestep", 0.0);
-    LifeV::Real startTime =  dataFile( "fluid/time_discretization/initialtime", 0.0);
 
     //Cycle of the intervals
     for ( UInt i(0); i< tensionData->iterStart().size(); i++ )
       {
 	const std::string initial = tensionData->iterStart(i);
 	const std::string last    = tensionData->iterEnd(i);
+	const LifeV::Real startTime = tensionData->initialTime(i);
 
 	//! Todo: A check on the existence of the initial and last strings would be appreciated
 	
@@ -377,10 +378,10 @@ Structure::run3d()
 	    //Perform the analysis
 	    solid.analyzeTensions();
 
-	    *solidTension = solid.pricipalStresses();
+	    *solidTensions = solid.principalStresses();
+
 	    //Export the principal stresses
 	    M_exporter->postProcess( startTime + iterDone*dt );
-
 
 	    //Increment the iterationString
 	    int iterations = std::atoi(iterationString.c_str());
