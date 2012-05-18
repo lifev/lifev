@@ -43,6 +43,7 @@
 #include <Epetra_LAPACK.h>
 #include <Epetra_BLAS.h>
 #include <Epetra_SerialDenseMatrix.h>
+#include <Epetra_SerialDenseVector.h>
 
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>
@@ -530,8 +531,8 @@ void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const KNMK<Real> CofFk,
   @param invariants vector of invariants of C
   @param tensorF deformation gradient tensor
  */
-  void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real >& invariants, 
-					       Epetra_SerialDenseMatrix& tensorF,
+  void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariants, 
+					       const Epetra_SerialDenseMatrix& tensorF,
 					       Epetra_SerialDenseMatrix& cofactorF);
 
 /*!
@@ -554,8 +555,8 @@ void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const KNMK<Real> CofFk,
   @param eigenvalues vector of principal tensions
  */
   void computeEigenvalues(Epetra_SerialDenseMatrix& cauchy,
-			  std::vector<LifeV::Real >& eigenvaluesR,
-			  std::vector<LifeV::Real >& eigenvaluesI);
+			  std::vector<LifeV::Real>& eigenvaluesR,
+			  std::vector<LifeV::Real>& eigenvaluesI);
 
 
 

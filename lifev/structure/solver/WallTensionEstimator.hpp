@@ -59,6 +59,8 @@
 #include <lifev/core/array/VectorElemental.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
+
+
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/AssemblyElemental.hpp>
 #include <lifev/core/fem/FESpace.hpp>
@@ -84,7 +86,6 @@
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
-
 
 namespace LifeV
 {
@@ -226,10 +227,10 @@ protected:
     //! Elementary matrix for the tensor \sigma (Cauchy tensor on the current config)
     matrixPtr_Type                                 M_sigma;
 
-    //! Vector of the invariants of C and detF
+    //! Vector of the invariants of C and detF (length = 4)
     vectorPtr_Type                                 M_invariants;
 
-    //! Vector of the eigenvalues of \sigma
+    //! Vector of the eigenvalues of \sigma on the DOF (length = 3)
     vectorPtr_Type                                 M_eigenvaluesR;
     vectorPtr_Type                                 M_eigenvaluesI;
 
@@ -327,18 +328,18 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
   M_displayer.reset    (new Displayer(comm));
 
   // Vector and Tensors
-  M_sigma.reset         (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
-  M_deformationF.reset  (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
-  M_cofactorF.reset     (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
-  M_firstPiola.reset    (new matrix_Type( M_FESpace->fieldDim(),M_FESpace->fieldDim() ) );
+  M_sigma.reset         (new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
+  M_deformationF.reset  (new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
+  M_cofactorF.reset     (new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
+  M_firstPiola.reset    (new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
   M_displ.reset         (new solutionVect_Type(*M_localMap) );
   M_displX.reset        (new solutionVect_Type(*M_localMap) );
   M_displY.reset        (new solutionVect_Type(*M_localMap) );
   M_displZ.reset        (new solutionVect_Type(*M_localMap) );
-  M_invariants.reset    (new vector_Type(4,0.0) );
-  M_eigenvaluesR.reset  (new vector_Type(3,0.0) );
-  M_eigenvaluesI.reset  (new vector_Type(3,0.0) );
   M_globalEigen.reset   (new solutionVect_Type(*M_localMap) );
+  M_invariants.reset    (new vector_Type( M_FESpace->fieldDim() + 1, 0.0 ));
+  M_eigenvaluesR.reset  (new vector_Type( M_FESpace->fieldDim(), 0.0 ) );
+  M_eigenvaluesI.reset  (new vector_Type( M_FESpace->fieldDim(), 0.0 ) );
 
   // Materials
   M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_dataMaterial->solidType() ) );
@@ -365,12 +366,19 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       std::vector<LifeV::Real> dX(3,0.0); 
       std::vector<LifeV::Real> dY(3,0.0); 
       std::vector<LifeV::Real> dZ(3,0.0);
- 
+
+      //Reinitialization of matrices and arrays
+      (*M_deformationF).Scale(0.0);
+      (*M_cofactorF).Scale(0.0);
+      (*M_firstPiola).Scale(0.0);
+      (*M_sigma).Scale(0.0);
+
+      //Extracting the gradient of U on the current DOF
       for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
 	{		    
-	  dX[iComp] = (*M_displX)(iDOF + iComp * dim + this->M_offset);
-	  dY[iComp] = (*M_displY)(iDOF + iComp * dim + this->M_offset);
-	  dZ[iComp] = (*M_displZ)(iDOF + iComp * dim + this->M_offset);
+	  dX[iComp] = (*M_displX)(iDOF + iComp * dim + this->M_offset); // (d_xX,d_yX,d_zX)
+	  dY[iComp] = (*M_displY)(iDOF + iComp * dim + this->M_offset); // (d_xY,d_yY,d_zY)
+	  dZ[iComp] = (*M_displZ)(iDOF + iComp * dim + this->M_offset); // (d_xZ,d_yZ,d_zZ)
 	}
 		
 		      
@@ -395,15 +403,15 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, (*M_invariants)[3], *M_deformationF);
       
       //Compute the eigenvalue
-      AssemblyElementalStructure::computeEigenvalues(*M_sigma,*M_eigenvaluesR,*M_eigenvaluesI);
+      AssemblyElementalStructure::computeEigenvalues(*M_sigma, *M_eigenvaluesR, *M_eigenvaluesI);
 
       //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-      //Check on the imaginary part of eigen values given by the Lapack method
-      LifeV::Real sum(0);
-      for( std::vector<LifeV::Real >::iterator i=(*M_eigenvaluesI).begin(); i!= (*M_eigenvaluesI).end(); ++i )
-	sum += *i;
+      //Check on the imaginary part of eigen values given by the Lapack method 
+      Real sum(0);
+      for( int i=0; i < (*M_eigenvaluesI).size(); i++ )
+	sum += std::abs((*M_eigenvaluesI)[i]);
 
-      ASSERT_PRE( sum < 1.0e-6, "The eigenvalues of the Cauchy stress tensors have to be real!" );
+      ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
       //Save the eigenvalues in the global vector
       for( UInt icoor = 0; icoor < nDimensions; icoor++ )

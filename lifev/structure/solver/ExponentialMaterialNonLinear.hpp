@@ -170,14 +170,6 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
     */
     void computeKinematicsVariables( const VectorElemental& dk_loc );
 
-
-    //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
-    /*!
-      \param dk_loc: local displacement vector
-    */
-    void computeStress( const vector_Type& sol );
-
-
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
     void showMe( std::string const& fileNameVectStiff,
 		 std::string const& fileNameJacobain );
@@ -194,7 +186,7 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
 						const Epetra_SerialDenseMatrix& tensorF,
 						const Epetra_SerialDenseMatrix& cofactorF,
 						const std::vector<Real>& invariants,
-						const UInt marker) {}
+						const UInt marker);
  
 
 //@}
@@ -626,6 +618,42 @@ void ExponentialMaterialNonLinear<Mesh>::Apply( const vector_Type& sol, vector_T
     res += *M_stiff;
 }
 
+
+template <typename Mesh>
+void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
+										const Epetra_SerialDenseMatrix& tensorF,
+										const Epetra_SerialDenseMatrix& cofactorF,
+										const std::vector<Real>& invariants,
+										const UInt marker)
+{
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Computing the First Piola Kirchhoff Tensor, EXP ");
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+
+  //Get the material parameters
+  Real alpha    = this->M_dataMaterial->alpha(marker);
+  Real gamma    = this->M_dataMaterial->gamma(marker);
+  Real bulk  	= this->M_dataMaterial->bulk(marker);
+
+
+  //Computing the first term \muJ^{-2/3}[F-(1/3)tr(C)F^{-T}]
+  Epetra_SerialDenseMatrix firstTerm(tensorF);
+  Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
+  copyCofactorF.Scale( -1 * (1 / 3) * invariants[0]);
+  firstTerm += copyCofactorF;
+  Real coef(alpha * std::pow(invariants[3],-2/3) * std::exp( gamma * ( invariants[0] - 3 ) ) );
+  firstTerm.Scale( coef );
+
+  //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
+  Epetra_SerialDenseMatrix secondTerm(cofactorF);
+  Real secCoef(0);
+  secCoef = invariants[3] * (bulk/2) * (invariants[3] - 1 + (1 / invariants[3]) * std::log(invariants[3]));
+  secondTerm.Scale( secCoef );
+
+  firstPiola += firstTerm;
+  firstPiola += secondTerm;
+
+}
 
 template <typename Mesh>
 inline StructuralMaterial<Mesh>* createExponentialMaterialNonLinear() { return new ExponentialMaterialNonLinear<Mesh >(); }

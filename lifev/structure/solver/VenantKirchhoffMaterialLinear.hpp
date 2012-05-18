@@ -331,37 +331,37 @@ VenantKirchhoffMaterialLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epet
 {
 
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Computing the First Piola Kirchhoff Tensor ");
+  this->M_displayer->leaderPrint("   Computing the First Piola Kirchhoff Tensor, LE ");
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
   //Get the material parameters
   Real lambda  	= this->M_dataMaterial->lambda(marker);
   Real mu    	= this->M_dataMaterial->mu(marker);
-  Real coef = ( lambda / 2 ) * ( invariants[1] - 3 );
 
-  Epetra_SerialDenseMatrix firstTerm(tensorF);
-  firstTerm.Scale(coef);
+  Epetra_SerialDenseMatrix copyF(tensorF);
+  Epetra_SerialDenseMatrix identity(nDimensions,nDimensions);
 
-  Epetra_SerialDenseMatrix secondTerm(tensorF);
+  //Computation gradient of u and setting the identity tensor
+  for( UInt icoor=0; icoor < nDimensions; icoor++ )
+    {
+      copyF(icoor,icoor) -= 1.0;
+      identity(icoor,icoor) = 1;
+    }
+
+  Real divergenceU( copyF(0,0) + copyF(1,1) + copyF(2,2) ); //DivU = tr(copyF)
+  identity.Scale( lambda );
+
+  Epetra_SerialDenseMatrix transposed(copyF);
+  transposed.SetUseTranspose(true);
+
+  Epetra_SerialDenseMatrix secondTerm(nDimensions,nDimensions);
+
+  secondTerm = copyF;
+  secondTerm += transposed;
   secondTerm.Scale(mu);
 
-  Epetra_SerialDenseMatrix thirdTerm(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
-  Epetra_SerialDenseMatrix rightCauchyC(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
-  rightCauchyC.Scale(0.0);
-
-
-  //Compute the tensors C
-  rightCauchyC.Multiply('T','N',1.0,tensorF,tensorF,0.0); //see Epetra_SerialDenseMatrix
-
-  thirdTerm.Multiply('N','N',1.0,tensorF,rightCauchyC,0.0);
-  thirdTerm.Scale(mu);
-
-  firstPiola.Scale(0.0);
-
-  firstPiola += firstTerm;
+  firstPiola = identity;
   firstPiola += secondTerm;
-  firstPiola += thirdTerm;
-  
 }
 
 

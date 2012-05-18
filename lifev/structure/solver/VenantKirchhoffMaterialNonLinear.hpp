@@ -157,10 +157,10 @@ class VenantKirchhoffMaterialNonLinear :
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
     void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-					       const Epetra_SerialDenseMatrix& tensorF,
-					       const Epetra_SerialDenseMatrix& cofactorF,
-					       const std::vector<Real>& invariants,
-					       const UInt marker) {}
+						const Epetra_SerialDenseMatrix& tensorF,
+						const Epetra_SerialDenseMatrix& cofactorF,
+						const std::vector<Real>& invariants,
+						const UInt marker);
  
 
   //@}
@@ -409,6 +409,48 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
 
     }
 }
+
+template <typename Mesh>
+void VenantKirchhoffMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
+									       const Epetra_SerialDenseMatrix& tensorF,
+									       const Epetra_SerialDenseMatrix& cofactorF,
+									       const std::vector<Real>& invariants,
+									       const UInt marker)
+{
+
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Computing the First Piola Kirchhoff Tensor, SVK ");
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+
+  //Get the material parameters
+  Real lambda  	= this->M_dataMaterial->lambda(marker);
+  Real mu    	= this->M_dataMaterial->mu(marker);
+  Real coef = ( lambda / 2 ) * ( invariants[1] - 3 );
+
+  Epetra_SerialDenseMatrix firstTerm(tensorF);
+  firstTerm.Scale(coef);
+
+  Epetra_SerialDenseMatrix secondTerm(tensorF);
+  secondTerm.Scale(mu);
+
+  Epetra_SerialDenseMatrix thirdTerm(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
+  Epetra_SerialDenseMatrix rightCauchyC(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
+  rightCauchyC.Scale(0.0);
+
+
+  //Compute the tensors C
+  rightCauchyC.Multiply('T','N',1.0,tensorF,tensorF,0.0); //see Epetra_SerialDenseMatrix
+
+  thirdTerm.Multiply('N','N',1.0,tensorF,rightCauchyC,0.0);
+  thirdTerm.Scale(mu);
+
+  firstPiola.Scale(0.0);
+
+  firstPiola += firstTerm;
+  firstPiola += secondTerm;
+  firstPiola += thirdTerm;
+}
+
 
 
 template <typename Mesh>
