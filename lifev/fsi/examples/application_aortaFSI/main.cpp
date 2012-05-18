@@ -71,8 +71,8 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #define BL 1
-//#define HAVE_NS_PREC 0
-#undef HAVE_NS_PREC 1
+#define HAVE_NS_PREC 1
+#undef HAVE_NS_PREC 
 #include <cassert>
 #include <cstdlib>
 
@@ -151,7 +151,8 @@ public:
 
     Problem( GetPot const& data_file ):
         M_Tstart(0.),
-        M_saveEvery(1)
+        M_saveEvery(1),
+	M_tol(1)
     {
         using namespace LifeV;
 
@@ -242,6 +243,7 @@ public:
 
         // load using ensight/hdf5
         M_saveEvery=data_file("exporter/saveEvery",1);
+        M_tol=data_file("exporter/tolSave",1);
 
         // load using ensight/hdf5
         std::string restartType(data_file("importer/restartType","newSimulation"));
@@ -288,11 +290,14 @@ public:
 
 
 
-        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart );
+//        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart );
+        M_data->dataFluid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataSolid()->dataTime()->setInitialTime( M_Tstart );
+//        M_data->dataSolid()->dataTime()->setInitialTime( M_Tstart );
         M_data->dataSolid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataALE()->setInitialTime( M_Tstart );
+	M_data->dataSolid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
+//        M_data->dataALE()->setInitialTime( M_Tstart );
+        M_data->dataALE()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
         M_data->dataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     }
 
@@ -306,6 +311,15 @@ public:
 
         LifeV::UInt iter = 1;
         LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
+
+	//This part is to have the pillow saving Paolo T. 
+	LifeV::UInt r(0);
+	LifeV::UInt d(0);
+	//This is the size of the TimeAdvaces classes. It uses the size of the solid. 
+	//It could be changed and it's better to set it up as the highest size of TA
+	LifeV::UInt sizeTA(M_fsi->FSIOper()->solidTimeAdvance()->size());
+	LifeV::UInt tol(sizeTA + M_tol);
+
 
         dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(1);
 
@@ -321,19 +335,33 @@ public:
         {
             boost::timer _timer;
 
-            if(iter%M_saveEvery==0)
-            {
-                M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
-                //M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
+//             if(iter%M_saveEvery==0)
+//             {
+//                 M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
+//                 //M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
 
-                M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
-                M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
+//                 M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
+//                 M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
 
-                //*M_WS= *(dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeStress());
+//                 //*M_WS= *(dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeStress());
 
-                *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
-                M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
-            }
+//                 *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
+//                 M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
+//             }
+
+	    r = iter%M_saveEvery;
+	    d = iter - r;
+
+	    if ( (iter - d) <= tol || ( (std::floor(d/M_saveEvery) + 1)*M_saveEvery - iter ) <= tol )
+	    {
+		*M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
+		M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
+		//M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
+		M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
+
+		M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
+		M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
+	    }
 
             M_fsi->iterate();
 
@@ -389,6 +417,7 @@ private:
     LifeV::Real    M_Tstart;
     // vectorPtr_Type M_WS;
     LifeV::UInt           M_saveEvery;
+    LifeV::UInt           M_tol;
 
     struct RESULT_CHANGED_EXCEPTION
     {
