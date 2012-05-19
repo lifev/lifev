@@ -2059,22 +2059,22 @@ private:
      //! Changes Current capacity of Ridges.
     void setMaxNumRidges( threeD_Type, UInt const n, bool const setcounter ) {setMaxNumEdges( n, setcounter);}
     void setMaxNumRidges( twoD_Type, UInt const n, bool const setcounter ) {setMaxNumPoints( n, setcounter);}
-    void setMaxNumRidges( oneD_Type, UInt const n, bool const setcounter ) {ERROR_MSG("RegionMesh::setMaxNumRidges, No ridges in 1D");}
+    void setMaxNumRidges( oneD_Type, UInt const, bool const ) {ERROR_MSG("RegionMesh::setMaxNumRidges, No ridges in 1D");}
 
     //! Changes Current capacity of Global Ridges.
     void setMaxNumGlobalRidges( threeD_Type, UInt const n ){ setMaxNumGlobalEdges( n );}
     void setMaxNumGlobalRidges( twoD_Type, UInt const n ){ setMaxNumGlobalPoints( n );}
-    void setMaxNumGlobalRidges( oneD_Type, UInt const n ){ ERROR_MSG("RegionMesh::setMaxNumGlobalRidges, No ridges in 1D");}
+    void setMaxNumGlobalRidges( oneD_Type, UInt const ){ ERROR_MSG("RegionMesh::setMaxNumGlobalRidges, No ridges in 1D");}
 
     //! Adds a Ridge.
     ridge_Type & addRidge( threeD_Type, bool const boundary ) {return addEdge( boundary);}
     ridge_Type & addRidge( twoD_Type, bool const boundary ) {return addPoint( boundary);}
-    ridge_Type & addRidge( oneD_Type, bool const boundary ) { ERROR_MSG("RegionMesh::addRidge, No ridges in 1D"); ; return M_aRidge;}
+    ridge_Type & addRidge( oneD_Type, bool const ) { ERROR_MSG("RegionMesh::addRidge, No ridges in 1D"); ; return M_aRidge;}
 
     //! i-th mesh ridge.
     ridge_Type const & ridge( threeD_Type, UInt const i ) const {return edge(i);}
     ridge_Type const & ridge( twoD_Type, UInt const i ) const {return point(i);}
-    ridge_Type const & ridge( oneD_Type, UInt const i ) const {ERROR_MSG("RegionMesh::ridge, No ridges in 1D"); return M_aRidge;}
+    ridge_Type const & ridge( oneD_Type, UInt const ) const {ERROR_MSG("RegionMesh::ridge, No ridges in 1D"); return M_aRidge;}
 
     //! i-th mesh ridge reference.
     ridge_Type & ridge( threeD_Type, UInt const i ) {return edge(i);}

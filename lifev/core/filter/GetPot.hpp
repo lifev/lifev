@@ -189,7 +189,7 @@ public:
     inline void            set(const char* VarName, const int Value, const bool Requested = true);
 
     // BEGIN Cristiano Malossi - 03/04/2009
-    inline bool 	       checkVariable(const char* VarName) const;
+    inline bool            checkVariable(const char* VarName) const;
     // END   Cristiano Malossi - 03/04/2009
 
     inline unsigned        vector_variable_size(const char* VarName) const;
@@ -1567,7 +1567,7 @@ GetPot::__match_starting_string(const char* StartString)
             { cursor = c; search_failed_f = false; return &(argv[c].c_str()[N]); }
     }
 
-    if ( ! search_loop_f ) return false;
+    if ( ! search_loop_f ) return 0;
 
     // (*) second loop from 0 to old cursor position
     for (c = 1; c < OldCursor; c++)

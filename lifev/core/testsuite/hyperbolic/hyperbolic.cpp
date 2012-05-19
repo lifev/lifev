@@ -291,6 +291,13 @@ struct hyperbolic::Private
         return f;
     }
 
+    fct_type getDual ( )
+    {
+        fct_type f;
+        f = boost::bind( & dataProblem::dual, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
 };
 
 // ===================================================
@@ -448,7 +455,7 @@ hyperbolic::run()
     // Vector for the interpolated dual solution.
     vector_ptrtype pressure_dualInterpolated( new vector_type ( pressure_uInterpolate_FESpace.map(), Repeated ) );
 
-    pressure_uInterpolate_FESpace.interpolate( dataProblem::dual, *pressure_dualInterpolated, 0 );
+    pressure_uInterpolate_FESpace.interpolate( static_cast<FESpace< RegionMesh, MapEpetra >::function_Type>( dataProblem::dual ), *pressure_dualInterpolated, 0 );
 
     // Finite element space
     feSpacePtr_Type feSpacePtr( new feSpace_Type( meshPart,

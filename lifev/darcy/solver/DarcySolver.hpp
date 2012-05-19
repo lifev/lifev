@@ -303,7 +303,7 @@ public:
                         FESpace<Mesh, MapEpetra>& dual_FESpace,
                         FESpace<Mesh, MapEpetra>& hybrid_FESpace,
                         FESpace<Mesh, MapEpetra>& VdotN_FESpace,
-                  const bchandler_raw_Type&       bcHandler,
+                        bchandler_raw_Type&       bcHandler,
                   const commPtr_Type&             comm );
 
     //! Constructor for the class without the definition of the boundary handler.
@@ -752,7 +752,7 @@ DarcySolver ( const data_Type&                 dataFile,
               FESpace<Mesh, MapEpetra>&  dual_FESpace,
               FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
               FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
-              const bchandler_raw_Type&        bcHandler,
+              bchandler_raw_Type&        bcHandler,
               const commPtr_Type&              comm ):
         // Parallel stuff.
         M_me                     ( comm->MyPID() ),

@@ -106,7 +106,7 @@ ExporterEmpty<MeshType>::ExporterEmpty(const GetPot& dfile, meshPtr_Type mesh, c
                                        const int& procId):
         super(dfile, prefix)
 {
-    setMeshProcId(mesh, procId);
+    this->setMeshProcId(mesh, procId);
 }
 
 template<typename MeshType>

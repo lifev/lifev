@@ -740,8 +740,8 @@ void MatrixEpetra<DataType>::removeZeros()
             row = tmp->LRID( i );
             tmp->ExtractMyRowView( row, NumEntries, Values, Indices );
 
-            Int Indices2[NumEntries];
-            Real Values2[NumEntries];
+            std::vector<Int> Indices2( NumEntries );
+            std::vector<Real> Values2( NumEntries );
             Int NumEntries2(0);
 
             for (Int j(0); j<NumEntries; ++j)
@@ -753,7 +753,7 @@ void MatrixEpetra<DataType>::removeZeros()
                     NumEntries2++;
                 }
             }
-            M_epetraCrs->InsertGlobalValues( row, NumEntries2, Values2, Indices2 );
+            M_epetraCrs->InsertGlobalValues( row, NumEntries2, &Values2[0], &Indices2[0] );
         }
         insertZeroDiagonal();
         M_epetraCrs->GlobalAssemble();

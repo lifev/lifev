@@ -997,8 +997,8 @@ void MeshPartitioner<MeshType>::redistributeElements()
     MPI_Comm_size(MPIcomm, &numProcesses);
 
     Int maxInt (1000);
-    Int sendSize[numProcesses];
-    Int receiveSize[numProcesses];
+    std::vector<Int> sendSize( numProcesses );
+    std::vector<Int> receiveSize( numProcesses );
     // cycling on subdomains
     // TODO: Matteo please comment this part :)
 
@@ -1012,7 +1012,7 @@ void MeshPartitioner<MeshType>::redistributeElements()
     {
         sendSize[iproc] = (*M_elementDomains)[iproc].size();
     }
-    MPI_Alltoall(sendSize, 1, MPI_INT, receiveSize, 1, MPI_INT, MPIcomm);
+    MPI_Alltoall( &sendSize[ 0 ], 1, MPI_INT, &receiveSize[ 0 ], 1, MPI_INT, MPIcomm );
 
     for (Int iproc = 0; iproc < numProcesses; ++iproc)
     {
