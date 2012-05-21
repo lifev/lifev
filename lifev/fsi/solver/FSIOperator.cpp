@@ -1178,7 +1178,7 @@ void
 FSIOperator::setAlphafbcf( const bcFunction_Type& alphafbcf )
 {
     vector_Type vec( M_fluid->velocityFESpace().map());
-    M_fluid->velocityFESpace().interpolate(alphafbcf, vec, 0.0);
+    M_fluid->velocityFESpace().interpolate( static_cast<FESpace<mesh_Type, MapEpetra>::function_Type>( alphafbcf ), vec, 0.0);
     *M_Alphaf = vec ;
 }
 

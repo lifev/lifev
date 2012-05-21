@@ -241,7 +241,7 @@ void advectionNewton( Real coef, VectorElemental& vel,
 template<typename localVector, typename localTensor>
 void symmetrizedAdvection(MatrixElemental& localAdv,
                           const CurrentFE& advCFE,
-                          const localVector& localValues,
+                          const localVector& /*localValues*/,
                           const localTensor& localGradient,
                           const UInt& fieldDim)
 {

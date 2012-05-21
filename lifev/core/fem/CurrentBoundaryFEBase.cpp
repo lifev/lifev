@@ -51,7 +51,7 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
         M_nbNode    ( refFE.nbDof() ),
         M_nbCoor    ( refFE.nbCoor() ),
         M_nbQuadPt  ( qr.nbQuadPt() ),
-        M_point     ( M_nbGeoNode, M_nbCoor + 1 ),
+        M_point     ( M_nbGeoNode, nDimensions ),
         refFE     ( refFE ),
         geoMap    ( geoMap ),
         qr( qr ),
@@ -68,11 +68,11 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
         M_quadPt    ( ( int ) M_nbQuadPt, 3 ),
         invArea   ( 1. )
 {
-	Real x[3] = {0, 0, 0};
-	for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
+    Real x[3] = {0, 0, 0};
+    for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
     {
-		for ( UInt icoor = 0; icoor < M_nbCoor+1; icoor++)
-			x[icoor] =  qr.quadPointCoor(iQuadPt,icoor);
+        for ( UInt icoor = 0; icoor < M_nbCoor+1; icoor++)
+            x[icoor] =  qr.quadPointCoor(iQuadPt,icoor);
 
         for ( UInt iNode(0); iNode < M_nbNode; iNode++ )
         {
@@ -102,7 +102,7 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
         M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
         M_nbQuadPt( quadRuleDummy.nbQuadPt() ),
-        M_point( M_nbGeoNode, M_nbCoor + 1 ),
+        M_point( M_nbGeoNode, nDimensions ),
         refFE( refFE ),
         geoMap( geoMap ),
         qr( quadRuleDummy ),
@@ -131,7 +131,7 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
         M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
         M_nbQuadPt( qr.nbQuadPt() ),
-        M_point( M_nbGeoNode, M_nbCoor + 1 ),
+        M_point( M_nbGeoNode, nDimensions ),
         refFE( refFE ),
         geoMap( geoMap ),
         qr( qr ),
@@ -149,13 +149,13 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
         invArea( invarea ),
         M_currentID( currentid )
 {
-	Real x[3] = {0, 0, 0};
-	for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
-	{
-		for ( UInt icoor = 0; icoor < M_nbCoor + 1; icoor++)
-			x[icoor] =  qr.quadPointCoor(iQuadPt,icoor);
+    Real x[3] = {0, 0, 0};
+    for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
+    {
+        for ( UInt icoor = 0; icoor < M_nbCoor + 1; icoor++)
+            x[icoor] =  qr.quadPointCoor(iQuadPt,icoor);
 
-		for ( UInt iNode(0); iNode < M_nbNode; iNode++ )
+        for ( UInt iNode(0); iNode < M_nbNode; iNode++ )
         {
             M_phi( iNode, iQuadPt ) = invArea*refFE.phi( iNode, x[0], x[1], x[2]);
 
@@ -174,8 +174,10 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
 
     for ( UInt iGeoNode(0); iGeoNode < M_nbGeoNode; iGeoNode++ )
     {
-    	for ( UInt icoor = 0; icoor < M_nbCoor+1; icoor++)
-			M_point( iGeoNode, icoor ) = refcoor[ (M_nbCoor+1) * iGeoNode + icoor];
+        for ( UInt icoor = 0; icoor < nDimensions; icoor++)
+        {
+            M_point( iGeoNode, icoor ) = refcoor[ nDimensions * iGeoNode + icoor];
+        }
     }
 
 #ifdef TEST_PRE
@@ -265,37 +267,37 @@ void CurrentBoundaryFEBase::computeMeasure()
 
         if(M_nbCoor == 1)
         {
-        	M_meas( iQuadPt ) = sqrt( M_metric( 0, 0, int(iQuadPt) ) );
-        	M_weightMeas( iQuadPt ) = M_meas( iQuadPt ) * qr.weight( iQuadPt );
+            M_meas( iQuadPt ) = std::sqrt( M_metric( 0, 0, int(iQuadPt) ) );
+            M_weightMeas( iQuadPt ) = M_meas( iQuadPt ) * qr.weight( iQuadPt );
         }
         else
         {
-			s = 0.;
-			for ( UInt iCoor = 0; iCoor < M_nbCoor+1; iCoor++ )
-			{
-				s += M_tangent( int(1), int(iCoor), int(iQuadPt) ) * M_tangent( int(1), int(iCoor), int(iQuadPt) );
-			}
+            s = 0.;
+            for ( UInt iCoor = 0; iCoor < M_nbCoor+1; iCoor++ )
+            {
+                s += M_tangent( int(1), int(iCoor), int(iQuadPt) ) * M_tangent( int(1), int(iCoor), int(iQuadPt) );
+            }
 
-			M_metric( int(1), int(1), int(iQuadPt) ) = s;
-			s = 0.;
-			for ( UInt iCoor = 0; iCoor < M_nbCoor+1; iCoor++ )
-			{
-				s += M_tangent( int(0), int(iCoor), int(iQuadPt) ) * M_tangent( int(1), int(iCoor), int(iQuadPt) );
-			}
+            M_metric( int(1), int(1), int(iQuadPt) ) = s;
+            s = 0.;
+            for ( UInt iCoor = 0; iCoor < M_nbCoor+1; iCoor++ )
+            {
+                s += M_tangent( int(0), int(iCoor), int(iQuadPt) ) * M_tangent( int(1), int(iCoor), int(iQuadPt) );
+            }
 
-			M_metric( int(0), int(1), int(iQuadPt) ) = M_metric( int(1), int(0), int(iQuadPt) ) = s;
-			M_meas( iQuadPt ) = sqrt( M_metric( int(0), int(0), int(iQuadPt) ) * M_metric( int(1), int(1), int(iQuadPt) )
-									- M_metric( int(0), int(1), int(iQuadPt) ) * M_metric( int(1), int(0), int(iQuadPt) ) );
-			M_weightMeas( iQuadPt ) = M_meas( iQuadPt ) * qr.weight( iQuadPt );
+            M_metric( int(0), int(1), int(iQuadPt) ) = M_metric( int(1), int(0), int(iQuadPt) ) = s;
+            M_meas( iQuadPt ) = std::sqrt( M_metric( int(0), int(0), int(iQuadPt) ) * M_metric( int(1), int(1), int(iQuadPt) )
+                                         - M_metric( int(0), int(1), int(iQuadPt) ) * M_metric( int(1), int(0), int(iQuadPt) ) );
+            M_weightMeas( iQuadPt ) = M_meas( iQuadPt ) * qr.weight( iQuadPt );
 
-			for ( UInt iCoor = 0; iCoor < M_nbCoor+1; iCoor++ )
-			{
-				for ( UInt jCoor = 0; jCoor < M_nbCoor; jCoor++ )
-				{
-					M_tangent( int(jCoor), int(iCoor), int(iQuadPt) ) = M_tangent( int(jCoor), int(iCoor), int(iQuadPt) )
-						/ sqrt( M_metric( int(jCoor), int(jCoor), int(iQuadPt) ) );
-				}
-			}
+            for ( UInt iCoor = 0; iCoor < M_nbCoor+1; iCoor++ )
+            {
+                for ( UInt jCoor = 0; jCoor < M_nbCoor; jCoor++ )
+                {
+                    M_tangent( int(jCoor), int(iCoor), int(iQuadPt) ) = M_tangent( int(jCoor), int(iCoor), int(iQuadPt) )
+                        / std::sqrt( M_metric( int(jCoor), int(jCoor), int(iQuadPt) ) );
+                }
+            }
         }
     }
 }
@@ -309,31 +311,31 @@ void CurrentBoundaryFEBase::computeMeasureNormal()
     computeMeasure();
     if(M_nbCoor == 1)
     {
-		for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
-		{
-			n1 = - M_tangent( int(0), int(1), int(ig) );
-			n2 = M_tangent( int(0), int(0), int(ig) );
-			norm = sqrt( n1 * n1 + n2 * n2 );
-			M_normal( UInt(0), ig ) = n1 / norm;
-			M_normal( UInt(1), ig ) = n2 / norm;
-		}
+        for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
+        {
+            n1 = - M_tangent( int(0), int(1), int(ig) );
+            n2 = M_tangent( int(0), int(0), int(ig) );
+            norm = sqrt( n1 * n1 + n2 * n2 );
+            M_normal( UInt(0), ig ) = n1 / norm;
+            M_normal( UInt(1), ig ) = n2 / norm;
+        }
     }
     else
     {
-		Real n3;
-		for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
-		{
-			n1 = M_tangent( int(0), int(1), int(ig) ) * M_tangent( int(1), int(2), int(ig) )
-				- M_tangent( int(0), int(2), int(ig) ) * M_tangent( int(1), int(1), int(ig) );
-			n2 = M_tangent( int(0), int(2), int(ig) ) * M_tangent( int(1), int(0), int(ig) )
-				- M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(2), int(ig) );
-			n3 = M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(1), int(ig) )
-				- M_tangent( int(0), int(1), int(ig) ) * M_tangent( int(1), int(0), int(ig) );
-			norm = sqrt( n1 * n1 + n2 * n2 + n3 * n3 );
-			M_normal( UInt(0), ig ) = n1 / norm;
-			M_normal( UInt(1), ig ) = n2 / norm;
-			M_normal( UInt(2), ig ) = n3 / norm;
-		}
+        Real n3;
+        for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
+        {
+            n1 = M_tangent( int(0), int(1), int(ig) ) * M_tangent( int(1), int(2), int(ig) )
+                - M_tangent( int(0), int(2), int(ig) ) * M_tangent( int(1), int(1), int(ig) );
+            n2 = M_tangent( int(0), int(2), int(ig) ) * M_tangent( int(1), int(0), int(ig) )
+                - M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(2), int(ig) );
+            n3 = M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(1), int(ig) )
+                - M_tangent( int(0), int(1), int(ig) ) * M_tangent( int(1), int(0), int(ig) );
+            norm = sqrt( n1 * n1 + n2 * n2 + n3 * n3 );
+            M_normal( UInt(0), ig ) = n1 / norm;
+            M_normal( UInt(1), ig ) = n2 / norm;
+            M_normal( UInt(2), ig ) = n3 / norm;
+        }
     }
 }
 

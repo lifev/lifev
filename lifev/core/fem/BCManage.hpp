@@ -1601,7 +1601,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
 {
 
     // Number of local DOF (i.e. nodes) in this face
-    UInt nDofF = currentBdFE.nbNode;
+    UInt nDofF = currentBdFE.nbNode();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -1660,7 +1660,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
                     idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
                     	// quadrature point coordinates
 						x = currentBdFE.quadPt(l, 0);
