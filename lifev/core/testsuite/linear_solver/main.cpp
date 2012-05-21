@@ -70,6 +70,8 @@
 #include <lifev/core/algorithm/LinearSolver.hpp>
 #include <lifev/core/function/Laplacian.hpp>
 
+#define TEST_TOLERANCE 1e-13
+
 using namespace LifeV;
 
 namespace
@@ -361,7 +363,19 @@ main( int argc, char** argv )
     printErrors( *solution3, uFESpace,verbose );
 
     if( verbose ) std::cout << "Difference between the Azteco and the Belos solutions: " << solutionsDiffNorm << std::endl;
+    if( solutionsDiffNorm > TEST_TOLERANCE )
+    {
+        if( verbose ) std::cout << "The difference between the two solutions is too large." << std::endl;
+        if( verbose ) std::cout << "Test status: FAILED" << std::endl;
+        return( EXIT_FAILURE );
+    }
     if( verbose ) std::cout << "Difference between the two AztecOO solvers solutions: " << solutionsDiffNorm2 << std::endl;
+    if( solutionsDiffNorm2 > TEST_TOLERANCE )
+    {
+        if( verbose ) std::cout << "The difference between the two solutions is too large." << std::endl;
+        if( verbose ) std::cout << "Test status: FAILED" << std::endl;
+        return( EXIT_FAILURE );
+    }
 
     // +-----------------------------------------------+
     // |            Ending the simulation              |
@@ -373,6 +387,9 @@ main( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
+
+    if( verbose ) std::cout << "Test status: SUCCESS" << std::endl;
+
     return( EXIT_SUCCESS );
 }
 
