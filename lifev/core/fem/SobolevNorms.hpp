@@ -136,7 +136,7 @@ elementaryFctL2NormSquare( boost::function<Real( Real, Real, Real, Real, UInt )>
 //! returns the square of the H1 norm of u on the current element
 template <typename VectorType>
 Real
-elementaryH1NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& dof, const int nbComp=1 )
+elementaryH1NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& dof, const UInt nbComp=1 )
 {
     UInt eleID (fe.currentLocalId());
     Real sum (0.0);
@@ -309,7 +309,6 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
-    Real sum2(0.0);
     Real x;
     Real y;
     Real z;
