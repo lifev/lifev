@@ -678,7 +678,7 @@ inline
 std::pair<ID, bool>
 MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item )
 {
-    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, M_idCount ) ) );
+  std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( this->insert( std::make_pair( item, M_idCount ) ) );
     if ( i.second )
         ++M_idCount;
     return std::make_pair( ( i.first )->second, i.second );
@@ -689,7 +689,7 @@ inline
 std::pair<ID, bool>
 MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item, const ID id )
 {
-    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, id ) ) );
+  std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( this->insert( std::make_pair( item, id ) ) );
     ( i.first ) ->second = id; // Set new id in any case.
     return std::make_pair( id, i.second ); // for consistency with other version.
 }
@@ -697,7 +697,7 @@ template <class BareItemType>
 bool
 MeshElementBareHandler<BareItemType>::deleteIfThere( bareItem_Type const & item )
 {
-    return erase( item ) != 0;
+    return this->erase( item ) != 0;
 }
 
 template <class BareItemType>
