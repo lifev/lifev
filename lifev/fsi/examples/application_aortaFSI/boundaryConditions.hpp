@@ -44,27 +44,98 @@
 
 #include "ud_functions.hpp"
 // LifeV includes
-#include "life/lifecore/LifeV.hpp"
-#include "life/lifefem/BCHandler.hpp"
+#include "lifev/core/LifeV.hpp"
+#include "lifev/core/fem/BCHandler.hpp"
 
 // Mathcard includes
-#include "life/lifesolver/FSIMonolithicGE.hpp"
-#include "life/lifesolver/FSIMonolithicGI.hpp"
+#include "lifev/fsi/solver/FSIMonolithicGE.hpp"
+#include "lifev/fsi/solver/FSIMonolithicGI.hpp"
 
-#define OUTLET 3
-#define INLET 2
-#define FLUIDINTERFACE 1
-#define OUTERWALL 10
-#define SOLIDINTERFACE 1
+//#ifndef BL
+//Fluid Mesh
+#define OUTLET 5
+#define OUTLETRING 50
+#define INLET 6
+#define INLETRING 60
+
+#define RCCA 8 //Right common carotid artery
+#define RCCARING 80
+#define RCSUBCA 2 //Right subclavial artery
+#define RCSUBCARING 20
+#define RCSUBSUBCA 9 //Right sub-subclavial artery
+#define RCSUBSUBCARING 90
+#define LSUBCA 4 //Left subclavial artery
+#define LSSUBCARING 40
+#define LSUBSUBCA 3 //Left sub-subclavial artery
+#define LSSUBSUBCARING 30
+#define LCCA 7 //Left common carotid artery
+#define LCCARING 70
+#define FLUIDINTERFACE 200
+
+//Solid Mesh
+#define OUTLETWALL 5
+#define OUTLETWALLRINGIN 50
+#define OUTLETWALLRINGOUT 51
+#define INLETWALL 6
+#define INLETWALLRINGIN 60
+#define INLETWALLRINGOUT 61
+
+#define RCCAWALL 8 //Right common carotid artery
+#define RCCAWALLRINGIN 80
+#define RCCAWALLRINGOUT 81
+#define RCSUBCAWALL 2 //Right subclavial artery
+#define RCSUBCAWALLRINGIN 20
+#define RCSUBCAWALLRINGOUT 21
+#define RCSUBSUBCAWALL 9 //Right sub-subclavial artery
+#define RCSUBSUBCAWALLRINGIN 90
+#define RCSUBSUBCAWALLRINGOUT 91
+#define LSUBCAWALL 4 //Left subclavial artery
+#define LSSUBCAWALLRINGIN 40
+#define LSSUBCAWALLRINGOUT 41
+#define LSUBSUBCAWALL 3 //Left sub-subclavial artery
+#define LSSUBSUBCAWALLRINGIN 30
+#define LSSUBSUBCAWALLRINGOUT 31
+#define LCCAWALL 7 //Left common carotid artery
+#define LCCAWALLRINGIN 70
+#define LCCAWALLRINGOUT 70
+#define SOLIDINTERFACE 200
+#define OUTERWALL 210
+
+//#endif
+
+/*
 //#define RING2 22
 #define RING 2
+//thoracic aorta,
 #define RING3 3
+//21, L. Brachia, bhanch 3_2
 #define RING4 4
+//first branch_1,
 #define RING5 5
+//branch 1_2 smallest
 #define RING6 6
+//R. Brachia, branch 1_3
 #define RING7 7
+// 15, LCCA, branch 2
 #define RING8 8
+// 20 LVA branch 3_1
+#define RING9 9
 #define INOUTEDGE 20
+#else
+#define OUTLET 5
+#define INLET 6
+#define FLUIDINTERFACE 200
+#define OUTERWALL 201
+#define SOLIDINTERFACE 200
+//#define RING2 22
+#define RING4 4
+#define RING5 8
+#define RING6 9
+#define RING7 2
+#define RING8 7
+#define RING6 4
+//#define INOUTEDGE 20
+*/
 
 namespace LifeV
 {
@@ -116,15 +187,16 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux()
     //     BCFunctionBase flow_jean (aortaFluxJean);
 
     //uncomment  to use fluxes
-    //BCh_fluid->addBC("InFlow" , INLET,  Flux, /*Full/**/Normal, flow_in);
-     BCh_fluid->addBC("OutFlow" , OUTLET,  Flux/*Essential*/, Normal, flow_3);
+    BCh_fluid->addBC("InFlow" , INLET,  Flux, /*Full/**/Normal, flow_in);
+    BCh_fluid->addBC("OutFlow" , OUTLET,  Flux/*Essential*/, Normal, flow_3);
 
-     BCh_fluid->addBC("Flow4" , 4,  Flux/*Essential*/, Normal, flow_4);
-     BCh_fluid->addBC("Flow7" , 7,  Flux/*Essential*/, Normal, flow_7);
-     BCh_fluid->addBC("Flow6" , 6,  Flux/*Essential*/, Normal, flow_6);
-     BCh_fluid->addBC("Flow5" , 5,  Flux/*Essential*/, Normal, flow_5);
-     BCh_fluid->addBC("Flow8" , 8,  Flux/*Essential*/, Normal, flow_8);
-     BCh_fluid->addBC("Flow9" , 9,  Flux/*Essential*/, Normal, flow_9);
+    //BCh_fluid->addBC("Flow4" , 4,  Flux/*Essential*/, Normal, flow_4);
+    BCh_fluid->addBC("Flow4" , LSUBCA,  Flux/*Essential*/, Normal, flow_4);
+    BCh_fluid->addBC("Flow7" , RCSUBCA,  Flux/*Essential*/, Normal, flow_7);
+    BCh_fluid->addBC("Flow6" , RCSUBSUBCA,  Flux/*Essential*/, Normal, flow_6);
+    BCh_fluid->addBC("Flow5" , RCCA,  Flux/*Essential*/, Normal, flow_5);
+    BCh_fluid->addBC("Flow8" , LCCA,  Flux/*Essential*/, Normal, flow_8);
+    BCh_fluid->addBC("Flow9" , LSUBSUBCA,  Flux/*Essential*/, Normal, flow_9);
 
     return BCh_fluid;
 }

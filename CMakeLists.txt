@@ -63,4 +63,8 @@ ENDFOREACH()
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/${PROJECT_NAME}_config.h.in
                ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_config.h)
 # We need the next line to install LifeV_config.h.in too
-INSTALL(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_config.h DESTINATION include) 
+INSTALL(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_config.h DESTINATION include)
+
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/lifev/debug.areas
+        DESTINATION share/lifev)
+

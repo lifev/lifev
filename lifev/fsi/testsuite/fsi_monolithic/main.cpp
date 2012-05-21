@@ -365,14 +365,14 @@ public:
 //                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            try
+            //try
             {
                 if (!M_data->method().compare("monolithicGI"))
                     checkCEResult(M_data->dataFluid()->dataTime()->time());
                 else
                     checkGCEResult(M_data->dataFluid()->dataTime()->time());
             }
-            catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
+            //catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
         }
 

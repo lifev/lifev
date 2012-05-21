@@ -10,7 +10,7 @@
 
 #include "ud_functions.hpp"
 //#include "flowConditions.hpp"
-#include "life/lifearray/VectorEpetra.hpp"
+#include "lifev/core/array/VectorEpetra.hpp"
 
 //#define ANEURISM100170
 #define AORTA
@@ -576,8 +576,8 @@ Real aortaFlux8(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real
     if (t<=0.39) return  2.076E-06*1e6;
     if (t<=0.40) return  1.131E-06*1e6;
     if (t<=0.41) return  1.861E-07*1e6;
-    if (t<=0.42) return  -4.577E-0*1e6;
-    if (t<=0.43) return  -4.657E-0*1e6;
+    if (t<=0.42) return  -4.577E-07*1e6;
+    if (t<=0.43) return  -4.657E-07*1e6;
     if (t<=0.44) return  3.124E-07*1e6;
     if (t<=0.45) return  1.684E-06*1e6;
     if (t<=0.46) return  3.174E-06*1e6;

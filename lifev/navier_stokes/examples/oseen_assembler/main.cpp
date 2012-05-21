@@ -87,11 +87,11 @@ enum ConvectionType{Explicit, SemiImplicit, KIO91};
  * Spectral Methods Evolution to Complex Geometries and Applications to Fluid Dynamics
  */
 
-typedef RegionMesh<LinearTetra> mesh_type;
-typedef MatrixEpetra<Real> matrix_type;
-typedef VectorEpetra vector_type;
+typedef RegionMesh<LinearTetra> mesh_Type;
+typedef MatrixEpetra<Real> matrix_Type;
+typedef VectorEpetra vector_Type;
 typedef boost::shared_ptr<VectorEpetra> vectorPtr_type;
-typedef FESpace< mesh_type, MapEpetra > fespace_type;
+typedef FESpace< mesh_Type, MapEpetra > fespace_type;
 typedef boost::shared_ptr< fespace_type > fespacePtr_type;
 typedef LifeV::RossEthierSteinmanUnsteadyDec problem_Type;
 }
@@ -102,10 +102,10 @@ Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
 }
 
 
-void printErrors(const vector_type& solution, const Real& currentTime, fespacePtr_type uFESpace, fespacePtr_type pFESpace, bool verbose)
+void printErrors(const vector_Type& solution, const Real& currentTime, fespacePtr_type uFESpace, fespacePtr_type pFESpace, bool verbose)
 {
-    vector_type velocity(uFESpace->map(),Repeated);
-    vector_type pressure(pFESpace->map(),Repeated);
+    vector_Type velocity(uFESpace->map(),Repeated);
+    vector_Type pressure(pFESpace->map(),Repeated);
     if (verbose) std::cout << std::endl << "[Computed errors]" << std::endl;
     velocity.subset(solution);
     pressure.subset(solution, 3 * uFESpace->dof().numTotalDof());
@@ -267,11 +267,11 @@ main( int argc, char** argv )
                            << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
-    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
+    fespacePtr_type uFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
-    fespacePtr_type pFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,pOrder, 1, Comm));
+    fespacePtr_type pFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,pOrder, 1, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     // Creation of the total map
@@ -311,16 +311,16 @@ main( int argc, char** argv )
     if (verbose) std::cout << std::endl << "[Matrices Assembly]" << std::endl;
 
     if (verbose) std::cout << "Setting up assembler... " << std::flush;
-    OseenAssembler<mesh_type,matrix_type,vector_type> oseenAssembler;
+    OseenAssembler<mesh_Type,matrix_Type,vector_Type> oseenAssembler;
     oseenAssembler.setup(uFESpace,pFESpace);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Defining the matrices... " << std::flush;
-    boost::shared_ptr<matrix_type> systemMatrix(new matrix_type( solutionMap ));
+    boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( solutionMap ));
     *systemMatrix *=0.0;
-    boost::shared_ptr<matrix_type> baseMatrix(new matrix_type( solutionMap ));
+    boost::shared_ptr<matrix_Type> baseMatrix(new matrix_Type( solutionMap ));
     *baseMatrix *=0.0;
-    boost::shared_ptr<matrix_type> massMatrix(new matrix_type( solutionMap ));
+    boost::shared_ptr<matrix_Type> massMatrix(new matrix_Type( solutionMap ));
     *massMatrix *=0.0;
     if (verbose) std::cout << "done" << std::endl;
 
@@ -371,7 +371,7 @@ main( int argc, char** argv )
     // Update the BCHandler (internal data related to FE)
     fluxHandler.bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
 
-    vector_type fluxVector(solutionMap);
+    vector_Type fluxVector(solutionMap);
     oseenAssembler.addFluxTerms(fluxVector, fluxHandler);
 
 
@@ -394,32 +394,32 @@ main( int argc, char** argv )
     if (verbose) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
     if (verbose) std::cout << "Creation of vectors... " << std::flush;
     vectorPtr_type rhs;
-    rhs.reset(new vector_type(solutionMap,Unique));
+    rhs.reset(new vector_Type(solutionMap,Unique));
 
     vectorPtr_type beta;
-    beta.reset(new vector_type(solutionMap,Repeated));
+    beta.reset(new vector_Type(solutionMap,Repeated));
 
-    vector_type convect(rhs->map());
+    vector_Type convect(rhs->map());
 
     vectorPtr_type velocity;
-    velocity.reset(new vector_type(uFESpace->map(),Unique));
+    velocity.reset(new vector_Type(uFESpace->map(),Unique));
 
     vectorPtr_type pressure;
-    pressure.reset(new vector_type(pFESpace->map(),Unique));
+    pressure.reset(new vector_Type(pFESpace->map(),Unique));
 
     vectorPtr_type solution;
-    solution.reset(new vector_type(solutionMap,Unique));
+    solution.reset(new vector_Type(solutionMap,Unique));
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Computing the initial solution ... " << std::endl;
     if(convectionTerm == KIO91) BDFOrder = 3;
 
     // bdf object to store the previous solutions
-    TimeAdvanceBDF<vector_type> bdf;
+    TimeAdvanceBDF<vector_Type> bdf;
     bdf.setup(BDFOrder);
-    TimeAdvanceBDF<vector_type> bdfConvection;
+    TimeAdvanceBDF<vector_Type> bdfConvection;
     bdfConvection.setup(BDFOrder);
-    TimeAdvanceBDF<vector_type> bdfConvectionInit; // Just for KIO91
+    TimeAdvanceBDF<vector_Type> bdfConvectionInit; // Just for KIO91
     bdfConvectionInit.setup(BDFOrder);
     Real currentTime = initialTime-timestep*BDFOrder;
 
@@ -478,7 +478,7 @@ main( int argc, char** argv )
 
 
             if (verbose) std::cout << "Updating the system... " << std::flush;
-            systemMatrix.reset(new matrix_type( solutionMap ));
+            systemMatrix.reset(new matrix_Type( solutionMap ));
             *systemMatrix += *baseMatrix;
             if(convectionTerm == SemiImplicit)
             {
@@ -528,15 +528,15 @@ main( int argc, char** argv )
     // |             Setting the exporter              |
     // +-----------------------------------------------+
     if (verbose) std::cout << "Defining the exporter... " << std::flush;
-    ExporterHDF5<mesh_type> exporter ( dataFile, "OseenAssembler");
+    ExporterHDF5<mesh_Type> exporter ( dataFile, "OseenAssembler");
     exporter.setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter.setMeshProcId( meshPart.meshPartition(), Comm->MyPID() );
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Updating the exporter... " << std::flush;
-    exporter.addVariable( ExporterData<mesh_type>::VectorField, "velocity", uFESpace,
+    exporter.addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace,
                           solution, UInt(0));
-    exporter.addVariable( ExporterData<mesh_type>::ScalarField, "pressure", pFESpace,
+    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace,
                           solution, pressureOffset );
     if (verbose) std::cout << "done" << std::endl;
 
@@ -568,7 +568,7 @@ main( int argc, char** argv )
         bdf.updateRHSContribution( timestep );
         *rhs  = *massMatrix*bdf.rhsContributionFirstDerivative();
 
-        systemMatrix.reset(new matrix_type( solutionMap ));
+        systemMatrix.reset(new matrix_Type( solutionMap ));
         double alpha = bdf.coefficientFirstDerivative( 0 ) / timestep;
         *systemMatrix += *massMatrix*alpha;
         *systemMatrix += *baseMatrix;

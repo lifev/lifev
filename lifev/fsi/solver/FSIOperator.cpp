@@ -542,7 +542,6 @@ FSIOperator::updateSystem()
 
       transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
 
-      *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
   }
 
     if ( this->isSolid() )

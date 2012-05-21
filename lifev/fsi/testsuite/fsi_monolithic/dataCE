@@ -75,6 +75,7 @@ useShapeDerivatives           = true
 semiImplicit                  = false # (only valid for method = monolithic or monolithic).
 domainVelImplicit             = false
 convectiveTermDer             = false
+conservativeFormulation       = false
 
 
 

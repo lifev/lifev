@@ -20,8 +20,8 @@
 #ifndef UDF_HPP
 #define UDF_HPP
 
-#include <life/lifecore/LifeV.hpp>
-#include "life/lifearray/VectorEpetra.hpp"
+#include <lifev/core/LifeV.hpp>
+#include "lifev/core/array/VectorEpetra.hpp"
 //#include "flowConditions.hpp"
 
 namespace LifeV

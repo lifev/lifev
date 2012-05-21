@@ -626,15 +626,10 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
     M_me                              = comm->MyPID();
     M_elmatM.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     M_localMap                        = monolithicMap;
-    //M_disp.reset                      (new vector_Type(*M_localMap));
     M_mass.reset                      (new matrix_Type(*M_localMap));
     M_systemMatrix.reset              (new matrix_Type(*M_localMap));
     M_jacobian.reset                  (new matrix_Type(*M_localMap));
-    //    M_disp.reset                       ( new vector_Type(*M_localMap));// to kill
 
-    //Vector of Stiffness for NH and Exp
-    //This vector stores the stiffness vector both in
-    //updateSystem and in evalresidual. That's why it is called tempVect
     M_offset                          = offset;
 
     M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->solidType() ) );
@@ -868,11 +863,6 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     M_Displayer->leaderPrint("    S- Updating the boundary conditions ... \t");
     LifeChrono chrono;
 
-    //This is the most important issue related with this class.
-    //At the moment, the BC are applied on the matrix and on rhsNoBc for VK models
-    //but for NH and EXP they are applied on the residual directly. This does not work for
-    //nonhomogeneus Dirichlet conditions!!
-
     if ( !M_BCh->bcUpdateDone() )
         M_BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
 
@@ -938,17 +928,6 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Type& solution )
 {
-
-    //This is consisten with the previous first approximation in iterateLin
-    //matrixPtr_Type matrixNoBC(new matrix_Type(*M_localMap));
-    //<<<<<<< HEAD
-    //  *M_systemMatrix += *M_material->linearStiff();
-    //=======
-    //*matrixNoBC += *M_material->jacobian();
-    //*M_systemMatrix *= M_zeta;
-    //>>>>>>> 20110728_ExponentialNeohookean
-    //*matrixNoBC += *M_mass;
-    //matrixNoBC->globalAssemble();
 
     M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
     LifeChrono chrono;
@@ -1164,11 +1143,12 @@ StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
     M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
     M_rescaleFactor=dataFile( "solid/rescaleFactor", 0. );
-    UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
-    if (!M_data->young(marker))
-        M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
-    if (!M_data->poisson(marker))
-        M_data->setPoisson(dataFile( "solid/physics/poisson", 0. ), marker);
+    // This is done in DataClass
+    // UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
+    // if (!M_data->young(marker))
+    //     M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
+    // if (!M_data->poisson(marker))
+    //     M_data->setPoisson(dataFile( "solid/physics/poisson", 0. ), marker);
 }
 
 
