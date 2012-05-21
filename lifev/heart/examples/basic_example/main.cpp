@@ -52,10 +52,10 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
-#include <heart.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
+#include "heart.hpp"
 
 using namespace LifeV;
 

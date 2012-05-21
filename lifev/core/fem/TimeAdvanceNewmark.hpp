@@ -48,7 +48,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
-#include <math.h>
+#include <cmath>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -299,7 +299,7 @@ void TimeAdvanceNewmark <feVectorType>::shiftRight(const feVectorType& solution)
     ASSERT (  this->M_timeStep != 0 ,  "M_timeStep must be different to 0");
 
     feVectorContainerPtrIterate_Type it   =  this->M_unknowns.end();
-    feVectorContainerPtrIterate_Type itb1 =  this->M_unknowns.begin() +  static_cast<Real>(this->M_size)/2;
+    feVectorContainerPtrIterate_Type itb1 =  this->M_unknowns.begin() +  this->M_size/2;
     feVectorContainerPtrIterate_Type itb  =  this->M_unknowns.begin();
 
     for ( ; itb1 != it; ++itb1, ++itb)

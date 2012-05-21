@@ -101,7 +101,7 @@ public:
     /*!
         @note all pointer members are copied (no new allocation is done in the class)
      */
-    PostProcessingBoundary( const PostProcessingBoundary& postProc )
+    PostProcessingBoundary( const PostProcessingBoundary& /*postProc*/ )
     {}
 
     //! Constructor
