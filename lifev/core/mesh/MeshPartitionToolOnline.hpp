@@ -607,8 +607,8 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFacets(
             pf->setPoint(id, M_meshPartition->pointList((*im).second));
         }
     }
-    M_meshPartition->setLinkSwitch("HAS_ALL_FACES");
-    M_meshPartition->setLinkSwitch("FACES_HAVE_ADIACENCY");
+    M_meshPartition->setLinkSwitch("HAS_ALL_FACETS");
+    M_meshPartition->setLinkSwitch("FACETS_HAVE_ADIACENCY");
 }
 
 template<typename MeshType, template <typename> class GraphPartitionToolType>

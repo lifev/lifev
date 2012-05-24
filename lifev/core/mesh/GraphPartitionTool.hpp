@@ -136,13 +136,13 @@ public:
     const boost::shared_ptr<std::vector<Int> >& getPartition(const UInt i) const {return M_partitionTable.find(i)->second;}
 
     //! Get number of stored graph elements
-    const UInt numStoredElements() const {return static_cast<UInt>(M_elementList.size());}
+    UInt numStoredElements() const {return static_cast<UInt>(M_elementList.size());}
 
     //! First global index that is initially assigned to process i
-    const Int firstIndex(const Int i) const {return M_indexBounds[i];}
+    Int firstIndex(const Int i) const {return M_indexBounds[i];}
 
     //! Last global index that is initially assigned to process i
-    const Int lastIndex(const Int i) const {return M_indexBounds[i + 1] - 1;}
+    Int lastIndex(const Int i) const {return M_indexBounds[i + 1] - 1;}
 
     //! The internally stored dual graph of the mesh
     const internalTable_Type& graph() const {return M_graph;}
@@ -160,10 +160,10 @@ public:
     std::vector<Int>& elementParts() {return M_elementParts;}
 
     //! The PID of the process
-    const Int myPID() const {return M_myPID;}
+    Int myPID() const {return M_myPID;}
 
     //! The number of processes in the comm
-    const Int numProcessors() const {return M_numProcessors;}
+    Int numProcessors() const {return M_numProcessors;}
     //@}
 
     //! @name Static methods
