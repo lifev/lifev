@@ -42,6 +42,11 @@ public:
 
 	AztecooOperator();
 
+    int numberOfIterations()
+    {
+        return M_linSolver->NumIters();
+    }
+
 protected:
 
 	virtual int doApplyInverse(const vector_Type& X, vector_Type& Y) const;
