@@ -247,6 +247,7 @@ Structure::run3d()
     boost::shared_ptr<WallTensionEstimatorData> tensionData(new WallTensionEstimatorData( ));
     tensionData->setup(dataFile);
 
+    tensionData->showMe();
     //! Read and partition mesh
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
@@ -260,6 +261,7 @@ Structure::run3d()
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
+
 
     //! Setting the marker for the volumes
     UInt marker = dataFile( "solid/physics/material_flag", 1);
@@ -275,8 +277,9 @@ Structure::run3d()
 		marker);
 
     //! 3. Creation of the importers to read the displacement field
-    std::string const importerType =  dataFile( "importer/type", "hdf5");
-    std::string const filename    = dataFile( "importer/fluid/filename", "solid");
+    std::string const filename    = tensionData->nameFile();
+    std::string const importerType =  tensionData->typeFile();
+
     std::string iterationString; //useful to iterate over the strings
 
     if (verbose) 
@@ -315,19 +318,19 @@ Structure::run3d()
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-      M_exporter.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "structure" ) );
+      M_exporter.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "tensions" ) );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
 	{
-	    M_exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+	    M_exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "tensions", parameters->comm->MyPID()) );
 	}
 
         else
         {
-	    M_exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+	    M_exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "tensions", parameters->comm->MyPID()) );
 	}
     }
 
@@ -339,67 +342,120 @@ Structure::run3d()
     M_exporter->postProcess( 0.0 );
 
 
-
-
     //! =================================================================================
     //! Analysis - Istant or Interval
     //! =================================================================================
 
     //! 5. For each interval, the analysis is performed
+    LifeV::Real dt =  dataFile( "solid/time_discretization/timestep", 0.0);    
 
-    LifeV::Real dt =  dataFile( "fluid/time_discretization/timestep", 0.0);
-
-    //Cycle of the intervals
-    for ( UInt i(0); i< tensionData->iterStart().size(); i++ )
+    if( !tensionData->analysisType().compare("istant") )
       {
-	const std::string initial = tensionData->iterStart(i);
-	const std::string last    = tensionData->iterEnd(i);
-	const LifeV::Real startTime = tensionData->initialTime(i);
-
-	//! Todo: A check on the existence of the initial and last strings would be appreciated
+	//Get the iteration number
+	iterationString = tensionData->iterStart(0);
+	LifeV::Real startTime = tensionData->initialTime(0);
 	
-	iterationString = initial;
-	UInt iterDone = 0;
+	/*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+	LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,"displacement."+iterationString, solid.dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );	
+	
+	//Read the variable
+	M_importer->readVariable(solutionDispl);
 
-	while( iterationString.compare(last)  )
-	  {
+	/*
+	//Create and exporter to check importing
+	std::string expVerFile = "verificationDisplExporter";
+	LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
+        vectorPtr_Type vectVer ( new vector_Type(solid.displacement(),  exporter.mapType() ) );
+	    
+        exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", solid.dFESpacePtr(),
+			      vectVer, UInt(0) );
 
-	    //Read variable at iterationString
+	exporter.postProcess(0.0);
+	*vectVer = *solidDisp;
+	exporter.postProcess(startTime);
 
-	    /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-	    LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,"s-displacement."+iterationString, solid.dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+	return 0;
+	*/
 
-	    //Read the variable
-	    M_importer->readVariable(solutionDispl);
+	//Set the current solution as the displacement vector to use
+	solid.setDisplacement(*solidDisp);
 
-	    //Set the current solution as the displacement vector to use
-	    solid.setDisplacement(*solidDisp);
+	std::cout << "The norm of the set displacement, at time " << startTime << ", is: "<< solid.displacement().norm2() << std::endl;
 
-	    //Perform the analysis
-	    solid.analyzeTensions();
+	//Perform the analysis
+	solid.analyzeTensions();
 
-	    *solidTensions = solid.principalStresses();
-
-	    //Export the principal stresses
-	    M_exporter->postProcess( startTime + iterDone*dt );
-
-	    //Increment the iterationString
-	    int iterations = std::atoi(iterationString.c_str());
-	    iterations++;
-
-	    std::ostringstream iter;
-	    iter.fill( '0' );
-	    iter << std::setw(5) << ( iterations );
-	    iterationString=iter.str();
-
-	    //Increment the iteration for the postProcess
-	    iterDone++;
-
-	  }
-
-	if (verbose ) 
-	  std::cout << "Analysis of the "<< i << "-th interval completed!" << std::endl;
+	return 0;
       }
+    else
+      {	
+
+	return 0;
+	// //Cycle of the intervals
+	// for ( UInt i(0); i< tensionData->iterStart().size() + 1; i++ )
+	//   {
+	//     const std::string initial = tensionData->iterStart(i);
+	//     const std::string last    = tensionData->iterEnd(i);
+	//     const LifeV::Real startTime = tensionData->initialTime(i);
+
+	//     //! Todo: A check on the existence of the initial and last strings would be appreciated
+	    
+	//     iterationString = initial;
+	//     std::cout << "the string I'll look for is: " << iterationString << std::endl;
+	//     std::cout << "the string I'll look for is: " << last << std::endl;
+	    
+	//     UInt iterDone = 0;
+	
+	//     while( iterationString.compare(last)  )
+	//       {
+	    
+	// 	//Read variable at iterationString
+	// 	std::cout << "the string I'll look for is: " << iterationString << std::endl;
+	// 	std::cout << "Here I am Fucking idiot! " << std::endl;
+	// 	int ko;
+	// 	std::cin >> ko;
+
+	// 	//Create and exporter to check importing
+	// 	std::string expVerFile = "verificationDisplExporter";
+	// 	LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
+        //         vectorPtr_Type vectVer ( new vector_Type(solid.displacement(),  exporter.mapType() ) );
+	    
+	// 	exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", solid.dFESpacePtr(),
+	// 			      vectVer, UInt(0) );
+
+	// 	exporter.postProcess(0.0);
+	// 	*vectVer = *solidDisp;
+	// 	exporter.postProcess(startTime);
+
+	// 	int c;
+	// 	std::cin >> c;
+	    
+	// 	//Set the current solution as the displacement vector to use
+	// 	solid.setDisplacement(*solidDisp);
+
+	// 	//Perform the analysis
+	// 	solid.analyzeTensions();
+
+	// 	*solidTensions = solid.principalStresses();
+
+	// 	//Export the principal stresses
+	// 	M_exporter->postProcess( startTime + iterDone*dt );
+
+	// 	//Increment the iterationString
+	// 	int iterations = std::atoi(iterationString.c_str());
+	// 	iterations++;
+
+	// 	std::ostringstream iter;
+	// 	iter.fill( '0' );
+	// 	iter << std::setw(5) << ( iterations );
+	// 	iterationString=iter.str();
+
+	// 	//Increment the iteration for the postProcess
+	// 	iterDone++;
+	//   }
+      }
+//if (verbose )  std::cout << "Analysis of the "<< i << "-th interval completed!" << std::endl;
+
 
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -408,8 +464,6 @@ Structure::run3d()
 
     
     //!--------------------------------------------------------------------------------------------------
-
-    MPI_Barrier(MPI_COMM_WORLD);
 }
 
 

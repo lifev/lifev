@@ -1340,40 +1340,28 @@ void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariant
   Real C11(0);
   Real C22(0);
   Real C33(0);
-
-  //Compute the tensor C = F^T * F using Epetra_SerialDenseMatrix functions
-  Epetra_SerialDenseMatrix tensorC(nDimensions,0.0);
-  tensorC.Multiply('T','N', 1.0, tensorF, tensorF, 0.0);
-
-  invariants[0]=tensorC(1,1) + tensorC(2,2) + tensorC(3,3);
-  invariants[1]=0.0; //Second invariant C
-  invariants[2]=0.0; //Third invariant C
-  invariants[3]=tensorF(0,0) * ( tensorF(1,1)*tensorF(2,2) - tensorF(1,2)*tensorF(2,1) ) - tensorF(0,1) * ( tensorF(1,0)*tensorF(2,2) - tensorF(1,2)*tensorF(2,0) ) + tensorF(0,2) * ( tensorF(1,0)*tensorF(2,1) - tensorF(1,1)*tensorF(2,0) ); //Determinant F
   
-  //Computing the cofactorF = detF*(F^{-T})using the Epetra_SerialDenseMatrix
-  Epetra_SerialDenseMatrix temp(tensorF);
-  temp.SetUseTranspose(true);
-
-  temp.ApplyInverse(temp,cofactorF); 
   //It is not rescaled by the determinant. It is done inside the method to compute the local Piola
   //cofactorF.Scale(invariants[3]);
 
-  // C11 = tensorF(0,0)*tensorF(0,0) + tensorF(1,0)*tensorF(1,0) + tensorF(2,0)*tensorF(2,0);
-  // C22 = tensorF(0,1)*tensorF(0,1) + tensorF(1,1)*tensorF(1,1) + tensorF(2,1)*tensorF(2,1);
-  // C33 = tensorF(0,2)*tensorF(0,2) + tensorF(1,2)*tensorF(1,2) + tensorF(2,2)*tensorF(2,2);
-  //  invariants[0]=C11 + C22 + C33; //First invariant C
+  C11 = tensorF(0,0)*tensorF(0,0) + tensorF(1,0)*tensorF(1,0) + tensorF(2,0)*tensorF(2,0);
+  C22 = tensorF(0,1)*tensorF(0,1) + tensorF(1,1)*tensorF(1,1) + tensorF(2,1)*tensorF(2,1);
+  C33 = tensorF(0,2)*tensorF(0,2) + tensorF(1,2)*tensorF(1,2) + tensorF(2,2)*tensorF(2,2);
+  invariants[0]=C11 + C22 + C33; //First invariant C
+  invariants[1]=0.0; //Second invariant C
+  invariants[2]=0.0; //Third invariant C
+  invariants[3]=tensorF(0,0) * ( tensorF(1,1)*tensorF(2,2) - tensorF(1,2)*tensorF(2,1) ) - tensorF(0,1) * ( tensorF(1,0)*tensorF(2,2) - tensorF(1,2)*tensorF(2,0) ) + tensorF(0,2) * ( tensorF(1,0)*tensorF(2,1) - tensorF(1,1)*tensorF(2,0) ); //Determinant F
 
-  // //Computation of the Cofactor of F
-  // cofactorF( 0 , 0 ) =   ( tensorF(1,1)*tensorF(2,2) - tensorF(1,2)*tensorF(2,1) );
-  // cofactorF( 0 , 1 ) = - ( tensorF(1,0)*tensorF(2,2) - tensorF(2,0)*tensorF(1,2) );
-  // cofactorF( 0 , 2 ) =   ( tensorF(1,0)*tensorF(2,1) - tensorF(1,1)*tensorF(2,0) );
-  // cofactorF( 1 , 0 ) = - ( tensorF(0,1)*tensorF(2,2) - tensorF(0,2)*tensorF(2,1) );
-  // cofactorF( 1 , 1 ) =   ( tensorF(0,0)*tensorF(2,2) - tensorF(0,2)*tensorF(2,0) );
-  // cofactorF( 1 , 2 ) = - ( tensorF(0,0)*tensorF(2,1) - tensorF(2,0)*tensorF(0,1) );
-  // cofactorF( 2 , 0 ) =   ( tensorF(0,1)*tensorF(1,2) - tensorF(0,2)*tensorF(1,1) );
-  // cofactorF( 2 , 1 ) = - ( tensorF(0,0)*tensorF(1,2) - tensorF(0,2)*tensorF(1,0) );
-  // cofactorF( 2 , 2 ) =   ( tensorF(0,0)*tensorF(1,1) - tensorF(1,0)*tensorF(0,1) );  
-
+  //Computation of the Cofactor of F
+  cofactorF( 0 , 0 ) =   ( tensorF(1,1)*tensorF(2,2) - tensorF(1,2)*tensorF(2,1) );
+  cofactorF( 0 , 1 ) = - ( tensorF(1,0)*tensorF(2,2) - tensorF(2,0)*tensorF(1,2) );
+  cofactorF( 0 , 2 ) =   ( tensorF(1,0)*tensorF(2,1) - tensorF(1,1)*tensorF(2,0) );
+  cofactorF( 1 , 0 ) = - ( tensorF(0,1)*tensorF(2,2) - tensorF(0,2)*tensorF(2,1) );
+  cofactorF( 1 , 1 ) =   ( tensorF(0,0)*tensorF(2,2) - tensorF(0,2)*tensorF(2,0) );
+  cofactorF( 1 , 2 ) = - ( tensorF(0,0)*tensorF(2,1) - tensorF(2,0)*tensorF(0,1) );
+  cofactorF( 2 , 0 ) =   ( tensorF(0,1)*tensorF(1,2) - tensorF(0,2)*tensorF(1,1) );
+  cofactorF( 2 , 1 ) = - ( tensorF(0,0)*tensorF(1,2) - tensorF(0,2)*tensorF(1,0) );
+  cofactorF( 2 , 2 ) =   ( tensorF(0,0)*tensorF(1,1) - tensorF(1,0)*tensorF(0,1) );  
   
 }
 
@@ -1422,10 +1410,6 @@ void computeEigenvalues(Epetra_SerialDenseMatrix& cauchy,
   std::vector<LifeV::Real > WORK(length, 0.0);
   Int LWORK = length;
   Int INFO;
-
-  //Conversion matrix Cauchy to Vector 
-  //  /*std::vector<LifeV::Real >*/ double A[3][3]; /*,0.0);*/
-
  
   std::vector<LifeV::Real> A(9, 0.0);
 
@@ -1437,10 +1421,12 @@ void computeEigenvalues(Epetra_SerialDenseMatrix& cauchy,
   	}
     }
 
-
   lapack.GEEV(JOBVL, JOBVR, N, &A[0] /*cauchy*/, LDA, &WR[0], &WI[0], &VL[0], LDVL, &VR[0], LDVR, &WORK[0], LWORK, INFO);
-  ASSERT_PRE( !INFO, "Calculation of the Eigenvalues failed!!!" );
+  //ASSERT_PRE( !INFO, "Calculation of the Eigenvalues failed!!!" );
 
+  std::cout << "Fuck you!" << std::endl;
+  int n;
+  std::cin >> n;
   eigenvaluesR = WR;
   eigenvaluesI = WI;
 

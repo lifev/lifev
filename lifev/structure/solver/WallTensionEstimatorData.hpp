@@ -60,13 +60,13 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef typename std::vector<std::string > iteration_Type;
-    typedef typename std::vector<LifeV::Real > time_Type;
+    typedef  std::vector<std::string > iteration_Type;
+    typedef  std::vector<LifeV::Real > time_Type;
     //@}
 
 
     //! @name Constructors & Destructor
-    //@{
+    //@{0
 
     //! Empty Constructor
     WallTensionEstimatorData();
@@ -103,7 +103,7 @@ public:
      * @param dataFile data file
      * @param section section of the file
      */
-    void setup( const GetPot& dataFile, const std::string& section = "analysis" );
+    void setup( const GetPot& dataFile, const std::string& section = "solid" );
 
     //! Display the values
     void showMe( std::ostream& output = std::cout ) const;
@@ -162,6 +162,12 @@ public:
      */
      const std::string& nameFile() const { return M_nameFile; }
 
+    //! Get typeFile
+    /*!
+     * @return std::string with the type of the file used for the analysis
+     */
+     const std::string& typeFile() const { return M_typeFile; }
+
     //! Get analysisType
     /*!
      * @return std::string with the type of analysis that has to be performed
@@ -217,34 +223,24 @@ public:
      */
     const std::string& iterEnd(const UInt i) const { return M_iterEnd[i]; }
 
-
-    // //! Get solid poisson coefficient
-    // /*!
-    //  * @param material material ID (1 by default)
-    //  * @return Solid poisson coefficient
-    //  */
-    // Real poisson( const UInt& material ) const;
-
     //@}
 
 private:
 
-    enum M_analysisType {istant,interval};
-
+    enum M_analysisType{istant,interval};
     //! Name of the file
     std::string           M_nameFile;
+    std::string           M_typeFile;
 
     //! Type of Analysis
     std::string           M_analysisType;
 
-    //! Initial Time
+    //! Initial & Final Time
     time_Type             M_initialTime;
-    //! Final Time
     time_Type             M_finalTime;
 
-    //! Initial Time
+    //! Initial & Final iteration
     iteration_Type        M_iterStart;
-    //! Final Time
     iteration_Type        M_iterEnd;
 
 

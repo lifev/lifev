@@ -39,6 +39,9 @@
 #ifndef _ELEMOPERSTRUCTURE_H_INCLUDED
 #define _ELEMOPERSTRUCTURE_H_INCLUDED
 
+#include <string>
+#include <iostream>
+
 //Trilinos includ
 #include <Epetra_LAPACK.h>
 #include <Epetra_BLAS.h>

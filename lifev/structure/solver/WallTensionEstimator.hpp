@@ -380,8 +380,7 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
 	  dY[iComp] = (*M_displY)(iDOF + iComp * dim + this->M_offset); // (d_xY,d_yY,d_zY)
 	  dZ[iComp] = (*M_displZ)(iDOF + iComp * dim + this->M_offset); // (d_xZ,d_yZ,d_zZ)
 	}
-		
-		      
+	      
       //Fill the matrix F
       for( UInt icoor = 0; icoor < M_FESpace->fieldDim(); icoor++ )
 	{
@@ -392,16 +391,27 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
 	  (*M_deformationF)(icoor,icoor) += 1.0;
 	}
 
-
       //Compute the rightCauchyC tensor
       AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(*M_invariants, *M_deformationF, *M_cofactorF);
 		
+      this->M_displayer->leaderPrint(" \n norm Inf of F:  ", (*M_deformationF).NormOne() );
+      this->M_displayer->leaderPrint(" \n norm Inf of cofF:  ", (*M_cofactorF).NormOne() );
+
+      LifeV::Real sumI(0);
+      for( UInt i(0); i < (*M_invariants).size(); i++ )
+	sumI += (*M_invariants)[i];
+      this->M_displayer->leaderPrint(" \n Sum of the terms in the invariants  ", sumI );
+      
       //Compute the first Piola-Kirchhoff tensor
       M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, *M_invariants, M_marker);
+
+      this->M_displayer->leaderPrint(" \n norm Inf of P:  ", (*M_firstPiola).NormOne() );
 
       //Compute the Cauchy tensor
       AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, (*M_invariants)[3], *M_deformationF);
       
+      this->M_displayer->leaderPrint(" \n norm Inf of P:  ", (*M_sigma).NormOne() );
+
       //Compute the eigenvalue
       AssemblyElementalStructure::computeEigenvalues(*M_sigma, *M_eigenvaluesR, *M_eigenvaluesI);
 

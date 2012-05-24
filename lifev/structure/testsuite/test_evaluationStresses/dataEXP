@@ -18,7 +18,7 @@
 
 
 [exporter]
-type       = ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
+type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
@@ -46,6 +46,16 @@ BDF_order   	= 2
 mesh_dir  	= ./
 mesh_file 	= StructuredCube4_test_structuralsolver.mesh
 order     	= P1
+
+[../analysis]
+nameFile                = structure
+typeFile                = hdf5
+analysisType            = istant
+start                   = 0.4
+end                     = 0.4
+iterationStart          = 00004 #Number of iteration
+iterationEnd            = 00004
+
 
 
 [../miscellaneous]

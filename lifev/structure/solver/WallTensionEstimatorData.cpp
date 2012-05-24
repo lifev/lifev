@@ -93,22 +93,33 @@ WallTensionEstimatorData::setup( const GetPot& dataFile, const std::string& sect
 
     // physics
     M_nameFile = dataFile( ( section + "/analysis/nameFile" ).data(), "NO_DEFAULT_NAME_FILE" );
-    M_analysisType = dataFile( ( section + "/analysis/type" ).data(), "NO_DEFAULT_ANALYSIS_TYPE" );
+    M_typeFile = dataFile( ( section + "/analysis/typeFile" ).data(), "NO_DEFAULT_FILE_TYPE" );
 
+    M_analysisType = dataFile( ( section + "/analysis/analysisType" ).data(), "NO_DEFAULT_ANALYSIS_TYPE" );
 
-    UInt timesNumber = dataFile.vector_variable_size( ( section + "/analysis/start" ).data() );
+    UInt timesNumber(0);
+
+    if( !M_analysisType.compare("istant") ) 
+      timesNumber = 1;
+    else
+      timesNumber = dataFile.vector_variable_size( ( section + "/analysis/start" ).data() );
     
+    //Resizing the vectors to store the right number of iterations & times
+    M_initialTime.resize(timesNumber);
+    M_finalTime.resize(timesNumber);
+
+    M_iterStart.resize(timesNumber);
+    M_iterEnd.resize(timesNumber);
 
     for ( UInt i(0); i < timesNumber ; i++)
       {
 	M_initialTime[i] = dataFile( ( section + "/analysis/start" ).data(), 0., i );
 	M_finalTime[i]   = dataFile( ( section + "/analysis/end"   ).data(), 0., i );
-      
-
+	
 	M_iterStart[i] = dataFile( ( section + "/analysis/iterationStart" ).data(), "00000", i );
 	M_iterEnd[i]   = dataFile( ( section + "/analysis/iterationEnd"   ).data(), "00000", i );
       }
-
+ 
 }
 
 void
@@ -116,17 +127,20 @@ WallTensionEstimatorData::showMe( std::ostream& output ) const
 {
     // physics
     output << "\n*** Values for wall tension analysis [solid/analysis]\n\n";
-    output << "name File                = " << M_nameFile << std::endl;
-    output << "analysis Type            = " << M_analysisType << std::endl;
-    output << "The intervals are        :\n " <<  std::endl;
+    output << "Name File                = " << M_nameFile << std::endl;
+    output << "Type File                = " << M_typeFile << std::endl;
+    output << "Analysis Type            = " << M_analysisType << std::endl;
+    output << "The numbers of intervals is =  " << M_initialTime.size() << std::endl;
 
     for ( UInt i(0); i< M_initialTime.size() ; i++ )
       {
-	output << "initial Time" << i << "  = " << M_initialTime[i] << std::endl;
-	output << "final  Time" << i << "   = " << M_finalTime[i] << std::endl;
 
-	output << "iteration Start " << i << "= " << M_iterStart[i] << std::endl;
-	output << "iteration End " << i << "= " << M_iterEnd[i] << std::endl;
+	output <<  i+1 << "  Interval: " <<  std::endl;
+	output << "initial Time " << i+1 << "  = " << M_initialTime[i] << std::endl;
+	output << "final  Time " << i+1 << "   = " << M_finalTime[i] << std::endl;
+
+	output << "iteration Start " << i+1 << "= " << M_iterStart[i] << std::endl;
+	output << "iteration End " << i+1 << "= " << M_iterEnd[i] << std::endl;
       }
 }
 
