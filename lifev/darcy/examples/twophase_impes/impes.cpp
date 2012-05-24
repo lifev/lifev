@@ -488,7 +488,7 @@ impes::run()
                                                                         *saturation_hyperbolic_qR,
                                                                         *saturation_hyperbolic_bdQr, 1, Members->comm ) );
 
-    GhostHandler<RegionMesh> ghost( fullMeshPtr, meshPart.meshPartition(), saturation_hyperbolic_FESpacePtr->map(), Members->comm );
+    GhostHandler<RegionMesh> ghost( fullMeshPtr, meshPart.meshPartition(), saturation_hyperbolic_FESpacePtr->mapPtr(), Members->comm );
 
     // Non-linear and transient Darcy parameters.
 
