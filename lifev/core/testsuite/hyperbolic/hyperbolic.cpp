@@ -465,7 +465,7 @@ hyperbolic::run()
                                                   1,
                                                   Members->comm ) );
 
-    GhostHandler<RegionMesh> ghost( fullMeshPtr, meshPart.meshPartition(), feSpacePtr->map(), Members->comm );
+    GhostHandler<RegionMesh> ghost( fullMeshPtr, meshPart.meshPartition(), feSpacePtr->mapPtr(), Members->comm );
 
     // Stop chronoFiniteElementSpace
     chronoFiniteElementSpace.stop();
