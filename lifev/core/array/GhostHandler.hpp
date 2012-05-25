@@ -102,6 +102,13 @@ public:
 
     //@}
 
+    //! @name Set Methods
+    //@{
+
+    void setVerbose( const bool & verbose ) { M_verbose = verbose && ( M_me == 0 ); }
+
+    //@}
+
     //! @name General Methods
     //@{
 
@@ -198,8 +205,7 @@ protected:
     neighborList_Type M_nodeEdgeNeighborsList;
     neighborList_Type M_nodeElementNeighborsList;
 
-    const bool M_verbose;
-
+    bool M_verbose;
     std::ofstream M_debugOut;
 
     //@}
@@ -218,7 +224,7 @@ GhostHandler<Mesh>::GhostHandler( meshPtr_Type fullMesh,
     M_nodeNodeNeighborsList(),
     M_nodeEdgeNeighborsList(),
     M_nodeElementNeighborsList(),
-    M_verbose( !M_me ),
+    M_verbose( 0 ),
 #ifdef HAVE_LIFEV_DEBUG
     M_debugOut( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string>( M_me ) : "s" ) + ".out" ).c_str() )
 #else
@@ -236,7 +242,7 @@ GhostHandler<Mesh>::GhostHandler( meshPtr_Type fullMesh,
     M_nodeNodeNeighborsList(),
     M_nodeEdgeNeighborsList(),
     M_nodeElementNeighborsList(),
-    M_verbose( !M_me ),
+    M_verbose( 0 ),
 #ifdef HAVE_LIFEV_DEBUG
     M_debugOut( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string>( M_me ) : "s" ) + ".out" ).c_str() )
 #else
