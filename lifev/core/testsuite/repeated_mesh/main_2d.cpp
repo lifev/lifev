@@ -63,7 +63,7 @@
 #include <lifev/core/fem/BCManage.hpp>
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh2DStructured.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 
@@ -109,17 +109,15 @@ Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, con
 #ifdef TEST_RHS
 Real epsilon(1);
 
-Real exactSolution( const Real& /* t */, const Real& /*x*/, const Real& /*y*/, const Real& /* z */, const ID& /* i */ )
+Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */, const ID& /* i */ )
 {
-//    return  sin(x)+y*y/2;
-    return  0.;
+    return  sin( x ) + y * y / 2.;
 }
 
 
-Real fRhs( const Real& /* t */, const Real& /*x*/, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
+Real fRhs( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
-//    return  sin(x)-1;
-    return  1.;
+    return  sin( x ) - 1.;
 }
 #endif
 
@@ -143,259 +141,292 @@ main( int argc, char** argv )
     {
 
 #ifdef HAVE_MPI
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+        boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
 #else
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+        boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
 #endif
 
-    const bool verbose(Comm->MyPID()==0);
-    std::ofstream debugOut( ( "rm." + ( Comm->NumProc() > 1 ? boost::lexical_cast<std::string>( Comm->MyPID() ) : "s" ) + ".out" ).c_str() );
+        GetPot dataFile( "data_2d" );
+        const bool isLeader( Comm->MyPID() == 0 );
+        const bool verbose( dataFile( "miscellaneous/verbose", 0 ) && isLeader );
 
-// Read first the data needed
+#ifdef HAVE_LIFEV_DEBUG
+        std::ofstream debugOut( ( "rm." + ( Comm->NumProc() > 1 ? boost::lexical_cast<std::string>( Comm->MyPID() ) : "s" ) + ".out" ).c_str() );
+#else
+        std::ofstream debugOut("/dev/null");
+#endif
 
-    if (verbose) std::cout << " -- Reading the data ... " << std::flush;
-    GetPot dataFile( "data_2d" );
-    if (verbose) std::cout << " done ! " << std::endl;
+        // Build and partition the mesh
 
+        if ( verbose ) std::cout << " -- Reading the mesh ... " << std::flush;
+        boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type());
+        if( dataFile( "mesh/mesh_type", "structured" ) == "structured" )
+        {
+            regularMesh2D( *fullMeshPtr, 0,
+                           dataFile( "mesh/nx", 20 ), dataFile( "mesh/ny", 20 ),
+                           dataFile( "mesh/verbose", false ),
+                           dataFile( "mesh/lx", 1. ), dataFile( "mesh/ly", 1. ) );
+        }
+        else
+        {
+            MeshData meshData(dataFile, "mesh");
+            readMesh(*fullMeshPtr,meshData);
+        }
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-// Build and partition the mesh
+        if ( verbose ) std::cout << " -- Partitioning the mesh ... " << std::flush;
 
-    if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
-    MeshData meshData(dataFile, "mesh");
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type());
-    readMesh(*fullMeshPtr,meshData);
-    if (verbose) std::cout << " done ! " << std::endl;
+        LifeChrono partTime;
+        partTime.start();
+        boost::shared_ptr< mesh_Type > localMesh;
+        {
+            MeshPartitioner< mesh_Type >   meshPart;
+            meshPart.doPartition( fullMeshPtr, Comm );
+            localMesh = meshPart.meshPartition();
+        }
+        partTime.stop();
+        if( isLeader ) std::cout << "partitioning time  = " << partTime.diff() << std::endl;
 
-    if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    boost::shared_ptr< mesh_Type > localMesh;
-    {
-        MeshPartitioner< mesh_Type >   meshPart;
-        meshPart.doPartition( fullMeshPtr, Comm );
-        localMesh = meshPart.meshPartition();
-    }
-    localMesh->mesh_Type::showMe( true, debugOut );
+        // localMesh->mesh_Type::showMe( true, debugOut );
 
-    boost::shared_ptr< mesh_Type > localMeshR;
-    {
-        MeshPartitioner< mesh_Type >   meshPartR;
-        meshPartR.setBuildOverlappingPartitions( true );
-        meshPartR.doPartition( fullMeshPtr, Comm );
-        localMeshR = meshPartR.meshPartition();
-    }
-    debugOut << "============================" << std::endl;
-    localMeshR->mesh_Type::showMe( true, debugOut );
-    if (verbose) std::cout << " done ! " << std::endl;
+        LifeChrono partTimeR;
+        partTimeR.start();
+        boost::shared_ptr< mesh_Type > localMeshR;
+        {
+            MeshPartitioner< mesh_Type >   meshPartR;
+            meshPartR.setBuildOverlappingPartitions( true );
+            meshPartR.doPartition( fullMeshPtr, Comm );
+            localMeshR = meshPartR.meshPartition();
+        }
+        partTimeR.stop();
+        if( isLeader ) std::cout << "partitioningR time = " << partTimeR.diff() << std::endl;
 
-    if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
-    fullMeshPtr.reset();
-    if (verbose) std::cout << " done ! " << std::endl;
+        // debugOut << "============================" << std::endl;
+        // localMeshR->mesh_Type::showMe( true, debugOut );
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-// Build the FESpaces
+        if ( verbose ) std::cout << " -- Freeing the global mesh ... " << std::flush;
+        fullMeshPtr.reset();
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
-    std::string uOrder("P1");
-    std::string bOrder("P1");
-    feSpacePtr_Type uFESpace( new feSpace_Type( localMesh, uOrder, 1, Comm ) );
-    feSpacePtr_Type uFESpaceR( new feSpace_Type( localMeshR, uOrder, 1, Comm ) );
-    feSpacePtr_Type betaFESpace( new feSpace_Type( localMesh, bOrder, 3, Comm ) );
-    feSpacePtr_Type betaFESpaceR( new feSpace_Type( localMeshR, bOrder, 3, Comm ) );
-    if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
+        // Build the FESpaces
 
-// Build the assembler and the matrices
+        if ( verbose ) std::cout << " -- Building FESpaces ... " << std::flush;
+        std::string uOrder("P1");
+        std::string bOrder("P1");
+        feSpacePtr_Type uFESpace( new feSpace_Type( localMesh, uOrder, 1, Comm ) );
+        feSpacePtr_Type uFESpaceR( new feSpace_Type( localMeshR, uOrder, 1, Comm ) );
+        feSpacePtr_Type betaFESpace( new feSpace_Type( localMesh, bOrder, 2, Comm ) );
+        feSpacePtr_Type betaFESpaceR( new feSpace_Type( localMeshR, bOrder, 2, Comm ) );
+        if ( verbose ) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
-    if (verbose) std::cout << " -- Building assembler ... " << std::flush;
-    ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
-    ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssemblerR;
-    if (verbose) std::cout << " done! " << std::endl;
+        // Build the assembler and the matrices
 
-    if (verbose) std::cout << " -- Setting up assembler ... " << std::flush;
-    adrAssembler.setup( uFESpace, betaFESpace);
-    adrAssemblerR.setup( uFESpaceR, betaFESpaceR);
-    if (verbose) std::cout << " done! " << std::endl;
+        if ( verbose ) std::cout << " -- Building assembler ... " << std::flush;
+        ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
+        ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssemblerR;
+        if ( verbose ) std::cout << " done! " << std::endl;
 
-    if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
-    boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uFESpace->map() ));
-    *systemMatrix *=0.0;
-    boost::shared_ptr<matrix_Type> systemMatrixR(new matrix_Type( uFESpaceR->map(), 50, true ));
-    *systemMatrixR *=0.0;
-    if (verbose) std::cout << " done! " << std::endl;
+        if ( verbose ) std::cout << " -- Setting up assembler ... " << std::flush;
+        adrAssembler.setup( uFESpace, betaFESpace);
+        adrAssemblerR.setup( uFESpaceR, betaFESpaceR);
+        if ( verbose ) std::cout << " done! " << std::endl;
 
-// Perform the assembly of the matrix
+        if ( verbose ) std::cout << " -- Defining the matrix ... " << std::flush;
+        boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uFESpace->map() ));
+        *systemMatrix *=0.0;
+        boost::shared_ptr<matrix_Type> systemMatrixR(new matrix_Type( uFESpaceR->map(), 50, true ));
+        *systemMatrixR *=0.0;
+        if ( verbose ) std::cout << " done! " << std::endl;
 
-    if (verbose) std::cout << " -- Adding the diffusion ... " << std::flush;
-    adrAssembler.addDiffusion(systemMatrix,epsilon);
-    adrAssemblerR.addDiffusion(systemMatrixR,epsilon);
-    if (verbose) std::cout << " done! " << std::endl;
-    if (verbose) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
+        // Perform the assembly of the matrix
+
+        if ( verbose ) std::cout << " -- Adding the diffusion ... " << std::flush;
+
+        LifeChrono assemblyTime;
+        assemblyTime.start();
+        adrAssembler.addDiffusion(systemMatrix,epsilon);
+        assemblyTime.stop();
+        if( isLeader ) std::cout << "assembly time  = " << assemblyTime.diff() << std::endl;
+
+        LifeChrono assemblyTimeR;
+        assemblyTimeR.start();
+        adrAssemblerR.addDiffusion(systemMatrixR,epsilon);
+        assemblyTimeR.stop();
+        if( isLeader ) std::cout << "assemblyR time = " << assemblyTimeR.diff() << std::endl;
+
+        if ( verbose ) std::cout << " done! " << std::endl;
+        if ( verbose ) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
+        if ( verbose ) std::cout << " Time needed : " << adrAssemblerR.diffusionAssemblyChrono().diffCumul() << std::endl;
 
 #ifdef TEST_ADVECTION
-    if (verbose) std::cout << " -- Adding the advection ... " << std::flush;
-    vector_type beta(betaFESpace->map(),Repeated);
-    betaFESpace->interpolate(betaFct,beta,0.0);
-    adrAssembler.addAdvection(systemMatrix,beta);
-    if (verbose) std::cout << " done! " << std::endl;
+        if ( verbose ) std::cout << " -- Adding the advection ... " << std::flush;
+        vector_type beta(betaFESpace->map(),Repeated);
+        betaFESpace->interpolate(betaFct,beta,0.0);
+        adrAssembler.addAdvection(systemMatrix,beta);
+        if ( verbose ) std::cout << " done! " << std::endl;
 #endif
 #ifdef TEST_MASS
-    if (verbose) std::cout << " -- Adding the mass ... " << std::flush;
-    adrAssembler.addMass(systemMatrix,1.0);
-    if (verbose) std::cout << " done! " << std::endl;
+        if ( verbose ) std::cout << " -- Adding the mass ... " << std::flush;
+        adrAssembler.addMass(systemMatrix,1.0);
+        if ( verbose ) std::cout << " done! " << std::endl;
 #endif
 
-    if (verbose) std::cout << " -- Closing the matrix ... " << std::flush;
-    systemMatrix->globalAssemble();
-    systemMatrixR->matrixPtr()->FillComplete();
-//    systemMatrixR->globalAssemble();
-    if (verbose) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " -- Closing the matrix ... " << std::flush;
+        systemMatrix->globalAssemble();
+        systemMatrixR->matrixPtr()->FillComplete();
+        //    systemMatrixR->globalAssemble();
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    //************* SPY ***********
-    systemMatrix->spy("matrixNoBC");
-    systemMatrixR->spy("matrixNoBCR");
-    //*****************************
-
-//#ifdef TEST_RHS
-//    Real matrixNorm(systemMatrix->norm1());
-//    if (verbose) std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
-//    if ( std::fabs(matrixNorm - 8 ) > 1e-3)
-//    {
-//        std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
-//        return EXIT_FAILURE;
-//    }
-//#endif
-
-// Definition and assembly of the RHS
-
-    if (verbose) std::cout << " -- Building the RHS ... " << std::flush;
-    //vector_type rhs(uFESpace->map(),Unique);
-    vector_Type rhs(uFESpace->map(),Repeated);
-    rhs*=0.0;
-    vector_Type rhsR(uFESpaceR->map(),Repeated);
-    rhsR*=0.0;
+        //************* SPY ***********
+//        systemMatrix->spy("matrixNoBC");
+//        systemMatrixR->spy("matrixNoBCR");
+        //*****************************
 
 #ifdef TEST_RHS
-    adrAssembler.addMassRhs( rhs, fRhs, 0. );
-    rhs.globalAssemble();
-    adrAssemblerR.addMassRhs( rhsR, fRhs, 0. );
-//    rhsR.globalAssemble( Zero );
+        Real matrixNorm(systemMatrix->norm1());
+        if ( verbose ) std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
+        if ( std::fabs(matrixNorm - 8 ) > 1e-3)
+        {
+            std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
+            return EXIT_FAILURE;
+        }
 #endif
 
-    if (verbose) std::cout << " done ! " << std::endl;
+        // Definition and assembly of the RHS
 
-// Definition and application of the BCs
+        if ( verbose ) std::cout << " -- Building the RHS ... " << std::flush;
+        //vector_type rhs(uFESpace->map(),Unique);
+        vector_Type rhs(uFESpace->map(),Repeated);
+        rhs*=0.0;
+        vector_Type rhsR(uFESpaceR->map(),Repeated);
+        rhsR*=0.0;
 
-    if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
-    BCHandler bchandler;
-    BCHandler bchandlerR;
-    BCFunctionBase BCu( exactSolution );
-    for ( UInt side = 1; side <= 4; side++ )
-    {
-        bchandler.addBC ( "Dirichlet", side, Essential, Full, BCu, 1 );
-        bchandlerR.addBC( "Dirichlet", side, Essential, Full, BCu, 1 );
-    }
-    if (verbose) std::cout << " done ! " << std::endl;
+#ifdef TEST_RHS
+        adrAssembler.addMassRhs( rhs, fRhs, 0. );
+        rhs.globalAssemble();
+        adrAssemblerR.addMassRhs( rhsR, fRhs, 0. );
+        rhsR.globalAssemble( Zero );
+#endif
 
-    if (verbose) std::cout << " -- Updating the BCs ... " << std::flush;
-    bchandler.bcUpdate(*uFESpace->mesh(),uFESpace->feBd(),uFESpace->dof());
-    bchandlerR.bcUpdate(*uFESpaceR->mesh(),uFESpaceR->feBd(),uFESpaceR->dof());
-    if (verbose) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
-    vector_Type rhsBC(rhs,Unique);
-    vector_Type rhsBCR(rhsR,Unique);
-    bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
-    bcManage(*systemMatrixR,rhsBCR,*uFESpaceR->mesh(),uFESpaceR->dof(),bchandlerR,uFESpaceR->feBd(),1.0,0.0);
-    rhs = rhsBC;
-    rhsR = rhsBCR;
-    if (verbose) std::cout << " done ! " << std::endl;
+        // Definition and application of the BCs
 
-    //************* SPY ***********
-    systemMatrix->spy("matrix");
-    systemMatrixR->spy("matrixR");
-    rhs.spy("rhs");
-    rhsR.spy("rhsR");
-    //*****************************
+        if ( verbose ) std::cout << " -- Building the BCHandler ... " << std::flush;
+        BCHandler bchandler;
+        BCHandler bchandlerR;
+        BCFunctionBase BCu( exactSolution );
+        for ( UInt side = 1; side <= 4; side++ )
+        {
+            bchandler.addBC ( "Dirichlet", side, Essential, Full, BCu, 1 );
+            bchandlerR.addBC( "Dirichlet", side, Essential, Full, BCu, 1 );
+        }
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-// Definition of the solver
+        if ( verbose ) std::cout << " -- Updating the BCs ... " << std::flush;
+        bchandler.bcUpdate(  *uFESpace->mesh(),  uFESpace->feBd(),  uFESpace->dof() );
+        bchandlerR.bcUpdate( *uFESpaceR->mesh(), uFESpaceR->feBd(), uFESpaceR->dof() );
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Building the solver ... " << std::flush;
-    SolverAztecOO linearSolver;
-    SolverAztecOO linearSolverR;
-    if (verbose) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " -- Applying the BCs ... " << std::flush;
+        vector_Type rhsBC(rhs,Unique);
+        vector_Type rhsBCR(rhsR,Unique);
+        bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
+        bcManage(*systemMatrixR,rhsBCR,*uFESpaceR->mesh(),uFESpaceR->dof(),bchandlerR,uFESpaceR->feBd(),1.0,0.0);
+        rhs = rhsBC;
+        rhsR = rhsBCR;
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Setting up the solver ... " << std::flush;
-    linearSolver.setDataFromGetPot(dataFile,"solver");
-    linearSolver.setupPreconditioner(dataFile,"prec");
-    linearSolverR.setDataFromGetPot(dataFile,"solver");
-    linearSolverR.setupPreconditioner(dataFile,"prec");
-    if (verbose) std::cout << " done ! " << std::endl;
+        //************* SPY ***********
+//        systemMatrix->spy("matrix");
+//        systemMatrixR->spy("matrixR");
+//        rhs.spy("rhs");
+//        rhsR.spy("rhsR");
+        //*****************************
 
-    if (verbose) std::cout << " -- Setting matrix in the solver ... " << std::flush;
-    linearSolver.setMatrix(*systemMatrix);
-    linearSolverR.setMatrix(*systemMatrixR);
-    if (verbose) std::cout << " done ! " << std::endl;
+        // Definition of the solver
 
-    linearSolver.setCommunicator(Comm);
-    linearSolverR.setCommunicator(Comm);
+        if ( verbose ) std::cout << " -- Building the solver ... " << std::flush;
+        SolverAztecOO linearSolver;
+        SolverAztecOO linearSolverR;
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-// Definition of the solution
+        if ( verbose ) std::cout << " -- Setting up the solver ... " << std::flush;
+        linearSolver.setDataFromGetPot(    dataFile, "solver" );
+        linearSolver.setupPreconditioner(  dataFile, "prec" );
+        linearSolverR.setDataFromGetPot(   dataFile, "solver" );
+        linearSolverR.setupPreconditioner( dataFile, "prec" );
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Defining the solution ... " << std::flush;
-    vector_Type solution(uFESpace->map(),Unique);
-    solution*=0.0;
-    vector_Type solutionR(uFESpaceR->map(),Unique);
-    solutionR *= 0.0;
-    if (verbose) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " -- Setting matrix in the solver ... " << std::flush;
+        linearSolver.setMatrix(  *systemMatrix  );
+        linearSolverR.setMatrix( *systemMatrixR );
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-// Solve the solution
+        linearSolver.setCommunicator(Comm);
+        linearSolverR.setCommunicator(Comm);
 
-    if (verbose) std::cout << " -- Solving the system ... " << std::flush;
-    linearSolver.solveSystem( rhsBC, solution, systemMatrix );
-    linearSolverR.solveSystem( rhsBCR, solutionR, systemMatrixR );
-    if (verbose) std::cout << " done ! " << std::endl;
+        // Definition of the solution
 
-    //************* SPY ***********
-    solution.spy("solution");
-    solutionR.spy("solutionR");
-    //*****************************
+        if ( verbose ) std::cout << " -- Defining the solution ... " << std::flush;
+        vector_Type solution( uFESpace->map(), Unique );
+        solution*=0.0;
+        vector_Type solutionR( uFESpaceR->map(),Unique );
+        solutionR *= 0.0;
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-// Error computation
+        // Solve the solution
 
-    if (verbose) std::cout << " -- Computing the error ... " << std::flush;
-    vector_Type error( solution );
-    error -= solutionR;
-    if (verbose) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " -- Solving the system ... " << std::flush;
+        linearSolver.solveSystem( rhsBC, solution, systemMatrix );
+        linearSolverR.solveSystem( rhsBCR, solutionR, systemMatrixR );
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-// Exporter definition and use
+        //************* SPY ***********
+//        solution.spy("solution");
+//        solutionR.spy("solutionR");
+        //*****************************
 
-    if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
+        // Error computation
+
+        if ( verbose ) std::cout << " -- Computing the error ... " << std::flush;
+        vector_Type error( solution );
+        error -= solutionR;
+        if ( verbose ) std::cout << " done ! " << std::endl;
+
+        // Exporter definition and use
+
+        if ( verbose ) std::cout << " -- Defining the exporter ... " << std::flush;
 #ifdef HAVE_HDF5
-    ExporterHDF5<mesh_Type> exporter ( dataFile, localMesh, "solution", Comm->MyPID()) ;
+        ExporterHDF5<mesh_Type> exporter ( dataFile, localMesh, "solution", Comm->MyPID()) ;
 #else
-    ExporterEnsight<mesh_type> exporter ( dataFile, localMesh, "solution", Comm->MyPID()) ;
+        ExporterEnsight<mesh_type> exporter ( dataFile, localMesh, "solution", Comm->MyPID()) ;
 #endif
-    if (verbose) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;
-    boost::shared_ptr<vector_Type> solutionPtr( new vector_Type( solution, Repeated ) );
-    boost::shared_ptr<vector_Type> errorPtr( new vector_Type( error, Repeated ) );
-    boost::shared_ptr<vector_Type> solutionPtrR( new vector_Type( solutionR, Repeated ) );
-    if (verbose) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " -- Defining the exported quantities ... " << std::flush;
+        boost::shared_ptr<vector_Type> solutionPtr( new vector_Type( solution, Repeated ) );
+        boost::shared_ptr<vector_Type> errorPtr( new vector_Type( error, Repeated ) );
+        boost::shared_ptr<vector_Type> solutionPtrR( new vector_Type( solutionR, Repeated ) );
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Updating the exporter ... " << std::flush;
-    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "solution", uFESpace, solutionPtr, UInt(0) );
-    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "solutionR", uFESpaceR, solutionPtrR, UInt(0) );
-    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "error", uFESpace, errorPtr, UInt(0) );
-    if (verbose) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " -- Updating the exporter ... " << std::flush;
+        exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "solution", uFESpace, solutionPtr, UInt(0) );
+        exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "solutionR", uFESpaceR, solutionPtrR, UInt(0) );
+        exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "error", uFESpace, errorPtr, UInt(0) );
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Exporting ... " << std::flush;
-    exporter.exportPID( localMesh, Comm, false );
-    exporter.exportPID( localMeshR, Comm, true );
-    exporter.postProcess( 0 );
-    if (verbose) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " -- Exporting ... " << std::flush;
+        exporter.exportPID( localMesh, Comm, false );
+        exporter.exportPID( localMeshR, Comm, true );
+        exporter.postProcess( 0 );
+        if ( verbose ) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
-
+        if( isLeader ) std::cout << "End Result: TEST PASSED" << std::endl;
     }
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
