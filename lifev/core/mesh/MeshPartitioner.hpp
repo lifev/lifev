@@ -1617,8 +1617,9 @@ void MeshPartitioner<MeshType>::execute()
     if ( M_buildOverlappingPartitions )
     {
         GhostHandler<mesh_Type> gh( M_originalMesh, M_comm );
-        gh.createNodeElementNeighborsMap();
-        gh.ghostMapOnElementsP1( M_elementDomains, M_entityPID, 1 );
+//        gh.createNodeElementNeighborsMap();
+        gh.fillEntityPID( M_elementDomains, M_entityPID );
+        gh.ghostMapOnElementsP1( M_elementDomains, M_entityPID[ 3 ], 1 );
      }
 
     doPartitionMesh();

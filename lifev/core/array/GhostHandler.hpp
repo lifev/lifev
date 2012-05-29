@@ -39,6 +39,8 @@
 #include <lifev/core/mesh/NeighborMarker.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 
+#include <lifev/core/util/LifeChrono.hpp>
+
 #include <EpetraExt_HDF5.h>
 
 namespace LifeV {
@@ -156,8 +158,11 @@ public:
     //! create ghost map
     map_Type & ghostMapOnElementsP1( UInt overlap );
 
+    //! fill entityPID
+    void fillEntityPID( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID );
+
     //! create ghost map
-    void ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID, UInt overlap );
+    void ghostMapOnElementsP1( graphPtr_Type elemGraph, const std::vector<UInt> & entityPID, UInt overlap );
 
     //! create ghost map
     map_Type & ghostMapOnNodesMap( UInt overlap );
@@ -828,16 +833,9 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
 }
 
 template <typename Mesh>
-void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID, UInt overlap )
+void GhostHandler<Mesh>::fillEntityPID( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID )
 {
-    if ( M_verbose ) std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
-
-    // check that the nodeElementNeighborsMap has been created
-    if ( M_nodeElementNeighborsList.empty()  )
-    {
-        if ( M_verbose ) std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
-        this->createNodeElementNeighborsMap();
-    }
+    if ( M_verbose ) std::cout << " GH- fillEntityPID()" << std::endl;
 
     std::vector<int> & myElems = (*elemGraph)[M_me];
 #ifdef HAVE_LIFEV_DEBUG
@@ -846,9 +844,6 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
     for( UInt i = 0; i < myElems.size(); i++ )
         M_debugOut << myElems[ i ] << std::endl;
 #endif
-
-    // generate graph of points
-    graph_Type pointGraph( M_comm->NumProc() );
 
     // initialize pointPID to NumProc
     std::vector<UInt> & pointPID = entityPID[ 3 ];
@@ -863,29 +858,27 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
     // @todo: check if parallel building + comm is faster
     for( UInt p = 0; p < static_cast<UInt>( M_comm->NumProc() ); p++ )
     {
-        std::set<int> localPointsSet;
         for( UInt e = 0; e < (*elemGraph)[ p ].size(); e++ )
         {
             // point block
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
             {
-                const ID pointID = M_fullMesh->element( (*elemGraph)[ p ][ e ] ).point( k ).id();
-                localPointsSet.insert( pointID );
-                const UInt pointCurrentPID = pointPID[ pointID ];
+                const ID & pointID = M_fullMesh->element( (*elemGraph)[ p ][ e ] ).point( k ).id();
+                const UInt & pointCurrentPID = pointPID[ pointID ];
                 // pointPID should be the minimum between the proc that own it
                 if( p < pointCurrentPID ) pointPID[ pointID ] = p;
             }
 
             // elem block
-            const ID elemID = M_fullMesh->element( (*elemGraph)[ p ][ e ] ).id();
+            const ID & elemID = M_fullMesh->element( (*elemGraph)[ p ][ e ] ).id();
             // elemPID is always at its initialization value
             elemPID[ elemID ] = p;
 
             // facet block
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
             {
-                const ID facetID = M_fullMesh->facet( M_fullMesh->localFacetId( elemID, k ) ).id();
-                const UInt facetCurrentPID = facetPID[ facetID ];
+                const ID & facetID = M_fullMesh->facet( M_fullMesh->localFacetId( elemID, k ) ).id();
+                const UInt & facetCurrentPID = facetPID[ facetID ];
                 // facetPID should be the minimum between the proc that own it
                 if( p < facetCurrentPID ) facetPID[ facetID ] = p;
             }
@@ -893,25 +886,81 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
             // ridge block
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
             {
-                const ID ridgeID = M_fullMesh->ridge( M_fullMesh->localRidgeId( elemID, k ) ).id();
-                const UInt ridgeCurrentPID = ridgePID[ ridgeID ];
+                const ID & ridgeID = M_fullMesh->ridge( M_fullMesh->localRidgeId( elemID, k ) ).id();
+                const UInt & ridgeCurrentPID = ridgePID[ ridgeID ];
                 // ridgePID should be the minimum between the proc that own it
                 if( p < ridgeCurrentPID ) ridgePID[ ridgeID ] = p;
             }
         }
+    }
+}
+
+template <typename Mesh>
+void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph,
+                                               const std::vector<UInt> & pointPID,
+                                               UInt overlap )
+{
+    LifeChrono chrono, chronoTotal;
+    chronoTotal.start();
+    if ( M_verbose ) std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
+
+
+    chrono.start();
+    // check that the nodeElementNeighborsMap has been created
+    if ( M_nodeElementNeighborsList.empty()  )
+    {
+        if ( M_verbose ) std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
+        this->createNodeElementNeighborsMap();
+    }
+    if ( M_nodeNodeNeighborsList.empty()  )
+    {
+        if ( M_verbose ) std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
+        this->createNodeNodeNeighborsMap();
+    }
+    chrono.stop();
+    std::cout << "neighbor lists init time = " << chrono.diff() << std::endl;
+    chrono.reset();
+
+    std::vector<int> & myElems = (*elemGraph)[M_me];
+#ifdef HAVE_LIFEV_DEBUG
+    // show own elements
+    M_debugOut << "own elements on proc " << M_me << std::endl;
+    for( UInt i = 0; i < myElems.size(); i++ )
+        M_debugOut << myElems[ i ] << std::endl;
+#endif
+
+    // generate graph of points
+    graph_Type pointGraph( M_comm->NumProc() );
+
+    chrono.start();
+    // @todo: check if parallel building + comm is faster
+    for( UInt p = 0; p < static_cast<UInt>( M_comm->NumProc() ); p++ )
+    {
+        std::set<int> localPointsSet;
+        for( UInt e = 0; e < (*elemGraph)[ p ].size(); e++ )
+        {
+            // point block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+            {
+                const ID & pointID = M_fullMesh->element( (*elemGraph)[ p ][ e ] ).point( k ).id();
+                localPointsSet.insert( pointID );
+            }
+        }
         pointGraph[ p ].assign( localPointsSet.begin(), localPointsSet.end() );
     }
+    chrono.stop();
+    std::cout << "pointGraph + entityPID time = " << chrono.diff() << std::endl;
+    chrono.reset();
 
     std::vector<int> const & myPoints = pointGraph[ M_me ];
 #ifdef HAVE_LIFEV_DEBUG
     M_debugOut << "own points on proc " << M_me << std::endl;
     for( UInt i = 0; i < myPoints.size(); i++ )
         M_debugOut << myPoints[ i ] << std::endl;
-    M_debugOut << "pointPID on proc " << M_me << std::endl;
-    for( UInt i = 0; i < pointPID.size(); i++ )
-        M_debugOut << pointPID[ i ] << std::endl;
 #endif
 
+
+    chrono.start();
     // find subdomain interface nodes
     std::set<Int> mySubdIntPoints;
     for( UInt k = 0; k < myPoints.size(); k++ )
@@ -940,9 +989,16 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
         M_debugOut << *i << std::endl;
 #endif
 
+    chrono.stop();
+    std::cout << "subdomain interface time = " << chrono.diff() << std::endl;
+    chrono.reset();
+    chrono.start();
     std::vector<int> workingPoints( mySubdIntPoints.begin(), mySubdIntPoints.end() );
     std::set<int> newPoints;
     std::set<int> augmentedElemsSet( myElems.begin(), myElems.end() );
+    chrono.stop();
+    std::cout << "init working vectors time = " << chrono.diff() << std::endl;
+    chrono.reset();
 
     for( UInt o = 0; o < overlap; o++ )
     {
@@ -951,6 +1007,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
         for( UInt i = 0; i < workingPoints.size(); i++ )
             M_debugOut << workingPoints[ i ] << std::endl;
 #endif
+        chrono.start();
         for( UInt k = 0; k < workingPoints.size(); k++ )
         {
             const int & currentPoint = workingPoints[ k ];
@@ -968,29 +1025,48 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph, std::vec
                 }
             }
         }
+        chrono.stop();
+        std::cout << "augmentedElemsSet time = " << chrono.diff() << std::endl;
+        chrono.reset();
+
 #ifdef HAVE_LIFEV_DEBUG
         M_debugOut << "augmentedElemsSet" << std::endl;
         for( std::set<Int>::const_iterator i = augmentedElemsSet.begin(); i != augmentedElemsSet.end(); ++i )
             M_debugOut << *i << std::endl;
 #endif
 
+        chrono.start();
         // clean up newPoints from already analized points
         for( UInt k = 0; k < workingPoints.size(); k++ )
         {
             newPoints.erase( newPoints.find( workingPoints[ k ] ) );
         }
+        chrono.stop();
+        std::cout << "clean up newPoints time = " << chrono.diff() << std::endl;
+        chrono.reset();
 #ifdef HAVE_LIFEV_DEBUG
         M_debugOut << "newPoints" << std::endl;
         for( std::set<int>::const_iterator i = newPoints.begin(); i != newPoints.end(); ++i )
             M_debugOut << *i << std::endl;
 #endif
+        chrono.start();
         // set up workingPoints if we are not exiting
         if( o + 1 < overlap  )
             workingPoints.assign( newPoints.begin(), newPoints.end() );
+        chrono.stop();
+        std::cout << "new workingPoints time = " << chrono.diff() << std::endl;
+        chrono.reset();
     }
 
+    chrono.start();
     // assign the augmentedElems to the element graph
     myElems.assign( augmentedElemsSet.begin(), augmentedElemsSet.end() );
+    chrono.stop();
+    std::cout << "augmentedElems time = " << chrono.diff() << std::endl;
+    chrono.reset();
+
+    chronoTotal.stop();
+    std::cout << "total time = " << chronoTotal.diff() << std::endl;
 }
 
 template <typename Mesh>
