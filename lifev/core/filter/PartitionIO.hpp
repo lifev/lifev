@@ -84,6 +84,8 @@ namespace LifeV {
 
   Creating, opening and closing the HDF5 file is done automatically by the
   object.
+
+  // the description of the storage format could be useful here
 */
 template<typename MeshType>
 class PartitionIO {
@@ -227,6 +229,9 @@ inline LifeV::PartitionIO<MeshType>::PartitionIO(const std::string& fileName,
 	M_maxNumElements(0)
 {
 	// Mesh geometry
+	// we should directly use the data structures provided by the library
+    // M_elementNodes = MeshType::elementShape_Type::S_numPoints;
+    // M_faceNodes = MeshType::elementShape_Type::GeoBShape::S_numPoints;
     switch (MeshType::elementShape_Type::S_shape)
     {
     case HEXA:
@@ -253,7 +258,10 @@ inline void LifeV::PartitionIO<MeshType>::setup(const std::string& fileName,
 	M_maxNumFaces = 0;
 	M_maxNumElements = 0;
 
-	// Mesh geometry
+    // Mesh geometry
+	// we should directly use the data structures provided by the library
+    // M_elementNodes = MeshType::elementShape_Type::S_numPoints;
+    // M_faceNodes = MeshType::elementShape_Type::GeoBShape::S_numPoints;
     switch (MeshType::elementShape_Type::S_shape)
     {
     case HEXA:
@@ -307,6 +315,7 @@ void LifeV::PartitionIO<MeshType>::createHDF5File()
 {
 	hid_t plistId;
 	MPI_Comm comm;
+	// why is this cast needed?
 	boost::shared_ptr<Epetra_MpiComm> tempComm =
 			boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
 	if (tempComm != 0) {
@@ -330,6 +339,9 @@ void LifeV::PartitionIO<MeshType>::writeStats()
     // Write mesh partition stats (N = number of parts)
     // This is an N x 15 table of int
 	hsize_t currentSpaceDims[2];
+    // you could avoid the if statement:
+    //    currentSpaceDims[!M_transposeInFile] = 15;
+    //    currentSpaceDims[M_transposeInFile] = M_numParts;
 	if (! M_transposeInFile) {
 		currentSpaceDims[0] = M_numParts;
 		currentSpaceDims[1] = 15;
@@ -342,6 +354,9 @@ void LifeV::PartitionIO<MeshType>::writeStats()
 						  	  	 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     hsize_t currentCount[2];
+    // you could avoid the if statement:
+    //    currentCount[M_transposeInFile] = 1;
+    //    currentCount[!M_transposeInFile] = currentSpaceDims[!M_transposeInFile];
 	if (! M_transposeInFile) {
 		currentCount[0] = 1;
 		currentCount[1] = currentSpaceDims[1];
@@ -382,6 +397,9 @@ void LifeV::PartitionIO<MeshType>::writeStats()
 		M_intBuffer[14] = currentPart.numGlobalVolumes();
 
 		hsize_t currentOffset[2];
+	    // you could avoid the if statement:
+	    //    currentOffset[M_transposeInFile] = i;
+	    //    currentOffset[!M_transposeInFile] = 0;
 		if (! M_transposeInFile) {
 			currentOffset[0] = i;
 			currentOffset[1] = 0;
@@ -409,6 +427,7 @@ void LifeV::PartitionIO<MeshType>::writePoints()
     // Two tables: one is (3 * N) x max_num_points of int
     //			   second is (3 * N) x max_num_points of real
 	hsize_t currentSpaceDims[2];
+	// you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentSpaceDims[0] = 3 * M_numParts;
 		currentSpaceDims[1] = M_maxNumPoints;
@@ -425,6 +444,7 @@ void LifeV::PartitionIO<MeshType>::writePoints()
 								  H5P_DEFAULT);
 
 	hsize_t currentCount[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentCount[0] = 3;
 		currentCount[1] = currentSpaceDims[1];
@@ -447,6 +467,7 @@ void LifeV::PartitionIO<MeshType>::writePoints()
 	    	for (UInt j = 0; j < currentPart.numPoints(); ++j) {
 	    		M_intBuffer[j] = currentPart.pointList[j].marker();
 	    		M_intBuffer[stride + j] = currentPart.point(j).id();
+	    		// we should save the flag (more informative) rather than a bool
 	    		M_intBuffer[2 * stride + j] =
 						static_cast<int>(currentPart.isBoundaryPoint(j));
 	    		M_realBuffer[j] = currentPart.pointList[j].x();
@@ -470,6 +491,7 @@ void LifeV::PartitionIO<MeshType>::writePoints()
 	    	for (UInt j = 0; j < currentPart.numPoints(); ++j) {
 	    		M_intBuffer[stride * j] = currentPart.pointList[j].marker();
 	    		M_intBuffer[stride * j + 1] = currentPart.point(j).id();
+                // we should save the flag (more informative) rather than a bool
 	    		M_intBuffer[stride * j + 2] =
 						static_cast<int>(currentPart.isBoundaryPoint(j));
 	    		M_realBuffer[stride * j] = currentPart.pointList[j].x();
@@ -478,6 +500,8 @@ void LifeV::PartitionIO<MeshType>::writePoints()
 	    	}
 
 	    	hsize_t currentOffset[2] = {0, i * currentCount[1]};
+	        // common calls to H5 routines could be factored out of the if..else statement
+	    	// to avoid code duplication
 	        H5Sselect_hyperslab(filespace, H5S_SELECT_SET, currentOffset, NULL,
 	          					currentCount, NULL);
 	        H5Dwrite(intDataset, H5T_NATIVE_INT, memspace, filespace, plistId,
@@ -504,6 +528,7 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
     // Write edges (N = number of parts)
     // Table is (5 * N) x max_num_edges of int
     hsize_t currentSpaceDims[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentSpaceDims[0] = 5 * M_numParts;
 		currentSpaceDims[1] = M_maxNumEdges;
@@ -516,6 +541,7 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
 							  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 	hsize_t currentCount[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentCount[0] = 5;
 		currentCount[1] = currentSpaceDims[1];
@@ -540,6 +566,7 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
 						currentPart.edgeList[j].point(1).localId();
 	    		M_intBuffer[2 * stride + j] = currentPart.edgeList[j].marker();
 	    		M_intBuffer[3 * stride + j] = currentPart.edgeList[j].id();
+                // we should save the flag (more informative) rather than a bool
 	    		M_intBuffer[4 * stride + j] =
 	    				static_cast<int>(currentPart.isBoundaryEdge(j));
 			}
@@ -560,11 +587,14 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
 						currentPart.edgeList[j].point(1).localId();
 	    		M_intBuffer[stride * j + 2] = currentPart.edgeList[j].marker();
 	    		M_intBuffer[stride * j + 3] = currentPart.edgeList[j].id();
+                // we should save the flag (more informative) rather than a bool
 	    		M_intBuffer[stride * j + 4] =
 	    				static_cast<int>(currentPart.isBoundaryEdge(j));
 			}
 
 	    	hsize_t currentOffset[2] = {0, i * currentCount[1]};
+            // common calls to H5 routines could be factored out of the if..else statement
+            // to avoid code duplication
 	        H5Sselect_hyperslab(filespace, H5S_SELECT_SET, currentOffset, NULL,
 	          					currentCount, NULL);
 	        H5Dwrite(dataset, H5T_NATIVE_INT, memspace, filespace, plistId,
@@ -585,6 +615,7 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
     // Write faces (N = number of parts)
     // Table is ((7 + num_face_nodes * N) x max_num_faces of int
     hsize_t currentSpaceDims[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentSpaceDims[0] = (7 + M_faceNodes) * M_numParts;
 		currentSpaceDims[1] = M_maxNumFaces;
@@ -597,6 +628,7 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
 							  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 	hsize_t currentCount[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentCount[0] = 7 + M_faceNodes;
 		currentCount[1] = currentSpaceDims[1];
@@ -632,6 +664,7 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
 						currentPart.faceList[j].firstAdjacentElementPosition();
 	    		M_intBuffer[(M_faceNodes + 5) * stride + j] =
 						currentPart.faceList[j].secondAdjacentElementPosition();
+                // we should save the flag (more informative) rather than a bool
 	    		M_intBuffer[(M_faceNodes + 6) * stride + j] =
 						static_cast<int>(currentPart.isBoundaryFace(j));
 			}
@@ -662,12 +695,15 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
 						currentPart.faceList[j].firstAdjacentElementPosition();
 	    		M_intBuffer[stride * j + M_faceNodes + 5] =
 						currentPart.faceList[j].secondAdjacentElementPosition();
+                // we should save the flag (more informative) rather than a bool
 	    		M_intBuffer[stride * j + M_faceNodes + 6] =
 						static_cast<int>(currentPart.isBoundaryFace(j));
 			}
 
 	    	hsize_t currentOffset[2] = {0, i * currentCount[1]};
-	        H5Sselect_hyperslab(filespace, H5S_SELECT_SET, currentOffset, NULL,
+            // common calls to H5 routines could be factored out of the if..else statement
+            // to avoid code duplication
+	    	H5Sselect_hyperslab(filespace, H5S_SELECT_SET, currentOffset, NULL,
 	          					currentCount, NULL);
 	        H5Dwrite(dataset, H5T_NATIVE_INT, memspace, filespace, plistId,
 	        		 &M_intBuffer[0]);
@@ -687,6 +723,7 @@ void LifeV::PartitionIO<MeshType>::writeElements()
     // Write faces (N = number of parts)
     // Table is ((2 + num_element_nodes * N) x max_num_elements of int
     hsize_t currentSpaceDims[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentSpaceDims[0] = (2 + M_elementNodes) * M_numParts;
 		currentSpaceDims[1] = M_maxNumElements;
@@ -699,6 +736,7 @@ void LifeV::PartitionIO<MeshType>::writeElements()
     						  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 	hsize_t currentCount[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentCount[0] = 2 + M_elementNodes;
 		currentCount[1] = currentSpaceDims[1];
@@ -749,6 +787,8 @@ void LifeV::PartitionIO<MeshType>::writeElements()
 	    		}
 
 	    	hsize_t currentOffset[2] = {0, i * currentCount[1]};
+            // common calls to H5 routines could be factored out of the if..else statement
+            // to avoid code duplication
 	        H5Sselect_hyperslab(filespace, H5S_SELECT_SET, currentOffset, NULL,
 	          					currentCount, NULL);
 	        H5Dwrite(dataset, H5T_NATIVE_INT, memspace, filespace, plistId,
@@ -803,6 +843,7 @@ void LifeV::PartitionIO<MeshType>::readStats()
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
 
     hsize_t currentCount[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentCount[0] = 1;
 		currentCount[1] = currentSpaceDims[1];
@@ -818,6 +859,7 @@ void LifeV::PartitionIO<MeshType>::readStats()
     // Fill buffer
 	M_intBuffer.resize(currentCount[0] * currentCount[1], 0);
 	hsize_t currentOffset[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentOffset[0] = M_myRank;
 		currentOffset[1] = 0;
@@ -880,6 +922,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
 
     hsize_t currentCount[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentCount[0] = 3;
 		currentCount[1] = currentSpaceDims[1];
@@ -895,6 +938,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     M_intBuffer.resize(currentCount[0] * currentCount[1], 0);
     M_realBuffer.resize(currentCount[0] * currentCount[1], 0);
     hsize_t currentOffset[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 	    currentOffset[0] = currentCount[0] * M_myRank;
 	    currentOffset[1] = 0;
@@ -963,6 +1007,7 @@ void LifeV::PartitionIO<MeshType>::readEdges()
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
 
     hsize_t currentCount[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentCount[0] = 5;
 		currentCount[1] = currentSpaceDims[1];
@@ -977,6 +1022,7 @@ void LifeV::PartitionIO<MeshType>::readEdges()
 
     M_intBuffer.resize(currentCount[0] * currentCount[1], 0);
     hsize_t currentOffset[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 	    currentOffset[0] = currentCount[0] * M_myRank;
 	    currentOffset[1] = 0;
@@ -1037,6 +1083,7 @@ void LifeV::PartitionIO<MeshType>::readFaces()
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
 
     hsize_t currentCount[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentCount[0] = 7 + M_faceNodes;
 		currentCount[1] = currentSpaceDims[1];
@@ -1051,6 +1098,7 @@ void LifeV::PartitionIO<MeshType>::readFaces()
 
     M_intBuffer.resize(currentCount[0] * currentCount[1], 0);
     hsize_t currentOffset[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 	    currentOffset[0] = currentCount[0] * M_myRank;
 	    currentOffset[1] = 0;
@@ -1138,6 +1186,7 @@ void LifeV::PartitionIO<MeshType>::readElements()
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
 
     hsize_t currentCount[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentCount[0] = 2 + M_elementNodes;
 		currentCount[1] = currentSpaceDims[1];
@@ -1152,6 +1201,7 @@ void LifeV::PartitionIO<MeshType>::readElements()
 
     M_intBuffer.resize(currentCount[0] * currentCount[1], 0);
     hsize_t currentOffset[2];
+    // you could avoid the if statement
 	if (! M_transposeInFile) {
 		currentOffset[0] = currentCount[0] * M_myRank;
 		currentOffset[1] = 0;
