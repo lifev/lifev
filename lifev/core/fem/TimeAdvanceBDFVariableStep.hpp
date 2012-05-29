@@ -419,14 +419,13 @@ template<typename FunctionType, typename FESpaceType>
 void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition( const FunctionType& u0Function, feVector_Type& u0Vector,
 					FESpaceType & feSpace, Real t0, Real timeStep )
 {
-
     M_unknowns.resize( 0 );
 
     for ( UInt i = 0 ; i < M_order; ++i )
     {
         feVectorPtr_Type tmp( new feVector_Type( u0Vector ) );
         M_unknowns.push_back( tmp );
-        feSpace.interpolate( u0Function, *M_unknowns[ i ], t0 - i * timeStep );
+        feSpace.interpolate( static_cast<typename FESpaceType::function_Type>( u0Function ), *M_unknowns[ i ], t0 - i * timeStep );
         M_timeStep[ i ] = timeStep;
     }
     u0Vector = *M_unknowns[ 0 ];

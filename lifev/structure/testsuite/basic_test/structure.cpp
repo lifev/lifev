@@ -351,8 +351,8 @@ Structure::run3d()
     vectorPtr_Type disp(new vector_Type(solid.getDisplacement(), Unique));
     vectorPtr_Type vel(new vector_Type(solid.getVelocity(), Unique));
 
-    dFESpace->interpolate(d0, *disp, 0.0);
-    dFESpace->interpolate(w0, *vel , 0.0);
+    dFESpace->interpolate(static_cast<Private::fct_type>( d0 ), *disp, 0.0);
+    dFESpace->interpolate(static_cast<Private::fct_type>( w0 ), *vel , 0.0);
 
     if (verbose) std::cout << "S- initialization ... ";
 

@@ -345,6 +345,72 @@ FSIMonolithic::updateSystem()
     this->M_fluid->resetStabilization();
 }
 
+// <<<<<<< HEAD
+// =======
+// void
+// FSIMonolithic::initialize( fluidPtr_Type::value_type::function_Type const& u0,
+//                            fluidPtr_Type::value_type::function_Type const& p0,
+//                            solidPtr_Type::value_type::Function const& d0,
+//                            solidPtr_Type::value_type::Function const& /*w0*/,
+//                            fluidPtr_Type::value_type::function_Type const& /*df0*/ )
+// {
+//     vector_Type u(M_uFESpace->map());
+//     M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->time());
+
+//     vector_Type p(M_pFESpace->map());
+//     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
+
+//     vector_Type d(M_dFESpace->map());
+//     M_dFESpace->interpolate( static_cast<fluidPtr_Type::value_type::function_Type>( d0 ), d, M_data->dataSolid()->getdataTime()->time());
+
+//     initialize(u, p, d);
+// }
+
+// void
+// FSIMonolithic::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
+//                            const vectorPtr_Type& fluidDisplacement,
+//                            const vectorPtr_Type& solidVelocity,
+//                            const vectorPtr_Type& solidDisplacement )
+// {
+//     // Solution
+//     setSolution( *fluidVelocityAndPressure );
+
+//     // Fluid
+//     M_fluid->initialize( *fluidVelocityAndPressure );
+//     M_meshMotion->initialize( *fluidDisplacement );
+//     initializeBDF( *fluidVelocityAndPressure );
+
+//     // Solid
+//     // Extend the external solid vectors to have the monolithic map
+//     vectorPtr_Type extendedSolidDisplacement( new vector_Type( *M_monolithicMap ) );
+//     vectorPtr_Type extendedSolidVelocity( new vector_Type( *M_monolithicMap ) );
+
+//     extendedSolidDisplacement->subset( *solidDisplacement, solidDisplacement->map(), static_cast <UInt> ( 0 ), M_offset );
+//     extendedSolidVelocity->subset( *solidVelocity, solidVelocity->map(), static_cast <UInt> ( 0 ), M_offset );
+
+//     // Rescale the quantities
+//     *extendedSolidDisplacement /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
+//     *extendedSolidVelocity /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
+
+//     M_solid->initialize( extendedSolidDisplacement, extendedSolidVelocity );
+// }
+
+// void
+// FSIMonolithic::initializeMesh(vectorPtr_Type fluid_dispOld)
+// {
+//     meshMotion().setDisplacement(*fluid_dispOld);
+// }
+
+// void
+// FSIMonolithic::initialize( const vector_Type& u0, const vector_Type& p0, const vector_Type& d0)
+// {
+//     *M_un=u0;
+//     M_un->add(p0, nDimensions*M_uFESpace->dof().numTotalDof());
+//     M_un->add(d0, M_offset);
+// }
+
+
+// >>>>>>> master
 
 // ===================================================
 // Protected Methods

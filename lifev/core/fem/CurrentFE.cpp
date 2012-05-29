@@ -307,7 +307,7 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
 //       zeta the reference coordinates
 
 Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
-                              int comp_x, int comp_zeta) const
+                              Int comp_x, Int comp_zeta) const
 {
     Real jac(0);
     GeoVector P(3);
@@ -342,8 +342,8 @@ Real CurrentFE::pointDetJacobian(const Real& hat_x, const Real& hat_y, const Rea
     {
         Real a ( pointJacobian(hat_x, hat_y, hat_z, 0, 0) );
         Real b ( pointJacobian(hat_x, hat_y, hat_z, 0, 1) );
-        Real c ( pointJacobian(hat_x, hat_y, hat_z, 0, 2) );
-        Real d ( pointJacobian(hat_x, hat_y, hat_z, 1, 0) );
+        Real c ( pointJacobian(hat_x, hat_y, hat_z, 1, 0) );
+        Real d ( pointJacobian(hat_x, hat_y, hat_z, 1, 1) );
 
         det = a * d - b * c;
 
@@ -381,7 +381,7 @@ Real CurrentFE::pointDetJacobian(const Real& hat_x, const Real& hat_y, const Rea
 }
 
 Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
-                                     int comp_x, int comp_zeta) const
+                                     Int comp_x, Int comp_zeta) const
 {
     if ( M_nbCoor ==1 )
     {
@@ -396,8 +396,8 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
         Real a21= pointJacobian(hat_x,hat_y,hat_z,1,0);
         Real a22= pointJacobian(hat_x,hat_y,hat_z,1,1);
 
-        int total(comp_x+comp_zeta);
-        int mysign(1);
+        Int total(comp_x+comp_zeta);
+        Int mysign(1);
         if (total % 2 == 1)
             mysign=-1;
 
@@ -589,7 +589,7 @@ Real CurrentFE::diameter() const
         for ( UInt j(i+1); j<M_nbGeoNode; ++j )
         {
             s = 0.0;
-            for ( int icoor(0); icoor < (int)nDimensions; ++icoor )
+            for ( Int icoor(0); icoor < (Int)nDimensions; ++icoor )
             {
                 s += std::fabs( M_cellNodes[i][icoor] - M_cellNodes[j][icoor] );
             }
@@ -615,7 +615,7 @@ Real CurrentFE::diameter2() const
         for ( UInt j(i+1); j < M_nbGeoNode; ++j)
         {
             s = 0.;
-            for ( int icoor(0); icoor < (int)nDimensions; ++icoor)
+            for ( Int icoor(0); icoor < (Int)nDimensions; ++icoor)
             {
                 d = ( M_cellNodes[i][icoor] - M_cellNodes[j][icoor] );
                 d = d*d;
@@ -847,9 +847,9 @@ void CurrentFE::computeQuadNodes()
 
     for ( UInt iterQuadNode (0); iterQuadNode < M_nbQuadPt; ++iterQuadNode)
     {
-    	GeoVector quadNode(coorMap(M_quadRule->quadPointCoor(iterQuadNode)));
-    	for(UInt i=0; i< quadNode.size(); i++)
-    		M_quadNodes[iterQuadNode][i] = quadNode[i];
+        GeoVector quadNode(coorMap(M_quadRule->quadPointCoor(iterQuadNode)));
+        for(UInt i=0; i< quadNode.size(); i++)
+            M_quadNodes[iterQuadNode][i] = quadNode[i];
     }
     M_quadNodesUpdated=true;
 }

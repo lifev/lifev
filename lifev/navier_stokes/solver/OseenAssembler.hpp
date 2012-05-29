@@ -914,7 +914,6 @@ addPressureMass(matrixType& matrix, const Real& coefficient, const UInt& offsetL
     // Some constants
     const UInt nbElements(M_pFESpace->mesh()->numElements());
     const UInt fieldDim(M_pFESpace->fieldDim());
-    const UInt nbUTotalDof(M_pFESpace->dof().numTotalDof());
 
 
     // Loop over the elements

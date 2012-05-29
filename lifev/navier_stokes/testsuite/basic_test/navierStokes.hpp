@@ -806,7 +806,7 @@ NavierStokes<MeshType, Problem>::run()
 
                 if (M_initMethod == Projection)
                 {
-                    uFESpace->interpolate(problem_Type::uderexact, rhs, time);
+                    uFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::uderexact ), rhs, time);
                     rhs *= -1.;
                     rhs = fluid.matrixMass()*rhs;
                     fluid.updateSystem( 0., beta, rhs );
@@ -874,9 +874,9 @@ NavierStokes<MeshType, Problem>::run()
             if(M_exportExactSolutions)
             {
                 exactPressPtr.reset( new vector_Type(exactPress, exporter->mapType() ) );
-                pFESpace->interpolate(problem_Type::pexact, *exactPressPtr, 0);
+                pFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::pexact ), *exactPressPtr, 0 );
                 exactVelPtr.reset( new vector_Type(exactVel, exporter->mapType() ) );
-                uFESpace->interpolate(problem_Type::uexact, *exactVelPtr, 0);
+                uFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::uexact ), *exactVelPtr, 0 );
             }
 
             exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace,
@@ -959,8 +959,8 @@ NavierStokes<MeshType, Problem>::run()
                 *velAndPressure = *fluid.solution();
                 if(M_exportExactSolutions)
                 {
-                    pFESpace->interpolate(problem_Type::pexact, *exactPressPtr, time);
-                    uFESpace->interpolate(problem_Type::uexact, *exactVelPtr, time);
+                    pFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::pexact ), *exactPressPtr, time );
+                    uFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::uexact ), *exactVelPtr, time );
                 }
                 exporter->postProcess( time );
 

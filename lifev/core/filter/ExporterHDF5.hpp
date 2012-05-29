@@ -398,7 +398,7 @@ Real ExporterHDF5<MeshType>::importFromIter( const UInt& iter )
         xmfFile.open( ( this->M_postDir + this->M_prefix + ".xmf" ).c_str(), std::ios::in );
 
         // Vector of TimeStep
-        std::vector< std::pair< Real, Int > > TimeAndPostfix;
+        std::vector< std::pair< Real, UInt > > TimeAndPostfix;
 
         if ( xmfFile.is_open() )
         {
@@ -427,7 +427,7 @@ Real ExporterHDF5<MeshType>::importFromIter( const UInt& iter )
         SelectedTimeAndPostfix = TimeAndPostfix.front();
         bool found             = false;
 
-        for ( std::vector< std::pair< Real, Int > >::const_iterator i = TimeAndPostfix.begin();
+        for ( std::vector< std::pair< Real, UInt > >::const_iterator i = TimeAndPostfix.begin();
                 i < TimeAndPostfix.end()  ; ++i )
         {
             if ( i->second == iter )
@@ -839,7 +839,7 @@ void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
          << "\"\n"
          << "                        Function=\"JOIN($0 , $1, $2)\">\n";
 
-    for (Int i(0); i < nDimensions; ++i)
+    for ( UInt i(0); i < nDimensions; ++i )
     {
         xdmf << "           <DataStructure  Format=\"HDF\"\n"
              << "                           Dimensions=\""

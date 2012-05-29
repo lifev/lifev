@@ -45,19 +45,19 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 //#include "life/lifesolver/NavierStokesSolver.hpp"
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifesolver/OseenData.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/navier_stokes/solver/OseenData.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
-#include <life/lifefilters/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
 
-#include <life/lifesolver/OseenSolver.hpp>
+#include <lifev/navier_stokes/solver/OseenSolver.hpp>
 
 #include "cylinder.hpp"
 #include <iostream>

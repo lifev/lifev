@@ -1728,7 +1728,7 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
     LifeChrono chrono;
     chrono.start();
 
-    const UInt numVelocityComponent ( velocityFESpace.fieldDim() );
+    const UInt numVelocityComponent ( M_velocityFESpace.fieldDim() );
     const UInt velocityTotalDof ( M_velocityFESpace.dof().numTotalDof() );
 
 
@@ -1744,7 +1744,7 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
         M_elementMatrixPreconditioner.zero();
         // mass
         chrono.start();
-        mass( 1, M_elementMatrixPreconditioner, M_pressureFESpace.fe(), 0, 0, velocityFESpace.fieldDim() );
+        mass( 1, M_elementMatrixPreconditioner, M_pressureFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
         chrono.stop();
 
         chrono.start();
@@ -1824,7 +1824,11 @@ OseenSolver<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       m
 
 template<typename MeshType, typename SolverType>
 void
-OseenSolver<MeshType, SolverType>::setupPostProc( )
+// <<<<<<< HEAD
+// OseenSolver<MeshType, SolverType>::setupPostProc( )
+// =======
+OseenSolver<MeshType, SolverType>::setupPostProc( const markerID_Type& /*flag*/, const mesh_Type /*meshPart*/ )
+//>>>>>>> master
 {
     M_postProcessing.reset( new PostProcessingBoundary<mesh_Type>( M_velocityFESpace.mesh(),
                                                      &M_velocityFESpace.feBd(),
