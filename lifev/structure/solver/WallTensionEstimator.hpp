@@ -50,7 +50,7 @@
 
 //Trilinos include
 #include <Epetra_SerialDenseMatrix.h>
-
+#include <iostream>
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -231,8 +231,8 @@ protected:
     vectorPtr_Type                                 M_invariants;
 
     //! Vector of the eigenvalues of \sigma on the DOF (length = 3)
-    vectorPtr_Type                                 M_eigenvaluesR;
-    vectorPtr_Type                                 M_eigenvaluesI;
+    vector_Type                                 M_eigenvaluesR;
+    vector_Type                                 M_eigenvaluesI;
 
     //! Vector for the displacement field
     solutionVectPtr_Type                            M_displ;
@@ -338,8 +338,8 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
   M_displZ.reset        (new solutionVect_Type(*M_localMap) );
   M_globalEigen.reset   (new solutionVect_Type(*M_localMap) );
   M_invariants.reset    (new vector_Type( M_FESpace->fieldDim() + 1, 0.0 ));
-  M_eigenvaluesR.reset  (new vector_Type( M_FESpace->fieldDim(), 0.0 ) );
-  M_eigenvaluesI.reset  (new vector_Type( M_FESpace->fieldDim(), 0.0 ) );
+  M_eigenvaluesR.resize ( M_FESpace->fieldDim() );
+  M_eigenvaluesI.resize ( M_FESpace->fieldDim() );
 
   // Materials
   M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_dataMaterial->solidType() ) );
@@ -413,20 +413,27 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       this->M_displayer->leaderPrint(" \n norm Inf of P:  ", (*M_sigma).NormOne() );
 
       //Compute the eigenvalue
-      AssemblyElementalStructure::computeEigenvalues(*M_sigma, *M_eigenvaluesR, *M_eigenvaluesI);
+      AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
+
+      M_sigma->Print(std::cout);
+
+
+      std::cout << "Values " <<M_eigenvaluesI[1] << std::endl;
+      int n1;
+      std::cin >> n1;
 
       //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
       //Check on the imaginary part of eigen values given by the Lapack method 
       Real sum(0);
-      for( int i=0; i < (*M_eigenvaluesI).size(); i++ )
-	sum += std::abs((*M_eigenvaluesI)[i]);
+      for( int i=0; i < M_eigenvaluesI.size(); i++ )
+	sum += std::abs(M_eigenvaluesI[i]);
 
       ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
       //Save the eigenvalues in the global vector
       for( UInt icoor = 0; icoor < nDimensions; icoor++ )
 	{
-	  (*M_globalEigen)(iDOF + iComp * dim + this->M_offset) = (*M_eigenvaluesR)[icoor];
+	  (*M_globalEigen)(iDOF + iComp * dim + this->M_offset) = M_eigenvaluesR[icoor];
 	}
     }
 }

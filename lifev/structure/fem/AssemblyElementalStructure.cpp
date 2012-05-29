@@ -1376,13 +1376,13 @@ void computeCauchyStressTensor(Epetra_SerialDenseMatrix& cauchy,
 
 }
 
-void computeEigenvalues(Epetra_SerialDenseMatrix& cauchy,
-			std::vector<LifeV::Real>& eigenvaluesR,
-			std::vector<LifeV::Real>& eigenvaluesI)
+void computeEigenvalues(Epetra_SerialDenseMatrix cauchy,
+			std::vector<LifeV::Real> eigenvaluesR,
+			std::vector<LifeV::Real> eigenvaluesI)
 
 {
   // LAPACK wrapper of Epetra
-  Epetra_LAPACK lapack;
+  Epetra_LAPACK* lapack = new Epetra_LAPACK;
 
   //List of flags for Lapack Function
   //For documentation, have a look at http://www.netlib.org/lapack/double/dgeev.f
@@ -1391,12 +1391,12 @@ void computeEigenvalues(Epetra_SerialDenseMatrix& cauchy,
   char JOBVR = 'N';
 
   //Size of the matrix
-  Int N = cauchy.RowDim();
-  Int LDA = cauchy.RowDim();
+  Int Dim = cauchy.RowDim();
+  Int LDA = Dim*Dim;
   
   //Arrays to store eigenvalues (their number = nDimensions)
-  std::vector<LifeV::Real > WR(nDimensions,0.0);
-  std::vector<LifeV::Real > WI(nDimensions,0.0);
+  double* WR = new double[nDimensions];
+  double* WI = new double[nDimensions];
 
   //Number of eigenvectors
   Int LDVR = nDimensions;
@@ -1404,32 +1404,42 @@ void computeEigenvalues(Epetra_SerialDenseMatrix& cauchy,
 
   //Arrays to store eigenvectors
   Int length = nDimensions * 3;
-  std::vector<LifeV::Real > VR(length,0.0);
-  std::vector<LifeV::Real > VL(length,0.0);
-  
-  std::vector<LifeV::Real > WORK(length, 0.0);
-  Int LWORK = length;
-  Int INFO;
- 
-  std::vector<LifeV::Real> A(9, 0.0);
 
-  for (int i(0); i< nDimensions; i++)
+  double* VR = new double[length];
+  double* VL = new double[length];
+  
+  Int LWORK = 10;
+  Int INFO = 0;
+
+  double* WORK = new double[LWORK]; 
+
+  double* A = new double[length];
+
+  for (UInt i(0); i< nDimensions; i++)
+      for (UInt j(0);j<nDimensions; j++)
+	A[nDimensions * i + j] = cauchy(i,j);
+
+  (*lapack).GEEV(JOBVL, JOBVR, Dim, &A[0] /*cauchy*/, LDA, /*eigenvaluesR*/  WR, /*&eigenvaluesI[0]*/ WI, VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
+  ASSERT_PRE( !INFO, "Calculation of the Eigenvalues failed!!!" ); 
+
+  for (UInt i(0); i< nDimensions; i++)
     {
-      for (int j(0);j<nDimensions; j++)
-  	{
-  	  A[nDimensions * i + j] = cauchy(i,j);
-  	}
+      eigenvaluesR[i] = WR[i];
+      eigenvaluesI[i] = WI[i];
     }
 
-  lapack.GEEV(JOBVL, JOBVR, N, &A[0] /*cauchy*/, LDA, &WR[0], &WI[0], &VL[0], LDVL, &VR[0], LDVR, &WORK[0], LWORK, INFO);
-  //ASSERT_PRE( !INFO, "Calculation of the Eigenvalues failed!!!" );
+  // for (int i=0; i<3; i++)
+  //   {
+  //     std::cout << "Value r" << eigenvaluesR[i]<< std::endl;
+  //     std::cout << "Value i" << eigenvaluesI[i]<< std::endl;
+  //   }
 
-  std::cout << "Fuck you!" << std::endl;
-  int n;
-  std::cin >> n;
-  eigenvaluesR = WR;
-  eigenvaluesI = WI;
-
+  //Memory cleaning
+  delete[] WORK;
+  delete[] VR;
+  delete[] VL;
+  delete[] WR;  
+  delete[] WI;
 
 }
 
