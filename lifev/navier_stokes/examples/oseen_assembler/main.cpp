@@ -400,11 +400,11 @@ main( int argc, char** argv )
     beta.reset(new vector_Type(solutionMap,Repeated));
 
 // <<<<<<< HEAD
-//     vector_Type convect(rhs->map());
+    vector_Type convect(rhs->map());
 
-//     vectorPtr_type velocity;
-// =======
     vectorPtr_Type velocity;
+// =======
+//    vectorPtr_Type velocity;
     //>>>>>>> master
     velocity.reset(new vector_Type(uFESpace->map(),Unique));
 
