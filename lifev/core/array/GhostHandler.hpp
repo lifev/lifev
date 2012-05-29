@@ -837,7 +837,6 @@ void GhostHandler<Mesh>::fillEntityPID( graphPtr_Type elemGraph, std::vector<std
 {
     if ( M_verbose ) std::cout << " GH- fillEntityPID()" << std::endl;
 
-    std::vector<int> & myElems = (*elemGraph)[M_me];
 #ifdef HAVE_LIFEV_DEBUG
     // show own elements
     M_debugOut << "own elements on proc " << M_me << std::endl;
@@ -959,6 +958,20 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph,
         M_debugOut << myPoints[ i ] << std::endl;
 #endif
 
+    // initialize a bool vector to know if a point is in current partition
+    std::vector<bool> isInPartition( M_fullMesh->numPoints(), false );
+    for( UInt e = 0; e < (*elemGraph)[ M_me ].size(); e++ )
+    {
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+        {
+            const ID & pointID = M_fullMesh->element( (*elemGraph)[ M_me ][ e ] ).point( k ).id();
+            isInPartition[ pointID ] = true;
+        }
+    }
+
+    chrono.stop();
+    std::cout << "subdomain interface time = " << chrono.diff() << std::endl;
+    chrono.reset();
 
     chrono.start();
     // find subdomain interface nodes
@@ -969,20 +982,20 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph,
         // mark as SUBD_INT point only if the point is owned by current process
         if( pointPID[ currentPoint ] == M_me )
         {
-            // cycle on all other processes
-            for( UInt p = 0; p < static_cast<UInt>( M_comm->NumProc() ); p++ )
+
+            // check if all neighbors are on this proc
+            for( neighbors_Type::const_iterator neighborIt = M_nodeNodeNeighborsList[ currentPoint ].begin();
+                 neighborIt != M_nodeNodeNeighborsList[ currentPoint ].end(); ++neighborIt )
             {
-                if ( p != M_me )
+                // add the point if a neighbor is missing
+                if( !isInPartition[ *neighborIt ] )
                 {
-                    // cycle on all points of that proc
-                    for( UInt j = 0; j < pointGraph[ p ].size(); j++ )
-                        // if i find currentPoint on other procs it means it is on SUBDOMAIN_INTERFACE
-                        if ( pointGraph[ p ][ j ] == currentPoint ) mySubdIntPoints.insert( currentPoint );
+                    mySubdIntPoints.insert( currentPoint );
+                    break;
                 }
             }
         }
     }
-
 #ifdef HAVE_LIFEV_DEBUG
     M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << M_me << std::endl;
     for( std::set<Int>::const_iterator i = mySubdIntPoints.begin(); i != mySubdIntPoints.end(); ++i )
@@ -992,6 +1005,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph,
     chrono.stop();
     std::cout << "subdomain interface time = " << chrono.diff() << std::endl;
     chrono.reset();
+
     chrono.start();
     std::vector<int> workingPoints( mySubdIntPoints.begin(), mySubdIntPoints.end() );
     std::set<int> newPoints;
