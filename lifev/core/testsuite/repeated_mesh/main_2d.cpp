@@ -242,47 +242,45 @@ main( int argc, char** argv )
 
         // Perform the assembly of the matrix
 
-        if ( verbose ) std::cout << " -- Adding the diffusion ... " << std::flush;
+//        if ( verbose ) std::cout << " -- Adding the diffusion ... " << std::flush;
+//        if ( verbose ) std::cout << " done! " << std::endl;
 
         LifeChrono assemblyTime;
         assemblyTime.start();
         adrAssembler.addDiffusion(systemMatrix,epsilon);
+
+//#ifdef TEST_ADVECTION
+//        if ( verbose ) std::cout << " -- Adding the advection ... " << std::flush;
+//        vector_type beta(betaFESpace->map(),Repeated);
+//        betaFESpace->interpolate(betaFct,beta,0.0);
+//        adrAssembler.addAdvection(systemMatrix,beta);
+//        if ( verbose ) std::cout << " done! " << std::endl;
+//#endif
+//#ifdef TEST_MASS
+//        if ( verbose ) std::cout << " -- Adding the mass ... " << std::flush;
+//        adrAssembler.addMass(systemMatrix,1.0);
+//        if ( verbose ) std::cout << " done! " << std::endl;
+//#endif
+
+//        if ( verbose ) std::cout << " -- Closing the matrix ... " << std::flush;
+        systemMatrix->globalAssemble();
+//        if ( verbose ) std::cout << " done ! " << std::endl;
         assemblyTime.stop();
         if( isLeader ) std::cout << "assembly time  = " << assemblyTime.diff() << std::endl;
 
         LifeChrono assemblyTimeR;
         assemblyTimeR.start();
         adrAssemblerR.addDiffusion(systemMatrixR,epsilon);
+        systemMatrixR->matrixPtr()->FillComplete();
         assemblyTimeR.stop();
         if( isLeader ) std::cout << "assemblyR time = " << assemblyTimeR.diff() << std::endl;
 
-        if ( verbose ) std::cout << " done! " << std::endl;
         if ( verbose ) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
         if ( verbose ) std::cout << " Time needed : " << adrAssemblerR.diffusionAssemblyChrono().diffCumul() << std::endl;
 
-#ifdef TEST_ADVECTION
-        if ( verbose ) std::cout << " -- Adding the advection ... " << std::flush;
-        vector_type beta(betaFESpace->map(),Repeated);
-        betaFESpace->interpolate(betaFct,beta,0.0);
-        adrAssembler.addAdvection(systemMatrix,beta);
-        if ( verbose ) std::cout << " done! " << std::endl;
-#endif
-#ifdef TEST_MASS
-        if ( verbose ) std::cout << " -- Adding the mass ... " << std::flush;
-        adrAssembler.addMass(systemMatrix,1.0);
-        if ( verbose ) std::cout << " done! " << std::endl;
-#endif
-
-        if ( verbose ) std::cout << " -- Closing the matrix ... " << std::flush;
-        systemMatrix->globalAssemble();
-        systemMatrixR->matrixPtr()->FillComplete();
-        //    systemMatrixR->globalAssemble();
-        if ( verbose ) std::cout << " done ! " << std::endl;
-
-        //************* SPY ***********
+        // SPY
 //        systemMatrix->spy("matrixNoBC");
 //        systemMatrixR->spy("matrixNoBCR");
-        //*****************************
 
 #ifdef TEST_RHS
         Real matrixNorm(systemMatrix->norm1());
@@ -339,12 +337,11 @@ main( int argc, char** argv )
         rhsR = rhsBCR;
         if ( verbose ) std::cout << " done ! " << std::endl;
 
-        //************* SPY ***********
+        // SPY
 //        systemMatrix->spy("matrix");
 //        systemMatrixR->spy("matrixR");
 //        rhs.spy("rhs");
 //        rhsR.spy("rhsR");
-        //*****************************
 
         // Definition of the solver
 
@@ -384,10 +381,9 @@ main( int argc, char** argv )
         linearSolverR.solveSystem( rhsBCR, solutionR, systemMatrixR );
         if ( verbose ) std::cout << " done ! " << std::endl;
 
-        //************* SPY ***********
+        // SPY
 //        solution.spy("solution");
 //        solutionR.spy("solutionR");
-        //*****************************
 
         // Error computation
 
