@@ -89,9 +89,9 @@ enum ConvectionType{Explicit, SemiImplicit, KIO91};
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
-typedef boost::shared_ptr<VectorEpetra> vectorPtr_type;
-typedef FESpace< mesh_Type, MapEpetra > fespace_type;
-typedef boost::shared_ptr< fespace_type > fespacePtr_type;
+typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
+typedef FESpace< mesh_Type, MapEpetra > fespace_Type;
+typedef boost::shared_ptr< fespace_Type > fespacePtr_Type;
 typedef LifeV::RossEthierSteinmanUnsteadyDec problem_Type;
 }
 
@@ -101,7 +101,7 @@ Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
 }
 
 
-void printErrors(const vector_Type& solution, const Real& currentTime, fespacePtr_type uFESpace, fespacePtr_type pFESpace, bool verbose)
+void printErrors(const vector_Type& solution, const Real& currentTime, fespacePtr_Type uFESpace, fespacePtr_Type pFESpace, bool verbose)
 {
     vector_Type velocity(uFESpace->map(),Repeated);
     vector_Type pressure(pFESpace->map(),Repeated);
@@ -266,11 +266,11 @@ main( int argc, char** argv )
                            << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
-    fespacePtr_type uFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
+    fespacePtr_Type uFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
-    fespacePtr_type pFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,pOrder, 1, Comm));
+    fespacePtr_Type pFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,pOrder, 1, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     // Creation of the total map
@@ -392,19 +392,19 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if (verbose) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
     if (verbose) std::cout << "Creation of vectors... " << std::flush;
-    vectorPtr_type rhs;
+    vectorPtr_Type rhs;
     rhs.reset(new vector_Type(solutionMap,Unique));
 
-    vectorPtr_type beta;
+    vectorPtr_Type beta;
     beta.reset(new vector_Type(solutionMap,Repeated));
 
-    vectorPtr_type velocity;
+    vectorPtr_Type velocity;
     velocity.reset(new vector_Type(uFESpace->map(),Unique));
 
-    vectorPtr_type pressure;
+    vectorPtr_Type pressure;
     pressure.reset(new vector_Type(pFESpace->map(),Unique));
 
-    vectorPtr_type solution;
+    vectorPtr_Type solution;
     solution.reset(new vector_Type(solutionMap,Unique));
     if (verbose) std::cout << "done" << std::endl;
 
@@ -422,7 +422,7 @@ main( int argc, char** argv )
 
     if(convectionTerm == KIO91)
     {
-        uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
+        uFESpace->interpolate( static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>( problem_Type::uexact ), *velocity, currentTime );
         *solution *= 0;
         *solution = *velocity;
         *beta *= 0;
@@ -434,7 +434,7 @@ main( int argc, char** argv )
         {
             for(UInt i(0);i<BDFOrder;++i)
             {
-                uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime-(3-i)*timestep);
+                uFESpace->interpolate( static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>( problem_Type::uexact ), *velocity, currentTime-(3-i)*timestep );
                 *solution = *velocity;
                 *beta *= 0;
                 oseenAssembler.addConvectionRhs(*beta,*solution);
@@ -443,8 +443,8 @@ main( int argc, char** argv )
         }
     }
 
-    uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
-    pFESpace->interpolate(problem_Type::pexact,*pressure,currentTime);
+    uFESpace->interpolate( static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>( problem_Type::uexact ), *velocity, currentTime );
+    pFESpace->interpolate( static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>( problem_Type::pexact ), *pressure, currentTime );
     *solution *= 0;
     *solution = *velocity;
     solution->add(*pressure,pressureOffset);
@@ -463,8 +463,8 @@ main( int argc, char** argv )
         *beta *= 0.;
         *solution *= 0;
 
-        uFESpace->interpolate(problem_Type::uexact,*velocity,currentTime);
-        pFESpace->interpolate(problem_Type::pexact,*pressure,currentTime);
+        uFESpace->interpolate( static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>( problem_Type::uexact ), *velocity, currentTime );
+        pFESpace->interpolate( static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>( problem_Type::pexact ), *pressure, currentTime );
         *solution = *velocity;
         solution->add(*pressure,pressureOffset);
 

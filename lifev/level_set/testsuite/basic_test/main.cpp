@@ -158,13 +158,13 @@ main( int argc, char** argv )
     level_set.setup(data_level_set);
 
     vector_Type initLS(level_set.map());
-    uFESpace->interpolate(initLSFct,initLS,0.0);
+    uFESpace->interpolate( static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>( initLSFct ), initLS, 0.0 );
     level_set.initialize(initLS);
 
     level_set.setupLinearSolver(dataFile,"");
 
     vector_Type beta(betaFESpace->map());
-    betaFESpace->interpolate(betaFct,beta,0.0);
+    betaFESpace->interpolate( static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>( betaFct ),beta,0.0);
 
     BCHandler bchandler;
     BCFunctionBase BCu( exactSolution );

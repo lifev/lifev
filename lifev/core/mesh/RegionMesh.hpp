@@ -89,8 +89,8 @@ public MC::regionMarker_Type
 {
 public:
 
-	//! static const S_geoDimensions: the dimensions (1,2,3) of the geometry
-	static const Int S_geoDimensions = GEOSHAPE::S_nDimensions;
+    //! static const S_geoDimensions: the dimensions (1,2,3) of the geometry
+    static const Int S_geoDimensions = GEOSHAPE::S_nDimensions;
 
 
     /** @name GeoDim Types
@@ -99,11 +99,11 @@ public:
      *
      *  @{
      */
-	typedef GeoDim<1> oneD_Type;
-	typedef GeoDim<2> twoD_Type;
-	typedef GeoDim<3> threeD_Type;
-	typedef GeoDim<S_geoDimensions> geoDim_Type;
-	 /** @} */ // End of group GeoDim Types
+    typedef GeoDim<1> oneD_Type;
+    typedef GeoDim<2> twoD_Type;
+    typedef GeoDim<3> threeD_Type;
+    typedef GeoDim<S_geoDimensions> geoDim_Type;
+     /** @} */ // End of group GeoDim Types
 
     /** @name Marker Types
      *  @ingroup public_types
@@ -128,24 +128,24 @@ public:
 
 
     /** @name Geometric Element Types
-	 *  @ingroup public_types
-	 *  volume_Type, face_Type, edge_Type, point_Type, element_Type, facet_Type, ridge_Type, peak_Type.
-	 *  Correspondences table:
-	 *  @table
-	 *  |		| element_Type | facet_Type | ridge_Type | peak_Type  |
-	 *  --------------------------------------------------------------|
-	 *  |  3D   | volume_Type  | face_Type  | edge_Type  | point_Type |
-	 *  |  2D   | face_Type    | edge_Type  | point_Type |     -      |
-	 *  |  1D   | edge_Type    | point_Type |     -      |	   -	  |
-	 *  @endtable
-	 *  @{
-	 */
+     *  @ingroup public_types
+     *  volume_Type, face_Type, edge_Type, point_Type, element_Type, facet_Type, ridge_Type, peak_Type.
+     *  Correspondences table:
+     *  @table
+     *  |       | element_Type | facet_Type | ridge_Type | peak_Type  |
+     *  --------------------------------------------------------------|
+     *  |  3D   | volume_Type  | face_Type  | edge_Type  | point_Type |
+     *  |  2D   | face_Type    | edge_Type  | point_Type |     -      |
+     *  |  1D   | edge_Type    | point_Type |     -      |     -      |
+     *  @endtable
+     *  @{
+     */
 
 
     typedef MeshElementMarked<3, S_geoDimensions, GEOSHAPE, MC>  volume_Type;
     typedef MeshElementMarked<2, S_geoDimensions, GEOSHAPE, MC> face_Type;
     typedef MeshElementMarked<1, S_geoDimensions, GEOSHAPE, MC> edge_Type;
-    typedef MeshElementMarked<0, S_geoDimensions, GEOSHAPE, MC>	point_Type;
+    typedef MeshElementMarked<0, S_geoDimensions, GEOSHAPE, MC> point_Type;
 
     typedef MeshElementMarked<S_geoDimensions, S_geoDimensions, GEOSHAPE, MC>  element_Type;
     typedef MeshElementMarked<S_geoDimensions-1, S_geoDimensions, GEOSHAPE, MC> facet_Type;
@@ -465,18 +465,18 @@ public:
 
     //! Is the array for local facets set up?
     /**
-	 *  It does not use switches, but interrogates the container directly
-	 *
-	 *  @return true if the array for local facets in not empty.
-	 */
+     *  It does not use switches, but interrogates the container directly
+     *
+     *  @return true if the array for local facets in not empty.
+     */
     bool hasLocalFacets() const {return ! M_ElemToFacet.empty();}
 
     //! Is the array for local faces set up?
     /**
-	 *  It does not use switches, but interrogates the container directly
-	 *
-	 *  @return true if array for local faces in not empty.
-	 */
+     *  It does not use switches, but interrogates the container directly
+     *
+     *  @return true if array for local faces in not empty.
+     */
     bool hasLocalFaces() const {return hasLocalFaces( twoD_Type() );}
 
     //! Build localFacetId table and optionally fills the list of Facets.
@@ -499,20 +499,20 @@ public:
 
 
     //! Build localFaceId table and optionally fills the list of Faces.
-	/**
-	 *  @param createFacet is set true if we want also to create the actual list
-	 *  of internal faces. There is another utility (in mesh_util.hpp), which
+    /**
+     *  @param createFacet is set true if we want also to create the actual list
+     *  of internal faces. There is another utility (in mesh_util.hpp), which
      *  might be used for the same purpose if we want just to create the faces
-	 *  and not also the LocaFaceID table.
-	 *  @param verbose if true, output is verbose.
-	 *  @param estimateFaceNumber is a guess provided by the user of the total
-	 *  number of faces. It is relevant only when createFaces=true. Setting it
-	 *  to a proper value helps in reducing time and memory.
-	 *
-	 *  @pre The routine assumes that the boundary facets are properly set, if not use the
-	 *  methods in #include MeshChecks.hpp
-	 *
-	 */
+     *  and not also the LocaFaceID table.
+     *  @param verbose if true, output is verbose.
+     *  @param estimateFaceNumber is a guess provided by the user of the total
+     *  number of faces. It is relevant only when createFaces=true. Setting it
+     *  to a proper value helps in reducing time and memory.
+     *
+     *  @pre The routine assumes that the boundary facets are properly set, if not use the
+     *  methods in #include MeshChecks.hpp
+     *
+     */
     void updateElementFaces( bool createFaces = false, const bool verbose = false, UInt estimateFaceNumber = 0 );
 
     //! Destroys element-to-facet container. Useful to save memory!
@@ -577,7 +577,7 @@ public:
      */
     void updateElementRidges( bool createRidges = false, const bool verbose = false,
                                  UInt estimateRidgeNumber = 0, bool renumber=true){
-    	updateElementRidges( M_geoDim, createRidges, verbose, estimateRidgeNumber, renumber);}
+        updateElementRidges( M_geoDim, createRidges, verbose, estimateRidgeNumber, renumber);}
 
     //! Build localEdgeId table and optionally fills the list of Edges
     /**
@@ -615,10 +615,10 @@ public:
 
 
     //! Local Ridge.
-	/** @param elem Reference of the element.
-	 *  @param locR local ridge number.
-	 *  @return ID of the ridge.
-	 */
+    /** @param elem Reference of the element.
+     *  @param locR local ridge number.
+     *  @return ID of the ridge.
+     */
     ID localRidgeId( const element_Type & elem, UInt const locR ) const {return localRidgeId( M_geoDim, elem.id(), locR );}
 
 
@@ -630,18 +630,18 @@ public:
     ID localEdgeId( UInt const elemId, UInt const locE ) const {return localEdgeId( M_geoDim, elemId, locE );}
 
     //! Local Edge (specialization for 3D geometries).
-	/** @param elem Reference of the element.
-	 *  @param locE local edge number 0 \< LocE \< numLocalEdges().
-	 *  @return ID of the edge.
-	 */
+    /** @param elem Reference of the element.
+     *  @param locE local edge number 0 \< LocE \< numLocalEdges().
+     *  @return ID of the edge.
+     */
     ID localEdgeId( const volume_Type & elem, UInt const locE ) const { return localRidgeId( elem, elem.id(), locE );}
 
 
     //! Local Edge (specialization for 2D geometries).
-	/** @param elem Reference of the element.
-	 *  @param locE local edge number 0 \< LocE \< numLocalEdges().
-	 *  @return ID of the edge.
-	 */
+    /** @param elem Reference of the element.
+     *  @param locE local edge number 0 \< LocE \< numLocalEdges().
+     *  @return ID of the edge.
+     */
     ID localEdgeId( const face_Type & elem, UInt const locE ) const { return localFacetId( elem.id(), locE );}
 
     /** @} */ // End of group Element Adjacency Methods
@@ -688,12 +688,12 @@ public:
 
 
     //! Returns Number of Facets
-	/**
-	 *  Returns number of Facets in the mesh
-	 *  as given by the internal counter.
-	 *
-	 *  @return Number of Facets.
-	 */
+    /**
+     *  Returns number of Facets in the mesh
+     *  as given by the internal counter.
+     *
+     *  @return Number of Facets.
+     */
     UInt numFacets() const {return numFacets( M_geoDim );}
 
 
@@ -1249,12 +1249,12 @@ public:
     point_Type & changePointBoundaryFlag(UInt const & position, bool const boundary);
 
     //! Returns the first mesh Point.
-	/**
-	 *  Returns the first Point in the mesh.
-	 *
-	 *  @return const reference to the first mesh Point.
-	 */
-	point_Type const & firstPoint() const {return pointList.front();}
+    /**
+     *  Returns the first Point in the mesh.
+     *
+     *  @return const reference to the first mesh Point.
+     */
+    point_Type const & firstPoint() const {return pointList.front();}
 
     //! Returns the last mesh Point.
     /**
@@ -1579,11 +1579,11 @@ public:
     void setMaxNumFacets( UInt const n, bool const setcounter = false ) {setMaxNumFacets( M_geoDim, n, setcounter);}
 
     //! Adds a facet.
-	/**
-	 *  Adds a facet (optionally a boundary facet). Id computed automatically.
-	 *  @param boundary true if it's a boundary facet.
-	 *  @return Reference to added facet.
-	 */
+    /**
+     *  Adds a facet (optionally a boundary facet). Id computed automatically.
+     *  @param boundary true if it's a boundary facet.
+     *  @return Reference to added facet.
+     */
     facet_Type & addFacet( bool const boundary ) {return addFacet( M_geoDim, boundary);}
 
 
@@ -1617,8 +1617,8 @@ public:
     //! i-th mesh Facet.
     /**
      *  @param i index of the mesh facet.
-	 *  @return the i-th facet.
-	 */
+     *  @return the i-th facet.
+     */
     facet_Type const & facet( UInt const i ) const {return facet( M_geoDim, i);};
 
 
@@ -1658,12 +1658,12 @@ public:
     UInt numRidges() const {return numRidges(M_geoDim); }
 
     //! Global number of Ridges.
-	/**
-	 *  Returns global number of Ridges in the mesh
-	 *  as given by the internal counter.
-	 *
-	 *  @return Global number of Ridges.
-	 */
+    /**
+     *  Returns global number of Ridges in the mesh
+     *  as given by the internal counter.
+     *
+     *  @return Global number of Ridges.
+     */
     UInt numGlobalRidges() const {return numGlobalRidges(M_geoDim );}
 
     //! Changes Current capacity of Ridges.
@@ -1777,13 +1777,13 @@ public:
     peak_Type const & peak( UInt const i ) const {return peak( M_geoDim, i );}
 
     //! Returns a reference to the i-th mesh peak.
-	/**
-	 *  Returns the i-th peak in the mesh.
-	 *UInt const i
-	 *  @param i Id of the peak.
-	 *  @return Reference i-th mesh peak.
-	 */
-//	peak_Type & peak( UInt const i ) {return peak( M_geoDim, i );}
+    /**
+     *  Returns the i-th peak in the mesh.
+     *UInt const i
+     *  @param i Id of the peak.
+     *  @return Reference i-th mesh peak.
+     */
+//  peak_Type & peak( UInt const i ) {return peak( M_geoDim, i );}
 
     //! Returns the global number of peaks in the mesh.
     /**
@@ -1914,9 +1914,9 @@ private:
     element_Type& element( oneD_Type, const UInt& i ) {return edge(i); }
 
     //! Get element at the i-th index.
-	const element_Type& element( threeD_Type, const UInt& i ) const {return volume(i); }
-	const element_Type& element( twoD_Type, const UInt& i ) const {return face(i); }
-	const element_Type& element( oneD_Type, const UInt& i ) const {return edge(i); }
+    const element_Type& element( threeD_Type, const UInt& i ) const {return volume(i); }
+    const element_Type& element( twoD_Type, const UInt& i ) const {return face(i); }
+    const element_Type& element( oneD_Type, const UInt& i ) const {return edge(i); }
 
     //! Get boundary facet at the i-th index.
     facet_Type& boundaryFacet( threeD_Type, const UInt& i ){ return boundaryFace(i); }
@@ -1971,12 +1971,12 @@ private:
     void updateElementRidges( threeD_Type, bool createRidges = false, const bool verbose = false,
                                  UInt estimateRidgeNumber = 0, bool renumber=true);
     void updateElementRidges( twoD_Type, bool, const bool, UInt, bool)
-	{
-    	ERROR_MSG("RegionMesh::updateElementRidges, It is not possible to use this method with 2D geometries.");
-	}
+    {
+        ERROR_MSG("RegionMesh::updateElementRidges, It is not possible to use this method with 2D geometries.");
+    }
     void updateElementRidges( oneD_Type, bool, const bool, UInt, bool)
     {
-		ERROR_MSG("RegionMesh::updateElementRidges, It is not possible to use this method with 1D geometries.");
+        ERROR_MSG("RegionMesh::updateElementRidges, It is not possible to use this method with 1D geometries.");
     }
 
 
@@ -2047,34 +2047,34 @@ private:
     bool isBoundaryFacet( oneD_Type, UInt const & id ) const { return isBoundaryPoint( id );};
 
     //! Number of Ridges.
-	UInt numRidges(threeD_Type) const {return numEdges(); }
-	UInt numRidges(twoD_Type) const {return numPoints(); }
-	UInt numRidges(oneD_Type) const {return 0; }
+    UInt numRidges(threeD_Type) const {return numEdges(); }
+    UInt numRidges(twoD_Type) const {return numPoints(); }
+    UInt numRidges(oneD_Type) const {return 0; }
 
-	//! Global number of Ridges.
-	UInt numGlobalRidges(threeD_Type) const {return numGlobalEdges();}
-	UInt numGlobalRidges(twoD_Type) const {return numGlobalVertices();}
-	UInt numGlobalRidges(oneD_Type) const {return 0;}
+    //! Global number of Ridges.
+    UInt numGlobalRidges(threeD_Type) const {return numGlobalEdges();}
+    UInt numGlobalRidges(twoD_Type) const {return numGlobalVertices();}
+    UInt numGlobalRidges(oneD_Type) const {return 0;}
 
-	 //! Changes Current capacity of Ridges.
-	void setMaxNumRidges( threeD_Type, UInt const n, bool const setcounter ) {setMaxNumEdges( n, setcounter);}
-	void setMaxNumRidges( twoD_Type, UInt const n, bool const setcounter ) {setMaxNumPoints( n, setcounter);}
-	void setMaxNumRidges( oneD_Type, UInt const n, bool const setcounter ) {ERROR_MSG("RegionMesh::setMaxNumRidges, No ridges in 1D");}
+     //! Changes Current capacity of Ridges.
+    void setMaxNumRidges( threeD_Type, UInt const n, bool const setcounter ) {setMaxNumEdges( n, setcounter);}
+    void setMaxNumRidges( twoD_Type, UInt const n, bool const setcounter ) {setMaxNumPoints( n, setcounter);}
+    void setMaxNumRidges( oneD_Type, UInt const, bool const ) {ERROR_MSG("RegionMesh::setMaxNumRidges, No ridges in 1D");}
 
     //! Changes Current capacity of Global Ridges.
     void setMaxNumGlobalRidges( threeD_Type, UInt const n ){ setMaxNumGlobalEdges( n );}
     void setMaxNumGlobalRidges( twoD_Type, UInt const n ){ setMaxNumGlobalPoints( n );}
-    void setMaxNumGlobalRidges( oneD_Type, UInt const n ){ ERROR_MSG("RegionMesh::setMaxNumGlobalRidges, No ridges in 1D");}
+    void setMaxNumGlobalRidges( oneD_Type, UInt const ){ ERROR_MSG("RegionMesh::setMaxNumGlobalRidges, No ridges in 1D");}
 
     //! Adds a Ridge.
     ridge_Type & addRidge( threeD_Type, bool const boundary ) {return addEdge( boundary);}
     ridge_Type & addRidge( twoD_Type, bool const boundary ) {return addPoint( boundary);}
-    ridge_Type & addRidge( oneD_Type, bool const boundary ) { ERROR_MSG("RegionMesh::addRidge, No ridges in 1D"); ; return M_aRidge;}
+    ridge_Type & addRidge( oneD_Type, bool const ) { ERROR_MSG("RegionMesh::addRidge, No ridges in 1D"); ; return M_aRidge;}
 
     //! i-th mesh ridge.
     ridge_Type const & ridge( threeD_Type, UInt const i ) const {return edge(i);}
     ridge_Type const & ridge( twoD_Type, UInt const i ) const {return point(i);}
-    ridge_Type const & ridge( oneD_Type, UInt const i ) const {ERROR_MSG("RegionMesh::ridge, No ridges in 1D"); return M_aRidge;}
+    ridge_Type const & ridge( oneD_Type, UInt const ) const {ERROR_MSG("RegionMesh::ridge, No ridges in 1D"); return M_aRidge;}
 
     //! i-th mesh ridge reference.
     ridge_Type & ridge( threeD_Type, UInt const i ) {return edge(i);}
@@ -3164,8 +3164,8 @@ template <typename GEOSHAPE, typename MC>
 inline UInt
 RegionMesh<GEOSHAPE, MC>::localFaceId( UInt const volId, UInt const locF ) const
 {
-	ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::localFaceId, It is not possible to use this method with 2D and 1D geometries.");
-	return localFacetId( volId, locF );
+    ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::localFaceId, It is not possible to use this method with 2D and 1D geometries.");
+    return localFacetId( volId, locF );
 }
 
 
@@ -3200,8 +3200,8 @@ template <typename GEOSHAPE, typename MC>
 typename RegionMesh<GEOSHAPE, MC>::facet_Type&
 RegionMesh<GEOSHAPE, MC>::boundaryFacet( oneD_Type, const UInt& i )
 {
-    	ASSERT_BD(i<2);
-    	return point(i*(numPoints()-1));
+        ASSERT_BD(i<2);
+        return point(i*(numPoints()-1));
 }
 
 /********************************************************************************
@@ -3213,10 +3213,10 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verbose, UInt ee, bool renumber )
 {
-	if(S_geoDimensions != 3)
-	{
-		ERROR_MSG("RegionMesh::updateElementRidges, It is not possible to use this method with 2D and 1D geometries.");
-	}
+    if(S_geoDimensions != 3)
+    {
+        ERROR_MSG("RegionMesh::updateElementRidges, It is not possible to use this method with 2D and 1D geometries.");
+    }
 
     // If the counter is set we trust it! Otherwise we use Euler formula
     // this is ok for domains with at most 1 hole!
@@ -3381,8 +3381,8 @@ void
 RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt ef )
 {
 
-	typedef BareEntitySelector<typename facetShape_Type::BasRefSha> bareEntitySelector_Type;
-	typedef typename bareEntitySelector_Type::bareEntity_Type bareFacet_type;
+    typedef BareEntitySelector<typename facetShape_Type::BasRefSha> bareEntitySelector_Type;
+    typedef typename bareEntitySelector_Type::bareEntity_Type bareFacet_type;
 
     if (verbose)
         std::cout << "     Updating element facets ... " << std::flush;
@@ -3448,25 +3448,25 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
         std::pair<UInt, bool> _check;
         for ( UInt j = 0; j < facetList().size(); ++j )
         {
-        	for (UInt k = 0; k < facetShape_Type::S_numVertices; k++)
-        		points[k] = ( facet( j ).point( k ) ).localId();
-           	_facet = bareEntitySelector_Type::makeBareEntity( points );
+            for (UInt k = 0; k < facetShape_Type::S_numVertices; k++)
+                points[k] = ( facet( j ).point( k ) ).localId();
+            _facet = bareEntitySelector_Type::makeBareEntity( points );
             _check = bareFacet.addIfNotThere( _facet.first );
             if (j>=this->numBoundaryFacets() ) extraBareFacet.addIfNotThere( _facet.first, j);
         }
     }
 
     for ( typename elements_Type::iterator elemIt = elementList().begin();
-    		elemIt != elementList().end(); ++elemIt )
+            elemIt != elementList().end(); ++elemIt )
     {
         elemLocalID = elemIt->localId();
         for ( UInt j = 0; j < element_Type::S_numLocalFacets; j++ )
         {
-        	for (UInt k = 0; k < facetShape_Type::S_numVertices; k++)
-        	{
-        		UInt id = ele.facetToPoint( j, k );
-        		points[k] = elemIt->point( id ).localId();
-        	}
+            for (UInt k = 0; k < facetShape_Type::S_numVertices; k++)
+            {
+                UInt id = ele.facetToPoint( j, k );
+                points[k] = elemIt->point( id ).localId();
+            }
             _facet = bareEntitySelector_Type::makeBareEntity( points );
 
             e = bareFacet.addIfNotThere( _facet.first );
@@ -3547,8 +3547,8 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, const bool verbose, UInt
 template <typename GEOSHAPE, typename MC>
 void RegionMesh<GEOSHAPE, MC>::updateElementFaces( bool createFaces, const bool verbose, UInt estimateFaceNumber)
 {
-	ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::updateElementFaces, It is not possible to use this method with 2D and 1D geometries.");
-	updateElementFacets( createFaces , verbose, estimateFaceNumber );
+    ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::updateElementFaces, It is not possible to use this method with 2D and 1D geometries.");
+    updateElementFacets( createFaces , verbose, estimateFaceNumber );
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -3564,8 +3564,8 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh<GEOSHAPE, MC>::cleanElementFaces()
 {
-	ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::cleanElementFaces(), It is not possible to use this method with 2D and 1D geometries.");
-	cleanElementFacets();
+    ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::cleanElementFaces(), It is not possible to use this method with 2D and 1D geometries.");
+    cleanElementFacets();
 }
 
 template <typename GEOSHAPE, typename MC>

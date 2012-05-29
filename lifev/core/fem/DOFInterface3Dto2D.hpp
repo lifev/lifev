@@ -401,9 +401,9 @@ updateDofConnections( const MeshType& mesh1 )
     UInt nbVertexPerFace = GeoBShape::S_numVertices; // Number of face's vertices
     UInt nbEdgePerFace = GeoBShape::S_numEdges;    // Number of face's edges
 
-    UInt nbDofPerVertex1 = M_refFE1->nbDofPerVertex; // number of DOF per vertices on mesh1
-    UInt nbDofPerEdge1 = M_refFE1->nbDofPerEdge;   // number of DOF per edges on mesh1
-    UInt nbDofPerFace1 = M_refFE1->nbDofPerFace;   // number of DOF per faces on mesh1
+    UInt nbDofPerVertex1 = M_refFE1->nbDofPerVertex(); // number of DOF per vertices on mesh1
+    UInt nbDofPerEdge1 = M_refFE1->nbDofPerEdge();   // number of DOF per edges on mesh1
+    UInt nbDofPerFace1 = M_refFE1->nbDofPerFace();   // number of DOF per faces on mesh1
 
     UInt nbVertexPerElement = GeoShape::S_numVertices; // Number of element's vertices
     UInt nbEdgePerElement = GeoShape::S_numEdges;    // Number of element's edges
