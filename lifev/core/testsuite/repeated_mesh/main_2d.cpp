@@ -274,7 +274,7 @@ main( int argc, char** argv )
         systemMatrixR->matrixPtr()->FillComplete();
         assemblyTimeR.stop();
         if( isLeader ) std::cout << "assemblyR time = " << assemblyTimeR.diff() << std::endl;
-
+/*
         if ( verbose ) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
         if ( verbose ) std::cout << " Time needed : " << adrAssemblerR.diffusionAssemblyChrono().diffCumul() << std::endl;
 
@@ -419,6 +419,7 @@ main( int argc, char** argv )
         exporter.exportPID( localMeshR, Comm, true );
         exporter.postProcess( 0 );
         if ( verbose ) std::cout << " done ! " << std::endl;
+        */
 
         if( isLeader ) std::cout << "End Result: TEST PASSED" << std::endl;
     }
