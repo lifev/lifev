@@ -163,6 +163,7 @@ public:
     //! file name for postprocessing has to include time dependency
     void setRegime(FieldRegimeEnum regime) {M_regime = regime;}
 
+    void setWhere( WhereEnum where ){M_where = where;}
     //@}
 
 
@@ -359,7 +360,7 @@ public:
      * @param dataFile data file.
      * @param section section in the data file.
      */
-    void setDataFromGetPot( const GetPot& dataFile, const std::string& section = "exporter" );
+    virtual void setDataFromGetPot( const GetPot& dataFile, const std::string& section = "exporter" );
 
     //! Set prefix.
     /*!
@@ -386,6 +387,15 @@ public:
     void setTimeIndex( const UInt& timeIndex )
     {
         M_timeIndex = timeIndex;
+    }
+
+    //! Set the time index of the first file
+    /*!
+     * @param timeIndexStart index of the first time frame
+     */
+    void setTimeIndexStart( const UInt& timeIndexStart )
+    {
+        M_timeIndexStart = timeIndexStart;
     }
 
     //! Set how many time step between two saves.
@@ -417,6 +427,7 @@ public:
 
     //! @name Get Methods
     //@{
+    const UInt& save() const { return M_save; }
 
     const UInt& timeIndexStart() const { return M_timeIndexStart; }
     const UInt& timeIndex() const { return M_timeIndex; }
@@ -450,6 +461,7 @@ protected:
     meshPtr_Type                M_mesh;
     int                         M_procId;
     std::string                 M_postfix;
+    UInt                        M_numImportProc;
 
     whereToDataIdMap_Type       M_whereToDataIdMap;
     feTypeToDataIdMap_Type      M_feTypeToDataIdMap;
@@ -543,27 +555,23 @@ std::string ExporterData<MeshType>::whereName() const
 // ===================================================
 template<typename MeshType>
 Exporter<MeshType>::Exporter():
-        M_prefix        ( "output"),
-        M_postDir       ( "./" ),
-        M_timeIndexStart( 0 ),
-        M_timeIndex     ( M_timeIndexStart ),
-        M_save          ( 1 ),
-        M_multimesh     ( true ),
+        M_prefix            ( "output"),
+        M_postDir           ( "./" ),
+        M_timeIndexStart    ( 0 ),
+        M_timeIndex         ( M_timeIndexStart ),
+        M_save              ( 1 ),
+        M_multimesh         ( true ),
         M_printConnectivity ( true ),
-        M_timeIndexWidth( 5 )
+        M_timeIndexWidth    ( 5 ),
+        M_numImportProc     ( 0 )
 {}
 
 template<typename MeshType>
 Exporter<MeshType>::Exporter( const GetPot& dfile, const std::string& prefix ):
-        M_prefix        ( prefix ),
-        M_postDir       ( dfile("exporter/post_dir", "./") ),
-        M_timeIndexStart( dfile("exporter/start",0) ),
-        M_timeIndex     ( M_timeIndexStart ),
-        M_save          ( dfile("exporter/save",1) ),
-        M_multimesh     ( dfile("exporter/multimesh",true) ),
-        M_printConnectivity ( true ),
-        M_timeIndexWidth( dfile("exporter/time_id_width",5) )
-{}
+        M_prefix        ( prefix )
+{
+    setDataFromGetPot(dfile);
+}
 
 // ===================================================
 // Methods
@@ -672,12 +680,14 @@ void Exporter<MeshType>::computePostfix()
 template<typename MeshType>
 void Exporter<MeshType>::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
 {
-    M_postDir        = dataFile( ( section + "/post_dir"  ).data(), "./" );
-    M_timeIndexStart = dataFile( ( section + "/start"     ).data(), 0 );
-    M_timeIndex      = M_timeIndexStart;
-    M_save           = dataFile( ( section + "/save"      ).data(), 1 );
-    M_multimesh      = dataFile( ( section + "/multimesh" ).data(), true );
-    M_timeIndexWidth = dataFile( ( section + "/time_id_width" ).data(), 5);
+    M_postDir           = dataFile( ( section + "/post_dir"  ).data(), "./" );
+    M_timeIndexStart    = dataFile( ( section + "/start"     ).data(), 0 );
+    M_timeIndex         = M_timeIndexStart;
+    M_save              = dataFile( ( section + "/save"      ).data(), 1 );
+    M_multimesh         = dataFile( ( section + "/multimesh" ).data(), true );
+    M_printConnectivity = dataFile( ( section + "/printConnectivity" ).data(), 1);
+    M_timeIndexWidth    = dataFile( ( section + "/time_id_width" ).data(), 5);
+    M_numImportProc     = dataFile( ( section + "/numImportProc" ).data(), 1);
 }
 
 template<typename MeshType>

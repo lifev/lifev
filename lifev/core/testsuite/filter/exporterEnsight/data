@@ -14,20 +14,46 @@
 
 [space_discretization]
 dimension = 1
-velFE = P2
-pressFE = P1
+velocity_fespace = P1
+velocity_fespace = P1
+mesh_from_file = true
+mesh_dir        = ./Mesh/
+mesh_type       = .mesh
+mesh_file       = CHOA009_t0_cm.mesh
+mesh_faces      = all
+mesh_edges      = all
 
 [time_discretization]
 initialtime = 0.
-endtime = 0.2
-timestep = 0.05
+endtime = 0.008
+timestep = 0.004
 
-[exporter]
-post_dir = ./
+[importer]
+post_dir = /Users/lucia/Documents/workspace/lifev-ecm2-parallel-2011/lifev-ecm2-parallel-debug/testsuite/test_harmonicExtension/
 start = 0
 save = 1
 multimesh = false
-time_id_width = 3
-exportMode = 2
-floatPrecision = 2
+time_id_width = 5
+exportMode = 1
+floatPrecision = 1
+numImportProc = 2
+import_globalIDMap = true
+testName         		= fluid
+testMeshName			= heProblem
+velocityName			= velocity
+pressureName			= pressure
+meshVelocityName		= computedVelocity
+meshDisplacementName	= computedDisplacementFromT0
+moving = 1
+loadFluid = 0
+
+[exporter]
+post_dir = ./
+start = 1
+save = 1
+multimesh = false
+time_id_width = 5
+exportMode = 1
+floatPrecision = 1
 numImportProc = 1
+testName         = fluidReduced

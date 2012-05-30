@@ -147,14 +147,19 @@ private:
     void writeAsciiGeometry( const std::string geoFile );
 
     void writeAscii(const exporterData_Type& dvar);
-    void writeAsciiScalar(const exporterData_Type& dvar);
-    void writeAsciiVector(const exporterData_Type& dvar);
+    void writeAsciiValues(const exporterData_Type& dvar, const std::string& suffix);
     void caseMeshSection(std::ofstream& casef);
     void caseVariableSection(std::ofstream& casef);
     void caseTimeSection(std::ofstream& casef, const Real& time);
+    void writeGlobalIDs(const std::string& filename);
 
-    void readScalar( exporterData_Type& dvar );
-    void readVector( exporterData_Type& dvar );
+    void readAscii( exporterData_Type& dvar );
+    void readAsciiValues( exporterData_Type& dvar, const std::string& suffix );
+    void readGlobalIDs( const std::string& filename,
+                        std::vector<Real>& globalDOF );
+
+    void readScalar( exporterData_Type& dvar ) { readAsciiValues(dvar, ".scl"); }
+    void readVector( exporterData_Type& dvar ) { readAsciiValues(dvar, ".vct"); }
 
     void initProcId();
     void setNodesMap( std::vector<Int> ltGNodesMap );
@@ -163,15 +168,16 @@ private:
 
     //! @name Private members
     //@{
-    std::string M_importDir;
-    UInt M_steps;
-    std::vector<Int> M_ltGNodesMap;
-    std::string M_me;
+    UInt                        M_steps;
+    std::vector<Int>            M_ltGNodesMap;
+    std::string                 M_me;
 
     std::string                 M_FEstr;
     std::string                 M_bdFEstr;
     UInt                        M_nbLocalDof;
     UInt                        M_nbLocalBdDof;
+
+    bool                        M_firstTimeStep;
     //@}
 };
 
@@ -187,10 +193,10 @@ private:
 template<typename MeshType>
 ExporterEnsight<MeshType>::ExporterEnsight():
         super(),
-        M_importDir("./"),
         M_steps(0),
         M_ltGNodesMap(),
-        M_me()
+        M_me(),
+        M_firstTimeStep(true)
 {
 }
 
@@ -199,22 +205,24 @@ ExporterEnsight<MeshType>::ExporterEnsight(const GetPot& dfile, meshPtr_Type mes
                                            const Int& procId)
         :
         super(dfile, prefix),
-        M_importDir(dfile("exporter/import_dir", "./")),
         M_steps(0),
         M_ltGNodesMap(),
-        M_me()
+        M_me(),
+        M_firstTimeStep(true)
 {
+    this->setDataFromGetPot(dfile,"exporter");
     this->setMeshProcId(mesh,procId);
 }
 
 template<typename MeshType>
 ExporterEnsight<MeshType>::ExporterEnsight(const GetPot& dfile, const std::string& prefix):
         super(dfile,prefix),
-        M_importDir(dfile("exporter/import_dir", "./")),
         M_steps(0),
         M_ltGNodesMap(),
-        M_me()
+        M_me(),
+        M_firstTimeStep(true)
 {
+    this->setDataFromGetPot(dfile,"exporter");
 }
 
 // =====================
@@ -225,7 +233,16 @@ template<typename MeshType>
 void ExporterEnsight<MeshType>::postProcess(const Real& time)
 {
     // typedef std::list< exporterData_Type >::iterator Iterator;
+    if( M_firstTimeStep )
+    {
+        if (!this->M_multimesh)
+            writeAsciiGeometry( this->M_postDir + this->M_prefix + this->M_me + ".geo" );
 
+        writeGlobalIDs( this->M_postDir + super::M_prefix + "_globalIDs" +
+                        this->M_me + ".scl" );
+
+        M_firstTimeStep = false;
+    }
     this->computePostfix();
 
     std::size_t found( this->M_postfix.find( "*" ) );
@@ -280,7 +297,7 @@ void ExporterEnsight<MeshType>::import(const Real& time)
 
     this->computePostfix();
 
-    assert( this->M_postfix != "*****" );
+    assert( this->M_postfix.find( "*" ) == string::npos );
 
     if (!this->M_procId) std::cout << "  X-  ExporterEnsight importing ..."<< std::endl;
 
@@ -335,8 +352,6 @@ void ExporterEnsight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const In
         ERROR_MSG( "FE not allowed in ExporterEnsight writer" );
     }
 
-    if (!this->M_multimesh)
-        writeAsciiGeometry( this->M_postDir + this->M_prefix + this->M_me + ".geo" );
 }
 
 // ===================
@@ -416,64 +431,28 @@ void ExporterEnsight<MeshType>::writeAscii(const exporterData_Type& dvar)
     switch ( dvar.fieldType() )
     {
     case exporterData_Type::ScalarField:
-        writeAsciiScalar(dvar);
+        writeAsciiValues(dvar,".scl");
         break;
     case exporterData_Type::VectorField:
-        writeAsciiVector(dvar);
+        writeAsciiValues(dvar,".vct");
         break;
     }
 
 }
 
 template <typename MeshType>
-void ExporterEnsight<MeshType>::writeAsciiScalar(const exporterData_Type& dvar)
+void ExporterEnsight<MeshType>::writeAsciiValues(const exporterData_Type& dvar, const std::string& suffix)
 {
     using std::setw;
 
-    std::ofstream scalarFile;
+    std::ofstream exportFile;
 
     if ( dvar.regime() == exporterData_Type::SteadyRegime )
-        scalarFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
-                          this->M_me + ".scl").c_str() );
+        exportFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+                          this->M_me + suffix).c_str() );
     else
-        scalarFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
-                          this->M_postfix + this->M_me + ".scl").c_str() );
-
-    UInt count=0;
-
-    UInt start = dvar.start();
-    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
-    scalarFile<<"Scalar per node\n";
-
-    scalarFile.setf(std::ios::right | std::ios_base::scientific);
-    scalarFile.precision(5);
-
-    for (UInt i=0; i<vertexNumber; ++i)
-    {
-        Int id = this->M_ltGNodesMap[i];
-        scalarFile << setw(12) << float(dvar(start + id)) ;
-        ++count;
-        if ( count == 6 )
-        {
-            scalarFile << "\n";
-            count=0;
-        }
-    }
-    scalarFile << std::endl;
-}
-
-template <typename MeshType> void ExporterEnsight<MeshType>::writeAsciiVector(const exporterData_Type& dvar)
-{
-    using std::setw;
-
-    std::ofstream vectorFile;
-
-    if ( dvar.regime() == exporterData_Type::SteadyRegime )
-        vectorFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
-                          this->M_me + ".vct").c_str() );
-    else
-        vectorFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
-                          this->M_postfix + this->M_me + ".vct").c_str() );
+        exportFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+                          this->M_postfix + this->M_me + suffix).c_str() );
 
     UInt count=0;
 
@@ -481,24 +460,56 @@ template <typename MeshType> void ExporterEnsight<MeshType>::writeAsciiVector(co
     UInt start = dvar.start();
     UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
 
-    vectorFile<<"Vector per node\n";
+    if( suffix.compare(".vct") == 0 )
+        exportFile<<"Vector per node\n";
+    else if( suffix.compare(".scl") == 0 )
+        exportFile<<"Scalar per node\n";
 
-    vectorFile.setf(std::ios::right | std::ios_base::scientific);
-    vectorFile.precision(5);
+    exportFile.setf(std::ios::right | std::ios_base::scientific);
+    exportFile.precision(5);
 
     for (UInt i=0; i<vertexNumber; ++i)
         for (UInt j=0; j< dvar.fieldDim(); ++j)
         {
             Int id = this->M_ltGNodesMap[i];
-            vectorFile << setw(12) << float(dvar(start + j * size + id)) ;
+            exportFile << setw(12) << float(dvar(start + j * size + id)) ;
             ++count;
             if ( count == 6 )
             {
-                vectorFile << "\n";
+                exportFile << "\n";
                 count=0;
             }
         }
-    vectorFile << std::endl;
+    exportFile << std::endl;
+}
+
+template <typename MeshType>
+void ExporterEnsight<MeshType>::writeGlobalIDs(const std::string& filename)
+{
+    using std::setw;
+
+    std::ofstream globalIDsFile;
+
+    globalIDsFile.open( filename.c_str() );
+
+    UInt count=0;
+
+    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
+    globalIDsFile<<"Node global ID "<<vertexNumber<<"\n";
+
+    for (UInt i=0; i<vertexNumber; ++i)
+    {
+        Int id = this->M_ltGNodesMap[i];
+        globalIDsFile << setw(12) << id ;
+        ++count;
+        if ( count == 6 )
+        {
+            globalIDsFile << "\n";
+            count=0;
+        }
+    }
+    globalIDsFile << std::endl;
+    globalIDsFile.close();
 }
 
 template <typename MeshType>
@@ -506,7 +517,12 @@ void ExporterEnsight<MeshType>::caseMeshSection(std::ofstream& casef)
 {
     casef << "GEOMETRY\n";
     if ( this->M_multimesh )
-        casef << "model: 1 " + this->M_prefix + ".*****"<< this->M_me << ".geo change_coords_only\n";
+    {
+        std::string stars(".");
+        for (UInt cc(0); cc<this->M_timeIndexWidth; ++cc) stars+="*";
+
+        casef << "model: 1 " + this->M_prefix + stars << this->M_me << ".geo change_coords_only\n";
+    }
     else
         casef << "model: 1 " + this->M_prefix + this->M_me + ".geo\n";
 }
@@ -522,7 +538,12 @@ void ExporterEnsight<MeshType>::caseVariableSection(std::ofstream& casef)
         if ( i->regime() == exporterData_Type::SteadyRegime )
             str = "";
         else
-            str = ".*****";
+        {
+            std::string stars(".");
+            for (UInt cc(0); cc<this->M_timeIndexWidth; ++cc) stars+="*";
+
+            str = stars;
+        }
         aux = i->variableName() + " " + super::M_prefix + "_" + i->variableName();
         switch ( i->fieldType() )
         {
@@ -564,81 +585,84 @@ void ExporterEnsight<MeshType>::caseTimeSection(std::ofstream& casef, const Real
 }
 
 template <typename MeshType>
-void ExporterEnsight<MeshType>::readScalar( exporterData_Type& dvar )
+void ExporterEnsight<MeshType>::readAscii(exporterData_Type& dvar)
 {
 
-    std::string filename( M_importDir + super::M_prefix + "_" + dvar.variableName() +
-                          this->M_postfix + this->M_me + ".scl" );
-    std::ifstream scalarFile( filename.c_str() );
-
-    if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
-
-    ASSERT(scalarFile.good(), std::stringstream("There is an error while reading " +
-                                                filename).str().c_str() );
-
-    UInt start = dvar.start();
-
-    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
-
-    std::string trashcan;
-
-    scalarFile >> trashcan >> trashcan >> trashcan;
-
-    scalarFile.setf(std::ios::right | std::ios_base::scientific);
-    scalarFile.precision(5);
-
-    std::map<Int,Int>::iterator iter;
-
-    for (UInt i=0; i<vertexNumber; ++i)
+    switch ( dvar.fieldType() )
     {
-        ASSERT(scalarFile.good(), std::stringstream("There is an error while reading " +
-                                                    filename).str().c_str() );
-
-        Int id = this->M_ltGNodesMap[i];
-        scalarFile.width(12);
-        scalarFile >> dvar(start + id) ;
+    case exporterData_Type::ScalarField:
+        writeAsciiValues(dvar,".scl");
+        break;
+    case exporterData_Type::VectorField:
+        writeAsciiValues(dvar,".vct");
+        break;
     }
 
-    ASSERT(!scalarFile.fail(), std::stringstream("There is an error while reading " +
-                                                 filename).str().c_str() );
 }
 
-template <typename MeshType> void ExporterEnsight<MeshType>::readVector(exporterData_Type& dvar)
+template <typename MeshType> void ExporterEnsight<MeshType>::readAsciiValues(exporterData_Type& dvar, const std::string& suffix)
 {
+    ASSERT( this->M_numImportProc, "The number of pieces to be loaded was not specified." );
 
-    std::string filename( M_importDir + super::M_prefix + "_" + dvar.variableName() +
-                          this->M_postfix + this->M_me + ".vct" );
-    std::ifstream vectorFile( filename.c_str() );
+    // this vector lists the global IDs of DOFs listed in each piece
+    std::vector<Real> globalDOF;
 
-    if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
+    // Each processor will read all the files, and fill just its own component of the vectors
+    for( UInt iProc = 0; iProc < this->M_numImportProc; ++iProc )
+    {
+        // build the postfix for the file corresponding to part iProc
+        std::ostringstream index;
+        index.fill( '0' );
+        index << std::setw(1) << "." ;
+        index << std::setw(3) << iProc;
 
-    ASSERT(vectorFile.good(), std::stringstream("There is an error while reading " +
-                                                filename).str().c_str() );
+        // fill globalDOF, the list of DOF IDs on which we are going to operate
+        readGlobalIDs( this->M_postDir + super::M_prefix + "_globalIDs" + index.str() + ".scl", globalDOF );
 
-    UInt size  = dvar.numDOF();
-    UInt start = dvar.start();
-    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
+        // open the file with the vector field to be imported
+        std::string filename( this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+                              this->M_postfix + index.str() + suffix );
+        std::ifstream importFile( filename.c_str() );
 
-    std::string trashcan;
+        // debugging step
+        if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
 
-    vectorFile >> trashcan >> trashcan >> trashcan;
+        ASSERT(importFile.good(), std::stringstream("There is an error while reading " +
+                                                    filename).str().c_str() );
+        // parameters to access ExporterData structures
+        UInt size  = dvar.numDOF();
+        UInt start = dvar.start();
 
-    vectorFile.setf(std::ios::right | std::ios_base::scientific);
-    vectorFile.precision(5);
+        // discard the header of the file
+        std::string trashcan;
+        importFile >> trashcan >> trashcan >> trashcan;
 
-    for (UInt i=0; i<vertexNumber; ++i)
-        for (UInt j=0; j< dvar.fieldDim(); ++j)
+        // loop over the DOFs listed in the current piece
+        for (UInt i=0; i<globalDOF.size(); ++i)
         {
-            ASSERT(vectorFile.good(), std::stringstream("There is an error while reading " +
-                                                        filename).str().c_str() );
+            // extract the global ID of each DOF
+            Int id = globalDOF[i];
+            // we are working with vectorial fields
+            for (UInt j=0; j<dvar.fieldDim(); ++j)
+            {
+                // this is the value of the field, to be imported
+                Real value(0);
+                ASSERT(importFile.good(), std::stringstream("There is an error while reading " +
+                                                            filename).str().c_str() );
+                importFile >> value;
 
-            Int id = this->M_ltGNodesMap[i];
-            vectorFile.width(12);
-            vectorFile >> dvar(start + j*size + id) ;
+                // do the actual import only if the global ID belongs to the current process
+                if( dvar.feSpacePtr()->map().map(Repeated)->MyGID( id ) )
+                {
+                    dvar(start + j*size + id) = value;
+                }
+            }
         }
 
-    ASSERT(!vectorFile.fail(), std::stringstream("There is an error while reading " +
-                                                 filename).str().c_str() );
+        ASSERT(!importFile.fail(), std::stringstream("There is an error while reading " +
+                                                     filename).str().c_str() );
+        importFile.close();
+    }
 }
 
 template<typename MeshType>
@@ -669,6 +693,44 @@ void ExporterEnsight<MeshType>::initNodesMap()
     {
         M_ltGNodesMap[i] = this->M_mesh->pointList( i ).id();
     }
+}
+
+template<typename MeshType>
+void ExporterEnsight<MeshType>::readGlobalIDs( const std::string& filename,
+                                               std::vector<Real>& globalDOF )
+{
+    std::ifstream globalIDsFile( filename.c_str() );
+    globalDOF.resize(0);
+
+    if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
+
+    ASSERT(globalIDsFile.good(), std::stringstream("There is an error while reading " +
+                                                   filename).str().c_str() );
+
+    UInt vertexNumber; // = static_cast<UInt> (this->M_ltGNodesMap.size()); // will become this->M_numDOF, TP 5/2011
+
+
+    // file parsing: line by line
+    std::string line;
+    std::stringstream parseLine;
+
+    getline( globalIDsFile, line ); // "Node global ID N"
+    parseLine.str(line);
+    std::string trashcan;
+    parseLine >> trashcan >> trashcan >> trashcan >> vertexNumber;
+
+    for( UInt iNode = 0; iNode < vertexNumber; ++iNode )
+    {
+        Real gID(0);
+        globalIDsFile >> gID;
+        globalDOF.push_back( gID );
+        // std::cout << globalDOF[iNode] << " " << std::flush;
+    }
+    // std::cout << std::endl;
+
+    ASSERT(!globalIDsFile.fail(), std::stringstream("There is an error while reading " +
+                                                    filename).str().c_str() );
+    globalIDsFile.close();
 }
 
 } // Namespace LifeV

@@ -175,6 +175,13 @@ public:
         std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
     }
 
+    //! Set data from file.
+    /*!
+       @param dataFile data file.
+       @param section section in the data file.
+     */
+    virtual void setDataFromGetPot( const GetPot& dataFile, const std::string& section = "exporter" );
+
     //@}
 
     //! @name Get methods
@@ -316,8 +323,6 @@ private:
     FLOAT_PRECISION M_floatPrecision;
 
     std::map< std::string, std::list<std::string> > M_pvtuFiles;
-
-    UInt M_numImportProc;
     //@}
 
 };
@@ -335,8 +340,7 @@ template<typename Mesh>
 ExporterVTK<Mesh>::ExporterVTK():
 super(),
 M_exportMode(ASCII_EXPORT),
-M_floatPrecision( DOUBLE_PRECISION ),
-M_numImportProc( 0 )
+M_floatPrecision( DOUBLE_PRECISION )
 {
 }
 
@@ -347,7 +351,18 @@ template<typename Mesh> ExporterVTK<Mesh >::ExporterVTK(
                 :
                 super(data_file, prefix)
 {
-    switch( data_file("exporter/exportMode",1) )
+    this->setDataFromGetPot(data_file);
+}
+
+
+template<typename Mesh>
+void ExporterVTK<Mesh >::setDataFromGetPot(
+                const GetPot& data_file,
+                const std::string& section )
+{
+    super::setDataFromGetPot( data_file, section );
+
+    switch( data_file( (section+"/exportMode").c_str(),1) )
     {
         case 1:
             M_exportMode = ASCII_EXPORT;
@@ -357,7 +372,7 @@ template<typename Mesh> ExporterVTK<Mesh >::ExporterVTK(
             break;
 
     }
-    switch( data_file("exporter/floatPrecision",2) )
+    switch( data_file( (section+"/floatPrecision").c_str(),2) )
     {
         case 1:
             M_floatPrecision = SINGLE_PRECISION;
@@ -367,11 +382,8 @@ template<typename Mesh> ExporterVTK<Mesh >::ExporterVTK(
             break;
 
     }
-    M_numImportProc = data_file("exporter/numImportProc",1);
 
 }
-
-
 // ==============
 // Destructor
 // ==============
@@ -537,6 +549,7 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
         case FE_P2_2D:
             vtkCellType = VTK_QUADRATIC_TRIANGLE;
             break;
+        case FE_P0_3D:
         case FE_P1_3D:
             vtkCellType = VTK_TETRA;
             break;
@@ -694,7 +707,7 @@ template <typename Mesh>
 void
 ExporterVTK<Mesh>::readVTUFiles( exporterData_Type& dvar )
 {
-    ASSERT( M_numImportProc, "The number of pieces to be loaded was not specified." );
+    ASSERT( this->M_numImportProc, "The number of pieces to be loaded was not specified." );
 
     UInt numPoints, numCells;
     std::vector<Real> inputValues;
@@ -703,11 +716,11 @@ ExporterVTK<Mesh>::readVTUFiles( exporterData_Type& dvar )
     UInt start        ( dvar.start() );
     UInt numGlobalDOF ( dvar.numDOF() );
 
-    dvar.feSpacePtr()->map().map(Repeated)->Print( std::cout );
-    dvar.feSpacePtr()->map().map(Unique)->Print( std::cout );
+//    dvar.feSpacePtr()->map().map(Repeated)->Print( std::cout );
+//    dvar.feSpacePtr()->map().map(Unique)->Print( std::cout );
 
     // Each processor will read all the files, and fill just its own component of the vectors
-    for( UInt iProc = 0; iProc < M_numImportProc; ++iProc )
+    for( UInt iProc = 0; iProc < this->M_numImportProc; ++iProc )
     {
         std::string filename( this->M_postDir + this->M_prefix + "_" + dvar.variableName() +
                               this->M_postfix + "." + iProc + ".vtu" );
@@ -762,6 +775,11 @@ ExporterVTK<Mesh>::readVTUFiles( exporterData_Type& dvar )
                             getline( inputFile, line );
                             readBinaryData( line, inputValues, numBitsFloat );
                         }
+                        else
+                        {
+                            getline( inputFile, line );
+                            readASCIIData( line, inputValues );
+                        }
                     }
                     if ( line.find( "GlobalId" ) != std::string::npos )
                     {
@@ -776,9 +794,9 @@ ExporterVTK<Mesh>::readVTUFiles( exporterData_Type& dvar )
                     Int id = localDOF[iPoint];
                     if( dvar.feSpacePtr()->map().map(Repeated)->MyGID( id ) )
                     {
-                        std::cout << "\nProcessor " << this->M_procId
-                                        << " will take care of (" << dvar.variableName()
-                                        << ") Global ID " << id << std::endl;
+//                        std::cout << "\nProcessor " << this->M_procId
+//                                        << " will take care of (" << dvar.variableName()
+//                                        << ") Global ID " << id << std::endl;
                         for (UInt iCoor=0; iCoor< dvar.fieldDim(); ++iCoor)
                         {
                             dvar( start + id + iCoor * numGlobalDOF ) =

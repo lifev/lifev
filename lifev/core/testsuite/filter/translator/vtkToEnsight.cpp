@@ -50,11 +50,11 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <lifev/core/LifeV.hpp>
-#include <lifev/core/function/Womersley.hpp>
-#include <lifev/core/function/RossEthierSteinmanInc.hpp>
-#include <lifev/core/function/RossEthierSteinmanDec.hpp>
-#include "testExporterVTK.hpp"
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifefunctions/Womersley.hpp>
+#include <life/lifefunctions/RossEthierSteinmanInc.hpp>
+#include <life/lifefunctions/RossEthierSteinmanDec.hpp>
+#include "../importExport/TestImportExport.hpp"
 
 using namespace LifeV;
 
@@ -95,11 +95,11 @@ main( int argc, char** argv )
 #endif
 
     GetPot command_line(argc,argv);
-    TestExporterVTK testExporterVTK( commPtr );
+    TestImportExport testImportExport( commPtr );
 
     bool passed(false);
 
-    passed = testExporterVTK.testExport( command_line );
+    passed = testImportExport.run<ExporterVTK<mesh_Type>, ExporterEnsight<mesh_Type> >( command_line, "import" );
 
     // ----- End of test calls -----
 

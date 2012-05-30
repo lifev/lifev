@@ -12,3 +12,37 @@
 ### DATA FILE #####################################################################################
 ###################################################################################################
 
+[space_discretization]
+dimension        = 1
+velocity_fespace = P1
+pressure_fespace = P1
+mesh_from_file  = true
+mesh_dir        = ./Mesh/
+mesh_type       = .mesh
+mesh_file       = P0086_2bend_fext_re_0.15_sc_10.mesh
+mesh_faces      = all
+mesh_edges      = all
+
+[time_discretization]
+initialtime     = 0.7
+endtime         = 0.75
+timestep        = 0.05
+
+[importer]
+post_dir        = ./importDir/
+start           = 16
+save            = 1
+multimesh       = false
+time_id_width   = 3
+numImportProc   = 40
+varName         = fluid
+
+[exporter]
+post_dir        = ./
+start           = 16
+save            = 1
+multimesh       = false
+time_id_width   = 3
+exportMode      = 1
+floatPrecision  = 1
+varName         = fluidReduced
