@@ -69,9 +69,15 @@ public:
     //@{
 
     typedef MapEpetra                        map_Type;
+
     typedef FESpace<meshType, map_Type>      fespace_Type;
     typedef boost::shared_ptr<fespace_Type>  fespacePtr_Type;
+
     typedef AssemblyElemental::function_Type function_Type;
+
+    typedef boost::shared_ptr<matrixType>    matrixPtr_Type;
+
+    typedef LifeChrono                       chrono_Type;
 
     //@}
 
@@ -183,27 +189,36 @@ public:
     //! Add the mass using offsets
     void addPressureMass(matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
 
-    //! Add the convective term
-    void addConvection(matrixType& matrix, const vectorType& beta)
+    //! Add a consistent stabilizing term
+    void addMassDivW(matrixType& matrix, const Real& coefficient, const vectorType& beta)
     {
-        addConvection(matrix,beta,0,0);
+        addMassDivW(matrix,coefficient,beta,0,0);
+    }
+
+    //! Add a consistent stabilizing term with the given offsets
+    void addMassDivW(matrixType& matrix, const Real& coefficient, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp);
+
+    //! Add the convective term
+    void addConvection(matrixType& matrix, const Real& coefficient, const vectorType& beta)
+    {
+        addConvection(matrix,coefficient,beta,0,0);
     }
 
     //! Add the convective term with the given offsets
-    void addConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp);
+    void addConvection(matrixType& matrix, const Real& coefficient, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp);
 
     //! Add the convective term
-    void addSymmetricConvection(matrixType& matrix, const vectorType& beta)
+    void addSymmetricConvection(matrixType& matrix, const Real& coefficient, const vectorType& beta)
     {
-        addSymmetricConvection(matrix,beta,0,0);
+        addSymmetricConvection(matrix,coefficient,beta,0,0);
     }
 
     //! Add the symmetric convective term with the given offset
-    void addSymmetricConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp);
+    void addSymmetricConvection(matrixType& matrix, const Real& coefficient, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp);
 
 
     //! Add an explicit convection term to the right hand side
-    void addConvectionRhs(vectorType& rhs, const vectorType& velocity);
+    void addConvectionRhs(vectorType& rhs, const Real& coefficient, const vectorType& velocity);
 
     void addMassRhs(vectorType& rhs, const function_Type& fun, const Real& t);
 
@@ -219,7 +234,7 @@ public:
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
     */
-    void setQuadRuleForMassRhs(const QuadratureRule& qr)
+    inline void setQuadRuleForMassRhs(const QuadratureRule& qr)
     {
         ASSERT(M_massRhsCFE != 0,"No Rhs currentFE for setting the quadrature rule!");
         M_massRhsCFE->setQuadRule(qr);
@@ -236,14 +251,14 @@ public:
 
 private:
 
-    typedef CurrentFE                          currentFE_Type;
-    typedef boost::scoped_ptr<currentFE_Type>  currentFEPtr_Type;
+    typedef CurrentFE                                    currentFE_Type;
+    typedef boost::scoped_ptr<currentFE_Type>            currentFEPtr_Type;
 
-    typedef MatrixElemental                    localmatrixType;
-    typedef boost::scoped_ptr<localmatrixType> localMatrixPtr_Type;
+    typedef MatrixElemental                              localMatrix_Type;
+    typedef boost::scoped_ptr<localMatrix_Type>          localMatrixPtr_Type;
 
-    typedef VectorElemental                    localvectorType;
-    typedef boost::scoped_ptr<localvectorType> localVectorPtr_Type;
+    typedef VectorElemental                              localVector_Type;
+    typedef boost::scoped_ptr<localVector_Type>          localVectorPtr_Type;
 
 
     //! @name Private Methods
@@ -397,33 +412,29 @@ setup(const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const fe
                                                  M_uFESpace->fe().geoMap(),
                                                  QuadratureRuleProvider::provideExactnessMax(TETRA,2*betaDegree+betaDegree-1)));
 
-    M_localViscous.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),
+    M_localViscous.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),
                                               M_uFESpace->fieldDim(),
                                               M_uFESpace->fieldDim()));
-
-    M_localGradPressure.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),nDimensions,0,
+    M_localGradPressure.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),nDimensions,0,
                                                    M_pFESpace->fe().nbFEDof(),0,1));
 
-    M_localDivergence.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),0,nDimensions,
+    M_localDivergence.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),0,nDimensions,
                                                  M_pFESpace->fe().nbFEDof(),1,0));
-
-    M_localMass.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),
+    M_localMass.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),
                                            M_uFESpace->fieldDim(),
                                            M_uFESpace->fieldDim()));
-
-    M_localMassPressure.reset(new localmatrixType(M_pFESpace->fe().nbFEDof(),
+    M_localMassPressure.reset(new localMatrix_Type(M_pFESpace->fe().nbFEDof(),
                                                    M_pFESpace->fieldDim(),
                                                    M_pFESpace->fieldDim()));
-
-    M_localConvection.reset(new localmatrixType(M_uFESpace->fe().nbFEDof(),
+    M_localConvection.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),
                                                  M_uFESpace->fieldDim(),
                                                  M_uFESpace->fieldDim()));
 
-    M_localConvectionRhs.reset(new localvectorType(M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim()));
+    M_localConvectionRhs.reset(new localVector_Type(M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim()));
 
     M_massRhsCFE.reset(new currentFE_Type(M_uFESpace->refFE(),M_uFESpace->fe().geoMap(),M_uFESpace->qr()));
 
-    M_localMassRhs.reset(new localvectorType(M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim()));
+    M_localMassRhs.reset(new localVector_Type(M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim()));
 
 
 
@@ -668,12 +679,12 @@ addDivergence(matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp, 
 template< typename meshType, typename matrixType, typename vectorType>
 void
 OseenAssembler<meshType,matrixType,vectorType>::
-addConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp)
+addConvection(matrixType& matrix, const Real& coefficient, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp)
 {
     // Beta has to be repeated
     if (beta.mapType() == Unique)
     {
-        addConvection(matrix,vectorType(beta,Repeated),offsetLeft,offsetUp);
+        addConvection(matrix,coefficient,vectorType(beta,Repeated),offsetLeft,offsetUp);
         return;
     }
 
@@ -706,7 +717,7 @@ addConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft
         AssemblyElemental::interpolate(localBetaValue,*M_convectionBetaCFE,nDimensions,M_betaFESpace->dof(),iterElement,beta);
 
         // Local convection
-        AssemblyElemental::advection(*M_localConvection,*M_convectionUCFE,localBetaValue,fieldDim);
+        AssemblyElemental::advection(*M_localConvection,*M_convectionUCFE,coefficient,localBetaValue,fieldDim);
 
         // Assembly
         for (UInt iFieldDim(0); iFieldDim<nDimensions; ++iFieldDim)
@@ -726,20 +737,20 @@ addConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft
 template< typename meshType, typename matrixType, typename vectorType>
 void
 OseenAssembler<meshType,matrixType,vectorType>::
-addSymmetricConvection(matrixType& matrix, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp)
+addSymmetricConvection(matrixType& matrix, const Real& coefficient, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp)
 {
     // Beta has to be repeated
     if (beta.mapType() == Unique)
     {
-        addSymmetricConvection(matrix,vectorType(beta,Repeated),offsetLeft,offsetUp);
+        addSymmetricConvection(matrix,coefficient,vectorType(beta,Repeated),offsetLeft,offsetUp);
         return;
     }
 
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the convection.");
     ASSERT(M_betaFESpace != 0, "No convective FE space for assembling the convection.");
-    ASSERT(offsetLeft + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalCols(),
+    ASSERT((int)offsetLeft + (int)M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalCols(),
            "The matrix is too small (columns) for the assembly of the convection");
-    ASSERT(offsetUp + M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalRows(),
+    ASSERT((int)offsetUp + (int)M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalRows(),
            " The matrix is too small (rows) for the assembly of the convection");
 
     // Some constants
@@ -771,7 +782,7 @@ addSymmetricConvection(matrixType& matrix, const vectorType& beta, const UInt& o
         // AssemblyElemental::advection(*M_localConvection,*M_convectionUCFE,localBetaValue,fieldDim);
 
         // Local convection, 1/2 \beta \grad u v + 1/2 u\grad \beta v
-        AssemblyElemental::symmetrizedAdvection(*M_localConvection, *M_convectionUCFE, localBetaValue, localBetaGradient, fieldDim);
+        AssemblyElemental::symmetrizedAdvection(*M_localConvection, *M_convectionUCFE, coefficient, localBetaGradient, fieldDim);
 
         // Assembly
         for (UInt iFieldDim(0); iFieldDim<nDimensions; ++iFieldDim)
@@ -795,12 +806,12 @@ addSymmetricConvection(matrixType& matrix, const vectorType& beta, const UInt& o
 template< typename meshType, typename matrixType, typename vectorType>
 void
 OseenAssembler<meshType,matrixType,vectorType>::
-addConvectionRhs(vectorType& rhs, const vectorType& velocity)
+addConvectionRhs(vectorType& rhs, const Real& coefficient, const vectorType& velocity)
 {
     // velocity has to be repeated!
     if (velocity.mapType() == Unique)
     {
-        addConvectionRhs(rhs, vectorType(velocity,Repeated));
+        addConvectionRhs(rhs, coefficient, vectorType(velocity,Repeated));
         return;
     }
 
@@ -838,7 +849,7 @@ addConvectionRhs(vectorType& rhs, const vectorType& velocity)
             }
         }
 
-        source_advection(localVelocity,localVelocity,*M_localConvectionRhs, *M_convectionRhsUCFE);
+        source_advection(coefficient,localVelocity,localVelocity,*M_localConvectionRhs, *M_convectionRhsUCFE);
 
         // Here add in the global rhs
         for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
@@ -905,9 +916,9 @@ addPressureMass(matrixType& matrix, const Real& coefficient, const UInt& offsetL
 {
 
     ASSERT(M_pFESpace != 0, "No pressure FE space for assembling the mass.");
-    ASSERT(offsetLeft + M_pFESpace->dof().numTotalDof() <= matrix.matrixPtr()->NumGlobalCols(),
+    ASSERT((int)offsetLeft + (int)M_pFESpace->dof().numTotalDof() <= matrix.matrixPtr()->NumGlobalCols(),
            "The matrix is too small (columns) for the assembly of the mass");
-    ASSERT(offsetUp + M_pFESpace->dof().numTotalDof() <= matrix.matrixPtr()->NumGlobalRows(),
+    ASSERT((int)offsetUp + (int)M_pFESpace->dof().numTotalDof() <= matrix.matrixPtr()->NumGlobalRows(),
            " The matrix is too small (rows) for the assembly of the mass");
 
     // Some constants
@@ -942,6 +953,63 @@ addPressureMass(matrixType& matrix, const Real& coefficient, const UInt& offsetL
     }
 }
 
+template< typename meshType, typename matrixType, typename vectorType>
+void
+OseenAssembler<meshType,matrixType,vectorType>::
+addMassDivW(matrixType& matrix, const Real& coefficient, const vectorType& beta, const UInt& offsetLeft, const UInt offsetUp)
+{
+    // Beta has to be repeated
+    if (beta.mapType() == Unique)
+    {
+        addMassDivW(matrix,coefficient,vectorType(beta,Repeated),offsetLeft,offsetUp);
+        return;
+    }
+
+    ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the mass.");
+    ASSERT(M_betaFESpace != 0, "No convective FE space for assembling the divergence.");
+    ASSERT((int)offsetLeft + (int)M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalCols(),
+           "The matrix is too small (columns) for the assembly of the mass");
+    ASSERT((int)offsetUp + (int)M_uFESpace->dof().numTotalDof()*nDimensions <= matrix.matrixPtr()->NumGlobalRows(),
+           " The matrix is too small (rows) for the assembly of the mass");
+
+    // Some constants
+    const UInt nbElements(M_uFESpace->mesh()->numElements());
+    const UInt fieldDim(M_uFESpace->fieldDim());
+    const UInt nbUTotalDof(M_uFESpace->dof().numTotalDof());
+    const UInt nbQuadPt(M_convectionUCFE->nbQuadPt());
+
+    std::vector< Real > localBetaDivergence(nbQuadPt);
+
+    // Loop over the elements
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+    {
+        // Update the diffusion current FE
+        M_convectionUCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_convectionBetaCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
+
+        // Clean the local matrix
+        M_localMass->zero();
+
+        // Interpolate
+        AssemblyElemental::interpolateDivergence(localBetaDivergence,*M_convectionBetaCFE,M_betaFESpace->dof(),iterElement,beta);
+
+        // local mass, with coefficients
+        AssemblyElemental::massDivW(*M_localMass,*M_convectionUCFE,coefficient,localBetaDivergence,fieldDim);
+
+        // Assembly
+        for (UInt iFieldDim(0); iFieldDim<nDimensions; ++iFieldDim)
+        {
+            assembleMatrix( matrix,
+                            *M_localMass,
+                            *M_convectionUCFE,
+                            *M_convectionUCFE,
+                            M_uFESpace->dof(),
+                            M_uFESpace->dof(),
+                            iFieldDim, iFieldDim,
+                            iFieldDim*nbUTotalDof + offsetUp, iFieldDim*nbUTotalDof + offsetLeft);
+                            }
+    }
+}
 
 template< typename meshType, typename matrixType, typename vectorType>
 void
