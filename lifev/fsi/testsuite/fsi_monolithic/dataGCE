@@ -83,7 +83,7 @@ viscosity = 0.03              # viscosity
 
 [../time_discretization]
 initialtime     = 0.
-endtime         = 0.004
+endtime         = 0.002
 timestep        = 0.001
 BDF_order       = 1
 
@@ -104,7 +104,7 @@ factor    = 1
 [../ipstab]
 gammaBeta  = 1
 gammaDiv   = 0.2
-gammaPress = 0.05
+gammaPress = 0.2
 reuse = true
 [../] # physics
 [../] # fluid
@@ -131,7 +131,7 @@ poisson   = 0.45
 
 [../time_discretization]
 initialtime     = 0.
-endtime         = 0.004
+endtime         = 0.002
 timestep        = 0.001
 BDF_order       = 1
 

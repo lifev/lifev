@@ -54,7 +54,7 @@ tolerance       =  0 # how far points are to be considered the same on the inter
 multimesh  = false  # actually we export also the displacement
 start      = 0 #start      = 4
 save       = 1
-type       = ensight
+type       = hdf5
 [./fluid]
 filename   = fluid
 [../solid]
@@ -62,9 +62,9 @@ filename = solid
 
 [fluid]
 
-useShapeDerivatives = true
+useShapeDerivatives = false
 absorbing_bc	    = true
-semiImplicit = true
+semiImplicit = false
 
 [./physics]
 density   = 1.0               # density
@@ -72,7 +72,7 @@ viscosity = 0.03              # viscosity
 
 [../time_discretization]
 initialtime		= 0.
-endtime			= 0.003
+endtime			= 0.002
 timestep		= 0.001
 method                  = BDF
 BDF_order		= 1
@@ -83,14 +83,14 @@ BDF_order		= 1
 [../ipstab]
 gammaBeta  = 1
 gammaDiv   = 0.2
-gammaPress = 0.2
+gammaPress = 0.05
 reuse      = true
 max_iter_reuse = 100
 
 [../space_discretization]
 mesh_dir  = ./ # the directory where the mesh file is
 mesh_file = tube20.mesh #carotid_fluid.mesh #tube_curve20.mesh  # mesh file
-
+stiff_strain=true
 vel_order		= P1		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
 
@@ -106,10 +106,10 @@ solver          = gmres
 scaling         = none
 output          = all  #none
 conv            = rhs
-max_iter        = 100
+max_iter        = 200
 reuse           = true
 max_iter_reuse  = 101
-kspace          = 100
+kspace          = 200
 tol             = 1.e-10    # AztecOO tolerance
 
 [../prec]
@@ -207,18 +207,17 @@ filter_singletons      = false
 material_flag   = '1' # '1 2'
 solidType       = linearVenantKirchhoff
 material_flag   = 1 # '1 2'
-young           = 3.0E6 #,1.9E9
-poisson         = 0.30 #,0.30
-
+young           = 4.0E6 #,1.9E9
+poisson         = 0.45 #,0.30
 density         = 1.2					# density
 thickness	= 0.1
 
 [../time_discretization]
 timestep        = 0.001
 method          = BDF
-BDF_order       = 2
-theta           = 0.25
-gamma           = 0.5
+BDF_order       = 1
+#theta           = 0.25
+#gamma           = 0.5
 
 
 [../space_discretization]

@@ -471,7 +471,7 @@ public:
             std::string velwName  = dataFile("fluid/miscellaneous/velwname", "velw");
             std::string depName   = dataFile("solid/miscellaneous/depname"  ,"dep");
             std::string velSName  = dataFile("solid/miscellaneous/velname"  ,"velw");
-            M_Tstart = dataFile("problem/Tstart"   ,0.);
+            M_Tstart = dataFile("problem/initialtime"   ,0.);
             std::cout << "Starting time = " << M_Tstart << std::endl;
 
             //M_fsi->initialize(velFName, pressName, velwName, depName, velSName, M_Tstart);
@@ -491,8 +491,8 @@ public:
         {
             M_fsi->initialize();
         }
-        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->timeStep() );
-        M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart ); //+ M_data->dataFluid()->dataTime()->timeStep() 
+        M_data->dataFluid()->dataTime()->setTime( M_Tstart  );
         //std::cout << "in problem" << std::endl;
         //M_fsi->FSIOper()->fluid().postProcess();
     }
@@ -597,14 +597,16 @@ private:
         assert(M_data->dataFluid()->dataTime()->timeStep()==0.001);
         double dispNorm(M_fsi->displacement().norm2());
 
+	std::cout << "Displ Norm: " << dispNorm << std::endl;
+
         const LifeV::Real relTol(5e-3);
 
-        if ( sameAs(time,0.001) && sameAs(dispNorm, 0.0621691, relTol) ) return;
-        if ( sameAs(time,0.002) && sameAs(dispNorm, 0.10668,   relTol) )  return;
-        if ( sameAs(time,0.003) && sameAs(dispNorm, 0.113252,  relTol) )  return;
-        if ( sameAs(time,0.004) && sameAs(dispNorm, 0.107976,  relTol) )  return;
-        if ( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, relTol) )  return;
-        if ( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, relTol) ) return;
+        if ( sameAs(time,0) && sameAs(dispNorm, 0.032284, relTol) ) return;
+        if ( sameAs(time,0.001) && sameAs(dispNorm, 0.0596407,   relTol) )  return;
+        if ( sameAs(time,0.002) && sameAs(dispNorm, 0.0823045,  relTol) )  return;
+        // if ( sameAs(time,0.004) && sameAs(dispNorm, 0.107976,  relTol) )  return;
+        // if ( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, relTol) )  return;
+        // if ( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, relTol) ) return;
 
         throw Problem::RESULT_CHANGED_EXCEPTION(time);
 
