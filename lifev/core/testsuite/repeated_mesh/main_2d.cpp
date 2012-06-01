@@ -173,6 +173,11 @@ main( int argc, char** argv )
             readMesh(*fullMeshPtr,meshData);
         }
         if ( verbose ) std::cout << " done ! " << std::endl;
+        if( isLeader )
+        {
+            std::cout << "mesh elements = " << fullMeshPtr->numElements() << "\n"
+                      << "mesh points   = " << fullMeshPtr->numPoints() << std::endl;
+        }
 
         if ( verbose ) std::cout << " -- Partitioning the mesh ... " << std::flush;
 
@@ -186,6 +191,11 @@ main( int argc, char** argv )
         }
         partTime.stop();
         if( isLeader ) std::cout << "partitioning time  = " << partTime.diff() << std::endl;
+        if( isLeader )
+        {
+            std::cout << "part mesh elements = " << localMesh->numElements() << "\n"
+                      << "part mesh points   = " << localMesh->numPoints() << std::endl;
+        }
 
         // localMesh->mesh_Type::showMe( true, debugOut );
 
