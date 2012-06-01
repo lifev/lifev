@@ -1376,13 +1376,13 @@ void computeCauchyStressTensor(Epetra_SerialDenseMatrix& cauchy,
 
 }
 
-void computeEigenvalues(Epetra_SerialDenseMatrix cauchy,
+void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
 			std::vector<LifeV::Real> eigenvaluesR,
 			std::vector<LifeV::Real> eigenvaluesI)
 
 {
   // LAPACK wrapper of Epetra
-  Epetra_LAPACK* lapack = new Epetra_LAPACK;
+  Epetra_LAPACK lapack;// = new Epetra_LAPACK;
 
   //List of flags for Lapack Function
   //For documentation, have a look at http://www.netlib.org/lapack/double/dgeev.f
@@ -1395,8 +1395,8 @@ void computeEigenvalues(Epetra_SerialDenseMatrix cauchy,
   Int LDA = Dim*Dim;
   
   //Arrays to store eigenvalues (their number = nDimensions)
-  double* WR = new double[nDimensions];
-  double* WI = new double[nDimensions];
+  double WR[nDimensions]; // = new double[nDimensions];
+  double WI[nDimensions]; // = new double[nDimensions];
 
   //Number of eigenvectors
   Int LDVR = nDimensions;
@@ -1405,46 +1405,34 @@ void computeEigenvalues(Epetra_SerialDenseMatrix cauchy,
   //Arrays to store eigenvectors
   Int length = nDimensions * 3;
 
-  double* VR = new double[length];
-  double* VL = new double[length];
+  double VR[length];// = new double[length];
+  double VL[length];// = new double[length];
   
   Int LWORK = 10;
   Int INFO = 0;
 
-  double* WORK = new double[LWORK]; 
+  double WORK[LWORK]; // = new double[LWORK]; 
 
-  double* A = new double[length];
+  double A[length]; // = new double[length];
 
   for (UInt i(0); i< nDimensions; i++)
       for (UInt j(0);j<nDimensions; j++)
 	A[nDimensions * i + j] = cauchy(i,j);
 
-  (*lapack).GEEV(JOBVL, JOBVR, Dim, &A[0] /*cauchy*/, LDA, /*eigenvaluesR*/  WR, /*&eigenvaluesI[0]*/ WI, VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
+  lapack.GEEV(JOBVL, JOBVR, Dim, A /*cauchy*/, LDA, WR, WI, VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
   ASSERT_PRE( !INFO, "Calculation of the Eigenvalues failed!!!" ); 
 
-  for (UInt i(0); i< nDimensions; i++)
+  for( UInt i(0); i < nDimensions; i++ )
     {
       eigenvaluesR[i] = WR[i];
       eigenvaluesI[i] = WI[i];
     }
-
-  // for (int i=0; i<3; i++)
-  //   {
-  //     std::cout << "Value r" << eigenvaluesR[i]<< std::endl;
-  //     std::cout << "Value i" << eigenvaluesI[i]<< std::endl;
-  //   }
-
-  //Memory cleaning
-  delete[] WORK;
-  delete[] VR;
-  delete[] VL;
-  delete[] WR;  
-  delete[] WI;
 
 }
 
 } //! End namespace AssemblyElementalStructure
 
 } //! End namespace LifeV
+
 
 #endif

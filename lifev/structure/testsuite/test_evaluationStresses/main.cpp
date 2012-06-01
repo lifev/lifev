@@ -341,10 +341,44 @@ Structure::run3d()
     M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", dFESpace, solidTensions, UInt(0) );
     M_exporter->postProcess( 0.0 );
 
+    /*
+    //Post processing for the displacement gradient
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterX;
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterY;
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterZ;
 
+    //Setting pointers
+    exporterX.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradX" ) );
+    exporterY.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradY" ) );
+    exporterZ.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradZ" ) );
+
+    exporterX->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
+    exporterY->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
+    exporterZ->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
+
+    //Defining the vectors
+    vectorPtr_Type gradX ( new vector_Type(solid.gradientX(),  M_exporter->mapType() ) );
+    vectorPtr_Type gradY ( new vector_Type(solid.gradientY(),  M_exporter->mapType() ) );
+    vectorPtr_Type gradZ ( new vector_Type(solid.gradientZ(),  M_exporter->mapType() ) );
+
+    //Adding variable
+    exporterX->addVariable( ExporterData<mesh_Type >::VectorField, "gradX", solid.dFESpacePtr(),
+			   gradX, UInt(0) );
+    exporterY->addVariable( ExporterData<mesh_Type >::VectorField, "gradY", solid.dFESpacePtr(),
+			   gradY, UInt(0) );
+    exporterZ->addVariable( ExporterData<mesh_Type >::VectorField, "gradZ", solid.dFESpacePtr(),
+			   gradZ, UInt(0) );
+
+    exporterX->postProcess( 0.0 );
+    exporterY->postProcess( 0.0 );
+    exporterZ->postProcess( 0.0 );
+    */
+    
     //! =================================================================================
     //! Analysis - Istant or Interval
     //! =================================================================================
+
+    MPI_Barrier(MPI_COMM_WORLD);    
 
     //! 5. For each interval, the analysis is performed
     LifeV::Real dt =  dataFile( "solid/time_discretization/timestep", 0.0);    
@@ -360,6 +394,7 @@ Structure::run3d()
 	
 	//Read the variable
 	M_importer->readVariable(solutionDispl);
+	M_importer->closeFile();
 
 	/*
 	//Create and exporter to check importing
@@ -385,85 +420,28 @@ Structure::run3d()
 	//Perform the analysis
 	solid.analyzeTensions();
 
-	return 0;
+	/*
+	exporterX->postProcess( startTime );
+	exporterY->postProcess( startTime );
+	exporterZ->postProcess( startTime );
+	*/
+	M_exporter->postProcess( startTime );
+
+	if (verbose ) std::cout << "Analysis Completed!" << std::endl;
+
       }
     else
       {	
-
-	return 0;
-	// //Cycle of the intervals
-	// for ( UInt i(0); i< tensionData->iterStart().size() + 1; i++ )
-	//   {
-	//     const std::string initial = tensionData->iterStart(i);
-	//     const std::string last    = tensionData->iterEnd(i);
-	//     const LifeV::Real startTime = tensionData->initialTime(i);
-
-	//     //! Todo: A check on the existence of the initial and last strings would be appreciated
-	    
-	//     iterationString = initial;
-	//     std::cout << "the string I'll look for is: " << iterationString << std::endl;
-	//     std::cout << "the string I'll look for is: " << last << std::endl;
-	    
-	//     UInt iterDone = 0;
-	
-	//     while( iterationString.compare(last)  )
-	//       {
-	    
-	// 	//Read variable at iterationString
-	// 	std::cout << "the string I'll look for is: " << iterationString << std::endl;
-	// 	std::cout << "Here I am Fucking idiot! " << std::endl;
-	// 	int ko;
-	// 	std::cin >> ko;
-
-	// 	//Create and exporter to check importing
-	// 	std::string expVerFile = "verificationDisplExporter";
-	// 	LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
-        //         vectorPtr_Type vectVer ( new vector_Type(solid.displacement(),  exporter.mapType() ) );
-	    
-	// 	exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", solid.dFESpacePtr(),
-	// 			      vectVer, UInt(0) );
-
-	// 	exporter.postProcess(0.0);
-	// 	*vectVer = *solidDisp;
-	// 	exporter.postProcess(startTime);
-
-	// 	int c;
-	// 	std::cin >> c;
-	    
-	// 	//Set the current solution as the displacement vector to use
-	// 	solid.setDisplacement(*solidDisp);
-
-	// 	//Perform the analysis
-	// 	solid.analyzeTensions();
-
-	// 	*solidTensions = solid.principalStresses();
-
-	// 	//Export the principal stresses
-	// 	M_exporter->postProcess( startTime + iterDone*dt );
-
-	// 	//Increment the iterationString
-	// 	int iterations = std::atoi(iterationString.c_str());
-	// 	iterations++;
-
-	// 	std::ostringstream iter;
-	// 	iter.fill( '0' );
-	// 	iter << std::setw(5) << ( iterations );
-	// 	iterationString=iter.str();
-
-	// 	//Increment the iteration for the postProcess
-	// 	iterDone++;
-	//   }
+	std::cout << "we are still working idiot! " << std::endl;
       }
-//if (verbose )  std::cout << "Analysis of the "<< i << "-th interval completed!" << std::endl;
-
-
-
-    MPI_Barrier(MPI_COMM_WORLD);
 
     if (verbose ) std::cout << "finished" << std::endl;
-
     
-    //!--------------------------------------------------------------------------------------------------
+    //Closing the files
+    M_exporter->closeFile();
+
+    MPI_Barrier(MPI_COMM_WORLD);    
+    //!---------------------------------------------.-----------------------------------------------------
 }
 
 

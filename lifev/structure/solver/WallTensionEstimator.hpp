@@ -137,7 +137,7 @@ public:
 
   WallTensionEstimator();
 
-  virtual ~WallTensionEstimator() {}
+  virtual ~WallTensionEstimator() {};
 
 //@}
 
@@ -192,6 +192,11 @@ public:
   //! Get the displacement solution
   solutionVect_Type displacement() {return *M_displ;}
 
+  //! Get the displacement solution
+  solutionVect_Type gradientX() {return *M_displX;}
+  solutionVect_Type gradientY() {return *M_displY;}
+  solutionVect_Type gradientZ() {return *M_displZ;}
+
   //! Get the global vector for the eigenvalues
   solutionVect_Type principalStresses() {return *M_globalEigen;}
 //@}
@@ -228,7 +233,7 @@ protected:
     matrixPtr_Type                                 M_sigma;
 
     //! Vector of the invariants of C and detF (length = 4)
-    vectorPtr_Type                                 M_invariants;
+    vector_Type                                 M_invariants;
 
     //! Vector of the eigenvalues of \sigma on the DOF (length = 3)
     vector_Type                                 M_eigenvaluesR;
@@ -337,7 +342,7 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
   M_displY.reset        (new solutionVect_Type(*M_localMap) );
   M_displZ.reset        (new solutionVect_Type(*M_localMap) );
   M_globalEigen.reset   (new solutionVect_Type(*M_localMap) );
-  M_invariants.reset    (new vector_Type( M_FESpace->fieldDim() + 1, 0.0 ));
+  M_invariants.resize   ( M_FESpace->fieldDim() + 1 );
   M_eigenvaluesR.resize ( M_FESpace->fieldDim() );
   M_eigenvaluesI.resize ( M_FESpace->fieldDim() );
 
@@ -361,7 +366,15 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
   //Therefore the tensor C,P, \sigma are computed for each DOF
   UInt dim = M_FESpace->dim();  
 
-  for ( UInt iDOF = 0; iDOF < ( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
+  LifeChrono chrono;
+
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Performing the analysis..., EXP ");
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+
+  chrono.start();
+
+  for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
     {      
       std::vector<LifeV::Real> dX(3,0.0); 
       std::vector<LifeV::Real> dY(3,0.0); 
@@ -392,36 +405,21 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
 	}
 
       //Compute the rightCauchyC tensor
-      AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(*M_invariants, *M_deformationF, *M_cofactorF);
+      AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);
 		
-      this->M_displayer->leaderPrint(" \n norm Inf of F:  ", (*M_deformationF).NormOne() );
-      this->M_displayer->leaderPrint(" \n norm Inf of cofF:  ", (*M_cofactorF).NormOne() );
-
       LifeV::Real sumI(0);
-      for( UInt i(0); i < (*M_invariants).size(); i++ )
-	sumI += (*M_invariants)[i];
-      this->M_displayer->leaderPrint(" \n Sum of the terms in the invariants  ", sumI );
+      for( UInt i(0); i < M_invariants.size(); i++ )
+	sumI += M_invariants[i];
       
       //Compute the first Piola-Kirchhoff tensor
-      M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, *M_invariants, M_marker);
-
-      this->M_displayer->leaderPrint(" \n norm Inf of P:  ", (*M_firstPiola).NormOne() );
+      M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
 
       //Compute the Cauchy tensor
-      AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, (*M_invariants)[3], *M_deformationF);
-      
-      this->M_displayer->leaderPrint(" \n norm Inf of P:  ", (*M_sigma).NormOne() );
+      AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
 
       //Compute the eigenvalue
       AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
-
-      M_sigma->Print(std::cout);
-
-
-      std::cout << "Values " <<M_eigenvaluesI[1] << std::endl;
-      int n1;
-      std::cin >> n1;
-
+      
       //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
       //Check on the imaginary part of eigen values given by the Lapack method 
       Real sum(0);
@@ -433,9 +431,13 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       //Save the eigenvalues in the global vector
       for( UInt icoor = 0; icoor < nDimensions; icoor++ )
 	{
-	  (*M_globalEigen)(iDOF + iComp * dim + this->M_offset) = M_eigenvaluesR[icoor];
+	  (*M_globalEigen)(iDOF + icoor * dim + this->M_offset) = M_eigenvaluesR[icoor];
 	}
     }
+
+  chrono.stop();
+  this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
+
 }
 
 
@@ -449,10 +451,19 @@ WallTensionEstimator<Mesh >::computeDisplacementGradient( void )
 
   //Compute the gradient along X of the displacement field
   *M_displX = M_FESpace->gradientRecovery(*M_displ, 0);
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Norm of the gradient with respect to x ", M_displX->norm2() );
+
   //Compute the gradient along Y of the displacement field
   *M_displY = M_FESpace->gradientRecovery(*M_displ, 1);
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Norm of the gradient with respect to y ", M_displY->norm2() );
+
   //Compute the gradient along Z of the displacement field
   *M_displZ = M_FESpace->gradientRecovery(*M_displ, 2);
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Norm of the gradient with respect to z ", M_displZ->norm2() );
+
 }  
 
 

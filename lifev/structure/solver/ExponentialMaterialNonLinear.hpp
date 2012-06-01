@@ -626,9 +626,6 @@ void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( 
 										const std::vector<Real>& invariants,
 										const UInt marker)
 {
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Computing the First Piola Kirchhoff Tensor, EXP ");
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
   //Get the material parameters
   Real alpha    = this->M_dataMaterial->alpha(marker);
