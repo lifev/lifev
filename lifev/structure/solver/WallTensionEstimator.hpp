@@ -362,6 +362,21 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
   //Compute the deformation gradient tensor F of the displ field
   computeDisplacementGradient();
 
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Norm of the gradient with respect to x ", M_displX->norm2() );
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Norm of the gradient with respect to y ", M_displY->norm2() );
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Norm of the gradient with respect to z ", M_displZ->norm2() );
+
+  std::string gradX = "gradientX";
+  std::string gradY = "gradientY";
+  std::string gradZ = "gradientZ";
+
+  M_displX->spy(gradX);
+  M_displY->spy(gradY);
+  M_displZ->spy(gradZ);
+  
   //For each of the DOF, the Cauchy tensor is computed. 
   //Therefore the tensor C,P, \sigma are computed for each DOF
   UInt dim = M_FESpace->dim();  
@@ -451,18 +466,12 @@ WallTensionEstimator<Mesh >::computeDisplacementGradient( void )
 
   //Compute the gradient along X of the displacement field
   *M_displX = M_FESpace->gradientRecovery(*M_displ, 0);
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Norm of the gradient with respect to x ", M_displX->norm2() );
 
   //Compute the gradient along Y of the displacement field
   *M_displY = M_FESpace->gradientRecovery(*M_displ, 1);
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Norm of the gradient with respect to y ", M_displY->norm2() );
 
   //Compute the gradient along Z of the displacement field
   *M_displZ = M_FESpace->gradientRecovery(*M_displ, 2);
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Norm of the gradient with respect to z ", M_displZ->norm2() );
 
 }  
 

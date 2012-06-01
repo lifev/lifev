@@ -336,12 +336,12 @@ Structure::run3d()
 
     M_exporter->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
 
-    vectorPtr_Type solidTensions ( new vector_Type(solid.displacement(),  M_exporter->mapType() ) );
+    vectorPtr_Type solidTensions ( new vector_Type(solid.principalStresses(),  M_exporter->mapType() ) );
 
     M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", dFESpace, solidTensions, UInt(0) );
     M_exporter->postProcess( 0.0 );
 
-    /*
+    
     //Post processing for the displacement gradient
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterX;
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterY;
@@ -372,7 +372,7 @@ Structure::run3d()
     exporterX->postProcess( 0.0 );
     exporterY->postProcess( 0.0 );
     exporterZ->postProcess( 0.0 );
-    */
+    
     
     //! =================================================================================
     //! Analysis - Istant or Interval
@@ -421,10 +421,18 @@ Structure::run3d()
 	solid.analyzeTensions();
 
 	/*
+	//Extracting the gradient
+	*gradX = solid.gradientX();
+	*gradY = solid.gradientY();
+	*gradZ = solid.gradientZ();
+
 	exporterX->postProcess( startTime );
 	exporterY->postProcess( startTime );
 	exporterZ->postProcess( startTime );
 	*/
+	
+	//Extracting the tensions
+	*solidTensions = solid.principalStresses();
 	M_exporter->postProcess( startTime );
 
 	if (verbose ) std::cout << "Analysis Completed!" << std::endl;
@@ -439,6 +447,9 @@ Structure::run3d()
     
     //Closing the files
     M_exporter->closeFile();
+    exporterX->closeFile();
+    exporterY->closeFile();
+    exporterZ->closeFile();
 
     MPI_Barrier(MPI_COMM_WORLD);    
     //!---------------------------------------------.-----------------------------------------------------
