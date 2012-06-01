@@ -41,77 +41,77 @@
     @date 19-08-1999
 
     Classes BareFace and BareEdge have been created to give an UNIQUE internal
-	representation for mesh faces and edges, allowing thus the construction of
-	DOF objects (which are naturally linked to mesh entities).
+    representation for mesh faces and edges, allowing thus the construction of
+    DOF objects (which are naturally linked to mesh entities).
 
-	\par Introduction
+    \par Introduction
 
-	One of the paradigms chosen for the development of this	library is the fact
-	that degrees of freedom (DOF) are linked to geometrical	entities.  Now if
-	we have degrees of freedom associated, for instance, to	an Edge (like in
-	a P2 Tetra) in order to build the global numbering of the DOF and the
-	association between local (element-wise) and global numbering, we need to
-	identify edges and give them a unique ID. Yet, we may not want to
-	build a full Edge (MeshElementMarked2D) object: we only need
-	the ID of the edge and a way of computing the ID's of the degrees of
-	freedom on the edge, all the remaining data of a full Edge object is not
-	necessarily needed.
+    One of the paradigms chosen for the development of this library is the fact
+    that degrees of freedom (DOF) are linked to geometrical entities.  Now if
+    we have degrees of freedom associated, for instance, to an Edge (like in
+    a P2 Tetra) in order to build the global numbering of the DOF and the
+    association between local (element-wise) and global numbering, we need to
+    identify edges and give them a unique ID. Yet, we may not want to
+    build a full Edge (MeshElementMarked2D) object: we only need
+    the ID of the edge and a way of computing the ID's of the degrees of
+    freedom on the edge, all the remaining data of a full Edge object is not
+    necessarily needed.
 
-	Another related problem is how to uniquely identify a face or an edge in the mesh.
+    Another related problem is how to uniquely identify a face or an edge in the mesh.
 
-	The dilemma has been resolved by creating the concept of a BareEdge and
-	BareFace (bare geometry items).  A bare geometry item is formed by the
-	minimal information required to uniquely identify it, namely 2
-	<tt>Point</tt>'s ID 's for an edge and 3 <tt>Point</tt>'s ID 's for the
-	Faces (it is enough also for Quad faces!). We build the bare items by
-	looping through the elements and obviously we make sure that the BareItem
-	ID is consistent with that of the corresponding ``full item'' if the latter
-	has been instantiated.
+    The dilemma has been resolved by creating the concept of a BareEdge and
+    BareFace (bare geometry items).  A bare geometry item is formed by the
+    minimal information required to uniquely identify it, namely 2
+    <tt>Point</tt>'s ID 's for an edge and 3 <tt>Point</tt>'s ID 's for the
+    Faces (it is enough also for Quad faces!). We build the bare items by
+    looping through the elements and obviously we make sure that the BareItem
+    ID is consistent with that of the corresponding ``full item'' if the latter
+    has been instantiated.
 
-	Another <em>very important</em> issue is that of orientation.  There are
-	different ways of considering orientation of a Face or an Edge. The first is
-	the <em>local</em> orientation of a Face or Edge of the reference finite
-	element. This is conventionally chosen when designing the finite
-	elements. For the faces, we have adopted the convention that the local
-	positive orientation is such that the face normal calculated with the right
-	hand rule is <em>outwardly</em> oriented. As for the edges, the local
-	orientation for a 3D element is more arbitrary.
+    Another <em>very important</em> issue is that of orientation.  There are
+    different ways of considering orientation of a Face or an Edge. The first is
+    the <em>local</em> orientation of a Face or Edge of the reference finite
+    element. This is conventionally chosen when designing the finite
+    elements. For the faces, we have adopted the convention that the local
+    positive orientation is such that the face normal calculated with the right
+    hand rule is <em>outwardly</em> oriented. As for the edges, the local
+    orientation for a 3D element is more arbitrary.
 
-	However, for a 2D element, the positive orientation of an Edge is the one
-	which is in accordance with the right hand rule applied to that element.
+    However, for a 2D element, the positive orientation of an Edge is the one
+    which is in accordance with the right hand rule applied to that element.
 
-	When a Face or an edge is <em>active</em>, i.e. is effectively stored in
-	the mesh, then there is another obvious orientation, of global rather than
-	local nature: that induced by the way the edge or face is stored. For
-	boundary elements (faced in 3D or edges in 2D) it is compulsory that the
-	orientation of the stored item be consistent with the convention chosen for
-	the orientation of the domain boundary. More precisely, boundary elements
-	are stored so that the normal (always calculated following the right hand
-	rule) is outward with respect to the domain.
+    When a Face or an edge is <em>active</em>, i.e. is effectively stored in
+    the mesh, then there is another obvious orientation, of global rather than
+    local nature: that induced by the way the edge or face is stored. For
+    boundary elements (faced in 3D or edges in 2D) it is compulsory that the
+    orientation of the stored item be consistent with the convention chosen for
+    the orientation of the domain boundary. More precisely, boundary elements
+    are stored so that the normal (always calculated following the right hand
+    rule) is outward with respect to the domain.
 
-	However, there is the need of defining a <em>global</em> orientation also
-	for <em>non active</em> entities. This because we do not always store all
-	faces and all edges. We need then to choose a unique way to identify the
-	orientation of an Edge or of a Face <em>independently </em> from the fact
-	that they are active or not. We will call this orientation the <em>natural </em>
-	orientation. We have chosen the following convention for natural orientation
-	of faces and edges
+    However, there is the need of defining a <em>global</em> orientation also
+    for <em>non active</em> entities. This because we do not always store all
+    faces and all edges. We need then to choose a unique way to identify the
+    orientation of an Edge or of a Face <em>independently </em> from the fact
+    that they are active or not. We will call this orientation the <em>natural </em>
+    orientation. We have chosen the following convention for natural orientation
+    of faces and edges
 
-	<ul>
-	<li>The positive natural orientation of an  <em>Edge</em> is given by \f$V_{min} \rightarrow V_{max} \f$,
+    <ul>
+    <li>The positive natural orientation of an  <em>Edge</em> is given by \f$V_{min} \rightarrow V_{max} \f$,
         \f$V_{min}\f$ being the Edge Vertex with smallest ID</li>
 
-	<li>The positive natural orientation of a  <em>Face</em> is given by the cicle
+    <li>The positive natural orientation of a  <em>Face</em> is given by the cicle
         \f$V_{min} \rightarrow V_2\rightarrow V_3 \f$,
         \f$V_{min}\f$ being the Face Vertex with smallest ID, \f$V_2\f$ the second smallest
         and \f$V_2\f$ the thirsd smallest.</li>
-	</ul>
+    </ul>
 
-	Note that the latter definition applies both to triangular and to quad faces.
+    Note that the latter definition applies both to triangular and to quad faces.
 
-	\warning If I want to associate boundary conditions I need the active
-	entity, since BareEdges do not store Marker data. (This is why the
-	RegionMesh classes treat boundary items in a rather special way).
+    \warning If I want to associate boundary conditions I need the active
+    entity, since BareEdges do not store Marker data. (This is why the
+    RegionMesh classes treat boundary items in a rather special way).
 
 
  */
@@ -488,9 +488,9 @@ operator<( const BareFace & f1 , const BareFace & f2 )
  * @author Mauro Perego
     @see
 
-	The proper bare entity type  (BareEdge or BareFace) and
-	the proper function to construct bare entities (makeBareEdge /  makeBareFace)
-	are selected based on the template int numPoints, which is the number of points of the bare entity.
+    The proper bare entity type  (BareEdge or BareFace) and
+    the proper function to construct bare entities (makeBareEdge /  makeBareFace)
+    are selected based on the template int numPoints, which is the number of points of the bare entity.
  */
 
 template<typename Shape>
@@ -498,26 +498,26 @@ class BareEntitySelector {};
 
 template<>
 struct BareEntitySelector<Point>{
-	static std::pair<BareVertex, bool> makeBareEntity(const ID points[]) {return std::make_pair(BareVertex(points[0]),true);}
-	typedef BareVertex bareEntity_Type;
+    static std::pair<BareVertex, bool> makeBareEntity(const ID points[]) {return std::make_pair(BareVertex(points[0]),true);}
+    typedef BareVertex bareEntity_Type;
 };
 
 template<>
 struct BareEntitySelector<Line>{
-	static std::pair<BareEdge, bool> makeBareEntity(const ID points[]) {return makeBareEdge(points[0], points[1]);}
-	typedef BareEdge bareEntity_Type;
+    static std::pair<BareEdge, bool> makeBareEntity(const ID points[]) {return makeBareEdge(points[0], points[1]);}
+    typedef BareEdge bareEntity_Type;
 };
 
 template<>
 struct BareEntitySelector<Triangle>{
-	typedef BareFace bareEntity_Type;
-	static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2]);}
+    typedef BareFace bareEntity_Type;
+    static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2]);}
 };
 
 template<>
 struct BareEntitySelector<Quad>{
-	typedef BareFace bareEntity_Type;
-	static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2], points[3]);}
+    typedef BareFace bareEntity_Type;
+    static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2], points[3]);}
 };
 
 
@@ -528,10 +528,10 @@ struct BareEntitySelector<Quad>{
     @author Luca Formaggia
     @see
 
-	This class handles mesh bare edges and faces construction. Used only in mesh builders
-	A MeshElementBareHandler is a specialisation of a STL map which holds the pair
-	formed by a bareitem and its ID.
-	The ID  is automatically generated if one uses the method addIfNotThere
+    This class handles mesh bare edges and faces construction. Used only in mesh builders
+    A MeshElementBareHandler is a specialisation of a STL map which holds the pair
+    formed by a bareitem and its ID.
+    The ID  is automatically generated if one uses the method addIfNotThere
  */
 template <typename BareItemType>
 class MeshElementBareHandler: public std::map<BareItemType, ID, cmpBareItem<BareItemType> >
@@ -539,11 +539,11 @@ class MeshElementBareHandler: public std::map<BareItemType, ID, cmpBareItem<Bare
 public:
     //! @name Public Types
     //@{
-    typedef BareItemType 												bareItem_Type;
-    typedef std::map<bareItem_Type, UInt, cmpBareItem<bareItem_Type> > 	container_Type;
-    typedef typename container_Type::iterator 							containerIterator_Type;
-    typedef typename container_Type::const_iterator 					containerConstIterator_Type;
-    typedef std::pair<const bareItem_Type, UInt> 						value_Type;
+    typedef BareItemType                                                bareItem_Type;
+    typedef std::map<bareItem_Type, UInt, cmpBareItem<bareItem_Type> >  container_Type;
+    typedef typename container_Type::iterator                           containerIterator_Type;
+    typedef typename container_Type::const_iterator                     containerConstIterator_Type;
+    typedef std::pair<const bareItem_Type, UInt>                        value_Type;
     //@}
 
     //! @name Constructors & Destructor
@@ -565,7 +565,7 @@ public:
     //! Method that adds a BareItem if it is not already there and automatically generates the ID
     /*!
         @param item Item to be added
-    	@return a pair composed of the ID of the added item and a boolean value which is True if the item has been successfully added and False otherwise
+        @return a pair composed of the ID of the added item and a boolean value which is True if the item has been successfully added and False otherwise
      */
     std::pair<ID, bool> addIfNotThere( bareItem_Type const & item );
 
@@ -573,14 +573,14 @@ public:
     /*!
         @param item Item to be added
         @param id ID to be assigned to the item
-    	@return a pair composed of the ID of the added item and a boolean value which is True if the item has been successfully added and False otherwise
+        @return a pair composed of the ID of the added item and a boolean value which is True if the item has been successfully added and False otherwise
      */
     std::pair<ID, bool> addIfNotThere( bareItem_Type const & item, const ID id );
 
     //! Method that removes a bareItem_Type if it is there (the ID is then lost)
     /*!
         @param item Item to be removed
-    	@return True if the item has been erased and False otherwise
+        @return True if the item has been erased and False otherwise
      */
     bool deleteIfThere( bareItem_Type const & item);
 
@@ -588,19 +588,19 @@ public:
     /*!
         @deprecated
         @param item Item to be removed
-    	@return True if the item has been erased and False otherwise
+        @return True if the item has been erased and False otherwise
      */
     bool isThereDel( bareItem_Type const & item);
 
     //! Method that counts how many items are stored
     /*!
-    	@return the number of entities actually stored
+        @return the number of entities actually stored
      */
     UInt howMany() const;
 
     //! Method that returns the maximum id currently in use
     /*!
-    	@return the maximum id currently in use
+        @return the maximum id currently in use
      */
     UInt maxId() const
     {
@@ -627,16 +627,16 @@ public:
     /*!
         @param item Item to modify
         @param id new ID to assign to item
-    	@return True if the item has been found and modified, False otherwise
+        @return True if the item has been found and modified, False otherwise
      */
     bool setId( bareItem_Type const & item, const ID& id );
 
     //! Method that returns the ID of a BareItem. It returns 0 if the item doesn't exist
     /*!
-     	@deprecated
+        @deprecated
         @param item Item to modify
         @param id new ID to assign to item
-    	@return True if the item has been found and modified, False otherwise
+        @return True if the item has been found and modified, False otherwise
      */
     bool setId( bareItem_Type const & item, ID const id );
     //@}
@@ -678,7 +678,7 @@ inline
 std::pair<ID, bool>
 MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item )
 {
-    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, M_idCount ) ) );
+    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( this->insert( std::make_pair( item, M_idCount ) ) );
     if ( i.second )
         ++M_idCount;
     return std::make_pair( ( i.first )->second, i.second );
@@ -689,7 +689,7 @@ inline
 std::pair<ID, bool>
 MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item, const ID id )
 {
-    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, id ) ) );
+    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( this->insert( std::make_pair( item, id ) ) );
     ( i.first ) ->second = id; // Set new id in any case.
     return std::make_pair( id, i.second ); // for consistency with other version.
 }
@@ -697,7 +697,7 @@ template <class BareItemType>
 bool
 MeshElementBareHandler<BareItemType>::deleteIfThere( bareItem_Type const & item )
 {
-    return erase( item ) != 0;
+    return this->erase( item ) != 0;
 }
 
 template <class BareItemType>

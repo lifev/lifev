@@ -673,8 +673,7 @@ GeoVector CurrentFE::coorMap(const GeoVector& P) const
 {
     ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
 
-    GeoVector Pcurrent(nDimensions);
-    Pcurrent*=0.0;
+    GeoVector Pcurrent( nDimensions, 0. );
 
     for ( UInt i(0); i < M_nbGeoNode; ++i )
     {

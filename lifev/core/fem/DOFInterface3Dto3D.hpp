@@ -315,9 +315,9 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
     UInt nbVertexPerFacet = GeoBShape::S_numVertices; // Number of facet's vertices
     UInt nbRidgePerFacet = GeoBShape::S_numRidges;    // Number of facet's ridges
 
-    UInt nbDofPerVertex = M_refFE1->nbDofPerVertex; // number of DOF per vertices
-    UInt nbDofPerRidge = M_refFE1->nbDofPerRidge;   // number of DOF per ridges
-    UInt nbDofPerFacet = M_refFE1->nbDofPerFacet;   // number of DOF per facets
+    UInt nbDofPerVertex = M_refFE1->nbDofPerVertex(); // number of DOF per vertices
+    UInt nbDofPerRidge = M_refFE1->nbDofPerRidge();   // number of DOF per ridges
+    UInt nbDofPerFacet = M_refFE1->nbDofPerFacet();   // number of DOF per facets
 
     UInt nbVertexPerElement = GeoShape::S_numVertices; // Number of element's vertices
     UInt nbRidgePerElement = GeoShape::S_numRidges;    // Number of element's ridges

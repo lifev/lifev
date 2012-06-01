@@ -31,6 +31,9 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @author Radu Popescu <radu.popescu@epfl.ch>
 
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
+
+  This class has been deprecated and will be removed in future releases.
+  Please use the PartitionIO class in its place.
 */
 
 #ifndef EXPORTER_HDF5_MESH_3D_H
@@ -161,7 +164,7 @@ public:
       partitionMesh::mesh() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMyMeshPartition(const meshPtr_Type& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
+    void addMyMeshPartition( const meshPtr_Type& /*meshPointer*/, boost::shared_ptr<Epetra_Comm>& /*comm*/ )
     {/*M_parallelMesh = meshPointer; M_serialMesh.reset(); M_comm = comm;*/}
 
     //! Add a DOF interface for writing to file
@@ -179,7 +182,7 @@ public:
     Int queryStoredInterfaceNumber();
 
     //! Get the types of the stored DOF interfaces
-    std::vector<std::string>& queryStoredInterfaceTypes();
+    std::vector<std::string> queryStoredInterfaceTypes();
 
     //! Return a pointer to the graph
     graphPtr_Type getGraph();
@@ -361,7 +364,7 @@ int ExporterHDF5Mesh3D<MeshType>::queryStoredInterfaceNumber()
 }
 
 template <typename MeshType>
-std::vector<std::string>& ExporterHDF5Mesh3D<MeshType>::queryStoredInterfaceTypes()
+std::vector<std::string> ExporterHDF5Mesh3D<MeshType>::queryStoredInterfaceTypes()
 {
     if (this->M_HDF5.get() == 0)
     {

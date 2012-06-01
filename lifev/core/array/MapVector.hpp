@@ -298,7 +298,7 @@ void
 MapVector<MapType>::
 showMe( std::ostream& output) const
 {
-    std::cout << " Number of map stored : " << M_vector.size() << std::endl;
+    output << " Number of map stored : " << M_vector.size() << std::endl;
 }
 
 template< typename MapType>

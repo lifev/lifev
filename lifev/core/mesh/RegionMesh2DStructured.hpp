@@ -45,6 +45,38 @@
 namespace LifeV
 {
 
+// Labels for the structured 2D mesh
+namespace Structured2DLabel
+{
+    //! Label for the internal entities
+    const markerID_Type INTERNAL = 0;
+
+    //! Label for the bottom boundary edge
+    const markerID_Type BOTTOM = 1;
+
+    //! Label for the left boundary edge
+    const markerID_Type LEFT = 2;
+
+    //! Label for the top boundary edge
+    const markerID_Type TOP = 3;
+
+    //! Label for the right boundary edge
+    const markerID_Type RIGHT = 4;
+
+    //! Label for the top and left boundary corner
+    const markerID_Type TOP_LEFT = 7;
+
+    //! Label for the bottom and right boundary corner
+    const markerID_Type BOTTOM_RIGHT = 5;
+
+    //! Label for the bottom and left boundary corner
+    const markerID_Type BOTTOM_LEFT = 8;
+
+    //! Label for the top and right boundary corner
+    const markerID_Type TOP_RIGHT = 6;
+
+}
+
 /*!
   @brief This method gives the flags for a rectangle
 
@@ -66,17 +98,17 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
   <br>
   For the corners the labels are:
   <ul>
-  <li> BOTTOM and LEFT = 7, i.e. \f$ x = 0 \f$ and \f$ y = 0 \f$ </li>
   <li> BOTTOM and RIGHT = 5, i.e. \f$ x = 1 \f$ and \f$ y = 0 \f$ </li>
-  <li> TOP and LEFT = 8, i.e. \f$ x = 0 \f$ and \f$ y = 1 \f$ </li>
   <li> TOP and RIGHT = 6, i.e. \f$ x = 1 \f$ and \f$ y = 1 \f$ </li>
+  <li> TOP and LEFT = 7, i.e. \f$ x = 0 \f$ and \f$ y = 1 \f$ </li>
+  <li> BOTTOM and LEFT = 8, i.e. \f$ x = 0 \f$ and \f$ y = 0 \f$ </li>
   </ul>
   For the edges the labels are:
   <ul>
   <li> BOTTOM = 1, i.e. \f$ x = 0 \f$ </li>
   <li> LEFT = 2, i.e. \f$ y = 0 \f$ </li>
-  <li> RIGHT = 3, i.e. \f$ y = 1 \f$ </li>
-  <li> TOP = 4, i.e. \f$ x = 1 \f$ </li>
+  <li> TOP = 3, i.e. \f$ x = 1 \f$ </li>
+  <li> RIGHT = 4, i.e. \f$ y = 1 \f$ </li>
   </ul>
 
   @param mesh The mesh that we want to generate
@@ -104,14 +136,11 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
     typedef LinearTriangle geoShape_Type;
     typedef RegionMesh < geoShape_Type, MC > mesh_Type;
 
-
-    ASSERT( geoShape_Type::S_numRidges == 3,"Not creating a P1 structured mesh" );
-
     // discretization
     const Real dx( l_x / m_x );
     const Real dy( l_y / m_y );
 
-    // Number of nodes along the side of the unit cube
+    // Number of nodes along the side of the rectangle
     const UInt n_x( m_x + 1 );
     const UInt n_y( m_y + 1 );
 
@@ -269,7 +298,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             nodeID = i;
             P0 = nodeID;
             P1 = nodeID + 1;
-            edgeLabel = 1; //BOTTOMEDGE
+            edgeLabel = Structured2DLabel::BOTTOM; //BOTTOMEDGE
             adjID = 2*i;
             pos = 2;
 
@@ -278,7 +307,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             nodeID = (i + 1 - m_x)*n_x -1;
             P0 = nodeID;
             P1 = nodeID + n_x;
-            edgeLabel = 3; //RIGHTEDGE
+            edgeLabel = Structured2DLabel::RIGHT; //RIGHTEDGE
             adjID =  ((i - m_x)*m_x + m_x - 1)*2;
             pos = 0;
         }
@@ -287,7 +316,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             nodeID = n_x*n_y - 1 - (i - m_x - m_y);
             P0 = nodeID;
             P1 = nodeID - 1;
-            edgeLabel = 4; //TOPEDGE
+            edgeLabel = Structured2DLabel::TOP; //TOPEDGE
             adjID = 2*m_x*m_y-(i - m_x - m_y)*2 -1;
             pos = 2;
         }
@@ -295,7 +324,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             nodeID =  n_x*n_y - 1 - m_x - (i - 2*m_x - m_y)*n_x ;
             P0 = nodeID;
             P1 = nodeID - n_x ;
-            edgeLabel = 2; //LEFTEDGE
+            edgeLabel = Structured2DLabel::LEFT; //LEFTEDGE
             adjID = -(i - 2*m_x - m_y)*(2*m_x) + (m_x*(m_y-1))*2 + 1;
             pos = 0;
         }

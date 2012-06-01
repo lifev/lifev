@@ -100,7 +100,7 @@ int main(int argc, char** argv)
 
     // Error of the problem
     const LifeV::Real error = Darcy.run();
-    bool unsuccess=std::fabs( error - errorKnown ) > tolerance;
+    const bool unsuccess=std::fabs( error - errorKnown ) > tolerance;
 
 #ifdef HAVE_MPI
     MPI_Finalize();

@@ -87,12 +87,12 @@ enum FE_TYPE
     FE_P1bubble_2D,
     FE_P2_2D,
 
-    FE_RT0_TRIA_2D,
-    FE_RT0_HYB_TRIA_2D,
-
     FE_Q0_2D,
     FE_Q1_2D,
     FE_Q2_2D,
+
+    FE_RT0_TRIA_2D,
+    FE_RT0_HYB_TRIA_2D,
 
     FE_P0_3D,
     FE_P1_3D,
