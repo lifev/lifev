@@ -1377,12 +1377,12 @@ void computeCauchyStressTensor(Epetra_SerialDenseMatrix& cauchy,
 }
 
 void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
-			std::vector<LifeV::Real> eigenvaluesR,
-			std::vector<LifeV::Real> eigenvaluesI)
+			std::vector<LifeV::Real>& eigenvaluesR,
+			std::vector<LifeV::Real>& eigenvaluesI)
 
 {
   // LAPACK wrapper of Epetra
-  Epetra_LAPACK lapack;// = new Epetra_LAPACK;
+  Epetra_LAPACK lapack;
 
   //List of flags for Lapack Function
   //For documentation, have a look at http://www.netlib.org/lapack/double/dgeev.f
@@ -1395,8 +1395,8 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
   Int LDA = Dim*Dim;
   
   //Arrays to store eigenvalues (their number = nDimensions)
-  double WR[nDimensions]; // = new double[nDimensions];
-  double WI[nDimensions]; // = new double[nDimensions];
+  double WR[nDimensions]; 
+  double WI[nDimensions]; 
 
   //Number of eigenvectors
   Int LDVR = nDimensions;
@@ -1405,15 +1405,15 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
   //Arrays to store eigenvectors
   Int length = nDimensions * 3;
 
-  double VR[length];// = new double[length];
-  double VL[length];// = new double[length];
+  double VR[length];
+  double VL[length];
   
-  Int LWORK = 10;
+  Int LWORK = 9;
   Int INFO = 0;
 
-  double WORK[LWORK]; // = new double[LWORK]; 
+  double WORK[LWORK]; 
 
-  double A[length]; // = new double[length];
+  double A[length]; 
 
   for (UInt i(0); i< nDimensions; i++)
       for (UInt j(0);j<nDimensions; j++)
@@ -1427,6 +1427,13 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
       eigenvaluesR[i] = WR[i];
       eigenvaluesI[i] = WI[i];
     }
+
+  // for( UInt i(0); i < nDimensions; i++ )
+  //   {
+  //     std::cout << "R: "<< eigenvaluesR[i] << std::endl;
+  //     std::cout << "I: "<< eigenvaluesI[i] << std::endl;
+  //   }
+  
 
 }
 

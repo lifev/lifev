@@ -420,18 +420,21 @@ Structure::run3d()
 	//Perform the analysis
 	solid.analyzeTensions();
 
-	/*
-	//Extracting the gradient
-	*gradX = solid.gradientX();
-	*gradY = solid.gradientY();
-	*gradZ = solid.gradientZ();
+	
+	// //Extracting the gradient
+	// *gradX = solid.gradientX();
+	// *gradY = solid.gradientY();
+	// *gradZ = solid.gradientZ();
 
-	exporterX->postProcess( startTime );
-	exporterY->postProcess( startTime );
-	exporterZ->postProcess( startTime );
-	*/
+	// exporterX->postProcess( startTime );
+	// exporterY->postProcess( startTime );
+	// exporterZ->postProcess( startTime );
+	
 	
 	//Extracting the tensions
+
+	std::cout << "Norm of the tension vector: " << solid.principalStresses().norm2() << std::endl;
+
 	*solidTensions = solid.principalStresses();
 	M_exporter->postProcess( startTime );
 

@@ -435,6 +435,14 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       //Compute the eigenvalue
       AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
       
+      // for( UInt i(0); i < nDimensions; i++ )
+      // 	{
+      // 	  std::cout << "R: "<< M_eigenvaluesR[i] << std::endl;
+      // 	  std::cout << "I: "<< M_eigenvaluesI[i] << std::endl;
+      // 	}
+  
+
+
       //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
       //Check on the imaginary part of eigen values given by the Lapack method 
       Real sum(0);
@@ -444,12 +452,14 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
       //Save the eigenvalues in the global vector
-      for( UInt icoor = 0; icoor < nDimensions; icoor++ )
+      for( UInt icoor = 0; icoor < nDimensions; ++icoor )
 	{
 	  (*M_globalEigen)(iDOF + icoor * dim + this->M_offset) = M_eigenvaluesR[icoor];
 	}
     }
 
+  std::string name="globalVect";
+  M_globalEigen->spy(name);
   chrono.stop();
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 

@@ -558,8 +558,8 @@ void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const KNMK<Real> CofFk,
   @param eigenvalues vector of principal tensions
  */
   void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
-			  std::vector<LifeV::Real> eigenvaluesR,
-			  std::vector<LifeV::Real> eigenvaluesI);
+			  std::vector<LifeV::Real>& eigenvaluesR,
+			  std::vector<LifeV::Real>& eigenvaluesI);
 
 
 
