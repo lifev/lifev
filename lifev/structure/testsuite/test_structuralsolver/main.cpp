@@ -181,7 +181,19 @@ static Real bcZero(const Real& t, const Real&  X, const Real& Y, const Real& Z, 
 
 static Real bcNonZero(const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
 {
-    return  300000.;
+  switch (i)
+    {
+    case 0:
+      return 300000.0;
+      break;
+    case 1:
+      return 0.0;
+      break;
+    case 2:
+      return 0.0;
+      break;
+    }
+    return 0;
 }
 
 };
@@ -303,24 +315,13 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC("EdgesIn",      20,  Natural,   Component, nonZero, compx);
+    BCh->addBC("EdgesIn",      20,  Natural,   Full, nonZero, 3);
     BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compx);
-    //! =================================================================================
 
-    //! =================================================================================
-    //! BC for StructuredCube4_simmetry.mesh
-    //! =================================================================================
-    /*
-    BCh->addBC("surf5",    5,   EssentialVertices,    Component, Homogeneous, compz);
-    BCh->addBC("line10",   10,  EssentialVertices,    Component, Homogeneous, compxz);
-    BCh->addBC("line20",   20,  EssentialVertices,    Component, Homogeneous, compxy);
-    BCh->addBC("line30",   30,  EssentialVertices,    Component, Homogeneous, compyz);
-    BCh->addBC("line40",   40,  EssentialVertices,    Component, Homogeneous, compy);
-    BCh->addBC("line50",   50,  EssentialVertices,    Component, Homogeneous, compz);
-    BCh->addBC("point100", 100, EssentialVertices,    Full,      Homogeneous, 3);
-    */
-    //! =================================================================================
-    //! #################################################################################
+    BCh->addBC("Vertex",      100,  EssentialVertices, Full, zero, 3);
+    BCh->addBC("EdgesIn",      50,  EssentialVertices, Component, zero, compxz);
+    BCh->addBC("EdgesIn",      30,  EssentialVertices, Component, zero, compxy);
+    BCh->addBC("EdgesIn",      60,  EssentialVertices, Component, zero, compyz);
 
     //! 1. Constructor of the structuralSolver
     StructuralSolver< RegionMesh<LinearTetra> > solid;
@@ -418,18 +419,18 @@ Structure::run3d()
     exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
 
     exporter->postProcess( 0 );
-    /*
+    
     //!--------------------------------------------------------------------------------------------
     //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
     //!--------------------------------------------------------------------------------------------
-    cout.precision(16);
-    ofstream file_comp( "Displacement_components_NL.m" );
-    if ( !file_comp )
-    {
-  	std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
-    }
+    // cout.precision(16);
+    // ofstream file_comp( "Displacement_components_NL.m" );
+    // if ( !file_comp )
+    // {
+    // 	std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
+    // }
 
-    int IDPoint = 73; // StructuredCube4
+    //int IDPoint = 73; // StructuredCube4
     //int IDPoint = 401; // StructuredCube8
     //int IDPoint = 2593; // StructuredCube16
 
@@ -437,20 +438,20 @@ Structure::run3d()
     //int IDPoint = 315;// cube8x8.mesh
     //int IDPoint = 1526;// cube16x16.mesh
 
-    file_comp << " % TEST NONLINEAR ELASTICITY" << endl;
-    file_comp << " % Displacement components of ID node  " << IDPoint << " :" << endl;
-    file_comp << " % Each row is a time step" << endl;
-    file_comp << " % First column = comp x, second = comp y and third = comp z. " << endl;
-    file_comp <<  endl;
-    file_comp << " SolidDisp_NL = [ " ;
+    // file_comp << " % TEST NONLINEAR ELASTICITY" << endl;
+    // file_comp << " % Displacement components of ID node  " << IDPoint << " :" << endl;
+    // file_comp << " % Each row is a time step" << endl;
+    // file_comp << " % First column = comp x, second = comp y and third = comp z. " << endl;
+    // file_comp <<  endl;
+    // file_comp << " SolidDisp_NL = [ " ;
 
-    for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-    {
-    file_comp<< solid.displacement()[ k ] << " ";
-    }
+    // for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
+    // {
+    // file_comp<< solid.displacement()[ k ] << " ";
+    // }
 
-    file_comp<< endl;
-    */
+    // file_comp<< endl;
+    
     //!--------------------------------------------------------------------------------------------
     //!The update of the RHS is done by the TimeAdvance class
     //solid.updateSystem();
@@ -489,26 +490,27 @@ Structure::run3d()
 	exporter->postProcess( time );
 
 	/* This part lets to save the displacement at one point of the mesh and to check the result
-	   w.r.t. manufactured solution.
+	   w.r.t. manufactured solution.*/
         //!--------------------------------------------------------------------------------------------------
         //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
         //!--------------------------------------------------------------------------------------------------
-	cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
-	for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-	{
-		file_comp<< solid.displacement()[ k ] << " ";
-        	cout.precision(16);
-		cout <<"*********************************************************"<< std::endl;
-		cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
-		cout <<"*********************************************************"<< std::endl;
-	}
-	file_comp<< endl;
-	*/
+	// cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
+	// for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
+	// {
+	//   file_comp<< solid.displacement()[ k ] << " ";
+        // 	cout.precision(16);
+	// 	cout <<"*********************************************************"<< std::endl;
+	// 	cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
+	// 	cout <<"*********************************************************"<< std::endl;
+	// }
+	// file_comp<< endl;
+	
 
 	Real normVect;
 	normVect =  solid.displacement().norm2();
 	std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
 
+	
 	///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
 	    if (!dataStructure->solidType().compare("linearVenantKirchhoff"))
 	      CheckResultLE(normVect,time);
@@ -532,48 +534,48 @@ Structure::run3d()
 
 void Structure::CheckResultLE(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.276527)>1e-5 )
+    if ( time == 0.1  && std::fabs(dispNorm-0.312358)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.276536)>1e-5 )
+    if ( time == 0.2  && std::fabs(dispNorm-0.312374)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.276529)>1e-5 )
+    if ( time == 0.3  && std::fabs(dispNorm-0.312362)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.276531)>1e-5 )
+    if ( time == 0.4  && std::fabs(dispNorm-0.312365)>1e-5 )
         this->resultChanged(time);
 }
 
 void Structure::CheckResultSVK(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.263348)>1e-5 )
+    if ( time == 0.1  && std::fabs(dispNorm-0.292970)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.263350)>1e-5 )
+    if ( time == 0.2  && std::fabs(dispNorm-0.298982)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.263350)>1e-5 )
+    if ( time == 0.3  && std::fabs(dispNorm-0.298977)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.263351)>1e-5 )
+    if ( time == 0.4  && std::fabs(dispNorm-0.298979)>1e-5 )
         this->resultChanged(time);
 }
 void Structure::CheckResultEXP(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.284844)>1e-5 )
+    if ( time == 0.1  && std::fabs(dispNorm-0.321481)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.284853)>1e-5 )
+    if ( time == 0.2  && std::fabs(dispNorm-0.321495)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.284846)>1e-5 )
+    if ( time == 0.3  && std::fabs(dispNorm-0.321489)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.284848)>1e-5 )
+    if ( time == 0.4  && std::fabs(dispNorm-0.321492)>1e-5 )
         this->resultChanged(time);
 }
 
 void Structure::CheckResultNH(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.286120)>1e-5 )
+    if ( time == 0.1  && std::fabs(dispNorm-0.321481)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.286129)>1e-5 )
+    if ( time == 0.2  && std::fabs(dispNorm-0.321495)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.286122)>1e-5 )
+    if ( time == 0.3  && std::fabs(dispNorm-0.321489)>1e-5 )
         this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.286123)>1e-5 )
+    if ( time == 0.4  && std::fabs(dispNorm-0.321492)>1e-5 )
         this->resultChanged(time);
 }
 

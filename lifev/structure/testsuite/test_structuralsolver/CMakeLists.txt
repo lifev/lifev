@@ -17,8 +17,8 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStVenant
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-TRIBITS_COPY_FILES_TO_BINARY_DIR(StructuredCube4_test_structuralsolver.mesh_Structure
-  SOURCE_FILES StructuredCube4_test_structuralsolver.mesh
+TRIBITS_COPY_FILES_TO_BINARY_DIR(Cube4-P1.mesh_Structure
+  SOURCE_FILES Cube4-P1.mesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/data/mesh/inria/
 )
 

@@ -18,7 +18,7 @@
 
 
 [exporter]
-type       		= ensight	#ensight # hdf5 (if library compiled with hdf5 support) or ensight
+type       		= hdf5	#ensight # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  		= false
 start      		= 0
 save       		= 1
@@ -46,7 +46,7 @@ BDF_order   		= 2
 
 [../space_discretization]
 mesh_dir  		= ./
-mesh_file 		= StructuredCube4_test_structuralsolver.mesh
+mesh_file 		= Cube4-P1.mesh
 order     		= P1
 
 [../miscellaneous]
