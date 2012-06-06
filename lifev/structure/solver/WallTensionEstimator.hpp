@@ -166,6 +166,12 @@ public:
     */
     void analyzeTensions( void );
 
+    //! Clean Matrices: It is to clean the term that are less than 10-7 to set them to zero.
+    /*!
+      \param NONE
+    */
+    void cleanMatrices( void );
+
 
 //! @name Set Methods
 //@{
@@ -421,28 +427,22 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
 
       //Compute the rightCauchyC tensor
       AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);
-		
+
+      cleanMatrices();
+      
       LifeV::Real sumI(0);
       for( UInt i(0); i < M_invariants.size(); i++ )
 	sumI += M_invariants[i];
       
       //Compute the first Piola-Kirchhoff tensor
       M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
-
+      
       //Compute the Cauchy tensor
       AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
 
       //Compute the eigenvalue
       AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
       
-      // for( UInt i(0); i < nDimensions; i++ )
-      // 	{
-      // 	  std::cout << "R: "<< M_eigenvaluesR[i] << std::endl;
-      // 	  std::cout << "I: "<< M_eigenvaluesI[i] << std::endl;
-      // 	}
-  
-
-
       //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
       //Check on the imaginary part of eigen values given by the Lapack method 
       Real sum(0);
@@ -458,8 +458,6 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
 	}
     }
 
-  std::string name="globalVect";
-  M_globalEigen->spy(name);
   chrono.stop();
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 
@@ -484,6 +482,26 @@ WallTensionEstimator<Mesh >::computeDisplacementGradient( void )
   *M_displZ = M_FESpace->gradientRecovery(*M_displ, 2);
 
 }  
+
+template <typename Mesh>
+void 
+WallTensionEstimator<Mesh >::cleanMatrices( void )
+{
+
+  UInt N(M_deformationF->N());
+  UInt M(M_deformationF->M());
+
+  //Clearning the deformationGradientF
+  for ( UInt i(0); i < N; i++ )
+      for ( UInt j(0); j < M; j++ )
+	if( (i-j) ) (*M_deformationF)(i,j) = 0;
+  
+  //Cleaning the cofactorF
+  for ( UInt i(0); i < N; i++ )
+      for ( UInt j(0); j < M; j++ )
+	if( (i-j) ) (*M_cofactorF)(i,j) = 0;
+
+}
 
 
 }

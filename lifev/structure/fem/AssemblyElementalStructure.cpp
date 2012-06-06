@@ -1363,6 +1363,7 @@ void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariant
   cofactorF( 2 , 1 ) = - ( tensorF(0,0)*tensorF(1,2) - tensorF(0,2)*tensorF(1,0) );
   cofactorF( 2 , 2 ) =   ( tensorF(0,0)*tensorF(1,1) - tensorF(1,0)*tensorF(0,1) );  
   
+  cofactorF.Scale(1/invariants[3]);
 }
 
 void computeCauchyStressTensor(Epetra_SerialDenseMatrix& cauchy,
@@ -1427,13 +1428,6 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
       eigenvaluesR[i] = WR[i];
       eigenvaluesI[i] = WI[i];
     }
-
-  // for( UInt i(0); i < nDimensions; i++ )
-  //   {
-  //     std::cout << "R: "<< eigenvaluesR[i] << std::endl;
-  //     std::cout << "I: "<< eigenvaluesI[i] << std::endl;
-  //   }
-  
 
 }
 

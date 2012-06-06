@@ -633,18 +633,28 @@ void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( 
   Real bulk  	= this->M_dataMaterial->bulk(marker);
 
 
-  //Computing the first term \muJ^{-2/3}[F-(1/3)tr(C)F^{-T}]
+  //Computing the first term \alphaJ^{-2/3}[F-(1/3)tr(C)F^{-T}]exp(\gamma(tr(Ciso) - 3)
   Epetra_SerialDenseMatrix firstTerm(tensorF);
   Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
-  copyCofactorF.Scale( -1 * (1 / 3) * invariants[0]);
+
+  Real scale(0.0);
+  scale = -invariants[0]/3;
+  copyCofactorF.Scale( scale );
   firstTerm += copyCofactorF;
-  Real coef(alpha * std::pow(invariants[3],-2/3) * std::exp( gamma * ( invariants[0] - 3 ) ) );
+
+  //Computation trace of the isochoric C
+  Real trCiso(0.0);
+  trCiso = std::pow(invariants[3],-2/3)*invariants[0];
+
+  Real coef( 0.0 );
+  coef = alpha * std::pow(invariants[3],-2/3) * std::exp( gamma * ( trCiso - 3 ) );
   firstTerm.Scale( coef );
 
   //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
   Epetra_SerialDenseMatrix secondTerm(cofactorF);
   Real secCoef(0);
   secCoef = invariants[3] * (bulk/2) * (invariants[3] - 1 + (1 / invariants[3]) * std::log(invariants[3]));
+
   secondTerm.Scale( secCoef );
 
   firstPiola += firstTerm;

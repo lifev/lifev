@@ -623,9 +623,14 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( E
   //Computing the first term \muJ^{-2/3}[F-(1/3)tr(C)F^{-T}]
   Epetra_SerialDenseMatrix firstTerm(tensorF);
   Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
-  copyCofactorF.Scale( -1 * (1 / 3) * invariants[0]);
+  Real scale( 0.0 );
+  scale = -1 * (1 / 3) * invariants[0];
+  copyCofactorF.Scale( scale );
   firstTerm += copyCofactorF;
-  firstTerm.Scale( mu * std::pow(invariants[3],-2/3) );
+
+  Real coef( 0.0 );
+  scoef = mu * std::pow(invariants[3],-2/3);
+  firstTerm.Scale( coef );
 
   //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
   Epetra_SerialDenseMatrix secondTerm(cofactorF);

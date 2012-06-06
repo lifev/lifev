@@ -396,7 +396,7 @@ Structure::run3d()
 	M_importer->readVariable(solutionDispl);
 	M_importer->closeFile();
 
-	/*
+	
 	//Create and exporter to check importing
 	std::string expVerFile = "verificationDisplExporter";
 	LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
@@ -409,8 +409,6 @@ Structure::run3d()
 	*vectVer = *solidDisp;
 	exporter.postProcess(startTime);
 
-	return 0;
-	*/
 
 	//Set the current solution as the displacement vector to use
 	solid.setDisplacement(*solidDisp);
@@ -421,14 +419,14 @@ Structure::run3d()
 	solid.analyzeTensions();
 
 	
-	// //Extracting the gradient
-	// *gradX = solid.gradientX();
-	// *gradY = solid.gradientY();
-	// *gradZ = solid.gradientZ();
+	//Extracting the gradient
+	*gradX = solid.gradientX();
+	*gradY = solid.gradientY();
+	*gradZ = solid.gradientZ();
 
-	// exporterX->postProcess( startTime );
-	// exporterY->postProcess( startTime );
-	// exporterZ->postProcess( startTime );
+	exporterX->postProcess( startTime );
+	exporterY->postProcess( startTime );
+	exporterZ->postProcess( startTime );
 	
 	
 	//Extracting the tensions

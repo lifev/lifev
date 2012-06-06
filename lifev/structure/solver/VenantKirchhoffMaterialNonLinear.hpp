@@ -425,13 +425,14 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTens
   //Get the material parameters
   Real lambda  	= this->M_dataMaterial->lambda(marker);
   Real mu    	= this->M_dataMaterial->mu(marker);
-  Real coef = ( lambda / 2 ) * ( invariants[1] - 3 );
+  Real coef = ( lambda / 2 ) * ( invariants[0] - 3 );
 
   Epetra_SerialDenseMatrix firstTerm(tensorF);
   firstTerm.Scale(coef);
 
   Epetra_SerialDenseMatrix secondTerm(tensorF);
-  secondTerm.Scale(mu);
+  Real coeff = -mu;
+  secondTerm.Scale( coeff );
 
   Epetra_SerialDenseMatrix thirdTerm(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
   Epetra_SerialDenseMatrix rightCauchyC(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
