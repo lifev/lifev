@@ -17,6 +17,7 @@ ProblemType = Multiscale
 ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_FS
 #ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_FS-S
 #ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_S
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_TS
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -40,8 +41,8 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_FS
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity                = 1.04          # density        [g/cm^3]
-FluidViscosity              = 1.005309649148734e-06 # viscosity      [g/cm/s]
+FluidDensity                = 1.00          # density        [g/cm^3]
+FluidViscosity              = 1.005309649148734e-01 # viscosity      [g/cm/s]
 FluidVenousPressure         = 0             # ven. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidExternalPressure       = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.2           # density        [g/cm^3]
