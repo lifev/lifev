@@ -12,6 +12,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
+
 # dist_pkgdata_DATA = $(shell find $(srcdir) -name "*.dat") 
 
 # check-local:
