@@ -35,16 +35,16 @@
 #define TESTIMPORTEXPORT_HPP_ 1
 
 // LifeV definition files
-#include <life/lifecore/Displayer.hpp>
-#include <life/lifecore/LifeChrono.hpp>
+#include <lifev/core/util/Displayer.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 //#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/TimeData.hpp>
-#include <life/lifefilters/ExporterVTK.hpp>
-#include <life/lifefilters/ExporterEnsight.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifefunctions/Womersley.hpp>
-#include <life/lifefunctions/RossEthierSteinmanInc.hpp>
+#include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/filter/ExporterVTK.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/navier_stokes/function/Womersley.hpp>
+#include <lifev/navier_stokes/function/RossEthierSteinmanInc.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
