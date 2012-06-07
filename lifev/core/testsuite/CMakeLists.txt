@@ -14,6 +14,7 @@ ADD_SUBDIRECTORIES(
   matrix_epetra_structured_framework
   mesh
   repeated_mesh
+  partition_io
   template_test
   vector_container
 )

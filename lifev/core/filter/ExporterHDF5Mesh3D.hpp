@@ -31,6 +31,9 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @author Radu Popescu <radu.popescu@epfl.ch>
 
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
+
+  This class has been deprecated and will be removed in future releases.
+  Please use the PartitionIO class in its place.
 */
 
 #ifndef EXPORTER_HDF5_MESH_3D_H
