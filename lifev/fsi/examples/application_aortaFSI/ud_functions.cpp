@@ -17,91 +17,91 @@
 namespace LifeV
 {
 
-Real aortaFluxIn(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFluxIn(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    if(t<=0.00+0.01) return	0.0000e+00;
-    if(t<=0.01+0.01) return	0.0000e+00;
-    if(t<=0.02+0.01) return	0.0000e+00;
-    if(t<=0.03+0.01) return	0.0000e+00;
-    if(t<=0.04+0.01) return	-9.1759e-06*1e6;
-    if(t<=0.05+0.01) return	-3.0930e-05*1e6;
-    if(t<=0.06+0.01) return	-6.2639e-05*1e6;
-    if(t<=0.07+0.01) return	-1.0212e-04*1e6;
-    if(t<=0.08+0.01) return	-1.4760e-04*1e6;
-    if(t<=0.09+0.01) return	-1.9726e-04*1e6;
-    if(t<=0.10+0.01) return	-2.4980e-04*1e6;
-    if(t<=0.11+0.01) return	-2.9526e-04*1e6;
-    if(t<=0.12+0.01) return	-3.2956e-04*1e6;
-    if(t<=0.13+0.01) return	-3.5469e-04*1e6;
-    if(t<=0.14+0.01) return	-3.7250e-04*1e6;
-    if(t<=0.15+0.01) return	-3.8429e-04*1e6;
-    if(t<=0.16+0.01) return	-3.9123e-04*1e6;
-    if(t<=0.17+0.01) return	-3.9431e-04*1e6;
-    if(t<=0.18+0.01) return	-3.9349e-04*1e6;
-    if(t<=0.19+0.01) return	-3.8858e-04*1e6;
-    if(t<=0.20+0.01) return	-3.7985e-04*1e6;
-    if(t<=0.21+0.01) return	-3.6756e-04*1e6;
-    if(t<=0.22+0.01) return	-3.5207e-04*1e6;
-    if(t<=0.23+0.01) return	-3.3408e-04*1e6;
-    if(t<=0.24+0.01) return	-3.1402e-04*1e6;
-    if(t<=0.25+0.01) return	-2.9288e-04*1e6;
-    if(t<=0.26+0.01) return	-2.7154e-04*1e6;
-    if(t<=0.27+0.01) return	-2.5054e-04*1e6;
-    if(t<=0.28+0.01) return	-2.2979e-04*1e6;
-    if(t<=0.29+0.01) return	-2.0904e-04*1e6;
-    if(t<=0.30+0.01) return	-1.8880e-04*1e6;
-    if(t<=0.31+0.01) return	-1.6899e-04*1e6;
-    if(t<=0.32+0.01) return	-1.4864e-04*1e6;
-    if(t<=0.33+0.01) return	-1.2730e-04*1e6;
-    if(t<=0.34+0.01) return	-1.0400e-04*1e6;
-    if(t<=0.35+0.01) return	-7.9755e-05*1e6;
-    if(t<=0.36+0.01) return	-5.8719e-05*1e6;
-    if(t<=0.37+0.01) return	-4.0345e-05*1e6;
-    if(t<=0.38+0.01) return	-2.4596e-05*1e6;
-    if(t<=0.39+0.01) return	-1.2259e-05*1e6;
-    if(t<=0.40+0.01) return	-3.8110e-06*1e6;
-    if(t<=0.41+0.01) return	0.0000e+00;
-    if(t<=0.42+0.01) return	0.0000e+00;
-    if(t<=0.43+0.01) return	0.0000e+00;
-    if(t<=0.44+0.01) return	0.0000e+00;
-    if(t<=0.45+0.01) return	0.0000e+00;
-    if(t<=0.46+0.01) return	0.0000e+00;
-    if(t<=0.47+0.01) return	0.0000e+00;
-    if(t<=0.48+0.01) return	0.0000e+00;
-    if(t<=0.49+0.01) return	0.0000e+00;
-    if(t<=0.50+0.01) return	0.0000e+00;
-    if(t<=0.51+0.01) return	0.0000e+00;
-    if(t<=0.52+0.01) return	0.0000e+00;
-    if(t<=0.53+0.01) return	0.0000e+00;
-    if(t<=0.54+0.01) return	0.0000e+00;
-    if(t<=0.55+0.01) return	0.0000e+00;
-    if(t<=0.56+0.01) return	0.0000e+00;
-    if(t<=0.57+0.01) return	0.0000e+00;
-    if(t<=0.58+0.01) return	0.0000e+00;
-    if(t<=0.59+0.01) return	0.0000e+00;
-    if(t<=0.60+0.01) return	0.0000e+00;
-    if(t<=0.61+0.01) return	0.0000e+00;
-    if(t<=0.62+0.01) return	0.0000e+00;
-    if(t<=0.63+0.01) return	0.0000e+00;
-    if(t<=0.64+0.01) return	0.0000e+00;
-    if(t<=0.65+0.01) return	0.0000e+00;
-    if(t<=0.66+0.01) return	0.0000e+00;
-    if(t<=0.67+0.01) return	0.0000e+00;
-    if(t<=0.68+0.01) return	0.0000e+00;
-    if(t<=0.69+0.01) return	0.0000e+00;
-    if(t<=0.70+0.01) return	0.0000e+00;
-    if(t<=0.71+0.01) return	0.0000e+00;
-    if(t<=0.72+0.01) return	0.0000e+00;
-    if(t<=0.73+0.01) return	0.0000e+00;
-    if(t<=0.74+0.01) return	0.0000e+00;
-    if(t<=0.75+0.01) return	0.0000e+00;
-    if(t<=0.76+0.01) return	0.0000e+00;
-    if(t<=0.77+0.01) return	0.0000e+00;
-    if(t<=0.78+0.01) return	0.0000e+00;
-    if(t<=0.79+0.01) return	0.0000e+00;
+    if(t<=0.00+0.01) return    0.0000e+00;
+    if(t<=0.01+0.01) return    0.0000e+00;
+    if(t<=0.02+0.01) return    0.0000e+00;
+    if(t<=0.03+0.01) return    0.0000e+00;
+    if(t<=0.04+0.01) return    -9.1759e-06*1e6;
+    if(t<=0.05+0.01) return    -3.0930e-05*1e6;
+    if(t<=0.06+0.01) return    -6.2639e-05*1e6;
+    if(t<=0.07+0.01) return    -1.0212e-04*1e6;
+    if(t<=0.08+0.01) return    -1.4760e-04*1e6;
+    if(t<=0.09+0.01) return    -1.9726e-04*1e6;
+    if(t<=0.10+0.01) return    -2.4980e-04*1e6;
+    if(t<=0.11+0.01) return    -2.9526e-04*1e6;
+    if(t<=0.12+0.01) return    -3.2956e-04*1e6;
+    if(t<=0.13+0.01) return    -3.5469e-04*1e6;
+    if(t<=0.14+0.01) return    -3.7250e-04*1e6;
+    if(t<=0.15+0.01) return    -3.8429e-04*1e6;
+    if(t<=0.16+0.01) return    -3.9123e-04*1e6;
+    if(t<=0.17+0.01) return    -3.9431e-04*1e6;
+    if(t<=0.18+0.01) return    -3.9349e-04*1e6;
+    if(t<=0.19+0.01) return    -3.8858e-04*1e6;
+    if(t<=0.20+0.01) return    -3.7985e-04*1e6;
+    if(t<=0.21+0.01) return    -3.6756e-04*1e6;
+    if(t<=0.22+0.01) return    -3.5207e-04*1e6;
+    if(t<=0.23+0.01) return    -3.3408e-04*1e6;
+    if(t<=0.24+0.01) return    -3.1402e-04*1e6;
+    if(t<=0.25+0.01) return    -2.9288e-04*1e6;
+    if(t<=0.26+0.01) return    -2.7154e-04*1e6;
+    if(t<=0.27+0.01) return    -2.5054e-04*1e6;
+    if(t<=0.28+0.01) return    -2.2979e-04*1e6;
+    if(t<=0.29+0.01) return    -2.0904e-04*1e6;
+    if(t<=0.30+0.01) return    -1.8880e-04*1e6;
+    if(t<=0.31+0.01) return    -1.6899e-04*1e6;
+    if(t<=0.32+0.01) return    -1.4864e-04*1e6;
+    if(t<=0.33+0.01) return    -1.2730e-04*1e6;
+    if(t<=0.34+0.01) return    -1.0400e-04*1e6;
+    if(t<=0.35+0.01) return    -7.9755e-05*1e6;
+    if(t<=0.36+0.01) return    -5.8719e-05*1e6;
+    if(t<=0.37+0.01) return    -4.0345e-05*1e6;
+    if(t<=0.38+0.01) return    -2.4596e-05*1e6;
+    if(t<=0.39+0.01) return    -1.2259e-05*1e6;
+    if(t<=0.40+0.01) return    -3.8110e-06*1e6;
+    if(t<=0.41+0.01) return    0.0000e+00;
+    if(t<=0.42+0.01) return    0.0000e+00;
+    if(t<=0.43+0.01) return    0.0000e+00;
+    if(t<=0.44+0.01) return    0.0000e+00;
+    if(t<=0.45+0.01) return    0.0000e+00;
+    if(t<=0.46+0.01) return    0.0000e+00;
+    if(t<=0.47+0.01) return    0.0000e+00;
+    if(t<=0.48+0.01) return    0.0000e+00;
+    if(t<=0.49+0.01) return    0.0000e+00;
+    if(t<=0.50+0.01) return    0.0000e+00;
+    if(t<=0.51+0.01) return    0.0000e+00;
+    if(t<=0.52+0.01) return    0.0000e+00;
+    if(t<=0.53+0.01) return    0.0000e+00;
+    if(t<=0.54+0.01) return    0.0000e+00;
+    if(t<=0.55+0.01) return    0.0000e+00;
+    if(t<=0.56+0.01) return    0.0000e+00;
+    if(t<=0.57+0.01) return    0.0000e+00;
+    if(t<=0.58+0.01) return    0.0000e+00;
+    if(t<=0.59+0.01) return    0.0000e+00;
+    if(t<=0.60+0.01) return    0.0000e+00;
+    if(t<=0.61+0.01) return    0.0000e+00;
+    if(t<=0.62+0.01) return    0.0000e+00;
+    if(t<=0.63+0.01) return    0.0000e+00;
+    if(t<=0.64+0.01) return    0.0000e+00;
+    if(t<=0.65+0.01) return    0.0000e+00;
+    if(t<=0.66+0.01) return    0.0000e+00;
+    if(t<=0.67+0.01) return    0.0000e+00;
+    if(t<=0.68+0.01) return    0.0000e+00;
+    if(t<=0.69+0.01) return    0.0000e+00;
+    if(t<=0.70+0.01) return    0.0000e+00;
+    if(t<=0.71+0.01) return    0.0000e+00;
+    if(t<=0.72+0.01) return    0.0000e+00;
+    if(t<=0.73+0.01) return    0.0000e+00;
+    if(t<=0.74+0.01) return    0.0000e+00;
+    if(t<=0.75+0.01) return    0.0000e+00;
+    if(t<=0.76+0.01) return    0.0000e+00;
+    if(t<=0.77+0.01) return    0.0000e+00;
+    if(t<=0.78+0.01) return    0.0000e+00;
+    if(t<=0.79+0.01) return    0.0000e+00;
 }
 
-Real aortaPhisPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaPhisPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     /*switch(i) {
     case 1:
@@ -196,7 +196,7 @@ Real aortaPhisPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const 
 }
 
 
-Real aortaFlux3(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFlux3(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if (t<=0.00) return 3.350E-05*1e6;
     if (t<=0.01) return 3.373E-05*1e6;
@@ -280,7 +280,7 @@ Real aortaFlux3(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real
     if (t<=0.79) return 3.300E-05*1e6;
 }//thoracic aorta,
 
-Real aortaFlux5(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFlux5(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if (t<=0.00) return  3.033E-06*1e6;
     if (t<=0.01) return  3.041E-06*1e6;
@@ -364,7 +364,7 @@ Real aortaFlux5(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real
     if (t<=0.79) return  3.016E-06*1e6;
 }//first branch_1,
 
-Real aortaFlux6(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFlux6(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if (t<=0.00) return  7.817E-07*1e6;
     if (t<=0.01) return  7.879E-07*1e6;
@@ -448,7 +448,7 @@ Real aortaFlux6(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real
     if (t<=0.79) return  7.754E-07*1e6;
 }//branch 1_2 smallest
 
-Real aortaFlux7(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFlux7(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if (t<=0.00) return  1.930E-06 *1e6;
     if (t<=0.01) return  1.710E-06 *1e6;
@@ -532,7 +532,7 @@ Real aortaFlux7(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real
     if (t<=0.79) return  2.185E-06 *1e6;
 }//R. Brachia, branch 1_3
 
-Real aortaFlux8(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFlux8(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if (t<=0.00) return  2.445E-06*1e6;
     if (t<=0.01) return  2.470E-06*1e6;
@@ -616,7 +616,7 @@ Real aortaFlux8(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real
     if (t<=0.79) return  2.433E-06*1e6;
 }// 15, LCCA, branch 2
 
-Real aortaFlux9(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFlux9(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if (t<=0.00) return  7.854E-07*1e6;
     if (t<=0.01) return  7.900E-07*1e6;
@@ -700,7 +700,7 @@ Real aortaFlux9(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real
     if (t<=0.79) return  7.807E-07*1e6;
 }// 20 LVA branch 3_1
 
-Real aortaFlux4(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFlux4(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if (t<=0.00) return  2.581E-06 *1e6;
     if (t<=0.01) return  2.499E-06 *1e6;
@@ -875,7 +875,7 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 
 
-Real linearPress2( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearPress2( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -886,7 +886,7 @@ Real linearPress2( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*
 }
 
 
-Real linearFlux3( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFlux3( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -897,7 +897,7 @@ Real linearFlux3( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 }
 
 
-Real linearFluxIn(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFluxIn(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -909,7 +909,7 @@ Real linearFluxIn(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 }
 
 
-Real linearFlux4(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFlux4(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -921,7 +921,7 @@ Real linearFlux4(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*
 
 
 
-Real linearFlux5( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFlux5( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -933,7 +933,7 @@ Real linearFlux5( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 
 
-Real linearFlux6( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFlux6( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -944,7 +944,7 @@ Real linearFlux6( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 }
 
 
-Real linearFlux7( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFlux7( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -955,7 +955,7 @@ Real linearFlux7( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 }
 
 
-Real linearFlux8(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFlux8(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -965,7 +965,7 @@ Real linearFlux8(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*
     return (aortaFlux8(tii)-aortaFlux8(ti))/(0.001)*(t-(ti))+aortaFlux8(ti);
 }
 
-Real linearFlux9( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFlux9( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -976,7 +976,7 @@ Real linearFlux9( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 }
 
 
-Real linearFlux3_(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFlux3_(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -987,7 +987,7 @@ Real linearFlux3_(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 }
 
 
-Real linearFlux6_( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real linearFlux6_( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t>0.8)
         t=(((int)floor(t*1000))%800)/1000;
@@ -997,7 +997,7 @@ Real linearFlux6_( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*
     return (aortaFlux6_(tii)-aortaFlux6_(ti))/(0.001)*(t-(ti))+aortaFlux6_(ti);
 }
 
-Real aortaFlux3_(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFlux3_(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t<=0.00+0.01) return  33.6             ;
     if(t<=0.01+0.01) return  33.83            ;
@@ -1081,7 +1081,7 @@ Real aortaFlux3_(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Rea
     if(t<=0.79+0.01) return  33.1             ;
 }
 
-Real aortaFlux6_(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaFlux6_(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if(t<=0.00+0.01) return    0.6737071250000001;
     if(t<=0.01+0.01) return    0.6799071250000001;
@@ -1165,7 +1165,7 @@ Real aortaFlux6_(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Rea
     if(t<=0.79+0.01) return    0.6674071250000001;
 }
 
-Real u2(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real u2(Real  /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return -1e4;
 }

@@ -69,14 +69,14 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
     typedef typename super::displayerPtr_Type        displayerPtr_Type;
 
     //! Definition of local tensors
-    typedef KN<Real> 				     KN_Type;
-    typedef boost::shared_ptr<KN_Type>		     KNPtr_Type;
+    typedef KN<Real>                      KN_Type;
+    typedef boost::shared_ptr<KN_Type>             KNPtr_Type;
 
-    typedef KNM<Real> 				     KNM_Type;
-    typedef boost::shared_ptr<KNM_Type>		     KNMPtr_Type;
+    typedef KNM<Real>                      KNM_Type;
+    typedef boost::shared_ptr<KNM_Type>             KNMPtr_Type;
 
-    typedef KNMK<Real> 				     KNMK_Type;
-    typedef boost::shared_ptr<KNMK_Type>	     KNMKPtr_Type;
+    typedef KNMK<Real>                      KNMK_Type;
+    typedef boost::shared_ptr<KNMK_Type>         KNMKPtr_Type;
 
 //@}
 
@@ -103,7 +103,7 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
       \param offset: the offset parameter used assembling the matrices
     */
     void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-	        const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                 const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
 
@@ -158,9 +158,9 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeVector( const vector_Type& sol,
-			Real factor,
-			const dataPtr_Type& dataMaterial,
-			const displayerPtr_Type& displayer );
+            Real factor,
+            const dataPtr_Type& dataMaterial,
+            const displayerPtr_Type& displayer );
 
 
     //! Computes the deformation gradient F, the cofactor matrix Cof(F), the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
@@ -180,7 +180,7 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
 
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
     void showMe( std::string const& fileNameVectStiff,
-		 std::string const& fileNameJacobain );
+         std::string const& fileNameJacobain );
 
 //@}
 
@@ -203,25 +203,25 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
 protected:
 
     //! Local stress vector
-    boost::scoped_ptr<VectorElemental>   	      	M_elvecK;
+    boost::scoped_ptr<VectorElemental>                 M_elvecK;
 
     //! Elementary matrices
-    boost::scoped_ptr<MatrixElemental>             	M_elmatK;
+    boost::scoped_ptr<MatrixElemental>                 M_elmatK;
 
     //! Vector: stiffness non-linear
-    vectorPtr_Type		     			M_stiff;
+    vectorPtr_Type                         M_stiff;
 
     //! First Piola-Kirchhoff stress tensor
-    vectorPtr_Type	      		      		M_FirstPiolaKStress;
+    vectorPtr_Type                                M_FirstPiolaKStress;
 
     //! Local tensors initialization
-    KNMPtr_Type						M_FirstPiolaKStressEle;
-    KNMKPtr_Type					M_Fk;
-    KNMKPtr_Type					M_CofFk;
-    KNMKPtr_Type					M_Identity;
-    KNPtr_Type						M_Jack;
-    KNPtr_Type						M_trCisok;
-    KNPtr_Type						M_trCk;
+    KNMPtr_Type                        M_FirstPiolaKStressEle;
+    KNMKPtr_Type                    M_Fk;
+    KNMKPtr_Type                    M_CofFk;
+    KNMKPtr_Type                    M_Identity;
+    KNPtr_Type                        M_Jack;
+    KNPtr_Type                        M_trCisok;
+    KNPtr_Type                        M_trCk;
 
 };
 
@@ -231,11 +231,11 @@ protected:
 
 template <typename Mesh>
 ExponentialMaterialNonLinear<Mesh>::ExponentialMaterialNonLinear():
-    super			( ),
-    M_elvecK 			( ),
+    super            ( ),
+    M_elvecK             ( ),
     M_elmatK                    ( ),
-    M_stiff	     	        ( ),
-    M_FirstPiolaKStress		( )
+    M_stiff                     ( ),
+    M_FirstPiolaKStress        ( )
 {
 }
 
@@ -265,20 +265,20 @@ ExponentialMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh
     this->M_localMap                    = monolithicMap;
     this->M_offset                      = offset;
 
-    M_stiff.reset                 	( new vector_Type(*this->M_localMap) );
+    M_stiff.reset                     ( new vector_Type(*this->M_localMap) );
 
-    M_FirstPiolaKStress.reset		( new vector_Type(*this->M_localMap) );
-    M_elvecK.reset			( new VectorElemental (this->M_FESpace->fe().nbFEDof(), nDimensions) );
+    M_FirstPiolaKStress.reset        ( new vector_Type(*this->M_localMap) );
+    M_elvecK.reset            ( new VectorElemental (this->M_FESpace->fe().nbFEDof(), nDimensions) );
     this->M_elmatK.reset                ( new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
 
     //! Local tensors initilization
-    M_FirstPiolaKStressEle.reset	( new KNM_Type( nDimensions, nDimensions ) );
-    M_Fk.reset			        ( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
-    M_CofFk.reset		   	( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
-    M_Identity.reset 	         	( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
-    M_Jack.reset			( new KN_Type( dFESpace->fe().nbQuadPt() ) );
-    M_trCisok.reset			( new KN_Type( dFESpace->fe().nbQuadPt() ) );
-    M_trCk.reset			( new KN_Type( dFESpace->fe().nbQuadPt() ) );
+    M_FirstPiolaKStressEle.reset    ( new KNM_Type( nDimensions, nDimensions ) );
+    M_Fk.reset                    ( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
+    M_CofFk.reset               ( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
+    M_Identity.reset                  ( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
+    M_Jack.reset            ( new KN_Type( dFESpace->fe().nbQuadPt() ) );
+    M_trCisok.reset            ( new KN_Type( dFESpace->fe().nbQuadPt() ) );
+    M_trCk.reset            ( new KN_Type( dFESpace->fe().nbQuadPt() ) );
 
 }
 
@@ -316,9 +316,9 @@ void ExponentialMaterialNonLinear<Mesh>::updateJacobianMatrix( const vector_Type
 
 
 template <typename Mesh>
-void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& 		jacobian,
-                                                                       const vector_Type& 	disp,
-                                                                       const dataPtr_Type& 	dataMaterial,
+void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type&         jacobian,
+                                                                       const vector_Type&     disp,
+                                                                       const dataPtr_Type&     dataMaterial,
                                                                        const displayerPtr_Type& displayer )
 {
     displayer->leaderPrint("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Exponential)");
@@ -335,75 +335,75 @@ void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr
     //! loop on volumes (i)
     for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
     {
-	this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
-       	this->M_elmatK->zero();
+    this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
+           this->M_elmatK->zero();
 
-	UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
-	Real mu     	= dataMaterial->mu(marker);
-	Real bulk   	= dataMaterial->bulk(marker);
-	Real alpha     	= dataMaterial->alpha(marker);
-	Real gamma   	= dataMaterial->gamma(marker);
+    UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+    //Real mu         = dataMaterial->mu(marker);
+    Real bulk       = dataMaterial->bulk(marker);
+    Real alpha         = dataMaterial->alpha(marker);
+    Real gamma       = dataMaterial->gamma(marker);
 
-       	UInt eleID = this->M_FESpace->fe().currentLocalId();
+           UInt eleID = this->M_FESpace->fe().currentLocalId();
 
-       	for ( UInt iNode = 0; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof(); iNode++ )
-       	{
-       	    	UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
+           for ( UInt iNode = 0; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof(); iNode++ )
+           {
+                   UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
 
-       	    	for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
-       		{
-       	        	UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*this->M_FESpace->dim() + this->M_offset;
-       	        	dk_loc[iloc + iComp*this->M_FESpace->fe().nbFEDof()] = dRep[ig];
-       		}
-       	}
+                   for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+               {
+                       UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*this->M_FESpace->dim() + this->M_offset;
+                       dk_loc[iloc + iComp*this->M_FESpace->fe().nbFEDof()] = dRep[ig];
+               }
+           }
 
-	//! Computes F, Cof(F), J = det(F), Tr(C)
-	computeKinematicsVariables( dk_loc );
+    //! Computes F, Cof(F), J = det(F), Tr(C)
+    computeKinematicsVariables( dk_loc );
 
-	//! Stiffness for non-linear terms of the Exponential model
-	/*!
-	 The results of the integrals are stored at each step into elmatK, until to build K matrix of the bilinear form
-	*/
+    //! Stiffness for non-linear terms of the Exponential model
+    /*!
+     The results of the integrals are stored at each step into elmatK, until to build K matrix of the bilinear form
+    */
 
-	//! VOLUMETRIC PART
-	//! 1. Stiffness matrix: int { 1/2 * bulk * ( 2 - 1/J + 1/J^2 ) * ( CofF : \nabla \delta ) (CofF : \nabla v) }
-	AssemblyElementalStructure::stiff_Jac_Pvol_1term( 0.5 *  bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+    //! VOLUMETRIC PART
+    //! 1. Stiffness matrix: int { 1/2 * bulk * ( 2 - 1/J + 1/J^2 ) * ( CofF : \nabla \delta ) (CofF : \nabla v) }
+    AssemblyElementalStructure::stiff_Jac_Pvol_1term( 0.5 *  bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 
-	//! 2. Stiffness matrix: int { 1/2 * bulk * ( 1/J- 1 - log(J)/J^2 ) * ( CofF1 [\nabla \delta]^t CofF ) : \nabla v }
-	AssemblyElementalStructure::stiff_Jac_Pvol_2term( 0.5 *  bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+    //! 2. Stiffness matrix: int { 1/2 * bulk * ( 1/J- 1 - log(J)/J^2 ) * ( CofF1 [\nabla \delta]^t CofF ) : \nabla v }
+    AssemblyElementalStructure::stiff_Jac_Pvol_2term( 0.5 *  bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 
-    	//! ISOCHORIC PART
-	//! 1. Stiffness matrix : int { - 2/3 * alpha * J^(-5/3) * exp( gamma*( Ic_iso - 3) )* ( 1. + coefExp * Ic_iso )
-	//!                      *( CofF : \nabla \delta ) ( F : \nabla \v ) }
-  	AssemblyElementalStructure::stiff_Jac_P1iso_Exp_1term( (-2.0/3.0) * alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+        //! ISOCHORIC PART
+    //! 1. Stiffness matrix : int { - 2/3 * alpha * J^(-5/3) * exp( gamma*( Ic_iso - 3) )* ( 1. + coefExp * Ic_iso )
+    //!                      *( CofF : \nabla \delta ) ( F : \nabla \v ) }
+      AssemblyElementalStructure::stiff_Jac_P1iso_Exp_1term( (-2.0/3.0) * alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
-   	//! 2. Stiffness matrix : int { 2 * alpha * gamma * J^(-4/3) * exp( gamma*( Ic_iso - 3) ) *
-	//!			 ( F : \nabla \delta ) ( F : \nabla \v ) }
-   	AssemblyElementalStructure::stiff_Jac_P1iso_Exp_2term( 2.0 * alpha * gamma, gamma, (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+       //! 2. Stiffness matrix : int { 2 * alpha * gamma * J^(-4/3) * exp( gamma*( Ic_iso - 3) ) *
+    //!             ( F : \nabla \delta ) ( F : \nabla \v ) }
+       AssemblyElementalStructure::stiff_Jac_P1iso_Exp_2term( 2.0 * alpha * gamma, gamma, (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
-   	//! 3. Stiffness matrix : int { 2.0/9.0 *  alpha * J^-2 * Ic_iso * exp( gamma*( Ic_iso - 3) )*
-	//!                       ( 1. + gamma * Ic_iso )( CofF : \nabla \delta ) ( CofF : \nabla \v )}
- 	AssemblyElementalStructure::stiff_Jac_P1iso_Exp_3term( (2.0/9.0) * alpha, gamma, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+       //! 3. Stiffness matrix : int { 2.0/9.0 *  alpha * J^-2 * Ic_iso * exp( gamma*( Ic_iso - 3) )*
+    //!                       ( 1. + gamma * Ic_iso )( CofF : \nabla \delta ) ( CofF : \nabla \v )}
+     AssemblyElementalStructure::stiff_Jac_P1iso_Exp_3term( (2.0/9.0) * alpha, gamma, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
-  	//! 4. Stiffness matrix : int { -2.0/3.0 *  alpha * J^(-5/3) * exp( gamma*( Ic_iso - 3) )
-	//!                    * ( 1. + gamma * Ic_iso )( F : \nabla \delta ) ( CofF : \nabla \v ) }
-  	AssemblyElementalStructure::stiff_Jac_P1iso_Exp_4term( (-2.0/3.0) * alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+      //! 4. Stiffness matrix : int { -2.0/3.0 *  alpha * J^(-5/3) * exp( gamma*( Ic_iso - 3) )
+    //!                    * ( 1. + gamma * Ic_iso )( F : \nabla \delta ) ( CofF : \nabla \v ) }
+      AssemblyElementalStructure::stiff_Jac_P1iso_Exp_4term( (-2.0/3.0) * alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
-  	//! 5. Stiffness matrix : int {  alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3)) (\nabla \delta: \nabla \v)}
-   	AssemblyElementalStructure::stiff_Jac_P1iso_Exp_5term( alpha, gamma, (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+      //! 5. Stiffness matrix : int {  alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3)) (\nabla \delta: \nabla \v)}
+       AssemblyElementalStructure::stiff_Jac_P1iso_Exp_5term( alpha, gamma, (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
-  	//! 6. Stiffness matrix : int { 1.0/3.0 * alpha * J^(-2) * Ic_iso *  exp(gamma*( Ic_iso - 3)) *
-	//!                       (CofF [\nabla \delta]^t CofF ) : \nabla \v  }
-   	AssemblyElementalStructure::stiff_Jac_P1iso_Exp_6term( (1.0/3.0) * alpha, gamma, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+      //! 6. Stiffness matrix : int { 1.0/3.0 * alpha * J^(-2) * Ic_iso *  exp(gamma*( Ic_iso - 3)) *
+    //!                       (CofF [\nabla \delta]^t CofF ) : \nabla \v  }
+       AssemblyElementalStructure::stiff_Jac_P1iso_Exp_6term( (1.0/3.0) * alpha, gamma, (*M_CofFk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
         //! assembling
         for ( UInt ic = 0; ic < nc; ++ic )
-	{
-            	for ( UInt jc = 0; jc < nc; jc++ )
-	   	{
-                	assembleMatrix( *jacobian, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof );
-		}
-	}
+    {
+                for ( UInt jc = 0; jc < nc; jc++ )
+           {
+                    assembleMatrix( *jacobian, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof );
+        }
+    }
     }
 }
 
@@ -413,9 +413,9 @@ void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr
 
 template <typename Mesh>
 void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& sol,
-						           Real /*factor*/,
-						           const dataPtr_Type& dataMaterial,
-						           const displayerPtr_Type& displayer )
+                                   Real /*factor*/,
+                                   const dataPtr_Type& dataMaterial,
+                                   const displayerPtr_Type& displayer )
 {
     this->M_stiff.reset(new vector_Type(*this->M_localMap));
 
@@ -432,58 +432,58 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
 
     for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); i++ )
     {
-	this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
+    this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
 
-	UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+    UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
 
-	//Getting the proper coefficients
-	Real mu     	= dataMaterial->mu(marker);
-	Real bulk   	= dataMaterial->bulk(marker);
-	Real alpha     	= dataMaterial->alpha(marker);
-	Real gamma   	= dataMaterial->gamma(marker);
+    //Getting the proper coefficients
+    //Real mu         = dataMaterial->mu(marker);
+    Real bulk       = dataMaterial->bulk(marker);
+    Real alpha         = dataMaterial->alpha(marker);
+    Real gamma       = dataMaterial->gamma(marker);
 
-       	UInt eleID = this->M_FESpace->fe().currentLocalId();
+           UInt eleID = this->M_FESpace->fe().currentLocalId();
 
-	for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof() ; iNode++ )
-	{
-		UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
+    for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof() ; iNode++ )
+    {
+        UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
 
-       		for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
-		{
-               		UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim + this->M_offset;
-               		dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig];
-		}
-	}
+               for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+        {
+                       UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim + this->M_offset;
+                       dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig];
+        }
+    }
 
         this->M_elvecK->zero();
 
-     	this->computeKinematicsVariables( dk_loc );
+         this->computeKinematicsVariables( dk_loc );
 
-     	//! Stiffness for non-linear terms of the Neo-Hookean model
-     	/*!
-     	The results of the integrals are stored at each step into elvecK, until to build K matrix of the bilinear form
-     	*/
-     	//! Volumetric part
-     	/*!
-	Source term Pvol: int { bulk /2* (J1^2 - J1  + log(J1) ) * 1/J1 * (CofF1 : \nabla v) }
-	*/
-	AssemblyElementalStructure::source_Pvol( 0.5 * bulk, (*M_CofFk), (*M_Jack), *this->M_elvecK,  this->M_FESpace->fe() );
+         //! Stiffness for non-linear terms of the Neo-Hookean model
+         /*!
+         The results of the integrals are stored at each step into elvecK, until to build K matrix of the bilinear form
+         */
+         //! Volumetric part
+         /*!
+    Source term Pvol: int { bulk /2* (J1^2 - J1  + log(J1) ) * 1/J1 * (CofF1 : \nabla v) }
+    */
+    AssemblyElementalStructure::source_Pvol( 0.5 * bulk, (*M_CofFk), (*M_Jack), *this->M_elvecK,  this->M_FESpace->fe() );
 
-	//! Isochoric part
-	/*!
- 	Source term P1iso_Exp: int { alpha * exp(gamma *(  Ic1_iso -3 )) *
-				( J1^(-2/3)* (F1 : \nabla v) - 1/3 * (Ic1_iso / J1) * (CofF1 : \nabla v) ) }
-	*/
-       	AssemblyElementalStructure::source_P1iso_Exp( alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elvecK, this->M_FESpace->fe() );
+    //! Isochoric part
+    /*!
+     Source term P1iso_Exp: int { alpha * exp(gamma *(  Ic1_iso -3 )) *
+                ( J1^(-2/3)* (F1 : \nabla v) - 1/3 * (Ic1_iso / J1) * (CofF1 : \nabla v) ) }
+    */
+           AssemblyElementalStructure::source_P1iso_Exp( alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elvecK, this->M_FESpace->fe() );
 
-     	for ( UInt ic = 0; ic < nDimensions; ++ic )
-     	{
-		/*!
-		M_elvecK is assemble into *vec_stiff vector that is recall
-		from updateSystem(matrix_ptrtype& mat_stiff, vector_ptr_type& vec_stiff)
-        	*/
-		assembleVector( *this->M_stiff, *this->M_elvecK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
-     	}
+         for ( UInt ic = 0; ic < nDimensions; ++ic )
+         {
+        /*!
+        M_elvecK is assemble into *vec_stiff vector that is recall
+        from updateSystem(matrix_ptrtype& mat_stiff, vector_ptr_type& vec_stiff)
+            */
+        assembleVector( *this->M_stiff, *this->M_elvecK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+         }
      }
 
      this->M_stiff->globalAssemble();
@@ -502,92 +502,92 @@ void ExponentialMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vecto
     //! loop on quadrature points (ig)
     for ( Int ig = 0; ig < static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
     {
-	//! loop on space coordinates (icoor)
+    //! loop on space coordinates (icoor)
       for ( Int icoor = 0; icoor < static_cast<Int> (nDimensions); icoor++ )
-	{
-		//! loop  on space coordinates (jcoor)
-	  for ( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); jcoor++ )
-		{
-			s = 0.0;
-			for ( Int i = 0; i < static_cast<Int> (this->M_FESpace->fe().nbFEDof()); i++ )
-			{
-				//! \grad u^k at a quadrature point
-				s += this->M_FESpace->fe().phiDer( i, jcoor, ig ) * dk_loc[ i + icoor * this->M_FESpace->fe().nbFEDof() ];
-			}
-			//! gradient of displacement
-			(*M_Fk)( icoor , jcoor ,ig ) = s;
-		}
-	}
+    {
+        //! loop  on space coordinates (jcoor)
+      for ( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); jcoor++ )
+        {
+            s = 0.0;
+            for ( Int i = 0; i < static_cast<Int> (this->M_FESpace->fe().nbFEDof()); i++ )
+            {
+                //! \grad u^k at a quadrature point
+                s += this->M_FESpace->fe().phiDer( i, jcoor, ig ) * dk_loc[ i + icoor * this->M_FESpace->fe().nbFEDof() ];
+            }
+            //! gradient of displacement
+            (*M_Fk)( icoor , jcoor ,ig ) = s;
+        }
+    }
     }
 
     //! loop on quadrature points (ig)
     for ( Int ig = 0; ig < static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
     {
-	//! loop on space coordinates (icoor)
+    //! loop on space coordinates (icoor)
       for ( Int  icoor = 0;icoor < static_cast<Int> (nDimensions); icoor++ )
-	{
+    {
                 //! deformation gradient Fk
-		(*M_Fk)( icoor , icoor , ig ) +=  1.0;
-	}
+        (*M_Fk)( icoor , icoor , ig ) +=  1.0;
+    }
     }
 
     Real a,b,c,d,e,f,g,h,i;
 
     for( Int ig=0; ig< static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
     {
-	a = (*M_Fk)( 0 , 0 , ig );
-	b = (*M_Fk)( 0 , 1 , ig );
-	c = (*M_Fk)( 0 , 2 , ig );
-	d = (*M_Fk)( 1 , 0 , ig );
-	e = (*M_Fk)( 1 , 1 , ig );
-	f = (*M_Fk)( 1 , 2 , ig );
-	g = (*M_Fk)( 2 , 0 , ig );
-	h = (*M_Fk)( 2 , 1 , ig );
-	i = (*M_Fk)( 2 , 2 , ig );
+    a = (*M_Fk)( 0 , 0 , ig );
+    b = (*M_Fk)( 0 , 1 , ig );
+    c = (*M_Fk)( 0 , 2 , ig );
+    d = (*M_Fk)( 1 , 0 , ig );
+    e = (*M_Fk)( 1 , 1 , ig );
+    f = (*M_Fk)( 1 , 2 , ig );
+    g = (*M_Fk)( 2 , 0 , ig );
+    h = (*M_Fk)( 2 , 1 , ig );
+    i = (*M_Fk)( 2 , 2 , ig );
 
-	//! determinant of deformation gradient Fk
-	(*M_Jack)(ig) = a*( e*i - f*h ) - b*( d*i - f*g ) + c*( d*h - e*g );
+    //! determinant of deformation gradient Fk
+    (*M_Jack)(ig) = a*( e*i - f*h ) - b*( d*i - f*g ) + c*( d*h - e*g );
 
-	(*M_CofFk)( 0 , 0 , ig ) =   ( e*i - f*h );
-	(*M_CofFk)( 0 , 1 , ig ) = - ( d*i - g*f );
-	(*M_CofFk)( 0 , 2 , ig ) =   ( d*h - e*g );
-	(*M_CofFk)( 1 , 0 , ig ) = - ( b*i - c*h );
-	(*M_CofFk)( 1 , 1 , ig ) =   ( a*i - c*g );
-	(*M_CofFk)( 1 , 2 , ig ) = - ( a*h - g*b );
-	(*M_CofFk)( 2 , 0 , ig ) =   ( b*f - c*e );
-	(*M_CofFk)( 2 , 1 , ig ) = - ( a*f - c*d );
-	(*M_CofFk)( 2 , 2 , ig ) =   ( a*e - d*b );
+    (*M_CofFk)( 0 , 0 , ig ) =   ( e*i - f*h );
+    (*M_CofFk)( 0 , 1 , ig ) = - ( d*i - g*f );
+    (*M_CofFk)( 0 , 2 , ig ) =   ( d*h - e*g );
+    (*M_CofFk)( 1 , 0 , ig ) = - ( b*i - c*h );
+    (*M_CofFk)( 1 , 1 , ig ) =   ( a*i - c*g );
+    (*M_CofFk)( 1 , 2 , ig ) = - ( a*h - g*b );
+    (*M_CofFk)( 2 , 0 , ig ) =   ( b*f - c*e );
+    (*M_CofFk)( 2 , 1 , ig ) = - ( a*f - c*d );
+    (*M_CofFk)( 2 , 2 , ig ) =   ( a*e - d*b );
     }
 
     for ( Int ig = 0; ig <  static_cast<Int> (this->M_FESpace->fe().nbQuadPt())  ;ig++ )
     {
-	if ((*M_Jack)(ig) < 0)
-	{
+    if ((*M_Jack)(ig) < 0)
+    {
 
-		std::cout <<"negative jacobian !!!!!! ERROR in computeKinematicsVariables"<<  std::endl;
+        std::cout <<"negative jacobian !!!!!! ERROR in computeKinematicsVariables"<<  std::endl;
 
-	}
+    }
     }
 
     //! loop on quadrature points
     for ( Int ig = 0;ig < static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
     {
-	s = 0.0;
-	for ( Int i = 0; i < static_cast<Int> (nDimensions); i++)
-	{
-	  for ( Int j = 0; j < static_cast<Int> (nDimensions); j++)
-		{
-		        //! trace of  C1 = (F1k^t F1k)
-			s +=  (*M_Fk)( i , j , ig ) * (*M_Fk)( i , j , ig );
-		}
-	}
-	(*M_trCk)( ig ) = s;
+    s = 0.0;
+    for ( Int i = 0; i < static_cast<Int> (nDimensions); i++)
+    {
+      for ( Int j = 0; j < static_cast<Int> (nDimensions); j++)
+        {
+                //! trace of  C1 = (F1k^t F1k)
+            s +=  (*M_Fk)( i , j , ig ) * (*M_Fk)( i , j , ig );
+        }
+    }
+    (*M_trCk)( ig ) = s;
     }
 
     for ( Int ig = 0; ig <  static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
     {
         //! trace of deviatoric C
-	(*M_trCisok)( ig ) =  pow((*M_Jack)( ig ), -2./3.) * (*M_trCk)( ig );
+    (*M_trCisok)( ig ) =  pow((*M_Jack)( ig ), -2./3.) * (*M_trCk)( ig );
     }
 }
 
@@ -597,7 +597,7 @@ void ExponentialMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vecto
 
 template <typename Mesh>
 void ExponentialMaterialNonLinear<Mesh>::showMe( std::string const& fileNameStiff,
-						 std::string const& fileNameJacobian )
+                         std::string const& fileNameJacobian )
 {
     this->M_stiff->spy(fileNameStiff);
     this->M_jacobian->spy(fileNameJacobian);

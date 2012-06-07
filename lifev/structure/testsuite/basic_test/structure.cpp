@@ -56,14 +56,14 @@ using namespace LifeV;
 
 /*Starting of ud_functions*/
 
-Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+Real d0(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     if (t == 0)
     {
         switch (i)
         {
         case 0:
-	  return 0.0;
+      return 0.0;
             break;
         case 1:
             return 0.0;

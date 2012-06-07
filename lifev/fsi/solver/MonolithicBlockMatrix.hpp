@@ -349,7 +349,7 @@ public:
      */
     void numerationInterface( vectorPtr_Type& numeration ) { numeration =  M_numerationInterface; }
 
-    const UInt whereIsBlock( UInt position )const {return 0;}
+    const UInt whereIsBlock( UInt /*position*/ )const {return 0;}
 
     //@}
 

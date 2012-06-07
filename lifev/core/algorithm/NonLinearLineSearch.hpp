@@ -203,7 +203,7 @@ Int NonLinearLineSearchCubic( Fct& f, VectorType& residual, VectorType& sol, Vec
     Int iterLinesearch;
     bool firstTime = true;
     Real lambda2, lambdaOld, lambdaOld2, lambdaTemporary,
-    normResTest, f0, ftest, fold, c, c11, c12, c21, c22, a, b, disc, g1, g2, gprev = 0;
+    normResTest, f0, ftest, c, c11, c12, c21, c22, a, b, disc, g1, g2, gprev = 0;
     //
     f0 = 0.5 * normRes * normRes;
     lambdaOld = lambda;

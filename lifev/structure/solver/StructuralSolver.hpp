@@ -81,7 +81,7 @@ namespace LifeV
 
 */
 template <typename Mesh,
-     	  typename SolverType = LifeV::SolverAztecOO >
+           typename SolverType = LifeV::SolverAztecOO >
 
 class StructuralSolver
 {
@@ -588,7 +588,7 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
                                           const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                          bchandler_Type&                	BCh,
+                                          bchandler_Type&                    BCh,
                                           boost::shared_ptr<Epetra_Comm>&   comm)
 {
     setup(data, dFESpace, comm);
@@ -807,7 +807,7 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
     Real zero(0.);
     if ( !bch->bcUpdateDone() )
         bch->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
-	bcManageVector( rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *bch, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
+    bcManageVector( rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *bch, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
     solveJacobian(*M_disp, rhsFull, zero, bch);
     evalResidualDisplacementLin(*M_disp);
 }
@@ -829,7 +829,7 @@ StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
 }
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& factor)
+void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& /*factor*/)
 {
     M_Displayer->leaderPrint( " Computing residual ... \t\t\t");
 
@@ -892,7 +892,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
         *M_rhs=*M_rhsNoBC;
         residual = *M_mass * solution;
         residual += *M_material->stiffVector();
-	vector_Type solRep(solution, Repeated);
+    vector_Type solRep(solution, Repeated);
         bcManageResidual( residual, *M_rhs, solRep, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
         residual -= *M_rhs;
         chrono.stop();
@@ -1195,7 +1195,7 @@ void StructuralSolver<Mesh, SolverType>::
 solveJacobian(vector_Type&           step,
               const vector_Type&     res,
               Real&                /*linear_rel_tol*/,
-              bchandler_Type&        BCh)
+              bchandler_Type&       /* BCh*/)
 {
     LifeChrono chrono;
 
@@ -1210,7 +1210,7 @@ solveJacobian(vector_Type&           step,
 
     if ( !M_BCh->bcUpdateDone() )
         M_BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
-	bcManageMatrix( *matrFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
+    bcManageMatrix( *matrFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
 
     M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
 

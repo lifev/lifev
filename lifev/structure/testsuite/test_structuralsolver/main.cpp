@@ -174,12 +174,12 @@ struct Structure::Private
 
     boost::shared_ptr<Epetra_Comm>     comm;
 
-static Real bcZero(const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
+static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
     return  0.;
 }
 
-static Real bcNonZero(const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
+static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
     return  300000.;
 }
@@ -191,7 +191,7 @@ static Real bcNonZero(const Real& t, const Real&  X, const Real& Y, const Real& 
 Structure::Structure( int                                   argc,
                       char**                                argv,
                       boost::shared_ptr<Epetra_Comm>        structComm):
-        	      parameters( new Private() )
+                  parameters( new Private() )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -368,9 +368,9 @@ Structure::run3d()
     {
         for ( UInt previousPass=0; previousPass < dataStructure->dataTime()->orderBDF() ; previousPass++)
         {
-	  Real previousTimeStep = -previousPass*dt;
-	  std::cout<<"BDF " <<previousTimeStep<<"\n";
-	  uv0.push_back(disp);
+      Real previousTimeStep = -previousPass*dt;
+      std::cout<<"BDF " <<previousTimeStep<<"\n";
+      uv0.push_back(disp);
         }
     }
 
@@ -396,14 +396,14 @@ Structure::run3d()
 #endif
     {
         if (exporterType.compare("none") == 0)
-	{
-	    exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
-	}
+    {
+        exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+    }
 
         else
         {
-	    exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
-	}
+        exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+    }
     }
 
     exporter->setPostDir( "./" );
@@ -426,7 +426,7 @@ Structure::run3d()
     ofstream file_comp( "Displacement_components_NL.m" );
     if ( !file_comp )
     {
-  	std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
+      std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
     }
 
     int IDPoint = 73; // StructuredCube4
@@ -463,66 +463,66 @@ Structure::run3d()
     //! =============================================================================
     for (Real time = dt; time <= T; time += dt)
     {
-	dataStructure->dataTime()->setTime(time);
+    dataStructure->dataTime()->setTime(time);
 
-	if (verbose)
+    if (verbose)
         {
-		std::cout << std::endl;
-		std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
-	}
+        std::cout << std::endl;
+        std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
+    }
 
         //! 6. Updating right-hand side
-	*rhs *=0;
-	timeAdvance->updateRHSContribution( dt );
-	*rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
-	solid.updateRightHandSide( *rhs );
+    *rhs *=0;
+    timeAdvance->updateRHSContribution( dt );
+    *rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
+    solid.updateRightHandSide( *rhs );
 
         //! 7. Iterate --> Calling Newton
-	solid.iterate( BCh );
+    solid.iterate( BCh );
 
         timeAdvance->shiftRight( solid.displacement() );
 
         *solidDisp = solid.displacement();
-	*solidVel  = timeAdvance->velocity();
-	*solidAcc  = timeAdvance->accelerate();
+    *solidVel  = timeAdvance->velocity();
+    *solidAcc  = timeAdvance->accelerate();
 
-	exporter->postProcess( time );
+    exporter->postProcess( time );
 
-	/* This part lets to save the displacement at one point of the mesh and to check the result
-	   w.r.t. manufactured solution.
+    /* This part lets to save the displacement at one point of the mesh and to check the result
+       w.r.t. manufactured solution.
         //!--------------------------------------------------------------------------------------------------
         //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
         //!--------------------------------------------------------------------------------------------------
-	cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
-	for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-	{
-		file_comp<< solid.displacement()[ k ] << " ";
-        	cout.precision(16);
-		cout <<"*********************************************************"<< std::endl;
-		cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
-		cout <<"*********************************************************"<< std::endl;
-	}
-	file_comp<< endl;
-	*/
+    cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
+    for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
+    {
+        file_comp<< solid.displacement()[ k ] << " ";
+            cout.precision(16);
+        cout <<"*********************************************************"<< std::endl;
+        cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
+        cout <<"*********************************************************"<< std::endl;
+    }
+    file_comp<< endl;
+    */
 
-	Real normVect;
-	normVect =  solid.displacement().norm2();
-	std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
+    Real normVect;
+    normVect =  solid.displacement().norm2();
+    std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
 
-	///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-	    if (!dataStructure->solidType().compare("linearVenantKirchhoff"))
-	      CheckResultLE(normVect,time);
-	    else if (!dataStructure->solidType().compare("nonlinearVenantKirchhoff"))
-	      CheckResultSVK(normVect,time);
-	    else if (!dataStructure->solidType().compare("exponential"))
-	      CheckResultEXP(normVect,time );
-	    else
-	      CheckResultNH(normVect,time );
+    ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+        if (!dataStructure->solidType().compare("linearVenantKirchhoff"))
+          CheckResultLE(normVect,time);
+        else if (!dataStructure->solidType().compare("nonlinearVenantKirchhoff"))
+          CheckResultSVK(normVect,time);
+        else if (!dataStructure->solidType().compare("exponential"))
+          CheckResultEXP(normVect,time );
+        else
+          CheckResultNH(normVect,time );
 
-	///////// END OF CHECK
+    ///////// END OF CHECK
 
 
-	//!--------------------------------------------------------------------------------------------------
+    //!--------------------------------------------------------------------------------------------------
 
         MPI_Barrier(MPI_COMM_WORLD);
     }

@@ -276,7 +276,7 @@ public:
     this class is virtual because used in TimeAdvanceNewmark scheme;
     @param x0 is a vector of feVectorType containing the state vector;
     */
-    virtual void setInitialCondition( const feVectorSharedPtrContainer_Type& x0){}
+    virtual void setInitialCondition( const feVectorSharedPtrContainer_Type& /*x0*/){}
 
   //!Initialize the RhsVector:
     /*!
