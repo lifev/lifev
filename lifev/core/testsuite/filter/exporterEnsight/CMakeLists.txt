@@ -12,6 +12,11 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
 #  STANDARD_PASS_OUTPUT
   )
 
+TRIBITS_ADD_EXECUTABLE(
+  ensightImport
+  SOURCES ensightImport.cpp ../importExport/RossEthierSteinmanDec.cpp
+  )
+
 TRIBITS_COPY_FILES_TO_BINARY_DIR(dataExport
   SOURCE_FILES dataExport
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
