@@ -355,12 +355,12 @@ public:
 
     //!@name Factory Method
     //@{
-    static MonolithicBlockMatrix*    createAdditiveSchwarz()
-    {
-        const Int couplings[] = { 15, 0, 16 };//to modify (15 to 7) to neglect the coupling (and solve Navier--Stokes)
-        const std::vector<Int> couplingVector(couplings, couplings+3);
-        return new MonolithicBlockMatrix(couplingVector);
-    }
+  static MonolithicBlockMatrix*    createAdditiveSchwarz()
+  {
+    const Int couplings[] = { 15, 0, 16 };//to modify (15 to 7, for DN, or 14, for DN2) to neglect the coupling (and solve Navier--Stokes)
+    const std::vector<Int> couplingVector(couplings, couplings+3);
+    return new MonolithicBlockMatrix(couplingVector);
+  }
 
     //@}
 

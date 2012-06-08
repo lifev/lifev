@@ -204,17 +204,71 @@ public:
 
     static MonolithicBlock* createComposedDNGI()
     {
-        const Int order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid, MonolithicBlockComposed::mesh };
-        const Int couplingsDNGI[] = { 0, 7, 16 };
-        const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
-        const std::vector<Int> orderVector(order, order+3);
-        return new MonolithicBlockComposedDN( couplingVectorDNGI, orderVector );
+      //! Factorization in three:
+      /*!
+	- Solid: Neumann
+	| I | 0 | 0 | 0 |
+	|---+---+---+---|
+	| 0 | S | 0 | 0 |
+	|---+---+---+---|
+	| 0 | 0 | I | 0 |
+	|---+---+---+---|
+	| 0 | 0 | 0 | I |
+	- ALE: Dirichlet
+	| I |  0 | 0 | 0 |
+	|---+----+---+---|
+	| 0 |  I | 0 | 0 |
+	|---+----+---+---|
+	| 0 |  0 | I | 0 |
+	|---+----+---+---|
+	| 0 | -C | 0 | H |
+	- Fluid: Dirichlet
+	| F | 0     | C | SD |
+	|---+-------+---+----|
+	| 0 | S     | 0 | 0  |
+	|---+-------+---+----|
+	| C | -C/dt | 0 | 0  |
+	|---+-------+---+----|
+	| 0 | 0     | 0 | I  |
+      */
+      const Int order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh, MonolithicBlockComposed::fluid };
+      const Int couplingsDNGI[] = { 0/*solid*/, 7/*fluid*/, 16/*ALE*/ };
+      const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
+      const std::vector<Int> orderVector(order, order+3);
+      return new MonolithicBlockComposedDN( couplingVectorDNGI, orderVector );
     }
 
 
     static MonolithicBlock* createComposedDN2GI()
     {
-        const Int order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh };
+      //! Factorization in three:
+      /*!
+	- Fluid: Dirichlet
+        | F | 0 | 0 | SD |
+        |---+---+---+----|
+        | 0 | I | 0 |  0 |
+        |---+---+---+----|
+        | C | 0 | I |  0 |
+        |---+---+---+----|
+        | 0 | 0 | 0 |  I |
+	- Solid: Neumann
+        | I |     0 | 0 | 0 |
+        |---+-------+---+---|
+        | 0 |     S | C | 0 |
+        |---+-------+---+---|
+        | 0 | -C/dt | 0 | 0 |
+        |---+-------+---+---|
+        | 0 |     0 | 0 | I |
+	- ALE: Dirichlet
+        | I |  0 | 0 | 0 |
+        |---+----+---+---|
+        | 0 |  I | 0 | 0 |
+        |---+----+---+---|
+        | 0 |  0 | I | 0 |
+        |---+----+---+---|
+        | 0 | -C | 0 | H |
+      */
+      const Int order[] = {   MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh };
         const Int couplingsDN2GI[] = { 8, 6, 16 };
         const std::vector<Int> couplingVectorDN2GI(couplingsDN2GI, couplingsDN2GI+3);
         const std::vector<Int> orderVector(order, order+3);

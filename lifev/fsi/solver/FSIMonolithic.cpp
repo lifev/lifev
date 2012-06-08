@@ -345,72 +345,6 @@ FSIMonolithic::updateSystem()
     this->M_fluid->resetStabilization();
 }
 
-// <<<<<<< HEAD
-// =======
-// void
-// FSIMonolithic::initialize( fluidPtr_Type::value_type::function_Type const& u0,
-//                            fluidPtr_Type::value_type::function_Type const& p0,
-//                            solidPtr_Type::value_type::Function const& d0,
-//                            solidPtr_Type::value_type::Function const& /*w0*/,
-//                            fluidPtr_Type::value_type::function_Type const& /*df0*/ )
-// {
-//     vector_Type u(M_uFESpace->map());
-//     M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->time());
-
-//     vector_Type p(M_pFESpace->map());
-//     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
-
-//     vector_Type d(M_dFESpace->map());
-//     M_dFESpace->interpolate( static_cast<fluidPtr_Type::value_type::function_Type>( d0 ), d, M_data->dataSolid()->getdataTime()->time());
-
-//     initialize(u, p, d);
-// }
-
-// void
-// FSIMonolithic::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
-//                            const vectorPtr_Type& fluidDisplacement,
-//                            const vectorPtr_Type& solidVelocity,
-//                            const vectorPtr_Type& solidDisplacement )
-// {
-//     // Solution
-//     setSolution( *fluidVelocityAndPressure );
-
-//     // Fluid
-//     M_fluid->initialize( *fluidVelocityAndPressure );
-//     M_meshMotion->initialize( *fluidDisplacement );
-//     initializeBDF( *fluidVelocityAndPressure );
-
-//     // Solid
-//     // Extend the external solid vectors to have the monolithic map
-//     vectorPtr_Type extendedSolidDisplacement( new vector_Type( *M_monolithicMap ) );
-//     vectorPtr_Type extendedSolidVelocity( new vector_Type( *M_monolithicMap ) );
-
-//     extendedSolidDisplacement->subset( *solidDisplacement, solidDisplacement->map(), static_cast <UInt> ( 0 ), M_offset );
-//     extendedSolidVelocity->subset( *solidVelocity, solidVelocity->map(), static_cast <UInt> ( 0 ), M_offset );
-
-//     // Rescale the quantities
-//     *extendedSolidDisplacement /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
-//     *extendedSolidVelocity /= M_data->dataFluid()->dataTime()->timeStep() * M_solid->getRescaleFactor();
-
-//     M_solid->initialize( extendedSolidDisplacement, extendedSolidVelocity );
-// }
-
-// void
-// FSIMonolithic::initializeMesh(vectorPtr_Type fluid_dispOld)
-// {
-//     meshMotion().setDisplacement(*fluid_dispOld);
-// }
-
-// void
-// FSIMonolithic::initialize( const vector_Type& u0, const vector_Type& p0, const vector_Type& d0)
-// {
-//     *M_un=u0;
-//     M_un->add(p0, nDimensions*M_uFESpace->dof().numTotalDof());
-//     M_un->add(d0, M_offset);
-// }
-
-
-// >>>>>>> master
 
 // ===================================================
 // Protected Methods
@@ -530,6 +464,11 @@ FSIMonolithic::variablesInit(const std::string& dOrder)
 
 void FSIMonolithic::setupBlockPrec( )
 {
+#ifdef HAVE_NS_PREC
+  std::string PCD("PCD");
+  UInt fluidPosition = M_precPtr->whereIsBlock(MonolithicBlockComposed::fluid);
+  std::string precType(M_precPtr->blockPrecs()[fluidPosition]->preconditionerType());
+#endif
     if(!(M_precPtr->set()))
      {
          M_precPtr->push_back_matrix(M_solidBlockPrec, M_structureNonLinear);
@@ -547,25 +486,23 @@ void FSIMonolithic::setupBlockPrec( )
 
 #ifdef HAVE_NS_PREC
     if(M_precPtr->blockPrecs().size()>1)
-    {
-        std::string PCD("PCD");
-        UInt fluidPosition = M_precPtr->whereIsBlock(MonolithicBlockComposed::fluid);
-        std::string precType(M_precPtr->blockPrecs()[fluidPosition]->preconditionerType());
-        if(!precType.compare(PCD))
-        {
-            Preconditioner* prec=(M_precPtr->blockPrecs()[fluidPosition].get());
-            PreconditionerPCD* prec_PCD = dynamic_cast<PreconditionerPCD*>(prec);
-            ASSERT(prec, "The preconditioner corresponding to the fluid block is probably not PCD. Check in the data file");
-            prec_PCD->setFESpace(M_uFESpace, M_pFESpace);
-            prec_PCD->setBCHandler(M_BCh_u);
-            prec_PCD->setTimestep(M_data->dataFluid()->dataTime()->timeStep());
-            prec_PCD->setViscosity(M_data->dataFluid()->viscosity());
-            prec_PCD->setDensity(M_data->dataFluid()->density());
-            prec_PCD->setCouplingMatrixView(M_precPtr->couplingVector()[MonolithicBlockComposed::fluid]);
-            prec_PCD->setMapStructure(&M_dFESpace->map());
-            prec_PCD->updateBeta(M_fluidTimeAdvance->singleElement(0));
-        }
-    }
+      {
+
+	if(!precType.compare(PCD))
+	  {
+	    Preconditioner* prec=(M_precPtr->blockPrecs()[fluidPosition].get());
+	    PreconditionerPCD* prec_PCD = dynamic_cast<PreconditionerPCD*>(prec);
+	    ASSERT(prec, "The preconditioner corresponding to the fluid block is probably not PCD. Check in the data file");
+	    prec_PCD->setFESpace(M_uFESpace, M_pFESpace);
+	    prec_PCD->setBCHandler(M_BCh_u);
+	    prec_PCD->setTimestep(M_data->dataFluid()->dataTime()->timeStep());
+	    prec_PCD->setViscosity(M_data->dataFluid()->viscosity());
+	    prec_PCD->setDensity(M_data->dataFluid()->density());
+	    prec_PCD->setCouplingMatrixView(M_precPtr->couplingVector()[MonolithicBlockComposed::fluid]);
+	    prec_PCD->setMapStructure(&M_dFESpace->map());
+	    prec_PCD->updateBeta(M_fluidTimeAdvance->singleElement(0));
+	  }
+      }
 #endif
 }
 
@@ -611,6 +548,10 @@ FSIMonolithic::assembleFluidBlock(UInt iter, const vector_Type& solution)
       {
 	M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
       }
+    else
+      if (! M_fluid->matrixMassPtr().get() )
+	M_fluid->buildSystem( );
+
     if (iter==0)
       {
         M_resetPrec=true;
