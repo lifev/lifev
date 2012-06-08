@@ -578,6 +578,11 @@ public:
         return *M_velocityMatrixMass;
     }
 
+    const matrixPtr_Type matrixMassPtr() const
+    {
+        return M_velocityMatrixMass;
+    }
+
     //@}
 
     //@{ unused methods
