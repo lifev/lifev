@@ -80,7 +80,6 @@ public:
 
     template<typename ImporterType, typename ExporterType>
     bool importLoop( const boost::shared_ptr< ImporterType > & importerPtr,
-					 const boost::shared_ptr< ImporterType > & importerMeshPtr,
                      const boost::shared_ptr< ExporterType > & exporterPtr );
 
     template<typename ImporterType, typename ExporterType>
@@ -103,26 +102,23 @@ private:
     boost::shared_ptr< LifeV::MeshPartitioner< mesh_Type > > M_meshPartPtr;
     LifeV::TimeData                                          M_timeData;
 
-    feSpacePtr_Type                                          M_velFESpacePtr;
-    feSpacePtr_Type                                          M_pressFESpacePtr;
-    vectorPtr_Type                                           M_velInterpolantPtr;
-    vectorPtr_Type                                           M_pressInterpolantPtr;
-    vectorPtr_Type                                           M_velImportedPtr;
-    vectorPtr_Type                                           M_pressImportedPtr;
-    vectorPtr_Type                                           M_meshDispImportedPtr;
-    vectorPtr_Type                                           M_meshVelImportedPtr;
-    bool													 M_moving;
-    bool													 M_loadFluid;
-    std::string 											M_velocityName;
-    std::string 											M_pressureName;
-    std::string 											M_meshVelocityName;
-    std::string 											M_meshDisplacementName;
+    feSpacePtr_Type                                          M_vectorFESpacePtr;
+    feSpacePtr_Type                                          M_scalarFESpacePtr;
+
+    std::vector< vectorPtr_Type >                            M_vectorInterpolantPtr;
+    std::vector< vectorPtr_Type >                            M_scalarInterpolantPtr;
+
+    std::vector< vectorPtr_Type >                            M_vectorImportedPtr;
+    std::vector< vectorPtr_Type >                            M_scalarImportedPtr;
+
+    std::vector< std::string >                               M_vectorName;
+    std::vector< std::string >                               M_scalarName;
 };
 
 
 TestImportExport::TestImportExport( const commPtr_Type& commPtr ) :
-                    M_commPtr  ( commPtr ),
-                    M_displayer( commPtr )
+    M_commPtr  ( commPtr ),
+    M_displayer( commPtr )
 {}
 
 
@@ -143,13 +139,33 @@ TestImportExport::loadData( GetPot& commandLine )
     const std::string defaultDataFileName("data"+problemName);
     const std::string dataFileName = commandLine.follow(defaultDataFileName.c_str(), 2, "-f","--file");
     M_dataFile = GetPot(dataFileName);
-    M_moving = M_dataFile("importer/moving", 0);
-    M_loadFluid = M_dataFile("importer/loadFluid", 1);
 
-    M_velocityName = M_dataFile("importer/velocityName", "");
-    M_pressureName = M_dataFile("importer/pressureName", "");
-    M_meshVelocityName = M_dataFile("importer/meshVelocityName", "meshVelocity");
-    M_meshDisplacementName = M_dataFile("importer/meshDisplacementName", "meshDisplacement");
+    UInt numVectors = M_dataFile("importer/numVectors", 0);
+    UInt numScalars = M_dataFile("importer/numScalars", 0);
+
+    M_vectorInterpolantPtr.resize(numVectors);
+    M_scalarInterpolantPtr.resize(numScalars);
+
+    M_vectorImportedPtr.resize(numVectors);
+    M_scalarImportedPtr.resize(numScalars);
+
+    M_vectorName.resize(numVectors);
+    M_scalarName.resize(numScalars);;
+
+    for( UInt iVec=0; iVec<numVectors; ++iVec )
+    {
+        std::stringstream ss;
+        ss.str("");
+        ss << "importer/vector" << iVec << "Name";
+        M_vectorName[iVec] = M_dataFile(ss.str().c_str(), "");
+    }
+    for( UInt iScal=0; iScal<numScalars; ++iScal )
+    {
+        std::stringstream ss;
+        ss.str("");
+        ss << "importer/scalar" << iScal << "Name";
+        M_scalarName[iScal] = M_dataFile(ss.str().c_str(), "");
+    }
 
     problem_Type::setParamsFromGetPot(M_dataFile);
 
@@ -209,30 +225,30 @@ TestImportExport::buildFESpaces()
     M_displayer.leaderPrint( "[Creating the FE spaces...]\n" );
     chrono.start();
 
-    const std::string velFE =  M_dataFile( "space_discretization/velocity_fespace", "P2");
-    M_displayer.leaderPrint( "\t-o FE for the velocity: ", velFE, "\n" );
+    const std::string vectorFE =  M_dataFile( "space_discretization/vector_fespace", "P2");
+    M_displayer.leaderPrint( "\t-o FE for the vector: ", vectorFE, "\n" );
 
-    M_displayer.leaderPrint( "\t-o Building the velocity FE space...\n" );
+    M_displayer.leaderPrint( "\t-o Building the vector FE space...\n" );
 
-    M_velFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, velFE, nDimensions, M_commPtr) );
+    M_vectorFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, vectorFE, nDimensions, M_commPtr) );
 
     M_displayer.leaderPrint( "\t\t...ok.\n" );
 
-    const std::string pressFE =  M_dataFile( "space_discretization/pressure_fespace", "P1");
-    M_displayer.leaderPrint( "\t-o FE for the pressure: ", pressFE, "\n" );
+    const std::string scalarFE =  M_dataFile( "space_discretization/scalar_fespace", "P1");
+    M_displayer.leaderPrint( "\t-o FE for the scalar: ", scalarFE, "\n" );
 
-    M_displayer.leaderPrint( "\t-o Building the pressure FE space...\n" );
+    M_displayer.leaderPrint( "\t-o Building the scalar FE space...\n" );
 
-    M_pressFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, pressFE, 1, M_commPtr) );
+    M_scalarFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, scalarFE, 1, M_commPtr) );
 
     M_displayer.leaderPrint( "\t\t...ok.\n" );
 
     // Total degrees of freedom (elements of matrix)
-    UInt velTotalDof   = M_velFESpacePtr->map().map(Unique)->NumGlobalElements();
-    UInt pressTotalDof = M_pressFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt vectorTotalDof   = M_vectorFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt scalarTotalDof = M_scalarFESpacePtr->map().map(Unique)->NumGlobalElements();
 
-    M_displayer.leaderPrint( "\t-o Total Dof for the velocity: ", velTotalDof, "\n" );
-    M_displayer.leaderPrint( "\t-o Total Dof for the pressure: ", pressTotalDof, "\n" );
+    M_displayer.leaderPrint( "\t-o Total Dof for the vector: ", vectorTotalDof, "\n" );
+    M_displayer.leaderPrint( "\t-o Total Dof for the scalar: ", scalarTotalDof, "\n" );
 
     chrono.stop();
     M_displayer.leaderPrint( "[...done in ", chrono.diff(), "s]\n" );
@@ -279,58 +295,45 @@ TestImportExport::run( GetPot& commandLine, const std::string& testString )
 
     boost::shared_ptr< ExporterType > exporterPtr;
     boost::shared_ptr< ImporterType > importerPtr;
-    boost::shared_ptr< ImporterType > importerMeshPtr;
 
-    buildExporter ( importerPtr, M_dataFile("importer/testName", "testImporter" ) );
-    buildExporter ( importerMeshPtr, M_dataFile("importer/testMeshName", "testImporterMesh" ) );
-    buildExporter ( exporterPtr, M_dataFile("exporter/testName", "testExporter" ) );
+    buildExporter ( importerPtr, M_dataFile("importer/prefix", "testImporter" ) );
+    buildExporter ( exporterPtr, M_dataFile("exporter/prefix", "testExporter" ) );
+
     importerPtr->setDataFromGetPot(M_dataFile, "importer");
-    importerMeshPtr->setDataFromGetPot(M_dataFile, "importer");
     exporterPtr->setDataFromGetPot(M_dataFile, "exporter");
 
     // Chronometer
     LifeChrono globalChrono;
 
     // Set up the IMPORTER
-    M_velImportedPtr.reset(
-                    new Exporter<mesh_Type >::vector_Type   ( M_velFESpacePtr->map(), Repeated ) );
-    M_pressImportedPtr.reset(
-                    new Exporter<mesh_Type >::vector_Type   ( M_pressFESpacePtr->map(), Repeated ) );
-
-    ExporterData<mesh_Type>::WhereEnum whereVelocity =
-                    ( M_velFESpacePtr->fe().refFE().type() == FE_P0_3D )
+    ExporterData<mesh_Type>::WhereEnum whereVector =
+                    ( M_vectorFESpacePtr->fe().refFE().type() == FE_P0_3D )
                     ?
-                     ExporterData<mesh_Type>::Cell : ExporterData<mesh_Type>::Node;
+                                    ExporterData<mesh_Type>::Cell : ExporterData<mesh_Type>::Node;
 
-    ExporterData<mesh_Type>::WhereEnum wherePressure =
-                    ( M_pressFESpacePtr->fe().refFE().type() == FE_P0_3D )
+    ExporterData<mesh_Type>::WhereEnum whereScalar =
+                    ( M_scalarFESpacePtr->fe().refFE().type() == FE_P0_3D )
                     ?
-                     ExporterData<mesh_Type>::Cell : ExporterData<mesh_Type>::Node;
+                                    ExporterData<mesh_Type>::Cell : ExporterData<mesh_Type>::Node;
 
-    if(M_loadFluid)
+    for( UInt iVec(0); iVec < M_vectorImportedPtr.size(); ++iVec )
     {
-        importerPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_velocityName,
-                                  M_velFESpacePtr, M_velImportedPtr, UInt(0),
+        M_vectorImportedPtr[iVec].reset(
+                        new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), Repeated ) );
+
+        importerPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
+                                  M_vectorFESpacePtr, M_vectorImportedPtr[iVec], UInt(0),
                                   ExporterData<mesh_Type>::UnsteadyRegime,
-                                  whereVelocity );
-        importerPtr->addVariable( ExporterData<mesh_Type>::ScalarField, M_pressureName,
-                                  M_pressFESpacePtr, M_pressImportedPtr, UInt(0),
-                                  ExporterData<mesh_Type>::UnsteadyRegime,
-                                  wherePressure );
+                                  whereVector );
     }
-
-    if(M_moving)
+    for( UInt iScal(0); iScal < M_scalarImportedPtr.size(); ++iScal )
     {
-        M_meshDispImportedPtr.reset(
-                        new Exporter<mesh_Type >::vector_Type   ( M_velFESpacePtr->map(), Repeated ) );
-        M_meshVelImportedPtr.reset(
-                        new Exporter<mesh_Type >::vector_Type   ( M_velFESpacePtr->map(), Repeated ) );
-
-        importerMeshPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_meshDisplacementName,
-                                      M_velFESpacePtr, M_meshDispImportedPtr, UInt(0) );
-
-        importerMeshPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_meshVelocityName,
-                                        M_velFESpacePtr, M_meshVelImportedPtr, UInt(0) );
+        M_scalarImportedPtr[iScal].reset(
+                        new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), Repeated ) );
+        importerPtr->addVariable( ExporterData<mesh_Type>::ScalarField, M_scalarName[iScal],
+                                  M_scalarFESpacePtr, M_scalarImportedPtr[iScal], UInt(0),
+                                  ExporterData<mesh_Type>::UnsteadyRegime,
+                                  whereScalar );
     }
 
     // +-----------------------------------------------+
@@ -345,7 +348,7 @@ TestImportExport::run( GetPot& commandLine, const std::string& testString )
     M_displayer.leaderPrint( "\t[t = ", M_timeData.time(), " s.]\n" );
 
     if( testString.compare( "import" ) == 0 )
-        passed = passed && importLoop(importerPtr, importerMeshPtr, exporterPtr);
+        passed = passed && importLoop(importerPtr, exporterPtr);
     else
         passed = passed && exportLoop(importerPtr, exporterPtr);
 
@@ -367,22 +370,28 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
 
     bool passed(true);
 
-   // Set up the EXPORTER
-    M_velInterpolantPtr.reset(
-        new Exporter<mesh_Type >::vector_Type   ( M_velFESpacePtr->map(), Repeated ) );
-    M_pressInterpolantPtr.reset(
-        new Exporter<mesh_Type >::vector_Type   ( M_pressFESpacePtr->map(), Repeated ) );
+    ASSERT( M_vectorImportedPtr.size() + M_scalarImportedPtr.size(), "There's no data on which to work!" )
 
-    exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_velocityName,
-                           M_velFESpacePtr, M_velInterpolantPtr, UInt(0) );
-
-    exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, M_pressureName,
-                           M_pressFESpacePtr, M_pressInterpolantPtr, UInt(0) );
+    // Set up the EXPORTER
+    for( UInt iVec(0); iVec < M_vectorImportedPtr.size(); ++iVec )
+    {
+        M_vectorInterpolantPtr[iVec].reset(
+                        new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), Repeated ) );
+        exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
+                                  M_vectorFESpacePtr, M_vectorInterpolantPtr[iVec], UInt(0) );
+    }
+    for( UInt iScal(0); iScal < M_scalarImportedPtr.size(); ++iScal )
+    {
+        M_scalarInterpolantPtr[iScal].reset(
+                        new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), Repeated ) );
+        exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, M_scalarName[iScal],
+                                  M_scalarFESpacePtr, M_scalarInterpolantPtr[iScal], UInt(0) );
+    }
 
     //exporterPtr->postProcess( 0 );
 
-    Exporter<mesh_Type >::vector_Type velDiff( M_velFESpacePtr->map(), Repeated );
-    Exporter<mesh_Type >::vector_Type pressDiff( M_pressFESpacePtr->map(), Repeated );
+    Exporter<mesh_Type >::vector_Type vectorDiff( M_vectorFESpacePtr->map(), Repeated );
+    Exporter<mesh_Type >::vector_Type scalarDiff( M_scalarFESpacePtr->map(), Repeated );
 
     for ( ; M_timeData.canAdvance(); M_timeData.updateTime() )
     {
@@ -390,8 +399,10 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
         M_displayer.leaderPrint( "[t = ", M_timeData.time(), " s.]\n" );
 
         // Computation of the interpolation
-        M_velFESpacePtr->interpolate( problem_Type::uexact, *M_velInterpolantPtr, M_timeData.time() );
-        M_pressFESpacePtr->interpolate( problem_Type::pexact, *M_pressInterpolantPtr, M_timeData.time() );
+        if( M_vectorImportedPtr.size() )
+            M_vectorFESpacePtr->interpolate( problem_Type::uexact, *M_vectorInterpolantPtr[0], M_timeData.time() );
+        if( M_scalarImportedPtr.size() )
+            M_scalarFESpacePtr->interpolate( problem_Type::pexact, *M_scalarInterpolantPtr[0], M_timeData.time() );
 
         // Exporting the solution
         exporterPtr->postProcess( M_timeData.time() );
@@ -405,21 +416,37 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
     for ( ; M_timeData.canAdvance(); M_timeData.updateTime() )
     {
         // Computation of the interpolation
-        M_velFESpacePtr->interpolate( problem_Type::uexact, *M_velInterpolantPtr, M_timeData.time() );
-        M_pressFESpacePtr->interpolate( problem_Type::pexact, *M_pressInterpolantPtr, M_timeData.time() );
+        if( M_vectorImportedPtr.size() )
+            M_vectorFESpacePtr->interpolate( problem_Type::uexact, *M_vectorInterpolantPtr[0], M_timeData.time() );
+        if( M_scalarImportedPtr.size() )
+            M_scalarFESpacePtr->interpolate( problem_Type::pexact, *M_scalarInterpolantPtr[0], M_timeData.time() );
 
         // Importing the solution
         importerPtr->import( M_timeData.time() );
 
-        velDiff = *M_velInterpolantPtr;
-        velDiff += (-*M_velImportedPtr);
-        Real maxDiff( velDiff.normInf() );
+        Real maxDiff(1.e6);
+        if( M_vectorImportedPtr.size() )
+        {
+            vectorDiff = *M_vectorInterpolantPtr[0];
+            vectorDiff += (-*M_vectorImportedPtr[0]);
+            maxDiff = vectorDiff.normInf();
 
-        M_velInterpolantPtr->spy("interpolant");
-        M_velImportedPtr->spy("imported");
+            M_vectorInterpolantPtr[0]->spy("interpolant");
+            M_vectorImportedPtr[0]->spy("imported");
 
-        M_displayer.leaderPrint( "[velDiff.normInf() = ", velDiff.normInf(), "]\n" );
+            M_displayer.leaderPrint( "[vectorDiff.normInf() = ", vectorDiff.normInf(), "]\n" );
+        }
+        if( M_scalarImportedPtr.size() )
+        {
+            scalarDiff = *M_scalarInterpolantPtr[0];
+            scalarDiff += (-*M_scalarImportedPtr[0]);
+            maxDiff = std::max(scalarDiff.normInf(), maxDiff);
 
+            M_scalarInterpolantPtr[0]->spy("interpolant");
+            M_scalarImportedPtr[0]->spy("imported");
+
+            M_displayer.leaderPrint( "[scalarDiff.normInf() = ", scalarDiff.normInf(), "]\n" );
+        }
         passed = passed && (maxDiff < 1.e-6);
 
     }
@@ -430,28 +457,22 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
 
 template<typename ImporterType, typename ExporterType>
 bool
-TestImportExport::importLoop( const boost::shared_ptr< ImporterType > & importerPtr, const boost::shared_ptr< ImporterType > & importerMeshPtr,
+TestImportExport::importLoop( const boost::shared_ptr< ImporterType > & importerPtr,
                               const boost::shared_ptr< ExporterType > & exporterPtr )
 {
     using namespace LifeV;
 
     bool passed(true);
 
-    if(M_loadFluid)
+    for( UInt iVec(0); iVec < M_vectorImportedPtr.size(); ++iVec )
     {
-    	exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_velocityName,
-                              M_velFESpacePtr, M_velImportedPtr, UInt(0) );
-
-    	exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, M_pressureName,
-                              M_pressFESpacePtr, M_pressImportedPtr, UInt(0) );
+        exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
+                                  M_vectorFESpacePtr, M_vectorImportedPtr[iVec], UInt(0) );
     }
-    if(M_moving)
+    for( UInt iScal(0); iScal < M_scalarImportedPtr.size(); ++iScal )
     {
-        exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_meshDisplacementName,
-									  M_velFESpacePtr, M_meshDispImportedPtr, UInt(0) );
-
-        exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_meshVelocityName,
-									M_velFESpacePtr, M_meshVelImportedPtr, UInt(0) );
+        exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, M_scalarName[iScal],
+                                  M_scalarFESpacePtr, M_scalarImportedPtr[iScal], UInt(0) );
     }
 
     for( ; M_timeData.canAdvance(); M_timeData.updateTime())
@@ -459,7 +480,6 @@ TestImportExport::importLoop( const boost::shared_ptr< ImporterType > & importer
         M_displayer.leaderPrint( "\t[t = ", M_timeData.time(), " s.]\n" );
 
         importerPtr->import( M_timeData.time() );
-        importerMeshPtr->import( M_timeData.time() );
 
         exporterPtr->postProcess( M_timeData.time() );
     }
