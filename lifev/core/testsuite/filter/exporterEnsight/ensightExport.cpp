@@ -51,9 +51,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <lifev/core/LifeV.hpp>
-#include <lifev/navier_stokes/function/Womersley.hpp>
-#include <lifev/navier_stokes/function/RossEthierSteinmanInc.hpp>
-#include <lifev/navier_stokes/function/RossEthierSteinmanDec.hpp>
+#include "../importExport/RossEthierSteinmanDec.hpp"
 #include "../importExport/TestImportExport.hpp"
 
 using namespace LifeV;

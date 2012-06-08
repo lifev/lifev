@@ -64,7 +64,7 @@
 
 // Object type definitions
 typedef LifeV::RegionMesh<LifeV::LinearTetra>         mesh_Type;
-typedef LifeV::RossEthierSteinmanUnsteadyInc          problem_Type;
+typedef LifeV::RossEthierSteinmanUnsteadyDec          problem_Type;
 typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
 typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
 typedef boost::shared_ptr<Epetra_Comm>                commPtr_Type;
@@ -447,7 +447,7 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
 
             M_displayer.leaderPrint( "[scalarDiff.normInf() = ", scalarDiff.normInf(), "]\n" );
         }
-        passed = passed && (maxDiff < 1.e-6);
+        passed = passed && (maxDiff < 1.e-4);
 
     }
 

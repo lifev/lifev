@@ -51,9 +51,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <lifev/core/LifeV.hpp>
-#include <lifev/core/function/Womersley.hpp>
-#include <lifev/core/function/RossEthierSteinmanInc.hpp>
-#include <lifev/core/function/RossEthierSteinmanDec.hpp>
+#include "../importExport/RossEthierSteinmanDec.hpp"
 #include "../importExport/TestImportExport.hpp"
 
 using namespace LifeV;
