@@ -4,7 +4,6 @@ INCLUDE(TribitsCopyFilesToBinaryDir)
 ADD_SUBDIRECTORIES(
   exporterEnsight
   exporterVTK
-  translator
 )
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})

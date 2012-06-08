@@ -5,17 +5,8 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   ensightExport
-  SOURCES ensightExport.cpp
-  ARGS -c
-  NUM_MPI_PROCS 2
-  COMM serial mpi
-#  STANDARD_PASS_OUTPUT
-  )
-
-TRIBITS_ADD_EXECUTABLE_AND_TEST(
-  ensightImport
-  SOURCES ensightImport.cpp
-  ARGS -c
+  SOURCES ensightExport.cpp ../importExport/RossEthierSteinmanDec.cpp
+  ARGS "-p Export"
   NUM_MPI_PROCS 2
   COMM serial mpi
 #  STANDARD_PASS_OUTPUT
