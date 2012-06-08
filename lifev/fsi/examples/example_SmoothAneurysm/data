@@ -81,6 +81,7 @@ useShapeDerivatives           = false
 semiImplicit                  = false # tells if we advance in time after the first nonlinear iteration or not
 domainVelImplicit             = true  # tells if the domain vel is to be considered implicitly in the convective term
 convectiveImplicit            = false  # tells if the velocity is to be considered implicitly in the convective term
+conservativeFormulation       = false
 
 [./physics]
 density   = 1.0               # density
@@ -89,7 +90,7 @@ viscosity = 0.035              # viscosity
 [../time_discretization]
 method          = BDF
 initialtime		= 0.0
-endtime			= 0.6
+endtime			= 0.01
 timestep		= 0.001
 BDF_order		= 2
 theta           = 0.5
@@ -149,7 +150,7 @@ thickness = 0.045
 [../time_discretization]
 method          = BDF # Newmark or BDF
 initialtime		= 0.0
-endtime			= 0.6
+endtime			= 0.01
 timestep		= 0.001
 BDF_order		= 2
 theta                   = 0.35
@@ -376,7 +377,7 @@ keep_info       = 1
 [../time_discretization]
 method          = BDF
 initialtime		= 0.0
-endtime			= 0.6
+endtime			= 0.01
 timestep		= 0.001
 BDF_order		= 1
 theta           = 0.5
