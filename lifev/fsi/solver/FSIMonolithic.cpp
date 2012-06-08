@@ -373,7 +373,7 @@ FSIMonolithic::initialize( fluidPtr_Type::value_type::function_Type const& u0,
     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
 
     vector_Type d(M_dFESpace->map());
-    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->getdataTime()->time());
+    M_dFESpace->interpolate( static_cast<fluidPtr_Type::value_type::function_Type>( d0 ), d, M_data->dataSolid()->getdataTime()->time());
 
     initialize(u, p, d);
 }

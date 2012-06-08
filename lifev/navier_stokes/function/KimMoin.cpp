@@ -46,6 +46,8 @@ Real KimMoin::uexact( const Real& t, const Real& x, const Real& y, const Real& /
         default:
             exit(1);
     }
+   //dummy return as required by IBM xlC compiler
+   return 1.;
 }
 
 Real KimMoin::pexact( const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& /* i */ )
@@ -84,6 +86,8 @@ Real KimMoin::grad_u( const UInt& icoor, const Real& t, const Real& x, const Rea
         default:
             exit(1);
     }
+   //dummy return as required by IBM xlC compiler
+   return 1.;
 }
 
 Real KimMoin::f( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& /* i */ ) { return 0; }
@@ -104,6 +108,8 @@ Real KimMoin::xexact( const Real& t,
         default:
             exit(1);
     }
+   //dummy return as required by IBM xlC compiler
+   return 1.;
 }
 
 

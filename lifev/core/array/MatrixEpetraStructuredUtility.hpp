@@ -134,7 +134,7 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
   @param destBlock Block where the data will be stored
 */
 template< typename DataType >
-void createZeroBlock ( MatrixEpetraStructuredView<DataType>& destBlock )
+void createZeroBlock ( MatrixEpetraStructuredView<DataType>& /*destBlock*/ )
 {
     // This method will maybe be replaced
     // by the method setBlockToZero

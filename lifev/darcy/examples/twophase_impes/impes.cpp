@@ -780,11 +780,11 @@ impes::run()
         // Set the current time as initial time.
         dataSaturationHyperbolic.dataTime()->setTime( dataSaturationDarcyNonLinear.dataTime()->time() );
 
-        // Set the end time.
-        dataSaturationHyperbolic.dataTime()->setEndTime( dataSaturationDarcyNonLinear.dataTime()->nextTime() );
-
         // Define the inner time step.
         Real innerTimeStep( 0. );
+
+        // Set the end time.
+        dataSaturationHyperbolic.dataTime()->setEndTime( dataSaturationDarcyNonLinear.dataTime()->nextTime() );
 
         // Define if the current time is the last time step.
         bool isLastTimeStep( false );
@@ -804,10 +804,9 @@ impes::run()
             {
                 // Compute the last time step.
                 innerTimeStep = dataSaturationHyperbolic.dataTime()->leftTime();
-
+                
                 // This is the last time step in the simulation
                 isLastTimeStep = true;
-
             }
 
             // Set the new time step in the dataHyperbolic.

@@ -126,6 +126,8 @@ Real fRhs( const Real& /* t */, const Real& x, const Real& /* y */, const Real& 
 typedef RegionMesh<LinearTriangle> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
+typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
+typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
 int
 main( int argc, char** argv )
@@ -172,8 +174,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
     std::string uOrder("P1");
     std::string bOrder("P1");
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace( new FESpace< mesh_Type, MapEpetra >(localMeshPtr,uOrder, 1, Comm));
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaFESpace( new FESpace< mesh_Type, MapEpetra >(localMeshPtr,bOrder, 3, Comm));
+    feSpacePtr_Type uFESpace( new feSpace_Type( localMeshPtr, uOrder, 1, Comm ) );
+    feSpacePtr_Type betaFESpace( new feSpace_Type( localMeshPtr, bOrder, 3, Comm ) );
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
@@ -201,7 +203,7 @@ main( int argc, char** argv )
 
 #ifdef TEST_ADVECTION
     if (verbose) std::cout << " -- Adding the advection ... " << std::flush;
-    vector_type beta(betaFESpace->map(),Repeated);
+    vector_Type beta(betaFESpace->map(),Repeated);
     betaFESpace->interpolate(betaFct,beta,0.0);
     adrAssembler.addAdvection(systemMatrix,beta);
     if (verbose) std::cout << " done! " << std::endl;
@@ -229,14 +231,14 @@ main( int argc, char** argv )
 // Definition and assembly of the RHS
 
     if (verbose) std::cout << " -- Building the RHS ... " << std::flush;
-    //vector_type rhs(uFESpace->map(),Unique);
+    //vector_Type rhs(uFESpace->map(),Unique);
     vector_Type rhs(uFESpace->map(),Repeated);
     rhs*=0.0;
 
 #ifdef TEST_RHS
     vector_Type fInterpolated(uFESpace->map(),Repeated);
     fInterpolated*=0.0;
-    uFESpace->interpolate(fRhs,fInterpolated,0.0);
+    uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( fRhs ), fInterpolated, 0.0 );
     adrAssembler.addMassRhs(rhs,fInterpolated);
     rhs.globalAssemble();
 #endif
@@ -247,7 +249,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
     BCHandler bchandler;
-    BCFunctionBase BCu( exactSolution );
+    BCFunctionBase BCu( static_cast<feSpace_Type::function_Type>( exactSolution ) );
     bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
     for (UInt i(2); i<=6; ++i)
     {
@@ -309,7 +311,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Computing the error ... " << std::flush;
     vector_Type solutionErr(solution);
     solutionErr*=0.0;
-    uFESpace->interpolate(exactSolution,solutionErr,0.0);
+    uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( exactSolution ), solutionErr, 0.0 );
     solutionErr-=solution;
     solutionErr.abs();
     Real l2error(uFESpace->l2Error(exactSolution,vector_Type(solution,Repeated),0.0));
