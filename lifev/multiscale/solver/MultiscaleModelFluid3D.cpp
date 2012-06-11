@@ -149,7 +149,7 @@ MultiscaleModelFluid3D::setupModel()
 
     //BDF
     M_bdf.reset( new bdf_Type);
-    M_bdf->setup(M_data->dataTime()->orderBDF() );
+    M_bdf->setup(M_data->dataTimeAdvance()->orderBDF() );
 
     //Problem coefficients
     M_beta.reset( new fluidVector_Type( M_map ) );
