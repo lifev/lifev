@@ -273,10 +273,10 @@ Structure::run3d()
 
     //! initialization of parameters of time Advance method:
     if (timeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataStructure->dataTime()->coefficientsNewmark() , OrderDev);
+        timeAdvance->setup( dataStructure->dataTimeAdvance()->coefficientsNewmark() , OrderDev);
 
     if (timeAdvanceMethod =="BDF")
-        timeAdvance->setup(dataStructure->dataTime()->orderBDF() , OrderDev);
+        timeAdvance->setup(dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
 
     timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
     timeAdvance->showMe();
@@ -366,7 +366,7 @@ Structure::run3d()
 
     if (timeAdvanceMethod =="BDF")
     {
-        for ( UInt previousPass=0; previousPass < dataStructure->dataTime()->orderBDF() ; previousPass++)
+        for ( UInt previousPass=0; previousPass < dataStructure->dataTimeAdvance()->orderBDF() ; previousPass++)
         {
       Real previousTimeStep = -previousPass*dt;
       std::cout<<"BDF " <<previousTimeStep<<"\n";

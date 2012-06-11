@@ -409,7 +409,7 @@ Cylinder::run()
     MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << oseenData->dataTimeAdvance()->orderBDF() << std::endl;
 
     //oseenData.meshData()->setMesh(meshPart.meshPartition());
 
@@ -468,7 +468,7 @@ Cylinder::run()
     // bdf object to store the previous solutions
 
     TimeAdvanceBDFNavierStokes<vector_Type> bdf;
-    bdf.setup(oseenData->dataTime()->orderBDF());
+    bdf.setup(oseenData->dataTimeAdvance()->orderBDF());
 
     vector_Type beta( fullMap );
     vector_Type rhs ( fullMap );
@@ -533,7 +533,7 @@ Cylinder::run()
         chrono.start();
 
         double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
-	//beta = bdf.bdfVelocity().extrapolation(  beta);
+    //beta = bdf.bdfVelocity().extrapolation(  beta);
         bdf.bdfVelocity().extrapolation(beta);
         bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
         rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();

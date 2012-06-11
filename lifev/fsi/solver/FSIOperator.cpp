@@ -522,11 +522,11 @@ FSIOperator::buildSystem()
 
     if (this->isSolid())
       {
-	M_data->dataSolid()->showMe();
-	//initialize xi0 for timaAdvance method for solid
-	double  xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep() );
-	M_solid->buildSystem(xi);
-	M_solid->Mass()->globalAssemble();
+    M_data->dataSolid()->showMe();
+    //initialize xi0 for timaAdvance method for solid
+    double  xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep() );
+    M_solid->buildSystem(xi);
+    M_solid->Mass()->globalAssemble();
       }
 
 }
@@ -570,15 +570,15 @@ void FSIOperator::couplingVariableExtrap( )
     }
      else
       {
-	if ( this->isSolid() )
-	  {
-	    vector_Type solidDisp(M_solid->displacement());
-	    vector_Type solidVel(M_solid->displacement());
-	    M_solidTimeAdvance->extrapolation(solidDisp);
-	    M_solidTimeAdvance->extrapolationFirstDerivative(solidVel);
-	    transferSolidOnInterface(solidDisp, *M_lambda);
-	    transferSolidOnInterface(solidVel, *M_lambdaDot);
-	  }
+    if ( this->isSolid() )
+      {
+        vector_Type solidDisp(M_solid->displacement());
+        vector_Type solidVel(M_solid->displacement());
+        M_solidTimeAdvance->extrapolation(solidDisp);
+        M_solidTimeAdvance->extrapolationFirstDerivative(solidVel);
+        transferSolidOnInterface(solidDisp, *M_lambda);
+        transferSolidOnInterface(solidVel, *M_lambdaDot);
+      }
       }
       displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->normInf(), "\n" );
       displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->normInf(), "\n");
@@ -640,29 +640,29 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
         M_fluidTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );
 
       if (M_fluidTimeAdvanceMethod =="Newmark")
-	{
-	  M_fluidTimeAdvance->setup(M_data->dataFluid()->dataTime()->coefficientsNewmark() , 1);
-	}
+    {
+      M_fluidTimeAdvance->setup(M_data->dataFluid()->dataTimeAdvance()->coefficientsNewmark() , 1);
+    }
       if (M_fluidTimeAdvanceMethod =="BDF")
-	{
-	  M_fluidTimeAdvance->setup( M_data->dataFluid()->dataTime()->orderBDF(), 1 );
-	}
+    {
+      M_fluidTimeAdvance->setup( M_data->dataFluid()->dataTimeAdvance()->orderBDF(), 1 );
+    }
      /*
       if (M_fluidTimeAdvanceMethod =="GeneralizedAlpha")
-	{
-	  M_fluidTimeAdvance->setup(M_data->dataFluid()->dataTime()->rhoInf() , 1,M_data->dataFluid()->dataTime()->typeOfGeneralizedAlpha() );
-	}
+    {
+      M_fluidTimeAdvance->setup(M_data->dataFluid()->dataTime()->rhoInf() , 1,M_data->dataFluid()->dataTime()->typeOfGeneralizedAlpha() );
+    }
     */
       M_ALETimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_ALETimeAdvanceMethod ) );
 
       if (M_ALETimeAdvanceMethod =="Newmark")
-          M_ALETimeAdvance->setup( M_data->dataALE()->coefficientsNewmark() , 2);
+          M_ALETimeAdvance->setup( M_data->timeAdvanceDataALE()->coefficientsNewmark() , 2);
 
       if (M_ALETimeAdvanceMethod =="BDF")
-          M_ALETimeAdvance->setup( M_data->dataALE()->orderBDF(), 1 );
+          M_ALETimeAdvance->setup( M_data->timeAdvanceDataALE()->orderBDF(), 1 );
       /*
         if (M_ALETimeAdvanceMethod =="GeneralizedAlpha")
-       	M_ALETimeAdvance->setup( M_data->timeMeshMotionRhoInf(), 2, M_data->timeMeshMotionTypeeOfGeneralizedAlpha() );
+           M_ALETimeAdvance->setup( M_data->timeMeshMotionRhoInf(), 2, M_data->timeMeshMotionTypeeOfGeneralizedAlpha() );
       */
 
       M_fluidTimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
@@ -670,9 +670,9 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 
       if(this->isLeader())
       {
-	M_fluidTimeAdvance->showMe();
-	//M_fluidMassTimeAdvance->showMe();
-	M_ALETimeAdvance->showMe();
+    M_fluidTimeAdvance->showMe();
+    //M_fluidMassTimeAdvance->showMe();
+    M_ALETimeAdvance->showMe();
       }
     }
   if( this->isSolid() )
@@ -688,20 +688,20 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 
 
       if (M_solidTimeAdvanceMethod =="Newmark")
-	M_solidTimeAdvance->setup( parameters, 2 );
+    M_solidTimeAdvance->setup( parameters, 2 );
 
       if (M_solidTimeAdvanceMethod =="BDF")
-	M_solidTimeAdvance->setup( order , 2);
+    M_solidTimeAdvance->setup( order , 2);
      /*
       if (M_solidTimeAdvanceMethod =="GeneralizedAlpha")
-       	M_solidTimeAdvance->setup( rhoInfty, 2, type );
+           M_solidTimeAdvance->setup( rhoInfty, 2, type );
      */
 
       M_solidTimeAdvance->setTimeStep( M_data->dataSolid()->dataTime()->timeStep());
       if(this->isLeader())
-	{
-	  M_solidTimeAdvance->showMe();
-	}
+    {
+      M_solidTimeAdvance->showMe();
+    }
     }
 //  M_epetraWorldComm->Barrier();
  }

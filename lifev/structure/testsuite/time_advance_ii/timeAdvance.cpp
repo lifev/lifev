@@ -267,10 +267,10 @@ problem::run()
 
     //! initialization of parameters of time Advance method:
     if (TimeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataProblem->dataTime()->coefficientsNewmark() , OrderDev);
+        timeAdvance->setup( dataProblem->dataTimeAdvance()->coefficientsNewmark() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
-        timeAdvance->setup(dataProblem->dataTime()->orderBDF() , OrderDev);
+        timeAdvance->setup(dataProblem->dataTimeAdvance()->orderBDF() , OrderDev);
 
     timeAdvance->setTimeStep(dataProblem->dataTime()->timeStep());
     timeAdvance->showMe();
@@ -353,7 +353,7 @@ problem::run()
     }
     if (TimeAdvanceMethod =="BDF")
     {
-        for ( UInt previousPass=0; previousPass < dataProblem->orderBDF() ; previousPass++)
+        for ( UInt previousPass=0; previousPass < dataProblem->dataTimeAdvance()->orderBDF() ; previousPass++)
         {
             Real previousTimeStep = -previousPass*dt;
 // <<<<<<< HEAD
@@ -362,7 +362,7 @@ problem::run()
 // =======
             // feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *U, previousTimeStep);
             // uv0.push_back(*U);
-	    //>>>>>>> master
+        //>>>>>>> master
         }
     }
 
@@ -393,7 +393,7 @@ problem::run()
 
     for (Real time = dt; time <= T; time += dt)
     {
-        dataProblem->setTime(time);
+        dataProblem->dataTime()->setTime(time);
 
         if (verbose)
         {

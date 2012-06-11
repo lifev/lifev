@@ -53,6 +53,7 @@ namespace LifeV
 //=====================================================
 VenantKirchhoffElasticData::VenantKirchhoffElasticData():
         M_time                             ( ),
+        M_timeAdvance                      ( ),
         M_density                          ( ),
         M_thickness                        ( ),
         M_externalPressure                 ( ),
@@ -70,6 +71,7 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData():
 
 VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffElasticData& venantKirchhoffElasticData ):
         M_time                             ( venantKirchhoffElasticData.M_time ),
+        M_timeAdvance                      ( venantKirchhoffElasticData.M_timeAdvance ),
         M_density                          ( venantKirchhoffElasticData.M_density ),
         M_thickness                        ( venantKirchhoffElasticData.M_thickness ),
         M_externalPressure                 ( venantKirchhoffElasticData.M_externalPressure ),
@@ -94,6 +96,7 @@ VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& venantK
     if ( this != &venantKirchhoffElasticData )
     {
         M_time                             = venantKirchhoffElasticData.M_time;
+        M_timeAdvance                      = venantKirchhoffElasticData.M_timeAdvance;
         M_density                          = venantKirchhoffElasticData.M_density;
         M_thickness                        = venantKirchhoffElasticData.M_thickness;
         M_externalPressure                 = venantKirchhoffElasticData.M_externalPressure;
@@ -120,6 +123,9 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
     // If data time has not been set
     if ( !M_time.get() )
         M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
+
+    if ( !M_timeAdvance.get() )
+        M_timeAdvance.reset( new timeAdvance_Type( dataFile, section + "/time_discretization" ) );
 
     // physics
     M_solidType = dataFile( ( section + "/physics/solidType" ).data(), "NO_DEFAULT_SOLID_TYPE" );
@@ -208,6 +214,7 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
 
     output << "\n*** Values for data [solid/time_discretization]\n\n";
     M_time->showMe( output );
+    M_timeAdvance->showMe( output );
 }
 
 // ===================================================

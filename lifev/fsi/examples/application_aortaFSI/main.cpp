@@ -297,8 +297,8 @@ public:
         M_data->dataSolid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     M_data->dataSolid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
 //        M_data->dataALE()->setInitialTime( M_Tstart );
-        M_data->dataALE()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->timeDataALE()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->timeDataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     }
 
     /*!
