@@ -91,8 +91,8 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarz",   &MonolithicBlockMatrix::createAdditiveSchwarz ) ;
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarzRN", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) ;
 
-    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhof",    &FSIOperator::createVenantKirchhoffLinear );
-    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createVenantKirchhoffNonLinear );
+    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff",    &FSIOperator::createVenantKirchhoffLinear );
+    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &FSIOperator::createVenantKirchhoffNonLinear );
     FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "exponential",             &FSIOperator::createExponentialMaterialNonLinear );
     FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "neoHookean",              &FSIOperator::createNeoHookeanMaterialNonLinear );
 }

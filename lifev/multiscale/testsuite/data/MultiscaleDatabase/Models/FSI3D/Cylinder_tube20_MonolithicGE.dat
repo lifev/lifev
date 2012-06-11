@@ -154,8 +154,8 @@ useExactJacobian = true # always false for linear structure model. Otherwise it 
 rescaleFactor    = 1. # this factor can be used to rescale the structure block
 
     [./physics]
-    solidType = linearVenantKirchhof # linearVenantKirchhof
-                                     # nonLinearVenantKirchhof
+    solidType = linearVenantKirchhoff # linearVenantKirchhoff
+                                     # nonLinearVenantKirchhoff
     material_flag    = 1
     #externalPressure = 0
     #density          = 1.2

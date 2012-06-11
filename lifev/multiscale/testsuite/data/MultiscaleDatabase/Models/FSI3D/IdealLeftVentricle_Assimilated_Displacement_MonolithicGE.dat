@@ -162,8 +162,8 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 [solid]
 
     [./physics]
-    solidType = linearVenantKirchhof # linearVenantKirchhof
-                                     # nonLinearVenantKirchhof
+    solidType = linearVenantKirchhoff # linearVenantKirchhoff
+                                     # nonLinearVenantKirchhoff
     material_flag    = 0
     externalPressure = 0
     #density          = 1.2

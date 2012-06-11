@@ -151,8 +151,8 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 [solid]
 
     [./physics]
-    solidType = linearVenantKirchhof # linearVenantKirchhof
-                                     # nonLinearVenantKirchhof
+    solidType = linearVenantKirchhoff # linearVenantKirchhoff
+                                     # nonLinearVenantKirchhoff
     # Material list: Outer Wall; Subclavian Right; Vertebral Right; Carotid Right; Carotid Left; Vertebral Left; Subclavian Left
     material_flag    = '1000 1001 1002 1003 1004 1005 1006'
     #externalPressure = 0

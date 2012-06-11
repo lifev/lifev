@@ -144,8 +144,8 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 [solid]
 
     [./physics]
-    solidType = linearVenantKirchhof # linearVenantKirchhof
-                                     # nonLinearVenantKirchhof
+    solidType = linearVenantKirchhoff # linearVenantKirchhoff
+                                     # nonLinearVenantKirchhoff
     # Material list: Common; Common Left; Common Right; External Left; Internal Left; Internal Right; External Right
     material_flag    = '1001 1002 1003 1004 1005 1006 1007'
     #externalPressure = 0
