@@ -365,10 +365,10 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-                if (!M_data->method().compare("monolithicGI"))
-                    checkCEResult(M_data->dataFluid()->dataTime()->time());
-                else
-                    checkGCEResult(M_data->dataFluid()->dataTime()->time());
+	    if (!M_data->method().compare("monolithicGI"))
+	      checkCEResult(M_data->dataFluid()->dataTime()->time());
+	    else
+	      checkGCEResult(M_data->dataFluid()->dataTime()->time());
 
         }
 
@@ -810,11 +810,11 @@ void Problem::initializeStokes( GetPot const& data_file)
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-147199)/dispNorm*(dispNorm-147199)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.001 && (dispNorm-182648)/dispNorm*(dispNorm-182648)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.002 && (dispNorm-118248)/dispNorm*(dispNorm-118248)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.003 && (dispNorm-107004)/dispNorm*(dispNorm-107004)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.004 && (dispNorm-102103)/dispNorm*(dispNorm-102103)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if (time==0.000 && (dispNorm-139381/*147199*/)/dispNorm*(dispNorm-139381/*147199*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.001 && (dispNorm-176761/*182648*/)/dispNorm*(dispNorm-176761/*182648*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.002 && (dispNorm-118832/*118248*/)/dispNorm*(dispNorm-118832/*118248*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.003 && (dispNorm-110505/*107004*/)/dispNorm*(dispNorm-110505/*107004*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.004 && (dispNorm-103743/*102103*/)/dispNorm*(dispNorm-103743/*102103*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
 
 

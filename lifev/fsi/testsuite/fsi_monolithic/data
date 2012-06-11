@@ -124,7 +124,7 @@ filename   = solidImp     # name of the imported solution
 
 * #Fluid data
 [fluid]
-useShapeDerivatives           = flase # tells if the shape derivatives are neglected or not in the Jacobian matrix
+useShapeDerivatives           = false # tells if the shape derivatives are neglected or not in the Jacobian matrix
 semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
 convectiveImplicit            = false  # tells if the velocity is to be considered implicitly in the convective term
@@ -198,7 +198,7 @@ young     = 4.0E6
 poisson   = 0.45
 bulk      = 1e7
 alpha     = 2.5e6			# the parameter at the exponent for the exponential model
-gamma     = 1				# parameter for the exponential model                    
+gamma     = 1				# parameter for the exponential model
 
 ** #time discretization
 [../time_discretization]
@@ -228,7 +228,7 @@ depname   = dep
 * #monolithic FSI linear system data
 [linear_system]
 
-** #linear solver 
+** #linear solver
 [./solver]
 output          = all            # none
 max_iter        = 200		 # max number of iterations
@@ -596,7 +596,7 @@ which = ML
 neval = 5
 
 * #preconditioner perameters that can be used for the blocks in the aPCD preconditioner
-** 2 level DD Preconditioner 
+** 2 level DD Preconditioner
 [DD2Levels]
 displayList                 = false
   [./ML]
