@@ -193,8 +193,8 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** # physical data for the solid
 [./physics]
 
-solidType = linearVenantKirchhof
-## available choices: exponential, neoHookean, nonLinearVenantKirchhof, linearVenantKirchhof
+solidType = linearVenantKirchhoff
+## available choices: exponential, neoHookean, nonLinearVenantKirchhoff, linearVenantKirchhoff
 material_flag = 1     		   #the mesh flag of the structure volume
 density   = 1.2
 young     = 4.0E6

@@ -395,7 +395,7 @@ template <typename Mesh>
 inline StructuralMaterial<Mesh>* createVenantKirchhoffNonLinear() { return new VenantKirchhoffMaterialNonLinear<Mesh >(); }
 namespace
 {
-static bool registerVKNL = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonlinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerVKNL = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

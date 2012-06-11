@@ -512,7 +512,7 @@ Structure::run3d()
     ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
         if (!dataStructure->solidType().compare("linearVenantKirchhoff"))
           CheckResultLE(normVect,time);
-        else if (!dataStructure->solidType().compare("nonlinearVenantKirchhoff"))
+        else if (!dataStructure->solidType().compare("nonLinearVenantKirchhoff"))
           CheckResultSVK(normVect,time);
         else if (!dataStructure->solidType().compare("exponential"))
           CheckResultEXP(normVect,time );

@@ -370,7 +370,7 @@ public:
     Problem( const std::string& dataFileName, std::string method = "" )
     {
 
-      //VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
+      //VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhoff", &createLinearStructure );
 
 
       //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
@@ -379,7 +379,7 @@ public:
 
       //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
 
-        //        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
+        //        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &createNonLinearStructure );
 
         Debug( 10000 ) << "Setting up data from GetPot \n";
         GetPot dataFile( dataFileName );
