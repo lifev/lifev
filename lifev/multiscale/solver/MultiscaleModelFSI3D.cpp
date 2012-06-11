@@ -91,14 +91,10 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarz",   &MonolithicBlockMatrix::createAdditiveSchwarz ) ;
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarzRN", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) ;
 
-    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createVenantKirchhoffLinear );
-    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "exponential", &FSIOperator::createExponentialMaterialNonLinear );
-    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "neoHookean", &FSIOperator::createNeoHookeanMaterialNonLinear );
+    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhof",    &FSIOperator::createVenantKirchhoffLinear );
     FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createVenantKirchhoffNonLinear );
-
-
-    //FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
-//    FSIOperator_Type::solid_Type::StructureSolverFactory_Type::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
+    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "exponential",             &FSIOperator::createExponentialMaterialNonLinear );
+    FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "neoHookean",              &FSIOperator::createNeoHookeanMaterialNonLinear );
 }
 
 // ===================================================

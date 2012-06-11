@@ -47,8 +47,8 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 
-#include <lifev/bc_interface/fem/BCInterface3D.hpp>
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
+#include <lifev/bc_interface/fem/BCInterface3D.hpp>
 
 #include <lifev/fsi/solver/FSIOperator.hpp>
 #include <lifev/fsi/solver/FSIMonolithicGE.hpp>
