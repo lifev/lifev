@@ -276,7 +276,7 @@ public:
         M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-displacement",
                                       M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
 
-    M_fsi->FSIOper()->fluid().setupPostProc(); //this has to be called if we want to initialize the postProcess
+    //M_fsi->FSIOper()->fluid().setupPostProc(); //this has to be called if we want to initialize the postProcess
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");
@@ -365,10 +365,10 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-	    if (!M_data->method().compare("monolithicGI"))
-	      checkCEResult(M_data->dataFluid()->dataTime()->time());
-	    else
-	      checkGCEResult(M_data->dataFluid()->dataTime()->time());
+        if (!M_data->method().compare("monolithicGI"))
+          checkCEResult(M_data->dataFluid()->dataTime()->time());
+        else
+          checkGCEResult(M_data->dataFluid()->dataTime()->time());
 
         }
 
