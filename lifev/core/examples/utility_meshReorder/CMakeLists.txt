@@ -14,9 +14,8 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(data_utility_meshReorder
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-TRIBITS_COPY_FILES_TO_BINARY_DIR(data_utility_meshReorder
+TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_utility_meshReorder
   CREATE_SYMLINK
-  SOURCE_FILES tube20.mesh
-  SOURCE_FILES vessel20.mesh
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/darcy/data/mesh/inria
+  SOURCE_FILES tube20.mesh vessel20.mesh
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/core/data/mesh/inria
 )
