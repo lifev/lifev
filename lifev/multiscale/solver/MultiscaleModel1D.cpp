@@ -300,8 +300,6 @@ MultiscaleModel1D::updateSolution()
     Debug( 8130 ) << "MultiscaleModel1D::updateSolution() \n";
 #endif
 
-    // Update exporter solution removing ghost nodes
-    copySolution( *M_solution, *M_exporterSolution );
 }
 
 void
@@ -311,6 +309,9 @@ MultiscaleModel1D::saveSolution()
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MultiscaleModel1D::saveSolution() \n";
 #endif
+
+    // Update exporter solution removing ghost nodes
+    copySolution( *M_solution, *M_exporterSolution );
 
 #ifdef HAVE_HDF5
     M_exporter->postProcess( M_data->dataTime()->time() );

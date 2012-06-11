@@ -223,6 +223,8 @@ Int main(Int argc, char** argv)
 
         chronoSystem.stop();
 
+        oneDModel.updateSolution();
+
         //Save solution
         if ( count%50 == 0 || oneDModel.data().dataTime()->isLastTimeStep() )
             oneDModel.saveSolution();
