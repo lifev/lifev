@@ -187,8 +187,6 @@ MultiscaleModelFSI3D::setupModel()
 
     //Setup linear model
     setupLinearModel();
-
-    M_FSIoperator->fluid().setupPostProc(); //this has to be called if we want to initialize the postProcess
 }
 
 void
@@ -474,6 +472,7 @@ MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
     // Global data time
     M_data->dataFluid()->setTimeData( M_globalData->dataTime() );
     M_data->dataSolid()->setTimeData( M_globalData->dataTime() );
+    M_data->setTimeDataALE( M_globalData->dataTime() );
 
     // Fluid global physical quantities
     if ( !dataFile.checkVariable( "fluid/physics/density" ) )
