@@ -589,12 +589,11 @@ FSIOperator::updateSolution( const vector_Type& solution )
 {
     if ( this->isFluid() )
     {
-      M_ALETimeAdvance->shiftRight( this->M_meshMotion->disp() );
-      M_fluidTimeAdvance->shiftRight( *M_fluid->solution()
-                                      );
+        M_ALETimeAdvance->shiftRight( this->M_meshMotion->disp() );
+        M_fluidTimeAdvance->shiftRight( *M_fluid->solution() );
     }
-  if ( this->isSolid())
-    M_solidTimeAdvance->shiftRight( M_solid->displacement());
+    if ( this->isSolid())
+        M_solidTimeAdvance->shiftRight( M_solid->displacement() );
 }
 
 UInt
