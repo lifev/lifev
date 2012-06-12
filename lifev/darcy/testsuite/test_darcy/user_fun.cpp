@@ -78,14 +78,14 @@ Matrix inversePermeability::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/,
 // Reaction term
 Real reactionTerm::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& /*time*/ ) const
 {
-    return (P[0] * P[1] - 0.5 * P[2]);
+    return (P[0] * P[1] - 0.5 * P[2]) * 0;
 }
 
 // Scalar source term
-Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& /*time*/ ) const
+Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& time ) const
 {
     return - 4. * P[1] * P[1] + 4. * P[0] * P[0] - 8. * P[0] * P[1] + 6. +
-         ( P[0] * P[1] - 0.5 * P[2] )  * ( P[0] * P[0] * P[1] * P[1] + 6. * P[0] + 5. * P[2] );
+         0*( P[0] * P[1] - 0.5 * P[2] )  * analyticalSolution ( time, P[0],  P[1], P[2], 0 );
 }
 
 // Vector source term
@@ -137,79 +137,53 @@ void setBoundaryConditions ( bcHandlerPtr_Type & bcDarcy )
     // dp/dn = first_parameter + second_parameter * p
     robinBDfun.setFunctions_Robin( robin, robinMass );
 
-    bcDarcy->addBC( "Top",     TOP,     Natural,    Full,    neumannBDfun1, 1 );
-    bcDarcy->addBC( "Bottom",  BOTTOM,  Robin,      Scalar,  robinBDfun      );
-    //bcDarcy->addBC(   "Top",    TOP,    Essential,  Scalar,  dirichletBDfun  );
-    //bcDarcy->addBC("Bottom", BOTTOM,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy->addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy->addBC( "Right",  RIGHT,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy->addBC( "Back",  BACK,    Essential,  Scalar,  dirichletBDfun  );
-    //bcDarcy->addBC(  "Front",   FRONT,    Essential,  Scalar,  dirichletBDfun  );
-    bcDarcy->addBC( "Front",    FRONT,    Natural,    Full,    neumannBDfun2, 1 );
+    bcDarcy->addBC( "Top",    BCFlags::TOP,    Natural,   Full,   neumannBDfun1, 1);
+    bcDarcy->addBC( "Bottom", BCFlags::BOTTOM, Robin,     Scalar, robinBDfun      );
+    bcDarcy->addBC( "Left",   BCFlags::LEFT,   Essential, Scalar, dirichletBDfun  );
+    bcDarcy->addBC( "Right",  BCFlags::RIGHT,  Essential, Scalar, dirichletBDfun  );
+    bcDarcy->addBC( "Back",   BCFlags::BACK,   Essential, Scalar, dirichletBDfun  );
+    bcDarcy->addBC( "Front",  BCFlags::FRONT,  Natural,   Full,   neumannBDfun2, 1);
 
 }
 
 // Boundary condition of Dirichlet
-Real dirichlet ( const Real& /*t*/,
+Real dirichlet ( const Real& t,
                  const Real& x,
                  const Real& y,
                  const Real& z,
-                 const ID&   /*icomp*/ )
+                 const ID&   icomp )
 {
-    return x * x * y * y + 6. * x + 5. * z;
+    return analyticalSolution ( t, x, y, z, icomp );
 }
 
 // Boundary condition of Neumann
-Real neumann1 ( const Real& /*t*/,
+Real neumann1 ( const Real& t,
                 const Real& x,
                 const Real& y,
-                const Real& /*z*/,
+                const Real& z,
                 const ID&   icomp )
 {
-    switch ( icomp )
-    {
-    case 0:   //! Dx
-        return  -1. * ( 4. * x * y * y + 2. * x * x * y + 12. - 2. * x * x * x - 2. * y );
-        break;
-    case 1:   //! Dy
-        return 0.;
-        break;
-    case 2:   //! Dz
-        return 0.;
-        break;
-    }
-    return 0.;
+    return analyticalFlux ( t, x, y, z, 2 );
 }
 
-Real neumann2 ( const Real& /*t*/,
+Real neumann2 ( const Real& t,
                 const Real& x,
                 const Real& y,
-                const Real& /*z*/,
+                const Real& z,
                 const ID&   icomp )
 {
-    switch ( icomp )
-    {
-    case 0:   //! Dx
-        return   ( 4. * x * y * y + 2. * x * x * y + 12. - 2. * x * x * x - 2. * y );
-        break;
-    case 1:   //! Dy
-        return 0.;
-        break;
-    case 2:   //! Dz
-        return 0.;
-        break;
-    }
-    return 0.;
+    return -1. * analyticalFlux ( t, x, y, z, 1 );
 }
 
 // Boundary condition of Robin
-Real robin ( const Real& /*t*/,
+Real robin ( const Real& t,
              const Real& x,
              const Real& y,
              const Real& z,
-             const ID&   /*icomp*/ )
+             const ID&   icomp )
 {
-    return -2. * y * x * x - 2. * x * y * y - 6. + 2. * y + x * x * x + x * x * y * y + 6. * x + 5. * z;
+    return -1. * analyticalFlux ( t, x, y, z, 2 ) +
+            analyticalSolution ( t, x, y, z, icomp );
 }
 
 Real robinMass( const Real& /*t*/,
