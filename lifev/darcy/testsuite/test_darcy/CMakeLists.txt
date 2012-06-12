@@ -18,9 +18,3 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(data_test_darcy
   SOURCE_FILES data
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-TRIBITS_COPY_FILES_TO_BINARY_DIR(cartesian_cube8.mesh
-  SOURCE_FILES cartesian_cube8.mesh
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/darcy/data/mesh/inria
-)
-
