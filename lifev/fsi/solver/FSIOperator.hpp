@@ -634,8 +634,7 @@ public:
     /*!
      * @param fluidDisplacement vector to be filled with the fluid displacement
      */
-    virtual void exportFluidDisplacement( vector_Type& fluidDisplacement ) { fluidDisplacement = M_meshMotion->disp(); }
-
+    virtual void exportFluidDisplacement( vector_Type& fluidDisplacement ) { fluidDisplacement = M_ALETimeAdvance->singleElement(0); }
 
     //@}
 
