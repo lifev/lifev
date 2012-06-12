@@ -82,7 +82,7 @@ public MeshEntity
 public:
 
     //! static const S_geoDimensions: the dimensions (1,2,3) of the geometry
-    static const Int S_geoDimensions = GEOSHAPE::S_nDimensions;
+    static const UInt S_geoDimensions = GEOSHAPE::S_nDimensions;
 
 
     /** @name GeoDim Types
