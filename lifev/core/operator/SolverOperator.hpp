@@ -102,7 +102,7 @@ public:
 	double NormInf() const { return M_oper->NormInf(); }
 
 	//! Reset the status for the state of convergence and loss of accuracy
-	void resetStatus() { M_lossOfAccuracy = undefined; M_converged = undefined; M_numIterations = 0; };
+    void resetStatus() { M_lossOfAccuracy = undefined; M_converged = undefined; M_numIterations = 0; }
 
 	//@}
 

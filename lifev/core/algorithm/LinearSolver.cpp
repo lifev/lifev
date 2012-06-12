@@ -448,6 +448,7 @@ LinearSolver::recursiveResidual()
     res.Norm2( &residual );
     return residual;
     */
+    return 0.;
 }
 
 LinearSolver::preconditionerPtr_Type&

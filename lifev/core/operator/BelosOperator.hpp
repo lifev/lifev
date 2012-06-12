@@ -83,7 +83,7 @@ public:
 	//! null constructor and destructor
 	//@{
 	BelosOperator();
-	~BelosOperator() {};
+    ~BelosOperator() {}
 	//@}
 
 	static solverManagerMap_Type* singletonSolverManagerMap();
@@ -121,5 +121,5 @@ namespace
 
 
 } /*end namespace Operators */
-} /*end namespace */
+} /*end namespace LifeV */
 #endif /* _BELOSOPERATOR_HPP_ */
