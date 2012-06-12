@@ -58,7 +58,7 @@ SolverAztecOO::SolverAztecOO() :
 	if( M_displayer->isLeader() )
 	{
 		std::cerr << "Warning: SolverAztecOO is deprecated!" << std::endl
-		          << "         You should use LinearSolver intead!" << std::endl;
+                  << "         You should use LinearSolver instead!" << std::endl;
 	}
 }
 
@@ -75,7 +75,7 @@ SolverAztecOO::SolverAztecOO( const boost::shared_ptr<Epetra_Comm>& comm ) :
 	if( M_displayer->isLeader() )
 	{
 		std::cerr << "Warning: SolverAztecOO is deprecated!" << std::endl
-		          << "         You should use LinearSolver intead!" << std::endl;
+                  << "         You should use LinearSolver instead!" << std::endl;
 	}
 }
 
