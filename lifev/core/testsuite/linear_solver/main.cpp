@@ -52,9 +52,6 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include<math.h>
-#include <string>
-
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
@@ -76,22 +73,23 @@ using namespace LifeV;
 
 namespace
 {
-typedef RegionMesh<LinearTetra>           mesh_type;
-typedef MatrixEpetra<Real>                matrix_type;
-typedef VectorEpetra                      vector_type;
-typedef boost::shared_ptr<VectorEpetra>   vectorPtr_type;
-typedef FESpace< mesh_type, MapEpetra >   fespace_type;
-typedef boost::shared_ptr< fespace_type > fespacePtr_type;
+typedef RegionMesh<LinearTetra>           mesh_Type;
+typedef boost::shared_ptr<mesh_Type>      meshPtr_Type;
+typedef MatrixEpetra<Real>                matrix_Type;
+typedef VectorEpetra                      vector_Type;
+typedef boost::shared_ptr<VectorEpetra>   vectorPtr_Type;
+typedef FESpace< mesh_Type, MapEpetra >   fespace_Type;
+typedef boost::shared_ptr< fespace_Type > fespacePtr_Type;
 
-typedef LifeV::Preconditioner             basePrec_type;
-typedef boost::shared_ptr<basePrec_type>  basePrecPtr_type;
-typedef LifeV::PreconditionerIfpack       prec_type;
-typedef boost::shared_ptr<prec_type>      precPtr_type;
+typedef LifeV::Preconditioner             basePrec_Type;
+typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
+typedef LifeV::PreconditionerIfpack       prec_Type;
+typedef boost::shared_ptr<prec_Type>      precPtr_Type;
 }
 
-void printErrors( const vector_type& solution, fespacePtr_type uFESpace, bool verbose )
+void printErrors( const vector_Type& solution, fespacePtr_Type uFESpace, bool verbose )
 {
-    vector_type velocity( solution, Repeated );
+    vector_Type velocity( solution, Repeated );
     Real uRelativeError, uL2Error;
     uL2Error = uFESpace->l2Error (Laplacian::uexact, velocity, 0, &uRelativeError );
     if( verbose ) std::cout << "Velocity" << std::endl;
@@ -108,9 +106,12 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
+#endif
+
+    {
+
+#ifdef HAVE_MPI
     boost::shared_ptr<Epetra_Comm> Comm( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-    int nproc;
-    MPI_Comm_size( MPI_COMM_WORLD, &nproc );
 #else
     boost::shared_ptr<Epetra_Comm> Comm( new Epetra_SerialComm );
 #endif
@@ -130,7 +131,7 @@ main( int argc, char** argv )
 
         std::cout << "[Initilization of MPI]" << std::endl;
 #ifdef HAVE_MPI
-        std::cout << "Using MPI (" << nproc << " proc.)" << std::endl;
+        std::cout << "Using MPI (" << Comm->NumProc() << " proc.)" << std::endl;
 #else
         std::cout << "Using serial version" << std::endl;
 #endif
@@ -162,7 +163,9 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if( verbose ) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr( new RegionMesh<LinearTetra> );
+    meshPtr_Type fullMeshPtr( new mesh_Type );
+    const UInt & geoDim = static_cast<UInt>( mesh_Type::S_geoDimensions );
+
 
     // Building the mesh from the source
 
@@ -178,7 +181,7 @@ main( int argc, char** argv )
 
     if( verbose ) std::cout << "Mesh size  : " << MeshUtility::MeshStatistics::computeSize( *fullMeshPtr ).maxH << std::endl;
     if( verbose ) std::cout << "Partitioning the mesh ... " << std::endl;
-    MeshPartitioner< RegionMesh<LinearTetra> >   meshPart( fullMeshPtr, Comm );
+    MeshPartitioner< mesh_Type >   meshPart( fullMeshPtr, Comm );
     fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
     // +-----------------------------------------------+
@@ -188,11 +191,11 @@ main( int argc, char** argv )
     if( verbose ) std::cout << "FE for the velocity: " << uOrder << std::endl;
 
     if( verbose ) std::cout << "Building the velocity FE space ... " << std::flush;
-    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >( meshPart, uOrder, nDimensions, Comm ) );
+    fespacePtr_Type uFESpace( new fespace_Type( meshPart, uOrder, geoDim, Comm ) );
     if( verbose ) std::cout << "ok." << std::endl;
 
     // Pressure offset in the vector
-    UInt numDofs = nDimensions * uFESpace->dof().numTotalDof();
+    UInt numDofs = geoDim * uFESpace->dof().numTotalDof();
 
     if( verbose ) std::cout << "Total Velocity Dof: " << numDofs << std::endl;
 
@@ -207,7 +210,7 @@ main( int argc, char** argv )
     if( verbose ) std::cout << "Setting Dirichlet BC... " << std::flush;
     for( UInt iDirichlet( 1 ); iDirichlet<=26; ++iDirichlet )
     {
-        bcHandler.addBC( "Wall", iDirichlet, Essential, Full, uExact, 3 );
+        bcHandler.addBC( "Wall", iDirichlet, Essential, Full, uExact, geoDim );
     }
     if( verbose ) std::cout << "ok." << std::endl;
 
@@ -220,13 +223,12 @@ main( int argc, char** argv )
     if( verbose ) std::cout << std::endl << "[Matrices Assembly]" << std::endl;
 
     if( verbose ) std::cout << "Setting up assembler... " << std::flush;
-    ADRAssembler<mesh_type,matrix_type,vector_type> adrAssembler;
+    ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
     adrAssembler.setup( uFESpace, uFESpace );
     if( verbose ) std::cout << "done" << std::endl;
 
     if( verbose ) std::cout << "Defining the matrices... " << std::flush;
-    boost::shared_ptr<matrix_type> systemMatrix( new matrix_type( uFESpace->map() ) );
-    *systemMatrix *= 0.0;
+    boost::shared_ptr<matrix_Type> systemMatrix( new matrix_Type( uFESpace->map() ) );
     if( verbose ) std::cout << "done" << std::endl;
 
     if( verbose ) std::cout << "Adding the viscous stress... " << std::flush;
@@ -237,8 +239,8 @@ main( int argc, char** argv )
     // |            Solver initialization              |
     // +-----------------------------------------------+
     if( verbose ) std::cout << std::endl << "[Solvers initialization]" << std::endl;
-    prec_type* precRawPtr;
-    basePrecPtr_type precPtr;
+    prec_Type* precRawPtr;
+    basePrecPtr_Type precPtr;
     precRawPtr = new PreconditionerIfpack;
     precRawPtr->setDataFromGetPot( dataFile, "prec" );
     precPtr.reset( precRawPtr );
@@ -279,46 +281,41 @@ main( int argc, char** argv )
     if( verbose ) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
     if( verbose ) std::cout << "Creation of vectors... " << std::flush;
 
-    boost::shared_ptr<vector_type> rhs;
-    rhs.reset( new vector_type( uFESpace->map(), Repeated ) );
-    *rhs *= 0.0;
+    boost::shared_ptr<vector_Type> rhs;
+    rhs.reset( new vector_Type( uFESpace->map(), Repeated ) );
 
-    vector_type fInterpolated( uFESpace->map(), Repeated );
-    fInterpolated *= 0.0;
+    vector_Type fInterpolated( uFESpace->map(), Repeated );
     adrAssembler.addMassRhs( *rhs, fRHS, 0.0 );
     rhs->globalAssemble();
     if( verbose ) std::cout << "done" << std::endl;
 
-    fInterpolated *= 0.0;
+    fInterpolated = 0.0;
     uFESpace->interpolate( uExact, fInterpolated, 0.0 );
 
 
     if( verbose ) std::cout << "Applying BC... " << std::flush;
     systemMatrix->globalAssemble();
-    boost::shared_ptr<vector_type> rhsBC;
-    rhsBC.reset( new vector_type( *rhs, Unique ) );
+    boost::shared_ptr<vector_Type> rhsBC;
+    rhsBC.reset( new vector_Type( *rhs, Unique ) );
     bcManage( *systemMatrix, *rhsBC, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
     if( verbose ) std::cout << "done" << std::endl;
 
     if( verbose ) std::cout << std::endl << "Solving the system with SolverAztec00... " << std::endl;
-    boost::shared_ptr<vector_type> solution;
-    solution.reset( new vector_type( uFESpace->map(), Unique ) );
-    *solution *= 0.0;
+    boost::shared_ptr<vector_Type> solution;
+    solution.reset( new vector_Type( uFESpace->map(), Unique ) );
     linearSolver1.setMatrix( *systemMatrix );
     linearSolver1.solveSystem( *rhsBC, *solution, systemMatrix );
 
     if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (Belos)... " << std::endl;
-    boost::shared_ptr<vector_type> solution2;
-    solution2.reset( new vector_type( uFESpace->map(), Unique ) );
-    *solution2 *= 0.0;
+    boost::shared_ptr<vector_Type> solution2;
+    solution2.reset( new vector_Type( uFESpace->map(), Unique ) );
     linearSolver2.setOperator( systemMatrix );
     linearSolver2.setRightHandSide( rhsBC );
     linearSolver2.solve( solution2 );
 
     if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (AztecOO)... " << std::endl;
-    boost::shared_ptr<vector_type> solution3;
-    solution3.reset( new vector_type( uFESpace->map(), Unique ) );
-    *solution3 *= 0.0;
+    boost::shared_ptr<vector_Type> solution3;
+    solution3.reset( new vector_Type( uFESpace->map(), Unique ) );
     linearSolver3.setOperator( systemMatrix );
     linearSolver3.setRightHandSide( rhsBC );
     linearSolver3.solve( solution3 );
@@ -327,29 +324,29 @@ main( int argc, char** argv )
     // |             Computing the error               |
     // +-----------------------------------------------+
     if( verbose ) std::cout << std::endl << "[Errors computation]" << std::endl;
-    vector_type solutionErr( *solution );
+    vector_Type solutionErr( *solution );
     solutionErr *= 0.0;
     uFESpace->interpolate( Laplacian::uexact, solutionErr, 0.0 );
     solutionErr -= *solution;
     solutionErr.abs();
 
-    vector_type solution2Err( *solution2 );
+    vector_Type solution2Err( *solution2 );
     solution2Err *= 0.0;
     uFESpace->interpolate( Laplacian::uexact,solution2Err, 0.0 );
     solution2Err -= *solution2;
     solution2Err.abs();
 
-    vector_type solution3Err( *solution3 );
+    vector_Type solution3Err( *solution3 );
     solution3Err *= 0.0;
     uFESpace->interpolate( Laplacian::uexact, solution3Err, 0.0 );
     solution3Err -= *solution3;
     solution3Err.abs();
 
-    vector_type solutionsDiff( *solution2 );
+    vector_Type solutionsDiff( *solution2 );
     solutionsDiff -= *solution;
     Real solutionsDiffNorm = solutionsDiff.norm2();
 
-    vector_type solutionsDiff2( *solution2 );
+    vector_Type solutionsDiff2( *solution2 );
     solutionsDiff2 -= *solution3;
     Real solutionsDiffNorm2 = solutionsDiff2.norm2();
 
@@ -384,11 +381,13 @@ main( int argc, char** argv )
     if( verbose ) std::cout << std::endl << "Total simulation time: " << globalChrono.diff() << " s." << std::endl;
     if( verbose ) std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
 
+    }
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    if( verbose ) std::cout << "Test status: SUCCESS" << std::endl;
+    /*if( verbose )*/ std::cout << "Test status: SUCCESS" << std::endl;
 
     return( EXIT_SUCCESS );
 }
