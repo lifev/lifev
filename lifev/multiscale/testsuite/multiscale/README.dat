@@ -10,15 +10,12 @@
 #
 ###################################################################################################
 
-Inside the test_Multiscale folder (mathcard-git/testsuite/test_Multiscale) there isn't any data file,
+Inside the test folder (lifev-git/lifev/multiscale/testsuite/multiscale) there isn't any data file,
 in fact all the data are placed into "mathcard-git/data/MultiscaleDatabase".
 
 To run a simulation type:
 
-make check
-make link
-
-./test_MS -f MultiscaleDatabase/*.dat
+./Multiscale_BasicTest.exe -f MultiscaleDatabase/*.dat
 
 where the * should be replaced with the name of the file to be loaded.
 
