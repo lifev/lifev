@@ -143,17 +143,17 @@ public:
 // ===================================================
 //!                    Boundary data
 // ===================================================
-enum BCNAME
+namespace BCFlags
 {
 
     // Flags for structured meshes
-    BACK   = 3,
-    FRONT  = 1,
-    LEFT   = 4,
-    RIGHT  = 2,
-    BOTTOM = 5,
-    TOP    = 6
-};
+    const UInt BACK   = 3;
+    const UInt FRONT  = 1;
+    const UInt LEFT   = 4;
+    const UInt RIGHT  = 2;
+    const UInt BOTTOM = 5;
+    const UInt TOP    = 6;
+}
 
 void setBoundaryConditions ( bcHandlerPtr_Type & bcDarcy) ;
 
