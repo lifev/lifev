@@ -350,17 +350,11 @@ private:
     // Vectorial external pressure
     vectorPtr_Type                         M_externalPressureVector;
 
-    // Post processing members TODO NOW SHOULD BE REMOVED
+    // Post processing members
     vectorPtr_Type                         M_fluidVelocityAndPressure;
     vectorPtr_Type                         M_fluidDisplacement;
     vectorPtr_Type                         M_solidVelocity;
     vectorPtr_Type                         M_solidDisplacement;
-
-    // Old Solution (used for subiterations)
-    std::vector<vectorPtr_Type>            M_fluidVelocityAndPressure_tn;
-    std::vector<vectorPtr_Type>            M_fluidDisplacement_tn;
-    std::vector<vectorPtr_Type>            M_solidVelocity_tn;
-    std::vector<vectorPtr_Type>            M_solidDisplacement_tn;
 
     vectorPtr_Type                         M_stateVariable;
 
