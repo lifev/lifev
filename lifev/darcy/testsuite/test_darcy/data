@@ -116,7 +116,7 @@ problem_type = 1
         overlap                = 1
 
             [./relaxation] # For relaxation scheme only
-            type                   = Gauss-Seidel
+            type                   = Jacobi
             damping_factor         = 1.
             sweeps                 = 1
             min_diagonal_value     = 0
@@ -139,7 +139,7 @@ problem_type = 1
             [../]
 
             [./fact]
-            drop_tolerance         = 1.e-4
+            drop_tolerance         = 1.e-10
             level-of-fill          = 1
             ict_level-of-fill      = 1
             ilut_level-of-fill     = 1
@@ -149,7 +149,7 @@ problem_type = 1
             [../]
 
             [./schwarz]
-            combine_mode           = Zero
+            combine_mode           = 0
             compute_condest        = false
             reordering_type        = none
             filter_singletons      = true
@@ -164,11 +164,11 @@ problem_type = 1
     solver          = gmres
     scaling         = none
     output          = all # none
-    conv            = Anorm
+    conv            = rhs
     max_iter        = 500
     reuse           = true
     max_iter_reuse  = 10
-    kspace          = 200
+    kspace          = 100
     tol             = 1.e-8    # AztecOO tolerance
     [../]
 
