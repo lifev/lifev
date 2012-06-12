@@ -131,7 +131,7 @@ public:
     /*!
       @param commPtr Communicator
      */
-    LinearSolver( const boost::shared_ptr<Epetra_Comm>& commPtr );
+    LinearSolver( const boost::shared_ptr<Epetra_Comm> commPtr );
 
     //! Destructor
     ~LinearSolver();
@@ -151,14 +151,14 @@ public:
       @param solutionPtr Vector to store the solution
       @return Number of iterations, M_maxIter+1 if solve failed.
      */
-    Int solve( vectorPtr_Type& solutionPtr );
+    Int solve( vectorPtr_Type solutionPtr );
 
     //! Compute the residual
     /*!
       @param solutionPtr Shared pointer on the solution of the system
       The method returns -1 if an error occurs
      */
-    Real computeResidual( vectorPtr_Type& solutionPtr );
+    Real computeResidual( vectorPtr_Type solutionPtr );
 
     //! return the solver status
     std::string printStatus();
@@ -211,37 +211,37 @@ public:
     /*!
       @param commPtr Communicator for the displayer
      */
-    void setCommunicator( const boost::shared_ptr<Epetra_Comm>& commPtr );
+    void setCommunicator( const boost::shared_ptr<Epetra_Comm> commPtr );
 
     //! Method to set matrix from MatrixEpetra
     /*!
       @param matrixPtr Matrix of the system
      */
-    void setOperator( matrixPtr_Type& matrixPtr );
+    void setOperator( matrixPtr_Type matrixPtr );
 
     //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
     /*!
       @param operPtr Pointer to an operator for the system
      */
-    void setOperator( operatorPtr_Type& operPtr );
+    void setOperator( operatorPtr_Type operPtr );
 
     //! Method to set the right hand side (rhs) of the linear system
     /*!
       @param rhsPtr right hand side of the system
      */
-    void setRightHandSide( const vectorPtr_Type& rhsPtr );
+    void setRightHandSide( const vectorPtr_Type rhsPtr );
 
     //! Method to set an Preconditioner preconditioner
     /*!
       @param preconditionerPtr Preconditioner to be used to solve the system
      */
-    void setPreconditioner( preconditionerPtr_Type& preconditionerPtr );
+    void setPreconditioner( preconditionerPtr_Type preconditionerPtr );
 
     //! Method to set a general Epetra_Operator as preconditioner
     /*!
       @param preconditionerPtr  Preconditioner to be set of type Epetra_Operator
      */
-    void setPreconditioner( operatorPtr_Type& preconditionerPtr );
+    void setPreconditioner( operatorPtr_Type preconditionerPtr );
 
     //! Method to setup the solver using Teuchos::ParameterList
     /*!
