@@ -143,8 +143,19 @@ public:
 // ===================================================
 //!                    Boundary data
 // ===================================================
+enum BCNAME
+{
 
-void setBoundaryConditions(boost::shared_ptr<BCHandler> & bcDarcy) ;
+    // Flags for structured meshes
+    BACK   = 3,
+    FRONT  = 1,
+    LEFT   = 4,
+    RIGHT  = 2,
+    BOTTOM = 5,
+    TOP    = 6
+};
+
+void setBoundaryConditions ( bcHandlerPtr_Type & bcDarcy) ;
 
 // Boundary condition of Dirichlet
 Real dirichlet ( const Real&, const Real&, const Real&, const Real&, const ID& );

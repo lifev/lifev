@@ -125,19 +125,7 @@ Real massFunction::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Re
 // ===================================================
 //!                    Boundary data
 // ===================================================
-enum BCNAME
-{
-
-    // Flags for structured meshes
-    BACK   = 3,
-    FRONT  = 1,
-    LEFT   = 4,
-    RIGHT  = 2,
-    BOTTOM = 5,
-    TOP    = 6
-};
-
-void setBoundaryConditions ( boost::shared_ptr<BCHandler> & bcDarcy )
+void setBoundaryConditions ( bcHandlerPtr_Type & bcDarcy )
 {
 
     BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
