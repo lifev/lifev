@@ -445,6 +445,12 @@ darcy::run()
     // Shared pointer used in the exporter for the dual solution
     vectorPtr_Type dualExporter;
 
+    // Shared pointer used in the exporter for the error of the primal solution
+    vectorPtr_Type primalErrorExporter;
+
+    // Shared pointer used for the exact primal solution
+    vectorPtr_Type primalExact;
+
     // Type of the exporter
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
@@ -484,7 +490,7 @@ darcy::run()
                             p_FESpacePtr,
                             primalExporter,
                             static_cast<UInt>( 0 ),
-                            ExporterData < regionMesh_Type >::UnsteadyRegime,
+                            ExporterData < regionMesh_Type >::SteadyRegime,
                             ExporterData < regionMesh_Type >::Cell );
 
     // Set the exporter dual pointer
@@ -496,19 +502,33 @@ darcy::run()
                             uInterpolate_FESpacePtr,
                             dualExporter,
                             static_cast<UInt>( 0 ),
-                            ExporterData < regionMesh_Type >::UnsteadyRegime,
+                            ExporterData < regionMesh_Type >::SteadyRegime,
+                            ExporterData < regionMesh_Type >::Cell );
+
+    // Set the exporter to the error of the primal pointer
+    primalErrorExporter.reset ( new vector_Type ( primalField->getVector(), exporter->mapType() ) );
+
+    // Set the primal exact pointer
+    primalExact.reset ( new vector_Type ( primalField->getVector(), exporter->mapType() ) );
+
+    // Add the error of the primal variable to the exporter
+    exporter->addVariable ( ExporterData < regionMesh_Type >::ScalarField,
+                            "PressureError",
+                            p_FESpacePtr,
+                            primalErrorExporter,
+                            static_cast<UInt>( 0 ),
+                            ExporterData < regionMesh_Type >::SteadyRegime,
                             ExporterData < regionMesh_Type >::Cell );
 
     // Display the total number of unknowns
     displayer->leaderPrint ( "Number of unknowns : ",
                              hybrid_FESpacePtr->map().map( Unique )->NumGlobalElements(), "\n" );
 
+    // Export the partitioning
+    exporter->exportPID( meshPart );
+
     // Solve the problem
     darcySolver.solve ();
-
-//darcySolver.solveLinearSystem ();
-
-//darcySolver.computePrimalAndDual();
 
     // Save the solution
 
@@ -520,6 +540,12 @@ darcy::run()
 
     // Copy the dual interpolated solution to the exporter
     *dualExporter = dualInterpolated->getVector();
+
+    // Interpolate the exact primal solution
+    p_FESpacePtr->interpolate ( Members->getAnalyticalSolution(), *primalExact );
+
+    // Copy the error of the primal solution to the exporter
+    *primalErrorExporter = *primalExact - primalField->getVector ();
 
     // Save the solution into the exporter
     exporter->postProcess( static_cast<Real>(0) );
