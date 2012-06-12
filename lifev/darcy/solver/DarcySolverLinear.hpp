@@ -804,12 +804,6 @@ protected:
 // IMPLEMENTATION
 //
 
-    //! Constructor for the class.
-/*template < typename MeshType, typename SolverType >
-DarcySolverLinear < MeshType, SolverType > ::DarcySolverLinear ():
-    M_matrHybrid ()
-{}
-*/
 // ===========================================================================================
 // Public methods
 // ==========================================================================================
