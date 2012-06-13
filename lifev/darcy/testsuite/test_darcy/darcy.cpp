@@ -385,14 +385,20 @@ darcy_linear::run()
     // Shared pointer used in the exporter for the primal solution
     vectorPtr_Type primalExporter;
 
-    // Shared pointer used in the exporter for the dual solution
-    vectorPtr_Type dualExporter;
-
     // Shared pointer used in the exporter for the error of the primal solution
     vectorPtr_Type primalErrorExporter;
 
     // Shared pointer used for the exact primal solution
     vectorPtr_Type primalExact;
+
+    // Shared pointer used in the exporter for the dual solution
+    vectorPtr_Type dualExporter;
+
+    // Shared pointer used in the exporter for the error of the dual solution
+    vectorPtr_Type dualErrorExporter;
+
+    // Shared pointer used for the exact dual solution
+    vectorPtr_Type dualExact;
 
     // Type of the exporter
     std::string const exporterType = dataFile( "exporter/type", "ensight" );
@@ -449,9 +455,24 @@ darcy_linear::run()
 
     // Add the error of the primal variable to the exporter
     exporter->addVariable ( ExporterData < regionMesh_Type >::ScalarField,
-                            "PressureError",
+                            dataFile( "exporter/name_primal", "Pressure" ) + std::string("Error"),
                             p_FESpacePtr,
                             primalErrorExporter,
+                            static_cast<UInt>( 0 ),
+                            ExporterData < regionMesh_Type >::SteadyRegime,
+                            ExporterData < regionMesh_Type >::Cell );
+
+    // Set the exporter to the error of the dual pointer
+    dualErrorExporter.reset ( new vector_Type ( dualInterpolated->getVector(), exporter->mapType() ) );
+
+    // Set the primal exact pointer
+    dualExact.reset ( new vector_Type ( dualInterpolated->getVector(), exporter->mapType() ) );
+
+    // Add the error of the primal variable to the exporter
+    exporter->addVariable ( ExporterData < regionMesh_Type >::VectorField,
+                            dataFile( "exporter/name_dual", "Velocity" ) + std::string("Error"),
+                            uInterpolate_FESpacePtr,
+                            dualErrorExporter,
                             static_cast<UInt>( 0 ),
                             ExporterData < regionMesh_Type >::SteadyRegime,
                             ExporterData < regionMesh_Type >::Cell );
@@ -482,6 +503,12 @@ darcy_linear::run()
 
     // Copy the error of the primal solution to the exporter
     *primalErrorExporter = *primalExact - primalField->getVector ();
+
+    // Interpolate the exact dual solution
+    uInterpolate_FESpacePtr->interpolate ( Members->getAnalyticalFlux(), *dualExact );
+
+    // Copy the error of the dual solution to the exporter
+    *dualErrorExporter = *dualExact - *dualExporter;
 
     // Save the solution into the exporter
     exporter->postProcess( static_cast<Real>(0) );
