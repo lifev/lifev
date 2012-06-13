@@ -37,13 +37,13 @@ name_dual   = Velocity
         #0 -> tetra, 1 -> hexa
         element_shape = 0
 
-    # For structured mesh
-    nx = 8
-    ny = 8
-    nz = 8
-    lx = 1.
-    ly = 1.
-    lz = 1.
+        # For structured mesh
+        nx = 5
+        ny = 5
+        nz = 5
+        lx = 1.
+        ly = 1.
+        lz = 1.
     [../]
 
     [./miscellaneous]

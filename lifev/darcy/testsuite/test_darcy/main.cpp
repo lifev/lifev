@@ -89,10 +89,10 @@ int main(int argc, char* argv[])
 #endif
 
     // Error known
-    const LifeV::Real errorKnown( 0.2080650770631508 );
+    const LifeV::Real errorKnown( 0.3382685026607046 );
 
     // Tolerance between the error and the error known
-    const LifeV::Real tolerance( 1e-8 );
+    const LifeV::Real tolerance( 1e-10 );
 
     darcy_linear Darcy( argc, argv );
 
