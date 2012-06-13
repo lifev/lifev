@@ -28,19 +28,13 @@
 
 Simple Darcy test with Dirichlet, Neumann and Robin boundary conditions
 
-Solve the problem
-
-               div u - f = 0            in \Omega
-
-               K^{-1} u + \nabla p = 0  in \Omega
-
 */
 
 
 /**
    @file main.hpp
    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   @date 2010-07-29
+   @date 2012-06-13
 */
 
 
@@ -98,12 +92,13 @@ int main(int argc, char* argv[])
     const LifeV::Real errorKnown = 0.2003582105255086;
 
     // Tolerance between the error and the error known
-    const LifeV::Real tolerance = 1e-8;
+    const LifeV::Real tolerance( 1e-8 );
 
-    darcy Darcy( argc, argv );
+    darcy_linear Darcy( argc, argv );
 
     // Error of the problem
     const LifeV::Real error = Darcy.run();
+    const bool unsuccess = std::fabs ( error - errorKnown ) > tolerance;
 
 #ifdef HAVE_MPI
 
@@ -111,7 +106,7 @@ int main(int argc, char* argv[])
 
 #endif
 
-    if ( std::fabs( error - errorKnown ) > tolerance )
+    if ( unsuccess )
     {
         return ( EXIT_FAILURE );
     }
