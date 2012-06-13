@@ -653,7 +653,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff
     //Compute the new Stiffness Matrix
     M_material->computeStiffness(*M_disp, M_rescaleFactor, M_data, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
         *mat_stiff += *M_material->stiffMatrix();
         mat_stiff->globalAssemble();
@@ -839,7 +839,7 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     //! It is right to do globalAssemble() inside the M_material class
     M_material->computeStiffness( sol, 1., M_data, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
         *stiff = *M_material->stiffMatrix();
         *stiff += *M_mass;
@@ -867,7 +867,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
         M_BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
 
     // ignoring non-local entries, Otherwise they are summed up lately
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
         chrono.start();
 
@@ -909,7 +909,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type&
     LifeChrono chrono;
     chrono.start();
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
         M_residual_d.reset(new vector_Type( *M_systemMatrix * solution ));
         *M_residual_d -= *M_rhsNoBC;

@@ -145,10 +145,10 @@ public:
     {
         using namespace LifeV;
 
-        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createVenantKirchhoffLinear );
+        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &FSIOperator::createVenantKirchhoffLinear );
         FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "exponential", &FSIOperator::createExponentialMaterialNonLinear );
         FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "neoHookean", &FSIOperator::createNeoHookeanMaterialNonLinear );
-        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createVenantKirchhoffNonLinear );
+        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &FSIOperator::createVenantKirchhoffNonLinear );
 
         std::cout<<"register MonolithicGE : "<<FSIMonolithicGE::S_register<<std::endl;
         std::cout<<"register MonolithicGI : "<<FSIMonolithicGI::S_register<<std::endl;
@@ -276,7 +276,7 @@ public:
         M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-displacement",
                                       M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
 
-    M_fsi->FSIOper()->fluid().setupPostProc(); //this has to be called if we want to initialize the postProcess
+    //M_fsi->FSIOper()->fluid().setupPostProc(); //this has to be called if we want to initialize the postProcess
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");
@@ -285,8 +285,8 @@ public:
         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
         M_data->dataSolid()->dataTime()->setInitialTime( M_Tstart );
         M_data->dataSolid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataALE()->setInitialTime( M_Tstart );
-        M_data->dataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->timeDataALE()->setInitialTime( M_Tstart );
+        M_data->timeDataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     }
 
     /*!
@@ -365,10 +365,10 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-	    if (!M_data->method().compare("monolithicGI"))
-	      checkCEResult(M_data->dataFluid()->dataTime()->time());
-	    else
-	      checkGCEResult(M_data->dataFluid()->dataTime()->time());
+        if (!M_data->method().compare("monolithicGI"))
+          checkCEResult(M_data->dataFluid()->dataTime()->time());
+        else
+          checkGCEResult(M_data->dataFluid()->dataTime()->time());
 
         }
 
@@ -810,11 +810,11 @@ void Problem::initializeStokes( GetPot const& data_file)
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-139381/*147199*/)/dispNorm*(dispNorm-139381/*147199*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.001 && (dispNorm-176761/*182648*/)/dispNorm*(dispNorm-176761/*182648*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.002 && (dispNorm-118832/*118248*/)/dispNorm*(dispNorm-118832/*118248*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.003 && (dispNorm-110505/*107004*/)/dispNorm*(dispNorm-110505/*107004*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.004 && (dispNorm-103743/*102103*/)/dispNorm*(dispNorm-103743/*102103*/)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if (time==0.000 && (dispNorm-139381)/dispNorm*(dispNorm-139381)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.001 && (dispNorm-176761)/dispNorm*(dispNorm-176761)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.002 && (dispNorm-118832)/dispNorm*(dispNorm-118832)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.003 && (dispNorm-110505)/dispNorm*(dispNorm-110505)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.004 && (dispNorm-103743)/dispNorm*(dispNorm-103743)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
 
 

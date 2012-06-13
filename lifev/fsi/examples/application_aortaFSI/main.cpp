@@ -156,10 +156,10 @@ public:
     {
         using namespace LifeV;
 
-        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createVenantKirchhoffLinear );
+        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &FSIOperator::createVenantKirchhoffLinear );
         FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "exponential", &FSIOperator::createExponentialMaterialNonLinear );
         FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "neoHookean", &FSIOperator::createNeoHookeanMaterialNonLinear );
-        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createVenantKirchhoffNonLinear );
+        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &FSIOperator::createVenantKirchhoffNonLinear );
 
         std::cout<<"register MonolithicGE : "<<FSIMonolithicGE::S_register<<std::endl;
         std::cout<<"register MonolithicGI : "<<FSIMonolithicGI::S_register<<std::endl;
@@ -297,8 +297,8 @@ public:
         M_data->dataSolid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     M_data->dataSolid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
 //        M_data->dataALE()->setInitialTime( M_Tstart );
-        M_data->dataALE()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->timeDataALE()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->timeDataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     }
 
     /*!

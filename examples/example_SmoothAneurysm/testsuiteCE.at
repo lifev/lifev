@@ -137,8 +137,8 @@ useExactJacobian = false # always false for linear structure model. Otherwise it
 
 [./physics]
 
-solidType = linearVenantKirchhof #NOTE: the nonlinear choice is not available (still in development)
-# either linearVenantKirchhof or nonLinearVenantKirchhof (the last one still in development)
+solidType = linearVenantKirchhoff #NOTE: the nonlinear choice is not available (still in development)
+# either linearVenantKirchhoff or nonLinearVenantKirchhoff (the last one still in development)
 material_flag = 1
 density   = 1.2
 young     = 4.0E6

@@ -845,12 +845,12 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_solution               ( ),
         M_residual               (  ),
         M_linearSolver           ( ),
-        M_postProcessing         ( /*new PostProcessingBoundary<mesh_Type>(M_velocityFESpace.mesh(),
+        M_postProcessing         ( new PostProcessingBoundary<mesh_Type>(M_velocityFESpace.mesh(),
                                                            &M_velocityFESpace.feBd(),
                                                            &M_velocityFESpace.dof(),
                                                            &M_pressureFESpace.feBd(),
                                                            &M_pressureFESpace.dof(),
-                                                           M_localMap ) */),
+                                                           M_localMap ) ),
         M_stabilization          ( false ),
         M_reuseStabilization     ( false ),
         M_resetStabilization     ( false ),
@@ -1366,27 +1366,27 @@ updateSystem( const Real         alpha,
                 }
             }
 
-	    if(M_oseenData->conservativeFormulation())
-	      {
-		// ALE term: - rho div(w) u v
-		mass_divw( - M_oseenData->density(),
-			   M_wLoc,
-			   M_elementMatrixStiff,
-			   M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
-	      }
+        if(M_oseenData->conservativeFormulation())
+        {
+             // ALE term: - rho div(w) u v
+             mass_divw( - M_oseenData->density(),
+             M_wLoc,
+             M_elementMatrixStiff,
+             M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+        }
 
-            // ALE stab implicit: 0.5 rho div u w v
-            mass_divw( 0.5*M_oseenData->density(),
-                       M_uLoc,
-                       M_elementMatrixStiff,
-                       M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+        // ALE stab implicit: 0.5 rho div u w v
+        mass_divw( 0.5*M_oseenData->density(),
+                   M_uLoc,
+                   M_elementMatrixStiff,
+                   M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
-            // Stabilising term: -rho div(u^n) u v
-            if ( M_divBetaUv )
-	      mass_divw( -0.5*M_oseenData->density(),
-			 M_uLoc,
-			 M_elementMatrixStiff,
-			 M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+        // Stabilising term: -rho div(u^n) u v
+        if ( M_divBetaUv )
+            mass_divw( -0.5*M_oseenData->density(),
+            M_uLoc,
+            M_elementMatrixStiff,
+            M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // compute local convective terms
             advection( M_oseenData->density(),

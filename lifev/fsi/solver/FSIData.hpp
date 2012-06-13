@@ -66,8 +66,11 @@ public:
     typedef VenantKirchhoffElasticData              dataSolid_Type;
     typedef boost::shared_ptr< dataSolid_Type >     dataSolidPtr_Type;
 
-    typedef TimeData                                timeData_Type;
-    typedef boost::shared_ptr< timeData_Type >      timeDataPtr_Type;
+    typedef dataFluid_Type::time_Type               time_Type;
+    typedef dataFluid_Type::timePtr_Type            timePtr_Type;
+
+    typedef dataFluid_Type::timeAdvance_Type        timeAdvance_Type;
+    typedef dataFluid_Type::timeAdvancePtr_Type     timeAdvancePtr_Type;
 
     //@}
 
@@ -135,13 +138,17 @@ public:
     void setDataSolid( const dataSolidPtr_Type& dataSolid ) { M_dataSolid = dataSolid; }
 
 
-    //! Set data solid container
+    //! Set TimeData ALE container
     /*!
-     * @param dataFluid shared_ptr to dataSolid container
+     * @param timeDataALE shared_ptr to timeDataALE container
      */
-    void setDataALE( const timeDataPtr_Type& dataALE ) { M_dataALE = dataALE; }
+    void setTimeDataALE( const timePtr_Type& timeALE ) { M_timeALE = timeALE; }
 
-    const timeDataPtr_Type& dataALE ( ) const { return M_dataALE; }
+    //! Set TimeData ALE container
+    /*!
+     * @param timeDataALE shared_ptr to timeDataALE container
+     */
+    void setTimeAdvanceDataALE( const timeAdvancePtr_Type& timeAdvanceALE ) { M_timeAdvanceALE = timeAdvanceALE; }
 
     //@}
 
@@ -160,6 +167,18 @@ public:
      * @return shared_ptr to dataSolid container
      */
     const dataSolidPtr_Type& dataSolid() const { return M_dataSolid; }
+
+    //! Get data time ALE
+    /*!
+     * @return shared_ptr to ALE dataTime container
+     */
+    const timePtr_Type& timeDataALE() const { return M_timeALE; }
+
+    //! Get data time ALE
+    /*!
+     * @return shared_ptr to ALE dataTimeAdvance container
+     */
+    const timeAdvancePtr_Type& timeAdvanceDataALE() const { return M_timeAdvanceALE; }
 
     //! Get maximum number of subiterations
     /*!
@@ -269,7 +288,8 @@ private:
 
     dataFluidPtr_Type             M_dataFluid;
     dataSolidPtr_Type             M_dataSolid;
-    timeDataPtr_Type              M_dataALE;
+    timePtr_Type                  M_timeALE;
+    timeAdvancePtr_Type           M_timeAdvanceALE;
 
     // Problem - Non Linear Richardson parameters
     UInt                          M_maxSubIterationNumber;

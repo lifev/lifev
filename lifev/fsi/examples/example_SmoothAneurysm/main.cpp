@@ -293,8 +293,8 @@ public:
         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
         M_data->dataSolid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
         M_data->dataSolid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataALE()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
-        M_data->dataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->timeDataALE()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->timeDataALE()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
 
 
     }
@@ -336,7 +336,7 @@ public:
       {
         M_data->dataFluid()->dataTime()->updateTime();
         M_data->dataSolid()->dataTime()->updateTime();
-        M_data->dataALE()->updateTime();
+        M_data->timeDataALE()->updateTime();
 
             FC2.renewParameters( *M_fsi, 2 );
 

@@ -76,7 +76,7 @@ public:
      */
     void updateJacobian( vector_Type& /*sol*/, matrixPtr_Type& /*jac*/ )
     {
-        this->M_Displayer->leaderPrint("  Linear S-  Doing nothing (updating jacobian of a linear system) ...                    ");
+        this->M_Displayer->leaderPrint("  S- Doing nothing (updating Jacobian of a linear system) ...    ");
     }
 
 

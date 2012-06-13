@@ -724,12 +724,12 @@ NavierStokes<MeshType, Problem>::run()
             boost::shared_ptr<OseenData> oseenData(new OseenData());
             oseenData->setup( dataFile );
 
-            if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
+            if (verbose) std::cout << "Time discretization order " << oseenData->dataTimeAdvance()->orderBDF() << std::endl;
 
             OseenSolver< mesh_Type > fluid (oseenData,
-					    *uFESpace,
-					    *pFESpace,
-					    M_data->comm);
+                        *uFESpace,
+                        *pFESpace,
+                        M_data->comm);
 
             MapEpetra fullMap(fluid.getMap());
 
@@ -749,7 +749,7 @@ NavierStokes<MeshType, Problem>::run()
 
             // bdf object to store the previous solutions
             TimeAdvanceBDFNavierStokes<vector_Type> bdf;
-            bdf.setup(oseenData->dataTime()->orderBDF());
+            bdf.setup(oseenData->dataTimeAdvance()->orderBDF());
 
             /*
                 Initialization with exact solution: either interpolation or "L2-NS"-projection
@@ -922,13 +922,13 @@ NavierStokes<MeshType, Problem>::run()
                 fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.norm2());
                 fluid.getDisplayer().leaderPrint("\n");
 
-		if(oseenData->conservativeFormulation())
-		  rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        if(oseenData->conservativeFormulation())
+          rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
                 fluid.updateSystem( alpha, beta, rhs );
 
-		if(!oseenData->conservativeFormulation())
-		  rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        if(!oseenData->conservativeFormulation())
+          rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
                 fluid.iterate( bcH );
 
