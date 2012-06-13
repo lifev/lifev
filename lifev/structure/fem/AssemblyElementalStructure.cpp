@@ -1393,7 +1393,6 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
 
   //Size of the matrix
   Int Dim = cauchy.RowDim();
-  Int LDA = Dim*Dim;
   
   //Arrays to store eigenvalues (their number = nDimensions)
   double WR[nDimensions]; 
@@ -1420,7 +1419,7 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
       for (UInt j(0);j<nDimensions; j++)
 	A[nDimensions * i + j] = cauchy(i,j);
 
-  lapack.GEEV(JOBVL, JOBVR, Dim, A /*cauchy*/, LDA, WR, WI, VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
+  lapack.GEEV(JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, &WR[0], &WI[0], VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
   ASSERT_PRE( !INFO, "Calculation of the Eigenvalues failed!!!" ); 
 
   for( UInt i(0); i < nDimensions; i++ )
