@@ -481,6 +481,8 @@ MultiscaleModelFSI3D::initializeSolution()
 
     // Define some variables
     vectorPtr_Type firstFluidDisplacement( new vector_Type(*M_FSIoperator->couplingVariableMap()) );
+    vectorPtr_Type secondFluidDisplacement( new vector_Type(*M_FSIoperator->couplingVariableMap()) );
+    Int convectiveTerm ( !M_data->dataFluid()->domainVelImplicit() );
 
     if ( multiscaleProblemStep > 0 )
     {
@@ -496,7 +498,6 @@ MultiscaleModelFSI3D::initializeSolution()
         UInt iterationImported(0);
         UInt offset(0);
         vectorPtr_Type temporaryVector;
-        //vectorPtr_Type solution( new vector_Type(*M_FSIoperator->couplingVariableMap()) );
 
         for( UInt i(0); i < M_FSIoperator->fluidTimeAdvance()->size() ; ++i )
         {
@@ -505,9 +506,8 @@ MultiscaleModelFSI3D::initializeSolution()
                 M_exporterFluid->setTimeIndex( iterationImported + 1 );
 
             temporaryVector.reset( new vector_Type( *M_fluidVelocityAndPressure, Unique, Zero ) );
-            //*solution = *temporaryVector;
 
-            importedFluidVelocityAndPressure[i] = temporaryVector; //solution;
+            importedFluidVelocityAndPressure[i] = temporaryVector;
         }
 
         offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->offset();
@@ -521,17 +521,13 @@ MultiscaleModelFSI3D::initializeSolution()
             temporaryVector->subset( *M_solidDisplacement, M_solidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
             *temporaryVector /= M_FSIoperator->solid().rescaleFactor();
 
-            //*solution = *temporaryVector;
-            importedSolidDisplacement[i] = temporaryVector; //solution;
+            importedSolidDisplacement[i] = temporaryVector;
         }
 
-        Int convectiveTerm=0;
-        if(!M_data->dataFluid()->domainVelImplicit())
-            convectiveTerm=1;
-
-        for( UInt i(0); i < M_FSIoperator->ALETimeAdvance()->size()+convectiveTerm+1 ; ++i )
+        /*for( UInt i(0); i < M_FSIoperator->ALETimeAdvance()->size()+convectiveTerm+1 ; ++i )
         {
             M_importerFluid->importFromTime( M_data->dataFluid()->dataTime()->initialTime() - i * M_data->dataFluid()->dataTime()->timeStep() );
+
             if ( !M_data->method().compare("monolithicGI") )
             {
                 if( i == 0 )
@@ -541,14 +537,38 @@ MultiscaleModelFSI3D::initializeSolution()
                     temporaryVector.reset( new vector_Type(*M_FSIoperator->couplingVariableMap(), Unique, Zero) );
                     temporaryVector->subset(*M_fluidDisplacement, M_fluidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
 
-                    if( !convectiveTerm )
+                    if( convectiveTerm )
                         *firstFluidDisplacement = *M_fluidDisplacement;
                 }
                 else
                     if( convectiveTerm && i == 1 )
                         *firstFluidDisplacement = *M_fluidDisplacement;
                     else
-                        importedFluidDisplacement[i] = M_fluidDisplacement;
+                        importedFluidDisplacement[i-1-convectiveTerm] = M_fluidDisplacement;
+            }
+        }*/
+
+        // TODO GCE RESTART WORKS BUT ...
+        for( UInt i(0); i < M_FSIoperator->ALETimeAdvance()->size()+convectiveTerm ; ++i )
+        {
+            M_importerFluid->importFromTime( M_data->dataFluid()->dataTime()->initialTime() - i * M_data->dataFluid()->dataTime()->timeStep() );
+
+            if ( !M_data->method().compare("monolithicGI") )
+            {
+                if( i == 0 )
+                {
+                    offset = boost::dynamic_pointer_cast< FSIMonolithicGI > ( M_FSIoperator )->mapWithoutMesh().map( Unique )->NumGlobalElements();
+
+                    temporaryVector.reset( new vector_Type(*M_FSIoperator->couplingVariableMap(), Unique, Zero) );
+                    temporaryVector->subset(*M_fluidDisplacement, M_fluidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
+
+                    if( convectiveTerm )
+                        *firstFluidDisplacement = *M_fluidDisplacement;
+                    else
+                        importedFluidDisplacement[0] = M_fluidDisplacement;
+                }
+                else
+                    importedFluidDisplacement[i-convectiveTerm] = M_fluidDisplacement;
             }
         }
 
@@ -593,10 +613,10 @@ MultiscaleModelFSI3D::initializeSolution()
     // Initialize time advance
     M_FSIoperator->initializeTimeAdvance( importedFluidVelocityAndPressure, importedSolidDisplacement, importedFluidDisplacement );
 
-    if( multiscaleProblemStep > 0 && !M_data->dataFluid()->domainVelImplicit() )
+    if( multiscaleProblemStep > 0 && convectiveTerm )
     {
         // The following is needed if the extrapolation of the fluid domain velocity is used, i.e., M_domainVelImplicit == false
-        M_FSIoperator->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataSolid()->dataTime()->timeStep() );
+        M_FSIoperator->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
         M_FSIoperator->ALETimeAdvance()->shiftRight( *firstFluidDisplacement );
     }
 }
