@@ -27,22 +27,6 @@ name_dual   = Velocity
 [../]
 
 [darcy]
-# linear = 1, nonLinear = 2, transient = 3, transientNonLinear = 4
-problem_type = 1
-
-    # used for nonLinear and transientNonLinear
-    [./non-linear]
-    fixed_point_iteration = 200
-    fixed_point_toll      = 1.e-6
-    [../]
-
-    # used for transient and transientNonLinear
-    [./time_discretization]
-    initialtime = 0 
-    endtime     = 1.5
-    timestep    = 0.25
-    BDF_order   = 2
-    [../]
 
     [./space_discretization]
     mesh_dir      = ./ # the directory where the mesh file is
