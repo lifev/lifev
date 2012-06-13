@@ -217,8 +217,11 @@ darcy_linear::run()
                        dataFile( ( structuredSection + "lz" ).data(), 1. ) );
     }
 
+    // Create the partitioner
+    meshPartitioner_Type meshPart;
+
     // Partition the mesh using ParMetis
-    meshPartitioner_Type meshPart ( fullMeshPtr, Members->comm );
+    meshPart.doPartition ( fullMeshPtr, Members->comm );
 
     // Stop chronoReadAndPartitionMesh
     chronoReadAndPartitionMesh.stop();
