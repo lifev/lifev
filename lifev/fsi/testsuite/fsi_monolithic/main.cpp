@@ -810,7 +810,7 @@ void Problem::initializeStokes( GetPot const& data_file)
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-139381/)/dispNorm*(dispNorm-139381)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if (time==0.000 && (dispNorm-139381)/dispNorm*(dispNorm-139381)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.001 && (dispNorm-176761)/dispNorm*(dispNorm-176761)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.002 && (dispNorm-118832)/dispNorm*(dispNorm-118832)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.003 && (dispNorm-110505)/dispNorm*(dispNorm-110505)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
