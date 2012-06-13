@@ -135,15 +135,15 @@
         </tr>
         <tr>
             <td> 40 </td>
-            <td> </td>
-            <td> </td>
-            <td> </td>
+            <td> 0.0416069 </td>
+            <td> 0.051361 </td>
+            <td> 32 </td>
         </tr>
         <tr>
             <td> 80 </td>
-            <td> </td>
-            <td> </td>
-            <td> </td>
+            <td> 0.0208047 </td>
+            <td> 0.0258553 </td>
+            <td> 96 </td>
         </tr>
     </table>
     where N is the number of subdivisions for each boundary.
