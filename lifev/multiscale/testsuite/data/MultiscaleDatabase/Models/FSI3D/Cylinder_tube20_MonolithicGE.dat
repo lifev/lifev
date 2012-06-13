@@ -78,13 +78,12 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     #viscosity       = 0.035           # viscosity [g/cm/s]
 
     [../time_discretization]
-    #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
-    method          = BDF # Newmark or BDF
-    BDF_order       = 1
-    theta           = 0.35
-    gamma           = 0.75
-    rhoInf          = 1
-    typeOfGeneralizedAlpha = HHT
+    method           = BDF             # Newmark, BDF
+    BDF_order        = 1
+    #theta            = 0.25
+    #gamma            = 0.50
+    #rhoInf           = 1
+    #typeOfGeneralizedAlpha = HHT
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
@@ -93,9 +92,7 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     verbose         = 0                # verbose during mesh-reading
 
     vel_order       = P1               # P1, P1Bubble, P2
-    mesh_order     = P1
-    #vel_order       = P1Bubble         # P1, P1Bubble, P2
-    #vel_order       = P2               # P1, P1Bubble, P2
+    mesh_order      = P1               # P1, P2
     press_order     = P1               # P1, P2
     stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it
     div_beta_u_v    = false            # 1=on, 0=off
@@ -149,30 +146,27 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
 
 [solid]
-useExactJacobian = true # always false for linear structure model. Otherwise it allows to chose beween an exact-inexact
-                         # Newton scheme
-rescaleFactor    = 1. # this factor can be used to rescale the structure block
+useExactJacobian = true # always false for linear structure model. Otherwise it allows to chose beween an exact-inexact Newton scheme
+rescaleFactor    = 1.0 # this factor can be used to rescale the structure block
 
     [./physics]
-    solidType = linearVenantKirchhoff # linearVenantKirchhoff
-                                     # nonLinearVenantKirchhoff
+    solidType = linearVenantKirchhoff # linearVenantKirchhoff, nonLinearVenantKirchhoff, exponential, neoHookean
     material_flag    = 1
     #externalPressure = 0
     #density          = 1.2
-    #young            = 3.0784E6
+    #young            = 4.0E6
     #poisson          = 0.48
-    bulk      = 1e7
-    alpha     = 2.5e6
-    gamma     = 1
+    bulk             = 1e7
+    alpha            = 2.5e6
+    gamma            = 1
 
     [../time_discretization]
-    #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
-    method          = BDF # Newmark or BDF
-    BDF_order       = 1
-    theta           = 0.35
-    gamma           = 0.75
-    rhoInf          = 1
-    typeOfGeneralizedAlpha = HHT
+    method           = BDF            # Newmark, BDF
+    BDF_order        = 1
+    #theta            = 0.25
+    #gamma            = 0.50
+    #rhoInf           = 1
+    #typeOfGeneralizedAlpha = HHT
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
@@ -371,7 +365,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../prec]
     #prectype                = AztecOO
-    reuse           = false
+    reuse                   = false
     prectype                = Composed
     displayList             = false
 

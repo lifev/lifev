@@ -25,7 +25,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_2Cylinders-tube20_FS
 
     [../Output]
     ProblemPrefix              = Multiscale # Problem prefix
-    SaveEach                   = 2          # time steps
+    SaveEach                   = 1          # time steps
 
     [../time_discretization]
     initialtime                = 0.000   # [s]
@@ -38,7 +38,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_2Cylinders-tube20_FS
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity                = 1.0           # density        [g/cm^3]
+FluidDensity                = 1.04          # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
 FluidVenousPressure         = 0.0           # ven. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidExternalPressure       = 0.0           # ref. pressure  [g/cm/s^2 - dyne/cm^2]
