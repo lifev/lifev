@@ -14,7 +14,7 @@ blockOper   = AdditiveSchwarzGI
 #AdditiveSchwarzGI: standard operator for the monolithicGI, the three fields (fluid, structure and geometry) are assembled in one single matrix
 #AdditiveSchwarzRNGI: Robin-Neumann operator for the GI
 
-DDBlockPrec = ComposedDN2GI
+DDBlockPrec = AdditiveSchwarzGI #ComposedDN2GI
 # OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
 #AdditiveSchwarzGI: monolithic A-S preconditioner,
@@ -178,6 +178,8 @@ reuse = true                  # boolean telling if the stabilization is reused f
 [interface]
 fluid_flag      =  1        # default: 1, the mesh flag of the interface
 tolerance       =  0         # how far points are to be considered the same on the interface
+fluid_vertex_flag = 1       # tells wether the in/out ring curves on the interface 
+                            # is considered in the coupling (fluid_vertex_flag=0) or not (fluid_vertex_flag=1)
 [../] # interface
 
 * #solid section
@@ -253,7 +255,7 @@ displayList        = false
 ** # preconditioner section
 [../prec]
 reuse           = false
-prectype        = Composed # either Ifpack, ML, or Composed
+prectype        = Ifpack #Composed # either Ifpack, ML, or Composed
 entry           = 0.0
 
 *** # parameters for the Robin-Robin preconditioner
