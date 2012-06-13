@@ -395,7 +395,7 @@ darcy_linear::run()
     vectorPtr_Type primalExact;
 
     // Type of the exporter
-    std::string const exporterType =  dataFile( "exporter/type", "ensight");
+    std::string const exporterType = dataFile( "exporter/type", "ensight" );
 
     // The name of the file
     const std::string exporterFileName = dataFile( "exporter/file_name", "PressureVelocity" );
@@ -409,14 +409,7 @@ darcy_linear::run()
     else
 #endif
     {
-        if ( exporterType.compare("none") == 0 )
-        {
-            exporter.reset( new ExporterEmpty < regionMesh_Type > ( dataFile, exporterFileName ) );
-        }
-        else
-        {
-            exporter.reset( new ExporterEnsight< regionMesh_Type > ( dataFile, exporterFileName ) );
-        }
+        exporter.reset( new ExporterEmpty < regionMesh_Type > ( dataFile, exporterFileName ) );
     }
 
     // Set directory where to save the solution

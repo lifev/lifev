@@ -47,7 +47,6 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 #include <lifev/core/filter/ExporterEmpty.hpp>
-#include <lifev/core/filter/ExporterEnsight.hpp>
 
 /*
     @class darcy
