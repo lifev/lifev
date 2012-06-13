@@ -107,6 +107,7 @@ public:
   typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
 
   // Filters
+  typedef typename LifeV::Exporter<mesh_Type  >                                filter_Type;
   typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
     
   typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
@@ -291,18 +292,18 @@ Structure::run3d()
 #ifdef HAVE_HDF5
     if (importerType.compare("hdf5") == 0)
       {
-	M_importer.reset( new  hdf5Filter_Type( dataFile, filename) );
+	M_importer.reset( new hdf5Filter_Type(dataFile, filename));
       }
     else
 #endif
       {
 	if (importerType.compare("none") == 0)
 	  {
-	    M_importer.reset( new ExporterEmpty<mesh_Type > ( dataFile, solid.dFESpace().mesh(), "solid", solid.dFESpace().map().comm().MyPID()) );
+	    M_importer.reset( new emptyFilter_Type( dataFile, solid.dFESpace().mesh(), "solid", solid.dFESpace().map().comm().MyPID() ) );
 	  }
 	else
 	  {
-	    M_importer.reset( new  ensightFilter_Type ( dataFile, filename) );
+	    M_importer.reset( new ensightFilter_Type( dataFile, filename ) );
 	  }
       }
     M_importer->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
@@ -313,24 +314,26 @@ Structure::run3d()
 
     //! 6. Post-processing setting
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
-
+ 
     std::string const exporterType =  dataFile( "exporter/type", "hdf5");
+    std::string const nameExporter =  dataFile( "exporter/name", "tensions");
+
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-      M_exporter.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "tensions" ) );
+      M_exporter.reset( new hdf5Filter_Type ( dataFile, nameExporter ) ); 
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
 	{
-	    M_exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "tensions", parameters->comm->MyPID()) );
+	  M_exporter.reset( new emptyFilter_Type( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID() ) ) ;
 	}
 
         else
         {
-	    M_exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "tensions", parameters->comm->MyPID()) );
+	  M_exporter.reset( new ensightFilter_Type( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID()) ) ;
 	}
     }
 
@@ -382,6 +385,7 @@ Structure::run3d()
 
     //! 5. For each interval, the analysis is performed
     LifeV::Real dt =  dataFile( "solid/time_discretization/timestep", 0.0);    
+    std::string const nameField =  dataFile( "solid/analysis/nameField", "NO_DEFAULT_VALUE");    
 
     if( !tensionData->analysisType().compare("istant") )
       {
@@ -390,11 +394,11 @@ Structure::run3d()
 	LifeV::Real startTime = tensionData->initialTime(0);
 	
 	/*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-	LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,"displacement."+iterationString, solid.dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );	
+	LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid.dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );	
 	
 	//Read the variable
 	M_importer->readVariable(solutionDispl);
-	M_importer->closeFile();
+	//M_importer->closeFile();
 
 	
 	//Create and exporter to check importing
@@ -419,6 +423,7 @@ Structure::run3d()
 	solid.analyzeTensions();
 
 	
+	
 	//Extracting the gradient
 	*gradX = solid.gradientX();
 	*gradY = solid.gradientY();
@@ -427,6 +432,7 @@ Structure::run3d()
 	exporterX->postProcess( startTime );
 	exporterY->postProcess( startTime );
 	exporterZ->postProcess( startTime );
+	
 	
 	
 	//Extracting the tensions
@@ -438,6 +444,14 @@ Structure::run3d()
 
 	if (verbose ) std::cout << "Analysis Completed!" << std::endl;
 
+	//Closing files
+	M_exporter->closeFile();	
+	exporterX->closeFile();
+	exporterY->closeFile();
+	exporterZ->closeFile();
+	exporter.closeFile();
+	
+
       }
     else
       {	
@@ -445,14 +459,10 @@ Structure::run3d()
       }
 
     if (verbose ) std::cout << "finished" << std::endl;
-    
-    //Closing the files
-    M_exporter->closeFile();
-    exporterX->closeFile();
-    exporterY->closeFile();
-    exporterZ->closeFile();
-
-    MPI_Barrier(MPI_COMM_WORLD);    
+        
+    MPI_Barrier(MPI_COMM_WORLD);
+    int n;
+    std::cin >> n;
     //!---------------------------------------------.-----------------------------------------------------
 }
 

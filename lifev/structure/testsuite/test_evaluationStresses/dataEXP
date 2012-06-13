@@ -49,6 +49,7 @@ order     	= P1
 
 [../analysis]
 nameFile                = structure
+nameField               = displacement
 typeFile                = hdf5
 analysisType            = istant
 start                   = 0.4
