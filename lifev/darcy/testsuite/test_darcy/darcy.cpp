@@ -24,65 +24,10 @@
 */
 //@HEADER
 /**
-   \file darcy.cpp
-   \author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   \date 2010-07-29
+   @file darcy.cpp
+   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+   @date 2012-06-13
  */
-
-/*!
-  Simple 3D Darcy test with Dirichlet, Neumann and Robin Boundary condition.
-  <br>
-  Solve the problem in dual-mixed form
-  \f[
-  \left\{
-  \begin{array}{l l l }
-  \Lambda^{-1} \sigma + \nabla p = 0 & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
-  \nabla \cdot \sigma - f = 0        & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
-  p = g_D                            & \mathrm{on} & \Gamma_D\,,\vspace{0.2cm} \\
-  \sigma \cdot n + h p = g_R         & \mathrm{on} & \Gamma_R\,, \vspace{0.2cm} \\
-  \sigma \cdot n = g_n               & \mathrm{on} & \Gamma_N\,.
-  \end{array}
-  \right.
-  \f]
-where \f$ \Omega \f$ is the unit cube with
-  \f[
-  \begin{array}{l}
-  \Gamma_R = \left\{ y = 1 \right\}\,, \vspace{0.2cm} \\
-  \Gamma_N = \left\{ x = 1 \right\} \cup \left\{ x = 0 \right\}\,, \vspace{0.2cm} \\
-  \Gamma_D = \partial [0,1]^3 \setminus \left( \Gamma_R \cup \Gamma_D \right)\,,
-  \end{array}
-  \f]
-and the data are
-  \f[
-  \left\{
-  \begin{array}{l}
-  f(x,y,z) = -2x^2 - 4y^2 - 8xy\,, \vspace{0.2cm} \\
-  g_D(x,y,z) = x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
-  h(x,y,z) = 1\,, \vspace{0.2cm} \\
-  g_R(x,y,z) = -2yx^2 - 2xy^2 - 6 + x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
-  g_N(x,y,z) = \pm (4xy^2 + 2x^2y + 12)\,, \vspace{0.2cm} \\
-  K(x,y,z) = \left[
-  \begin{array}{c c c}
-  2 & 1 & 0 \\
-  1 & 1 & 0 \\
-  0 & 0 & 1
-  \end{array}
-  \right]
-  \end{array}
-  \right.
-  \f]
-The analytical solutions are
-  \f[
-  p(x,y,z) = x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
-  \sigma(x,y,z) = \left(
-  \begin{array}{l}
-  - 4xy^2 - 12 - 2x^2y \\
-  -2xy^2 - 6 - 2x^2y \\
-  - 5
-  \end{array}
-  \right)\,.
-  \f]
-*/
 
 // ===================================================
 //! Includes
