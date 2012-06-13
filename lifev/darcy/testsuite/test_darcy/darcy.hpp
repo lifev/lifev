@@ -55,7 +55,7 @@
 
     @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
  */
-class darcy
+class darcy_linear
 //     :
 //     public LifeV::Application
 {
@@ -65,10 +65,10 @@ public:
      */
     //@{
 
-    darcy( int argc,
-           char** argv );
+    darcy_linear ( int argc,
+                   char** argv );
 
-    ~darcy()
+    ~darcy_linear ()
     {}
 
     //@}

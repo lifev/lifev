@@ -69,7 +69,7 @@ Real UZero( const Real& /* t */,
 //!                  Private Members
 // ===================================================
 
-struct darcy::Private
+struct darcy_linear::Private
 {
     Private() {}
 
@@ -119,8 +119,7 @@ struct darcy::Private
 //!                  Constructors
 // ===================================================
 
-darcy::darcy( int argc,
-              char** argv )
+darcy_linear::darcy_linear ( int argc, char** argv )
         : Members( new Private )
 {
     GetPot command_line(argc, argv);
@@ -132,8 +131,7 @@ darcy::darcy( int argc,
 
 #ifdef EPETRA_MPI
     Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-
-    int ntasks;
+    Int ntasks;
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     Members->comm.reset( new Epetra_SerialComm() );
@@ -146,7 +144,7 @@ darcy::darcy( int argc,
 // ===================================================
 
 Real
-darcy::run()
+darcy_linear::run()
 {
     using namespace dataProblem;
 
