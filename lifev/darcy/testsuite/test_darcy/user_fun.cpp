@@ -78,14 +78,14 @@ Matrix inversePermeability::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/,
 // Reaction term
 Real reactionTerm::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& /*time*/ ) const
 {
-    return (P[0] * P[1] - 0.5 * P[2]) * 0;
+    return (P[0] * P[1] - 0.5 * P[2]);
 }
 
 // Scalar source term
 Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& time ) const
 {
     return - 4. * P[1] * P[1] + 4. * P[0] * P[0] - 8. * P[0] * P[1] + 6. +
-         0*( P[0] * P[1] - 0.5 * P[2] )  * analyticalSolution ( time, P[0],  P[1], P[2], 0 );
+         ( P[0] * P[1] - 0.5 * P[2] )  * analyticalSolution ( time, P[0],  P[1], P[2], 0 );
 }
 
 // Vector source term
