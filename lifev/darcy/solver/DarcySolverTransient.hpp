@@ -40,19 +40,9 @@
 #ifndef _DARCYSOLVERTRANSIENT_H_
 #define _DARCYSOLVERTRANSIENT_H_ 1
 
-#include <lifev/darcy/solver/DarcySolver.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
-namespace
-{
-
-using namespace LifeV;
-
-Real _One_ ( const Real&, const Real&, const Real&, const Real&, const ID& )
-{
-    return static_cast<Real>( 1. );
-}
-
-} // anonimus namespace
+#include <lifev/darcy/solver/DarcySolverLinear.hpp>
 
 // LifeV namespace.
 namespace LifeV
