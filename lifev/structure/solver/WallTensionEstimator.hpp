@@ -437,6 +437,7 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       //Compute the first Piola-Kirchhoff tensor
       M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
       
+      M_firstPiola->Print(std::cout);
       //Compute the Cauchy tensor
       AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
 
