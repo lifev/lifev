@@ -1096,9 +1096,9 @@ computePrimalAndDual ()
 } // computePrimalAndDual
 
 // Solve the Darcy problem.
-template < typename Mesh, typename SolverType >
+template < typename MeshType, typename SolverType >
 void
-DarcySolverLinear < Mesh, SolverType >::
+DarcySolverLinear < MeshType, SolverType >::
 solve ()
 {
     // Create the hybrid system using the static condensation.
@@ -1117,9 +1117,9 @@ solve ()
 // ==============================================================================
 
 // Compute all the constant matrices.
-template < typename Mesh, typename SolverType >
+template < typename MeshType, typename SolverType >
 void
-DarcySolverLinear < Mesh, SolverType >::
+DarcySolverLinear < MeshType, SolverType >::
 computeConstantMatrices ( MatrixElemental& elmatMix )
 {
 
