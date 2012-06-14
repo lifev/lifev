@@ -226,7 +226,7 @@ public:
 
     //! @name Get Methods
     //@{
-    
+
     //! Return the finite element space.
     /*!
       @return Constant FESpace_Type reference of the finite element space.

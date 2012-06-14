@@ -60,183 +60,200 @@ namespace LifeV
 //!  @class DarcySolverTransient This class implements a mixed-hybrid FE Darcy solver for transient problems
 
 /*!
-  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @see For applications related to two-phase flow see \cite Fumagalli2011a
+    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
 
-  This class implements a transient Darcy solver in the finite time interval \f$ [0, T] \f$.
-  <br>
-  The classical time dependent Darcy formulation is a couple of differential equations of first order with
-  the unknowns \f$ p \in C^1(0, T; C^1 (\Omega )) \f$, being the pressure or the primal unknown,
-  and \f$ \sigma \in C^0(0, T; (C^1( \Omega ) )^n) \f$, being the Darcy velocity or the flux or the dual unknown,
-  such that
-  \f[
-  \left\{
-  \begin{array}{l l l}
-  \Lambda^{-1}(t) \sigma + \nabla p = 0                           & \mathrm{in} & \Omega   \times [0, T]\,, \vspace{0.2cm} \\
-  \displaystyle \frac{\partial p}{\partial t} + \nabla \cdot \sigma - f(t) = 0  & \mathrm{in} & \Omega   \times [0, T]\,, \vspace{0.2cm} \\
-  p = g_D(t)                                                      & \mathrm{on} & \Gamma_D \times [0, T]\,, \vspace{0.2cm} \\
-  \sigma \cdot n + h(t) p = g_R(t)                                & \mathrm{on} & \Gamma_R \times [0, T]\,. \vspace{0.2cm} \\
-  p(0) = p_0                                                      & \mathrm{in} & \Omega
-  \end{array}
-  \right.
-  \f]
-  Where \f$ p_0 \f$ is the primal initial value, \f$ \Lambda \f$ is the permeability tensor,
-  \f$ f \f$ is the source term, \f$ \Gamma_D \f$ is the subset of the boundary of \f$ \Omega \f$ with Dirichlet
-  boundary conditions with datum \f$ g_D \f$ and \f$ \Gamma_R \f$ is the part of the boundary of \f$ \Omega \f$
-  with Robin, or Neumann, boundary conditions with data \f$ h \f$ and \f$ g_R \f$. We suppose that
-  \f$ \partial \Omega = \Gamma_D \cup \Gamma_R \f$ and \f$ \Gamma_D \cap \Gamma_R = \emptyset \f$.
-  <br>
-  Using the hybridization procedure, and introducing a new variable, we may split the problem from
-  the entire domain to problems in each elements of the triangulation \f$ \mathcal{T}_h \f$, then we may write
-  the weak formulation for the dual problem.
-  The new variable is the hybrid unknown \f$ \lambda \f$, e.g. "the trace" of pressure of the primal unknown,
-  it is the Lagrange multipliers forcing the continuity of the flux across each faces or edges in the triangulation.
-  We introduce the following functional spaces, the first is the space of the primal variable, the third for
-  the dual variable, the fourth for the hybrid variable.
-  \f[
-  \begin{array}{l}
-  V = L^2 (\Omega ) \,,\vspace{0.2cm} \\
-  H(div, K) = \displaystyle \left\{ \tau \in ( L^2(K))^n : \nabla \cdot \tau \in L^2(K)\right\}\,, \vspace{0.2cm}\\
-  Z = \displaystyle \left\{ \tau \in L^2(\Omega) : \tau\vert_K \in H(div, K) \, \forall K \in  \mathcal{T}_h \right\}\,, \vspace{0.2cm}\\
-  \Lambda = \displaystyle \left\{ \lambda \in \prod_{K \in \mathcal{T}_h} H^{1/2} (\partial K): \lambda_K = \lambda_{K'} \,\, \mathrm{on} \,\, e_{K-K'} \, \forall K \in \mathcal{T}_h,\, \lambda = g_D \,\, \mathrm{on} \,\, \Gamma_D \right\}\,.
-  \end{array}
-  \f]
-  Introducing the following bilinear forms and functionals at fixed time \f$ t \in [0, T] \f$
-  \f[
-  \begin{array}{l l}
-  a(\sigma(t), \tau) = \displaystyle \sum_{K \in \mathcal{T}_h}\int_K \Lambda^{-1}(t) \sigma(t) \cdot \tau \,,  &
-  b(p(t), \tau) = \displaystyle -\sum_{K \in \mathcal{T}_h} \int_K p(t) \nabla \cdot \tau\,, \vspace{0.2cm}\\
-  c(\lambda(t), \tau) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K} \lambda(t) \tau \cdot n\,,&
-  h(\lambda(t), \mu) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K \cap \Gamma_R} h(t) \mu \lambda(t) \,,\vspace{0.2cm}\\
-  m(p(t), v) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_K p(t) v \,,\vspace{0.2cm}\\
-  F(v) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_K f(t) v\,,&
-  G(\mu) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K \cap \Gamma_R} g(t) \mu\,,
-  \end{array}
-  \f]
-  we obtain the Darcy problem in the weak form: find \f$ (\sigma(t), \, p(t), \, \lambda(t)) \in Z \times V \times \Lambda \f$ such that
-  \f[
-  \left\{
-  \begin{array}{l l}
-  a(\sigma(t), \tau) + b(p(t), \tau) + c(\lambda(t), \tau) = 0\,,  & \forall \tau \in Z \,,\vspace{0.2cm}\\
-  \displaystyle -\frac{\partial }{\partial t} m(p(t), v) + b(v, \sigma(t)) = -F(v)\,, & \forall v \in V \,,\vspace{0.2cm}\\
-  c(\mu, \sigma(t)) + h(\lambda(t), \mu) = G(\mu) \,,         & \forall \mu \in \Lambda\,.
-  \end{array}
-  \right.
-  \f]
-  At semi-discrete level. i.e. only space discretization is performed,
-  we introduce the polynomial space, of degree \f$ r \f$, that approximate the finite dimensional
-  spaces introduced above \f$ V_h \subset V \f$, \f$ Z_h \subset Z \f$ and \f$\Lambda_h \subset \Lambda \f$
-  \f[
-  \begin{array}{l}
-  V_h = \displaystyle \left\{ v_h \in V: v_h|_K \in P_r (K)\, \forall K \in \mathcal{T}_h \right\}\,, \vspace{0.2cm}\\
-  Z_h = \displaystyle \left\{ \tau_h \in Z: \tau_h|_K \in RT_r(K) \, \forall K \in \mathcal{T}_h \right\} \,, \vspace{0.2cm} \\
-  \Lambda_h = \displaystyle \left\{ \lambda_h \in \Lambda: \lambda_h|_{\partial K} \in R_r( \partial K ) \, \forall K \in \mathcal{T}_h\right\}\,,
-  \end{array}
-  \f]
-  where \f$ P_r(K) \f$ is the space of polynomial of degree \f$ r \f$ in the element \f$ K \f$, \f$ RT_r(K) \f$ is the space of
-  polynomial of Raviart-Thomas of degrees \f$ r \f$ in the element \f$ K \f$ and \f$ R_r(\partial K) \f$ is the space of polynomial of
-  degree \f$ r \f$ definite on each of the boundary of the element \f$ K \f$ and discontinuous from one edge to the other.
-  <BR>
-  The finite dimensional problem is: find \f$ (\sigma_h(t),\, p_h(t), \, \lambda_h(t)) \in Z_h \times V_h \times \Lambda_h \f$ such that
-  \f[
-  \left\{
-  \begin{array}{l l}
-  a(\sigma_h(t), \tau_h) + b(p_h(t), \tau_h) + c(\lambda_h(t), \tau_h) = 0\,,  & \forall \tau_h \in Z_h \,,\vspace{0.2cm}\\
-  \displaystyle -\frac{\partial }{\partial t} m(p_h(t),v_h) + b(v_h, \sigma_h(t)) = -F(v_h)\,,  & \forall v_h \in V_h \,,\vspace{0.2cm}\\
-  c(\mu_h, \sigma_h(t)) + h(\lambda_h(t), \mu_h) = G(\mu_h) \,,           & \forall \mu_h \in \Lambda_h\,.
-  \end{array}
-  \right.
-  \f]
-  To obatin a fully discrete problem we discretize the time derivative via an implicit Euler scheme, with \f$ \Delta t \f$ as time step. Choosing
-  \f[
-  p_h^0 = \prod_{V_h} p_0
-  \f]
-  we obtain the following system for each \f$ n = 0, \ldots, N \f$, with \f$ N = \frac{T}{\Delta t} \f$
-  \f[
-  \left\{
-  \begin{array}{l l}
-  a(\sigma_h^{n+1}, \tau_h) + b(p_h^{n+1}, \tau_h) + c(\lambda_h^{n+1}, \tau_h) = 0\,,  & \forall \tau_h \in Z_h \,,\vspace{0.2cm}\\
-  \displaystyle -\frac{1}{\Delta t} m(p_h^{n+1},v_h) + b(v_h, \sigma_h^{n+1}) = -F(v_h) - \frac{1}{\Delta t} m(p_h^n, v_h) \,,  & \forall v_h \in V_h \,,\vspace{0.2cm}\\
-  c(\mu_h, \sigma_h^{n+1}) + h(\lambda_h^{n+1}, \mu_h) = G(\mu_h) \,,           & \forall \mu_h \in \Lambda_h\,.
-  \end{array}
-  \right.
-  \f]
-  To solve the problem we use the static condensation procedure, i.e. the unknowns in the discrete
-  weak system are not independent and \f$ p_K \f$, \f$\sigma_K \f$ may be written in function of
-  \f$ \lambda_K \f$ alone. We introduce the following local matrices
-  \f[
-  \begin{array}{l l l}
-  \left[ A \right]_{ij} = \displaystyle   \int_K \Lambda^{-1}( (n+1) \Delta t) \psi_j \cdot \psi_i \,, &
-  \left[ B \right]_{ij} = \displaystyle - \int_K \phi_j \nabla \cdot \psi_i \,, &
-  \left[ C \right]_{ij} = \displaystyle   \int_{\partial K} \xi_i \psi_j \cdot n \,, \vspace{0.2cm} \\
-  \left[ H \right]_{ij} = \displaystyle   \int_{\partial K \cap \Gamma_R} h( (n+1) \Delta t) \xi_i \xi_j\,, &
-  \left[ M \right]_{ij} = \displaystyle   \int_{K} \phi_j \phi_i \,, &
-  \left[ F \right]_{j}  = \displaystyle   \int_K f( (n+1) \Delta t) \phi_j\,, \vspace{0.2cm} \\
-  \left[ G \right]_{j}  = \displaystyle   \int_{\partial K \cap \Gamma_R } g( (n+1) \Delta t) \xi_j\,,
-  \end{array}
-  \f]
-  where we avoid to write the dependence on the triangle \f$ K \f$ and on the current time step \f$ n+1 \f$ in all the matrices and vectors. <BR>
-  The local matrix formulation of the finite dimensional problem is
-  \f[
-  \left\{
-  \begin{array}{l}
-  A \sigma_K^{n+1} + B p_K^{n+1} + C \lambda_K^{n+1} = 0\,, \vspace{0.2cm} \\
-  \displaystyle -\frac{1}{\Delta t} M p_K^{n+1} + B^T \sigma_K^{n+1} = -F - \frac{1}{\Delta t} M p_K^n \,,  \vspace{0.2cm}\\
-  C^T \sigma_K^{n+1} + H \lambda_K^{n+1} = G\,.
-  \end{array}
-  \right.
-  \f]
-  Or alternatively
-  \f[
-  \begin{array}{l l l}
-  \left[
-  \begin{array}{c c c}
-  A   & B                    &  C \vspace{0.2cm} \\
-  B^T & \displaystyle -\frac{1}{\Delta t} M &  0 \vspace{0.2cm} \\
-  C^T & 0                    & H
-  \end{array}
-  \right] \, \cdot &
-  \left[
-  \begin{array}{c}
-  \sigma_K^{n+1}  \vspace{0.2cm}\\
-  p_K^{n+1}       \vspace{0.2cm}\\
-  \lambda_K^{n+1}
-  \end{array}
-  \right] \, &
-  =
-  \left[
-  \begin{array}{c}
-  0 \vspace{0.2cm}\\
-  \displaystyle - F - \frac{1}{\Delta t} M p_K^n \vspace{0.2cm}\\
-  G
-  \end{array}
-  \right]\,.
-  \end{array}
-  \f]
-  Introducing the local hybrid matrix and local hybrid right hand side
-  \f[
-  \begin{array}{l}
-  \displaystyle L_K = -C^T A^{-1} C + C^T A^{-1} B \left( \frac{1}{\Delta t} M + B^T A^{-1} B \right)^{-1} B^T A^{-1} C + H \,, \vspace{0.2cm} \\
-  \displaystyle r_K = G + C^T A^{-1} B \left( \frac{1}{\Delta t} M + B^T A^{-1} B \right)^{-1} \left( F + \frac{1}{\Delta t} M p_K^n \right) \,,
-  \end{array}
-  \f]
-  Imposing that at each edge or face the hybrid unknown is single value we obtain a linear system for the hybrid unknown
-  \f[
-  L \lambda^{n+1} = r \,.
-  \f]
-  We recover the primal and dual variable as a post-process from the hybrid variable at element level, so we have
-  \f[
-  \begin{array}{l}
-  \displaystyle p_K^{n+1} = \left( \frac{1}{\Delta t} M + B^T A^{-1} B \right)^{-1} \left( F + \frac{1}{\Delta t} M p_K^n - B^T A^{-1} C \lambda_K^{n+1} \right)\,, \vspace{0.2cm} \\
-  \sigma_K^{n+1} = -A^{-1} \left( B p_K^{n+1} + C \lambda_K^{n+1} \right) \,.
-  \end{array}
-  \f]
-  @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
-  @note The initial time is not fix at zero.
-  conditions are imposed via BCHandler class.
-  @todo Insert any scientific publications that use this solver.
-  @todo Post process for the dual variable.
-  @todo Use a better mass assembler
+    This class implements a transient Darcy solver in the finite time interval \f$ [0, T] \f$.
+    <br>
+    The classical time dependent Darcy formulation is a couple of differential equations of first order with
+    the unknowns \f$ p \in C^1(0, T; C^1 (\Omega )) \f$, being the pressure or the primal unknown,
+    and \f$ \sigma \in C^0(0, T; (C^1( \Omega ) )^n) \f$, being the Darcy velocity or the flux or the dual unknown,
+    such that
+    \f[
+    \left\{
+    \begin{array}{l l l}
+    \Lambda^{-1}(t) \sigma + \nabla p = f_v(t)                      & \mathrm{in} & \Omega   \times [0, T]\,, \vspace{0.2cm} \\
+    \displaystyle \phi \frac{\partial p}{\partial t} + \nabla \cdot \sigma + \pi(t) p - f(t) = 0  & \mathrm{in} & \Omega   \times [0, T]\,, \vspace{0.2cm} \\
+    p = g_D(t)                                                      & \mathrm{on} & \Gamma_D \times [0, T]\,, \vspace{0.2cm} \\
+    \sigma \cdot n + h(t) p = g_R(t)                                & \mathrm{on} & \Gamma_R \times [0, T]\,. \vspace{0.2cm} \\
+    p(0) = p_0                                                      & \mathrm{in} & \Omega
+    \end{array}
+    \right.
+    \f]
+    The data in the system are:
+    <ul>
+        <li> \f$ p_0 \f$ the primal variable at initial time; </li>
+        <li> \f$ \phi \f$ the mass term, which does not depend on time; </li>
+        <li> \f$ \Lambda(t) \f$ the permeability tensor; </li>
+        <li> \f$ f(t) \f$ the scalar source term; </li>
+        <li> \f$ f_v(t) \f$ the vector source term; </li>
+        <li> \f$ \pi(t) \f$ the reaction coefficient; </li>
+        <li> \f$ \Gamma_D \f$ the subset of the boundary of \f$ \Omega \f$ with Dirichlet boundary conditions; </li>
+        <li> \f$ g_D(t) \f$ Dirichlet boundary condition data; </li>
+        <li> \f$ \Gamma_R \f$ that is the part of the boundary of \f$ \Omega \f$ with Robin, or Neumann, boundary conditions; </li>
+        <li> \f$ h(t) \f$ and \f$ g_R(t) \f$ Robin boundary condition data; </li>
+    </ul>
+    We suppose that \f$ \partial \Omega = \Gamma_D \cup \Gamma_R \f$ and \f$ \Gamma_D \cap \Gamma_R = \emptyset \f$.
+    <br>
+    Using the hybridization procedure, and introducing a new variable, we may split the problem from
+    the entire domain to problems in each elements of the triangulation \f$ \mathcal{T}_h \f$, then we may write
+    the weak formulation for the dual problem.
+    The new variable is the hybrid unknown \f$ \lambda \f$, e.g. "the trace" of pressure of the primal unknown,
+    it is the Lagrange multipliers forcing the continuity of the flux across each faces or edges in the triangulation.
+    We introduce the following functional spaces, the first is the space of the primal variable, the third for
+    the dual variable, the fourth for the hybrid variable.
+    \f[
+    \begin{array}{l}
+    V = L^2 (\Omega ) \,,\vspace{0.2cm} \\
+    H(div, K) = \displaystyle \left\{ \tau \in ( L^2(K))^n : \nabla \cdot \tau \in L^2(K)\right\}\,, \vspace{0.2cm}\\
+    Z = \displaystyle \left\{ \tau \in L^2(\Omega) : \tau\vert_K \in H(div, K) \, \forall K \in  \mathcal{T}_h \right\}\,, \vspace{0.2cm}\\
+    \Lambda = \displaystyle \left\{ \lambda \in \prod_{K \in \mathcal{T}_h} H^{1/2} (\partial K): \lambda_K = \lambda_{K'} \,\, \mathrm{on} \,\, e_{K-K'} \, \forall K \in \mathcal{T}_h,\, \lambda = g_D \,\, \mathrm{on} \,\, \Gamma_D \right\}\,.
+    \end{array}
+    \f]
+    Introducing the following bilinear forms and functionals at fixed time \f$ t \in [0, T] \f$
+    \f[
+    \begin{array}{l l}
+    a(\sigma(t), \tau) = \displaystyle \sum_{K \in \mathcal{T}_h}\int_K \Lambda^{-1}(t) \sigma(t) \cdot \tau \,,  &
+    b(p(t), \tau) = \displaystyle -\sum_{K \in \mathcal{T}_h} \int_K p(t) \nabla \cdot \tau\,, \vspace{0.2cm}\\
+    c(\lambda(t), \tau) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K} \lambda(t) \tau \cdot n\,,&
+    d(p(t), v) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K} \pi(t) p(t) v \,,\vspace{0.2cm}\\
+    h(\lambda(t), \mu) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K \cap \Gamma_R} h(t) \mu \lambda(t) \,,&
+    m(p(t), v) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_K \phi p(t) v \,,\vspace{0.2cm}\\
+    F(v) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_K f(t) v\,,&
+    F_v(\tau) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_K f_v(t) \tau \,, \vspace{0.2cm}\\
+    G(\mu) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K \cap \Gamma_R} g(t) \mu\,,
+    \end{array}
+    \f]
+    we obtain the Darcy problem in the weak form: find \f$ (\sigma(t), \, p(t), \, \lambda(t)) \in Z \times V \times \Lambda \f$ such that
+    \f[
+    \left\{
+    \begin{array}{l l}
+    a(\sigma(t), \tau) + b(p(t), \tau) + c(\lambda(t), \tau) = F_v(\tau) \,,  & \forall \tau \in Z \,,\vspace{0.2cm}\\
+    \displaystyle -\frac{\partial }{\partial t} m(p(t), v) + b(v, \sigma(t)) - d(p(t), v) = -F(v)\,, & \forall v \in V \,,\vspace{0.2cm}\\
+    c(\mu, \sigma(t)) + h(\lambda(t), \mu) = G(\mu) \,,         & \forall \mu \in \Lambda\,.
+    \end{array}
+    \right.
+    \f]
+    At semi-discrete level. i.e. only space discretization is performed,
+    we introduce the polynomial space, of degree \f$ r \f$, that approximate the finite dimensional
+    spaces introduced above \f$ V_h \subset V \f$, \f$ Z_h \subset Z \f$ and \f$\Lambda_h \subset \Lambda \f$
+    \f[
+    \begin{array}{l}
+    V_h = \displaystyle \left\{ v_h \in V: v_h|_K \in P_r (K)\, \forall K \in \mathcal{T}_h \right\}\,, \vspace{0.2cm}\\
+    Z_h = \displaystyle \left\{ \tau_h \in Z: \tau_h|_K \in RT_r(K) \, \forall K \in \mathcal{T}_h \right\} \,, \vspace{0.2cm} \\
+    \Lambda_h = \displaystyle \left\{ \lambda_h \in \Lambda: \lambda_h|_{\partial K} \in R_r( \partial K ) \, \forall K \in \mathcal{T}_h\right\}\,,
+    \end{array}
+    \f]
+    where \f$ P_r(K) \f$ is the space of polynomial of degree \f$ r \f$ in the element \f$ K \f$, \f$ RT_r(K) \f$ is the space of
+    polynomial of Raviart-Thomas of degrees \f$ r \f$ in the element \f$ K \f$ and \f$ R_r(\partial K) \f$ is the space of polynomial of
+    degree \f$ r \f$ definite on each of the boundary of the element \f$ K \f$ and discontinuous from one edge to the other.
+    <br>
+    The finite dimensional problem is: find \f$ (\sigma_h(t),\, p_h(t), \, \lambda_h(t)) \in Z_h \times V_h \times \Lambda_h \f$ such that
+    \f[
+    \left\{
+    \begin{array}{l l}
+    a(\sigma_h(t), \tau_h) + b(p_h(t), \tau_h) + c(\lambda_h(t), \tau_h) = F_v(\tau_h) \,,  & \forall \tau_h \in Z_h \,,\vspace{0.2cm}\\
+    \displaystyle -\frac{\partial }{\partial t} m(p_h(t),v_h) + b(v_h, \sigma_h(t)) - d(p_h(t), v_h) = -F(v_h)\,,  & \forall v_h \in V_h \,,\vspace{0.2cm}\\
+    c(\mu_h, \sigma_h(t)) + h(\lambda_h(t), \mu_h) = G(\mu_h) \,,           & \forall \mu_h \in \Lambda_h\,.
+    \end{array}
+    \right.
+    \f]
+    To obatin a fully discrete problem we discretize the time derivative via BDF (backward differentiation formulae) schemes of order \f$ m \f$,
+    with \f$ \Delta t \f$ as time step. Choosing
+    \f[
+    p_h^0 = \prod_{V_h} p_0
+    \f]
+    we obtain the following system for each \f$ n = 0, \ldots, N \f$, with \f$ N = \frac{T}{\Delta t} \f$
+    \f[
+    \left\{
+    \begin{array}{l l}
+    a(\sigma_h^{n+1}, \tau_h) + b(p_h^{n+1}, \tau_h) + c(\lambda_h^{n+1}, \tau_h) = F_v(\tau_h)\,,  & \forall \tau_h \in Z_h \,,\vspace{0.2cm}\\
+    \displaystyle -\frac{\alpha_0}{\Delta t} m(p_h^{n+1},v_h) + b(v_h, \sigma_h^{n+1}) - d(p_h^{n+1}, v_h)= -F(v_h)
+                  - \frac{1}{\Delta t} m\left( \sum_{i=1}^m \alpha_i p_h^{n+1-i}, v_h \right) \,,  & \forall v_h \in V_h \,,\vspace{0.2cm}\\
+    c(\mu_h, \sigma_h^{n+1}) + h(\lambda_h^{n+1}, \mu_h) = G(\mu_h) \,,           & \forall \mu_h \in \Lambda_h\,.
+    \end{array}
+    \right.
+    \f]
+    To solve the problem we use the static condensation procedure, i.e. the unknowns in the discrete
+    weak system are not independent and \f$ p_K \f$, \f$\sigma_K \f$ may be written in function of
+    \f$ \lambda_K \f$ alone. We introduce the following local matrices
+    \f[
+    \begin{array}{l l l}
+    \left[ A \right]_{ij} = \displaystyle   \int_K \Lambda^{-1}( (n+1) \Delta t) \psi_j \cdot \psi_i \,, &
+    \left[ B \right]_{ij} = \displaystyle - \int_K \phi_j \nabla \cdot \psi_i \,, &
+    \left[ C \right]_{ij} = \displaystyle   \int_{\partial K} \xi_i \psi_j \cdot n \,, \vspace{0.2cm} \\
+    \left[ D \right]_{ij} = \displaystyle   \int_K \pi(t) \phi_j \phi_i\,, &
+    \left[ H \right]_{ij} = \displaystyle   \int_{\partial K \cap \Gamma_R} h( (n+1) \Delta t) \xi_i \xi_j\,, &
+    \left[ M \right]_{ij} = \displaystyle   \int_{K} \phi \phi_j \phi_i \,, \vspace{0.2cm} \\
+    \left[ F \right]_{j}  = \displaystyle   \int_K f( (n+1) \Delta t) \phi_j\,,&
+    \left[ F_v \right]_{j}= \displaystyle   \int_K f_v( (n+1) \Delta t) \cdot \psi_j\,,  &
+    \left[ G \right]_{j}  = \displaystyle   \int_{\partial K \cap \Gamma_R } g( (n+1) \Delta t) \xi_j\,,
+    \end{array}
+    \f]
+    where we avoid to write the dependence on the triangle \f$ K \f$ and on the current time step \f$ n+1 \f$ in all the matrices and vectors.
+    <br>
+    bre local matrix formulation of the finite dimensional problem is
+    \f[
+    \left\{
+    \begin{array}{l}
+    A \sigma_K^{n+1} + B p_K^{n+1} + C \lambda_K^{n+1} = F_v\,, \vspace{0.2cm} \\
+    \displaystyle -\frac{\alpha_0}{\Delta t} M p_K^{n+1} + B^T \sigma_K^{n+1} - D p_K^{n+1} = -F
+    - \frac{1}{\Delta t} M \sum_{i=1}^m \alpha_i p_K^{n+1-i} \,,\vspace{0.2cm}\\
+    C^T \sigma_K^{n+1} + H \lambda_K^{n+1} = G\,.
+    \end{array}
+    \right.
+    \f]
+    Or alternatively
+    \f[
+    \begin{array}{l l l}
+    \left[
+    \begin{array}{c c c}
+    A   & B                    &  C \vspace{0.2cm} \\
+    B^T & \displaystyle -\frac{\alpha_0}{\Delta t} M - D &  0 \vspace{0.2cm} \\
+    C^T & 0                    & H
+    \end{array}
+    \right] \, \cdot &
+    \left[
+    \begin{array}{c}
+    \sigma_K^{n+1}  \vspace{0.2cm}\\
+    p_K^{n+1}       \vspace{0.2cm}\\
+    \lambda_K^{n+1}
+    \end{array}
+    \right] \, &
+    =
+    \left[
+    \begin{array}{c}
+    F_v \vspace{0.2cm}\\
+    \displaystyle - F - \frac{1}{\Delta t} M \sum_{i=1}^m \alpha_i p_K^{n+1-i} \vspace{0.2cm}\\
+    G
+    \end{array}
+    \right]\,.
+    \end{array}
+    \f]
+    Introducing the local hybrid matrix and local hybrid right hand side
+    \f[
+    \begin{array}{l}
+    \displaystyle L_K = -C^T A^{-1} C + C^T A^{-1} B \left( \frac{\alpha_0}{\Delta t} M + B^T A^{-1} B  + D \right)^{-1} B^T A^{-1} C + H \,, \vspace{0.2cm} \\
+    \displaystyle r_K = G + C^T A^{-1} B \left( \frac{\alpha_0}{\Delta t} M + B^T A^{-1} B + D \right)^{-1}
+     \left( F + \frac{1}{\Delta t} M \sum_{i=1}^m \alpha_i p_K^{n+1-i} \right)
+     + C^T A^{-1} B \left( \frac{\alpha_0}{\Delta t}M + B^T A^{-1} B + D \right)^{-1} B^T A^{-1} F_v - C^T A^{-1} F_v \,,
+    \end{array}
+    \f]
+    Imposing that at each edge or face the hybrid unknown is single value we obtain a linear system for the hybrid unknown
+    \f[
+    L \lambda^{n+1} = r \,.
+    \f]
+    We recover the primal and dual variable as a post-process from the hybrid variable at element level, so we have
+    \f[
+    \begin{array}{l}
+    \displaystyle p_K^{n+1} = \left( \frac{\alpha_0}{\Delta t} M + B^T A^{-1} B + D\right)^{-1} \left( F + \frac{1}{\Delta t} M \sum_{i=1}^m \alpha_i p_K^{n+1-i}
+    - B^T A^{-1} C \lambda_K^{n+1} \right)\,, \vspace{0.2cm} \\
+    \sigma_K^{n+1} = -A^{-1} \left( B p_K^{n+1} + C \lambda_K^{n+1} \right) \,.
+    \end{array}
+    \f]
+    @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
+    @note The initial time is not fix at zero.
+    conditions are imposed via BCHandler class.
+    @todo Insert any scientific publications that use this solver.
 */
 template< typename Mesh, typename SolverType = LifeV::SolverAztecOO >
 class DarcySolverTransient :
