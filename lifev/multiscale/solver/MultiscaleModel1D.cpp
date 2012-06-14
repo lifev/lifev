@@ -540,6 +540,9 @@ MultiscaleModel1D::initializeSolution()
 
         // Compute W1 and W2 from A and Q
         M_solver->computeW1W2( *M_solution );
+
+        // Initialize area in physics for viscoelastic computation
+        M_physics->setArea_tn( *(*M_solution)["A"] );
     }
     else
     {
