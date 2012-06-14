@@ -1134,15 +1134,23 @@ computeConstantMatrices ( MatrixElemental& elmatMix )
     grad_Hdiv ( static_cast<Real>(1.), elmatMix, M_dualField->getFESpace().fe(),
                 M_primalField->getFESpace().fe(), 0, 1 );
 
-    // Select the correct element which represent ( RT0 \cdot N ) * Hybrid
+    // Select the correct element which represent ( RT0 \cdot N ) * Hybrid.
     const ReferenceFEHybrid* feRT0VdotNHyb = 0;
-  //  if ( typeid ( typename mesh_Type::element_Type ) == typeid ( LinearTetra ) )
-    //{
-        feRT0VdotNHyb = &feTetraRT0VdotNHyb;
-    //}
-//    else
+
+    // Selection, in the opt mode the switch is suppressed.
+    switch ( mesh_Type::elementShape_Type::S_shape )
     {
-//        feRT0VdotNHyb = &feHexaRT0VdotNHyb;
+        case TRIANGLE:
+            feRT0VdotNHyb = &feTriaRT0VdotNHyb;
+            break;
+        case TETRA:
+            feRT0VdotNHyb = &feTetraRT0VdotNHyb;
+            break;
+        case HEXA:
+            feRT0VdotNHyb = &feHexaRT0VdotNHyb;
+            break;
+        default:
+            ASSERT ( false, "DarcySolverLinear : Hybrid finite element not found." );
     }
 
     /* Update the boundary matrix, it is independent of the current element
