@@ -29,7 +29,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_2Cylinders-tube20_FS
 
     [../time_discretization]
     initialtime                = 0.000   # [s]
-    endtime                    = 0.004   # [s]
+    endtime                    = 0.008   # [s]
     timestep                   = 0.001   # [s]
 
     [../]
