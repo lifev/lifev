@@ -245,74 +245,63 @@ namespace LifeV
     conditions are imposed via BCHandler class.
     @todo Insert any scientific publications that use this solver.
 */
-template< typename Mesh, typename SolverType = LifeV::SolverAztecOO >
+template < typename MeshType,
+           typename SolverType = LifeV::SolverAztecOO >
 class DarcySolverTransient :
-        virtual public DarcySolver<Mesh, SolverType>
+        virtual public DarcySolverLinear < MeshType, SolverType >
 {
 
 public:
 
-    //! @name Pulbic Types
+    //! @name Public Types
     //@{
 
-    typedef DarcySolver<Mesh, SolverType> DarcySolverPolicies;
+    //! Typedef for mesh template.
+    typedef MeshType mesh_Type;
 
-    typedef typename DarcySolverPolicies::function_Type      function_Type;
+    //! Typedef for solver template.
+    typedef SolverType solver_Type;
 
-    typedef typename DarcySolverPolicies::data_Type          data_Type;
+    //! Self typedef.
+    typedef DarcySolverTransient < mesh_Type, solver_Type > darcySolverTransient_Type;
 
-    typedef typename DarcySolverPolicies::bchandler_raw_Type bchandler_raw_Type;
-    typedef typename DarcySolverPolicies::bchandler_Type     bchandler_Type;
+    //! Darcy solver class.
+    typedef DarcySolverLinear < mesh_Type, solver_Type > darcySolverLinear_Type;
 
-    typedef typename DarcySolverPolicies::matrix_Type        matrix_Type;
-    typedef typename DarcySolverPolicies::matrixPtr_Type     matrixPtr_Type;
+    //! Shared pointer to a scalar value function.
+    typedef typename darcySolverLinear_Type::scalarFctPtr_Type scalarFctPtr_Type;
 
-    typedef typename DarcySolverPolicies::vector_Type        vector_Type;
-    typedef typename DarcySolverPolicies::vectorPtr_Type     vectorPtr_Type;
+    //! Shared pointer to a distributed vector.
+    typedef typename darcySolverLinear_Type::vectorPtr_Type vectorPtr_Type;
 
-    typedef typename DarcySolverPolicies::comm_Type          comm_Type;
-    typedef typename DarcySolverPolicies::commPtr_Type       commPtr_Type;
+    //! Distributed vector.
+    typedef typename darcySolverLinear_Type::vector_Type vector_Type;
+
+    //! Shared pointer to a scalar field.
+    typedef typename darcySolverLinear_Type::scalarFieldPtr_Type scalarFieldPtr_Type;
+
+    //! Scalar field.
+    typedef typename darcySolverLinear_Type::scalarField_Type scalarField_Type;
+
+    //! Container of matrix elemental.
+    typedef std::vector< MatrixElemental > matrixElementalContainer_Type;
+
+    //! Time advance scheme.
+    typedef TimeAdvanceBDF < vector_Type > timeAdvance_Type;
+
+    //! Shared pointer to a time advance scheme.
+    typedef boost::shared_ptr < timeAdvance_Type > timeAdvancePtr_Type;
 
     //@}
 
     //! @name Constructors & destructor
     //@{
 
-    /*!
-      Full constructor for the class.
-      @param dataFile Data for the problem.
-      @param primal_FESpace Primal finite element space.
-      @param dual_FESpace Dual element space.
-      @param hybrid_FESpace Hybrid finite element space.
-      @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param bcHandler Boundary conditions for the problem.
-      @param comm Shared pointer of the Epetra communicator.
-    */
-    DarcySolverTransient ( const data_Type&          dataFile,
-                           FESpace<Mesh, MapEpetra>& primal_FESpace,
-                           FESpace<Mesh, MapEpetra>& dual_FESpace,
-                           FESpace<Mesh, MapEpetra>& hybrid_FESpace,
-                           FESpace<Mesh, MapEpetra>& VdotN_FESpace,
-                           bchandler_Type&           bcHandler,
-                           const commPtr_Type&             comm );
-    /*!
-      Constructor for the class without boundary condition handler.
-      @param dataFile Data for the problem.
-      @param primal_FESpace Primal finite element space.
-      @param dual_FESpace Dual element space.
-      @param hybrid_FESpace Hybrid finite element space.
-      @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param comm Shared pointer of the Epetra communicator.
-    */
-    DarcySolverTransient ( const data_Type&          dataFile,
-                           FESpace<Mesh, MapEpetra>& primal_FESpace,
-                           FESpace<Mesh, MapEpetra>& dual_FESpace,
-                           FESpace<Mesh, MapEpetra>& hybrid_FESpace,
-                           FESpace<Mesh, MapEpetra>& VdotN_FESpace,
-                           const commPtr_Type&             comm );
+    //! Constructor for the class.
+    DarcySolverTransient ();
 
     //! Virtual destructor.
-    virtual ~DarcySolverTransient ();
+    virtual ~DarcySolverTransient () {};
 
     //@}
 
@@ -335,7 +324,7 @@ public:
       variable at step zero.
       @param primalInitial The primal initial function.
     */
-    void setInitialPrimal ( const function_Type& primalInitial );
+    void setInitialPrimal ( const scalarFctPtr_Type& primalInitialFct );
 
     //! Set mass matrix
     /*!
@@ -343,207 +332,191 @@ public:
       By defaul it does not depend on time.
       @param mass Mass term for the problem.
     */
-
-    void setMass ( const function_Type& mass )
-    {
-        M_mass = mass;
-    }
+    void setMass ( const scalarFctPtr_Type& massFct );
 
     //@}
 
 protected:
 
     // Methods
-    //! @name methods
+    //! @name Protected methods
     //@{
+
+    //! Perform all the operations before doing the loop on volume elements.
+    /*!
+      Computes the element independent matrices, clean all the fields and
+      all the algebraich stuff. Useful for extentions in child classes.
+    */
+    virtual void preLoopElementsComputation ();
 
     //! Compute element matrices
     /*!
-      Locally update the current finite element for the primal
-      and dual finite element space, then compute the Hdiv mass
-      matrix.
+      Call the Darcy solver localMatrixComputation method and
+      compute the mass matrix for the time dependent term.
       @param iElem Id of the current geometrical element.
+      @param elmatMix The local matrix in mixed form.
+      @param elmatReactionTerm The local matrix for the reaction term.
     */
-    virtual void localElementComputation ( const UInt & iElem );
+    virtual void localMatrixComputation ( const UInt & iElem,
+                                          MatrixElemental& elmatMix,
+                                          MatrixElemental& elmatReactionTerm );
 
-    //! Perform static condensation
+    //! Computes local vectors
     /*!
-      Create the local hybrid matrix and local hybrid right hand side.
+      Call the Darc_y solver localVectorComputation method and
+      compute the additional scalar vector for the time dependent term.
+      @param iElem Id of the current geometrical element.
+      @param elvecMix The local vector in mixed form.
     */
-    virtual void staticCondensation ();
+    virtual void localVectorComputation ( const UInt & iElem,
+                                          VectorElemental& elvecMix );
 
-    //! Compute locally, as a post process, the primal and dual variable.
-    virtual void localComputePrimalAndDual ();
-
-    //! Update all variable
+    //! Do some computation after the calculation of the primal and dual variable.
     /*!
-      Update all the variables of the problem before the construction of
-      the global hybrid matrix, e.g. reset the global hybrid matrix.
+      Save into the time advance scheme the computed primal solution.
     */
-    virtual void updateVariables ();
+    virtual void postComputePrimalAndDual ()
+    {
+        // Update the solution in the time advance.
+        M_timeAdvance->shiftRight ( this->M_primalField->getVector() );
+    }
 
     //@}
-
-    //! @name Protected data
-    //@{
-
-    //! Primal solution at previous time.
-    vectorPtr_Type  M_primalOld;
-
-    //@}
-
 
 private:
+
+    // Private Constructors
+    //! @name Private Constructors
+    //@{
+
+    //! Inhibited copy constructor.
+    DarcySolverTransient ( const darcySolverTransient_Type& );
+
+    //@}
+
+    // Private Operators
+    //! @name Private Operators
+    //@{
+
+    //! Inhibited assign operator.
+    darcySolverTransient_Type& operator= ( const darcySolverTransient_Type& );
+
+    //@}
 
     // Data of the problem.
     //! @name Data of the problem
     //@{
 
     //! Initial time primal variable.
-    function_Type   M_primalInitial;
+    scalarFctPtr_Type M_primalFieldInitialFct;
 
     //! Mass function, it does not depend on time.
-    function_Type   M_mass;
+    scalarFctPtr_Type M_massFct;
 
     //@}
 
-    // Algebraic stuff.
+    // Time advance stuff
+    //! @name Time advance stuff
+    //@{
+
+    //! Time advance.
+    timeAdvancePtr_Type M_timeAdvance;
+
+    //! Local mass matrices.
+    matrixElementalContainer_Type M_localMassMatrix;
+
+    //! Right hand side coming from the time advance scheme.
+    vectorPtr_Type M_rhsTimeAdvance;
+
+    //@}
+
+    // Algebraic stuff
     //! @name Algebraic stuff
     //@{
 
     //! Boolean that indicates if the preconditioner is re-used or not.
-    bool            M_reusePrec;
+    bool M_reusePrec;
 
     //! Boolean that indicates if the matrix is updated for the current iteration.
-    bool            M_updated;
+    bool M_updated;
 
     //! Interger storing the max number of solver iteration with preconditioner recomputing.
-    UInt             M_maxIterSolver;
+    UInt M_maxIterSolver;
 
     //! Boolean that indicates if the matrix is recomputed for the current iteration.
-    bool            M_recomputeMatrix;
-
-    //@}
-
-    // Elementary matrices and vectors used for the static condensation.
-    //! @name Elementary matrices and vectors used for the static condensation.
-    //@{
-
-    /*! Temporary array of size the square of the number of degrees of freedom of the
-        primal variable. */
-    MatrixElemental         M_elmatMassPrimal;
+    bool M_recomputeMatrix;
 
     //@}
 
 }; // class DarcySolverTransient
 
-//
 // IMPLEMENTATION
-//
 
 // Complete constructor.
-template<typename Mesh, typename SolverType>
-DarcySolverTransient<Mesh, SolverType>::
-DarcySolverTransient ( const data_Type&           dataFile,
-                       FESpace<Mesh, MapEpetra>&  primal_FESpace,
-                       FESpace<Mesh, MapEpetra>&  dual_FESpace,
-                       FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
-                       FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
-                       bchandler_Type&            bcHandler,
-                       const commPtr_Type&              comm ):
+template < typename MeshType, typename SolverType >
+DarcySolverTransient < MeshType, SolverType >::
+DarcySolverTransient ():
         // Standard Darcy solver constructor.
-        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
-        M_primalOld              ( new vector_Type ( this->M_primal_FESpace.map() ) ),
-        // Data of the problem
-        M_primalInitial          ( NULL ),
-        M_mass                   ( _One_ ),
+        darcySolverLinear_Type::DarcySolverLinear (),
+        // Time advance data.
+        M_timeAdvance                 ( new timeAdvance_Type ),
         // Linear solver.
-        M_reusePrec              ( false ),
-        M_updated                ( false ),
-        M_maxIterSolver          ( static_cast<UInt>(0) ),
-        M_recomputeMatrix        ( false ),
-        // Local matrices and vectors
-        M_elmatMassPrimal        ( this->M_primal_FESpace.refFE().nbDof(), 1, 1 )
+        M_reusePrec                   ( false ),
+        M_updated                     ( false ),
+        M_maxIterSolver               ( static_cast<UInt>(0) ),
+        M_recomputeMatrix             ( false )
 {
-
 } // Constructor
-
-// Constructor without boundary condition handler.
-template<typename Mesh, typename SolverType>
-DarcySolverTransient<Mesh, SolverType>::
-DarcySolverTransient ( const data_Type&           dataFile,
-                       FESpace<Mesh, MapEpetra>&  primal_FESpace,
-                       FESpace<Mesh, MapEpetra>&  dual_FESpace,
-                       FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
-                       FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
-                       const commPtr_Type&              comm ):
-        // Standard Darcy solver constructor.
-        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
-        M_primalOld              ( new vector_Type ( this->M_primal_FESpace.map() ) ),
-        // Data of the problem
-        M_primalInitial          ( NULL ),
-        M_mass                   ( _One_ ),
-        // Linear solver.
-        M_reusePrec              ( false ),
-        M_updated                ( false ),
-        M_maxIterSolver          ( static_cast<UInt>(0) ),
-        M_recomputeMatrix        ( false ),
-        // Local matrices and vectors
-        M_elmatMassPrimal        ( this->M_primal_FESpace.refFE().nbDof(), 1, 1 )
-{
-
-} // Constructor
-
-// Virtual destructor.
-template<typename Mesh, typename SolverType>
-DarcySolverTransient<Mesh, SolverType>::
-~DarcySolverTransient ( void )
-{
-
-} // Destructor
 
 // ===========================================================================================
 // Public methods
 // ==========================================================================================
 
 // Set up the linear solver and the preconditioner.
-template<typename Mesh, typename SolverType>
+template < typename MeshType, typename SolverType >
 void
-DarcySolverTransient<Mesh, SolverType>::
+DarcySolverTransient < MeshType, SolverType >::
 setup ()
 {
 
-    GetPot dataFile( *(this->M_data.dataFile()) );
+    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
 
-    // Call the DarcySolver setup method for setting up the linear solver.
-    DarcySolver<Mesh, SolverType>::setup();
+    // Call the DarcySolverLinear setup method for setting up the linear solver.
+    darcySolverLinear_Type::setup ();
 
     // Set if the preconditioner is re-used.
-    M_reusePrec = dataFile( ( this->M_data.section() + "/solver/reuse" ).data(), false );
+    M_reusePrec = dataFile ( ( this->M_data->section() + "/solver/reuse" ).data(), false );
 
     // Set if the preconditioner is reused or not.
-    this->M_linearSolver.setReusePreconditioner( M_reusePrec );
+    this->M_linearSolver.setReusePreconditioner ( M_reusePrec );
 
     // Set the max number of iteration to mantein the same preconditioner.
-    M_maxIterSolver = static_cast<UInt>( dataFile( ( this->M_data.section() + "/solver/max_iter_reuse" ).data(),
-                                                   static_cast<Int>(0) ) );
+    M_maxIterSolver = dataFile( ( this->M_data->section() + "/solver/max_iter_reuse" ).data(), static_cast<Int>(0) );
+
+    // Set up the time advance.
+    M_timeAdvance->setup ( this->M_data->dataTimePtr()->orderBDF(), 1 );
 
 } // setup
 
 // Set the inital value
-template<typename Mesh, typename SolverType>
-inline
+template < typename MeshType, typename SolverType >
 void
-DarcySolverTransient<Mesh, SolverType>::
-setInitialPrimal ( const function_Type& primalInitial )
+DarcySolverTransient < MeshType, SolverType >::
+setInitialPrimal ( const scalarFctPtr_Type& primalInitialFct )
 {
     // Set the initial value function.
-    M_primalInitial = primalInitial;
+    M_primalFieldInitialFct = primalInitialFct;
+
+    // Create the interpolated initial condition for the primal variable.
+    scalarField_Type primalInitialField ( this->M_primalField->getFESpacePtr(),
+                                          this->M_primalField->getVector().mapType() );
 
     // Interpolate the primal initial value.
-    this->M_primal_FESpace.interpolate( M_primalInitial,
-                                        *(this->M_primal),
-                                        this->M_data.dataTime()->initialTime() );
+    M_primalFieldInitialFct->interpolate ( primalInitialField,
+                                           this->M_data->dataTimePtr()->initialTime() );
+
+    // Set the initial condition for the time advance method.
+    M_timeAdvance->setInitialCondition ( primalInitialField.getVector() );
 
 } // setInitialPrimal
 
@@ -551,416 +524,140 @@ setInitialPrimal ( const function_Type& primalInitial )
 // Protected methods
 // ==========================================================================================
 
+// Perform all the operations before doing the loop on volume elements.
+template < typename MeshType, typename SolverType >
+void
+DarcySolverTransient < MeshType, SolverType >::
+preLoopElementsComputation ()
+{
+    // Perform all the operations done by the Darcy solver.
+    darcySolverLinear_Type::preLoopElementsComputation ();
+
+    // Check if the initial solution for the primal variable is set or not.
+    ASSERT ( M_primalFieldInitialFct.get(), "DarcySolverTransient : initial condition not set." );
+
+    // Reset the right hand side coming from the time advance scheme.
+    M_rhsTimeAdvance.reset ( new vector_Type ( this->M_primalField->getFESpace().map() ) );
+
+    // Put in M_rhsTimeAdvance the contribution for the right hand side coming
+    // from the time scheme, without the time step.
+    *M_rhsTimeAdvance = M_timeAdvance->updateRHSFirstDerivative ();
+
+} // preLoopElementsComputation
+
+// Set and compute the mass matrix.
+template < typename MeshType, typename SolverType >
+void
+DarcySolverTransient < MeshType, SolverType >::
+setMass ( const scalarFctPtr_Type& massFct )
+{
+    // Save the mass function.
+    M_massFct = massFct;
+
+    // The total number of elements in the mesh.
+    const UInt meshNumberOfElements = this->M_primalField->getFESpace().mesh()->numElements();
+
+    // Element of current id.
+    typename mesh_Type::element_Type element;
+
+    // Reseve the memory for the mass matrices.
+    M_localMassMatrix.reserve ( meshNumberOfElements );
+
+    // Elemental matrix to store the current local mass matrix.
+    MatrixElemental localMassMatrix ( this->M_primalField->getFESpace().refFE().nbDof(), 1, 1 );
+
+    // The coordinate of the barycenter of local element.
+    Vector3D barycenter;
+
+    //! Loop on all the volume elements.
+    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
+    {
+        // Element of current ID.
+        element = this->M_primalField->getFESpace().mesh()->element ( iElem );
+
+        // Update the current element of ID iElem for the primal variable.
+        this->M_primalField->getFESpace().fe().update ( element, UPDATE_QUAD_NODES | UPDATE_WDET );
+
+        // Clean the local mass matrix before the computation.
+        localMassMatrix.zero ();
+
+        // Get the coordinates of the barycenter of the current element of ID iElem.
+        this->M_primalField->getFESpace().fe().barycenter( barycenter[0], barycenter[1], barycenter[2] );
+
+        // Computes the value for the mass term.
+        const Real massValue = M_massFct->eval( iElem, barycenter );
+
+        // Compute the mass matrix for the primal variable.
+        mass ( massValue, localMassMatrix, this->M_primalField->getFESpace().fe(), 0, 0);
+
+        // Save the computed mass matrix.
+        M_localMassMatrix.push_back ( localMassMatrix );
+    }
+
+} // setMass
+
+// Call the Darcy solver localMatrixComputation method and compute the mass matrix for the time dependent term.
+template < typename MeshType, typename SolverType >
+void
+DarcySolverTransient < MeshType, SolverType >::
+localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
+                         MatrixElemental& elmatReactionTerm )
+{
+    // Call the Darcy solver local matrix computation.
+    darcySolverLinear_Type::localMatrixComputation ( iElem, elmatMix, elmatReactionTerm );
+
+    // Check if the mass function is set or not.
+    ASSERT ( M_massFct.get(), "DarcySolverTransient : mass function not set." );
+
+    // Elemental matrix to store the current local mass matrix.
+    MatrixElemental localMassMatrix = M_localMassMatrix [ iElem ];
+
+    // Multiply the mass matrix by the time step and the time scheme coefficient.
+    localMassMatrix *= M_timeAdvance->coefficientFirstDerivative ( 0 ) /
+                       this->M_data->dataTimePtr()->timeStep();
+
+    /* Store in the reaction matrix the mass matrix,
+       divided by the time step and multiplied by the time scheme coefficient. */
+    elmatReactionTerm.mat() += localMassMatrix.mat();
+
+} // localMatrixComputation
+
 // Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
-template <typename Mesh, typename SolverType>
+template < typename MeshType, typename SolverType >
 void
-DarcySolverTransient<Mesh, SolverType>::
-localElementComputation ( const UInt & iElem )
+DarcySolverTransient < MeshType, SolverType >::
+localVectorComputation ( const UInt & iElem, VectorElemental& elvecMix )
 {
+    /* Call the Darcy solver localVectorComputation to update the finite elements
+       spaces and to compute the scalar and vector source term. */
+    darcySolverLinear_Type::localVectorComputation ( iElem, elvecMix );
 
-    /* Call the DarcySolver localElementComputation for update the local finite elements
-       and then compute the massHdiv matrix. */
-    DarcySolver<Mesh, SolverType>::localElementComputation( iElem );
+    // Create the local contribution of the time advance right hand side.
+    VectorElemental localRhsTimeAdvance ( this->M_primalField->getFESpace().refFE().nbDof(), 1 );
 
-    // Clear the mass matrix for the primal variable.
-    M_elmatMassPrimal.zero();
+    // Clean the local contribution before the computations.
+    localRhsTimeAdvance.zero ();
 
-    // Get the coordinate of the barycenter of the current element of ID iElem.
-    Real xg(0), yg(0), zg(0);
-    this->M_primal_FESpace.fe().barycenter( xg, yg, zg );
+    // Extract from the time advance right hand side the current contribution.
+    extract_vec ( *M_rhsTimeAdvance,
+                  localRhsTimeAdvance,
+                  this->M_primalField->getFESpace().refFE(),
+                  this->M_primalField->getFESpace().dof(),
+                  this->M_primalField->getFESpace().fe().currentLocalId(), 0 );
 
-    // Compute the mass matrix for the primal variable.
-    mass( M_mass( 0., xg, yg, zg, 0),
-          M_elmatMassPrimal,
-          this->M_primal_FESpace.fe(), 0, 0);
+    // Check if the mass function is setted or not.
+    ASSERT ( M_massFct.get(), "DarcySolverTransient : mass function not setted." );
 
-    // Store in the mass matrix for the primal variable also the time step.
-    M_elmatMassPrimal *= static_cast<Real>(1.) / this->M_data.dataTime()->timeStep();
+    // Extract the current mass matrix.
+    MatrixElemental::matrix_type localMassMatrix ( M_localMassMatrix [ iElem ].mat() );
 
-} // localElementComputation
+    // Divide the mass matrix by the time step.
+    localMassMatrix /= this->M_data->dataTimePtr()->timeStep();
 
-// Perform the static condensation for the local hybrid matrix.
-template <typename Mesh, typename SolverType>
-void
-DarcySolverTransient<Mesh, SolverType>::
-staticCondensation ()
-{
+    // Add to the local scalar source term the time advance term.
+    elvecMix.block ( 1 ) += localMassMatrix * localRhsTimeAdvance.vec();
 
-    // LAPACK wrapper of Epetra
-    Epetra_LAPACK lapack;
-
-    // BLAS wrapper of Epetra
-    Epetra_BLAS blas;
-
-    // Flags for the BLAS and LAPACK routine.
-    Int INFO[1]   = {0};
-
-    // Number of columns of the right hand side := 1.
-    Int NBRHS     = 1;
-    // Primal variable degrees of freedom.
-    Int NBP       = this->M_primal_FESpace.refFE().nbDof();
-    // Dual variable degrees of freedom.
-    Int NBU       = this->M_dual_FESpace.refFE().nbDof();
-    // Hybrid variable degree of freedom.
-    Int NBL       = this->M_hybrid_FESpace.refFE().nbDof();
-
-    Real ONE      = 1.0;
-    Real MINUSONE = -1.0;
-    Real ZERO     = 0.0;
-
-    // Parameter that indicate the Lower storage of matrices.
-    char UPLO     = 'L';
-
-    // Paramater that indicate the Transpose of matrices.
-    char   TRANS  = 'T';
-    char NOTRANS  = 'N';
-
-    // Parameter that indicates whether the matrix has diagonal unit ('N' means no)
-    char NODIAG   = 'N';
-
-    // Create and assign the local matrices A, B and C.
-    MatrixElemental::matrix_type A = this->M_elmatMix.block( 0, 0 );
-    MatrixElemental::matrix_type B = this->M_elmatMix.block( 0, 1 );
-    MatrixElemental::matrix_type C = this->M_elmatMix.block( 0, 2 );
-
-    //.................................
-    //        MATRIX OPERATIONS
-    //.................................
-
-    /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
-       For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-    lapack.POTRF ( UPLO, NBU, A, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
-
-    /* Put in B the matrix L^{-1} * B, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
-
-    /* Put in C the matrix L^{-1} * C, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBL, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
-
-    /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
-       M_BtB stored only on lower part.
-       For more details see http://www.netlib.org/slatec/lin/dsyrk.f */
-    blas.SYRK ( UPLO, TRANS, NBP, NBU, ONE, B, NBU, ZERO, this->M_BtB, NBP );
-
-    /* Put in M_BtB the matrix
-       M_BtB + M_elmatMassPrimal / \Delta t = B^T * A^{-1} * B + M_elmatMassPrimal / \Delta t
-       M_BtB stored only on lower part. */
-    this->M_BtB += M_elmatMassPrimal.mat();
-
-    /* Put in M_CtC the matrix C^T * L^{-T} * L^{-1} * C = C^T * A^{-1} * C
-       M_CtC stored only on lower part.
-       For more details see http://www.netlib.org/slatec/lin/dsyrk.f */
-    blas.SYRK ( UPLO, TRANS, NBL, NBU, ONE, C, NBU, ZERO, this->M_CtC, NBL );
-
-    /* Put in M_BtC the matrix B^T * L^{-T} * L^{-1} * C = B^T * A^{-1} * C
-       M_BtC fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    blas.GEMM ( TRANS, NOTRANS, NBP, NBL, NBU, ONE, B, NBU, C, NBU, ZERO, this->M_BtC, NBP );
-
-    /* Put in M_BtB the matrix LB and LB^T where LB and LB^T is the cholesky
-       factorization of B^T * A^{-1} * B + M_elmatMassPrimal / \Delta t.
-       For more details see http://www.netlib.org/lapack/double/dpotrf.f  */
-    lapack.POTRF ( UPLO, NBP, this->M_BtB, NBP, INFO );
-    ASSERT_PRE( !INFO[0],"Lapack factorization of BtB is not achieved." );
-
-    /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBL, this->M_BtB, NBP, this->M_BtC, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
-
-    /* Put in M_CtC the matrix -M_CtC + M_BtC^T * M_BtC
-       Result stored only on lower part, the matrix M_CtC stores
-       M_CtC = -C^T * A^{-1} * C + C^T * A^{-t} * B * ( M_elmatMassPrimal / \Delta t + B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C.
-       For more details see http://www.netlib.org/slatec/lin/dsyrk.f  */
-    blas.SYRK ( UPLO, TRANS, NBL, NBP, ONE, this->M_BtC, NBP, MINUSONE, this->M_CtC, NBL );
-
-    //...................................
-    //      END OF MATRIX OPERATIONS
-    //...................................
-
-    /* Sum up of the previews steps
-       A stores L and L^T where L and L^T is the Cholesky factorization of A
-       B stores L^{-1} * B
-       C stores L^{-1} * C
-       B^T stores LB and LB^T where LB and LB^T is the factorization of B^T * A^{-1} * B
-       M_BtC stores LB^{-1} * B^T * A^{-1} * C
-       M_CtC stores C^T * A^{-1} * C - C^T * A^{-t} * B * (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C */
-
-    //..........................
-    //     VECTOR OPERATIONS
-    //..........................
-
-    // Clear vector.
-    this->M_elvecHyb.zero();
-
-    // Take the pressure at the previews time step in the local element.
-    VectorElemental elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
-
-    // Extract the old primal variable for the current finite element and put it into elvecPrimalOldLocal.
-    extract_vec( *M_primalOld,
-                 elvecPrimalOldLocal,
-                 this->M_primal_FESpace.refFE(),
-                 this->M_primal_FESpace.dof(),
-                 this->M_primal_FESpace.fe().currentLocalId(), 0 );
-
-    /* Put in M_elvecSource the vector M_elmatMassPrimal / \Delta t * elvecPrimalOldLocal + M_elvecSource
-       For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    blas.GEMV ( NOTRANS, NBP, NBP, ONE, M_elmatMassPrimal.mat(), NBP, elvecPrimalOldLocal, ONE, this->M_elvecSource );
-
-    /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} *( M_elmatMassPrimal / \Delta t + F)
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBRHS, this->M_BtB, NBP, this->M_elvecSource, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
-
-    /* Put in M_elvecHyb the vector
-       M_BtC^T * M_elvecSource =
-       C^T * A^{-1} * B^T * ( M_elmatMassPrimal / \Delta t + B^T * A^{-1} * B)^{-1} * ( F + M_elmatMassPrimal / \Delta t * M_primalOld )
-       M_elvecHyb is fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBP, ONE, this->M_BtC, NBP, this->M_elvecSource, NBP, ZERO, this->M_elvecHyb, NBL );
-
-   /* Put in M_elvecSourceVector the vector L^{-1} * M_elvecSourceVector, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, this->M_elvecSourceVector, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = L^{-1} M_elvecSourceVector is not achieved." );
-
-    /* Add to M_elvecHyb the vector - C^T * M_elvecSourceVector = M_elvecHyb - C^T * A^{-1} * M_elvecSourceVector
-       M_elvecHyb is fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBL, MINUSONE, C, NBL, this->M_elvecSourceVector, NBU, ONE, this->M_elvecHyb, NBL );
-
-    /* Put in M_elvecSource the vector B^T * L^{-T} * M_elvecSourceVector =  B^T * A^{-1} * M_elvecSourceVector
-       M_elvecSource fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    blas.GEMM ( TRANS, TRANS, NBP, NBRHS, NBU, ONE, B, NBU, this->M_elvecSourceVector, NBRHS, ZERO, this->M_elvecSource, NBRHS );
-
-    /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * B^T * A^{-1} * M_elvecSource
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBRHS, this->M_BtB, NBP, this->M_elvecSource, NBRHS, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = LB^{-1} rhs is not achieved." );
-
-    /* Add in M_elvecHyb the vector M_BtC^T * M_elvecSource = 
-       C^T * A^{-1} * B^T * (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * M_elvecSource
-       M_elvecHyb is fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBP, ONE, this->M_BtC, NBP, this->M_elvecSource, NBRHS, ONE, this->M_elvecHyb, NBL );
-
-    //........................
-    // END OF VECTOR OPERATIONS.
-    //........................
-
-    /* Previously the matrix M_CtC is stored only in the lower part, but at the moment there is not
-       a function assembleMatrix that store a lower triangular sparse matrix.
-       Remind to correct these line in the future. */
-    this->symmetrizeMatrix( UPLO, NBL, this->M_CtC );
-
-    // Update the hybrid element matrix.
-    this->M_elmatHyb.block(0,0) = this->M_CtC;
-
-} // staticCondensation
-
-// Locally compute the primal and dual variable.
-template<typename Mesh, typename SolverType>
-void
-DarcySolverTransient<Mesh, SolverType>::
-localComputePrimalAndDual ()
-{
-
-    // LAPACK wrapper of Epetra
-    Epetra_LAPACK lapack;
-
-    // BLAS wrapper of Epetra
-    Epetra_BLAS blas;
-
-    // Flags for the BLAS and LAPACK routine.
-
-    Int INFO[1]   = {0};
-    // Number of columns of the right hand side := 1.
-    Int NBRHS     = 1;
-    // Primal variable degrees of freedom.
-    Int NBP       = this->M_primal_FESpace.refFE().nbDof();
-    // Dual variable degrees of freedom.
-    Int NBU       = this->M_dual_FESpace.refFE().nbDof();
-    // Hybrid variable degree of freedom.
-    Int NBL       = this->M_hybrid_FESpace.refFE().nbDof();
-
-    Real ONE      = 1.0;
-    Real MINUSONE = -1.0;
-    Real ZERO     = 0.0;
-
-    // Parameter that indicate the Lower storage of matrices.
-    char UPLO     = 'L';
-    // Parameter that indicate the Transpose of matrices.
-    char   TRANS  = 'T';
-    char NOTRANS  = 'N';
-    // Parameter that indicates whether the matrix has diagonal unit ('N' means no)
-    char NODIAG   = 'N';
-
-    // No need for CtC in this part, and last dsyrk, the only differences.
-    MatrixElemental::matrix_type A = this->M_elmatMix.block( 0, 0 );
-    MatrixElemental::matrix_type B = this->M_elmatMix.block( 0, 1 );
-    MatrixElemental::matrix_type C = this->M_elmatMix.block( 0, 2 );
-
-    //........................
-    //    MATRIX OPERATIONS
-    //........................
-
-    /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
-       For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-    lapack.POTRF ( UPLO, NBU, A, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
-
-    /* Put in B the matrix L^{-1} * B, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
-
-    /* Put in C the matrix L^{-1} * C, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
-
-    /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
-       M_BtB stored only on lower part.
-       For more details see http://www.netlib.org/slatec/lin/dsyrk.f */
-    blas.SYRK ( UPLO, TRANS, NBP, NBU, ONE, B, NBU, ZERO, this->M_BtB, NBP );
-
-    /* Put in M_BtB the matrix
-       M_BtB - M_elmatMassPrimal / \Delta t = B^T * A^{-1} * B - M_elmatMassPrimal / \Delta t
-       M_BtB stored only on lower part. */
-    this->M_BtB += M_elmatMassPrimal.mat();
-
-    /* Put in M_BtC the matrix B^T * L^{-T} * L^{-1} * C = B^T * A^{-1} * C
-       M_BtC fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    blas.GEMM ( TRANS, NOTRANS, NBP, NBL, NBU, ONE, B, NBU, C, NBU, ZERO, this->M_BtC, NBP );
-
-    /* Put in M_BtB the matrix LB and LB^T where LB and LB^T is the cholesky
-       factorization of B^T * A^{-1} * B + M_elmatMassPrimal / \Delta t.
-       For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-    lapack.POTRF ( UPLO, NBP, this->M_BtB, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack factorization of BtB is not achieved." );
-
-    /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
-           For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBL, this->M_BtB, NBP, this->M_BtC, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
-
-    //..............................
-    //   END OF MATRIX OPERATIONS
-    //..............................
-
-    /* Sum up of the previews steps
-       A stores L and L^T where L and L^T is the Cholesky factorization of A
-       B stores L^{-1} * B
-       C stores L^{-1} * C
-       B^T stores LB and LB^T where LB and LB^T is the factorization of B^T * A^{-1} * B
-       M_BtC stores LB^{-1} * B^T * A^{-1} * C */
-
-
-    //......................
-    //    VECTOR OPERATIONS (Computation of Pressure and Velocities)
-    //......................
-
-    //...................................
-    //  1) Computation of the PRESSURE
-    //...................................
-
-    // Save in M_elvecFlux the values in M_elvecSourceVector useful for the dual variable
-    this->M_elvecFlux = this->M_elvecSourceVector;
-
-    /* Put in M_elvecSourceVector the vector L^{-1} * M_elvecSourceVector, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, this->M_elvecSourceVector, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = L^{-1} M_elvecSourceVector is not achieved." );
-
-    /* Put in M_elvecSourceVector the vector B^T * L^{-T} * M_elvecSourceVector =  B^T * A^{-1} * M_elvecSourceVector
-       M_elvecSourceVector fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    blas.GEMM ( TRANS, TRANS, NBP, NBRHS, NBU, ONE, B, NBU, this->M_elvecSourceVector, NBRHS, ONE, this->M_elvecSource, NBRHS );
-
-    // Take the pressure at the previews time step in the local element.
-    VectorElemental elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
-
-    // Extract the old primal variable for the current finite element and put it into elvecPrimalOldLocal.
-    extract_vec( *M_primalOld,
-                 elvecPrimalOldLocal,
-                 this->M_primal_FESpace.refFE(),
-                 this->M_primal_FESpace.dof(),
-                 this->M_primal_FESpace.fe().currentLocalId(), 0 );
-
-    /* Put in M_elvecSource the vector M_elmatMassPrimal / \Delta t * elvecPrimalOldLocal + M_elvecSource
-       For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    blas.GEMV ( NOTRANS, NBP, NBP, ONE, M_elmatMassPrimal.mat(), NBP, elvecPrimalOldLocal, ONE, this->M_elvecSource );
-
-    /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * ( F + M_elmatMassPrimal / \Delta t * elvecPrimalOldLocal )
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBRHS, this->M_BtB, NBP, this->M_elvecSource, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} M_elvecSource is not achieved." );
-
-    /* Put in M_elvecSource the vector
-       -M_BtC * M_elvecHyb + M_elvecSource = -LB^{-1} * B^T * A^{-1} * C * lambda_K + LB^{-1} * ( F + M_elmatMassPrimal / \Delta t)
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    blas.GEMM ( NOTRANS, NOTRANS, NBP, NBRHS, NBL, MINUSONE, this->M_BtC, NBP, this->M_elvecHyb, NBL, ONE, this->M_elvecSource, NBP );
-
-    /* Put in M_elvecSource the vector LB^{-T} * M_elvecSource, where
-       M_elvecSource stores
-       - (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C * lambda_K + (B^T * A^{-1} * B)^{-1} * (F + M_elmatMassPrimal / \Delta t)
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, TRANS, NODIAG, NBP, NBRHS, this->M_BtB, NBP, this->M_elvecSource, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-T} M_elvecSource is not achieved." );
-
-    // Now rhs contains the primal variable for the current element, we must put it in the global vector.
-
-    //.....................................
-    //  2) Computation of the VELOCITIES
-    //.....................................
-
-    /* Put in M_elvecFlux the vector L^{-1} * M_elvecFlux, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, this->M_elvecFlux, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecFlux = L^{-1} M_elvecFlux is not achieved." );
-
-    /* Put in M_elvecFlux the vector B * M_elvecSource - M_elvecFlux = 
-       = L^{-1} * B * primal_K - M_elvecVectorSource
-       For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    blas.GEMV ( NOTRANS, NBU, NBP, ONE, B, NBU, this->M_elvecSource, MINUSONE, this->M_elvecFlux );
-
-    /* Put in M_elvecFlux the vector - C * M_elvecHyb - M_elvecFlux = 
-       = - L^{-1} * C * lambda_K - L^{-1} * B * primal_K + L^{-1} * M_elvecVectorSource
-       For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    blas.GEMV ( NOTRANS, NBU, NBL, MINUSONE, C, NBL, this->M_elvecHyb, MINUSONE, this->M_elvecFlux );
-
-    /* Put in flux the vector L^{-T} * M_elvecFlux = 
-       = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K + A^{-1} * M_elvecVectorSource
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    lapack.TRTRS ( UPLO, TRANS, NODIAG, NBU, NBRHS, A, NBU, this->M_elvecFlux, NBU, INFO );
-    ASSERT_PRE(!INFO[0], "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
-
-} // localComputePrimalAndDual
-
-// Update all the variables of the problem.
-template<typename Mesh, typename SolverType>
-inline
-void
-DarcySolverTransient<Mesh, SolverType>::
-updateVariables ()
-{
-    // Reset the primal old vector
-    M_primalOld.reset( new vector_Type ( this->M_primal_FESpace.map() ) );
-
-    // Update the primal solution.
-    *M_primalOld = *( this->M_primal );
-
-    // Call the method of the DarcySolver to update all the variables defined in it.
-    DarcySolver<Mesh, SolverType>::updateVariables();
-
-} // updateVariables
+} // localVectorComputation
 
 } // namespace LifeV
 
