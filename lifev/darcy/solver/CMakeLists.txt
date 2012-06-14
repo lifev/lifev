@@ -1,5 +1,6 @@
 SET(solver_HEADERS
   solver/DarcySolverLinear.hpp
+  solver/DarcySolverTransient.hpp
   solver/DarcyData.hpp
 CACHE INTERNAL "")
 
