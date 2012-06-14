@@ -166,11 +166,11 @@ public:
       @param point Point where the field is evaluated, vector format.
       @return The template type of the value of the field.
     */
-    virtual return_Type eval ( const UInt& iElem, 
-                               const point_Type& point, 
+    virtual return_Type eval ( const UInt& iElem,
+                               const point_Type& point,
                                const Real& time = 0.) const = 0;
 
-    //@}    
+    //@}
 
     //! @name Set Methods
     //@{
@@ -234,6 +234,15 @@ public:
     const FESpace_Type& getFESpace () const
     {
         return *M_FESpace;
+    }
+
+    //! Return the pointer to the finite element space.
+    /*!
+      @return Constant FESpacePtr_Type reference of the finite element space.
+    */
+    const FESpacePtr_Type& getFESpacePtr () const
+    {
+        return M_FESpace;
     }
 
     //! Return the finite element space.
