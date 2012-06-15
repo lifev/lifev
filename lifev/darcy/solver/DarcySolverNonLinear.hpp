@@ -241,10 +241,10 @@ namespace LifeV
     @todo Attention! We have the hypothesis that we use P0 elements for the primal unknown. Change this in a future!
     @todo Add criteria to ensure convergence of the fixed point method.
 */
-template< typename Mesh,
-typename SolverType = LifeV::SolverAztecOO >
+template < typename MeshType,
+           typename SolverType = LifeV::SolverAztecOO >
 class DarcySolverNonLinear :
-        virtual public DarcySolver<Mesh, SolverType>
+        virtual public DarcySolverLinear < MeshType, SolverType >
 {
 
 public:
@@ -252,68 +252,40 @@ public:
     //! @name Public Types
     //@{
 
-    typedef DarcySolver<Mesh, SolverType> DarcySolverPolicies;
+    //! Typedef for mesh template.
+    typedef MeshType mesh_Type;
 
-    typedef typename DarcySolverPolicies::function_Type      function_Type;
+    //! Typedef for solver template.
+    typedef SolverType solver_Type;
 
-    typedef typename DarcySolverPolicies::permeability_Type  permeability_Type;
+    //! Self typedef.
+    typedef DarcySolverNonLinear < mesh_Type, solver_Type > darcySolverNonLinear_Type;
 
-    typedef typename DarcySolverPolicies::data_Type          data_Type;
+    //! Darcy solver class.
+    typedef DarcySolverLinear < mesh_Type, solver_Type > darcySolverLinear_Type;
 
-    typedef typename DarcySolverPolicies::bchandler_raw_Type bchandler_raw_Type;
-    typedef typename DarcySolverPolicies::bchandler_Type     bchandler_Type;
+    //! Shared pointer to a scalar value function.
+    typedef typename darcySolverLinear_Type::scalarFctPtr_Type scalarFctPtr_Type;
 
-    typedef typename DarcySolverPolicies::matrix_Type        matrix_Type;
-    typedef typename DarcySolverPolicies::matrixPtr_Type     matrixPtr_Type;
+    //! Shared pointer to a matrix value function.
+    typedef typename darcySolverLinear_Type::matrixFctPtr_Type matrixFctPtr_Type;
 
-    typedef typename DarcySolverPolicies::vector_Type        vector_Type;
-    typedef typename DarcySolverPolicies::vectorPtr_Type     vectorPtr_Type;
+    //! Scalar field.
+    typedef typename darcySolverLinear_Type::scalarField_Type scalarField_Type;
 
-    typedef typename DarcySolverPolicies::comm_Type          comm_Type;
-    typedef typename DarcySolverPolicies::commPtr_Type       commPtr_Type;
+    //! Shared pointer to a scalar field.
+    typedef typename darcySolverLinear_Type::scalarFieldPtr_Type scalarFieldPtr_Type;
 
     //@}
 
     //! @name Constructors & destructor
     //@{
 
-    /*!
-      Full constructor for the class.
-      @param dataFile Data for the problem.
-      @param primal_FESpace Primal finite element space.
-      @param dual_FESpace Dual element space.
-      @param hybrid_FESpace Hybrid finite element space.
-      @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param bcHandler Boundary conditions for the problem.
-      @param comm Shared pointer of the Epetra communicator.
-    */
-    DarcySolverNonLinear ( const data_Type&          dataFile,
-                           FESpace<Mesh, MapEpetra>& primal_FESpace,
-                           FESpace<Mesh, MapEpetra>& dual_FESpace,
-                           FESpace<Mesh, MapEpetra>& hybrid_FESpace,
-                           FESpace<Mesh, MapEpetra>& VdotN_FESpace,
-                           bchandler_raw_Type&       bcHandler,
-                           const commPtr_Type&             comm );
-
-    /*!
-      Constructor for the class without the definition of the boundary handler.
-      @param dataFile Data for the problem.
-      @param primal_FESpace Primal finite element space.
-      @param dual_FESpace Dual finite element space.
-      @param hybrid_FESpace Hybrid finite element space.
-      @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param bcHandler Boundary conditions for the problem.
-      @param comm Shared pointer of the Epetra communicator.
-    */
-    DarcySolverNonLinear ( const data_Type&          dataFile,
-                           FESpace<Mesh, MapEpetra>& primal_FESpace,
-                           FESpace<Mesh, MapEpetra>& dual_FESpace,
-                           FESpace<Mesh, MapEpetra>& hybrid_FESpace,
-                           FESpace<Mesh, MapEpetra>& VdotN_FESpace,
-                           const commPtr_Type&             comm );
+    //! Constructor for the class.
+    DarcySolverNonLinear ();
 
     //! Virtual destructor.
-    virtual ~DarcySolverNonLinear ();
+    virtual ~DarcySolverNonLinear () {};
 
     //@}
 
@@ -324,7 +296,7 @@ public:
     virtual void setup ();
 
     //!  Perform the fixed point scheme.
-    void fixedPointScheme ();
+    virtual void solve ();
 
     //@}
 
@@ -333,24 +305,62 @@ public:
 
     //! Initial guess for fixed point iteration
     /*!
-      Set the function for the first iteration for the fixed point method. The default is the zero function.
+      Set the function for the first iteration for the fixed point method.
       @param primalZeroIteration The function for the first iteration.
     */
-    void setPrimalZeroIteration ( const function_Type& primalZeroIteration );
+    void setPrimalZeroIteration ( const scalarFctPtr_Type& primalZeroIteration );
 
     //! Set the inverse of diffusion tensor,
     /*!
-      The default inverse of permeability is the identity matrix.
+      The non linearity of the solver is in the diffusion or permeability tensor.
+      To handle this type of non linearity we use an iterative scheme and we
+      write the tensor depending on the solution at previuos step.
+      The non linear tensor now has as an additional scalar field, the last one,
+      the solution of the problem at previuos step.
+      <br>
+      The user should take into account that the value of the primal variable is
+      the last field set, by the user, plus one. So the inverse of permeability
+      can access to the primal variable with
+      \code
+      matrix invK (3,3);
+      Real unkown_n = scalarField(0).eval( iElem, P, time );
+      invK(0,0) = unknown_n * unknown_n + 1.;
+      \endcode
+      obtaining a tensor with the non linearity in the position \f$ (0,0) \f$
+      the function \f$ \left[K^{-1}\right]_{0,0} = u^2 + 1 \f$.
+      <br>
+      If \f$ m \f$ fields are previously added use \f$ m+1 \f$ instead the zero.
       @param invPerm Inverse of the permeability tensor for the problem.
     */
-    void setInversePermeability ( const permeability_Type& invPerm )
+    virtual void setInversePermeability ( const matrixFctPtr_Type& invPerm )
     {
 
         // Call the standard set inverse permeability
-        DarcySolver<Mesh, SolverType>::setInversePermeability( invPerm );
+        darcySolverLinear_Type::setInversePermeability ( invPerm );
+
+        // Create the primal variable for the first iteration.
+        M_primalFieldPreviousIteration.reset ( new scalarField_Type ( this->M_primalField->getFESpacePtr() ) );
 
         // Set the dependence of the previous solution in the permeability
-        this->M_inversePermeability->setField( primalPreviousIteration() );
+        this->M_inversePermeabilityFct->addScalarField ( M_primalFieldPreviousIteration );
+    }
+
+    /*!
+      Set fixed point tolerance
+      @param tol requested tolerance
+    */
+    void setFixedPointTolerance ( const Real& tol )
+    {
+        M_fixedPointTolerance = tol;
+    }
+
+    /*!
+      Set maximum number of fixed point iterations permitted
+      @param maxit requested maximum
+     */
+    void setFixedPointMaxIteration ( const UInt& maxit )
+    {
+        M_fixedPointMaxIteration = maxit;
     }
 
     //@}
@@ -412,18 +422,22 @@ public:
         return M_fixedPointMaxIteration;
     }
 
-    //!  Returns the pointer of the primal solution vector at previous step.
+    //!  Returns the pointer of the primal solution field at previous step.
     /*!
-      @return Constant vector_Type reference of the primal solution at previous step.
+      @return Constant scalarFieldPtr_Type reference of the primal solution field at previous step.
     */
-    const vectorPtr_Type& primalPreviousIteration () const
+    const scalarFieldPtr_Type& primalPreviousIterationPtr () const
     {
-        return M_primalPreviousIteration;
+        return M_primalFieldPreviousIteration;
     }
 
-          vectorPtr_Type& primalPreviousIteration ()
+    //!  Returns the pointer of the primal solution field at previous step.
+    /*!
+      @return Constant scalarFieldPtr_Type reference of the primal solution field at previous step.
+    */
+    scalarFieldPtr_Type& primalPreviousIterationPtr ()
     {
-        return M_primalPreviousIteration;
+        return M_primalFieldPreviousIteration;
     }
 
     //@}
@@ -440,30 +454,7 @@ protected:
       the global hybrid matrix, e.g. reset the global hybrid matrix.
       It is principally used for a time dependent derived class.
     */
-    virtual void updateVariables ();
-
-    //@}
-
-    //! @name Set methods
-    //@{
-
-    /*!
-      Set fixed point tolerance
-      @param tol requested tolerance
-    */
-    void setFixedPointTolerance ( const Real& tol)
-    {
-        M_fixedPointTolerance = tol;
-    }
-
-    /*!
-      Set maximum number of fixed point iterations permitted
-      @param maxit requested maximum
-     */
-    void setFixedPointMaxIteration ( const UInt& maxit)
-    {
-        M_fixedPointMaxIteration = maxit;
-    }
+    virtual void resetVariables ();
 
     //@}
 
@@ -471,30 +462,46 @@ protected:
     //@{
 
     //! Primal solution at previous iteration step.
-    vectorPtr_Type M_primalPreviousIteration;
+    scalarFieldPtr_Type M_primalFieldPreviousIteration;
 
     //@}
 
 private:
+
+    //! @name Private Constructors
+    //@{
+
+    //! Inhibited copy constructor.
+    DarcySolverNonLinear ( const darcySolverNonLinear_Type& );
+
+    //@}
+
+    //! @name Private Operators
+    //@{
+
+    //! Inhibited assign operator.
+    darcySolverNonLinear_Type& operator= ( const darcySolverNonLinear_Type& );
+
+    //@}
 
     // Non-linear stuff.
     //! @name Non-linear stuff
     //@{
 
     //! The maximum number of iterations for the fixed point method.
-    UInt           M_fixedPointMaxIteration;
+    UInt M_fixedPointMaxIteration;
 
     //! The current iterations for the fixed point method.
-    UInt           M_fixedPointNumIteration;
+    UInt M_fixedPointNumIteration;
 
     //! Tollerance for the stopping criteria for the fixed point method.
-    Real           M_fixedPointTolerance;
+    Real M_fixedPointTolerance;
 
     //! The residual between two iteration of the fixed point scheme.
-    Real           M_fixedPointResidual;
+    Real M_fixedPointResidual;
 
     //! Primal solution at zero time step.
-    function_Type  M_primalZeroIteration;
+    scalarFctPtr_Type  M_primalFieldZeroIterationFct;
 
     //@}
 
@@ -509,166 +516,119 @@ private:
 // ===================================================
 
 // Complete constructor.
-template<typename Mesh, typename SolverType>
-DarcySolverNonLinear<Mesh, SolverType>::
-DarcySolverNonLinear ( const data_Type&           dataFile,
-                       FESpace<Mesh, MapEpetra>&  primal_FESpace,
-                       FESpace<Mesh, MapEpetra>&  dual_FESpace,
-                       FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
-                       FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
-                       bchandler_raw_Type&        bcHandler,
-                       const commPtr_Type&              comm ):
+template < typename MeshType, typename SolverType >
+DarcySolverNonLinear < MeshType, SolverType >::
+DarcySolverNonLinear ( ):
         // Standard Darcy solver constructor.
-        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
+        darcySolverLinear_Type::DarcySolverLinear  ( ),
         // Non-linear stuff.
-        M_primalPreviousIteration       ( new vector_Type ( this->M_primal_FESpace.map() ) ),
-        M_fixedPointMaxIteration        ( static_cast<UInt>(10) ),
-        M_fixedPointNumIteration        ( static_cast<UInt>(0) ),
-        M_fixedPointTolerance           ( static_cast<Real>(1.e-8) ),
-        M_fixedPointResidual            ( M_fixedPointTolerance + static_cast<Real>(1) ),
-        M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
-
+        M_fixedPointMaxIteration       ( static_cast<UInt>(10) ),
+        M_fixedPointNumIteration       ( static_cast<UInt>(0) ),
+        M_fixedPointTolerance          ( static_cast<Real>(1.e-8) ),
+        M_fixedPointResidual           ( M_fixedPointTolerance + static_cast<Real>(1.) )
 {
-
-    // Interpolate the primal initial value on the default initial value function, for the fixed point scheme.
-    this->M_primal_FESpace.interpolate( M_primalZeroIteration,
-                                        *(this->M_primal),
-                                        static_cast<Real>(0) );
-
 } // Constructor
-
-// Constructor without boundary condition handler.
-template<typename Mesh, typename SolverType>
-DarcySolverNonLinear<Mesh, SolverType>::
-DarcySolverNonLinear ( const data_Type&           dataFile,
-                       FESpace<Mesh, MapEpetra>&  primal_FESpace,
-                       FESpace<Mesh, MapEpetra>&  dual_FESpace,
-                       FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
-                       FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
-                       const commPtr_Type&              comm ):
-        // Standard Darcy solver constructor.
-        DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
-        // Non-linear stuff.
-        M_primalPreviousIteration       ( new vector_Type ( this->M_primal_FESpace.map() ) ),
-        M_fixedPointMaxIteration        ( static_cast<UInt>(10) ),
-        M_fixedPointNumIteration        ( static_cast<UInt>(0) ),
-        M_fixedPointTolerance           ( static_cast<Real>(1.e-8) ),
-        M_fixedPointResidual            ( M_fixedPointTolerance + static_cast<Real>(1) ),
-        M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
-{
-
-    // Interpolate the primal initial value on the default initial value function, for the fixed point scheme.
-    this->M_primal_FESpace.interpolate( M_primalZeroIteration,
-                                        *(this->M_primal),
-                                        static_cast<Real>(0) );
-
-} // Constructor
-
-// Virtual destructor.
-template<typename Mesh, typename SolverType>
-DarcySolverNonLinear<Mesh, SolverType>::
-~DarcySolverNonLinear ( void )
-{
-
-} // Destructor
 
 // ===================================================
 // Public methods
 // ===================================================
 
 // Set up the linear solver and the preconditioner.
-template<typename Mesh, typename SolverType>
+template < typename MeshType, typename SolverType >
 void
-DarcySolverNonLinear<Mesh, SolverType>::
+DarcySolverNonLinear < MeshType, SolverType >::
 setup ()
 {
 
-    GetPot dataFile( *(this->M_data.dataFile()) );
+    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
 
-    // Call the DarcySolver setup method for setting up the linear solver.
-    DarcySolver<Mesh, SolverType>::setup();
+    // Call the DarcySolverLinear setup method for setting up the linear solver.
+    darcySolverLinear_Type::setup();
 
     // Set the maximum number of iteration for the fixed point iteration scheme.
-    setFixedPointMaxIteration(static_cast<UInt>( dataFile( ( this->M_data.section()
-                                 + "/non-linear/fixed_point_iteration" ).data(), 10 ) ));
+    const UInt maxIter = dataFile( ( this->M_data->section() + "/non-linear/fixed_point_iteration" ).data(), 10 );
+    setFixedPointMaxIteration ( maxIter );
 
     // Set the tollerance for the fixed point iteration scheme.
-    setFixedPointTolerance(dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 ));
+    const Real tol = dataFile( ( this->M_data->section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
+    setFixedPointTolerance ( tol );
 
 } // setup
 
 // Fixed point scheme.
-template <typename Mesh, typename SolverType>
+template < typename MeshType, typename SolverType >
 void
-DarcySolverNonLinear<Mesh, SolverType>::
-fixedPointScheme ()
+DarcySolverNonLinear < MeshType, SolverType >::
+solve ()
 {
 
     // Current iteration.
     M_fixedPointNumIteration = static_cast<UInt>(0);
 
     // Error between two iterations, it is the relative error between two step of the primal vector
-    M_fixedPointResidual =  fixedPointTolerance() + 1;
+    M_fixedPointResidual = fixedPointTolerance() + 1.;
 
     /* A loop for the fixed point scheme, with exit condition based on stagnate of the
        primal variable and the maximum iteration. */
-    while (    fixedPointResidual() > fixedPointTolerance()
-           && fixedPointNumIteration() < fixedPointMaxIteration() )
+    while ( M_fixedPointResidual > M_fixedPointTolerance
+        && M_fixedPointNumIteration < M_fixedPointMaxIteration )
     {
         // Increment the iteration number.
         ++M_fixedPointNumIteration;
 
-        // Build the linear system and the right hand side.
-        this->buildSystem();
-
-        // Solve the linear system.
-        this->solve();
-
-        // Post process of the primal and dual variables.
-        this->computePrimalAndDual();
+        // Solve the problem.
+        darcySolverLinear_Type::solve ();
 
         // Compute the error.
-        M_fixedPointResidual = ( *(this->M_primal) - *M_primalPreviousIteration ).norm2() / this->M_primal->norm2();
+        M_fixedPointResidual = ( this->M_primalField->getVector() -
+                                 M_primalFieldPreviousIteration->getVector() ).norm2()
+                               / this->M_primalField->getVector().norm2();
 
         // The leader process prints the iteration data.
-        this->M_displayer.leaderPrint( "Fixed point scheme           \n" );
+        this->M_displayer->leaderPrint ( "Fixed point scheme\n" );
 
         // Print the maximum number of iterations
-        this->M_displayer.leaderPrint( "Maximum number of iterations ",
-                                       fixedPointMaxIteration(), "\n" );
+        this->M_displayer->leaderPrint ( "Maximum number of iterations ",
+                                         M_fixedPointMaxIteration );
 
         // Print the actual iterations
-        this->M_displayer.leaderPrint( "Iteration number             ",
-                                       fixedPointNumIteration(), "\n" );
-
-        // Print the tollerance
-        this->M_displayer.leaderPrint( "Tolerance                   ",
-                                       fixedPointTolerance(), "\n" );
+        this->M_displayer->leaderPrint ( " of ",
+                                         M_fixedPointNumIteration , "\n" );
 
         // Print the error reached
-        this->M_displayer.leaderPrint( "Error                        ",
-                                       fixedPointResidual(), "\n" );
+        this->M_displayer->leaderPrint ( "Error ",
+                                         M_fixedPointResidual );
+
+        // Print the tollerance
+        this->M_displayer->leaderPrint ( " over ",
+                                         M_fixedPointTolerance, "\n" );
 
     }
 
     // Check if the fixed point method reach the tolerance.
-    ASSERT( fixedPointMaxIteration() > fixedPointNumIteration(), "Attention the fixed point scheme did not reach convergence." );
+    if ( M_fixedPointMaxIteration < M_fixedPointNumIteration )
+    {
+        std::cerr << "Attention the fixed point scheme did not reach convergence."
+                  << std::endl << "Max of iterations " << M_fixedPointMaxIteration
+                  << std::endl << "Number of iterations " << M_fixedPointNumIteration
+                  << std::endl;
+        exit(1);
+    }
 
 } // fixedPointScheme
 
 // Set the first value for the fixed point method.
-template<typename Mesh, typename SolverType>
+template < typename MeshType, typename SolverType >
 void
-DarcySolverNonLinear<Mesh, SolverType>::
-setPrimalZeroIteration ( const function_Type& primalZeroIteration )
+DarcySolverNonLinear < MeshType, SolverType >::
+setPrimalZeroIteration ( const scalarFctPtr_Type& primalZeroIterationFct )
 {
     // Set the function for the first iteration.
-    M_primalZeroIteration = primalZeroIteration;
+    M_primalFieldZeroIterationFct = primalZeroIterationFct;
 
     // Interpolate the primal variable for the first iteration.
-    this->M_primal_FESpace.interpolate( M_primalZeroIteration,
-                                        *(this->M_primal),
-                                        this->M_data.dataTime()->initialTime() );
+    M_primalFieldZeroIterationFct->interpolate ( *(this->M_primalField),
+                                                 this->M_data->dataTimePtr()->initialTime() );
 
 } // SetZeroIterationPrimal
 
@@ -677,24 +637,20 @@ setPrimalZeroIteration ( const function_Type& primalZeroIteration )
 // ===================================================
 
 // Update all the variables of the problem.
-template<typename Mesh, typename SolverType>
+template < typename MeshType, typename SolverType >
 void
-DarcySolverNonLinear<Mesh, SolverType>::
-updateVariables ()
+DarcySolverNonLinear < MeshType, SolverType >::
+resetVariables ()
 {
-    // Reset the primal vector at the previous iteration step.
-    M_primalPreviousIteration.reset( new vector_Type( this->M_primal_FESpace.map() ) );
 
     // Update the primal vector at the previous iteration step.
-    *M_primalPreviousIteration = *(this->M_primal);
+    M_primalFieldPreviousIteration->getVector() = this->M_primalField->getVector();
 
-    // Call the method of the DarcySolver to update all the variables defined in it.
-    DarcySolver<Mesh, SolverType>::updateVariables();
+    // Call the method of the DarcySolverLinear to update all the variables defined in it.
+    darcySolverLinear_Type::resetVariables();
 
-} // updateVariables
-
+} // resetVariables
 
 } // namespace LifeV
-
 
 #endif //_DARCYSOLVERNONLINEAR_H_
