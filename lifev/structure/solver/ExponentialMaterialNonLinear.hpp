@@ -644,10 +644,10 @@ void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( 
 
   //Computation trace of the isochoric C
   Real trCiso(0.0);
-  trCiso = std::pow(invariants[3],-2/3)*invariants[0];
+  trCiso = std::pow(invariants[3],-(2.0/3.0))*invariants[0];
 
   Real coef( 0.0 );
-  coef = alpha * std::pow(invariants[3],-2/3) * std::exp( gamma * ( trCiso - 3 ) );
+  coef = alpha * std::pow(invariants[3],-(2.0/3.0)) * std::exp( gamma * ( trCiso - 3 ) );
   firstTerm.Scale( coef );
 
   //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}

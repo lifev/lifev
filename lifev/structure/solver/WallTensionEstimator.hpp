@@ -437,7 +437,6 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       //Compute the first Piola-Kirchhoff tensor
       M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
       
-      M_firstPiola->Print(std::cout);
       //Compute the Cauchy tensor
       AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
 
@@ -449,7 +448,6 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
       Real sum(0);
       for( int i=0; i < M_eigenvaluesI.size(); i++ )
 	sum += std::abs(M_eigenvaluesI[i]);
-
       ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
       //Save the eigenvalues in the global vector

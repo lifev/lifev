@@ -1347,6 +1347,7 @@ void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariant
   C11 = tensorF(0,0)*tensorF(0,0) + tensorF(1,0)*tensorF(1,0) + tensorF(2,0)*tensorF(2,0);
   C22 = tensorF(0,1)*tensorF(0,1) + tensorF(1,1)*tensorF(1,1) + tensorF(2,1)*tensorF(2,1);
   C33 = tensorF(0,2)*tensorF(0,2) + tensorF(1,2)*tensorF(1,2) + tensorF(2,2)*tensorF(2,2);
+
   invariants[0]=C11 + C22 + C33; //First invariant C
   invariants[1]=0.0; //Second invariant C
   invariants[2]=0.0; //Third invariant C
