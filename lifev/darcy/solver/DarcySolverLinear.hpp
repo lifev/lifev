@@ -34,7 +34,7 @@
 
      @contributor M. Kern <michel.kern@inria.fr>
      @maintainer M. Kern <michel.kern@inria.fr>
- */
+*/
 
 #ifndef _DARCYSOLVERLINEAR_H_
 #define _DARCYSOLVERLINEAR_H_ 1
