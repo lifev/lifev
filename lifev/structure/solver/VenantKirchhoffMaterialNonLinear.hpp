@@ -121,11 +121,7 @@ class VenantKirchhoffMaterialNonLinear :
 				      const dataPtr_Type& dataMaterial,
 				      const displayerPtr_Type& displayer);
 
-//<<<<<<< HEAD
-    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
-//=======
-    //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
-//>>>>>>> 20110728_ExponentialNeohookean
+
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
@@ -458,7 +454,7 @@ template <typename Mesh>
 inline StructuralMaterial<Mesh>* createVenantKirchhoffNonLinear() { return new VenantKirchhoffMaterialNonLinear<Mesh >(); }
 namespace
 {
-static bool registerVKNL = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonlinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerVKNL = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

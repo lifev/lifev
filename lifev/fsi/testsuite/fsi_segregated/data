@@ -31,9 +31,12 @@ updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
 
-abstol = 0.  reltol = 1.e-5 etamax = 1.e-8 # tolerance of the
-interface problem (GMRES), # if semiImplicit, set etamax = 1.e-10, #
-else (e.g.)  etamax = 1.e-3 #IMPORTANT: etamax < abstol + reltol*res
+abstol = 0.  
+reltol = 1.e-5 
+etamax = 1.e-8 # tolerance of the interface problem (GMRES), # if semiImplicit, set etamax = 1.e-10, 
+       	       #else (e.g.)  etamax = 1.e-3 
+	       #IMPORTANT: etamax < abstol + reltol*res
+semiImplicit = 1
 maxSubIter = 100 #monolithic = 0
 
 restart    = false   # restart the computations (see also importer)
@@ -42,7 +45,7 @@ restart    = false   # restart the computations (see also importer)
 
 [interface] # mesh dependent flags for the interface.
 fluid_flag      =  1 # default: 1
-solid_flag      =  1 # default: fluid_flag
+#solid_flag      =  1 # default: fluid_flag
 #structure_flag  =  1 # default: fluid_flag
 #harmonic_flag   =  1 # default: fluid_flag
 tolerance       =  0 # how far points are to be considered the same on the interface
@@ -59,17 +62,17 @@ filename = solid
 
 [fluid]
 
-useShapeDerivatives = true
-absorbing_bc	    = false
-semiImplicit        = false # (only valid for method = exactJacobian or monolithic).
+useShapeDerivatives = false
+absorbing_bc	    = true
+semiImplicit = false
 
 [./physics]
 density   = 1.0               # density
-viscosity = 0.035              # viscosity
+viscosity = 0.03              # viscosity
 
 [../time_discretization]
 initialtime		= 0.
-endtime			= 0.05
+endtime			= 0.002
 timestep		= 0.001
 method                  = BDF
 BDF_order		= 1
@@ -80,14 +83,14 @@ BDF_order		= 1
 [../ipstab]
 gammaBeta  = 1
 gammaDiv   = 0.2
-gammaPress = 0.2
+gammaPress = 0.05
 reuse      = true
 max_iter_reuse = 100
 
 [../space_discretization]
 mesh_dir  = ./ # the directory where the mesh file is
 mesh_file = tube20.mesh #carotid_fluid.mesh #tube_curve20.mesh  # mesh file
-
+stiff_strain=true
 vel_order		= P1		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
 
@@ -103,10 +106,10 @@ solver          = gmres
 scaling         = none
 output          = all  #none
 conv            = rhs
-max_iter        = 100
+max_iter        = 200
 reuse           = true
 max_iter_reuse  = 101
-kspace          = 100
+kspace          = 200
 tol             = 1.e-10    # AztecOO tolerance
 
 [../prec]
@@ -204,18 +207,17 @@ filter_singletons      = false
 material_flag   = '1' # '1 2'
 solidType       = linearVenantKirchhoff
 material_flag   = 1 # '1 2'
-young           = 3.0E6 #,1.9E9
-poisson         = 0.30 #,0.30
-
+young           = 4.0E6 #,1.9E9
+poisson         = 0.45 #,0.30
 density         = 1.2					# density
 thickness	= 0.1
 
 [../time_discretization]
 timestep        = 0.001
 method          = BDF
-BDF_order       = 2
-theta           = 0.25
-gamma           = 0.5
+BDF_order       = 1
+#theta           = 0.25
+#gamma           = 0.5
 
 
 [../space_discretization]
@@ -224,7 +226,7 @@ mesh_file = vessel20.mesh #carotid_solid.mesh #vessel_curve20.mesh  # mesh
 order     = P1
 
 [../miscellaneous]
-factor    = 1
+factor    = 12
 verbose   = 1
 depname   = dep
 
@@ -270,7 +272,7 @@ solvertype      = Amesos_Umfpack
   reuse           = true
   max_iter_reuse  = 101
   kspace          = 100
-  tol             = 1.e-10    # AztecOO tolerance
+  tol             = 1.e-5    # AztecOO tolerance
 
 
 [../time_discretization]

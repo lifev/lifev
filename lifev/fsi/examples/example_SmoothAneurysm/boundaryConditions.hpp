@@ -145,7 +145,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
     return BCh_fluid;
 }
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool const & isOpen=true)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool const & /*isOpen=true*/)
 {
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the fluid\n";
@@ -173,7 +173,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool
     //Absorbing BC on outlet 2and3 caused instabilities
     BCh_fluid->addBC("out3", OUTLET, Natural,  Normal, out_press3);
     //BCh_fluid->addBC("out3", OUTLET, Natural,  Normal, bcf);
-    
+
     return BCh_fluid;
 }
 
@@ -194,23 +194,23 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
     BCh_solid->addBC("BORDERS-RIN",   INLETWALL_INTRING, Essential, Full, bcf,  3);
     BCh_solid->addBC("BORDERS-ROUT",   INLETWALL_OUTRING, Essential, Full, bcf,  3);
     BCh_solid->addBC("BORDERS",   OUTLETWALL, Essential, Full, bcf,  3);
-    BCh_solid->addBC("BORDERS-rin",   OUTLETWALL_INTRING, Essential, Full, bcf,  3);    
+    BCh_solid->addBC("BORDERS-rin",   OUTLETWALL_INTRING, Essential, Full, bcf,  3);
     BCh_solid->addBC("BORDERS-rout",   OUTLETWALL_OUTRING, Essential, Full, bcf,  3);
- 
+
     //aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
-    
-    
+
+
     //Robin BC
     BCFunctionBase hyd(fZero);
     BCFunctionBase young (E);
     //robin condition on the outer wall
     _oper.setRobinOuterWall(hyd, young);
     //BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
-    
-    
+
+
     //First try: Homogeneous Neumann
     BCh_solid->addBC("OuterWall", OUTERWALL, Natural, Normal, bcf);
-    
+
     return BCh_solid;
 }
 

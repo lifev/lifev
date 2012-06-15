@@ -496,8 +496,8 @@ void OseenSolverShapeDerivative<MeshType, SolverType>::solveLinearSystem( bcHand
 
     matrixPtr_Type matrixFull( new matrix_Type( this->M_localMap, this->M_matrixNoBC->meanNumEntries() ) );
 
-    updateStabilization( *matrixFull );
-    getFluidMatrix( *matrixFull );
+    this->updateStabilization( *matrixFull );
+    this->getFluidMatrix( *matrixFull );
 
     vector_Type    rightHandSideFull( M_linearRightHandSideNoBC );
 
@@ -508,7 +508,7 @@ void OseenSolverShapeDerivative<MeshType, SolverType>::solveLinearSystem( bcHand
     this->M_Displayer.leaderPrint( " LF-  Applying boundary conditions ...         " );
     chrono.start();
 
-    applyBoundaryConditions( *matrixFull, rightHandSideFull, bcHandler );
+    this->applyBoundaryConditions( *matrixFull, rightHandSideFull, bcHandler );
 
     chrono.stop();
     this->M_Displayer.leaderPrintMax( "done in ", chrono.diff() );

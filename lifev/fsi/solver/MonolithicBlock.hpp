@@ -144,7 +144,7 @@ public:
         @param data GetPot object reading the text data file
         @param section string specifying the path in the data file where to find the options for the operator
      */
-    virtual void setupSolver(solver_Type& solver, const GetPot& data){}
+    virtual void setupSolver(solver_Type& /*solver*/, const GetPot& /*data*/){}
 
     //! pushes a block at the end of the vector
     /*!

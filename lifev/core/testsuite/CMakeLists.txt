@@ -13,6 +13,7 @@ ADD_SUBDIRECTORIES(
   hyperbolic
   matrix_epetra_structured_framework
   mesh
+  partition_io
   template_test
   vector_container
 )

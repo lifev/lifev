@@ -53,6 +53,7 @@
 #include <lifev/core/util/StringUtility.hpp>
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/TimeAdvanceData.hpp>
 
 namespace LifeV
 {
@@ -65,11 +66,14 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef TimeData                                                  time_Type;
-    typedef boost::shared_ptr< time_Type >                            timePtr_Type;
+    typedef TimeData                               time_Type;
+    typedef boost::shared_ptr< time_Type >         timePtr_Type;
 
-    typedef std::map<UInt, Real>                                      materialContainer_Type;
-    typedef materialContainer_Type::const_iterator                    materialContainerIterator_Type;
+    typedef TimeAdvanceData                        timeAdvance_Type;
+    typedef boost::shared_ptr<timeAdvance_Type>    timeAdvancePtr_Type;
+
+    typedef std::map<UInt, Real>                   materialContainer_Type;
+    typedef materialContainer_Type::const_iterator materialContainerIterator_Type;
 
     //@}
 
@@ -126,6 +130,12 @@ public:
      */
     void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
 
+    //! Set data time advance container
+    /*!
+     * @param timeAdvanceData shared_ptr to TimeAdvanceData container
+     */
+    void setTimeAdvanceData( const timeAdvancePtr_Type timeAdvanceData ) { M_timeAdvance = timeAdvanceData; }
+
     //! Set data external pressure for the external surface of the solid
     /*!
      * @param externalPressure external pressure value
@@ -157,7 +167,7 @@ public:
      * @param material material ID (1 by default)
      */
     void setYoung( const Real& young, const UInt& material ) { M_materialsFlagSet = true; M_young[material] = young; }
- 
+
     //! Set bulk modulus (nearly incompressible materials)
     /*!
      * @param bulk modulus value
@@ -189,7 +199,13 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    const timePtr_Type& dataTime() const { return M_time; }
+    timePtr_Type dataTime() const { return M_time; }
+
+    //! Get data time advance container
+    /*!
+     * @return shared_ptr to TimeAdvanceData container
+     */
+    timeAdvancePtr_Type dataTimeAdvance() const { return M_timeAdvance; }
 
     //! Get the external pressure to be applied to the external surface of the solid
     /*!
@@ -294,6 +310,7 @@ private:
 
     //! Data containers for time and mesh
     timePtr_Type           M_time;
+    timeAdvancePtr_Type    M_timeAdvance;
 
     //! Physics
     Real                   M_density;
@@ -308,7 +325,7 @@ private:
 
     //! Bulk modulus k, alpha, gamma
     materialContainer_Type M_bulk;
-    materialContainer_Type M_alpha;		
+    materialContainer_Type M_alpha;
     materialContainer_Type M_gamma;
 
     //! Space discretization

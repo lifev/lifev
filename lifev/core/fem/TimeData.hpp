@@ -27,7 +27,7 @@
 
 /*!
     @file
-    @brief File containing a class for handling temporal discretization
+    @brief File containing a class for handling temporal data
 
     @author M.A. Fernandez
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -48,11 +48,11 @@
 namespace LifeV
 {
 
-//! TimeData - Class for handling temporal discretization.
+//! TimeData - Class for handling temporal data
 /*!
  *  @author Cristiano Malossi
  *
- *  The class is a data container for the time discretization.
+ *  The class is a data container for the time.
  */
 class TimeData
 {
@@ -156,24 +156,6 @@ public:
      */
     void setTimeStepNumber( const UInt& timeStepNumber ) { M_timeStepNumber = timeStepNumber; }
 
-    //! Set the BDF odert to use
-    /*!
-     * @param order BDF order
-     */
-    void setOrderBDF( const UInt& orderBDF ) { M_orderBDF = orderBDF; }
-
-    //! Set the theta of TimeAdvanceNewmark scheme
-    /*!
-     * @param theta - coefficient of TimeAdvanceNewmark scheme
-     */
-    void setTheta( const Real& theta ) { M_theta = theta; }
-
-    //! Set the theta of TimeAdvanceNewmark scheme
-    /*!
-     * @param gamma- coefficient of TimeAdvanceNewmark scheme
-     */
-    void setGamma( const Real& gamma ) { M_gamma = gamma; }
-
     //@}
 
 
@@ -248,30 +230,6 @@ public:
      */
     const UInt& timeStepNumber() const { return M_timeStepNumber; }
 
-    //! Get the BDF order used
-    /*!
-     * @return BDF order value
-     */
-    const UInt& orderBDF() const { return M_orderBDF; }
-
-    //! Return theta parameter of TimeAdvanceNewmark scheme
-    /*!
-     * @return theta value
-     */
-    const Real& theta() const { return M_theta; }
-
-    //! Return gamma of TimeAdvanceNewmark scheme
-    /*!
-     * @return gamma value
-     */
-    const Real& gamma() const { return M_gamma; }
-
-    //! Return TimeAdvanceNewmark parameters (\f$theta\f$, \f$\gamma\f$)
-    /*!
-     * @return TimeAdvanceNewmark parameters (\f$theta\f$, \f$\gamma\f$)
-     */
-    std::vector<Real> coefficientsNewmark();
-
     //@}
 
 private:
@@ -285,9 +243,6 @@ private:
     Real                    M_time;           // time
     Real                    M_timeStep;       // time step
     UInt                    M_timeStepNumber; // iteration number
-    UInt                    M_orderBDF;       // order of the time discretization formula
-    Real                    M_theta;          // TimeAdvanceNewmark parameter
-    Real                    M_gamma;          // TimeAdvanceNewmark parameter
 };
 
 } // namespace LifeV

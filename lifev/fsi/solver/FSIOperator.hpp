@@ -88,7 +88,6 @@
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 #include <lifev/structure/solver/VenantKirchhoffSolverLinear.hpp>
 #include <lifev/fsi/solver/HarmonicExtensionSolver.hpp>
-// >>>>>>> master:lifev/fsi/solver/FSIOperator.hpp
 
 namespace LifeV
 {
@@ -635,8 +634,7 @@ public:
     /*!
      * @param fluidDisplacement vector to be filled with the fluid displacement
      */
-    virtual void exportFluidDisplacement( vector_Type& fluidDisplacement ) { fluidDisplacement = M_meshMotion->disp(); }
-
+    virtual void exportFluidDisplacement( vector_Type& fluidDisplacement ) { fluidDisplacement = M_ALETimeAdvance->singleElement(0); }
 
     //@}
 

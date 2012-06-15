@@ -212,8 +212,11 @@ public:
      */
     void mergeBCHandlers()
     {
+      if(M_BCh_u.get())
         M_BCh_u->merge(*M_BCh_flux);
-        M_BCh_flux.reset();
+      else // in this case only fluxes are imposed on the fluid
+	M_BCh_u=M_BCh_flux;
+      M_BCh_flux.reset();
     }
 
 #ifdef HAVE_TRILINOS_ANASAZI

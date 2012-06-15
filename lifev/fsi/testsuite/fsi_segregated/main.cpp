@@ -85,10 +85,10 @@ namespace LifeV
 {
 namespace
 {
-	static bool regIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
-	static bool regML = PRECFactory::instance().registerProduct( "ML", &createML );
-	static bool regFP = FSIOperator::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
-	static bool regEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
+    static bool regIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
+    static bool regML = PRECFactory::instance().registerProduct( "ML", &createML );
+    static bool regFP = FSIOperator::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
+    static bool regEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
 }
 }
 
@@ -110,9 +110,9 @@ namespace
   //LifeV::StructuralMaterial< LifeV::FSIOperator::mesh_Type >*    createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear< LifeV::FSIOperator::mesh_Type >(); }
 
 
-	//LifeV::VenantKirchhoffSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >*    createLinearStructure() {
-	//return new VenantKirchhoffSolverLinear< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >();
-	//}
+    //LifeV::VenantKirchhoffSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >*    createLinearStructure() {
+    //return new VenantKirchhoffSolverLinear< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >();
+    //}
 
 
 //NOTE: the nonlinear structure solver is still in development in the FSI framework
@@ -134,22 +134,17 @@ public:
     bc_adaptor( FSIOperator& Operator ):
             M_oper   ( Operator )
     {
-        Real area0	= 0.7854;
-        //Real area0	= M_oper.fluid().area(3);
-        Real area	= area0;
-	UInt flag       = 1;
+        Real area0    = 0.7854;
+        //Real area0    = M_oper.fluid().area(3);
+        Real area    = area0;
+    UInt flag       = 1;
 
-        //Real beta	= M_oper.solid().thickness()*M_oper.solid().young() / (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+        Real beta    = M_oper.solid().thickness()*M_oper.solid().young( flag ) /
+                    (1 - M_oper.solid().poisson(  flag )*M_oper.solid().poisson( flag )) * PI/area0;
 
-	//Alexandra's Abc
-	Real exp  = 5/4;
-	Real beta = ( std::sqrt(PI) * M_oper.solid().thickness() * M_oper.solid().young( flag ) ) / (1 - M_oper.solid().poisson( flag ) * M_oper.solid().poisson( flag ) );
-	Real R    = ( std::sqrt(M_oper.solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
+        Real qn        = M_oper.fluid().flux(3);
 
-        Real qn		= M_oper.fluid().flux(3);
-
-	M_outflow       = R * qn;
-        //M_outflow	= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2) - beta*std::sqrt(area0);
+        M_outflow    = std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2) - beta*std::sqrt(area0);
 
         std::cout << "--------------- Absorbing boundary condition ---------------" << std::endl;
         std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
@@ -203,20 +198,20 @@ public:
     bc_adaptorFace( FSIOperator& Operator ):
             M_oper   ( Operator )
     {
-        Real area0	= 0.147439938;
-        Real area	= area0;
-	UInt flag       = 1;
+        Real area0    = 0.147439938;
+        //Real area    = area0;
+    UInt flag       = 1;
 
-        //Real beta	= M_oper.solid().thickness()*M_oper.solid().young() / (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
-	//Alexandra's Abc
-	Real exp  = 5/4;
-	Real beta = ( std::sqrt(PI) * M_oper.solid().thickness() * M_oper.solid().young( flag ) ) / (1 - M_oper.solid().poisson( flag ) * M_oper.solid().poisson( flag ) );
-	Real R    = ( std::sqrt(M_oper.solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
+        //Real beta    = M_oper.solid().thickness()*M_oper.solid().young() / (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+    //Alexandra's Abc
+    Real exp  = 5/4;
+    Real beta = ( std::sqrt(PI) * M_oper.solid().thickness() * M_oper.solid().young( flag ) ) / (1 - M_oper.solid().poisson( flag ) * M_oper.solid().poisson( flag ) );
+    Real R    = ( std::sqrt(M_oper.solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
 
-        Real qn		= M_oper.fluid().flux(3);
+        Real qn        = M_oper.fluid().flux(3);
 
-	M_outflowFace	= R * qn;
-        //M_outflowFace	= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)- beta*std::sqrt(area0);
+    M_outflowFace    = R * qn;
+        //M_outflowFace    = std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)- beta*std::sqrt(area0);
 
         std::cout << "--------------- Absorbing boundary condition for Face-------" << std::endl;
         std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
@@ -272,24 +267,24 @@ public:
     bc_adaptorBrain( FSIOperator& Operator ):
             M_oper   ( Operator )
     {
-        Real area0	= 0.191155176;
-        Real area	= area0;
-	UInt flag       = 1 ;
+        Real area0    = 0.191155176;
+        //Real area    = area0;
+    UInt flag       = 1 ;
 
-        //Real beta	= M_oper.solid().thickness()*M_oper.solid().young() / (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+        //Real beta    = M_oper.solid().thickness()*M_oper.solid().young() / (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
 
-	//Alexandra's Abc
-	Real exp  = 5/4;
-	Real beta = ( std::sqrt(PI) * M_oper.solid().thickness() * M_oper.solid().young( flag ) ) / (1 - M_oper.solid().poisson( flag ) * M_oper.solid().poisson( flag ) );
-	Real R    = ( std::sqrt(M_oper.solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
+    //Alexandra's Abc
+    Real exp  = 5/4;
+    Real beta = ( std::sqrt(PI) * M_oper.solid().thickness() * M_oper.solid().young( flag ) ) / (1 - M_oper.solid().poisson( flag ) * M_oper.solid().poisson( flag ) );
+    Real R    = ( std::sqrt(M_oper.solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
 
-        Real qn		= M_oper.fluid().flux(4);
+        Real qn        = M_oper.fluid().flux(4);
 
-	M_outflowBrain = R * qn;
+    M_outflowBrain = R * qn;
         //M_outflowBrain  = std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2) - beta*std::sqrt(area0);
 
 
-	std::cout << "--------------- Absorbing boundary condition for Brain-------" << std::endl;
+    std::cout << "--------------- Absorbing boundary condition for Brain-------" << std::endl;
         std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
         std::cout << "  Outflow BC : thickness = " << M_oper.solid().thickness() << std::endl;
         std::cout << "  Outflow BC : young     = " << M_oper.solid().young( flag ) << std::endl;
@@ -365,7 +360,7 @@ public:
     Problem( const std::string& dataFileName, std::string method = "" )
     {
 
-      //VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
+      //VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhoff", &createLinearStructure );
 
 
       //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
@@ -374,7 +369,7 @@ public:
 
       //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
 
-        //        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
+        //        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &createNonLinearStructure );
 
         Debug( 10000 ) << "Setting up data from GetPot \n";
         GetPot dataFile( dataFileName );
@@ -382,7 +377,7 @@ public:
         M_data->setup( dataFile );
         M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
         M_data->showMe();
-	M_data->dataSolid()->showMe();
+    //    M_data->dataSolid()->showMe();
         MPI_Barrier( MPI_COMM_WORLD );
 
         Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
@@ -457,10 +452,10 @@ public:
                 M_exporterSolid.reset( new ExporterEnsight<mesh_Type > ( dataFile, exporterName+"Solid" ) );
 
             M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
-	    M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().map(), M_exporterSolid->mapType() ));
+        M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().map(), M_exporterSolid->mapType() ));
             M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->solid().map(), M_exporterSolid->mapType() ));
 
-	    M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-displacement",
+        M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-displacement",
                                           M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
             M_exporterSolid->addVariable( ExporterData<mesh_Type>::VectorField, "s-velocity",
                                           M_fsi->FSIOper()->dFESpacePtr(), M_solidVel, UInt(0) );
@@ -476,7 +471,7 @@ public:
             std::string velwName  = dataFile("fluid/miscellaneous/velwname", "velw");
             std::string depName   = dataFile("solid/miscellaneous/depname"  ,"dep");
             std::string velSName  = dataFile("solid/miscellaneous/velname"  ,"velw");
-            M_Tstart = dataFile("problem/Tstart"   ,0.);
+            M_Tstart = dataFile("problem/initialtime"   ,0.);
             std::cout << "Starting time = " << M_Tstart << std::endl;
 
             //M_fsi->initialize(velFName, pressName, velwName, depName, velSName, M_Tstart);
@@ -496,8 +491,8 @@ public:
         {
             M_fsi->initialize();
         }
-        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->timeStep() );
-        M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart ); //+ M_data->dataFluid()->dataTime()->timeStep()
+        M_data->dataFluid()->dataTime()->setTime( M_Tstart  );
         //std::cout << "in problem" << std::endl;
         //M_fsi->FSIOper()->fluid().postProcess();
     }
@@ -533,16 +528,16 @@ public:
                 outFlow.setFunction(bc_adaptor(*M_fsi->FSIOper()));
                 M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlow);
 
-		/*
-	      BCFunctionBase outFlowFace;
+        /*
+          BCFunctionBase outFlowFace;
               BCFunctionBase outFlowBrain;
 
               outFlowFace.setFunction(bc_adaptorFace(*M_fsi->FSIOper()));
-	      M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlowFace);
+          M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlowFace);
 
-	      outFlowBrain.setFunction(bc_adaptorBrain(*M_fsi->FSIOper()));
-	      M_fsi->FSIOper()->BCh_fluid()->modifyBC(4, outFlowBrain);
-		*/
+          outFlowBrain.setFunction(bc_adaptorBrain(*M_fsi->FSIOper()));
+          M_fsi->FSIOper()->BCh_fluid()->modifyBC(4, outFlowBrain);
+        */
                 //std::cout << "  F-  Pressure = " << outFlow(0., 0., 0., 0., 3) << std::endl;
             }
 
@@ -553,21 +548,21 @@ public:
                 if ( isFluidLeader )
                     ofile << M_data->dataFluid()->dataTime()->time() << " ";
 
-//                 flux = M_fsi->FSIOper()->fluid().flux(2);
-//                 if ( isFluidLeader )
-//                     ofile << flux << " ";
+                flux = M_fsi->FSIOper()->fluid().flux(2);
+                if ( isFluidLeader )
+                    ofile << flux << " ";
 
-//                 flux = M_fsi->FSIOper()->fluid().flux(3);
-//                 if ( isFluidLeader )
-//                     ofile << flux << " ";
+                flux = M_fsi->FSIOper()->fluid().flux(3);
+                if ( isFluidLeader )
+                    ofile << flux << " ";
 
-//                 flux = M_fsi->FSIOper()->fluid().pressure(2);
-//                 if ( isFluidLeader )
-//                     ofile << flux << " ";
+                flux = M_fsi->FSIOper()->fluid().pressure(2);
+                if ( isFluidLeader )
+                    ofile << flux << " ";
 
-//                 flux = M_fsi->FSIOper()->fluid().pressure(3);
-//                 if ( isFluidLeader )
-//                     ofile << flux << " " << std::endl;
+                flux = M_fsi->FSIOper()->fluid().pressure(3);
+                if ( isFluidLeader )
+                    ofile << flux << " " << std::endl;
 
                 *M_velAndPressure = *M_fsi->FSIOper()->fluid().solution();
                 *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
@@ -575,10 +570,10 @@ public:
             }
 
             if ( M_fsi->isSolid() )
-	      {
+          {
                 *M_solidDisp = M_fsi->FSIOper()->solid().displacement();
-		// *M_solidVel = M_fsi->FSIOper()->solid().velocity();
-		*M_solidVel = M_fsi->FSIOper()->solidTimeAdvance()->velocity();
+        // *M_solidVel = M_fsi->FSIOper()->solid().velocity();
+        *M_solidVel = M_fsi->FSIOper()->solidTimeAdvance()->velocity();
 
                 M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
             }
@@ -589,7 +584,7 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            //checkResult( M_data->dataFluid()->dataTime()->time() );
+            checkResult( M_data->dataFluid()->dataTime()->time() );
         }
         std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
         ofile.close();
@@ -602,14 +597,16 @@ private:
         assert(M_data->dataFluid()->dataTime()->timeStep()==0.001);
         double dispNorm(M_fsi->displacement().norm2());
 
+    std::cout << "Displ Norm: " << dispNorm << std::endl;
+
         const LifeV::Real relTol(5e-3);
 
-        if ( sameAs(time,0.001) && sameAs(dispNorm, 0.0621691, relTol) ) return;
-        if ( sameAs(time,0.002) && sameAs(dispNorm, 0.10668,   relTol) )  return;
-        if ( sameAs(time,0.003) && sameAs(dispNorm, 0.113252,  relTol) )  return;
-        if ( sameAs(time,0.004) && sameAs(dispNorm, 0.107976,  relTol) )  return;
-        if ( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, relTol) )  return;
-        if ( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, relTol) ) return;
+        if ( sameAs(time,0) && sameAs(dispNorm, 0.032284, relTol) ) return;
+        if ( sameAs(time,0.001) && sameAs(dispNorm, 0.0596407,   relTol) )  return;
+        if ( sameAs(time,0.002) && sameAs(dispNorm, 0.0823045,  relTol) )  return;
+        // if ( sameAs(time,0.004) && sameAs(dispNorm, 0.107976,  relTol) )  return;
+        // if ( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, relTol) )  return;
+        // if ( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, relTol) ) return;
 
         throw Problem::RESULT_CHANGED_EXCEPTION(time);
 
@@ -728,9 +725,9 @@ int main( int argc, char** argv )
                       << "norm_2(displacement error EJ/SP) = " << norm1 << "\n";
 
             if (norm1 < 1e-04)
-            	returnValue = EXIT_SUCCESS;
+                returnValue = EXIT_SUCCESS;
             else
-            	returnValue = EXIT_FAILURE;
+                returnValue = EXIT_FAILURE;
         }
         else
         {

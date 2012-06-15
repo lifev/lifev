@@ -131,7 +131,7 @@ useExactJacobian = true # always false for linear structure model. Otherwise it 
                          # Newton scheme
 rescaleFactor    = 1. # this factor can be used to rescale the structure block
 [./physics]
-solidType = linearVenantKirchhof #exponential #NOTE: the nonlinear choice is not available (still in development)
+solidType = linearVenantKirchhoff #exponential #NOTE: the nonlinear choice is not available (still in development)
 material_flag = 1
 density   = 1.2               # density
 young     = 4.0E6

@@ -56,14 +56,14 @@ using namespace LifeV;
 
 /*Starting of ud_functions*/
 
-Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+Real d0(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     if (t == 0)
     {
         switch (i)
         {
         case 0:
-	  return 0.0;
+      return 0.0;
             break;
         case 1:
             return 0.0;
@@ -351,8 +351,8 @@ Structure::run3d()
     vectorPtr_Type disp(new vector_Type(solid.getDisplacement(), Unique));
     vectorPtr_Type vel(new vector_Type(solid.getVelocity(), Unique));
 
-    dFESpace->interpolate(d0, *disp, 0.0);
-    dFESpace->interpolate(w0, *vel , 0.0);
+    dFESpace->interpolate(static_cast<Private::fct_type>( d0 ), *disp, 0.0);
+    dFESpace->interpolate(static_cast<Private::fct_type>( w0 ), *vel , 0.0);
 
     if (verbose) std::cout << "S- initialization ... ";
 

@@ -135,7 +135,7 @@ rescaleFactor    = 1. # this factor can be used to rescale the structure block
 [./physics]
 
 solidType = linearVenantKirchhoff
-# either linearVenantKirchhof,  nonLinearVenantKirchhof, exponential...
+# either linearVenantKirchhoff,  nonLinearVenantKirchhoff, exponential...
 material_flag = 1
 density   = 1.2               # density
 young     = 4.0E6 

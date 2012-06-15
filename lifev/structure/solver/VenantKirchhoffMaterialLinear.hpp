@@ -125,10 +125,7 @@ class VenantKirchhoffMaterialLinear :
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-//     virtual void computeMatrix( const vector_Type& /*sol*/,
-//                                 Real /*factor*/,
-//                                 const dataPtr_Type& /*dataMaterial*/,
-//                                 const displayerPtr_Type& displayer);
+
     void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
     //! Missing Documentation!!!
@@ -136,7 +133,7 @@ class VenantKirchhoffMaterialLinear :
 
     //! ShowMe method of the class (saved on a file the two matrices)
     void showMe( std::string const& fileNameStiff,
-		 std::string const& fileNameJacobian);
+         std::string const& fileNameJacobian);
 
     //! Compute the First Piola Kirchhoff Tensor
     /*! 
@@ -186,7 +183,7 @@ protected:
 
 template <typename Mesh>
 VenantKirchhoffMaterialLinear<Mesh>::VenantKirchhoffMaterialLinear():
-    super			 ( ),
+    super             ( ),
     M_elmatK                     ( ),
     M_linearStiff                ( ),
     M_stiff                      ( )
@@ -203,7 +200,7 @@ void
 VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                                            const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
-				)
+                )
 {
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
@@ -238,8 +235,8 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 
         UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
 
-	Real mu = dataMaterial->mu(marker);
-	Real lambda = dataMaterial->lambda(marker);
+    Real mu = dataMaterial->mu(marker);
+    Real lambda = dataMaterial->lambda(marker);
 
     //These methods are implemented in AssemblyElemental.cpp
     //They have been kept in AssemblyElemental in order to avoid repetitions
@@ -272,14 +269,13 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateJacobianMatrix(const vector_Type
                                                                const dataPtr_Type& dataMaterial,
                                                                const displayerPtr_Type& displayer)
 {
+    //displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint("  S-  Updating the Jacobian Matrix (constant, Linear Elastic)\n");
+    //displayer->leaderPrint(" \n*********************************\n  ");
 
-    displayer->leaderPrint(" \n*********************************\n  ");
-    displayer->leaderPrint("   Linear S-  Updating the Jacobian Matrix (constant, Linear Elastic)");
-    displayer->leaderPrint(" \n*********************************\n  ");
-
-    displayer->leaderPrint(" \n*********************************\n  ");
+    //displayer->leaderPrint(" \n*********************************\n  ");
     updateNonLinearJacobianTerms(this->M_jacobian,disp,dataMaterial,displayer);
-    displayer->leaderPrint(" \n*********************************\n  ");
+    //displayer->leaderPrint(" \n*********************************\n  ");
 
 }
 
@@ -287,30 +283,29 @@ template <typename Mesh>
 void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& /*jacobian*/,
                                                                          const  vector_Type& /*disp*/,
                                                                          const dataPtr_Type& /*dataMaterial*/,
-                                                                         const displayerPtr_Type& displayer )
+                                                                         const displayerPtr_Type& /*displayer*/ )
 {
   //    this->M_stiff->globalAssemble();
-    displayer->leaderPrint("   Linear S- Doing nothing - Updating non linear terms in Jacobian Matrix (constant, Linear Elastic)\n");
+  //  displayer->leaderPrint("  S- Doing nothing - Updating non linear terms in Jacobian Matrix (constant, Linear Elastic)\n");
 }
 
 template <typename Mesh>
 void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& /*disp*/,
                                                             Real /*factor*/,
                                                             const dataPtr_Type& /*dataMaterial*/,
-                                                            const displayerPtr_Type& displayer )
+                                                            const displayerPtr_Type& /*displayer*/ )
 {
-    displayer->leaderPrint(" \n*********************************\n  ");
-    displayer->leaderPrint("   Linear S-  Using the the Stiffness Matrix (constant, Linear Elastic)");
-    displayer->leaderPrint(" \n*********************************\n  ");
-
+    //displayer->leaderPrint(" \n*********************************\n  ");
+    //displayer->leaderPrint("  S- Using the the Stiffness Matrix (constant, Linear Elastic)");
+    //displayer->leaderPrint(" \n*********************************\n  ");
 }
 
 
 template <typename Mesh>
 void
 VenantKirchhoffMaterialLinear<Mesh>::showMe( std::string const& fileNameStiff,
-				  std::string const& fileNameJacobian
-				)
+                  std::string const& fileNameJacobian
+                )
 {
   //This string is to save the linear part
   std::string fileNamelinearStiff =  fileNameStiff;

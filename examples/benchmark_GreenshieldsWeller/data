@@ -134,7 +134,7 @@ rescaleFactor    = 1.
 [./physics]
 
 solidType = exponential
-# either linearVenantKirchhof,  nonLinearVenantKirchhof, exponential...
+# either linearVenantKirchhoff,  nonLinearVenantKirchhoff, exponential...
 material_flag = 1
 density   = 1.               # density
 young     = 1.e7

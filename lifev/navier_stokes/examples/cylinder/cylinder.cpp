@@ -45,19 +45,19 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 //#include "life/lifesolver/NavierStokesSolver.hpp"
-#include <life/lifearray/MatrixEpetra.hpp>
-#include <life/lifearray/MapEpetra.hpp>
-#include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifesolver/OseenData.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/navier_stokes/solver/OseenData.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
-#include <life/lifefilters/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterEnsight.hpp>
 
-#include <life/lifesolver/OseenSolver.hpp>
+#include <lifev/navier_stokes/solver/OseenSolver.hpp>
 
 #include "cylinder.hpp"
 #include <iostream>
@@ -409,7 +409,7 @@ Cylinder::run()
     MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << oseenData->dataTimeAdvance()->orderBDF() << std::endl;
 
     //oseenData.meshData()->setMesh(meshPart.meshPartition());
 
@@ -468,7 +468,7 @@ Cylinder::run()
     // bdf object to store the previous solutions
 
     TimeAdvanceBDFNavierStokes<vector_Type> bdf;
-    bdf.setup(oseenData->dataTime()->orderBDF());
+    bdf.setup(oseenData->dataTimeAdvance()->orderBDF());
 
     vector_Type beta( fullMap );
     vector_Type rhs ( fullMap );
@@ -533,7 +533,7 @@ Cylinder::run()
         chrono.start();
 
         double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
-	//beta = bdf.bdfVelocity().extrapolation(  beta);
+    //beta = bdf.bdfVelocity().extrapolation(  beta);
         bdf.bdfVelocity().extrapolation(beta);
         bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
         rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();

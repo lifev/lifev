@@ -39,7 +39,7 @@ namespace LifeV
 // ===================================================
 
 
-void MonolithicBlockMatrix::setDataFromGetPot(const GetPot& data, const std::string& /*section*/)
+void MonolithicBlockMatrix::setDataFromGetPot(const GetPot& /*data*/, const std::string& /*section*/)
 {
 }
 
@@ -69,7 +69,7 @@ void MonolithicBlockMatrix::coupler(mapPtr_Type& map,
 }
 
 
-void MonolithicBlockMatrix::coupler(mapPtr_Type& map,
+void MonolithicBlockMatrix::coupler(mapPtr_Type& /*map*/,
                                     const std::map<ID, ID>& locDofMap,
                                     const vectorPtr_Type& numerationInterface,
                                     const Real& timeStep,

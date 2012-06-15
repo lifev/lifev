@@ -42,53 +42,28 @@
 #ifndef BC_HPP
 #define BC_HPP
 
+
 #include "ud_functions.hpp"
 // LifeV includes
-#include "life/lifecore/LifeV.hpp"
-#include "life/lifefem/BCHandler.hpp"
+#include "lifev/core/LifeV.hpp"
+#include "lifev/core/fem/BCHandler.hpp"
 
 // Mathcard includes
-#include "life/lifesolver/FSIMonolithicGE.hpp"
-#include "life/lifesolver/FSIMonolithicGI.hpp"
+#include "lifev/fsi/solver/FSIMonolithicGE.hpp"
+#include "lifev/fsi/solver/FSIMonolithicGI.hpp"
 
-#ifndef BL
 #define OUTLET 3
 #define INLET 2
-#define FLUIDINTERFACE 1
-#define OUTERWALL 10
-#define SOLIDINTERFACE 1
-//#define RING2 22
-#define RING 2
-//thoracic aorta,
-#define RING3 3
-//21, L. Brachia, bhanch 3_2
-#define RING4 4
-//first branch_1,
-#define RING5 5
-//branch 1_2 smallest
-#define RING6 6
-//R. Brachia, branch 1_3
-#define RING7 7
-// 15, LCCA, branch 2
-#define RING8 8
-// 20 LVA branch 3_1
-#define RING9 9
-#define INOUTEDGE 20
-#else
-#define OUTLET 5
-#define INLET 6
 #define FLUIDINTERFACE 200
-#define OUTERWALL 201
+#define OUTERWALL 210
 #define SOLIDINTERFACE 200
 //#define RING2 22
+#define RING 2
+#define RING3 3
 #define RING4 4
-#define RING5 8
-#define RING6 9
-#define RING7 2
-#define RING8 7
-#define RING6 4
-//#define INOUTEDGE 20
-#endif
+#define RING5 5
+#define RING6 6
+#define INOUTEDGE 20
 
 namespace LifeV
 {
@@ -107,7 +82,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
     FSISolver::fluidBchandlerPtr_Type BCh_he(new FSIOperator::fluidBchandler_Type );
 
 
-    BCh_he->addBC("Base",  INLET,     Essential, Full, bcf,   3);
+    //BCh_he->addBC("Base",  INLET,     Essential, Full, bcf,   3);
 
     if (_oper.data().method() == "monolithicGE")
     {
@@ -128,27 +103,29 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux()
 
     FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
 
-    BCFunctionBase flow_in (aortaFluxIn);
-    BCFunctionBase flow_3 (linearFlux3_);
-    BCFunctionBase flow_4 (linearFlux4);
-    BCFunctionBase flow_5 (linearFlux5);
-    BCFunctionBase flow_6 (linearFlux6_);
-    BCFunctionBase flow_7 (linearFlux7);
-    BCFunctionBase flow_8 (linearFlux8);
-    BCFunctionBase flow_9 (linearFlux9);
+     // BCFunctionBase flow_in (aortaFluxIn);
+    // BCFunctionBase flow_3 (linearFlux3_);
+    // BCFunctionBase flow_4 (linearFlux4);
+    // BCFunctionBase flow_5 (linearFlux5);
+    // BCFunctionBase flow_6 (linearFlux6_);
+    // BCFunctionBase flow_7 (linearFlux7);
+    // BCFunctionBase flow_8 (linearFlux8);
+    // BCFunctionBase flow_9 (linearFlux9);
+
+    BCFunctionBase flow_in (abdominalAorta);
 
     //     BCFunctionBase flow_jean (aortaFluxJean);
 
     //uncomment  to use fluxes
     BCh_fluid->addBC("InFlow" , INLET,  Flux, /*Full/**/Normal, flow_in);
-    BCh_fluid->addBC("OutFlow" , OUTLET,  Flux/*Essential*/, Normal, flow_3);
+     // BCh_fluid->addBC("OutFlow" , OUTLET,  Flux/*Essential*/, Normal, flow_3);
 
-    BCh_fluid->addBC("Flow4" , 4,  Flux/*Essential*/, Normal, flow_4);
-//     BCh_fluid->addBC("Flow7" , 7,  Flux/*Essential*/, Normal, flow_7);
-//     BCh_fluid->addBC("Flow6" , 6,  Flux/*Essential*/, Normal, flow_6);
-//     BCh_fluid->addBC("Flow5" , 5,  Flux/*Essential*/, Normal, flow_5);
-//     BCh_fluid->addBC("Flow8" , 8,  Flux/*Essential*/, Normal, flow_8);
-//     BCh_fluid->addBC("Flow9" , 9,  Flux/*Essential*/, Normal, flow_9);
+     // BCh_fluid->addBC("Flow4" , 4,  Flux/*Essential*/, Normal, flow_4);
+     // BCh_fluid->addBC("Flow7" , 7,  Flux/*Essential*/, Normal, flow_7);
+     // BCh_fluid->addBC("Flow6" , 6,  Flux/*Essential*/, Normal, flow_6);
+     // BCh_fluid->addBC("Flow5" , 5,  Flux/*Essential*/, Normal, flow_5);
+     // BCh_fluid->addBC("Flow8" , 8,  Flux/*Essential*/, Normal, flow_8);
+     // BCh_fluid->addBC("Flow9" , 9,  Flux/*Essential*/, Normal, flow_9);
 
     return BCh_fluid;
 }
@@ -171,7 +148,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper)
     BCFunctionBase out_flow (fZero);
 
 
-    //BCh_fluid->addBC("InFlow" , INLET,  Natural/*Essential*/, Normal, in_flow/*, 3*/);
+    BCh_fluid->addBC("InFlow" , INLET,  Natural/*Essential*/, Normal, in_flow/*, 3*/);
     return BCh_fluid;
 }
 
@@ -192,10 +169,10 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
 
     //robin condition on the outer wall
     _oper.setRobinOuterWall(bcf, young);
-    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
+    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Full, _oper.bcfRobinOuterWall(), 3);
 
     //BCh_solid->addBC("Top",  OUTLET, Essential, Full, bcf, 3);
-    BCh_solid->addBC("Base",  INLET, Essential, Full, bcf, 3);
+    //BCh_solid->addBC("Base",  INLET, Essential, Full, bcf, 3);
 
     return BCh_solid;
 }

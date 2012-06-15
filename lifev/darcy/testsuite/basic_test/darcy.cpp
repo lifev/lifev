@@ -270,7 +270,6 @@ darcy::darcy( int argc,
     Members->discretization_section = "darcy";
 
 #ifdef EPETRA_MPI
-    std::cout << "Epetra Initialization" << std::endl;
     Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
@@ -289,21 +288,23 @@ darcy::run()
 {
     using boost::dynamic_pointer_cast;
 
-    typedef RegionMesh< LinearTetra >                                 RegionMesh;
-    typedef SolverAztecOO                                             solver_type;
+    typedef RegionMesh< LinearTetra >            regionMesh_Type;
+    typedef boost::shared_ptr< regionMesh_Type > regionMeshPtr_Type;
 
-    typedef DarcySolver< RegionMesh, solver_type >                    darcyLinearSolver_type;
-    typedef DarcySolverNonLinear< RegionMesh, solver_type >           darcyNonLinearSolver_type;
-    typedef DarcySolverTransient< RegionMesh, solver_type >           darcyTransientSolver_type;
-    typedef DarcySolverTransientNonLinear< RegionMesh, solver_type >  darcyTransientNonLinearSolver_type;
+    typedef SolverAztecOO solver_Type;
 
-    typedef boost::shared_ptr< darcyLinearSolver_type >               darcyLinearSolver_ptrtype;
+    typedef DarcySolver< regionMesh_Type, solver_Type >                    darcyLinearSolver_Type;
+    typedef DarcySolverNonLinear< regionMesh_Type, solver_Type >           darcyNonLinearSolver_Type;
+    typedef DarcySolverTransient< regionMesh_Type, solver_Type >           darcyTransientSolver_Type;
+    typedef DarcySolverTransientNonLinear< regionMesh_Type, solver_Type >  darcyTransientNonLinearSolver_Type;
 
-    typedef darcyLinearSolver_type::vector_Type                       vector_type;
-    typedef boost::shared_ptr< vector_type >                          vector_ptrtype;
+    typedef boost::shared_ptr< darcyLinearSolver_Type >                    darcyLinearSolverPtr_Type;
 
-    typedef FESpace< RegionMesh, MapEpetra >                          feSpace_Type;
-    typedef boost::shared_ptr< feSpace_Type >                         feSpacePtr_Type;
+    typedef darcyLinearSolver_Type::vector_Type vector_Type;
+    typedef boost::shared_ptr< vector_Type >    vectorPtr_Type;
+
+    typedef FESpace< regionMesh_Type, MapEpetra > feSpace_Type;
+    typedef boost::shared_ptr< feSpace_Type >     feSpacePtr_Type;
 
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
@@ -340,7 +341,7 @@ darcy::run()
     chronoReadAndPartitionMesh.start();
 
     // Create the data file
-    DarcyData<RegionMesh> darcyData;
+    DarcyData<regionMesh_Type> darcyData;
 
     // Set up the data
     darcyData.setup( dataFile );
@@ -352,7 +353,7 @@ darcy::run()
     meshData.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the the mesh
-    boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh );
+    regionMeshPtr_Type fullMeshPtr( new regionMesh_Type );
 
     // Select if the mesh is structured or not
     if ( meshData.meshType() != "structured" )
@@ -374,7 +375,7 @@ darcy::run()
     }
 
     // Create the partitioner
-    MeshPartitioner< RegionMesh >  meshPart;
+    MeshPartitioner< regionMesh_Type >  meshPart;
 
     // Partition the mesh using ParMetis
     meshPart.doPartition ( fullMeshPtr, Members->comm );
@@ -503,23 +504,23 @@ darcy::run()
                                                                Members->comm ) );
 
     // Vector for the interpolated dual solution
-    vector_ptrtype dualInterpolated( new vector_type ( uInterpolate_FESpacePtr->map(), Repeated ) );
+    vectorPtr_Type dualInterpolated( new vector_Type ( uInterpolate_FESpacePtr->map(), Repeated ) );
 
     // Finite element space of the hybrid variable
-    FESpace< RegionMesh, MapEpetra > hybrid_FESpace( meshPart,
-                                                     *refFE_hybrid,
-                                                     *qR_hybrid,
-                                                     *bdQr_hybrid,
-                                                     1,
-                                                     Members->comm );
+    feSpacePtr_Type hybrid_FESpace( new feSpace_Type( meshPart,
+                                                      *refFE_hybrid,
+                                                      *qR_hybrid,
+                                                      *bdQr_hybrid,
+                                                      1,
+                                                      Members->comm ) );
 
     // Finite element space of the  outward unit normal variable
-    FESpace< RegionMesh, MapEpetra > VdotN_FESpace( meshPart,
-                                                    *refFE_VdotN,
-                                                    *qR_VdotN,
-                                                    *bdQr_VdotN,
-                                                    1,
-                                                    Members->comm );
+    feSpacePtr_Type VdotN_FESpace( new feSpace_Type( meshPart,
+                                                     *refFE_VdotN,
+                                                     *qR_VdotN,
+                                                     *bdQr_VdotN,
+                                                     1,
+                                                     Members->comm ) );
 
     // Stop chronoFiniteElementSpace
     chronoFiniteElementSpace.stop();
@@ -533,42 +534,42 @@ darcy::run()
     chronoProblem.start();
 
     // Instantiation of the DarcySolver class
-    darcyLinearSolver_ptrtype darcySolver;
+    darcyLinearSolverPtr_Type darcySolver;
 
     switch ( solverType )
     {
     case DARCY_LINEAR:
 
-        darcySolver.reset( new darcyLinearSolver_type( darcyData, *p_FESpacePtr,
-                                                       *u_FESpacePtr, hybrid_FESpace,
-                                                       VdotN_FESpace,
+        darcySolver.reset( new darcyLinearSolver_Type( darcyData, *p_FESpacePtr,
+                                                       *u_FESpacePtr, *hybrid_FESpace,
+                                                       *VdotN_FESpace,
                                                        Members->comm ) );
 
         break;
 
     case DARCY_NON_LINEAR:
 
-        darcySolver.reset( new darcyNonLinearSolver_type( darcyData, *p_FESpacePtr,
-                                                          *u_FESpacePtr, hybrid_FESpace,
-                                                          VdotN_FESpace,
+        darcySolver.reset( new darcyNonLinearSolver_Type( darcyData, *p_FESpacePtr,
+                                                          *u_FESpacePtr, *hybrid_FESpace,
+                                                          *VdotN_FESpace,
                                                           Members->comm ) );
 
         break;
 
     case DARCY_TRANSIENT:
 
-        darcySolver.reset( new darcyTransientSolver_type( darcyData, *p_FESpacePtr,
-                                                          *u_FESpacePtr, hybrid_FESpace,
-                                                          VdotN_FESpace,
+        darcySolver.reset( new darcyTransientSolver_Type( darcyData, *p_FESpacePtr,
+                                                          *u_FESpacePtr, *hybrid_FESpace,
+                                                          *VdotN_FESpace,
                                                           Members->comm ) );
 
         break;
 
     case DARCY_TRANSIENT_NON_LINEAR:
 
-        darcySolver.reset( new darcyTransientNonLinearSolver_type( darcyData, *p_FESpacePtr,
-                                                                   *u_FESpacePtr, hybrid_FESpace,
-                                                                   VdotN_FESpace,
+        darcySolver.reset( new darcyTransientNonLinearSolver_Type( darcyData, *p_FESpacePtr,
+                                                                   *u_FESpacePtr, *hybrid_FESpace,
+                                                                   *VdotN_FESpace,
                                                                    Members->comm ) );
 
         break;
@@ -597,7 +598,7 @@ darcy::run()
     darcySolver->setVectorSource ( Members->getVectorSource() );
 
     // Create the inverse permeability
-    inversePermeability < RegionMesh > invPerm ( Members->getInversePermeability(),
+    inversePermeability < regionMesh_Type > invPerm ( Members->getInversePermeability(),
                                                  *p_FESpacePtr );
 
     // Set the inverse of the permeability
@@ -613,7 +614,7 @@ darcy::run()
 
     case DARCY_NON_LINEAR:
         // Set the initial primal variable
-        ( dynamic_pointer_cast< darcyNonLinearSolver_type >( darcySolver ) )->setPrimalZeroIteration( Members->getPrimalZeroIteration() );
+        ( dynamic_pointer_cast< darcyNonLinearSolver_Type >( darcySolver ) )->setPrimalZeroIteration( Members->getPrimalZeroIteration() );
 
         break;
 
@@ -621,22 +622,22 @@ darcy::run()
     case DARCY_TRANSIENT:
 
         // Set the initial primal variable
-        ( dynamic_pointer_cast< darcyTransientSolver_type >( darcySolver ) )->setInitialPrimal( Members->getInitialPrimal() );
+        ( dynamic_pointer_cast< darcyTransientSolver_Type >( darcySolver ) )->setInitialPrimal( Members->getInitialPrimal() );
 
         // Set the mass function
-        ( dynamic_pointer_cast< darcyTransientSolver_type >( darcySolver ) )->setMass( Members->getMass() );
+        ( dynamic_pointer_cast< darcyTransientSolver_Type >( darcySolver ) )->setMass( Members->getMass() );
 
         break;
     }
 
     // Set the exporter for the solution
-    boost::shared_ptr< Exporter< RegionMesh > > exporter;
+    boost::shared_ptr< Exporter< regionMesh_Type > > exporter;
 
     // Shared pointer used in the exporter for the primal solution
-    vector_ptrtype primalExporter;
+    vectorPtr_Type primalExporter;
 
     // Shared pointer used in the exporter for the dual solution
-    vector_ptrtype dualExporter;
+    vectorPtr_Type dualExporter;
 
     // Type of the exporter
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
@@ -645,64 +646,54 @@ darcy::run()
 #ifdef HAVE_HDF5
     if ( exporterType.compare("hdf5") == 0 )
     {
-        exporter.reset( new ExporterHDF5< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
-
-        // Set directory where to save the solution
-        exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
-
-        exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
+        exporter.reset( new ExporterHDF5< regionMesh_Type > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
     }
     else
 #endif
     {
         if ( exporterType.compare("none") == 0 )
         {
-            exporter.reset( new ExporterEmpty< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
-
-            // Set directory where to save the solution
-            exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
-
-            exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
+            exporter.reset( new ExporterEmpty< regionMesh_Type > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
         }
         else
         {
-            exporter.reset( new ExporterEnsight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
-
-            // Set directory where to save the solution
-            exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
-
-            exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
+            exporter.reset( new ExporterEnsight< regionMesh_Type > ( dataFile, dataFile( "exporter/file_name", "PressureVelocity" ) ) );
         }
     }
 
+    // Set directory where to save the solution
+    exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
+
+    exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
+
     // Set the exporter primal pointer
-    primalExporter.reset( new vector_type ( *( darcySolver->primalSolution() ),
+    primalExporter.reset( new vector_Type ( *( darcySolver->primalSolution() ),
                                             exporter->mapType() ) );
 
     // Add the primal variable to the exporter
-    exporter->addVariable( ExporterData< RegionMesh >::ScalarField,
+    exporter->addVariable( ExporterData< regionMesh_Type >::ScalarField,
                            dataFile( "exporter/name_primal", "Pressure" ),
                            p_FESpacePtr,
                            primalExporter,
                            static_cast<UInt>( 0 ),
-                           ExporterData< RegionMesh >::UnsteadyRegime,
-                           ExporterData< RegionMesh >::Cell );
+                           ExporterData< regionMesh_Type >::UnsteadyRegime,
+                           ExporterData< regionMesh_Type >::Cell );
 
     // Set the exporter dual pointer
-    dualExporter.reset( new vector_type ( *dualInterpolated, exporter->mapType() ) );
+    dualExporter.reset( new vector_Type ( *dualInterpolated, exporter->mapType() ) );
 
     // Add the variable to the exporter
-    exporter->addVariable( ExporterData< RegionMesh >::VectorField,
+    exporter->addVariable( ExporterData< regionMesh_Type >::VectorField,
                            dataFile( "exporter/name_dual", "Velocity" ),
                            uInterpolate_FESpacePtr,
                            dualExporter,
                            static_cast<UInt>( 0 ),
-                           ExporterData< RegionMesh >::UnsteadyRegime,
-                           ExporterData< RegionMesh >::Cell );
+                           ExporterData< regionMesh_Type >::UnsteadyRegime,
+                           ExporterData< regionMesh_Type >::Cell );
 
     // Display the total number of unknowns
     darcySolver->getDisplayer().leaderPrint( "Number of unknowns : ",
-                                             hybrid_FESpace.map().map(Unique)->NumGlobalElements(), "\n" );
+                                             hybrid_FESpace->map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Export the partitioning
     exporter->exportPID( meshPart );
@@ -744,7 +735,7 @@ darcy::run()
         // Solve the problem
 
         // Start the fixed point simulation
-        ( dynamic_pointer_cast< darcyNonLinearSolver_type >( darcySolver ) )->fixedPointScheme();
+        ( dynamic_pointer_cast< darcyNonLinearSolver_Type >( darcySolver ) )->fixedPointScheme();
 
         // Save the solution
 
@@ -856,10 +847,10 @@ darcy::run()
             }
 
             // Update the primal old solution for the fixed point scheme
-            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_type >( darcySolver ) )->updatePrimalOldSolution();
+            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_Type >( darcySolver ) )->updatePrimalOldSolution();
 
             // Start the fixed point simulation
-            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_type >( darcySolver ) )->fixedPointScheme();
+            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_Type >( darcySolver ) )->fixedPointScheme();
 
             // Save the solution
 

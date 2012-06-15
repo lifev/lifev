@@ -81,7 +81,7 @@ namespace LifeV
 
 */
 template <typename Mesh,
-     	  typename SolverType = LifeV::SolverAztecOO >
+           typename SolverType = LifeV::SolverAztecOO >
 
 class StructuralSolver
 {
@@ -588,7 +588,7 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
                                           const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                          bchandler_Type&                	BCh,
+                                          bchandler_Type&                    BCh,
                                           boost::shared_ptr<Epetra_Comm>&   comm)
 {
     setup(data, dFESpace, comm);
@@ -626,15 +626,10 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
     M_me                              = comm->MyPID();
     M_elmatM.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     M_localMap                        = monolithicMap;
-    //M_disp.reset                      (new vector_Type(*M_localMap));
     M_mass.reset                      (new matrix_Type(*M_localMap));
     M_systemMatrix.reset              (new matrix_Type(*M_localMap));
     M_jacobian.reset                  (new matrix_Type(*M_localMap));
-    //    M_disp.reset                       ( new vector_Type(*M_localMap));// to kill
 
-    //Vector of Stiffness for NH and Exp
-    //This vector stores the stiffness vector both in
-    //updateSystem and in evalresidual. That's why it is called tempVect
     M_offset                          = offset;
 
     M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->solidType() ) );
@@ -658,7 +653,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff
     //Compute the new Stiffness Matrix
     M_material->computeStiffness(*M_disp, M_rescaleFactor, M_data, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
         *mat_stiff += *M_material->stiffMatrix();
         mat_stiff->globalAssemble();
@@ -812,7 +807,7 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
     Real zero(0.);
     if ( !bch->bcUpdateDone() )
         bch->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
-	bcManageVector( rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *bch, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
+    bcManageVector( rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *bch, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
     solveJacobian(*M_disp, rhsFull, zero, bch);
     evalResidualDisplacementLin(*M_disp);
 }
@@ -834,7 +829,7 @@ StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
 }
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& factor)
+void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& /*factor*/)
 {
     M_Displayer->leaderPrint( " Computing residual ... \t\t\t");
 
@@ -844,7 +839,7 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     //! It is right to do globalAssemble() inside the M_material class
     M_material->computeStiffness( sol, 1., M_data, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
         *stiff = *M_material->stiffMatrix();
         *stiff += *M_mass;
@@ -868,16 +863,11 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     M_Displayer->leaderPrint("    S- Updating the boundary conditions ... \t");
     LifeChrono chrono;
 
-    //This is the most important issue related with this class.
-    //At the moment, the BC are applied on the matrix and on rhsNoBc for VK models
-    //but for NH and EXP they are applied on the residual directly. This does not work for
-    //nonhomogeneus Dirichlet conditions!!
-
     if ( !M_BCh->bcUpdateDone() )
         M_BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
 
     // ignoring non-local entries, Otherwise they are summed up lately
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
         chrono.start();
 
@@ -902,7 +892,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
         *M_rhs=*M_rhsNoBC;
         residual = *M_mass * solution;
         residual += *M_material->stiffVector();
-	vector_Type solRep(solution, Repeated);
+    vector_Type solRep(solution, Repeated);
         bcManageResidual( residual, *M_rhs, solRep, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
         residual -= *M_rhs;
         chrono.stop();
@@ -919,7 +909,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type&
     LifeChrono chrono;
     chrono.start();
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonlinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
         M_residual_d.reset(new vector_Type( *M_systemMatrix * solution ));
         *M_residual_d -= *M_rhsNoBC;
@@ -938,17 +928,6 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Type& solution )
 {
-
-    //This is consisten with the previous first approximation in iterateLin
-    //matrixPtr_Type matrixNoBC(new matrix_Type(*M_localMap));
-    //<<<<<<< HEAD
-    //  *M_systemMatrix += *M_material->linearStiff();
-    //=======
-    //*matrixNoBC += *M_material->jacobian();
-    //*M_systemMatrix *= M_zeta;
-    //>>>>>>> 20110728_ExponentialNeohookean
-    //*matrixNoBC += *M_mass;
-    //matrixNoBC->globalAssemble();
 
     M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
     LifeChrono chrono;
@@ -1164,10 +1143,6 @@ StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
     M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
     M_rescaleFactor=dataFile( "solid/rescaleFactor", 0. );
-    
-    //To be consistent with the master, this has to be removed.
-    //It can interfere with other maps built for the same parameters in VKED
-
     // UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
     // if (!M_data->young(marker))
     //     M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
@@ -1219,7 +1194,7 @@ void StructuralSolver<Mesh, SolverType>::
 solveJacobian(vector_Type&           step,
               const vector_Type&     res,
               Real&                /*linear_rel_tol*/,
-              bchandler_Type&        BCh)
+              bchandler_Type&       /* BCh*/)
 {
     LifeChrono chrono;
 
@@ -1234,7 +1209,7 @@ solveJacobian(vector_Type&           step,
 
     if ( !M_BCh->bcUpdateDone() )
         M_BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
-	bcManageMatrix( *matrFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
+    bcManageMatrix( *matrFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
 
     M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
 

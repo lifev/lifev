@@ -170,6 +170,13 @@ class NeoHookeanMaterialNonLinear :
     */
     void computeKinematicsVariables( const VectorElemental& dk_loc );
 
+    //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
+    /*!
+      \param dk_loc: local displacement vector
+    */
+    //void computeStress( const vector_Type& sol);
+
+
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
     void showMe( std::string const& fileNameVectStiff,
 		 std::string const& fileNameJacobain);

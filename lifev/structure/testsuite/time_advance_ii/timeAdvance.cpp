@@ -267,10 +267,10 @@ problem::run()
 
     //! initialization of parameters of time Advance method:
     if (TimeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataProblem->dataTime()->coefficientsNewmark() , OrderDev);
+        timeAdvance->setup( dataProblem->dataTimeAdvance()->coefficientsNewmark() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
-        timeAdvance->setup(dataProblem->dataTime()->orderBDF() , OrderDev);
+        timeAdvance->setup(dataProblem->dataTimeAdvance()->orderBDF() , OrderDev);
 
     timeAdvance->setTimeStep(dataProblem->dataTime()->timeStep());
     timeAdvance->showMe();
@@ -334,9 +334,9 @@ problem::run()
     exporter->postProcess( 0 );
 
     //evaluate disp and vel as interpolate the bcFunction d0 and v0
-    feSpace->interpolate(d0, *U, 0.0);
-    feSpace->interpolate(v0, *V , 0.0);
-    feSpace->interpolate(a0, *W, 0.0);
+    feSpace->interpolate( static_cast<FESpace_type::function_Type>( d0 ), *U, 0.0 );
+    feSpace->interpolate( static_cast<FESpace_type::function_Type>( v0 ), *V, 0.0 );
+    feSpace->interpolate( static_cast<FESpace_type::function_Type>( a0 ), *W, 0.0 );
 
 //evaluate disp and vel as interpolate the bcFunction d0 and v0 and w0
 
@@ -353,11 +353,16 @@ problem::run()
     }
     if (TimeAdvanceMethod =="BDF")
     {
-        for ( UInt previousPass=0; previousPass < dataProblem->orderBDF() ; previousPass++)
+        for ( UInt previousPass=0; previousPass < dataProblem->dataTimeAdvance()->orderBDF() ; previousPass++)
         {
             Real previousTimeStep = -previousPass*dt;
+// <<<<<<< HEAD
             feSpace->interpolate(uexact, *U, previousTimeStep );
             uv0.push_back(U);
+// =======
+            // feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *U, previousTimeStep);
+            // uv0.push_back(*U);
+        //>>>>>>> master
         }
     }
 
@@ -372,9 +377,9 @@ problem::run()
     vector_type vExa(uMap, Repeated );
     vector_type wExa(uMap, Repeated );
 
-    feSpace->interpolate(uexact, *Exact, 0);
-    feSpace->interpolate(v0,     *vExact , 0);
-    feSpace->interpolate(a0,     *wExact , 0);
+    feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *Exact,  0 );
+    feSpace->interpolate( static_cast<FESpace_type::function_Type>( v0 ),     *vExact, 0 );
+    feSpace->interpolate( static_cast<FESpace_type::function_Type>( a0 ),     *wExact, 0 );
 
     *U = timeAdvance->solution();
     *V = timeAdvance->velocity();
@@ -388,7 +393,7 @@ problem::run()
 
     for (Real time = dt; time <= T; time += dt)
     {
-        dataProblem->setTime(time);
+        dataProblem->dataTime()->setTime(time);
 
         if (verbose)
         {
@@ -415,9 +420,9 @@ problem::run()
         timeAdvance->shiftRight(*problem.solution());
 
         //evaluate uexact solution
-        feSpace->interpolate(uexact, *Exact , time);
-        feSpace->interpolate(v0, *vExact , time);
-        feSpace->interpolate(a0, *wExact , time);
+        feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *Exact,  time );
+        feSpace->interpolate( static_cast<FESpace_type::function_Type>( v0 ),     *vExact, time );
+        feSpace->interpolate( static_cast<FESpace_type::function_Type>( a0 ),     *wExact, time );
 
         *U =  timeAdvance->solution();
         *V = timeAdvance->velocity();

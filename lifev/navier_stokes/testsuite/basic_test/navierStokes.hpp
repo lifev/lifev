@@ -724,12 +724,12 @@ NavierStokes<MeshType, Problem>::run()
             boost::shared_ptr<OseenData> oseenData(new OseenData());
             oseenData->setup( dataFile );
 
-            if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
+            if (verbose) std::cout << "Time discretization order " << oseenData->dataTimeAdvance()->orderBDF() << std::endl;
 
             OseenSolver< mesh_Type > fluid (oseenData,
-					    *uFESpace,
-					    *pFESpace,
-					    M_data->comm);
+                        *uFESpace,
+                        *pFESpace,
+                        M_data->comm);
 
             MapEpetra fullMap(fluid.getMap());
 
@@ -749,7 +749,7 @@ NavierStokes<MeshType, Problem>::run()
 
             // bdf object to store the previous solutions
             TimeAdvanceBDFNavierStokes<vector_Type> bdf;
-            bdf.setup(oseenData->dataTime()->orderBDF());
+            bdf.setup(oseenData->dataTimeAdvance()->orderBDF());
 
             /*
                 Initialization with exact solution: either interpolation or "L2-NS"-projection
@@ -806,7 +806,7 @@ NavierStokes<MeshType, Problem>::run()
 
                 if (M_initMethod == Projection)
                 {
-                    uFESpace->interpolate(problem_Type::uderexact, rhs, time);
+                    uFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::uderexact ), rhs, time);
                     rhs *= -1.;
                     rhs = fluid.matrixMass()*rhs;
                     fluid.updateSystem( 0., beta, rhs );
@@ -874,9 +874,9 @@ NavierStokes<MeshType, Problem>::run()
             if(M_exportExactSolutions)
             {
                 exactPressPtr.reset( new vector_Type(exactPress, exporter->mapType() ) );
-                pFESpace->interpolate(problem_Type::pexact, *exactPressPtr, 0);
+                pFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::pexact ), *exactPressPtr, 0 );
                 exactVelPtr.reset( new vector_Type(exactVel, exporter->mapType() ) );
-                uFESpace->interpolate(problem_Type::uexact, *exactVelPtr, 0);
+                uFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::uexact ), *exactVelPtr, 0 );
             }
 
             exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace,
@@ -922,13 +922,13 @@ NavierStokes<MeshType, Problem>::run()
                 fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.norm2());
                 fluid.getDisplayer().leaderPrint("\n");
 
-		if(oseenData->conservativeFormulation())
-		  rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        if(oseenData->conservativeFormulation())
+          rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
                 fluid.updateSystem( alpha, beta, rhs );
 
-		if(!oseenData->conservativeFormulation())
-		  rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        if(!oseenData->conservativeFormulation())
+          rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
                 fluid.iterate( bcH );
 
@@ -959,8 +959,8 @@ NavierStokes<MeshType, Problem>::run()
                 *velAndPressure = *fluid.solution();
                 if(M_exportExactSolutions)
                 {
-                    pFESpace->interpolate(problem_Type::pexact, *exactPressPtr, time);
-                    uFESpace->interpolate(problem_Type::uexact, *exactVelPtr, time);
+                    pFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::pexact ), *exactPressPtr, time );
+                    uFESpace->interpolate( static_cast<typename feSpace_Type::function_Type>( problem_Type::uexact ), *exactVelPtr, time );
                 }
                 exporter->postProcess( time );
 

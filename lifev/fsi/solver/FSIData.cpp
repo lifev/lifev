@@ -124,8 +124,11 @@ FSIData::operator=( const FSIData& FSIData )
 void
 FSIData::setup( const GetPot& dataFile, const std::string& section )
 {
-    if ( !M_dataALE.get() )
-        M_dataALE.reset( new timeData_Type( dataFile, "mesh_motion/time_discretization" ) );
+    if ( !M_timeALE.get() )
+        M_timeALE.reset( new time_Type( dataFile, section + "/time_discretization" ) );
+
+    if ( !M_timeAdvanceALE.get() )
+        M_timeAdvanceALE.reset( new timeAdvance_Type( dataFile, section + "/time_discretization" ) );
 
     M_dataFluid->setup( dataFile );
     M_dataSolid->setup( dataFile );
@@ -161,7 +164,7 @@ FSIData::setup( const GetPot& dataFile, const std::string& section )
     vertexFlag               = dataFile( "interface/structure_vertex_flag", -1 );
     if (vertexFlag >= 0)
         M_structureInterfaceVertexFlag.reset( new Int const ( vertexFlag ) );
-
+    
     M_interfaceTolerance = dataFile( "interface/tolerance",      0. );
 
     M_restartTimeStep  = dataFile( "importer/restart_timestep",      0. );

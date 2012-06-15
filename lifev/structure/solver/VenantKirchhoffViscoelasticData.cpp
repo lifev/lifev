@@ -44,6 +44,7 @@ namespace LifeV
 
 VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData() :
         M_time                           ( ),
+        M_timeAdvance                    ( ),
         M_density                        ( ),
         M_thickness                      ( ),
         M_poisson                        ( ),
@@ -51,24 +52,25 @@ VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData() :
         M_gamma                          ( ),
         M_beta                           ( ),
         M_factor                         ( ),
-	M_verbose                        ( ),
-	M_order                          ( ),
-      	M_damping                        ( )
+        M_verbose                        ( ),
+        M_order                          ( ),
+        M_damping                        ( )
 {
 }
 
-VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData):
-        TimeData               ( VenantKirchhoffViscoelasticData),
-        M_density              ( VenantKirchhoffViscoelasticData.M_density ),
-	M_thickness            ( VenantKirchhoffViscoelasticData.M_thickness ),
-        M_poisson              ( VenantKirchhoffViscoelasticData.M_poisson ),
-        M_young                ( VenantKirchhoffViscoelasticData.M_young ),
-        M_gamma                ( VenantKirchhoffViscoelasticData.M_gamma ),
-        M_beta                 ( VenantKirchhoffViscoelasticData.M_beta ),
-        M_factor               ( VenantKirchhoffViscoelasticData.M_factor ),
-        M_verbose              ( VenantKirchhoffViscoelasticData.M_verbose ),
-        M_order                ( VenantKirchhoffViscoelasticData.M_order ),
-	M_damping              ( VenantKirchhoffViscoelasticData.M_damping )
+VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData( const VenantKirchhoffViscoelasticData& venantKirchhoffViscoelasticData):
+        M_time                           ( venantKirchhoffViscoelasticData.M_time ),
+        M_timeAdvance                    ( venantKirchhoffViscoelasticData.M_timeAdvance ),
+        M_density                        ( venantKirchhoffViscoelasticData.M_density ),
+        M_thickness                      ( venantKirchhoffViscoelasticData.M_thickness ),
+        M_poisson                        ( venantKirchhoffViscoelasticData.M_poisson ),
+        M_young                          ( venantKirchhoffViscoelasticData.M_young ),
+        M_gamma                          ( venantKirchhoffViscoelasticData.M_gamma ),
+        M_beta                           ( venantKirchhoffViscoelasticData.M_beta ),
+        M_factor                         ( venantKirchhoffViscoelasticData.M_factor ),
+        M_verbose                        ( venantKirchhoffViscoelasticData.M_verbose ),
+        M_order                          ( venantKirchhoffViscoelasticData.M_order ),
+        M_damping                        ( venantKirchhoffViscoelasticData.M_damping )
 {
 }
 
@@ -77,21 +79,22 @@ VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData( const VenantKi
 //==================================================
 
 VenantKirchhoffViscoelasticData&
-VenantKirchhoffViscoelasticData::operator=( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData )
+VenantKirchhoffViscoelasticData::operator=( const VenantKirchhoffViscoelasticData& venantKirchhoffViscoelasticData )
 {
-    if ( this != &VenantKirchhoffViscoelasticData )
+    if ( this != &venantKirchhoffViscoelasticData )
     {
-        M_time                    = VenantKirchhoffViscoelasticData.M_time;
-        M_density                 = VenantKirchhoffViscoelasticData.M_density;
-	M_thickness               = VenantKirchhoffViscoelasticData.M_thickness;
-	M_poisson                 = VenantKirchhoffViscoelasticData.M_poisson;
-        M_young                   = VenantKirchhoffViscoelasticData.M_young;
-        M_gamma                   = VenantKirchhoffViscoelasticData.M_gamma;
-        M_beta                    = VenantKirchhoffViscoelasticData.M_beta;
-        M_factor                  = VenantKirchhoffViscoelasticData.M_factor;
-        M_verbose                 = VenantKirchhoffViscoelasticData.M_verbose;
-	M_order                   = VenantKirchhoffViscoelasticData.M_order;
-	M_damping                 = VenantKirchhoffViscoelasticData.M_damping;
+        M_time                    = venantKirchhoffViscoelasticData.M_time;
+        M_timeAdvance             = venantKirchhoffViscoelasticData.M_timeAdvance;
+        M_density                 = venantKirchhoffViscoelasticData.M_density;
+        M_thickness               = venantKirchhoffViscoelasticData.M_thickness;
+        M_poisson                 = venantKirchhoffViscoelasticData.M_poisson;
+        M_young                   = venantKirchhoffViscoelasticData.M_young;
+        M_gamma                   = venantKirchhoffViscoelasticData.M_gamma;
+        M_beta                    = venantKirchhoffViscoelasticData.M_beta;
+        M_factor                  = venantKirchhoffViscoelasticData.M_factor;
+        M_verbose                 = venantKirchhoffViscoelasticData.M_verbose;
+        M_order                   = venantKirchhoffViscoelasticData.M_order;
+        M_damping                 = venantKirchhoffViscoelasticData.M_damping;
     }
 
     return *this;
@@ -106,7 +109,10 @@ VenantKirchhoffViscoelasticData::setup( const GetPot& dataFile, const std::strin
 {
     // If data time has not been set
     if ( !M_time.get() )
-        M_time.reset( new Time_Type( dataFile, section + "/time_discretization" ) );
+        M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
+
+    if ( !M_timeAdvance.get() )
+        M_timeAdvance.reset( new timeAdvance_Type( dataFile, section + "/time_discretization" ) );
 
     // physics
     M_density   = dataFile( ( section + "/physics/density" ).data(), 1. );
@@ -116,9 +122,9 @@ VenantKirchhoffViscoelasticData::setup( const GetPot& dataFile, const std::strin
  // std::cout<<"materialNumber "<<materialsNumber<<"\n";
     if ( materialsNumber == 0 )
       {
-	std::cout<<"The material flag was not set from data file. Its value will be dedced from the first volume marker."<<"\n";
-	//         M_young[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
-	//         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
+    std::cout<<"The material flag was not set from data file. Its value will be dedced from the first volume marker."<<"\n";
+    //         M_young[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
+    //         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
       }
     else
       {
@@ -127,13 +133,13 @@ VenantKirchhoffViscoelasticData::setup( const GetPot& dataFile, const std::strin
 
         UInt material(0);
         for ( UInt i(0) ; i < materialsNumber ; ++i )
-	  {
+      {
             material            = dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
             M_young[material]   = dataFile( ( section + "/physics/young" ).data(), 0., i );
             M_poisson[material] = dataFile( ( section + "/physics/poisson" ).data(), 0., i );
-	    M_gamma[material]   = dataFile( ( section + "/physics/young" ).data(), 0., i );
+        M_gamma[material]   = dataFile( ( section + "/physics/young" ).data(), 0., i );
             M_beta[material] = dataFile( ( section + "/physics/poisson" ).data(), 0., i );
-	  }
+      }
     }
 
     M_damping     = dataFile( (section+"/damping").data(), false);
@@ -180,6 +186,7 @@ VenantKirchhoffViscoelasticData::showMe( std::ostream& output ) const
 
     output << "\n*** Values for data [solid/time_discretization]\n\n";
     M_time->showMe( output );
+    M_timeAdvance->showMe( output );
 }
 
 
@@ -187,13 +194,6 @@ VenantKirchhoffViscoelasticData::showMe( std::ostream& output ) const
 // ===================================================
 // Set Method
 // ===================================================
-
-void
-VenantKirchhoffViscoelasticData::setTimeData( const Time_ptrType TimeData )
-{
-    M_time = TimeData;
-}
-
 void
 VenantKirchhoffViscoelasticData::setDensity( const Real& density )
 {
@@ -234,13 +234,6 @@ VenantKirchhoffViscoelasticData::setBeta( const Real& beta, const UInt& material
 // ===================================================
 // Get Method
 // ===================================================
-
-VenantKirchhoffViscoelasticData::Time_ptrType
-VenantKirchhoffViscoelasticData::dataTime() const
-{
-    return M_time;
-}
-
 const Real&
 VenantKirchhoffViscoelasticData::rho() const
 {
