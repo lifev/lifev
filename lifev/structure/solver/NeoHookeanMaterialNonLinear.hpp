@@ -618,31 +618,27 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( E
 									       const std::vector<Real>& invariants,
 									       const UInt marker)
 {
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Computing the First Piola Kirchhoff Tensor, NH ");
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
   //Get the material parameters
   Real mu    	= this->M_dataMaterial->mu(marker);
   Real bulk  	= this->M_dataMaterial->bulk(marker);
 
-
   //Computing the first term \muJ^{-2/3}[F-(1/3)tr(C)F^{-T}]
   Epetra_SerialDenseMatrix firstTerm(tensorF);
   Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
   Real scale( 0.0 );
-  scale = -1 * (1 / 3) * invariants[0];
+  scale = -1 * (1.0 / 3.0) * invariants[0];
   copyCofactorF.Scale( scale );
   firstTerm += copyCofactorF;
 
   Real coef( 0.0 );
-  coef = mu * std::pow(invariants[3],-2/3);
+  coef = mu * std::pow(invariants[3],-2.0/3.0);
   firstTerm.Scale( coef );
 
   //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
   Epetra_SerialDenseMatrix secondTerm(cofactorF);
   Real sCoef(0);
-  sCoef = invariants[3] * (bulk/2) * (invariants[3] - 1 + (1 / invariants[3]) * std::log(invariants[3]));
+  sCoef = invariants[3] * (bulk/2.0) * (invariants[3] - 1 + (1 / invariants[3]) * std::log(invariants[3]));
   secondTerm.Scale( sCoef );
 
   firstPiola += firstTerm;

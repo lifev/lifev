@@ -414,20 +414,16 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTens
 									       const UInt marker)
 {
 
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Computing the First Piola Kirchhoff Tensor, SVK ");
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-
   //Get the material parameters
   Real lambda  	= this->M_dataMaterial->lambda(marker);
   Real mu    	= this->M_dataMaterial->mu(marker);
-  Real coef = ( lambda / 2 ) * ( invariants[0] - 3 );
+  Real coef = ( lambda / 2.0 ) * ( invariants[0] - 3.0 );
 
   Epetra_SerialDenseMatrix firstTerm(tensorF);
   firstTerm.Scale(coef);
 
   Epetra_SerialDenseMatrix secondTerm(tensorF);
-  Real coeff = -mu;
+  Real coeff = -1.0 * mu;
   secondTerm.Scale( coeff );
 
   Epetra_SerialDenseMatrix thirdTerm(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());

@@ -325,10 +325,6 @@ VenantKirchhoffMaterialLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epet
 									    const UInt marker)
 {
 
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Computing the First Piola Kirchhoff Tensor, LE ");
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-
   //Get the material parameters
   Real lambda  	= this->M_dataMaterial->lambda(marker);
   Real mu    	= this->M_dataMaterial->mu(marker);
@@ -344,7 +340,9 @@ VenantKirchhoffMaterialLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epet
     }
 
   Real divergenceU( copyF(0,0) + copyF(1,1) + copyF(2,2) ); //DivU = tr(copyF)
-  identity.Scale( lambda );
+  Real coefIdentity(0.0);
+  coefIdentity = divergenceU * lambda;
+  identity.Scale( coefIdentity );
 
   Epetra_SerialDenseMatrix transposed(copyF);
   transposed.SetUseTranspose(true);

@@ -644,7 +644,7 @@ void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( 
   Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
 
   Real scale(0.0);
-  scale = -invariants[0]/3;
+  scale = -invariants[0]/3.0;
   copyCofactorF.Scale( scale );
   firstTerm += copyCofactorF;
 
@@ -659,7 +659,7 @@ void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( 
   //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
   Epetra_SerialDenseMatrix secondTerm(cofactorF);
   Real secCoef(0);
-  secCoef = invariants[3] * (bulk/2) * (invariants[3] - 1 + (1 / invariants[3]) * std::log(invariants[3]));
+  secCoef = invariants[3] * (bulk/2.0) * (invariants[3] - 1 + (1.0 / invariants[3]) * std::log(invariants[3]));
 
   secondTerm.Scale( secCoef );
 
