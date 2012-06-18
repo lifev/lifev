@@ -1,0 +1,20 @@
+
+INCLUDE(TribitsAddExecutableAndTest)
+INCLUDE(TribitsCopyFilesToBinaryDir)
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+
+
+TRIBITS_ADD_EXECUTABLE_AND_TEST(
+  DarcyTest_2D
+  SOURCES main.cpp user_fun.cpp darcy.cpp
+  ARGS -c
+  NUM_MPI_PROCS 3
+  COMM serial mpi
+  )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(data_test_darcy_2d
+  CREATE_SYMLINK
+  SOURCE_FILES data
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+)
