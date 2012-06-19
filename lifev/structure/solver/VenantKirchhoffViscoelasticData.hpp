@@ -289,8 +289,6 @@ private:
     MaterialContainer_Type  M_beta;
     //@}
 
-    //! Miscellaneous
-    Real                   M_factor; // amplification factor for deformed mesh
     //!verbose
     UInt                   M_verbose; // temporal output verbose
     //! order

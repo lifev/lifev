@@ -280,12 +280,6 @@ public:
      */
     const std::string& order() const { return M_order; }
 
-    //! Get solid amplification factor
-    /*!
-     * @return Solid amplification factor
-     */
-    const Real& factor() const { return M_factor; }
-
     //! Get verbose level
     /*!
      * @return verbose level
@@ -332,7 +326,6 @@ private:
     std::string            M_order;
 
     //! Miscellaneous
-    Real                   M_factor;  // amplification factor for deformed mesh
     UInt                   M_verbose; // temporal output verbose
 
     std::string            M_solidType;

@@ -51,7 +51,6 @@ VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData() :
         M_young                          ( ),
         M_gamma                          ( ),
         M_beta                           ( ),
-        M_factor                         ( ),
         M_verbose                        ( ),
         M_order                          ( ),
         M_damping                        ( )
@@ -67,7 +66,6 @@ VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData( const VenantKi
         M_young                          ( venantKirchhoffViscoelasticData.M_young ),
         M_gamma                          ( venantKirchhoffViscoelasticData.M_gamma ),
         M_beta                           ( venantKirchhoffViscoelasticData.M_beta ),
-        M_factor                         ( venantKirchhoffViscoelasticData.M_factor ),
         M_verbose                        ( venantKirchhoffViscoelasticData.M_verbose ),
         M_order                          ( venantKirchhoffViscoelasticData.M_order ),
         M_damping                        ( venantKirchhoffViscoelasticData.M_damping )
@@ -91,7 +89,6 @@ VenantKirchhoffViscoelasticData::operator=( const VenantKirchhoffViscoelasticDat
         M_young                   = venantKirchhoffViscoelasticData.M_young;
         M_gamma                   = venantKirchhoffViscoelasticData.M_gamma;
         M_beta                    = venantKirchhoffViscoelasticData.M_beta;
-        M_factor                  = venantKirchhoffViscoelasticData.M_factor;
         M_verbose                 = venantKirchhoffViscoelasticData.M_verbose;
         M_order                   = venantKirchhoffViscoelasticData.M_order;
         M_damping                 = venantKirchhoffViscoelasticData.M_damping;
@@ -148,7 +145,6 @@ VenantKirchhoffViscoelasticData::setup( const GetPot& dataFile, const std::strin
     M_order     = dataFile( (section+"/space_discretization/order").data(), "P1" );
 
     // miscellaneous
-    M_factor  = dataFile( (section + "/miscellaneous/factor").data(), 1.0 );
     M_verbose = dataFile( (section + "/miscellaneous/verbose").data(), 1 );
 
 }
@@ -178,7 +174,6 @@ VenantKirchhoffViscoelasticData::showMe( std::ostream& output ) const
         output << "beta[" << i->first << "]                         = " << i->second << std::endl;
 
     output << "\n*** Values for data [solid/miscellaneous]\n\n";
-    output << "deformation factor               = " << M_factor << std::endl;
     output << "verbose                          = " << M_verbose << std::endl;
 
     output << "\n*** Values for data [solid/space_discretization]\n\n";
@@ -290,12 +285,6 @@ const Real&
 VenantKirchhoffViscoelasticData::beta( const UInt& material ) const
 {
     return M_beta.find( material )->second;
-}
-
-const Real&
-VenantKirchhoffViscoelasticData::factor() const
-{
-    return M_factor;
 }
 
 const std::string&
