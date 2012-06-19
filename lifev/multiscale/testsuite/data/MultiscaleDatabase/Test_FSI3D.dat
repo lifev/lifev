@@ -25,11 +25,11 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_2Cylinders-tube20_FS
 
     [../Output]
     ProblemPrefix              = Multiscale # Problem prefix
-    SaveEach                   = 1          # time steps
+    SaveEach                   = 2          # time steps
 
     [../time_discretization]
     initialtime                = 0.000   # [s]
-    endtime                    = 0.008   # [s]
+    endtime                    = 0.004   # [s]
     timestep                   = 0.001   # [s]
 
     [../]

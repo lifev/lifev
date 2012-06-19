@@ -33,13 +33,15 @@ algorithm = '       Broyden             Default'
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
             0       FSI3D               Cylinder_tube20_MonolithicGE
+            1       FSI3D               Cylinder_tube20_MonolithicGI
          '
 ###################################################################################################
 
 # List of MPI groups ##############################################################################
 ########### ID #### Load # Models #################################################################
 mpiGroups = '
-            1       100     0
+            1       50     0
+            2       50     1
             '
 ###################################################################################################
 
@@ -47,7 +49,8 @@ mpiGroups = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
             0       BoundaryCondition   FlowRate_SquareSinusoidalWave   0               0
-            2       BoundaryCondition   Stress_Zero                     0               1
+            1       FlowRateStress      Lagrange1                       1,0             0,1
+            2       BoundaryCondition   Stress_Zero                     1               1
             '
 ###################################################################################################
 

@@ -68,10 +68,11 @@ solidMeshPartitioned = none
 
 
 [fluid]
-useShapeDerivatives = false
-domainVelImplicit   = false  # tells if the domain vel is to be considered implicitly in the convective term
-convectiveImplicit  = false  # tells if the velocity is to be considered implicitly in the convective term
-semiImplicit        = true   # tells if we advance in time after the first nonlinear iteration or not
+useShapeDerivatives     = false
+domainVelImplicit       = false  # tells if the domain vel is to be considered implicitly in the convective term
+convectiveImplicit      = false  # tells if the velocity is to be considered implicitly in the convective term
+semiImplicit            = true   # tells if we advance in time after the first nonlinear iteration or not
+conservativeFormulation = false  # tells if the conservative or non conservative formulation is used
 
     [./physics] # Defined here only if different from the one in the main file.
     #density         = 1.0             # density   [g/cm^3]
@@ -79,9 +80,9 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
     [../time_discretization]
     method           = BDF             # Newmark, BDF
-    BDF_order        = 1
-    #theta            = 0.25
-    #gamma            = 0.50
+    BDF_order        = 2
+    theta            = 0.25
+    gamma            = 0.50
     #rhoInf           = 1
     #typeOfGeneralizedAlpha = HHT
 
@@ -106,6 +107,7 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     factor    = 1
 
     [../ipstab]
+    use             = 1                 # boolean telling if the stabilization is added
     gammaBeta       = 1
     gammaDiv        = 0.2
     gammaPress      = 0.05
@@ -162,9 +164,9 @@ rescaleFactor    = 1.0 # this factor can be used to rescale the structure block
 
     [../time_discretization]
     method           = BDF            # Newmark, BDF
-    BDF_order        = 1
-    #theta            = 0.25
-    #gamma            = 0.50
+    BDF_order        = 2
+    theta            = 0.25
+    gamma            = 0.50
     #rhoInf           = 1
     #typeOfGeneralizedAlpha = HHT
 
@@ -172,11 +174,11 @@ rescaleFactor    = 1.0 # this factor can be used to rescale the structure block
     mesh_dir         = ./Mesh/
     mesh_file        = vessel20.mesh  # mesh file
     order            = P1
+    mesh_faces       = all              # update all faces elements
+    mesh_edges       = all              # update all faces elements
 
     [../miscellaneous]
-    factor     = 12
-    verbose    = 1
-    depname    = dep
+    verbose    = 0
 
     [../newton]
     maxiter    = 1
@@ -185,9 +187,9 @@ rescaleFactor    = 1.0 # this factor can be used to rescale the structure block
 
     [../boundary_conditions]
     #list = ' '                                                                         # Free dispacement
-    list = 'Top_ReferencePressure Base_ReferencePressure OuterWall_ReferencePressure'   # Free dispacement + Reference pressure
+    #list = 'Top_ReferencePressure Base_ReferencePressure OuterWall_ReferencePressure'   # Free dispacement + Reference pressure
     #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
-    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ OuterWall_ReferencePressure'  # Free dispacement on XY + Reference pressure
+    list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ OuterWall_ReferencePressure'  # Free dispacement on XY + Reference pressure
     #list = 'Top Base TopEdge BaseEdge OuterWall_ReferencePressure'                     # Fixed dispacement + Reference pressure
 
         [./Top]
@@ -284,9 +286,9 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [./time_discretization]
     method           = BDF             # Newmark, BDF
-    BDF_order        = 1
-    #theta            = 0.25
-    #gamma            = 0.50
+    BDF_order        = 2
+    theta            = 0.25
+    gamma            = 0.50
     #rhoInf           = 1
     #typeOfGeneralizedAlpha = HHT
 

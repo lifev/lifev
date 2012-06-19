@@ -11,9 +11,9 @@ TRIBITS_ADD_EXECUTABLE(
 
 TRIBITS_ADD_TEST(
   BasicTest
-  POSTFIX_AND_ARGS_0 1D      -s 1 -f MultiscaleDatabase/Test_1D.dat      -c 88.582269095417459
-  POSTFIX_AND_ARGS_1 Fluid3D -s 1 -f MultiscaleDatabase/Test_Fluid3D.dat -c 1.8919584275659009
-  POSTFIX_AND_ARGS_2 FSI3D   -s 1 -f MultiscaleDatabase/Test_FSI3D.dat   -c 13.147029803470305
+  POSTFIX_AND_ARGS_0 Fluid3D -s 1 -f MultiscaleDatabase/Test_Fluid3D.dat -c 1.8919584275659009 -o test_Fluid3D
+  POSTFIX_AND_ARGS_1 1D      -s 1 -f MultiscaleDatabase/Test_1D.dat      -c 88.582269095417459 -o test_1D
+  POSTFIX_AND_ARGS_2 FSI3D   -s 1 -f MultiscaleDatabase/Test_FSI3D.dat   -c 4.3399328834457638 -o test_FSI3D
   NUM_MPI_PROCS 4
   COMM mpi
   )
