@@ -358,6 +358,7 @@ FSIMonolithic::iterateMonolithic(const vector_Type& rhs, vector_Type& step)
 
     //M_monolithicMatrix->GlobalAssemble();
     //necessary if we did not imposed Dirichlet b.c.
+
     M_linearSolver->setOperator(*M_monolithicMatrix->matrix()->matrixPtr());
 
     M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
@@ -433,8 +434,9 @@ void
 FSIMonolithic::
 updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
+    Real coefficient ( M_data->dataSolid()->dataTime()->timeStep() * M_data->dataSolid()->dataTime()->timeStep() * M_solid->rescaleFactor() /  M_solidTimeAdvance->coefficientSecondDerivative( 0 ) );
     M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
-    *rhsFluidCoupling += (*M_solid->Mass() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor()/**M_data->dataSolid()->dataTime()->timeStep()*//M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
+    *rhsFluidCoupling += *M_solid->Mass() * ( M_solidTimeAdvance->rhsContributionSecondDerivative() * coefficient );
 }
 
 void
@@ -510,9 +512,7 @@ void
 FSIMonolithic::assembleSolidBlock( UInt iter, const vector_Type& solution )
 {
     if (iter == 0)
-    {
         updateSolidSystem(this->M_rhs);
-    }
 
 
 if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean"))
@@ -556,23 +556,25 @@ FSIMonolithic::assembleFluidBlock(UInt iter, const vector_Type& solution)
       {
         M_resetPrec=true;
         M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-        *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());//(M_bdf->rhsContributionFirstDerivative()) ;
-        couplingRhs(M_rhs/*, M_fluidTimeAdvance->stencil()[0]*/);
+        *M_rhs += M_fluid->matrixMass() * ( M_fluidTimeAdvance->rhsContributionFirstDerivative() );
+        couplingRhs(M_rhs);
       }
     if(M_data->dataFluid()->conservativeFormulation())
-      {
-	M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
-      }
+        M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
     this->M_fluid->updateStabilization(*M_fluidBlock);
 }
 
 void FSIMonolithic::updateRHS()
 {
+    // Update fluid (iter == 0)
     M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-    *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());//M_bdf->rhsContributionFirstDerivative() ;
-    couplingRhs(M_rhs/*, M_fluidTimeAdvance->singleElement(0)*/);
-    //M_solid->updateVel();
+    *M_rhs += M_fluid->matrixMass() * ( M_fluidTimeAdvance->rhsContributionFirstDerivative() );
+    couplingRhs(M_rhs);
+
+    // Update solid (iter == 0)
     updateSolidSystem(M_rhs);
+
+    // Update RHS
     *M_rhsFull = *M_rhs;
 }
 
