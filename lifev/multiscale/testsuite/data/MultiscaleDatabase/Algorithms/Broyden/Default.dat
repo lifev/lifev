@@ -32,10 +32,10 @@ orthogonalizationSize          = 0
         scaling                    = none
         output                     = none           # none
         conv                       = AZ_noscaled   # r0, noscaled
-        max_iter                   = 100
+        max_iter                   = 10000
         reuse                      = false
-        max_iter_reuse             = 100
-        kspace                     = 100
+        max_iter_reuse             = 10000
+        kspace                     = 10000
         tol                        = 1.e-14
 
         [../Preconditioner]
