@@ -242,16 +242,14 @@ MultiscaleModelFSI3D::solveModel()
 
     // Non-linear Richardson solver
     UInt maxSubIterationNumber = M_data->maxSubIterationNumber();
-    std::ofstream outRes; // Useless variable -> TODO Clean NonLinearRichardson interface
-
     vectorPtr_Type solution( new vector_Type( *M_FSIoperator->fluidTimeAdvance()->stencil()[0] ) ); // Solution at the previous time step
 
     NonLinearRichardson( *solution, *M_FSIoperator,
                           M_data->absoluteTolerance(), M_data->relativeTolerance(),
                           maxSubIterationNumber, M_data->errorTolerance(),
                           M_data->NonLinearLineSearch(),
-                          outRes, M_data->dataFluid()->dataTime()->time(),
-                          M_nonLinearRichardsonIteration
+                          M_nonLinearRichardsonIteration,
+                          1
                        );
 
     // Save last solution (if convergence is achieved it is used for the next time step)
