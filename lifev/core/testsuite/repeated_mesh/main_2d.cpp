@@ -229,7 +229,7 @@ main( int argc, char** argv )
         feSpacePtr_Type betaFESpace( new feSpace_Type( localMesh, bOrder, 2, Comm ) );
         feSpacePtr_Type betaFESpaceR( new feSpace_Type( localMeshR, bOrder, 2, Comm ) );
         if ( verbose ) std::cout << " done ! " << std::endl;
-        if ( verbose ) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
+        if ( verbose ) std::cout << " ---> Dofs: " << uFESpaceR->dof().numTotalDof() << std::endl;
 
         // Build the assembler and the matrices
 
@@ -406,8 +406,9 @@ main( int argc, char** argv )
 
         if ( verbose ) std::cout << " -- Defining the exporter ... " << std::flush;
 #ifdef HAVE_HDF5
-        ExporterHDF5<mesh_Type> exporter ( dataFile, localMesh, "solution", Comm->MyPID()) ;
+        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "solution", comm->MyPID()) ;
 #else
+        // TODO: ExporterEnsight with repeated mesh not tested!
         ExporterEnsight<mesh_type> exporter ( dataFile, localMesh, "solution", Comm->MyPID()) ;
 #endif
         if ( verbose ) std::cout << " done ! " << std::endl;
