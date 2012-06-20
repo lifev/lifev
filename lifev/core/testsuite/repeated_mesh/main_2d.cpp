@@ -141,19 +141,19 @@ main( int argc, char** argv )
     {
 
 #ifdef HAVE_MPI
-        boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+        boost::shared_ptr<Epetra_Comm> comm(new Epetra_MpiComm(MPI_COMM_WORLD));
 #else
-        boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+        boost::shared_ptr<Epetra_Comm> comm(new Epetra_SerialComm);
 #endif
 
         GetPot dataFile( "data_2d" );
-        const bool isLeader( Comm->MyPID() == 0 );
+        const bool isLeader( comm->MyPID() == 0 );
         const bool verbose( dataFile( "miscellaneous/verbose", 0 ) && isLeader );
 
 #ifdef HAVE_LIFEV_DEBUG
-        std::ofstream debugOut( ( "rm." + ( Comm->NumProc() > 1 ? boost::lexical_cast<std::string>( Comm->MyPID() ) : "s" ) + ".out" ).c_str() );
+        std::ofstream debugOut( ( "rm." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string>( comm->MyPID() ) : "s" ) + ".out" ).c_str() );
 #else
-        std::ofstream debugOut("/dev/null");
+        std::ofstream debugOut( "/dev/null" );
 #endif
 
         // Build and partition the mesh
@@ -186,7 +186,7 @@ main( int argc, char** argv )
         boost::shared_ptr< mesh_Type > localMesh;
         {
             MeshPartitioner< mesh_Type >   meshPart;
-            meshPart.doPartition( fullMeshPtr, Comm );
+            meshPart.doPartition( fullMeshPtr, comm );
             localMesh = meshPart.meshPartition();
         }
         partTime.stop();
@@ -205,7 +205,7 @@ main( int argc, char** argv )
         {
             MeshPartitioner< mesh_Type >   meshPartR;
             meshPartR.setBuildOverlappingPartitions( true );
-            meshPartR.doPartition( fullMeshPtr, Comm );
+            meshPartR.doPartition( fullMeshPtr, comm );
             localMeshR = meshPartR.meshPartition();
         }
         partTimeR.stop();
@@ -224,10 +224,10 @@ main( int argc, char** argv )
         if ( verbose ) std::cout << " -- Building FESpaces ... " << std::flush;
         std::string uOrder("P1");
         std::string bOrder("P1");
-        feSpacePtr_Type uFESpace( new feSpace_Type( localMesh, uOrder, 1, Comm ) );
-        feSpacePtr_Type uFESpaceR( new feSpace_Type( localMeshR, uOrder, 1, Comm ) );
-        feSpacePtr_Type betaFESpace( new feSpace_Type( localMesh, bOrder, 2, Comm ) );
-        feSpacePtr_Type betaFESpaceR( new feSpace_Type( localMeshR, bOrder, 2, Comm ) );
+        feSpacePtr_Type uFESpace( new feSpace_Type( localMesh, uOrder, 1, comm ) );
+        feSpacePtr_Type uFESpaceR( new feSpace_Type( localMeshR, uOrder, 1, comm ) );
+        feSpacePtr_Type betaFESpace( new feSpace_Type( localMesh, bOrder, 2, comm ) );
+        feSpacePtr_Type betaFESpaceR( new feSpace_Type( localMeshR, bOrder, 2, comm ) );
         if ( verbose ) std::cout << " done ! " << std::endl;
         if ( verbose ) std::cout << " ---> Dofs: " << uFESpaceR->dof().numTotalDof() << std::endl;
 
@@ -245,15 +245,13 @@ main( int argc, char** argv )
 
         if ( verbose ) std::cout << " -- Defining the matrix ... " << std::flush;
         boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uFESpace->map() ));
-        *systemMatrix *=0.0;
         boost::shared_ptr<matrix_Type> systemMatrixR(new matrix_Type( uFESpaceR->map(), 50, true ));
-        *systemMatrixR *=0.0;
         if ( verbose ) std::cout << " done! " << std::endl;
 
         // Perform the assembly of the matrix
 
-//        if ( verbose ) std::cout << " -- Adding the diffusion ... " << std::flush;
-//        if ( verbose ) std::cout << " done! " << std::endl;
+        if ( verbose ) std::cout << " -- Adding the diffusion ... " << std::flush;
+        if ( verbose ) std::cout << " done! " << std::endl;
 
         LifeChrono assemblyTime;
         assemblyTime.start();
@@ -272,19 +270,18 @@ main( int argc, char** argv )
 //        if ( verbose ) std::cout << " done! " << std::endl;
 //#endif
 
-//        if ( verbose ) std::cout << " -- Closing the matrix ... " << std::flush;
+        if ( verbose ) std::cout << " -- Closing the matrix ... " << std::flush;
         systemMatrix->globalAssemble();
-//        if ( verbose ) std::cout << " done ! " << std::endl;
+        if ( verbose ) std::cout << " done ! " << std::endl;
         assemblyTime.stop();
         if( isLeader ) std::cout << "assembly time  = " << assemblyTime.diff() << std::endl;
-
         LifeChrono assemblyTimeR;
         assemblyTimeR.start();
         adrAssemblerR.addDiffusion(systemMatrixR,epsilon);
         systemMatrixR->matrixPtr()->FillComplete();
         assemblyTimeR.stop();
         if( isLeader ) std::cout << "assemblyR time = " << assemblyTimeR.diff() << std::endl;
-/*
+
         if ( verbose ) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
         if ( verbose ) std::cout << " Time needed : " << adrAssemblerR.diffusionAssemblyChrono().diffCumul() << std::endl;
 
@@ -307,9 +304,7 @@ main( int argc, char** argv )
         if ( verbose ) std::cout << " -- Building the RHS ... " << std::flush;
         //vector_type rhs(uFESpace->map(),Unique);
         vector_Type rhs(uFESpace->map(),Repeated);
-        rhs*=0.0;
         vector_Type rhsR(uFESpaceR->map(),Repeated);
-        rhsR*=0.0;
 
 #ifdef TEST_RHS
         adrAssembler.addMassRhs( rhs, fRhs, 0. );
@@ -372,16 +367,14 @@ main( int argc, char** argv )
         linearSolverR.setMatrix( *systemMatrixR );
         if ( verbose ) std::cout << " done ! " << std::endl;
 
-        linearSolver.setCommunicator(Comm);
-        linearSolverR.setCommunicator(Comm);
+        linearSolver.setCommunicator( comm );
+        linearSolverR.setCommunicator( comm );
 
         // Definition of the solution
 
         if ( verbose ) std::cout << " -- Defining the solution ... " << std::flush;
         vector_Type solution( uFESpace->map(), Unique );
-        solution*=0.0;
         vector_Type solutionR( uFESpaceR->map(),Unique );
-        solutionR *= 0.0;
         if ( verbose ) std::cout << " done ! " << std::endl;
 
         // Solve the solution
@@ -426,11 +419,11 @@ main( int argc, char** argv )
         if ( verbose ) std::cout << " done ! " << std::endl;
 
         if ( verbose ) std::cout << " -- Exporting ... " << std::flush;
-        exporter.exportPID( localMesh, Comm, false );
-        exporter.exportPID( localMeshR, Comm, true );
+        exporter.exportPID( localMesh, comm, false );
+        exporter.exportPID( localMeshR, comm, true );
         exporter.postProcess( 0 );
         if ( verbose ) std::cout << " done ! " << std::endl;
-        */
+
 
         if( isLeader ) std::cout << "End Result: TEST PASSED" << std::endl;
     }
@@ -441,5 +434,3 @@ main( int argc, char** argv )
 
     return( EXIT_SUCCESS );
 }
-
-
