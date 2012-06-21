@@ -554,12 +554,13 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
     // Some constants
     const UInt nbElements(M_fespace->mesh()->numElements());
     const UInt fieldDim(M_fespace->fieldDim());
+    const UInt betaFieldDim(M_betaFESpace->fieldDim());
     const UInt nbTotalDof(M_fespace->dof().numTotalDof());
     const UInt nbQuadPt(M_advCFE->nbQuadPt());
 
     // Temporaries
     //Real localValue(0);
-    std::vector< std::vector< Real > > localBetaValue(nbQuadPt, std::vector<Real>(3,0.0));
+    std::vector< std::vector< Real > > localBetaValue(nbQuadPt, std::vector<Real>( betaFieldDim, 0.0 ) );
 
     // Loop over the elements
     for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
@@ -572,7 +573,7 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
         M_localAdv->zero();
 
         // Interpolate beta in the quadrature points
-        AssemblyElemental::interpolate(localBetaValue,*M_advBetaCFE,3,M_betaFESpace->dof(),iterElement,beta);
+        AssemblyElemental::interpolate(localBetaValue,*M_advBetaCFE,betaFieldDim,M_betaFESpace->dof(),iterElement,beta);
 
         // Assemble the advection
         AssemblyElemental::advection(*M_localAdv,*M_advCFE,localBetaValue,fieldDim);
