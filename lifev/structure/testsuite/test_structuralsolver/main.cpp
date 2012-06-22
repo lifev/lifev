@@ -184,10 +184,10 @@ static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, 
   switch (i)
     {
     case 0:
-      return 0.0;
+      return 300000.0;
       break;
     case 1:
-      return 300000.0;
+      return 0.0;
       break;
     case 2:
       return 0.0;
@@ -316,12 +316,12 @@ Structure::run3d()
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
     BCh->addBC("EdgesIn",      20,  Natural,   Full, nonZero, 3);
-    BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compy);
+    BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compx);
 
     BCh->addBC("Vertex",      100,  EssentialVertices, Full, zero, 3);
-    BCh->addBC("EdgesIn",      50,  EssentialVertices, Component, zero, compyz);
-    BCh->addBC("EdgesIn",      30,  EssentialVertices, Component, zero, compxy);
-    BCh->addBC("EdgesIn",      60,  EssentialVertices, Component, zero, compxz);
+    BCh->addBC("EdgesIn",      5,  Essential, Component, zero, compy );
+    BCh->addBC("EdgesIn",      3,  Essential, Component, zero, compz);
+
 
     //! 1. Constructor of the structuralSolver
     StructuralSolver< RegionMesh<LinearTetra> > solid;
