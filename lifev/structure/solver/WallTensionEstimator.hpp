@@ -375,14 +375,6 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
   this->M_displayer->leaderPrint("   Norm of the gradient with respect to z ", M_displZ->norm2() );
 
-  std::string gradX = "gradientX";
-  std::string gradY = "gradientY";
-  std::string gradZ = "gradientZ";
-
-  M_displX->spy(gradX);
-  M_displY->spy(gradY);
-  M_displZ->spy(gradZ);
-  
   //For each of the DOF, the Cauchy tensor is computed. 
   //Therefore the tensor C,P, \sigma are computed for each DOF
   UInt dim = M_FESpace->dim();  
@@ -390,7 +382,7 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
   LifeChrono chrono;
 
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Performing the analysis..., EXP ");
+  this->M_displayer->leaderPrint("   Performing the analysis..., ", M_dataMaterial->solidType() );
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
   chrono.start();
