@@ -576,7 +576,7 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
         AssemblyElemental::interpolate(localBetaValue,*M_advBetaCFE,betaFieldDim,M_betaFESpace->dof(),iterElement,beta);
 
         // Assemble the advection
-        AssemblyElemental::advection(*M_localAdv,*M_advCFE,localBetaValue,fieldDim);
+        AssemblyElemental::advection(*M_localAdv,*M_advCFE,1.0,localBetaValue,fieldDim);
 
 
         // Assembly
