@@ -423,360 +423,46 @@ void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! \f$ coef \cdot ( [\nabla u^k]^T \nabla u : \nabla v  )\f$
-template<typename localVector>
-void stiff_dergradbis( Real coef, const localVector& localGradient, MatrixElemental& localStiff, const CurrentFE& stiffCFE )
-{
-    const UInt nbQuadPt( stiffCFE.nbQuadPt() );
-    const UInt nbFEDof(  stiffCFE.nbFEDof() );
-    const UInt nbCoor(   stiffCFE.nbCoor() );
-
-    Real localValue;
-
-    //
-    // blocks (iCoor,jCoor) of localStiff
-    //
-    for (UInt iCoor(0); iCoor<nbCoor; ++iCoor)
-    {
-        for (UInt jCoor(0); jCoor<nbCoor; ++jCoor)
-        {
-            MatrixElemental::matrix_view mat = localStiff.block( iCoor, jCoor );
-
-            // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
-            {
-                for (UInt jDof(0); jDof < nbFEDof ; ++jDof)
-                {
-                    localValue = 0.;
-                    for (UInt kCoor(0); kCoor < nbCoor; ++kCoor)
-                    {
-                        // Loop on the quadrature nodes
-                        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                        {
-                            localValue += stiffCFE.dphi( iDof, kCoor, iQuadPt ) * localGradient[ iQuadPt ][ jCoor ][ iCoor ] *
-                                            stiffCFE.dphi( jDof, kCoor, iQuadPt ) * stiffCFE.wDetJacobian( iQuadPt );
-                        }
-                    }
-                    mat( iDof, jDof ) += coef * localValue;
-                }
-            }
-        }
-    }
-
-}
+void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! \f$ coef \cdot ( [\nabla u]^T \nabla u^k + [\nabla u^k]^T \nabla u : \nabla v  )\f$ for Newton on St-Venant
 void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! \f$ coef \cdot ( trace { [\nabla u^k]^T \nabla u }, \nabla\cdot  v  ) \f$ for Newton on St-Venant
-template<typename localVector>
-void stiff_derdiv( Real coefficient, const localVector& localGradient, MatrixElemental& localStiff, const CurrentFE& stiffCFE )
-{
-    const UInt nbQuadPt( stiffCFE.nbQuadPt() );
-    const UInt nbFEDof(  stiffCFE.nbFEDof() );
-    const UInt nbCoor(   stiffCFE.nbCoor() );
-
-    Real localValue;
-    //
-    // blocks (icoor,jcoor) of elmat
-    //
-    for (UInt iCoor(0); iCoor<nbCoor; ++iCoor)
-    {
-        for (UInt jCoor(0); jCoor<nbCoor; ++jCoor)
-        {
-
-            MatrixElemental::matrix_view mat = localStiff.block( iCoor, jCoor );
-
-            // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
-            {
-                for (UInt jDof(0); jDof < nbFEDof ; ++jDof)
-                {
-                    localValue = 0.;
-                    for (UInt kCoor(0); kCoor < nbCoor; ++kCoor)
-                    {
-                        // Loop on the quadrature nodes
-                        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                        {
-                            localValue += stiffCFE.dphi( iDof, iCoor, iQuadPt ) * localGradient[ iQuadPt ][ jCoor ][ kCoor ] *
-                                            stiffCFE.dphi( jDof, kCoor, iQuadPt ) * stiffCFE.wDetJacobian( iQuadPt );
-                        }
-                    }
-                    mat( iDof, jDof ) += coefficient * localValue;
-                }
-            }
-        }
-    }
-}
-
-
+void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // -----------added Rita 2008   for non linear St-Venant----------------------------------------------------------
 
 // coef * ( (\div u_k) \grad u : \grad v  )--------------------------------------------------------------------controllato!!!
-template<typename localVector>
-void stiff_divgrad( Real coef, const localVector& localDivergence, MatrixElemental& localStiff, const CurrentFE& stiffCFE )
-{
-    const UInt nbQuadPt( stiffCFE.nbQuadPt() );
-    const UInt nbFEDof(  stiffCFE.nbFEDof() );
-    const UInt nbCoor(   stiffCFE.nbCoor() );
+void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
-    Real localValue;
-
-    MatrixElemental::matrix_type mat_tmp( nbFEDof, nbFEDof );
-
-    // Loop over the basis functions
-    for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
-    {
-        for (UInt jDof(0); jDof < nbFEDof ; ++jDof)
-        {
-            localValue = 0.0;
-            for (UInt kCoor(0); kCoor < nbCoor; ++kCoor)
-            {
-                // Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
-                    localValue += localDivergence[ iQuadPt ] * stiffCFE.dphi( iDof, kCoor, iQuadPt ) *
-                                    stiffCFE.dphi( jDof, kCoor, iQuadPt ) * stiffCFE.wDetJacobian( iQuadPt );
-                }
-
-            }
-            mat_tmp( iDof, jDof ) = coef * localValue;
-        }
-    }
-
-    for (UInt iCoor(0); iCoor<nbCoor; ++iCoor)
-    {
-        MatrixElemental::matrix_view mat = localStiff.block( iCoor, iCoor );
-        mat += mat_tmp;
-    }
-
-
-}
 // coef * ( (\div u) \grad u_k : \grad v  )
 // part of the jacobian of stiff_divgrad
 void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad u_k : \grad u_k) * ( \grad u : \grad v  )---------------------------------------------controllato!!!
-template<typename localVector>
-void stiff_gradgrad( Real coef, const localVector& localGradient, MatrixElemental& localStiff, const CurrentFE& stiffCFE )
-{
-    const UInt nbQuadPt( stiffCFE.nbQuadPt() );
-    const UInt nbFEDof(  stiffCFE.nbFEDof() );
-    const UInt nbCoor(   stiffCFE.nbCoor() );
-
-    std::vector< Real > localGradGrad( nbQuadPt, 0. );
-    Real localValue;
-
-    // Loop on the quadrature nodes
-    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-    {
-        // loop on space coordinates
-        for (UInt iCoor(0); iCoor<nbCoor; ++iCoor)
-        {
-            for (UInt jCoor(0); jCoor<nbCoor; ++jCoor)
-            {
-                localGradGrad[iQuadPt] += ( localGradient[iQuadPt][iCoor][jCoor] * localGradient[iQuadPt][iCoor][jCoor]);
-            }
-        }
-    }
-
-    MatrixElemental::matrix_type mat_tmp( nbFEDof, nbFEDof );
-
-    // Loop over the basis functions
-    for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
-    {
-        for (UInt jDof(0); jDof < nbFEDof ; ++jDof)
-        {
-            localValue = 0.;
-            for (UInt kCoor(0); kCoor < nbCoor; ++kCoor)
-            {
-                // Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
-                    localValue += localGradGrad[iQuadPt] * stiffCFE.dphi( iDof, kCoor, iQuadPt ) *
-                                    stiffCFE.dphi( jDof, kCoor, iQuadPt ) * stiffCFE.weightDet( iQuadPt );
-                }
-            }
-            mat_tmp( iDof, jDof ) = coef * localValue;
-        }
-    }
-
-    for (UInt iCoor(0); iCoor<nbCoor; ++iCoor)
-    {
-        MatrixElemental::matrix_view mat = localStiff.block( iCoor, iCoor );
-        mat += mat_tmp;
-    }
-
-}
+void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  )
 // part of the jacobian stiff_gradgrad
 void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad u^k \grad u : \grad v  )------------------------------------------------------------------controllato!!!
-template<typename localVector>
-void stiff_dergrad_gradbis( Real coef, const localVector& localGradient, MatrixElemental& localStiff, const CurrentFE& stiffCFE )
-{
-    const UInt nbQuadPt( stiffCFE.nbQuadPt() );
-    const UInt nbFEDof(  stiffCFE.nbFEDof() );
-    const UInt nbCoor(   stiffCFE.nbCoor() );
-
-    Real localValue;
-
-    //
-    // blocks (iCoor,jCoor) of localStiff
-    //
-    for (UInt iCoor(0); iCoor<nbCoor; ++iCoor)
-    {
-        for (UInt jCoor(0); jCoor<nbCoor; ++jCoor)
-        {
-            MatrixElemental::matrix_view mat = localStiff.block( iCoor, jCoor );
-
-            // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
-            {
-                for (UInt jDof(0); jDof < nbFEDof ; ++jDof)
-                {
-                    localValue = 0.;
-                    for (UInt kCoor(0); kCoor < nbCoor; ++kCoor)
-                    {
-                        // Loop on the quadrature nodes
-                        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                        {
-                            localValue += localGradient[ iQuadPt ][ iCoor ][ jCoor ] *
-                                            stiffCFE.dphi( iDof, kCoor, iQuadPt ) *  stiffCFE.dphi( jDof, kCoor, iQuadPt ) *
-                                            stiffCFE.wDetJacobian( iQuadPt );
-                        }
-                    }
-                    mat( iDof, jDof ) += coef * localValue;
-                }
-            }
-        }
-    }
-
-}
+void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad \delta u \grad u^k : \grad v  )
 // part of the jacobian of stiff_dergrad_gradbis
 void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad u^k [\grad u]^T : \grad v  )------------------------------------------------------------controllato!!!
-template<typename localVector>
-void stiff_dergrad_gradbis_Tr( Real coef, const localVector& localGradient, MatrixElemental& localStiff, const CurrentFE& stiffCFE )
-{
-    const UInt nbQuadPt( stiffCFE.nbQuadPt() );
-    const UInt nbFEDof(  stiffCFE.nbFEDof() );
-    const UInt nbCoor(   stiffCFE.nbCoor() );
+void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
-    Real localValue;
-
-    //
-    // blocks (iCoor,jCoor) of localStiff
-    //
-    for (UInt iCoor(0); iCoor<nbCoor; ++iCoor)
-    {
-        for (UInt jCoor(0); jCoor<nbCoor; ++jCoor)
-        {
-            MatrixElemental::matrix_view mat = localStiff.block( iCoor, jCoor );
-
-            // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
-            {
-                for (UInt jDof(0); jDof < nbFEDof ; ++jDof)
-                {
-                    localValue = 0.;
-                    for (UInt kCoor(0); kCoor < nbCoor; ++kCoor)
-                    {
-                        // Loop on the quadrature nodes
-                        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                        {
-                            localValue += localGradient[ iQuadPt ][ iCoor ][ kCoor ] *
-                                            stiffCFE.dphi( jDof, kCoor, iQuadPt ) *  stiffCFE.dphi( iDof, jCoor, iQuadPt ) *
-                                            stiffCFE.wDetJacobian( iQuadPt );
-                        }
-                    }
-                    mat( iDof, jDof ) += coef * localValue;
-                }
-            }
-        }
-    }
-}
 // coef * ( \grad \delta u [\grad u^k]^T : \grad v  )------------------------------------------------------------controllato!!!
 // part of the jacobian of stiff_dergrad_gradbis_Tr
 void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * (  \grad u^k [\grad u^k]^T \grad u : \grad v  )------------------------------------------------------------controllato!!!
-template<typename localVector>
-void stiff_gradgradTr_gradbis( Real coef, const localVector& localGradient, MatrixElemental& localStiff, const CurrentFE& stiffCFE )
-{
-    const UInt nbQuadPt( stiffCFE.nbQuadPt() );
-    const UInt nbFEDof(  stiffCFE.nbFEDof() );
-    const UInt nbCoor(   stiffCFE.nbCoor() );
-
-    std::vector< std::vector< std::vector< Real > > >
-    localGradGradTr( nbQuadPt, std::vector< std::vector< Real > >(
-                                    nbCoor, std::vector< Real >( nbCoor, 0.0 ) ) );
-    Real localValue;
-
-    // Loop on the quadrature nodes
-    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-    {
-        // for any quad point we are doing mat-mat product. we should use fast computing kernels,
-        // for now I will just try to optimize a bit the loops. TP 02/2012
-        // loop on the rows of the first matrix
-        for (UInt iCoor(0); iCoor<nbCoor; ++iCoor)
-        {
-            // loop on the columns of the second matrix
-            for (UInt kCoor(0); kCoor < nbCoor; ++kCoor)
-            {
-                localGradGradTr[iQuadPt][iCoor][kCoor] =
-                                localGradient[iQuadPt][iCoor][0] * localGradient[iQuadPt][0][kCoor];
-            }
-            // loop on the columns of the first matrix
-            for (UInt jCoor(1); jCoor<nbCoor; ++jCoor)
-            {
-                // loop on the columns of the second matrix
-                for (UInt kCoor(0); kCoor < nbCoor; ++kCoor)
-                {
-                    localGradGradTr[iQuadPt][iCoor][kCoor] +=
-                                    localGradient[iQuadPt][iCoor][jCoor] * localGradient[iQuadPt][jCoor][kCoor];
-                }
-            }
-        }
-    }
-
-    //
-    // blocks (iCoor,jCoor) of localStiff
-    //
-    for (UInt iCoor(0); iCoor<nbCoor; ++iCoor)
-    {
-        for (UInt jCoor(0); jCoor<nbCoor; ++jCoor)
-        {
-            MatrixElemental::matrix_view mat = localStiff.block( iCoor, jCoor );
-
-            // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
-            {
-                for (UInt jDof(0); jDof < nbFEDof ; ++jDof)
-                {
-                    localValue = 0.;
-                    for (UInt kCoor(0); kCoor < nbCoor; ++kCoor)
-                    {
-                        // Loop on the quadrature nodes
-                        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                        {
-                            localValue += localGradGradTr[iQuadPt][ iCoor ][ jCoor ] *
-                                            stiffCFE.dphi( iDof, kCoor, iQuadPt ) *
-                                            stiffCFE.dphi( jDof, kCoor, iQuadPt ) *
-                                            stiffCFE.weightDet( iQuadPt );
-                        }
-                    }
-                    mat( iDof, jDof ) = coef * localValue;
-                }
-            }
-        }
-    }
-}
+void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * (  \grad u^k [\grad u]^T \grad u^k : \grad v  )------------------------------------------------------------controllato!!!
 // part of the jacobian of  stiff_gradgradTr_gradbis

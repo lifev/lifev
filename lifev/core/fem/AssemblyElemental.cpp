@@ -495,6 +495,56 @@ void mass( const std::vector<Real>& coef, MatrixElemental& elmat, const CurrentF
 
 
 
+
+
+
+void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+{
+
+    double s;
+    // div u^k at quad pts
+    std::vector<Real> duk(fe.nbQuadPt());
+
+    // loop on quadrature points
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+        s=0;
+        // loop on space coordinates
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+            // s = 0.0; Alessandro
+            for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                s += fe.phiDer( i, icoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; // costruzione di \div u^k at a quadrature point
+
+            // duk[ ig ] = s; Alessandro
+        }// chiude il ciclo su icoor
+        duk[ ig ] = s;
+    }// chiude il ciclo su ig
+
+    MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+
+    for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+    {
+        for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+        {
+            s = 0.0;
+            for ( UInt k = 0; k < fe.nbCoor(); ++k )
+            {
+                for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                    s += duk[ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+            }
+            mat_tmp( i, j ) = coef * s;
+        }
+    }
+
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    {
+        MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
+        mat += mat_tmp;
+    }
+
+}
+
 // Stiffness matrix: coef * ( (\div u) \grad u_k : \grad v  ) controllato!!!
 void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
@@ -544,7 +594,53 @@ void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental&
     }
 }
 
+// Stiffness matrix: coef * ( \grad u_k : \grad u_k) *( \grad u : \grad v  ) controllato!!!
+void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+{
 
+    double s,s1;
+    std::vector<Real> gguk(fe.nbQuadPt());
+
+    // loop on quadrature points
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+        s=0;
+        // loop on space coordinates
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+            for ( UInt l = 0; l < fe.nbCoor(); l++ )
+            {
+                s1=0;
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                    s1+= fe.phiDer( i, l, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                s += s1*s1;
+            }
+        }// chiude il ciclo su icoor
+        gguk[ ig ] = s;
+    }// chiude il ciclo su ig
+
+    MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+
+    for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+    {
+        for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+        {
+            s = 0.0;
+            for ( UInt k = 0; k < fe.nbCoor(); ++k )
+            {
+                for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                    s += gguk[ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+            }
+            mat_tmp( i, j ) = coef * s;
+        }
+    }
+
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    {
+        MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
+        mat += mat_tmp;
+    }
+}
 
 // Stiffness matrix: coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  ) controllato!!!
 void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
@@ -591,6 +687,114 @@ void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental
                         }                                                                                                                                                                    // fa l'integrale
                     }
                     mat( i, j ) += coef  * s;
+                }
+            }
+        }
+    }
+}
+
+// Stiffness matrix: coef * ( \grad d^k \grad d : \grad v  )controllato!!!
+void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+{
+
+    double s;
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+
+    // loop on quadrature points
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+
+        // loop on space coordinates
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+
+            // loop  on space coordinates
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            {
+                s = 0.0;
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                guk[ icoor ][ jcoor ][ ig ] = s;
+            }
+        }
+    }
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
+
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    {
+        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        {
+
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
+
+            for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+            {
+                for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+                {
+                    s = 0.0;
+                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    {
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                            s += guk[ icoor ][ jcoor ][ ig ] * fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+                    }
+                    mat( i, j ) += coef * s;
+                }
+            }
+        }
+    }
+}
+
+// Stiffness matrix: coef * ( \grad u^k [\grad d]^T : \grad v  ) controllato!!!
+void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+{
+
+    double s;
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+
+    // loop on quadrature points
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+
+        // loop on space coordinates
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+
+            // loop  on space coordinates
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            {
+                s = 0.0;
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                guk[ icoor ][ jcoor ][ ig ] = s;
+            }
+        }
+    }
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
+
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    {
+        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        {
+
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
+
+            for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+            {
+                for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+                {
+                    s = 0.0;
+                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    {
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                            s += guk[ icoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) * fe.phiDer( i, jcoor, ig ) * fe.weightDet( ig );
+                    }
+                    mat( i, j ) += coef * s;
                 }
             }
         }
@@ -704,6 +908,64 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, Matri
     {
         MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
         mat += mat_tmp;
+    }
+}
+
+//  Stiffness matrix: coef * (  \grad u^k [\grad u^k]^T \grad u : \grad v  ) controllato!!!
+void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+{
+
+    double s;
+    boost::multi_array<Real, 3> guk_gukT(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+    
+    // loop on quadrature points
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+
+        // loop on space coordinates
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+
+            // loop  on space coordinates
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            {
+                s = 0.0;
+                for ( UInt n = 0; n < fe.nbCoor(); n++ )
+                {
+                    for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                    {
+                        for ( UInt j = 0; j < fe.nbFEDof(); j++ )
+                            s  += fe.phiDer( i, n, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ] * fe.phiDer( j, n, ig ) * uk_loc.vec() [ j + jcoor * fe.nbFEDof() ] ; // \grad u^k  [\grad u^k]^T  at each quadrature point
+                    }
+                }
+                guk_gukT[ icoor ][ jcoor ][ ig ] = s;
+            }
+        }
+    }
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
+
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    {
+        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        {
+
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor ); // estrae il blocco (icoor, jcoor)
+
+            for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+            {
+                for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+                {
+                    s = 0;
+                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                            s += fe.phiDer( i, k, ig ) * guk_gukT[ icoor ][ jcoor ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+                    mat( i, j ) += coef * s;
+                }
+            }
+        }
     }
 }
 
@@ -2185,6 +2447,63 @@ void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe )
 
 
 /*
+  Stiffness matrix: coef * ( [\grad u^k]^T \grad d : \grad v  )
+*/
+void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+{
+
+    double s;
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+
+    // loop on quadrature points
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+
+        // loop on space coordinates
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+
+            // loop  on space coordinates
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            {
+                s = 0.0;
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                guk[ icoor ][ jcoor ][ ig ] = s;
+            }
+        }
+    }
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
+
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    {
+        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        {
+
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
+
+            for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+            {
+                for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+                {
+                    s = 0;
+                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
+                            s += fe.phiDer( i, k, ig ) * guk[ jcoor ][ icoor ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+                    mat( i, j ) += coef * s;
+                }
+            }
+        }
+    }
+}
+
+
+
+
+/*
   Stiffness matrix: coef * ( [\grad u]^T \grad u^k [\grad u^k]^T \grad u : \grad v  ) for Newton on St-Venant
 */
 void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
@@ -2242,6 +2561,63 @@ void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
     }
 }
 
+
+
+
+
+//
+// coef * ( \tr { [\grad u^k]^T \grad u }, \div v  ) for Newton on St-Venant
+//
+//
+void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
+{
+    boost::multi_array<Real, 3> guk(
+      boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+
+    Real s;
+
+    // loop on quadrature points
+    for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+
+        // loop on space coordinates
+        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+
+            // loop  on space coordinates
+            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            {
+                s = 0.0;
+                for ( UInt i = 0; i < fe.nbFEDof(); i++ )
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                guk[ icoor ][ jcoor ][ ig ] = s;
+            }
+        }
+    }
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
+    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    {
+        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        {
+
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
+
+            for ( UInt i = 0; i < fe.nbFEDof(); ++i )
+            {
+                for ( UInt j = 0; j < fe.nbFEDof(); ++j )
+                {
+                    s = 0;
+                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                        for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
+                            s += fe.phiDer( i, icoor, ig ) * guk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+                    mat( i, j ) += coef * s;
+                }
+            }
+        }
+    }
+}
 
 
 
