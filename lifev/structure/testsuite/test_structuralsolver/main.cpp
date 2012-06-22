@@ -179,7 +179,7 @@ static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, con
     return  0.;
 }
 
-static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& i)
 {
   switch (i)
     {

@@ -397,63 +397,73 @@ WallTensionEstimator<Mesh >::analyzeTensions( void )
 
   for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
     {      
-      std::vector<LifeV::Real> dX(3,0.0); 
-      std::vector<LifeV::Real> dY(3,0.0); 
-      std::vector<LifeV::Real> dZ(3,0.0);
+      
+      if ( M_displ->blockMap().LID(iDOF) != -1 ) // The Global ID is on the calling processors
+	{
+	  std::vector<LifeV::Real> dX(3,0.0); 
+	  std::vector<LifeV::Real> dY(3,0.0); 
+	  std::vector<LifeV::Real> dZ(3,0.0);
 
-      //Reinitialization of matrices and arrays
-      (*M_deformationF).Scale(0.0);
-      (*M_cofactorF).Scale(0.0);
-      (*M_firstPiola).Scale(0.0);
-      (*M_sigma).Scale(0.0);
+	  //Reinitialization of matrices and arrays
+	  (*M_deformationF).Scale(0.0);
+	  (*M_cofactorF).Scale(0.0);
+	  (*M_firstPiola).Scale(0.0);
+	  (*M_sigma).Scale(0.0);
 
-      //Extracting the gradient of U on the current DOF
-      for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
-	{		    
-	  dX[iComp] = (*M_displX)(iDOF + iComp * dim + this->M_offset); // (d_xX,d_yX,d_zX)
-	  dY[iComp] = (*M_displY)(iDOF + iComp * dim + this->M_offset); // (d_xY,d_yY,d_zY)
-	  dZ[iComp] = (*M_displZ)(iDOF + iComp * dim + this->M_offset); // (d_xZ,d_yZ,d_zZ)
-	}
+	  //Extracting the gradient of U on the current DOF
+	  for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+	    {		    
+	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset); 
+	      Int GIDid = M_displ->blockMap().GID(LIDid); 
+	      dX[iComp] = (*M_displX)(GIDid); // (d_xX,d_yX,d_zX)
+	      dY[iComp] = (*M_displY)(GIDid); // (d_xY,d_yY,d_zY)
+	      dZ[iComp] = (*M_displZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
+	    }
+	  
 	      
-      //Fill the matrix F
-      for( UInt icoor = 0; icoor < M_FESpace->fieldDim(); icoor++ )
-	{
-	  (*M_deformationF)(icoor,0)=dX[icoor];
-	  (*M_deformationF)(icoor,1)=dY[icoor];
-	  (*M_deformationF)(icoor,2)=dZ[icoor];
-		    
-	  (*M_deformationF)(icoor,icoor) += 1.0;
-	}
+	  //Fill the matrix F
+	  for( UInt icoor = 0; icoor < M_FESpace->fieldDim(); icoor++ )
+	    {
+	      (*M_deformationF)(icoor,0)=dX[icoor];
+	      (*M_deformationF)(icoor,1)=dY[icoor];
+	      (*M_deformationF)(icoor,2)=dZ[icoor];
+	  
+	      (*M_deformationF)(icoor,icoor) += 1.0;
+	    }
+	  
+	  //Compute the rightCauchyC tensor
+	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);
 
-      //Compute the rightCauchyC tensor
-      AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);
+	  cleanMatrices();
+      
+	  LifeV::Real sumI(0);
+	  for( UInt i(0); i < M_invariants.size(); i++ )
+	    sumI += M_invariants[i];
+      
+	  //Compute the first Piola-Kirchhoff tensor
+	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
+      
+	  //Compute the Cauchy tensor
+	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
 
-      cleanMatrices();
+	  //Compute the eigenvalue
+	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
       
-      LifeV::Real sumI(0);
-      for( UInt i(0); i < M_invariants.size(); i++ )
-	sumI += M_invariants[i];
-      
-      //Compute the first Piola-Kirchhoff tensor
-      M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
-      
-      //Compute the Cauchy tensor
-      AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
-
-      //Compute the eigenvalue
-      AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
-      
-      //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-      //Check on the imaginary part of eigen values given by the Lapack method 
-      Real sum(0);
-      for( int i=0; i < M_eigenvaluesI.size(); i++ )
-	sum += std::abs(M_eigenvaluesI[i]);
-      ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
-
-      //Save the eigenvalues in the global vector
-      for( UInt icoor = 0; icoor < nDimensions; ++icoor )
-	{
-	  (*M_globalEigen)(iDOF + icoor * dim + this->M_offset) = M_eigenvaluesR[icoor];
+	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
+	  //Check on the imaginary part of eigen values given by the Lapack method 
+	  Real sum(0);
+	  for( int i=0; i < M_eigenvaluesI.size(); i++ )
+	    sum += std::abs(M_eigenvaluesI[i]);
+	  ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
+	  
+	  //Save the eigenvalues in the global vector
+	  for( UInt icoor = 0; icoor < nDimensions; ++icoor )
+	    {
+	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset); 
+	      Int GIDid = M_displ->blockMap().GID(LIDid); 
+	      (*M_globalEigen)(GIDid) = M_eigenvaluesR[icoor];
+	    }
+	
 	}
     }
 
