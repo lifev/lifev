@@ -15,7 +15,7 @@ blockOper   = AdditiveSchwarzGI
 #AdditiveSchwarzGI: standard operator for the monolithicGI, the three fields (fluid, structure and geometry) are assembled in one single matrix
 #AdditiveSchwarzRNGI: Robin-Neumann operator for the GI
 
-DDBlockPrec = AdditiveSchwarzGI #ComposedDN2GI
+DDBlockPrec = ComposedDN2GI
 # OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
 #AdditiveSchwarzGI: monolithic A-S preconditioner,
@@ -258,7 +258,7 @@ displayList        = false
 ** # preconditioner section
 [../prec]
 reuse           = false
-prectype        = Ifpack #Composed # either Ifpack, ML, or Composed
+prectype        = Composed # either Ifpack, ML, or Composed
 entry           = 0.0
 
 *** # parameters for the Robin-Robin preconditioner

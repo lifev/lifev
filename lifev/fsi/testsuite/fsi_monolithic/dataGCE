@@ -183,6 +183,7 @@ tolerance       =  0         # how far points are to be considered the same on t
                               # is considered in the coupling (fluid_vertex_flag=-1) or not (fluid_vertex_flag=fluid_flag)
 			      # NOTE: this does not work when using P2!!!
 			      # NOTE: this does not work when using monolithicGE!!!
+
 [../] # interface
 
 * #solid section
