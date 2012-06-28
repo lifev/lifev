@@ -252,11 +252,12 @@ namespace LifeV
     conditions are imposed via BCHandler class.
     @todo Insert any scientific publications that use this solver.
 */
-template< typename Mesh, typename SolverType = LifeV::SolverAztecOO >
+template < typename MeshType,
+           typename SolverType = LifeV::SolverAztecOO >
 class DarcySolverTransientNonLinear
         :
-        public DarcySolverNonLinear<Mesh, SolverType>,
-        public DarcySolverTransient<Mesh, SolverType>
+        public DarcySolverNonLinear < MeshType, SolverType >,
+        public DarcySolverTransient < MeshType, SolverType >
 {
 
 public:
@@ -264,24 +265,26 @@ public:
     //! @name Public Types
     //@{
 
-    typedef SolverType                    solver_Type;
-    typedef DarcySolver<Mesh, solver_Type> DarcySolverPolicies;
+    //! Typedef for mesh template.
+    typedef MeshType mesh_Type;
 
-    typedef typename DarcySolverPolicies::permeability_Type  permeability_Type;
+    //! Typedef for solver template.
+    typedef SolverType solver_Type;
 
-    typedef typename DarcySolverPolicies::data_Type          data_Type;
+    //! Self typedef.
+    typedef DarcySolverTransientNonLinear < mesh_Type, solver_Type > darcySolverTransientNonLinear_Type;
 
-    typedef typename DarcySolverPolicies::bchandler_raw_Type bchandler_raw_Type;
-    typedef typename DarcySolverPolicies::bchandler_Type     bchandler_Type;
+    //! Darcy solver class.
+    typedef DarcySolverLinear < mesh_Type, solver_Type > darcySolverLinear_Type;
 
-    typedef typename DarcySolverPolicies::matrix_Type        matrix_Type;
-    typedef typename DarcySolverPolicies::matrixPtr_Type     matrixPtr_Type;
+    //! Darcy non linear solver class.
+    typedef DarcySolverNonLinear < mesh_Type, solver_Type > darcySolverNonLinear_Type;
 
-    typedef typename DarcySolverPolicies::vector_Type        vector_Type;
-    typedef typename DarcySolverPolicies::vectorPtr_Type     vectorPtr_Type;
+    //! Darcy transient solver class.
+    typedef DarcySolverTransient < mesh_Type, solver_Type > darcySolverTransient_Type;
 
-    typedef typename DarcySolverPolicies::comm_Type          comm_Type;
-    typedef typename DarcySolverPolicies::commPtr_Type       commPtr_Type;
+    //! Shared pointer to a matrix value function.
+    typedef typename darcySolverLinear_Type::matrixFctPtr_Type matrixFctPtr_Type;
 
     //@}
 
@@ -302,16 +305,13 @@ public:
     //!  Set up the linear solver, the preconditioner for the linear system and the exporter to save the solution.
     virtual void setup ();
 
-    //! Update the primalOld solution needed, as starting solution, in the fixed point scheme.
-    inline void updatePrimalOldSolution()
+    //! Solve the problem calling the non linear solver.
+    virtual void solve ()
     {
-
-        // Reset the primal old vector.
-        this->M_primalOld.reset( new vector_Type( this->M_primal_FESpace.map() ) );
-
         // Update the primal solution.
-        *this->M_primalOld = *(this->M_primal);
+        //this->M_primalFieldPreviousIteration->getVector() = this->M_primalField->getVector();
 
+        darcySolverNonLinear_Type::solve ();
     }
 
     //@}
@@ -321,23 +321,47 @@ public:
 
     //! Set the inverse of diffusion tensor
     /*!
-      Set the inverse of diffusion tensor, the default (inverse of) permeability is the identity matrix.
+      Set the inverse of diffusion tensor.
       @param invPerm Inverse of the permeability tensor for the problem.
     */
-    inline void setInversePermeability ( const permeability_Type& invPerm )
+    void setInversePermeability ( const matrixFctPtr_Type& invPerm )
     {
-
         // Call the set inverse permeability of the non-linear Darcy solver
-        DarcySolverNonLinear<Mesh, solver_Type>::setInversePermeability( invPerm );
-
+        darcySolverNonLinear_Type::setInversePermeability ( invPerm );
     }
 
     //@}
 
 protected:
 
+    //! @name Private Constructors
+    //@{
+
+    //! Inhibited copy constructor.
+    DarcySolverTransientNonLinear ( const darcySolverTransientNonLinear_Type& );
+
+    //@}
+
+    //! @name Private Operators
+    //@{
+
+    //! Inhibited assign operator.
+    darcySolverTransientNonLinear_Type& operator= ( const darcySolverTransientNonLinear_Type& );
+
+    //@}
+
     //! @name Protected Methods
     //@{
+
+    //! Perform all the operations before doing the loop on volume elements.
+    /*!
+      Computes the element independent matrices, clean all the fields and
+      all the algebraich stuff. Useful for extentions in child classes.
+    */
+    virtual void preLoopElementsComputation ()
+    {
+        darcySolverTransient_Type::preLoopElementsComputation ();
+    }
 
     //! Update all problem variables
     /*!
@@ -345,16 +369,43 @@ protected:
       the global hybrid matrix, e.g. reset the global hybrid matrix.
       It is principally used for a time dependent derived class.
     */
-    virtual void updateVariables ();
+    virtual void resetVariables ();
 
     //! Compute elementary matrices
     /*!
-      Locally update the current finite element for the primal
-      and dual finite element space, then compute the Hdiv mass
-      matrix.
+      Locally update the current finite element for the dual finite element
+      space, then compute the Hdiv mass matrix.
       @param iElem Id of the current geometrical element.
+      @param elmatMix The local matrix in mixed form.
+      @param elmatReactionTerm The local matrix for the reaction term.
     */
-    virtual void localElementComputation ( const UInt & iElem );
+    virtual void localMatrixComputation ( const UInt & iElem,
+                                          MatrixElemental& elmatMix,
+                                          MatrixElemental& elmatReactionTerm )
+    {
+        darcySolverTransient_Type::localMatrixComputation ( iElem, elmatMix, elmatReactionTerm );
+    }
+
+    //! Computes local vectors
+    /*!
+      Call the Darc_y solver localVectorComputation method and
+      compute the additional scalar vector for the time dependent term.
+      @param iElem Id of the current geometrical element.
+      @param elvecMix The local vector in mixed form.
+    */
+    virtual void localVectorComputation ( const UInt & iElem,
+                                          VectorElemental& elvecMix )
+    {
+        darcySolverTransient_Type::localVectorComputation ( iElem, elvecMix );
+    }
+
+    //@}
+
+    //! @name Protected Attributes
+    //@{
+
+    //! Vector of degrees of freedom where the equation is not defined.
+    std::vector< UInt > M_dofUseless;
 
     //@}
 
@@ -386,22 +437,24 @@ DarcySolverTransientNonLinear ():
 // ===================================================
 
 // Set up the linear solver and the preconditioner.
-template<typename Mesh, typename SolverType>
+template < typename MeshType, typename SolverType >
 void
-DarcySolverTransientNonLinear<Mesh, SolverType>::
+DarcySolverTransientNonLinear < MeshType, SolverType >::
 setup ()
 {
 
-    GetPot dataFile( *(this->M_data.dataFile()) );
+    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
 
     // Call the DarcySolverTransient setup method for setting up the linear solver.
-    DarcySolverTransient<Mesh, solver_Type>::setup();
+    darcySolverTransient_Type::setup ();
 
     // Set the maximum number of iteration for the fixed point iteration scheme.
-    this->setFixedPointMaxIteration(static_cast<UInt>( dataFile( ( this->M_data.section() + "/non-linear/fixed_point_iteration" ).data(), 10 ) ));
+    const UInt maxIter = dataFile( ( this->M_data->section() + "/non-linear/fixed_point_iteration" ).data(), 10 );
+    this->setFixedPointMaxIteration ( maxIter );
 
     // Set the tollerance for the fixed point iteration scheme.
-    this->setFixedPointTolerance(dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 ));
+    const Real tol = dataFile( ( this->M_data->section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
+    this->setFixedPointTolerance ( tol );
 
 } // setup
 
@@ -410,33 +463,19 @@ setup ()
 // ===================================================
 
 // Update all the variables of the problem.
-template<typename Mesh, typename SolverType>
+template < typename MeshType, typename SolverType >
 void
-DarcySolverTransientNonLinear<Mesh, SolverType>::
-updateVariables ()
+DarcySolverTransientNonLinear < MeshType, SolverType >::
+resetVariables ()
 {
-
-    // Reset the primal vector at the previous iteration step.
-    this->M_primalPreviousIteration.reset( new vector_Type( this->M_primal_FESpace.map() ) );
 
     // Update the primal vector at the previous iteration step.
-    *(this->M_primalPreviousIteration) = *(this->M_primal);
+    //this->M_primalFieldPreviousIteration->getVector() = this->M_primalField->getVector();
 
-    // Call the method of the DarcySolver to update all the variables defined in it.
-    DarcySolver<Mesh, solver_Type>::updateVariables();
+    // Call the method of the DarcySolverLinear to update all the variables defined in it.
+    darcySolverNonLinear_Type::resetVariables ();
 
-} // updateVariables
-
-// Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
-template<typename Mesh, typename SolverType>
-void
-DarcySolverTransientNonLinear<Mesh, SolverType>::
-localElementComputation ( const UInt & iElem )
-{
-
-    DarcySolverTransient<Mesh, solver_Type>::localElementComputation( iElem );
-
-} // localElementComputation
+} // resetVariables
 
 } // namespace LifeV
 
