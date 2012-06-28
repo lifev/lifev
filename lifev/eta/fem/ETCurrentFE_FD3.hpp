@@ -1,4 +1,4 @@
-#include <life/lifearray/MatrixSmall.hpp>
+#include <lifev/eta/array/MatrixSmall.hpp>
 
 namespace LifeV {
 

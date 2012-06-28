@@ -36,7 +36,7 @@
 #ifndef ETCURRENTFEFLAG_HPP
 #define ETCURRENTFEFLAG_HPP
 
-#include <life/lifecore/LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {
