@@ -49,14 +49,15 @@ Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const R
 {
     Matrix invK ( static_cast<UInt>(2), static_cast<UInt>(2) );
 
-    Real unkown_n = scalarField(0).eval( iElem, P, time );
+//    Real unkown_n = scalarField(0).eval( iElem, P, time );
 
     // First row
     const Real Entry00 = 1.;
     const Real Entry01 = 0.;
 
     // Second row
-    const Real Entry11 = 1./( unkown_n * unkown_n + 1.);
+    const Real Entry11 = 1.;
+    //const Real Entry11 = 1./( unkown_n * unkown_n + 1.);
 
     // Fill in of the inversePermeabilityMatrix
     invK ( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
@@ -70,30 +71,28 @@ Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const R
 // Reaction term
 Real reactionTerm::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& /*time*/ ) const
 {
-    return 1;
+    return 0;//1;
 }
 
 // Scalar source term
-Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& /*time*/ ) const
+Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& t/*ime*/ ) const
 {
     const Real x(P[0]), y(P[1]);
-    return -1.*(3 +2*y-2+2*y*x*x*x*x-2*x*x*x*x+4*x*x*y*y*y-6*y*y*x*x+2*y*x*x*x+6*y*y*y*y*y-10*y*y*y*y
-        +4*y*y*y*x+6*y*y*x*x*x-8*x*x*x*y+2*x*x*x*x-8*x*x*y*y*y+12*x*x*y*y-4*x*x*x*y-10*x*y*y*y*y
-        +16*x*y*y*y-6*x*x*y*y)+x*x+x*y-y*y;
+    return  x;
 }
 
 // Vector source term
-Vector vectorSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& /*time*/ ) const
+Vector vectorSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& time ) const
 {
     Vector source( static_cast<UInt>(2) );
 
-    const Real Entry0 = - P[0] + P[1];
-    const Real Entry1 = - P[1] * P[1];
+    const Real Entry0 = time * ( - P[0] + P[1] );
+    const Real Entry1 = time * time * ( - P[1] * P[1] );
 
     source ( static_cast<UInt>(0) ) = Entry0;
     source ( static_cast<UInt>(1) ) = Entry1;
 
-    return source;
+    return 0*source;
 }
 
 // Initial time primal variable for transient and non-linear transient solvers
@@ -190,17 +189,17 @@ Real robinMass( const Real& /*t*/,
 // ===================================================
 
 // Analytical solution
-Real analyticalSolution ( const Real& /*t*/,
+Real analyticalSolution ( const Real& t,
                           const Real& x,
                           const Real& y,
                           const Real& z,
                           const ID& /*ic*/ )
 {
-    return  x * x + x *y - y * y;
+    return  t*x;
 }
 
 // Gradient of the analytical solution
-Real analyticalFlux ( const Real& /*t*/,
+Real analyticalFlux ( const Real& t,
                       const Real& x,
                       const Real& y,
                       const Real& z,
@@ -209,11 +208,9 @@ Real analyticalFlux ( const Real& /*t*/,
     switch ( icomp )
     {
     case 0:
-        return -3*x;
+        return t;
     case 1:
-        return -1.*(y*y-2*y+x+y*y*x*x*x*x-2*y*x*x*x*x+x*x*x*x*x+x*x*y*y*y*y-2*y*y*y*x*x+x*x*x*y*y+y*y*y*y*y*y
-            -2*y*y*y*y*y+y*y*y*y*x+2*x*x*x*y*y*y-4*x*x*x*y*y+2*x*x*x*x*y-2*x*x*y*y*y*y+4*x*x*y*y*y-2*x*x*x*y*y
-            -2*x*y*y*y*y*y+4*x*y*y*y*y-2*x*x*y*y*y);
+        return 0.;
     default:
         return 0.;
     }
