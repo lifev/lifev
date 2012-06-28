@@ -413,7 +413,7 @@ darcy_nonlinear::run()
     vectorPtr_Type dualExact;
 
     // Type of the exporter
-    std::string const exporterType = dataFile( "exporter/type", "ensight" );
+    std::string const exporterType = dataFile( "exporter/type", "none" );
 
     // The name of the file
     const std::string exporterFileName = dataFile( "exporter/file_name", "PressureVelocity" );
