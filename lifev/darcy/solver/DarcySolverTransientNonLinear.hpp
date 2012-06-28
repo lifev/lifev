@@ -288,43 +288,11 @@ public:
     //! @name Constructors & destructor
     //@{
 
-    /*!
-      Full constructor for the class.
-      @param dataFile Data for the problem.
-      @param primal_FESpace Primal finite element space.
-      @param dual_FESpace Dual element space.
-      @param hybrid_FESpace Hybrid finite element space.
-      @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param bcHandler Boundary conditions for the problem.
-      @param comm Shared pointer for the Epetra communicator.
-    */
-    DarcySolverTransientNonLinear ( const data_Type&          dataFile,
-                                    FESpace<Mesh, MapEpetra>& primal_FESpace,
-                                    FESpace<Mesh, MapEpetra>& dual_FESpace,
-                                    FESpace<Mesh, MapEpetra>& hybrid_FESpace,
-                                    FESpace<Mesh, MapEpetra>& VdotN_FESpace,
-                                    bchandler_raw_Type&       bcHandler,
-                                    commPtr_Type&             comm );
-
-    /*!
-      Constructor for the class without the definition of the boundary handler.
-      @param dataFile Data for the problem.
-      @param primal_FESpace Primal finite element space.
-      @param dual_FESpace Dual finite element space.
-      @param hybrid_FESpace Hybrid finite element space.
-      @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
-      @param bcHandler Boundary conditions for the problem.
-      @param comm Shared pointer for the Epetra communicator.
-    */
-    DarcySolverTransientNonLinear ( const data_Type&          dataFile,
-                                    FESpace<Mesh, MapEpetra>& primal_FESpace,
-                                    FESpace<Mesh, MapEpetra>& dual_FESpace,
-                                    FESpace<Mesh, MapEpetra>& hybrid_FESpace,
-                                    FESpace<Mesh, MapEpetra>& VdotN_FESpace,
-                                    commPtr_Type&             comm );
+    //! Constructor for the class.
+    DarcySolverTransientNonLinear ();
 
     //! Virtual destructor.
-    virtual ~DarcySolverTransientNonLinear ();
+    virtual ~DarcySolverTransientNonLinear () {};
 
     //@}
 
@@ -401,52 +369,17 @@ protected:
 // ===================================================
 
 // Complete constructor.
-template<typename Mesh, typename SolverType>
-DarcySolverTransientNonLinear<Mesh, SolverType>::
-DarcySolverTransientNonLinear ( const data_Type&           dataFile,
-                                FESpace<Mesh, MapEpetra>&  primal_FESpace,
-                                FESpace<Mesh, MapEpetra>&  dual_FESpace,
-                                FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
-                                FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
-                                bchandler_raw_Type&        bcHandler,
-                                commPtr_Type&              comm ):
+template < typename MeshType, typename SolverType >
+DarcySolverTransientNonLinear < MeshType, SolverType >::
+DarcySolverTransientNonLinear ():
         // Standard Darcy solver constructor.
-        DarcySolver<Mesh, solver_Type>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
+        darcySolverLinear_Type::DarcySolverLinear (),
         // Non-linear Darcy solver constructor.
-        DarcySolverNonLinear<Mesh, solver_Type>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
+        darcySolverNonLinear_Type::DarcySolverNonLinear (),
         // Transient Darcy solver contructor.
-        DarcySolverTransient<Mesh, solver_Type>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm)
+        darcySolverTransient_Type::DarcySolverTransient ()
 {
-
 } // Constructor
-
-
-// Constructor without boundary condition handler.
-template<typename Mesh, typename SolverType>
-DarcySolverTransientNonLinear<Mesh, SolverType>::
-DarcySolverTransientNonLinear ( const data_Type&           dataFile,
-                                FESpace<Mesh, MapEpetra>&  primal_FESpace,
-                                FESpace<Mesh, MapEpetra>&  dual_FESpace,
-                                FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
-                                FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
-                                commPtr_Type&              comm ):
-        // Standard Darcy solver constructor.
-        DarcySolver<Mesh, solver_Type>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
-        // Non-linear Darcy solver constructor.
-        DarcySolverNonLinear<Mesh, solver_Type>::DarcySolverNonLinear( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
-        // Transient Darcy solver contructor.
-        DarcySolverTransient<Mesh, solver_Type>::DarcySolverTransient( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm)
-{
-
-} // Constructor
-
-// Virtual destructor.
-template<typename Mesh, typename SolverType>
-DarcySolverTransientNonLinear<Mesh, SolverType>::
-~DarcySolverTransientNonLinear ( void )
-{
-
-} // Destructor
 
 // ===================================================
 // Public methods
