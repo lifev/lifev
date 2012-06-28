@@ -151,7 +151,7 @@ darcy_nonlinear::run()
     typedef DarcyData < regionMesh_Type > darcyData_Type;
     typedef boost::shared_ptr < darcyData_Type > darcyDataPtr_Type;
 
-    typedef DarcySolverNonLinear < regionMesh_Type, solver_Type > darcySolver_Type;
+    typedef DarcySolverTransient < regionMesh_Type, solver_Type > darcySolver_Type;
 
     // Life chonos
     LifeChrono chronoTotal;
@@ -378,15 +378,15 @@ darcy_nonlinear::run()
 
     // Set the initial primal variable
     scalarFctPtr_Type initialPrimalFct ( new initialCondition );
-    //darcySolver.setInitialPrimal ( initialPrimalFct );
+    darcySolver.setInitialPrimal ( initialPrimalFct );
 
     // Set the mass function
     scalarFctPtr_Type massFct ( new massFunction );
-    //darcySolver.setMass ( massFct );
+    darcySolver.setMass ( massFct );
 
     // Set the initial guess primal variable
-    scalarFctPtr_Type initialGuessPrimalFct ( new nonLinearStartValue );
-    darcySolver.setPrimalZeroIteration ( initialGuessPrimalFct );
+    //scalarFctPtr_Type initialGuessPrimalFct ( new nonLinearStartValue );
+    //darcySolver.setPrimalZeroIteration ( initialGuessPrimalFct );
 
     // Set the boudary conditions
     darcySolver.setBoundaryConditions ( bcDarcy );
@@ -458,7 +458,7 @@ darcy_nonlinear::run()
     exporter->postProcess ( darcyData->dataTimePtr()->initialTime() );
 
     // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-    //for ( ; darcyData->dataTimePtr()->time() < darcyData->dataTimePtr()->endTime(); )
+    for ( ; darcyData->dataTimePtr()->time() < darcyData->dataTimePtr()->endTime(); )
     {
 
         // Check if the time step is consistent, i.e.
