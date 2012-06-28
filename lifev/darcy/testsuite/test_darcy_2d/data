@@ -31,9 +31,9 @@
     # used for transient and transientNonLinear
     [./time_discretization]
         initialtime = 0.
-        endtime     = 0.04
-        timestep    = 0.00051
-        BDF_order   = 2
+        endtime     = 0.01
+        timestep    = 0.01
+        BDF_order   = 1
     [../]
 
     [./space_discretization]
