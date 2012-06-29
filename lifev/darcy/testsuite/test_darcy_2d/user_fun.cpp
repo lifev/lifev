@@ -208,7 +208,7 @@ Real analyticalFlux ( const Real& t,
     switch ( icomp )
     {
     case 0:
-        return t;
+        return -t;
     case 1:
         return 0.;
     default:
