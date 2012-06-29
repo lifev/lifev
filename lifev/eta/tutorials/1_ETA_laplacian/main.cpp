@@ -123,7 +123,7 @@ typedef MatrixEpetra<Real> matrix_Type;
 
 int main( int argc, char** argv )
 {
-    // Check for a mpi communicator
+
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
