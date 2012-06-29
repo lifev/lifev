@@ -526,20 +526,39 @@ darcy_nonlinear::run()
     // Save the initial primal solution into the exporter
     exporter->postProcess ( darcyData->dataTimePtr()->initialTime() );
 
-    // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-    for ( ; darcyData->dataTimePtr()->time() < darcyData->dataTimePtr()->endTime(); )
-    {
+    // Define if the current time is the last time step.
+    bool isLastTimeStep( false );
 
-        // Check if the time step is consistent, i.e.
-        // if innerTimeStep + currentTime < endTime.
-        if ( darcyData->dataTimePtr()->isLastTimeStep() )
+    // Define the end time
+    const Real endTime = darcyData->dataTimePtr()->endTime();
+
+    // Define the tolerance for the elapsed time
+    const Real tolTime = 1e-10;
+
+    // Take the current time.
+    Real currentTime = darcyData->dataTimePtr()->time();
+
+    // A loop for the simulation
+    while ( darcyData->dataTimePtr()->time() < endTime && !isLastTimeStep )
+    {
+        // Take the left time.
+        const Real leftTime = endTime - currentTime;
+
+        // Check if the time step is consistent
+        if ( darcyData->dataTimePtr()->timeStep() > leftTime + tolTime )
         {
             // Compute the last time step.
-            darcyData->dataTimePtr()->setTimeStep( darcyData->dataTimePtr()->leftTime() );
+            darcyData->dataTimePtr()->setTimeStep ( leftTime );
+
+            // This is the last time step in the simulation
+            isLastTimeStep = true;
         }
 
         // Advance the current time of \Delta t.
         darcyData->dataTimePtr()->updateTime();
+
+        // Take the current time.
+        currentTime = darcyData->dataTimePtr()->time();
 
         // The leader process prints the temporal data.
         if ( displayer->isLeader() )
@@ -557,7 +576,7 @@ darcy_nonlinear::run()
 
         // Interpolate the exact primal solution
         p_FESpacePtr->interpolate ( Members->getAnalyticalSolution(), *primalExact,
-            darcyData->dataTimePtr()->time() );
+                currentTime );
 
         // Copy the error of the primal solution to the exporter
         *primalErrorExporter = *primalExact - primalField->getVector ();
@@ -571,13 +590,13 @@ darcy_nonlinear::run()
 
         // Interpolate the exact dual solution
         uInterpolate_FESpacePtr->interpolate ( Members->getAnalyticalFlux(), *dualExact,
-            darcyData->dataTimePtr()->time() );
+                currentTime );
 
         // Copy the error of the dual solution to the exporter
         *dualErrorExporter = *dualExact - *dualExporter;
 
         // Save the solution into the exporter
-        exporter->postProcess( darcyData->dataTimePtr()->time() );
+        exporter->postProcess ( currentTime );
 
     }
 
