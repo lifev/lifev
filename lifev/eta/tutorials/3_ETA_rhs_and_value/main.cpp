@@ -366,7 +366,9 @@ int main( int argc, char** argv )
 
     checkRhs.globalAssemble();
 
-    Real errorRhsNorm( checkRhs.normInf() );
+    vector_Type checkRhsUnique(checkRhs, Unique);
+
+    Real errorRhsNorm( checkRhsUnique.normInf() );
 
     Real errorIntegralg(std::abs( globalIntegralg - 0.0));
 

@@ -187,7 +187,7 @@ MatrixEpetraStructured<DataType>::MatrixEpetraStructured(const MapEpetra& map, i
 
 template <typename DataType>
 MatrixEpetraStructured<DataType>::MatrixEpetraStructured( const MapVector<MapEpetra>& vector, int numEntries):
-    MatrixEpetra<DataType>( typename MatrixEpetra<DataType>::matrix_ptrtype())
+    MatrixEpetra<DataType>( MapEpetra(), typename MatrixEpetra<DataType>::matrix_ptrtype())
 {
 	ASSERT( vector.nbMap() > 0 ,"Map vector empty, impossible to construct a MatrixBlockMonolithicEpetra!");
 
