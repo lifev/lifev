@@ -575,17 +575,63 @@ int main( int argc, char** argv )
     if (verbose) std::cout << " done! " << std::endl;
     if (verbose) std::cout << " Time: " << chronoIV.diff() << std::endl;
 
+
+// ---------------------------------------------------------------
+// We finally compare the different matrices obtained.
+// ---------------------------------------------------------------
+
+    if (verbose) std::cout << " -- Computing the error ... " << std::flush;
+
+    boost::shared_ptr<matrix_Type> checkMatrixIvsII(new matrix_Type( ETuSpace->map() + ETpSpace->map() ));
+    *checkMatrixIvsII *=0.0;
+
+    *checkMatrixIvsII += *ETsystemMatrixI;
+    *checkMatrixIvsII += (*ETsystemMatrixII)*(-1);
+
+    checkMatrixIvsII->globalAssemble();
+
+    Real errorNormIvsII( checkMatrixIvsII->normInf() );
+
+
+    boost::shared_ptr<matrix_Type> checkMatrixIvsIII(new matrix_Type( ETuSpace->map() + ETpSpace->map() ));
+    *checkMatrixIvsIII *=0.0;
+
+    *checkMatrixIvsIII += *ETsystemMatrixI;
+    *checkMatrixIvsIII += (*ETsystemMatrixIII)*(-1);
+
+    checkMatrixIvsIII->globalAssemble();
+
+    Real errorNormIvsIII( checkMatrixIvsIII->normInf() );
+
+
+    boost::shared_ptr<matrix_Type> checkMatrixIvsIV(new matrix_Type( ETuSpace->map() + ETpSpace->map() ));
+    *checkMatrixIvsIV *=0.0;
+
+    *checkMatrixIvsIV += *ETsystemMatrixI;
+    *checkMatrixIvsIV += (*ETsystemMatrixIV)*(-1);
+
+    checkMatrixIvsIV->globalAssemble();
+
+    Real errorNormIvsIV( checkMatrixIvsIV->normInf() );
+
+
+
+    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose) std::cout << " I vs II : " << errorNormIvsII << std::endl;
+    if (verbose) std::cout << " I vs III : " << errorNormIvsIII << std::endl;
+    if (verbose) std::cout << " I vs IV : " << errorNormIvsIV << std::endl;
+
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
+    Real tolerance(1e-10);
 
-// ---------------------------------------------------------------
-// We finally compare the difference with the tolerance of the
-// test.
-// ---------------------------------------------------------------
-
-    if ( true )
+    if ( (errorNormIvsII < tolerance)
+         && (errorNormIvsIII < tolerance)
+         && (errorNormIvsIV < tolerance)
+        )
     {
         return( EXIT_SUCCESS );
     }

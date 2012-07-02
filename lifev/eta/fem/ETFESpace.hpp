@@ -223,6 +223,12 @@ public:
      */
 	const MapType& map() const { return *M_map; }
 
+    //! Getter for the algebraic map
+    /*!
+      @return The algebraic map
+     */
+        MapType& map() { return *M_map; }
+
     //! Getter for the dimension of the space (geometric, ambiant space)
     /*!
       @return The dimension of the space in which this FE space is defined
