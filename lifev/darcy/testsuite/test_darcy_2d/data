@@ -36,6 +36,11 @@
         BDF_order   = 1
     [../]
 
+    [./non-linear]
+        fixed_point_iteration = 20
+        fixed_point_toll      = 1e-10
+    [../]
+
     [./space_discretization]
         mesh_dir      = ./ # the directory where the mesh file is
         mesh_file     = cartesian_cube8.mesh
