@@ -31,8 +31,8 @@
     # used for transient and transientNonLinear
     [./time_discretization]
         initialtime = 0.
-        endtime     = 0.01
-        timestep    = 0.01
+        endtime     = 4
+        timestep    = 0.125
         BDF_order   = 1
     [../]
 
