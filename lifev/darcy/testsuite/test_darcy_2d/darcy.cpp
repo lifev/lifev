@@ -379,10 +379,6 @@ darcy_nonlinear::run()
     scalarFctPtr_Type massFct ( new massFunction );
     darcySolver.setMass ( massFct );
 
-    // Set the initial guess primal variable
-    //scalarFctPtr_Type initialGuessPrimalFct ( new nonLinearStartValue );
-    //darcySolver.setPrimalZeroIteration ( initialGuessPrimalFct );
-
     // Set the boudary conditions
     darcySolver.setBoundaryConditions ( bcDarcy );
 
