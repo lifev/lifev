@@ -292,6 +292,9 @@ public:
     //! Shared pointer to a matrix value function.
     typedef typename darcySolverLinear_Type::matrixFctPtr_Type matrixFctPtr_Type;
 
+    //! Distributed vector.
+    typedef typename darcySolverLinear_Type::vector_Type vector_Type;
+
     //@}
 
     //! @name Constructors & destructor
@@ -312,13 +315,7 @@ public:
     virtual void setup ();
 
     //! Solve the problem calling the non linear solver.
-    virtual void solve ()
-    {
-        // Update the primal solution.
-        //this->M_primalFieldPreviousIteration->getVector() = this->M_primalField->getVector();
-
-        darcySolverNonLinear_Type::solve ();
-    }
+    virtual void solve ();
 
     //@}
 
@@ -375,7 +372,10 @@ protected:
       the global hybrid matrix, e.g. reset the global hybrid matrix.
       It is principally used for a time dependent derived class.
     */
-    virtual void resetVariables ();
+    virtual void resetVariables ()
+    {
+        darcySolverNonLinear_Type::resetVariables ();
+    }
 
     //! Compute elementary matrices
     /*!
@@ -455,24 +455,23 @@ setup ()
     darcySolverNonLinear_Type::setup ();
 } // setup
 
-// ===================================================
-// Protected methods
-// ===================================================
-
-// Update all the variables of the problem.
+// Solve the problem.
 template < typename MeshType, typename SolverType >
 void
 DarcySolverTransientNonLinear < MeshType, SolverType >::
-resetVariables ()
+solve ()
 {
+    // Reset the right hand side coming from the time advance scheme.
+    this->M_rhsTimeAdvance.reset ( new vector_Type ( this->M_primalField->getFESpace().map() ) );
 
-    // Update the primal vector at the previous iteration step.
-    //this->M_primalFieldPreviousIteration->getVector() = this->M_primalField->getVector();
+    // Put in M_rhsTimeAdvance the contribution for the right hand side coming
+    // from the time scheme, without the time step.
+    *(this->M_rhsTimeAdvance) = this->M_timeAdvance->updateRHSFirstDerivative ();
 
-    // Call the method of the DarcySolverLinear to update all the variables defined in it.
-    darcySolverNonLinear_Type::resetVariables ();
+    // Solve the problem with the fixed point scheme.
+    this->fixedPoint ();
 
-} // resetVariables
+} // solve
 
 } // namespace LifeV
 
