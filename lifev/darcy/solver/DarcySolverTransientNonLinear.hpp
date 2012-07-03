@@ -283,6 +283,12 @@ public:
     //! Darcy transient solver class.
     typedef DarcySolverTransient < mesh_Type, solver_Type > darcySolverTransient_Type;
 
+    //! Typedef for the data type.
+    typedef typename darcySolverLinear_Type::data_Type data_Type;
+
+    //! Shared pointer for the data type.
+    typedef typename darcySolverLinear_Type::dataPtr_Type dataPtr_Type;
+
     //! Shared pointer to a matrix value function.
     typedef typename darcySolverLinear_Type::matrixFctPtr_Type matrixFctPtr_Type;
 

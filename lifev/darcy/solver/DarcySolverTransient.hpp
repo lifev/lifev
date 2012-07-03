@@ -268,6 +268,12 @@ public:
     //! Darcy solver class.
     typedef DarcySolverLinear < mesh_Type, solver_Type > darcySolverLinear_Type;
 
+    //! Typedef for the data type.
+    typedef typename darcySolverLinear_Type::data_Type data_Type;
+
+    //! Shared pointer for the data type.
+    typedef typename darcySolverLinear_Type::dataPtr_Type dataPtr_Type;
+
     //! Shared pointer to a scalar value function.
     typedef typename darcySolverLinear_Type::scalarFctPtr_Type scalarFctPtr_Type;
 
