@@ -126,13 +126,6 @@ public:
     virtual Real eval ( const UInt& iElem, const Vector3D& P, const Real& time = 0. ) const;
 };
 
-// Zero iteration primal variable for non-linear solver
-class nonLinearStartValue : public scalarFct_Type
-{
-public:
-    virtual Real eval ( const UInt& iElem, const Vector3D& P, const Real& time = 0. ) const;
-};
-
 // Mass function for time dependent problem
 class massFunction : public scalarFct_Type
 {

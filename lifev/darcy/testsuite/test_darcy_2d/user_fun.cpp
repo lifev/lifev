@@ -101,12 +101,6 @@ Real initialCondition::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, cons
     return 0.;
 }
 
-// Zero iteration primal variable for non-linear solver
-Real nonLinearStartValue::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Real& /*time*/ ) const
-{
-    return 1.;
-}
-
 // Mass function for time dependent problem
 Real massFunction::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Real& /*time*/ ) const
 {
