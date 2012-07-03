@@ -41,23 +41,21 @@ namespace dataProblem
 
 // Inverse of permeability matrix
 /* In this case the permeability matrix is
-K = [2 1 0
-     1 1 0
-     0 0 1]
+K = [1 0
+     0 1+p^2 ]
 */
 Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const Real& time ) const
 {
     Matrix invK ( static_cast<UInt>(2), static_cast<UInt>(2) );
 
-//    Real unkown_n = scalarField(0).eval( iElem, P, time );
+    const Real unkown_n = scalarField(0).eval( iElem, P, time );
 
     // First row
     const Real Entry00 = 1.;
     const Real Entry01 = 0.;
 
     // Second row
-    const Real Entry11 = 1.;
-    //const Real Entry11 = 1./( unkown_n * unkown_n + 1.);
+    const Real Entry11 = 1. / ( unkown_n * unkown_n + 1. );
 
     // Fill in of the inversePermeabilityMatrix
     invK ( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
@@ -71,28 +69,34 @@ Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const R
 // Reaction term
 Real reactionTerm::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& /*time*/ ) const
 {
-    return 0;//1;
+    return 1;
 }
 
 // Scalar source term
-Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& t/*ime*/ ) const
+Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& time ) const
 {
-    const Real x(P[0]), y(P[1]);
-    return  x;
+    const Real x(P[0]), y(P[1]), t(time);
+    return  t * x * x - 2. * t * t - t -
+            ( 6. * y + 2. * t * t * y ) * ( 1. + t * t * t * t * x * x * x * x +
+                                            y * y * y * y * y * y +
+                                            2. * t * t * x * x * y * y * y ) -
+            ( 3. * y * y + t * t * y * y ) * ( 6. * y * y * y * y * y +
+                                               6. * t * t * x * x * y * y );
 }
 
 // Vector source term
 Vector vectorSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& time ) const
 {
+    const Real x(P[0]), y(P[1]), t(time);
     Vector source( static_cast<UInt>(2) );
 
-    const Real Entry0 = time * ( - P[0] + P[1] );
-    const Real Entry1 = time * time * ( - P[1] * P[1] );
+    const Real Entry0 = t * ( - x + y );
+    const Real Entry1 = t * t * ( - y * y );
 
     source ( static_cast<UInt>(0) ) = Entry0;
     source ( static_cast<UInt>(1) ) = Entry1;
 
-    return 0*source;
+    return source;
 }
 
 // Initial time primal variable for transient and non-linear transient solvers
@@ -104,7 +108,7 @@ Real initialCondition::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, cons
 // Mass function for time dependent problem
 Real massFunction::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Real& /*time*/ ) const
 {
-    return 1.;
+    return 0.5;
 }
 
 // ===================================================
@@ -189,7 +193,7 @@ Real analyticalSolution ( const Real& t,
                           const Real& z,
                           const ID& /*ic*/ )
 {
-    return  t*x;
+    return  t * t * x * x + y * y * y;
 }
 
 // Gradient of the analytical solution
@@ -202,9 +206,12 @@ Real analyticalFlux ( const Real& t,
     switch ( icomp )
     {
     case 0:
-        return -t;
+        return -1. * ( 2. * t * t * x + t * ( x - y ) );
     case 1:
-        return 0.;
+        return -1. * ( ( 3. * y * y + t * t * y * y ) *
+                       ( 1. + t * t * t * t * x * x * x * x +
+                         y * y * y * y * y * y +
+                         2. * t * t * x * x * y * y * y ) );
     default:
         return 0.;
     }

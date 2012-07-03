@@ -58,34 +58,36 @@ typedef MeshPartitioner < regionMesh_Type > meshPartitioner_Type;
 
 typedef SolverAztecOO solver_Type;
 
-typedef DarcySolverLinear < regionMesh_Type, solver_Type > darcySolver_Type;
+typedef DarcySolverTransientNonLinear < regionMesh_Type, solver_Type > darcySolver_Type;
+
+typedef darcySolver_Type::darcySolverLinear_Type darcySolverLinear_Type;
 
 typedef darcySolver_Type::data_Type darcyData_Type;
 typedef darcySolver_Type::dataPtr_Type darcyDataPtr_Type;
 
-typedef darcySolver_Type::fESpace_Type fESpace_Type;
-typedef darcySolver_Type::fESpacePtr_Type fESpacePtr_Type;
+typedef darcySolverLinear_Type::fESpace_Type fESpace_Type;
+typedef darcySolverLinear_Type::fESpacePtr_Type fESpacePtr_Type;
 
-typedef darcySolver_Type::bcHandler_Type bcHandler_Type;
-typedef darcySolver_Type::bcHandlerPtr_Type bcHandlerPtr_Type;
+typedef darcySolverLinear_Type::bcHandler_Type bcHandler_Type;
+typedef darcySolverLinear_Type::bcHandlerPtr_Type bcHandlerPtr_Type;
 
-typedef darcySolver_Type::vectorField_Type vectorField_Type;
-typedef darcySolver_Type::vectorFieldPtr_Type vectorFieldPtr_Type;
+typedef darcySolverLinear_Type::vectorField_Type vectorField_Type;
+typedef darcySolverLinear_Type::vectorFieldPtr_Type vectorFieldPtr_Type;
 
-typedef darcySolver_Type::scalarField_Type scalarField_Type;
-typedef darcySolver_Type::scalarFieldPtr_Type scalarFieldPtr_Type;
+typedef darcySolverLinear_Type::scalarField_Type scalarField_Type;
+typedef darcySolverLinear_Type::scalarFieldPtr_Type scalarFieldPtr_Type;
 
-typedef darcySolver_Type::vectorFct_Type vectorFct_Type;
-typedef darcySolver_Type::vectorFctPtr_Type vectorFctPtr_Type;
+typedef darcySolverLinear_Type::vectorFct_Type vectorFct_Type;
+typedef darcySolverLinear_Type::vectorFctPtr_Type vectorFctPtr_Type;
 
-typedef darcySolver_Type::matrixFct_Type matrixFct_Type;
-typedef darcySolver_Type::matrixFctPtr_Type matrixFctPtr_Type;
+typedef darcySolverLinear_Type::matrixFct_Type matrixFct_Type;
+typedef darcySolverLinear_Type::matrixFctPtr_Type matrixFctPtr_Type;
 
-typedef darcySolver_Type::scalarFct_Type scalarFct_Type;
-typedef darcySolver_Type::scalarFctPtr_Type scalarFctPtr_Type;
+typedef darcySolverLinear_Type::scalarFct_Type scalarFct_Type;
+typedef darcySolverLinear_Type::scalarFctPtr_Type scalarFctPtr_Type;
 
-typedef darcySolver_Type::vector_Type vector_Type;
-typedef darcySolver_Type::vectorPtr_Type vectorPtr_Type;
+typedef darcySolverLinear_Type::vector_Type vector_Type;
+typedef darcySolverLinear_Type::vectorPtr_Type vectorPtr_Type;
 
 // ===================================================
 //!                    Problem data
