@@ -301,8 +301,11 @@ public:
     //!  Set up the linear solver and the preconditioner for the linear system.
     virtual void setup ();
 
-    //!  Perform the fixed point scheme.
-    virtual void solve ();
+    //! Solve the problem performing the fixed point scheme.
+    virtual void solve ()
+    {
+        fixedPoint ();
+    }
 
     //@}
 
@@ -472,6 +475,14 @@ protected:
 
     //@}
 
+    //! @name Protected Members
+    //@{
+
+    //! Perform the fixed point loop to solve the non-linear problem.
+    void fixedPoint ();
+
+    //@}
+
 private:
 
     //! @name Private Constructors
@@ -568,7 +579,7 @@ setup ()
 template < typename MeshType, typename SolverType >
 void
 DarcySolverNonLinear < MeshType, SolverType >::
-solve ()
+fixedPoint ()
 {
 
     // Current iteration.
@@ -620,7 +631,7 @@ solve ()
         exit(1);
     }
 
-} // fixedPointScheme
+} // fixedPoint
 
 // Set the first value for the fixed point method.
 template < typename MeshType, typename SolverType >
