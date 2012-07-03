@@ -580,7 +580,7 @@ solve ()
     /* A loop for the fixed point scheme, with exit condition based on stagnate of the
        primal variable and the maximum iteration. */
     while ( M_fixedPointResidual > M_fixedPointTolerance
-        && M_fixedPointNumIteration < M_fixedPointMaxIteration )
+            && M_fixedPointNumIteration < M_fixedPointMaxIteration )
     {
         // Increment the iteration number.
         ++M_fixedPointNumIteration;
@@ -596,21 +596,17 @@ solve ()
         // The leader process prints the iteration data.
         this->M_displayer->leaderPrint ( "Fixed point scheme\n" );
 
-        // Print the maximum number of iterations
-        this->M_displayer->leaderPrint ( "Maximum number of iterations ",
-                                         M_fixedPointMaxIteration );
-
         // Print the actual iterations
-        this->M_displayer->leaderPrint ( " of ",
-                                         M_fixedPointNumIteration , "\n" );
+        this->M_displayer->leaderPrint ( "Number of iterations ", M_fixedPointNumIteration );
+
+        // Print the maximum number of iterations
+        this->M_displayer->leaderPrint ( " of ", M_fixedPointMaxIteration, "\n" );
 
         // Print the error reached
-        this->M_displayer->leaderPrint ( "Error ",
-                                         M_fixedPointResidual );
+        this->M_displayer->leaderPrint ( "Error ", M_fixedPointResidual );
 
         // Print the tollerance
-        this->M_displayer->leaderPrint ( " over ",
-                                         M_fixedPointTolerance, "\n" );
+        this->M_displayer->leaderPrint ( " over ", M_fixedPointTolerance, "\n" );
 
     }
 
