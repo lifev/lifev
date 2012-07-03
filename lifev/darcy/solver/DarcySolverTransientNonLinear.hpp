@@ -448,20 +448,11 @@ void
 DarcySolverTransientNonLinear < MeshType, SolverType >::
 setup ()
 {
-
-    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
-
-    // Call the DarcySolverTransient setup method for setting up the linear solver.
+    // Call the DarcySolverTransient setup method for setting up the linear solver and time data.
     darcySolverTransient_Type::setup ();
 
-    // Set the maximum number of iteration for the fixed point iteration scheme.
-    const UInt maxIter = dataFile( ( this->M_data->section() + "/non-linear/fixed_point_iteration" ).data(), 10 );
-    this->setFixedPointMaxIteration ( maxIter );
-
-    // Set the tollerance for the fixed point iteration scheme.
-    const Real tol = dataFile( ( this->M_data->section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
-    this->setFixedPointTolerance ( tol );
-
+    // Call the DarcySolverNonLinear setup method for setting up the non-linear solver.
+    darcySolverNonLinear_Type::setup ();
 } // setup
 
 // ===================================================

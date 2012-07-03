@@ -551,12 +551,15 @@ setup ()
     // Call the DarcySolverLinear setup method for setting up the linear solver.
     darcySolverLinear_Type::setup();
 
+    // Path for the non linear stuff in the data file.
+    const std::string dataPath = this->M_data->section() + "/non-linear";
+
     // Set the maximum number of iteration for the fixed point iteration scheme.
-    const UInt maxIter = dataFile( ( this->M_data->section() + "/non-linear/fixed_point_iteration" ).data(), 10 );
+    const UInt maxIter = dataFile( ( dataPath + "/fixed_point_iteration" ).data(), 10 );
     setFixedPointMaxIteration ( maxIter );
 
     // Set the tollerance for the fixed point iteration scheme.
-    const Real tol = dataFile( ( this->M_data->section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
+    const Real tol = dataFile( ( dataPath + "/fixed_point_toll" ).data(), 1.e-8 );
     setFixedPointTolerance ( tol );
 
 } // setup
