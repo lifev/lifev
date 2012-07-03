@@ -356,16 +356,6 @@ protected:
     //! @name Protected Methods
     //@{
 
-    //! Perform all the operations before doing the loop on volume elements.
-    /*!
-      Computes the element independent matrices, clean all the fields and
-      all the algebraich stuff. Useful for extentions in child classes.
-    */
-    virtual void preLoopElementsComputation ()
-    {
-        darcySolverTransient_Type::preLoopElementsComputation ();
-    }
-
     //! Update all problem variables
     /*!
       Update all the variables of the problem before the construction of
@@ -407,14 +397,6 @@ protected:
 
     //@}
 
-    //! @name Protected Attributes
-    //@{
-
-    //! Vector of degrees of freedom where the equation is not defined.
-    std::vector< UInt > M_dofUseless;
-
-    //@}
-
 }; // class DarcySolverTransientNonLinear
 
 //
@@ -435,8 +417,7 @@ DarcySolverTransientNonLinear ():
         darcySolverNonLinear_Type::DarcySolverNonLinear (),
         // Transient Darcy solver contructor.
         darcySolverTransient_Type::DarcySolverTransient ()
-{
-} // Constructor
+{} // Constructor
 
 // ===================================================
 // Public methods
@@ -474,7 +455,6 @@ solve ()
 } // solve
 
 } // namespace LifeV
-
 
 #endif //_DARCYSOLVERTRANSIENTNONLINEAR_H_
 
