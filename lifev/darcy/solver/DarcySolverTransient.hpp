@@ -318,6 +318,9 @@ public:
     //! Set up the linear solver and the preconditioner for the linear system.
     virtual void setup ();
 
+    //! Solve the problem.
+    virtual void solve ();
+
     //@}
 
     // Update and set Methods.
@@ -347,13 +350,6 @@ protected:
     // Methods
     //! @name Protected methods
     //@{
-
-    //! Perform all the operations before doing the loop on volume elements.
-    /*!
-      Computes the element independent matrices, clean all the fields and
-      all the algebraich stuff. Useful for extentions in child classes.
-    */
-    virtual void preLoopElementsComputation ();
 
     //! Compute element matrices
     /*!
@@ -540,14 +536,8 @@ setInitialPrimal ( const scalarFctPtr_Type& primalInitialFct )
 template < typename MeshType, typename SolverType >
 void
 DarcySolverTransient < MeshType, SolverType >::
-preLoopElementsComputation ()
+solve ()
 {
-    // Perform all the operations done by the Darcy solver.
-    darcySolverLinear_Type::preLoopElementsComputation ();
-
-    // Check if the initial solution for the primal variable is set or not.
-    ASSERT ( M_primalFieldInitialFct.get(), "DarcySolverTransient : initial condition not set." );
-
     // Reset the right hand side coming from the time advance scheme.
     M_rhsTimeAdvance.reset ( new vector_Type ( this->M_primalField->getFESpace().map() ) );
 
@@ -555,7 +545,10 @@ preLoopElementsComputation ()
     // from the time scheme, without the time step.
     *M_rhsTimeAdvance = M_timeAdvance->updateRHSFirstDerivative ();
 
-} // preLoopElementsComputation
+    // Solve the problem
+    darcySolverLinear_Type::solve ();
+
+} // solve
 
 // Set and compute the mass matrix.
 template < typename MeshType, typename SolverType >
