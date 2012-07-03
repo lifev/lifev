@@ -389,6 +389,18 @@ protected:
 
     //@}
 
+    // Time advance stuff
+    //! @name Time advance stuff
+    //@{
+
+    //! Time advance.
+    timeAdvancePtr_Type M_timeAdvance;
+
+    //! Right hand side coming from the time advance scheme.
+    vectorPtr_Type M_rhsTimeAdvance;
+
+    //@}
+
 private:
 
     // Private Constructors
@@ -425,14 +437,8 @@ private:
     //! @name Time advance stuff
     //@{
 
-    //! Time advance.
-    timeAdvancePtr_Type M_timeAdvance;
-
     //! Local mass matrices.
     matrixElementalContainer_Type M_localMassMatrix;
-
-    //! Right hand side coming from the time advance scheme.
-    vectorPtr_Type M_rhsTimeAdvance;
 
     //@}
 
