@@ -148,11 +148,6 @@ darcy_nonlinear::run()
 {
     using namespace dataProblem;
 
-    typedef DarcyData < regionMesh_Type > darcyData_Type;
-    typedef boost::shared_ptr < darcyData_Type > darcyDataPtr_Type;
-
-    typedef DarcySolverTransient < regionMesh_Type, solver_Type > darcySolver_Type;
-
     // Life chonos
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
