@@ -81,7 +81,8 @@ Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& 
                                             y * y * y * y * y * y +
                                             2. * t * t * x * x * y * y * y ) -
             ( 3. * y * y + t * t * y * y ) * ( 6. * y * y * y * y * y +
-                                               6. * t * t * x * x * y * y );
+                                               6. * t * t * x * x * y * y ) +
+            t * t * x * x + y * y * y;
 }
 
 // Vector source term
@@ -100,9 +101,10 @@ Vector vectorSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real
 }
 
 // Initial time primal variable for transient and non-linear transient solvers
-Real initialCondition::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Real& /*time*/ ) const
+Real initialCondition::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& /*time*/ ) const
 {
-    return 0.;
+    const Real y(P[1]);
+    return y * y * y;
 }
 
 // Mass function for time dependent problem
