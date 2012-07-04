@@ -161,7 +161,7 @@ Real neumann1 ( const Real& t,
                 const Real& x,
                 const Real& y,
                 const Real& z,
-                const ID&   icomp )
+                const ID& /*icomp*/ )
 {
     return analyticalFlux ( t, x, y, z, 2 );
 }
@@ -170,7 +170,7 @@ Real neumann2 ( const Real& t,
                 const Real& x,
                 const Real& y,
                 const Real& z,
-                const ID&   icomp )
+                const ID& /*icomp*/ )
 {
     return -1. * analyticalFlux ( t, x, y, z, 1 );
 }
