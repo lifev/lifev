@@ -365,10 +365,10 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        if (!M_data->method().compare("monolithicGI"))
-          checkCEResult(M_data->dataFluid()->dataTime()->time());
-        else
-          checkGCEResult(M_data->dataFluid()->dataTime()->time());
+        // if (!M_data->method().compare("monolithicGI"))
+        //   checkCEResult(M_data->dataFluid()->dataTime()->time());
+        // else
+        //   checkGCEResult(M_data->dataFluid()->dataTime()->time());
 
         }
 
@@ -430,7 +430,6 @@ struct FSIChecker
         try
         {
             fsip = boost::shared_ptr<Problem>( new Problem( data_file ) );
-
             fsip->run();
         }
         catch ( std::exception const& _ex )
@@ -827,3 +826,4 @@ void Problem::checkCEResult(const LifeV::Real& time)
     else if (time==0.003 && (dispNorm-109704)/dispNorm*(dispNorm-109701)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.004 && (dispNorm-102733)/dispNorm*(dispNorm-102733)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
+
