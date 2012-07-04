@@ -107,34 +107,34 @@
             <th> N proc </th>
         </tr>
         <tr>
-            <td> 5 </td>
-            <td> 0.338269 </td>
-            <td> 0.411764 </td>
-            <td> 3 </td>
-        </tr>
-        <tr>
             <td> 10 </td>
-            <td> 0.166443 </td>
-            <td> 0.204983 </td>
-            <td> 3 </td>
+            <td> 0.105324 </td>
+            <td> 0.284968 </td>
+            <td> 8 </td>
         </tr>
         <tr>
             <td> 20 </td>
-            <td> 0.0832153 </td>
-            <td> 0.102579 </td>
-            <td> 3 </td>
+            <td> 0.0375415 </td>
+            <td> 0.140317 </td>
+            <td> 8 </td>
         </tr>
         <tr>
             <td> 40 </td>
-            <td> 0.0416069 </td>
-            <td> 0.051361 </td>
-            <td> 32 </td>
+            <td> 0.0162273 </td>
+            <td> 0.066338 </td>
+            <td> 16 </td>
         </tr>
         <tr>
             <td> 80 </td>
-            <td> 0.0208047 </td>
-            <td> 0.0258553 </td>
-            <td> 96 </td>
+            <td> 0.00773563 </td>
+            <td> 0.0315562 </td>
+            <td> 16 </td>
+        </tr>
+        <tr>
+            <td> 160 </td>
+            <td> 0.00381641 </td>
+            <td> 0.015142 </td>
+            <td> 32 </td>
         </tr>
     </table>
     where N is the number of subdivisions for each boundary.
