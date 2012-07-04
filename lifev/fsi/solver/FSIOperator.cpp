@@ -684,11 +684,11 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
       M_ALETimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
 
       if(this->isLeader())
-      {
-    M_fluidTimeAdvance->showMe();
-    //M_fluidMassTimeAdvance->showMe();
-    M_ALETimeAdvance->showMe();
-      }
+	{
+	  M_fluidTimeAdvance->showMe();
+	  //M_fluidMassTimeAdvance->showMe();
+	  M_ALETimeAdvance->showMe();
+	}
     }
   if( this->isSolid() )
   {
@@ -730,8 +730,15 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
       if ( this->isFluid() )
       {
           ASSERT( initialFluidVel.size() == M_fluidTimeAdvance->size(), "The number of vectors for initializing the time scheme for the fluid velocity is not consistent with the discretization chosen" );
+
+	  if(M_data->dataFluid()->conservativeFormulation())
+	    ASSERT( initialFluidVel.size() == M_fluidMassTimeAdvance->size(), "The number of vectors for initializing the time scheme for the fluid velocity is not consistent with the discretization chosen" );
+
           ASSERT(initialFluidDisp.size() == M_ALETimeAdvance->size() , "The number of vectors for initializing the time discretization for the ALE map is not consistent with the discretization chosen");
           this->M_fluidTimeAdvance->setInitialCondition(initialFluidVel);
+
+	  if(M_data->dataFluid()->conservativeFormulation())
+	    this->M_fluidMassTimeAdvance->setInitialCondition(initialFluidVel);
 
 
           this->M_ALETimeAdvance->setInitialCondition(initialFluidDisp);
