@@ -50,8 +50,10 @@ namespace LifeV
 /*!
     @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
 
-    This class implements a nolinear Darcy solver. <br>
-    The classical time dependant, non-linmar, Darcy formulation is a couple of differential equations of first order with
+    This class implements a non-linear and transient Darcy solver.
+    <br>
+    <br>
+    The classical time dependant, non-linear, Darcy formulation is a couple of differential equations of first order with
     the unknowns \f$ p \in C^1 (\Omega ) \f$, being the pressure or the primal unknown,
     and \f$ \sigma \in (C^1( \Omega ) )^n \f$, being the Darcy velocity or the flux or the dual unknown,
     such that
