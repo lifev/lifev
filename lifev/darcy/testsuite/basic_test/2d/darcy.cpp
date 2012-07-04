@@ -428,9 +428,6 @@ darcy_nonlinear::run()
     // Copy the initial primal to the exporter
     *primalExporter = primalField->getVector ();
 
-    // Interpolate the exact dual solution
-    uInterpolate_FESpacePtr->interpolate ( Members->getAnalyticalFlux(), *dualExact );
-
     // Save the initial primal solution into the exporter
     exporter->postProcess ( darcyData->dataTimePtr()->initialTime() );
 
