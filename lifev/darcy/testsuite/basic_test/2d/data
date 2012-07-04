@@ -32,13 +32,13 @@
     [./time_discretization]
         initialtime = 0.
         endtime     = 4
-        timestep    = 0.5
+        timestep    = 2
         BDF_order   = 1
     [../]
 
     [./non-linear]
         fixed_point_iteration = 100
-        fixed_point_toll      = 1e-4
+        fixed_point_toll      = 1e-1
     [../]
 
     [./space_discretization]
@@ -51,8 +51,8 @@
         element_shape = 0
 
         # For structured mesh
-        nx = 20
-        ny = 20
+        nx = 10
+        ny = 10
         lx = 1.
         ly = 1.
     [../]
