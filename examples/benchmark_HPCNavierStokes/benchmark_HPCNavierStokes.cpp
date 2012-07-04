@@ -502,7 +502,7 @@ main( Int argc, char** argv )
         bdf.extrapolation(*beta); // Extrapolation for the convective term
         // committed matteo
         //*beta = bdf.extrapolation(); // Extrapolation for the convective term
-        oseenAssembler.addConvection(*systemMatrix,*beta);
+        oseenAssembler.addConvection(*systemMatrix,1.0,*beta);
 
         if (verbose) std::cout << "done" << std::endl;
 
