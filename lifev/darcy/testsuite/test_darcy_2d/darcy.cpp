@@ -55,16 +55,6 @@ Real UOne( const Real& /* t */,
     return 1.;
 }
 
-Real UZero( const Real& /* t */,
-            const Real& /* x */,
-            const Real& /* y */,
-            const Real& /* z */,
-            const ID&   /* icomp */)
-{
-    return 0.;
-}
-
-
 // ===================================================
 //!                  Private Members
 // ===================================================
@@ -89,13 +79,6 @@ struct darcy_nonlinear::Private
     {
         fct_type f;
         f = boost::bind( &UOne, _1, _2, _3, _4, _5 );
-        return f;
-    }
-
-    fct_type getUZero ( )
-    {
-        fct_type f;
-        f = boost::bind( &UZero, _1, _2, _3, _4, _5 );
         return f;
     }
 
@@ -388,20 +371,8 @@ darcy_nonlinear::run()
     // Shared pointer used in the exporter for the primal solution
     vectorPtr_Type primalExporter;
 
-    // Shared pointer used in the exporter for the error of the primal solution
-    vectorPtr_Type primalErrorExporter;
-
-    // Shared pointer used for the exact primal solution
-    vectorPtr_Type primalExact;
-
     // Shared pointer used in the exporter for the dual solution
     vectorPtr_Type dualExporter;
-
-    // Shared pointer used in the exporter for the error of the dual solution
-    vectorPtr_Type dualErrorExporter;
-
-    // Shared pointer used for the exact dual solution
-    vectorPtr_Type dualExact;
 
     // Type of the exporter
     std::string const exporterType = dataFile( "exporter/type", "none" );
@@ -454,65 +425,11 @@ darcy_nonlinear::run()
     displayer->leaderPrint ( "Number of unknowns : ",
                              hybrid_FESpacePtr->map().map( Unique )->NumGlobalElements(), "\n" );
 
-    // Set the exporter to the error of the dual pointer
-    dualErrorExporter.reset ( new vector_Type ( dualInterpolated->getVector(), exporter->mapType() ) );
-
-    // Set the exporter to the error of the primal pointer
-    primalErrorExporter.reset ( new vector_Type ( primalField->getVector(), exporter->mapType() ) );
-
-    // Set the primal exact pointer
-    primalExact.reset ( new vector_Type ( primalField->getVector(), exporter->mapType() ) );
-
-    // Add the error of the primal variable to the exporter
-    exporter->addVariable ( ExporterData < regionMesh_Type >::ScalarField,
-                            dataFile( "exporter/name_primal", "Pressure" ) + std::string("Error"),
-                            p_FESpacePtr,
-                            primalErrorExporter,
-                            static_cast<UInt>( 0 ),
-                            ExporterData < regionMesh_Type >::SteadyRegime,
-                            ExporterData < regionMesh_Type >::Cell );
-
-    // Add the error of the primal variable to the exporter
-    exporter->addVariable ( ExporterData < regionMesh_Type >::ScalarField,
-                            "PressureExact",
-                            p_FESpacePtr,
-                            primalExact,
-                            static_cast<UInt>( 0 ),
-                            ExporterData < regionMesh_Type >::SteadyRegime,
-                            ExporterData < regionMesh_Type >::Cell );
-
-    // Set the primal exact pointer
-    dualExact.reset ( new vector_Type ( dualInterpolated->getVector(), exporter->mapType() ) );
-
-    // Add the error of the primal variable to the exporter
-    exporter->addVariable ( ExporterData < regionMesh_Type >::VectorField,
-                            dataFile( "exporter/name_dual", "Velocity" ) + std::string("Error"),
-                            uInterpolate_FESpacePtr,
-                            dualErrorExporter,
-                            static_cast<UInt>( 0 ),
-                            ExporterData < regionMesh_Type >::SteadyRegime,
-                            ExporterData < regionMesh_Type >::Cell );
-
-    // Add the error of the primal variable to the exporter
-    exporter->addVariable ( ExporterData < regionMesh_Type >::VectorField,
-                            "VelocityExact",
-                            uInterpolate_FESpacePtr,
-                            dualExact,
-                            static_cast<UInt>( 0 ),
-                            ExporterData < regionMesh_Type >::SteadyRegime,
-                            ExporterData < regionMesh_Type >::Cell );
-
-    // Export the partitioning
-    exporter->exportPID( meshPart );
-
     // Copy the initial primal to the exporter
     *primalExporter = primalField->getVector ();
 
     // Interpolate the exact dual solution
     uInterpolate_FESpacePtr->interpolate ( Members->getAnalyticalFlux(), *dualExact );
-
-    // Copy the error of the dual solution to the exporter
-    *dualErrorExporter = *dualExact - *dualExporter;
 
     // Save the initial primal solution into the exporter
     exporter->postProcess ( darcyData->dataTimePtr()->initialTime() );
@@ -557,36 +474,22 @@ darcy_nonlinear::run()
             darcyData->dataTimePtr()->showMe();
         }
 
-        // Solve the problem
+        // Solve the problem.
         darcySolver.solve ();
 
-        // Save the solution
+        // Save the solutions.
 
-        // Copy the primal solution to the exporter
+        // Copy the primal solution to the exporter.
         *primalExporter = primalField->getVector ();
 
-        // Interpolate the exact primal solution
-        p_FESpacePtr->interpolate ( Members->getAnalyticalSolution(), *primalExact,
-                currentTime );
-
-        // Copy the error of the primal solution to the exporter
-        *primalErrorExporter = *primalExact - primalField->getVector ();
-
-        // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
+        // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field.
         dualInterpolated->getVector() = uInterpolate_FESpacePtr->feToFEInterpolate(
                 *u_FESpacePtr, dualField->getVector() );
 
-        // Copy the dual interpolated solution to the exporter
+        // Copy the dual interpolated solution to the exporter.
         *dualExporter = dualInterpolated->getVector();
 
-        // Interpolate the exact dual solution
-        uInterpolate_FESpacePtr->interpolate ( Members->getAnalyticalFlux(), *dualExact,
-                currentTime );
-
-        // Copy the error of the dual solution to the exporter
-        *dualErrorExporter = *dualExact - *dualExporter;
-
-        // Save the solution into the exporter
+        // Save the solution into the exporter.
         exporter->postProcess ( currentTime );
 
     }
