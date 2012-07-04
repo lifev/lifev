@@ -300,7 +300,10 @@ FSISolver::iterate()
                                        M_data->errorTolerance(),
                                        M_data->NonLinearLineSearch(),
                                        M_out_res,
-                                       M_data->dataFluid()->dataTime()->time() );
+                                       M_data->dataFluid()->dataTime()->time()
+                                       0,/*first newton iter*/
+                                       2,/*verbosity level*/
+				       );
 
     // We update the solution
     M_oper->updateSolution( lambda );
