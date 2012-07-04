@@ -119,19 +119,13 @@ Real massFunction::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Re
 void setBoundaryConditions ( bcHandlerPtr_Type & bcDarcy )
 {
 
-    BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
-    BCFunctionRobin robinBDfun;
-
+    BCFunctionBase dirichletBDfun;
     dirichletBDfun.setFunction ( dirichlet );
-    neumannBDfun1.setFunction  ( neumann1 );
-    neumannBDfun2.setFunction  ( neumann2 );
-    // dp/dn = first_parameter + second_parameter * p
-    robinBDfun.setFunctions_Robin( robin, robinMass );
 
-    bcDarcy->addBC( "Top",    BCFlags::TOP,    Essential, Scalar, dirichletBDfun  );
-    bcDarcy->addBC( "Bottom", BCFlags::BOTTOM, Essential, Scalar, dirichletBDfun  );
-    bcDarcy->addBC( "Left",   BCFlags::LEFT,   Essential, Scalar, dirichletBDfun  );
-    bcDarcy->addBC( "Right",  BCFlags::RIGHT,  Essential, Scalar, dirichletBDfun  );
+    bcDarcy->addBC( "Top",    BCFlags::TOP,    Essential, Scalar, dirichletBDfun );
+    bcDarcy->addBC( "Bottom", BCFlags::BOTTOM, Essential, Scalar, dirichletBDfun );
+    bcDarcy->addBC( "Left",   BCFlags::LEFT,   Essential, Scalar, dirichletBDfun );
+    bcDarcy->addBC( "Right",  BCFlags::RIGHT,  Essential, Scalar, dirichletBDfun );
 
 }
 
@@ -143,45 +137,6 @@ Real dirichlet ( const Real& t,
                  const ID&   icomp )
 {
     return analyticalSolution ( t, x, y, z, icomp );
-}
-
-// Boundary condition of Neumann
-Real neumann1 ( const Real& t,
-                const Real& x,
-                const Real& y,
-                const Real& z,
-                const ID&   icomp )
-{
-    return analyticalFlux ( t, x, y, z, 0 );
-}
-
-Real neumann2 ( const Real& t,
-                const Real& x,
-                const Real& y,
-                const Real& z,
-                const ID&   icomp )
-{
-    return -1. * analyticalFlux ( t, x, y, z, 1 );
-}
-
-// Boundary condition of Robin
-Real robin ( const Real& t,
-             const Real& x,
-             const Real& y,
-             const Real& z,
-             const ID&   icomp )
-{
-    return -1. * analyticalFlux ( t, x, y, z, 2 ) +
-            analyticalSolution ( t, x, y, z, icomp );
-}
-
-Real robinMass( const Real& /*t*/,
-                const Real& /*x*/,
-                const Real& /*y*/,
-                const Real& /*z*/,
-                const ID&   /*icomp*/ )
-{
-    return 1.;
 }
 
 // ===================================================

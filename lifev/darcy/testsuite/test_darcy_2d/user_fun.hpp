@@ -152,15 +152,6 @@ void setBoundaryConditions ( bcHandlerPtr_Type & bcDarcy) ;
 // Boundary condition of Dirichlet
 Real dirichlet ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
-// Boundary condition of Neumann
-Real neumann1 ( const Real&, const Real&, const Real&, const Real&, const ID& );
-
-Real neumann2 ( const Real&, const Real&, const Real&, const Real&, const ID& );
-
-// Boundary condition of Robin (2 functions needed)
-Real robin     ( const Real&, const Real&, const Real&, const Real&, const ID& );
-Real robinMass ( const Real&, const Real&, const Real&, const Real&, const ID& );
-
 // ===================================================
 //!                 Analytical solution
 // ===================================================
