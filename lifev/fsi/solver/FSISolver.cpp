@@ -237,20 +237,6 @@ FSISolver::setup( void )
     M_oper->buildSystem();
 }
 
-
-void
-FSISolver::initialize( const std::string& /*velFName*/,
-                       const std::string& /*pressName*/,
-                       const std::string& /*velwName*/,
-                       const std::string& /*depName*/,
-                       const std::string& /*velSName*/,
-                       const Real&        /*Tstart = 0.*/)
-{
-//             M_oper->fluid().initialize(velFName, pressName, velwName, Tstart);
-//             M_oper->solid().initialize(depName, velSName, Tstart);
-}
-
-
 void
 FSISolver::initialize(std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Type> ds0, std::vector< vectorPtr_Type> df0)
 {
@@ -288,16 +274,6 @@ FSISolver::initialize(std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Ty
     }
 }
 
-void
-FSISolver::initialize( fluidFunction_Type const& u0,
-                       fluidFunction_Type const& p0,
-                       solidFunction_Type const& d0,
-                       solidFunction_Type const& w0,
-                       fluidFunction_Type const& df0)
-{
-}
-
-
 
 void
 FSISolver::iterate()
@@ -309,7 +285,7 @@ FSISolver::iterate()
     // Update the system
     M_oper->updateSystem( );
 
-    // We extract a pointer to the solution (\todo{uselessly})
+    // We extract a copy of the solution (\todo{uselessly})
     //    vector_Type* lambda = M_oper->solutionPtr();
     vector_Type lambda = M_oper->solution();
     //M_oper->solutionPtr(lambda);//copy of a shared_ptr
@@ -326,7 +302,7 @@ FSISolver::iterate()
                                        M_out_res,
                                        M_data->dataFluid()->dataTime()->time() );
 
-    // We update the solution pointer
+    // We update the solution
     M_oper->updateSolution( lambda );
 
     // Update the system

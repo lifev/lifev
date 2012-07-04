@@ -59,8 +59,8 @@ namespace LifeV
   {
     super_Type::setUp( dataFile );
 
-    M_domainVelImplicit = M_data->dataFluid()->domainVelImplicit(); //dataFile( "fluid/domainVelImplicit", true );
-    M_convectiveTermDer = M_data->dataFluid()->convectiveImplicit(); //dataFile( "fluid/convectiveTermDer", false );
+    M_domainVelImplicit = M_data->dataFluid()->domainVelImplicit();
+    M_convectiveTermDer = M_data->dataFluid()->convectiveImplicit();
   }
 
   void
@@ -84,7 +84,7 @@ namespace LifeV
     M_rhs.reset(new vector_Type(*M_monolithicMap));
     M_rhsFull.reset(new vector_Type(*M_monolithicMap));
     if(M_data->dataFluid()->useShapeDerivatives())
-      M_shapeDerivativesBlock.reset(new FSIOperator::fluidPtr_Type::value_type::matrix_Type(*M_monolithicMap));
+      M_shapeDerivativesBlock.reset(new matrix_Type(*M_monolithicMap));
     M_uk.reset (new vector_Type(*M_monolithicMap));
 
     M_meshMotion.reset(new meshMotion_Type(*M_mmFESpace,
@@ -117,12 +117,6 @@ namespace LifeV
   }
 
   void
-  FSIMonolithicGI::updateSystem()
-  {
-    super_Type::updateSystem();
-  }
-
-  void
   FSIMonolithicGI::evalResidual( vector_Type&       res,
 				 const vector_Type& disp,
 				 const UInt          iter )
@@ -130,13 +124,6 @@ namespace LifeV
     res *= 0.;//this is important. Don't remove it!
     if ((iter==0)|| !M_data->dataFluid()->isSemiImplicit())
       {
-
-	Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
-	if(M_restarts)
-	  {
-            alpha = 1/M_data->restartTimeStep();
-            M_restarts = false;
-	  }
 
 	M_uk.reset(new vector_Type( disp ));//M_uk should point to the same vector as disp, indeed, not be copied.
 	//in that case this line is useless
@@ -215,7 +202,7 @@ namespace LifeV
 	    M_monolithicMatrix->setSpaces(M_FESpaces);
 	    M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
 	    M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor());
-	    M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
+	    M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
 	  }
 	else
 	  {
@@ -275,8 +262,6 @@ namespace LifeV
       M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
-    // M_monolithicMatrix->GlobalAssemble();
-    // M_monolithicMatrix->matrix()->spy("FMFI");
   }
 
 
@@ -284,8 +269,6 @@ namespace LifeV
 
   void FSIMonolithicGI::setupBlockPrec()
   {
-
-    //M_solidDerBlock = M_solidBlockPrec; // an inexact Newton approximation of the Jacobian
 
     //The following part accounts for a possibly nonlinear structure model, should not be run when linear
     //elasticity is used
@@ -297,17 +280,12 @@ namespace LifeV
         *M_solidBlockPrec += *M_solid->Mass();
         *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
         M_solidBlockPrec->globalAssemble();
-        //        *M_solidBlockPrec *= M_data->dataSolid()->dataTime()->timeStep();
         *M_solidBlockPrec *= M_solid->rescaleFactor();
 
-	//         *M_solidBlockPrec += *M_solidDerBlock;
-        //M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
         M_monolithicMatrix->replace_matrix( M_solidBlockPrec, 0 );
       }
 
-    // *M_monolithicMatrix->matrix() *= 0;
     M_monolithicMatrix->blockAssembling();
-    //*M_monolithicMatrix->matrix() *= M_data->dataFluid()->dataTime()->timeStep();
 
     if (M_data->dataFluid()->useShapeDerivatives())
       {
@@ -331,7 +309,7 @@ namespace LifeV
 
         M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time());
         M_monolithicMatrix->GlobalAssemble();
-	//M_monolithicMatrix->matrix()->spy("jacobian");
+	// M_monolithicMatrix->matrix()->spy("jacobian");
       }
 
 
@@ -343,7 +321,7 @@ namespace LifeV
         M_precPtr->setConditions( M_BChs );
         M_precPtr->setSpaces( M_FESpaces );
         M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
-        M_precPtr->coupler( M_monolithicMap, M_dofStructureToFluid/*HarmonicExtension*/->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep() ,M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
+        M_precPtr->coupler( M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep() ,M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
 
         if (M_data->dataFluid()->useShapeDerivatives())
 	  {
@@ -366,7 +344,7 @@ namespace LifeV
 
   void FSIMonolithicGI::shapeDerivatives( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix )
   {
-    Real alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
+    Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 )/M_data->dataFluid()->dataTime()->timeStep();
     vectorPtr_Type rhsNew(new vector_Type(*M_monolithicMap));
     vector_Type un(M_uFESpace->map());
     vector_Type uk(M_uFESpace->map()+M_pFESpace->map());

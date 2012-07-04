@@ -77,6 +77,7 @@ FSIOperator::FSIOperator():
     M_solidTimeAdvanceMethod             ( ),
     M_ALETimeAdvanceMethod               ( ),
     M_fluidTimeAdvance                   ( ),
+    M_fluidMassTimeAdvance               ( ),
     M_solidTimeAdvance                   ( ),
     M_ALETimeAdvance                     ( ),
     M_dataFile                           ( ),
@@ -540,6 +541,9 @@ FSIOperator::updateSystem()
       M_ALETimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
       M_fluidTimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
 
+      if(M_data->dataFluid()->conservativeFormulation())
+	M_fluidMassTimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
+
       transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
 
   }
@@ -591,6 +595,8 @@ FSIOperator::updateSolution( const vector_Type& solution )
     {
         M_ALETimeAdvance->shiftRight( this->M_meshMotion->disp() );
         M_fluidTimeAdvance->shiftRight( *M_fluid->solution() );
+	if(M_data->dataFluid()->conservativeFormulation())
+	  M_fluidTimeAdvance->shiftRight( M_fluid->matrixMass()*(*M_fluid->solution()) );
     }
     if ( this->isSolid())
         M_solidTimeAdvance->shiftRight( M_solid->displacement() );
@@ -637,14 +643,21 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
   if(this->isFluid())
     {
         M_fluidTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );
+	if(M_data->dataFluid()->conservativeFormulation())
+	  M_fluidMassTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );
+
 
       if (M_fluidTimeAdvanceMethod =="Newmark")
     {
       M_fluidTimeAdvance->setup(M_data->dataFluid()->dataTimeAdvance()->coefficientsNewmark() , 1);
+      if(M_data->dataFluid()->conservativeFormulation())
+	M_fluidMassTimeAdvance->setup(M_data->dataFluid()->dataTimeAdvance()->coefficientsNewmark() , 1);
     }
       if (M_fluidTimeAdvanceMethod =="BDF")
     {
       M_fluidTimeAdvance->setup( M_data->dataFluid()->dataTimeAdvance()->orderBDF(), 1 );
+      if(M_data->dataFluid()->conservativeFormulation())
+	M_fluidMassTimeAdvance->setup( M_data->dataFluid()->dataTimeAdvance()->orderBDF(), 1 );
     }
      /*
       if (M_fluidTimeAdvanceMethod =="GeneralizedAlpha")
@@ -665,6 +678,9 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
       */
 
       M_fluidTimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
+      if(M_data->dataFluid()->conservativeFormulation())
+	M_fluidMassTimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
+
       M_ALETimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
 
       if(this->isLeader())
@@ -1836,68 +1852,6 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
     }
 
 
-    //         // Face based Dof
-//         if ( nDofpF )
-//         {
-
-//             // loop on element faces
-//             for ( ID iFa = 0; iFa < nElemF; ++iFa )
-//             {
-
-//                 // Loop on number of DOF per face
-//                 for ( ID l = 0; l < nDofpF; ++l )
-//                 {
-
-//                     lDof = nDofElemE + nDofElemV + iFa * nDofpF + l; // Local dof in the adjacent Element
-
-//                     // Nodal coordinates
-//                     x = _fespace1.refFE().xi( lDof );
-//                     y = _fespace1.refFE().eta( lDof );
-//                     z = _fespace1.refFE().zeta( lDof );
-
-//                     // Loop on data vector components
-//                     for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
-//                     {
-
-//                         // Interpolating data at the nodal point
-//                         Real __sum = 0;
-//                         for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local DOF on the adjacent element
-//                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z ); // Problem here with P2
-
-//                         // Updating interpolating vector
-//                         int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobalMap( iElem, lDof);
-//                         _vec2.setCoefficient( iDof ,__sum);
-//                     }
-//                 }
-//             }
-//         }
-
-//         // Element based Dof
-//         // Loop on number of DOF per Element
-//         for ( ID l = 0; l < nDofpEl; ++l )
-//         {
-//             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
-
-//             // Nodal coordinates
-//             x = _fespace1.refFE().xi( lDof );
-//             y = _fespace1.refFE().eta( lDof );
-//             z = _fespace1.refFE().zeta( lDof );
-
-//             // Loop on data vector components
-//             for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
-//             {
-
-//                 // Interpolating data at the nodal point
-//                 Real __sum = 0;
-//                 for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local DOF on the adjacent element
-//                     __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z );
-
-//                 // Updating interpolating vector
-
-//                 int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobalMap( elemId, lDof );
-//                 _vec2.setCoefficient( iDof, __sum);
-//             }
-//         }
 }
 
 

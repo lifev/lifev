@@ -116,11 +116,6 @@ public:
     void buildSystem ();
 
     /**
-       updates the solution, advances of a time step
-    */
-    void updateSystem();
-
-    /**
        evaluates the residual b-Ax
        \param res: output
        \param _sol: fluid domain displacement solution

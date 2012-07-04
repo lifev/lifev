@@ -231,9 +231,7 @@ public:
     //! returns the vector of pointers to the coupling blocks (by const reference).
     const std::vector<matrixPtr_Type>& couplingVector() const {return M_coupling;}
 
-    //const std::vector<Int>& blockReordering(){return M_blockReordering;}
-
-    //@}
+  //@}
 
     //!@name Set Methods
     //@{

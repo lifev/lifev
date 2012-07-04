@@ -320,7 +320,7 @@ public:
     //@{
     //!Initializes the TimeAdvance scheme which should handle the fluid time discretization, solid and move mesh
     /**
-       \todo{a general time advancing class should be used everywhere}
+       Initialization of the time advancing classes for fluid, structure and geometry problem.
      */
     void initializeTimeAdvance( const std::vector<vectorPtr_Type>& initialFluidVel, const std::vector<vectorPtr_Type>& initialSolidDisp,const std::vector<vectorPtr_Type>&  initialFluiDisp);
 
@@ -754,7 +754,7 @@ public:
     //! Setter for the time derivative of the interface displacement
     void setSolutionDerivative( const vector_Type& solutionDerivative ) { M_lambdaDot.reset( new vector_Type( solutionDerivative ) ); }
 
-    //! Setup of the TimeAdvance classes
+    //! Setup of the TimeAdvance classes given the input data file
     void
     setupTimeAdvance( const dataFile_Type& dataFile );
 
@@ -837,6 +837,7 @@ protected:
     std::string                                          M_ALETimeAdvanceMethod;
 
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_fluidTimeAdvance;
+    boost::shared_ptr<TimeAdvance<vector_Type> >      M_fluidMassTimeAdvance;
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_solidTimeAdvance;
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_ALETimeAdvance;
 

@@ -96,7 +96,6 @@ FSIMonolithic::setupFEspace()
 void
 FSIMonolithic::setupDOF( void )
 {
-
     M_dofStructureToHarmonicExtension    .reset( new DOFInterface3Dto3D );
     M_dofStructureToFluid    .reset( new DOFInterface3Dto3D );
 
@@ -113,7 +112,6 @@ FSIMonolithic::setupDOF( void )
                                    *M_dFESpace->mesh(),  M_data->structureInterfaceFlag(),
                                    M_data->interfaceTolerance(),
                                    M_data->fluidInterfaceVertexFlag() );
-
 
     createInterfaceMaps(M_dofStructureToFluid/*HarmonicExtension*/->localDofMap());
 
@@ -337,9 +335,6 @@ FSIMonolithic::solveJac( vector_Type& step, const vector_Type& res, const Real /
 void
 FSIMonolithic::updateSystem()
 {
-    //M_solidBlock->spy("solid");
-
-    // this->fluid().updateUn(*this->M_un);
     *M_rhs*=0;
     *M_rhsFull*=0;
     this->M_fluid->resetStabilization();
@@ -384,10 +379,10 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs) // not working with non-matching 
     std::map<ID, ID>::const_iterator ITrow;
     //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
-    vector_Type extrapolation(M_solidTimeAdvance->rhsContributionFirstDerivative()*M_solid->rescaleFactor(), Unique);
+    vector_Type rhsStructureVelocity(M_solidTimeAdvance->rhsContributionFirstDerivative()*M_solid->rescaleFactor(), Unique);
     vector_Type lambda(*M_interfaceMap, Unique);
 
-    this->monolithicToInterface(lambda, extrapolation);
+    this->monolithicToInterface(lambda, rhsStructureVelocity);
 
     UInt interface(M_monolithicMatrix->interface());
     //Real rescale(M_solid->rescaleFactor());
@@ -409,7 +404,7 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs) // not working with non-matching 
 
 void
 FSIMonolithic::
-evalResidual( const vector_Type& sol, vectorPtr_Type& rhs, vector_Type& res, bool diagonalScaling)
+evalResidual( const vector_Type& sol, const vectorPtr_Type& rhs, vector_Type& res, bool diagonalScaling)
 {
     if( diagonalScaling )
         diagonalScale(*rhs, M_monolithicMatrix->matrix());
@@ -434,7 +429,7 @@ FSIMonolithic::
 updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
-    *rhsFluidCoupling += (*M_solid->Mass() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor()/**M_data->dataSolid()->dataTime()->timeStep()*//M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
+    *rhsFluidCoupling += (*M_solid->Mass() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor()/M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
 }
 
 void
@@ -517,7 +512,7 @@ FSIMonolithic::assembleSolidBlock( UInt iter, const vector_Type& solution )
 
 if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean"))
 {
-    M_solid->material()->computeStiffness(solution*M_solid->rescaleFactor()/**M_data->dataFluid()->dataTime()->timeStep()*/, 1./*M_solid->rescaleFactor()*/, M_data->dataSolid(), M_solid->displayerPtr());
+    M_solid->material()->computeStiffness(solution*M_solid->rescaleFactor(), 1., M_data->dataSolid(), M_solid->displayerPtr());
     M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
     *M_solidBlockPrec += *M_solid->Mass();
     *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
@@ -526,7 +521,7 @@ if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid(
 }
 else
 {
-    M_solid->material()->updateJacobianMatrix( solution*M_solid->rescaleFactor()/**M_data->dataFluid()->dataTime()->timeStep()*/, dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+    M_solid->material()->updateJacobianMatrix( solution*M_solid->rescaleFactor(), dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
     M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
     *M_solidBlockPrec += *M_solid->Mass();
     *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
@@ -544,21 +539,25 @@ FSIMonolithic::assembleFluidBlock(UInt iter, const vector_Type& solution)
     M_fluidBlock.reset(new  FSIOperator::fluidPtr_Type::value_type::matrix_Type(*M_monolithicMap));
 
     Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 )/M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
-    if(!M_data->dataFluid()->conservativeFormulation())
-      {
+    // if(!M_data->dataFluid()->conservativeFormulation())
+    //   {
 	M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
-      }
-    else
-      if (! M_fluid->matrixMassPtr().get() )
-	M_fluid->buildSystem( );
+    //   }
+    // else
+    //   if (! M_fluid->matrixMassPtr().get() )
+    // 	M_fluid->buildSystem( );
 
     if (iter==0)
       {
         M_resetPrec=true;
         M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-        *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());//(M_bdf->rhsContributionFirstDerivative()) ;
+	if(!M_data->dataFluid()->conservativeFormulation())
+	  *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());//(M_bdf->rhsContributionFirstDerivative()) ;
+	else
+	  *M_rhs += (M_fluidMassTimeAdvance->rhsContributionFirstDerivative());//(M_bdf->rhsContributionFirstDerivative()) ;
         couplingRhs(M_rhs/*, M_fluidTimeAdvance->stencil()[0]*/);
       }
+    //the conservative formulation as it is now is of order 1. To have higher order (TODO) we need to store the mass matrices computed at the previous time steps.
     if(M_data->dataFluid()->conservativeFormulation())
       {
 	M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
@@ -569,8 +568,8 @@ FSIMonolithic::assembleFluidBlock(UInt iter, const vector_Type& solution)
 void FSIMonolithic::updateRHS()
 {
     M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-    *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());//M_bdf->rhsContributionFirstDerivative() ;
-    couplingRhs(M_rhs/*, M_fluidTimeAdvance->singleElement(0)*/);
+    *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());
+    couplingRhs(M_rhs);
     //M_solid->updateVel();
     updateSolidSystem(M_rhs);
     *M_rhsFull = *M_rhs;
