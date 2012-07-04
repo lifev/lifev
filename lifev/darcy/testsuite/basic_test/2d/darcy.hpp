@@ -81,7 +81,8 @@
                 1 & 0 \\
                 0 & 1+p^2
             \end{array}
-            \right).
+            \right), \\
+            p_0(x,y) = y^3. & &
         \end{array}
     \f]
     The analytical solutions are
