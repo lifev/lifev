@@ -84,7 +84,7 @@
             g_R(x,y,z) =  5 - 4z + x^2y^2 + 6x + 5z, \vspace{0.2cm} \\
             g_{N_1}(x,y,z) = - 5 + 4z, &
             g_{N_2}(x,y,z) = 2xy^2 + 6 + 2x^2y - 2y - x^3, &
-            K(x,y,z) =
+            \Lambda (x,y,z) =
             \left(
             \begin{array}{c c c}
                 2 & 1 & 0 \\
