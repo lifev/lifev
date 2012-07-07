@@ -503,7 +503,7 @@ main( Int argc, char** argv )
 
         // SemiImplicit
         *beta = bdf.extrapolation(); // Extrapolation for the convective term
-        oseenAssembler.addConvection(*systemMatrix,*beta);
+        oseenAssembler.addConvection(*systemMatrix,1.0,*beta);
 
         if (verbose) std::cout << "done" << std::endl;
 
