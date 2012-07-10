@@ -37,6 +37,8 @@
 
     In this tutorial, we assemble a Stokes problem and a convection problem
     using the blocks.
+
+    Tutorials that should be read before: 1,4
  */
 
 // ---------------------------------------------------------------

@@ -42,6 +42,8 @@
     are the exact criteria that makes an expression well-formed
     or ill-formed.
 
+    Tutorials that should be read before: 1,2
+
  */
 
 // ---------------------------------------------------------------

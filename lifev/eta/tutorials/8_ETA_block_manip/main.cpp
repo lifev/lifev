@@ -35,6 +35,8 @@
     block structured matrices. This tutorial aims at investigating
     that more in detail.
 
+    Tutorials that should be read before: 1,4,7
+
  */
 
 // ---------------------------------------------------------------

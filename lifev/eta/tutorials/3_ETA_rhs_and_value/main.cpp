@@ -35,6 +35,8 @@
     In this tutorial, we show how to assemble a right hand side and compute a
     volume integral, using the ETA framework.
 
+    Tutorials that should be read before: 1,2
+
  */
 
 // ---------------------------------------------------------------

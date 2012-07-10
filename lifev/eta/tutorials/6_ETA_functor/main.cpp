@@ -37,6 +37,8 @@
     We show, in particular, how to assemble a SUPG stabilized
     advection diffusion matrix. We also show how to integrate
     functions without interpolating them.
+
+    Tutorials that should be read before: 1,2,3
  */
 
 // ---------------------------------------------------------------
