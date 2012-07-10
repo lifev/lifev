@@ -431,7 +431,9 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     Real coefficient ( M_data->dataSolid()->dataTime()->timeStep() * M_data->dataSolid()->dataTime()->timeStep() * M_solid->rescaleFactor() /  M_solidTimeAdvance->coefficientSecondDerivative( 0 ) );
     M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
-    *rhsFluidCoupling += (*M_solid->Mass() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor()/M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
+    *rhsFluidCoupling += *M_solid->Mass() * ( M_solidTimeAdvance->rhsContributionSecondDerivative() * coefficient );
+    // TODO NOTE: this mass * vector multiplication in serial may lead to a NaN for unclear reasons
+    // (both the matrix and the vector does not contain a NaN before the multiplication..)
 }
 
 void
@@ -569,7 +571,8 @@ void FSIMonolithic::updateRHS()
     M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
     *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());
     couplingRhs(M_rhs);
-    //M_solid->updateVel();
+    
+    // Update solid (iter == 0)
     updateSolidSystem(M_rhs);
 
     // Update RHS
