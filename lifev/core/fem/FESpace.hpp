@@ -344,6 +344,24 @@ public:
     template <typename vector_type>
     vector_type gradientRecovery(const vector_type& solution, const UInt& component) const;
 
+    //! This method reconstruct a gradient of a solution in the present FE space.
+    /*!
+      The goal of this method is to build an approximation of the gradient of a given
+      FE function in this FESpace. Typically, when one use P1 elements for approximating
+      the solution of a given problem, the gradient is only piecewise constant. However, one
+      could need continuous gradient. The solutions to this problem is either to use specific
+      finite elements (like Hermite FE) or rely on a recovery procedure for the gradient.
+
+      This method implements a recovery procedure that performs a local average with weights
+      corresponding to the areas of the elements:
+      \f[ Gr(P) = \frac{\sum_{P \in T} |T| \nabla u(P)}{\sum_{P \in T} |T|} \f]
+      See Zienkiewicz and Zhu (1987) for more details.
+
+      @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
+     */
+    template <typename vector_type>
+    vector_type recoveryFunction(const vector_type& solution) const;
+
     //! Reconstruction of the laplacian using gradientRecovery procedures.
     /*!
       This method simply uses the FESpace::gradientRecovery method several times so
@@ -1509,6 +1527,74 @@ gradientRecovery(const vector_type& solution, const UInt& dxi) const
     // Assembly
     return vector_type(gradientSum,Unique,Add)/vector_type(patchArea,Unique,Add);
 }
+
+
+template<typename MeshType, typename MapType>
+template<typename vector_type>
+vector_type
+FESpace<MeshType,MapType>::
+recoveryFunction(const vector_type& solution) const
+{
+    if (solution.mapType() != Repeated)
+    {
+        return recoveryFunction(vector_type(solution,Repeated));
+    }
+
+    Real refElemArea(0); //area of reference element
+
+    //compute the area of reference element
+    for(UInt iq=0; iq< M_Qr->nbQuadPt(); iq++)
+        refElemArea += M_Qr->weight(iq);
+
+    // Define a special quadrature rule for the interpolation
+    QuadratureRule interpQuad;
+    interpQuad.setDimensionShape(shapeDimension(M_refFE->shape()), M_refFE->shape());
+    Real wQuad(refElemArea/M_refFE->nbDof());
+
+    for (UInt i(0); i<M_refFE->nbDof(); ++i) //nbRefCoor
+    {
+        interpQuad.addPoint(QuadraturePoint(M_refFE->xi(i),M_refFE->eta(i),M_refFE->zeta(i),wQuad));
+    }
+
+    // Initialization of the vectors
+    vector_type patchArea(solution,Repeated);
+    patchArea *= 0.0;
+
+    vector_type gradientSum(solution,Repeated);
+    gradientSum *= 0.0;
+
+
+    UInt totalNumberElements(M_mesh->numElements());
+    UInt numberLocalDof(M_dof->numLocalDof());
+
+    CurrentFE interpCFE(*M_refFE,getGeometricMap(*M_mesh ),interpQuad);
+
+    // Loop over the cells
+    for (UInt iterElement(0); iterElement< totalNumberElements; ++iterElement)
+    {
+        interpCFE.update(mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
+
+        for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+        {
+            for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
+            {
+                ID globalDofID(dof().localToGlobalMap(iterElement,iterDof) + iDim*dof().numTotalDof());
+
+                patchArea[globalDofID] += interpCFE.measure();
+                for (UInt iterDofGrad(0); iterDofGrad < numberLocalDof; ++iterDofGrad)
+                {
+                    ID globalDofIDGrad(dof().localToGlobalMap(iterElement,iterDofGrad) + iDim*dof().numTotalDof());
+                    gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.phi(iterDofGrad,iDim,iterDof);
+                }
+            }
+        }
+    }
+
+    // Assembly
+    return vector_type(gradientSum,Unique,Add)/vector_type(patchArea,Unique,Add);
+}
+
+
 
 template<typename MeshType, typename MapType>
 template<typename vector_type>
