@@ -299,10 +299,10 @@ FSISolver::iterate()
                                        maxiter,
                                        M_data->errorTolerance(),
                                        M_data->NonLinearLineSearch(),
-                                       M_out_res,
-                                       M_data->dataFluid()->dataTime()->time(),
                                        0,/*first newton iter*/
-                                       2/*verbosity level*/
+                                       2,/*verbosity level*/
+                                       M_out_res,
+                                       M_data->dataFluid()->dataTime()->time()
 				       );
 
     // We update the solution

@@ -86,10 +86,10 @@ Int NonLinearRichardson( VectorEpetra& sol,
 			 UInt&       maxit,
 			 Real        eta_max,
 			 Int         NonLinearLineSearch,
-			 std::ostream& output = std::cout,
-			 const Real& time = 0,
 			 UInt iter = UInt(0),
-			 UInt        verboseLevel = 0
+			 UInt        verboseLevel = 0,
+			 std::ostream& output = std::cout,
+			 const Real& time = 0
 			 )
 {
     /*

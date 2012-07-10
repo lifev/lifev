@@ -778,7 +778,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
     Int status = 0;
 
     if ( M_data->verbose() )
-      status = NonLinearRichardson( *M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch, M_out_res, M_data->dataTime()->time(),  0, 2 );
+        status = NonLinearRichardson( *M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch, 0, 2, M_out_res, M_data->dataTime()->time() );
     else
         status = NonLinearRichardson( *M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch );
 
