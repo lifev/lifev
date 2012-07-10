@@ -96,6 +96,16 @@ namespace AssemblyElementalStructure
   void computeGradientLocalDisplacement (KNMK<Real>& gradientLocalDisplacement, const VectorElemental& uk_loc, const CurrentFE& fe );
 
 
+//! Deformation Gradient on the local element
+/*!
+  This function assembles the local deformation gradient
+
+  @param uk_loc The local displacement (remark: the nonlinear matrix depends on current displacement)
+  @param fe The current finite element
+ */
+  void computeLocalDeformationGradient (const VectorElemental& uk_loc, std::vector<Epetra_SerialDenseMatrix>& tensorF, const CurrentFE& fe );
+
+
 //! METHODS SHARED BETWEEN LINEAR ELASTIC MODEL AND ST.VENANT-KIRCHHOFF MODEL
 //! These two methods are implemented in AssemblyElemental.cpp.
 //void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe );

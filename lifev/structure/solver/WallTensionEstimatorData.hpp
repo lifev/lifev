@@ -126,6 +126,12 @@ public:
      */
     void setAnalysisType( const std::string& analysisType) { M_analysisType = analysisType; }
 
+    //! Set Recovery Variable
+    /*!
+     * @param recoveryVariable the field that is recovered (displacement or tensions)
+     */
+    void setRecoveryVariable( const std::string& recoveryVariable) { M_recoveryVariable = recoveryVariable; }
+
     //! Set initialTime
     /*!
      * @param initial Time initial of the analysis
@@ -173,6 +179,12 @@ public:
      * @return std::string with the type of analysis that has to be performed
      */
     const std::string& analysisType() const { return M_analysisType; }
+
+    //! Get recoveryVariable
+    /*!
+     * @return std::string with the name of the field that is recovered
+     */
+    const std::string& recoveryVariable() const { return M_recoveryVariable; }
 
     //! Get initial Time
     /*!
@@ -234,6 +246,8 @@ private:
 
     //! Type of Analysis
     std::string           M_analysisType;
+    //! Field that is recovered
+    std::string           M_recoveryVariable;
 
     //! Initial & Final Time
     time_Type             M_initialTime;

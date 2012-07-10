@@ -276,7 +276,7 @@ Structure::run3d()
                 dFESpace,
                 parameters->comm,
 		marker);
-
+    
     //! 3. Creation of the importers to read the displacement field
     std::string const filename    = tensionData->nameFile();
     std::string const importerType =  tensionData->typeFile();
@@ -421,8 +421,6 @@ Structure::run3d()
 
 	//Perform the analysis
 	solid.analyzeTensions();
-
-	
 	
 	//Extracting the gradient
 	// *gradX = solid.gradientX();

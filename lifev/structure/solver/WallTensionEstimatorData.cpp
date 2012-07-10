@@ -47,6 +47,7 @@ namespace LifeV
 WallTensionEstimatorData::WallTensionEstimatorData():
         M_nameFile                         ( ),
         M_analysisType                     ( ),
+        M_recoveryVariable                 ( ),
         M_initialTime                      ( ),
         M_finalTime                        ( ),
         M_iterStart                        ( ),
@@ -57,6 +58,7 @@ WallTensionEstimatorData::WallTensionEstimatorData():
 WallTensionEstimatorData::WallTensionEstimatorData( const WallTensionEstimatorData& wallTensionEstimatorData ):
         M_nameFile                         ( wallTensionEstimatorData.M_nameFile ),
         M_analysisType                     ( wallTensionEstimatorData.M_analysisType ),
+        M_recoveryVariable                 ( wallTensionEstimatorData.M_recoveryVariable ),
         M_initialTime                      ( wallTensionEstimatorData.M_initialTime ),
         M_finalTime                        ( wallTensionEstimatorData.M_finalTime ),
         M_iterStart                        ( wallTensionEstimatorData.M_iterStart ),
@@ -74,6 +76,7 @@ WallTensionEstimatorData::operator=( const WallTensionEstimatorData& wallTension
     {
         M_nameFile                         = wallTensionEstimatorData.M_nameFile;
         M_analysisType                     = wallTensionEstimatorData.M_analysisType;
+        M_recoveryVariable                 = wallTensionEstimatorData.M_recoveryVariable;
         M_initialTime                      = wallTensionEstimatorData.M_initialTime;
         M_finalTime                        = wallTensionEstimatorData.M_finalTime;
         M_iterStart                        = wallTensionEstimatorData.M_iterStart;
@@ -96,6 +99,7 @@ WallTensionEstimatorData::setup( const GetPot& dataFile, const std::string& sect
     M_typeFile = dataFile( ( section + "/analysis/typeFile" ).data(), "NO_DEFAULT_FILE_TYPE" );
 
     M_analysisType = dataFile( ( section + "/analysis/analysisType" ).data(), "NO_DEFAULT_ANALYSIS_TYPE" );
+    M_recoveryVariable = dataFile( ( section + "/analysis/recoveryVariable" ).data(), "NO_DEFAULT_ANALYSIS_TYPE" );
 
     UInt timesNumber(0);
 
@@ -130,6 +134,7 @@ WallTensionEstimatorData::showMe( std::ostream& output ) const
     output << "Name File                = " << M_nameFile << std::endl;
     output << "Type File                = " << M_typeFile << std::endl;
     output << "Analysis Type            = " << M_analysisType << std::endl;
+    output << "Analysis Type            = " << M_recoveryVariable << std::endl;
     output << "The numbers of intervals is =  " << M_initialTime.size() << std::endl;
 
     for ( UInt i(0); i< M_initialTime.size() ; i++ )
