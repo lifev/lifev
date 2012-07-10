@@ -149,6 +149,9 @@ public:
 // field. As there is no expression already set up for it, we
 // devise a functor.
 //
+// For the sake of exposition, we add a member to the functor
+// representing the exponent of the norm.
+//
 // Following the same rules as before, we define the following
 // class.
 // ---------------------------------------------------------------
@@ -160,14 +163,25 @@ public:
 
     return_Type operator()(const VectorSmall<3>& advection_field)
     {
-        return std::sqrt( advection_field[0]*advection_field[0]
-                          +advection_field[1]*advection_field[1]
-                          +advection_field[2]*advection_field[2]);
+        return std::pow( std::pow( std::abs(advection_field[0]), M_exponent)
+                         + std::pow( std::abs(advection_field[1]), M_exponent)
+                         + std::pow( std::abs(advection_field[2]), M_exponent)
+                         , 1.0/M_exponent);
     }
 
-    normFunctor(){}
-    normFunctor(const normFunctor&){}
+    normFunctor(const UInt& expo = 1) 
+        : M_exponent(expo) {}
+
+    normFunctor(const normFunctor& nf) 
+        : M_exponent(nf.M_exponent){}
+
     ~normFunctor(){}
+
+    void setExponent(const UInt& expo) { M_exponent = expo; }
+
+private:
+    
+    UInt M_exponent;
 };
 
 
@@ -319,6 +333,8 @@ int main( int argc, char** argv )
         VectorSmall<3> beta(0,1.0,2.0);
 
         boost::shared_ptr<normFunctor> norm( new normFunctor);
+        
+        norm->setExponent(2);
 
         integrate( elements(ETuSpace->mesh()),
                    uSpace->qr(),
