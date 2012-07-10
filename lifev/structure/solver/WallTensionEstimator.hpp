@@ -629,6 +629,13 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( void )
     }
   
   M_globalEigen->globalAssemble();
+
+  //Recovery procedure over the globalEigen vector
+  solutionVectPtr_Type reconstructedEigenvalues( new solutionVect_Type(*M_localMap) );
+  *reconstructedEigenvalues = M_FESpace->recoveryFunction(*M_globalEigen);
+
+  M_globalEigen = reconstructedEigenvalues;
+
   chrono.stop();
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 }
