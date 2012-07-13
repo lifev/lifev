@@ -35,6 +35,15 @@
     block structured matrices. This tutorial aims at investigating
     that more in detail.
 
+    In particular, 4 different strategies are proposed for the assembly
+    of the Stokes matrix. The first one is the most simple strategy, but
+    not the most efficient one. Two intermediate strategies are developed
+    to show the influence of the different points. The last strategy
+    represents the most efficient way of assembling the matrix.
+
+    In practice, only the first (simplest) and last (fastest) strategy
+    should be considered since intermediate strategies have no advantages.
+
     Tutorials that should be read before: 1,4,7
 
  */
