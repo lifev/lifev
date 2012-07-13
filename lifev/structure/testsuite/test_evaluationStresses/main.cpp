@@ -261,6 +261,7 @@ Structure::run3d()
     //! Functional spaces - needed for the computations of the gradients
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+    solidFESpace_Type copyFESpace(meshPart,dOrder,3,parameters->comm);
     if (verbose) std::cout << std::endl;
 
 
@@ -420,7 +421,7 @@ Structure::run3d()
 	std::cout << "The norm of the set displacement, at time " << startTime << ", is: "<< solid.displacement().norm2() << std::endl;
 
 	//Perform the analysis
-	solid.analyzeTensions();
+	solid.analyzeTensions(copyFESpace);
 	
 	//Extracting the gradient
 	// *gradX = solid.gradientX();

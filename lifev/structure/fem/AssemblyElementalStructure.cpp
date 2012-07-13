@@ -80,7 +80,7 @@ void computeLocalDeformationGradient (const VectorElemental& uk_loc, std::vector
     // \grad u^k at each quadrature poInt
     Real s;
 
-    for ( Int k=0; k<static_cast<Int> (fe.nbFEDof()); k++)
+    for ( Int k=0; k < static_cast<Int> (fe.nbFEDof()); k++)
       {
 	// loop on space coordinates
 	for ( Int icoor = 0; icoor < static_cast<Int> (nDimensions); icoor++ )
