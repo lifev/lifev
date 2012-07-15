@@ -5,6 +5,18 @@
  *      Author: uvilla
  */
 
+//@HEADER
+
+/*!
+ * \file ApproximatedInvertibleRowMatrix.hpp
+ * \author Umberto Villa
+ * \date 2011-10-13
+ * This file contains the definition of the class ApproximatedInvertibleRowMatrix.
+ * ApproximatedInvertibleRowMatrix is derived by the LinearOperator class, and it can be used to
+ * approximate the inverse of a Epetra_CsrMatrix, either by using the Krylov methods in Belos or AztecOO or
+ * the preconditioning techniques in ML or Ifpack.
+ */
+
 #ifndef APPROXIMATEDINVERTIBLEROWMATRIX_H_
 #define APPROXIMATEDINVERTIBLEROWMATRIX_H_
 
@@ -20,7 +32,15 @@ namespace Operators
 
 //! @class ApproximatedInvertibleRowMatrix
 /*!
- * Structure of the ParameterList:
+ * ApproximatedInvertibleRowMatrix is derived by the LinearOperator class, and it can be used to
+ * approximate the inverse of a Epetra_CsrMatrix, either by using the Krylov methods in Belos or AztecOO or
+ * the preconditioning techniques in ML or Ifpack.
+ * Internally ApproximatedInvertibleRowMatrix contains pointers to a Epetra_CsrMatrix,
+ * to an InvertibleOperator object (that provides the interface to AztecOO or Belos), and RowMatrixPreconditioner
+ * (the provides the interface to Ifpack or ML).
+ *
+ * The parameters to set up the Krylov methods or the preconditioner are given by using a Teuchos Parameter List.
+ * Below how the parameter list would look like:
  *
  *         <ParameterList name="ApproximatedInvertibleRowMatrix">
             <Parameter name="use preconditioner as approximated inverse" type="bool" value="false"/>
@@ -64,11 +84,15 @@ class ApproximatedInvertibleRowMatrix : public LinearOperator
 {
 public:
 
+	//! @name Public Typedef
+	//@{
 	typedef Epetra_CrsMatrix rowMatrix_Type;
 	typedef boost::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
 	typedef Teuchos::ParameterList pList_Type;
+	//@}
 
 	ApproximatedInvertibleRowMatrix();
+
 	virtual ~ApproximatedInvertibleRowMatrix();
 
     //! @name Attribute set methods
@@ -76,7 +100,7 @@ public:
     void SetRowMatrix(const rowMatrixPtr_Type & rowMatrix);
 
     void SetParameterList(const pList_Type pList);
-
+    //! not fully supported!
     virtual int SetUseTranspose(bool UseTranspose);
     //@}
 

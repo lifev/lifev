@@ -5,6 +5,18 @@
  *      Author: uvilla
  */
 
+//@HEADER
+
+/*!
+ * \file AztecooOperator.hpp
+ * \author Umberto Villa
+ * \date 2010-09-03
+ * Interface to the AztecOO linear solver in Trilinos. This interface requires the user to provide
+ * the preconditioner in the form of a LinearOperator. If no preconditioner is provided,
+ * AztecOO will use unpreconditioned Krylov methods.
+ */
+
+
 #ifndef AZTECOOOPERATOR_HPP_
 #define AZTECOOOPERATOR_HPP_
 
@@ -30,8 +42,12 @@ namespace LifeV
 {
 namespace Operators
 {
-//! @class InvertibleOperator
-/*! @brief Abstract class which defines the interface of an Invertible Linear Operator.
+//! @class
+/*! @brief InvertibleOperator interface to AztecOO in Trilinos.
+ * AztecooOperator will use the matrix-free Krylov methods in Trilinos, therefore both the operator and
+ * the preconditioner must be given in the form of LinearOperator.
+ *
+ * For a description of the class functionality, please refer to the parent class InvertibleOperator.
  *
  */
 class AztecooOperator : public InvertibleOperator

@@ -5,6 +5,17 @@
  *      Author: uvilla
  */
 
+//@HEADER
+
+/*!
+ * \file BelosOperator.hpp
+ * \author Umberto Villa
+ * \date 2010-09-28
+ * Interface to the Belos linear solver in Trilinos. This interface requires the user to provide
+ * the preconditioner in the form of a LinearOperator.
+ */
+
+
 #ifndef BELOSOPERATOR_HPP_
 #define BELOSOPERATOR_HPP_
 
@@ -29,8 +40,11 @@ namespace LifeV
 {
 namespace Operators
 {
-//! @class BelosOperator
-/*! @brief Class which defines the interface of an Invertible Linear Operator through belos.
+//! @class
+/*! @brief InvertibleOperator interface to Belos in Trilinos.
+ * BelosOperator requires the operator to be solved and the preconditioner in the form of LinearOperator.
+ *
+ * For a description of the class functionality, please refer to the parent class InvertibleOperator.
  *
  */
 
