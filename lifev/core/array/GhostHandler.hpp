@@ -101,6 +101,12 @@ public:
         return M_nodeNodeNeighborsList;
     }
 
+    //! Node to edge neighbor map
+    neighborList_Type const & nodeEdgeNeighborsList()
+    {
+        ASSERT( !M_nodeEdgeNeighborsList.empty(), "M_nodeEdgeNeighborsList iss empty" );
+        return M_nodeEdgeNeighborsList;
+    }
 
     //! Node to element neighbor map
     neighborList_Type const & nodeElementNeighborsList()
