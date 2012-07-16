@@ -105,7 +105,7 @@ typedef VectorEpetraStructured blockVector_Type;
 Real forceFct( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& z , const ID& /*i*/)
 {
     return z*z;
-};
+}
 
 // ---------------------------------------------------------------
 // As usual, we start by the MPI communicator, the definition of
@@ -133,7 +133,7 @@ int main( int argc, char** argv )
 
     regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                    2.0,   2.0,   2.0,
-                   -1.0,  -1.0,  -1.0);
+                  -1.0,  -1.0,  -1.0);
 
     MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
 
