@@ -95,10 +95,19 @@ public:
     map_Type const & map() { return *M_map; }
 
     //! Node to node neighbor map
-    neighborList_Type const & nodeNodeNeighborsList() { return M_nodeNodeNeighborsList; }
+    neighborList_Type const & nodeNodeNeighborsList()
+    {
+        ASSERT( !M_nodeNodeNeighborsList.empty(), "M_nodeNodeNeighborsList iss empty" );
+        return M_nodeNodeNeighborsList;
+    }
+
 
     //! Node to element neighbor map
-    neighborList_Type const & nodeElementNeighborsList() { return M_nodeElementNeighborsList; }
+    neighborList_Type const & nodeElementNeighborsList()
+    {
+        ASSERT( !M_nodeElementNeighborsList.empty(), "M_nodeElementNeighborsList iss empty" );
+        return M_nodeElementNeighborsList;
+    }
 
     //@}
 
