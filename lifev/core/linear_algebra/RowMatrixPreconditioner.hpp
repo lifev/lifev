@@ -4,6 +4,12 @@
  *  Created on: Oct 8, 2011
  *      Author: uvilla
  */
+/*!
+ * \file RowMatrixPreconditoner.hpp
+ * \author Umberto Villa
+ * \date 2011-10-08
+ * Abstract class to construct preconditioners from a matrix in Epetra_CsrFormat.
+ */
 
 #ifndef ROWMATRIXPRECONDITIONER_HPP_
 #define ROWMATRIXPRECONDITIONER_HPP_
@@ -28,42 +34,67 @@ namespace LifeV
 
 namespace Operators
 {
+//! @class
+/*!
+ * @brief Abstract class to construct preconditioners from a matrix in Epetra_CsrFormat.
+ *
+ * This class implementents all public methods of the parent class \c LinearOperator, and additionally introduce
+ * the following public methods"
+ * <ul>
+ * <li> \c SetRowMatrix to specify the matrix in Epetra_CsrMatrix format
+ * <li> \c SetParameterList to specify the list of parameter to be used in the preconditioner
+ * <li> \c Compute do all the operator to compute the preconditioner. This method assert that the parameter are
+ *         set correctly and then it calls the protected abstract method myCompute.
+ * </ul>
+ *
+ * Concrete instances of the \c RowMatrixPreconditioner class should implement the protected method \c myCompute.
+ */
 
 class RowMatrixPreconditioner : public LinearOperator
 {
 public:
 
+	//@name Typdefs
+	//@{
 	typedef Epetra_CrsMatrix rowMatrix_Type;
 	typedef boost::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
 	typedef Teuchos::ParameterList pList_Type;
+	//@}
 
+	//! Empty constructor
 	RowMatrixPreconditioner(): LinearOperator() {};
 
-    //! @name Destructor
-    //@{
+
     //! Destructor
     virtual ~RowMatrixPreconditioner() {};
-    //@}
 
     //! @name Attribute set methods
     //@{
+    //! Set the row matrix
     void SetRowMatrix(const rowMatrixPtr_Type & rowMatrix)
     {
     	ASSERT_PRE(rowMatrix.get() != 0, "RowMatrixPreconditioner::SetRowMatrix(): rowMatrix can not be a null Pointer");
     	M_rowMatrix = rowMatrix;
     }
 
+    //! Set the list of paramenters
     void SetParameterList(const pList_Type pList)
     {
     	M_pList = pList;
     }
 
+    //! Transposition
     virtual int SetUseTranspose(bool UseTranspose)
     {
     	return M_prec->SetUseTranspose(UseTranspose);
     }
     //@}
 
+    //! Compute the preconditioner.
+    /*!
+     * Derived classes should implement the protected method myCompute called by this function.
+     * @return: 0 success, negative number error, positive number warning
+     */
     int Compute()
     {
     	ASSERT_PRE(M_rowMatrix.get()!= 0, "RowMatrixPreconditioner::Compute(): You need to SetRowMatrix first \n");
@@ -129,6 +160,7 @@ public:
     //@}
 
 protected:
+    //! Abstract method myCompute implemented by the derived class
     virtual int myCompute() = 0;
 
     rowMatrixPtr_Type M_rowMatrix;
@@ -138,6 +170,10 @@ protected:
 
 };
 
+//! @typedef
+/*!
+ * @brief \c RowMatrixPreconditionerFactory should be used for the creation of concrete instances of \c RowMatrixPreconditioner
+ */
 typedef FactorySingleton<Factory<RowMatrixPreconditioner, std::string> > RowMatrixPreconditionerFactory;
 
 } /* end Operator namespace */
