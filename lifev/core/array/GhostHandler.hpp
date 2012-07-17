@@ -69,6 +69,9 @@ public:
     //@{
 
     //! Constructor
+    explicit GhostHandler( commPtr_Type const & comm );
+
+    //! Constructor
     GhostHandler( meshPtr_Type fullMesh, commPtr_Type const & comm );
 
     //! Constructor
@@ -230,6 +233,25 @@ protected:
 
     //@}
 };
+
+template <typename Mesh>
+GhostHandler<Mesh>::GhostHandler( commPtr_Type const & comm ):
+    M_fullMesh(),
+    M_localMesh(),
+    M_map(),
+    M_comm( comm ),
+    M_me( comm->MyPID() ),
+    M_nodeNodeNeighborsList(),
+    M_nodeEdgeNeighborsList(),
+    M_nodeElementNeighborsList(),
+    M_verbose( 0 ),
+#ifdef HAVE_LIFEV_DEBUG
+    M_debugOut( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string>( M_me ) : "s" ) + ".out" ).c_str() )
+#else
+    M_debugOut()
+#endif
+{
+}
 
 template <typename Mesh>
 GhostHandler<Mesh>::GhostHandler( meshPtr_Type fullMesh,
