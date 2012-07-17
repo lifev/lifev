@@ -208,10 +208,6 @@ protected:
     mapPtr_Type M_ghostMapOnEdges;
     mapPtr_Type M_ghostMapOnElementsP0;
     mapPtr_Type M_ghostMapOnElementsP1;
-    mapList_Type M_ghostMapOnNodesMap;
-    mapList_Type M_ghostMapOnEdgesMap;
-    mapList_Type M_ghostMapOnElementsP0Map;
-    mapList_Type M_ghostMapOnElementsP1Map;
 
     //@}
 
@@ -589,9 +585,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes()
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
-    // memorize the map in the list
-    M_ghostMapOnNodesMap[ 1 ] = M_ghostMapOnNodes;
-
     return *M_ghostMapOnNodes;
 }
 
@@ -653,9 +646,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UIn
     // generate map
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
-
-    // memorize the map in the list
-    M_ghostMapOnNodesMap[ overlap ] = M_ghostMapOnNodes;
 
     return *M_ghostMapOnNodes;
 }
@@ -736,9 +726,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
         ghostMap.setMap( repeatedMap, Repeated );
     }
 
-    // memorize the map in the list
-    M_ghostMapOnEdgesMap[ overlap ] = M_ghostMapOnEdges;
-
     return *M_ghostMapOnEdges;
 }
 
@@ -785,9 +772,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP0
     // generate map
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
-
-    // memorize the map in the list
-    M_ghostMapOnElementsP0Map[ 1 ] = M_ghostMapOnElementsP0;
 
     return *M_ghostMapOnElementsP0;
 }
@@ -868,9 +852,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
     // generate map
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
-
-    // memorize the map in the list
-    M_ghostMapOnElementsP1Map[ overlap ] = M_ghostMapOnElementsP1;
 
     return *M_ghostMapOnElementsP1;
 }
