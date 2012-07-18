@@ -453,8 +453,8 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 	  
 	  //Compute the rightCauchyC tensor
 	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);
-
-	  cleanMatrices();
+	  
+	  //cleanMatrices();
       
 	  LifeV::Real sumI(0);
 	  for( UInt i(0); i < M_invariants.size(); i++ )
@@ -463,8 +463,12 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 	  //Compute the first Piola-Kirchhoff tensor
 	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
       
+	  //M_firstPiola->Print(std::cout);
+
 	  //Compute the Cauchy tensor
 	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
+
+	  //M_sigma->Print(std::cout);
 
 	  //Compute the eigenvalue
 	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
@@ -530,6 +534,11 @@ WallTensionEstimator<Mesh >::cleanMatrices( void )
       for ( UInt j(0); j < M; j++ )
 	if( (i-j) ) (*M_cofactorF)(i,j) = 0;
 
+  //Cleaning the cofactorF
+  for ( UInt i(0); i < N; i++ )
+      for ( UInt j(0); j < M; j++ )
+	if( (i-j) ) (*M_cofactorF)(i,j) = 0;
+
 }
 
 
@@ -537,14 +546,15 @@ template <typename Mesh>
 void 
 WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace )
 {
-  
+  M_dataMaterial->showMe();
+
   LifeChrono chrono;
 
   QuadratureRule fakeQuadratureRule;
 
   //Setting the quadrature Points = DOFs of the element and weight = 1
   std::vector<GeoVector> coords = copyFESpace->refFE().refCoor();
-  std::vector<Real> weights(copyFESpace->fe().nbFEDof(), 1.0);
+  std::vector<Real> weights(copyFESpace->fe().nbFEDof(), 0.0);
   fakeQuadratureRule.setDimensionShape ( shapeDimension(copyFESpace->refFE().shape()), copyFESpace->refFE().shape() );
   fakeQuadratureRule.setPoints(coords,weights);
 
@@ -571,10 +581,6 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
       copyFESpace->fe().updateFirstDerivQuadPt( copyFESpace->mesh()->volumeList( i ) );
       this->M_elVecTens->zero();
 
-      M_sigma->Scale(0.0);
-      M_firstPiola->Scale(0.0);
-      M_cofactorF->Scale(0.0);
-
       M_marker = copyFESpace->mesh()->volumeList( i ).marker();
 
       UInt eleID = copyFESpace->fe().currentLocalId();
@@ -599,17 +605,28 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 	{
 	  UInt  iloc = copyFESpace->fe().patternFirst( nDOF );
 
+	  M_sigma->Scale(0.0);
+	  M_firstPiola->Scale(0.0);
+	  M_cofactorF->Scale(0.0);
+
 	  //Compute the rightCauchyC tensor
 	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);	  
 
 	  //Compute the first Piola-Kirchhoff tensor
-	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
+	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, 1);
       
+	  //M_firstPiola->Print(std::cout);
+
 	  //Compute the Cauchy tensor
 	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
 
+	  //M_sigma->Print(std::cout);
+	 
 	  //Compute the eigenvalue
 	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
+
+	  // for( int j=0;j<M_eigenvaluesR.size();j++)
+	  //   std::cout << j << "-th realEigenvalues: " << M_eigenvaluesR[j] << std::endl;
       
 	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
 	  //Check on the imaginary part of eigen values given by the Lapack method 
@@ -622,6 +639,8 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 	  for ( int coor=0; coor < M_eigenvaluesR.size(); coor++ )
 	    (*M_elVecTens)[iloc + coor*copyFESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
 
+	  //M_elVecTens->showMe();
+
 	}
 
       //Assembling the local into global vector
@@ -631,11 +650,13 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
   
   M_globalEigen->globalAssemble();
 
-  //Recovery procedure over the globalEigen vector
-  solutionVectPtr_Type reconstructedEigenvalues( new solutionVect_Type(*M_localMap) );
-  *reconstructedEigenvalues = M_FESpace->recoveryFunction(*M_globalEigen);
+  std::cout << "Norm of globalEigen: " <<  M_globalEigen->norm2() << std::endl;
 
-  M_globalEigen = reconstructedEigenvalues;
+  //Recovery procedure over the globalEigen vector
+  // solutionVectPtr_Type reconstructedEigenvalues( new solutionVect_Type(*M_localMap) );
+  // *reconstructedEigenvalues = M_FESpace->recoveryFunction(*M_globalEigen);
+
+  // M_globalEigen = reconstructedEigenvalues;
 
   chrono.stop();
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
