@@ -1572,7 +1572,7 @@ recoveryFunction(const vector_type& solution) const
     // Loop over the cells
     for (UInt iterElement(0); iterElement< totalNumberElements; ++iterElement)
     {
-        interpCFE.update(mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
+        interpCFE.update(mesh()->element(iterElement), UPDATE_PHI | UPDATE_WDET );
 
         for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
         {
@@ -1584,7 +1584,7 @@ recoveryFunction(const vector_type& solution) const
                 for (UInt iterDofGrad(0); iterDofGrad < numberLocalDof; ++iterDofGrad)
                 {
                     ID globalDofIDGrad(dof().localToGlobalMap(iterElement,iterDofGrad) + iDim*dof().numTotalDof());
-                    gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.phi(iterDofGrad,iDim,iterDof);
+                    gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.phi(iterDofGrad,iterDof);
                 }
             }
         }
