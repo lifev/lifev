@@ -67,7 +67,7 @@ LinearSolver::LinearSolver() :
 
 }
 
-LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm>& commPtr ) :
+LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm> commPtr ) :
 		M_operator             (),
 		M_matrix               (),
 		M_baseMatrixForPreconditioner(),
@@ -98,7 +98,7 @@ LinearSolver::~LinearSolver()
 // Methods
 // ===================================================
 Int
-LinearSolver::solve( vectorPtr_Type& solutionPtr )
+LinearSolver::solve( vectorPtr_Type solutionPtr )
 {
     // Build preconditioners if needed
     bool retry( true );
@@ -202,7 +202,7 @@ LinearSolver::solve( vectorPtr_Type& solutionPtr )
 }
 
 Real
-LinearSolver::computeResidual( vectorPtr_Type& solutionPtr )
+LinearSolver::computeResidual( vectorPtr_Type solutionPtr )
 {
     if( !M_operator || !M_rhs )
     {
@@ -370,32 +370,32 @@ LinearSolver::setSolverType( const SolverType& solverType )
 }
 
 void
-LinearSolver::setCommunicator( const boost::shared_ptr<Epetra_Comm>& commPtr )
+LinearSolver::setCommunicator( const boost::shared_ptr<Epetra_Comm> commPtr )
 {
     M_displayer->setCommunicator( commPtr );
 }
 
-void LinearSolver::setOperator( matrixPtr_Type& matrixPtr )
+void LinearSolver::setOperator( matrixPtr_Type matrixPtr )
 {
 	M_operator = matrixPtr->matrixPtr();
     M_matrix = matrixPtr;
 }
 
 void
-LinearSolver::setOperator( operatorPtr_Type& operPtr )
+LinearSolver::setOperator( operatorPtr_Type operPtr )
 {
 	M_matrix.reset();
 	M_operator = operPtr;
 }
 
 void
-LinearSolver::setRightHandSide( const vectorPtr_Type& rhsPtr )
+LinearSolver::setRightHandSide( const vectorPtr_Type rhsPtr )
 {
 	M_rhs = rhsPtr;
 }
 
 void
-LinearSolver::setPreconditioner( preconditionerPtr_Type& preconditionerPtr )
+LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
 {
 	// If a preconditioner operator exists it must be deleted
 	M_preconditionerOperator.reset();
@@ -404,7 +404,7 @@ LinearSolver::setPreconditioner( preconditionerPtr_Type& preconditionerPtr )
 }
 
 void
-LinearSolver::setPreconditioner( operatorPtr_Type& preconditionerPtr )
+LinearSolver::setPreconditioner( operatorPtr_Type preconditionerPtr )
 {
 	// Does the solverOperator exists?
 
@@ -488,6 +488,7 @@ LinearSolver::recursiveResidual()
     res.Norm2( &residual );
     return residual;
     */
+    return 0.;
 }
 
 LinearSolver::preconditionerPtr_Type&

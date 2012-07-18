@@ -102,7 +102,7 @@ public:
     //! @name Destructor
     //@{
     //! Destructor
-    virtual ~LinearOperator() {};
+    virtual ~LinearOperator() {}
     //@}
 
     //! @name Attribute set methods

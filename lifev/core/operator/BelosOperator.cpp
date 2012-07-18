@@ -118,7 +118,12 @@ void BelosOperator::doSetOperator()
 
 void BelosOperator::doSetPreconditioner()
 {
-	M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( Teuchos::rcp( M_prec ) ), false );
+    Teuchos::RCP<OP> tmpPtr( M_prec.get(), false );
+    M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( tmpPtr ), false );
+
+    // The line below produces a memory link; It has been kept as an example to illustrate
+    // why it has been changed.
+    // M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( Teuchos::rcp( M_prec ) ), false );
 }
 
 void BelosOperator::doSetParameterList()
@@ -163,7 +168,8 @@ void BelosOperator::allocateSolver( const SolverManagerType & solverManagerType 
 	   // If a SolverManager already exists we simply clean it!
 	    if ( !M_solverManager.is_null() )
 	    {
-	        M_solverManager.reset();
+	        //M_solverManager.reset();
+	        M_solverManager = Teuchos::null;
 	    }
 
 	    switch ( solverManagerType )

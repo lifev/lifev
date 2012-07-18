@@ -14,6 +14,7 @@ ADD_SUBDIRECTORIES(
   linear_solver
   matrix_epetra_structured_framework
   mesh
+  partition_io
   template_test
   vector_container
 )

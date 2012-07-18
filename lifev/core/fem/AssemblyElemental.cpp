@@ -52,43 +52,56 @@ void mass(MatrixElemental& localMass,
     const UInt nbQuadPt(massCFE.nbQuadPt());
     Real localValue(0);
 
-    // Assemble the local mass
-    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    MatrixElemental::matrix_type mat_tmp(nbFEDof,nbFEDof);
+
+    // Loop over the basis functions (diagonal part)
+    for (UInt iDof(0); iDof<nbFEDof; ++iDof)
     {
-        // Extract the view of the matrix
-        MatrixElemental::matrix_view localView = localMass.block(iterFDim,iterFDim);
-
-        // Loop over the basis functions
-        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+        localValue = 0.0;
+        for (UInt iQuadPt(0); iQuadPt<nbQuadPt; ++iQuadPt)
         {
-            // Build the local matrix only where needed:
-            // Lower triangular + diagonal parts
-            for (UInt jDof(0); jDof <= iDof; ++jDof)
+            localValue += massCFE.phi(iDof,iQuadPt)
+                        * massCFE.phi(iDof,iQuadPt)
+                        * massCFE.wDetJacobian(iQuadPt);
+        }
+        localValue *= coefficient;
+
+        // Add on the local matrix
+        mat_tmp(iDof,iDof) = localValue;
+    }
+
+    // Loop over the basis functions (extradiagonal part)
+    for (UInt iDof(0); iDof<nbFEDof; ++iDof)
+    {
+        // Build the local matrix only where needed:
+        // Lower triangular + diagonal parts
+        for (UInt jDof(0); jDof<iDof; ++jDof)
+        {
+            localValue = 0.0;
+
+            //Loop on the quadrature nodes
+            for (UInt iQuadPt(0); iQuadPt<nbQuadPt; ++iQuadPt)
             {
-                localValue = 0.0;
-
-                //Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
-                    localValue += massCFE.phi(iDof,iQuadPt)
-                                  * massCFE.phi(jDof,iQuadPt)
-                                  * massCFE.wDetJacobian(iQuadPt);
-                }
-
-                localValue*=coefficient;
-
-                // Add on the local matrix
-                localView(iDof,jDof)+=localValue;
-
-                if (iDof!=jDof)
-                {
-                    localView(jDof,iDof)+=localValue;
-                }
+                localValue += massCFE.phi(iDof,iQuadPt)
+                            * massCFE.phi(jDof,iQuadPt)
+                            * massCFE.wDetJacobian(iQuadPt);
             }
+
+            localValue *= coefficient;
+
+            // Add on the local matrix
+            mat_tmp(iDof,jDof) = localValue;
+            mat_tmp(jDof,iDof) = localValue;
         }
     }
-}
 
+	// Copying the mass in all the diagonal blocks (just one for scalar problem)
+    for (UInt iDim(0); iDim<fieldDim; ++iDim)
+    {
+        MatrixElemental::matrix_view mat = localMass.block(iDim,iDim);
+        mat += mat_tmp;
+    }
+}
 
 void stiffness(MatrixElemental& localStiff,
                const CurrentFE& stiffCFE,
@@ -99,43 +112,60 @@ void stiffness(MatrixElemental& localStiff,
     const UInt nbQuadPt(stiffCFE.nbQuadPt());
     Real localValue(0);
 
-    // Assemble the local diffusion
-    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    MatrixElemental::matrix_type mat_tmp(nbFEDof,nbFEDof);
+
+    // Loop over the basis functions (diagonal part)
+    for (UInt iDof(0); iDof<nbFEDof; ++iDof)
     {
-        // Extract the view of the matrix
-        MatrixElemental::matrix_view localView = localStiff.block(iterFDim,iterFDim);
-
-        // Loop over the basis functions
-        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+        localValue = 0.0;
+        
+        // Loop on the quadrature noodes
+        for (UInt iQuadPt(0); iQuadPt<nbQuadPt; ++iQuadPt)
         {
-            // Build the local matrix only where needed:
-            // Lower triangular + diagonal parts
-            for (UInt jDof(0); jDof <= iDof; ++jDof)
+            for (UInt iDim(0); iDim<stiffCFE.nbCoor(); ++iDim)
             {
-                localValue = 0.0;
-
-                //Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
-                    for (UInt iDim(0); iDim<stiffCFE.nbCoor(); ++iDim)
-                    {
-                        localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
-                                      * stiffCFE.dphi(jDof,iDim,iQuadPt)
-                                      * stiffCFE.wDetJacobian(iQuadPt);
-                    }
-                }
-
-                localValue*=coefficient;
-
-                // Add on the local matrix
-                localView(iDof,jDof)+=localValue;
-
-                if (iDof != jDof)
-                {
-                    localView(jDof,iDof)+=localValue;
-                }
+                localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
+                            * stiffCFE.dphi(iDof,iDim,iQuadPt)
+                            * stiffCFE.wDetJacobian(iQuadPt);
             }
         }
+        localValue *= coefficient;
+
+        // Add on the local matrix
+        mat_tmp(iDof,iDof) = localValue;
+    }
+
+    // Loop over the basis functions (extradiagonal part)
+    for (UInt iDof(0); iDof<nbFEDof ; ++iDof)
+    {
+        for (UInt jDof(0); jDof<iDof; ++jDof)
+        {
+            localValue = 0.0;
+            
+            // Loop on the quadrature nodes
+            for (UInt iQuadPt(0); iQuadPt<nbQuadPt; ++iQuadPt)
+            {
+                for (UInt iDim(0); iDim<stiffCFE.nbCoor(); ++iDim)
+                {
+                    localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
+                                * stiffCFE.dphi(jDof,iDim,iQuadPt)
+                                * stiffCFE.wDetJacobian(iQuadPt);
+                }
+            }
+
+            localValue *= coefficient;
+
+            // Put in the local matrix
+            mat_tmp(iDof,jDof) = localValue;
+            mat_tmp(jDof,iDof) = localValue;
+        }
+    }
+
+    // Copying the diffusion in all the diagonal blocks
+    for ( UInt iDim(0); iDim<fieldDim; ++iDim)
+    {
+        MatrixElemental::matrix_view mat = localStiff.block(iDim,iDim);
+        mat += mat_tmp;
     }
 }
 
@@ -158,7 +188,7 @@ void advectionNewton( Real coef, VectorElemental& vel,
                 VectorElemental::vector_view velicoor = vel.block( iblock );
                 sumDerivative = 0.;
                 for ( UInt k = 0; k < fe.nbFEDof(); k++ )
-                    sumDerivative += velicoor( k ) * fe.phiDer( k, jblock, iq );
+                    sumDerivative += velicoor( k ) * fe.dphi( k, jblock, iq );
                 //end evaluate derivative
 
                 sum += fe.phi(j,iq)*sumDerivative*fe.phi(i,iq) * fe.weightDet( iq );
@@ -241,44 +271,7 @@ void stiffStrain(MatrixElemental& localStiff,
     Real localValue(0);
     const Real newCoefficient(coefficient*0.5);
 
-    // Assemble the local diffusion
-    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
-    {
-        // Extract the view of the matrix
-        MatrixElemental::matrix_view localView = localStiff.block(iterFDim,iterFDim);
-
-        // Loop over the basis functions
-        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
-        {
-            // Build the local matrix only where needed:
-            // Lower triangular + diagonal parts
-            for (UInt jDof(0); jDof <= iDof; ++jDof)
-            {
-                localValue = 0.0;
-
-                //Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
-                    for (UInt iDim(0); iDim< stiffCFE.nbCoor(); ++iDim)
-                    {
-                        localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
-                            * stiffCFE.dphi(jDof,iDim,iQuadPt)
-                            * stiffCFE.wDetJacobian(iQuadPt);
-                    }
-                }
-
-                localValue*=newCoefficient;
-
-                // Add on the local matrix
-                localView(iDof,jDof)+=localValue;
-
-                if (iDof != jDof)
-                {
-                    localView(jDof,iDof)+=localValue;
-                }
-            }
-        }
-    }
+	stiffness(localStiff,stiffCFE,newCoefficient,fieldDim); // for the stiff part, we exploit the existing routine
 
     for ( UInt iFDim (0); iFDim < fieldDim; ++iFDim )
     {
@@ -351,7 +344,7 @@ void bodyForces(VectorElemental& localForce,
 
 }
 
-}
+} // Namespace AssemblyElemental
 
 //
 //----------------------------------------------------------------------
@@ -2697,8 +2690,6 @@ void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe )
     }
 }
 
-
-
 void mass_divw( Real coef, const VectorElemental& w_loc, MatrixElemental& elmat, const CurrentFE& fe,
                 int iblock, int jblock, UInt nb )
 /*
@@ -3520,7 +3511,7 @@ void source_fhn( Real coef_f, Real coef_a, VectorElemental& u, VectorElemental& 
 }
 
 //! \f$(beta\cdot\nabla u^k, v  )\f$
-void source_advection( const VectorElemental& beta_loc, const VectorElemental& uk_loc,
+void source_advection( const Real& coefficient, const VectorElemental& beta_loc, const VectorElemental& uk_loc,
                        VectorElemental& elvec, const CurrentFE& fe )
 {
     boost::multi_array<Real, 2> guk(
@@ -3592,7 +3583,7 @@ void source_advection( const VectorElemental& beta_loc, const VectorElemental& u
             s = 0;
             for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
                 s += conv[ ig ][ icoor ] * fe.phi( i, ig ) * fe.wDetJacobian( ig );
-            vec( i ) += s;
+            vec( i ) += coefficient * s;
         }
     }
 }
