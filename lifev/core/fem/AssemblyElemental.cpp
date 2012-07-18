@@ -188,7 +188,7 @@ void advectionNewton( Real coef, VectorElemental& vel,
                 VectorElemental::vector_view velicoor = vel.block( iblock );
                 sumDerivative = 0.;
                 for ( UInt k = 0; k < fe.nbFEDof(); k++ )
-                    sumDerivative += velicoor( k ) * fe.phiDer( k, jblock, iq );
+                    sumDerivative += velicoor( k ) * fe.dphi( k, jblock, iq );
                 //end evaluate derivative
 
                 sum += fe.phi(j,iq)*sumDerivative*fe.phi(i,iq) * fe.weightDet( iq );
