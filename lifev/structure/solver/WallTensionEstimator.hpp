@@ -163,9 +163,9 @@ public:
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
-      \param NONE
+      \param NONE FESpace<Mesh, MapEpetra>& copyFESpace 
     */
-    void analyzeTensions( FESpace<Mesh, MapEpetra>& copyFESpace );
+    void analyzeTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace );
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
@@ -177,7 +177,7 @@ public:
     /*!
       \param NONE
     */
-    void analyzeTensionsRecoveryTensions( FESpace<Mesh, MapEpetra>& copyFESpace );
+    void analyzeTensionsRecoveryTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace );
 
     //! Clean Matrices: It is to clean the term that are less than 10-7 to set them to zero.
     /*!
@@ -380,12 +380,12 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
 
 template <typename Mesh>
 void 
-WallTensionEstimator<Mesh >::analyzeTensions( FESpace<Mesh, MapEpetra>& copyFESpace )
+WallTensionEstimator<Mesh >::analyzeTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace )   
 {
   if ( !M_analysisData->recoveryVariable().compare("displacement") )
     analyzeTensionsRecoveryDisplacement();
   else
-    analyzeTensionsRecoveryTensions( copyFESpace );
+    analyzeTensionsRecoveryTensions(copyFESpace);
 }
 
 
@@ -535,7 +535,7 @@ WallTensionEstimator<Mesh >::cleanMatrices( void )
 
 template <typename Mesh>
 void 
-WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( FESpace<Mesh, MapEpetra>&  copyFESpace )
+WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace )
 {
   
   LifeChrono chrono;
@@ -543,61 +543,61 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( FESpace<Mesh, MapE
   QuadratureRule fakeQuadratureRule;
 
   //Setting the quadrature Points = DOFs of the element and weight = 1
-  std::vector<GeoVector> coords = copyFESpace.refFE().refCoor();
-  std::vector<Real> weights(copyFESpace.fe().nbFEDof(), 1.0);
+  std::vector<GeoVector> coords = copyFESpace->refFE().refCoor();
+  std::vector<Real> weights(copyFESpace->fe().nbFEDof(), 1.0);
+  fakeQuadratureRule.setDimensionShape ( shapeDimension(copyFESpace->refFE().shape()), copyFESpace->refFE().shape() );
   fakeQuadratureRule.setPoints(coords,weights);
 
   //Set the new quadrature rule
-  this->M_FESpace->setQuadRule(fakeQuadratureRule);
+  copyFESpace->setQuadRule(fakeQuadratureRule);
 
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
   this->M_displayer->leaderPrint("   Performing the analysis recovering the tensions..., ", M_dataMaterial->solidType() );
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
-  UInt totalDof = copyFESpace.dof().numTotalDof();
-  VectorElemental dk_loc(copyFESpace.fe().nbFEDof(), nDimensions);
+  UInt totalDof = copyFESpace->dof().numTotalDof();
+  VectorElemental dk_loc(copyFESpace->fe().nbFEDof(), nDimensions);
 
   //Vectors for the deformation tensor
-  std::vector<matrix_Type> vectorDeformationF(copyFESpace.fe().nbFEDof(),*M_deformationF);
+  std::vector<matrix_Type> vectorDeformationF(copyFESpace->fe().nbFEDof(),*M_deformationF);
+  //Copying the displacement field into a vector with repeated map for parallel computations
+  solutionVect_Type dRep(*M_displ, Repeated);
 
   chrono.start();
 
   //Loop on each volume
-  for ( UInt i = 0; i < copyFESpace.mesh()->numVolumes(); ++i )
+  for ( UInt i = 0; i < copyFESpace->mesh()->numVolumes(); ++i )
     {
-      copyFESpace.fe().updateFirstDerivQuadPt( copyFESpace.mesh()->volumeList( i ) );
+      copyFESpace->fe().updateFirstDerivQuadPt( copyFESpace->mesh()->volumeList( i ) );
       this->M_elVecTens->zero();
 
       M_sigma->Scale(0.0);
       M_firstPiola->Scale(0.0);
       M_cofactorF->Scale(0.0);
 
-      M_marker = copyFESpace.mesh()->volumeList( i ).marker();
+      M_marker = copyFESpace->mesh()->volumeList( i ).marker();
 
-      //Copying the displacement field into a vector with repeated map for parallel computations
-      solutionVect_Type dRep(*M_displ, Repeated);
-
-      UInt eleID = copyFESpace.fe().currentLocalId();
+      UInt eleID = copyFESpace->fe().currentLocalId();
 
       //Extracting the local displacement
-      for ( UInt iNode = 0; iNode < ( UInt ) copyFESpace.fe().nbFEDof(); iNode++ )
+      for ( UInt iNode = 0; iNode < ( UInt ) copyFESpace->fe().nbFEDof(); iNode++ )
 	{
-	  UInt  iloc = copyFESpace.fe().patternFirst( iNode );
+	  UInt  iloc = copyFESpace->fe().patternFirst( iNode );
 
 	  for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
 	    {
-	      UInt ig = copyFESpace.dof().localToGlobalMap( eleID, iloc ) + iComp*copyFESpace.dim() + this->M_offset;
-	      dk_loc[iloc + iComp*copyFESpace.fe().nbFEDof()] = dRep[ig];
+	      UInt ig = copyFESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*copyFESpace->dim() + this->M_offset;
+	      dk_loc[iloc + iComp*copyFESpace->fe().nbFEDof()] = dRep[ig];
 	    }
 	}
       
       //Compute the element tensor F
-      AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, copyFESpace.fe() );
+      AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, copyFESpace->fe() );
 
       //Compute the local vector of the principal stresses
-      for( UInt nDOF=0; nDOF < ( UInt ) copyFESpace.fe().nbFEDof(); nDOF++ )
+      for( UInt nDOF=0; nDOF < ( UInt ) copyFESpace->fe().nbFEDof(); nDOF++ )
 	{
-	  UInt  iloc = copyFESpace.fe().patternFirst( nDOF );
+	  UInt  iloc = copyFESpace->fe().patternFirst( nDOF );
 
 	  //Compute the rightCauchyC tensor
 	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);	  
@@ -620,13 +620,13 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( FESpace<Mesh, MapE
 
 	  //Assembling the local vector
 	  for ( int coor=0; coor < M_eigenvaluesR.size(); coor++ )
-	    (*M_elVecTens)[iloc + coor*copyFESpace.fe().nbFEDof()] = M_eigenvaluesR[coor];
+	    (*M_elVecTens)[iloc + coor*copyFESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
 
 	}
 
       //Assembling the local into global vector
       for ( UInt ic = 0; ic < nDimensions; ++ic )
-	  assembleVector(*M_globalEigen, *M_elVecTens, copyFESpace.fe(), copyFESpace.dof(), ic, this->M_offset +  ic*totalDof );
+	  assembleVector(*M_globalEigen, *M_elVecTens, copyFESpace->fe(), copyFESpace->dof(), ic, this->M_offset +  ic*totalDof );
     }
   
   M_globalEigen->globalAssemble();

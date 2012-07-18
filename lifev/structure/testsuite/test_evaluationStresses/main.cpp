@@ -261,7 +261,8 @@ Structure::run3d()
     //! Functional spaces - needed for the computations of the gradients
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
-    solidFESpace_Type copyFESpace(meshPart,dOrder,3,parameters->comm);
+    solidFESpacePtr_Type copyFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+    //    solidFESpace_Type copyFESpace(meshPart,dOrder,3,parameters->comm);
     if (verbose) std::cout << std::endl;
 
 
@@ -269,10 +270,10 @@ Structure::run3d()
     UInt marker = dataFile( "solid/physics/material_flag", 1);
 
     //! 1. Constructor of the class to compute the tensions
-    WallTensionEstimator< mesh_Type > solid;
+    boost::shared_ptr<WallTensionEstimator< mesh_Type > >  solid( new WallTensionEstimator< mesh_Type >() );
 
     //! 2. Its setup
-    solid.setup(dataStructure,
+    solid->setup(dataStructure,
     		tensionData,
                 dFESpace,
                 parameters->comm,
@@ -300,17 +301,17 @@ Structure::run3d()
       {
 	if (importerType.compare("none") == 0)
 	  {
-	    M_importer.reset( new emptyFilter_Type( dataFile, solid.dFESpace().mesh(), "solid", solid.dFESpace().map().comm().MyPID() ) );
+	    M_importer.reset( new emptyFilter_Type( dataFile, solid->dFESpace().mesh(), "solid", solid->dFESpace().map().comm().MyPID() ) );
 	  }
 	else
 	  {
 	    M_importer.reset( new ensightFilter_Type( dataFile, filename ) );
 	  }
       }
-    M_importer->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
+    M_importer->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
 
     // The vector where the solution will be stored
-    vectorPtr_Type solidDisp (new vector_Type(solid.dFESpace().map(),M_importer->mapType() ));
+    vectorPtr_Type solidDisp (new vector_Type(solid->dFESpace().map(),M_importer->mapType() ));
 
 
     //! 6. Post-processing setting
@@ -338,9 +339,9 @@ Structure::run3d()
 	}
     }
 
-    M_exporter->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
+    M_exporter->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
 
-    vectorPtr_Type solidTensions ( new vector_Type(solid.principalStresses(),  M_exporter->mapType() ) );
+    vectorPtr_Type solidTensions ( new vector_Type(solid->principalStresses(),  M_exporter->mapType() ) );
 
     M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", dFESpace, solidTensions, UInt(0) );
     M_exporter->postProcess( 0.0 );
@@ -356,21 +357,21 @@ Structure::run3d()
     // exporterY.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradY" ) );
     // exporterZ.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradZ" ) );
 
-    // exporterX->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
-    // exporterY->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
-    // exporterZ->setMeshProcId(solid.dFESpace().mesh(), solid.dFESpace().map().comm().MyPID());
+    // exporterX->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
+    // exporterY->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
+    // exporterZ->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
 
     // //Defining the vectors
-    // vectorPtr_Type gradX ( new vector_Type(solid.gradientX(),  M_exporter->mapType() ) );
-    // vectorPtr_Type gradY ( new vector_Type(solid.gradientY(),  M_exporter->mapType() ) );
-    // vectorPtr_Type gradZ ( new vector_Type(solid.gradientZ(),  M_exporter->mapType() ) );
+    // vectorPtr_Type gradX ( new vector_Type(solid->gradientX(),  M_exporter->mapType() ) );
+    // vectorPtr_Type gradY ( new vector_Type(solid->gradientY(),  M_exporter->mapType() ) );
+    // vectorPtr_Type gradZ ( new vector_Type(solid->gradientZ(),  M_exporter->mapType() ) );
 
     // //Adding variable
-    // exporterX->addVariable( ExporterData<mesh_Type >::VectorField, "gradX", solid.dFESpacePtr(),
+    // exporterX->addVariable( ExporterData<mesh_Type >::VectorField, "gradX", solid->dFESpacePtr(),
     // 			   gradX, UInt(0) );
-    // exporterY->addVariable( ExporterData<mesh_Type >::VectorField, "gradY", solid.dFESpacePtr(),
+    // exporterY->addVariable( ExporterData<mesh_Type >::VectorField, "gradY", solid->dFESpacePtr(),
     // 			   gradY, UInt(0) );
-    // exporterZ->addVariable( ExporterData<mesh_Type >::VectorField, "gradZ", solid.dFESpacePtr(),
+    // exporterZ->addVariable( ExporterData<mesh_Type >::VectorField, "gradZ", solid->dFESpacePtr(),
     // 			   gradZ, UInt(0) );
 
     // exporterX->postProcess( 0.0 );
@@ -395,7 +396,7 @@ Structure::run3d()
 	LifeV::Real startTime = tensionData->initialTime(0);
 	
 	/*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-	LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid.dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );	
+	LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );	
 	
 	//Read the variable
 	M_importer->readVariable(solutionDispl);
@@ -405,9 +406,9 @@ Structure::run3d()
 	//Create and exporter to check importing
 	// std::string expVerFile = "verificationDisplExporter";
 	// LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
-        // vectorPtr_Type vectVer ( new vector_Type(solid.displacement(),  exporter.mapType() ) );
+        // vectorPtr_Type vectVer ( new vector_Type(solid->displacement(),  exporter.mapType() ) );
 	    
-        // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", solid.dFESpacePtr(),
+        // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", solid->dFESpacePtr(),
 	// 		      vectVer, UInt(0) );
 
 	// exporter.postProcess(0.0);
@@ -416,17 +417,17 @@ Structure::run3d()
 
 
 	//Set the current solution as the displacement vector to use
-	solid.setDisplacement(*solidDisp);
+	solid->setDisplacement(*solidDisp);
 
-	std::cout << "The norm of the set displacement, at time " << startTime << ", is: "<< solid.displacement().norm2() << std::endl;
+	std::cout << "The norm of the set displacement, at time " << startTime << ", is: "<< solid->displacement().norm2() << std::endl;
 
 	//Perform the analysis
-	solid.analyzeTensions(copyFESpace);
+	solid->analyzeTensions(copyFESpace);
 	
 	//Extracting the gradient
-	// *gradX = solid.gradientX();
-	// *gradY = solid.gradientY();
-	// *gradZ = solid.gradientZ();
+	// *gradX = solid->gradientX();
+	// *gradY = solid->gradientY();
+	// *gradZ = solid->gradientZ();
 
 	// exporterX->postProcess( startTime );
 	// exporterY->postProcess( startTime );
@@ -436,9 +437,9 @@ Structure::run3d()
 	
 	//Extracting the tensions
 
-	std::cout << "Norm of the tension vector: " << solid.principalStresses().norm2() << std::endl;
+	std::cout << "Norm of the tension vector: " << solid->principalStresses().norm2() << std::endl;
 
-	*solidTensions = solid.principalStresses();
+	*solidTensions = solid->principalStresses();
 	M_exporter->postProcess( startTime );
 
 	if (verbose ) std::cout << "Analysis Completed!" << std::endl;
