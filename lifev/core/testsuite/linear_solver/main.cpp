@@ -241,7 +241,7 @@ main( int argc, char** argv )
     if( verbose ) std::cout << std::endl << "[Solvers initialization]" << std::endl;
     prec_Type* precRawPtr;
     basePrecPtr_Type precPtr;
-    precRawPtr = new PreconditionerIfpack;
+    precRawPtr = new prec_Type;
     precRawPtr->setDataFromGetPot( dataFile, "prec" );
     precPtr.reset( precRawPtr );
 
