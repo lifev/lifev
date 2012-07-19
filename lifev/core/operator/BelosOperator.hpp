@@ -75,19 +75,13 @@ public:
                              BlockGmres, PseudoBlockGmres, GmresPoly,
                              GCRODR, PCPG, TFQMR };
 
-	typedef std::map<std::string, SolverManagerType> solverManagerMap_Type;
-	typedef std::map<std::string, PreconditionerSide> precSideMap_Type;
-
 	//@}
 
 	//! null constructor and destructor
 	//@{
 	BelosOperator();
-    ~BelosOperator() {}
+    ~BelosOperator();
 	//@}
-
-	static solverManagerMap_Type* singletonSolverManagerMap();
-	static precSideMap_Type*      singletonPrecSideMap();
 
 protected:
 
@@ -109,8 +103,10 @@ protected:
 	SolverType_ptr M_solverManager;
 	//! Cast to a Belos Preconditioner
 	Teuchos::RCP<Belos::EpetraPrecOp> M_belosPrec;
-	static std::auto_ptr< solverManagerMap_Type > S_solverManagerMap;
-	static std::auto_ptr<precSideMap_Type> S_precSideMap;
+
+	static SolverManagerType  getSolverManagerTypeFromString ( const std::string& str );
+	static PreconditionerSide getPreconditionerSideFromString( const std::string& str );
+
 };
 
 inline SolverOperator* createBelosOperator() { return new BelosOperator(); }
