@@ -121,6 +121,9 @@ public:
                Int* myGlobalElements,
                const comm_ptrtype& commPtr );
 
+    MapEpetra( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
+               const comm_ptrtype& commPtr );
+
     //! Constructor
     /*
       Build a nearly equally distributed map.
