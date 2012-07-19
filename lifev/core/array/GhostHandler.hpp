@@ -859,6 +859,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
 template <typename Mesh>
 void GhostHandler<Mesh>::fillEntityPID( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID )
 {
+    //@todo: this routine does not belong here, should be moved to MeshPartitioner
     if ( M_verbose ) std::cout << " GH- fillEntityPID()" << std::endl;
 
     // initialize pointPID to NumProc
