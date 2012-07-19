@@ -135,6 +135,18 @@ public:
     template <typename T1>
     void leaderPrintMax( const T1& message1, const Real& localMax ) const;
 
+    //! Print the maximum value among the processors
+    /*!
+     * Take a Real input value from all processors in the communicator, computes the max,
+     * returns the max to all processors of the communicator.
+     * Then processor 0 of the communicator prints it.
+     * @param message1 message to print out
+     * @param message2 second message to print out
+     * @param localMax Int or Real local maximum value that we want to print
+     */
+    template <typename T1, typename T2>
+    void leaderPrintMax( const T1& message1, const Real& localMax, const T2& message2 ) const;
+
     //! Determine if it is the leader
     /*!
      * @return true if it is process 0 of the communicator
@@ -214,6 +226,23 @@ Displayer::leaderPrintMax( const T1& message1, const Real& localMax ) const
     }
     else
         std::cout << message1 << localMax << std::endl;
+}
+
+template <typename T1, typename T2>
+void
+Displayer::leaderPrintMax( const T1& message1, const Real& localMax, const T2& message2 ) const
+{
+    if ( M_comm.get() )
+    {
+        Real num( localMax );
+        Real globalMax;
+
+        M_comm->MaxAll( &num, &globalMax, 1 );
+        if ( M_verbose )
+            std::cout << message1 << globalMax << message2 << std::endl;
+    }
+    else
+        std::cout << message1 << localMax << message2 << std::endl;
 }
 
 } // Namespace LifeV

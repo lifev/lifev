@@ -16,6 +16,7 @@ lifefem=`findhpp  "lifefem"`
 lifesolver=`findhpp  "lifesolver"`
 lifefilters=`findhpp  "lifefilters"`
 lifefunctions=`findhpp  "lifefunctions"`
+lifeoperators=`findhpp  "lifeoperators"`
 
 echo -n "creating Makefile.headers..."
     cat > Makefile.headers <<EOF
@@ -39,6 +40,8 @@ LIFEFILTERS_HDRS=$lifefilters
 
 LIFEFUNCTIONS_HDRS=$lifefunctions
 
+LIFEOPERATORS_HDRS=$lifeoperators
+
 nobase_include_HEADERS=lifeconfig.h\\
 \$(LIFECORE_HDRS)\\
 \$(LIFEARRAY_HDRS)\\
@@ -47,7 +50,8 @@ nobase_include_HEADERS=lifeconfig.h\\
 \$(LIFEFEM_HDRS)\\
 \$(LIFESOLVER_HDRS)\\
 \$(LIFEFILTERS_HDRS)\\
-\$(LIFEFUNCTIONS_HDRS)
+\$(LIFEFUNCTIONS_HDRS)\\
+\$(LIFEOPERATORS_HDRS)
 EOF
 echo " done."
 
