@@ -100,21 +100,21 @@ public:
     //! Node to node neighbor map
     neighborList_Type const & nodeNodeNeighborsList()
     {
-        ASSERT( !M_nodeNodeNeighborsList.empty(), "M_nodeNodeNeighborsList iss empty" );
+        ASSERT( !M_nodeNodeNeighborsList.empty(), "M_nodeNodeNeighborsList is empty" );
         return M_nodeNodeNeighborsList;
     }
 
     //! Node to edge neighbor map
     neighborList_Type const & nodeEdgeNeighborsList()
     {
-        ASSERT( !M_nodeEdgeNeighborsList.empty(), "M_nodeEdgeNeighborsList iss empty" );
+        ASSERT( !M_nodeEdgeNeighborsList.empty(), "M_nodeEdgeNeighborsList is empty" );
         return M_nodeEdgeNeighborsList;
     }
 
     //! Node to element neighbor map
     neighborList_Type const & nodeElementNeighborsList()
     {
-        ASSERT( !M_nodeElementNeighborsList.empty(), "M_nodeElementNeighborsList iss empty" );
+        ASSERT( !M_nodeElementNeighborsList.empty(), "M_nodeElementNeighborsList is empty" );
         return M_nodeElementNeighborsList;
     }
 
