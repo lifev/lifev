@@ -60,14 +60,16 @@ namespace LifeV
 namespace Operators
 {
 
-std::auto_ptr<BelosOperator::solverManagerMap_Type> BelosOperator::S_solverManagerMap( BelosOperator::singletonSolverManagerMap() );
-std::auto_ptr<BelosOperator::precSideMap_Type> BelosOperator::S_precSideMap( BelosOperator::singletonPrecSideMap() );
-
 BelosOperator::BelosOperator():
 		SolverOperator(),
 		M_linProblem( Teuchos::rcp( new LinearProblem ) )
 {
 	M_name = "BelosOperator";
+}
+
+BelosOperator::~BelosOperator()
+{
+
 }
 
 int BelosOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
@@ -113,13 +115,14 @@ int BelosOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
 
 void BelosOperator::doSetOperator()
 {
-	M_linProblem->setOperator( Teuchos::rcp( M_oper ) );
+    Teuchos::RCP<OP> tmpPtr( M_oper.get(), false );
+    M_linProblem->setOperator( tmpPtr );
 }
 
 void BelosOperator::doSetPreconditioner()
 {
     Teuchos::RCP<OP> tmpPtr( M_prec.get(), false );
-    M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( tmpPtr ), false );
+    M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( tmpPtr ), true );
 
     // The line below produces a memory link; It has been kept as an example to illustrate
     // why it has been changed.
@@ -136,11 +139,11 @@ void BelosOperator::doSetParameterList()
 	    M_pList->sublist( "Trilinos: Belos List" ).set( "Convergence Tolerance", M_tolerance );
 
 	std::string solverType( M_pList->get<std::string>( "Solver Manager Type" ) );
-	allocateSolver( ( *S_solverManagerMap)[solverType] );
+	allocateSolver( getSolverManagerTypeFromString( solverType ) );
 	M_solverManager->setParameters( sublist( M_pList, "Trilinos: Belos List", true ) );
 
 	std::string precSideStr( M_pList->get<std::string>( "Preconditioner Side" ) );
-	PreconditionerSide precSide( (*S_precSideMap)[precSideStr] );
+	PreconditionerSide precSide( getPreconditionerSideFromString( precSideStr ) );
 
 	switch(precSide)
 	{
@@ -168,7 +171,6 @@ void BelosOperator::allocateSolver( const SolverManagerType & solverManagerType 
 	   // If a SolverManager already exists we simply clean it!
 	    if ( !M_solverManager.is_null() )
 	    {
-	        //M_solverManager.reset();
 	        M_solverManager = Teuchos::null;
 	    }
 
@@ -197,51 +199,56 @@ void BelosOperator::allocateSolver( const SolverManagerType & solverManagerType 
 	            break;
 	        case GmresPoly:
 	            M_solverManager = rcp( new Belos::GmresPolySolMgr<Real,vector_Type,operator_Type>() );
-	             break;
-	         case GCRODR:
-	             M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,vector_Type,operator_Type>() );
-	             break;
-	         case PCPG:
-	             M_solverManager = rcp( new Belos::PCPGSolMgr<Real,vector_Type,operator_Type>() );
-	             break;
-	         case TFQMR:
-	             // Create TFQMR iteration
-	             M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,vector_Type,operator_Type>() );
-	             break;
+	            break;
+	        case GCRODR:
+	            M_solverManager = rcp( new Belos::GCRODRSolMgr<Real,vector_Type,operator_Type>() );
+	            break;
+	        case PCPG:
+	            M_solverManager = rcp( new Belos::PCPGSolMgr<Real,vector_Type,operator_Type>() );
+	            break;
+	        case TFQMR:
+	            // Create TFQMR iteration
+	            M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,vector_Type,operator_Type>() );
+	            break;
 	     }
 
 }
 
-BelosOperator::solverManagerMap_Type* BelosOperator::singletonSolverManagerMap()
+BelosOperator::SolverManagerType
+BelosOperator::getSolverManagerTypeFromString ( const std::string& str )
 {
-	solverManagerMap_Type * map( new solverManagerMap_Type );
-    (*map)["BlockCG"] = BlockCG;
-    (*map)["PseudoBlockCG"] = PseudoBlockCG;
-    (*map)["RCG"] = RCG;
-    (*map)["BlockGmres"] = BlockGmres;
-    (*map)["PseudoBlockGmres"] = PseudoBlockGmres;
-    (*map)["GmresPoly"] = GmresPoly;
-    (*map)["GCRODR"] = GCRODR;
-    (*map)["PCPG"] = PCPG;
-    (*map)["TFQMR"] = TFQMR;
-
-    return map;
+    if( str == "BlockCG" )
+        return BlockCG;
+    else if( str == "PseudoBlockCG" )
+        return PseudoBlockCG;
+    else if( str == "RCG" )
+        return RCG;
+    else if( str == "BlockGmres" )
+        return BlockGmres;
+    else if( str == "PseudoBlockGmres" )
+        return PseudoBlockGmres;
+    else if( str == "GmresPoly" )
+        return GmresPoly;
+    else if( str == "GCRODR" )
+        return GCRODR;
+    else if( str == "PCPG" )
+        return PCPG;
+    else if( str == "TFQMR" )
+        return TFQMR;
+    else
+        return NotAValidSolverManager;
 }
 
-BelosOperator::precSideMap_Type* BelosOperator::singletonPrecSideMap()
+BelosOperator::PreconditionerSide
+BelosOperator::getPreconditionerSideFromString( const std::string& str )
 {
-	precSideMap_Type * map( new precSideMap_Type );
-    (*map)["None"] = None;
-    (*map)["Right"] = Right;
-    (*map)["Left"] = Left;
-
-    (*map)["none"] = None;
-    (*map)["right"] = Right;
-    (*map)["left"] = Left;
-
-    return map;
+    if( str == "Right" || str == "right" )
+        return Right;
+    else if( str == "Left" || str == "left" )
+        return Left;
+    else
+        return None;
 }
-
 
 } /* end namespace Operators */
 } /* end namespace */
