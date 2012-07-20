@@ -776,7 +776,7 @@ addNewtonConvection( matrixType& matrix, const vectorType& beta, const UInt& off
         // Clean the local matrix
         M_localConvection->zero();
 
-        localvectorType betaLocal( M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() );
+        VectorElemental betaLocal( M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() );
 
         // Create local vector
         for ( UInt iNode = 0 ; iNode < M_uFESpace->fe().nbFEDof() ; iNode++ )
@@ -1136,7 +1136,7 @@ template< typename meshType, typename matrixType, typename vectorType>
 void
 OseenAssembler<meshType,matrixType,vectorType>::
 addFluxTerms( vectorType&     vector,
-	      BCHandler const& bcHandler)
+          BCHandler const& bcHandler)
 {
 
     for ( ID hCounter = 0; hCounter < bcHandler.size(); ++hCounter )
