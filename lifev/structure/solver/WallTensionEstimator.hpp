@@ -235,6 +235,13 @@ protected:
   */
    void constructPatchAreaVector( solutionVect_Type& patchArea );    
 
+  //! orderEigenvalues it puts in an increasing order the eigenvalues
+  /*!
+    \param std::vector of the real part of the eigenvalues that has been found
+  */
+  void orderEigenvalues( std::vector<Real>& eigenvaluesR );    
+
+
     
 //@}
 
@@ -386,6 +393,8 @@ template <typename Mesh>
 void 
 WallTensionEstimator<Mesh >::analyzeTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace )   
 {
+
+  *M_globalEigen *= 0.0;
   if ( !M_analysisData->recoveryVariable().compare("displacement") )
     analyzeTensionsRecoveryDisplacement();
   else
@@ -482,6 +491,8 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 	    sum += std::abs(M_eigenvaluesI[i]);
 	  ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 	  
+	  orderEigenvalues( M_eigenvaluesR );
+
 	  //Save the eigenvalues in the global vector
 	  for( UInt icoor = 0; icoor < nDimensions; ++icoor )
 	    {
@@ -593,13 +604,9 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 
 	  //Compute the first Piola-Kirchhoff tensor
 	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, 1);
-      
-	  //M_firstPiola->Print(std::cout);
 
 	  //Compute the Cauchy tensor
 	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
-
-	  //M_sigma->Print(std::cout);
 	 
 	  //Compute the eigenvalue
 	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
@@ -611,13 +618,15 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 	    sum += std::abs(M_eigenvaluesI[i]);
 	  ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
+	  orderEigenvalues( M_eigenvaluesR );
+
 	  //Assembling the local vector
 	  for ( int coor=0; coor < M_eigenvaluesR.size(); coor++ )
 	    (*M_elVecTens)[iloc + coor*copyFESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
-
-	  reconstructElementaryVector( patchArea, i );
-
 	}
+
+      //Before assembling the reconstruction process is done
+      reconstructElementaryVector( patchArea, i );
 
       //Assembling the local into global vector
       for ( UInt ic = 0; ic < nDimensions; ++ic )
@@ -640,6 +649,7 @@ WallTensionEstimator<Mesh >::reconstructElementaryVector( solutionVect_Type& pat
   M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
 
   Real measure = M_FESpace->fe().measure();
+  UInt eleID = M_FESpace->fe().currentLocalId();
 
   for (UInt iDof=0; iDof < M_FESpace->fe().nbFEDof(); iDof++)
     {
@@ -647,12 +657,10 @@ WallTensionEstimator<Mesh >::reconstructElementaryVector( solutionVect_Type& pat
 
       for( UInt icoor=0;  icoor < M_FESpace->fieldDim(); icoor++ )
 	{
-	  UInt eleID = M_FESpace->fe().currentLocalId();
 	  ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
-
 	  (*M_elVecTens)[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );	  	  
-	}
-      
+
+	}     
     }     
 }
 
@@ -701,6 +709,31 @@ void WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& p
     }
 }
 	 
+
+template <typename Mesh>
+void WallTensionEstimator<Mesh >::orderEigenvalues( std::vector<Real>& eigenvaluesR )
+{
+  //The number of elements is 3. Thefore, a simple bubble scheme is implemented.
+
+  int ordered = 0;
+
+  do
+    {
+      ordered = 0;
+      for( UInt i(0); i < eigenvaluesR.size()-1; i++ )
+	{
+	  if( eigenvaluesR[i] > eigenvaluesR[i+1] )
+	    {
+	      Real tmp = eigenvaluesR[i];
+	      eigenvaluesR[i] = eigenvaluesR[i+1];
+	      eigenvaluesR[i+1] = tmp;
+	      ordered = 1;
+	    }
+	}
+    }
+  while( ordered );
+
+}
 	 
 }
 
