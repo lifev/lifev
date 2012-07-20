@@ -179,13 +179,6 @@ public:
     */
     void analyzeTensionsRecoveryTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace );
 
-    //! Clean Matrices: It is to clean the term that are less than 10-7 to set them to zero.
-    /*!
-      \param NONE
-    */
-    void cleanMatrices( void );
-
-
 //! @name Set Methods
 //@{
 
@@ -224,12 +217,23 @@ protected:
 
 //! @name Protected methods
 //@{
-    //! computeDeformation: This method computes the tensor F given the displacement on the element.
-    /*!
-      \param M_deformationF the local 3x3 tensor F to be filled
-      \param dk_loc the local displacement field
-    */
-   void computeDisplacementGradient( void );    
+  //! computeDeformation: This method computes the tensor F given the displacement on the element.
+  /*!
+    \param NONE
+  */
+  void computeDisplacementGradient( void );    
+
+  //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
+  /*!
+    \param elvecTens VectorElemental over which the reconstruction is applied
+  */
+  void reconstructElementaryVector( solutionVect_Type& patchArea, UInt nVol );    
+
+  //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
+  /*!
+    \param NONE
+  */
+   void constructPatchAreaVector( solutionVect_Type& patchArea );    
 
     
 //@}
@@ -452,9 +456,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 	    }
 	  
 	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);
-	  
-	  //cleanMatrices();
+	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);	 
       
 	  LifeV::Real sumI(0);
 	  for( UInt i(0); i < M_invariants.size(); i++ )
@@ -518,37 +520,14 @@ WallTensionEstimator<Mesh >::computeDisplacementGradient( void )
 
 template <typename Mesh>
 void 
-WallTensionEstimator<Mesh >::cleanMatrices( void )
-{
-
-  UInt N(M_deformationF->N());
-  UInt M(M_deformationF->M());
-
-  //Clearning the deformationGradientF
-  for ( UInt i(0); i < N; i++ )
-      for ( UInt j(0); j < M; j++ )
-	if( (i-j) ) (*M_deformationF)(i,j) = 0;
-  
-  //Cleaning the cofactorF
-  for ( UInt i(0); i < N; i++ )
-      for ( UInt j(0); j < M; j++ )
-	if( (i-j) ) (*M_cofactorF)(i,j) = 0;
-
-  //Cleaning the cofactorF
-  for ( UInt i(0); i < N; i++ )
-      for ( UInt j(0); j < M; j++ )
-	if( (i-j) ) (*M_cofactorF)(i,j) = 0;
-
-}
-
-
-template <typename Mesh>
-void 
 WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace )
 {
-  M_dataMaterial->showMe();
 
   LifeChrono chrono;
+
+  solutionVect_Type patchArea(*M_displ,Repeated);
+
+  constructPatchAreaVector( patchArea );
 
   QuadratureRule fakeQuadratureRule;
 
@@ -596,7 +575,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 	      dk_loc[iloc + iComp*copyFESpace->fe().nbFEDof()] = dRep[ig];
 	    }
 	}
-      
+
       //Compute the element tensor F
       AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, copyFESpace->fe() );
 
@@ -625,9 +604,6 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 	  //Compute the eigenvalue
 	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
 
-	  // for( int j=0;j<M_eigenvaluesR.size();j++)
-	  //   std::cout << j << "-th realEigenvalues: " << M_eigenvaluesR[j] << std::endl;
-      
 	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
 	  //Check on the imaginary part of eigen values given by the Lapack method 
 	  Real sum(0);
@@ -639,7 +615,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 	  for ( int coor=0; coor < M_eigenvaluesR.size(); coor++ )
 	    (*M_elVecTens)[iloc + coor*copyFESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
 
-	  //M_elVecTens->showMe();
+	  reconstructElementaryVector( patchArea, i );
 
 	}
 
@@ -652,15 +628,80 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 
   std::cout << "Norm of globalEigen: " <<  M_globalEigen->norm2() << std::endl;
 
-  //Recovery procedure over the globalEigen vector
-  // solutionVectPtr_Type reconstructedEigenvalues( new solutionVect_Type(*M_localMap) );
-  // *reconstructedEigenvalues = M_FESpace->recoveryFunction(*M_globalEigen);
-
-  // M_globalEigen = reconstructedEigenvalues;
-
   chrono.stop();
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 }
 
+template <typename Mesh>
+void 
+WallTensionEstimator<Mesh >::reconstructElementaryVector( solutionVect_Type& patchArea, UInt nVol )
+{
+  //UpdateElement Infos
+  M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
+
+  Real measure = M_FESpace->fe().measure();
+
+  for (UInt iDof=0; iDof < M_FESpace->fe().nbFEDof(); iDof++)
+    {
+      UInt  iloc = M_FESpace->fe().patternFirst( iDof );
+
+      for( UInt icoor=0;  icoor < M_FESpace->fieldDim(); icoor++ )
+	{
+	  UInt eleID = M_FESpace->fe().currentLocalId();
+	  ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
+
+	  (*M_elVecTens)[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );	  	  
+	}
+      
+    }     
 }
+
+
+template <typename Mesh>
+void WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& patchArea )
+{
+
+  patchArea *= 0.0;
+  
+  Real refElemArea(0); //area of reference element
+  UInt totalDof = M_FESpace->dof().numTotalDof();
+  //compute the area of reference element
+  for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
+    refElemArea += M_FESpace->qr().weight(iq);
+
+  // Define a special quadrature rule for the interpolation
+  QuadratureRule interpQuad;
+  interpQuad.setDimensionShape(shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape());
+  Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
+
+  for (UInt i(0); i< M_FESpace->refFE().nbDof(); ++i) //nbRefCoor
+    {
+      interpQuad.addPoint(QuadraturePoint(M_FESpace->refFE().xi(i),M_FESpace->refFE().eta(i),M_FESpace->refFE().zeta(i),wQuad));
+    }
+
+
+  UInt totalNumberVolumes(M_FESpace->mesh()->numVolumes());
+  UInt numberLocalDof(M_FESpace->dof().numLocalDof());
+
+  CurrentFE interpCFE(M_FESpace->refFE(),getGeometricMap(*(M_FESpace->mesh()) ),interpQuad);
+
+  // Loop over the cells
+  for (UInt iterElement(0); iterElement< totalNumberVolumes; ++iterElement)
+    {
+      interpCFE.update(M_FESpace->mesh()->volumeList( iterElement ), UPDATE_PHI | UPDATE_WDET );
+
+      for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+        {
+	  for (UInt iDim(0); iDim < M_FESpace->fieldDim(); ++iDim)
+            {
+	      ID globalDofID(M_FESpace->dof().localToGlobalMap(iterElement,iterDof) + iDim * totalDof);
+	      patchArea[globalDofID] += interpCFE.measure();
+            }
+        }
+    }
+}
+	 
+	 
+}
+
 #endif /*_WALLTENSION_H_ 1*/

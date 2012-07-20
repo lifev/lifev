@@ -79,7 +79,6 @@ void computeLocalDeformationGradient (const VectorElemental& uk_loc, std::vector
 {
     // \grad u^k at each quadrature poInt
     Real s;
-    uk_loc.showMe();
 
     for ( Int k=0; k < static_cast<Int> (fe.nbQuadPt()); k++)
       {
@@ -1373,8 +1372,6 @@ void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariant
   
   //It is not rescaled by the determinant. It is done inside the method to compute the local Piola
   //cofactorF.Scale(invariants[3]);
-
-  tensorF.Print(std::cout);
 
   C11 = tensorF(0,0)*tensorF(0,0) + tensorF(1,0)*tensorF(1,0) + tensorF(2,0)*tensorF(2,0);
   C22 = tensorF(0,1)*tensorF(0,1) + tensorF(1,1)*tensorF(1,1) + tensorF(2,1)*tensorF(2,1);
