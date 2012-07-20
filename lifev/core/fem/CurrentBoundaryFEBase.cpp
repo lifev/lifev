@@ -309,18 +309,18 @@ void CurrentBoundaryFEBase::computeMeasureNormal()
 
     Real norm, n1, n2;
     computeMeasure();
-    if(M_nbCoor == 1)
+    if ( M_nbCoor == 1 )
     {
         for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
         {
-            n1 = - M_tangent( int(0), int(1), int(ig) );
-            n2 = M_tangent( int(0), int(0), int(ig) );
+            n1 = M_tangent( int(0), int(1), int(ig) );
+            n2 = - M_tangent( int(0), int(0), int(ig) );
             norm = sqrt( n1 * n1 + n2 * n2 );
             M_normal( UInt(0), ig ) = n1 / norm;
             M_normal( UInt(1), ig ) = n2 / norm;
         }
     }
-    else
+    else if ( M_nbCoor == 2 )
     {
         Real n3;
         for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
@@ -336,6 +336,10 @@ void CurrentBoundaryFEBase::computeMeasureNormal()
             M_normal( UInt(1), ig ) = n2 / norm;
             M_normal( UInt(2), ig ) = n3 / norm;
         }
+    }
+    else
+    {
+        ASSERT ( 0, "Wrong space dimension." );
     }
 }
 
