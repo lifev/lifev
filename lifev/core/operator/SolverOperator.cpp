@@ -68,7 +68,8 @@ SolverOperator::SolverOperator( boost::shared_ptr<Epetra_Comm> comm ):
 
 SolverOperator::~SolverOperator()
 {
-
+    M_prec.reset();
+    M_oper.reset();
 }
 
 int SolverOperator::SetUseTranspose( bool useTranspose )
