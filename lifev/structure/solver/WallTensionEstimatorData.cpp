@@ -134,7 +134,7 @@ WallTensionEstimatorData::showMe( std::ostream& output ) const
     output << "Name File                = " << M_nameFile << std::endl;
     output << "Type File                = " << M_typeFile << std::endl;
     output << "Analysis Type            = " << M_analysisType << std::endl;
-    output << "Analysis Type            = " << M_recoveryVariable << std::endl;
+    output << "Recovery Variable        = " << M_recoveryVariable << std::endl;
     output << "The numbers of intervals is =  " << M_initialTime.size() << std::endl;
 
     for ( UInt i(0); i< M_initialTime.size() ; i++ )

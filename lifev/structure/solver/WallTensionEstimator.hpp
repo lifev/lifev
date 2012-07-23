@@ -95,6 +95,10 @@ namespace LifeV
   This class lets to compute the wall tensions inside the arterial wall. The tensorial operations
   that are needed to compute the stress tensor are defined in AssemblyElementalStructure. When a new
   type of analysis wants to be performed new methods can be added
+
+
+  ATTENTION: In the case of reconstruction of the tensions, the code works fine in serial but not in parallel.
+  In fact, on big meshes it stops working after some iterations
 */
 
 template <typename Mesh>
@@ -233,7 +237,7 @@ protected:
   /*!
     \param NONE
   */
-   void constructPatchAreaVector( solutionVect_Type& patchArea );    
+  void constructPatchAreaVector( solutionVect_Type& patchArea );    
 
   //! orderEigenvalues it puts in an increasing order the eigenvalues
   /*!
@@ -473,13 +477,9 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
       
 	  //Compute the first Piola-Kirchhoff tensor
 	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
-      
-	  //M_firstPiola->Print(std::cout);
 
 	  //Compute the Cauchy tensor
 	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
-
-	  //M_sigma->Print(std::cout);
 
 	  //Compute the eigenvalue
 	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
@@ -536,10 +536,11 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 
   LifeChrono chrono;
 
-  solutionVect_Type patchArea(*M_displ,Repeated);
+  solutionVect_Type patchArea(*M_displ,Unique,Add);
+  patchArea *= 0.0;
 
   constructPatchAreaVector( patchArea );
-
+  
   QuadratureRule fakeQuadratureRule;
 
   //Setting the quadrature Points = DOFs of the element and weight = 1
@@ -568,6 +569,10 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
   //Loop on each volume
   for ( UInt i = 0; i < copyFESpace->mesh()->numVolumes(); ++i )
     {
+
+      std::cout <<  std::endl;
+      std::cout << "Currently at volume: "<< i << std::endl;
+      std::cout <<  std::endl;
       copyFESpace->fe().updateFirstDerivQuadPt( copyFESpace->mesh()->volumeList( i ) );
       this->M_elVecTens->zero();
 
@@ -603,7 +608,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);	  
 
 	  //Compute the first Piola-Kirchhoff tensor
-	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, 1);
+	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
 
 	  //Compute the Cauchy tensor
 	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
@@ -622,11 +627,14 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 
 	  //Assembling the local vector
 	  for ( int coor=0; coor < M_eigenvaluesR.size(); coor++ )
-	    (*M_elVecTens)[iloc + coor*copyFESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
+	    {
+	      (*M_elVecTens)[iloc + coor*copyFESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
+	    }
 	}
 
       //Before assembling the reconstruction process is done
-      reconstructElementaryVector( patchArea, i );
+      solutionVect_Type patchAreaR(patchArea,Repeated);
+      reconstructElementaryVector( patchAreaR, i );
 
       //Assembling the local into global vector
       for ( UInt ic = 0; ic < nDimensions; ++ic )
@@ -634,8 +642,6 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
     }
   
   M_globalEigen->globalAssemble();
-
-  std::cout << "Norm of globalEigen: " <<  M_globalEigen->norm2() << std::endl;
 
   chrono.stop();
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
@@ -658,18 +664,20 @@ WallTensionEstimator<Mesh >::reconstructElementaryVector( solutionVect_Type& pat
       for( UInt icoor=0;  icoor < M_FESpace->fieldDim(); icoor++ )
 	{
 	  ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
-	  (*M_elVecTens)[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );	  	  
 
-	}     
+	  (*M_elVecTens)[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] ); 
+	}
+
     }     
-}
-
+}     
 
 template <typename Mesh>
-void WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& patchArea )
+void
+WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& patchArea )
 {
 
-  patchArea *= 0.0;
+  solutionVect_Type patchAreaR(*M_displ,Repeated);
+  patchAreaR *= 0.0;
   
   Real refElemArea(0); //area of reference element
   UInt totalDof = M_FESpace->dof().numTotalDof();
@@ -687,26 +695,30 @@ void WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& p
       interpQuad.addPoint(QuadraturePoint(M_FESpace->refFE().xi(i),M_FESpace->refFE().eta(i),M_FESpace->refFE().zeta(i),wQuad));
     }
 
-
   UInt totalNumberVolumes(M_FESpace->mesh()->numVolumes());
   UInt numberLocalDof(M_FESpace->dof().numLocalDof());
 
   CurrentFE interpCFE(M_FESpace->refFE(),getGeometricMap(*(M_FESpace->mesh()) ),interpQuad);
 
   // Loop over the cells
-  for (UInt iterElement(0); iterElement< totalNumberVolumes; ++iterElement)
+  for (UInt iterElement(0); iterElement< totalNumberVolumes; iterElement++)
     {
-      interpCFE.update(M_FESpace->mesh()->volumeList( iterElement ), UPDATE_PHI | UPDATE_WDET );
-
-      for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+      interpCFE.update(M_FESpace->mesh()->volumeList( iterElement ), UPDATE_WDET );      
+      
+      for (UInt iterDof(0); iterDof < numberLocalDof; iterDof++)
         {
 	  for (UInt iDim(0); iDim < M_FESpace->fieldDim(); ++iDim)
             {
 	      ID globalDofID(M_FESpace->dof().localToGlobalMap(iterElement,iterDof) + iDim * totalDof);
-	      patchArea[globalDofID] += interpCFE.measure();
+	      patchAreaR[globalDofID] += interpCFE.measure();
             }
         }
     }
+
+  solutionVect_Type final(patchAreaR,Unique,Add);
+
+  patchArea.add(final);
+
 }
 	 
 

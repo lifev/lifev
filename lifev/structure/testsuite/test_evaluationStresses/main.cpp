@@ -432,11 +432,9 @@ Structure::run3d()
 	// exporterX->postProcess( startTime );
 	// exporterY->postProcess( startTime );
 	// exporterZ->postProcess( startTime );
-	
-	
-	
+			
 	//Extracting the tensions
-
+	std::cout << std::endl;
 	std::cout << "Norm of the tension vector: " << solid->principalStresses().norm2() << std::endl;
 
 	*solidTensions = solid->principalStresses();
