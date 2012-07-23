@@ -190,12 +190,10 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
         resetPreconditioner();
 
     // <!-- TO BE RECODED IF POSSIBLE
-	// AztecOO contains pointers to some operators
-	// ML is crashing for this reason.
-    if( M_solverType == AztecOO )
-    {
-        M_solverOperator.reset();
-    }
+    // AztecOO and Belos contain pointers
+    // to some operators.
+    // ML is crashing for this reason.
+    M_solverOperator.reset();
     // -->
 
     return numIters;

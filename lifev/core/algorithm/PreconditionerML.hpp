@@ -247,7 +247,7 @@ protected:
 
 private:
 
-    operator_raw_type::matrix_ptrtype M_operator;
+    operator_type           M_operator;
 
     prec_type               M_preconditioner;
 
