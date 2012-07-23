@@ -71,7 +71,8 @@ PreconditionerComposition::PreconditionerComposition( const PreconditionerCompos
 
 PreconditionerComposition::~PreconditionerComposition()
 {
-
+    M_prec.reset();
+    M_precBaseOperators.clear();
 }
 
 // ===================================================
