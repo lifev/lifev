@@ -107,13 +107,13 @@ public:
     //@{
 
     //! Empty constructor
-    SolverAztecOO();
+    LIFEV_DEPRECATED( SolverAztecOO() );
 
     //! Constructor
     /*!
       @param comm Communicator
      */
-    SolverAztecOO( const boost::shared_ptr<Epetra_Comm>& comm );
+    LIFEV_DEPRECATED( SolverAztecOO( const boost::shared_ptr<Epetra_Comm>& comm ) );
 
     //@}
 
