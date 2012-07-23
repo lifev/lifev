@@ -365,10 +365,10 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        // if (!M_data->method().compare("monolithicGI"))
-        //   checkCEResult(M_data->dataFluid()->dataTime()->time());
-        // else
-        //   checkGCEResult(M_data->dataFluid()->dataTime()->time());
+        if (!M_data->method().compare("monolithicGI"))
+          checkCEResult(M_data->dataFluid()->dataTime()->time());
+        else
+          checkGCEResult(M_data->dataFluid()->dataTime()->time());
 
         }
 
@@ -806,24 +806,24 @@ void Problem::initializeStokes( GetPot const& data_file)
 }
 
 
-void Problem::checkGCEResult(const LifeV::Real& time)
-{
-    LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-139381)/dispNorm*(dispNorm-139381)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.001 && (dispNorm-176761)/dispNorm*(dispNorm-176761)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.002 && (dispNorm-118832)/dispNorm*(dispNorm-118832)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.003 && (dispNorm-110505)/dispNorm*(dispNorm-110505)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.004 && (dispNorm-103743)/dispNorm*(dispNorm-103743)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-}
-
-
 void Problem::checkCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-139362)/dispNorm*(dispNorm-139362)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.001 && (dispNorm-176015)/dispNorm*(dispNorm-176015)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.002 && (dispNorm-118146)/dispNorm*(dispNorm-118146)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.003 && (dispNorm-109704)/dispNorm*(dispNorm-109701)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.004 && (dispNorm-102733)/dispNorm*(dispNorm-102733)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if (time==0.000 && (dispNorm-116028)/dispNorm*(dispNorm-116028)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.001 && (dispNorm-145330)/dispNorm*(dispNorm-145330)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.002 && (dispNorm-97555)/dispNorm*(dispNorm-97555)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.003 && (dispNorm-90666)/dispNorm*(dispNorm-90666)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.004 && (dispNorm-84913)/dispNorm*(dispNorm-84913)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+}
+
+
+void Problem::checkGCEResult(const LifeV::Real& time)
+{
+    LifeV::Real dispNorm=M_fsi->displacement().norm2();
+    if (time==0.000 && (dispNorm-106856)/dispNorm*(dispNorm-106856)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.001 && (dispNorm-114222)/dispNorm*(dispNorm-114222)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.002 && (dispNorm-86107)/dispNorm*(dispNorm-86107)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.003 && (dispNorm-80013)/dispNorm*(dispNorm-80013)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.004 && (dispNorm-74586)/dispNorm*(dispNorm-74586)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
 

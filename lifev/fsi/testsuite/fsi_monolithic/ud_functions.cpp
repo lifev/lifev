@@ -401,7 +401,7 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -100;
+    return -10;
 }
 
 Real squareSinusoidalFluxFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
