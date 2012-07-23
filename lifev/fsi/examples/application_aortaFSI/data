@@ -28,33 +28,33 @@ DDBlockPrec = AdditiveSchwarzGI #ComposedDN2GI
 #ComposedDND2GI: other factorization option, the matrix is split in 3 factors, Dirichlet, Neumann snd Dirichlet.
 ** #examples:
       //! Factorization in three:
-	- Solid: Neumann
-	| I | 0 | 0 | 0 |
-	|---+---+---+---|
-	| 0 | S | 0 | 0 |
-	|---+---+---+---|
-	| 0 | 0 | I | 0 |
-	|---+---+---+---|
-	| 0 | 0 | 0 | I |
-	- ALE: Dirichlet
-	| I |  0 | 0 | 0 |
-	|---+----+---+---|
-	| 0 |  I | 0 | 0 |
-	|---+----+---+---|
-	| 0 |  0 | I | 0 |
-	|---+----+---+---|
-	| 0 | -C | 0 | H |
-	- Fluid: Dirichlet
-	| F | 0     | C | SD |
-	|---+-------+---+----|
-	| 0 | S     | 0 | 0  |
-	|---+-------+---+----|
-	| C | -C/dt | 0 | 0  |
-	|---+-------+---+----|
-	| 0 | 0     | 0 | I  |
+    - Solid: Neumann
+    | I | 0 | 0 | 0 |
+    |---+---+---+---|
+    | 0 | S | 0 | 0 |
+    |---+---+---+---|
+    | 0 | 0 | I | 0 |
+    |---+---+---+---|
+    | 0 | 0 | 0 | I |
+    - ALE: Dirichlet
+    | I |  0 | 0 | 0 |
+    |---+----+---+---|
+    | 0 |  I | 0 | 0 |
+    |---+----+---+---|
+    | 0 |  0 | I | 0 |
+    |---+----+---+---|
+    | 0 | -C | 0 | H |
+    - Fluid: Dirichlet
+    | F | 0     | C | SD |
+    |---+-------+---+----|
+    | 0 | S     | 0 | 0  |
+    |---+-------+---+----|
+    | C | -C/dt | 0 | 0  |
+    |---+-------+---+----|
+    | 0 | 0     | 0 | I  |
 
       //! Factorization in three:
-	- Fluid: Dirichlet
+    - Fluid: Dirichlet
         | F | 0 | 0 | SD |
         |---+---+---+----|
         | 0 | I | 0 |  0 |
@@ -62,7 +62,7 @@ DDBlockPrec = AdditiveSchwarzGI #ComposedDN2GI
         | C | 0 | I |  0 |
         |---+---+---+----|
         | 0 | 0 | 0 |  I |
-	- Solid: Neumann
+    - Solid: Neumann
         | I |     0 | 0 | 0 |
         |---+-------+---+---|
         | 0 |     S | C | 0 |
@@ -70,7 +70,7 @@ DDBlockPrec = AdditiveSchwarzGI #ComposedDN2GI
         | 0 | -C/dt | 0 | 0 |
         |---+-------+---+---|
         | 0 |     0 | 0 | I |
-	- ALE: Dirichlet
+    - ALE: Dirichlet
         | I |  0 | 0 | 0 |
         |---+----+---+---|
         | 0 |  I | 0 | 0 |

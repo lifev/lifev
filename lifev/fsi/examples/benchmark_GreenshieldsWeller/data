@@ -28,33 +28,33 @@ DDBlockPrec = ComposedDN2GI
 #ComposedDND2GI: other factorization option, the matrix is split in 3 factors, Dirichlet, Neumann snd Dirichlet.
 ** #examples:
       //! Factorization in three:
-	- Solid: Neumann
-	| I | 0 | 0 | 0 |
-	|---+---+---+---|
-	| 0 | S | 0 | 0 |
-	|---+---+---+---|
-	| 0 | 0 | I | 0 |
-	|---+---+---+---|
-	| 0 | 0 | 0 | I |
-	- ALE: Dirichlet
-	| I |  0 | 0 | 0 |
-	|---+----+---+---|
-	| 0 |  I | 0 | 0 |
-	|---+----+---+---|
-	| 0 |  0 | I | 0 |
-	|---+----+---+---|
-	| 0 | -C | 0 | H |
-	- Fluid: Dirichlet
-	| F | 0     | C | SD |
-	|---+-------+---+----|
-	| 0 | S     | 0 | 0  |
-	|---+-------+---+----|
-	| C | -C/dt | 0 | 0  |
-	|---+-------+---+----|
-	| 0 | 0     | 0 | I  |
+    - Solid: Neumann
+    | I | 0 | 0 | 0 |
+    |---+---+---+---|
+    | 0 | S | 0 | 0 |
+    |---+---+---+---|
+    | 0 | 0 | I | 0 |
+    |---+---+---+---|
+    | 0 | 0 | 0 | I |
+    - ALE: Dirichlet
+    | I |  0 | 0 | 0 |
+    |---+----+---+---|
+    | 0 |  I | 0 | 0 |
+    |---+----+---+---|
+    | 0 |  0 | I | 0 |
+    |---+----+---+---|
+    | 0 | -C | 0 | H |
+    - Fluid: Dirichlet
+    | F | 0     | C | SD |
+    |---+-------+---+----|
+    | 0 | S     | 0 | 0  |
+    |---+-------+---+----|
+    | C | -C/dt | 0 | 0  |
+    |---+-------+---+----|
+    | 0 | 0     | 0 | I  |
 
       //! Factorization in three:
-	- Fluid: Dirichlet
+    - Fluid: Dirichlet
         | F | 0 | 0 | SD |
         |---+---+---+----|
         | 0 | I | 0 |  0 |
@@ -62,7 +62,7 @@ DDBlockPrec = ComposedDN2GI
         | C | 0 | I |  0 |
         |---+---+---+----|
         | 0 | 0 | 0 |  I |
-	- Solid: Neumann
+    - Solid: Neumann
         | I |     0 | 0 | 0 |
         |---+-------+---+---|
         | 0 |     S | C | 0 |
@@ -70,7 +70,7 @@ DDBlockPrec = ComposedDN2GI
         | 0 | -C/dt | 0 | 0 |
         |---+-------+---+---|
         | 0 |     0 | 0 | I |
-	- ALE: Dirichlet
+    - ALE: Dirichlet
         | I |  0 | 0 | 0 |
         |---+----+---+---|
         | 0 |  I | 0 | 0 |
@@ -124,7 +124,7 @@ filename   = solidImp     # name of the imported solution
 
 * #Fluid data
 [fluid]
-useShapeDerivatives           = flase # tells if the shape derivatives are neglected or not in the Jacobian matrix
+useShapeDerivatives           = false # tells if the shape derivatives are neglected or not in the Jacobian matrix
 semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
 convectiveImplicit            = false  # tells if the velocity is to be considered implicitly in the convective term
