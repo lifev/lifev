@@ -541,64 +541,70 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 
   constructPatchAreaVector( patchArea );
   
+  //Before assembling the reconstruction process is done
+  solutionVect_Type patchAreaR(patchArea,Repeated);
+
   QuadratureRule fakeQuadratureRule;
 
+  Real refElemArea(0); //area of reference element
+  //compute the area of reference element
+  for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
+    refElemArea += M_FESpace->qr().weight(iq);
+
+  Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
+
   //Setting the quadrature Points = DOFs of the element and weight = 1
-  std::vector<GeoVector> coords = copyFESpace->refFE().refCoor();
-  std::vector<Real> weights(copyFESpace->fe().nbFEDof(), 0.0);
-  fakeQuadratureRule.setDimensionShape ( shapeDimension(copyFESpace->refFE().shape()), copyFESpace->refFE().shape() );
+  std::vector<GeoVector> coords = M_FESpace->refFE().refCoor();
+  std::vector<Real> weights(M_FESpace->fe().nbFEDof(), wQuad);
+  fakeQuadratureRule.setDimensionShape ( shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape() );
   fakeQuadratureRule.setPoints(coords,weights);
 
   //Set the new quadrature rule
-  copyFESpace->setQuadRule(fakeQuadratureRule);
+  M_FESpace->setQuadRule(fakeQuadratureRule);
 
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
   this->M_displayer->leaderPrint("   Performing the analysis recovering the tensions..., ", M_dataMaterial->solidType() );
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
-  UInt totalDof = copyFESpace->dof().numTotalDof();
-  VectorElemental dk_loc(copyFESpace->fe().nbFEDof(), nDimensions);
+  UInt totalDof = M_FESpace->dof().numTotalDof();
+  VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), nDimensions);
 
   //Vectors for the deformation tensor
-  std::vector<matrix_Type> vectorDeformationF(copyFESpace->fe().nbFEDof(),*M_deformationF);
+  std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
   //Copying the displacement field into a vector with repeated map for parallel computations
   solutionVect_Type dRep(*M_displ, Repeated);
 
   chrono.start();
 
   //Loop on each volume
-  for ( UInt i = 0; i < copyFESpace->mesh()->numVolumes(); ++i )
+  for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
     {
-
-      std::cout <<  std::endl;
-      std::cout << "Currently at volume: "<< i << std::endl;
-      std::cout <<  std::endl;
-      copyFESpace->fe().updateFirstDerivQuadPt( copyFESpace->mesh()->volumeList( i ) );
+      M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
       this->M_elVecTens->zero();
 
-      M_marker = copyFESpace->mesh()->volumeList( i ).marker();
+      M_marker = M_FESpace->mesh()->volumeList( i ).marker();
 
-      UInt eleID = copyFESpace->fe().currentLocalId();
+      UInt eleID = M_FESpace->fe().currentLocalId();
 
       //Extracting the local displacement
-      for ( UInt iNode = 0; iNode < ( UInt ) copyFESpace->fe().nbFEDof(); iNode++ )
+      for ( UInt iNode = 0; iNode < ( UInt ) M_FESpace->fe().nbFEDof(); iNode++ )
 	{
-	  UInt  iloc = copyFESpace->fe().patternFirst( iNode );
+	  UInt  iloc = M_FESpace->fe().patternFirst( iNode );
 
 	  for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
 	    {
-	      UInt ig = copyFESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*copyFESpace->dim() + this->M_offset;
-	      dk_loc[iloc + iComp*copyFESpace->fe().nbFEDof()] = dRep[ig];
+	      UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
+	      dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
 	    }
 	}
 
       //Compute the element tensor F
-      AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, copyFESpace->fe() );
+      AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, M_FESpace->fe() );
 
       //Compute the local vector of the principal stresses
-      for( UInt nDOF=0; nDOF < ( UInt ) copyFESpace->fe().nbFEDof(); nDOF++ )
+      for( UInt nDOF=0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
 	{
-	  UInt  iloc = copyFESpace->fe().patternFirst( nDOF );
+	  UInt  iloc = M_FESpace->fe().patternFirst( nDOF );
 
 	  M_sigma->Scale(0.0);
 	  M_firstPiola->Scale(0.0);
@@ -628,17 +634,15 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::share
 	  //Assembling the local vector
 	  for ( int coor=0; coor < M_eigenvaluesR.size(); coor++ )
 	    {
-	      (*M_elVecTens)[iloc + coor*copyFESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
+	      (*M_elVecTens)[iloc + coor*M_FESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
 	    }
 	}
 
-      //Before assembling the reconstruction process is done
-      solutionVect_Type patchAreaR(patchArea,Repeated);
       reconstructElementaryVector( patchAreaR, i );
 
       //Assembling the local into global vector
       for ( UInt ic = 0; ic < nDimensions; ++ic )
-	  assembleVector(*M_globalEigen, *M_elVecTens, copyFESpace->fe(), copyFESpace->dof(), ic, this->M_offset +  ic*totalDof );
+	  assembleVector(*M_globalEigen, *M_elVecTens, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
     }
   
   M_globalEigen->globalAssemble();
@@ -652,7 +656,7 @@ void
 WallTensionEstimator<Mesh >::reconstructElementaryVector( solutionVect_Type& patchArea, UInt nVol )
 {
   //UpdateElement Infos
-  M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
+  //M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
 
   Real measure = M_FESpace->fe().measure();
   UInt eleID = M_FESpace->fe().currentLocalId();
