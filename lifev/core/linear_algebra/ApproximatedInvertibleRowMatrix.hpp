@@ -110,6 +110,8 @@ public:
 
     int Compute();
 
+    boost::shared_ptr<RowMatrixPreconditioner> & Preconditioner(){return M_prec;}
+
     //! @name Mathematical functions
     //@{
     virtual int Apply(const vector_Type& X, vector_Type& Y) const;
