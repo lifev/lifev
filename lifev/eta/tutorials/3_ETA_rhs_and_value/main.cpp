@@ -182,13 +182,13 @@ int main( int argc, char** argv )
 
     vector_Type fInterpolated(uSpace->map(),Repeated);
 
-    fInterpolated*=0.0;
+    fInterpolated=0.0;
 
     uSpace->interpolate(fRhs,fInterpolated,0.0);
 
     vector_Type rhs(uSpace->map(),Repeated);
 
-    rhs*=0.0;
+    rhs=0.0;
 
     ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
 
@@ -202,14 +202,12 @@ int main( int argc, char** argv )
 
 
 // ---------------------------------------------------------------
-// Now we perform the same assembly with the ETA framework. We
-// do not need to interpolate the function here, since the scalar
-// constants can be used directly in the expressions.
+// Now we perform the same assembly with the ETA framework.
 //
 // The assembly looks very similar to those seen in the previous
 // tutorials. The main differences are:
 //
-// - There is one less arguement in the integrate function.
+// - There is one less argument in the integrate function.
 //   Indeed, the trial space (solution space) does not make sense
 //   when assembling the right hand side.
 //
@@ -223,7 +221,36 @@ int main( int argc, char** argv )
     if (verbose) std::cout << " -- ETA way ... " << std::flush;
 
     vector_Type rhsET(ETuSpace->map(),Repeated);
-    rhsET*=0.0;
+    rhsET=0.0;
+
+    {
+        using namespace ExpressionAssembly;
+
+        integrate( elements(ETuSpace->mesh()),
+                   uSpace->qr() ,
+                   ETuSpace,
+                   value(ETuSpace,fInterpolated)*phi_i
+                 )
+            >> rhsET;
+    }
+
+    rhsET.globalAssemble();
+
+    if (verbose) std::cout << " done ! " << std::endl;
+
+
+// ---------------------------------------------------------------
+// We remark that in this particular case, since the function
+// is constant, we could directly use the value of the constant
+// in the expression, thus avoiding the interpolation step.
+//
+// The following code would then yield the same results.
+// ---------------------------------------------------------------
+/*
+    if (verbose) std::cout << " -- ETA way ... " << std::flush;
+
+    vector_Type rhsET(ETuSpace->map(),Repeated);
+    rhsET=0.0;
 
     {
         using namespace ExpressionAssembly;
@@ -239,13 +266,13 @@ int main( int argc, char** argv )
     rhsET.globalAssemble();
 
     if (verbose) std::cout << " done ! " << std::endl;
-
+*/
 
 // ---------------------------------------------------------------
 // Before checking that the two right hand sides that we assembled
-// are egal, we also integrate values on the domain.
+// are legal, we also integrate values on the domain.
 //
-// Integrating values is again slighty different than the other
+// Integrating values is again slightly different than the other
 // integrations.
 //
 // We start by integrating the function g on the
@@ -266,7 +293,7 @@ int main( int argc, char** argv )
 
     vector_Type gInterpolated(uSpace->map(),Repeated);
 
-    gInterpolated*=0.0;
+    gInterpolated=0.0;
 
     uSpace->interpolate(g,gInterpolated,0.0);
 
@@ -361,7 +388,7 @@ int main( int argc, char** argv )
 // ---------------------------------------------------------------
 
     vector_Type checkRhs(ETuSpace->map(),Repeated);
-    checkRhs*=0.0;
+    checkRhs=0.0;
 
     checkRhs += rhs;
     checkRhs -= rhsET;
