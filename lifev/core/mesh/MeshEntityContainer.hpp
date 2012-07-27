@@ -32,7 +32,6 @@
  *  @date 30-08-1999
  *  @author Luca Formaggia <luca.formaggia@polimi.it>
  *
- *  @todo TO BE MOVED IN lifemesh!
  *  @contributor Laura Cattaneo
  *  @mantainer Laura Cattaneo
  */
