@@ -249,7 +249,7 @@ public:
     inline MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > & meshTransformer();
 
     //! Return the communicator
-    const Epetra_Comm & comm();
+    const Epetra_Comm & comm() const;
 
     /** @} */ // End of group Utilities
 
@@ -3680,7 +3680,7 @@ RegionMesh<GEOSHAPE, MC>::meshTransformer()
 
 template <typename GEOSHAPE, typename MC>
 inline Epetra_Comm const &
-RegionMesh<GEOSHAPE, MC>::comm()
+RegionMesh<GEOSHAPE, MC>::comm() const
 {
     return this->M_comm;
 }
