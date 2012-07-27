@@ -110,19 +110,19 @@ public:
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
 
-    LIFEV_DEPRECATED ( FESpace( MeshPartitioner<MeshType>&  mesh,
-             const ReferenceFE&         refFE,
-             const QuadratureRule&          Qr,
-             const QuadratureRule&          bdQr,
-             const Int              fDim,
-             const commPtr_Type&            commptr
-           ) );
+    LIFEV_DEPRECATED ( FESpace( MeshPartitioner<MeshType>& mesh,
+                                const ReferenceFE&         refFE,
+                                const QuadratureRule&      Qr,
+                                const QuadratureRule&      bdQr,
+                                const Int                  fDim,
+                                const commPtr_Type&        commptr
+                                ) );
 
-    LIFEV_DEPRECATED ( FESpace( MeshPartitioner<MeshType>&  mesh,
-             const std::string&     space,
-             const Int              fDim,
-             const commPtr_Type&            commptr
-           ) );
+    LIFEV_DEPRECATED ( FESpace( MeshPartitioner<MeshType>& mesh,
+                                const std::string&         space,
+                                const Int                  fDim,
+                                const commPtr_Type&        commptr
+                                ) );
 
     FESpace( meshPtr_Type            mesh,
              const ReferenceFE&      refFE,
