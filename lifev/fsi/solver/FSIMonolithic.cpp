@@ -68,9 +68,6 @@ FSIMonolithic::FSIMonolithic():
         M_preconditionedSymmetrizedMatrix(),
         M_stress(),
         M_fluxes(0)
-#ifdef OBSOLETE
-        ,M_rhsShapeDerivatives()
-#endif
 {}
 
 FSIMonolithic::~FSIMonolithic()
@@ -463,11 +460,6 @@ FSIMonolithic::variablesInit(const std::string& dOrder)
 
 void FSIMonolithic::setupBlockPrec( )
 {
-#ifdef HAVE_NS_PREC
-  std::string PCD("PCD");
-  UInt fluidPosition = M_precPtr->whereIsBlock(MonolithicBlockComposed::fluid);
-  std::string precType(M_precPtr->blockPrecs()[fluidPosition]->preconditionerType());
-#endif
     if(!(M_precPtr->set()))
      {
          M_precPtr->push_back_matrix(M_solidBlockPrec, M_structureNonLinear);
@@ -484,24 +476,28 @@ void FSIMonolithic::setupBlockPrec( )
     }
 
 #ifdef HAVE_NS_PREC
-    if(M_precPtr->blockPrecs().size()>1)
-      {
+	/* This shall be enabled once the branch about NS_PREC is going to be merged to master*/
+    boost::shared_ptr<MonolithicBlockComposed> blockPrecPointer ( boost::dynamic_pointer_cast<MonolithicBlockComposed> M_precPtr);
 
-	if(!precType.compare(PCD))
-	  {
-	    Preconditioner* prec=(M_precPtr->blockPrecs()[fluidPosition].get());
-	    PreconditionerPCD* prec_PCD = dynamic_cast<PreconditionerPCD*>(prec);
-	    ASSERT(prec, "The preconditioner corresponding to the fluid block is probably not PCD. Check in the data file");
-	    prec_PCD->setFESpace(M_uFESpace, M_pFESpace);
-	    prec_PCD->setBCHandler(M_BCh_u);
-	    prec_PCD->setTimestep(M_data->dataFluid()->dataTime()->timeStep());
-	    prec_PCD->setViscosity(M_data->dataFluid()->viscosity());
-	    prec_PCD->setDensity(M_data->dataFluid()->density());
-	    prec_PCD->setCouplingMatrixView(M_precPtr->couplingVector()[MonolithicBlockComposed::fluid]);
-	    prec_PCD->setMapStructure(&M_dFESpace->map());
-	    prec_PCD->updateBeta(M_fluidTimeAdvance->singleElement(0));
-	  }
-      }
+    if (blockPrecPointer.get() != 0)
+    {
+    	UInt fluidPosition = blockPrecPointer->whereIsBlock(MonolithicBlockComposed::fluid);
+		ASSERT(blockPrecPointer->blockPrecs().size() < fluidPosition, "The preconditioner corresponding to the fluid block is probably not PCD. Check in the data file");
+        boost::shared_ptr<PreconditionerPCD> prec_PCD ( boost::dynamic_pointer_cast<PreconditionerPCD> blockPrecPointer->blockPrecs()[fluidPosition] );
+
+
+		if (prec_PCD.get() != 0)
+		{
+			prec_PCD->setFESpace(M_uFESpace, M_pFESpace);
+			prec_PCD->setBCHandler(M_BCh_u);
+			prec_PCD->setTimestep(M_data->dataFluid()->dataTime()->timeStep());
+			prec_PCD->setViscosity(M_data->dataFluid()->viscosity());
+			prec_PCD->setDensity(M_data->dataFluid()->density());
+			prec_PCD->setCouplingMatrixView(M_precPtr->couplingVector()[MonolithicBlockComposed::fluid]);
+			prec_PCD->setMapStructure(&M_dFESpace->map());
+			prec_PCD->updateBeta(M_fluidTimeAdvance->singleElement(0));
+		}
+    }
 #endif
 }
 
@@ -571,7 +567,7 @@ void FSIMonolithic::updateRHS()
     M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
     *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());
     couplingRhs(M_rhs);
-    
+
     // Update solid (iter == 0)
     updateSolidSystem(M_rhs);
 
