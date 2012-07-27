@@ -2192,18 +2192,19 @@ inline RegionMesh<GEOSHAPE, MC>::RegionMesh( Epetra_Comm const & comm ):
 
 template <typename GEOSHAPE, typename MC>
 inline RegionMesh<GEOSHAPE, MC>::RegionMesh( UInt id, Epetra_Comm const & comm ) :
-MeshEntity( id ),
-switches(),
-M_numVolumes( 0 ),
-M_numVertices( 0 ),
-M_numBVertices( 0 ),
-M_numPoints( 0 ),
-M_numBPoints( 0 ),
-M_numFaces( 0 ),
-M_numBFaces( 0 ),
-M_numEdges( 0 ),
-M_numBEdges( 0 ),
-M_meshTransformer(*this)
+    MeshEntity( id ),
+    switches(),
+    M_numVolumes( 0 ),
+    M_numVertices( 0 ),
+    M_numBVertices( 0 ),
+    M_numPoints( 0 ),
+    M_numBPoints( 0 ),
+    M_numFaces( 0 ),
+    M_numBFaces( 0 ),
+    M_numEdges( 0 ),
+    M_numBEdges( 0 ),
+    M_meshTransformer( *this ),
+    M_comm( comm )
 { //Modif Miguel:11/2002
     set_switches_for_regionmesh( switches );
 }
