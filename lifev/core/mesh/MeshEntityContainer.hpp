@@ -67,37 +67,47 @@ namespace Comparers{
  *  It defaults to std::less<ID>.
  *  We rely on the fact that std::less<ID>(ID a, ID b) is defined (otherwise the user must supply it).
  */
-template <typename MeshEntity, typename Policy=boost::function2<bool,ID,ID> >
-class CompareAccordingToLocalId{
+template < typename MeshEntity,
+           typename Policy=boost::function2<bool,ID,ID> >
+class CompareAccordingToLocalId
+{
 public:
     //! Constructor
     /**
      * The constructor can receive anything which is convertible the chosen
      * policy type. This allows great flexibility (maybe too much!)
      */
-    CompareAccordingToLocalId(Policy const & p=std::less<ID>()):M_policy(p){};
-    bool operator()(MeshEntity const & a, MeshEntity const & b){
-        return M_policy(a.localId(),b.localId());
+    CompareAccordingToLocalId( Policy const & p = std::less<ID>() ):M_policy( p ) {}
+
+    bool operator()( MeshEntity const & a, MeshEntity const & b )
+    {
+        return M_policy( a.localId(), b.localId() );
     }
+
 private:
     const Policy M_policy;
 };
+
 /** Compare according to Marker ID.
  *  It compares according to the Marker of a MeshEntity and it relies on std comparison operators
  *  It defaults to std::less<markerID_Type>. We rely on the fact that less<ID>(ID a, ID b) (otherwise the user must supply it).
  */
-template <typename MeshEntity, typename Policy=boost::function2<bool,markerID_Type,markerID_Type> >
-class CompareAccordingToMarker{
+template <typename MeshEntity, typename Policy = boost::function2< bool, markerID_Type, markerID_Type> >
+class CompareAccordingToMarker
+{
 public:
     //! Constructor
     /**
      * The constructor can receive anything which is convertible the chosen
      * policy type. This allows great flexibility (maybe too much!)
      */
-    CompareAccordingToMarker(Policy const & p=std::less<markerID_Type>()):M_policy(p){};
-    bool operator()(MeshEntity const & a, MeshEntity const & b){
-        return M_policy(a.markerID(),b.markerID());
+    CompareAccordingToMarker( Policy const & p = std::less<markerID_Type>() ): M_policy( p ) {}
+
+    bool operator()( MeshEntity const & a, MeshEntity const & b )
+    {
+        return M_policy( a.markerID(), b.markerID() );
     }
+
 private:
     const Policy M_policy;
 };
@@ -105,6 +115,7 @@ private:
 /** @}*/
 
 }
+
 namespace Predicates
 {
 /** @defgroup Predicates
@@ -138,18 +149,22 @@ namespace Predicates
 
  @author Luca Formaggia
  */
-template <typename MeshEntity,
-typename ComparisonPolicy=boost::function2<bool,flag_Type,flag_Type> >
-class EntityFlagInterrogator{
+template < typename MeshEntity,
+           typename ComparisonPolicy = boost::function2<bool,flag_Type,flag_Type> >
+class EntityFlagInterrogator
+{
 public:
     typedef ComparisonPolicy comparisonPolicy_Type;
-    EntityFlagInterrogator(flag_Type flag,
-                                    ComparisonPolicy const & p=ComparisonPolicy(Flag::testOneSet) ):
-                                    M_flag(flag),M_policy(p){}
 
-    bool operator()(const MeshEntity & entity)const{
-        return M_policy(entity.flag(),M_flag);
+    EntityFlagInterrogator( flag_Type flag,
+                            ComparisonPolicy const & p = ComparisonPolicy( &Flag::testOneSet ) ):
+        M_flag( flag ), M_policy( p ) {}
+
+    bool operator()( const MeshEntity & entity ) const
+    {
+        return M_policy( entity.flag(), M_flag );
     }
+
 private:
     const flag_Type M_flag;
     const ComparisonPolicy M_policy;
@@ -175,16 +190,21 @@ private:
 
  @author Luca Formaggia
  */
-template<typename MeshEntity,typename ComparisonPolicy=boost::function2<bool,markerID_Type,markerID_Type> >
-class EntityMarkerIDInterrogator{
+template< typename MeshEntity,
+          typename ComparisonPolicy = boost::function2< bool, markerID_Type, markerID_Type> >
+class EntityMarkerIDInterrogator
+{
 public:
     typedef ComparisonPolicy comparisonPolicy_Type;
-    EntityMarkerIDInterrogator(markerID_Type flag,ComparisonPolicy const & p=std::equal_to<markerID_Type>() ):
-                                    M_flag(flag),M_policy(p){}
 
-    bool operator()(const MeshEntity & entity)const {
-        return M_policy(entity.markerID(),M_flag);
+    EntityMarkerIDInterrogator( markerID_Type flag, ComparisonPolicy const & p = std::equal_to<markerID_Type>() ):
+        M_flag( flag ), M_policy( p ) {}
+
+    bool operator()( const MeshEntity & entity ) const
+    {
+        return M_policy( entity.markerID(), M_flag );
     }
+
 private:
     markerID_Type const M_flag;
     ComparisonPolicy const M_policy;
@@ -204,7 +224,7 @@ private:
  */
 
 template <typename DataType, class Allocator = std::allocator<DataType> >
-class MeshEntityContainer : public std::vector<DataType,Allocator>
+class MeshEntityContainer : public std::vector<DataType, Allocator>
 {
 public:
 
@@ -212,7 +232,7 @@ public:
     //@{
 
     typedef DataType                                data_Type;
-    typedef std::vector<DataType,Allocator>         vector_Type;
+    typedef std::vector<DataType, Allocator>        vector_Type;
     typedef typename vector_Type::size_type         size_type;
     typedef typename vector_Type::value_type        value_type;
     typedef typename vector_Type::reference         reference;
@@ -230,13 +250,13 @@ public:
     //@{
 
     //! Empty Constructor
-    MeshEntityContainer() : vector_Type() {}
+    MeshEntityContainer(): vector_Type() {}
 
     //! Constructor
     /*!
         @param vectorSize size of the vector
      */
-    explicit MeshEntityContainer( size_type vectorSize ) : vector_Type( vectorSize ){};
+    explicit MeshEntityContainer( size_type vectorSize ): vector_Type( vectorSize ){}
 
     //! Copy constructor
     /*!
@@ -267,7 +287,7 @@ public:
         @return Reference to a new MeshEntityContainer vector with the same
                 content of MeshEntityContainer vector
      */
-    MeshEntityContainer<DataType, Allocator> & operator=( const MeshEntityContainer<DataType,Allocator> & vector );
+    MeshEntityContainer<DataType, Allocator> & operator=( const MeshEntityContainer<DataType, Allocator> & vector );
 
     //! Access operator
     /*!
@@ -307,33 +327,9 @@ public:
     //! trims the container so that capacity almost equals size
     void trim()
     {
-     MeshEntityContainer<DataType,Allocator>(*this).swap(*this);
+        MeshEntityContainer<DataType, Allocator>(*this).swap( *this );
     }
 
-    //! Check if the MeshEntityContainer contains an element with index i
-    /*!
-        @param i index
-        @return boolean
-     */
-/*    bool checkIndex( size_type const i ) const
-    {
-        return i >= 0 && i < this->size() ;
-    }
-*/
-    //! Returns the number of elements in the container
-    //! @todo Useless. take away
-/*    UInt numItems()const
-    {
-        return this->size();
-    }
-*/
-    //! Returns the capacity of the container
-    //! @todo Useless. Take away
-/*    UInt maxNumItems()const
-    {
-        return this->capacity();
-    }
-*/
     //! It sets the capacity of the container
     //! It returns a bool to allow to test whether the container data pool
     //! has changed
@@ -341,7 +337,8 @@ public:
     //! It does not change the value of the elements currently stored, nor the container size
     //! @param size the new capacity of the container
     //! @return a bool which is true if the data pool has changed
-    bool setMaxNumItems(UInt size);
+    bool setMaxNumItems( UInt size );
+
     /** @name Extractors
      *  Utilities to extract from the SimpleVector. They rely on std::algorithms
      */
@@ -369,7 +366,7 @@ public:
      *  of those in the container
      */
     template<typename Predicate>
-    std::vector<DataType const *> extractAccordingToPredicate(Predicate const& p) const;
+    std::vector<DataType const *> extractAccordingToPredicate( Predicate const& p ) const;
     /** Entity Counter.
      *  It returns the number of stored entities for which a predicate
      *  returns true
@@ -379,9 +376,10 @@ public:
      *  @param p  The predicate
      *  @return   Number of entities in the container satisfying the predicate
      */
+
     template<typename Predicate>
-     UInt countAccordingToPredicate(Predicate const& p) const;
-      /** @brief It extracts all elements that satisfy a condition on the flag
+    UInt countAccordingToPredicate( Predicate const& p ) const;
+    /** @brief It extracts all elements that satisfy a condition on the flag
      *
      *  It operates only container elements  where the method
      *  flag_Type flag()  is defined.
@@ -406,7 +404,7 @@ public:
      */
     template<typename Policy>
     std::vector<DataType const *>
-    extractElementsWithFlag(const flag_Type & refFlag, Policy const & policy=&Flag::testOneSet) const;
+    extractElementsWithFlag( const flag_Type & refFlag, Policy const & policy = &Flag::testOneSet ) const;
 
     /*! @brief It counts all elements that satisfy a condition on the flag
      *
@@ -427,15 +425,15 @@ public:
      *  @return an unsigned integer
      */
     template<typename Policy>
-    UInt countElementsWithFlag(const flag_Type & refFlag,
-                               Policy const & policy= &Flag::testOneSet) const;
+    UInt countElementsWithFlag( const flag_Type & refFlag,
+                                Policy const & policy = &Flag::testOneSet ) const;
     //@}
 
-     /** @name Changers
+    /** @name Changers
       * Utilities that change the elements according to policies
       */
     //@{
-      /** Set element with certain flag set first
+    /** Set element with certain flag set first
      *
      * It reorders the container starting from the given offset up to the end of the container
      * so that elements with the given flag set are first. A policy must be passed.
@@ -456,9 +454,10 @@ public:
      * i was before in  NewToOld[i].
      *
      */
-   template<typename Policy>
-    std::pair<UInt,std::vector<ID> > reorderAccordingToFlag(const flag_Type & refFlag,  Policy const & policy=&Flag::testOneSet,
-                                UInt offset=0);
+    template<typename Policy>
+    std::pair<UInt, std::vector<ID> > reorderAccordingToFlag( const flag_Type & refFlag,
+                                                              Policy const & policy = &Flag::testOneSet,
+                                                              UInt offset = 0 );
 
     //! Changes content according to a given functor
     /*!
@@ -472,10 +471,11 @@ public:
      *
      */
     template<typename Functor>
-    void changeAccordingToFunctor(Functor const & fun)
+    void changeAccordingToFunctor( Functor const & fun )
     {
-        std::for_each(this->begin(),this->end(),fun);
+        std::for_each( this->begin(), this->end(), fun );
     }
+
     //! Resets the id of the mesh entities so that it matches the position in the container
     /**
      * After its call the id of each mesh entity matches its position in the container.
@@ -484,17 +484,18 @@ public:
      * was originally in position newtoold[id]
      */
     std::vector<UInt> resetId()
-                    {
+    {
         std::vector<ID> newToOld;
         newToOld.reserve( this->size() );
         iterator a( this->begin() ) ;
-        for (UInt i=0;i<this->size();++i){
-            ID old=a->localId();
-            (a++)->setLocalId(i);
-            newToOld.push_back(old);
+        for( UInt i = 0; i < this->size(); ++i )
+        {
+            ID old = a->localId();
+            (a++)->setLocalId( i );
+            newToOld.push_back( old );
         }
         return newToOld;
-                    }
+    }
     //@}
 };
 
@@ -516,18 +517,21 @@ namespace Utilities
  *  @pre The permutation vector must be of the right size
  *  @pre The permutation vector must be a good permutation vector
  */
-
 template <typename EntityContainer >
-void reorderAccordingToIdPermutation(EntityContainer & container,std::vector<ID> const & newToOld){
-    ASSERT_BD(newToOld.size()>=container.size());
+void reorderAccordingToIdPermutation( EntityContainer & container, std::vector<ID> const & newToOld )
+{
+    ASSERT_BD( newToOld.size() >= container.size() );
     typedef typename EntityContainer::iterator it;
     typedef typename EntityContainer::value_type meshEntity_Type;
-    std::vector<ID>::const_iterator start=newToOld.begin();
+    std::vector<ID>::const_iterator start = newToOld.begin();
     // Change the id's
-    for (it i=container.begin();i<container.end();++i)i->setLocalId(*(start++));
+    for( it i = container.begin(); i < container.end(); ++i) i->setLocalId( *(start++) );
     // Fix the ordering
-    std::sort(container.begin(),container.end(),Comparers::CompareAccordingToLocalId<meshEntity_Type,std::less<ID> >());
+    std::sort( container.begin(),
+               container.end(),
+               Comparers::CompareAccordingToLocalId<meshEntity_Type, std::less<ID> >() );
 }
+
 /** Fix pointers after permutation
  *  If a mesh entity contains pointers to other mesh entities (typically Points), after the renumbering of the
  *  referenced mesh entity (for instance using reorderAccordingToPermutation on Points) the address stored in
@@ -544,24 +548,27 @@ void reorderAccordingToIdPermutation(EntityContainer & container,std::vector<ID>
  *  @endcode
  */
 template <typename EntityContainer, typename RefEntityContainer >
-void fixAfterPermutation(EntityContainer & container, RefEntityContainer const & refcontainer,std::vector<ID> const & newToOld)
+void fixAfterPermutation( EntityContainer & container,
+                          RefEntityContainer const & refcontainer,
+                          std::vector<ID> const & newToOld )
 {
     // I need to build the inverse permutation
-    std::vector<ID> oldToNew(newToOld.size());
-    for (UInt i=0;i<newToOld.size();++i) oldToNew[newToOld[i]]=i;
+    std::vector<ID> oldToNew( newToOld.size() );
+    for( UInt i = 0; i < newToOld.size(); ++i ) oldToNew[ newToOld[ i ] ] = i;
     typedef typename EntityContainer::iterator it;
     typedef typename EntityContainer::value_type meshEntity_Type;
     const UInt numPoints=meshEntity_Type::geoShape_Type::S_numPoints;
-    for (it i=container.begin();i<container.end();++i)
+    for( it i = container.begin(); i < container.end(); ++i )
+    {
+        for( UInt j = 0; j < numPoints; ++j )
         {
-        for(UInt j=0;j<numPoints;++j)
-        {
-            ID oldaddress=i->point(j).localId();
-            ID newaddress=oldToNew[oldaddress];
-            i->setPoint(j,&(refcontainer[newaddress]));
+            ID oldaddress = i->point( j ).localId();
+            ID newaddress = oldToNew[ oldaddress ];
+            i->setPoint( j, &( refcontainer[ newaddress ] ) );
         }
     }
 }
+
 ///! Fix pointers after shallow copy
 /*!
  *  If a mesh entity contains pointers to other mesh entities (typically Points), after a shallow copy, for instance
@@ -582,15 +589,15 @@ void fixAfterPermutation(EntityContainer & container, RefEntityContainer const &
  *  @note For efficiency reason no consistency checks are made
  */
 template <typename EntityContainer, typename PointContainer >
-void fixAfterShallowCopy(EntityContainer & container, PointContainer const & newPointContainer)
+void fixAfterShallowCopy( EntityContainer & container, PointContainer const & newPointContainer )
 {
     typedef typename EntityContainer::iterator it;
     typedef typename EntityContainer::value_type meshEntity_Type;
-    const UInt numPoints=meshEntity_Type::geoShape_Type::S_numPoints;
+    const UInt numPoints = meshEntity_Type::geoShape_Type::S_numPoints;
 
-    for (it i=container.begin();i<container.end();++i)
-        for(UInt j=0;j<numPoints;++j)
-            i->setPoint( j,&( newPointContainer[ i->point(j).localId() ] ) );
+    for( it i = container.begin(); i < container.end(); ++i )
+        for( UInt j = 0; j < numPoints; ++j )
+            i->setPoint( j, &( newPointContainer[ i->point( j ).localId() ] ) );
 }
 /* @}*/
 }// End namespace Utilities
@@ -603,17 +610,17 @@ void fixAfterShallowCopy(EntityContainer & container, PointContainer const & new
 // Constructors
 //============================================================================
 template <typename DataType, class Allocator>
-MeshEntityContainer<DataType,Allocator>::MeshEntityContainer( const MeshEntityContainer<DataType,Allocator> & vector )
-:vector_Type( vector )
+MeshEntityContainer<DataType,Allocator>::MeshEntityContainer( const MeshEntityContainer<DataType, Allocator> & vector )
+    :vector_Type( vector )
 {}
 
 
 //============================================================================
 // Operators
 //============================================================================
-template <typename DataType,class Allocator>
-MeshEntityContainer<DataType,Allocator> &
-MeshEntityContainer<DataType,Allocator>::operator=( const MeshEntityContainer<DataType,Allocator> & vector )
+template <typename DataType, class Allocator>
+MeshEntityContainer<DataType, Allocator> &
+MeshEntityContainer<DataType, Allocator>::operator=( const MeshEntityContainer<DataType, Allocator> & vector )
 {
     vector_Type::operator=( vector );
     return *this;
@@ -628,71 +635,69 @@ void
 MeshEntityContainer<DataType, Allocator>::destroyData()
 {
     this->clear();
-    this->vector_Type::swap(vector_Type());
+    this->vector_Type::swap( vector_Type() );
 }
 
 template<typename DataType, class Allocator>
-bool MeshEntityContainer<DataType,Allocator>::setMaxNumItems(UInt size)
+bool MeshEntityContainer<DataType, Allocator>::setMaxNumItems( UInt size )
 {
-    bool _check=(this->capacity()) < size;
-    this->reserve(size);
+    bool _check=( this->capacity() ) < size;
+    this->reserve( size );
     return _check;
 }
 
 template<typename DataType, class Allocator>
 template<typename Predicate>
- std::vector<DataType const *>
-MeshEntityContainer<DataType,Allocator>::extractAccordingToPredicate(Predicate const& p)const
+std::vector<DataType const *>
+MeshEntityContainer<DataType, Allocator>::extractAccordingToPredicate( Predicate const& p ) const
 {
-    UInt howmany=this->countAccordingToPredicate(p);
+    UInt howmany = this->countAccordingToPredicate( p );
     std::vector<DataType const *> tmp;
-    tmp.reserve(howmany);
-    for (const_iterator i=this->begin();i<this->end();++i)
-        if (p(*i)) tmp.push_back(&(*i));
+    tmp.reserve( howmany );
+    for( const_iterator i = this->begin(); i < this->end(); ++i )
+        if( p(*i) ) tmp.push_back( &(*i) );
     return tmp;
 }
+
 template<typename DataType, class Allocator>
- template<typename Predicate>
-  UInt MeshEntityContainer<DataType,Allocator>::countAccordingToPredicate(Predicate const& p) const{
-  return std::count_if(this->begin(),this->end(),p);
- }
+template<typename Predicate>
+UInt MeshEntityContainer<DataType, Allocator>::countAccordingToPredicate( Predicate const& p ) const
+{
+    return std::count_if( this->begin(), this->end(), p );
+}
 
 template<typename DataType, class Allocator>
 template<typename Policy>
 std::vector<DataType const *>
-MeshEntityContainer<DataType,Allocator>::extractElementsWithFlag(
-                const flag_Type & refFlag,
-                const Policy & policy)const
-                {
-    Predicates::EntityFlagInterrogator<DataType> interrogator(refFlag,policy);
-    return this->extractAccordingToPredicate(interrogator);
-                }
-
-template<typename DataType, class Allocator>
-template<typename Policy>
-UInt MeshEntityContainer<DataType,Allocator>::countElementsWithFlag(
-                const flag_Type & refFlag,
-                const Policy & policy)const
-                {
-    Predicates::EntityFlagInterrogator<DataType> interrogator(refFlag,policy);
-    return this->countAccordingToPredicate(interrogator);
-                }
-
-template<typename DataType, class Allocator>
-template<typename Policy>
-std::pair<UInt,std::vector<ID> > MeshEntityContainer<DataType,Allocator>::reorderAccordingToFlag(const flag_Type & refFlag,
-                                                                            Policy const & policy,
-                                                                            UInt offset)
+MeshEntityContainer<DataType,Allocator>::extractElementsWithFlag( const flag_Type & refFlag,
+                                                                  const Policy & policy ) const
 {
-    iterator last= std::stable_partition(this->begin()+offset,this->end(),
-                                         Predicates::EntityFlagInterrogator<DataType>(
-                                                                  refFlag,
-                                                                   policy )
-                                         );
-    std::vector<ID> newToOld=this->resetId();
-    return std::make_pair(std::distance(this->begin(),last),newToOld);
+    Predicates::EntityFlagInterrogator<DataType> interrogator( refFlag, policy );
+    return this->extractAccordingToPredicate( interrogator );
+}
+
+template<typename DataType, class Allocator>
+template<typename Policy>
+UInt MeshEntityContainer<DataType, Allocator>::countElementsWithFlag( const flag_Type & refFlag,
+                                                                      const Policy & policy ) const
+{
+    Predicates::EntityFlagInterrogator<DataType> interrogator( refFlag, policy );
+    return this->countAccordingToPredicate( interrogator );
+}
+
+template<typename DataType, class Allocator>
+template<typename Policy>
+std::pair<UInt, std::vector<ID> >
+MeshEntityContainer<DataType, Allocator>::reorderAccordingToFlag( const flag_Type & refFlag,
+                                                                  Policy const & policy,
+                                                                  UInt offset )
+{
+    iterator last = std::stable_partition( this->begin() + offset,
+                                           this->end(),
+                                           Predicates::EntityFlagInterrogator<DataType>( refFlag, policy ) );
+    std::vector<ID> newToOld = this->resetId();
+    return std::make_pair( std::distance( this->begin(), last), newToOld );
 }
 }/// end of LifeV namespace
 
 #endif /* _MESHENTITYCONTAINER_HH_ */
-
