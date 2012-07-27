@@ -8,7 +8,7 @@
 #ifndef MESHEXTRACTOR_HPP_
 #define MESHEXTRACTOR_HPP_
 
-#include<life/lifemesh/RegionMesh.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 
 namespace LifeV
 {
@@ -63,7 +63,7 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
     }
 
     //(4) Allocate memory for the new mesh
-    boundaryRegionMesh_Type * mesh2D(new boundaryRegionMesh_Type);
+    boundaryRegionMesh_Type * mesh2D(new boundaryRegionMesh_Type( mesh3D.comm() ) );
     typename boundaryRegionMesh_Type::point_Type * pp = 0;
     typename boundaryRegionMesh_Type::edge_Type * pe = 0;
     typename boundaryRegionMesh_Type::face_Type * pf = 0;

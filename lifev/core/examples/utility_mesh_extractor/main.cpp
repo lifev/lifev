@@ -8,9 +8,9 @@
 #include <Epetra_ConfigDefs.h>
 #include <Epetra_Comm.h>
 
-#include<life/lifecore/LifeV.hpp>
-#include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/LifeChrono.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 
 
 using namespace LifeV;
