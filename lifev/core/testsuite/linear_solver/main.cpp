@@ -163,7 +163,7 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if( verbose ) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
-    meshPtr_Type fullMeshPtr( new mesh_Type );
+    meshPtr_Type fullMeshPtr( new mesh_Type( *Comm ) );
     const UInt & geoDim = static_cast<UInt>( mesh_Type::S_geoDimensions );
 
 
