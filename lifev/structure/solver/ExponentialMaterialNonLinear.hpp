@@ -45,7 +45,6 @@
 
 
 #include <lifev/structure/solver/StructuralMaterial.hpp>
-#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 
 namespace LifeV
 {
