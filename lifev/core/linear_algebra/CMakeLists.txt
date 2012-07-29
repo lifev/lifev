@@ -5,6 +5,7 @@ SET(linear_algebra_HEADERS
   linear_algebra/BlockEpetra_Map.hpp
   linear_algebra/BlockEpetra_MultiVector.hpp
   linear_algebra/BlockOperator.hpp
+  linear_algebra/CompositeOperator.hpp
   linear_algebra/IfpackPreconditioner.hpp
   linear_algebra/InvertibleOperator.hpp
   linear_algebra/LinearOperator.hpp
@@ -22,6 +23,7 @@ SET(linear_algebra_SOURCES
   linear_algebra/BlockEpetra_Map.cpp
   linear_algebra/BlockEpetra_MultiVector.cpp
   linear_algebra/BlockOperator.cpp
+  linear_algebra/CompositeOperator.cpp
   linear_algebra/IfpackPreconditioner.cpp
   linear_algebra/InvertibleOperator.cpp
   linear_algebra/LinearOperator.cpp
