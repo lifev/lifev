@@ -141,42 +141,120 @@ public:
 private:
     //! @name Private methods
     //@{
-    void defineShape();
-
+    //! Compose the .case file
+    /*!
+      @param Time the time of the snapshot
+    */
     void writeCase(const Real& time);
+    //! Compose the .geo file
+    /*!
+      @param geoFile the name of the file to be produced
+    */
     void writeAsciiGeometry( const std::string geoFile );
-
-    void writeAscii(const exporterData_Type& dvar);
+    //! The ASCII writer
+    /*!
+      @param dvar the ExporterData object
+    */
+    void writeAscii( const exporterData_Type& dvar);
+    //! The ASCII writer
+    /*!
+      @param dvar the ExporterData object
+      @param suffix the file suffix (.scl or .vct)
+    */
     void writeAsciiValues(const exporterData_Type& dvar, const std::string& suffix);
-    void caseMeshSection(std::ofstream& casef);
-    void caseVariableSection(std::ofstream& casef);
-    void caseTimeSection(std::ofstream& casef, const Real& time);
-    void writeGlobalIDs(const std::string& filename);
+    //! Compose the "mesh" section of the .case file
+    /*!
+      @param casef the file object
 
+      Specify whether or not the mesh is changing for each snapshot
+    */
+    void caseMeshSection(std::ofstream& casef);
+    //! Compose the "variable" section of the .case file
+    /*!
+      @param casef the file object
+
+      The file name will be different based on the regime and the kind of
+      field (scalar / vector)
+    */
+    void caseVariableSection(std::ofstream& casef);
+    //! Compose the "time" section of the .case file
+    /*!
+      @param casef the file object
+      @param time the current time
+
+      The file will contain the updated number of time steps and the complete
+      list of time values
+    */
+    void caseTimeSection(std::ofstream& casef, const Real& time);
+    //! Dump on file the IDs of the global DOFs associated to this process
+    /*!
+      @param filename the file name
+    */
+    void writeGlobalIDs(const std::string& filename);
+    //! The ASCII reader
+    /*!
+      @param dvar the ExporterData object
+    */
     void readAscii( exporterData_Type& dvar );
+    //! The ASCII reader
+    /*!
+      @param dvar the ExporterData object
+      @param suffix the file suffix (.scl or .vct)
+    */
     void readAsciiValues( exporterData_Type& dvar, const std::string& suffix );
+    //! Read from file and store in a vector a list of global IDs
+    /*!
+      @param filename the file name
+      @param globalDOF the stored list of IDs
+    */
     void readGlobalIDs( const std::string& filename,
                         std::vector<Real>& globalDOF );
-
+    //! The generic reader (specialization of the parent class method)
+    /*!
+      @param dvar the ExporterData object
+    */
     void readScalar( exporterData_Type& dvar ) { readAsciiValues(dvar, ".scl"); }
+    //! The generic reader (specialization of the parent class method)
+    /*!
+      @param dvar the ExporterData object
+    */
     void readVector( exporterData_Type& dvar ) { readAsciiValues(dvar, ".vct"); }
-
+    //! initialize the internal data structures storing the ID of the current process
     void initProcId();
+    //! Set the local-to-global map of DOFs
+    /*!
+      @param ltGNodesMap the local-to-global map
+
+      ltGNodesMap[i] is the global ID of the i-th DOF owned by the current process
+    */
     void setNodesMap( std::vector<Int> ltGNodesMap );
+    //! Build the local-to-global map of DOFs
+    /*!
+      @param ltGNodesMap the local-to-global map
+
+      ltGNodesMap[i] is the global ID of the i-th DOF owned by the current process
+    */
     void initNodesMap();
     //@}
 
     //! @name Private members
     //@{
+    //! the counter of the number of steps processed
     UInt                        M_steps;
+    //! the local-to-global map: ltGNodesMap[i] is the global ID of the i-th DOF
+    //! owned by the current process
     std::vector<Int>            M_ltGNodesMap;
+    //! the ID of the current process
     std::string                 M_me;
-
+    //! a string label for the FE space
     std::string                 M_FEstr;
+    //! a string label for the boundary FE space
     std::string                 M_bdFEstr;
+    //! the number of local DOFs (per element)
     UInt                        M_nbLocalDof;
+    //! the number of local boundary DOFs (per element)
     UInt                        M_nbLocalBdDof;
-
+    //! are we performing the first post-processing operation?
     bool                        M_firstTimeStep;
     //@}
 };
@@ -371,12 +449,15 @@ MapEpetraType ExporterEnsight<MeshType>::mapType() const
 template <typename MeshType>
 void ExporterEnsight<MeshType>::writeCase(const Real& time)
 {
-    std::ofstream casef( (this->M_postDir + this->M_prefix + this->M_me + ".case").c_str() );
-    casef << "FORMAT\n";
-    casef << "type: ensight\n";
+    std::string filename( this->M_postDir + this->M_prefix + this->M_me + ".case" );
+    std::ofstream casef( filename.c_str() );
+    ASSERT(casef.is_open(), "There is an error while opening " + filename );
+    ASSERT(casef.good(), "There is an error while writing to " + filename );
+    casef << "FORMAT\ntype: ensight\n";
     caseMeshSection(casef);
     caseVariableSection(casef);
     caseTimeSection(casef,time);
+    casef.close();
 }
 
 template <typename MeshType>
@@ -385,43 +466,48 @@ void ExporterEnsight<MeshType>::writeAsciiGeometry(const std::string gFile)
     using std::setw;
 
     std::ofstream geoFile(gFile.c_str() );
+    ASSERT(geoFile.is_open(), "There is an error while opening " + gFile );
     ID vertexNumber = this->M_mesh->numVertices();
     ID elementNumber = this->M_mesh->numElements();
     UInt part=0;
-    geoFile << "Geometry file\n";
-    geoFile << "Geometry file\n";
-    geoFile << "node id given\n";
-    geoFile << "element id given\n";
-    geoFile << "coordinates\n";
+    ASSERT(geoFile.good(), "There is an error while writing to " + gFile );
+    geoFile << "Geometry file\nnode id given\nelement id given\ncoordinates\n";
     geoFile.setf(std::ios::right | std::ios_base::scientific);
     geoFile.precision(5);
+    ASSERT(geoFile.good(), "There is an error while writing to " + gFile );
     geoFile << setw(8) <<  vertexNumber << "\n";
     for (ID i=0; i < vertexNumber; ++i)
     {
+        ASSERT(geoFile.good(), "There is an error while writing to " + gFile );
         geoFile << setw(8) << i + ensightOffset;
         for (UInt icoor=0; icoor<nDimensions; icoor++)
-            geoFile << setw(12) << float(this->M_mesh->pointList(i).coordinatesArray()[icoor]);
+        {
+            ASSERT(geoFile.good(), "There is an error while writing to " + gFile );
+            geoFile << setw(12) << static_cast<float>(this->M_mesh->pointList(i).coordinatesArray()[icoor]);
+        }
+        ASSERT(geoFile.good(), "There is an error while opening " + gFile );
         geoFile << "\n";
     }
 
-    geoFile<< "part";
-
+    ASSERT(geoFile.good(), "There is an error while writing to " + gFile );
     ++part;
-    geoFile << setw(8) << part << "\n";
-    geoFile << "full geometry\n";
-    // elements
-    geoFile << M_FEstr << "\n";
-    geoFile << setw(8) << elementNumber << "\n";
+    geoFile << "part" << setw(8) << part << "\nfull geometry\n"
+                    // elements
+                    << M_FEstr << "\n" << setw(8) << elementNumber << "\n";
     for (ID i=0; i < elementNumber; ++i)
     {
+        ASSERT(geoFile.good(), "There is an error while writing to " + gFile );
         geoFile << setw(8) << i + ensightOffset;
         for (ID j=0; j< M_nbLocalDof; ++j)
         {
+            ASSERT(geoFile.good(), "There is an error while writing to " + gFile );
             geoFile << setw(8) << this->M_mesh->element(i).point(j).localId() + ensightOffset;
         }
+        ASSERT(geoFile.good(), "There is an error while writing to " + gFile );
         geoFile << "\n";
 
     }
+    geoFile.close();
 }
 
 template <typename MeshType>
@@ -446,20 +532,26 @@ void ExporterEnsight<MeshType>::writeAsciiValues(const exporterData_Type& dvar, 
     using std::setw;
 
     std::ofstream exportFile;
+    std::string filename;
 
     if ( dvar.regime() == exporterData_Type::SteadyRegime )
-        exportFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
-                          this->M_me + suffix).c_str() );
+        filename = this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+        this->M_me + suffix;
     else
-        exportFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
-                          this->M_postfix + this->M_me + suffix).c_str() );
+        filename = this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+        this->M_postfix + this->M_me + suffix;
+
+    exportFile.open( filename.c_str() );
+
+    ASSERT(exportFile.is_open(), "There is an error while opening " + filename );
 
     UInt count=0;
 
-    UInt size  = dvar.numDOF();
-    UInt start = dvar.start();
-    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
+    const UInt size  = dvar.numDOF();
+    const UInt start = dvar.start();
+    const UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
 
+    ASSERT(exportFile.good(), "There is an error while writing to " + filename );
     if( suffix.compare(".vct") == 0 )
         exportFile<<"Vector per node\n";
     else if( suffix.compare(".scl") == 0 )
@@ -471,16 +563,21 @@ void ExporterEnsight<MeshType>::writeAsciiValues(const exporterData_Type& dvar, 
     for (UInt i=0; i<vertexNumber; ++i)
         for (UInt j=0; j< dvar.fieldDim(); ++j)
         {
-            Int id = this->M_ltGNodesMap[i];
-            exportFile << setw(12) << float(dvar(start + j * size + id)) ;
+            const Int id = this->M_ltGNodesMap[i];
+            ASSERT(exportFile.good(), "There is an error while writing to " + filename );
+            exportFile << setw(12) << static_cast<float>(dvar(start + j * size + id)) ;
             ++count;
             if ( count == 6 )
             {
+                ASSERT(exportFile.good(), "There is an error while writing to " + filename );
                 exportFile << "\n";
                 count=0;
             }
         }
+    ASSERT(exportFile.good(), "There is an error while writing to " + filename );
     exportFile << std::endl;
+
+    exportFile.close();
 }
 
 template <typename MeshType>
@@ -491,23 +588,28 @@ void ExporterEnsight<MeshType>::writeGlobalIDs(const std::string& filename)
     std::ofstream globalIDsFile;
 
     globalIDsFile.open( filename.c_str() );
+    ASSERT(globalIDsFile.is_open(), "There is an error while opening " + filename );
 
     UInt count=0;
 
-    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
+    const UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
+    ASSERT(globalIDsFile.good(), "There is an error while writing to " + filename );
     globalIDsFile<<"Node global ID "<<vertexNumber<<"\n";
 
     for (UInt i=0; i<vertexNumber; ++i)
     {
-        Int id = this->M_ltGNodesMap[i];
+        const Int id = this->M_ltGNodesMap[i];
+        ASSERT(globalIDsFile.good(), "There is an error while writing to " + filename );
         globalIDsFile << setw(12) << id ;
         ++count;
         if ( count == 6 )
         {
+            ASSERT(globalIDsFile.good(), "There is an error while writing to " + filename );
             globalIDsFile << "\n";
             count=0;
         }
     }
+    ASSERT(globalIDsFile.good(), "There is an error while writing to " + filename );
     globalIDsFile << std::endl;
     globalIDsFile.close();
 }
@@ -515,22 +617,27 @@ void ExporterEnsight<MeshType>::writeGlobalIDs(const std::string& filename)
 template <typename MeshType>
 void ExporterEnsight<MeshType>::caseMeshSection(std::ofstream& casef)
 {
+    ASSERT(casef.good(), "There is an error while writing to file" );
     casef << "GEOMETRY\n";
     if ( this->M_multimesh )
     {
         std::string stars(".");
         for (UInt cc(0); cc<this->M_timeIndexWidth; ++cc) stars+="*";
 
+        ASSERT(casef.good(), "There is an error while writing to file" );
         casef << "model: 1 " + this->M_prefix + stars << this->M_me << ".geo change_coords_only\n";
     }
     else
+    {
+        ASSERT(casef.good(), "There is an error while writing to file" );
         casef << "model: 1 " + this->M_prefix + this->M_me + ".geo\n";
+    }
 }
 
 template <typename MeshType>
 void ExporterEnsight<MeshType>::caseVariableSection(std::ofstream& casef)
 {
-    // typedef typename std::list< exporterData_Type >::const_iterator Iterator;
+    ASSERT(casef.good(), "There is an error while writing to file" );
     casef << "VARIABLE\n";
     std::string aux, str;
     for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
@@ -548,9 +655,11 @@ void ExporterEnsight<MeshType>::caseVariableSection(std::ofstream& casef)
         switch ( i->fieldType() )
         {
         case exporterData_Type::ScalarField:
+            ASSERT(casef.good(), "There is an error while writing to file" );
             casef << "scalar per node: 1 " +  aux + str << this->M_me << ".scl\n";
             break;
         case exporterData_Type::VectorField:
+            ASSERT(casef.good(), "There is an error while writing to file" );
             casef << "vector per node: 1 " +  aux +  str << this->M_me << ".vct\n";
             break;
         }
@@ -560,24 +669,24 @@ void ExporterEnsight<MeshType>::caseVariableSection(std::ofstream& casef)
 template <typename MeshType>
 void ExporterEnsight<MeshType>::caseTimeSection(std::ofstream& casef, const Real& time)
 {
+    ASSERT(casef.good(), "There is an error while writing to file" );
     this->M_timeSteps.push_back(time);
     ++this->M_steps;
-    casef << "TIME\n";
-    casef << "time set: 1\n";
-    casef << "number of steps: " <<  this->M_steps << "\n";
-    casef << "filename start number: " << this->M_timeIndexStart << "\n";
-    casef << "filename increment: 1\n";
-    casef << "time values:\n";
+    casef << "TIME\ntime set: 1\nnumber of steps: " <<  this->M_steps << "\n"
+                    << "filename start number: " << this->M_timeIndexStart << "\n"
+                    << "filename increment: 1\ntime values:\n";
 
     UInt count=0;
 
     typedef std::list<Real>::const_iterator Iterator;
     for (Iterator i=this->M_timeSteps.begin(); i != this->M_timeSteps.end(); ++i)
     {
+        ASSERT(casef.good(), "There is an error while writing to file" );
         casef << *i << " " ;
         ++count;
         if ( count == 6)
         {
+            ASSERT(casef.good(), "There is an error while writing to file" );
             casef <<"\n";
             count = 0;
         }
@@ -596,11 +705,15 @@ void ExporterEnsight<MeshType>::readAscii(exporterData_Type& dvar)
     case exporterData_Type::VectorField:
         writeAsciiValues(dvar,".vct");
         break;
+    default:
+        ERROR_MSG("Unsupported field type!");
+        break;
     }
 
 }
 
-template <typename MeshType> void ExporterEnsight<MeshType>::readAsciiValues(exporterData_Type& dvar, const std::string& suffix)
+template <typename MeshType> void ExporterEnsight<MeshType>::readAsciiValues(exporterData_Type& dvar,
+                                                                             const std::string& suffix)
 {
     ASSERT( this->M_numImportProc, "The number of pieces to be loaded was not specified." );
 
@@ -620,35 +733,35 @@ template <typename MeshType> void ExporterEnsight<MeshType>::readAsciiValues(exp
         readGlobalIDs( this->M_postDir + super::M_prefix + "_globalIDs" + index.str() + ".scl", globalDOF );
 
         // open the file with the vector field to be imported
-        std::string filename( this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+        const std::string filename( this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
                               this->M_postfix + index.str() + suffix );
         std::ifstream importFile( filename.c_str() );
 
         // debugging step
         if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
 
-        ASSERT(importFile.good(), std::stringstream("There is an error while reading " +
-                                                    filename).str().c_str() );
-        // parameters to access ExporterData structures
-        UInt size  = dvar.numDOF();
-        UInt start = dvar.start();
-
+        ASSERT(importFile.is_open(), "There is an error while reading " + filename );
         // discard the header of the file
-        std::string trashcan;
-        importFile >> trashcan >> trashcan >> trashcan;
+        std::string line;
+        ASSERT(importFile.good(), "There is an error while reading from " + filename );
+        getline( importFile, line ); // the line looks like this: "Vector/Scalar per node"
+
+        // parameters to access ExporterData structures
+        const UInt size  = dvar.numDOF();
+        const UInt start = dvar.start();
 
         // loop over the DOFs listed in the current piece
         for (UInt i=0; i<globalDOF.size(); ++i)
         {
             // extract the global ID of each DOF
-            Int id = globalDOF[i];
+            const Int id = globalDOF[i];
             // we are working with vectorial fields
             for (UInt j=0; j<dvar.fieldDim(); ++j)
             {
                 // this is the value of the field, to be imported
                 Real value(0);
-                ASSERT(importFile.good(), std::stringstream("There is an error while reading " +
-                                                            filename).str().c_str() );
+
+                ASSERT(importFile.good(), "There is an error while reading from " + filename );
                 importFile >> value;
 
                 // do the actual import only if the global ID belongs to the current process
@@ -659,8 +772,7 @@ template <typename MeshType> void ExporterEnsight<MeshType>::readAsciiValues(exp
             }
         }
 
-        ASSERT(!importFile.fail(), std::stringstream("There is an error while reading " +
-                                                     filename).str().c_str() );
+        ASSERT(!importFile.fail(), "There is an error while reading " + filename );
         importFile.close();
     }
 }
@@ -700,21 +812,20 @@ void ExporterEnsight<MeshType>::readGlobalIDs( const std::string& filename,
                                                std::vector<Real>& globalDOF )
 {
     std::ifstream globalIDsFile( filename.c_str() );
-    globalDOF.resize(0);
 
     if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
 
-    ASSERT(globalIDsFile.good(), std::stringstream("There is an error while reading " +
-                                                   filename).str().c_str() );
+    ASSERT(globalIDsFile.is_open(), "There is an error while opening " + filename );
 
-    UInt vertexNumber; // = static_cast<UInt> (this->M_ltGNodesMap.size()); // will become this->M_numDOF, TP 5/2011
-
+    UInt vertexNumber;
+    globalDOF.resize(0);
 
     // file parsing: line by line
     std::string line;
     std::stringstream parseLine;
 
-    getline( globalIDsFile, line ); // "Node global ID N"
+    ASSERT(globalIDsFile.good(), "There is an error while reading " + filename );
+    getline( globalIDsFile, line ); // the line looks like this: "Node global ID N"
     parseLine.str(line);
     std::string trashcan;
     parseLine >> trashcan >> trashcan >> trashcan >> vertexNumber;
@@ -722,14 +833,12 @@ void ExporterEnsight<MeshType>::readGlobalIDs( const std::string& filename,
     for( UInt iNode = 0; iNode < vertexNumber; ++iNode )
     {
         Real gID(0);
+        ASSERT(globalIDsFile.good(), "There is an error while reading " + filename );
         globalIDsFile >> gID;
         globalDOF.push_back( gID );
-        // std::cout << globalDOF[iNode] << " " << std::flush;
     }
-    // std::cout << std::endl;
 
-    ASSERT(!globalIDsFile.fail(), std::stringstream("There is an error while reading " +
-                                                    filename).str().c_str() );
+    ASSERT(!globalIDsFile.fail(), "There is an error while reading " + filename );
     globalIDsFile.close();
 }
 

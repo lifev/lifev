@@ -68,14 +68,14 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
-//! ExporterData - Holds the datastructure of the an array to import/export
+//! ExporterData - Holds the data structure of the array to import/export
 /*!
     @author Simone Deparis <simone.deparis@epfl.ch>
     @date 11-11-2008
 
-    This class holds the datastructure of one datum
+    This class holds the data structure of one datum
     to help the importer/exporter
-    like:   variable name, shared pointer to data, size, and few others.
+    e.g. variable name, shared pointer to data, size, and few others.
  */
 template< typename MeshType >
 class ExporterData
@@ -160,9 +160,10 @@ public:
     //! @name Set Methods
     //@{
 
-    //! file name for postprocessing has to include time dependency
+    //! set the time regime of the field
     void setRegime(FieldRegimeEnum regime) {M_regime = regime;}
 
+    //! set where is the variable located (Node or Cell)
     void setWhere( WhereEnum where ){M_where = where;}
     //@}
 
@@ -291,7 +292,7 @@ public:
         In this case prefix and procID should be set separately
         @param dfile the GetPot data file where you must provide an [exporter] section with:
           "start"     (start index for filenames 0 for 000, 1 for 001 etc.),
-          "save"      (how many time steps per postprocessing)
+          "save"      (how many time steps between snapshots)
           "multimesh" ( = true if the mesh has to be saved at each post-processing step)
        @param the prefix for the case file (ex. "test" for test.case)
     */
@@ -398,7 +399,7 @@ public:
         M_timeIndexStart = timeIndexStart;
     }
 
-    //! Set how many time step between two saves.
+    //! Set how many time step between two snapshots
     /*!
      * @param save steps
      */
@@ -420,16 +421,19 @@ public:
 
     //! Close the output file
     /*!
-         This method is only used by  some of the exporter which derived from this class.
+         This method is only used by  some of the exporter which derive from this class.
      */
     virtual void closeFile() {}
     //@}
 
     //! @name Get Methods
     //@{
+    //! returns how many time steps between two snapshots
     const UInt& save() const { return M_save; }
 
+    //! returns the time index of the first snapshot
     const UInt& timeIndexStart() const { return M_timeIndexStart; }
+    //! returns the time index of the current snapshot
     const UInt& timeIndex() const { return M_timeIndex; }
 
     //! returns the type of the map to use for the VectorEpetra
@@ -450,22 +454,35 @@ protected:
 
     //! @name Protected data members
     //@{
+    //! the file prefix
     std::string                 M_prefix;
+    //! the name of the folder where to read or write files
     std::string                 M_postDir;
+    //! the time index of the first snapshot
     UInt                        M_timeIndexStart;
+    //! the time index of the current snapshot
     UInt                        M_timeIndex;
+    //! how many time steps between subsequent snapshots
     UInt                        M_save;
+    //! do we want to save the mesh with each snapshot?
     bool                        M_multimesh;
-    bool                        M_printConnectivity;
+    //! how many digits (in the file suffix) for the time index
     UInt                        M_timeIndexWidth;
+    //! a pointer to the mesh
     meshPtr_Type                M_mesh;
-    int                         M_procId;
+    //! the ID of the process
+    Int                         M_procId;
+    //! the file suffix
     std::string                 M_postfix;
+    //! how many processes produced the data that we want to import
     UInt                        M_numImportProc;
-
+    //! a map to retrieve all data located in the same geo entities (node or element)
     whereToDataIdMap_Type       M_whereToDataIdMap;
+    //! a map to retrieve all data defined in the same FE space
     feTypeToDataIdMap_Type      M_feTypeToDataIdMap;
+    //! the vector of ExporterData objects
     dataVector_Type             M_dataVector;
+    //! the list of time steps (for use in import procedures)
     std::list<Real>             M_timeSteps;
     //@}
 };
@@ -561,7 +578,6 @@ Exporter<MeshType>::Exporter():
         M_timeIndex         ( M_timeIndexStart ),
         M_save              ( 1 ),
         M_multimesh         ( true ),
-        M_printConnectivity ( true ),
         M_timeIndexWidth    ( 5 ),
         M_numImportProc     ( 0 )
 {}
@@ -685,7 +701,6 @@ void Exporter<MeshType>::setDataFromGetPot( const GetPot& dataFile, const std::s
     M_timeIndex         = M_timeIndexStart;
     M_save              = dataFile( ( section + "/save"      ).data(), 1 );
     M_multimesh         = dataFile( ( section + "/multimesh" ).data(), true );
-    M_printConnectivity = dataFile( ( section + "/printConnectivity" ).data(), 1);
     M_timeIndexWidth    = dataFile( ( section + "/time_id_width" ).data(), 5);
     M_numImportProc     = dataFile( ( section + "/numImportProc" ).data(), 1);
 }
