@@ -11,6 +11,7 @@ ADD_SUBDIRECTORIES(
   fem
   filter
   hyperbolic
+  linear_solver
   matrix_epetra_structured_framework
   mesh
   repeated_mesh

@@ -41,9 +41,6 @@ SUBDIRS		=  benchmark_RossEthierSteinman \
                unmaintained_rk
 
 
-
-
-
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 	{									   \
 	echo '# Signature of the current package.'; \
