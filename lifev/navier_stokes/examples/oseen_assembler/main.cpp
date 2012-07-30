@@ -426,7 +426,7 @@ main( int argc, char** argv )
         *solution *= 0;
         *solution = *velocity;
         *beta *= 0;
-        oseenAssembler.addConvectionRhs(*beta,*solution);
+        oseenAssembler.addConvectionRhs(*beta,1.,*solution);
         bdfConvection.setInitialCondition( *beta );
         bdfConvectionInit.setInitialCondition( *beta );
 
@@ -437,7 +437,7 @@ main( int argc, char** argv )
                 uFESpace->interpolate( static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>( problem_Type::uexact ), *velocity, currentTime-(3-i)*timestep );
                 *solution = *velocity;
                 *beta *= 0;
-                oseenAssembler.addConvectionRhs(*beta,*solution);
+                oseenAssembler.addConvectionRhs(*beta,1.,*solution);
                 bdfConvectionInit.shiftRight( *beta );
             }
         }
@@ -479,17 +479,17 @@ main( int argc, char** argv )
             *systemMatrix += *baseMatrix;
             if(convectionTerm == SemiImplicit)
             {
-                oseenAssembler.addConvection(*systemMatrix,*solution);
+                oseenAssembler.addConvection(*systemMatrix,1.0,*solution);
             }
             else if(convectionTerm == Explicit)
             {
-                oseenAssembler.addConvectionRhs(*rhs,*solution);
+                oseenAssembler.addConvectionRhs(*rhs,1.,*solution);
             }
             else if(convectionTerm == KIO91)
             {
                 *rhs -= bdfConvectionInit.extrapolation();
                 *beta *= 0;
-                oseenAssembler.addConvectionRhs(*beta,*solution);
+                oseenAssembler.addConvectionRhs(*beta,1.,*solution);
                 bdfConvectionInit.shiftRight(*beta);
             }
 
@@ -512,7 +512,7 @@ main( int argc, char** argv )
         if(convectionTerm == KIO91)
         {
             *beta *= 0;
-            oseenAssembler.addConvectionRhs(*beta,*solution);
+            oseenAssembler.addConvectionRhs(*beta,1.,*solution);
             bdfConvection.shiftRight(*beta);
         }
 
@@ -572,11 +572,11 @@ main( int argc, char** argv )
         if(convectionTerm == SemiImplicit)
         {
             *beta = bdf.extrapolation(); // Extrapolation for the convective term
-            oseenAssembler.addConvection(*systemMatrix,*beta);
+            oseenAssembler.addConvection(*systemMatrix,1.0,*beta);
         }
         else if(convectionTerm == Explicit)
         {
-            oseenAssembler.addConvectionRhs(*rhs,*solution);
+            oseenAssembler.addConvectionRhs(*rhs,1.,*solution);
         }
         else if(convectionTerm == KIO91)
         {
@@ -600,7 +600,7 @@ main( int argc, char** argv )
         if(convectionTerm == KIO91)
         {
             *beta *= 0;
-            oseenAssembler.addConvectionRhs(*beta,*solution);
+            oseenAssembler.addConvectionRhs(*beta,1.,*solution);
             bdfConvection.shiftRight(*beta);
         }
 

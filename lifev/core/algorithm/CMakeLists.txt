@@ -11,6 +11,7 @@ SET(algorithm_HEADERS
   algorithm/NonLinearBrent.hpp
   algorithm/Preconditioner.hpp
   algorithm/EigenSolver.hpp
+  algorithm/LinearSolver.hpp
   algorithm/PreconditionerML.hpp
 CACHE INTERNAL "")
 
@@ -23,6 +24,7 @@ SET(algorithm_SOURCES
   algorithm/PreconditionerIfpack.cpp
   algorithm/SolverAztecOO.cpp
   algorithm/EigenSolver.cpp
+  algorithm/LinearSolver.cpp
 CACHE INTERNAL "")
 
 

@@ -30,8 +30,9 @@ m4_include([test_VectorContainer/testsuite.at])
 m4_include([test_MatrixEpetraStructuredFramework/testsuite.at])
 
 #lifealg tests
-#AT_BANNER([life/lifealg testsuite ...])
+AT_BANNER([life/lifealg testsuite ...])
 #m4_include([lifealg/testsuite.at])
+m4_include([test_LinearSolver/testsuite.at])
 
 #lifefem tests
 AT_BANNER([life/lifefem testsuite ...])
