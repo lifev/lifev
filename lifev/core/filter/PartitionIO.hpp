@@ -138,13 +138,14 @@ namespace LifeV {
   	 	 - position of first neighbour element
   	 	 - position of second neighbour element
   	 	 - face flags
-  6. elements ((2 + num of element nodes) * N) x (maximum number of elements
+  6. elements ((3 + num of element nodes) * N) x (maximum number of elements
   	 in mesh parts) (unsigned integer) - each mesh part uses (2 + num of
   	 element nodes) consecutive rows, with the following contents:
   	 	 - one row for the local ids of each element node of the elements in
   	 	   the mesh part
   	 	 - element markers
   	 	 - element global ids
+         - element flag
 */
 template<typename MeshType>
 class PartitionIO {
@@ -631,20 +632,20 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
 template<typename MeshType>
 void LifeV::PartitionIO<MeshType>::writeElements()
 {
-    // Write faces (N = number of parts)
-    // Table is ((2 + num_element_nodes * N) x max_num_elements of int
+    // Write elements (N = number of parts)
+    // Table is ((3 + num_element_nodes * N) x max_num_elements of int
     hsize_t currentSpaceDims[2];
 	hsize_t currentCount[2];
 	if (! M_transposeInFile) {
-		currentSpaceDims[0] = (2 + M_elementNodes) * M_numParts;
+        currentSpaceDims[0] = (3 + M_elementNodes) * M_numParts;
 		currentSpaceDims[1] = M_maxNumElements;
-		currentCount[0] = 2 + M_elementNodes;
+        currentCount[0] = 3 + M_elementNodes;
 		currentCount[1] = currentSpaceDims[1];
 	} else {
 		currentSpaceDims[0] = M_maxNumElements;
-		currentSpaceDims[1] = (2 + M_elementNodes) * M_numParts;
+        currentSpaceDims[1] = (3 + M_elementNodes) * M_numParts;
 		currentCount[0] = currentSpaceDims[0];;
-		currentCount[1] = 2 + M_elementNodes;
+        currentCount[1] = 3 + M_elementNodes;
 	}
 
     M_HDF5IO.createTable("elements", H5T_STD_U32BE, currentSpaceDims);
@@ -664,7 +665,9 @@ void LifeV::PartitionIO<MeshType>::writeElements()
 						currentPart.volumeList[j].marker();
 	    		M_uintBuffer[(M_elementNodes + 1) * stride + j] =
 						currentPart.volumeList[j].id();
-	    		}
+                M_uintBuffer[(M_elementNodes + 2) * stride + j] =
+                        static_cast<int>(currentPart.volumeList[j].flag());
+                }
 
 	    	hsize_t currentOffset[2] = {i * currentCount[0], 0};
 	    	M_HDF5IO.write("elements", H5T_NATIVE_UINT, currentCount,
@@ -682,7 +685,9 @@ void LifeV::PartitionIO<MeshType>::writeElements()
 						currentPart.volumeList[j].marker();
 	    		M_uintBuffer[stride * j + M_elementNodes + 1] =
 						currentPart.volumeList[j].id();
-	    		}
+                M_uintBuffer[stride * j + M_elementNodes + 2] =
+                        static_cast<int>(currentPart.volumeList[j].flag());
+                }
 
 	    	hsize_t currentOffset[2] = {0, i * currentCount[1]};
 	    	M_HDF5IO.write("elements", H5T_NATIVE_UINT, currentCount,
@@ -756,7 +761,7 @@ void LifeV::PartitionIO<MeshType>::readStats()
 template<typename MeshType>
 void LifeV::PartitionIO<MeshType>::readPoints()
 {
-    // Write mesh points (N = number of parts)
+    // Read mesh points (N = number of parts)
     // There are two tables: a (3 * N) x max_num_points table of int and
 	// a (3 * N) x max_num_points table of real
 	hsize_t currentSpaceDims[2];
@@ -830,7 +835,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
 template<typename MeshType>
 void LifeV::PartitionIO<MeshType>::readEdges()
 {
-    // Write mesh edges (N = number of parts)
+    // Read mesh edges (N = number of parts)
     // Read a (5 * N) x max_num_edges table of int and
 	hsize_t currentSpaceDims[2];
     hsize_t currentCount[2];
@@ -891,7 +896,7 @@ void LifeV::PartitionIO<MeshType>::readEdges()
 template<typename MeshType>
 void LifeV::PartitionIO<MeshType>::readFaces()
 {
-    // Write mesh faces (N = number of parts)
+    // read mesh faces (N = number of parts)
     // Read a ((7 + num_face_points) * N) x max_num_faces table of int
 	hsize_t currentSpaceDims[2];
     hsize_t currentCount[2];
@@ -979,8 +984,8 @@ void LifeV::PartitionIO<MeshType>::readFaces()
 template<typename MeshType>
 void LifeV::PartitionIO<MeshType>::readElements()
 {
-    // Write mesh faces (N = number of parts)
-    // Read a ((2 + num_element_points) * N) x max_num_elements table of int
+    // Read mesh elements (N = number of parts)
+    // Read a ((3 + num_element_points) * N) x max_num_elements table of int
 	hsize_t currentSpaceDims[2];
     hsize_t currentCount[2];
     hsize_t currentOffset[2];
@@ -988,13 +993,13 @@ void LifeV::PartitionIO<MeshType>::readElements()
     M_HDF5IO.openTable("elements", currentSpaceDims);
 
 	if (! M_transposeInFile) {
-		currentCount[0] = 2 + M_elementNodes;
+        currentCount[0] = 3 + M_elementNodes;
 		currentCount[1] = currentSpaceDims[1];
 		currentOffset[0] = currentCount[0] * M_myRank;
 		currentOffset[1] = 0;
 	} else {
 		currentCount[0] = currentSpaceDims[0];
-		currentCount[1] = 2 + M_elementNodes;
+        currentCount[1] = 3 + M_elementNodes;
 		currentOffset[0] = 0;
 		currentOffset[1] = currentCount[1] * M_myRank;
 	}
@@ -1014,7 +1019,9 @@ void LifeV::PartitionIO<MeshType>::readElements()
 	    for (UInt j = 0; j < M_numElements; ++j)
 	    {
 	        pv = &(M_meshPartIn->addVolume());
-	        pv->setId(M_uintBuffer[(M_elementNodes + 1) * stride + j]);
+            pv->replaceFlag(
+                    static_cast<flag_Type>(M_uintBuffer[(M_elementNodes + 2) * stride + j]));
+            pv->setId(M_uintBuffer[(M_elementNodes + 1) * stride + j]);
 	        pv->setLocalId(j);
 	        for (UInt k = 0; k < M_elementNodes; ++k)
 	        {
@@ -1027,7 +1034,9 @@ void LifeV::PartitionIO<MeshType>::readElements()
 	    for (UInt j = 0; j < M_numElements; ++j)
 	    {
 	        pv = &(M_meshPartIn->addVolume());
-	        pv->setId(M_uintBuffer[stride * j + M_elementNodes + 1]);
+            pv->replaceFlag(
+                    static_cast<flag_Type>(M_uintBuffer[stride * j + M_elementNodes + 2]));
+            pv->setId(M_uintBuffer[stride * j + M_elementNodes + 1]);
 	        pv->setLocalId(j);
 	        for (UInt k = 0; k < M_elementNodes; ++k)
 	        {
