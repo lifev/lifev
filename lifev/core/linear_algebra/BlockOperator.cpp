@@ -15,7 +15,9 @@ BlockOperator::BlockOperator():
 		M_name("BlockOperator"),
 		M_useTranspose(false),
 		M_structure(NoStructure)
-		{};
+{
+
+}
 
 void BlockOperator::setUp(const boost::shared_ptr<BlockEpetra_Map> & map, const commPtr_Type & comm)
 {
@@ -100,13 +102,13 @@ void BlockOperator::fillComplete()
 	bool thereAreUpperDiagonalBlocks(false);
 	for(UInt iblock = 0; iblock < M_nBlockRows; ++iblock)
 		for(UInt jblock = iblock+1; jblock < M_nBlockCols; ++jblock)
-			if(M_oper(iblock,jblock).get() != 0 && M_oper(iblock, jblock)->HasNormInf() && M_oper(iblock, jblock)->NormInf()!=0 )
+			if(M_oper(iblock,jblock).get() != 0 && (M_oper(iblock, jblock)->HasNormInf() ? M_oper(iblock, jblock)->NormInf()!=0 : true) )
 				thereAreUpperDiagonalBlocks = true;
 
 	bool thereAreLowerDiagonalBlocks(false);
 	for(UInt iblock = 0; iblock < M_nBlockRows; ++iblock)
 		for(UInt jblock = 0; jblock < iblock; ++jblock)
-			if(M_oper(iblock,jblock).get() != 0  && M_oper(iblock, jblock)->HasNormInf() && M_oper(iblock, jblock)->NormInf()!=0 )
+			if(M_oper(iblock,jblock).get() != 0  && (M_oper(iblock, jblock)->HasNormInf() ? M_oper(iblock, jblock)->NormInf()!=0 : true) )
 				thereAreLowerDiagonalBlocks = true;
 
 	for(UInt iblock = 0; iblock < M_nBlockRows; ++iblock)
@@ -268,7 +270,6 @@ int BlockOperator::applyTranspose(const vector_Type & X, vector_Type & Y) const
 
 int BlockOperator::blockJacobi(const vector_Type & X, vector_Type & Y) const
 {
-
 	const std::auto_ptr<BlockEpetra_MultiVector> Xcopy( new BlockEpetra_MultiVector(Copy, X, *M_rangeMap) );
 	const std::auto_ptr<BlockEpetra_MultiVector> Yview( new BlockEpetra_MultiVector(View, Y, *M_rangeMap) );
 
@@ -284,7 +285,6 @@ int BlockOperator::blockJacobi(const vector_Type & X, vector_Type & Y) const
 
 int BlockOperator::blockLowerTriangularSolve(const vector_Type & X, vector_Type & Y) const
 {
-
 	const std::auto_ptr<BlockEpetra_MultiVector> Xcopy( new BlockEpetra_MultiVector(Copy, X, *M_rangeMap) );
 	const std::auto_ptr<BlockEpetra_MultiVector> Yview( new BlockEpetra_MultiVector(View, Y, *M_rangeMap) );
 	BlockEpetra_MultiVector Z(*M_rangeMap, X.NumVectors(), true);
@@ -308,7 +308,6 @@ int BlockOperator::blockLowerTriangularSolve(const vector_Type & X, vector_Type 
 
 int BlockOperator::blockUpperTriangularSolve(const vector_Type & X, vector_Type & Y) const
 {
-
 	const std::auto_ptr<BlockEpetra_MultiVector> Xcopy( new BlockEpetra_MultiVector(Copy, X, *M_rangeMap) );
 	const std::auto_ptr<BlockEpetra_MultiVector> Yview( new BlockEpetra_MultiVector(View, Y, *M_rangeMap) );
 	BlockEpetra_MultiVector Z(*M_rangeMap, X.NumVectors(), true);
