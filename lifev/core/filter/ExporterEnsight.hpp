@@ -452,6 +452,7 @@ void ExporterEnsight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const In
         break;
     default:
         ERROR_MSG( "FE not allowed in ExporterEnsight writer" );
+        break;
     }
 
 }

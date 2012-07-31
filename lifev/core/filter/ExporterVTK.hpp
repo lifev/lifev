@@ -986,6 +986,9 @@ ExporterVTK<MeshType>::composeDataArrayStream(where_Type where,
                         }
                     }
                     break;*/
+                default:
+                    ERROR_MSG( "Unknown field type" );
+                    break;
             }
             dataArraysStringStream << "\n\t\t\t\t</DataArray>\n";
         }
