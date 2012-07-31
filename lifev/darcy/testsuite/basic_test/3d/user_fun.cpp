@@ -104,24 +104,6 @@ Vector vectorSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real
     return source;
 }
 
-// Initial time primal variable for transient and non-linear transient solvers
-Real initialCondition::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Real& /*time*/ ) const
-{
-    return 0.;
-}
-
-// Zero iteration primal variable for non-linear solver
-Real nonLinearStartValue::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Real& /*time*/ ) const
-{
-    return 1.;
-}
-
-// Mass function for time dependent problem
-Real massFunction::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Real& /*time*/ ) const
-{
-    return 1.;
-}
-
 // ===================================================
 //!                    Boundary data
 // ===================================================
