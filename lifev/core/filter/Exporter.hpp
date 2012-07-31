@@ -108,9 +108,9 @@ public:
     //! Time regime of the field /
     enum FieldRegimeEnum
     {
-        UnsteadyRegime = 0, /*!< The field is in unsteady regime */
-        SteadyRegime = 1, /*!< The field is in steady regime */
-        NullRegime = 2 /*!< DEPRECATED */
+        UnsteadyRegime, /*!< The field is in unsteady regime */
+        SteadyRegime, /*!< The field is in steady regime */
+        NullRegime /*!< DEPRECATED */
     };
 
     //@}
@@ -266,7 +266,7 @@ public:
     //! @name Public typedefs
     //@{
     typedef MeshType                                    mesh_Type;
-    typedef boost::shared_ptr<MeshType>                 meshPtr_Type;
+    typedef boost::shared_ptr<mesh_Type>                meshPtr_Type;
     typedef ExporterData<mesh_Type>                     exporterData_Type;
     typedef typename exporterData_Type::vector_Type     vector_Type;
     typedef typename exporterData_Type::vectorPtr_Type  vectorPtr_Type;
@@ -447,7 +447,15 @@ protected:
     //! compute postfix
     void computePostfix();
 
+    //! A method to read a scalar field (to be implemented in derived classes)
+    /*!
+       @param dvar the ExporterData object
+     */
     virtual void readScalar( exporterData_Type& dvar ) = 0;
+    //! A method to read a vector field (to be implemented in derived classes)
+    /*!
+       @param dvar the ExporterData object
+     */
     virtual void readVector( exporterData_Type& dvar ) = 0;
 
     //@}
@@ -540,7 +548,7 @@ std::string ExporterData<MeshType>::typeName() const
         return "Vector";
     }
 
-    return "ERROR string";
+    ERROR_MSG( "Unknown field type" );
 }
 
 template< typename MeshType >
@@ -560,7 +568,7 @@ std::string ExporterData<MeshType>::whereName() const
         return "Cell";
     }
 
-    return "ERROR string";
+    ERROR_MSG( "Unknown location of data" );
 }
 
 // ==================================================

@@ -107,7 +107,7 @@ public:
     };
 
     typedef MeshType                          mesh_Type;
-    typedef Exporter<MeshType>                super;
+    typedef Exporter<mesh_Type>               super;
     typedef typename super::meshPtr_Type      meshPtr_Type;
     typedef typename super::feSpacePtr_Type   feSpacePtr_Type;
     typedef typename super::exporterData_Type exporterData_Type;
@@ -136,7 +136,7 @@ public:
 
 private:
     //! Copy constructor
-    ExporterVTK( const ExporterVTK& example ) {}
+    ExporterVTK( const ExporterVTK& example );
 
 public:
     //! Destructor
@@ -155,22 +155,29 @@ public:
 
     //! Import data from previous simulations at a certain time
     /*!
-       @param Time the time of the data to be imported
-     */
+      @param Time the time of the data to be imported
+
+      Not yet implemented for ExporterVTK
+    */
     virtual UInt importFromTime( const Real& /*Time*/ ) { return -1; }
+
+    //! Import data from previous simulations and rebuild the internal time counters
+    /*!
+      @param importTime the time of the snapshot to be imported
+      @param dt the time step, is used to rebuild the history up to now
+
+      Not yet implemented for ExporterVTK
+    */
+    virtual void import(const Real& /*Tstart*/, const Real& /*dt*/) {}
 
     //! Import data from previous simulations
     /*!
-       @param time the solver time
-       @param dt time step used to rebuild the history up to now
-     */
-    virtual void import(const Real& /*Tstart*/, const Real& /*dt*/) {}
-
-    //! Read  only last timestep
+      @param importTime the time of the snapshot to be imported
+    */
     virtual void import(const Real& Tstart);
 
     //! temporary: the method should work form the Exporter class
-    void exportPID ( MeshPartitioner<MeshType> const & /*meshPart*/ )
+    void exportPID ( MeshPartitioner<mesh_Type> const & /*meshPart*/ )
     {
         std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
     }
@@ -267,7 +274,6 @@ private:
      */
     void composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr,
                               const std::map<UInt, UInt>& globalToLocalPointsMap,
-                              //const std::map<UInt, UInt>& localToGlobalPointsMap,
                               const std::vector<Vector>& coordinatesOfPoints,
                               std::stringstream& vtuGeoStringStream );
 
@@ -307,12 +313,35 @@ private:
 
     // to be checked - do not use for now
     void composeDataArrayStream(where_Type where,
-                           std::stringstream& dataArraysStringStream);
+                                std::stringstream& dataArraysStringStream);
 
+    //! The scalar reader (specialization of the parent class method)
+    /*!
+      @param dvar the ExporterData object
+    */
     virtual void readScalar( ExporterData<mesh_Type>& /*dvar*/ ) {}
+    //! The vector reader (specialization of the parent class method)
+    /*!
+      @param dvar the ExporterData object
+    */
     virtual void readVector( ExporterData<mesh_Type>& /*dvar*/ ) {}
+    //! The reader for VTU files
+    /*!
+      @param dvar the ExporterData object
+    */
     void readVTUFiles( exporterData_Type& dvar );
+    //! A routine for loading values stored in binary format in a VTU file
+    /*!
+      @param line a line read from file
+      @param values the list of values extracted from the line
+      @param numBits the size of data to be read
+    */
     void readBinaryData( const std::string& line, std::vector<Real>& values, const UInt& numBits );
+    //! A routine for loading values stored in ASCII format in a VTU file
+    /*!
+      @param line a line read from file
+      @param values the list of values extracted from the line
+    */
     void readASCIIData( const std::string& line, std::vector<Real>& values );
     //@}
 
@@ -336,8 +365,8 @@ private:
 // Constructors
 // ==============
 
-template<typename Mesh>
-ExporterVTK<Mesh>::ExporterVTK():
+template<typename MeshType>
+ExporterVTK<MeshType>::ExporterVTK():
 super(),
 M_exportMode(ASCII_EXPORT),
 M_floatPrecision( DOUBLE_PRECISION )
@@ -345,7 +374,7 @@ M_floatPrecision( DOUBLE_PRECISION )
 }
 
 
-template<typename Mesh> ExporterVTK<Mesh >::ExporterVTK(
+template<typename MeshType> ExporterVTK<MeshType >::ExporterVTK(
                 const GetPot& data_file,
                 const std::string prefix)
                 :
@@ -355,8 +384,8 @@ template<typename Mesh> ExporterVTK<Mesh >::ExporterVTK(
 }
 
 
-template<typename Mesh>
-void ExporterVTK<Mesh >::setDataFromGetPot(
+template<typename MeshType>
+void ExporterVTK<MeshType >::setDataFromGetPot(
                 const GetPot& data_file,
                 const std::string& section )
 {
@@ -392,8 +421,8 @@ void ExporterVTK<Mesh >::setDataFromGetPot(
 // ==============
 // Destructor
 // ==============
-template<typename Mesh>
-ExporterVTK<Mesh>::~ExporterVTK()
+template<typename MeshType>
+ExporterVTK<MeshType>::~ExporterVTK()
 {
     // Right before dying, the exporter will write a VTK collection in a pvd file
     // This allows ParaView to load a single file for the entire time series,
@@ -430,8 +459,8 @@ ExporterVTK<Mesh>::~ExporterVTK()
 // Public methods
 // =====================
 
-template<typename Mesh>
-void ExporterVTK<Mesh>::postProcess(const Real& time)
+template<typename MeshType>
+void ExporterVTK<MeshType>::postProcess(const Real& time)
 {
     // typedef std::list< ExporterData >::iterator Iterator;
 
@@ -506,11 +535,9 @@ void ExporterVTK<Mesh>::postProcess(const Real& time)
 }
 
 
-template<typename Mesh>
-void ExporterVTK<Mesh>::import(const Real& /*time*/)
+template<typename MeshType>
+void ExporterVTK<MeshType>::import(const Real& /*time*/)
 {
-    //this->M_timeSteps.push_back(time);
-
     this->computePostfix();
 
     assert( this->M_postfix != "*****" );
@@ -545,8 +572,8 @@ MapEpetraType ExporterVTK<MeshType>::mapType() const
 // Private methods
 // ===================
 
-template <typename Mesh>
-UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
+template <typename MeshType>
+UInt ExporterVTK<MeshType>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
 {
     ASSERT( _feSpacePtr.get(), "\nA pointer to a valid FE object is required!");
 
@@ -583,9 +610,7 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
             vtkCellType = VTK_QUADRATIC_HEXAHEDRON;
             break;
         default:
-            if (!this->M_procId)
-                std::cout << "WARNING: the element is not yet implemented in ExporterVTK\n";
-            abort();
+            ERROR_MSG( "WARNING: the element is not yet implemented in ExporterVTK\n" )
             break;
     }
 
@@ -593,15 +618,15 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
 }
 
 
-template <typename Mesh>
+template <typename MeshType>
 void
-ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
+ExporterVTK<MeshType>::composeDataArrayStream(const exporterData_Type& dvar,
                                           const std::map<UInt,UInt>& localToGlobalMap,
                                           std::stringstream& dataArraysStringStream)
 {
-    UInt start        ( dvar.start() );
-    UInt numGlobalDOF ( dvar.numDOF() );
-    UInt numMyDOF     ( localToGlobalMap.size() );
+    const UInt start        ( dvar.start() );
+    const UInt numGlobalDOF ( dvar.numDOF() );
+    const UInt numMyDOF     ( localToGlobalMap.size() );
 
     std::stringstream dataToBeEncoded; dataToBeEncoded.str("");
     std::string encodedDataString;
@@ -625,7 +650,7 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             floatTypeString = "Float64";
             break;
         default:
-            abort();
+            ERROR_MSG( "WARNING: this float precision cannot be handled in ExporterVTK\n" )
             break;
     }
 
@@ -642,6 +667,9 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
                                    sizeof(int32_type) );
             lengthOfRawData += sizeof(int32_type);
             break;
+        default:
+            ERROR_MSG( "WARNING: this export mode cannot be handled in ExporterVTK\n" )
+            break;
     }
 
     dataArraysStringStream << "\t\t\t\t<DataArray type=\"" << floatTypeString << "\" Name=\""
@@ -657,41 +685,29 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
 
             for (UInt iDOF=0; iDOF<numMyDOF; ++iDOF)
             {
-                Int id = localToGlobalMap.find(iDOF)->second;
+                const Int id = localToGlobalMap.find(iDOF)->second;
                 for (UInt iCoor=0; iCoor< dvar.fieldDim(); ++iCoor)
                 {
-                    // the tensor case is not ready yet
-                    //                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
-                    //                    {
                     dataArraysStringStream << dvar( start + id +
                                                     iCoor * numGlobalDOF ) << " ";
-                    //                                                        + jcoor * numGlobalDOF * dvar.fieldDim() ) << " ";
-                    //                    }
                 }
             }
             break;
         case BINARY_EXPORT:
             for (UInt iDOF=0; iDOF<numMyDOF; ++iDOF)
             {
-                Int id = localToGlobalMap.find(iDOF)->second;
+                const Int id = localToGlobalMap.find(iDOF)->second;
                 for (UInt iCoor=0; iCoor< dvar.fieldDim(); ++iCoor)
                 {
-                    // the tensor case is not ready yet
-                    //                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
-                    //                    {
                     if( M_floatPrecision == SINGLE_PRECISION )
                     {
-                        float value( dvar( start + id + iCoor * numGlobalDOF ) );
-                        //                                                        + jcoor * numGlobalDOF * dvar.fieldDim() ) << " ";
+                        const float value( dvar( start + id + iCoor * numGlobalDOF ) );
                         dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(float) );
-                        //                    }
                     }
                     else
                     {
-                        Real value( dvar( start + id + iCoor * numGlobalDOF ) );
-                        //                                                        + jcoor * numGlobalDOF * dvar.fieldDim() ) << " ";
+                        const Real value( dvar( start + id + iCoor * numGlobalDOF ) );
                         dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(Real) );
-                        //                    }
                     }
                 }
             }
@@ -700,6 +716,9 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
                                               lengthOfRawData );
             dataArraysStringStream << encodedDataString;
 
+            break;
+        default:
+            ERROR_MSG( "WARNING: this export mode cannot be handled in ExporterVTK\n" )
             break;
     }
 
@@ -715,9 +734,9 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
 }
 
 
-template <typename Mesh>
+template <typename MeshType>
 void
-ExporterVTK<Mesh>::readVTUFiles( exporterData_Type& dvar )
+ExporterVTK<MeshType>::readVTUFiles( exporterData_Type& dvar )
 {
     ASSERT( this->M_numImportProc, "The number of pieces to be loaded was not specified." );
 
@@ -819,9 +838,9 @@ ExporterVTK<Mesh>::readVTUFiles( exporterData_Type& dvar )
 }
 
 
-template <typename Mesh>
+template <typename MeshType>
 void
-ExporterVTK<Mesh>::readBinaryData( const std::string& line, std::vector<Real>& values, const UInt& numBits )
+ExporterVTK<MeshType>::readBinaryData( const std::string& line, std::vector<Real>& values, const UInt& numBits )
 {
     std::stringstream decodedData, dataToBeDecoded; dataToBeDecoded.str("");
     std::string decodedDataString;
@@ -838,15 +857,11 @@ ExporterVTK<Mesh>::readBinaryData( const std::string& line, std::vector<Real>& v
             sizeOfFloat = sizeof(Real);
             break;
         default:
-            ASSERT( false, "unmanaged float type" );
+            ERROR_MSG( "unmanaged float type" );
             break;
     }
 
     lengthOfRawData = sizeOfVector*sizeOfFloat + sizeof(int32_type);
-
-    // read from file a block of char
-    //char* inputRawData = new char[ lengthOfRawData ];
-    //iFile.read( inputRawData, lengthOfRawData );
 
     // assign the block of char to a stringstream (to convert it into a string)
     dataToBeDecoded.write( line.c_str(), line.size() );
@@ -856,8 +871,6 @@ ExporterVTK<Mesh>::readBinaryData( const std::string& line, std::vector<Real>& v
     decodedDataString = base64_decode( dataToBeDecoded.str() );
     decodedData.str( decodedDataString );
 
-    //std::cout << "\nlengthOfRawData = " << lengthOfRawData << ", line.size() = " << line.size()
-    //            << ", decodedDataString.size() = " << decodedDataString.size() << std::endl;
     ASSERT( lengthOfRawData == decodedDataString.size(), "unexpected line length" );
 
 
@@ -891,27 +904,18 @@ ExporterVTK<Mesh>::readBinaryData( const std::string& line, std::vector<Real>& v
                 break;
             }
     }
-    // output data to screen to verify/compare the results
-    //for (UInt i = 0; i < values.size(); i++)
-    //  std::cout << values[i] << " " << std::flush;
-    //std::cout << std::endl;
 }
 
 
-template <typename Mesh>
+template <typename MeshType>
 void
-ExporterVTK<Mesh>::readASCIIData( const std::string& line, std::vector<Real>& values )
+ExporterVTK<MeshType>::readASCIIData( const std::string& line, std::vector<Real>& values )
 {
     std::stringstream readData( line );
 
     // simply parse the line to fill the vector of values
     for (UInt i = 0; i < values.size(); i++)
       readData >> values[i];
-
-    // output data to screen to verify/compare the results
-    //for (UInt i = 0; i < values.size(); i++)
-    //  std::cout << values[i] << " " << std::flush;
-    //std::cout << std::endl;
 
 }
 
@@ -922,9 +926,9 @@ ExporterVTK<Mesh>::readASCIIData( const std::string& line, std::vector<Real>& va
 
     Untested for now.
  */
-template <typename Mesh>
+template <typename MeshType>
 void
-ExporterVTK<Mesh>::composeDataArrayStream(where_Type where,
+ExporterVTK<MeshType>::composeDataArrayStream(where_Type where,
                                      std::stringstream& dataArraysStringStream)
 {
 
@@ -990,11 +994,10 @@ ExporterVTK<Mesh>::composeDataArrayStream(where_Type where,
                                      }
 
 
-template <typename Mesh>
-void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
+template <typename MeshType>
+void ExporterVTK<MeshType>::composePVTUStream(const exporterData_Type& dvar,
                                           std::stringstream& pVTUStringStream)
 {
-    // ASSERT( vtkFile, "Error: Output file cannot be open" );
 
     std::string floatTypeString;
     switch( M_floatPrecision )
@@ -1006,7 +1009,7 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
             floatTypeString = "Float64";
             break;
         default:
-            abort();
+            ERROR_MSG( "unmanaged float type" );
             break;
     }
 
@@ -1040,6 +1043,9 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
         case exporterData_Type::Cell:
             whereString = "PCellData";
             break;
+        default:
+            ERROR_MSG( "Cannot manage this data location" );
+            break;
     }
     pVTUStringStream << "\t\t<" << whereString << " ";
 
@@ -1056,6 +1062,9 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
         case BINARY_EXPORT:
             formatString = "binary";
             break;
+        default:
+            ERROR_MSG( "Cannot manage this export mode" );
+            break;
     }
     pVTUStringStream << "\t\t\t<PDataArray type=\"" << floatTypeString << "\" Name=\""
                     << dvar.variableName() << "\" NumberOfComponents=\""
@@ -1067,18 +1076,9 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
                     << "format=\"ascii\">\n";
     pVTUStringStream << "\t\t\t</PDataArray>\n";
 
-    switch ( dvar.where() )
-    {
-        case exporterData_Type::Node:
-            whereString = "PPointData";
-            break;
-        case exporterData_Type::Cell:
-            whereString = "PCellData";
-            break;
-    }
     pVTUStringStream << "\t\t</" << whereString << ">\n";
 
-    for( int iProc = 0; iProc < dvar.feSpacePtr()->map().comm().NumProc(); ++iProc )
+    for( Int iProc = 0; iProc < dvar.feSpacePtr()->map().comm().NumProc(); ++iProc )
     {
         std::stringstream fileName( ( this->M_postDir+this->M_prefix+"_" + dvar.variableName()+
                                       this->M_postfix+"."+iProc+".vtu").c_str() );
@@ -1093,8 +1093,8 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
 }
 
 
-template <typename Mesh>
-void ExporterVTK<Mesh>::createPointsMaps( const feSpacePtr_Type & _feSpacePtr,
+template <typename MeshType>
+void ExporterVTK<MeshType>::createPointsMaps( const feSpacePtr_Type & _feSpacePtr,
                                           std::map<UInt, UInt>& globalToLocalPointsMap,
                                           std::map<UInt, UInt>& localToGlobalPointsMap,
                                           std::vector<Vector>& coordinatesOfPoints )
@@ -1102,12 +1102,12 @@ void ExporterVTK<Mesh>::createPointsMaps( const feSpacePtr_Type & _feSpacePtr,
     ASSERT( this->M_mesh.get(), "\nA pointer to a valid mesh object is required!");
     ASSERT( _feSpacePtr.get(), "\nA pointer to a valid FESpace object is required!");
 
-    ID numVertices = this->M_mesh->numVertices();
-    ID numElements = this->M_mesh->numElements();
+    const ID numVertices = this->M_mesh->numVertices();
+    const ID numElements = this->M_mesh->numElements();
 
     // careful: the vertex map in the mesh is repeated. to know how many non vertex dofs I have
     // in the partitioned mesh I need to look at repeated maps
-    UInt numPoints = _feSpacePtr->map().map(Repeated)->NumMyElements() / _feSpacePtr->fieldDim();
+    const UInt numPoints = _feSpacePtr->map().map(Repeated)->NumMyElements() / _feSpacePtr->fieldDim();
 
     coordinatesOfPoints.resize( nDimensions, ZeroVector(numPoints) );
 
@@ -1177,8 +1177,8 @@ void ExporterVTK<Mesh>::createPointsMaps( const feSpacePtr_Type & _feSpacePtr,
 }
 
 
-template <typename Mesh>
-void ExporterVTK<Mesh>::composeVTKCollection( const std::string& variableName,
+template <typename MeshType>
+void ExporterVTK<MeshType>::composeVTKCollection( const std::string& variableName,
                                               std::stringstream& vtkCollectionStringStream )
 {
     ASSERT( this->M_timeSteps.size(), "No time values to be saved in the VTK collection!");
@@ -1207,8 +1207,8 @@ void ExporterVTK<Mesh>::composeVTKCollection( const std::string& variableName,
 }
 
 
-template <typename Mesh>
-void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr,
+template <typename MeshType>
+void ExporterVTK<MeshType>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr,
                                              const std::map<UInt, UInt>& globalToLocalPointsMap,
                                              //const std::map<UInt, UInt>& localToGlobalPointsMap,
                                              const std::vector<Vector>& coordinatesOfPoints,
@@ -1219,9 +1219,9 @@ void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr
 
     Debug(8000) << "\n[ExporterVTK::composeVTUHeaderStream]\n";
 
-    UInt numPoints = globalToLocalPointsMap.size();
-    UInt numElements = this->M_mesh->numElements();
-    UInt numLocalDof = _feSpacePtr->dof().numLocalDof();
+    const UInt numPoints = globalToLocalPointsMap.size();
+    const UInt numElements = this->M_mesh->numElements();
+    const UInt numLocalDof = _feSpacePtr->dof().numLocalDof();
 
     vtuGeoStringStream << "\t\t\t<Points>\n";
     vtuGeoStringStream << "\t\t\t\t<DataArray type=\"Float32\" NumberOfComponents=\"" << nDimensions
@@ -1245,12 +1245,11 @@ void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr
     {
         for ( UInt jPoint=0; jPoint < numLocalDof; ++jPoint)
         {
-            // vtkFile.width(8);
             // UInt globalElementId( this->M_mesh->element(iElement).id() );
-            UInt globalPointId( _feSpacePtr->dof().localToGlobalMap( iElement, jPoint ) );
+            const UInt globalPointId( _feSpacePtr->dof().localToGlobalMap( iElement, jPoint ) );
             ASSERT( globalToLocalPointsMap.find( globalPointId )!=globalToLocalPointsMap.end(),
                     "didn't find a local ID for global point" );
-            UInt localId( globalToLocalPointsMap.find( globalPointId )->second );
+            const UInt localId( globalToLocalPointsMap.find( globalPointId )->second );
             vtuGeoStringStream << localId << " ";
         }
     }
@@ -1280,8 +1279,8 @@ void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr
 }
 
 
-template <typename Mesh>
-void ExporterVTK<Mesh>::composeVTUHeaderStream( UInt numPoints,
+template <typename MeshType>
+void ExporterVTK<MeshType>::composeVTUHeaderStream( UInt numPoints,
                                                 std::stringstream& vtuHeaderStringStream )
 {
 
@@ -1296,8 +1295,8 @@ void ExporterVTK<Mesh>::composeVTUHeaderStream( UInt numPoints,
 }
 
 
-template <typename Mesh>
-void ExporterVTK<Mesh>::composeVTUFooterStream( std::stringstream& vtuFooterStringStream )
+template <typename MeshType>
+void ExporterVTK<MeshType>::composeVTUFooterStream( std::stringstream& vtuFooterStringStream )
 {
     Debug(8000) << "\n[ExporterVTK::composeFooter]\n";
 
@@ -1310,9 +1309,9 @@ void ExporterVTK<Mesh>::composeVTUFooterStream( std::stringstream& vtuFooterStri
 }
 
 
-template <typename Mesh>
+template <typename MeshType>
 void
-ExporterVTK<Mesh>::composeTypeDataHeaderStream(where_Type where,
+ExporterVTK<MeshType>::composeTypeDataHeaderStream(where_Type where,
                                          std::stringstream& dataHeaderStringStream)
 {
     Debug(8000) << "\n[ExporterVTK::composeTypeDataHeaderStream] where = " << where << "\n";
@@ -1326,6 +1325,9 @@ ExporterVTK<Mesh>::composeTypeDataHeaderStream(where_Type where,
         case exporterData_Type::Cell:
             whereString = "CellData";
             break;
+        default:
+            ERROR_MSG( "Cannot manage this data location")
+            break;
     }
     dataHeaderStringStream << "\t\t\t<" << whereString << " ";
 
@@ -1333,9 +1335,9 @@ ExporterVTK<Mesh>::composeTypeDataHeaderStream(where_Type where,
 }
 
 
-template <typename Mesh>
+template <typename MeshType>
 void
-ExporterVTK<Mesh>::composeTypeDataFooterStream(where_Type where,
+ExporterVTK<MeshType>::composeTypeDataFooterStream(where_Type where,
                                          std::stringstream& dataFooterStringStream)
 {
     std::string whereString;
@@ -1346,6 +1348,9 @@ ExporterVTK<Mesh>::composeTypeDataFooterStream(where_Type where,
             break;
         case exporterData_Type::Cell:
             whereString = "CellData";
+            break;
+        default:
+            ERROR_MSG( "Cannot manage this data location")
             break;
     }
     dataFooterStringStream << "\t\t\t</" << whereString << ">\n";

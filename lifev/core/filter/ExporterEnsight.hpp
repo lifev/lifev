@@ -33,6 +33,7 @@
  *  @author S. Deparis
  *  @date 1-10-2005
  *
+ *  @contributor Tiziano Passerini <tiziano@mathcs.emory.edu>
  *  @maintainer Radu Popescu <radu.popescu@epfl.ch>
  */
 
@@ -44,7 +45,7 @@
 namespace LifeV
 {
 
-const int ensightOffset = 1; //the offset of the IDs in ensight files
+const UInt ensightOffset = 1; //the offset of the IDs in ensight files
 
 /**
  * @class ExporterEnsight
@@ -57,10 +58,10 @@ class ExporterEnsight : public Exporter<MeshType>
 public:
     //! @name Public typedefs
     //@{
-    typedef MeshType mesh_Type;
-    typedef Exporter<MeshType> super;
-    typedef typename super::meshPtr_Type  meshPtr_Type;
-    typedef typename super::vectorPtr_Type vectorPtr_Type;
+    typedef MeshType                          mesh_Type;
+    typedef Exporter<mesh_Type>               super;
+    typedef typename super::meshPtr_Type      meshPtr_Type;
+    typedef typename super::vectorPtr_Type    vectorPtr_Type;
     typedef typename super::exporterData_Type exporterData_Type;
     //@}
 
@@ -106,27 +107,36 @@ public:
     */
     UInt importFromTime( const Real& /*time*/ ) { assert(false); return 0; }
 
+    //! Import data from previous simulations and rebuild the internal time counters
+    /*!
+      @param importTime the time of the snapshot to be imported
+      @param dt the time step, is used to rebuild the history up to now
+    */
+    void import(const Real& importTime, const Real& dt);
+
     //! Import data from previous simulations
     /*!
-      @param time the solver time
-
-      dt is used to rebuild the history up to now
+      @param importTime the time of the snapshot to be imported
     */
-    void import(const Real& startTime, const Real& dt);
-
-    //! Read  only last timestep
-    void import(const Real& startTime);
+    void import(const Real& importTime);
 
     //! Read variable
+    /*!
+      @param dvar the ExporterData object
+    */
     void readVariable(exporterData_Type& dvar) {super::readVariable(dvar);}
 
     //! Set the mesh and the processor id
+    /*!
+      @param mesh a pointer to the mesh
+      @param procId the ID of the current process
+    */
     void setMeshProcId( const meshPtr_Type mesh, const Int& procId );
 
     //! temporary: the method should work form the Exporter class
     void exportPID ( MeshPartitioner<MeshType> const & /*meshPart*/ )
     {
-        std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+        std::cerr << "  X-  exportPID is not working with Ensight" << std::endl;
     }
     //@}
 
@@ -134,7 +144,10 @@ public:
     //@{
 
     //! returns the type of the map to use for the VectorEpetra
-    MapEpetraType mapType() const;
+    MapEpetraType mapType() const
+    {
+        return Repeated;
+    }
 
     //@}
 
@@ -227,7 +240,10 @@ private:
 
       ltGNodesMap[i] is the global ID of the i-th DOF owned by the current process
     */
-    void setNodesMap( std::vector<Int> ltGNodesMap );
+    void setNodesMap( std::vector<Int> ltGNodesMap )
+    {
+        M_ltGNodesMap = ltGNodesMap;
+    }
     //! Build the local-to-global map of DOFs
     /*!
       @param ltGNodesMap the local-to-global map
@@ -310,7 +326,7 @@ ExporterEnsight<MeshType>::ExporterEnsight(const GetPot& dfile, const std::strin
 template<typename MeshType>
 void ExporterEnsight<MeshType>::postProcess(const Real& time)
 {
-    // typedef std::list< exporterData_Type >::iterator Iterator;
+    // writing the geo file and the list of global IDs, but only upon the first instance
     if( M_firstTimeStep )
     {
         if (!this->M_multimesh)
@@ -321,23 +337,31 @@ void ExporterEnsight<MeshType>::postProcess(const Real& time)
 
         M_firstTimeStep = false;
     }
+    // prepare the file postfix
     this->computePostfix();
 
+    // the postfix will be full of stars, if this time step is not going to generate a snapshot
     std::size_t found( this->M_postfix.find( "*" ) );
     if ( found == string::npos )
     {
-        if (!this->M_procId) std::cout << "  X-  ExporterEnsight post-processing ...        " << std::flush;
+        if (!this->M_procId)
+            std::cout << "  X-  ExporterEnsight post-processing ...        " << std::flush;
         LifeChrono chrono;
         chrono.start();
-        for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
+        for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin();
+                        i != this->M_dataVector.end(); ++i)
         {
+            // the "regime" attribute needs to be valid
             if ( i->regime() != exporterData_Type::NullRegime )
                 writeAscii(*i);
+            // if the solution is steady, we do not need to export it at each time step
             if (i->regime() == exporterData_Type::SteadyRegime)
                 i->setRegime( exporterData_Type::NullRegime );
         }
+        // write an updated case file
         writeCase(time);
 
+        // write an updated geo file, if needed
         if (this->M_multimesh)
             writeAsciiGeometry( this->M_postDir + this->M_prefix + this->M_postfix + this->M_me+".geo" );
         chrono.stop();
@@ -436,12 +460,6 @@ void ExporterEnsight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const In
 // Get methods
 // ===================
 
-template<typename MeshType>
-MapEpetraType ExporterEnsight<MeshType>::mapType() const
-{
-    return Repeated;
-}
-
 // ===================
 // Private methods
 // ===================
@@ -521,6 +539,9 @@ void ExporterEnsight<MeshType>::writeAscii(const exporterData_Type& dvar)
         break;
     case exporterData_Type::VectorField:
         writeAsciiValues(dvar,".vct");
+        break;
+    default:
+        ERROR_MSG( "Unknown field type" )
         break;
     }
 
@@ -788,12 +809,6 @@ void ExporterEnsight<MeshType>::initProcId()
         index << std::setw(3) << this->M_procId;
     }
     M_me = index.str();
-}
-
-template<typename MeshType>
-void ExporterEnsight<MeshType>::setNodesMap( std::vector<Int> ltGNodesMap )
-{
-    M_ltGNodesMap = ltGNodesMap;
 }
 
 template<typename MeshType>
