@@ -26,10 +26,9 @@
 
 /*!
     @file
-    @brief test ExporterVTK
+    @brief test for ExporterEnsight
 
     @author Tiziano Passerini <tiziano@mathcs.emory.edu>
-    @author Umberto Villa <uvilla@emory.edu>
     @contributor
     @maintainer
 
@@ -44,11 +43,11 @@
 #include <Epetra_ConfigDefs.h>
 #include <Epetra_Comm.h>
 
+#include <boost/shared_ptr.hpp>
+
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
-
-#include <boost/shared_ptr.hpp>
 
 #include <lifev/core/LifeV.hpp>
 #include "../importExport/RossEthierSteinmanDec.hpp"
@@ -97,7 +96,8 @@ main( int argc, char** argv )
 
     bool passed(false);
 
-    passed = testImportExport.run<ExporterEnsight<mesh_Type>, ExporterEnsight<mesh_Type> >( command_line, "export" );
+    typedef ExporterEnsight<mesh_Type> exporter_Type;
+    passed = testImportExport.run<exporter_Type, exporter_Type >( command_line, "export" );
 
     // ----- End of test calls -----
 

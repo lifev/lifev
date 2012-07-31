@@ -24,11 +24,16 @@
  */
 //@HEADER
 
-/*
- * testImportExport.hpp
- *
- *  Created on: Jan 13, 2011
- *      Author: tiziano
+/*!
+    @file
+    @brief TestImportExport
+
+    @author Tiziano Passerini <tiziano@mathcs.emory.edu>
+    @contributor
+    @maintainer
+
+    @date 05-2011
+
  */
 
 #ifndef TESTIMPORTEXPORT_HPP_
@@ -37,14 +42,13 @@
 // LifeV definition files
 #include <lifev/core/util/Displayer.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
-//#include <life/lifecore/LifeV.hpp>
 #include <lifev/core/fem/TimeData.hpp>
 #include <lifev/core/filter/ExporterVTK.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/navier_stokes/function/Womersley.hpp>
-#include <lifev/navier_stokes/function/RossEthierSteinmanInc.hpp>
+#include <lifev/navier_stokes/function/RossEthierSteinmanDec.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -93,8 +97,6 @@ private:
     template<typename ExporterType>
     void buildExporter( boost::shared_ptr< ExporterType >& exporterPtr,
                         const std::string& prefix );
-    //template<typename ImporterType>
-    //void buildImporter( boost::shared_ptr< ImporterType >& exporterPtr  );
 
     commPtr_Type                                             M_commPtr;
     LifeV::Displayer                                         M_displayer;
