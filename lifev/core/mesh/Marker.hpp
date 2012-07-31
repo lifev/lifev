@@ -217,7 +217,7 @@ public:
      */
     markerID_Type setStrongerMarkerID( markerID_Type const & markerID );
 
-    //! Sets to the strongest marker ID
+    //! Sets to the weaker marker ID
     /*!
         If marker ID is not set, is sets it to that of the argument, otherwise
         it sets it to  the weaker ID between the stored one

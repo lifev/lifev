@@ -32,6 +32,8 @@
  *  @author Miguel Fernandez
  *
  *  @contributor Simone Pezzuto <simone.pezzuto@mail.polimi.it>
+ *  @contributor Antonio Cervone <ant.cervone@gmail.com>
+ *  @contributor Mauro Perego <mperego@fsu.edu>
  *  @mantainer Simone Pezzuto <simone.pezzuto@mail.polimi.it>
  */
 
@@ -525,8 +527,8 @@ public:
      *  number of faces. It is relevant only when createFaces=true. Setting it
      *  to a proper value helps in reducing time and memory.
      *
-     *  @note Faces are renumbered so that boundary faces are stored first
-     *  @pre The routine assumes that the boundary faces are properly set, if not use the
+     *  @note Facets are renumbered so that boundary facets are stored first
+     *  @pre The routine assumes that the boundary facets are properly set, if not use the
      *  methods in #include MeshChecks.hpp
      *
      */
@@ -642,10 +644,10 @@ public:
     //! Destroys edge To facet lookup table.
     void cleanElementEdges() { cleanElementEdges( edge_Type() ); }
 
-    //! Local Ridge ID of a ridge in a volume stored in the mesh
-    /** @param volId local ID of the volume
-     *  @param locE local edge number (elemental) 0 \< LocE \< numLocalEdges().
-     *  @return local ID of the edge.
+    //! Local Ridge ID of a ridge in an element stored in the mesh
+    /** @param elemId local ID of the element
+     *  @param locR local ridge number (elemental) 0 \<= locR \< numLocalRidges().
+     *  @return local ID of the ridge.
      */
     ID localRidgeId( UInt const elemId, UInt const locR ) const {return localRidgeId( M_geoDim, elemId, locR );}
 
@@ -653,30 +655,30 @@ public:
     //! Local Ridge.
     /** @param elem Reference of the element.
      *  @param locR local ridge number.
-     *  @return ID of the ridge.
+     *  @return local ID of the ridge.
      */
     ID localRidgeId( const element_Type & elem, UInt const locR ) const {return localRidgeId( M_geoDim, elem.localId(), locR );}
 
 
     //! Local Edge.
     /** @param elemId Id of element.
-     *  @param locE local edge number 0 \< LocE \< numLocalEdges().
-     *  @return ID of the edge.
+     *  @param locE local edge number 0 \<= LocE \< numLocalEdges().
+     *  @return local ID of the edge.
      */
     ID localEdgeId( UInt const elemId, UInt const locE ) const {return localEdgeId( M_geoDim, elemId, locE );}
 
     //! Local Edge (specialization for 3D geometries).
     /** @param elem Reference of the element.
-     *  @param locE local edge number 0 \< LocE \< numLocalEdges().
-     *  @return ID of the edge.
+     *  @param locE local edge number 0 \<= LocE \< numLocalEdges().
+     *  @return local ID of the edge.
      */
     ID localEdgeId( const volume_Type & elem, UInt const locE ) const { return localRidgeId( elem, elem.localId(), locE );}
 
 
     //! Local Edge (specialization for 2D geometries).
     /** @param elem Reference of the element.
-     *  @param locE local edge number 0 \< LocE \< numLocalEdges().
-     *  @return ID of the edge.
+     *  @param locE local edge number 0 \<= LocE \< numLocalEdges().
+     *  @return local ID of the edge.
      */
     ID localEdgeId( const face_Type & elem, UInt const locE ) const { return localFacetId( elem.localId(), locE );}
     /** @} */ // End of group Element Adjacency Methods
