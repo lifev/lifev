@@ -433,6 +433,7 @@ public:
 
     //! returns the time index of the first snapshot
     const UInt& timeIndexStart() const { return M_timeIndexStart; }
+
     //! returns the time index of the current snapshot
     const UInt& timeIndex() const { return M_timeIndex; }
 
@@ -549,6 +550,7 @@ std::string ExporterData<MeshType>::typeName() const
     }
 
     ERROR_MSG( "Unknown field type" );
+    return std::string();
 }
 
 template< typename MeshType >
@@ -569,6 +571,7 @@ std::string ExporterData<MeshType>::whereName() const
     }
 
     ERROR_MSG( "Unknown location of data" );
+    return std::string();
 }
 
 // ==================================================

@@ -105,7 +105,8 @@ public:
 
       Not yet implemented for ExporterEnsight
     */
-    UInt importFromTime( const Real& /*time*/ ) { assert(false); return 0; }
+    UInt importFromTime( const Real& /*time*/ )
+    { ERROR_MSG( "ExporterEnsight::importFromTime has not yet been implemented."); return -1; }
 
     //! Import data from previous simulations and rebuild the internal time counters
     /*!

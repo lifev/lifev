@@ -159,7 +159,8 @@ public:
 
       Not yet implemented for ExporterVTK
     */
-    virtual UInt importFromTime( const Real& /*Time*/ ) { return -1; }
+    virtual UInt importFromTime( const Real& /*Time*/ )
+    { ERROR_MSG( "ExporterVTK::importFromTime has not yet been implemented."); return -1; }
 
     //! Import data from previous simulations and rebuild the internal time counters
     /*!
@@ -168,7 +169,8 @@ public:
 
       Not yet implemented for ExporterVTK
     */
-    virtual void import(const Real& /*Tstart*/, const Real& /*dt*/) {}
+    virtual void import(const Real& /*Tstart*/, const Real& /*dt*/)
+    { ERROR_MSG( "ExporterVTK::importFromTime has not yet been implemented."); }
 
     //! Import data from previous simulations
     /*!
@@ -319,12 +321,14 @@ private:
     /*!
       @param dvar the ExporterData object
     */
-    virtual void readScalar( ExporterData<mesh_Type>& /*dvar*/ ) {}
+    virtual void readScalar( ExporterData<mesh_Type>& /*dvar*/ )
+    { ERROR_MSG( "ExporterVTK::readScalar has not yet been implemented."); }
     //! The vector reader (specialization of the parent class method)
     /*!
       @param dvar the ExporterData object
     */
-    virtual void readVector( ExporterData<mesh_Type>& /*dvar*/ ) {}
+    virtual void readVector( ExporterData<mesh_Type>& /*dvar*/ )
+    { ERROR_MSG( "ExporterVTK::readVector has not yet been implemented."); }
     //! The reader for VTU files
     /*!
       @param dvar the ExporterData object
