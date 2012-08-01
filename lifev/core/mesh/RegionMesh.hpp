@@ -2108,7 +2108,7 @@ private:
 
     //! Adds a Ridge.
     ridge_Type & addRidge( threeD_Type, bool const boundary ) {return addEdge( boundary);}
-    ridge_Type & addRidge( twoD_Type, bool const boundary ) {return addPoint( boundary);}
+    ridge_Type & addRidge( twoD_Type, bool const boundary ) {return addPoint( boundary, false );}
     ridge_Type & addRidge( oneD_Type, bool const ) { ERROR_MSG("RegionMesh::addRidge, No ridges in 1D"); ; return M_aRidge;}
 
     //! i-th mesh ridge.

@@ -2123,7 +2123,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
         edgePtr = & mesh.edge( jEdgeId );
         point1Id = ( edgePtr->point( 0 ) ).localId();
         point2Id = ( edgePtr->point( 1 ) ).localId();
-        pointPtr = & mesh.addPoint( jEdgeId < numBoundaryEdges ); // true for boundary points
+        pointPtr = & mesh.addPoint( jEdgeId < numBoundaryEdges, false ); // true for boundary points
         pointPtr->x() = ( ( edgePtr->point( 0 ) ).x() +
                         ( edgePtr->point( 1 ) ).x() ) * .5;
         pointPtr->y() = ( ( edgePtr->point( 0 ) ).y() +
@@ -2170,7 +2170,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
                 else
                 {
                     // new edge -> new Point
-                    pointPtr = &mesh.addPoint( kFaceId < numBoundaryFaces );// true for boundary points
+                    pointPtr = &mesh.addPoint( kFaceId < numBoundaryFaces, false );// true for boundary points
                     edgeIdToBoolPair = bareEdgeHandler.addIfNotThere( bareEdgeToBoolPair.first, pointPtr->localId() );
                     pointPtr->x() = ( mesh.point( point1Id ).x() +
                                     mesh.point( point2Id ).x() ) * .5;
@@ -2208,7 +2208,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
             else
             {
                 // cannot be on boundary if the mesh is proper!
-                pointPtr = &mesh.addPoint( false );
+                pointPtr = &mesh.addPoint( false, false );
                 edgeIdToBoolPair = bareEdgeHandler.addIfNotThere( bareEdgeToBoolPair.first, pointPtr->localId() );
                 pointPtr->x() = ( mesh.point( point1Id ).x() +
                                 mesh.point( point2Id ).x() ) * .5;

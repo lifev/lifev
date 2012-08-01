@@ -762,7 +762,7 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
 
     for ( UInt __i = 0; __i < __nv; ++__i )
     {
-        pp = &mesh.addPoint( __isonboundary[ __i ], false );
+        pp = &mesh.addPoint( __isonboundary[ __i ], true );
         pp->setMarkerID( __whichboundary[ __i ] );
         pp->x() = __x[ 2 * __i ];
         pp->y() = __x[ 2 * __i + 1 ];

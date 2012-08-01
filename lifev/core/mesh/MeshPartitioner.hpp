@@ -1171,13 +1171,11 @@ void MeshPartitioner<MeshType>::constructNodes()
         // in this loop inode is the local numbering of the points
         for (it = M_localNodes[i].begin(); it != M_localNodes[i].end(); ++it, ++inode)
         {
-            typename MeshType::point_Type point = 0;
-
             // create a boundary point in the local mesh, if needed
             bool boundary = M_originalMesh->isBoundaryPoint(*it);
             M_nBoundaryPoints[i] += boundary;
 
-            pp = &(*M_meshPartitions)[i]->addPoint(boundary);
+            pp = &(*M_meshPartitions)[i]->addPoint( boundary, false );
             *pp = M_originalMesh->point( *it );
 
             pp->setLocalId( inode );

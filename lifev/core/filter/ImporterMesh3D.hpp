@@ -220,7 +220,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
         // Boundary point. Boundary switch set by the mesh method.
         }
 
-        pointerPoint = &mesh.addPoint( isOnBoundary );
+        pointerPoint = &mesh.addPoint( isOnBoundary, true );
 
         pointerPoint->setId     ( i );
         pointerPoint->setLocalId( i );
@@ -556,7 +556,7 @@ readMppFile( RegionMesh<GeoShape, MC> & mesh,
                 if ( ity != 3 )
                 {
                     ++count;
-                    pointerPoint = &mesh.addPoint( true );
+                    pointerPoint = &mesh.addPoint( true, true );
 
                   //Boundary point. Boundary switch set by the mesh method.
 
@@ -564,7 +564,7 @@ readMppFile( RegionMesh<GeoShape, MC> & mesh,
                 }
                 else
                 {
-                    pointerPoint = &mesh.addPoint( false );
+                    pointerPoint = &mesh.addPoint( false, true );
                 }
 
                 pointerPoint->x() = x;
@@ -975,13 +975,13 @@ readINRIAMeshFile( RegionMesh<GeoShape, MC>&      mesh,
                 {
                     ++count;
                 // Boundary point. Boundary switch set by the mesh method.
-                    pointerPoint = &mesh.addPoint( true );
+                    pointerPoint = &mesh.addPoint( true, true );
                     pointerPoint->setMarkerID( markerID_Type( ibc ) );
                 }
 
                 else
                 {
-                    pointerPoint = &mesh.addPoint( false );
+                    pointerPoint = &mesh.addPoint( false, true );
                 }
 
                 pointerPoint->setId     ( i );

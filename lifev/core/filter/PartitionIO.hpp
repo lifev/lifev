@@ -959,7 +959,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     if (! M_transposeInFile) {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &(M_meshPartIn->addPoint(false));
+            pp = &( M_meshPartIn->addPoint( false, false ) );
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[2 * stride + j]));
             pp->setMarkerID(M_uintBuffer[j]);
@@ -972,7 +972,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     } else {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &(M_meshPartIn->addPoint(false));
+            pp = &( M_meshPartIn->addPoint( false, false ) );
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + 2]));
             pp->setMarkerID(M_uintBuffer[stride * j]);
