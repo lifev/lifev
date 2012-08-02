@@ -2261,7 +2261,6 @@ RegionMesh<GEOSHAPE, MC>::addVolume()
 {
     // I need to set the global ID
     element_Type aVolume;
-    aVolume.setId( volumeList.size() );
     return addVolume( aVolume );
 }
 
@@ -2269,13 +2268,8 @@ template <typename GEOSHAPE, typename MC>
 inline typename RegionMesh<GEOSHAPE, MC>::element_Type &
 RegionMesh<GEOSHAPE, MC>::addVolume( element_Type const & v )
 {
-//    ASSERT_PRE( volumeList.size() < volumeList.capacity() , "Volume list size exceeded" <<
-//                volumeList.size() + 1 << " " << volumeList.capacity() ) ;
-
     volumeList.push_back( v );
     volume_Type & thisVolume(volumeList.back());
-    if (thisVolume.id()==NotAnId)
-        thisVolume.setId(volumeList.size()-1);
     thisVolume.setLocalId( volumeList.size() - 1 );
     return thisVolume;
 }
@@ -2287,10 +2281,8 @@ RegionMesh<GEOSHAPE, MC>::setVolume( element_Type const & v, UInt const pos )
 {
     ASSERT_PRE( pos < volumeList.capacity() , "position requested exceed capacity" <<
                 pos << " " << volumeList.capacity() ) ;
-    volume_Type & thisVolume(volumeList( pos ));
+    volume_Type & thisVolume( volumeList( pos ) );
     thisVolume.setLocalId( pos );
-    if (thisVolume.id()==NotAnId)
-        thisVolume.setId(pos);
     return thisVolume;
 }
 
