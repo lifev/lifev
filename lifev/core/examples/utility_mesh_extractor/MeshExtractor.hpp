@@ -217,6 +217,7 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
     for ( UInt __i = 0; __i < __ne; ++__i )
     {
         pe = &( mesh2D->addEdge( true ) );
+        pe->setId( __i );
         pe->setMarkerID( markerID_Type( __edge_label[ __i ] ) );
         pe->setPoint( 0, mesh2D->point( __edge_nodes[ 2 * __i ] ) );
         pe->setPoint( 1, mesh2D->point( __edge_nodes[ 2 * __i + 1 ] ) );
