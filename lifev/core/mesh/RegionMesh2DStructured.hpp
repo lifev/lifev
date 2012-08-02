@@ -229,14 +229,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             nodeFlag = regularMeshPointPosition2D(i, j, n_x, n_y );
 
             // We create the point
-            if ( nodeFlag>0 )
-            {
-                pointPtr = &mesh.addRidge( true ); //it is a boundary point
-            }
-            else
-            {
-                pointPtr = &mesh.addRidge( false );
-            }
+            pointPtr = &mesh.addRidge( nodeFlag > 0 ); // node flag determines if the point is on boundary
 
 
             // We set the point properties

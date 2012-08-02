@@ -274,14 +274,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 nodeMarkerID = regularMeshPointPosition(i, j, k, n_x, n_y, n_z);
 
                 // We create the point
-                if ( nodeMarkerID>0 )
-                {
-                    pointPtr = &mesh.addPoint( true, true ); //it is a boundary point
-                }
-                else
-                {
-                    pointPtr = &mesh.addPoint( false, true );
-                }
+                pointPtr = &mesh.addPoint( nodeMarkerID > 0, true ); //nodeMarkerID determines if the point is on boundary
 
                 // We set the point properties
                 nodeID = k * N_z + j * N_y + i;
