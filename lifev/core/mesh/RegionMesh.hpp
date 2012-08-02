@@ -2355,10 +2355,8 @@ typename RegionMesh<GEOSHAPE, MC>::face_Type &
 RegionMesh<GEOSHAPE, MC>::addFace( bool const boundary )
 {
     face_Type aFace;
-    // It is a new face. I set the global ID.
-    aFace.setId(faceList.size());
-    aFace.setBoundary(boundary);
-    return this->addFace( aFace);
+    aFace.setBoundary( boundary );
+    return this->addFace( aFace );
 }
 
 
@@ -2367,13 +2365,9 @@ inline
 typename RegionMesh<GEOSHAPE, MC>::face_Type &
 RegionMesh<GEOSHAPE, MC>::addFace( face_Type const & f )
 {
-//    ASSERT_PRE( faceList.size() < faceList.capacity(), "Face list size exceeded" <<
-//                faceList.size() + 1 << " " << faceList.capacity() ) ;
-
     faceList.push_back( f );
     face_Type & thisFace=faceList.back();
     thisFace.setLocalId( faceList.size() -1 );
-    if (thisFace.id()==NotAnId)thisFace.setId(faceList.size()-1);
     return thisFace;
 }
 
