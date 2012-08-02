@@ -186,7 +186,7 @@ value(
 )
 {
 	return ExpressionInterpolateValue<MeshType,MapType,SpaceDim,FieldDim>(fespace,vector);
-};
+}
 
 
 } // Namespace ExpressionAssembly

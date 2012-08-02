@@ -162,7 +162,7 @@ ExpressionProduct<LExpressionType,RExpressionType>
 operator*(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
 	return ExpressionProduct<LExpressionType,RExpressionType>(l.cast(),r.cast());
-};
+}
 
 // "Specialization" for the case of a scalar
 template< typename RExpressionType >
@@ -170,7 +170,7 @@ ExpressionProduct<ExpressionScalar,RExpressionType>
 operator*(const Real& l, const ExpressionBase<RExpressionType>& r)
 {
     return ExpressionProduct<ExpressionScalar,RExpressionType>(ExpressionScalar(l),r.cast());
-};
+}
 
 // "Specialization" for the case of a scalar
 template< typename LExpressionType >
@@ -178,7 +178,7 @@ ExpressionProduct<LExpressionType,ExpressionScalar>
 operator*(const ExpressionBase<LExpressionType>& l, const Real& r)
 {
     return ExpressionProduct<LExpressionType,ExpressionScalar>(l.cast(),ExpressionScalar(r));
-};
+}
 
 // "Specialization" for the case of a vector
 template< typename RExpressionType, UInt Vdim >
@@ -186,7 +186,7 @@ ExpressionProduct<ExpressionVector<Vdim>, RExpressionType>
 operator*(const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
 {
     return ExpressionProduct<ExpressionVector<Vdim>,RExpressionType>(ExpressionVector<Vdim>(l),r.cast());
-};
+}
 
 // "Specialization" for the case of a vector
 template< typename LExpressionType, UInt Vdim>
@@ -194,7 +194,7 @@ ExpressionProduct<LExpressionType, ExpressionVector<Vdim> >
 operator*(const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 {
     return ExpressionProduct<LExpressionType, ExpressionVector<Vdim> >(l.cast(), ExpressionVector<Vdim>(r));
-};
+}
 
 
 

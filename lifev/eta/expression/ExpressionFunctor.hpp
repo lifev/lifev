@@ -183,21 +183,21 @@ inline ExpressionFunctor1<FunctorType,ArgumentType>
 eval(boost::shared_ptr<FunctorType> fct, const ExpressionBase<ArgumentType>& argument)
 {
     return ExpressionFunctor1<FunctorType,ArgumentType>(fct,argument.cast());
-};
+}
 
 template< typename FunctorType>
 inline ExpressionFunctor1<FunctorType,ExpressionScalar>
 eval(boost::shared_ptr<FunctorType> fct, const Real& argument)
 {
     return ExpressionFunctor1<FunctorType,ExpressionScalar>(fct,ExpressionScalar(argument));
-};
+}
 
 template< typename FunctorType, UInt Vdim>
 inline ExpressionFunctor1<FunctorType,ExpressionVector<Vdim> >
 eval(boost::shared_ptr<FunctorType> fct, const VectorSmall<Vdim>& argument)
 {
     return ExpressionFunctor1<FunctorType,ExpressionVector<Vdim> >(fct,ExpressionVector<Vdim>(argument));
-};
+}
 
 
 ///
@@ -343,7 +343,7 @@ inline ExpressionFunctor2<FunctorType,ArgumentType1,ArgumentType2>
 eval(boost::shared_ptr<FunctorType> fct, const ArgumentType1& arg1, const ArgumentType2& arg2)
 {
 	return ExpressionFunctor2<FunctorType,ArgumentType1,ArgumentType2>(fct,arg1,arg2);
-};
+}
 
 } // Namespace ExpressionAssembly
 

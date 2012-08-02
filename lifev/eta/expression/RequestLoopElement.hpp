@@ -126,7 +126,7 @@ RequestLoopElement<MeshType>
 elements(const boost::shared_ptr<MeshType>& mesh)
 {
 	return RequestLoopElement<MeshType>(mesh);
-};
+}
 
 
 } // Namespace ExpressionAssembly

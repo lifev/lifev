@@ -67,37 +67,37 @@ template<>
 inline const GeometricMap& geometricMapFromElementShape<GeoPoint>()
 {
 	return geoLinearNode;
-};
+}
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearLine>()
 {
 	return geoLinearSeg;
-};
+}
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearTriangle>()
 {
 	return geoLinearTria;
-};
+}
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearQuad>()
 {
 	return geoBilinearQuad;
-};
+}
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearTetra>()
 {
 	return geoLinearTetra;
-};
+}
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearHexa>()
 {
 	return geoBilinearHexa;
-};
+}
 
 
 //! \endcond
@@ -111,7 +111,7 @@ template <typename MeshType>
 inline const GeometricMap& geometricMapFromMesh()
 {
 	return geometricMapFromElementShape<typename MeshType::elementShape_Type>();
-};
+}
 
 
 //! Function to get the map that goes with a mesh (version with mesh in argument)
@@ -123,7 +123,7 @@ template <typename MeshType>
 inline const GeometricMap& geometricMapFromMesh(const boost::shared_ptr<MeshType> & /*mesh*/ )
 {
 	return geometricMapFromElementShape<typename MeshType::elementShape_Type>();
-};
+}
 
 } // namespace LifeV
 

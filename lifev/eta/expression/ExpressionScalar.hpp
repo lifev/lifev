@@ -117,7 +117,7 @@ inline ExpressionScalar
 value(const Real& myValue)
 {
 	return ExpressionScalar(myValue);
-};
+}
 
 
 } // Namespace ExpressionAssembly

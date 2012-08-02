@@ -161,7 +161,7 @@ ExpressionSubstraction<LExpressionType,RExpressionType>
 operator-(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
 	return ExpressionSubstraction<LExpressionType,RExpressionType>(l.cast(),r.cast());
-};
+}
 
 // Specialization for the real constants
 template< typename LExpressionType >
@@ -169,14 +169,14 @@ ExpressionSubstraction<LExpressionType, ExpressionScalar >
 operator-(const ExpressionBase<LExpressionType>& l, const Real& r)
 {
     return ExpressionSubstraction<LExpressionType,ExpressionScalar>(l.cast(),ExpressionScalar(r));
-};
+}
 
 template< typename RExpressionType >
 ExpressionSubstraction<ExpressionScalar,RExpressionType>
 operator-(const Real& l, const ExpressionBase<RExpressionType>& r)
 {
     return ExpressionSubstraction<ExpressionScalar,RExpressionType>(ExpressionScalar(l),r.cast());
-};
+}
 
 // Specialization for the vectorial constants
 template< typename RExpressionType , UInt Vdim>
@@ -184,14 +184,14 @@ ExpressionSubstraction<ExpressionVector<Vdim>,RExpressionType>
 operator-(const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
 {
     return ExpressionSubstraction<ExpressionVector<Vdim>,RExpressionType>(ExpressionVector<Vdim>(l),r.cast());
-};
+}
 
 template< typename LExpressionType, UInt Vdim >
 ExpressionSubstraction<LExpressionType, ExpressionVector<Vdim> >
 operator-(const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 {
     return ExpressionSubstraction<LExpressionType,ExpressionVector<Vdim> >(l.cast(),ExpressionVector<Vdim>(r));
-};
+}
 
 
 } // Namespace ExpressionAssembly

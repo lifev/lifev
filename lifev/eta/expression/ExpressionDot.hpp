@@ -163,7 +163,7 @@ ExpressionDot<LExpressionType,RExpressionType>
 dot(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
 	return ExpressionDot<LExpressionType,RExpressionType>(l.cast(),r.cast());
-};
+}
 
 // Specialization for the real constants
 template< typename LExpressionType >
@@ -171,14 +171,14 @@ ExpressionDot<LExpressionType, ExpressionScalar >
 dot(const ExpressionBase<LExpressionType>& l, const Real& r)
 {
     return ExpressionDot<LExpressionType,ExpressionScalar>(l.cast(),ExpressionScalar(r));
-};
+}
 
 template< typename RExpressionType >
 ExpressionDot<ExpressionScalar,RExpressionType>
 dot(const Real& l, const ExpressionBase<RExpressionType>& r)
 {
     return ExpressionDot<ExpressionScalar,RExpressionType>(ExpressionScalar(l),r.cast());
-};
+}
 
 // Specialization for the vectorial constants
 template< typename RExpressionType , UInt Vdim>
@@ -186,14 +186,14 @@ ExpressionDot<ExpressionVector<Vdim>,RExpressionType>
 dot(const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
 {
     return ExpressionDot<ExpressionVector<Vdim>,RExpressionType>(ExpressionVector<Vdim>(l),r.cast());
-};
+}
 
 template< typename LExpressionType, UInt Vdim >
 ExpressionDot<LExpressionType, ExpressionVector<Vdim> >
 dot(const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 {
     return ExpressionDot<LExpressionType,ExpressionVector<Vdim> >(l.cast(),ExpressionVector<Vdim>(r));
-};
+}
 
 
 } // Namespace ExpressionAssembly

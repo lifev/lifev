@@ -96,7 +96,7 @@ inline ExpressionDphiI
 grad(const ExpressionPhiI& )
 {
 	return ExpressionDphiI();
-};
+}
 
 
 } // Namespace ExpressionAssembly

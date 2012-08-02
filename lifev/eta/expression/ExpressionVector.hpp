@@ -132,7 +132,7 @@ inline ExpressionVector<VectorDim>
 value(const VectorSmall<VectorDim>& myValue)
 {
 	return ExpressionVector<VectorDim>(myValue);
-};
+}
 
 
 } // Namespace ExpressionAssembly

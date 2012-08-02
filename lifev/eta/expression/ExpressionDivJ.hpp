@@ -96,8 +96,8 @@ public:
 inline ExpressionDivJ
 div(const ExpressionPhiJ& /*exp*/)
 {
-	return ExpressionDivJ();
-};
+    return ExpressionDivJ();
+}
 
 
 } // Namespace ExpressionAssembly

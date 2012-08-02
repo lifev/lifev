@@ -96,7 +96,7 @@ inline ExpressionDivI
 div(const ExpressionPhiI& /*exp*/)
 {
 	return ExpressionDivI();
-};
+}
 
 
 } // Namespace ExpressionAssembly

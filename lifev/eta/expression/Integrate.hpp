@@ -76,7 +76,7 @@ integrate( const RequestLoopElement<MeshType>& request,
 {
 	return IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
 		(request.mesh(),quadrature,testSpace,solutionSpace,expression);
-};
+}
 
 //! Integrate function for vectorial expressions
 /*!
@@ -95,7 +95,7 @@ integrate( const RequestLoopElement<MeshType>& request,
 {
 	return IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType>
 		(request.mesh(),quadrature,testSpace,expression);
-};
+}
 
 //! Integrate function for benchmark expressions
 /*!
@@ -113,7 +113,7 @@ integrate( const RequestLoopElement<MeshType>& request,
 {
 	return IntegrateValueElement<MeshType,ExpressionType>
 		(request.mesh(),quadrature,expression);
-};
+}
 
 
 } // Namespace ExpressionAssembly
