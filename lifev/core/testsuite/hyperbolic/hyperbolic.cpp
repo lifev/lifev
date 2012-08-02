@@ -386,11 +386,11 @@ hyperbolic::run()
     readMesh( *fullMeshPtr, meshData );
 
     // Partition the mesh using ParMetis
-    boost::shared_ptr<RegionMesh> localMeshPtr;
+    boost::shared_ptr<RegionMesh> meshPtr;
     MeshPartitioner<RegionMesh>::GhostEntityDataMap_Type ghostDataMap;
     {
         MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
-        localMeshPtr = meshPart.meshPartition();
+        meshPtr = meshPart.meshPartition();
         ghostDataMap = meshPart.ghostDataMap();
     }
 
@@ -455,7 +455,7 @@ hyperbolic::run()
     pressure_bdQr_dualInterpolate  = &quadRuleTria4pt;
 
     // Finite element space of the interpolation of dual variable.
-    FESpace< RegionMesh, MapEpetra > pressure_uInterpolate_FESpace( localMeshPtr, *pressure_refFE_dualInterpolate, *pressure_qR_dualInterpolate,
+    FESpace< RegionMesh, MapEpetra > pressure_uInterpolate_FESpace( meshPtr, *pressure_refFE_dualInterpolate, *pressure_qR_dualInterpolate,
                                                                     *pressure_bdQr_dualInterpolate, 3, Members->comm );
 
     // Vector for the interpolated dual solution.
@@ -464,7 +464,7 @@ hyperbolic::run()
     pressure_uInterpolate_FESpace.interpolate( static_cast<FESpace< RegionMesh, MapEpetra >::function_Type>( dataProblem::dual ), *pressure_dualInterpolated, 0 );
 
     // Finite element space
-    feSpacePtr_Type feSpacePtr( new feSpace_Type( localMeshPtr,
+    feSpacePtr_Type feSpacePtr( new feSpace_Type( meshPtr,
                                                   *refFE,
                                                   *qR,
                                                   *bdQr,
@@ -545,7 +545,7 @@ hyperbolic::run()
         // Set directory where to save the solution
         exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-        exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+        exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
     }
     else
 #endif
@@ -557,7 +557,7 @@ hyperbolic::run()
             // Set directory where to save the solution
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+            exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
         }
         else
         {
@@ -566,15 +566,15 @@ hyperbolic::run()
             // Set directory where to save the solution
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+            exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
         }
     }
 
     // Export the partitioning
-    exporter->exportPID( localMeshPtr, Members->comm );
+    exporter->exportPID( meshPtr, Members->comm );
 
     // export the flags set on the mesh
-    exporter->exportFlags( localMeshPtr, Members->comm );
+    exporter->exportFlags( meshPtr, Members->comm );
 
     // Set the exporter solution
     exporterSolution.reset( new vector_type ( *hyperbolicSolver.solution(),

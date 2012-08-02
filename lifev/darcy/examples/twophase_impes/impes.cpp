@@ -301,10 +301,10 @@ impes::run()
     readMesh( *fullMeshPtr, meshData );
 
     // Partition the mesh using ParMetis.
-    boost::shared_ptr<RegionMesh> localMeshPtr;
+    boost::shared_ptr<RegionMesh> meshPtr;
     {
         MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
-        localMeshPtr = meshPart.meshPartition();
+        meshPtr = meshPart.meshPartition();
     }
 
     // Stop chronoReadAndPartitionMesh.
@@ -453,15 +453,15 @@ impes::run()
 
 
     // Finite element space of the primal variable.
-    feSpacePtr_Type pressure_p_FESpacePtr( new feSpace_Type( localMeshPtr, *pressure_refFE_primal, *pressure_qR_primal,
+    feSpacePtr_Type pressure_p_FESpacePtr( new feSpace_Type( meshPtr, *pressure_refFE_primal, *pressure_qR_primal,
                                                              *pressure_bdQr_primal, 1, Members->comm ) );
 
     // Finite element space of the dual variable.
-    feSpacePtr_Type pressure_u_FESpacePtr( new feSpace_Type( localMeshPtr, *pressure_refFE_dual, *pressure_qR_dual,
+    feSpacePtr_Type pressure_u_FESpacePtr( new feSpace_Type( meshPtr, *pressure_refFE_dual, *pressure_qR_dual,
                                                              *pressure_bdQr_dual, 1, Members->comm ) );
 
     // Finite element space of the interpolation of dual variable.
-    feSpacePtr_Type pressure_uInterpolate_FESpacePtr( new feSpace_Type( localMeshPtr, *pressure_refFE_dualInterpolate,
+    feSpacePtr_Type pressure_uInterpolate_FESpacePtr( new feSpace_Type( meshPtr, *pressure_refFE_dualInterpolate,
                                                                         *pressure_qR_dualInterpolate,
                                                                         *pressure_bdQr_dualInterpolate, 3, Members->comm ) );
 
@@ -469,11 +469,11 @@ impes::run()
     vector_ptrtype pressure_dualInterpolated( new vector_type ( pressure_uInterpolate_FESpacePtr->map(), Repeated ) );
 
     // Finite element space of the hybrid variable.
-    FESpace< RegionMesh, MapEpetra > pressure_hybrid_FESpace( localMeshPtr, *pressure_refFE_hybrid, *pressure_qR_hybrid,
+    FESpace< RegionMesh, MapEpetra > pressure_hybrid_FESpace( meshPtr, *pressure_refFE_hybrid, *pressure_qR_hybrid,
                                                               *pressure_bdQr_hybrid, 1, Members->comm );
 
     // Finite element space of the  outward unit normal variable.
-    FESpace< RegionMesh, MapEpetra > pressure_VdotN_FESpace( localMeshPtr, *pressure_refFE_VdotN, *pressure_qR_VdotN,
+    FESpace< RegionMesh, MapEpetra > pressure_VdotN_FESpace( meshPtr, *pressure_refFE_VdotN, *pressure_qR_VdotN,
                                                              *pressure_bdQr_VdotN, 1, Members->comm );
 
     // Parameters for the saturation equation.
@@ -488,7 +488,7 @@ impes::run()
     saturation_hyperbolic_bdQr  = &quadRuleTria1pt;
 
     // Finite element space.
-    feSpacePtr_Type saturation_hyperbolic_FESpacePtr( new feSpace_Type( localMeshPtr, *saturation_hyperbolic_refFE,
+    feSpacePtr_Type saturation_hyperbolic_FESpacePtr( new feSpace_Type( meshPtr, *saturation_hyperbolic_refFE,
                                                                         *saturation_hyperbolic_qR,
                                                                         *saturation_hyperbolic_bdQr, 1, Members->comm ) );
 
@@ -533,22 +533,22 @@ impes::run()
 
 
     // Finite element space of the primal variable.
-    FESpace< RegionMesh, MapEpetra > saturation_darcy_p_FESpace( localMeshPtr, *saturation_darcy_refFE_primal,
+    FESpace< RegionMesh, MapEpetra > saturation_darcy_p_FESpace( meshPtr, *saturation_darcy_refFE_primal,
                                                                  *saturation_darcy_qR_primal,
                                                                  *saturation_darcy_bdQr_primal, 1, Members->comm );
 
     // Finite element space of the dual variable.
-    FESpace< RegionMesh, MapEpetra > saturation_darcy_u_FESpace( localMeshPtr, *saturation_darcy_refFE_dual,
+    FESpace< RegionMesh, MapEpetra > saturation_darcy_u_FESpace( meshPtr, *saturation_darcy_refFE_dual,
                                                                  *saturation_darcy_qR_dual,
                                                                  *saturation_darcy_bdQr_dual, 1, Members->comm );
 
     // Finite element space of the hybrid variable.
-    FESpace< RegionMesh, MapEpetra > saturation_darcy_hybrid_FESpace( localMeshPtr, *saturation_darcy_refFE_hybrid,
+    FESpace< RegionMesh, MapEpetra > saturation_darcy_hybrid_FESpace( meshPtr, *saturation_darcy_refFE_hybrid,
                                                                       *saturation_darcy_qR_hybrid,
                                                                       *saturation_darcy_bdQr_hybrid, 1, Members->comm );
 
     // Finite element space of the  outward unit normal variable.
-    FESpace< RegionMesh, MapEpetra > saturation_darcy_VdotN_FESpace( localMeshPtr, *saturation_darcy_refFE_VdotN,
+    FESpace< RegionMesh, MapEpetra > saturation_darcy_VdotN_FESpace( meshPtr, *saturation_darcy_refFE_VdotN,
                                                                      *saturation_darcy_qR_VdotN,
                                                                      *saturation_darcy_bdQr_VdotN, 1, Members->comm );
 
@@ -677,7 +677,7 @@ impes::run()
         // Set directory where to save the solution.
         exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-        exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+        exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
     }
     else
 #endif
@@ -689,7 +689,7 @@ impes::run()
             // Set directory where to save the solution.
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+            exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
         }
         else
         {
@@ -698,7 +698,7 @@ impes::run()
             // Set directory where to save the solution.
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+            exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
         }
     }
 

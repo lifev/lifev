@@ -375,7 +375,7 @@ darcy::run()
     }
 
     // Create the local mesh ( local scope used to delete the meshPart object )
-    regionMeshPtr_Type localMeshPtr;
+    regionMeshPtr_Type meshPtr;
     {
         // Create the partitioner
         MeshPartitioner< regionMesh_Type >  meshPart;
@@ -384,7 +384,7 @@ darcy::run()
         meshPart.doPartition ( fullMeshPtr, Members->comm );
 
         // Get the local mesh
-        localMeshPtr = meshPart.meshPartition();
+        meshPtr = meshPart.meshPartition();
     }
 
     // Stop chronoReadAndPartitionMesh
@@ -487,7 +487,7 @@ darcy::run()
 
 
     // Finite element space of the primal variable
-    feSpacePtr_Type p_FESpacePtr( new feSpace_Type( localMeshPtr,
+    feSpacePtr_Type p_FESpacePtr( new feSpace_Type( meshPtr,
                                                     *refFE_primal,
                                                     *qR_primal,
                                                     *bdQr_primal,
@@ -495,7 +495,7 @@ darcy::run()
                                                     Members->comm ) );
 
     // Finite element space of the dual variable
-    feSpacePtr_Type u_FESpacePtr( new feSpace_Type( localMeshPtr,
+    feSpacePtr_Type u_FESpacePtr( new feSpace_Type( meshPtr,
                                                     *refFE_dual,
                                                     *qR_dual,
                                                     *bdQr_dual,
@@ -503,7 +503,7 @@ darcy::run()
                                                     Members->comm ) );
 
     // Finite element space of the interpolation of dual variable
-    feSpacePtr_Type uInterpolate_FESpacePtr( new feSpace_Type( localMeshPtr,
+    feSpacePtr_Type uInterpolate_FESpacePtr( new feSpace_Type( meshPtr,
                                                                *refFE_dualInterpolate,
                                                                *qR_dualInterpolate,
                                                                *bdQr_dualInterpolate,
@@ -514,7 +514,7 @@ darcy::run()
     vectorPtr_Type dualInterpolated( new vector_Type ( uInterpolate_FESpacePtr->map(), Repeated ) );
 
     // Finite element space of the hybrid variable
-    feSpacePtr_Type hybrid_FESpace( new feSpace_Type( localMeshPtr,
+    feSpacePtr_Type hybrid_FESpace( new feSpace_Type( meshPtr,
                                                       *refFE_hybrid,
                                                       *qR_hybrid,
                                                       *bdQr_hybrid,
@@ -522,7 +522,7 @@ darcy::run()
                                                       Members->comm ) );
 
     // Finite element space of the  outward unit normal variable
-    feSpacePtr_Type VdotN_FESpace( new feSpace_Type( localMeshPtr,
+    feSpacePtr_Type VdotN_FESpace( new feSpace_Type( meshPtr,
                                                      *refFE_VdotN,
                                                      *qR_VdotN,
                                                      *bdQr_VdotN,
@@ -671,7 +671,7 @@ darcy::run()
     // Set directory where to save the solution
     exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-    exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+    exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
 
     // Set the exporter primal pointer
     primalExporter.reset( new vector_Type ( *( darcySolver->primalSolution() ),
@@ -703,7 +703,7 @@ darcy::run()
                                              hybrid_FESpace->map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Export the partitioning
-    exporter->exportPID( localMeshPtr, Members->comm );
+    exporter->exportPID( meshPtr, Members->comm );
 
     switch ( solverType )
     {

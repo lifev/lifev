@@ -139,10 +139,10 @@ fefct::run()
     readMesh( *fullMeshPtr, meshData );
 
     // Create local mesh using ParMetis partitioner
-    regionMeshPtr_Type localMeshPtr;
+    regionMeshPtr_Type meshPtr;
     { // local scope to properly delete the meshPart object
         MeshPartitioner < regionMesh_Type >  meshPart( fullMeshPtr, Members->comm );
-        localMeshPtr = meshPart.meshPartition();
+        meshPtr = meshPart.meshPartition();
     }
 
     // Stop chronoReadAndPartitionMesh
@@ -158,19 +158,19 @@ fefct::run()
     chronoFiniteElementSpace.start();
 
     // Finite element space of the first scalar field - RT0
-    FESpacePtr_Type scalarField1_FESpace ( new FESpace_Type ( localMeshPtr, feTetraP0, quadRuleTetra15pt,
+    FESpacePtr_Type scalarField1_FESpace ( new FESpace_Type ( meshPtr, feTetraP0, quadRuleTetra15pt,
                                                               quadRuleTria4pt, 1, Members->comm ) );
 
     // Finite element space of the second scalar field - P1
-    FESpacePtr_Type scalarField2_FESpace ( new FESpace_Type ( localMeshPtr, feTetraP1, quadRuleTetra15pt,
+    FESpacePtr_Type scalarField2_FESpace ( new FESpace_Type ( meshPtr, feTetraP1, quadRuleTetra15pt,
                                                               quadRuleTria4pt, 1, Members->comm ) );
 
     // Finite element space of the vector field - P0
-    FESpacePtr_Type vectorField_FESpace ( new FESpace_Type ( localMeshPtr, feTetraP0, quadRuleTetra15pt,
+    FESpacePtr_Type vectorField_FESpace ( new FESpace_Type ( meshPtr, feTetraP0, quadRuleTetra15pt,
                                                              quadRuleTria4pt, 3, Members->comm ) );
 
     // Finite element space for the function visualization - P0
-    FESpacePtr_Type function_FESpace ( new FESpace_Type ( localMeshPtr, feTetraP0, quadRuleTetra15pt,
+    FESpacePtr_Type function_FESpace ( new FESpace_Type ( meshPtr, feTetraP0, quadRuleTetra15pt,
                                                           quadRuleTria4pt, 1, Members->comm ) );
 
     // Stop chronoFiniteElementSpace
@@ -255,7 +255,7 @@ fefct::run()
         // Set directory where to save the solution
         exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-        exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+        exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
     }
     else
 #endif
@@ -267,7 +267,7 @@ fefct::run()
             // Set directory where to save the solution
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+            exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
         }
         else
         {
@@ -276,7 +276,7 @@ fefct::run()
             // Set directory where to save the solution
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( localMeshPtr, Members->comm->MyPID() );
+            exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
         }
     }
 
