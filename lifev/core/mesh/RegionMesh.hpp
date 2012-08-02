@@ -3537,6 +3537,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, bool verbose, UInt ef )
         }
     }
     UInt numFoundBoundaryFacets = bareFacet.size();
+    UInt facetCount = numFoundBoundaryFacets;
     for ( typename elements_Type::iterator elemIt = elementList().begin();
             elemIt != elementList().end(); ++elemIt )
     {
@@ -3596,6 +3597,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, bool verbose, UInt ef )
                     // gets the marker from the RegionMesh
                     aFacet.setMarkerID( NotAnId );
                     aFacet.setBoundary(false);
+                    aFacet.setId( facetCount++ );
                     addFacet( aFacet); //The id should be correct
                 }
                 else
