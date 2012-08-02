@@ -360,9 +360,8 @@ void LifeV::PartitionIO<MeshType>::createHDF5File()
     MPI_Comm comm;
     boost::shared_ptr<Epetra_MpiComm> tempComm =
             boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
-    if (tempComm != 0) {
-        comm = tempComm->Comm();
-    }
+    ASSERT( tempComm, "Error: the casting of M_comm has failed" );
+    comm = tempComm->Comm();
     MPI_Info info = MPI_INFO_NULL;
 
     // Set up file access property list with parallel I/O access
