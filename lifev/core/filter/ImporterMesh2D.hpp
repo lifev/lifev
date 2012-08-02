@@ -777,6 +777,7 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
         pe->setMarkerID( markerID_Type( __edge_label[ __i ] ) );
         pe->setPoint( 0, mesh.point( __edge_nodes[ 2 * __i ] ) );
         pe->setPoint( 1, mesh.point( __edge_nodes[ 2 * __i + 1 ] ) );
+        pe->setId( __i );
         _edge = makeBareEdge( __edge_nodes[ 2 * __i ], __edge_nodes[ 2 * __i + 1 ] );
         UInt map_it( _be.id( _edge.first ) );
         pe->firstAdjacentElementIdentity() = edge_to_firstAdjacentElementIdentity[ map_it ];
@@ -787,7 +788,7 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
     for ( UInt __i = 0; __i < __nt; ++__i )
     {
         pf = &( mesh.addFace(true) );
-        pf->setId     ( __i );
+        pf->setId( __i );
         pf->setMarkerID( markerID_Type( __triangle_label[ __i ] ) );
         pf->setPoint( 0, mesh.point( __triangle_nodes[ 3 * __i ] ) );
         pf->setPoint( 1, mesh.point( __triangle_nodes[ 3 * __i + 1 ] ) );
