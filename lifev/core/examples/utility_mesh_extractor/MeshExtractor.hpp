@@ -211,7 +211,6 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
         pp->y() = __x[ 3 * __i + 1 ];
         pp->z() = __x[ 3 * __i + 2];
         pp->setId( __i );
-        pp->setLocalId( __i );
     }
 
     // add the edges to the mesh
@@ -228,7 +227,6 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
     {
         pf = &( mesh2D->addFace(true) );
         pf->setId     ( __i );
-        pf->setLocalId( __i );
         pf->setMarkerID( markerID_Type( __triangle_label[ __i ] ) );
         pf->setPoint( 0, mesh2D->point( __triangle_nodes[ 3 * __i ] ) );
         pf->setPoint( 1, mesh2D->point( __triangle_nodes[ 3 * __i + 1 ] ) );

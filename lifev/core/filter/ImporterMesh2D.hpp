@@ -768,7 +768,6 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
         pp->y() = __x[ 2 * __i + 1 ];
         pp->z() = 0;
         pp->setId( __i );
-        pp->setLocalId( __i );
     }
 
     // add the edges to the mesh
@@ -789,7 +788,6 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
     {
         pf = &( mesh.addFace(true) );
         pf->setId     ( __i );
-        pf->setLocalId( __i );
         pf->setMarkerID( markerID_Type( __triangle_label[ __i ] ) );
         pf->setPoint( 0, mesh.point( __triangle_nodes[ 3 * __i ] ) );
         pf->setPoint( 1, mesh.point( __triangle_nodes[ 3 * __i + 1 ] ) );

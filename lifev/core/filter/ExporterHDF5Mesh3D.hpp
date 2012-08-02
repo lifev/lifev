@@ -522,7 +522,6 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
         pp->x() = pointCoordinates[0][j];
         pp->y() = pointCoordinates[1][j];
         pp->z() = pointCoordinates[2][j];
-        pp->setLocalId(j);
         pp->setId(pointGlobalId[j]);
     }
 
@@ -553,7 +552,6 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     for (Int j = 0; j < numEdges; ++j)
     {
         pe = &(tempMesh->addEdge(edgeBoundaryFlags[j]));
-        pe->setLocalId(j);
         pe->setId(edgeGlobalId[j]);
         pe->setPoint(0, tempMesh->point(edgePoints[0][j]));
         pe->setPoint(1, tempMesh->point(edgePoints[1][j]));
@@ -607,7 +605,6 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     for (Int j = 0; j < numFaces; ++j)
     {
         pf = &(tempMesh->addFace(faceBoundaryFlags[j]));
-        pf->setLocalId(j);
         pf->setId(faceGlobalId[j]);
 
         pf->firstAdjacentElementIdentity() = faceNeighbourId[0][j];
@@ -658,7 +655,6 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     {
         pv = &(tempMesh->addVolume());
         pv->setId(volumeGlobalId[j]);
-        pv->setLocalId(j);
         for (UInt k = 0; k < elementNodes; ++k)
         {
             pv->setPoint(k, tempMesh->point(volumePoints[k][j]) );

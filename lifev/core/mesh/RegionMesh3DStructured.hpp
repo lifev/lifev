@@ -286,7 +286,6 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // We set the point properties
                 nodeID = k * N_z + j * N_y + i;
                 pointPtr->setId( nodeID );
-                pointPtr->setLocalId( nodeID );
 
                 pointPtr->setMarkerID( nodeMarkerID );
                 pointPtr->x() = xPosition + t_x;
@@ -940,7 +939,6 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Tetra 1
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId( volumeID );
-                volumePtr->setLocalId( volumeID );
                 volumePtr->setPoint( 0, mesh.point(P0) );
                 volumePtr->setPoint( 1, mesh.point(P1) );
                 volumePtr->setPoint( 2, mesh.point(P3) );
@@ -950,7 +948,6 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Tetra 2
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId( volumeID + 1 );
-                volumePtr->setLocalId( volumeID + 1 );
                 volumePtr->setPoint( 0, mesh.point(P1) );
                 volumePtr->setPoint( 1, mesh.point(P3) );
                 volumePtr->setPoint( 2, mesh.point(P4) );
@@ -960,7 +957,6 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Tetra 3
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId( volumeID + 2 );
-                volumePtr->setLocalId( volumeID + 2 );
                 volumePtr->setPoint( 0, mesh.point(P4) );
                 volumePtr->setPoint( 1, mesh.point(P5) );
                 volumePtr->setPoint( 2, mesh.point(P3) );
@@ -970,7 +966,6 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Tetra 4
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId( volumeID + 3 );
-                volumePtr->setLocalId( volumeID + 3 );
                 volumePtr->setPoint( 0, mesh.point(P0) );
                 volumePtr->setPoint( 1, mesh.point(P3) );
                 volumePtr->setPoint( 2, mesh.point(P2) );
@@ -980,7 +975,6 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Tetra 5
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId( volumeID + 4 );
-                volumePtr->setLocalId( volumeID + 4 );
                 volumePtr->setPoint( 0, mesh.point(P6) );
                 volumePtr->setPoint( 1, mesh.point(P3) );
                 volumePtr->setPoint( 2, mesh.point(P4) );
@@ -990,7 +984,6 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Tetra 6
                 volumePtr = &mesh.addVolume();
                 volumePtr->setId(volumeID+5);
-                volumePtr->setLocalId(volumeID+5);
                 volumePtr->setPoint(0, mesh.point(P7));
                 volumePtr->setPoint(1, mesh.point(P6));
                 volumePtr->setPoint(2, mesh.point(P3));

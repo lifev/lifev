@@ -242,7 +242,6 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             // We set the point properties
             nodeID = j * N_y + i;
             pointPtr->setId( nodeID );
-            pointPtr->setLocalId( nodeID );
 
             pointPtr->setMarkerID( nodeFlag );
             pointPtr->x() = xPosition + t_x;
@@ -269,7 +268,6 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             // Triangle 1
             elementPtr = &mesh.addElement();
             elementPtr->setId( faceID );
-            elementPtr->setLocalId( faceID );
             elementPtr->setPoint( 0, mesh.point(P1) );
             elementPtr->setPoint( 1, mesh.point(P2) );
             elementPtr->setPoint( 2, mesh.point(P0) );
@@ -278,7 +276,6 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
             // Triangle 2
             elementPtr = &mesh.addElement();
             elementPtr->setId( faceID + 1 );
-            elementPtr->setLocalId( faceID + 1 );
             elementPtr->setPoint( 0, mesh.point(P3) );
             elementPtr->setPoint( 1, mesh.point(P0) );
             elementPtr->setPoint( 2, mesh.point(P2) );

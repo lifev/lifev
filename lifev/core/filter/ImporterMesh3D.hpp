@@ -223,7 +223,6 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
         pointerPoint = &mesh.addPoint( isOnBoundary, true );
 
         pointerPoint->setId     ( i );
-        pointerPoint->setLocalId( i );
         pointerPoint->x() = x;
         pointerPoint->y() = y;
         pointerPoint->z() = z;
@@ -319,7 +318,6 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
 
         pointerVolume = &mesh.addVolume();
         pointerVolume->setId     ( i );
-        pointerVolume->setLocalId( i );
         for ( UInt j = 0; j < GeoShape::S_numPoints; j++ )
             pointerVolume->setPoint( j, mesh.point( p[ j ] ) );
         pointerVolume->setMarkerID( markerID_Type( ibc ) );
@@ -573,7 +571,6 @@ readMppFile( RegionMesh<GeoShape, MC> & mesh,
                 pointerPoint->setMarkerID( markerID_Type( ibc ) );
 
                 pointerPoint->setId     ( i );
-                pointerPoint->setLocalId( i );
            }
 
             oStr << "Vertices Read " << std::endl;
@@ -648,7 +645,6 @@ readMppFile( RegionMesh<GeoShape, MC> & mesh,
                 p1 -= idOffset; p2 -= idOffset; p3 -= idOffset; p4 -= idOffset; //get the 0-based numbering
                 pointerVolume = &mesh.addVolume();
                 pointerVolume->setId     ( i );
-                pointerVolume->setLocalId( i);
                 pointerVolume->setPoint( 0, mesh.point( p1 ) );
                 pointerVolume->setPoint( 1, mesh.point( p2 ) );
                 pointerVolume->setPoint( 2, mesh.point( p3 ) );
@@ -907,7 +903,7 @@ readINRIAMeshFile( RegionMesh<GeoShape, MC>&      mesh,
          << "Number of Edges           = "  << std::setw( 10 ) << numberEdges            << std::endl
          << "Number of Boundary Edges  = "  << std::setw( 10 ) << numberBoundaryEdges    << std::endl
          << "Number of Stored Edges    = "  << std::setw( 10 ) << numberStoredEdges      << std::endl
-     << "Number of Points          = "  << std::setw( 10 ) << numberPoints           << std::endl
+         << "Number of Points          = "  << std::setw( 10 ) << numberPoints           << std::endl
          << "Number of Boundary Points = "  << std::setw( 10 ) << numberBoundaryPoints   << std::endl
          << "Number of Volumes         = "  << std::setw( 10 ) << numberVolumes          << std::endl;
 
@@ -985,7 +981,6 @@ readINRIAMeshFile( RegionMesh<GeoShape, MC>&      mesh,
                 }
 
                 pointerPoint->setId     ( i );
-                pointerPoint->setLocalId( i );
                 pointerPoint->x() = x;
                 pointerPoint->y() = y;
                 pointerPoint->z() = z;
@@ -1165,7 +1160,6 @@ readINRIAMeshFile( RegionMesh<GeoShape, MC>&      mesh,
                 p1 -= idOffset; p2 -= idOffset; p3 -= idOffset; p4 -= idOffset; //get the 0-based numbering
                 pointerVolume = &mesh.addVolume();
                 pointerVolume->setId     ( i );
-                pointerVolume->setLocalId( i);
                 pointerVolume->setPoint( 0, mesh.point( p1 ) );
                 pointerVolume->setPoint( 1, mesh.point( p2 ) );
                 pointerVolume->setPoint( 2, mesh.point( p3 ) );
@@ -1191,7 +1185,6 @@ readINRIAMeshFile( RegionMesh<GeoShape, MC>&      mesh,
                 p5 -= idOffset; p6 -= idOffset; p7 -= idOffset; p8 -= idOffset; //get the 0-based numbering
                 pointerVolume = &mesh.addVolume();
                 pointerVolume->setId     ( i );
-                pointerVolume->setLocalId( i );
                 pointerVolume->setPoint( 0, mesh.point( p1 ) );
                 pointerVolume->setPoint( 1, mesh.point( p2 ) );
                 pointerVolume->setPoint( 2, mesh.point( p3 ) );
@@ -1798,7 +1791,6 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
         pointerPoint = &mesh.addPoint( isonboundary[ i ], true );
         pointerPoint->setMarkerID( whichboundary[ i ] );
         pointerPoint->setId( i );
-        pointerPoint->setLocalId( i );
         pointerPoint->x() = x[ 3 * i ];
         pointerPoint->y() = x[ 3 * i + 1 ];
         pointerPoint->z() = x[ 3 * i + 2 ];
@@ -1852,7 +1844,6 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
         {
             pointerVolume = &( mesh.addVolume() );
             pointerVolume->setId     ( numberVolumes );
-            pointerVolume->setLocalId( numberVolumes++ );
             pointerVolume->setMarkerID( markerID_Type( et[ i ] ) );
             pointerVolume->setPoint( 0, mesh.point( e[ i ][ 0 ] ) );
             pointerVolume->setPoint( 1, mesh.point( e[ i ][ 1 ] ) );
@@ -1867,7 +1858,6 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
             pointerVolume = &( mesh.addVolume() );
 
             pointerVolume->setId     ( i );
-            pointerVolume->setLocalId( i );
             pointerVolume->setMarkerID( markerID_Type( et[ i ] ) );
             pointerVolume->setPoint( 0, mesh.point( e[ i ][ 0 ] ) );
             pointerVolume->setPoint( 1, mesh.point( e[ i ][ 1 ] ) );
@@ -2290,7 +2280,6 @@ readNetgenMesh(RegionMesh<GeoShape,MC> & mesh,
         pointerPoint=&mesh.addPoint( boundaryPoint[ i ], true ); //true if boundary point
 
         pointerPoint->setId     ( i );
-        pointerPoint->setLocalId( i );
 
         pointerPoint->setMarkerID( bcnpoints[ i ] );
         pointerPoint->x() = pointCoordinates[ nDimensions * i ];
@@ -2329,7 +2318,6 @@ readNetgenMesh(RegionMesh<GeoShape,MC> & mesh,
 
         pointerVolume = &mesh.addVolume();
         pointerVolume->setId( i );
-        pointerVolume->setLocalId( i );
         p1 = volumePointID[ 4 * i ];
         p2 = volumePointID[ 4 * i + 1 ];
         p3 = volumePointID[ 4 * i + 2 ];

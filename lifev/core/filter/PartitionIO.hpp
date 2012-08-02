@@ -966,7 +966,6 @@ void LifeV::PartitionIO<MeshType>::readPoints()
             pp->x() = M_realBuffer[j];
             pp->y() = M_realBuffer[stride + j];
             pp->z() = M_realBuffer[2 * stride + j];
-            pp->setLocalId(j);
             pp->setId(M_uintBuffer[stride + j]);
         }
     } else {
@@ -979,7 +978,6 @@ void LifeV::PartitionIO<MeshType>::readPoints()
             pp->x() = M_realBuffer[stride * j];
             pp->y() = M_realBuffer[stride * j + 1];
             pp->z() = M_realBuffer[stride * j + 2];
-            pp->setLocalId(j);
             pp->setId(M_uintBuffer[stride * j + 1]);
         }
     }
@@ -1039,7 +1037,6 @@ void LifeV::PartitionIO<MeshType>::readEdges()
             pe = &(M_meshPartIn->addEdge(false));
             pe->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[4 * stride + j]));
-            pe->setLocalId(j);
             pe->setId(M_uintBuffer[3 * stride + j]);
             pe->setPoint(0, M_meshPartIn->point(M_uintBuffer[j]));
             pe->setPoint(1, M_meshPartIn->point(M_uintBuffer[stride +j]));
@@ -1051,7 +1048,6 @@ void LifeV::PartitionIO<MeshType>::readEdges()
             pe = &(M_meshPartIn->addEdge(false));
             pe->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + 4]));
-            pe->setLocalId(j);
             pe->setId(M_uintBuffer[stride * j + 3]);
             pe->setPoint(0, M_meshPartIn->point(M_uintBuffer[stride * j]));
             pe->setPoint(1, M_meshPartIn->point(M_uintBuffer[stride * j + 1]));
@@ -1114,7 +1110,6 @@ void LifeV::PartitionIO<MeshType>::readFaces()
             pf->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[(6 + M_faceNodes)
                                                        * stride + j]));
-            pf->setLocalId(j);
             pf->setId(M_uintBuffer[(M_faceNodes + 1) * stride + j]);
             pf->firstAdjacentElementIdentity() =
                     M_uintBuffer[(M_faceNodes + 2) * stride + j];
@@ -1138,7 +1133,6 @@ void LifeV::PartitionIO<MeshType>::readFaces()
             pf->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j
                                                        + M_faceNodes + 6]));
-            pf->setLocalId(j);
             pf->setId(M_uintBuffer[stride * j + M_faceNodes + 1]);
             pf->firstAdjacentElementIdentity() =
                     M_uintBuffer[stride * j + M_faceNodes + 2];
@@ -1215,7 +1209,6 @@ void LifeV::PartitionIO<MeshType>::readElements()
             pv->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[(M_elementNodes + 2) * stride + j]));
             pv->setId(M_uintBuffer[(M_elementNodes + 1) * stride + j]);
-            pv->setLocalId(j);
             for (UInt k = 0; k < M_elementNodes; ++k)
             {
                 pv->setPoint(k, M_meshPartIn->point(
@@ -1230,7 +1223,6 @@ void LifeV::PartitionIO<MeshType>::readElements()
             pv->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + M_elementNodes + 2]));
             pv->setId(M_uintBuffer[stride * j + M_elementNodes + 1]);
-            pv->setLocalId(j);
             for (UInt k = 0; k < M_elementNodes; ++k)
             {
                 pv->setPoint(k, M_meshPartIn->point(
