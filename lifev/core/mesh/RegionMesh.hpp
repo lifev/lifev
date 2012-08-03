@@ -3363,8 +3363,9 @@ RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verbose
                     edg.setPoint( k, ifa->point( inode ) );
                 }
                 MeshUtility::inheritPointsWeakerMarker( edg );
-                edg.setBoundary(true);
-                addRidge( edg);
+                edg.setBoundary( true );
+                edg.setId( ridgeList().size() );
+                addRidge( edg );
             }
         }
 
@@ -3400,8 +3401,9 @@ RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verbose
                     edg.setPoint( k, elemIt->point( inode ) );
                 }
                 MeshUtility::inheritPointsWeakerMarker( edg );
-                edg.setBoundary(true);;
-                addRidge( edg);
+                edg.setBoundary( true );
+                edg.setId( ridgeList().size() );
+                addRidge( edg );
             }
         }
     }
