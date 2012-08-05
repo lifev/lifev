@@ -271,6 +271,7 @@ ExporterHDF5<MeshType>::ExporterHDF5(const GetPot& dfile, meshPtr_Type mesh, con
         M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
         M_outputFileName    ( "noninitialisedFileName" )
 {
+    M_printConnectivity = dfile( ( prefix + "/printConnectivity" ).data(), 1);
     this->setMeshProcId( mesh, procId );
 }
 
@@ -281,6 +282,7 @@ ExporterHDF5<MeshType>::ExporterHDF5(const GetPot& dfile, const std::string& pre
         M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
         M_outputFileName    ( "noninitialisedFileName" )
 {
+    M_printConnectivity = dfile( ( prefix + "/printConnectivity" ).data(), 1);
 }
 
 // ===================================================
