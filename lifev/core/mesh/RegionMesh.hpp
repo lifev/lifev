@@ -1259,33 +1259,6 @@ public:
      */
     point_Type & addPoint( point_Type const & p);
 
-
-    //! Adds a Point in the mesh giving an id.
-    /**
-     *  Stores a point at the specified position. The id is set equal to the position
-     *  All other Point attributes must be set beforehand
-     *
-     *  @param p Point to be added.
-     *  @param position Desired id.
-     *  @return Reference to the newly added Point.
-     */
-    point_Type & setPoint( point_Type const & p, UInt const position);
-
-    //! Chang boundary flag of a given point
-    /**
-     * This method is required because in the present implementation of RegionMesh we keep
-     * track of the boundary points, so just doing point(pos).setBoundary(boundary) will not
-     * work since the internal list will  not be updated. We remind, however, that MeshEntityContainer
-     * methods allow to extract all entities with a given flag set, so you may use that
-     * method to extract boundary points irrespectively of the information stored in the
-     * mesh boundary point list.
-     *
-     * @param position The position in the list of the point to be changed
-     * @param boundary true or false if the point is or is not on the boundary
-     * @return a reference to the point
-     */
-    point_Type & changePointBoundaryFlag(UInt const & position, bool const boundary);
-
     //! Returns the first mesh Point.
     /**
      *  Returns the first Point in the mesh.
@@ -2710,65 +2683,6 @@ RegionMesh<GEOSHAPE, MC>::addPoint( point_Type const & p)
         _bPoints.push_back( & pointList.back());
     }
     return thisPoint;
-}
-
-template <typename GEOSHAPE, typename MC>
-inline
-typename RegionMesh<GEOSHAPE, MC>::point_Type &
-RegionMesh<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position)
-{
-    ASSERT_PRE( position < pointList.size(), "Position  exceed lpoint list size" <<
-                position << " " << pointList.size() ) ;
-
-    bool setToBoundary=p.boundary();
-    point_Type & thisPoint(pointList[position]);
-    bool originalBoundary=thisPoint.boundary();
-
-    thisPoint=p;
-
-    // make sure that localID correspond to the position
-    thisPoint->setLocalId(position);
-    if (thisPoint.id()==NotAnId)thisPoint.setId(position);
-    if (setToBoundary!=originalBoundary)
-    {
-        if(setToBoundary)
-        {
-            // add to list of boundary points
-            _bPoints.push_back( &pointList[position] );
-        }
-        else
-        {
-            // This is rather complex, since I do not know a priori
-            // if and where point was already stored in the list!
-            // No way to avoid it, sorry
-            typename std::vector<point_Type *>::iterator bp;
-            for (bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
-            {
-                if ( ( *bp ) ->localId() == position )
-                {
-                    _bPoints.erase(bp);
-                    break;
-                }
-            }
-        }
-        return thisPoint;
-    }
-    return pointList[position];
-}
-
-template <typename GEOSHAPE, typename MC>
-inline 
-typename RegionMesh<GEOSHAPE, MC>::point_Type &
-RegionMesh<GEOSHAPE, MC>::
-changePointBoundaryFlag(UInt const & position, bool const boundary)
-{
-    point_Type pp = pointList[position];
-    if(pp.boundary()!=boundary)
-    {
-        pp.setBoundary(boundary);
-        this->setPoint(pp,position);
-    }
-    return pointList[position];
 }
 
 template <typename GEOSHAPE, typename MC>
