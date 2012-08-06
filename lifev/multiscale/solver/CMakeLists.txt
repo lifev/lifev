@@ -11,6 +11,7 @@ SET(solver_HEADERS
   solver/MultiscaleCouplingFlowRateStress.hpp
   solver/MultiscaleCouplingFlowRateValve.hpp
   solver/MultiscaleCouplingStress.hpp
+  solver/MultiscaleCouplingMeanTotalNormalStress.hpp
   solver/MultiscaleData.hpp
   solver/MultiscaleDefinitions.hpp
   solver/MultiscaleInterfaceFluid.hpp
@@ -37,6 +38,7 @@ SET(solver_SOURCES
   solver/MultiscaleCouplingFlowRateStress.cpp
   solver/MultiscaleCouplingFlowRateValve.cpp
   solver/MultiscaleCouplingStress.cpp
+  solver/MultiscaleCouplingMeanTotalNormalStress.cpp
   solver/MultiscaleData.cpp
   solver/MultiscaleModel.cpp
   solver/MultiscaleModel0D.cpp
