@@ -1986,11 +1986,12 @@ bool buildEdges( MeshType & mesh,
                 edgeExists=true;
 
             }
-             else
-             {
+            else
+            {
                 edge = edge_Type();
+                edge.setId( mesh.edgeList.size() );
                 edgeExists=false;
-             }
+            }
             for ( UInt kPointId = 0; kPointId < edge_Type::S_numPoints; ++kPointId )
             {
                 edge.setPoint( kPointId, facePtr->point( faceShape_Type::edgeToPoint( jEdgeLocalId, kPointId ) ) );
@@ -2005,7 +2006,10 @@ bool buildEdges( MeshType & mesh,
                 mesh.setEdge(edge,newEdgeId);
             }
             else
+            {
                 newEdgeId = mesh.addEdge( edge).localId();
+            }
+
             if ( verbose )
             {
                 if ( newEdgeId % 6 == 0 )
@@ -2055,6 +2059,7 @@ bool buildEdges( MeshType & mesh,
          else
          {
             edge = edge_Type();
+            edge.setId( mesh.edgeList.size() );
             edgeExists=false;
          }
         for ( UInt kPointId = 0; kPointId < edge_Type::S_numPoints; ++kPointId )
