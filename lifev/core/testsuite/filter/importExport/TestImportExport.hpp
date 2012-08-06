@@ -101,7 +101,7 @@ private:
     commPtr_Type                                             M_commPtr;
     LifeV::Displayer                                         M_displayer;
     GetPot                                                   M_dataFile;
-    boost::shared_ptr< LifeV::MeshPartitioner< mesh_Type > > M_meshPartPtr;
+    boost::shared_ptr< mesh_Type >                           M_meshPtr;
     LifeV::TimeData                                          M_timeData;
 
     feSpacePtr_Type                                          M_vectorFESpacePtr;
@@ -204,9 +204,11 @@ TestImportExport::buildMesh()
         regularMesh3D(*fullMeshPtr, 0, nEl, nEl, nEl);
     }
     // Split the mesh between processors
-    M_meshPartPtr.reset( new MeshPartitioner< mesh_Type >( fullMeshPtr, M_commPtr ) );
+    MeshPartitioner<mesh_Type> meshPart( fullMeshPtr, M_commPtr );
+    // Get the mesh for the current partition
+    M_meshPtr = meshPart.meshPartition();
     // Release the original mesh from the MeshPartitioner object and delete the RegionMesh3D object
-    M_meshPartPtr->releaseUnpartitionedMesh();
+    meshPart.releaseUnpartitionedMesh();
     fullMeshPtr.reset();
 
     chrono.stop();
@@ -232,7 +234,7 @@ TestImportExport::buildFESpaces()
 
     M_displayer.leaderPrint( "\t-o Building the vector FE space...\n" );
 
-    M_vectorFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, vectorFE, nDimensions, M_commPtr) );
+    M_vectorFESpacePtr.reset( new feSpace_Type( M_meshPtr, vectorFE, nDimensions, M_commPtr ) );
 
     M_displayer.leaderPrint( "\t\t...ok.\n" );
 
@@ -241,7 +243,7 @@ TestImportExport::buildFESpaces()
 
     M_displayer.leaderPrint( "\t-o Building the scalar FE space...\n" );
 
-    M_scalarFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, scalarFE, 1, M_commPtr) );
+    M_scalarFESpacePtr.reset( new feSpace_Type( M_meshPtr, scalarFE, 1, M_commPtr ) );
 
     M_displayer.leaderPrint( "\t\t...ok.\n" );
 
@@ -276,7 +278,7 @@ TestImportExport::buildExporter( boost::shared_ptr< ExporterType >& exporterPtr,
     exporterPtr.reset( new ExporterType ( M_dataFile, prefix ) );
 
     //exporterPtr->setPostDir( "./" );
-    exporterPtr->setMeshProcId( M_meshPartPtr->meshPartition(), M_commPtr->MyPID() );
+    exporterPtr->setMeshProcId( M_meshPtr, M_commPtr->MyPID() );
     chrono.stop();
     M_displayer.leaderPrint( "[...done in ", chrono.diff(), "s]\n" );
 
