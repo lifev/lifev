@@ -584,7 +584,7 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            //checkResult( M_data->dataFluid()->dataTime()->time() );
+            checkResult( M_data->dataFluid()->dataTime()->time() );
         }
         std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
         ofile.close();
