@@ -93,7 +93,7 @@ public:
     */
     ComposedOperator( const ComposedOperator<operator_Type>& P);
 
-    virtual ~ComposedOperator( );
+    virtual ~ComposedOperator();
     //@}
 
     //!@name Public Methods
@@ -345,7 +345,7 @@ ComposedOperator<operator_Type>::ComposedOperator( const ComposedOperator<operat
 template <typename operator_Type>
 ComposedOperator<operator_Type>::~ComposedOperator()
 {
-
+    M_operator.clear();
 }
 
 // ===================================================

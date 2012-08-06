@@ -23,7 +23,8 @@ import_dir = ./importDir/
 
 [importer]
 type       = ensight
-filename   = ethiersteinman
+filename   = rossEthierSteinman
+numImportProc = 4
 
 
 [fluid]
@@ -34,7 +35,7 @@ viscosity       = .01       # viscosity
 
 [../time_discretization]
 initialtime     = 0.
-endtime         = 0.04
+endtime         = 0.02
 timestep        = 0.01
 BDF_order       = 1
 

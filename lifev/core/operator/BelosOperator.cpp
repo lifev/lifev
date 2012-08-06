@@ -69,7 +69,9 @@ BelosOperator::BelosOperator():
 
 BelosOperator::~BelosOperator()
 {
-
+    M_belosPrec = Teuchos::null;
+    M_linProblem = Teuchos::null;
+    M_solverManager = Teuchos::null;
 }
 
 int BelosOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const

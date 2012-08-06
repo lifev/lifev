@@ -53,7 +53,8 @@ SolverOperator::SolverOperator():
 
 SolverOperator::~SolverOperator()
 {
-
+    M_prec.reset();
+    M_oper.reset();
 }
 
 int SolverOperator::SetUseTranspose( bool useTranspose )
