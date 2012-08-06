@@ -223,7 +223,7 @@ EnsightToHdf5::run()
 
     std::string const importerType =  dataFile( "importer/type", "ensight");
     std::string const importerName =  dataFile( "importer/filename", "ethiersteinman");
-    std::string const importDir    =  dataFile( "importer/importDir", "importDir");
+    std::string const importDir    =  dataFile( "importer/importDir", "importDir/");
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)

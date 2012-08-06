@@ -52,6 +52,19 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <mpi.h>
+
+#ifndef H5Dcreate_vers
+#define H5Dcreate_vers 2
+#endif
+
+#ifndef H5Dopen_vers
+#define H5Dopen_vers 2
+#endif
+
+#ifndef H5Gcreate_vers
+#define H5Gcreate_vers 2
+#endif
+
 #include <hdf5.h>
 
 #include <boost/shared_ptr.hpp>
