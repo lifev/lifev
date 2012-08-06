@@ -328,6 +328,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
 
 
         edgePtr = &mesh.addFacet( true ) ;
+        edgePtr->setId( mesh.facetList().size() - 1 );
         edgePtr->setMarkerID( edgeLabel );
         edgePtr->setPoint( 0, mesh.point( P0 ));
         edgePtr->setPoint( 1, mesh.point( P1 ));
