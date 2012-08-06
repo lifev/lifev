@@ -45,7 +45,6 @@
 
 
 #include <lifev/structure/solver/StructuralMaterial.hpp>
-#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 
 namespace LifeV
 {
@@ -188,7 +187,7 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
 //@{
 
     //! Get the Stiffness matrix
-    matrixPtr_Type const stiffMatrix() const { }
+  matrixPtr_Type const stiffMatrix() const { return super::M_jacobian; }
 
 
     //! Get the stiffness vector
@@ -215,13 +214,12 @@ protected:
     vectorPtr_Type                                M_FirstPiolaKStress;
 
     //! Local tensors initialization
-    KNMPtr_Type                        M_FirstPiolaKStressEle;
-    KNMKPtr_Type                    M_Fk;
-    KNMKPtr_Type                    M_CofFk;
-    KNMKPtr_Type                    M_Identity;
-    KNPtr_Type                        M_Jack;
-    KNPtr_Type                        M_trCisok;
-    KNPtr_Type                        M_trCk;
+  boost::shared_ptr<boost::multi_array<Real, 3> > M_Fk;
+  boost::shared_ptr<boost::multi_array<Real, 3> > M_CofFk;
+
+  boost::shared_ptr<std::vector<Real> > M_Jack;
+  boost::shared_ptr<std::vector<Real> > M_trCisok;
+  boost::shared_ptr<std::vector<Real> > M_trCk;
 
 };
 
@@ -259,7 +257,7 @@ ExponentialMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh
 {
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
-    std::cout<<"I am setting up the Material"<<std::endl;
+    //    std::cout<<"I am setting up the Material"<<std::endl;
 
     this->M_FESpace                     = dFESpace;
     this->M_localMap                    = monolithicMap;
@@ -272,13 +270,12 @@ ExponentialMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh
     this->M_elmatK.reset                ( new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
 
     //! Local tensors initilization
-    M_FirstPiolaKStressEle.reset    ( new KNM_Type( nDimensions, nDimensions ) );
-    M_Fk.reset                    ( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
-    M_CofFk.reset               ( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
-    M_Identity.reset                  ( new KNMK_Type( nDimensions, nDimensions,dFESpace->fe().nbQuadPt() ) );
-    M_Jack.reset            ( new KN_Type( dFESpace->fe().nbQuadPt() ) );
-    M_trCisok.reset            ( new KN_Type( dFESpace->fe().nbQuadPt() ) );
-    M_trCk.reset            ( new KN_Type( dFESpace->fe().nbQuadPt() ) );
+    M_Fk.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
+    M_CofFk.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
+
+    M_Jack.reset ( new std::vector<Real>(dFESpace->fe().nbQuadPt(),0.0) );
+    M_trCisok.reset ( new std::vector<Real>(dFESpace->fe().nbQuadPt(),0.0) );
+    M_trCk.reset ( new std::vector<Real>(dFESpace->fe().nbQuadPt(),0.0) );
 
 }
 
@@ -500,94 +497,86 @@ void ExponentialMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vecto
     Real s;
 
     //! loop on quadrature points (ig)
-    for ( Int ig = 0; ig < static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
+    for ( UInt ig = 0; ig < this->M_FESpace->fe().nbQuadPt(); ig++ )
     {
     //! loop on space coordinates (icoor)
-      for ( Int icoor = 0; icoor < static_cast<Int> (nDimensions); icoor++ )
+      for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
     {
         //! loop  on space coordinates (jcoor)
-      for ( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); jcoor++ )
+      for ( UInt jcoor = 0; jcoor < nDimensions; jcoor++ )
         {
             s = 0.0;
-            for ( Int i = 0; i < static_cast<Int> (this->M_FESpace->fe().nbFEDof()); i++ )
+            for ( UInt i = 0; i < this->M_FESpace->fe().nbFEDof(); i++ )
             {
                 //! \grad u^k at a quadrature point
                 s += this->M_FESpace->fe().phiDer( i, jcoor, ig ) * dk_loc[ i + icoor * this->M_FESpace->fe().nbFEDof() ];
             }
             //! gradient of displacement
-            (*M_Fk)( icoor , jcoor ,ig ) = s;
+            (*M_Fk)[ icoor ][ jcoor ][ig ] = s;
         }
     }
     }
 
     //! loop on quadrature points (ig)
-    for ( Int ig = 0; ig < static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
+    for ( UInt ig = 0; ig < this->M_FESpace->fe().nbQuadPt(); ig++ )
     {
     //! loop on space coordinates (icoor)
-      for ( Int  icoor = 0;icoor < static_cast<Int> (nDimensions); icoor++ )
+      for ( UInt  icoor = 0;icoor < nDimensions; icoor++ )
     {
                 //! deformation gradient Fk
-        (*M_Fk)( icoor , icoor , ig ) +=  1.0;
+        (*M_Fk)[ icoor ][ icoor ][ ig ] +=  1.0;
     }
     }
 
     Real a,b,c,d,e,f,g,h,i;
 
-    for( Int ig=0; ig< static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
+    for( UInt ig=0; ig< this->M_FESpace->fe().nbQuadPt(); ig++ )
     {
-    a = (*M_Fk)( 0 , 0 , ig );
-    b = (*M_Fk)( 0 , 1 , ig );
-    c = (*M_Fk)( 0 , 2 , ig );
-    d = (*M_Fk)( 1 , 0 , ig );
-    e = (*M_Fk)( 1 , 1 , ig );
-    f = (*M_Fk)( 1 , 2 , ig );
-    g = (*M_Fk)( 2 , 0 , ig );
-    h = (*M_Fk)( 2 , 1 , ig );
-    i = (*M_Fk)( 2 , 2 , ig );
+    a = (*M_Fk)[ 0 ][ 0 ][ ig ];
+    b = (*M_Fk)[ 0 ][ 1 ][ ig ];
+    c = (*M_Fk)[ 0 ][ 2 ][ ig ];
+    d = (*M_Fk)[ 1 ][ 0 ][ ig ];
+    e = (*M_Fk)[ 1 ][ 1 ][ ig ];
+    f = (*M_Fk)[ 1 ][ 2 ][ ig ];
+    g = (*M_Fk)[ 2 ][ 0 ][ ig ];
+    h = (*M_Fk)[ 2 ][ 1 ][ ig ];
+    i = (*M_Fk)[ 2 ][ 2 ][ ig ];
 
     //! determinant of deformation gradient Fk
-    (*M_Jack)(ig) = a*( e*i - f*h ) - b*( d*i - f*g ) + c*( d*h - e*g );
+    (*M_Jack)[ig] = a*( e*i - f*h ) - b*( d*i - f*g ) + c*( d*h - e*g );
 
-    (*M_CofFk)( 0 , 0 , ig ) =   ( e*i - f*h );
-    (*M_CofFk)( 0 , 1 , ig ) = - ( d*i - g*f );
-    (*M_CofFk)( 0 , 2 , ig ) =   ( d*h - e*g );
-    (*M_CofFk)( 1 , 0 , ig ) = - ( b*i - c*h );
-    (*M_CofFk)( 1 , 1 , ig ) =   ( a*i - c*g );
-    (*M_CofFk)( 1 , 2 , ig ) = - ( a*h - g*b );
-    (*M_CofFk)( 2 , 0 , ig ) =   ( b*f - c*e );
-    (*M_CofFk)( 2 , 1 , ig ) = - ( a*f - c*d );
-    (*M_CofFk)( 2 , 2 , ig ) =   ( a*e - d*b );
-    }
+    ASSERT_PRE((*M_Jack)[ig] > 0, "Negative Jacobian. Error!" ); 
 
-    for ( Int ig = 0; ig <  static_cast<Int> (this->M_FESpace->fe().nbQuadPt())  ;ig++ )
-    {
-    if ((*M_Jack)(ig) < 0)
-    {
-
-        std::cout <<"negative jacobian !!!!!! ERROR in computeKinematicsVariables"<<  std::endl;
-
-    }
+    (*M_CofFk)[ 0 ][ 0 ][ ig ] =   ( e*i - f*h );
+    (*M_CofFk)[ 0 ][ 1 ][ ig ] = - ( d*i - g*f );
+    (*M_CofFk)[ 0 ][ 2 ][ ig ] =   ( d*h - e*g );
+    (*M_CofFk)[ 1 ][ 0 ][ ig ] = - ( b*i - c*h );
+    (*M_CofFk)[ 1 ][ 1 ][ ig ] =   ( a*i - c*g );
+    (*M_CofFk)[ 1 ][ 2 ][ ig ] = - ( a*h - g*b );
+    (*M_CofFk)[ 2 ][ 0 ][ ig ] =   ( b*f - c*e );
+    (*M_CofFk)[ 2 ][ 1 ][ ig ] = - ( a*f - c*d );
+    (*M_CofFk)[ 2 ][ 2 ][ ig ] =   ( a*e - d*b );
     }
 
     //! loop on quadrature points
-    for ( Int ig = 0;ig < static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
+    for ( UInt ig = 0;ig < this->M_FESpace->fe().nbQuadPt(); ig++ )
     {
     s = 0.0;
-    for ( Int i = 0; i < static_cast<Int> (nDimensions); i++)
+    for ( UInt i = 0; i < nDimensions; i++)
     {
-      for ( Int j = 0; j < static_cast<Int> (nDimensions); j++)
+      for ( UInt j = 0; j < nDimensions; j++)
         {
                 //! trace of  C1 = (F1k^t F1k)
-            s +=  (*M_Fk)( i , j , ig ) * (*M_Fk)( i , j , ig );
+            s +=  (*M_Fk)[ i ][ j ][ ig ] * (*M_Fk)[ i ][ j ][ ig ];
         }
     }
-    (*M_trCk)( ig ) = s;
+    (*M_trCk)[ ig ] = s;
     }
 
-    for ( Int ig = 0; ig <  static_cast<Int> (this->M_FESpace->fe().nbQuadPt()); ig++ )
+    for ( UInt ig = 0; ig <  this->M_FESpace->fe().nbQuadPt(); ig++ )
     {
         //! trace of deviatoric C
-    (*M_trCisok)( ig ) =  pow((*M_Jack)( ig ), -2./3.) * (*M_trCk)( ig );
+    (*M_trCisok)[ ig ] =  pow((*M_Jack)[ ig ], -2./3.) * (*M_trCk)[ ig ];
     }
 }
 
