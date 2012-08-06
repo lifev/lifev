@@ -2513,7 +2513,6 @@ RegionMesh<GEOSHAPE, MC>::addEdge( bool const boundary )
 {
     edge_Type anEdge;
     anEdge.setBoundary(boundary);
-    anEdge.setId(edgeList.size());
     return addEdge( anEdge);
 }
 
@@ -2527,7 +2526,6 @@ RegionMesh<GEOSHAPE, MC>::addEdge( edge_Type const & f)
     edgeList.push_back( f );
     edge_Type & thisEdge=edgeList.back();
     thisEdge.setLocalId(edgeList.size() - 1);
-    if (thisEdge.id()==NotAnId)thisEdge.setId(edgeList.size()-1);
     return thisEdge;
 }
 
@@ -2541,8 +2539,6 @@ RegionMesh<GEOSHAPE, MC>::setEdge( edge_Type const & f, UInt position)
     edgeList( position ) = f;
     edge_Type & thisEdge(edgeList( position ) );
     thisEdge.setLocalId( position );
-    if(thisEdge.id()==NotAnId)
-        thisEdge.setId( position );
     return thisEdge;
 }
 
