@@ -1640,6 +1640,7 @@ bool buildFaces( MeshType & mesh,
             {
                 faceExists=false;
                 face=face_Type();
+                face.setId( mesh.faceList.size() );
             }
             volumeIdToLocalFaceIdPair = boundaryFaceContainerIterator->second;
             volumeId = volumeIdToLocalFaceIdPair.first; // Element ID
@@ -1793,6 +1794,7 @@ bool buildFaces( MeshType & mesh,
                 {
                     faceExists=false;
                     face=face_Type();
+                    face.setId( mesh.faceList.size() );
                 }
 
                 for ( UInt kPointId = 0; kPointId < face_Type::S_numPoints; ++kPointId )
