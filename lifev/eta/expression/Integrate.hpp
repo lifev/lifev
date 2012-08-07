@@ -41,6 +41,8 @@
 #include <lifev/eta/expression/RequestLoopElement.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
+#include <lifev/eta/fem/QRAdapterBase.hpp>
+#include <lifev/eta/fem/QRAdapterNeverAdapt.hpp>
 
 #include <lifev/eta/expression/IntegrateMatrixElement.hpp>
 #include <lifev/eta/expression/IntegrateVectorElement.hpp>
@@ -105,14 +107,24 @@ integrate( const RequestLoopElement<MeshType>& request,
   for performing an integration, here to assemble a benchmark
   with a loop on the elements.
  */
-template < typename MeshType, typename ExpressionType>
-IntegrateValueElement<MeshType,ExpressionType>
+template < typename MeshType, typename ExpressionType, typename QRAdapterType>
+IntegrateValueElement<MeshType,ExpressionType,QRAdapterType>
 integrate( const RequestLoopElement<MeshType>& request,
-			const QuadratureRule& quadrature,
-			const ExpressionType& expression)
+           const QRAdapterBase<QRAdapterType>& qrAdapter,
+           const ExpressionType& expression)
 {
-	return IntegrateValueElement<MeshType,ExpressionType>
-		(request.mesh(),quadrature,expression);
+    return IntegrateValueElement<MeshType,ExpressionType,QRAdapterType>
+        (request.mesh(),qrAdapter.implementation(),expression);
+}
+
+template < typename MeshType, typename ExpressionType>
+IntegrateValueElement<MeshType,ExpressionType,QRAdapterNeverAdapt>
+integrate( const RequestLoopElement<MeshType>& request,
+           const QuadratureRule& quadrature,
+           const ExpressionType& expression)
+{
+    return IntegrateValueElement<MeshType,ExpressionType,QRAdapterNeverAdapt>
+        (request.mesh(),QRAdapterNeverAdapt(quadrature),expression);
 }
 
 
