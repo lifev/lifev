@@ -51,7 +51,10 @@
 namespace LifeV
 {
 //! @todo Move to aspecific file meshentityutility
-namespace Comparers{
+
+namespace Comparers
+{
+
 /** @defgroup ComparisonOperators
  * They define a comparison operators for mesh entities according to some of
  * their attributes
