@@ -88,15 +88,26 @@ integrate( const RequestLoopElement<MeshType>& request,
   for performing an integration, here to assemble a vector
   with a loop on the elements.
  */
-template < typename MeshType, typename TestSpaceType, typename ExpressionType>
-IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType>
+template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType,QRAdapterType>
 integrate( const RequestLoopElement<MeshType>& request,
-			const QuadratureRule& quadrature,
-			const boost::shared_ptr<TestSpaceType>& testSpace,
-			const ExpressionType& expression)
+           const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const ExpressionType& expression)
 {
-	return IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType>
-		(request.mesh(),quadrature,testSpace,expression);
+    return IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType,QRAdapterType>
+        (request.mesh(),qrAdapterBase.implementation(),testSpace,expression);
+}
+
+template < typename MeshType, typename TestSpaceType, typename ExpressionType>
+IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType,QRAdapterNeverAdapt>
+integrate( const RequestLoopElement<MeshType>& request,
+           const QuadratureRule& quadrature,
+           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const ExpressionType& expression)
+{
+    return IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType,QRAdapterNeverAdapt>
+        (request.mesh(),QRAdapterNeverAdapt(quadrature),testSpace,expression);
 }
 
 //! Integrate function for benchmark expressions
@@ -110,11 +121,11 @@ integrate( const RequestLoopElement<MeshType>& request,
 template < typename MeshType, typename ExpressionType, typename QRAdapterType>
 IntegrateValueElement<MeshType,ExpressionType,QRAdapterType>
 integrate( const RequestLoopElement<MeshType>& request,
-           const QRAdapterBase<QRAdapterType>& qrAdapter,
+           const QRAdapterBase<QRAdapterType>& qrAdapterBase,
            const ExpressionType& expression)
 {
     return IntegrateValueElement<MeshType,ExpressionType,QRAdapterType>
-        (request.mesh(),qrAdapter.implementation(),expression);
+        (request.mesh(),qrAdapterBase.implementation(),expression);
 }
 
 template < typename MeshType, typename ExpressionType>
