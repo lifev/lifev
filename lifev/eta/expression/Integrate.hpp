@@ -68,16 +68,28 @@ namespace ExpressionAssembly{
   for performing an integration, here to assemble a matrix
   with a loop on the elements.
  */
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>
 integrate( const RequestLoopElement<MeshType>& request,
-			const QuadratureRule& quadrature,
-			const boost::shared_ptr<TestSpaceType>& testSpace,
-			const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-			const ExpressionType& expression)
+           const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+           const ExpressionType& expression)
 {
-	return IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
-		(request.mesh(),quadrature,testSpace,solutionSpace,expression);
+    return IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>
+        (request.mesh(),qrAdapterBase.implementation(),testSpace,solutionSpace,expression);
+}
+
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterNeverAdapt>
+integrate( const RequestLoopElement<MeshType>& request,
+           const QuadratureRule& quadrature,
+           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+           const ExpressionType& expression)
+{
+    return IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterNeverAdapt>
+        (request.mesh(),QRAdapterNeverAdapt(quadrature),testSpace,solutionSpace,expression);
 }
 
 //! Integrate function for vectorial expressions
