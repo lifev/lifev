@@ -420,7 +420,7 @@ Structure::run3d()
     exporter->postProcess( 0 );
     /*
     //!--------------------------------------------------------------------------------------------
-    //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
+    //! MATLAB FILE WITH DISPLACEMENT OF A CHOSEN POINT
     //!--------------------------------------------------------------------------------------------
     cout.precision(16);
     ofstream file_comp( "Displacement_components_NL.m" );
@@ -581,7 +581,7 @@ void Structure::CheckResultNH(const Real& dispNorm,const Real& time)
 
 void Structure::resultChanged(Real time)
 {
-  std::cout << "Some modifications led to changes in the l2 norm of the solution at time " << time << std::endl;
+  std::cout << "Correct value at time: " << time << std::endl;
   returnValue = EXIT_SUCCESS;
 }
 
