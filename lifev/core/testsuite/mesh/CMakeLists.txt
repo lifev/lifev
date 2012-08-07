@@ -41,3 +41,11 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_BareMesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/core/data/mesh/inria
 )
 
+TRIBITS_ADD_EXECUTABLE_AND_TEST(
+  EntitySelection
+  SOURCES entity_selection.cpp
+  ARGS -c
+  NUM_MPI_PROCS 1
+  COMM serial mpi
+#  STANDARD_PASS_OUTPUT
+)
