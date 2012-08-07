@@ -4,6 +4,8 @@ SET(fem_HEADERS
   fem/ETCurrentFlag.hpp
   fem/ETFESpace.hpp
   fem/MeshGeometricMap.hpp
+  fem/QRAdapterBase.hpp
+  fem/QRAdapterNeverAdapt.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES ""
