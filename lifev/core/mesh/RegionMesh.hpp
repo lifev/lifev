@@ -329,7 +329,7 @@ public:
     /**
      *  @return regionmesh marker.
      */
-    typename MC::regionMarker_Type & markerClass() { return M_marker; }
+    typename MC::regionMarker_Type & markerClass() const { return M_marker; }
 
     //! get only mesh marker id.
     /**
