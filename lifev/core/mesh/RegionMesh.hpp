@@ -2668,9 +2668,9 @@ typename RegionMesh<GEOSHAPE, MC>::point_Type &
 RegionMesh<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
 {
     point_Type aPoint;
-    aPoint.setBoundary(boundary);
-    if(vertex) aPoint.setFlag( EntityFlags::VERTEX );
-    return addPoint(aPoint);
+    aPoint.setBoundary( boundary );
+    if( vertex ) aPoint.setFlag( EntityFlags::VERTEX );
+    return addPoint( aPoint );
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2682,8 +2682,8 @@ RegionMesh<GEOSHAPE, MC>::addPoint( point_Type const & p)
                 pointList.size() + 1 << " " << pointList.capacity() ) ;
 
     pointList.push_back( p );
-    point_Type & thisPoint(pointList.back());
-    thisPoint.setLocalId(pointList.size()-1);
+    point_Type & thisPoint( pointList.back() );
+    thisPoint.setLocalId( pointList.size() - 1 );
     //todo This is bug prone!
     if ( thisPoint.boundary() )
     {
