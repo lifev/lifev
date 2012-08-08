@@ -215,14 +215,15 @@ public:
   //! Get the displacement solution
   solutionVect_Type displacement() {return *M_displ;}
 
-  //! Get the displacement solution
-  solutionVect_Type gradientX() {return *M_displX;}
-  solutionVect_Type gradientY() {return *M_displY;}
-  solutionVect_Type gradientZ() {return *M_displZ;}
+  //Getters initially used for debug to check the gradient of the displacement
+  // //! Get the displacement solution
+  // solutionVect_Type gradientX() {return *M_displX;}
+  // solutionVect_Type gradientY() {return *M_displY;}
+  // solutionVect_Type gradientZ() {return *M_displZ;}
 
-  solutionVect_Type sigmaX() {return *M_sigmaX;}
-  solutionVect_Type sigmaY() {return *M_sigmaY;}
-  solutionVect_Type sigmaZ() {return *M_sigmaZ;}
+  // solutionVect_Type sigmaX() {return *M_sigmaX;}
+  // solutionVect_Type sigmaY() {return *M_sigmaY;}
+  // solutionVect_Type sigmaZ() {return *M_sigmaZ;}
 
   //! Get the global vector for the eigenvalues
   solutionVect_Type principalStresses() {return *M_globalEigen;}
@@ -236,13 +237,9 @@ protected:
   /*!
     \param NONE
   */
-  void computeDisplacementGradient( void );    
-
-  //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
-  /*!
-    \param elvecTens VectorElemental over which the reconstruction is applied
-  */
-  void reconstructElementaryVector( solutionVect_Type& patchArea, UInt nVol );    
+  void computeDisplacementGradient( solutionVectPtr_Type grDisplX,
+				    solutionVectPtr_Type grDisplY,
+				    solutionVectPtr_Type grDisplZ);    
 
   //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
   /*!
@@ -277,9 +274,6 @@ protected:
     boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
 
     boost::shared_ptr<const MapEpetra>             M_localMap;
-
-    //! Elementary vector for the tensions on the element
-    boost::scoped_ptr<VectorElemental>             M_elVecTens;
     
     //! Elementary matrix for the tensor F
     matrixPtr_Type                                 M_deformationF;
@@ -302,20 +296,24 @@ protected:
     //! Vector for the displacement field
     solutionVectPtr_Type                            M_displ;
 
-    //! Vector for the gradient along X of the displacement field
-    solutionVectPtr_Type                            M_displX;
-    //! Vector for the gradient along Y of the displacement field
-    solutionVectPtr_Type                            M_displY;
-    //! Vector for the gradient along Z of the displacement field
-    solutionVectPtr_Type                            M_displZ;
+
+    // Vector initially used for debug
+    //! Elementary vector for the tensions on the element
+    //boost::scoped_ptr<VectorElemental>             M_elVecTens;
+    // //! Vector for the gradient along X of the displacement field
+    // solutionVectPtr_Type                            M_displX;
+    // //! Vector for the gradient along Y of the displacement field
+    // solutionVectPtr_Type                            M_displY;
+    // //! Vector for the gradient along Z of the displacement field
+    // solutionVectPtr_Type                            M_displZ;
 
 
-    //! Vector for the gradient along X of the displacement field
-    solutionVectPtr_Type                            M_sigmaX;
-    //! Vector for the gradient along Y of the displacement field
-    solutionVectPtr_Type                            M_sigmaY;
-    //! Vector for the gradient along Z of the displacement field
-    solutionVectPtr_Type                            M_sigmaZ;
+    // //! Vector for the gradient along X of the displacement field
+    // solutionVectPtr_Type                            M_sigmaX;
+    // //! Vector for the gradient along Y of the displacement field
+    // solutionVectPtr_Type                            M_sigmaY;
+    // //! Vector for the gradient along Z of the displacement field
+    // solutionVectPtr_Type                            M_sigmaZ;
 
 
     //! Vector for the eigenvalues of the Cauchy stress tensor
@@ -366,14 +364,13 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ):
     M_eigenvaluesI               ( ),   
     M_displ                      ( ),
     M_globalEigen                ( ),
-    M_displX                     ( ),
-    M_displY                     ( ),
-    M_displZ                     ( ),
-
-    M_sigmaX                     ( ),
-    M_sigmaY                     ( ),
-    M_sigmaZ                     ( ),
-    M_elVecTens                  ( ),
+    // M_displX                     ( ),
+    // M_displY                     ( ),
+    // M_displZ                     ( ),
+    // M_sigmaX                     ( ),
+    // M_sigmaY                     ( ),
+    // M_sigmaZ                     ( ),
+    // M_elVecTens                  ( ),
     M_material                   ( )
 {
   
@@ -412,16 +409,16 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
   M_cofactorF.reset     ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
   M_firstPiola.reset    ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
   M_displ.reset         ( new solutionVect_Type(*M_localMap) );
-  M_displX.reset        ( new solutionVect_Type(*M_localMap) );
-  M_displY.reset        ( new solutionVect_Type(*M_localMap) );
-  M_displZ.reset        ( new solutionVect_Type(*M_localMap) );
+  // M_displX.reset        ( new solutionVect_Type(*M_localMap) );
+  // M_displY.reset        ( new solutionVect_Type(*M_localMap) );
+  // M_displZ.reset        ( new solutionVect_Type(*M_localMap) );
 
-  M_sigmaX.reset        ( new solutionVect_Type(*M_localMap) );
-  M_sigmaY.reset        ( new solutionVect_Type(*M_localMap) );
-  M_sigmaZ.reset        ( new solutionVect_Type(*M_localMap) );
+  // M_sigmaX.reset        ( new solutionVect_Type(*M_localMap) );
+  // M_sigmaY.reset        ( new solutionVect_Type(*M_localMap) );
+  // M_sigmaZ.reset        ( new solutionVect_Type(*M_localMap) );
+  // M_elVecTens.reset     ( new VectorElemental(this->M_FESpace->fe().nbFEDof(), nDimensions) );
 
   M_globalEigen.reset   ( new solutionVect_Type(*M_localMap) );
-  M_elVecTens.reset     ( new VectorElemental(this->M_FESpace->fe().nbFEDof(), nDimensions) );
   M_invariants.resize   ( M_FESpace->fieldDim() + 1 );
   M_eigenvaluesR.resize ( M_FESpace->fieldDim() );
   M_eigenvaluesI.resize ( M_FESpace->fieldDim() );
@@ -453,15 +450,21 @@ template <typename Mesh>
 void 
 WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 {
-  //Compute the deformation gradient tensor F of the displ field
-  computeDisplacementGradient();
+  
+  solutionVectPtr_Type grDisplX( new solutionVect_Type(*M_localMap) );
+  solutionVectPtr_Type grDisplY( new solutionVect_Type(*M_localMap) );
+  solutionVectPtr_Type grDisplZ( new solutionVect_Type(*M_localMap) );
 
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Norm of the gradient with respect to x ", M_displX->norm2() );
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Norm of the gradient with respect to y ", M_displY->norm2() );
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Norm of the gradient with respect to z ", M_displZ->norm2() );
+  //Compute the deformation gradient tensor F of the displ field
+  computeDisplacementGradient( grDisplX, grDisplY, grDisplZ);
+
+  //Initially used for debug
+  // this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  // this->M_displayer->leaderPrint("   Norm of the gradient with respect to x ", grDisplX->norm2() );
+  // this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  // this->M_displayer->leaderPrint("   Norm of the gradient with respect to y ", grDisplY->norm2() );
+  // this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  // this->M_displayer->leaderPrint("   Norm of the gradient with respect to z ", grDisplZ->norm2() );
 
   //For each of the DOF, the Cauchy tensor is computed. 
   //Therefore the tensor C,P, \sigma are computed for each DOF
@@ -495,12 +498,11 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 	    {		    
 	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset); 
 	      Int GIDid = M_displ->blockMap().GID(LIDid); 
-	      dX[iComp] = (*M_displX)(GIDid); // (d_xX,d_yX,d_zX)
-	      dY[iComp] = (*M_displY)(GIDid); // (d_xY,d_yY,d_zY)
-	      dZ[iComp] = (*M_displZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
+	      dX[iComp] = (*grDisplX)(GIDid); // (d_xX,d_yX,d_zX)
+	      dY[iComp] = (*grDisplY)(GIDid); // (d_xY,d_yY,d_zY)
+	      dZ[iComp] = (*grDisplZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
 	    }
-	  
-	      
+	  	      
 	  //Fill the matrix F
 	  for( UInt icoor = 0; icoor < M_FESpace->fieldDim(); icoor++ )
 	    {
@@ -556,25 +558,27 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 
 template <typename Mesh>
 void 
-WallTensionEstimator<Mesh >::computeDisplacementGradient( void )
+WallTensionEstimator<Mesh >::computeDisplacementGradient( solutionVectPtr_Type grDisplX,
+							  solutionVectPtr_Type grDisplY,
+							  solutionVectPtr_Type grDisplZ)
 {
   //The map of the displacement field is not transformed in a Repeated map
   //because it is done inside the gradientRecovery method
 
   //Compute the gradient along X of the displacement field
-  *M_displX = M_FESpace->gradientRecovery(*M_displ, 0);
+  *grDisplX = M_FESpace->gradientRecovery(*M_displ, 0);
 
   //Compute the gradient along Y of the displacement field
-  *M_displY = M_FESpace->gradientRecovery(*M_displ, 1);
+  *grDisplY = M_FESpace->gradientRecovery(*M_displ, 1);
 
   //Compute the gradient along Z of the displacement field
-  *M_displZ = M_FESpace->gradientRecovery(*M_displ, 2);
+  *grDisplZ = M_FESpace->gradientRecovery(*M_displ, 2);
 
 }  
 
 template <typename Mesh>
 void 
-WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( )
+WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
 {
 
   LifeChrono chrono;
@@ -617,13 +621,15 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( )
   //Copying the displacement field into a vector with repeated map for parallel computations
   solutionVect_Type dRep(*M_displ, Repeated);
 
+  VectorElemental elVecTens(this->M_FESpace->fe().nbFEDof(), nDimensions);
+
   chrono.start();
 
   //Loop on each volume
   for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
     {
       M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
-      this->M_elVecTens->zero();
+      elVecTens.zero();
 
       M_marker = M_FESpace->mesh()->volumeList( i ).marker();
 
@@ -677,15 +683,15 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( )
 	  //Assembling the local vector
 	  for ( int coor=0; coor < M_eigenvaluesR.size(); coor++ )
 	    {
-	      (*M_elVecTens)[iloc + coor*M_FESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
+	      elVecTens[iloc + coor*M_FESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
 	    }
 	}
 
-      reconstructElementaryVector( patchAreaR, i );
+      reconstructElementaryVector( elVecTens, patchAreaR, i );
 
       //Assembling the local into global vector
       for ( UInt ic = 0; ic < nDimensions; ++ic )
-	  assembleVector(*M_globalEigen, *M_elVecTens, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+	  assembleVector(*M_globalEigen, elVecTens, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
     }
   
   M_globalEigen->globalAssemble();
@@ -693,30 +699,6 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( )
   chrono.stop();
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 }
-
-template <typename Mesh>
-void 
-WallTensionEstimator<Mesh >::reconstructElementaryVector( solutionVect_Type& patchArea, UInt nVol )
-{
-  //UpdateElement Infos
-  //M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
-
-  Real measure = M_FESpace->fe().measure();
-  UInt eleID = M_FESpace->fe().currentLocalId();
-
-  for (UInt iDof=0; iDof < M_FESpace->fe().nbFEDof(); iDof++)
-    {
-      UInt  iloc = M_FESpace->fe().patternFirst( iDof );
-
-      for( UInt icoor=0;  icoor < M_FESpace->fieldDim(); icoor++ )
-	{
-	  ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
-
-	  (*M_elVecTens)[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] ); 
-	}
-
-    }     
-}     
 
 template <typename Mesh>
 void
@@ -796,7 +778,7 @@ void WallTensionEstimator<Mesh >::orderEigenvalues( std::vector<Real>& eigenvalu
 
 template <typename Mesh>
 void 
-WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( )
+WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( void )
 {
 
   LifeChrono chrono;
@@ -809,7 +791,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( )
   solutionVectPtr_Type sigmaY( new solutionVect_Type(*M_localMap) );
   solutionVectPtr_Type sigmaZ( new solutionVect_Type(*M_localMap) );
   
-  constructGlobalStressVector(*M_sigmaX,*M_sigmaY,*M_sigmaZ);
+  constructGlobalStressVector(*sigmaX,*sigmaY,*sigmaZ);
 
 
   for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
@@ -825,9 +807,9 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( )
 	    {		    
 	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset); 
 	      Int GIDid = M_displ->blockMap().GID(LIDid); 
-	      (*M_sigma)(iComp,0) = (*M_sigmaX)(GIDid); // (d_xX,d_yX,d_zX)
-	      (*M_sigma)(iComp,1) = (*M_sigmaY)(GIDid); // (d_xY,d_yY,d_zY)
-	      (*M_sigma)(iComp,2) = (*M_sigmaZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
+	      (*M_sigma)(iComp,0) = (*sigmaX)(GIDid); // (d_xX,d_yX,d_zX)
+	      (*M_sigma)(iComp,1) = (*sigmaY)(GIDid); // (d_xY,d_yY,d_zY)
+	      (*M_sigma)(iComp,2) = (*sigmaZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
 	    }
 
 	  //Compute the eigenvalue
