@@ -2171,7 +2171,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
                 point2Id = ( facePtr->point( point2Id ) ).localId();
                 bareEdgeToBoolPair = makeBareEdge( point1Id, point2Id );
                 edgeId = bareEdgeHandler.id( bareEdgeToBoolPair.first );
-                if ( edgeId != 0 )
+                if ( edgeId != NotAnId )
                 {
                     pointPtr = &mesh.point( edgeId );
                 }
@@ -2210,7 +2210,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
             point2Id = ( elementPtr->point( point2Id ) ).localId();
             bareEdgeToBoolPair = makeBareEdge( point1Id, point2Id );
             edgeId = bareEdgeHandler.id( bareEdgeToBoolPair.first );
-            if ( edgeId != 0 )
+            if ( edgeId != NotAnId )
             {
                 pointPtr = &mesh.point( edgeId );
             }
