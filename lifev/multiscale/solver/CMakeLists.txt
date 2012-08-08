@@ -7,11 +7,8 @@ SET(solver_HEADERS
   solver/MultiscaleCommunicatorsManager.hpp
   solver/MultiscaleCoupling.hpp
   solver/MultiscaleCouplingBoundaryCondition.hpp
-  solver/MultiscaleCouplingFlowRate.hpp
-  solver/MultiscaleCouplingFlowRateStress.hpp
-  solver/MultiscaleCouplingFlowRateValve.hpp
-  solver/MultiscaleCouplingStress.hpp
   solver/MultiscaleCouplingMeanNormalStress.hpp
+  solver/MultiscaleCouplingMeanNormalStressValve.hpp
   solver/MultiscaleCouplingMeanTotalNormalStress.hpp
   solver/MultiscaleData.hpp
   solver/MultiscaleDefinitions.hpp
@@ -19,10 +16,10 @@ SET(solver_HEADERS
   solver/MultiscaleModel.hpp
   solver/MultiscaleModel0D.hpp
   solver/MultiscaleModel1D.hpp
-  solver/MultiscaleModelFSI3D.hpp
   solver/MultiscaleModelFluid3D.hpp
-  solver/MultiscaleModelMultiscale.hpp
+  solver/MultiscaleModelFSI3D.hpp
   solver/MultiscaleModelWindkessel0D.hpp
+  solver/MultiscaleModelMultiscale.hpp
   solver/MultiscaleSolver.hpp
 CACHE INTERNAL "")
 
@@ -35,20 +32,17 @@ SET(solver_SOURCES
   solver/MultiscaleCommunicatorsManager.cpp
   solver/MultiscaleCoupling.cpp
   solver/MultiscaleCouplingBoundaryCondition.cpp
-  solver/MultiscaleCouplingFlowRate.cpp
-  solver/MultiscaleCouplingFlowRateStress.cpp
-  solver/MultiscaleCouplingFlowRateValve.cpp
-  solver/MultiscaleCouplingStress.cpp
   solver/MultiscaleCouplingMeanNormalStress.cpp
+  solver/MultiscaleCouplingMeanNormalStressValve.cpp
   solver/MultiscaleCouplingMeanTotalNormalStress.cpp
   solver/MultiscaleData.cpp
   solver/MultiscaleModel.cpp
   solver/MultiscaleModel0D.cpp
   solver/MultiscaleModel1D.cpp
-  solver/MultiscaleModelFSI3D.cpp
   solver/MultiscaleModelFluid3D.cpp
-  solver/MultiscaleModelMultiscale.cpp
+  solver/MultiscaleModelFSI3D.cpp
   solver/MultiscaleModelWindkessel0D.cpp
+  solver/MultiscaleModelMultiscale.cpp
   solver/MultiscaleSolver.cpp
 CACHE INTERNAL "")
 

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the Multiscale Coupling FlowRateValve
+ *  @brief File containing the multiscale mean normal stress coupling class with simple valve
  *
  *  @date 05-04-2011
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,33 +34,33 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MultiscaleCouplingFlowRateValve_H
-#define MultiscaleCouplingFlowRateValve_H 1
+#ifndef MultiscaleCouplingMeanNormalStressValve_H
+#define MultiscaleCouplingMeanNormalStressValve_H 1
 
-#include <lifev/multiscale/solver/MultiscaleCouplingFlowRate.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStress.hpp>
 
 namespace LifeV
 {
 namespace Multiscale
 {
 
-//! MultiscaleCouplingFlowRateValve - FlowRate coupling condition with a valve
+//! MultiscaleCouplingMeanNormalStressValve - Mean normal stress coupling condition with simple valve
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleCouplingFlowRateValve class is an implementation of the multiscaleCoupling_Type
+ *  The MultiscaleCouplingMeanNormalStressValve class is an implementation of the multiscaleCoupling_Type
  *  for applying flow rate coupling conditions on the models including a valve between the first model and the others.
  *
  *  NOTE: The current implementation works only for two models!
  */
-class MultiscaleCouplingFlowRateValve: public virtual MultiscaleCouplingFlowRate
+class MultiscaleCouplingMeanNormalStressValve: public virtual MultiscaleCouplingMeanNormalStress
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef MultiscaleCouplingFlowRate                          super_Type;
+    typedef MultiscaleCouplingMeanNormalStress                  super_Type;
 
     //@}
 
@@ -69,10 +69,10 @@ public:
     //@{
 
     //! Constructor
-    explicit MultiscaleCouplingFlowRateValve();
+    explicit MultiscaleCouplingMeanNormalStressValve();
 
     //! Destructor
-    virtual ~MultiscaleCouplingFlowRateValve() {}
+    virtual ~MultiscaleCouplingMeanNormalStressValve() {}
 
     //@}
 
@@ -113,9 +113,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleCouplingFlowRateValve( const MultiscaleCouplingFlowRateValve& coupling );
+    MultiscaleCouplingMeanNormalStressValve( const MultiscaleCouplingMeanNormalStressValve& coupling );
 
-    MultiscaleCouplingFlowRateValve& operator=( const MultiscaleCouplingFlowRateValve& coupling );
+    MultiscaleCouplingMeanNormalStressValve& operator=( const MultiscaleCouplingMeanNormalStressValve& coupling );
 
     //@}
 
@@ -145,12 +145,12 @@ private:
 };
 
 //! Factory create function
-inline multiscaleCoupling_Type* createMultiscaleCouplingFlowRateValve()
+inline multiscaleCoupling_Type* createMultiscaleCouplingMeanNormalStressValve()
 {
-    return new MultiscaleCouplingFlowRateValve();
+    return new MultiscaleCouplingMeanNormalStressValve();
 }
 
 } // Namespace Multiscale
 } // Namespace LifeV
 
-#endif /* MultiscaleCouplingFlowRateValve_H */
+#endif /* MultiscaleCouplingMeanNormalStressValve_H */

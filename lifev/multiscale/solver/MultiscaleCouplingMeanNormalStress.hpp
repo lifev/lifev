@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the Multiscale Mean Normal Stress class
+ *  @brief File containing the multiscale mean normal stress coupling class
  *
  *  @date 07-08-2012
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -116,6 +116,8 @@ private:
      * @return list of models affected by the perturbation
      */
     multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
+
+protected:
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!

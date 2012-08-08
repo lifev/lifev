@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the Multiscale Coupling FlowRateValve
+ *  @brief File containing the multiscale mean normal stress coupling class with simple valve
  *
  *  @date 05-04-2011
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/multiscale/solver/MultiscaleCouplingFlowRateValve.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStressValve.hpp>
 
 namespace LifeV
 {
@@ -44,7 +44,7 @@ namespace Multiscale
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MultiscaleCouplingFlowRateValve::MultiscaleCouplingFlowRateValve() :
+MultiscaleCouplingMeanNormalStressValve::MultiscaleCouplingMeanNormalStressValve() :
         multiscaleCoupling_Type     (),
         super_Type                  (),
         M_valveIsOpen               ( true ),
@@ -52,35 +52,35 @@ MultiscaleCouplingFlowRateValve::MultiscaleCouplingFlowRateValve() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingFlowRateValve::MultiscaleCouplingFlowRateValve() \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanNormalStressValve::MultiscaleCouplingMeanNormalStressValve() \n";
 #endif
 
-    M_type = FlowRateValve;
+    M_type = MeanNormalStressValve;
 }
 
 // ===================================================
 // Multiscale PhysicalCoupling Implementation
 // ===================================================
 void
-MultiscaleCouplingFlowRateValve::setupCoupling()
+MultiscaleCouplingMeanNormalStressValve::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8240 ) << "MultiscaleCouplingFlowRateValve::setupCoupling() \n";
+    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::setupCoupling() \n";
 #endif
 
     super_Type::setupCoupling();
 
     if ( M_couplingVariablesNumber > 2 )
-        std::cout << "!!! WARNING: MultiscaleCouplingFlowRateValve does not work with more than two models !!!" << std::endl;
+        std::cout << "!!! WARNING: MultiscaleCouplingMeanNormalStressValve does not work with more than two models !!!" << std::endl;
 }
 
 void
-MultiscaleCouplingFlowRateValve::initializeCouplingVariables()
+MultiscaleCouplingMeanNormalStressValve::initializeCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingFlowRateValve::initializeCouplingVariables() \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanNormalStressValve::initializeCouplingVariables() \n";
 #endif
 
     super_Type::initializeCouplingVariables();
@@ -120,11 +120,11 @@ MultiscaleCouplingFlowRateValve::initializeCouplingVariables()
 }
 
 void
-MultiscaleCouplingFlowRateValve::updateCoupling()
+MultiscaleCouplingMeanNormalStressValve::updateCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingFlowRateValve::updateCoupling() \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanNormalStressValve::updateCoupling() \n";
 #endif
 
     super_Type::updateCoupling();
@@ -187,11 +187,11 @@ MultiscaleCouplingFlowRateValve::updateCoupling()
 }
 
 void
-MultiscaleCouplingFlowRateValve::exportCouplingResiduals( multiscaleVector_Type& couplingResiduals )
+MultiscaleCouplingMeanNormalStressValve::exportCouplingResiduals( multiscaleVector_Type& couplingResiduals )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingFlowRateValve::exportCouplingResiduals()  \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanNormalStressValve::exportCouplingResiduals()  \n";
 #endif
 
     if ( M_valveIsOpen )
@@ -213,11 +213,11 @@ MultiscaleCouplingFlowRateValve::exportCouplingResiduals( multiscaleVector_Type&
 // Private MultiscaleCoupling Implementation
 // ===================================================
 void
-MultiscaleCouplingFlowRateValve::insertJacobianConstantCoefficients( multiscaleMatrix_Type& jacobian )
+MultiscaleCouplingMeanNormalStressValve::insertJacobianConstantCoefficients( multiscaleMatrix_Type& jacobian )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingFlowRateValve::insertJacobianConstantCoefficients( jacobian )  \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanNormalStressValve::insertJacobianConstantCoefficients( jacobian )  \n";
 #endif
 
     if ( M_valveIsOpen )
@@ -238,11 +238,11 @@ MultiscaleCouplingFlowRateValve::insertJacobianConstantCoefficients( multiscaleM
 }
 
 void
-MultiscaleCouplingFlowRateValve::insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem )
+MultiscaleCouplingMeanNormalStressValve::insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingFlowRateValve::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanNormalStressValve::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
 #endif
 
     if ( M_valveIsOpen )

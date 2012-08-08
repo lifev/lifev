@@ -42,11 +42,8 @@
 #include <lifev/multiscale/solver/MultiscaleAlgorithmNewton.hpp>
 
 #include <lifev/multiscale/solver/MultiscaleCouplingBoundaryCondition.hpp>
-#include <lifev/multiscale/solver/MultiscaleCouplingFlowRate.hpp>
-#include <lifev/multiscale/solver/MultiscaleCouplingFlowRateValve.hpp>
-#include <lifev/multiscale/solver/MultiscaleCouplingFlowRateStress.hpp>
-#include <lifev/multiscale/solver/MultiscaleCouplingStress.hpp>
 #include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStress.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStressValve.hpp>
 #include <lifev/multiscale/solver/MultiscaleCouplingMeanTotalNormalStress.hpp>
 
 namespace LifeV
@@ -71,17 +68,14 @@ MultiscaleModelMultiscale::MultiscaleModelMultiscale() :
 
     M_type = Multiscale;
 
-    multiscaleAlgorithmFactory_Type::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
-    multiscaleAlgorithmFactory_Type::instance().registerProduct( Broyden,             &createMultiscaleAlgorithmBroyden );
-    multiscaleAlgorithmFactory_Type::instance().registerProduct( Explicit,            &createMultiscaleAlgorithmExplicit );
-    multiscaleAlgorithmFactory_Type::instance().registerProduct( Newton,              &createMultiscaleAlgorithmNewton );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Aitken,                &createMultiscaleAlgorithmAitken );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Broyden,               &createMultiscaleAlgorithmBroyden );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Explicit,              &createMultiscaleAlgorithmExplicit );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Newton,                &createMultiscaleAlgorithmNewton );
 
-    multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
-    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRate,            &createMultiscaleCouplingFlowRate );
-    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateValve,       &createMultiscaleCouplingFlowRateValve );
-    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
-    multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,     &createMultiscaleCouplingBoundaryCondition );
     multiscaleCouplingFactory_Type::instance().registerProduct(  MeanNormalStress,      &createMultiscaleCouplingMeanNormalStress );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  MeanNormalStressValve, &createMultiscaleCouplingMeanNormalStressValve );
     multiscaleCouplingFactory_Type::instance().registerProduct(  MeanTotalNormalStress, &createMultiscaleCouplingMeanTotalNormalStress );
 }
 

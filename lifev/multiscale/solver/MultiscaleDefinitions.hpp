@@ -67,11 +67,7 @@
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 
-<<<<<<< HEAD:lifev/multiscale/solver/MultiscaleDefinitions.hpp
 #include <lifev/multiscale/solver/MultiscaleData.hpp>
-=======
-#include <lifemc/lifesolver/MultiscaleData.hpp>
->>>>>>> Updating headers for core module:lifemc/lifesolver/MultiscaleDefinitions.hpp
 
 namespace LifeV
 {
@@ -106,11 +102,8 @@ enum models_Type
 enum couplings_Type
 {
     BoundaryCondition,      /*!< Boundary condition */
-    FlowRate,               /*!< All flow rate coupling condition */
-    FlowRateValve,          /*!< All flow rate coupling condition with a valve between model 1 and the others*/
-    FlowRateStress,         /*!< Flow rate/stress coupling condition */
-    Stress,                 /*!< All stress coupling condition */
     MeanNormalStress,       /*!< Mean normal stress coupling condition */
+    MeanNormalStressValve,  /*!< Mean normal stress coupling condition with simple valve*/
     MeanTotalNormalStress   /*!< Mean total normal stress coupling condition */
 };
 
@@ -194,25 +187,22 @@ typedef boost::shared_ptr< multiscaleData_Type >                                
 inline void
 multiscaleMapsDefinition()
 {
-    multiscaleModelsMap["Fluid3D"]              = Fluid3D;
-    multiscaleModelsMap["FSI3D"]                = FSI3D;
-    multiscaleModelsMap["Multiscale"]           = Multiscale;
-    multiscaleModelsMap["OneDimensional"]       = OneDimensional;
-    multiscaleModelsMap["Windkessel0D"]         = Windkessel0D;
-    multiscaleModelsMap["ZeroDimensional"]      = ZeroDimensional;
+    multiscaleModelsMap["Fluid3D"]         = Fluid3D;
+    multiscaleModelsMap["FSI3D"]           = FSI3D;
+    multiscaleModelsMap["Multiscale"]      = Multiscale;
+    multiscaleModelsMap["OneDimensional"]  = OneDimensional;
+    multiscaleModelsMap["Windkessel0D"]    = Windkessel0D;
+    multiscaleModelsMap["ZeroDimensional"] = ZeroDimensional;
 
-    multiscaleCouplingsMap["BoundaryCondition"] = BoundaryCondition;
-    multiscaleCouplingsMap["FlowRate"]          = FlowRate;
-    multiscaleCouplingsMap["FlowRateValve"]     = FlowRateValve;
-    multiscaleCouplingsMap["FlowRateStress"]    = FlowRateStress;
-    multiscaleCouplingsMap["Stress"]            = Stress;
+    multiscaleCouplingsMap["BoundaryCondition"]     = BoundaryCondition;
     multiscaleCouplingsMap["MeanNormalStress"]      = MeanNormalStress;
+    multiscaleCouplingsMap["MeanNormalStressValve"] = MeanNormalStressValve;
     multiscaleCouplingsMap["MeanTotalNormalStress"] = MeanTotalNormalStress;
 
-    multiscaleAlgorithmsMap["Aitken"]           = Aitken;
-    multiscaleAlgorithmsMap["Broyden"]          = Broyden;
-    multiscaleAlgorithmsMap["Explicit"]         = Explicit;
-    multiscaleAlgorithmsMap["Newton"]           = Newton;
+    multiscaleAlgorithmsMap["Aitken"]   = Aitken;
+    multiscaleAlgorithmsMap["Broyden"]  = Broyden;
+    multiscaleAlgorithmsMap["Explicit"] = Explicit;
+    multiscaleAlgorithmsMap["Newton"]   = Newton;
 }
 
 //! Perform a dynamic cast from a base class to a derived class
