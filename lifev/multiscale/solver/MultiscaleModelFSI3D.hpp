@@ -684,7 +684,7 @@ public:
                                                                                      + "_Flag_" + number2string( M_fluidFlag )
                                                                                      + "_" + number2string( multiscaleProblemStep ) + ".mfile";
 
-            if ( M_FSI3D->globalData()->dataTime()->isFirstTimeStep() )
+            if ( M_FSI3D->globalData()->dataTime()->isFirstTimeStep() || ( multiscaleProblemStep > 0 && M_FSI3D->globalData()->dataTime()->isFirstNTimeStep( multiscaleSaveEachNTimeSteps ) ) )
             {
                 output.open( filename.c_str(), std::ios::trunc );
                 output << "% Model:         " << number2string( M_FSI3D->ID() ) << std::endl;
