@@ -2485,20 +2485,17 @@ inline typename RegionMesh<GEOSHAPE, MC>::edge_Type &
 RegionMesh<GEOSHAPE, MC>::addEdge( bool const boundary )
 {
     edge_Type anEdge;
-    anEdge.setBoundary(boundary);
-    return addEdge( anEdge);
+    anEdge.setBoundary( boundary );
+    return addEdge( anEdge );
 }
 
 template <typename GEOSHAPE, typename MC>
 inline typename RegionMesh<GEOSHAPE, MC>::edge_Type &
 RegionMesh<GEOSHAPE, MC>::addEdge( edge_Type const & f)
 {
-//    ASSERT_PRE( edgeList.size() < edgeList.capacity(), "Edge list size exceeded" <<
-//                edgeList.size() + 1 << " " << edgeList.capacity() ) ;
-
     edgeList.push_back( f );
-    edge_Type & thisEdge=edgeList.back();
-    thisEdge.setLocalId(edgeList.size() - 1);
+    edge_Type & thisEdge = edgeList.back();
+    thisEdge.setLocalId( edgeList.size() - 1 );
     return thisEdge;
 }
 
