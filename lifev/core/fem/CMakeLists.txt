@@ -38,6 +38,7 @@ SET(fem_HEADERS
   fem/TimeAdvanceBDFNavierStokes.hpp
   fem/ReferenceFE.hpp
   fem/BCHandler.hpp
+  fem/QRKeast.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES
@@ -68,6 +69,7 @@ SET(fem_SOURCES
   fem/ReferenceElement.cpp
   fem/DOF.cpp
   fem/ReferenceFE.cpp
+  fem/QRKeast.cpp
 CACHE INTERNAL "")
 
 

@@ -373,44 +373,44 @@ setup(const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const fe
 
     M_viscousCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                           M_uFESpace->fe().geoMap(),
-                                          QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree-2)));
+                                          QuadratureRuleProvider::provideExactness(TETRA,2*uDegree-2)));
 
     M_gradPressureUCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                                 M_uFESpace->fe().geoMap(),
-                                                QuadratureRuleProvider::provideExactnessMax(TETRA,uDegree+pDegree-1)));
+                                                QuadratureRuleProvider::provideExactness(TETRA,uDegree+pDegree-1)));
 
     M_gradPressurePCFE.reset(new currentFE_Type(M_pFESpace->refFE(),
                                                 M_uFESpace->fe().geoMap(),
-                                                QuadratureRuleProvider::provideExactnessMax(TETRA,uDegree+pDegree-1)));
+                                                QuadratureRuleProvider::provideExactness(TETRA,uDegree+pDegree-1)));
 
     M_divergenceUCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                               M_uFESpace->fe().geoMap(),
-                                              QuadratureRuleProvider::provideExactnessMax(TETRA,uDegree+pDegree-1)));
+                                              QuadratureRuleProvider::provideExactness(TETRA,uDegree+pDegree-1)));
 
 
     M_divergencePCFE.reset(new currentFE_Type(M_pFESpace->refFE(),
                                               M_uFESpace->fe().geoMap(),
-                                              QuadratureRuleProvider::provideExactnessMax(TETRA,uDegree+pDegree-1)));
+                                              QuadratureRuleProvider::provideExactness(TETRA,uDegree+pDegree-1)));
 
     M_massCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                        M_uFESpace->fe().geoMap(),
-                                       QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree)));
+                                       QuadratureRuleProvider::provideExactness(TETRA,2*uDegree)));
 
     M_massPressureCFE.reset(new currentFE_Type(M_pFESpace->refFE(),
                                                M_pFESpace->fe().geoMap(),
-                                               QuadratureRuleProvider::provideExactnessMax(TETRA,2*pDegree)));
+                                               QuadratureRuleProvider::provideExactness(TETRA,2*pDegree)));
 
     M_convectionUCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
                                               M_uFESpace->fe().geoMap(),
-                                              QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
+                                              QuadratureRuleProvider::provideExactness(TETRA,2*uDegree+betaDegree-1)));
 
     M_convectionBetaCFE.reset(new currentFE_Type(M_betaFESpace->refFE(),
                                                  M_uFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
+                                                 QuadratureRuleProvider::provideExactness(TETRA,2*uDegree+betaDegree-1)));
 
     M_convectionRhsUCFE.reset(new currentFE_Type(M_betaFESpace->refFE(),
                                                  M_uFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideExactnessMax(TETRA,2*betaDegree+betaDegree-1)));
+                                                 QuadratureRuleProvider::provideExactness(TETRA,2*betaDegree+betaDegree-1)));
 
     M_localViscous.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),
                                               M_uFESpace->fieldDim(),
