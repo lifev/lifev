@@ -328,8 +328,12 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
             *M_beta -= veloFluidMesh();//implicit
 
 
+	    //the conservative formulation as it is now is of order 1. To have higher order (TODO) we need to store the mass matrices computed at the previous time steps.
 	    if(M_data->dataFluid()->conservativeFormulation())
-	      *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+	      //*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+	      *M_rhs = M_fluidMassTimeAdvance->rhsContributionFirstDerivative();
+
+
             if (recomputeMatrices)
             {
                 double alpha = M_fluidTimeAdvance->coefficientFirstDerivative(0)/M_data->dataFluid()->dataTime()->timeStep();
@@ -340,7 +344,10 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
                 this->M_fluid->updateRightHandSide( *M_rhs );
             }
 	    if(!M_data->dataFluid()->conservativeFormulation())
-	      *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+	      {
+		*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+		this->M_fluid->updateRightHandSide( *M_rhs );
+	      }
         }
 
         this->M_fluid->iterate( *M_BCh_u );

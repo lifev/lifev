@@ -217,18 +217,6 @@ public:
 
     void setup( );
 
-    void initialize( const fluidFunction_Type& u0,
-                     const fluidFunction_Type& p0,
-                     const solidFunction_Type& d0,
-                     const solidFunction_Type& w0,
-                     const fluidFunction_Type& df0=fluidFunction_Type() );
-
-    void initialize( const std::string& /*velFName*/,
-                     const std::string& /*pressName*/,
-                     const std::string& /*velwName*/,
-                     const std::string& /*depName*/,
-                     const std::string& /*velSName*/,
-                     const Real&        /*Tstart = 0.*/);
 
     virtual void initialize(std::vector<vectorPtr_Type> u0=std::vector<vectorPtr_Type>(0), std::vector<vectorPtr_Type> ds0=std::vector<vectorPtr_Type>(0), std::vector<vectorPtr_Type> df0=std::vector<vectorPtr_Type>(0));
 

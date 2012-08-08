@@ -178,8 +178,9 @@ reuse = true
 [interface]
 fluid_flag      =  1        # default: 1, the mesh flag of the interface
 tolerance       =  0         # how far points are to be considered the same on the interface
-fluid_vertex_flag = 1       # tells wether the in/out ring curves on the interface 
-                            # is considered in the coupling (fluid_vertex_flag=0) or not (fluid_vertex_flag=1)
+fluid_vertex_flag = 1       # tells wether the in/out ring curves on the interface
+                            # is considered in the coupling (fluid_vertex_flag=0) or not (fluid_vertex_flag=fluid_flag)
+			    # NOTE: this does not work when using P2!!!
 [../] # interface
 
 * #solid section
@@ -200,7 +201,7 @@ young     = 1.e7
 poisson   = 0.3
 bulk      = 1e7
 alpha     = 2.5e6			# the parameter at the exponent for the exponential model
-gamma     = 1				# parameter for the exponential model                    
+gamma     = 1				# parameter for the exponential model
 
 ** #time discretization
 [../time_discretization]
@@ -230,7 +231,7 @@ depname   = dep
 * #monolithic FSI linear system data
 [linear_system]
 
-** #linear solver 
+** #linear solver
 [./solver]
 output          = all            # none
 max_iter        = 200		 # max number of iterations
@@ -599,7 +600,7 @@ which = ML
 neval = 5
 
 * #preconditioner perameters that can be used for the blocks in the aPCD preconditioner
-** 2 level DD Preconditioner 
+** 2 level DD Preconditioner
 [DD2Levels]
 displayList                 = false
   [./ML]

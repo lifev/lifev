@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   Structure
-  NAME testSVK
+  NAME SVK
   SOURCES main.cpp
   ARGS "-f dataSVK"
   NUM_MPI_PROCS 2
@@ -24,7 +24,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(Cube4-P1.mesh_Structure
 
 TRIBITS_ADD_TEST(
   Structure
-  NAME testNH
+  NAME NH
   ARGS "-f dataNH"
   NUM_MPI_PROCS 2
   COMM serial mpi
@@ -37,7 +37,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataNeoHookean
 
 TRIBITS_ADD_TEST(
   Structure
-  NAME testLE
+  NAME LE
   ARGS "-f dataLE"
   NUM_MPI_PROCS 2
   COMM serial mpi
@@ -50,7 +50,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataLinearElastic
 
 TRIBITS_ADD_TEST(
   Structure
-  NAME testEXP
+  NAME EXP
   ARGS "-f dataEXP"
   NUM_MPI_PROCS 2
   COMM serial mpi

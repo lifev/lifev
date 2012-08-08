@@ -147,8 +147,6 @@ public:
 
     bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->number();}
 
-    //const std::vector<boost::shared_ptr<Preconditioner> >& blockPrecs() const { return boost::static_pointer_cast<std::vector<boost::shared_ptr<Preconditioner> > >(M_blockPrecs->Operator()[0]->Operator());}
-
 
     //@}
     //!@name Factory Method

@@ -60,7 +60,7 @@ class VenantKirchhoffMaterialNonLinear :
 
     typedef typename super::vector_Type              vector_Type;
     typedef typename super::matrix_Type              matrix_Type;
-
+    typedef typename super::vectorPtr_Type              vectorPtr_Type;
     typedef typename super::matrixPtr_Type           matrixPtr_Type;
     typedef typename super::dataPtr_Type             dataPtr_Type;
     typedef typename super::displayerPtr_Type        displayerPtr_Type;
@@ -162,7 +162,8 @@ class VenantKirchhoffMaterialNonLinear :
   //@}
 
     protected:
-    KNMKPtr_Type					M_gradientLocalDisplacement;
+  //KNMKPtr_Type					M_gradientLocalDisplacement;
+  boost::shared_ptr<boost::multi_array<Real, 3> >	M_gradientLocalDisplacement;
 
 };
 
@@ -185,7 +186,10 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::setup(const boost::shared_ptr< FESp
 {
     super::setup(dFESpace,monolithicMap,offset, dataMaterial, displayer);
     this->M_stiff.reset               (new matrix_Type(*this->M_localMap));
-    M_gradientLocalDisplacement.reset ( new KNMK_Type( nDimensions, nDimensions, dFESpace->fe().nbQuadPt() ) );
+    //M_gradientLocalDisplacement.reset ( new KNMK_Type( nDimensions, nDimensions, dFESpace->fe().nbQuadPt() ) );
+    M_gradientLocalDisplacement.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
+
+    //    M_gradientLocalDisplacement.
 }
 
 
@@ -255,7 +259,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
 
 	  //Reset the local gradient of the Displacement
 	  //this->M_gradientLocalDisplacement.reset (new KNMK_Type(nDimensions , nDimensions,this->M_FESpace->fe().nbQuadPt() ) );
-	  *M_gradientLocalDisplacement *= 0.0;
+	  //*M_gradientLocalDisplacement *= 0.0;
 	  AssemblyElementalStructure::computeGradientLocalDisplacement(*M_gradientLocalDisplacement, dk_loc, this->M_FESpace->fe());
 
 	  //  3):  \lambda * ( \tr { [\grad d^k]^T \grad \delta d }, \div v  )
@@ -372,7 +376,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
         this->M_elmatK->zero();
 
         // non-linear terms of the stiffness matrix
-	*M_gradientLocalDisplacement *= 0.0;
+	//*M_gradientLocalDisplacement *= 0.0;
 	AssemblyElementalStructure::computeGradientLocalDisplacement(*M_gradientLocalDisplacement, dk_loc, this->M_FESpace->fe());
 
         // 3) 1/2 * \lambda  ( \tr { [\grad d^k]^T \grad d }, \div v  )

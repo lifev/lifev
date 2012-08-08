@@ -114,7 +114,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
 //       BCh_fluid->addBC("InFlow" , INLET,  Flux,   Normal, bcf);
 
     //uncomment  to use fluxes
-    //BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
+    BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
 
     return BCh_fluid;
 }
@@ -137,12 +137,13 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool
     BCFunctionBase out_press (FlowConditions::outPressure0);
     BCFunctionBase bcfw0 (w0);
 
-    if(isOpen)
-      BCh_fluid->addBC("InFlow" , INLET,  Natural, Normal, in_flow);
-    else      
-      BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, bcf, 3);
+    if(!isOpen)
+      BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, bcf,3);
+
 
     BCh_fluid->addBC("OutFlow", OUTLET,  Natural,  Normal, out_press);
+    //BCh_fluid->addBC("OutFlow", INOUTEDGE,  EssentialEdges,  Full, bcf,3);
+    
     return BCh_fluid;
 }
 
@@ -166,7 +167,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
     BCFunctionBase young (E);
     //robin condition on the outer wall
     _oper.setRobinOuterWall(hyd, young);
-    //BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
+    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
 
     return BCh_solid;
 }
@@ -174,3 +175,4 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
 }
 
 #endif
+

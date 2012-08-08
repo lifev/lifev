@@ -64,7 +64,6 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData():
         M_alpha                            ( ),
         M_gamma                            ( ),
         M_order                            ( ),
-        M_factor                           ( ),
         M_verbose                          ( )
 {
 }
@@ -82,7 +81,6 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffEla
         M_alpha                            ( venantKirchhoffElasticData.M_alpha ),
         M_gamma                            ( venantKirchhoffElasticData.M_gamma ),
         M_order                            ( venantKirchhoffElasticData.M_order ),
-        M_factor                           ( venantKirchhoffElasticData.M_factor ),
         M_verbose                          ( venantKirchhoffElasticData.M_verbose )
 {
 }
@@ -107,7 +105,6 @@ VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& venantK
         M_alpha                            = venantKirchhoffElasticData.M_alpha;
         M_gamma                            = venantKirchhoffElasticData.M_gamma;
         M_order                            = venantKirchhoffElasticData.M_order;
-        M_factor                           = venantKirchhoffElasticData.M_factor;
         M_verbose                          = venantKirchhoffElasticData.M_verbose;
     }
 
@@ -172,8 +169,7 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
     M_order            = dataFile( ( section + "/space_discretization/order" ).data(), "P1" );
 
     // miscellaneous
-    M_factor           = dataFile( ( section + "/miscellaneous/factor"  ).data(), 1.0 );
-    M_verbose          = dataFile( ( section + "/miscellaneous/verbose" ).data(), 1 );
+    M_verbose          = dataFile( ( section + "/miscellaneous/verbose" ).data(), 0 );
     M_useExactJacobian = dataFile( ( section + "/useExactJacobian"      ).data(), false );
 }
 
@@ -206,7 +202,6 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
     }
 
     output << "\n*** Values for data [solid/miscellaneous]\n\n";
-    output << "deformation factor               = " << M_factor << std::endl;
     output << "verbose                          = " << M_verbose << std::endl;
 
     output << "\n*** Values for data [solid/space_discretization]\n\n";

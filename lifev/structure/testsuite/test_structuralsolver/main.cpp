@@ -84,7 +84,7 @@
 
 using namespace LifeV;
 
-int returnValue = EXIT_SUCCESS;
+int returnValue = EXIT_FAILURE;
 enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
 
 namespace
@@ -421,7 +421,7 @@ Structure::run3d()
     exporter->postProcess( 0 );
     
     //!--------------------------------------------------------------------------------------------
-    //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
+    //! MATLAB FILE WITH DISPLACEMENT OF A CHOSEN POINT
     //!--------------------------------------------------------------------------------------------
     cout.precision(16);
     ofstream file_comp( "Displacement_components_NL.m" );
@@ -533,48 +533,48 @@ Structure::run3d()
 
 void Structure::CheckResultLE(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.312358)>1e-5 )
+    if ( time == 0.1  && std::fabs(dispNorm-0.276527)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.312374)>1e-5 )
+    if ( time == 0.2  && std::fabs(dispNorm-0.276536)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.312362)>1e-5 )
+    if ( time == 0.3  && std::fabs(dispNorm-0.276529)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.312365)>1e-5 )
+    if ( time == 0.4  && std::fabs(dispNorm-0.276531)<=1e-5 )
         this->resultChanged(time);
 }
 
 void Structure::CheckResultSVK(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.292970)>1e-5 )
+    if ( time == 0.1  && std::fabs(dispNorm-0.263348)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.298982)>1e-5 )
+    if ( time == 0.2  && std::fabs(dispNorm-0.263350)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.298977)>1e-5 )
+    if ( time == 0.3  && std::fabs(dispNorm-0.263350)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.298979)>1e-5 )
+    if ( time == 0.4  && std::fabs(dispNorm-0.263351)<=1e-5 )
         this->resultChanged(time);
 }
 void Structure::CheckResultEXP(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.321481)>1e-5 )
+    if ( time == 0.1  && std::fabs(dispNorm-0.284844)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.321495)>1e-5 )
+    if ( time == 0.2  && std::fabs(dispNorm-0.284853)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.321489)>1e-5 )
+    if ( time == 0.3  && std::fabs(dispNorm-0.284846)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.321492)>1e-5 )
+    if ( time == 0.4  && std::fabs(dispNorm-0.284848)<=1e-5 )
         this->resultChanged(time);
 }
 
 void Structure::CheckResultNH(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.321481)>1e-5 )
+    if ( time == 0.1  && std::fabs(dispNorm-0.286120)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.321495)>1e-5 )
+    if ( time == 0.2  && std::fabs(dispNorm-0.286129)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.321489)>1e-5 )
+    if ( time == 0.3  && std::fabs(dispNorm-0.286122)<=1e-5 )
         this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.321492)>1e-5 )
+    if ( time == 0.4  && std::fabs(dispNorm-0.286123)<=1e-5 )
         this->resultChanged(time);
 }
 
@@ -582,8 +582,8 @@ void Structure::CheckResultNH(const Real& dispNorm,const Real& time)
 
 void Structure::resultChanged(Real time)
 {
-  std::cout << "Some modifications led to changes in the l2 norm of the solution at time " << time << std::endl;
-  returnValue = EXIT_FAILURE;
+  std::cout << "Correct value at time: " << time << std::endl;
+  returnValue = EXIT_SUCCESS;
 }
 
 

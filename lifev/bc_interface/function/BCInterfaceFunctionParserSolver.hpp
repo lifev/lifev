@@ -496,22 +496,31 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
             break;
 
         case f_flux:
-
+	
+       	    if ( M_physicalSolver->isFluid() )	    
+            {
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag ) << "\n";
+	        Debug( 5023 ) << "!!! Warning: fluid not initialized yet, setting flux = 0 in BCInterface !!!\n";
 #endif
-
-            setVariable( "f_flux", M_physicalSolver->fluid().flux( M_flag, M_physicalSolver->un() ) );
+	        setVariable( "f_flux", 0.0 );
+            }
+       	    else
+       	    {
+#ifdef HAVE_LIFEV_DEBUG
+                Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag, M_physicalSolver->solution() ) << "\n";
+#endif
+                setVariable( "f_flux", M_physicalSolver->fluid().flux( M_flag, M_physicalSolver->solution() ) );
+       	    }
 
             break;
 
         case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().pressure( M_flag ) << "\n";
+            Debug( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().pressure( M_flag, M_physicalSolver->solution() ) << "\n";
 #endif
 
-            setVariable( "f_pressure", M_physicalSolver->fluid().pressure( M_flag, M_physicalSolver->un() ) );
+            setVariable( "f_pressure", M_physicalSolver->fluid().pressure( M_flag, M_physicalSolver->solution() ) );
 
             break;
 

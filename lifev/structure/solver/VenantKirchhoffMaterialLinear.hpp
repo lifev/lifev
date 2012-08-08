@@ -161,7 +161,7 @@ class VenantKirchhoffMaterialLinear :
     matrixPtr_Type const stiffMatrix() const {return M_stiff; }
 
     //! Get the Stiffness vector
-    vectorPtr_Type const stiffVector() const {};
+  vectorPtr_Type const stiffVector() const { vectorPtr_Type zero( new vector_Type()); return zero;}
 
     void Apply( const vector_Type& sol, vector_Type& res) {res += *M_stiff*sol;}
 

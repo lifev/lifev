@@ -153,9 +153,9 @@ typeOfGeneralizedAlpha            = HHT
 [../space_discretization]
 mesh_dir  = ./
 mesh_file = fluidBig.mesh #aorta_fluid_scaled.mesh
-mesh_order     = P1                                # order for the geometry problem, P1 or P2									   
-vel_order       = P1Bubble           # order for the fluid velocity FE space: P1, P1Bubble, P2							   
-press_order     = P1                 # P1, P2													   
+mesh_order     = P1                                # order for the geometry problem, P1 or P2
+vel_order       = P1Bubble           # order for the fluid velocity FE space: P1, P1Bubble, P2
+press_order     = P1                 # P1, P2
 stiff_strain    = true		     # wether the full stiffness tensor is assembled, or just the laplacian (should be true in FSI for consistency)
 
 ** #misellaneous (obsolete)
@@ -203,7 +203,7 @@ young     = 4.0E6
 poisson   = 0.45
 bulk      = 1e7
 alpha     = 2.5e6              		# the parameter at the exponent for the exponential model
-gamma     = 1		       		# parameter for the exponential model                    
+gamma     = 1		       		# parameter for the exponential model
 thickness = 0.045
 
 ** #time discretization
@@ -234,7 +234,7 @@ depname   = dep
 * #monolithic FSI linear system data
 [linear_system]
 
-** #linear solver 
+** #linear solver
 [./solver]
 output          = all            # none
 max_iter        = 200		 # max number of iterations
@@ -603,7 +603,7 @@ which = ML
 neval = 5
 
 * #preconditioner perameters that can be used for the blocks in the aPCD preconditioner
-** 2 level DD Preconditioner 
+** 2 level DD Preconditioner
 [DD2Levels]
 displayList                 = false
   [./ML]

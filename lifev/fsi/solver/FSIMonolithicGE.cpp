@@ -122,7 +122,6 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         iterateMesh(disp);
 
         // Update displacement
-        //        M_meshMotion->updateDispDiff();
 
         M_beta.reset(new vector_Type(M_uFESpace->map()));
         vector_Type meshDisp( M_meshMotion->disp(), Repeated );
@@ -163,7 +162,6 @@ FSIMonolithicGE::iterateMesh(const vector_Type& disp)
 
     monolithicToInterface(lambdaFluid, disp);
 
-    //lambdaFluid *= (M_data->dataFluid()->dataTime()->timeStep()*M_solid->rescaleFactor());//(M_data->dataSolid()->rescaleFactor()));
     lambdaFluid *= (M_solid->rescaleFactor());
 
     this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
@@ -196,7 +194,7 @@ void FSIMonolithicGE::applyBoundaryConditions( )
              M_monolithicMatrix->setConditions(M_BChs);
              M_monolithicMatrix->setSpaces(M_FESpaces);
              M_monolithicMatrix->setOffsets(2, M_offset, 0);
-             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid/*HarmonicExtension*/->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor());
+             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor());
          }
          else
          {

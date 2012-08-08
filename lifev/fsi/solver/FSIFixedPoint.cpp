@@ -58,8 +58,7 @@ void  FSIFixedPoint::solveJac(vector_Type        &muk,
 
     if (M_data->algorithm()=="RobinNeumann")
     {
-      M_nonLinearAitken.restart();
-      muk = res; // M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(),-1*res);
+      muk = res;
     }
     else
     {
@@ -184,32 +183,10 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         this->moveMesh(meshDispDiff);
         */
 
-	// *M_beta = this->veloFluidMesh();
-	//	*M_beta *= -1;
-
-        //this->transferMeshMotionOnFluid(M_meshMotion->dispDiff(),  *M_beta);
-
-        //*M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
-
-        //*M_beta += this->M_bdf->extrapolation();
-
 	*M_beta =0;
 
-    // PAOLO: the mesh motion should be updated here, to compute the nonlinear residual, right?
-    vector_Type meshDisp( M_meshMotion->disp(), Repeated );
-    this->moveMesh(meshDisp);
-
-    /*
- if( iter==0 )
-    {
-        M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-        M_ALETimeAdvance->shiftRight(meshDisp);
-    }
-    else
-    {
-        M_ALETimeAdvance->setSolution(meshDisp);
-    }
-    */
+	vector_Type meshDisp( M_meshMotion->disp(), Repeated );
+	this->moveMesh(meshDisp);
 
 	if(iter==0)
 	  M_fluidTimeAdvance->extrapolation( *M_beta);//explicit treatment of u
@@ -229,8 +206,9 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     //*M_rhsNew  *= alpha;
 
 
+    //the conservative formulation as it is now is of order 1. To have higher order (TODO) we need to store the mass matrices computed at the previous time steps.
     if(M_data->dataFluid()->conservativeFormulation())
-      *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+      *M_rhs = M_fluidMassTimeAdvance->rhsContributionFirstDerivative();
     if (recomputeMatrices)
       {
 
@@ -241,7 +219,10 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 	this->M_fluid->updateRightHandSide( *M_rhs );
       }
     if(!M_data->dataFluid()->conservativeFormulation())
-      *M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+      {
+	*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+	this->M_fluid->updateRightHandSide( *M_rhs );
+      }
 
         //	if(this->algorithm()=="RobinNeumann") this->updatealphaf(this->veloFluidMesh());// this->setAlphaf();
 
@@ -281,7 +262,6 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
         this->M_solid->iterate( M_BCh_d );
         this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
 	this->transferSolidOnInterface( M_solidTimeAdvance->velocity( this->solid().displacement()), lambdaDotSolidUnique );
-	//  this->transferSolidOnInterface(this->M_solid->velocity(),      lambdaDotSolidUnique);
         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 

@@ -231,7 +231,7 @@ public:
      //! Initialize the parameters of time advance scheme
      /*
      @param  order define the order of BDF;
-     @param  orderDerivatve  define the order of derivate;
+     @param  orderDerivative  define the order of derivate;
      */
      virtual void setup ( const UInt& order,  const  UInt& orderDerivative ) = 0;
 

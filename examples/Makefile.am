@@ -41,11 +41,6 @@ SUBDIRS		=  benchmark_GreenshieldsWeller \
                unmaintained_masstransport \
                unmaintained_rk
 
-
-
-##               example_OseenAssembler \
-##               example_incompressibleStructure \
-
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 	{									   \
 	echo '# Signature of the current package.'; \

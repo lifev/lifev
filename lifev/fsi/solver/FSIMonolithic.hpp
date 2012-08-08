@@ -102,8 +102,7 @@ public:
     //!@name Typedefs
     //@{
     typedef FSIOperator                                           super_Type;
-    //typedef FSIOperator::fluidPtr_Type::value_type::matrix_Type   matrix_Type;
-    typedef MatrixEpetra<Real>                                    matrix_Type;
+    typedef FSIOperator::fluidPtr_Type::value_type::matrix_Type   matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                        matrixPtr_Type;
     typedef MonolithicBlock                                       prec_Type;
     typedef boost::shared_ptr<prec_Type>                          precPtr_Type;
@@ -195,10 +194,6 @@ public:
     */
     void monolithicToX(const vector_Type& disp, vector_Type& dispFluid, MapEpetra& map, UInt offset=(UInt)0);
 
-    // /**
-    //    sets the vector M_solid->dispSolid() to the monolithic solution M_solid->disp() in the solid nodes, to 0 in the fluid nodes
-    // */
-    // void setDispSolid(const vector_Type& sol);
 
     /**
        builds the constant part of the monolithic matrix
@@ -374,7 +369,6 @@ public:
     void exportSolidDisplacement( vector_Type& solidDisplacement )
     {
         solidDisplacement.subset( solution(), M_offset);
-        //        solidDisplacement *= dataFluid()->dataTime()->timeStep() * M_solid->rescaleFactor();
         solidDisplacement *= M_solid->rescaleFactor();
     }
 
@@ -384,21 +378,20 @@ public:
       \param solidVelocity: input vector (output solid velocity)
     */
     void exportSolidVelocity( vector_Type& solidVelocity )
-    {   // Matteo
+    {
         solidVelocity = M_solidTimeAdvance->velocity();
-        // solidVelocity *= dataSolid()->dataTime()->timeStep() * M_solid->rescaleFactor();
         solidVelocity *= M_solid->rescaleFactor();
     }
+
     //!Get the solid accelration
     /*!
       fills an input vector with the solid displacement from the solution.
       \param solidVelocity: input vector (output solid acceleration)
     */
     void exportSolidAcceleration( vector_Type& solidAcceleration )
-    {   // Paolo T.
-        solidAcceleration = M_solidTimeAdvance->accelerate();
-        // solidAcceleration *= dataSolid()->dataTime()->timeStep() * M_solid->rescaleFactor();
-        solidAcceleration *= M_solid->rescaleFactor();
+    {
+      solidAcceleration = M_solidTimeAdvance->accelerate();
+      solidAcceleration *= M_solid->rescaleFactor();
     }
 
     //! Gets the fluid and pressure
@@ -455,7 +448,7 @@ protected:
        \param res: the output residual
        \param diagonalScaling: flag stating wether to perform diagonal scaling
     */
-    void evalResidual( const vector_Type& sol, vectorPtr_Type& rhs,  vector_Type& res, bool diagonalScaling=false);
+    void evalResidual( const vector_Type& sol, const vectorPtr_Type& rhs,  vector_Type& res, bool diagonalScaling=false);
 
     //!\small says if the preconditioner will be recomputed
     bool recomputePrec() {return(!M_reusePrec || M_resetPrec);}
@@ -475,9 +468,9 @@ protected:
     void updateSolution( const vector_Type& solution )
     {
         this->M_fluidTimeAdvance->shiftRight(solution);
+	if(M_data->dataFluid()->conservativeFormulation())
+	  this->M_fluidMassTimeAdvance->shiftRight(M_fluid->matrixMass()*solution);
         this->M_solidTimeAdvance->shiftRight(solution);
-        //setSolution( solution );
-        //setDispSolid( solution );
     }
 
     //! Constructs the solid FESpace
@@ -542,21 +535,15 @@ protected:
     boost::shared_ptr< MapEpetra >                    M_interfaceMap;///the solid interface map
     boost::shared_ptr<vector_Type>                    M_beta;
     boost::shared_ptr<MonolithicBlockMatrix >                   M_monolithicMatrix;
-    //matrixPtr_Type                                    M_precMatrPtr;
     precPtr_Type                                      M_precPtr;
     boost::shared_ptr<vector_Type>                    M_rhsFull;
 
     fluidBchandlerPtr_Type                            M_BCh_flux;
-    //    solidBchandlerPtr_Type                            M_BCh_Robin;
-    //UInt                                            M_fluxes;
     solidBchandlerPtr_Type                            M_BChWS;
     BCFunctionRobin                                   M_bcfWs;
-    //    matrixPtr_Type                                    M_robinCoupling;
     UInt                                              M_offset;
     UInt                                              M_solidAndFluidDim;
-    //matrixPtr_Type                                    M_fluidBlock;
     FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type M_fluidBlock;
-  //matrixPtr_Type                                    M_solidBlock;
     matrixPtr_Type                                    M_solidBlockPrec;
     matrixPtr_Type                                    M_robinCoupling; //uninitialized if not needed
     matrixPtr_Type                                    M_boundaryMass;

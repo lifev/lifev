@@ -6,11 +6,11 @@ ADD_SUBDIRECTORIES(
   adr_assembler
   array
   bdf
-  exporter_vtk
   fe_function
   fem
   filter
   hyperbolic
+  linear_solver
   matrix_epetra_structured_framework
   mesh
   partition_io

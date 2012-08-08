@@ -139,13 +139,6 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
             (*M_robinBetaCoefficient)[gid + verticesGlobalNumber * 2]  = beta;
         }
 
-        // Set displacement and velocity at time tn (mid-point scheme for the solid)
-        FSIOperator::vector_Type displacementTn( M_physicalSolver->dFESpace().map(), Repeated, Zero );
-        FSIOperator::vector_Type velocityTn( M_physicalSolver->dFESpace().map(), Repeated, Zero );
-
-        M_physicalSolver->exportSolidDisplacement( displacementTn );
-        M_physicalSolver->exportSolidVelocity( velocityTn );
-
         *M_robinRHS = M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative();
 
         break;

@@ -568,8 +568,8 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
     M_sxx                        (/*M_localMap*/),//useless
     M_syy                        (/*M_localMap*/),//useless
     M_szz                        (/*M_localMap*/),//useless
-    M_out_iter                   ( "out_iter_solid" ),
-    M_out_res                    ( "out_res_solid" ),
+    M_out_iter                   ( ),
+    M_out_res                    ( ),
     M_BCh                        ( ),
     M_localMap                   ( ),
     M_mass                       ( ),
@@ -634,6 +634,12 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
 
     M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->solidType() ) );
     M_material->setup( dFESpace,M_localMap,M_offset, M_data, M_Displayer );
+
+    if ( M_data->verbose() )
+    {
+        M_out_iter.open( "out_iter_solid" );
+        M_out_res.open( "out_res_solid" );
+    }
 }
 
 template <typename Mesh, typename SolverType>
@@ -771,7 +777,11 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
     Int status = 0;
 
-    status = NonLinearRichardson( *M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch, M_out_res, M_data->dataTime()->time() );
+    if ( M_data->verbose() )
+        status = NonLinearRichardson( *M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch, 0, 2, M_out_res, M_data->dataTime()->time() );
+    else
+        status = NonLinearRichardson( *M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch );
+
 
     if ( status == 1 )
     {
@@ -786,8 +796,8 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
         // std::cout <<" Number of inner iterations       : " << maxiter <<  std::endl;
 
         // std::cout <<" We are at the time step          : "  << M_data->dataTime()->time() << std::endl;
-
-        M_out_iter << time << " " << maxiter << std::endl;
+        if ( M_data->verbose() )
+            M_out_iter << time << " " << maxiter << std::endl;
     }
 
     // updateVelAndAcceleration();
