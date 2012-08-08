@@ -196,7 +196,7 @@ public:
     /**
      *  @param id marker of the RegionMesh
      */
-    explicit RegionMesh( UInt id, const Epetra_Comm & comm );
+    RegionMesh( UInt id, const Epetra_Comm & comm );
 
     //! Destructor
     virtual ~RegionMesh();
