@@ -71,8 +71,14 @@ MultiscaleCouplingMeanNormalStressValve::setupCoupling()
 
     super_Type::setupCoupling();
 
-    if ( M_couplingVariablesNumber > 2 )
-        std::cout << "!!! WARNING: MultiscaleCouplingMeanNormalStressValve does not work with more than two models !!!" << std::endl;
+    // Preliminary checks to use the valve
+    if ( myModelsNumber() > 0 )
+    {
+        if ( modelsNumber() > 2 )
+            std::cout << "!!! WARNING: MultiscaleCouplingMeanNormalStressValve does not work with more than two models !!!" << std::endl;
+        if ( M_flowRateInterfaces != modelsNumber() )
+            std::cout << "!!! WARNING: MultiscaleCouplingMeanNormalStressValve does not work with stress boundary data !!!" << std::endl;
+    }
 }
 
 void
@@ -93,7 +99,7 @@ MultiscaleCouplingMeanNormalStressValve::initializeCouplingVariables()
     if ( myModel( 0 ) )
         if ( isModelLeaderProcess( 0 ) )
         {
-            if ( localCouplingVariables( 0 )[0] <= 1e-10 )
+            if ( localCouplingVariables( 0 )[M_flowRateInterfaces] <= 1e-10 )
             {
                 std::cout << " MS-  Valve closed at coupling " << M_ID << std::endl;
                 localValvePosition = 0;
@@ -113,7 +119,8 @@ MultiscaleCouplingMeanNormalStressValve::initializeCouplingVariables()
     {
         M_valveIsOpen = false;
         if ( myModelsNumber() > 0 )
-            localCouplingVariables( 0 ) = 0;
+            for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i ) // Only the flow rate is set to zero
+                localCouplingVariables( 0 )[i] = 0;
     }
     else
         M_valveIsOpen = true;
@@ -231,7 +238,7 @@ MultiscaleCouplingMeanNormalStressValve::insertJacobianConstantCoefficients( mul
                 UInt row    = M_couplingVariablesOffset;
                 UInt column = M_couplingVariablesOffset;
 
-                for ( UInt i( 0 ); i < modelsNumber(); ++i )
+                for ( UInt i( 0 ); i < M_flowRateInterfaces + 1; ++i )
                     jacobian.addToCoefficient( row + i, column + i, 1 );
             }
     }
