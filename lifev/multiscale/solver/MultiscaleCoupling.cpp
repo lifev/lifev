@@ -59,6 +59,7 @@ MultiscaleCoupling::MultiscaleCoupling() :
         M_localCouplingVariables      (),
         M_localCouplingResiduals      (),
         M_timeInterpolationOrder      ( 0 ),
+        M_flowRateInterfaces          ( 0 ),
         M_perturbedCoupling           ( false ),
         M_comm                        ()
 {
@@ -85,13 +86,16 @@ MultiscaleCoupling::setupData( const std::string& fileName )
     // Read Multiscale parameters
     M_couplingName = dataFile( "Multiscale/couplingName", "couplingName" );
 
-    if ( myModelsNumber() > 0 )
-    {
-        M_timeInterpolationOrder = dataFile( "Multiscale/timeInterpolationOrder", 0 );
+    M_timeInterpolationOrder = dataFile( "Multiscale/timeInterpolationOrder", 0 );
+    M_flowRateInterfaces     = dataFile( "Multiscale/flowRateInterfaces", 0 );
 
-        // Set the size of the local coupling variables
+    // If flowRateInterfaces is negative all the interfaces get a flow rate
+    if ( M_flowRateInterfaces < 0 )
+        M_flowRateInterfaces = modelsNumber();
+
+    // Set the size of the local coupling variables
+    if ( myModelsNumber() > 0 )
         M_localCouplingVariables.reserve( M_timeInterpolationOrder + 1 );
-    }
 }
 
 // ===================================================
@@ -273,6 +277,9 @@ MultiscaleCoupling::showMe()
         std::cout << "Coupling id         = " << M_ID << std::endl
                   << "Coupling name       = " << M_couplingName << std::endl
                   << "Coupling type       = " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
+
+        std::cout << "Interpolation order = " << M_timeInterpolationOrder << std::endl
+                  << "Flow interfaces     = " << M_flowRateInterfaces << std::endl << std::endl;
 
         std::cout << "Models ID(s)        = ";
         for ( UInt i( 0 ); i < modelsNumber(); ++i )

@@ -445,6 +445,7 @@ protected:
     multiscaleVectorPtr_Type             M_localCouplingResiduals;
 
     UInt                                 M_timeInterpolationOrder;
+    Int                                  M_flowRateInterfaces;
 
     Int                                  M_perturbedCoupling;
 
