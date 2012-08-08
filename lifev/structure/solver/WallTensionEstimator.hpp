@@ -44,6 +44,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <boost/scoped_ptr.hpp>
+#include <boost/multi_array.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -169,7 +170,7 @@ public:
     /*!
       \param NONE FESpace<Mesh, MapEpetra>& copyFESpace 
     */
-    void analyzeTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace );
+    void analyzeTensions( );
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
@@ -181,7 +182,13 @@ public:
     /*!
       \param NONE
     */
-    void analyzeTensionsRecoveryTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace );
+    void analyzeTensionsRecoveryEigenvalues( void );
+
+    //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
+    /*!
+      \param NONE
+    */
+    void analyzeTensionsRecoveryCauchyStresses( void );
 
 //! @name Set Methods
 //@{
@@ -213,6 +220,10 @@ public:
   solutionVect_Type gradientY() {return *M_displY;}
   solutionVect_Type gradientZ() {return *M_displZ;}
 
+  solutionVect_Type sigmaX() {return *M_sigmaX;}
+  solutionVect_Type sigmaY() {return *M_sigmaY;}
+  solutionVect_Type sigmaZ() {return *M_sigmaZ;}
+
   //! Get the global vector for the eigenvalues
   solutionVect_Type principalStresses() {return *M_globalEigen;}
 //@}
@@ -233,6 +244,12 @@ protected:
   */
   void reconstructElementaryVector( solutionVect_Type& patchArea, UInt nVol );    
 
+  //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
+  /*!
+    \param elvecTens VectorElemental over which the reconstruction is applied
+  */
+  void reconstructElementaryVector( VectorElemental& elVecSigma, solutionVect_Type& patchArea, UInt nVol );    
+
   //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
   /*!
     \param NONE
@@ -245,6 +262,11 @@ protected:
   */
   void orderEigenvalues( std::vector<Real>& eigenvaluesR );    
 
+  //! constructGlobalStressVector: This method construct the vectors \sigma_{.,i} for i=x,y,z to have for each DOF the tensor \sigma
+  /*!
+    \param NONE
+  */
+  void constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ );    
 
     
 //@}
@@ -286,6 +308,15 @@ protected:
     solutionVectPtr_Type                            M_displY;
     //! Vector for the gradient along Z of the displacement field
     solutionVectPtr_Type                            M_displZ;
+
+
+    //! Vector for the gradient along X of the displacement field
+    solutionVectPtr_Type                            M_sigmaX;
+    //! Vector for the gradient along Y of the displacement field
+    solutionVectPtr_Type                            M_sigmaY;
+    //! Vector for the gradient along Z of the displacement field
+    solutionVectPtr_Type                            M_sigmaZ;
+
 
     //! Vector for the eigenvalues of the Cauchy stress tensor
     solutionVectPtr_Type                            M_globalEigen;
@@ -338,6 +369,10 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ):
     M_displX                     ( ),
     M_displY                     ( ),
     M_displZ                     ( ),
+
+    M_sigmaX                     ( ),
+    M_sigmaY                     ( ),
+    M_sigmaZ                     ( ),
     M_elVecTens                  ( ),
     M_material                   ( )
 {
@@ -380,6 +415,11 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
   M_displX.reset        ( new solutionVect_Type(*M_localMap) );
   M_displY.reset        ( new solutionVect_Type(*M_localMap) );
   M_displZ.reset        ( new solutionVect_Type(*M_localMap) );
+
+  M_sigmaX.reset        ( new solutionVect_Type(*M_localMap) );
+  M_sigmaY.reset        ( new solutionVect_Type(*M_localMap) );
+  M_sigmaZ.reset        ( new solutionVect_Type(*M_localMap) );
+
   M_globalEigen.reset   ( new solutionVect_Type(*M_localMap) );
   M_elVecTens.reset     ( new VectorElemental(this->M_FESpace->fe().nbFEDof(), nDimensions) );
   M_invariants.resize   ( M_FESpace->fieldDim() + 1 );
@@ -395,14 +435,17 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
 
 template <typename Mesh>
 void 
-WallTensionEstimator<Mesh >::analyzeTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace )   
+WallTensionEstimator<Mesh >::analyzeTensions( )   
 {
 
   *M_globalEigen *= 0.0;
   if ( !M_analysisData->recoveryVariable().compare("displacement") )
     analyzeTensionsRecoveryDisplacement();
+  else if ( !M_analysisData->recoveryVariable().compare("eigenvalues") )
+    analyzeTensionsRecoveryEigenvalues();
   else
-    analyzeTensionsRecoveryTensions(copyFESpace);
+    analyzeTensionsRecoveryCauchyStresses();
+    
 }
 
 
@@ -531,7 +574,7 @@ WallTensionEstimator<Mesh >::computeDisplacementGradient( void )
 
 template <typename Mesh>
 void 
-WallTensionEstimator<Mesh >::analyzeTensionsRecoveryTensions( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& copyFESpace )
+WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( )
 {
 
   LifeChrono chrono;
@@ -750,7 +793,229 @@ void WallTensionEstimator<Mesh >::orderEigenvalues( std::vector<Real>& eigenvalu
   while( ordered );
 
 }
+
+template <typename Mesh>
+void 
+WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( )
+{
+
+  LifeChrono chrono;
+
+  chrono.start();
+  UInt dim = M_FESpace->dim();  
+  
+  //Construction of the global tensionsVector
+  solutionVectPtr_Type sigmaX( new solutionVect_Type(*M_localMap) );
+  solutionVectPtr_Type sigmaY( new solutionVect_Type(*M_localMap) );
+  solutionVectPtr_Type sigmaZ( new solutionVect_Type(*M_localMap) );
+  
+  constructGlobalStressVector(*M_sigmaX,*M_sigmaY,*M_sigmaZ);
+
+
+  for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
+    {      
+      
+      if ( M_displ->blockMap().LID(iDOF) != -1 ) // The Global ID is on the calling processors
+	{
+
+	  (*M_sigma).Scale(0.0);
+
+	  //Extracting the gradient of U on the current DOF
+	  for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+	    {		    
+	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset); 
+	      Int GIDid = M_displ->blockMap().GID(LIDid); 
+	      (*M_sigma)(iComp,0) = (*M_sigmaX)(GIDid); // (d_xX,d_yX,d_zX)
+	      (*M_sigma)(iComp,1) = (*M_sigmaY)(GIDid); // (d_xY,d_yY,d_zY)
+	      (*M_sigma)(iComp,2) = (*M_sigmaZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
+	    }
+
+	  //Compute the eigenvalue
+	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
+
+	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
+	  //Check on the imaginary part of eigen values given by the Lapack method 
+	  Real sum(0);
+	  for( int i=0; i < M_eigenvaluesI.size(); i++ )
+	    sum += std::abs(M_eigenvaluesI[i]);
+	  ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
+
+	  orderEigenvalues( M_eigenvaluesR );
+
+	  //Save the eigenvalues in the global vector
+	  for( UInt icoor = 0; icoor < nDimensions; ++icoor )
+	    {
+	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset); 
+	      Int GIDid = M_displ->blockMap().GID(LIDid); 
+	      (*M_globalEigen)(GIDid) = M_eigenvaluesR[icoor];
+	    }
+	
+	}
+    }
+
+  chrono.stop();
+  this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 	 
+}
+
+template <typename Mesh>
+void 
+WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ )
+{
+
+  //Creating the local stress tensors
+  VectorElemental elVecSigmaX(this->M_FESpace->fe().nbFEDof(), nDimensions);
+  VectorElemental elVecSigmaY(this->M_FESpace->fe().nbFEDof(), nDimensions);
+  VectorElemental elVecSigmaZ(this->M_FESpace->fe().nbFEDof(), nDimensions);
+
+  LifeChrono chrono;
+
+  //Constructing the patch area vector for reconstruction purposes
+  solutionVect_Type patchArea(*M_displ,Unique,Add);
+  patchArea *= 0.0;
+
+  constructPatchAreaVector( patchArea );
+  
+  //Before assembling the reconstruction process is done
+  solutionVect_Type patchAreaR(patchArea,Repeated);
+
+  QuadratureRule fakeQuadratureRule;
+
+  Real refElemArea(0); //area of reference element
+  //compute the area of reference element
+  for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
+    refElemArea += M_FESpace->qr().weight(iq);
+
+  Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
+
+  //Setting the quadrature Points = DOFs of the element and weight = 1
+  std::vector<GeoVector> coords = M_FESpace->refFE().refCoor();
+  std::vector<Real> weights(M_FESpace->fe().nbFEDof(), wQuad);
+  fakeQuadratureRule.setDimensionShape ( shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape() );
+  fakeQuadratureRule.setPoints(coords,weights);
+
+  //Set the new quadrature rule
+  M_FESpace->setQuadRule(fakeQuadratureRule);
+
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+  this->M_displayer->leaderPrint("   Performing the analysis recovering the Cauchy stresses..., ", M_dataMaterial->solidType() );
+  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+
+  UInt totalDof = M_FESpace->dof().numTotalDof();
+  VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), nDimensions);
+
+  //Vectors for the deformation tensor
+  std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
+  //Copying the displacement field into a vector with repeated map for parallel computations
+  solutionVect_Type dRep(*M_displ, Repeated);
+
+  chrono.start();
+
+  //Loop on each volume
+  for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
+    {
+      M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
+      
+      elVecSigmaX.zero();
+      elVecSigmaY.zero();
+      elVecSigmaZ.zero();
+
+      M_marker = M_FESpace->mesh()->volumeList( i ).marker();
+
+      UInt eleID = M_FESpace->fe().currentLocalId();
+
+      //Extracting the local displacement
+      for ( UInt iNode = 0; iNode < ( UInt ) M_FESpace->fe().nbFEDof(); iNode++ )
+	{
+	  UInt  iloc = M_FESpace->fe().patternFirst( iNode );
+
+	  for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+	    {
+	      UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
+	      dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
+	    }
+	}
+
+      //Compute the element tensor F
+      AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, M_FESpace->fe() );
+
+      //Compute the local vector of the principal stresses
+      for( UInt nDOF=0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
+	{
+	  UInt  iloc = M_FESpace->fe().patternFirst( nDOF );
+
+	  M_sigma->Scale(0.0);
+	  M_firstPiola->Scale(0.0);
+	  M_cofactorF->Scale(0.0);
+
+	  //Compute the rightCauchyC tensor
+	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);	  
+
+	  //Compute the first Piola-Kirchhoff tensor
+	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
+
+	  //Compute the Cauchy tensor
+	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
+
+	  //Assembling the local vectors for local tensions Component X
+	  for ( int coor=0; coor < nDimensions; coor++ )
+	      (elVecSigmaX)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,0);
+
+	  //Assembling the local vectors for local tensions Component Y
+	  for ( int coor=0; coor < nDimensions; coor++ )
+	      (elVecSigmaY)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,1);
+
+	  //Assembling the local vectors for local tensions Component Z
+	  for ( int coor=0; coor < nDimensions; coor++ )
+	      (elVecSigmaZ)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,2);
+
+	}
+
+      reconstructElementaryVector( elVecSigmaX, patchAreaR, i );
+      reconstructElementaryVector( elVecSigmaY, patchAreaR, i );
+      reconstructElementaryVector( elVecSigmaZ, patchAreaR, i );
+
+      //Assembling the three elemental vector in the three global
+      for ( UInt ic = 0; ic < nDimensions; ++ic )
+	{
+	  assembleVector(sigmaX, elVecSigmaX, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+	  assembleVector(sigmaY, elVecSigmaY, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+	  assembleVector(sigmaZ, elVecSigmaZ, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+	}
+    }
+
+
+  sigmaX.globalAssemble();
+  sigmaY.globalAssemble();
+  sigmaZ.globalAssemble();
+}    
+
+template <typename Mesh>
+void 
+WallTensionEstimator<Mesh >::reconstructElementaryVector( VectorElemental& elVecSigma, 
+							  solutionVect_Type& patchArea,
+							  UInt nVol )
+{
+  //UpdateElement Infos
+  //M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
+
+  Real measure = M_FESpace->fe().measure();
+  UInt eleID = M_FESpace->fe().currentLocalId();
+
+  for (UInt iDof=0; iDof < M_FESpace->fe().nbFEDof(); iDof++)
+    {
+      UInt  iloc = M_FESpace->fe().patternFirst( iDof );
+
+      for( UInt icoor=0;  icoor < M_FESpace->fieldDim(); icoor++ )
+	{
+	  ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
+
+	  elVecSigma[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] ); 
+	}
+
+    }     
+}
+
 }
 
 #endif /*_WALLTENSION_H_ 1*/
