@@ -337,6 +337,13 @@ public:
      */
     markerID_Type markerID() const { return M_marker.markerID(); }
 
+    //! get M_isPartitioned bool
+    /**
+     * @brief isPartitioned
+     * @return M_isPartitioned member
+     */
+    bool isPartitioned() const { return M_isPartitioned; }
+
     /** @} */ // End of group Generic Methods
 
 
@@ -403,6 +410,8 @@ public:
      *  @param marker id to be set.
      */
     void setMarkerID( markerID_Type const & markerId ) { M_marker.setMarkerID ( markerId ); }
+
+    void setIsPartitioned( bool const isPartitioned ) { M_isPartitioned = isPartitioned; }
 
     //! Changes Current capacity of Volumes.
     /**
@@ -1898,6 +1907,7 @@ private:
     UInt M_numGlobalFaces;
     UInt M_numGlobalVolumes;
 
+    bool M_isPartitioned;
     typename  MC::regionMarker_Type M_marker;
     MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > M_meshTransformer;
 
@@ -2158,6 +2168,7 @@ inline RegionMesh<GEOSHAPE, MC>::RegionMesh( Epetra_Comm const & comm ):
     M_numBFaces( 0 ),
     M_numEdges( 0 ),
     M_numBEdges( 0 ),
+    M_isPartitioned( false ),
     M_meshTransformer( *this ),
     M_comm( comm )
 { //Modif Miguel:11/2002
@@ -2178,6 +2189,7 @@ inline RegionMesh<GEOSHAPE, MC>::RegionMesh( UInt id, Epetra_Comm const & comm )
     M_numBFaces( 0 ),
     M_numEdges( 0 ),
     M_numBEdges( 0 ),
+    M_isPartitioned( false ),
     M_meshTransformer( *this ),
     M_comm( comm )
 { //Modif Miguel:11/2002
