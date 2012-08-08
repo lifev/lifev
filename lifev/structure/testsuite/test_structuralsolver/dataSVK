@@ -44,7 +44,7 @@ BDF_order   	= 2
 
 [../space_discretization]
 mesh_dir  	= ./
-mesh_file 	= Cube4-P1.mesh 
+mesh_file 	= StructuredCube4_test_structuralsolver.mesh
 order     	= P1
 
 

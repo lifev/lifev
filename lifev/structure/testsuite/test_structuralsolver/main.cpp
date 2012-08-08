@@ -179,21 +179,9 @@ static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, con
     return  0.;
 }
 
-static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& i)
+static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-  switch (i)
-    {
-    case 0:
-      return 300000.0;
-      break;
-    case 1:
-      return 0.0;
-      break;
-    case 2:
-      return 0.0;
-      break;
-    }
-    return 0;
+    return  300000.;
 }
 
 };
@@ -315,12 +303,8 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC("EdgesIn",      20,  Natural,   Full, nonZero, 3);
+    BCh->addBC("EdgesIn",      20,  Natural,   Component, nonZero, compx);
     BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compx);
-
-    BCh->addBC("Vertex",      100,  EssentialVertices, Full, zero, 3);
-    BCh->addBC("EdgesIn",      5,  Essential, Component, zero, compy );
-    BCh->addBC("EdgesIn",      3,  Essential, Component, zero, compz);
 
 
     //! 1. Constructor of the structuralSolver
@@ -419,7 +403,8 @@ Structure::run3d()
     exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
 
     exporter->postProcess( 0 );
-    
+
+    /*
     //!--------------------------------------------------------------------------------------------
     //! MATLAB FILE WITH DISPLACEMENT OF A CHOSEN POINT
     //!--------------------------------------------------------------------------------------------
@@ -438,20 +423,20 @@ Structure::run3d()
     //int IDPoint = 315;// cube8x8.mesh
     //int IDPoint = 1526;// cube16x16.mesh
 
-    // file_comp << " % TEST NONLINEAR ELASTICITY" << endl;
-    // file_comp << " % Displacement components of ID node  " << IDPoint << " :" << endl;
-    // file_comp << " % Each row is a time step" << endl;
-    // file_comp << " % First column = comp x, second = comp y and third = comp z. " << endl;
-    // file_comp <<  endl;
-    // file_comp << " SolidDisp_NL = [ " ;
+    file_comp << " % TEST NONLINEAR ELASTICITY" << endl;
+    file_comp << " % Displacement components of ID node  " << IDPoint << " :" << endl;
+    file_comp << " % Each row is a time step" << endl;
+    file_comp << " % First column = comp x, second = comp y and third = comp z. " << endl;
+    file_comp <<  endl;
+    file_comp << " SolidDisp_NL = [ " ;
 
-    // for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-    // {
-    // file_comp<< solid.displacement()[ k ] << " ";
-    // }
+    for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
+    {
+    file_comp<< solid.displacement()[ k ] << " ";
+    }
 
-    // file_comp<< endl;
-    
+    file_comp<< endl;
+    */
     //!--------------------------------------------------------------------------------------------
     //!The update of the RHS is done by the TimeAdvance class
     //solid.updateSystem();

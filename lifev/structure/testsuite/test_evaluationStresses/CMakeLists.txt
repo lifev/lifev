@@ -4,8 +4,8 @@ INCLUDE(TribitsCopyFilesToBinaryDir)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
-  Structure
-  NAME testStressEXP
+  Tensions
+  NAME Stress
   SOURCES main.cpp
   ARGS "-f dataEXP"
   NUM_MPI_PROCS 2

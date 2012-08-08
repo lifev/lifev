@@ -422,7 +422,7 @@ Structure::run3d()
 	std::cout << "The norm of the set displacement, at time " << startTime << ", is: "<< solid->displacement().norm2() << std::endl;
 
 	//Perform the analysis
-	solid->analyzeTensions(copyFESpace);
+	solid->analyzeTensions();
 	
 	//Extracting the gradient
 	// *gradX = solid->gradientX();
