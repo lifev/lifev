@@ -87,16 +87,19 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
     std::vector<UInt> points( volume_Type::S_numVertices );
 
     UInt done = 0;
-    UInt numberVertices         ( bareMesh.points.numberOfColumns() ),
-         numberBoundaryVertices ( 0 ),
-         numberPoints           ( bareMesh.points.numberOfColumns() ),
-         numberBoundaryPoints   ( 0 ),
-         numberEdges            ( bareMesh.edges.numberOfColumns() ),
-         numberBoundaryEdges    ( 0 ),
-         numberFaces            ( bareMesh.numBoundaryFaces ),
-         numberBoundaryFaces    ( 0 ),
-         numberElements         ( bareMesh.elements.numberOfColumns() ),
-         numberStoredFaces      ( bareMesh.faces.numberOfColumns() );
+    UInt numberVertices         = bareMesh.points.numberOfColumns();
+    UInt numberBoundaryVertices = bareMesh.numBoundaryPoints;
+    UInt numberPoints           = bareMesh.points.numberOfColumns();
+    UInt numberBoundaryPoints   = bareMesh.numBoundaryPoints;
+    UInt numberStoredEdges      = bareMesh.edges.numberOfColumns();
+    UInt numberBoundaryEdges    = 0;
+    UInt numberStoredFaces      = bareMesh.faces.numberOfColumns();
+    UInt numberBoundaryFaces    = bareMesh.numBoundaryFaces;
+    UInt numberElements         = bareMesh.elements.numberOfColumns();
+
+    // Euler formulas
+    UInt numberFaces = 2 * numberElements + ( numberBoundaryFaces / 2 );
+    UInt numberEdges = ( 3 * numberBoundaryFaces - 2 * numberBoundaryVertices ) / 4 + numberVertices + numberElements;
 
     faceStore_Type faceHelp;
     typename faceStore_Type::iterator faceHelpIterator;
@@ -259,7 +262,7 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
 
     oStr << "Reading boundary edges " << std::endl;
 
-    for ( UInt i = 0; i < numberBoundaryEdges; i++ )
+    for ( UInt i = 0; i < numberStoredEdges; i++ )
     {
         for ( UInt j = 0; j < edge_Type::S_numPoints; j++ )
             points[ j ] = bareMesh.edges( j, i );
@@ -404,16 +407,6 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
 
     ASSERT_PRE0( GeoShape::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
 
-    // Euler formulas to get number of faces and number of edges
-    numberFaces = 2 * numberVolumes + ( numberBoundaryFaces / 2 );
-    Int num1  = numberVertices + numberVolumes;
-    Int num2  = numberBoundaryVertices;
-    Int num3  = numberBoundaryFaces;
-
-    numberEdges = ( 3 * num3 - 2 * num2 ) / 4 + num1;
-
-//    numberEdges = (int) numberVolumes + numberVertices + ( 3 * numberBoundaryFaces + dummy ) / 4;
-
     // Be a little verbose
     switch ( shape )
     {
@@ -456,18 +449,8 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
         ERROR_MSG( "Current version of INRIA Mesh file reader only accepts TETRA and HEXA" );
     }
 
-    oStr << "Number of Vertices        = "  << std::setw( 10 ) << numberVertices         << std::endl
-         << "Number of BVertices       = "  << std::setw( 10 ) << numberBoundaryVertices << std::endl
-         << "Number of Faces           = "  << std::setw( 10 ) << numberFaces            << std::endl
-         << "Number of Boundary Faces  = "  << std::setw( 10 ) << numberBoundaryFaces    << std::endl
-         << "Number of Stored Faces    = "  << std::setw( 10 ) << numberStoredFaces      << std::endl
-         << "Number of Edges           = "  << std::setw( 10 ) << numberEdges            << std::endl
-         << "Number of Boundary Edges  = "  << std::setw( 10 ) << numberBoundaryEdges    << std::endl
-         << "Number of Points          = "  << std::setw( 10 ) << numberPoints           << std::endl
-         << "Number of Boundary Points = "  << std::setw( 10 ) << numberBoundaryPoints   << std::endl
-         << "Number of Volumes         = "  << std::setw( 10 ) << numberVolumes          << std::endl;
-
     // Set all basic data structure
+    bareMesh.numBoundaryPoints = numberBoundaryVertices;
     bareMesh.points.reshape   ( 3, numberPoints );
     bareMesh.pointsMarkers.resize ( numberPoints );
 

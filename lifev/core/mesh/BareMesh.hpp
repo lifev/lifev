@@ -56,6 +56,7 @@ struct RegionMeshBare{
     ID regionMarkerID;
     ReferenceShapes refShape;
     ReferenceShapes bRefShape;
+    UInt numBoundaryPoints;
     ArraySimple<Real> points;
     std::vector<ID> pointsMarkers;
     ArraySimple<UInt> edges;
