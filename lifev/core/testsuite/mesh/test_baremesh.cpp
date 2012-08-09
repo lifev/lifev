@@ -60,7 +60,7 @@
 #include <lifev/core/filter/GetPot.hpp>
 
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
-#include <lifev/core/filter/ImporterMesh3D.hpp>
+#include <lifev/core/filter/ImporterMesh3DNew.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/BareMesh.hpp>
 #include <lifev/core/mesh/MeshElementBare.hpp>
