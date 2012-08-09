@@ -58,7 +58,6 @@ namespace LifeV
  *
  *   @deprecated OBSOLETE, now this is handled through SetFlagAccordingToWatermarks
  */
-
 class InternalEntitySelector
 {
 public:
@@ -77,9 +76,8 @@ public:
         @param w, the costant EntityFlag which is required in order
         to create an InternalEntitySelector object.
      */
-    InternalEntitySelector(const markerID_Type & w);
+    explicit InternalEntitySelector( const markerID_Type & w );
     //@}
-
 
     //! @name Operators
     //@{
@@ -91,7 +89,7 @@ public:
         @param test, it is the reference to geometric entity.
         @return true, if the flag corresponds to an internal entity.
      */
-    bool operator()(markerID_Type const & test) const;
+    bool operator()( markerID_Type const & test ) const;
     //@}
 
 private:
@@ -103,6 +101,7 @@ private:
 
 namespace Utility
 {
+
 //! A helper functor
 /*!
  * This is a helper functor not of general use.
@@ -112,13 +111,16 @@ class MarkerMapTraits
 public:
     //! The type of a range of marker ID values
     typedef std::pair<markerID_Type,markerID_Type> rangeID_Type;
+
     //! Comparison operator for ranges
-    inline bool operator()(rangeID_Type const & a,  rangeID_Type const & b) const
+    bool operator()( rangeID_Type const & a, rangeID_Type const & b ) const
     {
         return a.first < b.first;
     }
 };
+
 }// end namespace Utility
+
 /** @defgroup MeshEntityFlagsChangers
  * Useful functors to change marker IDs according to certain conditions
  *
@@ -147,95 +149,100 @@ public:
 *
 */
 
-class
-SetFlagAccordingToMarkerRanges{
+class SetFlagAccordingToMarkerRanges
+{
 public:
-   //! The type of a flag policy
-  typedef flag_Type (*flagPolicy_ptr)(flag_Type const &, flag_Type const &);
-  //! The type of a range
-  typedef Utility::MarkerMapTraits::rangeID_Type rangeID_Type;
-  //! Constructor optionally takes a policy
-  SetFlagAccordingToMarkerRanges(const flagPolicy_ptr & flagPolicy=&Flag::turnOn):
-      M_flagPolicy(flagPolicy){};
-  //! Inserts a range with associated flag
-  /*!
-   * The range may be given by calling std::make_pair(markerID_Type a, markerID_Type b)
-   * It is the user responsibility making sure that b>=a and that there are not overlapping
-   * ranges. Otherwise the result is unpredictable
-   *
-   * @param key a pair of markerIDs defining a range
-   * @param flag the associated flag
-   */
-  void insert(rangeID_Type const & key, flag_Type flag);
-  //! Finds the flag associated to a range.
-  /*!
-   * It is mainly meant as helper function for operator(), but it is exposed
-   * because it might be useful for debugging
-   * @param m The markerID to be searched
-   * @return a pair containing the flag and a bool. If the bool is false it means that there is no
-   *         corresponding range. In that case the flag defaults to DEFAULT
-   */
-  std::pair<flag_Type,bool> findFlag( markerID_Type const & m)const;
-  //! The operator doing the job
-  /*!
-   * It is the operator that does the check on a given mesh entity
-   * @param e The entity to change (possibly) using the given policy
-   */
-  template<typename MeshEntity>
-  void operator()(MeshEntity & e)const
-  {
-      std::pair<flag_Type,bool> tmp=this->findFlag(e.markerID());
-      if (tmp.second) e.replaceFlag(M_flagPolicy(e.flag(),tmp.first));
-  }
+    //! The type of a flag policy
+    typedef flag_Type (*flagPolicy_ptr)(flag_Type const &, flag_Type const &);
+    //! The type of a range
+    typedef Utility::MarkerMapTraits::rangeID_Type rangeID_Type;
+
+    //! Constructor optionally takes a policy
+    explicit SetFlagAccordingToMarkerRanges( const flagPolicy_ptr & flagPolicy = &Flag::turnOn ):
+        M_flagPolicy(flagPolicy) {};
+
+    //! Inserts a range with associated flag
+    /*!
+     * The range may be given by calling std::make_pair(markerID_Type a, markerID_Type b)
+     * It is the user responsibility making sure that b>=a and that there are not overlapping
+     * ranges. Otherwise the result is unpredictable
+     *
+     * @param key a pair of markerIDs defining a range
+     * @param flag the associated flag
+     */
+    void insert(rangeID_Type const & key, flag_Type flag);
+
+    //! Finds the flag associated to a range.
+    /*!
+     * It is mainly meant as helper function for operator(), but it is exposed
+     * because it might be useful for debugging
+     * @param m The markerID to be searched
+     * @return a pair containing the flag and a bool. If the bool is false it means that there is no
+     *         corresponding range. In that case the flag defaults to DEFAULT
+     */
+    std::pair<flag_Type,bool> findFlag( markerID_Type const & m) const;
+
+    //! The operator doing the job
+    /*!
+     * It is the operator that does the check on a given mesh entity
+     * @param e The entity to change (possibly) using the given policy
+     */
+    template<typename MeshEntity>
+    void operator()(MeshEntity & e)const
+    {
+        std::pair<flag_Type,bool> tmp=this->findFlag( e.markerID() );
+        if( tmp.second ) e.replaceFlag( M_flagPolicy( e.flag(), tmp.first ) );
+    }
+
 private:
-  typedef std::map<rangeID_Type, flag_Type, Utility::MarkerMapTraits> map_Type;
-  typedef map_Type::const_iterator const_iterator_Type;
-  map_Type M_map;
-  flagPolicy_ptr M_flagPolicy;
+    typedef std::map<rangeID_Type, flag_Type, Utility::MarkerMapTraits> map_Type;
+    typedef map_Type::const_iterator const_iterator_Type;
+    map_Type M_map;
+    flagPolicy_ptr M_flagPolicy;
 };
 
-
-
- //!Sets the flag of a mesh entity according to the value of its Marker id.
- /*!
- *  We compare the marker ID with a watermark according to a policy which is a comparison operator
- *
- *   @code
-     bool operator()(markerID_Type const & mId, markerID_Type const & watermark)
- *   @endcode
- *
- *  which by default is greater<>  (i.e. returns true if  mId > watermark).
- *  If the comparison is true the given flag is assigned to the entity using a second policy
- *  implemented as a function:
- *
- *  @code
-    flag_Type flagPolicy  ( flag_Type const & inputFlag, flag_Type const & refFlag )
- *  @endcode
- *
- *  passed in the constructor and defaulted to Flag::turnOn
- *
- *  Example:
- *  I want to set the flag INTERNAL_INTERFACE to all faces with marker ID > 1000
- *
- * @code
-    SetFlagAccordingToWatermark
-           changer(EntityFlags::INTERNAL_INTERFACE,1000,Flag::turnOn)
-    // the last argument (turnOn) is not needed
-    mesh.faceList.changeAccordingToFunctor(changer);
-   @endcode
- *  I want to set the flag INTERNAL_INTERFACE to all faces with marker ID =12000
- *  @code
-    SetFlagAccordingToWatermark<std::equal_to<markerID_Type> >
-                            changer(EntityFlags::INTERNAL_INTERFACE,12000,Flag::turnOn)
-    (the last argument is not needed)
-    mesh.faceList.changeAccordingToFunctor(changer);
- *  @endcode
- *
- */
+//!Sets the flag of a mesh entity according to the value of its Marker id.
+/*!
+*  We compare the marker ID with a watermark according to a policy which is a comparison operator
+*
+*   @code
+    bool operator()(markerID_Type const & mId, markerID_Type const & watermark)
+*   @endcode
+*
+*  which by default is greater<>  (i.e. returns true if  mId > watermark).
+*  If the comparison is true the given flag is assigned to the entity using a second policy
+*  implemented as a function:
+*
+*  @code
+   flag_Type flagPolicy  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+*  @endcode
+*
+*  passed in the constructor and defaulted to Flag::turnOn
+*
+*  Example:
+*  I want to set the flag INTERNAL_INTERFACE to all faces with marker ID > 1000
+*
+* @code
+   SetFlagAccordingToWatermark
+          changer(EntityFlags::INTERNAL_INTERFACE,1000,Flag::turnOn)
+   // the last argument (turnOn) is not needed
+   mesh.faceList.changeAccordingToFunctor(changer);
+  @endcode
+*  I want to set the flag INTERNAL_INTERFACE to all faces with marker ID =12000
+*  @code
+   SetFlagAccordingToWatermark<std::equal_to<markerID_Type> >
+                           changer(EntityFlags::INTERNAL_INTERFACE,12000,Flag::turnOn)
+   (the last argument is not needed)
+   mesh.faceList.changeAccordingToFunctor(changer);
+*  @endcode
+*
+*/
 template<typename Policy=std::greater<markerID_Type> >
-    class SetFlagAccordingToWatermark{
-    public:
-    typedef flag_Type (*flagPolicy_ptr)(flag_Type const &, flag_Type const &);
+class SetFlagAccordingToWatermark
+{
+public:
+    typedef flag_Type (*flagPolicy_ptr)( flag_Type const &, flag_Type const & );
+
     //! The constructor
     /*!
      * @param flagToSet the flag we want to set if the condition is satisfied
@@ -244,22 +251,27 @@ template<typename Policy=std::greater<markerID_Type> >
      * turns on the bit-flags defined in flagToSet. Other possibilities are turnOff or
      * change (the names are self explanatory)
      */
-    SetFlagAccordingToWatermark(const flag_Type & flagToSet, const markerID_Type & watermark,
-                                const flagPolicy_ptr & flagPolicy=&Flag::turnOn ):
-        M_flagToSet(flagToSet),M_watermark(watermark), M_policy(Policy()),M_flagPolicy(flagPolicy)
-    {
-    }
+    SetFlagAccordingToWatermark( const flag_Type & flagToSet,
+                                 const markerID_Type & watermark,
+                                 const flagPolicy_ptr & flagPolicy = &Flag::turnOn ):
+        M_flagToSet( flagToSet ),
+        M_watermark( watermark ),
+        M_policy( Policy() ),
+        M_flagPolicy( flagPolicy ) {}
+
     //! The operator doing the job
-     /*!
-      * It is the operator that does the check on a given mesh entity
-      * @param e The entity to change (possibly) using the given policy
-      */
+    /*!
+     * It is the operator that does the check on a given mesh entity
+     * @param e The entity to change (possibly) using the given policy
+     */
     template<typename MeshEntity>
-       void operator()(MeshEntity & e)const
+    void operator()( MeshEntity & e ) const
     {
-        if ( M_policy(e.markerID(),M_watermark) ) e.replaceFlag(M_flagPolicy(e.flag(),M_flagToSet));
+        if ( M_policy(e.markerID(),M_watermark) )
+	    e.replaceFlag( M_flagPolicy( e.flag(), M_flagToSet ) );
     }
-    private:
+
+private:
     const flag_Type M_flagToSet;
     const markerID_Type M_watermark;
     const Policy M_policy;
@@ -287,32 +299,35 @@ template<typename Policy=std::greater<markerID_Type> >
    @code
  *
  */
-
-class SetFlagAccordingToWatermarks{
+class SetFlagAccordingToWatermarks
+{
 public:
-    typedef flag_Type (*flagPolicy_ptr)(flag_Type const &, flag_Type const &);
+    typedef flag_Type (*flagPolicy_ptr)( flag_Type const &, flag_Type const & );
+    
     //! The constructor
-     /*!
-      * @param flagToSet the flag we want to set if the condition is satisfied
-      * @param watermarks The std::vector of watermarks to be used in the comparison
-      * @param flagPolicy The policy we want to use. Default is turnOn, which
-      * turns on the bit-flags defined in flagToSet. Other possibilities are turnOff or
-      * change (the names are self explanatory)
-      */
-      SetFlagAccordingToWatermarks(const flag_Type & flagToSet,
-                                 const std::vector<markerID_Type> & watermarks,
-                                 const flagPolicy_ptr & flagPolicy=&Flag::turnOn );
+    /*!
+     * @param flagToSet the flag we want to set if the condition is satisfied
+     * @param watermarks The std::vector of watermarks to be used in the comparison
+     * @param flagPolicy The policy we want to use. Default is turnOn, which
+     * turns on the bit-flags defined in flagToSet. Other possibilities are turnOff or
+     * change (the names are self explanatory)
+     */
+    SetFlagAccordingToWatermarks( const flag_Type & flagToSet,
+                                  const std::vector<markerID_Type> & watermarks,
+                                  const flagPolicy_ptr & flagPolicy=&Flag::turnOn );
+
     //! The operator doing the job
     /*!
      * It is the operator that does the check on a given mesh entity
      * @param e The entity to change (possibly) using the given policy
      */
-      template<typename MeshEntity>
-      void operator()(MeshEntity & e)const
-      {
-          if (std::binary_search(M_watermarks.begin(),M_watermarks.end(),e.markerID() ) )
-              e.replaceFlag( M_flagPolicy(e.flag(),M_flagToSet) );
-      }
+    template<typename MeshEntity>
+    void operator()( MeshEntity & e ) const
+    {
+        if( std::binary_search( M_watermarks.begin(), M_watermarks.end(), e.markerID() ) )
+            e.replaceFlag( M_flagPolicy( e.flag(), M_flagToSet ) );
+    }
+
 private:
     const flag_Type M_flagToSet;
     std::vector<markerID_Type> M_watermarks;
@@ -340,15 +355,16 @@ private:
  */
 template <typename MeshEntityList>
 void
-ChangeMarkersAccordingToMap(MeshEntityList & entityList,
-                            std::map<UInt, UInt> const& locDof,
-                            UInt const newMarker)
+ChangeMarkersAccordingToMap( MeshEntityList & entityList,
+                             std::map<UInt, UInt> const& locDof,
+                             UInt const newMarker )
 {
     typedef std::map<UInt, UInt>::const_iterator it_type;
-    for (it_type IT=locDof.begin(); IT!=locDof.end(); ++IT)
-        entityList[IT->second].setMarkerID( newMarker );
+    for( it_type it=locDof.begin(); it !=locDof.end(); ++it )
+        entityList[ it->second ].setMarkerID( newMarker );
 }
 /** @}*/
+
 } // Namespace LifeV
 
 #endif /* SELECTMARKER_H */
