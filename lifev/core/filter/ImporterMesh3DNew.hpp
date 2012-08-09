@@ -47,6 +47,19 @@
 namespace LifeV
 {
 
+namespace
+{
+
+// local structure to store a bare info on a face
+template <UInt n>
+struct FaceStore
+{
+    ID points[ n ];
+    markerID_Type bc;
+};
+
+}
+
 //! convertBareMesh - convert a previously read BareMesh in a RegionMesh object
 /*!
   Starting from a BareMesh, this routine generates a fully compliant RegionMesh object
@@ -58,19 +71,22 @@ namespace LifeV
   @param iSelect,
   @return true if everything went fine, false otherwise.
 */
-
-template <typename GeoShape, typename MC>
+template <typename GeoShapeType, typename MCType>
 bool
-convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
-                  RegionMesh<GeoShape, MC>& mesh,
-                  bool                        verbose = false,
-                  InternalEntitySelector      iSelect = InternalEntitySelector() )
+convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
+                  RegionMesh<GeoShapeType, MCType>&  mesh,
+                  bool                       verbose = false,
+                  InternalEntitySelector     iSelect = InternalEntitySelector() )
 {
-    Real x, y, z;
-    UInt p[ GeoShape::S_numVertices ];
+    typedef typename RegionMesh<GeoShapeType, MCType>::point_Type  point_Type;
+    typedef typename RegionMesh<GeoShapeType, MCType>::edge_Type   edge_Type;
+    typedef typename RegionMesh<GeoShapeType, MCType>::face_Type   face_Type;
+    typedef typename RegionMesh<GeoShapeType, MCType>::volume_Type volume_Type;
+    typedef std::vector<FaceStore<face_Type::S_numPoints> > faceStore_Type;
+
+    std::vector<UInt> points( volume_Type::S_numVertices );
 
     UInt done = 0;
-    UInt i;
     UInt numberVertices         ( bareMesh.points.numberOfColumns() ),
          numberBoundaryVertices ( 0 ),
          numberPoints           ( bareMesh.points.numberOfColumns() ),
@@ -79,11 +95,11 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
          numberBoundaryEdges    ( 0 ),
          numberFaces            ( bareMesh.numBoundaryFaces ),
          numberBoundaryFaces    ( 0 ),
-         numberElements         ( bareMesh.elements.numberOfColumns() );
-    UInt numberStoredFaces      ( bareMesh.faces.numberOfColumns() );
+         numberElements         ( bareMesh.elements.numberOfColumns() ),
+         numberStoredFaces      ( bareMesh.faces.numberOfColumns() );
 
-    std::vector<FaceHelp> faceHelp;
-    typename std::vector<FaceHelp>::iterator faceHelpIterator;
+    faceStore_Type faceHelp;
+    typename faceStore_Type::iterator faceHelpIterator;
 
     std::stringstream discardedLog;
     std::ostream& oStr = verbose ? std::cout : discardedLog;
@@ -91,16 +107,16 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
     if ( verbose ) std::cout << "Converting bare mesh" << std::endl;
 
     // Be a little verbose
-    switch ( GeoShape::S_shape )
+    switch ( GeoShapeType::S_shape )
     {
         case HEXA:
-            if ( GeoShape::S_numPoints > 8 ) std::cout << "Quadratic Hexa mesh" << std::endl;
-            else                             std::cout << "Linear Hexa mesh" << std::endl;
+            if     ( GeoShapeType::S_numPoints == 27 ) std::cout << "Quadratic Hexa mesh" << std::endl;
+            else if( GeoShapeType::S_numPoints ==  8 ) std::cout << "Linear Hexa mesh" << std::endl;
             break;
 
         case TETRA:
-            if ( GeoShape::S_numPoints > 4 ) std::cout << "Quadratic Tetra mesh" << std::endl;
-            else                             std::cout << "Linear Tetra Mesh" << std::endl;
+            if     ( GeoShapeType::S_numPoints == 10 ) std::cout << "Quadratic Tetra mesh" << std::endl;
+            else if( GeoShapeType::S_numPoints ==  4 ) std::cout << "Linear Tetra Mesh" << std::endl;
             break;
 
         default:
@@ -143,21 +159,6 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
 
     mesh.setMarkerID           ( bareMesh.regionMarkerID );
 
-    typedef typename RegionMesh<GeoShape, MC>::point_Type  point_Type;
-    typedef typename RegionMesh<GeoShape, MC>::edge_Type   edge_Type;
-    typedef typename RegionMesh<GeoShape, MC>::face_Type   face_Type;
-    typedef typename RegionMesh<GeoShape, MC>::volume_Type volume_Type;
-
-    point_Type  * pointerPoint;
-    edge_Type   * pointerEdge;
-    face_Type   * pointerFace;
-    volume_Type * pointerVolume;
-    // addPoint()/Face()/Edge() returns a reference to the last stored point
-    // I use that information to set all point info, by using a pointer.
-
-    UInt count ( 0 );
-    Int  ibc;
-
     // To account for internal faces
     if ( numberStoredFaces > numberBoundaryFaces )
     {
@@ -166,32 +167,29 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
 
         oStr << "WARNING: The mesh file (apparently) contains "
              << numberStoredFaces - numberBoundaryFaces << " internal faces" << std::endl;
-
     }
 
     // reading vertices
-    for ( i = 0; i < numberVertices; i++ )
+    UInt boundaryPointsCount = 0;
+    for ( UInt i = 0; i < numberVertices; i++ )
     {
-        x = bareMesh.points( 0, i );
-        y = bareMesh.points( 1, i );
-        z = bareMesh.points( 2, i );
-        ibc = bareMesh.pointsMarkers[ i ];
+        Real const & x = bareMesh.points( 0, i );
+        Real const & y = bareMesh.points( 1, i );
+        Real const & z = bareMesh.points( 2, i );
+        markerID_Type ibc = bareMesh.pointsMarkers[ i ];
 
-        bool isOnBoundary ( iSelect(markerID_Type(ibc)) );
+        bool isOnBoundary ( iSelect( ibc ) );
         if ( isOnBoundary )
         {
-            ++count;
-        // Boundary point. Boundary switch set by the mesh method.
+            boundaryPointsCount++;
         }
 
-        pointerPoint = &mesh.addPoint( isOnBoundary, true );
-
+        point_Type* pointerPoint = &mesh.addPoint( isOnBoundary, true );
         pointerPoint->setId( i );
         pointerPoint->x() = x;
         pointerPoint->y() = y;
         pointerPoint->z() = z;
-        pointerPoint->setMarkerID( markerID_Type( ibc ) );
-        pointerPoint->setFlag( EntityFlags::VERTEX );
+        pointerPoint->setMarkerID( ibc );
     }
 
     oStr << "Vertices read " << std::endl;
@@ -199,7 +197,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
          << numberVertices * sizeof( point_Type ) / 1024. / 1024. << " MB" << std::endl;
     done++;
 
-    if ( count != numberBoundaryVertices )
+    if ( boundaryPointsCount != numberBoundaryVertices )
     {
         std::cerr << "Number boundary points inconsistent!" << std::endl;
     }
@@ -207,32 +205,32 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
     oStr << "Reading boundary faces " << std::endl;
 
     // reading boundary faces
-    for ( i = 0; i < numberStoredFaces; i++ )
+    for ( UInt i = 0; i < numberStoredFaces; i++ )
     {
-        for ( UInt j = 0; j < GeoShape::GeoBShape::S_numPoints; j++ )
+        for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
         {
-            p[ j ] = bareMesh.faces( j, i );
+            points[ j ] = bareMesh.faces( j, i );
         }
-        ibc = bareMesh.facesMarkers[ i ];
+        markerID_Type ibc = bareMesh.facesMarkers[ i ];
 
-        bool isOnBoundary ( iSelect( markerID_Type( ibc ) ) );
+        bool isOnBoundary ( iSelect( ibc ) );
         if ( isOnBoundary )
         {
-            pointerFace = &( mesh.addFace( isOnBoundary ) ); // only boundary faces
-            for ( UInt j = 0; j < GeoShape::GeoBShape::S_numPoints; j++ )
+            face_Type* pointerFace = &( mesh.addFace( isOnBoundary ) ); // only boundary faces
+            for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
             {
-                pointerFace->setPoint( j, mesh.point( p[ 0 ] ) );
+                pointerFace->setPoint( j, mesh.point( points[ 0 ] ) );
             }
             pointerFace->setId( mesh.faceList.size() - 1 );
-            pointerFace->setMarkerID( markerID_Type( ibc ) );
+            pointerFace->setMarkerID( ibc );
         }
         else // additional faces
         {
-            for ( UInt j = 0; j < GeoShape::GeoBShape::S_numPoints; j++ )
+            for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
             {
-                faceHelpIterator->i[ j ] = p[ j ];
+                faceHelpIterator->points[ j ] = points[ j ];
             }
-            faceHelpIterator->ibc = ibc;
+            faceHelpIterator->bc = ibc;
             ++faceHelpIterator;
         }
     }
@@ -240,17 +238,18 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
     for ( faceHelpIterator = faceHelp.begin();
           faceHelpIterator != faceHelp.end(); ++faceHelpIterator )
     {
-        for ( UInt j = 0; j < GeoShape::GeoBShape::S_numPoints; j++ )
+        for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
         {
-            p[ j ]  = faceHelpIterator->i[ j ];
+            points[ j ]  = faceHelpIterator->points[ j ];
         }
-        ibc = faceHelpIterator->ibc;
-        pointerFace  = &( mesh.addFace( false ) ); // INTERNAL FACE
+        markerID_Type ibc = faceHelpIterator->bc;
+
+        face_Type* pointerFace = &( mesh.addFace( false ) ); // INTERNAL FACE
         pointerFace->setId( mesh.faceList.size() - 1 );
-        pointerFace->setMarkerID( markerID_Type( ibc ) );
-        for ( UInt j = 0; j < GeoShape::GeoBShape::S_numPoints; j++ )
+        pointerFace->setMarkerID( ibc );
+        for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
         {
-            pointerFace->setPoint( j, mesh.point( p[ j ] ) ); // set face conn.
+            pointerFace->setPoint( j, mesh.point( points[ j ] ) ); // set face conn.
         }
     }
 
@@ -260,39 +259,37 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
 
     oStr << "Reading boundary edges " << std::endl;
 
-    for ( i = 0; i < numberBoundaryEdges; i++ )
+    for ( UInt i = 0; i < numberBoundaryEdges; i++ )
     {
-        for ( UInt j = 0; j < GeoShape::GeoBShape::GeoBShape::S_numPoints; j++ )
-            p[ j ] = bareMesh.edges( j, i );
-        ibc = bareMesh.edgesMarkers[ i ];
-        pointerEdge = &mesh.addEdge( true ); // Only boundary edges.
+        for ( UInt j = 0; j < edge_Type::S_numPoints; j++ )
+            points[ j ] = bareMesh.edges( j, i );
+        markerID_Type ibc = bareMesh.edgesMarkers[ i ];
+        edge_Type* pointerEdge = &mesh.addEdge( true ); // Only boundary edges.
         pointerEdge->setId( i );
         pointerEdge->setMarkerID( markerID_Type( ibc ) );
-        for ( UInt j = 0; j < GeoShape::GeoBShape::GeoBShape::S_numPoints; j++ )
-            pointerEdge->setPoint( j, mesh.point( p[ j ] ) ); // set edge conn.
+        for ( UInt j = 0; j < edge_Type::S_numPoints; j++ )
+            pointerEdge->setPoint( j, mesh.point( points[ j ] ) ); // set edge conn.
     }
     oStr << "Boundary edges read " << std::endl;
     done++;
 
-    count = 0;
     oStr << "Reading volumes " << std::endl;
 
-    for ( i = 0; i < numberElements; i++ )
+    for ( UInt i = 0; i < numberElements; i++ )
     {
-        for ( UInt j = 0; j < GeoShape::S_numPoints; j++ )
-            p[ j ] = bareMesh.elements( j, i );
-        ibc = bareMesh.elementsMarkers[ i ];
+        for ( UInt j = 0; j < volume_Type::S_numPoints; j++ )
+            points[ j ] = bareMesh.elements( j, i );
+        markerID_Type ibc = bareMesh.elementsMarkers[ i ];
 
-        pointerVolume = &mesh.addVolume();
+        volume_Type* pointerVolume = &mesh.addVolume();
         pointerVolume->setId( i );
-        for ( UInt j = 0; j < GeoShape::S_numPoints; j++ )
-            pointerVolume->setPoint( j, mesh.point( p[ j ] ) );
-        pointerVolume->setMarkerID( markerID_Type( ibc ) );
-        count++;
+        for ( UInt j = 0; j < volume_Type::S_numPoints; j++ )
+            pointerVolume->setPoint( j, mesh.point( points[ j ] ) );
+        pointerVolume->setMarkerID( ibc );
     }
-    oStr << "size of the volume storage is " << sizeof( volume_Type ) * count / 1024. / 1024.
+    oStr << "size of the volume storage is " << sizeof( volume_Type ) * numberElements / 1024. / 1024.
          << " MB" << std::endl;
-    oStr << count << " Volume elements read" << std::endl;
+    oStr << numberElements << " Volume elements read" << std::endl;
     done++;
 
     // Test the mesh
@@ -305,7 +302,7 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
     }
 
     // This part is to build a P2 mesh from a P1 geometry
-    if ( GeoShape::S_shape == TETRA && GeoShape::S_numPoints > 4 )
+    if ( GeoShapeType::S_shape == TETRA && GeoShapeType::S_numPoints == 10 )
     {
         MeshUtility::p2MeshFromP1Data( mesh );
     }
@@ -325,7 +322,6 @@ convertBareMesh ( RegionMeshBare<GeoShape> &  bareMesh,
 
     return done == 4 ;
 }// Function convertBareMesh
-
 
 //! readINRIAMeshFile - reads .mesh meshes.
 /*!
