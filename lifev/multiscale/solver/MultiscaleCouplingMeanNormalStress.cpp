@@ -100,7 +100,7 @@ MultiscaleCouplingMeanNormalStress::initializeCouplingVariables()
     Debug( 8220 ) << "MultiscaleCouplingMeanNormalStress::initializeCouplingVariables() \n";
 #endif
 
-    // Compute the flow rate coupling variables on the other models
+    // Compute the flow rate coupling variables on the first M_flowRateInterfaces models
     Real localSum( 0 );
     Real globalSum( 0 );
 
@@ -161,7 +161,7 @@ MultiscaleCouplingMeanNormalStress::exportCouplingResiduals( multiscaleVector_Ty
                 Real myValueStress = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_flags[i] );
                 if ( isModelLeaderProcess( i ) )
                 {
-                    ( *M_localCouplingResiduals )[0] += localCouplingVariables( 0 )[i];
+                    ( *M_localCouplingResiduals )[0]  += localCouplingVariables( 0 )[i];
                     ( *M_localCouplingResiduals )[i+1] = myValueStress - localCouplingVariables( 0 )[M_flowRateInterfaces];
                 }
             }
@@ -172,7 +172,7 @@ MultiscaleCouplingMeanNormalStress::exportCouplingResiduals( multiscaleVector_Ty
                 Real myValueFlowRate = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
                 if ( isModelLeaderProcess( i ) )
                 {
-                    ( *M_localCouplingResiduals )[0] += myValueFlowRate;
+                    ( *M_localCouplingResiduals )[0]  += myValueFlowRate;
                 }
             }
     }
