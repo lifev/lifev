@@ -178,7 +178,7 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
         Real const & z = bareMesh.points( 2, i );
         markerID_Type ibc = bareMesh.pointsMarkers[ i ];
 
-        bool isOnBoundary ( iSelect( ibc ) );
+        bool isOnBoundary = !iSelect( ibc );
         if ( isOnBoundary )
         {
             boundaryPointsCount++;
@@ -213,7 +213,7 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
         }
         markerID_Type ibc = bareMesh.facesMarkers[ i ];
 
-        bool isOnBoundary ( iSelect( ibc ) );
+        bool isOnBoundary = !iSelect( ibc );
         if ( isOnBoundary )
         {
             face_Type* pointerFace = &( mesh.addFace( isOnBoundary ) ); // only boundary faces
