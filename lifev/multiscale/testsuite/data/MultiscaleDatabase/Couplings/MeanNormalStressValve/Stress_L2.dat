@@ -5,13 +5,14 @@
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2011-04-01
+#           Date: 2012-08-07
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: Stress - Lagrange Polynomial Order 4 ################################################
+### COUPLING: MeanNormalStressValve ###############################################################
 ###################################################################################################
 
 [Multiscale]
-couplingName           = Stress_Lagrange4
-timeInterpolationOrder = 4
+couplingName           = Stress_L2
+timeInterpolationOrder = 2
+flowRateInterfaces     = 0

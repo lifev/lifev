@@ -5,13 +5,14 @@
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2011-04-01
+#           Date: 2012-08-07
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: FlowRateStress - Lagrange Polynomial Order 5 ########################################
+### COUPLING: MeanNormalStressValve ###############################################################
 ###################################################################################################
 
 [Multiscale]
-couplingName           = FlowRateStress_Lagrange5
-timeInterpolationOrder = 5
+couplingName           = FlowRate1Stress_L2
+timeInterpolationOrder = 2
+flowRateInterfaces     = 1
