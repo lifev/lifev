@@ -308,4 +308,11 @@ int main( int argc, char** argv )
     
 }
 
+#else /* LIFEV_HAS_ETA */
+
+int main( int argc, char** argv )
+{
+    return (EXIT_SUCCESS );
+}
+
 #endif /* LIFEV_HAS_ETA */
