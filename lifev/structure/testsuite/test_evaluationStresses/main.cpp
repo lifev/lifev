@@ -78,7 +78,7 @@
 
 using namespace LifeV;
 
-int returnValue = EXIT_SUCCESS;
+int returnValue = EXIT_FAILURE;
 
 std::set<UInt> parseList( const std::string& list )
 {
@@ -138,8 +138,10 @@ public:
     {
         run3d();
     }
-    void CheckResult(const Real& dispNorm, const Real& time);
-    void resultChanged(Real time);
+    void CheckResultDisplacement(const Real tensNorm);
+    void CheckResultEigenvalues(const Real tensNorm);
+    void CheckResultTensions(const Real tensNorm);
+    void resultChanged( void );
 //@}
 
 protected:
@@ -442,6 +444,16 @@ Structure::run3d()
 
 	if (verbose ) std::cout << "Analysis Completed!" << std::endl;
 
+    ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+        if ( !tensionData->recoveryVariable().compare("displacement")  )
+          CheckResultDisplacement( solid->principalStresses().norm2()  );
+        else if ( !tensionData->recoveryVariable().compare("eigenvalues") )
+          CheckResultEigenvalues( solid->principalStresses().norm2() );
+        else
+          CheckResultTensions( solid->principalStresses().norm2()  );
+
+    ///////// END OF CHECK
+
 	//Closing files
 	M_exporter->closeFile();	
 	// exporterX->closeFile();
@@ -462,13 +474,29 @@ Structure::run3d()
     //!---------------------------------------------.-----------------------------------------------------
 }
 
-
-void Structure::resultChanged(Real time)
+void Structure::CheckResultDisplacement(const Real tensNorm)
 {
-  std::cout << "Some modifications led to changes in the l2 norm of the solution at time " << time << std::endl;
-  returnValue = EXIT_FAILURE;
+  if( ( (std::fabs(tensNorm-4.67086e6)/4.67086e6) <=1e-5 ) )
+        this->resultChanged( );
 }
 
+void Structure::CheckResultEigenvalues(const Real tensNorm)
+{
+  if( ( (std::fabs(tensNorm-4.67086e6) / 4.67086e6)<=1e-5 ) )
+        this->resultChanged( );
+}
+
+void Structure::CheckResultTensions(const Real tensNorm)
+{
+  if( ( ( std::fabs(tensNorm-4.67086e6) / 4.67086e6) <=1e-5 ) )
+        this->resultChanged( );
+}
+
+void Structure::resultChanged( void )
+{
+  std::cout << "Correct Result after the Analysis" << std::endl;
+  returnValue = EXIT_SUCCESS;
+}
 
 
 int
