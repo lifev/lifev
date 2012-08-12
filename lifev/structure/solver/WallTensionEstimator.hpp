@@ -97,9 +97,6 @@ namespace LifeV
   that are needed to compute the stress tensor are defined in AssemblyElementalStructure. When a new
   type of analysis wants to be performed new methods can be added
 
-
-  ATTENTION: In the case of reconstruction of the tensions, the code works fine in serial but not in parallel.
-  In fact, on big meshes it stops working after some iterations
 */
 
 template <typename Mesh>
