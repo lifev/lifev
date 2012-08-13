@@ -101,6 +101,31 @@ void computeLocalDeformationGradient (const VectorElemental& uk_loc, std::vector
       }
 }
 
+void computeLocalDeformationGradientWithoutIdentity (const VectorElemental& uk_loc, std::vector<Epetra_SerialDenseMatrix>& tensorF, const CurrentFE& fe )
+{
+    // \grad u^k at each quadrature poInt
+    Real s;
+
+    for ( Int k=0; k < static_cast<Int> (fe.nbQuadPt()); k++)
+      {
+	// loop on space coordinates
+	for ( Int icoor = 0; icoor < static_cast<Int> (nDimensions); icoor++ )
+	  {
+	    // loop  on space coordinates
+	    for ( Int jcoor = 0; jcoor < static_cast<Int> (nDimensions); jcoor++ )
+	      {
+		s = 0.0;
+		for (Int i = 0; i < static_cast<Int> (fe.nbFEDof()); i++ )
+		  {
+		    //  \grad u^k at a quadrature poInt 
+		    s += fe.phiDer( i, jcoor, k ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+		  }
+		tensorF[k]( icoor, jcoor ) = s;
+	      }
+	  }
+      }
+}
+
     // The methods for linear elastic model (stiff_strain and stiff_div) are implemented in AssemblyElemental.cpp
 
     //! Methods for St. Venant Kirchhoff model
