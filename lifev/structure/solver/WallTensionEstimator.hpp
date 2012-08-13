@@ -167,7 +167,7 @@ public:
     /*!
       \param NONE FESpace<Mesh, MapEpetra>& copyFESpace 
     */
-    void analyzeTensions( );
+    virtual void analyzeTensions( );
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
@@ -230,6 +230,7 @@ protected:
 
 //! @name Protected methods
 //@{
+  
   //! computeDeformation: This method computes the tensor F given the displacement on the element.
   /*!
     \param NONE
@@ -413,7 +414,7 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
   // M_sigmaX.reset        ( new solutionVect_Type(*M_localMap) );
   // M_sigmaY.reset        ( new solutionVect_Type(*M_localMap) );
   // M_sigmaZ.reset        ( new solutionVect_Type(*M_localMap) );
-  // M_elVecTens.reset     ( new VectorElemental(this->M_FESpace->fe().nbFEDof(), nDimensions) );
+  // M_elVecTens.reset     ( new VectorElemental(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim()) );
 
   M_globalEigen.reset   ( new solutionVect_Type(*M_localMap) );
   M_invariants.resize   ( M_FESpace->fieldDim() + 1 );
@@ -491,7 +492,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 	  (*M_sigma).Scale(0.0);
 
 	  //Extracting the gradient of U on the current DOF
-	  for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
 	    {		    
 	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset); 
 	      Int GIDid = M_displ->blockMap().GID(LIDid); 
@@ -536,7 +537,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 	  orderEigenvalues( M_eigenvaluesR );
 
 	  //Save the eigenvalues in the global vector
-	  for( UInt icoor = 0; icoor < nDimensions; ++icoor )
+	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
 	    {
 	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset); 
 	      Int GIDid = M_displ->blockMap().GID(LIDid); 
@@ -550,8 +551,6 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 
 }
-
-
 
 template <typename Mesh>
 void 
@@ -611,14 +610,14 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
   UInt totalDof = M_FESpace->dof().numTotalDof();
-  VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), nDimensions);
+  VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
 
   //Vectors for the deformation tensor
   std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
   //Copying the displacement field into a vector with repeated map for parallel computations
   solutionVect_Type dRep(*M_displ, Repeated);
 
-  VectorElemental elVecTens(this->M_FESpace->fe().nbFEDof(), nDimensions);
+  VectorElemental elVecTens(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
 
   chrono.start();
 
@@ -637,7 +636,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
 	{
 	  UInt  iloc = M_FESpace->fe().patternFirst( iNode );
 
-	  for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
 	    {
 	      UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
 	      dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
@@ -687,7 +686,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
       reconstructElementaryVector( elVecTens, patchAreaR, i );
 
       //Assembling the local into global vector
-      for ( UInt ic = 0; ic < nDimensions; ++ic )
+      for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
 	  assembleVector(*M_globalEigen, elVecTens, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
     }
   
@@ -800,7 +799,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( void )
 	  (*M_sigma).Scale(0.0);
 
 	  //Extracting the gradient of U on the current DOF
-	  for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
 	    {		    
 	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset); 
 	      Int GIDid = M_displ->blockMap().GID(LIDid); 
@@ -822,7 +821,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( void )
 	  orderEigenvalues( M_eigenvaluesR );
 
 	  //Save the eigenvalues in the global vector
-	  for( UInt icoor = 0; icoor < nDimensions; ++icoor )
+	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
 	    {
 	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset); 
 	      Int GIDid = M_displ->blockMap().GID(LIDid); 
@@ -843,9 +842,9 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
 {
 
   //Creating the local stress tensors
-  VectorElemental elVecSigmaX(this->M_FESpace->fe().nbFEDof(), nDimensions);
-  VectorElemental elVecSigmaY(this->M_FESpace->fe().nbFEDof(), nDimensions);
-  VectorElemental elVecSigmaZ(this->M_FESpace->fe().nbFEDof(), nDimensions);
+  VectorElemental elVecSigmaX(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
+  VectorElemental elVecSigmaY(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
+  VectorElemental elVecSigmaZ(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
 
   LifeChrono chrono;
 
@@ -881,7 +880,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
   UInt totalDof = M_FESpace->dof().numTotalDof();
-  VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), nDimensions);
+  VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
 
   //Vectors for the deformation tensor
   std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
@@ -908,7 +907,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
 	{
 	  UInt  iloc = M_FESpace->fe().patternFirst( iNode );
 
-	  for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
 	    {
 	      UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
 	      dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
@@ -937,15 +936,15 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
 	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
 
 	  //Assembling the local vectors for local tensions Component X
-	  for ( int coor=0; coor < nDimensions; coor++ )
+	  for ( int coor=0; coor < this->M_FESpace->fieldDim(); coor++ )
 	      (elVecSigmaX)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,0);
 
 	  //Assembling the local vectors for local tensions Component Y
-	  for ( int coor=0; coor < nDimensions; coor++ )
+	  for ( int coor=0; coor < this->M_FESpace->fieldDim(); coor++ )
 	      (elVecSigmaY)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,1);
 
 	  //Assembling the local vectors for local tensions Component Z
-	  for ( int coor=0; coor < nDimensions; coor++ )
+	  for ( int coor=0; coor < this->M_FESpace->fieldDim(); coor++ )
 	      (elVecSigmaZ)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,2);
 
 	}
@@ -955,7 +954,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
       reconstructElementaryVector( elVecSigmaZ, patchAreaR, i );
 
       //Assembling the three elemental vector in the three global
-      for ( UInt ic = 0; ic < nDimensions; ++ic )
+      for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
 	{
 	  assembleVector(sigmaX, elVecSigmaX, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
 	  assembleVector(sigmaY, elVecSigmaY, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
