@@ -68,8 +68,6 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#ifdef LIFEV_HAS_ETA
-
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
@@ -307,12 +305,3 @@ int main( int argc, char** argv )
     return ( EXIT_FAILURE );
     
 }
-
-#else /* LIFEV_HAS_ETA */
-
-int main( int argc, char** argv )
-{
-    return (EXIT_SUCCESS );
-}
-
-#endif /* LIFEV_HAS_ETA */
