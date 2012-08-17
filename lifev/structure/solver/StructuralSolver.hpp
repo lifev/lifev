@@ -38,7 +38,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _STRUCTURALSOLVER_H_
 #define _STRUCTURALSOLVER_H_ 1
 
-                                       //#include<boost/scoped_ptr.hpp>
+//#include<boost/scoped_ptr.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
