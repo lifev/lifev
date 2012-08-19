@@ -116,6 +116,7 @@ public:
     //!@name Constructors, Destructor
     //!@{
     FSIMonolithic();
+
     ~FSIMonolithic();
     //!@}
 
@@ -333,25 +334,6 @@ public:
         }
     }
 
-    //!@}
-    //!@name Get Methods
-    //!@{
-
-    //! Returns the wall stress
-    //!@note still not fixed in parallel
-    //     vectorPtr_Type getWS( )
-    //     {
-    //         return M_wss;
-    //     }
-
-    //! returns a boost shared pointer to the preconditioner
-    //prec_raw_type & preconditioner(){return M_prec.preconditioner();}
-
-#ifdef OBSOLETE
-    /** get the shape derivatives vector*/
-    vector_Type getRhsShapeDerivatives(){return *M_rhsShapeDerivatives;}
-#endif
-    //    const boost::shared_ptr<MapEpetra>& monolithicMap() {return M_monolithicMap;}
 
     //!get the total dimension of the FS interface
     UInt dimInterface() const {return nDimensions*M_monolithicMatrix->interface();}
@@ -492,9 +474,6 @@ protected:
     //!
     virtual void setupBlockPrec();
 
-#ifdef OBSOLETE
-    void setOperator(Epetra_Operator& epetraOperator) {M_linearSolver->setOperator(epetraOperator);}
-#endif
 
     //! assembles the solid problem (the matrix and the rhs due to the time derivative)
     /*
@@ -568,9 +547,6 @@ private:
     std::vector<bcName_Type>                          M_BCFluxNames;
     std::vector<UInt>                                 M_fluxOffset;
 
-#ifdef OBSOLETE
-    boost::shared_ptr<vector_Type>                    M_rhsShapeDerivatives;
-#endif
     //@}
 };
 
