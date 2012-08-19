@@ -110,7 +110,7 @@ OneDFSIFluxNonLinear::eigenValuesEigenVectors( const Real& A,
                                                       const UInt& iNode ) const
 {
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6312) << "[OneDFSIModel_Flux_NonLinear]::jacobian_EigenValues_Vectors\n";
+    debugStream(6312) << "[OneDFSIModel_Flux_NonLinear]::jacobian_EigenValues_Vectors\n";
 #endif
 
     Real celerity;

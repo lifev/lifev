@@ -105,7 +105,7 @@ OneDFSIBC::applyBC( const Real& time, const Real& timeStep, const solution_Type&
     (*rhs[1])( iNode ) = bc[1];
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6311) << "[OneDFSIBC::applyBC] on bcSide " << M_bcSide << " imposing [ A, Q ] = [ " << bc[0] << ", " << bc[1] << " ]\n";
+    debugStream(6311) << "[OneDFSIBC::applyBC] on bcSide " << M_bcSide << " imposing [ A, Q ] = [ " << bc[0] << ", " << bc[1] << " ]\n";
 #endif
 }
 
@@ -193,7 +193,7 @@ OneDFSIBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const fl
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6311) << "[OneDFSIBC::computeMatrixAndRHS] to impose variable "
+    debugStream(6311) << "[OneDFSIBC::computeMatrixAndRHS] to impose variable "
     << M_bcType[line] << ", " << line << " line = " << bcMatrix[line][0] << ", " << bcMatrix[line][1] << "\n";
 #endif
 }
