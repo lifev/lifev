@@ -1002,7 +1002,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
     std::ifstream inputFile ( fileName.c_str() );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "Gmsh reading: " << fileName << "\n";
+    debugStream ( 8000 ) << "Gmsh reading: " << fileName << "\n";
 #endif
 
     //    char buffer[256];
@@ -1018,7 +1018,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
     inputFile >> numberNodes;
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "Number of nodes = " << numberNodes;
+    debugStream ( 8000 ) << "Number of nodes = " << numberNodes;
 #endif
 
     // Add Marker to list of Markers
@@ -1030,7 +1030,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
     std::vector<UInt> whichboundary( numberNodes );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "Reading " << numberNodes << " nodes\n";
+    debugStream ( 8000 ) << "Reading " << numberNodes << " nodes\n";
 #endif
 
     std::map<Int,Int> itoii;
@@ -1048,13 +1048,13 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
     inputFile >> buffer;
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "buffer = " << buffer << "\n";
+    debugStream ( 8000 ) << "buffer = " << buffer << "\n";
 #endif
 
     inputFile >> buffer;
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "buffer = " << buffer << "\n";
+    debugStream ( 8000 ) << "buffer = " << buffer << "\n";
 #endif
 
     UInt numberElements;
@@ -1065,7 +1065,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
     typename mesh_Type::volume_Type * pointerVolume = 0;
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "number of elements: " << numberElements << "\n";
+    debugStream ( 8000 ) << "number of elements: " << numberElements << "\n";
 #endif
 
     std::vector<std::vector<int> > e( numberElements );
@@ -1099,7 +1099,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
             np = 0;
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug ( 8000 ) << "Element type unknown " << ne << "\n";
+            debugStream ( 8000 ) << "Element type unknown " << ne << "\n";
 #endif
 
             ASSERT( true, "Elements type unsupported.\n" )
@@ -1156,7 +1156,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
     mesh.setMaxNumGlobalEdges( gt[ 1 ] );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "number of edges= " << gt[ 1 ] << "\n";
+    debugStream ( 8000 ) << "number of edges= " << gt[ 1 ] << "\n";
 #endif
 
     // Only Boundary Faces
@@ -1168,14 +1168,14 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
     mesh.setMaxNumGlobalFaces( n_faces_total );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "number of faces = " << n_faces_boundary << "\n";
+    debugStream ( 8000 ) << "number of faces = " << n_faces_boundary << "\n";
 #endif
 
     mesh.setMaxNumVolumes( n_volumes, true );
     mesh.setMaxNumGlobalVolumes( n_volumes );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "number of volumes = " << n_volumes << "\n";
+    debugStream ( 8000 ) << "number of volumes = " << n_volumes << "\n";
 #endif
 
     isonboundary.assign( numberNodes, false );
@@ -1207,10 +1207,10 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
     mesh.setNumBPoints  ( mesh.numBVertices() );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug ( 8000 ) << "number of points : "            << mesh.numPoints() << "\n";
-    Debug ( 8000 ) << "number of boundary points : "   << mesh.numBPoints() << "\n";
-    Debug ( 8000 ) << "number of vertices : "          << mesh.numVertices() << "\n";
-    Debug ( 8000 ) << "number of boundary vertices : " << mesh.numBVertices() << "\n";
+    debugStream ( 8000 ) << "number of points : "            << mesh.numPoints() << "\n";
+    debugStream ( 8000 ) << "number of boundary points : "   << mesh.numBPoints() << "\n";
+    debugStream ( 8000 ) << "number of vertices : "          << mesh.numVertices() << "\n";
+    debugStream ( 8000 ) << "number of boundary vertices : " << mesh.numBVertices() << "\n";
 #endif
 
     for ( UInt i = 0; i < numberNodes; ++i )

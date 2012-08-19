@@ -614,10 +614,10 @@ FSIOperator::initialize( fluidPtr_Type::value_type::function_Type const& u0,
                          solidPtr_Type::value_type::Function const& w0,
                          fluidPtr_Type::value_type::function_Type const& /*df0*/ )
 {
-    Debug( 6220 ) << "FSI:: solid init \n";
+    debugStream( 6220 ) << "FSI:: solid init \n";
     if (this->isSolid())
         solid().initialize(d0, w0, w0);
-    Debug( 6220 ) << "FSI:: fluid init \n";
+    debugStream( 6220 ) << "FSI:: fluid init \n";
     if (this->isFluid())
         fluid().initialize(u0, p0);
 }

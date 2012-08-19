@@ -355,14 +355,14 @@ void DebugStream::detachAll()
 
 #ifndef NDEBUG_OLD
 DebugStream
-Debug( int area, DebugStream::stprintf func )
+debugStream( int area, DebugStream::stprintf func )
 {
     DebugStream s( area, DEBUG_INFO );
     s.setFlush( func );
     return s;
 }
 
-DebugStream Debug( bool cond, int area, DebugStream::stprintf /*func*/ )
+DebugStream debugStream( bool cond, int area, DebugStream::stprintf /*func*/ )
 {
     if ( cond )
         return DebugStream( area, DEBUG_INFO );
@@ -387,13 +387,13 @@ DebugStream Warning( bool cond, int area )
 
 DebugStream Error( int area )
 {
-    //Debug () << LBacktrace() << "\n";
+    //debugStream () << LBacktrace() << "\n";
     return DebugStream( "ERROR: ", area, DEBUG_ERROR );
 }
 
 DebugStream Error( bool cond, int area )
 {
-    //Debug () << LBacktrace() << "\n";
+    //debugStream () << LBacktrace() << "\n";
     if ( cond )
         return DebugStream( "ERROR: ", area, DEBUG_ERROR );
     else

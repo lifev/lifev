@@ -193,7 +193,7 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::BCInterfaceFunctionParserFi
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile()" << "\n";
+    debugStream( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile()" << "\n";
 #endif
 
 }
@@ -207,7 +207,7 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::loadData( DataType data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterfaceFunctionFile::loadData            fileName: " << data.baseString() << "\n";
+    debugStream( 5022 ) << "BCInterfaceFunctionFile::loadData            fileName: " << data.baseString() << "\n";
 #endif
 
     std::vector< std::string > stringsVector;
@@ -241,7 +241,7 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::loadData( DataType data )
     for ( UInt j(0); j < variablesNumber; ++j )
         output << scale[j] << "  ";
 
-    Debug( 5022 ) << output.str() << "\n";
+    debugStream( 5022 ) << output.str() << "\n";
 #endif
 
     //Load loop flag
@@ -271,7 +271,7 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::loadData( DataType data )
             output << " " << M_data[ M_variables[j] ][i];
         output << "\n";
     }
-    Debug( 5022 ) << output.str();
+    debugStream( 5022 ) << output.str();
 #endif
 
     //Initialize iterator
@@ -290,7 +290,7 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::loadData( DataType data )
     functionParser_Type::setData( data );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "                                             function: " << data.baseString() << "\n";
+    debugStream( 5022 ) << "                                             function: " << data.baseString() << "\n";
 #endif
 
 }
@@ -307,7 +307,7 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::dataInterpolation()
         X -= ( std::ceil( X / M_data[M_variables[0]].back() ) - 1 ) * M_data[M_variables[0]].back();
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "                                                    variable: " << X << "\n";
+    debugStream( 5022 ) << "                                                    variable: " << X << "\n";
 #endif
 
     //Move Iterator
@@ -315,9 +315,9 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::dataInterpolation()
     {
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5022 ) << "                                       iterator  position   : " << static_cast<Real> ( M_dataIterator - M_data[ M_variables[0] ].begin() ) << "\n";
-        Debug( 5022 ) << "                                       variable (position)  : " << *M_dataIterator << "\n";
-        Debug( 5022 ) << "                                       variable (position+1): " << *(M_dataIterator+1) << "\n";
+        debugStream( 5022 ) << "                                       iterator  position   : " << static_cast<Real> ( M_dataIterator - M_data[ M_variables[0] ].begin() ) << "\n";
+        debugStream( 5022 ) << "                                       variable (position)  : " << *M_dataIterator << "\n";
+        debugStream( 5022 ) << "                                       variable (position+1): " << *(M_dataIterator+1) << "\n";
 #endif
 
         if ( X >= *M_dataIterator && X <= *( M_dataIterator + 1 ) )
@@ -352,7 +352,7 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::dataInterpolation()
         functionParser_Type::M_parser->setVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";
+        debugStream( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";
 #endif
     }
 }

@@ -50,7 +50,7 @@ PreconditionerAztecOO::PreconditionerAztecOO() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "PreconditionerAztecOO::PreconditionerAztecOO() \n";
+    debugStream( 7100 ) << "PreconditionerAztecOO::PreconditionerAztecOO() \n";
 #endif
 
 }
@@ -64,7 +64,7 @@ PreconditionerAztecOO::buildPreconditioner( operator_type& matrix )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "PreconditionerAztecOO::buildPreconditioner( Operator ) \n";
+    debugStream( 7100 ) << "PreconditionerAztecOO::buildPreconditioner( Operator ) \n";
 #endif
 
     if ( this->M_preconditionerCreated )
@@ -88,7 +88,7 @@ PreconditionerAztecOO::resetPreconditioner()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "PreconditionerAztecOO::precReset() \n";
+    debugStream( 7100 ) << "PreconditionerAztecOO::precReset() \n";
 #endif
 
     M_solver->solver().SetAztecOption( AZ_keep_info, 0 );
@@ -173,7 +173,7 @@ PreconditionerAztecOO::condest()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "PreconditionerAztecOO::Condest() \n";
+    debugStream( 7100 ) << "PreconditionerAztecOO::Condest() \n";
 #endif
 
     return M_solver->solver().Condest();
@@ -188,7 +188,7 @@ PreconditionerAztecOO::setDataFromGetPot( const GetPot&      dataFile,
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "PreconditionerAztecOO::setDataFromGetPot(dataFile, section) \n";
+    debugStream( 7100 ) << "PreconditionerAztecOO::setDataFromGetPot(dataFile, section) \n";
 #endif
 
     createParametersList( M_list, dataFile, section, "AztecOO" );
@@ -203,7 +203,7 @@ PreconditionerAztecOO::preconditioner()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "PreconditionerAztecOO::getPrec() \n";
+    debugStream( 7100 ) << "PreconditionerAztecOO::getPrec() \n";
 #endif
 
     if ( this->M_preconditionerCreated )
@@ -217,7 +217,7 @@ PreconditionerAztecOO::preconditionerPtr()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "PreconditionerAztecOO::getPrec() \n";
+    debugStream( 7100 ) << "PreconditionerAztecOO::getPrec() \n";
 #endif
 
     boost::shared_ptr<Epetra_RowMatrix> prec;

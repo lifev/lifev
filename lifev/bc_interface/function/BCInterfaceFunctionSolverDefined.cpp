@@ -57,7 +57,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::BCInterfaceFunctionSolverDefine
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
+    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
 #endif
 
 }
@@ -70,7 +70,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::exportData( BCInterfaceData3D& 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::exportData" << "\n";
+    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::exportData" << "\n";
 #endif
 
     data.setName( M_name );
@@ -85,7 +85,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::updatePhysicalSolverVariables" << "\n";
+    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::updatePhysicalSolverVariables" << "\n";
 #endif
 
     switch ( M_FSIFunction )
@@ -161,7 +161,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::setData( const BCInterfaceData3
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::setData" << "\n";
+    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::setData" << "\n";
 #endif
 
     //Set mapFunction
@@ -217,7 +217,7 @@ BCInterfaceFunctionSolverDefined< OneDFSISolver >::BCInterfaceFunctionSolverDefi
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
+    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
 #endif
 
 }
@@ -268,7 +268,7 @@ BCInterfaceFunctionSolverDefined< OneDFSISolver >::setData( const BCInterfaceDat
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::setData( data )" << "\n";
+    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::setData( data )" << "\n";
 #endif
 
     //Set mapFunction
