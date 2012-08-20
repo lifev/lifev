@@ -113,7 +113,7 @@ AztecooOperator::doSetParameterList()
 }
 
 void
-AztecooOperator::doDestroyPreconditioner()
+AztecooOperator::doResetSolver()
 {
     if( M_linSolver ) M_linSolver->DestroyPreconditioner();
 }

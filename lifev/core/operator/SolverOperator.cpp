@@ -115,10 +115,11 @@ void SolverOperator::setUsedForPreconditioning( const bool& enable )
 	M_printSubiterationCount = enable;
 }
 
-void SolverOperator::destroyPreconditioner()
+void SolverOperator::resetSolver()
 {
-    doDestroyPreconditioner();
+    doResetSolver();
     M_prec.reset();
+    M_oper.reset();
 }
 
 int SolverOperator::Apply( const vector_Type& X, vector_Type& Y ) const
