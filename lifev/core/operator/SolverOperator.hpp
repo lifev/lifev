@@ -95,6 +95,8 @@ public:
 
 	void resetCumulIterations() { M_numCumulIterations = 0; }
 
+	void destroyPreconditioner();
+
 	//@}
 
 	//! @name Mathematical methods
@@ -158,6 +160,7 @@ protected:
 	virtual void doSetOperator() = 0;
 	virtual void doSetPreconditioner() = 0;
 	virtual void doSetParameterList() = 0;
+	virtual void doDestroyPreconditioner() = 0;
 
 	//! The name of the Operator
 	std::string M_name;
