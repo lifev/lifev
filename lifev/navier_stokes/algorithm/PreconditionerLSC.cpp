@@ -113,7 +113,7 @@ void
 PreconditionerLSC::createLSCList( list_Type&         list,
                                   const GetPot&      dataFile,
                                   const std::string& section,
-                                  const std::string& subsection,
+                                  const std::string& /* subsection */,
                                   const bool&        verbose )
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
