@@ -59,6 +59,11 @@ AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
 	M_linSolver->SetRHS( &Xcopy );
 	M_linSolver->SetLHS( &Y );
 
+    M_linSolver->SetUserOperator( M_oper.get() );
+
+    if( M_prec.get() != 0 )
+        M_linSolver->SetPrecOperator( (Epetra_Operator*) M_prec.get() );
+
 	int maxIter( M_pList->sublist( "Trilinos: AztecOO List" ).get<int>( "max_iter" ) );
 	double tol(  M_pList->sublist( "Trilinos: AztecOO List" ).get<double>( "tol" ) );
 
@@ -96,14 +101,13 @@ AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
 void
 AztecooOperator::doSetOperator()
 {
-	M_linSolver->SetUserOperator( M_oper.get() );
+
 }
 
 void
 AztecooOperator::doSetPreconditioner()
 {
-	if( M_prec.get() != 0 )
-		M_linSolver->SetPrecOperator( (Epetra_Operator*) M_prec.get() );
+
 }
 
 void
