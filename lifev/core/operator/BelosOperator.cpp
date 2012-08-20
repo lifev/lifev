@@ -253,8 +253,9 @@ BelosOperator::getPreconditionerSideFromString( const std::string& str )
 }
 
 void
-BelosOperator::doDestroyPreconditioner()
+BelosOperator::doResetSolver()
 {
+    M_solverManager->reset(Belos::Problem);
     M_belosPrec = Teuchos::null;
 }
 

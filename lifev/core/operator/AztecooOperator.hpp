@@ -74,7 +74,7 @@ protected:
 	virtual void doSetOperator();
 	virtual void doSetPreconditioner();
 	virtual void doSetParameterList();
-	virtual void doDestroyPreconditioner();
+	virtual void doResetSolver();
 
 	SolverType_ptr M_linSolver;
 };

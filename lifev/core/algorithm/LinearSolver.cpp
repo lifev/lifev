@@ -119,7 +119,7 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
         return -1;
     }
 
-    // Setup the Solver Operator?? Really here??
+    // Setup the Solver Operator
     setupSolverOperator();
 
     // Reset status informations
@@ -183,18 +183,14 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
     if( M_quitOnFailure && failure )
         exit( -1 );
 
+    // Reset the solver to free the internal pointers
+    M_solverOperator->resetSolver();
+
     // If the number of iterations reaches the threshold of maxIterForReuse
     // we reset the preconditioners to force to solver to recompute it next
     // time
     if( numIters > M_maxItersForReuse )
         resetPreconditioner();
-
-    // <!-- TO BE RECODED IF POSSIBLE
-    // AztecOO and Belos contain pointers
-    // to some operators.
-    // ML is crashing for this reason.
-    //M_solverOperator.reset();
-    // -->
 
     return numIters;
 }
@@ -347,9 +343,13 @@ LinearSolver::setupSolverOperator()
 
     // Set the preconditioner operator in the SolverOperator object
     if( M_preconditioner )
+    {
     	M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
+    }
     else
+    {
     	M_solverOperator->setPreconditioner( M_preconditionerOperator );
+    }
 
     // Set the operator in the SolverOperator object
     M_solverOperator->setOperator( M_operator );
@@ -399,8 +399,7 @@ LinearSolver::setRightHandSide( const vectorPtr_Type rhsPtr )
 void
 LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
 {
-    M_solverOperator.reset();
-    if( M_solverOperator ) M_solverOperator->destroyPreconditioner();
+    if( M_solverOperator ) M_solverOperator->resetSolver();
 
     // If a preconditioner operator exists it must be deleted
 	M_preconditionerOperator.reset();
@@ -411,8 +410,7 @@ LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
 void
 LinearSolver::setPreconditioner( operatorPtr_Type preconditionerPtr )
 {
-    M_solverOperator.reset();
-    if( M_solverOperator ) M_solverOperator->destroyPreconditioner();
+    if( M_solverOperator ) M_solverOperator->resetSolver();
 
 	// If a LifeV::Preconditioner exists it must be deleted
 	M_preconditioner.reset();
