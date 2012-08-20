@@ -355,11 +355,23 @@ void DebugStream::detachAll()
 
 #ifndef NDEBUG_OLD
 DebugStream
+Debug( int area, DebugStream::stprintf func )
+{
+    return debugStream( area, func );
+}
+
+DebugStream
 debugStream( int area, DebugStream::stprintf func )
 {
     DebugStream s( area, DEBUG_INFO );
     s.setFlush( func );
     return s;
+}
+
+DebugStream
+Debug( bool cond, int area, DebugStream::stprintf func )
+{
+    return debugStream( cond, area, func );
 }
 
 DebugStream debugStream( bool cond, int area, DebugStream::stprintf /*func*/ )
