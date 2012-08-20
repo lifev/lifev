@@ -319,12 +319,9 @@ LinearSolver::showMe( std::ostream& output ) const
 void
 LinearSolver::setupSolverOperator()
 {
-    // If a SolverOperator already exists we simply clean it!
+    // Creation of a solver if there exists any
     if( !M_solverOperator )
     {
-        //M_solverOperator.reset();
-
-
         switch( M_solverType )
         {
             case Belos:
@@ -338,7 +335,6 @@ LinearSolver::setupSolverOperator()
                 exit( 1 );
                 break;
         }
-
     }
 
     // Set the preconditioner operator in the SolverOperator object
@@ -399,10 +395,8 @@ LinearSolver::setRightHandSide( const vectorPtr_Type rhsPtr )
 void
 LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
 {
-    if( M_solverOperator ) M_solverOperator->resetSolver();
-
     // If a preconditioner operator exists it must be deleted
-	M_preconditionerOperator.reset();
+    M_preconditionerOperator.reset();
 
     M_preconditioner = preconditionerPtr;
 }
@@ -410,12 +404,10 @@ LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
 void
 LinearSolver::setPreconditioner( operatorPtr_Type preconditionerPtr )
 {
-    if( M_solverOperator ) M_solverOperator->resetSolver();
+    // If a LifeV::Preconditioner exists it must be deleted
+    M_preconditioner.reset();
 
-	// If a LifeV::Preconditioner exists it must be deleted
-	M_preconditioner.reset();
-
-	M_preconditionerOperator = preconditionerPtr;
+    M_preconditionerOperator = preconditionerPtr;
 }
 
 void
