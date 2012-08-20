@@ -37,6 +37,10 @@
 
 #include <lifev/core/algorithm/PreconditionerComposition.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 // <--Check for necessity
 #include <Ifpack_config.h>
 #include <Ifpack.h>
@@ -46,6 +50,10 @@
 #include <Ifpack_Amesos.h>
 #include <Ifpack_ILU.h>
 // -->
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV {
 
@@ -82,7 +90,7 @@ PreconditionerComposition::~PreconditionerComposition()
 void
 PreconditionerComposition::resetPreconditioner()
 {
-    M_prec.reset();
+    M_prec.reset( new prec_Type( M_comm ) );
     M_precBaseOperators.clear();
     this->M_preconditionerCreated = false;
 }
@@ -181,7 +189,7 @@ PreconditionerComposition::numOperators() const
 // Protected Methods
 // ===================================================
 int
-PreconditionerComposition::pushBack( matrixPtr_Type& A,
+PreconditionerComposition::pushBack( matrixPtr_Type A,
                                      const bool useInverse,
                                      const bool useTranspose )
 {
@@ -192,7 +200,7 @@ PreconditionerComposition::pushBack( matrixPtr_Type& A,
 }
 
 int
-PreconditionerComposition::pushBack( matrixPtr_Type& A,
+PreconditionerComposition::pushBack( matrixPtr_Type A,
                                      superPtr_Type& preconditionerPtr,
                                      const bool useInverse,
                                      const bool useTranspose )
@@ -201,49 +209,9 @@ PreconditionerComposition::pushBack( matrixPtr_Type& A,
     M_precBaseOperators.push_back( A );
     preconditionerPtr->buildPreconditioner( A );
     operatorPtr_Type oper( preconditionerPtr->preconditionerPtr() );
-    //std::cout << "[DEBUG] Number of pointers which share the operator: " << oper.use_count() << std::endl;
     M_prec->push_back( oper,useInverse, useTranspose );
 
     return EXIT_SUCCESS;
 }
-
-int
-PreconditionerComposition::pushBack( operator_Type& A,
-                                     const bool useInverse,
-                                     const bool useTranspose )
-{
-    // todo to be implemented
-    std::cout << "[DEBUG] pushBack() operator version" << std::endl;
-    std::cout << "[DEBUG] NOT IMPLEMENTED" << std::endl;
-    //M_operators.push_back(A);
-
-    return EXIT_SUCCESS;
-}
-
-int
-PreconditionerComposition::replace( operator_Type& A,
-                                    const UInt index,
-                                    const bool useInverse,
-                                    const bool useTranspose )
-{
-    //ASSERT( index <= M_operators.size(), "ComposedPreconditioner::replace: index too large" );
-    //M_operators[index] = A;
-    //M_prec->replace( index, useInverse, useTranspose );
-
-    return EXIT_SUCCESS;
-}
-
-int
-PreconditionerComposition::initializeOperator()
-{
-    //if ( !isPreconditionerSet() )
-    //{
-        //std::cout << "[DEBUG] PreconditionerComposition::initializeOperator() called" << std::endl;
-        M_prec.reset( new prec_Type( M_comm ) );
-        M_precBaseOperators.clear();
-    //}
-    return EXIT_SUCCESS;
-}
-
 
 } // Namespace LifeV

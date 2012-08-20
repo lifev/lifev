@@ -40,7 +40,17 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <Teuchos_ParameterList.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/algorithm/ComposedOperator.hpp>
@@ -194,29 +204,15 @@ protected:
     //@{
 
     //! Add A to the right of the composition
-    int pushBack( matrixPtr_Type& A,
+    int pushBack( matrixPtr_Type A,
                   const bool useInverse   = false,
                   const bool useTranspose = false );
 
     //! Use a preconditioner to build the inverse of A and add it to the right of the composition
-    int pushBack( matrixPtr_Type& A,
+    int pushBack( matrixPtr_Type A,
                   superPtr_Type& preconditioner,
                   const bool useInverse   = false,
                   const bool useTranspose = false );
-
-    //! Use a preconditioner to build the inverse of A and add it to the right of the composition
-    int pushBack( operator_Type& A,
-                  const bool useInverse   = false,
-                  const bool useTranspose = false );
-
-    //! Replace the operators at position i by A
-    int replace( operator_Type& A,
-                 const UInt index,
-                 const bool useInverse   = false,
-                 const bool useTranspose = false );
-
-    //! If no operator exists (null pointer), build a new one
-    int initializeOperator();
 
     //@}
 
@@ -224,7 +220,7 @@ protected:
 
 private:
     precPtr_Type                   M_prec;
-    std::vector<operator_type>     M_precBaseOperators;
+    std::vector< matrixPtr_Type >  M_precBaseOperators;
 };
 
 } // Namespace LifeV
