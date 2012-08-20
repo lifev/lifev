@@ -168,6 +168,9 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     bool verbose( false );
     if ( M_comm->MyPID() == 0 ) verbose = true;
 
+    // Make sure that the preconditioner is reset
+    this->resetPreconditioner();
+
     std::vector<UInt> blockNumRows( 2, 0 );
     blockNumRows[0] = M_velocityBlockSize;
     blockNumRows[1] = M_pressureBlockSize;

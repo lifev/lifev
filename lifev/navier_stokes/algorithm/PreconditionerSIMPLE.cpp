@@ -119,6 +119,9 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
         exit( 0 );
     }
 
+    // Make sure that the preconditioner is reset
+    this->resetPreconditioner();
+
     bool verbose( false );
     if ( M_comm->MyPID() == 0 ) verbose = true;
 
