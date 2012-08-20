@@ -96,6 +96,7 @@ protected:
 	virtual void doSetOperator();
 	virtual void doSetPreconditioner();
 	virtual void doSetParameterList();
+	virtual void doDestroyPreconditioner();
 	void allocateSolver( const SolverManagerType & solverManagerType );
 	//! The linearProblem
 	LinearProblem_ptr M_linProblem;

@@ -193,7 +193,7 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
     // AztecOO and Belos contain pointers
     // to some operators.
     // ML is crashing for this reason.
-    M_solverOperator.reset();
+    //M_solverOperator.reset();
     // -->
 
     return numIters;
@@ -286,7 +286,9 @@ void
 LinearSolver::resetPreconditioner()
 {
     if( M_preconditioner )
+    {
         M_preconditioner->resetPreconditioner();
+    }
 }
 
 bool
@@ -322,33 +324,35 @@ void
 LinearSolver::setupSolverOperator()
 {
     // If a SolverOperator already exists we simply clean it!
-    if( M_solverOperator )
+    if( !M_solverOperator )
     {
-        M_solverOperator.reset();
-    }
+        //M_solverOperator.reset();
 
-    switch( M_solverType )
-    {
-        case Belos:
-        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
-            break;
-        case AztecOO:
-        	M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "AztecOO" ) );
-            break;
-        default:
-            M_displayer->leaderPrint( "SLV-  ERROR: The type of solver is not recognized!\n" );
-        	exit( 1 );
-        	break;
-    }
 
-    // Set the operator in the SolverOperator object
-    M_solverOperator->setOperator( M_operator );
+        switch( M_solverType )
+        {
+            case Belos:
+                M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
+                break;
+            case AztecOO:
+                M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "AztecOO" ) );
+                break;
+            default:
+                M_displayer->leaderPrint( "SLV-  ERROR: The type of solver is not recognized!\n" );
+                exit( 1 );
+                break;
+        }
+
+    }
 
     // Set the preconditioner operator in the SolverOperator object
     if( M_preconditioner )
     	M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
     else
     	M_solverOperator->setPreconditioner( M_preconditionerOperator );
+
+    // Set the operator in the SolverOperator object
+    M_solverOperator->setOperator( M_operator );
 
     // Set the tolerance if it has been set
     if( M_tolerance > 0 )
@@ -395,7 +399,10 @@ LinearSolver::setRightHandSide( const vectorPtr_Type rhsPtr )
 void
 LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
 {
-	// If a preconditioner operator exists it must be deleted
+    M_solverOperator.reset();
+    if( M_solverOperator ) M_solverOperator->destroyPreconditioner();
+
+    // If a preconditioner operator exists it must be deleted
 	M_preconditionerOperator.reset();
 
     M_preconditioner = preconditionerPtr;
@@ -404,7 +411,8 @@ LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
 void
 LinearSolver::setPreconditioner( operatorPtr_Type preconditionerPtr )
 {
-	// Does the solverOperator exists?
+    M_solverOperator.reset();
+    if( M_solverOperator ) M_solverOperator->destroyPreconditioner();
 
 	// If a LifeV::Preconditioner exists it must be deleted
 	M_preconditioner.reset();

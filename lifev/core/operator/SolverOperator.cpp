@@ -115,6 +115,12 @@ void SolverOperator::setUsedForPreconditioning( const bool& enable )
 	M_printSubiterationCount = enable;
 }
 
+void SolverOperator::destroyPreconditioner()
+{
+    doDestroyPreconditioner();
+    M_prec.reset();
+}
+
 int SolverOperator::Apply( const vector_Type& X, vector_Type& Y ) const
 {
 	ASSERT_PRE( X.Map().SameAs( M_oper->OperatorDomainMap() ), "X and domain map do no coincide \n" );

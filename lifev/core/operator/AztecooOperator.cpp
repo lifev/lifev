@@ -112,6 +112,12 @@ AztecooOperator::doSetParameterList()
 	M_linSolver->SetParameters( M_pList->sublist( "Trilinos: AztecOO List" ) );
 }
 
+void
+AztecooOperator::doDestroyPreconditioner()
+{
+    if( M_linSolver ) M_linSolver->DestroyPreconditioner();
+}
+
 } // Namespace Operators
 
 } // Namespace LifeV
