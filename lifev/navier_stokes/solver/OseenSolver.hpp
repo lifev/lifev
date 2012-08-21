@@ -326,18 +326,18 @@ public:
      */
     Real flux( const markerID_Type& flag );
 
-    //! Compute flux on a boundary face with given flag and a given solution
+    //! Compute kinetic energy on a boundary face with a given flag and a given solution
     /*!
-        @param  flag
-        @param  solution
-        @return kinetic energy
+     *  @param flag boundary flag
+     *  @param solution problem solution
+     *  @return kinetic energy
      */
     Real kineticEnergy( const markerID_Type& flag, const vector_Type& solution );
 
-    //! Compute flux on a boundary face with given flag
+    //! Compute the kinetic energy on a boundary face with a given flag
     /*!
-        @param flag
-        @return kinetic energy
+     *  @param flag boundary flag
+     *  @return kinetic energy
      */
     Real kineticEnergy( const markerID_Type& flag );
 
