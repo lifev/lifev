@@ -142,12 +142,29 @@ public:
         return M_blockFirstIndex[index];
     }
 
+    /*!
+       @return Number of blocks
+     */
+    UInt numBlocks() const
+    {
+        return M_blockSize.size();
+    }
+
+    /*!
+       @return Number of blocks
+     */
+    UInt totalSize() const
+    {
+        return M_totalSize;
+    }
+
     //@}
 
 private:
 
     std::vector<UInt> M_blockSize;
     std::vector<UInt> M_blockFirstIndex;
+    UInt              M_totalSize;
 
 };
 

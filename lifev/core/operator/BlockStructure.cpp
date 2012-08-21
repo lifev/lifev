@@ -43,7 +43,8 @@ namespace LifeV {
 BlockStructure::
 BlockStructure( const map_Type& map )
     : M_blockSize( 1, map.map( Unique )->NumGlobalElements() ),
-      M_blockFirstIndex( 1, 0 )
+      M_blockFirstIndex( 1, 0 ),
+      M_totalSize( map.map( Unique )->NumGlobalElements() )
 {}
 
 BlockStructure::
@@ -56,14 +57,14 @@ BlockStructure( const mapVector_Type& mapVector )
 	M_blockSize[0] = mapVector.mapSize( 0 );
 	M_blockFirstIndex[0] = 0;
 
-	UInt totalSize( M_blockSize[0] );
+	M_totalSize = M_blockSize[0];
 
 	for ( UInt i( 1 ); i < mapVector.nbMap(); ++i )
 	{
 		M_blockSize[i] = mapVector.mapSize( i );
-		M_blockFirstIndex[i] = totalSize;
+		M_blockFirstIndex[i] = M_totalSize;
 
-		totalSize += M_blockSize[i];
+		M_totalSize += M_blockSize[i];
 	}
 
 }
@@ -71,7 +72,8 @@ BlockStructure( const mapVector_Type& mapVector )
 BlockStructure::
 BlockStructure( const BlockStructure& blockStructure )
     : M_blockSize( blockStructure.M_blockSize ),
-      M_blockFirstIndex( blockStructure.M_blockFirstIndex )
+      M_blockFirstIndex( blockStructure.M_blockFirstIndex ),
+      M_totalSize( M_totalSize )
 {
 
 }
@@ -88,11 +90,12 @@ setBlockStructure( const std::vector<UInt>& blockSizes )
 
     M_blockFirstIndex.resize( M_blockSize.size() );
 
-    UInt currentSize( 0 );
+    M_totalSize = 0;
+
     for ( UInt i( 0 ); i< M_blockSize.size(); ++i )
     {
-        M_blockFirstIndex[i] = currentSize;
-        currentSize += M_blockSize[i];
+        M_blockFirstIndex[i] = M_totalSize;
+        M_totalSize += M_blockSize[i];
     }
 }
 
@@ -105,12 +108,13 @@ setBlockStructure( const mapVector_Type& mapVector )
     M_blockSize.resize( mapVector.nbMap() );
     M_blockFirstIndex.resize( mapVector.nbMap() );
 
-	UInt totalSize( 0 );
+	M_totalSize = 0;
 
 	for ( UInt i( 0 ); i < mapVector.nbMap(); ++i )
 	{
 		M_blockSize[i] = mapVector.mapSize( i );
-		M_blockFirstIndex[i] = totalSize;
+		M_blockFirstIndex[i] = M_totalSize;
+		M_totalSize += M_blockSize[i];
 	}
 }
 

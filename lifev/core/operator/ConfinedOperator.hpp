@@ -95,6 +95,8 @@ public:
 
     void setStructure( blockStructurePtr_Type blockStructure );
 
+    void setBlockIndex( UInt index );
+
     //@}
 
     //! @name Mathematical methods
@@ -137,7 +139,8 @@ public:
 protected:
 
 	operatorPtr_Type       M_oper;
-	blockStructurePtr_Type M_structure;
+	blockStructurePtr_Type M_blockStructure;
+	UInt                   M_blockIndex;
 
 };
 
