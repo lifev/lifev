@@ -71,20 +71,15 @@ MultiscaleCouplingMeanTotalNormalStress::setupCoupling()
         // Set the number of coupling variables
         M_couplingVariablesNumber = modelsNumber() + 1;
 
-        // Impose flow rate boundary conditions
-        for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i )
+        // Impose flow rate and stress boundary conditions
+        for ( UInt i( 0 ); i < modelsNumber(); ++i )
             if ( myModel( i ) )
             {
                 M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, i ) );
-                multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryFlowRate( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
-            }
-
-        // Impose stress boundary conditions
-        for ( UInt i( M_flowRateInterfaces ); i < modelsNumber(); ++i )
-            if ( myModel( i ) )
-            {
-                M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, M_flowRateInterfaces ) );
-                multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryStress( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+                if ( i < M_flowRateInterfaces )
+                    multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryFlowRate( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+                else
+                    multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryStress( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
             }
     }
 
