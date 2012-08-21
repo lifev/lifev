@@ -221,6 +221,7 @@ protected:
     bool        M_useLumpedPressureMass;
     bool        M_setApBoundaryConditions;
     bool        M_setFpBoundaryConditions;
+    bool        M_setMpBoundaryConditions;
     bool        M_fullFactorization;
 
 private:

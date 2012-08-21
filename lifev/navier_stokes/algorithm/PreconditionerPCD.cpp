@@ -69,6 +69,7 @@ PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     M_useLumpedPressureMass      ( false ),
     M_setApBoundaryConditions    ( false ),
     M_setFpBoundaryConditions    ( false ),
+    M_setMpBoundaryConditions    ( false ),
     M_fullFactorization          ( false )
 {
     M_uFESpace.reset();
@@ -131,6 +132,9 @@ PreconditionerPCD::createPCDList( list_Type&         list,
 
     bool setFpBoundaryConditions = dataFile( ( section + "/" + subsection + "/set_Fp_boundary_conditions" ).data(), false );
     list.set( "set Fp boundary conditions", setFpBoundaryConditions );
+
+    bool setMpBoundaryConditions = dataFile( ( section + "/" + subsection + "/set_Mp_boundary_conditions" ).data(), false );
+    list.set( "set Mp boundary conditions", setMpBoundaryConditions );
 
     bool fullFactorization = dataFile( ( section + "/" + subsection + "/full_factorization" ).data(), false );
     list.set( "full factorization", fullFactorization );
@@ -374,7 +378,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         UInt firstIndex = M_pFESpace->map().map( Unique )->MaxMyGID() + B22.firstRowIndex();
         pAp->diagonalize( firstIndex, 1.0 );
         pFp->diagonalize( firstIndex, 1.0 );
-        //pMp->diagonalize( firstIndex, 1.0 );
+        pMp->diagonalize( firstIndex, 1.0 );
     }
     else if ( M_pressureBoundaryConditions == "dirichlet_to_dirichlet" )
     {
@@ -388,7 +392,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
                     UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id() + B22.firstRowIndex();
                     if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0);
                     if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0);
-                    //pMp->diagonalize( myId, 1.0 );
+                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId, 1.0 );
                 }
             }
         }
@@ -405,7 +409,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
                     UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id() + B22.firstRowIndex();
                     if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0 );
                     if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0 );
-                    //pMp->diagonalize( myId, 1.0 );
+                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId, 1.0 );
                 }
             }
         }
@@ -422,6 +426,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
                     UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id() + B22.firstRowIndex();
                     if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0 );
                     if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0 );
+                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId, 1.0 );
                 }
             }
         }
@@ -475,6 +480,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     if ( verbose ) std::cout << " Pressure BC type = " << M_pressureBoundaryConditions << std::endl;
     if ( ( verbose )&&( M_setApBoundaryConditions ) ) std::cout << " BC imposed on Ap" << std::endl;
     if ( ( verbose )&&( M_setFpBoundaryConditions ) ) std::cout << " BC imposed on Fp" << std::endl;
+    if ( ( verbose )&&( M_setMpBoundaryConditions ) ) std::cout << " BC imposed on Mp" << std::endl;
 
     if ( verbose ) std::cout << " Schur block (a)... ";
     timer.start();
@@ -612,6 +618,7 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
     M_useLumpedPressureMass            = this->M_list.get( "use lumped pressure mass", false );
     M_setApBoundaryConditions          = this->M_list.get( "set Ap boundary conditions", false );
     M_setFpBoundaryConditions          = this->M_list.get( "set Fp boundary conditions", false );
+    M_setMpBoundaryConditions          = this->M_list.get( "set Mp boundary conditions", false );
     M_fullFactorization                = this->M_list.get( "full factorization", false );
 }
 
