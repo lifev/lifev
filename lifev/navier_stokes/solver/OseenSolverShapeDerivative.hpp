@@ -276,6 +276,22 @@ public:
      */
     Real getLinearPressure( const markerID_Type& flag );
 
+    //! Compute the derivative of the kinetic energy on a boundary face with given flag
+    /*!
+     *  @param flag boundary flag
+     *  @return derivative of the kinetic energy
+     */
+    Real linearKineticEnergy( const markerID_Type& flag );
+
+    //! Compute the derivative of the kinetic energy on a boundary face with a given flag and a given solution
+    /*!
+     *  @param flag boundary flag
+     *  @param solution problem solution
+     *  @param linearSolution linear problem solution
+     *  @return derivative of the kinetic energy
+     */
+    Real linearKineticEnergy( const markerID_Type& flag, const vector_Type& solution, const vector_Type& linearSolution );
+
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary.
     /*!
         @param Flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
@@ -453,6 +469,28 @@ Real
 OseenSolverShapeDerivative<MeshType, SolverType>::getLinearPressure( const markerID_Type& flag )
 {
     return pressure( flag, M_linearSolution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearKineticEnergy( const markerID_Type& flag )
+{
+    return linearKineticEnergy( flag, *this->M_solution, M_linearSolution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearKineticEnergy( const markerID_Type& flag, const vector_Type& solution, const vector_Type& linearSolution )
+{
+    vector_Type velocityAndPressure( solution, Repeated );
+    vector_Type velocity( this->M_velocityFESpace.map(), Repeated );
+    velocity.subset( velocityAndPressure );
+
+    vector_Type linearVelocityAndPressure( linearSolution, Repeated );
+    vector_Type linearVelocity( this->M_velocityFESpace.map(), Repeated );
+    linearVelocity.subset( linearVelocityAndPressure );
+
+    return this->M_postProcessing->kineticEnergyDerivative( velocity, linearVelocity, this->M_oseenData->density(), flag );
 }
 
 template<typename MeshType, typename SolverType>
