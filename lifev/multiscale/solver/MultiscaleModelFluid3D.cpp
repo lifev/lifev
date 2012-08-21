@@ -394,8 +394,7 @@ MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solv
 Real
 MultiscaleModelFluid3D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
-    // TODO FIX THIS: FOR NOW IT IS APPROXIMATED WITH THE DELTASTRESS
-    return boundaryDeltaStress( flag, solveLinearSystem );
+    return boundaryDeltaStress( flag, solveLinearSystem ) - M_fluid->linearKineticEnergy( flag );
 }
 
 // ===================================================
