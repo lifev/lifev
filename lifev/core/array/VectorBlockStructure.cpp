@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Implementation file for BlockStructure
+    @brief Implementation file for VectorBlockStructure
 
     @author Gwenol Grandperrin <gwenol.grandperrin@gmail.com>
     @date 21-08-2012

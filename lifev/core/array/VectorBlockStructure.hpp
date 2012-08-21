@@ -75,6 +75,9 @@ public:
     //! @name Constructor & Destructor
     //@{
 
+    //! Default constructor
+    VectorBlockStructure();
+
     //! Constructor with the monolithic map
     VectorBlockStructure( const map_Type& map );
 
@@ -170,4 +173,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* _VECTORBLCOKSTRUCTURE_HPP_ */
+#endif /* _VECTORBLOCKSTRUCTURE_HPP_ */
