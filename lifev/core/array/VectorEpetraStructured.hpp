@@ -102,7 +102,7 @@ public:
     //@{
 
     //! Constructor with the monolithic map
-    VectorEpetraStructured( const map_type& map, const mapType_type& mapType = Unique);
+    VectorEpetraStructured( const map_type& map, const mapType_type& mapType = Unique );
 
     //! Construction with a vector of map
     /*!
@@ -110,16 +110,16 @@ public:
       vector. The monolithic map and vectors are also built by concatenating the different maps
       in the vector.
      */
-    VectorEpetraStructured( const mapVector_type& mapVector, const mapType_type& mapType = Unique);
+    VectorEpetraStructured( const mapVector_type& mapVector, const mapType_type& mapType = Unique );
 
     //! Copy constructor
-    VectorEpetraStructured( const VectorEpetraStructured& vector);
+    VectorEpetraStructured( const VectorEpetraStructured& vector );
 
     //! Copy constructor with a specified map type (Repeated/Unique)
-    VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType);
+    VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType );
 
     //! Copy constructor with specified map type and combine mode
-    VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType, const combine_type& combineMode);
+    VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType, const combine_type& combineMode );
 
     //! Destructor
     ~VectorEpetraStructured(){}
@@ -145,7 +145,7 @@ public:
       through this method, nor its map.
       @param The MapVector containing the maps
      */
-    void setBlockStructure( const mapVector_type& mapVector);
+    void setBlockStructure( const mapVector_type& mapVector );
 
     //@}
 
@@ -158,9 +158,9 @@ public:
       @param index Index of the block
       @return size of the index-th block
      */
-    UInt blockSize(const UInt& index) const
+    UInt blockSize( const UInt& index ) const
     {
-        ASSERT( index < M_blockSize.size(), "Invalid block index");
+        ASSERT( index < M_blockSize.size(), "Invalid block index" );
         return M_blockSize[index];
     }
 
@@ -169,14 +169,14 @@ public:
       @param index Index of the block
       @param blockView The blockView to be filled
      */
-    void blockView( const UInt& index, block_type& blockView);
+    void blockView( const UInt& index, block_type& blockView );
 
     //! Getter for the block index
     /*!
       @param index Index of the block
       @return The index-th block
      */
-    block_ptrType block( const UInt& index);
+    block_ptrType block( const UInt& index );
 
     //@}
 

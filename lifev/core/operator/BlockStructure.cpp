@@ -42,7 +42,7 @@ namespace LifeV {
 
 BlockStructure::
 BlockStructure( const map_Type& map )
-    : M_blockSize( 1, map.map(Unique)->NumGlobalElements() ),
+    : M_blockSize( 1, map.map( Unique )->NumGlobalElements() ),
       M_blockFirstIndex( 1, 0 )
 {}
 
@@ -60,7 +60,7 @@ BlockStructure( const mapVector_Type& mapVector )
 
 	for ( UInt i( 1 ); i < mapVector.nbMap(); ++i )
 	{
-		M_blockSize[i] = mapVector.mapSize(i);
+		M_blockSize[i] = mapVector.mapSize( i );
 		M_blockFirstIndex[i] = totalSize;
 
 		totalSize += M_blockSize[i];

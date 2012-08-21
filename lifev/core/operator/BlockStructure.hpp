@@ -38,6 +38,7 @@
 #include <boost/shared_ptr.hpp>
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/MapVector.hpp>
 
 namespace LifeV {
 
