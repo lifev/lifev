@@ -32,7 +32,7 @@
     @date 21-08-2012
  */
 
-#include <lifev/core/operator/BlockStructure.hpp>
+#include <lifev/core/array/VectorBlockStructure.hpp>
 
 namespace LifeV {
 
@@ -40,15 +40,15 @@ namespace LifeV {
 // Constructors & Destructor
 // ===================================================
 
-BlockStructure::
-BlockStructure( const map_Type& map )
+VectorBlockStructure::
+VectorBlockStructure( const map_Type& map )
     : M_blockSize( 1, map.map( Unique )->NumGlobalElements() ),
       M_blockFirstIndex( 1, 0 ),
       M_totalSize( map.map( Unique )->NumGlobalElements() )
 {}
 
-BlockStructure::
-BlockStructure( const mapVector_Type& mapVector )
+VectorBlockStructure::
+VectorBlockStructure( const mapVector_Type& mapVector )
     : M_blockSize( mapVector.nbMap() ),
       M_blockFirstIndex( mapVector.nbMap() )
 {
@@ -69,8 +69,8 @@ BlockStructure( const mapVector_Type& mapVector )
 
 }
 
-BlockStructure::
-BlockStructure( const BlockStructure& blockStructure )
+VectorBlockStructure::
+VectorBlockStructure( const VectorBlockStructure& blockStructure )
     : M_blockSize( blockStructure.M_blockSize ),
       M_blockFirstIndex( blockStructure.M_blockFirstIndex ),
       M_totalSize( M_totalSize )
@@ -83,7 +83,7 @@ BlockStructure( const BlockStructure& blockStructure )
 // ===================================================
 
 void
-BlockStructure::
+VectorBlockStructure::
 setBlockStructure( const std::vector<UInt>& blockSizes )
 {
     M_blockSize = blockSizes;
@@ -100,7 +100,7 @@ setBlockStructure( const std::vector<UInt>& blockSizes )
 }
 
 void
-BlockStructure::
+VectorBlockStructure::
 setBlockStructure( const mapVector_Type& mapVector )
 {
     ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to set the block structure" );

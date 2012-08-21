@@ -26,14 +26,14 @@
 
 /*!
     @file
-    @brief File containing the BlockStructure class
+    @brief File containing the VectorBlockStructure class
 
     @author Gwenol Grandperrin <gwenol.grandperrin@gmail.com>
     @date 21-08-2012
  */
 
-#ifndef _BLOCKSTRUCTURE_HPP_
-#define _BLOCKSTRUCTURE_HPP_ 1
+#ifndef _VECTORBLOCKSTRUCTURE_HPP_
+#define _VECTORBLOCKSTRUCTURE_HPP_ 1
 
 #include <boost/shared_ptr.hpp>
 #include <lifev/core/LifeV.hpp>
@@ -42,12 +42,12 @@
 
 namespace LifeV {
 
-//! BlockStructure - class representing the structure of a vector or of a matrix domain/range
+//! VectorBlockStructure - class representing the structure of a vector
 /*!
   @author Gwenol Grandperrin <gwenol.grandperrin@gmail.com>
 
  */
-class BlockStructure
+class VectorBlockStructure
 {
 public:
 
@@ -76,7 +76,7 @@ public:
     //@{
 
     //! Constructor with the monolithic map
-    BlockStructure( const map_Type& map );
+    VectorBlockStructure( const map_Type& map );
 
     //! Construction with a map
     /*!
@@ -84,13 +84,13 @@ public:
       vector. The monolithic map and vectors are also built by concatenating the different maps
       in the vector.
      */
-    BlockStructure( const mapVector_Type& mapVector );
+    VectorBlockStructure( const mapVector_Type& mapVector );
 
     //! Copy constructor
-    BlockStructure( const BlockStructure& blockStructure );
+    VectorBlockStructure( const VectorBlockStructure& blockStructure );
 
     //! Destructor
-    ~BlockStructure(){}
+    ~VectorBlockStructure(){}
 
     //@}
 
@@ -170,4 +170,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* _BLCOKSTRUCTURE_HPP_ */
+#endif /* _VECTORBLCOKSTRUCTURE_HPP_ */

@@ -51,7 +51,7 @@
 #pragma GCC diagnostic warning "-Wextra"
 
 #include <boost/shared_ptr.hpp>
-#include <lifev/core/operator/BlockStructure.hpp>
+#include <lifev/core/array/VectorBlockStructure.hpp>
 #include <lifev/core/operator/LinearOperator.hpp>
 
 namespace LifeV
@@ -71,7 +71,7 @@ public:
 	//@{
     typedef LinearOperator                         operator_Type;
     typedef boost::shared_ptr<operator_Type>       operatorPtr_Type;
-    typedef BlockStructure                         blockStructure_Type;
+    typedef VectorBlockStructure                         blockStructure_Type;
     typedef boost::shared_ptr<blockStructure_Type> blockStructurePtr_Type;
     typedef Epetra_MultiVector                     vector_Type;
     typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;

@@ -3,6 +3,7 @@ SET(array_HEADERS
   array/MapVector.hpp
   array/VectorSmall.hpp
   array/RNMTemplate.hpp
+  array/VectorBlockStructure.hpp
   array/MatrixEpetraStructuredUtility.hpp
   array/MatrixEpetraStructuredView.hpp
   array/MapEpetra.hpp
@@ -23,6 +24,7 @@ CACHE INTERNAL "")
 SET(array_SOURCES
   array/VectorElemental.cpp
   array/MatrixElemental.cpp
+  array/VectorBlockStructure.cpp
   array/VectorEpetraStructuredView.cpp
   array/VectorEpetra.cpp
   array/MapEpetra.cpp
