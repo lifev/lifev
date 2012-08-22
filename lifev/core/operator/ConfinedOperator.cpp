@@ -115,7 +115,28 @@ ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 {
     ASSERT( M_oper.get() != 0, "ConfinedOperator::ApplyInverse: Error: M_oper pointer is null" );
     ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::ApplyInverse: Error: M_structure is not initialized null" );
-    return M_oper->ApplyInverse( X, Y );
+
+    int numVectors = X.NumVectors();
+    int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
+    int blockSize  = M_blockStructure.blockSize( M_blockIndex );
+    Epetra_MultiVector xtmp( M_oper->OperatorRangeMap(), blockSize );
+    Epetra_MultiVector ytmp( M_oper->OperatorDomainMap(), blockSize );
+
+    // Extract the values from the vector
+    for( int c( 0 ); c < numVectors; ++c )
+        for( int i( 0 ); i < blockSize ; ++i )
+            xtmp[c][i] = X[c][firstIndex + i];
+
+    // Apply the operator
+    int result = M_oper->ApplyInverse( xtmp, ytmp );
+
+    // Copy back the result in the Y vector;
+    Y = X;
+    for( int c( 0 ); c < numVectors; ++c )
+        for( int i( 0 ); i < blockSize ; ++i )
+            Y[c][firstIndex + i] = ytmp[c][i];
+
+    return result;
 }
 
 double
