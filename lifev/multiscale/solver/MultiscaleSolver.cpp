@@ -61,16 +61,16 @@ MultiscaleSolver::MultiscaleSolver() :
     Debug( 8000 ) << "MultiscaleSolver::MultiscaleSolver() \n";
 #endif
 
-    //Define the maps of MS objects
+    //Define the maps of Multiscale objects
     multiscaleMapsDefinition();
 
-    //Register the objects
-    multiscaleModelFactory_Type::instance().registerProduct   (  Fluid3D,             &createMultiscaleModelFluid3D );
-    multiscaleModelFactory_Type::instance().registerProduct   (  FSI3D,               &createMultiscaleModelFSI3D );
-    multiscaleModelFactory_Type::instance().registerProduct   (  Multiscale,          &createMultiscaleModelMultiscale );
-    multiscaleModelFactory_Type::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
-    multiscaleModelFactory_Type::instance().registerProduct   (  Windkessel0D,        &createMultiscaleModelWindkessel0D );
-    multiscaleModelFactory_Type::instance().registerProduct   (  ZeroDimensional,     &createMultiscaleModelZeroDimensional );
+    //Register the available models
+    multiscaleModelFactory_Type::instance().registerProduct( Fluid3D,         &createMultiscaleModelFluid3D );
+    multiscaleModelFactory_Type::instance().registerProduct( FSI3D,           &createMultiscaleModelFSI3D );
+    multiscaleModelFactory_Type::instance().registerProduct( Multiscale,      &createMultiscaleModelMultiscale );
+    multiscaleModelFactory_Type::instance().registerProduct( OneDimensional,  &createMultiscaleModelOneDimensional );
+    multiscaleModelFactory_Type::instance().registerProduct( Windkessel0D,    &createMultiscaleModelWindkessel0D );
+    multiscaleModelFactory_Type::instance().registerProduct( ZeroDimensional, &createMultiscaleModelZeroDimensional );
 }
 
 // ===================================================
@@ -123,7 +123,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     if ( !multiscaleProblemStep )
         M_model->saveSolution();
 
-    // Move to the "true" first time-step (needed to perform initializations of the different models/couplings/algorithms)
+    // Move to the "true" first time-step (needed to perform initializations in the different model/couplings/algorithms)
     M_globalData->dataTime()->updateTime();
     M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 }
