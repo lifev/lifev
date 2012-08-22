@@ -132,6 +132,13 @@ MatrixBlockStructure::setBlockStructure( const MapVector<MapEpetra>& mapVector )
 }
 
 void
+MatrixBlockStructure::setBlockStructure( const MatrixBlockStructure& blockStructure )
+{
+    M_rowsBlockStructure.setBlockStructure( blockStructure.M_rowsBlockStructure );
+    M_columnsBlockStructure.setBlockStructure( blockStructure.M_columnsBlockStructure );
+}
+
+void
 MatrixBlockStructure::setBlockStructure( const VectorBlockStructure& rowsBlockStructure,
                                          const VectorBlockStructure& columnsBlockStructure )
 {

@@ -153,6 +153,9 @@ public:
      */
     void setBlockStructure( const MapVector<MapEpetra>& mapVector );
 
+    //! Set the block structure from a matrix structure object
+    void setBlockStructure( const MatrixBlockStructure& blockStructure );
+
     //! Set the block structure from row and column structures
     void setBlockStructure( const VectorBlockStructure& rowsBlockStructure,
                             const VectorBlockStructure& columnsBlockStructure );
