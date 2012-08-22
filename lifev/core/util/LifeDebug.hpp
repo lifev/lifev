@@ -41,7 +41,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <string>
 
-#include <LifeV.hpp>
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {
