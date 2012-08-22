@@ -125,4 +125,21 @@ setBlockStructure( const mapVector_Type& mapVector )
 	}
 }
 
+void
+VectorBlockStructure::
+setBlockStructure( const VectorBlockStructure& blockStructure )
+{
+    UInt size( blockStructure.numBlocks() );
+    M_blockSize.resize( size );
+    M_blockFirstIndex.resize( size );
+
+    M_totalSize = blockStructure.M_totalSize;
+
+    for ( UInt i( 0 ); i < size; ++i )
+    {
+        M_blockSize[i] = blockStructure.M_blockSize[i];
+        M_blockFirstIndex[i] = blockStructure.M_blockFirstIndex[i];
+    }
+}
+
 } // Namespace LifeV

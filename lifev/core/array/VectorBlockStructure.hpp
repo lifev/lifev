@@ -118,6 +118,11 @@ public:
      */
     void setBlockStructure( const mapVector_Type& mapVector );
 
+    /*! Set the block structure using a block structure
+     *  @param blockStructure Structure of the vector
+     */
+    void setBlockStructure( const VectorBlockStructure& blockStructure );
+
     //@}
 
 

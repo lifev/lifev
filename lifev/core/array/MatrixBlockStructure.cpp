@@ -135,15 +135,15 @@ void
 MatrixBlockStructure::setBlockStructure( const VectorBlockStructure& rowsBlockStructure,
                                          const VectorBlockStructure& columnsBlockStructure )
 {
-    M_rowsBlockStructure    = rowsBlockStructure;
-    M_columnsBlockStructure = columnsBlockStructure;
+    M_rowsBlockStructure.setBlockStructure( rowsBlockStructure );
+    M_columnsBlockStructure.setBlockStructure( columnsBlockStructure );
 }
 
 void
 MatrixBlockStructure::setBlockStructure( const VectorBlockStructure& vectorBlockStructure )
 {
-    M_rowsBlockStructure    = vectorBlockStructure;
-    M_columnsBlockStructure = vectorBlockStructure;
+    M_rowsBlockStructure.setBlockStructure( vectorBlockStructure );
+    M_columnsBlockStructure.setBlockStructure( vectorBlockStructure );
 }
 
 // ===================================================
