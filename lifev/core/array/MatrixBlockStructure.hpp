@@ -204,8 +204,10 @@ public:
     //! Number of rows
     UInt numColumns() const;
 
+    //! Get the rows block structure
     VectorBlockStructure rowsBlockStructure() const;
 
+    //! Get the columns block structure
     VectorBlockStructure columnsBlockStructure() const;
 
     //@}

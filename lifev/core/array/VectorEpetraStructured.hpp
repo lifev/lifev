@@ -148,6 +148,11 @@ public:
      */
     void setBlockStructure( const mapVector_type& mapVector );
 
+    /*! Set the block structure of the vector
+     *  @param blockStructure Structure of the vector
+     */
+    void setBlockStructure( const VectorBlockStructure& blockStructure );
+
     //@}
 
 
@@ -174,6 +179,11 @@ public:
       @return The index-th block
      */
     block_ptrType block( const UInt& index );
+
+    /*! Get the block structure of the vector
+     *  @param blockStructure Structure of the vector
+     */
+    VectorBlockStructure blockStructure() const;
 
     //@}
 

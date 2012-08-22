@@ -120,6 +120,16 @@ public:
      */
     void setBlockStructure( const MapVector<MapEpetra>& mapVector );
 
+    //! Set the block structure from a matrix structure object
+    void setBlockStructure( const MatrixBlockStructure& blockStructure );
+
+    //! Set the block structure from row and column structures
+    void setBlockStructure( const VectorBlockStructure& rowsBlockStructure,
+                            const VectorBlockStructure& columnsBlockStructure );
+
+    //! Set the block structure from row and column structures
+    void setBlockStructure( const VectorBlockStructure& vectorBlockStructure );
+
     //@}
 
 
@@ -156,6 +166,15 @@ public:
       @param columnIndex The index of the block w.r. to the block structure
      */
 	block_ptrType block( const UInt& rowIndex, const UInt& columnIndex );
+
+	//! Get the rows block structure
+    VectorBlockStructure rowsBlockStructure() const;
+
+    //! Get the columns block structure
+    VectorBlockStructure columnsBlockStructure() const;
+
+    //! Get the matrix block structure
+    MatrixBlockStructure blockStructure() const;
 
     //@}
 
@@ -237,6 +256,28 @@ MatrixEpetraStructured<DataType>::setBlockStructure( const MapVector<MapEpetra>&
     ASSERT( this->matrixPtr()->NumGlobalRows() == M_blockStructure.numColumns(), " Incompatible block structure (global size does not match) " );
 }
 
+template <typename DataType>
+void
+MatrixEpetraStructured<DataType>::setBlockStructure( const MatrixBlockStructure& blockStructure )
+{
+    M_blockStructure.setBlockStructure( blockStructure );
+}
+
+template <typename DataType>
+void
+MatrixEpetraStructured<DataType>::setBlockStructure( const VectorBlockStructure& rowsBlockStructure,
+                                                     const VectorBlockStructure& columnsBlockStructure )
+{
+    M_blockStructure.setBlockStructure( rowsBlockStructure, columnsBlockStructure );
+}
+
+template <typename DataType>
+void
+MatrixEpetraStructured<DataType>::setBlockStructure( const VectorBlockStructure& vectorBlockStructure )
+{
+    M_blockStructure.setBlockStructure( vectorBlockStructure, vectorBlockStructure );
+}
+
 // ===================================================
 // Get Methods
 // ===================================================
@@ -280,6 +321,27 @@ MatrixEpetraStructured<DataType>::block( const UInt& rowIndex, const UInt& colum
                             this );
 
 	return matrixBlockView;
+}
+
+template <typename DataType>
+VectorBlockStructure
+MatrixEpetraStructured<DataType>::rowsBlockStructure() const
+{
+    return M_blockStructure.rowsBlockStructure();
+}
+
+template <typename DataType>
+VectorBlockStructure
+MatrixEpetraStructured<DataType>::columnsBlockStructure() const
+{
+    return M_blockStructure.columnsBlockStructure();
+}
+
+template <typename DataType>
+MatrixBlockStructure
+MatrixEpetraStructured<DataType>::blockStructure() const
+{
+    return M_blockStructure;
 }
 
 

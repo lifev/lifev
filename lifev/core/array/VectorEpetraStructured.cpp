@@ -99,6 +99,13 @@ setBlockStructure( const mapVector_type& mapVector )
     ASSERT( M_blockStructure.totalSize() == static_cast<UInt>( this->size() ), " Incompatible block structure (global size does not match) " );
 }
 
+void
+VectorEpetraStructured::
+setBlockStructure( const VectorBlockStructure& blockStructure )
+{
+    M_blockStructure.setBlockStructure( blockStructure );
+}
+
 // ===================================================
 // Get Methods
 // ===================================================
@@ -126,6 +133,13 @@ block( const UInt& index )
     vectorBlockView->setup( M_blockStructure.blockFirstIndex( index ), M_blockStructure.blockSize( index ), this );
 
     return vectorBlockView;
+}
+
+VectorBlockStructure
+VectorEpetraStructured::
+blockStructure() const
+{
+    return M_blockStructure;
 }
 
 
