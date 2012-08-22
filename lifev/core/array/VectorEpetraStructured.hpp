@@ -40,6 +40,7 @@
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/MapVector.hpp>
+#include <lifev/core/array/VectorBlockStructure.hpp>
 #include <lifev/core/array/VectorEpetraStructuredView.hpp>
 
 #include <boost/shared_ptr.hpp>
@@ -158,11 +159,7 @@ public:
       @param index Index of the block
       @return size of the index-th block
      */
-    UInt blockSize( const UInt& index ) const
-    {
-        ASSERT( index < M_blockSize.size(), "Invalid block index" );
-        return M_blockSize[index];
-    }
+    UInt blockSize( const UInt& index ) const;
 
     //! Getter for the block index
     /*!
@@ -182,8 +179,7 @@ public:
 
 private:
 
-    std::vector<UInt> M_blockSize;
-    std::vector<UInt> M_blockFirstIndex;
+    VectorBlockStructure M_blockStructure;
 
 };
 

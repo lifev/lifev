@@ -41,6 +41,13 @@ namespace LifeV {
 // ===================================================
 
 VectorBlockStructure::
+VectorBlockStructure()
+    : M_blockSize(),
+      M_blockFirstIndex(),
+      M_totalSize( 0 )
+{}
+
+VectorBlockStructure::
 VectorBlockStructure( const map_Type& map )
     : M_blockSize( 1, map.map( Unique )->NumGlobalElements() ),
       M_blockFirstIndex( 1, 0 ),
