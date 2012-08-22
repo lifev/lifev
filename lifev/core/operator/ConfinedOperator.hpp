@@ -71,8 +71,7 @@ public:
 	//@{
     typedef LinearOperator                         operator_Type;
     typedef boost::shared_ptr<operator_Type>       operatorPtr_Type;
-    typedef VectorBlockStructure                         blockStructure_Type;
-    typedef boost::shared_ptr<blockStructure_Type> blockStructurePtr_Type;
+    typedef VectorBlockStructure                   blockStructure_Type;
     typedef Epetra_MultiVector                     vector_Type;
     typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
     typedef Epetra_Comm                            comm_Type;
@@ -93,7 +92,7 @@ public:
 
     void setOperator( operatorPtr_Type oper );
 
-    void setStructure( blockStructurePtr_Type blockStructure );
+    void setBlockStructure( const blockStructure_Type& blockStructure );
 
     void setBlockIndex( UInt index );
 
@@ -138,9 +137,9 @@ public:
 
 protected:
 
-	operatorPtr_Type       M_oper;
-	blockStructurePtr_Type M_blockStructure;
-	UInt                   M_blockIndex;
+	operatorPtr_Type    M_oper;
+	blockStructure_Type M_blockStructure;
+	UInt                M_blockIndex;
 
 };
 

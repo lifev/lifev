@@ -41,6 +41,8 @@ namespace Operators
 {
 
 ConfinedOperator::ConfinedOperator():
+        M_oper(),
+        M_blockStructure(),
         M_blockIndex( 0 )
 {
 
@@ -66,16 +68,16 @@ ConfinedOperator::setOperator( operatorPtr_Type oper )
 }
 
 void
-ConfinedOperator::setStructure( blockStructurePtr_Type blockStructure )
+ConfinedOperator::setBlockStructure( const blockStructure_Type& blockStructure )
 {
-    M_blockStructure = blockStructure;
+    M_blockStructure.setBlockStructure( blockStructure );
 }
 
 void
 ConfinedOperator::setBlockIndex( UInt index )
 {
-    ASSERT( M_blockStructure.get() != 0, "ConfinedOperator::setBlockIndex: Error: M_structure pointer is null" );
-    ASSERT( index < M_blockStructure->numBlocks(), "ConfinedOperator::setBlockIndex: Error: index out of range" );
+    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::setBlockIndex: Error: M_structure is not initialized null" );
+    ASSERT( index < M_blockStructure.numBlocks(), "ConfinedOperator::setBlockIndex: Error: index out of range" );
     M_blockIndex = index;
 }
 
@@ -83,11 +85,11 @@ int
 ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
 {
     ASSERT( M_oper.get() != 0, "ConfinedOperator::Apply: Error: M_oper pointer is null" );
-    ASSERT( M_blockStructure.get() != 0, "ConfinedOperator::Apply: Error: M_structure pointer is null" );
+    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::Apply: Error: M_structure is not initialized null" );
 
     int numVectors = X.NumVectors();
-    int firstIndex = M_blockStructure->blockFirstIndex( M_blockIndex );
-    int blockSize  = M_blockStructure->blockSize( M_blockIndex );
+    int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
+    int blockSize  = M_blockStructure.blockSize( M_blockIndex );
     Epetra_MultiVector xtmp( M_oper->OperatorDomainMap(), blockSize );
     Epetra_MultiVector ytmp( M_oper->OperatorRangeMap(), blockSize );
 
@@ -112,7 +114,7 @@ int
 ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 {
     ASSERT( M_oper.get() != 0, "ConfinedOperator::ApplyInverse: Error: M_oper pointer is null" );
-    ASSERT( M_blockStructure.get() != 0, "ConfinedOperator::ApplyInverse: Error: M_structure pointer is null" );
+    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::ApplyInverse: Error: M_structure is not initialized null" );
     return M_oper->ApplyInverse( X, Y );
 }
 
