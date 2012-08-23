@@ -76,7 +76,7 @@ ConfinedOperator::setBlockStructure( const blockStructure_Type& blockStructure )
 void
 ConfinedOperator::setBlockIndex( UInt index )
 {
-    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::setBlockIndex: Error: M_structure is not initialized null" );
+    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::setBlockIndex: Error: M_structure is not initialized" );
     ASSERT( index < M_blockStructure.numBlocks(), "ConfinedOperator::setBlockIndex: Error: index out of range" );
     M_blockIndex = index;
 }
@@ -85,27 +85,39 @@ int
 ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
 {
     ASSERT( M_oper.get() != 0, "ConfinedOperator::Apply: Error: M_oper pointer is null" );
-    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::Apply: Error: M_structure is not initialized null" );
+    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::Apply: Error: M_structure is not initialized" );
 
-    int numVectors = X.NumVectors();
     int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
-    int blockSize  = M_blockStructure.blockSize( M_blockIndex );
-    Epetra_MultiVector xtmp( M_oper->OperatorDomainMap(), blockSize );
-    Epetra_MultiVector ytmp( M_oper->OperatorRangeMap(), blockSize );
+    Epetra_MultiVector xtmp( M_oper->OperatorRangeMap(), 1 );
+    Epetra_MultiVector ytmp( M_oper->OperatorDomainMap(), 1 );
 
     // Extract the values from the vector
-    for( int c( 0 ); c < numVectors; ++c )
-        for( int i( 0 ); i < blockSize ; ++i )
-            xtmp[c][i] = X[c][firstIndex + i];
+    const Int* gids         = M_oper->OperatorDomainMap().MyGlobalElements();
+    const UInt numMyEntries = M_oper->OperatorDomainMap().NumMyElements();
+    Int lid1 ;
+    Int lid2 ;
+    for ( UInt i = 0; i < numMyEntries; ++i )
+    {
+        lid1 = X.Map().LID( gids[i]+firstIndex );
+        lid2 = M_oper->OperatorDomainMap().LID( gids[i] );
+        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
+        xtmp[0][lid2] = X[0][lid1];
+    }
 
     // Apply the operator
     int result = M_oper->Apply( xtmp, ytmp );
 
     // Copy back the result in the Y vector;
     Y = X;
-    for( int c( 0 ); c < numVectors; ++c )
-        for( int i( 0 ); i < blockSize ; ++i )
-            Y[c][firstIndex + i] = ytmp[c][i];
+    const Int* gids2         = M_oper->OperatorRangeMap().MyGlobalElements();
+    const UInt numMyEntries2 = M_oper->OperatorRangeMap().NumMyElements();
+    for ( UInt i = 0; i < numMyEntries2; ++i )
+    {
+        lid1 = Y.Map().LID( gids2[i]+firstIndex );
+        lid2 = M_oper->OperatorRangeMap().LID( gids2[i] );
+        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
+        Y[0][lid1] = ytmp[0][lid2];
+    }
 
     return result;
 }
@@ -114,27 +126,39 @@ int
 ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 {
     ASSERT( M_oper.get() != 0, "ConfinedOperator::ApplyInverse: Error: M_oper pointer is null" );
-    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::ApplyInverse: Error: M_structure is not initialized null" );
+    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::ApplyInverse: Error: M_structure is not initialized" );
 
-    int numVectors = X.NumVectors();
     int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
-    int blockSize  = M_blockStructure.blockSize( M_blockIndex );
-    Epetra_MultiVector xtmp( M_oper->OperatorRangeMap(), blockSize );
-    Epetra_MultiVector ytmp( M_oper->OperatorDomainMap(), blockSize );
+    Epetra_MultiVector xtmp( M_oper->OperatorRangeMap(), 1 );
+    Epetra_MultiVector ytmp( M_oper->OperatorDomainMap(), 1 );
 
     // Extract the values from the vector
-    for( int c( 0 ); c < numVectors; ++c )
-        for( int i( 0 ); i < blockSize ; ++i )
-            xtmp[c][i] = X[c][firstIndex + i];
+    const Int* gids         = M_oper->OperatorDomainMap().MyGlobalElements();
+    const UInt numMyEntries = M_oper->OperatorDomainMap().NumMyElements();
+    Int lid1 ;
+    Int lid2 ;
+    for ( UInt i = 0; i < numMyEntries; ++i )
+    {
+        lid1 = X.Map().LID( gids[i]+firstIndex );
+        lid2 = M_oper->OperatorDomainMap().LID( gids[i] );
+        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::ApplyInverse: Error: lid < 0" );
+        xtmp[0][lid2] = X[0][lid1];
+    }
 
     // Apply the operator
     int result = M_oper->ApplyInverse( xtmp, ytmp );
 
     // Copy back the result in the Y vector;
     Y = X;
-    for( int c( 0 ); c < numVectors; ++c )
-        for( int i( 0 ); i < blockSize ; ++i )
-            Y[c][firstIndex + i] = ytmp[c][i];
+    const Int* gids2         = M_oper->OperatorRangeMap().MyGlobalElements();
+    const UInt numMyEntries2 = M_oper->OperatorRangeMap().NumMyElements();
+    for ( UInt i = 0; i < numMyEntries2; ++i )
+    {
+        lid1 = Y.Map().LID( gids2[i]+firstIndex );
+        lid2 = M_oper->OperatorRangeMap().LID( gids2[i] );
+        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
+        Y[0][lid1] = ytmp[0][lid2];
+    }
 
     return result;
 }

@@ -44,6 +44,7 @@
 #include <Epetra_Comm.h>
 #include <Epetra_Map.h>
 #include <Epetra_MultiVector.h>
+#include <Epetra_Operator.h>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -69,7 +70,7 @@ public:
 
 	//! @name Public Typedefs and Enumerators
 	//@{
-    typedef LinearOperator                         operator_Type;
+    typedef Epetra_Operator                        operator_Type;
     typedef boost::shared_ptr<operator_Type>       operatorPtr_Type;
     typedef VectorBlockStructure                   blockStructure_Type;
     typedef Epetra_MultiVector                     vector_Type;
