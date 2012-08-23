@@ -54,6 +54,7 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/algorithm/ComposedOperator.hpp>
+#include <lifev/core/array/VectorBlockStructure.hpp>
 
 namespace LifeV {
 
@@ -211,6 +212,14 @@ protected:
     //! Use a preconditioner to build the inverse of A and add it to the right of the composition
     int pushBack( matrixPtr_Type A,
                   superPtr_Type& preconditioner,
+                  const bool useInverse   = false,
+                  const bool useTranspose = false );
+
+    //! Use a preconditioner to build the inverse of A and add it to the right of the composition
+    int pushBack( matrixPtr_Type embeddedA,
+                  superPtr_Type& preconditioner,
+                  const VectorBlockStructure& blockStructure,
+                  const UInt& blockIndex,
                   const bool useInverse   = false,
                   const bool useTranspose = false );
 

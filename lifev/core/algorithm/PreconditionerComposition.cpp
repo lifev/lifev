@@ -36,6 +36,7 @@
  */
 
 #include <lifev/core/algorithm/PreconditionerComposition.hpp>
+#include <lifev/core/operator/ConfinedOperator.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -201,14 +202,42 @@ PreconditionerComposition::pushBack( matrixPtr_Type A,
 
 int
 PreconditionerComposition::pushBack( matrixPtr_Type A,
-                                     superPtr_Type& preconditionerPtr,
+                                     superPtr_Type& preconditioner,
                                      const bool useInverse,
                                      const bool useTranspose )
 {
     //std::cout << "[DEBUG] pushBack() preconditioner version" << std::endl;
     M_precBaseOperators.push_back( A );
-    preconditionerPtr->buildPreconditioner( A );
-    operatorPtr_Type oper( preconditionerPtr->preconditionerPtr() );
+    preconditioner->buildPreconditioner( A );
+    operatorPtr_Type oper( preconditioner->preconditionerPtr() );
+    M_prec->push_back( oper,useInverse, useTranspose );
+
+    return EXIT_SUCCESS;
+}
+
+int
+PreconditionerComposition::pushBack( matrixPtr_Type embeddedA,
+                                     superPtr_Type& preconditioner,
+                                     const VectorBlockStructure& blockStructure,
+                                     const UInt& blockIndex,
+                                     const bool useInverse,
+                                     const bool useTranspose )
+{
+    // Add the operator
+    M_precBaseOperators.push_back( embeddedA );
+
+    // Build the preconditioner
+    preconditioner->buildPreconditioner( embeddedA );
+    operatorPtr_Type precOper( preconditioner->preconditionerPtr() );
+
+    // Wrap the preconditioner in a ConfinedOperator
+    Operators::ConfinedOperator* confinedOperator = new Operators::ConfinedOperator;
+    confinedOperator->setOperator( precOper );
+    confinedOperator->setBlockStructure( blockStructure );
+    confinedOperator->setBlockIndex( blockIndex );
+    operatorPtr_Type oper( confinedOperator );
+
+    // Add the operator
     M_prec->push_back( oper,useInverse, useTranspose );
 
     return EXIT_SUCCESS;
