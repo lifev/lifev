@@ -37,6 +37,8 @@
 #ifndef _MATRIXEPETRASTRUCTUREDUTILITY_HPP_
 #define _MATRIXEPETRASTRUCTUREDUTILITY_HPP_
 
+#include <boost/shared_ptr.hpp>
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/core/array/MatrixEpetraStructuredView.hpp>
 
 namespace LifeV {
@@ -54,7 +56,7 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 {
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
-	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columns" );
 
     // BLOCK PTR TEST
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
@@ -206,7 +208,7 @@ void createDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
-	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columns" );
 
     // BLOCK PTR TEST
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
@@ -277,7 +279,7 @@ void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
-	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columns" );
 
     // BLOCK PTR TEST
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
@@ -352,7 +354,7 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
-	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columns" );
 
     // BLOCK PTR TEST
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
@@ -426,7 +428,7 @@ void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
-	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columns" );
 
     // BLOCK PTR TEST
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
@@ -503,7 +505,7 @@ void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
-	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columns" );
 
     // BLOCK PTR TEST
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
@@ -581,7 +583,7 @@ void createLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
-	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columns" );
 
     // BLOCK PTR TEST
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
@@ -651,7 +653,7 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
 
     // BLOCK COMPATIBILITY TEST
 	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
-	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columnss" );
+	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columns" );
 
     // BLOCK PTR TEST
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
@@ -711,6 +713,36 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
     }
 }
 
+//! Create a new matrix from the block specified
+/*!
+  @param srcBlock Source block
+  @param dstMatrix Pointer to be initialized with a new matrix
+  @param rowMap Row map. The column map will be defined in MatrixEpetraStructured<DataType>::GlobalAssemble(...,...)
+  @param closeMatrix If closeMatrix is equal to true, globalAssemble will be called.
+  @warning This method is only intended to be used with square blocks!
+*/
+template< typename DataType>
+void createMatrixFromBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+                             boost::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
+                             const MapEpetra& rowMap,
+                             bool closeMatrix=true )
+{
+    // SQUARE TEST
+    ASSERT( srcBlock.numRows() == srcBlock.numColumns() , "The source block must be square" );
+    ASSERT( srcBlock.numRows() == rowMap.mapSize(), "The two blocks must have the same number of rows" );
+
+    // Create destination matrix
+    destMatrix.reset( new MatrixEpetraStructured<DataType>( rowMap, srcBlock.matrixPtr()->meanNumEntries() ) );
+
+    // Copy the entries
+    copyBlock( srcBlock, *( destMatrix->block( 0, 0 ) ) );
+
+    // Close the matrix if requested
+    if( closeMatrix )
+    {
+        destMatrix->globalAssemble();
+    }
+}
 
 } // namespace MatrixEpetraStructuredUtility
 
