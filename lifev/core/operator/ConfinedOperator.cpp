@@ -88,7 +88,6 @@ ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
     ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::Apply: Error: M_structure is not initialized" );
 
     int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
-    // int blockSize  = M_blockStructure.blockSize( M_blockIndex );
     Epetra_MultiVector xtmp( M_oper->OperatorRangeMap(), 1 );
     Epetra_MultiVector ytmp( M_oper->OperatorDomainMap(), 1 );
 
@@ -104,8 +103,6 @@ ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
         ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
         xtmp[0][lid2] = X[0][lid1];
     }
-    //for( int i( 0 ); i < blockSize ; ++i )
-    //    xtmp[0][i] = X[0][firstIndex + i];
 
     // Apply the operator
     int result = M_oper->Apply( xtmp, ytmp );
@@ -121,8 +118,6 @@ ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
         ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
         Y[0][lid1] = ytmp[0][lid2];
     }
-    //for( int i( 0 ); i < blockSize ; ++i )
-    //    Y[0][firstIndex + i] = ytmp[0][i];
 
     return result;
 }
@@ -134,7 +129,6 @@ ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
     ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::ApplyInverse: Error: M_structure is not initialized" );
 
     int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
-    // int blockSize  = M_blockStructure.blockSize( M_blockIndex );
     Epetra_MultiVector xtmp( M_oper->OperatorRangeMap(), 1 );
     Epetra_MultiVector ytmp( M_oper->OperatorDomainMap(), 1 );
 
@@ -150,8 +144,6 @@ ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
         ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::ApplyInverse: Error: lid < 0" );
         xtmp[0][lid2] = X[0][lid1];
     }
-    //for( int i( 0 ); i < blockSize ; ++i )
-    //    xtmp[0][i] = X[0][firstIndex + i];
 
     // Apply the operator
     int result = M_oper->ApplyInverse( xtmp, ytmp );
@@ -167,8 +159,6 @@ ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
         ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
         Y[0][lid1] = ytmp[0][lid2];
     }
-    //for( int i( 0 ); i < blockSize ; ++i )
-    //    Y[0][firstIndex + i] = ytmp[0][i];
 
     return result;
 }
