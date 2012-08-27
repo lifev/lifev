@@ -223,6 +223,7 @@ protected:
     bool        M_setFpBoundaryConditions;
     bool        M_setMpBoundaryConditions;
     bool        M_fullFactorization;
+    bool        M_schurOperatorReverseOrder;
 
 private:
     PreconditionerPCD( const PreconditionerPCD& P ):

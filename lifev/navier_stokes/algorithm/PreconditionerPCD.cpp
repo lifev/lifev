@@ -70,7 +70,8 @@ PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     M_setApBoundaryConditions    ( false ),
     M_setFpBoundaryConditions    ( false ),
     M_setMpBoundaryConditions    ( false ),
-    M_fullFactorization          ( false )
+    M_fullFactorization          ( false ),
+    M_schurOperatorReverseOrder  ( false )
 {
     M_uFESpace.reset();
     M_pFESpace.reset();
@@ -138,6 +139,9 @@ PreconditionerPCD::createPCDList( list_Type&         list,
 
     bool fullFactorization = dataFile( ( section + "/" + subsection + "/full_factorization" ).data(), false );
     list.set( "full factorization", fullFactorization );
+
+    bool schurOperatorReverseOrder = dataFile( ( section + "/" + subsection + "/Schur_operator_reverse_order" ).data(), false );
+    list.set( "Schur operator reverse order", schurOperatorReverseOrder );
 
     if ( displayList && verbose )
     {
@@ -483,40 +487,79 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     if ( ( verbose )&&( M_setMpBoundaryConditions ) ) std::cout << " BC imposed on Mp" << std::endl;
 
     if ( verbose ) std::cout << " Schur block (a)... ";
-    timer.start();
-    //pAp->spy( "p1a" );
-    superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_pressureLaplacianPrec ) );
-    precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
-    this->pushBack( pAp, precForBlock1, notInversed, notTransposed );
-    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-    if ( verbose ) std::cout << " Schur block (b)... ";
-    timer.start();
-    boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
-    P1b->setBlockStructure( blockNumRows, blockNumColumns );
-    *P1b += *PFp;
-    P1b->blockView( 0, 0, B11 );
-    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
-    P1b->globalAssemble();
-    boost::shared_ptr<matrix_Type> p1b = P1b;
-    //p1b->spy( "p1b" );
-    this->pushBack( p1b, inversed,notTransposed );
-    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
-
-    if ( verbose ) std::cout << " Schur block (c)... ";
-    timer.start();
-    //pMp->spy( "p1c" );
-    if ( M_useLumpedPressureMass )
+    if ( M_schurOperatorReverseOrder )
     {
-        this->pushBack( pMp, inversed, notTransposed );
+        if ( verbose ) std::cout << " Use reverse order for the Schur approximation";
+
+        if ( verbose ) std::cout << " Schur block (a)... ";
+        timer.start();
+        if ( M_useLumpedPressureMass )
+        {
+            this->pushBack( pMp, inversed, notTransposed );
+        }
+        else
+        {
+            superPtr_Type precForBlock2( PRECFactory::instance().createObject( M_pressureMassPrec ) );
+            precForBlock2->setDataFromGetPot( M_dataFile, M_pressureMassPrecDataSection );
+            this->pushBack( pMp,precForBlock2, notInversed, notTransposed );
+        }
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
+        if ( verbose ) std::cout << " Schur block (b)... ";
+        timer.start();
+        boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
+        P1b->setBlockStructure( blockNumRows, blockNumColumns );
+        *P1b += *PFp;
+        P1b->blockView( 0, 0, B11 );
+        MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+        P1b->globalAssemble();
+        boost::shared_ptr<matrix_Type> p1b = P1b;
+        this->pushBack( p1b, inversed,notTransposed );
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
+        if ( verbose ) std::cout << " Schur block (c)... ";
+        timer.start();
+        superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_pressureLaplacianPrec ) );
+        precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
+        this->pushBack( pAp, precForBlock1, notInversed, notTransposed );
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
     }
     else
     {
-        superPtr_Type precForBlock2( PRECFactory::instance().createObject( M_pressureMassPrec ) );
-        precForBlock2->setDataFromGetPot( M_dataFile, M_pressureMassPrecDataSection );
-        this->pushBack( pMp,precForBlock2, notInversed, notTransposed );
+        timer.start();
+        superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_pressureLaplacianPrec ) );
+        precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
+        this->pushBack( pAp, precForBlock1, notInversed, notTransposed );
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
+        if ( verbose ) std::cout << " Schur block (b)... ";
+        timer.start();
+        boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
+        P1b->setBlockStructure( blockNumRows, blockNumColumns );
+        *P1b += *PFp;
+        P1b->blockView( 0, 0, B11 );
+        MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+        P1b->globalAssemble();
+        boost::shared_ptr<matrix_Type> p1b = P1b;
+        //p1b->spy( "p1b" );
+        this->pushBack( p1b, inversed,notTransposed );
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
+        if ( verbose ) std::cout << " Schur block (c)... ";
+        timer.start();
+        if ( M_useLumpedPressureMass )
+        {
+            this->pushBack( pMp, inversed, notTransposed );
+        }
+        else
+        {
+            superPtr_Type precForBlock2( PRECFactory::instance().createObject( M_pressureMassPrec ) );
+            precForBlock2->setDataFromGetPot( M_dataFile, M_pressureMassPrecDataSection );
+            this->pushBack( pMp,precForBlock2, notInversed, notTransposed );
+        }
+        if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
     }
-    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
     /*
      * Building the block (the block is inversed)
@@ -620,6 +663,7 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
     M_setFpBoundaryConditions          = this->M_list.get( "set Fp boundary conditions", false );
     M_setMpBoundaryConditions          = this->M_list.get( "set Mp boundary conditions", false );
     M_fullFactorization                = this->M_list.get( "full factorization", false );
+    M_schurOperatorReverseOrder        = this->M_list.get( "Schur operator reverse order", false );
 }
 
 void
