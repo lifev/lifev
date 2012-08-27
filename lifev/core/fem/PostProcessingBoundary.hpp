@@ -870,8 +870,8 @@ Vector PostProcessingBoundary<MeshType>::normal( const markerID_Type& flag, UInt
 #ifdef DEBUG
     if ( abs( nn ) < 1e-6 )
     {
-        Debug( 5000 ) << "Approximate surface normal could not be reliably computed.\n";
-        Debug( 5000 ) << "Modulus of the integrated normal vector was: " << nn  << "\n";
+        debugStream( 5000 ) << "Approximate surface normal could not be reliably computed.\n";
+        debugStream( 5000 ) << "Modulus of the integrated normal vector was: " << nn  << "\n";
     }
 #endif
 

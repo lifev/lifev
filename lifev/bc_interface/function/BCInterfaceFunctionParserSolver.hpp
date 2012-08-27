@@ -309,7 +309,7 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::BCInterfaceFunctionParser
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver::BCInterfaceFunctionSolver()" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver::BCInterfaceFunctionSolver()" << "\n";
 #endif
 
 }
@@ -323,7 +323,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<FSI>::updatePhysicalSolverVariables" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<FSI>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -334,7 +334,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->physics()->data()->dataTime()->timeStep() << "\n";
+            debugStream( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->physics()->data()->dataTime()->timeStep() << "\n";
 #endif
             setVariable( "f_timeStep", M_physicalSolver->physics()->data()->dataTime()->timeStep() );
 
@@ -343,7 +343,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_area(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( *M_solution, OneDFSI::A, M_side ) << "\n";
+            debugStream( 5023 ) << "                                              f_area(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( *M_solution, OneDFSI::A, M_side ) << "\n";
 #endif
             setVariable( "f_area", M_physicalSolver->boundaryValue( *M_solution, OneDFSI::A, M_side ) );
 
@@ -352,7 +352,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_density: " << M_physicalSolver->physics()->data()->densityRho() << "\n";
+            debugStream( 5023 ) << "                                              f_density: " << M_physicalSolver->physics()->data()->densityRho() << "\n";
 #endif
             setVariable( "f_density", M_physicalSolver->physics()->data()->densityRho() );
 
@@ -361,7 +361,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( *M_solution, OneDFSI::Q, M_side ) << "\n";
+            debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( *M_solution, OneDFSI::Q, M_side ) << "\n";
 #endif
 
             setVariable( "f_flux", M_physicalSolver->boundaryValue( *M_solution, OneDFSI::Q, M_side ) );
@@ -371,7 +371,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( *M_solution, OneDFSI::P, M_side ) << "\n";
+            debugStream( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( *M_solution, OneDFSI::P, M_side ) << "\n";
 #endif
 
             setVariable( "f_pressure", M_physicalSolver->boundaryValue( *M_solution, OneDFSI::P, M_side ) );
@@ -381,7 +381,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_viscosity: " << M_physicalSolver->physics()->data()->viscosity() << "\n";
+            debugStream( 5023 ) << "                                              f_viscosity: " << M_physicalSolver->physics()->data()->viscosity() << "\n";
 #endif
             setVariable( "f_viscosity", M_physicalSolver->physics()->data()->viscosity() );
 
@@ -390,7 +390,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case f_venousPressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_venousPressure: " << M_physicalSolver->physics()->data()->venousPressure() << "\n";
+            debugStream( 5023 ) << "                                              f_venousPressure: " << M_physicalSolver->physics()->data()->venousPressure() << "\n";
 #endif
             setVariable( "f_venousPressure", M_physicalSolver->physics()->data()->venousPressure() );
 
@@ -400,7 +400,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_density: " << M_physicalSolver->physics()->data()->densityWall() << "\n";
+            debugStream( 5023 ) << "                                              s_density: " << M_physicalSolver->physics()->data()->densityWall() << "\n";
 #endif
 
             setVariable( "s_density", M_physicalSolver->physics()->data()->densityWall() );
@@ -410,7 +410,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case s_poisson:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_poisson: " << M_physicalSolver->physics()->data()->poisson() << "\n";
+            debugStream( 5023 ) << "                                              s_poisson: " << M_physicalSolver->physics()->data()->poisson() << "\n";
 #endif
 
             setVariable( "s_poisson", M_physicalSolver->physics()->data()->poisson() );
@@ -420,7 +420,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case s_thickness:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_thickness: " << M_physicalSolver->physics()->data()->thickness( M_physicalSolver->boundaryDOF( M_side ) ) << "\n";
+            debugStream( 5023 ) << "                                              s_thickness: " << M_physicalSolver->physics()->data()->thickness( M_physicalSolver->boundaryDOF( M_side ) ) << "\n";
 #endif
 
             setVariable( "s_thickness", M_physicalSolver->physics()->data()->thickness( M_physicalSolver->boundaryDOF( M_side ) ) );
@@ -430,7 +430,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case s_young:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_young: " << M_physicalSolver->physics()->data()->young() << "\n";
+            debugStream( 5023 ) << "                                              s_young: " << M_physicalSolver->physics()->data()->young() << "\n";
 #endif
 
             setVariable( "s_young", M_physicalSolver->physics()->data()->young() );
@@ -440,7 +440,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
         case s_externalPressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_externalPressure: " << M_physicalSolver->physics()->data()->externalPressure() << "\n";
+            debugStream( 5023 ) << "                                              s_externalPressure: " << M_physicalSolver->physics()->data()->externalPressure() << "\n";
 #endif
 
             setVariable( "s_externalPressure", M_physicalSolver->physics()->data()->externalPressure() );
@@ -460,7 +460,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<FSIOperator>::updatePhysicalSolverVariables" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<FSIOperator>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -471,7 +471,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->data().dataFluid()->dataTime()->timeStep() << "\n";
+            debugStream( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->data().dataFluid()->dataTime()->timeStep() << "\n";
 #endif
             setVariable( "f_timeStep", M_physicalSolver->data().dataFluid()->dataTime()->timeStep() );
 
@@ -480,7 +480,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_area(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().area( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_area(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().area( M_flag ) << "\n";
 #endif
             setVariable( "f_area", M_physicalSolver->fluid().area( M_flag ) );
 
@@ -489,7 +489,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_density: " << M_physicalSolver->fluid().density() << "\n";
+            debugStream( 5023 ) << "                                              f_density: " << M_physicalSolver->fluid().density() << "\n";
 #endif
             setVariable( "f_density", M_physicalSolver->fluid().density() );
 
@@ -498,7 +498,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag ) << "\n";
 #endif
 
             setVariable( "f_flux", M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->un() ) );
@@ -508,7 +508,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().pressure( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().pressure( M_flag ) << "\n";
 #endif
 
             setVariable( "f_pressure", M_physicalSolver->fluid().pressure( M_flag, *M_physicalSolver->un() ) );
@@ -518,7 +518,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_viscosity: " << M_physicalSolver->fluid().viscosity() << "\n";
+            debugStream( 5023 ) << "                                              f_viscosity: " << M_physicalSolver->fluid().viscosity() << "\n";
 #endif
             setVariable( "f_viscosity", M_physicalSolver->fluid().viscosity() );
 
@@ -528,7 +528,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_density: " << M_physicalSolver->solid().getRho() << "\n";
+            debugStream( 5023 ) << "                                              s_density: " << M_physicalSolver->solid().getRho() << "\n";
 #endif
 
             setVariable( "s_density", M_physicalSolver->solid().getRho() );
@@ -538,7 +538,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case s_poisson:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_poisson: " << M_physicalSolver->solid().getPoisson() << "\n";
+            debugStream( 5023 ) << "                                              s_poisson: " << M_physicalSolver->solid().getPoisson() << "\n";
 #endif
 
             setVariable( "s_poisson", M_physicalSolver->solid().getPoisson() );
@@ -548,7 +548,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case s_thickness:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_thickness: " << M_physicalSolver->solid().getThickness() << "\n";
+            debugStream( 5023 ) << "                                              s_thickness: " << M_physicalSolver->solid().getThickness() << "\n";
 #endif
 
             setVariable( "s_thickness", M_physicalSolver->solid().getThickness() );
@@ -558,7 +558,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case s_young:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_young: " << M_physicalSolver->solid().getYoung() << "\n";
+            debugStream( 5023 ) << "                                              s_young: " << M_physicalSolver->solid().getYoung() << "\n";
 #endif
 
             setVariable( "s_young", M_physicalSolver->solid().getYoung() );
@@ -568,7 +568,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case s_externalPressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              s_externalPressure: " << M_physicalSolver->solid().data()->externalPressure() << "\n";
+            debugStream( 5023 ) << "                                              s_externalPressure: " << M_physicalSolver->solid().data()->externalPressure() << "\n";
 #endif
 
             setVariable( "s_externalPressure", M_physicalSolver->solid().data()->externalPressure() );
@@ -589,7 +589,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::upd
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<OseenSolver>::updatePhysicalSolverVariables" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<OseenSolver>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -600,7 +600,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::upd
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
+            debugStream( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
 #endif
             setVariable( "f_timeStep", M_physicalSolver->data()->dataTime()->timeStep() );
 
@@ -609,7 +609,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::upd
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_area(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->area( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_area(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->area( M_flag ) << "\n";
 #endif
             setVariable( "f_area", M_physicalSolver->area( M_flag ) );
 
@@ -618,7 +618,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::upd
         case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_density: " << M_physicalSolver->density() << "\n";
+            debugStream( 5023 ) << "                                              f_density: " << M_physicalSolver->density() << "\n";
 #endif
             setVariable( "f_density", M_physicalSolver->density() );
 
@@ -627,7 +627,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::upd
         case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->flux( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->flux( M_flag ) << "\n";
 #endif
 
             setVariable( "f_flux", M_physicalSolver->flux( M_flag ) );
@@ -637,7 +637,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::upd
         case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->pressure( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->pressure( M_flag ) << "\n";
 #endif
 
             setVariable( "f_pressure", M_physicalSolver->pressure( M_flag ) );
@@ -647,7 +647,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::upd
         case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_viscosity: " << M_physicalSolver->viscosity() << "\n";
+            debugStream( 5023 ) << "                                              f_viscosity: " << M_physicalSolver->viscosity() << "\n";
 #endif
             setVariable( "f_viscosity", M_physicalSolver->viscosity() );
 
@@ -667,7 +667,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<OseenSolverShapeDerivative>::updatePhysicalSolverVariables" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<OseenSolverShapeDerivative>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -678,7 +678,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
+            debugStream( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
 #endif
             setVariable( "f_timeStep", M_physicalSolver->data()->dataTime()->timeStep() );
 
@@ -687,7 +687,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_area(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->area( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_area(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->area( M_flag ) << "\n";
 #endif
             setVariable( "f_area", M_physicalSolver->area( M_flag ) );
 
@@ -696,7 +696,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
         case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_density(): " << M_physicalSolver->density() << "\n";
+            debugStream( 5023 ) << "                                              f_density(): " << M_physicalSolver->density() << "\n";
 #endif
             setVariable( "f_density", M_physicalSolver->density() );
 
@@ -705,7 +705,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
         case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->flux( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->flux( M_flag ) << "\n";
 #endif
 
             setVariable( "f_flux", M_physicalSolver->flux( M_flag ) );
@@ -715,7 +715,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
         case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->pressure( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->pressure( M_flag ) << "\n";
 #endif
 
             setVariable( "f_pressure", M_physicalSolver->pressure( M_flag ) );
@@ -725,7 +725,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
         case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_viscosity(): " << M_physicalSolver->viscosity() << "\n";
+            debugStream( 5023 ) << "                                              f_viscosity(): " << M_physicalSolver->viscosity() << "\n";
 #endif
             setVariable( "f_viscosity", M_physicalSolver->viscosity() );
 
@@ -749,7 +749,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::updatePhysicalSolverVariables" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -761,7 +761,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->dataTime()->timeStep() << "\n";
+            debugStream( 5023 ) << "                                              f_timeStep(): " << M_physicalSolver->dataTime()->timeStep() << "\n";
 #endif
             setVariable( "f_timeStep", M_physicalSolver->dataTime()->timeStep() );
 
@@ -770,7 +770,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
         case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_density(): " << M_physicalSolver->fluidDensity() << "\n";
+            debugStream( 5023 ) << "                                              f_density(): " << M_physicalSolver->fluidDensity() << "\n";
 #endif
             setVariable( "f_density", M_physicalSolver->fluidDensity() );
 
@@ -779,7 +779,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
         case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_viscosity(): " << M_physicalSolver->fluidViscosity() << "\n";
+            debugStream( 5023 ) << "                                              f_viscosity(): " << M_physicalSolver->fluidViscosity() << "\n";
 #endif
             setVariable( "f_viscosity", M_physicalSolver->fluidViscosity() );
 
@@ -788,7 +788,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
         case f_venousPressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                              f_venousPressure(): " << M_physicalSolver->fluidVenousPressure() << "\n";
+            debugStream( 5023 ) << "                                              f_venousPressure(): " << M_physicalSolver->fluidVenousPressure() << "\n";
 #endif
             setVariable( "f_venousPressure", M_physicalSolver->fluidVenousPressure() );
 
@@ -811,7 +811,7 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfac
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
 #endif
 
     M_flag = data.flag();
@@ -827,7 +827,7 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfac
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
 #endif
 
     M_side = data.side();
@@ -843,7 +843,7 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData( const BCInterfac
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
 #endif
 
     M_flag = data.flag();
@@ -862,7 +862,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::createAccessList( const BCInte
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<OneDimensionaSolver>::createAccessList( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<OneDimensionaSolver>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
@@ -881,7 +881,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::createAccessList( const BCInterf
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<FSIOperator>::createAccessList( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<FSIOperator>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
@@ -900,7 +900,7 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::cre
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<OseenSolver>::createAccessList( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<OseenSolver>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
@@ -918,7 +918,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<OseenSolverShapeDerivative>::createAccessList( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<OseenSolverShapeDerivative>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
@@ -940,7 +940,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::createAccessLis
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::createAccessList( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
