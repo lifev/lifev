@@ -186,12 +186,13 @@ void fixVolumes( RegionMesh & mesh,
 /*!
   It computes, for $i=0,1,2$, the integral \f$\int_{\partial \Omega} x_i n_i
   d\gamma \f$, \f$n_i\f$ being the i-th component of the boundary normal. If
-  the domain boundary is properly disretised they should all return (within
+  the domain boundary is properly discretised they should all return (within
   discretisation and truncation errors) the quantity \f$\vert\Omega\vert\f$.
 
   \warning Not to be used for accurate computations (it always adopts
-  linear or bilinear elements, with a simple integration rule) \param mesh
-  A 3D mesh \param vols returns 3 Real corresponding to the 3 integrals
+  linear or bilinear elements, with a simple integration rule)
+  \param mesh A 3D mesh
+  \param vols returns 3 Real corresponding to the 3 integrals
 */
 template <typename RegionMesh>
 void getVolumeFromFaces( RegionMesh const & mesh,
