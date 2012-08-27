@@ -46,6 +46,7 @@
 #include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/core/solver/ADRAssembler.hpp>
 #include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/BCBase.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 
 namespace LifeV {
@@ -182,12 +183,21 @@ public:
      */
     void setViscosity( const Real& viscosity );
 
-    //! Setter for the densitz
+    //! Setter for the density
     /*!
         This method set the density used to compute Fp.
         @param density Density used to compute the solution of the Navier-Stokes equations
      */
     void setDensity( const Real& density );
+
+    //! Setter for the BC of the original problem
+    /*!
+        This method is used to compute Fp with the correct BC.
+        @param density Density used to compute the solution of the Navier-Stokes equations
+     */
+    void setBoundaryTypes( const std::vector<bcFlag_Type>& inflowBoundaryFlagsVector,
+                           const std::vector<bcFlag_Type>& outflowBoundaryFlagsVector,
+                           const std::vector<bcFlag_Type>& characteristicBoundaryFlagsVector );
 
     //@}
 
@@ -224,6 +234,10 @@ protected:
     bool        M_setMpBoundaryConditions;
     bool        M_fullFactorization;
     bool        M_schurOperatorReverseOrder;
+
+    std::vector<bcFlag_Type> M_inflowBoundaryFlags;
+    std::vector<bcFlag_Type> M_outflowBoundaryFlags;
+    std::vector<bcFlag_Type> M_characteristicBoundaryFlags;
 
 private:
     PreconditionerPCD( const PreconditionerPCD& P ):

@@ -71,7 +71,10 @@ PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     M_setFpBoundaryConditions    ( false ),
     M_setMpBoundaryConditions    ( false ),
     M_fullFactorization          ( false ),
-    M_schurOperatorReverseOrder  ( false )
+    M_schurOperatorReverseOrder  ( false ),
+    M_inflowBoundaryFlags        (),
+    M_outflowBoundaryFlags       (),
+    M_characteristicBoundaryFlags()
 {
     M_uFESpace.reset();
     M_pFESpace.reset();
@@ -418,23 +421,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             }
         }
     }
-    else if ( M_pressureBoundaryConditions == "dirichlet_at_inflow" )
-    {
-        // Loop on boundary conditions
-        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
-        {
-            if ( M_bcHandlerPtr->operator[]( i ).flag() == 1 )
-            {
-                for ( ID j = 0; j < M_bcHandlerPtr->operator[]( i ).list_size(); ++j )
-                {
-                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id() + B22.firstRowIndex();
-                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0 );
-                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0 );
-                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId, 1.0 );
-                }
-            }
-        }
-    }
     else if ( M_pressureBoundaryConditions == "robin_at_inflow" )
     {
         BCHandler bcHandler;
@@ -481,6 +467,78 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         if ( M_setFpBoundaryConditions ) bcManageMatrix( *pFp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
 
     }
+    else if ( M_pressureBoundaryConditions == "2001_PCD_BC" )
+    {
+        // This option is the one used by Elman & al. in the original PCD:
+        // * Dirichlet boundary conditions at inflows
+        // * Neumann boundary conditions at outflows
+        // * Neumann boundary conditions on characteristic boundaries
+
+        // Loop on boundary conditions
+        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
+        {
+
+            for( ID j = 0; j < M_inflowBoundaryFlags.size(); ++j )
+            {
+                if ( M_bcHandlerPtr->operator[]( i ).flag() == M_inflowBoundaryFlags[j] )
+                {
+                    for ( ID k = 0; k < M_bcHandlerPtr->operator[]( i ).list_size(); ++k )
+                    {
+                        UInt myId = M_bcHandlerPtr->operator[]( i )[k]->id() + B22.firstRowIndex();
+                        if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0 );
+                        if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0 );
+                        if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId, 1.0 );
+                    }
+                }
+            }
+            // For Neumann BC we do not need to do anything
+        }
+    }
+    else if ( M_pressureBoundaryConditions == "2009_PCD_BC" )
+    {
+        // This option is the one used by Elman & al. in the original PCD:
+        // * Robin boundary conditions at inflows
+        // * Neumann boundary conditions at outflows
+        // * Neumann boundary conditions on characteristic boundaries
+
+        BCHandler bcHandler;
+
+        // Offset to set the BC for the pressure
+        bcHandler.setOffset( B22.firstRowIndex() );
+
+        // Creating the vector
+        vector_Type convVelocity( *M_beta, Repeated );
+        vector_Type robinRHS( M_uFESpace->map(), Repeated );
+
+        // Loop on boundary conditions
+        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
+        {
+
+            for( ID j = 0; j < M_inflowBoundaryFlags.size(); ++j )
+            {
+                if ( M_bcHandlerPtr->operator[]( i ).flag() == M_inflowBoundaryFlags[j] )
+                {
+                    BCVector uRobin( robinRHS, M_uFESpace->dof().numTotalDof(), 0 );
+                    uRobin.setRobinCoeffVector( convVelocity );
+                    uRobin.setBetaCoeff( M_viscosity/M_density );
+
+                    bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
+                                     M_bcHandlerPtr->operator[]( i ).flag(),
+                                     Robin,
+                                     Normal,
+                                     uRobin,
+                                     1 );
+                }
+                // For Neumann BC we do not need to do anything
+            }
+        }
+        if ( M_setApBoundaryConditions ) bcManageMatrix( *pAp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
+        if ( M_setFpBoundaryConditions ) bcManageMatrix( *pFp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
+        if ( M_setMpBoundaryConditions ) bcManageMatrix( *pMp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
+    }
+    // For enclosed flow where only characteristics BC are imposed,
+    // the choice is correct by default, i.e. Neumann BC.
+
     if ( verbose ) std::cout << " Pressure BC type = " << M_pressureBoundaryConditions << std::endl;
     if ( ( verbose )&&( M_setApBoundaryConditions ) ) std::cout << " BC imposed on Ap" << std::endl;
     if ( ( verbose )&&( M_setFpBoundaryConditions ) ) std::cout << " BC imposed on Fp" << std::endl;
@@ -703,6 +761,16 @@ void
 PreconditionerPCD::setDensity( const Real& density )
 {
     M_density = density;
+}
+
+void
+PreconditionerPCD::setBoundaryTypes( const std::vector<bcFlag_Type>& inflowBoundaryFlags,
+                                     const std::vector<bcFlag_Type>& outflowBoundaryFlags,
+                                     const std::vector<bcFlag_Type>& characteristicBoundaryFlags )
+{
+    M_inflowBoundaryFlags = inflowBoundaryFlags;
+    M_outflowBoundaryFlags = outflowBoundaryFlags;
+    M_characteristicBoundaryFlags = characteristicBoundaryFlags;
 }
 
 } // namespace LifeV
