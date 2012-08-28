@@ -409,8 +409,7 @@ MultiscaleModelFSI3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveL
 Real
 MultiscaleModelFSI3D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
-    // TODO FIX THIS: FOR NOW IT IS APPROXIMATED WITH THE DELTASTRESS
-    return boundaryDeltaStress( flag, solveLinearSystem );
+    return boundaryDeltaStress( flag, solveLinearSystem ) - M_FSIoperator->fluid().linearKineticEnergy( flag, *M_fluidVelocityAndPressure, *M_linearSolution );
 }
 
 // ===================================================

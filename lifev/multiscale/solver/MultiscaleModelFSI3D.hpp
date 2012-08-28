@@ -251,6 +251,7 @@ public:
 
     //! Get the variation of the integral of the total normal stress (on a specific boundary face)
     /*!
+     * TODO The integral terms of the derivative of the area have not been coded yet. They are used only by the GI formulation.
      * @param flag flag of the boundary face
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @param stressType Type of approximation for the stress
