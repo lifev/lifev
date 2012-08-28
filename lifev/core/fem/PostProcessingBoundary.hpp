@@ -690,8 +690,7 @@ Real PostProcessingBoundary<MeshType>::measure( const markerID_Type& flag )
 // flux of vector field "field" through facets with a certain marker
 template<typename MeshType>
 template<typename VectorType>
-Real PostProcessingBoundary<MeshType>::flux( const VectorType& field, const markerID_Type& flag, UInt feSpace,
-                           UInt nDim )
+Real PostProcessingBoundary<MeshType>::flux( const VectorType& field, const markerID_Type& flag, UInt feSpace, UInt nDim )
 {
     // Each processor computes the flux across his own flagged facets --> fluxScatter
     // At the end I'll reduce the process fluxes --> flux
@@ -754,7 +753,7 @@ Real PostProcessingBoundary<MeshType>::flux( const VectorType& field, const mark
 
 template<typename MeshType>
 template<typename VectorType>
-Real PostProcessingBoundary<MeshType>::kineticEnergy( const VectorType& velocity, const Real& density, const markerID_Type& flag, UInt feSpace, UInt nDim )
+Real PostProcessingBoundary<MeshType>::kineticEnergy( const VectorType& velocity, const Real& density, const markerID_Type& flag, UInt feSpace, UInt /*nDim*/ )
 {
     // Each processor computes the quantities across his own flagged facets
     Real kineticEnergyScatter(0.0), kineticEnergy(0.0);
@@ -812,12 +811,14 @@ Real PostProcessingBoundary<MeshType>::kineticEnergy( const VectorType& velocity
 template<typename MeshType>
 template<typename VectorType>
 Real PostProcessingBoundary<MeshType>::kineticEnergyDerivative( const VectorType& velocity, const VectorType& velocityDerivative,
-                                                                const Real& density, const markerID_Type& flag, UInt feSpace, UInt nDim )
+                                                                const Real& density, const markerID_Type& flag, UInt feSpace, UInt /*nDim*/ )
 {
+    //TODO The two terms which depend on the displacement of the fluid have still to be coded
+
     // Each processor computes the quantities across his own flagged facets
     Real kineticEnergyScatter(0.0), kineticEnergy(0.0);
     Real areaScatter(0.0), area(0.0);
-    Real temp1(0.0), temp2(0.0);
+    Real temp(0.0);
 
     // Compute the normal
     Vector faceNormal = normal( flag );
@@ -849,17 +850,20 @@ Real PostProcessingBoundary<MeshType>::kineticEnergyDerivative( const VectorType
                 dofVectorIndex = M_vectorNumberingPerFacetVector[feSpace][ ( UInt ) *j ][ iDof ];
                 dofGlobalId    = M_dofGlobalIdVector[feSpace][dofVectorIndex]; // this is in the GLOBAL mesh
 
-                temp1 = velocity[0*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[0]  // u_x * n_x
-                      + velocity[1*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[1]  // u_y * n_y
-                      + velocity[2*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[2]; // u_z * n_z
-
-                temp2 = velocityDerivative[0*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[0]  // u_x * n_x
-                      + velocityDerivative[1*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[1]  // u_y * n_y
-                      + velocityDerivative[2*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[2]; // u_z * n_z
+                temp = (
+                       velocity[0*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[0]  // u_x * n_x
+                     + velocity[1*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[1]  // u_y * n_y
+                     + velocity[2*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[2]  // u_z * n_z
+                       )
+                     * (
+                       velocityDerivative[0*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[0]  // du_x * n_x
+                     + velocityDerivative[1*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[1]  // du_y * n_y
+                     + velocityDerivative[2*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[2]  // du_z * n_z
+                       );
 
                 kineticEnergyScatter += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
                                       * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
-                                      * temp1 * temp2;
+                                      * temp;
                 }
         }
     }
