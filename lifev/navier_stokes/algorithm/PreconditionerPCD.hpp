@@ -238,11 +238,23 @@ protected:
     std::vector<bcFlag_Type> M_inflowBoundaryFlags;
     std::vector<bcFlag_Type> M_outflowBoundaryFlags;
     std::vector<bcFlag_Type> M_characteristicBoundaryFlags;
+    std::string M_inflowBoundaryType;
+    std::string M_outflowBoundaryType;
+    std::string M_characteristicBoundaryType;
 
 private:
     PreconditionerPCD( const PreconditionerPCD& P ):
         PreconditionerComposition( P.M_comm ){}
     PreconditionerPCD( const boost::shared_ptr<PreconditionerPCD>& /*P*/ ){}
+
+    static Real fZero( const Real& /* t */,
+                       const Real& /* x */,
+                       const Real& /* y */,
+                       const Real& /* z */,
+                       const ID& /* i */ )
+    {
+        return 0.0;
+    }
 
 };
 

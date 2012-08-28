@@ -74,7 +74,10 @@ PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     M_schurOperatorReverseOrder  ( false ),
     M_inflowBoundaryFlags        (),
     M_outflowBoundaryFlags       (),
-    M_characteristicBoundaryFlags()
+    M_characteristicBoundaryFlags(),
+    M_inflowBoundaryType         ( "Robin" ),
+    M_outflowBoundaryType        ( "Neumann" ),
+    M_characteristicBoundaryType ( "Neumann" )
 {
     M_uFESpace.reset();
     M_pFESpace.reset();
@@ -145,6 +148,15 @@ PreconditionerPCD::createPCDList( list_Type&         list,
 
     bool schurOperatorReverseOrder = dataFile( ( section + "/" + subsection + "/Schur_operator_reverse_order" ).data(), false );
     list.set( "Schur operator reverse order", schurOperatorReverseOrder );
+
+    std::string inflowBoundaryType = dataFile( ( section + "/" + subsection + "/inflow_boundary_type" ).data(), "Robin" );
+    list.set( "inflow boundary type", inflowBoundaryType );
+
+    std::string outflowBoundaryType = dataFile( ( section + "/" + subsection + "/outflow_boundary_type" ).data(), "Neumann" );
+    list.set( "outflow boundary type", outflowBoundaryType );
+
+    std::string characteristicBoundaryType = dataFile( ( section + "/" + subsection + "/characteristic_boundary_type" ).data(), "Neumann" );
+    list.set( "characteristic boundary type", characteristicBoundaryType );
 
     if ( displayList && verbose )
     {
@@ -317,7 +329,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     M_adrPressureAssembler.addDiffusion( PFp, -M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
     M_adrPressureAssembler.addAdvection( PFp, *M_beta, B22.firstRowIndex(), B22.firstColumnIndex() );
     M_adrPressureAssembler.addMass( PFp, 1.0/M_timestep, B22.firstRowIndex(), B22.firstColumnIndex() );
-    PFp->globalAssemble();
     boost::shared_ptr<matrix_Type> pFp = PFp;
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
@@ -346,7 +357,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         M_adrPressureAssembler.addDiffusion( PAp, 1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
         MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
     }
-    PAp->globalAssemble();
     boost::shared_ptr<matrix_Type> pAp = PAp;
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
@@ -376,12 +386,15 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         if ( verbose ) std::cout << "... ";
         M_adrPressureAssembler.addMass( PMp, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
-    PMp->globalAssemble();
     boost::shared_ptr<matrix_Type> pMp = PMp;
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     if ( M_pressureBoundaryConditions == "first_dof_dirichlet" )
     {
+        pAp->globalAssemble();
+        pFp->globalAssemble();
+        pMp->globalAssemble();
+
         UInt firstIndex = M_pFESpace->map().map( Unique )->MaxMyGID() + B22.firstRowIndex();
         pAp->diagonalize( firstIndex, 1.0 );
         pFp->diagonalize( firstIndex, 1.0 );
@@ -389,6 +402,10 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     }
     else if ( M_pressureBoundaryConditions == "dirichlet_to_dirichlet" )
     {
+        pAp->globalAssemble();
+        pFp->globalAssemble();
+        pMp->globalAssemble();
+
         // Loop on boundary conditions
         for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
         {
@@ -406,6 +423,10 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     }
     else if ( M_pressureBoundaryConditions == "neumann_to_dirichlet" )
     {
+        pAp->globalAssemble();
+        pFp->globalAssemble();
+        pMp->globalAssemble();
+
         // Loop on boundary conditions
         for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
         {
@@ -467,39 +488,19 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         if ( M_setFpBoundaryConditions ) bcManageMatrix( *pFp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
 
     }
-    else if ( M_pressureBoundaryConditions == "2001_PCD_BC" )
+    else if ( M_pressureBoundaryConditions == "custom" )
     {
         // This option is the one used by Elman & al. in the original PCD:
         // * Dirichlet boundary conditions at inflows
         // * Neumann boundary conditions at outflows
         // * Neumann boundary conditions on characteristic boundaries
 
-        // Loop on boundary conditions
-        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
-        {
-
-            for( ID j = 0; j < M_inflowBoundaryFlags.size(); ++j )
-            {
-                if ( M_bcHandlerPtr->operator[]( i ).flag() == M_inflowBoundaryFlags[j] )
-                {
-                    for ( ID k = 0; k < M_bcHandlerPtr->operator[]( i ).list_size(); ++k )
-                    {
-                        UInt myId = M_bcHandlerPtr->operator[]( i )[k]->id() + B22.firstRowIndex();
-                        if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0 );
-                        if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0 );
-                        if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId, 1.0 );
-                    }
-                }
-            }
-            // For Neumann BC we do not need to do anything
-        }
-    }
-    else if ( M_pressureBoundaryConditions == "2009_PCD_BC" )
-    {
-        // This option is the one used by Elman & al. in the original PCD:
+        // This option is the one used by Elman & al. in the New PCD:
         // * Robin boundary conditions at inflows
         // * Neumann boundary conditions at outflows
         // * Neumann boundary conditions on characteristic boundaries
+
+        std::string boundaryType( "none" );
 
         BCHandler bcHandler;
 
@@ -507,35 +508,86 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         bcHandler.setOffset( B22.firstRowIndex() );
 
         // Creating the vector
-        vector_Type convVelocity( *M_beta, Repeated );
-        vector_Type robinRHS( M_uFESpace->map(), Repeated );
+        vector_Type    convVelocity( *M_beta, Repeated );
+        vector_Type    robinRHS( M_uFESpace->map(), Repeated );
+        BCFunctionBase uZero( fZero );
 
         // Loop on boundary conditions
         for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
         {
 
+
+            boundaryType = "none";
             for( ID j = 0; j < M_inflowBoundaryFlags.size(); ++j )
             {
                 if ( M_bcHandlerPtr->operator[]( i ).flag() == M_inflowBoundaryFlags[j] )
                 {
-                    BCVector uRobin( robinRHS, M_uFESpace->dof().numTotalDof(), 0 );
-                    uRobin.setRobinCoeffVector( convVelocity );
-                    uRobin.setBetaCoeff( M_viscosity/M_density );
-
-                    bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
-                                     M_bcHandlerPtr->operator[]( i ).flag(),
-                                     Robin,
-                                     Normal,
-                                     uRobin,
-                                     1 );
+                    boundaryType = M_inflowBoundaryType;
                 }
+            }
+            for( ID j = 0; j < M_outflowBoundaryFlags.size(); ++j )
+            {
+                if ( M_bcHandlerPtr->operator[]( i ).flag() == M_outflowBoundaryFlags[j] )
+                {
+                    boundaryType = M_outflowBoundaryType;
+                }
+            }
+            for( ID j = 0; j < M_characteristicBoundaryFlags.size(); ++j )
+            {
+                if ( M_bcHandlerPtr->operator[]( i ).flag() == M_characteristicBoundaryFlags[j] )
+                {
+                    boundaryType = M_characteristicBoundaryType;
+                }
+            }
+
+            if ( boundaryType == "Dirichlet" )
+            {
+                bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
+                                 M_bcHandlerPtr->operator[]( i ).flag(),
+                                 Essential,
+                                 Full,
+                                 uZero,
+                                 1 );
+            }
+            else if ( boundaryType == "Robin" )
+            {
+                BCVector uRobin( robinRHS, M_uFESpace->dof().numTotalDof(), 0 );
+                uRobin.setRobinCoeffVector( convVelocity );
+                uRobin.setBetaCoeff( M_viscosity/M_density );
+
+                bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
+                                 M_bcHandlerPtr->operator[]( i ).flag(),
+                                 Robin,
+                                 Full,
+                                 uRobin,
+                                 1 );
+                /*
+                aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
+                    BCFunctionBase hyd(fZero);
+                    BCFunctionBase young (E);
+                    //robin condition on the outer wall
+                    _oper.setRobinOuterWall(hyd, young);
+                    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, uRobin );
+                 */
+            }
+            else if ( boundaryType == "Neumann" )
+            {
                 // For Neumann BC we do not need to do anything
+            }
+            else
+            {
+                if ( verbose ) std::cout << "Error! The type of BC is unknown." << std::endl;
+                exit(-1);
             }
         }
         if ( M_setApBoundaryConditions ) bcManageMatrix( *pAp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
         if ( M_setFpBoundaryConditions ) bcManageMatrix( *pFp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
         if ( M_setMpBoundaryConditions ) bcManageMatrix( *pMp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
+        pAp->globalAssemble();
+        pFp->globalAssemble();
+        pMp->globalAssemble();
     }
+
     // For enclosed flow where only characteristics BC are imposed,
     // the choice is correct by default, i.e. Neumann BC.
 
@@ -544,11 +596,9 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     if ( ( verbose )&&( M_setFpBoundaryConditions ) ) std::cout << " BC imposed on Fp" << std::endl;
     if ( ( verbose )&&( M_setMpBoundaryConditions ) ) std::cout << " BC imposed on Mp" << std::endl;
 
-    if ( verbose ) std::cout << " Schur block (a)... ";
-
     if ( M_schurOperatorReverseOrder )
     {
-        if ( verbose ) std::cout << " Use reverse order for the Schur approximation";
+        if ( verbose ) std::cout << " Use reverse order for the Schur approximation" << std::endl;
 
         if ( verbose ) std::cout << " Schur block (a)... ";
         timer.start();
@@ -585,6 +635,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     }
     else
     {
+        if ( verbose ) std::cout << " Schur block (a)... ";
         timer.start();
         superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_pressureLaplacianPrec ) );
         precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
@@ -722,6 +773,9 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
     M_setMpBoundaryConditions          = this->M_list.get( "set Mp boundary conditions", false );
     M_fullFactorization                = this->M_list.get( "full factorization", false );
     M_schurOperatorReverseOrder        = this->M_list.get( "Schur operator reverse order", false );
+    M_inflowBoundaryType               = this->M_list.get( "inflow boundary type", "Robin" );
+    M_outflowBoundaryType              = this->M_list.get( "outflow boundary type", "Neumann" );
+    M_characteristicBoundaryType       = this->M_list.get( "characteristic boundary type", "Neumann" );
 }
 
 void
