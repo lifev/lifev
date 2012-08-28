@@ -270,7 +270,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::BCInterfaceFunctionParser() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction()" << "\n";
+    debugStream( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction()" << "\n";
 #endif
 
 }
@@ -284,8 +284,8 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTime( const Real& t )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::functionTime: " << "\n";
-    Debug( 5021 ) << "                                                           t: " << t << "\n";
+    debugStream( 5021 ) << "BCInterfaceFunction::functionTime: " << "\n";
+    debugStream( 5021 ) << "                                                           t: " << t << "\n";
 #endif
 
     M_parser->setVariable( "t", t );
@@ -293,7 +293,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTime( const Real& t )
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
+    debugStream( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
 #endif
 
     return M_parser->evaluate( 0 );
@@ -305,9 +305,9 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeTimeStep( const Rea
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::functionTime: " << "\n";
-    Debug( 5021 ) << "                                                           t: " << t << "\n";
-    Debug( 5021 ) << "                                                           timeStep: " << timeStep << "\n";
+    debugStream( 5021 ) << "BCInterfaceFunction::functionTime: " << "\n";
+    debugStream( 5021 ) << "                                                           t: " << t << "\n";
+    debugStream( 5021 ) << "                                                           timeStep: " << timeStep << "\n";
 #endif
 
     M_parser->setVariable( "t", t );
@@ -316,7 +316,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeTimeStep( const Rea
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
+    debugStream( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
 #endif
 
     return M_parser->evaluate( 0 );
@@ -328,11 +328,11 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpace( const Real& 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::functionTimeSpace: " << "\n";
-    Debug( 5021 ) << "                                                           x: " << x << "\n";
-    Debug( 5021 ) << "                                                           y: " << y << "\n";
-    Debug( 5021 ) << "                                                           z: " << z << "\n";
-    Debug( 5021 ) << "                                                           t: " << t << "\n";
+    debugStream( 5021 ) << "BCInterfaceFunction::functionTimeSpace: " << "\n";
+    debugStream( 5021 ) << "                                                           x: " << x << "\n";
+    debugStream( 5021 ) << "                                                           y: " << y << "\n";
+    debugStream( 5021 ) << "                                                           z: " << z << "\n";
+    debugStream( 5021 ) << "                                                           t: " << t << "\n";
 #endif
 
     M_parser->setVariable( "t", t );
@@ -343,7 +343,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpace( const Real& 
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
+    debugStream( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
 #endif
 
     return M_parser->evaluate( 0 );
@@ -355,12 +355,12 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID( const Real
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::functionTimeSpaceID: " << "\n";
-    Debug( 5021 ) << "                                                           x: " << x << "\n";
-    Debug( 5021 ) << "                                                           y: " << y << "\n";
-    Debug( 5021 ) << "                                                           z: " << z << "\n";
-    Debug( 5021 ) << "                                                           t: " << t << "\n";
-    Debug( 5021 ) << "                                                          id: " << id << "\n";
+    debugStream( 5021 ) << "BCInterfaceFunction::functionTimeSpaceID: " << "\n";
+    debugStream( 5021 ) << "                                                           x: " << x << "\n";
+    debugStream( 5021 ) << "                                                           y: " << y << "\n";
+    debugStream( 5021 ) << "                                                           z: " << z << "\n";
+    debugStream( 5021 ) << "                                                           t: " << t << "\n";
+    debugStream( 5021 ) << "                                                          id: " << id << "\n";
 #endif
 
     M_parser->setVariable( "t", t );
@@ -371,7 +371,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID( const Real
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate( M_mapID[id] ) << "\n";
+    debugStream( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate( M_mapID[id] ) << "\n";
 #endif
 
     return M_parser->evaluate( M_mapID[id] );
@@ -386,7 +386,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setData( const BCInterfaceData0
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+    debugStream( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
 
     setupParser( data );
@@ -398,7 +398,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setData( const BCInterfaceData1
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+    debugStream( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
 
     setupParser( data );
@@ -410,7 +410,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setData( const BCInterfaceData3
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+    debugStream( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
 
     setupParser( data );
@@ -428,7 +428,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setData( const BCInterfaceData3
      */
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring( "," ) << "\n";
+    debugStream( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring( "," ) << "\n";
 #endif
 
     // Note: the map ID is used only for 3D handler.
@@ -454,7 +454,7 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setupParser( const BCInterfaceD
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterfaceFunction::setParser" << "\n";
+    debugStream( 5022 ) << "BCInterfaceFunction::setParser" << "\n";
 #endif
 
     if ( M_parser )
