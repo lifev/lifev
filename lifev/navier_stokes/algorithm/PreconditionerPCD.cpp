@@ -44,6 +44,7 @@
 #include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/core/array/MatrixEpetraStructuredView.hpp>
 #include <lifev/core/array/MatrixEpetraStructuredUtility.hpp>
+#include <lifev/core/array/VectorBlockStructure.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -198,6 +199,8 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     blockNumRows[0] = M_velocityBlockSize;
     blockNumRows[1] = M_pressureBlockSize;
     std::vector<UInt> blockNumColumns( blockNumRows );
+    VectorBlockStructure vectorStructure;
+    vectorStructure.setBlockStructure( blockNumColumns );
 
     bool inversed( true );
     bool notInversed( false );
@@ -205,7 +208,8 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     bool notTransposed( false );
 
     map_Type map( oper->map() );
-    //oper->spy( "A" );
+    map_Type velocityMap( M_uFESpace->map() );
+    map_Type pressureMap( M_pFESpace->map() );
 
     LifeChrono timer;
 
@@ -214,24 +218,20 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
      * / F Bt \
      * \ B C  /
      */
-    if ( verbose ) std::cout << std::endl << "      >Getting the structure of A... ";
+    if ( verbose ) std::cout << "      >Getting the structure of A... ";
     timer.start();
     matrixBlockView_Type F, Bt, B, C;
     //oper.blockView( 0, 0, F );
     F.setup( 0 ,0, blockNumRows[0], blockNumColumns[0], oper.get() );
-    //F.showMe();
 
     //oper.blockView( 0, 1, Bt );
     Bt.setup( 0, blockNumColumns[0], blockNumRows[0], blockNumColumns[1], oper.get() );
-    //Bt.showMe();
 
     //oper.blockView( 1, 0, B );
     B.setup( blockNumRows[0], 0, blockNumRows[1], blockNumColumns[0], oper.get() );
-    //B.showMe();
 
     //oper.blockView( 1, 1, C );
     C.setup( blockNumRows[0], blockNumColumns[0], blockNumRows[1], blockNumColumns[1], oper.get() );
-    //C.showMe();
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     // Getting the block structure of B
@@ -249,6 +249,23 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
 
     boost::shared_ptr<matrix_Type> p3;
     superPtr_Type precForBlock3;
+    boost::shared_ptr<matrixBlock_Type> P3;
+    if( M_fluidPrec == "LinearSolver" )
+    {
+        MatrixEpetraStructuredUtility::createMatrixFromBlock( F, P3, velocityMap, true );
+    }
+    else
+    {
+        P3.reset( new matrixBlock_Type( map ) );
+        P3->setBlockStructure( blockNumRows, blockNumColumns );
+        P3->blockView( 0, 0, B11 );
+        P3->blockView( 1, 1, B22 );
+        MatrixEpetraStructuredUtility::copyBlock( F, B11 );
+        MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
+        P3->globalAssemble();
+    }
+    p3 = P3;
+
     if( M_fullFactorization == true )
     {
         /*
@@ -262,17 +279,8 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
          * / F 0 \
          * \ 0 I /
          */
-        if ( verbose ) std::cout << " Fluid block... ";
+        if ( verbose ) std::cout << "      >Fluid block... ";
         timer.start();
-        boost::shared_ptr<matrixBlock_Type> P3( new matrixBlock_Type( map ) );
-        P3->setBlockStructure( blockNumRows, blockNumColumns );
-        P3->blockView( 0, 0, B11 );
-        P3->blockView( 1, 1, B22 );
-        MatrixEpetraStructuredUtility::copyBlock( F, B11 );
-        MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
-        P3->globalAssemble();
-        //P3->spy( "p3" );
-        p3 = P3;
         precForBlock3.reset( PRECFactory::instance().createObject( M_fluidPrec ) );
         precForBlock3->setDataFromGetPot( M_dataFile, M_fluidPrecDataSection );
         if( M_fluidPrec == "ML2" )
@@ -280,7 +288,14 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*>( precForBlock3.get() );
             tmpPrecPtr->setFESpace( M_uFESpace, M_pFESpace );
         }
-        this->pushBack( p3,precForBlock3, notInversed, notTransposed );
+        if( M_fluidPrec == "LinearSolver" )
+        {
+            this->pushBack( p3, precForBlock3, vectorStructure, 0, notInversed, notTransposed );
+        }
+        else
+        {
+            this->pushBack( p3, precForBlock3, notInversed, notTransposed );
+        }
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
         /*
@@ -288,7 +303,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
          * /  I  0 \
          * \ -B  I /
          */
-        if ( verbose ) std::cout << " Divergence block... ";
+        if ( verbose ) std::cout << "      >Divergence block... ";
         timer.start();
         boost::shared_ptr<matrixBlock_Type> P2e( new matrixBlock_Type( map ) );
         P2e->setBlockStructure( blockNumRows, blockNumColumns );
@@ -300,7 +315,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
         MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
         P2e->globalAssemble();
-        //P2->spy( "p2" );
         boost::shared_ptr<matrix_Type> p2e = P2e;
         this->pushBack( p2e, inversed, notTransposed );
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
@@ -310,7 +324,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
          * / F^-1 0 \
          * \ 0    I /
          */
-        if ( verbose ) std::cout << " Fluid block... ";
+        if ( verbose ) std::cout << "      >Fluid block... ";
         this->pushBack( p3, inversed, notTransposed );
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
     }
@@ -320,25 +334,40 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
      * / I  0 \   / I     0      \   / I  0  \ / I 0     \ / I 0  \
      * \ 0 -S / = \ 0 -ApFp^-1Mp / = \ 0 -Ap / \ 0 Fp^-1 / \ 0 Mp /
      */
-    if ( verbose ) std::cout << " Building Fp... ";
+    if ( verbose ) std::cout << "      >Building Fp... ";
     timer.start();
-    boost::shared_ptr<matrixBlock_Type> PFp( new matrixBlock_Type( map ) );
-    *PFp *= 0.0;
+    boost::shared_ptr<matrixBlock_Type> PFp;
+    PFp.reset( new matrixBlock_Type( map ) );
     PFp->setBlockStructure( blockNumRows, blockNumColumns );
+    *PFp *= 0.0;
+    PFp->blockView( 0, 0, B11 );
     PFp->blockView( 1, 1, B22 );
+    MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
     M_adrPressureAssembler.addDiffusion( PFp, -M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
     M_adrPressureAssembler.addAdvection( PFp, *M_beta, B22.firstRowIndex(), B22.firstColumnIndex() );
     M_adrPressureAssembler.addMass( PFp, 1.0/M_timestep, B22.firstRowIndex(), B22.firstColumnIndex() );
     boost::shared_ptr<matrix_Type> pFp = PFp;
+    UInt FpOffset( B22.firstRowIndex() );
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
-    if ( verbose ) std::cout << " Building Ap";
+    if ( verbose ) std::cout << "      >Building Ap";
     timer.start();
-    boost::shared_ptr<matrixBlock_Type> PAp( new matrixBlock_Type( map ) );
-    *PAp *= 0.0;
-    PAp->setBlockStructure( blockNumRows, blockNumColumns );
-    PAp->blockView( 0, 0, B11 );
-    PAp->blockView( 1, 1, B22 );
+    boost::shared_ptr<matrixBlock_Type> PAp;
+    if( M_pressureLaplacianPrec == "LinearSolver" )
+    {
+        PAp.reset( new matrixBlock_Type( pressureMap ) );
+        *PAp *= 0.0;
+        PAp->blockView( 0, 0, B22 );
+    }
+    else
+    {
+        PAp.reset( new matrixBlock_Type( map ) );
+        PAp->setBlockStructure( blockNumRows, blockNumColumns );
+        *PAp *= 0.0;
+        PAp->blockView( 0, 0, B11 );
+        PAp->blockView( 1, 1, B22 );
+        MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
+    }
 
     if ( M_pressureLaplacianOperator == "symmetric" )
     {
@@ -348,27 +377,35 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         EpetraExt::MatrixMatrix::Add( *( pFp->matrixPtr() ), false, 0.5*M_density/M_viscosity,
                                       *( pFp->matrixPtr() ), true,  0.5*M_density/M_viscosity,
                                       tmpCrsMatrix );
-
-        MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
     }
     else
     {
         if ( verbose ) std::cout << "... ";
         M_adrPressureAssembler.addDiffusion( PAp, 1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
-        MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
     }
     boost::shared_ptr<matrix_Type> pAp = PAp;
+    UInt ApOffset( B22.firstRowIndex() );
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
 
-    if ( verbose ) std::cout << " Building Mp";
+    if ( verbose ) std::cout << "      >Building Mp";
     timer.start();
-    boost::shared_ptr<matrixBlock_Type> PMp( new matrixBlock_Type( map ) );
-    *PMp *= 0.0;
-    PMp->setBlockStructure( blockNumRows, blockNumColumns );
-    PMp->blockView( 0, 0, B11 );
-    PMp->blockView( 1, 1, B22 );
-    MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
+    boost::shared_ptr<matrixBlock_Type> PMp;
+    if( M_pressureMassPrec == "LinearSolver" )
+    {
+        PMp.reset( new matrixBlock_Type( pressureMap ) );
+        *PMp *= 0.0;
+        PMp->blockView( 0, 0, B22 );
+    }
+    else
+    {
+        PMp.reset( new matrixBlock_Type( map ) );
+        PMp->setBlockStructure( blockNumRows, blockNumColumns );
+        *PMp *= 0.0;
+        PMp->blockView( 0, 0, B11 );
+        PMp->blockView( 1, 1, B22 );
+        MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
+    }
     if ( M_useLumpedPressureMass )
     {
         if ( verbose ) std::cout << " (Lumped version)... ";
@@ -379,7 +416,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         tmpMass->blockView( 1, 1, B11 );
         MatrixEpetraStructuredUtility::createInvLumpedBlock( B11, B22 );
         tmpMass.reset();
-
     }
     else
     {
@@ -387,6 +423,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         M_adrPressureAssembler.addMass( PMp, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
     boost::shared_ptr<matrix_Type> pMp = PMp;
+    UInt MpOffset( B22.firstRowIndex() );
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     if ( M_pressureBoundaryConditions == "first_dof_dirichlet" )
@@ -395,10 +432,10 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         pFp->globalAssemble();
         pMp->globalAssemble();
 
-        UInt firstIndex = M_pFESpace->map().map( Unique )->MaxMyGID() + B22.firstRowIndex();
-        pAp->diagonalize( firstIndex, 1.0 );
-        pFp->diagonalize( firstIndex, 1.0 );
-        pMp->diagonalize( firstIndex, 1.0 );
+        UInt firstIndex = M_pFESpace->map().map( Unique )->MaxMyGID();
+        pAp->diagonalize( firstIndex + ApOffset, 1.0 );
+        pFp->diagonalize( firstIndex + FpOffset, 1.0 );
+        pMp->diagonalize( firstIndex + MpOffset, 1.0 );
     }
     else if ( M_pressureBoundaryConditions == "dirichlet_to_dirichlet" )
     {
@@ -413,10 +450,10 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             {
                 for ( ID j = 0; j < M_bcHandlerPtr->operator[]( i ).list_size(); ++j )
                 {
-                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id() + B22.firstRowIndex();
-                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0);
-                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0);
-                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId, 1.0 );
+                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id();
+                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId + ApOffset, 1.0 );
+                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId + FpOffset, 1.0 );
+                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId + MpOffset, 1.0 );
                 }
             }
         }
@@ -434,10 +471,10 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             {
                 for ( ID j = 0; j < M_bcHandlerPtr->operator[]( i ).list_size(); ++j )
                 {
-                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id() + B22.firstRowIndex();
-                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId, 1.0 );
-                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId, 1.0 );
-                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId, 1.0 );
+                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id();
+                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId + ApOffset, 1.0 );
+                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId + FpOffset, 1.0 );
+                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId + MpOffset, 1.0 );
                 }
             }
         }
@@ -445,9 +482,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     else if ( M_pressureBoundaryConditions == "robin_at_inflow" )
     {
         BCHandler bcHandler;
-
-        // Offset to set the BC for the pressure
-        bcHandler.setOffset( B22.firstRowIndex() );
 
         // Loop on boundary conditions
         for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
@@ -472,6 +506,13 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
                                  Normal,
                                  uRobin,
                                  numComponents );
+
+                aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
+                    BCFunctionBase hyd(fZero);
+                    BCFunctionBase young (E);
+                    //robin condition on the outer wall
+                    _oper.setRobinOuterWall(hyd, young);
+                    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, uRobin );
                 */
             }
             else
@@ -484,8 +525,33 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
                                  numComponents );
             }
         }
-        if ( M_setApBoundaryConditions ) bcManageMatrix( *pAp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
-        if ( M_setFpBoundaryConditions ) bcManageMatrix( *pFp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
+
+        if ( !bcHandler.bcUpdateDone() )
+        {
+            if ( verbose ) std::cout << "      >Updating the BC handler" << std::endl;
+            bcHandler.bcUpdate( *M_pFESpace->mesh(),
+                                 M_pFESpace->feBd(),
+                                 M_pFESpace->dof() );
+        }
+
+        if ( M_setApBoundaryConditions )
+        {
+            // Offset to set the BC for the pressure
+            bcHandler.setOffset( ApOffset );
+            bcManageMatrix( *pAp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+        }
+        if ( M_setFpBoundaryConditions )
+        {
+            // Offset to set the BC for the pressure
+            bcHandler.setOffset( FpOffset );
+            bcManageMatrix( *pFp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+        }
+        if ( M_setMpBoundaryConditions )
+        {
+            // Offset to set the BC for the pressure
+            bcHandler.setOffset( MpOffset );
+            bcManageMatrix( *pMp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+        }
 
     }
     else if ( M_pressureBoundaryConditions == "custom" )
@@ -504,9 +570,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
 
         BCHandler bcHandler;
 
-        // Offset to set the BC for the pressure
-        bcHandler.setOffset( B22.firstRowIndex() );
-
         // Creating the vector
         vector_Type    convVelocity( *M_beta, Repeated );
         vector_Type    robinRHS( M_uFESpace->map(), Repeated );
@@ -515,8 +578,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         // Loop on boundary conditions
         for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
         {
-
-
             boundaryType = "none";
             for( ID j = 0; j < M_inflowBoundaryFlags.size(); ++j )
             {
@@ -561,14 +622,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
                                  Full,
                                  uRobin,
                                  1 );
-                /*
-                aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
-                    BCFunctionBase hyd(fZero);
-                    BCFunctionBase young (E);
-                    //robin condition on the outer wall
-                    _oper.setRobinOuterWall(hyd, young);
-                    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, uRobin );
-                 */
             }
             else if ( boundaryType == "Neumann" )
             {
@@ -580,27 +633,51 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
                 exit(-1);
             }
         }
-        if ( M_setApBoundaryConditions ) bcManageMatrix( *pAp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
-        if ( M_setFpBoundaryConditions ) bcManageMatrix( *pFp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
-        if ( M_setMpBoundaryConditions ) bcManageMatrix( *pMp, *M_uFESpace->mesh(), M_uFESpace->dof(), bcHandler, M_uFESpace->feBd(), 1.0, 0.0 );
+
+        if ( !bcHandler.bcUpdateDone() )
+        {
+            if ( verbose ) std::cout << "      >Updating the BC handler" << std::endl;
+            bcHandler.bcUpdate( *M_pFESpace->mesh(),
+                                 M_pFESpace->feBd(),
+                                 M_pFESpace->dof() );
+        }
+
+        if ( M_setApBoundaryConditions )
+        {
+            bcHandler.setOffset( ApOffset );
+            bcManageMatrix( *pAp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+        }
+        if ( M_setFpBoundaryConditions )
+        {
+            bcHandler.setOffset( FpOffset );
+            bcManageMatrix( *pFp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+        }
+        if ( M_setMpBoundaryConditions )
+        {
+            bcHandler.setOffset( MpOffset );
+            bcManageMatrix( *pMp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+        }
         pAp->globalAssemble();
         pFp->globalAssemble();
         pMp->globalAssemble();
+        //pAp->spy("pAp");
+        //pFp->spy("pFp");
+        //pMp->spy("pMp");
     }
 
     // For enclosed flow where only characteristics BC are imposed,
     // the choice is correct by default, i.e. Neumann BC.
 
-    if ( verbose ) std::cout << " Pressure BC type = " << M_pressureBoundaryConditions << std::endl;
-    if ( ( verbose )&&( M_setApBoundaryConditions ) ) std::cout << " BC imposed on Ap" << std::endl;
-    if ( ( verbose )&&( M_setFpBoundaryConditions ) ) std::cout << " BC imposed on Fp" << std::endl;
-    if ( ( verbose )&&( M_setMpBoundaryConditions ) ) std::cout << " BC imposed on Mp" << std::endl;
+    if ( verbose ) std::cout << "      >Pressure BC type = " << M_pressureBoundaryConditions << std::endl;
+    if ( ( verbose )&&( M_setApBoundaryConditions ) ) std::cout << "      >BC imposed on Ap" << std::endl;
+    if ( ( verbose )&&( M_setFpBoundaryConditions ) ) std::cout << "      >BC imposed on Fp" << std::endl;
+    if ( ( verbose )&&( M_setMpBoundaryConditions ) ) std::cout << "      >BC imposed on Mp" << std::endl;
 
     if ( M_schurOperatorReverseOrder )
     {
-        if ( verbose ) std::cout << " Use reverse order for the Schur approximation" << std::endl;
+        if ( verbose ) std::cout << "      >Use reverse order for the Schur approximation" << std::endl;
 
-        if ( verbose ) std::cout << " Schur block (a)... ";
+        if ( verbose ) std::cout << "      >Schur block (a)... ";
         timer.start();
         if ( M_useLumpedPressureMass )
         {
@@ -610,52 +687,60 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         {
             superPtr_Type precForBlock2( PRECFactory::instance().createObject( M_pressureMassPrec ) );
             precForBlock2->setDataFromGetPot( M_dataFile, M_pressureMassPrecDataSection );
-            this->pushBack( pMp,precForBlock2, notInversed, notTransposed );
+            if( M_pressureMassPrec == "LinearSolver" )
+            {
+                this->pushBack( pMp, precForBlock2, vectorStructure, 1, notInversed, notTransposed );
+            }
+            else
+            {
+                this->pushBack( pMp,precForBlock2, notInversed, notTransposed );
+            }
         }
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-        if ( verbose ) std::cout << " Schur block (b)... ";
+        if ( verbose ) std::cout << "      >Schur block (b)... ";
         timer.start();
-        boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
-        P1b->setBlockStructure( blockNumRows, blockNumColumns );
-        *P1b += *PFp;
-        P1b->blockView( 0, 0, B11 );
-        MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
-        P1b->globalAssemble();
-        boost::shared_ptr<matrix_Type> p1b = P1b;
+        boost::shared_ptr<matrix_Type> p1b = PFp;
         this->pushBack( p1b, inversed,notTransposed );
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-        if ( verbose ) std::cout << " Schur block (c)... ";
+        if ( verbose ) std::cout << "      >Schur block (c)... ";
         timer.start();
         superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_pressureLaplacianPrec ) );
         precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
-        this->pushBack( pAp, precForBlock1, notInversed, notTransposed );
+        if( M_pressureLaplacianPrec == "LinearSolver" )
+        {
+            this->pushBack( pAp, precForBlock1, vectorStructure, 1, notInversed, notTransposed );
+        }
+        else
+        {
+            this->pushBack( pAp, precForBlock1, notInversed, notTransposed );
+        }
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
     }
     else
     {
-        if ( verbose ) std::cout << " Schur block (a)... ";
+        if ( verbose ) std::cout << "      >Schur block (a)... ";
         timer.start();
         superPtr_Type precForBlock1( PRECFactory::instance().createObject( M_pressureLaplacianPrec ) );
         precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
-        this->pushBack( pAp, precForBlock1, notInversed, notTransposed );
+        if( M_pressureLaplacianPrec == "LinearSolver" )
+        {
+            this->pushBack( pAp, precForBlock1, vectorStructure, 1, notInversed, notTransposed );
+        }
+        else
+        {
+            this->pushBack( pAp, precForBlock1, notInversed, notTransposed );
+        }
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-        if ( verbose ) std::cout << " Schur block (b)... ";
+        if ( verbose ) std::cout << "      >Schur block (b)... ";
         timer.start();
-        boost::shared_ptr<matrixBlock_Type> P1b( new matrixBlock_Type( map ) );
-        P1b->setBlockStructure( blockNumRows, blockNumColumns );
-        *P1b += *PFp;
-        P1b->blockView( 0, 0, B11 );
-        MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
-        P1b->globalAssemble();
-        boost::shared_ptr<matrix_Type> p1b = P1b;
-        //p1b->spy( "p1b" );
+        boost::shared_ptr<matrix_Type> p1b = PFp;
         this->pushBack( p1b, inversed,notTransposed );
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-        if ( verbose ) std::cout << " Schur block (c)... ";
+        if ( verbose ) std::cout << "      >Schur block (c)... ";
         timer.start();
         if ( M_useLumpedPressureMass )
         {
@@ -665,7 +750,14 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         {
             superPtr_Type precForBlock2( PRECFactory::instance().createObject( M_pressureMassPrec ) );
             precForBlock2->setDataFromGetPot( M_dataFile, M_pressureMassPrecDataSection );
-            this->pushBack( pMp,precForBlock2, notInversed, notTransposed );
+            if( M_pressureMassPrec == "LinearSolver" )
+            {
+                this->pushBack( pMp, precForBlock2, vectorStructure, 1, notInversed, notTransposed );
+            }
+            else
+            {
+                this->pushBack( pMp,precForBlock2, notInversed, notTransposed );
+            }
         }
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
     }
@@ -675,7 +767,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
      * / I -Bt \
      * \ 0  I  /
      */
-    if ( verbose ) std::cout << " Gradient block... ";
+    if ( verbose ) std::cout << "      >Gradient block... ";
     timer.start();
     boost::shared_ptr<matrixBlock_Type> P2( new matrixBlock_Type( map ) );
     P2->setBlockStructure( blockNumRows, blockNumColumns );
@@ -687,7 +779,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     MatrixEpetraStructuredUtility::createIdentityBlock( B11 );
     MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
     P2->globalAssemble();
-    //P2->spy( "p2" );
     boost::shared_ptr<matrix_Type> p2 = P2;
     this->pushBack( p2, inversed, notTransposed );
     if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
@@ -699,24 +790,20 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
      */
     if( M_fullFactorization == true )
     {
-        precForBlock3.reset( PRECFactory::instance().createObject( M_fluidPrec ) );
-        precForBlock3->setDataFromGetPot( M_dataFile, M_fluidPrecDataSection );
-        this->pushBack( p3,precForBlock3, notInversed, notTransposed );
+        if( M_fluidPrec == "LinearSolver" )
+        {
+            this->pushBack( p3, precForBlock3, vectorStructure, 0, notInversed, notTransposed );
+        }
+        else
+        {
+            this->pushBack( p3, precForBlock3, notInversed, notTransposed );
+        }
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
     }
     else
     {
-        if ( verbose ) std::cout << " Fluid block... ";
+        if ( verbose ) std::cout << "      >Fluid block... ";
         timer.start();
-        boost::shared_ptr<matrixBlock_Type> P3( new matrixBlock_Type( map ) );
-        P3->setBlockStructure( blockNumRows, blockNumColumns );
-        P3->blockView( 0, 0, B11 );
-        P3->blockView( 1, 1, B22 );
-        MatrixEpetraStructuredUtility::copyBlock( F, B11 );
-        MatrixEpetraStructuredUtility::createIdentityBlock( B22 );
-        P3->globalAssemble();
-        //P3->spy( "p3" );
-        p3 = P3;
         precForBlock3.reset( PRECFactory::instance().createObject( M_fluidPrec ) );
         precForBlock3->setDataFromGetPot( M_dataFile, M_fluidPrecDataSection );
         if( M_fluidPrec == "ML2" )
@@ -724,7 +811,14 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*>( precForBlock3.get() );
             tmpPrecPtr->setFESpace( M_uFESpace, M_pFESpace );
         }
-        this->pushBack( p3,precForBlock3, notInversed, notTransposed );
+        if( M_fluidPrec == "LinearSolver" )
+        {
+            this->pushBack( p3, precForBlock3, vectorStructure, 0, notInversed, notTransposed );
+        }
+        else
+        {
+            this->pushBack( p3, precForBlock3, notInversed, notTransposed );
+        }
         if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
     }
 
