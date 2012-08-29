@@ -147,7 +147,7 @@ BCInterfaceFactory< PhysicalSolverType >::BCInterfaceFactory()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterfaceFactory::BCInterfaceFactory" << "\n";
+    debugStream( 5020 ) << "BCInterfaceFactory::BCInterfaceFactory" << "\n";
 #endif
 
     //Factory registration

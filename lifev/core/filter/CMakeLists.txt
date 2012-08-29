@@ -15,7 +15,6 @@ SET(filter_HEADERS
 CACHE INTERNAL "")
 
 SET(filter_SOURCES
-  filter/Exporter.cpp
   filter/HDF5IO.cpp
   filter/Importer.cpp
   filter/ImporterMesh3D.cpp

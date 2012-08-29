@@ -294,10 +294,10 @@ is the problem definition part, starting from these lines
         {
             using namespace LifeV;
 
-            Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
+            debugStream( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
 
             M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
-            Debug( 10000 ) << _oper << " set \n";
+            debugStream( 10000 ) << _oper << " set \n";
 
             MPI_Barrier(MPI_COMM_WORLD);
 \end{verbatim}
@@ -460,14 +460,14 @@ will be solved on a lead structure processor (\#0 processor within the structure
                                data_file("problem/precond"   ,
                                DIRICHLET_NEUMANN );
 
-    Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
+    debugStream( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
 
     if ( !__oper.empty() )
     {
         M_method = __oper;
     }
 
-    Debug( 6220 ) << "FSISolver::setFSIOperator " << M_method << "\n";
+    debugStream( 6220 ) << "FSISolver::setFSIOperator " << M_method << "\n";
 
     this->setFSIOperator( M_method );
 
@@ -477,25 +477,25 @@ will be solved on a lead structure processor (\#0 processor within the structure
     M_oper->setFluidLeader(fluidLeader);
     M_oper->setSolidLeader(solidLeader);
 
-    Debug( 6220 ) << "FSISolver::setPreconditioner " << precond << "\n";
+    debugStream( 6220 ) << "FSISolver::setPreconditioner " << precond << "\n";
 
     std::cout << std::flush;
     M_oper->setComm(M_epetraComm, M_epetraWorldComm);
 
-    Debug( 6220 ) << "FSISolver::setDataFromGetPot " << precond << "\n";
+    debugStream( 6220 ) << "FSISolver::setDataFromGetPot " << precond << "\n";
     std::cout << std::flush;
 
     M_oper->setDataFromGetPot( data_file );
 
 
-    Debug( 6220 ) << "FSISolver::setPrecond " << precond << "\n";
+    debugStream( 6220 ) << "FSISolver::setPrecond " << precond << "\n";
     std::cout << std::flush;
 
     M_oper->setPreconditioner( precond );
 
     M_oper->setup();
 
-    Debug( 6220 ) << "FSISolver:: variable setup " << precond << "\n";
+    debugStream( 6220 ) << "FSISolver:: variable setup " << precond << "\n";
 
     M_oper->setUpSystem(data_file);
 
@@ -566,7 +566,7 @@ The last interesting part in the \verb!FSISolver! class, is the \verb!iterate! m
 
     // the newton solver
     UInt status = 1;
-    Debug( 6220 ) << "Calling non-linear Richardson \n";
+    debugStream( 6220 ) << "Calling non-linear Richardson \n";
 
     status = nonLinRichardson(*M_lambda,
                               *M_oper,

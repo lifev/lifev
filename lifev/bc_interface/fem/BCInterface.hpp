@@ -293,7 +293,7 @@ BCInterface< BcHandler, PhysicalSolverType >::BCInterface() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface::BCInterface" << "\n";
+    debugStream( 5020 ) << "BCInterface::BCInterface" << "\n";
 #endif
 
 }
@@ -307,7 +307,7 @@ BCInterface< BcHandler, PhysicalSolverType >::fillHandler( const std::string& fi
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface::fillHandler\n";
+    debugStream( 5020 ) << "BCInterface::fillHandler\n";
 #endif
 
     GetPot dataFile( fileName );
@@ -326,7 +326,7 @@ BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface::updatePhysicalSolverVariables\n";
+    debugStream( 5020 ) << "BCInterface::updatePhysicalSolverVariables\n";
 #endif
 
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )

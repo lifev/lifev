@@ -281,7 +281,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::BCInterface3D() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface3D::BCInterface3D" << "\n";
+    debugStream( 5020 ) << "BCInterface3D::BCInterface3D" << "\n";
 #endif
 
 }
@@ -295,7 +295,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface3D::insertBC\n";
+    debugStream( 5020 ) << "BCInterface3D::insertBC\n";
 #endif
 
     switch ( M_data.base().second )
@@ -457,7 +457,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
     case Directional:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Scalar, Normal, Tangential, Directional" << "\n\n";
+        debugStream( 5020 ) << "BCInterface3D::addBcToHandler                            Scalar, Normal, Tangential, Directional" << "\n\n";
 #endif
 
         this->M_handler->addBC( M_data.name(), M_data.flag(), M_data.type(), M_data.mode(), base );
@@ -467,7 +467,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
     case Full:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Full" << "\n\n";
+        debugStream( 5020 ) << "BCInterface3D::addBcToHandler                            Full" << "\n\n";
 #endif
 
         this->M_handler->addBC( M_data.name(), M_data.flag(), M_data.type(), M_data.mode(), base, M_data.componentsNumber() );
@@ -477,7 +477,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
     case Component:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Component" << "\n\n";
+        debugStream( 5020 ) << "BCInterface3D::addBcToHandler                            Component" << "\n\n";
 #endif
 
         this->M_handler->addBC( M_data.name(), M_data.flag(), M_data.type(), M_data.mode(), base, M_data.componentsVector() );

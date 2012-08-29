@@ -182,6 +182,18 @@ public:
 
     //@}
 
+    //! @name Set Methods
+    //@{
+
+    //! Set data from file.
+    /*!
+     * @param dataFile data file.
+     * @param section section in the data file.
+     */
+    void setDataFromGetPot( const GetPot& dataFile, const std::string& section = "exporter" );
+
+    //@}
+
     //! @name Get Methods
     //@{
 
@@ -229,6 +241,9 @@ protected:
     const std::string M_closingLines;
     std::streampos    M_closingLinesPosition;
     std::string       M_outputFileName;
+
+    //! do we want to write on file the connectivity?
+    bool                        M_printConnectivity;
     //@}
 
 };
@@ -243,7 +258,8 @@ ExporterHDF5<MeshType>::ExporterHDF5():
         super               (),
         M_HDF5              (),
         M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
-        M_outputFileName    ( "noninitialisedFileName" )
+        M_outputFileName    ( "noninitialisedFileName" ),
+        M_printConnectivity ( true )
 {
 }
 
@@ -255,6 +271,7 @@ ExporterHDF5<MeshType>::ExporterHDF5(const GetPot& dfile, meshPtr_Type mesh, con
         M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
         M_outputFileName    ( "noninitialisedFileName" )
 {
+    M_printConnectivity = dfile( ( prefix + "/printConnectivity" ).data(), 1);
     this->setMeshProcId( mesh, procId );
 }
 
@@ -265,6 +282,7 @@ ExporterHDF5<MeshType>::ExporterHDF5(const GetPot& dfile, const std::string& pre
         M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
         M_outputFileName    ( "noninitialisedFileName" )
 {
+    M_printConnectivity = dfile( ( prefix + "/printConnectivity" ).data(), 1);
 }
 
 // ===================================================
@@ -527,6 +545,16 @@ void ExporterHDF5<MeshType>::readVariable(exporterData_Type& dvar)
         M_HDF5->Open(this->M_postDir+this->M_prefix+".h5"); //!! Simone
     }
     super::readVariable(dvar);
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+template<typename MeshType>
+void ExporterHDF5<MeshType>::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
+{
+    super::setDataFromGetPot( dataFile, section );
+    M_printConnectivity = dataFile( ( section + "/printConnectivity" ).data(), 1);
 }
 
 // ===================================================
