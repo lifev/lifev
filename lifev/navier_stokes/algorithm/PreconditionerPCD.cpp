@@ -334,6 +334,10 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
      * / I  0 \   / I     0      \   / I  0  \ / I 0     \ / I 0  \
      * \ 0 -S / = \ 0 -ApFp^-1Mp / = \ 0 -Ap / \ 0 Fp^-1 / \ 0 Mp /
      */
+    UInt ApOffset( 0 );
+    UInt FpOffset( 0 );
+    UInt MpOffset( 0 );
+
     if ( verbose ) std::cout << "      >Building Fp... ";
     timer.start();
     boost::shared_ptr<matrixBlock_Type> PFp;
@@ -347,7 +351,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     M_adrPressureAssembler.addAdvection( PFp, *M_beta, B22.firstRowIndex(), B22.firstColumnIndex() );
     M_adrPressureAssembler.addMass( PFp, 1.0/M_timestep, B22.firstRowIndex(), B22.firstColumnIndex() );
     boost::shared_ptr<matrix_Type> pFp = PFp;
-    UInt FpOffset( B22.firstRowIndex() );
+    FpOffset = B22.firstRowIndex();
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     if ( verbose ) std::cout << "      >Building Ap";
@@ -358,6 +362,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         PAp.reset( new matrixBlock_Type( pressureMap ) );
         *PAp *= 0.0;
         PAp->blockView( 0, 0, B22 );
+        ApOffset = B22.firstRowIndex();
     }
     else
     {
@@ -367,6 +372,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         PAp->blockView( 0, 0, B11 );
         PAp->blockView( 1, 1, B22 );
         MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
+        ApOffset = B22.firstRowIndex();
     }
 
     if ( M_pressureLaplacianOperator == "symmetric" )
@@ -384,18 +390,18 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         M_adrPressureAssembler.addDiffusion( PAp, 1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
     boost::shared_ptr<matrix_Type> pAp = PAp;
-    UInt ApOffset( B22.firstRowIndex() );
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
 
     if ( verbose ) std::cout << "      >Building Mp";
     timer.start();
     boost::shared_ptr<matrixBlock_Type> PMp;
-    if( M_pressureMassPrec == "LinearSolver" )
+    if( M_pressureMassPrec == "LinearSolver" && !M_useLumpedPressureMass )
     {
         PMp.reset( new matrixBlock_Type( pressureMap ) );
         *PMp *= 0.0;
         PMp->blockView( 0, 0, B22 );
+        MpOffset = 0;
     }
     else
     {
@@ -405,6 +411,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         PMp->blockView( 0, 0, B11 );
         PMp->blockView( 1, 1, B22 );
         MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
+        MpOffset = B22.firstRowIndex();
     }
     if ( M_useLumpedPressureMass )
     {
@@ -423,7 +430,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         M_adrPressureAssembler.addMass( PMp, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
     boost::shared_ptr<matrix_Type> pMp = PMp;
-    UInt MpOffset( B22.firstRowIndex() );
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     if ( M_pressureBoundaryConditions == "first_dof_dirichlet" )
@@ -528,7 +534,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
 
         if ( !bcHandler.bcUpdateDone() )
         {
-            if ( verbose ) std::cout << "      >Updating the BC handler" << std::endl;
             bcHandler.bcUpdate( *M_pFESpace->mesh(),
                                  M_pFESpace->feBd(),
                                  M_pFESpace->dof() );
@@ -614,7 +619,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             {
                 BCVector uRobin( robinRHS, M_uFESpace->dof().numTotalDof(), 0 );
                 uRobin.setRobinCoeffVector( convVelocity );
-                uRobin.setBetaCoeff( M_viscosity/M_density );
+                uRobin.setBetaCoeff( -M_viscosity/M_density );
 
                 bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
                                  M_bcHandlerPtr->operator[]( i ).flag(),
@@ -636,7 +641,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
 
         if ( !bcHandler.bcUpdateDone() )
         {
-            if ( verbose ) std::cout << "      >Updating the BC handler" << std::endl;
             bcHandler.bcUpdate( *M_pFESpace->mesh(),
                                  M_pFESpace->feBd(),
                                  M_pFESpace->dof() );
@@ -660,9 +664,6 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         pAp->globalAssemble();
         pFp->globalAssemble();
         pMp->globalAssemble();
-        //pAp->spy("pAp");
-        //pFp->spy("pFp");
-        //pMp->spy("pMp");
     }
 
     // For enclosed flow where only characteristics BC are imposed,
