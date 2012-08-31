@@ -276,6 +276,7 @@ MultiscaleSolver::importIterationNumber()
 {
     // Initialize the iteration number
     Int iterationNumber( 0 );
+    Real initialTime( 0. );
 
     if ( M_comm->MyPID() == 0 )
     {
@@ -299,7 +300,8 @@ MultiscaleSolver::importIterationNumber()
             while ( std::getline( inputFile, line, '\n' ) )
             {
                 boost::split( stringsVector, line, boost::is_any_of( " " ), boost::token_compress_on );
-                iterationAndTime.push_back( std::make_pair( string2number( stringsVector[1] ), string2number( stringsVector[2] ) ) );
+                if ( string2number( stringsVector[7] ) > 0 ) // check if we have saved the data
+                    iterationAndTime.push_back( std::make_pair( string2number( stringsVector[1] ), string2number( stringsVector[2] ) ) );
             }
 
             // Close file
@@ -313,16 +315,20 @@ MultiscaleSolver::importIterationNumber()
 
             // Select the iteration number
             iterationNumber = selectedIterationAndTime.first;
+            initialTime = selectedIterationAndTime.second;
         }
         else
             std::cerr << " !!! Error: cannot open file: " << fileName.c_str() << " !!!" << std::endl;
     }
 
-    // Share the value with the other processes
+    // Share the values with the other processes
     M_comm->Broadcast( &iterationNumber, 1, 0 );
+    M_comm->Broadcast( &initialTime, 1, 0 );
 
-    // Set the iteration number
+    // Set the iteration number and the initial time on the basis of the available saved data
     M_globalData->dataTime()->setTimeStepNumber( iterationNumber );
+    M_globalData->dataTime()->setInitialTime( initialTime );
+    M_globalData->dataTime()->setTime( initialTime );
 }
 
 } // Namespace multiscale
