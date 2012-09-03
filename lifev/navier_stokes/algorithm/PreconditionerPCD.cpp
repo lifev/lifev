@@ -940,21 +940,21 @@ PreconditionerPCD::computeNormalVectors()
     // STEP 1: Calculating the normals
     //-----------------------------------------------------
 
-    vector_Type repNormals( M_beta->map(), Repeated );
-    UInt numTotalDofs( M_uFESpace->dof().numTotalDof() );
+    vector_Type repNormals( M_pFESpace->map()+M_pFESpace->map()+M_pFESpace->map(), Repeated );
+    UInt numTotalDofs( M_pFESpace->dof().numTotalDof() );
 
     //Loop on the Faces
-    UInt numBoundaryFacets( M_uFESpace->mesh()->numBoundaryFacets() );
+    UInt numBoundaryFacets( M_pFESpace->mesh()->numBoundaryFacets() );
     for ( UInt iFace = 0; iFace < numBoundaryFacets; ++iFace )
     {
         //Update the currentBdFE with the face data
-        M_uFESpace->feBd().updateMeasNormalQuadPt( M_uFESpace->mesh()->boundaryFacet( iFace ) );
-        UInt nDofF = M_uFESpace->feBd().nbNode();
+        M_pFESpace->feBd().updateMeasNormalQuadPt( M_pFESpace->mesh()->boundaryFacet( iFace ) );
+        UInt nDofF = M_pFESpace->feBd().nbNode();
 
         //For each node on the face
         for ( UInt icheck = 0; icheck < nDofF; ++icheck )
         {
-            ID idf = M_uFESpace->dof().localToGlobalMapByBdFacet( iFace, icheck );
+            ID idf = M_pFESpace->dof().localToGlobalMapByBdFacet( iFace, icheck );
 
             //If the face exists and the point is on this processor
             //if (M_flags.find(idf) != M_flags.end())
@@ -968,12 +968,12 @@ PreconditionerPCD::computeNormalVectors()
                     //Warning: the normal is taken in the first Gauss point
                     //since the normal is the same over the triangle
                     //(not true in the case of quadratic and bilinear maps)
-                    Real nx( M_uFESpace->feBd().normal( 0, 0 ) );
-                    Real ny( M_uFESpace->feBd().normal( 1, 0 ) );
-                    Real nz( M_uFESpace->feBd().normal( 2, 0 ) );
+                    Real nx( M_pFESpace->feBd().normal( 0, 0 ) );
+                    Real ny( M_pFESpace->feBd().normal( 1, 0 ) );
+                    Real nz( M_pFESpace->feBd().normal( 2, 0 ) );
 
                     //We get the area
-                    Real area( M_uFESpace->feBd().measure() );
+                    Real area( M_pFESpace->feBd().measure() );
 
                     //We update the normal component of the boundary point
                     ( repNormals )[idf]                  += nx * area;
@@ -1036,7 +1036,8 @@ PreconditionerPCD::computeRobinCoefficient()
     vectorPtr_Type robinCoeffVector( new vector_Type( M_pFESpace->map(), Unique ) );
 
     //We obtain the ID of the element
-    Int numTotalDofs( M_uFESpace->dof().numTotalDof() );
+    Int numVelocityTotalDofs( M_uFESpace->dof().numTotalDof() );
+    Int numPressureTotalDofs( M_pFESpace->dof().numTotalDof() );
     Int NumMyElements = robinCoeffVector->map().map( Unique )->NumMyElements();
     std::vector<Int> MyGlobalElements( NumMyElements );
     robinCoeffVector->map().map( Unique )->MyGlobalElements( &( MyGlobalElements[0] ) );
@@ -1050,9 +1051,9 @@ PreconditionerPCD::computeRobinCoefficient()
     for ( Int i( 0 ); i < NumMyElements; ++i )
     {
         id = MyGlobalElements[i];
-        Real x( ( *M_normalVectors )[id]                  * ( *M_beta )[id]                  );
-        Real y( ( *M_normalVectors )[id +   numTotalDofs] * ( *M_beta )[id +   numTotalDofs] );
-        Real z( ( *M_normalVectors )[id + 2*numTotalDofs] * ( *M_beta )[id + 2*numTotalDofs] );
+        Real x( ( *M_normalVectors )[id]                          * ( *M_beta )[id]                          );
+        Real y( ( *M_normalVectors )[id +   numPressureTotalDofs] * ( *M_beta )[id +   numVelocityTotalDofs] );
+        Real z( ( *M_normalVectors )[id + 2*numPressureTotalDofs] * ( *M_beta )[id + 2*numVelocityTotalDofs] );
         ( *robinCoeffVector )[id] = ( x + y + z ) * invNu;
     }
 
