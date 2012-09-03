@@ -516,6 +516,7 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
                     myStream >> buffer;
                     bareMesh.faces( k, i ) = buffer - idOffset;
                 }
+                myStream >> ibc;
                 bareMesh.facesMarkers[ i ] = ibc;
             }
 
@@ -535,6 +536,7 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
                     myStream >> buffer;
                     bareMesh.edges( k, i ) = buffer - idOffset;
                 }
+                myStream >> ibc;
                 bareMesh.edgesMarkers[ i ] = ibc;
             }
             oStr << "Boundary edges read " << std::endl;
@@ -554,6 +556,7 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
                     myStream >> buffer;
                     bareMesh.elements( k, i ) = buffer - idOffset;
                 }
+                myStream >> ibc;
                 bareMesh.elementsMarkers[ i ] = ibc;
                 count++;
             }
