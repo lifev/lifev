@@ -208,26 +208,20 @@ static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, con
 
 static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-    return  200000;
+    return  20000;
 }
 
 static Real bcPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
 {
   Real radius = 0.5;
-  Real pressure = 30000;
+  Real pressure = 3000;
   switch (i)
     {
     case 0:
-      if( t>= 1.5 )
-	return pressure * ( x / radius );
-      else
-	return 0;
+      return pressure * std::fabs( ( y / radius ) );
       break;
     case 1:
-      if( t>= 1.5 )
-	return pressure * ( y / radius );
-      else
-	return 0;      
+      return pressure * std::fabs( ( x / radius ) );
       break;
     case 2:
       return 0.0;
@@ -238,6 +232,10 @@ static Real bcPressure(const Real& t, const Real&  x, const Real& y, const Real&
 
 }
 
+static Real pressureUsingNormal(const Real& t, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+{
+  return  -(300000/15)*t;
+}
 
 
 };
@@ -344,19 +342,34 @@ Structure::run3d()
     BCFunctionBase zero(Private::bcZero);
     BCFunctionBase nonZero(Private::bcNonZero);
     BCFunctionBase pressure(Private::bcPressure);
+    BCFunctionBase pressureNormal(Private::pressureUsingNormal);
 
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
+    //Condition for Extension
     BCh->addBC("EdgesIn",      20,  Essential, Component, zero, compz);
+    //Condition for Inflation
+    //    BCh->addBC("EdgesIn",      20,  Essential, Full, zero, 3);
+
+    //Condition for Extension
     BCh->addBC("EdgesIn",      40,  Natural, Component, nonZero, compz);
+    //Condition for Inflation
+    //BCh->addBC("EdgesIn",      40,  Essential, Full, zero, 3);
 
     BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compx);
     BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compy);
     BCh->addBC("EdgesIn",      70,  Natural, Full, zero, 3);
     BCh->addBC("EdgesIn",      60,  Natural, Full, zero, 3);
 
+    //Tube 20
+    // BCh->addBC("EdgesIn",      2,  Essential, Full, zero, 3);
+    // BCh->addBC("EdgesIn",      3,  Essential, Full, zero, 3);    
 
+    // BCh->addBC("EdgesIn",      30,  EssentialVertices, Full, zero, 3);
+    // BCh->addBC("EdgesIn",      50,  EssentialVertices, Full, zero, 3);
+    // BCh->addBC("EdgesIn",      10,  Natural, Full, zero, 3);
+    // BCh->addBC("EdgesIn",      1,  Natural,  Normal, pressureNormal);
 
     //! 1. Constructor of the structuralSolver
     StructuralSolver< RegionMesh<LinearTetra> > solid;
