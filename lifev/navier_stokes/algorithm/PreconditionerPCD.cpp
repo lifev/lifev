@@ -576,7 +576,9 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         BCHandler bcHandler;
 
         // Creating the vector
-        vector_Type    convVelocity( *M_beta, Repeated );
+        vector_Type    robinCoeffVector( *computeRobinCoefficient(), Repeated );
+        robinCoeffVector.spy("test");
+
         vector_Type    robinRHS( M_uFESpace->map(), Repeated );
         BCFunctionBase uZero( fZero );
 
@@ -618,8 +620,8 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             else if ( boundaryType == "Robin" )
             {
                 BCVector uRobin( robinRHS, M_uFESpace->dof().numTotalDof(), 0 );
-                uRobin.setRobinCoeffVector( convVelocity );
-                uRobin.setBetaCoeff( -M_viscosity/M_density );
+                uRobin.setRobinCoeffVector( robinCoeffVector );
+                uRobin.setBetaCoeff( 0 );
 
                 bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
                                  M_bcHandlerPtr->operator[]( i ).flag(),
@@ -842,7 +844,8 @@ PreconditionerPCD::numBlocksColumns() const
     return 2;
 }
 
-void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
+void
+PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
                                            const std::string& section )
 {
     M_dataFile   = dataFile;
@@ -920,6 +923,140 @@ PreconditionerPCD::setBoundaryTypes( const std::vector<bcFlag_Type>& inflowBound
     M_inflowBoundaryFlags = inflowBoundaryFlags;
     M_outflowBoundaryFlags = outflowBoundaryFlags;
     M_characteristicBoundaryFlags = characteristicBoundaryFlags;
+}
+
+void
+PreconditionerPCD::computeNormalVectors()
+{
+    bool verbose( false );
+    if ( M_comm->MyPID() == 0 ) verbose = true;
+
+    LifeChrono timer;
+
+    if ( verbose ) std::cout << "      >Computing the normal vectors on the boundary... ";
+    timer.start();
+
+    //-----------------------------------------------------
+    // STEP 1: Calculating the normals
+    //-----------------------------------------------------
+
+    vector_Type repNormals( M_beta->map(), Repeated );
+    UInt numTotalDofs( M_uFESpace->dof().numTotalDof() );
+
+    //Loop on the Faces
+    UInt numBoundaryFacets( M_uFESpace->mesh()->numBoundaryFacets() );
+    for ( UInt iFace = 0; iFace < numBoundaryFacets; ++iFace )
+    {
+        //Update the currentBdFE with the face data
+        M_uFESpace->feBd().updateMeasNormalQuadPt( M_uFESpace->mesh()->boundaryFacet( iFace ) );
+        UInt nDofF = M_uFESpace->feBd().nbNode();
+
+        //For each node on the face
+        for ( UInt icheck = 0; icheck < nDofF; ++icheck )
+        {
+            ID idf = M_uFESpace->dof().localToGlobalMapByBdFacet( iFace, icheck );
+
+            //If the face exists and the point is on this processor
+            //if (M_flags.find(idf) != M_flags.end())
+            //{
+                // ID flag = M_flags[idf];
+
+                //if the normal is not already calculated
+                //and the marker correspond to the flag of the point
+                // if ((flag == M_uFESpace->mesh().boundaryFacet( iFace ).marker())||(flag == 0))
+                // {
+                    //Warning: the normal is taken in the first Gauss point
+                    //since the normal is the same over the triangle
+                    //(not true in the case of quadratic and bilinear maps)
+                    Real nx( M_uFESpace->feBd().normal( 0, 0 ) );
+                    Real ny( M_uFESpace->feBd().normal( 1, 0 ) );
+                    Real nz( M_uFESpace->feBd().normal( 2, 0 ) );
+
+                    //We get the area
+                    Real area( M_uFESpace->feBd().measure() );
+
+                    //We update the normal component of the boundary point
+                    ( repNormals )[idf]                  += nx * area;
+                    ( repNormals )[idf +   numTotalDofs] += ny * area;
+                    ( repNormals )[idf + 2*numTotalDofs] += nz * area;
+                // }
+            //}
+        }
+    }
+
+    //-----------------------------------------------------
+    // STEP 2: Gathering the data from others processors
+    //-----------------------------------------------------
+
+    M_normalVectors.reset( new vector_Type( repNormals, Unique ) );
+
+    //-----------------------------------------------------
+    // STEP 3: Normalizing the vectors
+    //-----------------------------------------------------
+
+    //We obtain the ID of the element
+    Int NumMyElements = M_normalVectors->map().map( Unique )->NumMyElements();
+    std::vector<Int> MyGlobalElements( NumMyElements );
+    M_normalVectors->map().map( Unique )->MyGlobalElements( &( MyGlobalElements[0] ) );
+
+    //We normalize the normal
+    Real norm;
+    UInt id;
+
+    //Need to run only over the first third of MyGlobalElements
+    //(the larger values are the y and z components)
+    for ( Int i( 0 ); i < NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+    {
+        id = MyGlobalElements[i];
+        Real nx( ( *M_normalVectors )[id]                  );
+        Real ny( ( *M_normalVectors )[id +   numTotalDofs] );
+        Real nz( ( *M_normalVectors )[id + 2*numTotalDofs] );
+        norm = sqrt( nx*nx + ny*ny + nz*nz );
+
+        // If the norm is exactly 0 it means that the point is an interior point
+        if( norm != 0.0 )
+        {
+            ( *M_normalVectors )[id]                  /= norm;
+            ( *M_normalVectors )[id +   numTotalDofs] /= norm;
+            ( *M_normalVectors )[id + 2*numTotalDofs] /= norm;
+        }
+    }
+
+    if ( verbose ) std::cout << " done in " << timer.diff() << " s." << std::endl;
+}
+
+PreconditionerPCD::vectorPtr_Type
+PreconditionerPCD::computeRobinCoefficient()
+{
+    if( M_normalVectors.get() == 0 )
+    {
+        this->computeNormalVectors();
+    }
+
+    vectorPtr_Type robinCoeffVector( new vector_Type( M_pFESpace->map(), Unique ) );
+
+    //We obtain the ID of the element
+    Int numTotalDofs( M_uFESpace->dof().numTotalDof() );
+    Int NumMyElements = robinCoeffVector->map().map( Unique )->NumMyElements();
+    std::vector<Int> MyGlobalElements( NumMyElements );
+    robinCoeffVector->map().map( Unique )->MyGlobalElements( &( MyGlobalElements[0] ) );
+
+    //We compute (beta*n)/nu
+    UInt id;
+    Real invNu = -M_density/M_viscosity;
+
+    //Need to run only over the first third of MyGlobalElements
+    //(the larger values are the y and z components)
+    for ( Int i( 0 ); i < NumMyElements; ++i )
+    {
+        id = MyGlobalElements[i];
+        Real x( ( *M_normalVectors )[id]                  * ( *M_beta )[id]                  );
+        Real y( ( *M_normalVectors )[id +   numTotalDofs] * ( *M_beta )[id +   numTotalDofs] );
+        Real z( ( *M_normalVectors )[id + 2*numTotalDofs] * ( *M_beta )[id + 2*numTotalDofs] );
+        ( *robinCoeffVector )[id] = ( x + y + z ) * invNu;
+    }
+
+    return robinCoeffVector;
 }
 
 } // namespace LifeV

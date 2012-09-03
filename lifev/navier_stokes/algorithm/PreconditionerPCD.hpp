@@ -242,10 +242,16 @@ protected:
     std::string M_outflowBoundaryType;
     std::string M_characteristicBoundaryType;
 
+    vectorPtr_Type M_normalVectors;
+
 private:
     PreconditionerPCD( const PreconditionerPCD& P ):
         PreconditionerComposition( P.M_comm ){}
     PreconditionerPCD( const boost::shared_ptr<PreconditionerPCD>& /*P*/ ){}
+
+    void computeNormalVectors();
+
+    vectorPtr_Type computeRobinCoefficient();
 
     static Real fZero( const Real& /* t */,
                        const Real& /* x */,
