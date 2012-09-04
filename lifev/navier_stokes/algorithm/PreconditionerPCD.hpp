@@ -262,6 +262,13 @@ private:
         return 0.0;
     }
 
+    void setBCFromBoundaryFlags( matrixPtr_type Ap, UInt ApOffset,
+                                 matrixPtr_type Fp, UInt FpOffset,
+                                 matrixPtr_type Mp, UInt MpOffset );
+    void setBCByBoundaryClassification( matrixPtr_type Ap, UInt ApOffset,
+                                        matrixPtr_type Fp, UInt FpOffset,
+                                        matrixPtr_type Mp, UInt MpOffset );
+
 };
 
 inline Preconditioner* createPCD(){ return new PreconditionerPCD(); }

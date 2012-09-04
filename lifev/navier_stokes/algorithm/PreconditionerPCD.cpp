@@ -41,10 +41,13 @@
 #include <lifev/core/algorithm/PreconditionerML2.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/fem/BCManage.hpp>
+#include <lifev/core/fem/BCBase.hpp>
+#include <lifev/core/fem/BCIdentifier.hpp>
 #include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/core/array/MatrixEpetraStructuredView.hpp>
 #include <lifev/core/array/MatrixEpetraStructuredUtility.hpp>
 #include <lifev/core/array/VectorBlockStructure.hpp>
+
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -432,6 +435,15 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     boost::shared_ptr<matrix_Type> pMp = PMp;
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
+    // This option is the one used by Elman & al. in the original PCD:
+    // * Dirichlet boundary conditions at inflows
+    // * Neumann boundary conditions at outflows
+    // * Neumann boundary conditions on characteristic boundaries
+
+    // This option is the one used by Elman & al. in the New PCD:
+    // * Robin boundary conditions at inflows
+    // * Neumann boundary conditions at outflows
+    // * Neumann boundary conditions on characteristic boundaries
     if ( M_pressureBoundaryConditions == "first_dof_dirichlet" )
     {
         pAp->globalAssemble();
@@ -485,187 +497,17 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             }
         }
     }
-    else if ( M_pressureBoundaryConditions == "robin_at_inflow" )
-    {
-        BCHandler bcHandler;
-
-        // Loop on boundary conditions
-        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
-        {
-            if ( verbose ) std::cout << "BCHandler name: " << M_bcHandlerPtr->operator[]( i ).name() << std::endl;
-
-            UInt numComponents = M_bcHandlerPtr->operator[]( i ).numberOfComponents();
-            numComponents = 1;
-
-            if ( M_bcHandlerPtr->operator[]( i ).flag() == 1 )
-            {
-                vector_Type convVelocity( *M_beta, Repeated );
-                vector_Type robinRHS( M_uFESpace->map(), Repeated );
-                /*
-                BCVector uRobin( robinRHS, M_uFESpace->dof().numTotalDof(), 0 );
-                uRobin.setRobinCoeffVector( convVelocity );
-                uRobin.setBetaCoeff( M_viscosity/M_density );
-
-                bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
-                                 M_bcHandlerPtr->operator[]( i ).flag(),
-                                 Robin,
-                                 Normal,
-                                 uRobin,
-                                 numComponents );
-
-                aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
-                    BCFunctionBase hyd(fZero);
-                    BCFunctionBase young (E);
-                    //robin condition on the outer wall
-                    _oper.setRobinOuterWall(hyd, young);
-                    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, uRobin );
-                */
-            }
-            else
-            {
-                bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
-                                 M_bcHandlerPtr->operator[]( i ).flag(),
-                                 M_bcHandlerPtr->operator[]( i ).type(),
-                                 M_bcHandlerPtr->operator[]( i ).mode(),
-                                 const_cast<BCFunctionBase&>( *( M_bcHandlerPtr->operator[]( i ).pointerToFunctor() ) ),
-                                 numComponents );
-            }
-        }
-
-        if ( !bcHandler.bcUpdateDone() )
-        {
-            bcHandler.bcUpdate( *M_pFESpace->mesh(),
-                                 M_pFESpace->feBd(),
-                                 M_pFESpace->dof() );
-        }
-
-        if ( M_setApBoundaryConditions )
-        {
-            // Offset to set the BC for the pressure
-            bcHandler.setOffset( ApOffset );
-            bcManageMatrix( *pAp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
-        }
-        if ( M_setFpBoundaryConditions )
-        {
-            // Offset to set the BC for the pressure
-            bcHandler.setOffset( FpOffset );
-            bcManageMatrix( *pFp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
-        }
-        if ( M_setMpBoundaryConditions )
-        {
-            // Offset to set the BC for the pressure
-            bcHandler.setOffset( MpOffset );
-            bcManageMatrix( *pMp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
-        }
-
-    }
     else if ( M_pressureBoundaryConditions == "custom" )
     {
-        // This option is the one used by Elman & al. in the original PCD:
-        // * Dirichlet boundary conditions at inflows
-        // * Neumann boundary conditions at outflows
-        // * Neumann boundary conditions on characteristic boundaries
-
-        // This option is the one used by Elman & al. in the New PCD:
-        // * Robin boundary conditions at inflows
-        // * Neumann boundary conditions at outflows
-        // * Neumann boundary conditions on characteristic boundaries
-
-        std::string boundaryType( "none" );
-
-        BCHandler bcHandler;
-
-        // Creating the vector
-        vector_Type    robinCoeffVector( *computeRobinCoefficient(), Repeated );
-        robinCoeffVector.spy("test");
-
-        vector_Type    robinRHS( M_uFESpace->map(), Repeated );
-        BCFunctionBase uZero( fZero );
-
-        // Loop on boundary conditions
-        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
-        {
-            boundaryType = "none";
-            for( ID j = 0; j < M_inflowBoundaryFlags.size(); ++j )
-            {
-                if ( M_bcHandlerPtr->operator[]( i ).flag() == M_inflowBoundaryFlags[j] )
-                {
-                    boundaryType = M_inflowBoundaryType;
-                }
-            }
-            for( ID j = 0; j < M_outflowBoundaryFlags.size(); ++j )
-            {
-                if ( M_bcHandlerPtr->operator[]( i ).flag() == M_outflowBoundaryFlags[j] )
-                {
-                    boundaryType = M_outflowBoundaryType;
-                }
-            }
-            for( ID j = 0; j < M_characteristicBoundaryFlags.size(); ++j )
-            {
-                if ( M_bcHandlerPtr->operator[]( i ).flag() == M_characteristicBoundaryFlags[j] )
-                {
-                    boundaryType = M_characteristicBoundaryType;
-                }
-            }
-
-            if ( boundaryType == "Dirichlet" )
-            {
-                bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
-                                 M_bcHandlerPtr->operator[]( i ).flag(),
-                                 Essential,
-                                 Full,
-                                 uZero,
-                                 1 );
-            }
-            else if ( boundaryType == "Robin" )
-            {
-                BCVector uRobin( robinRHS, M_uFESpace->dof().numTotalDof(), 0 );
-                uRobin.setRobinCoeffVector( robinCoeffVector );
-                uRobin.setBetaCoeff( 0 );
-
-                bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
-                                 M_bcHandlerPtr->operator[]( i ).flag(),
-                                 Robin,
-                                 Full,
-                                 uRobin,
-                                 1 );
-            }
-            else if ( boundaryType == "Neumann" )
-            {
-                // For Neumann BC we do not need to do anything
-            }
-            else
-            {
-                if ( verbose ) std::cout << "Error! The type of BC is unknown." << std::endl;
-                exit(-1);
-            }
-        }
-
-        if ( !bcHandler.bcUpdateDone() )
-        {
-            bcHandler.bcUpdate( *M_pFESpace->mesh(),
-                                 M_pFESpace->feBd(),
-                                 M_pFESpace->dof() );
-        }
-
-        if ( M_setApBoundaryConditions )
-        {
-            bcHandler.setOffset( ApOffset );
-            bcManageMatrix( *pAp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
-        }
-        if ( M_setFpBoundaryConditions )
-        {
-            bcHandler.setOffset( FpOffset );
-            bcManageMatrix( *pFp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
-        }
-        if ( M_setMpBoundaryConditions )
-        {
-            bcHandler.setOffset( MpOffset );
-            bcManageMatrix( *pMp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
-        }
-        pAp->globalAssemble();
-        pFp->globalAssemble();
-        pMp->globalAssemble();
+        this->setBCFromBoundaryFlags( pAp, ApOffset,
+                                      pFp, FpOffset,
+                                      pMp, MpOffset );
+    }
+    else if ( M_pressureBoundaryConditions == "classification" )
+    {
+        this->setBCByBoundaryClassification( pAp, ApOffset,
+                                             pFp, FpOffset,
+                                             pMp, MpOffset );
     }
 
     // For enclosed flow where only characteristics BC are imposed,
@@ -956,9 +798,9 @@ PreconditionerPCD::computeNormalVectors()
         {
             ID idf = M_pFESpace->dof().localToGlobalMapByBdFacet( iFace, icheck );
 
-            //If the face exists and the point is on this processor
-            //if (M_flags.find(idf) != M_flags.end())
-            //{
+            //If the point is on this processor
+            if ( repNormals.isGlobalIDPresent( idf ) )
+            {
                 // ID flag = M_flags[idf];
 
                 //if the normal is not already calculated
@@ -980,7 +822,7 @@ PreconditionerPCD::computeNormalVectors()
                     ( repNormals )[idf +   numTotalDofs] += ny * area;
                     ( repNormals )[idf + 2*numTotalDofs] += nz * area;
                 // }
-            //}
+            }
         }
     }
 
@@ -1058,6 +900,374 @@ PreconditionerPCD::computeRobinCoefficient()
     }
 
     return robinCoeffVector;
+}
+
+void
+PreconditionerPCD::setBCFromBoundaryFlags( matrixPtr_type Ap, UInt ApOffset,
+                                           matrixPtr_type Fp, UInt FpOffset,
+                                           matrixPtr_type Mp, UInt MpOffset )
+{
+    bool verbose( false );
+    if ( M_comm->MyPID() == 0 ) verbose = true;
+
+    std::string boundaryType( "none" );
+
+    BCHandler bcHandler;
+
+    vector_Type    robinCoeffVector( *computeRobinCoefficient(), Repeated );
+    vector_Type    robinRHS( M_pFESpace->map(), Repeated );
+    BCFunctionBase uZero( fZero );
+
+    // Loop on boundary conditions
+    for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
+    {
+        boundaryType = "none";
+        for( ID j = 0; j < M_inflowBoundaryFlags.size(); ++j )
+        {
+            if ( M_bcHandlerPtr->operator[]( i ).flag() == M_inflowBoundaryFlags[j] )
+            {
+                boundaryType = M_inflowBoundaryType;
+            }
+        }
+        for( ID j = 0; j < M_outflowBoundaryFlags.size(); ++j )
+        {
+            if ( M_bcHandlerPtr->operator[]( i ).flag() == M_outflowBoundaryFlags[j] )
+            {
+                boundaryType = M_outflowBoundaryType;
+            }
+        }
+        for( ID j = 0; j < M_characteristicBoundaryFlags.size(); ++j )
+        {
+            if ( M_bcHandlerPtr->operator[]( i ).flag() == M_characteristicBoundaryFlags[j] )
+            {
+                boundaryType = M_characteristicBoundaryType;
+            }
+        }
+
+        if ( boundaryType == "Dirichlet" )
+        {
+            bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
+                             M_bcHandlerPtr->operator[]( i ).flag(),
+                             Essential,
+                             Full,
+                             uZero,
+                             1 );
+        }
+        else if ( boundaryType == "Robin" )
+        {
+            BCVector uRobin( robinRHS, M_pFESpace->dof().numTotalDof(), 0 );
+            uRobin.setRobinCoeffVector( robinCoeffVector );
+            uRobin.setBetaCoeff( 0 );
+
+            bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
+                             M_bcHandlerPtr->operator[]( i ).flag(),
+                             Robin,
+                             Full,
+                             uRobin,
+                             1 );
+        }
+        else if ( boundaryType == "Neumann" )
+        {
+            // For Neumann BC we do not need to do anything
+        }
+        else
+        {
+            if ( verbose ) std::cout << "Error! The type of BC is unknown." << std::endl;
+            exit(-1);
+        }
+    }
+
+    if ( !bcHandler.bcUpdateDone() )
+    {
+        bcHandler.bcUpdate( *M_pFESpace->mesh(),
+                             M_pFESpace->feBd(),
+                             M_pFESpace->dof() );
+    }
+
+    if ( M_setApBoundaryConditions )
+    {
+        bcHandler.setOffset( ApOffset );
+        bcManageMatrix( *Ap, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+    }
+    if ( M_setFpBoundaryConditions )
+    {
+        bcHandler.setOffset( FpOffset );
+        bcManageMatrix( *Fp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+    }
+    if ( M_setMpBoundaryConditions )
+    {
+        bcHandler.setOffset( MpOffset );
+        bcManageMatrix( *Mp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+    }
+    Ap->globalAssemble();
+    Fp->globalAssemble();
+    Mp->globalAssemble();
+}
+
+void
+PreconditionerPCD::setBCByBoundaryClassification( matrixPtr_type Ap, UInt ApOffset,
+                                                  matrixPtr_type Fp, UInt FpOffset,
+                                                  matrixPtr_type Mp, UInt MpOffset )
+{
+    bool verbose( false );
+    if ( M_comm->MyPID() == 0 ) verbose = true;
+
+    std::string boundaryType( "none" );
+    Real indicator( 0.0 );
+
+    vector_Type    robinCoeffVector( *computeRobinCoefficient(), Repeated );
+    vector_Type    robinRHS( M_pFESpace->map(), Repeated );
+    BCVector uRobin( robinRHS, M_pFESpace->dof().numTotalDof(), 0 );
+    uRobin.setRobinCoeffVector( robinCoeffVector );
+    uRobin.setBetaCoeff( 0 );
+    BCFunctionBase uZero( fZero );
+
+    // <-- DEBUG
+    /*{
+    Int NumMyElements = M_pFESpace->map().map( Unique )->NumMyElements();
+    std::vector<Int> MyGlobalElements( NumMyElements );
+    M_pFESpace->map().map( Unique )->MyGlobalElements(&MyGlobalElements[0]);
+    ID idof(0);
+
+    UInt numPressureDofs = M_pFESpace->dof().numTotalDof();
+
+    VTKWriter writer;
+    writer.setLabel( "Debug normal and boundary classification" );
+    writer.addScalarField( "BCType" );
+    writer.addVectorField( "Normal_vectors" );
+
+    Real x, y, z;
+    UInt boundaryTypeId;
+    for ( Int i(0); i<NumMyElements; ++i )
+    {
+        idof = MyGlobalElements[i];
+
+        if( robinCoeffVector[idof] > 0.0 )
+        {
+            // Inflow
+            boundaryTypeId = 1;
+        }
+        else if( robinCoeffVector[idof] < 0.0 )
+        {
+            // Outflow
+            boundaryTypeId = 2;
+        }
+        else if( robinCoeffVector[idof] == 0.0 )
+        {
+            // Characteristic
+            boundaryTypeId = 3;
+        }
+        writer.addToScalarField( "BCType", boundaryTypeId );
+        writer.addToScalarField( "Robin_coeff", robinCoeffVector[idof] );
+        writer.addToVectorField( "Normal_vectors",
+                                 (*M_normalVectors)[idof],
+                                 (*M_normalVectors)[idof +   numPressureDofs],
+                                 (*M_normalVectors)[idof + 2*numPressureDofs] );
+
+        for ( UInt j( 0 ); j < M_pFESpace->mesh()->pointList.size(); ++j )
+        {
+            if ( idof == M_pFESpace->mesh()->pointList[j].id() )
+            {
+                x = M_pFESpace->mesh()->pointList[j].x();
+                y = M_pFESpace->mesh()->pointList[j].y();
+                z = M_pFESpace->mesh()->pointList[j].z();
+                j = M_pFESpace->mesh()->pointList.size();
+            }
+        }
+        writer.addPoint( x, y, z );
+    }
+    std::string fileName( "debugInfos_" );
+    std::ostringstream ossMyPid;
+    ossMyPid << M_pFESpace->map().comm().MyPID();
+    fileName.append( ossMyPid.str() );
+    writer.write( fileName );
+    }*/
+    // --> DEBUG END
+
+    BCHandler bcHandler;
+
+    // BC for the inflow, outflow, and characteristic boundaries
+    BCBase *currentBoundary;
+    BCBase *inflowBoundary, *outflowBoundary, *characteristicBoundary;
+
+    // inflow
+    if( M_inflowBoundaryType == "Dirichlet" )
+    {
+        bcHandler.addBC( BCBase( "inflow",
+                                        1,
+                                Essential,
+                                     Full,
+                                    uZero,
+                                        1 ) );
+
+    }
+    else if ( M_inflowBoundaryType == "Neumann" )
+    {
+        bcHandler.addBC( BCBase( "inflow",
+                                        1,
+                                  Natural,
+                                     Full,
+                                    uZero,
+                                        1 ) );
+    }
+    else if ( M_inflowBoundaryType == "Robin" )
+    {
+        bcHandler.addBC( BCBase( "inflow",
+                                        1,
+                                    Robin,
+                                     Full,
+                                   uRobin,
+                                        1 ) );
+    }
+
+    // outflow
+    if( M_outflowBoundaryType == "Dirichlet" )
+    {
+        bcHandler.addBC( BCBase( "outflow",
+                                         2,
+                                 Essential,
+                                      Full,
+                                     uZero,
+                                         1 ) );
+    }
+    else if ( M_outflowBoundaryType == "Neumann" )
+    {
+        bcHandler.addBC( BCBase( "outflow",
+                                         2,
+                                   Natural,
+                                      Full,
+                                     uZero,
+                                         1 ) );
+    }
+    else if ( M_outflowBoundaryType == "Robin" )
+    {
+        bcHandler.addBC( BCBase( "outflow",
+                                         2,
+                                     Robin,
+                                      Full,
+                                    uRobin,
+                                         1 ) );
+    }
+
+    // characteristic
+    if( M_characteristicBoundaryType == "Dirichlet" )
+    {
+        bcHandler.addBC( BCBase( "characteristic",
+                                                3,
+                                        Essential,
+                                             Full,
+                                            uZero,
+                                                1 ) );
+    }
+    else if ( M_characteristicBoundaryType == "Neumann" )
+    {
+        bcHandler.addBC( BCBase( "characteristic",
+                                                3,
+                                          Natural,
+                                             Full,
+                                            uZero,
+                                                1 ) );
+    }
+    else if ( M_characteristicBoundaryType == "Robin" )
+    {
+        bcHandler.addBC( BCBase( "characteristic",
+                                                3,
+                                            Robin,
+                                             Full,
+                                           uRobin,
+                                                1 ) );
+    }
+
+    inflowBoundary         = &( bcHandler.findBCWithFlag( 1 ) );
+    outflowBoundary        = &( bcHandler.findBCWithFlag( 2 ) );
+    characteristicBoundary = &( bcHandler.findBCWithFlag( 3 ) );
+
+    bcFlag_Type elementMarker; //will store the marker of the element
+
+    // Loop on boundary faces
+    for ( ID iBoundaryElement = 0 ; iBoundaryElement < M_pFESpace->mesh()->numBoundaryFacets(); ++iBoundaryElement )
+    {
+        // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)
+        M_pFESpace->feBd().updateMeas( M_pFESpace->mesh()->boundaryFacet( iBoundaryElement ) );  // updating finite element information
+        elementMarker = M_pFESpace->mesh()->boundaryFacet( iBoundaryElement ).marker(); // We keep the element marker
+
+
+        //vector containing the local to global map on each element
+        std::vector<ID> localToGlobalMapOnBElem = M_pFESpace->dof().localToGlobalMapOnBdFacet( iBoundaryElement );
+
+        // We classify and build bc objects:
+        // a) inflow         where -(w*n)/nu > 0
+        // b) outflow        where -(w*n)/nu < 0
+        // c) characteristic where -(w*n)/nu = 0
+        indicator = 0.0;
+        for (ID lDof = 0; lDof < localToGlobalMapOnBElem.size(); lDof++)
+        {
+            ID gDof = localToGlobalMapOnBElem[lDof];
+            indicator += robinCoeffVector[gDof];
+        }
+        if( indicator > 0.0 )       // inflow
+        {
+            boundaryType = M_inflowBoundaryType;
+            currentBoundary = inflowBoundary;
+        }
+        else if( indicator < 0.0 )  // outflow
+        {
+            boundaryType = M_outflowBoundaryType;
+            currentBoundary = outflowBoundary;
+        }
+        else if( indicator == 0.0 ) // characteristic
+        {
+            boundaryType = M_characteristicBoundaryType;
+            currentBoundary = characteristicBoundary;
+        }
+
+        // Setup the boundary conditions
+        if( boundaryType == "Dirichlet" )
+        {
+            for (ID lDof = 0; lDof < localToGlobalMapOnBElem.size(); lDof++)
+            {
+                ID gDof = localToGlobalMapOnBElem[lDof]; // global DOF
+
+                //providing Essential boundary conditions with user defined functions
+                currentBoundary->addBCIdentifier( new BCIdentifierEssential( gDof, 0.0, 0.0, 0.0 ) );
+            }
+        }
+        else if( boundaryType == "Robin" )
+        {
+            //providing Robin boundary conditions with global DOFs on element
+            currentBoundary->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
+        }
+        else if( boundaryType == "Neumann" )
+        {
+            // For Neumann BC we do not need to do anything
+        }
+    }
+
+    // Copying the IDs
+    inflowBoundary->copyIdSetIntoIdVector();
+    outflowBoundary->copyIdSetIntoIdVector();
+    characteristicBoundary->copyIdSetIntoIdVector();
+
+    // We do not update the BCHandler!
+
+    if ( M_setApBoundaryConditions )
+    {
+        bcHandler.setOffset( ApOffset );
+        bcManageMatrix( *Ap, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+    }
+    if ( M_setFpBoundaryConditions )
+    {
+        bcHandler.setOffset( FpOffset );
+        bcManageMatrix( *Fp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+    }
+    if ( M_setMpBoundaryConditions )
+    {
+        bcHandler.setOffset( MpOffset );
+        bcManageMatrix( *Mp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
+    }
+    Ap->globalAssemble();
+    Fp->globalAssemble();
+    Mp->globalAssemble();
 }
 
 } // namespace LifeV
