@@ -38,6 +38,8 @@
 #define _MATRIXEPETRASTRUCTUREDUTILITY_HPP_
 
 #include <boost/shared_ptr.hpp>
+#include <lifev/core/array/MatrixBlockStructure.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/core/array/MatrixEpetraStructuredView.hpp>
 
@@ -742,6 +744,60 @@ void createMatrixFromBlock ( const MatrixEpetraStructuredView<DataType>& srcBloc
     {
         destMatrix->globalAssemble();
     }
+}
+
+//! Create a block view using an unstructured matrix and block structure informations
+/*!
+  @param matrixPtr Pointer on an unstructured matrix
+  @param blockStructure Structure to be used to extract block view
+  @param rowIndex Row position of the block in the matrix
+  @param columnIndex Column position of the block in the matrix
+*/
+template <typename DataType>
+boost::shared_ptr< MatrixEpetraStructuredView<DataType> >
+createBlockView( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
+                 const MatrixBlockStructure& blockStructure,
+                 const UInt& rowIndex,
+                 const UInt& columnIndex )
+{
+    ASSERT( matrixPtr->matrixPtr()->NumGlobalCols() == blockStructure.numRows(), " Incompatible block structure (global size does not match) " );
+    ASSERT( matrixPtr->matrixPtr()->NumGlobalRows() == blockStructure.numColumns(), " Incompatible block structure (global size does not match) " );
+
+    boost::shared_ptr< MatrixEpetraStructuredView<DataType> > matrixBlockView( new MatrixEpetraStructuredView<DataType> );
+
+    matrixBlockView->setup( blockStructure.rowBlockFirstIndex( rowIndex ),
+                            blockStructure.columnBlockFirstIndex( columnIndex ),
+                            blockStructure.blockNumRows( rowIndex ),
+                            blockStructure.blockNumColumns( columnIndex ),
+                            matrixPtr->matrixPtr().get() );
+
+    return matrixBlockView;
+}
+
+//! Fill a block view using an unstructured matrix and block structure informations
+/*!
+  @param matrixPtr Pointer on an unstructured matrix
+  @param blockStructure Structure to be used to extract block view
+  @param rowIndex Row position of the block in the matrix
+  @param columnIndex Column position of the block in the matrix
+  @param blockView block view to be filled with informations
+*/
+template <typename DataType>
+void
+fillBlockView( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
+               const MatrixBlockStructure& blockStructure,
+               const UInt& rowIndex,
+               const UInt& columnIndex,
+               MatrixEpetraStructuredView<DataType>& blockView )
+{
+    ASSERT( matrixPtr->matrixPtr()->NumGlobalCols() == blockStructure.numRows(), " Incompatible block structure (global size does not match) " );
+    ASSERT( matrixPtr->matrixPtr()->NumGlobalRows() == blockStructure.numColumns(), " Incompatible block structure (global size does not match) " );
+
+    blockView.setup( blockStructure.rowBlockFirstIndex( rowIndex ),
+                     blockStructure.columnBlockFirstIndex( columnIndex ),
+                     blockStructure.blockNumRows( rowIndex ),
+                     blockStructure.blockNumColumns( columnIndex ),
+                     matrixPtr->matrixPtr().get() );
 }
 
 } // namespace MatrixEpetraStructuredUtility
