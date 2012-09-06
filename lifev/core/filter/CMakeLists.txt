@@ -14,7 +14,6 @@ SET(filter_HEADERS
 CACHE INTERNAL "")
 
 SET(filter_SOURCES
-  filter/Exporter.cpp
   filter/Importer.cpp
   filter/ImporterMesh3D.cpp
 CACHE INTERNAL "")
