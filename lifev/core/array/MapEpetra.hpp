@@ -277,6 +277,12 @@ public:
         return map(Unique)->NumGlobalElements();
     }
 
+    //! check if a global id is owned by the current partition
+    bool isOwned( const UInt globalId ) const
+    {
+        return ( M_uniqueMapEpetra->LID( globalId ) > -1 );
+    }
+
     //@}
 
     //! @name Get Methods
