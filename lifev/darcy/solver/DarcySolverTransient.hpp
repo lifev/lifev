@@ -245,10 +245,9 @@ namespace LifeV
     conditions are imposed via BCHandler class.
     @todo Insert any scientific publications that use this solver.
 */
-template < typename MeshType,
-           typename SolverType = LifeV::SolverAztecOO >
+template < typename MeshType >
 class DarcySolverTransient :
-        virtual public DarcySolverLinear < MeshType, SolverType >
+        virtual public DarcySolverLinear < MeshType >
 {
 
 public:
@@ -259,14 +258,11 @@ public:
     //! Typedef for mesh template.
     typedef MeshType mesh_Type;
 
-    //! Typedef for solver template.
-    typedef SolverType solver_Type;
-
     //! Self typedef.
-    typedef DarcySolverTransient < mesh_Type, solver_Type > darcySolverTransient_Type;
+    typedef DarcySolverTransient < mesh_Type > darcySolverTransient_Type;
 
     //! Darcy solver class.
-    typedef DarcySolverLinear < mesh_Type, solver_Type > darcySolverLinear_Type;
+    typedef DarcySolverLinear < mesh_Type > darcySolverLinear_Type;
 
     //! Typedef for the data type.
     typedef typename darcySolverLinear_Type::data_Type data_Type;
@@ -461,8 +457,8 @@ private:
 // IMPLEMENTATION
 
 // Complete constructor.
-template < typename MeshType, typename SolverType >
-DarcySolverTransient < MeshType, SolverType >::
+template < typename MeshType >
+DarcySolverTransient < MeshType >::
 DarcySolverTransient ():
         // Standard Darcy solver constructor.
         darcySolverLinear_Type::DarcySolverLinear (),
@@ -481,9 +477,9 @@ DarcySolverTransient ():
 // ==========================================================================================
 
 // Set up the linear solver and the preconditioner.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverTransient < MeshType, SolverType >::
+DarcySolverTransient < MeshType >::
 setup ()
 {
 
@@ -507,9 +503,9 @@ setup ()
 } // setup
 
 // Set the inital value
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverTransient < MeshType, SolverType >::
+DarcySolverTransient < MeshType >::
 setInitialPrimal ( const scalarFctPtr_Type& primalInitialFct )
 {
     // Set the initial value function.
@@ -533,9 +529,9 @@ setInitialPrimal ( const scalarFctPtr_Type& primalInitialFct )
 // ==========================================================================================
 
 // Perform all the operations before doing the loop on volume elements.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverTransient < MeshType, SolverType >::
+DarcySolverTransient < MeshType >::
 solve ()
 {
     // Reset the right hand side coming from the time advance scheme.
@@ -551,9 +547,9 @@ solve ()
 } // solve
 
 // Set and compute the mass matrix.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverTransient < MeshType, SolverType >::
+DarcySolverTransient < MeshType >::
 setMass ( const scalarFctPtr_Type& massFct )
 {
     // Save the mass function.
@@ -602,9 +598,9 @@ setMass ( const scalarFctPtr_Type& massFct )
 } // setMass
 
 // Call the Darcy solver localMatrixComputation method and compute the mass matrix for the time dependent term.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverTransient < MeshType, SolverType >::
+DarcySolverTransient < MeshType >::
 localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
                          MatrixElemental& elmatReactionTerm )
 {
@@ -628,9 +624,9 @@ localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
 } // localMatrixComputation
 
 // Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverTransient < MeshType, SolverType >::
+DarcySolverTransient < MeshType >::
 localVectorComputation ( const UInt & iElem, VectorElemental& elvecMix )
 {
     /* Call the Darcy solver localVectorComputation to update the finite elements

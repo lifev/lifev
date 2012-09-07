@@ -241,10 +241,9 @@ namespace LifeV
     @todo Attention! We have the hypothesis that we use P0 elements for the primal unknown. Change this in a future!
     @todo Add criteria to ensure convergence of the fixed point method.
 */
-template < typename MeshType,
-           typename SolverType = LifeV::SolverAztecOO >
+template < typename MeshType >
 class DarcySolverNonLinear :
-        virtual public DarcySolverLinear < MeshType, SolverType >
+        virtual public DarcySolverLinear < MeshType >
 {
 
 public:
@@ -255,14 +254,11 @@ public:
     //! Typedef for mesh template.
     typedef MeshType mesh_Type;
 
-    //! Typedef for solver template.
-    typedef SolverType solver_Type;
-
     //! Self typedef.
-    typedef DarcySolverNonLinear < mesh_Type, solver_Type > darcySolverNonLinear_Type;
+    typedef DarcySolverNonLinear < mesh_Type > darcySolverNonLinear_Type;
 
     //! Darcy solver class.
-    typedef DarcySolverLinear < mesh_Type, solver_Type > darcySolverLinear_Type;
+    typedef DarcySolverLinear < mesh_Type > darcySolverLinear_Type;
 
     //! Typedef for the data type.
     typedef typename darcySolverLinear_Type::data_Type data_Type;
@@ -533,8 +529,8 @@ private:
 // ===================================================
 
 // Complete constructor.
-template < typename MeshType, typename SolverType >
-DarcySolverNonLinear < MeshType, SolverType >::
+template < typename MeshType >
+DarcySolverNonLinear < MeshType >::
 DarcySolverNonLinear ( ):
         // Standard Darcy solver constructor.
         darcySolverLinear_Type::DarcySolverLinear  ( ),
@@ -551,9 +547,9 @@ DarcySolverNonLinear ( ):
 // ===================================================
 
 // Set up the linear solver and the preconditioner.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverNonLinear < MeshType, SolverType >::
+DarcySolverNonLinear < MeshType >::
 setup ()
 {
 
@@ -576,9 +572,9 @@ setup ()
 } // setup
 
 // Fixed point scheme.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverNonLinear < MeshType, SolverType >::
+DarcySolverNonLinear < MeshType >::
 fixedPoint ()
 {
 
@@ -634,9 +630,9 @@ fixedPoint ()
 } // fixedPoint
 
 // Set the first value for the fixed point method.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverNonLinear < MeshType, SolverType >::
+DarcySolverNonLinear < MeshType >::
 setPrimalZeroIteration ( const scalarFctPtr_Type& primalZeroIterationFct )
 {
     // Set the function for the first iteration.
@@ -653,9 +649,9 @@ setPrimalZeroIteration ( const scalarFctPtr_Type& primalZeroIterationFct )
 // ===================================================
 
 // Update all the variables of the problem.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverNonLinear < MeshType, SolverType >::
+DarcySolverNonLinear < MeshType >::
 resetVariables ()
 {
 

@@ -246,8 +246,7 @@ namespace LifeV
     @bug If the save flag for the exporter is setted to 0 the program fails.
 */
 
-template < typename MeshType,
-           typename SolverType = LifeV::SolverAztecOO >
+template < typename MeshType >
 class DarcySolverLinear
 {
 
@@ -260,10 +259,10 @@ public:
     typedef MeshType mesh_Type;
 
     //! Typedef for solver template.
-    typedef SolverType solver_Type;
+    typedef LinearSolver solver_Type;
 
     //! Self typedef
-    typedef DarcySolverLinear < mesh_Type, solver_Type > darcySolver_Type;
+    typedef DarcySolverLinear < mesh_Type > darcySolver_Type;
 
     //! Typedef for the data type.
     typedef DarcyData < mesh_Type > data_Type;
@@ -812,9 +811,9 @@ protected:
 // ==========================================================================================
 
 // Build the global hybrid matrix and global hybrid right hand side, with boundary conditions.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 buildSystem ()
 {
 
@@ -933,9 +932,9 @@ buildSystem ()
 } // buildSystem
 
 // Set up the linear solver and the preconditioner.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 setup ()
 {
 
@@ -966,9 +965,9 @@ setup ()
 } // setup
 
 // Solve the linear system.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 solveLinearSystem ()
 {
 
@@ -993,9 +992,9 @@ solveLinearSystem ()
 } // solveLinearSystem
 
 // Compute primal and dual unknown as a post process.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 computePrimalAndDual ()
 {
 
@@ -1115,9 +1114,9 @@ computePrimalAndDual ()
 } // computePrimalAndDual
 
 // Solve the Darcy problem.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 solve ()
 {
     // Create the hybrid system using the static condensation.
@@ -1136,9 +1135,9 @@ solve ()
 // ==============================================================================
 
 // Compute all the constant matrices.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 computeConstantMatrices ( MatrixElemental& elmatMix )
 {
 
@@ -1185,9 +1184,9 @@ computeConstantMatrices ( MatrixElemental& elmatMix )
 } // computeConstantMatrices
 
 // Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
                          MatrixElemental& elmatReactionTerm )
 {
@@ -1236,9 +1235,9 @@ localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
 } // localMatrixComputation
 
 // Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 localVectorComputation ( const UInt & iElem, VectorElemental& elvecMix )
 {
     // Element of current id.
@@ -1279,9 +1278,9 @@ localVectorComputation ( const UInt & iElem, VectorElemental& elvecMix )
 } // localVectorComputation
 
 // Perform the static condensation for the local hybrid matrix.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 staticCondensation ( MatrixElemental& localMatrixHybrid,
                      VectorElemental& localVectorHybrid,
                      MatrixElemental& elmatMix,
@@ -1462,9 +1461,9 @@ staticCondensation ( MatrixElemental& localMatrixHybrid,
 } // staticCondensation
 
 // Locally compute the primal and dual variable.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 localComputePrimalAndDual ( VectorElemental& localSolution,
                             MatrixElemental& elmatMix,
                             MatrixElemental& elmatReactionTerm,
@@ -1641,9 +1640,9 @@ localComputePrimalAndDual ( VectorElemental& localSolution,
 } // localComputePrimalAndDual
 
 // Update all the variables of the problem.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 resetVariables ()
 {
 
@@ -1670,9 +1669,9 @@ resetVariables ()
 } // resetVariables
 
 // Apply the boundary conditions to the global hybrid matrix and the global hybrid right hand side.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 applyBoundaryConditions ()
 {
 
@@ -1703,10 +1702,10 @@ applyBoundaryConditions ()
 } // applyBoundaryConditions
 
 // Reorder a non full stored symmetric matrix.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 template < typename MatrixType >
 void
-DarcySolverLinear < MeshType, SolverType >::
+DarcySolverLinear < MeshType >::
 symmetrizeMatrix ( Int N, MatrixType& A  )
 {
 

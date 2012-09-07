@@ -254,12 +254,11 @@ namespace LifeV
     conditions are imposed via BCHandler class.
     @todo Insert any scientific publications that use this solver.
 */
-template < typename MeshType,
-           typename SolverType = LifeV::SolverAztecOO >
+template < typename MeshType >
 class DarcySolverTransientNonLinear
         :
-        public DarcySolverNonLinear < MeshType, SolverType >,
-        public DarcySolverTransient < MeshType, SolverType >
+        public DarcySolverNonLinear < MeshType >,
+        public DarcySolverTransient < MeshType >
 {
 
 public:
@@ -270,20 +269,17 @@ public:
     //! Typedef for mesh template.
     typedef MeshType mesh_Type;
 
-    //! Typedef for solver template.
-    typedef SolverType solver_Type;
-
     //! Self typedef.
-    typedef DarcySolverTransientNonLinear < mesh_Type, solver_Type > darcySolverTransientNonLinear_Type;
+    typedef DarcySolverTransientNonLinear < mesh_Type > darcySolverTransientNonLinear_Type;
 
     //! Darcy solver class.
-    typedef DarcySolverLinear < mesh_Type, solver_Type > darcySolverLinear_Type;
+    typedef DarcySolverLinear < mesh_Type > darcySolverLinear_Type;
 
     //! Darcy non linear solver class.
-    typedef DarcySolverNonLinear < mesh_Type, solver_Type > darcySolverNonLinear_Type;
+    typedef DarcySolverNonLinear < mesh_Type > darcySolverNonLinear_Type;
 
     //! Darcy transient solver class.
-    typedef DarcySolverTransient < mesh_Type, solver_Type > darcySolverTransient_Type;
+    typedef DarcySolverTransient < mesh_Type > darcySolverTransient_Type;
 
     //! Typedef for the data type.
     typedef typename darcySolverLinear_Type::data_Type data_Type;
@@ -410,8 +406,8 @@ protected:
 // ===================================================
 
 // Complete constructor.
-template < typename MeshType, typename SolverType >
-DarcySolverTransientNonLinear < MeshType, SolverType >::
+template < typename MeshType >
+DarcySolverTransientNonLinear < MeshType >::
 DarcySolverTransientNonLinear ():
         // Standard Darcy solver constructor.
         darcySolverLinear_Type::DarcySolverLinear (),
@@ -426,9 +422,9 @@ DarcySolverTransientNonLinear ():
 // ===================================================
 
 // Set up the linear solver and the preconditioner.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverTransientNonLinear < MeshType, SolverType >::
+DarcySolverTransientNonLinear < MeshType >::
 setup ()
 {
     // Call the DarcySolverTransient setup method for setting up the linear solver and time data.
@@ -439,9 +435,9 @@ setup ()
 } // setup
 
 // Solve the problem.
-template < typename MeshType, typename SolverType >
+template < typename MeshType >
 void
-DarcySolverTransientNonLinear < MeshType, SolverType >::
+DarcySolverTransientNonLinear < MeshType >::
 solve ()
 {
     // Reset the right hand side coming from the time advance scheme.
