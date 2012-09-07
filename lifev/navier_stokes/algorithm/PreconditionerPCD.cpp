@@ -70,11 +70,13 @@ PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     M_density                    ( 1.0 ),
     M_pressureBoundaryConditions ( "none" ),
     M_pressureLaplacianOperator  ( "standard" ),
-    M_useLumpedPressureMass      ( false ),
+    M_pressureMassOperator       ( "lumped" ),
     M_setApBoundaryConditions    ( false ),
     M_setFpBoundaryConditions    ( false ),
     M_setMpBoundaryConditions    ( false ),
     M_fullFactorization          ( false ),
+    M_useStiffStrain             ( false ),
+    M_enableTransient            ( true ),
     M_schurOperatorReverseOrder  ( false ),
     M_inflowBoundaryFlags        (),
     M_outflowBoundaryFlags       (),
@@ -135,8 +137,8 @@ PreconditionerPCD::createPCDList( list_Type&         list,
     std::string pressureLaplacianOperator = dataFile( ( section + "/" + subsection + "/pressure_laplacian_operator").data(), "standard" );
     list.set( "pressure laplacian operator", pressureLaplacianOperator );
 
-    bool useLumpedPressureMass = dataFile( ( section + "/" + subsection + "/use_lumped_pressure_mass" ).data(), false );
-    list.set( "use lumped pressure mass", useLumpedPressureMass );
+    std::string pressureMassOperator = dataFile( ( section + "/" + subsection + "/pressure_mass_operator").data(), "lumped" );
+    list.set( "pressure mass operator", pressureMassOperator );
 
     bool setApBoundaryConditions = dataFile( ( section + "/" + subsection + "/set_Ap_boundary_conditions" ).data(), false );
     list.set( "set Ap boundary conditions", setApBoundaryConditions );
@@ -149,6 +151,12 @@ PreconditionerPCD::createPCDList( list_Type&         list,
 
     bool fullFactorization = dataFile( ( section + "/" + subsection + "/full_factorization" ).data(), false );
     list.set( "full factorization", fullFactorization );
+    
+    bool useStiffStrain = dataFile( ( section + "/" + subsection + "/use_StiffStrain" ).data(), false );
+    list.set( "use stiff strain", useStiffStrain );
+
+    bool enableTransient = dataFile( ( section + "/" + subsection + "/enable_transient" ).data(), true );
+    list.set( "enable transient", enableTransient );
 
     bool schurOperatorReverseOrder = dataFile( ( section + "/" + subsection + "/Schur_operator_reverse_order" ).data(), false );
     list.set( "Schur operator reverse order", schurOperatorReverseOrder );
@@ -350,9 +358,19 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     PFp->blockView( 0, 0, B11 );
     PFp->blockView( 1, 1, B22 );
     MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
-    M_adrPressureAssembler.addDiffusion( PFp, -M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
+    if( M_useStiffStrain )
+    {
+    	// M_adrPressureAssembler.addStiffStrain( PFp, -M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
+    }
+    else
+    {
+        M_adrPressureAssembler.addDiffusion( PFp, -M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
+    }
     M_adrPressureAssembler.addAdvection( PFp, *M_beta, B22.firstRowIndex(), B22.firstColumnIndex() );
-    M_adrPressureAssembler.addMass( PFp, 1.0/M_timestep, B22.firstRowIndex(), B22.firstColumnIndex() );
+    if( M_enableTransient )
+    {
+        M_adrPressureAssembler.addMass( PFp, 1.0/M_timestep, B22.firstRowIndex(), B22.firstColumnIndex() );
+    }
     boost::shared_ptr<matrix_Type> pFp = PFp;
     FpOffset = B22.firstRowIndex();
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
@@ -387,6 +405,69 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
                                       *( pFp->matrixPtr() ), true,  0.5*M_density/M_viscosity,
                                       tmpCrsMatrix );
     }
+    else if( M_pressureLaplacianOperator == "BBt" )
+    {
+        if ( verbose ) std::cout << " (BBt version)... ";
+        boost::shared_ptr<matrixBlock_Type> BMat( new matrixBlock_Type( map ) );
+        BMat->setBlockStructure( blockNumRows, blockNumColumns );
+        MatrixEpetraStructuredUtility::copyBlock( B, *( BMat->block( 1, 0 ) ) );
+        BMat->globalAssemble();
+        boost::shared_ptr<matrixBlock_Type> BtMat( new matrixBlock_Type( map ) );
+        BtMat->setBlockStructure( blockNumRows, blockNumColumns );
+        MatrixEpetraStructuredUtility::copyBlock( Bt, *( BtMat->block( 0, 1 ) ) );
+        BtMat->globalAssemble();
+        boost::shared_ptr<matrixBlock_Type> BBtMat( new matrixBlock_Type( map ) );
+        BBtMat->setBlockStructure( blockNumRows, blockNumColumns );
+        BMat->multiply( false,
+                        *BtMat , false,
+                        *BBtMat, true );
+        MatrixEpetraStructuredUtility::copyBlock( *( BBtMat->block( 1, 1 ) ), B22 );
+    }
+    else if( M_pressureLaplacianOperator == "BinvDBt" )
+    {
+        if ( verbose ) std::cout << " (BinvDBt version)... ";
+        // Create B
+        boost::shared_ptr<matrixBlock_Type> BMat( new matrixBlock_Type( map ) );
+        BMat->setBlockStructure( blockNumRows, blockNumColumns );
+        MatrixEpetraStructuredUtility::copyBlock( B, *( BMat->block( 1, 0 ) ) );
+        BMat->globalAssemble();
+
+        // Create the inverse of the diagonal mass matrix D
+        boost::shared_ptr<matrixBlock_Type> tmpVelocityMass( new matrixBlock_Type( map ) );
+        tmpVelocityMass->setBlockStructure( blockNumRows, blockNumColumns );
+        M_adrVelocityAssembler.addMass( tmpVelocityMass, 1.0 );
+        tmpVelocityMass->globalAssemble();
+        boost::shared_ptr<matrixBlock_Type> invDMat( new matrixBlock_Type( map ) );
+        invDMat->setBlockStructure( blockNumRows, blockNumColumns );
+        MatrixEpetraStructuredUtility::createInvDiagBlock( *( tmpVelocityMass->block( 0, 0 ) ), *( invDMat->block( 0, 0 ) ) );
+        invDMat->globalAssemble();
+        tmpVelocityMass.reset(); // Free the memory
+
+        // Compute BD^-1
+        boost::shared_ptr<matrixBlock_Type> BinvDMat( new matrixBlock_Type( map ) );
+        BinvDMat->setBlockStructure( blockNumRows, blockNumColumns );
+        BMat->multiply( false,
+                        *invDMat , false,
+                        *BinvDMat, true );
+        invDMat.reset(); // Free the memory
+        BMat.reset();
+
+        // Compute BD^-1Bt
+        boost::shared_ptr<matrixBlock_Type> BtMat( new matrixBlock_Type( map ) );
+        BtMat->setBlockStructure( blockNumRows, blockNumColumns );
+        MatrixEpetraStructuredUtility::copyBlock( Bt, *( BtMat->block( 0, 1 ) ) );
+        BtMat->globalAssemble();
+        boost::shared_ptr<matrixBlock_Type> BBtMat( new matrixBlock_Type( map ) );
+        BBtMat->setBlockStructure( blockNumRows, blockNumColumns );
+        BinvDMat->multiply( false,
+                            *BtMat , false,
+                            *BBtMat, true );
+        BinvDMat.reset(); // Free the memory
+        BtMat.reset();
+
+        // Export the matrix
+        MatrixEpetraStructuredUtility::copyBlock( *( BBtMat->block( 1, 1 ) ), B22 );
+    }
     else
     {
         if ( verbose ) std::cout << "... ";
@@ -399,7 +480,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     if ( verbose ) std::cout << "      >Building Mp";
     timer.start();
     boost::shared_ptr<matrixBlock_Type> PMp;
-    if( M_pressureMassPrec == "LinearSolver" && !M_useLumpedPressureMass )
+    if( M_pressureMassPrec == "LinearSolver" && M_pressureMassOperator == "standard" )
     {
         PMp.reset( new matrixBlock_Type( pressureMap ) );
         *PMp *= 0.0;
@@ -416,7 +497,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
         MpOffset = B22.firstRowIndex();
     }
-    if ( M_useLumpedPressureMass )
+    if ( M_pressureMassOperator == "lumped" )
     {
         if ( verbose ) std::cout << " (Lumped version)... ";
         boost::shared_ptr<matrixBlock_Type> tmpMass( new matrixBlock_Type( map ) );
@@ -425,6 +506,17 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         tmpMass->setBlockStructure( blockNumRows, blockNumColumns );
         tmpMass->blockView( 1, 1, B11 );
         MatrixEpetraStructuredUtility::createInvLumpedBlock( B11, B22 );
+        tmpMass.reset();
+    }
+    if ( M_pressureMassOperator == "diagonal" )
+    {
+        if ( verbose ) std::cout << " (diagonal version)... ";
+        boost::shared_ptr<matrixBlock_Type> tmpMass( new matrixBlock_Type( map ) );
+        M_adrPressureAssembler.addMass( tmpMass, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
+        tmpMass->globalAssemble();
+        tmpMass->setBlockStructure( blockNumRows, blockNumColumns );
+        tmpMass->blockView( 1, 1, B11 );
+        MatrixEpetraStructuredUtility::createInvDiagBlock( B11, B22 );
         tmpMass.reset();
     }
     else
@@ -524,7 +616,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
 
         if ( verbose ) std::cout << "      >Schur block (a)... ";
         timer.start();
-        if ( M_useLumpedPressureMass )
+        if ( M_pressureMassOperator != "standard" )
         {
             this->pushBack( pMp, inversed, notTransposed );
         }
@@ -587,7 +679,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
 
         if ( verbose ) std::cout << "      >Schur block (c)... ";
         timer.start();
-        if ( M_useLumpedPressureMass )
+        if ( M_pressureMassOperator != "standard" )
         {
             this->pushBack( pMp, inversed, notTransposed );
         }
@@ -707,11 +799,13 @@ PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
     M_pressureBoundaryConditions       = this->M_list.get( "pressure boundary conditions", "none" );
     M_pressureLaplacianOperator        = this->M_list.get( "pressure laplacian operator", "standard" );
 
-    M_useLumpedPressureMass            = this->M_list.get( "use lumped pressure mass", false );
+    M_pressureMassOperator             = this->M_list.get( "pressure mass operator", "lumped" );
     M_setApBoundaryConditions          = this->M_list.get( "set Ap boundary conditions", false );
     M_setFpBoundaryConditions          = this->M_list.get( "set Fp boundary conditions", false );
     M_setMpBoundaryConditions          = this->M_list.get( "set Mp boundary conditions", false );
     M_fullFactorization                = this->M_list.get( "full factorization", false );
+    M_useStiffStrain                   = this->M_list.get( "use stiff strain", false );
+    M_enableTransient                  = this->M_list.get( "enable transient", true );
     M_schurOperatorReverseOrder        = this->M_list.get( "Schur operator reverse order", false );
     M_inflowBoundaryType               = this->M_list.get( "inflow boundary type", "Robin" );
     M_outflowBoundaryType              = this->M_list.get( "outflow boundary type", "Neumann" );

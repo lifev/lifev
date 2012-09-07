@@ -228,12 +228,14 @@ protected:
 
     string      M_pressureBoundaryConditions;
     string      M_pressureLaplacianOperator;
-    bool        M_useLumpedPressureMass;
+    string      M_pressureMassOperator;
     bool        M_setApBoundaryConditions;
     bool        M_setFpBoundaryConditions;
     bool        M_setMpBoundaryConditions;
     bool        M_fullFactorization;
     bool        M_schurOperatorReverseOrder;
+    bool        M_useStiffStrain;
+    bool        M_enableTransient;
 
     std::vector<bcFlag_Type> M_inflowBoundaryFlags;
     std::vector<bcFlag_Type> M_outflowBoundaryFlags;
