@@ -35,8 +35,6 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
-
 #include <lifev/core/mesh/RegionMesh.hpp>
 
 #include <lifev/darcy/solver/DarcySolverTransientNonLinear.hpp>
@@ -56,9 +54,7 @@ typedef boost::shared_ptr < regionMesh_Type > regionMeshPtr_Type;
 
 typedef MeshPartitioner < regionMesh_Type > meshPartitioner_Type;
 
-typedef SolverAztecOO solver_Type;
-
-typedef DarcySolverTransientNonLinear < regionMesh_Type, solver_Type > darcySolver_Type;
+typedef DarcySolverTransientNonLinear < regionMesh_Type > darcySolver_Type;
 
 typedef darcySolver_Type::darcySolverLinear_Type darcySolverLinear_Type;
 

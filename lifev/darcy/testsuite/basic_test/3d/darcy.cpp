@@ -148,11 +148,6 @@ darcy_linear::run()
 {
     using namespace dataProblem;
 
-    typedef DarcyData < regionMesh_Type > darcyData_Type;
-    typedef boost::shared_ptr < darcyData_Type > darcyDataPtr_Type;
-
-    typedef DarcySolverLinear < regionMesh_Type, solver_Type > darcyLinearSolver_Type;
-
     // Life chonos
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
@@ -316,7 +311,7 @@ darcy_linear::run()
     chronoProblem.start();
 
     // Instantiation of the DarcySolver class
-    darcyLinearSolver_Type darcySolver;
+    darcySolver_Type darcySolver;
 
     // Stop chronoProblem
     chronoProblem.stop();
