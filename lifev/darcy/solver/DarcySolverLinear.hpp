@@ -45,10 +45,13 @@
 #include <Epetra_LAPACK.h>
 #include <Epetra_BLAS.h>
 
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
+
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
 
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/AssemblyElemental.hpp>
@@ -320,19 +323,19 @@ public:
     typedef boost::shared_ptr < matrixFct_Type > matrixFctPtr_Type;
 
     //! Sparse and distributed matrix.
-    typedef typename solver_Type::matrix_type matrix_Type;
+    typedef typename solver_Type::matrix_Type matrix_Type;
 
     //! Shared pointer to a sparse and distributed matrix.
-    typedef boost::shared_ptr < matrix_Type > matrixPtr_Type;
+    typedef typename solver_Type::matrixPtr_Type matrixPtr_Type;
 
     //! Distributed vector.
-    typedef typename solver_Type::vector_type vector_Type;
+    typedef typename solver_Type::vector_Type vector_Type;
 
     //! Shared pointer to a distributed vector.
-    typedef boost::shared_ptr < vector_Type > vectorPtr_Type;
+    typedef typename solver_Type::vectorPtr_Type vectorPtr_Type;
 
     //! Shared pointer to the preconditioner.
-    typedef typename solver_Type::prec_type precPtr_Type;
+    typedef typename solver_Type::preconditionerPtr_Type preconditionerPtr_Type;
 
     //@}
 
@@ -794,7 +797,7 @@ protected:
     solver_Type M_linearSolver;
 
     //! Epetra preconditioner for the linear system.
-    precPtr_Type M_prec;
+    preconditionerPtr_Type M_prec;
 
     //@}
 
@@ -938,9 +941,16 @@ setup ()
 
     const typename data_Type::data_Type& dataFile = *( M_data->dataFilePtr() );
 
-    // Set up data for the linear solver and the preconditioner.
-    M_linearSolver.setDataFromGetPot ( dataFile, ( M_data->section() + "/solver" ).data() );
-    M_linearSolver.setupPreconditioner ( dataFile, ( M_data->section() + "/prec" ).data() );
+    // Setup the teuchos parameter list for the linear solver.
+    const std::string solverSection = M_data->section() + "/solver";
+    const std::string xmlFolder = dataFile( ( solverSection + "/folder" ).data(), "./" );
+    const std::string xmlFile = dataFile( ( solverSection + "/file" ).data(), "parameterList.xml" );
+
+    Teuchos::RCP< Teuchos::ParameterList > parameterList = Teuchos::rcp ( new Teuchos::ParameterList );
+    parameterList = Teuchos::getParametersFromXmlFile( xmlFolder + xmlFile );
+
+    // Setup the linear solver.
+    M_linearSolver.setParameters( *parameterList );
     M_linearSolver.setCommunicator ( M_displayer->comm() );
 
     // Choose the preconditioner type.
@@ -949,6 +959,9 @@ setup ()
     // Create a preconditioner object.
     M_prec.reset ( PRECFactory::instance().createObject( precType ) );
     ASSERT( M_prec.get() != 0, "DarcySolverLinear : Preconditioner not set" );
+
+    // Set the data for the preconditioner.
+    M_prec->setDataFromGetPot( dataFile, ( M_data->section() + "/prec" ).data() );
 
 } // setup
 
@@ -960,16 +973,22 @@ solveLinearSystem ()
 {
 
     // Set the matrix.
-    M_linearSolver.setMatrix( *M_matrHybrid );
+    M_linearSolver.setOperator ( M_matrHybrid );
+
+    // Set the righthand side.
+    M_linearSolver.setRightHandSide ( M_rhs );
+
+    // Set the preconditioner.
+    M_linearSolver.setPreconditioner ( M_prec );
 
     // Create the solution vector, it has to be of Unique type.
-    vector_Type solution ( M_hybridField->getFESpace().map(), Unique );
+    vectorPtr_Type solution ( new vector_Type ( M_hybridField->getFESpace().map(), Unique ) );
 
-    // Solve the linear system, if used a iterative scheme numIter stores the number of iterations.
-    M_linearSolver.solveSystem( *M_rhs, solution, M_matrHybrid );
+    // Solve the linear system.
+    M_linearSolver.solve ( solution );
 
     // Save the solution into the hybrid variable.
-    M_hybridField->getVector() = solution;
+    M_hybridField->getVector() = *solution;
 
 } // solveLinearSystem
 
