@@ -155,16 +155,8 @@
     [../]
 
     [./solver]
-        #gmres cg
-        solver          = gmres
-        scaling         = none
-        output          = all # none
-        conv            = rhs
-        max_iter        = 500
-        reuse           = true
-        max_iter_reuse  = 10
-        kspace          = 100
-        tol             = 1.e-8    # AztecOO tolerance
+        folder = ./
+        file = SolverParamList_AztecOO.xml
     [../]
 
 [../]
