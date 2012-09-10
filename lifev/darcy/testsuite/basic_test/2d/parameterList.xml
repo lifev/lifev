@@ -1,4 +1,4 @@
-<ParameterList>
+<ParameterList name="Linear Algebra">
 
     <ParameterList name="Linear Solver">
         <Parameter docString="" id="0" isDefault="false" isUsed="true" name="Max Iterations For Reuse" type="int" value="10"/>
