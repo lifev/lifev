@@ -364,7 +364,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
     if( M_useStiffStrain )
     {
-    	// M_adrPressureAssembler.addStiffStrain( PFp, M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
+    	M_adrPressureAssembler.addStiffStrain( PFp, M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
     else
     {
