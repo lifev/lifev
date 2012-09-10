@@ -77,6 +77,7 @@ PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     M_fullFactorization          ( false ),
     M_useStiffStrain             ( false ),
     M_enableTransient            ( true ),
+    M_divergenceCoeff            ( 1.0 ),
     M_schurOperatorReverseOrder  ( false ),
     M_inflowBoundaryFlags        (),
     M_outflowBoundaryFlags       (),
@@ -157,6 +158,9 @@ PreconditionerPCD::createPCDList( list_Type&         list,
 
     bool enableTransient = dataFile( ( section + "/" + subsection + "/enable_transient" ).data(), true );
     list.set( "enable transient", enableTransient );
+
+    bool useMinusDivergence = dataFile( ( section + "/" + subsection + "/use_minus_divergence" ).data(), false );
+    list.set( "use minus divergence", useMinusDivergence );
 
     bool schurOperatorReverseOrder = dataFile( ( section + "/" + subsection + "/Schur_operator_reverse_order" ).data(), false );
     list.set( "Schur operator reverse order", schurOperatorReverseOrder );
@@ -342,8 +346,8 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
 
     /*
      * Building the block
-     * / I  0 \   / I     0      \   / I  0  \ / I 0     \ / I 0  \
-     * \ 0 -S / = \ 0 -ApFp^-1Mp / = \ 0 -Ap / \ 0 Fp^-1 / \ 0 Mp /
+     * / I  0 \   / I     0      \   / I 0  \ / I 0     \ / I  0  \
+     * \ 0 -S / = \ 0 -ApFp^-1Mp / = \ 0 Ap / \ 0 Fp^-1 / \ 0 -Mp /
      */
     UInt ApOffset( 0 );
     UInt FpOffset( 0 );
@@ -360,11 +364,11 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     MatrixEpetraStructuredUtility::createScalarBlock( B11, 1.0 );
     if( M_useStiffStrain )
     {
-    	// M_adrPressureAssembler.addStiffStrain( PFp, -M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
+    	// M_adrPressureAssembler.addStiffStrain( PFp, M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
     else
     {
-        M_adrPressureAssembler.addDiffusion( PFp, -M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
+        M_adrPressureAssembler.addDiffusion( PFp, M_viscosity/M_density, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
     M_adrPressureAssembler.addAdvection( PFp, *M_beta, B22.firstRowIndex(), B22.firstColumnIndex() );
     if( M_enableTransient )
@@ -404,6 +408,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         EpetraExt::MatrixMatrix::Add( *( pFp->matrixPtr() ), false, 0.5*M_density/M_viscosity,
                                       *( pFp->matrixPtr() ), true,  0.5*M_density/M_viscosity,
                                       tmpCrsMatrix );
+        *PAp *= M_divergenceCoeff;
     }
     else if( M_pressureLaplacianOperator == "BBt" )
     {
@@ -471,7 +476,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     else
     {
         if ( verbose ) std::cout << "... ";
-        M_adrPressureAssembler.addDiffusion( PAp, 1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
+        M_adrPressureAssembler.addDiffusion( PAp, M_divergenceCoeff, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
     boost::shared_ptr<matrix_Type> pAp = PAp;
     if ( verbose ) std::cout << "done in " << timer.diff() << " s." << std::endl;
@@ -806,6 +811,8 @@ PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
     M_fullFactorization                = this->M_list.get( "full factorization", false );
     M_useStiffStrain                   = this->M_list.get( "use stiff strain", false );
     M_enableTransient                  = this->M_list.get( "enable transient", true );
+    bool useMinusDivergence            = this->M_list.get( "use minus divergence", false );
+    this->setUseMinusDivergence( useMinusDivergence );
     M_schurOperatorReverseOrder        = this->M_list.get( "Schur operator reverse order", false );
     M_inflowBoundaryType               = this->M_list.get( "inflow boundary type", "Robin" );
     M_outflowBoundaryType              = this->M_list.get( "outflow boundary type", "Neumann" );
@@ -859,6 +866,19 @@ PreconditionerPCD::setBoundaryTypes( const std::vector<bcFlag_Type>& inflowBound
     M_inflowBoundaryFlags = inflowBoundaryFlags;
     M_outflowBoundaryFlags = outflowBoundaryFlags;
     M_characteristicBoundaryFlags = characteristicBoundaryFlags;
+}
+
+void
+PreconditionerPCD::setUseMinusDivergence( const bool& useMinusDivergence )
+{
+    if ( useMinusDivergence )
+    {
+        M_divergenceCoeff = -1.0;
+    }
+    else
+    {
+        M_divergenceCoeff = 1.0;
+    }
 }
 
 void

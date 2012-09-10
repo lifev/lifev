@@ -199,6 +199,12 @@ public:
                            const std::vector<bcFlag_Type>& outflowBoundaryFlagsVector,
                            const std::vector<bcFlag_Type>& characteristicBoundaryFlagsVector );
 
+    //! Setter to know if we used B or -B in the discretization of the Navier-Stokes equations
+    /*!
+        @param useMinusDivergence is true if -B has been used.
+     */
+    void setUseMinusDivergence( const bool& useMinusDivergence );
+
     //@}
 
 protected:
@@ -236,6 +242,7 @@ protected:
     bool        M_schurOperatorReverseOrder;
     bool        M_useStiffStrain;
     bool        M_enableTransient;
+    Real        M_divergenceCoeff;
 
     std::vector<bcFlag_Type> M_inflowBoundaryFlags;
     std::vector<bcFlag_Type> M_outflowBoundaryFlags;
