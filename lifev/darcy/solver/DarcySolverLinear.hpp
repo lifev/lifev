@@ -941,26 +941,26 @@ setup ()
     const typename data_Type::data_Type& dataFile = *( M_data->dataFilePtr() );
 
     // Setup the teuchos parameter list for the linear solver.
-    const std::string solverSection = M_data->section() + "/solver";
-    const std::string xmlFolder = dataFile( ( solverSection + "/folder" ).data(), "./" );
-    const std::string xmlFile = dataFile( ( solverSection + "/file" ).data(), "parameterList.xml" );
+    const std::string xmlSection = M_data->section() + "/xml";
+    const std::string xmlFolder = dataFile( ( xmlSection + "/folder" ).data(), "./" );
+    const std::string xmlFile = dataFile( ( xmlSection + "/file" ).data(), "parameterList.xml" );
 
     Teuchos::RCP< Teuchos::ParameterList > parameterList = Teuchos::rcp ( new Teuchos::ParameterList );
     parameterList = Teuchos::getParametersFromXmlFile( xmlFolder + xmlFile );
 
     // Setup the linear solver.
-    M_linearSolver.setParameters( *parameterList );
+    M_linearSolver.setParameters( parameterList->sublist("Linear Solver") );
     M_linearSolver.setCommunicator ( M_displayer->comm() );
 
     // Choose the preconditioner type.
-    const std::string precType = dataFile( ( M_data->section() + "/prec/prectype" ).data() , "Ifpack");
+    const std::string precType = parameterList->sublist( "Preconditioner" ).get( "prectype", "Ifpack" );
 
     // Create a preconditioner object.
     M_prec.reset ( PRECFactory::instance().createObject( precType ) );
     ASSERT( M_prec.get() != 0, "DarcySolverLinear : Preconditioner not set" );
 
     // Set the data for the preconditioner.
-    M_prec->setDataFromGetPot( dataFile, ( M_data->section() + "/prec" ).data() );
+    M_prec->setParametersList( parameterList->sublist( "Preconditioner" ).sublist( precType ) );
 
 } // setup
 
@@ -977,8 +977,9 @@ solveLinearSystem ()
     // Set the righthand side.
     M_linearSolver.setRightHandSide ( M_rhs );
 
-    // Set the preconditioner.
+    // Set and build the preconditioner.
     M_linearSolver.setPreconditioner ( M_prec );
+    M_linearSolver.buildPreconditioner ();
 
     // Create the solution vector, it has to be of Unique type.
     vectorPtr_Type solution ( new vector_Type ( M_hybridField->getFESpace().map(), Unique ) );
