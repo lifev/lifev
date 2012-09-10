@@ -142,7 +142,7 @@ PreconditionerYosida::buildPreconditioner( matrixPtr_Type& oper )
      * / F Bt \
      * \ B C  /
      */
-    if ( verbose ) std::cout << std::endl << "      >Getting the structure of A... ";
+    if ( verbose ) std::cout << "      >Getting the structure of A... ";
     timer.start();
     matrixBlockView_Type F, Bt, B, C, M;
     //oper.blockView( 0, 0, F );
