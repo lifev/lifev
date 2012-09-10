@@ -461,21 +461,19 @@ protected:
     */
     virtual void resetVariables ();
 
-    //@}
+    //! Perform the fixed point loop to solve the non-linear problem.
+    void fixedPoint ();
 
-    //! @name protected variables
-    //@{
-
-    //! Primal solution at previous iteration step.
-    scalarFieldPtr_Type M_primalFieldPreviousIteration;
+    //! Set up the data for the non-linear solver.
+    void setupNonLinear ();
 
     //@}
 
     //! @name Protected Members
     //@{
 
-    //! Perform the fixed point loop to solve the non-linear problem.
-    void fixedPoint ();
+    //! Primal solution at previous iteration step.
+    scalarFieldPtr_Type M_primalFieldPreviousIteration;
 
     //@}
 
@@ -553,10 +551,22 @@ DarcySolverNonLinear < MeshType >::
 setup ()
 {
 
-    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
-
     // Call the DarcySolverLinear setup method for setting up the linear solver.
     darcySolverLinear_Type::setup();
+
+    // Call the setup for the non-linear data.
+    setupNonLinear ();
+
+} // setup
+
+// Set up the non-linear data.
+template < typename MeshType >
+void
+DarcySolverNonLinear < MeshType >::
+setupNonLinear ()
+{
+
+    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
 
     // Path for the non linear stuff in the data file.
     const std::string dataPath = this->M_data->section() + "/non-linear";
@@ -569,7 +579,7 @@ setup ()
     const Real tol = dataFile( ( dataPath + "/fixed_point_toll" ).data(), 1.e-8 );
     setFixedPointTolerance ( tol );
 
-} // setup
+} // setupNonLinear
 
 // Fixed point scheme.
 template < typename MeshType >

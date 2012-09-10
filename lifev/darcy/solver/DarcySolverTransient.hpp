@@ -379,6 +379,9 @@ protected:
         M_timeAdvance->shiftRight ( this->M_primalField->getVector() );
     }
 
+    //! Setup the time data.
+    void setupTime ();
+
     //@}
 
     // Time advance stuff
@@ -483,10 +486,22 @@ DarcySolverTransient < MeshType >::
 setup ()
 {
 
-    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
-
     // Call the DarcySolverLinear setup method for setting up the linear solver.
     darcySolverLinear_Type::setup ();
+
+    // Setup the time data
+    setupTime ();
+
+} // setup
+
+// Set up the linear solver and the preconditioner.
+template < typename MeshType >
+void
+DarcySolverTransient < MeshType >::
+setupTime ()
+{
+
+    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
 
     // Set if the preconditioner is re-used.
     M_reusePrec = dataFile ( ( this->M_data->section() + "/solver/reuse" ).data(), false );
@@ -500,7 +515,7 @@ setup ()
     // Set up the time advance.
     M_timeAdvance->setup ( this->M_data->dataTimePtr()->orderBDF(), 1 );
 
-} // setup
+} // setupTime
 
 // Set the inital value
 template < typename MeshType >
