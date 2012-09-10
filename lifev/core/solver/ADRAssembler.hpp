@@ -654,7 +654,7 @@ void
 ADRAssembler<mesh_type, matrix_type, vector_type>::
 addStiffStrain(matrix_ptrType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp)
 {
-    ASSERT(M_uFESpace != 0, "No FE space for assembling the stiff strain.");
+    ASSERT(M_fespace != 0, "No FE space for assembling the stiff strain.");
     ASSERT(offsetLeft + M_fespace->dof().numTotalDof()*(M_fespace->fieldDim()) <=
            UInt(matrix->matrixPtr()->NumGlobalCols()),
            " The matrix is too small (columns) for the assembly of the stiff strain");
