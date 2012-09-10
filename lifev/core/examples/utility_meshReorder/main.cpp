@@ -6,7 +6,7 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <lifev/core/mesh/InternalEntitySelector.hpp>
+#include <life/lifemesh/InternalEntitySelector.hpp>
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <mpi.h>
@@ -19,14 +19,14 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <lifev/core/mesh/MeshData.hpp>
+#include<life/lifemesh/MeshData.hpp>
 
-#include <lifev/core/filter/GetPot.hpp>
-#include <lifev/core/filter/MeshWriter.hpp>
+#include<life/lifefilters/GetPot.hpp>
+#include <life/lifefilters/MeshWriter.hpp>
 #include <string>
 
-#include <lifev/core/fem/DOFInterface3Dto3D.hpp>
-#include <lifev/core/fem/FESpace.hpp>
+#include <life/lifefem/DOFInterface3Dto3D.hpp>
+#include <life/lifefem/FESpace.hpp>
 
 /*!
  * @file
@@ -83,17 +83,17 @@ int main(int argc, char** argv)
 
     if (ordering)
     {
-        Int numtasks;
-        Int me;
+        int numtasks;
+        int me;
         MPI_Comm_rank(MPI_COMM_WORLD, &me);
         MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
         MPI_Comm MPIcomm;
         MPI_Group  originGroup, newGroup;
         MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
-        std::vector<Int> members(numtasks);
+        int members[numtasks];
         for (Int i=0; i<numtasks; ++i)
             members[i]=0;
-        MPI_Group_incl(originGroup, 1, &members[0], &newGroup);
+        MPI_Group_incl(originGroup, 1, members, &newGroup);
 
         MPI_Comm_create(MPI_COMM_WORLD, newGroup, &MPIcomm);
         if(me==0)
@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     {
         UInt FluidInterfaceFlag           = data_file("interface/fluidInterfaceFlag",      2 );
         UInt SolidInterfaceFlag           = data_file("interface/solidInterfaceFlag",      2 );
-        Int const edgeFlag                 (data_file("interface/edgeFlag",      2 ) );
+        int const edgeFlag                 (data_file("interface/edgeFlag",      2 ) );
 
         boost::shared_ptr<Epetra_Comm> uselessComm(new Epetra_MpiComm(MPI_COMM_WORLD));
         MeshData mesh_data2;
