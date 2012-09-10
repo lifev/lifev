@@ -1162,8 +1162,8 @@ void computeLocalDeformationGradientWithoutIdentity (const VectorElemental& uk_l
 				{
 				  s += pow( Jk[ig], -5./3. ) * exp( coefExp*( Ic_isok[ig] - 3 ) ) *
                                     ( 1. + coefExp * Ic_isok[ig] ) *
-                                    CofFk[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) *
-                                    Fk[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+                                    CofFk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) *
+                                    Fk[ icoor ][ l ][ ig ] * fe.phiDer( i, l, ig ) * fe.weightDet( ig );
 				}
 			    }
 			}
@@ -1284,8 +1284,8 @@ void computeLocalDeformationGradientWithoutIdentity (const VectorElemental& uk_l
 				{
 				  s += pow( Jk[ig], -5./3. ) * exp( coefExp*( Ic_isok[ig] - 3  ) ) *
                                     ( 1. + coefExp * Ic_isok[ig] ) *
-                                    Fk[ icoor ][ k ][ ig ]  * fe.phiDer( i, k, ig ) *
-                                    CofFk[ jcoor ][ l ][ ig ] *  fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+                                    Fk[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) *
+                                    CofFk[ icoor ][ l ][ ig ] *  fe.phiDer( i, l, ig ) * fe.weightDet( ig );
 				}
 			    }
 			}
@@ -1361,8 +1361,8 @@ void computeLocalDeformationGradientWithoutIdentity (const VectorElemental& uk_l
 				{
 				  s += ( 1/( Jk[ig]*Jk[ig] ) ) * Ic_isok[ig] *
                                     exp( coefExp*( Ic_isok[ig] -3  ) ) *
-                                    CofFk[ icoor ][ l ][ ig ] * fe.phiDer( i, k, ig ) *
-                                    CofFk[ jcoor ][ k ][ ig ] * fe.phiDer( j, l, ig ) * fe.weightDet( ig );
+                                    CofFk[ icoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) *
+                                    CofFk[ jcoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
 				}
 			    }
 			}

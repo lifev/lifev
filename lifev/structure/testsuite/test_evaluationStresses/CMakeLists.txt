@@ -22,6 +22,17 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(cubeY4.mesh_Structure
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/data/mesh/inria/
 )
 
+TRIBITS_COPY_FILES_TO_BINARY_DIR(xmfDataStructure
+  SOURCE_FILES structure.xmf
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/testsuite/test_evaluationStresses/
+)
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(h5DataStructure
+  SOURCE_FILES structure.h5
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/testsuite/test_evaluationStresses/
+)
+
+
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   TensionsTens
   NAME StressTensions

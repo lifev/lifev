@@ -98,7 +98,6 @@ static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createI
 static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
 
-
 std::set<UInt> parseList( const std::string& list )
 {
     std::string stringList = list;
@@ -214,14 +213,20 @@ static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, 
 static Real bcPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
 {
   Real radius = 0.5;
-  Real pressure = 3000;
+  Real pressure = 3000/(2*0.5*40*3.1415962);
   switch (i)
     {
     case 0:
-      return pressure * std::fabs( ( y / radius ) );
+      // if( t < 15.0 )
+      // 	return ( pressure * std::fabs( ( x / radius ) ) * (1/15.0) ) * t ;
+      // else
+	return  pressure * std::fabs( ( x / radius ) );
       break;
     case 1:
-      return pressure * std::fabs( ( x / radius ) );
+      // if( t < 15.0 )
+      // 	return ( pressure * std::fabs( ( y / radius ) ) * (1/15.0) ) * t;
+      // else
+	return  pressure * std::fabs( ( y / radius ) );
       break;
     case 2:
       return 0.0;
@@ -234,7 +239,10 @@ static Real bcPressure(const Real& t, const Real&  x, const Real& y, const Real&
 
 static Real pressureUsingNormal(const Real& t, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-  return  -(300000/15)*t;
+  if( t < 15.0 )
+    return  -(300000/(2*3.1415962*0.5*40))*(1/15)*t;
+  else
+    return  -300000/(2*3.1415962*0.5*40);
 }
 
 
@@ -348,28 +356,21 @@ Structure::run3d()
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
     //Condition for Extension
-    BCh->addBC("EdgesIn",      20,  Essential, Component, zero, compz);
+    BCh->addBC("EdgesIn",      20,  Essential, Full, zero, 3);
     //Condition for Inflation
-    //    BCh->addBC("EdgesIn",      20,  Essential, Full, zero, 3);
+    //BCh->addBC("EdgesIn",      20,  Essential, Full, zero, 3);
 
     //Condition for Extension
-    BCh->addBC("EdgesIn",      40,  Natural, Component, nonZero, compz);
+    //BCh->addBC("EdgesIn",      40,  Natural, Component, nonZero, compz);
     //Condition for Inflation
+    BCh->addBC("EdgesIn",      40,  Essential, Full, zero, 3);
     //BCh->addBC("EdgesIn",      40,  Essential, Full, zero, 3);
 
     BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compx);
     BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compy);
     BCh->addBC("EdgesIn",      70,  Natural, Full, zero, 3);
     BCh->addBC("EdgesIn",      60,  Natural, Full, zero, 3);
-
-    //Tube 20
-    // BCh->addBC("EdgesIn",      2,  Essential, Full, zero, 3);
-    // BCh->addBC("EdgesIn",      3,  Essential, Full, zero, 3);    
-
-    // BCh->addBC("EdgesIn",      30,  EssentialVertices, Full, zero, 3);
-    // BCh->addBC("EdgesIn",      50,  EssentialVertices, Full, zero, 3);
-    // BCh->addBC("EdgesIn",      10,  Natural, Full, zero, 3);
-    // BCh->addBC("EdgesIn",      1,  Natural,  Normal, pressureNormal);
+    //BCh->addBC("EdgesIn",      60,  Natural, Normal, pressureNormal);
 
     //! 1. Constructor of the structuralSolver
     StructuralSolver< RegionMesh<LinearTetra> > solid;
@@ -474,6 +475,7 @@ Structure::run3d()
     else //Initialize with zero vectors
       {	
 
+	std::cout << "Starting from scratch" << std::endl;
 	vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique) );
 
 	if (timeAdvanceMethod =="Newmark")
