@@ -222,7 +222,7 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
             face_Type* pointerFace = &( mesh.addFace( isOnBoundary ) ); // only boundary faces
             for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
             {
-                pointerFace->setPoint( j, mesh.point( points[ 0 ] ) );
+                pointerFace->setPoint( j, mesh.point( points[ j ] ) );
             }
             pointerFace->setId( mesh.faceList.size() - 1 );
             pointerFace->setMarkerID( ibc );
