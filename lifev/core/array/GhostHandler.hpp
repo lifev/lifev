@@ -340,19 +340,18 @@ void writeNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::st
     file.Write( name, "valueSize", static_cast<Int>( values.size() ) );
     file.Write( name, "values", H5T_NATIVE_INT, values.size(), &values[ 0 ] );
 
-    /*
-    // DEBUG
-    std::cerr << name << std::endl;
-    for ( UInt i ( 0 ); i < map.size(); i++ )
-    {
-        std::cerr << i << "> ";
-        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
-        {
-            std::cerr << *j << " ";
-        }
-        std::cerr <<std::endl;
-    }
-    */
+//#ifdef HAVE_LIFEV_DEBUG
+//    std::cerr << name << std::endl;
+//    for ( UInt i ( 0 ); i < map.size(); i++ )
+//    {
+//        std::cerr << i << "> ";
+//        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+//        {
+//            std::cerr << *j << " ";
+//        }
+//        std::cerr <<std::endl;
+//    }
+//#endif
 }
 
 void readNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::string const & name )
@@ -377,19 +376,18 @@ void readNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::str
         }
     }
 
-    /*
-    // DEBUG
-    std::cerr << name << std::endl;
-    for ( UInt i ( 0 ); i < map.size(); i++ )
-    {
-        std::cerr << i << "> ";
-        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
-        {
-            std::cerr << *j << " ";
-        }
-        std::cerr <<std::endl;
-    }
-    */
+//#ifdef HAVE_LIFEV_DEBUG
+//    std::cerr << name << std::endl;
+//    for ( UInt i ( 0 ); i < map.size(); i++ )
+//    {
+//        std::cerr << i << "> ";
+//        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+//        {
+//            std::cerr << *j << " ";
+//        }
+//        std::cerr <<std::endl;
+//    }
+//#endif
 }
 
 }
@@ -502,6 +500,18 @@ void GhostHandler<Mesh>::createNodeNodeNeighborsMap()
         M_nodeNodeNeighborsList[ id0 ].insert( id1 );
         M_nodeNodeNeighborsList[ id1 ].insert( id0 );
     }
+
+#ifdef HAVE_LIFEV_DEBUG
+    M_debugOut << "M_nodeNodeNeighborsList on proc " << M_me << std::endl;
+    for( UInt i = 0; i < M_nodeNodeNeighborsList.size(); i++ )
+    {
+        M_debugOut << i << ": ";
+        for( neighbors_Type::const_iterator it = M_nodeNodeNeighborsList[ i ].begin();
+             it != M_nodeNodeNeighborsList[ i ].end(); ++it )
+            M_debugOut << *it << " ";
+        M_debugOut << std::endl;
+    }
+#endif
 }
 
 template <typename Mesh>
@@ -521,6 +531,18 @@ void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
         M_nodeEdgeNeighborsList[ id0 ].insert ( ie );
         M_nodeEdgeNeighborsList[ id1 ].insert ( ie );
     }
+
+#ifdef HAVE_LIFEV_DEBUG
+    M_debugOut << "M_nodeEdgeNeighborsList on proc " << M_me << std::endl;
+    for( UInt i = 0; i < M_nodeEdgeNeighborsList.size(); i++ )
+    {
+        M_debugOut << i << ": ";
+        for( neighbors_Type::const_iterator it = M_nodeEdgeNeighborsList[ i ].begin();
+             it != M_nodeEdgeNeighborsList[ i ].end(); ++it )
+            M_debugOut << *it << " ";
+        M_debugOut << std::endl;
+    }
+#endif
 }
 
 template <typename Mesh>
@@ -665,16 +687,20 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
         this->createNodeEdgeNeighborsMap();
     }
 
+    // set up Unique (first) and Repeated edges based on the OWNED flag
+    std::pair< std::vector<Int>, std::vector<Int> > myGlobalElements;
+    myGlobalElements.first.reserve( M_localMesh->numEdges() );
+    myGlobalElements.second.reserve( M_localMesh->numEdges() );
     // loop on local mesh edges
-    std::vector<Int> myGlobalElements;
-    myGlobalElements.reserve( M_localMesh->numEdges() );
     for ( ID ie = 0; ie < M_localMesh->numEdges(); ie++ )
     {
-        myGlobalElements.push_back( M_localMesh->edge( ie ).id() );
+        myGlobalElements.second.push_back( M_localMesh->edge( ie ).id() );
+        if( Flag::testOneSet( M_localMesh->edge( ie ).flag(), EntityFlags::OWNED ) )
+            myGlobalElements.first.push_back( M_localMesh->edge( ie ).id() );
     }
 
     // create map
-    M_ghostMapOnEdges.reset ( new map_Type( -1, myGlobalElements.size(), &myGlobalElements[0], M_comm ) );
+    M_ghostMapOnEdges.reset ( new map_Type( myGlobalElements, M_comm ) );
 
     if ( overlap > 0 )
     {
@@ -682,13 +708,13 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
 
         std::set<Int> myGlobalElementsSet;
         std::set<Int> addedElementsSet;
-        for (  UInt k ( 0 ); k < myGlobalElements.size(); k++ )
+        for (  UInt k ( 0 ); k < myGlobalElements.second.size(); k++ )
         {
-            typename mesh_Type::EdgeType const & edge = M_fullMesh->edge ( myGlobalElements[ k ] );
-            for ( UInt edgePoint = 0; edgePoint < mesh_Type::EdgeType::S_numPoints; edgePoint++ )
+            typename mesh_Type::edge_Type const & edge = M_fullMesh->edge ( myGlobalElements.second[ k ] );
+            for ( UInt edgePoint = 0; edgePoint < mesh_Type::edge_Type::S_numPoints; edgePoint++ )
                 addedElementsSet.insert( edge.point( edgePoint ).id() );
         }
-        ( myGlobalElements.begin(), myGlobalElements.end() );
+        ( myGlobalElements.second.begin(), myGlobalElements.second.end() );
 
         // @todo: optimize this!!
         // 1: work only on the boundary
@@ -719,10 +745,10 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
             }
         }
 
-        myGlobalElements.assign( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
+        myGlobalElements.second.assign( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
         // generate map
-        map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+        map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.second.size(), &myGlobalElements.second[0], 0, *M_comm ) );
         ghostMap.setMap( repeatedMap, Repeated );
     }
 
