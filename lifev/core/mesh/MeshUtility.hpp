@@ -2606,6 +2606,23 @@ MeshStatistics::meshSize MeshStatistics::computeSize(REGIONMESH const & mesh)
     return out;
 }
 
+template <typename RegionMeshType, typename RegionFunctorType>
+void assignRegionMarkerID ( RegionMeshType & mesh, const RegionFunctorType& fun )
+{
+
+    RegionMeshType::elements_Type & elementList = mesh.elementList ();
+    const UInt elementListSize = elementList.size();
+
+    for ( UInt i = 0; i < elementListSize; ++i )
+    {
+        // Computes the barycentre of the element
+        Vector3D barycentre;
+
+        elementList[i].setMarkerID ( fun ( barycentre ) );
+
+    }
+
+}
 
 } // namespace MeshUtility
 
