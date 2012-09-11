@@ -767,8 +767,8 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
     M_BCh = bch;
 
-    Real abstol  = 1.e-6;
-    Real reltol  = 1.e-6;
+    Real abstol  = 1.e-10;
+    Real reltol  = 1.e-10;
     UInt maxiter = 20;
     Real etamax  = 1e-7;
     Int NonLinearLineSearch = 0;
@@ -887,6 +887,12 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
         {
             *M_rhs=*M_rhsNoBC;
             bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
+
+	    std::string nameFile="residualAfterBC";
+	    M_rhs->spy(nameFile);
+	    int n;
+	    //std::cin >> n;
+
         }
 
         bcManageMatrix( matrixFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
