@@ -322,19 +322,51 @@ public:
       write the tensor depending on the solution at previuos step.
       The non linear tensor now has as an additional scalar field, the last one,
       the solution of the problem at previuos step.
+      This scalar field is automatically updated each iteration of the non
+      linear solver.
       <br>
       The user should take into account that the value of the primal variable is
       the last field set, by the user, plus one. So the inverse of permeability
-      can access to the primal variable with
+      can access to the primal variable, for example, with
       \code
-      matrix invK (3,3);
-      Real unkown_n = scalarField(0).eval( iElem, P, time );
-      invK(0,0) = unknown_n * unknown_n + 1.;
+// Inverse of permeability matrix
+typedef RegionMesh < LinearTriangle > regionMesh_Type;
+class inversePermeability : public FEFunction < regionMesh_Type, MapEpetra, Matrix >
+
+{
+public:
+    virtual Matrix eval ( const UInt& iElem, const Vector3D& P, const Real& time = 0. ) const;
+};
       \endcode
-      obtaining a tensor with the non linearity in the position \f$ (0,0) \f$
-      the function \f$ \left[K^{-1}\right]_{0,0} = u^2 + 1 \f$.
-      <br>
-      If \f$ m \f$ fields are previously added use \f$ m+1 \f$ instead the zero.
+      Its implementation is
+      \code
+Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const Real& time ) const
+{
+    Matrix invK ( 2, 2 );
+
+    Real unkown_n = scalarField(0).eval( iElem, P, time );
+
+    // Fill in of the inversePermeabilityMatrix
+    invK ( 0, 0 ) = 1;
+    invK ( 0, 1 ) = 0;
+    invK ( 1, 0 ) = 0;
+    invK ( 1, 1 ) = 1. / ( unkown_n * unkown_n + 1. );
+
+    return invK;
+}
+      \endcode
+      obtaining a tensor with the non linearity in the position \f$ (1,1) \f$
+      the function \f$ \left[K^{-1}\right]_{1,1} = u^2 + 1 \f$. In the previous
+      example we have supposed that the permeability has not others scalar fields,
+      alternatively given \f$ m \f$ scalar fields instead to have
+      \code
+const Real unkown_n = scalarField(0).eval( iElem, P, time );
+      \endcode
+      the code should be
+      \code
+const Real unkown_n = scalarField(m).eval( iElem, P, time );
+      \endcode
+
       @param invPerm Inverse of the permeability tensor for the problem.
     */
     virtual void setInversePermeability ( const matrixFctPtr_Type& invPerm )
