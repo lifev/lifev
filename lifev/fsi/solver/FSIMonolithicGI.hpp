@@ -81,149 +81,149 @@ class Epetra_FullMonolithic;
  MonolithicBlockComposedNN, MonolithicBlockComposedDNND.
  */
 
-class FSIMonolithicGI : public FSIMonolithic
-{
-public:
+   class FSIMonolithicGI : public FSIMonolithic
+   {
+   public:
 
-    typedef FSIMonolithic                                  super_Type;
-    typedef Preconditioner                                 prec_Type;
-    typedef boost::shared_ptr<prec_Type>                   prec_type;
+       typedef FSIMonolithic                                  super_Type;
+       typedef Preconditioner                                 prec_Type;
+       typedef boost::shared_ptr<prec_Type>                   prec_type;
 
-    //!@name Constructor and Destructor
-    //@{
+       //!@name Constructor and Destructor
+       //@{
 
-    //! Empty Constructor
-    FSIMonolithicGI();
+       //! Empty Constructor
+       FSIMonolithicGI();
 
-    //! Destructor
-    virtual ~FSIMonolithicGI() {}
+       //! Destructor
+       virtual ~FSIMonolithicGI() {}
 
-    //@}
+       //@}
 
 
-    //!@name Public Methods
-    //@{
+       //!@name Public Methods
+       //@{
 
-    /**
+       /**
        Sets the parameters read from data file
-    */
-    void setUp( const GetPot& dataFile );
+        */
+       void setUp( const GetPot& dataFile );
 
-    //! initializes the fluid and mesh problems, creates the map of the global matrix
-    void setupFluidSolid( UInt const fluxes );
+       //! initializes the fluid and mesh problems, creates the map of the global matrix
+       void setupFluidSolid( UInt const fluxes );
 
-    //! builds the constant part of the fluid-structure-mesh motion matrix
-    void buildSystem ();
+       //! builds the constant part of the fluid-structure-mesh motion matrix
+       void buildSystem ();
 
-    /**
+       /**
        evaluates the residual b-Ax
        \param res: output
        \param _sol: fluid domain displacement solution
        \param iter: current NonLinearRichardson (block Gauss Seidel for the tangent system) iteration
-    */
-    void evalResidual( vector_Type&  res, const vector_Type& sol, const UInt iter );
+        */
+       void evalResidual( vector_Type&  res, const vector_Type& sol, const UInt iter );
 
-    //!Apply the boundary conditions to each block composing the monolithic problem
-    /**
+       //!Apply the boundary conditions to each block composing the monolithic problem
+       /**
        Sets the vectors of: boundary conditions, FESpaces, couplings, offsets, and sets the blocks in the composed operator
        which constitutes the monolithic problem. Then calls the applyBoundaryConditions of the MonolithicBlockMatrix operator, passing
        also the right hand side.
-     */
-    void applyBoundaryConditions();
-    //@}
+        */
+       void applyBoundaryConditions();
+       //@}
 
-    //!@name Set Methods
-    //@{
+       //!@name Set Methods
+       //@{
 
-    //! set the solution
-    void setSolution( const vector_Type& solution ) { M_uk.reset( new vector_Type( solution ) ); }
+       //! set the solution
+       void setSolution( const vector_Type& solution ) { M_uk.reset( new vector_Type( solution ) ); }
 
-    void setSolutionPtr( const vectorPtr_Type& sol) { M_uk = sol; }
+       void setSolutionPtr( const vectorPtr_Type& sol) { M_uk = sol; }
 
-    //@}
+       //@}
 
 
-    //!@name Get Methods
-    //@{
+       //!@name Get Methods
+       //@{
 
-    //! getter for the map of fluid-structure-interface (without the mesh motion)
-    const MapEpetra& mapWithoutMesh() const { return *M_mapWithoutMesh; }
+       //! getter for the map of fluid-structure-interface (without the mesh motion)
+       const MapEpetra& mapWithoutMesh() const { return *M_mapWithoutMesh; }
 
-    //! getter for the global matrix of the system
-    const matrixPtr_Type matrixPtr() const { return M_monolithicMatrix->matrix(); }
+       //! getter for the global matrix of the system
+       const matrixPtr_Type matrixPtr() const { return M_monolithicMatrix->matrix(); }
 
-    //! getter for the pointer to the current iteration solution
-    //const vectorPtr_Type  uk()  const      {return M_uk;}
+       //! getter for the pointer to the current iteration solution
+       //const vectorPtr_Type  uk()  const      {return M_uk;}
 
-    //! get the current solution vector.
-    const vector_Type& solution() const {  return M_fluidTimeAdvance->singleElement(0);
-    }
+       //! get the current solution vector.
+       const vector_Type& solution() const {  return M_fluidTimeAdvance->singleElement(0);
+       }
 
-    //! get the solution.
-    vector_Type* solutionPtr() {  return M_fluidTimeAdvance->stencil()[0];
-    }
+       //! get the solution.
+       vector_Type* solutionPtr() {  return M_fluidTimeAdvance->stencil()[0];
+       }
 
-    static bool                          S_register;
+       static bool                          S_register;
 
-    //@}
+       //@}
 
-protected:
+   protected:
 
-    //!@name Protected Methods
-    //@{
+       //!@name Protected Methods
+       //@{
 
-    //! set the block preconditioner
-    void setupBlockPrec();
+       //! set the block preconditioner
+       void setupBlockPrec();
 
-    //@}
+       //@}
 
-private:
+   private:
 
-    //! @name Private Methods
-    //@{
+       //! @name Private Methods
+       //@{
 
-    //! Factory method for the system matrix, of type MonolithicBlockBase
-    void createOperator( std::string& operType )
-    {
-        M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ));
-        M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ));
-    }
+       //! Factory method for the system matrix, of type MonolithicBlockBase
+       void createOperator( std::string& operType )
+       {
+           M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ));
+           M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ));
+       }
 
-    /**
+       /**
        calculates the terms due to the shape derivatives given the mesh increment deltaDisp. The shape derivative block is assembled in a matrix
        (not in a right hand side representing the matrix-vector multiplication)
        \param sdMatrix: output. Shape derivatives block to be summed to the Jacobian matrix.
-    */
-    void shapeDerivatives( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix );
+        */
+       void shapeDerivatives( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix );
 
-    //! assembles the mesh motion matrix.
-    /*!In Particular it diagonalize the part of the matrix corresponding to the
+       //! assembles the mesh motion matrix.
+       /*!In Particular it diagonalize the part of the matrix corresponding to the
       Dirichlet condition expressing the coupling
       \param iter: current iteration: used as flag to distinguish the first nonlinear iteration from the others
-     */
-    void assembleMeshBlock(UInt iter);
+        */
+       void assembleMeshBlock(UInt iter);
 
-    //@}
+       //@}
 
 
-    //!@name Private Members
-    //@{
+       //!@name Private Members
+       //@{
 
-    boost::shared_ptr<MapEpetra>         M_mapWithoutMesh;
-    vectorPtr_Type                       M_uk;
-    bool                                 M_domainVelImplicit;
-    bool                                 M_convectiveTermDer;
-    UInt                                 M_interface;
-    matrixPtr_Type                       M_meshBlock;
-    FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type M_shapeDerivativesBlock;
-    matrixPtr_Type                       M_solidDerBlock;
-    //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
-    //@}
+       boost::shared_ptr<MapEpetra>         M_mapWithoutMesh;
+       vectorPtr_Type                       M_uk;
+       bool                                 M_domainVelImplicit;
+       bool                                 M_convectiveTermDer;
+       UInt                                 M_interface;
+       matrixPtr_Type                       M_meshBlock;
+       FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type M_shapeDerivativesBlock;
+       matrixPtr_Type                       M_solidDerBlock;
+       //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
+       //@}
 
-    //! Factory method
-    static FSIOperator* instantiate() { return new FSIMonolithicGI(); }
+       //! Factory method
+       static FSIOperator* instantiate() { return new FSIMonolithicGI(); }
 
-};
+   };
 
 }
 #endif
