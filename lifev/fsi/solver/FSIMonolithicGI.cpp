@@ -104,7 +104,7 @@ void FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
                    M_epetraComm,
                    M_monolithicMap,
                    M_offset
-		   );
+           );
   }
 
 void
@@ -116,8 +116,8 @@ FSIMonolithicGI::buildSystem()
 
 void
 FSIMonolithicGI::evalResidual( vector_Type&       res,
-			       const vector_Type& disp,
-			       const UInt          iter )
+                   const vector_Type& disp,
+                   const UInt          iter )
 {
     res *= 0.;//this is important. Don't remove it!
     if ( ( iter == 0 ) || !M_data->dataFluid()->isSemiImplicit() )
@@ -134,16 +134,16 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
       meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
       if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
-	{
-	  *meshVel = M_ALETimeAdvance->velocity( );
-	  M_ALETimeAdvance->extrapolation(*mmRep);
-	  moveMesh(*mmRep);// re-initialize the mesh points
-	  if( iter==0 )
-	    {
-	      M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-	      M_ALETimeAdvance->shiftRight(*meshDisp);
-	    }
-	}
+    {
+      *meshVel = M_ALETimeAdvance->velocity( );
+      M_ALETimeAdvance->extrapolation(*mmRep);
+      moveMesh(*mmRep);// re-initialize the mesh points
+      if( iter==0 )
+        {
+          M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
+          M_ALETimeAdvance->shiftRight(*meshDisp);
+        }
+    }
         else
         {
             if ( iter == 0 )
@@ -186,39 +186,39 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
         M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
 
-	if (!M_monolithicMatrix->set())
-	  {
-	    M_BChs.push_back(M_BCh_d);
-	    M_BChs.push_back(M_BCh_u);
-	    M_FESpaces.push_back(M_dFESpace);
-	    M_FESpaces.push_back(M_uFESpace);
+    if (!M_monolithicMatrix->set())
+      {
+        M_BChs.push_back(M_BCh_d);
+        M_BChs.push_back(M_BCh_u);
+        M_FESpaces.push_back(M_dFESpace);
+        M_FESpaces.push_back(M_uFESpace);
 
-	    M_BChs.push_back(M_BCh_mesh);
-	    M_FESpaces.push_back(M_mmFESpace);
+        M_BChs.push_back(M_BCh_mesh);
+        M_FESpaces.push_back(M_mmFESpace);
 
-	    M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
-	    M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
-	    M_monolithicMatrix->push_back_matrix(M_meshBlock, false);
-	    M_monolithicMatrix->setConditions(M_BChs);
-	    M_monolithicMatrix->setSpaces(M_FESpaces);
-	    M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
-	    M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor());
-	    M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
-	  }
-	else
-	  {
-	    M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
-	    M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
-	    M_monolithicMatrix->replace_matrix(M_meshBlock, 2);
-	  }
+        M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
+        M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
+        M_monolithicMatrix->push_back_matrix(M_meshBlock, false);
+        M_monolithicMatrix->setConditions(M_BChs);
+        M_monolithicMatrix->setSpaces(M_FESpaces);
+        M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
+        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor());
+        M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
+      }
+    else
+      {
+        M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
+        M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
+        M_monolithicMatrix->replace_matrix(M_meshBlock, 2);
+      }
 
-	M_monolithicMatrix->blockAssembling();
-	super_Type::checkIfChangedFluxBC( M_monolithicMatrix );
+    M_monolithicMatrix->blockAssembling();
+    super_Type::checkIfChangedFluxBC( M_monolithicMatrix );
 
 
 
-	if( (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
-	  applyBoundaryConditions();
+    if( (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
+      applyBoundaryConditions();
       }
     M_monolithicMatrix->GlobalAssemble();
     //M_monolithicMatrix->matrix()->spy("FMFI");
@@ -328,7 +328,7 @@ void FSIMonolithicGI::setupBlockPrec()
 
         M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->time() );
         M_monolithicMatrix->GlobalAssemble();
-	// M_monolithicMatrix->matrix()->spy("jacobian");
+    // M_monolithicMatrix->matrix()->spy("jacobian");
       }
 
     super_Type::setupBlockPrec();
@@ -343,7 +343,7 @@ void FSIMonolithicGI::setupBlockPrec()
         M_precPtr->coupler( M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep() ,M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
 
         if (M_data->dataFluid()->useShapeDerivatives())
-	  {
+      {
             boost::shared_ptr<MatrixEpetra<Real> > staticCast=boost::static_pointer_cast<MatrixEpetra<Real> >(M_shapeDerivativesBlock);
             M_precPtr->push_back_coupling( staticCast );
         }

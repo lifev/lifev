@@ -211,7 +211,7 @@ public:
       if(M_BCh_u.get())
         M_BCh_u->merge(*M_BCh_flux);
       else // in this case only fluxes are imposed on the fluid
-	M_BCh_u=M_BCh_flux;
+    M_BCh_u=M_BCh_flux;
       M_BCh_flux.reset();
     }
 
@@ -441,7 +441,7 @@ protected:
     /**\small scales matrix and rhs
        \param rhs: the output rhs
        \param matrFull: the output matrix*/
-    void    diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull);
+    void diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull);
 
     //! Update the solution after NonLinearRichardson is called.
     /*!
@@ -450,8 +450,8 @@ protected:
     void updateSolution( const vector_Type& solution )
     {
         this->M_fluidTimeAdvance->shiftRight(solution);
-	if(M_data->dataFluid()->conservativeFormulation())
-	  this->M_fluidMassTimeAdvance->shiftRight(M_fluid->matrixMass()*solution);
+        if(M_data->dataFluid()->conservativeFormulation())
+            this->M_fluidMassTimeAdvance->shiftRight(M_fluid->matrixMass()*solution);
         this->M_solidTimeAdvance->shiftRight(solution);
     }
 
