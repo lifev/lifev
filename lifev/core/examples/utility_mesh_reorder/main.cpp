@@ -68,8 +68,8 @@ int main(int argc, char** argv)
     MeshData mesh_data;
     mesh_data.setup(data_file, "space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > mesh;
-    mesh.reset(new RegionMesh<LinearTetra>);
+    boost::shared_ptr<Epetra_Comm> uselessComm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    boost::shared_ptr<RegionMesh<LinearTetra> > mesh(new RegionMesh<LinearTetra>(*uselessComm) );
 
     readMesh(*mesh, mesh_data);
 
@@ -113,12 +113,11 @@ int main(int argc, char** argv)
         UInt SolidInterfaceFlag           = data_file("interface/solidInterfaceFlag",      2 );
         Int const edgeFlag                 (data_file("interface/edgeFlag",      2 ) );
 
-        boost::shared_ptr<Epetra_Comm> uselessComm(new Epetra_MpiComm(MPI_COMM_WORLD));
         MeshData mesh_data2;
         mesh_data2.setup(data_file, "second_mesh/space_discretization");
 
         boost::shared_ptr<RegionMesh<LinearTetra> > mesh2;
-        mesh2.reset(new RegionMesh<LinearTetra>);
+        mesh2.reset(new RegionMesh<LinearTetra>(*uselessComm));
 
         readMesh(*mesh2, mesh_data2);
 
