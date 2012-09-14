@@ -432,6 +432,19 @@ public:
                                 Policy const & policy = &Flag::testOneSet ) const;
     //@}
 
+    /*! @brief It counts all elements with a markerID
+     *
+     *  @param markerID the markerID against which the test is made
+     *  @param policy. A functor/function pointer which implements
+     *  bool policy(const markerID_Type & inputMarkerID, const markerID_Type & refMarkerID)
+     *  By default it uses std::equal_to
+     *  @return an unsigned integer
+     */
+    template<typename Policy>
+    UInt countElementsWithMarkerID( const markerID_Type & markerID,
+                                    const Policy & policy = &std::equal_to<markerID_Type>() ) const;
+    //@}
+
     /** @name Changers
       * Utilities that change the elements according to policies
       */
@@ -685,6 +698,15 @@ UInt MeshEntityContainer<DataType, Allocator>::countElementsWithFlag( const flag
                                                                       const Policy & policy ) const
 {
     Predicates::EntityFlagInterrogator<DataType> interrogator( refFlag, policy );
+    return this->countAccordingToPredicate( interrogator );
+}
+
+template<typename DataType, class Allocator>
+template<typename Policy>
+UInt MeshEntityContainer<DataType, Allocator>::countElementsWithMarkerID( const markerID_Type & markerID,
+                                                                          const Policy & policy ) const
+{
+    Predicates::EntityMarkerIDInterrogator<DataType> interrogator( markerID, policy );
     return this->countAccordingToPredicate( interrogator );
 }
 
