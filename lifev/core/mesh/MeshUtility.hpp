@@ -54,6 +54,7 @@
 #include <lifev/core/mesh/MeshEntity.hpp>
 #include <lifev/core/mesh/MeshEntityContainer.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 
 namespace LifeV
 {
@@ -2610,19 +2611,28 @@ template <typename RegionMeshType, typename RegionFunctorType>
 void assignRegionMarkerID ( RegionMeshType & mesh, const RegionFunctorType& fun )
 {
 
-    RegionMeshType::elements_Type & elementList = mesh.elementList ();
+    // Extract the element list.
+    typename RegionMeshType::elements_Type & elementList = mesh.elementList ();
     const UInt elementListSize = elementList.size();
 
+    // Loop on the elements and decide the flag.
     for ( UInt i = 0; i < elementListSize; ++i )
     {
         // Computes the barycentre of the element
         Vector3D barycentre;
 
+        for( UInt k = 0; k < RegionMeshType::element_Type::S_numPoints; k++ )
+        {
+            barycentre += elementList[i].point( k ).coordinates();
+        }
+        barycentre /= RegionMeshType::element_Type::S_numPoints;
+
+        // Set the marker Id.
         elementList[i].setMarkerID ( fun ( barycentre ) );
 
     }
 
-}
+} // assignRegionMarkerID
 
 } // namespace MeshUtility
 
