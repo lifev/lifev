@@ -26,246 +26,207 @@
 
 /*!
     @file
-    @brief CurrentFE living on the sides of the elements
+    @brief  A class for static boundary finite element
 
     @author Jean-Frederic Gerbeau
+            Vincent Martin
     @date 00-09-2002
 
+    @refactoring Luca Bertagna <lbertag@emory.edu>
+    @date Sept 2012
+
+    @contributor Luca Bertagna <lbertag@emory.edu>
     @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-
  */
 
-#ifndef _CURRENTBDFE_H
-#define _CURRENTBDFE_H
+#ifndef CURRENT_BOUNDARY_FE_HPP
+#define CURRENT_BOUNDARY_FE_HPP 1
 
-#include <lifev/core/LifeV.hpp>
-
-#include <lifev/core/fem/GeometricMap.hpp>
-#include <lifev/core/fem/ReferenceFE.hpp>
-#include <lifev/core/fem/CurrentBoundaryFEBase.hpp>
+#include <boost/multi_array.hpp>
+#include <lifev/core/fem/CurrentFE.hpp>
 
 namespace LifeV
 {
-/*!
-  \class CurrentBoundaryFE
-  \brief The class for a boundary finite element
-  \author J.-F. Gerbeau
-  \date 09/2002
 
-  This class is used for a current boundary elements, i.e. the boundary of
-  a CurrentFE. As for the CurrentFE (and contrarily to CurrentBoundaryFEBase) on must
-  update this element with a geometrical element before using it. If only
-  the measure is needed - to perform for example surface integrations -
-  call updateMeas(...), which by the way compute also the tangent.  If, the
-  normal at the integration point is needed, call updateMeasNormal(...).
-  See the description of the base class CurrentBoundaryFEBase for further details.
+/* A few more update flags specific for the boundary elements.
+   For more info about how update flags work, see CurrentFE.hpp
 */
 
-class CurrentBoundaryFE:
-        public CurrentBoundaryFEBase
+const flag_Type UPDATE_ONLY_TANGENTS(16384);
+const flag_Type UPDATE_ONLY_NORMALS(32768);
+const flag_Type UPDATE_ONLY_METRIC(65536);
+const flag_Type UPDATE_ONLY_W_ROOT_DET_METRIC(131072);
+
+const flag_Type UPDATE_TANGENTS(UPDATE_ONLY_TANGENTS
+                                |UPDATE_ONLY_CELL_NODES);
+const flag_Type UPDATE_NORMALS(UPDATE_ONLY_NORMALS
+                               |UPDATE_ONLY_TANGENTS
+                               |UPDATE_ONLY_CELL_NODES);
+const flag_Type UPDATE_METRIC(UPDATE_ONLY_METRIC
+                              |UPDATE_ONLY_TANGENTS
+                              |UPDATE_ONLY_CELL_NODES);
+const flag_Type UPDATE_W_ROOT_DET_METRIC(UPDATE_ONLY_W_ROOT_DET_METRIC
+                                         |UPDATE_ONLY_METRIC
+                                         |UPDATE_ONLY_TANGENTS
+                                         |UPDATE_ONLY_CELL_NODES);
+
+/*!
+  \class CurrentBoundaryFE
+  \brief A class for static boundary finite element
+
+  This class inherits from CurrentFE and adds some functionality related
+  to the boundary, like normals, tangents, etc.
+*/
+
+class CurrentBoundaryFE : public CurrentFE
 {
+
 public:
-
-    //! @name Constructor & Destructor
+    //! @name Constructor(s) & Destructor
     //@{
+    CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricMap& geoMap);
 
-    //! Constructor with reference FE and geometric mapping
-    CurrentBoundaryFE( const ReferenceFE& refFE, const GeometricMap& geoMap );
+    CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr);
 
-    //! Constructor with reference FE, geometric mapping and quadrature rule
-    CurrentBoundaryFE( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr );
+    //! new optionnal argument for hybrid hdiv fe invArea
+    CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr,
+                       const Real* refCoor, UInt currentId, Real invArea = 1. );
 
-    //! Destructor
-    virtual ~CurrentBoundaryFE();
+    //! Needed in FEDefinition while creating hybrid refFE (otherwise linker complains about missing base class copy constructor)
+    CurrentBoundaryFE (const CurrentBoundaryFE& bdFE);
 
+    virtual ~CurrentBoundaryFE ();
     //@}
-
 
     //! @name Methods
     //@{
 
+    using CurrentFE::update;
     /*!
-      Compute only the coordinates of the nodes on the current boundary element
-    */
-    template <typename GeometricType>
-    void update( const GeometricType& geometricEntity );
+        Overrides the method of base class CurrentFE. Actually, it calls the method of the base
+        class and then performs some extra updates if upFlag contains also some boundary updates
+     */
+    virtual void update(const std::vector<std::vector<Real> >& pts, flag_Type upFlag);
 
     /*!
-      Compute the arrays meas, weightMeas, tangent
-      on the current boundary element
+      return the coordinate (x,y,z)= F(xi,eta), (F: geo mappping)
+      where (xi,eta) are the coor in the ref element
+      and   (x,y,z) the coor in the current element
+      (if the code is compiled in 2D mode then z=0 and eta is disgarded)
     */
-    template <typename GeometricType>
-    void updateMeas( const GeometricType& geometricEntity );
+    void coorMap (Real& x, Real& y, Real& z, Real xi, Real eta) const;
 
-    /*!
-      Compute the arrays meas, weightMeas, tangent
-      and quadrature points on the current boundary element
-    */
-    template <typename GeometricType>
-    void updateMeasQuadPt( const GeometricType& geometricEntity );
+    //! Overrides the corresponding method in the mother class
+    Real measure () const;
 
-    /*!
-      Compute the arrays meas, weightMeas, tangent
-      and normal on the current boundary element
-    */
-    template <typename GeometricType>
-    void updateMeasNormal( const GeometricType& geometricEntity );
+    //! Compute the integral of f over the current boundary element
+    template <typename FunctorType>
+    Real integral (const FunctorType& f) const;
 
-    /*!
-      Compute the arrays meas, weightMeas, tangent,
-      normal and quadrature points on the current boundary element
-    */
-    template <typename GeometricType>
-    void updateMeasNormalQuadPt( const GeometricType& geometricEntity );
-
+    //! Compute the integral of a <f,n> over the current boundary element
+    template <typename FunctorType>
+    Real normalIntegral (const FunctorType& f) const;
     //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Values of the geometric basis functions on quadrature points (different from M_phi(iGeoNode,quadNode) only for Hybrid elements)
+    Real phiGeo (UInt iGeoNode, UInt quadNode) const
+    {
+        return M_phiGeo[iGeoNode][quadNode];
+    }
+
+    //! Values of the tangents on the quadrature points
+    Real tangent (UInt tangent, UInt coordinate, UInt quadNode) const
+    {
+        ASSERT(M_tangentsUpdated,"Tangents are not updated!");
+        return M_tangents[tangent][coordinate][quadNode];
+    }
+
+    //! Values of the normal on the quadrature points
+    Real normal (UInt coordinate, UInt quadNode) const
+    {
+        ASSERT(M_normalUpdated,"Normals are not updated!");
+        return M_normal[coordinate][quadNode];
+    }
+
+    //! Metric tensor on the quadrature points
+    Real metric (UInt iCoor, UInt jCoor, UInt quadNode) const
+    {
+        ASSERT(M_metricUpdated,"Metric is not updated!");
+        return M_metric[iCoor][jCoor][quadNode];
+    }
+
+    //! Square root of the determinant of the metric times the weight on the quadrature points
+    Real wRootDetMetric (UInt quadNode) const
+    {
+        ASSERT(M_wRootDetMetricUpdated,"Weighted metric determinant is not updated!\n");
+        return M_wRootDetMetric[quadNode];
+    }
+
+protected:
+
+    //! Computes the tangent vectors in the quadrature nodes
+    void computeTangents ();
+
+    //! Computes the normal vectors in the quadrature nodes
+    void computeNormal ();
+
+    //! Computes the metric in the quadrature nodes
+    void computeMetric ();
+
+    //! Computes the square root of the determinant of the metric times the weight in the quadrature nodes
+    void computeWRootDetMetric ();
+
+    //! Geometric map in the geometric nodes (different from M_phi only for Hybrid elements)
+    boost::multi_array<Real,2> M_phiGeo;
+
+    //! Normal and tangent vectors, metric tensor and weighted measure in the quadrature nodes
+    boost::multi_array<Real,3> M_tangents;
+    boost::multi_array<Real,2> M_normal;
+    boost::multi_array<Real,3> M_metric;
+    boost::multi_array<Real,1> M_wRootDetMetric;
+
+    //! Check variables
+    bool M_tangentsUpdated;
+    bool M_normalUpdated;
+    bool M_metricUpdated;
+    bool M_wRootDetMetricUpdated;
 };
 
-// ===================================================
-// Methods
-// ===================================================
-
-template <typename GeometricType>
-void
-CurrentBoundaryFE::
-update( const GeometricType& geometricEntity )
+template <typename FunctorType>
+Real CurrentBoundaryFE::integral(const FunctorType& f) const
 {
-#ifdef TEST_PRE
-    M_hasMeasure = false;
-    M_hasTangent = false;
-    M_hasNormal = false;
-    M_hasQuadPtCoor = false;
-    M_hasFirstDerivative = false;
-#endif
+    ASSERT_PRE(M_quadNodesUpdated && M_wRootDetMetricUpdated,"Error! Quadrature nodes and Jacobian Determinant have not been updated yet.\n");
+    Real result = 0.0;
+    for (UInt iq(0); iq<M_nbQuadPt; ++iq)
+        result += f(M_quadNodes[iq][0],M_quadNodes[iq][1],M_quadNodes[iq][2])*M_wRootDetMetric[iq];
 
-    M_currentID = geometricEntity.id();
-    // update the definition of the geo points
-    for ( UInt i(0); i < M_nbGeoNode; i++ )
-    {
-        for (UInt icoor(0); icoor < M_nbCoor+1; icoor++)
-        {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
-        }
-    }
+    return result;
 }
 
-template <typename GeometricType>
-void
-CurrentBoundaryFE::
-updateMeas( const GeometricType& geometricEntity )
+template <typename FunctorType>
+Real CurrentBoundaryFE::normalIntegral(const FunctorType& f) const
 {
-#ifdef TEST_PRE
-    M_hasMeasure = true;
-    M_hasTangent = true;
-    M_hasNormal = false;
-    M_hasQuadPtCoor = false;
-    M_hasFirstDerivative = false;
-#endif
+    ASSERT_PRE(M_quadNodesUpdated && M_normalUpdated && M_wRootDetMetricUpdated,"Error! Normal and Jacobian Determinant have not been updated yet.\n");
+    Real result = 0.0;
 
-    M_currentID = geometricEntity.id();
-    // update the definition of the geo points
-
-    for ( UInt i = 0; i < M_nbGeoNode; i++ )
+    Real tmp;
+    Real returnValues[M_nbCoor+1];
+    for (UInt iq(0); iq<M_nbQuadPt; ++iq)
     {
-        for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
-        {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
-        }
+        tmp = 0;
+        f(M_quadNodes[iq][0],M_quadNodes[iq][1],M_quadNodes[iq][2],returnValues);
+        for (UInt iCoor(0); iCoor<=M_nbCoor; ++iCoor)
+            tmp += returnValues[iCoor]*M_normal[iCoor][iq];
+        result += tmp*M_wRootDetMetric[iq];
     }
-
-    // compute the measure
-    computeMeasure();
+    return result;
 }
 
-template <typename GeometricType>
-void
-CurrentBoundaryFE::
-updateMeasQuadPt( const GeometricType& geometricEntity )
-{
-#ifdef TEST_PRE
-    M_hasMeasure = true;
-    M_hasTangent = true;
-    M_hasNormal = false;
-    M_hasQuadPtCoor = true;
-    M_hasFirstDerivative = false;
-#endif
+} // Namespace LifeV
 
-    M_currentID = geometricEntity.id();
-    // update the definition of the geo points
-
-    for ( UInt i = 0; i < M_nbGeoNode; i++ )
-    {
-        for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
-        {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
-        }
-    }
-
-    // compute the measure
-    computeMeasure();
-    // compute the coordinates of the quad points
-    computeQuadPointCoordinate();
-}
-
-template <typename GeometricType>
-void
-CurrentBoundaryFE::
-updateMeasNormal( const GeometricType& geometricEntity )
-{
-#ifdef TEST_PRE
-    M_hasMeasure = true;
-    M_hasTangent = true;
-    M_hasNormal = true;
-    M_hasQuadPtCoor = false;
-    M_hasFirstDerivative = false;
-#endif
-
-    M_currentID = geometricEntity.id();
-    // update the definition of the geo points
-
-    for ( UInt i = 0; i < M_nbGeoNode; i++ )
-    {
-        for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
-        {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
-        }
-    }
-
-    // compute the measure and the normal
-    computeMeasureNormal();
-}
-
-template <typename GeometricType>
-void
-CurrentBoundaryFE::
-updateMeasNormalQuadPt( const GeometricType& geometricEntity )
-{
-#ifdef TEST_PRE
-    M_hasMeasure = true;
-    M_hasTangent = true;
-    M_hasNormal = true;
-    M_hasQuadPtCoor = true;
-    M_hasFirstDerivative = false;
-#endif
-
-    M_currentID = geometricEntity.id();
-    // update the definition of the geo points
-
-    for ( UInt i = 0; i < M_nbGeoNode; i++ )
-    {
-    	for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
-        {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
-        }
-    }
-
-    // compute the measure and the normal
-    computeMeasureNormal();
-
-    // compute the coordinates of the quad points
-    computeQuadPointCoordinate();
-}
-
-}
-#endif
+#endif // CURRENT_BOUNDARY_FE_HPP

@@ -4,7 +4,6 @@ SET(fem_HEADERS
   fem/FEField.hpp
   fem/BCBase.hpp
   fem/PostProcessingBoundary.hpp
-  fem/CurrentBoundaryFEBase.hpp
   fem/CurrentBoundaryFE.hpp
   fem/FEFunction.hpp
   fem/TimeData.hpp
@@ -42,7 +41,6 @@ CACHE INTERNAL "")
 
 SET(fem_SOURCES
   fem/DOFInterface.cpp
-  fem/CurrentBoundaryFEBase.cpp
   fem/DOFInterface3Dto3D.cpp
   fem/DOFInterface3Dto2D.cpp
   fem/BCFunction.cpp
