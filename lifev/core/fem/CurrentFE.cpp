@@ -49,7 +49,7 @@ CurrentFE::CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap, cons
         M_nbPattern( refFE.nbPattern() ),
 
         M_nbGeoNode( geoMap.nbDof() ),
-        M_nbQuadPt( UInt(qr.nbQuadPt()) ),
+        M_nbQuadPt( qr.nbQuadPt() ),
 
         M_refFE( &refFE ),
         M_geoMap( &geoMap),
@@ -195,13 +195,62 @@ CurrentFE::CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap )
         M_divPhiRefUpdated(false)
 
 {
+    // Nothing to be done here
+}
+
+CurrentFE::CurrentFE(const CurrentFE& fe) :
+        M_nbNode                  (fe.M_nbNode),
+        M_nbCoor                  (fe.M_nbCoor),
+        M_nbDiag                  (fe.M_nbDiag),
+        M_nbUpper                 (fe.M_nbUpper) ,
+        M_nbPattern               (fe.M_nbPattern),
+        M_currentId               (fe.M_currentId),
+        M_currentLocalId          (fe.M_currentLocalId),
+        M_nbGeoNode               (fe.M_nbGeoNode),
+        M_nbQuadPt                (fe.M_nbQuadPt),
+
+        M_refFE                   (fe.M_refFE),
+        M_geoMap                  (fe.M_geoMap),
+        M_quadRule                (new QuadratureRule(*fe.M_quadRule)),
+
+        M_cellNodes               (fe.M_cellNodes),
+        M_quadNodes               (fe.M_quadNodes),
+        M_dphiGeometricMap        (fe.M_dphiGeometricMap),
+        M_jacobian                (fe.M_jacobian),
+        M_detJacobian             (fe.M_detJacobian),
+        M_wDetJacobian            (fe.M_wDetJacobian),
+        M_tInverseJacobian        (fe.M_tInverseJacobian),
+        M_phi                     (fe.M_phi),
+        M_dphi                    (fe.M_dphi),
+        M_d2phi                   (fe.M_d2phi),
+        M_phiVect                 (fe.M_phiVect),
+        M_dphiRef                 (fe.M_dphiRef),
+        M_d2phiRef                (fe.M_d2phiRef),
+        M_divPhiRef               (fe.M_divPhiRef),
+
+        M_cellNodesUpdated        (fe.M_cellNodesUpdated),
+        M_quadNodesUpdated        (fe.M_quadNodesUpdated),
+        M_dphiGeometricMapUpdated (fe.M_dphiGeometricMapUpdated),
+        M_jacobianUpdated         (fe.M_jacobianUpdated),
+        M_detJacobianUpdated      (fe.M_detJacobianUpdated),
+        M_wDetJacobianUpdated     (fe.M_wDetJacobianUpdated),
+        M_tInverseJacobianUpdated (fe.M_tInverseJacobianUpdated),
+        M_phiUpdated              (fe.M_phiUpdated),
+        M_dphiUpdated             (fe.M_dphiUpdated),
+        M_d2phiUpdated            (fe.M_d2phiUpdated),
+        M_phiVectUpdated          (fe.M_phiVectUpdated),
+        M_dphiRefUpdated          (fe.M_dphiRefUpdated),
+        M_d2phiRefUpdated         (fe.M_d2phiRefUpdated),
+        M_divPhiRefUpdated        (fe.M_divPhiRefUpdated)
+{
+    // Nothing to be done here
 }
 
 //----------------------------------------------------------------------
 
 // Added by S. Quinodoz
-void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
-                            Real & xi, Real & eta, Real& zeta) const
+void CurrentFE::coorBackMap(Real x, Real y, Real z,
+                            Real& xi, Real& eta, Real& zeta) const
 {
     // If the Mapping is not P1, this simple "back mapping" does not
     // work properly, as it suppose that the mapping is P1. If another
@@ -306,7 +355,7 @@ void CurrentFE::coorBackMap(const Real& x, const Real& y, const Real& z,
 // where x are the global coordinates
 //       zeta the reference coordinates
 
-Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
+Real CurrentFE::pointJacobian(Real hat_x, Real hat_y, Real hat_z,
                               Int comp_x, Int comp_zeta) const
 {
     Real jac(0);
@@ -324,7 +373,7 @@ Real CurrentFE::pointJacobian(const Real& hat_x, const Real& hat_y, const Real& 
 }
 
 // Compute the determinant of the Jacobian at the given point
-Real CurrentFE::pointDetJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z) const
+Real CurrentFE::pointDetJacobian(Real hat_x, Real hat_y, Real hat_z) const
 {
     Real det(0);
 
@@ -380,7 +429,7 @@ Real CurrentFE::pointDetJacobian(const Real& hat_x, const Real& hat_y, const Rea
     return det;
 }
 
-Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
+Real CurrentFE::pointInverseJacobian(Real hat_x, Real hat_y, Real hat_z,
                                      Int comp_x, Int comp_zeta) const
 {
     if ( M_nbCoor ==1 )
@@ -417,10 +466,6 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
         Real a32= pointJacobian(hat_x,hat_y,hat_z,2,1);
         Real a33= pointJacobian(hat_x,hat_y,hat_z,2,2);
 
-        //std::cout << a11 << "  " << a12 << "  " << a13 << std::endl;
-        //std::cout << a21 << "  " << a22 << "  " << a23 << std::endl;
-        //std::cout << a31 << "  " << a32 << "  " << a33 << std::endl;
-
         Real det= a11*a22*a33 + a12*a23*a31 + a13*a21*a32 - a11*a23*a32 - a13*a22*a31 - a12*a21*a33;
 
         std::vector<std::vector< Real > > cof(3,std::vector<Real>(3,0));
@@ -435,11 +480,6 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
         cof[2][1]= -(a11*a23 - a13*a21);
         cof[2][2]=  (a11*a22 - a12*a21);
 
-        //std::cout << cof[0][0] << " ; " <<  cof[0][1] << " ; " <<  cof[0][2] << std::endl;
-        //std::cout << cof[1][0] << " ; " <<  cof[1][1] << " ; " <<  cof[1][2] << std::endl;
-        //std::cout << cof[2][0] << " ; " <<  cof[2][1] << " ; " <<  cof[2][2] << std::endl;
-        //std::cout << det << std::endl;
-
         // inverse need the TRANSPOSE!
         return cof[comp_x][comp_zeta]/det;
     }
@@ -452,9 +492,9 @@ Real CurrentFE::pointInverseJacobian(const Real& hat_x, const Real& hat_y, const
 
 //----------------------------------------------------------------------
 
-void CurrentFE::update(const std::vector<std::vector<Real> >& pts, const flag_Type& upFlag)
+void CurrentFE::update(const std::vector<std::vector<Real> >& pts, flag_Type upFlag)
 {
-    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    ASSERT(M_nbQuadPt!=0 || upFlag==UPDATE_ONLY_CELL_NODES," No quadrature rule defined, cannot update!");
 
     M_cellNodesUpdated=false;
     if ( (upFlag & UPDATE_ONLY_CELL_NODES) != 0)
@@ -511,7 +551,7 @@ void CurrentFE::update(const std::vector<std::vector<Real> >& pts, const flag_Ty
     };
 }
 
-void CurrentFE::update(const std::vector<GeoVector>& pts, const flag_Type& upFlag)
+void CurrentFE::update(const std::vector<GeoVector>& pts, flag_Type upFlag)
 {
     std::vector< std::vector <Real > > newpts(pts.size(), std::vector<Real> (pts[0].size()));
 
@@ -632,14 +672,14 @@ Real CurrentFE::diameter2() const
 }
 
 void CurrentFE::coorMap( Real& x, Real& y, Real& z,
-                         const Real & xi, const Real & eta, const Real & zeta ) const
+                         Real xi, Real eta, Real zeta ) const
 {
     ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
 
     x=0.0;
     y=0.0;
     z=0.0;
-
+/*
     switch ( M_nbCoor )
     {
     case 1:    // 1D
@@ -666,6 +706,20 @@ void CurrentFE::coorMap( Real& x, Real& y, Real& z,
     default:
         ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
         break;
+    }
+*/
+
+    // Note: we assume (already in the constructor) that the 2nd dimension of
+    // M_cellNodes is nDimensions, that is 3. If in the future nDimensions!=3
+    // this piece of code needs to be modified.
+
+    Real geoMap;
+    for (UInt iNode(0); iNode<M_nbGeoNode; ++iNode)
+    {
+        geoMap = M_geoMap->phi( iNode, xi, eta, zeta );
+        x += M_cellNodes[iNode][0]*geoMap;
+        y += M_cellNodes[iNode][1]*geoMap;
+        z += M_cellNodes[iNode][2]*geoMap;
     }
 }
 
@@ -828,16 +882,12 @@ void CurrentFE::setQuadRule(const QuadratureRule& newQuadRule)
 
 }
 
-
 void CurrentFE::computeCellNodes( const std::vector< std::vector<Real> >& pts)
 {
     for (UInt iterNode(0); iterNode< M_nbGeoNode; ++iterNode)
-    {
         for (UInt iterCoord(0); iterCoord < nDimensions; ++iterCoord)
-        {
             M_cellNodes[iterNode][iterCoord] = pts[iterNode][iterCoord];
-        }
-    }
+
     M_cellNodesUpdated=true;
 }
 
@@ -1177,6 +1227,4 @@ void CurrentFE::computePhiVect()
     M_phiVectUpdated=true;
 }
 
-} // END OF THE NAMESPACE
-
-
+} // Namespace LifeV
