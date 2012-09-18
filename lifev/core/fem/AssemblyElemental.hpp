@@ -52,6 +52,7 @@
 
 #include <lifev/core/fem/CurrentBoundaryFE.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
+#include <lifev/core/fem/ReferenceFEHybrid.hpp>
 #include <lifev/core/fem/DOF.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"

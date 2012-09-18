@@ -478,8 +478,8 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
     for ( UInt iFace = 0; iFace< mesh.numBoundaryFacets(); ++iFace )
     {
         //Update the currentBdFE with the face data
-        currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( iFace ) );
-        UInt nDofF = currentBdFE.nbNode();
+        currentBdFE.update( mesh.boundaryFacet( iFace ), UPDATE_NORMALS | UPDATE_W_ROOT_DET_METRIC );
+        UInt nDofF = currentBdFE.nbFEDof();
 
         //For each node on the face
         for (UInt icheck = 0; icheck< nDofF; ++icheck)

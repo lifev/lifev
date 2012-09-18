@@ -113,9 +113,9 @@ public:
      * @param dof        dof_Type      the velocity/pressure dof (same order discretization)
      * @param refFE      ReferenceFE         the velocity/pressure field reference finite
      * @param feBd       CurrentBoundaryFE   the facet current fe to be used to compute the jumps
-     * 								   on the interface within elements.
+     *                                 on the interface within elements.
      * @param quadRule   QuadratureRule      the element quadrature rule used for the facet projection
-     * @param gammaBeta  Real 		   the stabilization parameter @f$\gamma_\beta@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\beta \cdot \nabla \mathbf{u}] [\beta \cdot \nabla \mathbf{v}]@f$
+     * @param gammaBeta  Real          the stabilization parameter @f$\gamma_\beta@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\beta \cdot \nabla \mathbf{u}] [\beta \cdot \nabla \mathbf{v}]@f$
      * @param gammaDiv   Real          the stabilization parameter @f$\gamma_d@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [div \mathbf{u}] [div \mathbf{v}]@f$
      * @param gammaPress Real          the stabilization parameter @f$\gamma_p@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\nabla p] \cdot [\nabla q]@f$
      * @param viscosity  Real          the fluid viscosity @f$\nu@f$
@@ -143,7 +143,7 @@ public:
      *  </ol>
      *  Both high Pechlet numbers and inf-sup incompatible FEM are stabilized.
      *
-     *	PREREQUISITE: The velocity and the pressure field should belong to the same finite element space
+     *  PREREQUISITE: The velocity and the pressure field should belong to the same finite element space
      *
      *  Parameters are the followings:
      *  @param dt      Real   timestep (INPUT)
@@ -270,7 +270,7 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     state.normInf(&normInf);
 
     // local trace of the velocity
-    VectorElemental beta( M_feBd->nbNode(), geoDimensions );
+    VectorElemental beta( M_feBd->nbFEDof(), geoDimensions );
 
     UInt myFacets(0);
 
@@ -285,7 +285,7 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
         if ( Flag::testOneSet( M_mesh->facet( iFacet ).flag(),
                                EntityFlags::SUBDOMAIN_INTERFACE | EntityFlags::PHYSICAL_BOUNDARY ) )
         {
-        	//std::cout << "iElAd1 = " << iElAd1 << "; iElAd2 = " << iElAd2 << std::endl;
+            //std::cout << "iElAd1 = " << iElAd1 << "; iElAd2 = " << iElAd2 << std::endl;
             continue;
         }
         ++myFacets;
@@ -293,7 +293,7 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
         chronoUpdate.start();
         // update current finite elements
 #if WITH_DIVERGENCE
-        M_feBd->updateMeas( M_mesh->facet( iFacet ) );
+        M_feBd->update( M_mesh->facet( iFacet ), UPDATE_W_ROOT_DET_METRIC );
 #else
         M_feBd->updateMeasNormal( M_mesh->facet( iFacet ) );
         KNM<Real>& normal = M_feBd->normal;
@@ -314,7 +314,7 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 
             // local id of the facet in its adjacent element
             UInt iFaEl ( M_mesh->facet( iFacet ).firstAdjacentElementPosition() );
-            for ( UInt iNode ( 0 ); iNode < M_feBd->nbNode(); ++iNode )
+            for ( UInt iNode ( 0 ); iNode < M_feBd->nbFEDof(); ++iNode )
             {
                 UInt iloc ( M_facetToPoint( iFaEl, iNode ) );
                 for ( UInt iCoor ( 0 ); iCoor < M_feOnSide1->nbCoor(); ++iCoor )
@@ -322,12 +322,12 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
                     UInt ig ( M_dof->localToGlobalMap( iElAd1, iloc ) +iCoor*nDof );
 
                     if (state.blockMap().LID(ig) >= 0)
-                        beta.vec()[ iCoor*M_feBd->nbNode() + iNode ] = state( ig);
+                        beta.vec()[ iCoor*M_feBd->nbFEDof() + iNode ] = state( ig);
                 }
             }
 
             // second, calculate its max norm
-            for ( UInt l ( 0 ); l < static_cast<UInt>( M_feOnSide1->nbCoor()*M_feBd->nbNode() ); ++l )
+            for ( UInt l ( 0 ); l < static_cast<UInt>( M_feOnSide1->nbCoor()*M_feBd->nbFEDof() ); ++l )
             {
                 if ( bmax < std::fabs( beta.vec()[ l ] ) )
                     bmax = std::fabs( beta.vec()[ l ] );
@@ -593,9 +593,9 @@ template<typename MeshType, typename DofType>
 template<typename MapType>
 void StabilizationIP<MeshType, DofType>::setFeSpaceVelocity(FESpace<mesh_Type, MapType> & feSpaceVelocity)
 {
-	setMesh(feSpaceVelocity.mesh());
-	setDiscretization(feSpaceVelocity.dofPtr(), feSpaceVelocity.refFE(),
-			          feSpaceVelocity.feBd(), feSpaceVelocity.qr() );
+    setMesh(feSpaceVelocity.mesh());
+    setDiscretization(feSpaceVelocity.dofPtr(), feSpaceVelocity.refFE(),
+                      feSpaceVelocity.feBd(), feSpaceVelocity.qr() );
 }
 
 } // namespace details

@@ -198,9 +198,9 @@ void getVolumeFromFaces( RegionMesh const & mesh,
                          Real vols[ 3 ],
                          std::ostream & err = std::cerr )
 {
-	MeshUtility::GetCoordComponent getx( 0 );
-	MeshUtility::GetCoordComponent gety( 1 );
-	MeshUtility::GetCoordComponent getz( 2 );
+    MeshUtility::GetCoordComponent getx( 0 );
+    MeshUtility::GetCoordComponent gety( 1 );
+    MeshUtility::GetCoordComponent getz( 2 );
     vols[ 0 ] = 0.0;
     vols[ 1 ] = 0.0;
     vols[ 2 ] = 0.0;
@@ -217,10 +217,10 @@ void getVolumeFromFaces( RegionMesh const & mesh,
                                                  quadRuleTria1pt ) );
         for ( ID i = 0; i < mesh.numBFaces(); i++ )
         {
-            bdfe->updateMeasNormal( mesh.face( i ) );
-            vols[ 0 ] += bdfe->integral_n( getx );
-            vols[ 1 ] += bdfe->integral_n( gety );
-            vols[ 2 ] += bdfe->integral_n( getz );
+            bdfe->update( mesh.face( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+            vols[ 0 ] += bdfe->normalIntegral( getx );
+            vols[ 1 ] += bdfe->normalIntegral( gety );
+            vols[ 2 ] += bdfe->normalIntegral( getz );
         }
         break;
     case QUAD:
@@ -228,10 +228,10 @@ void getVolumeFromFaces( RegionMesh const & mesh,
                                                  quadRuleQuad1pt ) );
         for ( ID i = 0; i < mesh.numBFaces(); i++ )
         {
-            bdfe->updateMeasNormal( mesh.face( i ) );
-            vols[ 0 ] += bdfe->integral_n( getx );
-            vols[ 1 ] += bdfe->integral_n( gety );
-            vols[ 2 ] += bdfe->integral_n( getz );
+            bdfe->update( mesh.face( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+            vols[ 0 ] += bdfe->normalIntegral( getx );
+            vols[ 1 ] += bdfe->normalIntegral( gety );
+            vols[ 2 ] += bdfe->normalIntegral( getz );
         }
         break;
     default:
@@ -263,8 +263,8 @@ Real testClosedDomain( RegionMesh const & mesh,
                                                  quadRuleTria1pt ) );
         for ( ID i = 0; i < mesh.numBFaces(); i++ )
         {
-            bdfe->updateMeasNormal( mesh.face( i ) );
-            test += bdfe->integral_n( ones );
+            bdfe->update( mesh.face( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+            test += bdfe->normalIntegral( ones );
         }
         break;
     case QUAD:
@@ -272,8 +272,8 @@ Real testClosedDomain( RegionMesh const & mesh,
                                                  quadRuleQuad1pt ) );
         for ( ID i = 0; i < mesh.numBFaces(); i++ )
         {
-            bdfe->updateMeasNormal( mesh.face( i ) );
-            test += bdfe->integral_n( ones );
+            bdfe->update( mesh.face( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+            test += bdfe->normalIntegral( ones );
         }
 
         break;
@@ -454,7 +454,7 @@ bool checkMesh3D( RegionMesh & mesh,
     //-----------------------------------------------------
 
     boost::shared_ptr<MeshUtility::temporaryFaceContainer_Type> bfaces(
-    		new MeshUtility::temporaryFaceContainer_Type );
+            new MeshUtility::temporaryFaceContainer_Type );
     UInt numInternalFaces, numFaces;
 
     if(verbose) out<<"Finding boundary faces from mesh topology"<<std::endl;
@@ -598,7 +598,7 @@ bool checkMesh3D( RegionMesh & mesh,
     //-----------------------------------------------------
 
     boost::shared_ptr<MeshUtility::temporaryEdgeContainer_Type> bedges(
-    		new MeshUtility::temporaryEdgeContainer_Type );
+            new MeshUtility::temporaryEdgeContainer_Type );
 
     UInt bEdgesFound = MeshUtility::findBoundaryEdges( mesh, *bedges );
     MeshUtility::EnquireBEdge<RegionMesh> enquireBEdge(*bedges );

@@ -114,10 +114,10 @@ public:
     DOFInterface3Dto3D( const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2, const DOF& dof2 );
 
     //! Constructor for interfacing DOF of the same type (ReferenceFE)
-	/*!
-	 \param dof the DOF object of the mesh in which we want to make the computations
-	*/
-	DOFInterface3Dto3D( const ReferenceFE& refFE, const DOF& dof);
+    /*!
+     \param dof the DOF object of the mesh in which we want to make the computations
+    */
+    DOFInterface3Dto3D( const ReferenceFE& refFE, const DOF& dof);
 
 
     //@}
@@ -158,7 +158,7 @@ public:
       \param flag2 the marker of facets to be connected with facets marked with flag1
       \param tol tolerance for connecting points of both meshes at the interface
       \param coupled a function of points p1 and p2, that returns true if the points are coupled, false otherwise.
-			 points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
+             points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
     */
     template <typename MeshType>
     void update( MeshType& mesh,
@@ -211,7 +211,7 @@ private:
       \param flag2 the marker of the interface in the mesh2
       \param tol tolerance for connecting points of both meshes at the interface
       \param coupled a function of points p1 and p2, that returns true if the points are coupled, false otherwise.
-			 points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
+             points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
      */
     template <typename MeshType>
     void updateFacetConnections( const MeshType& mesh1, const markerID_Type& flag1,
@@ -224,8 +224,8 @@ private:
       \param dof2 the DOF object of the mesh which provides de data at the interface
       \param tol tolerance for connecting points of both meshes at the interface
       \param coupled a function of points p1 and p2, that returns true if the points are coupled, false otherwise.
-			 points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
-	  \param flag3 the marker of a region of interface in the mesh1
+             points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
+      \param flag3 the marker of a region of interface in the mesh1
       \brief{The parameter flag3 is used in test_meshReorder to export the part of interface determined by flag3 on mesh2.}
       */
     template <typename MeshType>
@@ -297,7 +297,7 @@ template <typename MeshType>
 void DOFInterface3Dto3D::update( MeshType& mesh, const markerID_Type& flag1,
                                  const markerID_Type& flag2, const Real& tol, const fct& coupled)
 {
-	// Updating facet connections at the interface
+    // Updating facet connections at the interface
     updateFacetConnections( mesh, flag1, mesh, flag2, tol, coupled );
 
     // Update of the DOF connections without interpolation
@@ -474,8 +474,8 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
 
     // select facets flagged with flag 2
     for ( ID ibF2 = 0; ibF2 < bdnF2; ++ibF2 )
-    	if ( flag2 == mesh2.boundaryFacet( ibF2 ).marker())
-    		facetsFlagged2.insert(ibF2);
+        if ( flag2 == mesh2.boundaryFacet( ibF2 ).marker())
+            facetsFlagged2.insert(ibF2);
 
     // Loop on boundary facets on mesh1
     for ( ID ibF1 = 0; ibF1 < bdnF1; ++ibF1 )
@@ -501,34 +501,34 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
             std::set<ID>::iterator it = facetsFlagged2.begin();
             for (; it != facetsFlagged2.end(); ++it )
             {
-            	ID ibF2 = *it;
+                ID ibF2 = *it;
 
-				// Loop on facet vertices
-				bool matched;
-				ID iVeFa = 0;
-				do{
-					// Loop on vertex coordinates
-					for ( ID j = 0; j < nDimensions; ++j )
-						v2[ j ] = mesh2.boundaryFacet( ibF2 ).point( iVeFa ).coordinate( j );
+                // Loop on facet vertices
+                bool matched;
+                ID iVeFa = 0;
+                do{
+                    // Loop on vertex coordinates
+                    for ( ID j = 0; j < nDimensions; ++j )
+                        v2[ j ] = mesh2.boundaryFacet( ibF2 ).point( iVeFa ).coordinate( j );
 
-					// Loop on facet vertices on mesh1
-					ID ivefa = 0;
-					do
-					{
-						// Do the vertices match? if yes break the loop
-						matched = coupled( vertexVector[ivefa], v2, tol );
-					}
-					while( (++ivefa < nbVertexPerFacet) && !matched );
-				}
-				while ( (++iVeFa < nbVertexPerFacet)&& matched);
-				//! Do the facets match?
-				if ( matched )
-				{
-					std::pair<ID, ID> elc( ibF1, ibF2 );
-					M_facetToFacetConnectionList.push_front( elc );
-					facetsFlagged2.erase(it);
-					break; // Stop loop on boundary facets on mesh2
-				}
+                    // Loop on facet vertices on mesh1
+                    ID ivefa = 0;
+                    do
+                    {
+                        // Do the vertices match? if yes break the loop
+                        matched = coupled( vertexVector[ivefa], v2, tol );
+                    }
+                    while( (++ivefa < nbVertexPerFacet) && !matched );
+                }
+                while ( (++iVeFa < nbVertexPerFacet)&& matched);
+                //! Do the facets match?
+                if ( matched )
+                {
+                    std::pair<ID, ID> elc( ibF1, ibF2 );
+                    M_facetToFacetConnectionList.push_front( elc );
+                    facetsFlagged2.erase(it);
+                    break; // Stop loop on boundary facets on mesh2
+                }
 
             }
         }
@@ -556,7 +556,7 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
-    	if ( flag3 != 0 && Int(mesh1.boundaryFacet(i->first).marker()) != *flag3) continue;
+        if ( flag3 != 0 && Int(mesh1.boundaryFacet(i->first).marker()) != *flag3) continue;
 
         feBd1.update( mesh1.boundaryFacet( i->first ) );  // Updating facet information on mesh1
         feBd2.update( mesh2.boundaryFacet( i->second ) );  // Updating facet information on mesh2
@@ -565,23 +565,23 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
         std::vector<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet(i->second);
 
         for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
-		{
-			ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
-			feBd1.coorMap( p1[0], p1[1], p1[2], feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
+        {
+            ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
+            feBd1.coorMap( p1[0], p1[1], p1[2], feBd1.refFE().xi( lDof1 ), feBd1.refFE().eta( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
 
-			for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
-			{
-				ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
-				feBd2.coorMap( p2[0], p2[1], p2[2], feBd2.refFE.xi( lDof2 ), feBd2.refFE.eta( lDof2 ) );
+            for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
+            {
+                ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
+                feBd2.coorMap( p2[0], p2[1], p2[2], feBd2.refFE().xi( lDof2 ), feBd2.refFE().eta( lDof2 ) );
 
-				if ( coupled( p1, p2, tol ) )
-				{
-					std::pair<ID, ID> locDof( gDof1, gDof2 );
-					M_dofToDofConnectionList.push_front( locDof ); // Updating the list of dof connections
-					break;
-				}
-			}
-		}
+                if ( coupled( p1, p2, tol ) )
+                {
+                    std::pair<ID, ID> locDof( gDof1, gDof2 );
+                    M_dofToDofConnectionList.push_front( locDof ); // Updating the list of dof connections
+                    break;
+                }
+            }
+        }
     }
 
     // Updating the map containter with the connections

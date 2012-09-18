@@ -95,7 +95,7 @@ void mass(MatrixElemental& localMass,
         }
     }
 
-	// Copying the mass in all the diagonal blocks (just one for scalar problem)
+    // Copying the mass in all the diagonal blocks (just one for scalar problem)
     for (UInt iDim(0); iDim<fieldDim; ++iDim)
     {
         MatrixElemental::matrix_view mat = localMass.block(iDim,iDim);
@@ -271,7 +271,7 @@ void stiffStrain(MatrixElemental& localStiff,
     Real localValue(0);
     const Real newCoefficient(coefficient*0.5);
 
-	stiffness(localStiff,stiffCFE,newCoefficient,fieldDim); // for the stiff part, we exploit the existing routine
+    stiffness(localStiff,stiffCFE,newCoefficient,fieldDim); // for the stiff part, we exploit the existing routine
 
     for ( UInt iFDim (0); iFDim < fieldDim; ++iFDim )
     {
@@ -1203,7 +1203,7 @@ void ipstab_grad( const Real         coef,
             // Loop on coordinates
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
-                    sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.weightMeas( ig );
+                    sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.wRootDetMetric( ig );
             mat( i, j ) += coef * sum;
         }
     }
@@ -1301,7 +1301,7 @@ void ipstab_grad( const Real         coef,
             // Loop on coordinates
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
-                    sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.weightMeas( ig );
+                    sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.wRootDetMetric( ig );
             mat_tmp( i, j ) = coef * sum;
         }
     }
@@ -1350,7 +1350,7 @@ void ipstab_bgrad( const Real         coef,
         for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
         {
             sum = 0;
-            for ( i = 0; i < bdfe.nbNode(); ++i )
+            for ( i = 0; i < bdfe.nbFEDof(); ++i )
             {
                 sum += bdfe.phi( i, ig ) * beta.vec() [ icoor * bdfe.nbCoor() + i ];
             }
@@ -1434,7 +1434,7 @@ void ipstab_bgrad( const Real         coef,
                     for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
                         sum += phid1[ i ][ icoor ][ ig ]*phid2[ j ][ jcoor ][ ig ]
                                *b[ icoor ][ ig ]*b[ jcoor ][ ig ]
-                               *bdfe.weightMeas( ig );
+                               *bdfe.wRootDetMetric( ig );
             mat_tmp( i, j ) = coef * sum;
         }
     }
@@ -1531,7 +1531,7 @@ void ipstab_div( const Real coef, MatrixElemental& elmat, const CurrentFE& fe1, 
                 {
                     sum = 0.0;
                     for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
-                        sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ jcoor ][ ig ] * bdfe.weightMeas( ig );
+                        sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ jcoor ][ ig ] * bdfe.wRootDetMetric( ig );
                     mat_icomp( i, j ) += coef * sum;
                 }
             }
@@ -1648,7 +1648,7 @@ void ipstab_bagrad( const Real coef, MatrixElemental& elmat,
                     sum += ba2[ ig ] *
                            phid1[ i ][ icoor ][ ig ] *
                            phid2[ j ][ icoor ][ ig ] *
-                           bdfe.weightMeas( ig );
+                           bdfe.wRootDetMetric( ig );
             mat( i, j ) += coef * sum;
         }
     }
@@ -1774,7 +1774,7 @@ void ipstab_bagrad( const Real         coef,
                     sum += bn[ ig ] *
                            phid1[ i ][ icoor ][ ig ] *
                            phid2[ j ][ icoor ][ ig ] *
-                           bdfe.weightMeas( ig );
+                           bdfe.wRootDetMetric( ig );
             mat( i, j ) += coef * sum;
         }
     }
@@ -4918,10 +4918,10 @@ void TP_VdotN_Hdiv( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& 
     for ( UInt nf(0); nf < hybridFE.numberBoundaryFE(); ++nf )
     {
         // Take the staticBdFE of the hybrid finite element.
-        const CurrentBoundaryFEBase & boundaryElementHybridFE( hybridFE[ nf ] );
+        const CurrentBoundaryFE& boundaryElementHybridFE( hybridFE[ nf ] );
         // Take the staticBdFE of the Hdiv function dot product outward unit normal.
-        const CurrentBoundaryFEBase & boundaryElementDualDotNFE( dualDotNFE[ nf ] );
-        nbnode = boundaryElementHybridFE.nbNode();
+        const CurrentBoundaryFE& boundaryElementDualDotNFE( dualDotNFE[ nf ] );
+        nbnode = boundaryElementHybridFE.nbFEDof();
 
         // Loop over all the the degrees of freedom of the dual dot normal variable.
         for ( UInt i(0); i < nbnode; ++i )
@@ -4936,7 +4936,7 @@ void TP_VdotN_Hdiv( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& 
                     // Using the Piola transform properties.
                     sum += boundaryElementHybridFE.phi( j , ig ) *
                            boundaryElementDualDotNFE.phi( i , ig ) *
-                           boundaryElementHybridFE.weightMeas( ig );
+                           boundaryElementHybridFE.wRootDetMetric( ig );
                 }
                 // The matrix is block diagonal, so the size of the blocks is bdfe.nbNode.
                 mat( nf * nbnode + i, nf * nbnode + j ) += sum * coef;
@@ -4957,8 +4957,8 @@ void TP_TP_Hdiv( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& hyb
     for ( UInt nf(0); nf < hybridFE.numberBoundaryFE(); ++nf )
     {
         // Take the staticBdFE of the hybrid finite element.
-        const CurrentBoundaryFEBase & boundaryElementHybridFE( hybridFE[ nf ] );
-        nbnode = boundaryElementHybridFE.nbNode();
+        const CurrentBoundaryFE& boundaryElementHybridFE( hybridFE[ nf ] );
+        nbnode = boundaryElementHybridFE.nbFEDof();
 
         // Loop over all the degrees of freedom of the first hybrid variable.
         for ( UInt i(0); i < nbnode; ++i )
@@ -4972,7 +4972,7 @@ void TP_TP_Hdiv( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& hyb
                     // Using the Piola transform properties.
                     sum += boundaryElementHybridFE.phi( j , ig ) *
                            boundaryElementHybridFE.phi( i , ig ) *
-                           boundaryElementHybridFE.weightMeas( ig );
+                           boundaryElementHybridFE.wRootDetMetric( ig );
 
                 // The matrix is block diagonal, so the size of the blocks is bdfe.nbNode.
                 mat( nf * nbnode + i, nf * nbnode + j ) += sum * coef;

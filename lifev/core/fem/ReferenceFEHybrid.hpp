@@ -39,7 +39,7 @@
 #ifndef REFFEHYBRID_H
 #define REFFEHYBRID_H 1
 
-#include <lifev/core/fem/CurrentBoundaryFEBase.hpp>
+#include <lifev/core/fem/CurrentBoundaryFE.hpp>
 
 namespace LifeV
 {
@@ -83,17 +83,17 @@ FE_PIPO = a_new_number
 extern const RefHybridFE fePipo;
   \endcode
 
-  @li In defQuadRuleFE.cc: you define a list of CurrentBoundaryFEBase with a command like:
+  @li In defQuadRuleFE.cc: you define a list of CurrentBoundaryFE with a command like:
   \code
   #define NB_BDFE_PIPO
-static const CurrentBoundaryFEBase BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTria4pt, refcoor_PIPO_1, 0 );
+static const CurrentBoundaryFE BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTria4pt, refcoor_PIPO_1, 0 );
 ...
   \endcode
 
-  @li In defQuadRuleFE.cc: you define a static array containing all the CurrentBoundaryFEBase
+  @li In defQuadRuleFE.cc: you define a static array containing all the CurrentBoundaryFE
   with a command like
   \code
-static const CurrentBoundaryFEBase HybPIPOList[ NB_BDFE_PIPO ] =
+static const CurrentBoundaryFE HybPIPOList[ NB_BDFE_PIPO ] =
 {
      BdFE_PIPO_1, BdFE_PIPO_2,
      ...
@@ -147,7 +147,7 @@ public:
                  UInt               nbDof,
                  UInt               nbCoor,
                  const UInt&        numberBoundaryFE,
-                 const CurrentBoundaryFEBase*  boundaryFEList,
+                 const CurrentBoundaryFE*  boundaryFEList,
                  const Real*        refCoor,
                  DofPatternType     patternType = STANDARD_PATTERN );
 
@@ -160,8 +160,8 @@ public:
     //! @name Operators
     //@{
 
-    //! Extracting a CurrentBoundaryFEBase from the faces list.
-    const CurrentBoundaryFEBase& operator[] ( const ID& i ) const
+    //! Extracting a CurrentBoundaryFE from the faces list.
+    const CurrentBoundaryFE& operator[] ( const ID& i ) const
     {
         ASSERT_BD( i < static_cast<ID>( M_numberBoundaryFE ) );
         return M_boundaryFEList[ i ];
@@ -196,8 +196,8 @@ private:
     /*! List holding the stored boundary elements that live on the boundary faces (3D),
         or edges (2D), of the RefHybridFE element. The boundary elements of a reference
         element are not in general reference elements themselves, that is why
-        we use here the CurrentBoundaryFEBase rather that ReferenceFE. */
-    const CurrentBoundaryFEBase* M_boundaryFEList;
+        we use here the CurrentBoundaryFE rather that ReferenceFE. */
+    const CurrentBoundaryFE* M_boundaryFEList;
 };
 
 

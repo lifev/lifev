@@ -118,8 +118,8 @@ public:
     //! Copy constructor
     /*!
        @warning This is not a copy constructor, since bcUpdate is set to false,
-       		   as a consequence of the fact that also BCBase "copy" constructor is not
-      			actually a copy constructor
+               as a consequence of the fact that also BCBase "copy" constructor is not
+                actually a copy constructor
        @param bcHandler BCHandler
      */
     BCHandler( const BCHandler & bcHandler );
@@ -559,8 +559,8 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
     // Essential, EssentialEdges, EssentialVertices)
 
     beginEssential = M_bcList.begin();
-	while ((beginEssential != M_bcList.end())&&(beginEssential->type() < Essential))
-		beginEssential++;
+    while ((beginEssential != M_bcList.end())&&(beginEssential->type() < Essential))
+        beginEssential++;
 
     beginEssEdges = beginEssential;
     while ((beginEssEdges != M_bcList.end())&&(beginEssEdges->type() < EssentialEdges))
@@ -579,7 +579,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
         // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)
         // ===================================================================================
 
-        boundaryFE.updateMeas( mesh.boundaryFacet( iBoundaryElement ) );  // updating finite element information
+        boundaryFE.update( mesh.boundaryFacet( iBoundaryElement ), UPDATE_ONLY_CELL_NODES );  // updating finite element information
         elementMarker = mesh.boundaryFacet( iBoundaryElement ).marker(); // We keep the element marker
 
 
@@ -614,7 +614,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                         bcBaseIterator->addBCIdentifier( new BCIdentifierBase( gDof) );
                     else
                     { // With user defined functions
-                        boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
+                        boundaryFE.coorMap( x, y, z, boundaryFE.refFE().xi( lDof ), boundaryFE.refFE().eta( lDof ) );
                         bcBaseIterator->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                     }
                 }
@@ -721,7 +721,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                             bcBaseIterator->addBCIdentifier( new BCIdentifierBase( gDof ) );
                         else
                         { // With user defined functions
-                            boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
+                            boundaryFE.coorMap( x, y, z, boundaryFE.refFE().xi( lDof ), boundaryFE.refFE().eta( lDof ) );
                             bcBaseIterator->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                         }
                     }
@@ -755,7 +755,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                             bcBaseIterator->addBCIdentifier( new BCIdentifierBase( gDof ) );
                         else
                         { // With user defined functions
-                            boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
+                            boundaryFE.coorMap( x, y, z, boundaryFE.refFE().xi( lDof ), boundaryFE.refFE().eta( lDof ) );
                             bcBaseIterator->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                         }
                     }

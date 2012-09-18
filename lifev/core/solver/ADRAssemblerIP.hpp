@@ -293,7 +293,7 @@ setup( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
     M_fespace = fespace;
     M_betaFESpace = betaFESpace;
 
-    M_IPFaceCFE.reset(new CurrentBoundaryFE(M_fespace->feBd().refFE, M_fespace->feBd().geoMap, M_fespace->feBd().qr));
+    M_IPFaceCFE.reset(new CurrentBoundaryFE(M_fespace->feBd().refFE(), M_fespace->feBd().geoMap(), M_fespace->feBd().quadRule()));
 
     // For the two next CurrentFEs, the quadrature plays no role
     M_IPQuad1CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
@@ -378,7 +378,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // we need to update the currentFEs with a quadrature that lies on the face.
         // First step , we compute this quadrature.
 
-        M_IPFaceCFE->updateMeasNormalQuadPt(M_fespace->mesh()->face(iFace));
+        M_IPFaceCFE->update(M_fespace->mesh()->face(iFace), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES);
         hFace2 = M_IPFaceCFE->measure();
 
         // Second step, we take the quadrature back to the reference frame for both
@@ -603,7 +603,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // we need to update the currentFEs with a quadrature that lies on the face.
         // First step , we compute this quadrature.
 
-        M_IPFaceCFE->updateMeasNormalQuadPt(M_fespace->mesh()->face(iFace));
+        M_IPFaceCFE->update(M_fespace->mesh()->face(iFace), UPDATE_W_ROOT_DET_METRIC | UPDATE_QUAD_NODES);
         hFace2 = M_IPFaceCFE->measure();
 
         // Second step, we take the quadrature back to the reference frame for both
