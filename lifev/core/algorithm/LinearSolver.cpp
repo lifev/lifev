@@ -130,6 +130,7 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
     // Solve the linear system
     LifeChrono chrono;
     chrono.start();
+
     M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solutionPtr->epetraVector() );
     M_converged         = M_solverOperator->hasConverged();
     M_lossOfPrecision   = M_solverOperator->isLossOfAccuracyDetected();

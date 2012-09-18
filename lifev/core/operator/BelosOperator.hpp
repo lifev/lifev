@@ -73,7 +73,7 @@ public:
 
     enum SolverManagerType { NotAValidSolverManager, BlockCG, PseudoBlockCG, RCG,
                              BlockGmres, PseudoBlockGmres, GmresPoly,
-                             GCRODR, PCPG, TFQMR };
+                             GCRODR, PCPG, TFQMR, MINRES };
 
     //@}
 

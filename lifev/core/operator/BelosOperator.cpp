@@ -46,6 +46,7 @@
 #include <BelosPCPGSolMgr.hpp>
 #include <BelosPseudoBlockCGSolMgr.hpp>
 #include <BelosPseudoBlockGmresSolMgr.hpp>
+#include <BelosMinresSolMgr.hpp>
 #include <BelosRCGSolMgr.hpp>
 #include <BelosTFQMRSolMgr.hpp>
 #include "Teuchos_RCPBoostSharedPtrConversions.hpp"
@@ -85,6 +86,8 @@ int BelosOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
         std::cout << std::endl << "SLV-  ERROR: Belos::LinearProblem failed to set up correctly!" << std::endl;
         return -12;
     }
+
+    M_solverManager->setProblem( M_linProblem );
 
 
     // Solving the system
@@ -161,7 +164,6 @@ void BelosOperator::doSetParameterList()
     default:
         exit(1);
     }
-	M_solverManager->setProblem( M_linProblem );
 
 }
 
@@ -212,6 +214,12 @@ void BelosOperator::allocateSolver( const SolverManagerType & solverManagerType 
                 // Create TFQMR iteration
                 M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,vector_Type,operator_Type>() );
                 break;
+            case MINRES:
+                // Create MINRES iteration
+                M_solverManager = rcp( new Belos::MinresSolMgr<Real,vector_Type,operator_Type>() );
+                break;
+            default:
+                ERROR_MSG("Belos solver not found!");
          }
 
 }
@@ -237,6 +245,8 @@ BelosOperator::getSolverManagerTypeFromString ( const std::string& str )
         return PCPG;
     else if( str == "TFQMR" )
         return TFQMR;
+    else if( str == "MINRES" )
+        return MINRES;
     else
         return NotAValidSolverManager;
 }
