@@ -1024,8 +1024,8 @@ computePrimalAndDual ()
     vector_Type hybrid_Repeated( M_hybridField->getVector(), Repeated );
 
     // Clean the vector for the primal and the dual variable
-    M_primalField->getVector().zero();
-    M_dualField->getVector().zero();
+    M_primalField->cleanField();
+    M_dualField->cleanField();
 
     /* Elemental matrix for mixed hybrid matrix, maps [A | B | C] in
      | A    B  C |
@@ -1659,13 +1659,13 @@ resetVariables ()
     M_residual.reset ( new vector_Type ( problemMap ) );
 
     // Reset the global primal vector
-    M_primalField->getVector().zero();
+    M_primalField->cleanField();
 
     // Reset the global dual vector
-    M_dualField->getVector().zero();
+    M_dualField->cleanField();
 
     // Reset the global hybrid vector
-    M_hybridField->getVector().zero();
+    M_hybridField->cleanField();
 
 } // resetVariables
 
