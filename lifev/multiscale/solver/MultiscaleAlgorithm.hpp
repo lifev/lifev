@@ -86,9 +86,9 @@ public:
 
     //! Setup the data of the algorithm using a data file
     /*!
-     * @param FileName Name of the data file.
+     * @param fileName Name of the data file.
      */
-    virtual void setupData( const std::string& fileName );
+    virtual void setupData( const std::string& fileName ) = 0;
 
     //! Setup coupling variables and other quantities of the algorithm
     virtual void setupAlgorithm();
@@ -136,6 +136,18 @@ public:
      * @param tolerance coupling tolerance
      */
     void setTolerance( const Real& tolerance ) { M_tolerance = tolerance; }
+
+    //! Set the algorithm name
+    /*!
+     * @param parameterList teuchos list of parameters
+     */
+    void setAlgorithmName( const multiscaleParameterList_Type& parameterList );
+
+    //! Set the the main parameters of the algorithm (tolerance, maximum number of subiterations, etc.)
+    /*!
+     * @param parameterList teuchos list of parameters
+     */
+    virtual void setAlgorithmParameters( const multiscaleParameterList_Type& parameterList );
 
     //@}
 

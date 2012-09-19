@@ -59,6 +59,22 @@ MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() :
 // Multiscale Algorithm Virtual Methods
 // ===================================================
 void
+MultiscaleAlgorithmExplicit::setupData( const std::string& fileName )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
+#endif
+
+    // Read parameters
+    multiscaleParameterListPtr_Type solverParametersList = Teuchos::rcp( new Teuchos::ParameterList );
+    solverParametersList = Teuchos::getParametersFromXmlFile( fileName );
+
+    setAlgorithmName( solverParametersList->sublist( "Multiscale", true, "" ) );
+    setAlgorithmParameters( solverParametersList->sublist( "Multiscale Algorithm", true, "" ) );
+}
+
+void
 MultiscaleAlgorithmExplicit::subIterate()
 {
     checkResidual( 0 );

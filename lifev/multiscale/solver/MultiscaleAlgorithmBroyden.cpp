@@ -75,19 +75,17 @@ MultiscaleAlgorithmBroyden::setupData( const std::string& fileName )
     Debug( 8014 ) << "MultiscaleAlgorithmBroyden::setupData( fileName ) \n";
 #endif
 
-    multiscaleAlgorithm_Type::setupData( fileName );
+    // Read parameters
+    multiscaleParameterListPtr_Type solverParametersList = Teuchos::rcp( new Teuchos::ParameterList );
+    solverParametersList = Teuchos::getParametersFromXmlFile( fileName );
 
-    GetPot dataFile( fileName );
+    // Set main parameters
+    setAlgorithmName( solverParametersList->sublist( "Multiscale", true, "" ) );
+    setAlgorithmParameters( solverParametersList->sublist( "Multiscale Algorithm", true, "" ) );
 
-    M_initializeAsIdentityMatrix = dataFile( "Parameters/initializeAsIdentityMatrix", false );
-    M_iterationsLimitForReset = static_cast <UInt> ( M_subiterationsMaximumNumber * dataFile( "Parameters/iterationsLimitForReset", 1.0 ) );
-
-    M_orthogonalization = dataFile( "Parameters/orthogonalization", false );
-    M_orthogonalizationSize = dataFile( "Parameters/orthogonalizationSize", 1 );
-
+    // Set main parameters
     M_solver.setCommunicator( M_comm );
-    M_solver.setDataFromGetPot( dataFile, "Solver/AztecOO" );
-    //M_solver.setupPreconditioner( DataFile, "Solver/Preconditioner" );
+    M_solver.setParameters( solverParametersList->sublist( "Linear Solver List", true, "" ) );
 }
 
 void
@@ -132,18 +130,11 @@ MultiscaleAlgorithmBroyden::subIterate()
 
     M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
-    multiscaleVector_Type delta( *M_couplingResiduals, Unique );
-    delta = 0.0;
-    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals, Unique );
-    minusCouplingResidual = 0.0;
+    multiscaleVectorPtr_Type delta( new multiscaleVector_Type( *M_couplingResiduals, Unique ) );
+    *delta = 0.0;
 
     for ( UInt subIT(1); subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
-//        std::cout << " MS-  CouplingVariables:\n" << std::endl;
-//        M_couplingVariables->showMe();
-//        std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-//        M_couplingResiduals->showMe();
-
         // Compute the Jacobian
         if ( subIT == 1 )
         {
@@ -154,20 +145,17 @@ MultiscaleAlgorithmBroyden::subIterate()
             }
         }
         else
-            broydenJacobianUpdate( delta );
+            broydenJacobianUpdate( *delta );
 
-        //Compute delta using -R
-        minusCouplingResidual = -( *M_couplingResiduals );
+        // Set matrix and RHS
+        M_solver.setOperator( M_jacobian );
+        M_solver.setRightHandSide( M_couplingResiduals );
 
-        M_solver.setMatrix( *M_jacobian );
-        M_solver.solve( delta, minusCouplingResidual );
-        //M_solver.solveSystem( minusCouplingResidual, delta, M_jacobian, false );
+        // Solve Newton (without changing the sign of the residual)
+        M_solver.solve( delta );
 
         // Update Coupling Variables using the Broyden Method
-        *M_couplingVariables += delta;
-
-//        std::cout << " MS-  New CouplingVariables:\n" << std::endl;
-//        M_couplingVariables->showMe();
+        *M_couplingVariables -= *delta;
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );
@@ -206,6 +194,22 @@ MultiscaleAlgorithmBroyden::showMe()
         std::cout << "Orthogonalization memory size        = " << M_orthogonalizationSize << std::endl;
         std::cout << std::endl << std::endl;
     }
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+MultiscaleAlgorithmBroyden::setAlgorithmParameters( const multiscaleParameterList_Type& parameterList )
+{
+    multiscaleAlgorithm_Type::setAlgorithmParameters( parameterList );
+
+    M_initializeAsIdentityMatrix = parameterList.get<bool>( "Initialize as identity matrix" );
+    M_iterationsLimitForReset    = static_cast <UInt> ( M_subiterationsMaximumNumber
+                                 * parameterList.get<Real>( "Iterations limit for reset" ) );
+
+    M_orthogonalization          = parameterList.get<bool>( "Orthogonalization" );
+    M_orthogonalizationSize      = parameterList.get<UInt>( "Orthogonalization size" );
 }
 
 // ===================================================

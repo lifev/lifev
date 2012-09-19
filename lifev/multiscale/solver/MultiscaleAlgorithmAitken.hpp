@@ -86,6 +86,17 @@ public:
 
     //@}
 
+    //! @name Set Methods
+    //@{
+
+    //! Set the the main parameters of the algorithm (tolerance, maximum number of subiterations, etc.)
+    /*!
+     * @param parameterList teuchos list of parameters
+     */
+    void setAlgorithmParameters( const multiscaleParameterList_Type& parameterList );
+
+    //@}
+
 private:
 
     //! @name Unimplemented Methods

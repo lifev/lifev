@@ -237,10 +237,10 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
 
     // Load Algorithm
     path = dataFile( "Problem/algorithmsPath", "./" );
-    algorithm = multiscaleAlgorithmsMap[ dataFile( "Problem/algorithm", "Newton", 0 ) ];
+    algorithm = multiscaleAlgorithmsMap[ dataFile( "Problem/algorithm", "Explicit", 0 ) ];
     M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( algorithm, multiscaleAlgorithmsMap ) );
     M_algorithm->setCommunicator( M_comm );
-    M_algorithm->setupData( path + enum2String( algorithm, multiscaleAlgorithmsMap ) + "/" + dataFile( "Problem/algorithm", "undefined", 1 ) + ".dat" );
+    M_algorithm->setupData( path + enum2String( algorithm, multiscaleAlgorithmsMap ) + "/" + dataFile( "Problem/algorithm", "undefined", 1 ) + ".xml" );
 }
 
 void

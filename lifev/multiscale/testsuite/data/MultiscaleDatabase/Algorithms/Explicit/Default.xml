@@ -1,3 +1,4 @@
+<!--
 ###################################################################################################
 #
 #                       This file is part of the LifeV Library
@@ -11,11 +12,19 @@
 ###################################################################################################
 ### ALGORITHM: Explicit - Default parameters ######################################################
 ###################################################################################################
+-->
 
-[Multiscale]
-algorithmName        = Default
-algorithmType        = Explicit
+<ParameterList>
+    <!-- Multiscale parameters -->
+    <ParameterList name="Multiscale">
+        <Parameter name="Algorithm Name" type="string" value="Default"/>
+        <Parameter name="Algorithm Type" type="string" value="Explicit"/>
+    </ParameterList>
 
-[Parameters]
-subiterationsMaximumNumber     = 0      # Maximum number for coupling subiterations
-tolerance                      = 0      # Tolerance on the coupling values
+    <!-- Multiscale Algorithm parameters -->
+    <ParameterList name="Multiscale Algorithm">
+        <Parameter name="Subiterations Maximum Number" type="unsigned int" value="0"/>
+        <Parameter name="Tolerance" type="double" value="0.0"/>
+    </ParameterList>
+</ParameterList>
+

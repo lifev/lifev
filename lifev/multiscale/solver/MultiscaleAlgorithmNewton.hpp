@@ -37,10 +37,7 @@
 #ifndef MultiscaleAlgorithmNewton_H
 #define MultiscaleAlgorithmNewton_H 1
 
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
-
-#include <lifev/core/algorithm/Preconditioner.hpp>
-#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
 
 #include <lifev/multiscale/solver/MultiscaleAlgorithm.hpp>
 
@@ -105,7 +102,7 @@ private:
 
     //@}
 
-    SolverAztecOO                            M_solver;
+    LinearSolver                             M_solver;
     multiscaleMatrixPtr_Type                 M_jacobian;
 };
 

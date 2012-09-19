@@ -74,16 +74,13 @@ MultiscaleAlgorithmAitken::setupData( const std::string& fileName )
     Debug( 8011 ) << "MultiscaleAlgorithmAitken::setupData( fileName ) \n";
 #endif
 
-    multiscaleAlgorithm_Type::setupData( fileName );
+    // Read parameters
+    multiscaleParameterListPtr_Type solverParametersList = Teuchos::rcp( new Teuchos::ParameterList );
+    solverParametersList = Teuchos::getParametersFromXmlFile( fileName );
 
-    GetPot dataFile( fileName );
-
-    M_generalizedAitken.setDefaultOmega( dataFile( "Parameters/omega", 1.e-3 ) );
-    M_generalizedAitken.useDefaultOmega( dataFile( "Parameters/fixedOmega",   false ) );
-    M_generalizedAitken.setOmegaMin( dataFile( "Parameters/range", M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
-    M_generalizedAitken.setOmegaMax( dataFile( "Parameters/range", M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
-    M_generalizedAitken.setMinimizationType( dataFile( "Parameters/inverseOmega", true ) );
-    M_method = M_methodMap[ dataFile( "Parameters/method", "Vectorial" ) ];
+    // Set main parameters
+    setAlgorithmName( solverParametersList->sublist( "Multiscale", true, "" ) );
+    setAlgorithmParameters( solverParametersList->sublist( "Multiscale Algorithm", true, "" ) );
 }
 
 void
@@ -113,11 +110,6 @@ MultiscaleAlgorithmAitken::subIterate()
 
     for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
-//        std::cout << " MS-  CouplingVariables:\n" << std::endl;
-//        M_couplingVariables->showMe();
-//        std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-//        M_couplingResiduals->showMe();
-
         // Update Coupling Variables
         switch ( M_method )
         {
@@ -139,9 +131,6 @@ MultiscaleAlgorithmAitken::subIterate()
 
             break;
         }
-
-//        std::cout << " MS-  New CouplingVariables:\n" << std::endl;
-//        M_couplingVariables->showMe();
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );
@@ -167,6 +156,22 @@ MultiscaleAlgorithmAitken::showMe()
         std::cout << "Aitken Method                        = " << enum2String( M_method, M_methodMap ) << std::endl;
         std::cout << std::endl << std::endl;
     }
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+MultiscaleAlgorithmAitken::setAlgorithmParameters( const multiscaleParameterList_Type& parameterList )
+{
+    multiscaleAlgorithm_Type::setAlgorithmParameters( parameterList );
+
+    M_generalizedAitken.setDefaultOmega( parameterList.get<Real>( "Omega" ) );
+    M_generalizedAitken.useDefaultOmega( parameterList.get<bool>( "Fixed omega" ) );
+    M_generalizedAitken.setOmegaMin( parameterList.get<Real>( "Range minimum" ) );
+    M_generalizedAitken.setOmegaMax( parameterList.get<Real>( "Range maximum" ) );
+    M_generalizedAitken.setMinimizationType( parameterList.get<bool>( "Inverse omega" ) );
+    M_method = M_methodMap[ parameterList.get<std::string>( "Method" ) ];
 }
 
 } // Namespace Multiscale

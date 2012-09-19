@@ -68,13 +68,17 @@ MultiscaleAlgorithmNewton::setupData( const std::string& fileName )
     Debug( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
 #endif
 
-    multiscaleAlgorithm_Type::setupData( fileName );
+    // Read parameters
+    multiscaleParameterListPtr_Type solverParametersList = Teuchos::rcp( new Teuchos::ParameterList );
+    solverParametersList = Teuchos::getParametersFromXmlFile( fileName );
 
-    GetPot dataFile( fileName );
+    // Set main parameters
+    setAlgorithmName( solverParametersList->sublist( "Multiscale", true, "" ) );
+    setAlgorithmParameters( solverParametersList->sublist( "Multiscale Algorithm", true, "" ) );
 
+    // Set main parameters
     M_solver.setCommunicator( M_comm );
-    M_solver.setDataFromGetPot( dataFile, "Solver/AztecOO" );
-    //M_solver.setupPreconditioner( DataFile, "Solver/Preconditioner" );
+    M_solver.setParameters( solverParametersList->sublist( "Linear Solver List", true, "" ) );
 }
 
 void
@@ -93,33 +97,23 @@ MultiscaleAlgorithmNewton::subIterate()
 
     M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
-    multiscaleVector_Type delta( *M_couplingResiduals, Unique );
-    delta = 0.0;
-    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals, Unique );
-    minusCouplingResidual = 0.0;
+    multiscaleVectorPtr_Type delta( new multiscaleVector_Type( *M_couplingResiduals, Unique ) );
+    *delta = 0.0;
 
     for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
-//        std::cout << " MS-  CouplingVariables:\n" << std::endl;
-//        M_couplingVariables->showMe();
-//        std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-//        M_couplingResiduals->showMe();
-
-        // Compute the Jacobian (we completery delete the previous matrix)
+        // Compute the Jacobian
         assembleJacobianMatrix();
 
-        //Compute delta using -R
-        minusCouplingResidual = -( *M_couplingResiduals );
+        // Set matrix and RHS
+        M_solver.setOperator( M_jacobian );
+        M_solver.setRightHandSide( M_couplingResiduals );
 
-        M_solver.setMatrix( *M_jacobian );
-        M_solver.solve( delta, minusCouplingResidual );
-        //M_solver.solveModel( minusCouplingResidual, delta, M_jacobian, false );
+        // Solve Newton (without changing the sign of the residual)
+        M_solver.solve( delta );
 
         // Update Coupling Variables using the Newton Method
-        *M_couplingVariables += delta;
-
-//        std::cout << " MS-  New CouplingVariables:\n" << std::endl;
-//        M_couplingVariables->showMe();
+        *M_couplingVariables -= *delta;
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );
@@ -141,7 +135,7 @@ MultiscaleAlgorithmNewton::subIterate()
 void
 MultiscaleAlgorithmNewton::assembleJacobianMatrix()
 {
-    // Compute the Jacobian matrix
+    // Compute the Jacobian matrix (we completely delete the previous matrix)
     M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50 ) );
     M_multiscale->exportJacobian( *M_jacobian );
     M_jacobian->globalAssemble();

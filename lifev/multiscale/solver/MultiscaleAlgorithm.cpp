@@ -67,21 +67,6 @@ MultiscaleAlgorithm::MultiscaleAlgorithm() :
 // Multiscale Algorithm Virtual Methods
 // ===================================================
 void
-MultiscaleAlgorithm::setupData( const std::string& fileName )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::setupData( fileName ) \n";
-#endif
-
-    GetPot dataFile( fileName );
-    M_name = dataFile( "Multiscale/algorithmName", "algorithmName" );
-
-    M_subiterationsMaximumNumber = dataFile( "Parameters/subiterationsMaximumNumber", 10 );
-    M_tolerance = dataFile( "Parameters/tolerance", 1e-2 );
-}
-
-void
 MultiscaleAlgorithm::setupAlgorithm()
 {
 
@@ -132,6 +117,22 @@ MultiscaleAlgorithm::computeResidual() const
     // Compute computeResidual
     M_multiscale->exportCouplingResiduals( *M_couplingResiduals );
     return M_couplingResiduals->norm2();
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+MultiscaleAlgorithm::setAlgorithmName( const multiscaleParameterList_Type& parameterList )
+{
+    M_name = parameterList.get<std::string>( "Algorithm Name" );
+}
+
+void
+MultiscaleAlgorithm::setAlgorithmParameters( const multiscaleParameterList_Type& parameterList )
+{
+    M_subiterationsMaximumNumber = parameterList.get<UInt>( "Subiterations Maximum Number" );
+    M_tolerance                  = parameterList.get<Real>( "Tolerance" );
 }
 
 // ===================================================

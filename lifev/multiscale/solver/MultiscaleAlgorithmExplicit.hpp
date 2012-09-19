@@ -70,6 +70,12 @@ public:
     //! @name Multiscale Algorithm Virtual Methods
     //@{
 
+    //! Setup the data of the algorithm using a data file
+    /*!
+     * @param fileName Name of the data file.
+     */
+    void setupData( const std::string& fileName );
+
     //! Perform sub-iteration on the coupling variables
     void subIterate();
 

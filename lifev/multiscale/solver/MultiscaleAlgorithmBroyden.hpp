@@ -37,10 +37,7 @@
 #ifndef MultiscaleAlgorithmBroyden_H
 #define MultiscaleAlgorithmBroyden_H 1
 
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
-
-#include <lifev/core/algorithm/Preconditioner.hpp>
-#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
 
 #include <lifev/multiscale/solver/MultiscaleAlgorithm.hpp>
 
@@ -92,6 +89,18 @@ public:
 
     //@}
 
+
+    //! @name Set Methods
+    //@{
+
+    //! Set the the main parameters of the algorithm (tolerance, maximum number of subiterations, etc.)
+    /*!
+     * @param parameterList teuchos list of parameters
+     */
+    void setAlgorithmParameters( const multiscaleParameterList_Type& parameterList );
+
+    //@}
+
 private:
 
     //! @name Private Types
@@ -132,14 +141,14 @@ private:
 
     //@}
 
-    SolverAztecOO                            M_solver;
+    LinearSolver                             M_solver;
     multiscaleMatrixPtr_Type                 M_jacobian;
 
     bool                                     M_initializeAsIdentityMatrix;
     bool                                     M_iterationsLimitReached;
     UInt                                     M_iterationsLimitForReset;
     bool                                     M_orthogonalization;
-    Real                                     M_orthogonalizationSize;
+    UInt                                     M_orthogonalizationSize;
     container_Type                           M_orthogonalizationContainer;
     bool                                     M_truncate;
 };

@@ -63,6 +63,8 @@
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
 
+#include <lifev/core/algorithm/LinearSolver.hpp>
+
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
@@ -155,6 +157,9 @@ typedef boost::shared_ptr< multiscaleVector_Type >                              
 
 typedef MatrixEpetra< Real >                                                     multiscaleMatrix_Type;
 typedef boost::shared_ptr< multiscaleMatrix_Type >                               multiscaleMatrixPtr_Type;
+
+typedef LinearSolver::parameterList_Type                                         multiscaleParameterList_Type;
+typedef LinearSolver::parameterListPtr_Type                                      multiscaleParameterListPtr_Type;
 
 typedef MultiscaleAlgorithm                                                      multiscaleAlgorithm_Type;
 typedef boost::shared_ptr< multiscaleAlgorithm_Type >                            multiscaleAlgorithmPtr_Type;
