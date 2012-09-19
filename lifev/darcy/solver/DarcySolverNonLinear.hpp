@@ -698,7 +698,7 @@ resetVariables ()
 {
 
     // Update the primal vector at the previous iteration step.
-    M_primalFieldPreviousIteration->getVector() = this->M_primalField->getVector();
+    M_primalFieldPreviousIteration->setVector( this->M_primalField->getVector() );
 
     // Call the method of the DarcySolverLinear to update all the variables defined in it.
     darcySolverLinear_Type::resetVariables();
