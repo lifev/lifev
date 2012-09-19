@@ -222,6 +222,12 @@ public:
         this->setVectorPtr ( vector );
     }
 
+    //! Clean the field.
+    void cleanField ()
+    {
+        this->getVector().zero();
+    }
+
     //@}
 
     //! @name Get Methods
