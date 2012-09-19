@@ -988,7 +988,7 @@ solveLinearSystem ()
     M_linearSolver.solve ( solution );
 
     // Save the solution into the hybrid variable.
-    M_hybridField->getVector() = *solution;
+    M_hybridField->setVector( *solution );
 
 } // solveLinearSystem
 
