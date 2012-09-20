@@ -154,8 +154,11 @@ MultiscaleAlgorithmBroyden::subIterate()
         // Solve Newton (without changing the sign of the residual)
         M_solver.solve( delta );
 
+        // Changing the sign of the solution (this is important for the broydenJacobianUpdate method)
+        *delta *= -1;
+
         // Update Coupling Variables using the Broyden Method
-        *M_couplingVariables -= *delta;
+        *M_couplingVariables += *delta;
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );

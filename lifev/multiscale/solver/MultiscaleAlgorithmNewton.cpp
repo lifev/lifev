@@ -112,8 +112,11 @@ MultiscaleAlgorithmNewton::subIterate()
         // Solve Newton (without changing the sign of the residual)
         M_solver.solve( delta );
 
+        // Changing the sign of the solution
+        *delta *= -1;
+
         // Update Coupling Variables using the Newton Method
-        *M_couplingVariables -= *delta;
+        *M_couplingVariables += *delta;
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->importCouplingVariables( *M_couplingVariables );
