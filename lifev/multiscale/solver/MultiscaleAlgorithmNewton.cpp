@@ -100,7 +100,7 @@ MultiscaleAlgorithmNewton::subIterate()
     multiscaleVectorPtr_Type delta( new multiscaleVector_Type( *M_couplingResiduals, Unique ) );
     *delta = 0.0;
 
-    for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
+    for ( UInt subIT(1); subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
         // Compute the Jacobian
         assembleJacobianMatrix();
