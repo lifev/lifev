@@ -592,7 +592,14 @@ MultiscaleModelFSI3D::initializeSolution()
         for( UInt i(0) ; i < M_FSIoperator->solidTimeAdvance()->size() ; ++i )
         {
             *M_solidDisplacement = 0.0;
-            vectorPtr_Type tempVector( new vector_Type( *M_solidDisplacement, Unique, Zero ) );
+
+            /* Bugfix by PC 2012-09-24 */
+            UInt offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->offset();
+            vectorPtr_Type tempVector( new vector_Type(*M_FSIoperator->couplingVariableMap(), Unique, Zero) );
+            tempVector->subset( *M_solidDisplacement, M_solidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
+            *tempVector /= M_FSIoperator->solid().rescaleFactor();
+
+            //vectorPtr_Type tempVector( new vector_Type( *M_solidDisplacement, Unique, Zero ) );
             importedSolidDisplacement[i] = tempVector;
         }
         for( UInt i(0) ; i < M_FSIoperator->ALETimeAdvance()->size() ; ++i )
