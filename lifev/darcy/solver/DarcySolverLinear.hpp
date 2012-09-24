@@ -1071,7 +1071,7 @@ computePrimalAndDual ()
                       localSolution,
                       M_hybridField->getFESpace().refFE (),
                       M_hybridField->getFESpace().dof (),
-                      M_primalField->getFESpace().fe().currentLocalId (), 2, 0 );
+                      M_primalField->getFESpace().fe().currentLocalId (), 2 );
 
         // Given the local hybrid variable, computes locally the primal and dual variable.
         localComputePrimalAndDual ( localSolution, elmatMix, elmatReactionTerm, elvecMix );
