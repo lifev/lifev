@@ -325,15 +325,14 @@ extract_vec( const VectorEpetra& V,
              const DOFLocalPattern& fe,
              const DOF& dof,
              const UInt feId,
-             const UInt elvecBlock,
-             const UInt epetraBlock = 0 )
+             const UInt elvecBlock )
 {
     typename VectorElemental::vector_view vec = elvec.block ( elvecBlock );
     const UInt totDof ( dof.numTotalDof() );
 
     for ( UInt i (0) ; i < fe.nbLocalDof() ; ++i )
     {
-        const UInt ig = dof.localToGlobalMap( feId, i ) + epetraBlock * totDof;
+        const UInt ig = dof.localToGlobalMap( feId, i );
         vec ( i ) = V [ ig ];
     }
 }
