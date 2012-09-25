@@ -252,7 +252,7 @@ public:
     //@{
 
     //! Set M_buildOverlappingPartitions
-    void setBuildOverlappingPartitions( bool bop ) { M_buildOverlappingPartitions = bop; }
+    void setPartitionOverlap( UInt const overlap ) { M_partitionOverlap = overlap; }
 
     //@}
 
@@ -397,7 +397,7 @@ private:
     std::vector<Int>                     M_graphVertexLocations;
     graphPtr_Type                        M_elementDomains;
     bool                                 M_serialMode; // how to tell if running serial partition mode
-    bool                                 M_buildOverlappingPartitions;
+    UInt                                 M_partitionOverlap;
 
     //! Store ownership for each entity, subdivided by entity type
     //! 0: elements, 1: facets, 2: ridges, 3: points
@@ -451,7 +451,7 @@ init ()
     M_elementDomains.reset ( new graph_Type );
     M_entityPID.resize( 4 );
     M_serialMode = false;
-    M_buildOverlappingPartitions = false;
+    M_partitionOverlap = 0;
 
     /*
       Sets element parameters (nodes, faces, ridges and number of nodes on each
@@ -1614,7 +1614,7 @@ void MeshPartitioner<MeshType>::execute()
     debugStream(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
 #endif
 
-    if ( M_buildOverlappingPartitions )
+    if( M_partitionOverlap )
     {
         GhostHandler<mesh_Type> gh( M_originalMesh, M_comm );
 //        gh.createNodeElementNeighborsMap();
@@ -1640,7 +1640,7 @@ void MeshPartitioner<MeshType>::execute()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::markEntityOwnership()
 {
-    if( M_buildOverlappingPartitions )
+    if( M_partitionOverlap )
     {
         // mark owned entities by each partition as described in M_entityPID
         //@todo: does not work for offline partitioning!

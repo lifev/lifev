@@ -151,7 +151,10 @@ main( int argc, char** argv )
         const bool verbose( dataFile( "miscellaneous/verbose", 0 ) && isLeader );
 
 #ifdef HAVE_LIFEV_DEBUG
-        std::ofstream debugOut( ( "rm." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string>( comm->MyPID() ) : "s" ) + ".out" ).c_str() );
+        std::ofstream debugOut(
+                    ( "rm." +
+                      ( comm->NumProc() > 1 ? boost::lexical_cast<std::string>( comm->MyPID() ) : "s" ) +
+                      ".out" ).c_str() );
 #else
         std::ofstream debugOut( "/dev/null" );
 #endif
@@ -204,7 +207,7 @@ main( int argc, char** argv )
         boost::shared_ptr< mesh_Type > localMeshR;
         {
             MeshPartitioner< mesh_Type >   meshPartR;
-            meshPartR.setBuildOverlappingPartitions( true );
+            meshPartR.setPartitionOverlap( 1 );
             meshPartR.doPartition( fullMeshPtr, comm );
             localMeshR = meshPartR.meshPartition();
         }
