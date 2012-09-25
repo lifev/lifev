@@ -356,17 +356,18 @@ Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const R
 }
       \endcode
       obtaining a tensor with the non linearity in the position \f$ (1,1) \f$
-      the function \f$ \left[K^{-1}\right]_{1,1} = u^2 + 1 \f$. In the previous
-      example we have supposed that the permeability has not others scalar fields,
-      alternatively given \f$ m \f$ scalar fields instead to have
-      \code
-const Real unkown_n = scalarField(0).eval( iElem, P, time );
-      \endcode
-      the code should be
+      the function \f$ \left[K^{-1}\right]_{1,1} = u^2 + 1 \f$.
+      <br>
+      In the previous
+      example we have supposed that the permeability has not others scalar fields.
+      If the user has set \f$ m \f$ scalar fields prior to calling setInversePermeability, then the code
+      should be
       \code
 const Real unkown_n = scalarField(m).eval( iElem, P, time );
       \endcode
-
+      to access the primal at previous step.
+      @note For an example of the usage see darcy_nonlinear and
+      twophase_impes
       @param invPerm Inverse of the permeability tensor for the problem.
     */
     virtual void setInversePermeability ( const matrixFctPtr_Type& invPerm )
