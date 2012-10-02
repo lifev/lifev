@@ -372,7 +372,7 @@ public:
      */
     void exportSolidAcceleration( vector_Type& solidAcceleration )
     {
-        solidAcceleration = M_solidTimeAdvance->accelerate();
+        solidAcceleration = M_solidTimeAdvance->acceleration();
         solidAcceleration *= M_solid->rescaleFactor();
     }
 

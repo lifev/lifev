@@ -618,7 +618,7 @@ public:
     /*!
      * @param solidAcc vector to be filled with the solid acceleration
      */
-    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->accelerate(); }
+    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->acceleration(); }
 
 
     //! Getter for the right hand side
