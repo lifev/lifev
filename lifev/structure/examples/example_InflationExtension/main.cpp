@@ -218,16 +218,10 @@ static Real bcPressure(const Real& t, const Real&  x, const Real& y, const Real&
   switch (i)
     {
     case 0:
-      // if( t < 15.0 )
-      // 	return ( pressure * std::fabs( ( x / radius ) ) * (1/15.0) ) * t ;
-      // else
-	return  pressure * std::fabs( ( x / radius ) );
+      return  pressure * std::fabs( ( x / radius ) );
       break;
     case 1:
-      // if( t < 15.0 )
-      // 	return ( pressure * std::fabs( ( y / radius ) ) * (1/15.0) ) * t;
-      // else
-	return  pressure * std::fabs( ( y / radius ) );
+      return  pressure * std::fabs( ( y / radius ) );
       break;
     case 2:
       return 0.0;
@@ -321,10 +315,6 @@ Structure::run3d()
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
 
-    //MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
-
-    //MapEpetra fullMap;
-
     std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
 
     timeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( timeAdvanceMethod ) );
@@ -355,26 +345,27 @@ Structure::run3d()
     BCFunctionBase pressure(Private::bcPressure);
     BCFunctionBase pressureNormal(Private::pressureUsingNormal);
 
+
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
     //Condition for Extension
-    BCh->addBC("EdgesIn",      20,  Essential, Component, zero, compz);
+    BCh->addBC("EdgesIn",      60,  Essential, Component, zero, compz);
     //Condition for Inflation
     //BCh->addBC("EdgesIn",      20,  Essential, Full, zero, 3);
 
     //Condition for Extension
     //BCh->addBC("EdgesIn",      40,  Natural, Component, nonZero, compz);
     //Condition for Inflation
-    BCh->addBC("EdgesIn",      40,  Essential, Component, zero, compz);
+    BCh->addBC("EdgesIn",      70,  Essential, Component, zero, compz);
     //BCh->addBC("EdgesIn",      40,  Essential, Full, zero, 3);
 
-    BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compx);
-    BCh->addBC("EdgesIn",      70,  Natural, Full, zero, 3);
-    
-    //BCh->addBC("EdgesIn",      60,  Natural, Full, zero, 3);
-    BCh->addBC("EdgesIn",      60,  Natural, Full, pressure, 3);
-    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compy);
+    BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
+    //BCh->addBC("EdgesIn",      120,  EssentialVertices, Component, zero, compxz);
+    BCh->addBC("EdgesIn",      40,  Natural, Full, zero, 3);
+    BCh->addBC("EdgesIn",      200,  Natural,   Full, pressure, 3);
+    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
+    //BCh->addBC("EdgesIn",      110,  EssentialVertices, Component, zero, compyz);
     //BCh->addBC("EdgesIn",      60,  Natural, Normal, pressureNormal);
     
 
@@ -559,20 +550,20 @@ Structure::run3d()
     //! =============================================================================
     //! Temporal loop
     //! =============================================================================
-    for (Real time = initialTime + dt; time <= T; time += dt)
-    {
-    dataStructure->dataTime()->setTime(time);
+    // for (Real time = initialTime + dt; time <= T; time += dt)
+    // {
+    // dataStructure->dataTime()->setTime(time);
 
     if (verbose)
         {
         std::cout << std::endl;
         std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
-	}
+    	}
 
         //! 6. Updating right-hand side
     *rhs *=0;
-    timeAdvance->updateRHSContribution( dt );
-    *rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
+    // timeAdvance->updateRHSContribution( dt );
+    // *rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
 
     std::cout << "Norm of the rhsNoBC: " << (*rhs).norm2() << std::endl;
     solid.updateRightHandSide( *rhs );
@@ -586,7 +577,8 @@ Structure::run3d()
     *solidVel  = timeAdvance->velocity();
     *solidAcc  = timeAdvance->accelerate();
 
-    exporterSolid->postProcess( time );
+    //    exporterSolid->postProcess( time );
+    exporterSolid->postProcess( 1.0 );
 
     Real normVect;
     normVect =  solid.displacement().norm2();
@@ -596,7 +588,7 @@ Structure::run3d()
     //!--------------------------------------------------------------------------------------------------
 
     MPI_Barrier(MPI_COMM_WORLD);
-    }
+    //    }
 
     exporterSolid->closeFile();
 }
