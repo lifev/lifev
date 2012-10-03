@@ -329,7 +329,6 @@ extract_vec( const VectorEpetra& V,
              const UInt elvecBlock )
 {
     typename VectorElemental::vector_view vec = elvec.block ( elvecBlock );
-    const UInt totDof ( dof.numTotalDof() );
 
     for ( UInt i (0) ; i < fe.nbLocalDof() ; ++i )
     {
