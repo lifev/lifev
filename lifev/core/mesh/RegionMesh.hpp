@@ -2275,9 +2275,9 @@ RegionMesh<GEOSHAPE, MC>::setVolume( element_Type const & v, UInt const pos )
 {
     ASSERT_PRE( pos < volumeList.capacity() , "position requested exceed capacity" <<
                 pos << " " << volumeList.capacity() ) ;
-    volume_Type & thisVolume( volumeList( pos ) );
-    thisVolume.setLocalId( pos );
-    return thisVolume;
+    volumeList( pos ) = v;
+    volumeList( pos ).setLocalId( pos );
+    return volumeList( pos );
 }
 
 template <typename GEOSHAPE, typename MC>
