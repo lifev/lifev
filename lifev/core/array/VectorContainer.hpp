@@ -39,14 +39,8 @@
 #ifndef VectorContainer_H
 #define VectorContainer_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <boost/shared_ptr.hpp>
-
-// Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
 
 namespace LifeV
 {
@@ -61,16 +55,16 @@ namespace LifeV
  *  <b> Type of compatible vectors </b><BR>
  *  This class has been developed in order to work with:
  *  <ol>
- *  	<li> \c VectorEpetra
- *  	<li> \c  boost::numeric::ublas::vector
+ *      <li> \c VectorEpetra
+ *      <li> \c  boost::numeric::ublas::vector
  *  </ol>
  *
  *  <b> Type of compatible containers </b><BR>
  *  This class has been developed in order to work with:
  *  <ol>
- *  	<li> \c std::vector
- *  	<li> \c std::dequee
- *  	<li> \c std::list
+ *      <li> \c std::vector
+ *      <li> \c std::dequee
+ *      <li> \c std::list
  *  </ol>
  *
  *  <b> NOTES </b><BR>

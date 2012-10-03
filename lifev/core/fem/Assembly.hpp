@@ -51,6 +51,8 @@
 #ifndef _ASSEMBLY
 #define _ASSEMBLY
 
+#include <lifev/core/LifeV.hpp>
+
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
@@ -59,7 +61,6 @@
 #include <lifev/core/fem/CurrentFE.hpp>
 #include <lifev/core/fem/DOFLocalPattern.hpp>
 
-#include <vector>
 
 namespace LifeV
 {

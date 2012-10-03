@@ -38,7 +38,6 @@
 #ifndef _MLPRECONDITIONER_HPP_
 #define _MLPRECONDITIONER_HPP_
 
-#include <boost/shared_ptr.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -51,6 +50,8 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 #pragma GCC diagnostic warning "-Wextra"
+
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>

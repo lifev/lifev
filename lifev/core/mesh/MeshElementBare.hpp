@@ -119,13 +119,11 @@
 #ifndef MESHELEMENTBARE_H
 #define MESHELEMENTBARE_H 1
 
-#include<utility>
-#include<vector>
-#include<map>
-#include<algorithm>
-#include<iostream>
+#include <utility>
+#include <algorithm>
 
-#include<lifev/core/mesh/ElementShapes.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/mesh/ElementShapes.hpp>
 
 namespace LifeV
 {

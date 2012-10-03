@@ -39,16 +39,13 @@
 #ifndef ADRASSEMBLER_H
 #define ADRASSEMBLER_H 1
 
-#include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/LifeV.hpp>
+
+#include <lifev/core/util/LifeChrono.hpp>
 
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/AssemblyElemental.hpp>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-
 
 namespace LifeV
 {

@@ -36,16 +36,11 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef STRING_UTILITY_H
 #define STRING_UTILITY_H
 
-# include <cstdio>
-# include <cstdlib>
-# include <cstring>
-# include <iosfwd>
-# include <iostream>
-# include <list>
-# include <map>
-# include <sstream>
-# include <string>
-# include <vector>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iosfwd>
+#include <sstream>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

@@ -43,14 +43,9 @@
 #ifndef _FESPACE_H_
 #define _FESPACE_H_
 
-#include <cmath>
-#include <map>
 #include <iomanip>
 #include <sstream>
 #include <utility>
-
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <lifev/core/LifeV.hpp>
 

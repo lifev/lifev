@@ -40,15 +40,14 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <map>
 #include <stdexcept>
-#include <string>
 
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/util/LifeDebug.hpp>
 #include <lifev/core/util/FactoryTypeInfo.hpp>

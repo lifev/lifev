@@ -36,9 +36,8 @@
 #ifndef _MATRIXEPETRASTRUCTUREDVIEW_HPP_
 #define _MATRIXEPETRASTRUCTUREDVIEW_HPP_
 
-#include <boost/shared_ptr.hpp>
 
-#include <iostream>
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 
