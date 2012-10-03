@@ -1704,6 +1704,12 @@ public:
      */
     void setMaxNumGlobalRidges( UInt const n ){ setMaxNumGlobalRidges(M_geoDim, n);}
 
+    //! Set counter of facets.
+    /**
+     *  @param n Number of facets.
+     */
+    void setNumRidges( UInt const n ) {setNumRidges( M_geoDim, n );}
+
     //! Adds a Ridge.
     /**
      *  Adds a ridge. Id computed automatically.
@@ -2103,6 +2109,9 @@ private:
     ridge_Type & ridge( threeD_Type, UInt const i ) {return edge(i);}
     ridge_Type & ridge( twoD_Type, UInt const i ) {return point(i);}
     ridge_Type & ridge( oneD_Type, UInt const ) {ERROR_MSG("RegionMesh::ridge, No ridges in 1D"); return M_aRidge;}
+
+    //! Set counter of ridges.
+    void setNumRidges( threeD_Type, UInt const n ) { setNumEdges( n ); }
 
     //! Set boundary ridge counter.
     void setNumBoundaryRidges( threeD_Type, UInt const n ) {setNumBEdges( n );}
