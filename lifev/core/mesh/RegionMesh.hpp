@@ -1648,7 +1648,7 @@ public:
      *  @param i index of the mesh facet.
      *  @return reference to the ith mesh facet.
      */
-    facet_Type & facet( UInt const i ) {return facet( M_geoDim, i);};
+    facet_Type & facet( UInt const i ) {return facet( M_geoDim, i);}
 
     //! Set counter of facets.
     /**
