@@ -243,6 +243,8 @@ namespace LifeV
     @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
     @note The initial time is not fix at zero.
     conditions are imposed via BCHandler class.
+    @note Example of useing can be found in darcy_nonlinear and darcy_linear.
+    Coupled with an hyperbolic solver in impes.
     @todo Insert any scientific publications that use this solver.
 */
 template < typename MeshType >
