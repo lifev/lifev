@@ -3199,9 +3199,9 @@ RegionMesh<GEOSHAPE, MC>::boundaryFacet( oneD_Type, const UInt& i )
 // Forward Declarations
 template <typename GEOSHAPE, typename MC>
 void
-RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verbose, UInt ee, bool renumber )
+RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verb, UInt ee, bool renumber )
 {
-    verbose = verbose && ( M_comm.MyPID() == 0 );
+    bool verbose = verb && ( M_comm.MyPID() == 0 );
 
     if(S_geoDimensions != 3)
     {
