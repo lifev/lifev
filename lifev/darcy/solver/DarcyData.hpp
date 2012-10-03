@@ -40,35 +40,49 @@
 #define _DATADARCY_H_ 1
 
 #include <lifev/core/mesh/MeshData.hpp>
+
 #include <lifev/core/fem/TimeData.hpp>
-#include <lifev/core/fem/Assembly.hpp>
 
 // LifeV namespace
 namespace LifeV
 {
-/*!
-  @class DarcyData
 
-  This class contain the basic data for the Darcy solver. In particoular it stores...
-  @todo class not finished!
- */
-template <typename Mesh>
+//! @class DarcyData This class contain the basic data for the Darcy solver.
+/*!
+  In particolar it stores the data as GetPot object, the data for the mesh and the data for the time schemes.
+*/
+template < typename MeshType >
 class DarcyData
 {
 public:
 
-    // Policies
-    //! @name Policies
+    // Policies.
+    //! @name Public policies
     //@{
 
-    typedef GetPot                          Data_Type;
-    typedef boost::shared_ptr< Data_Type >  Data_ptrType;
+    //! Typedef for the mesh template.
+    typedef MeshType mesh_Type;
 
-    typedef TimeData                        Time_Type;
-    typedef boost::shared_ptr< Time_Type >  Time_ptrType;
+    //! Typedef for the GetPot data.
+    typedef GetPot data_Type;
 
-    typedef MeshData                        Mesh_Type;
-    typedef boost::shared_ptr< Mesh_Type >  Mesh_ptrType;
+    //! Shared pointer for the data.
+    typedef boost::shared_ptr < data_Type > dataPtr_Type;
+
+    //! Typedef for the time data.
+    typedef TimeData timeData_Type;
+
+    //! Shared pointer for the time data.
+    typedef boost::shared_ptr < timeData_Type > timeDataPtr_Type;
+
+    //! Typedef for the mesh data.
+    typedef MeshData meshData_Type;
+
+    //! Shared pointer for the mesh data.
+    typedef boost::shared_ptr < meshData_Type > meshDataPtr_Type;
+
+    //! Self typedef.
+    typedef DarcyData < mesh_Type > darcyData_Type;
 
     //@}
 
@@ -76,21 +90,22 @@ public:
     //! @name Constructors
     //@{
 
-    //! Empty Constructor
-    DarcyData();
+    //! Empty Constructor.
+    DarcyData ();
 
+    //! Constructor using a data file.
     /*!
-    Constructor using a data file.
-      @param dataFile GetPot data file for setup the problem
-      @param section the section for the Darcy data
+      @param dataFile GetPot data file for setup the problem.
+      @param section the section for the Darcy data.
     */
-    DarcyData( const GetPot& dataFile, const std::string& section = "darcy" );
+    DarcyData ( const data_Type& dataFile,
+                const std::string& section = "darcy" );
 
+    //! Copy constructor.
     /*!
-    Copy constructor.
-      @param darcyData object to take a copy
+      @param darcyData object to take a copy.
     */
-    DarcyData( const DarcyData &darcyData );
+    DarcyData ( const darcyData_Type &darcyData );
 
     //@}
 
@@ -98,16 +113,19 @@ public:
     //! @name Methods
     //@{
 
-    /*! Overloading of the operator =
-        @param darcyData The DarcyData to be copied.
+    //! Overloading of the operator =.
+    /*!
+       @param darcyData The DarcyData to be copied.
     */
-    DarcyData& operator=( const DarcyData& darcyData );
+    darcyData_Type& operator= ( const darcyData_Type& darcyData );
 
-    /*! External setup
-        @param dataFile The data file with all the data.
-        @param section The global section.
+    //! External setup.
+    /*!
+      @param dataFile The data file with all the data.
+      @param section The global section.
     */
-    void setup( const Data_Type& dataFile, const std::string& section = "darcy"  );
+    void setup ( const data_Type& dataFile,
+                 const std::string& section = "darcy"  );
 
     //@}
 
@@ -115,18 +133,20 @@ public:
     //! @name Set methods
     //@{
 
-    /*! Set data time container
-        @param TimeData Boost shared_ptr to TimeData container
+    //! Set data time container.
+    /*!
+      @param TimeData Boost shared_ptr to TimeData container
     */
-    inline void setTimeData( const Time_ptrType TimeData )
+    void setTimeData ( const timeDataPtr_Type& TimeData )
     {
         M_time = TimeData;
     }
 
-    /*! Set mesh container
-        @param MeshData Boost shared_ptr to meshData container
+    //! Set mesh container.
+    /*!
+      @param MeshData Boost shared_ptr to meshData container
     */
-    inline void setMeshData( const Mesh_ptrType MeshData )
+    void setMeshData ( const meshDataPtr_Type& MeshData )
     {
         M_mesh = MeshData;
     }
@@ -136,35 +156,67 @@ public:
     //@{
 
     //! Get the level of verbosity of the problem.
-    inline UInt verbose( void ) const
+    UInt verbose () const
     {
         return M_verbose;
     }
 
     //! Get the main section of the data file.
-    inline std::string section( void ) const
+    std::string section () const
     {
         return M_section;
     }
 
     //! Get the data file of the problem.
-    inline Data_ptrType dataFile( void ) const
+    /*!
+      @return shared_ptr to data container.
+    */
+    const dataPtr_Type& dataFilePtr () const
     {
         return M_data;
     }
 
-    /*! Get data time container.
-        @return shared_ptr to TimeData container
+    //! Get the data file of the problem.
+    /*!
+      @return shared_ptr to data container.
     */
-    inline Time_ptrType dataTime( void ) const
+    dataPtr_Type& dataFilePtr ()
+    {
+        return M_data;
+    }
+
+    //! Get data time container.
+    /*!
+      @return shared_ptr to TimeData container.
+    */
+    const timeDataPtr_Type& dataTimePtr () const
     {
         return M_time;
     }
 
-    /*! Get mesh container
-       @return shared_ptr to meshData container
+    //! Get data time container.
+    /*!
+       @return shared_ptr to TimeData container.
     */
-    inline Mesh_ptrType meshData( void ) const
+    timeDataPtr_Type& dataTimePtr ()
+    {
+        return M_time;
+    }
+
+    //! Get mesh container
+    /*!
+      @return shared_ptr to meshData container.
+    */
+    const meshDataPtr_Type& meshDataPtr () const
+    {
+        return M_mesh;
+    }
+
+    //! Get mesh container
+    /*!
+      @return shared_ptr to meshData container.
+    */
+    meshDataPtr_Type& meshDataPtr ()
     {
         return M_mesh;
     }
@@ -175,13 +227,13 @@ public:
 private:
 
     //! Data containers for time and mesh
-    Data_ptrType      M_data;
-    Time_ptrType      M_time;
-    Mesh_ptrType      M_mesh;
+    dataPtr_Type M_data;
+    timeDataPtr_Type M_time;
+    meshDataPtr_Type M_mesh;
 
     //! Miscellaneous
-    UInt              M_verbose;
-    std::string       M_section;
+    UInt M_verbose;
+    std::string M_section;
 
 };
 
@@ -189,175 +241,79 @@ private:
 // Constructors
 // ===================================================
 
-template < typename Mesh >
-DarcyData<Mesh>::DarcyData( ):
-        // Data containers
-        M_data          ( ),
-        M_time          ( ),
-        M_mesh          ( ),
+template < typename MeshType >
+DarcyData < MeshType >::
+DarcyData ():
         // Miscellaneous
-        M_verbose       ( static_cast<UInt>(0) ),
-        M_section       ( )
-{
-
-}
+        M_verbose       ( static_cast<UInt>(0) )
+{}
 
 // Copy constructor
-template < typename Mesh >
-DarcyData<Mesh>::DarcyData( const DarcyData &darcyData ):
+template < typename MeshType >
+DarcyData < MeshType >::
+DarcyData ( const darcyData_Type &darcyData ):
         // Data containers
-        M_data                ( darcyData.M_data ),
-        M_time                ( darcyData.M_time ),
-        M_mesh                ( darcyData.M_mesh ),
+        M_data ( darcyData.M_data ),
+        M_time ( darcyData.M_time ),
+        M_mesh ( darcyData.M_mesh ),
         // Miscellaneous
-        M_verbose             ( darcyData.M_verbose ),
-        M_section             ( darcyData.M_section )
-{
-
-}
+        M_verbose ( darcyData.M_verbose ),
+        M_section ( darcyData.M_section )
+{}
 
 // Overloading of the operator =
-template < typename Mesh >
-DarcyData<Mesh>&
-DarcyData<Mesh>::operator=( const DarcyData& darcyData )
+template < typename MeshType >
+DarcyData < MeshType >&
+DarcyData < MeshType >::
+operator= ( const darcyData_Type& darcyData )
 {
     // Avoid auto-copy
     if ( this != &darcyData )
     {
         // Data containers
-        M_data           = darcyData.M_data;
-        M_time           = darcyData.M_time;
-        M_mesh           = darcyData.M_mesh;
+        M_data = darcyData.M_data;
+        M_time = darcyData.M_time;
+        M_mesh = darcyData.M_mesh;
         // Mescellaneous
-        M_verbose       = darcyData.M_verbose;
+        M_verbose = darcyData.M_verbose;
     }
 
     return *this;
-
-}
+} // operator=
 
 
 // External set up method
-template < typename Mesh >
-void DarcyData<Mesh>::setup( const Data_Type& dataFile, const std::string& section )
+template < typename MeshType >
+void
+DarcyData < MeshType >::
+setup ( const data_Type& dataFile, const std::string& section )
 {
     M_section = section;
 
     // If data has not been set
     if ( !M_data.get() )
-        M_data.reset( new Data_Type( dataFile ) );
+    {
+        M_data.reset( new data_Type ( dataFile ) );
+    }
 
     // If data time has not been set
     if ( !M_time.get() )
-        M_time.reset( new Time_Type( dataFile, M_section + "/time_discretization" ) );
+    {
+        M_time.reset( new timeData_Type ( dataFile, M_section + "/time_discretization" ) );
+    }
 
     // If data mesh has not been set
     if ( !M_mesh.get() )
-        M_mesh.reset( new Mesh_Type( dataFile, M_section + "/space_discretization" ) );
-
-    // Miscellaneous
-    M_verbose      = dataFile( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////
-
-template< typename Mesh, typename SolverType = LifeV::SolverAztecOO >
-class inversePermeability
-{
-
-public:
-
-    // Policies.
-    //! @name Policies
-    //@{
-
-    typedef boost::function<Matrix ( const Real&, const Real&,
-                                     const Real&, const Real&,
-                                     const std::vector<Real> & )> permeability_Type;
-
-    typedef typename SolverType::vector_type      vector_Type;
-    typedef boost::shared_ptr<vector_Type>        vectorPtr_Type;
-
-    //@}
-
-    // Constructors and destructor.
-    //! @name Constructors and destructor
-    //@{
-
-    // Copy constructor
-    inversePermeability ( const permeability_Type& invPerm, FESpace<Mesh, MapEpetra>& fESpace ):
-	M_fields              ( std::vector< const vectorPtr_Type* >(0) ),
-	M_inversePermeability ( invPerm ),
-	M_fESpace             ( fESpace )
     {
-    };
-
-    //! Virtual destructor.
-    // virtual ~inversePermeability ();
-
-    //@}
-
-    // Set methods
-    //! @name Set methods
-    //@{
-
-    // Add one field
-    inline void setField ( const vectorPtr_Type & field ) { M_fields.push_back( &field ); };
-
-    inline void setFunction ( const permeability_Type & invPerm ) { M_inversePermeability = invPerm; };
-
-    //@}
-
-    // Get methods
-    //! @name Get methods
-    //@{
-
-    Matrix operator() ( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& iElem );
-
-    //@}
-
-private:
-
-    // Vector of pointers for the dependences of the permeability to an external field.
-    std::vector< const vectorPtr_Type* > M_fields;
-
-    // Inverse permeability function
-    permeability_Type             M_inversePermeability;
-
-    // Finite element space
-    FESpace<Mesh, MapEpetra>&     M_fESpace;
-
-};
-
-template < typename Mesh, typename SolverType >
-Matrix
-inversePermeability < Mesh, SolverType >::
-operator() ( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& iElem )
-{
-    std::vector<Real> values ( M_fields.size(), 0 );
-    VectorElemental value ( M_fESpace.refFE().nbDof(), 1 );
-
-    // Update the value of the current element
-    M_fESpace.fe().update( M_fESpace.mesh()->element( iElem ),
-                           UPDATE_QUAD_NODES | UPDATE_WDET );
-
-    for ( UInt i(static_cast<UInt>(0)); i < values.size(); ++i )
-    {
-        extract_vec ( *( *(M_fields)[i] ),
-                      value,
-                      M_fESpace.refFE(),
-                      M_fESpace.dof(),
-                      M_fESpace.fe().currentLocalId(), 0 );
-
-        values[i] = value[0];
-
+        M_mesh.reset( new meshData_Type ( dataFile, M_section + "/space_discretization" ) );
     }
 
-    return M_inversePermeability ( t, x, y, z, values );
-}
+    // Miscellaneous
+    M_verbose = dataFile( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
+} // setup
 
-}
+} // Namespace LifeV
+
 #endif // _DATADARCY_H_
 
 // -*- mode: c++ -*-

@@ -40,6 +40,7 @@
 #define TESTIMPORTEXPORT_HPP_ 1
 
 // LifeV definition files
+#include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/Displayer.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/fem/TimeData.hpp>
@@ -73,10 +74,16 @@ typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
 typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
 typedef boost::shared_ptr<Epetra_Comm>                commPtr_Type;
 typedef LifeV::Exporter<mesh_Type >::vectorPtr_Type   vectorPtr_Type;
+typedef boost::function< LifeV::Real( LifeV::Real const &,
+                                      LifeV::Real const &,
+                                      LifeV::Real const &,
+                                      LifeV::Real const &,
+                                      LifeV::UInt const & ) > function_Type;
 
 class TestImportExport
 {
 public:
+
     TestImportExport( const commPtr_Type& commPtr );
 
     template<typename ImporterType, typename ExporterType>
@@ -404,9 +411,9 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
 
         // Computation of the interpolation
         if( M_vectorImportedPtr.size() )
-            M_vectorFESpacePtr->interpolate( problem_Type::uexact, *M_vectorInterpolantPtr[0], M_timeData.time() );
+            M_vectorFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::uexact ), *M_vectorInterpolantPtr[0], M_timeData.time() );
         if( M_scalarImportedPtr.size() )
-            M_scalarFESpacePtr->interpolate( problem_Type::pexact, *M_scalarInterpolantPtr[0], M_timeData.time() );
+            M_scalarFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::pexact ), *M_scalarInterpolantPtr[0], M_timeData.time() );
 
         // Exporting the solution
         exporterPtr->postProcess( M_timeData.time() );
@@ -421,9 +428,9 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
     {
         // Computation of the interpolation
         if( M_vectorImportedPtr.size() )
-            M_vectorFESpacePtr->interpolate( problem_Type::uexact, *M_vectorInterpolantPtr[0], M_timeData.time() );
+            M_vectorFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::uexact ), *M_vectorInterpolantPtr[0], M_timeData.time() );
         if( M_scalarImportedPtr.size() )
-            M_scalarFESpacePtr->interpolate( problem_Type::pexact, *M_scalarInterpolantPtr[0], M_timeData.time() );
+            M_scalarFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::pexact ), *M_scalarInterpolantPtr[0], M_timeData.time() );
 
         // Importing the solution
         importerPtr->import( M_timeData.time() );

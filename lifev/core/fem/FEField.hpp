@@ -46,6 +46,7 @@
 
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 
 namespace LifeV
 {
@@ -62,10 +63,10 @@ typedef boost::numeric::ublas::matrix<Real> Matrix;
   <br>
   This class is implemented as a simple container which stores a reference to a finite element space
   and a pointer to a vector. The vector represents the value of the field at each degree of freedom.
-  The type of the value, e.g. scalar, is a template parameter which is specialized in the derived classes 
+  The type of the value, e.g. scalar, is a template parameter which is specialized in the derived classes
   for the case of scalar fields and vector fields.
   <br>
-  The evaluation of the field in a given point is given in the access operator (). The implementation 
+  The evaluation of the field in a given point is given in the access operator (). The implementation
   of this method requires also the id of the geometrical element in the mesh, which is less general but
   more efficient compared to the case where the id of the geometrical element is not given.
 
@@ -93,7 +94,7 @@ public:
     typedef VectorEpetra vector_Type;
     typedef boost::shared_ptr < vector_Type > vectorPtr_Type;
 
-    typedef std::vector < Real > point_Type;
+    typedef Vector3D point_Type;
 
     //@}
 
@@ -165,11 +166,11 @@ public:
       @param point Point where the field is evaluated, vector format.
       @return The template type of the value of the field.
     */
-    virtual return_Type eval ( const UInt& iElem, 
-                               const point_Type& point, 
+    virtual return_Type eval ( const UInt& iElem,
+                               const point_Type& point,
                                const Real& time = 0.) const = 0;
 
-    //@}    
+    //@}
 
     //! @name Set Methods
     //@{
@@ -221,11 +222,17 @@ public:
         this->setVectorPtr ( vector );
     }
 
+    //! Clean the field.
+    void cleanField ()
+    {
+        this->getVector().zero();
+    }
+
     //@}
 
     //! @name Get Methods
     //@{
-    
+
     //! Return the finite element space.
     /*!
       @return Constant FESpace_Type reference of the finite element space.
@@ -233,6 +240,15 @@ public:
     const FESpace_Type& getFESpace () const
     {
         return *M_FESpace;
+    }
+
+    //! Return the pointer to the finite element space.
+    /*!
+      @return Constant FESpacePtr_Type reference of the finite element space.
+    */
+    const FESpacePtr_Type& getFESpacePtr () const
+    {
+        return M_FESpace;
     }
 
     //! Return the finite element space.
@@ -288,7 +304,7 @@ protected:
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author M. Kern <michel.kern@inria.fr>
 
-  This class, derived from FEField, implements the concept of a scalar field associated to a 
+  This class, derived from FEField, implements the concept of a scalar field associated to a
   finite element space.
 */
 template < typename MeshType, typename MapType >
@@ -363,8 +379,8 @@ public:
       @param point Point where the field is evaluated, vector format.
       @return The scalar value of the field.
     */
-    virtual return_Type eval ( const UInt& iElem, 
-                               const point_Type& P, 
+    virtual return_Type eval ( const UInt& iElem,
+                               const point_Type& P,
                                const Real& time = 0. ) const;
 
     //!}
@@ -372,7 +388,7 @@ public:
 };
 
 template < typename MeshType, typename MapType >
-inline Real 
+inline Real
 FEScalarField < MeshType, MapType >::
 eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
 {
@@ -384,9 +400,9 @@ eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
 //! FEVectorField - This class gives an abstract implementation of a finite element vector field.
 /*!
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @author M. Kern <michel.kern@inria.fr> 
+  @author M. Kern <michel.kern@inria.fr>
 
-  This class, derived from FEField, implements the concept of a vector field associated to a 
+  This class, derived from FEField, implements the concept of a vector field associated to a
   finite element space.
 */
 template < typename MeshType, typename MapType >

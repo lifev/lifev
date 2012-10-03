@@ -53,10 +53,10 @@
 #include <lifev/core/filter/ExporterEnsight.hpp>
 
 /*!
- @class impes
- @brief LifeV IMPES test case
+    @class twophase_impes
+    @brief LifeV IMPES test case
 
- @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
  */
 class impes
 //     :
