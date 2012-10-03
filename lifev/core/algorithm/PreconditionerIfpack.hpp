@@ -181,9 +181,6 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Return true if the preconditioner is set
-    bool isPreconditionerSet() const;
-
     //! Return An estimation of the condition number of the preconditioner
     Real condest ();
 

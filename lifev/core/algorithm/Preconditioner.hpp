@@ -209,9 +209,6 @@ public:
     //! Return true if the preconditioner has been created
     const bool& preconditionerCreated();
 
-    //! Return true if the preconditioner is set
-    virtual bool isPreconditionerSet() const = 0;
-
     //! Return a raw pointer on the preconditioner
     virtual prec_raw_type* preconditioner() = 0;
 
