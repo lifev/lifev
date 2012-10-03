@@ -1518,7 +1518,7 @@ void MeshPartitioner<MeshType>::finalSetup()
         (*M_meshPartitions)[i]->setMaxNumGlobalFacets  (M_originalMesh->numFacets());
 
         (*M_meshPartitions)[i]->setMaxNumGlobalElements(M_originalMesh->numElements());
-        (*M_meshPartitions)[i]->setnumBoundaryFacets    (M_nBoundaryFacets[i]);
+        (*M_meshPartitions)[i]->setNumBoundaryFacets    (M_nBoundaryFacets[i]);
 
         (*M_meshPartitions)[i]->setNumBPoints   (M_nBoundaryPoints[i]);
         (*M_meshPartitions)[i]->setNumBoundaryRidges    (M_nBoundaryRidges[i]);
