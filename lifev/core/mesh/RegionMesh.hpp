@@ -1660,7 +1660,7 @@ public:
     /**
      *  @param n Number of boundary facets.
      */
-    void setnumBoundaryFacets( UInt const n ) {setnumBoundaryFacets( M_geoDim, n ) ;}
+    void setNumBoundaryFacets( UInt const n ) {setNumBoundaryFacets( M_geoDim, n ) ;}
 
     //! Is facet whose id is given on boundary?
     /**
@@ -2060,9 +2060,9 @@ private:
     void setNumFacets( oneD_Type, UInt const n ) {setNumVertices( n );}
 
     //! Set counter of boundary facets.
-    void setnumBoundaryFacets( threeD_Type, UInt const n ) {setNumBFaces( n ) ;}
-    void setnumBoundaryFacets( twoD_Type, UInt const n ) {setNumBEdges( n ) ;}
-    void setnumBoundaryFacets( oneD_Type, UInt const n ) {setNumBVertices( n ) ;}
+    void setNumBoundaryFacets( threeD_Type, UInt const n ) {setNumBFaces( n ) ;}
+    void setNumBoundaryFacets( twoD_Type, UInt const n ) {setNumBEdges( n ) ;}
+    void setNumBoundaryFacets( oneD_Type, UInt const n ) {setNumBVertices( n ) ;}
 
     //! Is facet whose id is given on boundary?
     bool isBoundaryFacet( threeD_Type, UInt const & id ) const { return isBoundaryFace( id );}
