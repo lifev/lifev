@@ -50,37 +50,38 @@ namespace LifeV
  * a regionmesh
  * All SimpleArray have the first dimension the "shortest" one
  */
-template <typename GeoShape>
-struct RegionMeshBare{
+template <typename GeoShapeType>
+struct BareMesh
+{
     UInt nDimensions;
     ID regionMarkerID;
     ReferenceShapes refShape;
     ReferenceShapes bRefShape;
     UInt numBoundaryPoints;
     ArraySimple<Real> points;
-    std::vector<ID> pointsMarkers;
-    ArraySimple<UInt> edges;
-    std::vector<ID> edgesMarkers;
-    UInt numBoundaryFaces;
-    ArraySimple<UInt> faces;
-    std::vector<ID> facesMarkers;
+    std::vector<ID> pointMarkers;
+    ArraySimple<UInt> ridges;
+    std::vector<ID> ridgeMarkers;
+    UInt numBoundaryFacets;
+    ArraySimple<UInt> facets;
+    std::vector<ID> facetMarkers;
     ArraySimple<UInt> elements;
-    std::vector<ID> elementsMarkers;
+    std::vector<ID> elementMarkers;
 
     void clear();
 };
 
-template <typename GeoShape>
-void RegionMeshBare<GeoShape>::clear()
+template <typename GeoShapeType>
+void BareMesh<GeoShapeType>::clear()
 {
     clearVector ( points );
-    clearVector ( pointsMarkers );
-    clearVector ( edges );
-    clearVector ( edgesMarkers );
-    clearVector ( faces );
-    clearVector ( facesMarkers );
+    clearVector ( pointMarkers );
+    clearVector ( ridges );
+    clearVector ( ridgeMarkers );
+    clearVector ( facets );
+    clearVector ( facetMarkers );
     clearVector ( elements );
-    clearVector ( elementsMarkers );
+    clearVector ( elementMarkers );
 }
 
 }
