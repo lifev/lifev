@@ -186,7 +186,7 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
 
     // About edges:
     mesh.setNumFacets         ( edgesNumber );
-    mesh.setnumBoundaryFacets ( boundaryEdgesNumber );
+    mesh.setNumBoundaryFacets ( boundaryEdgesNumber );
     mesh.setMaxNumFacets      ( edgesNumber );
     mesh.setMaxNumGlobalFacets( edgesNumber );
 
