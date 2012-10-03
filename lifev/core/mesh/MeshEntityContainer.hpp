@@ -442,7 +442,7 @@ public:
      */
     template<typename Policy>
     UInt countElementsWithMarkerID( const markerID_Type & markerID,
-                                    const Policy & policy = &std::equal_to<markerID_Type>() ) const;
+                                    const Policy & policy = std::equal_to<markerID_Type>() ) const;
     //@}
 
     /** @name Changers
