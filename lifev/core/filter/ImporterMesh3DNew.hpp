@@ -52,7 +52,7 @@ namespace
 
 // local structure to store a bare info on a face
 template <UInt n>
-struct FaceStore
+struct FacetStore
 {
     ID points[ n ];
     markerID_Type bc;
@@ -73,36 +73,36 @@ struct FaceStore
 */
 template <typename GeoShapeType, typename MCType>
 bool
-convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
+convertBareMesh ( BareMesh<GeoShapeType> & bareMesh,
                   RegionMesh<GeoShapeType, MCType>&  mesh,
                   bool                       verbose = false,
                   InternalEntitySelector     iSelect = InternalEntitySelector() )
 {
     typedef typename RegionMesh<GeoShapeType, MCType>::point_Type  point_Type;
-    typedef typename RegionMesh<GeoShapeType, MCType>::edge_Type   edge_Type;
-    typedef typename RegionMesh<GeoShapeType, MCType>::face_Type   face_Type;
-    typedef typename RegionMesh<GeoShapeType, MCType>::volume_Type volume_Type;
-    typedef std::vector<FaceStore<face_Type::S_numPoints> > faceStore_Type;
+    typedef typename RegionMesh<GeoShapeType, MCType>::ridge_Type   ridge_Type;
+    typedef typename RegionMesh<GeoShapeType, MCType>::facet_Type   facet_Type;
+    typedef typename RegionMesh<GeoShapeType, MCType>::element_Type element_Type;
+    typedef std::vector<FacetStore<facet_Type::S_numPoints> > facetStore_Type;
 
-    std::vector<UInt> points( volume_Type::S_numVertices );
+    std::vector<UInt> points( element_Type::S_numVertices );
 
     UInt done = 0;
     UInt numberVertices         = bareMesh.points.numberOfColumns();
     UInt numberBoundaryVertices = bareMesh.numBoundaryPoints;
     UInt numberPoints           = bareMesh.points.numberOfColumns();
     UInt numberBoundaryPoints   = bareMesh.numBoundaryPoints;
-    UInt numberStoredEdges      = bareMesh.edges.numberOfColumns();
-    UInt numberBoundaryEdges    = 0;
-    UInt numberStoredFaces      = bareMesh.faces.numberOfColumns();
-    UInt numberBoundaryFaces    = bareMesh.numBoundaryFaces;
+    UInt numberStoredRidges     = bareMesh.ridges.numberOfColumns();
+    UInt numberBoundaryRidges   = 0;
+    UInt numberStoredFacets     = bareMesh.facets.numberOfColumns();
+    UInt numberBoundaryFacets   = bareMesh.numBoundaryFacets;
     UInt numberElements         = bareMesh.elements.numberOfColumns();
 
     // Euler formulas
-    UInt numberFaces = 2 * numberElements + ( numberBoundaryFaces / 2 );
-    UInt numberEdges = ( 3 * numberBoundaryFaces - 2 * numberBoundaryVertices ) / 4 + numberVertices + numberElements;
+    UInt numberFacets = 2 * numberElements + ( numberBoundaryFacets / 2 );
+    UInt numberRidges = ( 3 * numberBoundaryFacets - 2 * numberBoundaryVertices ) / 4 + numberVertices + numberElements;
 
-    faceStore_Type faceHelp;
-    typename faceStore_Type::iterator faceHelpIterator;
+    facetStore_Type facetHelp;
+    typename facetStore_Type::iterator facetHelpIterator;
 
     std::stringstream discardedLog;
     std::ostream& oStr = verbose ? std::cout : discardedLog;
@@ -128,11 +128,11 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
 
     oStr << "Number of Vertices        = "  << std::setw( 10 ) << numberVertices         << std::endl
          << "Number of BVertices       = "  << std::setw( 10 ) << numberBoundaryVertices << std::endl
-         << "Number of Faces           = "  << std::setw( 10 ) << numberFaces            << std::endl
-         << "Number of Boundary Faces  = "  << std::setw( 10 ) << numberBoundaryFaces    << std::endl
-         << "Number of Stored Faces    = "  << std::setw( 10 ) << numberStoredFaces      << std::endl
-         << "Number of Edges           = "  << std::setw( 10 ) << numberEdges            << std::endl
-         << "Number of Boundary Edges  = "  << std::setw( 10 ) << numberBoundaryEdges    << std::endl
+         << "Number of Faces           = "  << std::setw( 10 ) << numberFacets           << std::endl
+         << "Number of Boundary Faces  = "  << std::setw( 10 ) << numberBoundaryFacets   << std::endl
+         << "Number of Stored Faces    = "  << std::setw( 10 ) << numberStoredFacets     << std::endl
+         << "Number of Edges           = "  << std::setw( 10 ) << numberRidges           << std::endl
+         << "Number of Boundary Edges  = "  << std::setw( 10 ) << numberBoundaryRidges   << std::endl
          << "Number of Points          = "  << std::setw( 10 ) << numberPoints           << std::endl
          << "Number of Boundary Points = "  << std::setw( 10 ) << numberBoundaryPoints   << std::endl
          << "Number of Volumes         = "  << std::setw( 10 ) << numberElements         << std::endl;
@@ -140,36 +140,36 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
     // Set all basic data structure
 
     // I store all Points
-    mesh.setMaxNumPoints       ( numberPoints, true );
-    mesh.setMaxNumGlobalPoints ( numberPoints );
-    mesh.setNumBPoints         ( numberBoundaryPoints );
-    mesh.setNumVertices        ( numberVertices );
-    mesh.setNumGlobalVertices  ( numberVertices );
-    mesh.setNumBVertices       ( numberBoundaryVertices );
+    mesh.setMaxNumPoints        ( numberPoints, true );
+    mesh.setMaxNumGlobalPoints  ( numberPoints );
+    mesh.setNumBPoints          ( numberBoundaryPoints );
+    mesh.setNumVertices         ( numberVertices );
+    mesh.setNumGlobalVertices   ( numberVertices );
+    mesh.setNumBVertices        ( numberBoundaryVertices );
     // Only Boundary Edges (in a next version I will allow for different choices)
-    mesh.setMaxNumEdges        ( numberBoundaryEdges );
-    mesh.setMaxNumGlobalEdges  ( numberEdges );
-    mesh.setNumEdges           ( numberEdges ); // Here the REAL number of edges (all of them)
-    mesh.setNumBEdges          ( numberBoundaryEdges );
+    mesh.setMaxNumRidges        ( numberBoundaryRidges );
+    mesh.setMaxNumGlobalRidges  ( numberRidges );
+    mesh.setNumRidges           ( numberRidges ); // Here the REAL number of edges (all of them)
+    mesh.setNumBoundaryRidges   ( numberBoundaryRidges );
     // Only Boundary Faces
-    mesh.setMaxNumFaces        ( numberStoredFaces );
-    mesh.setMaxNumGlobalFaces  ( numberBoundaryFaces );
-    mesh.setNumFaces           ( numberFaces ); // Here the REAL number of faces (all of them)
-    mesh.setNumBFaces          ( numberBoundaryFaces );
+    mesh.setMaxNumFacets        ( numberStoredFacets );
+    mesh.setMaxNumGlobalFacets  ( numberBoundaryFacets );
+    mesh.setNumFacets           ( numberFacets ); // Here the REAL number of faces (all of them)
+    mesh.setNumBoundaryFacets   ( numberBoundaryFacets );
 
-    mesh.setMaxNumVolumes      ( numberElements, true );
-    mesh.setMaxNumGlobalVolumes( numberElements );
+    mesh.setMaxNumElements      ( numberElements, true );
+    mesh.setMaxNumGlobalElements( numberElements );
 
-    mesh.setMarkerID           ( bareMesh.regionMarkerID );
+    mesh.setMarkerID            ( bareMesh.regionMarkerID );
 
     // To account for internal faces
-    if ( numberStoredFaces > numberBoundaryFaces )
+    if ( numberStoredFacets > numberBoundaryFacets )
     {
-        faceHelp.resize( numberStoredFaces - numberBoundaryFaces );
-        faceHelpIterator = faceHelp.begin();
+        facetHelp.resize( numberStoredFacets - numberBoundaryFacets );
+        facetHelpIterator = facetHelp.begin();
 
         oStr << "WARNING: The mesh file (apparently) contains "
-             << numberStoredFaces - numberBoundaryFaces << " internal faces" << std::endl;
+             << numberStoredFacets - numberBoundaryFacets << " internal faces" << std::endl;
     }
 
     // reading vertices
@@ -179,7 +179,7 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
         Real const & x = bareMesh.points( 0, i );
         Real const & y = bareMesh.points( 1, i );
         Real const & z = bareMesh.points( 2, i );
-        markerID_Type ibc = bareMesh.pointsMarkers[ i ];
+        markerID_Type ibc = bareMesh.pointMarkers[ i ];
 
         bool isOnBoundary = !iSelect( ibc );
         if ( isOnBoundary )
@@ -208,19 +208,19 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
     oStr << "Reading boundary faces " << std::endl;
 
     // reading boundary faces
-    for ( UInt i = 0; i < numberStoredFaces; i++ )
+    for ( UInt i = 0; i < numberStoredFacets; i++ )
     {
-        for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
+        for ( UInt j = 0; j < facet_Type::S_numPoints; j++ )
         {
-            points[ j ] = bareMesh.faces( j, i );
+            points[ j ] = bareMesh.facets( j, i );
         }
-        markerID_Type ibc = bareMesh.facesMarkers[ i ];
+        markerID_Type ibc = bareMesh.facetMarkers[ i ];
 
         bool isOnBoundary = !iSelect( ibc );
         if ( isOnBoundary )
         {
-            face_Type* pointerFace = &( mesh.addFace( isOnBoundary ) ); // only boundary faces
-            for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
+            facet_Type* pointerFace = &( mesh.addFacet( isOnBoundary ) ); // only boundary faces
+            for ( UInt j = 0; j < facet_Type::S_numPoints; j++ )
             {
                 pointerFace->setPoint( j, mesh.point( points[ j ] ) );
             }
@@ -229,30 +229,30 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
         }
         else // additional faces
         {
-            for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
+            for ( UInt j = 0; j < facet_Type::S_numPoints; j++ )
             {
-                faceHelpIterator->points[ j ] = points[ j ];
+                facetHelpIterator->points[ j ] = points[ j ];
             }
-            faceHelpIterator->bc = ibc;
-            ++faceHelpIterator;
+            facetHelpIterator->bc = ibc;
+            ++facetHelpIterator;
         }
     }
 
-    for ( faceHelpIterator = faceHelp.begin();
-          faceHelpIterator != faceHelp.end(); ++faceHelpIterator )
+    for ( facetHelpIterator = facetHelp.begin();
+          facetHelpIterator != facetHelp.end(); ++facetHelpIterator )
     {
-        for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
+        for ( UInt j = 0; j < facet_Type::S_numPoints; j++ )
         {
-            points[ j ]  = faceHelpIterator->points[ j ];
+            points[ j ]  = facetHelpIterator->points[ j ];
         }
-        markerID_Type ibc = faceHelpIterator->bc;
+        markerID_Type ibc = facetHelpIterator->bc;
 
-        face_Type* pointerFace = &( mesh.addFace( false ) ); // INTERNAL FACE
-        pointerFace->setId( mesh.faceList.size() - 1 );
-        pointerFace->setMarkerID( ibc );
-        for ( UInt j = 0; j < face_Type::S_numPoints; j++ )
+        facet_Type* FacetP = &( mesh.addFacet( false ) ); // INTERNAL FACET
+        FacetP->setId( mesh.faceList.size() - 1 );
+        FacetP->setMarkerID( ibc );
+        for ( UInt j = 0; j < facet_Type::S_numPoints; j++ )
         {
-            pointerFace->setPoint( j, mesh.point( points[ j ] ) ); // set face conn.
+            FacetP->setPoint( j, mesh.point( points[ j ] ) ); // set face conn.
         }
     }
 
@@ -262,16 +262,16 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
 
     oStr << "Reading boundary edges " << std::endl;
 
-    for ( UInt i = 0; i < numberStoredEdges; i++ )
+    for ( UInt i = 0; i < numberStoredRidges; i++ )
     {
-        for ( UInt j = 0; j < edge_Type::S_numPoints; j++ )
-            points[ j ] = bareMesh.edges( j, i );
-        markerID_Type ibc = bareMesh.edgesMarkers[ i ];
-        edge_Type* pointerEdge = &mesh.addEdge( true ); // Only boundary edges.
-        pointerEdge->setId( i );
-        pointerEdge->setMarkerID( markerID_Type( ibc ) );
-        for ( UInt j = 0; j < edge_Type::S_numPoints; j++ )
-            pointerEdge->setPoint( j, mesh.point( points[ j ] ) ); // set edge conn.
+        for ( UInt j = 0; j < ridge_Type::S_numPoints; j++ )
+            points[ j ] = bareMesh.ridges( j, i );
+        markerID_Type ibc = bareMesh.ridgeMarkers[ i ];
+        ridge_Type* RidgeP = &mesh.addRidge( true ); // Only boundary edges.
+        RidgeP->setId( i );
+        RidgeP->setMarkerID( markerID_Type( ibc ) );
+        for ( UInt j = 0; j < ridge_Type::S_numPoints; j++ )
+            RidgeP->setPoint( j, mesh.point( points[ j ] ) ); // set edge conn.
     }
     oStr << "Boundary edges read " << std::endl;
     done++;
@@ -280,17 +280,17 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
 
     for ( UInt i = 0; i < numberElements; i++ )
     {
-        for ( UInt j = 0; j < volume_Type::S_numPoints; j++ )
+        for ( UInt j = 0; j < element_Type::S_numPoints; j++ )
             points[ j ] = bareMesh.elements( j, i );
-        markerID_Type ibc = bareMesh.elementsMarkers[ i ];
+        markerID_Type ibc = bareMesh.elementMarkers[ i ];
 
-        volume_Type* pointerVolume = &mesh.addVolume();
-        pointerVolume->setId( i );
-        for ( UInt j = 0; j < volume_Type::S_numPoints; j++ )
-            pointerVolume->setPoint( j, mesh.point( points[ j ] ) );
-        pointerVolume->setMarkerID( ibc );
+        element_Type* ElementP = &mesh.addElement();
+        ElementP->setId( i );
+        for ( UInt j = 0; j < element_Type::S_numPoints; j++ )
+            ElementP->setPoint( j, mesh.point( points[ j ] ) );
+        ElementP->setMarkerID( ibc );
     }
-    oStr << "size of the volume storage is " << sizeof( volume_Type ) * numberElements / 1024. / 1024.
+    oStr << "size of the volume storage is " << sizeof( element_Type ) * numberElements / 1024. / 1024.
          << " MB" << std::endl;
     oStr << numberElements << " Volume elements read" << std::endl;
     done++;
@@ -337,7 +337,7 @@ convertBareMesh ( RegionMeshBare<GeoShapeType> & bareMesh,
 */
 template <typename GeoShape>
 bool
-readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
+readINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
                    std::string const &        fileName,
                    markerID_Type              regionFlag,
                    bool                       verbose = false,
@@ -351,12 +351,11 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
     ID buffer;
 
     UInt done = 0;
-    UInt numberVertices( 0 ), numberBoundaryVertices( 0 ),
-         numberFaces   ( 0 ), numberBoundaryFaces   ( 0 ),
-         numberPoints  ( 0 ), numberBoundaryPoints  ( 0 ),
-         numberEdges   ( 0 ), numberBoundaryEdges   ( 0 );
-    UInt numberVolumes ( 0 );
-    UInt numberStoredFaces( 0 );
+    UInt numberPoints, numberBoundaryPoints;
+    UInt numberVertices, numberBoundaryVertices;
+    UInt numberEdges, numberBoundaryEdges;
+    UInt numberBoundaryFaces, numberStoredFaces;
+    UInt numberVolumes;
 
     std::stringstream discardedLog;
 
@@ -450,19 +449,19 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
     }
 
     // Set all basic data structure
-    bareMesh.numBoundaryPoints = numberBoundaryVertices;
-    bareMesh.points.reshape   ( 3, numberPoints );
-    bareMesh.pointsMarkers.resize ( numberPoints );
+    bareMesh.numBoundaryPoints = numberBoundaryPoints;
+    bareMesh.points.reshape( 3, numberPoints );
+    bareMesh.pointMarkers.resize( numberPoints );
 
-    bareMesh.edges.reshape    ( GeoShape::GeoBShape::GeoBShape::S_numPoints, numberBoundaryEdges );
-    bareMesh.edgesMarkers.resize ( numberBoundaryEdges );
+    bareMesh.ridges.reshape    ( GeoShape::GeoBShape::GeoBShape::S_numPoints, numberBoundaryEdges );
+    bareMesh.ridgeMarkers.resize( numberBoundaryEdges );
 
-    bareMesh.numBoundaryFaces = numberBoundaryFaces;
-    bareMesh.faces.reshape    ( GeoShape::GeoBShape::S_numPoints, numberStoredFaces );
-    bareMesh.facesMarkers.resize ( numberStoredFaces );
+    bareMesh.numBoundaryFacets = numberBoundaryFaces;
+    bareMesh.facets.reshape( GeoShape::GeoBShape::S_numPoints, numberStoredFaces );
+    bareMesh.facetMarkers.resize( numberStoredFaces );
 
-    bareMesh.elements.reshape ( GeoShape::S_numPoints, numberVolumes );
-    bareMesh.elementsMarkers.resize ( numberVolumes );
+    bareMesh.elements.reshape( GeoShape::S_numPoints, numberVolumes );
+    bareMesh.elementMarkers.resize( numberVolumes );
 
     bareMesh.regionMarkerID = regionFlag;
 
@@ -494,7 +493,7 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
                 bareMesh.points( 0, i ) = x;
                 bareMesh.points( 1, i ) = y;
                 bareMesh.points( 2, i ) = z;
-                bareMesh.pointsMarkers[ i ] = ibc;
+                bareMesh.pointMarkers[ i ] = ibc;
             }
             done++;
 
@@ -514,10 +513,10 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
                 for( UInt k = 0; k < GeoShape::GeoBShape::S_numPoints; k++ )
                 {
                     myStream >> buffer;
-                    bareMesh.faces( k, i ) = buffer - idOffset;
+                    bareMesh.facets( k, i ) = buffer - idOffset;
                 }
                 myStream >> ibc;
-                bareMesh.facesMarkers[ i ] = ibc;
+                bareMesh.facetMarkers[ i ] = ibc;
             }
 
             oStr << "Boundary faces read " << std::endl;
@@ -534,10 +533,10 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
                 for( UInt k = 0; k < GeoShape::GeoBShape::GeoBShape::S_numPoints; k++ )
                 {
                     myStream >> buffer;
-                    bareMesh.edges( k, i ) = buffer - idOffset;
+                    bareMesh.ridges( k, i ) = buffer - idOffset;
                 }
                 myStream >> ibc;
-                bareMesh.edgesMarkers[ i ] = ibc;
+                bareMesh.ridgeMarkers[ i ] = ibc;
             }
             oStr << "Boundary edges read " << std::endl;
             done++;
@@ -557,7 +556,7 @@ readINRIAMeshFile( RegionMeshBare<GeoShape> & bareMesh,
                     bareMesh.elements( k, i ) = buffer - idOffset;
                 }
                 myStream >> ibc;
-                bareMesh.elementsMarkers[ i ] = ibc;
+                bareMesh.elementMarkers[ i ] = ibc;
                 count++;
             }
             oStr << count << " Volume elements read" << std::endl;
