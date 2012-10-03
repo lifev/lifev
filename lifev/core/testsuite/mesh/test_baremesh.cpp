@@ -111,7 +111,7 @@ int main(int argc, char** argv)
       abort();
     }
 
-    typedef RegionMeshBare<LinearTetra> bareMesh_Type;
+    typedef BareMesh<LinearTetra> bareMesh_Type;
     typedef RegionMesh<LinearTetra>     mesh_Type;
 
     ID m=1;
