@@ -164,6 +164,12 @@ public:
     virtual void setDataFromGetPot ( const GetPot& dataFile,
                                      const std::string& section ) = 0;
 
+    //! Method to setup the solver using Teuchos::ParameterList
+    /*!
+        @param list Teuchos::ParameterList object
+     */
+    virtual void setParameters( Teuchos::ParameterList& list ) = 0;
+
     /*!
         copies the shared_ptr to the communicator in the member M_comm and builds a new instance
     */

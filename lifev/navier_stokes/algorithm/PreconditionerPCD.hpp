@@ -39,6 +39,16 @@
 
 #include <boost/shared_ptr.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Teuchos_ParameterList.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
@@ -110,13 +120,7 @@ public:
     void createParametersList( list_Type&         list,
                                const GetPot&      dataFile,
                                const std::string& section,
-                               const std::string& subSection );
-
-    static void createPCDList( list_Type&         list,
-                               const GetPot&      dataFile,
-                               const std::string& section,
-                               const std::string& subSection = "PCD",
-                               const bool& verbose = true );
+                               const std::string& subsection = "PCD" );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();
@@ -151,6 +155,12 @@ public:
      */
     void setDataFromGetPot( const GetPot&      dataFile,
                             const std::string& section );
+
+    //! Method to setup the solver using Teuchos::ParameterList
+    /*!
+        @param list Teuchos::ParameterList object
+     */
+    virtual void setParameters( Teuchos::ParameterList& list );
 
     //! Setter for the FESpace
     /*!
@@ -225,16 +235,16 @@ protected:
     // todo: Remove the member dataFile (bad programmation)
     GetPot      M_dataFile;
     BCHandlerPtr_Type M_bcHandlerPtr;
-    string      M_fluidPrec;
-    string      M_fluidPrecDataSection;
-    string      M_pressureLaplacianPrec;
-    string      M_pressureLaplacianPrecDataSection;
-    string      M_pressureMassPrec;
-    string      M_pressureMassPrecDataSection;
+    std::string M_fluidPrec;
+    std::string M_fluidPrecDataSection;
+    std::string M_pressureLaplacianPrec;
+    std::string M_pressureLaplacianPrecDataSection;
+    std::string M_pressureMassPrec;
+    std::string M_pressureMassPrecDataSection;
 
-    string      M_pressureBoundaryConditions;
-    string      M_pressureLaplacianOperator;
-    string      M_pressureMassOperator;
+    std::string M_pressureBoundaryConditions;
+    std::string M_pressureLaplacianOperator;
+    std::string M_pressureMassOperator;
     bool        M_setApBoundaryConditions;
     bool        M_setFpBoundaryConditions;
     bool        M_setMpBoundaryConditions;

@@ -67,18 +67,10 @@ void
 PreconditionerYosida::createParametersList( list_Type&         list,
                                             const GetPot&      dataFile,
                                             const std::string& section,
-                                            const std::string& subSection )
+                                            const std::string& subsection )
 {
-    createYosidaList( list, dataFile, section, subSection,  M_comm->MyPID() == 0 );
-}
+    bool verbose( M_comm->MyPID() == 0 );
 
-void
-PreconditionerYosida::createYosidaList( list_Type&         list,
-                                        const GetPot&      dataFile,
-                                        const std::string& section,
-                                        const std::string& subsection,
-                                        const bool&        verbose )
-{
     bool displayList = dataFile( ( section + "/displayList" ).data(), false);
 
     std::string precType = dataFile( ( section + "/prectype" ).data(), "Yosida" );
@@ -96,10 +88,10 @@ PreconditionerYosida::createYosidaList( list_Type&         list,
 
     if ( displayList && verbose )
     {
-    	std::cout << "Yosida parameters list:" << std::endl;
-    	std::cout << "-----------------------------" << std::endl;
-    	list.print( std::cout );
-    	std::cout << "-----------------------------" << std::endl;
+        std::cout << "Yosida parameters list:" << std::endl;
+        std::cout << "-----------------------------" << std::endl;
+        list.print( std::cout );
+        std::cout << "-----------------------------" << std::endl;
     }
 }
 
@@ -344,13 +336,20 @@ PreconditionerYosida::setDataFromGetPot( const GetPot& dataFile,
                                          const std::string& section )
 {
     M_dataFile   = dataFile;
-    createYosidaList( M_list, dataFile, section, "Yosida", M_comm->MyPID() == 0 );
+    this->createParametersList( M_list, dataFile, section, "Yosida" );
+    this->setParameters( M_list );
+}
 
-    M_fluidPrec        = this->M_list.get( "subprecs: fluid prec", "ML" );
-    M_fluidDataSection = this->M_list.get( "subprecs: fluid prec data section", "" );
+void
+PreconditionerYosida::setParameters( Teuchos::ParameterList& list )
+{
+    M_precType         = list.get( "prectype", "Yosida" );
 
-    M_schurPrec        = this->M_list.get( "subprecs: Schur prec", "ML" );
-    M_schurDataSection = this->M_list.get( "subprecs: Schur prec data section", "" );
+    M_fluidPrec        = list.get( "subprecs: fluid prec", "ML" );
+    M_fluidDataSection = list.get( "subprecs: fluid prec data section", "" );
+
+    M_schurPrec        = list.get( "subprecs: Schur prec", "ML" );
+    M_schurDataSection = list.get( "subprecs: Schur prec data section", "" );
 }
 
 void

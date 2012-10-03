@@ -39,6 +39,16 @@
 
 #include <boost/shared_ptr.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Teuchos_ParameterList.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
@@ -108,13 +118,7 @@ public:
     void createParametersList( list_Type&         list,
                                const GetPot&      dataFile,
                                const std::string& section,
-                               const std::string& subSection );
-
-    static void createSIMPLEList( list_Type&         list,
-                                  const GetPot&      dataFile,
-                                  const std::string& section,
-                                  const std::string& subSection = "SIMPLE",
-                                  const bool& verbose = true );
+                               const std::string& subsection = "SIMPLE" );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();
@@ -141,6 +145,12 @@ public:
      */
     void setDataFromGetPot ( const GetPot&      dataFile,
                              const std::string& section );
+
+    //! Method to setup the solver using Teuchos::ParameterList
+    /*!
+        @param list Teuchos::ParameterList object
+     */
+    virtual void setParameters( Teuchos::ParameterList& list );
 
     //! Setter for the FESpace
     /*!

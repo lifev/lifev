@@ -49,6 +49,7 @@
 
 // Teuchos includes
 #include <Teuchos_RCP.hpp>
+#include <Teuchos_ParameterList.hpp>
 
 // Teko-Package includes
 #include <Teko_Utilities.hpp>
@@ -129,19 +130,19 @@ public:
     void setDataFromGetPot ( const GetPot&      dataFile,
                              const std::string& section );
 
+    //! Method to setup the solver using Teuchos::ParameterList
+    /*!
+        @param list Teuchos::ParameterList object
+     */
+    virtual void setParameters( Teuchos::ParameterList& list );
+
     void setFESpace( FESpacePtr_Type uFESpace,
                      FESpacePtr_Type pFESpace );
 
     void createParametersList( list_Type&         list,
                                const GetPot&      dataFile,
                                const std::string& section,
-                               const std::string& subSection );
-
-    static void createLSCList( list_Type&         list,
-                               const GetPot&      dataFile,
-                               const std::string& section,
-                               const std::string& subSection = "LSC",
-                               const bool& verbose = true );
+                               const std::string& subSection = "LSC" );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();

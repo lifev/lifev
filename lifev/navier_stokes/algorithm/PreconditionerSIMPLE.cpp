@@ -65,18 +65,10 @@ void
 PreconditionerSIMPLE::createParametersList( list_Type&         list,
                                             const GetPot&      dataFile,
                                             const std::string& section,
-                                            const std::string& subSection )
+                                            const std::string& subsection )
 {
-    createSIMPLEList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
-}
+    bool verbose( M_comm->MyPID() == 0 );
 
-void
-PreconditionerSIMPLE::createSIMPLEList( list_Type&         list,
-                                        const GetPot&      dataFile,
-                                        const std::string& section,
-                                        const std::string& subsection,
-                                        const bool&        verbose )
-{
     bool displayList = dataFile( ( section + "/displayList" ).data(), false);
 
     std::string precType = dataFile( ( section + "/prectype" ).data(), "SIMPLE" );
@@ -97,10 +89,10 @@ PreconditionerSIMPLE::createSIMPLEList( list_Type&         list,
 
     if ( displayList && verbose )
     {
-    	std::cout << "SIMPLE parameters list:" << std::endl;
-    	std::cout << "-----------------------------" << std::endl;
-    	list.print( std::cout );
-    	std::cout << "-----------------------------" << std::endl;
+        std::cout << "SIMPLE parameters list:" << std::endl;
+        std::cout << "-----------------------------" << std::endl;
+        list.print( std::cout );
+        std::cout << "-----------------------------" << std::endl;
     }
 }
 
@@ -367,16 +359,21 @@ PreconditionerSIMPLE::setDataFromGetPot( const GetPot& dataFile,
                                          const std::string& section )
 {
     M_dataFile   = dataFile;
-    createSIMPLEList( M_list, dataFile, section, "SIMPLE", M_comm->MyPID() == 0 );
+    this->createParametersList( M_list, dataFile, section, "SIMPLE" );
+    this->setParameters( M_list );
+}
 
-    M_precType         = this->M_list.get( "prectype", "SIMPLE" );
-    M_SIMPLEType       = this->M_list.get( "SIMPLE Type", "SIMPLE" );
+void
+PreconditionerSIMPLE::setParameters( Teuchos::ParameterList& list )
+{
+    M_precType         = list.get( "prectype", "SIMPLE" );
+    M_SIMPLEType       = list.get( "SIMPLE Type", "SIMPLE" );
 
-    M_fluidPrec        = this->M_list.get( "subprecs: fluid prec", "ML" );
-    M_fluidDataSection = this->M_list.get( "subprecs: fluid prec data section", "" );
+    M_fluidPrec        = list.get( "subprecs: fluid prec", "ML" );
+    M_fluidDataSection = list.get( "subprecs: fluid prec data section", "" );
 
-    M_schurPrec        = this->M_list.get( "subprecs: Schur prec", "ML" );
-    M_schurDataSection = this->M_list.get( "subprecs: Schur prec data section", "" );
+    M_schurPrec        = list.get( "subprecs: Schur prec", "ML" );
+    M_schurDataSection = list.get( "subprecs: Schur prec data section", "" );
 }
 
 void

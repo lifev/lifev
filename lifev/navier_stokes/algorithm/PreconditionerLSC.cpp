@@ -55,8 +55,14 @@ void
 PreconditionerLSC::setDataFromGetPot( const GetPot& dataFile,
                                       const std::string& section )
 {
-    createLSCList( M_list, dataFile, section, "LSC", M_comm->MyPID() == 0 );
-    M_precType          = this->M_list.get( "prectype", "LSC" );
+    this->createParametersList( M_list, dataFile, section, "LSC" );
+    this->setParameters( M_list );
+}
+
+void
+PreconditionerLSC::setParameters( Teuchos::ParameterList& list )
+{
+    M_precType          = list.get( "prectype", "LSC" );
 }
 
 void
@@ -104,18 +110,10 @@ void
 PreconditionerLSC::createParametersList( list_Type&         list,
                                          const GetPot&      dataFile,
                                          const std::string& section,
-                                         const std::string& subSection )
+                                         const std::string& /* subSection */ )
 {
-    createLSCList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
-}
+    bool verbose( M_comm->MyPID() == 0 );
 
-void
-PreconditionerLSC::createLSCList( list_Type&         list,
-                                  const GetPot&      dataFile,
-                                  const std::string& section,
-                                  const std::string& /* subsection */,
-                                  const bool&        verbose )
-{
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
@@ -126,10 +124,10 @@ PreconditionerLSC::createLSCList( list_Type&         list,
 
     if ( displayList && verbose )
     {
-    	std::cout << "LSC parameters list:" << std::endl;
-    	std::cout << "-----------------------------" << std::endl;
-    	list.print( std::cout );
-    	std::cout << "-----------------------------" << std::endl;
+        std::cout << "LSC parameters list:" << std::endl;
+        std::cout << "-----------------------------" << std::endl;
+        list.print( std::cout );
+        std::cout << "-----------------------------" << std::endl;
     }
 }
 

@@ -100,21 +100,13 @@ void
 PreconditionerPCD::createParametersList( list_Type&         list,
                                          const GetPot&      dataFile,
                                          const std::string& section,
-                                         const std::string& subSection )
+                                         const std::string& subsection )
 {
-    createPCDList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
-}
+    bool verbose( M_comm->MyPID() == 0 );
 
-void
-PreconditionerPCD::createPCDList( list_Type&         list,
-                                  const GetPot&      dataFile,
-                                  const std::string& section,
-                                  const std::string& subsection,
-                                  const bool&        verbose )
-{
     bool displayList = dataFile( ( section + "/displayList" ).data(), false );
 
-    std::string precType = dataFile( ( section + "/prectype" ).data(),"PCD" );
+    std::string precType = dataFile( ( section + "/prectype" ).data(), "PCD" );
     list.set( "prectype", precType );
 
     std::string fluidPrec = dataFile( ( section + "/" + subsection + "/subprecs/fluid_prec" ).data(), "ML" );
@@ -176,10 +168,10 @@ PreconditionerPCD::createPCDList( list_Type&         list,
 
     if ( displayList && verbose )
     {
-    	std::cout << "PCD parameters list:" << std::endl;
-    	std::cout << "-----------------------------" << std::endl;
-    	list.print( std::cout );
-    	std::cout << "-----------------------------" << std::endl;
+        std::cout << "PCD parameters list:" << std::endl;
+        std::cout << "-----------------------------" << std::endl;
+        list.print( std::cout );
+        std::cout << "-----------------------------" << std::endl;
     }
 }
 
@@ -785,38 +777,43 @@ PreconditionerPCD::numBlocksColumns() const
 
 void
 PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
-                                           const std::string& section )
+                                      const std::string& section )
 {
     M_dataFile   = dataFile;
-    createPCDList( M_list, dataFile, section, "PCD", M_comm->MyPID() == 0 );
+    this->createParametersList( M_list, dataFile, section, "PCD" );
+    this->setParameters( M_list );
+}
 
-    M_precType                         = this->M_list.get( "prectype", "PCD" );
+void
+PreconditionerPCD::setParameters( Teuchos::ParameterList& list )
+{
+    M_precType                         = list.get( "prectype", "PCD" );
 
-    M_fluidPrec                        = this->M_list.get( "subprecs: fluid prec","ML" );
-    M_fluidPrecDataSection             = this->M_list.get( "subprecs: fluid prec data section", "" );
+    M_fluidPrec                        = list.get( "subprecs: fluid prec", "ML" );
+    M_fluidPrecDataSection             = list.get( "subprecs: fluid prec data section", "" );
 
-    M_pressureLaplacianPrec            = this->M_list.get( "subprecs: pressure laplacian prec", "ML");
-    M_pressureLaplacianPrecDataSection = this->M_list.get( "subprecs: pressure laplacian prec data section", "" );
+    M_pressureLaplacianPrec            = list.get( "subprecs: pressure laplacian prec", "ML");
+    M_pressureLaplacianPrecDataSection = list.get( "subprecs: pressure laplacian prec data section", "" );
 
-    M_pressureMassPrec                 = this->M_list.get( "subprecs: pressure mass prec", "ML" );
-    M_pressureMassPrecDataSection      = this->M_list.get( "subprecs: pressure mass prec data section", "" );
+    M_pressureMassPrec                 = list.get( "subprecs: pressure mass prec", "ML" );
+    M_pressureMassPrecDataSection      = list.get( "subprecs: pressure mass prec data section", "" );
 
-    M_pressureBoundaryConditions       = this->M_list.get( "pressure boundary conditions", "none" );
-    M_pressureLaplacianOperator        = this->M_list.get( "pressure laplacian operator", "standard" );
+    M_pressureBoundaryConditions       = list.get( "pressure boundary conditions", "none" );
+    M_pressureLaplacianOperator        = list.get( "pressure laplacian operator", "standard" );
 
-    M_pressureMassOperator             = this->M_list.get( "pressure mass operator", "lumped" );
-    M_setApBoundaryConditions          = this->M_list.get( "set Ap boundary conditions", false );
-    M_setFpBoundaryConditions          = this->M_list.get( "set Fp boundary conditions", false );
-    M_setMpBoundaryConditions          = this->M_list.get( "set Mp boundary conditions", false );
-    M_fullFactorization                = this->M_list.get( "full factorization", false );
-    M_useStiffStrain                   = this->M_list.get( "use stiff strain", false );
-    M_enableTransient                  = this->M_list.get( "enable transient", true );
-    bool useMinusDivergence            = this->M_list.get( "use minus divergence", false );
+    M_pressureMassOperator             = list.get( "pressure mass operator", "lumped" );
+    M_setApBoundaryConditions          = list.get( "set Ap boundary conditions", false );
+    M_setFpBoundaryConditions          = list.get( "set Fp boundary conditions", false );
+    M_setMpBoundaryConditions          = list.get( "set Mp boundary conditions", false );
+    M_fullFactorization                = list.get( "full factorization", false );
+    M_useStiffStrain                   = list.get( "use stiff strain", false );
+    M_enableTransient                  = list.get( "enable transient", true );
+    bool useMinusDivergence            = list.get( "use minus divergence", false );
     this->setUseMinusDivergence( useMinusDivergence );
-    M_schurOperatorReverseOrder        = this->M_list.get( "Schur operator reverse order", false );
-    M_inflowBoundaryType               = this->M_list.get( "inflow boundary type", "Robin" );
-    M_outflowBoundaryType              = this->M_list.get( "outflow boundary type", "Neumann" );
-    M_characteristicBoundaryType       = this->M_list.get( "characteristic boundary type", "Neumann" );
+    M_schurOperatorReverseOrder        = list.get( "Schur operator reverse order", false );
+    M_inflowBoundaryType               = list.get( "inflow boundary type", "Robin" );
+    M_outflowBoundaryType              = list.get( "outflow boundary type", "Neumann" );
+    M_characteristicBoundaryType       = list.get( "characteristic boundary type", "Neumann" );
 }
 
 void
