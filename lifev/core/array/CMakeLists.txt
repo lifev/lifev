@@ -13,6 +13,10 @@ SET(array_HEADERS
   array/MatrixEpetra.hpp
   array/VectorEpetraStructured.hpp
   array/MatrixEpetraStructured.hpp
+  array/MatrixBlockMonolithicEpetraView.hpp
+  array/MatrixBlockMonolithicEpetra.hpp
+  array/VectorBlockMonolithicEpetra.hpp
+  array/VectorBlockMonolithicEpetraView.hpp
   array/VectorEpetraStructuredView.hpp
   array/ArraySimple.hpp
   array/VectorElemental.hpp
@@ -23,6 +27,8 @@ CACHE INTERNAL "")
 SET(array_SOURCES
   array/VectorElemental.cpp
   array/MatrixElemental.cpp
+  array/VectorBlockMonolithicEpetra.cpp
+  array/VectorBlockMonolithicEpetraView.cpp
   array/VectorEpetraStructuredView.cpp
   array/VectorEpetra.cpp
   array/MapEpetra.cpp

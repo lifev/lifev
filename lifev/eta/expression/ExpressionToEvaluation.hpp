@@ -60,6 +60,10 @@
 #include <lifev/eta/expression/ExpressionHK.hpp>
 #include <lifev/eta/expression/ExpressionMeas.hpp>
 #include <lifev/eta/expression/ExpressionPosition.hpp>
+#include <lifev/eta/expression/ExpressionNormal.hpp>
+
+#include <lifev/eta/expression/ExpressionIfCrossed.hpp>
+
 
 #include <lifev/eta/expression/EvaluationPhiI.hpp>
 #include <lifev/eta/expression/EvaluationPhiJ.hpp>
@@ -85,6 +89,9 @@
 #include <lifev/eta/expression/EvaluationHK.hpp>
 #include <lifev/eta/expression/EvaluationMeas.hpp>
 #include <lifev/eta/expression/EvaluationPosition.hpp>
+#include <lifev/eta/expression/EvaluationNormal.hpp>
+
+#include <lifev/eta/expression/EvaluationIfCrossed.hpp>
 
 namespace LifeV
 {
@@ -374,6 +381,29 @@ private:
 	ExpressionToEvaluation();
 	~ExpressionToEvaluation();
 };
+
+// Specialized for the normal
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionNormal,testDim,solutionDim,spaceDim>
+{
+public:
+	typedef EvaluationNormal<spaceDim> evaluation_Type;
+private:
+	ExpressionToEvaluation();
+	~ExpressionToEvaluation();
+};
+
+template<typename MeshType, typename MapType, UInt FESpaceDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<
+ExpressionIfCrossed<MeshType,MapType,FESpaceDim>,testDim,solutionDim,spaceDim>
+{
+public:
+	typedef EvaluationIfCrossed<MeshType,MapType,FESpaceDim> evaluation_Type;
+private:
+	ExpressionToEvaluation();
+	~ExpressionToEvaluation();
+};
+
 
 
 // \endcond
