@@ -60,7 +60,6 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
-#include <boost/shared_ptr.hpp>
 
 using namespace LifeV;
 

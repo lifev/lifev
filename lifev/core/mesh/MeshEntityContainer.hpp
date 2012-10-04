@@ -39,14 +39,12 @@
 #ifndef _MESHENTITYCONTAINER_HH_
 #define _MESHENTITYCONTAINER_HH_
 
-#include <cstdlib>
-#include <vector>
+#include <algorithm>
+#include <iterator>
+
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/Marker.hpp>
 #include <lifev/core/mesh/MeshEntity.hpp>
-#include <algorithm>
-#include <iterator>
-#include <boost/function.hpp>
 
 namespace LifeV
 {

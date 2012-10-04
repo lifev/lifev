@@ -46,17 +46,14 @@
 #ifndef _DOFINTERFACE3DTO2D_HH
 #define _DOFINTERFACE3DTO2D_HH
 
+#include <fstream>
+
+#include <lifev/core/LifeV.hpp>
+
 #include <lifev/core/fem/DOFInterface.hpp>
 #include <lifev/core/fem/DOFLocalPattern.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <list>   //necessary to write vertices in order.
-#include <vector>   //necessary to write faces and access them arbitrarily.
-
 
 namespace LifeV
 {

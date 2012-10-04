@@ -40,16 +40,11 @@
 #define MESH_PARTITIONER_H 1
 
 #include <fstream>
-#include <iostream>
-#include <set>
 #include <sstream>
-#include <string>
-#include <vector>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <boost/shared_ptr.hpp>
 #include <parmetis.h>
 #include <Epetra_MpiComm.h>
 

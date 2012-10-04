@@ -38,8 +38,6 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <vector>
-
 namespace LifeV
 {
 

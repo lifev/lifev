@@ -36,10 +36,9 @@
 #ifndef ELEMVEC_H
 #define ELEMVEC_H
 
-#include <vector>
+#include <iomanip>
 
 #include <lifev/core/LifeV.hpp>
-#include <iomanip>
 #include <lifev/core/array/RNM.hpp>
 
 namespace LifeV

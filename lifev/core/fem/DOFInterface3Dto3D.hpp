@@ -42,14 +42,7 @@
 #ifndef _DOFINTERFACE3DTO3D_HH
 #define _DOFINTERFACE3DTO3D_HH
 
-#include <list>
-#include <cmath>
-#include <set>
-#include <iostream>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/function.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
 

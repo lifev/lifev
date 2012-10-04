@@ -36,31 +36,26 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PARTITION_IO_H_
 #define PARTITION_IO_H_
 
-#include<lifev/core/LifeV.hpp>
-
-#include <Epetra_config.h>
-
 #ifdef HAVE_HDF5
 #ifdef HAVE_MPI
 
 #include <algorithm>
-#include <string>
-#include <vector>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <mpi.h>
+#include <Epetra_config.h>
 
 #include <hdf5.h>
 
-#include <boost/shared_ptr.hpp>
 #include <Epetra_MpiComm.h>
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include<lifev/core/LifeV.hpp>
 
 namespace LifeV {
 

@@ -32,14 +32,16 @@
     @author: luca formaggia
 */
 
+#ifndef BAREMESH_HPP_
+#define BAREMESH_HPP_
+
 #include <lifev/core/LifeV.hpp>
-#include <map>
-#include <vector>
+
 #include <lifev/core/mesh/ElementShapes.hpp>
 #include <lifev/core/array/ArraySimple.hpp>
 
-#ifndef BAREMESH_HPP_
-#define BAREMESH_HPP_
+namespace LifeV
+{
 
 namespace LifeV
 {

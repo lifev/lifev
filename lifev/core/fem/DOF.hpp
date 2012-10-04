@@ -47,17 +47,15 @@
 #ifndef _DOF_HH
 #define _DOF_HH
 
-#include <lifev/core/array/ArraySimple.hpp>
+#include <algorithm>
 
 #include <lifev/core/LifeV.hpp>
+
+#include <lifev/core/array/ArraySimple.hpp>
 
 #include <lifev/core/fem/DOFLocalPattern.hpp>
 
 #include <lifev/core/mesh/ElementShapes.hpp>
-
-#include <algorithm>
-#include <map>
-#include <set>
 
 namespace LifeV
 {
