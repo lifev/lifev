@@ -9,6 +9,7 @@ SET(fem_HEADERS
   fem/FEFunction.hpp
   fem/TimeData.hpp
   fem/GeometricMap.hpp
+  fem/GradientRecovery.hpp
   fem/Assembly.hpp
   fem/ReferenceElement.hpp
   fem/FESpace.hpp

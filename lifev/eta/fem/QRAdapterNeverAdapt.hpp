@@ -57,14 +57,16 @@ class QRAdapterNeverAdapt : public QRAdapterBase< QRAdapterNeverAdapt >
 {
 public:
 
+	typedef QRAdapterBase< QRAdapterNeverAdapt > base_Type;
+
     //! @name Constructor & Destructor
     //@{
 
     //! Constructor with a quadrature rule.
-    QRAdapterNeverAdapt(const QuadratureRule& qr) : M_qr(qr) {}
+    QRAdapterNeverAdapt(const QuadratureRule& qr) : base_Type(), M_qr(qr) {}
 
     //! Copy constructor
-    QRAdapterNeverAdapt(const QRAdapterNeverAdapt& qrAdapter) : M_qr(qrAdapter.M_qr) {}
+    QRAdapterNeverAdapt(const QRAdapterNeverAdapt& qrAdapter) : base_Type(), M_qr(qrAdapter.M_qr) {}
 
     //! Simple destructor
     ~QRAdapterNeverAdapt(){}

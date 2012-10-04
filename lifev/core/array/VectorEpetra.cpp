@@ -922,6 +922,14 @@ void VectorEpetra::showMe( std::ostream& output ) const
         output << Values[i] << std::endl;
 }
 
+void VectorEpetra::apply(const boost::function1<Real,Real>& f)
+{
+    Int i, j;
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            (*M_epetraVector)[i][j] = f((*M_epetraVector)[i][j]);
+}
+
 
 // ===================================================
 // Set Methods

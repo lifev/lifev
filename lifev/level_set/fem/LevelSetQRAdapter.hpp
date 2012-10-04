@@ -76,6 +76,8 @@ public:
 
     typedef boost::shared_ptr<FESpaceType> FESpaceType_Ptr;
 
+  typedef QRAdapterBase< LevelSetQRAdapter<FESpaceType,VectorType> > base_Type;
+
     //@}
 
 
@@ -179,6 +181,7 @@ template< typename FESpaceType, typename VectorType >
 LevelSetQRAdapter<FESpaceType,VectorType>::
 LevelSetQRAdapter(FESpaceType_Ptr fespace, const VectorType& vect, const QuadratureRule& qr)
     :
+    base_Type(),
     M_lsFESpace(fespace),
     M_lsValue(vect,Repeated),
     M_qr(qr),
@@ -194,6 +197,7 @@ template< typename FESpaceType, typename VectorType >
 LevelSetQRAdapter<FESpaceType,VectorType>::
 LevelSetQRAdapter(const LevelSetQRAdapter<FESpaceType,VectorType>& lsqra)
     :
+    base_Type(),
     M_lsFESpace( lsqra.M_lsFESpace ),
     M_lsValue( lsqra.M_lsValue ),
     M_qr ( lsqra.M_qr ),
