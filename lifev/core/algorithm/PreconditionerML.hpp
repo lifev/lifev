@@ -118,9 +118,6 @@ public:
     //! Reset the preconditioner
     void resetPreconditioner();
 
-    //! Returns true if the preconditioner is set
-    bool  isPreconditionerSet() const {return M_preconditioner;}
-
     //! Create the list of parameters of the preconditioner
     /*!
       @param list A Parameter list to be filled

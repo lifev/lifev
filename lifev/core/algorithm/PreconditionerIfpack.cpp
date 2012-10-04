@@ -250,12 +250,6 @@ PreconditionerIfpack::SetUseTranspose( bool useTranspose )
 // ===================================================
 // Get Methods
 // ===================================================
-bool
-PreconditionerIfpack::isPreconditionerSet() const
-{
-    return M_preconditioner;
-}
-
 Real
 PreconditionerIfpack::condest()
 {
