@@ -100,9 +100,11 @@ MultiscaleAlgorithmBroyden::setupAlgorithm()
 
 #ifdef HAVE_HDF5
 #if ( H5_VERS_MAJOR > 1 || ( H5_VERS_MAJOR == 1 && H5_VERS_MINOR > 8 ) || ( H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 8 && H5_VERS_RELEASE >= 7 ) )
+#ifdef BROYDEN_IMPORTJACOBIAN
     // Import Jacobian from previous simulation
     if ( multiscaleProblemStep > 0 )
         importJacobianFromHDF5();
+#endif
 #endif
 #endif
 }

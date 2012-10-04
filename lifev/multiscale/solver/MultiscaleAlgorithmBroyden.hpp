@@ -37,6 +37,11 @@
 #ifndef MultiscaleAlgorithmBroyden_H
 #define MultiscaleAlgorithmBroyden_H 1
 
+// If the following macro is defined, when a simulation restarts the corresponding saved
+// Broyden matrix is loaded from data file.
+// TODO For now it is disabled due to issues with some simulations.
+//#define BROYDEN_IMPORTJACOBIAN
+
 #include <lifev/core/algorithm/LinearSolver.hpp>
 
 #include <lifev/multiscale/solver/MultiscaleAlgorithm.hpp>
