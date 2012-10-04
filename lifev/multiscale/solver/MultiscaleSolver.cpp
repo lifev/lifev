@@ -123,7 +123,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     if ( !multiscaleProblemStep )
         M_model->saveSolution();
 
-    // Move to the "true" first time-step (needed to perform initializations in the different model/couplings/algorithms)
+    // Move to the "true" first time-step (needed to perform initializations of the different models/couplings/algorithms)
     M_globalData->dataTime()->updateTime();
     M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 }
