@@ -121,12 +121,13 @@ private:
 
     //! Save CPU time at each time step
     /*!
+     * @param totalCPUTime total CPU time of the iteration
      * @param buildUpdateCPUTime CPU time to build/update the problem
      * @param solveCPUTime CPU time to solve the problem
      * @param updateSolutionCPUTime CPU time to update the solution of the problem
      * @param saveCPUTime CPU time to save the solution
      */
-    void saveCPUTime( const Real& buildUpdateCPUTime, const Real& solveCPUTime,
+    void saveCPUTime( const Real& totalCPUTime, const Real& buildUpdateCPUTime, const Real& solveCPUTime,
                       const Real& updateSolutionCPUTime, const Real& saveCPUTime ) const;
 
     //! Import iteration number from the CPU file

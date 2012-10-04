@@ -123,7 +123,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     if ( !multiscaleProblemStep )
         M_model->saveSolution();
 
-    // Move to the "true" first time-step
+    // Move to the "true" first time-step (needed to perform initializations of the different models/couplings/algorithms)
     M_globalData->dataTime()->updateTime();
     M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 }
@@ -188,21 +188,23 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         globalChrono.stop();
 
         // Compute time step time
-        saveCPUTime( buildUpdateChrono.globalDiff( *M_comm ), solveChrono.globalDiff( *M_comm ),
-                     updateSolutionChrono.globalDiff( *M_comm ), saveChrono.globalDiff( *M_comm ) );
         timeStepTime = globalChrono.globalDiff( *M_comm );
-
-        if ( M_comm->MyPID() == 0 )
-            std::cout << " MS-  Total iteration time:                    " << timeStepTime << " s" << std::endl;
 
         // Updating total simulation time
         totalSimulationTime += timeStepTime;
+
+        if ( M_comm->MyPID() == 0 )
+        {
+            std::cout << " MS-  Total iteration time:                    " << timeStepTime << " s" << std::endl;
+            std::cout << " MS-  Total simulation time:                   " << totalSimulationTime << " s" << std::endl;
+        }
+
+        // Save CPU time
+        saveCPUTime( timeStepTime, buildUpdateChrono.globalDiff( *M_comm ), solveChrono.globalDiff( *M_comm ),
+                     updateSolutionChrono.globalDiff( *M_comm ), saveChrono.globalDiff( *M_comm ) );
     }
 
-    if ( M_comm->MyPID() == 0 )
-        std::cout << " MS-  Total simulation time:                   " << totalSimulationTime << " s" << std::endl;
-
-    // Check on the last iteration
+    // Numerical check of the last iteration solution (used for the night testsuite check)
     Real computedSolution( M_model->checkSolution() );
     if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
         multiscaleErrorCheck( Solution, "Problem solution: "    + number2string( computedSolution ) +
@@ -241,7 +243,7 @@ MultiscaleSolver::showMe() const
 // Private Methods
 // ===================================================
 void
-MultiscaleSolver::saveCPUTime( const Real& buildUpdateCPUTime,    const Real& solveCPUTime,
+MultiscaleSolver::saveCPUTime( const Real& totalCPUTime, const Real& buildUpdateCPUTime,    const Real& solveCPUTime,
                                const Real& updateSolutionCPUTime, const Real& saveCPUTime ) const
 {
     if ( M_comm->MyPID() == 0 )
@@ -255,17 +257,16 @@ MultiscaleSolver::saveCPUTime( const Real& buildUpdateCPUTime,    const Real& so
         {
             outputFile.open( filename.c_str(), std::ios::trunc );
             outputFile << "% ITERATION                TIME                     TOTAL                    BUILD/UPDATE             "
-                            "SOLVE                    UPDATE SOLUTION          SAVE" << std::endl;
+                          "SOLVE                    UPDATE SOLUTION          SAVE" << std::endl;
         }
         else
         {
             outputFile.open( filename.c_str(), std::ios::app );
         }
         outputFile << "  " << number2string( M_globalData->dataTime()->timeStepNumber() )
-               << "                        " << M_globalData->dataTime()->time()
-               << "    " << buildUpdateCPUTime + solveCPUTime + updateSolutionCPUTime + saveCPUTime
-               << "    " << buildUpdateCPUTime << "    " << solveCPUTime
-               << "    " << updateSolutionCPUTime  << "    " << saveCPUTime << std::endl;
+                   << "                        " << M_globalData->dataTime()->time()
+                   << "    " << totalCPUTime << "    " << buildUpdateCPUTime << "    " << solveCPUTime
+                   << "    " << updateSolutionCPUTime  << "    " << saveCPUTime << std::endl;
         outputFile.close();
     }
 }
@@ -294,7 +295,7 @@ MultiscaleSolver::importIterationNumber()
             // Read the first line with comments
             std::getline( inputFile, line, '\n' );
 
-            // Read one-by-one all the others lines of the file
+            // Read one-by-one all the other lines of the file
             while ( std::getline( inputFile, line, '\n' ) )
             {
                 boost::split( stringsVector, line, boost::is_any_of( " " ), boost::token_compress_on );
