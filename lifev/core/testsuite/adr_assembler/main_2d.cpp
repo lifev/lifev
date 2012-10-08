@@ -153,12 +153,16 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
     MeshData meshData(dataFile, "mesh");
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type());
+    boost::shared_ptr< mesh_Type > fullMeshPtr( new mesh_Type( *Comm ) );
     readMesh(*fullMeshPtr,meshData);
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
+        meshPtr = meshPart.meshPartition();
+    }
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
@@ -170,8 +174,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
     std::string uOrder("P1");
     std::string bOrder("P1");
-    feSpacePtr_Type uFESpace( new feSpace_Type( meshPart, uOrder, 1, Comm ) );
-    feSpacePtr_Type betaFESpace( new feSpace_Type( meshPart, bOrder, 3, Comm ) );
+    feSpacePtr_Type uFESpace( new feSpace_Type( meshPtr, uOrder, 1, Comm ) );
+    feSpacePtr_Type betaFESpace( new feSpace_Type( meshPtr, bOrder, 3, Comm ) );
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
@@ -331,7 +335,7 @@ main( int argc, char** argv )
 // Exporter definition and use
 
     if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
-    ExporterEnsight<mesh_Type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID()) ;
+    ExporterEnsight<mesh_Type> exporter ( dataFile, meshPtr, "solution", Comm->MyPID()) ;
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;

@@ -57,8 +57,8 @@ FSIOperator::FSIOperator():
     M_mmFESpace                          ( ),
     M_fluidMesh                          ( ),
     M_solidMesh                          ( ),
-    M_fluidMeshPart                      ( ),
-    M_solidMeshPart                      ( ),
+    M_fluidLocalMesh                     ( ),
+    M_solidLocalMesh                     ( ),
     M_BCh_u                              ( ),
     M_BCh_d                              ( ),
     M_BCh_mesh                           ( ),
@@ -157,11 +157,16 @@ FSIOperator::~FSIOperator()
 void
 FSIOperator::setDataFile( const GetPot& dataFile )
 {
-    M_fluidMesh.reset(new mesh_Type());
+// <<<<<<< HEAD
+//     M_fluidMesh.reset(new mesh_Type());
+// =======
+
+    M_fluidMesh.reset( new mesh_Type( *M_epetraComm ) );
+
     M_meshDataFluid->setup(dataFile, "fluid/space_discretization");
     readMesh(*M_fluidMesh, *M_meshDataFluid);
 
-    M_solidMesh.reset(new mesh_Type());
+    M_solidMesh.reset(new mesh_Type( *M_epetraComm ) );
     M_meshDataSolid->setup(dataFile, "solid/space_discretization");
     readMesh(*M_solidMesh, *M_meshDataSolid);
 
@@ -286,7 +291,7 @@ FSIOperator::setupFEspace()
     if (this->isFluid())
     {
 
-        M_mmFESpace.reset(new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
+        M_mmFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_fluidLocalMesh,
                                                             //dOrder,
                                                             *refFE_mesh,
                                                             *qR_mesh,
@@ -294,7 +299,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_uFESpace.reset( new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
+        M_uFESpace.reset( new FESpace<mesh_Type, MapEpetra>(M_fluidLocalMesh,
                                                             //uOrder,
                                                             *refFE_vel,
                                                             *qR_vel,
@@ -302,7 +307,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_pFESpace.reset( new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
+        M_pFESpace.reset( new FESpace<mesh_Type, MapEpetra>(M_fluidLocalMesh,
                                                             //pOrder,
                                                             *refFE_press,
                                                             *qR_press,
@@ -341,7 +346,7 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSI-  Building solid FESpace ...               \n");
     if (this->isSolid())
     {
-        M_dFESpace.reset( new FESpace<mesh_Type, MapEpetra>( *M_solidMeshPart,
+        M_dFESpace.reset( new FESpace<mesh_Type, MapEpetra>( M_solidLocalMesh,
                                                              dOrder,
                                                              //*refFE_struct,
                                                              //*qR_struct,
@@ -368,11 +373,13 @@ FSIOperator::partitionMeshes()
 {
     if (this->isFluid())
     {
-        M_fluidMeshPart.reset(new  MeshPartitioner< mesh_Type > (M_fluidMesh, M_epetraComm));
+        MeshPartitioner< mesh_Type > fluidPartitioner(M_fluidMesh, M_epetraComm);
+        M_fluidLocalMesh = fluidPartitioner.meshPartition();
     }
     if (this->isSolid())
     {
-        M_solidMeshPart.reset( new  MeshPartitioner< mesh_Type > ( M_solidMesh, M_epetraComm ) );
+        MeshPartitioner< mesh_Type > solidPartitioner(M_solidMesh, M_epetraComm);
+        M_solidLocalMesh = solidPartitioner.meshPartition();
     }
 }
 
@@ -773,7 +780,7 @@ void
 FSIOperator::moveMesh( const vector_Type& dep )
 {
     displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
-    M_fluidMeshPart->meshPartition()->meshTransformer().moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
+    M_fluidLocalMesh->meshTransformer().moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
     displayer().leaderPrint( "done\n" );
     M_fluid->setRecomputeMatrix( true );
 }
@@ -1737,7 +1744,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
         //            std::cout << "  -> both FESpace have unknowns on their nodes" << std::endl;
         for ( ID iVert = 0; iVert < _fespace1.mesh()->numVertices(); ++iVert )
         {
-            if ((int)_fespace1.mesh()->pointList(iVert).marker() != M_data->fluidInterfaceFlag()) continue;
+            if ((int)_fespace1.mesh()->pointList(iVert).markerID() != M_data->fluidInterfaceFlag()) continue;
 
             ID nodeID = _fespace1.mesh()->pointList(iVert).id();
             // Loop number of DOF per vertex
@@ -1767,7 +1774,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
         // loop on boundary edges
         for ( ID iEdge = 0; iEdge < nBEdges1; ++iEdge )
         {
-            if ((int)_fespace1.mesh()->edgeList(iEdge).marker() != M_data->fluidInterfaceFlag()) continue;
+            if ((int)_fespace1.mesh()->edgeList(iEdge).markerID() != M_data->fluidInterfaceFlag()) continue;
 
             // edge ID
             ID edgeID = _fespace1.mesh()->edgeList(iEdge).id();
@@ -1839,7 +1846,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
         // loop on boundary edges
         for ( ID iEdge = 0; iEdge < nBEdges2; ++iEdge )
         {
-            if ((int)_fespace2.mesh()->edgeList(iEdge).marker() != M_data->fluidInterfaceFlag()) continue;
+            if ((int)_fespace2.mesh()->edgeList(iEdge).markerID() != M_data->fluidInterfaceFlag()) continue;
             // Now that we have an edge on the FS interface, let's get its ID
             ID edgeID = _fespace2.mesh()->edgeList(iEdge).id();
             // dof position of the edge since unknowns are store using [ node | edges | faces | volumes ]

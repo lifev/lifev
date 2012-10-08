@@ -33,33 +33,33 @@
     @contributor Zhen Wang <zwang26@emory.edu>
     @contributor Tiziano Passerini <tiziano@mathcs.emory.edu>
 
-	These classes provide the most basic definitions for the geometric
-	elements. The variables names are self-explanatory.
+    These classes provide the most basic definitions for the geometric
+    elements. The variables names are self-explanatory.
 
-	The Basis Geometric Shapes (<tt>GeoShape</tt>) are derived from a set of
-	classes called Basis Reference Shapes (<tt>BasRefSha</tt>), which contains
-	the very basic information about the reference element geometries
-	supported by the library (reference element geometry=geometry of the
-	finite element in the reference space.)
+    The Basis Geometric Shapes (<tt>GeoShape</tt>) are derived from a set of
+    classes called Basis Reference Shapes (<tt>BasRefSha</tt>), which contains
+    the very basic information about the reference element geometries
+    supported by the library (reference element geometry=geometry of the
+    finite element in the reference space.)
 
-	A Basis Geometric Shape contains (when relevant) the following methods
-	<ol>
-	<li> <tt>static ID edgeToPoint(ID const jEdge, ID const iPoint);</tt>
+    A Basis Geometric Shape contains (when relevant) the following methods
+    <ol>
+    <li> <tt>static ID edgeToPoint(ID const jEdge, ID const iPoint);</tt>
          which returns the local ID of the i-th point of the j-th edge of the GeoShape
 
-	<li> <tt>static ID faceToPoint(ID const jFace, ID const iPoint);</tt>
+    <li> <tt>static ID faceToPoint(ID const jFace, ID const iPoint);</tt>
          which returns the local ID of the i-th point of the j-th face of the GeoShape
 
-	<li> <tt>static pair<ID,bool> faceToEdge(ID const jFace, ID const iEdge);</tt>
-	     which returns the local numbering of the i-th edge on the j-th face.
+    <li> <tt>static pair<ID,bool> faceToEdge(ID const jFace, ID const iEdge);</tt>
+         which returns the local numbering of the i-th edge on the j-th face.
          It returns also if the orientation of the edge on the face is consistent
-	     with that of the same edge on the element
-	</ol>
+         with that of the same edge on the element
+    </ol>
 
-	@note The methods edge to point-ID (EtoP) and Face to point-ID (FtoP)
-	      return the local id number of points on faces and edges (when relevant)
-	@note We follow the convention of indicating THE VERTICES FIRST in the list
-	      of dofs
+    @note The methods edge to point-ID (EtoP) and Face to point-ID (FtoP)
+          return the local id number of points on faces and edges (when relevant)
+    @note We follow the convention of indicating THE VERTICES FIRST in the list
+          of dofs
  */
 
 #ifndef ELEMENTSHAPES_H
@@ -75,9 +75,12 @@ namespace LifeV
  *  It must be specialised for the specific GeoShape since the inverse ordering
  *  depends on how points are numbered in the actual GeoShape.
  *  This utility is meant to be used only by procedures that build a mesh, since it operates on
- *  basic mesh structure. It can be dangerous to use, for instance, after a full mesh has been set up.
+ *  basic mesh structures. It can be dangerous to use, for instance, after a full mesh has been set up.
  *  It is useful to invert faces or edges which are incorrectly oriented or to fix a mesh produced by a mesher
  *  which uses a different orientation convention.
+ *
+ *  @param pointId Elemental local id of a point of the GeoShape
+ *  @return the (local) ID of the corresponding point in the reversed GeoShape
  */
 template <typename GeoShapeType>
 inline ID reversePoint( ID const & pointId );
@@ -90,7 +93,7 @@ inline ID reversePoint( ID const & pointId );
 
 enum ReferenceShapes
 {
-	NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA
+    NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA
 };
  */
 // deprecated name
@@ -114,7 +117,7 @@ UInt shapeDimension(const ReferenceShapes& shape);
 
 enum ReferenceGeometry
 {
-	VERTEX = 0, EDGE = 1, FACE = 2, VOLUME = 3
+    VERTEX = 0, EDGE = 1, FACE = 2, VOLUME = 3
 };
  */
 // deprecated name
@@ -129,7 +132,7 @@ enum ReferenceGeometry
 //! @ingroup BasRefSha
 class nullShape{
 public:
-	typedef nullShape GeoBShape;
+    typedef nullShape GeoBShape;
 };
 
 
@@ -150,7 +153,7 @@ public:
     static const UInt S_numVertices           = 1;     //!< Number of vertices.
     static const UInt S_numFacets             = 0;     //!< Number of facets
     static const UInt S_numRidges             = 0;     //!< Number of ridges
-    static const UInt S_numPeaks	          = 0;     //!< Number of peaks
+    static const UInt S_numPeaks              = 0;     //!< Number of peaks
 };
 
 
@@ -165,8 +168,8 @@ public:
     static const UInt S_numEdges = 1;                //!< Number of edges
     static const UInt S_numVertices = 2;             //!< Number of vertices.
     static const UInt S_numFacets = S_numVertices;   //!< Number of facets
-    static const UInt S_numRidges = 0;     		     //!< Number of ridges
-    static const UInt S_numPeaks = 0;     		     //!< Number of peaks
+    static const UInt S_numRidges = 0;               //!< Number of ridges
+    static const UInt S_numPeaks = 0;                //!< Number of peaks
 
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& /*iEdge*/, ID const& jPoint ) { return jPoint;}
@@ -188,11 +191,11 @@ public:
     static const ReferenceGeometry S_geometry = FACE;//!< Identify the geometric entity
     static const UInt S_nDimensions = 2;             //!< Dimensionality
     static const UInt S_numVertices = 3;             //!< Number of vertices.
-    static const UInt S_numEdges = 3;    			 //!< Number of edges
+    static const UInt S_numEdges = 3;                //!< Number of edges
     static const UInt S_numFaces = 1;                //!< Number of faces
     static const UInt S_numFacets = S_numEdges;      //!< Number of facets
     static const UInt S_numRidges = S_numVertices;   //!< Number of ridges
-    static const UInt S_numPeaks = 0;     		     //!< Number of peaks
+    static const UInt S_numPeaks = 0;                //!< Number of peaks
 
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& /*iFace*/, ID const& jPoint ) {return jPoint;};
@@ -218,10 +221,10 @@ public:
     static const UInt S_nDimensions = 2;             //!< Dimensionality
     static const UInt S_numFaces = 1;                //!< Number of faces
     static const UInt S_numVertices = 4;             //!< Number of vertices.
-    static const UInt S_numEdges = 4;    			 //!< Number of edges
+    static const UInt S_numEdges = 4;                //!< Number of edges
     static const UInt S_numFacets = S_numEdges;      //!< Number of facets
     static const UInt S_numRidges = S_numVertices;   //!< Number of ridges
-    static const UInt S_numPeaks = 0;     		     //!< Number of peaks
+    static const UInt S_numPeaks = 0;                //!< Number of peaks
 
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& /*iFace*/, ID const& jPoint ) {return jPoint;};
@@ -248,9 +251,9 @@ public:
     static const UInt S_numVertices = 4;                      //!< Number of vertices.
     static const UInt S_numFaces = 4;                         //!< Number of faces
     static const UInt S_numEdges = S_numFaces + S_numVertices - 2;//!< Number of edges
-    static const UInt S_numFacets = S_numFaces;  			 //!< Number of facets
-    static const UInt S_numRidges = S_numEdges;  			 //!< Number of ridges
-    static const UInt S_numPeaks = S_numVertices;     		     		 //!< Number of peaks
+    static const UInt S_numFacets = S_numFaces;              //!< Number of facets
+    static const UInt S_numRidges = S_numEdges;              //!< Number of ridges
+    static const UInt S_numPeaks = S_numVertices;                        //!< Number of peaks
 
     /*!
         @return a pair: the local numbering of the j-th edge on the i-th face, and
@@ -271,9 +274,9 @@ public:
     static const UInt S_numFaces = 6;                         //!< Number of faces
     static const UInt S_numVertices = 8;                      //!< Number of vertices.
     static const UInt S_numEdges = S_numFaces + S_numVertices - 2;//!< Number of edges
-    static const UInt S_numFacets = S_numFaces;  			 //!< Number of facets
-    static const UInt S_numRidges = S_numEdges;  			 //!< Number of ridges
-    static const UInt S_numPeaks = S_numVertices;     		     		 //!< Number of peaks
+    static const UInt S_numFacets = S_numFaces;              //!< Number of facets
+    static const UInt S_numRidges = S_numEdges;              //!< Number of ridges
+    static const UInt S_numPeaks = S_numVertices;                        //!< Number of peaks
 
     /*!
         @return a pair: the local numbering of the j-th edge on the i-th face, and
@@ -344,7 +347,7 @@ public:
     static const UInt S_numPointsPerRidge = 0;   //!< Number of points per ridge
     static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
 };
-
+//! Inverts a line
 template <>
 inline ID reversePoint<LinearLine>( ID const & pointId ){
     static ID _rid[]={1,0};
@@ -409,7 +412,7 @@ public:
 
     //! @return the local ID of the j-th ridge of the i-th facet
     static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-    	{return edgeToPoint(iFacet, jRidge);}
+        {return edgeToPoint(iFacet, jRidge);}
 };
 
 template <>
@@ -446,7 +449,7 @@ public:
     static ID facetToPoint( ID const& iFacet, ID const& jPoint )
         {return edgeToPoint( iFacet, jPoint );}
     static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-		{return edgeToPoint(iFacet, jRidge);}
+        {return edgeToPoint(iFacet, jRidge);}
 };
 
 template <>
@@ -486,7 +489,7 @@ public:
 
     //! @return the local ID of the j-th point of the i-th ridge
     static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-		{return edgeToPoint(iFacet, jRidge);}
+        {return edgeToPoint(iFacet, jRidge);}
 };
 
 //! Specialization
@@ -565,15 +568,15 @@ public:
 
     //! @return the local ID of the j-th point of the i-th facet
     static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-    	{return faceToPoint( iFacet, jPoint );}
+        {return faceToPoint( iFacet, jPoint );}
 
     //! @return the local ID of the j-th ridge of the i-th facet
-	static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
         {return faceToEdge(iFacet, jRidge).first;}
 
-	//! @return the local ID of the j-th peak of the i-th facet
+    //! @return the local ID of the j-th peak of the i-th facet
     static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-    	{return faceToPoint(iFacet, jPeak);}
+        {return faceToPoint(iFacet, jPeak);}
 };
 
 //! Specialization
@@ -613,7 +616,7 @@ public:
 
     //! @return the local ID of the j-th point of the i-th facet
     static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-    	{return faceToPoint( iFacet, jPoint );}
+        {return faceToPoint( iFacet, jPoint );}
 
     //! @return the local ID of the j-th ridge of the i-th facet
     static ID facetToRidge( ID const& iFacet, ID const& jRidge )
@@ -621,7 +624,7 @@ public:
 
     //! @return the local ID of the j-th peak of the i-th facet
     static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-    	{return faceToPoint(iFacet, jPeak);}
+        {return faceToPoint(iFacet, jPeak);}
 };
 
 template <>

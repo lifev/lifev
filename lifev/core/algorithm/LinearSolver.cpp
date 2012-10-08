@@ -314,7 +314,7 @@ LinearSolver::showMe( std::ostream& output ) const
     {
         output << "Solver parameters list:" << std::endl;
         output << "-----------------------------" << std::endl;
-        output << M_parameterList << endl;
+        output << M_parameterList << std::endl;
         output << "-----------------------------" << std::endl;
     }
 }

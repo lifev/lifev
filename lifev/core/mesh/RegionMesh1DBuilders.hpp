@@ -77,7 +77,6 @@ void uniformMesh1D( RegionMesh<LinearLine, MC>& mesh, const Real& x_l, const Rea
         pp->x() = x_l + it*deltax;
         pp->y() = pp->z() = 0.;
         pp->setId(it);
-        pp->setLocalId(it);
         if(isBoundary)
         {
         	pp->firstAdjacentElementIdentity() = it;
@@ -101,7 +100,6 @@ void uniformMesh1D( RegionMesh<LinearLine, MC>& mesh, const Real& x_l, const Rea
         pe->setPoint(0, mesh.point(it));
         pe->setPoint(1, mesh.point(it + 1));
         pe->setId(it);
-        pe->setLocalId(it);
     }
     mesh.setNumEdges(mesh.edgeList.size() );
     mesh.setMaxNumGlobalEdges(mesh.edgeList.size() );

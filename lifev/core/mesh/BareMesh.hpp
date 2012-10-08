@@ -43,25 +43,49 @@
 namespace LifeV
 {
 
+namespace LifeV
+{
+
 //! A struct for a bare mesh
 /**
  * A very simple struct which stores an mesh as read from a file, ready to be imported in
  * a regionmesh
  * All SimpleArray have the first dimension the "shortest" one
  */
-struct RegionMeshBare{
+template <typename GeoShapeType>
+struct BareMesh
+{
     UInt nDimensions;
-    ReferenceGeometry geoShape;
-    ReferenceGeometry bGeoShape;
-    ArraySimple<UInt> points;
-    std::vector<ID> pointsMarkers;
-    ArraySimple<UInt> edges;
-    std::vector<ID> edgesMarkers;
-    ArraySimple<UInt> faces;
-    std::vector<ID> facesMarkers;
+    ID regionMarkerID;
+    ReferenceShapes refShape;
+    ReferenceShapes bRefShape;
+    UInt numBoundaryPoints;
+    ArraySimple<Real> points;
+    std::vector<ID> pointMarkers;
+    ArraySimple<UInt> ridges;
+    std::vector<ID> ridgeMarkers;
+    UInt numBoundaryFacets;
+    ArraySimple<UInt> facets;
+    std::vector<ID> facetMarkers;
     ArraySimple<UInt> elements;
-    std::vector<ID> elementsMarkers;
+    std::vector<ID> elementMarkers;
 
+    void clear();
 };
+
+template <typename GeoShapeType>
+void BareMesh<GeoShapeType>::clear()
+{
+    clearVector ( points );
+    clearVector ( pointMarkers );
+    clearVector ( ridges );
+    clearVector ( ridgeMarkers );
+    clearVector ( facets );
+    clearVector ( facetMarkers );
+    clearVector ( elements );
+    clearVector ( elementMarkers );
+}
+
+}
 
 #endif /* BAREMESH_HPP_ */

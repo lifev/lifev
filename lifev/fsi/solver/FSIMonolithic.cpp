@@ -449,7 +449,7 @@ diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull)
 void
 FSIMonolithic::variablesInit(const std::string& dOrder)
 {
-    M_dFESpace.reset(new FESpace<mesh_Type, MapEpetra>(*M_solidMeshPart,
+    M_dFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_solidLocalMesh,
                                                        dOrder,
                                                        3,
                                                        M_epetraComm));

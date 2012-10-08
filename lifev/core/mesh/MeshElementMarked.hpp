@@ -89,7 +89,7 @@ public:
     	@param identity Element identity
         @param boundary True if the element is on boundary
      */
-    MeshElementMarked( ID identity, bool boundary = false );
+    explicit MeshElementMarked( ID identity, bool boundary = false );
 
     //! Declares item identity, provides coordinate and states if it is on boundary
     /*!
@@ -168,7 +168,7 @@ public:
     	@param identity Element identity
         @param boundary True if the element is on boundary
      */
-    MeshElementMarked( ID identity, bool boundary = false );
+    explicit MeshElementMarked( ID identity, bool boundary = false );
 
     //! Declares item identity, provides coordinate and states if it is on boundary
     /*!
@@ -230,7 +230,7 @@ public:
     {
 
     	return M_firstAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the identity of the second adjacent element
     /*!
@@ -239,7 +239,7 @@ public:
     ID secondAdjacentElementIdentity() const
     {
         return M_secondAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the identity of the first adjacent element
     /*!
@@ -248,7 +248,7 @@ public:
     ID & firstAdjacentElementIdentity()
     {
         return M_firstAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the identity of the second adjacent element
     /*!
@@ -257,7 +257,7 @@ public:
     ID & secondAdjacentElementIdentity()
     {
         return M_secondAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the position of the first adjacent element
     /*!
@@ -266,7 +266,7 @@ public:
     ID firstAdjacentElementPosition() const
     {
         return M_firstAdjacentElementPosition;
-    };
+    }
 
     //! Returns the position of the second adjacent element
     /*!
@@ -275,7 +275,7 @@ public:
     ID secondAdjacentElementPosition() const
     {
         return M_secondAdjacentElementPosition;
-    };
+    }
 
 
     //! Returns the position of the first adjacent element
@@ -285,7 +285,7 @@ public:
     ID & firstAdjacentElementPosition()
     {
         return M_firstAdjacentElementPosition;
-    };
+    }
 
     //! Returns the position of the second adjacent element
     /*!
@@ -294,7 +294,7 @@ public:
     ID & secondAdjacentElementPosition()
     {
         return M_secondAdjacentElementPosition;
-    };
+    }
 
     //@}
 
@@ -451,7 +451,7 @@ public:
     {
 
     	return M_firstAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the identity of the second adjacent element
     /*!
@@ -460,7 +460,7 @@ public:
     ID secondAdjacentElementIdentity() const
     {
         return M_secondAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the identity of the first adjacent element
     /*!
@@ -469,7 +469,7 @@ public:
     ID & firstAdjacentElementIdentity()
     {
         return M_firstAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the identity of the second adjacent element
     /*!
@@ -478,7 +478,7 @@ public:
     ID & secondAdjacentElementIdentity()
     {
         return M_secondAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the position of the first adjacent element
     /*!
@@ -487,7 +487,7 @@ public:
     ID firstAdjacentElementPosition() const
     {
         return M_firstAdjacentElementPosition;
-    };
+    }
 
     //! Returns the position of the second adjacent element
     /*!
@@ -496,7 +496,7 @@ public:
     ID secondAdjacentElementPosition() const
     {
         return M_secondAdjacentElementPosition;
-    };
+    }
 
 
     //! Returns the position of the first adjacent element
@@ -506,7 +506,7 @@ public:
     ID & firstAdjacentElementPosition()
     {
         return M_firstAdjacentElementPosition;
-    };
+    }
 
     //! Returns the position of the second adjacent element
     /*!
@@ -515,7 +515,7 @@ public:
     ID & secondAdjacentElementPosition()
     {
         return M_secondAdjacentElementPosition;
-    };
+    }
 
     //@}
 
@@ -586,7 +586,7 @@ public:
     {
 
     	return M_firstAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the identity of the second adjacent element
     /*!
@@ -595,7 +595,7 @@ public:
     ID secondAdjacentElementIdentity() const
     {
         return M_secondAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the identity of the first adjacent element
     /*!
@@ -604,7 +604,7 @@ public:
     ID & firstAdjacentElementIdentity()
     {
         return M_firstAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the identity of the second adjacent element
     /*!
@@ -613,7 +613,7 @@ public:
     ID & secondAdjacentElementIdentity()
     {
         return M_secondAdjacentElementIdentity;
-    };
+    }
 
     //! Returns the position of the first adjacent element
     /*!
@@ -622,7 +622,7 @@ public:
     ID firstAdjacentElementPosition() const
     {
         return M_firstAdjacentElementPosition;
-    };
+    }
 
     //! Returns the position of the second adjacent element
     /*!
@@ -631,7 +631,7 @@ public:
     ID secondAdjacentElementPosition() const
     {
         return M_secondAdjacentElementPosition;
-    };
+    }
 
 
     //! Returns the position of the first adjacent element
@@ -641,7 +641,7 @@ public:
     ID & firstAdjacentElementPosition()
     {
         return M_firstAdjacentElementPosition;
-    };
+    }
 
     //! Returns the position of the second adjacent element
     /*!
@@ -650,7 +650,7 @@ public:
     ID & secondAdjacentElementPosition()
     {
         return M_secondAdjacentElementPosition;
-    };
+    }
 
     //@}
 

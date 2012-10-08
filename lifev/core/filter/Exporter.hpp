@@ -338,7 +338,10 @@ public:
     virtual void readVariable(exporterData_Type& dvar);
 
     //! Export the Processor ID as P0 variable
-    virtual void exportPID( MeshPartitioner< MeshType > & meshPart );
+    virtual void exportPID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm );
+
+    //! Export entity flags
+    virtual void exportFlags( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const & flag = EntityFlags::ALL );
 
     //@}
 
@@ -620,9 +623,47 @@ void Exporter<MeshType>::readVariable(exporterData_Type& dvar)
     }
 }
 
+template <typename MeshType>
+void Exporter<MeshType>::exportFlags( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const & compareFlag )
+{
+    // @todo this is only for point flags, extension to other entity flags is trivial
+
+    // @todo switch loops for efficiency!
+
+    // @todo use FESpace M_spacemap for generality
+    const ReferenceFE &    refFE = feTetraP1;
+    const QuadratureRule & qR    = quadRuleTetra15pt;
+    const QuadratureRule & bdQr  = quadRuleTria4pt;
+
+    feSpacePtr_Type FlagFESpacePtr( new feSpace_Type( mesh, refFE, qR, bdQr, 1, comm ) );
+
+    std::vector< vectorPtr_Type > FlagData ( EntityFlags::number );
+
+    for ( flag_Type kFlag ( 1 ), flagCount ( 0 ); kFlag < EntityFlags::ALL; kFlag *=2, flagCount++ )
+    {
+        if ( kFlag & compareFlag )
+        {
+            FlagData[ flagCount ].reset ( new vector_Type ( FlagFESpacePtr->map() ) );
+
+            for ( UInt iPoint( 0 ); iPoint < FlagFESpacePtr->mesh()->numPoints(); ++iPoint )
+            {
+                typename MeshType::point_Type const & point = FlagFESpacePtr->mesh()->pointList[ iPoint ];
+                FlagData[ flagCount ]->setCoefficient ( point.id() , Flag::testOneSet( point.flag(), kFlag ) );
+            }
+
+            addVariable( exporterData_Type::ScalarField,
+                         "Flag " + EntityFlags::name ( kFlag ),
+                         FlagFESpacePtr,
+                         FlagData[ flagCount ],
+                         0,
+                         exporterData_Type::SteadyRegime,
+                         exporterData_Type::Node );
+        }
+    }
+}
 
 template <typename MeshType>
-void Exporter<MeshType>::exportPID( MeshPartitioner< MeshType > & meshPart )
+void Exporter<MeshType>::exportPID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
 {
     // TODO: use FESpace M_spacemap for generality
     const ReferenceFE* refFEPtr;
@@ -648,14 +689,14 @@ void Exporter<MeshType>::exportPID( MeshPartitioner< MeshType > & meshPart )
     const QuadratureRule & qR   = quadRuleDummy;
     const QuadratureRule & bdQr = quadRuleDummy;
 
-    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( meshPart, *refFEPtr, qR, bdQr, 1, meshPart.comm() ) );
+    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( mesh, *refFEPtr, qR, bdQr, 1, comm ) );
 
     vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
 
-    for ( UInt iElem( 0 ); iElem < PID_FESpacePtr->mesh()->numElements(); ++iElem )
+    for ( UInt iElem( 0 ); iElem < mesh->numElements(); ++iElem )
     {
         ID globalElem = PID_FESpacePtr->mesh()->element(iElem).id();
-        (*PIDData)[ globalElem ] = meshPart.comm()->MyPID();
+        (*PIDData)[ globalElem ] = comm->MyPID();
     }
 
     addVariable( exporterData_Type::ScalarField,

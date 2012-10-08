@@ -158,15 +158,19 @@ void test_bdf::run()
     //Mesh stuff
     Members->comm->Barrier();
     MeshData meshData(dataFile, ("bdf/" + discretization_section).c_str());
-    boost::shared_ptr<regionMesh> meshPtr( new regionMesh() );
-    readMesh(*meshPtr,meshData);
-    MeshPartitioner<regionMesh> meshPart(meshPtr, Members->comm);
+    boost::shared_ptr<regionMesh> fullMeshPtr( new regionMesh( *( Members->comm ) ) );
+    readMesh(*fullMeshPtr,meshData);
+    boost::shared_ptr<regionMesh> meshPtr;
+    {
+        MeshPartitioner<regionMesh> meshPart( fullMeshPtr, Members->comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     //=============================================================================
     //finite element space of the solution
     boost::shared_ptr<FESpace<regionMesh, MapEpetra> > feSpacePtr(
         new FESpace<regionMesh, MapEpetra> (
-            meshPart, dataFile(("bdf/"+discretization_section + "/order").c_str(), "P2"), 1, Members->comm) );
+                        meshPtr, dataFile(("bdf/"+discretization_section + "/order").c_str(), "P2"), 1, Members->comm) );
 
     if (verbose)
         std::cout << "  Number of unknowns : "
@@ -234,16 +238,16 @@ void test_bdf::run()
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new ExporterEmpty<regionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<regionMesh > ( dataFile, meshPtr, "bdf_test", Members->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new ExporterEnsight<regionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<regionMesh > ( dataFile, meshPtr, "bdf_test", Members->comm->MyPID()) );
         }
     }
 
     exporter->setPostDir( "./" );
-    exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
+    exporter->setMeshProcId( meshPtr, Members->comm->MyPID() );
 
     boost::shared_ptr<VectorEpetra> u_display_ptr(new VectorEpetra(
                                                       feSpacePtr->map(), exporter->mapType()));

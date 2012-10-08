@@ -129,8 +129,8 @@ public:
       @param solidPartitionNumber Int
       @param velocityOrder std::string
       @param displacementOrder std::string
-      @param fluidInterfaceFlag LifeV::EntityFlagStandardPolicy::markerID_Type (Int)
-      @param solidInterfaceFlag LifeV::EntityFlagStandardPolicy::markerID_Type (Int)
+      @param fluidInterfaceFlag LifeV::MarkerIDStandardPolicy::markerID_Type (Int)
+      @param solidInterfaceFlag LifeV::MarkerIDStandardPolicy::markerID_Type (Int)
       @param interfaceTolerance Real
       @param fluidInterfaceVertexFlag Int
       @param comm boost::shared_ptr to a Epetra_Comm object
