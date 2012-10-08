@@ -335,7 +335,7 @@ void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr
     this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
            this->M_elmatK->zero();
 
-    UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+    UInt marker = this->M_FESpace->mesh()->volumeList( i ).markerID();
     //Real mu         = dataMaterial->mu(marker);
     Real bulk       = dataMaterial->bulk(marker);
     Real alpha         = dataMaterial->alpha(marker);
@@ -431,7 +431,7 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
     {
     this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
 
-    UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+    UInt marker = this->M_FESpace->mesh()->volumeList( i ).markerID();
 
     //Getting the proper coefficients
     //Real mu         = dataMaterial->mu(marker);

@@ -342,7 +342,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 	this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
        	this->M_elmatK->zero();
 
-	UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+	UInt marker = this->M_FESpace->mesh()->volumeList( i ).markerID();
 	Real mu     = dataMaterial->mu(marker);
 	Real bulk   = dataMaterial->bulk(marker);
 
@@ -433,7 +433,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
     {
 	this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
 
-	UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+	UInt marker = this->M_FESpace->mesh()->volumeList( i ).markerID();
 
 	//! Getting the proper coefficients
 	Real mu     = dataMaterial->mu(marker);

@@ -191,7 +191,7 @@ FSIOperator::setupFEspace()
     std::string meshOrder = M_meshDataFluid->mOrder();
 
 
-    ASSERT( meshOrder.compare("P1"), "Only P1 FESpace can be used for the mesh motion!") ;
+    ASSERT( meshOrder.compare("P2"), "Only P1 FESpace can be used for the mesh motion!") ;
 
     const ReferenceFE*    refFE_vel(0);
     const QuadratureRule* qR_vel(0);

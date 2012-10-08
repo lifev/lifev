@@ -224,7 +224,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
 
 	  this->M_elmatK->zero();
 
-	  UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+	  UInt marker = this->M_FESpace->mesh()->volumeList( i ).markerID();
 
 	  Real mu = dataMaterial->mu(marker);
 	  Real lambda = dataMaterial->lambda(marker);
@@ -341,7 +341,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
 
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
 
-	UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+	UInt marker = this->M_FESpace->mesh()->volumeList( i ).markerID();
 
 	Real mu = dataMaterial->mu(marker);
 	Real lambda = dataMaterial->lambda(marker);

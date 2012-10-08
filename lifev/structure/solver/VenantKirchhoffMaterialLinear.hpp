@@ -219,7 +219,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 
         this->M_elmatK->zero();
 
-        UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+        UInt marker = this->M_FESpace->mesh()->volumeList( i ).markerID();
 
     Real mu = dataMaterial->mu(marker);
     Real lambda = dataMaterial->lambda(marker);

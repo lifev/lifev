@@ -43,9 +43,6 @@
 namespace LifeV
 {
 
-namespace LifeV
-{
-
 //! A struct for a bare mesh
 /**
  * A very simple struct which stores an mesh as read from a file, ready to be imported in

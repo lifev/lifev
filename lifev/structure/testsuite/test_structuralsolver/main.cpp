@@ -249,7 +249,7 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( *( parameters->comm ) ));
     readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner< RegionMesh<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );

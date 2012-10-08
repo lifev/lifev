@@ -112,8 +112,8 @@ FSIMonolithic::setupDOF( void )
 
     createInterfaceMaps(M_dofStructureToFluid/*HarmonicExtension*/->localDofMap());
 
-    M_fluidMeshPart->releaseUnpartitionedMesh();
-    M_solidMeshPart->releaseUnpartitionedMesh();
+    //M_fluidMeshPart->releaseUnpartitionedMesh();
+    //M_solidMeshPart->releaseUnpartitionedMesh();
     M_fluidMesh.reset();
     M_solidMesh.reset();
 }
