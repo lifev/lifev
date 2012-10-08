@@ -772,16 +772,16 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
     {
 
 
-        Debug(5010) <<
+        debugStream(5010) <<
         "WARNING -- BCHandler::bcUpdate()\n" <<
         "  boundary degrees of freedom with the following markers\n" <<
         "  have no boundary condition set: ";
         for ( std::set<bcFlag_Type>::iterator it = notFoundMarkers.begin();
                 it != notFoundMarkers.end(); ++it )
         {
-            Debug(5010) << *it << " ";
+            debugStream(5010) << *it << " ";
         }
-        Debug(5010) << "\n";
+        debugStream(5010) << "\n";
 
     }
 #endif

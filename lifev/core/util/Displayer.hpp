@@ -41,7 +41,6 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <boost/shared_ptr.hpp>
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <Epetra_MpiComm.h>

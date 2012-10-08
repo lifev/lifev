@@ -241,7 +241,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::BCInterface1D() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface1D::BCInterface1D" << "\n";
+    debugStream( 5020 ) << "BCInterface1D::BCInterface1D" << "\n";
 #endif
 
 }
@@ -255,7 +255,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface1D::insertBC\n";
+    debugStream( 5020 ) << "BCInterface1D::insertBC\n";
 #endif
 
     switch ( M_data.base().second )
@@ -348,7 +348,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         this->createHandler();
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface1D::addBCManager" << "\n\n";
+        debugStream( 5020 ) << "BCInterface1D::addBCManager" << "\n\n";
 #endif
 
         this->M_handler->setBC( M_data.side(), M_data.line(), M_data.quantity(), base );

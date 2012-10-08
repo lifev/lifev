@@ -175,4 +175,3 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
 }
 
 #endif
-

@@ -43,14 +43,9 @@
 #ifndef _FESPACE_H_
 #define _FESPACE_H_
 
-#include <cmath>
-#include <map>
 #include <iomanip>
 #include <sstream>
 #include <utility>
-
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <lifev/core/LifeV.hpp>
 
@@ -720,7 +715,7 @@ interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real 
     const UInt numberLocalDof ( M_dof->numLocalDof() );
 
     // Storage for the values
-    typename FEFunctionType::point_Type point(3);
+    typename FEFunctionType::point_Type point;
     std::vector<Real> nodalValues (numberLocalDof, 0);
     std::vector<Real> FEValues (numberLocalDof, 0);
 

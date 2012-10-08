@@ -317,14 +317,14 @@ void StabilizationSD<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
 
     }// loop on elements
 
-    Debug(7100) << std::endl;
-    Debug(7100) << "      Updating of element   done in "
+    debugStream(7100) << std::endl;
+    debugStream(7100) << "      Updating of element   done in "
     << chronoUpdate.diffCumul()   << "s." << std::endl;
-    Debug(7100) << "      Determination of parameters done in "
+    debugStream(7100) << "      Determination of parameters done in "
     << chronoBeta.diffCumul()     << "s." << std::endl;
-    Debug(7100) << "      Element computations  done in "
+    debugStream(7100) << "      Element computations  done in "
     << chronoElemComp.diffCumul() << "s." << std::endl;
-    Debug(7100) << "      Assembly              done in "
+    debugStream(7100) << "      Assembly              done in "
     << chronoAssembly.diffCumul() << "s." << std::endl;
 
 
@@ -387,14 +387,14 @@ void StabilizationSD<MeshType, DofType>::applySD(const Real dt, MatrixType& matr
 
     }// loop on elements
 
-    Debug(7100) << std::endl;
-    Debug(7100) << "      Updating of element   done in "
+    debugStream(7100) << std::endl;
+    debugStream(7100) << "      Updating of element   done in "
     << chronoUpdate.diffCumul()   << "s." << std::endl;
-    Debug(7100) << "      Determination of parameters done in "
+    debugStream(7100) << "      Determination of parameters done in "
     << chronoBeta.diffCumul()     << "s." << std::endl;
-    Debug(7100) << "      Element computations  done in "
+    debugStream(7100) << "      Element computations  done in "
     << chronoElemComp.diffCumul() << "s." << std::endl;
-    Debug(7100) << "      Assembly              done in "
+    debugStream(7100) << "      Assembly              done in "
     << chronoAssembly.diffCumul() << "s." << std::endl;
 
 
@@ -454,14 +454,14 @@ void StabilizationSD<MeshType, DofType>::applyRHS(const Real dt, VectorType& vec
 
     }// loop on elements
 
-    Debug(7100) << std::endl;
-    Debug(7100) << "      Updating of element   done in "
+    debugStream(7100) << std::endl;
+    debugStream(7100) << "      Updating of element   done in "
     << chronoUpdate.diffCumul()   << "s." << std::endl;
-    Debug(7100) << "      Determination of parameters done in "
+    debugStream(7100) << "      Determination of parameters done in "
     << chronoBeta.diffCumul()     << "s." << std::endl;
-    Debug(7100) << "      Element computations  done in "
+    debugStream(7100) << "      Element computations  done in "
     << chronoElemComp.diffCumul() << "s." << std::endl;
-    Debug(7100) << "      Assembly              done in "
+    debugStream(7100) << "      Assembly              done in "
     << chronoAssembly.diffCumul() << "s." << std::endl;
 
 

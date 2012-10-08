@@ -101,7 +101,7 @@ FSIFixedPoint::setupFluidSolid()
 {
     // call FSI setup()
 
-    Debug( 6205 ) << "Setting up the FSI problem \n";
+    debugStream( 6205 ) << "Setting up the FSI problem \n";
 
     super::setLinearFluid(false);
     super::setLinearSolid(false);

@@ -85,6 +85,11 @@ typedef LifeV::Preconditioner             basePrec_Type;
 typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
 typedef LifeV::PreconditionerIfpack       prec_Type;
 typedef boost::shared_ptr<prec_Type>      precPtr_Type;
+typedef boost::function< Real( Real const &,
+                               Real const &,
+                               Real const &,
+                               Real const &,
+                               UInt const & ) > function_Type;
 }
 
 void printErrors( const vector_Type& solution, fespacePtr_Type uFESpace, bool verbose )
@@ -326,19 +331,19 @@ main( int argc, char** argv )
     if( verbose ) std::cout << std::endl << "[Errors computation]" << std::endl;
     vector_Type solutionErr( *solution );
     solutionErr *= 0.0;
-    uFESpace->interpolate( Laplacian::uexact, solutionErr, 0.0 );
+    uFESpace->interpolate( static_cast<function_Type>( Laplacian::uexact ), solutionErr, 0.0 );
     solutionErr -= *solution;
     solutionErr.abs();
 
     vector_Type solution2Err( *solution2 );
     solution2Err *= 0.0;
-    uFESpace->interpolate( Laplacian::uexact,solution2Err, 0.0 );
+    uFESpace->interpolate( static_cast<function_Type>( Laplacian::uexact ),solution2Err, 0.0 );
     solution2Err -= *solution2;
     solution2Err.abs();
 
     vector_Type solution3Err( *solution3 );
     solution3Err *= 0.0;
-    uFESpace->interpolate( Laplacian::uexact, solution3Err, 0.0 );
+    uFESpace->interpolate( static_cast<function_Type>( Laplacian::uexact ), solution3Err, 0.0 );
     solution3Err -= *solution3;
     solution3Err.abs();
 

@@ -55,7 +55,7 @@ FSISolver::FSISolver():
         M_interComm         ( new MPI_Comm )
 {
 #ifdef DEBUG
-    Debug( 6220 ) << "FSISolver::FSISolver constructor starts\n";
+    debugStream( 6220 ) << "FSISolver::FSISolver constructor starts\n";
 #endif
 }
 
@@ -145,7 +145,7 @@ FSISolver::setData( const dataPtr_Type& data )
 #ifdef DEBUG
     if ( fluid )
     {
-        Debug(6220) << M_epetraComm->MyPID()
+        debugStream(6220) << M_epetraComm->MyPID()
         << " ( " << rank << " ) "
         << " out of " << M_epetraComm->NumProc()
         << " ( " << numtasks << " ) "
@@ -153,7 +153,7 @@ FSISolver::setData( const dataPtr_Type& data )
     }
     if ( solid )
     {
-        Debug(6220) << M_epetraComm->MyPID()
+        debugStream(6220) << M_epetraComm->MyPID()
         << " ( " << rank << " ) "
         << " out of " << M_epetraComm->NumProc()
         << " ( " << numtasks << " ) "
@@ -212,7 +212,7 @@ FSISolver::setData( const dataPtr_Type& data )
     M_epetraWorldComm->Barrier();
 
 #ifdef DEBUG
-    Debug( 6220 ) << "FSISolver constructor ends\n";
+    debugStream( 6220 ) << "FSISolver constructor ends\n";
 #endif
 
 //@     M_lambda.resize(M_oper->displacement().size());
@@ -221,8 +221,8 @@ FSISolver::setData( const dataPtr_Type& data )
 //     M_lambda   = ZeroVector( M_lambda.size() );
 //     M_lambdaDot   = ZeroVector( M_lambdaDot.size() );
 
-//     Debug( 6220 ) << "FSISolver::M_lambda: " << M_lambda.size() << "\n";
-//     Debug( 6220 ) << "FSISolver::M_lambdaDot: " << M_lambdaDot.size() << "\n";
+//     debugStream( 6220 ) << "FSISolver::M_lambda: " << M_lambda.size() << "\n";
+//     debugStream( 6220 ) << "FSISolver::M_lambdaDot: " << M_lambdaDot.size() << "\n";
 
     M_oper->setData( data );
 }
@@ -278,9 +278,9 @@ FSISolver::initialize(std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Ty
 void
 FSISolver::iterate()
 {
-    Debug( 6220 ) << "============================================================\n";
-    Debug( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSI: " << M_data->method()  << "\n";
-    Debug( 6220 ) << "============================================================\n";
+    debugStream( 6220 ) << "============================================================\n";
+    debugStream( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSI: " << M_data->method()  << "\n";
+    debugStream( 6220 ) << "============================================================\n";
 
     // Update the system
     M_oper->updateSystem( );
@@ -326,8 +326,8 @@ FSISolver::iterate()
         }
     }
 
-    Debug( 6220 ) << "FSISolver iteration at time " << M_data->dataFluid()->dataTime()->time() << " done\n";
-    Debug( 6220 ) << "============================================================\n";
+    debugStream( 6220 ) << "FSISolver iteration at time " << M_data->dataFluid()->dataTime()->time() << " done\n";
+    debugStream( 6220 ) << "============================================================\n";
     std::cout << std::flush;
 }
 
@@ -345,7 +345,7 @@ FSISolver::setSourceTerms( const fluidSource_Type& fluidSource,
 void
 FSISolver::setFSI( )
 {
-    Debug( 6220 ) << "FSISolver::setFSI with operator " << M_data->method() << "\n";
+    debugStream( 6220 ) << "FSISolver::setFSI with operator " << M_data->method() << "\n";
     M_oper = FSIOperPtr_Type( FSIOperator::FSIFactory_Type::instance().createObject( M_data->method() ) );
 }
 

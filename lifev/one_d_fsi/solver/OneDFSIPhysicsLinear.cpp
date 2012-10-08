@@ -56,11 +56,11 @@ OneDFSIPhysicsLinear::fromUToW( Real& W1, Real& W2, const Real& U1, const Real& 
     W2 = U2 - celerity0( iNode ) * ( U1 - M_dataPtr->area0( iNode ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] Q " << U2 << "\n";
-    Debug( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] W1 " << W1 << "\n";
-    Debug( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] W2 " << W2 << "\n";
-    Debug( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] celerity " << celerity0( iNode ) << "\n";
-    Debug( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] ( _U1 - area0( iNode ) ) " << ( U1 - M_dataPtr->area0( iNode ) ) << "\n";
+    debugStream( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] Q " << U2 << "\n";
+    debugStream( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] W1 " << W1 << "\n";
+    debugStream( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] W2 " << W2 << "\n";
+    debugStream( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] celerity " << celerity0( iNode ) << "\n";
+    debugStream( 6320 ) << "[OneDFSIModel_Physics_Linear::fromUToW] ( _U1 - area0( iNode ) ) " << ( U1 - M_dataPtr->area0( iNode ) ) << "\n";
 #endif
 }
 
@@ -89,11 +89,11 @@ OneDFSIPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& iW, cons
                                                                                               1 / M_dataPtr -> beta1( iNode ) ) - 1 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6320) << "[fromPToW] "
+    debugStream(6320) << "[fromPToW] "
     << "2 * celerity0( iNode ) * area0( iNode ) = " << 2 * celerity0( iNode ) * M_dataPtr -> area0( iNode )
     << ", pow( ( P / beta0( iNode ) + 1 ), 1 / beta1( iNode ) ) = "
     << OneDFSI::pow20( P / M_dataPtr -> beta0( iNode ) + 1 , 1 / M_dataPtr -> beta1( iNode ) ) << "\n";
-    Debug(6320) << "[fromPToW] add term = " << add << "\n";
+    debugStream(6320) << "[fromPToW] add term = " << add << "\n";
 #endif
 
     if ( iW == 0 )

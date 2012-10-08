@@ -39,9 +39,6 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/RNM.hpp>
 
-#include <vector>
-#include <cmath>
-
 // LifeV namespace.
 namespace LifeV
 {

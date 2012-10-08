@@ -372,7 +372,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::assignFunction( BCBaseType& bas
     case EXACTJACOBIAN:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            exactJacobian" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            exactJacobian" << "\n";
 #endif
 
         checkFunction< FSIExactJacobian > ( base );
@@ -382,7 +382,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::assignFunction( BCBaseType& bas
     case FIXEDPOINT:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            fixedPoint" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            fixedPoint" << "\n";
 #endif
 
         checkFunction< FSIFixedPoint > ( base );
@@ -392,7 +392,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::assignFunction( BCBaseType& bas
     case MONOLITHIC_GE:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            monolithicGE" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            monolithicGE" << "\n";
 #endif
 
         checkFunction< FSIMonolithicGE >( base );
@@ -402,7 +402,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::assignFunction( BCBaseType& bas
     case MONOLITHIC_GI:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            monolithicGI" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            monolithicGI" << "\n";
 #endif
 
         checkFunction< FSIMonolithicGI >( base );
@@ -431,7 +431,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case DerFluidLoadToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerFluidLoadToFluid" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerFluidLoadToFluid" << "\n";
 #endif
 
         break;
@@ -439,7 +439,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case DerFluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerFluidLoadToStructure" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
         if ( !operMethod->isSolid() )
             return;
@@ -453,7 +453,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case DerHarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -468,7 +468,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case DerStructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerStructureDispToSolid" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerStructureDispToSolid" << "\n";
 #endif
 
         break;
@@ -476,7 +476,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case FluidInterfaceDisp:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          FluidInterfaceDisp" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
         //operMethod->FluidInterfaceDisp( (LifeV::Vector&) operMethod->lambdaFluidRepeated() );
@@ -488,7 +488,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case FluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          FluidLoadToStructure" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
         if ( !operMethod->isSolid() )
@@ -503,7 +503,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case HarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -518,7 +518,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case SolidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          SolidLoadToStructure" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
         if ( !operMethod->isFluid() )
             return;
@@ -532,7 +532,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case StructureDispToHarmonicExtension:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureDispToHarmonicExtension" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -547,7 +547,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case StructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureDispToSolid" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureDispToSolid" << "\n";
 #endif
 
         break;
@@ -555,7 +555,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case StructureToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureToFluid" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureToFluid" << "\n";
 #endif
 
         if ( !operMethod->isFluid() )
@@ -586,7 +586,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     case RobinWall:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          RobinWall" << "\n";
+        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          RobinWall" << "\n";
 #endif
 
         if ( !operMethod->isSolid() )

@@ -143,7 +143,7 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::BCInterfaceFunctionPa
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterfaceFunctionFileSolver::BCInterfaceFunctionFileSolver()" << "\n";
+    debugStream( 5024 ) << "BCInterfaceFunctionFileSolver::BCInterfaceFunctionFileSolver()" << "\n";
 #endif
 
 }
@@ -157,7 +157,7 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData( const BCInte
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
+    debugStream( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
     functionParserFile_Type::setData( data );
 
@@ -173,7 +173,7 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData( const BCInte
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
+    debugStream( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
     functionParserFile_Type::setData( data );
 
@@ -189,7 +189,7 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData( const BCInte
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
+    debugStream( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
     functionParserFile_Type::setData( data );
 
