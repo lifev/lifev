@@ -339,7 +339,7 @@ Structure::run3d()
     solid.buildSystem(timeAdvanceCoefficient);
 
 
-
+    dataStructure->showMe();
     //! =================================================================================
     //! Temporal data and initial conditions
     //! =================================================================================

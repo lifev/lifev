@@ -103,7 +103,6 @@ private:
 
 }; // Marker selector
 
-
 /*!
   \class StructuralSolver
   \brief
@@ -153,7 +152,6 @@ public:
 
   typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
   typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
-
   //@}
 
 
@@ -696,8 +694,7 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
         M_out_iter.open( "out_iter_solid" );
         M_out_res.open( "out_res_solid" );
     }
-
-    M_mapMarkersVolumes.reset (new  mapMarkerVolumes_Type( ) );
+    M_mapMarkersVolumes.reset( new mapMarkerVolumes_Type() );
     this->setupMapMarkersVolumes();
 }
 
@@ -803,7 +800,7 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& coefficient )
     chrono.start();
 
     computeMassMatrix( coefficient );
-    M_material->computeLinearStiff(M_data);
+    M_material->computeLinearStiff(M_data, M_mapMarkersVolumes);
 
     chrono.stop();
     M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
@@ -946,7 +943,7 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     chrono.start();
 
     //! It is right to do globalAssemble() inside the M_material class
-    M_material->computeStiffness( sol, 1., M_data, M_Displayer);
+    M_material->computeStiffness( sol, 1., M_data, M_mapMarkersVolumes, M_Displayer);
 
     if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
@@ -1270,7 +1267,7 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( const vector_Type & sol
     LifeChrono chrono;
     chrono.start();
 
-    M_material->updateJacobianMatrix(sol, M_data, M_Displayer);
+    M_material->updateJacobianMatrix(sol, M_data, M_mapMarkersVolumes, M_Displayer);
 
     jacobian.reset(new matrix_Type(*M_localMap));
     *jacobian += *M_material->jacobian();
@@ -1339,7 +1336,7 @@ solveJacobian(vector_Type&           step,
 template<typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::Apply( const vector_Type& sol, vector_Type& res) const
 {
-    M_material->Apply(sol, res);
+  M_material->Apply(sol, res, M_mapMarkersVolumes);
     res += (*M_mass)*sol;
 }
 
