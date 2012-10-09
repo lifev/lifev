@@ -427,6 +427,9 @@ public:
      */
     Int globalToLocalRowId( const UInt row ) const;
 
+    //! set zero in all the vector entries
+    void zero() {M_epetraVector->PutScalar(0.);}
+
     //! Look for the given global row and set its value
     /*!
       @param row Global row Id

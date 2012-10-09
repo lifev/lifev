@@ -39,7 +39,6 @@
 
 #include <iomanip>
 
-#include <boost/shared_ptr.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -73,6 +72,8 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/util/LifeDebug.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
@@ -278,9 +279,9 @@ public:
     void setQuitOnFailure( const bool enable );
 
     //! Set the tolerance of the solver
-	/*!
-	  @param tolerance Tolerance used by the solver
-	 */
+    /*!
+      @param tolerance Tolerance used by the solver
+     */
     void setTolerance( const Real& tolerance );
 
     //@}
@@ -321,13 +322,13 @@ public:
     //! Returns if the solver is in silent mode
     bool silent() const;
 
-	//! Returns if the maximum number of iterations has been reached
+    //! Returns if the maximum number of iterations has been reached
     SolverOperator_Type::SolverOperatorStatusType hasReachedMaxNumIters() const;
 
-	//! Returns if a loss of precision has been detected
+    //! Returns if a loss of precision has been detected
     SolverOperator_Type::SolverOperatorStatusType isLossOfAccuracyDetected() const;
 
-	//! Returns if the convergence has been achieved
+    //! Returns if the convergence has been achieved
     SolverOperator_Type::SolverOperatorStatusType hasConverged() const;
 
     //@}

@@ -45,25 +45,22 @@
 #ifndef _ELEMOPER_H_INCLUDED
 #define _ELEMOPER_H_INCLUDED
 
-#include <lifev/core/array/MatrixElemental.hpp>
-#include <lifev/core/array/VectorElemental.hpp>
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/numeric/ublas/matrix.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
+
+#include <lifev/core/array/MatrixElemental.hpp>
+#include <lifev/core/array/VectorElemental.hpp>
 
 #include <lifev/core/fem/CurrentBoundaryFE.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
 #include <lifev/core/fem/DOF.hpp>
-
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <boost/shared_ptr.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/function.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV
 {

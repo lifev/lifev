@@ -28,19 +28,13 @@
 
 Simple Darcy test with Dirichlet, Neumann and Robin boundary conditions
 
-Solve the problem
-
-               div u - f = 0            in \Omega
-
-               K^{-1} u + \nabla p = 0  in \Omega
-
 */
 
 
 /**
    @file main.hpp
    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-   @date 2010-07-29
+   @date 2012-06-13
 */
 
 
@@ -85,7 +79,7 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 
 #ifdef HAVE_MPI
@@ -95,21 +89,24 @@ int main(int argc, char** argv)
 #endif
 
     // Error known
-    const LifeV::Real errorKnown( 0.2003822844278755 );
+    const LifeV::Real errorKnown ( 0.9554685918458008 );
 
-    // Tolerance between the error and the errorKnown
-    const LifeV::Real tolerance( 1e-8 );
+    // Tolerance between the error and the error known
+    const LifeV::Real tolerance( 1e-10 );
 
-    darcy Darcy( argc, argv );
+    darcy_nonlinear Darcy( argc, argv );
 
     // Error of the problem
     const LifeV::Real error = Darcy.run();
-    const bool unsuccess=std::fabs( error - errorKnown ) > tolerance;
+    const bool unsuccess = std::fabs ( error - errorKnown ) > tolerance;
+
 #ifdef HAVE_MPI
+
     MPI_Finalize();
+
 #endif
 
-    if (unsuccess)
+    if ( unsuccess )
     {
         return ( EXIT_FAILURE );
     }

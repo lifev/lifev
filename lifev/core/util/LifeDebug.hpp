@@ -39,7 +39,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdio>
 #include <iosfwd>
 #include <sstream>
-#include <string>
 
 #include <lifev/core/LifeV.hpp>
 

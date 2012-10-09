@@ -39,8 +39,6 @@
 
 // #endif
 
-#include <lifev/core/LifeV.hpp>
-
 #ifdef  HAVE_TRILINOS_ANASAZI
 
 #ifndef EIGENSOLVER_HPP
@@ -48,9 +46,6 @@
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <cstdlib>
-#include <boost/shared_ptr.hpp>
 
 #include <Epetra_MultiVector.h>
 #include <Epetra_SerialDenseVector.h>
@@ -71,6 +66,8 @@
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/filter/GetPot.hpp>
 

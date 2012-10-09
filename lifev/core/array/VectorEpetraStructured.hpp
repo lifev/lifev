@@ -42,7 +42,6 @@
 #include <lifev/core/array/MapVector.hpp>
 #include <lifev/core/array/VectorEpetraStructuredView.hpp>
 
-#include <boost/shared_ptr.hpp>
 
 namespace LifeV {
 
