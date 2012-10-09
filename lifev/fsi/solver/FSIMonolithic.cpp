@@ -510,7 +510,7 @@ FSIMonolithic::assembleSolidBlock( UInt iter, const vector_Type& solution )
 
     if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean"))
     {
-        M_solid->material()->computeStiffness(solution*M_solid->rescaleFactor(), 1., M_data->dataSolid(), M_solid->displayerPtr());
+      M_solid->material()->computeStiffness(solution*M_solid->rescaleFactor(), 1., M_data->dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr());
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solid->Mass();
         *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
@@ -519,7 +519,7 @@ FSIMonolithic::assembleSolidBlock( UInt iter, const vector_Type& solution )
     }
     else
     {
-        M_solid->material()->updateJacobianMatrix( solution*M_solid->rescaleFactor(), dataSolid(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+      M_solid->material()->updateJacobianMatrix( solution*M_solid->rescaleFactor(), dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solid->Mass();
         *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();

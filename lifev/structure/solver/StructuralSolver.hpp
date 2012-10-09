@@ -493,6 +493,9 @@ public:
 
     void Apply( const vector_Type& sol, vector_Type& res) const;
 
+
+    //! Get the density
+    mapMarkerVolumesPtr_Type mapMarkersVolumes() const { return M_mapMarkersVolumes; }
     //@}
 
 protected:
@@ -753,7 +756,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff
     chrono.start();
 
     //Compute the new Stiffness Matrix
-    M_material->computeStiffness(*M_disp, M_rescaleFactor, M_data, M_Displayer);
+    M_material->computeStiffness(*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_Displayer);
 
     if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {

@@ -287,6 +287,7 @@ void FSIMonolithicGI::setupBlockPrec()
     {
         M_solid->material()->updateJacobianMatrix( *M_uk * M_solid->rescaleFactor()/**M_data->dataFluid()->dataTime()->timeStep()*/,
                                                    dataSolid(),
+						   M_solid->mapMarkersVolumes(),
                                                    M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap,
                                                  1 ) );
