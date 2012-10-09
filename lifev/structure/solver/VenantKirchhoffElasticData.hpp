@@ -74,6 +74,7 @@ public:
 
     typedef std::map<UInt, Real>                   materialContainer_Type;
     typedef materialContainer_Type::const_iterator materialContainerIterator_Type;
+    typedef std::vector<UInt>                      vectorFlags_Type;
 
     //@}
 
@@ -298,6 +299,13 @@ public:
      */
     const bool& getUseExactJacobian() const { return M_useExactJacobian; }
 
+
+    //! Get the vector of the set material_flags
+    /*!
+     * @return the vector of the material_flags set in the data file
+     */
+    const vectorFlags_Type& vectorFlags() const { return M_vectorMaterialFlags; }
+
     //@}
 
 private:
@@ -330,6 +338,8 @@ private:
 
     std::string            M_solidType;
     bool                   M_useExactJacobian;
+
+    vectorFlags_Type       M_vectorMaterialFlags;
 };
 
 } // end namespace LifeV
