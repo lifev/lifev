@@ -49,7 +49,7 @@ MultiscaleCouplingMeanTotalNormalStress::MultiscaleCouplingMeanTotalNormalStress
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MultiscaleCouplingMeanTotalNormalStress::MultiscaleCouplingMeanTotalNormalStress() \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::MultiscaleCouplingMeanTotalNormalStress() \n";
 #endif
 
     M_type = MeanTotalNormalStress;
@@ -63,7 +63,7 @@ MultiscaleCouplingMeanTotalNormalStress::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MultiscaleCouplingMeanTotalNormalStress::setupCoupling() \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::setupCoupling() \n";
 #endif
 
     if ( myModelsNumber() > 0 )
@@ -92,7 +92,7 @@ MultiscaleCouplingMeanTotalNormalStress::initializeCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MultiscaleCouplingMeanTotalNormalStress::initializeCouplingVariables() \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::initializeCouplingVariables() \n";
 #endif
 
     // Compute the flow rate and mean normal stress coupling variables
@@ -137,7 +137,7 @@ MultiscaleCouplingMeanTotalNormalStress::initializeCouplingVariables()
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
-        Debug( 8220 ) << "C(" << M_couplingVariablesOffset + i << ") = " << localCouplingVariables( 0 )[i]  << "\n";
+        Debug( 8250 ) << "C(" << M_couplingVariablesOffset + i << ") = " << localCouplingVariables( 0 )[i]  << "\n";
 #endif
 
 }
@@ -147,7 +147,7 @@ MultiscaleCouplingMeanTotalNormalStress::exportCouplingResiduals( multiscaleVect
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MultiscaleCouplingMeanTotalNormalStress::exportCouplingResiduals()  \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::exportCouplingResiduals()  \n";
 #endif
 
     // Reset coupling residual
@@ -183,7 +183,7 @@ MultiscaleCouplingMeanTotalNormalStress::exportCouplingResiduals( multiscaleVect
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
-        Debug( 8220 ) << "R(" << M_couplingVariablesOffset + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
+        Debug( 8250 ) << "R(" << M_couplingVariablesOffset + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
 #endif
 
 }
@@ -196,7 +196,7 @@ MultiscaleCouplingMeanTotalNormalStress::listOfPerturbedModels( const UInt& loca
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MultiscaleCouplingMeanTotalNormalStress::listOfPerturbedModels( localCouplingVariableID ) \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::listOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
     multiscaleModelsContainer_Type perturbedModelsList(0);
@@ -215,7 +215,7 @@ MultiscaleCouplingMeanTotalNormalStress::insertJacobianConstantCoefficients( mul
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MultiscaleCouplingMeanTotalNormalStress::insertJacobianConstantCoefficients( jacobian )  \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::insertJacobianConstantCoefficients( jacobian )  \n";
 #endif
 
     // The constant coefficients are added by the leader process of model 0.
@@ -234,7 +234,7 @@ MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( multis
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
 #endif
 
     // Model global to local conversion
@@ -254,7 +254,7 @@ MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( multis
             jacobian.addToCoefficient( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 8220 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
+            Debug( 8250 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
 #endif
         }
 
@@ -270,7 +270,7 @@ MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( multis
                 jacobian.addToCoefficient( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 8220 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
+                Debug( 8250 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
 #endif
             }
         }
