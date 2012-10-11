@@ -497,18 +497,18 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
 
         case f_flux:
 
-               if ( M_physicalSolver->isFluid() )
+            if ( M_physicalSolver->isFluid() )
             {
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag ) << "\n";
+                debugStream( 5023 ) << "!!! Warning: fluid not initialized yet, setting flux = 0 in BCInterface !!!\n";
 
 #endif
-            setVariable( "f_flux", 0.0 );
+                setVariable( "f_flux", 0.0 );
             }
             else
             {
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
+                debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
 #endif
                 setVariable( "f_flux", M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) );
             }
