@@ -103,10 +103,12 @@ enum models_Type
  */
 enum couplings_Type
 {
-    BoundaryCondition,      /*!< Boundary condition */
-    MeanNormalStress,       /*!< Mean normal stress coupling condition */
-    MeanNormalStressValve,  /*!< Mean normal stress coupling condition with simple valve*/
-    MeanTotalNormalStress   /*!< Mean total normal stress coupling condition */
+    BoundaryCondition,        /*!< Boundary condition */
+    MeanNormalStress,         /*!< Mean normal stress coupling condition */
+    MeanNormalStressArea,     /*!< Mean normal stress with area coupling condition */
+    MeanNormalStressValve,    /*!< Mean normal stress coupling condition with simple valve*/
+    MeanTotalNormalStress,    /*!< Mean total normal stress coupling condition */
+    MeanTotalNormalStressArea /*!< Mean total normal stress with area coupling condition */
 };
 
 enum errors_Type
@@ -116,7 +118,8 @@ enum errors_Type
     Residual,                /*!< External residual not satisfied */
     Solution,                /*!< Solution check not satisfied */
     ModelType,               /*!< Model type not recognized */
-    CouplingType             /*!< Coupling type not recognized */
+    CouplingType,            /*!< Coupling type not recognized */
+    ModelInterface           /*!< Model interface not available */
 };
 
 // Folder of the problem
@@ -199,10 +202,12 @@ multiscaleMapsDefinition()
     multiscaleModelsMap["Windkessel0D"]    = Windkessel0D;
     multiscaleModelsMap["ZeroDimensional"] = ZeroDimensional;
 
-    multiscaleCouplingsMap["BoundaryCondition"]     = BoundaryCondition;
-    multiscaleCouplingsMap["MeanNormalStress"]      = MeanNormalStress;
-    multiscaleCouplingsMap["MeanNormalStressValve"] = MeanNormalStressValve;
-    multiscaleCouplingsMap["MeanTotalNormalStress"] = MeanTotalNormalStress;
+    multiscaleCouplingsMap["BoundaryCondition"]         = BoundaryCondition;
+    multiscaleCouplingsMap["MeanNormalStress"]          = MeanNormalStress;
+    multiscaleCouplingsMap["MeanNormalStressArea"]      = MeanNormalStressArea;
+    multiscaleCouplingsMap["MeanNormalStressValve"]     = MeanNormalStressValve;
+    multiscaleCouplingsMap["MeanTotalNormalStress"]     = MeanTotalNormalStress;
+    multiscaleCouplingsMap["MeanTotalNormalStressArea"] = MeanTotalNormalStressArea;
 
     multiscaleAlgorithmsMap["Aitken"]   = Aitken;
     multiscaleAlgorithmsMap["Broyden"]  = Broyden;
@@ -229,7 +234,7 @@ multiscaleDynamicCast( BasePtrType& base )
 inline void
 multiscaleErrorMessage( const std::stringstream& errorMessage )
 {
-    std::cout << std::setprecision( 10 ) << std::scientific << "MS ERROR: " << errorMessage.str() << std::endl;
+    std::cerr << std::setprecision( 10 ) << std::scientific << "MS ERROR: " << errorMessage.str() << std::endl;
 }
 
 //! Create an error message
@@ -279,6 +284,12 @@ multiscaleErrorCheck( const errors_Type& error, const std::string& message = "",
         case CouplingType:
 
             errorMessage << "Coupling type incorrect!\n";
+
+            break;
+
+        case ModelInterface:
+
+            errorMessage << "Model interface not available!\n";
 
             break;
 

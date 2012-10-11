@@ -127,6 +127,12 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 
                     break;
 
+                case ZeroDimensional:
+
+                    applyBoundaryConditions0D< MultiscaleModel0D > ( i );
+
+                    break;
+
                 default:
 
                     switchErrorMessage( M_models[i] );

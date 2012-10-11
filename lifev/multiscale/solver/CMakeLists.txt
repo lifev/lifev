@@ -8,6 +8,7 @@ SET(solver_HEADERS
   solver/MultiscaleCoupling.hpp
   solver/MultiscaleCouplingBoundaryCondition.hpp
   solver/MultiscaleCouplingMeanNormalStress.hpp
+  solver/MultiscaleCouplingMeanNormalStressArea.hpp
   solver/MultiscaleCouplingMeanNormalStressValve.hpp
   solver/MultiscaleCouplingMeanTotalNormalStress.hpp
   solver/MultiscaleData.hpp
@@ -33,6 +34,7 @@ SET(solver_SOURCES
   solver/MultiscaleCoupling.cpp
   solver/MultiscaleCouplingBoundaryCondition.cpp
   solver/MultiscaleCouplingMeanNormalStress.cpp
+  solver/MultiscaleCouplingMeanNormalStressArea.cpp
   solver/MultiscaleCouplingMeanNormalStressValve.cpp
   solver/MultiscaleCouplingMeanTotalNormalStress.cpp
   solver/MultiscaleData.cpp

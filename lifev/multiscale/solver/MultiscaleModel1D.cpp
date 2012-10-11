@@ -430,6 +430,25 @@ MultiscaleModel1D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solv
     return (Tdelta - T) / M_bcDelta;
 }
 
+Real
+MultiscaleModel1D::boundaryDeltaArea( const bcFlag_Type& flag, bool& solveLinearSystem )
+{
+    bcSide_Type bcSide = flagConverter( flag );
+
+    solveLinearModel( solveLinearSystem );
+
+    Real A      = M_solver->boundaryValue( *M_solution, OneDFSI::A, bcSide );
+    Real Adelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::A, bcSide );
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaArea( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "A:          " << A <<  "\n";
+    Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
+#endif
+
+    return (Adelta - A) / M_bcDelta;
+}
+
 #else
 
 Real
@@ -448,6 +467,12 @@ Real
 MultiscaleModel1D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
 {
     return tangentProblem( flagConverter( flag ), OneDFSI::T );
+}
+
+Real
+MultiscaleModel1D::boundaryDeltaArea( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
+{
+    return tangentProblem( flagConverter( flag ), OneDFSI::A );
 }
 
 #endif

@@ -197,67 +197,108 @@ public:
     //! @name MultiscaleInterfaceFluid Methods
     //@{
 
-    //! Impose the flow rate on a specific boundary face of the model
+    //! Impose the flow rate on a specific interface of the model
     /*!
-     * @param flag flag of the boundary face
+     * @param flag flag of the boundary interface
      * @param function boundary condition function
      */
     void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function );
 
-    //! Impose the integral of the normal stress on a specific boundary face of the model
+    //! Impose the integral of the mean normal stress on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary face
+     * @param flag flag of the boundary interface
      * @param function boundary condition function
      */
     void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function );
 
-    //! Get the flow rate on a specific boundary face of the model
+    //! Impose the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary face
+     * Note: mean total normal stress cannot be imposed at the interfaces of this model.
+     *
+     * @param flag flag of the boundary interface
+     * @param function boundary condition function
+     */
+    void imposeBoundaryTotalStress( const bcFlag_Type& /*flag*/, const function_Type& /*function*/ )
+    {
+        multiscaleErrorCheck( ModelInterface, "Invalid interface [MeanTotalNormalStress] for model type [" + enum2String( M_type, multiscaleModelsMap ) +"]", M_comm->MyPID() == 0 );
+    }
+
+    //! Impose the area on a specific boundary interface of the model
+    /*!
+     * Note: area cannot be imposed at the interfaces of this model.
+     *
+     * @param flag flag of the boundary interface
+     * @param function boundary condition function
+     */
+    void imposeBoundaryArea( const bcFlag_Type& /*flag*/, const function_Type& /*function*/ )
+    {
+        multiscaleErrorCheck( ModelInterface, "Invalid interface [Area] for model type [" + enum2String( M_type, multiscaleModelsMap ) +"]", M_comm->MyPID() == 0 );
+    }
+
+    //! Get the flow rate on a specific boundary interface of the model
+    /*!
+     * @param flag flag of the boundary interface
      * @return flow rate value
      */
     Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().flux( flag, *M_stateVariable ); }
 
-    //! Get the integral of the normal stress (on a specific boundary face)
+    //! Get the integral of the mean normal stress on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary face
-     * @return stress value
+     * @param flag flag of the boundary interface
+     * @return mean normal stress value
      */
     Real boundaryStress( const bcFlag_Type& flag ) const { return -boundaryPressure( flag ); }
 
-    //! Get the integral of the normal stress (on a specific boundary face)
+    //! Get the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary face
-     * @return stress value
+     * @param flag flag of the boundary interface
+     * @return mean total normal stress value
      */
     Real boundaryTotalStress( const bcFlag_Type& flag ) const { return -boundaryTotalPressure( flag ); }
 
-    //! Get the variation of the flow rate (on a specific boundary face) using the linear model
+    //! Get the area on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary face on which quantity should be computed
+     *  Note: returns always a NaN.
+     *
+     * @param flag flag of the boundary interface
+     * @return area value
+     */
+    Real boundaryArea( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().area( flag ); }
+
+    //! Get the variation of the flow rate (on a specific boundary interface) using the linear model
+    /*!
+     * @param flag flag of the boundary interface
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flow rate
      */
     Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem );
 
-    //! Get the variation of the integral of the normal stress (on a specific boundary face)
+    //! Get the variation of the integral of the mean normal stress (on a specific boundary interface) using the linear model
     /*!
-     * @param flag flag of the boundary face
+     * @param flag flag of the boundary interface
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @param stressType Type of approximation for the stress
-     * @return variation of the stress
+     * @return variation of the mean normal stress
      */
     Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem );
 
-    //! Get the variation of the integral of the total normal stress (on a specific boundary face)
+    //! Get the variation of the integral of the mean total normal stress (on a specific boundary interface) using the linear model
     /*!
      * TODO The integral terms of the derivative of the area have not been coded yet. They are used only by the GI formulation.
      * @param flag flag of the boundary face
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @param stressType Type of approximation for the stress
-     * @return variation of the total normal stress
+     * @return variation of the mean total normal stress
      */
     Real boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem );
+
+    //! Get the variation of the integral of the area (on a specific boundary interface) using the linear model
+    /*!
+     *  Note: returns always a NaN.
+     *
+     * @param flag flag of the boundary interface
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the area
+     */
+    Real boundaryDeltaArea( const bcFlag_Type& /*flag*/, bool& /*solveLinearSystem*/ ) { return NaN; }
 
     //@}
 
@@ -308,13 +349,6 @@ public:
      * @return viscosity value
      */
     Real boundaryViscosity( const bcFlag_Type& /*flag*/) const { return M_FSIoperator->dataFluid()->viscosity(); }
-
-    //! Get the area on a specific boundary face of the model
-    /*!
-     * @param flag flag of the boundary face
-     * @return area value
-     */
-    Real boundaryArea( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().area( flag ); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
