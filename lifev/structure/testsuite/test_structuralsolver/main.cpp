@@ -66,8 +66,8 @@
 
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 
-#include <lifev/structure/solver/StructuralMaterial.hpp>
-#include <lifev/structure/solver/StructuralSolver.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/StructuralOperator.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
@@ -231,7 +231,7 @@ Structure::run2d()
 void
 Structure::run3d()
 {
-    typedef StructuralSolver< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
+    typedef StructuralOperator< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
 
@@ -323,7 +323,7 @@ Structure::run3d()
     //! #################################################################################
 
     //! 1. Constructor of the structuralSolver
-    StructuralSolver< RegionMesh<LinearTetra> > solid;
+    StructuralOperator< RegionMesh<LinearTetra> > solid;
 
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,

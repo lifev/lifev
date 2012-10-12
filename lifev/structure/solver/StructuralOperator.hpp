@@ -35,8 +35,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
 */
 
-#ifndef _STRUCTURALSOLVER_H_
-#define _STRUCTURALSOLVER_H_ 1
+#ifndef _STRUCTURALOPERATOR_H_
+#define _STRUCTURALOPERATOR_H_ 1
 
                                        //#include<boost/scoped_ptr.hpp>
 
@@ -68,7 +68,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
 
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
-#include <lifev/structure/solver/StructuralMaterial.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 
 namespace LifeV
@@ -113,7 +113,7 @@ private:
 template <typename Mesh,
            typename SolverType = LifeV::SolverAztecOO >
 
-class StructuralSolver
+class StructuralOperator
 {
 public:
 
@@ -122,7 +122,7 @@ public:
   typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
   typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
 
-  typedef StructuralMaterial<Mesh>                      material_Type;
+  typedef StructuralConstitutiveLaw<Mesh>               material_Type;
   typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
   typedef BCHandler                                     bcHandlerRaw_Type;
@@ -158,9 +158,9 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    StructuralSolver();
+    StructuralOperator();
 
-    virtual ~StructuralSolver() {};
+    virtual ~StructuralOperator() {};
 
     //@}
 
@@ -611,7 +611,7 @@ protected:
 //=====================================
 
 template <typename Mesh, typename SolverType>
-StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
+StructuralOperator<Mesh, SolverType>::StructuralOperator( ):
     M_data                       ( ),
     M_FESpace                    ( ),
     M_Displayer                  ( ),
@@ -643,7 +643,7 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
+StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
                                           const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                           bcHandler_Type&                    BCh,
                                           boost::shared_ptr<Epetra_Comm>&   comm)
@@ -654,7 +654,7 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
+StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
                                           const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                           boost::shared_ptr<Epetra_Comm>&     comm)
 {
@@ -671,7 +671,7 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
+StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
                                           const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                           boost::shared_ptr<Epetra_Comm>&     comm,
                                           const boost::shared_ptr<const MapEpetra>&  monolithicMap,
@@ -703,7 +703,7 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
 
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::setupMapMarkersVolumes( void )
+void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes( void )
 {
  
   this->M_Displayer->leaderPrint(" S-  Building the map between volumesMarkers <--> volumes \n");
@@ -742,13 +742,13 @@ void StructuralSolver<Mesh, SolverType>::setupMapMarkersVolumes( void )
 
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::updateSystem( void )
+void StructuralOperator<Mesh, SolverType>::updateSystem( void )
 {
     updateSystem(M_systemMatrix);
 }
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff)
+void StructuralOperator<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff)
 {
     M_Displayer->leaderPrint(" S-  Updating mass term on right hand side... ");
 
@@ -771,7 +771,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff
 }
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::updateSourceTerm( source_Type const& source )
+void StructuralOperator<Mesh, SolverType>::updateSourceTerm( source_Type const& source )
 {
     vector_Type rhs(vector_Type(*M_localMap));
 
@@ -796,7 +796,7 @@ void StructuralSolver<Mesh, SolverType>::updateSourceTerm( source_Type const& so
 }
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::buildSystem( const Real coefficient )
+void StructuralOperator<Mesh, SolverType>::buildSystem( const Real coefficient )
 {
     M_Displayer->leaderPrint("  S-  Computing constant matrices ...          ");
     LifeChrono chrono;
@@ -812,14 +812,14 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real coefficient )
 
 
 // template <typename Mesh, typename SolverType>
-// void  StructuralSolver<Mesh, SolverType>::buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor)
+// void  StructuralOperator<Mesh, SolverType>::buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor)
 // {}
 // ;
 
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real factor)
+StructuralOperator<Mesh, SolverType>::computeMassMatrix( const Real factor)
 {
     UInt totalDof = M_FESpace->dof().numTotalDof();
 
@@ -857,7 +857,7 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real factor)
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::iterate( bcHandler_Type& bch )
+StructuralOperator<Mesh, SolverType>::iterate( bcHandler_Type& bch )
 {
     LifeChrono chrono;
 
@@ -885,7 +885,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bcHandler_Type& bch )
     if ( status == 1 )
     {
         std::ostringstream ex;
-        ex << "StructuralSolver::iterate() Inners nonLinearRichardson iterations failed to converge\n";
+        ex << "StructuralOperator::iterate() Inners nonLinearRichardson iterations failed to converge\n";
         throw std::logic_error( ex.str() );
     }
     else // if status == 0 NonLinearrRichardson converges
@@ -910,7 +910,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bcHandler_Type& bch )
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::iterateLin( bcHandler_Type& bch )
+StructuralOperator<Mesh, SolverType>::iterateLin( bcHandler_Type& bch )
 {
     vector_Type rhsFull (M_rhsNoBC->map());
     Real zero(0.);
@@ -924,9 +924,9 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bcHandler_Type& bch )
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
+StructuralOperator<Mesh, SolverType>::showMe( std::ostream& c  ) const
 {
-    c << "\n*** StructuralSolver::showMe method" << std::endl;
+    c << "\n*** StructuralOperator::showMe method" << std::endl;
     c << "****** Data of the Material************" << std::endl;
     c << "Thickness:    " << M_data->thickness() << std::endl;
     c << "Density:      " << M_data->rho() << std::endl;
@@ -938,7 +938,7 @@ StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
 }
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& /*factor*/)
+void StructuralOperator<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& /*factor*/)
 {
     M_Displayer->leaderPrint( " Computing residual ... \t\t\t");
 
@@ -962,7 +962,7 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const vector_Type& solution, Int iter)
+StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const vector_Type& solution, Int iter)
 {
 
     //This method call the M_material computeStiffness
@@ -1011,7 +1011,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type& solution )
+StructuralOperator<Mesh, SolverType>::evalResidualDisplacement( const vector_Type& solution )
 {
 
     M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
@@ -1035,7 +1035,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type&
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Type& solution )
+StructuralOperator<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Type& solution )
 {
 
     M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
@@ -1053,7 +1053,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Ty
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
+StructuralOperator<Mesh, SolverType>::evalConstraintTensor()
 {
     vector_Type count(*M_localMap);
 
@@ -1191,7 +1191,7 @@ StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_Type /*vel*/, vectorPtr_Type /*acc*/)
+StructuralOperator<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_Type /*vel*/, vectorPtr_Type /*acc*/)
 {
     *M_disp = *disp;
     //  if (vel.get())
@@ -1200,7 +1200,7 @@ StructuralSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_T
 /*
   template <typename Mesh, typename SolverType>
   void
-  StructuralSolver<Mesh, SolverType>::initializeVel( const vector_Type& vel)
+  StructuralOperator<Mesh, SolverType>::initializeVel( const vector_Type& vel)
   {
   *M_vel = vel;
   }
@@ -1208,7 +1208,7 @@ StructuralSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_T
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::initialize( const function& d0, const function& w0, const function& a0 )
+StructuralOperator<Mesh, SolverType>::initialize( const function& d0, const function& w0, const function& a0 )
 {
     M_FESpace->interpolate(d0, *M_disp, 0.0);
     //M_FESpace->interpolate(w0, *M_vel , 0.0);
@@ -1218,7 +1218,7 @@ StructuralSolver<Mesh, SolverType>::initialize( const function& d0, const functi
 /*
 //Matteo this method isn't necessary timeAdvance compute the accelerate and velocity
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::updateVelAndAcceleration()
+void StructuralOperator<Mesh, SolverType>::updateVelAndAcceleration()
 {
 Real DeltaT = M_data->dataTime()->timeStep();
 
@@ -1229,7 +1229,7 @@ Real DeltaT = M_data->dataTime()->timeStep();
 
 template<typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, Vector& velocity )
+StructuralOperator<Mesh, SolverType>::reduceSolution( Vector& displacement, Vector& velocity )
 {
     vector_Type disp(*M_disp, 0);
     //vector_Type vel(*M_vel , 0);
@@ -1247,7 +1247,7 @@ StructuralSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, Vector
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
+StructuralOperator<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
 {
     M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
     M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
@@ -1263,7 +1263,7 @@ StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
 
 //Method UpdateJacobian
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::updateJacobian( const vector_Type & sol, matrixPtr_Type& jacobian  )
+void StructuralOperator<Mesh, SolverType>::updateJacobian( const vector_Type & sol, matrixPtr_Type& jacobian  )
 {
     M_Displayer->leaderPrint("  S-  Solid: Updating JACOBIAN... ");
 
@@ -1283,14 +1283,14 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( const vector_Type & sol
 
 //Method UpdateJacobian
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::updateJacobian( const vector_Type & sol)
+void StructuralOperator<Mesh, SolverType>::updateJacobian( const vector_Type & sol)
 {
     updateJacobian(sol, M_jacobian);
 }
 
 //solveJac( const Vector& res, Real& linear_rel_tol, Vector &step)
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::
+void StructuralOperator<Mesh, SolverType>::
 solveJac( vector_Type& step, const vector_Type& res, Real& linear_rel_tol)
 {
     updateJacobian( *M_disp, M_jacobian );
@@ -1300,7 +1300,7 @@ solveJac( vector_Type& step, const vector_Type& res, Real& linear_rel_tol)
 
 //Method SolveJacobian
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::
+void StructuralOperator<Mesh, SolverType>::
 solveJacobian(vector_Type&           step,
               const vector_Type&     res,
               Real&                /*linear_rel_tol*/,
@@ -1337,7 +1337,7 @@ solveJacobian(vector_Type&           step,
 }
 
 template<typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::apply( const vector_Type& sol, vector_Type& res) const
+void StructuralOperator<Mesh, SolverType>::apply( const vector_Type& sol, vector_Type& res) const
 {
   M_material->apply(sol, res, M_mapMarkersVolumes);
     res += (*M_massMatrix)*sol;
@@ -1345,7 +1345,7 @@ void StructuralSolver<Mesh, SolverType>::apply( const vector_Type& sol, vector_T
 
 template<typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
+StructuralOperator<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
                                                              vector_Type&        rhs,
                                                              bcHandler_Type&     BCh,
                                                              UInt                offset)

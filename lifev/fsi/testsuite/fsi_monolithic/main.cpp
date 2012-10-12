@@ -95,7 +95,7 @@
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 
 #include <lifev/fsi/solver/FSISolver.hpp>
-#include <lifev/structure/solver/StructuralSolver.hpp>
+#include <lifev/structure/solver/StructuralOperator.hpp>
 #include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>

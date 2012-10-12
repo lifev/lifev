@@ -53,8 +53,8 @@
 #include <lifev/fsi/solver/FSIExactJacobian.hpp>
 #include <lifev/fsi/solver/FSIFixedPoint.hpp>
 #include <lifev/fsi/solver/FSIData.hpp>
-#include <lifev/structure/solver/StructuralSolver.hpp>
-#include <lifev/structure/solver/StructuralMaterial.hpp>
+#include <lifev/structure/solver/StructuralOperator.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 
@@ -365,7 +365,7 @@ public:
 
       //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
 
-      StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >();
+      StructuralOperator< FSIOperator::mesh_Type, SolverAztecOO >();
 
       //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
 

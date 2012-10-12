@@ -44,18 +44,18 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 
-#include <lifev/structure/solver/StructuralMaterial.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 namespace LifeV
 {
 template <typename Mesh>
-class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
+class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
 {
 //!@name Type definitions
 //@{
 
     public:
-    typedef StructuralMaterial<Mesh>                 super;
+    typedef StructuralConstitutiveLaw<Mesh>                 super;
 
     typedef typename super::data_Type                data_Type;
 
@@ -98,7 +98,7 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
 //!@name Methods
 //@{
 
-    //! Setup the created object of the class StructuralMaterial
+    //! Setup the created object of the class StructuralConstitutiveLaw
     /*!
       \param dFespace: the FiniteElement Space
       \param monolithicMap: the MapEpetra
@@ -169,7 +169,7 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
 
 
     //! Computes the deformation gradient F, the cofactor matrix Cof(F), the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
-    //! This function is used in StructuralMaterial::computeStiffness
+    //! This function is used in StructuralConstitutiveLaw::computeStiffness
     /*!
       \param dk_loc: the elemental displacement
     */
@@ -627,10 +627,10 @@ void ExponentialMaterialNonLinear<Mesh>::apply( const vector_Type& sol, vector_T
 
 
 template <typename Mesh>
-inline StructuralMaterial<Mesh>* createExponentialMaterialNonLinear() { return new ExponentialMaterialNonLinear<Mesh >(); }
+inline StructuralConstitutiveLaw<Mesh>* createExponentialMaterialNonLinear() { return new ExponentialMaterialNonLinear<Mesh >(); }
 namespace
 {
-static bool registerEXP = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

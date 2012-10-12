@@ -66,8 +66,8 @@
 
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
 
-#include <lifev/structure/solver/StructuralSolver.hpp>
-#include <lifev/structure/solver/StructuralMaterial.hpp>
+#include <lifev/structure/solver/StructuralOperator.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
@@ -120,10 +120,10 @@ public:
 #endif
 
     typedef OseenSolverShapeDerivative   <mesh_Type>                                fluid_Type;
-    typedef StructuralSolver  <mesh_Type>                                           solid_Type;
+    typedef StructuralOperator  <mesh_Type>                                           solid_Type;
     typedef HarmonicExtensionSolver<mesh_Type>                                      meshMotion_Type;
     typedef OseenSolverShapeDerivative   <mesh_Type>                                fluidLin_Type;
-    typedef StructuralSolver  <mesh_Type>                                           solidLin_Type;
+    typedef StructuralOperator  <mesh_Type>                                           solidLin_Type;
     typedef boost::shared_ptr<fluid_Type>                                           fluidPtr_Type;
     typedef boost::shared_ptr<solid_Type>                                           solidPtr_Type;
     typedef boost::shared_ptr<meshMotion_Type>                                      meshMotionPtr_Type;
@@ -303,12 +303,12 @@ public:
 
     //!@name Factory Methods
     //@{
-    static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear(){ return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >(); }
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear(){ return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >(); }
 
-    static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear(){ return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >(); }
-    static StructuralMaterial< FSIOperator::mesh_Type >*    createExponentialMaterialNonLinear(){ return new ExponentialMaterialNonLinear< FSIOperator::mesh_Type >(); }
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear(){ return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >(); }
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createExponentialMaterialNonLinear(){ return new ExponentialMaterialNonLinear< FSIOperator::mesh_Type >(); }
 
-    static StructuralMaterial< FSIOperator::mesh_Type >*    createNeoHookeanMaterialNonLinear(){ return new NeoHookeanMaterialNonLinear< FSIOperator::mesh_Type >(); }
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createNeoHookeanMaterialNonLinear(){ return new NeoHookeanMaterialNonLinear< FSIOperator::mesh_Type >(); }
 
     //@}
 
