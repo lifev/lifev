@@ -536,7 +536,7 @@ FSIOperator::buildSystem()
     //initialize xi0 for timaAdvance method for solid
     double  xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep() );
     M_solid->buildSystem(xi);
-    M_solid->Mass()->globalAssemble();
+    M_solid->massMatrix()->globalAssemble();
       }
 
 }
@@ -562,8 +562,8 @@ FSIOperator::updateSystem()
         M_solid->updateSystem();
         M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
         vector_Type rhsW(M_dFESpace->map(), Repeated);
-        rhsW = (*M_solid->Mass() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()/M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
-        M_solid->updateRightHandSide( rhsW );  //for the solid rhs;
+        rhsW = (*M_solid->massMatrix() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()/M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
+        M_solid->setRightHandSide( rhsW );  //for the solid rhs;
     }
 
    couplingVariableExtrap( );
@@ -633,8 +633,8 @@ FSIOperator::imposedFluxes( void )
 void
 FSIOperator::initialize( fluidPtr_Type::value_type::function_Type const& u0,
                          fluidPtr_Type::value_type::function_Type const& p0,
-                         solidPtr_Type::value_type::Function const& d0,
-                         solidPtr_Type::value_type::Function const& w0,
+                         solidPtr_Type::value_type::function const& d0,
+                         solidPtr_Type::value_type::function const& w0,
                          fluidPtr_Type::value_type::function_Type const& /*df0*/ )
 {
     debugStream( 6220 ) << "FSI:: solid init \n";

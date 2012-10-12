@@ -208,7 +208,7 @@ public:
     //! Get the Stiffness matrix
     virtual vectorPtr_Type const stiffVector() const = 0;
 
-  virtual void Apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) =0;
+  virtual void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) =0;
 
 //@}
 

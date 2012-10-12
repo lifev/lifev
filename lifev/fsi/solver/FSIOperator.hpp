@@ -284,8 +284,8 @@ public:
      */
     virtual void initialize( fluidPtr_Type::value_type::function_Type const& u0,
                              fluidPtr_Type::value_type::function_Type const& p0,
-                             solidPtr_Type::value_type::Function const& d0,
-                             solidPtr_Type::value_type::Function const& w0,
+                             solidPtr_Type::value_type::function const& d0,
+                             solidPtr_Type::value_type::function const& w0,
                              fluidPtr_Type::value_type::function_Type const& df0 );
 
     //@}

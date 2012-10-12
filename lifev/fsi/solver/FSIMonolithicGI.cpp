@@ -291,7 +291,7 @@ void FSIMonolithicGI::setupBlockPrec()
                                                    M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap,
                                                  1 ) );
-        *M_solidBlockPrec += *M_solid->Mass();
+        *M_solidBlockPrec += *M_solid->massMatrix();
         *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
         M_solidBlockPrec->globalAssemble();
         *M_solidBlockPrec *= M_solid->rescaleFactor();

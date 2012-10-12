@@ -119,14 +119,14 @@ public:
 
   //!@name Type definitions
   //@{
-  typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+  typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
   typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
 
   typedef StructuralMaterial<Mesh>                      material_Type;
   typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
-  typedef BCHandler                                     bchandlerRaw_Type;
-  typedef boost::shared_ptr<bchandlerRaw_Type>          bchandler_Type;
+  typedef BCHandler                                     bcHandlerRaw_Type;
+  typedef boost::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
 
   typedef SolverType                                    solver_Type;
 
@@ -176,7 +176,7 @@ public:
     */
     void setup( boost::shared_ptr<data_Type> data,
                 const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   FESpace,
-                bchandler_Type&       BCh,
+                bcHandler_Type&       BCh,
                 boost::shared_ptr<Epetra_Comm>&     comm
                 );
 
@@ -234,13 +234,13 @@ public:
     /*!
       \param rhs: solid  right hand side
       !*/
-    void updateRightHandSide(const vector_Type& rightHandSide) { *M_rhsNoBC = rightHandSide;};
+    void setRightHandSide(const vector_Type& rightHandSide) { *M_rhsNoBC = rightHandSide;};
 
     //! Comuptes the right hand side in the updateSystem methods
     void computeRHSNoBC( void );
 
     //! Compute the mass matrix and it calls the method to build the linear part of the stiffness matrix of the material class
-    void buildSystem( const Real& coefficient );
+    void buildSystem( const Real coefficient );
 
     //void buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor); // used for monolithic
 
@@ -249,19 +249,19 @@ public:
       \param matrix the matrix containing the mass matrix and the linear part of he stiffness matrix
       \param rescale factor for FSI problems
     */
-    void computeMassMatrix( const Real& factor=1.);
+    void computeMassMatrix( const Real factor=1.);
 
     //! Solve the non-linear system
     /*!
       \param bch BCHander object containing the boundary conditions
     */
-    void iterate( bchandler_Type& bch );
+    void iterate( bcHandler_Type& bch );
 
     //! Solve the linearized problem. Used in FSI segregated in ExactJacobian
     /*!
       \param bch BCHander object containing the boundary conditions
     */
-    void iterateLin( bchandler_Type& bch );
+    void iterateLin( bcHandler_Type& bch );
 
 
     //! Output
@@ -306,7 +306,7 @@ public:
     void solveJacobian( vector_Type&       step,
                         const vector_Type& residual,
                         Real&            linear_rel_tol,
-                        bchandler_Type&    BCd ) ;
+                        bcHandler_Type&    BCd ) ;
 
 
     //! Evaluates residual for newton interations
@@ -337,7 +337,7 @@ public:
       \param w0 space function describing the initial velocity
       \param a0 space function describing the initial acceleration
     */
-    void initialize( const Function& d0, const Function& w0, const Function& a0 );
+    void initialize( const function& d0, const function& w0, const function& a0 );
 
     //! Sets the initial velocity
     /*!
@@ -388,7 +388,7 @@ public:
 
     //!Setters
     //! Set the BCHandler object
-    void setBC(bchandler_Type& BCd)   {M_BCh = BCd;}
+    void setBC(bcHandler_Type& BCd)   {M_BCh = BCd;}
 
     //! Set the source object
     void setSourceTerm( source_Type const& s ) { M_source = s; }
@@ -424,13 +424,13 @@ public:
     //matrixPtr_Type const MassStiff() const {return M_massStiff; }
 
     //! Get the mass matrix
-    matrixPtr_Type const Mass() const {return M_mass; }
+    matrixPtr_Type const massMatrix() const {return M_massMatrix; }
 
     //! Get the FESpace object
     FESpace<Mesh, MapEpetra>& dFESpace() {return M_FESpace;}
 
     //! Get the bCHandler object
-    bchandler_Type const & BChandler() const {return M_BCh;}
+    bcHandler_Type const & bcHandler() const {return M_BCh;}
 
     //! Get the residual
     vector_Type& residual()             {return *M_residual_d;}
@@ -452,7 +452,7 @@ public:
     vectorPtr_Type& rhsWithoutBC() { return M_rhsNoBC; }
 
     //! Get the comunicator object
-    boost::shared_ptr<Epetra_Comm> const& getComunicator() const {return M_Displayer->comm();}
+    boost::shared_ptr<Epetra_Comm> const& comunicator() const {return M_Displayer->comm();}
 
     //! Get the rescaleFactor
     Real rescaleFactor() {return M_rescaleFactor;}
@@ -491,7 +491,7 @@ public:
     //! Get the data container
     boost::shared_ptr<data_Type> data()       const { return M_data; }
 
-    void Apply( const vector_Type& sol, vector_Type& res) const;
+    void apply( const vector_Type& sol, vector_Type& res) const;
 
 
     //! Get the density
@@ -509,7 +509,7 @@ protected:
     */
     void applyBoundaryConditions(matrix_Type &matrix,
                                  vector_Type &rhs,
-                                 bchandler_Type& BCh,
+                                 bcHandler_Type& BCh,
                                  UInt         offset=0);
 
 
@@ -572,13 +572,13 @@ protected:
     std::ofstream                        M_out_res;
 
     //! BCHandler object
-    bchandler_Type                       M_BCh;
+    bcHandler_Type                       M_BCh;
 
     //! Map Epetra
     boost::shared_ptr<const MapEpetra>   M_localMap;
 
     //! Matrix M: mass
-    matrixPtr_Type                       M_mass;
+    matrixPtr_Type                       M_massMatrix;
 
     //! Matrix Temp: Temporary matrix to compute residuals or rhs
     matrixPtr_Type                       M_systemMatrix;
@@ -628,8 +628,8 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
     M_out_res                    ( ),
     M_BCh                        ( ),
     M_localMap                   ( ),
-    M_mass                       ( ),
-    M_systemMatrix                 ( ),
+    M_massMatrix                 ( ),
+    M_systemMatrix               ( ),
     M_jacobian                   ( ),
     M_recur                      ( ),
     M_source                     ( ),
@@ -645,7 +645,7 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
                                           const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                          bchandler_Type&                    BCh,
+                                          bcHandler_Type&                    BCh,
                                           boost::shared_ptr<Epetra_Comm>&   comm)
 {
     setup(data, dFESpace, comm);
@@ -683,7 +683,7 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
     M_me                              = comm->MyPID();
     M_elmatM.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     M_localMap                        = monolithicMap;
-    M_mass.reset                      (new matrix_Type(*M_localMap));
+    M_massMatrix.reset                (new matrix_Type(*M_localMap));
     M_systemMatrix.reset              (new matrix_Type(*M_localMap));
     M_jacobian.reset                  (new matrix_Type(*M_localMap));
 
@@ -796,7 +796,7 @@ void StructuralSolver<Mesh, SolverType>::updateSourceTerm( source_Type const& so
 }
 
 template <typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& coefficient )
+void StructuralSolver<Mesh, SolverType>::buildSystem( const Real coefficient )
 {
     M_Displayer->leaderPrint("  S-  Computing constant matrices ...          ");
     LifeChrono chrono;
@@ -819,13 +819,13 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& coefficient )
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
+StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real factor)
 {
     UInt totalDof = M_FESpace->dof().numTotalDof();
 
     //! Number of displacement components
     UInt nc = nDimensions;
-
+    const Real factorMassMatrix = factor * M_data->rho();
 
     //! Elementary computation and matrix assembling
     //! Loop on elements
@@ -838,26 +838,26 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
 
         // mass
         // The method mass is implemented in AssemblyElemental.cpp
-        mass( factor * M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
+	mass( factorMassMatrix , *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
 
         //! assembling
         for ( UInt ic = 0; ic < nc; ic++ )
         {
             //mass
-            assembleMatrix( *M_mass, *M_elmatM, M_FESpace->fe(), M_FESpace->dof(),ic,ic, M_offset +  ic*totalDof, M_offset +  ic*totalDof);
+            assembleMatrix( *M_massMatrix, *M_elmatM, M_FESpace->fe(), M_FESpace->dof(),ic,ic, M_offset +  ic*totalDof, M_offset +  ic*totalDof);
         }
     }
 
     //getComunicator()->Barrier();
 
-    M_mass->globalAssemble();
+    M_massMatrix->globalAssemble();
 
     //*massStiff *= factor; //M_data.dataTime()->timeStep() * M_rescaleFactor;
 }
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
+StructuralSolver<Mesh, SolverType>::iterate( bcHandler_Type& bch )
 {
     LifeChrono chrono;
 
@@ -910,7 +910,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
+StructuralSolver<Mesh, SolverType>::iterateLin( bcHandler_Type& bch )
 {
     vector_Type rhsFull (M_rhsNoBC->map());
     Real zero(0.);
@@ -951,7 +951,7 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
         *stiff = *M_material->stiffMatrix();
-        *stiff += *M_mass;
+        *stiff += *M_massMatrix;
         stiff->globalAssemble();
     }
 
@@ -999,7 +999,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     {
         chrono.start();
         *M_rhs=*M_rhsNoBC;
-        residual = *M_mass * solution;
+        residual = *M_massMatrix * solution;
         residual += *M_material->stiffVector();
     vector_Type solRep(solution, Repeated);
         bcManageResidual( residual, *M_rhs, solRep, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
@@ -1208,7 +1208,7 @@ StructuralSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_T
 
 template <typename Mesh, typename SolverType>
 void
-StructuralSolver<Mesh, SolverType>::initialize( const Function& d0, const Function& w0, const Function& a0 )
+StructuralSolver<Mesh, SolverType>::initialize( const function& d0, const function& w0, const function& a0 )
 {
     M_FESpace->interpolate(d0, *M_disp, 0.0);
     //M_FESpace->interpolate(w0, *M_vel , 0.0);
@@ -1274,7 +1274,7 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( const vector_Type & sol
 
     jacobian.reset(new matrix_Type(*M_localMap));
     *jacobian += *M_material->jacobian();
-    *jacobian += *M_mass;
+    *jacobian += *M_massMatrix;
 
     chrono.stop();
     M_Displayer->leaderPrintMax("   ... done in ", chrono.diff() );
@@ -1304,7 +1304,7 @@ void StructuralSolver<Mesh, SolverType>::
 solveJacobian(vector_Type&           step,
               const vector_Type&     res,
               Real&                /*linear_rel_tol*/,
-              bchandler_Type&       /* BCh*/)
+              bcHandler_Type&       /* BCh*/)
 {
     LifeChrono chrono;
 
@@ -1337,17 +1337,17 @@ solveJacobian(vector_Type&           step,
 }
 
 template<typename Mesh, typename SolverType>
-void StructuralSolver<Mesh, SolverType>::Apply( const vector_Type& sol, vector_Type& res) const
+void StructuralSolver<Mesh, SolverType>::apply( const vector_Type& sol, vector_Type& res) const
 {
-  M_material->Apply(sol, res, M_mapMarkersVolumes);
-    res += (*M_mass)*sol;
+  M_material->apply(sol, res, M_mapMarkersVolumes);
+    res += (*M_massMatrix)*sol;
 }
 
 template<typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
                                                              vector_Type&        rhs,
-                                                             bchandler_Type&     BCh,
+                                                             bcHandler_Type&     BCh,
                                                              UInt                offset)
 {
     // BC manage for the velocity

@@ -199,7 +199,7 @@ class ExponentialMaterialNonLinear : public StructuralMaterial<Mesh>
     //! Get the stiffness vector
     vectorPtr_Type const stiffVector() const {return M_stiff; }
 
-  void Apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) ;
+  void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) ;
 
 //@}
 
@@ -619,7 +619,7 @@ void ExponentialMaterialNonLinear<Mesh>::showMe( std::string const& fileNameStif
 
 
 template <typename Mesh>
-void ExponentialMaterialNonLinear<Mesh>::Apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes )
+void ExponentialMaterialNonLinear<Mesh>::apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes )
 {
   computeStiffness(sol, 0, this->M_dataMaterial, mapsMarkerVolumes, this->M_displayer);
     res += *M_stiff;
