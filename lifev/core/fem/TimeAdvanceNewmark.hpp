@@ -191,27 +191,7 @@ public:
   
   //!@name Set Methods
   //@{
-  
-  //! Initialize the parameters of time advance scheme
-  /*
-    Initialize parameters of time advance scheme used in TimeAdvanceNewmark scheme
-    @param  coefficients define the TimeAdvanceNewmark's coefficients
-    @param  orderDerivative  define the order of derivate;
-  */
-  void setup (const  std::vector<Real>&  coefficients, const  UInt& orderDerivative)
-  {  
-    ERROR_MSG("use setup for BDF but the time advance scheme is TimeAdvanceNewmark or  theta-method"); 
-  }
-  
-  
-  //! initialize parameters of time advance scheme;
-  /*!
-    Initialize parameters of time advance scheme used in BDF;
-    @param  order define the order of BDF;
-    @param  orderDerivative  define the order of derivate;
-  */
-  void setup ( const UInt& order, const  UInt& orderDerivative);
-  
+ 
   //! Initialize the StateVector
   /*!
     Initialize all the entries of the unknown vector to be derived with the vector x0 (duplicated).
@@ -585,7 +565,7 @@ void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVector_Type&
   this->setInitialRHS(zero);
 }
   
-template<typename feVector_Type>
+template<typename feVectorType>
 void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVectorSharedPtrContainer_Type& x0)
 {
   const UInt n0 = x0.size();
