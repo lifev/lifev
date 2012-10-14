@@ -124,7 +124,7 @@ namespace LifeV
 */
 
 template<typename feVectorType = VectorEpetra >
-class TimeAdvanceNewmark :
+class TimeAdvanceNewmark:
         public TimeAdvance < feVectorType >
 {
 public:
@@ -157,7 +157,7 @@ public:
   TimeAdvanceNewmark();
   
   //! Destructor
-  ~TimeAdvanceNewmark() {}
+  virtual ~TimeAdvanceNewmark() {}
   
   //@}
   
@@ -191,7 +191,24 @@ public:
   
   //!@name Set Methods
   //@{
- 
+
+  //! Initialize the parameters of time advance scheme
+  /*!
+    @param  order define the order of BDF;
+    @param  orderDerivatve  define the order of derivative;
+  */ 
+  void setup ( const UInt& order,  const  UInt& orderDerivative )
+  {
+    ERROR_MSG("use setup for TimeAdvanceBDF but the time advance scheme is Newmark");
+  }
+
+  //! Initialize the parameters of time advance scheme
+  /*!
+    @param  coefficients define the TimeAdvanceNewmark's coefficients (\theta, \gamma);
+    @param  orderDerivative  define the order of derivative;
+  */
+  void setup(const std::vector<Real>& coefficients, const  UInt& orderDerivative);
+
   //! Initialize the StateVector
   /*!
     Initialize all the entries of the unknown vector to be derived with the vector x0 (duplicated).
@@ -643,11 +660,11 @@ TimeAdvanceNewmark<feVectorType>::extrapolationFirstDerivative(feVector_Type& ex
 
 //! define the TimeAdvanceNewmark;  this class runs only the default template parameter.
 inline
-TimeAdvance< VectorEpetra >* createTimeAdvanceNewmark() { return new TimeAdvanceNewmark<VectorEpetra>(); }
+TimeAdvance< VectorEpetra >* createTimeAdvanceNewmark() { return new TimeAdvanceNewmark< VectorEpetra >(); }
 
 namespace
 {
-static bool registerTimeAdvanceNewmark = TimeAdvanceFactory::instance().registerProduct( "Newmark",  &createTimeAdvanceNewmark);
+  static bool registerTimeAdvanceNewmark = TimeAdvanceFactory::instance().registerProduct( "Newmark",  &createTimeAdvanceNewmark);
 }
 
 }

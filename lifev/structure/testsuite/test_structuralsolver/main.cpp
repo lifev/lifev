@@ -484,7 +484,7 @@ Structure::run3d()
 
         *solidDisp = solid.displacement();
     *solidVel  = timeAdvance->velocity();
-    *solidAcc  = timeAdvance->accelerate();
+    *solidAcc  = timeAdvance->acceleration();
 
     exporter->postProcess( time );
 
