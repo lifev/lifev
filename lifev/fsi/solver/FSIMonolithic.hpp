@@ -447,12 +447,12 @@ protected:
     /*!
      *  Here it is used also to update the velocity for the post-processing.
      */
-    void updateSolution( const vector_Type& solution )
+    virtual void updateSolution( const vector_Type& solution )
     {
         this->M_fluidTimeAdvance->shiftRight(solution);
         if(M_data->dataFluid()->conservativeFormulation())
             this->M_fluidMassTimeAdvance->shiftRight(M_fluid->matrixMass()*solution);
-        this->M_solidTimeAdvance->shiftRight(solution);
+        this->M_solidTimeAdvance->shiftRight(solution);	
     }
 
     //! Constructs the solid FESpace

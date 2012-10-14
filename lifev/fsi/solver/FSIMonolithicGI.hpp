@@ -140,6 +140,27 @@ class Epetra_FullMonolithic;
 
        void setSolutionPtr( const vectorPtr_Type& sol) { M_uk = sol; }
 
+       void updateSolution( const vector_Type& solution )
+        {
+       	  vectorPtr_Type previousMeshDisp( new vector_Type(M_mmFESpace->map()) );
+       	  UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
+       	  previousMeshDisp->subset(solution, offset); 
+
+	  if (!M_domainVelImplicit)
+	    {
+	      M_velImplicit.reset( new vector_Type(M_mmFESpace->map()) );
+	      M_vectorMeshMovement.reset( new vector_Type(M_mmFESpace->map()) );
+
+	      *M_velImplicit = M_ALETimeAdvance->velocity( );
+	      M_ALETimeAdvance->extrapolation(*M_vectorMeshMovement);
+	    }
+
+       	  M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+       	  M_ALETimeAdvance->shiftRight( *previousMeshDisp );
+	  
+       	  super_Type::updateSolution( solution );
+        }
+
        //@}
 
 
@@ -211,6 +232,8 @@ class Epetra_FullMonolithic;
 
        boost::shared_ptr<MapEpetra>         M_mapWithoutMesh;
        vectorPtr_Type                       M_uk;
+       vectorPtr_Type                       M_velImplicit;
+       vectorPtr_Type                       M_vectorMeshMovement;
        bool                                 M_domainVelImplicit;
        bool                                 M_convectiveTermDer;
        UInt                                 M_interface;
