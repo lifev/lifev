@@ -387,7 +387,7 @@ problem::run()
 
     *U = timeAdvance->solution();
     *V = timeAdvance->velocity();
-    *W = timeAdvance->accelerate();
+    *W = timeAdvance->acceleration();
 
 
     exporter->postProcess( 0 );
@@ -430,7 +430,7 @@ problem::run()
 
         *U =  timeAdvance->solution();
         *V = timeAdvance->velocity();
-        *W = timeAdvance->accelerate();
+        *W = timeAdvance->acceleration();
 
         //postProcess
         exporter->postProcess( time );
