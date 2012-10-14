@@ -1234,7 +1234,7 @@ StructuralOperator<Mesh, SolverType>::reduceSolution( Vector& displacement, Vect
     vector_Type disp(*M_disp, 0);
     //vector_Type vel(*M_vel , 0);
 
-    if ( getComunicator()->MyPID() == 0 )
+    if ( comunicator()->MyPID() == 0 )
     {
         for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
         {
