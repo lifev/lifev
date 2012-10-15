@@ -305,7 +305,7 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( *( parameters->comm ) ));
     readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner< RegionMesh<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
@@ -550,35 +550,34 @@ Structure::run3d()
     //! =============================================================================
     //! Temporal loop
     //! =============================================================================
-    // for (Real time = initialTime + dt; time <= T; time += dt)
-    // {
-    // dataStructure->dataTime()->setTime(time);
+    for (Real time = initialTime + dt; time <= T; time += dt)
+    {
+    dataStructure->dataTime()->setTime(time);
 
     if (verbose)
         {
-        std::cout << std::endl;
-        std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
+	  std::cout << std::endl;
+	  std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
     	}
 
         //! 6. Updating right-hand side
     *rhs *=0;
-    // timeAdvance->updateRHSContribution( dt );
-    // *rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
+    timeAdvance->updateRHSContribution( dt );
+    *rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
 
     std::cout << "Norm of the rhsNoBC: " << (*rhs).norm2() << std::endl;
     solid.updateRightHandSide( *rhs );
 
-        //! 7. Iterate --> Calling Newton
+    //! 7. Iterate --> Calling Newton
     solid.iterate( BCh );
 
     timeAdvance->shiftRight( solid.displacement() );
 
     *solidDisp = solid.displacement();
     *solidVel  = timeAdvance->velocity();
-    *solidAcc  = timeAdvance->accelerate();
+    *solidAcc  = timeAdvance->acceleration();
 
-    //    exporterSolid->postProcess( time );
-    exporterSolid->postProcess( 1.0 );
+    exporterSolid->postProcess( time );
 
     Real normVect;
     normVect =  solid.displacement().norm2();
@@ -588,7 +587,7 @@ Structure::run3d()
     //!--------------------------------------------------------------------------------------------------
 
     MPI_Barrier(MPI_COMM_WORLD);
-    //    }
+    }
 
     exporterSolid->closeFile();
 }
