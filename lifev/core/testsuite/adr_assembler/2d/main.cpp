@@ -64,7 +64,7 @@
 #include <lifev/core/fem/BCManage.hpp>
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh2DStructured.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 
 #include <lifev/core/solver/ADRAssembler.hpp>
@@ -145,7 +145,7 @@ main( int argc, char** argv )
 // Read first the data needed
 
     if (verbose) std::cout << " -- Reading the data ... " << std::flush;
-    GetPot dataFile( "data_2d" );
+    GetPot dataFile( "data" );
     if (verbose) std::cout << " done ! " << std::endl;
 
 
@@ -154,7 +154,24 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
     MeshData meshData(dataFile, "mesh");
     boost::shared_ptr< mesh_Type > fullMeshPtr( new mesh_Type( *Comm ) );
-    readMesh(*fullMeshPtr,meshData);
+
+    // Select if the mesh is structured or not
+    if ( meshData.meshType() != "structured" )
+    {
+        // Set up the mesh
+        readMesh( *fullMeshPtr, meshData );
+    }
+    else
+    {
+        // Set up the structured mesh
+        regularMesh2D( *fullMeshPtr, 0,
+                       dataFile( "mesh/nx", 20 ),
+                       dataFile( "mesh/ny", 20 ),
+                       dataFile( "mesh/verbose", false ),
+                       dataFile( "mesh/lx", 1. ),
+                       dataFile( "mesh/ly", 1. ) );
+    }
+
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
@@ -251,7 +268,7 @@ main( int argc, char** argv )
     BCHandler bchandler;
     BCFunctionBase BCu( static_cast<feSpace_Type::function_Type>( exactSolution ) );
     bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
-    for (UInt i(2); i<=6; ++i)
+    for (UInt i(2); i<=4; ++i)
     {
         bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
     }
