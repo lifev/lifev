@@ -499,9 +499,9 @@ public:
     // const mesh_Type& solidMesh()                                  const { return *M_solidMesh; }
 
     //!getter for the partitioned fluid mesh
-    const MeshPartitioner< mesh_Type >& fluidMeshPart()           const { return *M_fluidMeshPart; }
+    mesh_Type & fluidLocalMesh()                                        { return *M_fluidLocalMesh; }
     //!getter for the partitioned solid mesh
-    const MeshPartitioner< mesh_Type >& solidMeshPart()           const { return *M_solidMeshPart; }
+    mesh_Type & solidLocalMesh()                                        { return *M_solidLocalMesh; }
 
     //!getter for the fluid velocity FESpace
     const FESpace<mesh_Type, MapEpetra>& uFESpace()               const { return *M_uFESpace; }
@@ -618,7 +618,7 @@ public:
     /*!
      * @param solidAcc vector to be filled with the solid acceleration
      */
-    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->accelerate(); }
+    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->acceleration(); }
 
 
     //! Getter for the right hand side
@@ -811,8 +811,8 @@ protected:
     boost::shared_ptr<mesh_Type>                      M_fluidMesh;
     boost::shared_ptr<mesh_Type>                      M_solidMesh;
 
-    boost::shared_ptr<MeshPartitioner< mesh_Type > >    M_fluidMeshPart;
-    boost::shared_ptr<MeshPartitioner< mesh_Type > >    M_solidMeshPart;
+    boost::shared_ptr<mesh_Type>                        M_fluidLocalMesh;
+    boost::shared_ptr<mesh_Type>                        M_solidLocalMesh;
 
     fluidBchandlerPtr_Type                              M_BCh_u;
     solidBchandlerPtr_Type                              M_BCh_d;

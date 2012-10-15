@@ -39,15 +39,6 @@
 #ifndef _SOBOLEVNORMS_H_INCLUDED
 #define _SOBOLEVNORMS_H_INCLUDED
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <boost/function.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>

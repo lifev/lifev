@@ -43,14 +43,9 @@
 #ifndef _FESPACE_H_
 #define _FESPACE_H_
 
-#include <cmath>
-#include <map>
 #include <iomanip>
 #include <sstream>
 #include <utility>
-
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <lifev/core/LifeV.hpp>
 
@@ -110,19 +105,19 @@ public:
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
 
-    FESpace( MeshPartitioner<MeshType>& mesh,
-             const ReferenceFE&         refFE,
-             const QuadratureRule&      Qr,
-             const QuadratureRule&      bdQr,
-             const Int                  fDim,
-             const commPtr_Type&        commptr
-           );
+    LIFEV_DEPRECATED ( FESpace( MeshPartitioner<MeshType>& mesh,
+                                const ReferenceFE&         refFE,
+                                const QuadratureRule&      Qr,
+                                const QuadratureRule&      bdQr,
+                                const Int                  fDim,
+                                const commPtr_Type&        commptr
+                                ) );
 
-    FESpace( MeshPartitioner<MeshType>& mesh,
-             const std::string&         space,
-             const Int                  fDim,
-             const commPtr_Type&        commptr
-           );
+    LIFEV_DEPRECATED ( FESpace( MeshPartitioner<MeshType>& mesh,
+                                const std::string&         space,
+                                const Int                  fDim,
+                                const commPtr_Type&        commptr
+                                ) );
 
     FESpace( meshPtr_Type            mesh,
              const ReferenceFE&      refFE,
@@ -738,7 +733,7 @@ interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real 
     const UInt numberLocalDof ( M_dof->numLocalDof() );
 
     // Storage for the values
-    typename FEFunctionType::point_Type point(3);
+    typename FEFunctionType::point_Type point;
     std::vector<Real> nodalValues (numberLocalDof, 0);
     std::vector<Real> FEValues (numberLocalDof, 0);
 
@@ -1673,7 +1668,6 @@ createMap(const commPtr_Type& commptr)
 {
     // Against dummies
     ASSERT_PRE(this->M_dof->numTotalDof()>0," Cannot create FeSpace with no degrees of freedom");
-
     // get globalElements list from DOF
     std::vector<Int> myGlobalElements( this->M_dof->globalElements( *this->M_mesh ) );
     // Create the map

@@ -197,7 +197,7 @@ This is a short list of programming and general conventions that should be used 
   \item For debugging purposes please use the \texttt{debug.hpp} class features:
 \begin{lstlisting}
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3000 ) << "MyClass::myFunction  myVariable = "
+    debugStream( 3000 ) << "MyClass::myFunction  myVariable = "
                   << M_myVariable << "\n";
 #endif
 \end{lstlisting}

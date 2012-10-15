@@ -36,12 +36,12 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SMART_ASSERT_H
 #define SMART_ASSERT_H
 
-#include <iostream>
-#include <map>
 #include <sstream>
-#include <string>
 #include <utility>
 #include <vector>
+#include <map>
+#include <iostream>
+#include <set>
 
 namespace LifeV
 {

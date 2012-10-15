@@ -179,9 +179,9 @@ public:
     virtual void import(const Real& Tstart);
 
     //! temporary: the method should work form the Exporter class
-    void exportPID ( MeshPartitioner<mesh_Type> const & /*meshPart*/ )
+    void exportPID( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/ )
     {
-        std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+        std::cerr << "  X-  exportPID is not working with VTK (missing P0 element support)" << std::endl;
     }
 
     //! Set data from file.
@@ -944,7 +944,7 @@ ExporterVTK<MeshType>::composeDataArrayStream(where_Type where,
 
     if ( rangeFound.first != rangeFound.second )
     {
-        Debug(8000) << "\n[ExporterVTK::composeDataArrayStream] found data\n";
+        debugStream(8000) << "\n[ExporterVTK::composeDataArrayStream] found data\n";
 
         dataArraysStringStream.setf(std::ios_base::fixed);
         dataArraysStringStream.precision(5);
@@ -1224,7 +1224,7 @@ void ExporterVTK<MeshType>::composeVTUGeoStream( const feSpacePtr_Type & _feSpac
     ASSERT( this->M_mesh.get(), "\nA pointer to a valid mesh object is required!");
     ASSERT( _feSpacePtr.get(), "\nA pointer to a valid FESpace object is required!");
 
-    Debug(8000) << "\n[ExporterVTK::composeVTUHeaderStream]\n";
+    debugStream(8000) << "\n[ExporterVTK::composeVTUHeaderStream]\n";
 
     const UInt numPoints = globalToLocalPointsMap.size();
     const UInt numElements = this->M_mesh->numElements();
@@ -1305,7 +1305,7 @@ void ExporterVTK<MeshType>::composeVTUHeaderStream( UInt numPoints,
 template <typename MeshType>
 void ExporterVTK<MeshType>::composeVTUFooterStream( std::stringstream& vtuFooterStringStream )
 {
-    Debug(8000) << "\n[ExporterVTK::composeFooter]\n";
+    debugStream(8000) << "\n[ExporterVTK::composeFooter]\n";
 
     //footer part of the file
     vtuFooterStringStream << "\t\t</Piece>\n";
@@ -1321,7 +1321,7 @@ void
 ExporterVTK<MeshType>::composeTypeDataHeaderStream(where_Type where,
                                          std::stringstream& dataHeaderStringStream)
 {
-    Debug(8000) << "\n[ExporterVTK::composeTypeDataHeaderStream] where = " << where << "\n";
+    debugStream(8000) << "\n[ExporterVTK::composeTypeDataHeaderStream] where = " << where << "\n";
 
     std::string whereString;
     switch ( where )

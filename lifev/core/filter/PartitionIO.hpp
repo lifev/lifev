@@ -36,43 +36,26 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PARTITION_IO_H_
 #define PARTITION_IO_H_
 
-#include<lifev/core/LifeV.hpp>
-
-#include <Epetra_config.h>
-
 #ifdef HAVE_HDF5
 #ifdef HAVE_MPI
 
 #include <algorithm>
-#include <string>
-#include <vector>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <mpi.h>
-
-#ifndef H5Dcreate_vers
-#define H5Dcreate_vers 2
-#endif
-
-#ifndef H5Dopen_vers
-#define H5Dopen_vers 2
-#endif
-
-#ifndef H5Gcreate_vers
-#define H5Gcreate_vers 2
-#endif
+#include <Epetra_config.h>
 
 #include <hdf5.h>
 
-#include <boost/shared_ptr.hpp>
 #include <Epetra_MpiComm.h>
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include<lifev/core/LifeV.hpp>
 
 namespace LifeV {
 
@@ -352,7 +335,7 @@ template<typename MeshType>
 void LifeV::PartitionIO<MeshType>::read(meshPtr_Type& meshPart)
 {
     meshPart.reset();
-    M_meshPartIn.reset(new mesh_Type);
+    M_meshPartIn.reset(new mesh_Type( *M_comm ) );
 
     openHDF5File();
     readStats();
@@ -373,9 +356,8 @@ void LifeV::PartitionIO<MeshType>::createHDF5File()
     MPI_Comm comm;
     boost::shared_ptr<Epetra_MpiComm> tempComm =
             boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
-    if (tempComm != 0) {
-        comm = tempComm->Comm();
-    }
+    ASSERT( tempComm, "Error: the casting of M_comm has failed" );
+    comm = tempComm->Comm();
     MPI_Info info = MPI_INFO_NULL;
 
     // Set up file access property list with parallel I/O access
@@ -402,8 +384,14 @@ void LifeV::PartitionIO<MeshType>::writeStats()
         currentSpaceDims[1] = M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dcreate(M_fileId, "stats", H5T_STD_U32BE, filespace,
+                                 H5P_DEFAULT);
+#else
     hid_t intDataset = H5Dcreate(M_fileId, "stats", H5T_STD_U32BE, filespace,
                                  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -479,12 +467,20 @@ void LifeV::PartitionIO<MeshType>::writePoints()
         currentSpaceDims[1] = 3 * M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+
+#ifdef H5_USE_16_API
     hid_t intDataset = H5Dcreate(M_fileId, "point_ids", H5T_STD_U32BE,
-                                 filespace, H5P_DEFAULT, H5P_DEFAULT,
-                                 H5P_DEFAULT);
+                                 filespace, H5P_DEFAULT);
+    hid_t realDataset = H5Dcreate(M_fileId, "point_coords", H5T_IEEE_F64BE,
+                                  filespace, H5P_DEFAULT);
+#else
     hid_t realDataset = H5Dcreate(M_fileId, "point_coords", H5T_IEEE_F64BE,
                                   filespace, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT);
+    hid_t intDataset = H5Dcreate(M_fileId, "point_ids", H5T_STD_U32BE,
+                                 filespace, H5P_DEFAULT, H5P_DEFAULT,
+                                 H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -507,7 +503,7 @@ void LifeV::PartitionIO<MeshType>::writePoints()
         for (UInt i = 0; i < M_numParts; ++i) {
             mesh_Type& currentPart = (*(*M_meshPartsOut)[i]);
             for (UInt j = 0; j < currentPart.numPoints(); ++j) {
-                M_uintBuffer[j] = currentPart.pointList[j].marker();
+                M_uintBuffer[j] = currentPart.pointList[j].markerID();
                 M_uintBuffer[stride + j] = currentPart.point(j).id();
                 M_uintBuffer[2 * stride + j] =
                         static_cast<int>(currentPart.pointList[j].flag());
@@ -528,7 +524,7 @@ void LifeV::PartitionIO<MeshType>::writePoints()
         for (UInt i = 0; i < M_numParts; ++i) {
             mesh_Type& currentPart = (*(*M_meshPartsOut)[i]);
             for (UInt j = 0; j < currentPart.numPoints(); ++j) {
-                M_uintBuffer[stride * j] = currentPart.pointList[j].marker();
+                M_uintBuffer[stride * j] = currentPart.pointList[j].markerID();
                 M_uintBuffer[stride * j + 1] = currentPart.point(j).id();
                 M_uintBuffer[stride * j + 2] =
                         static_cast<int>(currentPart.pointList[j].flag());
@@ -570,8 +566,13 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
         currentSpaceDims[1] = 5 * M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+#ifdef H5_USE_16_API
+    hid_t dataset = H5Dcreate(M_fileId, "edges", H5T_STD_U32BE, filespace,
+                              H5P_DEFAULT);
+#else
     hid_t dataset = H5Dcreate(M_fileId, "edges", H5T_STD_U32BE, filespace,
                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -596,7 +597,7 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
                 M_uintBuffer[j] = currentPart.edgeList[j].point(0).localId();
                 M_uintBuffer[stride + j] =
                         currentPart.edgeList[j].point(1).localId();
-                M_uintBuffer[2 * stride + j] = currentPart.edgeList[j].marker();
+                M_uintBuffer[2 * stride + j] = currentPart.edgeList[j].markerID();
                 M_uintBuffer[3 * stride + j] = currentPart.edgeList[j].id();
                 M_uintBuffer[4 * stride + j] =
                         static_cast<int>(currentPart.edgeList[j].flag());
@@ -614,7 +615,7 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
                         currentPart.edgeList[j].point(0).localId();
                 M_uintBuffer[stride * j + 1] =
                         currentPart.edgeList[j].point(1).localId();
-                M_uintBuffer[stride * j + 2] = currentPart.edgeList[j].marker();
+                M_uintBuffer[stride * j + 2] = currentPart.edgeList[j].markerID();
                 M_uintBuffer[stride * j + 3] = currentPart.edgeList[j].id();
                 M_uintBuffer[stride * j + 4] =
                         static_cast<int>(currentPart.edgeList[j].flag());
@@ -647,8 +648,13 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
         currentSpaceDims[1] = (7 + M_faceNodes) * M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+#ifdef H5_USE_16_API
+    hid_t dataset = H5Dcreate(M_fileId, "faces", H5T_STD_U32BE, filespace,
+                              H5P_DEFAULT);
+#else
     hid_t dataset = H5Dcreate(M_fileId, "faces", H5T_STD_U32BE, filespace,
                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -675,7 +681,7 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
                         currentPart.faceList[j].point(k).localId();
                 }
                 M_uintBuffer[M_faceNodes * stride +j] =
-                        currentPart.faceList[j].marker();
+                        currentPart.faceList[j].markerID();
                 M_uintBuffer[(M_faceNodes + 1) * stride + j] =
                         currentPart.faceList[j].id();
                 M_uintBuffer[(M_faceNodes + 2) * stride + j] =
@@ -703,7 +709,7 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
                         currentPart.faceList[j].point(k).localId();
                 }
                 M_uintBuffer[stride * j + M_faceNodes] =
-                        currentPart.faceList[j].marker();
+                        currentPart.faceList[j].markerID();
                 M_uintBuffer[stride * j + M_faceNodes + 1] =
                         currentPart.faceList[j].id();
                 M_uintBuffer[stride * j + M_faceNodes + 2] =
@@ -745,8 +751,13 @@ void LifeV::PartitionIO<MeshType>::writeElements()
         currentSpaceDims[1] = (3 + M_elementNodes) * M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+#ifdef H5_USE_16_API
+    hid_t dataset = H5Dcreate(M_fileId, "elements", H5T_STD_U32BE, filespace, 
+                              H5P_DEFAULT);
+#else
     hid_t dataset = H5Dcreate(M_fileId, "elements", H5T_STD_U32BE, filespace,
                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -773,7 +784,7 @@ void LifeV::PartitionIO<MeshType>::writeElements()
                         currentPart.volumeList[j].point(k).localId();
                 }
                 M_uintBuffer[M_elementNodes * stride +j] =
-                        currentPart.volumeList[j].marker();
+                        currentPart.volumeList[j].markerID();
                 M_uintBuffer[(M_elementNodes + 1) * stride + j] =
                         currentPart.volumeList[j].id();
                 M_uintBuffer[(M_elementNodes + 2) * stride + j] =
@@ -793,7 +804,7 @@ void LifeV::PartitionIO<MeshType>::writeElements()
                         currentPart.volumeList[j].point(k).localId();
                 }
                 M_uintBuffer[stride * j + M_elementNodes] =
-                        currentPart.volumeList[j].marker();
+                        currentPart.volumeList[j].markerID();
                 M_uintBuffer[stride * j + M_elementNodes + 1] =
                         currentPart.volumeList[j].id();
                 M_uintBuffer[stride * j + M_elementNodes + 2] =
@@ -848,7 +859,11 @@ void LifeV::PartitionIO<MeshType>::readStats()
     // Write mesh partition stats (N = number of parts)
     // This is an N x 15 table of int
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dopen(M_fileId, "stats");
+#else
     hid_t intDataset = H5Dopen(M_fileId, "stats", H5P_DEFAULT);
+#endif
     hid_t filespace = H5Dget_space(intDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
 
@@ -921,8 +936,13 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     // There are two tables: a (3 * N) x max_num_points table of int and
     // a (3 * N) x max_num_points table of real
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dopen(M_fileId, "point_ids");
+    hid_t realDataset = H5Dopen(M_fileId, "point_coords");
+#else
     hid_t intDataset = H5Dopen(M_fileId, "point_ids", H5P_DEFAULT);
     hid_t realDataset = H5Dopen(M_fileId, "point_coords", H5P_DEFAULT);
+#endif
 
     hid_t filespace = H5Dget_space(intDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
@@ -972,27 +992,25 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     if (! M_transposeInFile) {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &(M_meshPartIn->addPoint(false));
+            pp = &( M_meshPartIn->addPoint( false, false ) );
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[2 * stride + j]));
-            pp->setMarker(M_uintBuffer[j]);
+            pp->setMarkerID(M_uintBuffer[j]);
             pp->x() = M_realBuffer[j];
             pp->y() = M_realBuffer[stride + j];
             pp->z() = M_realBuffer[2 * stride + j];
-            pp->setLocalId(j);
             pp->setId(M_uintBuffer[stride + j]);
         }
     } else {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &(M_meshPartIn->addPoint(false));
+            pp = &( M_meshPartIn->addPoint( false, false ) );
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + 2]));
-            pp->setMarker(M_uintBuffer[stride * j]);
+            pp->setMarkerID(M_uintBuffer[stride * j]);
             pp->x() = M_realBuffer[stride * j];
             pp->y() = M_realBuffer[stride * j + 1];
             pp->z() = M_realBuffer[stride * j + 2];
-            pp->setLocalId(j);
             pp->setId(M_uintBuffer[stride * j + 1]);
         }
     }
@@ -1005,7 +1023,11 @@ void LifeV::PartitionIO<MeshType>::readEdges()
     // Read mesh edges (N = number of parts)
     // Read a (5 * N) x max_num_edges table of int and
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dopen(M_fileId, "edges");
+#else
     hid_t intDataset = H5Dopen(M_fileId, "edges", H5P_DEFAULT);
+#endif
 
     hid_t filespace = H5Dget_space(intDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
@@ -1052,11 +1074,10 @@ void LifeV::PartitionIO<MeshType>::readEdges()
             pe = &(M_meshPartIn->addEdge(false));
             pe->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[4 * stride + j]));
-            pe->setLocalId(j);
             pe->setId(M_uintBuffer[3 * stride + j]);
             pe->setPoint(0, M_meshPartIn->point(M_uintBuffer[j]));
             pe->setPoint(1, M_meshPartIn->point(M_uintBuffer[stride +j]));
-            pe->setMarker(M_uintBuffer[2 * stride + j]);
+            pe->setMarkerID(M_uintBuffer[2 * stride + j]);
         }
     } else {
         for (UInt j = 0; j < M_numEdges; ++j)
@@ -1064,11 +1085,10 @@ void LifeV::PartitionIO<MeshType>::readEdges()
             pe = &(M_meshPartIn->addEdge(false));
             pe->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + 4]));
-            pe->setLocalId(j);
             pe->setId(M_uintBuffer[stride * j + 3]);
             pe->setPoint(0, M_meshPartIn->point(M_uintBuffer[stride * j]));
             pe->setPoint(1, M_meshPartIn->point(M_uintBuffer[stride * j + 1]));
-            pe->setMarker(M_uintBuffer[stride * j + 2]);
+            pe->setMarkerID(M_uintBuffer[stride * j + 2]);
         }
     }
 }
@@ -1079,7 +1099,11 @@ void LifeV::PartitionIO<MeshType>::readFaces()
     // read mesh faces (N = number of parts)
     // Read a ((7 + num_face_points) * N) x max_num_faces table of int
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dopen(M_fileId, "faces");
+#else
     hid_t intDataset = H5Dopen(M_fileId, "faces", H5P_DEFAULT);
+#endif
 
     hid_t filespace = H5Dget_space(intDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
@@ -1127,7 +1151,6 @@ void LifeV::PartitionIO<MeshType>::readFaces()
             pf->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[(6 + M_faceNodes)
                                                        * stride + j]));
-            pf->setLocalId(j);
             pf->setId(M_uintBuffer[(M_faceNodes + 1) * stride + j]);
             pf->firstAdjacentElementIdentity() =
                     M_uintBuffer[(M_faceNodes + 2) * stride + j];
@@ -1137,7 +1160,7 @@ void LifeV::PartitionIO<MeshType>::readFaces()
                     M_uintBuffer[(M_faceNodes + 4) * stride + j];
             pf->secondAdjacentElementPosition() =
                     M_uintBuffer[(M_faceNodes + 5) * stride + j];
-            pf->setMarker(M_uintBuffer[M_faceNodes * stride + j]);
+            pf->setMarkerID(M_uintBuffer[M_faceNodes * stride + j]);
             for (UInt k = 0; k < M_faceNodes; ++k)
             {
                 pf->setPoint(k, M_meshPartIn->point(
@@ -1151,7 +1174,6 @@ void LifeV::PartitionIO<MeshType>::readFaces()
             pf->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j
                                                        + M_faceNodes + 6]));
-            pf->setLocalId(j);
             pf->setId(M_uintBuffer[stride * j + M_faceNodes + 1]);
             pf->firstAdjacentElementIdentity() =
                     M_uintBuffer[stride * j + M_faceNodes + 2];
@@ -1161,7 +1183,7 @@ void LifeV::PartitionIO<MeshType>::readFaces()
                     M_uintBuffer[stride * j + M_faceNodes + 4];
             pf->secondAdjacentElementPosition() =
                     M_uintBuffer[stride * j + M_faceNodes + 5];
-            pf->setMarker(M_uintBuffer[(7 + M_faceNodes) * j + M_faceNodes]);
+            pf->setMarkerID(M_uintBuffer[(7 + M_faceNodes) * j + M_faceNodes]);
             for (UInt k = 0; k < M_faceNodes; ++k)
             {
                 pf->setPoint(k, M_meshPartIn->point(
@@ -1180,7 +1202,11 @@ void LifeV::PartitionIO<MeshType>::readElements()
     // Read mesh elements (N = number of parts)
     // Read a ((3 + num_element_points) * N) x max_num_elements table of int
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t uintDataset = H5Dopen(M_fileId, "elements");
+#else
     hid_t uintDataset = H5Dopen(M_fileId, "elements", H5P_DEFAULT);
+#endif
 
     hid_t filespace = H5Dget_space(uintDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
@@ -1228,13 +1254,12 @@ void LifeV::PartitionIO<MeshType>::readElements()
             pv->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[(M_elementNodes + 2) * stride + j]));
             pv->setId(M_uintBuffer[(M_elementNodes + 1) * stride + j]);
-            pv->setLocalId(j);
             for (UInt k = 0; k < M_elementNodes; ++k)
             {
                 pv->setPoint(k, M_meshPartIn->point(
                         M_uintBuffer[k * stride + j]));
             }
-            pv->setMarker(M_uintBuffer[M_elementNodes * stride + j]);
+            pv->setMarkerID(M_uintBuffer[M_elementNodes * stride + j]);
         }
     } else {
         for (UInt j = 0; j < M_numElements; ++j)
@@ -1243,13 +1268,12 @@ void LifeV::PartitionIO<MeshType>::readElements()
             pv->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + M_elementNodes + 2]));
             pv->setId(M_uintBuffer[stride * j + M_elementNodes + 1]);
-            pv->setLocalId(j);
             for (UInt k = 0; k < M_elementNodes; ++k)
             {
                 pv->setPoint(k, M_meshPartIn->point(
                         M_uintBuffer[stride * j + k]));
             }
-            pv->setMarker(M_uintBuffer[stride * j + M_elementNodes]);
+            pv->setMarkerID(M_uintBuffer[stride * j + M_elementNodes]);
         }
     }
 

@@ -35,10 +35,14 @@
     @date 07 Jun 2010
  */
 
-#ifndef BLOCKINTERFACE_H
-#define BLOCKINTERFACE_H 1
+#ifndef MONOLITHICBLOCK_H
+#define MONOLITHICBLOCK_H 1
 
 #include <cstdarg>
+
+#include <Epetra_Comm.h>
+#include <Epetra_Operator.h>
+
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/LifeV.hpp>
 
@@ -79,12 +83,9 @@ public:
     typedef matrix_Type::matrix_type/*matrix_Type*/                    epetraMatrix_Type;
     typedef SolverAztecOO                                              solver_Type;
     typedef boost::shared_ptr< SolverAztecOO >                         solverPtr_Type;
-    typedef boost::shared_ptr< FESpace<RegionMesh<LinearTetra>, MapEpetra> >  fespacePtr_Type;
-    //typedef fespacePtr_Type                                     fespacePtr_Type;
-    //    typedef FESpace<RegionMesh<LinearTetra>, MapEpetra>*                 fespacePtr_Type;
-    //typedef MapEpetra*                                                 mapPtr_Type;
+    typedef FESpace<RegionMesh<LinearTetra>, MapEpetra>                fespace_Type;
+    typedef boost::shared_ptr< fespace_Type >                          fespacePtr_Type;
     typedef boost::shared_ptr< MapEpetra >                             mapPtr_Type;
-    //typedef BCHandler*                                                 bchandlerPtr_Type;
     typedef boost::shared_ptr< BCHandler >                             bchandlerPtr_Type;
     //@}
 
@@ -110,10 +111,8 @@ public:
 //     {}
 
     //! Destructor
-    ~MonolithicBlock()
+    virtual ~MonolithicBlock()
     {
-//     free(M_offset);
-//     free(M_FESpace);
     }
     //@}
 
@@ -452,10 +451,6 @@ public:
     //! returns the vector of the offsets (by const reference).
     const std::vector<UInt>&              offsetVector() {return M_offset;}
 
-    virtual const std::vector<boost::shared_ptr<Preconditioner> >& blockPrecs() const {return std::vector<boost::shared_ptr<Preconditioner> >(0); }
-
-    virtual const std::vector<matrixPtr_Type>& couplingVector() const =0;
-
     virtual const UInt whereIsBlock( UInt position )const =0;
 
     //@}
@@ -539,4 +534,4 @@ MonolithicBlock::insert(std::vector<Operator>& vectorFrom, std::vector<Operator>
 
 } // Namespace LifeV
 
-#endif /* BLOCKINTERFACE_H */
+#endif /* MONOLITHICBLOCK_H */

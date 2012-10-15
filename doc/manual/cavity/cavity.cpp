@@ -150,7 +150,11 @@ int main(int argc, char** argv)
     boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
     LifeV::readMesh(*fullMeshPtr, meshData);
     // Split the mesh between processors
-    LifeV::MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, comm);
+    boost::shared_ptr< mesh_Type > localMeshPtr;
+    {
+        LifeV::MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, comm);
+        localMeshPtr = meshPart.meshPartition();
+    }
 
     // +-----------------------------------------------+
     // |            Creating the FE spaces             |
@@ -162,12 +166,12 @@ int main(int argc, char** argv)
                                << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space... " << std::flush;
-    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart, uOrder, 3, comm) );
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type(localMeshPtr, uOrder, 3, comm) );
     if (verbose)
         std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space... " << std::flush;
-    feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart,pOrder,1,comm) );
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type(localMeshPtr,pOrder,1,comm) );
     if (verbose) std::cout << "ok." << std::endl;
 
     // Total degrees of freedom (elements of matrix)
@@ -285,7 +289,7 @@ int main(int argc, char** argv)
 
     exporter.reset( new LifeV::ExporterHDF5<mesh_Type> ( dataFile, "cavity_example" ) );
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
+    exporter->setMeshProcId( localMeshPtr, comm->MyPID() );
 
     velAndPressure.reset( new vector_Type(*fluid.solution(), exporter->mapType() ) );
 

@@ -139,10 +139,6 @@ public:
     //! resets the pointer to the preconditioner M_prec
     void                   resetPreconditioner();
 
-    //! returns true if prec exists
-    /*const*/
-    bool                   isPreconditionerSet() const {return M_prec;}
-
     //! returns the operator vectir
     const std::vector<operatorPtr_Type>& operVector() const {return M_operVector;}
     //@}

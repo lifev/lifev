@@ -45,20 +45,21 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
                                using gnuplot
  */
 
-#include <lifev/core/LifeV.hpp>
-#include <lifev/core/fem/QuadratureRule.hpp>
-#include <string>
-#include <fstream>
-
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <boost/numeric/ublas/vector.hpp>
+#include <fstream>
+
+#include <Epetra_SerialComm.h>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/QuadratureRule.hpp>
+
 #include "SetOfFun.hpp"
+
 namespace LifeV
 {
 typedef boost::numeric::ublas::vector<Real> Vector;
@@ -69,8 +70,8 @@ typedef container_Type::const_iterator constIterator_Type;
 template<typename Mesh>
 bool quad_check_doe(const ReferenceFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_file)
 {
-
-    Mesh aMesh;
+    boost::shared_ptr<Epetra_Comm> dummyComm( new Epetra_SerialComm );
+    Mesh aMesh( *dummyComm );
     UInt nEl(1);
     regularMesh3D( aMesh, 1, nEl, nEl, nEl);
 
@@ -133,6 +134,7 @@ bool quad_check_doe(const ReferenceFE &refFE, const GeometricMap & geoMap, const
 template<typename Mesh>
 bool quad_check_cr( const ReferenceFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_name)
 {
+    boost::shared_ptr<Epetra_Comm> dummyComm( new Epetra_SerialComm );
     SetofFun fct;
     int fun(fct.nfun());
 
@@ -148,7 +150,7 @@ bool quad_check_cr( const ReferenceFE &refFE, const GeometricMap & geoMap, const
     for (int iref = 0; iref<nrefine; ++iref)
     {
 
-        Mesh aMesh;
+        Mesh aMesh( *dummyComm );
         UInt nEl( pow(2.0,static_cast<double>(iref) ) );
         regularMesh3D( aMesh, 1, nEl, nEl, nEl);
 

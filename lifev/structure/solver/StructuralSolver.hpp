@@ -62,6 +62,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/BCManage.hpp>
 #include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/mesh/MeshEntityContainer.hpp>
 
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
@@ -72,6 +73,35 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace LifeV
 {
+
+template < typename MeshEntityType,
+           typename ComparisonPolicyType = boost::function2<bool,
+                                                            const UInt,
+                                                            const UInt > >
+class MarkerSelector
+{
+public:
+    typedef MeshEntityType       meshEntity_Type;
+    typedef ComparisonPolicyType comparisonPolicy_Type;
+
+    MarkerSelector( const UInt materialFlagReference,
+                    comparisonPolicy_Type const & policy = std::equal_to<UInt>() )
+        : M_reference( materialFlagReference ),
+          M_policy( policy ) {}
+
+    bool operator()( const meshEntity_Type & entity ) const
+    {
+      //Extract the flag from the mesh entity
+      UInt flagChecked = entity.markerID();
+
+      return M_policy( flagChecked, M_reference );
+    }
+
+private:
+    const UInt M_reference;
+    const comparisonPolicy_Type M_policy;
+
+}; // Marker selector
 
 /*!
   \class StructuralSolver
@@ -87,30 +117,42 @@ class StructuralSolver
 {
 public:
 
-    //!@name Type definitions
-    //@{
-    typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
+  //!@name Type definitions
+  //@{
+  typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+  typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
 
-    typedef StructuralMaterial<Mesh>               material_Type;
-    typedef boost::shared_ptr<material_Type>       materialPtr_Type;
+  typedef StructuralMaterial<Mesh>                      material_Type;
+  typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
-    typedef BCHandler                              bchandlerRaw_Type;
-    typedef boost::shared_ptr<bchandlerRaw_Type>   bchandler_Type;
+  typedef BCHandler                                     bchandlerRaw_Type;
+  typedef boost::shared_ptr<bchandlerRaw_Type>          bchandler_Type;
 
-    typedef SolverType                             solver_Type;
+  typedef SolverType                                    solver_Type;
 
-    typedef typename solver_Type::matrix_type      matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
-    typedef typename solver_Type::vector_type      vector_Type;
-    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
+  typedef typename solver_Type::matrix_type             matrix_Type;
+  typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
+  typedef typename solver_Type::vector_type             vector_Type;
+  typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
 
-    typedef typename SolverType::prec_raw_type     precRaw_Type;
-    typedef typename SolverType::prec_type         prec_Type;
+  typedef typename SolverType::prec_raw_type            precRaw_Type;
+  typedef typename SolverType::prec_type                prec_Type;
 
-    typedef VenantKirchhoffElasticData             data_Type;
+  typedef VenantKirchhoffElasticData                    data_Type;
 
-    //@}
+  typedef RegionMesh<LinearTetra >                      mesh_Type;
+  typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+
+  typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
+  typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+
+  typedef typename mesh_Type::element_Type                        meshEntity_Type;
+
+  typedef typename boost::function2<bool, const UInt, const UInt> comparisonPolicy_Type;
+
+  typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
+  typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
+  //@}
 
 
     //! @name Constructor & Destructor
@@ -451,6 +493,9 @@ public:
 
     void Apply( const vector_Type& sol, vector_Type& res) const;
 
+
+    //! Get the density
+    mapMarkerVolumesPtr_Type mapMarkersVolumes() const { return M_mapMarkersVolumes; }
     //@}
 
 protected:
@@ -469,6 +514,14 @@ protected:
 
 
     UInt dim() const { return M_FESpace->dim(); }
+
+
+    //! construct the map between the markers and the volumes
+    /*!
+      \param VOID
+      \return VOID
+    */
+    void setupMapMarkersVolumes( void );
 
     //!Protected Members
 
@@ -548,6 +601,9 @@ protected:
     //! Material class
     materialPtr_Type                     M_material;
 
+    //! Map between markers and volumes on the mesh
+    mapMarkerVolumesPtr_Type             M_mapMarkersVolumes;
+
 };
 
 //====================================
@@ -579,7 +635,8 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
     M_source                     ( ),
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
-    M_material                   ( )
+    M_material                   ( ),
+    M_mapMarkersVolumes          ( )
 {
     //    M_Displayer->leaderPrint("I am in the constructor for the solver");
 }
@@ -640,7 +697,49 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
         M_out_iter.open( "out_iter_solid" );
         M_out_res.open( "out_res_solid" );
     }
+    M_mapMarkersVolumes.reset( new mapMarkerVolumes_Type() );
+    this->setupMapMarkersVolumes();
 }
+
+
+template <typename Mesh, typename SolverType>
+void StructuralSolver<Mesh, SolverType>::setupMapMarkersVolumes( void )
+{
+ 
+  this->M_Displayer->leaderPrint(" S-  Building the map between volumesMarkers <--> volumes \n");
+
+  //We first loop over the vector of the material_flags
+  for (  UInt i(0); i < M_data->vectorFlags().size(); i++ )
+    {
+
+      //Create the functor to extract volumes
+      markerSelectorPtr_Type ref( new markerSelector_Type(M_data->vectorFlags()[i]) );
+
+      //Number of volumes with the current marker
+      UInt numExtractedVolumes = this->M_FESpace->mesh()->elementList().countAccordingToPredicate( *ref );
+
+      this->M_Displayer->leaderPrint(" Current marker: ", M_data->vectorFlags()[i]);
+      this->M_Displayer->leaderPrint(" \n");
+      this->M_Displayer->leaderPrint(" Number of volumes:", numExtractedVolumes);
+      this->M_Displayer->leaderPrint(" \n");
+
+      //Vector large enough to contain the number of volumes with the current marker
+      vectorVolumes_Type extractedVolumes( numExtractedVolumes );
+
+      //Extracting the volumes
+      extractedVolumes = this->M_FESpace->mesh()->elementList().extractAccordingToPredicate( *ref );
+
+      //Insert the correspondande Marker <--> List of Volumes inside the map
+      M_mapMarkersVolumes->insert( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags()[i], extractedVolumes) ) ;
+
+      //Cleaning the vector
+      extractedVolumes.clear();
+
+    }
+}
+
+
+
 
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::updateSystem( void )
@@ -657,7 +756,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& mat_stiff
     chrono.start();
 
     //Compute the new Stiffness Matrix
-    M_material->computeStiffness(*M_disp, M_rescaleFactor, M_data, M_Displayer);
+    M_material->computeStiffness(*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_Displayer);
 
     if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
@@ -704,7 +803,7 @@ void StructuralSolver<Mesh, SolverType>::buildSystem( const Real& coefficient )
     chrono.start();
 
     computeMassMatrix( coefficient );
-    M_material->computeLinearStiff(M_data);
+    M_material->computeLinearStiff(M_data, M_mapMarkersVolumes);
 
     chrono.stop();
     M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
@@ -847,7 +946,7 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     chrono.start();
 
     //! It is right to do globalAssemble() inside the M_material class
-    M_material->computeStiffness( sol, 1., M_data, M_Displayer);
+    M_material->computeStiffness( sol, 1., M_data, M_mapMarkersVolumes, M_Displayer);
 
     if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
     {
@@ -1176,7 +1275,7 @@ void StructuralSolver<Mesh, SolverType>::updateJacobian( const vector_Type & sol
     LifeChrono chrono;
     chrono.start();
 
-    M_material->updateJacobianMatrix(sol, M_data, M_Displayer);
+    M_material->updateJacobianMatrix(sol, M_data, M_mapMarkersVolumes, M_Displayer);
 
     jacobian.reset(new matrix_Type(*M_localMap));
     *jacobian += *M_material->jacobian();
@@ -1245,7 +1344,7 @@ solveJacobian(vector_Type&           step,
 template<typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::Apply( const vector_Type& sol, vector_Type& res) const
 {
-    M_material->Apply(sol, res);
+  M_material->Apply(sol, res, M_mapMarkersVolumes);
     res += (*M_mass)*sol;
 }
 

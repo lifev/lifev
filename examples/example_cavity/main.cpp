@@ -148,7 +148,11 @@ int main(int argc, char** argv)
     boost::shared_ptr< LifeV::RegionMesh<LifeV::LinearTetra> > fullMeshPtr(new LifeV::RegionMesh<LifeV::LinearTetra>);
     LifeV::readMesh(*fullMeshPtr, meshData);
     // Split the mesh between processors
-    LifeV::MeshPartitioner< LifeV::RegionMesh<LifeV::LinearTetra> >   meshPart(fullMeshPtr, comm);
+    boost::shared_ptr<LifeV::RegionMesh<LifeV::LinearTetra> > localMeshPtr;
+    {
+        LifeV::MeshPartitioner< LifeV::RegionMesh<LifeV::LinearTetra> >   meshPart(fullMeshPtr, comm);
+        localMeshPtr = meshPart.meshPartition();
+    }
 
     // +-----------------------------------------------+
     // |            Creating the FE spaces             |
@@ -161,13 +165,13 @@ int main(int argc, char** argv)
 
     if (verbose) std::cout << "Building the velocity FE space... " << std::flush;
     boost::shared_ptr<LifeV::FESpace< LifeV::RegionMesh<LifeV::LinearTetra>, LifeV::MapEpetra > > uFESpacePtr(
-                    new LifeV::FESpace< LifeV::RegionMesh<LifeV::LinearTetra>, LifeV::MapEpetra > (meshPart, uOrder, 3, comm) );
+                    new LifeV::FESpace< LifeV::RegionMesh<LifeV::LinearTetra>, LifeV::MapEpetra > (localMeshPtr, uOrder, 3, comm) );
     if (verbose)
         std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space... " << std::flush;
     boost::shared_ptr<LifeV::FESpace< LifeV::RegionMesh<LifeV::LinearTetra>, LifeV::MapEpetra > > pFESpacePtr(
-                    new LifeV::FESpace< LifeV::RegionMesh<LifeV::LinearTetra>, LifeV::MapEpetra > (meshPart,pOrder,1,comm) );
+                    new LifeV::FESpace< LifeV::RegionMesh<LifeV::LinearTetra>, LifeV::MapEpetra > (localMeshPtr,pOrder,1,comm) );
     if (verbose) std::cout << "ok." << std::endl;
 
     // Total degrees of freedom (elements of matrix)
@@ -285,7 +289,7 @@ int main(int argc, char** argv)
 
     exporter.reset( new LifeV::ExporterHDF5<LifeV::RegionMesh<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
+    exporter->setMeshProcId( localMeshPtr, comm->MyPID() );
 
     velAndPressure.reset( new vector_Type(*fluid.solution(), exporter->mapType() ) );
 

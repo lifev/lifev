@@ -42,14 +42,7 @@
 #ifndef _DOFINTERFACE3DTO3D_HH
 #define _DOFINTERFACE3DTO3D_HH
 
-#include <list>
-#include <cmath>
-#include <set>
-#include <iostream>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/function.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
 
@@ -474,7 +467,7 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
 
     // select facets flagged with flag 2
     for ( ID ibF2 = 0; ibF2 < bdnF2; ++ibF2 )
-    	if ( flag2 == mesh2.boundaryFacet( ibF2 ).marker())
+    	if ( flag2 == mesh2.boundaryFacet( ibF2 ).markerID())
     		facetsFlagged2.insert(ibF2);
 
     // Loop on boundary facets on mesh1
@@ -482,7 +475,7 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
     {
 
         // The facet marker
-        marker1 = mesh1.boundaryFacet( ibF1 ).marker();
+        marker1 = mesh1.boundaryFacet( ibF1 ).markerID();
 
         // Is the facet on the interface?
         if ( marker1 == flag1 )
@@ -556,6 +549,11 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
+// <<<<<<< HEAD
+// =======
+//     	if ( flag3 != 0 && Int(mesh1.boundaryFacet(i->first).markerID()) != *flag3) continue;
+
+// >>>>>>> RegionMesh_part2
         feBd1.update( mesh1.boundaryFacet( i->first ) );  // Updating facet information on mesh1
         feBd2.update( mesh2.boundaryFacet( i->second ) );  // Updating facet information on mesh2
 
@@ -564,7 +562,7 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
 
         for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
 		{
-		  if ( flag3 != 0 && mesh1.boundaryFacet(i->first).point(lDof1).marker() == *flag3) 
+		  if ( flag3 != 0 && mesh1.boundaryFacet(i->first).point(lDof1).markerID() == *flag3) 
 		    continue;
 		  ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
 		  feBd1.coorMap( p1[0], p1[1], p1[2], feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)

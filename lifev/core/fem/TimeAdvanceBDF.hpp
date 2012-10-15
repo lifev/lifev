@@ -29,7 +29,8 @@
     @brief File containing a class to  deal the time advancing scheme.
     A class for an easy handling of different order time
     discretizations/extrapolations BDF based for first and second order problem
-    @date
+
+    @date 09-2010
 
     @author Simone Deparis  <simone.deparis@epfl.ch>
     @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
@@ -46,16 +47,11 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <string>
-#include <iostream>
-#include <stdexcept>
-#include <sstream>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/fem/TimeAdvance.hpp>
 
 namespace LifeV
@@ -152,148 +148,157 @@ class TimeAdvanceBDF:
 {
 public:
 
-    //!@name Public Types
-    //@{
-
-    typedef TimeAdvance< feVectorType >                   super;
-    typedef typename super::feVectorContainer_Type        feVectorContainer_Type ;
-    typedef typename super::feVectorContainerPtr_Type     feVectorContainerPtr_Type;
-    typedef typename feVectorContainerPtr_Type::iterator  feVectorContainerPtrIterate_Type;
-    typedef typename super::feVectorSharedPtrContainer_Type        feVectorSharedPtrContainer_Type;
-
-    //@}
-
-     //! @name Constructor & Destructor
-    //@{
-
-    //! Empty  Constructor
-
-    TimeAdvanceBDF();
-     //! Constructor
-     /*!
-     @param  order of the BDF
-     */
-    //  TimeAdvanceBDF( const UInt& order);
-
-    /*! Constructor
-     @param order: is accurancy's order of the BDF,
-     @param orderDerivative: is the maximum order of derivate
-     */
-    //TimeAdvanceBDF( const UInt& order, const  UInt& orderDerivative );
-
-     //! Destructor
-     ~TimeAdvanceBDF() {}
-
-   //@}
-
-    //! @name Methods
-    //@{
-
-     //!Update the state vector
-     /*! Update the vectors of the previous time steps by shifting on the right  the old values.
-     @param solution current (new) value of the state vector
-     */
-     void shiftRight(const feVectorType&  solution );
-
-     //! Update the right hand side \f$ f_V \f$ of the time derivative formula
-     /*!
-     Set and Return the right hand side \f$ f_V \f$ of the time derivative formula
-     @param timeStep defined the  time step need to compute the
-     @returns rhsV
-     */
-    void updateRHSFirstDerivative(const Real& timeStep = 1 );
-
-     //! Update the right hand side \f$ f_W \f$ of the time derivative formula
-     /*
-     Sets and Returns the right hand side \f$ f_W \f$ of the time derivative formula
-     @param timeStep defined the  time step need to compute the \f$ f_W \f$
-     @returns rhsW
-     */
-    void updateRHSSecondDerivative(const Real& timeStep = 1 );
-
-     //!Show the properties  of temporal scheme
-     void showMe() const;
-    //@}
-
-    //!@name Set Methods
-    //@{
-
-     //! Initialize the parameters of time advance scheme
-     /*
-     Initialize parameters of time advance scheme;
-     @param  order define the order of BDF;
-     @param  orderDerivative  define the order of derivate;
-     */
-    void setup ( const UInt& order, const UInt& orderDerivative = 1 );
-
-    //! Initialize the parameters of time advance scheme used in TimeAdvanceNewmark
-
-    void setup ( const  std::vector<Real>&  coefficients, const  UInt& orderDerivative);
-
-     //! Initialize the StateVector
-     /*!
-     Initialize all the entries of the unknown vector to be derived with the vector x0 (duplicated).
-     this class is virtual because used in BDF;
-     @param x0 is the initial unk;
-     */
-    void setInitialCondition( const feVectorType& x0);
-
-    //! Initialize the StateVector used in TimeAdvanceNewmark
-    void setInitialCondition(const feVectorType& x0, const feVectorType& v0 );
-
-    //! Initialize the StateVector used in TimeAdvanceNewmark
-    void setInitialCondition(const feVectorType& x0, const feVectorType& v0, const feVectorType&  w0 );
-
-    //! Initialize all the entries of the unknown vector to be derived with a
-    //! set of vectors x0
-    //! note: this is taken as a copy (not a reference), since x0 is resized inside the method.
-    void setInitialCondition(const feVectorSharedPtrContainer_Type& x0 );
-
-    //@}
-
-    //!@name Get Methods
-    //@{
-
-    //!Return the \f$i\f$-th coefficient of the unk's extrapolation
-    /*!
+  //!@name Public Types
+  //@{
+  
+  //! class super
+  typedef TimeAdvance< feVectorType >                    super;
+  //! type of template
+  typedef typename super::feVector_Type                  feVector_Type;
+  
+  //! container of feVector
+  typedef typename super::feVectorContainer_Type         feVectorContainer_Type;
+  
+  //! container of pointer of feVector;
+  typedef typename super::feVectorContainerPtr_Type      feVectorContainerPtr_Type;
+  
+  //! iterator;
+  typedef typename feVectorContainerPtr_Type::iterator   feVectorContainerPtrIterate_Type;
+  
+  //! container of pointer of feVector;
+  typedef typename super::feVectorSharedPtrContainer_Type        feVectorSharedPtrContainer_Type;
+  
+  //@}
+  
+  //! @name Constructor & Destructor
+  //@{
+  
+  //! Empty  Constructor
+  
+  TimeAdvanceBDF();
+  
+  //! Destructor
+  virtual ~TimeAdvanceBDF() {}
+  
+  //@}
+  
+  //! @name Methods
+  //@{
+  
+  //!Update the state vector
+  /*! Update the vectors of the previous time steps by shifting on the right  the old values.
+    @param solution current (new) value of the state vector
+  */
+  void shiftRight(const feVector_Type&  solution );
+  
+  //! Update the right hand side \f$ f_V \f$ of the time derivative formula
+  /*!
+    Set and Return the right hand side \f$ f_V \f$ of the time derivative formula
+    @param timeStep defined the  time step need to compute the
+    @returns rhsV
+  */
+  void updateRHSFirstDerivative(const Real& timeStep = 1 );
+  
+  //! Update the right hand side \f$ f_W \f$ of the time derivative formula
+  /*!
+    Sets and Returns the right hand side \f$ f_W \f$ of the time derivative formula
+    @param timeStep defined the  time step need to compute the \f$ f_W \f$
+    @returns rhsW
+  */
+  void updateRHSSecondDerivative(const Real& timeStep = 1 );
+  
+  //!Show the properties  of temporal scheme
+  void showMe(std::ostream& output = std::cout ) const;
+  //@}
+  
+  //!@name Set Methods
+  //@{
+  
+  //! Initialize the parameters of time advance scheme
+  /*!
+    Initialize parameters of time advance scheme;
+    @param  order define the order of BDF;
+    @param  orderDerivative  define the order of derivate;
+  */
+  void setup ( const UInt& order, const UInt& orderDerivative = 1 );
+  
+  //! Initialize the parameters of time advance scheme used in TimeAdvanceNewmark
+  /*!
+    @note: this setup does not run for BDF class;
+  */
+  void setup ( const  std::vector<Real>&  /*coefficients*/, const  UInt& /*orderDerivative*/)
+  {
+    ERROR_MSG("use setup for TimeAdvanceNewmark but the time advance scheme is BDF");
+  }
+  
+  //! Initialize the StateVector
+  /*!
+    Initialize all the entries of the unknown vector to be derived with the vector x0 (duplicated).
+    this class is virtual because used in BDF;
+    @param x0 is the initial unk;
+  */
+  void setInitialCondition( const feVector_Type& x0);
+  
+  //! Initialize the StateVector used in TimeAdvanceNewmark
+  void setInitialCondition(const feVector_Type&/* x0*/, const feVector_Type& /*v0*/ )
+  {
+    ERROR_MSG( "this method  is not yet implemented" ); 
+  }
+  
+  //! Initialize the StateVector used in TimeAdvanceNewmark
+  void setInitialCondition(const feVector_Type& /*x0*/, const feVector_Type& /*v0*/, const feVector_Type& /* w0*/ )
+  {
+    ERROR_MSG( "this method  is not yet implemented" );
+  }
+  
+  //! Initialize all the entries of the unknown vector to be derived with a
+  /*! set of vectors x0
+    @note: this is taken as a copy (not a reference), since x0 is resized inside the method.
+  */
+  void setInitialCondition(const feVectorSharedPtrContainer_Type& x0 );
+  
+  //@}
+  
+  //!@name Get Methods
+  //@{
+  
+  //!Return the \f$i\f$-th coefficient of the unk's extrapolation
+  /*!
     @param \f$i\f$ index of  extrapolation coefficient
     @returns beta
-    */
-    Real coefficientExtrapolation(const UInt& i ) const;
-
-    //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
-    /*!
+  */
+    inline Real coefficientExtrapolation(const UInt& i ) const;
+  
+  //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
+  /*!
     @param \f$i\f$ index of velocity's extrapolation  coefficient
     @returns betaFirstDerivative
-    */
-    Real coefficientExtrapolationFirstDerivative(const UInt& i ) const;
-
-    //! Compute the polynomial extrapolation of solution
-    /*!
+  */
+  inline Real coefficientExtrapolationFirstDerivative(const UInt& i ) const;
+  
+  //! Compute the polynomial extrapolation of solution
+  /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
-    */
-    // feVectorType extrapolation( ) const;
+  */
 
-    void extrapolation(feVectorType& extrapolation) const;
-
-    //! Compute the polynomial extrapolation of velocity
-    /*!
+  void extrapolation(feVector_Type& extrapolation) const;
+  
+  //! Compute the polynomial extrapolation of velocity
+  /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
-    */
-    void extrapolationFirstDerivative(feVectorType& extrapolation) const;
-
-    //! Return the current velocity
-    feVectorType velocity()  const;
-    //void velocity(feVectorType& velocity) const;
-
-    //!Return the current accelerate
-    feVectorType accelerate() const;
-    //void accelerate(feVectorType& accelerate) const;
-
-   //@}
-
+  */
+  void extrapolationFirstDerivative(feVector_Type& extrapolation) const;
+  
+  //! Return the current velocity
+  feVectorType velocity()  const;
+  
+  //!Return the current acceleration
+  feVectorType acceleration() const;
+  
+  //@}
+  
 };
 
 // ===================================================
@@ -311,7 +316,7 @@ TimeAdvanceBDF <feVectorType> :: TimeAdvanceBDF() :
 // ===================================================
 template<typename feVectorType>
 void
-TimeAdvanceBDF<feVectorType>::shiftRight(feVectorType const&  solution )
+TimeAdvanceBDF<feVectorType>::shiftRight(feVector_Type const&  solution )
 {
      ASSERT ( this->M_unknowns.size() == this->M_size,
              "M_unknowns.size() and  M_size must be equal" );
@@ -328,7 +333,7 @@ TimeAdvanceBDF<feVectorType>::shiftRight(feVectorType const&  solution )
         *it = *itm1;
     }
 
-    *itb = new feVectorType(solution);
+    *itb = new feVector_Type(solution);
 
 }
 
@@ -338,16 +343,16 @@ TimeAdvanceBDF<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
 {
     feVectorContainerPtrIterate_Type it  = this->M_rhsContribution.begin();
 
-    //feVectorType fv ( *this->M_unknowns[ 0 ] );
+    //feVector_Type fv ( *this->M_unknowns[ 0 ] );
 
-    *it = new feVectorType(*this->M_unknowns[ 0 ]*(this->M_alpha[ 1 ] / timeStep));
+    *it = new feVector_Type(*this->M_unknowns[ 0 ]*(this->M_alpha[ 1 ] / timeStep));
 
     for ( UInt i = 1; i < this->M_order; ++i )
     {
         **it += (this->M_alpha[ i + 1 ] / timeStep) * *this->M_unknowns[ i ];
     }
 
-    //*it = new feVectorType( fv );
+    //*it = new feVector_Type( fv );
     //return fv;
 }
 
@@ -360,42 +365,38 @@ TimeAdvanceBDF<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
 
     feVectorContainerPtrIterate_Type it  = this->M_rhsContribution.end()-1;
 
-    *it = new feVectorType(*this->M_unknowns[ 0 ]);
+    *it = new feVector_Type(*this->M_unknowns[ 0 ]);
 
     **it *= this->M_xi[ 1 ] / (timeStep*timeStep);
 
     for ( UInt i = 1; i < this->M_order + 1; ++i )
         **it += ( this->M_xi[ i + 1 ] / (timeStep*timeStep) ) * *this->M_unknowns[ i ];
-
-    //*it = new feVectorType( fw );
-
-    //return fw;
 }
 
 template<typename feVectorType>
 void
-TimeAdvanceBDF<feVectorType>::showMe() const
+TimeAdvanceBDF<feVectorType>::showMe(std::ostream& output) const
 {
-    std::cout << "*** BDF Time discretization of order " << this->M_order << " maximum order of derivate "<< this->M_orderDerivative<< " ***"
+    output << "*** BDF Time discretization of order " << this->M_order << " maximum order of derivate "<< this->M_orderDerivative<< " ***"
               << std::endl;
-    std::cout << "    Coefficients: " << std::endl;
+    output << "    Coefficients: " << std::endl;
     for ( UInt i = 0; i < this->M_order + 1; ++i )
-        std::cout << "       alpha(" << i << ") = " << this->M_alpha[ i ]
+        output << "       alpha(" << i << ") = " << this->M_alpha[ i ]
                   << std::endl;
     for ( UInt i = 0; i < this->M_order; ++i )
-        std::cout << "       beta (" << i << ") = " << this->M_beta[ i ]
+        output << "       beta (" << i << ") = " << this->M_beta[ i ]
                   << std::endl;
     if (this->M_orderDerivative==2)
     {
         for ( UInt i = 0; i < this->M_order + this->M_orderDerivative; ++i )
-            std::cout << "     xi(" << i << ") = " << this->M_xi[ i ]  << std::endl;
+            output << "     xi(" << i << ") = " << this->M_xi[ i ]  << std::endl;
         for ( UInt i = 0;  i < this->M_order + 1; ++i  )
-            std::cout << "       beta of the extrapolation of the first derivative ("
+            output << "       beta of the extrapolation of the first derivative ("
 		      << i << ") = " << this->M_betaFirstDerivative[ i ]
                       << std::endl;
     }
-    std::cout <<"Delta Time : "<<this->M_timeStep<<"\n";
-    std::cout <<"*************************************\n";
+    output <<"Delta Time : "<<this->M_timeStep<<"\n";
+    output <<"*************************************\n";
     return ;
 }
 
@@ -526,14 +527,7 @@ TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivat
 }
 
 template<typename feVectorType>
-void
-TimeAdvanceBDF<feVectorType>::setup ( const  std::vector<Real>&  /*coefficients*/,  const  UInt& /*orderDerivative*/)
-{
-    ERROR_MSG("use setup for TimeAdvanceNewmark but the time advance scheme is BDF");
-}
-
-template<typename feVectorType>
-void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorType& x0)
+void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVector_Type& x0)
 {
     feVectorContainerPtrIterate_Type iter     = this->M_unknowns.begin();
     feVectorContainerPtrIterate_Type iter_end = this->M_unknowns.end();
@@ -541,30 +535,18 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorType& x0)
     for ( ; iter != iter_end; iter++ )
     {
         delete *iter;
-        *iter = new feVectorType(x0);
+        *iter = new feVector_Type(x0);
     }
 
     for ( UInt i(this->M_unknowns.size()) ; i < this->M_order; i++ )
-        this->M_unknowns.push_back(new feVectorType(x0));
+        this->M_unknowns.push_back(new feVector_Type(x0));
 
-    feVectorType zero(x0);
+    feVector_Type zero(x0);
     zero *=0;
     this->setInitialRHS(zero);
 
     ASSERT ( this->M_unknowns.size() == this->M_order,
              "M_unknowns.size() and  M_order must be equal" );
-}
-
-template<typename feVectorType>
-void  TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorType& /*x0*/, const feVectorType& /*v0*/)
-{
-    ERROR_MSG( "this method  is not yet implemented" );
-}
-
-template<typename feVectorType>
-void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorType& /*x0*/, const feVectorType& /*v0*/, const feVectorType& /*w0*/)
-{
-    ERROR_MSG( "this method  is not yet implemented" );
 }
 
 template<typename feVectorType>
@@ -582,16 +564,16 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorSharedPtrC
     for ( ; iter != iter_end && i< n0 ; ++iter, ++i )
     {
         delete *iter;
-        *iter = new feVectorType(*x0[i]);
+        *iter = new feVector_Type(*x0[i]);
     }
 
     for ( i = this->M_unknowns.size() ; i < this->M_order && i< n0; ++i )
-        this->M_unknowns.push_back(new feVectorType(*x0[i]));
+        this->M_unknowns.push_back(new feVector_Type(*x0[i]));
 
     if (this->M_orderDerivative == 1)
     {
         for ( i = this->M_unknowns.size() ; i < this->M_order; ++i )
-            this->M_unknowns.push_back(new feVectorType(*x0[n0-1]));
+            this->M_unknowns.push_back(new feVector_Type(*x0[n0-1]));
 
         ASSERT ( this->M_unknowns.size() == this->M_order,
                  "M_unknowns.size() and  M_order must be equal" );
@@ -599,14 +581,14 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorSharedPtrC
     if (this->M_orderDerivative == 2)
     {
         for ( i = this->M_unknowns.size() ; i < this->M_order + 1; ++i )
-            this->M_unknowns.push_back(new feVectorType(*x0[n0-1]));
+            this->M_unknowns.push_back(new feVector_Type(*x0[n0-1]));
 
         ASSERT ( this->M_unknowns.size() == this->M_order + 1,
                  "M_unknowns.size() and  M_order must be equal" );
     }
 
     //!initialize zero
-    feVectorType zero(*x0[0]);
+    feVector_Type zero(*x0[0]);
     zero *=0;
     this->setInitialRHS(zero);
 }
@@ -616,7 +598,7 @@ void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorSharedPtrC
 // ===================================================
 
 template<typename feVectorType>
-Real
+inline Real
 TimeAdvanceBDF<feVectorType>::coefficientExtrapolation(const UInt& i ) const
 {
     // Pay attention: i is c-based indexed
@@ -626,141 +608,62 @@ TimeAdvanceBDF<feVectorType>::coefficientExtrapolation(const UInt& i ) const
 }
 
 template<typename feVectorType>
-double
+inline double
 TimeAdvanceBDF<feVectorType>::coefficientExtrapolationFirstDerivative (const UInt& i ) const
 {
-      // Pay attention: i is c-based indexed
-    ASSERT( i < this->M_order,
-            "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
-    return this->M_betaFirstDerivative[ i ];
+  // Pay attention: i is c-based indexed
+  ASSERT( i < this->M_order,
+	  "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
+  return this->M_betaFirstDerivative[ i ];
 }
-/*
-template<typename feVectorType>
-feVectorType
-TimeAdvanceBDF<feVectorType>::extrapolation() const
-{
-
-    feVectorType ue(*this->M_unknowns[ 0 ]);
-    ue *= this->M_beta[ 0 ];
-
-    for ( UInt i = 1; i < this->M_order; ++i )
-    {
-        ue += this->M_beta[ i ] * *this->M_unknowns[ i ];
-    }
-
-    return ue;
-}
-*/
-
+  
 template<typename feVectorType>
 void
-TimeAdvanceBDF<feVectorType>::extrapolation(feVectorType& extrapolation) const
+TimeAdvanceBDF<feVectorType>::extrapolation(feVector_Type& extrapolation) const
 {
-    extrapolation = this->M_beta[ 0 ]*(*this->M_unknowns[ 0 ]);
-
-    for ( UInt i = 1; i < this->M_order; ++i )
-        extrapolation += this->M_beta[ i ] * (*this->M_unknowns[ i ]);
+  extrapolation = this->M_beta[ 0 ]*(*this->M_unknowns[ 0 ]);
+  
+  for ( UInt i = 1; i < this->M_order; ++i )
+    extrapolation += this->M_beta[ i ] * (*this->M_unknowns[ i ]);
 }
-
-/*
-template<typename feVectorType>
-feVectorType
-TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative() const
-{
-   ASSERT ( this->M_orderDerivative == 2,
-             "extrapolationFirstDerivative: this method must be used with the second order problem." )
-
-    feVectorType extrapolation(*this->M_unknowns[ 0 ]);
-
-    extrapolation *= this->M_betaFirstDerivative[ 0 ];
-
-    for ( UInt i = 1; i < this->M_order; ++i )
-        extrapolation += this->M_betaFirstDerivative[ i ] * (*this->M_unknowns[ i ]);
-
-}
-*/
-
-
+  
 template<typename feVectorType>
 void
-TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative(feVectorType& extrapolation) const
+TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative(feVector_Type& extrapolation) const
 {
-   ASSERT ( this->M_orderDerivative == 2,
-             "extrapolationFirstDerivative: this method must be used with the second order problem." )
-
+  ASSERT ( this->M_orderDerivative == 2,
+	   "extrapolationFirstDerivative: this method must be used with the second order problem." )
+    
     extrapolation = this->M_betaFirstDerivative[ 0 ]*(*this->M_unknowns[ 0 ]);
-
-    for ( UInt i = 1; i < this->M_order; ++i )
-        extrapolation += this->M_betaFirstDerivative[ i ] * (*this->M_unknowns[ i ]);
+  
+  for ( UInt i = 1; i < this->M_order; ++i )
+    extrapolation += this->M_betaFirstDerivative[ i ] * (*this->M_unknowns[ i ]);
 }
-
-/*
-template<typename feVectorType>
-feVectorType
-TimeAdvanceBDF<feVectorType>::velocity()  const
-{
-    feVectorType velocity(*this->M_unknowns[0]);
-    velocity  *= this->M_alpha[ 0 ] / this->M_timeStep;
-    velocity  -= (*this->M_rhsContribution[0]);
-    return velocity;
-}
-*/
-
-
+  
 template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::velocity() const
 {
-    return (*this->M_unknowns[0])
-          * this->M_alpha[ 0 ] / this->M_timeStep
-            -  ( *this->M_rhsContribution[0] );
+  return (*this->M_unknowns[0])
+    * this->M_alpha[ 0 ] / this->M_timeStep
+    -  ( *this->M_rhsContribution[0] );
 }
 
-/*
-template<typename feVectorType>
-void
-TimedvanceBDF<feVectorType>::velocity(feVectorType& velocity) const
-{
-  velocity   = (*this->M_unknowns[0]) * this->M_alpha[ 0 ] / this->M_timeStep;
-  velocity  -= (*this->M_rhsContribution[0]);
-}
- */
-
-/*
 template<typename feVectorType>
 feVectorType
-TimeAdvanceBDF<feVectorType>::accelerate() const
+TimeAdvanceBDF<feVectorType>::acceleration() const
 {
-    feVectorType accelerate(*this->M_unknowns[0]);
-    accelerate  *= this->M_xi[ 0 ]  /  (this->M_timeStep*this->M_timeStep);
-    accelerate  -=  ( *this->M_rhsContribution[1] );
-    return accelerate;
-}
-*/
-template<typename feVectorType>
-feVectorType
-TimeAdvanceBDF<feVectorType>::accelerate() const
-{
-    return (*this->M_unknowns[0])
-            * this->M_xi[ 0 ]/(this->M_timeStep*this->M_timeStep);
-            -  ( *this->M_rhsContribution[1] );
+  return (*this->M_unknowns[0])
+    * this->M_xi[ 0 ]/(this->M_timeStep*this->M_timeStep);
+  -  ( *this->M_rhsContribution[1] );
 }
 
-/*
-template<typename feVectorType>
-void
-TimedvanceBDF<feVectorType>::accelerate(feVectorType& accelerate) const
-{
-    accelerate  = *this->M_unknowns[0]* this->M_xi[ 0 ]  /  (this->M_timeStep*this->M_timeStep);
-    accelerate  -=  ( *this->M_rhsContribution[1] );
-}
-*/
 
 // ===================================================
 // Macros
 // ===================================================
 
-//! define the BDF factory
+//! define the BDF factory; this class runs only the default template parameter.
 inline
 TimeAdvance<VectorEpetra>* createBDF() { return new TimeAdvanceBDF<VectorEpetra>(); }
 
@@ -768,7 +671,7 @@ namespace
 {
 static bool registerBDF = TimeAdvanceFactory::instance().registerProduct( "BDF",  &createBDF );
 }
-
+  
 }  //Namespace LifeV
 
 #endif  /*TIMEADVANCEBDF */

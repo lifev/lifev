@@ -38,7 +38,6 @@
 #ifndef _IFPACKPRECONDITIONER_HPP_
 #define _IFPACKPRECONDITIONER_HPP_
 
-#include <boost/shared_ptr.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -54,6 +53,8 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
@@ -180,9 +181,6 @@ public:
 
     //! @name Get Methods
     //@{
-
-    //! Return true if the preconditioner is set
-    bool isPreconditionerSet() const;
 
     //! Return An estimation of the condition number of the preconditioner
     Real condest ();

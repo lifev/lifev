@@ -39,14 +39,11 @@
 #ifndef VectorContainer_H
 #define VectorContainer_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
 
-#include <boost/shared_ptr.hpp>
-
-// Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
 
 namespace LifeV
 {
@@ -61,16 +58,16 @@ namespace LifeV
  *  <b> Type of compatible vectors </b><BR>
  *  This class has been developed in order to work with:
  *  <ol>
- *  	<li> \c VectorEpetra
- *  	<li> \c  boost::numeric::ublas::vector
+ *      <li> \c VectorEpetra
+ *      <li> \c  boost::numeric::ublas::vector
  *  </ol>
  *
  *  <b> Type of compatible containers </b><BR>
  *  This class has been developed in order to work with:
  *  <ol>
- *  	<li> \c std::vector
- *  	<li> \c std::dequee
- *  	<li> \c std::list
+ *      <li> \c std::vector
+ *      <li> \c std::dequee
+ *      <li> \c std::list
  *  </ol>
  *
  *  <b> NOTES </b><BR>
@@ -448,7 +445,7 @@ VectorContainer< VectorType, ContainerType >::VectorContainer():
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::VectorContainer()" << "\n";
+    debugStream( 3100 ) << "VectorContainer::VectorContainer()" << "\n";
 #endif
 
 }
@@ -459,7 +456,7 @@ VectorContainer< VectorType, ContainerType >::VectorContainer( const VectorConta
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::VectorContainer( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::VectorContainer( vectorContainer )" << "\n";
 #endif
 
     *this = vectorContainer;
@@ -474,7 +471,7 @@ VectorContainer< VectorType, ContainerType >::operator=( const VectorContainer< 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator=( vector_ptr )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator=( vector_ptr )" << "\n";
 #endif
 
     if ( this != &vectorContainer )
@@ -497,7 +494,7 @@ VectorContainer< VectorType, ContainerType >::operator=( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator=( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator=( scalar )" << "\n";
 #endif
 
     for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
@@ -512,7 +509,7 @@ VectorContainer< VectorType, ContainerType >::operator&=( const VectorContainer<
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator&=( vector_ptr )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator&=( vector_ptr )" << "\n";
 #endif
 
     if ( this != &vectorContainer )
@@ -529,7 +526,7 @@ VectorContainer< VectorType, ContainerType >::operator[]( const UInt& id ) const
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator[]( id )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator[]( id )" << "\n";
 #endif
 
     UInt k( 0 );
@@ -551,7 +548,7 @@ VectorContainer< VectorType, ContainerType >::operator()( const UInt& id )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator()( id )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator()( id )" << "\n";
 #endif
 
     return M_container[id];
@@ -563,7 +560,7 @@ VectorContainer< VectorType, ContainerType >::operator+=( const VectorContainer<
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator+=( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator+=( vectorContainer )" << "\n";
 #endif
 
     for ( UInt i( 0 ); i < vectorContainer.vectorsNumber(); ++i )
@@ -578,7 +575,7 @@ VectorContainer< VectorType, ContainerType >::operator-=( const VectorContainer<
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator-=( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator-=( vectorContainer )" << "\n";
 #endif
 
     for ( UInt i( 0 ); i < vectorContainer.vectorsNumber(); ++i )
@@ -593,7 +590,7 @@ VectorContainer< VectorType, ContainerType >::operator*=( const VectorContainer<
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator*=( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator*=( vectorContainer )" << "\n";
 #endif
 
     for ( UInt i( 0 ); i < vectorsNumber(); ++i )
@@ -608,7 +605,7 @@ VectorContainer< VectorType, ContainerType >::operator/=( const VectorContainer<
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator/=( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator/=( vectorContainer )" << "\n";
 #endif
 
     for ( UInt i( 0 ); i < vectorsNumber(); ++i )
@@ -623,7 +620,7 @@ VectorContainer< VectorType, ContainerType >::operator+( const VectorContainer< 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator+( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator+( vectorContainer )" << "\n";
 #endif
 
     VectorContainer myVectorCopy = *this;
@@ -639,7 +636,7 @@ VectorContainer< VectorType, ContainerType >::operator-( const VectorContainer< 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator-( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator-( vectorContainer )" << "\n";
 #endif
 
     VectorContainer myVectorCopy = *this;
@@ -655,7 +652,7 @@ VectorContainer< VectorType, ContainerType >::operator*( const VectorContainer< 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator*( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator*( vectorContainer )" << "\n";
 #endif
 
     VectorContainer myVectorCopy = *this;
@@ -671,7 +668,7 @@ VectorContainer< VectorType, ContainerType >::operator/( const VectorContainer< 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator/( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator/( vectorContainer )" << "\n";
 #endif
 
     VectorContainer myVectorCopy = *this;
@@ -687,7 +684,7 @@ VectorContainer< VectorType, ContainerType >::operator+=( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator+=( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator+=( scalar )" << "\n";
 #endif
 
     for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
@@ -702,7 +699,7 @@ VectorContainer< VectorType, ContainerType >::operator-=( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator-=( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator-=( scalar )" << "\n";
 #endif
 
     for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
@@ -717,7 +714,7 @@ VectorContainer< VectorType, ContainerType >::operator*=( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator*=( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator*=( scalar )" << "\n";
 #endif
 
     for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
@@ -732,7 +729,7 @@ VectorContainer< VectorType, ContainerType >::operator/=( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator/=( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator/=( scalar )" << "\n";
 #endif
 
     this->operator*=( 1. / scalar );
@@ -746,7 +743,7 @@ VectorContainer< VectorType, ContainerType >::operator+( const Real& scalar ) co
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator+( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator+( scalar )" << "\n";
 #endif
 
     VectorContainer myVectorCopy = *this;
@@ -762,7 +759,7 @@ VectorContainer< VectorType, ContainerType >::operator-( const Real& scalar ) co
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator-( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator-( scalar )" << "\n";
 #endif
 
     VectorContainer myVectorCopy = *this;
@@ -778,7 +775,7 @@ VectorContainer< VectorType, ContainerType >::operator*( const Real& scalar ) co
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator*( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator*( scalar )" << "\n";
 #endif
 
     VectorContainer myVectorCopy = *this;
@@ -794,7 +791,7 @@ VectorContainer< VectorType, ContainerType >::operator/( const Real& scalar ) co
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator/( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator/( scalar )" << "\n";
 #endif
 
     VectorContainer myVectorCopy = *this;
@@ -812,7 +809,7 @@ operator*( const ScalarType& scalar,
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator*( scalar, vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator*( scalar, vectorContainer )" << "\n";
 #endif
 
     VectorContainer< VectorType, ContainerType > vectorContainerCopy( vectorContainer );
@@ -826,7 +823,7 @@ VectorContainer< VectorType, ContainerType >::operator==( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator==( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator==( scalar )" << "\n";
 #endif
 
     VectorContainer< vector_Type, container_Type > vectorContainerCopy( *this );
@@ -847,7 +844,7 @@ VectorContainer< VectorType, ContainerType >::operator!=( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator!=( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator!=( scalar )" << "\n";
 #endif
 
     VectorContainer< vector_Type, container_Type > vectorContainerCopy( *this );
@@ -868,7 +865,7 @@ VectorContainer< VectorType, ContainerType >::operator>( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator>( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator>( scalar )" << "\n";
 #endif
 
     VectorContainer< vector_Type, container_Type > vectorContainerCopy( *this );
@@ -889,7 +886,7 @@ VectorContainer< VectorType, ContainerType >::operator<( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator<( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator<( scalar )" << "\n";
 #endif
 
     VectorContainer< vector_Type, container_Type > vectorContainerCopy( *this );
@@ -910,7 +907,7 @@ VectorContainer< VectorType, ContainerType >::operator>=( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator>=( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator>=( scalar )" << "\n";
 #endif
 
     VectorContainer< vector_Type, container_Type > vectorContainerCopy( *this );
@@ -931,7 +928,7 @@ VectorContainer< VectorType, ContainerType >::operator<=( const Real& scalar )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator<=( scalar )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator<=( scalar )" << "\n";
 #endif
 
     VectorContainer< vector_Type, container_Type > vectorContainerCopy( *this );
@@ -952,7 +949,7 @@ VectorContainer< VectorType, ContainerType >::operator&&( const VectorContainer<
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator&&( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator&&( vectorContainer )" << "\n";
 #endif
 
     VectorContainer< vector_Type, container_Type > vectorContainerCopy;
@@ -974,7 +971,7 @@ VectorContainer< VectorType, ContainerType >::operator||( const VectorContainer<
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator||( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator||( vectorContainer )" << "\n";
 #endif
 
     VectorContainer< vector_Type, container_Type > vectorContainerCopy;
@@ -996,7 +993,7 @@ VectorContainer< VectorType, ContainerType >::operator!()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::operator!()" << "\n";
+    debugStream( 3100 ) << "VectorContainer::operator!()" << "\n";
 #endif
 
     VectorContainer< vector_Type, container_Type > vectorContainerCopy;
@@ -1021,7 +1018,7 @@ VectorContainer< VectorType, ContainerType >::dot( const VectorContainer< vector
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::dot( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::dot( vectorContainer )" << "\n";
 #endif
 
     Real scalarProduct = 0;
@@ -1038,7 +1035,7 @@ VectorContainer< VectorType, ContainerType >::dot( const VectorContainer< vector
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::dot( vectorContainer, scalarProduct )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::dot( vectorContainer, scalarProduct )" << "\n";
 #endif
 
     for ( UInt i( 0 ); i < vectorsNumber(); ++i )
@@ -1051,7 +1048,7 @@ VectorContainer< VectorType, ContainerType >::abs()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::abs()" << "\n";
+    debugStream( 3100 ) << "VectorContainer::abs()" << "\n";
 #endif
 
     for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
@@ -1065,7 +1062,7 @@ VectorContainer< VectorType, ContainerType >::abs( VectorContainer< vector_Type,
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::abs( vectorContainer )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::abs( vectorContainer )" << "\n";
 #endif
 
     vectorContainer = *this;
@@ -1079,7 +1076,7 @@ VectorContainer< VectorType, ContainerType >::weightNorm2()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::weightNorm2()" << "\n";
+    debugStream( 3100 ) << "VectorContainer::weightNorm2()" << "\n";
 #endif
 
     Real PartialNorm, TotalNorm = 0;
@@ -1099,7 +1096,7 @@ VectorContainer< VectorType, ContainerType >::push_back( const VectorContainer< 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::push_back( vector_ptr )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::push_back( vector_ptr )" << "\n";
 #endif
 
     for ( constIterator_Type i = vectorContainer.M_container.begin(); i < vectorContainer.M_container.end(); ++i )
@@ -1114,7 +1111,7 @@ VectorContainer< VectorType, ContainerType >::push_back( const vectorPtr_Type& v
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::push_back( vector_ptr )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::push_back( vector_ptr )" << "\n";
 #endif
 
     M_container.push_back( vector_ptr );
@@ -1128,7 +1125,7 @@ VectorContainer< VectorType, ContainerType >::push_front( const VectorContainer<
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::push_front( vector_ptr )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::push_front( vector_ptr )" << "\n";
 #endif
 
     for ( constIterator_Type i = vectorContainer.M_container.begin(); i < vectorContainer.M_container.end(); ++i )
@@ -1143,7 +1140,7 @@ VectorContainer< VectorType, ContainerType >::push_front( const vectorPtr_Type& 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::push_front( vector_ptr )" << "\n";
+    debugStream( 3100 ) << "VectorContainer::push_front( vector_ptr )" << "\n";
 #endif
 
     M_container.push_front( vector_ptr );
@@ -1157,7 +1154,7 @@ VectorContainer< VectorType, ContainerType >::showMe( std::ostream& output ) con
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::showMe()" << "\n";
+    debugStream( 3100 ) << "VectorContainer::showMe()" << "\n";
 #endif
 
     output << "Number of vectors:  " << vectorsNumber() << std::endl;
@@ -1180,7 +1177,7 @@ VectorContainer< VectorType, ContainerType >::size() const
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "VectorContainer::size()" << "\n";
+    debugStream( 3100 ) << "VectorContainer::size()" << "\n";
 #endif
 
     UInt size = 0;

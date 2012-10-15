@@ -91,19 +91,26 @@ public:
 //!@name Type definitions
 //@{
 
-    typedef VenantKirchhoffElasticData             data_Type;
+  typedef VenantKirchhoffElasticData             data_Type;
 
-    typedef typename LifeV::SolverAztecOO          solver_Type;
+  typedef typename LifeV::SolverAztecOO          solver_Type;
 
-    typedef typename solver_Type::matrix_type      matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
-    typedef typename solver_Type::vector_type      vector_Type;
-    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
+  typedef typename solver_Type::matrix_type      matrix_Type;
+  typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
+  typedef typename solver_Type::vector_type      vector_Type;
+  typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
 
-    typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
-    typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
+  typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
+  typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
-    typedef FactorySingleton<Factory<StructuralMaterial<Mesh>,std::string> >  StructureMaterialFactory;
+  typedef FactorySingleton<Factory<StructuralMaterial<Mesh>,std::string> >  StructureMaterialFactory;
+
+  typedef RegionMesh<LinearTetra >                      mesh_Type;
+  typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+
+  typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
+  typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+
 
 //@}
 
@@ -138,7 +145,7 @@ public:
     /*!
       \param dataMaterial the class with Material properties data
     */
-    virtual  void computeLinearStiff( dataPtr_Type& dataMaterial ) = 0;
+  virtual  void computeLinearStiff( dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes  ) = 0;
 
     //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
     /*!
@@ -146,7 +153,7 @@ public:
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
+  virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const displayerPtr_Type& displayer ) = 0;
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
@@ -157,7 +164,7 @@ public:
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
+  virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const displayerPtr_Type& displayer ) = 0;
 
 
     //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
@@ -217,7 +224,7 @@ public:
     //! Get the Stiffness matrix
     virtual vectorPtr_Type const stiffVector() const = 0;
 
-    virtual void Apply( const vector_Type& sol, vector_Type& res) =0;
+  virtual void Apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) =0;
 
 //@}
 

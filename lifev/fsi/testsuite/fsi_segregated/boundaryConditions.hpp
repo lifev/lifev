@@ -65,7 +65,7 @@ typedef FSIOperator::solid_Type solid;
 FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 {
 
-//     Debug(10000) << "SP harmonic extension\n";
+//     debugStream(10000) << "SP harmonic extension\n";
 //     fixedPoint *FPOper = dynamic_cast<fixedPoint *>(&_oper);
 
 //     FPOper->setStructureDispToHarmonicExtension(_oper.lambdaFluid());
@@ -76,7 +76,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 //    FPOper->bcvStructureDispToHarmonicExtension()->showMe(true,std::cout);
 
     // Boundary condition for the mesh
-    Debug( 10000 ) << "Boundary condition for the harmonic extension\n";
+    debugStream( 10000 ) << "Boundary condition for the harmonic extension\n";
 
     BCFunctionBase bcf(fZero);
 
@@ -94,7 +94,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 
     if (_oper.data().method() == "steklovPoincare")
     {
-//         Debug(10000) << "SP harmonic extension\n";
+//         debugStream(10000) << "SP harmonic extension\n";
 //         steklovPoincare *SPOper = dynamic_cast<steklovPoincare *>(&_oper);
 //         SPOper->setFluidInterfaceDisp((LifeV::Vector&) _oper.lambdaFluidRepeated());
 //         BCh_he->addBC("Interface", 1, Essential, Full,
@@ -102,7 +102,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
     }
     else if (_oper.data().method() == "exactJacobian")
     {
-        Debug(10000) << "EJ harmonic extension\n";
+        debugStream(10000) << "EJ harmonic extension\n";
         FSIExactJacobian *EJOper = dynamic_cast<FSIExactJacobian *>(&_oper);
         EJOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
         BCh_he->addBC("Interface", 1, Essential, Full,
@@ -110,7 +110,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
     }
     else if (_oper.data().method() == "fixedPoint")
     {
-        Debug(10000) << "FP harmonic extension\n";
+        debugStream(10000) << "FP harmonic extension\n";
         FSIFixedPoint *FPOper = dynamic_cast<FSIFixedPoint *>(&_oper);
 
         FPOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
@@ -127,7 +127,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
 {
     // Boundary conditions for the fluid velocity
-    Debug( 10000 ) << "Boundary condition for the fluid\n";
+    debugStream( 10000 ) << "Boundary condition for the fluid\n";
 
     if (! _oper.isFluid() )
         return FSIOperator::fluidBchandlerPtr_Type();
@@ -186,7 +186,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluidInv(FSIOperator &_oper)
         return FSIOperator::fluidBchandlerPtr_Type();
 
     // Boundary conditions for the fluid velocity
-    Debug( 10000 ) << "Boundary condition for the inverse fluid\n";
+    debugStream( 10000 ) << "Boundary condition for the inverse fluid\n";
     FSIOperator::fluidBchandlerPtr_Type BCh_fluidInv( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
@@ -207,7 +207,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluidLin(FSIOperator &_oper)
         return FSIOperator::fluidBchandlerPtr_Type();
 
     // Boundary conditions for the fluid velocity
-    Debug( 10000 ) << "Boundary condition for the linearized fluid\n";
+    debugStream( 10000 ) << "Boundary condition for the linearized fluid\n";
     FSIOperator::fluidBchandlerPtr_Type BCh_fluidLin( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
@@ -252,7 +252,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_solid(FSIOperator &_oper)
         return FSIOperator::solidBchandlerPtr_Type();
 
     // Boundary conditions for the solid displacement
-    Debug( 10000 ) << "Boundary condition for the solid\n";
+    debugStream( 10000 ) << "Boundary condition for the solid\n";
     FSIOperator::solidBchandlerPtr_Type BCh_solid( new FSIOperator::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
@@ -264,7 +264,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_solid(FSIOperator &_oper)
 
     std::vector<ID> zComp(1);
     zComp[0] = 3;
-//     Debug(10000) << "SP harmonic extension\n";
+//     debugStream(10000) << "SP harmonic extension\n";
 
     if (_oper.data().method() == "steklovPoincare")
     {
@@ -302,7 +302,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_solidLin(FSIOperator &_oper)
         return FSIOperator::solidBchandlerPtr_Type();
 
     // Boundary conditions for the solid displacement
-    Debug( 10000 ) << "Boundary condition for the linear solid\n";
+    debugStream( 10000 ) << "Boundary condition for the linear solid\n";
     FSIOperator::solidBchandlerPtr_Type BCh_solidLin( new FSIOperator::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
@@ -339,7 +339,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_solidInvLin(FSIOperator &_oper)
         return FSIOperator::solidBchandlerPtr_Type();
 
     // Boundary conditions for the solid displacement
-    Debug( 10000 ) << "Boundary condition for the inverse linear solid\n";
+    debugStream( 10000 ) << "Boundary condition for the inverse linear solid\n";
     FSIOperator::solidBchandlerPtr_Type BCh_solidLinInv( new FSIOperator::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);

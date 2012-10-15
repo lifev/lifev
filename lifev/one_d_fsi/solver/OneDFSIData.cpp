@@ -53,7 +53,7 @@ OneDFSIData::OneDFSIData():
     M_fluxType                  (),
     M_sourceType                (),
     M_timeDataPtr               (),
-    M_meshPtr                   ( new mesh_Type() ),
+    M_meshPtr                   ( new mesh_Type( Epetra_SerialComm() ) ),
     M_viscoelasticWall          (),
     M_viscoelasticAngle         (),
     M_viscoelasticPeriod        (),

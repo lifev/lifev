@@ -85,6 +85,11 @@ typedef LifeV::Preconditioner             basePrec_Type;
 typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
 typedef LifeV::PreconditionerIfpack       prec_Type;
 typedef boost::shared_ptr<prec_Type>      precPtr_Type;
+typedef boost::function< Real( Real const &,
+                               Real const &,
+                               Real const &,
+                               Real const &,
+                               UInt const & ) > function_Type;
 }
 
 void printErrors( const vector_Type& solution, fespacePtr_Type uFESpace, bool verbose )
@@ -163,7 +168,7 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if( verbose ) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
-    meshPtr_Type fullMeshPtr( new mesh_Type );
+    meshPtr_Type fullMeshPtr( new mesh_Type( *Comm ) );
     const UInt & geoDim = static_cast<UInt>( mesh_Type::S_geoDimensions );
 
 
@@ -181,7 +186,11 @@ main( int argc, char** argv )
 
     if( verbose ) std::cout << "Mesh size  : " << MeshUtility::MeshStatistics::computeSize( *fullMeshPtr ).maxH << std::endl;
     if( verbose ) std::cout << "Partitioning the mesh ... " << std::endl;
-    MeshPartitioner< mesh_Type >   meshPart( fullMeshPtr, Comm );
+    meshPtr_Type meshPtr;
+    {
+        MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, Comm );
+        meshPtr = meshPart.meshPartition();
+    }
     fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
     // +-----------------------------------------------+
@@ -191,7 +200,7 @@ main( int argc, char** argv )
     if( verbose ) std::cout << "FE for the velocity: " << uOrder << std::endl;
 
     if( verbose ) std::cout << "Building the velocity FE space ... " << std::flush;
-    fespacePtr_Type uFESpace( new fespace_Type( meshPart, uOrder, geoDim, Comm ) );
+    fespacePtr_Type uFESpace( new fespace_Type( meshPtr, uOrder, geoDim, Comm ) );
     if( verbose ) std::cout << "ok." << std::endl;
 
     // Pressure offset in the vector
@@ -326,19 +335,19 @@ main( int argc, char** argv )
     if( verbose ) std::cout << std::endl << "[Errors computation]" << std::endl;
     vector_Type solutionErr( *solution );
     solutionErr *= 0.0;
-    uFESpace->interpolate( Laplacian::uexact, solutionErr, 0.0 );
+    uFESpace->interpolate( static_cast<function_Type>( Laplacian::uexact ), solutionErr, 0.0 );
     solutionErr -= *solution;
     solutionErr.abs();
 
     vector_Type solution2Err( *solution2 );
     solution2Err *= 0.0;
-    uFESpace->interpolate( Laplacian::uexact,solution2Err, 0.0 );
+    uFESpace->interpolate( static_cast<function_Type>( Laplacian::uexact ),solution2Err, 0.0 );
     solution2Err -= *solution2;
     solution2Err.abs();
 
     vector_Type solution3Err( *solution3 );
     solution3Err *= 0.0;
-    uFESpace->interpolate( Laplacian::uexact, solution3Err, 0.0 );
+    uFESpace->interpolate( static_cast<function_Type>( Laplacian::uexact ), solution3Err, 0.0 );
     solution3Err -= *solution3;
     solution3Err.abs();
 

@@ -219,8 +219,6 @@ public:
     */
     matrixPtr_Type& matrix( ){return M_globalMatrix;}
 
-    const std::vector<matrixPtr_Type>& couplingVector() const {return std::vector<matrixPtr_Type>(1, M_coupling);}
-
     //! multiplies the whole system times a matrix
     /*!
       applies a matrix robinCoupling to the system matrix M_globalMatrix, to the rpeconditioner prec passed as input,

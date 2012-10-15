@@ -39,14 +39,9 @@
 #ifndef BCVECTOR_H
 #define BCVECTOR_H 1
 
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/DOFInterface.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
-
-
 
 namespace LifeV
 {

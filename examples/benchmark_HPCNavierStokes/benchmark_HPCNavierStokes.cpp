@@ -265,7 +265,11 @@ main( Int argc, char** argv )
         std::cout << "Mesh size  : " <<
         MeshUtility::MeshStatistics::computeSize(*fullMeshPtr).maxH << std::endl;
     if (verbose) std::cout << "Partitioning the mesh ... " << std::endl;
-    MeshPartitioner< RegionMesh<LinearTetra> >   meshPart(fullMeshPtr, Comm);
+    boost::shared_ptr<RegionMesh<LinearTetra> > localMeshPtr;
+    {
+        MeshPartitioner< RegionMesh<LinearTetra> >   meshPart(fullMeshPtr, Comm);
+        localMeshPtr = meshPart.meshPartition();
+    }
     fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
     // +-----------------------------------------------+
@@ -277,11 +281,11 @@ main( Int argc, char** argv )
                            << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
-    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, nDimensions, Comm));
+    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >(localMeshPtr,uOrder, nDimensions, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
-    fespacePtr_type pFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,pOrder, 1, Comm));
+    fespacePtr_type pFESpace( new FESpace< mesh_type, MapEpetra >(localMeshPtr,pOrder, 1, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     // Creation of the total map
@@ -312,7 +316,7 @@ main( Int argc, char** argv )
     if (verbose) std::cout << "ok." << std::endl;
 
     // Update the BCHandler (internal data related to FE)
-    bcHandler->bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
+    bcHandler->bcUpdate( *localMeshPtr, uFESpace->feBd(), uFESpace->dof());
 
     // +-----------------------------------------------+
     // |              Matrices Assembly                |
@@ -454,7 +458,7 @@ main( Int argc, char** argv )
     if (verbose) std::cout << "Defining the exporter... " << std::flush;
     ExporterHDF5<mesh_type> exporter ( dataFile, "OseenAssembler");
     exporter.setPostDir( "./" ); // This is a test to see if M_post_dir is working
-    exporter.setMeshProcId( meshPart.meshPartition(), Comm->MyPID() );
+    exporter.setMeshProcId( localMeshPtr, Comm->MyPID() );
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Updating the exporter... " << std::flush;

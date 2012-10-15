@@ -64,7 +64,8 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData():
         M_alpha                            ( ),
         M_gamma                            ( ),
         M_order                            ( ),
-        M_verbose                          ( )
+        M_verbose                          ( ),
+	M_vectorMaterialFlags              ( )
 {
 }
 
@@ -81,7 +82,8 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffEla
         M_alpha                            ( venantKirchhoffElasticData.M_alpha ),
         M_gamma                            ( venantKirchhoffElasticData.M_gamma ),
         M_order                            ( venantKirchhoffElasticData.M_order ),
-        M_verbose                          ( venantKirchhoffElasticData.M_verbose )
+        M_verbose                          ( venantKirchhoffElasticData.M_verbose ),
+	M_vectorMaterialFlags              ( venantKirchhoffElasticData.M_vectorMaterialFlags )
 {
 }
 
@@ -106,6 +108,7 @@ VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& venantK
         M_gamma                            = venantKirchhoffElasticData.M_gamma;
         M_order                            = venantKirchhoffElasticData.M_order;
         M_verbose                          = venantKirchhoffElasticData.M_verbose;
+        M_vectorMaterialFlags              = venantKirchhoffElasticData.M_vectorMaterialFlags;
     }
 
     return *this;
@@ -130,13 +133,16 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
     M_density   = dataFile( ( section + "/physics/density"   ).data(), 1. );
     M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
 
+
     UInt materialsNumber = dataFile.vector_variable_size( ( section + "/physics/material_flag" ).data() );
     if ( materialsNumber == 0 )
     {
         // If no material is specified in the data file the code assume that there is just one material
         // and by default it is memorized with ID 1. Getters and Setters have been designed to deal with thic choice.
         M_materialsFlagSet = false;
-
+	M_vectorMaterialFlags.resize(1);
+	
+	M_vectorMaterialFlags[0] = 1;
         M_young[1]   = dataFile( ( section + "/physics/young"   ).data(), 0. );
         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
 
@@ -155,7 +161,11 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
         UInt material(0);
         for ( UInt i(0) ; i < materialsNumber ; ++i )
         {
+	  
+  	    M_vectorMaterialFlags.resize( materialsNumber );
             material            = dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
+	    
+	    M_vectorMaterialFlags[i] = material;
             M_young[material]   = dataFile( ( section + "/physics/young"         ).data(), 0., i );
             M_poisson[material] = dataFile( ( section + "/physics/poisson"       ).data(), 0., i );
 
@@ -200,6 +210,12 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
         output << "Lame - lambda[" << i->first << "]                 = " << lambda( i->first ) << std::endl;
         output << "Lame - mu[" << i->first << "]                     = " << mu( i->first ) << std::endl;
     }
+
+    for ( UInt i(0); i < M_vectorMaterialFlags.size(); i++ )
+    {
+        output << "Position:" << i << " -> Material Flag:            = " << M_vectorMaterialFlags[i] << std::endl;
+    }
+
 
     output << "\n*** Values for data [solid/miscellaneous]\n\n";
     output << "verbose                          = " << M_verbose << std::endl;

@@ -580,7 +580,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
         // ===================================================================================
 
         boundaryFE.updateMeas( mesh.boundaryFacet( iBoundaryElement ) );  // updating finite element information
-        elementMarker = mesh.boundaryFacet( iBoundaryElement ).marker(); // We keep the element marker
+        elementMarker = mesh.boundaryFacet( iBoundaryElement ).markerID(); // We keep the element marker
 
 
         //vector containing the local to global map on each element
@@ -683,7 +683,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                 ID iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first;
 
                 //marker on boundary edge
-                marker = mesh.boundaryEdge( mesh.localEdgeId( iAdjacentElem, iElemEdge ) ).marker(); // edge marker
+                marker = mesh.boundaryEdge( mesh.localEdgeId( iAdjacentElem, iElemEdge ) ).markerID(); // edge marker
 
                 //indices of edge's vertices
                 UInt iEdgeFirstVert =  geoBShape_Type::edgeToPoint( iBElemEdge, 0);
@@ -739,7 +739,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
             //loop on boundary element vertices
             for ( ID iBElemVert = 0; iBElemVert < nBElemVertices; ++iBElemVert )
             {
-                marker = mesh.boundaryFacet( iBoundaryElement ).point( iBElemVert ).marker(); // vertex marker
+                marker = mesh.boundaryFacet( iBoundaryElement ).point( iBElemVert ).markerID(); // vertex marker
 
                 // Finding this marker on the BC list
                 bcBaseIterator = beginEssVertices;
@@ -772,16 +772,16 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
     {
 
 
-        Debug(5010) <<
+        debugStream(5010) <<
         "WARNING -- BCHandler::bcUpdate()\n" <<
         "  boundary degrees of freedom with the following markers\n" <<
         "  have no boundary condition set: ";
         for ( std::set<bcFlag_Type>::iterator it = notFoundMarkers.begin();
                 it != notFoundMarkers.end(); ++it )
         {
-            Debug(5010) << *it << " ";
+            debugStream(5010) << *it << " ";
         }
-        Debug(5010) << "\n";
+        debugStream(5010) << "\n";
 
     }
 #endif

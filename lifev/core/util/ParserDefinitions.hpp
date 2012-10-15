@@ -37,22 +37,16 @@
 #ifndef Parser_Definitions_H
 #define Parser_Definitions_H 1
 
-// LifeV classes
-#include <lifev/core/LifeV.hpp>
-
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // STD Classes
-#include <map>
 #include <iomanip>
-#include <string>
 #include <algorithm>
 
 // BOOST Classes
 #include <boost/algorithm/string.hpp>
-#include <boost/shared_ptr.hpp>
 
 #ifdef HAVE_BOOST_SPIRIT_QI
 #ifdef ENABLE_SPIRIT_PARSER
@@ -74,5 +68,8 @@ namespace phoenix = boost::phoenix;
 // Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+// LifeV classes
+#include <lifev/core/LifeV.hpp>
 
 #endif /* Parser_Definitions_H */

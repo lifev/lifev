@@ -46,17 +46,14 @@
 #ifndef _DOFINTERFACE3DTO2D_HH
 #define _DOFINTERFACE3DTO2D_HH
 
+#include <fstream>
+
+#include <lifev/core/LifeV.hpp>
+
 #include <lifev/core/fem/DOFInterface.hpp>
 #include <lifev/core/fem/DOFLocalPattern.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <list>   //necessary to write vertices in order.
-#include <vector>   //necessary to write faces and access them arbitrarily.
-
 
 namespace LifeV
 {
@@ -294,7 +291,7 @@ generate2DMesh( std::string fname, const MeshType& mesh1 ) const
         ofile << mesh1.pointList( idpoint3D ).x() << " "
         << mesh1.pointList( idpoint3D ).y() << " "
         << mesh1.pointList( idpoint3D ).z() << " "
-        << mesh1.pointList( idpoint3D ).marker() << std::endl;
+        << mesh1.pointList( idpoint3D ).markerID() << std::endl;
     }
     ofile << std::endl;
 
@@ -323,7 +320,7 @@ generate2DMesh( std::string fname, const MeshType& mesh1 ) const
             idpoint2D = vertex3Dto2D( idpoint3D ); //Simple algorithm (of Search in the list...)
             ofile << idpoint2D << " ";
         }
-        ofile << mesh1.boundaryFace( idface3D ).marker() << std::endl;
+        ofile << mesh1.boundaryFace( idface3D ).markerID() << std::endl;
     }
 }
 
@@ -349,7 +346,7 @@ updateFaceConnections( const MeshType& mesh1, const markerID_Type& flag1 )
     {
 
         //! The face marker
-        marker1 = mesh1.boundaryFace( iBoundaryFace1 ).marker();
+        marker1 = mesh1.boundaryFace( iBoundaryFace1 ).markerID();
 
         //! Is the face on the interface?
         if ( marker1 == flag1 )

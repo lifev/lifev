@@ -53,6 +53,29 @@ CMAKE_MINIMUM_REQUIRED(VERSION ${TRIBITS_CMAKE_MINIMUM_REQUIRED})
 # Do all of the processing for this Tribits project
 TRIBITS_PROJECT()
 
+# Check for HDF5 APIs version
+if (HDF5_IS_IN_TRILINOS AND NOT EpetraExt_FOUND)
+  # H5public.h defines all we need
+  find_file(LIFEV_H5PUBLIC_H H5public.h
+    HINTS ${Trilinos_TPL_INCLUDE_DIRS}
+    NO_DEFAULT_PATH)
+  if (LIFEV_H5PUBLIC_H)
+    # Found, let's open it a look for minor version
+    file(STRINGS ${LIFEV_H5PUBLIC_H} LIFEV_HDF5_VERSION_TMP
+      REGEX "^#define H5_VERS_MINOR")
+    string(REGEX REPLACE ".*#define H5_VERS_MINOR[\t]+([0-9]+).*" "\\1" 
+      LIFEV_HDF5_MINOR_VERSION ${LIFEV_HDF5_VERSION_TMP})
+    if(LIFEV_HDF5_MINOR_VERSION LESS 8)
+      message(WARNING ":: HDF5 version < 1.8.x! Setting to 1.6.x ...")
+      set(H5_USE_16_API 1)
+    endif()
+  else()
+    # I can't find the header ... something wrong!
+    message(WARNING ":: Cannot find HDF5 version! Setting to 1.6.x ...")
+    set(H5_USE_16_API 1)
+  endif()
+endif()
+
 # Add documentation
 ADD_SUBDIRECTORY(doc)
 

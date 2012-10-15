@@ -55,7 +55,7 @@ OneDFSIBCHandler::OneDFSIBCHandler() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 6311 ) << "[OneDFSIModel_BCHandler::OneDFSIModel_BCHandler] Creating OneDFSIModel_BC classes.\n";
+    debugStream( 6311 ) << "[OneDFSIModel_BCHandler::OneDFSIModel_BCHandler] Creating OneDFSIModel_BC classes.\n";
 #endif
 
     M_boundary[ OneDFSI::left ].reset(  new bc_Type( OneDFSI::left ) );
@@ -120,7 +120,7 @@ OneDFSIBCHandler::setBC( const bcSide_Type& bcSide, const bcLine_Type& bcLine,
     M_boundary[bcSide]->setBCFunction( bcLine, bcFunction );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 6311 ) << "[OneDFSIModel_BCHandler::setBC] imposing function at "
+    debugStream( 6311 ) << "[OneDFSIModel_BCHandler::setBC] imposing function at "
                   << bcSide << " boundary (" << bcLine << " bcLine), variable " << bcType << ".\n";
 #endif
 }
@@ -129,7 +129,7 @@ void
 OneDFSIBCHandler::setDefaultBC()
 {
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 6311 ) << "[OneDFSIModel_BCHandler::OneDFSIModel_BCHandler] Set Default BC ... \n";
+    debugStream( 6311 ) << "[OneDFSIModel_BCHandler::OneDFSIModel_BCHandler] Set Default BC ... \n";
 #endif
 
     if ( !M_boundarySet[ OneDFSI::left ][OneDFSI::first] )
@@ -144,7 +144,7 @@ OneDFSIBCHandler::setDefaultBC()
                                              dynamic_cast<OneDFSIFunctionSolverDefinedRiemann *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] left-first-W1 Invoking setBC.\n";
+        debugStream( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] left-first-W1 Invoking setBC.\n";
 #endif
         setBC( OneDFSI::left, OneDFSI::first, OneDFSI::W1, bcFunction );
     }
@@ -161,7 +161,7 @@ OneDFSIBCHandler::setDefaultBC()
                                              dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] left-second-W2 Invoking setBC.\n";
+        debugStream( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] left-second-W2 Invoking setBC.\n";
 #endif
         setBC( OneDFSI::left, OneDFSI::second, OneDFSI::W2, bcFunction );
     }
@@ -178,7 +178,7 @@ OneDFSIBCHandler::setDefaultBC()
                                              dynamic_cast<OneDFSIFunctionSolverDefinedRiemann *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] right-first-W2 Invoking setBC.\n";
+        debugStream( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] right-first-W2 Invoking setBC.\n";
 #endif
         setBC( OneDFSI::right, OneDFSI::first, OneDFSI::W2, bcFunction );
     }
@@ -195,7 +195,7 @@ OneDFSIBCHandler::setDefaultBC()
                                              dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] right-second-W1 Invoking setBC.\n";
+        debugStream( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] right-second-W1 Invoking setBC.\n";
 #endif
         setBC( OneDFSI::right, OneDFSI::second, OneDFSI::W1, bcFunction );
     }
