@@ -105,10 +105,10 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
   </ul>
   For the edges the labels are:
   <ul>
-  <li> BOTTOM = 1, i.e. \f$ x = 0 \f$ </li>
-  <li> LEFT = 2, i.e. \f$ y = 0 \f$ </li>
-  <li> TOP = 3, i.e. \f$ x = 1 \f$ </li>
-  <li> RIGHT = 4, i.e. \f$ y = 1 \f$ </li>
+  <li> LEFT    = 1, i.e. \f$ x = 0 \f$ </li>
+  <li> BOTTOM  = 2, i.e. \f$ y = 0 \f$ </li>
+  <li> RIGHT   = 3, i.e. \f$ x = 1 \f$ </li>
+  <li> TOP     = 4, i.e. \f$ y = 1 \f$ </li>
   </ul>
 
   @param mesh The mesh that we want to generate
