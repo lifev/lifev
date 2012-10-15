@@ -151,6 +151,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
             if( iter==0 )
             {
               moveMesh(*M_vectorMeshMovement);
+	      *meshVel = *M_velImplicit;
 	      // M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
               //   M_ALETimeAdvance->shiftRight(*meshDisp);
             }

@@ -480,10 +480,10 @@ public:
     Real thickness() const { return M_data->thickness(); }
 
     //! Get the Young modulus
-    Real young( UInt material )            const { return M_data->young( material ); }
+    Real young( UInt material = 1)            const { return M_data->young( material ); }
 
     //! Get the Poisson coefficient
-    Real poisson( UInt material )          const { return M_data->poisson( material ); }
+    Real poisson( UInt material = 1 )          const { return M_data->poisson( material ); }
 
     //! Get the density
     Real rho()       const { return M_data->rho(); }
