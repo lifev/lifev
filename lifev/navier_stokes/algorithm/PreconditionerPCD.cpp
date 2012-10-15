@@ -68,7 +68,6 @@ PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     M_timestep                   ( 1.0 ),
     M_viscosity                  ( 1.0 ),
     M_density                    ( 1.0 ),
-    M_pressureBoundaryConditions ( "none" ),
     M_pressureLaplacianOperator  ( "standard" ),
     M_pressureMassOperator       ( "lumped" ),
     M_setApBoundaryConditions    ( false ),
@@ -79,9 +78,6 @@ PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     M_enableTransient            ( true ),
     M_divergenceCoeff            ( 1.0 ),
     M_schurOperatorReverseOrder  ( false ),
-    M_inflowBoundaryFlags        (),
-    M_outflowBoundaryFlags       (),
-    M_characteristicBoundaryFlags(),
     M_inflowBoundaryType         ( "Robin" ),
     M_outflowBoundaryType        ( "Neumann" ),
     M_characteristicBoundaryType ( "Neumann" )
@@ -531,76 +527,12 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     // * Robin boundary conditions at inflows
     // * Neumann boundary conditions at outflows
     // * Neumann boundary conditions on characteristic boundaries
-    if ( M_pressureBoundaryConditions == "first_dof_dirichlet" )
-    {
-        pAp->globalAssemble();
-        pFp->globalAssemble();
-        pMp->globalAssemble();
-
-        UInt firstIndex = M_pFESpace->map().map( Unique )->MaxMyGID();
-        pAp->diagonalize( firstIndex + ApOffset, 1.0 );
-        pFp->diagonalize( firstIndex + FpOffset, 1.0 );
-        pMp->diagonalize( firstIndex + MpOffset, 1.0 );
-    }
-    else if ( M_pressureBoundaryConditions == "dirichlet_to_dirichlet" )
-    {
-        pAp->globalAssemble();
-        pFp->globalAssemble();
-        pMp->globalAssemble();
-
-        // Loop on boundary conditions
-        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
-        {
-            if ( M_bcHandlerPtr->operator[]( i ).type() == Essential )
-            {
-                for ( ID j = 0; j < M_bcHandlerPtr->operator[]( i ).list_size(); ++j )
-                {
-                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id();
-                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId + ApOffset, 1.0 );
-                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId + FpOffset, 1.0 );
-                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId + MpOffset, 1.0 );
-                }
-            }
-        }
-    }
-    else if ( M_pressureBoundaryConditions == "neumann_to_dirichlet" )
-    {
-        pAp->globalAssemble();
-        pFp->globalAssemble();
-        pMp->globalAssemble();
-
-        // Loop on boundary conditions
-        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
-        {
-            if( M_bcHandlerPtr->operator[]( i ).type() == Natural )
-            {
-                for ( ID j = 0; j < M_bcHandlerPtr->operator[]( i ).list_size(); ++j )
-                {
-                    UInt myId = M_bcHandlerPtr->operator[]( i )[j]->id();
-                    if ( M_setApBoundaryConditions ) pAp->diagonalize( myId + ApOffset, 1.0 );
-                    if ( M_setFpBoundaryConditions ) pFp->diagonalize( myId + FpOffset, 1.0 );
-                    if ( M_setMpBoundaryConditions ) pMp->diagonalize( myId + MpOffset, 1.0 );
-                }
-            }
-        }
-    }
-    else if ( M_pressureBoundaryConditions == "custom" )
-    {
-        this->setBCFromBoundaryFlags( pAp, ApOffset,
-                                      pFp, FpOffset,
-                                      pMp, MpOffset );
-    }
-    else if ( M_pressureBoundaryConditions == "classification" )
-    {
-        this->setBCByBoundaryClassification( pAp, ApOffset,
-                                             pFp, FpOffset,
-                                             pMp, MpOffset );
-    }
+    this->setBCByBoundaryType( pAp, ApOffset,
+                               pFp, FpOffset,
+                               pMp, MpOffset );
 
     // For enclosed flow where only characteristics BC are imposed,
     // the choice is correct by default, i.e. Neumann BC.
-
-    if ( verbose ) std::cout << "      >Pressure BC type = " << M_pressureBoundaryConditions << std::endl;
     if ( ( verbose )&&( M_setApBoundaryConditions ) ) std::cout << "      >BC imposed on Ap" << std::endl;
     if ( ( verbose )&&( M_setFpBoundaryConditions ) ) std::cout << "      >BC imposed on Fp" << std::endl;
     if ( ( verbose )&&( M_setMpBoundaryConditions ) ) std::cout << "      >BC imposed on Mp" << std::endl;
@@ -796,7 +728,6 @@ PreconditionerPCD::setParameters( Teuchos::ParameterList& list )
     M_pressureMassPrec                 = list.get( "subprecs: pressure mass prec", "ML" );
     M_pressureMassPrecDataSection      = list.get( "subprecs: pressure mass prec data section", "" );
 
-    M_pressureBoundaryConditions       = list.get( "pressure boundary conditions", "none" );
     M_pressureLaplacianOperator        = list.get( "pressure laplacian operator", "standard" );
 
     M_pressureMassOperator             = list.get( "pressure mass operator", "lumped" );
@@ -851,16 +782,6 @@ void
 PreconditionerPCD::setDensity( const Real& density )
 {
     M_density = density;
-}
-
-void
-PreconditionerPCD::setBoundaryTypes( const std::vector<bcFlag_Type>& inflowBoundaryFlags,
-                                     const std::vector<bcFlag_Type>& outflowBoundaryFlags,
-                                     const std::vector<bcFlag_Type>& characteristicBoundaryFlags )
-{
-    M_inflowBoundaryFlags = inflowBoundaryFlags;
-    M_outflowBoundaryFlags = outflowBoundaryFlags;
-    M_characteristicBoundaryFlags = characteristicBoundaryFlags;
 }
 
 void
@@ -1012,111 +933,9 @@ PreconditionerPCD::computeRobinCoefficient()
 }
 
 void
-PreconditionerPCD::setBCFromBoundaryFlags( matrixPtr_type Ap, UInt ApOffset,
-                                           matrixPtr_type Fp, UInt FpOffset,
-                                           matrixPtr_type Mp, UInt MpOffset )
-{
-    bool verbose( false );
-    if ( M_comm->MyPID() == 0 ) verbose = true;
-
-    std::string boundaryType( "none" );
-
-    BCHandler bcHandler;
-
-    vector_Type    robinCoeffVector( *computeRobinCoefficient(), Repeated );
-    vector_Type    robinRHS( M_pFESpace->map(), Repeated );
-    BCFunctionBase uZero( fZero );
-
-    // Loop on boundary conditions
-    for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
-    {
-        boundaryType = "none";
-        for( ID j = 0; j < M_inflowBoundaryFlags.size(); ++j )
-        {
-            if ( M_bcHandlerPtr->operator[]( i ).flag() == M_inflowBoundaryFlags[j] )
-            {
-                boundaryType = M_inflowBoundaryType;
-            }
-        }
-        for( ID j = 0; j < M_outflowBoundaryFlags.size(); ++j )
-        {
-            if ( M_bcHandlerPtr->operator[]( i ).flag() == M_outflowBoundaryFlags[j] )
-            {
-                boundaryType = M_outflowBoundaryType;
-            }
-        }
-        for( ID j = 0; j < M_characteristicBoundaryFlags.size(); ++j )
-        {
-            if ( M_bcHandlerPtr->operator[]( i ).flag() == M_characteristicBoundaryFlags[j] )
-            {
-                boundaryType = M_characteristicBoundaryType;
-            }
-        }
-
-        if ( boundaryType == "Dirichlet" )
-        {
-            bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
-                             M_bcHandlerPtr->operator[]( i ).flag(),
-                             Essential,
-                             Full,
-                             uZero,
-                             1 );
-        }
-        else if ( boundaryType == "Robin" )
-        {
-            BCVector uRobin( robinRHS, M_pFESpace->dof().numTotalDof(), 0 );
-            uRobin.setRobinCoeffVector( robinCoeffVector );
-            uRobin.setBetaCoeff( 0 );
-
-            bcHandler.addBC( M_bcHandlerPtr->operator[]( i ).name(),
-                             M_bcHandlerPtr->operator[]( i ).flag(),
-                             Robin,
-                             Full,
-                             uRobin,
-                             1 );
-        }
-        else if ( boundaryType == "Neumann" )
-        {
-            // For Neumann BC we do not need to do anything
-        }
-        else
-        {
-            if ( verbose ) std::cout << "Error! The type of BC is unknown." << std::endl;
-            exit(-1);
-        }
-    }
-
-    if ( !bcHandler.bcUpdateDone() )
-    {
-        bcHandler.bcUpdate( *M_pFESpace->mesh(),
-                             M_pFESpace->feBd(),
-                             M_pFESpace->dof() );
-    }
-
-    if ( M_setApBoundaryConditions )
-    {
-        bcHandler.setOffset( ApOffset );
-        bcManageMatrix( *Ap, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
-    }
-    if ( M_setFpBoundaryConditions )
-    {
-        bcHandler.setOffset( FpOffset );
-        bcManageMatrix( *Fp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
-    }
-    if ( M_setMpBoundaryConditions )
-    {
-        bcHandler.setOffset( MpOffset );
-        bcManageMatrix( *Mp, *M_pFESpace->mesh(), M_pFESpace->dof(), bcHandler, M_pFESpace->feBd(), 1.0, 0.0 );
-    }
-    Ap->globalAssemble();
-    Fp->globalAssemble();
-    Mp->globalAssemble();
-}
-
-void
-PreconditionerPCD::setBCByBoundaryClassification( matrixPtr_type Ap, UInt ApOffset,
-                                                  matrixPtr_type Fp, UInt FpOffset,
-                                                  matrixPtr_type Mp, UInt MpOffset )
+PreconditionerPCD::setBCByBoundaryType( matrixPtr_type Ap, UInt ApOffset,
+                                        matrixPtr_type Fp, UInt FpOffset,
+                                        matrixPtr_type Mp, UInt MpOffset )
 {
     const bool verbose( M_comm->MyPID() == 0 );
 

@@ -200,15 +200,6 @@ public:
      */
     void setDensity( const Real& density );
 
-    //! Setter for the BC of the original problem
-    /*!
-        This method is used to compute Fp with the correct BC.
-        @param density Density used to compute the solution of the Navier-Stokes equations
-     */
-    void setBoundaryTypes( const std::vector<bcFlag_Type>& inflowBoundaryFlagsVector,
-                           const std::vector<bcFlag_Type>& outflowBoundaryFlagsVector,
-                           const std::vector<bcFlag_Type>& characteristicBoundaryFlagsVector );
-
     //! Setter to know if we used B or -B in the discretization of the Navier-Stokes equations
     /*!
         @param useMinusDivergence is true if -B has been used.
@@ -241,8 +232,6 @@ protected:
     std::string M_pressureLaplacianPrecDataSection;
     std::string M_pressureMassPrec;
     std::string M_pressureMassPrecDataSection;
-
-    std::string M_pressureBoundaryConditions;
     std::string M_pressureLaplacianOperator;
     std::string M_pressureMassOperator;
     bool        M_setApBoundaryConditions;
@@ -254,9 +243,6 @@ protected:
     bool        M_enableTransient;
     Real        M_divergenceCoeff;
 
-    std::vector<bcFlag_Type> M_inflowBoundaryFlags;
-    std::vector<bcFlag_Type> M_outflowBoundaryFlags;
-    std::vector<bcFlag_Type> M_characteristicBoundaryFlags;
     std::string M_inflowBoundaryType;
     std::string M_outflowBoundaryType;
     std::string M_characteristicBoundaryType;
@@ -281,12 +267,9 @@ private:
         return 0.0;
     }
 
-    void setBCFromBoundaryFlags( matrixPtr_type Ap, UInt ApOffset,
-                                 matrixPtr_type Fp, UInt FpOffset,
-                                 matrixPtr_type Mp, UInt MpOffset );
-    void setBCByBoundaryClassification( matrixPtr_type Ap, UInt ApOffset,
-                                        matrixPtr_type Fp, UInt FpOffset,
-                                        matrixPtr_type Mp, UInt MpOffset );
+    void setBCByBoundaryType( matrixPtr_type Ap, UInt ApOffset,
+                              matrixPtr_type Fp, UInt FpOffset,
+                              matrixPtr_type Mp, UInt MpOffset );
 
 };
 
