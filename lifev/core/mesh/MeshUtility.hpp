@@ -2287,7 +2287,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
  * @date 2 August 2011
  */
 //
-template <typename REGIONMESH, typename RMTYPE=typename REGIONMESH::MarkerCommon >
+template <typename REGIONMESH, typename RMTYPE=typename REGIONMESH::markerCommon_Type >
 class MeshTransformer{
 public:
     /** the constructor may take a reference to the mesh to be manipulated */

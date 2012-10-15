@@ -121,8 +121,8 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
   @param t_x translation of the mesh along the x-axis
   @param t_y translation of the mesh along the y-axis
 */
-template <typename MC>
-void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
+template <typename MeshType>
+void regularMesh2D( MeshType& mesh,
                     markerID_Type regionFlag,
                     const UInt& m_x,
                     const UInt& m_y,
@@ -132,9 +132,12 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
                     const Real& t_x = 0.0,
                     const Real& t_y = 0.0 )
 {
+    typedef MeshType mesh_Type;
+    typedef typename mesh_Type::geoShape_Type geoShape_Type;
 
-    typedef LinearTriangle geoShape_Type;
-    typedef RegionMesh < geoShape_Type, MC > mesh_Type;
+    ASSERT( ( geoShape_Type::S_shape == TRIANGLE )
+            || ( geoShape_Type::S_shape == QUAD ),
+            "Type of 2d structured mesh not available." );
 
     // discretization
     const Real dx( l_x / m_x );

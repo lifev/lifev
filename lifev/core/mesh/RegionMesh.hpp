@@ -76,15 +76,20 @@ namespace LifeV
  *  the ones in the global mesh, before partitioning. The latter are identified
  *  by the keyword Global in the name, e.g. numGlobalFaces() versus numFaces()
  */
-template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
+template <typename GeoShapeType, typename MCType = defaultMarkerCommon_Type >
 class RegionMesh
 :
 public MeshEntity
 {
 public:
 
+    typedef GeoShapeType geoShape_Type;
+
+    //! Common Markers
+    typedef MCType markerCommon_Type;
+
     //! static const S_geoDimensions: the dimensions (1,2,3) of the geometry
-    static const UInt S_geoDimensions = GEOSHAPE::S_nDimensions;
+    static const UInt S_geoDimensions = geoShape_Type::S_nDimensions;
 
 
     /** @name GeoDim Types
@@ -106,18 +111,16 @@ public:
      *  @{
      */
 
-    //! Common Markers
-    typedef MC MarkerCommon;
     //! Point Marker
-    typedef typename MC::pointMarker_Type pointMarker_Type;
+    typedef typename markerCommon_Type::pointMarker_Type pointMarker_Type;
     //! Edge Marker
-    typedef typename MC::edgeMarker_Type edgeMarker_Type;
+    typedef typename markerCommon_Type::edgeMarker_Type edgeMarker_Type;
     //! Face Marker
-    typedef typename MC::faceMarker_Type faceMarker_Type;
+    typedef typename markerCommon_Type::faceMarker_Type faceMarker_Type;
     //! Volume Marker
-    typedef typename MC::volumeMarker_Type volumeMarker_Type;
+    typedef typename markerCommon_Type::volumeMarker_Type volumeMarker_Type;
     //! Region Marker
-    typedef typename MC::regionMarker_Type regionMarker_Type;
+    typedef typename markerCommon_Type::regionMarker_Type regionMarker_Type;
     /** @} */ // End of group Marker Types
 
 
@@ -136,15 +139,15 @@ public:
      */
 
 
-    typedef MeshElementMarked<3, S_geoDimensions, GEOSHAPE, MC>  volume_Type;
-    typedef MeshElementMarked<2, S_geoDimensions, GEOSHAPE, MC> face_Type;
-    typedef MeshElementMarked<1, S_geoDimensions, GEOSHAPE, MC> edge_Type;
-    typedef MeshElementMarked<0, S_geoDimensions, GEOSHAPE, MC> point_Type;
+    typedef MeshElementMarked<3, S_geoDimensions, geoShape_Type, markerCommon_Type>  volume_Type;
+    typedef MeshElementMarked<2, S_geoDimensions, geoShape_Type, markerCommon_Type> face_Type;
+    typedef MeshElementMarked<1, S_geoDimensions, geoShape_Type, markerCommon_Type> edge_Type;
+    typedef MeshElementMarked<0, S_geoDimensions, geoShape_Type, markerCommon_Type> point_Type;
 
-    typedef MeshElementMarked<S_geoDimensions, S_geoDimensions, GEOSHAPE, MC>  element_Type;
-    typedef MeshElementMarked<S_geoDimensions-1, S_geoDimensions, GEOSHAPE, MC> facet_Type;
-    typedef MeshElementMarked<S_geoDimensions-2, S_geoDimensions, GEOSHAPE, MC> ridge_Type;
-    typedef MeshElementMarked<S_geoDimensions-3, S_geoDimensions, GEOSHAPE, MC>  peak_Type;
+    typedef MeshElementMarked<S_geoDimensions, S_geoDimensions, geoShape_Type, markerCommon_Type>  element_Type;
+    typedef MeshElementMarked<S_geoDimensions-1, S_geoDimensions, geoShape_Type, markerCommon_Type> facet_Type;
+    typedef MeshElementMarked<S_geoDimensions-2, S_geoDimensions, geoShape_Type, markerCommon_Type> ridge_Type;
+    typedef MeshElementMarked<S_geoDimensions-3, S_geoDimensions, geoShape_Type, markerCommon_Type>  peak_Type;
 
     /** @} */ // End of group Geometric Element Types
 
@@ -160,8 +163,8 @@ public:
     typedef typename face_Type::geoShape_Type faceShape_Type;
     typedef typename edge_Type::geoShape_Type edgeShape_Type;
 
-    typedef GEOSHAPE elementShape_Type;
-    typedef typename GEOSHAPE::GeoBShape facetShape_Type;
+    typedef geoShape_Type elementShape_Type;
+    typedef typename geoShape_Type::GeoBShape facetShape_Type;
     typedef typename facetShape_Type::GeoBShape ridgeShape_Type;
     /** @} */ // End of group Basic Element Shape Types
 
@@ -174,7 +177,7 @@ public:
     typedef MeshEntityContainer<face_Type>    faces_Type;
     typedef MeshEntityContainer<edge_Type>    edges_Type;
     typedef MeshEntityContainer<point_Type>   points_Type;
-    
+
     typedef MeshEntityContainer<element_Type>  elements_Type;
     typedef MeshEntityContainer<facet_Type>    facets_Type;
     typedef MeshEntityContainer<ridge_Type>    ridges_Type;
@@ -248,7 +251,7 @@ public:
     void printLtGMap(std::ostream & os);
 
     //! Return the handle to perform transormations on the mesh
-    inline MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > & meshTransformer();
+    inline MeshUtility::MeshTransformer<RegionMesh<geoShape_Type, markerCommon_Type>, markerCommon_Type > & meshTransformer();
 
     //! Return the communicator
     const Epetra_Comm & comm() const;
@@ -329,7 +332,7 @@ public:
     /**
      *  @return regionmesh marker.
      */
-    typename MC::regionMarker_Type & markerClass() const { return M_marker; }
+    typename markerCommon_Type::regionMarker_Type & markerClass() const { return M_marker; }
 
     //! get only mesh marker id.
     /**
@@ -402,7 +405,7 @@ public:
     /**
      *  @param marker to be set.
      */
-    void setMarkerClass( typename MC::regionMarker_Type const & marker ) { M_marker = marker; }
+    void setMarkerClass( typename MCType::regionMarker_Type const & marker ) { M_marker = marker; }
 
 
     //! set only the mesh marker id.
@@ -1914,8 +1917,8 @@ private:
     UInt M_numGlobalVolumes;
 
     bool M_isPartitioned;
-    typename  MC::regionMarker_Type M_marker;
-    MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > M_meshTransformer;
+    typename  markerCommon_Type::regionMarker_Type M_marker;
+    MeshUtility::MeshTransformer<RegionMesh<geoShape_Type, markerCommon_Type>, markerCommon_Type > M_meshTransformer;
 
     // communicator
     Epetra_Comm const & M_comm;
@@ -2164,8 +2167,8 @@ private:
 
 void set_switches_for_regionmesh( Switch & sw );
 
-template <typename GEOSHAPE, typename MC>
-inline RegionMesh<GEOSHAPE, MC>::RegionMesh( Epetra_Comm const & comm ):
+template <typename GeoShapeType, typename MCType>
+inline RegionMesh<GeoShapeType, MCType>::RegionMesh( Epetra_Comm const & comm ):
     MeshEntity(),
     switches(),
     M_numVolumes( 0 ),
@@ -2185,8 +2188,8 @@ inline RegionMesh<GEOSHAPE, MC>::RegionMesh( Epetra_Comm const & comm ):
 }
 
 
-template <typename GEOSHAPE, typename MC>
-inline RegionMesh<GEOSHAPE, MC>::RegionMesh( UInt id, Epetra_Comm const & comm ) :
+template <typename GeoShapeType, typename MCType>
+inline RegionMesh<GeoShapeType, MCType>::RegionMesh( UInt id, Epetra_Comm const & comm ) :
     MeshEntity( id ),
     switches(),
     M_numVolumes( 0 ),
@@ -2205,62 +2208,62 @@ inline RegionMesh<GEOSHAPE, MC>::RegionMesh( UInt id, Epetra_Comm const & comm )
     set_switches_for_regionmesh( switches );
 }
 
-template <typename GEOSHAPE, typename MC>
-inline RegionMesh<GEOSHAPE, MC>::~RegionMesh()
+template <typename GeoShapeType, typename MCType>
+inline RegionMesh<GeoShapeType, MCType>::~RegionMesh()
 {
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numLocalVertices() const
+RegionMesh<GeoShapeType, MCType>::numLocalVertices() const
 {
     return element_Type::S_numLocalVertices;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numLocalFaces() const
+RegionMesh<GeoShapeType, MCType>::numLocalFaces() const
 {
     return element_Type::S_numLocalFaces;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numLocalEdges() const
+RegionMesh<GeoShapeType, MCType>::numLocalEdges() const
 {
     return element_Type::S_numLocalEdges;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numLocalEdgesOfFace() const
+RegionMesh<GeoShapeType, MCType>::numLocalEdgesOfFace() const
 {
     return face_Type::S_numLocalEdges;
 }
 
 // ***************************** VOLUMES
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setMaxNumVolumes( UInt const n, bool const setcounter )
+RegionMesh<GeoShapeType, MCType>::setMaxNumVolumes( UInt const n, bool const setcounter )
 {
     volumeList.setMaxNumItems(n);
     if ( setcounter )
         M_numVolumes = n;
 }
 
-template <typename GEOSHAPE, typename MC>
-typename RegionMesh<GEOSHAPE, MC>::element_Type &
-RegionMesh<GEOSHAPE, MC>::addVolume()
+template <typename GeoShapeType, typename MCType>
+typename RegionMesh<GeoShapeType, MCType>::element_Type &
+RegionMesh<GeoShapeType, MCType>::addVolume()
 {
     // I need to set the global ID
     element_Type aVolume;
     return addVolume( aVolume );
 }
 
-template <typename GEOSHAPE, typename MC>
-inline typename RegionMesh<GEOSHAPE, MC>::element_Type &
-RegionMesh<GEOSHAPE, MC>::addVolume( element_Type const & v )
+template <typename GeoShapeType, typename MCType>
+inline typename RegionMesh<GeoShapeType, MCType>::element_Type &
+RegionMesh<GeoShapeType, MCType>::addVolume( element_Type const & v )
 {
     volumeList.push_back( v );
     volume_Type & thisVolume(volumeList.back());
@@ -2268,10 +2271,10 @@ RegionMesh<GEOSHAPE, MC>::addVolume( element_Type const & v )
     return thisVolume;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::element_Type &
-RegionMesh<GEOSHAPE, MC>::setVolume( element_Type const & v, UInt const pos )
+typename RegionMesh<GeoShapeType, MCType>::element_Type &
+RegionMesh<GeoShapeType, MCType>::setVolume( element_Type const & v, UInt const pos )
 {
     ASSERT_PRE( pos < volumeList.capacity() , "position requested exceed capacity" <<
                 pos << " " << volumeList.capacity() ) ;
@@ -2280,73 +2283,73 @@ RegionMesh<GEOSHAPE, MC>::setVolume( element_Type const & v, UInt const pos )
     return volumeList( pos );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::element_Type const &
-RegionMesh<GEOSHAPE, MC>::volume( UInt const i ) const
+typename RegionMesh<GeoShapeType, MCType>::element_Type const &
+RegionMesh<GeoShapeType, MCType>::volume( UInt const i ) const
 {
     ASSERT_BD( i < volumeList.size() ) ;
     return volumeList[ i ];
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::element_Type &
-RegionMesh<GEOSHAPE, MC>::volume( UInt const i )
+typename RegionMesh<GeoShapeType, MCType>::element_Type &
+RegionMesh<GeoShapeType, MCType>::volume( UInt const i )
 {
     ASSERT_BD( i < volumeList.size() ) ;
     return volumeList[ i ];
 }
 
 // ************************* FACES ******************************
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt /*const*/
-RegionMesh<GEOSHAPE, MC>::numFaces() const
+RegionMesh<GeoShapeType, MCType>::numFaces() const
 {
     return M_numFaces;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt /*const*/
-RegionMesh<GEOSHAPE, MC>::numGlobalFaces() const
+RegionMesh<GeoShapeType, MCType>::numGlobalFaces() const
 {
     return M_numGlobalFaces;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::storedFaces() const
+RegionMesh<GeoShapeType, MCType>::storedFaces() const
 {
     return faceList.size();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::maxNumFaces() const
+RegionMesh<GeoShapeType, MCType>::maxNumFaces() const
 {
     return faceList.maxNumItems();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setMaxNumFaces( UInt const n, bool const setcounter )
+RegionMesh<GeoShapeType, MCType>::setMaxNumFaces( UInt const n, bool const setcounter )
 {
     faceList.setMaxNumItems(n);
     if ( setcounter )
         M_numFaces = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setMaxNumGlobalFaces( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setMaxNumGlobalFaces( UInt const n )
 {
     M_numGlobalFaces = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::face_Type &
-RegionMesh<GEOSHAPE, MC>::addFace( bool const boundary )
+typename RegionMesh<GeoShapeType, MCType>::face_Type &
+RegionMesh<GeoShapeType, MCType>::addFace( bool const boundary )
 {
     face_Type aFace;
     aFace.setBoundary( boundary );
@@ -2354,10 +2357,10 @@ RegionMesh<GEOSHAPE, MC>::addFace( bool const boundary )
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::face_Type &
-RegionMesh<GEOSHAPE, MC>::addFace( face_Type const & f )
+typename RegionMesh<GeoShapeType, MCType>::face_Type &
+RegionMesh<GeoShapeType, MCType>::addFace( face_Type const & f )
 {
     faceList.push_back( f );
     face_Type & thisFace=faceList.back();
@@ -2365,10 +2368,10 @@ RegionMesh<GEOSHAPE, MC>::addFace( face_Type const & f )
     return thisFace;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::face_Type &
-RegionMesh<GEOSHAPE, MC>::setFace( face_Type const & f, UInt position)
+typename RegionMesh<GeoShapeType, MCType>::face_Type &
+RegionMesh<GeoShapeType, MCType>::setFace( face_Type const & f, UInt position)
 {
     ASSERT_PRE( position < faceList.capacity(), "Face list size exceeded" <<
                 position << " " << faceList.capacity() ) ;
@@ -2377,38 +2380,38 @@ RegionMesh<GEOSHAPE, MC>::setFace( face_Type const & f, UInt position)
     return faceList( position );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::face_Type &
-RegionMesh<GEOSHAPE, MC>::lastFace()
+typename RegionMesh<GeoShapeType, MCType>::face_Type &
+RegionMesh<GeoShapeType, MCType>::lastFace()
 {
     return faceList.back();
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::face_Type const &
-RegionMesh<GEOSHAPE, MC>::face( UInt const i ) const
+typename RegionMesh<GeoShapeType, MCType>::face_Type const &
+RegionMesh<GeoShapeType, MCType>::face( UInt const i ) const
 {
     ASSERT_BD( i < faceList.size() ) ;
     return faceList[ i ];
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::face_Type &
-RegionMesh<GEOSHAPE, MC>::face( UInt const i )
+typename RegionMesh<GeoShapeType, MCType>::face_Type &
+RegionMesh<GeoShapeType, MCType>::face( UInt const i )
 {
     ASSERT_BD( i < faceList.size() ) ;
     return faceList[ i ];
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::face_Type const &
-RegionMesh<GEOSHAPE, MC>::boundaryFace( UInt const i ) const
+typename RegionMesh<GeoShapeType, MCType>::face_Type const &
+RegionMesh<GeoShapeType, MCType>::boundaryFace( UInt const i ) const
 {
     ASSERT_PRE( faceList.size() != 0, "Boundary Faces not stored" ) ;
     //ASSERT_BD( i < this->numBFaces()) ; //TODO TO BE FIXED! LF
@@ -2416,10 +2419,10 @@ RegionMesh<GEOSHAPE, MC>::boundaryFace( UInt const i ) const
     return faceList[ i ];
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::face_Type &
-RegionMesh<GEOSHAPE, MC>::boundaryFace( UInt const i )
+typename RegionMesh<GeoShapeType, MCType>::face_Type &
+RegionMesh<GeoShapeType, MCType>::boundaryFace( UInt const i )
 {
     ASSERT_PRE( faceList.size() != 0, "Boundary Faces not stored" ) ;
     //    ASSERT_BD( i < this->numBFaces()) ;
@@ -2427,92 +2430,92 @@ RegionMesh<GEOSHAPE, MC>::boundaryFace( UInt const i )
     return faceList[ i ];
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numBFaces() const
+RegionMesh<GeoShapeType, MCType>::numBFaces() const
 {
     return M_numBFaces;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setNumFaces( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setNumFaces( UInt const n )
 {
     M_numFaces = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setNumBFaces( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setNumBFaces( UInt const n )
 {
     M_numBFaces = n;
 }
 
 // ************************* EDGES ******************************
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt /*const*/
-RegionMesh<GEOSHAPE, MC>::numEdges() const
+RegionMesh<GeoShapeType, MCType>::numEdges() const
 {
     return M_numEdges;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt /*const*/
-RegionMesh<GEOSHAPE, MC>::numGlobalEdges() const
+RegionMesh<GeoShapeType, MCType>::numGlobalEdges() const
 {
     return M_numGlobalEdges;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::storedEdges() const
+RegionMesh<GeoShapeType, MCType>::storedEdges() const
 {
     return edgeList.size();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::maxNumEdges() const
+RegionMesh<GeoShapeType, MCType>::maxNumEdges() const
 {
     return edgeList.maxNumItems();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setMaxNumEdges( UInt const n, bool const setcounter )
+RegionMesh<GeoShapeType, MCType>::setMaxNumEdges( UInt const n, bool const setcounter )
 {
     edgeList.setMaxNumItems(n);
     if ( setcounter )
         M_numEdges = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setMaxNumGlobalEdges( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setMaxNumGlobalEdges( UInt const n )
 {
     M_numGlobalEdges = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setNumEdges( UInt const n)
+RegionMesh<GeoShapeType, MCType>::setNumEdges( UInt const n)
 {
     M_numEdges = n;
 }
 
-template <typename GEOSHAPE, typename MC>
-inline typename RegionMesh<GEOSHAPE, MC>::edge_Type &
-RegionMesh<GEOSHAPE, MC>::addEdge( bool const boundary )
+template <typename GeoShapeType, typename MCType>
+inline typename RegionMesh<GeoShapeType, MCType>::edge_Type &
+RegionMesh<GeoShapeType, MCType>::addEdge( bool const boundary )
 {
     edge_Type anEdge;
     anEdge.setBoundary( boundary );
     return addEdge( anEdge );
 }
 
-template <typename GEOSHAPE, typename MC>
-inline typename RegionMesh<GEOSHAPE, MC>::edge_Type &
-RegionMesh<GEOSHAPE, MC>::addEdge( edge_Type const & f)
+template <typename GeoShapeType, typename MCType>
+inline typename RegionMesh<GeoShapeType, MCType>::edge_Type &
+RegionMesh<GeoShapeType, MCType>::addEdge( edge_Type const & f)
 {
     edgeList.push_back( f );
     edge_Type & thisEdge = edgeList.back();
@@ -2520,10 +2523,10 @@ RegionMesh<GEOSHAPE, MC>::addEdge( edge_Type const & f)
     return thisEdge;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::edge_Type &
-RegionMesh<GEOSHAPE, MC>::setEdge( edge_Type const & f, UInt position)
+typename RegionMesh<GeoShapeType, MCType>::edge_Type &
+RegionMesh<GeoShapeType, MCType>::setEdge( edge_Type const & f, UInt position)
 {
     ASSERT_PRE( position < edgeList.capacity(), "Edge list size exceeded" <<
                 position << " " << edgeList.capacity() ) ;
@@ -2534,147 +2537,147 @@ RegionMesh<GEOSHAPE, MC>::setEdge( edge_Type const & f, UInt position)
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::edge_Type &
-RegionMesh<GEOSHAPE, MC>::lastEdge()
+typename RegionMesh<GeoShapeType, MCType>::edge_Type &
+RegionMesh<GeoShapeType, MCType>::lastEdge()
 {
     return edgeList.back();
 }
 
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::edge_Type const &
-RegionMesh<GEOSHAPE, MC>::edge( UInt const i ) const
+typename RegionMesh<GeoShapeType, MCType>::edge_Type const &
+RegionMesh<GeoShapeType, MCType>::edge( UInt const i ) const
 {
     ASSERT_BD( i < edgeList.size() ) ;
     return edgeList[ i ];
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::edge_Type &
-RegionMesh<GEOSHAPE, MC>::edge( UInt const i )
+typename RegionMesh<GeoShapeType, MCType>::edge_Type &
+RegionMesh<GeoShapeType, MCType>::edge( UInt const i )
 {
     ASSERT_BD( i < edgeList.size() ) ;
     return edgeList[ i ];
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::edge_Type const &
-RegionMesh<GEOSHAPE, MC>::boundaryEdge( UInt const i ) const
-{
-    ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
-    ASSERT_BD( i < edgeList.size() ) ;
-    return edgeList[ i ];
-}
-
-template <typename GEOSHAPE, typename MC>
-inline
-typename RegionMesh<GEOSHAPE, MC>::edge_Type &
-RegionMesh<GEOSHAPE, MC>::boundaryEdge( UInt const i )
+typename RegionMesh<GeoShapeType, MCType>::edge_Type const &
+RegionMesh<GeoShapeType, MCType>::boundaryEdge( UInt const i ) const
 {
     ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
     ASSERT_BD( i < edgeList.size() ) ;
     return edgeList[ i ];
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
+inline
+typename RegionMesh<GeoShapeType, MCType>::edge_Type &
+RegionMesh<GeoShapeType, MCType>::boundaryEdge( UInt const i )
+{
+    ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
+    ASSERT_BD( i < edgeList.size() ) ;
+    return edgeList[ i ];
+}
+
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numBEdges() const
+RegionMesh<GeoShapeType, MCType>::numBEdges() const
 {
     return M_numBEdges;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setNumBEdges( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setNumBEdges( UInt const n )
 {
     M_numBEdges = n;
 }
 
 // ************************ Points/Vertices
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numPoints() const
+RegionMesh<GeoShapeType, MCType>::numPoints() const
 {
     return M_numPoints;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt &
-RegionMesh<GEOSHAPE, MC>::numPoints()
+RegionMesh<GeoShapeType, MCType>::numPoints()
 {
     return M_numPoints;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::storedPoints() const
+RegionMesh<GeoShapeType, MCType>::storedPoints() const
 {
     return pointList.size();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::storedBPoints() const
+RegionMesh<GeoShapeType, MCType>::storedBPoints() const
 {
     return _bPoints.size();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::maxNumPoints() const
+RegionMesh<GeoShapeType, MCType>::maxNumPoints() const
 {
     return pointList.maxNumItems();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setMaxNumPoints( UInt const n, bool const setcounter )
+RegionMesh<GeoShapeType, MCType>::setMaxNumPoints( UInt const n, bool const setcounter )
 {
     pointList.setMaxNumItems(n);
     if ( setcounter )
         M_numPoints = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setNumVertices( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setNumVertices( UInt const n )
 {
     M_numVertices = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setNumGlobalVertices( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setNumGlobalVertices( UInt const n )
 {
     M_numGlobalVertices = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setNumBVertices( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setNumBVertices( UInt const n )
 {
     M_numBVertices = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setMaxNumGlobalPoints( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setMaxNumGlobalPoints( UInt const n )
 {
     M_numGlobalPoints = n;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::point_Type &
-RegionMesh<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
+typename RegionMesh<GeoShapeType, MCType>::point_Type &
+RegionMesh<GeoShapeType, MCType>::addPoint( bool const boundary, bool const vertex )
 {
     point_Type aPoint;
     aPoint.setBoundary( boundary );
@@ -2682,10 +2685,10 @@ RegionMesh<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
     return addPoint( aPoint );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::point_Type &
-RegionMesh<GEOSHAPE, MC>::addPoint( point_Type const & p)
+typename RegionMesh<GeoShapeType, MCType>::point_Type &
+RegionMesh<GeoShapeType, MCType>::addPoint( point_Type const & p)
 {
     ASSERT_PRE( pointList.size() < pointList.capacity(), "Point list size exceeded" <<
                 pointList.size() + 1 << " " << pointList.capacity() ) ;
@@ -2703,95 +2706,95 @@ RegionMesh<GEOSHAPE, MC>::addPoint( point_Type const & p)
     return thisPoint;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::point_Type const &
-RegionMesh<GEOSHAPE, MC>::point( UInt const i ) const
+typename RegionMesh<GeoShapeType, MCType>::point_Type const &
+RegionMesh<GeoShapeType, MCType>::point( UInt const i ) const
 {
     ASSERT_BD( i < pointList.size() ) ;
 
     return pointList[ i ];
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::point_Type &
-RegionMesh<GEOSHAPE, MC>::point( UInt const i )
+typename RegionMesh<GeoShapeType, MCType>::point_Type &
+RegionMesh<GeoShapeType, MCType>::point( UInt const i )
 {
     ASSERT_BD( i < pointList.size() ) ;
 
     return pointList[ i ];
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::point_Type const &
-RegionMesh<GEOSHAPE, MC>::boundaryPoint( UInt const i ) const
+typename RegionMesh<GeoShapeType, MCType>::point_Type const &
+RegionMesh<GeoShapeType, MCType>::boundaryPoint( UInt const i ) const
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
     ASSERT_BD( i < _bPoints.size() ) ;
     return *( _bPoints[ i ] );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
-typename RegionMesh<GEOSHAPE, MC>::point_Type &
-RegionMesh<GEOSHAPE, MC>::boundaryPoint( UInt const i )
+typename RegionMesh<GeoShapeType, MCType>::point_Type &
+RegionMesh<GeoShapeType, MCType>::boundaryPoint( UInt const i )
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
     ASSERT_BD( i < _bPoints.size() ) ;
     return *( _bPoints[ i ] );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numBPoints() const
+RegionMesh<GeoShapeType, MCType>::numBPoints() const
 {
     return M_numBPoints;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::setNumBPoints( UInt const n )
+RegionMesh<GeoShapeType, MCType>::setNumBPoints( UInt const n )
 {
     M_numBPoints = n;
     _bPoints.reserve( n );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numVertices() const
+RegionMesh<GeoShapeType, MCType>::numVertices() const
 {
     return M_numVertices;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numGlobalVertices() const
+RegionMesh<GeoShapeType, MCType>::numGlobalVertices() const
 {
     return M_numGlobalVertices;
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::numBVertices() const
+RegionMesh<GeoShapeType, MCType>::numBVertices() const
 {
     return M_numBVertices;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt &
-RegionMesh<GEOSHAPE, MC>::numBVertices()
+RegionMesh<GeoShapeType, MCType>::numBVertices()
 {
     return M_numBVertices;
 }
 
 // *************** GENERAL *******************
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline std::ostream &
-RegionMesh<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
+RegionMesh<GeoShapeType, MCType>::showMe( bool verbose, std::ostream & out ) const
 {
     out << "**************************************************" << std::endl;
     out << "**************************************************" << std::endl;
@@ -2833,9 +2836,9 @@ RegionMesh<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
 
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline int
-RegionMesh<GEOSHAPE, MC>::check( int level, bool const fix, bool verb, std::ostream & out )
+RegionMesh<GeoShapeType, MCType>::check( int level, bool const fix, bool verb, std::ostream & out )
 {
     verb = verb && ( M_comm.MyPID() == 0 );
     int severity = 0;
@@ -3007,10 +3010,10 @@ RegionMesh<GEOSHAPE, MC>::check( int level, bool const fix, bool verb, std::ostr
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 UInt
-RegionMesh<GEOSHAPE, MC>::faceElement( UInt const i, UInt const Pos ) const
+RegionMesh<GeoShapeType, MCType>::faceElement( UInt const i, UInt const Pos ) const
 {
     ASSERT_PRE( i < faceList.size(), "Not enough faces stored" ) ;
     ASSERT_PRE( Pos <= 1 , "Wrong position (0 or 1)" ) ;
@@ -3024,10 +3027,10 @@ RegionMesh<GEOSHAPE, MC>::faceElement( UInt const i, UInt const Pos ) const
     }
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 UInt
-RegionMesh<GEOSHAPE, MC>::faceElement( facet_Type const & f, UInt const Pos ) const
+RegionMesh<GeoShapeType, MCType>::faceElement( facet_Type const & f, UInt const Pos ) const
 {
     ASSERT_BD( ! faceList.empty() ) ;
     ASSERT_PRE( Pos <= 1 , "Wrong position (0 or 1)" );
@@ -3042,106 +3045,106 @@ RegionMesh<GEOSHAPE, MC>::faceElement( facet_Type const & f, UInt const Pos ) co
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 void
-RegionMesh<GEOSHAPE, MC>::setLinkSwitch( std::string const & _s )
+RegionMesh<GeoShapeType, MCType>::setLinkSwitch( std::string const & _s )
 {
     ASSERT0( switches.set( _s ), std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 void
-RegionMesh<GEOSHAPE, MC>::unsetLinkSwitch( std::string const & _s )
+RegionMesh<GeoShapeType, MCType>::unsetLinkSwitch( std::string const & _s )
 {
     ASSERT0( switches.unset( _s ), std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::getLinkSwitch( std::string const & _s ) const
+RegionMesh<GeoShapeType, MCType>::getLinkSwitch( std::string const & _s ) const
 {
     return switches.test( _s );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::hasInternalFaces() const
+RegionMesh<GeoShapeType, MCType>::hasInternalFaces() const
 {
     return faceList.size() > M_numBFaces;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::hasInternalEdges() const
+RegionMesh<GeoShapeType, MCType>::hasInternalEdges() const
 {
     return edgeList.size() > M_numBEdges;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::hasEdges() const
+RegionMesh<GeoShapeType, MCType>::hasEdges() const
 {
     return ! edgeList.empty();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::hasFaces() const
+RegionMesh<GeoShapeType, MCType>::hasFaces() const
 {
     return ! faceList.empty();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::isVertex( point_Type const & p ) const
+RegionMesh<GeoShapeType, MCType>::isVertex( point_Type const & p ) const
 {
     return Flag::testOneSet(p.flag(),EntityFlags::VERTEX);
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::isVertex( UInt const & id ) const
+RegionMesh<GeoShapeType, MCType>::isVertex( UInt const & id ) const
 {
     return isVertex(pointList[id]);
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::isBoundaryPoint( UInt const & id ) const
+RegionMesh<GeoShapeType, MCType>::isBoundaryPoint( UInt const & id ) const
 {
     return point( id ).boundary();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::isBoundaryPoint( point_Type const & p ) const
+RegionMesh<GeoShapeType, MCType>::isBoundaryPoint( point_Type const & p ) const
 {
     return p.boundary();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::isBoundaryFace( UInt const & id ) const
+RegionMesh<GeoShapeType, MCType>::isBoundaryFace( UInt const & id ) const
 {
     return this->faceList[id].boundary();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::localFacetId( UInt const elemId, UInt const locF ) const
+RegionMesh<GeoShapeType, MCType>::localFacetId( UInt const elemId, UInt const locF ) const
 {
     ASSERT_PRE( !M_ElemToFacet.empty(), "Element to Facet array not  set" );
     ASSERT_BD( elemId < numElements() );
@@ -3149,18 +3152,18 @@ RegionMesh<GEOSHAPE, MC>::localFacetId( UInt const elemId, UInt const locF ) con
     return M_ElemToFacet.operator() ( locF, elemId );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline UInt
-RegionMesh<GEOSHAPE, MC>::localFaceId( UInt const volId, UInt const locF ) const
+RegionMesh<GeoShapeType, MCType>::localFaceId( UInt const volId, UInt const locF ) const
 {
     ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::localFaceId, It is not possible to use this method with 2D and 1D geometries.");
     return localFacetId( volId, locF );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 UInt
-RegionMesh<GEOSHAPE, MC>::localRidgeId(threeD_Type,  UInt const elemId, UInt const locR )
+RegionMesh<GeoShapeType, MCType>::localRidgeId(threeD_Type,  UInt const elemId, UInt const locR )
 const
 {
     ASSERT_PRE( !M_ElemToRidge.empty(), "Volume to Edges array not  set" );
@@ -3169,24 +3172,24 @@ const
     return M_ElemToRidge( locR, elemId );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline
 bool
-RegionMesh<GEOSHAPE, MC>::isFullEdge( UInt const & id ) const
+RegionMesh<GeoShapeType, MCType>::isFullEdge( UInt const & id ) const
 {
     return edgeList.size() > id;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 bool
-RegionMesh<GEOSHAPE, MC>::isFullFace( UInt const & id ) const
+RegionMesh<GeoShapeType, MCType>::isFullFace( UInt const & id ) const
 {
     return faceList.size() > id;
 }
 
-template <typename GEOSHAPE, typename MC>
-typename RegionMesh<GEOSHAPE, MC>::facet_Type&
-RegionMesh<GEOSHAPE, MC>::boundaryFacet( oneD_Type, const UInt& i )
+template <typename GeoShapeType, typename MCType>
+typename RegionMesh<GeoShapeType, MCType>::facet_Type&
+RegionMesh<GeoShapeType, MCType>::boundaryFacet( oneD_Type, const UInt& i )
 {
         ASSERT_BD(i<2);
         return point(i*(numPoints()-1));
@@ -3197,9 +3200,9 @@ RegionMesh<GEOSHAPE, MC>::boundaryFacet( oneD_Type, const UInt& i )
  *******************************************************************************/
 
 // Forward Declarations
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 void
-RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verb, UInt ee, bool renumber )
+RegionMesh<GeoShapeType, MCType>::updateElementRidges(threeD_Type, bool ce, bool verb, UInt ee, bool renumber )
 {
     bool verbose = verb && ( M_comm.MyPID() == 0 );
 
@@ -3216,7 +3219,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verb, U
 
     renumber=renumber && ce && !  this->ridgeList().empty();
     if ( ce && ee == 0 )
-        ee = M_numEdges > M_numBEdges ? M_numEdges : ( GEOSHAPE::S_numFaces / 2 - 1 ) * numVolumes() + M_numBFaces / 2 + numVertices();
+        ee = M_numEdges > M_numBEdges ? M_numEdges : ( GeoShapeType::S_numFaces / 2 - 1 ) * numVolumes() + M_numBFaces / 2 + numVertices();
 
 
     if ( ce )
@@ -3230,7 +3233,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verb, U
 
     UInt elemLocalID, i1, i2;
     std::pair<BareEdge, bool> _edge;
-    GEOSHAPE ele;
+    GeoShapeType ele;
     facetShape_Type bele;
     // First We check if we have already Edges stored
     if ( ! ridgeList().empty() )
@@ -3307,7 +3310,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verb, U
             M_ElemToRidge.operator() ( j, elemLocalID ) = e.first;
             if ( ce && e.second )
             {
-                for ( UInt k = 0; k < 2 + elementShape_Type::S_numPointsPerEdge; k++ )
+                for ( UInt k = 0; k < 2 + geoShape_Type::S_numPointsPerEdge; k++ )
                 {
                     UInt inode = ele.edgeToPoint(j, k);
                     edg.setPoint( k, elemIt->point( inode ) );
@@ -3369,9 +3372,9 @@ RegionMesh<GEOSHAPE, MC>::updateElementRidges(threeD_Type, bool ce, bool verb, U
 // Update element faces
 //
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 void
-RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, bool verbose, UInt ef )
+RegionMesh<GeoShapeType, MCType>::updateElementFacets( bool cf, bool verbose, UInt ef )
 {
     verbose = verbose && ( M_comm.MyPID() == 0 );
 
@@ -3387,7 +3390,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, bool verbose, UInt ef )
     // If the counter is set we trust it! Otherwise we use Euler formula
 
     if ( cf && ef == 0 )
-        ef = numFacets() > numBoundaryFacets() ? numFacets() : ( elementShape_Type::S_numFacets * numElements() + numBoundaryFacets() ) / 2;
+        ef = numFacets() > numBoundaryFacets() ? numFacets() : ( geoShape_Type::S_numFacets * numElements() + numBoundaryFacets() ) / 2;
 
     ASSERT( cf || numFacets() > 0 , "Mesh is not properly set!" );
 
@@ -3407,7 +3410,7 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, bool verbose, UInt ef )
     UInt elemLocalID;
     std::pair<bareFacet_type, bool>_facet;
 
-    GEOSHAPE ele;
+    GeoShapeType ele;
     // If we have all facets and the facets store all adjacency info
     // everything is easier
     if ( (facetList().size() == numFacets()) & getLinkSwitch( "FACETS_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_FACETS" ) )
@@ -3540,42 +3543,42 @@ RegionMesh<GEOSHAPE, MC>::updateElementFacets( bool cf, bool verbose, UInt ef )
         std::cout << " done." << std::endl;
 }
 
-template <typename GEOSHAPE, typename MC>
-void RegionMesh<GEOSHAPE, MC>::updateElementFaces( bool createFaces, const bool verbose, UInt estimateFaceNumber)
+template <typename GeoShapeType, typename MCType>
+void RegionMesh<GeoShapeType, MCType>::updateElementFaces( bool createFaces, const bool verbose, UInt estimateFaceNumber)
 {
     ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::updateElementFaces, It is not possible to use this method with 2D and 1D geometries.");
     updateElementFacets( createFaces , verbose, estimateFaceNumber );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 void
-RegionMesh<GEOSHAPE, MC>::cleanElementFacets()
+RegionMesh<GeoShapeType, MCType>::cleanElementFacets()
 {
     M_ElemToFacet.clearArray();
 
     unsetLinkSwitch( "HAS_ELEMENT_TO_FACETS" );
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 void
-RegionMesh<GEOSHAPE, MC>::cleanElementFaces()
+RegionMesh<GeoShapeType, MCType>::cleanElementFaces()
 {
     ASSERT_PRE(S_geoDimensions == 3, "RegionMesh::cleanElementFaces(), It is not possible to use this method with 2D and 1D geometries.");
     cleanElementFacets();
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 void
-RegionMesh<GEOSHAPE, MC>::cleanElementRidges()
+RegionMesh<GeoShapeType, MCType>::cleanElementRidges()
 {
     M_ElemToRidge.clearArray();
     unsetLinkSwitch( "HAS_ELEMENT_TO_RIDGES" );
 }
 
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline void
-RegionMesh<GEOSHAPE, MC>::
+RegionMesh<GeoShapeType, MCType>::
 getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& list_pts )
 {
     for ( UInt i = 0; i < M_numPoints; i++ )
@@ -3589,16 +3592,16 @@ getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& li
 }
 
 
-template <typename GEOSHAPE, typename MC>
-inline MeshUtility::MeshTransformer<RegionMesh<GEOSHAPE, MC>, MC > &
-RegionMesh<GEOSHAPE, MC>::meshTransformer()
+template <typename GeoShapeType, typename MCType>
+inline MeshUtility::MeshTransformer<RegionMesh<GeoShapeType, MCType>, MCType > &
+RegionMesh<GeoShapeType, MCType>::meshTransformer()
 {
     return this->M_meshTransformer;
 }
 
-template <typename GEOSHAPE, typename MC>
+template <typename GeoShapeType, typename MCType>
 inline Epetra_Comm const &
-RegionMesh<GEOSHAPE, MC>::comm() const
+RegionMesh<GeoShapeType, MCType>::comm() const
 {
     return this->M_comm;
 }
