@@ -15,6 +15,7 @@ SET(mesh_HEADERS
   mesh/MeshElement.hpp
   mesh/MeshElementBare.hpp
   mesh/RegionMesh1DBuilders.hpp
+  mesh/RegionMesh1DStructured.hpp
   mesh/MeshChecks.hpp
   mesh/MeshElementMarked.hpp
   mesh/RegionMesh2DStructured.hpp
