@@ -67,7 +67,7 @@ PreconditionerSIMPLE::createParametersList( list_Type&         list,
                                             const std::string& section,
                                             const std::string& subsection )
 {
-    bool verbose( M_comm->MyPID() == 0 );
+    const bool verbose( M_comm->MyPID() == 0 );
 
     bool displayList = dataFile( ( section + "/displayList" ).data(), false);
 
@@ -114,18 +114,16 @@ PreconditionerSIMPLE::buildPreconditioner( matrixPtr_Type& oper )
     // Make sure that the preconditioner is reset
     this->resetPreconditioner();
 
-    bool verbose( false );
-    if ( M_comm->MyPID() == 0 ) verbose = true;
+    const bool verbose( M_comm->MyPID() == 0 );
 
     std::vector<UInt> blockNumRows( 2, 0 );
     blockNumRows[0] = M_velocityBlockSize;
     blockNumRows[1] = M_pressureBlockSize;
     std::vector<UInt> blockNumColumns( blockNumRows );
 
-    bool inversed( true );
-    bool notInversed( false );
-    //bool transposed( true );
-    bool notTransposed( false );
+    const bool inversed( true );
+    const bool notInversed( false );
+    const bool notTransposed( false );
 
     map_Type map( oper->map() );
     //oper->spy( "A" );

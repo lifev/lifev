@@ -102,7 +102,7 @@ PreconditionerPCD::createParametersList( list_Type&         list,
                                          const std::string& section,
                                          const std::string& subsection )
 {
-    bool verbose( M_comm->MyPID() == 0 );
+    const bool verbose( M_comm->MyPID() == 0 );
 
     bool displayList = dataFile( ( section + "/displayList" ).data(), false );
 
@@ -196,8 +196,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         exit( -1 );
     }
 
-    bool verbose( false );
-    if ( M_comm->MyPID() == 0 ) verbose = true;
+    const bool verbose( M_comm->MyPID() == 0 );
 
     // Make sure that the preconditioner is reset
     this->resetPreconditioner();
@@ -209,10 +208,9 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     VectorBlockStructure vectorStructure;
     vectorStructure.setBlockStructure( blockNumColumns );
 
-    bool inversed( true );
-    bool notInversed( false );
-    //bool transposed( true );
-    bool notTransposed( false );
+    const bool inversed( true );
+    const bool notInversed( false );
+    const bool notTransposed( false );
 
     map_Type map( oper->map() );
     map_Type velocityMap( M_uFESpace->map() );
@@ -981,7 +979,7 @@ PreconditionerPCD::computeNormalVectors()
 PreconditionerPCD::vectorPtr_Type
 PreconditionerPCD::computeRobinCoefficient()
 {
-    if( M_normalVectors.get() == 0 )
+    //if( M_normalVectors.get() == 0 )
     {
         this->computeNormalVectors();
     }
@@ -1120,8 +1118,7 @@ PreconditionerPCD::setBCByBoundaryClassification( matrixPtr_type Ap, UInt ApOffs
                                                   matrixPtr_type Fp, UInt FpOffset,
                                                   matrixPtr_type Mp, UInt MpOffset )
 {
-    bool verbose( false );
-    if ( M_comm->MyPID() == 0 ) verbose = true;
+    const bool verbose( M_comm->MyPID() == 0 );
 
     std::string boundaryType( "none" );
     Real indicator( 0.0 );
