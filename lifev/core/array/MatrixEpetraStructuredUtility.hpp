@@ -887,7 +887,7 @@ void createMatrixFromBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataT
                              const MapEpetra& rowMap,
                              bool closeMatrix=true )
 {
-    createMatrixFromBlock( *srcBlock, *destMatrix, rowMap, closeMatrix );
+    createMatrixFromBlock( *srcBlock, destMatrix, rowMap, closeMatrix );
 }
 
 //! Create a block view using an unstructured matrix and block structure informations
@@ -941,7 +941,7 @@ fillBlockView( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
                      blockStructure.columnBlockFirstIndex( columnIndex ),
                      blockStructure.blockNumRows( rowIndex ),
                      blockStructure.blockNumColumns( columnIndex ),
-                     matrixPtr->matrixPtr().get() );
+                     matrixPtr.get() );
 }
 
 //! Fill a block view using an unstructured matrix and block structure informations
