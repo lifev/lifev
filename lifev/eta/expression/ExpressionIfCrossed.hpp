@@ -42,7 +42,7 @@
 
 #include <lifev/eta/expression/ExpressionBase.hpp>
 
-#include <lifev/core/fem/ETFESpace.hpp>
+#include <lifev/eta/fem/ETFESpace.hpp>
 
 #include <boost/shared_ptr.hpp>
 
