@@ -48,9 +48,14 @@
 #include <lifev/eta/expression/ExpressionProduct.hpp>
 #include <lifev/eta/expression/ExpressionDot.hpp>
 #include <lifev/eta/expression/ExpressionDivision.hpp>
+#include <lifev/eta/expression/ExpressionEmult.hpp>
+#include <lifev/eta/expression/ExpressionExtract1.hpp>
+#include <lifev/eta/expression/ExpressionExtract2.hpp>
+#include <lifev/eta/expression/ExpressionTranspose.hpp>
 
 #include <lifev/eta/expression/ExpressionScalar.hpp>
 #include <lifev/eta/expression/ExpressionVector.hpp>
+#include <lifev/eta/expression/ExpressionMatrix.hpp>
 
 #include <lifev/eta/expression/ExpressionInterpolateValue.hpp>
 #include <lifev/eta/expression/ExpressionInterpolateGradient.hpp>
@@ -77,9 +82,14 @@
 #include <lifev/eta/expression/EvaluationProduct.hpp>
 #include <lifev/eta/expression/EvaluationDot.hpp>
 #include <lifev/eta/expression/EvaluationDivision.hpp>
+#include <lifev/eta/expression/EvaluationEmult.hpp>
+#include <lifev/eta/expression/EvaluationExtract1.hpp>
+#include <lifev/eta/expression/EvaluationExtract2.hpp>
+#include <lifev/eta/expression/EvaluationTranspose.hpp>
 
 #include <lifev/eta/expression/EvaluationScalar.hpp>
 #include <lifev/eta/expression/EvaluationVector.hpp>
+#include <lifev/eta/expression/EvaluationMatrix.hpp>
 
 #include <lifev/eta/expression/EvaluationInterpolateValue.hpp>
 #include <lifev/eta/expression/EvaluationInterpolateGradient.hpp>
@@ -129,6 +139,42 @@ private:
 };
 
 // \cond
+
+// Specialized for Extract1
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<
+    ExpressionExtract1<Expression>
+    ,testDim
+    ,solutionDim
+    ,spaceDim>
+{
+public:
+    typedef EvaluationExtract1<
+                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
+                    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for Extract2
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<
+    ExpressionExtract2<Expression>
+    ,testDim
+    ,solutionDim
+    ,spaceDim>
+{
+public:
+    typedef EvaluationExtract2<
+                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
+                    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+    };
+
 // Specialized for phi_i
 template<UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation<ExpressionPhiI,testDim,solutionDim,spaceDim>
@@ -194,6 +240,24 @@ private:
 	ExpressionToEvaluation();
 	~ExpressionToEvaluation();
 };
+
+  // Specialized for transpose
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<
+    ExpressionTranspose<Expression>
+    ,testDim
+    ,solutionDim
+    ,spaceDim>
+{
+public:
+    typedef EvaluationTranspose<
+                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
+                    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+    };
+
 
 // Specialized for scalar
 template<UInt testDim, UInt solutionDim, UInt spaceDim>
@@ -334,6 +398,20 @@ private:
 	ExpressionToEvaluation();
 	~ExpressionToEvaluation();
 };
+
+// Specialized for a element-wise multiplication
+template<typename ExpressionL, typename ExpressionR, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionEmult<ExpressionL,ExpressionR>,testDim,solutionDim,spaceDim>
+{
+public:
+    typedef EvaluationEmult<
+                typename ExpressionToEvaluation<ExpressionL,testDim,solutionDim,spaceDim>::evaluation_Type
+               ,typename ExpressionToEvaluation<ExpressionR,testDim,solutionDim,spaceDim>::evaluation_Type
+            > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+    };
 
 // Specialized for a division
 template<typename ExpressionL, typename ExpressionR, UInt testDim, UInt solutionDim, UInt spaceDim>

@@ -332,6 +332,59 @@ public:
         return scalarProduct;
     }
 
+
+    //! Element-wise multiplication between matrices
+    /*!
+    @param matrix second operand
+    @return resultant matrix
+    */
+    MatrixSmall<Dim1, Dim2> emult ( MatrixSmall<Dim1, Dim2> const & matrix ) const
+    {
+        MatrixSmall<Dim1, Dim2> resultantMatrix ;
+        for ( UInt i = 0; i < Dim1; i++ )
+            for ( UInt j = 0; j < Dim2; j++ )
+                resultantMatrix.M_coords[ i ][ j ] = M_coords[ i ][ j ] * matrix.M_coords[ i ][ j ];
+        return resultantMatrix;
+	}
+
+
+    //! Extraction of a row
+    /*!
+    @param index of the row to be extracted
+    @return extracted row
+    */
+    VectorSmall<Dim2> extract ( UInt const & i ) const
+    {
+        VectorSmall<Dim2> row;
+        for ( UInt j = 0; j < Dim2; j++ )
+            row[j] = M_coords[i][j];
+        return( row );
+	}
+
+    //! Extraction of a component
+    /*!
+    @param index of the component to be extracted
+    @return extracted component
+    */
+    Real extract ( UInt const & i, UInt const & j ) const
+        {
+            return( M_coords[i][j] );
+        }
+    
+    //! Transpose of a matrix
+    /*!
+    @return transposed matrix
+    */
+    MatrixSmall<Dim2, Dim1> transpose () const
+    {
+        MatrixSmall<Dim2, Dim1> resultantMatrix ;
+        for (int j=0; j < Dim2; ++j)
+            for(int i=0; i < Dim1; ++i)
+                resultantMatrix.M_coords[ j ][ i ] = M_coords[ i ][ j ];
+
+        return (resultantMatrix);
+	}
+
     //! Norm value
     /*!
     @return norm value

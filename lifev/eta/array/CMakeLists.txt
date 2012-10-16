@@ -5,8 +5,12 @@ SET(array_HEADERS
   array/OperationSmallAddition.hpp
   array/OperationSmallDivision.hpp
   array/OperationSmallDot.hpp
+  array/OperationSmallEmult.hpp
+  array/OperationSmallExtract.hpp
   array/OperationSmallProduct.hpp
   array/OperationSmallSubstraction.hpp
+  array/OperationSmallTranspose.hpp
+  array/VectorSmall.hpp
 CACHE INTERNAL "")
 
 SET(array_SOURCES ""

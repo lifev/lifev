@@ -6,6 +6,9 @@ SET(expression_HEADERS
 	expression/EvaluationDot.hpp
 	expression/EvaluationDphiI.hpp
 	expression/EvaluationDphiJ.hpp
+	expression/EvaluationEmult.hpp
+	expression/EvaluationExtract1.hpp
+	expression/EvaluationExtract2.hpp
 	expression/EvaluationFunctor.hpp
 	expression/EvaluationHK.hpp
 	expression/EvaluationIfCrossed.hpp
@@ -19,6 +22,7 @@ SET(expression_HEADERS
 	expression/EvaluationNormal.hpp
 	expression/EvaluationScalar.hpp
 	expression/EvaluationSubstraction.hpp
+	expression/EvaluationTranspose.hpp
 	expression/EvaluationVector.hpp
 	expression/ExpressionAddition.hpp
 	expression/ExpressionBase.hpp
@@ -28,6 +32,9 @@ SET(expression_HEADERS
 	expression/ExpressionDot.hpp
 	expression/ExpressionDphiI.hpp
 	expression/ExpressionDphiJ.hpp
+	expression/ExpressionEmult.hpp
+	expression/ExpressionExtract1.hpp
+	expression/ExpressionExtract2.hpp
 	expression/ExpressionFunctor.hpp
 	expression/ExpressionHK.hpp
 	expression/ExpressionIfCrossed.hpp
@@ -40,7 +47,8 @@ SET(expression_HEADERS
 	expression/ExpressionNormal.hpp
 	expression/ExpressionProduct.hpp
 	expression/ExpressionScalar.hpp
-	expression/ExpressionSubstraction.hpp
+	expression/ExpressionSubstraction.hpp	
+	expression/ExpressionTranspose.hpp
 	expression/ExpressionToEvaluation.hpp
 	expression/ExpressionVector.hpp
 	expression/Integrate.hpp
@@ -70,6 +78,9 @@ SET(expression_SOURCES ""
 	expression/ExpressionPosition.cpp
 	expression/ExpressionNormal.cpp
 	expression/ExpressionScalar.cpp
+	expression/EvaluationPhiI.cpp
+	expression/EvaluationPhiJ.cpp
+	expression/EvaluationScalar.cpp
 CACHE INTERNAL "")
 
 
