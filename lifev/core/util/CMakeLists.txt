@@ -1,5 +1,4 @@
 SET(util_HEADERS
-  util/CBlas.hpp
   util/FactoryTypeInfo.hpp
   util/Switch.hpp
   util/EncoderBase64.hpp
@@ -8,7 +7,6 @@ SET(util_HEADERS
   util/LifeAssertSmart.hpp
   util/Parser.hpp
   util/FactorySingleton.hpp
-  util/CLapack.hpp
   util/StringData.hpp
   util/ParserSpiritGrammar.hpp
   util/FortranWrapper.hpp
