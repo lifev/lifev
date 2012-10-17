@@ -106,7 +106,9 @@ public:
     //@{
 
     //! Empty Constructor.
-    DarcyData ();
+    DarcyData ():
+        M_verbose(0)
+    {}
 
     //! Constructor using a data file.
     /*!
@@ -272,12 +274,36 @@ public:
 
     //@}
 
-
 private:
 
-    //! Data containers for time and mesh
+    //! @name Private Constructors
+    //@{
+
+    //! Inhibited copy constructor.
+    DarcyData ( const darcyData_Type & );
+
+    //@}
+
+    //! @name Private Operators
+    //@{
+
+    //! Inhibited assign operator.
+    darcyData_Type& operator= ( const darcyData_Type& );
+
+    //@}
+
+    //! Inhibited assign operator.
+
+    //! Data GetPot.
     dataPtr_Type M_data;
+
+    //! Section in GetPot file.
+    std::string M_section;
+
+    //! Data container for time.
     timeDataPtr_Type M_time;
+
+    //! Data container for mesh.
     meshDataPtr_Type M_mesh;
 
     //! Teuchos paramter list for linear algebra.
@@ -289,56 +315,14 @@ private:
     //! Section in the parameter list for preconditioner.
     std::string M_precondSection;
 
-    //! Miscellaneous
+    //! Output verbose.
     UInt M_verbose;
-    std::string M_section;
 
 };
 
 // ===================================================
 // Constructors
 // ===================================================
-
-template < typename MeshType >
-DarcyData < MeshType >::
-DarcyData ():
-        // Miscellaneous
-        M_verbose       ( static_cast<UInt>(0) )
-{}
-
-// Copy constructor
-template < typename MeshType >
-DarcyData < MeshType >::
-DarcyData ( const darcyData_Type &darcyData ):
-        // Data containers
-        M_data ( darcyData.M_data ),
-        M_time ( darcyData.M_time ),
-        M_mesh ( darcyData.M_mesh ),
-        // Miscellaneous
-        M_verbose ( darcyData.M_verbose ),
-        M_section ( darcyData.M_section )
-{}
-
-// Overloading of the operator =
-template < typename MeshType >
-DarcyData < MeshType >&
-DarcyData < MeshType >::
-operator= ( const darcyData_Type& darcyData )
-{
-    // Avoid auto-copy
-    if ( this != &darcyData )
-    {
-        // Data containers
-        M_data = darcyData.M_data;
-        M_time = darcyData.M_time;
-        M_mesh = darcyData.M_mesh;
-        // Mescellaneous
-        M_verbose = darcyData.M_verbose;
-    }
-
-    return *this;
-} // operator=
-
 
 // External set up method
 template < typename MeshType >
