@@ -958,8 +958,12 @@ fillBlockView( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
                const MatrixBlockStructure& blockStructure,
                const UInt& rowIndex,
                const UInt& columnIndex,
-               boost::shared_ptr< MatrixEpetraStructuredView<DataType> > blockView )
+               boost::shared_ptr< MatrixEpetraStructuredView<DataType> >& blockView )
 {
+    if( blockView.get() == 0 )
+    {
+        blockView.reset( new MatrixEpetraStructuredView<DataType> );
+    }
     fillBlockView( matrixPtr, blockStructure, rowIndex, columnIndex, *blockView );
 }
 
