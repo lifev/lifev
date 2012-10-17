@@ -227,7 +227,8 @@ protected:
                   const VectorBlockStructure& blockStructure,
                   const UInt& blockIndex,
                   const bool useInverse   = false,
-                  const bool useTranspose = false );
+                  const bool useTranspose = false,
+                  const bool buildPreconditioner = true );
 
     //@}
 

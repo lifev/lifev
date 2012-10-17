@@ -221,13 +221,17 @@ PreconditionerComposition::pushBack( matrixPtr_Type embeddedA,
                                      const VectorBlockStructure& blockStructure,
                                      const UInt& blockIndex,
                                      const bool useInverse,
-                                     const bool useTranspose )
+                                     const bool useTranspose,
+                                     const bool buildPreconditioner )
 {
     // Add the operator
     M_precBaseOperators.push_back( embeddedA );
 
     // Build the preconditioner
-    preconditioner->buildPreconditioner( embeddedA );
+    if( buildPreconditioner )
+    {
+        preconditioner->buildPreconditioner( embeddedA );
+    }
     operatorPtr_Type precOper( preconditioner->preconditionerPtr() );
 
     // Wrap the preconditioner in a ConfinedOperator
