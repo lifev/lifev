@@ -39,6 +39,15 @@
 #ifndef _DATADARCY_H_
 #define _DATADARCY_H_ 1
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <lifev/core/mesh/MeshData.hpp>
 
 #include <lifev/core/fem/TimeData.hpp>
@@ -68,6 +77,12 @@ public:
 
     //! Shared pointer for the data.
     typedef boost::shared_ptr < data_Type > dataPtr_Type;
+
+    //! Teuchos pareameter list.
+    typedef Teuchos::ParameterList paramList_Type;
+
+    //! Shared pointer for the Teuchos parameter list.
+    typedef Teuchos::RCP< paramList_Type > paramListPtr_Type;
 
     //! Typedef for the time data.
     typedef TimeData timeData_Type;
@@ -132,6 +147,21 @@ public:
     // Set methods
     //! @name Set methods
     //@{
+
+    //! Set Teuchos parameter list for linear algebra.
+    /*!
+      @param paramList Teuchos RCP with the parameter list.
+      @param linearSolver Section of the linear solver in the paramList.
+      @param precond Section of the preconditioner in the paramList.
+    */
+    void setLinearAlgebraList ( const paramListPtr_Type& linearAlgebraList,
+                                const std::string& linearSolver = "Linear Solver",
+                                const std::string& precond = "Preconditioner" )
+    {
+        M_linearAlgebraList = linearAlgebraList;
+        M_linearSolverSection = M_linearSolver;
+        M_precondSection = precond;
+    }
 
     //! Set data time container.
     /*!
@@ -221,6 +251,23 @@ public:
         return M_mesh;
     }
 
+    //! Get Teuchos parameter list for the linear solver.
+    /*!
+      @return Teuchos RCP with the parameter list for the linear solver.
+    */
+    const paramListPtr_Type& linearSolverList () const
+    {
+        return M_linearAlgebraList->sublist( M_linearSolverSection );
+    }
+    //! Get Teuchos parameter list for the preconditioner.
+    /*!
+      @return Teuchos RCP with the parameter list for the preconditioner.
+    */
+    const paramListPtr_Type& preconditionerList () const
+    {
+        return M_linearAlgebraList->sublist( M_precondSection );
+    }
+
     //@}
 
 
@@ -230,6 +277,15 @@ private:
     dataPtr_Type M_data;
     timeDataPtr_Type M_time;
     meshDataPtr_Type M_mesh;
+
+    //! Teuchos paramter list for linear algebra.
+    paramListPtr_Type M_linearAlgebraList;
+
+    //! Section in the parameter list for linear solver.
+    std::string M_linearSolverSection;
+
+    //! Section in the parameter list for preconditioner.
+    std::string M_precondSection;
 
     //! Miscellaneous
     UInt M_verbose;
