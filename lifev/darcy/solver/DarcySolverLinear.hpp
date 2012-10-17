@@ -45,9 +45,6 @@
 #include <Epetra_LAPACK.h>
 #include <Epetra_BLAS.h>
 
-#include <Teuchos_XMLParameterListHelpers.hpp>
-#include <Teuchos_RCP.hpp>
-
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
@@ -937,31 +934,19 @@ void
 DarcySolverLinear < MeshType >::
 setup ()
 {
-
-    const typename data_Type::data_Type& dataFile = *( M_data->dataFilePtr() );
-
-    // Setup the teuchos parameter list for the linear solver.
-    const std::string xmlSection = M_data->section() + "/xml";
-    const std::string xmlFolder = dataFile( ( xmlSection + "/folder" ).data(), "./" );
-    const std::string xmlFile = dataFile( ( xmlSection + "/file" ).data(), "parameterList.xml" );
-
-    Teuchos::RCP< Teuchos::ParameterList > parameterList = Teuchos::rcp ( new Teuchos::ParameterList );
-    parameterList = Teuchos::getParametersFromXmlFile( xmlFolder + xmlFile );
-
     // Setup the linear solver.
-    M_linearSolver.setParameters( parameterList->sublist("Linear Solver") );
+    M_linearSolver.setParameters( M_data->linearSolverList() );
     M_linearSolver.setCommunicator ( M_displayer->comm() );
 
     // Choose the preconditioner type.
-    const std::string precType = parameterList->sublist( "Preconditioner" ).get( "prectype", "Ifpack" );
+    const std::string precType = M_data->preconditionerList().get( "prectype", "Ifpack" );
 
     // Create a preconditioner object.
     M_prec.reset ( PRECFactory::instance().createObject( precType ) );
     ASSERT( M_prec.get() != 0, "DarcySolverLinear : Preconditioner not set" );
 
     // Set the data for the preconditioner.
-    M_prec->setParametersList( parameterList->sublist( "Preconditioner" ).sublist( precType ) );
-
+    M_prec->setParametersList( M_data->preconditionerList().sublist( precType ) );
 } // setup
 
 // Solve the linear system.
