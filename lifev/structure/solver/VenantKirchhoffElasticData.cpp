@@ -133,8 +133,10 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
     M_density   = dataFile( ( section + "/physics/density"   ).data(), 1. );
     M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
 
-
     UInt materialsNumber = dataFile.vector_variable_size( ( section + "/physics/material_flag" ).data() );
+
+    ASSERT( materialsNumber, "Set the materrial_flag variable in [solid]/physics");
+
     if ( materialsNumber == 0 )
     {
         // If no material is specified in the data file the code assume that there is just one material
