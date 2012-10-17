@@ -257,6 +257,7 @@ public:
     */
     const paramListPtr_Type& linearSolverList () const
     {
+        ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
         return M_linearAlgebraList->sublist( M_linearSolverSection );
     }
     //! Get Teuchos parameter list for the preconditioner.
@@ -265,6 +266,7 @@ public:
     */
     const paramListPtr_Type& preconditionerList () const
     {
+        ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
         return M_linearAlgebraList->sublist( M_precondSection );
     }
 
