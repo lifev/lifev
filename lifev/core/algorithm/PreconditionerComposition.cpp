@@ -235,7 +235,7 @@ PreconditionerComposition::pushBack( matrixPtr_Type embeddedA,
     operatorPtr_Type precOper( preconditioner->preconditionerPtr() );
 
     // Wrap the preconditioner in a ConfinedOperator
-    Operators::ConfinedOperator* confinedOperator = new Operators::ConfinedOperator;
+    Operators::ConfinedOperator* confinedOperator = new Operators::ConfinedOperator( M_comm );
     confinedOperator->setOperator( precOper );
     confinedOperator->setBlockStructure( blockStructure );
     confinedOperator->setBlockIndex( blockIndex );
