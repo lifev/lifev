@@ -167,7 +167,7 @@ factor    = 1
 
 ** # stabilization parameters
 [../ipstab]
-use        = 0                       # boolean telling if the stabilization is added
+use        = 1                       # boolean telling if the stabilization is added
 gammaBeta  = 0.1             # parameter stabilizing the velocity gradient jump
 gammaDiv   = 0.2             # parameter stabilizing the velocity divergence jump
 gammaPress = 0.05             # parameter stabilizing the pressure gradient jump (compressibility)
