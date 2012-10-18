@@ -549,7 +549,7 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
-        if ( flag3 != 0 && Int(mesh1.boundaryFacet(i->first).marker()) != *flag3) continue;
+        if ( flag3 != 0 && Int(mesh1.boundaryFacet(i->first).markerID()) != *flag3) continue;
 
         feBd1.update( mesh1.boundaryFacet( i->first ) );  // Updating facet information on mesh1
         feBd2.update( mesh2.boundaryFacet( i->second ) );  // Updating facet information on mesh2
