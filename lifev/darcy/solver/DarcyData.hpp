@@ -147,9 +147,9 @@ public:
                                 const std::string& precond = "Preconditioner" )
     {
         M_linearAlgebraList = linearAlgebraList;
-        M_linearSolverSection = M_linearSolver;
+        M_linearSolverSection = linearSolver;
         M_precondSection = precond;
-    }
+    } // setLinearAlgebraList
 
     //! Set data time container.
     /*!
@@ -158,7 +158,7 @@ public:
     void setTimeData ( const timeDataPtr_Type& TimeData )
     {
         M_time = TimeData;
-    }
+    } // setTimeData
 
     //! Set mesh container.
     /*!
@@ -167,7 +167,7 @@ public:
     void setMeshData ( const meshDataPtr_Type& MeshData )
     {
         M_mesh = MeshData;
-    }
+    } // setMeshData
 
     // Get methods.
     //! @name Get methods
@@ -177,13 +177,13 @@ public:
     UInt verbose () const
     {
         return M_verbose;
-    }
+    } // verbose
 
     //! Get the main section of the data file.
     std::string section () const
     {
         return M_section;
-    }
+    } // section
 
     //! Get the data file of the problem.
     /*!
@@ -192,7 +192,7 @@ public:
     const dataPtr_Type& dataFilePtr () const
     {
         return M_data;
-    }
+    } // dataFilePtr
 
     //! Get the data file of the problem.
     /*!
@@ -201,7 +201,7 @@ public:
     dataPtr_Type& dataFilePtr ()
     {
         return M_data;
-    }
+    } // dataFilePtr
 
     //! Get data time container.
     /*!
@@ -210,7 +210,7 @@ public:
     const timeDataPtr_Type& dataTimePtr () const
     {
         return M_time;
-    }
+    } // dataTimePtr
 
     //! Get data time container.
     /*!
@@ -219,7 +219,7 @@ public:
     timeDataPtr_Type& dataTimePtr ()
     {
         return M_time;
-    }
+    } // dataTimePtr
 
     //! Get mesh container
     /*!
@@ -228,7 +228,7 @@ public:
     const meshDataPtr_Type& meshDataPtr () const
     {
         return M_mesh;
-    }
+    } // meshDataPtr
 
     //! Get mesh container
     /*!
@@ -237,7 +237,7 @@ public:
     meshDataPtr_Type& meshDataPtr ()
     {
         return M_mesh;
-    }
+    } // meshDataPtr
 
     //! Get Teuchos parameter list for the linear solver.
     /*!
@@ -247,7 +247,8 @@ public:
     {
         ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
         return M_linearAlgebraList->sublist( M_linearSolverSection );
-    }
+    } // linearSolverList
+
     //! Get Teuchos parameter list for the preconditioner.
     /*!
       @return Teuchos RCP with the parameter list for the preconditioner.
@@ -256,7 +257,7 @@ public:
     {
         ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
         return M_linearAlgebraList->sublist( M_precondSection );
-    }
+    } // preconditionerList
 
     //@}
 
