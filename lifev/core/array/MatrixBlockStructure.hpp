@@ -205,10 +205,10 @@ public:
     UInt numColumns() const;
 
     //! Get the rows block structure
-    VectorBlockStructure rowsBlockStructure() const;
+    const VectorBlockStructure& rowsBlockStructure() const;
 
     //! Get the columns block structure
-    VectorBlockStructure columnsBlockStructure() const;
+    const VectorBlockStructure& columnsBlockStructure() const;
 
     //@}
 
