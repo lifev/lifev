@@ -205,13 +205,13 @@ MatrixBlockStructure::numColumns() const
     return M_columnsBlockStructure.totalSize();
 }
 
-VectorBlockStructure
+const VectorBlockStructure&
 MatrixBlockStructure::rowsBlockStructure() const
 {
     return M_rowsBlockStructure;
 }
 
-VectorBlockStructure
+const VectorBlockStructure&
 MatrixBlockStructure::columnsBlockStructure() const
 {
     return M_columnsBlockStructure;
