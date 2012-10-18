@@ -552,9 +552,12 @@ solve ()
     // Reset the right hand side coming from the time advance scheme.
     M_rhsTimeAdvance.reset ( new vector_Type ( this->M_primalField->getFESpace().map() ) );
 
+    // Update the RHS
+    M_timeAdvance->updateRHSFirstDerivative ();
+
     // Put in M_rhsTimeAdvance the contribution for the right hand side coming
     // from the time scheme, without the time step.
-    *M_rhsTimeAdvance = M_timeAdvance->updateRHSFirstDerivative ();
+    *M_rhsTimeAdvance = M_timeAdvance->rhsContributionFirstDerivative ();
 
     // Solve the problem
     darcySolverLinear_Type::solve ();
