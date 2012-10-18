@@ -258,7 +258,7 @@ public:
   //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
   /*!
     @param \f$i\f$ index of the coefficient of the first derivative
-    @returns \f$\betaFirstDerivative\f$
+    @returns beta 
   */
   Real coefficientExtrapolationFirstDerivative(const UInt& i ) const;
   
