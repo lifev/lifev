@@ -40,10 +40,12 @@ namespace LifeV
 namespace Operators
 {
 
-ConfinedOperator::ConfinedOperator():
+ConfinedOperator::ConfinedOperator( boost::shared_ptr<Epetra_Comm> comm ):
         M_oper(),
         M_blockStructure(),
-        M_blockIndex( 0 )
+        M_blockIndex( 0 ),
+        M_comm( comm ),
+        M_map()
 {
 
 }
@@ -71,6 +73,8 @@ void
 ConfinedOperator::setBlockStructure( const blockStructure_Type& blockStructure )
 {
     M_blockStructure.setBlockStructure( blockStructure );
+    int size( (int) blockStructure.totalSize() );
+    M_map.reset( new Epetra_Map( size, 0, *M_comm ) );
 }
 
 void
@@ -86,16 +90,17 @@ ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
 {
     ASSERT( M_oper.get() != 0, "ConfinedOperator::Apply: Error: M_oper pointer is null" );
     ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::Apply: Error: M_structure is not initialized" );
+    ASSERT( X.MyLength() == Y.MyLength(), "ConfinedOperator::Apply: Error: X and Y must have the same length" );
 
     int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
-    Epetra_MultiVector xtmp( M_oper->OperatorRangeMap(), 1 );
-    Epetra_MultiVector ytmp( M_oper->OperatorDomainMap(), 1 );
+    Epetra_MultiVector xtmp( M_oper->OperatorDomainMap(), 1 );
+    Epetra_MultiVector ytmp( M_oper->OperatorRangeMap() , 1 );
 
     // Extract the values from the vector
     const Int* gids         = M_oper->OperatorDomainMap().MyGlobalElements();
     const UInt numMyEntries = M_oper->OperatorDomainMap().NumMyElements();
-    Int lid1 ;
-    Int lid2 ;
+    Int lid1;
+    Int lid2;
     for ( UInt i = 0; i < numMyEntries; ++i )
     {
         lid1 = X.Map().LID( gids[i]+firstIndex );
@@ -127,20 +132,21 @@ ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 {
     ASSERT( M_oper.get() != 0, "ConfinedOperator::ApplyInverse: Error: M_oper pointer is null" );
     ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::ApplyInverse: Error: M_structure is not initialized" );
+    ASSERT( X.MyLength() == Y.MyLength(), "ConfinedOperator::ApplyInverse: Error: X and Y must have the same length" );
 
     int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
-    Epetra_MultiVector xtmp( M_oper->OperatorRangeMap(), 1 );
+    Epetra_MultiVector xtmp( M_oper->OperatorRangeMap() , 1 );
     Epetra_MultiVector ytmp( M_oper->OperatorDomainMap(), 1 );
 
     // Extract the values from the vector
-    const Int* gids         = M_oper->OperatorDomainMap().MyGlobalElements();
-    const UInt numMyEntries = M_oper->OperatorDomainMap().NumMyElements();
-    Int lid1 ;
-    Int lid2 ;
+    const Int* gids         = M_oper->OperatorRangeMap().MyGlobalElements();
+    const UInt numMyEntries = M_oper->OperatorRangeMap().NumMyElements();
+    Int lid1;
+    Int lid2;
     for ( UInt i = 0; i < numMyEntries; ++i )
     {
         lid1 = X.Map().LID( gids[i]+firstIndex );
-        lid2 = M_oper->OperatorDomainMap().LID( gids[i] );
+        lid2 = M_oper->OperatorRangeMap().LID( gids[i] );
         ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::ApplyInverse: Error: lid < 0" );
         xtmp[0][lid2] = X[0][lid1];
     }
@@ -150,12 +156,12 @@ ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 
     // Copy back the result in the Y vector;
     Y = X;
-    const Int* gids2         = M_oper->OperatorRangeMap().MyGlobalElements();
-    const UInt numMyEntries2 = M_oper->OperatorRangeMap().NumMyElements();
+    const Int* gids2         = M_oper->OperatorDomainMap().MyGlobalElements();
+    const UInt numMyEntries2 = M_oper->OperatorDomainMap().NumMyElements();
     for ( UInt i = 0; i < numMyEntries2; ++i )
     {
         lid1 = Y.Map().LID( gids2[i]+firstIndex );
-        lid2 = M_oper->OperatorRangeMap().LID( gids2[i] );
+        lid2 = M_oper->OperatorDomainMap().LID( gids2[i] );
         ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
         Y[0][lid1] = ytmp[0][lid2];
     }
@@ -201,15 +207,15 @@ ConfinedOperator::Comm() const
 const ConfinedOperator::map_Type&
 ConfinedOperator::OperatorDomainMap() const
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::OperatorDomainMap: Error: M_oper pointer is null" );
-    return M_oper->OperatorDomainMap();
+    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::OperatorDomainMap: Error: the structure is not known" );
+    return *M_map;
 }
 
 const ConfinedOperator::map_Type&
 ConfinedOperator::OperatorRangeMap() const
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::OperatorRangeMap: Error: M_oper pointer is null" );
-    return M_oper->OperatorRangeMap();
+    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::OperatorRangeMap: Error: the structure is not known" );
+    return *M_map;
 }
 
 

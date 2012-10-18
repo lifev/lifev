@@ -53,6 +53,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <lifev/core/array/VectorBlockStructure.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/operator/LinearOperator.hpp>
 
 namespace LifeV
@@ -81,7 +82,11 @@ public:
 
 	//! null constructor and destructor
 	//@{
-	ConfinedOperator();
+#ifdef HAVE_MPI
+    ConfinedOperator( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+    ConfinedOperator( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
     ~ConfinedOperator();
 	//@}
 
@@ -138,9 +143,11 @@ public:
 
 protected:
 
-	operatorPtr_Type    M_oper;
-	blockStructure_Type M_blockStructure;
-	UInt                M_blockIndex;
+	operatorPtr_Type               M_oper;
+	blockStructure_Type            M_blockStructure;
+	UInt                           M_blockIndex;
+	boost::shared_ptr<Epetra_Comm> M_comm;
+	boost::shared_ptr<map_Type>    M_map;
 
 };
 
