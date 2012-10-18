@@ -28,7 +28,7 @@
  *  @file
  *  @brief File containing the multiscale mean normal stress coupling class
  *
- *  @date 07-08-2012
+ *  @date 11-10-2012
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -37,12 +37,7 @@
 #ifndef MultiscaleCouplingMeanNormalStressArea_H
 #define MultiscaleCouplingMeanNormalStressArea_H 1
 
-#include <lifev/multiscale/solver/MultiscaleCoupling.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelFluid3D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModel1D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelWindkessel0D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModel0D.hpp>
+#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStress.hpp>
 
 namespace LifeV
 {
@@ -56,9 +51,17 @@ namespace Multiscale
  *  The MultiscaleCouplingMeanNormalStressArea class is an implementation of the multiscaleCoupling_Type
  *  for applying mean normal stress with area coupling conditions to the models interfaces.
  */
-class MultiscaleCouplingMeanNormalStressArea: public virtual multiscaleCoupling_Type
+class MultiscaleCouplingMeanNormalStressArea: public virtual MultiscaleCouplingMeanNormalStress
 {
 public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef MultiscaleCouplingMeanNormalStress                  super_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -75,17 +78,14 @@ public:
     //! @name Multiscale PhysicalCoupling Implementation
     //@{
 
+    //! Setup the coupling variables number.
+    void setupCouplingVariablesNumber();
+
     //! Setup the coupling
     void setupCoupling();
 
     //! Initialize the values of the coupling variables
     void initializeCouplingVariables();
-
-    //! Update the coupling
-    /*!
-     * Nothing to do for this coupling.
-     */
-    void updateCoupling() {};
 
     //! Update the values of the coupling residuals
     /*!
@@ -117,8 +117,6 @@ private:
      */
     multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
 
-protected:
-
     //! Insert constant coefficients into the Jacobian matrix
     /*!
      * @param jacobian the Jacobian matrix
@@ -135,6 +133,7 @@ protected:
     void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
 
     //@}
+
 };
 
 //! Factory create function

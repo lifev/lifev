@@ -59,6 +59,17 @@ MultiscaleCouplingMeanNormalStress::MultiscaleCouplingMeanNormalStress() :
 // Multiscale PhysicalCoupling Implementation
 // ===================================================
 void
+MultiscaleCouplingMeanNormalStress::setupCouplingVariablesNumber()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8220 ) << "MultiscaleCouplingMeanNormalStress::setupCouplingVariablesNumber() \n";
+#endif
+
+    M_couplingVariablesNumber = M_flowRateInterfaces + 1;
+}
+
+void
 MultiscaleCouplingMeanNormalStress::setupCoupling()
 {
 
@@ -68,9 +79,6 @@ MultiscaleCouplingMeanNormalStress::setupCoupling()
 
     if ( myModelsNumber() > 0 )
     {
-        // Set the number of coupling variables
-        M_couplingVariablesNumber = M_flowRateInterfaces + 1;
-
         // Impose flow rate boundary conditions
         for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i )
             if ( myModel( i ) )
@@ -87,9 +95,6 @@ MultiscaleCouplingMeanNormalStress::setupCoupling()
                 multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryStress( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
             }
     }
-
-    // Create local vectors
-    createLocalVectors();
 }
 
 void

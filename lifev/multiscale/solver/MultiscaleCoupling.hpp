@@ -99,6 +99,9 @@ public:
      */
     virtual void setupData( const std::string& fileName );
 
+    //! Setup the coupling variables number.
+    virtual void setupCouplingVariablesNumber() = 0;
+
     //! Setup the coupling
     virtual void setupCoupling() = 0;
 

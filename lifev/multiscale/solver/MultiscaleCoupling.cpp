@@ -96,6 +96,13 @@ MultiscaleCoupling::setupData( const std::string& fileName )
     // Set the size of the local coupling variables
     if ( myModelsNumber() > 0 )
         M_localCouplingVariables.reserve( M_timeInterpolationOrder + 1 );
+
+    // Set the number of coupling variables (default is 0)
+    if ( myModelsNumber() > 0 )
+        setupCouplingVariablesNumber();
+
+    // Create local vectors
+    createLocalVectors();
 }
 
 // ===================================================

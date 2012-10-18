@@ -85,6 +85,9 @@ public:
      */
     void setupData( const std::string& fileName );
 
+    //! Setup the coupling variables number.
+    void setupCouplingVariablesNumber();
+
     //! Setup the coupling
     void setupCoupling();
 

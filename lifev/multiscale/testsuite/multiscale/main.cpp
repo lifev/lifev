@@ -47,10 +47,11 @@
  *  Couplings available:
  *  <ol>
  *      <li> BoundaryCondition
- *      <li> Stress
- *      <li> FlowRateStress
- *      <li> FlowRate
- *      <li> FlowRateValve
+ *      <li> MeanNormalStress
+ *      <li> MeanNormalStressArea
+ *      <li> MeanNormalStressValve
+ *      <li> MeanTotalNormalStress
+ *      <li> MeanTotalNormalStressArea
  *  </ol>
  *
  *  Algorithms available:

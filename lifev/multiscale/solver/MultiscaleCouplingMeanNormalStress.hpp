@@ -75,6 +75,9 @@ public:
     //! @name Multiscale PhysicalCoupling Implementation
     //@{
 
+    //! Setup the coupling variables number.
+    void setupCouplingVariablesNumber();
+
     //! Setup the coupling
     void setupCoupling();
 

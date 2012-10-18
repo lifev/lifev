@@ -28,7 +28,7 @@
  *  @file
  *  @brief File containing the multiscale mean normal stress coupling class
  *
- *  @date 07-08-2012
+ *  @date 11-10-2012
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -59,6 +59,17 @@ MultiscaleCouplingMeanNormalStressArea::MultiscaleCouplingMeanNormalStressArea()
 // Multiscale PhysicalCoupling Implementation
 // ===================================================
 void
+MultiscaleCouplingMeanNormalStressArea::setupCouplingVariablesNumber()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::setupCouplingVariablesNumber() \n";
+#endif
+
+    M_couplingVariablesNumber = M_flowRateInterfaces + 1 + 1;
+}
+
+void
 MultiscaleCouplingMeanNormalStressArea::setupCoupling()
 {
 
@@ -66,30 +77,30 @@ MultiscaleCouplingMeanNormalStressArea::setupCoupling()
     Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::setupCoupling() \n";
 #endif
 
+    // Preliminary checks
     if ( myModelsNumber() > 0 )
     {
-        // Set the number of coupling variables
-        M_couplingVariablesNumber = M_flowRateInterfaces + 1;
+        if ( modelsNumber() > 2 )
+            std::cout << "!!! WARNING: MultiscaleCouplingMeanNormalStressArea does not work with more than two models !!!" << std::endl;
 
-        // Impose flow rate boundary conditions
-        for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i )
-            if ( myModel( i ) )
-            {
-                M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, i ) );
-                multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryFlowRate( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
-            }
-
-        // Impose stress boundary conditions
-        for ( UInt i( M_flowRateInterfaces ); i < modelsNumber(); ++i )
-            if ( myModel( i ) )
-            {
-                M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, M_flowRateInterfaces ) );
-                multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryStress( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
-            }
+        //TODO: add a check on the type of the two models: they must be a FSI3D and a 1D model.
     }
 
-    // Create local vectors
-    createLocalVectors();
+    super_Type::setupCoupling();
+
+    if ( myModelsNumber() > 0 )
+    {
+        // Impose area boundary conditions
+        for ( UInt i( 0 ); i < 2; ++i )
+            if ( myModel( i ) )
+                if ( M_models[i]->type() == FSI3D )
+                {
+                    M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, 2 ) );
+                    multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryArea( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+
+                    break;
+                }
+    }
 }
 
 void

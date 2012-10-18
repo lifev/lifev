@@ -86,6 +86,17 @@ MultiscaleCouplingBoundaryCondition::setupData( const std::string& fileName )
 }
 
 void
+MultiscaleCouplingBoundaryCondition::setupCouplingVariablesNumber()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCouplingVariablesNumber() \n";
+#endif
+
+    M_couplingVariablesNumber = 0;
+}
+
+void
 MultiscaleCouplingBoundaryCondition::setupCoupling()
 {
 
@@ -95,9 +106,6 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 
     if ( myModelsNumber() > 0 )
     {
-        //Set the number of coupling variables
-        M_couplingVariablesNumber  = 0;
-
         // Impose boundary conditions on all the models
         for ( UInt i( 0 ); i < modelsNumber(); ++i )
             if ( myModel( i ) )
@@ -140,9 +148,6 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
                     break;
                 }
     }
-
-    //Create local vectors
-    createLocalVectors();
 }
 
 // ===================================================
