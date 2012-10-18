@@ -2028,6 +2028,13 @@ private:
     //! Local Edge (specialization for 2D geometries).
     ID localEdgeId( const twoD_Type, UInt const elemId, UInt const locE ) const { return localFacetId( elemId, locE );}
 
+    //! Local Edge (specialization for 1D geometries). It calls an error.
+    ID localEdgeId( const oneD_Type, UInt const /*elemId*/, UInt const /*locE*/ ) const
+    {
+        ERROR_MSG ( "localEdgeId not implemented for oneD_Type." );
+        return static_cast<ID>(0);
+    }
+
     //! specializations for numFacets
     UInt numFacets(threeD_Type) const {return numFaces();}
     UInt numFacets(twoD_Type) const {return numEdges();}
@@ -3149,6 +3156,7 @@ RegionMesh<GeoShapeType, MCType>::localFacetId( UInt const elemId, UInt const lo
     ASSERT_PRE( !M_ElemToFacet.empty(), "Element to Facet array not  set" );
     ASSERT_BD( elemId < numElements() );
     ASSERT_BD( locF < element_Type::S_numLocalFacets );
+
     return M_ElemToFacet.operator() ( locF, elemId );
 }
 
