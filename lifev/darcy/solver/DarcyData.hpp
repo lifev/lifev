@@ -118,23 +118,9 @@ public:
     DarcyData ( const data_Type& dataFile,
                 const std::string& section = "darcy" );
 
-    //! Copy constructor.
-    /*!
-      @param darcyData object to take a copy.
-    */
-    DarcyData ( const darcyData_Type &darcyData );
-
-    //@}
-
     // Methods.
     //! @name Methods
     //@{
-
-    //! Overloading of the operator =.
-    /*!
-       @param darcyData The DarcyData to be copied.
-    */
-    darcyData_Type& operator= ( const darcyData_Type& darcyData );
 
     //! External setup.
     /*!
