@@ -36,8 +36,8 @@
  *  @contributor  Gianmarco Mengaldo <gianmarco.mengaldo@gmail.com>
  */
 
-#ifndef _STRUCTURALMATERIAL_H_
-#define _STRUCTURALMATERIAL_H_ 1
+#ifndef _STRUCTURALCONSTITUTIVELAW_H_
+#define _STRUCTURALCONSTITUTIVELAW_H_ 1
 
 #include <string>
 #include <sstream>
@@ -76,14 +76,14 @@
 namespace LifeV
 {
 /*!
-  \class StructuralMaterial
+  \class StructuralConstitutiveLaw
   \brief
   This class is an abstract class to define different type of models for the arterial wall.
   This class has just pure virtual methods. They are implemented in the specific class for one material
 */
 
 template <typename Mesh>
-class StructuralMaterial
+class StructuralConstitutiveLaw
 {
 public:
 
@@ -102,7 +102,7 @@ public:
   typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
   typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
-  typedef FactorySingleton<Factory<StructuralMaterial<Mesh>,std::string> >  StructureMaterialFactory;
+  typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>,std::string> >  StructureMaterialFactory;
 
   typedef RegionMesh<LinearTetra >                      mesh_Type;
   typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
@@ -118,9 +118,9 @@ public:
 //! @name Constructor &  Deconstructor
 //@{
 
-  StructuralMaterial();
+  StructuralConstitutiveLaw();
 
-  virtual ~StructuralMaterial() {}
+  virtual ~StructuralConstitutiveLaw() {}
 
 //@}
 
@@ -129,7 +129,7 @@ public:
 //!@name Methods
 //@{
 
-    //! Setup the created object of the class StructuralMaterial
+    //! Setup the created object of the class StructuralConstitutiveLaw
     /*!
       \param dFespace: the FiniteElement Space
       \param monolithicMap: the MapEpetra
@@ -208,7 +208,7 @@ public:
     //! Get the Stiffness matrix
     virtual vectorPtr_Type const stiffVector() const = 0;
 
-  virtual void Apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) =0;
+  virtual void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) =0;
 
 //@}
 
@@ -240,13 +240,13 @@ protected:
 //=====================================
 
 template <typename Mesh>
-StructuralMaterial<Mesh>::StructuralMaterial( ):
+StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ):
     M_FESpace                    ( ),
     M_localMap                   ( ),
     M_jacobian                   ( ),
     M_offset                     ( 0 )
 {
-  //    std::cout << "I am in the constructor of StructuralMaterial" << std::endl;
+  //    std::cout << "I am in the constructor of StructuralConstitutiveLaw" << std::endl;
 }
 
 }

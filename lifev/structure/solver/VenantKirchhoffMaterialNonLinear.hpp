@@ -41,7 +41,7 @@
 #ifndef _NONLINVENANTKIRCHHOFFMATERIAL_H_
 #define _NONLINVENANTKIRCHHOFFMATERIAL_H_
 
-#include <lifev/structure/solver/StructuralMaterial.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 
 namespace LifeV
@@ -423,10 +423,10 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
 }
 
 template <typename Mesh>
-inline StructuralMaterial<Mesh>* createVenantKirchhoffNonLinear() { return new VenantKirchhoffMaterialNonLinear<Mesh >(); }
+inline StructuralConstitutiveLaw<Mesh>* createVenantKirchhoffNonLinear() { return new VenantKirchhoffMaterialNonLinear<Mesh >(); }
 namespace
 {
-static bool registerVKNL = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerVKNL = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

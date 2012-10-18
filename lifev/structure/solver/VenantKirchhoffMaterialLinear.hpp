@@ -38,20 +38,20 @@
 #ifndef _LINVENANTKIRCHHOFFMATERIAL_H_
 #define _LINVENANTKIRCHHOFFMATERIAL_H_
 
-#include <lifev/structure/solver/StructuralMaterial.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 
 namespace LifeV
 {
 template <typename Mesh>
 class VenantKirchhoffMaterialLinear :
-        public StructuralMaterial<Mesh>
+        public StructuralConstitutiveLaw<Mesh>
 {
  //!@name Type definitions
  //@{
 
   public:
-    typedef StructuralMaterial<Mesh>                 super;
+    typedef StructuralConstitutiveLaw<Mesh>                 super;
 
     typedef typename super::data_Type                         data_Type;
 
@@ -81,7 +81,7 @@ class VenantKirchhoffMaterialLinear :
  //!@name Methods
  //@{
 
-  //! Setup the created object of the class StructuralMaterial
+  //! Setup the created object of the class StructuralConstitutiveLaw
   /*!
     \param dFespace: the FiniteElement Space
     \param monolithicMap: the MapEpetra
@@ -155,7 +155,7 @@ class VenantKirchhoffMaterialLinear :
     //! Get the Stiffness vector
   vectorPtr_Type const stiffVector() const { vectorPtr_Type zero( new vector_Type()); return zero;}
 
-  void Apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) {res += *M_stiff*sol;}
+  void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) {res += *M_stiff*sol;}
 
     //@}
 
@@ -324,10 +324,10 @@ VenantKirchhoffMaterialLinear<Mesh>::showMe( std::string const& fileNameStiff,
 }
 
 template <typename Mesh>
-inline StructuralMaterial<Mesh>* createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear<Mesh >(); }
+inline StructuralConstitutiveLaw<Mesh>* createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear<Mesh >(); }
 namespace
 {
-static bool registerVKL = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerVKL = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV
