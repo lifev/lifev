@@ -503,7 +503,7 @@ void
 MultiscaleModelFluid3D::setupMesh()
 {
     //Read fluid mesh from file
-    boost::shared_ptr< mesh_Type > fluidMesh( new mesh_Type );
+    boost::shared_ptr< mesh_Type > fluidMesh( new mesh_Type( *M_comm ) );
     readMesh( *fluidMesh, *M_meshData );
 
     //Transform mesh

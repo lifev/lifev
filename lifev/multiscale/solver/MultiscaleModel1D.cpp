@@ -55,7 +55,7 @@ MultiscaleModel1D::MultiscaleModel1D() :
 #ifdef HAVE_HDF5
         M_exporter                     ( new IOFile_Type() ),
         M_importer                     ( new IOFile_Type() ),
-        M_exporterMesh                 ( new mesh_Type() ),
+        M_exporterMesh                 (),
         M_exporterSolution             ( new solution_Type() ),
 #endif
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
@@ -161,6 +161,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     M_data->setPostprocessingFile( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) );
 
 #ifdef HAVE_HDF5
+    M_exporterMesh.reset( new mesh_Type( *M_comm ) );
     uniformMesh1D( *M_exporterMesh, 0., M_data->length(), M_data->numberOfElements() );
 
     M_exporter->setDataFromGetPot( dataFile );
