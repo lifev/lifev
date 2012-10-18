@@ -195,10 +195,14 @@ problem::run()
     MeshData             meshData;
     meshData.setup(dataFile, "problem/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( *( members->comm ) ) );
     readMesh(*fullMeshPtr, meshData);
 
-    MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, members->comm );
+    boost::shared_ptr<mesh_Type > localMeshPtr;
+    {
+        MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, members->comm );
+        localMeshPtr = meshPart.meshPartition();
+    }
 
     //
     // The Problem Solver
@@ -227,7 +231,7 @@ problem::run()
     // finite element space of the solution
     std::string dOrder =  dataFile( "problem/space_discretization/order", "P1");
 
-    FESpace_ptrtype feSpace( new FESpace_type(meshPart,dOrder,1,members->comm) );
+    FESpace_ptrtype feSpace( new FESpace_type(localMeshPtr,dOrder,1,members->comm) );
 
     // instantiation of the VenantKirchhoffViscoelasticSolver class
 
@@ -313,13 +317,13 @@ problem::run()
 #endif
     {
         if (exporterType.compare("none") == 0)
-            exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, meshPart.meshPartition(), "problem", members ->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, localMeshPtr, "problem", members ->comm->MyPID()) );
         else
-            exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, meshPart.meshPartition(), "problem",   members->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, localMeshPtr, "problem",   members->comm->MyPID()) );
     }
 
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.meshPartition(),  members->comm->MyPID() );
+    exporter->setMeshProcId( localMeshPtr,  members->comm->MyPID() );
 
     vector_ptrtype U ( new vector_type(*problem.solution(), exporter->mapType() ) );
     vector_ptrtype V  ( new vector_type(*problem.solution(),  exporter->mapType() ) );

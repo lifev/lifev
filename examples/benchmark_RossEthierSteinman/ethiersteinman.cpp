@@ -485,7 +485,11 @@ Ethiersteinman::run()
             }
 
             if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
-            MeshPartitioner< RegionMesh<LinearTetra> >   meshPart(fullMeshPtr, M_data->comm);
+            boost::shared_ptr<RegionMesh<LinearTetra> > localMeshPtr;
+            {
+                MeshPartitioner< RegionMesh<LinearTetra> >   meshPart(fullMeshPtr, M_data->comm);
+                localMeshPtr = meshPart.meshPartition();
+            }
             fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
             // +-----------------------------------------------+
@@ -500,12 +504,12 @@ Ethiersteinman::run()
 
             if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
             feSpacePtr_Type uFESpace;
-            uFESpace.reset(new feSpace_Type(meshPart, uOrder, 3, M_data->comm));
+            uFESpace.reset(new feSpace_Type(localMeshPtr, uOrder, 3, M_data->comm));
             if (verbose) std::cout << "ok." << std::endl;
 
             if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
             feSpacePtr_Type pFESpace;
-            pFESpace.reset(new feSpace_Type(meshPart, pOrder, 1, M_data->comm));
+            pFESpace.reset(new feSpace_Type(localMeshPtr, pOrder, 1, M_data->comm));
             if (verbose) std::cout << "ok." << std::endl;
 
             UInt totalVelDof   = uFESpace->dof().numTotalDof();
@@ -542,7 +546,7 @@ Ethiersteinman::run()
             }
 
             // If we change the FE we have to update the BCHandler (internal data)
-            bcH.bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
+            bcH.bcUpdate( *localMeshPtr, uFESpace->feBd(), uFESpace->dof());
 
             // +-----------------------------------------------+
             // |             Creating the problem              |
@@ -682,18 +686,18 @@ Ethiersteinman::run()
             {
                 exporter.reset( new ExporterHDF5<mesh_Type > ( dataFile, "ethiersteinman" ) );
                 exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-                exporter->setMeshProcId( meshPart.meshPartition(), M_data->comm->MyPID() );
+                exporter->setMeshProcId( localMeshPtr, M_data->comm->MyPID() );
             }
             else
 #endif
             {
                 if (exporterType.compare("none") == 0)
                 {
-                    exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, meshPart.meshPartition(), "ethiersteinman", M_data->comm->MyPID()) );
+                    exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, localMeshPtr, "ethiersteinman", M_data->comm->MyPID()) );
                 }
                 else
                 {
-                    exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, meshPart.meshPartition(), "ethiersteinman", M_data->comm->MyPID()) );
+                    exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, localMeshPtr, "ethiersteinman", M_data->comm->MyPID()) );
                 }
             }
 

@@ -75,7 +75,7 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
         ofile << mesh.pointList( i ).x() << " "
               << mesh.pointList( i ).y() << " "
               << mesh.pointList( i ).z() << " "
-              << mesh.pointList( i ).marker() << "\n";
+              << mesh.pointList( i ).markerID() << "\n";
     }
     ofile << "\n";
 
@@ -106,7 +106,7 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
             ofile << mesh.boundaryFace( k ).point( i ).id()+1
                   << " ";
         }
-        ofile << mesh.boundaryFace( k ).marker() << "\n";
+        ofile << mesh.boundaryFace( k ).markerID() << "\n";
     }
     ofile << "\n";
 
@@ -140,7 +140,7 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
             ofile << ielem+1
                   << " ";
         }
-        ofile << mesh.volume( k ).marker() << "\n";
+        ofile << mesh.volume( k ).markerID() << "\n";
     }
     ofile.close();
 }

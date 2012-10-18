@@ -73,7 +73,11 @@ passing the mesh to the constructor, or calling the method DOF::update().
 \note The methods bulds the table for ALL degrees of freedom, i.e. it does not handle any essential
 boundary condition.
 
-Now the class include also a local-to-global table with DOF grouped by (internal) face that was implemented in the old versions into the dofByFace.hpp and dofByFace.cpp files created by D. A. Di Pietro in 2004
+Now the class include also a local-to-global table with DOF grouped by (internal) face
+that was implemented in the old versions into the dofByFace.hpp and dofByFace.cpp files created by D. A. Di Pietro in 2004
+
+@note The dof numbering refers to the global numbering, not the numbering local to a partition of a partitioned mesh
+@todo This class must be bettered. The logic by which the dof table is built may fail for certain type of elements.
 */
 class DOF
 {
@@ -81,7 +85,6 @@ public:
 
     //! @name Public Types
     //@{
-
     //@}
 
 

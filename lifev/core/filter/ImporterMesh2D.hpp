@@ -256,7 +256,7 @@ importerMesh2D( RegionMesh      & mesh, //importerMesh2D
     mesh.setMaxNumFaces( nFa, true );
 
     // Add Marker to mesh
-    mesh.setMarker( regionFlag );
+    mesh.setMarkerID( regionFlag );
 
     // Now put the whole lot into the RegionMesh structure
     typename RegionMesh::point_Type * pp = 0;
@@ -292,10 +292,10 @@ importerMesh2D( RegionMesh      & mesh, //importerMesh2D
         pe = &mesh.addEdge( true ); // Only boundary edges.
         p1 = ID( ib( 0, i ) ); // Explicit conversion to ID
         p2 = ID( ib( 1, i ) );
-        ibc = markerID_Type( bc( i ) ); //Explicit conversion to entity flag
+        ibc = markerID_Type( bc( i ) ); //Explicit conversion to marker ID
 
         // Boundary condition marker
-        pe->setMarker( ibc );
+        pe->setMarkerID( ibc );
         pe->setPoint( 0, mesh.point( p1 ) ); // set edge conn.
         pe->setPoint( 1, mesh.point( p2 ) ); // set edge conn.
 
@@ -342,7 +342,7 @@ importerMesh2D( RegionMesh      & mesh, //importerMesh2D
         p3 = ID( iel( 2, i ) );
         pf = &( mesh.addFace() ); // Only boundary faces
 
-        pf->setMarker( markerID_Type( ibc ) );
+        pf->setMarkerID( markerID_Type( ibc ) );
         pf->setPoint( 0, mesh.point( p1 ) ); // set face conn.
         pf->setPoint( 1, mesh.point( p2 ) ); // set face conn.
         pf->setPoint( 2, mesh.point( p3 ) ); // set face conn.
@@ -399,7 +399,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
 #endif
 
     // Add Marker to list of Markers
-    mesh.setMarker( regionFlag );
+    mesh.setMarkerID( regionFlag );
 
     std::vector<Real> __x( 3 * __n );
     std::vector<bool> __isonboundary( __n );
@@ -542,7 +542,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
     for ( UInt __i = 0; __i < __n; ++__i )
     {
         pp = &mesh.addPoint( __isonboundary[ __i ] );
-        pp->setMarker( __whichboundary[ __i ] );
+        pp->setMarkerID( __whichboundary[ __i ] );
         pp->x() = __x[ 2 * __i ];
         pp->y() = __x[ 2 * __i + 1 ];
     }
@@ -556,7 +556,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
         case 1:
         {
             pe = &( mesh.addEdge( true ) );
-            pe->setMarker( markerID_Type( __et[ __i ] ) );
+            pe->setMarkerID( markerID_Type( __et[ __i ] ) );
             pe->setPoint( 0, mesh.point( __e[ __i ][ 0 ] ) );
             pe->setPoint( 1, mesh.point( __e[ __i ][ 1 ] ) );
         }
@@ -566,7 +566,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
         case 2:
         {
             pf = &( mesh.addFace() );
-            pf->setMarker( markerID_Type( __et[ __i ] ) );
+            pf->setMarkerID( markerID_Type( __et[ __i ] ) );
             pf->setPoint( 0, mesh.point( __e[ __i ][ 0 ] ) );
             pf->setPoint( 1, mesh.point( __e[ __i ][ 1 ] ) );
             pf->setPoint( 2, mesh.point( __e[ __i ][ 2 ] ) );
@@ -577,7 +577,7 @@ readGmshFile( RegionMesh<GeoShape, MC> & mesh,
         case 3:
         {
             pf = &( mesh.addFace() );
-            pf->setMarker( markerID_Type( __et[ __i ] ) );
+            pf->setMarkerID( markerID_Type( __et[ __i ] ) );
             pf->setPoint( 0, mesh.point( __e[ __i ][ 0 ] ) );
             pf->setPoint( 1, mesh.point( __e[ __i ][ 1 ] ) );
             pf->setPoint( 2, mesh.point( __e[ __i ][ 2 ] ) );
@@ -727,7 +727,7 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
 
     // Set mesh properties
     // Add Marker to list of Markers
-    mesh.setMarker( regionFlag );
+    mesh.setMarkerID( regionFlag );
 
     // Till now I only have information about boundary edges - I don't know the MAX num of edges
     // Euler formula: ne = nv + nt - 1
@@ -762,22 +762,22 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
 
     for ( UInt __i = 0; __i < __nv; ++__i )
     {
-        pp = &mesh.addPoint( __isonboundary[ __i ], false );
-        pp->setMarker( __whichboundary[ __i ] );
+        pp = &mesh.addPoint( __isonboundary[ __i ], true );
+        pp->setMarkerID( __whichboundary[ __i ] );
         pp->x() = __x[ 2 * __i ];
         pp->y() = __x[ 2 * __i + 1 ];
         pp->z() = 0;
         pp->setId( __i );
-        pp->setLocalId( __i );
     }
 
     // add the edges to the mesh
     for ( UInt __i = 0; __i < __ne; ++__i )
     {
         pe = &( mesh.addEdge( true ) );
-        pe->setMarker( markerID_Type( __edge_label[ __i ] ) );
+        pe->setMarkerID( markerID_Type( __edge_label[ __i ] ) );
         pe->setPoint( 0, mesh.point( __edge_nodes[ 2 * __i ] ) );
         pe->setPoint( 1, mesh.point( __edge_nodes[ 2 * __i + 1 ] ) );
+        pe->setId( __i );
         _edge = makeBareEdge( __edge_nodes[ 2 * __i ], __edge_nodes[ 2 * __i + 1 ] );
         UInt map_it( _be.id( _edge.first ) );
         pe->firstAdjacentElementIdentity() = edge_to_firstAdjacentElementIdentity[ map_it ];
@@ -788,9 +788,8 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
     for ( UInt __i = 0; __i < __nt; ++__i )
     {
         pf = &( mesh.addFace(true) );
-        pf->setId     ( __i );
-        pf->setLocalId( __i );
-        pf->setMarker( markerID_Type( __triangle_label[ __i ] ) );
+        pf->setId( __i );
+        pf->setMarkerID( markerID_Type( __triangle_label[ __i ] ) );
         pf->setPoint( 0, mesh.point( __triangle_nodes[ 3 * __i ] ) );
         pf->setPoint( 1, mesh.point( __triangle_nodes[ 3 * __i + 1 ] ) );
         pf->setPoint( 2, mesh.point( __triangle_nodes[ 3 * __i + 2 ] ) );

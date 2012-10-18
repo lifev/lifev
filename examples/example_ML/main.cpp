@@ -179,7 +179,11 @@ main( int argc, char** argv )
     readMesh(*fullMeshPtr, meshData);
 
     // Partition the mesh
-    MeshPartitioner< RegionMesh<LinearTetra> >   meshPart(fullMeshPtr, comm);
+    boost::shared_ptr< RegionMesh < LinearTetra > > localMeshPtr;
+    {
+        MeshPartitioner< RegionMesh<LinearTetra> >   meshPart(fullMeshPtr, comm);
+        localMeshPtr = meshPart.meshPartition();
+    }
 
     // Now we proceed with the FESpace definition
     // here we decided to use P2/P1 elements
@@ -190,7 +194,7 @@ main( int argc, char** argv )
         std::cout << "Building the velocity FE space ... " << std::flush;
 
     boost::shared_ptr<FESpace< RegionMesh<LinearTetra>, MapEpetra > > uFESpacePtr(
-                    new FESpace< RegionMesh<LinearTetra>, MapEpetra >(meshPart,"P2",3,comm) );
+                    new FESpace< RegionMesh<LinearTetra>, MapEpetra >(localMeshPtr,"P2",3,comm) );
 
     // then the pressure FE space
 
@@ -198,7 +202,7 @@ main( int argc, char** argv )
         std::cout << "Building the pressure FE space ... " << std::flush;
 
     boost::shared_ptr<FESpace< RegionMesh<LinearTetra>, MapEpetra > > pFESpacePtr(
-                    new FESpace< RegionMesh<LinearTetra>, MapEpetra >(meshPart,"P1",1,comm) );
+                    new FESpace< RegionMesh<LinearTetra>, MapEpetra >(localMeshPtr,"P1",1,comm) );
 
 
     if (verbose)
@@ -241,7 +245,7 @@ main( int argc, char** argv )
     // finally, let's create an exporter in order to view the results
     // here, we use the ensight exporter
 
-    ExporterEnsight<RegionMesh<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cavity", comm->MyPID());
+    ExporterEnsight<RegionMesh<LinearTetra> > ensight( dataFile, localMeshPtr, "cavity", comm->MyPID());
 
     // we have to define a variable that will store the solution
     vector_ptrtype velAndPressure ( new vector_Type(*fluid.solution(), Repeated ) );

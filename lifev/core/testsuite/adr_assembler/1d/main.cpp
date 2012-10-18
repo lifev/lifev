@@ -28,8 +28,8 @@
     @file
     @brief
 
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 08-10-2010
+    @author
+    @date
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -50,7 +50,6 @@
 
 #include <lifev/core/LifeV.hpp>
 
-
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 
@@ -58,17 +57,19 @@
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 
-#include <lifev/core/filter/ExporterEnsight.hpp>
+#ifdef HAVE_HDF5
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#else
+#include <lifev/core/filter/ExporterVTK.hpp>
+#endif
 
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/BCManage.hpp>
 
-#include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
-#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/RegionMesh1DStructured.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
 
 #include <lifev/core/solver/ADRAssembler.hpp>
-#include <lifev/core/mesh/MeshData.hpp>
 
 using namespace LifeV;
 
@@ -78,179 +79,119 @@ static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createI
 static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
 
-//#define TEST_MASS
-//#define TEST_ADVECTION
-#define TEST_RHS
-
-
-#ifdef TEST_MASS
-Real epsilon(1);
-
-Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
+Real exactSolution( const Real& /* t */, const Real& x, const Real& /*y*/, const Real& /* z */, const ID& /* i */ )
 {
-    Real seps(sqrt(epsilon));
-    return  exp(seps*x)/(exp(seps)-exp(-seps));
-}
-#endif
-
-#ifdef TEST_ADVECTION
-Real epsilon(1);
-
-Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */, const ID& /* i */ )
-{
-    return  (exp(x/epsilon) - 1 )/( exp(1/epsilon) - 1);
-}
-
-Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
-{
-    return (i == 0);
-}
-#endif
-
-#ifdef TEST_RHS
-Real epsilon(1);
-
-Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */, const ID& /* i */ )
-{
-    return  sin(x)+y*y/2;
+    return std::sin( M_PI * 0.5 * x );
 }
 
 
 Real fRhs( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
-    return  sin(x)-1;
+    return 1.25 * M_PI * M_PI * std::sin( M_PI * 0.5 * x );
 }
-#endif
 
-
-typedef RegionMesh<LinearTriangle> mesh_Type;
-typedef MatrixEpetra<Real> matrix_Type;
-typedef VectorEpetra vector_Type;
-typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
-typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
 int
-main( int argc, char** argv )
+main( int argc, char* argv[] )
 {
 
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
+#endif
+
+    { // needed to properly destroy all objects inside before mpi finalize
+
+#ifdef HAVE_MPI
     boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    ASSERT ( Comm->NumProc() < 2, "The test does not run in parallel." );
 #else
     boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
 #endif
 
+    typedef RegionMesh<LinearLine> mesh_Type;
+    typedef MatrixEpetra<Real> matrix_Type;
+    typedef VectorEpetra vector_Type;
+    typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
+    typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+
     const bool verbose(Comm->MyPID()==0);
 
-// Read first the data needed
+    // Read first the data needed
 
     if (verbose) std::cout << " -- Reading the data ... " << std::flush;
-    GetPot dataFile( "data_2d" );
+    GetPot dataFile( "data" );
     if (verbose) std::cout << " done ! " << std::endl;
 
-
-// Build and partition the mesh
+    // Build the mesh
 
     if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
     MeshData meshData(dataFile, "mesh");
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type());
-    readMesh(*fullMeshPtr,meshData);
+    boost::shared_ptr< mesh_Type > meshPtr( new mesh_Type( *Comm ) );
+
+    // Set up the structured mesh
+    regularMesh1D( *meshPtr, 0,
+                   dataFile( "mesh/n", 20 ),
+                   dataFile( "mesh/verbose", false ),
+                   dataFile( "mesh/length", 1. ),
+                   dataFile( "mesh/origin", 0. ) );
+
     if (verbose) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
-    if (verbose) std::cout << " done ! " << std::endl;
-
-    if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
-    fullMeshPtr.reset();
-    if (verbose) std::cout << " done ! " << std::endl;
-
-// Build the FESpaces
-
+    // Build the FESpaces
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
-    std::string uOrder("P1");
-    std::string bOrder("P1");
-    feSpacePtr_Type uFESpace( new feSpace_Type( meshPart, uOrder, 1, Comm ) );
-    feSpacePtr_Type betaFESpace( new feSpace_Type( meshPart, bOrder, 3, Comm ) );
+    feSpacePtr_Type uFESpace( new feSpace_Type( meshPtr, feSegP1, quadRuleSeg1pt, quadRuleNode1pt, 1, Comm ) );
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
-// Build the assembler and the matrices
+    // Build the assembler and the matrices
 
     if (verbose) std::cout << " -- Building assembler ... " << std::flush;
     ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
     if (verbose) std::cout << " done! " << std::endl;
 
     if (verbose) std::cout << " -- Setting up assembler ... " << std::flush;
-    adrAssembler.setup(uFESpace,betaFESpace);
+    adrAssembler.setFespace(uFESpace);
     if (verbose) std::cout << " done! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
     boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uFESpace->map() ));
-    *systemMatrix *=0.0;
     if (verbose) std::cout << " done! " << std::endl;
 
-// Perform the assembly of the matrix
+    // Perform the assembly of the matrix
 
     if (verbose) std::cout << " -- Adding the diffusion ... " << std::flush;
-    adrAssembler.addDiffusion(systemMatrix,epsilon);
+    adrAssembler.addDiffusion(systemMatrix, 1.);
     if (verbose) std::cout << " done! " << std::endl;
     if (verbose) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
 
-#ifdef TEST_ADVECTION
-    if (verbose) std::cout << " -- Adding the advection ... " << std::flush;
-    vector_Type beta(betaFESpace->map(),Repeated);
-    betaFESpace->interpolate(betaFct,beta,0.0);
-    adrAssembler.addAdvection(systemMatrix,beta);
-    if (verbose) std::cout << " done! " << std::endl;
-#endif
-#ifdef TEST_MASS
     if (verbose) std::cout << " -- Adding the mass ... " << std::flush;
-    adrAssembler.addMass(systemMatrix,1.0);
+    adrAssembler.addMass(systemMatrix, M_PI * M_PI );
     if (verbose) std::cout << " done! " << std::endl;
-#endif
 
     if (verbose) std::cout << " -- Closing the matrix ... " << std::flush;
     systemMatrix->globalAssemble();
     if (verbose) std::cout << " done ! " << std::endl;
 
-#ifdef TEST_RHS
-    Real matrixNorm(systemMatrix->norm1());
-    if (verbose) std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
-    if ( std::fabs(matrixNorm - 8 ) > 1e-3)
-    {
-        std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
-#endif
-
-// Definition and assembly of the RHS
-
+    // Definition and assembly of the RHS
     if (verbose) std::cout << " -- Building the RHS ... " << std::flush;
-    //vector_Type rhs(uFESpace->map(),Unique);
     vector_Type rhs(uFESpace->map(),Repeated);
-    rhs*=0.0;
 
-#ifdef TEST_RHS
     vector_Type fInterpolated(uFESpace->map(),Repeated);
-    fInterpolated*=0.0;
     uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( fRhs ), fInterpolated, 0.0 );
     adrAssembler.addMassRhs(rhs,fInterpolated);
     rhs.globalAssemble();
-#endif
 
     if (verbose) std::cout << " done ! " << std::endl;
 
-// Definition and application of the BCs
-
+    // Definition and application of the BCs
     if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
     BCHandler bchandler;
+
     BCFunctionBase BCu( static_cast<feSpace_Type::function_Type>( exactSolution ) );
-    bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
-    for (UInt i(2); i<=6; ++i)
-    {
-        bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
-    }
+
+    bchandler.addBC("Dirichlet", Structured1DLabel::LEFT,Essential,Full,BCu,1);
+    bchandler.addBC("Dirichlet", Structured1DLabel::RIGHT,Essential,Full,BCu,1);
+
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Updating the BCs ... " << std::flush;
@@ -263,13 +204,7 @@ main( int argc, char** argv )
     rhs = rhsBC;
     if (verbose) std::cout << " done ! " << std::endl;
 
-    //************* SPY ***********
-    //systemMatrix->spy("matrix");
-    //rhs.spy("vector");
-    //*****************************
-
-// Definition of the solver
-
+    // Definition of the solver
     if (verbose) std::cout << " -- Building the solver ... " << std::flush;
     SolverAztecOO linearSolver;
     if (verbose) std::cout << " done ! " << std::endl;
@@ -285,28 +220,19 @@ main( int argc, char** argv )
 
     linearSolver.setCommunicator(Comm);
 
-// Definition of the solution
-
+    // Definition of the solution
     if (verbose) std::cout << " -- Defining the solution ... " << std::flush;
     vector_Type solution(uFESpace->map(),Unique);
-    solution*=0.0;
     if (verbose) std::cout << " done ! " << std::endl;
 
-// Solve the solution
-
+    // Solve the solution
     if (verbose) std::cout << " -- Solving the system ... " << std::flush;
     linearSolver.solveSystem(rhsBC,solution,systemMatrix);
     if (verbose) std::cout << " done ! " << std::endl;
 
-    //************* SPY ***********
-    //solution.spy("solution");
-    //*****************************
-
-// Error computation
-
+    // Error computation
     if (verbose) std::cout << " -- Computing the error ... " << std::flush;
     vector_Type solutionErr(solution);
-    solutionErr*=0.0;
     uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( exactSolution ), solutionErr, 0.0 );
     solutionErr-=solution;
     solutionErr.abs();
@@ -316,22 +242,15 @@ main( int argc, char** argv )
     Real linferror( solutionErr.normInf());
     if (verbose) std::cout << " ---> Norm Inf : " << linferror << std::endl;
 
-
-    if (l2error > 0.0026)
-    {
-        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
-    if (linferror > 0.000016)
-    {
-        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
-
-// Exporter definition and use
-
+    // Exporter definition and use
     if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
-    ExporterEnsight<mesh_Type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID()) ;
+
+#ifdef HAVE_HDF5
+    ExporterHDF5<mesh_Type> exporter ( dataFile, "solution" );
+#else
+    ExporterVTK<mesh_Type> exporter ( dataFile, "solution" );
+#endif
+    exporter.setMeshProcId( meshPtr, Comm->MyPID()) ;
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;
@@ -348,7 +267,20 @@ main( int argc, char** argv )
     exporter.postProcess(0);
     if (verbose) std::cout << " done ! " << std::endl;
 
+    if ( std::fabs( l2error - 0.0006169843149652788l ) > 1e-10 )
+    {
+        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
+        return EXIT_FAILURE;
+    }
+    if ( std::fabs( linferror - 0.0001092814405985187l ) > 1e-10 )
+    {
+        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
+        return EXIT_FAILURE;
+    }
+
     if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
+
+    } // needed to properly destroy all objects inside before mpi finalize
 
 #ifdef HAVE_MPI
     MPI_Finalize();
@@ -356,5 +288,3 @@ main( int argc, char** argv )
 
     return( EXIT_SUCCESS );
 }
-
-

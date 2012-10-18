@@ -480,7 +480,7 @@ void PostProcessingBoundary<MeshType>::buildVectors()
         iFirstAdjacentElement = M_meshPtr->boundaryFacet( iboundaryFacet ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
         iFacetLocalId = M_meshPtr->boundaryFacet( iboundaryFacet ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
-        boundaryFlag = M_meshPtr->boundaryFacet(iboundaryFacet ).marker();
+        boundaryFlag = M_meshPtr->boundaryFacet(iboundaryFacet ).markerID();
         M_boundaryMarkerToFacetIdMap[boundaryFlag].push_back( iboundaryFacet ); // fill the flag-to-faceIdList map
 
         for (UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace)

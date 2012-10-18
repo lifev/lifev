@@ -467,7 +467,7 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
 
     // select facets flagged with flag 2
     for ( ID ibF2 = 0; ibF2 < bdnF2; ++ibF2 )
-        if ( flag2 == mesh2.boundaryFacet( ibF2 ).marker())
+        if ( flag2 == mesh2.boundaryFacet( ibF2 ).markerID())
             facetsFlagged2.insert(ibF2);
 
     // Loop on boundary facets on mesh1
@@ -475,7 +475,7 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
     {
 
         // The facet marker
-        marker1 = mesh1.boundaryFacet( ibF1 ).marker();
+        marker1 = mesh1.boundaryFacet( ibF1 ).markerID();
 
         // Is the facet on the interface?
         if ( marker1 == flag1 )

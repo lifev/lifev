@@ -120,7 +120,7 @@ Heart::run()
 
     MeshData meshData;
     meshData.setup(M_heart_fct->M_dataFile, "electric/space_discretization");
-    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( *( M_heart_fct->M_comm ) ) );
     readMesh(*fullMeshPtr, meshData);
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
 
@@ -141,7 +141,11 @@ Heart::run()
 
 
     //! Construction of the partitioned mesh
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, M_heart_fct->M_comm);
+    boost::shared_ptr<mesh_Type> localMeshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, M_heart_fct->M_comm);
+        localMeshPtr = meshPart.meshPartition();
+    }
     std::string uOrder =  M_heart_fct->M_dataFile( "electric/space_discretization/u_order", "P1");
 
     //! Initialization of the FE type and quadrature rules for both the variables
@@ -176,7 +180,7 @@ Heart::run()
     if (verbose)
         std::cout << "Building the potential FE space ... " << std::flush;
 
-    feSpacePtr_Type uFESpacePtr( new feSpace_Type( meshPart,
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type( localMeshPtr,
                                                    *refFE_u,
                                                    *qR_u,
                                                    *bdQr_u,
@@ -184,7 +188,7 @@ Heart::run()
                                                    M_heart_fct->M_comm) );
 
 #ifdef BIDOMAIN
-    feSpacePtr_Type _FESpacePtr( new feSpace_Type(meshPart,
+    feSpacePtr_Type _FESpacePtr( new feSpace_Type(localMeshPtr,
                                                   *refFE_u,
                                                   *qR_u,
                                                   *bdQr_u,
@@ -220,7 +224,7 @@ Heart::run()
     {
         if (verbose) std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
         ionicModel.reset(new RogersMcCulloch< mesh_Type >(_dataIonic,
-                                                          *meshPart.meshPartition(),
+                                                          *localMeshPtr,
                                                           *uFESpacePtr,
                                                           *M_heart_fct->M_comm));
     }
@@ -228,7 +232,7 @@ Heart::run()
     {
         if (verbose) std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
         ionicModel.reset(new LuoRudy< mesh_Type >(_dataIonic,
-                                                  *meshPart.meshPartition(),
+                                                  *localMeshPtr,
                                                   *uFESpacePtr,
                                                   *M_heart_fct->M_comm));
     }
@@ -236,7 +240,7 @@ Heart::run()
     {
         if (verbose) std::cout<<"Ion Model = Mitchell-Schaeffer"<<std::endl<<std::flush;
         ionicModel.reset(new MitchellSchaeffer< mesh_Type >(_dataIonic,
-                                                            *meshPart.meshPartition(),
+                                                            *localMeshPtr,
                                                             *uFESpacePtr,
                                                             *M_heart_fct->M_comm));
     }
@@ -275,7 +279,7 @@ Heart::run()
         exporter.reset( new ExporterHDF5<mesh_Type > ( M_heart_fct->M_dataFile,
                                                        "heart" ) );
         exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId( meshPart.meshPartition(), M_heart_fct->M_comm->MyPID() );
+        exporter->setMeshProcId( localMeshPtr, M_heart_fct->M_comm->MyPID() );
     }
     else
 #endif
@@ -283,14 +287,14 @@ Heart::run()
         if (exporterType.compare("none") == 0)
         {
             exporter.reset( new ExporterEmpty<mesh_Type > ( M_heart_fct->M_dataFile,
-                                                            meshPart.meshPartition(),
+                                                            localMeshPtr,
                                                             "heart",
                                                             M_heart_fct->M_comm->MyPID()) );
         }
         else
         {
             exporter.reset( new ExporterEnsight<mesh_Type > ( M_heart_fct->M_dataFile,
-                                                              meshPart.meshPartition(),
+                                                              localMeshPtr,
                                                               "heart",
                                                               M_heart_fct->M_comm->MyPID()) );
         }

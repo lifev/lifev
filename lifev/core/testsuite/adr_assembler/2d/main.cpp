@@ -64,7 +64,7 @@
 #include <lifev/core/fem/BCManage.hpp>
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh2DStructured.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 
 #include <lifev/core/solver/ADRAssembler.hpp>
@@ -103,27 +103,27 @@ Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, con
 
 Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
 {
-    return Real(i == 0);
+    return (i == 0);
 }
 #endif
 
 #ifdef TEST_RHS
 Real epsilon(1);
 
-Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& z , const ID& /* i */ )
+Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */, const ID& /* i */ )
 {
-    return  sin(x+y)+z*z/2;
+    return  sin(x)+y*y/2;
 }
 
 
-Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ , const ID& /* i */ )
+Real fRhs( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
-    return  2*sin(x+y)-1;
+    return  sin(x)-1;
 }
 #endif
 
 
-typedef RegionMesh<LinearTetra> mesh_Type;
+typedef RegionMesh<LinearTriangle> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
 typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
@@ -148,20 +148,38 @@ main( int argc, char** argv )
     GetPot dataFile( "data" );
     if (verbose) std::cout << " done ! " << std::endl;
 
-    const UInt Nelements(dataFile("mesh/nelements",10));
-    if (verbose) std::cout << " ---> Number of elements : " << Nelements << std::endl;
 
 // Build and partition the mesh
 
-    if (verbose) std::cout << " -- Building the mesh ... " << std::flush;
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new RegionMesh<LinearTetra>);
-    regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
-                   2.0,   2.0,   2.0,
-                   -1.0,  -1.0,  -1.0);
+    if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
+    MeshData meshData(dataFile, "mesh");
+    boost::shared_ptr< mesh_Type > fullMeshPtr( new mesh_Type( *Comm ) );
+
+    // Select if the mesh is structured or not
+    if ( meshData.meshType() != "structured" )
+    {
+        // Set up the mesh
+        readMesh( *fullMeshPtr, meshData );
+    }
+    else
+    {
+        // Set up the structured mesh
+        regularMesh2D( *fullMeshPtr, 0,
+                       dataFile( "mesh/nx", 20 ),
+                       dataFile( "mesh/ny", 20 ),
+                       dataFile( "mesh/verbose", false ),
+                       dataFile( "mesh/lx", 1. ),
+                       dataFile( "mesh/ly", 1. ) );
+    }
+
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
+        meshPtr = meshPart.meshPartition();
+    }
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
@@ -173,8 +191,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
     std::string uOrder("P1");
     std::string bOrder("P1");
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 1, Comm));
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaFESpace( new FESpace< mesh_Type, MapEpetra >(meshPart,bOrder, 3, Comm));
+    feSpacePtr_Type uFESpace( new feSpace_Type( meshPtr, uOrder, 1, Comm ) );
+    feSpacePtr_Type betaFESpace( new feSpace_Type( meshPtr, bOrder, 3, Comm ) );
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 
@@ -220,7 +238,7 @@ main( int argc, char** argv )
 #ifdef TEST_RHS
     Real matrixNorm(systemMatrix->norm1());
     if (verbose) std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
-    if ( std::fabs(matrixNorm - 1.68421 ) > 1e-3)
+    if ( std::fabs(matrixNorm - 8 ) > 1e-3)
     {
         std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
         return EXIT_FAILURE;
@@ -248,9 +266,9 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
     BCHandler bchandler;
-    BCFunctionBase BCu( exactSolution );
+    BCFunctionBase BCu( static_cast<feSpace_Type::function_Type>( exactSolution ) );
     bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
-    for (UInt i(2); i<=6; ++i)
+    for (UInt i(2); i<=4; ++i)
     {
         bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
     }
@@ -320,12 +338,12 @@ main( int argc, char** argv )
     if (verbose) std::cout << " ---> Norm Inf : " << linferror << std::endl;
 
 
-    if (l2error > 0.0055)
+    if (l2error > 0.0026)
     {
         std::cout << " <!> Solution has changed !!! <!> " << std::endl;
         return EXIT_FAILURE;
     }
-    if (linferror > 0.0046)
+    if (linferror > 0.000016)
     {
         std::cout << " <!> Solution has changed !!! <!> " << std::endl;
         return EXIT_FAILURE;
@@ -334,7 +352,7 @@ main( int argc, char** argv )
 // Exporter definition and use
 
     if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
-    ExporterEnsight<mesh_Type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID()) ;
+    ExporterEnsight<mesh_Type> exporter ( dataFile, meshPtr, "solution", Comm->MyPID()) ;
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;
