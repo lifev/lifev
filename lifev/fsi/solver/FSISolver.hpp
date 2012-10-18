@@ -110,7 +110,7 @@ public:
     typedef FSIOperator::solidPtr_Type::value_type					solid_Type;
 
     typedef fluid_Type::function_Type    						    fluidFunction_Type;
-    typedef solid_Type::Function								    solidFunction_Type;
+    typedef solid_Type::function								    solidFunction_Type;
 
     typedef fluid_Type::source_Type    							    fluidSource_Type;
     typedef solid_Type::source_Type							        solidSource_Type;

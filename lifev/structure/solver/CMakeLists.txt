@@ -5,8 +5,8 @@ SET(solver_HEADERS
   solver/VenantKirchhoffElasticHandler.hpp
   solver/VenantKirchhoffSolver.hpp
   solver/VenantKirchhoffViscoelasticSolver.hpp
-  solver/StructuralMaterial.hpp
-  solver/StructuralSolver.hpp
+  solver/StructuralConstitutiveLaw.hpp
+  solver/StructuralOperator.hpp
   solver/NeoHookeanMaterialNonLinear.hpp
   solver/ExponentialMaterialNonLinear.hpp
   solver/VenantKirchhoffMaterialLinear.hpp

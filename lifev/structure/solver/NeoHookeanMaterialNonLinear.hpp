@@ -43,20 +43,20 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <lifev/structure/solver/StructuralMaterial.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 namespace LifeV
 {
 
 template <typename Mesh>
 class NeoHookeanMaterialNonLinear :
-        public StructuralMaterial<Mesh>
+        public StructuralConstitutiveLaw<Mesh>
 {
 //!@name Type definitions
 //@{
 
     public:
-    typedef StructuralMaterial<Mesh>                 super;
+    typedef StructuralConstitutiveLaw<Mesh>                 super;
 
     typedef VenantKirchhoffElasticData               data_Type;
 
@@ -99,7 +99,7 @@ class NeoHookeanMaterialNonLinear :
 //!@name Methods
 //@{
 
-    //! Setup the created object of the class StructuralMaterial
+    //! Setup the created object of the class StructuralConstitutiveLaw
     /*!
       \param dFespace: the FiniteElement Space
       \param monolithicMap: the MapEpetra
@@ -170,7 +170,7 @@ class NeoHookeanMaterialNonLinear :
 
 
     //! Computes the deformation gradient F, the cofactor matrix Cof(F), the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
-    //! This function is used in StructuralMaterial::computeStiffness
+    //! This function is used in StructuralConstitutiveLaw::computeStiffness
     /*!
       \param dk_loc: the elemental displacement
     */
@@ -215,7 +215,7 @@ class NeoHookeanMaterialNonLinear :
     //! Get the stiffness vector
     vectorPtr_Type const stiffVector() const {return M_stiff; }
 
-  void Apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes);
+  void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes);
 
 //@}
 
@@ -434,7 +434,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 }
 
 template <typename Mesh>
-void NeoHookeanMaterialNonLinear<Mesh>::Apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes )
+void NeoHookeanMaterialNonLinear<Mesh>::apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes )
 {
   computeStiffness(sol, 0., this->M_dataMaterial, mapsMarkerVolumes, this->M_displayer);
     res += *M_stiff;
@@ -666,10 +666,10 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( E
 
 
 template <typename Mesh>
-inline StructuralMaterial<Mesh>* createNeoHookeanMaterialNonLinear() { return new NeoHookeanMaterialNonLinear<Mesh >(); }
+inline StructuralConstitutiveLaw<Mesh>* createNeoHookeanMaterialNonLinear() { return new NeoHookeanMaterialNonLinear<Mesh >(); }
 namespace
 {
-static bool registerNH = StructuralMaterial<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "neoHookean", &createNeoHookeanMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerNH = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "neoHookean", &createNeoHookeanMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

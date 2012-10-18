@@ -408,7 +408,7 @@ evalResidual( const vector_Type& sol, const vectorPtr_Type& rhs, vector_Type& re
         diagonalScale(*rhs, M_monolithicMatrix->matrix());
     if(!(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
     {
-        M_solid->Apply(sol*M_solid->rescaleFactor(), res);
+        M_solid->apply(sol*M_solid->rescaleFactor(), res);
         M_fluidBlock->globalAssemble();
 
         res += ((*M_fluidBlock)*sol);
@@ -428,7 +428,7 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     Real coefficient ( M_data->dataSolid()->dataTime()->timeStep() * M_data->dataSolid()->dataTime()->timeStep() * M_solid->rescaleFactor() /  M_solidTimeAdvance->coefficientSecondDerivative( 0 ) );
     M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
-    *rhsFluidCoupling += *M_solid->Mass() * ( M_solidTimeAdvance->rhsContributionSecondDerivative() * coefficient );
+    *rhsFluidCoupling += *M_solid->massMatrix() * ( M_solidTimeAdvance->rhsContributionSecondDerivative() * coefficient );
     // TODO NOTE: this mass * vector multiplication in serial may lead to a NaN for unclear reasons
     // (both the matrix and the vector does not contain a NaN before the multiplication..)
 }
@@ -512,7 +512,7 @@ FSIMonolithic::assembleSolidBlock( UInt iter, const vector_Type& solution )
     {
       M_solid->material()->computeStiffness(solution*M_solid->rescaleFactor(), 1., M_data->dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr());
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
-        *M_solidBlockPrec += *M_solid->Mass();
+        *M_solidBlockPrec += *M_solid->massMatrix();
         *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
         M_solidBlockPrec->globalAssemble();
         *M_solidBlockPrec *= M_solid->rescaleFactor();
@@ -521,7 +521,7 @@ FSIMonolithic::assembleSolidBlock( UInt iter, const vector_Type& solution )
     {
       M_solid->material()->updateJacobianMatrix( solution*M_solid->rescaleFactor(), dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
-        *M_solidBlockPrec += *M_solid->Mass();
+        *M_solidBlockPrec += *M_solid->massMatrix();
         *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
         M_solidBlockPrec->globalAssemble();
         *M_solidBlockPrec *= M_solid->rescaleFactor();

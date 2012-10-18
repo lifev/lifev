@@ -27,6 +27,7 @@ save       = 1
 
   [./physics]
   density   = 1.2               # density
+  material_flag = 2
   young     = 8.0E6
   poisson   = 0.4
 

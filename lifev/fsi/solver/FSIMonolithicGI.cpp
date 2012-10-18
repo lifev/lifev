@@ -42,6 +42,8 @@ FSIMonolithicGI::FSIMonolithicGI() :
                     super_Type              (),
                     M_mapWithoutMesh        (),
                     M_uk                    (),
+                    M_velImplicit           (),
+                    M_vectorMeshMovement    (),
                     M_domainVelImplicit     (true),
                     M_convectiveTermDer     (true),
                     M_interface             (0),
@@ -105,6 +107,13 @@ void FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
                    M_monolithicMap,
                    M_offset
     );
+
+    M_velImplicit.reset( new vector_Type(M_mmFESpace->map()) );
+    M_vectorMeshMovement.reset( new vector_Type(M_mmFESpace->map()) );
+
+    *M_velImplicit = 0.0;
+    *M_vectorMeshMovement = 0.0;
+    
 }
 
 void
@@ -120,6 +129,7 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
                                const UInt          iter )
 {
     res *= 0.;//this is important. Don't remove it!
+
     if ( ( iter == 0 ) || !M_data->dataFluid()->isSemiImplicit() )
     {
 
@@ -135,22 +145,30 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
-            *meshVel = M_ALETimeAdvance->velocity( );
-            M_ALETimeAdvance->extrapolation(*mmRep);
-            moveMesh(*mmRep);// re-initialize the mesh points
+	  //*meshVel = M_ALETimeAdvance->velocity( );
+	  //M_ALETimeAdvance->extrapolation(*mmRep);
+	  //moveMesh(*mmRep);// re-initialize the mesh points
             if( iter==0 )
             {
-                M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-                M_ALETimeAdvance->shiftRight(*meshDisp);
+              moveMesh(*M_vectorMeshMovement);
+	      *meshVel = *M_velImplicit;
+	      // M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
+              //   M_ALETimeAdvance->shiftRight(*meshDisp);
             }
+	    else
+	      {
+		*meshVel = M_ALETimeAdvance->velocity( );
+		M_ALETimeAdvance->extrapolation(*mmRep);
+		moveMesh(*mmRep);// re-initialize the mesh points
+	      }
         }
         else
         {
             if ( iter == 0 )
             {
-                M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
-                M_ALETimeAdvance->shiftRight( *meshDisp );
-                M_ALETimeAdvance->extrapolation( *mmRep );
+	      //M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+              //M_ALETimeAdvance->shiftRight( *meshDisp );
+              M_ALETimeAdvance->extrapolation( *mmRep );
             }
             else
             {
@@ -291,7 +309,7 @@ void FSIMonolithicGI::setupBlockPrec()
                                                    M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap,
                                                  1 ) );
-        *M_solidBlockPrec += *M_solid->Mass();
+        *M_solidBlockPrec += *M_solid->massMatrix();
         *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
         M_solidBlockPrec->globalAssemble();
         *M_solidBlockPrec *= M_solid->rescaleFactor();
