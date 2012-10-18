@@ -37,7 +37,7 @@
 #ifndef __MESH_UTILITIES__
 #define __MESH_UTILITIES__
 
-#include <boost/shared_ptr.hpp>
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/mesh/MeshUtility.hpp>
 #include <lifev/core/fem/GeometricMap.hpp>

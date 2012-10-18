@@ -37,10 +37,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef STRING_DATA_H
 #define STRING_DATA_H
 
-#include <iostream>
-#include <string>
-#include <vector>
-
 #include <lifev/core/LifeV.hpp>
 
 namespace LifeV

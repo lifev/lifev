@@ -51,6 +51,8 @@
 #ifndef _ASSEMBLY
 #define _ASSEMBLY
 
+#include <lifev/core/LifeV.hpp>
+
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
@@ -59,7 +61,6 @@
 #include <lifev/core/fem/CurrentFE.hpp>
 #include <lifev/core/fem/DOFLocalPattern.hpp>
 
-#include <vector>
 
 namespace LifeV
 {
@@ -120,14 +121,14 @@ assembleVector( VectorEpetra&    globalVector,
 template <typename DofType>
 void
 assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
-                const UInt&      	  elementID,
-                MatrixElemental&          	  localMatrix,
+                const UInt&           elementID,
+                MatrixElemental&              localMatrix,
                 const UInt&           feNbDof,
-                const DofType&    	  dof,
+                const DofType&        dof,
                 Int                   iblock,
                 Int                   jblock,
-                Int              	  iOffset,
-                Int              	  jOffset)
+                Int                   iOffset,
+                Int                   jOffset)
 
 {
 
@@ -320,20 +321,19 @@ assembleTransposeMatrix( MatrixEpetra<Real>&   globalMatrix,
 
 template <typename DOF, typename VectorElemental>
 void
-extract_vec( VectorEpetra& V,
+extract_vec( const VectorEpetra& V,
              VectorElemental& elvec,
              const DOFLocalPattern& fe,
              const DOF& dof,
              const UInt feId,
-             Int iblock )
+             const UInt elvecBlock )
 {
-    UInt totdof (dof.numTotalDof());
-    typename VectorElemental::vector_view vec = elvec.block( iblock );
-    UInt ig;
+    typename VectorElemental::vector_view vec = elvec.block ( elvecBlock );
+
     for ( UInt i (0) ; i < fe.nbLocalDof() ; ++i )
     {
-        ig = dof.localToGlobalMap( feId, i ) + iblock * totdof;
-        vec( i ) = V[ ig ];
+        const UInt ig = dof.localToGlobalMap( feId, i );
+        vec ( i ) = V [ ig ];
     }
 }
 

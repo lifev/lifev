@@ -36,14 +36,11 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef LIFE_CHRONO_H
 #define LIFE_CHRONO_H
 
-#include <ctime>
-
-#include <lifev/core/LifeV.hpp>
-
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <boost/shared_ptr.hpp>
+#include <ctime>
+
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <Epetra_MpiComm.h>
@@ -53,6 +50,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {

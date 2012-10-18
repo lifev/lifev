@@ -1,0 +1,107 @@
+<ParameterList>
+
+    <ParameterList name="Linear Solver">
+        <Parameter docString="" id="0" isDefault="false" isUsed="true" name="Max Iterations For Reuse" type="int" value="10"/>
+        <Parameter docString="" id="1" isDefault="false" isUsed="true" name="Quit On Failure" type="bool" value="false"/>
+        <Parameter docString="" id="2" isDefault="false" isUsed="true" name="Reuse Preconditioner" type="bool" value="true"/>
+        <Parameter docString="" id="3" isDefault="false" isUsed="true" name="Silent" type="bool" value="false"/>
+        <Parameter docString="" id="4" isDefault="false" isUsed="true" name="Solver Type" type="string" value="Belos"/>
+
+        <ParameterList id="27" name="Solver: Operator List">
+            <Parameter docString="" id="5" isDefault="false" isUsed="true" name="Preconditioner Side" type="string" value="Right"/>
+            <Parameter docString="" id="6" isDefault="false" isUsed="true" name="Solver Manager Type" type="string" value="BlockGmres"/>
+
+            <ParameterList id="16" name="Trilinos: AztecOO List">
+                <Parameter docString="" id="7" isDefault="false" isUsed="true" name="aux_vec" type="int" value="0"/>
+                <Parameter docString="" id="8" isDefault="false" isUsed="true" name="conv" type="string" value="rhs"/>
+                <Parameter docString="" id="9" isDefault="false" isUsed="true" name="kspace" type="int" value="100"/>
+                <Parameter docString="" id="10" isDefault="false" isUsed="true" name="max_iter" type="int" value="500"/>
+                <Parameter docString="" id="11" isDefault="false" isUsed="true" name="orthog" type="int" value="0"/>
+                <Parameter docString="" id="12" isDefault="false" isUsed="true" name="output" type="string" value="all"/>
+                <Parameter docString="" id="13" isDefault="false" isUsed="true" name="scaling" type="string" value="none"/>
+                <Parameter docString="" id="14" isDefault="false" isUsed="true" name="solver" type="string" value="gmres"/>
+                <Parameter docString="" id="15" isDefault="false" isUsed="true" name="tol" type="double" value="1e-05"/>
+            </ParameterList>
+
+            <ParameterList id="26" name="Trilinos: Belos List">
+                <Parameter docString="" id="17" isDefault="false" isUsed="true" name="Block Size" type="int" value="1"/>
+                <Parameter docString="" id="18" isDefault="false" isUsed="true" name="Convergence Tolerance" type="double" value="1e-12"/>
+                <Parameter docString="" id="19" isDefault="false" isUsed="true" name="Flexible Gmres" type="bool" value="false"/>
+                <Parameter docString="" id="20" isDefault="false" isUsed="true" name="Maximum Iterations" type="int" value="200"/>
+                <Parameter docString="" id="21" isDefault="false" isUsed="true" name="Maximum Restarts" type="int" value="1"/>
+                <Parameter docString="" id="22" isDefault="false" isUsed="true" name="Num Blocks" type="int" value="100"/>
+                <Parameter docString="" id="23" isDefault="false" isUsed="true" name="Output Frequency" type="int" value="1"/>
+                <Parameter docString="" id="24" isDefault="false" isUsed="true" name="Output Style" type="int" value="1"/>
+                <Parameter docString="" id="25" isDefault="false" isUsed="true" name="Verbosity" type="int" value="35"/>
+            </ParameterList>
+
+        </ParameterList>
+
+    </ParameterList>
+
+    <ParameterList name="Preconditioner">
+        <Parameter name="prectype" type="string" value="Ifpack"/>
+        <Parameter name="reuse" type="bool" value="false"/>
+
+        <ParameterList name="Ifpack">
+            <Parameter name="prectype" type="string" value="Amesos"/>
+            <Parameter name="overlap level" type="int" value="5"/>
+
+            <Parameter name="relaxation: type" type="string" value="ILU"/>
+            <Parameter name="relaxation: damping factor" type="double" value="1."/>
+            <Parameter name="relaxation: sweeps" type="int" value="1"/>
+            <Parameter name="relaxation: min diagonal value" type="double" value="0."/>
+            <Parameter name="relaxation: zero starting solution" type="bool" value="true"/>
+
+            <Parameter name="partitioner: type" type="string" value="metis"/>
+            <Parameter name="partitioner: overlap" type="int" value="0"/>
+            <Parameter name="partitioner: local parts" type="int" value="1"/>
+            <Parameter name="partitioner: root node" type="int" value="0"/>
+            <Parameter name="partitioner: use symmetric graph" type="bool" value="true"/>
+
+            <Parameter name="amesos: solver type" type="string" value="Amesos_Umfpack" />
+
+            <Parameter name="fact: drop tolerance" type="double" value="1e-10" />
+            <Parameter name="fact: level-of-fill" type="int" value="1" />
+            <Parameter name="fact: ilut level-of-fill" type="double" value="1" />
+            <Parameter name="fact: absolute threshold" type="double" value="1e-5" />
+            <Parameter name="fact: relative threshold" type="double" value="1" />
+            <Parameter name="fact: relax value" type="double" value="0" />
+
+<!--            <Parameter name="schwarz: combine mode" type="bool" value="0"/> -->
+            <Parameter name="schwarz: compute condest" type="bool" value="false"/>
+            <Parameter name="schwarz: reordering type" type="string" value="none"/>
+            <Parameter name="schwarz: filter singletons" type="bool" value="true"/>
+
+        </ParameterList>
+
+        <ParameterList name="ML">
+            <Parameter name="ML output" type="int" value="10"/>
+            <Parameter name="print unused" type="int" value="2"/>
+            <Parameter name="default values" type="string" value="DD"/>
+            <Parameter name="max levels" type="int" value="10"/>
+            <Parameter name="prec type" type="string" value="MGV"/>
+
+            <Parameter name="smoother: type" type="string" value="self"/>
+            <Parameter name="smoother: pre or post" type="string" value="both"/>
+            <Parameter name="smoother: sweeps" type="int" value="3"/>
+            <Parameter name="smoother: damping factor" type="double" value="1"/>
+
+            <Parameter name="coarse: type" type="string" value="self"/>
+            <Parameter name="coarse: sweeps" type="int" value="1"/>
+            <Parameter name="coarse: pre or post" type="string" value="both"/>
+            <Parameter name="coarse: max size" type="int" value="1024"/>
+
+            <Parameter name="repartition: enable" type="int" value="1"/>
+            <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
+            <Parameter name="repartition: max min ratio" type="double" value="1.3"/>
+            <Parameter name="repartition: min per proc" type="int" value="500"/>
+
+            <Parameter name="energy minimization: enable" type="bool" value="true"/>
+            <Parameter name="energy minimization: type" type="int" value="3"/> -->
+
+        </ParameterList>
+
+    </ParameterList>
+
+</ParameterList>

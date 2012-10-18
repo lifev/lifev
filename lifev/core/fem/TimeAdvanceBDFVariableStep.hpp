@@ -42,13 +42,9 @@
 
 #ifndef _BDF_VARIABLE_TIMESTEP_H
 #define _BDF_VARIABLE_TIMESTEP_H
-#include <string>
-#include <iostream>
-#include <numeric>
-#include <boost/numeric/ublas/vector.hpp>
 
+#include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
-
 
 namespace LifeV
 {
