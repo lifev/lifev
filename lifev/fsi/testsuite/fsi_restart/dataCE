@@ -110,7 +110,7 @@ filename   = solidRst  # name of the postprocessed file
 
 * #importer details
 [importer]
-restartType=restartFSI
+restartFSI=true
 initSol=00005             # label of the solution from which we want to start (5 digits by convention)
 initSolFD=00006           # label of the fluid displacement solution from which we want to start (may be important e.g. if we want to restart with GI from a GE simulation)
 type       = hdf5         # format of the imported solution
