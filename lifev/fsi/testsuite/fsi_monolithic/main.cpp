@@ -343,11 +343,6 @@ public:
 
             M_fsi->iterate( solution );
 
-	    std::string currentSol="currentSol";
-	    solution->spy(currentSol);
-
-	    std::cout << "Saved the solution" << std::endl;
-
 	    if(M_data->method().compare("monolithicGI") == 0)
 	      {
 		// Saving the solution
@@ -541,26 +536,13 @@ void Problem::updateSolutionDomainVelocityFalse( const vectorPtr_Type solution )
 
   //Extract the previous solution
   vector_Type previousSolution( M_fsi->FSIOper()->solution() );
-
-  std::cout << "Norm of the solution" << previousSolution.norm2() << std::endl;
-  std::cout << "Norm of the solution" << solution->norm2() << std::endl;
   vector_Type previousDisplacement( M_fsi->FSIOper()->mmFESpace().map() );
   previousDisplacement *= 0.0;
 
-  std::cout << "Primo" << std::endl;
   LifeV::UInt sizeOfSolutionVector = previousSolution.size();
-
-  std::cout << "Size of the vector:"  << previousSolution.size() << std::endl;
   LifeV::UInt offsetStartCopying = sizeOfSolutionVector - nDofsALE;
 		
-  std::string pSol="previousSolution";
-  std::string pDispl="previousDispl";
-		
-  previousSolution.spy(pSol);
   previousDisplacement.subset(previousSolution,  offsetStartCopying ); 
-
-  previousDisplacement.spy(pDispl);
-  std::cout << "Saved the pdispl " << std::endl;
 
   //After having saved the previous displacement we can push the current solution
   M_fsi->FSIOper()->updateSolution ( *solution );

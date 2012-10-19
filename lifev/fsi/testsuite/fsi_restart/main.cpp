@@ -324,9 +324,6 @@ public:
 	*solution = M_fsi->FSIOper()->solution();
 
 	M_fsi->iterate( solution );
-
-	std::cout << "At time: " << M_data->dataFluid()->dataTime()->time() << std::endl;
-	solution->spy("solutionVector");
 	
 	// Saving the solution
 	if( M_data->dataFluid()->domainVelImplicit() == true )
@@ -693,8 +690,6 @@ void Problem::restartFSI(  GetPot const& data_file)
     //this is going to be the global solutions returned by the method solution()
 
     HarmonicSol->spy("harmonicRelaode");
-    int n;
-    std::cin >>n;
 
     std::cout << "Norm of the reloaded solution: " <<  M_fluidStencil[0]->norm2() << std::endl;
 
@@ -730,25 +725,14 @@ void Problem::updateSolutionDomainVelocityFalse( const vectorPtr_Type solution )
   //Extract the previous solution
   vector_Type previousSolution( M_fsi->FSIOper()->solution() );
 
-  std::cout << "Norm of the solution" << previousSolution.norm2() << std::endl;
-  std::cout << "Norm of the solution" << solution->norm2() << std::endl;
   vector_Type previousDisplacement( M_fsi->FSIOper()->mmFESpace().map() );
   previousDisplacement *= 0.0;
 
-  std::cout << "Primo" << std::endl;
-  LifeV::UInt sizeOfSolutionVector = previousSolution.size();
 
-  std::cout << "Size of the vector:"  << previousSolution.size() << std::endl;
+  LifeV::UInt sizeOfSolutionVector = previousSolution.size();
   LifeV::UInt offsetStartCopying = sizeOfSolutionVector - nDofsALE;
 		
-  std::string pSol="previousSolution";
-  std::string pDispl="previousDispl";
-		
-  previousSolution.spy(pSol);
   previousDisplacement.subset(previousSolution,  offsetStartCopying ); 
-
-  previousDisplacement.spy(pDispl);
-  std::cout << "Saved the pdispl " << std::endl;
 
   //After having saved the previous displacement we can push the current solution
   M_fsi->FSIOper()->updateSolution ( *solution );
@@ -764,10 +748,10 @@ void Problem::checkResult(const LifeV::Real& time)
 
   LifeV::Real dispNorm=M_fsi->displacement().norm2();
 
-  if (time==0.006 && (dispNorm-100337)/dispNorm*(dispNorm-100337)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.007 && (dispNorm-94927.2)/dispNorm*(dispNorm-94927.2)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.008 && (dispNorm-91964.6)/dispNorm*(dispNorm-91964.6)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.009 && (dispNorm-86967.1)/dispNorm*(dispNorm-86967.1)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.01 && (dispNorm-80348.1)/dispNorm*(dispNorm-80348.1)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.011 && (dispNorm-68899.5)/dispNorm*(dispNorm-68899.5)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
+  if (time==0.006 && (dispNorm-100511)/dispNorm*(dispNorm-100511)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
+  else if (time==0.007 && (dispNorm-95089.3)/dispNorm*(dispNorm-95089.3)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
+  else if (time==0.008 && (dispNorm-92130)/dispNorm*(dispNorm-92130)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
+  else if (time==0.009 && (dispNorm-87117.1)/dispNorm*(dispNorm-87117.1)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
+  else if (time==0.01 && (dispNorm-80428.2)/dispNorm*(dispNorm-80428.2)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
+  else if (time==0.011 && (dispNorm-68876)/dispNorm*(dispNorm-68876)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
 }
