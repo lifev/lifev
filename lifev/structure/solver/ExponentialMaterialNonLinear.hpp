@@ -682,7 +682,9 @@ void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( 
 
 }
 
+template <typename Mesh>
 inline StructuralConstitutiveLaw<Mesh>* createExponentialMaterialNonLinear() { return new ExponentialMaterialNonLinear<Mesh >(); }
+
 namespace
 {
 static bool registerEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );

@@ -80,7 +80,7 @@
 #include <lifev/structure/fem/AssemblyElementalStructure.hpp>
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 #include <lifev/structure/solver/WallTensionEstimatorData.hpp>
-#include <lifev/structure/solver/StructuralMaterial.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 //Materials
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
@@ -128,7 +128,7 @@ public:
     typedef typename boost::shared_ptr< Exporter<Mesh> >  exporterPtr_Type;
 
     // Materials
-    typedef StructuralMaterial<Mesh>                       material_Type;
+    typedef StructuralConstitutiveLaw<Mesh>                material_Type;
     typedef boost::shared_ptr<material_Type>               materialPtr_Type;
 
 //@}
@@ -627,7 +627,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
       M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
       elVecTens.zero();
 
-      M_marker = M_FESpace->mesh()->volumeList( i ).marker();
+      M_marker = M_FESpace->mesh()->volumeList( i ).markerID();
 
       UInt eleID = M_FESpace->fe().currentLocalId();
 
@@ -898,7 +898,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
       elVecSigmaY.zero();
       elVecSigmaZ.zero();
 
-      M_marker = M_FESpace->mesh()->volumeList( i ).marker();
+      M_marker = M_FESpace->mesh()->volumeList( i ).markerID();
 
       UInt eleID = M_FESpace->fe().currentLocalId();
 

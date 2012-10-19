@@ -378,7 +378,7 @@ VenantKirchhoffMaterialLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epet
   firstPiola += secondTerm;
 }
 
-
+template <typename Mesh>
 inline StructuralConstitutiveLaw<Mesh>* createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear<Mesh >(); }
 namespace
 {

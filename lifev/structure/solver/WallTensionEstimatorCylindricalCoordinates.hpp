@@ -315,7 +315,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
   for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
     {
 
-      this->M_marker = this->M_FESpace->mesh()->volumeList( i ).marker();
+      this->M_marker = this->M_FESpace->mesh()->volumeList( i ).markerID();
 
       //Recrating local vectors
       vector_Type dX(this->M_FESpace->fieldDim(),0.0);

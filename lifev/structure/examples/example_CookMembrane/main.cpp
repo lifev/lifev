@@ -70,8 +70,8 @@
 
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 
-#include <lifev/structure/solver/StructuralMaterial.hpp>
-#include <lifev/structure/solver/StructuralSolver.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/StructuralOperator.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
@@ -123,7 +123,7 @@ class Structure
 public:
 
   typedef RegionMesh<LifeV::LinearTetra >                       mesh_Type;  
-  typedef StructuralSolver<mesh_Type >::vector_Type             vector_Type;
+  typedef StructuralOperator<mesh_Type >::vector_Type             vector_Type;
   typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
   typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
 
@@ -376,7 +376,7 @@ Structure::run3d()
     BCh->addBC("EdgesIn",      70,  Essential, Component, zero, compz);
 
     //! 1. Constructor of the structuralSolver
-    StructuralSolver< RegionMesh<LinearTetra> > solid;
+    StructuralOperator< RegionMesh<LinearTetra> > solid;
 
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,
@@ -569,10 +569,10 @@ Structure::run3d()
         //! 6. Updating right-hand side
     *rhs *=0;
     timeAdvance->updateRHSContribution( dt );
-    *rhs += *solid.Mass() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
+    *rhs += *solid.massMatrix() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
 
     std::cout << "Norm of the rhsNoBC: " << (*rhs).norm2() << std::endl;
-    solid.updateRightHandSide( *rhs );
+    solid.setRightHandSide( *rhs );
 
     //! 7. Iterate --> Calling Newton
     solid.iterate( BCh );
