@@ -331,6 +331,62 @@ FSISolver::iterate()
     std::cout << std::flush;
 }
 
+
+void
+FSISolver::iterate( vectorPtr_Type& solution )
+{
+    debugStream( 6220 ) << "============================================================\n";
+    debugStream( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSI: " << M_data->method()  << "\n";
+    debugStream( 6220 ) << "============================================================\n";
+
+    // Update the system
+    M_oper->updateSystem( );
+
+    // The initial guess for the Newton method is received from outside.
+    // For instance, it can be the solution at the previous time or an extrapolation
+    vector_Type lambda ( *solution );
+
+
+    // the newton solver
+    UInt maxiter = M_data->maxSubIterationNumber();
+    UInt status = NonLinearRichardson( lambda,
+                                       *M_oper,
+                                       M_data->absoluteTolerance(),
+                                       M_data->relativeTolerance(),
+                                       maxiter,
+                                       M_data->errorTolerance(),
+                                       M_data->NonLinearLineSearch(),
+                                       0,/*first newton iter*/
+                                       2,/*verbosity level*/
+                                       M_out_res,
+                                       M_data->dataFluid()->dataTime()->time()
+				       );
+
+    // After the Newton method, the solution that was received is modified with the current solution
+    // It is passed outside where it is used as the user wants.
+
+    *solution = lambda;
+
+    if (status == EXIT_FAILURE)
+    {
+        std::ostringstream __ex;
+        __ex << "FSISolver::iterate ( " << M_data->dataFluid()->dataTime()->time() << " ) Inners iterations failed to converge\n";
+        throw std::logic_error( __ex.str() );
+    }
+    else
+    {
+        //M_oper->displayer().leaderPrint("FSI-  Number of inner iterations:              ", maxiter, "\n" );
+        if (M_epetraWorldComm->MyPID() == 0)
+        {
+            M_out_iter << M_data->dataFluid()->dataTime()->time() << " " << maxiter;
+        }
+    }
+
+    debugStream( 6220 ) << "FSISolver iteration at time " << M_data->dataFluid()->dataTime()->time() << " done\n";
+    debugStream( 6220 ) << "============================================================\n";
+    std::cout << std::flush;
+}
+
 // ===================================================
 // Set Functions
 // ===================================================

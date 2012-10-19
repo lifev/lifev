@@ -458,7 +458,7 @@ protected:
     //! Constructs the solid FESpace
     /**
        Creates the solid FESpace with an unpartitioned mesh, necessary step to create the dof interconnections
-       at the interface. The solid FESpace will be reset in variablesInit using the partitioned mesh.
+       at the interface. The solid FESpace will be reset in variablesInit using the partitioned mesh.export
        If the interface map is created offline this method is never called.
        \param dOrder: discretization order
      */

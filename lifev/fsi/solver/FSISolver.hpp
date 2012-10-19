@@ -222,6 +222,8 @@ public:
 
     void iterate();
 
+    void iterate( vectorPtr_Type& solution );
+
     void showMe() {}
 
 private:

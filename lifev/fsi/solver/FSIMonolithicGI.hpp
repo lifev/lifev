@@ -142,24 +142,20 @@ class Epetra_FullMonolithic;
 
        void updateSolution( const vector_Type& solution )
         {
-       	  vectorPtr_Type previousMeshDisp( new vector_Type(M_mmFESpace->map()) );
-       	  UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
-       	  previousMeshDisp->subset(solution, offset); 
+       	  super_Type::updateSolution( solution );
 
-	  if (!M_domainVelImplicit)
+	  // //ALE shiftRight
+	  if( M_domainVelImplicit == true )
 	    {
-	      M_velImplicit.reset( new vector_Type(M_mmFESpace->map()) );
-	      M_vectorMeshMovement.reset( new vector_Type(M_mmFESpace->map()) );
+	      vectorPtr_Type displacementToSave( new vector_Type(M_mmFESpace->map()) );
+	      UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
-	      *M_velImplicit = M_ALETimeAdvance->velocity( );
-	      M_ALETimeAdvance->extrapolation(*M_vectorMeshMovement);
+	      displacementToSave->subset(solution, offset); //if the conv. term is to be condidered implicitly
+	      M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+	      M_ALETimeAdvance->shiftRight( *displacementToSave );
 	    }
 
-       	  M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
-       	  M_ALETimeAdvance->shiftRight( *previousMeshDisp );
-	  
-       	  super_Type::updateSolution( solution );
-        }
+	}
 
        //@}
 

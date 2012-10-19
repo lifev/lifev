@@ -145,40 +145,25 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 
         if (!M_domainVelImplicit)//if the mesh motion is at the previous time step in the convective term
         {
-	  //*meshVel = M_ALETimeAdvance->velocity( );
-	  //M_ALETimeAdvance->extrapolation(*mmRep);
-	  //moveMesh(*mmRep);// re-initialize the mesh points
-            if( iter==0 )
-            {
-              moveMesh(*M_vectorMeshMovement);
-	      *meshVel = *M_velImplicit;
-	      // M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-              //   M_ALETimeAdvance->shiftRight(*meshDisp);
-            }
-	    else
-	      {
-		*meshVel = M_ALETimeAdvance->velocity( );
-		M_ALETimeAdvance->extrapolation(*mmRep);
-		moveMesh(*mmRep);// re-initialize the mesh points
-	      }
+	  *meshVel = M_ALETimeAdvance->velocity( );
+	  M_ALETimeAdvance->extrapolation(*mmRep);
+	  moveMesh(*mmRep);// re-initialize the mesh points
         }
         else
         {
-            if ( iter == 0 )
+	  if ( iter == 0 )
             {
-	      //M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
-              //M_ALETimeAdvance->shiftRight( *meshDisp );
               M_ALETimeAdvance->extrapolation( *mmRep );
             }
-            else
+	  else
             {
-                M_ALETimeAdvance->setSolution( *meshDisp );
-                *mmRep = *meshDisp;
+	      M_ALETimeAdvance->setSolution( *meshDisp );
+	      *mmRep = *meshDisp;
             }
-            *meshVel = M_ALETimeAdvance->velocity();
-            moveMesh( *mmRep );// re-initialize the mesh points
+	  *meshVel = M_ALETimeAdvance->velocity();
+	  moveMesh( *mmRep );// re-initialize the mesh points
         }
-
+	
         *mmRep = *meshVel * ( -1. );
         interpolateVelocity( *mmRep,
                              *M_beta );

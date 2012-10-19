@@ -296,18 +296,21 @@ public:
         boost::timer _overall_timer;
 
         LifeV::UInt iter = 1;
-        //LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
 
         dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(0);
 
-    bool valveIsOpen = true;
+	bool valveIsOpen = true;
 
-    //Initialize the exporters
-    M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
-    M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
-    *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
-    M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
-    M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );    
+	vectorPtr_Type solution ( new vector_Type( (*M_fsi->FSIOper()->couplingVariableMap()) ) );
+	
+	*solution = M_fsi->FSIOper()->solution();
+
+	//Initialize the exporters
+	M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
+	M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
+	*M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
+	M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
+	M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );    
 
     for ( ; M_data->dataFluid()->dataTime()->canAdvance();  ++iter)
       {
@@ -318,21 +321,34 @@ public:
 	boost::timer _timer;
 	FC0.renewParameters( *M_fsi, 3 );
 
-	M_fsi->iterate();
+	*solution = M_fsi->FSIOper()->solution();
+
+	M_fsi->iterate( solution );
+
+	std::cout << "At time: " << M_data->dataFluid()->dataTime()->time() << std::endl;
+	solution->spy("solutionVector");
+	
+	// Saving the solution
+	if( M_data->dataFluid()->domainVelImplicit() == true )
+	  {
+	
+	    M_fsi->FSIOper()->updateSolution( *solution );
+
+	    M_fsi->FSIOper()->setSolution( *solution );
+	  }
+	else
+	  {
+	    updateSolutionDomainVelocityFalse( solution );
+	    M_fsi->FSIOper()->setSolution( *solution );
+	  }
 
 	if(iter%M_saveEvery==0)
 	  {
-	    M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
-	    //M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
-
+	    M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);
 	    M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
-	    M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
-
-	    //M_fsi->iterate();
-
-	    //*M_WS= *(dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeStress());
-
 	    *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
+
+	    M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
 	    M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
 	  }
 
@@ -355,7 +371,7 @@ public:
 private:
 
     void restartFSI(  GetPot const& data_file);
-
+   void updateSolutionDomainVelocityFalse( const vectorPtr_Type solution );
     void checkResult(const LifeV::Real& time);
 
     fsi_solver_ptr M_fsi;
@@ -529,10 +545,10 @@ void Problem::restartFSI(  GetPot const& data_file)
   vectorPtr_Type structureSol      (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
   vectorPtr_Type temporarySol     (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
 
-  vectorPtr_Type vel           (new vector_Type(M_fsi->FSIOper()->uFESpace().map(), M_importerFluid->mapType()));
-  vectorPtr_Type pressure      (new vector_Type(M_fsi->FSIOper()->pFESpace().map(), M_importerFluid->mapType()));
-  vectorPtr_Type solidDisp    (new vector_Type(M_fsi->FSIOper()->dFESpace().map(), M_importerSolid->mapType()));
-  vectorPtr_Type fluidDisp(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), M_importerFluid->mapType()));
+  vectorPtr_Type vel           (new vector_Type(M_fsi->FSIOper()->uFESpace().map(), LifeV::Unique));
+  vectorPtr_Type pressure      (new vector_Type(M_fsi->FSIOper()->pFESpace().map(), LifeV::Unique));
+  vectorPtr_Type solidDisp    (new vector_Type(M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique));
+  vectorPtr_Type fluidDisp(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique));
 
   vectorPtr_Type firstFluidDisp(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), M_importerFluid->mapType()));
 
@@ -646,7 +662,7 @@ void Problem::restartFSI(  GetPot const& data_file)
     if(iterInit == 0)
       {
         HarmonicSol->subset(*fluidDisp, fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
-        if( !domainVelocity )
+        if( !domainVelocity ) //This is the first displacement of interest for the domainVelocity = true. This is why initFDSol = initSol in the data
           {
 	    *firstFluidDisp = *fluidDisp;
           }
@@ -676,16 +692,17 @@ void Problem::restartFSI(  GetPot const& data_file)
     *M_fluidStencil[0]+=*HarmonicSol;
     //this is going to be the global solutions returned by the method solution()
 
+    HarmonicSol->spy("harmonicRelaode");
+    int n;
+    std::cin >>n;
+
+    std::cout << "Norm of the reloaded solution: " <<  M_fluidStencil[0]->norm2() << std::endl;
+
     M_fsi->initialize(M_fluidStencil, M_solidStencil, M_ALEStencil);
 
-    if( domainVelocity )
-      {
 	//The following is needed because (and if) of the extrapolation of the fluid domain velocity is used, i.e. M_domainVelImplicit
-	M_fsi->FSIOper()->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataSolid()->dataTime()->timeStep() );
-	M_fsi->FSIOper()->ALETimeAdvance()->shiftRight(*firstFluidDisp);
-
-	//	dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->updateALEStencilRestart ( *M_fluidStencil[0] );	
-      }
+    M_fsi->FSIOper()->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataSolid()->dataTime()->timeStep() );
+    M_fsi->FSIOper()->ALETimeAdvance()->shiftRight(*firstFluidDisp);
 
     M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(), M_importerFluid->mapType() ));
     M_velAndPressure->subset(*pressure, pressure->map(), UInt(0), (UInt)3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof());
@@ -698,6 +715,47 @@ void Problem::restartFSI(  GetPot const& data_file)
     M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->dataTime()->updateTime();
 
     
+}
+
+void Problem::updateSolutionDomainVelocityFalse( const vectorPtr_Type solution )
+{
+
+  //The solution for the fluid and solid is at the current time
+  //The solution for the ALE is at the previous time		
+
+  //I build the vector I want to push in the exporters
+  //In this case, the vector is ( f^n+1, s^n+1, df^n )
+  LifeV::UInt nDofsALE = M_fsi->FSIOper()->mmFESpace().fieldDim() * M_fsi->FSIOper()->mmFESpace().dof().numTotalDof();
+
+  //Extract the previous solution
+  vector_Type previousSolution( M_fsi->FSIOper()->solution() );
+
+  std::cout << "Norm of the solution" << previousSolution.norm2() << std::endl;
+  std::cout << "Norm of the solution" << solution->norm2() << std::endl;
+  vector_Type previousDisplacement( M_fsi->FSIOper()->mmFESpace().map() );
+  previousDisplacement *= 0.0;
+
+  std::cout << "Primo" << std::endl;
+  LifeV::UInt sizeOfSolutionVector = previousSolution.size();
+
+  std::cout << "Size of the vector:"  << previousSolution.size() << std::endl;
+  LifeV::UInt offsetStartCopying = sizeOfSolutionVector - nDofsALE;
+		
+  std::string pSol="previousSolution";
+  std::string pDispl="previousDispl";
+		
+  previousSolution.spy(pSol);
+  previousDisplacement.subset(previousSolution,  offsetStartCopying ); 
+
+  previousDisplacement.spy(pDispl);
+  std::cout << "Saved the pdispl " << std::endl;
+
+  //After having saved the previous displacement we can push the current solution
+  M_fsi->FSIOper()->updateSolution ( *solution );
+
+  M_fsi->FSIOper()->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+  M_fsi->FSIOper()->ALETimeAdvance()->shiftRight( previousDisplacement );
+
 }
 
 void Problem::checkResult(const LifeV::Real& time)
