@@ -154,7 +154,7 @@ EnsightToHdf5::run()
     geometryTranslate[1] = dataFile( "fluid/space_discretization/transform", 0., 7);
     geometryTranslate[2] = dataFile( "fluid/space_discretization/transform", 0., 8);
 
-    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::MarkerCommon > _transformMesh(*fullMeshPtr);
+    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::markerCommon_Type > _transformMesh(*fullMeshPtr);
     _transformMesh.transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
     boost::shared_ptr<mesh_Type > meshPtr;
