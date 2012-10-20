@@ -601,7 +601,7 @@ public:
     /*!
       @return Reference of the shared pointer of the communicator of the problem.
     */
-    commPtr_Type & getCommPtr ()
+    commPtr_Type getCommPtr ()
     {
         return M_displayer->comm();
     }
