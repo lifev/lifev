@@ -70,11 +70,15 @@ ConfinedOperator::setOperator( operatorPtr_Type oper )
 }
 
 void
+ConfinedOperator::setFullMap( const MapEpetra& map )
+{
+    M_map.reset( new Epetra_Map( *( map.map(Unique) ) ) );
+}
+
+void
 ConfinedOperator::setBlockStructure( const blockStructure_Type& blockStructure )
 {
     M_blockStructure.setBlockStructure( blockStructure );
-    int size( (int) blockStructure.totalSize() );
-    M_map.reset( new Epetra_Map( size, 0, *M_comm ) );
 }
 
 void
