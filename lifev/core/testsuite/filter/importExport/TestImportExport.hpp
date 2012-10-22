@@ -381,8 +381,8 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
 
     ASSERT( M_vectorImportedPtr.size() + M_scalarImportedPtr.size(), "There's no data on which to work!" )
 
-    Int vectorImportedPtrSize = M_vectorImportedPtr.size();
-    Int scalarImportedPtrSize = M_scalarImportedPtr.size();
+    const UInt vectorImportedPtrSize = M_vectorImportedPtr.size();
+    const UInt scalarImportedPtrSize = M_scalarImportedPtr.size();
 
     // Set up the EXPORTER
     for( UInt iVec(0); iVec < vectorImportedPtrSize; ++iVec )
