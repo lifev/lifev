@@ -123,7 +123,7 @@ void bcExportTriadToParaview(std::map< ID,std::vector< Real > > &triad,std::stri
         //Writing the points
         file << "DATASET POLYDATA" << std::endl;
         file << "POINTS " << nbPoints << " float" << std::endl;
-        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); ++mapIt )
             file << (*mapIt).second[9] << "\t" << (*mapIt).second[10] << "\t" << (*mapIt).second[11] << std::endl;
 
         //Starting the data part of the file
@@ -131,17 +131,17 @@ void bcExportTriadToParaview(std::map< ID,std::vector< Real > > &triad,std::stri
 
         //Writing t1
         file << "VECTORS cell_tangent_1 float" << std::endl;
-        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); ++mapIt )
             file << (*mapIt).second[0] << "\t" << (*mapIt).second[1] << "\t" << (*mapIt).second[2] << std::endl;
 
         //Writing t2
         file << "VECTORS cell_tangent_2 float" << std::endl;
-        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); ++mapIt )
             file << (*mapIt).second[3] << "\t" << (*mapIt).second[4] << "\t" << (*mapIt).second[5] << std::endl;
 
         //Writing n
         file << "VECTORS cell_normals float" << std::endl;
-        for ( mapIt=triad.begin() ; mapIt != triad.end(); mapIt++ )
+        for ( mapIt=triad.begin() ; mapIt != triad.end(); ++mapIt )
             file << (*mapIt).second[6] << "\t" << (*mapIt).second[7] << "\t" << (*mapIt).second[8] << std::endl;
 
         //Closing the file
