@@ -98,6 +98,8 @@ public:
 
     void setOperator( operatorPtr_Type oper );
 
+    void setFullMap( const MapEpetra& map );
+
     void setBlockStructure( const blockStructure_Type& blockStructure );
 
     void setBlockIndex( UInt index );
