@@ -381,15 +381,18 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
 
     ASSERT( M_vectorImportedPtr.size() + M_scalarImportedPtr.size(), "There's no data on which to work!" )
 
+    Int vectorImportedPtrSize = M_vectorImportedPtr.size();
+    Int scalarImportedPtrSize = M_scalarImportedPtr.size();
+
     // Set up the EXPORTER
-    for( UInt iVec(0); iVec < M_vectorImportedPtr.size(); ++iVec )
+    for( UInt iVec(0); iVec < vectorImportedPtrSize; ++iVec )
     {
         M_vectorInterpolantPtr[iVec].reset(
                         new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), Repeated ) );
         exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
                                   M_vectorFESpacePtr, M_vectorInterpolantPtr[iVec], UInt(0) );
     }
-    for( UInt iScal(0); iScal < M_scalarImportedPtr.size(); ++iScal )
+    for( UInt iScal(0); iScal < scalarImportedPtrSize; ++iScal )
     {
         M_scalarInterpolantPtr[iScal].reset(
                         new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), Repeated ) );
@@ -408,9 +411,9 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
         M_displayer.leaderPrint( "[t = ", M_timeData.time(), " s.]\n" );
 
         // Computation of the interpolation
-        if( M_vectorImportedPtr.size() )
+        if( vectorImportedPtrSize )
             M_vectorFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::uexact ), *M_vectorInterpolantPtr[0], M_timeData.time() );
-        if( M_scalarImportedPtr.size() )
+        if( scalarImportedPtrSize )
             M_scalarFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::pexact ), *M_scalarInterpolantPtr[0], M_timeData.time() );
 
         // Exporting the solution
@@ -425,16 +428,16 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
     for ( ; M_timeData.canAdvance(); M_timeData.updateTime() )
     {
         // Computation of the interpolation
-        if( M_vectorImportedPtr.size() )
+        if( vectorImportedPtrSize )
             M_vectorFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::uexact ), *M_vectorInterpolantPtr[0], M_timeData.time() );
-        if( M_scalarImportedPtr.size() )
+        if( scalarImportedPtrSize )
             M_scalarFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::pexact ), *M_scalarInterpolantPtr[0], M_timeData.time() );
 
         // Importing the solution
         importerPtr->import( M_timeData.time() );
 
         Real maxDiff(1.e6);
-        if( M_vectorImportedPtr.size() )
+        if( vectorImportedPtrSize )
         {
             vectorDiff = *M_vectorInterpolantPtr[0];
             vectorDiff += (-*M_vectorImportedPtr[0]);
@@ -445,7 +448,7 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
 
             M_displayer.leaderPrint( "[vectorDiff.normInf() = ", vectorDiff.normInf(), "]\n" );
         }
-        if( M_scalarImportedPtr.size() )
+        if( scalarImportedPtrSize )
         {
             scalarDiff = *M_scalarInterpolantPtr[0];
             scalarDiff += (-*M_scalarImportedPtr[0]);
