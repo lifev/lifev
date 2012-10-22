@@ -220,6 +220,7 @@ PreconditionerComposition::pushBack( matrixPtr_Type embeddedA,
                                      superPtr_Type& preconditioner,
                                      const VectorBlockStructure& blockStructure,
                                      const UInt& blockIndex,
+                                     const MapEpetra& fullMap,
                                      const bool useInverse,
                                      const bool useTranspose,
                                      const bool buildPreconditioner )
@@ -237,6 +238,7 @@ PreconditionerComposition::pushBack( matrixPtr_Type embeddedA,
     // Wrap the preconditioner in a ConfinedOperator
     Operators::ConfinedOperator* confinedOperator = new Operators::ConfinedOperator( M_comm );
     confinedOperator->setOperator( precOper );
+    confinedOperator->setFullMap( fullMap );
     confinedOperator->setBlockStructure( blockStructure );
     confinedOperator->setBlockIndex( blockIndex );
     operatorPtr_Type oper( confinedOperator );

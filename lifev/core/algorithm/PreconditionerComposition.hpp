@@ -54,6 +54,7 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/algorithm/ComposedOperator.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/array/VectorBlockStructure.hpp>
 
 namespace LifeV {
@@ -226,6 +227,7 @@ protected:
                   superPtr_Type& preconditioner,
                   const VectorBlockStructure& blockStructure,
                   const UInt& blockIndex,
+                  const MapEpetra& fullMap,
                   const bool useInverse   = false,
                   const bool useTranspose = false,
                   const bool buildPreconditioner = true );

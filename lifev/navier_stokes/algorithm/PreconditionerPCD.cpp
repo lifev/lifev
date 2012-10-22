@@ -291,7 +291,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         }
         if( M_fluidPrec == "LinearSolver" )
         {
-            this->pushBack( p3, precForBlock3, vectorStructure, 0, notInversed, notTransposed );
+            this->pushBack( p3, precForBlock3, vectorStructure, 0, oper->map(), notInversed, notTransposed );
         }
         else
         {
@@ -553,7 +553,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             precForBlock2->setDataFromGetPot( M_dataFile, M_pressureMassPrecDataSection );
             if( M_pressureMassPrec == "LinearSolver" )
             {
-                this->pushBack( pMp, precForBlock2, vectorStructure, 1, notInversed, notTransposed );
+                this->pushBack( pMp, precForBlock2, vectorStructure, 1, oper->map(), notInversed, notTransposed );
             }
             else
             {
@@ -574,7 +574,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
         if( M_pressureLaplacianPrec == "LinearSolver" )
         {
-            this->pushBack( pAp, precForBlock1, vectorStructure, 1, notInversed, notTransposed );
+            this->pushBack( pAp, precForBlock1, vectorStructure, 1, oper->map(), notInversed, notTransposed );
         }
         else
         {
@@ -590,7 +590,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         precForBlock1->setDataFromGetPot( M_dataFile, M_pressureLaplacianPrecDataSection );
         if( M_pressureLaplacianPrec == "LinearSolver" )
         {
-            this->pushBack( pAp, precForBlock1, vectorStructure, 1, notInversed, notTransposed );
+            this->pushBack( pAp, precForBlock1, vectorStructure, 1, oper->map(), notInversed, notTransposed );
         }
         else
         {
@@ -616,7 +616,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
             precForBlock2->setDataFromGetPot( M_dataFile, M_pressureMassPrecDataSection );
             if( M_pressureMassPrec == "LinearSolver" )
             {
-                this->pushBack( pMp, precForBlock2, vectorStructure, 1, notInversed, notTransposed );
+                this->pushBack( pMp, precForBlock2, vectorStructure, 1, oper->map(), notInversed, notTransposed );
             }
             else
             {
@@ -656,7 +656,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
     {
         if( M_fluidPrec == "LinearSolver" )
         {
-            this->pushBack( p3, precForBlock3, vectorStructure, 0, notInversed, notTransposed );
+            this->pushBack( p3, precForBlock3, vectorStructure, 0, oper->map(), notInversed, notTransposed );
         }
         else
         {
@@ -677,7 +677,7 @@ PreconditionerPCD::buildPreconditioner( matrixPtr_type& oper )
         }
         if( M_fluidPrec == "LinearSolver" )
         {
-            this->pushBack( p3, precForBlock3, vectorStructure, 0, notInversed, notTransposed );
+            this->pushBack( p3, precForBlock3, vectorStructure, 0, oper->map(), notInversed, notTransposed );
         }
         else
         {
@@ -937,8 +937,6 @@ PreconditionerPCD::setBCByBoundaryType( matrixPtr_type Ap, UInt ApOffset,
                                         matrixPtr_type Fp, UInt FpOffset,
                                         matrixPtr_type Mp, UInt MpOffset )
 {
-    const bool verbose( M_comm->MyPID() == 0 );
-
     std::string boundaryType( "none" );
     Real indicator( 0.0 );
 
