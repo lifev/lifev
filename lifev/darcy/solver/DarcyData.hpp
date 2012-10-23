@@ -42,6 +42,7 @@
 #include <lifev/core/mesh/MeshData.hpp>
 
 #include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/TimeAdvanceData.hpp>
 
 // LifeV namespace
 namespace LifeV
@@ -74,6 +75,12 @@ public:
 
     //! Shared pointer for the time data.
     typedef boost::shared_ptr < timeData_Type > timeDataPtr_Type;
+
+    //! Typedef for the time advance data.
+    typedef TimeAdvanceData timeAdvanceData_Type;
+
+    //! Shared pointer for the time advance data.
+    typedef boost::shared_ptr < timeAdvanceData_Type > timeAdvanceDataPtr_Type;
 
     //! Typedef for the mesh data.
     typedef MeshData meshData_Type;
@@ -135,20 +142,29 @@ public:
 
     //! Set data time container.
     /*!
-      @param TimeData Boost shared_ptr to TimeData container
+      @param timeData Boost shared_ptr to timeData container
     */
-    void setTimeData ( const timeDataPtr_Type& TimeData )
+    void setTimeData ( const timeDataPtr_Type& timeData )
     {
-        M_time = TimeData;
+        M_time = timeData;
+    }
+
+    //! Set data time container.
+    /*!
+      @param timeAdvanceData Boost shared_ptr to timeAdvanceData container
+    */
+    void setTimeAdvanceData ( const timeDataPtr_Type& timeAdvanceData )
+    {
+        M_timeAdvance = timeAdvanceData;
     }
 
     //! Set mesh container.
     /*!
-      @param MeshData Boost shared_ptr to meshData container
+      @param meshData Boost shared_ptr to meshData container
     */
-    void setMeshData ( const meshDataPtr_Type& MeshData )
+    void setMeshData ( const meshDataPtr_Type& meshData )
     {
-        M_mesh = MeshData;
+        M_mesh = meshData;
     }
 
     // Get methods.
@@ -203,6 +219,24 @@ public:
         return M_time;
     }
 
+    //! Get data time advance container.
+    /*!
+      @return shared_ptr to TimeAdvanceData container.
+    */
+    const timeAdvanceDataPtr_Type& dataTimeAdvancePtr () const
+    {
+        return M_timeAdvance;
+    }
+
+    //! Get data time advance container.
+    /*!
+       @return shared_ptr to TimeAdvanceData container.
+    */
+    timeAdvanceDataPtr_Type& dataTimeAdvancePtr ()
+    {
+        return M_timeAdvance;
+    }
+
     //! Get mesh container
     /*!
       @return shared_ptr to meshData container.
@@ -227,13 +261,14 @@ public:
 private:
 
     //! Data containers for time and mesh
-    dataPtr_Type M_data;
-    timeDataPtr_Type M_time;
-    meshDataPtr_Type M_mesh;
+    dataPtr_Type            M_data;
+    timeDataPtr_Type        M_time;
+    timeAdvanceDataPtr_Type M_timeAdvance;
+    meshDataPtr_Type        M_mesh;
 
     //! Miscellaneous
-    UInt M_verbose;
-    std::string M_section;
+    UInt                    M_verbose;
+    std::string             M_section;
 
 };
 
@@ -255,6 +290,7 @@ DarcyData ( const darcyData_Type &darcyData ):
         // Data containers
         M_data ( darcyData.M_data ),
         M_time ( darcyData.M_time ),
+        M_timeAdvance ( darcyData.M_timeAdvance ),
         M_mesh ( darcyData.M_mesh ),
         // Miscellaneous
         M_verbose ( darcyData.M_verbose ),
@@ -273,6 +309,7 @@ operator= ( const darcyData_Type& darcyData )
         // Data containers
         M_data = darcyData.M_data;
         M_time = darcyData.M_time;
+        M_timeAdvance = darcyData.M_timeAdvance;
         M_mesh = darcyData.M_mesh;
         // Mescellaneous
         M_verbose = darcyData.M_verbose;
@@ -300,6 +337,12 @@ setup ( const data_Type& dataFile, const std::string& section )
     if ( !M_time.get() )
     {
         M_time.reset( new timeData_Type ( dataFile, M_section + "/time_discretization" ) );
+    }
+
+    // If data time has not been set
+    if ( !M_timeAdvance.get() )
+    {
+        M_timeAdvance.reset( new timeAdvanceData_Type ( dataFile, M_section + "/time_discretization" ) );
     }
 
     // If data mesh has not been set

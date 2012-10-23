@@ -513,7 +513,7 @@ setupTime ()
     M_maxIterSolver = dataFile( ( this->M_data->section() + "/solver/max_iter_reuse" ).data(), static_cast<Int>(0) );
 
     // Set up the time advance.
-    M_timeAdvance->setup ( this->M_data->dataTimePtr()->orderBDF(), 1 );
+    M_timeAdvance->setup ( this->M_data->dataTimeAdvancePtr()->orderBDF(), 1 );
 
 } // setupTime
 
