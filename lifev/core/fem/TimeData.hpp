@@ -244,13 +244,13 @@ public:
      * @return time step performed
      */
     const UInt& timeStepNumber() const { return M_timeStepNumber; }
-  
+
   //@}
-  
+
 private:
-  
+
     Real round( const Real& n, const Int& decimal=10 ) const;
-  
+
     //! initial time
     Real                    M_initialTime;
 
@@ -260,12 +260,9 @@ private:
     //! period time
     Real                    M_periodTime;
 
-    //! in cycle time
-    Real                    M_inCycleTime;
-
     //! current time
     Real                    M_time;
- 
+
     //! time step
     Real                    M_timeStep;
 
