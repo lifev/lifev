@@ -157,9 +157,6 @@ FSIOperator::~FSIOperator()
 void
 FSIOperator::setDataFile( const GetPot& dataFile )
 {
-// <<<<<<< HEAD
-//     M_fluidMesh.reset(new mesh_Type());
-// =======
 
     M_fluidMesh.reset( new mesh_Type( *M_epetraComm ) );
 
@@ -241,7 +238,6 @@ FSIOperator::setupFEspace()
     else if ( pOrder.compare("P1") == 0 )
     {
         refFE_press = &feTetraP1;
-//             qR_press    = &quadRuleTetra64pt;  // DoE 2
         qR_press    = qR_vel;  // DoE 2
         bdQr_press  = &quadRuleTria3pt;   // DoE 2
     }
@@ -474,24 +470,18 @@ FSIOperator::setupFluidSolid( void )
 void
 FSIOperator::setupFluidSolid( UInt const fluxes )
 {
+    M_meshMotion.reset( new meshMotion_Type( *M_mmFESpace, M_epetraComm ) );
+
     if ( this->isFluid() )
     {
-        M_meshMotion.reset( new meshMotion_Type(               *M_mmFESpace,             M_epetraComm ) );
-        M_fluid.reset(      new fluid_Type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
-        M_solid.reset( new solid_Type( ) );
-        M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
+        M_fluid.reset( new fluid_Type( M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
 
         //Vector initialization
         M_rhs.reset( new vector_Type( M_fluid->getMap() ) );
     }
 
-    if ( this->isSolid() )
-    {
-        M_meshMotion.reset( new meshMotion_Type(               *M_mmFESpace, M_epetraComm ) );
-        M_solid.reset( new solid_Type( ) );
-        M_solid->setup( M_data->dataSolid(), M_dFESpace,  M_epetraComm );
-
-    }
+    M_solid.reset( new solid_Type( ) );
+    M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
 
     M_epetraWorldComm->Barrier();
 }
