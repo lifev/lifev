@@ -138,6 +138,9 @@ public:
   typedef LifeV::ExporterEnsight<mesh_Type >                    ensightFilter_Type;
   typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 
+  typedef LifeV::ExporterData<mesh_Type>                        exporterData_Type;
+  typedef boost::shared_ptr<exporterData_Type>                  exporterDataPtr_Type;
+
 #ifdef HAVE_HDF5
   typedef LifeV::ExporterHDF5<mesh_Type >                       hdf5Filter_Type;
   typedef boost::shared_ptr<hdf5Filter_Type>                    hdf5FilterPtr_Type;
@@ -185,6 +188,10 @@ private:
     filterPtr_Type exporterSolid;
 
     filterPtr_Type exporterCheck;
+
+    solidFESpacePtr_Type dFESpace;
+
+    solidFESpacePtr_Type exportFESpace;
   
   
 };
@@ -265,7 +272,9 @@ static Real pressureUsingNormal(const Real& t, const Real&  /*X*/, const Real& /
 Structure::Structure( int                                   argc,
                       char**                                argv,
                       boost::shared_ptr<Epetra_Comm>        structComm):
-                  parameters( new Private() )
+  parameters( new Private() ),
+  dFESpace(),
+  exportFESpace()
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -323,11 +332,20 @@ Structure::run3d()
     boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( *( parameters->comm ) ));
     readMesh(*fullMeshPtr, meshData);
 
+    fullMeshPtr->showMe( );
+
     MeshPartitioner< RegionMesh<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
-    solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+    dFESpace.reset( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+    
+    if( dOrder.compare("P2") == 0 )
+      {
+	//A P1 FESpace has to be created since Paraview reads only P1 vectorial fields
+	exportFESpace.reset( new solidFESpace_Type(meshPart,"P1",3,parameters->comm) );
+      }
+
     if (verbose) std::cout << std::endl;
 
     std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
@@ -415,12 +433,28 @@ Structure::run3d()
 #endif
 	  {
 	    if ( !importerType.compare("none") )
-		importerSolid.reset( new emptyExporter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID()) );
+	      {
+		if( dataStructure->order().compare("P2") == 0 )
+		  {
+		    importerSolid.reset( new emptyExporter_Type ( dataFile, exportFESpace->mesh(), "solid", exportFESpace->map().comm().MyPID()) );
+		  }
+		else
+		  {
+		    importerSolid.reset( new emptyExporter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID()) );
+		  }
+	      }
 	    else
 		importerSolid.reset( new  ensightFilter_Type ( dataFile, fileName) );
 	  }
 
-	importerSolid->setMeshProcId(dFESpace->mesh(), dFESpace->map().comm().MyPID());
+	if( dataStructure->order().compare("P2") == 0 )
+	  {
+	    importerSolid->setMeshProcId(exportFESpace->mesh(), exportFESpace->map().comm().MyPID());
+	  }
+	else
+	  {
+	    importerSolid->setMeshProcId(dFESpace->mesh(), dFESpace->map().comm().MyPID());
+	  }
 
 	//Creation of Exporter to check the loaded solution (working only for HDF5)
 	// std::string expVerFile = "verificationDisplExporter";
@@ -432,34 +466,75 @@ Structure::run3d()
 	// exporter.postProcess(0.0);
 
 	//Reading the displacement field and the timesteps need by the TimeAdvance class
-	vectorPtr_Type solidDisp (new vector_Type(dFESpace->map(),importerSolid->mapType() ));
+	vectorPtr_Type solidDisp;
+
+	if( dataStructure->order().compare("P2") == 0 )
+	  {
+	    solidDisp.reset (new vector_Type(exportFESpace->map(), Unique ));
+	  }
+	else
+	  {
+	    solidDisp.reset (new vector_Type(dFESpace->map(), Unique ));
+	  }
 	
 	std::string iterationString;
 
 	std::cout << "size TimeAdvance:" << timeAdvance->size() << std::endl;
 	
 	//Loading the stencil
+	exporterDataPtr_Type solidDataReader;
 	iterationString = initialLoaded;
 	for(UInt iterInit=0; iterInit < timeAdvance->size(); iterInit++ )
 	  {
 	    *solidDisp *= 0.0;
 
-	    LifeV::ExporterData<mesh_Type> solidDataReader (LifeV::ExporterData<mesh_Type>::VectorField, std::string("displacement."+iterationString), dFESpace, solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-	    
-	    importerSolid->readVariable(solidDataReader);
+	    if( dataStructure->order().compare("P2") == 0 )
+	      {
+		solidDataReader.reset(new exporterData_Type(exporterData_Type::VectorField, std::string("displacement."+iterationString), exportFESpace, solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime) );
+	      }
+	    else
+	      {
+		solidDataReader.reset(new exporterData_Type(exporterData_Type::VectorField, std::string("displacement."+iterationString), dFESpace, solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime) );
+	      }
+
+	    importerSolid->readVariable( *solidDataReader );
 
 	    std::cout << "Norm of the " << iterInit + 1 << "-th solution : "<< solidDisp->norm2() << std::endl;
 	    
 	    //Exporting the just loaded solution (debug purposes)
 	    // Real currentLoading(iterInit + 1.0);
 	    // *vectVer = *solidDisp;
-	    // exporter.postProcess( currentLoading );
+	    // exporter.postProcess( currentLoading )
+	    
+	    //Useful if the discretization FESpace != exporter FESpace
+	    vectorPtr_Type interpolatedDisplacement (new vector_Type(dFESpace->map(), Unique ));
 
-	    solutionStencil.push_back( solidDisp );
+	    //If the discretization FESpace == P2 then the exported one is P1 anyway, so we have to trasform it.
+	    if( dataStructure->order().compare("P2") == 0 )
+	      {
+		//Transform from P1 to P2
+		*interpolatedDisplacement = dFESpace->feToFEInterpolate( *exportFESpace, *solidDisp, Unique );
+
+		//Push it in the stencil
+		solutionStencil.push_back( interpolatedDisplacement );
+	      }
+	    else
+	      {
+		solutionStencil.push_back( solidDisp );
+	      }
 
 	    //initializing the displacement field in the StructuralSolver class with the first solution
 	    if( !iterInit )
-	      solid.initialize( solidDisp );
+	      {
+		if( dataStructure->order().compare("P2") == 0 )
+		  {
+		    solid.initialize( interpolatedDisplacement );
+		  }
+		else
+		  {
+		    solid.initialize( solidDisp );
+		  }
+	      }
 
 	    //Updating string name
 	    int iterations = std::atoi(iterationString.c_str());
@@ -541,17 +616,46 @@ Structure::run3d()
     exporterSolid->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
     exporterCheck->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
-    vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  exporterSolid->mapType() ) );
-    vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporterSolid->mapType() ) );
-    vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporterSolid->mapType() ) );
+    //discretization FESpace : the possibilities offered by the FESpace class
+    //export FESpace : P1 since Paraview does not read higher fields
+    
+    //This are the vector to extract the displacement, velocity and acceleration. 
+    //Their map has to be the one of the discretization FESpace 
+    vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  Unique ) );
+    vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  Unique ) );
+    vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  Unique ) );
 
+    //This are used when the discretization FESpace != export FESpace
+    vectorPtr_Type solidDispReduced;
+    vectorPtr_Type solidVelReduced; 
+    vectorPtr_Type solidAccReduced; 
+    vectorPtr_Type rhsVectorReduced;
+
+    //Created for debug reasons. The map has to be the one of the discretization FESpace
     vectorPtr_Type rhsVector ( new vector_Type(solid.rhs(),  Unique ) );
 
+    //If the discretization FESpace == P2, then the vector have to be reduced to P1
+    if( dataStructure->order().compare("P2") == 0 )
+      {
+	solidDispReduced.reset ( new vector_Type(exportFESpace->map(),  Unique ) );
+	solidVelReduced.reset  ( new vector_Type(exportFESpace->map(),  Unique ) );
+	solidAccReduced.reset  ( new vector_Type(exportFESpace->map(),  Unique ) );
+	rhsVectorReduced.reset ( new vector_Type(exportFESpace->map(),  Unique ) );
+      }
+
+    //
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
-
     exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt(0) );
+
+    if( dataStructure->order().compare("P2") == 0 )
+      {
+	exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", exportFESpace, solidDispReduced, UInt(0) );
+	exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     exportFESpace, solidVelReduced,  UInt(0) );
+	exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", exportFESpace, solidAccReduced,  UInt(0) );
+	exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", exportFESpace, rhsVectorReduced,  UInt(0) );
+      }    
 
     exporterSolid->postProcess( 0 );
     exporterCheck->postProcess( 0 );
@@ -597,11 +701,30 @@ Structure::run3d()
     *solidDisp = solid.displacement();
     *solidVel  = timeAdvance->velocity();
     *solidAcc  = timeAdvance->acceleration();
-
     *rhsVector = solid.rhs();
 
-    exporterSolid->postProcess( time );
-    exporterCheck->postProcess( time );
+    if( dataStructure->order().compare("P2") == 0 )
+      {
+	//Projection of the vectorial field on P1
+	solidDispReduced.reset ( new vector_Type(exportFESpace->map()) );
+	solidVelReduced.reset  ( new vector_Type(exportFESpace->map()) );
+	solidAccReduced.reset  ( new vector_Type(exportFESpace->map()) );
+	rhsVectorReduced.reset ( new vector_Type(exportFESpace->map()) );
+
+	*solidDispReduced = exportFESpace->feToFEInterpolate(*dFESpace, *solidDisp, Unique);
+	*solidVelReduced  = exportFESpace->feToFEInterpolate(*dFESpace, *solidVel, Unique);
+	*solidAccReduced  = exportFESpace->feToFEInterpolate(*dFESpace, *solidAcc, Unique);
+	*rhsVectorReduced = exportFESpace->feToFEInterpolate(*dFESpace, *rhsVector, Unique);
+
+	//Export
+	exporterSolid->postProcess( time );
+	exporterCheck->postProcess( time );
+      }
+    else
+      {
+	exporterSolid->postProcess( time );
+	exporterCheck->postProcess( time );
+      }
 
     Real normVect;
     normVect =  solid.displacement().norm2();
