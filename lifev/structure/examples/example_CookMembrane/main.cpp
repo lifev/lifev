@@ -183,6 +183,8 @@ private:
     boost::shared_ptr<Private> parameters;
     filterPtr_Type importerSolid;
     filterPtr_Type exporterSolid;
+
+    filterPtr_Type exporterCheck;
   
   
 };
@@ -370,10 +372,10 @@ Structure::run3d()
     BCh->addBC("EdgesIn",      30,  Natural, Full, zero, 3);
     BCh->addBC("EdgesIn",      70,  Natural, Full, nonZero, 3);    
 
-    BCh->addBC("EdgesIn",      40,  Essential, Component, zero, compz);
-    BCh->addBC("EdgesIn",      20,  Essential, Component, zero, compz);
-    BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compz);
-    BCh->addBC("EdgesIn",      70,  Essential, Component, zero, compz);
+    // BCh->addBC("EdgesIn",      40,  Essential, Component, zero, compz);
+    // BCh->addBC("EdgesIn",      20,  Essential, Component, zero, compz);
+    // BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compz);
+    // BCh->addBC("EdgesIn",      70,  Essential, Component, zero, compz);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -514,11 +516,18 @@ Structure::run3d()
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterSolid;
 
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
+
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
     std::string const exportFileName = dataFile( "exporter/nameFile", "structure");
+
+    std::string const exportCheckName = "checkExporter";
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
-      exporterSolid.reset( new hdf5Filter_Type ( dataFile, exportFileName ) );
+      {
+	exporterSolid.reset( new hdf5Filter_Type ( dataFile, exportFileName ) );
+	exporterCheck.reset( new hdf5Filter_Type ( dataFile, exportCheckName ) );
+      }
     else
 #endif
     {
@@ -530,16 +539,22 @@ Structure::run3d()
 
     exporterSolid->setPostDir( "./" );
     exporterSolid->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
+    exporterCheck->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
     vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  exporterSolid->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporterSolid->mapType() ) );
     vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporterSolid->mapType() ) );
 
+    vectorPtr_Type rhsVector ( new vector_Type(solid.rhs(),  Unique ) );
+
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
 
+    exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt(0) );
+
     exporterSolid->postProcess( 0 );
+    exporterCheck->postProcess( 0 );
 
     //!--------------------------------------------------------------------------------------------
     //!The update of the RHS is done by the TimeAdvance class
@@ -583,7 +598,10 @@ Structure::run3d()
     *solidVel  = timeAdvance->velocity();
     *solidAcc  = timeAdvance->acceleration();
 
+    *rhsVector = solid.rhs();
+
     exporterSolid->postProcess( time );
+    exporterCheck->postProcess( time );
 
     Real normVect;
     normVect =  solid.displacement().norm2();
