@@ -301,6 +301,9 @@ public:
 
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->dataTime()->updateTime(), ++iter)
         {
+  	  //Return value for the testsuite 
+	  returnValue = EXIT_FAILURE;
+
             LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
             if ( valveIsOpen)
             {
@@ -412,7 +415,8 @@ private:
     LifeV::UInt           M_saveEvery;
 
 public:
-  RESULT_CORRECT(LifeV::Real time)
+  
+  void resultCorrect(LifeV::Real time)
   {
     std::cout<<"Result correct at time: "<<time<<std::endl;
     returnValue = EXIT_SUCCESS;
@@ -501,27 +505,23 @@ int main(int argc, char** argv)
 
 void Problem::checkCEResult(const LifeV::Real& time)
 {
-  returnValue = EXIT_FAILURE;
-
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-116028)/dispNorm*(dispNorm-116028)/dispNorm<1e-5) Problem::RESULT_CORRECT(time);
-    else if (time==0.001 && (dispNorm-145850)/dispNorm*(dispNorm-145850)/dispNorm<1e-5)  Problem::RESULT_CORRECT(time);
-    else if (time==0.002 && (dispNorm-98125.7)/dispNorm*(dispNorm-98125.7)/dispNorm<1e-5)  Problem::RESULT_CORRECT(time);
-    else if (time==0.003 && (dispNorm-91354.4)/dispNorm*(dispNorm-91354.4)/dispNorm<1e-5)  Problem::RESULT_CORRECT(time);
-    else if (time==0.004 && (dispNorm-85702.6)/dispNorm*(dispNorm-85702.6)/dispNorm<1e-5)  Problem::RESULT_CORRECT(time);
+    if (time==0.000 && (dispNorm-116028)/dispNorm*(dispNorm-116028)/dispNorm<1e-5) Problem::resultCorrect(time);
+    else if (time==0.001 && (dispNorm-145850)/dispNorm*(dispNorm-145850)/dispNorm<1e-5)  Problem::resultCorrect(time);
+    else if (time==0.002 && (dispNorm-98125.7)/dispNorm*(dispNorm-98125.7)/dispNorm<1e-5)  Problem::resultCorrect(time);
+    else if (time==0.003 && (dispNorm-91354.4)/dispNorm*(dispNorm-91354.4)/dispNorm<1e-5)  Problem::resultCorrect(time);
+    else if (time==0.004 && (dispNorm-85702.6)/dispNorm*(dispNorm-85702.6)/dispNorm<1e-5)  Problem::resultCorrect(time);
 }
 
 
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
-  returnValue = EXIT_FAILURE;
-
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-106856)/dispNorm*(dispNorm-106856)/dispNorm<1e-3) Problem::RESULT_CORRECT(time);
-    else if (time==0.001 && (dispNorm-114222)/dispNorm*(dispNorm-114222)/dispNorm<1e-3) Problem::RESULT_CORRECT(time);
-    else if (time==0.002 && (dispNorm-86107)/dispNorm*(dispNorm-86107)/dispNorm<1e-3) Problem::RESULT_CORRECT(time);
-    else if (time==0.003 && (dispNorm-80013)/dispNorm*(dispNorm-80013)/dispNorm<1e-3) Problem::RESULT_CORRECT(time);
-    else if (time==0.004 && (dispNorm-74586)/dispNorm*(dispNorm-74586)/dispNorm<1e-3) Problem::RESULT_CORRECT(time);
+    if (time==0.000 && (dispNorm-106856)/dispNorm*(dispNorm-106856)/dispNorm<1e-3) Problem::resultCorrect(time);
+    else if (time==0.001 && (dispNorm-114222)/dispNorm*(dispNorm-114222)/dispNorm<1e-3) Problem::resultCorrect(time);
+    else if (time==0.002 && (dispNorm-86107)/dispNorm*(dispNorm-86107)/dispNorm<1e-3) Problem::resultCorrect(time);
+    else if (time==0.003 && (dispNorm-80013)/dispNorm*(dispNorm-80013)/dispNorm<1e-3) Problem::resultCorrect(time);
+    else if (time==0.004 && (dispNorm-74586)/dispNorm*(dispNorm-74586)/dispNorm<1e-3) Problem::resultCorrect(time);
 }
 
 void Problem::updateSolutionDomainVelocityFalse( const vectorPtr_Type solution )
