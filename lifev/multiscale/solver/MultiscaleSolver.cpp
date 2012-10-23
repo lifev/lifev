@@ -43,7 +43,7 @@ namespace Multiscale
 
 UInt        multiscaleCoresPerNode       = 1;
 std::string multiscaleProblemFolder      = "./";
-std::string multiscaleProblemPrefix      = "Step";
+std::string multiscaleProblemPrefix      = "Multiscale";
 UInt        multiscaleProblemStep        = 0;
 UInt        multiscaleSaveEachNTimeSteps = 1;
 bool        multiscaleExitFlag           = EXIT_SUCCESS;
@@ -155,8 +155,8 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
             std::cout << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
             std::cout << "                    MULTISCALE FRAMEWORK" << std::endl;
-            std::cout << "             time = " << M_globalData->dataTime()->time() << " s; "
-                      << "time step number = " << M_globalData->dataTime()->timeStepNumber()  << std::endl;
+            std::cout << "             time = " << M_globalData->dataTime()->time() << " s;"
+                      << " time step number = " << M_globalData->dataTime()->timeStepNumber() << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
         }
 

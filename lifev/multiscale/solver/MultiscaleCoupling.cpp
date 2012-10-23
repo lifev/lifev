@@ -244,7 +244,7 @@ MultiscaleCoupling::saveSolution()
                                                                                              + "_Flag_" + number2string( i )
                                                                                              + "_" + number2string( multiscaleProblemStep ) + ".mfile";
 
-                    if ( M_globalData->dataTime()->isFirstTimeStep() )
+                    if ( M_globalData->dataTime()->isFirstTimeStep() || ( multiscaleProblemStep > 0 && M_globalData->dataTime()->isFirstNTimeStep( multiscaleSaveEachNTimeSteps ) ) )
                     {
                         output.open( filename.c_str(), std::ios::trunc );
                         output << "% Coupling Type: " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl;
