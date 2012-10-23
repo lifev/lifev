@@ -451,6 +451,9 @@ public:
     //! Get the right hand sde without BC
     vectorPtr_Type& rhsWithoutBC() { return M_rhsNoBC; }
 
+    //! Get the right hand. The member rhsCopy is used for Debug purposes!
+    //vector_Type& rhs() { return *M_rhsCopy; }
+
     //! Get the comunicator object
     boost::shared_ptr<Epetra_Comm> const& comunicator() const {return M_Displayer->comm();}
 
@@ -546,6 +549,7 @@ protected:
 
     //! right  hand  side displacement
     vectorPtr_Type                       M_rhs;
+  //vectorPtr_Type                       M_rhsCopy;
 
     //! right  hand  side velocity
     //  vectorPtr_Type                       M_rhsW;
@@ -620,6 +624,7 @@ StructuralOperator<Mesh, SolverType>::StructuralOperator( ):
     M_elmatM                     ( ),
     M_disp                       ( ),
     M_rhsNoBC                    ( ),
+    //    M_rhsCopy                    ( ),
     M_residual_d                 ( ),
     M_sxx                        (/*M_localMap*/),//useless
     M_syy                        (/*M_localMap*/),//useless
@@ -661,6 +666,7 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
     setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
 
     M_rhs.reset                        ( new vector_Type(*M_localMap));
+    //    M_rhsCopy.reset                        ( new vector_Type(*M_localMap));
     M_rhsNoBC.reset                    ( new vector_Type(*M_localMap));
     M_sxx.reset                        ( new vector_Type(*M_localMap) );
     M_syy.reset                        ( new vector_Type(*M_localMap) );
@@ -987,10 +993,13 @@ StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const
             *M_rhs=*M_rhsNoBC;
             bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
 
-	    std::string nameFile="residualAfterBC";
-	    M_rhs->spy(nameFile);
-	    int n;
-	    //std::cin >> n;
+	    //To export for check
+	    //	    M_rhsCopy = M_rhs;
+
+	    // std::string nameFile="residualAfterBC";
+	    // M_rhs->spy(nameFile);
+	    // int n;
+	    // std::cin >> n;
 
         }
 

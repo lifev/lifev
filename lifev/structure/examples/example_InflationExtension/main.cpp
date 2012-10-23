@@ -183,6 +183,8 @@ private:
     boost::shared_ptr<Private> parameters;
     filterPtr_Type importerSolid;
     filterPtr_Type exporterSolid;
+
+    filterPtr_Type checkExporter;
   
   
 };
@@ -351,23 +353,11 @@ Structure::run3d()
     //! =================================================================================
     //Condition for Extension
     BCh->addBC("EdgesIn",      60,  Essential, Component, zero, compz);
-    //Condition for Inflation
-    //BCh->addBC("EdgesIn",      20,  Essential, Full, zero, 3);
-
-    //Condition for Extension
-    //BCh->addBC("EdgesIn",      40,  Natural, Component, nonZero, compz);
-    //Condition for Inflation
     BCh->addBC("EdgesIn",      70,  Essential, Component, zero, compz);
-    //BCh->addBC("EdgesIn",      40,  Essential, Full, zero, 3);
-
     BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
-    //BCh->addBC("EdgesIn",      120,  EssentialVertices, Component, zero, compxz);
     BCh->addBC("EdgesIn",      40,  Natural, Full, zero, 3);
     BCh->addBC("EdgesIn",      200,  Natural,   Full, pressure, 3);
-    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
-    //BCh->addBC("EdgesIn",      110,  EssentialVertices, Component, zero, compyz);
-    //BCh->addBC("EdgesIn",      60,  Natural, Normal, pressureNormal);
-    
+    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);    
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -508,11 +498,20 @@ Structure::run3d()
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterSolid;
 
+    //boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
+
+
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
     std::string const exportFileName = dataFile( "exporter/nameFile", "structure");
+
+    //std::string const exportCheckName = "checkExporter";
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
-      exporterSolid.reset( new hdf5Filter_Type ( dataFile, exportFileName ) );
+      {
+	exporterSolid.reset( new hdf5Filter_Type ( dataFile, exportFileName ) );
+	//exporterCheck.reset( new hdf5Filter_Type ( dataFile, exportCheckName ) ); //The check is done in hdf5 for sake of brevity.
+      }
+    
     else
 #endif
     {
@@ -524,16 +523,22 @@ Structure::run3d()
 
     exporterSolid->setPostDir( "./" );
     exporterSolid->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
+    //exporterCheck->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
-    vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  exporterSolid->mapType() ) );
-    vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporterSolid->mapType() ) );
-    vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporterSolid->mapType() ) );
+    vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  Unique ) );
+    vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  Unique ) );
+    vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  Unique ) );
+
+    //vectorPtr_Type rhsVector ( new vector_Type(solid.rhs(),  Unique ) );
 
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
 
+    //exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt(0) );
+
     exporterSolid->postProcess( 0 );
+    //exporterCheck->postProcess( 0 );
 
     //!--------------------------------------------------------------------------------------------
     //!The update of the RHS is done by the TimeAdvance class
@@ -566,7 +571,7 @@ Structure::run3d()
     *rhs += *solid.massMatrix() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
 
     std::cout << "Norm of the rhsNoBC: " << (*rhs).norm2() << std::endl;
-    solid.setRightHandSide( *rhs );
+    //solid.setRightHandSide( *rhs );
 
     //! 7. Iterate --> Calling Newton
     solid.iterate( BCh );
@@ -576,8 +581,11 @@ Structure::run3d()
     *solidDisp = solid.displacement();
     *solidVel  = timeAdvance->velocity();
     *solidAcc  = timeAdvance->acceleration();
+    
+    //*rhsVector = solid.rhs();
 
     exporterSolid->postProcess( time );
+    //exporterCheck->postProcess( time );
 
     Real normVect;
     normVect =  solid.displacement().norm2();
@@ -590,6 +598,7 @@ Structure::run3d()
     }
 
     exporterSolid->closeFile();
+    //exporterCheck->closeFile();
 }
 
 
