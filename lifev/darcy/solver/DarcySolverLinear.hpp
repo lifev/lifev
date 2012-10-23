@@ -939,7 +939,7 @@ setup ()
     M_linearSolver.setCommunicator ( M_displayer->comm() );
 
     // Choose the preconditioner type.
-    const std::string precType = M_data->preconditionerList().get( "prectype", "Ifpack" );
+    const std::string precType = M_data->preconditionerList().template get<std::string>( "prectype" );
 
     // Create a preconditioner object.
     M_prec.reset ( PRECFactory::instance().createObject( precType ) );

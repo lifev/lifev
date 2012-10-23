@@ -243,7 +243,7 @@ public:
     /*!
       @return Teuchos RCP with the parameter list for the linear solver.
     */
-    const paramListPtr_Type& linearSolverList () const
+    const paramList_Type& linearSolverList () const
     {
         ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
         return M_linearAlgebraList->sublist( M_linearSolverSection );
@@ -253,7 +253,7 @@ public:
     /*!
       @return Teuchos RCP with the parameter list for the preconditioner.
     */
-    const paramListPtr_Type& preconditionerList () const
+    const paramList_Type& preconditionerList () const
     {
         ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
         return M_linearAlgebraList->sublist( M_precondSection );

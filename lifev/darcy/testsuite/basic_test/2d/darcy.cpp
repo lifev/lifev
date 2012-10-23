@@ -108,9 +108,9 @@ darcy_nonlinear::darcy_nonlinear ( int argc, char** argv )
 {
     GetPot command_line(argc, argv);
     Members->data_file_name = command_line.follow("data", 2, "-f", "--file");
-    Members->xml_file_name = command_line.follow("parameterList.xml", 3, "--xml");
+    Members->xml_file_name = command_line.follow("parameterList.xml", "--xml");
 
-    GetPot dataFile( data_file_name );
+    GetPot dataFile( Members->data_file_name );
 
     Members->discretization_section = "darcy";
 
