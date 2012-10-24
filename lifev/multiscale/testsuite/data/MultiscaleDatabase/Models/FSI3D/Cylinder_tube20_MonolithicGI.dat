@@ -174,8 +174,8 @@ rescaleFactor    = 1.0 # this factor can be used to rescale the structure block
     mesh_dir         = ./Mesh/
     mesh_file        = vessel20.mesh  # mesh file
     order            = P1
-    mesh_faces      = all              # update all faces elements
-    mesh_edges      = all              # update all faces elements
+    mesh_faces       = all              # update all faces elements
+    mesh_edges       = all              # update all faces elements
 
     [../miscellaneous]
     verbose    = 0
