@@ -269,6 +269,7 @@ MultiscaleModelFSI3D::updateSolution()
 #endif
 
     M_FSIoperator->updateSolution( *M_stateVariable );
+    M_FSIoperator->setSolution( *M_stateVariable );
 }
 
 void
@@ -341,8 +342,6 @@ MultiscaleModelFSI3D::checkSolution() const
 {
     return M_stateVariable->norm2();
 }
-
-
 
 // ===================================================
 // MultiscaleInterfaceFluid Methods
@@ -482,6 +481,7 @@ MultiscaleModelFSI3D::initializeSolution()
     vectorPtr_Type secondFluidDisplacement( new vector_Type(*M_FSIoperator->couplingVariableMap()) );
     Int convectiveTerm ( !M_data->dataFluid()->domainVelImplicit() );
 
+    UInt offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->offset();
     if ( multiscaleProblemStep > 0 )
     {
         M_importerFluid->setMeshProcId( M_FSIoperator->uFESpace().mesh(), M_FSIoperator->uFESpace().map().comm().MyPID() );
@@ -494,7 +494,6 @@ MultiscaleModelFSI3D::initializeSolution()
         M_importerSolid->addVariable( IOData_Type::VectorField, "Displacement (solid)", M_FSIoperator->dFESpacePtr(),  M_solidDisplacement, static_cast <UInt> (0) );
 
         UInt iterationImported(0);
-        UInt offset(0);
         vectorPtr_Type temporaryVector;
 
         for( UInt i(0); i < M_FSIoperator->fluidTimeAdvance()->size() ; ++i )
@@ -508,7 +507,6 @@ MultiscaleModelFSI3D::initializeSolution()
             importedFluidVelocityAndPressure[i] = temporaryVector;
         }
 
-        offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->offset();
         for( UInt i(0); i < M_FSIoperator->solidTimeAdvance()->size() ; ++i )
         {
             iterationImported = M_importerSolid->importFromTime( M_data->dataSolid()->dataTime()->initialTime() - i * M_data->dataSolid()->dataTime()->timeStep() );
@@ -593,13 +591,9 @@ MultiscaleModelFSI3D::initializeSolution()
         {
             *M_solidDisplacement = 0.0;
 
-            /* Bugfix by PC 2012-09-24 */
-            UInt offset = boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->offset();
             vectorPtr_Type tempVector( new vector_Type(*M_FSIoperator->couplingVariableMap(), Unique, Zero) );
             tempVector->subset( *M_solidDisplacement, M_solidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
             *tempVector /= M_FSIoperator->solid().rescaleFactor();
-
-            //vectorPtr_Type tempVector( new vector_Type( *M_solidDisplacement, Unique, Zero ) );
             importedSolidDisplacement[i] = tempVector;
         }
         for( UInt i(0) ; i < M_FSIoperator->ALETimeAdvance()->size() ; ++i )
