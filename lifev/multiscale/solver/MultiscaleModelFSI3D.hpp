@@ -198,7 +198,7 @@ public:
      * @param flag flag of the boundary face
      * @return flow rate value
      */
-    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().flux( flag, M_FSIoperator->solution() ); }
+    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().flux( flag, *M_stateVariable ); }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!

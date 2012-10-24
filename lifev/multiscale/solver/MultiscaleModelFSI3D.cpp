@@ -242,7 +242,7 @@ MultiscaleModelFSI3D::solveModel()
 
     // Non-linear Richardson solver
     UInt maxSubIterationNumber = M_data->maxSubIterationNumber();
-    vectorPtr_Type solution( new vector_Type( *M_FSIoperator->fluidTimeAdvance()->stencil()[0] ) ); // Solution at the previous time step
+    vectorPtr_Type solution( new vector_Type( M_FSIoperator->solution() ) ); // Solution at the previous time step
 
     NonLinearRichardson( *solution, *M_FSIoperator,
                           M_data->absoluteTolerance(), M_data->relativeTolerance(),
@@ -269,7 +269,6 @@ MultiscaleModelFSI3D::updateSolution()
 #endif
 
     M_FSIoperator->updateSolution( *M_stateVariable );
-    M_FSIoperator->setSolution( *M_stateVariable );
 }
 
 void
@@ -396,15 +395,15 @@ MultiscaleModelFSI3D::boundaryPressure( const bcFlag_Type& flag ) const
 {
     if ( M_fluidBC->handler()->findBCWithFlag( flag ).type() == Flux )
 #ifdef FSI_WITH_EXTERNALPRESSURE
-        return M_FSIoperator->fluid().lagrangeMultiplier( flag, *M_fluidBC->handler(), M_FSIoperator->solution() );
+        return M_FSIoperator->fluid().lagrangeMultiplier( flag, *M_fluidBC->handler(), *M_stateVariable );
 #else
-        return M_FSIoperator->fluid().lagrangeMultiplier( flag, *M_fluidBC->handler(), M_FSIoperator->solution() ) + M_externalPressureScalar;
+        return M_FSIoperator->fluid().lagrangeMultiplier( flag, *M_fluidBC->handler(), *M_stateVariable ) + M_externalPressureScalar;
 #endif
     else
 #ifdef FSI_WITH_EXTERNALPRESSURE
-        return M_FSIoperator->fluid().pressure( flag, M_FSIoperator->solution() );
+        return M_FSIoperator->fluid().pressure( flag, *M_stateVariable );
 #else
-        return M_FSIoperator->fluid().pressure( flag, M_FSIoperator->solution() ) + M_externalPressureScalar;
+        return M_FSIoperator->fluid().pressure( flag, *M_stateVariable ) + M_externalPressureScalar;
 #endif
 }
 
@@ -618,6 +617,9 @@ MultiscaleModelFSI3D::initializeSolution()
         M_FSIoperator->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
         M_FSIoperator->ALETimeAdvance()->shiftRight( *firstFluidDisplacement );
     }
+
+    // Initialize state variables
+    M_stateVariable.reset( new vector_Type( M_FSIoperator->solution() ) );
 }
 
 void
