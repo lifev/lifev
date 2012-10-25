@@ -246,30 +246,29 @@ FSISolver::initialize(std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Ty
       if ( this->isFluid() )
       {
         for(i=0; i<M_oper->fluidTimeAdvance()->size(); ++i)
-	  {
+      {
             vectorPtr_Type vec(new vector_Type(M_oper->fluid().getMap()));
             u0.push_back(vec);// couplingVariableMap()
-	  }
+      }
         for(i=0; i<M_oper->ALETimeAdvance()->size(); ++i)
-	  {
+      {
             vectorPtr_Type vec(new vector_Type(M_oper->meshMotion().getMap()));
             df0.push_back(vec);// couplingVariableMap()
-	  }
+      }
       }
       if ( this->isSolid() )
       {
         for(i=0; i<M_oper->solidTimeAdvance()->size(); ++i)
-	  {
+      {
             vectorPtr_Type vec(new vector_Type(M_oper->solid().map()));
             ds0.push_back(vec);// couplingVariableMap()
-	  }
+      }
       }
       M_oper->initializeTimeAdvance(u0, ds0, df0);
       //  M_oper->initializeBDF(*u0);
     }
     else
     {
-
         M_oper->initializeTimeAdvance(u0, ds0, df0); // couplingVariableMap()//copy
     }
 }
@@ -282,15 +281,19 @@ FSISolver::iterate()
     debugStream( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSI: " << M_data->method()  << "\n";
     debugStream( 6220 ) << "============================================================\n";
 
+    if (M_epetraWorldComm->MyPID() == 0)
+    {
+        std::cerr << std::endl << "Warning: FSISolver::iterate() is deprecated!" << std::endl
+                  << "         You should use FSISolver::iterate( solution ) instead!" << std::endl;
+    }
+
     // Update the system
     M_oper->updateSystem( );
 
     // We extract a copy of the solution (\todo{uselessly})
-    //    vector_Type* lambda = M_oper->solutionPtr();
     vector_Type lambda = M_oper->solution();
-    //M_oper->solutionPtr(lambda);//copy of a shared_ptr
 
-    // the newton solver
+    // The Newton solver
     UInt maxiter = M_data->maxSubIterationNumber();
     UInt status = NonLinearRichardson( lambda,
                                        *M_oper,
@@ -303,7 +306,7 @@ FSISolver::iterate()
                                        2,/*verbosity level*/
                                        M_out_res,
                                        M_data->dataFluid()->dataTime()->time()
-				       );
+                       );
 
     // We update the solution
     M_oper->updateSolution( lambda );
@@ -360,11 +363,10 @@ FSISolver::iterate( vectorPtr_Type& solution )
                                        2,/*verbosity level*/
                                        M_out_res,
                                        M_data->dataFluid()->dataTime()->time()
-				       );
+                       );
 
     // After the Newton method, the solution that was received is modified with the current solution
     // It is passed outside where it is used as the user wants.
-
     *solution = lambda;
 
     if (status == EXIT_FAILURE)

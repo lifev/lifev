@@ -422,6 +422,12 @@ public:
      */
     //@{
 
+    //! Get the extrapolation of the solution
+    /*!
+     *  @param extrapolation vector to be filled with the extrapolated solution
+     */
+    void extrapolation( vector_Type& extrapolation ) const { M_fluidTimeAdvance->extrapolation( extrapolation ); }
+
 //     vector_Type & displacement()                                        { return *M_lambdaSolid; }
 //     vector_Type & displacementOld()                                     { return *M_lambdaSolidOld; }
 //     vector_Type & residual();
@@ -574,9 +580,6 @@ public:
     //! Getter for the right hand side
     const vectorPtr_Type& getRHS()                                  const { return M_rhs; }
 
-    //! getter for the fluid velocity
-    const vector_Type& un()                                      const { return M_fluidTimeAdvance->solution(); }
-
     const boost::shared_ptr<TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
     const boost::shared_ptr<TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
     const boost::shared_ptr<TimeAdvance<vector_Type> > solidTimeAdvance()const { return  M_solidTimeAdvance; }
@@ -585,20 +588,14 @@ public:
     const string fluidTimeAdvanceMethod()const { return  M_fluidTimeAdvanceMethod; }
     const string solidTimeAdvanceMethod()const { return  M_solidTimeAdvanceMethod; }
 
-
     //! gets the solution vector by reference
     virtual const vector_Type& solution()                           const { return *M_lambda; }
-
-    //! gets a pointer to the solution vector by reference
-
 
     //! gets the solid displacement by copy
     virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->displacement(); }
 
     //! gets the solid velocity by copy
     virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solidTimeAdvance->velocity(); }
-
-    virtual vector_Type* solutionPtr()                                 { return M_lambda.get(); }
 
     //! Export the solid displacement by copying it to an external vector
     /*!
@@ -743,13 +740,6 @@ public:
     void setDerFluidLoadToStructure          ( const vector_Type& dload, UInt type = 0 );
     void setDerFluidLoadToFluid              ( const vector_Type& dload, UInt type = 0 );
     void setRobinOuterWall                   ( const function_Type& dload, const function_Type& E);
-
-    //! sets the solution vector by reference
-    virtual void setSolutionPtr              ( const vectorPtr_Type& sol ) { M_lambda = sol; }
-
-    //! sets the solution vector by copy
-    virtual void setSolution                 ( const vector_Type& solution ) { M_lambda.reset( new vector_Type( solution ) ); }
-
 
     //! Setter for the time derivative of the interface displacement
     void setSolutionDerivative( const vector_Type& solutionDerivative ) { M_lambdaDot.reset( new vector_Type( solutionDerivative ) ); }
