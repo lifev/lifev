@@ -65,7 +65,7 @@ void FlowConditions::initParameters( FSIOperator&  Oper,
                                      const int&    outflowFlag)
 {
 
-  UInt flag = 1; 
+  UInt flag = 1;
     Epetra_SerialDenseVector fluidQuantities(1); // M_area0
     Epetra_SerialDenseVector solidQuantities(2); // M_beta and M_rhos
 
@@ -123,7 +123,7 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
 
     if (Oper->isFluid())
     {
-        fluidQuantities(0) = Oper->fluid().flux(outflowFlag, oper_.displacement());
+        fluidQuantities(0) = Oper->fluid().flux(outflowFlag, *Oper->fluid().solution());
         fluidQuantities(1) = Oper->fluid().area(outflowFlag);
     }
 
@@ -146,16 +146,16 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
     // if imposing the absorbing boundary condition through the pressure:
     if (bcOnFluid)
     {
-      
-        // Moura et al.
-      	//Alexandra's Abc
-	Real exp  = 5/4;
-	Real beta = ( std::sqrt(PI) * Oper->solid().thickness() * Oper->solid().young( flag ) ) / (1 - Oper->solid().poisson( flag ) * Oper->solid().poisson( flag ) );
-	Real R    = ( std::sqrt(Oper->solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
 
-	M_outP       = R * qn;
-      
-        // Nobile & Vergara 
+        // Moura et al.
+          //Alexandra's Abc
+    Real exp  = 5/4;
+    Real beta = ( std::sqrt(PI) * Oper->solid().thickness() * Oper->solid().young( flag ) ) / (1 - Oper->solid().poisson( flag ) * Oper->solid().poisson( flag ) );
+    Real R    = ( std::sqrt(Oper->solid().rho( ) * beta ) ) / ( std::sqrt(2.0) * std::pow(area0,exp) );
+
+    M_outP       = R * qn;
+
+        // Nobile & Vergara
         // M_outP =  pow((sqrt(density)/(2.*sqrt(2))*qn/area + sqrt(M_beta*sqrt(M_area0))),2)
         //           - M_beta*sqrt(M_area0);
         FlowConditions::outputVector[conditionNumber]=M_outP;

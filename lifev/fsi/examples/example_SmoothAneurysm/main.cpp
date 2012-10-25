@@ -362,9 +362,6 @@ public:
             std::cout << "[fsi_run] Iteration " << iter+1 << " was done in : "
                       << _timer.elapsed() << "\n";
 
-            std::cout << "solution norm " << iter+1 << " : "
-                      << M_fsi->displacement().norm2() << "\n";
-
       }
     /*
         if (M_data->method().compare("monolithicGI"))
@@ -852,7 +849,9 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
-    LifeV::Real dispNorm=M_fsi->displacement().norm2();
+    vector_Type previousSolution;
+    M_fsi->FSIOper()->extrapolation( previousSolution );
+    LifeV::Real dispNorm=previousSolution.norm2();
     if (time==0.000 && (dispNorm-834634)     /dispNorm*(dispNorm-834634)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.001 && (dispNorm-1.15328e+06)     /dispNorm*(dispNorm-1.15328e+06)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.002 && (dispNorm-943681)/dispNorm*(dispNorm-943681)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
@@ -863,7 +862,9 @@ void Problem::checkGCEResult(const LifeV::Real& time)
 
 void Problem::checkCEResult(const LifeV::Real& time)
 {
-    LifeV::Real dispNorm=M_fsi->displacement().norm2();
+    vector_Type previousSolution;
+    M_fsi->FSIOper()->extrapolation( previousSolution );
+    LifeV::Real dispNorm=previousSolution.norm2();
     if (time==0.000 && (dispNorm-772280)/dispNorm*(dispNorm-772280)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.001 && (dispNorm-1.12286e+06)/dispNorm*(dispNorm-1.12286e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.002 && (dispNorm-943697)/dispNorm*(dispNorm-943697)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
