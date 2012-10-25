@@ -488,7 +488,7 @@ int main(int argc, char** argv)
 
 void Problem::checkCEResult(const LifeV::Real& time)
 {
-	LifeV::Real dispNorm=M_fsi->displacement().norm2();
+    LifeV::Real dispNorm=M_fsi->displacement().norm2();
     if (time==0.000 && (dispNorm-116028)/dispNorm*(dispNorm-116028)/dispNorm<1e-5) Problem::resultCorrect(time);
     else if (time==0.001 && (dispNorm-145850)/dispNorm*(dispNorm-145850)/dispNorm<1e-5)  Problem::resultCorrect(time);
     else if (time==0.002 && (dispNorm-98125.7)/dispNorm*(dispNorm-98125.7)/dispNorm<1e-5)  Problem::resultCorrect(time);
@@ -499,7 +499,7 @@ void Problem::checkCEResult(const LifeV::Real& time)
 
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
-	LifeV::Real dispNorm=M_fsi->displacement().norm2();
+    LifeV::Real dispNorm=M_fsi->displacement().norm2();
     if (time==0.000 && (dispNorm-106856)/dispNorm*(dispNorm-106856)/dispNorm<1e-3) Problem::resultCorrect(time);
     else if (time==0.001 && (dispNorm-114222)/dispNorm*(dispNorm-114222)/dispNorm<1e-3) Problem::resultCorrect(time);
     else if (time==0.002 && (dispNorm-86107)/dispNorm*(dispNorm-86107)/dispNorm<1e-3) Problem::resultCorrect(time);
@@ -517,7 +517,7 @@ void Problem::updateSolutionDomainVelocityFalse( const vectorPtr_Type solution )
     LifeV::UInt nDofsALE = M_fsi->FSIOper()->mmFESpace().fieldDim() * M_fsi->FSIOper()->mmFESpace().dof().numTotalDof();
 
     //Extract the previous solution
-	vector_Type previousSolution( M_fsi->FSIOper()->solution() );
+    vector_Type previousSolution( M_fsi->FSIOper()->solution() );
     vector_Type previousDisplacement( M_fsi->FSIOper()->mmFESpace().map() );
     previousDisplacement *= 0.0;
 
