@@ -2,42 +2,42 @@
 /*
 *******************************************************************************
 
-    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-    This file is part of LifeV.
+This file is part of LifeV.
 
-    LifeV is free software; you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    LifeV is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public License
-    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 *******************************************************************************
 */
 //@HEADER
 /**
-   \file main.cpp
-   \author Paolo Tricerri <paolo.tricerri@epfl.ch>
+\file main.cpp
+\author Paolo Tricerri <paolo.tricerri@epfl.ch>
 
 
-   Attention: At the moment the restart works only if the solution is saved at 
-   each time step
-   \date 2005-04-16
- */
+Attention: At the moment the restart works only if the solution is saved at
+each time step
+\date 2005-04-16
+*/
 #undef HAVE_HDF5
 #ifdef TWODIM
 #error test_structure cannot be compiled in 2D
 #endif
 
-// Tell the compiler to ignore specific kind of warnings:
+                                       // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -49,7 +49,7 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-//Tell the compiler to restore the warning previously silented
+                                       //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
@@ -58,7 +58,7 @@
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 
 
-//Include fils which were in the structure.cpp file
+                                       //Include fils which were in the structure.cpp file
 #include <lifev/core/array/MapEpetra.hpp>
 
 #include <lifev/core/fem/TimeAdvance.hpp>
@@ -122,47 +122,47 @@ class Structure
 {
 public:
 
-  typedef RegionMesh<LifeV::LinearTetra >                       mesh_Type;  
-  typedef StructuralOperator<mesh_Type >::vector_Type             vector_Type;
-  typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
-  typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
+    typedef RegionMesh<LifeV::LinearTetra >                       mesh_Type;
+    typedef StructuralOperator<mesh_Type >::vector_Type             vector_Type;
+    typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
+    typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
 
-  typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
-  //Exporters Typedefs
-  typedef typename LifeV::Exporter<mesh_Type >                  filter_Type;
-  typedef boost::shared_ptr<filter_Type >                       filterPtr_Type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+    //Exporters Typedefs
+    typedef typename LifeV::Exporter<mesh_Type >                  filter_Type;
+    typedef boost::shared_ptr<filter_Type >                       filterPtr_Type;
 
-  typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
-  typedef boost::shared_ptr<emptyExporter_Type>                 emptyExporterPtr_Type;    
+    typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
+    typedef boost::shared_ptr<emptyExporter_Type>                 emptyExporterPtr_Type;
 
-  typedef LifeV::ExporterEnsight<mesh_Type >                    ensightFilter_Type;
-  typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
+    typedef LifeV::ExporterEnsight<mesh_Type >                    ensightFilter_Type;
+    typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 
 #ifdef HAVE_HDF5
-  typedef LifeV::ExporterHDF5<mesh_Type >                       hdf5Filter_Type;
-  typedef boost::shared_ptr<hdf5Filter_Type>                    hdf5FilterPtr_Type;
+    typedef LifeV::ExporterHDF5<mesh_Type >                       hdf5Filter_Type;
+    typedef boost::shared_ptr<hdf5Filter_Type>                    hdf5FilterPtr_Type;
 #endif
 
-  typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >         solidFESpace_Type;
-  typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >         solidFESpace_Type;
+    typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
-/** @name Constructors, destructor
- */
-//@{
+    /** @name Constructors, destructor
+     */
+    //@{
     Structure( int                                   argc,
                char**                                argv,
                boost::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
-//@}
+    //@}
 
-//@{
+    //@{
     void run()
     {
         run3d();
     }
-//@}
+    //@}
 
 protected:
 
@@ -185,8 +185,8 @@ private:
     filterPtr_Type exporterSolid;
 
     filterPtr_Type checkExporter;
-  
-  
+
+
 };
 
 
@@ -194,7 +194,7 @@ private:
 struct Structure::Private
 {
     Private() :
-            rho(1), poisson(1), young(1), bulk(1), alpha(1), gamma(1)
+        rho(1), poisson(1), young(1), bulk(1), alpha(1), gamma(1)
     {}
     double rho, poisson, young, bulk, alpha, gamma;
 
@@ -202,47 +202,47 @@ struct Structure::Private
 
     boost::shared_ptr<Epetra_Comm>     comm;
 
-static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-{
-    return  0.;
-}
-
-static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-{
-    return  20000;
-}
-
-static Real bcPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
-{
-  Real radius = 0.5;
-  Real pressure = 5000;
-    //3000/(2*0.5*40*3.1415962);
-  switch (i)
+    static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-    case 0:
-      return  pressure * std::fabs( ( x / radius ) );
-      break;
-    case 1:
-      return  pressure * std::fabs( ( y / radius ) );
-      break;
-    case 2:
-      return 0.0;
-      break;
+        return  0.;
+    }
+
+    static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+    {
+        return  20000;
+    }
+
+    static Real bcPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
+    {
+        Real radius = 0.5;
+        Real pressure = 5000;
+        //3000/(2*0.5*40*3.1415962);
+        switch (i)
+        {
+        case 0:
+            return  pressure * std::fabs( ( x / radius ) );
+            break;
+        case 1:
+            return  pressure * std::fabs( ( y / radius ) );
+            break;
+        case 2:
+            return 0.0;
+            break;
+
+        }
+        return 0;
 
     }
-  return 0;
 
-}
+    static Real pressureUsingNormal(const Real& t, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+    {
 
-static Real pressureUsingNormal(const Real& t, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-{
-
-  return -5000;
-  // if( t < 15.0 )
-  //   return  -(300000/(2*3.1415962*0.5*40))*(1/15)*t;
-  // else
-  //   return  -300000/(2*3.1415962*0.5*40);
-}
+        return -5000;
+        // if( t < 15.0 )
+        //   return  -(300000/(2*3.1415962*0.5*40))*(1/15)*t;
+        // else
+        //   return  -300000/(2*3.1415962*0.5*40);
+    }
 
 
 };
@@ -252,7 +252,7 @@ static Real pressureUsingNormal(const Real& t, const Real&  /*X*/, const Real& /
 Structure::Structure( int                                   argc,
                       char**                                argv,
                       boost::shared_ptr<Epetra_Comm>        structComm):
-                  parameters( new Private() )
+    parameters( new Private() )
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -291,7 +291,7 @@ Structure::run2d()
 
 void
 Structure::run3d()
-{    
+{
 
     bool verbose = (parameters->comm->MyPID() == 0);
 
@@ -357,7 +357,7 @@ Structure::run3d()
     BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
     BCh->addBC("EdgesIn",      40,  Natural, Full, zero, 3);
     BCh->addBC("EdgesIn",      200,  Natural,   Full, pressure, 3);
-    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);    
+    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -379,109 +379,109 @@ Structure::run3d()
 
     //Initialization of TimeAdvance
     std::string const restart =  dataFile( "importer/restart", "none");
-    std::vector<vectorPtr_Type> solutionStencil; 
+    std::vector<vectorPtr_Type> solutionStencil;
 
     if( restart.compare( "none" ) )
-      {
-	//Reading fileNames - setting data for reading
-	std::string const importerType =  dataFile( "importer/type", "ensight");
-	std::string const fileName     =  dataFile( "importer/filename", "structure");
-	std::string const initialLoaded     =  dataFile( "importer/initialSol", "NO_DEFAULT_VALUE");
-	LifeV::Real initialTime        =  dataFile( "importer/initialTime", 0.0);
+    {
+        //Reading fileNames - setting data for reading
+        std::string const importerType =  dataFile( "importer/type", "ensight");
+        std::string const fileName     =  dataFile( "importer/filename", "structure");
+        std::string const initialLoaded     =  dataFile( "importer/initialSol", "NO_DEFAULT_VALUE");
+        LifeV::Real initialTime        =  dataFile( "importer/initialTime", 0.0);
 
-	//Creating the importer
+        //Creating the importer
 #ifdef HAVE_HDF5
-	if ( !importerType.compare("hdf5") )
-	    importerSolid.reset( new  hdf5Filter_Type( dataFile, fileName) );
-	else
+        if ( !importerType.compare("hdf5") )
+            importerSolid.reset( new  hdf5Filter_Type( dataFile, fileName) );
+        else
 #endif
-	  {
-	    if ( !importerType.compare("none") )
-		importerSolid.reset( new emptyExporter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID()) );
-	    else
-		importerSolid.reset( new  ensightFilter_Type ( dataFile, fileName) );
-	  }
+        {
+            if ( !importerType.compare("none") )
+                importerSolid.reset( new emptyExporter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID()) );
+            else
+                importerSolid.reset( new  ensightFilter_Type ( dataFile, fileName) );
+        }
 
-	importerSolid->setMeshProcId(dFESpace->mesh(), dFESpace->map().comm().MyPID());
+        importerSolid->setMeshProcId(dFESpace->mesh(), dFESpace->map().comm().MyPID());
 
-	//Creation of Exporter to check the loaded solution (working only for HDF5)
-	// std::string expVerFile = "verificationDisplExporter";
-	// LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
+        //Creation of Exporter to check the loaded solution (working only for HDF5)
+        // std::string expVerFile = "verificationDisplExporter";
+        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
         // vectorPtr_Type vectVer ( new vector_Type(solid.displacement(),  LifeV::Unique ) );
-	    
+
         // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt(0) );
 
-	// exporter.postProcess(0.0);
+        // exporter.postProcess(0.0);
 
-	//Reading the displacement field and the timesteps need by the TimeAdvance class
-	vectorPtr_Type solidDisp (new vector_Type(dFESpace->map(),importerSolid->mapType() ));
-	
-	std::string iterationString;
+        //Reading the displacement field and the timesteps need by the TimeAdvance class
+        vectorPtr_Type solidDisp (new vector_Type(dFESpace->map(),importerSolid->mapType() ));
 
-	std::cout << "size TimeAdvance:" << timeAdvance->size() << std::endl;
-	
-	//Loading the stencil
-	iterationString = initialLoaded;
-	for(UInt iterInit=0; iterInit < timeAdvance->size(); iterInit++ )
-	  {
-	    *solidDisp *= 0.0;
+        std::string iterationString;
 
-	    LifeV::ExporterData<mesh_Type> solidDataReader (LifeV::ExporterData<mesh_Type>::VectorField, std::string("displacement."+iterationString), dFESpace, solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-	    
-	    importerSolid->readVariable(solidDataReader);
+        std::cout << "size TimeAdvance:" << timeAdvance->size() << std::endl;
 
-	    std::cout << "Norm of the " << iterInit + 1 << "-th solution : "<< solidDisp->norm2() << std::endl;
-	    
-	    //Exporting the just loaded solution (debug purposes)
-	    // Real currentLoading(iterInit + 1.0);
-	    // *vectVer = *solidDisp;
-	    // exporter.postProcess( currentLoading );
+        //Loading the stencil
+        iterationString = initialLoaded;
+        for(UInt iterInit=0; iterInit < timeAdvance->size(); iterInit++ )
+        {
+            *solidDisp *= 0.0;
 
-	    solutionStencil.push_back( solidDisp );
+            LifeV::ExporterData<mesh_Type> solidDataReader (LifeV::ExporterData<mesh_Type>::VectorField, std::string("displacement."+iterationString), dFESpace, solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-	    //initializing the displacement field in the StructuralSolver class with the first solution
-	    if( !iterInit )
-	      solid.initialize( solidDisp );
+            importerSolid->readVariable(solidDataReader);
 
-	    //Updating string name
-	    int iterations = std::atoi(iterationString.c_str());
-	    iterations--;
+            std::cout << "Norm of the " << iterInit + 1 << "-th solution : "<< solidDisp->norm2() << std::endl;
 
-	    std::ostringstream iter;
-	    iter.fill( '0' );
-	    iter << std::setw(5) << ( iterations );
-	    iterationString=iter.str();
-	    
-	  }
+            //Exporting the just loaded solution (debug purposes)
+            // Real currentLoading(iterInit + 1.0);
+            // *vectVer = *solidDisp;
+            // exporter.postProcess( currentLoading );
 
-	importerSolid->closeFile();
+            solutionStencil.push_back( solidDisp );
 
-	//Putting the vector in the TimeAdvance Stencil
-	timeAdvance->setInitialCondition(solutionStencil);
-      }
+            //initializing the displacement field in the StructuralSolver class with the first solution
+            if( !iterInit )
+                solid.initialize( solidDisp );
+
+            //Updating string name
+            int iterations = std::atoi(iterationString.c_str());
+            iterations--;
+
+            std::ostringstream iter;
+            iter.fill( '0' );
+            iter << std::setw(5) << ( iterations );
+            iterationString=iter.str();
+
+        }
+
+        importerSolid->closeFile();
+
+        //Putting the vector in the TimeAdvance Stencil
+        timeAdvance->setInitialCondition(solutionStencil);
+    }
     else //Initialize with zero vectors
-      {	
+    {
 
-	std::cout << "Starting from scratch" << std::endl;
-	vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique) );
+        std::cout << "Starting from scratch" << std::endl;
+        vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique) );
 
-	if (timeAdvanceMethod =="Newmark")
-	{
-	    solutionStencil.push_back(disp);
-	    solutionStencil.push_back(disp);
-	    solutionStencil.push_back(disp);
-	}
+        if (timeAdvanceMethod =="Newmark")
+        {
+            solutionStencil.push_back(disp);
+            solutionStencil.push_back(disp);
+            solutionStencil.push_back(disp);
+        }
 
-	if (timeAdvanceMethod =="BDF")
-	{
-	  for ( UInt previousPass=0; previousPass < dataStructure->dataTimeAdvance()->orderBDF() ; previousPass++)
-	      solutionStencil.push_back(disp);
-	}
+        if (timeAdvanceMethod =="BDF")
+        {
+            for ( UInt previousPass=0; previousPass < dataStructure->dataTimeAdvance()->orderBDF() ; previousPass++)
+                solutionStencil.push_back(disp);
+        }
 
-	timeAdvance->setInitialCondition(solutionStencil);
-	
-      }
-    
+        timeAdvance->setInitialCondition(solutionStencil);
+
+    }
+
 
 
     //! =================================================================================
@@ -507,18 +507,18 @@ Structure::run3d()
     //std::string const exportCheckName = "checkExporter";
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
-      {
-	exporterSolid.reset( new hdf5Filter_Type ( dataFile, exportFileName ) );
-	//exporterCheck.reset( new hdf5Filter_Type ( dataFile, exportCheckName ) ); //The check is done in hdf5 for sake of brevity.
-      }
-    
+    {
+        exporterSolid.reset( new hdf5Filter_Type ( dataFile, exportFileName ) );
+        //exporterCheck.reset( new hdf5Filter_Type ( dataFile, exportCheckName ) ); //The check is done in hdf5 for sake of brevity.
+    }
+
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
-	  exporterSolid.reset( new emptyExporter_Type ( dataFile, meshPart.meshPartition(), exportFileName, parameters->comm->MyPID()) );
+            exporterSolid.reset( new emptyExporter_Type ( dataFile, meshPart.meshPartition(), exportFileName, parameters->comm->MyPID()) );
         else
-	  exporterSolid.reset( new ensightFilter_Type ( dataFile, meshPart.meshPartition(), exportFileName, parameters->comm->MyPID()) );
+            exporterSolid.reset( new ensightFilter_Type ( dataFile, meshPart.meshPartition(), exportFileName, parameters->comm->MyPID()) );
     }
 
     exporterSolid->setPostDir( "./" );
@@ -557,44 +557,44 @@ Structure::run3d()
     //! =============================================================================
     for (Real time = initialTime + dt; time <= T; time += dt)
     {
-    dataStructure->dataTime()->setTime(time);
+        dataStructure->dataTime()->setTime(time);
 
-    if (verbose)
+        if (verbose)
         {
-	  std::cout << std::endl;
-	  std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
+            std::cout << std::endl;
+            std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
     	}
 
         //! 6. Updating right-hand side
-    *rhs *=0;
-    timeAdvance->updateRHSContribution( dt );
-    *rhs += *solid.massMatrix() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
+        *rhs *=0;
+        timeAdvance->updateRHSContribution( dt );
+        *rhs += *solid.massMatrix() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
 
-    std::cout << "Norm of the rhsNoBC: " << (*rhs).norm2() << std::endl;
-    //solid.setRightHandSide( *rhs );
+        std::cout << "Norm of the rhsNoBC: " << (*rhs).norm2() << std::endl;
+        //solid.setRightHandSide( *rhs );
 
-    //! 7. Iterate --> Calling Newton
-    solid.iterate( BCh );
+        //! 7. Iterate --> Calling Newton
+        solid.iterate( BCh );
 
-    timeAdvance->shiftRight( solid.displacement() );
+        timeAdvance->shiftRight( solid.displacement() );
 
-    *solidDisp = solid.displacement();
-    *solidVel  = timeAdvance->velocity();
-    *solidAcc  = timeAdvance->acceleration();
-    
-    //*rhsVector = solid.rhs();
+        *solidDisp = solid.displacement();
+        *solidVel  = timeAdvance->velocity();
+        *solidAcc  = timeAdvance->acceleration();
 
-    exporterSolid->postProcess( time );
-    //exporterCheck->postProcess( time );
+        //*rhsVector = solid.rhs();
 
-    Real normVect;
-    normVect =  solid.displacement().norm2();
-    std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
+        exporterSolid->postProcess( time );
+        //exporterCheck->postProcess( time );
+
+        Real normVect;
+        normVect =  solid.displacement().norm2();
+        std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
 
 
-    //!--------------------------------------------------------------------------------------------------
+        //!--------------------------------------------------------------------------------------------------
 
-    MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
     }
 
     exporterSolid->closeFile();

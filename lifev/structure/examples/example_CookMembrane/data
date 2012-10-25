@@ -18,8 +18,8 @@
 
 
 [exporter]
-type       = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
-nameFile   = cookFineP2
+type       = vtk #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
+nameFile   = cookUnstructuredRealP2
 multimesh  = false
 start      = 0
 save       = 1
@@ -53,7 +53,7 @@ BDF_order   	= 2
 
 [../space_discretization]
 mesh_dir  	= ./
-mesh_file 	= cookMembraneFine.mesh
+mesh_file 	= cookMembraneUnstructred.mesh
 order     	= P2
 
 
@@ -85,7 +85,7 @@ displayList     = true
 [./ifpack]
 overlap  	= 2
 
-[./fact]
+ [./fact]
 ilut_level-of-fill 	= 1
 drop_tolerance          = 1.e-5
 relax_value             = 0
