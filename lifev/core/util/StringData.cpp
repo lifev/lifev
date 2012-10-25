@@ -68,7 +68,7 @@ void StringDataList::showMe( std::ostream& c, bool val ) const
 {
     c << M_title << " : " << std::endl;
     for ( std::vector<StringData>::const_iterator ds = M_list.begin();
-          ds != M_list.end(); ds++ )
+          ds != M_list.end(); ++ds )
     {
         c << "   " << ds->string() << " : " << ds->help();
         if ( val )
@@ -84,7 +84,7 @@ Int StringDataList::value( const std::string& str ) const
     {
         if ( ds->string() == str )
             return ds->value();
-        ds++;
+        ++ds;
     };
     std::ostringstream exception;
     exception << "Error in " << LIFEV_FUNCINFO  << ": "
