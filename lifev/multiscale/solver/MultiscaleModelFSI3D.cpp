@@ -242,18 +242,15 @@ MultiscaleModelFSI3D::solveModel()
 
     // Non-linear Richardson solver
     UInt maxSubIterationNumber = M_data->maxSubIterationNumber();
-    vectorPtr_Type solution( new vector_Type( M_FSIoperator->solution() ) ); // Solution at the previous time step
+    M_FSIoperator->extrapolation( *M_stateVariable );
 
-    NonLinearRichardson( *solution, *M_FSIoperator,
-                          M_data->absoluteTolerance(), M_data->relativeTolerance(),
-                          maxSubIterationNumber, M_data->errorTolerance(),
-                          M_data->NonLinearLineSearch(),
-                          M_nonLinearRichardsonIteration,
-                          1
+    NonLinearRichardson( *M_stateVariable, *M_FSIoperator,
+                         M_data->absoluteTolerance(), M_data->relativeTolerance(),
+                         maxSubIterationNumber, M_data->errorTolerance(),
+                         M_data->NonLinearLineSearch(),
+                         M_nonLinearRichardsonIteration,
+                         1
                        );
-
-    // Save last solution (if convergence is achieved it is used for the next time step)
-    M_stateVariable.reset( new vector_Type( *solution ) );
 
     // Parameters for Multiscale subiterations
     boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->precPtrView()->setRecompute( 1, false );
@@ -619,7 +616,7 @@ MultiscaleModelFSI3D::initializeSolution()
     }
 
     // Initialize state variables
-    M_stateVariable.reset( new vector_Type( M_FSIoperator->solution() ) );
+    M_stateVariable.reset( new vector_Type( M_FSIoperator->fluidTimeAdvance()->singleElement(0) ) );
 }
 
 void
