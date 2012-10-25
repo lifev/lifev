@@ -194,6 +194,7 @@ private:
     filterPtr_Type exporterCheck;
 
     solidFESpacePtr_Type dFESpace;
+    solidFESpacePtr_Type exporterFESpace;
 
 };
 
@@ -274,7 +275,8 @@ Structure::Structure( int                                   argc,
                       char**                                argv,
                       boost::shared_ptr<Epetra_Comm>        structComm):
     parameters( new Private() ),
-    dFESpace()
+    dFESpace(),
+    exporterFESpace()
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -340,6 +342,9 @@ Structure::run3d()
 
     dFESpace.reset( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
 
+    // if( dOrder.compare("P2") == 0 )
+    //     exporterFESpace.reset( new solidFESpace_Type(meshPart,"P1",3,parameters->comm) );
+
     if (verbose) std::cout << std::endl;
 
     std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
@@ -379,12 +384,12 @@ Structure::run3d()
     //Condition for Extension
     //This conditions have to be changed according to script used to generate the mesh
     //cookMembraneStructure.geo or cookMembrane.geo
-    BCh->addBC("EdgesIn",      60,  Essential, Full, zero, 3);
-    BCh->addBC("EdgesIn",      40,  Natural, Full, zero, 3);
+    BCh->addBC("EdgesIn",      40,  Essential, Full, zero, 3);
+    BCh->addBC("EdgesIn",      60,  Natural, Full, zero, 3);
     BCh->addBC("EdgesIn",      20,  Natural, Full, zero, 3);
-    BCh->addBC("EdgesIn",      50,  Natural, Full, zero, 3);
+    BCh->addBC("EdgesIn",      70,  Natural, Full, zero, 3);
     BCh->addBC("EdgesIn",      30,  Natural, Full, zero, 3);
-    BCh->addBC("EdgesIn",      70,  Natural, Full, nonZero, 3);
+    BCh->addBC("EdgesIn",      50,  Natural, Full, nonZero, 3);
 
     // BCh->addBC("EdgesIn",      40,  Essential, Component, zero, compz);
     // BCh->addBC("EdgesIn",      20,  Essential, Component, zero, compz);
@@ -421,11 +426,12 @@ Structure::run3d()
         std::string const initialLoaded     =  dataFile( "importer/initialSol", "NO_DEFAULT_VALUE");
         LifeV::Real initialTime        =  dataFile( "importer/initialTime", 0.0);
 
-        //Creating the importer for the case P2
-        if( dataStructure->order().compare("P2") == 0 )
-        {
-            importerSolid.reset( new exporterVTK_Type ( dataFile, fileName ) );
-        }
+        //Creating the importer for the case P2 if vtk is used.
+        //For other exporters we have to go from P1 to P2
+        // if( dataStructure->order().compare("P2") == 0 )
+        // {
+        //     importerSolid.reset( new exporterVTK_Type ( dataFile, fileName ) );
+        // }
 
         //Creating the importer
 #ifdef HAVE_HDF5
@@ -545,24 +551,24 @@ Structure::run3d()
 
         boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterSolid;
 
-        boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
+        //boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
 
         std::string const exporterType =  dataFile( "exporter/type", "ensight");
         std::string const exportFileName = dataFile( "exporter/nameFile", "structure");
-
         std::string const exportCheckName = "checkExporter";
 
-        if( dataStructure->order().compare("P2") == 0 )
-        {
-            exporterSolid.reset( new exporterVTK_Type ( dataFile, exportFileName ) );
-            exporterCheck.reset( new exporterVTK_Type ( dataFile, exportCheckName ) );
-        }
+        //If exporterVTK is used
+        // if( dataStructure->order().compare("P2") == 0 )
+        // {
+        //     exporterSolid.reset( new exporterVTK_Type ( dataFile, exportFileName ) );
+        //     exporterCheck.reset( new exporterVTK_Type ( dataFile, exportCheckName ) );
+        // }
 
 #ifdef HAVE_HDF5
         if (exporterType.compare("hdf5") == 0)
         {
             exporterSolid.reset( new hdf5Filter_Type ( dataFile, exportFileName ) );
-            exporterCheck.reset( new hdf5Filter_Type ( dataFile, exportCheckName ) );
+            //exporterCheck.reset( new hdf5Filter_Type ( dataFile, exportCheckName ) );
         }
         else
 #endif
@@ -575,7 +581,13 @@ Structure::run3d()
 
         exporterSolid->setPostDir( "./" );
         exporterSolid->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
-        exporterCheck->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
+        //exporterCheck->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
+
+        // if( dataStructure->order().compare("P2") == 0 )
+        // {
+        //     exporterSolid->setDataFromGetPot( dataFile, "exporter" );
+        //     exporterCheck->setDataFromGetPot( dataFile, "exporter" );
+        // }
 
         //discretization FESpace : the possibilities offered by the FESpace class
         //export FESpace : P1 since Paraview does not read higher fields
@@ -585,17 +597,35 @@ Structure::run3d()
         vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  Unique ) );
         vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  Unique ) );
         vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  Unique ) );
-
         //Created for debug reasons. The map has to be the one of the discretization FESpace
-        vectorPtr_Type rhsVector ( new vector_Type(solid.rhs(),  Unique ) );
+        //vectorPtr_Type rhsVector ( new vector_Type(solid.rhs(),  Unique ) );
 
-        exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
-        exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
-        exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
-        exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt(0) );
+        vectorPtr_Type solidDispReduced;
+        vectorPtr_Type solidVelReduced;
+        vectorPtr_Type solidAccReduced;
+        vectorPtr_Type rhsVectorReduced;
+
+        // if( dataStructure->order().compare("P2") == 0 )
+        // {
+        //     solidDispReduced.reset( new vector_Type( exporterFESpace->map(),  Unique ) );
+        //     solidVelReduced.reset( new vector_Type( exporterFESpace->map(),  Unique ) );
+        //     solidAccReduced.reset( new vector_Type( exporterFESpace->map(),  Unique ) );
+        //     //rhsVectorReduced.reset( new vector_Type( exporterFESpace->map(),  Unique ) );
+        //     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", exporterFESpace, solidDispReduced, UInt(0) );
+        //     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     exporterFESpace, solidVelReduced,  UInt(0) );
+        //     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", exporterFESpace, solidAccReduced,  UInt(0) );
+        //     //exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", exporterFESpace, rhsVectorReduced,  UInt(0) );
+        // }
+        // else
+        // {
+            exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
+            exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
+            exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
+            //exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt(0) );
+        // }
 
         exporterSolid->postProcess( 0 );
-        exporterCheck->postProcess( 0 );
+        //exporterCheck->postProcess( 0 );
 
         //!--------------------------------------------------------------------------------------------
         //!The update of the RHS is done by the TimeAdvance class
@@ -638,10 +668,21 @@ Structure::run3d()
             *solidDisp = solid.displacement();
             *solidVel  = timeAdvance->velocity();
             *solidAcc  = timeAdvance->acceleration();
-            *rhsVector = solid.rhs();
+            //*rhsVector = solid.rhs();
 
-            exporterSolid->postProcess( time );
-            exporterCheck->postProcess( time );
+            // if( dataStructure->order().compare("P2") == 0 )
+            // {
+            //     *solidDispReduced = exporterFESpace->feToFEInterpolate( *dFESpace, *solidDisp);
+            //     *solidVelReduced = exporterFESpace->feToFEInterpolate( *dFESpace, *solidVel );
+            //     *solidAccReduced = exporterFESpace->feToFEInterpolate( *dFESpace, *solidAcc );
+            //     //*rhsVectorReduced = exporterFESpace->feToFEInterpolate( *dFESpace, *rhsVector );
+            //     exporterSolid->postProcess( time );
+            // }
+            // else
+            // {
+                exporterSolid->postProcess( time );
+                //exporterCheck->postProcess( time );
+            // }
 
             Real normVect;
             normVect =  solid.displacement().norm2();

@@ -18,15 +18,15 @@
 
 
 [exporter]
-type       = vtk #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
-nameFile   = cookUnstructuredRealP2
+type       = hdf5
+nameFile   = P2NOTTransformed
 multimesh  = false
 start      = 0
 save       = 1
 
 [importer]
 restart      = none
-type         = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
+type         = hdf5
 filename     = structure
 initialSol   = 00000
 initialTime  = 4.0
@@ -53,7 +53,7 @@ BDF_order   	= 2
 
 [../space_discretization]
 mesh_dir  	= ./
-mesh_file 	= cookMembraneUnstructred.mesh
+mesh_file 	= cookCompletelyStructured.mesh
 order     	= P2
 
 
