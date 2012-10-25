@@ -105,7 +105,7 @@ OseenData::OseenData( const OseenData& oseenData ) :
         M_ZSectionFinal                    ( oseenData.M_ZSectionFinal ),
         M_NbPolygonEdges                   ( oseenData.M_NbPolygonEdges ),
         M_stabilizationList                ( oseenData.M_stabilizationList ),
-        M_conservativeFormulation          ( true )
+        M_conservativeFormulation          ( false )
 {
 }
 
@@ -215,7 +215,7 @@ OseenData::setup( const GetPot& dataFile, const std::string& section )
     setSemiImplicit( dataFile( ( section + "/semiImplicit" ).data(), false ) );
     M_domainVelImplicit= dataFile( (section + "/domainVelImplicit").data(), false );
     M_convectiveImplicit= dataFile( (section + "/convectiveImplicit").data(), false );
-    M_conservativeFormulation   = dataFile( ( section + "/conservativeFormulation" ).data(), true );
+    M_conservativeFormulation   = dataFile( ( section + "/conservativeFormulation" ).data(), false );
 
     // Mean values per section
     M_computeMeanValuesPerSection = dataFile( ( section + "/valuespersection/computeMeanValuesPerSection" ).data(), 0 );
