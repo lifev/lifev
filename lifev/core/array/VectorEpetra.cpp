@@ -890,7 +890,7 @@ void VectorEpetra::matrixMarket( std::string const &fileName, const bool headers
 void VectorEpetra::spy( std::string const &fileName ) const
 {
     // Purpose: Matlab dumping and spy
-    std::string name = fileName, uti = " , ";
+    std::string name = fileName;
 
     Int  me    = M_epetraVector->Comm().MyPID();
 
