@@ -68,7 +68,7 @@ void MonolithicBlock::couplingMatrix(matrixPtr_Type & bigMatrix,
         {
             for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow )
             {
-                if ( numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+                if ( numerationInterface->map().map(Unique)->LID( static_cast<EpetraInt_Type>(ITrow->second /*+ dim*solidDim*/) ) >= 0 )//to avoid repeated stuff
                 {
                     bigMatrix->addToCoefficient(solidFluidInterface + ITrow->first + dim*problem[2]->dof().numTotalDof(), offset[0] + ITrow->second + dim* problem[0]->dof().numTotalDof(), (-value)*timeStep/**1.e-2*//*scaling of the solid matrix*/ );
                 }
@@ -83,7 +83,7 @@ void MonolithicBlock::couplingMatrix(matrixPtr_Type & bigMatrix,
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow, newFlag = flag )
         {
-            if (numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->map().map(Unique)->LID( static_cast<EpetraInt_Type>(ITrow->second /*+ dim*solidDim*/) ) >= 0 )//to avoid repeated stuff
             {
                 if (newFlag-8>=0)//right low
                 {
@@ -177,7 +177,7 @@ MonolithicBlock::robinCoupling( matrixPtr_Type& matrix,
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            if (numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->map().map(Unique)->LID( static_cast<EpetraInt_Type>(ITrow->second /*+ dim*solidDim*/) ) >= 0 )//to avoid repeated stuff
             {
                 for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
@@ -191,7 +191,7 @@ MonolithicBlock::robinCoupling( matrixPtr_Type& matrix,
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            if (numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->map().map(Unique)->LID( static_cast<EpetraInt_Type>(ITrow->second /*+ dim*solidDim*/) ) >= 0 )//to avoid repeated stuff
             {
                 for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
@@ -205,7 +205,7 @@ MonolithicBlock::robinCoupling( matrixPtr_Type& matrix,
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            if (numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->map().map(Unique)->LID( static_cast<EpetraInt_Type>(ITrow->second /*+ dim*solidDim*/) ) >= 0 )//to avoid repeated stuff
             {
                 for (UInt dim = 0; dim < nDimensions; ++dim)
                 {

@@ -472,7 +472,7 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working
     {
         for( ITrow = localDofMap.begin(); ITrow != localDofMap.end() ; ++ITrow)
         {
-            if(M_interfaceMap->map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if(M_interfaceMap->map(Unique)->LID( static_cast<EpetraInt_Type>(ITrow->second /*+ dim*solidDim*/) ) >= 0 )//to avoid repeated stuff
             {
                 if(rhs.get())
                     (*rhs)[  (int)(*M_numerationInterface)[ITrow->second ] + dim*interface +M_solidAndFluidDim ] = -lambda( ITrow->second + dim*totalDofs )/**rescale*/;

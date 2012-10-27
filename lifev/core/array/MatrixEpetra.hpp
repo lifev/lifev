@@ -733,7 +733,7 @@ void MatrixEpetra<DataType>::removeZeros()
 
         for ( Int i(0); i<tmp->NumGlobalRows(); ++i )
         {
-            row = tmp->LRID( i );
+            row = tmp->LRID( static_cast<EpetraInt_Type>(i) );
             tmp->ExtractMyRowView( row, NumEntries, Values, Indices );
 
             std::vector<Int> Indices2( NumEntries );
@@ -925,10 +925,10 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
     const Epetra_Map& colMap( M_epetraCrs->ColMap() );
 
 
-    Int myCol = colMap.LID( row + offset );
+    Int myCol = colMap.LID( static_cast<EpetraInt_Type>(row + offset) );
 
     // row: if r is mine, zero out values
-    Int myRow = rowMap.LID( row + offset );
+    Int myRow = rowMap.LID( static_cast<EpetraInt_Type>(row + offset) );
 
     if ( myRow >= 0 )  // I have this row
     {
@@ -992,7 +992,7 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
 
     for ( Int ii = 0; ii < (Int)rVec.size(); ++ii )
     {
-        Int lID = rowMap.LID(rVec[ii]);
+        Int lID = rowMap.LID( static_cast<EpetraInt_Type>(rVec[ii]) );
         if ( !( lID < 0 ) )
         {
 
@@ -1162,7 +1162,7 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
     const Epetra_Map& colMap( M_epetraCrs->ColMap() );
 
 
-    Int myCol = colMap.LID( row + offset );
+    Int myCol = colMap.LID( static_cast<EpetraInt_Type>(row + offset) );
 
 #ifdef EPETRAMATRIX_SYMMETRIC_DIAGONALIZE
     if ( myCol >= 0 )  // I have this column
@@ -1176,7 +1176,7 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
 #endif
 
     // row: if r is mine, zero out values
-    Int myRow = rowMap.LID( row + offset );
+    Int myRow = rowMap.LID( static_cast<EpetraInt_Type>(row + offset) );
 
     if ( myRow >= 0 )  // I have this row
     {
