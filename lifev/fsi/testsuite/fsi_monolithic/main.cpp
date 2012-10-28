@@ -351,9 +351,7 @@ public:
 			{
                 // shift_right of the solution of all the time advance classes in the FSIOperator
                 M_fsi->FSIOper()->updateSolution( *solution );
-                // This resets M_uk to *solution, but indeed is superseeded in the call of evalResidual
-                M_fsi->FSIOper()->setSolution( *solution );
-			}
+            }
 			else //Case when monolithicGE is used
 			{
 				M_fsi->FSIOper()->updateSolution( *solution );

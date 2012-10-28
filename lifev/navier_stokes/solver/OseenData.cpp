@@ -74,7 +74,7 @@ OseenData::OseenData( ) :
         M_ZSectionFinal                    ( ),
         M_NbPolygonEdges                   ( ),
         M_stabilizationList                ( "fluid/space_discretization/stabilization" ),
-        M_conservativeFormulation          (true)
+        M_conservativeFormulation          (false)
 {
 }
 
