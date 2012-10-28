@@ -282,117 +282,108 @@ public:
 
     /*!
       This routine runs the temporal loop
-     */
-    int
-    run()
-    {
-        boost::timer _overall_timer;
+	 */
+	int
+	run()
+	{
+		boost::timer _overall_timer;
 
-        LifeV::UInt iter = 1;
-        //LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
+		LifeV::UInt iter = 1;
+		//LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
 
-        dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(1);
+		dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(1);
 
-        bool valveIsOpen = true;
+		bool valveIsOpen = true;
 
-        vectorPtr_Type solution ( new vector_Type( (*M_fsi->FSIOper()->couplingVariableMap()) ) );
+		vectorPtr_Type solution ( new vector_Type( (*M_fsi->FSIOper()->couplingVariableMap()) ) );
 
-        M_fsi->FSIOper()->extrapolation( *solution );
+		*solution = M_fsi->FSIOper()->extrapolation( *solution );
 
-        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->dataTime()->updateTime(), ++iter)
-        {
-            //Return value for the testsuite
-            M_returnValue = EXIT_FAILURE;
+		for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->dataTime()->updateTime(), ++iter)
+		{
+			//Return value for the testsuite
+			M_returnValue = EXIT_FAILURE;
 
-            LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
-            if ( valveIsOpen)
-            {
-                if ( iter == 3 /*flux < -100*/)
-                {
-                    valveIsOpen=false;
-                    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
-                    //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Essential, LifeV::Full, (const LifeV::UInt) 3);
-                }
-            }
-            // close the valve
-            else
-            {
-                if (false && M_fsi->FSIOper()->fluid().pressure(2, M_fsi->displacement()) < LifeV::LumpedHeart::M_pressure )
-                {
-                    valveIsOpen=true;
-                    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
-                    //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Natural, LifeV::Full, 3);
-                }
-            }
+			LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
+			if ( valveIsOpen)
+			{
+				if ( iter == 3 /*flux < -100*/)
+				{
+					valveIsOpen=false;
+					M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+					//M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Essential, LifeV::Full, (const LifeV::UInt) 3);
+				}
+			}
+			// close the valve
+			else
+			{
+				if (false && M_fsi->FSIOper()->fluid().pressure(2, M_fsi->displacement()) < LifeV::LumpedHeart::M_pressure )
+				{
+					valveIsOpen=true;
+					M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+					//M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Natural, LifeV::Full, 3);
+				}
+			}
 
-            int flag =2;
-            FC0.renewParameters( *M_fsi, 3 );
-            LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->time(), flux );
+			int flag =2;
+			FC0.renewParameters( *M_fsi, 3 );
+			LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->time(), flux );
 
-            boost::timer _timer;
+			boost::timer _timer;
 
-            if(iter%M_saveEvery==0)
-            {
-                M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);
+			if(iter%M_saveEvery==0)
+			{
+				M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);
 
-                M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
-                M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
+				M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
+				M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
 
-                *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
-                M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
-            }
+				*M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
+				M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
+			}
 
-            // This is just the previous solution. Should use the extrapolation from time advance
-            M_fsi->FSIOper()->extrapolation( *solution );
+			// This is just the previous solution. Should use the extrapolation from time advance
+			*solution = M_fsi->FSIOper()->extrapolation( *solution );
 
-            M_fsi->iterate( solution );
+			M_fsi->iterate( solution );
 
-            if(M_data->method().compare("monolithicGI") == 0)
-            {
-                // Saving the solution
-                if( M_data->dataFluid()->domainVelImplicit() )
-                {
-                    // shift_right of the solution of all the time advance classes in the FSIOperator
-                    M_fsi->FSIOper()->updateSolution( *solution );
-                    // This resets M_uk to *solution, but indeed is superseeded in the call of evalResidual
-                }
-                else
-                {
-                    // This resets M_uk to *solution, but indeed is superseeded in the call of evalResidual
-                    updateSolutionDomainVelocityFalse( solution );
-                }
-            }
-            else //Case when monolithicGE is used
-            {
+			if(M_data->method().compare("monolithicGI") == 0)
+			{
+                // shift_right of the solution of all the time advance classes in the FSIOperator
                 M_fsi->FSIOper()->updateSolution( *solution );
             }
-            M_fsi->FSIOper()->displayer().leaderPrintMax("[fsi_run] Iteration ", iter);
-            M_fsi->FSIOper()->displayer().leaderPrintMax(" was done in : ", _timer.elapsed());
+			else //Case when monolithicGE is used
+			{
+				M_fsi->FSIOper()->updateSolution( *solution );
+			}
+			M_fsi->FSIOper()->displayer().leaderPrintMax("[fsi_run] Iteration ", iter);
+			M_fsi->FSIOper()->displayer().leaderPrintMax(" was done in : ", _timer.elapsed());
 
-            //     ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            if (!M_data->method().compare("monolithicGI"))
-                checkCEResult(M_data->dataFluid()->dataTime()->time());
-            else
-                checkGCEResult(M_data->dataFluid()->dataTime()->time());
+			std::cout << "solution norm " << iter << " : "
+					<< M_fsi->displacement().norm2() << "\n";
 
-        }
+			//     ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+			 if (!M_data->method().compare("monolithicGI"))
+			 	checkCEResult(M_data->dataFluid()->dataTime()->time());
+			 else
+			 	checkGCEResult(M_data->dataFluid()->dataTime()->time());
 
-        std::cout << "Total computation time = "
-                << _overall_timer.elapsed() << "s" << "\n";
+		}
 
-        return M_returnValue;
+		std::cout << "Total computation time = "
+				<< _overall_timer.elapsed() << "s" << "\n";
 
-    }
+		return M_returnValue;
+
+	}
 
 private:
 
     void checkCEResult(const LifeV::Real& time);
     void checkGCEResult(const LifeV::Real& time);
 
-    void updateSolutionDomainVelocityFalse( const vectorPtr_Type solution );
-
-    fsi_solver_ptr M_fsi;
-    dataPtr_Type   M_data;
+	fsi_solver_ptr M_fsi;
+	dataPtr_Type   M_data;
 
     filterPtr_Type M_exporterSolid;
     filterPtr_Type M_exporterFluid;
@@ -488,12 +479,12 @@ int main(int argc, char** argv)
 
 void Problem::checkCEResult(const LifeV::Real& time)
 {
-    LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-116028)/dispNorm*(dispNorm-116028)/dispNorm<1e-5) Problem::resultCorrect(time);
-    else if (time==0.001 && (dispNorm-145850)/dispNorm*(dispNorm-145850)/dispNorm<1e-5)  Problem::resultCorrect(time);
-    else if (time==0.002 && (dispNorm-98125.7)/dispNorm*(dispNorm-98125.7)/dispNorm<1e-5)  Problem::resultCorrect(time);
-    else if (time==0.003 && (dispNorm-91354.4)/dispNorm*(dispNorm-91354.4)/dispNorm<1e-5)  Problem::resultCorrect(time);
-    else if (time==0.004 && (dispNorm-85702.6)/dispNorm*(dispNorm-85702.6)/dispNorm<1e-5)  Problem::resultCorrect(time);
+	LifeV::Real dispNorm=M_fsi->displacement().norm2();
+	if (time==0.000 && (dispNorm-114908)/dispNorm*(dispNorm-114908)/dispNorm<1e-5) Problem::resultCorrect(time);
+	else if (time==0.001 && (dispNorm-143981)/dispNorm*(dispNorm-143981)/dispNorm<1e-5)  Problem::resultCorrect(time);
+	else if (time==0.002 && (dispNorm-97513.4)/dispNorm*(dispNorm-97513.4)/dispNorm<1e-5)  Problem::resultCorrect(time);
+	else if (time==0.003 && (dispNorm-90963.4)/dispNorm*(dispNorm-90963.4)/dispNorm<1e-5)  Problem::resultCorrect(time);
+	else if (time==0.004 && (dispNorm-85451.2)/dispNorm*(dispNorm-85451.2)/dispNorm<1e-5)  Problem::resultCorrect(time);
 }
 
 
@@ -505,31 +496,4 @@ void Problem::checkGCEResult(const LifeV::Real& time)
     else if (time==0.002 && (dispNorm-86107)/dispNorm*(dispNorm-86107)/dispNorm<1e-3) Problem::resultCorrect(time);
     else if (time==0.003 && (dispNorm-80013)/dispNorm*(dispNorm-80013)/dispNorm<1e-3) Problem::resultCorrect(time);
     else if (time==0.004 && (dispNorm-74586)/dispNorm*(dispNorm-74586)/dispNorm<1e-3) Problem::resultCorrect(time);
-}
-
-void Problem::updateSolutionDomainVelocityFalse( const vectorPtr_Type solution )
-{
-    //The solution for the fluid and solid is at the current time
-    //The solution for the ALE is at the previous time
-
-    //I build the vector I want to push in the exporters
-    //In this case, the vector is ( f^n+1, s^n+1, df^n )
-    LifeV::UInt nDofsALE = M_fsi->FSIOper()->mmFESpace().fieldDim() * M_fsi->FSIOper()->mmFESpace().dof().numTotalDof();
-
-    //Extract the previous solution
-    vector_Type previousSolution( M_fsi->FSIOper()->solution() );
-    vector_Type previousDisplacement( M_fsi->FSIOper()->mmFESpace().map() );
-    previousDisplacement *= 0.0;
-
-    LifeV::UInt sizeOfSolutionVector = previousSolution.size();
-    LifeV::UInt offsetStartCopying = sizeOfSolutionVector - nDofsALE;
-
-    previousDisplacement.subset(previousSolution,  offsetStartCopying );
-
-    //After having saved the previous displacement we can push the current solution
-    M_fsi->FSIOper()->updateSolution ( *solution );
-
-    M_fsi->FSIOper()->ALETimeAdvance()->shiftRight( previousDisplacement );
-    M_fsi->FSIOper()->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
-
 }
