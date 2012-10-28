@@ -313,7 +313,7 @@ public:
 
     for ( ; M_data->dataFluid()->dataTime()->canAdvance();  ++iter)
       {
-          M_returnValue = EXIT_FAILURE
+          M_returnValue = EXIT_FAILURE;
 	M_data->dataFluid()->dataTime()->updateTime();
 	M_data->dataSolid()->dataTime()->updateTime();
 	M_data->timeDataALE()->updateTime();
@@ -349,12 +349,12 @@ public:
 	M_fsi->FSIOper()->displayer().leaderPrintMax("[fsi_run] Iteration ", iter);
 	M_fsi->FSIOper()->displayer().leaderPrintMax(" was done in : ", _timer.elapsed());
 
-	std::cout << "solution norm " << iter << " : "
+	std::cout << "solution norm at time: " <<  M_data->dataFluid()->dataTime()->time() << "(iter" << iter << ") : "
 		  << M_fsi->displacement().norm2() << "\n";
 
-	//checkResult(M_data->dataFluid()->dataTime()->time());
+	checkResult(M_data->dataFluid()->dataTime()->time());
 
-        }
+      }
 
         std::cout << "Total computation time = "
                   << _overall_timer.elapsed() << "s" << "\n";
@@ -392,7 +392,7 @@ public:
   void resultCorrect(LifeV::Real time)
   {
     std::cout<<"Result correct at time: " << time << std::endl;
-    returnValue = EXIT_SUCCESS;
+    M_returnValue = EXIT_SUCCESS;
   }
 
 };
@@ -403,20 +403,23 @@ struct FSIChecker
             data_file( _data_file )
     {}
 
-    void operator()()
+    int operator()()
     {
         boost::shared_ptr<Problem> fsip;
-
+        int returnVariable;
+        returnVariable = EXIT_FAILURE;
         try
         {
             fsip = boost::shared_ptr<Problem>( new Problem( data_file ) );
-            return fsip->run();
+            returnVariable = fsip->run();
+
         }
         catch ( std::exception const& _ex )
         {
             std::cout << "caught exception :  " << _ex.what() << "\n";
         }
-        return EXIT_FAILURE;
+
+        return returnVariable;
     }
 
     GetPot                data_file;
@@ -674,14 +677,9 @@ void Problem::restartFSI(  GetPot const& data_file)
 
 void Problem::checkResult(const LifeV::Real& time)
 {
-  returnValue = EXIT_FAILURE;
 
   LifeV::Real dispNorm=M_fsi->displacement().norm2();
-
-  if (time==0.006 && (dispNorm-100221)/dispNorm*(dispNorm-100221)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.007 && (dispNorm-94939.8)/dispNorm*(dispNorm-94939.8)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.008 && (dispNorm-91911.3)/dispNorm*(dispNorm-91911.3)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.009 && (dispNorm-86978.8)/dispNorm*(dispNorm-86978.8)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.01 && (dispNorm-80.174.8)/dispNorm*(dispNorm-80174.8)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
-  else if (time==0.011 && (dispNorm-68697.3)/dispNorm*(dispNorm-68697.3)/dispNorm < 1e-5) Problem::RESULT_CORRECT(time);
+  if (time==0.006 &&      (dispNorm-100221)/dispNorm * (dispNorm-100221)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.007 && (dispNorm-94940.1)/dispNorm * (dispNorm-94940.1)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.008 && (dispNorm-91910.8)/dispNorm * (dispNorm-91910.8)/dispNorm < 1e-5) resultCorrect(time);
 }
